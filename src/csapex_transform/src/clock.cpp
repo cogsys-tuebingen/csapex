@@ -35,8 +35,9 @@ void Clock::tick()
         time->value = ros::Time(0);
     }
 
-    time_label_->setText(boost::posix_time::to_simple_string(time->value.toBoost()).c_str());
-
+    if(time_label_) {
+        time_label_->setText(boost::posix_time::to_simple_string(time->value.toBoost()).c_str());
+    }
     output_->publish(time);
 }
 
@@ -45,12 +46,15 @@ void Clock::process()
 
 }
 
-void Clock::fill(QBoxLayout* layout)
+void Clock::setup()
 {
     setSynchronizedInputs(true);
 
     output_ = addOutput<connection_types::TimeStampMessage>("Time");
+}
 
+void Clock::fill(QBoxLayout* layout)
+{
     time_type_ = new QPushButton;
     time_type_->setCheckable(true);
     QObject::connect(time_type_, SIGNAL(clicked()), this, SLOT(update()));
