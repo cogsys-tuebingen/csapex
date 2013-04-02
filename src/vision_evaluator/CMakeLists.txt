@@ -125,6 +125,7 @@ add_executable(evaluator
     src/evaluator/global_option_manager.cpp
     src/evaluator/panel.cpp
     src/evaluator/viewer.cpp
+    src/qt_helper.hpp
     ${QT_EVALUATOR}
 )
 target_link_libraries(evaluator ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})

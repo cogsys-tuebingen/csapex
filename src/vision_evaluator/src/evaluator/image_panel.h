@@ -5,6 +5,7 @@
 #include "panel.h"
 #include "viewer.h"
 #include "filter_manager.h"
+#include "global_option_manager.h"
 
 /// SYSTEM
 #include <QObject>
@@ -75,6 +76,8 @@ private:
     Ui::ImagePanel* ui;
 
     FilterManager filter_manager;
+    GlobalOptionManager option_manager;
+
     QFileSystemModel* model;
 
     Viewer* viewer;

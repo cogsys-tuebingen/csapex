@@ -26,6 +26,11 @@ ImagePanel::ImagePanel(QWidget* parent) :
     filter_layout->addSpacerItem(new QSpacerItem(0, 1000, QSizePolicy::Minimum, QSizePolicy::Expanding));
     ui->filter_page->setLayout(filter_layout);
 
+    QVBoxLayout* options_layout = new QVBoxLayout;
+    option_manager.insert(options_layout);
+    options_layout->addSpacerItem(new QSpacerItem(0, 1000, QSizePolicy::Minimum, QSizePolicy::Expanding));
+    ui->options_page->setLayout(options_layout);
+
     view = ui->graphicsView;
     view->setScene(scene);
 

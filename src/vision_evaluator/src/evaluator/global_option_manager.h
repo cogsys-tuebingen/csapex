@@ -8,10 +8,28 @@
 #ifndef GLOBAL_OPTION_MANAGER_H
 #define GLOBAL_OPTION_MANAGER_H
 
-class GlobalOptionManager
+/// COMPONENT
+#include "global_option.h"
+#include "generic_manager.hpp"
+
+#define REGISTER_GLOBAL_OPTION(class_name)\
+    REGISTER_GENERIC(GlobalOptionManager, class_name)
+
+namespace vision_evaluator {
+
+class GlobalOptionManager : public GenericManager<GlobalOption>
 {
+    Q_OBJECT
+
 public:
     GlobalOptionManager();
+
+    virtual void insert(QBoxLayout* parent);
+
+private:
+    std::vector<GlobalOption*> options;
 };
+
+}
 
 #endif // GLOBAL_OPTION_MANAGER_H

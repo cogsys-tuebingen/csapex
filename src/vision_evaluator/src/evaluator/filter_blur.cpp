@@ -4,6 +4,9 @@
 /// COMPONENT
 #include "filter_manager.h"
 
+/// PROJECT
+#include <qt_helper.hpp>
+
 REGISTER_FILTER(FilterBlur)
 
 using namespace vision_evaluator;
@@ -22,7 +25,7 @@ void FilterBlur::filter(cv::Mat img, cv::Mat mask)
 
 void FilterBlur::insert(QBoxLayout* layout)
 {
-    slider = makeSlider(layout, "blur", 0, 0, 26);
+    slider = QtHelper::makeSlider(layout, "blur", 0, 0, 26);
 
     QObject::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(update(int)));
 }

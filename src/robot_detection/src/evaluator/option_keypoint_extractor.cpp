@@ -1,6 +1,14 @@
 /// HEADER
 #include "option_keypoint_extractor.h"
 
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
+#include <vision_evaluator/qt_helper.hpp>
+
+PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointExtractor, vision_evaluator::GlobalOption)
+
+using namespace robot_detection;
+
 
 OptionKeypointExtractor::OptionKeypointExtractor()
     : selection(NULL), threshold(NULL)
@@ -31,18 +39,18 @@ void OptionKeypointExtractor::insert(QBoxLayout* layout)
     for(int k = 0; k < Types::Keypoint::COUNT; k++) {
         selection->addItem(Types::Keypoint::write(k).c_str());
     }
-    layout->addWidget(selection);
-
     Config config = Config::getGlobal();
-    selection->setCurrentIndex(config.getKeypointType());
+    layout->addLayout(QtHelper::wrap("Keypoint", selection));
 
     QObject::connect(selection, SIGNAL(currentIndexChanged(int)), this, SLOT(update_type(int)));
 
 
-    threshold = new QSlider(Qt::Horizontal);
-    threshold->setMinimum(1);
-    threshold->setMaximum(200);
-    threshold->setValue(config.extractor_threshold);
+    //threshold = new QSlider(Qt::Horizontal);
+    //threshold->setMinimum(1);
+    //threshold->setMaximum(200);
+    //threshold->setValue(config.extractor_threshold);
+
+    threshold = QtHelper::makeSlider(layout, "threshold", config.extractor_threshold, 1, 200);
 
     layout->addWidget(threshold);
 

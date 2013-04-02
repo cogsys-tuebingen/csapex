@@ -10,6 +10,7 @@
 
 /// SYSTEM
 #include <QBoxLayout>
+#include <boost/shared_ptr.hpp>
 
 namespace vision_evaluator
 {
@@ -17,6 +18,9 @@ namespace vision_evaluator
 class GlobalOption : public QObject
 {
     Q_OBJECT
+
+public:
+    typedef boost::shared_ptr<GlobalOption> Ptr;
 
 public:
     GlobalOption();

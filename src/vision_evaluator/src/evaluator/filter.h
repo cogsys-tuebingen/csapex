@@ -4,7 +4,7 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
-#include <QSlider>
+#include <QObject>
 #include <QBoxLayout>
 
 namespace vision_evaluator
@@ -32,8 +32,6 @@ public Q_SLOTS:
 
 protected:
     Filter();
-
-    QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max);
 
 private:
     std::string name_;

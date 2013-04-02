@@ -17,4 +17,11 @@
     <description>none yet</description>
   </class>
 
+  <class type="robot_detection::OptionKeypointExtractor" base_class_type="vision_evaluator::GlobalOption">
+    <description>none yet</description>
+  </class>
+  <class type="robot_detection::OptionKeypointDescriptor" base_class_type="vision_evaluator::GlobalOption">
+    <description>none yet</description>
+  </class>
+
 </library>

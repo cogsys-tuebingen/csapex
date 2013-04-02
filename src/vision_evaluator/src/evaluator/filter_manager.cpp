@@ -57,7 +57,7 @@ void FilterManager::insert(QBoxLayout* layout)
     options->setLayout(options_layout);
     group_layout->addWidget(options);
 
-    for(std::vector<FilterManager::Constructor>::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
+    for(std::vector<Constructor>::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
         available->addItem(it->name.c_str());
     }
 

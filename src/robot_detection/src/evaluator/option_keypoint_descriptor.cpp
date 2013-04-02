@@ -1,6 +1,15 @@
 /// HEADER
 #include "option_keypoint_descriptor.h"
 
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
+#include <vision_evaluator/qt_helper.hpp>
+
+PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointDescriptor, vision_evaluator::GlobalOption)
+
+using namespace robot_detection;
+
+
 OptionKeypointDescriptor::OptionKeypointDescriptor()
     : selection(NULL)
 {
@@ -30,7 +39,7 @@ void OptionKeypointDescriptor::insert(QBoxLayout* layout)
     for(int k = 0; k < Types::Descriptor::COUNT; k++) {
         selection->addItem(Types::Descriptor::write(k).c_str());
     }
-    layout->addWidget(selection);
+    layout->addLayout(QtHelper::wrap("Descriptor", selection));
 
     Config config = Config::getGlobal();
     selection->setCurrentIndex(config.getDescriptorType());
