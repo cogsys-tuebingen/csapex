@@ -1,0 +1,2 @@
+local_pubs: [/robot_0/spacepoint/imu]
+foreign_pubs: [/robot_1/spacepoint/imu, /robot_1/scan, /robot_1/pose, /robot_1/tf]

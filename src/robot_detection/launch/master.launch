@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="master" />
+  <arg name="port" default="11311" />
+  <arg name="cfg" default="$(arg master)" />
+  <node pkg="multimaster" type="master_sync.py" name="master_sync" output="screen"> 
+    <param name="foreign_master" value="http://$(arg master):$(arg port)" />      
+    <rosparam command="load" file="$(find robot_detection)/launch/config_$(arg cfg).yaml" />
+  </node>
+</launch>

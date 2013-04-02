@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<launch>
+   <include file="$(find ramaxxbase)/launch/thrain.launch" />
+ 
+   <node name="relay_imu" pkg="topic_tools" type="relay" args="/spacepoint/imu /robot_0/spacepoint/imu" output="screen" />
+
+   <node name="relay_tf" pkg="topic_tools" type="relay" args="/tf /robot_0/tf" output="screen" />
+
+   <include file="$(find hector_mapping)/launch/mapping_default.launch"/>
+
+   <include file="$(find robot_detection)/launch/master.launch">
+       <arg name="master" value="durin" />
+   </include>
+
+   <node pkg="robot_detection" type="rerouter" name="rerouter" output="screen">
+       <param name="master" type="bool" value="true" />
+       <param name="laser_frame" type="string" value="/laser" />
+       <param name="target_frame" type="string" value="/map" />
+   </node>
+
+   <node name="tf_importer" pkg="robot_detection" type="tf_importer" output="screen" />
+
+   <node name="amcl" pkg="amcl_mod" type="amcl" output="screen">
+       <remap from="/scan" to="/sync/scan" />
+       <remap from="/map" to="/sync/map" />
+       
+       <param name="use_map_topic" type="bool" value="true" />
+       <param name="first_map_only" type="bool" value="false" />
+       <param name="reinitialize_filter" type="bool" value="false" />
+
+       <param name="initial_cov_xx" type="double" value="10" />
+       <param name="initial_cov_yy" type="double" value="10" />
+       <param name="initial_cov_aa" type="double" value="10" />
+
+       <param name="odom_alpha1" type="double" value="0.2" />
+       <param name="odom_alpha2" type="double" value="0.2" />
+       <param name="odom_alpha3" type="double" value="0.6" />
+       <param name="odom_alpha4" type="double" value="0.2" />
+
+       <param name="odom_model_type" type="string" value="diff" />
+       <param name="laser_model_type" type="string" value="likelihood_field" />
+
+       <param name="resample_interval" type="int" value="1" />
+       
+       <param name="odom_frame_id" type="string" value="/sync/odom" />
+       <param name="base_frame_id" type="string" value="/sync/base_link" />
+       <param name="global_frame_id" type="string" value="/sync/map" />
+    </node>
+   
+   <include file="$(find robot_detection)/launch/1394cam_marl.launch" />
+
+</launch>

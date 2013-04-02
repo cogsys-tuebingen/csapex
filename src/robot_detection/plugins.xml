@@ -1,0 +1,5 @@
+<library path="libevaluation_plugin">
+  <class type="robot_detection::FilterDisplayFeatures" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
+</library>

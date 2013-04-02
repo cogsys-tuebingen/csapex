@@ -1,0 +1,49 @@
+#ifndef IMAGE_COMBINER_PEAK_MATCH_H
+#define IMAGE_COMBINER_PEAK_MATCH_H
+
+/// COMPONENT
+#include <vision_evaluator/image_combiner.h>
+#include <vision_evaluator/option.h>
+#include "histogram_viewer_widget.h"
+
+/// PROJECT
+#include <config/reconfigurable.h>
+#include <utils/hough_peak.h>
+
+/// SYSTEM
+#include <QSlider>
+//#include <QMainWindow>
+
+class ImageCombinerPeakMatch : public vision_evaluator::ImageCombiner, public Reconfigurable
+{
+    Q_OBJECT
+
+    typedef HoughPeak<true, true> HoughTheta;
+    typedef HoughPeak<true, false> HoughNoTheta;
+
+public:
+    ImageCombinerPeakMatch(const std::string& label);
+    virtual ~ImageCombinerPeakMatch();
+
+public:
+    virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
+
+    void putMultiLineText(cv::Mat combined_target, const std::string& txt);
+    void init_gui(QToolBox* toolbox);
+
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void wheelEvent(QWheelEvent* event);
+    virtual void keyEvent(QKeyEvent* event);
+
+private:
+    void drawDebug(Frame::Ptr& a, Frame::Ptr& b,
+                   const cv::Mat& img1, const cv::Mat& img2, cv::Mat& out,
+                   std::vector<HoughData::Cluster>& clusters, HoughAlgorithm_Debug* h);
+
+private:
+    HistogramViewerWidget* histviewer;
+//    QMainWindow* histogram_view;
+};
+
+#endif // IMAGE_COMBINER_PEAK_MATCH_H
