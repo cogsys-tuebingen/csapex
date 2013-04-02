@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(vision_evaluator)
 
-add_definitions(-Wall)
+add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function)
 
+# Set the build type.  Options are:
+#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
+#  Debug          : w/ debug symbols, w/o optimization
+#  Release        : w/o debug symbols, w/ optimization
+#  RelWithDebInfo : w/ debug symbols, w/ optimization
+#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
+#set(ROS_BUILD_TYPE RelWithDebInfo)
 set(CMAKE_BUILD_TYPE Debug)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -24,10 +31,6 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
-
-foreach(U ${UTILS_INCLUDE_DIRS})
-    message(ERROR ${U})
-endforeach()
 
 
 file(GLOB         QT_FORMS RELATIVE         ${CMAKE_CURRENT_SOURCE_DIR}                 ui/*.ui)
@@ -83,7 +86,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES vision_evaluator
-#  CATKIN_DEPENDS pluginlib roscpp rospy std_msgs
+  CATKIN_DEPENDS pluginlib roscpp std_msgs rabot_utils
 #  DEPENDS system_lib
 )
 
@@ -127,6 +130,15 @@ add_executable(evaluator
     ${QT_EVALUATOR}
 )
 target_link_libraries(evaluator ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+
+# INSTALL INCLUDE HEADERS
+string(REGEX REPLACE ".*/src/([^/]+)" "\\1" lib ${CMAKE_CURRENT_SOURCE_DIR})
+file(GLOB_RECURSE headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h *.hpp)
+foreach(h ${headers})
+    get_filename_component(dir ${h} PATH)
+    file(COPY ${h} DESTINATION ${PROJECT_SOURCE_DIR}/include/${lib}/)
+    #message("file(COPY ${h} DESTINATION ${PROJECT_SOURCE_DIR}/include/${lib}/)")
+endforeach()
 
 #############
 ## Install ##

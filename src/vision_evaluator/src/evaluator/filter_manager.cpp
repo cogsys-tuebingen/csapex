@@ -9,11 +9,14 @@
 #include "filter_manager.h"
 
 /// SYSTEM
+#include <boost/bind.hpp>
 #include <utils/LibUtil/QtCvImageConverter.h>
 
 using namespace vision_evaluator;
 
 std::vector<FilterManager::Constructor> FilterManager::available_filters;
+bool FilterManager::plugins_loaded_ = false;
+FilterManager::FilterLoader FilterManager::loader_("vision_evaluator", "vision_evaluator::Filter");
 
 FilterManager::FilterManager()
     : group(NULL), group_layout(NULL), active_filters(NULL), available(NULL)
@@ -22,6 +25,28 @@ FilterManager::FilterManager()
 
 void FilterManager::insert(QBoxLayout* layout)
 {
+    if(!plugins_loaded_) {
+        try
+        {
+            std::vector<std::string> classes = loader_.getDeclaredClasses();
+            for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
+                std::cout << "load library for class " << *c << std::endl;
+                loader_.loadLibraryForClass(*c);
+
+                Constructor constructor;
+                constructor.name = *c;
+                constructor.constructor = boost::bind(&FilterLoader::createUnmanagedInstance, &loader_, *c);
+                available_filters.push_back(constructor);
+                std::cout << "loaded plugin class " << *c << std::endl;
+            }
+        }
+        catch(pluginlib::PluginlibException& ex)
+        {
+            ROS_ERROR("The plugin failed to load for some reason. Error: %s", ex.what());
+        }
+        plugins_loaded_ = true;
+    }
+
     parent_layout = layout;
     group = new QGroupBox("Filters");
     layout->addWidget(group);
@@ -62,8 +87,8 @@ void FilterManager::insert(QBoxLayout* layout)
     QObject::connect(available, SIGNAL(activated(int)), this, SLOT(add_filter(int)));
 
     active_filters->installEventFilter(new ListSignalHandler(Qt::Key_Delete,
-                                       boost::bind(&FilterManager::delete_filter, this),
-                                       boost::bind(&FilterManager::reorder_filters, this)));
+                                                             boost::bind(&FilterManager::delete_filter, this),
+                                                             boost::bind(&FilterManager::reorder_filters, this)));
 
     QObject::connect(active_filters, SIGNAL(currentRowChanged(int)), this, SLOT(select_row(int)));
 
@@ -144,8 +169,8 @@ void FilterManager::refresh_filters()
     std::cout << "refresh filters" << std::endl;
     active_filters->clear();
 
-//    active_filters->setMinimumHeight(active_filters->sizeHintForRow(0));
-//    active_filters->setFixedHeight(active.size() * active_filters->sizeHintForRow(0));
+    //    active_filters->setMinimumHeight(active_filters->sizeHintForRow(0));
+    //    active_filters->setFixedHeight(active.size() * active_filters->sizeHintForRow(0));
     for(unsigned i = 0; i < active.size(); ++i) {
         Filter::Ptr e = active[i];
 

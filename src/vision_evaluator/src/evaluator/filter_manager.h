@@ -15,6 +15,7 @@
 #include <boost/signals2.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
+#include <pluginlib/class_loader.h>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QLayout>
@@ -55,7 +56,11 @@ public:
             return res;
         }
     };
+    typedef pluginlib::ClassLoader<vision_evaluator::Filter> FilterLoader;
+
     static std::vector<FilterManager::Constructor> available_filters;
+    static bool plugins_loaded_;
+    static FilterLoader loader_;
 
 public:
     FilterManager();

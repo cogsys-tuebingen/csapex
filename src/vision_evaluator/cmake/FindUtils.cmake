@@ -21,14 +21,12 @@ if(UTILS_FOUND)
     set(UTILS_INCLUDE_DIR "${UTILS_DIR}/include")
     set(UTILS_LIBRARY_DIR "${UTILS_DIR}/lib")
 
-    message("looking for utils @ ${UTILS_LIBRARY_DIR}")
     file(GLOB_RECURSE UTILS_LIBRARIES_GLOB RELATIVE ${UTILS_LIBRARY_DIR} FOLLOW_SYMLINKS ${UTILS_LIBRARY_DIR}/*.so)
 
     set(UTILS_LIBRARIES_INCL "-L${UTILS_LIBRARY_DIR}")
 
     foreach(next_ITEM ${UTILS_LIBRARIES_GLOB})
         STRING(REGEX REPLACE "lib([^\\.]+)\\.so" "\\1" lib "${next_ITEM}" )
-        message(STATUS "util: ${lib}")
         list(APPEND UTILS_LIBRARIES_INCL "-l${lib}")
     endforeach(next_ITEM ${UTILS_LIBRARIES_GLOB})
 
