@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package>
+  <name>background_subtraction</name>
+  <version>0.0.1</version>
+  <description>The background_subtraction package provides nodes to extract objects from the background of their images</description>
+
+  <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
+
+  <license>BSD</license>
+  <author email="sebastian.buck@uni-tuebingen.de">buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>rabot_utils</build_depend>
+
+  <run_depend>message_runtime</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>rabot_utils</run_depend>
+
+  <export>
+   <!-- <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -lbg_sub"/>-->
+  </export>
+</package>
+
+
