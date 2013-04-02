@@ -19,12 +19,6 @@ class ImageCombinerRobustMatch : public ImageCombiner
     Q_OBJECT
 
 public:
-    ImageCombinerRobustMatch(const std::string& label);
-
-public:
-    static ImageCombiner::TypePtr createInstance(CONSTRUCTOR_MODE mode);
-
-public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
 };
 

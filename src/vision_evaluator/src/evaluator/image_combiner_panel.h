@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include "panel.h"
-#include "plugin_queue.h"
+#include "image_combiner_manager.h"
 
 /// SYSTEM
 #include <QWidget>
@@ -46,6 +46,8 @@ private:
 
 private:
     Ui::ImageCombinerPanel* ui;
+
+    ImageCombinerManager combiner_manager;
 
     bool has_1;
     bool has_2;

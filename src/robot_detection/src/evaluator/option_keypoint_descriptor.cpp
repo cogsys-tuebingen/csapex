@@ -2,7 +2,7 @@
 #include "option_keypoint_descriptor.h"
 
 OptionKeypointDescriptor::OptionKeypointDescriptor()
-    : Option("Keypoint Descriptor"), selection(NULL)
+    : selection(NULL)
 {
 }
 
@@ -22,8 +22,6 @@ void OptionKeypointDescriptor::update(int slot)
 
     config.setDescriptorType(static_cast<Types::Descriptor::ID>(slot));
     config.replaceGlobal();
-
-    plugin_changed();
 }
 
 void OptionKeypointDescriptor::insert(QBoxLayout* layout)

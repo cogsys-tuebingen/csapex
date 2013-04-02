@@ -13,7 +13,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-REGISTER_META_PLUGIN(ImageProviderRosTopic)
+//REGISTER_META_PLUGIN(ImageProviderRosTopic)
 
 using namespace vision_evaluator;
 
@@ -22,16 +22,6 @@ boost::function<bool(ImageProvider*)> ImageProviderRosTopic::Identity
 
 QFuture<bool> ImageProviderRosTopic::has_connection;
 
-
-ImageProviderRosTopic::PluginPtr ImageProviderRosTopic::createMetaInstance()
-{
-    return PluginPtr(new ImageProviderRosTopic());
-}
-
-ImageProviderRosTopic::PluginPtr ImageProviderRosTopic::metaInstance()
-{
-    return ImageProviderRosTopic::createMetaInstance();
-}
 
 void ImageProviderRosTopic::initHandle(bool try_only)
 {
@@ -49,7 +39,7 @@ void ImageProviderRosTopic::initHandle(bool try_only)
 }
 
 ImageProviderRosTopic::ImageProviderRosTopic()
-    : ImageProvider("Image Provider ROS Topic"), nh(NULL), layout(NULL)
+    : nh(NULL), layout(NULL)
 {
     initHandle(true);
 }
@@ -74,11 +64,6 @@ void ImageProviderRosTopic::init(int argc, char** argv)
     ros::init(argc, argv, "evaluator_node");
 
     checkMasterConnection();
-}
-
-ImageProvider* ImageProviderRosTopic::createInstance()
-{
-    return new ImageProviderRosTopic();
 }
 
 void ImageProviderRosTopic::forceRefresh()
@@ -168,7 +153,7 @@ void ImageProviderRosTopic::changeTopic()
             std::cout << "selected topic: "  << topic << std::endl;
             current_subscriber = nh->subscribe<sensor_msgs::Image>(topic, 1, boost::bind(&ImageProviderRosTopic::callback, this, _1));
 
-            queue_->viewer->setProvider(QSharedPointer<ImageProviderRosTopic>(this));
+//            queue_->viewer->setProvider(QSharedPointer<ImageProviderRosTopic>(this));
             return;
         }
     }

@@ -1,12 +1,11 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-/// COMPONENT
-#include "plugin.h"
-
 /// SYSTEM
+#include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
 #include <QSlider>
+#include <QBoxLayout>
 
 namespace vision_evaluator
 {

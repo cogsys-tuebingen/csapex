@@ -8,13 +8,13 @@
 #include <data/frame_io.h>
 #include <utils/opencv_utils.hpp>
 
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(robot_detection::ImageCombinerClusterMatchEM, vision_evaluator::ImageCombiner)
+
 using namespace lib_clustering;
-
-ImageCombinerClusterMatchEM::ImageCombinerClusterMatchEM(const std::string& label)
-    : ImageCombiner(label)
-{
-}
-
+using namespace robot_detection;
 
 class HoughEM
 {

@@ -1,6 +1,5 @@
 /// PROJECT
 #include <evaluator/evaluation_window.h>
-#include <evaluator/plugin_manager.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -25,8 +24,6 @@ int main(int argc, char** argv)
     if(XInitThreads() == 0) {
         std::cout << "cannot start the application, XLib couldn't be initialized" << std::endl;
     }
-
-    PluginManager::instance().init(argc, argv);
 
     po::options_description desc("Allowed options");
     desc.add_options()

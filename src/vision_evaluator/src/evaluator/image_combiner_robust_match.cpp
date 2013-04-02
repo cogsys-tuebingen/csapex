@@ -8,9 +8,12 @@
 /// HEADER
 #include "image_combiner_robust_match.h"
 
-REGISTER_IMAGE_COMBINER(ImageCombinerRobustMatch)
+/// COMPONENT
+#include "image_combiner_manager.h"
 
 using namespace vision_evaluator;
+
+REGISTER_COMBINER(ImageCombinerRobustMatch)
 
 //RobustMatcher class taken from OpenCV2 Computer Vision Application Programming Cookbook Ch 9
 class RobustMatcher
@@ -250,10 +253,6 @@ public:
 };
 
 
-ImageCombinerRobustMatch::ImageCombinerRobustMatch(const std::string& label)
-    : ImageCombiner(label)
-{
-}
 cv::Mat ImageCombinerRobustMatch::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
 
@@ -270,9 +269,4 @@ cv::Mat ImageCombinerRobustMatch::combine(const cv::Mat img1, const cv::Mat mask
     cv::drawMatches(img1, key1, img2, key2, matches, out, cv::Scalar(0,0,255), cv::Scalar::all(0), cv::vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
     return out;
-}
-
-ImageCombiner::TypePtr ImageCombinerRobustMatch::createInstance(CONSTRUCTOR_MODE mode)
-{
-    return ImageCombiner::TypePtr(new ImageCombinerRobustMatch("Robust Match"));
 }

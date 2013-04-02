@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include "image_provider.h"
-#include "plugin_queue.h"
 
 /// SYSTEM
 #include <boost/signals2.hpp>
@@ -21,7 +20,7 @@ class Viewer : public QObject
     Q_OBJECT
 
 public:
-    Viewer(QFrame* additional_holder, PluginQueue::Ptr queue);
+    Viewer(QFrame* additional_holder);
     ~Viewer();
 
     void setProvider(QSharedPointer<ImageProvider> provider);
@@ -55,7 +54,6 @@ private:
     int fps;
     bool one_shot_mode;
     int requests;
-    PluginQueue::Ptr queue;
 };
 
 } /// NAMESPACE

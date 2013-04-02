@@ -11,8 +11,8 @@
 
 using namespace vision_evaluator;
 
-Viewer::Viewer(QFrame* additional_holder, PluginQueue::Ptr queue)
-    : ticker_(NULL), additional_holder_(additional_holder), provider_(NULL), fps(10), one_shot_mode(false), requests(1), queue(queue)
+Viewer::Viewer(QFrame* additional_holder)
+    : ticker_(NULL), additional_holder_(additional_holder), provider_(NULL), fps(10), one_shot_mode(false), requests(1)
 {
     ticker_ = new QTimer(this);
     QObject::connect(ticker_, SIGNAL(timeout()), this, SLOT(iteration()));
@@ -67,7 +67,6 @@ void Viewer::update_gui()
 void Viewer::setProvider(QSharedPointer<ImageProvider> provider)
 {
     provider_ = provider;
-    provider_->setQueue(queue.get());
 
     QObject::connect(&*provider_, SIGNAL(new_image(cv::Mat, cv::Mat)), this, SIGNAL(image_provided(cv::Mat, cv::Mat)), Qt::DirectConnection);
 

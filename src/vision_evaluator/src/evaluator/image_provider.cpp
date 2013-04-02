@@ -10,11 +10,6 @@ using namespace vision_evaluator;
 
 std::map<std::string, ImageProvider::ProviderConstructor> ImageProvider::plugins;
 
-ImageProvider::ImageProvider(const std::string& label)
-    : Plugin(label)
-{
-}
-
 ImageProvider::~ImageProvider()
 {
 }

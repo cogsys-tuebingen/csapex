@@ -108,7 +108,9 @@ add_executable(evaluator
     src/evaluator/filter_manager.cpp
     src/evaluator/filter_blur.cpp
     src/evaluator/filter_static_mask.cpp
+    src/evaluator/generic_manager.hpp
     src/evaluator/image_combiner.cpp
+    src/evaluator/image_combiner_manager.cpp
     src/evaluator/image_combiner_robust_match.cpp
     src/evaluator/image_combiner_panel.cpp
     src/evaluator/image_panel.cpp
@@ -119,13 +121,9 @@ add_executable(evaluator
     src/evaluator/image_provider_mov.cpp
     src/evaluator/image_provider_set.cpp
     src/evaluator/image_provider_ros_topic.cpp
-    src/evaluator/option.cpp
     src/evaluator/global_option.cpp
+    src/evaluator/global_option_manager.cpp
     src/evaluator/panel.cpp
-    src/evaluator/plugin.cpp
-    src/evaluator/plugin_base.cpp
-    src/evaluator/plugin_manager.cpp
-    src/evaluator/plugin_queue.cpp
     src/evaluator/viewer.cpp
     ${QT_EVALUATOR}
 )

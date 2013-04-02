@@ -1,50 +1,38 @@
 #ifndef IMAGE_COMBINER_H
 #define IMAGE_COMBINER_H
 
-/// COMPONENT
-#include "plugin.h"
-
 /// SYSTEM
+#include <boost/shared_ptr.hpp>
 #include <QRadioButton>
-
-#define REGISTER_IMAGE_COMBINER(type) \
-    REGISTER_PLUGIN(ImageCombiner, type)
+#include <QBoxLayout>
+#include <opencv2/opencv.hpp>
 
 namespace vision_evaluator
 {
 
-class ImageCombiner : public Plugin<ImageCombiner>
+class ImageCombiner : public QObject
 {
     Q_OBJECT
 
 public:
-    static PluginPtr createMetaInstance();
-    virtual PluginPtr metaInstance();
+    typedef boost::shared_ptr<ImageCombiner> Ptr;
 
 public:
-    virtual void setQueue(PluginQueue* queue);
-    virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
+    virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2) = 0;
 
+    void setName(const std::string& name);
+    const std::string& getName();
 
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void wheelEvent(QWheelEvent* event);
-    virtual void keyEvent(QKeyEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event) {}
+    virtual void mouseMoveEvent(QMouseEvent* event) {}
+    virtual void wheelEvent(QWheelEvent* event) {}
+    virtual void keyEvent(QKeyEvent* event) {}
 
 protected:
-    ImageCombiner(const std::string& label);
     virtual void insert(QBoxLayout*);
 
-protected Q_SLOTS:
-    void update();
-
-Q_SIGNALS:
-    void combinerInstalled();
-    void combinerDeinstalled();
-
 private:
-    ImageCombiner::TypePtr active;
-    std::vector<QRadioButton*> buttons;
+    std::string name_;
 };
 
 } /// NAMESPACE

@@ -1,9 +1,6 @@
 #ifndef IMAGE_PROVIDER_H
 #define IMAGE_PROVIDER_H
 
-/// COMPONENT
-#include "plugin.h"
-
 /// SYSTEM
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
@@ -11,6 +8,7 @@
 #include <boost/signals2.hpp>
 #include <map>
 #include <opencv2/opencv.hpp>
+#include <QBoxLayout>
 #include <QFrame>
 #include <string>
 #include <vector>
@@ -29,21 +27,11 @@
 namespace vision_evaluator
 {
 
-class ImageProvider : public Plugin<ImageProvider>
+class ImageProvider : public QObject
 {
     Q_OBJECT
 
-public:
-    static PluginPtr createMetaInstance() {
-        assert(false);
-    }
-    virtual PluginPtr metaInstance() {
-        assert(false);
-    }
-
 protected:
-    ImageProvider(const std::string& label);
-
     typedef boost::function<ImageProvider*(const std::string&)> ProviderConstructor;
 
 public:

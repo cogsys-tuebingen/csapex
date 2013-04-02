@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include "filter.h"
-#include "option.h"
 
 /// SYSTEM
 #include <QSlider>

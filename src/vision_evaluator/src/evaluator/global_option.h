@@ -8,13 +8,20 @@
 #ifndef GLOBAL_OPTION_H
 #define GLOBAL_OPTION_H
 
+/// SYSTEM
+#include <QBoxLayout>
+
 namespace vision_evaluator
 {
 
-class GlobalOption
+class GlobalOption : public QObject
 {
+    Q_OBJECT
+
 public:
     GlobalOption();
+
+    virtual void insert(QBoxLayout* layout) = 0;
 };
 
 } /// NAMESPACE

@@ -14,37 +14,15 @@
 
 using namespace vision_evaluator;
 
-std::vector<FilterManager::Constructor> FilterManager::available_filters;
-bool FilterManager::plugins_loaded_ = false;
-FilterManager::FilterLoader FilterManager::loader_("vision_evaluator", "vision_evaluator::Filter");
-
 FilterManager::FilterManager()
-    : group(NULL), group_layout(NULL), active_filters(NULL), available(NULL)
+    : GenericManager<vision_evaluator::Filter>("vision_evaluator::Filter"), group(NULL), group_layout(NULL), active_filters(NULL), available(NULL)
 {
 }
 
 void FilterManager::insert(QBoxLayout* layout)
 {
     if(!plugins_loaded_) {
-        try
-        {
-            std::vector<std::string> classes = loader_.getDeclaredClasses();
-            for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
-                std::cout << "load library for class " << *c << std::endl;
-                loader_.loadLibraryForClass(*c);
-
-                Constructor constructor;
-                constructor.name = *c;
-                constructor.constructor = boost::bind(&FilterLoader::createUnmanagedInstance, &loader_, *c);
-                available_filters.push_back(constructor);
-                std::cout << "loaded plugin class " << *c << std::endl;
-            }
-        }
-        catch(pluginlib::PluginlibException& ex)
-        {
-            ROS_ERROR("The plugin failed to load for some reason. Error: %s", ex.what());
-        }
-        plugins_loaded_ = true;
+        reload();
     }
 
     parent_layout = layout;
@@ -79,7 +57,7 @@ void FilterManager::insert(QBoxLayout* layout)
     options->setLayout(options_layout);
     group_layout->addWidget(options);
 
-    for(std::vector<FilterManager::Constructor>::iterator it = available_filters.begin(); it != available_filters.end(); ++it) {
+    for(std::vector<FilterManager::Constructor>::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
         available->addItem(it->name.c_str());
     }
 
@@ -104,7 +82,7 @@ void FilterManager::add_filter(int index)
         return;
     }
 
-    Filter::Ptr filter = available_filters[index - 2]();
+    Filter::Ptr filter = available_classes[index - 2]();
 
     QObject::connect(filter.get(), SIGNAL(filter_changed()), this, SIGNAL(filter_changed()));
 

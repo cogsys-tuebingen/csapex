@@ -2,7 +2,7 @@
 #define OPTION_KEYPOINT_EXTRACTOR_H
 
 /// COMPONENT
-#include <vision_evaluator/option.h>
+#include <vision_evaluator/global_option.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>
@@ -11,7 +11,7 @@
 #include <QComboBox>
 #include <QSlider>
 
-class OptionKeypointExtractor : public vision_evaluator::Option, public Reconfigurable
+class OptionKeypointExtractor : public vision_evaluator::GlobalOption, public Reconfigurable
 {
     Q_OBJECT
 

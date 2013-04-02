@@ -8,16 +8,14 @@
 #ifndef OPTION_CLUSTERING_H
 #define OPTION_CLUSTERING_H
 
-/// COMPONENT
-#include <vision_evaluator/option.h>
-
 /// HEADER
 #include "option_clustering.h"
 
 /// SYSTEM
 #include <QSlider>
+#include <QBoxLayout>
 
-class ClusteringOptions : public vision_evaluator::Option
+class ClusteringOptions : public QObject
 {
     Q_OBJECT
 
@@ -28,6 +26,9 @@ private Q_SLOTS:
     void updateSliders();
     void updateThreshold(int value);
     void update();
+
+Q_SIGNALS:
+    void plugin_changed();
 
 public:
     static int k;

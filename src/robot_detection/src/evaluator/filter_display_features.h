@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <vision_evaluator/filter.h>
-#include <vision_evaluator/option.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>

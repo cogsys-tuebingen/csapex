@@ -10,7 +10,7 @@ boost::function<bool(ImageProvider*)> ImageProviderImg::Identity
 = boost::bind(&ImageProviderImg::checkIdentity, _1);
 
 ImageProviderImg::ImageProviderImg(const std::string& path)
-    : ImageProvider("Image Provider"), img(cv::imread(path)), displayed(false)
+    : img(cv::imread(path)), displayed(false)
 {
 }
 

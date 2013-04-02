@@ -12,9 +12,14 @@
 #include <boost/algorithm/string.hpp>
 #include <utils/LibUtil/Stopwatch.h>
 #include <utils/LibUtil/QtCvImageConverter.h>
+#include <pluginlib/class_list_macros.h>
 
-ImageCombinerPeakMatch::ImageCombinerPeakMatch(const std::string& label)
-    : ImageCombiner(label), histviewer(NULL)/*, histogram_view(NULL)*/
+PLUGINLIB_EXPORT_CLASS(robot_detection::ImageCombinerPeakMatch, vision_evaluator::ImageCombiner)
+
+using namespace robot_detection;
+
+ImageCombinerPeakMatch::ImageCombinerPeakMatch()
+    : histviewer(NULL)/*, histogram_view(NULL)*/
 {
 }
 
@@ -48,7 +53,7 @@ void ImageCombinerPeakMatch::putMultiLineText(cv::Mat combined_target, const std
 
 void ImageCombinerPeakMatch::init_gui(QToolBox* toolbox)
 {
-    ImageCombiner::init_gui(toolbox);
+//    ImageCombiner::init_gui(toolbox);
 
 //    if(histogram_view == NULL) {
 //        histogram_view = new QMainWindow();

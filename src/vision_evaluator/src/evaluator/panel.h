@@ -1,9 +1,6 @@
 #ifndef PANEL_H
 #define PANEL_H
 
-/// COMPONENT
-#include "plugin_queue.h"
-
 /// SYSTEM
 #include <opencv2/opencv.hpp>
 #include <QGraphicsScene>
@@ -33,7 +30,6 @@ protected Q_SLOTS:
 protected:
     QGraphicsView* view;
     QGraphicsScene* scene;
-    PluginQueue::Ptr queue;
 
     QThread* worker;
 };

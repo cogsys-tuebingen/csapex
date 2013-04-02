@@ -2,7 +2,7 @@
 #define OPTION_KEYPOINT_DESCRIPTOR_H
 
 /// COMPONENT
-#include <vision_evaluator/option.h>
+#include <vision_evaluator/global_option.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>
@@ -10,7 +10,7 @@
 /// SYSTEM
 #include <QComboBox>
 
-class OptionKeypointDescriptor : public vision_evaluator::Option, public Reconfigurable
+class OptionKeypointDescriptor : public vision_evaluator::GlobalOption, public Reconfigurable
 {
     Q_OBJECT
 

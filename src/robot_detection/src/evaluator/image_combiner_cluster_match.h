@@ -20,16 +20,17 @@ typedef KMeans<4, PlusPlusInitialization, EuclideanDistance, SparseNonUnique, Po
 
 }
 
+namespace robot_detection {
+
 class ImageCombinerClusterMatch : public vision_evaluator::ImageCombiner, public Reconfigurable
 {
     Q_OBJECT
 
 public:
-    ImageCombinerClusterMatch(const std::string& label);
-
-public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
 
 };
+
+}
 
 #endif // IMAGE_COMBINER_CLUSTER_MATCH_H

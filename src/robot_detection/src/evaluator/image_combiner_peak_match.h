@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <vision_evaluator/image_combiner.h>
-#include <vision_evaluator/option.h>
 #include "histogram_viewer_widget.h"
 
 /// PROJECT
@@ -12,7 +11,10 @@
 
 /// SYSTEM
 #include <QSlider>
+#include <QToolBox>
 //#include <QMainWindow>
+
+namespace robot_detection {
 
 class ImageCombinerPeakMatch : public vision_evaluator::ImageCombiner, public Reconfigurable
 {
@@ -22,7 +24,7 @@ class ImageCombinerPeakMatch : public vision_evaluator::ImageCombiner, public Re
     typedef HoughPeak<true, false> HoughNoTheta;
 
 public:
-    ImageCombinerPeakMatch(const std::string& label);
+    ImageCombinerPeakMatch();
     virtual ~ImageCombinerPeakMatch();
 
 public:
@@ -45,5 +47,7 @@ private:
     HistogramViewerWidget* histviewer;
 //    QMainWindow* histogram_view;
 };
+
+}
 
 #endif // IMAGE_COMBINER_PEAK_MATCH_H

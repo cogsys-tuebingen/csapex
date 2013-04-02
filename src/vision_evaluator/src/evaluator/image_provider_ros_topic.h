@@ -8,11 +8,14 @@
 #include <opencv2/opencv.hpp>
 #include <QRadioButton>
 #include <QFuture>
+#include <QToolBox>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 
 namespace vision_evaluator
 {
+
+// @TODO this should be a "page plugin"
 
 class ImageProviderRosTopic : public ImageProvider
 {
@@ -29,10 +32,6 @@ private:
     static bool checkIdentity(ImageProvider*);
 
 public:
-    static ImageProvider* createInstance();
-    static PluginPtr createMetaInstance();
-    virtual PluginPtr metaInstance();
-
     bool hasNext();
 
 public Q_SLOTS:

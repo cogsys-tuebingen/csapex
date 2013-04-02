@@ -8,7 +8,7 @@ REGISTER_IMAGE_PROVIDERS(ImageProviderDir, DIRECTORY)
 using namespace vision_evaluator;
 
 ImageProviderDir::ImageProviderDir(const std::string& directory)
-    : ImageProvider("training"), is_right_format(false)//,dir_(directory), dir_it_(directory)
+    : is_right_format(false)//,dir_(directory), dir_it_(directory)
 {
     std::cout << directory << "!!!" << std::endl;
 

@@ -3,8 +3,6 @@
 
 /// COMPONENT
 #include "ui_image_panel.h"
-#include "plugin_manager.h"
-#include "option.h"
 
 /// SYSTEM
 #include <boost/assign.hpp>
@@ -23,11 +21,6 @@ ImagePanel::ImagePanel(QWidget* parent) :
     model->setRootPath(tr("/"));
     ui->browser->setModel(model);
 
-
-//    queue = PluginManager::instance().createQueue(ui->options_page, ui->toolbox,
-//            boost::assign::list_of(Option::makeSelector()));
-//    queue->moveToThread(worker);
-
     QVBoxLayout* filter_layout = new QVBoxLayout;
     filter_manager.insert(filter_layout);
     filter_layout->addSpacerItem(new QSpacerItem(0, 1000, QSizePolicy::Minimum, QSizePolicy::Expanding));
@@ -36,7 +29,7 @@ ImagePanel::ImagePanel(QWidget* parent) :
     view = ui->graphicsView;
     view->setScene(scene);
 
-    viewer = new Viewer(ui->additional_frame, queue);
+    viewer = new Viewer(ui->additional_frame);
     viewer->moveToThread(worker);
 
 

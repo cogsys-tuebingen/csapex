@@ -3,7 +3,7 @@
 
 
 OptionKeypointExtractor::OptionKeypointExtractor()
-    : Option("Keypoint Extractor"), selection(NULL), threshold(NULL)
+    : selection(NULL), threshold(NULL)
 {
 }
 
@@ -16,8 +16,6 @@ void OptionKeypointExtractor::update_type(int slot)
     Config current = Config::getGlobal();
     current.setKeypointType(static_cast<Types::Keypoint::ID>(slot));
     current.replaceGlobal();
-
-    plugin_changed();
 }
 
 void OptionKeypointExtractor::update_threshold(int t)
@@ -25,8 +23,6 @@ void OptionKeypointExtractor::update_threshold(int t)
     Config current = Config::getGlobal();
     current.extractor_threshold = t;
     current.replaceGlobal();
-
-    plugin_changed();
 }
 
 void OptionKeypointExtractor::insert(QBoxLayout* layout)

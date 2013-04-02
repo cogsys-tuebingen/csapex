@@ -10,12 +10,9 @@
 
 /// COMPONENT
 #include "filter.h"
+#include "generic_manager.hpp"
 
 /// SYSTEM
-#include <boost/signals2.hpp>
-#include <boost/lambda/bind.hpp>
-#include <boost/lambda/construct.hpp>
-#include <pluginlib/class_loader.h>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QLayout>
@@ -24,43 +21,13 @@
 #include <QKeyEvent>
 
 #define REGISTER_FILTER(class_name)\
-    namespace vision_evaluator { \
-    class _____FILTER_##class_name##_registrator { \
-        static _____FILTER_##class_name##_registrator instance; \
-        _____FILTER_##class_name##_registrator () {\
-            std::cout << "register filter instance " << #class_name << std::endl; \
-                FilterManager::Constructor constructor; \
-                constructor.name = #class_name; \
-                constructor.constructor = boost::lambda::new_ptr<class_name>(); \
-                vision_evaluator::FilterManager::available_filters.push_back(constructor); \
-        } \
-    };\
-    _____FILTER_##class_name##_registrator _____FILTER_##class_name##_registrator::instance;\
-    }
+    REGISTER_GENERIC(FilterManager, class_name)
 
 namespace vision_evaluator
 {
-class FilterManager : public Filter
+class FilterManager : public GenericManager<Filter>
 {
     Q_OBJECT
-
-public:
-    struct Constructor {
-        std::string name;
-        boost::function<Filter*()> constructor;
-
-        Filter::Ptr operator () (){
-            Filter::Ptr res(constructor());
-            res->setName(name);
-            assert(res.get() != NULL);
-            return res;
-        }
-    };
-    typedef pluginlib::ClassLoader<vision_evaluator::Filter> FilterLoader;
-
-    static std::vector<FilterManager::Constructor> available_filters;
-    static bool plugins_loaded_;
-    static FilterLoader loader_;
 
 public:
     FilterManager();

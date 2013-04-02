@@ -19,7 +19,6 @@ int ClusteringOptions::scaling = 12;
 int ClusteringOptions::min_cluster_size = 4;
 
 ClusteringOptions::ClusteringOptions()
-    : Option("Clustering Options")
 {
 }
 

@@ -7,7 +7,7 @@
 using namespace vision_evaluator;
 
 ImageProviderSet::ImageProviderSet()
-    : ImageProvider("Set Provider"), playing_(true), current_frame(0), next_frame(-1)
+    : playing_(true), current_frame(0), next_frame(-1)
 {
 }
 

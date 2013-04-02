@@ -4,10 +4,12 @@
 /// PROJECT
 #include <data/frame_io.h>
 
-ImageCombinerSimpleMatch::ImageCombinerSimpleMatch(const std::string& label)
-    : ImageCombiner(label)
-{
-}
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(robot_detection::ImageCombinerSimpleMatch, vision_evaluator::ImageCombiner)
+
+using namespace robot_detection;
 
 cv::Mat ImageCombinerSimpleMatch::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
