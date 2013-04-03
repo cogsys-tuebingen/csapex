@@ -18,7 +18,7 @@ std::string Filter::getName()
     return name_;
 }
 
-void Filter::setName(const std::string &name)
+void Filter::setName(const std::string& name)
 {
     name_ = name;
 }

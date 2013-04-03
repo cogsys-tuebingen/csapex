@@ -15,10 +15,10 @@ GlobalOptionManager::GlobalOptionManager()
 {
 }
 
-void GlobalOptionManager::insert(QBoxLayout *parent)
+void GlobalOptionManager::insert(QBoxLayout* parent)
 {
     if(options.empty()) {
-        if(!plugins_loaded_){
+        if(!plugins_loaded_) {
             reload();
         }
 

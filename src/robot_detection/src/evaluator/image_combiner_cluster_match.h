@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <vision_evaluator/image_combiner.h>
+#include "option_clustering.h"
 
 /// PROJECT
 #include <config/reconfigurable.h>
@@ -20,7 +21,8 @@ typedef KMeans<4, PlusPlusInitialization, EuclideanDistance, SparseNonUnique, Po
 
 }
 
-namespace robot_detection {
+namespace robot_detection
+{
 
 class ImageCombinerClusterMatch : public vision_evaluator::ImageCombiner, public Reconfigurable
 {
@@ -28,7 +30,10 @@ class ImageCombinerClusterMatch : public vision_evaluator::ImageCombiner, public
 
 public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
+    virtual void update_gui(QFrame* additional_holder);
 
+private:
+    static ClusteringOptions options;
 };
 
 }

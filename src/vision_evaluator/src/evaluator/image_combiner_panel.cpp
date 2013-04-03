@@ -21,6 +21,7 @@ ImageCombinerPanel::ImageCombinerPanel(QWidget* parent) :
     view = ui->view;
     view->setScene(scene);
 
+    combiner_manager.setAdditionalHolder(ui->combiner_frame);
 
     QHBoxLayout* combiner_layout = new QHBoxLayout;
     combiner_manager.insert(combiner_layout);

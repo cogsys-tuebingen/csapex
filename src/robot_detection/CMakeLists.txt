@@ -37,6 +37,8 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(DBOW2 REQUIRED)
 include_directories(${DBOW2_INCLUDE_DIRS})
 
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 
 
 generate_dynamic_reconfigure_options(cfg/Global.cfg cfg/TfCreator.cfg)
@@ -192,8 +194,10 @@ add_library(evaluation_plugin       src/evaluator/filter_display_features.cpp
                                     ${QT_EVALUATOR}
 )
 
+message(ERROR ${OPENGL_LIBRARIES})
 target_link_libraries(evaluation_plugin
-                                    logger cfg utils data Random ${catkin_LIBRARIES}  ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${UTILS_LIBRARIES})
+                                    logger cfg utils data Random ${catkin_LIBRARIES} ${UTILS_LIBRARIES}
+                                    ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES}  ${GLUT_LIBRARY})
 
 ##### ADAPTER
 add_library(adapter                 src/adapter/analyzer_adapter.cpp

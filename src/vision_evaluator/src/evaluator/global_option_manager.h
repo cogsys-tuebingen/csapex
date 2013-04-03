@@ -15,7 +15,8 @@
 #define REGISTER_GLOBAL_OPTION(class_name)\
     REGISTER_GENERIC(GlobalOptionManager, class_name)
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 class GlobalOptionManager : public GenericManager<GlobalOption>
 {

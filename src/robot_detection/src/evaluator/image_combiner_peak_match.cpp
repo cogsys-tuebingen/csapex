@@ -18,18 +18,15 @@ PLUGINLIB_EXPORT_CLASS(robot_detection::ImageCombinerPeakMatch, vision_evaluator
 
 using namespace robot_detection;
 
+ClusteringOptions ImageCombinerPeakMatch::options;
+
 ImageCombinerPeakMatch::ImageCombinerPeakMatch()
-    : histviewer(NULL)/*, histogram_view(NULL)*/
+    : histviewer(NULL)
 {
 }
 
 ImageCombinerPeakMatch::~ImageCombinerPeakMatch()
 {
-//    if(histogram_view != NULL){
-//        histogram_view->close();
-//        delete histogram_view;
-//    }
-
     if(histviewer != NULL) {
         delete histviewer;
     }
@@ -51,19 +48,19 @@ void ImageCombinerPeakMatch::putMultiLineText(cv::Mat combined_target, const std
     }
 }
 
-void ImageCombinerPeakMatch::init_gui(QToolBox* toolbox)
+void ImageCombinerPeakMatch::update_gui(QFrame* additional_holder)
 {
-//    ImageCombiner::init_gui(toolbox);
 
-//    if(histogram_view == NULL) {
-//        histogram_view = new QMainWindow();
-//    }
-
+    if(histviewer != NULL) {
+        delete histviewer;
+    }
     histviewer = new HistogramViewerWidget;
-//    histogram_view->setCentralWidget(histviewer);
-//    histogram_view->show();
-}
 
+    QBoxLayout* layout = new QVBoxLayout;
+    options.insert(layout);
+
+    additional_holder->setLayout(layout);
+}
 
 
 void ImageCombinerPeakMatch::mousePressEvent(QMouseEvent* event)
@@ -110,14 +107,14 @@ void ImageCombinerPeakMatch::drawDebug(Frame::Ptr& a, Frame::Ptr& b,
 
         for(unsigned i = 0; i < clusters.size(); ++i) {
             HoughData::Cluster& cluster = clusters[i];
-//            if(cluster.matches.size() < 4) {
-//                continue;
-//            }
+            //            if(cluster.matches.size() < 4) {
+            //                continue;
+            //            }
 
             std::cout << "cluster " << i << ": " << cluster.matches.size() << std::endl;
 
             cv::Scalar c = cv::rangeColor(i, clusters.size());
-//            int radius = cluster.radius;
+            //            int radius = cluster.radius;
             cv::Point center(cluster.mean[HoughData::INDEX_X] * h->scale_factor, cluster.mean[HoughData::INDEX_Y] * h->scale_factor);
             cv::RotatedRect box(center, cv::Size(std::sqrt(cluster.variance)* h->scale_factor, std::sqrt(cluster.variance)* h->scale_factor), 0.0);
             std::cout << cluster.variance << std::endl;
@@ -165,19 +162,19 @@ void ImageCombinerPeakMatch::drawDebug(Frame::Ptr& a, Frame::Ptr& b,
 
         h->debug.copyTo(cv::Mat(out, cv::Rect(0, 0, h->debug.cols, h->debug.rows)));
 
-//        histviewer->waitForPainting(rest_w, rest_h);
+        histviewer->waitForPainting(rest_w, rest_h);
 
-//        QImage img = histviewer->grabFrameBuffer();
-//        std::cout << img.width() << " == " << rest_w << std::endl;
-//        std::cout << img.height() << " == " << rest_h << std::endl;
-//        assert(img.width() == rest_w);
-//        assert(img.height() == rest_h);
-//        for(int y = 0; y < rest_h; ++y) {
-//            for(int x = 0; x < rest_w; ++x) {
-//                QRgb pixel = img.pixel(x, y);
-//                rest.at<cv::Vec3b>(y, x) = cv::Vec3b(qBlue(pixel), qGreen(pixel), qRed(pixel));
-//            }
-//        }
+        QImage img = histviewer->grabFrameBuffer();
+        std::cout << img.width() << " == " << rest_w << std::endl;
+        std::cout << img.height() << " == " << rest_h << std::endl;
+        assert(img.width() == rest_w);
+        assert(img.height() == rest_h);
+        for(int y = 0; y < rest_h; ++y) {
+            for(int x = 0; x < rest_w; ++x) {
+                QRgb pixel = img.pixel(x, y);
+                rest.at<cv::Vec3b>(y, x) = cv::Vec3b(qBlue(pixel), qGreen(pixel), qRed(pixel));
+            }
+        }
 
     } catch(cv::Exception& e) {
         WARN("cv exception: " << e.what());
@@ -200,19 +197,16 @@ cv::Mat ImageCombinerPeakMatch::combine(const cv::Mat img1, const cv::Mat mask1,
 
     Stopwatch stopwatch;
 
-//    ClusteringOptions* opt = get<Option, ClusteringOptions>();
-//    assert(opt);
-
     HoughAlgorithm* h;
 
     if(tools->getExtractor()->hasOrientation()) {
-        h = new HoughTheta(/*opt->k, opt->scaling*/1,1, config.octaves, *a, *b);
+        h = new HoughTheta(options.k, options.scaling, config.octaves, *a, *b);
     } else {
-        h = new HoughNoTheta(/*opt->k, opt->scaling*/1,1, config.octaves, *a, *b);
+        h = new HoughNoTheta(options.k, options.scaling, config.octaves, *a, *b);
     }
 
 
-    h->min_count = 0;//opt->min_cluster_size;
+    h->min_count = options.min_cluster_size;
 
     h->log.str(std::string());
     h->log << "setup: " << stopwatch.usElapsed() * 1e-3 << "ms\n";

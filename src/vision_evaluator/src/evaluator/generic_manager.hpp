@@ -37,7 +37,7 @@ public:
         std::string name;
         boost::function<M*()> constructor;
 
-        typename M::Ptr operator () (){
+        typename M::Ptr operator()() {
             typename M::Ptr res(constructor());
             res->setName(name);
             assert(res.get() != NULL);
@@ -51,8 +51,7 @@ public:
     static boost::shared_ptr<Loader> loader_;
 
 public:
-    GenericManager(const std::string& full_name)
-    {
+    GenericManager(const std::string& full_name) {
         if(loader_ == NULL) {
             loader_.reset(new Loader("vision_evaluator", full_name));
         }
@@ -62,8 +61,7 @@ public:
     }
 
     void reload() {
-        try
-        {
+        try {
             std::vector<std::string> classes = loader_->getDeclaredClasses();
             for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
                 std::cout << "load library for class " << *c << std::endl;
@@ -75,9 +73,7 @@ public:
                 available_classes.push_back(constructor);
                 std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;
             }
-        }
-        catch(pluginlib::PluginlibException& ex)
-        {
+        } catch(pluginlib::PluginlibException& ex) {
             ROS_ERROR("The plugin failed to load for some reason. Error: %s", ex.what());
         }
         plugins_loaded_ = true;

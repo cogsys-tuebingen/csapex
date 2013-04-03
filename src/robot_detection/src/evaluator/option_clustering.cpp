@@ -15,39 +15,19 @@
 #include <vision_evaluator/qt_helper.hpp>
 #include <QLabel>
 
-int ClusteringOptions::k = 8;
-int ClusteringOptions::scaling = 12;
-int ClusteringOptions::min_cluster_size = 4;
 
 ClusteringOptions::ClusteringOptions()
 {
+    k = 8;
+    scaling = 12;
+    min_cluster_size = 4;
 }
-
-//namespace
-//{
-//QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max)
-//{
-//    QHBoxLayout* internal_layout = new QHBoxLayout;
-
-//    QSlider* slider = new QSlider(Qt::Horizontal);
-//    slider->setMinimum(min);
-//    slider->setMaximum(max);
-//    slider->setValue(def);
-
-//    internal_layout->addWidget(new QLabel(name.c_str()));
-//    internal_layout->addWidget(slider);
-
-//    layout->addLayout(internal_layout);
-
-//    return slider;
-//}
-//}
 
 void ClusteringOptions::insert(QBoxLayout* layout)
 {
     k_slider = QtHelper::makeSlider(layout, "k Clusters", k, 1,32);
     scaling_slider = QtHelper::makeSlider(layout, "scaling", scaling, 1,32);
-    threshold_slider = QtHelper::makeSlider(layout, "threshold", Config::getGlobal().matcher_threshold * 100, 1,100);
+    threshold_slider = QtHelper::makeSlider(layout, "(global) matcher threshold", Config::getGlobal().matcher_threshold * 100, 1,100);
     min_slider = QtHelper::makeSlider(layout, "min cluster size", 4, 1,32);
 
     QObject::connect(k_slider, SIGNAL(valueChanged(int)), this, SLOT(updateSliders()));

@@ -11,7 +11,8 @@
 #include <QComboBox>
 #include <QSlider>
 
-namespace robot_detection {
+namespace robot_detection
+{
 
 class OptionKeypointExtractor : public vision_evaluator::GlobalOption, public Reconfigurable
 {

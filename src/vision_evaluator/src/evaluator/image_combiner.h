@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <QRadioButton>
 #include <QBoxLayout>
+#include <QFrame>
 #include <opencv2/opencv.hpp>
 
 namespace vision_evaluator
@@ -22,6 +23,8 @@ public:
 
     void setName(const std::string& name);
     const std::string& getName();
+
+    virtual void update_gui(QFrame* additional_holder) {}
 
     virtual void mousePressEvent(QMouseEvent* event) {}
     virtual void mouseMoveEvent(QMouseEvent* event) {}

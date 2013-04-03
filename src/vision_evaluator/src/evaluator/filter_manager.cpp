@@ -8,6 +8,9 @@
 /// HEADER
 #include "filter_manager.h"
 
+/// COMPONENT
+#include "../qt_helper.hpp"
+
 /// SYSTEM
 #include <boost/bind.hpp>
 #include <utils/LibUtil/QtCvImageConverter.h>
@@ -65,8 +68,8 @@ void FilterManager::insert(QBoxLayout* layout)
     QObject::connect(available, SIGNAL(activated(int)), this, SLOT(add_filter(int)));
 
     active_filters->installEventFilter(new ListSignalHandler(Qt::Key_Delete,
-                                                             boost::bind(&FilterManager::delete_filter, this),
-                                                             boost::bind(&FilterManager::reorder_filters, this)));
+                                       boost::bind(&FilterManager::delete_filter, this),
+                                       boost::bind(&FilterManager::reorder_filters, this)));
 
     QObject::connect(active_filters, SIGNAL(currentRowChanged(int)), this, SLOT(select_row(int)));
 
@@ -110,25 +113,9 @@ void FilterManager::delete_filter()
     filter_changed();
 }
 
-namespace {
-void clearLayout(QLayout* layout){
-    QLayoutItem* item;
-    while((item = layout->takeAt(0)) != NULL) {
-        if(item->layout()) {
-            clearLayout(item->layout());
-        }
-        if(item->widget()){
-            delete item->widget();
-        }
-        delete item;
-    }
-
-}
-}
-
 void FilterManager::select_row(int index)
 {
-    clearLayout(options_layout);
+    QtHelper::clearLayout(options_layout);
 
     delete options_layout;
     options_layout = new QVBoxLayout;

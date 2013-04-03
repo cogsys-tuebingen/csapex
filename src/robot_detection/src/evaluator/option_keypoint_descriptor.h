@@ -10,7 +10,8 @@
 /// SYSTEM
 #include <QComboBox>
 
-namespace robot_detection {
+namespace robot_detection
+{
 
 class OptionKeypointDescriptor : public vision_evaluator::GlobalOption, public Reconfigurable
 {

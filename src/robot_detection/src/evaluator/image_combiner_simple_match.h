@@ -7,7 +7,8 @@
 /// PROJECT
 #include <config/reconfigurable.h>
 
-namespace robot_detection {
+namespace robot_detection
+{
 
 class ImageCombinerSimpleMatch : public vision_evaluator::ImageCombiner, public Reconfigurable
 {

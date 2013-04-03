@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <vision_evaluator/image_combiner.h>
 #include "histogram_viewer_widget.h"
+#include "option_clustering.h"
 
 /// PROJECT
 #include <config/reconfigurable.h>
@@ -14,7 +15,8 @@
 #include <QToolBox>
 //#include <QMainWindow>
 
-namespace robot_detection {
+namespace robot_detection
+{
 
 class ImageCombinerPeakMatch : public vision_evaluator::ImageCombiner, public Reconfigurable
 {
@@ -31,7 +33,8 @@ public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
 
     void putMultiLineText(cv::Mat combined_target, const std::string& txt);
-    void init_gui(QToolBox* toolbox);
+
+    virtual void update_gui(QFrame* additional_holder);
 
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
@@ -45,6 +48,7 @@ private:
 
 private:
     HistogramViewerWidget* histviewer;
+    static ClusteringOptions options;
 //    QMainWindow* histogram_view;
 };
 

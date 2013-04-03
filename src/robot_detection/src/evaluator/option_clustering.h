@@ -19,6 +19,7 @@ class ClusteringOptions : public QObject
 {
     Q_OBJECT
 
+public:
     ClusteringOptions();
     virtual void insert(QBoxLayout* layout);
 
@@ -31,9 +32,9 @@ Q_SIGNALS:
     void plugin_changed();
 
 public:
-    static int k;
-    static int min_cluster_size;
-    static int scaling;
+    int k;
+    int min_cluster_size;
+    int scaling;
 
 private:
     QSlider* k_slider;

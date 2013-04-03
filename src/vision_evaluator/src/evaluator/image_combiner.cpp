@@ -3,7 +3,7 @@
 
 using namespace vision_evaluator;
 
-void ImageCombiner::setName(const std::string &name)
+void ImageCombiner::setName(const std::string& name)
 {
     name_ = name;
 }

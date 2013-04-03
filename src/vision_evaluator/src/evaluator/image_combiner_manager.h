@@ -30,6 +30,8 @@ public:
     virtual void wheelEvent(QWheelEvent* event);
     virtual void keyEvent(QKeyEvent* event);
 
+    void setAdditionalHolder(QFrame* frame);
+
 protected Q_SLOTS:
     void update();
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
@@ -44,6 +46,7 @@ Q_SIGNALS:
 private:
     ImageCombiner::Ptr active;
     std::vector<QRadioButton*> buttons;
+    QFrame* additional_holder_;
 };
 
 }

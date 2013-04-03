@@ -9,12 +9,13 @@
 #include "image_combiner_manager.h"
 
 /// SYSTEM
+#include <vision_evaluator/qt_helper.hpp>
 #include <utils/LibUtil/QtCvImageConverter.h>
 
 using namespace vision_evaluator;
 
 ImageCombinerManager::ImageCombinerManager()
-    : GenericManager<vision_evaluator::ImageCombiner>("vision_evaluator::ImageCombiner")
+    : GenericManager<vision_evaluator::ImageCombiner>("vision_evaluator::ImageCombiner"), additional_holder_(NULL)
 {
 }
 
@@ -35,15 +36,27 @@ void ImageCombinerManager::insert(QBoxLayout* layout)
     }
 }
 
+void ImageCombinerManager::setAdditionalHolder(QFrame* frame)
+{
+    additional_holder_ = frame;
+}
+
 void ImageCombinerManager::update()
 {
+    if(additional_holder_->layout()) {
+        QtHelper::clearLayout(additional_holder_->layout());
+        delete additional_holder_->layout();
+    }
+
     int i = 0;
     for(std::vector<QRadioButton*>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
         QRadioButton* rb = *it;
 
         if(rb->isChecked()) {
             active = available_classes[i]();
-//            active->init_gui(NULL);
+
+            assert(additional_holder_);
+            active->update_gui(additional_holder_);
 //            active->setQueue(queue_);
 
             Q_EMIT combinerInstalled();

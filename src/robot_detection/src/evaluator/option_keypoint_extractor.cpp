@@ -44,14 +44,7 @@ void OptionKeypointExtractor::insert(QBoxLayout* layout)
 
     QObject::connect(selection, SIGNAL(currentIndexChanged(int)), this, SLOT(update_type(int)));
 
-
-    //threshold = new QSlider(Qt::Horizontal);
-    //threshold->setMinimum(1);
-    //threshold->setMaximum(200);
-    //threshold->setValue(config.extractor_threshold);
-
     threshold = QtHelper::makeSlider(layout, "threshold", config.extractor_threshold, 1, 200);
-
     layout->addWidget(threshold);
 
     QObject::connect(threshold, SIGNAL(valueChanged(int)), this, SLOT(update_threshold(int)));

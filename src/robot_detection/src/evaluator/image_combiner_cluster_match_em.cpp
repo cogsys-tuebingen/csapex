@@ -227,6 +227,16 @@ public:
     cv::Mat debug;
 };
 
+ClusteringOptions ImageCombinerClusterMatchEM::options;
+
+void ImageCombinerClusterMatchEM::update_gui(QFrame* additional_holder)
+{
+    QBoxLayout* layout = new QVBoxLayout;
+    options.insert(layout);
+
+    additional_holder->setLayout(layout);
+}
+
 
 cv::Mat ImageCombinerClusterMatchEM::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
@@ -243,10 +253,7 @@ cv::Mat ImageCombinerClusterMatchEM::combine(const cv::Mat img1, const cv::Mat m
     WARN("got " << matches.size() << " matches");
 
 
-//    ClusteringOptions* opt = get<Option, ClusteringOptions>();
-//    assert(opt);
-//    WARN("k=" << opt->k);
-    HoughEM h(1/*opt->k*/, config.octaves, a, b);
+    HoughEM h(options.k, config.octaves, a, b);
 
     std::vector<KMeansAlgorithm::ClusterT> clusters;
     h.filter(matches, clusters);

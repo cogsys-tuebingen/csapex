@@ -17,8 +17,7 @@
 class QtHelper
 {
 public:
-    static QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max)
-    {
+    static QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max) {
         QHBoxLayout* internal_layout = new QHBoxLayout;
 
         QSlider* slider = new QSlider(Qt::Horizontal);
@@ -44,8 +43,7 @@ public:
         return slider;
     }
 
-    static QHBoxLayout* wrap(const std::string& label, QWidget* widget)
-    {
+    static QHBoxLayout* wrap(const std::string& label, QWidget* widget) {
 
         QHBoxLayout* internal_layout = new QHBoxLayout;
 
@@ -53,6 +51,20 @@ public:
         internal_layout->addWidget(widget);
 
         return internal_layout;
+    }
+
+    static void clearLayout(QLayout* layout) {
+        QLayoutItem* item;
+        while((item = layout->takeAt(0)) != NULL) {
+            if(item->layout()) {
+                clearLayout(item->layout());
+            }
+            if(item->widget()) {
+                delete item->widget();
+            }
+            delete item;
+        }
+
     }
 };
 
