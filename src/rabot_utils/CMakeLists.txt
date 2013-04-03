@@ -18,10 +18,10 @@ include_directories(${UTILS_INCLUDE_DIRS})
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#   INCLUDE_DIRS ${UTILS_INCLUDE_DIRS}
-#   LIBRARIES ${UTILS_LIBRARIES_VERBOSE}
-#  CATKIN_DEPENDS
-#  DEPENDS system_lib
+   INCLUDE_DIRS include
+   LIBRARIES ${UTILS_LIBRARIES_RAW}
+#   CATKIN_DEPENDS
+   DEPENDS Eigen ${UTILS_LIBRARIES_RAW}
 )
 
 #foreach(lib ${UTILS_LIBRARY_PATHS})
@@ -32,7 +32,7 @@ catkin_package(
 
 #execute_process(COMMAND ln -s ${UTILS_PATH}/src/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/src
 #                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-execute_process(COMMAND ln -s ${UTILS_PATH}/src ${CMAKE_CURRENT_SOURCE_DIR}
+execute_process(COMMAND ln -sf ${UTILS_PATH}/src ${CMAKE_CURRENT_SOURCE_DIR}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(src)

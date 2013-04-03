@@ -194,7 +194,6 @@ add_library(evaluation_plugin       src/evaluator/filter_display_features.cpp
                                     ${QT_EVALUATOR}
 )
 
-message(ERROR ${OPENGL_LIBRARIES})
 target_link_libraries(evaluation_plugin
                                     logger cfg utils data Random ${catkin_LIBRARIES} ${UTILS_LIBRARIES}
                                     ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES}  ${GLUT_LIBRARY})

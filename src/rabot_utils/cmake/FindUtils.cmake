@@ -25,11 +25,15 @@ if(UTILS_FOUND)
     file(GLOB_RECURSE UTILS_LIBRARIES_GLOB RELATIVE ${UTILS_LIBRARY_DIR} FOLLOW_SYMLINKS ${UTILS_LIBRARY_DIR}/*.so)
 
     set(UTILS_LIBRARIES_INCL "-L${UTILS_LIBRARY_DIR}")
+    unset(UTILS_LIBRARIES_NAMES)
 
     foreach(next_ITEM ${UTILS_LIBRARIES_GLOB})
         STRING(REGEX REPLACE "lib([^\\.]+)\\.so" "\\1" lib "${next_ITEM}" )
-        message(STATUS "util: ${lib}")
-        list(APPEND UTILS_LIBRARIES_INCL "-l${lib}")
+        if(NOT ${lib} MATCHES "LibRosUtil")
+            message(STATUS "> util: ${lib}")
+            list(APPEND UTILS_LIBRARIES_INCL "-l${lib}")
+            list(APPEND UTILS_LIBRARIES_NAMES ${lib})
+        endif()
     endforeach(next_ITEM ${UTILS_LIBRARIES_GLOB})
 
 
@@ -52,5 +56,6 @@ if(UTILS_FOUND)
     set(UTILS_PATH ${UTILS_DIR} CACHE PATH "The UTILS path.")
     set(UTILS_INCLUDE_DIRS ${UTILS_INCLUDE_DIR} CACHE PATH "The UTILS include path.")
     set(UTILS_LIBRARIES ${UTILS_LIBRARIES_INCL} CACHE PATH "The UTILS libraries.")
+    set(UTILS_LIBRARIES_RAW ${UTILS_LIBRARIES_NAMES} CACHE PATH "The UTILS libraries.")
 
 endif()
