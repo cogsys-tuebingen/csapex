@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <name>fotonic_e70</name>
+  <version>0.0.1</version>
+  <description>The fotonic_e70 package contains a driver node for the Fotonic E70P sensor.</description>
+
+  <maintainer email="sebastian.buck@uni-tuebingen.de">Sebastian Buck</maintainer>
+
+  <license>BSD</license>
+
+  <author email="sebastian.buck@uni-tuebingen.de">Sebastian Buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+
+  <run_depend>pcl_ros</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+
+  <export>
+  </export>
+</package>
