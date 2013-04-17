@@ -1,7 +1,24 @@
 #ifndef BACKGROUND_REMOVER_H
 #define BACKGROUND_REMOVER_H
+
+/// PROJECT
+#include <background_subtraction/GlobalConfig.h>
+
 /// SYSTEM
 #include <opencv2/opencv.hpp>
+
+#define REGISTER_REMOVER(classname)\
+    class classname##registerer {\
+        classname##registerer() {\
+            std::cout << "registering " << #classname << std::endl;\
+            background_subtraction::BackgroundRemover* i = new classname();\
+            background_subtraction::BackgroundRemover::metaInstance().instances.push_back(i);\
+        }\
+        static classname##registerer reg;\
+    };\
+    classname##registerer classname##registerer::reg
+
+
 
 namespace background_subtraction
 {
@@ -12,10 +29,21 @@ namespace background_subtraction
 class BackgroundRemover
 {
 public:
+    struct Meta {
+        std::vector<BackgroundRemover*> instances;
+    };
+
+    static Meta& metaInstance() {
+        static Meta m;
+        return m;
+    }
+
+public:
     /**
      * @brief BackgroundRemover
+     * @param name the name of this remover
      */
-    BackgroundRemover();
+    BackgroundRemover(const std::string& name);
 
     /**
      * @brief ~BackgroundRemover
@@ -64,6 +92,20 @@ public:
     virtual cv::Mat getBackground() {
         return background;
     }
+
+    /**
+     * @brief getName
+     * @return the name of this remover
+     */
+    const std::string& getName() {
+        return name_;
+    }
+
+    /**
+     * @brief applyConfig
+     * @param config
+     */
+    virtual void applyConfig(background_subtraction::GlobalConfig& config) {};
 
     /**
      * @brief setThreshold Setter
@@ -136,6 +178,7 @@ private:
     static cv::Mat NO_DEBUG;
 
 protected:
+    std::string name_;
     bool has_background;
     cv::Mat background;
     cv::Mat background_blured;

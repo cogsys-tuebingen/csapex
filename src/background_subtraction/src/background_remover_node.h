@@ -120,10 +120,6 @@ private:
     background_subtraction::GlobalConfig current_config;
 
     BackgroundRemover* active_background_remover;
-    VibeBackgroundRemover vibe_remover;
-    SimpleBackgroundRemover simple_remover;
-    AdaptiveBackgroundRemover adaptive_remover;
-    OpenCvBackgroundRemover cv_remover;
 
     bool has_images;
     bool use_frame_as_bg;

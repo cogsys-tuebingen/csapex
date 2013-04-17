@@ -67,6 +67,8 @@ public:
         decay = d;
     }
 
+    virtual void applyConfig(background_subtraction::GlobalConfig& config);
+
 protected:
     /**
      * @brief segmentation Template method for subclasses

@@ -3,7 +3,10 @@
 
 using namespace background_subtraction;
 
+REGISTER_REMOVER(SimpleBackgroundRemover);
+
 SimpleBackgroundRemover::SimpleBackgroundRemover()
+    : BackgroundRemover("simple")
 {
 }
 

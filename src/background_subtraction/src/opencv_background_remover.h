@@ -51,6 +51,7 @@ private:
 
 private:
     cv::BackgroundSubtractor* subtractor;
+    bool has_frames;
 };
 }
 

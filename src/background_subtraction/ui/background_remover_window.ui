@@ -76,28 +76,8 @@
       <item>
        <widget class="QComboBox" name="algorithm">
         <property name="currentIndex">
-         <number>0</number>
+         <number>-1</number>
         </property>
-        <item>
-         <property name="text">
-          <string>Simple</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Vibe</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Adaptive</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>OpenCV</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>

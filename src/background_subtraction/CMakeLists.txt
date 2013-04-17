@@ -105,7 +105,7 @@ target_link_libraries(bg_sub
     ${catkin_LIBRARIES}
 )
 
-add_executable(bg_remover
+set(bg_remover_src
     src/node.cpp
     src/adaptive_background_remover.cpp
     src/background_remover.cpp
@@ -113,10 +113,25 @@ add_executable(bg_remover
     src/background_remover_window.cpp
     src/simple_background_remover.cpp
     src/opencv_background_remover.cpp
-    src/vibe_background_remover.cpp
-    src/vibe-background.o
     ${QT}
 )
+
+
+set(bitness 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(bitness 64)
+endif()
+
+if(bitness EQUAL 64)
+    set(bg_remover_src
+        ${bg_remover_src}
+        src/vibe_background_remover.cpp
+        src/vibe-background.o
+    )
+endif()
+
+add_executable(bg_remover ${bg_remover_src})
+
 target_link_libraries(bg_remover
     bg_sub
     ${QT_LIBRARIES}

@@ -37,12 +37,14 @@ bool BackgroundRemoverNode::init()
     filtered_pub = n.advertise<sensor_msgs::Image> (filtered, 4);
     masked_pub = n.advertise<background_subtraction::MaskedImage> (masked, 4);
 
-    active_background_remover = &adaptive_remover;
 
-    simple_remover.init();
-    vibe_remover.init();
-    adaptive_remover.init();
-    cv_remover.init();
+    for(std::vector<BackgroundRemover*>::iterator it = BackgroundRemover::metaInstance().instances.begin();
+        it != BackgroundRemover::metaInstance().instances.end();
+        ++it) {
+        (*it)->init();
+    }
+
+    active_background_remover = BackgroundRemover::metaInstance().instances[0];
 
     f = boost::bind(&BackgroundRemoverNode::dynamicReconfigureCB, this, _1, _2);
     server.setCallback(f);
@@ -60,9 +62,10 @@ void BackgroundRemoverNode::applyConfig(background_subtraction::GlobalConfig& co
     setOpen(config.open);
     setClose(config.close);
 
-    adaptive_remover.setMaxDistance(config.max_dist);
-    adaptive_remover.setMaxStdDev(config.max_std_dev);
-    adaptive_remover.setDecay(config.decay);
+
+    for(std::vector<BackgroundRemover*>::iterator it = BackgroundRemover::metaInstance().instances.begin(); it != BackgroundRemover::metaInstance().instances.end(); ++it) {
+        (*it)->applyConfig(config);
+    }
 }
 
 void BackgroundRemoverNode::dynamicReconfigureCB(background_subtraction::GlobalConfig& config, uint32_t level)
@@ -85,47 +88,35 @@ void BackgroundRemoverNode::setBackground()
 
 void BackgroundRemoverNode::changeAlgo(int i)
 {
-    switch(i) {
-    case 0:
-        active_background_remover = &simple_remover;
-        break;
-    case 1:
-        active_background_remover = &vibe_remover;
-        break;
-    case 2:
-        active_background_remover = &adaptive_remover;
-        break;
-    case 3:
-        active_background_remover = &cv_remover;
-        break;
-
-    default:
-        std::cout << "unknown algorithm selected!";
+    int n = BackgroundRemover::metaInstance().instances.size();
+    if(i >= n) {
+        std::cout << "unknown algorithm selected: " << i << " of " << n << "!" << std::endl;
+        assert(false);
     }
+
+    active_background_remover = BackgroundRemover::metaInstance().instances[i];
 }
 
 void BackgroundRemoverNode::setThreshold(int i)
 {
-    simple_remover.setThreshold(i);
-    vibe_remover.setThreshold(i);
-    adaptive_remover.setThreshold(i);
-    cv_remover.setThreshold(i);
+    for(std::vector<BackgroundRemover*>::iterator it = BackgroundRemover::metaInstance().instances.begin(); it != BackgroundRemover::metaInstance().instances.end(); ++it) {
+        (*it)->setThreshold(i);
+    }
 }
 
 void BackgroundRemoverNode::setOpen(int i)
 {
-    simple_remover.setOpen(i);
-    vibe_remover.setOpen(i);
-    adaptive_remover.setOpen(i);
-    cv_remover.setOpen(i);
+    for(std::vector<BackgroundRemover*>::iterator it = BackgroundRemover::metaInstance().instances.begin(); it != BackgroundRemover::metaInstance().instances.end(); ++it) {
+        (*it)->setOpen(i);
+    }
 }
 
 void BackgroundRemoverNode::setClose(int i)
 {
-    simple_remover.setClose(i);
-    vibe_remover.setClose(i);
-    adaptive_remover.setClose(i);
-    cv_remover.setClose(i);
+
+    for(std::vector<BackgroundRemover*>::iterator it = BackgroundRemover::metaInstance().instances.begin(); it != BackgroundRemover::metaInstance().instances.end(); ++it) {
+        (*it)->setClose(i);
+    }
 }
 
 void BackgroundRemoverNode::imageCB(const sensor_msgs::ImageConstPtr& msg)
@@ -148,10 +139,11 @@ void BackgroundRemoverNode::imageCB(const sensor_msgs::ImageConstPtr& msg)
     /// initialize background remover if necessary
     if(use_frame_as_bg) {
         use_frame_as_bg = false;
-        simple_remover.setBackground(frame);
-        vibe_remover.setBackground(frame);
-        adaptive_remover.setBackground(frame);
-        cv_remover.setBackground(frame);
+
+
+        for(std::vector<BackgroundRemover*>::iterator it = BackgroundRemover::metaInstance().instances.begin(); it != BackgroundRemover::metaInstance().instances.end(); ++it) {
+            (*it)->setBackground(frame);
+        }
     }
 
     /// filter the background

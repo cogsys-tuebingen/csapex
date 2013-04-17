@@ -42,6 +42,11 @@ BackgroundRemoverWindow::BackgroundRemoverWindow(ros::NodeHandle& nh, QWidget* p
 
     node.init();
 
+    std::vector<BackgroundRemover*>& removers = BackgroundRemover::metaInstance().instances;
+    for(std::vector<BackgroundRemover*>::iterator it = removers.begin(); it != removers.end(); ++it) {
+        ui->algorithm->addItem(tr((*it)->getName().c_str()));
+    }
+
     ui->threshold->setValue(node.active_background_remover->getThreshold());
     ui->open->setValue(node.active_background_remover->getOpen());
     ui->close->setValue(node.active_background_remover->getClose());

@@ -6,8 +6,10 @@
 
 using namespace background_subtraction;
 
+REGISTER_REMOVER(AdaptiveBackgroundRemover);
+
 AdaptiveBackgroundRemover::AdaptiveBackgroundRemover()
-    : n(0), scale(2), takes_max(5), takes(takes_max)
+    : BackgroundRemover("adaptive"), n(0), scale(2), takes_max(5), takes(takes_max)
 {
 }
 
@@ -32,6 +34,13 @@ inline void reset_pixel(int ws, int i, int j, int n, double* mean_data, double* 
     double& M2 = M2_data[i * ws + j * channels + channel];
     M2 *= 0.1;
 }
+}
+
+void AdaptiveBackgroundRemover::applyConfig(GlobalConfig &config)
+{
+    setMaxDistance(config.max_dist);
+    setMaxStdDev(config.max_std_dev);
+    setDecay(config.decay);
 }
 
 void AdaptiveBackgroundRemover::add(const cv::Mat& frame)

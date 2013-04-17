@@ -101,7 +101,7 @@ include_directories(include
 )
 
 ##### EVALUATION
-add_executable(evaluator
+add_executable(vision_evaluator
     src/evaluator.cpp
     src/evaluator/evaluation_window.cpp
     src/evaluator/filter.cpp
@@ -128,7 +128,7 @@ add_executable(evaluator
     src/qt_helper.hpp
     ${QT_EVALUATOR}
 )
-target_link_libraries(evaluator ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(vision_evaluator ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 # INSTALL INCLUDE HEADERS
 string(REGEX REPLACE ".*/src/([^/]+)" "\\1" lib ${CMAKE_CURRENT_SOURCE_DIR})

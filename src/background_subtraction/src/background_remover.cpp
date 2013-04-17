@@ -5,8 +5,8 @@ using namespace background_subtraction;
 
 cv::Mat BackgroundRemover::NO_DEBUG = cv::Mat(5,5,CV_8UC3,cv::Scalar::all(0));
 
-BackgroundRemover::BackgroundRemover()
-    : has_background(false), difference_threshold(0),
+BackgroundRemover::BackgroundRemover(const std::string &name)
+    : name_(name), has_background(false), difference_threshold(0),
       sigma_blur(5.5), blur_kernel(15,15),
       close_iterations(0), open_iterations(0),
       changed(false)
