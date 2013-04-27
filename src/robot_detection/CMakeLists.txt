@@ -25,21 +25,31 @@ include(${QT_USE_FILE})
 
 find_package(Boost COMPONENTS system filesystem serialization iostreams signals program_options thread REQUIRED)
 
-find_package(ViolaJones REQUIRED)
-include_directories(${VIOLA_JONES_INCLUDE_DIRS})
-
 find_package(Eigen REQUIRED)
 include_directories(${EIGEN_INCLUDE_DIRS})
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-find_package(DBOW2 REQUIRED)
-include_directories(${DBOW2_INCLUDE_DIRS})
-
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
+find_package(DBOW2)
+if(NOT ${DBOW2_FOUND})
+    message("not building DBoW2 support")
+else()
+    include_directories(${DBOW2_INCLUDE_DIRS})
+    add_definitions(-DWITH_DBOW2)
+endif()
+
+find_package(ViolaJones)
+
+if(NOT ${VIOLA_JONES_FOUND})
+    message("not building ViolaJones support")
+else()
+    include_directories(${VIOLA_JONES_INCLUDE_DIRS})
+    add_definitions(-DWITH_VIOLA_JONES)
+endif()
 
 generate_dynamic_reconfigure_options(cfg/Global.cfg cfg/TfCreator.cfg)
 
@@ -127,41 +137,59 @@ target_link_libraries(utils         data)
 target_link_libraries(utils         yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 ##### DATABASE
-add_library(database                src/db/bag.cpp
-                                    src/db/bag_database.cpp
-                                    src/db/bin.cpp
+set(DB_SRC                          src/db/bin.cpp
                                     src/db/bin_database.cpp
                                     src/db/bow_database.cpp
                                     src/db/database.cpp
                                     src/db/database_io.cpp
                                     src/db/naive_database.cpp
-                                    src/db/serializer.h
-                                    ${GLOBALS})
+                                    src/db/serializer.h)
+if(${DBOW2_FOUND})
+    set(DB_SRC ${DB_SRC}            src/db/bag.cpp
+                                    src/db/bag_database.cpp)
+endif()
+
+add_library(database                ${DB_SRC} ${GLOBALS})
+
 target_link_libraries(database      data)
-target_link_libraries(database      ${DBOW2_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(database      ${Boost_LIBRARIES})
+if(${DBOW2_FOUND})
+    target_link_libraries(database  ${DBOW2_LIBRARIES})
+endif()
+
 
 ##### DATABASE STRATEGIES
-add_library(db_strategy             src/db_strategy/bin_db_strategy.cpp
-                                    src/db_strategy/bag_db_strategy.cpp
+set(DB_STRAT_SRC                    src/db_strategy/bin_db_strategy.cpp
                                     src/db_strategy/bow_db_strategy.cpp
                                     src/db_strategy/db_strategy.cpp
                                     src/db_strategy/db_strategy_interface.cpp
                                     src/db_strategy/db_strategy_decorator.cpp
                                     src/db_strategy/evaluation_strategy_decorator.cpp
                                     src/db_strategy/factory.cpp
-                                    src/db_strategy/naive_db_strategy.cpp
-                                    ${GLOBALS})
+                                    src/db_strategy/naive_db_strategy.cpp)
+if(${DBOW2_FOUND})
+    set(DB_STRAT_SRC ${DB_STRAT_SRC}
+                                    src/db_strategy/bag_db_strategy.cpp)
+endif()
+
+add_library(db_strategy             ${DB_STRAT_SRC} ${GLOBALS})
 target_link_libraries(db_strategy   database roc)
 
 ##### ROI
-add_library(roi                     src/roi/roi.cpp
+set(ROI_SRC                         src/roi/roi.cpp
                                     src/roi/roi_manager.cpp
                                     src/roi/roi_provider.cpp
                                     src/roi/nth_full_frame_roi.cpp
-                                    src/roi/screen_space_roi_tracker.cpp
-                                    src/roi/viola_jones_roi.cpp
-                                    ${GLOBALS})
+                                    src/roi/screen_space_roi_tracker.cpp)
+if(${VIOLA_JONES_FOUND})
+    set(ROI_SRC ${ROI_SRC}          src/roi/viola_jones_roi.cpp)
+endif()
+                                    
+add_library(roi                     ${ROI_SRC} ${GLOBALS})
 target_link_libraries(roi           utils)
+if(${VIOLA_JONES_FOUND})
+    target_link_libraries(roi       ${VIOLA_JONES_LIBRARIES}})
+endif()
 
 
 ##### ANALYZER
@@ -172,7 +200,8 @@ add_library(analyzer                src/analyzer/analyzer.cpp
                                     src/analyzer/trainer_online.cpp
                                     ${GLOBALS})
 target_link_libraries(analyzer      data roi db_strategy)
-target_link_libraries(analyzer      ${VIOLA_JONES_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(analyzer      ${OpenCV_LIBS})
+
 
 ##### TRACKER
 add_library(tracker                 src/tracker/tracker.cpp

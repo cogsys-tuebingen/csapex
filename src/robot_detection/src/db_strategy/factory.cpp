@@ -26,8 +26,10 @@ DatabaseStrategyInterface::Ptr DatabaseStrategyFactory::create()
     case Types::Strategy::NAIVE:
         return DatabaseStrategyInterface::Ptr(new NaiveDatabaseStrategy);
 
+#ifdef WITH_DBOW2
     case Types::Strategy::BAG:
         return DatabaseStrategyInterface::Ptr(new BagDatabaseStrategy);
+#endif
 
     case Types::Strategy::BOW:
         return DatabaseStrategyInterface::Ptr(new BowDatabaseStrategy);

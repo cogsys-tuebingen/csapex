@@ -20,18 +20,20 @@
 /// EXPORT
 #include <boost/serialization/export.hpp>
 #include <db/bin_database.h>
-#include <db/bag_database.h>
+#ifdef WITH_DBOW2
+    #include <db/bag_database.h>
+#endif
 #include <db/bow_database.h>
 #include <db/naive_database.h>
 
 BOOST_CLASS_EXPORT(Database)
 BOOST_CLASS_EXPORT(BinDatabase)
-BOOST_CLASS_EXPORT(BagDatabase)
 BOOST_CLASS_EXPORT(BowDatabase)
 BOOST_CLASS_EXPORT(NaiveDatabase)
-//BOOST_CLASS_EXPORT_GUID(BinDatabase, "BinDatabase")
-//BOOST_CLASS_EXPORT_GUID(BowDatabase, "BowDatabase")
-//BOOST_CLASS_EXPORT_GUID(NaiveDatabase, "NaiveDatabase")
+
+#ifdef WITH_DBOW2
+BOOST_CLASS_EXPORT(BagDatabase)
+#endif
 
 BOOST_SERIALIZATION_SPLIT_FREE(cv::Mat)
 BOOST_SERIALIZATION_SPLIT_FREE(cv::KeyPoint)

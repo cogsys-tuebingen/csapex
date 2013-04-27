@@ -1,4 +1,5 @@
 # - Try to find DBoW2 in Rabot
+set(DBOW2_FOUND 0)
 if (DBOW2_LIBRARIES)
     set(DBOW2_FOUND 1)
 else ()
@@ -32,6 +33,10 @@ else ()
     set(LIB ${DBOW2_LIBRARY} ${DUTILS_LIBRARY} ${DVISION_LIBRARY} ${DUTILSCV_LIBRARY})
     set(DBOW2_INCLUDE_DIRS ${INCL} CACHE PATH "The DBOW2 include path.")
     set(DBOW2_LIBRARIES ${LIB} CACHE PATH "The DBOW2libraries.")
-    set(DBOW2_FOUND 1)
+    if(DBOW2_LIBRARIES)
+	    set(DBOW2_FOUND 1)
+    else()
+	    set(DBOW2_FOUND 0)
+    endif()
 endif()
 
