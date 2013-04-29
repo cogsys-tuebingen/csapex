@@ -188,7 +188,7 @@ endif()
 add_library(roi                     ${ROI_SRC} ${GLOBALS})
 target_link_libraries(roi           utils)
 if(${VIOLA_JONES_FOUND})
-    target_link_libraries(roi       ${VIOLA_JONES_LIBRARIES}})
+    target_link_libraries(roi       ${VIOLA_JONES_LIBRARIES})
 endif()
 
 

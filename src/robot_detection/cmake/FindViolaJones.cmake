@@ -14,7 +14,6 @@
         set(VIOLA_JONES_INCLUDE_DIRS ${VIOLA_JONES_INCLUDE_DIR} CACHE PATH "The Viola Jones include path.")
         set(VIOLA_JONES_LIBRARIES ${VIOLA_JONES_LIBRARY} CACHE PATH "The Viola Jones libraries.")
         set(VIOLA_JONES_FOUND 1)
-	set(VIOLA_JONES_FOUND 1)
     else()
 	set(VIOLA_JONES_FOUND 0)
     endif()
