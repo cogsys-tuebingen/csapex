@@ -38,7 +38,7 @@ ImagePanel::ImagePanel(QWidget* parent) :
     viewer->moveToThread(worker);
 
 
-    QObject::connect(viewer, SIGNAL(image_provided(cv::Mat, cv::Mat)), &filter_manager, SLOT(filter(cv::Mat, cv::Mat)), Qt::DirectConnection);
+    QObject::connect(viewer, SIGNAL(image_provided(cv::Mat, cv::Mat)), &filter_manager, SLOT(filterCopy(cv::Mat, cv::Mat)), Qt::DirectConnection);
     QObject::connect(this, SIGNAL(handle(std::string)), viewer, SLOT(handle(std::string)), Qt::QueuedConnection);
 
     QObject::connect(viewer, SIGNAL(update_request()), this, SLOT(update()), Qt::QueuedConnection);

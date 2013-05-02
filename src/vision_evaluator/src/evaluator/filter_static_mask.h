@@ -26,7 +26,7 @@ public:
     virtual void insert(QLayout*);
 
 public Q_SLOTS:
-    virtual void filter(cv::Mat img, cv::Mat mask);
+    virtual void filter(cv::Mat& img, cv::Mat& mask);
     void new_mask(cv::Mat m);
     void showPainter();
 

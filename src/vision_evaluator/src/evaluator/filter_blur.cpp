@@ -16,7 +16,7 @@ FilterBlur::FilterBlur()
 {
 }
 
-void FilterBlur::filter(cv::Mat img, cv::Mat mask)
+void FilterBlur::filter(cv::Mat& img, cv::Mat& mask)
 {
     if(blur > 0) {
         cv::blur(img, img, cv::Size(blur, blur));

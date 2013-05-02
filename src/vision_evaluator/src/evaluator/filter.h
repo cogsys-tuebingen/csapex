@@ -27,7 +27,7 @@ public Q_SLOTS:
     virtual std::string getName();
     void setName(const std::string& name);
 
-    virtual void filter(cv::Mat img, cv::Mat mask) = 0;
+    virtual void filter(cv::Mat& img, cv::Mat& mask) = 0;
     virtual void insert(QBoxLayout* parent) {}
 
 protected:

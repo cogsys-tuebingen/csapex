@@ -156,6 +156,7 @@ void ModalPainter::input(cv::Mat img)
 FilterStaticMask::FilterStaticMask()
     : painter(NULL)
 {
+    showPainter();
 }
 
 FilterStaticMask::~FilterStaticMask()
@@ -177,15 +178,17 @@ void FilterStaticMask::new_mask(cv::Mat mask)
     mask.copyTo(mask_);
 }
 
-void FilterStaticMask::filter(cv::Mat img, cv::Mat mask)
+void FilterStaticMask::filter(cv::Mat &img, cv::Mat &mask)
 {
     Q_EMIT input(img);
 
-
     if(!mask_.empty()) {
-        mask = cv::min(mask, mask_);
+        if(mask.empty()){
+            mask = mask_;
+        } else {
+            mask = cv::min(mask, mask_);
+        }
     }
-
 }
 
 void FilterStaticMask::insert(QLayout*)

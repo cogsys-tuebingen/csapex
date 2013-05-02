@@ -33,7 +33,7 @@ public:
     FilterManager();
 
     virtual void insert(QBoxLayout* parent);
-    virtual void filter(cv::Mat img, cv::Mat mask);
+    virtual void filter(cv::Mat& img, cv::Mat& mask);
 
 private Q_SLOTS:
     void add_filter(int index);
@@ -41,6 +41,7 @@ private Q_SLOTS:
     void delete_filter();
     void refresh_filters();
     void reorder_filters();
+    void filterCopy(cv::Mat img, cv::Mat mask);
 
 Q_SIGNALS:
     void outputMat(cv::Mat, cv::Mat);

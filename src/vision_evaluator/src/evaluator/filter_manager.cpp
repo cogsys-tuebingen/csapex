@@ -175,8 +175,12 @@ void FilterManager::reorder_filters()
     }
 }
 
+void FilterManager::filterCopy(cv::Mat img, cv::Mat mask)
+{
+    filter(img, mask);
+}
 
-void FilterManager::filter(cv::Mat img, cv::Mat mask)
+void FilterManager::filter(cv::Mat& img, cv::Mat& mask)
 {
     if(!active.empty()) {
         for(unsigned i = 0; i < active.size(); ++i) {

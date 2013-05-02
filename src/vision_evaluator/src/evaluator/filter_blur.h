@@ -17,7 +17,7 @@ class FilterBlur : public Filter
 public:
     FilterBlur();
 
-    virtual void filter(cv::Mat img, cv::Mat mask);
+    virtual void filter(cv::Mat& img, cv::Mat& mask);
 
     virtual void insert(QBoxLayout* layout);
 
