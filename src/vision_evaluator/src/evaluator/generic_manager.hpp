@@ -48,16 +48,20 @@ public:
 
     static std::vector<Constructor> available_classes;
     static bool plugins_loaded_;
-    static boost::shared_ptr<Loader> loader_;
+    static Loader* loader_;
 
 public:
     GenericManager(const std::string& full_name) {
         if(loader_ == NULL) {
-            loader_.reset(new Loader("vision_evaluator", full_name));
+            loader_ = new Loader("vision_evaluator", full_name);
         }
     }
 
     virtual ~GenericManager() {
+        if(loader_ != NULL) {
+            delete loader_;
+            loader_ = NULL;
+        }
     }
 
     void reload() {
@@ -69,7 +73,7 @@ public:
 
                 Constructor constructor;
                 constructor.name = *c;
-                constructor.constructor = boost::bind(&Loader::createUnmanagedInstance, loader_.get(), *c);
+                constructor.constructor = boost::bind(&Loader::createUnmanagedInstance, loader_, *c);
                 available_classes.push_back(constructor);
                 std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;
             }
@@ -87,6 +91,6 @@ template <class M>
 bool GenericManager<M>::plugins_loaded_ = false;
 
 template <class M>
-boost::shared_ptr<typename GenericManager<M>::Loader> GenericManager<M>::loader_((typename GenericManager<M>::Loader*) NULL);
+typename GenericManager<M>::Loader* GenericManager<M>::loader_(NULL);
 
 #endif // GENERIC_MANAGER_H
