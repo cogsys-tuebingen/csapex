@@ -33,11 +33,14 @@ find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
 
-file(GLOB         QT_FORMS RELATIVE         ${CMAKE_CURRENT_SOURCE_DIR}                 ui/*.ui)
+file(GLOB         QT_FORMS RELATIVE   ${CMAKE_CURRENT_SOURCE_DIR}                 ui/*.ui)
 file(GLOB_RECURSE QT_MOC_EVA RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/evaluator/*.h)
+file(GLOB_RECURSE QT_MOC_DES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/designer/*.h)
 QT4_WRAP_CPP(QT_MOC_EVA ${QT_MOC_EVA})
+QT4_WRAP_CPP(QT_MOC_DES ${QT_MOC_DES})
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
 set(QT_EVALUATOR ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_EVA})
+set(QT_DESIGNER ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_DES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -101,8 +104,21 @@ include_directories(include
 )
 
 ##### EVALUATION
+add_library(designer
+    src/designer/drag_tracker.cpp
+    src/designer/box.cpp
+    src/designer/connector.cpp
+    src/designer/connector_in.cpp
+    src/designer/connector_out.cpp
+    src/designer/design_board.cpp
+    src/designer/designer.cpp
+    src/designer/overlay.cpp
+    src/designer/selector_proxy.cpp
+    ${QT_DESIGNER}
+)
+
 add_executable(vision_evaluator
-    src/evaluator.cpp
+    src/evaluator.cpp   
     src/evaluator/evaluation_window.cpp
     src/evaluator/filter.cpp
     src/evaluator/filter_manager.cpp
@@ -128,7 +144,7 @@ add_executable(vision_evaluator
     src/qt_helper.hpp
     ${QT_EVALUATOR}
 )
-target_link_libraries(vision_evaluator ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(vision_evaluator designer ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 # INSTALL INCLUDE HEADERS
 string(REGEX REPLACE ".*/src/([^/]+)" "\\1" lib ${CMAKE_CURRENT_SOURCE_DIR})

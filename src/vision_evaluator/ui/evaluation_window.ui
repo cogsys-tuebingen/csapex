@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="mode_tab">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="single_image_tab">
        <attribute name="title">
@@ -63,6 +63,26 @@
            <widget class="vision_evaluator::ImagePanel" name="right" native="true"/>
           </widget>
           <widget class="vision_evaluator::ImageCombinerPanel" name="combiner" native="true"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="designer_tab">
+       <attribute name="title">
+        <string>Designer</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="vision_evaluator::Designer" name="designer" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="acceptDrops">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
        </layout>
@@ -130,6 +150,12 @@
    <class>vision_evaluator::ImageCombinerPanel</class>
    <extends>QWidget</extends>
    <header location="global">evaluator/image_combiner_panel.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>vision_evaluator::Designer</class>
+   <extends>QWidget</extends>
+   <header location="global">designer/designer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
