@@ -1,6 +1,9 @@
 #ifndef SELECTOR_PROXY_H
 #define SELECTOR_PROXY_H
 
+/// COMPONENT
+#include "box.h"
+
 /// SYSTEM
 #include <QGraphicsView>
 #include <iostream>
@@ -51,7 +54,7 @@ public:
         if (event->button() == Qt::LeftButton) {
             QDrag *drag = new QDrag(this);
             QMimeData *mimeData = new QMimeData;
-            mimeData->setText("vision_evaluator/box");
+            mimeData->setText(Box::MIME);
             mimeData->setParent(this);
             drag->setMimeData(mimeData);
             drag->setPixmap(box_->makePixmap());

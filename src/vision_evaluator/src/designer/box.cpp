@@ -11,8 +11,11 @@
 
 using namespace vision_evaluator;
 
+const QString Box::MIME = "vision_evaluator/box";
+const QString Box::MIME_MOVE = "vision_evaluator/box/move";
+
 Box::Box(QWidget *parent)
-    : QWidget(parent), DragTracker(this), ui(new Ui::Box), input(new ConnectorIn(this)), output(new ConnectorOut(this))
+    : QWidget(parent), ui(new Ui::Box), input(new ConnectorIn(this)), output(new ConnectorOut(this))
 {
     ui->setupUi(this);
 
@@ -31,6 +34,20 @@ Box::~Box()
 
 }
 
+void Box::mousePressEvent(QMouseEvent *e)
+{
+    if (e->button() == Qt::LeftButton) {
+        QDrag *drag = new QDrag(this);
+        QMimeData *mimeData = new QMimeData;
+        mimeData->setText(Box::MIME_MOVE);
+        mimeData->setParent(this);
+        mimeData->setUserData(0, new MoveOffset(-e->pos()));
+        drag->setMimeData(mimeData);
+
+        drag->exec();
+    }
+}
+
 QPixmap Box::makePixmap()
 {
     int border = 3;
@@ -46,7 +63,7 @@ QPixmap Box::makePixmap()
 
 void Box::setOverlay(Overlay *o)
 {
-    DragTracker::setOverlay(o);
+    overlay_ = o;
 
     input->setOverlay(o);
     output->setOverlay(o);
@@ -68,23 +85,4 @@ void Box::showContextMenu(const QPoint &pos)
             deleteLater();
         }
     }
-}
-
-void Box::mouseReleaseEvent(QMouseEvent *e)
-{
-    DragTracker::mouseReleaseEvent(e);
-
-    e->ignore();
-}
-
-
-void Box::mouseDelta(const QPoint& delta)
-{
-    move(start_pos + delta);
-    overlay_->repaint();
-}
-
-QPoint Box::getPos() const
-{
-    return pos();
 }

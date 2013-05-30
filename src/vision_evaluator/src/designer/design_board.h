@@ -26,11 +26,10 @@ public:
     DesignBoard(QWidget* parent = 0);
 
     void resizeEvent(QResizeEvent * e);
-    virtual void mouseReleaseEvent(QMouseEvent * e);
-    void connectorReleased(Connector *startConnector, const QPoint& pt);
 
     virtual bool eventFilter(QObject* o, QEvent *e);
-    void dragEnterEvent(QDragEnterEvent * e);
+    void dragEnterEvent(QDragEnterEvent* e);
+    void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent * e);
 
 public Q_SLOTS:

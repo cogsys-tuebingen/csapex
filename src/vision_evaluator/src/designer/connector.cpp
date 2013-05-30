@@ -8,17 +8,20 @@
 /// SYSTEM
 #include <iostream>
 #include <typeinfo>
+#include <QDragEnterEvent>
+
+const QString Connector::MIME = "vision_evaluator/connector";
 
 Connector::Connector(QWidget* parent)
-    : DragTracker(this), parent_widget(parent), box(NULL), designer(NULL)
+    : QRadioButton(parent), parent_widget(parent), box(NULL), designer(NULL)
 {
     findParents();
     setFocusPolicy(Qt::NoFocus);
+    setAcceptDrops(true);
 }
 
 Connector::~Connector()
 {
-//    overlay_->connectorRemoved(this);
 }
 
 bool Connector::tryConnect(QObject *other_side)
@@ -56,19 +59,55 @@ bool Connector::hitButton(const QPoint &) const
     return false;
 }
 
-void Connector::mousePressEvent(QMouseEvent *e)
+bool Connector::canConnectTo(Connector *other_side)
 {
-    DragTracker::mousePressEvent(e);
+    return (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
 }
 
-void Connector::mouseReleaseEvent(QMouseEvent *e)
+void Connector::dragEnterEvent(QDragEnterEvent *e)
 {
-    DragTracker::mouseReleaseEvent(e);
+    if (e->mimeData()->text() == Connector::MIME) {
+        Connector* from = dynamic_cast<Connector*> (e->mimeData()->parent());
+        if(from->canConnectTo(this) && canConnectTo(from)) {
+            e->acceptProposedAction();
+        }
+    }
+}
 
-    e->accept();
+void Connector::dragMoveEvent(QDragMoveEvent *e)
+{
+    if (e->mimeData()->text() == Connector::MIME) {
+        Connector* from = dynamic_cast<Connector*> (e->mimeData()->parent());
+        overlay_->drawTemporaryLine(QLine(from->centerPoint(), centerPoint()));
+    }
+}
 
-    overlay_->deleteTemporaryLine();
-    designer->connectorReleased(this, e->globalPos());
+void Connector::dropEvent(QDropEvent *e)
+{
+    if (e->mimeData()->text() == Connector::MIME) {
+        Connector* from = dynamic_cast<Connector*> (e->mimeData()->parent());
+
+        if(from && from != this) {
+            if(tryConnect(from)) {
+                overlay_->repaint();
+            }
+        }
+    }
+}
+
+void Connector::mousePressEvent(QMouseEvent *e)
+{
+    if (e->button() == Qt::LeftButton) {
+        QDrag *drag = new QDrag(this);
+        QMimeData *mimeData = new QMimeData;
+        mimeData->setText(Connector::MIME);
+        mimeData->setParent(this);
+        drag->setMimeData(mimeData);
+
+        drag->exec();
+
+        overlay_->deleteTemporaryLine();
+    }
 }
 
 QPoint Connector::topLeft()
@@ -77,28 +116,12 @@ QPoint Connector::topLeft()
         findParents();
     }
 
-    return box->geometry().topLeft() + /*box->widget()->geometry().topLeft() + */ pos();
+    return box->geometry().topLeft() + pos();
 }
 
 QPoint Connector::centerPoint()
 {
     return topLeft() + 0.5 * (geometry().bottomRight() - geometry().topLeft());
-}
-
-void Connector::mouseDelta(const QPoint& delta)
-{
-    QPoint radio_center = centerPoint();
-
-    if(isOutput()) {
-        overlay_->drawTemporaryLine(QLine(radio_center, radio_center + delta));
-    } else {
-        overlay_->drawTemporaryLine(QLine(radio_center + delta, radio_center));
-    }
-}
-
-QPoint Connector::getPos() const
-{
-    return pos();
 }
 
 void Connector::paintEvent(QPaintEvent *e)

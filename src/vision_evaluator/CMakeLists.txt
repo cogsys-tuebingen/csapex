@@ -105,8 +105,8 @@ include_directories(include
 
 ##### EVALUATION
 add_library(designer
-    src/designer/drag_tracker.cpp
     src/designer/box.cpp
+    src/designer/box_manager.cpp
     src/designer/connector.cpp
     src/designer/connector_in.cpp
     src/designer/connector_out.cpp

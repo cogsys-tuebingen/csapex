@@ -2,7 +2,6 @@
 #define BOX_H
 
 /// COMPONENT
-#include "drag_tracker.h"
 #include "connector_in.h"
 #include "connector_out.h"
 
@@ -19,34 +18,43 @@ class Box;
 namespace vision_evaluator
 {
 
-class Box : public QWidget, public DragTracker
+class Box : public QWidget
 {
     Q_OBJECT
 
-    virtual void mousePressEvent(QMouseEvent * e) {DragTracker::mousePressEvent(e);}
-    virtual void mouseMoveEvent(QMouseEvent* e) {DragTracker::mouseMoveEvent(e);}
+public:
+    struct MoveOffset : public QObjectUserData
+    {
+        MoveOffset(const QPoint& o)
+            : value(o)
+        {}
+
+        QPoint value;
+    };
+
+public:
+    static const QString MIME;
+    static const QString MIME_MOVE;
+
 
 public:
     Box(QWidget* parent = 0);
     virtual ~Box();
 
-    virtual void mouseReleaseEvent(QMouseEvent * e);
-
+    virtual void mousePressEvent(QMouseEvent * e);
     virtual QPixmap makePixmap();
 
 public Q_SLOTS:
     virtual void setOverlay(Overlay *o);
     void showContextMenu(const QPoint& pos);
 
-protected:
-    void mouseDelta(const QPoint& delta);
-    virtual QPoint getPos() const;
-
 private:
     Ui::Box* ui;
 
     ConnectorIn* input;
     ConnectorOut* output;
+
+    Overlay* overlay_;
 };
 
 }

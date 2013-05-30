@@ -2,7 +2,6 @@
 #define CONNECTOR_H
 
 /// COMPONENT
-#include "drag_tracker.h"
 #include "overlay.h"
 
 /// SYSTEM
@@ -14,18 +13,23 @@ class Box;
 class DesignBoard;
 }
 
-class Connector : public QRadioButton, public DragTracker
+class Connector : public QRadioButton
 {
     Q_OBJECT
 
-    virtual void mouseMoveEvent(QMouseEvent* e) {DragTracker::mouseMoveEvent(e);}
+public:
+    static const QString MIME;
 
 public:
     virtual bool hitButton(const QPoint &) const;
     virtual void mousePressEvent(QMouseEvent * e);
-    virtual void mouseReleaseEvent(QMouseEvent * e);
+
+    void dragEnterEvent(QDragEnterEvent* e);
+    void dragMoveEvent(QDragMoveEvent* e);
+    void dropEvent(QDropEvent * e);
 
     virtual bool canConnect() = 0;
+    virtual bool canConnectTo(Connector* other_side);
     virtual bool isConnected() = 0;
     virtual bool tryConnect(Connector* other_side) = 0;
     virtual void removeConnection(Connector *other_side) = 0;
@@ -37,6 +41,10 @@ public:
     }
     virtual bool isInput() {
         return false;
+    }
+
+    virtual void setOverlay(Overlay* o) {
+        overlay_ = o;
     }
 
     virtual QPoint centerPoint();
@@ -51,14 +59,14 @@ protected:
 
 protected:
     virtual void findParents();
-    virtual void mouseDelta(const QPoint& delta);
-    virtual QPoint getPos() const;
     virtual QPoint topLeft();
 
 protected:
     QWidget* parent_widget;
     vision_evaluator::Box* box;
     vision_evaluator::DesignBoard* designer;
+
+    Overlay* overlay_;
 };
 
 #endif // CONNECTOR_H
