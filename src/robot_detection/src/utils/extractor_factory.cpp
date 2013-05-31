@@ -116,6 +116,14 @@ void ExtractorFactory::init_keypoint(Extractor::Ptr& e, Types::Keypoint::ID keyp
 #endif
         e->detector = new cv::GoodFeaturesToTrackDetector(t, 0.005, 2);
     }
+    case Types::Keypoint::GFTT_HARRIS: {
+#if USE_THRESHOLD_ADAPTATION
+        t = relative_threshold<Extractor::TARGET_MAX_FEATURE_COUNT / 10, 1>(extractor_threshold);
+#else
+        t = extractor_threshold * 50.0;
+#endif
+        e->detector = new cv::GoodFeaturesToTrackDetector(t, 0.005, 2, 3, true);
+    }
     break;
     default:
         ERROR("Keypoint " << config.getKeypointType() << " not recognized. Check spelling!");

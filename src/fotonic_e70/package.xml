@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>fotonic_e70</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>The fotonic_e70 package contains a driver node for the Fotonic E70P sensor.</description>
 
   <maintainer email="sebastian.buck@uni-tuebingen.de">Sebastian Buck</maintainer>

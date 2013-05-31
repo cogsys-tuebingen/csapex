@@ -42,6 +42,9 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros roscpp senso
 #   sensor_msgs
 # )
 
+## Generate dynamic config
+generate_dynamic_reconfigure_options(cfg/FotonicE70.cfg)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -53,7 +56,7 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros roscpp senso
 catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES fotonic_e70
-#  CATKIN_DEPENDS dynamic_reconfigure pcl_ros roscpp sensor_msgs
+   CATKIN_DEPENDS dynamic_reconfigure pcl_ros roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -65,7 +68,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(include
   ${catkin_INCLUDE_DIRS}
-  include
+  ${PROJECT_SOURCE_DIR}/cfg/cpp/
 )
 
 ## Declare a cpp library
@@ -87,6 +90,8 @@ add_executable(fotonic_e70_node
     src/fz_api/stream.cpp
     src/fz_api/timer.cpp
 )
+
+add_dependencies(fotonic_e70_node ${catkin_EXPORTED_TARGETS} fotonic_e70_gencfg)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

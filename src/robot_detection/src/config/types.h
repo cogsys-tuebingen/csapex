@@ -50,7 +50,7 @@ class KeypointImp
 {
 public:
     enum ID {
-        FIRST, BRISK = 0, SIFT, SURF, ORB, FAST, AGAST, MSER, STAR, GFTT,
+        FIRST, BRISK = 0, SIFT, SURF, ORB, FAST, AGAST, MSER, STAR, GFTT, GFTT_HARRIS,
         COUNT
     };
 protected:
