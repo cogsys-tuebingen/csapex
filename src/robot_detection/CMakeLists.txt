@@ -84,33 +84,33 @@ add_definitions(-ggdb)
 ##### LIBRARIES
 
 
-##### COMMON
-set(GLOBALS                         src/common/global.hpp)
+###### COMMON
+#set(GLOBALS                         src/common/global.hpp)
 
-##### LOGGER
-add_library(logger                  src/utils/logger.cpp)
+###### LOGGER
+#add_library(logger                  src/utils/logger.cpp)
 
-##### CONFIG
-add_library(cfg                     src/config/config.cpp
-                                    src/config/configurated_tools.cpp
-                                    src/config/reconfigurable.cpp
-                                    src/config/types.cpp
-                                    ${GLOBALS})
-target_link_libraries(cfg           logger)
+###### CONFIG
+#add_library(cfg                     src/config/config.cpp
+#                                    src/config/configurated_tools.cpp
+#                                    src/config/reconfigurable.cpp
+#                                    src/config/types.cpp
+#                                    ${GLOBALS})
+#target_link_libraries(cfg           logger)
 
-##### DATA
-add_library(data                    src/data/angle.cpp
-                                    src/data/directory_io.cpp
-                                    src/data/frame.cpp
-                                    src/data/frame_buffer.cpp
-                                    src/data/frame_io.cpp
-                                    src/data/matchable.cpp
-                                    src/data/matchable_pose.cpp
-                                    src/data/painter.cpp
-                                    src/data/pose.cpp
-                                    ${GLOBALS})
-target_link_libraries(data          yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
-target_link_libraries(data          logger)
+###### DATA
+#add_library(data                    src/data/angle.cpp
+#                                    src/data/directory_io.cpp
+#                                    src/data/frame.cpp
+#                                    src/data/frame_buffer.cpp
+#                                    src/data/frame_io.cpp
+#                                    src/data/matchable.cpp
+#                                    src/data/matchable_pose.cpp
+#                                    src/data/painter.cpp
+#                                    src/data/pose.cpp
+#                                    ${GLOBALS})
+#target_link_libraries(data          yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+#target_link_libraries(data          logger)
 
 ##### ROC
 add_library(roc                     src/roc/roc_creator.cpp
@@ -118,20 +118,20 @@ add_library(roc                     src/roc/roc_creator.cpp
 target_link_libraries(roc           yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 ##### UTILS
-add_library(utils                   src/utils/extractor.cpp
-                                    src/utils/extractor_factory.cpp
-                                    src/utils/hough_peak.cpp
-                                    src/utils/matcher.cpp
-                                    src/utils/match_scorer.cpp
-                                    src/utils/match_scorer_homography.cpp
-                                    src/utils/match_scorer_clustering.cpp
-                                    src/utils/match_scorer_reprojection.cpp
-                                    src/utils/match_scorer_factory.cpp
-                                    src/utils/opencv_utils.hpp
-                                    src/utils/rectangle_cluster.cpp
-                                    ${GLOBALS})
-target_link_libraries(utils         data)
-target_link_libraries(utils         yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
+#add_library(utils                   src/utils/extractor.cpp
+#                                    src/utils/extractor_factory.cpp
+#                                    src/utils/hough_peak.cpp
+#                                    src/utils/matcher.cpp
+#                                    src/utils/match_scorer.cpp
+#                                    src/utils/match_scorer_homography.cpp
+#                                    src/utils/match_scorer_clustering.cpp
+#                                    src/utils/match_scorer_reprojection.cpp
+#                                    src/utils/match_scorer_factory.cpp
+#                                    src/utils/opencv_utils.hpp
+#                                    src/utils/rectangle_cluster.cpp
+#                                    ${GLOBALS})
+#target_link_libraries(utils         data)
+#target_link_libraries(utils         yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 ##### DATABASE
 set(DB_SRC                          src/db/bin.cpp
