@@ -16,13 +16,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy std_msgs rosbag cv_bridge)
+find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy std_msgs rosbag cv_bridge  utils)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
-
-find_package(Utils REQUIRED)
-include_directories(${UTILS_INCLUDE_DIRS})
 
 find_package(OpenCV REQUIRED)
 
@@ -89,7 +86,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES vision_evaluator
-  CATKIN_DEPENDS pluginlib roscpp std_msgs rabot_utils
+  CATKIN_DEPENDS pluginlib roscpp std_msgs utils
 #  DEPENDS system_lib
 )
 

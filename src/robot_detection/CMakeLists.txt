@@ -15,10 +15,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs cv_bridge dynamic_reconfigure tf vision_evaluator background_subtraction tf_conversions)
-
-find_package(Utils REQUIRED)
-include_directories(${UTILS_INCLUDE_DIRS})
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs cv_bridge dynamic_reconfigure tf vision_evaluator background_subtraction tf_conversions utils)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGL)
 include(${QT_USE_FILE})
@@ -112,7 +109,7 @@ add_library(data                    src/data/angle.cpp
                                     src/data/painter.cpp
                                     src/data/pose.cpp
                                     ${GLOBALS})
-target_link_libraries(data          yaml-cpp ${Boost_LIBRARIES} ${UTILS_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(data          yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
 target_link_libraries(data          logger)
 
 ##### ROC
@@ -224,7 +221,7 @@ add_library(evaluation_plugin       src/evaluator/filter_display_features.cpp
 )
 
 target_link_libraries(evaluation_plugin
-                                    logger cfg utils data Random ${catkin_LIBRARIES} ${UTILS_LIBRARIES}
+                                    logger cfg utils data Random ${catkin_LIBRARIES}
                                     ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES}  ${GLUT_LIBRARY})
 
 ##### ADAPTER
@@ -301,16 +298,16 @@ add_executable(tracker_node    src/tracker_node.cpp)
 target_link_libraries(tracker_node      ros viz ${catkin_LIBRARIES})
 
 add_executable(detector_batch           src/robot_detector_batch.cpp)
-target_link_libraries(detector_batch    viz)
+target_link_libraries(detector_batch    viz ${catkin_LIBRARIES})
 
 #add_executable(thresh_norm     src/threshold_normalizer.cpp)
 #target_link_libraries(thresh_norm       robot_finder ${catkin_LIBRARIES})
 
 add_executable(trainer_online  src/robot_trainer_node.cpp)
-target_link_libraries(trainer_online    ros viz)
+target_link_libraries(trainer_online    ros viz ${catkin_LIBRARIES})
 
 add_executable(trainer_batch   src/robot_trainer_batch.cpp)
-target_link_libraries(trainer_batch     viz)
+target_link_libraries(trainer_batch     viz ${catkin_LIBRARIES})
 
 add_executable(trainer_dump    src/robot_trainer_dump_node.cpp)
 target_link_libraries(trainer_dump      ros viz ${catkin_LIBRARIES})

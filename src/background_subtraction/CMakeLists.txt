@@ -16,12 +16,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS  genmsg roscpp sensor_msgs cv_bridge dynamic_reconfigure)
+find_package(catkin REQUIRED COMPONENTS  genmsg roscpp sensor_msgs cv_bridge dynamic_reconfigure utils)
 
 find_package(OpenCV REQUIRED)
-
-find_package(Utils REQUIRED)
-include_directories(${UTILS_INCLUDE_DIRS})
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
@@ -86,14 +83,17 @@ generate_messages(
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES bg_sub
-   CATKIN_DEPENDS message_runtime sensor_msgs rabot_utils
+   CATKIN_DEPENDS message_runtime sensor_msgs utils
 #  DEPENDS system_lib
 )
 
 
 
 file(COPY src/masked_image_handler.h DESTINATION ${PROJECT_SOURCE_DIR}/include/background_subtraction/)
-include_directories(include)
+include_directories(include
+  ${catkin_INCLUDE_DIRS}
+)
+
 
 
 add_library(bg_sub
@@ -137,7 +137,6 @@ target_link_libraries(bg_remover
     ${QT_LIBRARIES}
     ${OpenCV_LIBS}
     ${catkin_LIBRARIES}
-    ${UTILS_LIBRARIES}
 )
 
 add_executable(masked2img

@@ -16,14 +16,14 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>rabot_utils</build_depend>
+  <build_depend>utils</build_depend>
 
   <run_depend>message_runtime</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>rabot_utils</run_depend>
+  <run_depend>utils</run_depend>
 
   <export>
    <!-- <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -lbg_sub"/>-->
