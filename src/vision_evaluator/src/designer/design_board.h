@@ -25,12 +25,12 @@ class DesignBoard : public QWidget
 public:
     DesignBoard(QWidget* parent = 0);
 
-    void resizeEvent(QResizeEvent * e);
+    void resizeEvent(QResizeEvent* e);
 
-    virtual bool eventFilter(QObject* o, QEvent *e);
+    virtual bool eventFilter(QObject* o, QEvent* e);
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
-    void dropEvent(QDropEvent * e);
+    void dropEvent(QDropEvent* e);
 
 public Q_SLOTS:
     void showContextMenu(const QPoint& pos);

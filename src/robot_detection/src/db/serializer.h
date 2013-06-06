@@ -21,7 +21,7 @@
 #include <boost/serialization/export.hpp>
 #include <db/bin_database.h>
 #ifdef WITH_DBOW2
-    #include <db/bag_database.h>
+#include <db/bag_database.h>
 #endif
 #include <db/bow_database.h>
 #include <db/naive_database.h>

@@ -17,9 +17,9 @@ private:
     typedef std::vector<ConnectionPair> ConnectionList;
 
 public:
-    Overlay(QWidget *parent = 0);
+    Overlay(QWidget* parent = 0);
 
-    void drawTemporaryLine(const QLine &line);
+    void drawTemporaryLine(const QLine& line);
     void deleteTemporaryLine();
     void addConnection(Connector* from, Connector* to);
     void connectorRemoved(Connector* c);
@@ -28,8 +28,8 @@ public Q_SLOTS:
     void connectorRemoved(QObject* o);
 
 protected:
-    void drawConnection(const QPoint &p1, const QPoint &p2);
-    void paintEvent(QPaintEvent *event);
+    void drawConnection(const QPoint& p1, const QPoint& p2);
+    void paintEvent(QPaintEvent* event);
 
 protected:
     QLine temp_line;

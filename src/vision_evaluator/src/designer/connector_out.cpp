@@ -20,7 +20,7 @@ ConnectorOut::~ConnectorOut()
     }
 }
 
-void ConnectorOut::removeConnection(Connector *other_side)
+void ConnectorOut::removeConnection(Connector* other_side)
 {
     for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
@@ -32,7 +32,7 @@ void ConnectorOut::removeConnection(Connector *other_side)
     }
 }
 
-bool ConnectorOut::tryConnect(Connector *other_side)
+bool ConnectorOut::tryConnect(Connector* other_side)
 {
     if(!other_side->isInput()) {
         return false;

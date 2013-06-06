@@ -7,14 +7,14 @@
 /// SYSTEM
 #include <iostream>
 
-Overlay::Overlay(QWidget *parent)
+Overlay::Overlay(QWidget* parent)
     : QWidget(parent)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 
-void Overlay::drawTemporaryLine(const QLine &line)
+void Overlay::drawTemporaryLine(const QLine& line)
 {
     temp_line = line;
     repaint();
@@ -26,7 +26,7 @@ void Overlay::deleteTemporaryLine()
     repaint();
 }
 
-void Overlay::addConnection(Connector *from, Connector *to)
+void Overlay::addConnection(Connector* from, Connector* to)
 {
     connections.push_back(std::make_pair(from, to));
 
@@ -34,12 +34,12 @@ void Overlay::addConnection(Connector *from, Connector *to)
     connect(to, SIGNAL(destroyed(QObject*)), this, SLOT(connectorRemoved(QObject*)));
 }
 
-void Overlay::connectorRemoved(QObject *o)
+void Overlay::connectorRemoved(QObject* o)
 {
     connectorRemoved((Connector*) o);
 }
 
-void Overlay::connectorRemoved(Connector *c)
+void Overlay::connectorRemoved(Connector* c)
 {
     for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
         const ConnectionPair& connection = *i;
@@ -68,7 +68,7 @@ void Overlay::drawConnection(const QPoint& p1, const QPoint& p2)
     painter->drawPath(path);
 }
 
-void Overlay::paintEvent(QPaintEvent *event)
+void Overlay::paintEvent(QPaintEvent* event)
 {
     QPainter p(this);
 

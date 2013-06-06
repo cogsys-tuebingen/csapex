@@ -178,12 +178,12 @@ void FilterStaticMask::new_mask(cv::Mat mask)
     mask.copyTo(mask_);
 }
 
-void FilterStaticMask::filter(cv::Mat &img, cv::Mat &mask)
+void FilterStaticMask::filter(cv::Mat& img, cv::Mat& mask)
 {
     Q_EMIT input(img);
 
     if(!mask_.empty()) {
-        if(mask.empty()){
+        if(mask.empty()) {
             mask = mask_;
         } else {
             mask = cv::min(mask, mask_);

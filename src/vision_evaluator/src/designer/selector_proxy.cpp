@@ -4,7 +4,7 @@
 
 using namespace vision_evaluator;
 
-SelectorProxy::SelectorProxy(QWidget *parent)
+SelectorProxy::SelectorProxy(QWidget* parent)
     : QGraphicsView(parent)
 {
 }

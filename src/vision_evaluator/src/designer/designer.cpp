@@ -13,7 +13,7 @@
 
 using namespace vision_evaluator;
 
-Designer::Designer(QWidget *parent)
+Designer::Designer(QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer)
 {
     ui->setupUi(this);

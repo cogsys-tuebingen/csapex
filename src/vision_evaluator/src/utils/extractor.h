@@ -16,9 +16,28 @@ class Extractor
     friend class ExtractorFactory;
 
 public:
+    typedef boost::shared_ptr<Extractor> Ptr;
+
     static const int TARGET_MAX_FEATURE_COUNT = 2500;
 
-    typedef boost::shared_ptr<Extractor> Ptr;
+    /**
+     * @brief The Initializer interface to initialize an Extractor
+     */
+    struct Initializer {
+        typedef boost::shared_ptr<Initializer> Ptr;
+
+        virtual void init(Extractor*) = 0;
+    };
+
+    /**
+     * @brief The IllegalKeypointException
+     */
+    class IllegalKeypointException : public std::exception {};
+
+    /**
+     * @brief The IllegalDescriptorException
+     */
+    class IllegalDescriptorException : public std::exception {};
 
 private:
     /**
@@ -58,12 +77,13 @@ public:
      */
     bool valid() const;
 
-private:
+public:
     cv::Ptr<cv::FeatureDetector> detector;
     cv::Ptr<cv::DescriptorExtractor> descriptor_extractor;
 
-    Types::Keypoint::ID keypoint;
-    Types::Descriptor::ID descriptor;
+    std::string keypoint;
+    std::string descriptor;
+
     bool is_binary;
     bool has_orientation;
 };

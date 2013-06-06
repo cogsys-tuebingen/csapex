@@ -15,17 +15,17 @@
 using namespace vision_evaluator;
 
 ImageCombinerManager::ImageCombinerManager()
-    : GenericManager<vision_evaluator::ImageCombiner>("vision_evaluator::ImageCombiner"), additional_holder_(NULL)
+    : PluginManager<vision_evaluator::ImageCombiner>("vision_evaluator::ImageCombiner"), additional_holder_(NULL)
 {
 }
 
 void ImageCombinerManager::insert(QBoxLayout* layout)
 {
-    if(!plugins_loaded_) {
+    if(!pluginsLoaded()) {
         reload();
     }
 
-    for(std::vector<ImageCombinerManager::Constructor>::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
+    for(std::vector<ImageCombinerManager::Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
         ImageCombiner::Ptr combiner = (*it)();
 
         QRadioButton* btn = new QRadioButton(combiner->getName().c_str());
@@ -53,7 +53,7 @@ void ImageCombinerManager::update()
         QRadioButton* rb = *it;
 
         if(rb->isChecked()) {
-            active = available_classes[i]();
+            active = availableClasses()[i]();
 
             assert(additional_holder_);
             active->update_gui(additional_holder_);

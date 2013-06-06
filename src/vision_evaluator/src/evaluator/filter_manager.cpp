@@ -18,13 +18,13 @@
 using namespace vision_evaluator;
 
 FilterManager::FilterManager()
-    : GenericManager<vision_evaluator::Filter>("vision_evaluator::Filter"), group(NULL), group_layout(NULL), active_filters(NULL), available(NULL)
+    : PluginManager<Filter>("vision_evaluator::Filter"), group(NULL), group_layout(NULL), active_filters(NULL), available(NULL)
 {
 }
 
 void FilterManager::insert(QBoxLayout* layout)
 {
-    if(!plugins_loaded_) {
+    if(!pluginsLoaded()) {
         reload();
     }
 
@@ -60,7 +60,7 @@ void FilterManager::insert(QBoxLayout* layout)
     options->setLayout(options_layout);
     group_layout->addWidget(options);
 
-    for(std::vector<Constructor>::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
+    for(std::vector<Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
         available->addItem(it->name.c_str());
     }
 
@@ -85,7 +85,7 @@ void FilterManager::add_filter(int index)
         return;
     }
 
-    Filter::Ptr filter = available_classes[index - 2]();
+    Filter::Ptr filter = availableClasses(index - 2)();
 
     QObject::connect(filter.get(), SIGNAL(filter_changed()), this, SIGNAL(filter_changed()));
 

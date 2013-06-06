@@ -23,8 +23,7 @@ class Box : public QWidget
     Q_OBJECT
 
 public:
-    struct MoveOffset : public QObjectUserData
-    {
+    struct MoveOffset : public QObjectUserData {
         MoveOffset(const QPoint& o)
             : value(o)
         {}
@@ -41,11 +40,11 @@ public:
     Box(QWidget* parent = 0);
     virtual ~Box();
 
-    virtual void mousePressEvent(QMouseEvent * e);
+    virtual void mousePressEvent(QMouseEvent* e);
     virtual QPixmap makePixmap();
 
 public Q_SLOTS:
-    virtual void setOverlay(Overlay *o);
+    virtual void setOverlay(Overlay* o);
     void showContextMenu(const QPoint& pos);
 
 private:

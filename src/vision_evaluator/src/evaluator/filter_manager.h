@@ -25,7 +25,7 @@
 
 namespace vision_evaluator
 {
-class FilterManager : public GenericManager<Filter>
+class FilterManager : public Filter, public PluginManager<Filter>
 {
     Q_OBJECT
 

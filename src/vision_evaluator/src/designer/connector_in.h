@@ -16,8 +16,8 @@ public:
     virtual bool tryConnect(Connector* other_side);
     virtual bool canConnect();
     virtual bool isConnected();
-    virtual bool acknowledgeConnection(Connector *other_side);
-    virtual void removeConnection(Connector *other_side);
+    virtual bool acknowledgeConnection(Connector* other_side);
+    virtual void removeConnection(Connector* other_side);
 
     virtual bool isInput() {
         return true;

@@ -18,7 +18,7 @@
 namespace vision_evaluator
 {
 
-class GlobalOptionManager : public GenericManager<GlobalOption>
+class GlobalOptionManager : public GlobalOption, PluginManager<GlobalOption>
 {
     Q_OBJECT
 

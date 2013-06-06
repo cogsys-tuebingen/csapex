@@ -5,7 +5,7 @@
 #include <config/config.h>
 #include <data/matchable_pose.h>
 #include <data/matchable.h>
-#include <utils/extractor.h>
+#include <utils/extractor_factory.h>
 
 /// SYSTEM
 #include <fstream>
@@ -18,14 +18,12 @@ Bag* Bag::create()
 {
     const Config cfg = Config::getGlobal();
 
-    switch(cfg.getDescriptorType()) {
-    case Types::Descriptor::ORB:
+    if(cfg.getDescriptorType() == "ORB") {
         return new BagImplementation<DBoW2::FOrb::TDescriptor, DBoW2::FOrb>();
-        break;
 
-    default:
-        ERROR("descriptor type " << Types::Descriptor::write(cfg.getDescriptorType()) << " not supported with bag database...");
-        throw Types::Descriptor::IllegalException();
+    } else {
+        ERROR("descriptor type " << cfg.getDescriptorType() << " not supported with bag database...");
+        throw Extractor::IllegalDescriptorException();
     }
 
     assert(false);
@@ -48,7 +46,7 @@ template<class TDescriptor>
 void convert(const cv::Mat& descriptors, std::vector<TDescriptor>& out)
 {
     ERROR("not implemented");
-    throw Types::Descriptor::IllegalException();
+    throw Extractor::IllegalDescriptorException();
 }
 
 template<>

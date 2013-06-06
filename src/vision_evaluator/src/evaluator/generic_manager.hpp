@@ -14,54 +14,78 @@
 #include <boost/lambda/construct.hpp>
 #include <pluginlib/class_loader.h>
 
-#define REGISTER_GENERIC(Manager, class_name)\
+#define STATIC_INIT(prefix, name, code)\
     namespace vision_evaluator { \
-    class _____Manager_##class_name##_registrator { \
-        static _____Manager_##class_name##_registrator instance; \
-        _____Manager_##class_name##_registrator () {\
-            std::cout << "register filter instance " << #class_name << std::endl; \
-                Manager::Constructor constructor; \
-                constructor.name = #class_name; \
-                constructor.constructor = boost::lambda::new_ptr<class_name>(); \
-                vision_evaluator::Manager::available_classes.push_back(constructor); \
+    class _____##prefix##name##_registrator { \
+        static _____##prefix##name##_registrator instance; \
+        _____##prefix##name##_registrator () {\
+            { code } \
         } \
     };\
-    _____Manager_##class_name##_registrator _____Manager_##class_name##_registrator::instance;\
+    _____##prefix##name##_registrator _____##prefix##name##_registrator::instance;\
     }
 
+#define REGISTER_GENERIC(Manager, class_name)\
+    STATIC_INIT(Manager, class_name, { \
+        std::cout << "register filter instance " << #class_name << std::endl; \
+        Manager::Constructor constructor; \
+        constructor.name = #class_name; \
+        constructor.constructor = boost::lambda::new_ptr<class_name>(); \
+        vision_evaluator::Manager manager;\
+        manager.registerConstructor(constructor); \
+    });\
+ 
 template <class M>
-class GenericManager : public M
-{
-public:
-    struct Constructor {
-        std::string name;
-        boost::function<M*()> constructor;
+struct DefaultConstructor {
+    std::string name;
+    boost::function<M*()> constructor;
 
-        typename M::Ptr operator()() {
-            typename M::Ptr res(constructor());
-            res->setName(name);
-            assert(res.get() != NULL);
-            return res;
-        }
-    };
+    typename boost::shared_ptr<M> operator()() const {
+        boost::shared_ptr<M> res(constructor());
+        res->setName(name);
+        assert(res.get() != NULL);
+        return res;
+    }
+    bool valid() const {
+        typename boost::shared_ptr<M> res(constructor());
+        return res.get() != NULL;
+    }
+};
+
+template <class M, class C, class Container>
+class PluginManagerImp
+{
+    template <class, class, class>
+    friend class PluginManager;
+
+protected:
+    typedef C Constructor;
+    typedef Container Constructors;
+
+    static PluginManagerImp<M,C,Container>& instance(const std::string& full_name) {
+        static PluginManagerImp<M,C,Container> i(full_name);
+        return i;
+    }
+
+protected:
     typedef pluginlib::ClassLoader<M> Loader;
 
-    static std::vector<Constructor> available_classes;
-    static bool plugins_loaded_;
-    static Loader* loader_;
+    PluginManagerImp(const std::string& full_name)
+        : loader_(new Loader("vision_evaluator", full_name)) {
+    }
+    PluginManagerImp(const PluginManagerImp& rhs);
+    PluginManagerImp& operator = (const PluginManagerImp& rhs);
 
-public:
-    GenericManager(const std::string& full_name) {
-        if(loader_ == NULL) {
-            loader_ = new Loader("vision_evaluator", full_name);
-        }
+protected:
+    virtual ~PluginManagerImp() {
+//        if(loader_ != NULL) {
+//            delete loader_;
+//            loader_ = NULL;
+//        }
     }
 
-    virtual ~GenericManager() {
-        if(loader_ != NULL) {
-            delete loader_;
-            loader_ = NULL;
-        }
+    void registerConstructor(Constructor constructor) {
+        available_classes.push_back(constructor);
     }
 
     void reload() {
@@ -74,7 +98,7 @@ public:
                 Constructor constructor;
                 constructor.name = *c;
                 constructor.constructor = boost::bind(&Loader::createUnmanagedInstance, loader_, *c);
-                available_classes.push_back(constructor);
+                registerConstructor(constructor);
                 std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;
             }
         } catch(pluginlib::PluginlibException& ex) {
@@ -82,15 +106,56 @@ public:
         }
         plugins_loaded_ = true;
     }
+
+protected:
+    bool plugins_loaded_;
+    Loader* loader_;
+
+    Constructors available_classes;
 };
 
-template <class M>
-std::vector<typename GenericManager<M>::Constructor> GenericManager<M>::available_classes;
+template <class M, class C = DefaultConstructor<M>, class Container = std::vector<C> >
+class PluginManager
+{
+protected:
+    typedef PluginManagerImp<M, C, Container> Parent;
 
-template <class M>
-bool GenericManager<M>::plugins_loaded_ = false;
+public:
+    typedef typename Parent::Constructor Constructor;
+    typedef typename Parent::Constructors Constructors;
 
-template <class M>
-typename GenericManager<M>::Loader* GenericManager<M>::loader_(NULL);
+    PluginManager(const std::string& full_name)
+        : instance(Parent::instance(full_name))
+    {}
+
+    void registerConstructor(Constructor constructor) {
+        instance.registerConstructor(constructor);
+    }
+
+    bool pluginsLoaded() const {
+        return instance.plugins_loaded_;
+    }
+
+    void reload() {
+        instance.reload();
+    }
+
+    const Constructors& availableClasses() const {
+        return instance.available_classes;
+    }
+    const Constructor& availableClasses(unsigned index) const {
+        return instance.available_classes[index];
+    }
+    const Constructor& availableClasses(const std::string& key) const {
+        return instance.available_classes[key];
+    }
+    Constructor& availableClasses(const std::string& key) {
+        return instance.available_classes[key];
+    }
+
+protected:
+    Parent& instance;
+};
+
 
 #endif // GENERIC_MANAGER_H

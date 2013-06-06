@@ -57,50 +57,17 @@ void readKeypointDescriptor(YAML::Node& doc, Config& cfg)
     std::string descriptor, keypoint;
 
     doc["keypoint_type"] >> keypoint;
-    cfg.setKeypointType(Types::Keypoint::read(keypoint));
+    cfg.setKeypointType(keypoint);
 
     if(doc.FindValue("descriptor_type")) {
         doc["descriptor_type"] >> descriptor;
-        cfg.setDescriptorType(Types::Descriptor::read(descriptor));
+        cfg.setDescriptorType(descriptor);
     } else {
-        Types::Descriptor::ID descriptor_type;
-
-        switch(cfg.getKeypointType()) {
-        case Types::Keypoint::BRISK:
-            descriptor_type = Types::Descriptor::BRISK;
-            break;
-        case Types::Keypoint::SIFT:
-            descriptor_type = Types::Descriptor::SIFT;
-            break;
-        case Types::Keypoint::SURF:
-            descriptor_type = Types::Descriptor::SURF;
-            break;
-        case Types::Keypoint::ORB:
-            descriptor_type = Types::Descriptor::ORB;
-            break;
-        case Types::Keypoint::FAST:
-            descriptor_type = Types::Descriptor::ORB;
-            break;
-        case Types::Keypoint::AGAST:
-            descriptor_type = Types::Descriptor::ORB;
-            break;
-        case Types::Keypoint::MSER:
-            descriptor_type = Types::Descriptor::ORB;
-            break;
-        case Types::Keypoint::STAR:
-            descriptor_type = Types::Descriptor::ORB;
-            break;
-        case Types::Keypoint::GFTT:
-            descriptor_type = Types::Descriptor::ORB;
-            break;
-
-        default:
-            ERROR("unknown Keypoint type");
-            throw Types::Keypoint::IllegalException();
-        }
-
-        cfg.setDescriptorType(descriptor_type);
+        ERROR("no descriptor type");
+        throw Extractor::IllegalDescriptorException();
     }
+
+    cfg.setDescriptorType(descriptor);
 }
 
 Config read_parameters(int argc, char** argv)

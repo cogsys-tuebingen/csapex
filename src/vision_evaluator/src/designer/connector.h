@@ -8,7 +8,8 @@
 #include <QRadioButton>
 
 /// FORWARDS DECLARATION
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 class Box;
 class DesignBoard;
 }
@@ -21,20 +22,20 @@ public:
     static const QString MIME;
 
 public:
-    virtual bool hitButton(const QPoint &) const;
-    virtual void mousePressEvent(QMouseEvent * e);
+    virtual bool hitButton(const QPoint&) const;
+    virtual void mousePressEvent(QMouseEvent* e);
 
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
-    void dropEvent(QDropEvent * e);
+    void dropEvent(QDropEvent* e);
 
     virtual bool canConnect() = 0;
     virtual bool canConnectTo(Connector* other_side);
     virtual bool isConnected() = 0;
     virtual bool tryConnect(Connector* other_side) = 0;
-    virtual void removeConnection(Connector *other_side) = 0;
+    virtual void removeConnection(Connector* other_side) = 0;
 
-    virtual void paintEvent(QPaintEvent *e);
+    virtual void paintEvent(QPaintEvent* e);
 
     virtual bool isOutput() {
         return false;
@@ -51,7 +52,7 @@ public:
 
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
-    virtual void removeConnection(QObject *other_side);
+    virtual void removeConnection(QObject* other_side);
 
 protected:
     Connector(QWidget* parent);

@@ -1,6 +1,9 @@
 /// HEADER
 #include "option_keypoint_extractor.h"
 
+/// PROJECT
+#include <utils/extractor_manager.h>
+
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <vision_evaluator/qt_helper.hpp>
@@ -8,6 +11,7 @@
 PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointExtractor, vision_evaluator::GlobalOption)
 
 using namespace robot_detection;
+using namespace vision_evaluator;
 
 
 OptionKeypointExtractor::OptionKeypointExtractor()
@@ -21,9 +25,15 @@ OptionKeypointExtractor::~OptionKeypointExtractor()
 
 void OptionKeypointExtractor::update_type(int slot)
 {
-    Config current = Config::getGlobal();
-    current.setKeypointType(static_cast<Types::Keypoint::ID>(slot));
-    current.replaceGlobal();
+    Config config = Config::getGlobal();
+
+    QString target = config.getKeypointType().c_str();
+    if(target == selection->itemText(slot)) {
+        return;
+    }
+
+    config.setKeypointType(selection->itemText(slot).toUtf8().constData());
+    config.replaceGlobal();
 }
 
 void OptionKeypointExtractor::update_threshold(int t)
@@ -36,11 +46,25 @@ void OptionKeypointExtractor::update_threshold(int t)
 void OptionKeypointExtractor::insert(QBoxLayout* layout)
 {
     selection = new QComboBox;
-    for(int k = 0; k < Types::Keypoint::COUNT; k++) {
-        selection->addItem(Types::Keypoint::write(k).c_str());
+
+    ExtractorManager manager;
+    typedef std::pair<std::string, ExtractorManager::FeatureDetectorConstructor::Ptr> Pair;
+    BOOST_FOREACH(Pair fc, manager.featureDetectors()) {
+        selection->addItem(fc.second->getName().c_str());
     }
-    Config config = Config::getGlobal();
     layout->addLayout(QtHelper::wrap("Keypoint", selection));
+
+    Config config = Config::getGlobal();
+    QString target = config.getKeypointType().c_str();
+
+    if(selection != NULL) {
+        for(int i = 0; i < selection->count(); ++i) {
+            if(selection->itemText(i) == target) {
+                selection->setCurrentIndex(i);
+            }
+        }
+    }
+
 
     QObject::connect(selection, SIGNAL(currentIndexChanged(int)), this, SLOT(update_type(int)));
 
@@ -52,12 +76,19 @@ void OptionKeypointExtractor::insert(QBoxLayout* layout)
 
 void OptionKeypointExtractor::configChanged()
 {
-    if(config.getKeypointType() < 0) {
-        return;
-    }
+//    if(config.getKeypointType() < 0) {
+//        return;
+//    }
+
+    QString target = config.getKeypointType().c_str();
 
     if(selection != NULL) {
-        selection->setCurrentIndex(config.getKeypointType());
+        for(int i = 0; i < selection->count(); ++i) {
+            if(selection->itemText(i) == target) {
+                selection->setCurrentIndex(i);
+                return;
+            }
+        }
     }
 }
 

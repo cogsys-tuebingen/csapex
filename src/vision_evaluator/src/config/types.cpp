@@ -41,29 +41,6 @@ typename Parameter<T>::SubType Parameter<T>::readName(const std::string& type)
     throw IllegalException();
 }
 
-void DescriptorImp::initialize(std::map<ID, std::string>& map)
-{
-    map[BRISK] = "BRISK";
-    map[BRIEF] = "BRIEF";
-    map[SURF] = "SURF";
-    map[SIFT] = "SIFT";
-    map[ORB] = "ORB";
-    map[FREAK] = "FREAK";
-}
-
-void KeypointImp::initialize(std::map<ID, std::string> &map)
-{
-    map[FAST] = "FAST";
-    map[AGAST] = "AGAST";
-    map[BRISK] = "BRISK";
-    map[SURF] = "SURF";
-    map[SIFT] = "SIFT";
-    map[ORB] = "ORB";
-    map[MSER] = "MSER";
-    map[STAR] = "STAR";
-    map[GFTT] = "GFTT";
-}
-
 void StrategyImp::initialize(std::map<ID, std::string> &map)
 {
     map[NAIVE] = "FAST";
@@ -74,7 +51,4 @@ void StrategyImp::initialize(std::map<ID, std::string> &map)
 
 
 /// INSTANCIATION
-
-template class Parameter<KeypointImp>;
-template class Parameter<DescriptorImp>;
 template class Parameter<StrategyImp>;

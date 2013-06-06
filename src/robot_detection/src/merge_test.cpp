@@ -18,53 +18,55 @@ namespace bfs = boost::filesystem3;
 
 int main(int argc, char** argv)
 {
-    if(argc <= 1) {
-        std::cout << "usage: " << argv[0] << " <path-to-test-files>" << std::endl;
-        return 1;
-    }
+    Extractor::Ptr e = ExtractorFactory::create("BRISK", "BRISK");
 
-    bfs::path path = argv[1];
-    if(!bfs::exists(path)) {
-        std::cout << "path " << path << " does not exist" << std::endl;
-        return 2;
-    }
+//    if(argc <= 1) {
+//        std::cout << "usage: " << argv[0] << " <path-to-test-files>" << std::endl;
+//        return 1;
+//    }
 
-    Config cfg = Config::getGlobal();
-    cfg.setKeypointType(Types::Keypoint::ORB);
-    cfg.setDescriptorType(Types::Descriptor::ORB);
+//    bfs::path path = argv[1];
+//    if(!bfs::exists(path)) {
+//        std::cout << "path " << path << " does not exist" << std::endl;
+//        return 2;
+//    }
 
-    cfg.extractor_threshold = 10;
-    cfg.matcher_threshold = 0.75;
+//    Config cfg = Config::getGlobal();
+//    cfg.setKeypointType(Types::Keypoint::ORB);
+//    cfg.setDescriptorType(Types::Descriptor::ORB);
 
-    cfg.replaceGlobal();
+//    cfg.extractor_threshold = 10;
+//    cfg.matcher_threshold = 0.75;
 
-    MatchScorerFactory::setType(MatchScorerFactory::Scorer::HOMOGRAPHY);
+//    cfg.replaceGlobal();
 
-    Extractor::Ptr extractor = ExtractorFactory::create(cfg.getKeypointType(), cfg.getDescriptorType());
-    Matcher matcher(extractor->binary());
+//    MatchScorerFactory::setType(MatchScorerFactory::Scorer::HOMOGRAPHY);
 
-    int files = 0;
+//    Extractor::Ptr extractor = ExtractorFactory::create(cfg.getKeypointType(), cfg.getDescriptorType());
+//    Matcher matcher(extractor->binary());
 
-    bfs::directory_iterator end;
-    for(bfs::directory_iterator dir(path); dir != end; ++dir) {
-        bfs::path path = dir->path();
-        if(path.extension() == ".png") {
-            files++;
-        }
-    }
+//    int files = 0;
 
-    cv::Mat images[files];
-    int image = 0;
-    for(bfs::directory_iterator dir(path); dir != end; ++dir) {
-        bfs::path path = dir->path();
-        if(path.extension() == ".png") {
-            images[image] = cv::imread(path.string().c_str());
-            image++;
-        }
-    }
+//    bfs::directory_iterator end;
+//    for(bfs::directory_iterator dir(path); dir != end; ++dir) {
+//        bfs::path path = dir->path();
+//        if(path.extension() == ".png") {
+//            files++;
+//        }
+//    }
 
-    for(int i = 0; i < files; ++i) {
-        cv::imshow("test", images[i]);
-        cv::waitKey(1000);
-    }
+//    cv::Mat images[files];
+//    int image = 0;
+//    for(bfs::directory_iterator dir(path); dir != end; ++dir) {
+//        bfs::path path = dir->path();
+//        if(path.extension() == ".png") {
+//            images[image] = cv::imread(path.string().c_str());
+//            image++;
+//        }
+//    }
+
+//    for(int i = 0; i < files; ++i) {
+//        cv::imshow("test", images[i]);
+//        cv::waitKey(1000);
+//    }
 }

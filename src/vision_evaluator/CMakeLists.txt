@@ -132,6 +132,8 @@ target_link_libraries(data          logger)
 ##### UTILS
 add_library(utils                   src/utils/extractor.cpp
                                     src/utils/extractor_factory.cpp
+                                    src/utils/extractor_manager.cpp
+                                    src/utils/extractors_default.cpp
                                     src/utils/hough_peak.cpp
                                     src/utils/matcher.cpp
                                     src/utils/match_scorer.cpp

@@ -86,15 +86,11 @@ public: // these came originally from ros
     bool interactive;
 
 public:
-    Types::Keypoint::ID getKeypointType() const;
-    Types::Descriptor::ID getDescriptorType() const;
+    const std::string& getKeypointType() const;
+    const std::string& getDescriptorType() const;
 
-    void setKeypointType(Types::Keypoint::ID type);
-    void setDescriptorType(Types::Descriptor::ID type);
-
-protected:
-    Types::Keypoint::ID keypoint_type;
-    Types::Descriptor::ID descriptor_type;
+    void setKeypointType(const std::string& type);
+    void setDescriptorType(const std::string& type);
 
 protected:
     virtual void make_defaults();
@@ -127,8 +123,8 @@ protected:
         ar& crop_test;
         ar& interactive;
 
-        setKeypointType(Types::Keypoint::read(keypoint_name));
-        setDescriptorType(Types::Descriptor::read(descriptor_name));
+        setKeypointType(keypoint_name);
+        setDescriptorType(descriptor_name);
     }
 
 //    template<class Archive>

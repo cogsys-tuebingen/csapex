@@ -17,7 +17,7 @@
 
 namespace vision_evaluator
 {
-class ImageCombinerManager : public GenericManager<ImageCombiner>
+class ImageCombinerManager : public ImageCombiner, public PluginManager<ImageCombiner>
 {
     Q_OBJECT
 

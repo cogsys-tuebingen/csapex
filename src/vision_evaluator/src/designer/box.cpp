@@ -14,7 +14,7 @@ using namespace vision_evaluator;
 const QString Box::MIME = "vision_evaluator/box";
 const QString Box::MIME_MOVE = "vision_evaluator/box/move";
 
-Box::Box(QWidget *parent)
+Box::Box(QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), input(new ConnectorIn(this)), output(new ConnectorOut(this))
 {
     ui->setupUi(this);
@@ -34,11 +34,11 @@ Box::~Box()
 
 }
 
-void Box::mousePressEvent(QMouseEvent *e)
+void Box::mousePressEvent(QMouseEvent* e)
 {
-    if (e->button() == Qt::LeftButton) {
-        QDrag *drag = new QDrag(this);
-        QMimeData *mimeData = new QMimeData;
+    if(e->button() == Qt::LeftButton) {
+        QDrag* drag = new QDrag(this);
+        QMimeData* mimeData = new QMimeData;
         mimeData->setText(Box::MIME_MOVE);
         mimeData->setParent(this);
         mimeData->setUserData(0, new MoveOffset(-e->pos()));
@@ -61,7 +61,7 @@ QPixmap Box::makePixmap()
     return QPixmap::fromImage(img);
 }
 
-void Box::setOverlay(Overlay *o)
+void Box::setOverlay(Overlay* o)
 {
     overlay_ = o;
 
@@ -69,7 +69,7 @@ void Box::setOverlay(Overlay *o)
     output->setOverlay(o);
 }
 
-void Box::showContextMenu(const QPoint &pos)
+void Box::showContextMenu(const QPoint& pos)
 {
     QPoint globalPos = mapToGlobal(pos);
 
@@ -80,7 +80,7 @@ void Box::showContextMenu(const QPoint &pos)
 
     QAction* selectedItem = menu.exec(globalPos);
 
-    if (selectedItem) {
+    if(selectedItem) {
         if(selectedItem->text() == remove_txt) {
             deleteLater();
         }

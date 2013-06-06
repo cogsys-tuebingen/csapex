@@ -10,13 +10,13 @@ class ConnectorIn;
 class ConnectorOut : public Connector
 {
 public:
-    ConnectorOut(QWidget *parent);
+    ConnectorOut(QWidget* parent);
     ~ConnectorOut();
 
     virtual bool tryConnect(Connector* other_side);
     virtual bool canConnect();
     virtual bool isConnected();
-    virtual void removeConnection(Connector *other_side);
+    virtual void removeConnection(Connector* other_side);
 
     virtual bool isOutput() {
         return true;

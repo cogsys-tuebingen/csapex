@@ -16,7 +16,7 @@ FilterDisplayFeatures::FilterDisplayFeatures()
 {
 }
 
-void FilterDisplayFeatures::filter(cv::Mat &img, cv::Mat &mask)
+void FilterDisplayFeatures::filter(cv::Mat& img, cv::Mat& mask)
 {
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat descriptors;

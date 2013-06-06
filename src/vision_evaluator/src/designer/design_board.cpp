@@ -15,7 +15,7 @@
 
 using namespace vision_evaluator;
 
-DesignBoard::DesignBoard(QWidget *parent)
+DesignBoard::DesignBoard(QWidget* parent)
     : QWidget(parent), ui(new Ui::DesignBoard)
 {
     ui->setupUi(this);
@@ -29,7 +29,7 @@ DesignBoard::DesignBoard(QWidget *parent)
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
-bool DesignBoard::eventFilter(QObject* o, QEvent *e)
+bool DesignBoard::eventFilter(QObject* o, QEvent* e)
 {
     if(e->type() == QEvent::ChildPolished) {
         QChildEvent* ch = dynamic_cast<QChildEvent*>(e);
@@ -46,17 +46,17 @@ bool DesignBoard::eventFilter(QObject* o, QEvent *e)
 }
 
 
-void DesignBoard::showContextMenu(const QPoint &pos)
+void DesignBoard::showContextMenu(const QPoint& pos)
 {
 
 }
 
-void DesignBoard::resizeEvent(QResizeEvent *e)
+void DesignBoard::resizeEvent(QResizeEvent* e)
 {
     overlay->resize(e->size());
 }
 
-void DesignBoard::dragEnterEvent(QDragEnterEvent *e)
+void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
 {
     if(e->mimeData()->text() == Box::MIME) {
         e->acceptProposedAction();
@@ -68,25 +68,25 @@ void DesignBoard::dragEnterEvent(QDragEnterEvent *e)
         e->acceptProposedAction();
     }
 }
-void DesignBoard::dragMoveEvent(QDragMoveEvent *e)
+void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
     if(e->mimeData()->text() == Connector::MIME) {
-        Connector* c = dynamic_cast<Connector*> (e->mimeData()->parent());
+        Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->drawTemporaryLine(QLine(c->centerPoint(), e->pos()));
     }
 
     if(e->mimeData()->text() == Box::MIME_MOVE) {
-        Box* box = dynamic_cast<Box*> (e->mimeData()->parent());
-        Box::MoveOffset* offset = dynamic_cast<Box::MoveOffset*> (e->mimeData()->userData(0));
+        Box* box = dynamic_cast<Box*>(e->mimeData()->parent());
+        Box::MoveOffset* offset = dynamic_cast<Box::MoveOffset*>(e->mimeData()->userData(0));
         box->move(e->pos() + offset->value);
         overlay->repaint();
     }
 }
 
-void DesignBoard::dropEvent(QDropEvent *e)
+void DesignBoard::dropEvent(QDropEvent* e)
 {
-    if (e->mimeData()->text() == Box::MIME) {
-        SelectorProxy* selector = dynamic_cast<SelectorProxy*> (e->mimeData()->parent());
+    if(e->mimeData()->text() == Box::MIME) {
+        SelectorProxy* selector = dynamic_cast<SelectorProxy*>(e->mimeData()->parent());
 
         if(!selector) {
             return;
@@ -98,7 +98,7 @@ void DesignBoard::dropEvent(QDropEvent *e)
         selector->spawnObject(this, e->pos());
     }
 
-    if (e->mimeData()->text() == Connector::MIME) {
+    if(e->mimeData()->text() == Connector::MIME) {
         e->ignore();
     }
 }

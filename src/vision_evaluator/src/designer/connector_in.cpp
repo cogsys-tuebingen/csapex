@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <iostream>
 
-ConnectorIn::ConnectorIn(QWidget *parent)
+ConnectorIn::ConnectorIn(QWidget* parent)
     : Connector(parent), input(NULL)
 {
 }
@@ -20,7 +20,7 @@ ConnectorIn::~ConnectorIn()
     }
 }
 
-bool ConnectorIn::tryConnect(Connector *other_side)
+bool ConnectorIn::tryConnect(Connector* other_side)
 {
     if(!other_side->isOutput()) {
         return false;
@@ -29,14 +29,14 @@ bool ConnectorIn::tryConnect(Connector *other_side)
     return other_side->tryConnect(this);
 }
 
-bool ConnectorIn::acknowledgeConnection(Connector *other_side)
+bool ConnectorIn::acknowledgeConnection(Connector* other_side)
 {
-    input = dynamic_cast<ConnectorOut*> (other_side);
+    input = dynamic_cast<ConnectorOut*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
     return true;
 }
 
-void ConnectorIn::removeConnection(Connector *other_side)
+void ConnectorIn::removeConnection(Connector* other_side)
 {
     if(input != NULL) {
         assert(other_side == input);

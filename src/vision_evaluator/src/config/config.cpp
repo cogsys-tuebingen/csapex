@@ -34,8 +34,8 @@ void Config::make_defaults()
 
 void Config::init()
 {
-    setDescriptorType(Types::Descriptor::read(descriptor_name));
-    setKeypointType(Types::Keypoint::read(keypoint_name));
+    setDescriptorType(descriptor_name);
+    setKeypointType(keypoint_name);
 
     config_dir = std::string(getenv("RABOT")) + "/Config/RobotDetection/";
     result_dir = config_dir + "results/";
@@ -66,33 +66,31 @@ Config Config::getGlobal()
     return latest;
 }
 
-Types::Keypoint::ID Config::getKeypointType() const
+const std::string& Config::getKeypointType() const
 {
-    return keypoint_type;
+    return keypoint_name;
 }
 
-Types::Descriptor::ID Config::getDescriptorType() const
+const std::string& Config::getDescriptorType() const
 {
-    return descriptor_type;
+    return descriptor_name;
 }
 
-void Config::setKeypointType(Types::Keypoint::ID type)
+void Config::setKeypointType(const std::string& type)
 {
-    keypoint_type = type;
-    keypoint_name = Types::Keypoint::write(type);
+    keypoint_name = type;
 }
 
-void Config::setDescriptorType(Types::Descriptor::ID type)
+void Config::setDescriptorType(const std::string& type)
 {
-    descriptor_type = type;
-    descriptor_name = Types::Descriptor::write(type);
+    descriptor_name = type;
 }
 
 std::string Config::getDescription() const
 {
     std::stringstream name;
-    name << keypoint_type << "_"
-         << descriptor_type << "_"
+    name << keypoint_name << "_"
+         << descriptor_name << "_"
          << bin_count << "_" << extractor_threshold
          << "_" << min_points << "_" << octaves
          << "_" << matcher_threshold

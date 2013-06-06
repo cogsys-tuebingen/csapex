@@ -44,41 +44,6 @@ protected:
 };
 
 /**
- * @brief The Keypoint class represents symbolic names for keypoint types
- */
-class KeypointImp
-{
-public:
-    enum ID {
-        FIRST, BRISK = 0, SIFT, SURF, ORB, FAST, AGAST, MSER, STAR, GFTT, GFTT_HARRIS,
-        COUNT
-    };
-protected:
-    void initialize(std::map<ID, std::string>& map);
-};
-
-typedef Parameter<KeypointImp> Keypoint;
-
-
-/**
- * @brief The Descriptor class represents symbolic names for descriptor types
- */
-class DescriptorImp
-{
-public:
-    enum ID {
-        FIRST, BRISK = 0, SIFT, SURF, BRIEF, ORB, FREAK,
-        COUNT
-    };
-protected:
-    void initialize(std::map<ID, std::string>& map);
-};
-
-typedef Parameter<DescriptorImp> Descriptor;
-
-
-
-/**
  * @brief The Strategy class represents symbolic constants
  */
 class StrategyImp

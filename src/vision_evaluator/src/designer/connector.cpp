@@ -24,18 +24,18 @@ Connector::~Connector()
 {
 }
 
-bool Connector::tryConnect(QObject *other_side)
+bool Connector::tryConnect(QObject* other_side)
 {
-    Connector* c = dynamic_cast<Connector*> (other_side);
+    Connector* c = dynamic_cast<Connector*>(other_side);
     if(c) {
         return tryConnect(c);
     }
     return false;
 }
 
-void Connector::removeConnection(QObject *other_side)
+void Connector::removeConnection(QObject* other_side)
 {
-    Connector* c = dynamic_cast<Connector*> (other_side);
+    Connector* c = dynamic_cast<Connector*>(other_side);
     if(c) {
         removeConnection(c);
     }
@@ -43,7 +43,7 @@ void Connector::removeConnection(QObject *other_side)
 
 void Connector::findParents()
 {
-    QWidget * tmp = this;
+    QWidget* tmp = this;
     while(tmp != NULL) {
         if(dynamic_cast<vision_evaluator::Box*>(tmp)) {
             box = dynamic_cast<vision_evaluator::Box*>(tmp);
@@ -54,38 +54,38 @@ void Connector::findParents()
     }
 }
 
-bool Connector::hitButton(const QPoint &) const
+bool Connector::hitButton(const QPoint&) const
 {
     return false;
 }
 
-bool Connector::canConnectTo(Connector *other_side)
+bool Connector::canConnectTo(Connector* other_side)
 {
     return (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
 }
 
-void Connector::dragEnterEvent(QDragEnterEvent *e)
+void Connector::dragEnterEvent(QDragEnterEvent* e)
 {
-    if (e->mimeData()->text() == Connector::MIME) {
-        Connector* from = dynamic_cast<Connector*> (e->mimeData()->parent());
+    if(e->mimeData()->text() == Connector::MIME) {
+        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
         if(from->canConnectTo(this) && canConnectTo(from)) {
             e->acceptProposedAction();
         }
     }
 }
 
-void Connector::dragMoveEvent(QDragMoveEvent *e)
+void Connector::dragMoveEvent(QDragMoveEvent* e)
 {
-    if (e->mimeData()->text() == Connector::MIME) {
-        Connector* from = dynamic_cast<Connector*> (e->mimeData()->parent());
+    if(e->mimeData()->text() == Connector::MIME) {
+        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay_->drawTemporaryLine(QLine(from->centerPoint(), centerPoint()));
     }
 }
 
-void Connector::dropEvent(QDropEvent *e)
+void Connector::dropEvent(QDropEvent* e)
 {
-    if (e->mimeData()->text() == Connector::MIME) {
-        Connector* from = dynamic_cast<Connector*> (e->mimeData()->parent());
+    if(e->mimeData()->text() == Connector::MIME) {
+        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
             if(tryConnect(from)) {
@@ -95,11 +95,11 @@ void Connector::dropEvent(QDropEvent *e)
     }
 }
 
-void Connector::mousePressEvent(QMouseEvent *e)
+void Connector::mousePressEvent(QMouseEvent* e)
 {
-    if (e->button() == Qt::LeftButton) {
-        QDrag *drag = new QDrag(this);
-        QMimeData *mimeData = new QMimeData;
+    if(e->button() == Qt::LeftButton) {
+        QDrag* drag = new QDrag(this);
+        QMimeData* mimeData = new QMimeData;
         mimeData->setText(Connector::MIME);
         mimeData->setParent(this);
         drag->setMimeData(mimeData);
@@ -124,7 +124,7 @@ QPoint Connector::centerPoint()
     return topLeft() + 0.5 * (geometry().bottomRight() - geometry().topLeft());
 }
 
-void Connector::paintEvent(QPaintEvent *e)
+void Connector::paintEvent(QPaintEvent* e)
 {
     setAutoExclusive(false);
     setChecked(isConnected());

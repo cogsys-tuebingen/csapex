@@ -238,8 +238,10 @@ public:
         // > than threshold
         // clean image 1 -> image 2 matches
         // clean image 2 -> image 1 matches
-        int removed= ratioTest(matches1);
-        removed= ratioTest(matches2);
+        /*int removed= */
+        ratioTest(matches1);
+        /*removed= */
+        ratioTest(matches2);
         // 4. Remove non-symmetrical matches
         std::vector<cv::DMatch> symMatches;
         symmetryTest(matches1,matches2,symMatches);

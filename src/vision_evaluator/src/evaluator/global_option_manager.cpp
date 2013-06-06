@@ -11,18 +11,18 @@
 using namespace vision_evaluator;
 
 GlobalOptionManager::GlobalOptionManager()
-    : GenericManager<vision_evaluator::GlobalOption>("vision_evaluator::GlobalOption")
+    : PluginManager<vision_evaluator::GlobalOption>("vision_evaluator::GlobalOption")
 {
 }
 
 void GlobalOptionManager::insert(QBoxLayout* parent)
 {
     if(options.empty()) {
-        if(!plugins_loaded_) {
+        if(!pluginsLoaded()) {
             reload();
         }
 
-        for(std::vector<Constructor>::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
+        for(std::vector<Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
             options.push_back(it->constructor());
         }
     }

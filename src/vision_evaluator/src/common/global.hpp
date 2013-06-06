@@ -22,7 +22,7 @@
 #else
 #include <utils/logger.h>
 
-#define STREAM(out, args) (out << args); out.endl()
+#define STREAM(out, args) {(out << args); out.endl();}
 #define INFO_ Logger::INFO
 #define INFO(args) STREAM( INFO_, args)
 #define WARN_ Logger::WARN
