@@ -42,39 +42,6 @@ set(QT_DESIGNER ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_DES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/groovy/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
-
-#######################################
-## Declare ROS messages and services ##
-#######################################
-
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
-
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
-
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -102,50 +69,61 @@ include_directories(include
 
 
 ##### COMMON
-set(GLOBALS                         src/common/global.hpp)
+set(GLOBALS
+    src/common/global.hpp)
 
 ##### LOGGER
-add_library(logger                  src/utils/logger.cpp)
+add_library(logger
+    src/common/global.hpp
+    src/common/logger.cpp)
 
 ##### CONFIG
-add_library(cfg                     src/config/config.cpp
-                                    src/config/configurated_tools.cpp
-                                    src/config/reconfigurable.cpp
-                                    src/config/types.cpp
-                                    ${GLOBALS})
-target_link_libraries(cfg           logger)
+add_library(cfg
+    src/config/config.cpp
+    src/config/configurated_tools.cpp
+    src/config/reconfigurable.cpp
+    src/config/types.cpp
+    ${GLOBALS})
+target_link_libraries(cfg
+    logger)
 
 ##### DATA
-add_library(data                    src/data/angle.cpp
-                                    src/data/directory_io.cpp
-                                    src/data/frame.cpp
-                                    src/data/frame_buffer.cpp
-                                    src/data/frame_io.cpp
-                                    src/data/matchable.cpp
-                                    src/data/matchable_pose.cpp
-                                    src/data/painter.cpp
-                                    src/data/pose.cpp
-                                    ${GLOBALS})
-target_link_libraries(data          yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
-target_link_libraries(data          logger)
+add_library(data
+    src/data/angle.cpp
+    src/data/directory_io.cpp
+    src/data/frame.cpp
+    src/data/frame_buffer.cpp
+    src/data/frame_io.cpp
+    src/data/matchable.cpp
+    src/data/matchable_pose.cpp
+    src/data/painter.cpp
+    src/data/pose.cpp
+    ${GLOBALS})
+target_link_libraries(data
+    yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+target_link_libraries(data
+    logger)
 
 ##### UTILS
-add_library(utils                   src/utils/extractor.cpp
-                                    src/utils/extractor_factory.cpp
-                                    src/utils/extractor_manager.cpp
-                                    src/utils/extractors_default.cpp
-                                    src/utils/hough_peak.cpp
-                                    src/utils/matcher.cpp
-                                    src/utils/match_scorer.cpp
-                                    src/utils/match_scorer_homography.cpp
-                                    src/utils/match_scorer_clustering.cpp
-                                    src/utils/match_scorer_reprojection.cpp
-                                    src/utils/match_scorer_factory.cpp
-                                    src/utils/opencv_utils.hpp
-                                    src/utils/rectangle_cluster.cpp
-                                    ${GLOBALS})
-target_link_libraries(utils         data)
-target_link_libraries(utils         yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
+add_library(utils
+    src/utils/extractor.cpp
+    src/utils/extractor_factory.cpp
+    src/utils/extractor_manager.cpp
+    src/utils/extractors_default.cpp
+    src/utils/hough_peak.cpp
+    src/utils/matcher.cpp
+    src/utils/match_scorer.cpp
+    src/utils/match_scorer_homography.cpp
+    src/utils/match_scorer_clustering.cpp
+    src/utils/match_scorer_reprojection.cpp
+    src/utils/match_scorer_factory.cpp
+    src/utils/opencv_utils.hpp
+    src/utils/rectangle_cluster.cpp
+    ${GLOBALS})
+target_link_libraries(utils
+    data)
+target_link_libraries(utils
+    yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 ##### EVALUATION
 add_library(designer
@@ -162,7 +140,7 @@ add_library(designer
 )
 
 add_executable(vision_evaluator
-    src/evaluator.cpp   
+    src/evaluator.cpp
     src/evaluator/evaluation_window.cpp
     src/evaluator/filter.cpp
     src/evaluator/filter_manager.cpp
@@ -188,7 +166,9 @@ add_executable(vision_evaluator
     src/qt_helper.hpp
     ${QT_EVALUATOR}
 )
-target_link_libraries(vision_evaluator designer ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(vision_evaluator
+    designer
+    ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 # INSTALL INCLUDE HEADERS
 string(REGEX REPLACE ".*/src/([^/]+)" "\\1" lib ${CMAKE_CURRENT_SOURCE_DIR})
@@ -198,51 +178,3 @@ foreach(h ${headers})
     file(COPY ${h} DESTINATION ${PROJECT_SOURCE_DIR}/include/${lib}/)
     #message("file(COPY ${h} DESTINATION ${PROJECT_SOURCE_DIR}/include/${lib}/)")
 endforeach()
-
-#############
-## Install ##
-#############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/groovy/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark executables and/or libraries for installation
-# install(TARGETS vision_evaluator vision_evaluator_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
-
-#############
-## Testing ##
-#############
-
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_vision_evaluator.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)

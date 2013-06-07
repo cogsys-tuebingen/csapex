@@ -20,7 +20,7 @@
 #define FATAL(args) ROS_FATAL_STREAM(args)
 
 #else
-#include <utils/logger.h>
+#include "logger.h"
 
 #define STREAM(out, args) {(out << args); out.endl();}
 #define INFO_ Logger::INFO
