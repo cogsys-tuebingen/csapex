@@ -87,7 +87,7 @@ add_definitions(-ggdb)
 add_library(roc
     src/roc/roc_creator.cpp
     ${GLOBALS})
-target_link_libraries(roc           yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(roc yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 ##### DATABASE
 set(DB_SRC
@@ -107,13 +107,9 @@ endif()
 add_library(database
     ${DB_SRC} ${GLOBALS})
 
-target_link_libraries(database
-    data)
-target_link_libraries(database
-    ${Boost_LIBRARIES})
+target_link_libraries(database ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 if(${DBOW2_FOUND})
-    target_link_libraries(database
-        ${DBOW2_LIBRARIES})
+    target_link_libraries(database ${DBOW2_LIBRARIES})
 endif()
 
 
@@ -132,10 +128,8 @@ if(${DBOW2_FOUND})
     src/db_strategy/bag_db_strategy.cpp)
 endif()
 
-add_library(db_strategy
-    ${DB_STRAT_SRC} ${GLOBALS})
-target_link_libraries(db_strategy
-    database roc)
+add_library(db_strategy ${DB_STRAT_SRC} ${GLOBALS})
+target_link_libraries(db_strategy database roc)
 
 ##### ROI
 set(ROI_SRC
@@ -150,9 +144,8 @@ if(${VIOLA_JONES_FOUND})
 endif()
 
 add_library(roi  ${ROI_SRC} ${GLOBALS})
-target_link_libraries(roi  utils)
 if(${VIOLA_JONES_FOUND})
-    target_link_libraries(roi ${VIOLA_JONES_LIBRARIES})
+    target_link_libraries(roi ${VIOLA_JONES_LIBRARIES} ${catkin_LIBRARIES})
 endif()
 
 
@@ -164,7 +157,7 @@ add_library(analyzer
     src/analyzer/trainer.cpp
     src/analyzer/trainer_online.cpp
     ${GLOBALS})
-target_link_libraries(analyzer data roi db_strategy)
+target_link_libraries(analyzer roi db_strategy)
 target_link_libraries(analyzer ${OpenCV_LIBS})
 
 
@@ -174,7 +167,6 @@ add_library(tracker
     src/tracker/kalman_filter.cpp
     src/tracker/hypothesis.cpp
     ${GLOBALS})
-target_link_libraries(tracker data)
 
 ##### EVALUATION
 add_library(evaluation_plugin
@@ -191,7 +183,7 @@ add_library(evaluation_plugin
 )
 
 target_link_libraries(evaluation_plugin
-    logger cfg utils data Random ${catkin_LIBRARIES}
+    ${catkin_LIBRARIES}
     ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES}  ${GLUT_LIBRARY})
 
 ##### ADAPTER
@@ -202,7 +194,7 @@ add_library(adapter
     src/adapter/trainer_adapter.cpp
     src/adapter/trainer_adapter_static.cpp
     ${GLOBALS})
-target_link_libraries(adapter cfg analyzer logger)
+target_link_libraries(adapter analyzer)
 target_link_libraries(adapter ${Boost_LIBRARIES} ${QT_LIBRARIES})
 
 ##### VISUALIZATION
@@ -225,7 +217,7 @@ add_library(ros
     src/ros/trainer_adapter_ros.cpp
     src/ros/tracker_adapter_ros.cpp
     ${GLOBALS})
-target_link_libraries(ros adapter cfg tracker ${catkin_LIBRARIES})
+target_link_libraries(ros adapter tracker ${catkin_LIBRARIES})
 
 
 ########################
@@ -235,31 +227,31 @@ add_executable(manual_tf_creator src/manual_tf_creator.cpp)
 target_link_libraries(manual_tf_creator logger ${catkin_LIBRARIES})
 
 #add_executable(antifilter_test src/anti_filter_test.cpp)
-#target_link_libraries(antifilter_test   utils viz ${catkin_LIBRARIES})
+#target_link_libraries(antifilter_test viz ${catkin_LIBRARIES})
 
 #add_executable(test_suite src/test_suite.cpp)
 #target_link_libraries(test_suite viz ${catkin_LIBRARIES})
 
 add_executable(merge_test src/merge_test.cpp)
-target_link_libraries(merge_test utils cfg ${catkin_LIBRARIES})
+target_link_libraries(merge_test ${catkin_LIBRARIES})
 
 #add_executable(test_rectangle  src/test/test_rectangle.cpp)
-#target_link_libraries(test_rectangle utils ${catkin_LIBRARIES})
+#target_link_libraries(test_rectangle ${catkin_LIBRARIES})
 
 #add_executable(stats_feat_dist src/stats_feat_per_distance.cpp)
-#target_link_libraries(stats_feat_dist utils viz ${catkin_LIBRARIES})
+#target_link_libraries(stats_feat_dist viz ${catkin_LIBRARIES})
 
 add_executable(rerouter src/rerouter.cpp)
-target_link_libraries(rerouter logger ${catkin_LIBRARIES})
+target_link_libraries(rerouter ${catkin_LIBRARIES})
 
 add_executable(tf_importer src/tf_importer.cpp)
-target_link_libraries(tf_importer logger ${catkin_LIBRARIES})
+target_link_libraries(tf_importer ${catkin_LIBRARIES})
 
 add_executable(pose2tf src/pose_2_tf.cpp)
-target_link_libraries(pose2tf logger ${catkin_LIBRARIES})
+target_link_libraries(pose2tf ${catkin_LIBRARIES})
 
 add_executable(roc_viewer src/roc_viewer.cpp)
-target_link_libraries(roc_viewer roc logger ${catkin_LIBRARIES})
+target_link_libraries(roc_viewer roc ${catkin_LIBRARIES})
 
 add_executable(database_viewer src/database_viewer_node.cpp)
 target_link_libraries(database_viewer viz ${catkin_LIBRARIES})
