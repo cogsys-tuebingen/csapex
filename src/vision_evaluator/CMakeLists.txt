@@ -52,8 +52,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include src
-#  LIBRARIES vision_evaluator
-  CATKIN_DEPENDS pluginlib roscpp std_msgs utils
+   LIBRARIES vision_core logger
+   CATKIN_DEPENDS pluginlib roscpp std_msgs utils
 #  DEPENDS system_lib
 )
 
@@ -77,18 +77,12 @@ add_library(logger
     src/common/global.hpp
     src/common/logger.cpp)
 
-##### CONFIG
-add_library(cfg
+##### CORE
+add_library(vision_core
     src/config/config.cpp
     src/config/configurated_tools.cpp
     src/config/reconfigurable.cpp
     src/config/types.cpp
-    ${GLOBALS})
-target_link_libraries(cfg
-    logger)
-
-##### DATA
-add_library(data
     src/data/angle.cpp
     src/data/directory_io.cpp
     src/data/frame.cpp
@@ -98,14 +92,6 @@ add_library(data
     src/data/matchable_pose.cpp
     src/data/painter.cpp
     src/data/pose.cpp
-    ${GLOBALS})
-target_link_libraries(data
-    yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
-target_link_libraries(data
-    logger)
-
-##### UTILS
-add_library(utils
     src/utils/extractor.cpp
     src/utils/extractor_factory.cpp
     src/utils/extractor_manager.cpp
@@ -120,10 +106,8 @@ add_library(utils
     src/utils/opencv_utils.hpp
     src/utils/rectangle_cluster.cpp
     ${GLOBALS})
-target_link_libraries(utils
-    data)
-target_link_libraries(utils
-    yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(vision_core yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+target_link_libraries(vision_core logger)
 
 ##### EVALUATION
 add_library(designer
