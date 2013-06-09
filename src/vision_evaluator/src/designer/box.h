@@ -41,7 +41,11 @@ public:
     virtual ~Box();
 
     virtual void mousePressEvent(QMouseEvent* e);
-    virtual QPixmap makePixmap();
+    virtual QPixmap makePixmap(const std::string &label);
+
+protected:
+    void paintEvent(QPaintEvent * e);
+    bool eventFilter(QObject *, QEvent *);
 
 public Q_SLOTS:
     virtual void setOverlay(Overlay* o);
@@ -52,6 +56,8 @@ private:
 
     ConnectorIn* input;
     ConnectorOut* output;
+
+    bool down_;
 
     Overlay* overlay_;
 };

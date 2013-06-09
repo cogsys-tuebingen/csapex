@@ -78,12 +78,16 @@ const std::string& Config::getDescriptorType() const
 
 void Config::setKeypointType(const std::string& type)
 {
-    keypoint_name = type;
+    std::string low = type;
+    std::transform(low.begin(), low.end(), low.begin(), ::tolower);
+    keypoint_name = low;
 }
 
 void Config::setDescriptorType(const std::string& type)
 {
-    descriptor_name = type;
+    std::string low = type;
+    std::transform(low.begin(), low.end(), low.begin(), ::tolower);
+    descriptor_name = low;
 }
 
 std::string Config::getDescription() const

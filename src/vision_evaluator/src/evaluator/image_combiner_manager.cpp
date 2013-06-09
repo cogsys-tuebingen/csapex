@@ -25,8 +25,8 @@ void ImageCombinerManager::insert(QBoxLayout* layout)
         reload();
     }
 
-    for(std::vector<ImageCombinerManager::Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
-        ImageCombiner::Ptr combiner = (*it)();
+    for(std::map<std::string, ImageCombinerManager::Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
+        ImageCombiner::Ptr combiner = (it->second)();
 
         QRadioButton* btn = new QRadioButton(combiner->getName().c_str());
         layout->addWidget(btn);
@@ -53,7 +53,7 @@ void ImageCombinerManager::update()
         QRadioButton* rb = *it;
 
         if(rb->isChecked()) {
-            active = availableClasses()[i]();
+            active = availableClasses(i)();
 
             assert(additional_holder_);
             active->update_gui(additional_holder_);

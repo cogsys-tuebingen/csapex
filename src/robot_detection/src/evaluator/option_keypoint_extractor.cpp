@@ -48,9 +48,9 @@ void OptionKeypointExtractor::insert(QBoxLayout* layout)
     selection = new QComboBox;
 
     ExtractorManager manager;
-    typedef std::pair<std::string, ExtractorManager::FeatureDetectorConstructor::Ptr> Pair;
+    typedef std::pair<std::string, ExtractorManager::ExtractorInitializer> Pair;
     BOOST_FOREACH(Pair fc, manager.featureDetectors()) {
-        selection->addItem(fc.second->getName().c_str());
+        selection->addItem(fc.second.getName().c_str());
     }
     layout->addLayout(QtHelper::wrap("Keypoint", selection));
 

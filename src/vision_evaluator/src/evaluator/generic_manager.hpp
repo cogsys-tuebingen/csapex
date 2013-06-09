@@ -8,6 +8,12 @@
 #ifndef GENERIC_MANAGER_H
 #define GENERIC_MANAGER_H
 
+/// COMPONENT
+#include "constructor.hpp"
+
+/// PROJECT
+#include <designer/selector_proxy.h>
+
 /// SYSTEM
 #include <boost/signals2.hpp>
 #include <boost/lambda/bind.hpp>
@@ -20,10 +26,11 @@
         static _____##prefix##name##_registrator instance; \
         _____##prefix##name##_registrator () {\
             { code } \
-        } \
+        }\
     };\
     _____##prefix##name##_registrator _____##prefix##name##_registrator::instance;\
     }
+
 
 #define REGISTER_GENERIC(Manager, class_name)\
     STATIC_INIT(Manager, class_name, { \
@@ -33,37 +40,27 @@
         constructor.constructor = boost::lambda::new_ptr<class_name>(); \
         vision_evaluator::Manager manager;\
         manager.registerConstructor(constructor); \
+    \
+        SelectorProxy::ProxyConstructor c;\
+        c.name = constructor.name;\
+        c.constructor = boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<class_name> >(), boost::lambda::_1, (QWidget*) NULL); \
+        SelectorProxy::registerProxy(c);\
     });\
- 
-template <class M>
-struct DefaultConstructor {
-    std::string name;
-    boost::function<M*()> constructor;
 
-    typename boost::shared_ptr<M> operator()() const {
-        boost::shared_ptr<M> res(constructor());
-        res->setName(name);
-        assert(res.get() != NULL);
-        return res;
-    }
-    bool valid() const {
-        typename boost::shared_ptr<M> res(constructor());
-        return res.get() != NULL;
-    }
-};
 
-template <class M, class C, class Container>
+
+template <class M, class C>
 class PluginManagerImp
 {
-    template <class, class, class>
+    template <class, class>
     friend class PluginManager;
 
 protected:
     typedef C Constructor;
-    typedef Container Constructors;
+    typedef std::map<std::string, Constructor> Constructors;
 
-    static PluginManagerImp<M,C,Container>& instance(const std::string& full_name) {
-        static PluginManagerImp<M,C,Container> i(full_name);
+    static PluginManagerImp<M,C>& instance(const std::string& full_name) {
+        static PluginManagerImp<M,C> i(full_name);
         return i;
     }
 
@@ -78,14 +75,10 @@ protected:
 
 protected:
     virtual ~PluginManagerImp() {
-//        if(loader_ != NULL) {
-//            delete loader_;
-//            loader_ = NULL;
-//        }
     }
 
     void registerConstructor(Constructor constructor) {
-        available_classes.push_back(constructor);
+        available_classes[constructor.getName()] = constructor;
     }
 
     void reload() {
@@ -114,11 +107,11 @@ protected:
     Constructors available_classes;
 };
 
-template <class M, class C = DefaultConstructor<M>, class Container = std::vector<C> >
+template <class M, class C = DefaultConstructor<M> >
 class PluginManager
 {
 protected:
-    typedef PluginManagerImp<M, C, Container> Parent;
+    typedef PluginManagerImp<M, C> Parent;
 
 public:
     typedef typename Parent::Constructor Constructor;
@@ -128,7 +121,7 @@ public:
         : instance(Parent::instance(full_name))
     {}
 
-    void registerConstructor(Constructor constructor) {
+    virtual void registerConstructor(Constructor constructor) {
         instance.registerConstructor(constructor);
     }
 
@@ -144,7 +137,9 @@ public:
         return instance.available_classes;
     }
     const Constructor& availableClasses(unsigned index) const {
-        return instance.available_classes[index];
+        typename Constructors::iterator it = instance.available_classes.begin();
+        std::advance(it, index);
+        return it->second;
     }
     const Constructor& availableClasses(const std::string& key) const {
         return instance.available_classes[key];
@@ -156,6 +151,5 @@ public:
 protected:
     Parent& instance;
 };
-
 
 #endif // GENERIC_MANAGER_H

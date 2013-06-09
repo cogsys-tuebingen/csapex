@@ -11,8 +11,8 @@
 using namespace vision_evaluator;
 
 ExtractorManager::ExtractorManager()
-    : available_keypoints("vision_evaluator::ExtractorManager::FeatureDetectorConstructor"),
-      available_descriptors("vision_evaluator::ExtractorManager::DescriptorExtractorConstructor")
+    : available_keypoints("vision_evaluator::ExtractorManager::KeypointInitializerManager"),
+      available_descriptors("vision_evaluator::ExtractorManager::DescriptorInitializerManager")
 {
 }
 
@@ -28,17 +28,17 @@ Extractor::Initializer::Ptr ExtractorManager::getInitializer(const std::string& 
     std::string descriptor_lower = descriptor;
     std::transform(descriptor_lower.begin(), descriptor_lower.end(), descriptor_lower.begin(), ::tolower);
 
-    FeatureDetectorConstructor::Ptr kc = available_keypoints.availableClasses(keypoint_lower);
-    DescriptorConstructor::Ptr dc = available_descriptors.availableClasses(descriptor_lower);
+    KeypointInitializerManager::Constructor kc = available_keypoints.availableClasses(keypoint_lower);
+    DescriptorInitializerManager::Constructor dc = available_descriptors.availableClasses(descriptor_lower);
 
-    if(!kc.get())
+    if(kc.valid())
         FATAL("invalid keypoint type: '" << keypoint_lower << "'");
-    if(!dc.get())
+    if(dc.valid())
         FATAL("invalid descriptor type: '" << descriptor_lower << "'");
 
-    if(!kc.get())
+    if(kc.valid())
         throw Extractor::IllegalKeypointException();
-    if(!dc.get())
+    if(dc.valid())
         throw Extractor::IllegalDescriptorException();
 
     bool complete_set = keypoint_lower == descriptor_lower;
@@ -48,19 +48,27 @@ Extractor::Initializer::Ptr ExtractorManager::getInitializer(const std::string& 
     return i;
 }
 
-void ExtractorManager::registerKeypointConstructor(const std::string& key, FeatureDetectorConstructor::Ptr kc)
+void ExtractorManager::registerKeypointConstructor(const std::string& key, KeypointInit kc)
 {
     std::string key_lower = key;
     std::transform(key_lower.begin(), key_lower.end(), key_lower.begin(), ::tolower);
     std::cout << "register keypoint detector instance " << key_lower << std::endl;
-    available_keypoints.availableClasses(key_lower) = kc;
+
+    KeypointInitializer c;
+    c.name = key_lower;
+    c.constructor = kc;
+    available_keypoints.availableClasses(key_lower) = c;
 }
 
 
-void ExtractorManager::registerDescriptorConstructor(const std::string& key, DescriptorConstructor::Ptr dc)
+void ExtractorManager::registerDescriptorConstructor(const std::string& key, DescriptorInit dc)
 {
     std::string key_lower = key;
     std::transform(key_lower.begin(), key_lower.end(), key_lower.begin(), ::tolower);
     std::cout << "register descriptor extractor instance " << key_lower << std::endl;
-    available_descriptors.availableClasses(key_lower) = dc;
+
+    DescriptorInitializer c;
+    c.name = key_lower;
+    c.constructor = dc;
+    available_descriptors.availableClasses(key_lower) = c;
 }

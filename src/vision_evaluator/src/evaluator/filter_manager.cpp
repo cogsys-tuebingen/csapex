@@ -60,8 +60,8 @@ void FilterManager::insert(QBoxLayout* layout)
     options->setLayout(options_layout);
     group_layout->addWidget(options);
 
-    for(std::vector<Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
-        available->addItem(it->name.c_str());
+    for(std::map<std::string, Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
+        available->addItem(it->second.getName().c_str());
     }
 
     QObject::connect(available, SIGNAL(currentIndexChanged(int)), this, SLOT(add_filter(int)));

@@ -79,6 +79,8 @@ add_library(logger
 
 ##### CORE
 add_library(vision_core
+    src/utils/extractors_default.cpp
+
     src/config/config.cpp
     src/config/configurated_tools.cpp
     src/config/reconfigurable.cpp
@@ -95,7 +97,6 @@ add_library(vision_core
     src/utils/extractor.cpp
     src/utils/extractor_factory.cpp
     src/utils/extractor_manager.cpp
-    src/utils/extractors_default.cpp
     src/utils/hough_peak.cpp
     src/utils/matcher.cpp
     src/utils/match_scorer.cpp
@@ -126,6 +127,7 @@ add_library(designer
 add_executable(vision_evaluator
     src/evaluator.cpp
     src/evaluator/evaluation_window.cpp
+    src/evaluator/constructor.hpp
     src/evaluator/filter.cpp
     src/evaluator/filter_manager.cpp
     src/evaluator/filter_blur.cpp

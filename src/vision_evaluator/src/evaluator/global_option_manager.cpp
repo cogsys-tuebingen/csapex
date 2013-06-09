@@ -8,6 +8,9 @@
 /// HEADER
 #include "global_option_manager.h"
 
+/// SYSTEM
+#include <boost/foreach.hpp>
+
 using namespace vision_evaluator;
 
 GlobalOptionManager::GlobalOptionManager()
@@ -22,8 +25,9 @@ void GlobalOptionManager::insert(QBoxLayout* parent)
             reload();
         }
 
-        for(std::vector<Constructor>::const_iterator it = availableClasses().begin(); it != availableClasses().end(); ++it) {
-            options.push_back(it->constructor());
+        typedef const std::pair<std::string, Constructor> PAIR;
+        BOOST_FOREACH(PAIR& pair, availableClasses()) {
+            options.push_back(pair.second.constructor());
         }
     }
 

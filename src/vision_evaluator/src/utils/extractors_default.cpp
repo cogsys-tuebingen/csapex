@@ -5,16 +5,16 @@
 #include "extractor_manager.h"
 
 /// SYSTEM
-#include <opencv2/nonfree.hpp>
+#include <opencv2/nonfree/nonfree.hpp>
 
 using namespace vision_evaluator;
 
 /// COMBINATIONS
 
-struct Orb : public ExtractorManager::FeatureDetectorConstructor, public ExtractorManager::DescriptorConstructor {
+struct Orb : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -28,7 +28,7 @@ struct Orb : public ExtractorManager::FeatureDetectorConstructor, public Extract
         }
     }
 
-    void descriptor(Extractor* e) {
+    static void descriptor(Extractor* e) {
         Config config = Config::getGlobal();
 
         e->is_binary = true;
@@ -37,12 +37,13 @@ struct Orb : public ExtractorManager::FeatureDetectorConstructor, public Extract
     }
 };
 REGISTER_FEATURE_DETECTOR(Orb, ORB);
+BOOST_STATIC_ASSERT(DetectorTraits<Orb>::HasKeypoint);
+BOOST_STATIC_ASSERT(DetectorTraits<Orb>::HasDescriptor);
 
-
-struct Brisk : public ExtractorManager::FeatureDetectorConstructor, public ExtractorManager::DescriptorConstructor {
+struct Brisk : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -56,7 +57,7 @@ struct Brisk : public ExtractorManager::FeatureDetectorConstructor, public Extra
         }
     }
 
-    void descriptor(Extractor* e) {
+    static void descriptor(Extractor* e) {
         Config config = Config::getGlobal();
 
         e->is_binary = true;
@@ -66,12 +67,14 @@ struct Brisk : public ExtractorManager::FeatureDetectorConstructor, public Extra
 
 };
 REGISTER_FEATURE_DETECTOR(Brisk, BRISK);
+BOOST_STATIC_ASSERT(DetectorTraits<Brisk>::HasKeypoint);
+BOOST_STATIC_ASSERT(DetectorTraits<Brisk>::HasDescriptor);
 
 
-struct Sift : public ExtractorManager::FeatureDetectorConstructor, public ExtractorManager::DescriptorConstructor {
+struct Sift : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -85,7 +88,7 @@ struct Sift : public ExtractorManager::FeatureDetectorConstructor, public Extrac
         }
     }
 
-    void descriptor(Extractor* e) {
+    static void descriptor(Extractor* e) {
         Config config = Config::getGlobal();
 
         e->is_binary = false;
@@ -95,13 +98,15 @@ struct Sift : public ExtractorManager::FeatureDetectorConstructor, public Extrac
 
 };
 REGISTER_FEATURE_DETECTOR(Sift, SIFT);
+BOOST_STATIC_ASSERT(DetectorTraits<Sift>::HasKeypoint);
+BOOST_STATIC_ASSERT(DetectorTraits<Sift>::HasDescriptor);
 
 
 
-struct Surf : public ExtractorManager::FeatureDetectorConstructor, public ExtractorManager::DescriptorConstructor {
+struct Surf : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -115,7 +120,7 @@ struct Surf : public ExtractorManager::FeatureDetectorConstructor, public Extrac
         }
     }
 
-    void descriptor(Extractor* e) {
+    static void descriptor(Extractor* e) {
         Config config = Config::getGlobal();
 
         e->is_binary = false;
@@ -125,6 +130,8 @@ struct Surf : public ExtractorManager::FeatureDetectorConstructor, public Extrac
 
 };
 REGISTER_FEATURE_DETECTOR(Surf, SURF);
+BOOST_STATIC_ASSERT(DetectorTraits<Surf>::HasKeypoint);
+BOOST_STATIC_ASSERT(DetectorTraits<Surf>::HasDescriptor);
 
 
 
@@ -132,10 +139,10 @@ REGISTER_FEATURE_DETECTOR(Surf, SURF);
 /// KEYPOINTS ONLY
 
 
-struct Fast : public ExtractorManager::FeatureDetectorConstructor {
+struct Fast : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -144,13 +151,15 @@ struct Fast : public ExtractorManager::FeatureDetectorConstructor {
     }
 };
 REGISTER_FEATURE_DETECTOR(Fast, FAST);
+BOOST_STATIC_ASSERT(DetectorTraits<Fast>::HasKeypoint);
+BOOST_STATIC_ASSERT(!DetectorTraits<Fast>::HasDescriptor);
 
 
 
-struct Mser : public ExtractorManager::FeatureDetectorConstructor {
+struct Mser : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -159,13 +168,15 @@ struct Mser : public ExtractorManager::FeatureDetectorConstructor {
     }
 };
 REGISTER_FEATURE_DETECTOR(Mser, MSER);
+BOOST_STATIC_ASSERT(DetectorTraits<Mser>::HasKeypoint);
+BOOST_STATIC_ASSERT(!DetectorTraits<Mser>::HasDescriptor);
 
 
 
-struct Star : public ExtractorManager::FeatureDetectorConstructor {
+struct Star : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -174,12 +185,14 @@ struct Star : public ExtractorManager::FeatureDetectorConstructor {
     }
 };
 REGISTER_FEATURE_DETECTOR(Star, STAR);
+BOOST_STATIC_ASSERT(DetectorTraits<Star>::HasKeypoint);
+BOOST_STATIC_ASSERT(!DetectorTraits<Star>::HasDescriptor);
 
 
-struct Gftt : public ExtractorManager::FeatureDetectorConstructor {
+struct Gftt : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -188,12 +201,14 @@ struct Gftt : public ExtractorManager::FeatureDetectorConstructor {
     }
 };
 REGISTER_FEATURE_DETECTOR(Gftt, GFTT);
+BOOST_STATIC_ASSERT(DetectorTraits<Gftt>::HasKeypoint);
+BOOST_STATIC_ASSERT(!DetectorTraits<Gftt>::HasDescriptor);
 
 
-struct GfttHarris : public ExtractorManager::FeatureDetectorConstructor {
+struct GfttHarris : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void keypoint(Extractor* e, bool complete) {
+    static void keypoint(Extractor* e, bool complete) {
         Config config = Config::getGlobal();
 
         e->keypoint = config.getKeypointType();
@@ -202,15 +217,17 @@ struct GfttHarris : public ExtractorManager::FeatureDetectorConstructor {
     }
 };
 REGISTER_FEATURE_DETECTOR(GfttHarris, GFTT_HARRIS);
+BOOST_STATIC_ASSERT(DetectorTraits<GfttHarris>::HasKeypoint);
+BOOST_STATIC_ASSERT(!DetectorTraits<GfttHarris>::HasDescriptor);
 
 
 
 /// DESCRIPTORS ONLY
 
-struct Brief : public ExtractorManager::DescriptorConstructor {
+struct Brief : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void descriptor(Extractor* e) {
+    static void descriptor(Extractor* e) {
         Config config = Config::getGlobal();
 
         e->is_binary = true;
@@ -219,12 +236,14 @@ struct Brief : public ExtractorManager::DescriptorConstructor {
     }
 };
 REGISTER_FEATURE_DETECTOR(Brief, BRIEF);
+BOOST_STATIC_ASSERT(!DetectorTraits<Brief>::HasKeypoint);
+BOOST_STATIC_ASSERT(DetectorTraits<Brief>::HasDescriptor);
 
 
-struct Freak : public ExtractorManager::DescriptorConstructor {
+struct Freak : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
-    void descriptor(Extractor* e) {
+    static void descriptor(Extractor* e) {
         Config config = Config::getGlobal();
 
         e->is_binary = true;
@@ -233,5 +252,7 @@ struct Freak : public ExtractorManager::DescriptorConstructor {
     }
 };
 REGISTER_FEATURE_DETECTOR(Freak, FREAK);
+BOOST_STATIC_ASSERT(!DetectorTraits<Freak>::HasKeypoint);
+BOOST_STATIC_ASSERT(DetectorTraits<Freak>::HasDescriptor);
 
 #endif // EXTRACTORS_DEFAULT_HPP

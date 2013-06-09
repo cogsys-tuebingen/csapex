@@ -5,6 +5,7 @@
 #include "ui_designer.h"
 #include "connector.h"
 #include "selector_proxy.h"
+#include "box_manager.h"
 
 /// SYSTEM
 #include <QResizeEvent>
@@ -18,6 +19,5 @@ Designer::Designer(QWidget* parent)
 {
     ui->setupUi(this);
 
-    SelectorProxy* proxy = new SelectorProxyImp<Box>();
-    ui->widget_selection->layout()->addWidget(proxy);
+    BoxManager::instance().fill(ui->widget_selection->layout());
 }
