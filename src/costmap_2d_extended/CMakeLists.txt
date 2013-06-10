@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(costmap_2d_extended)
 set(CMAKE_BUILD_TYPE Release)
 
-find_package(catkin REQUIRED COMPONENTS genmsg roscpp dynamic_reconfigure std_msgs geometry_msgs pcl pcl_ros voxel_grid laser_geometry)
+find_package(catkin REQUIRED COMPONENTS message_generation genmsg roscpp dynamic_reconfigure std_msgs geometry_msgs pcl pcl_ros voxel_grid laser_geometry)
 
 ## Find message files
 file(GLOB messages messages RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/msg/"

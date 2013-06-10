@@ -10,7 +10,10 @@
 
 /// COMPONENT
 #include "filter.h"
-#include "generic_manager.hpp"
+#include "registration.hpp"
+
+/// PROJECT
+#include <utils/plugin_manager.hpp>
 
 /// SYSTEM
 #include <QComboBox>

@@ -94,6 +94,7 @@ add_library(vision_core
     src/data/matchable_pose.cpp
     src/data/painter.cpp
     src/data/pose.cpp
+    src/utils/constructor.hpp
     src/utils/extractor.cpp
     src/utils/extractor_factory.cpp
     src/utils/extractor_manager.cpp
@@ -105,6 +106,7 @@ add_library(vision_core
     src/utils/match_scorer_reprojection.cpp
     src/utils/match_scorer_factory.cpp
     src/utils/opencv_utils.hpp
+    src/utils/plugin_manager.hpp
     src/utils/rectangle_cluster.cpp
     ${GLOBALS})
 target_link_libraries(vision_core yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
@@ -127,12 +129,10 @@ add_library(designer
 add_executable(vision_evaluator
     src/evaluator.cpp
     src/evaluator/evaluation_window.cpp
-    src/evaluator/constructor.hpp
     src/evaluator/filter.cpp
     src/evaluator/filter_manager.cpp
     src/evaluator/filter_blur.cpp
     src/evaluator/filter_static_mask.cpp
-    src/evaluator/generic_manager.hpp
     src/evaluator/image_combiner.cpp
     src/evaluator/image_combiner_manager.cpp
     src/evaluator/image_combiner_robust_match.cpp
@@ -148,6 +148,7 @@ add_executable(vision_evaluator
     src/evaluator/global_option.cpp
     src/evaluator/global_option_manager.cpp
     src/evaluator/panel.cpp
+    src/evaluator/registration.hpp
     src/evaluator/viewer.cpp
     src/qt_helper.hpp
     ${QT_EVALUATOR}

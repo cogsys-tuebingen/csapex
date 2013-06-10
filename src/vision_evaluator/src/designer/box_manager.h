@@ -5,7 +5,7 @@
 #include "selector_proxy.h"
 
 /// PROJECT
-#include <evaluator/generic_manager.hpp>
+#include <utils/plugin_manager.hpp>
 
 /// SYSTEM
 #include <QLayout>

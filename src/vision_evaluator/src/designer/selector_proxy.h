@@ -5,7 +5,7 @@
 #include "box.h"
 
 /// PROJECT
-#include <evaluator/constructor.hpp>
+#include <utils/constructor.hpp>
 
 /// SYSTEM
 #include <QGraphicsView>

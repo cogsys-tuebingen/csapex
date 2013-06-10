@@ -5,7 +5,7 @@
 #include "extractor.h"
 
 /// PROJECT
-#include <evaluator/generic_manager.hpp>
+#include <utils/plugin_manager.hpp>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>

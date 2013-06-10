@@ -10,7 +10,10 @@
 
 /// COMPONENT
 #include "global_option.h"
-#include "generic_manager.hpp"
+#include "registration.hpp"
+
+/// PROJECT
+#include <utils/plugin_manager.hpp>
 
 #define REGISTER_GLOBAL_OPTION(class_name)\
     REGISTER_GENERIC(GlobalOptionManager, class_name)

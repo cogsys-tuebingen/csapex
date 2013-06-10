@@ -8,9 +8,12 @@
 #ifndef IMAGE_COMBINER_MANAGER_H
 #define IMAGE_COMBINER_MANAGER_H
 
+/// PROJECT
+#include <utils/plugin_manager.hpp>
+
 /// COMPONENT
 #include "image_combiner.h"
-#include "generic_manager.hpp"
+#include "registration.hpp"
 
 #define REGISTER_COMBINER(class_name)\
     REGISTER_GENERIC(ImageCombinerManager, class_name)
