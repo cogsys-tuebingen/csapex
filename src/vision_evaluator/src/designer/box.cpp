@@ -45,7 +45,14 @@ bool Box::eventFilter(QObject * o, QEvent * e)
             down_ = false;
         } else if(e->type() == QEvent::MouseMove) {
             if(down_) {
+                QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
                 e->ignore();
+
+                QPoint offset = ui->content->geometry().topLeft();
+                startDrag(-em->pos() - offset);
+
+                down_ = false;
+                return true;
             }
         }
     }
@@ -62,15 +69,20 @@ void Box::paintEvent(QPaintEvent *e)
 void Box::mousePressEvent(QMouseEvent* e)
 {
     if(e->button() == Qt::LeftButton) {
-        QDrag* drag = new QDrag(this);
-        QMimeData* mimeData = new QMimeData;
-        mimeData->setText(Box::MIME_MOVE);
-        mimeData->setParent(this);
-        mimeData->setUserData(0, new MoveOffset(-e->pos()));
-        drag->setMimeData(mimeData);
-
-        drag->exec();
+        startDrag(-e->pos());
     }
+}
+
+void Box::startDrag(QPoint offset)
+{
+    QDrag* drag = new QDrag(this);
+    QMimeData* mimeData = new QMimeData;
+    mimeData->setText(Box::MIME_MOVE);
+    mimeData->setParent(this);
+    mimeData->setUserData(0, new MoveOffset(offset));
+    drag->setMimeData(mimeData);
+
+    drag->exec();
 }
 
 QPixmap Box::makePixmap(const std::string& label)

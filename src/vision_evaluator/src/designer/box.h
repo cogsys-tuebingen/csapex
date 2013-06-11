@@ -44,6 +44,7 @@ public:
     virtual QPixmap makePixmap(const std::string &label);
 
 protected:
+    void startDrag(QPoint offset);
     void paintEvent(QPaintEvent * e);
     bool eventFilter(QObject *, QEvent *);
 
