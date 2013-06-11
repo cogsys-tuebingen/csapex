@@ -54,7 +54,7 @@ catkin_package(
    INCLUDE_DIRS include src
    LIBRARIES vision_core logger
    CATKIN_DEPENDS pluginlib roscpp std_msgs utils
-#  DEPENDS system_lib
+   DEPENDS Qt4 OpenCV
 )
 
 ###########
@@ -131,6 +131,7 @@ add_executable(vision_evaluator
     src/evaluator/evaluation_window.cpp
     src/evaluator/filter.cpp
     src/evaluator/filter_manager.cpp
+    src/evaluator/filter_apply_mask.cpp
     src/evaluator/filter_blur.cpp
     src/evaluator/filter_static_mask.cpp
     src/evaluator/image_combiner.cpp

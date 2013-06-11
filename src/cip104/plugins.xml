@@ -1,0 +1,7 @@
+<library path="libcip104">
+
+  <class type="cip104::HSVSegmentation" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
+
+</library>
