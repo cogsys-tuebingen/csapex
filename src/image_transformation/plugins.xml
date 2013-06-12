@@ -1,0 +1,9 @@
+<library path="libimage_transformation">
+  <class type="image_transformation::Undistort" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
+
+  <class type="image_transformation::PerspectiveTransform" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
+</library>
