@@ -34,6 +34,7 @@ include_directories(include
 
 add_library(cip104
   src/filter_hsv_segmentation.cpp
+  src/filter_lk_tracking.cpp
   ${MOC}
 )
 target_link_libraries(cip104

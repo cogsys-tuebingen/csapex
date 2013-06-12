@@ -3,5 +3,7 @@
   <class type="cip104::HSVSegmentation" base_class_type="vision_evaluator::Filter">
     <description>none yet</description>
   </class>
-
+  <class type="cip104::LKTracking" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
 </library>
