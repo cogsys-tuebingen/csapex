@@ -12,7 +12,6 @@ namespace vision_evaluator
 {
 class Box;
 class DesignBoard;
-}
 
 class Connector : public QRadioButton
 {
@@ -69,5 +68,7 @@ protected:
 
     Overlay* overlay_;
 };
+
+}
 
 #endif // CONNECTOR_H

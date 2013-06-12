@@ -6,31 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>882</width>
-    <height>720</height>
+    <width>587</width>
+    <height>359</height>
    </rect>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="enabled">
     <bool>true</bool>
    </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>500000</width>
-     <height>16777215</height>
-    </size>
-   </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QTabWidget" name="mode_tab">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="single_image_tab">
        <attribute name="title">
@@ -133,7 +121,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>882</width>
+     <width>587</width>
      <height>25</height>
     </rect>
    </property>

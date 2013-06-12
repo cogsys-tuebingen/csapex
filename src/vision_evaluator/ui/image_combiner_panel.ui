@@ -26,7 +26,7 @@
       </size>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">font: 75 italic 7pt &quot;Ubuntu&quot;;</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -34,7 +34,6 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <zorder>horizontalLayoutWidget</zorder>
     </widget>
    </item>
    <item>

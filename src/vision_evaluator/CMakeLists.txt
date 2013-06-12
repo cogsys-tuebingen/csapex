@@ -52,7 +52,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include src
-   LIBRARIES vision_core logger
+   LIBRARIES vision_core logger vision_evaluation
    CATKIN_DEPENDS pluginlib roscpp std_msgs utils
    DEPENDS Qt4 OpenCV
 )
@@ -115,6 +115,7 @@ target_link_libraries(vision_core logger)
 ##### EVALUATION
 add_library(designer
     src/designer/box.cpp
+    src/designer/boxed_object.cpp
     src/designer/box_manager.cpp
     src/designer/connector.cpp
     src/designer/connector_in.cpp
@@ -126,9 +127,9 @@ add_library(designer
     ${QT_DESIGNER}
 )
 
-add_executable(vision_evaluator
-    src/evaluator.cpp
+add_library(vision_evaluation
     src/evaluator/evaluation_window.cpp
+    src/evaluator/file_importer.cpp
     src/evaluator/filter.cpp
     src/evaluator/filter_manager.cpp
     src/evaluator/filter_apply_mask.cpp
@@ -154,9 +155,14 @@ add_executable(vision_evaluator
     src/qt_helper.hpp
     ${QT_EVALUATOR}
 )
-target_link_libraries(vision_evaluator
+target_link_libraries(vision_evaluation
     designer
     ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+
+
+add_executable(vision_evaluator
+    src/evaluator.cpp)
+target_link_libraries(vision_evaluator vision_evaluation)
 
 # INSTALL INCLUDE HEADERS
 string(REGEX REPLACE ".*/src/([^/]+)" "\\1" lib ${CMAKE_CURRENT_SOURCE_DIR})

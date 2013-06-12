@@ -5,6 +5,8 @@
 #include <QWidget>
 #include <QPainter>
 
+namespace vision_evaluator {
+
 /// FORWARD DECLARATION
 class Connector;
 
@@ -37,4 +39,5 @@ protected:
     ConnectionList connections;
 };
 
+}
 #endif // OVERLAY_H

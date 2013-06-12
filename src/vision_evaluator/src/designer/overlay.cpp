@@ -7,6 +7,8 @@
 /// SYSTEM
 #include <iostream>
 
+using namespace vision_evaluator;
+
 Overlay::Overlay(QWidget* parent)
     : QWidget(parent)
 {

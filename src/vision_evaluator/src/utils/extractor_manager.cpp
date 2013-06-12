@@ -55,8 +55,8 @@ void ExtractorManager::registerKeypointConstructor(const std::string& key, Keypo
     std::cout << "register keypoint detector instance " << key_lower << std::endl;
 
     KeypointInitializer c;
-    c.name = key_lower;
-    c.constructor = kc;
+    c.setName(key_lower);
+    c.setConstructor(kc);
     available_keypoints.availableClasses(key_lower) = c;
 }
 
@@ -68,7 +68,7 @@ void ExtractorManager::registerDescriptorConstructor(const std::string& key, Des
     std::cout << "register descriptor extractor instance " << key_lower << std::endl;
 
     DescriptorInitializer c;
-    c.name = key_lower;
-    c.constructor = dc;
+    c.setName(key_lower);
+    c.setConstructor(dc);
     available_descriptors.availableClasses(key_lower) = c;
 }

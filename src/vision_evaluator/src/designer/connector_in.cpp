@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <iostream>
 
+using namespace vision_evaluator;
+
 ConnectorIn::ConnectorIn(QWidget* parent)
     : Connector(parent), input(NULL)
 {

@@ -6,23 +6,30 @@
 #include <boost/function.hpp>
 
 struct Constructor {
-    std::string name;
-    bool valid_;
-
-    Constructor() : valid_(false) {}
+    Constructor() : valid_(false), has_constructor(false) {}
 
     virtual bool valid() const {
-        return valid_;
+        return valid_ && has_constructor;
     }
 
     std::string getName() const {
         return name;
     }
+
+    void setName(const std::string& n) {
+        name = n;
+    }
+
+protected:
+    std::string name;
+    bool valid_;
+    bool has_constructor;
 };
 
 template <class M>
 struct DefaultConstructor : public Constructor {
-    boost::function<M*()> constructor;
+
+    typedef boost::function<M*()> Call;
 
     typename boost::shared_ptr<M> operator()() const {
         return construct();
@@ -39,6 +46,14 @@ struct DefaultConstructor : public Constructor {
         typename boost::shared_ptr<M> res(constructor());
         return res.get() != NULL;
     }
+
+    void setConstructor(Call c) {
+        constructor = c;
+        has_constructor = true;
+    }
+
+private:
+    Call constructor;
 };
 
 #endif // CONSTRUCTOR_HPP

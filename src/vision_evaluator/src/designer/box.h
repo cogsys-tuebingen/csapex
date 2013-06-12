@@ -15,8 +15,11 @@ namespace Ui
 class Box;
 }
 
+
 namespace vision_evaluator
 {
+
+class BoxedObject;
 
 class Box : public QWidget
 {
@@ -37,11 +40,16 @@ public:
 
 
 public:
-    Box(QWidget* parent = 0);
+    Box(BoxedObject* content, QWidget* parent = 0);
     virtual ~Box();
 
     virtual void mousePressEvent(QMouseEvent* e);
     virtual QPixmap makePixmap(const std::string &label);
+
+    virtual void init(const QPoint &pos);
+
+    void addInput(ConnectorIn* in);
+    void addOutput(ConnectorOut* out);
 
 protected:
     void startDrag(QPoint offset);
@@ -55,11 +63,12 @@ public Q_SLOTS:
 private:
     Ui::Box* ui;
 
-    ConnectorIn* input;
-    ConnectorOut* output;
+    std::vector<ConnectorIn*> input;
+    std::vector<ConnectorOut*> output;
 
     bool down_;
 
+    BoxedObject* content_;
     Overlay* overlay_;
 };
 

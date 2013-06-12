@@ -31,12 +31,12 @@ protected:
     PluginManagerImp(const std::string& full_name)
         : loader_(new Loader("vision_evaluator", full_name)) {
     }
+
     PluginManagerImp(const PluginManagerImp& rhs);
     PluginManagerImp& operator = (const PluginManagerImp& rhs);
 
 protected:
-    virtual ~PluginManagerImp() {
-    }
+    virtual ~PluginManagerImp() {}
 
     void registerConstructor(Constructor constructor) {
         available_classes[constructor.getName()] = constructor;
@@ -50,8 +50,8 @@ protected:
                 loader_->loadLibraryForClass(*c);
 
                 Constructor constructor;
-                constructor.name = *c;
-                constructor.constructor = boost::bind(&Loader::createUnmanagedInstance, loader_, *c);
+                constructor.setName(*c);
+                constructor.setConstructor(boost::bind(&Loader::createUnmanagedInstance, loader_, *c));
                 registerConstructor(constructor);
                 std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;
             }
@@ -80,6 +80,9 @@ public:
 
     PluginManager(const std::string& full_name)
         : instance(Parent::instance(full_name))
+    {}
+
+    virtual ~PluginManager()
     {}
 
     virtual void registerConstructor(Constructor constructor) {

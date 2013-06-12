@@ -38,7 +38,7 @@
             <x>0</x>
             <y>0</y>
             <width>424</width>
-            <height>393</height>
+            <height>362</height>
            </rect>
           </property>
           <attribute name="label">
@@ -85,6 +85,14 @@
           </layout>
          </widget>
          <widget class="QWidget" name="filter_page">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>424</width>
+            <height>362</height>
+           </rect>
+          </property>
           <attribute name="label">
            <string>Filter</string>
           </attribute>

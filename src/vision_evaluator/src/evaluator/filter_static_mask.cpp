@@ -156,7 +156,6 @@ void ModalPainter::input(cv::Mat img)
 FilterStaticMask::FilterStaticMask()
     : painter(NULL)
 {
-    showPainter();
 }
 
 FilterStaticMask::~FilterStaticMask()
@@ -191,7 +190,7 @@ void FilterStaticMask::filter(cv::Mat& img, cv::Mat& mask)
     }
 }
 
-void FilterStaticMask::insert(QLayout*)
+void FilterStaticMask::insert(QBoxLayout *)
 {
-
+    showPainter();
 }

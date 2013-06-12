@@ -2,13 +2,15 @@
 #define SELECTOR_PROXY_H
 
 /// COMPONENT
-#include "box.h"
+#include "boxed_object.h"
 
 /// PROJECT
 #include <utils/constructor.hpp>
 
 /// SYSTEM
 #include <QGraphicsView>
+#include <QGroupBox>
+#include <QLayout>
 #include <iostream>
 #include <QMouseEvent>
 #include <typeinfo>
@@ -17,30 +19,44 @@
 namespace vision_evaluator
 {
 
+class Box;
+
 class SelectorProxy : public QGraphicsView
 {
 public:
     struct ProxyConstructor : public Constructor {
-        boost::function<SelectorProxy* (const std::string)> constructor;
+        typedef boost::function<SelectorProxy* (const std::string)> Call;
 
         SelectorProxy* operator()() {
             SelectorProxy* res(constructor(name));
             assert(res != NULL);
             return res;
         }
+
+        void setConstructor(Call c) {
+            constructor = c;
+            has_constructor = true;
+        }
+
+    private:
+        Call constructor;
     };
 
     static void registerProxy(ProxyConstructor c);
 
 public:
-    SelectorProxy(const std::string& name, QWidget* parent = 0);
+    SelectorProxy(const std::string& name, BoxedObject* content, QWidget* parent = 0);
     virtual ~SelectorProxy();
 
-    virtual void mousePressEvent(QMouseEvent* event) = 0;
-    virtual void spawnObject(QWidget* parent, const QPoint& pos) = 0;
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual void spawnObject(QWidget* parent, const QPoint& pos);
+
+protected:
+    virtual BoxedObject* makeContent() = 0;
 
 protected:
     std::string name_;
+    boost::shared_ptr<vision_evaluator::Box> box_;
 };
 
 template <class T>
@@ -48,43 +64,16 @@ class SelectorProxyImp : public SelectorProxy
 {
 public:
     SelectorProxyImp(const std::string& name, QWidget *parent = 0)
-        : SelectorProxy(name, parent), box_(new vision_evaluator::Box)/*, element_(new T)*/
+        : SelectorProxy(name, new T, parent)
+    {}
+
+    virtual ~SelectorProxyImp()
+    {}
+
+    virtual BoxedObject* makeContent()
     {
-        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        QSize size(80, 80);
-
-        setScene(new QGraphicsScene(QRectF(QPoint(), size)));
-        scene()->addPixmap(box_->makePixmap(name_));
+        return new T;
     }
-
-    virtual ~SelectorProxyImp() {
-        delete box_;
-//        delete element_;
-    }
-
-    virtual void spawnObject(QWidget* parent, const QPoint& pos) {
-        vision_evaluator::Box* object(new vision_evaluator::Box(parent));
-        object->setGeometry(pos.x(), pos.y(), 100, 100);
-        object->setObjectName(name_.c_str());
-        object->show();
-    }
-
-    virtual void mousePressEvent(QMouseEvent* event) {
-        if(event->button() == Qt::LeftButton) {
-            QDrag* drag = new QDrag(this);
-            QMimeData* mimeData = new QMimeData;
-            mimeData->setText(Box::MIME);
-            mimeData->setParent(this);
-            drag->setMimeData(mimeData);
-            drag->setPixmap(box_->makePixmap(name_));
-            drag->exec();
-        }
-    }
-
-
-private:
-    vision_evaluator::Box* box_;
-//    T* element_;
 };
 
 }

@@ -31,7 +31,7 @@ public:
     virtual void insert(QBoxLayout* parent);
 
 private:
-    std::vector<GlobalOption*> options;
+    std::vector<GlobalOption::Ptr> options;
 };
 
 }

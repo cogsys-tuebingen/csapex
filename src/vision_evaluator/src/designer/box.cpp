@@ -3,32 +3,57 @@
 
 /// PROJECT
 #include "ui_box.h"
+#include "boxed_object.h"
 
 /// SYSTEM
 #include <QDragMoveEvent>
 #include <QMenu>
 #include <iostream>
+#include <boost/foreach.hpp>
 
 using namespace vision_evaluator;
 
 const QString Box::MIME = "vision_evaluator/box";
 const QString Box::MIME_MOVE = "vision_evaluator/box/move";
 
-Box::Box(QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), input(new ConnectorIn(this)), output(new ConnectorOut(this)), down_(false)
+Box::Box(BoxedObject *content, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), down_(false), content_(content)
 {
     ui->setupUi(this);
-
-    ui->input_layout->addWidget(input);
-    ui->output_layout->addWidget(output);
 
     setObjectName(ui->content->title());
 
     ui->content->installEventFilter(this);
 
+    content_->setBox(this);
+
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+}
+
+void Box::addInput(ConnectorIn *in)
+{
+    in->setParent(NULL);
+    ui->input_layout->addWidget(in);
+    input.push_back(in);
+}
+
+void Box::addOutput(ConnectorOut *out)
+{
+    out->setParent(NULL);
+    ui->output_layout->addWidget(out);
+    output.push_back(out);
+}
+
+void Box::init(const QPoint &pos)
+{
+    setGeometry(pos.x(), pos.y(), 100, 100);
+
+    QBoxLayout* layout = new QHBoxLayout;
+    ui->content->setLayout(layout);
+
+    content_->fill(layout);
 }
 
 Box::~Box()
@@ -102,8 +127,12 @@ void Box::setOverlay(Overlay* o)
 {
     overlay_ = o;
 
-    input->setOverlay(o);
-    output->setOverlay(o);
+    BOOST_FOREACH(ConnectorIn* i, input) {
+        i->setOverlay(o);
+    }
+    BOOST_FOREACH(ConnectorOut* i, output) {
+        i->setOverlay(o);
+    }
 }
 
 void Box::showContextMenu(const QPoint& pos)

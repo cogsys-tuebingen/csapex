@@ -2,7 +2,6 @@
 #define DESIGN_BOARD_H
 
 /// COMPONENT
-#include "box.h"
 #include "overlay.h"
 #include "connector.h"
 

@@ -4,6 +4,8 @@
 /// COMPONENT
 #include "connector.h"
 
+namespace vision_evaluator {
+
 /// FORWARDS DECLARATION
 class ConnectorOut;
 
@@ -26,5 +28,7 @@ public:
 private:
     ConnectorOut* input;
 };
+
+}
 
 #endif // CONNECTOR_IN_H

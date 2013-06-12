@@ -23,7 +23,7 @@ public:
     virtual ~FilterStaticMask();
 
 public:
-    virtual void insert(QLayout*);
+    virtual void insert(QBoxLayout*);
 
 public Q_SLOTS:
     virtual void filter(cv::Mat& img, cv::Mat& mask);

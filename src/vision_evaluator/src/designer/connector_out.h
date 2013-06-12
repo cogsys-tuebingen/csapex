@@ -4,6 +4,8 @@
 /// COMPONENT
 #include "connector.h"
 
+namespace vision_evaluator {
+
 /// FORWARD DECLARATION
 class ConnectorIn;
 
@@ -25,5 +27,7 @@ public:
 protected:
     std::vector<ConnectorIn*> targets_;
 };
+
+}
 
 #endif // CONNECTOR_OUT_H

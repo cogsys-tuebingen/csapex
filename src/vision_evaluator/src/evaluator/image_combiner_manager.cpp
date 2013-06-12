@@ -19,6 +19,11 @@ ImageCombinerManager::ImageCombinerManager()
 {
 }
 
+ImageCombinerManager::~ImageCombinerManager()
+{
+
+}
+
 void ImageCombinerManager::insert(QBoxLayout* layout)
 {
     if(!pluginsLoaded()) {

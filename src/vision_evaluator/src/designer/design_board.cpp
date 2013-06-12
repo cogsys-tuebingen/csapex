@@ -5,6 +5,7 @@
 #include "ui_design_board.h"
 #include "connector.h"
 #include "selector_proxy.h"
+#include "box.h"
 
 /// SYSTEM
 #include <QResizeEvent>

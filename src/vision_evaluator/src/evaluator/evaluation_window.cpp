@@ -26,6 +26,7 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
     ui->setupUi(this);
+//    setWindowFlags( (windowFlags() | Qt::CustomizeWindowHint));
 
     QList<ImagePanel*> ips = findChildren<ImagePanel*>(QRegExp(".*"));
     for(QList<ImagePanel*>::Iterator it = ips.begin(); it != ips.end(); ++it) {

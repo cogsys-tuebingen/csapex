@@ -27,12 +27,12 @@ void GlobalOptionManager::insert(QBoxLayout* parent)
 
         typedef const std::pair<std::string, Constructor> PAIR;
         BOOST_FOREACH(PAIR& pair, availableClasses()) {
-            options.push_back(pair.second.constructor());
+            options.push_back(pair.second.construct());
         }
     }
 
-    for(std::vector<GlobalOption*>::iterator it = options.begin(); it != options.end(); ++it) {
-        (*it)->insert(parent);
+    BOOST_FOREACH(GlobalOption::Ptr it, options) {
+        it->insert(parent);
     }
 
 }

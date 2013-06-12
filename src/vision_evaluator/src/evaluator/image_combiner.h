@@ -1,6 +1,9 @@
 #ifndef IMAGE_COMBINER_H
 #define IMAGE_COMBINER_H
 
+/// PROJECT
+#include <designer/boxed_object.h>
+
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <QRadioButton>
@@ -11,7 +14,7 @@
 namespace vision_evaluator
 {
 
-class ImageCombiner : public QObject
+class ImageCombiner : public QObject, public BoxedObject
 {
     Q_OBJECT
 
@@ -19,10 +22,9 @@ public:
     typedef boost::shared_ptr<ImageCombiner> Ptr;
 
 public:
-    virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2) = 0;
+    virtual ~ImageCombiner();
 
-    void setName(const std::string& name);
-    const std::string& getName();
+    virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2) = 0;
 
     virtual void update_gui(QFrame* additional_holder) {}
 
@@ -32,10 +34,8 @@ public:
     virtual void keyEvent(QKeyEvent* event) {}
 
 protected:
+    virtual void fill(QBoxLayout *layout);
     virtual void insert(QBoxLayout*);
-
-private:
-    std::string name_;
 };
 
 } /// NAMESPACE

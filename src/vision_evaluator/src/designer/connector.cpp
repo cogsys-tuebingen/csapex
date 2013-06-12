@@ -10,6 +10,8 @@
 #include <typeinfo>
 #include <QDragEnterEvent>
 
+using namespace vision_evaluator;
+
 const QString Connector::MIME = "vision_evaluator/connector";
 
 Connector::Connector(QWidget* parent)

@@ -26,6 +26,11 @@ public:
     GlobalOption();
 
     virtual void insert(QBoxLayout* layout) = 0;
+
+    virtual void setName(const std::string& name);
+
+protected:
+    std::string name_;
 };
 
 } /// NAMESPACE

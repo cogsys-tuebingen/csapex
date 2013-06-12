@@ -3,15 +3,15 @@
 
 using namespace vision_evaluator;
 
-void ImageCombiner::setName(const std::string& name)
-{
-    name_ = name;
+ImageCombiner::~ImageCombiner() {
+
 }
 
-const std::string& ImageCombiner::getName()
+void ImageCombiner::fill(QBoxLayout* layout)
 {
-    return name_;
+    insert(layout);
 }
+
 
 void ImageCombiner::insert(QBoxLayout* layout)
 {

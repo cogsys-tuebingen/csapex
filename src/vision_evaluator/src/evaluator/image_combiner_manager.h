@@ -26,6 +26,7 @@ class ImageCombinerManager : public ImageCombiner, public PluginManager<ImageCom
 
 public:
     ImageCombinerManager();
+    virtual ~ImageCombinerManager();
     virtual void insert(QBoxLayout*);
 
     virtual void mousePressEvent(QMouseEvent* event);

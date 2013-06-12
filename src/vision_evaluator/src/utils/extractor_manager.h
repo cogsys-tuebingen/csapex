@@ -82,7 +82,6 @@ public:
      */
     struct ExtractorInitializer : public Constructor {
         typedef boost::function<void(Extractor*, bool)> Call;
-        Call constructor;
 
         void operator() (Extractor* r, bool complete = false) const {
             return construct(r, complete);
@@ -91,6 +90,14 @@ public:
         void construct(Extractor* r, bool complete = false) const {
             constructor(r, complete);
         }
+
+        void setConstructor(Call c) {
+            constructor = c;
+            has_constructor = true;
+        }
+
+    private:
+        Call constructor;
     };
 
     class KeypointInitializer : public ExtractorInitializer {};

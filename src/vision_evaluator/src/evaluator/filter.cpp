@@ -1,25 +1,38 @@
 /// HEADER
 #include "filter.h"
 
+/// PROJECT
+#include <designer/connector_in.h>
+#include <designer/connector_out.h>
+#include <designer/box.h>
+
+/// SYSTEM
+#include <QLabel>
+
 using namespace vision_evaluator;
 
 
 Filter::Filter()
-    : name_("unnamed")
+    : input_(NULL), output_(NULL)
 {
+    setName("unnamed filter");
 }
 
 Filter::~Filter()
 {
 }
 
-std::string Filter::getName()
+void Filter::fill(QBoxLayout *parent)
 {
-    return name_;
-}
+    if(input_ == NULL) {
+//        parent->addWidget(new QLabel("Filter Filter!!!11eins"));
 
-void Filter::setName(const std::string& name)
-{
-    name_ = name;
-}
+        input_ = new ConnectorIn(box_);
+        box_->addInput(input_);
 
+        output_ = new ConnectorOut(box_);
+        box_->addOutput(output_);
+
+        insert(parent);
+    }
+}
