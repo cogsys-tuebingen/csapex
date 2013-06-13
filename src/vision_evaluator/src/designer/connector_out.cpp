@@ -34,6 +34,16 @@ void ConnectorOut::removeConnection(Connector* other_side)
     }
 }
 
+void ConnectorOut::removeAllConnections()
+{
+    for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
+        (*i)->removeConnection(this);
+        i = targets_.erase(i);
+    }
+
+    Q_EMIT disconnected(this);
+}
+
 bool ConnectorOut::tryConnect(Connector* other_side)
 {
     if(!other_side->isInput()) {

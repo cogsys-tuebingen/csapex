@@ -62,7 +62,7 @@ void Undistort::insert(QBoxLayout *parent)
 
     margin_ = QtHelper::makeSlider(parent, "margin", 0, 0, 1000);
 
-    connect(file_dialog_, SIGNAL(pressed()), this, SLOT(search()));
+    QObject::connect(file_dialog_, SIGNAL(pressed()), this, SLOT(search()));
 }
 
 void Undistort::search()

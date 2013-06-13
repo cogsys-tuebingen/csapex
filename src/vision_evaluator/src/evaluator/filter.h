@@ -16,7 +16,7 @@ namespace vision_evaluator
 class ConnectorIn;
 class ConnectorOut;
 
-class Filter : public QObject, public BoxedObject
+class Filter : public BoxedObject
 {
     Q_OBJECT
 

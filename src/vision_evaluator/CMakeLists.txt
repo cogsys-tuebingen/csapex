@@ -149,6 +149,7 @@ add_library(vision_evaluation
     src/evaluator/image_provider_ros_topic.cpp
     src/evaluator/global_option.cpp
     src/evaluator/global_option_manager.cpp
+    src/evaluator/output_display.cpp
     src/evaluator/panel.cpp
     src/evaluator/registration.hpp
     src/evaluator/viewer.cpp

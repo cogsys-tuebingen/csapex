@@ -34,6 +34,9 @@ void Overlay::addConnection(Connector* from, Connector* to)
 
     connect(from, SIGNAL(destroyed(QObject*)), this, SLOT(connectorRemoved(QObject*)));
     connect(to, SIGNAL(destroyed(QObject*)), this, SLOT(connectorRemoved(QObject*)));
+
+    connect(from, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
+    connect(to, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
 }
 
 void Overlay::connectorRemoved(QObject* o)

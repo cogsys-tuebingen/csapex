@@ -14,7 +14,7 @@
 namespace vision_evaluator
 {
 
-class ImageCombiner : public QObject, public BoxedObject
+class ImageCombiner : public BoxedObject
 {
     Q_OBJECT
 

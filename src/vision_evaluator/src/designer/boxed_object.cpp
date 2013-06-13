@@ -6,20 +6,29 @@
 
 /// SYSTEM
 #include <QLabel>
+#include <QThread>
 
 using namespace vision_evaluator;
 
 BoxedObject::BoxedObject()
+    : private_thread_(NULL)
 {
 }
 
 BoxedObject::BoxedObject(const std::string& name)
-    : name_(name)
+    : name_(name), private_thread_(NULL)
 {
 }
 
 BoxedObject::~BoxedObject()
 {
+    if(private_thread_) {
+        private_thread_->wait(1000);
+        if(private_thread_->isRunning()) {
+            std::cout << "terminate thread" << std::endl;
+            private_thread_->terminate();
+        }
+    }
 }
 
 void BoxedObject::setName(const std::string &name)
@@ -40,4 +49,11 @@ void BoxedObject::setBox(Box *box)
 void BoxedObject::fill(QBoxLayout *layout)
 {
     layout->addWidget(new QLabel(name_.c_str()));
+}
+
+void BoxedObject::makeThread()
+{
+    if(!private_thread_) {
+        private_thread_ = new QThread;
+    }
 }

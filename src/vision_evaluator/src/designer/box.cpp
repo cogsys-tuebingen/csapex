@@ -29,6 +29,7 @@ Box::Box(BoxedObject *content, QWidget* parent)
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
+    connect(ui->content, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
@@ -63,14 +64,14 @@ Box::~Box()
 
 bool Box::eventFilter(QObject * o, QEvent * e)
 {
+    QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
     if(o == ui->content) {
-        if(e->type() == QEvent::MouseButtonPress) {
+        if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
             down_ = true;
-        } else if(e->type() == QEvent::MouseButtonRelease) {
+        } else if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::LeftButton) {
             down_ = false;
         } else if(e->type() == QEvent::MouseMove) {
             if(down_) {
-                QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
                 e->ignore();
 
                 QPoint offset = ui->content->geometry().topLeft();

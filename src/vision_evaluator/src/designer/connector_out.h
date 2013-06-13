@@ -11,6 +11,8 @@ class ConnectorIn;
 
 class ConnectorOut : public Connector
 {
+    Q_OBJECT
+
 public:
     ConnectorOut(QWidget* parent);
     ~ConnectorOut();
@@ -23,6 +25,9 @@ public:
     virtual bool isOutput() {
         return true;
     }
+
+public Q_SLOTS:
+    virtual void removeAllConnections();
 
 protected:
     std::vector<ConnectorIn*> targets_;

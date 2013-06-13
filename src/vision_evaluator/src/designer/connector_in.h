@@ -11,6 +11,8 @@ class ConnectorOut;
 
 class ConnectorIn : public Connector
 {
+    Q_OBJECT
+
 public:
     ConnectorIn(QWidget* parent);
     ~ConnectorIn();
@@ -24,6 +26,9 @@ public:
     virtual bool isInput() {
         return true;
     }
+
+public Q_SLOTS:
+    virtual void removeAllConnections();
 
 private:
     ConnectorOut* input;

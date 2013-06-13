@@ -60,6 +60,9 @@ public Q_SLOTS:
     virtual void setOverlay(Overlay* o);
     void showContextMenu(const QPoint& pos);
 
+Q_SIGNALS:
+    void toggled(bool);
+
 private:
     Ui::Box* ui;
 

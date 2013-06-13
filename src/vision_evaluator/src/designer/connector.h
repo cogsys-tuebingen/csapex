@@ -23,6 +23,7 @@ public:
 public:
     virtual bool hitButton(const QPoint&) const;
     virtual void mousePressEvent(QMouseEvent* e);
+    virtual void mouseReleaseEvent(QMouseEvent *e);
 
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
@@ -52,6 +53,11 @@ public:
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
     virtual void removeConnection(QObject* other_side);
+
+    virtual void removeAllConnections() = 0;
+
+Q_SIGNALS:
+    virtual void disconnected(QObject*);
 
 protected:
     Connector(QWidget* parent);

@@ -46,6 +46,15 @@ void ConnectorIn::removeConnection(Connector* other_side)
     }
 }
 
+void ConnectorIn::removeAllConnections()
+{
+    if(input != NULL) {
+        input->removeConnection(this);
+        input = NULL;
+        Q_EMIT disconnected(this);
+    }
+}
+
 bool ConnectorIn::canConnect()
 {
     return input == NULL;

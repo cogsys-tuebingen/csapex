@@ -112,6 +112,13 @@ void Connector::mousePressEvent(QMouseEvent* e)
     }
 }
 
+void Connector::mouseReleaseEvent(QMouseEvent *e)
+{
+    if(e->button() == Qt::MiddleButton) {
+        removeAllConnections();
+    }
+}
+
 QPoint Connector::topLeft()
 {
     if(box == NULL) {

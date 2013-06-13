@@ -4,12 +4,14 @@
 /// SYSTEM
 #include <string>
 #include <QLayout>
+#include <QObject>
+#include <QThread>
 
 namespace vision_evaluator {
 
 class Box;
 
-class BoxedObject
+class BoxedObject : public QObject
 {
 public:
     BoxedObject();
@@ -25,8 +27,13 @@ public:
     virtual void fill(QBoxLayout* layout);
 
 protected:
+    void makeThread();
+
+protected:
     std::string name_;
     Box* box_;
+
+    QThread* private_thread_;
 };
 
 }
