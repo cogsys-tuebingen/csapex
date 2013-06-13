@@ -1,6 +1,8 @@
 #ifndef UNDISTORTER_H
 #define UNDISTORTER_H
+/// SYSTEM
 #include <opencv2/opencv.hpp>
+
 class  Undistorter
 {
 public:
@@ -46,7 +48,7 @@ public:
      * @brief Reset the map and it's size. Method not required for 'nomap' methods
      * @param s - the new size
      */
-    void reset_map(cv::Size s);
+    void reset_map(const cv::Size s, const float camera_offset_x, const float camera_offset_y);
 private:
     int         interpolation_method_;
     cv::Mat     camera_mat_;
@@ -56,6 +58,9 @@ private:
     cv::Mat     undist_map_x_;
     cv::Mat     undist_map_y_;
     cv::Size    undist_img_size_;
+
+    int         camera_offset_x_;
+    int         camera_offset_y_;
 };
 
 #endif // UNDISTORTER_H
