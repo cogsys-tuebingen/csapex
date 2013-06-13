@@ -18,6 +18,24 @@ void siginthandler(int param)
     exit(1);
 }
 
+struct EvaluationApplication : public QApplication
+{
+    EvaluationApplication(int &argc, char** argv)
+        : QApplication(argc, argv)
+    {}
+
+    virtual bool notify(QObject * receiver, QEvent * event)
+    {
+        try {
+            return QApplication::notify(receiver, event);
+        }
+        catch(std::exception& e) {
+            qWarning() << "Exception thrown:" << e.what();
+        }
+        return false;
+    }
+};
+
 int main(int argc, char** argv)
 {
     // initialize XLib, so that OpenGL can safely be used in a multithreaded environment
@@ -55,7 +73,7 @@ int main(int argc, char** argv)
     std::string directory = vm["directory"].as<std::string>();
     std::cout << "working directory is " << directory << std::endl;
 
-    QApplication app(argc, argv);
+    EvaluationApplication app(argc, argv);
     EvaluationWindow w(directory);
 
     if(vm.find("second_directory") != vm.end()) {

@@ -32,12 +32,7 @@ void ImageProviderImg::next()
 
     img.copyTo(cv::Mat(grown, roi));
 
-    cv::Mat mask(grown.rows, grown.cols, CV_8UC1, cv::Scalar::all(0));
-
-    int d = 5;
-    cv::rectangle(mask, cv::Rect(roi.x+d, roi.y+d, roi.width-2*d, roi.height-2*d), cv::Scalar::all(255), CV_FILLED);
-
-    new_image(grown, mask);
+    new_image(grown, cv::Mat());
 }
 
 bool ImageProviderImg::hasNext()
