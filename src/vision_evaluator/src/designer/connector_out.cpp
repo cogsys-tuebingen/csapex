@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <assert.h>
+#include <boost/foreach.hpp>
 #include <iostream>
 
 using namespace vision_evaluator;
@@ -17,8 +18,8 @@ ConnectorOut::ConnectorOut(QWidget* parent)
 
 ConnectorOut::~ConnectorOut()
 {
-    for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end(); ++i) {
-        (*i)->removeConnection(this);
+    BOOST_FOREACH(ConnectorIn* i, targets_) {
+        i->removeConnection(this);
     }
 }
 
@@ -75,4 +76,15 @@ bool ConnectorOut::canConnect()
 bool ConnectorOut::isConnected()
 {
     return targets_.size() > 0;
+}
+
+void ConnectorOut::publish(ConnectionType::Ptr message)
+{
+    if(targets_.size() == 1) {
+        targets_[0]->inputMessage(message);
+    } else if(targets_.size() > 1) {
+        BOOST_FOREACH(ConnectorIn* i, targets_) {
+            i->inputMessage(message->clone());
+        }
+    }
 }

@@ -19,15 +19,15 @@ ImageProviderDir::ImageProviderDir(const std::string& directory)
         bfs::path path = dir->path();
         if(path.filename() == "img.ppm") {
             std::cout << "image" << std::endl;
-            img = cv::imread(path.string());
+            img_ = cv::imread(path.string());
 
         } else if(path.filename() == "mask.ppm") {
             std::cout << "mask" << std::endl;
-            mask = cv::imread(path.string());
+            mask_ = cv::imread(path.string());
         }
     }
 
-    if(!img.empty() && !mask.empty()) {
+    if(!img_.empty() && !mask_.empty()) {
         is_right_format = true;
         std::cout << "got mask and image" << std::endl;
     }
@@ -47,17 +47,15 @@ bool ImageProviderDir::hasNext()
     return is_right_format;//bfs::exists(dir_) && dir_it_ != end_it_;
 }
 
-void ImageProviderDir::next()
+void ImageProviderDir::next(cv::Mat& img, cv::Mat& mask)
 {
-    cv::Mat grown(img.rows + 80, img.cols + 80, img.type(), cv::Scalar::all(0));
-    cv::Rect roi(40, 40, img.cols, img.rows);
+    img = cv::Mat(img_.rows + 80, img_.cols + 80, img_.type(), cv::Scalar::all(0));
+    cv::Rect roi(40, 40, img_.cols, img_.rows);
 
-    img.copyTo(cv::Mat(grown, roi));
+    img_.copyTo(cv::Mat(img, roi));
 
-    cv::Mat mask(grown.rows, grown.cols, CV_8UC1, cv::Scalar::all(0));
+    mask = cv::Mat(img.rows, img.cols, CV_8UC1, cv::Scalar::all(0));
 
     int d = 5;
     cv::rectangle(mask, cv::Rect(roi.x+d, roi.y+d, roi.width-2*d, roi.height-2*d), cv::Scalar::all(255), CV_FILLED);
-
-    new_image(grown, mask);
 }

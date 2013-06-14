@@ -14,7 +14,7 @@ GlobalOption::GlobalOption()
 {
 }
 
-void GlobalOption::setName(const std::string &name)
+void GlobalOption::setName(const std::string& name)
 {
     name_ = name;
 }

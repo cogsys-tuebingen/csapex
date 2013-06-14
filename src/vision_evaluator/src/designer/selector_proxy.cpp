@@ -8,7 +8,7 @@
 
 using namespace vision_evaluator;
 
-SelectorProxy::SelectorProxy(const std::string& name, BoxedObject *content, QWidget *parent)
+SelectorProxy::SelectorProxy(const std::string& name, BoxedObject* content, QWidget* parent)
     : QGraphicsView(parent), name_(name), box_(new vision_evaluator::Box(content))
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -24,10 +24,12 @@ SelectorProxy::~SelectorProxy()
 
 void SelectorProxy::registerProxy(ProxyConstructor c)
 {
-    BoxManager::instance().register_box_type(c);\
+    BoxManager::instance().register_box_type(c);
+    \
 }
 
-void SelectorProxy::mousePressEvent(QMouseEvent* event) {
+void SelectorProxy::mousePressEvent(QMouseEvent* event)
+{
     if(event->button() == Qt::LeftButton) {
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
@@ -39,7 +41,7 @@ void SelectorProxy::mousePressEvent(QMouseEvent* event) {
     }
 }
 
-void SelectorProxy::spawnObject(QWidget *parent, const QPoint &pos)
+void SelectorProxy::spawnObject(QWidget* parent, const QPoint& pos)
 {
     vision_evaluator::Box* object(new vision_evaluator::Box(makeContent(), parent));
     object->setObjectName(name_.c_str());

@@ -31,15 +31,24 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     virtual void filter(cv::Mat& img, cv::Mat& mask) = 0;
-    virtual void fill(QBoxLayout *layout);
+    virtual void fill(QBoxLayout* layout);
     virtual void insert(QBoxLayout* parent) = 0;
+
+private Q_SLOTS:
+    void messageArrived(ConnectorIn* source);
 
 protected:
     Filter();
 
 protected:
-    ConnectorIn* input_;
-    ConnectorOut* output_;
+    ConnectorIn* input_img_;
+    ConnectorIn* input_mask_;
+
+    ConnectorOut* output_img_;
+    ConnectorOut* output_mask_;
+
+    bool has_img;
+    bool has_mask;
 };
 
 } /// NAMESPACE

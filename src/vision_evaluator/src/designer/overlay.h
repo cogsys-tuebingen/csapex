@@ -5,7 +5,8 @@
 #include <QWidget>
 #include <QPainter>
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 /// FORWARD DECLARATION
 class Connector;

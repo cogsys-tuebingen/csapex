@@ -16,7 +16,7 @@ using namespace vision_evaluator;
 const QString Box::MIME = "vision_evaluator/box";
 const QString Box::MIME_MOVE = "vision_evaluator/box/move";
 
-Box::Box(BoxedObject *content, QWidget* parent)
+Box::Box(BoxedObject* content, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), down_(false), content_(content)
 {
     ui->setupUi(this);
@@ -33,21 +33,21 @@ Box::Box(BoxedObject *content, QWidget* parent)
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
-void Box::addInput(ConnectorIn *in)
+void Box::addInput(ConnectorIn* in)
 {
     in->setParent(NULL);
     ui->input_layout->addWidget(in);
     input.push_back(in);
 }
 
-void Box::addOutput(ConnectorOut *out)
+void Box::addOutput(ConnectorOut* out)
 {
     out->setParent(NULL);
     ui->output_layout->addWidget(out);
     output.push_back(out);
 }
 
-void Box::init(const QPoint &pos)
+void Box::init(const QPoint& pos)
 {
     setGeometry(pos.x(), pos.y(), 100, 100);
 
@@ -62,7 +62,7 @@ Box::~Box()
 
 }
 
-bool Box::eventFilter(QObject * o, QEvent * e)
+bool Box::eventFilter(QObject* o, QEvent* e)
 {
     QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
     if(o == ui->content) {
@@ -86,7 +86,7 @@ bool Box::eventFilter(QObject * o, QEvent * e)
     return false;
 }
 
-void Box::paintEvent(QPaintEvent *e)
+void Box::paintEvent(QPaintEvent* e)
 {
     ui->content->setTitle(objectName());
     resize(sizeHint());

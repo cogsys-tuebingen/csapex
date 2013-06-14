@@ -14,13 +14,19 @@ class ConnectorIn;
 
 class OutputDisplay : public BoxedObject
 {
+    Q_OBJECT
+
 public:
     OutputDisplay();
 
-    virtual void fill(QBoxLayout *layout);
+    virtual void fill(QBoxLayout* layout);
+
+public Q_SLOTS:
+    void messageArrived(ConnectorIn* source);
 
 private:
     ConnectorIn* input_;
+    QPixmap pixmap_;
 
     QGraphicsView* view_;
 };

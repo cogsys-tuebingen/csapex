@@ -7,7 +7,8 @@
 #include <QObject>
 #include <QThread>
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 class Box;
 

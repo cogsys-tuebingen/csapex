@@ -3,88 +3,131 @@
 
 /// COMPONENT
 #include "registration.hpp"
+#include "messages_default.hpp"
 
 /// PROJECT
 #include <designer/box.h>
 #include <designer/connector_out.h>
+#include <qt_helper.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <QLabel>
 #include <QFileDialog>
 #include <QTimer>
+#include <QtConcurrentRun>
 
 STATIC_INIT(FileImporter, generic, {
-                SelectorProxy::ProxyConstructor c;\
-                c.setName("File Importer");\
-                c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<FileImporter> >(), \
-                boost::lambda::_1, (QWidget*) NULL)); \
-                SelectorProxy::registerProxy(c);\
-            });
+    SelectorProxy::ProxyConstructor c; \
+    c.setName("File Importer"); \
+    c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<FileImporter> >(), \
+    boost::lambda::_1, (QWidget*) NULL)); \
+    SelectorProxy::registerProxy(c); \
+});
 
 using namespace vision_evaluator;
 
+FileImporterWorker::FileImporterWorker()
+    : timer_(NULL), output_img_(NULL), output_mask_(NULL), last_path_(QDir::currentPath())
+{
+    timer_ = new QTimer();
+    timer_->setInterval(100);
+    timer_->start();
+
+    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
+}
+
+void FileImporterWorker::publish()
+{
+    if(!provider_.isNull()) {
+        CvMatMessage::Ptr img(new CvMatMessage);
+        CvMatMessage::Ptr mask(new CvMatMessage);
+
+        provider_->next(img->value, mask->value);
+
+        output_img_->publish(img);
+        output_mask_->publish(mask);
+    }
+}
+
+bool FileImporterWorker::import(const QString& path)
+{
+    last_path_ = path;
+    provider_ = QSharedPointer<ImageProvider>(ImageProvider::create(last_path_.toUtf8().constData()));
+
+    return !provider_.isNull();
+}
+
+
 FileImporter::FileImporter()
-    : output_img_(NULL), output_mask_(NULL), timer_(NULL)
+    : worker(NULL)
 {
 }
 
-void FileImporter::fill(QBoxLayout *layout)
+FileImporter::~FileImporter()
 {
-    if(output_img_ == NULL) {
+    if(worker != NULL) {
+        delete worker;
+    }
+}
+
+void FileImporter::fill(QBoxLayout* layout)
+{
+    if(worker == NULL) {
+        worker = new FileImporterWorker;
+
         file_dialog_ = new QPushButton("Import");
 
-        layout->addWidget(file_dialog_);
+        QVBoxLayout* nested = new QVBoxLayout;
+        nested->addWidget(file_dialog_);
+
+        additional_layout_ = new QHBoxLayout;
+        nested->addLayout(additional_layout_);
+
+        layout->addLayout(nested);
 
         connect(file_dialog_, SIGNAL(pressed()), this, SLOT(importDialog()));
 
-        output_img_ = new ConnectorOut(box_);
-        box_->addOutput(output_img_);
+        worker->output_img_ = new ConnectorOut(box_);
+        box_->addOutput(worker->output_img_);
 
-        output_mask_ = new ConnectorOut(box_);
-        box_->addOutput(output_mask_);
+        worker->output_mask_ = new ConnectorOut(box_);
+        box_->addOutput(worker->output_mask_);
 
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
 
-        timer_ = new QTimer();
-        timer_->setInterval(100);
-        timer_->start();
-
         makeThread();
-        timer_->moveToThread(private_thread_);
+        worker->moveToThread(private_thread_);
+        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
 
-        QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
+        private_thread_->start();
     }
 }
 
 void FileImporter::toggle(bool on)
 {
-    if(on && !timer_->isActive()) {
-        timer_->start();
-    } else if(!on && timer_->isActive()) {
-        timer_->stop();
-    }
-}
-
-void FileImporter::publish()
-{
-    if(!provider_.isNull()) {
-        provider_->next();
+    if(on && !worker->timer_->isActive()) {
+        worker->timer_->start();
+    } else if(!on && worker->timer_->isActive()) {
+        worker->timer_->stop();
     }
 }
 
 void FileImporter::importDialog()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Input", QDir::currentPath(), "All files (*.*)");
+    QString filename = QFileDialog::getOpenFileName(0, "Input", worker->last_path_, "All files (*.*)");
 
     if(!filename.isNull()) {
-        provider_ = QSharedPointer<ImageProvider>(ImageProvider::create(filename.toUtf8().constData()));
+        if(worker->import(filename)) {
+            QtHelper::clearLayout(additional_layout_);
+            worker->provider_->insert(additional_layout_);
 
-        if(!provider_.isNull()) {
             file_dialog_->setText(filename);
-            return;
-        }
-    }
 
-    file_dialog_->setText("Import");
+        } else {
+            file_dialog_->setText("Import");
+        }
+    } else {
+        file_dialog_->setText("Import");
+    }
 }

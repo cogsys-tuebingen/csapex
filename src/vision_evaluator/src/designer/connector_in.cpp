@@ -64,3 +64,15 @@ bool ConnectorIn::isConnected()
 {
     return input != NULL;
 }
+
+void ConnectorIn::inputMessage(ConnectionType::Ptr message)
+{
+    message_ = message;
+
+    Q_EMIT messageArrived(this);
+}
+
+ConnectionType::Ptr ConnectorIn::getMessage()
+{
+    return message_;
+}

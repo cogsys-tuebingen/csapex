@@ -20,18 +20,16 @@ protected:
     virtual ~ImageProviderSet();
 
 public:
+    virtual void insert(QBoxLayout* layout);
     virtual void update_gui(QFrame* additional_holder);
-    virtual void next();
+    virtual void next(cv::Mat& img, cv::Mat& mask);
 
 protected Q_SLOTS:
     void showFrame();
     void setPlaying(bool playing);
 
-protected:
-    void provide(cv::Mat frame);
-
 protected: // abstract
-    virtual void reallyNext() = 0;
+    virtual void reallyNext(cv::Mat& img, cv::Mat& mask) = 0;
 
 protected:
     cv::Mat last_frame_;

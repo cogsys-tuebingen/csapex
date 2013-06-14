@@ -18,7 +18,7 @@ public:
     static ImageProvider* createInstance(const std::string& path);
 
     virtual bool hasNext();
-    virtual void reallyNext();
+    virtual void reallyNext(cv::Mat& img, cv::Mat& mask);
 
 private:
     void display();

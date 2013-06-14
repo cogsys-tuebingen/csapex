@@ -11,7 +11,8 @@
 #include <QLayout>
 #include <vector>
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 class BoxManager
 {

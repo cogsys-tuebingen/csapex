@@ -4,7 +4,8 @@
 /// COMPONENT
 #include "connector.h"
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 /// FORWARDS DECLARATION
 class ConnectorOut;
@@ -27,11 +28,19 @@ public:
         return true;
     }
 
+    virtual void inputMessage(ConnectionType::Ptr message);
+    virtual ConnectionType::Ptr getMessage();
+
+Q_SIGNALS:
+    void messageArrived(ConnectorIn* source);
+
 public Q_SLOTS:
     virtual void removeAllConnections();
 
 private:
     ConnectorOut* input;
+
+    ConnectionType::Ptr message_;
 };
 
 }

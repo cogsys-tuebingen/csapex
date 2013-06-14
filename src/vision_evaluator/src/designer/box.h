@@ -44,17 +44,17 @@ public:
     virtual ~Box();
 
     virtual void mousePressEvent(QMouseEvent* e);
-    virtual QPixmap makePixmap(const std::string &label);
+    virtual QPixmap makePixmap(const std::string& label);
 
-    virtual void init(const QPoint &pos);
+    virtual void init(const QPoint& pos);
 
     void addInput(ConnectorIn* in);
     void addOutput(ConnectorOut* out);
 
 protected:
     void startDrag(QPoint offset);
-    void paintEvent(QPaintEvent * e);
-    bool eventFilter(QObject *, QEvent *);
+    void paintEvent(QPaintEvent* e);
+    bool eventFilter(QObject*, QEvent*);
 
 public Q_SLOTS:
     virtual void setOverlay(Overlay* o);

@@ -18,19 +18,16 @@ void siginthandler(int param)
     exit(1);
 }
 
-struct EvaluationApplication : public QApplication
-{
-    EvaluationApplication(int &argc, char** argv)
+struct EvaluationApplication : public QApplication {
+    EvaluationApplication(int& argc, char** argv)
         : QApplication(argc, argv)
     {}
 
-    virtual bool notify(QObject * receiver, QEvent * event)
-    {
+    virtual bool notify(QObject* receiver, QEvent* event) {
         try {
             return QApplication::notify(receiver, event);
-        }
-        catch(std::exception& e) {
-            qWarning() << "Exception thrown:" << e.what();
+        } catch(std::exception& e) {
+            std::cout << "Exception thrown:" << e.what() << std::endl;
         }
         return false;
     }

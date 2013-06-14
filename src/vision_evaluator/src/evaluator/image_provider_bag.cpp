@@ -11,18 +11,9 @@ REGISTER_IMAGE_PROVIDERS(ImageProviderBag, bag)
 using namespace vision_evaluator;
 
 ImageProviderBag::ImageProviderBag(const std::string& file)
-    : bag(file), view(bag, rosbag::TopicQuery("/camera/image_raw"))
+    : file_(file), bag(file), view_(NULL), initiated(false)
 {
-    view_it = view.begin();
     frames_ = 0;
-
-    for(rosbag::View::iterator it = view.begin(); it != view.end(); ++it) {
-//        sensor_msgs::ImageConstPtr img = it->instantiate<sensor_msgs::Image>();
-//        assert(img != NULL);
-
-        frames_++;
-    }
-    frames_--;
 }
 
 ImageProvider* ImageProviderBag::createInstance(const std::string& path)
@@ -32,13 +23,29 @@ ImageProvider* ImageProviderBag::createInstance(const std::string& path)
 
 bool ImageProviderBag::hasNext()
 {
-    return true;
+    return initiated;
 }
 
-void ImageProviderBag::reallyNext()
+void ImageProviderBag::doInit()
 {
+    view_ = new rosbag::View(bag, rosbag::TopicQuery("/camera/image_raw"));
+    for(rosbag::View::iterator it = view_->begin(); it != view_->end(); ++it) {
+        frames_++;
+    }
+    view_it = view_->begin();
+    frames_--;
+
+    initiated = true;
+}
+
+void ImageProviderBag::reallyNext(cv::Mat& img, cv::Mat& mask)
+{
+    if(!initiated) {
+        return;
+    }
+
     if(next_frame != -1) {
-        view_it = view.begin();
+        view_it = view_->begin();
         for(current_frame=0; current_frame != next_frame; ++current_frame) {
             view_it++;
         }
@@ -46,22 +53,22 @@ void ImageProviderBag::reallyNext()
     }
     assert(hasNext());
 
-    sensor_msgs::ImageConstPtr img = view_it->instantiate<sensor_msgs::Image>();
-    assert(img != NULL);
+    if(view_it != view_->end()) {
+        sensor_msgs::ImageConstPtr img_msg = view_it->instantiate<sensor_msgs::Image>();
+        assert(img_msg != NULL);
 
-    cv_bridge::CvImageConstPtr mat = cv_bridge::toCvShare(img, "bgr8");
-    mat->image.copyTo(last_frame_);
+        cv_bridge::CvImageConstPtr mat = cv_bridge::toCvShare(img_msg, "bgr8");
+        mat->image.copyTo(last_frame_);
 
-    view_it++;
-    current_frame++;
+        view_it++;
+        current_frame++;
+    }
+
+    img = last_frame_;
 
     if(!slider_->isSliderDown()) {
         slider_->setValue(current_frame);
     }
-
-    provide(last_frame_);
-
-//    provide(last_frame_);
 
     if(current_frame == frames_) {
         setPlaying(false);

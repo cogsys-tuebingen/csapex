@@ -12,7 +12,8 @@
 #include <boost/function.hpp>
 #include <boost/foreach.hpp>
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 template <typename Any>
 class DetectorTraits
 {
@@ -66,7 +67,7 @@ public:
     _____##class_name##impname##_registrator _____##class_name##impname##_registrator::instance;\
     }
 
- 
+
 
 namespace vision_evaluator
 {
@@ -83,7 +84,7 @@ public:
     struct ExtractorInitializer : public Constructor {
         typedef boost::function<void(Extractor*, bool)> Call;
 
-        void operator() (Extractor* r, bool complete = false) const {
+        void operator()(Extractor* r, bool complete = false) const {
             return construct(r, complete);
         }
 

@@ -4,7 +4,8 @@
 /// COMPONENT
 #include "connector.h"
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 /// FORWARD DECLARATION
 class ConnectorIn;
@@ -25,6 +26,8 @@ public:
     virtual bool isOutput() {
         return true;
     }
+
+    virtual void publish(ConnectionType::Ptr message);
 
 public Q_SLOTS:
     virtual void removeAllConnections();

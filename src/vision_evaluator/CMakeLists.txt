@@ -120,6 +120,7 @@ add_library(designer
     src/designer/connector.cpp
     src/designer/connector_in.cpp
     src/designer/connector_out.cpp
+    src/designer/connection_type.cpp
     src/designer/design_board.cpp
     src/designer/designer.cpp
     src/designer/overlay.cpp
@@ -149,6 +150,7 @@ add_library(vision_evaluation
     src/evaluator/image_provider_ros_topic.cpp
     src/evaluator/global_option.cpp
     src/evaluator/global_option_manager.cpp
+    src/evaluator/messages_default.hpp
     src/evaluator/output_display.cpp
     src/evaluator/panel.cpp
     src/evaluator/registration.hpp

@@ -56,10 +56,13 @@ public:
     };
 
 public:
+    ImageProvider();
     virtual ~ImageProvider();
 
 public:
     virtual void insert(QBoxLayout* layout) {}
+    virtual void update_gui(QFrame* additional_holder) {}
+    virtual void next();
 
 public:
     static ImageProvider* create(const std::string& path);
@@ -67,10 +70,11 @@ public:
     static bool canHandle(const std::string& path,
                           boost::function<bool(ImageProvider*)> reference);
 
-    virtual void update_gui(QFrame* additional_holder) {}
 
+    void init();
+    virtual void doInit() {}
     virtual bool hasNext() = 0;
-    virtual void next() = 0;
+    virtual void next(cv::Mat&, cv::Mat&) = 0;
     virtual int sleepTime();
 
 Q_SIGNALS:
@@ -78,6 +82,8 @@ Q_SIGNALS:
 
 private:
     static std::map<std::string, ProviderConstructor> plugins;
+
+    QThread* private_thread;
 };
 
 } /// NAMESPACE

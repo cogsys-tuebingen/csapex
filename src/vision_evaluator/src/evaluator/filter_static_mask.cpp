@@ -190,7 +190,7 @@ void FilterStaticMask::filter(cv::Mat& img, cv::Mat& mask)
     }
 }
 
-void FilterStaticMask::insert(QBoxLayout *)
+void FilterStaticMask::insert(QBoxLayout*)
 {
     showPainter();
 }

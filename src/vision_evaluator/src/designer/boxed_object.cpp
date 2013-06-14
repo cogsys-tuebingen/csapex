@@ -31,7 +31,7 @@ BoxedObject::~BoxedObject()
     }
 }
 
-void BoxedObject::setName(const std::string &name)
+void BoxedObject::setName(const std::string& name)
 {
     name_ = name;
 }
@@ -41,12 +41,12 @@ std::string BoxedObject::getName()
     return name_;
 }
 
-void BoxedObject::setBox(Box *box)
+void BoxedObject::setBox(Box* box)
 {
     box_ = box;
 }
 
-void BoxedObject::fill(QBoxLayout *layout)
+void BoxedObject::fill(QBoxLayout* layout)
 {
     layout->addWidget(new QLabel(name_.c_str()));
 }

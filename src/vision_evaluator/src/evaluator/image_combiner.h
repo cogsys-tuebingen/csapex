@@ -34,7 +34,7 @@ public:
     virtual void keyEvent(QKeyEvent* event) {}
 
 protected:
-    virtual void fill(QBoxLayout *layout);
+    virtual void fill(QBoxLayout* layout);
     virtual void insert(QBoxLayout*);
 };
 

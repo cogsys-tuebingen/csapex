@@ -15,10 +15,8 @@ ImageProviderSet::~ImageProviderSet()
 {
 }
 
-void ImageProviderSet::update_gui(QFrame* additional_holder)
+void ImageProviderSet::insert(QBoxLayout* layout)
 {
-    QHBoxLayout* layout = new QHBoxLayout(additional_holder);
-
     slider_ = new QSlider(Qt::Horizontal);
     slider_->setMaximum(frames_);
 
@@ -29,29 +27,30 @@ void ImageProviderSet::update_gui(QFrame* additional_holder)
     layout->addWidget(play_pause_);
     layout->addWidget(slider_);
 
-    additional_holder->setLayout(layout);
 
     QObject::connect(slider_, SIGNAL(sliderMoved(int)), this, SLOT(showFrame()));
     QObject::connect(slider_, SIGNAL(valueChanged(int)), this, SLOT(showFrame()));
     QObject::connect(play_pause_, SIGNAL(toggled(bool)), this, SLOT(setPlaying(bool)));
 }
 
-void ImageProviderSet::next()
+void ImageProviderSet::update_gui(QFrame* additional_holder)
+{
+    QHBoxLayout* layout = new QHBoxLayout(additional_holder);
+
+    insert(layout);
+
+    additional_holder->setLayout(layout);
+}
+
+void ImageProviderSet::next(cv::Mat& img, cv::Mat& mask)
 {
     if(playing_ || next_frame != -1) {
-        reallyNext();
+        reallyNext(img, mask);
         next_frame = -1;
 
     } else {
-        provide(last_frame_);
+        img = last_frame_;
     }
-}
-
-void ImageProviderSet::provide(cv::Mat frame)
-{
-    cv::Mat clone;
-    frame.copyTo(clone);
-    Q_EMIT new_image(clone, cv::Mat());
 }
 
 void ImageProviderSet::setPlaying(bool playing)

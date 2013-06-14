@@ -63,15 +63,14 @@ template <class T>
 class SelectorProxyImp : public SelectorProxy
 {
 public:
-    SelectorProxyImp(const std::string& name, QWidget *parent = 0)
+    SelectorProxyImp(const std::string& name, QWidget* parent = 0)
         : SelectorProxy(name, new T, parent)
     {}
 
     virtual ~SelectorProxyImp()
     {}
 
-    virtual BoxedObject* makeContent()
-    {
+    virtual BoxedObject* makeContent() {
         return new T;
     }
 };

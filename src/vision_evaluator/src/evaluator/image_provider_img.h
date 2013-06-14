@@ -26,10 +26,10 @@ public:
     static ImageProvider* createInstance(const std::string& path);
 
     bool hasNext();
-    void next();
+    void next(cv::Mat& img, cv::Mat& mask);
 
 private:
-    cv::Mat img;
+    cv::Mat img_;
     bool displayed;
 };
 

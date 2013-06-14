@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "overlay.h"
+#include "connection_type.h"
 
 /// SYSTEM
 #include <QRadioButton>
@@ -23,7 +24,7 @@ public:
 public:
     virtual bool hitButton(const QPoint&) const;
     virtual void mousePressEvent(QMouseEvent* e);
-    virtual void mouseReleaseEvent(QMouseEvent *e);
+    virtual void mouseReleaseEvent(QMouseEvent* e);
 
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);

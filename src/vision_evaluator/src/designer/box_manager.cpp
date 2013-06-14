@@ -14,7 +14,7 @@ BoxManager::BoxManager()
 {
 }
 
-void BoxManager::fill(QLayout *layout)
+void BoxManager::fill(QLayout* layout)
 {
     typedef std::pair<std::string, SelectorProxy::ProxyConstructor> Pair;
     BOOST_FOREACH(Pair p, available_elements.availableClasses()) {

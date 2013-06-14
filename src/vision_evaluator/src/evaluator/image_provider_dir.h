@@ -25,13 +25,13 @@ public:
     static ImageProvider* createInstance(const std::string& path);
 
     virtual bool hasNext();
-    void next();
+    void next(cv::Mat& img, cv::Mat& mask);
 
 private:
     bool is_right_format;
     const std::string dir_;
 
-    cv::Mat img, mask;
+    cv::Mat img_, mask_;
 //    boost::filesystem::directory_iterator dir_it_;
 //    boost::filesystem::directory_iterator end_it_;
 };

@@ -3,6 +3,8 @@
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
+#include <QThread>
+#include <QtConcurrentRun>
 
 namespace bfs = boost::filesystem;
 
@@ -10,8 +12,20 @@ using namespace vision_evaluator;
 
 std::map<std::string, ImageProvider::ProviderConstructor> ImageProvider::plugins;
 
+ImageProvider::ImageProvider()
+    : private_thread(NULL)
+{
+}
+
 ImageProvider::~ImageProvider()
 {
+    if(private_thread) {
+        private_thread->wait(1000);
+        if(private_thread) {
+            private_thread->terminate();
+        }
+        delete private_thread;
+    }
 }
 
 bool ImageProvider::canHandle(const std::string& path,
@@ -57,8 +71,24 @@ ImageProvider* ImageProvider::create(const std::string& path)
     if(constructor.empty()) {
         return NULL;
     } else {
-        return constructor(path);
+        ImageProvider* result = constructor(path);
+        result->init();
+        return result;
     }
+}
+
+void ImageProvider::init()
+{
+    QtConcurrent::run(this, &ImageProvider::doInit);
+}
+
+void ImageProvider::next()
+{
+    cv::Mat img, mask;
+
+    next(img, mask);
+
+    new_image(img, mask);
 }
 
 int ImageProvider::sleepTime()

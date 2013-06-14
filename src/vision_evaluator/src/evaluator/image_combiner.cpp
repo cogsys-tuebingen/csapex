@@ -3,7 +3,8 @@
 
 using namespace vision_evaluator;
 
-ImageCombiner::~ImageCombiner() {
+ImageCombiner::~ImageCombiner()
+{
 
 }
 

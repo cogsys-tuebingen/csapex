@@ -27,7 +27,7 @@ bool ImageProviderMov::hasNext()
     return capture_.isOpened();
 }
 
-void ImageProviderMov::reallyNext()
+void ImageProviderMov::reallyNext(cv::Mat& img, cv::Mat& mask)
 {
     if(!capture_.isOpened()) {
         std::cerr << "cannot display, capture not open" << std::endl;
@@ -40,15 +40,13 @@ void ImageProviderMov::reallyNext()
 
     capture_ >> last_frame_;
 
+    img = last_frame_;
+
     current_frame = capture_.get(CV_CAP_PROP_POS_FRAMES);
 
     if(!slider_->isSliderDown()) {
         slider_->setValue(current_frame);
     }
-
-    provide(last_frame_);
-
-//    provide(last_frame_);
 
     if(current_frame == frames_) {
         setPlaying(false);
