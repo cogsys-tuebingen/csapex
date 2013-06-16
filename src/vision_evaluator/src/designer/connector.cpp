@@ -4,9 +4,12 @@
 /// COMPONENT
 #include "design_board.h"
 #include "box.h"
+#include "box_manager.h"
+#include "command_add_connection.h"
 
 /// SYSTEM
 #include <iostream>
+#include <sstream>
 #include <typeinfo>
 #include <QDragEnterEvent>
 
@@ -14,16 +17,31 @@ using namespace vision_evaluator;
 
 const QString Connector::MIME = "vision_evaluator/connector";
 
-Connector::Connector(QWidget* parent)
-    : QRadioButton(parent), parent_widget(parent), box(NULL), designer(NULL)
+Connector::Connector(Box *parent, int sub_id)
+    : QRadioButton(parent), parent_widget(parent), box_(parent), designer(NULL)
 {
     findParents();
     setFocusPolicy(Qt::NoFocus);
     setAcceptDrops(true);
+
+    std::stringstream ss;
+    ss << box_->UUID() << "_" << sub_id;
+
+    uuid_ = ss.str();
 }
 
 Connector::~Connector()
 {
+}
+
+std::string Connector::UUID()
+{
+    return uuid_;
+}
+
+void Connector::setUUID(const std::string &uuid)
+{
+    uuid_ = uuid;
 }
 
 bool Connector::tryConnect(QObject* other_side)
@@ -48,7 +66,7 @@ void Connector::findParents()
     QWidget* tmp = this;
     while(tmp != NULL) {
         if(dynamic_cast<vision_evaluator::Box*>(tmp)) {
-            box = dynamic_cast<vision_evaluator::Box*>(tmp);
+            box_ = dynamic_cast<vision_evaluator::Box*>(tmp);
         } else if(dynamic_cast<vision_evaluator::DesignBoard*>(tmp)) {
             designer = dynamic_cast<vision_evaluator::DesignBoard*>(tmp);
         }
@@ -90,9 +108,8 @@ void Connector::dropEvent(QDropEvent* e)
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
-            if(tryConnect(from)) {
-                overlay_->repaint();
-            }
+            Command::Ptr cmd(new command::AddConnection(overlay_, this, from, designer));
+            BoxManager::instance().execute(cmd);
         }
     }
 }
@@ -121,11 +138,11 @@ void Connector::mouseReleaseEvent(QMouseEvent* e)
 
 QPoint Connector::topLeft()
 {
-    if(box == NULL) {
+    if(box_ == NULL) {
         findParents();
     }
 
-    return box->geometry().topLeft() + pos();
+    return box_->geometry().topLeft() + pos();
 }
 
 QPoint Connector::centerPoint()
@@ -139,4 +156,9 @@ void Connector::paintEvent(QPaintEvent* e)
     setChecked(isConnected());
 
     QRadioButton::paintEvent(e);
+}
+
+vision_evaluator::Box* Connector::box()
+{
+    return box_;
 }

@@ -20,6 +20,20 @@ class Designer : public QWidget
 public:
     Designer(QWidget* parent = 0);
 
+    bool isDirty();
+
+    bool canUndo();
+    bool canRedo();
+
+public Q_SLOTS:
+    void save();
+    void load();
+    void undo();
+    void redo();
+
+Q_SIGNALS:
+    void stateChanged();
+
 private:
     Ui::Designer* ui;
 };

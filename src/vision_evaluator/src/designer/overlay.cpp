@@ -5,6 +5,7 @@
 #include "connector.h"
 
 /// SYSTEM
+#include <boost/foreach.hpp>
 #include <iostream>
 
 using namespace vision_evaluator;
@@ -37,6 +38,8 @@ void Overlay::addConnection(Connector* from, Connector* to)
 
     connect(from, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
     connect(to, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
+
+    repaint();
 }
 
 void Overlay::connectorRemoved(QObject* o)
@@ -55,6 +58,24 @@ void Overlay::connectorRemoved(Connector* c)
             ++i;
         }
     }
+
+    repaint();
+}
+
+void Overlay::removeConnection(Connector* from, Connector* to)
+{
+    for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
+        ConnectionPair &connection = *i;
+
+        if(connection.first == from && connection.second == to) {
+            i = connections.erase(i);
+        } else {
+            ++i;
+        }
+    }
+
+    from->update();
+    to->update();
 
     repaint();
 }

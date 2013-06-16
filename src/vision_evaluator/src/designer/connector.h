@@ -18,6 +18,8 @@ class Connector : public QRadioButton
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString class READ cssClass)
+
 public:
     static const QString MIME;
 
@@ -49,7 +51,15 @@ public:
         overlay_ = o;
     }
 
+    std::string UUID();
+    void setUUID(const std::string& uuid);
+
     virtual QPoint centerPoint();
+
+    vision_evaluator::Box* box();
+    int connectorID();
+
+    QString cssClass() { return QString("Connector"); }
 
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
@@ -61,7 +71,7 @@ Q_SIGNALS:
     virtual void disconnected(QObject*);
 
 protected:
-    Connector(QWidget* parent);
+    Connector(Box* parent, int sub_id);
     virtual ~Connector();
 
 protected:
@@ -70,10 +80,12 @@ protected:
 
 protected:
     QWidget* parent_widget;
-    vision_evaluator::Box* box;
+    vision_evaluator::Box* box_;
     vision_evaluator::DesignBoard* designer;
 
     Overlay* overlay_;
+
+    std::string uuid_;
 };
 
 }

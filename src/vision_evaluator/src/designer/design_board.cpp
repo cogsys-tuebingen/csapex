@@ -6,6 +6,8 @@
 #include "connector.h"
 #include "selector_proxy.h"
 #include "box.h"
+#include "command_add_box.h"
+#include "box_manager.h"
 
 /// SYSTEM
 #include <QResizeEvent>
@@ -29,6 +31,10 @@ DesignBoard::DesignBoard(QWidget* parent)
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
+
+DesignBoard::~DesignBoard()
+{}
+
 
 bool DesignBoard::eventFilter(QObject* o, QEvent* e)
 {
@@ -96,7 +102,8 @@ void DesignBoard::dropEvent(QDropEvent* e)
         e->setDropAction(Qt::CopyAction);
         e->accept();
 
-        selector->spawnObject(this, e->pos());
+        Command::Ptr add_box(new command::AddBox(selector, this, e->pos()));
+        BoxManager::instance().execute(add_box);
     }
 
     if(e->mimeData()->text() == Connector::MIME) {

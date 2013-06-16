@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "connector_in.h"
+#include "design_board.h"
 
 /// SYSTEM
 #include <assert.h>
@@ -11,8 +12,8 @@
 
 using namespace vision_evaluator;
 
-ConnectorOut::ConnectorOut(QWidget* parent)
-    : Connector(parent)
+ConnectorOut::ConnectorOut(Box *parent, int sub_id)
+    : Connector(parent, sub_id)
 {
 }
 
@@ -63,8 +64,6 @@ bool ConnectorOut::tryConnect(Connector* other_side)
     targets_.push_back(input);
 
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
-
-    overlay_->addConnection(this, input);
 
     return true;
 }

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "connector_in.h"
 #include "connector_out.h"
+#include "memento.h"
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -40,16 +41,26 @@ public:
 
 
 public:
-    Box(BoxedObject* content, QWidget* parent = 0);
+    Box(BoxedObject* content, const std::string& uuid = "", QWidget* parent = 0);
     virtual ~Box();
+
+    void stop();
 
     virtual void mousePressEvent(QMouseEvent* e);
     virtual QPixmap makePixmap(const std::string& label);
+
+    void moveEvent(QMoveEvent *);
 
     virtual void init(const QPoint& pos);
 
     void addInput(ConnectorIn* in);
     void addOutput(ConnectorOut* out);
+
+    void setUUID(const std::string& uuid);
+    std::string UUID() const;
+
+    Memento::Ptr saveState();
+    void loadState(Memento::Ptr state);
 
 protected:
     void startDrag(QPoint offset);
@@ -73,6 +84,8 @@ private:
 
     BoxedObject* content_;
     Overlay* overlay_;
+
+    std::string uuid_;
 };
 
 }

@@ -31,6 +31,18 @@ BoxedObject::~BoxedObject()
     }
 }
 
+void BoxedObject::stop()
+{
+    if(private_thread_) {
+        private_thread_->quit();
+        private_thread_->wait(1000);
+        if(private_thread_->isRunning()) {
+            std::cout << "terminate thread" << std::endl;
+            private_thread_->terminate();
+        }
+    }
+}
+
 void BoxedObject::setName(const std::string& name)
 {
     name_ = name;
@@ -56,4 +68,14 @@ void BoxedObject::makeThread()
     if(!private_thread_) {
         private_thread_ = new QThread;
     }
+}
+
+Memento::Ptr BoxedObject::saveState()
+{
+    return Memento::Ptr((Memento*) NULL);
+}
+
+void BoxedObject::loadState(Memento::Ptr memento)
+{
+
 }

@@ -23,6 +23,7 @@ class DesignBoard : public QWidget
 
 public:
     DesignBoard(QWidget* parent = 0);
+    virtual ~DesignBoard();
 
     void resizeEvent(QResizeEvent* e);
 

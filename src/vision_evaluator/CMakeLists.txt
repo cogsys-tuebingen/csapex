@@ -117,12 +117,16 @@ add_library(designer
     src/designer/box.cpp
     src/designer/boxed_object.cpp
     src/designer/box_manager.cpp
+    src/designer/command.cpp
+    src/designer/command_add_box.cpp
+    src/designer/command_add_connection.cpp
     src/designer/connector.cpp
     src/designer/connector_in.cpp
     src/designer/connector_out.cpp
     src/designer/connection_type.cpp
     src/designer/design_board.cpp
     src/designer/designer.cpp
+    src/designer/memento.cpp
     src/designer/overlay.cpp
     src/designer/selector_proxy.cpp
     ${QT_DESIGNER}

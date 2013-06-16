@@ -11,6 +11,7 @@
 #include <QObjectList>
 #include <QSharedPointer>
 #include <QMetaType>
+#include <QMessageBox>
 
 Q_DECLARE_METATYPE(cv::Mat)
 Q_DECLARE_METATYPE(std::string)
@@ -26,7 +27,7 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
     ui->setupUi(this);
-//    setWindowFlags( (windowFlags() | Qt::CustomizeWindowHint));
+    //    setWindowFlags( (windowFlags() | Qt::CustomizeWindowHint));
 
     QList<ImagePanel*> ips = findChildren<ImagePanel*>(QRegExp(".*"));
     for(QList<ImagePanel*>::Iterator it = ips.begin(); it != ips.end(); ++it) {
@@ -45,6 +46,21 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     QObject::connect(ui->combiner, SIGNAL(combinerDeinstalled()), ui->right, SLOT(setOneShotModeOff()));
 
     QObject::connect(ui->fps, SIGNAL(valueChanged(int)), this, SLOT(set_fps(int)));
+
+    QObject::connect(ui->actionSave, SIGNAL(triggered()), ui->designer, SLOT(save()));
+    QObject::connect(ui->actionLoad, SIGNAL(triggered()), ui->designer, SLOT(load()));
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), ui->designer, SLOT(undo()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), ui->designer, SLOT(redo()));
+
+    QObject::connect(ui->designer, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
+
+    updateMenu();
+}
+
+void EvaluationWindow::updateMenu()
+{
+    ui->actionUndo->setDisabled(!ui->designer->canUndo());
+    ui->actionRedo->setDisabled(!ui->designer->canRedo());
 }
 
 void EvaluationWindow::set_fps(int fps)
@@ -57,6 +73,23 @@ void EvaluationWindow::set_fps(int fps)
 
 void EvaluationWindow::closeEvent(QCloseEvent* event)
 {
+    if(ui->designer->isDirty()) {
+        int r = QMessageBox::warning(this, tr("Vision Designer"),
+                                     tr("Do you want to save the layout before closing?"),
+                                     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        if (r == QMessageBox::Save) {
+            std::cout << "save" << std::endl;
+
+            ui->designer->save();
+            event->accept();
+        } else if (r == QMessageBox::Discard) {
+            event->accept();
+        } else {
+            event->ignore();
+            return;
+        }
+    }
+
     ui->left->quit();
     ui->right->quit();
     ui->solo_image->quit();

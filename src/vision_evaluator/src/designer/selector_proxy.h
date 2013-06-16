@@ -21,8 +21,14 @@ namespace vision_evaluator
 
 class Box;
 
+namespace command {
+class AddBox;
+}
+
 class SelectorProxy : public QGraphicsView
 {
+    friend class command::AddBox;
+
 public:
     struct ProxyConstructor : public Constructor {
         typedef boost::function<SelectorProxy* (const std::string)> Call;
@@ -49,7 +55,10 @@ public:
     virtual ~SelectorProxy();
 
     virtual void mousePressEvent(QMouseEvent* event);
-    virtual void spawnObject(QWidget* parent, const QPoint& pos);
+    std::string name();
+
+private:
+    virtual vision_evaluator::Box* spawnObject(QWidget* parent, const QPoint& pos, const std::string &uuid);
 
 protected:
     virtual BoxedObject* makeContent() = 0;

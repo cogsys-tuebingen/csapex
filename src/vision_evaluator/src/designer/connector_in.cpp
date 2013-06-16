@@ -10,8 +10,8 @@
 
 using namespace vision_evaluator;
 
-ConnectorIn::ConnectorIn(QWidget* parent)
-    : Connector(parent), input(NULL)
+ConnectorIn::ConnectorIn(Box* parent, int sub_id)
+    : Connector(parent, sub_id), input(NULL)
 {
 }
 

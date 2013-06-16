@@ -33,7 +33,7 @@ void OutputDisplay::fill(QBoxLayout* layout)
 //        this->moveToThread(private_thread_);
 //        private_thread_->start();
 
-        input_ = new ConnectorIn(box_);
+        input_ = new ConnectorIn(box_, 0);
         box_->addInput(input_);
 
         view_->setFixedSize(QSize(300, 300));

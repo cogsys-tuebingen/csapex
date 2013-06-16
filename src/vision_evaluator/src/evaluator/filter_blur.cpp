@@ -12,14 +12,14 @@ REGISTER_FILTER(FilterBlur)
 using namespace vision_evaluator;
 
 FilterBlur::FilterBlur()
-    : blur(0)
 {
+    state.blur = 0;
 }
 
 void FilterBlur::filter(cv::Mat& img, cv::Mat& mask)
 {
-    if(blur > 0) {
-        cv::blur(img, img, cv::Size(blur, blur));
+    if(state.blur > 0) {
+        cv::blur(img, img, cv::Size(state.blur, state.blur));
     }
 }
 
@@ -33,7 +33,27 @@ void FilterBlur::insert(QBoxLayout* layout)
 
 void FilterBlur::update(int slot)
 {
-    blur = slot;
+    state.blur = slot;
+
+    Q_EMIT filter_changed();
+}
+
+Memento::Ptr FilterBlur::saveState()
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state;
+
+    return memento;
+}
+
+void FilterBlur::loadState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    state = *m;
+
+    slider->setValue(state.blur);
 
     Q_EMIT filter_changed();
 }

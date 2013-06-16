@@ -29,14 +29,14 @@ void Filter::fill(QBoxLayout* parent)
 {
     if(input_img_ == NULL) {
 
-        input_img_ = new ConnectorIn(box_);
+        input_img_ = new ConnectorIn(box_, 0);
         box_->addInput(input_img_);
-        input_mask_ = new ConnectorIn(box_);
+        input_mask_ = new ConnectorIn(box_, 1);
         box_->addInput(input_mask_);
 
-        output_img_ = new ConnectorOut(box_);
+        output_img_ = new ConnectorOut(box_, 0);
         box_->addOutput(output_img_);
-        output_mask_ = new ConnectorOut(box_);
+        output_mask_ = new ConnectorOut(box_, 1);
         box_->addOutput(output_mask_);
 
         connect(input_img_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));

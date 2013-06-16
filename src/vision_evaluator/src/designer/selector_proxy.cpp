@@ -9,7 +9,7 @@
 using namespace vision_evaluator;
 
 SelectorProxy::SelectorProxy(const std::string& name, BoxedObject* content, QWidget* parent)
-    : QGraphicsView(parent), name_(name), box_(new vision_evaluator::Box(content))
+    : QGraphicsView(parent), name_(name), box_(new vision_evaluator::Box(content, name))
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     QSize size(80, 80);
@@ -41,10 +41,17 @@ void SelectorProxy::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void SelectorProxy::spawnObject(QWidget* parent, const QPoint& pos)
+vision_evaluator::Box* SelectorProxy::spawnObject(QWidget* parent, const QPoint& pos, const std::string& uuid)
 {
-    vision_evaluator::Box* object(new vision_evaluator::Box(makeContent(), parent));
-    object->setObjectName(name_.c_str());
+    vision_evaluator::Box* object(new vision_evaluator::Box(makeContent(), uuid, parent));
+    object->setObjectName(uuid.c_str());
     object->init(pos);
     object->show();
+
+    return object;
+}
+
+std::string SelectorProxy::name()
+{
+    return name_;
 }

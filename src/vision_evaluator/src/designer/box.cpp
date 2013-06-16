@@ -1,9 +1,10 @@
 /// HEADER
 #include "box.h"
 
-/// PROJECT
+/// COMPONENT
 #include "ui_box.h"
 #include "boxed_object.h"
+#include "box_manager.h"
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -16,8 +17,8 @@ using namespace vision_evaluator;
 const QString Box::MIME = "vision_evaluator/box";
 const QString Box::MIME_MOVE = "vision_evaluator/box/move";
 
-Box::Box(BoxedObject* content, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), down_(false), content_(content)
+Box::Box(BoxedObject *content, const std::string &uuid, QWidget *parent)
+    : QWidget(parent), ui(new Ui::Box), down_(false), content_(content), uuid_(uuid)
 {
     ui->setupUi(this);
 
@@ -31,6 +32,21 @@ Box::Box(BoxedObject* content, QWidget* parent)
 
     connect(ui->content, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+}
+
+void Box::stop()
+{
+    content_->stop();
+}
+
+void Box::setUUID(const std::string &uuid)
+{
+    uuid_ = uuid;
+}
+
+std::string Box::UUID() const
+{
+    return uuid_;
 }
 
 void Box::addInput(ConnectorIn* in)
@@ -59,7 +75,7 @@ void Box::init(const QPoint& pos)
 
 Box::~Box()
 {
-
+    BoxManager::instance().setDirty(true);
 }
 
 bool Box::eventFilter(QObject* o, QEvent* e)
@@ -97,6 +113,11 @@ void Box::mousePressEvent(QMouseEvent* e)
     if(e->button() == Qt::LeftButton) {
         startDrag(-e->pos());
     }
+}
+
+void Box::moveEvent(QMoveEvent *)
+{
+    BoxManager::instance().setDirty(true);
 }
 
 void Box::startDrag(QPoint offset)
@@ -152,4 +173,15 @@ void Box::showContextMenu(const QPoint& pos)
             deleteLater();
         }
     }
+}
+
+
+Memento::Ptr Box::saveState()
+{
+    return content_->saveState();
+}
+
+void Box::loadState(Memento::Ptr state)
+{
+    content_->loadState(state);
 }

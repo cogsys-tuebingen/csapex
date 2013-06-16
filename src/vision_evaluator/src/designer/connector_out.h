@@ -14,14 +14,12 @@ class ConnectorOut : public Connector
 {
     Q_OBJECT
 
-public:
-    ConnectorOut(QWidget* parent);
-    ~ConnectorOut();
+    friend class ConnectorIn;
+    friend class command::AddConnection;
 
-    virtual bool tryConnect(Connector* other_side);
-    virtual bool canConnect();
-    virtual bool isConnected();
-    virtual void removeConnection(Connector* other_side);
+public:
+    ConnectorOut(Box* parent, int sub_id);
+    ~ConnectorOut();
 
     virtual bool isOutput() {
         return true;
@@ -29,7 +27,12 @@ public:
 
     virtual void publish(ConnectionType::Ptr message);
 
-public Q_SLOTS:
+    virtual bool canConnect();
+    virtual bool isConnected();
+
+private:
+    virtual bool tryConnect(Connector* other_side);
+    virtual void removeConnection(Connector* other_side);
     virtual void removeAllConnections();
 
 protected:
