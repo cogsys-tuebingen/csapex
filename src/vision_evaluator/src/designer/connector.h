@@ -69,6 +69,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     virtual void disconnected(QObject*);
+    virtual void connectionChanged();
 
 protected:
     Connector(Box* parent, int sub_id);

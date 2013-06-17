@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <boost/foreach.hpp>
+#include <stack>
 
 using namespace vision_evaluator;
 
@@ -31,6 +32,10 @@ void BoxManager::execute(Command::Ptr command)
 {
     command->execute();
     done.push(command);
+
+    while(!undone.empty()) {
+        undone.pop();
+    }
 
     Q_EMIT stateChanged();
 }

@@ -19,6 +19,7 @@ ConnectorIn::~ConnectorIn()
 {
     if(input != NULL) {
         input->removeConnection(this);
+        Q_EMIT connectionChanged();
     }
 }
 
@@ -35,6 +36,7 @@ bool ConnectorIn::acknowledgeConnection(Connector* other_side)
 {
     input = dynamic_cast<ConnectorOut*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
+    Q_EMIT connectionChanged();
     return true;
 }
 
@@ -43,6 +45,7 @@ void ConnectorIn::removeConnection(Connector* other_side)
     if(input != NULL) {
         assert(other_side == input);
         input = NULL;
+        Q_EMIT connectionChanged();
     }
 }
 
@@ -52,6 +55,7 @@ void ConnectorIn::removeAllConnections()
         input->removeConnection(this);
         input = NULL;
         Q_EMIT disconnected(this);
+        Q_EMIT connectionChanged();
     }
 }
 

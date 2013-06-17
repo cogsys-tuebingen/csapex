@@ -31,6 +31,8 @@ Box::Box(BoxedObject *content, const std::string &uuid, QWidget *parent)
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(ui->content, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+    connect(ui->content, SIGNAL(toggled(bool)), content, SLOT(disable(bool)));
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
@@ -54,6 +56,8 @@ void Box::addInput(ConnectorIn* in)
     in->setParent(NULL);
     ui->input_layout->addWidget(in);
     input.push_back(in);
+
+    QObject::connect(in, SIGNAL(connectionChanged()), content_, SLOT(connectorChanged()));
 }
 
 void Box::addOutput(ConnectorOut* out)
@@ -61,6 +65,8 @@ void Box::addOutput(ConnectorOut* out)
     out->setParent(NULL);
     ui->output_layout->addWidget(out);
     output.push_back(out);
+
+    QObject::connect(out, SIGNAL(connectionChanged()), content_, SLOT(connectorChanged()));
 }
 
 void Box::init(const QPoint& pos)
@@ -100,6 +106,15 @@ bool Box::eventFilter(QObject* o, QEvent* e)
     }
 
     return false;
+}
+
+void Box::enabledChange(bool val)
+{
+    if(val)  {
+        content_->enable();
+    } else {
+        content_->disable();
+    }
 }
 
 void Box::paintEvent(QPaintEvent* e)

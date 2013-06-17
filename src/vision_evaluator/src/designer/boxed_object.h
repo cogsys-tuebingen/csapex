@@ -17,13 +17,13 @@ class Box;
 
 class BoxedObject : public QObject
 {
+    Q_OBJECT
+
 public:
     BoxedObject();
     BoxedObject(const std::string& name);
 
     virtual ~BoxedObject();
-
-    virtual void stop();
 
     void setName(const std::string& name);
     std::string getName();
@@ -35,6 +35,17 @@ public:
     virtual Memento::Ptr saveState();
     virtual void loadState(Memento::Ptr memento);
 
+    bool isEnabled();
+
+public Q_SLOTS:
+    virtual void stop();
+
+    virtual void enable(bool e);
+    virtual void enable();
+    virtual void disable(bool e);
+    virtual void disable();
+    virtual void connectorChanged();
+
 protected:
     void makeThread();
 
@@ -44,6 +55,8 @@ protected:
     Box* box_;
 
     QThread* private_thread_;
+
+    bool enabled_;
 };
 
 }

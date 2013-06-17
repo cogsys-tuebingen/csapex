@@ -18,8 +18,13 @@ class OutputDisplay : public BoxedObject
 
 public:
     OutputDisplay();
+    virtual ~OutputDisplay();
 
     virtual void fill(QBoxLayout* layout);
+
+    virtual void enable();
+    virtual void disable();
+    virtual void connectorChanged();
 
 public Q_SLOTS:
     void messageArrived(ConnectorIn* source);
@@ -29,6 +34,11 @@ private:
     QPixmap pixmap_;
 
     QGraphicsView* view_;
+
+    QImage empty;
+    QPainter painter;
+
+    bool display_is_empty;
 };
 
 }

@@ -66,6 +66,7 @@ protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
+    void enabledChange(bool val);
 
 public Q_SLOTS:
     virtual void setOverlay(Overlay* o);

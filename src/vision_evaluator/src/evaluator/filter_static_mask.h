@@ -25,6 +25,9 @@ public:
 public:
     virtual void insert(QBoxLayout*);
 
+    virtual Memento::Ptr saveState();
+    virtual void loadState(Memento::Ptr memento);
+
 public Q_SLOTS:
     virtual void filter(cv::Mat& img, cv::Mat& mask);
     void new_mask(cv::Mat m);
@@ -35,8 +38,14 @@ Q_SIGNALS:
 
 private:
     ModalPainter* painter;
-    cv::Mat mask_;
 
+    QPushButton* btn;
+
+    struct State : public Memento {
+        cv::Mat mask_;
+    };
+
+    State state;
 };
 
 

@@ -9,6 +9,7 @@
 #include <QGraphicsSceneEvent>
 #include <utils/LibUtil/QtCvImageConverter.h>
 #include <QKeyEvent>
+#include <QPushButton>
 
 REGISTER_FILTER(FilterStaticMask)
 
@@ -174,23 +175,45 @@ void FilterStaticMask::showPainter()
 
 void FilterStaticMask::new_mask(cv::Mat mask)
 {
-    mask.copyTo(mask_);
+    mask.copyTo(state.mask_);
 }
 
 void FilterStaticMask::filter(cv::Mat& img, cv::Mat& mask)
 {
     Q_EMIT input(img);
 
-    if(!mask_.empty()) {
+    if(!state.mask_.empty()) {
         if(mask.empty()) {
-            mask = mask_;
+            mask = state.mask_;
         } else {
-            mask = cv::min(mask, mask_);
+            mask = cv::min(mask, state.mask_);
         }
     }
 }
 
-void FilterStaticMask::insert(QBoxLayout*)
+void FilterStaticMask::insert(QBoxLayout* layout)
 {
-    showPainter();
+    btn = new QPushButton("create mask");
+
+    layout->addWidget(btn);
+
+    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(showPainter()), Qt::DirectConnection);
+}
+
+Memento::Ptr FilterStaticMask::saveState()
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state;
+
+    return memento;
+}
+
+void FilterStaticMask::loadState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    state = *m;
+
+    Q_EMIT filter_changed();
 }

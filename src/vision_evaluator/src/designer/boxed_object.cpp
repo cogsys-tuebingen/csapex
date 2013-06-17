@@ -16,7 +16,7 @@ BoxedObject::BoxedObject()
 }
 
 BoxedObject::BoxedObject(const std::string& name)
-    : name_(name), private_thread_(NULL)
+    : name_(name), private_thread_(NULL), enabled_(true)
 {
 }
 
@@ -29,6 +29,11 @@ BoxedObject::~BoxedObject()
             private_thread_->terminate();
         }
     }
+}
+
+bool BoxedObject::isEnabled()
+{
+    return enabled_;
 }
 
 void BoxedObject::stop()
@@ -76,6 +81,37 @@ Memento::Ptr BoxedObject::saveState()
 }
 
 void BoxedObject::loadState(Memento::Ptr memento)
+{
+
+}
+
+void BoxedObject::enable(bool e)
+{
+    enabled_ = e;
+    if(enabled_) {
+        enable();
+    } else {
+        disable();
+    }
+}
+
+void BoxedObject::enable()
+{
+
+}
+
+void BoxedObject::disable(bool d)
+{
+    enable(!d);
+}
+
+
+void BoxedObject::disable()
+{
+
+}
+
+void BoxedObject::connectorChanged()
 {
 
 }
