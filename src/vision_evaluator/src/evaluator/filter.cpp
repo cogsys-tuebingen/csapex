@@ -52,7 +52,7 @@ void Filter::fill(QBoxLayout* parent)
 
 void Filter::messageArrived(ConnectorIn* source)
 {
-    if(!box_->isEnabled()) {
+    if(!isEnabled()) {
         return;
     }
 
@@ -78,8 +78,10 @@ void Filter::messageArrived(ConnectorIn* source)
     CvMatMessage::Ptr mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_->getMessage());
 
     if(img_msg.get() && !img_msg->value.empty()) {
-        cv::Mat mask = mask_msg.get() ? mask_msg->value : cv::Mat();
-        filter(img_msg->value, mask);
+        if(!mask_msg.get()){
+            mask_msg.reset(new CvMatMessage);
+        }
+        filter(img_msg->value, mask_msg->value);
 
         output_img_->publish(img_msg);
         output_mask_->publish(mask_msg);

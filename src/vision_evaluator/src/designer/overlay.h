@@ -34,6 +34,8 @@ public:
 
 public Q_SLOTS:
     void connectorRemoved(QObject* o);
+    void showPublisherSignal(QPoint p);
+    void tick();
 
 protected:
     void drawConnection(const QPoint& p1, const QPoint& p2);
@@ -47,6 +49,10 @@ protected:
     QLine temp_line;
     QPainter* painter;
     ConnectionList connections;
+
+    QTimer* repainter;
+
+    std::vector<std::pair<int, QPoint> > publisher_signals_;
 };
 
 }

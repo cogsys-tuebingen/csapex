@@ -11,7 +11,7 @@
 using namespace vision_evaluator;
 
 BoxedObject::BoxedObject()
-    : private_thread_(NULL)
+    : private_thread_(NULL), enabled_(true)
 {
 }
 

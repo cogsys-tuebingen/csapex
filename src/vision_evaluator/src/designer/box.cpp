@@ -31,7 +31,7 @@ Box::Box(BoxedObject *content, const std::string &uuid, QWidget *parent)
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(ui->content, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
-    connect(ui->content, SIGNAL(toggled(bool)), content, SLOT(disable(bool)));
+    connect(ui->content, SIGNAL(toggled(bool)), content, SLOT(enable(bool)));
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }

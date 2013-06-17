@@ -74,6 +74,8 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
     message_ = message;
 
     Q_EMIT messageArrived(this);
+
+    overlay_->showPublisherSignal(centerPoint());
 }
 
 ConnectionType::Ptr ConnectorIn::getMessage()

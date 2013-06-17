@@ -89,5 +89,9 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         BOOST_FOREACH(ConnectorIn* i, targets_) {
             i->inputMessage(message->clone());
         }
+    } else {
+        return;
     }
+
+    overlay_->showPublisherSignal(centerPoint());
 }

@@ -28,11 +28,13 @@ STATIC_INIT(FileImporter, generic, {
 using namespace vision_evaluator;
 
 FileImporterWorker::FileImporterWorker()
-    : timer_(NULL), output_img_(NULL), output_mask_(NULL), last_path_(QDir::currentPath())
+    : timer_(NULL), output_img_(NULL), output_mask_(NULL)
 {
     timer_ = new QTimer();
     timer_->setInterval(100);
     timer_->start();
+
+    state.last_path_ = QDir::currentPath();
 
     QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
 }
@@ -52,8 +54,8 @@ void FileImporterWorker::publish()
 
 bool FileImporterWorker::import(const QString& path)
 {
-    last_path_ = path;
-    provider_ = QSharedPointer<ImageProvider>(ImageProvider::create(last_path_.toUtf8().constData()));
+    state.last_path_ = path;
+    provider_ = QSharedPointer<ImageProvider>(ImageProvider::create(state.last_path_.toUtf8().constData()));
 
     return !provider_.isNull();
 }
@@ -113,10 +115,8 @@ void FileImporter::toggle(bool on)
     }
 }
 
-void FileImporter::importDialog()
+void FileImporter::import(const QString& filename)
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Input", worker->last_path_, "All files (*.*)");
-
     if(!filename.isNull()) {
         if(worker->import(filename)) {
             QtHelper::clearLayout(additional_layout_);
@@ -130,4 +130,29 @@ void FileImporter::importDialog()
     } else {
         file_dialog_->setText("Import");
     }
+}
+
+void FileImporter::importDialog()
+{
+    QString filename = QFileDialog::getOpenFileName(0, "Input", worker->state.last_path_, "All files (*.*)");
+
+    import(filename);
+}
+
+Memento::Ptr FileImporter::saveState()
+{
+    boost::shared_ptr<FileImporterWorker::State> memento(new FileImporterWorker::State);
+    *memento = worker->state;
+
+    return memento;
+}
+
+void FileImporter::loadState(Memento::Ptr memento)
+{
+    boost::shared_ptr<FileImporterWorker::State> m = boost::dynamic_pointer_cast<FileImporterWorker::State> (memento);
+    assert(m.get());
+
+    worker->state = *m;
+
+    import(worker->state.last_path_);
 }

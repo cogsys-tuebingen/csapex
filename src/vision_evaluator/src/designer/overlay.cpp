@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <iostream>
+#include <QTimer>
 
 using namespace vision_evaluator;
 
@@ -15,6 +16,13 @@ Overlay::Overlay(QWidget* parent)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    repainter = new QTimer();
+    repainter->setInterval(125);
+    repainter->start();
+
+    QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(repaint()));
+    QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void Overlay::drawTemporaryLine(const QLine& line)
@@ -45,6 +53,11 @@ void Overlay::addConnection(Connector* from, Connector* to)
 void Overlay::connectorRemoved(QObject* o)
 {
     connectorRemoved((Connector*) o);
+}
+
+void Overlay::showPublisherSignal(QPoint p)
+{
+    publisher_signals_.push_back(std::make_pair(10, p));
 }
 
 void Overlay::connectorRemoved(Connector* c)
@@ -94,6 +107,21 @@ void Overlay::drawConnection(const QPoint& p1, const QPoint& p2)
     painter->drawPath(path);
 }
 
+void Overlay::tick()
+{
+    for(std::vector<std::pair<int, QPoint> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
+        std::pair<int, QPoint>& p = *it;
+
+        --p.first;
+
+        if(p.first <= 0) {
+            it = publisher_signals_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 void Overlay::paintEvent(QPaintEvent* event)
 {
     QPainter p(this);
@@ -112,6 +140,22 @@ void Overlay::paintEvent(QPaintEvent* event)
 
         painter->setPen(QPen(Qt::red, 2));
         drawConnection(connection.first->centerPoint(), connection.second->centerPoint());
+    }
+
+    for(std::vector<std::pair<int, QPoint> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end(); ++it) {
+        std::pair<int, QPoint>& p = *it;
+
+        if(p.first > 0) {
+            int max_radius = 20;
+            int max_width = 3;
+            int min_opacity = 55;
+
+            int r = std::max(0, max_radius - p.first);
+            double f = (1- r / (double) max_radius);
+            int w = f * max_width;
+            painter->setPen(QPen(QColor(0x33, 0x33, 0xCC, min_opacity + (255 - min_opacity) * f), w));
+            painter->drawEllipse(p.second, r, r);
+        }
     }
 
     painter = NULL;

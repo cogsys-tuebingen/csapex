@@ -34,8 +34,13 @@ private:
     ConnectorOut* output_img_;
     ConnectorOut* output_mask_;
 
-    QString last_path_;
     QSharedPointer<ImageProvider> provider_;
+
+    struct State : public Memento {
+        QString last_path_;
+    };
+
+    State state;
 };
 
 class FileImporter : public BoxedObject
@@ -47,6 +52,11 @@ public:
     ~FileImporter();
 
     virtual void fill(QBoxLayout* layout);
+
+    virtual Memento::Ptr saveState();
+    virtual void loadState(Memento::Ptr memento);
+
+    void import(const QString &filename);
 
 public Q_SLOTS:
     void importDialog();

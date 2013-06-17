@@ -26,7 +26,9 @@ using namespace vision_evaluator;
 OutputDisplay::OutputDisplay()
     : input_(NULL), view_(new QGraphicsView), empty(400, 400, QImage::Format_RGB16), painter(&empty)
 {
-    painter.fillRect(QRect(0, 0, 400, 400), Qt::red);
+    painter.setPen(QPen(Qt::red));
+    painter.fillRect(QRect(0, 0, empty.width(), empty.height()), Qt::white);
+    painter.drawRect(QRect(0, 0, empty.width()-1, empty.height()-1));
 }
 
 OutputDisplay::~OutputDisplay()
@@ -86,7 +88,7 @@ void OutputDisplay::connectorChanged()
 
 void OutputDisplay::messageArrived(ConnectorIn* source)
 {
-    if(isEnabled()) {
+    if(!isEnabled()) {
         disable();
         return;
     }
