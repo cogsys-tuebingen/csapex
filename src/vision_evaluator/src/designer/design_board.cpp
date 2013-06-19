@@ -63,6 +63,13 @@ void DesignBoard::resizeEvent(QResizeEvent* e)
     overlay->resize(e->size());
 }
 
+void DesignBoard::childEvent(QChildEvent *e)
+{
+    //if(e->type() == QChildEvent::ChildAdded) {
+    //    resize(sizeHint());
+    //}
+}
+
 void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
 {
     if(e->mimeData()->text() == Box::MIME) {

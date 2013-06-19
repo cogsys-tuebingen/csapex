@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <boost/foreach.hpp>
+#include <QPushButton>
 
 PLUGINLIB_EXPORT_CLASS(cip104::LKTracking, vision_evaluator::Filter)
 
@@ -52,6 +53,11 @@ void LKTracking::update()
 {
 }
 
+void LKTracking::reset()
+{
+    init_ = true;
+}
+
 void LKTracking::init(cv::Mat& gray, cv::Mat& mask)
 {
     cv::goodFeaturesToTrack(gray, points[1], max_count, 0.01, 10, mask, 3, 0, 0.04);
@@ -60,4 +66,8 @@ void LKTracking::init(cv::Mat& gray, cv::Mat& mask)
 
 void LKTracking::insert(QBoxLayout* layout)
 {
+    QPushButton* reset = new QPushButton("reset");
+    layout->addWidget(reset);
+
+    connect(reset, SIGNAL(clicked()), this, SLOT(reset()));
 }

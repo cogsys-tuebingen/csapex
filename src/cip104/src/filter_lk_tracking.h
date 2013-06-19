@@ -23,6 +23,7 @@ public:
 
 public Q_SLOTS:
     void update();
+    void reset();
 
 protected:
     void init(cv::Mat &gray, cv::Mat &mask);

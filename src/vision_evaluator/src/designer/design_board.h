@@ -26,6 +26,7 @@ public:
     virtual ~DesignBoard();
 
     void resizeEvent(QResizeEvent* e);
+    void childEvent(QChildEvent* e);
 
     virtual bool eventFilter(QObject* o, QEvent* e);
     void dragEnterEvent(QDragEnterEvent* e);
