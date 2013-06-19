@@ -4,7 +4,7 @@ project(pcl_demo)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pcl_ros roscpp)
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros roscpp)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -39,6 +39,8 @@ find_package(catkin REQUIRED COMPONENTS pcl_ros roscpp)
 #   std_msgs  # Or other packages containing msgs
 # )
 
+generate_dynamic_reconfigure_options(cfg/pcl_demo.cfg cfg/pcl_filter.cfg)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -62,6 +64,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(include
   ${catkin_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/cfg/cpp/
 )
 
 ## Declare a cpp library
@@ -71,6 +74,11 @@ include_directories(include
 
 ## Declare a cpp executable
 add_executable(pcl_demo_node src/pcl_demo_node.cpp)
+add_dependencies(pcl_demo_node ${catkin_EXPORTED_TARGETS} pcl_demo_node_gencfg)
+
+add_executable(pcl_filter src/pcl_filter.cpp)
+add_dependencies(pcl_filter ${catkin_EXPORTED_TARGETS} pcl_filter_gencfg)
+
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -78,6 +86,9 @@ add_executable(pcl_demo_node src/pcl_demo_node.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pcl_demo_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(pcl_filter
   ${catkin_LIBRARIES}
 )
 

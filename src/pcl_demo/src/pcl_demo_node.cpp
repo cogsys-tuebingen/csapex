@@ -19,34 +19,58 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/filters/voxel_grid.h>
 
 #include <visualization_msgs/Marker.h>
+
+#include <dynamic_reconfigure/server.h>
+#include <pcl_demo/pcl_demoConfig.h>
 
 class PclDemo
 {
 public:
-    typedef pcl::PointXYZI PointT;
+    typedef pcl::PointXYZRGB PointT;
     typedef pcl::PointCloud<PointT> PointCloud;
 
     PclDemo()
         : nh_("~")
     {
-        sub_ = nh_.subscribe<PointCloud>("/fotonic_e70_node/cloud", 1, boost::bind(&PclDemo::callback, this, _1));
+        std::string topic = "/camera/depth_registered/points/filtered";
+
+        nh_.param("cloud_topic", topic, topic);
+
+        sub_ = nh_.subscribe<PointCloud>(topic, 1, boost::bind(&PclDemo::callback, this, _1));
         pub_plane_ = nh_.advertise<PointCloud>("plane", 1, true);
         pub_sphere_ = nh_.advertise<PointCloud>("sphere", 1, true);
         pub_marker_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
 
         id = 0;
+
+        f = boost::bind(&PclDemo::dynamicReconfigureCallback, this, _1, _2);
+        server.setCallback(f);
+    }
+
+    void dynamicReconfigureCallback(pcl_demo::pcl_demoConfig &config, uint32_t level) {
+        ransac_plane_ = config.ransac_plane;
+        ransac_sphere_ = config.ransac_sphere;
+
+        sphere_r_min_ = config.sphere_radius_min;
+        sphere_r_max_ = config.sphere_radius_max;
+
+        iterations_plane_ = config.iterations_plane;
+        iterations_sphere_ = config.iterations_sphere;
+
+        planes_ = config.planes;
+        spheres_ = config.spheres;
+
+        std::cout << "reconfigure: " << spheres_ << std::endl;
     }
 
     void callback(const PointCloud::ConstPtr& cloud)
     {
         // All the objects needed
-        pcl::PCDReader reader;
-        pcl::PassThrough<PointT> pass;
         pcl::NormalEstimation<PointT, pcl::Normal> ne;
         pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg;
-        pcl::PCDWriter writer;
         pcl::ExtractIndices<PointT> extract;
         pcl::ExtractIndices<pcl::Normal> extract_normals;
         pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
@@ -59,11 +83,7 @@ public:
         pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_sphere (new pcl::ModelCoefficients);
         pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_sphere (new pcl::PointIndices);
 
-        // Build a passthrough filter to remove spurious NaNs
-        pass.setInputCloud (cloud);
-        //        pass.setFilterFieldName ("z");
-        //        pass.setFilterLimits (-4, 4);
-        pass.filter (*cloud_filtered);
+        *cloud_filtered = *cloud;
 
         // Estimate point normals
         ne.setSearchMethod (tree);
@@ -75,12 +95,12 @@ public:
         cloud_plane->header = cloud->header;
 
         // Create the segmentation object for the planar model and set all the parameters
-        for(int i=0; i < 15; ++i){
+        for(int i=0; i < planes_; ++i){
             seg.setOptimizeCoefficients (true);
             seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
             seg.setNormalDistanceWeight (0.1);
-            seg.setMethodType (pcl::SAC_RANSAC);
-            seg.setMaxIterations (100);
+            seg.setMethodType (ransac_plane_);
+            seg.setMaxIterations (iterations_plane_);
             seg.setDistanceThreshold (0.05);
             seg.setInputCloud (cloud_filtered);
             seg.setInputNormals (cloud_normals);
@@ -94,8 +114,10 @@ public:
             extract.setNegative (false);
 
             if(inliers_plane->indices.size() < 1000) {
+                std::cerr << "no plane" << std::endl;
                 break;
             }
+            std::cerr << "Plane" << std::endl;
 
             pcl::PointCloud<PointT>::Ptr tmp (new pcl::PointCloud<PointT> ());
             extract.filter (*tmp);
@@ -114,8 +136,10 @@ public:
             cloud_normals = cloud_normals2;
         }
 
+
         // Publish the planar inliers
         pub_plane_.publish(cloud_plane);
+        std::cout << "publish plane (size=" << cloud_plane->points.size() << ")" << std::endl;
 
         pcl::PointCloud<PointT>::Ptr cloud_sphere (new pcl::PointCloud<PointT> ());
         cloud_sphere->header = cloud->header;
@@ -123,15 +147,14 @@ public:
         visualization_msgs::Marker balls;
 
         // Create the segmentation object for cylinder segmentation and set all the parameters
-        std::cerr << "Sphere coefficients" << std::endl;
-        for(int i=0; i < 4; ++i){
+        for(int i=0; i < spheres_; ++i){
             seg.setOptimizeCoefficients (true);
             seg.setModelType (pcl::SACMODEL_SPHERE);
-            seg.setMethodType (pcl::SAC_RANSAC);
+            seg.setMethodType (ransac_sphere_);
             seg.setNormalDistanceWeight (0.1);
-            seg.setMaxIterations (20000);
+            seg.setMaxIterations (iterations_sphere_);
             seg.setDistanceThreshold (0.03);
-            seg.setRadiusLimits (0.08, 0.17);
+            seg.setRadiusLimits (sphere_r_min_, sphere_r_max_);
             seg.setInputCloud (cloud_filtered);
             seg.setInputNormals (cloud_normals);
 
@@ -170,6 +193,9 @@ public:
 
             cloud_filtered = cloud_filtered2;
             cloud_normals = cloud_normals2;
+
+
+            ros::spinOnce();
         }
 
         pub_sphere_.publish(cloud_sphere);
@@ -205,6 +231,22 @@ private:
     ros::Publisher pub_plane_;
     ros::Publisher pub_sphere_;
     ros::Publisher pub_marker_;
+
+    dynamic_reconfigure::Server<pcl_demo::pcl_demoConfig> server;
+    dynamic_reconfigure::Server<pcl_demo::pcl_demoConfig>::CallbackType f;
+
+    int ransac_plane_;
+    int ransac_sphere_;
+
+    int planes_;
+    int spheres_;
+
+    int iterations_plane_;
+    int iterations_sphere_;
+
+    double sphere_r_min_;
+    double sphere_r_max_;
+    double leaf_;
 
     int id;
 };
