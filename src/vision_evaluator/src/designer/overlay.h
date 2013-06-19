@@ -34,10 +34,11 @@ public:
 
 public Q_SLOTS:
     void connectorRemoved(QObject* o);
-    void showPublisherSignal(QPoint p);
+    void showPublisherSignal(Connector *c);
     void tick();
 
 protected:
+    void drawActivity(int life, Connector *c);
     void drawConnection(const QPoint& p1, const QPoint& p2);
     void paintEvent(QPaintEvent* event);
 
@@ -52,7 +53,13 @@ protected:
 
     QTimer* repainter;
 
-    std::vector<std::pair<int, QPoint> > publisher_signals_;
+    int activity_marker_max_lifetime_;
+    int activity_marker_min_width_;
+    int activity_marker_max_width_;
+    int activity_marker_min_opacity_;
+    int activity_marker_max_opacity_;
+
+    std::vector<std::pair<int, Connector*> > publisher_signals_;
 };
 
 }

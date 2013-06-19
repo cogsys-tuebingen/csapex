@@ -49,6 +49,7 @@ protected:
 
     bool has_img;
     bool has_mask;
+    long guard;
 };
 
 } /// NAMESPACE

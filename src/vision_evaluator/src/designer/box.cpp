@@ -44,6 +44,7 @@ void Box::stop()
 void Box::setUUID(const std::string &uuid)
 {
     uuid_ = uuid;
+    ui->content->setTitle(uuid_.c_str());
 }
 
 std::string Box::UUID() const
@@ -73,7 +74,7 @@ void Box::init(const QPoint& pos)
 {
     setGeometry(pos.x(), pos.y(), 100, 100);
 
-    QBoxLayout* layout = new QHBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout;
     ui->content->setLayout(layout);
 
     content_->fill(layout);
@@ -120,6 +121,22 @@ void Box::enabledChange(bool val)
 void Box::paintEvent(QPaintEvent* e)
 {
     ui->content->setTitle(objectName());
+
+    bool change = ui->boxframe->property("error").toBool() != content_->isError();
+    ui->boxframe->setProperty("error",content_->isError());
+
+    if(change) {
+        if(content_->isError()) {
+            ui->content->setTitle("ERROR: " + objectName());
+        } else {
+            ui->content->setTitle(objectName());
+        }
+
+        ui->boxframe->style()->unpolish(ui->boxframe);
+        ui->boxframe->style()->polish(ui->boxframe);
+        ui->boxframe->update();
+    }
+
     resize(sizeHint());
 }
 

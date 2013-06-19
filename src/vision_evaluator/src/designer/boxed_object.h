@@ -36,9 +36,11 @@ public:
     virtual void loadState(Memento::Ptr memento);
 
     bool isEnabled();
+    bool isError();
 
 public Q_SLOTS:
     virtual void stop();
+    virtual void setError(bool e, const std::string &msg = "");
 
     virtual void enable(bool e);
     virtual void enable();
@@ -57,6 +59,7 @@ protected:
     QThread* private_thread_;
 
     bool enabled_;
+    bool error_;
 };
 
 }

@@ -4,6 +4,10 @@
 /// COMPONENT
 #include "constructor.hpp"
 
+/// PROJECT
+#include <designer/boxed_object.h>
+#include <designer/selector_proxy.h>
+
 /// SYSTEM
 #include <boost/signals2.hpp>
 #include <boost/lambda/bind.hpp>
@@ -42,12 +46,28 @@ protected:
         available_classes[constructor.getName()] = constructor;
     }
 
+    template <class Class>
+    typename boost::enable_if<boost::is_base_of<vision_evaluator::BoxedObject, Class> >::type
+    loadSelectorProxy(const std::string& name) {
+        std::cout << "loaded instance of boxedobject:" << name << std::endl;
+
+        vision_evaluator::SelectorProxy::Ptr dynamic(new vision_evaluator::SelectorProxyDynamic(name, boost::bind(&Loader::createUnmanagedInstance, loader_, name)));
+        vision_evaluator::SelectorProxy::registerProxy(dynamic);
+    }
+
+    template <class Class>
+    typename boost::disable_if<boost::is_base_of<vision_evaluator::BoxedObject, Class> >::type
+    loadSelectorProxy(const std::string& name) {
+    }
+
     void reload() {
         try {
             std::vector<std::string> classes = loader_->getDeclaredClasses();
             for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
                 std::cout << "load library for class " << *c << std::endl;
                 loader_->loadLibraryForClass(*c);
+
+                loadSelectorProxy<M>(*c);
 
                 Constructor constructor;
                 constructor.setName(*c);

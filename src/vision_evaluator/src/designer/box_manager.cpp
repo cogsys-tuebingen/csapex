@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "selector_proxy.h"
+#include "box.h"
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -21,11 +22,19 @@ void BoxManager::fill(QLayout* layout)
     BOOST_FOREACH(Pair p, available_elements.availableClasses()) {
         layout->addWidget(p.second());
     }
+    BOOST_FOREACH(SelectorProxy::Ptr p, available_elements_prototypes) {
+        layout->addWidget(p->clone());
+    }
 }
 
 void BoxManager::register_box_type(SelectorProxy::ProxyConstructor provider)
 {
     available_elements.registerConstructor(provider);
+}
+
+void BoxManager::register_box_type(SelectorProxy::Ptr provider)
+{
+    available_elements_prototypes.push_back(provider);
 }
 
 void BoxManager::execute(Command::Ptr command)

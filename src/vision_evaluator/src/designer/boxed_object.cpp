@@ -11,7 +11,7 @@
 using namespace vision_evaluator;
 
 BoxedObject::BoxedObject()
-    : private_thread_(NULL), enabled_(true)
+    : private_thread_(NULL), enabled_(true), error_(false)
 {
 }
 
@@ -34,6 +34,26 @@ BoxedObject::~BoxedObject()
 bool BoxedObject::isEnabled()
 {
     return enabled_;
+}
+
+void BoxedObject::setError(bool e, const std::string& msg)
+{
+    QString err;
+    if(e) {
+        unsigned line = 60;
+        for(unsigned i = 0; i < msg.size(); ++i) {
+            err += msg[i];
+            if((i%line) == 0) {
+                err += '\n';
+            }
+        }
+    }
+    box_->setToolTip(err);
+    error_ = e;
+}
+bool BoxedObject::isError()
+{
+    return error_;
 }
 
 void BoxedObject::stop()
@@ -97,7 +117,7 @@ void BoxedObject::enable(bool e)
 
 void BoxedObject::enable()
 {
-
+    setError(false);
 }
 
 void BoxedObject::disable(bool d)
@@ -108,7 +128,7 @@ void BoxedObject::disable(bool d)
 
 void BoxedObject::disable()
 {
-
+    setError(false);
 }
 
 void BoxedObject::connectorChanged()

@@ -27,6 +27,8 @@ public:
 
 public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
+    void register_box_type(SelectorProxy::Ptr provider);
+
     void fill(QLayout* layout);
 
     void execute(Command::Ptr command);
@@ -52,6 +54,7 @@ protected:
     BoxManager& operator = (const BoxManager& assign);
 
     PluginManager<SelectorProxy, SelectorProxy::ProxyConstructor> available_elements;
+    std::vector<SelectorProxy::Ptr> available_elements_prototypes;
 
     std::stack<Command::Ptr> done;
     std::stack<Command::Ptr> undone;

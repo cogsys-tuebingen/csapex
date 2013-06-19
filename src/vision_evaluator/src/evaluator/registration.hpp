@@ -43,6 +43,6 @@
         c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<class_name> >(), boost::lambda::_1, (QWidget*) NULL)); \
         SelectorProxy::registerProxy(c);\
     });\
- 
+
 
 #endif // GENERIC_MANAGER_H

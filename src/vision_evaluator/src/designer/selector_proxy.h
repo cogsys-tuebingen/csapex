@@ -1,9 +1,6 @@
 #ifndef SELECTOR_PROXY_H
 #define SELECTOR_PROXY_H
 
-/// COMPONENT
-#include "boxed_object.h"
-
 /// PROJECT
 #include <utils/constructor.hpp>
 
@@ -20,6 +17,7 @@ namespace vision_evaluator
 {
 
 class Box;
+class BoxedObject;
 
 namespace command {
 class AddBox;
@@ -28,6 +26,9 @@ class AddBox;
 class SelectorProxy : public QGraphicsView
 {
     friend class command::AddBox;
+
+public:
+    typedef boost::shared_ptr<SelectorProxy> Ptr;
 
 public:
     struct ProxyConstructor : public Constructor {
@@ -49,10 +50,13 @@ public:
     };
 
     static void registerProxy(ProxyConstructor c);
+    static void registerProxy(SelectorProxy::Ptr prototype);
 
 public:
-    SelectorProxy(const std::string& name, BoxedObject* content, QWidget* parent = 0);
+    SelectorProxy(const std::string& name, BoxedObject* prototype, QWidget* parent = 0);
     virtual ~SelectorProxy();
+
+    virtual SelectorProxy* clone() = 0;
 
     virtual void mousePressEvent(QMouseEvent* event);
     std::string name();
@@ -65,7 +69,7 @@ protected:
 
 protected:
     std::string name_;
-    boost::shared_ptr<vision_evaluator::Box> box_;
+    boost::shared_ptr<vision_evaluator::Box> prototype_box_;
 };
 
 template <class T>
@@ -82,7 +86,38 @@ public:
     virtual BoxedObject* makeContent() {
         return new T;
     }
+
+    virtual SelectorProxy* clone() {
+        assert(false);
+        return NULL;
+    }
 };
+
+class SelectorProxyDynamic : public SelectorProxy
+{
+public:
+    typedef boost::function<BoxedObject*()> Make;
+
+public:
+    SelectorProxyDynamic(const std::string& name, Make c, QWidget* parent = 0)
+        : SelectorProxy(name, c(), parent), c(c)
+    {}
+
+    virtual ~SelectorProxyDynamic()
+    {}
+
+    virtual BoxedObject* makeContent() {
+        return c();
+    }
+
+    virtual SelectorProxy* clone() {
+        return new SelectorProxyDynamic(name(), c);
+    }
+
+protected:
+    Make c;
+};
+
 
 }
 #endif // SELECTOR_PROXY_H

@@ -16,7 +16,7 @@ using namespace vision_evaluator;
 
 
 Filter::Filter()
-    : input_img_(NULL), input_mask_(NULL), output_img_(NULL), output_mask_(NULL), has_img(false), has_mask(false)
+    : input_img_(NULL), input_mask_(NULL), output_img_(NULL), output_mask_(NULL), has_img(false), has_mask(false), guard(0xDEADBEEFL)
 {
     setName("unnamed filter");
 }
@@ -81,7 +81,13 @@ void Filter::messageArrived(ConnectorIn* source)
         if(!mask_msg.get()){
             mask_msg.reset(new CvMatMessage);
         }
-        filter(img_msg->value, mask_msg->value);
+
+        try {
+            filter(img_msg->value, mask_msg->value);
+            setError(false);
+        } catch(cv::Exception& cve) {
+            setError(true, cve.what());
+        }
 
         output_img_->publish(img_msg);
         output_mask_->publish(mask_msg);

@@ -93,5 +93,5 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         return;
     }
 
-    overlay_->showPublisherSignal(centerPoint());
+    overlay_->showPublisherSignal(this);
 }

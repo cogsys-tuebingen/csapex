@@ -21,6 +21,12 @@ Overlay::Overlay(QWidget* parent)
     repainter->setInterval(125);
     repainter->start();
 
+    activity_marker_max_lifetime_ = 5;
+    activity_marker_min_width_ = 12;
+    activity_marker_max_width_ = 18;
+    activity_marker_min_opacity_ = 25;
+    activity_marker_max_opacity_ = 100;
+
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(repaint()));
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(tick()));
 }
@@ -55,9 +61,9 @@ void Overlay::connectorRemoved(QObject* o)
     connectorRemoved((Connector*) o);
 }
 
-void Overlay::showPublisherSignal(QPoint p)
+void Overlay::showPublisherSignal(Connector* c)
 {
-    publisher_signals_.push_back(std::make_pair(10, p));
+    publisher_signals_.push_back(std::make_pair(activity_marker_max_lifetime_, c));
 }
 
 void Overlay::connectorRemoved(Connector* c)
@@ -95,22 +101,36 @@ void Overlay::removeConnection(Connector* from, Connector* to)
 
 void Overlay::drawConnection(const QPoint& p1, const QPoint& p2)
 {
+    QPoint offset(0, 20);
+
     QPoint diff = (p2 - p1);
     QPoint delta = QPoint(std::max(40, std::abs((0.45 * diff).x())), 0);
-    QPoint cp1 = p1 + delta;
-    QPoint cp2 = p2 - delta;
+    QPoint cp1 = p1 + delta + offset;
+    QPoint cp2 = p2 - delta + offset;
 
     QPainterPath path;
     path.moveTo(p1);
     path.cubicTo(cp1, cp2, p2);
 
+    painter->setPen(QPen(QColor(0x33, 0x66, 0xFF, 0xDD), 3));
     painter->drawPath(path);
+}
+
+void Overlay::drawActivity(int life, Connector* c)
+{
+    if(life > 0) {
+        int r = std::max(0, activity_marker_max_lifetime_ - life);
+        double f = r / (double) activity_marker_max_lifetime_;
+        int w = activity_marker_min_width_ + f * (activity_marker_max_width_ - activity_marker_min_width_);
+        painter->setPen(QPen(QColor(0x33, 0x33, 0xCC, activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * (1-f)), w));
+        painter->drawEllipse(c->centerPoint(), r, r);
+    }
 }
 
 void Overlay::tick()
 {
-    for(std::vector<std::pair<int, QPoint> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
-        std::pair<int, QPoint>& p = *it;
+    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
+        std::pair<int, Connector*>& p = *it;
 
         --p.first;
 
@@ -134,29 +154,18 @@ void Overlay::paintEvent(QPaintEvent* event)
     if(!temp_line.isNull()) {
         drawConnection(temp_line.p1(), temp_line.p2());
     }
+    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end(); ++it) {
+        std::pair<int, Connector*>& p = *it;
+
+        drawActivity(p.first, p.second);
+    }
 
     for(ConnectionList::const_iterator i = connections.begin(); i != connections.end(); ++i) {
         const ConnectionPair& connection = *i;
 
-        painter->setPen(QPen(Qt::red, 2));
         drawConnection(connection.first->centerPoint(), connection.second->centerPoint());
     }
 
-    for(std::vector<std::pair<int, QPoint> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end(); ++it) {
-        std::pair<int, QPoint>& p = *it;
-
-        if(p.first > 0) {
-            int max_radius = 20;
-            int max_width = 3;
-            int min_opacity = 55;
-
-            int r = std::max(0, max_radius - p.first);
-            double f = (1- r / (double) max_radius);
-            int w = f * max_width;
-            painter->setPen(QPen(QColor(0x33, 0x33, 0xCC, min_opacity + (255 - min_opacity) * f), w));
-            painter->drawEllipse(p.second, r, r);
-        }
-    }
 
     painter = NULL;
 }

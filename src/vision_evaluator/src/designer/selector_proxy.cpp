@@ -8,24 +8,28 @@
 
 using namespace vision_evaluator;
 
-SelectorProxy::SelectorProxy(const std::string& name, BoxedObject* content, QWidget* parent)
-    : QGraphicsView(parent), name_(name), box_(new vision_evaluator::Box(content, name))
+SelectorProxy::SelectorProxy(const std::string& name, BoxedObject* prototype, QWidget* parent)
+    : QGraphicsView(parent), name_(name), prototype_box_(new vision_evaluator::Box(prototype, name))
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     QSize size(80, 80);
 
     setScene(new QGraphicsScene(QRectF(QPoint(), size)));
-    scene()->addPixmap(box_->makePixmap(name_));
+    scene()->addPixmap(prototype_box_->makePixmap(name_));
 }
 
 SelectorProxy::~SelectorProxy()
 {
 }
 
+void SelectorProxy::registerProxy(SelectorProxy::Ptr prototype)
+{
+    BoxManager::instance().register_box_type(prototype);
+}
+
 void SelectorProxy::registerProxy(ProxyConstructor c)
 {
     BoxManager::instance().register_box_type(c);
-    \
 }
 
 void SelectorProxy::mousePressEvent(QMouseEvent* event)
@@ -36,7 +40,7 @@ void SelectorProxy::mousePressEvent(QMouseEvent* event)
         mimeData->setText(Box::MIME);
         mimeData->setParent(this);
         drag->setMimeData(mimeData);
-        drag->setPixmap(box_->makePixmap(name_));
+        drag->setPixmap(prototype_box_->makePixmap(name_));
         drag->exec();
     }
 }
