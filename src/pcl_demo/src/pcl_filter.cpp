@@ -48,6 +48,8 @@ public:
 
     void dynamicReconfigureCallback(pcl_demo::pcl_filterConfig &config, uint32_t level) {
         leaf_ = config.leaf_size;
+        forward_ = config.view_forward;
+        width_ = config.view_width;
     }
 
     void callback(const PointCloud::ConstPtr& cloud)
@@ -67,11 +69,11 @@ public:
         // Build a passthrough filter to remove spurious NaNs
         pass.setInputCloud (cloud_filtered);
         pass.setFilterFieldName ("x");
-        pass.setFilterLimits (-0.4, 0.4);
+        pass.setFilterLimits (-width_, width_);
         pass.filter (*cloud_filtered2);
         pass.setInputCloud (cloud_filtered2);
         pass.setFilterFieldName ("y");
-        pass.setFilterLimits (-0.2, 3.8);
+        pass.setFilterLimits (-forward_, 10);
         pass.filter (*cloud_filtered);
 
 
@@ -87,6 +89,8 @@ private:
     dynamic_reconfigure::Server<pcl_demo::pcl_filterConfig>::CallbackType f;
 
     double leaf_;
+    double forward_;
+    double width_;
 };
 
 int main(int argc, char** argv)
