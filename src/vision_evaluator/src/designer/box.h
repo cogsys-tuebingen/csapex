@@ -74,6 +74,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void toggled(bool);
+    void moved(Box*);
 
 private:
     Ui::Box* ui;

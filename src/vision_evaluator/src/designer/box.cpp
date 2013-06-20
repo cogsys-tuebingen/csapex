@@ -150,6 +150,7 @@ void Box::mousePressEvent(QMouseEvent* e)
 void Box::moveEvent(QMoveEvent *)
 {
     BoxManager::instance().setDirty(true);
+    Q_EMIT moved(this);
 }
 
 void Box::startDrag(QPoint offset)
