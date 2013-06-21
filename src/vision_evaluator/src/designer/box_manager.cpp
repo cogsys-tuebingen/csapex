@@ -37,6 +37,31 @@ void BoxManager::register_box_type(SelectorProxy::Ptr provider)
     available_elements_prototypes.push_back(provider);
 }
 
+Box* BoxManager::makeBox(QWidget* parent, QPoint pos, const std::string& type, const std::string& uuid)
+{
+    std::string uuid_ = uuid;
+    typedef std::pair<std::string, SelectorProxy::ProxyConstructor> Pair;
+    BOOST_FOREACH(Pair p, available_elements.availableClasses()) {
+        if(p.second.getType() == type) {
+            if(uuid_.empty()) {
+                uuid_ = makeUUID(type);
+            }
+            return p.second()->spawnObject(parent, pos, uuid);
+        }
+    }
+    BOOST_FOREACH(SelectorProxy::Ptr p, available_elements_prototypes) {
+        if(p->getType() == type) {
+            if(uuid_.empty()) {
+                uuid_ = makeUUID(type);
+            }
+            return p->spawnObject(parent, pos, uuid);
+        }
+    }
+
+    std::cerr << "error: cannot make box, type '" << type << "' is unknown" << std::endl;
+    return NULL;
+}
+
 void BoxManager::execute(Command::Ptr command)
 {
     command->execute();
@@ -49,7 +74,7 @@ void BoxManager::execute(Command::Ptr command)
     Q_EMIT stateChanged();
 }
 
-std::string BoxManager::makeUUID(const std::string &name)
+std::string BoxManager::makeUUID(const std::string& name)
 {
     int& last_id = uuids[name];
     ++last_id;

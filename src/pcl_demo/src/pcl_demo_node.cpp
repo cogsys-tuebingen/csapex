@@ -42,6 +42,7 @@ public:
         sub_ = nh_.subscribe<PointCloud>(topic, 1, boost::bind(&PclDemo::callback, this, _1));
         pub_plane_ = nh_.advertise<PointCloud>("plane", 1, true);
         pub_sphere_ = nh_.advertise<PointCloud>("sphere", 1, true);
+        pub_balls_ = nh_.advertise<PointCloud>("balls", 1, true);
         pub_marker_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
 
         id = 0;
@@ -82,6 +83,9 @@ public:
         pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
         pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_sphere (new pcl::ModelCoefficients);
         pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_sphere (new pcl::PointIndices);
+        pcl::PointCloud<PointT>::Ptr balls (new pcl::PointCloud<PointT>);
+
+        balls->header = cloud->header;
 
         *cloud_filtered = *cloud;
 
@@ -144,7 +148,7 @@ public:
         pcl::PointCloud<PointT>::Ptr cloud_sphere (new pcl::PointCloud<PointT> ());
         cloud_sphere->header = cloud->header;
 
-        visualization_msgs::Marker balls;
+        visualization_msgs::Marker balls_marker;
 
         // Create the segmentation object for cylinder segmentation and set all the parameters
         for(int i=0; i < spheres_; ++i){
@@ -171,7 +175,7 @@ public:
             pt.x = coefficients_sphere->values[0];
             pt.y = coefficients_sphere->values[1];
             pt.z = coefficients_sphere->values[2];
-            balls.points.push_back(pt);
+            balls_marker.points.push_back(pt);
 
             // Write the cylinder inliers to disk
             extract.setInputCloud (cloud_filtered);
@@ -182,6 +186,31 @@ public:
             extract.filter (*tmp);
 
             *cloud_sphere += *tmp;
+
+
+            PointT ball;
+            ball.x = pt.x;
+            ball.y = pt.y;
+            ball.z = pt.z;
+
+            int r = 0;
+            int g = 0;
+            int b = 0;
+
+            double c = 0;
+            BOOST_FOREACH(PointT& pt, tmp->points) {
+                r += pt.r;
+                g += pt.g;
+                b += pt.b;
+
+                ++c;
+            }
+
+            ball.r = r / c;
+            ball.g = g / c;
+            ball.b = b / c;
+
+            balls->points.push_back(ball);
 
             // Remove the sphere inliers, extract the rest
             extract.setNegative (true);
@@ -198,31 +227,28 @@ public:
             ros::spinOnce();
         }
 
+        pub_balls_.publish(balls);
         pub_sphere_.publish(cloud_sphere);
 
-        if (balls.points.size()) {
-            std::cerr << "Can't find the spherical component." << std::endl;
-        }
+        balls_marker.action = visualization_msgs::Marker::ADD;
+        balls_marker.type = visualization_msgs::Marker::SPHERE_LIST;
+        balls_marker.color.a = 1.0;
+        balls_marker.color.r = 1.0;
+        balls_marker.color.g = 1.0;
+        balls_marker.color.b = 1.0;
 
-        balls.action = visualization_msgs::Marker::ADD;
-        balls.type = visualization_msgs::Marker::SPHERE_LIST;
-        balls.color.a = 1.0;
-        balls.color.r = 1.0;
-        balls.color.g = 1.0;
-        balls.color.b = 1.0;
-
-        balls.lifetime = ros::Duration(1.0);
+        balls_marker.lifetime = ros::Duration(1.0);
 
         double r = 0.3;
-        balls.scale.x = r;
-        balls.scale.y = r;
-        balls.scale.z = r;
+        balls_marker.scale.x = r;
+        balls_marker.scale.y = r;
+        balls_marker.scale.z = r;
 
-        balls.header = cloud->header;
-        balls.id = id++;
-        balls.ns = "balls";
+        balls_marker.header = cloud->header;
+        balls_marker.id = id++;
+        balls_marker.ns = "balls";
 
-        pub_marker_.publish(balls);
+        pub_marker_.publish(balls_marker);
     }
 
 private:
@@ -230,6 +256,7 @@ private:
     ros::Subscriber sub_;
     ros::Publisher pub_plane_;
     ros::Publisher pub_sphere_;
+    ros::Publisher pub_balls_;
     ros::Publisher pub_marker_;
 
     dynamic_reconfigure::Server<pcl_demo::pcl_demoConfig> server;

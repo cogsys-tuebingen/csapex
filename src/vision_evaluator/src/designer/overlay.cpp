@@ -66,6 +66,11 @@ void Overlay::showPublisherSignal(Connector* c)
     publisher_signals_.push_back(std::make_pair(activity_marker_max_lifetime_, c));
 }
 
+void Overlay::clear()
+{
+    publisher_signals_.clear();
+}
+
 void Overlay::connectorRemoved(Connector* c)
 {
     for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
@@ -84,7 +89,7 @@ void Overlay::connectorRemoved(Connector* c)
 void Overlay::removeConnection(Connector* from, Connector* to)
 {
     for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
-        ConnectionPair &connection = *i;
+        ConnectionPair& connection = *i;
 
         if(connection.first == from && connection.second == to) {
             i = connections.erase(i);

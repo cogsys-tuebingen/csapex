@@ -200,7 +200,7 @@ void FilterStaticMask::insert(QBoxLayout* layout)
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(showPainter()), Qt::DirectConnection);
 }
 
-Memento::Ptr FilterStaticMask::saveState()
+Memento::Ptr FilterStaticMask::getState() const
 {
     boost::shared_ptr<State> memento(new State);
     *memento = state;
@@ -208,7 +208,7 @@ Memento::Ptr FilterStaticMask::saveState()
     return memento;
 }
 
-void FilterStaticMask::loadState(Memento::Ptr memento)
+void FilterStaticMask::setState(Memento::Ptr memento)
 {
     boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
     assert(m.get());

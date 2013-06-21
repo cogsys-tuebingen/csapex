@@ -12,16 +12,16 @@ struct Constructor {
         return valid_ && has_constructor;
     }
 
-    std::string getName() const {
-        return name;
+    std::string getType() const {
+        return type;
     }
 
-    void setName(const std::string& n) {
-        name = n;
+    void setType(const std::string& n) {
+        type = n;
     }
 
 protected:
-    std::string name;
+    std::string type;
     bool valid_;
     bool has_constructor;
 };
@@ -37,7 +37,7 @@ struct DefaultConstructor : public Constructor {
 
     typename boost::shared_ptr<M> construct() const {
         boost::shared_ptr<M> res(constructor());
-        res->setName(name);
+        res->setName(type);
         assert(res.get() != NULL);
         return res;
     }

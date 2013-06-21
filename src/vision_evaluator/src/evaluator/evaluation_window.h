@@ -37,6 +37,9 @@ private Q_SLOTS:
     void set_fps(int fps);
     void updateMenu();
 
+public Q_SLOTS:
+    void start();
+
 private:
     Ui::EvaluationWindow* ui;
 };

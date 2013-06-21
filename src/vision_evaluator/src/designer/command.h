@@ -4,7 +4,8 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 class Command
 {

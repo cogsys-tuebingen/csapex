@@ -43,7 +43,7 @@ protected:
     virtual ~PluginManagerImp() {}
 
     void registerConstructor(Constructor constructor) {
-        available_classes[constructor.getName()] = constructor;
+        available_classes[constructor.getType()] = constructor;
     }
 
     template <class Class>
@@ -70,7 +70,7 @@ protected:
                 loadSelectorProxy<M>(*c);
 
                 Constructor constructor;
-                constructor.setName(*c);
+                constructor.setType(*c);
                 constructor.setConstructor(boost::bind(&Loader::createUnmanagedInstance, loader_, *c));
                 registerConstructor(constructor);
                 std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;

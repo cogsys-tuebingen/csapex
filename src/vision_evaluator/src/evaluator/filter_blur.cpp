@@ -38,7 +38,7 @@ void FilterBlur::update(int slot)
     Q_EMIT filter_changed();
 }
 
-Memento::Ptr FilterBlur::saveState()
+Memento::Ptr FilterBlur::getState() const
 {
     boost::shared_ptr<State> memento(new State);
     *memento = state;
@@ -46,7 +46,7 @@ Memento::Ptr FilterBlur::saveState()
     return memento;
 }
 
-void FilterBlur::loadState(Memento::Ptr memento)
+void FilterBlur::setState(Memento::Ptr memento)
 {
     boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
     assert(m.get());

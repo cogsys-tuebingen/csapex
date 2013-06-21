@@ -16,6 +16,12 @@ class ConnectorOut : public Connector
 
     friend class ConnectorIn;
     friend class command::AddConnection;
+    friend class DesignerIO;
+
+    typedef std::vector<ConnectorIn*> TargetList;
+
+public:
+    typedef TargetList::iterator TargetIterator;
 
 public:
     ConnectorOut(Box* parent, int sub_id);
@@ -30,13 +36,17 @@ public:
     virtual bool canConnect();
     virtual bool isConnected();
 
+    TargetIterator beginTargets();
+    TargetIterator endTargets();
+
 private:
+    /// PRIVATE: Use command to create a connection (undoable)
     virtual bool tryConnect(Connector* other_side);
     virtual void removeConnection(Connector* other_side);
     virtual void removeAllConnections();
 
 protected:
-    std::vector<ConnectorIn*> targets_;
+    TargetList targets_;
 };
 
 }

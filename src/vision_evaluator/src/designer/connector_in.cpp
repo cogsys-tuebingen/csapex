@@ -11,7 +11,7 @@
 using namespace vision_evaluator;
 
 ConnectorIn::ConnectorIn(Box* parent, int sub_id)
-    : Connector(parent, sub_id), input(NULL)
+    : Connector(parent, "in", sub_id), input(NULL)
 {
 }
 

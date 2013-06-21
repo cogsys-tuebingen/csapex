@@ -59,7 +59,9 @@ public:
     vision_evaluator::Box* box();
     int connectorID();
 
-    QString cssClass() { return QString("Connector"); }
+    QString cssClass() {
+        return QString("Connector");
+    }
 
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
@@ -72,7 +74,7 @@ Q_SIGNALS:
     virtual void connectionChanged();
 
 protected:
-    Connector(Box* parent, int sub_id);
+    Connector(Box* parent, const std::string& type, int sub_id);
     virtual ~Connector();
 
 protected:

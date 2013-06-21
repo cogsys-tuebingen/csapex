@@ -25,8 +25,8 @@ public:
 public:
     virtual void insert(QBoxLayout*);
 
-    virtual Memento::Ptr saveState();
-    virtual void loadState(Memento::Ptr memento);
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
     virtual void filter(cv::Mat& img, cv::Mat& mask);

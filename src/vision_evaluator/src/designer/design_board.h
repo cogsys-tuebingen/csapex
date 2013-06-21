@@ -26,22 +26,26 @@ public:
     DesignBoard(QWidget* parent = 0);
     virtual ~DesignBoard();
 
-    void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent*);
     void resizeEvent(QResizeEvent* e);
 
-    void keyPressEvent(QKeyEvent * e);
-    void keyReleaseEvent(QKeyEvent * e);
+    void keyPressEvent(QKeyEvent* e);
+    void keyReleaseEvent(QKeyEvent* e);
 
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
+    void mousePressEvent(QMouseEvent* e);
+    void mouseReleaseEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent* e);
 
     virtual bool eventFilter(QObject* o, QEvent* e);
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
 
-    QString cssClass() { return QString("DesignBoard"); }
+    Overlay* getOverlay();
+
+    QString cssClass() {
+        return QString("DesignBoard");
+    }
 
 public Q_SLOTS:
     void updateCursor();

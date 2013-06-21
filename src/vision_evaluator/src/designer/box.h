@@ -9,6 +9,7 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <QWidget>
+#include <yaml-cpp/yaml.h>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -49,18 +50,24 @@ public:
     virtual void mousePressEvent(QMouseEvent* e);
     virtual QPixmap makePixmap(const std::string& label);
 
-    void moveEvent(QMoveEvent *);
+    void moveEvent(QMoveEvent*);
 
     virtual void init(const QPoint& pos);
+    BoxedObject* getContent();
 
     void addInput(ConnectorIn* in);
     void addOutput(ConnectorOut* out);
 
+    ConnectorIn* getInput(const std::string& uuid);
+    ConnectorOut* getOutput(const std::string& uuid);
+
     void setUUID(const std::string& uuid);
     std::string UUID() const;
 
-    Memento::Ptr saveState();
-    void loadState(Memento::Ptr state);
+    Memento::Ptr getState() const;
+    void setState(Memento::Ptr state);
+
+    YAML::Emitter& save(YAML::Emitter& out) const;
 
 protected:
     void startDrag(QPoint offset);
@@ -89,6 +96,11 @@ private:
 
     std::string uuid_;
 };
+
+inline YAML::Emitter& operator << (YAML::Emitter& out, const Box& box)
+{
+    return box.save(out);
+}
 
 }
 #endif // BOX_H

@@ -78,6 +78,17 @@ std::string BoxedObject::getName()
     return name_;
 }
 
+
+void BoxedObject::setTypeName(const std::string& type_name)
+{
+    type_name_ = type_name;
+}
+
+std::string BoxedObject::getTypeName()
+{
+    return type_name_;
+}
+
 void BoxedObject::setBox(Box* box)
 {
     box_ = box;
@@ -95,12 +106,12 @@ void BoxedObject::makeThread()
     }
 }
 
-Memento::Ptr BoxedObject::saveState()
+Memento::Ptr BoxedObject::getState() const
 {
     return Memento::Ptr((Memento*) NULL);
 }
 
-void BoxedObject::loadState(Memento::Ptr memento)
+void BoxedObject::setState(Memento::Ptr memento)
 {
 
 }

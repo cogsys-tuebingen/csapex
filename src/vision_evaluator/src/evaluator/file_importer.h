@@ -38,6 +38,16 @@ private:
 
     struct State : public Memento {
         QString last_path_;
+        virtual void writeYaml(YAML::Emitter& out) const {
+            out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
+        }
+        virtual void readYaml(const YAML::Node& node) {
+            std::string path;
+            node["path"] >> path;
+            std::cout << "read path: " << path << std::endl;
+
+            last_path_ = QString::fromUtf8(path.c_str());
+        }
     };
 
     State state;
@@ -53,10 +63,10 @@ public:
 
     virtual void fill(QBoxLayout* layout);
 
-    virtual Memento::Ptr saveState();
-    virtual void loadState(Memento::Ptr memento);
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
 
-    void import(const QString &filename);
+    void import(const QString& filename);
 
 public Q_SLOTS:
     void importDialog();

@@ -18,7 +18,7 @@ class ConnectorIn : public Connector
     friend class command::AddConnection;
 
 public:
-    ConnectorIn(Box *parent, int sub_id);
+    ConnectorIn(Box* parent, int sub_id);
     ~ConnectorIn();
 
     virtual bool isInput() {

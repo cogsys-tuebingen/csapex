@@ -12,20 +12,23 @@ using namespace vision_evaluator::command;
 AddBox::AddBox(SelectorProxy* selector, QWidget* parent, QPoint pos)
     : selector(selector), parent(parent), pos(pos)
 {
-    uuid = BoxManager::instance().makeUUID(selector->name());
+    uuid = BoxManager::instance().makeUUID(selector->getType());
 }
 
-void AddBox::execute() {
+void AddBox::execute()
+{
     box = selector->spawnObject(parent, pos, uuid);
 }
 
-void AddBox::undo() {
-    saved_state = box->saveState();
+void AddBox::undo()
+{
+    saved_state = box->getState();
     box->stop();
     delete box;
 }
 
-void AddBox::redo() {
+void AddBox::redo()
+{
     box = selector->spawnObject(parent, pos, uuid);
-    box->loadState(saved_state);
+    box->setState(saved_state);
 }

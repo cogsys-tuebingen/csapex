@@ -12,8 +12,8 @@
 
 using namespace vision_evaluator;
 
-ConnectorOut::ConnectorOut(Box *parent, int sub_id)
-    : Connector(parent, sub_id)
+ConnectorOut::ConnectorOut(Box* parent, int sub_id)
+    : Connector(parent, "out", sub_id)
 {
 }
 
@@ -23,6 +23,15 @@ ConnectorOut::~ConnectorOut()
         i->removeConnection(this);
     }
     Q_EMIT connectionChanged();
+}
+
+ConnectorOut::TargetIterator ConnectorOut::beginTargets()
+{
+    return targets_.begin();
+}
+ConnectorOut::TargetIterator ConnectorOut::endTargets()
+{
+    return targets_.end();
 }
 
 void ConnectorOut::removeConnection(Connector* other_side)

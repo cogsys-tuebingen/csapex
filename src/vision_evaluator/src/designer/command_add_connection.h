@@ -7,7 +7,8 @@
 /// SYSTEM
 #include <QWidget>
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 class SelectorProxy;
 class Box;
@@ -16,7 +17,8 @@ class Connector;
 class ConnectorIn;
 class ConnectorOut;
 
-namespace command {
+namespace command
+{
 
 struct AddConnection : public Command {
     AddConnection(Overlay* overlay, Connector* a, Connector* b, QWidget* parent);

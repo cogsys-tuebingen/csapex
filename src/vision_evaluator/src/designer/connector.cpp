@@ -17,7 +17,7 @@ using namespace vision_evaluator;
 
 const QString Connector::MIME = "vision_evaluator/connector";
 
-Connector::Connector(Box *parent, int sub_id)
+Connector::Connector(Box* parent, const std::string& type, int sub_id)
     : QRadioButton(parent), parent_widget(parent), box_(parent), designer(NULL)
 {
     findParents();
@@ -25,7 +25,7 @@ Connector::Connector(Box *parent, int sub_id)
     setAcceptDrops(true);
 
     std::stringstream ss;
-    ss << box_->UUID() << "_" << sub_id;
+    ss << box_->UUID() << "_" << type << "_" << sub_id;
 
     uuid_ = ss.str();
 }
@@ -39,7 +39,7 @@ std::string Connector::UUID()
     return uuid_;
 }
 
-void Connector::setUUID(const std::string &uuid)
+void Connector::setUUID(const std::string& uuid)
 {
     uuid_ = uuid;
 }

@@ -19,13 +19,15 @@ namespace vision_evaluator
 class Box;
 class BoxedObject;
 
-namespace command {
+namespace command
+{
 class AddBox;
 }
 
 class SelectorProxy : public QGraphicsView
 {
     friend class command::AddBox;
+    friend class BoxManager;
 
 public:
     typedef boost::shared_ptr<SelectorProxy> Ptr;
@@ -35,7 +37,7 @@ public:
         typedef boost::function<SelectorProxy* (const std::string)> Call;
 
         SelectorProxy* operator()() {
-            SelectorProxy* res(constructor(name));
+            SelectorProxy* res(constructor(type));
             assert(res != NULL);
             return res;
         }
@@ -53,22 +55,23 @@ public:
     static void registerProxy(SelectorProxy::Ptr prototype);
 
 public:
-    SelectorProxy(const std::string& name, BoxedObject* prototype, QWidget* parent = 0);
+    SelectorProxy(const std::string& type, BoxedObject* prototype, QWidget* parent = 0);
     virtual ~SelectorProxy();
 
     virtual SelectorProxy* clone() = 0;
 
     virtual void mousePressEvent(QMouseEvent* event);
-    std::string name();
+    std::string getType();
 
 private:
-    virtual vision_evaluator::Box* spawnObject(QWidget* parent, const QPoint& pos, const std::string &uuid);
+    /// PRIVATE: Use command to spawn objects (undoable)
+    virtual vision_evaluator::Box* spawnObject(QWidget* parent, const QPoint& pos, const std::string& uuid);
 
 protected:
     virtual BoxedObject* makeContent() = 0;
 
 protected:
-    std::string name_;
+    std::string type_;
     boost::shared_ptr<vision_evaluator::Box> prototype_box_;
 };
 
@@ -111,7 +114,7 @@ public:
     }
 
     virtual SelectorProxy* clone() {
-        return new SelectorProxyDynamic(name(), c);
+        return new SelectorProxyDynamic(getType(), c);
     }
 
 protected:

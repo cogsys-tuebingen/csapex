@@ -11,7 +11,8 @@ namespace vision_evaluator
 /// FORWARD DECLARATION
 class Connector;
 
-namespace command {
+namespace command
+{
 class AddConnection;
 }
 
@@ -20,6 +21,7 @@ class Overlay : public QWidget
     Q_OBJECT
 
     friend class command::AddConnection;
+    friend class DesignerIO;
 
 private:
     typedef std::pair<Connector*, Connector*> ConnectionPair;
@@ -34,15 +36,17 @@ public:
 
 public Q_SLOTS:
     void connectorRemoved(QObject* o);
-    void showPublisherSignal(Connector *c);
+    void showPublisherSignal(Connector* c);
     void tick();
+    void clear();
 
 protected:
-    void drawActivity(int life, Connector *c);
+    void drawActivity(int life, Connector* c);
     void drawConnection(const QPoint& p1, const QPoint& p2);
     void paintEvent(QPaintEvent* event);
 
 private:
+    /// PRIVATE: Use command to spawn objects (undoable)
     void addConnection(Connector* from, Connector* to);
     void removeConnection(Connector* from, Connector* to);
 

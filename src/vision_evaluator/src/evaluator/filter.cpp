@@ -78,7 +78,7 @@ void Filter::messageArrived(ConnectorIn* source)
     CvMatMessage::Ptr mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_->getMessage());
 
     if(img_msg.get() && !img_msg->value.empty()) {
-        if(!mask_msg.get()){
+        if(!mask_msg.get()) {
             mask_msg.reset(new CvMatMessage);
         }
 

@@ -28,6 +28,7 @@ public:
 public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
     void register_box_type(SelectorProxy::Ptr provider);
+    Box* makeBox(QWidget* parent, QPoint pos, const std::string& type, const std::string& uuid = "");
 
     void fill(QLayout* layout);
 

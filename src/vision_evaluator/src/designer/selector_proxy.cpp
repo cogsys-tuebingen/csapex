@@ -8,14 +8,14 @@
 
 using namespace vision_evaluator;
 
-SelectorProxy::SelectorProxy(const std::string& name, BoxedObject* prototype, QWidget* parent)
-    : QGraphicsView(parent), name_(name), prototype_box_(new vision_evaluator::Box(prototype, name))
+SelectorProxy::SelectorProxy(const std::string& type, BoxedObject* prototype, QWidget* parent)
+    : QGraphicsView(parent), type_(type), prototype_box_(new vision_evaluator::Box(prototype, type))
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     QSize size(80, 80);
 
     setScene(new QGraphicsScene(QRectF(QPoint(), size)));
-    scene()->addPixmap(prototype_box_->makePixmap(name_));
+    scene()->addPixmap(prototype_box_->makePixmap(type_));
 }
 
 SelectorProxy::~SelectorProxy()
@@ -40,7 +40,7 @@ void SelectorProxy::mousePressEvent(QMouseEvent* event)
         mimeData->setText(Box::MIME);
         mimeData->setParent(this);
         drag->setMimeData(mimeData);
-        drag->setPixmap(prototype_box_->makePixmap(name_));
+        drag->setPixmap(prototype_box_->makePixmap(type_));
         drag->exec();
     }
 }
@@ -51,11 +51,12 @@ vision_evaluator::Box* SelectorProxy::spawnObject(QWidget* parent, const QPoint&
     object->setObjectName(uuid.c_str());
     object->init(pos);
     object->show();
+    object->getContent()->setTypeName(type_);
 
     return object;
 }
 
-std::string SelectorProxy::name()
+std::string SelectorProxy::getType()
 {
-    return name_;
+    return type_;
 }

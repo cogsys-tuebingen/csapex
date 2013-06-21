@@ -8,12 +8,14 @@
 /// SYSTEM
 #include <QWidget>
 
-namespace vision_evaluator {
+namespace vision_evaluator
+{
 
 class SelectorProxy;
 class Box;
 
-namespace command {
+namespace command
+{
 
 struct AddBox : public Command {
     AddBox(SelectorProxy* selector, QWidget* parent, QPoint pos);

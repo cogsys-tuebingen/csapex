@@ -14,12 +14,12 @@
 #include <QPainter>
 
 STATIC_INIT(OutputDisplay, generic, {
-                SelectorProxy::ProxyConstructor c; \
-                c.setName("Output Display"); \
-                c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<OutputDisplay> >(), \
-                boost::lambda::_1, (QWidget*) NULL)); \
-                SelectorProxy::registerProxy(c); \
-            });
+    SelectorProxy::ProxyConstructor c; \
+    c.setType("Output Display"); \
+    c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<OutputDisplay> >(), \
+    boost::lambda::_1, (QWidget*) NULL)); \
+    SelectorProxy::registerProxy(c); \
+});
 
 using namespace vision_evaluator;
 

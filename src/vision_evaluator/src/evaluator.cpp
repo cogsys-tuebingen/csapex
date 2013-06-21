@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         w.setDualMode();
     }
 
-    w.show();
+    w.start();
 
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
     signal(SIGINT, siginthandler);

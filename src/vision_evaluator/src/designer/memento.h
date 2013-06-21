@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
+#include <yaml-cpp/yaml.h>
 
 class Memento
 {
@@ -12,6 +13,9 @@ public:
 public:
     Memento();
     virtual ~Memento();
+
+    virtual void writeYaml(YAML::Emitter& out) const;
+    virtual void readYaml(const YAML::Node& node);
 };
 
 #endif // MEMENTO_H

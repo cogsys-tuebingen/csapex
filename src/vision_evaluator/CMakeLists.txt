@@ -126,6 +126,7 @@ add_library(designer
     src/designer/connection_type.cpp
     src/designer/design_board.cpp
     src/designer/designer.cpp
+    src/designer/designerio.cpp
     src/designer/memento.cpp
     src/designer/overlay.cpp
     src/designer/selector_proxy.cpp
@@ -164,7 +165,7 @@ add_library(vision_evaluation
 )
 target_link_libraries(vision_evaluation
     designer
-    ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 
 add_executable(vision_evaluator

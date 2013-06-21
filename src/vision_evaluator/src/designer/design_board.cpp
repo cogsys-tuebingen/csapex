@@ -40,7 +40,7 @@ DesignBoard::~DesignBoard()
 
 void DesignBoard::updateCursor()
 {
-    if(space_){
+    if(space_) {
         if(drag_) {
             setCursor(Qt::ClosedHandCursor);
         } else {
@@ -51,7 +51,7 @@ void DesignBoard::updateCursor()
     }
 }
 
-void DesignBoard::paintEvent(QPaintEvent *)
+void DesignBoard::paintEvent(QPaintEvent*)
 {
     QStyleOption opt;
     opt.init(this);
@@ -84,14 +84,14 @@ void DesignBoard::findMinSize(Box* box)
     setMinimumSize(minimum);
 }
 
-void DesignBoard::keyPressEvent(QKeyEvent *e)
+void DesignBoard::keyPressEvent(QKeyEvent* e)
 {
     if(e->key() == Qt::Key_Space) {
         space_ = true;
     }
 }
 
-void DesignBoard::keyReleaseEvent(QKeyEvent *e)
+void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
     if(!e->isAutoRepeat() && e->key() == Qt::Key_Space) {
         space_ = false;
@@ -99,20 +99,20 @@ void DesignBoard::keyReleaseEvent(QKeyEvent *e)
     }
 }
 
-void DesignBoard::mousePressEvent(QMouseEvent *e)
+void DesignBoard::mousePressEvent(QMouseEvent* e)
 {
     drag_ = true;
     drag_start_pos_ = e->globalPos();
     updateCursor();
 }
 
-void DesignBoard::mouseReleaseEvent(QMouseEvent *e)
+void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 {
     drag_ = false;
     updateCursor();
 }
 
-void DesignBoard::mouseMoveEvent(QMouseEvent *e)
+void DesignBoard::mouseMoveEvent(QMouseEvent* e)
 {
     if(drag_ && space_) {
         QSize minimum = minimumSize();
@@ -132,7 +132,7 @@ void DesignBoard::mouseMoveEvent(QMouseEvent *e)
         QScrollArea* parent_scroll = NULL;
         QWidget* tmp = parentWidget();
         while(tmp != NULL) {
-            parent_scroll = dynamic_cast<QScrollArea*> (tmp);
+            parent_scroll = dynamic_cast<QScrollArea*>(tmp);
             if(parent_scroll) {
                 break;
             }
@@ -250,4 +250,9 @@ void DesignBoard::dropEvent(QDropEvent* e)
     if(e->mimeData()->text() == Connector::MIME) {
         e->ignore();
     }
+}
+
+Overlay* DesignBoard::getOverlay()
+{
+    return overlay;
 }

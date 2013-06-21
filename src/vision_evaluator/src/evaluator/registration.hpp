@@ -33,16 +33,16 @@
     STATIC_INIT(Manager, class_name, { \
         std::cout << "register filter instance " << #class_name << std::endl; \
         Manager::Constructor constructor; \
-        constructor.setName(#class_name); \
+        constructor.setType(#class_name); \
         constructor.setConstructor(boost::lambda::new_ptr<class_name>()); \
         vision_evaluator::Manager manager;\
         manager.registerConstructor(constructor); \
     \
         SelectorProxy::ProxyConstructor c;\
-        c.setName(#class_name);\
+        c.setType(#class_name);\
         c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<class_name> >(), boost::lambda::_1, (QWidget*) NULL)); \
         SelectorProxy::registerProxy(c);\
     });\
-
+ 
 
 #endif // GENERIC_MANAGER_H

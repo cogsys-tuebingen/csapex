@@ -51,10 +51,17 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     QObject::connect(ui->actionLoad, SIGNAL(triggered()), ui->designer, SLOT(load()));
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), ui->designer, SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), ui->designer, SLOT(redo()));
+    QObject::connect(ui->actionClear, SIGNAL(triggered()), ui->designer, SLOT(clear()));
 
     QObject::connect(ui->designer, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
     updateMenu();
+}
+
+void EvaluationWindow::start()
+{
+    show();
+    ui->designer->load();
 }
 
 void EvaluationWindow::updateMenu()
@@ -77,12 +84,12 @@ void EvaluationWindow::closeEvent(QCloseEvent* event)
         int r = QMessageBox::warning(this, tr("Vision Designer"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if (r == QMessageBox::Save) {
+        if(r == QMessageBox::Save) {
             std::cout << "save" << std::endl;
 
             ui->designer->save();
             event->accept();
-        } else if (r == QMessageBox::Discard) {
+        } else if(r == QMessageBox::Discard) {
             event->accept();
         } else {
             event->ignore();

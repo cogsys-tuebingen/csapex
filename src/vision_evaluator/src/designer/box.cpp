@@ -17,7 +17,8 @@ using namespace vision_evaluator;
 const QString Box::MIME = "vision_evaluator/box";
 const QString Box::MIME_MOVE = "vision_evaluator/box/move";
 
-Box::Box(BoxedObject *content, const std::string &uuid, QWidget *parent)
+
+Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), down_(false), content_(content), uuid_(uuid)
 {
     ui->setupUi(this);
@@ -36,12 +37,62 @@ Box::Box(BoxedObject *content, const std::string &uuid, QWidget *parent)
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
+
+
+YAML::Emitter& Box::save(YAML::Emitter& out) const
+{
+    out << YAML::Flow;
+    out << YAML::BeginMap;
+    out << YAML::Key << "type";
+    out << YAML::Value << content_->getTypeName();
+    out << YAML::Key << "uuid";
+    out << YAML::Value << UUID();
+    out << YAML::Key << "pos";
+    out << YAML::Value << YAML::BeginSeq << pos().x() << pos().y() << YAML::EndSeq;
+
+    Memento::Ptr state = getState();
+    if(state.get()) {
+        out << YAML::Key << "state";
+        out << YAML::Value << YAML::BeginMap;
+        state->writeYaml(out);
+        out << YAML::EndMap;
+    }
+
+    out << YAML::Key << "connections";
+    out << YAML::Value << YAML::BeginMap;
+
+    if(!output.empty()) {
+        out << YAML::Key << "out";
+        out << YAML::Value << YAML::BeginSeq;
+        BOOST_FOREACH(ConnectorOut* o, output) {
+            out << YAML::BeginMap;
+            out << YAML::Key << "uuid";
+            out << YAML::Value << o->UUID();
+            out << YAML::Key << "targets";
+            out << YAML::Value << YAML::BeginSeq;
+            for(ConnectorOut::TargetIterator it = o->beginTargets(); it != o->endTargets(); ++it) {
+                ConnectorIn* i = *it;
+                out << i->UUID();
+            }
+            out << YAML::EndSeq;
+
+            out << YAML::EndMap;
+        }
+        out << YAML::EndSeq;
+    }
+
+    out << YAML::EndMap;
+
+    out << YAML::EndMap;
+    return out;
+}
+
 void Box::stop()
 {
     content_->stop();
 }
 
-void Box::setUUID(const std::string &uuid)
+void Box::setUUID(const std::string& uuid)
 {
     uuid_ = uuid;
     ui->content->setTitle(uuid_.c_str());
@@ -70,6 +121,28 @@ void Box::addOutput(ConnectorOut* out)
     QObject::connect(out, SIGNAL(connectionChanged()), content_, SLOT(connectorChanged()));
 }
 
+ConnectorIn* Box::getInput(const std::string& uuid)
+{
+    BOOST_FOREACH(ConnectorIn* in, input) {
+        if(in->UUID() == uuid) {
+            return in;
+        }
+    }
+
+    return NULL;
+}
+
+ConnectorOut* Box::getOutput(const std::string& uuid)
+{
+    BOOST_FOREACH(ConnectorOut* out, output) {
+        if(out->UUID() == uuid) {
+            return out;
+        }
+    }
+
+    return NULL;
+}
+
 void Box::init(const QPoint& pos)
 {
     setGeometry(pos.x(), pos.y(), 100, 100);
@@ -78,6 +151,11 @@ void Box::init(const QPoint& pos)
     ui->content->setLayout(layout);
 
     content_->fill(layout);
+}
+
+BoxedObject* Box::getContent()
+{
+    return content_;
 }
 
 Box::~Box()
@@ -147,7 +225,7 @@ void Box::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void Box::moveEvent(QMoveEvent *)
+void Box::moveEvent(QMoveEvent*)
 {
     BoxManager::instance().setDirty(true);
     Q_EMIT moved(this);
@@ -209,12 +287,12 @@ void Box::showContextMenu(const QPoint& pos)
 }
 
 
-Memento::Ptr Box::saveState()
+Memento::Ptr Box::getState() const
 {
-    return content_->saveState();
+    return content_->getState();
 }
 
-void Box::loadState(Memento::Ptr state)
+void Box::setState(Memento::Ptr state)
 {
-    content_->loadState(state);
+    content_->setState(state);
 }

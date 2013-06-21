@@ -28,19 +28,22 @@ public:
     void setName(const std::string& name);
     std::string getName();
 
+    void setTypeName(const std::string& type_name);
+    std::string getTypeName();
+
     void setBox(Box* box);
 
     virtual void fill(QBoxLayout* layout);
 
-    virtual Memento::Ptr saveState();
-    virtual void loadState(Memento::Ptr memento);
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
 
     bool isEnabled();
     bool isError();
 
 public Q_SLOTS:
     virtual void stop();
-    virtual void setError(bool e, const std::string &msg = "");
+    virtual void setError(bool e, const std::string& msg = "");
 
     virtual void enable(bool e);
     virtual void enable();
@@ -52,6 +55,7 @@ protected:
     void makeThread();
 
 protected:
+    std::string type_name_;
     std::string name_;
 
     Box* box_;

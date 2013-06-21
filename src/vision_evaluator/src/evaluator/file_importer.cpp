@@ -19,7 +19,7 @@
 
 STATIC_INIT(FileImporter, generic, {
     SelectorProxy::ProxyConstructor c; \
-    c.setName("File Importer"); \
+    c.setType("File Importer"); \
     c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<FileImporter> >(), \
     boost::lambda::_1, (QWidget*) NULL)); \
     SelectorProxy::registerProxy(c); \
@@ -139,7 +139,7 @@ void FileImporter::importDialog()
     import(filename);
 }
 
-Memento::Ptr FileImporter::saveState()
+Memento::Ptr FileImporter::getState() const
 {
     boost::shared_ptr<FileImporterWorker::State> memento(new FileImporterWorker::State);
     *memento = worker->state;
@@ -147,7 +147,7 @@ Memento::Ptr FileImporter::saveState()
     return memento;
 }
 
-void FileImporter::loadState(Memento::Ptr memento)
+void FileImporter::setState(Memento::Ptr memento)
 {
     boost::shared_ptr<FileImporterWorker::State> m = boost::dynamic_pointer_cast<FileImporterWorker::State> (memento);
     assert(m.get());

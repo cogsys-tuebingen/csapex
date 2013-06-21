@@ -45,7 +45,7 @@ void OptionKeypointDescriptor::insert(QBoxLayout* layout)
     ExtractorManager manager;
     typedef std::pair<std::string, ExtractorManager::ExtractorInitializer> Pair;
     BOOST_FOREACH(Pair fc, manager.descriptorExtractors()) {
-        selection->addItem(fc.second.getName().c_str());
+        selection->addItem(fc.second.getType().c_str());
     }
     layout->addLayout(QtHelper::wrap("Descriptor", selection));
 
