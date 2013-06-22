@@ -32,6 +32,8 @@ DesignBoard::DesignBoard(QWidget* parent)
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
+    BoxManager::instance().setContainer(this);
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
@@ -180,11 +182,16 @@ bool DesignBoard::eventFilter(QObject* o, QEvent* e)
         QObject* child = ch->child();
         Box* box = dynamic_cast<Box*>(child);
         if(box) {
-            box->setOverlay(overlay);
-
             findMinSize(box);
 
             QObject::connect(box, SIGNAL(moved(Box*)), this, SLOT(findMinSize(Box*)));
+            QObject::connect(box, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(addConnection(ConnectorOut*,ConnectorIn*)));
+            QObject::connect(box, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(removeConnection(ConnectorOut*,ConnectorIn*)));
+
+            QObject::connect(box, SIGNAL(messageSent(ConnectorOut*)), overlay, SLOT(showPublisherSignal(ConnectorOut*)));
+            QObject::connect(box, SIGNAL(messageArrived(ConnectorIn*)), overlay, SLOT(showPublisherSignal(ConnectorIn*)));
+            QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(drawConnectionPreview(Connector*,Connector*)));
+            QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnection()));
         }
 
         overlay->raise();
@@ -220,7 +227,7 @@ void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
     if(e->mimeData()->text() == Connector::MIME) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
-        overlay->drawTemporaryLine(QLine(c->centerPoint(), e->pos()));
+        overlay->drawTemporaryConnection(c, e->pos());
     }
 
     if(e->mimeData()->text() == Box::MIME_MOVE) {

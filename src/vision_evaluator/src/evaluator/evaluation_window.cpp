@@ -5,6 +5,9 @@
 #include "ui_evaluation_window.h"
 #include "image_panel.h"
 
+/// PROJECT
+#include <designer/box_manager.h>
+
 /// SYSTEM
 #include <iostream>
 #include <QCloseEvent>
@@ -48,26 +51,44 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     QObject::connect(ui->fps, SIGNAL(valueChanged(int)), this, SLOT(set_fps(int)));
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), ui->designer, SLOT(save()));
+    QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), ui->designer, SLOT(saveAs()));
     QObject::connect(ui->actionLoad, SIGNAL(triggered()), ui->designer, SLOT(load()));
+    QObject::connect(ui->actionReload, SIGNAL(triggered()), ui->designer, SLOT(reload()));
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), ui->designer, SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), ui->designer, SLOT(redo()));
     QObject::connect(ui->actionClear, SIGNAL(triggered()), ui->designer, SLOT(clear()));
 
     QObject::connect(ui->designer, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
+    QObject::connect(ui->designer, SIGNAL(configChanged()), this, SLOT(updateTitle()));
+    QObject::connect(&BoxManager::instance(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
+
     updateMenu();
+    updateTitle();
 }
 
 void EvaluationWindow::start()
 {
     show();
-    ui->designer->load();
+    ui->designer->reload();
 }
 
 void EvaluationWindow::updateMenu()
 {
     ui->actionUndo->setDisabled(!ui->designer->canUndo());
     ui->actionRedo->setDisabled(!ui->designer->canRedo());
+}
+
+void EvaluationWindow::updateTitle()
+{
+    std::stringstream window;
+    window << "Vision Evaluator (" << ui->designer->getConfig() << ")";
+
+    if(BoxManager::instance().isDirty()) {
+        window << " *";
+    }
+
+    setWindowTitle(window.str().c_str());
 }
 
 void EvaluationWindow::set_fps(int fps)

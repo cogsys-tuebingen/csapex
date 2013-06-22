@@ -2,7 +2,8 @@
 #include "overlay.h"
 
 /// COMPONENT
-#include "connector.h"
+#include "connector_out.h"
+#include "connector_in.h"
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -31,19 +32,35 @@ Overlay::Overlay(QWidget* parent)
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void Overlay::drawTemporaryLine(const QLine& line)
+void Overlay::drawTemporaryConnection(Connector *from, const QPoint& end)
 {
-    temp_line = line;
+    if(dynamic_cast<ConnectorOut*>(from)) {
+        temp_line = QLine(from->centerPoint(), end);
+    } else {
+        temp_line = QLine(end, from->centerPoint());
+    }
+
     repaint();
 }
 
-void Overlay::deleteTemporaryLine()
+void Overlay::drawConnectionPreview(Connector *from, Connector *to)
+{
+    if(dynamic_cast<ConnectorOut*>(from)) {
+        temp_line = QLine(from->centerPoint(), to->centerPoint());
+    } else {
+        temp_line = QLine(to->centerPoint(), from->centerPoint());
+    }
+
+    repaint();
+}
+
+void Overlay::deleteTemporaryConnection()
 {
     temp_line = QLine();
     repaint();
 }
 
-void Overlay::addConnection(Connector* from, Connector* to)
+void Overlay::addConnection(ConnectorOut* from, ConnectorIn* to)
 {
     connections.push_back(std::make_pair(from, to));
 
@@ -59,6 +76,16 @@ void Overlay::addConnection(Connector* from, Connector* to)
 void Overlay::connectorRemoved(QObject* o)
 {
     connectorRemoved((Connector*) o);
+}
+
+void Overlay::showPublisherSignal(ConnectorIn *c)
+{
+    showPublisherSignal((Connector*) c);
+}
+
+void Overlay::showPublisherSignal(ConnectorOut *c)
+{
+    showPublisherSignal((Connector*) c);
 }
 
 void Overlay::showPublisherSignal(Connector* c)
@@ -83,20 +110,35 @@ void Overlay::connectorRemoved(Connector* c)
         }
     }
 
+    clearActivity(c);
+
     repaint();
 }
 
-void Overlay::removeConnection(Connector* from, Connector* to)
+void Overlay::removeConnection(ConnectorOut* from, ConnectorIn* to)
 {
+    bool found = false;
     for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
         ConnectionPair& connection = *i;
 
         if(connection.first == from && connection.second == to) {
             i = connections.erase(i);
+            found = true;
         } else {
             ++i;
         }
     }
+
+    if(!found) {
+        std::cerr << "could not remove connection between " << from->UUID() << " and " << to->UUID() << std::endl;
+        std::cerr << "connections are:" << std::endl;
+        BOOST_FOREACH(ConnectionPair& connection, connections) {
+            std::cerr << " -" << connection.first->UUID() << " > " << connection.second->UUID() << std::endl;
+        }
+    }
+
+    clearActivity(from);
+    clearActivity(to);
 
     from->update();
     to->update();
@@ -129,6 +171,19 @@ void Overlay::drawActivity(int life, Connector* c)
         int w = activity_marker_min_width_ + f * (activity_marker_max_width_ - activity_marker_min_width_);
         painter->setPen(QPen(QColor(0x33, 0x33, 0xCC, activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * (1-f)), w));
         painter->drawEllipse(c->centerPoint(), r, r);
+    }
+}
+
+void Overlay::clearActivity(Connector *c)
+{
+    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
+        std::pair<int, Connector*>& p = *it;
+
+        if(p.second == c) {
+            it = publisher_signals_.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 

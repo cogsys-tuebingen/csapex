@@ -1,5 +1,5 @@
-#ifndef COMMAND_ADD_CONNECTION_HPP
-#define COMMAND_ADD_CONNECTION_HPP
+#ifndef COMMAND_DELETE_CONNECTION_H
+#define COMMAND_DELETE_CONNECTION_H
 
 /// COMPONENT
 #include "command.h"
@@ -14,15 +14,15 @@ class ConnectorOut;
 namespace command
 {
 
-struct AddConnection : public Command {
-    AddConnection(Connector* a, Connector* b);
+struct DeleteConnection : public Command {
+    DeleteConnection(Connector* a, Connector* b);
 
 protected:
     void execute();
     bool undo();
     void redo();
 
-    void refresh();
+    bool refresh();
 
 private:
     ConnectorOut* from;
@@ -33,4 +33,5 @@ private:
 };
 }
 }
-#endif // COMMAND_ADD_CONNECTION_HPP
+
+#endif // COMMAND_DELETE_CONNECTION_H

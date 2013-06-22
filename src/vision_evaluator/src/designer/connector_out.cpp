@@ -4,6 +4,8 @@
 /// COMPONENT
 #include "connector_in.h"
 #include "design_board.h"
+#include "command_meta.h"
+#include "command_delete_connection.h"
 
 /// SYSTEM
 #include <assert.h>
@@ -21,8 +23,8 @@ ConnectorOut::~ConnectorOut()
 {
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         i->removeConnection(this);
+        Q_EMIT connectionDestroyed(this, i);
     }
-    Q_EMIT connectionChanged();
 }
 
 ConnectorOut::TargetIterator ConnectorOut::beginTargets()
@@ -38,24 +40,42 @@ void ConnectorOut::removeConnection(Connector* other_side)
 {
     for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
-            i = targets_.erase(i);
-            Q_EMIT connectionChanged();
+            other_side->removeConnection(this);
+            Q_EMIT connectionDestroyed(this, *i);
 
+            i = targets_.erase(i);
         } else {
             ++i;
         }
     }
 }
 
-void ConnectorOut::removeAllConnections()
+Command::Ptr ConnectorOut::removeAllConnectionsCmd()
+{
+    command::Meta::Ptr removeAll(new command::Meta);
+
+    BOOST_FOREACH(ConnectorIn* target, targets_) {
+        Command::Ptr removeThis(new command::DeleteConnection(this, target));
+        removeAll->add(removeThis);
+    }
+
+    return removeAll;
+}
+
+void ConnectorOut::removeAllConnectionsNotUndoable()
 {
     for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
         (*i)->removeConnection(this);
+        Q_EMIT connectionDestroyed(this, *i);
         i = targets_.erase(i);
     }
 
     Q_EMIT disconnected(this);
-    Q_EMIT connectionChanged();
+}
+
+void ConnectorOut::connectForcedWithoutCommand(ConnectorIn *other_side)
+{
+    tryConnect(other_side);
 }
 
 bool ConnectorOut::tryConnect(Connector* other_side)
@@ -76,7 +96,8 @@ bool ConnectorOut::tryConnect(Connector* other_side)
     targets_.push_back(input);
 
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
-    Q_EMIT connectionChanged();
+
+    Q_EMIT connectionFormed(this, input);
 
     return true;
 }
@@ -102,5 +123,5 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         return;
     }
 
-    overlay_->showPublisherSignal(this);
+    Q_EMIT messageSent(this);
 }

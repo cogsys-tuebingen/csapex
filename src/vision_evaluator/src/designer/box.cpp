@@ -5,6 +5,9 @@
 #include "ui_box.h"
 #include "boxed_object.h"
 #include "box_manager.h"
+#include "command_move_box.h"
+#include "command_delete_box.h"
+#include "command_meta.h"
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -17,54 +20,32 @@ using namespace vision_evaluator;
 const QString Box::MIME = "vision_evaluator/box";
 const QString Box::MIME_MOVE = "vision_evaluator/box/move";
 
-
-Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), down_(false), content_(content), uuid_(uuid)
-{
-    ui->setupUi(this);
-
-    setObjectName(ui->content->title());
-
-    ui->content->installEventFilter(this);
-
-    content_->setBox(this);
-
-    setContextMenuPolicy(Qt::CustomContextMenu);
-
-    connect(ui->content, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
-    connect(ui->content, SIGNAL(toggled(bool)), content, SLOT(enable(bool)));
-
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
-}
-
-
-
-YAML::Emitter& Box::save(YAML::Emitter& out) const
+void Box::State::writeYaml(YAML::Emitter &out) const
 {
     out << YAML::Flow;
     out << YAML::BeginMap;
     out << YAML::Key << "type";
-    out << YAML::Value << content_->getTypeName();
+    out << YAML::Value << type_;
     out << YAML::Key << "uuid";
-    out << YAML::Value << UUID();
+    out << YAML::Value << uuid_;
     out << YAML::Key << "pos";
-    out << YAML::Value << YAML::BeginSeq << pos().x() << pos().y() << YAML::EndSeq;
+    out << YAML::Value << YAML::BeginSeq << parent->pos().x() << parent->pos().y() << YAML::EndSeq;
 
-    Memento::Ptr state = getState();
-    if(state.get()) {
+    boxed_state = parent->content_->getState();
+    if(boxed_state.get()) {
         out << YAML::Key << "state";
         out << YAML::Value << YAML::BeginMap;
-        state->writeYaml(out);
+        boxed_state->writeYaml(out);
         out << YAML::EndMap;
     }
 
     out << YAML::Key << "connections";
     out << YAML::Value << YAML::BeginMap;
 
-    if(!output.empty()) {
+    if(!parent->output.empty()) {
         out << YAML::Key << "out";
         out << YAML::Value << YAML::BeginSeq;
-        BOOST_FOREACH(ConnectorOut* o, output) {
+        BOOST_FOREACH(ConnectorOut* o, parent->output) {
             out << YAML::BeginMap;
             out << YAML::Key << "uuid";
             out << YAML::Value << o->UUID();
@@ -84,6 +65,88 @@ YAML::Emitter& Box::save(YAML::Emitter& out) const
     out << YAML::EndMap;
 
     out << YAML::EndMap;
+}
+
+void Box::State::readYaml(const YAML::Node &node)
+{
+    if(node.FindValue("state")) {
+        const YAML::Node& state_map = node["state"];
+        boxed_state = parent->content_->getState();
+        boxed_state->readYaml(state_map);
+    }
+
+    if(node.FindValue("connections")) {
+        const YAML::Node& connections = node["connections"];
+        if(connections.FindValue("out")) {
+            const YAML::Node& out_list = connections["out"];
+            assert(out_list.Type() == YAML::NodeType::Sequence);
+
+            for(unsigned i=0; i<out_list.size(); ++i) {
+                const YAML::Node& connector = out_list[i];
+                assert(connector.Type() == YAML::NodeType::Map);
+                std::string from_uuid;
+                connector["uuid"] >> from_uuid;
+
+                const YAML::Node& targets = connector["targets"];
+                assert(targets.Type() == YAML::NodeType::Sequence);
+
+                for(unsigned j=0; j<targets.size(); ++j) {
+                    std::string to_uuid;
+                    targets[j] >> to_uuid;
+
+                    ConnectorOut* from = parent->getOutput(from_uuid);
+                    if(from == NULL) {
+                        std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+                        continue;
+                    }
+
+                    Box* target_box = BoxManager::instance().findConnectorOwner(to_uuid);
+                    if(target_box == NULL) {
+                        std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
+                        continue;
+                    }
+
+                    ConnectorIn* to = target_box->getInput(to_uuid);
+                    assert(to); // if parent box has been found, this should never happen
+
+                    from->connectForcedWithoutCommand(to);
+                }
+            }
+
+        }
+    }
+}
+
+
+Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), state(new State(this)), down_(false)
+{
+    ui->setupUi(this);
+
+    content_ = content;
+    content_->setBox(this);
+
+    state->uuid_ = uuid;
+
+    setObjectName(ui->content->title());
+
+    ui->content->installEventFilter(this);
+
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(ui->content, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+    connect(ui->content, SIGNAL(toggled(bool)), content, SLOT(enable(bool)));
+
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+}
+
+
+
+YAML::Emitter& Box::save(YAML::Emitter& out) const
+{
+    state->writeYaml(out);
+
     return out;
 }
 
@@ -94,13 +157,23 @@ void Box::stop()
 
 void Box::setUUID(const std::string& uuid)
 {
-    uuid_ = uuid;
-    ui->content->setTitle(uuid_.c_str());
+    state->uuid_ = uuid;
+    ui->content->setTitle(state->uuid_.c_str());
 }
 
 std::string Box::UUID() const
 {
-    return uuid_;
+    return state->uuid_;
+}
+
+void Box::setType(const std::string& type)
+{
+    state->type_ = type;
+}
+
+std::string Box::getType() const
+{
+    return state->type_;
 }
 
 void Box::addInput(ConnectorIn* in)
@@ -109,7 +182,9 @@ void Box::addInput(ConnectorIn* in)
     ui->input_layout->addWidget(in);
     input.push_back(in);
 
-    QObject::connect(in, SIGNAL(connectionChanged()), content_, SLOT(connectorChanged()));
+    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
+    QObject::connect(in, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::connect(in, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }
 
 void Box::addOutput(ConnectorOut* out)
@@ -118,7 +193,12 @@ void Box::addOutput(ConnectorOut* out)
     ui->output_layout->addWidget(out);
     output.push_back(out);
 
-    QObject::connect(out, SIGNAL(connectionChanged()), content_, SLOT(connectorChanged()));
+    QObject::connect(out, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)));
+    QObject::connect(out, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)));
+    QObject::connect(out, SIGNAL(messageSent(ConnectorOut*)), this, SIGNAL(messageSent(ConnectorOut*)));
+    QObject::connect(out, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::connect(out, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+
 }
 
 ConnectorIn* Box::getInput(const std::string& uuid)
@@ -191,6 +271,7 @@ void Box::enabledChange(bool val)
 {
     if(val)  {
         content_->enable();
+        BoxManager::instance().setDirty(true);
     } else {
         content_->disable();
     }
@@ -225,10 +306,12 @@ void Box::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void Box::moveEvent(QMoveEvent*)
+void Box::moveEvent(QMoveEvent* e)
 {
-    BoxManager::instance().setDirty(true);
-    Q_EMIT moved(this);
+    QPoint delta = (e->pos() - e->oldPos());
+    if(delta.x() == 0 && delta.y() == 0) {
+        return;
+    }
 }
 
 void Box::startDrag(QPoint offset)
@@ -240,7 +323,14 @@ void Box::startDrag(QPoint offset)
     mimeData->setUserData(0, new MoveOffset(offset));
     drag->setMimeData(mimeData);
 
+    QPoint start_pos = pos();
     drag->exec();
+    QPoint end_pos = pos();
+
+    Command::Ptr cmd(new command::MoveBox(this, start_pos, end_pos));
+    BoxManager::instance().execute(cmd);
+
+    Q_EMIT moved(this);
 }
 
 QPixmap Box::makePixmap(const std::string& label)
@@ -256,18 +346,6 @@ QPixmap Box::makePixmap(const std::string& label)
     return QPixmap::fromImage(img);
 }
 
-void Box::setOverlay(Overlay* o)
-{
-    overlay_ = o;
-
-    BOOST_FOREACH(ConnectorIn* i, input) {
-        i->setOverlay(o);
-    }
-    BOOST_FOREACH(ConnectorOut* i, output) {
-        i->setOverlay(o);
-    }
-}
-
 void Box::showContextMenu(const QPoint& pos)
 {
     QPoint globalPos = mapToGlobal(pos);
@@ -281,7 +359,8 @@ void Box::showContextMenu(const QPoint& pos)
 
     if(selectedItem) {
         if(selectedItem->text() == remove_txt) {
-            deleteLater();
+            Command::Ptr cmd(new command::DeleteBox(this));
+            BoxManager::instance().execute(cmd);
         }
     }
 }
@@ -289,10 +368,38 @@ void Box::showContextMenu(const QPoint& pos)
 
 Memento::Ptr Box::getState() const
 {
-    return content_->getState();
+    State::Ptr memento(new State);
+    *memento = *state;
+
+    memento->boxed_state = content_->getState();
+
+    return memento;
 }
 
-void Box::setState(Memento::Ptr state)
+void Box::setState(Memento::Ptr memento)
 {
-    content_->setState(state);
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    *state = *m;
+    state->parent = this;
+    content_->setState(m->boxed_state);
+}
+
+Command::Ptr Box::removeAllConnectionsCmd()
+{
+    command::Meta::Ptr cmd(new command::Meta);
+
+    BOOST_FOREACH(ConnectorIn* i, input) {
+        if(i->isConnected()) {
+            cmd->add(i->removeAllConnectionsCmd());
+        }
+    }
+    BOOST_FOREACH(ConnectorOut* i, output) {
+        if(i->isConnected()) {
+            cmd->add(i->removeAllConnectionsCmd());
+        }
+    }
+
+    return cmd;
 }

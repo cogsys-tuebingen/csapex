@@ -11,8 +11,7 @@
 using namespace vision_evaluator;
 using namespace vision_evaluator::command;
 
-AddConnection::AddConnection(Overlay* overlay, Connector* a, Connector* b, QWidget* parent)
-    : overlay(overlay), parent(parent)
+AddConnection::AddConnection(Connector* a, Connector* b)
 {
     from = dynamic_cast<ConnectorOut*>(a);
     if(from) {
@@ -30,39 +29,30 @@ AddConnection::AddConnection(Overlay* overlay, Connector* a, Connector* b, QWidg
 
 void AddConnection::execute()
 {
-
     if(from->tryConnect(to)) {
-        overlay->addConnection(from, to);
+        BoxManager::instance().setDirty(true);
     }
 }
 
-void AddConnection::undo()
+bool AddConnection::undo()
 {
+    refresh();
     from->removeConnection(to);
-    to->removeConnection(from);
-    overlay->removeConnection(from, to);
+    BoxManager::instance().setDirty(true);
+
+    return true;
 }
 void AddConnection::redo()
 {
-    // from and to might not be valid anymore
-    // (if they have been deleted and restored)
-    from = find<ConnectorOut>(from_uuid);
-    to = find<ConnectorIn>(to_uuid);
-
-    assert(from);
-    assert(to);
-
+    refresh();
     execute();
 }
 
-template <class C>
-C* AddConnection::find(const std::string& uuid)
+void AddConnection::refresh()
 {
-    QList<C*> children = parent->findChildren<C*>();
-    BOOST_FOREACH(C* c, children) {
-        if(c->UUID() == uuid) {
-            return c;
-        }
-    }
-    return NULL;
+    from = BoxManager::instance().findConnectorOwner(from_uuid)->getOutput(from_uuid);
+    to = BoxManager::instance().findConnectorOwner(to_uuid)->getInput(to_uuid);
+
+    assert(from);
+    assert(to);
 }

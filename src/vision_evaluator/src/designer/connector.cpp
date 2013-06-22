@@ -61,6 +61,12 @@ void Connector::removeConnection(QObject* other_side)
     }
 }
 
+void Connector::removeAllConnectionsUndoable()
+{
+    Command::Ptr cmd = removeAllConnectionsCmd();
+    BoxManager::instance().execute(cmd);
+}
+
 void Connector::findParents()
 {
     QWidget* tmp = this;
@@ -98,7 +104,8 @@ void Connector::dragMoveEvent(QDragMoveEvent* e)
 {
     if(e->mimeData()->text() == Connector::MIME) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        overlay_->drawTemporaryLine(QLine(from->centerPoint(), centerPoint()));
+
+        Q_EMIT(connectionInProgress(this, from));
     }
 }
 
@@ -108,7 +115,7 @@ void Connector::dropEvent(QDropEvent* e)
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
-            Command::Ptr cmd(new command::AddConnection(overlay_, this, from, designer));
+            Command::Ptr cmd(new command::AddConnection(this, from));
             BoxManager::instance().execute(cmd);
         }
     }
@@ -125,14 +132,14 @@ void Connector::mousePressEvent(QMouseEvent* e)
 
         drag->exec();
 
-        overlay_->deleteTemporaryLine();
+        Q_EMIT connectionDone();
     }
 }
 
 void Connector::mouseReleaseEvent(QMouseEvent* e)
 {
     if(e->button() == Qt::MiddleButton) {
-        removeAllConnections();
+        removeAllConnectionsUndoable();
     }
 }
 

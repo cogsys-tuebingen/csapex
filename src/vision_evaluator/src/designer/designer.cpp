@@ -11,12 +11,15 @@
 #include "box.h"
 #include "../qt_helper.hpp"
 #include "designerio.h"
+#include "command_meta.h"
+#include "command_delete_box.h"
 
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <QResizeEvent>
 #include <QMenu>
 #include <QScrollBar>
+#include <QFileDialog>
 
 using namespace vision_evaluator;
 
@@ -24,6 +27,8 @@ Designer::Designer(QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer)
 {
     ui->setupUi(this);
+
+    setCurrentConfig(DesignerIO::default_config);
 
     BoxManager::instance().fill(ui->widget_selection->layout());
 
@@ -68,12 +73,44 @@ bool Designer::canRedo()
 
 void Designer::save()
 {
-    DesignerIO::save(this);
+    DesignerIO::save(this, current_config_);
+}
+
+void Designer::setCurrentConfig(const std::string& filename)
+{
+    current_config_ = filename;
+
+    Q_EMIT configChanged();
+}
+
+std::string Designer::getConfig()
+{
+    return current_config_;
+}
+
+void Designer::saveAs()
+{
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", current_config_.c_str(), DesignerIO::config_selector.c_str());
+
+    if(!filename.isEmpty()) {
+        DesignerIO::save(this, filename.toUtf8().constData());
+        setCurrentConfig(filename.toUtf8().constData());
+    }
 }
 
 void Designer::load()
 {
-    DesignerIO::load(this);
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", current_config_.c_str(), DesignerIO::config_selector.c_str());
+
+    if(QFile(filename).exists()) {
+        DesignerIO::load(this, filename.toUtf8().constData());
+        setCurrentConfig(filename.toUtf8().constData());
+    }
+}
+
+void Designer::reload()
+{
+    DesignerIO::load(this, current_config_);
 }
 
 void Designer::undo()
@@ -88,12 +125,12 @@ void Designer::redo()
 
 void Designer::clear()
 {
+    command::Meta::Ptr clear(new command::Meta);
+
     QList<vision_evaluator::Box*> boxes = findChildren<vision_evaluator::Box*> ();
     BOOST_FOREACH(vision_evaluator::Box* box, boxes) {
-        box->stop();
+        Command::Ptr cmd(new command::DeleteBox(box));
+        clear->add(cmd);
     }
-    ui->designer->getOverlay()->clear();
-    BOOST_FOREACH(vision_evaluator::Box* box, boxes) {
-        delete box;
-    }
+    BoxManager::instance().execute(clear);
 }

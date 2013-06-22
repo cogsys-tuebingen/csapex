@@ -36,6 +36,7 @@ public:
 private Q_SLOTS:
     void set_fps(int fps);
     void updateMenu();
+    void updateTitle();
 
 public Q_SLOTS:
     void start();

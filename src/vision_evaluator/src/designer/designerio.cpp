@@ -8,19 +8,30 @@
 #include "ui_designer.h"
 
 /// SYSTEM
+#include <QMessageBox>
 #include <boost/foreach.hpp>
 #include <iostream>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
+#include <QScrollBar>
 
 using namespace vision_evaluator;
+
+const std::string DesignerIO::extension = ".vecfg";
+const std::string DesignerIO::default_config = "default" + DesignerIO::extension;
+const std::string DesignerIO::config_selector = "Configs (*" + DesignerIO::extension + ")";
 
 DesignerIO::DesignerIO()
 {
 }
 
-void DesignerIO::save(Designer* designer)
+void DesignerIO::save(Designer* designer, const std::string& file)
 {
+    if(file.empty()) {
+        std::cerr << "cannot save, no file specified" << std::endl;
+        return;
+    }
+
     YAML::Emitter yaml;
 
     // settings
@@ -41,7 +52,7 @@ void DesignerIO::save(Designer* designer)
         yaml << *box;
     }
 
-    std::ofstream ofs("ve_config.yaml");
+    std::ofstream ofs(file.c_str());
     ofs << yaml.c_str();
 
     std::cout << "save: " << yaml.c_str() << std::endl;
@@ -49,29 +60,32 @@ void DesignerIO::save(Designer* designer)
     BoxManager::instance().setDirty(false);
 }
 
-void DesignerIO::load(Designer* designer)
+void DesignerIO::load(Designer* designer, const std::string& file)
 {
+    if(file.empty()) {
+        std::cerr << "cannot load, no file specified" << std::endl;
+        return;
+    }
+
+    QFile test(file.c_str());
+    if(!test.exists()) {
+        std::cerr << "cannot load " << file << ", doesn't exist" << std::endl;
+        return;
+    }
+
     designer->clear();
 
     std::map<std::string, Box*> loaded_boxes;
 
-    loadBoxes(designer, loaded_boxes);
-    loadConnections(designer, loaded_boxes);
+    loadBoxShells(designer, file, loaded_boxes);
+    loadConnections(designer, file, loaded_boxes);
+
+    BoxManager::instance().setDirty(false);
 }
 
-void DesignerIO::loadBoxes(Designer* designer, std::map<std::string, Box*>& loaded_boxes)
+void DesignerIO::loadSettings(Designer* designer, YAML::Node &doc)
 {
-    std::ifstream ifs("ve_config.yaml");
-    YAML::Parser parser(ifs);
-
-    YAML::Node doc;
-
-    if(!parser.GetNextDocument(doc)) {
-        std::cerr << "cannot read the config" << std::endl;
-        return;
-    }
-
-    QWidget* window = designer->window();//QApplication::activeWindow();
+    QWidget* window = designer->window();
 
     int w = window->width();
     int h = window->height();
@@ -89,6 +103,21 @@ void DesignerIO::loadBoxes(Designer* designer, std::map<std::string, Box*>& load
     }
 
     window->setGeometry(x,y,w,h);
+}
+
+void DesignerIO::loadBoxShells(Designer* designer, const std::string &file, std::map<std::string, Box*>& loaded_boxes)
+{
+    std::ifstream ifs(file.c_str());
+    YAML::Parser parser(ifs);
+
+    YAML::Node doc;
+
+    if(!parser.GetNextDocument(doc)) {
+        std::cerr << "cannot read the config" << std::endl;
+        return;
+    }
+
+    loadSettings(designer, doc);
 
     while(parser.GetNextDocument(doc)) {
         std::string type, uuid;
@@ -103,18 +132,12 @@ void DesignerIO::loadBoxes(Designer* designer, std::map<std::string, Box*>& load
 
         Box* box = BoxManager::instance().makeBox(designer->ui->designer, QPoint(x,y), type, uuid);
         loaded_boxes[uuid] = box;
-
-        if(doc.FindValue("state")) {
-            const YAML::Node& state_map = doc["state"];
-            Memento::Ptr state = box->getState();
-            state->readYaml(state_map);
-            box->setState(state);
-        }
     }
 }
-void DesignerIO::loadConnections(Designer* designer, std::map<std::string, Box*>& loaded_boxes)
+
+void DesignerIO::loadConnections(Designer* designer, const std::string &file,  std::map<std::string, Box*>& loaded_boxes)
 {
-    std::ifstream ifs("ve_config.yaml");
+    std::ifstream ifs(file.c_str());
     YAML::Parser parser(ifs);
 
     YAML::Node doc;
@@ -128,54 +151,10 @@ void DesignerIO::loadConnections(Designer* designer, std::map<std::string, Box*>
         std::string uuid;
         doc["uuid"] >> uuid;
 
-        if(doc.FindValue("connections")) {
-            const YAML::Node& connections = doc["connections"];
-            if(connections.FindValue("out")) {
-                const YAML::Node& out_list = connections["out"];
-                assert(out_list.Type() == YAML::NodeType::Sequence);
+        Box* box = loaded_boxes[uuid];
 
-                for(unsigned i=0; i<out_list.size(); ++i) {
-                    const YAML::Node& connector = out_list[i];
-                    assert(connector.Type() == YAML::NodeType::Map);
-                    std::string from_uuid;
-                    connector["uuid"] >> from_uuid;
-
-                    const YAML::Node& targets = connector["targets"];
-                    assert(targets.Type() == YAML::NodeType::Sequence);
-
-                    for(unsigned j=0; j<targets.size(); ++j) {
-                        std::string to_uuid;
-                        targets[j] >> to_uuid;
-
-                        Box* from_box = loaded_boxes[uuid];
-                        if(from_box == NULL) {
-                            std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
-                            continue;
-                        }
-                        ConnectorOut* from = from_box->getOutput(from_uuid);
-
-                        ConnectorIn* to = NULL;
-
-                        typedef std::pair<std::string, Box*> Pair;
-                        BOOST_FOREACH(Pair p, loaded_boxes) {
-                            Box* b = p.second;
-                            to = b->getInput(to_uuid);
-                            if(to != NULL) {
-                                break;
-                            }
-                        }
-
-                        if(to == NULL) {
-                            std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
-                            continue;
-                        }
-                        if(from->tryConnect(to)) {
-                            designer->ui->designer->getOverlay()->addConnection(from, to);
-                        }
-                    }
-                }
-
-            }
-        }
+        Memento::Ptr s = box->getState();
+        s->readYaml(doc);
+        box->setState(s);
     }
 }

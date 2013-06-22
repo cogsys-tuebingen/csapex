@@ -36,6 +36,27 @@ public:
         QPoint value;
     };
 
+    struct State : public Memento {
+        typedef boost::shared_ptr<State> Ptr;
+
+        State()
+            : parent(NULL)
+        {}
+        State(Box* parent)
+            : parent(parent)
+        {}
+
+        virtual void writeYaml(YAML::Emitter& out) const;
+        virtual void readYaml(const YAML::Node& node);
+
+        Box* parent;
+
+        mutable Memento::Ptr boxed_state;
+
+        std::string uuid_;
+        std::string type_;
+    };
+
 public:
     static const QString MIME;
     static const QString MIME_MOVE;
@@ -64,8 +85,13 @@ public:
     void setUUID(const std::string& uuid);
     std::string UUID() const;
 
+    void setType(const std::string& type);
+    std::string getType() const;
+
     Memento::Ptr getState() const;
-    void setState(Memento::Ptr state);
+    void setState(Memento::Ptr memento);
+
+    Command::Ptr removeAllConnectionsCmd();
 
     YAML::Emitter& save(YAML::Emitter& out) const;
 
@@ -76,25 +102,29 @@ protected:
     void enabledChange(bool val);
 
 public Q_SLOTS:
-    virtual void setOverlay(Overlay* o);
     void showContextMenu(const QPoint& pos);
 
 Q_SIGNALS:
     void toggled(bool);
     void moved(Box*);
+    void connectionFormed(ConnectorOut*, ConnectorIn*);
+    void connectionDestroyed(ConnectorOut*, ConnectorIn*);
+
+    void messageSent(ConnectorOut* source);
+    void messageArrived(ConnectorIn* source);
+    void connectionInProgress(Connector*, Connector*);
+    void connectionDone();
 
 private:
     Ui::Box* ui;
+
+    State::Ptr state;
+    BoxedObject* content_;
 
     std::vector<ConnectorIn*> input;
     std::vector<ConnectorOut*> output;
 
     bool down_;
-
-    BoxedObject* content_;
-    Overlay* overlay_;
-
-    std::string uuid_;
 };
 
 inline YAML::Emitter& operator << (YAML::Emitter& out, const Box& box)

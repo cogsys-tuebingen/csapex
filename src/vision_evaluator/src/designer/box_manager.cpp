@@ -46,7 +46,7 @@ Box* BoxManager::makeBox(QWidget* parent, QPoint pos, const std::string& type, c
             if(uuid_.empty()) {
                 uuid_ = makeUUID(type);
             }
-            return p.second()->spawnObject(parent, pos, uuid);
+            return p.second()->spawnObject(parent, pos, type, uuid);
         }
     }
     BOOST_FOREACH(SelectorProxy::Ptr p, available_elements_prototypes) {
@@ -54,12 +54,47 @@ Box* BoxManager::makeBox(QWidget* parent, QPoint pos, const std::string& type, c
             if(uuid_.empty()) {
                 uuid_ = makeUUID(type);
             }
-            return p->spawnObject(parent, pos, uuid);
+            return p->spawnObject(parent, pos, type, uuid);
         }
     }
 
     std::cerr << "error: cannot make box, type '" << type << "' is unknown" << std::endl;
     return NULL;
+}
+
+Box* BoxManager::findBox(const std::string &uuid)
+{
+    BOOST_FOREACH(Box* b, container_->findChildren<Box*>()) {
+        if(b->UUID() == uuid) {
+            return b;
+        }
+    }
+
+    return NULL;
+}
+
+Box* BoxManager::findConnectorOwner(const std::string &uuid)
+{
+    BOOST_FOREACH(Box* b, container_->findChildren<Box*>()) {
+        if(b->getInput(uuid)) {
+            return b;
+        }
+        if(b->getOutput(uuid)) {
+            return b;
+        }
+    }
+
+    return NULL;
+}
+
+void BoxManager::setContainer(QWidget *c)
+{
+    container_ = c;
+}
+
+QWidget* BoxManager::container()
+{
+    return container_;
 }
 
 void BoxManager::execute(Command::Ptr command)
@@ -92,8 +127,15 @@ bool BoxManager::isDirty()
 
 void BoxManager::setDirty(bool dirty)
 {
+    bool change = (dirty != dirty_);
+
     dirty_ = dirty;
+
+    if(change) {
+        Q_EMIT dirtyChanged(dirty_);
+    }
 }
+
 
 bool BoxManager::canUndo()
 {
@@ -114,7 +156,7 @@ void BoxManager::undo()
     Command::Ptr last = done.top();
     done.pop();
 
-    last->undo();
+    assert(last->undo());
 
     undone.push(last);
 

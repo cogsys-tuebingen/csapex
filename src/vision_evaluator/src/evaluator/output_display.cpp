@@ -65,9 +65,6 @@ void OutputDisplay::disable()
 {
     if(!display_is_empty) {
         pixmap_ = QPixmap::fromImage(empty);
-        if(view_->scene()) {
-            delete view_->scene();
-        }
         view_->setScene(new QGraphicsScene());
         view_->scene()->addPixmap(pixmap_);
         view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);

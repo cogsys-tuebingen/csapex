@@ -2,8 +2,8 @@
 #define CONNECTOR_H
 
 /// COMPONENT
-#include "overlay.h"
 #include "connection_type.h"
+#include "command.h"
 
 /// SYSTEM
 #include <QRadioButton>
@@ -47,10 +47,6 @@ public:
         return false;
     }
 
-    virtual void setOverlay(Overlay* o) {
-        overlay_ = o;
-    }
-
     std::string UUID();
     void setUUID(const std::string& uuid);
 
@@ -67,15 +63,21 @@ public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
     virtual void removeConnection(QObject* other_side);
 
-    virtual void removeAllConnections() = 0;
+    void removeAllConnectionsUndoable();
+
+
 
 Q_SIGNALS:
-    virtual void disconnected(QObject*);
-    virtual void connectionChanged();
+    void disconnected(QObject*);
+    void connectionInProgress(Connector*, Connector*);
+    void connectionDone();
 
 protected:
     Connector(Box* parent, const std::string& type, int sub_id);
     virtual ~Connector();
+
+    virtual void removeAllConnectionsNotUndoable() = 0;
+    virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
 protected:
     virtual void findParents();
@@ -85,8 +87,6 @@ protected:
     QWidget* parent_widget;
     vision_evaluator::Box* box_;
     vision_evaluator::DesignBoard* designer;
-
-    Overlay* overlay_;
 
     std::string uuid_;
 };

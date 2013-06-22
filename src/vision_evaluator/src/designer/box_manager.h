@@ -28,7 +28,14 @@ public:
 public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
     void register_box_type(SelectorProxy::Ptr provider);
+
     Box* makeBox(QWidget* parent, QPoint pos, const std::string& type, const std::string& uuid = "");
+    Box* findBox(const std::string& uuid);
+
+    Box* findConnectorOwner(const std::string& uuid);
+
+    void setContainer(QWidget* c);
+    QWidget* container();
 
     void fill(QLayout* layout);
 
@@ -48,6 +55,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void stateChanged();
+    void dirtyChanged(bool);
 
 protected:
     BoxManager();
@@ -62,6 +70,7 @@ protected:
 
     std::map<std::string, int> uuids;
 
+    QWidget* container_;
     bool dirty_;
 };
 

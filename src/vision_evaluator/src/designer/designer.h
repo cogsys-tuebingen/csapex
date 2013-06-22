@@ -37,15 +37,23 @@ public:
 
     void updateCursor();
 
+    std::string getConfig();
+
 public Q_SLOTS:
     void save();
+    void saveAs();
     void load();
+    void reload();
     void undo();
     void redo();
     void clear();
 
 Q_SIGNALS:
     void stateChanged();
+    void configChanged();
+
+private:
+    void setCurrentConfig(const std::string& filename);
 
 private:
     Ui::Designer* ui;
@@ -53,6 +61,8 @@ private:
     bool space_;
     bool drag_;
     QPoint drag_start_pos_;
+
+    std::string current_config_;
 };
 
 }

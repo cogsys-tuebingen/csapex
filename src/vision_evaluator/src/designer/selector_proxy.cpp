@@ -45,10 +45,11 @@ void SelectorProxy::mousePressEvent(QMouseEvent* event)
     }
 }
 
-vision_evaluator::Box* SelectorProxy::spawnObject(QWidget* parent, const QPoint& pos, const std::string& uuid)
+vision_evaluator::Box* SelectorProxy::spawnObject(QWidget* parent, const QPoint& pos, const std::string& type, const std::string& uuid)
 {
     vision_evaluator::Box* object(new vision_evaluator::Box(makeContent(), uuid, parent));
     object->setObjectName(uuid.c_str());
+    object->setType(type);
     object->init(pos);
     object->show();
     object->getContent()->setTypeName(type_);

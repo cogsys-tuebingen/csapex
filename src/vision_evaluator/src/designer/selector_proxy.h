@@ -65,7 +65,7 @@ public:
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)
-    virtual vision_evaluator::Box* spawnObject(QWidget* parent, const QPoint& pos, const std::string& uuid);
+    virtual vision_evaluator::Box* spawnObject(QWidget* parent, const QPoint& pos, const std::string &type, const std::string& uuid);
 
 protected:
     virtual BoxedObject* makeContent() = 0;

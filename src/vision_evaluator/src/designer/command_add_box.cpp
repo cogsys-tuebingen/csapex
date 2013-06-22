@@ -13,22 +13,26 @@ AddBox::AddBox(SelectorProxy* selector, QWidget* parent, QPoint pos)
     : selector(selector), parent(parent), pos(pos)
 {
     uuid = BoxManager::instance().makeUUID(selector->getType());
+    type = selector->getType();
 }
 
 void AddBox::execute()
 {
-    box = selector->spawnObject(parent, pos, uuid);
+    box = selector->spawnObject(parent, pos, type, uuid);
+    BoxManager::instance().setDirty(true);
 }
 
-void AddBox::undo()
+bool AddBox::undo()
 {
     saved_state = box->getState();
     box->stop();
     delete box;
+
+    return true;
 }
 
 void AddBox::redo()
 {
-    box = selector->spawnObject(parent, pos, uuid);
+    execute();
     box->setState(saved_state);
 }
