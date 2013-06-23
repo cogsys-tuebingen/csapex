@@ -31,6 +31,7 @@ class ImageCombinerClusterMatch : public vision_evaluator::ImageCombiner, public
 public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
     virtual void update_gui(QFrame* additional_holder);
+    virtual void insert(QBoxLayout* layout);
 
 private:
     static ClusteringOptions options;

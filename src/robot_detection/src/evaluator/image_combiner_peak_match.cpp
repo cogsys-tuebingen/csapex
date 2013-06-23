@@ -21,15 +21,15 @@ using namespace robot_detection;
 ClusteringOptions ImageCombinerPeakMatch::options;
 
 ImageCombinerPeakMatch::ImageCombinerPeakMatch()
-    : histviewer(NULL)
+//    : histviewer(NULL)
 {
 }
 
 ImageCombinerPeakMatch::~ImageCombinerPeakMatch()
 {
-    if(histviewer != NULL) {
-        delete histviewer;
-    }
+//    if(histviewer != NULL) {
+//        delete histviewer;
+//    }
 }
 
 void ImageCombinerPeakMatch::putMultiLineText(cv::Mat combined_target, const std::string& txt)
@@ -50,37 +50,41 @@ void ImageCombinerPeakMatch::putMultiLineText(cv::Mat combined_target, const std
 
 void ImageCombinerPeakMatch::update_gui(QFrame* additional_holder)
 {
-
-    if(histviewer != NULL) {
-        delete histviewer;
-    }
-    histviewer = new HistogramViewerWidget;
-
     QBoxLayout* layout = new QVBoxLayout;
-    options.insert(layout);
-
     additional_holder->setLayout(layout);
+
+    insert(layout);
+}
+
+void ImageCombinerPeakMatch::insert(QBoxLayout *layout)
+{
+//    if(histviewer != NULL) {
+//        delete histviewer;
+//    }
+//    histviewer = new HistogramViewerWidget;
+
+    options.insert(layout);
 }
 
 
 void ImageCombinerPeakMatch::mousePressEvent(QMouseEvent* event)
 {
-    histviewer->mousePressEvent(event);
+//    histviewer->mousePressEvent(event);
 }
 
 void ImageCombinerPeakMatch::mouseMoveEvent(QMouseEvent* event)
 {
-    histviewer->mouseMoveEvent(event);
+//    histviewer->mouseMoveEvent(event);
 }
 
 void ImageCombinerPeakMatch::wheelEvent(QWheelEvent* event)
 {
-    histviewer->wheelEvent(event);
+//    histviewer->wheelEvent(event);
 }
 
 void ImageCombinerPeakMatch::keyEvent(QKeyEvent* event)
 {
-    histviewer->keyEvent(event);
+//    histviewer->keyEvent(event);
 }
 
 void ImageCombinerPeakMatch::drawDebug(Frame::Ptr& a, Frame::Ptr& b,
@@ -162,19 +166,19 @@ void ImageCombinerPeakMatch::drawDebug(Frame::Ptr& a, Frame::Ptr& b,
 
         h->debug.copyTo(cv::Mat(out, cv::Rect(0, 0, h->debug.cols, h->debug.rows)));
 
-        histviewer->waitForPainting(rest_w, rest_h);
+//        histviewer->waitForPainting(rest_w, rest_h);
 
-        QImage img = histviewer->grabFrameBuffer();
-        std::cout << img.width() << " == " << rest_w << std::endl;
-        std::cout << img.height() << " == " << rest_h << std::endl;
-        assert(img.width() == rest_w);
-        assert(img.height() == rest_h);
-        for(int y = 0; y < rest_h; ++y) {
-            for(int x = 0; x < rest_w; ++x) {
-                QRgb pixel = img.pixel(x, y);
-                rest.at<cv::Vec3b>(y, x) = cv::Vec3b(qBlue(pixel), qGreen(pixel), qRed(pixel));
-            }
-        }
+//        QImage img = histviewer->grabFrameBuffer();
+//        std::cout << img.width() << " == " << rest_w << std::endl;
+//        std::cout << img.height() << " == " << rest_h << std::endl;
+//        assert(img.width() == rest_w);
+//        assert(img.height() == rest_h);
+//        for(int y = 0; y < rest_h; ++y) {
+//            for(int x = 0; x < rest_w; ++x) {
+//                QRgb pixel = img.pixel(x, y);
+//                rest.at<cv::Vec3b>(y, x) = cv::Vec3b(qBlue(pixel), qGreen(pixel), qRed(pixel));
+//            }
+//        }
 
     } catch(cv::Exception& e) {
         WARN("cv exception: " << e.what());
@@ -217,7 +221,7 @@ cv::Mat ImageCombinerPeakMatch::combine(const cv::Mat img1, const cv::Mat mask1,
 
     h->log << "---------------\noverall: " << stopwatch.usElapsed() * 1e-3 << "ms";
 
-    histviewer->setHistogram(h->hough);
+//    histviewer->setHistogram(h->hough);
 
     cv::Mat out;
 

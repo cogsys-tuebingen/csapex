@@ -192,9 +192,14 @@ ClusteringOptions ImageCombinerClusterMatch::options;
 void ImageCombinerClusterMatch::update_gui(QFrame* additional_holder)
 {
     QBoxLayout* layout = new QVBoxLayout;
-    options.insert(layout);
-
     additional_holder->setLayout(layout);
+
+    insert(layout);
+}
+
+void ImageCombinerClusterMatch::insert(QBoxLayout *layout)
+{
+    options.insert(layout);
 }
 
 cv::Mat ImageCombinerClusterMatch::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)

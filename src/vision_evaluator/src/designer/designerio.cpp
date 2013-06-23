@@ -45,6 +45,9 @@ void DesignerIO::save(Designer* designer, const std::string& file)
     yaml << YAML::Key << "window_pos";
     yaml << YAML::Value << YAML::BeginSeq << window_pos.x() << window_pos.y() << YAML::EndSeq;
 
+    yaml << YAML::Key << "uuid_map";
+    yaml << YAML::Value << BoxManager::instance().uuids;
+
     yaml << YAML::EndMap;
 
     QList<vision_evaluator::Box*> boxes = designer->findChildren<vision_evaluator::Box*> ();
@@ -101,8 +104,11 @@ void DesignerIO::loadSettings(Designer* designer, YAML::Node &doc)
         doc["window_pos"][0] >> x;
         doc["window_pos"][1] >> y;
     }
-
     window->setGeometry(x,y,w,h);
+
+    if(doc.FindValue("uuid_map")) {
+        doc["uuid_map"] >> BoxManager::instance().uuids;
+    }
 }
 
 void DesignerIO::loadBoxShells(Designer* designer, const std::string &file, std::map<std::string, Box*>& loaded_boxes)

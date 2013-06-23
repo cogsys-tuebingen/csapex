@@ -35,6 +35,7 @@ public:
     void putMultiLineText(cv::Mat combined_target, const std::string& txt);
 
     virtual void update_gui(QFrame* additional_holder);
+    virtual void insert(QBoxLayout* layout);
 
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
@@ -47,7 +48,7 @@ private:
                    std::vector<HoughData::Cluster>& clusters, HoughAlgorithm_Debug* h);
 
 private:
-    HistogramViewerWidget* histviewer;
+//    HistogramViewerWidget* histviewer;
     static ClusteringOptions options;
 //    QMainWindow* histogram_view;
 };

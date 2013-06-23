@@ -232,9 +232,14 @@ ClusteringOptions ImageCombinerClusterMatchEM::options;
 void ImageCombinerClusterMatchEM::update_gui(QFrame* additional_holder)
 {
     QBoxLayout* layout = new QVBoxLayout;
-    options.insert(layout);
-
     additional_holder->setLayout(layout);
+
+    insert(layout);
+}
+
+void ImageCombinerClusterMatchEM::insert(QBoxLayout *layout)
+{
+    options.insert(layout);
 }
 
 
@@ -251,7 +256,6 @@ cv::Mat ImageCombinerClusterMatchEM::combine(const cv::Mat img1, const cv::Mat m
     tools->getMatcher()->match(a.get(), b.get(), matches);
 
     WARN("got " << matches.size() << " matches");
-
 
     HoughEM h(options.k, config.octaves, a, b);
 

@@ -31,6 +31,8 @@ void ImageProviderImg::next(cv::Mat& img, cv::Mat& mask)
     cv::Rect roi(40, 40, img_.cols, img_.rows);
 
     img_.copyTo(cv::Mat(img, roi));
+    mask = cv::Mat(img.rows, img.cols, CV_8UC1, cv::Scalar::all(0));
+    cv::rectangle(mask, roi + cv::Point(2,2) + cv::Size(-4,-4), cv::Scalar::all(255), CV_FILLED);
 }
 
 bool ImageProviderImg::hasNext()

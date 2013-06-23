@@ -74,10 +74,10 @@ include_directories(include
 
 ## Declare a cpp executable
 add_executable(pcl_demo_node src/pcl_demo_node.cpp)
-add_dependencies(pcl_demo_node ${catkin_EXPORTED_TARGETS} pcl_demo_node_gencfg)
+add_dependencies(pcl_demo_node ${catkin_EXPORTED_TARGETS} pcl_demo_gencfg)
 
 add_executable(pcl_filter src/pcl_filter.cpp)
-add_dependencies(pcl_filter ${catkin_EXPORTED_TARGETS} pcl_filter_gencfg)
+add_dependencies(pcl_filter ${catkin_EXPORTED_TARGETS} pcl_demo_gencfg)
 
 
 ## Add cmake target dependencies of the executable/library

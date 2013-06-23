@@ -19,6 +19,8 @@ class BoxManager : public QObject
 {
     Q_OBJECT
 
+    friend class DesignerIO;
+
 public:
     static BoxManager& instance() {
         static BoxManager inst;

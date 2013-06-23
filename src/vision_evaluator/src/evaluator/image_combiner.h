@@ -14,6 +14,9 @@
 namespace vision_evaluator
 {
 
+class ConnectorIn;
+class ConnectorOut;
+
 class ImageCombiner : public BoxedObject
 {
     Q_OBJECT
@@ -22,6 +25,7 @@ public:
     typedef boost::shared_ptr<ImageCombiner> Ptr;
 
 public:
+    ImageCombiner();
     virtual ~ImageCombiner();
 
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2) = 0;
@@ -33,9 +37,26 @@ public:
     virtual void wheelEvent(QWheelEvent* event) {}
     virtual void keyEvent(QKeyEvent* event) {}
 
+private Q_SLOTS:
+    void messageArrived(ConnectorIn* source);
+
 protected:
     virtual void fill(QBoxLayout* layout);
     virtual void insert(QBoxLayout*);
+
+
+    ConnectorIn* input_img_a_;
+    ConnectorIn* input_mask_a_;
+
+    ConnectorIn* input_img_b_;
+    ConnectorIn* input_mask_b_;
+
+    ConnectorOut* output_img_;
+
+    bool has_img_a;
+    bool has_mask_a;
+    bool has_img_b;
+    bool has_mask_b;
 };
 
 } /// NAMESPACE
