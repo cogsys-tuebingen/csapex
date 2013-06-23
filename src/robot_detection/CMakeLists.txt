@@ -225,6 +225,7 @@ target_link_libraries(ros adapter tracker ${catkin_LIBRARIES})
 ##### NODES AND PROGRAMS
 add_executable(manual_tf_creator src/manual_tf_creator.cpp)
 target_link_libraries(manual_tf_creator logger ${catkin_LIBRARIES})
+add_dependencies(manual_tf_creator ${catkin_EXPORTED_TARGETS} robot_detection_gencfg)
 
 #add_executable(antifilter_test src/anti_filter_test.cpp)
 #target_link_libraries(antifilter_test viz ${catkin_LIBRARIES})

@@ -119,7 +119,7 @@ void BoxedObject::setState(Memento::Ptr memento)
 void BoxedObject::enable(bool e)
 {
     enabled_ = e;
-    if(enabled_) {
+    if(e) {
         enable();
     } else {
         disable();
@@ -128,6 +128,7 @@ void BoxedObject::enable(bool e)
 
 void BoxedObject::enable()
 {
+    enabled_ = true;
     setError(false);
 }
 
@@ -139,6 +140,7 @@ void BoxedObject::disable(bool d)
 
 void BoxedObject::disable()
 {
+    enabled_ = false;
     setError(false);
 }
 

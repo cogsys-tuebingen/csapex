@@ -103,6 +103,7 @@ protected:
 
 public Q_SLOTS:
     void showContextMenu(const QPoint& pos);
+    void enableContent(bool enable);
 
 Q_SIGNALS:
     void toggled(bool);
