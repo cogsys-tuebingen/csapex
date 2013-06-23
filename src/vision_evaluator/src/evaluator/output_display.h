@@ -26,10 +26,36 @@ public:
     virtual void disable();
     virtual void connectorChanged();
 
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
 public Q_SLOTS:
     void messageArrived(ConnectorIn* source);
 
+protected:
+    bool eventFilter(QObject* o, QEvent* e);
+
 private:
+
+    struct State : public Memento {
+        int width;
+        int height;
+
+        State()
+            : width(300), height(300)
+        {}
+
+        virtual void writeYaml(YAML::Emitter& out) const {
+            out << YAML::Key << "width" << YAML::Value << width;
+            out << YAML::Key << "height" << YAML::Value << height;
+        }
+        virtual void readYaml(const YAML::Node& node) {
+            node["width"] >> width;
+            node["height"] >> height;
+        }
+    };
+
+    State state;
     ConnectorIn* input_;
     QPixmap pixmap_;
 
@@ -39,6 +65,9 @@ private:
     QPainter painter;
 
     bool display_is_empty;
+
+    bool down_;
+    QPoint last_pos_;
 };
 
 }

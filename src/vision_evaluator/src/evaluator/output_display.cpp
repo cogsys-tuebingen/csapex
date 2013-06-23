@@ -12,6 +12,7 @@
 
 /// SYSTEM
 #include <QPainter>
+#include <QGraphicsSceneEvent>
 
 STATIC_INIT(OutputDisplay, generic, {
     SelectorProxy::ProxyConstructor c; \
@@ -24,7 +25,7 @@ STATIC_INIT(OutputDisplay, generic, {
 using namespace vision_evaluator;
 
 OutputDisplay::OutputDisplay()
-    : input_(NULL), view_(new QGraphicsView), empty(400, 400, QImage::Format_RGB16), painter(&empty)
+    : input_(NULL), view_(new QGraphicsView), empty(400, 400, QImage::Format_RGB16), painter(&empty), down_(false)
 {
     painter.setPen(QPen(Qt::red));
     painter.fillRect(QRect(0, 0, empty.width(), empty.height()), Qt::white);
@@ -35,17 +36,59 @@ OutputDisplay::~OutputDisplay()
 {
 }
 
+bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
+{
+//    if(o == view_) {
+
+    QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
+
+        switch(e->type()) {
+        case QEvent::GraphicsSceneMousePress:
+            down_ = true;
+            std::cout << "down" << std::endl;
+            last_pos_ = me->screenPos();
+            e->accept();
+            return true;
+        case QEvent::GraphicsSceneMouseRelease:
+            down_ = false;
+            std::cout << "up" << std::endl;
+            e->accept();
+            return true;
+        case QEvent::GraphicsSceneMouseMove:
+            if(down_) {
+                QPoint delta = me->screenPos() - last_pos_;
+
+                last_pos_ = me->screenPos();
+
+                state.width = view_->width() + delta.x();
+                state.height = view_->height() + delta.y();
+
+                view_->setFixedSize(QSize(state.width, state.height));
+            }
+            e->accept();
+            return true;
+
+        default:
+            break;
+        }
+//    }
+
+    return false;
+}
+
 void OutputDisplay::fill(QBoxLayout* layout)
 {
     if(input_ == NULL) {
         input_ = new ConnectorIn(box_, 0);
         box_->addInput(input_);
 
-        view_->setFixedSize(QSize(300, 300));
+        view_->setFixedSize(QSize(state.width, state.height));
+        view_->setMouseTracking(true);
         QGraphicsScene* scene = view_->scene();
         if(scene == NULL) {
             scene = new QGraphicsScene();
             view_->setScene(scene);
+            scene->installEventFilter(this);
         }
 
         display_is_empty = false;
@@ -55,6 +98,24 @@ void OutputDisplay::fill(QBoxLayout* layout)
 
         connect(input_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
     }
+}
+
+Memento::Ptr OutputDisplay::getState() const
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state;
+
+    return memento;
+}
+
+void OutputDisplay::setState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    state = *m;
+
+    view_->setFixedSize(QSize(state.width, state.height));
 }
 
 void OutputDisplay::enable()
@@ -102,6 +163,7 @@ void OutputDisplay::messageArrived(ConnectorIn* source)
                 delete view_->scene();
             }
             view_->setScene(new QGraphicsScene());
+            view_->scene()->installEventFilter(this);
             pixmap_ = QPixmap::fromImage(*img);
             view_->scene()->addPixmap(pixmap_);
             display_is_empty = false;
