@@ -80,3 +80,37 @@ void OptionKeypointDescriptor::configChanged()
         }
     }
 }
+
+namespace {
+struct OptionKeypointDescriptorState : public Memento {
+    typedef boost::shared_ptr<OptionKeypointDescriptorState> Ptr;
+    std::string descriptor_name;
+
+    virtual void writeYaml(YAML::Emitter& out) const {
+        out << YAML::Key << "descriptor_name" << YAML::Value << descriptor_name;
+    }
+    virtual void readYaml(const YAML::Node& node) {
+        node["descriptor_name"] >> descriptor_name;
+    }
+};
+}
+
+Memento::Ptr OptionKeypointDescriptor::getState() const
+{
+    Config current = Config::getGlobal();
+
+    OptionKeypointDescriptorState::Ptr res(new OptionKeypointDescriptorState);
+    res->descriptor_name = current.descriptor_name;
+    return res;
+}
+
+void OptionKeypointDescriptor::setState(Memento::Ptr memento)
+{
+    OptionKeypointDescriptorState::Ptr m = boost::dynamic_pointer_cast<OptionKeypointDescriptorState> (memento);
+    assert(m.get());
+
+    Config current = Config::getGlobal();
+    current.descriptor_name = m->descriptor_name;
+    current.replaceGlobal();
+}
+

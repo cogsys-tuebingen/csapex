@@ -126,6 +126,8 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     content_ = content;
     content_->setBox(this);
 
+    ui->content->setCheckable(content_->canBeDisabled());
+
     state->uuid_ = uuid;
 
     setObjectName(ui->content->title());

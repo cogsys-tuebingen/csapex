@@ -38,6 +38,8 @@ public:
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);
 
+    virtual bool canBeDisabled() const;
+
     bool isEnabled();
     bool isError();
 

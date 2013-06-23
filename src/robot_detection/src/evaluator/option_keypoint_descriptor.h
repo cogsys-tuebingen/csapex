@@ -24,6 +24,9 @@ public:
 
     virtual void insert(QBoxLayout* layout);
 
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
 private Q_SLOTS:
     void update(int slot);
 

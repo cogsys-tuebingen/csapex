@@ -82,6 +82,7 @@ void OptionKeypointExtractor::configChanged()
 
     QString target = config.getKeypointType().c_str();
 
+    threshold->setValue(config.extractor_threshold);
     if(selection != NULL) {
         for(int i = 0; i < selection->count(); ++i) {
             if(selection->itemText(i) == target) {
@@ -92,3 +93,43 @@ void OptionKeypointExtractor::configChanged()
     }
 }
 
+namespace {
+struct OptionKeypointExtractorState : public Memento {
+    typedef boost::shared_ptr<OptionKeypointExtractorState> Ptr;
+    std::string keypoint_name;
+    int threshold;
+
+    virtual void writeYaml(YAML::Emitter& out) const {
+        out << YAML::Key << "keypoint_name" << YAML::Value << keypoint_name;
+        out << YAML::Key << "threshold" << YAML::Value << threshold;
+    }
+    virtual void readYaml(const YAML::Node& node) {
+        node["threshold"] >> threshold;
+        node["keypoint_name"] >> keypoint_name;
+    }
+};
+}
+
+Memento::Ptr OptionKeypointExtractor::getState() const
+{
+    Config current = Config::getGlobal();
+
+    OptionKeypointExtractorState::Ptr res(new OptionKeypointExtractorState);
+    res->threshold = current.extractor_threshold;
+    res->keypoint_name = current.keypoint_name;
+
+    return res;
+}
+
+void OptionKeypointExtractor::setState(Memento::Ptr memento)
+{
+    OptionKeypointExtractorState::Ptr m = boost::dynamic_pointer_cast<OptionKeypointExtractorState> (memento);
+    assert(m.get());
+
+    Config current = Config::getGlobal();
+    current.extractor_threshold = m->threshold;
+    current.keypoint_name = m->keypoint_name;
+    current.replaceGlobal();
+
+    threshold->setValue(m->threshold);
+}

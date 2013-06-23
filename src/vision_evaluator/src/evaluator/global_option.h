@@ -8,6 +8,9 @@
 #ifndef GLOBAL_OPTION_H
 #define GLOBAL_OPTION_H
 
+/// PROJECT
+#include <designer/memento.h>
+
 /// SYSTEM
 #include <QBoxLayout>
 #include <boost/shared_ptr.hpp>
@@ -28,6 +31,9 @@ public:
     virtual void insert(QBoxLayout* layout) = 0;
 
     virtual void setName(const std::string& name);
+
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
 
 protected:
     std::string name_;

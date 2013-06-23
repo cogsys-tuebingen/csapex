@@ -106,6 +106,11 @@ void BoxedObject::makeThread()
     }
 }
 
+bool BoxedObject::canBeDisabled() const
+{
+    return true;
+}
+
 Memento::Ptr BoxedObject::getState() const
 {
     return Memento::Ptr((Memento*) NULL);

@@ -18,3 +18,13 @@ void GlobalOption::setName(const std::string& name)
 {
     name_ = name;
 }
+
+Memento::Ptr GlobalOption::getState() const
+{
+    return Memento::Ptr((Memento*) NULL);
+}
+
+void GlobalOption::setState(Memento::Ptr memento)
+{
+
+}
