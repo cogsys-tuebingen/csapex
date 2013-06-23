@@ -24,6 +24,10 @@ public:
     virtual void update_gui(QFrame* additional_holder);
     virtual void next(cv::Mat& img, cv::Mat& mask);
 
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
+
 protected Q_SLOTS:
     void showFrame();
     void setPlaying(bool playing);
@@ -32,16 +36,31 @@ protected: // abstract
     virtual void reallyNext(cv::Mat& img, cv::Mat& mask) = 0;
 
 protected:
+
+    struct State : public Memento {
+        bool playing_;
+        int current_frame;
+
+        virtual void writeYaml(YAML::Emitter& out) const {
+            out << YAML::Key << "playing" << YAML::Value << playing_;
+            out << YAML::Key << "current_frame" << YAML::Value << current_frame;
+        }
+        virtual void readYaml(const YAML::Node& node) {
+            node["playing"] >> playing_;
+            node["current_frame"] >> current_frame;
+        }
+    };
+
+    State state;
+
     cv::Mat last_frame_;
 
     QPushButton* play_pause_;
     QSlider* slider_;
 
-    bool playing_;
 
     double fps_;
     double frames_;
-    int current_frame;
     int next_frame;
 };
 

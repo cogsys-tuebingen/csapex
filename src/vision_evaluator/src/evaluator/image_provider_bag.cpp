@@ -46,7 +46,7 @@ void ImageProviderBag::reallyNext(cv::Mat& img, cv::Mat& mask)
 
     if(next_frame != -1) {
         view_it = view_->begin();
-        for(current_frame=0; current_frame != next_frame; ++current_frame) {
+        for(state.current_frame=0; state.current_frame != next_frame; ++state.current_frame) {
             view_it++;
         }
         next_frame = -1;
@@ -61,16 +61,16 @@ void ImageProviderBag::reallyNext(cv::Mat& img, cv::Mat& mask)
         mat->image.copyTo(last_frame_);
 
         view_it++;
-        current_frame++;
+        state.current_frame++;
     }
 
     img = last_frame_;
 
     if(!slider_->isSliderDown()) {
-        slider_->setValue(current_frame);
+        slider_->setValue(state.current_frame);
     }
 
-    if(current_frame == frames_) {
+    if(state.current_frame == frames_) {
         setPlaying(false);
     }
 }

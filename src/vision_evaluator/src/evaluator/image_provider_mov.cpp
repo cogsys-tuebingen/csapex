@@ -13,6 +13,11 @@ ImageProviderMov::ImageProviderMov(const std::string& movie_file)
     frames_ = capture_.get(CV_CAP_PROP_FRAME_COUNT);
 }
 
+ImageProviderMov::~ImageProviderMov()
+{
+    capture_.release();
+}
+
 ImageProvider* ImageProviderMov::createInstance(const std::string& path)
 {
     return new ImageProviderMov(path);
@@ -35,6 +40,8 @@ void ImageProviderMov::reallyNext(cv::Mat& img, cv::Mat& mask)
     }
 
     if(next_frame != -1) {
+        state.current_frame = capture_.get(CV_CAP_PROP_POS_FRAMES);
+        capture_ >> last_frame_;
         capture_.set(CV_CAP_PROP_POS_FRAMES, next_frame);
     }
 
@@ -42,13 +49,13 @@ void ImageProviderMov::reallyNext(cv::Mat& img, cv::Mat& mask)
 
     img = last_frame_;
 
-    current_frame = capture_.get(CV_CAP_PROP_POS_FRAMES);
+    state.current_frame = capture_.get(CV_CAP_PROP_POS_FRAMES);
 
     if(!slider_->isSliderDown()) {
-        slider_->setValue(current_frame);
+        slider_->setValue(state.current_frame);
     }
 
-    if(current_frame == frames_) {
+    if(state.current_frame == frames_) {
         setPlaying(false);
     }
 }

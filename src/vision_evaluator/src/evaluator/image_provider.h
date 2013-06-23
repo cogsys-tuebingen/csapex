@@ -1,6 +1,9 @@
 #ifndef IMAGE_PROVIDER_H
 #define IMAGE_PROVIDER_H
 
+/// PROJECT
+#include <designer/memento.h>
+
 /// SYSTEM
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
@@ -30,6 +33,9 @@ namespace vision_evaluator
 class ImageProvider : public QObject
 {
     Q_OBJECT
+
+public:
+    typedef boost::shared_ptr<ImageProvider> Ptr;
 
 protected:
     typedef boost::function<ImageProvider*(const std::string&)> ProviderConstructor;
@@ -76,6 +82,10 @@ public:
     virtual bool hasNext() = 0;
     virtual void next(cv::Mat&, cv::Mat&) = 0;
     virtual int sleepTime();
+
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
 
 Q_SIGNALS:
     void new_image(cv::Mat, cv::Mat);

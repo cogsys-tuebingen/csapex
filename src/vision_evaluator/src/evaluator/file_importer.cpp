@@ -27,8 +27,8 @@ STATIC_INIT(FileImporter, generic, {
 
 using namespace vision_evaluator;
 
-FileImporterWorker::FileImporterWorker()
-    : timer_(NULL), output_img_(NULL), output_mask_(NULL)
+FileImporterWorker::FileImporterWorker(FileImporter *parent)
+    : state(parent), timer_(NULL), output_img_(NULL), output_mask_(NULL)
 {
     timer_ = new QTimer();
     timer_->setInterval(100);
@@ -39,9 +39,35 @@ FileImporterWorker::FileImporterWorker()
     QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
 }
 
+void FileImporterWorker::State::writeYaml(YAML::Emitter& out) const {
+    out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
+
+    if(parent->worker->provider_->getState().get()) {
+        out << YAML::Key << "sub_state";
+        out << YAML::Value << YAML::BeginMap;
+        parent->worker->provider_->getState()->writeYaml(out);
+        out << YAML::EndMap;
+    }
+}
+void FileImporterWorker::State::readYaml(const YAML::Node& node) {
+    std::string path;
+    node["path"] >> path;
+    std::cout << "read path: " << path << std::endl;
+
+    last_path_ = QString::fromUtf8(path.c_str());
+    parent->import(last_path_);
+
+    if(node.FindValue("sub_state")) {
+        const YAML::Node& sub_state_node = node["sub_state"];
+        sub_state = parent->worker->provider_->getState();
+        sub_state->readYaml(sub_state_node);
+//        parent->worker->provider_->setState(sub_state);
+    }
+}
+
 void FileImporterWorker::publish()
 {
-    if(!provider_.isNull()) {
+    if(provider_.get()) {
         CvMatMessage::Ptr img(new CvMatMessage);
         CvMatMessage::Ptr mask(new CvMatMessage);
 
@@ -55,9 +81,9 @@ void FileImporterWorker::publish()
 bool FileImporterWorker::import(const QString& path)
 {
     state.last_path_ = path;
-    provider_ = QSharedPointer<ImageProvider>(ImageProvider::create(state.last_path_.toUtf8().constData()));
+    provider_ = ImageProvider::Ptr(ImageProvider::create(state.last_path_.toUtf8().constData()));
 
-    return !provider_.isNull();
+    return provider_.get();
 }
 
 
@@ -76,7 +102,7 @@ FileImporter::~FileImporter()
 void FileImporter::fill(QBoxLayout* layout)
 {
     if(worker == NULL) {
-        worker = new FileImporterWorker;
+        worker = new FileImporterWorker(this);
 
         file_dialog_ = new QPushButton("Import");
 
@@ -141,7 +167,7 @@ void FileImporter::importDialog()
 
 Memento::Ptr FileImporter::getState() const
 {
-    boost::shared_ptr<FileImporterWorker::State> memento(new FileImporterWorker::State);
+    boost::shared_ptr<FileImporterWorker::State> memento(new FileImporterWorker::State((FileImporter*) this));
     *memento = worker->state;
 
     return memento;
@@ -153,6 +179,7 @@ void FileImporter::setState(Memento::Ptr memento)
     assert(m.get());
 
     worker->state = *m;
+//    import(worker->state.last_path_);
+    worker->provider_->setState(m->sub_state);
 
-    import(worker->state.last_path_);
 }

@@ -7,8 +7,10 @@
 using namespace vision_evaluator;
 
 ImageProviderSet::ImageProviderSet()
-    : playing_(true), current_frame(0), next_frame(-1)
+    : next_frame(-1)
 {
+    state.playing_ = true;
+    state.current_frame = 0;
 }
 
 ImageProviderSet::~ImageProviderSet()
@@ -22,7 +24,7 @@ void ImageProviderSet::insert(QBoxLayout* layout)
 
     play_pause_ = new QPushButton(tr("Play / Pause"));
     play_pause_->setCheckable(true);
-    play_pause_->setChecked(playing_);
+    play_pause_->setChecked(state.playing_);
 
     layout->addWidget(play_pause_);
     layout->addWidget(slider_);
@@ -44,7 +46,7 @@ void ImageProviderSet::update_gui(QFrame* additional_holder)
 
 void ImageProviderSet::next(cv::Mat& img, cv::Mat& mask)
 {
-    if(playing_ || next_frame != -1) {
+    if(state.playing_ || next_frame != -1) {
         reallyNext(img, mask);
         next_frame = -1;
 
@@ -55,7 +57,7 @@ void ImageProviderSet::next(cv::Mat& img, cv::Mat& mask)
 
 void ImageProviderSet::setPlaying(bool playing)
 {
-    playing_ = playing;
+    state.playing_ = playing;
     if(play_pause_->isChecked() != playing) {
         play_pause_->setChecked(playing);
     }
@@ -65,7 +67,7 @@ void ImageProviderSet::showFrame()
 {
     int frame = slider_->value();
 
-    if(frame == current_frame) {
+    if(frame == state.current_frame) {
         return;
     }
     std::cout << "skip to frame " << frame << " / " << frames_ << std::endl;
@@ -73,3 +75,22 @@ void ImageProviderSet::showFrame()
     next_frame = frame;
 }
 
+Memento::Ptr ImageProviderSet::getState() const
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state;
+
+    return memento;
+}
+
+void ImageProviderSet::setState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    state = *m;
+
+    state.current_frame = 0;
+    slider_->setValue(m->current_frame);
+    setPlaying(state.playing_);
+}

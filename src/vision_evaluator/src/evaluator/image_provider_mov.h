@@ -13,6 +13,7 @@ class ImageProviderMov : public ImageProviderSet
 
 protected:
     ImageProviderMov(const std::string& movie_file);
+    ~ImageProviderMov();
 
 public:
     static ImageProvider* createInstance(const std::string& path);

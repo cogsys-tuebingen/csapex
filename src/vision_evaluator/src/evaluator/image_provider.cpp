@@ -95,3 +95,14 @@ int ImageProvider::sleepTime()
 {
     return 100;
 }
+
+
+Memento::Ptr ImageProvider::getState() const
+{
+    return Memento::Ptr((Memento*) NULL);
+}
+
+void ImageProvider::setState(Memento::Ptr memento)
+{
+
+}
