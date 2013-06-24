@@ -155,7 +155,7 @@ void ModalPainter::input(cv::Mat img)
 }
 
 FilterStaticMask::FilterStaticMask()
-    : painter(NULL)
+    : painter(NULL), state(this)
 {
 }
 
@@ -184,7 +184,7 @@ void FilterStaticMask::filter(cv::Mat& img, cv::Mat& mask)
 
     if(!state.mask_.empty()) {
         if(mask.empty()) {
-            mask = state.mask_;
+            state.mask_.copyTo(mask);
         } else {
             mask = cv::min(mask, state.mask_);
         }
@@ -202,7 +202,7 @@ void FilterStaticMask::insert(QBoxLayout* layout)
 
 Memento::Ptr FilterStaticMask::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
+    boost::shared_ptr<State> memento(new State((FilterStaticMask*) this));
     *memento = state;
 
     return memento;

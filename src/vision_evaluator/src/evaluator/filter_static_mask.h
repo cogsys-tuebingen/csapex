@@ -8,6 +8,7 @@
 #include <QDialog>
 #include <QGraphicsView>
 #include <QPushButton>
+#include <fstream>
 
 namespace vision_evaluator
 {
@@ -43,6 +44,27 @@ private:
 
     struct State : public Memento {
         cv::Mat mask_;
+
+        State(FilterStaticMask* parent)
+            : parent(parent)
+        {}
+
+        virtual void writeYaml(YAML::Emitter& out) const {
+            std::string file = parent->getName() + ".ppm"; // TODO: also use random part
+            out << YAML::Key << "mask" << YAML::Value << file;
+            cv::imwrite(file, mask_);
+
+        }
+        virtual void readYaml(const YAML::Node& node) {
+            if(!node.FindValue("mask")){
+                return;
+            }
+            std::string file;
+            node["mask"] >> file;
+            mask_ = cv::imread(file, 0);
+        }
+
+        FilterStaticMask* parent;
     };
 
     State state;
