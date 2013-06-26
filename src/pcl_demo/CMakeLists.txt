@@ -6,6 +6,8 @@ project(pcl_demo)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros roscpp)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -79,6 +81,13 @@ add_dependencies(pcl_demo_node ${catkin_EXPORTED_TARGETS} pcl_demo_gencfg)
 add_executable(pcl_filter src/pcl_filter.cpp)
 add_dependencies(pcl_filter ${catkin_EXPORTED_TARGETS} pcl_demo_gencfg)
 
+add_executable(simple_tracker src/simple_tracker.cpp)
+add_dependencies(simple_tracker ${catkin_EXPORTED_TARGETS} pcl_demo_gencfg)
+
+add_executable(simple_tracker_framework src/simple_tracker_framework.cpp)
+add_dependencies(simple_tracker_framework ${catkin_EXPORTED_TARGETS} pcl_demo_gencfg)
+
+
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -89,6 +98,12 @@ target_link_libraries(pcl_demo_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(pcl_filter
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(simple_tracker
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(simple_tracker_framework
   ${catkin_LIBRARIES}
 )
 

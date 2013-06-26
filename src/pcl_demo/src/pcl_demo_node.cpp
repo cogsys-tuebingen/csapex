@@ -20,11 +20,14 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
 
 #include <visualization_msgs/Marker.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <pcl_demo/pcl_demoConfig.h>
+#include <tf/transform_listener.h>
+#include <tf/exceptions.h>
 
 class PclDemo
 {
@@ -39,13 +42,26 @@ public:
 
         nh_.param("cloud_topic", topic, topic);
 
+        target_frame = "/base_link";
+        nh_.param("target_frame", target_frame, target_frame);
+
+        memory_frame = "/odom";
+        nh_.param("memory_frame", memory_frame, memory_frame);
+
+
         sub_ = nh_.subscribe<PointCloud>(topic, 1, boost::bind(&PclDemo::callback, this, _1));
         pub_plane_ = nh_.advertise<PointCloud>("plane", 1, true);
         pub_sphere_ = nh_.advertise<PointCloud>("sphere", 1, true);
         pub_balls_ = nh_.advertise<PointCloud>("balls", 1, true);
-        pub_marker_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
+        pub_goal_pos_ = nh_.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1, true);
 
-        id = 0;
+        has_ball = false;
+        max_wait_time = ros::Duration(1);
+        last = ros::Time::now();
+
+        init_transformation = true;
+
+        cloud.reset(new PointCloud);
 
         f = boost::bind(&PclDemo::dynamicReconfigureCallback, this, _1, _2);
         server.setCallback(f);
@@ -61,206 +77,340 @@ public:
         iterations_plane_ = config.iterations_plane;
         iterations_sphere_ = config.iterations_sphere;
 
+        sphere_min_points = config.sphere_min_points;
+
+        sphere_distance_threshold = config.sphere_distance_threshold;
+        sphere_normal_distance_weight = config.sphere_normal_distance_weight;
+
         planes_ = config.planes;
         spheres_ = config.spheres;
 
-        std::cout << "reconfigure: " << spheres_ << std::endl;
+
+        segmenter_plane.setOptimizeCoefficients (true);
+        segmenter_plane.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+        segmenter_plane.setNormalDistanceWeight (0.1);
+        segmenter_plane.setMethodType (ransac_plane_);
+        segmenter_plane.setMaxIterations (iterations_plane_);
+        segmenter_plane.setDistanceThreshold (0.025);
+
+        segmenter_sphere.setOptimizeCoefficients (true);
+        segmenter_sphere.setModelType (pcl::SACMODEL_SPHERE);
+        segmenter_sphere.setMethodType (ransac_sphere_);
+        segmenter_sphere.setNormalDistanceWeight (sphere_normal_distance_weight);
+        segmenter_sphere.setMaxIterations (iterations_sphere_);
+        segmenter_sphere.setDistanceThreshold (sphere_distance_threshold);
+        segmenter_sphere.setRadiusLimits (sphere_r_min_, sphere_r_max_);
     }
 
-    void callback(const PointCloud::ConstPtr& cloud)
+    void estimateNormals()
     {
-        // All the objects needed
-        pcl::NormalEstimation<PointT, pcl::Normal> ne;
-        pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg;
-        pcl::ExtractIndices<PointT> extract;
-        pcl::ExtractIndices<pcl::Normal> extract_normals;
-        pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
+        pcl::NormalEstimation<PointT, pcl::Normal> normal_estimation;
+        pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
 
-        // Datasets
-        pcl::PointCloud<PointT>::Ptr cloud_filtered (new pcl::PointCloud<PointT>);
-        pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-        pcl::PointCloud<PointT>::Ptr cloud_filtered2 (new pcl::PointCloud<PointT>);
-        pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
-        pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_sphere (new pcl::ModelCoefficients);
-        pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_sphere (new pcl::PointIndices);
-        pcl::PointCloud<PointT>::Ptr balls (new pcl::PointCloud<PointT>);
+        normal_estimation.setSearchMethod (tree);
+        normal_estimation.setInputCloud (cloud);
+        normal_estimation.setKSearch (50);
+        normal_estimation.compute (*normals);
+    }
 
-        balls->header = cloud->header;
+    bool findAndExtractPlane()
+    {
+        pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices);
+        pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients);
+        PointCloud::Ptr cloud_plane (new PointCloud);
 
-        *cloud_filtered = *cloud;
-
-        // Estimate point normals
-        ne.setSearchMethod (tree);
-        ne.setInputCloud (cloud_filtered);
-        ne.setKSearch (50);
-        ne.compute (*cloud_normals);
-
-        pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ());
         cloud_plane->header = cloud->header;
 
-        // Create the segmentation object for the planar model and set all the parameters
-        for(int i=0; i < planes_; ++i){
-            seg.setOptimizeCoefficients (true);
-            seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
-            seg.setNormalDistanceWeight (0.1);
-            seg.setMethodType (ransac_plane_);
-            seg.setMaxIterations (iterations_plane_);
-            seg.setDistanceThreshold (0.05);
-            seg.setInputCloud (cloud_filtered);
-            seg.setInputNormals (cloud_normals);
-            // Obtain the plane inliers and coefficients
-            seg.segment (*inliers_plane, *coefficients_plane);
-            //              std::cerr << "Plane coefficients: " << *coefficients_plane << std::endl;
+        for(int i=0; i < std::max(1, planes_); ++i){
+            segmenter_plane.setInputCloud (cloud);
+            segmenter_plane.setInputNormals (normals);
+            segmenter_plane.segment (*inliers_plane, *coefficients_plane);
 
-            // Extract the planar inliers from the input cloud
-            extract.setInputCloud (cloud_filtered);
-            extract.setIndices (inliers_plane);
-            extract.setNegative (false);
-
-            if(inliers_plane->indices.size() < 1000) {
-                std::cerr << "no plane" << std::endl;
-                break;
+            if(inliers_plane->indices.size() < 100) {
+                continue;
             }
-            std::cerr << "Plane" << std::endl;
 
-            pcl::PointCloud<PointT>::Ptr tmp (new pcl::PointCloud<PointT> ());
-            extract.filter (*tmp);
+            extract_points.setInputCloud (cloud);
+            extract_points.setIndices (inliers_plane);
+            extract_points.setNegative (false);
 
-            *cloud_plane += *tmp;
+            PointCloud::Ptr extraced_plane (new PointCloud);
+            extract_points.filter (*extraced_plane);
 
-            // Remove the planar inliers, extract the rest
-            extract.setNegative (true);
-            extract.filter (*cloud_filtered2);
+            *cloud_plane = *extraced_plane;
+
+            extract_points.setNegative (true);
+            extract_points.filter (*cloud);
+
             extract_normals.setNegative (true);
-            extract_normals.setInputCloud (cloud_normals);
+            extract_normals.setInputCloud (normals);
             extract_normals.setIndices (inliers_plane);
-            extract_normals.filter (*cloud_normals2);
+            extract_normals.filter (*normals);
 
-            cloud_filtered = cloud_filtered2;
-            cloud_normals = cloud_normals2;
+            // update plane model
+            plane[0] = coefficients_plane->values[0];
+            plane[1] = coefficients_plane->values[1];
+            plane[2] = coefficients_plane->values[2];
+            plane[3] = coefficients_plane->values[3];
+
+            pub_plane_.publish(cloud_plane);
+
+            return true;
         }
 
+        return false;
+    }
 
-        // Publish the planar inliers
-        pub_plane_.publish(cloud_plane);
-        std::cout << "publish plane (size=" << cloud_plane->points.size() << ")" << std::endl;
+    void findBalls()
+    {
+        pcl::PointIndices::Ptr inliers_sphere (new pcl::PointIndices);
+        pcl::ModelCoefficients::Ptr coefficients_sphere (new pcl::ModelCoefficients);
+        PointCloud::Ptr cloud_sphere (new PointCloud);
 
-        pcl::PointCloud<PointT>::Ptr cloud_sphere (new pcl::PointCloud<PointT> ());
         cloud_sphere->header = cloud->header;
+        balls->header = cloud->header;
 
-        visualization_msgs::Marker balls_marker;
-
-        // Create the segmentation object for cylinder segmentation and set all the parameters
         for(int i=0; i < spheres_; ++i){
-            seg.setOptimizeCoefficients (true);
-            seg.setModelType (pcl::SACMODEL_SPHERE);
-            seg.setMethodType (ransac_sphere_);
-            seg.setNormalDistanceWeight (0.1);
-            seg.setMaxIterations (iterations_sphere_);
-            seg.setDistanceThreshold (0.03);
-            seg.setRadiusLimits (sphere_r_min_, sphere_r_max_);
-            seg.setInputCloud (cloud_filtered);
-            seg.setInputNormals (cloud_normals);
+            segmenter_sphere.setInputCloud (cloud);
+            segmenter_sphere.setInputNormals (normals);
 
-            std::cerr << "Sphere coefficients " << i << std::endl;
-            // Obtain the sphere inliers and coefficients
-            seg.segment (*inliers_sphere, *coefficients_sphere);
+            segmenter_sphere.segment (*inliers_sphere, *coefficients_sphere);
 
-            if(inliers_sphere->indices.size() < 4) {
-                break;
-            }
-            std::cerr << "Sphere coefficients (" << i << "): " << *coefficients_sphere << std::endl;
-
-            geometry_msgs::Point pt;
-            pt.x = coefficients_sphere->values[0];
-            pt.y = coefficients_sphere->values[1];
-            pt.z = coefficients_sphere->values[2];
-            balls_marker.points.push_back(pt);
-
-            // Write the cylinder inliers to disk
-            extract.setInputCloud (cloud_filtered);
-            extract.setIndices (inliers_sphere);
-            extract.setNegative (false);
-
-            pcl::PointCloud<PointT>::Ptr tmp (new pcl::PointCloud<PointT> ());
-            extract.filter (*tmp);
-
-            *cloud_sphere += *tmp;
-
-
-            PointT ball;
-            ball.x = pt.x;
-            ball.y = pt.y;
-            ball.z = pt.z;
-
-            int r = 0;
-            int g = 0;
-            int b = 0;
-
-            double c = 0;
-            BOOST_FOREACH(PointT& pt, tmp->points) {
-                r += pt.r;
-                g += pt.g;
-                b += pt.b;
-
-                ++c;
+            if(inliers_sphere->indices.size() < sphere_min_points) {
+                continue;
             }
 
-            ball.r = r / c;
-            ball.g = g / c;
-            ball.b = b / c;
+            pcl::PointXYZ sphere_center;
+            sphere_center.x = coefficients_sphere->values[0];
+            sphere_center.y = coefficients_sphere->values[1];
+            sphere_center.z = coefficients_sphere->values[2];
 
-            balls->points.push_back(ball);
+            double dist = pcl::pointToPlaneDistanceSigned(sphere_center, plane);
 
-            // Remove the sphere inliers, extract the rest
-            extract.setNegative (true);
-            extract.filter (*cloud_filtered2);
+            if(dist < - 3 * sphere_r_max_ || dist > 3 * sphere_r_max_) {
+                std::cout << "skipping ball with distance " << dist << std::endl;
+                continue;
+            }
+
+            extract_points.setInputCloud (cloud);
+            extract_points.setIndices (inliers_sphere);
+            extract_points.setNegative (false);
+
+            PointCloud::Ptr extracted_sphere_points (new PointCloud);
+            extract_points.filter (*extracted_sphere_points);
+
+            *cloud_sphere += *extracted_sphere_points;
+
+            extractBall(sphere_center, extracted_sphere_points);
+
+            extract_points.setNegative (true);
+            extract_points.filter (*cloud);
+
             extract_normals.setNegative (true);
-            extract_normals.setInputCloud (cloud_normals);
+            extract_normals.setInputCloud (normals);
             extract_normals.setIndices (inliers_sphere);
-            extract_normals.filter (*cloud_normals2);
-
-            cloud_filtered = cloud_filtered2;
-            cloud_normals = cloud_normals2;
-
-
-            ros::spinOnce();
+            extract_normals.filter (*normals);
         }
 
         pub_balls_.publish(balls);
         pub_sphere_.publish(cloud_sphere);
+    }
 
-        balls_marker.action = visualization_msgs::Marker::ADD;
-        balls_marker.type = visualization_msgs::Marker::SPHERE_LIST;
-        balls_marker.color.a = 1.0;
-        balls_marker.color.r = 1.0;
-        balls_marker.color.g = 1.0;
-        balls_marker.color.b = 1.0;
+    void extractBall(pcl::PointXYZ center, PointCloud::Ptr points)
+    {
+        PointT ball;
+        ball.x = center.x;
+        ball.y = center.y;
+        ball.z = center.z;
+        ball.a = 255;
 
-        balls_marker.lifetime = ros::Duration(1.0);
+        int r = 0;
+        int g = 0;
+        int b = 0;
 
-        double r = 0.3;
-        balls_marker.scale.x = r;
-        balls_marker.scale.y = r;
-        balls_marker.scale.z = r;
+        double c = 0;
+        BOOST_FOREACH(PointT& center, points->points) {
+            r += center.r;
+            g += center.g;
+            b += center.b;
 
-        balls_marker.header = cloud->header;
-        balls_marker.id = id++;
-        balls_marker.ns = "balls";
+            ++c;
+        }
 
-        pub_marker_.publish(balls_marker);
+        ball.r = r / c;
+        ball.g = g / c;
+        ball.b = b / c;
+
+        balls->points.push_back(ball);
+    }
+
+    void processBalls()
+    {
+        BOOST_FOREACH(PointT& ball, balls->points) {
+            ROS_INFO_STREAM("ball: rgb: " << (int) ball.r << " / " << (int) ball.g << " / " << (int) ball.b);
+            ROS_INFO_STREAM("ball: " << (ball.g > ball.b * 1.2) << " && " << (ball.g > ball.r * 1.2));
+            if(isMagenta(ball)) {
+                has_ball = true;
+                last_ball_odom = transformPoint(ball, memory_frame, balls->header.frame_id);
+                last_ball_time = ros::Time::now();
+                return;
+            }
+        }
+
+    }
+
+    bool isBlue(PointT& ball)
+    {
+        return ball.b > ball.g * 1.2 && ball.b > ball.r * 1.2;
+    }
+
+    bool isMagenta(PointT& ball)
+    {
+        return ball.r > ball.g * 1.2 && ball.r > ball.b * 1.2;
+    }
+
+    bool isGreen(PointT& ball)
+    {
+        return ball.g > ball.b * 1.2 && ball.g > ball.r * 1.2;
+    }
+
+    PointT transformPoint(const PointT& pt,const std::string& target_frame, const std::string& source_frame, tf::Quaternion* quat = NULL)
+    {
+        tf::StampedTransform transformation;
+        try {
+            tfl.lookupTransform(target_frame, source_frame, ros::Time(0), transformation);
+        } catch(tf::TransformException& e) {
+            ROS_WARN_STREAM(e.what());
+            tfl.clear();
+            return PointT();
+        }
+
+        tf::Vector3 ball_pt(pt.x, pt.y, pt.z);
+        tf::Vector3 ball_pt_target_frame = transformation (ball_pt);
+
+        PointT result;
+        result.x = ball_pt_target_frame.x();
+        result.y = ball_pt_target_frame.y();
+        result.z = ball_pt_target_frame.z();
+
+        if(quat) {
+            *quat = tf::createQuaternionFromYaw(std::atan2(ball_pt_target_frame.y(), ball_pt_target_frame.x()));
+        }
+
+        return result;
+    }
+
+    void sendBallPoseAsGoalPose(PointT& ball)
+    {
+        tf::Quaternion quat;
+        PointT ball_target_frame = transformPoint(ball, target_frame, memory_frame, &quat);
+
+        geometry_msgs::PoseStamped goal;
+        goal.pose.position.x = ball_target_frame.x;
+        goal.pose.position.y = ball_target_frame.y;
+        goal.pose.position.z = ball_target_frame.z;
+
+        tf::quaternionTFToMsg(quat, goal.pose.orientation);
+
+        goal.header.frame_id = target_frame;
+
+        pub_goal_pos_.publish(goal);
+    }
+
+    void reset(const PointCloud::ConstPtr& input)
+    {
+        normals.reset(new pcl::PointCloud<pcl::Normal>);
+        balls.reset (new PointCloud);
+        *cloud = *input;
+    }
+
+    void callback(const PointCloud::ConstPtr& input)
+    {
+        if(init_transformation) {
+            try {
+                init_transformation = tfl.waitForTransform(input->header.frame_id, target_frame, ros::Time(0), ros::Duration(0.5));
+            } catch(tf::ConnectivityException& e) {
+                ROS_WARN_STREAM(e.what());
+            }
+        }
+
+        reset(input);
+
+        estimateNormals();
+
+        if(!findAndExtractPlane()) {
+            ROS_DEBUG_STREAM("cannot find the plane");
+        }
+
+        findBalls();
+
+        processBalls();
+    }
+
+    void tick()
+    {
+        ros::Time now = ros::Time::now();
+
+        if(now < last) {
+            tfl.clear();
+            init_transformation = true;
+        }
+
+        last = now;
+
+        if(has_ball && ros::Time::now() < last_ball_time + max_wait_time) {
+            sendBallPoseAsGoalPose(last_ball_odom);
+
+        } else {
+            geometry_msgs::PoseStamped goal;
+            goal.pose.position.x = 0.5;
+            goal.pose.position.y = 0;
+            goal.pose.position.z = 0;
+
+            goal.pose.orientation = tf::createQuaternionMsgFromYaw(0);
+
+            goal.header.frame_id = target_frame;
+
+            pub_goal_pos_.publish(goal);
+        }
+
     }
 
 private:
     ros::NodeHandle nh_;
+    ros::Time last;
+
     ros::Subscriber sub_;
     ros::Publisher pub_plane_;
     ros::Publisher pub_sphere_;
     ros::Publisher pub_balls_;
-    ros::Publisher pub_marker_;
+    ros::Publisher pub_goal_pos_;
+
+    pcl::ExtractIndices<pcl::Normal> extract_normals;
+    pcl::ExtractIndices<PointT> extract_points;
+    pcl::SACSegmentationFromNormals<PointT, pcl::Normal> segmenter_plane;
+    pcl::SACSegmentationFromNormals<PointT, pcl::Normal> segmenter_sphere;
+
+    PointCloud::Ptr cloud;
+    pcl::PointCloud<pcl::Normal>::Ptr normals;
+    PointCloud::Ptr balls;
+
+    Eigen::Vector4f plane;
 
     dynamic_reconfigure::Server<pcl_demo::pcl_demoConfig> server;
     dynamic_reconfigure::Server<pcl_demo::pcl_demoConfig>::CallbackType f;
+
+    tf::TransformListener tfl;
+
+    std::string memory_frame;
+    std::string target_frame;
+
+    bool init_transformation;
+
+    bool has_ball;
+    PointT last_ball_odom;
+    ros::Time last_ball_time;
+    ros::Duration max_wait_time;
 
     int ransac_plane_;
     int ransac_sphere_;
@@ -271,11 +421,14 @@ private:
     int iterations_plane_;
     int iterations_sphere_;
 
+    int sphere_min_points;
+
+    double sphere_normal_distance_weight;
+    double sphere_distance_threshold;
+
     double sphere_r_min_;
     double sphere_r_max_;
     double leaf_;
-
-    int id;
 };
 
 int main(int argc, char** argv)
@@ -285,9 +438,10 @@ int main(int argc, char** argv)
 
     PclDemo demo;
 
-    ros::WallRate rate(30);
+    ros::WallRate rate(30);  
 
     while(ros::ok()) {
+        demo.tick();
         ros::spinOnce();
         rate.sleep();
     }
