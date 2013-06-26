@@ -37,6 +37,8 @@ add_library(image_transformation
     src/filter_undistort.cpp
     src/perspective.cpp
     src/filter_perspective.cpp
+    src/simple_image_difference.cpp
+    src/simple_sink.cpp
     ${MOC}
 )
 

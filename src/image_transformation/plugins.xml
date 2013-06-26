@@ -6,4 +6,10 @@
   <class type="image_transformation::PerspectiveTransform" base_class_type="vision_evaluator::Filter">
     <description>none yet</description>
   </class>
+  <class type="image_transformation::SimpleImageDifference" base_class_type="vision_evaluator::ImageCombiner">
+    <description>none yet</description>
+  </class>
+  <class type="vision_evaluator::SimpleSink" base_class_type="vision_evaluator::BoxedObject">
+    <description>none yet</description>
+  </class>
 </library>

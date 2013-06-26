@@ -12,12 +12,16 @@
 using namespace vision_evaluator;
 
 BoxManager::BoxManager()
-    : available_elements("vision_evaluator::SelectorProxy"), dirty_(false)
+    : PluginManager<vision_evaluator::BoxedObject>("vision_evaluator::BoxedObject"), available_elements("vision_evaluator::SelectorProxy"), dirty_(false)
 {
 }
 
 void BoxManager::fill(QLayout* layout)
 {
+    if(!pluginsLoaded()) {
+        reload();
+    }
+
     typedef std::pair<std::string, SelectorProxy::ProxyConstructor> Pair;
     BOOST_FOREACH(Pair p, available_elements.availableClasses()) {
         layout->addWidget(p.second());

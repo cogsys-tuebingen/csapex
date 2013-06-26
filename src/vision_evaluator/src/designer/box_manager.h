@@ -15,7 +15,7 @@
 namespace vision_evaluator
 {
 
-class BoxManager : public QObject
+class BoxManager : public QObject, public PluginManager<BoxedObject>
 {
     Q_OBJECT
 
