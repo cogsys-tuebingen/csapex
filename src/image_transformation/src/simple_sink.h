@@ -24,6 +24,7 @@ private Q_SLOTS:
 
 private:
     ConnectorIn* input_;
+    ConnectorOut *output_;
 
     QLabel* label;
     int sunk;

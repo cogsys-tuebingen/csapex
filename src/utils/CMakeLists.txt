@@ -43,6 +43,7 @@ catkin_package(
      include/utils/LibPath/
      include/utils/LibLaserProcessing/
      include/utils/LibOdoCalib/
+     include/utils/LibCvTools/
 #     include/utils/LibLaserProcessing/segmentation
 #     include/utils/LibLaserProcessing/leg_filter
    LIBRARIES
@@ -57,6 +58,7 @@ catkin_package(
      LibOdoCalib 
      LibLaserProcessing
      LibRosUtil
+     LibCvTools
    CATKIN_DEPENDS genmsg roscpp sensor_msgs std_msgs costmap_2d_extended
    DEPENDS Eigen OpenCV
 )

@@ -5,6 +5,7 @@ include_directories (
     LibGeneric
     LibRobot
     LibRandom/include/
+    LibCvTools
 )
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
@@ -22,3 +23,4 @@ add_subdirectory (LibRandom)
 add_subdirectory (LibGeneric)
 add_subdirectory (LibClustering)
 add_subdirectory (LibRosUtil)
+add_subdirectory (LibCvTools)
