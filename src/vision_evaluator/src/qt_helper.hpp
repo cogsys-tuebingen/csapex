@@ -13,6 +13,8 @@
 #include <QBoxLayout>
 #include <QSpinBox>
 #include <QLabel>
+#include <utils/qdouble_slider.h>
+#include <QDoubleSpinBox>
 
 class QtHelper
 {
@@ -42,6 +44,34 @@ public:
 
         return slider;
     }
+
+    static QSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size) {
+        QHBoxLayout* internal_layout = new QHBoxLayout;
+
+        QDoubleSlider* slider = new QDoubleSlider(Qt::Horizontal, step_size);
+        slider->setDoubleMinimum(min);
+        slider->setDoubleMaximum(max);
+        slider->setDoubleValue(def);
+        slider->setMinimumWidth(100);
+
+        QDoubleSpinBox* display = new QDoubleSpinBox;
+        display->setMinimum(min);
+        display->setMaximum(max);
+        display->setValue(def);
+
+        internal_layout->addWidget(new QLabel(name.c_str()));
+        internal_layout->addWidget(slider);
+        internal_layout->addWidget(display);
+
+        layout->addLayout(internal_layout);
+
+        QObject::connect(slider, SIGNAL(valueChanged(double)), display, SLOT(setValue(double)));
+        QObject::connect(display, SIGNAL(valueChanged(double)), slider, SLOT(setDoubleValue(double)));
+
+        return slider;
+    }
+
+
 
     static QHBoxLayout* wrap(const std::string& label, QWidget* widget) {
 

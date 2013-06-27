@@ -33,11 +33,14 @@ include(${QT_USE_FILE})
 file(GLOB         QT_FORMS RELATIVE   ${CMAKE_CURRENT_SOURCE_DIR}                 ui/*.ui)
 file(GLOB_RECURSE QT_MOC_EVA RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/evaluator/*.h)
 file(GLOB_RECURSE QT_MOC_DES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/designer/*.h)
+file(GLOB_RECURSE QT_MOC_UTI RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/utils/*.h)
 QT4_WRAP_CPP(QT_MOC_EVA ${QT_MOC_EVA})
 QT4_WRAP_CPP(QT_MOC_DES ${QT_MOC_DES})
+QT4_WRAP_CPP(QT_MOC_UTI ${QT_MOC_UTI})
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
 set(QT_EVALUATOR ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_EVA})
 set(QT_DESIGNER ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_DES})
+set(QT_UTIL ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_UTI})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -108,8 +111,10 @@ add_library(vision_core
     src/utils/opencv_utils.hpp
     src/utils/plugin_manager.hpp
     src/utils/rectangle_cluster.cpp
+    src/utils/qdouble_slider.cpp
+    ${QT_UTIL}
     ${GLOBALS})
-target_link_libraries(vision_core yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+target_link_libraries(vision_core yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} ${QT_LIBRARIES})
 target_link_libraries(vision_core logger)
 
 ##### EVALUATION

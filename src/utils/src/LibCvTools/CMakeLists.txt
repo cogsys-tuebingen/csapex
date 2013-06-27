@@ -8,6 +8,7 @@ add_library (LibCvTools SHARED
     perspective_transform.cpp
     grid.hpp
     grid_attributes.hpp
+    grid_compute.hpp
     histogram.hpp
     quad_tree.hpp
     decomposition_quadtree.cpp

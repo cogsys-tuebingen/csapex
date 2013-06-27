@@ -35,6 +35,7 @@ include_directories(include
 add_library(vision_plugins
     src/filter_undistort.cpp
     src/filter_perspective.cpp
+    src/filter_histogram.cpp
     src/simple_image_difference.cpp
     src/simple_sink.cpp
     ${MOC}
