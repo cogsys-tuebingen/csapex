@@ -8,10 +8,10 @@
 /// SYSTEM
 #include <QLabel>
 
-namespace vision_evaluator
+namespace vision_plugins
 {
 
-class SimpleSink : public BoxedObject
+class SimpleSink : public vision_evaluator::BoxedObject
 {
     Q_OBJECT
 
@@ -20,11 +20,11 @@ public:
     virtual void fill(QBoxLayout* layout);
 
 private Q_SLOTS:
-    void messageArrived(ConnectorIn* source);
+    void messageArrived(vision_evaluator::ConnectorIn* source);
 
 private:
-    ConnectorIn* input_;
-    ConnectorOut *output_;
+    vision_evaluator::ConnectorIn* input_;
+    vision_evaluator::ConnectorOut *output_;
 
     QLabel* label;
     int sunk;

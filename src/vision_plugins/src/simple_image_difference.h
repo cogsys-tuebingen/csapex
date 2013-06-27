@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <vision_evaluator/image_combiner.h>
 
-namespace image_transformation
+namespace vision_plugins
 {
 
 class SimpleImageDifference : public vision_evaluator::ImageCombiner

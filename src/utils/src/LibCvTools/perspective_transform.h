@@ -6,17 +6,17 @@
  * @brief The PerspectiveTransform class calculates a perspective transformation
  *        given different parameters, such as 3 angles, focal length and distance.
  */
-class PerspectiveTransform
+class PerspectiveTransformer
 {
 public:
     /**
      * @brief PerspectiveTransform constructor.
      */
-    PerspectiveTransform();
+    PerspectiveTransformer();
     /**
      * @brief ~PerspectiveTransform destructor.
      */
-    virtual ~PerspectiveTransform();
+    virtual ~PerspectiveTransformer();
     /**
      * @brief Set rotation around x axis using angles.
      * @param ang   the angle

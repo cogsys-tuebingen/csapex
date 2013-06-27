@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <vision_evaluator/filter.h>
-#include "undistort.h"
+#include <utils/LibCvTools/undistorter.h>
 
 /// SYSTEM
 #include <QFileDialog>
@@ -11,7 +11,7 @@
 #include <QPushButton>
 #include <QSlider>
 
-namespace image_transformation {
+namespace vision_plugins {
 class Undistort : public vision_evaluator::Filter
 {
     Q_OBJECT

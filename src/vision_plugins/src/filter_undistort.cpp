@@ -7,9 +7,9 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(image_transformation::Undistort, vision_evaluator::Filter)
+PLUGINLIB_EXPORT_CLASS(vision_plugins::Undistort, vision_evaluator::Filter)
 
-using namespace image_transformation;
+using namespace vision_plugins;
 
 Undistort::Undistort() :
     undist_(NULL)

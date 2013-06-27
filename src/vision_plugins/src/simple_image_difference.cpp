@@ -4,9 +4,9 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-using namespace image_transformation;
+using namespace vision_plugins;
 
-PLUGINLIB_EXPORT_CLASS(image_transformation::SimpleImageDifference, vision_evaluator::ImageCombiner);
+PLUGINLIB_EXPORT_CLASS(vision_plugins::SimpleImageDifference, vision_evaluator::ImageCombiner);
 
 SimpleImageDifference::SimpleImageDifference()
 {
