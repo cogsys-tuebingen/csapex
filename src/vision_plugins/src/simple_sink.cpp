@@ -12,11 +12,10 @@
 #include <pluginlib/class_list_macros.h>
 #include <QLabel>
 
-PLUGINLIB_EXPORT_CLASS(vision_plugins::SimpleSink, vision_evaluator::BoxedObject);
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::SimpleSink, vision_evaluator::BoxedObject);
 
 
 using namespace vision_evaluator;
-using namespace vision_plugins;
 
 SimpleSink::SimpleSink()
     : input_(NULL),output_(NULL), sunk(0)

@@ -9,7 +9,7 @@
   <class type="vision_plugins::SimpleImageDifference" base_class_type="vision_evaluator::ImageCombiner">
     <description>none yet</description>
   </class>
-  <class type="vision_plugins::SimpleSink" base_class_type="vision_evaluator::BoxedObject">
+  <class type="vision_evaluator::SimpleSink" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
 </library>
