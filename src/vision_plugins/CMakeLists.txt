@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(image_transformation)
+project(vision_plugins)
 
-find_package(catkin REQUIRED roscpp vision_evaluator)
+find_package(catkin REQUIRED roscpp vision_evaluator utils)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
@@ -32,7 +32,7 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
 
-add_library(image_transformation
+add_library(vision_plugins
     src/undistort.cpp
     src/filter_undistort.cpp
     src/perspective.cpp
@@ -42,6 +42,6 @@ add_library(image_transformation
     ${MOC}
 )
 
-target_link_libraries(image_transformation
+target_link_libraries(vision_plugins
   ${catkin_LIBRARIES}
 )

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>image_transformation</name>
+  <name>vision_plugins</name>
   <version>0.0.0</version>
   <description>The image_transformation package contains image transformation plugins for the vision evaluator.</description>
   <maintainer email="richard.hanten@uni-tuebingen.de">hanten</maintainer>
@@ -9,6 +9,7 @@
  <buildtool_depend>catkin</buildtool_depend>
 
  <build_depend>vision_evaluator</build_depend>
+ <build_depend>utils</build_depend>
  <build_depend>roscpp</build_depend>
 
  <run_depend>vision_evaluator</run_depend>

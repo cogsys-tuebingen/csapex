@@ -1,0 +1,15 @@
+<library path="libvision_plugins">
+  <class type="vision_plugins::Undistort" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
+
+  <class type="vision_plugins::PerspectiveTransform" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
+  <class type="vision_plugins::SimpleImageDifference" base_class_type="vision_evaluator::ImageCombiner">
+    <description>none yet</description>
+  </class>
+  <class type="vision_plugins::SimpleSink" base_class_type="vision_evaluator::BoxedObject">
+    <description>none yet</description>
+  </class>
+</library>
