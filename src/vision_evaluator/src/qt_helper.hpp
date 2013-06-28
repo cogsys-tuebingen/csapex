@@ -71,8 +71,7 @@ public:
         return slider;
     }
 
-    template<class Layout>
-    static QWidget* wrapLayout(Layout *l)
+    static QWidget* wrapLayout(QBoxLayout *l)
     {
         QWidget *container = new QWidget;
         container->setLayout(l);
