@@ -61,7 +61,7 @@ void Histogram::fill(QBoxLayout *layout)
         presets_.insert ( std::pair<QString,Preset>(QString("HSL"), RGB) );
         presets_.insert ( std::pair<QString,Preset>(QString("HSV"), RGB) );
         layout->addWidget(combo_ch_norm_);
-
+        selectedPreset(combo_ch_norm_->currentText());
 
         QHBoxLayout* scale_layout = new QHBoxLayout;
         slide_ch_scale_ = QtHelper::makeDoubleSlider(scale_layout, "Scale ", 5.0, 0, 10.0, 0.01);
@@ -69,10 +69,12 @@ void Histogram::fill(QBoxLayout *layout)
         layout->addWidget(slide_ch_scale_container_);
 
         slide_ch_scale_container_->setHidden(true);
+        slide_ch_container_->setHidden(true);
         combo_ch_norm_->setHidden(true);
 
         QComboBox::connect(combo_ch_norm_, SIGNAL(currentIndexChanged(QString)), this, SLOT(selectedPreset(QString)));
         QCheckBox::connect(check_ch_norm_, SIGNAL(clicked(bool)), this, SLOT(enableNorm(bool)));
+
     }
 }
 
@@ -83,38 +85,43 @@ void Histogram::messageArrived(ConnectorIn *source)
     CvMatMessage::Ptr histogram(new CvMatMessage);
 
     if(check_equal_->isChecked())
-        cv::equalizeHist(m->value, m->value);
+        cv_histogram::equalize_hist(m->value, m->value);
 
-    if(channel_norm) {
-        std::vector<double> norm_factors;
-        norm_factors.push_back(slide_ch_scale_->doubleValue() * HSV || HSL ? 179.0 : 255.0);
-        norm_factors.push_back(slide_ch_scale_->doubleValue() * 255.0);
-        norm_factors.push_back(slide_ch_scale_->doubleValue() * 255.0);
-        cv_histogram::normalize<cv::NORM_MINMAX>(m->value, m->value, norm_factors);
-    }
+//    if(channel_norm) {
+//        std::vector<double> norm_factors;
+//-        norm_factors.push_back(slide_ch_scale_->doubleValue() * HSV || HSL ? 179.0 : 255.0);
+//-        norm_factors.push_back(slide_ch_scale_->doubleValue() * 255.0);
+//-        norm_factors.push_back(slide_ch_scale_->doubleValue() * 255.0);
+//-        cv_histogram::normalize<cv::NORM_MINMAX>(m->value, m->value, norm_factors);
+//-    }
+
+
 
     if(channel_norm) {
         std::vector<double> norm_factors;
         norm_factors.push_back(channels_[0]->doubleValue());
         norm_factors.push_back(channels_[1]->doubleValue());
         norm_factors.push_back(channels_[2]->doubleValue());
-        cv_histogram::normalize<cv::NORM_L2>(m->value, m->value, norm_factors);
+        cv_histogram::normalize<cv::NORM_MINMAX>(m->value, m->value, norm_factors);
     }
 
     std::vector<cv::Mat> histograms;
     std::vector<int>     bins;
-    std::vector<int>     ranges;
+    std::vector<float>   ranges;
     bins.push_back( HSV || HSL ? 180 : 256 );
     bins.push_back(256);
     bins.push_back(256);
+    ranges.push_back(0.f);
     ranges.push_back(HSV || HSL ? 179 : 255);
+    ranges.push_back(0.f);
     ranges.push_back(255);
+    ranges.push_back(0.f);
     ranges.push_back(255);
-    cv_histogram::generate_histogram(m->value, histograms, bins, ranges, std::vector<float>());
+    // cv_histogram::generate_histogram(m->value, histograms, cv::Mat(), bins, ranges);
 
-    cv::Mat histogram_img(480,640,CV_8UC3, cv::Scalar(0,0,0));
-    cv_histogram::render_histogram(histograms, bins, colors, histogram_img);
-    histogram->value = histogram_img;
+//    cv::Mat histogram_img(480,640,CV_8UC3, cv::Scalar(0,0,0));
+//    cv_histogram::render_histogram(histograms, bins, colors, histogram_img);
+//    histogram->value = histogram_img;
 
     output_->publish(m);
     output_histogram_->publish(histogram);
@@ -125,42 +132,43 @@ void Histogram::selectedPreset(QString text)
     if(slide_ch_container_ != NULL) {
         layout_->removeWidget(slide_ch_container_);
         delete slide_ch_container_;
+        channels_.clear();
     }
 
     QBoxLayout *container_layout = new QVBoxLayout;
 
     switch(presets_[text]) {
     case RGB:
-        QtHelper::makeDoubleSlider(container_layout, "R", 127.0, 0.0, 255.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "G", 127.0, 0.0, 255.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "B", 127.0, 0.0, 255.0, 0.01);
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "R", 127.0, 0.0, 255.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "G", 127.0, 0.0, 255.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "B", 127.0, 0.0, 255.0, 0.01));
         colors.push_back(cv_histogram::COLOR_RED);
         colors.push_back(cv_histogram::COLOR_GREEN);
         colors.push_back(cv_histogram::COLOR_BLUE);
         active_preset_ = RGB;
         break;
     case BGR:
-        QtHelper::makeDoubleSlider(container_layout, "B", 127.0, 0.0, 255.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "G", 127.0, 0.0, 255.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "R", 127.0, 0.0, 255.0, 0.01);
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "B", 127.0, 0.0, 255.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "G", 127.0, 0.0, 255.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "R", 127.0, 0.0, 255.0, 0.01));
         colors.push_back(cv_histogram::COLOR_BLUE);
         colors.push_back(cv_histogram::COLOR_GREEN);
         colors.push_back(cv_histogram::COLOR_RED);
         active_preset_ = BGR;
         break;
     case HSV:
-        QtHelper::makeDoubleSlider(container_layout, "H", 90.0, 0.0, 180.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "S", 127.0, 0.0, 255.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "V", 127.0, 0.0, 255.0, 0.01);
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "H", 90.0, 0.0, 180.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "S", 127.0, 0.0, 255.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "V", 127.0, 0.0, 255.0, 0.01));
         colors.push_back(cv_histogram::COLOR_WHITE);
         colors.push_back(cv_histogram::COLOR_CYAN);
         colors.push_back(cv_histogram::COLOR_RED);
         active_preset_ = HSV;
         break;
     case HSL:
-        QtHelper::makeDoubleSlider(container_layout, "H", 90.0, 0.0, 180.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "L", 127.0, 0.0, 255.0, 0.01);
-        QtHelper::makeDoubleSlider(container_layout, "S", 127.0, 0.0, 255.0, 0.01);
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "H", 90.0, 0.0, 180.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "L", 127.0, 0.0, 255.0, 0.01));
+        channels_.push_back(QtHelper::makeDoubleSlider(container_layout, "S", 127.0, 0.0, 255.0, 0.01));
         colors.push_back(cv_histogram::COLOR_WHITE);
         colors.push_back(cv_histogram::COLOR_CYAN);
         colors.push_back(cv_histogram::COLOR_RED);
