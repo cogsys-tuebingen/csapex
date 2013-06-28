@@ -109,11 +109,11 @@ public:
         instance.registerConstructor(constructor);
     }
 
-    bool pluginsLoaded() const {
+    virtual bool pluginsLoaded() const {
         return instance.plugins_loaded_;
     }
 
-    void reload() {
+    virtual void reload() {
         instance.reload();
     }
 

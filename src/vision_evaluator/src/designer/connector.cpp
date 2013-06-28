@@ -28,6 +28,8 @@ Connector::Connector(Box* parent, const std::string& type, int sub_id)
     ss << box_->UUID() << "_" << type << "_" << sub_id;
 
     uuid_ = ss.str();
+
+    setContextMenuPolicy(Qt::PreventContextMenu);
 }
 
 Connector::~Connector()

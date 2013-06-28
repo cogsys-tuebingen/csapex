@@ -31,6 +31,9 @@ public:
     void setTypeName(const std::string& type_name);
     std::string getTypeName();
 
+    void setCategory(const std::string& category);
+    std::string getCategory();
+
     void setBox(Box* box);
 
     virtual void fill(QBoxLayout* layout);
@@ -59,6 +62,7 @@ protected:
 protected:
     std::string type_name_;
     std::string name_;
+    std::string category_;
 
     Box* box_;
 

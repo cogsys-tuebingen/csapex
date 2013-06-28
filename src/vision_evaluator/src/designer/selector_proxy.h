@@ -62,6 +62,9 @@ public:
 
     virtual void mousePressEvent(QMouseEvent* event);
     std::string getType();
+    std::string getCategory();
+
+    void startObjectPositioning();
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)
@@ -79,8 +82,8 @@ template <class T>
 class SelectorProxyImp : public SelectorProxy
 {
 public:
-    SelectorProxyImp(const std::string& name, QWidget* parent = 0)
-        : SelectorProxy(name, new T, parent)
+    SelectorProxyImp(const std::string& type, QWidget* parent = 0)
+        : SelectorProxy(type, new T, parent)
     {}
 
     virtual ~SelectorProxyImp()
@@ -91,8 +94,7 @@ public:
     }
 
     virtual SelectorProxy* clone() {
-        assert(false);
-        return NULL;
+        return new SelectorProxyImp<T>(type_, parentWidget());
     }
 };
 

@@ -15,7 +15,7 @@ ImageCombiner::ImageCombiner()
     : input_img_a_(NULL), input_mask_a_(NULL), input_img_b_(NULL), input_mask_b_(NULL), output_img_(NULL),
       has_img_a(false), has_mask_a(false), has_img_b(false), has_mask_b(false)
 {
-
+    setCategory("Image Combiner");
 }
 
 ImageCombiner::~ImageCombiner()

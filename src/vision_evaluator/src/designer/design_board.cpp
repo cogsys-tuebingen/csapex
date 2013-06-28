@@ -203,7 +203,17 @@ bool DesignBoard::eventFilter(QObject* o, QEvent* e)
 
 void DesignBoard::showContextMenu(const QPoint& pos)
 {
+    QPoint globalPos = mapToGlobal(pos);
 
+    QMenu menu;
+    BoxManager::instance().fill(&menu);
+
+    QAction* selectedItem = menu.exec(globalPos);
+
+    if(selectedItem) {
+        std::string selected = selectedItem->text().toUtf8().constData();
+        BoxManager::instance().startPlacingBox(selected);
+    }
 }
 
 void DesignBoard::resizeEvent(QResizeEvent* e)

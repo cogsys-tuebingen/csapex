@@ -32,16 +32,35 @@ void SelectorProxy::registerProxy(ProxyConstructor c)
     BoxManager::instance().register_box_type(c);
 }
 
+void SelectorProxy::startObjectPositioning()
+{
+    QDrag* drag = new QDrag(this);
+    QMimeData* mimeData = new QMimeData;
+    mimeData->setText(Box::MIME);
+    mimeData->setParent(this);
+    drag->setMimeData(mimeData);
+
+    //    QPixmap pm = prototype_box_->makePixmap(type_);
+
+    vision_evaluator::Box* object(new vision_evaluator::Box(makeContent(), ""));
+    object->setObjectName(type_.c_str());
+    object->setType(type_);
+    object->init(QPoint(0,0));
+    object->getContent()->setTypeName(type_);
+
+    QPixmap pm = QPixmap::grabWidget(object);
+
+    delete object;
+
+    drag->setPixmap(pm);
+    drag->setHotSpot(QPoint(0,0));
+    drag->exec();
+}
+
 void SelectorProxy::mousePressEvent(QMouseEvent* event)
 {
     if(event->button() == Qt::LeftButton) {
-        QDrag* drag = new QDrag(this);
-        QMimeData* mimeData = new QMimeData;
-        mimeData->setText(Box::MIME);
-        mimeData->setParent(this);
-        drag->setMimeData(mimeData);
-        drag->setPixmap(prototype_box_->makePixmap(type_));
-        drag->exec();
+        startObjectPositioning();
     }
 }
 
@@ -60,4 +79,14 @@ vision_evaluator::Box* SelectorProxy::spawnObject(QWidget* parent, const QPoint&
 std::string SelectorProxy::getType()
 {
     return type_;
+}
+
+std::string SelectorProxy::getCategory()
+{
+    BoxedObject* b = makeContent();
+    std::string cat = b->getCategory();
+    delete b;
+
+    return cat;
+
 }

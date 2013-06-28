@@ -10,6 +10,7 @@
 
 /// SYSTEM
 #include <QLayout>
+#include <QMenu>
 #include <vector>
 
 namespace vision_evaluator
@@ -31,6 +32,7 @@ public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
     void register_box_type(SelectorProxy::Ptr provider);
 
+    void startPlacingBox(const std::string& type);
     Box* makeBox(QWidget* parent, QPoint pos, const std::string& type, const std::string& uuid = "");
     Box* findBox(const std::string& uuid);
 
@@ -40,6 +42,7 @@ public:
     QWidget* container();
 
     void fill(QLayout* layout);
+    void fill(QMenu* menu);
 
     void execute(Command::Ptr command);
 
@@ -50,6 +53,9 @@ public:
     bool canRedo();
 
     std::string makeUUID(const std::string& name);
+
+    virtual bool pluginsLoaded();
+    virtual void reload();
 
 public Q_SLOTS:
     void undo();
@@ -64,8 +70,8 @@ protected:
     BoxManager(const BoxManager& copy);
     BoxManager& operator = (const BoxManager& assign);
 
-    PluginManager<SelectorProxy, SelectorProxy::ProxyConstructor> available_elements;
     std::vector<SelectorProxy::Ptr> available_elements_prototypes;
+    std::vector<SelectorProxy::ProxyConstructor> unloaded_elements;
 
     std::stack<Command::Ptr> done;
     std::stack<Command::Ptr> undone;

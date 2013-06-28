@@ -231,7 +231,7 @@ ConnectorOut* Box::getOutput(const std::string& uuid)
 
 void Box::init(const QPoint& pos)
 {
-    setGeometry(pos.x(), pos.y(), 100, 100);
+    move(pos);
 
     QBoxLayout* layout = new QVBoxLayout;
     ui->content->setLayout(layout);

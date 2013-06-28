@@ -89,6 +89,18 @@ std::string BoxedObject::getTypeName()
     return type_name_;
 }
 
+
+
+void BoxedObject::setCategory(const std::string &category)
+{
+    category_ = category;
+}
+
+std::string BoxedObject::getCategory()
+{
+    return category_;
+}
+
 void BoxedObject::setBox(Box* box)
 {
     box_ = box;
