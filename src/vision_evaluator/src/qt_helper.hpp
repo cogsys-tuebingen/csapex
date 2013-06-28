@@ -71,7 +71,13 @@ public:
         return slider;
     }
 
-
+    template<class Layout>
+    static QWidget* wrapLayout(Layout *l)
+    {
+        QWidget *container = new QWidget;
+        container->setLayout(l);
+        return container;
+    }
 
     static QHBoxLayout* wrap(const std::string& label, QWidget* widget) {
 

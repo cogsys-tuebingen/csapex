@@ -1,12 +1,18 @@
 #ifndef CV_HISTOGRAM_HPP
 #define CV_HISTOGRAM_HPP
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 /**
  * @namespace cv_histogram is a namespace containing functions that make calculating histograms easier.
  * @author Hanten, Richard
  */
 namespace cv_histogram {
+static cv::Scalar COLOR_BLUE    = cv::Scalar(255, 0, 0);
+static cv::Scalar COLOR_GREEN   = cv::Scalar(0, 255, 0);
+static cv::Scalar COLOR_RED     = cv::Scalar(0, 0, 255);
+static cv::Scalar COLOR_CYAN    = cv::Scalar(255, 0, 255);
+static cv::Scalar COLOR_WHITE   = cv::Scalar(255,255,255);
 
 /**
  * @brief Normalize a rgb image.
@@ -49,7 +55,7 @@ inline void normalize_rgb(const cv::Mat &src, cv::Mat &dst)
  * @param accumulate    if the histogram should be calculated accumulative
  */
 inline void generate_histogram(const cv::Mat &image, std::vector<cv::Mat> &histograms, const cv::Mat mask,
-                               const std::vector<int> &bins, const std::vector<int> ranges,
+                               const std::vector<int> &bins, const std::vector<int> &ranges,
                                const std::vector<float> &normalize,
                                const bool uniform = false, bool accumulate = true)
 {
@@ -68,7 +74,6 @@ inline void generate_histogram(const cv::Mat &image, std::vector<cv::Mat> &histo
         hist_ranges[i].push_back(0.f);
         hist_ranges[i].push_back(ranges[i]);
     }
-
     for(unsigned int i = 0 ; i < plane_count ; i++) {
         int b = bins_count > 1 ? bins[i] : bins[0];
         const float* r = { range_count > 1 ? (float*) hist_ranges[i].data() : (float*) hist_ranges[0].data() };
@@ -84,7 +89,7 @@ inline void generate_histogram(const cv::Mat &image, std::vector<cv::Mat> &histo
 }
 
 inline void generate_histogram(const cv::Mat &image, std::vector<cv::Mat> &histograms,
-                               const std::vector<int> &bins, const std::vector<int> ranges,
+                               const std::vector<int> &bins, const std::vector<int> &ranges,
                                const std::vector<float> &normalize,
                                const bool uniform = false, bool accumulate = true)
 {
@@ -143,23 +148,43 @@ inline void generate_histogram_rgb(const cv::Mat &image, std::vector<std::vector
  * @param histogram_color   the histogram specific color to be used
  * @param dst               the image to write to
  */
-inline void render_histogram(const std::vector<cv::Mat> histograms, const int bins, const std::vector<cv::Scalar> histogram_color, cv::Mat &dst)
+inline void render_histogram(const std::vector<cv::Mat> &histograms, const std::vector<int> bins, const std::vector<cv::Scalar> histogram_colors, cv::Mat &dst)
 {
     assert(!dst.empty());
-
-    int bin_w = cvRound( dst.cols/ (double) bins );
-
+    assert(bins.size() == histograms.size());
+    assert(bins.size() == histogram_colors.size());
     for( int i = 0 ; i < histograms.size() ; i++) {
-
-        for( int j = 1; j < bins; j++ )
+        int bin_w = cvRound( dst.cols/ (double) bins[i] );
+        for( int j = 1; j < bins[i]; j++ )
         {
             cv::line(dst,
                      cv::Point(bin_w*(j-1), dst.rows - cvRound(histograms[i].at<float>(j - 1))),
                      cv::Point(bin_w*j, dst.rows - cvRound(histograms[i].at<float>(j))),
-                     histogram_color[i]);
+                     histogram_colors[i]);
         }
     }
 
+}
+
+inline void equalize_hist(const cv::Mat &src, cv::Mat &dst)
+{
+    std::vector<cv::Mat> channels;
+    cv::split(src, channels);
+    for(int i = 0 ; i < channels.size() ; i++) {
+        cv::equalizeHist(channels[i], channels[i]);
+    }
+    cv::merge(channels, dst);
+}
+
+template<int norm>
+inline void normalize(const cv::Mat &src, cv::Mat &dst, const std::vector<double> channel_factors)
+{
+    std::vector<cv::Mat> channels;
+    cv::split(src, channels);
+    for(int i = 0 ; i < channels.size() ; i++) {
+        cv::normalize(channels[i], channels[i], channel_factors[i], 0, norm);
+    }
+    cv::merge(channels, dst);
 }
 }
 
