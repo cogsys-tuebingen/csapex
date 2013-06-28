@@ -29,6 +29,8 @@ public Q_SLOTS:
     void setDoubleMaximum(double max);
     void setDoubleValue(double val);
     double doubleValue();
+    double doubleMaximum();
+    double doubleMinimum();
 };
 
 

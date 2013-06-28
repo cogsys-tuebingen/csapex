@@ -45,7 +45,7 @@ public:
         return slider;
     }
 
-    static QSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size) {
+    static QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size) {
         QHBoxLayout* internal_layout = new QHBoxLayout;
 
         QDoubleSlider* slider = new QDoubleSlider(Qt::Horizontal, step_size);

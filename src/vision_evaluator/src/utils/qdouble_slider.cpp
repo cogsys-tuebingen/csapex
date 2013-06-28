@@ -56,3 +56,13 @@ double QDoubleSlider::doubleValue()
 {
     return int2double(value());
 }
+
+double QDoubleSlider::doubleMaximum()
+{
+    return int2double(maximum());
+}
+
+double QDoubleSlider::doubleMinimum()
+{
+    return int2double(minimum());
+}

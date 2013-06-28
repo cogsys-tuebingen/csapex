@@ -9,7 +9,7 @@ boost::signals2::connection Reconfigurable::tools_updater = Config::replace.conn
 boost::signals2::signal<void(const Config&)> Reconfigurable::tools_replaced;
 
 Reconfigurable::Reconfigurable()
-    : config(Config::latest), tools(latest_tools)
+    : config(Config::getGlobal()), tools(latest_tools)
 {
     connection = tools_replaced.connect(boost::bind(&Reconfigurable::applyConfig, this, _1));
 }
