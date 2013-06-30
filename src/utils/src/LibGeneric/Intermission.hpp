@@ -11,28 +11,34 @@
 namespace generic
 {
 
-template <int steps>
+template <int steps, int start_step = 0>
 struct CallbackIntermission {
     template <class Callback, class A>
     static void callAndCopy(Callback& c, const A& from, A& to) {
-        static int next = 0;
-        if(--next <= 0) {
+        static int next = start_step;
+        static bool start = true;
+        if(--next <= 0 || start) {
             to = from;
             c();
+            if(next > 0) return;
             next = steps;
+            start = false;
         }
     }
     template <class Callback>
     static void call(Callback& c) {
-        static int next = 0;
-        if(--next <= 0) {
+        static int next = start_step;
+        static bool start = true;
+        if(--next <= 0 || start) {
             c();
+            if(next > 0) return;
             next = steps;
+            start = false;
         }
     }
 };
-template<>
-struct CallbackIntermission<0> {
+template<int start_step>
+struct CallbackIntermission<0, start_step> {
     template <class Callback, class A>
     static void callAndCopy(Callback& c, const A& from, A& to) {}
     template <class Callback>
