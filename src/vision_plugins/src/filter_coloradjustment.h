@@ -1,45 +1,49 @@
-#ifndef FILTER_HISTOGRAM_H
-#define FILTER_HISTOGRAM_H
+#ifndef FILTER_COLORCHANNEL_H
+#define FILTER_COLORCHANNEL_H
+#include <vision_evaluator/filter.h>
 
+class QSlider;
 class QDoubleSlider;
 class QCheckBox;
 class QComboBox;
-class QSlider;
-
-/// COMPONENT
-#include <vision_evaluator/filter.h>
 
 namespace vision_evaluator {
-class Histogram : public vision_evaluator::BoxedObject
+class ColorAdjustment : public vision_evaluator::BoxedObject
 {
     Q_OBJECT
 
 public:
-    Histogram();
+    ColorAdjustment();
+    virtual ~ColorAdjustment();
 
-    void         setState(Memento::Ptr memento);
-    Memento::Ptr getState();
-
-    virtual void fill(QBoxLayout* layout);
+    virtual void fill(QBoxLayout *parent);
 
 private Q_SLOTS:
-    void messageArrived(ConnectorIn* source);
-    void selectedPreset(QString text);
-    void enableNorm(bool value);
-    void enableScale(bool value);
+    virtual void messageArrived(ConnectorIn *source);
+    void setPreset(QString text);
 
 private:
+    typedef std::vector<std::pair<QDoubleSlider*, QDoubleSlider*> > ChannelLimits;
     ConnectorIn   *input_;
     ConnectorOut  *output_;
-    ConnectorOut  *output_histogram_;
-    QBoxLayout    *layout_;
-    QSlider       *slide_lightness_;
-    QDoubleSlider *slide_ch_zoom_;
-    QWidget       *zoom_container_;
-    QCheckBox     *check_equal_;
 
-    std::vector<cv::Scalar> colors_;
+    enum Preset{NONE, CH1, CH2, HSV, HSL, CH3, CH4};
+    Preset                      active_preset_;
+    int                     channel_count(Preset p);
 
+
+    QBoxLayout                 *layout_;
+    QCheckBox                  *limit_;
+    QSlider                    *slide_lightness_;
+    QWidget                    *slide_ch_container_;
+    QDoubleSlider              *last_updater_;
+    std::map<QString, Preset>   presets_;
+    ChannelLimits               channel_limits_;
+
+
+    void addLightness(cv::Mat &img);
+    void connectPair(const std::pair<QDoubleSlider *, QDoubleSlider *> &pair);
+    void insertPair(QDoubleSlider *min, QDoubleSlider *max);
 
     class State : public Memento {
     public:
@@ -70,12 +74,10 @@ private:
         double ch2_max;
         double ch3_min;
         double ch3_max;
-
-
     };
 
-    State state_;
 
 };
 }
-#endif // FILTER_HISTOGRAM_H
+
+#endif // FILTER_COLORCHANNEL_H

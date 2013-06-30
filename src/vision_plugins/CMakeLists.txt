@@ -36,9 +36,10 @@ add_library(vision_plugins
     src/filter_undistort.cpp
     src/filter_perspective.cpp
     src/filter_histogram.cpp
+    src/filter_coloradjustment.cpp
     src/simple_image_difference.cpp
-    src/simple_sink.cpp
-    ${MOC}
+    src/simple_sink.cpp 
+   ${MOC}
 )
 
 target_link_libraries(vision_plugins

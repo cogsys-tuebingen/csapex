@@ -71,9 +71,9 @@ public:
         return slider;
     }
 
-    static QWidget* wrapLayout(QBoxLayout *l)
+    static QWidget* wrapLayout(QBoxLayout *l, QWidget *parent = 0)
     {
-        QWidget *container = new QWidget;
+        QWidget *container = new QWidget(parent);
         container->setLayout(l);
         return container;
     }

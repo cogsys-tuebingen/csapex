@@ -28,6 +28,8 @@ public Q_SLOTS:
     void setDoubleMinimum(double min);
     void setDoubleMaximum(double max);
     void setDoubleValue(double val);
+    void limitMin(double limit);
+    void limitMax(double limit);
     double doubleValue();
     double doubleMaximum();
     double doubleMinimum();

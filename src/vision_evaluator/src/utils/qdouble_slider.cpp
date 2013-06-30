@@ -52,6 +52,19 @@ void QDoubleSlider::setDoubleValue(double val)
     setValue(double2int(val));
 }
 
+void QDoubleSlider::limitMin(double limit)
+{
+    double limited = std::max(doubleValue(), limit);
+    setDoubleValue(limited);
+}
+
+void QDoubleSlider::limitMax(double limit)
+{
+    double limited = std::min(doubleValue(), limit);
+    setDoubleValue(limited);
+}
+
+
 double QDoubleSlider::doubleValue()
 {
     return int2double(value());

@@ -11,7 +11,7 @@ namespace cv_histogram {
 const cv::Scalar COLOR_BLUE    = cv::Scalar(255, 0, 0);
 const cv::Scalar COLOR_GREEN   = cv::Scalar(0, 255, 0);
 const cv::Scalar COLOR_RED     = cv::Scalar(0, 0, 255);
-const cv::Scalar COLOR_CYAN    = cv::Scalar(255, 0, 255);
+const cv::Scalar COLOR_CYAN    = cv::Scalar(255, 255,0);
 const cv::Scalar COLOR_WHITE   = cv::Scalar(255,255,255);
 
 /**
@@ -40,7 +40,6 @@ inline void normalize_rgb(const cv::Mat &src, cv::Mat &dst)
             }
         }
     }
-
 }
 
 inline void single_channel_histogram(const cv::Mat &src, std::vector<cv::MatND> &histograms, const cv::Mat &mask,
@@ -98,7 +97,7 @@ inline void render_histogram(const std::vector<cv::Mat> &histograms, const std::
 {
     assert(!dst.empty());
     assert(bins.size() == histograms.size());
-    assert(bins.size() == histogram_colors.size());
+    assert(bins.size() < histogram_colors.size());
 
     for( int i = 0 ; i < histograms.size() ; i++) {
         cv::Mat histogram = histograms[i].clone();
