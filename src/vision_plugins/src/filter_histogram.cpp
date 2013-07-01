@@ -23,15 +23,17 @@ PLUGINLIB_EXPORT_CLASS(vision_evaluator::Histogram, vision_evaluator::BoxedObjec
 using namespace vision_evaluator;
 
 Histogram::Histogram() :
-    input_(NULL), output_histogram_(NULL), channel_count_(0)
+    input_(NULL), output_histogram_(NULL),container_bin_counts_(NULL),channel_count_(0)
 {
     colors_.push_back(cv_histogram::COLOR_WHITE);
     colors_.push_back(cv_histogram::COLOR_GREEN);
     colors_.push_back(cv_histogram::COLOR_CYAN);
     colors_.push_back(cv_histogram::COLOR_RED);
+
+    setCategory("Analysis");
 }
 
-Memento::Ptr Histogram::getState()
+Memento::Ptr Histogram::getState() const
 {
     boost::shared_ptr<State> memento(new State);
     *memento = state_;
@@ -41,14 +43,17 @@ Memento::Ptr Histogram::getState()
 
 void Histogram::setState(Memento::Ptr memento)
 {
-    //    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
-    //    assert(m.get());
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
 
-    //    state_ = *m;
+    state_ = *m;
+    channel_count_ = state_.channel_count;
+    updateSliders();
+    for(int i = 0 ; i < channel_count_ ; i++) {
+        bin_counts_[i]->setValue(m->bin_counts[i]);
+    }
 
-
-
-    //    Q_EMIT filter_changed();
+    slide_zoom_->setDoubleValue(state_.zoom);
 }
 
 
@@ -69,7 +74,7 @@ void Histogram::fill(QBoxLayout *layout)
 
         /// add sliders and stuff
         QHBoxLayout *zoom_layout = new QHBoxLayout;
-        slide_zoom_ = QtHelper::makeDoubleSlider(zoom_layout, "Zoom ", 1.0, 1.0, 20.0, 0.01);
+        slide_zoom_ = QtHelper::makeDoubleSlider(zoom_layout, "Zoom ", 1.0, -20.0, 20.0, 0.01);
         container_zoom_ = QtHelper::wrapLayout(zoom_layout);
         layout_->addWidget(container_zoom_);
 
@@ -90,7 +95,7 @@ void Histogram::messageArrived(ConnectorIn *source)
 
     }
 
-
+    updateState();
 
     cv::Mat bins, ranges;
     prepare(bins, ranges);
@@ -119,6 +124,16 @@ void Histogram::prepare(cv::Mat &bins, cv::Mat &ranges)
     ranges = r;
 }
 
+void Histogram::updateState()
+{
+    state_.bin_counts.clear();
+    for(std::vector<QSlider*>::iterator it = bin_counts_.begin() ; it != bin_counts_.end() ; it++) {
+        state_.bin_counts.push_back((*it)->value());
+    }
+    state_.channel_count = channel_count_;
+    state_.zoom = slide_zoom_->doubleValue();
+}
+
 void Histogram::updateSliders()
 {
     bin_counts_.clear();
@@ -132,7 +147,7 @@ void Histogram::updateSliders()
     for(int i = 0 ; i < channel_count_; i++) {
         std::stringstream ch;
         ch << "Ch." << i+1 << " bins";
-        bin_counts_.push_back(QtHelper::makeSpinBox(internal_layout, ch.str(), HISTOGRAM_BINS_STD, 1, HISTOGRAM_BINS_MAX));
+        bin_counts_.push_back(QtHelper::makeSlider(internal_layout, ch.str(), HISTOGRAM_BINS_STD, 1, HISTOGRAM_BINS_MAX));
     }
     container_bin_counts_ = QtHelper::wrapLayout(internal_layout);
     layout_->addWidget(container_bin_counts_);

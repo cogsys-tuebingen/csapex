@@ -3,6 +3,7 @@
 
 class QDoubleSlider;
 class QSpinBox;
+class QSlider;
 
 /// COMPONENT
 #include <vision_evaluator/filter.h>
@@ -20,12 +21,13 @@ public:
     Histogram();
 
     void         setState(Memento::Ptr memento);
-    Memento::Ptr getState();
+    Memento::Ptr getState() const;
 
     virtual void fill(QBoxLayout* layout);
 
 private Q_SLOTS:
     void messageArrived(ConnectorIn* source);
+
 
 private:
     /// connectors
@@ -39,43 +41,44 @@ private:
     QWidget       *container_zoom_;
     QWidget       *container_bin_counts_;
 
-    std::vector<QSpinBox*>  bin_counts_;
+    std::vector<QSlider*>  bin_counts_;
     std::vector<cv::Scalar> colors_;
 
     void prepare(cv::Mat &bins, cv::Mat &ranges);
     void updateSliders();
     cv::Scalar randomColor();
 
+    /// memento
+    void updateState();
     class State : public Memento {
     public:
         void readYaml(const YAML::Node &node)
         {
-            node["ch1_min"] >> ch1_min;
-            node["ch1_max"] >> ch1_max;
-            node["ch2_min"] >> ch2_min;
-            node["ch2_max"] >> ch2_max;
-            node["ch3_min"] >> ch3_min;
-            node["ch3_max"] >> ch3_max;
+            const YAML::Node &values = node["bin_counts"];
+            for(YAML::Iterator it = values.begin() ; it != values.end() ; it++) {
+                int value;
+                *it >> value;
+                bin_counts.push_back(value);
+            }
+            node["channel_count"] >> channel_count;
+            node["zoom"] >> zoom;
         }
 
         void writeYaml(YAML::Emitter &out) const
         {
-            out << YAML::Key << "ch1_min" << YAML::Value << ch1_min;
-            out << YAML::Key << "ch1_max" << YAML::Value << ch1_max;
-            out << YAML::Key << "ch2_min" << YAML::Value << ch2_min;
-            out << YAML::Key << "ch2_max" << YAML::Value << ch2_max;
-            out << YAML::Key << "ch3_min" << YAML::Value << ch3_min;
-            out << YAML::Key << "ch3_max" << YAML::Value << ch3_max;
+            out << YAML::Key << "bin_counts" << YAML::Value << YAML::BeginSeq;
+            for(std::vector<int>::const_iterator it = bin_counts.begin() ; it != bin_counts.end() ; it++) {
+                out << *it;
+            }
+            out << YAML::EndSeq;
+            out << YAML::Key << "channel_count" << YAML::Value << channel_count;
+            out << YAML::Key << "zoom" << YAML::Value << zoom;
         }
 
     public:
-        double ch1_min;
-        double ch1_max;
-        double ch2_min;
-        double ch2_max;
-        double ch3_min;
-        double ch3_max;
-
+        std::vector<int> bin_counts;
+        int     channel_count;
+        double  zoom;
 
     };
 

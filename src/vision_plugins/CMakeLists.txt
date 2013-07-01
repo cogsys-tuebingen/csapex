@@ -6,6 +6,8 @@ find_package(catkin REQUIRED roscpp vision_evaluator utils)
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
+set(CMAKE_BUILD_TYPE Debug)
+
 file(GLOB_RECURSE MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 QT4_WRAP_CPP(MOC ${MOC})
 

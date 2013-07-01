@@ -24,10 +24,39 @@ ColorAdjustment::ColorAdjustment() :
     channel_count_(0),
     container_ch_sliders_(NULL)
 {
+    setCategory("Filter");
 }
 
 ColorAdjustment::~ColorAdjustment()
 {
+}
+
+void ColorAdjustment::setState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    state_ = *m;
+    channel_count_ = state_.channel_count;
+    active_preset_ = state_.preset;
+    combo_preset_->setCurrentIndex(preset_to_index_[active_preset_]);
+    updateSliders();
+    for(int i = 0 ; i < channel_count_ ; i++) {
+        slider_pairs_[i].first->setDoubleValue(state_.mins[i]);
+        slider_pairs_[i].second->setDoubleValue(state_.maxs[i]);
+    }
+
+    slide_lightness_->setValue(state_.lightness);
+    check_normalize_->setChecked(state_.normalize);
+    combo_preset_->setCurrentIndex(preset_to_index_[active_preset_]);
+}
+
+Memento::Ptr ColorAdjustment::getState() const
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state_;
+
+    return memento;
 }
 
 void ColorAdjustment::fill(QBoxLayout *parent)
@@ -53,21 +82,24 @@ void ColorAdjustment::fill(QBoxLayout *parent)
 
         parent->addWidget(new QLabel("Channel Adjustment"));
 
-        QComboBox *combo_preset = new QComboBox();
-        combo_preset->addItem("STD");
-        combo_preset->addItem("HSV");
-        combo_preset->addItem("HSL");
-        presets_.insert ( std::pair<QString,Preset>(QString("STD"), STD) );
-        presets_.insert ( std::pair<QString,Preset>(QString("HSV"), HSV) );
-        presets_.insert ( std::pair<QString,Preset>(QString("HSL"), HSL) );
-        layout_->addWidget(combo_preset);
+        combo_preset_ = new QComboBox();
+        combo_preset_->addItem("STD");
+        combo_preset_->addItem("HSV");
+        combo_preset_->addItem("HSL");
+        text_to_preset_.insert ( std::pair<QString,Preset>(QString("STD"), STD) );
+        text_to_preset_.insert ( std::pair<QString,Preset>(QString("HSV"), HSV) );
+        text_to_preset_.insert ( std::pair<QString,Preset>(QString("HSL"), HSL) );
+        preset_to_index_.insert( std::pair<Preset,int>(STD, combo_preset_->findText("STD")));
+        preset_to_index_.insert( std::pair<Preset,int>(HSV, combo_preset_->findText("HSV")));
+        preset_to_index_.insert( std::pair<Preset,int>(HSL, combo_preset_->findText("HSL")));
+        layout_->addWidget(combo_preset_);
 
-        setPreset(combo_preset->currentText());
+        setPreset(combo_preset_->currentText());
 
 
         slide_lightness_ = QtHelper::makeSlider(layout_, "Lightness -/+", 0, -255, 255);
 
-        QObject::connect(combo_preset, SIGNAL(currentIndexChanged(QString)), this, SLOT(setPreset(QString)));
+        QObject::connect(combo_preset_, SIGNAL(currentIndexChanged(QString)), this, SLOT(setPreset(QString)));
     }
 }
 
@@ -83,6 +115,8 @@ void ColorAdjustment::messageArrived(ConnectorIn *source)
         channel_count_ = m->value.channels();
         updateSliders();
     }
+
+    updateState();
 
     for(int i = 0 ; i < slider_pairs_.size() && i < channels.size() ; i++) {
         double min = slider_pairs_[i].first->doubleValue();
@@ -104,7 +138,7 @@ void ColorAdjustment::messageArrived(ConnectorIn *source)
 
 void ColorAdjustment::setPreset(QString text)
 {
-    active_preset_  = presets_[text];
+    active_preset_  = text_to_preset_[text];
     updateSliders();
 }
 
@@ -165,4 +199,19 @@ void ColorAdjustment::updateSliders()
 
     container_ch_sliders_ = QtHelper::wrapLayout(internal_layout);
     layout_->addWidget(container_ch_sliders_);
+}
+
+void ColorAdjustment::updateState()
+{
+    state_.mins.clear();
+    state_.maxs.clear();
+    state_.lightness = slide_lightness_->value();
+    state_.preset = active_preset_;
+    state_.channel_count = channel_count_;
+    state_.normalize = check_normalize_->isChecked();
+
+    for(ChannelLimits::iterator it = slider_pairs_.begin() ; it != slider_pairs_.end() ; it++) {
+        state_.mins.push_back(it->first->doubleValue());
+        state_.maxs.push_back(it->second->doubleValue());
+    }
 }
