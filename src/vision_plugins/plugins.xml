@@ -1,5 +1,8 @@
 <library path="libvision_plugins">
-  <class type="vision_evaluator::Histogram" base_class_type="vision_evaluator::BoxedObject">
+ <class type="vision_plugins::Equalize" base_class_type="vision_evaluator::Filter">
+  <description>none yet</description>
+  </class>
+ <class type="vision_evaluator::Histogram" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
   <class type="vision_evaluator::ColorAdjustment" base_class_type="vision_evaluator::BoxedObject">

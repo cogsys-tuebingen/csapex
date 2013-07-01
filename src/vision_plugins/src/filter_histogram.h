@@ -2,14 +2,16 @@
 #define FILTER_HISTOGRAM_H
 
 class QDoubleSlider;
-class QCheckBox;
-class QComboBox;
-class QSlider;
+class QSpinBox;
 
 /// COMPONENT
 #include <vision_evaluator/filter.h>
 
 namespace vision_evaluator {
+/// constants
+static int HISTOGRAM_BINS_MAX = 512;
+static int HISTOGRAM_BINS_STD = 256;
+
 class Histogram : public vision_evaluator::BoxedObject
 {
     Q_OBJECT
@@ -24,22 +26,25 @@ public:
 
 private Q_SLOTS:
     void messageArrived(ConnectorIn* source);
-    void selectedPreset(QString text);
-    void enableNorm(bool value);
-    void enableScale(bool value);
 
 private:
+    /// connectors
     ConnectorIn   *input_;
-    ConnectorOut  *output_;
     ConnectorOut  *output_histogram_;
-    QBoxLayout    *layout_;
-    QSlider       *slide_lightness_;
-    QDoubleSlider *slide_ch_zoom_;
-    QWidget       *zoom_container_;
-    QCheckBox     *check_equal_;
 
+    /// layout and computation
+    int            channel_count_;
+    QBoxLayout    *layout_;
+    QDoubleSlider *slide_zoom_;
+    QWidget       *container_zoom_;
+    QWidget       *container_bin_counts_;
+
+    std::vector<QSpinBox*>  bin_counts_;
     std::vector<cv::Scalar> colors_;
 
+    void prepare(cv::Mat &bins, cv::Mat &ranges);
+    void updateSliders();
+    cv::Scalar randomColor();
 
     class State : public Memento {
     public:

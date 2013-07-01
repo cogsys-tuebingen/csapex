@@ -33,6 +33,7 @@ include_directories(include
 )
 
 add_library(vision_plugins
+    src/filter_equalize.cpp
     src/filter_undistort.cpp
     src/filter_perspective.cpp
     src/filter_histogram.cpp

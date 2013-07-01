@@ -21,7 +21,8 @@ ColorAdjustment::ColorAdjustment() :
     input_(NULL),
     output_(NULL),
     active_preset_(NONE),
-    slide_ch_container_(NULL)
+    channel_count_(0),
+    container_ch_sliders_(NULL)
 {
 }
 
@@ -46,23 +47,17 @@ void ColorAdjustment::fill(QBoxLayout *parent)
 
         layout_ = parent;
 
-        limit_ = new QCheckBox("Normalization Mode");
-        parent->addWidget(limit_);
+        check_normalize_ = new QCheckBox("Normalization Mode");
+        parent->addWidget(check_normalize_);
 
 
         parent->addWidget(new QLabel("Channel Adjustment"));
 
         QComboBox *combo_preset = new QComboBox();
-        combo_preset->addItem("1 Channel");
-        combo_preset->addItem("2 Channel");
-        combo_preset->addItem("3 Channel");
-        combo_preset->addItem("4 Channel");
+        combo_preset->addItem("STD");
         combo_preset->addItem("HSV");
         combo_preset->addItem("HSL");
-        presets_.insert ( std::pair<QString,Preset>(QString("1 Channel"), CH1) );
-        presets_.insert ( std::pair<QString,Preset>(QString("2 Channel"), CH2) );
-        presets_.insert ( std::pair<QString,Preset>(QString("3 Channel"), CH3) );
-        presets_.insert ( std::pair<QString,Preset>(QString("4 Channel"), CH4) );
+        presets_.insert ( std::pair<QString,Preset>(QString("STD"), STD) );
         presets_.insert ( std::pair<QString,Preset>(QString("HSV"), HSV) );
         presets_.insert ( std::pair<QString,Preset>(QString("HSL"), HSL) );
         layout_->addWidget(combo_preset);
@@ -84,10 +79,15 @@ void ColorAdjustment::messageArrived(ConnectorIn *source)
     std::vector<cv::Mat> channels;
     cv::split(m->value, channels);
 
-    for(int i = 0 ; i < channel_limits_.size() && i < channels.size() ; i++) {
-        double min = channel_limits_[i].first->doubleValue();
-        double max = channel_limits_[i].second->doubleValue();
-        if(limit_->isChecked()) {
+    if(channel_count_ != m->value.channels()) {
+        channel_count_ = m->value.channels();
+        updateSliders();
+    }
+
+    for(int i = 0 ; i < slider_pairs_.size() && i < channels.size() ; i++) {
+        double min = slider_pairs_[i].first->doubleValue();
+        double max = slider_pairs_[i].second->doubleValue();
+        if(check_normalize_->isChecked()) {
             cv::normalize(channels[i], channels[i], max, min, cv::NORM_MINMAX);
         } else {
             cv::threshold(channels[i], channels[i], min, max, cv::THRESH_TOZERO);
@@ -104,35 +104,8 @@ void ColorAdjustment::messageArrived(ConnectorIn *source)
 
 void ColorAdjustment::setPreset(QString text)
 {
-    channel_limits_.clear();
-    QVBoxLayout *layout;
-
-    if(slide_ch_container_ != NULL) {
-        slide_ch_container_->deleteLater();
-    }
-
-    layout = new QVBoxLayout;
-    Preset preset = presets_[text];
-
-    for(int i = 0 ; i < channel_count(preset) ; i++) {
-        std::stringstream ch;
-        ch << i;
-
-        double ch_limit = 255.0;
-        if(i == 0 && (preset == HSL || preset == HSV)) {
-            ch_limit = 180.0;
-        }
-
-        QDoubleSlider *tmp_min = QtHelper::makeDoubleSlider(layout, "min. " + ch.str(), 0.0, 0.0, ch_limit, 0.01);
-        QDoubleSlider *tmp_max = QtHelper::makeDoubleSlider(layout, "max. " + ch.str(), 255.0, 0.0, ch_limit, 0.01);
-        insertPair(tmp_min, tmp_max);
-
-    }
-
-    slide_ch_container_ = QtHelper::wrapLayout(layout);
-    active_preset_ = preset;
-    layout_->addWidget(slide_ch_container_);
-
+    active_preset_  = presets_[text];
+    updateSliders();
 }
 
 void ColorAdjustment::addLightness(cv::Mat &img)
@@ -154,35 +127,42 @@ void ColorAdjustment::addLightness(cv::Mat &img)
     }
 }
 
-void ColorAdjustment::connectPair(const std::pair<QDoubleSlider *, QDoubleSlider *> &pair)
-{
-    QDoubleSlider::connect(pair.first, SIGNAL(valueChanged(double)), pair.second, SLOT(limitMin(double)));
-    QDoubleSlider::connect(pair.second, SIGNAL(valueChanged(double)), pair.first, SLOT(limitMax(double)));
-}
-
-void ColorAdjustment::insertPair(QDoubleSlider *min, QDoubleSlider *max)
+void ColorAdjustment::prepareSliderPair(QDoubleSlider *min, QDoubleSlider *max)
 {
     std::pair<QDoubleSlider*, QDoubleSlider*> minMax;
     minMax.first  = min;
     minMax.second = max;
-    connectPair(minMax);
-    channel_limits_.push_back(minMax);
+    QDoubleSlider::connect(minMax.first, SIGNAL(valueChanged(double)), minMax.second, SLOT(limitMin(double)));
+    QDoubleSlider::connect(minMax.second, SIGNAL(valueChanged(double)), minMax.first, SLOT(limitMax(double)));
+    slider_pairs_.push_back(minMax);
 }
 
-int ColorAdjustment::channel_count(Preset p)
+void ColorAdjustment::updateSliders()
 {
-    switch(p) {
-    case CH1:
-        return 1;
-    case CH2:
-        return 2;
-    case CH3:
-        return 3;
-    case HSL:
-        return 3;
-    case HSV:
-        return 3;
-    case CH4:
-        return 4;
+    slider_pairs_.clear();
+    QVBoxLayout *internal_layout;
+
+    if(container_ch_sliders_ != NULL) {
+        container_ch_sliders_->deleteLater();
     }
+
+    internal_layout = new QVBoxLayout;
+
+    for(int i = 0 ; i < channel_count_ ; i++) {
+        std::stringstream ch;
+        ch << i + 1;
+
+        double ch_limit = 255.0;
+        if(i == 0 && (active_preset_ == HSL || active_preset_ == HSV)) {
+            ch_limit = 180.0;
+        }
+
+        QDoubleSlider *tmp_min = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + "min.", 0.0, 0.0, ch_limit, 0.01);
+        QDoubleSlider *tmp_max = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + "max.", 255.0, 0.0, ch_limit, 0.01);
+        prepareSliderPair(tmp_min, tmp_max);
+
+    }
+
+    container_ch_sliders_ = QtHelper::wrapLayout(internal_layout);
+    layout_->addWidget(container_ch_sliders_);
 }

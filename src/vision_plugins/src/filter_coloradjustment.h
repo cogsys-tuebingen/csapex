@@ -23,28 +23,33 @@ private Q_SLOTS:
     void setPreset(QString text);
 
 private:
+    /// internal typedefs
     typedef std::vector<std::pair<QDoubleSlider*, QDoubleSlider*> > ChannelLimits;
+
+    /// connectors
     ConnectorIn   *input_;
     ConnectorOut  *output_;
 
-    enum Preset{NONE, CH1, CH2, HSV, HSL, CH3, CH4};
-    Preset                      active_preset_;
-    int                     channel_count(Preset p);
+    /// presets
+    enum Preset{NONE, HSV, HSL, STD};
+    Preset  active_preset_;
+    int     channel_count_;
 
-
+    /// layout and computation
     QBoxLayout                 *layout_;
-    QCheckBox                  *limit_;
+    QCheckBox                  *check_normalize_;
     QSlider                    *slide_lightness_;
-    QWidget                    *slide_ch_container_;
-    QDoubleSlider              *last_updater_;
+    QWidget                    *container_ch_sliders_;
+    ChannelLimits               slider_pairs_;
     std::map<QString, Preset>   presets_;
-    ChannelLimits               channel_limits_;
 
-
+    /// helpers
     void addLightness(cv::Mat &img);
-    void connectPair(const std::pair<QDoubleSlider *, QDoubleSlider *> &pair);
-    void insertPair(QDoubleSlider *min, QDoubleSlider *max);
+    void prepareSliderPair(QDoubleSlider *min, QDoubleSlider *max);
+    void updateSliders();
 
+
+    /// MEMENTO
     class State : public Memento {
     public:
         void readYaml(const YAML::Node &node)
