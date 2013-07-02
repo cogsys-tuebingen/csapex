@@ -6,4 +6,7 @@
   <class type="cip104::LKTracking" base_class_type="vision_evaluator::Filter">
     <description>none yet</description>
   </class>
+  <class type="vision_evaluator::VirtualCamera" base_class_type="vision_evaluator::BoxedObject">
+    <description>none yet</description>
+  </class>
 </library>

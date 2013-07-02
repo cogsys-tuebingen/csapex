@@ -6,6 +6,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp vision_evaluator)
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
+set(CMAKE_BUILD_TYPE Debug)
+
 file(GLOB_RECURSE MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 QT4_WRAP_CPP(MOC ${MOC})
 
@@ -35,6 +37,7 @@ include_directories(include
 add_library(cip104
   src/filter_hsv_segmentation.cpp
   src/filter_lk_tracking.cpp
+  src/virtual_camera.cpp
   ${MOC}
 )
 target_link_libraries(cip104
