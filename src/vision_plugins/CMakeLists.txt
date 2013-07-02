@@ -35,6 +35,7 @@ include_directories(include
 )
 
 add_library(vision_plugins
+    src/combiner_gridcompare.cpp
     src/filter_merger.cpp
     src/filter_splitter.cpp
     src/filter_equalize.cpp

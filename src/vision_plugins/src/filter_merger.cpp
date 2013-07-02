@@ -1,19 +1,15 @@
 #include "filter_merger.h"
 
 /// PROJECT
-#include <QLabel>
 #include <designer/box.h>
 #include <vision_evaluator/box_manager.h>
-#include <vision_evaluator/command_add_connection.h>
-#include <vision_evaluator/command_delete_connection.h>
 #include <evaluator/messages_default.hpp>
 #include <designer/connector_in.h>
 #include <designer/connector_out.h>
-#include <designer/command_meta.h>
-#include <designer/command.h>
 #include <vision_evaluator/qt_helper.hpp>
 
 /// SYSTEM
+#include <QLabel>
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::Merger, vision_evaluator::BoxedObject)
@@ -33,7 +29,7 @@ void Merger::fill(QBoxLayout *layout)
         box_->addOutput(output_);
 
         /// inputs
-        input_count_ = QtHelper::makeSpinBox(layout, "Inputs: ", 2, 2, 10);
+        input_count_ = QtHelper::makeSpinBox(layout, "Inputs: ", 2, 2, MERGER_INPUT_MAX);
         QSpinBox::connect(input_count_, SIGNAL(valueChanged(int)), this, SLOT(updateInputs(int)));
         updateInputs(2);
     }
@@ -61,34 +57,25 @@ void Merger::messageArrived(ConnectorIn *source)
 
     resetInputArrivals();
 
-
-
 }
 
 void Merger::updateInputs(int value)
 {
-    int to_erase = inputs_.size() - value;
-    if(to_erase > 0) {
-        for(int i = 0 ; i < to_erase ; i++) {
-            ConnectorIn *ptr = inputs_.back();
-            inputs_.pop_back();
+    int current_amount = box_->countInputs();
+    if(current_amount > value) {
+        for(int i = current_amount; i > value ; i--) {
+            ConnectorIn *ptr = box_->getInput(i - 1);
+            if(ptr->isConnected())
+                ptr->removeAllConnectionsUndoable();
             box_->removeInput(ptr);
-
-            for(std::map<ConnectorIn*,bool>::iterator it = input_arrivals_.begin() ; it != input_arrivals_.end() ; it++) {
-                if(it->first == ptr) {
-                    input_arrivals_.erase(it, it);
-                    break;
-                }
-            }
+            input_arrivals_.erase(ptr);
         }
     } else {
-        int to_add = -to_erase;
+        int to_add = value - current_amount;
         for(int i = 0 ; i < to_add ; i++) {
-            ConnectorIn* input = new ConnectorIn(box_, inputs_.size() + i);
+            ConnectorIn* input = new ConnectorIn(box_, box_->countInputs() + i);
             box_->addInput(input);
             assert(QObject::connect(input, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*))));
-
-            inputs_.push_back(input);
             input_arrivals_.insert(std::pair<ConnectorIn*, bool>(input, false));
 
         }
@@ -98,20 +85,20 @@ void Merger::updateInputs(int value)
 
 void Merger::collectMessage(std::vector<cv::Mat> &messages)
 {
-    for(std::vector<ConnectorIn*>::iterator it = inputs_.begin() ; it != inputs_.end() ; it++) {
-        if((*it)->isConnected()) {
-            CvMatMessage::Ptr msg = boost::dynamic_pointer_cast<CvMatMessage> ((*it)->getMessage());
+    for(int i = 0 ; i < box_->countInputs() ; i++) {
+        ConnectorIn *in = box_->getInput(i);
+        if(in->isConnected()) {
+            CvMatMessage::Ptr msg = boost::dynamic_pointer_cast<CvMatMessage>(in->getMessage());
             messages.push_back(msg->value);
         }
     }
 }
 
-
 bool Merger::gotAllArrivals()
 {
     bool ready = true;
-    for(std::vector<ConnectorIn*>::iterator it = inputs_.begin() ; it != inputs_.end() ; it++) {
-        ready &= input_arrivals_[*it] || !(*it)->isConnected();
+    for(std::map<ConnectorIn*, bool>::iterator it = input_arrivals_.begin() ; it != input_arrivals_.end() ; it++) {
+        ready &= !it->first->isConnected() || it->second;
     }
     return ready;
 }

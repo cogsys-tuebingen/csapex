@@ -2,18 +2,15 @@
 
 /// PROJECT
 #include <designer/box.h>
+#include <designer/command_meta.h>
 #include <vision_evaluator/box_manager.h>
-#include <vision_evaluator/command_add_connection.h>
-#include <vision_evaluator/command_delete_connection.h>
 #include <evaluator/messages_default.hpp>
 #include <designer/connector_in.h>
 #include <designer/connector_out.h>
-#include <designer/command_meta.h>
-#include <designer/command.h>
+
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
-#include <boost/foreach.hpp>
 
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::Splitter, vision_evaluator::BoxedObject)
 
@@ -47,29 +44,27 @@ void Splitter::messageArrived(ConnectorIn *source)
     }
 
     for(int i = 0 ; i < channel_count_ ; i++) {
-         CvMatMessage::Ptr channel_out(new CvMatMessage);
-         channel_out->value = channels[i];
-         outputs_[i]->publish(channel_out);
+        CvMatMessage::Ptr channel_out(new CvMatMessage);
+        channel_out->value = channels[i];
+        box_->getOutput(i)->publish(channel_out);
     }
 }
 
 void Splitter::updateOutputs()
 {
-    Command::Ptr cmd = box_->removeAllOutputsCmd();
-        BoxManager::instance().execute(cmd);
+    command::Meta::Ptr cmd(new command::Meta);
 
-    for(int i = 0 ; i < outputs_.size() ; i++) {
-        Command::Ptr cmd = outputs_[i]->removeAllConnectionsCmd();
-        BoxManager::instance().execute(cmd);
-        outputs_[i]->deleteLater();
+    for(int i = 0 ; i < box_->countOutputs() ; i++) {
+        ConnectorOut *ptr = box_->getOutput(i);
+        if(ptr->isConnected())
+            cmd->add(ptr->removeAllConnectionsCmd());
+        box_->removeOutput(box_->getOutput(i));
     }
 
-    box_->clearOutput();
+    BoxManager::instance().execute(cmd);
 
-    outputs_.clear();
     for(int i = 0 ; i < channel_count_ ; i++) {
         ConnectorOut *out = new ConnectorOut(box_, i);
         box_->addOutput(out);
-        outputs_.push_back(out);
     }
 }

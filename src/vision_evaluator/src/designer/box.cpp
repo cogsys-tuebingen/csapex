@@ -214,15 +214,11 @@ void Box::removeInput(ConnectorIn *in)
 
     assert(*it == in);
 
-    if(in->isConnected()) {
-        Command::Ptr cmd = in->removeAllConnectionsCmd();
-        BoxManager::instance().execute(cmd);
-    }
     QObject::disconnect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
     QObject::disconnect(in, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::disconnect(in, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
     in->deleteLater();
-    input.erase(it, it);
+    input.erase(it);
 }
 
 void Box::removeOutput(ConnectorOut *out)
@@ -232,17 +228,35 @@ void Box::removeOutput(ConnectorOut *out)
 
     assert(*it == out);
 
-    if(out->isConnected()) {
-        Command::Ptr cmd = out->removeAllConnectionsCmd();
-        BoxManager::instance().execute(cmd);
-    }
     QObject::disconnect(out, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)));
     QObject::disconnect(out, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)));
     QObject::disconnect(out, SIGNAL(messageSent(ConnectorOut*)), this, SIGNAL(messageSent(ConnectorOut*)));
     QObject::disconnect(out, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::disconnect(out, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
     out->deleteLater();
-    output.erase(it, it);
+    output.erase(it);
+}
+
+int Box::countInputs()
+{
+    return input.size();
+}
+
+int Box::countOutputs()
+{
+    return output.size();
+}
+
+ConnectorIn* Box::getInput(const unsigned int index)
+{
+    assert(index < input.size());
+    return input[index];
+}
+
+ConnectorOut* Box::getOutput(const unsigned int index)
+{
+    assert(index < output.size());
+    return output[index];
 }
 
 ConnectorIn* Box::getInput(const std::string& uuid)

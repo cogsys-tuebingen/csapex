@@ -82,6 +82,11 @@ public:
     void removeInput(ConnectorIn *in);
     void removeOutput(ConnectorOut *out);
 
+    int  countInputs();
+    int  countOutputs();
+
+    ConnectorIn* getInput(const unsigned int index);
+    ConnectorOut *getOutput(const unsigned int index);
 
     ConnectorIn* getInput(const std::string& uuid);
     ConnectorOut* getOutput(const std::string& uuid);
@@ -98,11 +103,6 @@ public:
     Command::Ptr removeAllConnectionsCmd();
     Command::Ptr removeAllOutputsCmd();
     Command::Ptr removeAllInputsCmd();
-
-    void clearOutput() {
-        output.clear();
-    }
-
 
     YAML::Emitter& save(YAML::Emitter& out) const;
 

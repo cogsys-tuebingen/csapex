@@ -8,7 +8,7 @@ class QSpinBox;
 
 namespace vision_evaluator {
 
-const static int MERGER_INPUT_MAX = 7;
+const static int MERGER_INPUT_MAX = 10;
 
 class Merger : public BoxedObject
 {
@@ -25,9 +25,7 @@ private Q_SLOTS:
 
 private:
     ConnectorOut *output_;
-    std::vector<ConnectorIn*>   inputs_;
     std::map<ConnectorIn*,bool> input_arrivals_;
-
     QSpinBox                    *input_count_;
 
     void collectMessage(std::vector<cv::Mat> &messages);

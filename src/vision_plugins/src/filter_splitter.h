@@ -19,8 +19,6 @@ private Q_SLOTS:
 
 private:
     ConnectorIn *input_;
-    std::vector<ConnectorOut*> outputs_;
-
     int channel_count_;
 
     void updateOutputs();

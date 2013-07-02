@@ -128,6 +128,7 @@ add_library(designer
     src/designer/command_add_connection.cpp
     src/designer/command_delete_box.cpp
     src/designer/command_delete_connection.cpp
+    src/designer/command_delete_connector.cpp
     src/designer/command_move_box.cpp
     src/designer/connector.cpp
     src/designer/connector_in.cpp
