@@ -6,6 +6,7 @@
 class QDoubleSlider : public QSlider
 {
     Q_OBJECT
+
 public:
     QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget *parent = 0);
     virtual ~QDoubleSlider();

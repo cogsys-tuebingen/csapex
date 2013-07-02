@@ -99,9 +99,21 @@ inline void render_histogram(const std::vector<cv::Mat> &histograms, const std::
     assert(bins.size() == histograms.size());
     assert(bins.size() < histogram_colors.size());
 
+    double scale_;
+    if(scale > 0) {
+        scale_ = scale;
+    }
+    if(scale == 0) {
+        scale_ = 0.1;
+    }
+    if(scale < 0) {
+        scale_ = 1 / (double) std::abs(scale);
+    }
+
+
     for( int i = 0 ; i < histograms.size() ; i++) {
         cv::Mat histogram = histograms[i].clone();
-        cv::normalize(histogram, histogram, dst.rows * scale, cv::NORM_MINMAX);
+        cv::normalize(histogram, histogram, dst.rows * scale_, cv::NORM_MINMAX);
         int bin_w = cvRound( dst.cols/ (double) bins[i] );
         for( int j = 1; j < bins[i]; j++ )
         {

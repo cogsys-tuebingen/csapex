@@ -39,6 +39,7 @@ private Q_SLOTS:
 
 protected:
     Filter();
+    virtual bool usesMask();
 
 protected:
     ConnectorIn* input_img_;

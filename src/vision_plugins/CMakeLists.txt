@@ -35,6 +35,8 @@ include_directories(include
 )
 
 add_library(vision_plugins
+    src/filter_merger.cpp
+    src/filter_splitter.cpp
     src/filter_equalize.cpp
     src/filter_undistort.cpp
     src/filter_perspective.cpp

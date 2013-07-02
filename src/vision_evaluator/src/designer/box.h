@@ -79,6 +79,10 @@ public:
     void addInput(ConnectorIn* in);
     void addOutput(ConnectorOut* out);
 
+    void removeInput(ConnectorIn *in);
+    void removeOutput(ConnectorOut *out);
+
+
     ConnectorIn* getInput(const std::string& uuid);
     ConnectorOut* getOutput(const std::string& uuid);
 
@@ -92,6 +96,13 @@ public:
     void setState(Memento::Ptr memento);
 
     Command::Ptr removeAllConnectionsCmd();
+    Command::Ptr removeAllOutputsCmd();
+    Command::Ptr removeAllInputsCmd();
+
+    void clearOutput() {
+        output.clear();
+    }
+
 
     YAML::Emitter& save(YAML::Emitter& out) const;
 

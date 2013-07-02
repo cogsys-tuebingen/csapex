@@ -207,6 +207,44 @@ void Box::addOutput(ConnectorOut* out)
 
 }
 
+void Box::removeInput(ConnectorIn *in)
+{
+    std::vector<ConnectorIn*>::iterator it;
+    it = std::find(input.begin(), input.end(), in);
+
+    assert(*it == in);
+
+    if(in->isConnected()) {
+        Command::Ptr cmd = in->removeAllConnectionsCmd();
+        BoxManager::instance().execute(cmd);
+    }
+    QObject::disconnect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
+    QObject::disconnect(in, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::disconnect(in, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+    in->deleteLater();
+    input.erase(it, it);
+}
+
+void Box::removeOutput(ConnectorOut *out)
+{
+    std::vector<ConnectorOut*>::iterator it;
+    it = std::find(output.begin(), output.end(), out);
+
+    assert(*it == out);
+
+    if(out->isConnected()) {
+        Command::Ptr cmd = out->removeAllConnectionsCmd();
+        BoxManager::instance().execute(cmd);
+    }
+    QObject::disconnect(out, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)));
+    QObject::disconnect(out, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)));
+    QObject::disconnect(out, SIGNAL(messageSent(ConnectorOut*)), this, SIGNAL(messageSent(ConnectorOut*)));
+    QObject::disconnect(out, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::disconnect(out, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+    out->deleteLater();
+    output.erase(it, it);
+}
+
 ConnectorIn* Box::getInput(const std::string& uuid)
 {
     BOOST_FOREACH(ConnectorIn* in, input) {
@@ -389,7 +427,10 @@ void Box::setState(Memento::Ptr memento)
 
     *state = *m;
     state->parent = this;
-    content_->setState(m->boxed_state);
+    if(m->boxed_state != NULL) {
+        content_->setState(m->boxed_state);
+
+    }
 }
 
 Command::Ptr Box::removeAllConnectionsCmd()
@@ -409,3 +450,30 @@ Command::Ptr Box::removeAllConnectionsCmd()
 
     return cmd;
 }
+
+Command::Ptr Box::removeAllOutputsCmd()
+{
+    command::Meta::Ptr cmd(new command::Meta);
+
+    BOOST_FOREACH(ConnectorOut* i, output) {
+        if(i->isConnected()) {
+            cmd->add(i->removeAllConnectionsCmd());
+        }
+    }
+
+    return cmd;
+}
+
+Command::Ptr Box::removeAllInputsCmd()
+{
+    command::Meta::Ptr cmd(new command::Meta);
+
+    BOOST_FOREACH(ConnectorIn* i, input) {
+        if(i->isConnected()) {
+            cmd->add(i->removeAllConnectionsCmd());
+        }
+    }
+    return cmd;
+}
+
+

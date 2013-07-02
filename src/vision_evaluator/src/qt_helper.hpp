@@ -19,6 +19,21 @@
 class QtHelper
 {
 public:
+    static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max) {
+        QHBoxLayout *internal_layout = new QHBoxLayout;
+
+        QSpinBox* spinner = new QSpinBox;
+        spinner->setMinimum(min);
+        spinner->setMaximum(max);
+        spinner->setValue(def);
+
+        internal_layout->addWidget(new QLabel(name.c_str()));
+        internal_layout->addWidget(spinner);
+        layout->addLayout(internal_layout);
+
+        return spinner;
+    }
+
     static QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max) {
         QHBoxLayout* internal_layout = new QHBoxLayout;
 

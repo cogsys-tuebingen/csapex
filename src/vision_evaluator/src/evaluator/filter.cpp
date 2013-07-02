@@ -32,17 +32,21 @@ void Filter::fill(QBoxLayout* parent)
 
         input_img_ = new ConnectorIn(box_, 0);
         box_->addInput(input_img_);
-        input_mask_ = new ConnectorIn(box_, 1);
-        box_->addInput(input_mask_);
-
+        if(usesMask()) {
+            input_mask_ = new ConnectorIn(box_, 1);
+            box_->addInput(input_mask_);
+        }
         output_img_ = new ConnectorOut(box_, 0);
         box_->addOutput(output_img_);
-        output_mask_ = new ConnectorOut(box_, 1);
-        box_->addOutput(output_mask_);
+        if(usesMask()) {
+            output_mask_ = new ConnectorOut(box_, 1);
+            box_->addOutput(output_mask_);
+        }
 
         connect(input_img_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-        connect(input_mask_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-
+        if(usesMask()) {
+            connect(input_mask_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
+        }
         insert(parent);
 
         makeThread();
@@ -63,7 +67,7 @@ void Filter::messageArrived(ConnectorIn* source)
         has_mask = true;
     }
 
-    if(!input_mask_->isConnected()) {
+    if(!usesMask() || !input_mask_->isConnected()) {
         has_mask = true;
     }
 
@@ -76,7 +80,10 @@ void Filter::messageArrived(ConnectorIn* source)
     has_mask = false;
 
     CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_img_->getMessage());
-    CvMatMessage::Ptr mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_->getMessage());
+    CvMatMessage::Ptr mask_msg;
+    if(usesMask()) {
+        mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_->getMessage());
+    }
 
     if(img_msg.get() && !img_msg->value.empty()) {
         if(!mask_msg.get()) {
@@ -91,6 +98,12 @@ void Filter::messageArrived(ConnectorIn* source)
         }
 
         output_img_->publish(img_msg);
-        output_mask_->publish(mask_msg);
+        if(usesMask())
+            output_mask_->publish(mask_msg);
     }
+}
+
+bool Filter::usesMask()
+{
+    return true;
 }

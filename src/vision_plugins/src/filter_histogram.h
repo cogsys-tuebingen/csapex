@@ -8,6 +8,7 @@ class QSlider;
 /// COMPONENT
 #include <vision_evaluator/filter.h>
 
+
 namespace vision_evaluator {
 /// constants
 static int HISTOGRAM_BINS_MAX = 512;
