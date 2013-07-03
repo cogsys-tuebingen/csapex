@@ -17,8 +17,9 @@ PLUGINLIB_EXPORT_CLASS(vision_evaluator::Splitter, vision_evaluator::BoxedObject
 using namespace vision_evaluator;
 
 Splitter::Splitter() :
-    input_(NULL), channel_count_(0)
+    input_(NULL)
 {
+    state_.channel_count_ = 0;
 }
 
 void Splitter::fill(QBoxLayout *layout)
@@ -38,12 +39,12 @@ void Splitter::messageArrived(ConnectorIn *source)
     std::vector<cv::Mat> channels;
     cv::split(m->value, channels);
 
-    if(channel_count_ != channels.size()) {
-        channel_count_ = channels.size();
+    if(state_.channel_count_ != channels.size()) {
+        state_.channel_count_ = channels.size();
         updateOutputs();
     }
 
-    for(int i = 0 ; i < channel_count_ ; i++) {
+    for(int i = 0 ; i < state_.channel_count_ ; i++) {
         CvMatMessage::Ptr channel_out(new CvMatMessage);
         channel_out->value = channels[i];
         box_->getOutput(i)->publish(channel_out);
@@ -52,19 +53,57 @@ void Splitter::messageArrived(ConnectorIn *source)
 
 void Splitter::updateOutputs()
 {
-    command::Meta::Ptr cmd(new command::Meta);
+    int n = box_->countOutputs();
 
-    for(int i = 0 ; i < box_->countOutputs() ; i++) {
-        ConnectorOut *ptr = box_->getOutput(i);
-        if(ptr->isConnected())
-            cmd->add(ptr->removeAllConnectionsCmd());
-        box_->removeOutput(box_->getOutput(i));
+    if(state_.channel_count_ == n) {
+        return;
     }
 
-    BoxManager::instance().execute(cmd);
-
-    for(int i = 0 ; i < channel_count_ ; i++) {
-        ConnectorOut *out = new ConnectorOut(box_, i);
-        box_->addOutput(out);
+    if(state_.channel_count_ > n) {
+        for(int i = n ; i < state_.channel_count_ ; ++i) {
+            ConnectorOut *out = new ConnectorOut(box_, i);
+            box_->addOutput(out);
+        }
+    } else {
+        for(int i = n-1 ; i >= state_.channel_count_ ; --i) {
+            box_->removeOutput(box_->getOutput(i));
+        }
     }
+
+//    command::Meta::Ptr cmd(new command::Meta);
+
+//    for(int i = 0 ; i < box_->countOutputs() ; i++) {
+//        ConnectorOut *ptr = box_->getOutput(i);
+//        if(ptr->isConnected())
+//            cmd->add(ptr->removeAllConnectionsCmd());
+//        box_->removeOutput(box_->getOutput(i));
+//    }
+
+//    // do not use command here!!!!
+//    // clears redo stack!!!
+//    BoxManager::instance().execute(cmd);
+
+//    for(int i = 0 ; i < channel_count_ ; i++) {
+//        ConnectorOut *out = new ConnectorOut(box_, i);
+//        box_->addOutput(out);
+//    }
+}
+
+
+Memento::Ptr Splitter::getState() const
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state_;
+
+    return memento;
+}
+
+void Splitter::setState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    state_ = *m;
+
+    updateOutputs();
 }

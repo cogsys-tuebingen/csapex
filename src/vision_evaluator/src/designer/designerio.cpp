@@ -35,7 +35,7 @@ void DesignerIO::save(Designer* designer, const std::string& file)
     YAML::Emitter yaml;
 
     // settings
-    yaml << YAML::BeginMap;
+    yaml << YAML::BeginMap; // settings map
 
     QSize window_size = designer->window()->size();
     yaml << YAML::Key << "window_size";
@@ -48,9 +48,15 @@ void DesignerIO::save(Designer* designer, const std::string& file)
     yaml << YAML::Key << "uuid_map";
     yaml << YAML::Value << BoxManager::instance().uuids;
 
-    yaml << YAML::EndMap;
 
     QList<vision_evaluator::Box*> boxes = designer->findChildren<vision_evaluator::Box*> ();
+
+    // connections
+    saveConnections(yaml, boxes); // connections map
+
+    yaml << YAML::EndMap; // settings map
+
+    // boxes
     BOOST_FOREACH(vision_evaluator::Box* box, boxes) {
         yaml << *box;
     }
@@ -78,10 +84,8 @@ void DesignerIO::load(Designer* designer, const std::string& file)
 
     designer->clear();
 
-    std::map<std::string, Box*> loaded_boxes;
-
-    loadBoxShells(designer, file, loaded_boxes);
-    loadConnections(designer, file, loaded_boxes);
+    loadBoxes(designer, file);
+    loadConnections(designer, file);
 
     BoxManager::instance().setDirty(false);
 }
@@ -111,7 +115,7 @@ void DesignerIO::loadSettings(Designer* designer, YAML::Node &doc)
     }
 }
 
-void DesignerIO::loadBoxShells(Designer* designer, const std::string &file, std::map<std::string, Box*>& loaded_boxes)
+void DesignerIO::loadBoxes(Designer* designer, const std::string &file)
 {
     std::ifstream ifs(file.c_str());
     YAML::Parser parser(ifs);
@@ -137,11 +141,44 @@ void DesignerIO::loadBoxShells(Designer* designer, const std::string &file, std:
         std::cout << "create box: " << type << " @ " << x << ", " << y << std::endl;
 
         Box* box = BoxManager::instance().makeBox(designer->ui->designer, QPoint(x,y), type, uuid);
-        loaded_boxes[uuid] = box;
+
+        Memento::Ptr s = box->getState();
+        s->readYaml(doc);
+        box->setState(s);
     }
 }
 
-void DesignerIO::loadConnections(Designer* designer, const std::string &file,  std::map<std::string, Box*>& loaded_boxes)
+void DesignerIO::saveConnections(YAML::Emitter &yaml, QList<vision_evaluator::Box*>& boxes)
+{
+    yaml << YAML::Key << "connections";
+    yaml << YAML::Value << YAML::BeginSeq; // connections seq
+
+    BOOST_FOREACH(vision_evaluator::Box* box, boxes) {
+        if(!box->output.empty()) {
+            BOOST_FOREACH(ConnectorOut* o, box->output) {
+                if(o->beginTargets() == o->endTargets()) {
+                    continue;
+                }
+                yaml << YAML::BeginMap; // output map
+                yaml << YAML::Key << "uuid";
+                yaml << YAML::Value << o->UUID();
+                yaml << YAML::Key << "targets";
+                yaml << YAML::Value << YAML::BeginSeq; // output list
+                for(ConnectorOut::TargetIterator it = o->beginTargets(); it != o->endTargets(); ++it) {
+                    ConnectorIn* i = *it;
+                    yaml << i->UUID();
+                }
+                yaml << YAML::EndSeq; // output list
+
+                yaml << YAML::EndMap; // output map
+            }
+        }
+    }
+
+    yaml << YAML::EndSeq; // connections seq
+}
+
+void DesignerIO::loadConnections(Designer* designer, const std::string &file)
 {
     std::ifstream ifs(file.c_str());
     YAML::Parser parser(ifs);
@@ -153,14 +190,43 @@ void DesignerIO::loadConnections(Designer* designer, const std::string &file,  s
         return;
     }
 
-    while(parser.GetNextDocument(doc)) {
-        std::string uuid;
-        doc["uuid"] >> uuid;
+    if(doc.FindValue("connections")) {
+        const YAML::Node& connections = doc["connections"];
+        assert(connections.Type() == YAML::NodeType::Sequence);
 
-        Box* box = loaded_boxes[uuid];
+        for(unsigned i = 0; i < connections.size(); ++i) {
+            const YAML::Node& connection = connections[i];
+            assert(connection.Type() == YAML::NodeType::Map);
 
-        Memento::Ptr s = box->getState();
-        s->readYaml(doc);
-        box->setState(s);
+            std::string from_uuid;
+            connection["uuid"] >> from_uuid;
+            Box* parent = BoxManager::instance().findConnectorOwner(from_uuid);
+
+            const YAML::Node& targets = connection["targets"];
+            assert(targets.Type() == YAML::NodeType::Sequence);
+
+            for(unsigned j=0; j<targets.size(); ++j) {
+                std::string to_uuid;
+                targets[j] >> to_uuid;
+
+                ConnectorOut* from = parent->getOutput(from_uuid);
+                if(from == NULL) {
+                    std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+                    continue;
+                }
+
+                Box* target_box = BoxManager::instance().findConnectorOwner(to_uuid);
+                if(target_box == NULL) {
+                    std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
+                    continue;
+                }
+
+                ConnectorIn* to = target_box->getInput(to_uuid);
+                assert(to); // if parent box has been found, this should never happen
+
+                std::cout << "connection: " << from_uuid << " -> " << to_uuid << std::endl;
+                from->connectForcedWithoutCommand(to);
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <yaml-cpp/yaml.h>
+#include <QList>
 
 /// FORWARD DECLARATION
 
@@ -30,8 +31,10 @@ public:
 private:
     static void loadSettings(Designer* designer, YAML::Node& doc);
 
-    static void loadBoxShells(Designer* designer, const std::string &file, std::map<std::string, Box*>& loaded_boxes);
-    static void loadConnections(Designer* designer, const std::string &file, std::map<std::string, Box*>& loaded_boxes);
+    static void loadBoxes(Designer* designer, const std::string &file);
+
+    static void saveConnections(YAML::Emitter& yaml, QList<Box *> &boxes);
+    static void loadConnections(Designer* designer, const std::string &file);
 };
 
 }

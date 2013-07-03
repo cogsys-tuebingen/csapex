@@ -42,7 +42,7 @@ FileImporterWorker::FileImporterWorker(FileImporter *parent)
 void FileImporterWorker::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
 
-    if(parent->worker->provider_->getState().get()) {
+    if(parent->worker->provider_.get() && parent->worker->provider_->getState().get()) {
         out << YAML::Key << "sub_state";
         out << YAML::Value << YAML::BeginMap;
         parent->worker->provider_->getState()->writeYaml(out);

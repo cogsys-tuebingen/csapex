@@ -27,6 +27,8 @@ class Box : public QWidget
 {
     Q_OBJECT
 
+    friend class DesignerIO;
+
 public:
     struct MoveOffset : public QObjectUserData {
         MoveOffset(const QPoint& o)

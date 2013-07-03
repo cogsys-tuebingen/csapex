@@ -39,31 +39,6 @@ void Box::State::writeYaml(YAML::Emitter &out) const
         out << YAML::EndMap;
     }
 
-    out << YAML::Key << "connections";
-    out << YAML::Value << YAML::BeginMap;
-
-    if(!parent->output.empty()) {
-        out << YAML::Key << "out";
-        out << YAML::Value << YAML::BeginSeq;
-        BOOST_FOREACH(ConnectorOut* o, parent->output) {
-            out << YAML::BeginMap;
-            out << YAML::Key << "uuid";
-            out << YAML::Value << o->UUID();
-            out << YAML::Key << "targets";
-            out << YAML::Value << YAML::BeginSeq;
-            for(ConnectorOut::TargetIterator it = o->beginTargets(); it != o->endTargets(); ++it) {
-                ConnectorIn* i = *it;
-                out << i->UUID();
-            }
-            out << YAML::EndSeq;
-
-            out << YAML::EndMap;
-        }
-        out << YAML::EndSeq;
-    }
-
-    out << YAML::EndMap;
-
     out << YAML::EndMap;
 }
 
@@ -73,47 +48,6 @@ void Box::State::readYaml(const YAML::Node &node)
         const YAML::Node& state_map = node["state"];
         boxed_state = parent->content_->getState();
         boxed_state->readYaml(state_map);
-    }
-
-    if(node.FindValue("connections")) {
-        const YAML::Node& connections = node["connections"];
-        if(connections.FindValue("out")) {
-            const YAML::Node& out_list = connections["out"];
-            assert(out_list.Type() == YAML::NodeType::Sequence);
-
-            for(unsigned i=0; i<out_list.size(); ++i) {
-                const YAML::Node& connector = out_list[i];
-                assert(connector.Type() == YAML::NodeType::Map);
-                std::string from_uuid;
-                connector["uuid"] >> from_uuid;
-
-                const YAML::Node& targets = connector["targets"];
-                assert(targets.Type() == YAML::NodeType::Sequence);
-
-                for(unsigned j=0; j<targets.size(); ++j) {
-                    std::string to_uuid;
-                    targets[j] >> to_uuid;
-
-                    ConnectorOut* from = parent->getOutput(from_uuid);
-                    if(from == NULL) {
-                        std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
-                        continue;
-                    }
-
-                    Box* target_box = BoxManager::instance().findConnectorOwner(to_uuid);
-                    if(target_box == NULL) {
-                        std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
-                        continue;
-                    }
-
-                    ConnectorIn* to = target_box->getInput(to_uuid);
-                    assert(to); // if parent box has been found, this should never happen
-
-                    from->connectForcedWithoutCommand(to);
-                }
-            }
-
-        }
     }
 }
 
