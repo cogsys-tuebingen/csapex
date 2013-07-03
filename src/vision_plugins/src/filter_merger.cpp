@@ -35,6 +35,26 @@ void Merger::fill(QBoxLayout *layout)
     }
 }
 
+Memento::Ptr Merger::getState() const
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state_;
+
+    return memento;
+}
+
+void Merger::setState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+
+    state_ = *m;
+    input_count_->setValue(state_.input_count);
+}
+
+
+
+
 void Merger::messageArrived(ConnectorIn *source)
 {
     input_arrivals_[source] = true;
@@ -61,6 +81,7 @@ void Merger::messageArrived(ConnectorIn *source)
 
 void Merger::updateInputs(int value)
 {
+    state_.input_count = value;
     int current_amount = box_->countInputs();
     if(current_amount > value) {
         for(int i = current_amount; i > value ; i--) {
