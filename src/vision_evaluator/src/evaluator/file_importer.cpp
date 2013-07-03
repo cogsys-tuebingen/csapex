@@ -179,7 +179,7 @@ void FileImporter::setState(Memento::Ptr memento)
     assert(m.get());
 
     worker->state = *m;
-//    import(worker->state.last_path_);
+    import(worker->state.last_path_);
     worker->provider_->setState(m->sub_state);
 
 }
