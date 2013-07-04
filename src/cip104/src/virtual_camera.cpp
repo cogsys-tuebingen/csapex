@@ -19,7 +19,7 @@ PLUGINLIB_EXPORT_CLASS(vision_evaluator::VirtualCamera, vision_evaluator::BoxedO
 using namespace vision_evaluator;
 
 VirtualCameraWorker::VirtualCameraWorker(VirtualCamera *parent)
-    : state(parent), timer_(NULL), map_out(new CvMatMessage), view(new CvMatMessage), output_view_(NULL), output_map_(NULL)
+    : state(parent), timer_(NULL), map_msg(new CvMatMessage), view_msg(new CvMatMessage), output_view_(NULL), output_map_(NULL)
 {
     timer_ = new QTimer();
     timer_->setInterval(100);
@@ -121,8 +121,8 @@ void VirtualCameraWorker::updatePose()
                          0, 0, 0, 1);
 
     if(output_map_->isConnected()) {
-        map.copyTo(map_out->value);
-        cv::circle(map_out->value, p, 1, cv::Scalar(0xFF, 0x00, 0x00), 3, CV_AA);
+        map.copyTo(map_out);
+        cv::circle(map_out, p, 1, cv::Scalar(0xFF, 0x00, 0x00), 3, CV_AA);
     }
 
     double fov = M_PI / 8;
@@ -133,14 +133,12 @@ void VirtualCameraWorker::updatePose()
     double w_view = std::tan(w_fov / 2.0) * 2.0 / (state.focal_length / 1000.0);
     double h_view = std::tan(h_fov / 2.0) * 2.0 / (state.focal_length / 1000.0);
 
-    view->value.create(state.h, state.w, map.type());
-
-    cv::Mat& out = view->value;
+    view.create(state.h, state.w, map.type());
 
     cv::Mat down = (cv::Mat_<double>(4,1) << 0,0,1.0,1);
     cv::Mat rot = rot_x * rot_y * rot_z;
 
-    uchar* data = out.data;
+    uchar* data = view.data;
 
     int ox = map.cols/2 + state.pos[0];
     int oy = map.rows/2 + state.pos[1];
@@ -195,8 +193,14 @@ void VirtualCameraWorker::updatePose()
 void VirtualCameraWorker::publish()
 {
     if(provider_.get()) {
-        output_view_->publish(view);
-        output_map_->publish(map_out);
+        view_msg = CvMatMessage::Ptr(new CvMatMessage);
+        map_msg = CvMatMessage::Ptr(new CvMatMessage);
+
+        view.copyTo(view_msg->value);
+        map_out.copyTo(map_msg->value);
+
+        output_view_->publish(view_msg);
+        output_map_->publish(map_msg);
     }
 }
 

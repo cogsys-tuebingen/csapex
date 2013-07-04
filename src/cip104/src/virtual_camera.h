@@ -67,9 +67,11 @@ private:
     PerspectiveTransformer transformer_;
 
     cv::Mat map;
+    cv::Mat map_out;
+    cv::Mat view;
 
-    CvMatMessage::Ptr map_out;
-    CvMatMessage::Ptr view;
+    CvMatMessage::Ptr map_msg;
+    CvMatMessage::Ptr view_msg;
 
     ConnectorOut* output_view_;
     ConnectorOut* output_map_;
