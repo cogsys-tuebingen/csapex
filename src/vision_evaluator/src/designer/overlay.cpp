@@ -9,6 +9,8 @@
 #include <boost/foreach.hpp>
 #include <iostream>
 #include <QTimer>
+#include <QPainter>
+#include <QFontMetrics>
 
 using namespace vision_evaluator;
 
@@ -27,6 +29,14 @@ Overlay::Overlay(QWidget* parent)
     activity_marker_max_width_ = 18;
     activity_marker_min_opacity_ = 25;
     activity_marker_max_opacity_ = 100;
+
+    color_connection = QColor(0xFF, 0xFF, 0xFF, 0xFF);
+
+    color_in_connected = QColor(0x33, 0x33, 0xFF, 0xFF);
+    color_in_disconnected = QColor(0xDD, 0xEE, 0xFF, 0xFF);
+
+    color_out_connected = QColor(0x77, 0x33, 0xFF, 0xFF);
+    color_out_disconnected = QColor(0xFF, 0xEE, 0xFF, 0xFF);
 
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(repaint()));
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(tick()));
@@ -64,18 +74,17 @@ void Overlay::addConnection(ConnectorOut* from, ConnectorIn* to)
 {
     connections.push_back(std::make_pair(from, to));
 
-    connect(from, SIGNAL(destroyed(QObject*)), this, SLOT(connectorRemoved(QObject*)));
-    connect(to, SIGNAL(destroyed(QObject*)), this, SLOT(connectorRemoved(QObject*)));
-
-    connect(from, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
-    connect(to, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
-
     repaint();
 }
 
 void Overlay::connectorRemoved(QObject* o)
 {
     connectorRemoved((Connector*) o);
+}
+
+void Overlay::connectorAdded(QObject* o)
+{
+    connectorAdded((Connector*) o);
 }
 
 void Overlay::showPublisherSignal(ConnectorIn *c)
@@ -98,6 +107,15 @@ void Overlay::clear()
     publisher_signals_.clear();
 }
 
+
+void Overlay::connectorAdded(Connector *c)
+{
+    connectors_.push_back(c);
+
+    connect(c, SIGNAL(destroyed(QObject*)), this, SLOT(connectorRemoved(QObject*)));
+    connect(c, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
+}
+
 void Overlay::connectorRemoved(Connector* c)
 {
     for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
@@ -110,10 +128,14 @@ void Overlay::connectorRemoved(Connector* c)
         }
     }
 
+    connectors_.erase(std::find(connectors_.begin(), connectors_.end(), c));
+
     clearActivity(c);
 
     repaint();
 }
+
+
 
 void Overlay::removeConnection(ConnectorOut* from, ConnectorIn* to)
 {
@@ -159,8 +181,50 @@ void Overlay::drawConnection(const QPoint& p1, const QPoint& p2)
     path.moveTo(p1);
     path.cubicTo(cp1, cp2, p2);
 
-    painter->setPen(QPen(QColor(0x33, 0x66, 0xFF, 0xDD), 3));
+    painter->setPen(QPen(color_connection, 3));
     painter->drawPath(path);
+}
+
+void Overlay::drawConnector(Connector *c)
+{
+    bool output = c->isOutput();
+
+    QColor color;
+
+    if(c->isConnected()){
+        color = output ? color_out_connected : color_in_connected;
+    } else {
+        color = output ? color_out_disconnected : color_in_disconnected;
+    }
+
+    painter->setBrush(QBrush(color, Qt::SolidPattern));
+    painter->setPen(QPen(color.darker(), 2));
+
+    int r = 7;
+    int font_size = 10;
+    int lines = 3;
+    painter->drawEllipse(c->centerPoint(), r, r);
+
+    QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
+
+    QFont font;
+    font.setPixelSize(font_size);
+    painter->setFont(font);
+
+    QString text = c->getLabel().c_str();
+    if(text.length() != 0) {
+        text += "\n";
+    }
+    text += c->getTypeName().c_str();
+
+    QFontMetrics metrics(font);
+
+    int dx = 80;
+    int dy = lines * metrics.height();
+
+    QRectF rect(c->centerPoint() + QPointF(output ? 2*r : -2*r-dx, -dy / 2.0), QSize(dx, dy));
+
+    painter->drawText(rect, text, opt);
 }
 
 void Overlay::drawActivity(int life, Connector* c)
@@ -226,6 +290,9 @@ void Overlay::paintEvent(QPaintEvent* event)
         drawConnection(connection.first->centerPoint(), connection.second->centerPoint());
     }
 
+    foreach (Connector* connector, connectors_) {
+        drawConnector(connector);
+    }
 
     painter = NULL;
 }

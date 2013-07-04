@@ -80,6 +80,7 @@ void OutputDisplay::fill(QBoxLayout* layout)
 {
     if(input_ == NULL) {
         input_ = new ConnectorIn(box_, 0);
+        input_->setLabel("Image");
         box_->addInput(input_);
 
         view_->setFixedSize(QSize(state.width, state.height));

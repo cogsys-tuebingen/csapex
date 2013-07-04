@@ -37,6 +37,8 @@ public:
     virtual bool canConnect();
     virtual bool isConnected();
 
+    ConnectorOut* getConnected();
+
     virtual Command::Ptr removeAllConnectionsCmd();
 
 private:

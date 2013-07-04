@@ -74,6 +74,7 @@ public:
     virtual QPixmap makePixmap(const std::string& label);
 
     void moveEvent(QMoveEvent*);
+    void registered();
 
     virtual void init(const QPoint& pos);
     BoxedObject* getContent();
@@ -121,6 +122,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void toggled(bool);
     void moved(Box*);
+    void connectorCreated(Connector*);
     void connectionFormed(ConnectorOut*, ConnectorIn*);
     void connectionDestroyed(ConnectorOut*, ConnectorIn*);
 

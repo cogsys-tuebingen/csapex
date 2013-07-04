@@ -185,6 +185,7 @@ bool DesignBoard::eventFilter(QObject* o, QEvent* e)
             findMinSize(box);
 
             QObject::connect(box, SIGNAL(moved(Box*)), this, SLOT(findMinSize(Box*)));
+            QObject::connect(box, SIGNAL(connectorCreated(Connector*)), overlay, SLOT(connectorAdded(Connector*)));
             QObject::connect(box, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(addConnection(ConnectorOut*,ConnectorIn*)));
             QObject::connect(box, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(removeConnection(ConnectorOut*,ConnectorIn*)));
 
@@ -192,6 +193,8 @@ bool DesignBoard::eventFilter(QObject* o, QEvent* e)
             QObject::connect(box, SIGNAL(messageArrived(ConnectorIn*)), overlay, SLOT(showPublisherSignal(ConnectorIn*)));
             QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(drawConnectionPreview(Connector*,Connector*)));
             QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnection()));
+
+            box->registered();
         }
 
         overlay->raise();
@@ -229,13 +232,21 @@ void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
     if(e->mimeData()->text() == Box::MIME_MOVE) {
         e->acceptProposedAction();
     }
-    if(e->mimeData()->text() == Connector::MIME) {
+    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+        e->acceptProposedAction();
+    }
+    if(e->mimeData()->text() == Connector::MIME_MOVE) {
         e->acceptProposedAction();
     }
 }
 void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->text() == Connector::MIME) {
+    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+        Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
+        overlay->drawTemporaryConnection(c, e->pos());
+    }
+
+    if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->drawTemporaryConnection(c, e->pos());
     }
@@ -264,7 +275,10 @@ void DesignBoard::dropEvent(QDropEvent* e)
         BoxManager::instance().execute(add_box);
     }
 
-    if(e->mimeData()->text() == Connector::MIME) {
+    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+        e->ignore();
+    }
+    if(e->mimeData()->text() == Connector::MIME_MOVE) {
         e->ignore();
     }
 }

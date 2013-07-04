@@ -117,9 +117,11 @@ void FileImporter::fill(QBoxLayout* layout)
         connect(file_dialog_, SIGNAL(pressed()), this, SLOT(importDialog()));
 
         worker->output_img_ = new ConnectorOut(box_, 0);
+        worker->output_img_->setLabel("Image");
         box_->addOutput(worker->output_img_);
 
         worker->output_mask_ = new ConnectorOut(box_, 1);
+        worker->output_mask_->setLabel("Mask");
         box_->addOutput(worker->output_mask_);
 
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));

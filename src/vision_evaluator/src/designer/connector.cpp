@@ -15,7 +15,8 @@
 
 using namespace vision_evaluator;
 
-const QString Connector::MIME = "vision_evaluator/connector";
+const QString Connector::MIME_CREATE = "vision_evaluator/connector/create";
+const QString Connector::MIME_MOVE = "vision_evaluator/connector/move";
 
 Connector::Connector(Box* parent, const std::string& type, int sub_id)
     : QRadioButton(parent), parent_widget(parent), box_(parent), designer(NULL)
@@ -94,7 +95,12 @@ bool Connector::canConnectTo(Connector* other_side)
 
 void Connector::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->text() == Connector::MIME) {
+    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
+        if(from->canConnectTo(this) && canConnectTo(from)) {
+            e->acceptProposedAction();
+        }
+    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
         if(from->canConnectTo(this) && canConnectTo(from)) {
             e->acceptProposedAction();
@@ -104,7 +110,11 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
 
 void Connector::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->text() == Connector::MIME) {
+    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
+
+        Q_EMIT(connectionInProgress(this, from));
+    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         Q_EMIT(connectionInProgress(this, from));
@@ -113,29 +123,65 @@ void Connector::dragMoveEvent(QDragMoveEvent* e)
 
 void Connector::dropEvent(QDropEvent* e)
 {
-    if(e->mimeData()->text() == Connector::MIME) {
+    if(e->mimeData()->text() == Connector::MIME_CREATE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
             Command::Ptr cmd(new command::AddConnection(this, from));
             BoxManager::instance().execute(cmd);
         }
+    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
+        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
+
+        if(from && from != this) {
+            Command::Ptr cmd(new command::AddConnection(this, from));
+//            BoxManager::instance().execute(cmd);
+        }
     }
 }
 
 void Connector::mousePressEvent(QMouseEvent* e)
 {
-    if(e->button() == Qt::LeftButton) {
+    bool create = e->button() == Qt::LeftButton;
+    bool move = e->button() == Qt::RightButton && isConnected();
+
+    if(create || move) {
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
-        mimeData->setText(Connector::MIME);
-        mimeData->setParent(this);
-        drag->setMimeData(mimeData);
 
-        drag->exec();
+        if(move) {
+            ConnectorOut* source;
+            if(isOutput()) {
+                source = dynamic_cast<ConnectorOut*>(this);
+            } else {
+                ConnectorIn* self = dynamic_cast<ConnectorIn*>(this);
+                source = dynamic_cast<ConnectorOut*>(self->getConnected());
+            }
+
+            mimeData->setText(Connector::MIME_MOVE);
+            mimeData->setParent(source);
+            drag->setMimeData(mimeData);
+
+            Command::Ptr remove = source->removeAllConnectionsCmd();
+            BoxManager::instance().execute(remove);
+
+            drag->exec();
+
+            BoxManager::instance().undo();
+
+        } else {
+            mimeData->setText(Connector::MIME_CREATE);
+            mimeData->setParent(this);
+            drag->setMimeData(mimeData);
+
+            drag->exec();
+        }
+
+        e->accept();
 
         Q_EMIT connectionDone();
     }
+    e->accept();
 }
 
 void Connector::mouseReleaseEvent(QMouseEvent* e)
@@ -143,6 +189,8 @@ void Connector::mouseReleaseEvent(QMouseEvent* e)
     if(e->button() == Qt::MiddleButton) {
         removeAllConnectionsUndoable();
     }
+
+    e->accept();
 }
 
 QPoint Connector::topLeft()
@@ -170,4 +218,19 @@ void Connector::paintEvent(QPaintEvent* e)
 vision_evaluator::Box* Connector::box()
 {
     return box_;
+}
+
+std::string Connector::getLabel() const
+{
+    return label_;
+}
+
+void Connector::setLabel(const std::string &label)
+{
+    label_ = label;
+}
+
+std::string Connector::getTypeName() const
+{
+    return "cv::Mat";
 }

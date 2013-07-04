@@ -72,6 +72,11 @@ bool ConnectorIn::isConnected()
     return input != NULL;
 }
 
+ConnectorOut* ConnectorIn::getConnected()
+{
+    return input;
+}
+
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
     message_ = message;

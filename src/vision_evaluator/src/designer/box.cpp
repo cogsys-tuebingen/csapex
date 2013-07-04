@@ -125,6 +125,8 @@ void Box::addInput(ConnectorIn* in)
     QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
     QObject::connect(in, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::connect(in, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+
+    Q_EMIT connectorCreated(in);
 }
 
 void Box::addOutput(ConnectorOut* out)
@@ -139,6 +141,7 @@ void Box::addOutput(ConnectorOut* out)
     QObject::connect(out, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::connect(out, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 
+    Q_EMIT connectorCreated(out);
 }
 
 void Box::removeInput(ConnectorIn *in)
@@ -303,6 +306,16 @@ void Box::moveEvent(QMoveEvent* e)
     QPoint delta = (e->pos() - e->oldPos());
     if(delta.x() == 0 && delta.y() == 0) {
         return;
+    }
+}
+
+void Box::registered()
+{
+    foreach(ConnectorIn* i, input) {
+        Q_EMIT connectorCreated(i);
+    }
+    foreach(ConnectorOut* i, output) {
+        Q_EMIT connectorCreated(i);
     }
 }
 

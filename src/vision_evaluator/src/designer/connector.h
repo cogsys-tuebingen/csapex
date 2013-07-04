@@ -21,7 +21,8 @@ class Connector : public QRadioButton
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    static const QString MIME;
+    static const QString MIME_CREATE;
+    static const QString MIME_MOVE;
 
 public:
     virtual bool hitButton(const QPoint&) const;
@@ -59,6 +60,11 @@ public:
         return QString("Connector");
     }
 
+    std::string getLabel() const;
+    void setLabel(const std::string& label);
+
+    std::string getTypeName() const;
+
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
     virtual void removeConnection(QObject* other_side);
@@ -89,6 +95,7 @@ protected:
     vision_evaluator::DesignBoard* designer;
 
     std::string uuid_;
+    std::string label_;
 };
 
 }
