@@ -1,6 +1,6 @@
 #ifndef CV_GRID_HPP
 #define CV_GRID_HPP
-#include <common/datastructures/grid.hpp>
+#include "grid.hpp"
 #include "grid_attributes.hpp"
 
 /**
@@ -44,6 +44,7 @@ inline void  prepare_grid_hls(GridHLS &grid, const cv::Mat &img, const int rows,
         }
     }
 }
+
 }
 
 

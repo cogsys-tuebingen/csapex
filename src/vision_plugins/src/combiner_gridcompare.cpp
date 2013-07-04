@@ -3,6 +3,11 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
+/// PROJECT
+//#include <utils/LibCvTools/grid.hpp>
+//#include <utils/LibCvTools/grid_attributes.hpp>
+//#include <utils/LibCvTools/grid_compute.hpp>
+
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompare, vision_evaluator::ImageCombiner)
 
 

@@ -6,7 +6,7 @@
 #include <utils/LibCvTools/perspective_transform.h>
 
 /// SYSTEM
-#include <QSlider>
+class QDoubleSlider;
 
 namespace vision_plugins {
 
@@ -27,11 +27,11 @@ public Q_SLOTS:
 private:
     PerspectiveTransformer transformer_;
 
-    QSlider *rot_x_;
-    QSlider *rot_y_;
-    QSlider *rot_z_;
-    QSlider *distance_;
-    QSlider *focal_length_;
+    QDoubleSlider *rot_x_;
+    QDoubleSlider *rot_y_;
+    QDoubleSlider *rot_z_;
+    QDoubleSlider *distance_;
+    QDoubleSlider *focal_length_;
 
 };
 

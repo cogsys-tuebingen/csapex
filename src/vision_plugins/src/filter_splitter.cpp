@@ -69,26 +69,7 @@ void Splitter::updateOutputs()
             box_->removeOutput(box_->getOutput(i));
         }
     }
-
-//    command::Meta::Ptr cmd(new command::Meta);
-
-//    for(int i = 0 ; i < box_->countOutputs() ; i++) {
-//        ConnectorOut *ptr = box_->getOutput(i);
-//        if(ptr->isConnected())
-//            cmd->add(ptr->removeAllConnectionsCmd());
-//        box_->removeOutput(box_->getOutput(i));
-//    }
-
-//    // do not use command here!!!!
-//    // clears redo stack!!!
-//    BoxManager::instance().execute(cmd);
-
-//    for(int i = 0 ; i < channel_count_ ; i++) {
-//        ConnectorOut *out = new ConnectorOut(box_, i);
-//        box_->addOutput(out);
-//    }
 }
-
 
 Memento::Ptr Splitter::getState() const
 {

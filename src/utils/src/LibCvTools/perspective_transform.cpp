@@ -100,7 +100,7 @@ void PerspectiveTransformer::transform(const cv::Mat &src, cv::Mat &dst)
         recompute_transform();
     }
 
-    cv::warpPerspective(src, dst, transformation_ , img_size_, cv::INTER_CUBIC | cv::WARP_INVERSE_MAP);
+    cv::warpPerspective(src, dst, transformation_ , img_size_, cv::INTER_CUBIC);
 }
 
 void PerspectiveTransformer::recompute_transform()
@@ -113,5 +113,5 @@ void PerspectiveTransformer::recompute_transform()
 
     transformation_ = proj_to2d_ * (distance_ * ((rot_x_ * rot_y_ * rot_z_) * proj_to3d_));
 
-     dirty_ = false;
+    dirty_ = false;
 }
