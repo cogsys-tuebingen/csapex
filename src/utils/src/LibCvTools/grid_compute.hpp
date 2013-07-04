@@ -7,9 +7,6 @@
  * @namespace Common operations for opencv when a grid is needed.
  */
 namespace cv_grid {
-typedef datastructure::AttributedGridCell<cv::Rect, AttributeColorHLS>   GridCellHLS;    /// a grid cell using hls attributes
-typedef datastructure::Grid<GridCellHLS>                            GridHLS;        /// a grid based on hls grid cells
-
 /**
  * @brief Prepare a homogene grid using hls attributes for cell comparison.
  * @param grid      the reference the grid will be written to
@@ -18,9 +15,11 @@ typedef datastructure::Grid<GridCellHLS>                            GridHLS;    
  * @param cols      the amount of cols
  * @param eps       the mean error
  */
-inline void  prepare_grid_hls(GridHLS &grid, const cv::Mat &img, const int rows, const int cols, cv::Scalar eps)
+template<class Grid, class Attribute>
+inline void  prepare_grid(Grid &grid, const cv::Mat &img, const int rows, const int cols)
 {
-    grid = GridHLS(rows,cols);
+
+    grid = Grid(rows,cols);
 
     int cell_height      = img.rows / rows;
     int cell_width       = img.cols / cols;
@@ -38,12 +37,17 @@ inline void  prepare_grid_hls(GridHLS &grid, const cv::Mat &img, const int rows,
 
             cv::Mat roi(img, r);
 
-            AttributeColorHLS attr = AttributeColorHLS::generate(roi, eps);
-            grid(j,i) = GridCellHLS(r, attr);
+            Attribute attr = Attribute::generate(roi, Attribute::Params);
+            grid(j,i) = GridCell<cv::Rect, Attribute>(r, attr);
 
         }
     }
 }
+
+typedef GridCell<cv::Rect, AttrHLS>         GridCellHLS;    /// a grid cell using hls attributes
+typedef Grid_<GridCellHLS>                   GridHLS;        /// a grid based on hls grid cells
+typedef GridCell<cv::Rect, AttrHistogram>   GridCellHist;
+typedef Grid_<GridCellHist>                  GridHist;
 
 }
 

@@ -42,7 +42,35 @@ inline void normalize_rgb(const cv::Mat &src, cv::Mat &dst)
     }
 }
 
-inline void single_channel_histogram(const cv::Mat &src, std::vector<cv::MatND> &histograms, const cv::Mat &mask,
+/**
+ * @brief Prepare parameters
+ * @param bins
+ * @param ranges
+ * @param channel_count
+ */
+inline void prepare_params(cv::Mat &bins, cv::Mat &ranges, const int channel_count)
+{
+    bins = cv::Mat_<int>(channel_count, 1);
+    ranges = cv::Mat_<float>(channel_count * 2, 1);
+
+    for(int i = 0 ; i < channel_count ; i++) {
+        bins.at<int>(i) = 256;
+        ranges.at<float>(2 * i) = 0.f;
+        ranges.at<float>(2 * i + 1) = 256.f;
+    }
+}
+
+/**
+ * @brief Do a histogram analysis for all channels of an image.
+ * @param src           source image
+ * @param histograms    the histograms will be written to here
+ * @param mask          am mask for the analysis
+ * @param bins          the amount of bins per channel
+ * @param ranges        the ranges per channel
+ * @param uniform       if the histogram should be uniform
+ * @param accumulate    if the histogram computation shall work accumluative
+ */
+inline void full_channel_histogram(const cv::Mat &src, std::vector<cv::MatND> &histograms, const cv::Mat &mask,
                                      const cv::Mat &bins, const cv::Mat &ranges,
                                      bool uniform = true, bool accumulate = false)
 {
@@ -63,6 +91,11 @@ inline void single_channel_histogram(const cv::Mat &src, std::vector<cv::MatND> 
     }
 }
 
+/**
+ * @brief Do a full channel histogram equalization of an image.
+ * @param src   source image
+ * @param dst   destination image
+ */
 inline void full_channel_equalize(const cv::Mat &src, cv::Mat &dst)
 {
     std::vector<cv::Mat> channels;
@@ -73,8 +106,14 @@ inline void full_channel_equalize(const cv::Mat &src, cv::Mat &dst)
     cv::merge(channels, dst);
 }
 
+/**
+ * @brief Normalize all channesl of a matrix e.g. histogram matrix.
+ * @param src               the source matrix
+ * @param dst               the normalized matrix
+ * @param channel_factors   list of <min, max> for limiting
+ */
 template<int norm>
-inline void normalize(const cv::Mat &src, cv::Mat &dst, const std::vector<double> channel_factors, bool round = true)
+inline void normalize(const cv::Mat &src, cv::Mat &dst, const std::vector<double> channel_factors)
 {
     assert(channel_factors.size() % 2 == 0);
 

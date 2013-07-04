@@ -101,7 +101,7 @@ void Histogram::messageArrived(ConnectorIn *source)
     prepare(bins, ranges);
 
     std::vector<cv::MatND>  histograms;
-    cv_histogram::single_channel_histogram(m->value, histograms, cv::Mat(), bins, ranges);
+    cv_histogram::full_channel_histogram(m->value, histograms, cv::Mat(), bins, ranges);
 
     cv::Mat histogram_img(600,800,CV_8UC3, cv::Scalar(0,0,0));
     cv_histogram::render_histogram(histograms, bins, colors_, histogram_img, slide_zoom_->doubleValue());
@@ -111,17 +111,10 @@ void Histogram::messageArrived(ConnectorIn *source)
 
 void Histogram::prepare(cv::Mat &bins, cv::Mat &ranges)
 {
-    cv::Mat_<int>  b(channel_count_, 1);
-    cv::Mat_<float>r(channel_count_ * 2, 1);
-
+    cv_histogram::prepare_params(bins, ranges, channel_count_);
     for(int i = 0 ; i < channel_count_ ; i++) {
-        b.at<int>(i) = bin_counts_[i]->value();
-        r.at<float>(2 * i) = 0.f;
-        r.at<float>(2 * i + 1) = 256.f;
+        bins.at<int>(i) = bin_counts_[i]->value();
     }
-
-    bins = b;
-    ranges = r;
 }
 
 void Histogram::updateState()

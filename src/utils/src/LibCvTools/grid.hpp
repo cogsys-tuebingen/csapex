@@ -4,44 +4,81 @@
 #include <assert.h>
 
 /**
- * @class The AttributedGridCell class is used as the content for a cell of a grid.
+ * @class The GridCell class is used as the content for a cell of a grid.
  *        An attribute is a value that can be used to compare two cells.
  */
-template<class Rect, class Attributes>
-class AttributedGridCell {
+namespace cv_grid {
+/**
+ * @brief The Grid container.
+ */
+class Grid {
 public:
     /**
-     * @brief AttributedGridCell default constructor.
+     * @brief Return amount of rows.
+     * @return          the amount of rows
      */
-    AttributedGridCell()
+    int rows() const
+    {
+        return rows_;
+    }
+
+    /**
+     * @brief Return amount of cols.
+     * @return          the amount of cols
+     */
+    int cols() const
+    {
+        return cols_;
+    }
+
+protected:
+    Grid(const int rows, const int cols) :
+        rows_(rows),
+        cols_(cols)
+    {
+    }
+
+    int rows_;      /// amount of rows
+    int cols_;      /// amount of cols
+};
+/**
+ * @brief A grid cell.
+ */
+template<class Rect, class Attributes>
+class GridCell {
+public:
+    /**
+     * @brief GridCell default constructor.
+     */
+    GridCell()
     {
     }
 
     /**
-     * @brief AttributedGridCell constructor.
+     * @brief GridCell constructor.
      * @param _bounding         the grid cells bounding box
      * @param _attributes       the grid cells attributes
      */
-    AttributedGridCell(const Rect _bounding, const Attributes _attributes) :
+    GridCell(const Rect _bounding, const Attributes _attributes) :
         bounding(_bounding),
         attributes(_attributes)
     {
     }
 
     /**
-     * @brief AttributedGridCell copy constructor.
+     * @brief GridCell copy constructor.
      * @param c     another grid cell
      */
-    AttributedGridCell(const AttributedGridCell<Rect, Attributes> &c) :
+    GridCell(const GridCell<Rect, Attributes> &c) :
         bounding(c.bounding),
         attributes(c.attributes)
     {
     }
 
     /**
-     * @brief ~AttributedGridCell default destructor.
+     * @brief ~GridCell default destructor.
      */
-    virtual ~AttributedGridCell()
+    virtual ~GridCell()
     {
     }
 
@@ -61,7 +98,7 @@ public:
      * @param g     another grid cell
      * @return      if the cells are equal in a defined way
      */
-    bool operator == (const AttributedGridCell<Rect, Attributes> g) const
+    bool operator == (const GridCell<Rect, Attributes> g) const
     {
         return g.attributes == attributes;
     }
@@ -75,14 +112,14 @@ public:
  *          It can be observed as a functional wrapper class.
  */
 template<class Cell>
-class Grid {
+class Grid_ : public Grid
+{
 public:
     /**
      * @brief Grid default constructor.
      */
-    Grid() :
-        rows_(0),
-        cols_(0),
+    Grid_() :
+        Grid(0,0),
         cells_(0)
     {
     }
@@ -92,9 +129,8 @@ public:
      * @param rows      the amount of rows
      * @param cols      the amount of cols
      */
-    Grid(const int rows, const int cols) :
-        rows_(rows),
-        cols_(cols),
+    Grid_(const int rows, const int cols) :
+        Grid(rows, cols),
         cells_(rows * cols)
     {
     }
@@ -103,9 +139,8 @@ public:
      * @brief Grid copy constructor.
      * @param g         another grid
      */
-    Grid(const Grid& g) :
-        rows_(g.rows_),
-        cols_(g.cols_),
+    Grid_(const Grid_& g) :
+        Grid(g.rows_, g.cols()),
         cells_(g.rows_ * g.cols_)
     {
         memcpy(cells_.data(), g.cells_.data(), sizeof(Cell) * cols_ * rows_);
@@ -114,7 +149,7 @@ public:
     /**
      * @brief ~Grid default destructor.
      */
-    virtual ~Grid()
+    virtual ~Grid_()
     {
     }
 
@@ -147,29 +182,11 @@ public:
     }
 
     /**
-     * @brief Return amount of rows.
-     * @return          the amount of rows
-     */
-    int rows() const
-    {
-        return rows_;
-    }
-
-    /**
-     * @brief Return amount of cols.
-     * @return          the amount of cols
-     */
-    int cols() const
-    {
-        return cols_;
-    }
-
-    /**
      * @brief Compare to grids.
      * @param g         another grid
      * @return          if the grids are equal
      */
-    bool operator == (const Grid<Cell> &g)
+    bool operator == (const Grid_<Cell> &g)
     {
         assert(cols_ == g.cols_);
         assert(rows_ == g.rows_);
@@ -185,8 +202,7 @@ public:
     }
 
 private:
-int                     rows_;      /// amount of rows
-int                     cols_;      /// amount of cols
 std::vector<Cell>       cells_;     /// the cells
 };
+}
 #endif // GRID_HPP

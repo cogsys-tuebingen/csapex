@@ -5,12 +5,17 @@
 /**
  * @class This can be used as an attribute to attach to a grid cell.
  */
-class AttributeColorHLS {
+namespace cv_grid {
+class AttrHLS {
 public:
+    struct Params {
+        cv::Scalar eps;
+    };
+
     /**
      * @brief AttributeHLS default constructor.
      */
-    AttributeColorHLS()
+    AttrHLS()
     {
     }
 
@@ -19,7 +24,7 @@ public:
      * @param _hls      the color value assigned to the cell
      * @param _eps      the maximum error to this value for comparision with another attribute
      */
-    AttributeColorHLS(const cv::Scalar &_hls, const cv::Scalar &_eps) :
+    AttrHLS(const cv::Scalar &_hls, const cv::Scalar &_eps) :
         hls(_hls),
         eps(_eps)
     {
@@ -29,7 +34,7 @@ public:
      * @brief AttributeHLS copy constructor.
      * @param h         the attribute to copy
      */
-    AttributeColorHLS(const AttributeColorHLS &h) :
+    AttrHLS(const AttrHLS &h) :
         hls(h.hls),
         eps(h.eps)
     {
@@ -40,7 +45,7 @@ public:
      * @param attr      the other attribute
      * @return          if the attributes are equal
      */
-    bool operator == (const AttributeColorHLS &attr) const
+    bool operator == (const AttrHLS &attr) const
     {
         bool res = true;
         res &= std::abs(hls[0] - attr.hls[0]) <= eps[0];
@@ -54,85 +59,81 @@ public:
      * @param eps           the mean error
      * @return              an attribute
      */
-    static AttributeColorHLS generate(const cv::Mat &img, const cv::Scalar &eps)
+    static AttrHLS generate(const cv::Mat &img, const AttrHLS::Params &p)
     {
         cv::Scalar value = cv::mean(img);
-        return AttributeColorHLS(value, eps);
+        return AttrHLS(value, p.eps);
     }
 
     cv::Scalar hls;
     cv::Scalar eps;
 };
 
-class AttributeHistogram {
-    enum ColorRoom{HSV, HLS, HSVFULL, HLSFULL, RGB8NORM, BGR8NORM};
+class AttrHistogram {
+    /*
+        CV_COMP_CORREL Correlation
+        CV_COMP_CHISQR Chi-Square
+        CV_COMP_INTERSECT Intersection
+        CV_COMP_BHATTACHARYYA Bhattacharyya distance
+        CV_COMP_HELLINGER Synonym for CV_COMP_BHATTACHARYYA
+    */
 public:
-    AttributeHistogram()
+    struct Params {
+        cv::Mat bins;
+        cv::Mat ranges;
+        cv::Scalar eps;
+        int method;
+    };
+
+    AttrHistogram()
     {
     }
 
-    AttributeHistogram(const std::vector<cv::Mat> &_histograms, const double _eps) :
-        histograms(histograms),
-        eps(_eps)
+    AttrHistogram(const std::vector<cv::MatND> &_histograms, const cv::Scalar & _eps, const int _method) :
+        histograms(_histograms),
+        eps(_eps),
+        method(_method)
     {
     }
 
-    AttributeHistogram(const AttributeHistogram &h) :
+    AttrHistogram(const AttrHistogram &h) :
         histograms(h.histograms),
-        eps(h.eps)
+        eps(h.eps),
+        method(h.method)
     {
     }
 
-    bool operator == (const AttributeHistogram &attr) const
+    bool operator == (const AttrHistogram &attr) const
     {
+        assert(histograms.size() == attr.histograms.size());
         bool res = true;
+
+        for(int i = 0 ; i < histograms.size() ; i++) {
+            res &= cv::compareHist(histograms[i], attr.histograms[i], method) <= eps[i];
+        }
 
 
         return res;
     }
 
-    static AttributeHistogram generate(const cv::Mat &_img, const std::vector<int> &bins, const double _eps, const ColorRoom c,
-                                       const std::vector<float> &normalize = std::vector<float>())
+    //    prepare(bins, ranges);
+    //        const cv::Mat &_bins, const cv::Mat &_ranges,
+    //        const double _eps, const int _method = CV_COMP_CHISQR
+    static AttrHistogram generate(const cv::Mat &_img, const AttrHistogram::Params &p)
     {
-        /// pushback 256 , 256 , 256 for bgr / rgb
-        /// puschback 180 , 256, 256 for hsv / hls
 
-        cv::Mat working_copy = _img.clone();
-        std::vector<int> ranges;
-        switch(c) {
-        case RGB8NORM:
-            ranges.push_back(255);
-            cv_histogram::normalize_rgb(working_copy, working_copy);
-            break;
-        case BGR8NORM:
-            ranges.push_back(255);
-            cv_histogram::normalize_rgb(working_copy, working_copy);
-            break;
-        case HSV:
-            ranges.push_back(180);
-            ranges.push_back(255);
-            ranges.push_back(255);
-            break;
-        case HLS:
-            ranges.push_back(180);
-            ranges.push_back(255);
-            ranges.push_back(255);
-            break;
-        default:
-            ranges.push_back(255);
-        }
+        std::vector<cv::MatND>  histograms;
+        cv_histogram::full_channel_histogram(_img, histograms, cv::Mat(), p.bins, p.ranges);
 
-        std::vector<cv::Mat>   histograms;
-        cv_histogram::generate_histogram(working_copy, histograms, bins, ranges, normalize);
-
-        return AttributeHistogram(histograms, _eps);
+        return AttrHistogram(histograms, p.eps, p.method);
     }
 
-    std::vector<cv::Mat> histograms;
-    double               eps;
+    std::vector<cv::MatND>  histograms;
+    cv::Scalar              eps;
+    int                     method;
 
 private:
 
 };
-
+}
 #endif // GRID_ATTRIBUTES_HPP
