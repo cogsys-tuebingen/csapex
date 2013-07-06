@@ -15,8 +15,8 @@ namespace cv_grid {
  * @param cols      the amount of cols
  * @param eps       the mean error
  */
-template<class Grid, class Attribute>
-inline void  prepare_grid(Grid &grid, const cv::Mat &img, const int rows, const int cols)
+template<class Attribute, class Grid, class Params>
+inline void  prepare_grid(Grid &grid, const cv::Mat &img, const int rows, const int cols, const Params &p)
 {
 
     grid = Grid(rows,cols);
@@ -37,17 +37,17 @@ inline void  prepare_grid(Grid &grid, const cv::Mat &img, const int rows, const 
 
             cv::Mat roi(img, r);
 
-            Attribute attr = Attribute::generate(roi, Attribute::Params);
+            Attribute attr = Attribute::generate(roi, p);
             grid(j,i) = GridCell<cv::Rect, Attribute>(r, attr);
 
         }
     }
 }
 
-typedef GridCell<cv::Rect, AttrHLS>         GridCellHLS;    /// a grid cell using hls attributes
-typedef Grid_<GridCellHLS>                   GridHLS;        /// a grid based on hls grid cells
-typedef GridCell<cv::Rect, AttrHistogram>   GridCellHist;
-typedef Grid_<GridCellHist>                  GridHist;
+typedef GridCell<cv::Rect, AttrScalar>          GridCellScalar;    /// a grid cell using hls attributes
+typedef Grid_<GridCellScalar>                   GridScalar;        /// a grid based on hls grid cells
+typedef GridCell<cv::Rect, AttrHistogram>       GridCellHist;
+typedef Grid_<GridCellHist>                     GridHist;
 
 }
 

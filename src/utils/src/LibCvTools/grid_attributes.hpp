@@ -6,67 +6,50 @@
  * @class This can be used as an attribute to attach to a grid cell.
  */
 namespace cv_grid {
-class AttrHLS {
+class AttrScalar {
 public:
     struct Params {
         cv::Scalar eps;
+        cv::Vec<bool, 4> ignore;
     };
 
-    /**
-     * @brief AttributeHLS default constructor.
-     */
-    AttrHLS()
+    AttrScalar()
     {
     }
 
-    /**
-     * @brief AttributeHLS constructor.
-     * @param _hls      the color value assigned to the cell
-     * @param _eps      the maximum error to this value for comparision with another attribute
-     */
-    AttrHLS(const cv::Scalar &_hls, const cv::Scalar &_eps) :
-        hls(_hls),
-        eps(_eps)
+    AttrScalar(const cv::Scalar &_scalar, const cv::Scalar &_eps, const cv::Vec<bool, 4> _ignore) :
+        scalar(_scalar),
+        eps(_eps),
+        ignore(_ignore)
     {
     }
 
-    /**
-     * @brief AttributeHLS copy constructor.
-     * @param h         the attribute to copy
-     */
-    AttrHLS(const AttrHLS &h) :
-        hls(h.hls),
-        eps(h.eps)
+    AttrScalar(const AttrScalar &h) :
+        scalar(h.scalar),
+        eps(h.eps),
+        ignore(h.ignore)
     {
     }
 
-    /**
-     * @brief Compare two attributes considering an error.
-     * @param attr      the other attribute
-     * @return          if the attributes are equal
-     */
-    bool operator == (const AttrHLS &attr) const
+    bool operator == (const AttrScalar &attr) const
     {
         bool res = true;
-        res &= std::abs(hls[0] - attr.hls[0]) <= eps[0];
-        res &= std::abs(hls[2] - attr.hls[2]) <= eps[2];
+        res &=  ignore[0] || std::abs(scalar[0] - attr.scalar[0]) <= eps[0];
+        res &=  ignore[1] || std::abs(scalar[1] - attr.scalar[1]) <= eps[1];
+        res &=  ignore[2] || std::abs(scalar[2] - attr.scalar[2]) <= eps[2];
+        res &=  ignore[3] || std::abs(scalar[3] - attr.scalar[3]) <= eps[3];
         return res;
     }
 
-    /**
-     * @brief Produce an attribute, processing the image part in the most common way.
-     * @param img           the source image
-     * @param eps           the mean error
-     * @return              an attribute
-     */
-    static AttrHLS generate(const cv::Mat &img, const AttrHLS::Params &p)
+    static AttrScalar generate(const cv::Mat &img, const AttrScalar::Params &p)
     {
         cv::Scalar value = cv::mean(img);
-        return AttrHLS(value, p.eps);
+        return AttrScalar(value, p.eps, p.ignore);
     }
 
-    cv::Scalar hls;
-    cv::Scalar eps;
+    cv::Scalar      scalar;
+    cv::Scalar      eps;
+    cv::Vec<bool,4> ignore;
 };
 
 class AttrHistogram {
@@ -109,7 +92,8 @@ public:
         bool res = true;
 
         for(int i = 0 ; i < histograms.size() ; i++) {
-            res &= cv::compareHist(histograms[i], attr.histograms[i], method) <= eps[i];
+            res &= cv::compareHist(histograms[i], attr.histograms[i], method) <= eps[i] || i == 0;
+            std::cout << "%%%" << cv::compareHist(histograms[i], attr.histograms[i], method) << std::endl;
         }
 
 
