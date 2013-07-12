@@ -116,8 +116,10 @@ protected:
     void enabledChange(bool val);
 
 public Q_SLOTS:
-    void showContextMenu(const QPoint& pos);
+    void deleteBox();
+    void minimizeBox(bool minimize);
     void enableContent(bool enable);
+    void refreshStylesheet();
 
 Q_SIGNALS:
     void toggled(bool);

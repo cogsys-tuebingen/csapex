@@ -60,21 +60,19 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     content_ = content;
     content_->setBox(this);
 
-    ui->content->setCheckable(content_->canBeDisabled());
+    ui->enablebtn->setCheckable(content_->canBeDisabled());
 
     state->uuid_ = uuid;
 
-    setObjectName(ui->content->title());
+    setObjectName(ui->enablebtn->text());
 
     ui->content->installEventFilter(this);
 
+    connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+    connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    setContextMenuPolicy(Qt::CustomContextMenu);
-
-    connect(ui->content, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
-    connect(ui->content, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
-
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+    connect(ui->closebtn, SIGNAL(clicked()), this, SLOT(deleteBox()));
+    connect(ui->minimizebtn, SIGNAL(toggled(bool)), this, SLOT(minimizeBox(bool)));
 }
 
 void Box::enableContent(bool enable)
@@ -98,7 +96,7 @@ void Box::stop()
 void Box::setUUID(const std::string& uuid)
 {
     state->uuid_ = uuid;
-    ui->content->setTitle(state->uuid_.c_str());
+    ui->enablebtn->setText(state->uuid_.c_str());
 }
 
 std::string Box::UUID() const
@@ -222,10 +220,10 @@ void Box::init(const QPoint& pos)
 {
     move(pos);
 
-    QBoxLayout* layout = new QVBoxLayout;
-    ui->content->setLayout(layout);
+    //    QBoxLayout* layout = new QVBoxLayout;
+    //    ui->content->setLayout(layout);
 
-    content_->fill(layout);
+    content_->fill(ui->content);
 }
 
 BoxedObject* Box::getContent()
@@ -274,21 +272,19 @@ void Box::enabledChange(bool val)
 
 void Box::paintEvent(QPaintEvent* e)
 {
-    ui->content->setTitle(objectName());
+//    ui->enablebtn->setText(objectName());
 
     bool change = ui->boxframe->property("error").toBool() != content_->isError();
     ui->boxframe->setProperty("error",content_->isError());
 
     if(change) {
         if(content_->isError()) {
-            ui->content->setTitle("ERROR: " + objectName());
+            ui->enablebtn->setText("ERROR: " + objectName());
         } else {
-            ui->content->setTitle(objectName());
+            ui->enablebtn->setText(objectName());
         }
 
-        ui->boxframe->style()->unpolish(ui->boxframe);
-        ui->boxframe->style()->polish(ui->boxframe);
-        ui->boxframe->update();
+        refreshStylesheet();
     }
 
     resize(sizeHint());
@@ -351,25 +347,34 @@ QPixmap Box::makePixmap(const std::string& label)
     return QPixmap::fromImage(img);
 }
 
-void Box::showContextMenu(const QPoint& pos)
+void Box::deleteBox()
 {
-    QPoint globalPos = mapToGlobal(pos);
-
-    QString remove_txt("delete");
-
-    QMenu menu;
-    menu.addAction(remove_txt);
-
-    QAction* selectedItem = menu.exec(globalPos);
-
-    if(selectedItem) {
-        if(selectedItem->text() == remove_txt) {
-            Command::Ptr cmd(new command::DeleteBox(this));
-            BoxManager::instance().execute(cmd);
-        }
-    }
+    Command::Ptr cmd(new command::DeleteBox(this));
+    BoxManager::instance().execute(cmd);
 }
 
+void Box::refreshStylesheet()
+{
+    ui->boxframe->style()->unpolish(ui->boxframe);
+    ui->boxframe->style()->polish(ui->boxframe);
+}
+
+void Box::minimizeBox(bool minimize)
+{
+    if(minimize) {
+        ui->frame->hide();
+        ui->enablebtn->setText("");
+        ui->boxframe->setProperty("content_minimized", true);
+    } else {
+        ui->frame->show();
+        ui->enablebtn->setText(objectName());
+        ui->boxframe->setProperty("content_minimized", false);
+    }
+
+    refreshStylesheet();
+
+    resize(sizeHint());
+}
 
 Memento::Ptr Box::getState() const
 {

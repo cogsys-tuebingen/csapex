@@ -23,17 +23,16 @@
    <item>
     <widget class="QFrame" name="boxframe">
      <property name="styleSheet">
-      <string notr="true">QGroupBox
-{
-    font-size: 8px;
-    font-weight: bold;
-}
-QFrame#boxframe {
+      <string notr="true">QFrame#boxframe {
 	background-color: rgb(230, 200, 146);
 	border: 1px solid rgb(35, 35, 35);
 	border-radius: 5px;
 	outline-offset:5px;
 }
+QFrame#boxframe[content_minimized=&quot;true&quot;] {
+	background-color: rgb(230, 200, 200);
+}
+
 QFrame#boxframe[error=&quot;true&quot;] {
 	background-color: rgb(230, 50, 50);
 	border: 3px solid rgb(180, 0, 0);
@@ -53,7 +52,10 @@ QFrame#boxframe vision_evaluator--Connector {
      <property name="lineWidth">
       <number>2</number>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <property name="margin">
        <number>0</number>
       </property>
@@ -65,26 +67,124 @@ QFrame#boxframe vision_evaluator--Connector {
        </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="content">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>1</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <layout class="QVBoxLayout" name="mainLayout" stretch="0,0,1">
+        <property name="spacing">
+         <number>0</number>
         </property>
-        <property name="mouseTracking">
-         <bool>true</bool>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
         </property>
-        <property name="styleSheet">
-         <string notr="true">font-size: 8pt;</string>
-        </property>
-        <property name="title">
-         <string>unnamed box</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
+        <item>
+         <layout class="QHBoxLayout" name="header">
+          <item>
+           <widget class="QCheckBox" name="enablebtn">
+            <property name="styleSheet">
+             <string notr="true">font-size: 8pt;
+font-weight: bold;</string>
+            </property>
+            <property name="text">
+             <string>unnamed box</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="minimizebtn">
+            <property name="maximumSize">
+             <size>
+              <width>16</width>
+              <height>16</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset theme="zoom-out">
+              <normaloff/>
+             </iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="closebtn">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16</width>
+              <height>16</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset theme="window-close">
+              <normaloff/>
+             </iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>16</width>
+              <height>16</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame">
+          <layout class="QVBoxLayout" name="content">
+           <property name="margin">
+            <number>0</number>
+           </property>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QVBoxLayout" name="output_layout"/>
