@@ -57,6 +57,9 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 {
     ui->setupUi(this);
 
+    minimize_icon_ = ui->minimizebtn->icon();
+    maximize_icon_ = QIcon(":/maximize.png");
+
     content_ = content;
     content_->setBox(this);
 
@@ -272,7 +275,7 @@ void Box::enabledChange(bool val)
 
 void Box::paintEvent(QPaintEvent* e)
 {
-//    ui->enablebtn->setText(objectName());
+    ui->enablebtn->setText(objectName());
 
     bool change = ui->boxframe->property("error").toBool() != content_->isError();
     ui->boxframe->setProperty("error",content_->isError());
@@ -365,10 +368,12 @@ void Box::minimizeBox(bool minimize)
         ui->frame->hide();
         ui->enablebtn->setText("");
         ui->boxframe->setProperty("content_minimized", true);
+        ui->minimizebtn->setIcon(maximize_icon_);
     } else {
         ui->frame->show();
         ui->enablebtn->setText(objectName());
         ui->boxframe->setProperty("content_minimized", false);
+        ui->minimizebtn->setIcon(minimize_icon_);
     }
 
     refreshStylesheet();

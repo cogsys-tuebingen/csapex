@@ -143,6 +143,9 @@ private:
     std::vector<ConnectorOut*> output;
 
     bool down_;
+
+    QIcon minimize_icon_;
+    QIcon maximize_icon_;
 };
 
 inline YAML::Emitter& operator << (YAML::Emitter& out, const Box& box)
