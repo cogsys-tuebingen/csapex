@@ -30,7 +30,10 @@ Overlay::Overlay(QWidget* parent)
     activity_marker_min_opacity_ = 25;
     activity_marker_max_opacity_ = 100;
 
-    color_connection = QColor(0xFF, 0xFF, 0xFF, 0xFF);
+
+    connector_radius_ = 7;
+
+    color_connection = QColor(0xCC, 0xDD, 0xEE, 0xFF);
 
     color_in_connected = QColor(0x33, 0x33, 0xFF, 0xFF);
     color_in_disconnected = QColor(0xDD, 0xEE, 0xFF, 0xFF);
@@ -181,7 +184,13 @@ void Overlay::drawConnection(const QPoint& p1, const QPoint& p2)
     path.moveTo(p1);
     path.cubicTo(cp1, cp2, p2);
 
-    painter->setPen(QPen(color_connection, 3));
+    QLinearGradient lg(p1, p2);
+    lg.setColorAt(0,color_out_connected.lighter());
+    lg.setColorAt(1,color_in_connected.lighter());
+    QPen gp = QPen(Qt::black, connector_radius_ * 0.75, Qt::DotLine, Qt::RoundCap,Qt::RoundJoin);
+    gp.setBrush(QBrush(lg));
+
+    painter->setPen(gp);
     painter->drawPath(path);
 }
 
@@ -200,10 +209,9 @@ void Overlay::drawConnector(Connector *c)
     painter->setBrush(QBrush(color, Qt::SolidPattern));
     painter->setPen(QPen(color.darker(), 2));
 
-    int r = 7;
     int font_size = 10;
     int lines = 3;
-    painter->drawEllipse(c->centerPoint(), r, r);
+    painter->drawEllipse(c->centerPoint(), connector_radius_, connector_radius_);
 
     QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
 
@@ -222,7 +230,7 @@ void Overlay::drawConnector(Connector *c)
     int dx = 80;
     int dy = lines * metrics.height();
 
-    QRectF rect(c->centerPoint() + QPointF(output ? 2*r : -2*r-dx, -dy / 2.0), QSize(dx, dy));
+    QRectF rect(c->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
 
     painter->drawText(rect, text, opt);
 }

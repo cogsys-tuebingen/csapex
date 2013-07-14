@@ -12,10 +12,10 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget#designer {
-	background-color: rgb(230, 220, 203);
+	background-color: rgb(255, 255, 255);
 }</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1">
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="verticalScrollBarPolicy">
@@ -33,7 +33,7 @@
         <x>0</x>
         <y>0</y>
         <width>1009</width>
-        <height>547</height>
+        <height>631</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -54,24 +54,6 @@
         </widget>
        </item>
       </layout>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QScrollArea" name="widget_selection_scroll">
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="widget_selection">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>1009</width>
-        <height>76</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout"/>
      </widget>
     </widget>
    </item>

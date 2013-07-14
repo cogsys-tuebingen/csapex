@@ -76,6 +76,11 @@ public:
     void moveEvent(QMoveEvent*);
     void registered();
 
+    void focusInEvent(QFocusEvent * e);
+    void focusOutEvent(QFocusEvent * e);
+
+    void keyPressEvent(QKeyEvent * e);
+
     virtual void init(const QPoint& pos);
     BoxedObject* getContent();
 

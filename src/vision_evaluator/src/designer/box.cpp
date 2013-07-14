@@ -65,6 +65,8 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 
     ui->enablebtn->setCheckable(content_->canBeDisabled());
 
+    setFocusPolicy(Qt::ClickFocus);
+
     state->uuid_ = uuid;
 
     setObjectName(ui->enablebtn->text());
@@ -315,6 +317,27 @@ void Box::registered()
     }
     foreach(ConnectorOut* i, output) {
         Q_EMIT connectorCreated(i);
+    }
+}
+
+void Box::focusInEvent(QFocusEvent *e)
+{
+    ui->boxframe->setProperty("focused",true);
+    refreshStylesheet();
+}
+
+void Box::focusOutEvent(QFocusEvent *e)
+{
+    ui->boxframe->setProperty("focused",false);
+    refreshStylesheet();
+}
+
+void Box::keyPressEvent(QKeyEvent *e)
+{
+    if(hasFocus()) {
+        if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
+            deleteBox();
+        }
     }
 }
 

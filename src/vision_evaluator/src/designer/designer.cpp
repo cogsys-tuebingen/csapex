@@ -30,7 +30,7 @@ Designer::Designer(QWidget* parent)
 
     setCurrentConfig(DesignerIO::default_config);
 
-    BoxManager::instance().fill(ui->widget_selection->layout());
+//    BoxManager::instance().fill(ui->widget_selection->layout());
 
     QObject::connect(&BoxManager::instance(), SIGNAL(stateChanged()), this, SIGNAL(stateChanged()));
 }

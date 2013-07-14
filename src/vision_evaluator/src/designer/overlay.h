@@ -76,6 +76,9 @@ protected:
     QColor color_out_connected;
     QColor color_out_disconnected;
 
+
+    int connector_radius_;
+
     std::vector<std::pair<int, Connector*> > publisher_signals_;
 };
 

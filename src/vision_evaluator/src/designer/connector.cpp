@@ -66,8 +66,10 @@ void Connector::removeConnection(QObject* other_side)
 
 void Connector::removeAllConnectionsUndoable()
 {
-    Command::Ptr cmd = removeAllConnectionsCmd();
-    BoxManager::instance().execute(cmd);
+    if(isConnected()) {
+        Command::Ptr cmd = removeAllConnectionsCmd();
+        BoxManager::instance().execute(cmd);
+    }
 }
 
 void Connector::findParents()
@@ -135,7 +137,7 @@ void Connector::dropEvent(QDropEvent* e)
 
         if(from && from != this) {
             Command::Ptr cmd(new command::AddConnection(this, from));
-//            BoxManager::instance().execute(cmd);
+            //            BoxManager::instance().execute(cmd);
         }
     }
 }
