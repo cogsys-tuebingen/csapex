@@ -50,7 +50,8 @@ public:
     /**
      * @brief GridCell default constructor.
      */
-    GridCell()
+    GridCell() :
+        enabled(false)
     {
     }
 
@@ -61,7 +62,8 @@ public:
      */
     GridCell(const Rect _bounding, const Attributes _attributes) :
         bounding(_bounding),
-        attributes(_attributes)
+        attributes(_attributes),
+        enabled(true)
     {
     }
 
@@ -71,7 +73,8 @@ public:
      */
     GridCell(const GridCell<Rect, Attributes> &c) :
         bounding(c.bounding),
-        attributes(c.attributes)
+        attributes(c.attributes),
+        enabled(true)
     {
     }
 
@@ -105,6 +108,7 @@ public:
 
     Rect        bounding;           /// bounding box of the grid
     Attributes  attributes;         /// the attributes to compare
+    bool        enabled;
 };
 
 /**

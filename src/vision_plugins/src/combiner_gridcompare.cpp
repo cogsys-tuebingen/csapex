@@ -6,6 +6,7 @@
 /// PROJECT
 #include <utils/LibCvTools/grid_attributes.hpp>
 #include <utils/LibCvTools/grid_compute.hpp>
+#include <vision_evaluator/qt_helper.hpp>
 
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompare, vision_evaluator::ImageCombiner)
 
@@ -32,8 +33,8 @@ cv::Mat GridCompare::combine(const cv::Mat img1, const cv::Mat mask1, const cv::
         cv::cvtColor(img1, img1_, CV_BGR2YUV);
         cv::cvtColor(img2, img2_, CV_BGR2YUV);
 
-        cv_grid::prepare_grid<AttrHistogram>(g1, img1_, 56, 72, p);
-        cv_grid::prepare_grid<AttrHistogram>(g2, img2_, 56, 72, p);
+        cv_grid::prepare_grid<AttrHistogram>(g1, img1_, 56, 72, p, mask1, 1.0);
+        cv_grid::prepare_grid<AttrHistogram>(g2, img2_, 56, 72, p, mask2, 1.0);
 
 
         std::cout << img1.rows << " " << img1.cols << std::endl;
@@ -52,4 +53,8 @@ cv::Mat GridCompare::combine(const cv::Mat img1, const cv::Mat mask1, const cv::
 void GridCompare::fill(QBoxLayout *layout)
 {
     ImageCombiner::fill(layout);
+    slide_width_  = QtHelper::makeSlider(layout, "Grid Width",  64, 1, 640);
+    slide_height_ = QtHelper::makeSlider(layout, "Grid Height", 48, 1, 640);
+
+
 }

@@ -16,7 +16,7 @@ namespace cv_grid {
  * @param eps       the mean error
  */
 template<class Attribute, class Grid, class Params>
-inline void  prepare_grid(Grid &grid, const cv::Mat &img, const int rows, const int cols, const Params &p)
+inline void  prepare_grid(Grid &grid, const cv::Mat &img, const int rows, const int cols, const Params &p, const cv::Mat &mask = cv::Mat(), const double thresh = 1.0)
 {
 
     grid = Grid(rows,cols);
@@ -35,11 +35,19 @@ inline void  prepare_grid(Grid &grid, const cv::Mat &img, const int rows, const 
             if(j == rows - 1)
                 r.height += cell_height_rest;
 
-            cv::Mat roi(img, r);
 
-            Attribute attr = Attribute::generate(roi, p);
+            if(!mask.empty()) {
+                cv::Mat mask_roi(mask, r);
+                cv::Scalar s = cv::sum(mask_roi);
+                if(s[0] / (double)(r.width * r.height) < thresh) {
+                    grid(i,j) = GridCell<cv::Rect, Attribute>();
+                    continue;
+                }
+            }
+
+            cv::Mat img_roi(img, r);
+            Attribute attr = Attribute::generate(img_roi, p);
             grid(j,i) = GridCell<cv::Rect, Attribute>(r, attr);
-
         }
     }
 }

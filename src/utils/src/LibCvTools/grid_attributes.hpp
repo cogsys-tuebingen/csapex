@@ -9,7 +9,7 @@ namespace cv_grid {
 class AttrScalar {
 public:
     struct Params {
-        cv::Scalar eps;
+        cv::Scalar       eps;
         cv::Vec<bool, 4> ignore;
     };
 
@@ -62,10 +62,10 @@ class AttrHistogram {
     */
 public:
     struct Params {
-        cv::Mat bins;
-        cv::Mat ranges;
-        cv::Scalar eps;
-        int method;
+        cv::Mat     bins;
+        cv::Mat     ranges;
+        cv::Scalar  eps;
+        int         method;
     };
 
     AttrHistogram()

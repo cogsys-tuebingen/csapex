@@ -4,6 +4,8 @@
 #include <vision_evaluator/image_combiner.h>
 #include <utils/LibCvTools/grid.hpp>
 
+class QSlider;
+
 namespace vision_evaluator {
 class GridCompare : public ImageCombiner
 {
@@ -12,6 +14,9 @@ public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
 
 protected:
+    QSlider *slide_width_;
+    QSlider *slide_height_;
+
     virtual void fill(QBoxLayout *layout);
 
     template<class GridT>
@@ -34,6 +39,8 @@ protected:
             }
         }
     }
+
+
 };
 }
 #endif // COMBINER_GRIDCOMPARE_H
