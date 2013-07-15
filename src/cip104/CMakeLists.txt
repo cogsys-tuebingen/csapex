@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(cip104)
 
-find_package(catkin REQUIRED COMPONENTS roscpp vision_evaluator)
+find_package(catkin REQUIRED COMPONENTS roscpp vision_evaluator utils)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})

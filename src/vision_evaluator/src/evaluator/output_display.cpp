@@ -38,20 +38,16 @@ OutputDisplay::~OutputDisplay()
 
 bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
 {
-//    if(o == view_) {
-
     QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
 
         switch(e->type()) {
         case QEvent::GraphicsSceneMousePress:
             down_ = true;
-            std::cout << "down" << std::endl;
             last_pos_ = me->screenPos();
             e->accept();
             return true;
         case QEvent::GraphicsSceneMouseRelease:
             down_ = false;
-            std::cout << "up" << std::endl;
             e->accept();
             return true;
         case QEvent::GraphicsSceneMouseMove:
@@ -71,7 +67,6 @@ bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
         default:
             break;
         }
-//    }
 
     return false;
 }

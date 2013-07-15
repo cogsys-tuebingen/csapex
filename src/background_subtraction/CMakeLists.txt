@@ -83,7 +83,7 @@ generate_messages(
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES bg_sub
-   CATKIN_DEPENDS message_runtime sensor_msgs utils
+   CATKIN_DEPENDS message_runtime sensor_msgs
 #  DEPENDS system_lib
 )
 

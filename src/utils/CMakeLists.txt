@@ -44,8 +44,6 @@ catkin_package(
      include/utils/LibLaserProcessing/
      include/utils/LibOdoCalib/
      include/utils/LibCvTools/
-#     include/utils/LibLaserProcessing/segmentation
-#     include/utils/LibLaserProcessing/leg_filter
    LIBRARIES
      Gnuplot
      LibUtil
