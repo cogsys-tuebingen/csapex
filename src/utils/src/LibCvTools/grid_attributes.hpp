@@ -93,7 +93,7 @@ public:
 
         for(int i = 0 ; i < histograms.size() ; i++) {
             res &= cv::compareHist(histograms[i], attr.histograms[i], method) <= eps[i] || i == 0;
-            std::cout << "%%%" << cv::compareHist(histograms[i], attr.histograms[i], method) << std::endl;
+        //  std::cout << "%%%" << cv::compareHist(histograms[i], attr.histograms[i], method) << std::endl;
         }
 
 

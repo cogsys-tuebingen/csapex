@@ -86,20 +86,22 @@ void ColorAdjustment::fill(QBoxLayout *parent)
         combo_preset_->addItem("STD");
         combo_preset_->addItem("HSV");
         combo_preset_->addItem("HSL");
-        text_to_preset_.insert ( std::pair<QString,Preset>(QString("STD"), STD) );
-        text_to_preset_.insert ( std::pair<QString,Preset>(QString("HSV"), HSV) );
-        text_to_preset_.insert ( std::pair<QString,Preset>(QString("HSL"), HSL) );
-        preset_to_index_.insert( std::pair<Preset,int>(STD, combo_preset_->findText("STD")));
-        preset_to_index_.insert( std::pair<Preset,int>(HSV, combo_preset_->findText("HSV")));
-        preset_to_index_.insert( std::pair<Preset,int>(HSL, combo_preset_->findText("HSL")));
+
+        int index = combo_preset_->findText("STD");
+        index_to_preset_.insert(intPresetPair(index, STD));
+        preset_to_index_.insert(presetIntPair(STD, index));
+        index = combo_preset_->findText("HSV");
+        index_to_preset_.insert(intPresetPair(index, HSV));
+        preset_to_index_.insert(presetIntPair(HSV, index));
+        index = combo_preset_->findText("HSL");
+        index_to_preset_.insert(intPresetPair(index, HSL));
+        preset_to_index_.insert(presetIntPair(HSL, index));
         layout_->addWidget(combo_preset_);
 
-        setPreset(combo_preset_->currentText());
-
-
+        setPreset(combo_preset_->currentIndex());
         slide_lightness_ = QtHelper::makeSlider(layout_, "Lightness -/+", 0, -255, 255);
 
-        QObject::connect(combo_preset_, SIGNAL(currentIndexChanged(QString)), this, SLOT(setPreset(QString)));
+        QObject::connect(combo_preset_, SIGNAL(currentIndexChanged(int)), this, SLOT(setPreset(int)));
     }
 }
 
@@ -136,9 +138,9 @@ void ColorAdjustment::messageArrived(ConnectorIn *source)
     output_->publish(m);
 }
 
-void ColorAdjustment::setPreset(QString text)
+void ColorAdjustment::setPreset(int index)
 {
-    active_preset_  = text_to_preset_[text];
+    active_preset_  = index_to_preset_[index];
     updateSliders();
 }
 
@@ -191,8 +193,8 @@ void ColorAdjustment::updateSliders()
             ch_limit = 180.0;
         }
 
-        QDoubleSlider *tmp_min = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + "min.", 0.0, 0.0, ch_limit, 0.01);
-        QDoubleSlider *tmp_max = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + "max.", 255.0, 0.0, ch_limit, 0.01);
+        QDoubleSlider *tmp_min = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + " min.", 0.0, 0.0, ch_limit, 0.01);
+        QDoubleSlider *tmp_max = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + " max.", 255.0, 0.0, ch_limit, 0.01);
         prepareSliderPair(tmp_min, tmp_max);
 
     }

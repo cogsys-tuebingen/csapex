@@ -50,8 +50,8 @@ public:
     /**
      * @brief GridCell default constructor.
      */
-    GridCell() :
-        enabled(false)
+    GridCell(const bool _enabled = true) :
+        enabled(_enabled)
     {
     }
 
@@ -104,6 +104,15 @@ public:
     bool operator == (const GridCell<Rect, Attributes> g) const
     {
         return g.attributes == attributes;
+    }
+
+    /**
+     * @brief Check if cell is enabled.
+     * @return
+     */
+    bool is_enbabled()
+    {
+        return enabled;
     }
 
     Rect        bounding;           /// bounding box of the grid
