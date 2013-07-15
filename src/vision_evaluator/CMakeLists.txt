@@ -59,7 +59,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include src
    LIBRARIES vision_core logger vision_evaluation
-   CATKIN_DEPENDS pluginlib roscpp std_msgs utils
+   CATKIN_DEPENDS pluginlib roscpp std_msgs
    DEPENDS Qt4 OpenCV
 )
 

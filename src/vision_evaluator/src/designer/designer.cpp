@@ -30,7 +30,7 @@ Designer::Designer(QWidget* parent)
 
     setCurrentConfig(DesignerIO::default_config);
 
-//    BoxManager::instance().fill(ui->widget_selection->layout());
+    BoxManager::instance().reload();
 
     QObject::connect(&BoxManager::instance(), SIGNAL(stateChanged()), this, SIGNAL(stateChanged()));
 }
@@ -52,7 +52,6 @@ void Designer::keyReleaseEvent(QKeyEvent* e)
 
 void Designer::resizeEvent(QResizeEvent* e)
 {
-    //    ui->designer->resizeEvent(e);
 }
 
 bool Designer::isDirty()
