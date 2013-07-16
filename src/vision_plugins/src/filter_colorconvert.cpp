@@ -58,6 +58,9 @@ void ColorConvert::filter(cv::Mat &img, cv::Mat &mask)
     cspair.first  = index_to_cs_in_[state_.input_index];
     cspair.second = index_to_cs_out_[state_.output_index];
 
+    if(cspair.first == cspair.second)
+        return;
+
     if(cs_pair_to_operation_.find(cspair) != cs_pair_to_operation_.end()) {
         int mode = cs_pair_to_operation_[cspair];
         cv::cvtColor(img, img, mode);
