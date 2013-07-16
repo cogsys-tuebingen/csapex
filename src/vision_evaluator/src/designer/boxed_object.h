@@ -14,6 +14,7 @@ namespace vision_evaluator
 {
 
 class Box;
+class ConnectorIn;
 
 class BoxedObject : public QObject
 {
@@ -48,6 +49,8 @@ public:
     bool isError();
 
 public Q_SLOTS:
+    virtual void messageArrived(ConnectorIn* source) = 0;
+
     virtual void stop();
     virtual void setError(bool e, const std::string& msg = "");
 

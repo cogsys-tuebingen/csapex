@@ -126,6 +126,7 @@ public Q_SLOTS:
     void enableContent(bool enable);
     void refreshStylesheet();
     void eventModelChanged();
+    void forwardMessage(ConnectorIn* source);
 
 Q_SIGNALS:
     void toggled(bool);

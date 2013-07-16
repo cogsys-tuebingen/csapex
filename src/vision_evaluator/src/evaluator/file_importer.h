@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <designer/boxed_object.h>
+#include <designer/worker.h>
 
 /// SYSTEM
 #include <QPushButton>
@@ -17,7 +18,7 @@ class ConnectorOut;
 
 class FileImporter;
 
-class FileImporterWorker : public QObject
+class FileImporterWorker : public Worker
 {
     Q_OBJECT
 
@@ -26,6 +27,8 @@ class FileImporterWorker : public QObject
 
 public:
     FileImporterWorker(FileImporter* parent);
+
+    BoxedObject* getParent();
 
 public Q_SLOTS:
     void publish();
@@ -80,6 +83,7 @@ public:
 public Q_SLOTS:
     void importDialog();
     void toggle(bool on);
+    void messageArrived(ConnectorIn* source);
 
 private:
     FileImporterWorker* worker;

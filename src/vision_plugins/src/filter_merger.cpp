@@ -93,9 +93,7 @@ void Merger::updateInputs(int value)
         for(int i = 0 ; i < to_add ; i++) {
             ConnectorIn* input = new ConnectorIn(box_, box_->countInputs() + i);
             box_->addInput(input);
-            assert(QObject::connect(input, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*))));
             input_arrivals_.insert(std::pair<ConnectorIn*, bool>(input, false));
-
         }
     }
 

@@ -30,6 +30,11 @@ VirtualCameraWorker::VirtualCameraWorker(VirtualCamera *parent)
     QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
 }
 
+BoxedObject* VirtualCameraWorker::getParent()
+{
+    return state.parent;
+}
+
 void VirtualCameraWorker::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
     out << YAML::Key << "focal_length" << YAML::Value << focal_length;
@@ -293,6 +298,11 @@ void VirtualCamera::toggle(bool on)
     } else if(!on && worker->timer_->isActive()) {
         worker->timer_->stop();
     }
+}
+
+void VirtualCamera::messageArrived(ConnectorIn *source)
+{
+    // NO INPUTS
 }
 
 void VirtualCamera::import(const QString& filename)

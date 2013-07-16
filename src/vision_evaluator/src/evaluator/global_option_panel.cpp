@@ -51,6 +51,11 @@ GlobalOptionPanel::GlobalOptionPanel()
 
 }
 
+void GlobalOptionPanel::messageArrived(ConnectorIn *source)
+{
+    // NO INPUTS
+}
+
 GlobalOptionPanel::~GlobalOptionPanel()
 {
 

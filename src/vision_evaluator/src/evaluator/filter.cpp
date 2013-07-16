@@ -43,10 +43,6 @@ void Filter::fill(QBoxLayout* parent)
             box_->addOutput(output_mask_);
         }
 
-        connect(input_img_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-        if(usesMask()) {
-            connect(input_mask_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-        }
         insert(parent);
 
         makeThread();
@@ -90,12 +86,7 @@ void Filter::messageArrived(ConnectorIn* source)
             mask_msg.reset(new CvMatMessage);
         }
 
-        try {
-            filter(img_msg->value, mask_msg->value);
-            setError(false);
-        } catch(cv::Exception& cve) {
-            setError(true, cve.what());
-        }
+        filter(img_msg->value, mask_msg->value);
 
         output_img_->publish(img_msg);
         if(usesMask())

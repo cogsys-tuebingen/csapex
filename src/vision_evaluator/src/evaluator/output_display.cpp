@@ -91,8 +91,6 @@ void OutputDisplay::fill(QBoxLayout* layout)
         layout->addWidget(view_);
 
         disable();
-
-        connect(input_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
     }
 }
 

@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <designer/boxed_object.h>
+#include <designer/worker.h>
 #include <vision_evaluator/image_provider.h>
 #include <vision_evaluator/messages_default.hpp>
 #include <qt_helper.hpp>
@@ -20,7 +21,7 @@ class ConnectorOut;
 
 class VirtualCamera;
 
-class VirtualCameraWorker : public QObject
+class VirtualCameraWorker : public Worker
 {
     Q_OBJECT
 
@@ -29,6 +30,8 @@ class VirtualCameraWorker : public QObject
 
 public:
     VirtualCameraWorker(VirtualCamera* parent);
+
+    BoxedObject* getParent();
 
 public Q_SLOTS:
     void publish();
@@ -98,6 +101,7 @@ public:
 public Q_SLOTS:
     void importDialog();
     void toggle(bool on);
+    virtual void messageArrived(ConnectorIn* source);
 
 private:
     VirtualCameraWorker* worker;

@@ -28,8 +28,6 @@ void Splitter::fill(QBoxLayout *layout)
         /// add input
         input_ = new ConnectorIn(box_, 0);
         box_->addInput(input_);
-
-        assert(QObject::connect(input_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*))));
     }
 }
 

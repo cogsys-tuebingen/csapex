@@ -25,6 +25,8 @@ public:
 
     virtual bool canBeDisabled() const;
 
+    virtual void messageArrived(ConnectorIn* source);
+
 private:
     void ensureLoaded();
 

@@ -14,6 +14,7 @@
 #include <QMenu>
 #include <iostream>
 #include <boost/foreach.hpp>
+#include <opencv2/opencv.hpp>
 
 using namespace vision_evaluator;
 
@@ -128,6 +129,7 @@ void Box::addInput(ConnectorIn* in)
     input.push_back(in);
 
     QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
+    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(forwardMessage(ConnectorIn*)));
     QObject::connect(in, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::connect(in, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 
@@ -390,6 +392,18 @@ void Box::refreshStylesheet()
 void Box::eventModelChanged()
 {
     content_->updateGui(ui->content);
+}
+
+void Box::forwardMessage(ConnectorIn *source)
+{
+//    try {
+        content_->messageArrived(source);
+        content_->setError(false);
+//    } catch(cv::Exception& cve) {
+//        content_->setError(true, cve.what());
+//    } catch(std::runtime_error& err){
+//        content_->setError(true, err.what());
+//    }
 }
 
 void Box::minimizeBox(bool minimize)

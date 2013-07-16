@@ -42,11 +42,6 @@ void ImageCombiner::fill(QBoxLayout* layout)
         output_img_ = new ConnectorOut(box_, 0);
         box_->addOutput(output_img_);
 
-        connect(input_img_a_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-        connect(input_mask_a_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-        connect(input_img_b_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-        connect(input_mask_b_, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(messageArrived(ConnectorIn*)));
-
         insert(layout);
 
         makeThread();
@@ -102,15 +97,8 @@ void ImageCombiner::messageArrived(ConnectorIn* source)
         }
 
         CvMatMessage::Ptr img_msg_result(new CvMatMessage);
-        try {
-            img_msg_result->value = combine(img_msg_a->value, mask_msg_a->value, img_msg_b->value, mask_msg_b->value);
-            setError(false);
-            output_img_->publish(img_msg_result);
-        } catch(cv::Exception& cve) {
-            setError(true, cve.what());
-        } catch(std::runtime_error& err){
-            setError(true, err.what());
-        }
+        img_msg_result->value = combine(img_msg_a->value, mask_msg_a->value, img_msg_b->value, mask_msg_b->value);
+        output_img_->publish(img_msg_result);
     }
 }
 

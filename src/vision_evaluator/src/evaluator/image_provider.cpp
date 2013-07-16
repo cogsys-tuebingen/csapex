@@ -4,7 +4,6 @@
 /// SYSTEM
 #include <boost/filesystem.hpp>
 #include <QThread>
-#include <QtConcurrentRun>
 
 namespace bfs = boost::filesystem;
 
@@ -79,7 +78,7 @@ ImageProvider* ImageProvider::create(const std::string& path)
 
 void ImageProvider::init()
 {
-    QtConcurrent::run(this, &ImageProvider::doInit);
+    doInit();
 }
 
 void ImageProvider::next()

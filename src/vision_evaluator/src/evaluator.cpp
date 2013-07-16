@@ -1,9 +1,12 @@
 /// PROJECT
 #include <evaluator/evaluation_window.h>
+#include <designer/worker.h>
+#include <designer/box.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
 #include <QtGui>
+#include <opencv2/opencv.hpp>
 #include <QApplication>
 #include <signal.h>
 #include <X11/Xlib.h>
@@ -27,7 +30,19 @@ struct EvaluationApplication : public QApplication {
         try {
             return QApplication::notify(receiver, event);
         } catch(std::exception& e) {
-            std::cout << "Exception thrown:" << e.what() << std::endl;
+            BoxedObject* bo = dynamic_cast<BoxedObject*> (receiver);
+            Box* box = dynamic_cast<Box*> (receiver);
+            Worker* worker = dynamic_cast<Worker*> (receiver);
+
+            if(bo) {
+                bo->setError(true, e.what());
+            } else if(box) {
+                box->getContent()->setError(true, e.what());
+            } else if(worker) {
+                worker->getParent()->setError(true, e.what());
+            } else {
+                std::cerr << "Uncatched exception:" << e.what() << std::endl;
+            }
         }
         return false;
     }
@@ -42,10 +57,10 @@ int main(int argc, char** argv)
 
     po::options_description desc("Allowed options");
     desc.add_options()
-    ("help", "show help message")
-    ("directory",  po::value<std::string>()->default_value("."), "working directory")
-    ("second_directory",  po::value<std::string>(), "comparation directory")
-    ;
+            ("help", "show help message")
+            ("directory",  po::value<std::string>()->default_value("."), "working directory")
+            ("second_directory",  po::value<std::string>(), "comparation directory")
+            ;
 
     po::positional_options_description p;
     p.add("directory", 1).add("second_directory", 1);

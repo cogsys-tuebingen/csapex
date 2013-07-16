@@ -40,6 +40,11 @@ FileImporterWorker::FileImporterWorker(FileImporter *parent)
     QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
 }
 
+BoxedObject* FileImporterWorker::getParent()
+{
+    return state.parent;
+}
+
 void FileImporterWorker::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
 
@@ -155,6 +160,11 @@ void FileImporter::toggle(bool on)
     } else if(!on && worker->timer_->isActive()) {
         worker->timer_->stop();
     }
+}
+
+void FileImporter::messageArrived(ConnectorIn *source)
+{
+    // NO INPUT
 }
 
 void FileImporter::import(const QString& filename)
