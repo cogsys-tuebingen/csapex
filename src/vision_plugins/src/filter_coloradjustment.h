@@ -49,14 +49,13 @@ private:
     QWidget                    *container_ch_sliders_;
     ChannelLimits               slider_pairs_;
     std::map<int, Preset>       index_to_preset_;
-    std::map<Preset, int>       preset_to_index_;
 
     /// helpers
     void addLightness(cv::Mat &img);
     void prepareSliderPair(QDoubleSlider *min, QDoubleSlider *max);
     void updateSliders();
 
-    /// memento
+    /// MEMENTO
     void updateState();
     class State : public Memento {
     public:
@@ -79,9 +78,7 @@ private:
             node["channel_count"] >> channel_count;
             node["normalize"] >> normalize;
             node["lightness"] >> lightness;
-            int preset_int;
-            node["preset"] >> preset_int;
-            preset = static_cast<Preset>(preset_int);
+            node["preset"] >> combo_index;
         }
 
         void writeYaml(YAML::Emitter &out) const
@@ -98,7 +95,7 @@ private:
             out << YAML::EndSeq;
             out << YAML::Key << "channel_count" << YAML::Value << channel_count;
             out << YAML::Key << "normalize" << YAML::Value << normalize;
-            out << YAML::Key << "preset" << YAML::Value << (int) preset;
+            out << YAML::Key << "preset" << YAML::Value << combo_index;
             out << YAML::Key << "lightness" << YAML::Value << lightness;
         }
 
@@ -107,8 +104,8 @@ private:
         std::vector<double> maxs;
         int     channel_count;
         bool    normalize;
-        Preset  preset;
         int     lightness;
+        int     combo_index;
 
     };
 

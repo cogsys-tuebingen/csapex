@@ -43,7 +43,7 @@ void BoxedObject::setError(bool e, const std::string& msg)
         unsigned line = 60;
         for(unsigned i = 0; i < msg.size(); ++i) {
             err += msg[i];
-            if((i%line) == 0) {
+            if((i%line) == 0 && i != 0) {
                 err += '\n';
             }
         }
@@ -109,6 +109,10 @@ void BoxedObject::setBox(Box* box)
 void BoxedObject::fill(QBoxLayout* layout)
 {
     layout->addWidget(new QLabel(name_.c_str()));
+}
+
+void BoxedObject::updateGui(QBoxLayout *layout)
+{
 }
 
 void BoxedObject::makeThread()

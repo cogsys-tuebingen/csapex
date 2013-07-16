@@ -125,6 +125,7 @@ public Q_SLOTS:
     void minimizeBox(bool minimize);
     void enableContent(bool enable);
     void refreshStylesheet();
+    void eventModelChanged();
 
 Q_SIGNALS:
     void toggled(bool);

@@ -38,8 +38,8 @@ void ColorAdjustment::setState(Memento::Ptr memento)
 
     state_ = *m;
     channel_count_ = state_.channel_count;
-    active_preset_ = state_.preset;
-    combo_preset_->setCurrentIndex(preset_to_index_[active_preset_]);
+    combo_preset_->setCurrentIndex(state_.combo_index);
+    setPreset(state_.combo_index);
     updateSliders();
     for(int i = 0 ; i < channel_count_ ; i++) {
         slider_pairs_[i].first->setDoubleValue(state_.mins[i]);
@@ -48,7 +48,6 @@ void ColorAdjustment::setState(Memento::Ptr memento)
 
     slide_lightness_->setValue(state_.lightness);
     check_normalize_->setChecked(state_.normalize);
-    combo_preset_->setCurrentIndex(preset_to_index_[active_preset_]);
 }
 
 Memento::Ptr ColorAdjustment::getState() const
@@ -89,13 +88,10 @@ void ColorAdjustment::fill(QBoxLayout *parent)
 
         int index = combo_preset_->findText("STD");
         index_to_preset_.insert(intPresetPair(index, STD));
-        preset_to_index_.insert(presetIntPair(STD, index));
         index = combo_preset_->findText("HSV");
         index_to_preset_.insert(intPresetPair(index, HSV));
-        preset_to_index_.insert(presetIntPair(HSV, index));
         index = combo_preset_->findText("HSL");
         index_to_preset_.insert(intPresetPair(index, HSL));
-        preset_to_index_.insert(presetIntPair(HSL, index));
         layout_->addWidget(combo_preset_);
 
         setPreset(combo_preset_->currentIndex());
@@ -208,7 +204,7 @@ void ColorAdjustment::updateState()
     state_.mins.clear();
     state_.maxs.clear();
     state_.lightness = slide_lightness_->value();
-    state_.preset = active_preset_;
+    state_.combo_index = combo_preset_->currentIndex();
     state_.channel_count = channel_count_;
     state_.normalize = check_normalize_->isChecked();
 

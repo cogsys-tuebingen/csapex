@@ -10,50 +10,114 @@ using namespace vision_evaluator;
 using namespace cv_grid;
 
 GridCompareHist::GridCompareHist() :
-    channel_count_(0),
     container_hist_sliders_(NULL)
 {
+    state_.channel_count = 0;
+    state_.restored = false;
 }
 
 cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
     if(!img1.empty() && !img2.empty()) {
-        assert(img1.channels() == img2.channels());
+        if(img1.channels() != img2.channels())
+            throw std::runtime_error("Channel count is not matching!");
 
-        if(channel_count_ != img1.channels()) {
-            channel_count_ = img1.channels();
-            updateSliders();
+        if(state_.channel_count != img1.channels()) {
+            state_.channel_count = img1.channels();
+            state_.bins.clear();
+            state_.eps.clear();
+            Q_EMIT modelChanged();
         }
 
-        GridHist g1, g2;
-        AttrHistogram::Params p;
-        prepareHistParams(p.bins, p.ranges, p.eps);
-        p.method = index_to_compare_[combo_compare_->currentIndex()];
+        if(hist_sliders_.size() == state_.channel_count) {
+            GridHist g1, g2;
+            AttrHistogram::Params p;
+            prepareHistParams(p.bins, p.ranges, p.eps);
+            int index = combo_compare_->currentIndex();
+            p.method = index_to_compare_[index];
 
-        int width = slide_width_->value();
-        int height = slide_height_->value();
+            int width = slide_width_->value();
+            int height = slide_height_->value();
 
-        cv_grid::prepare_grid<AttrHistogram>(g1, img1, height, width, p, mask1, 1.0);
-        cv_grid::prepare_grid<AttrHistogram>(g2, img2, height, width, p, mask2, 1.0);
+            /// MEMENTO
+            state_.combo_index = index;
+            state_.grid_width = width;
+            state_.grid_height = height;
 
-        cv::Mat out(img1.rows + 20, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
-        intPair counts;
-        int     valid;
-        render_grid(g1, g2, out, counts, valid);
+            cv_grid::prepare_grid<AttrHistogram>(g1, img1, height, width, p, mask1, 1.0);
+            cv_grid::prepare_grid<AttrHistogram>(g2, img2, height, width, p, mask2, 1.0);
 
-        std::stringstream text;
-        text << "+" << counts.first << " | -" << counts.second << " | " << valid << std::endl;
-        cv::putText(out, text.str(), cv::Point(0, out.rows - 2), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 255, 255));
-
-        return out;
+            cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
+            render_grid(g1, g2, out);
+            return out;
+        }
     }
     return cv::Mat();
 }
 
+void GridCompareHist::updateGui(QBoxLayout *layout)
+{
+    QVBoxLayout *internal_layout;
+    if(container_hist_sliders_ != NULL) {
+        container_hist_sliders_->deleteLater();
+    }
+    internal_layout = new QVBoxLayout;
+
+    for(int i = 0 ; i < state_.channel_count ; i++) {
+        std::stringstream ch;
+        ch << i + 1;
+
+        int    default_bin = 32;
+        double default_eps = 0.0;
+
+        if(state_.restored) {
+            default_bin = state_.bins[i];
+            default_eps = state_.eps[i];
+        } else {
+            state_.bins.push_back(default_bin);
+            state_.eps.push_back(default_eps);
+        }
+
+        QSlider *bins = QtHelper::makeSlider(internal_layout, "Ch." + ch.str() + " bins", default_bin, 1, 1000);
+        QDoubleSlider *eps = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + " eps", default_eps, 0.0, 255.0, 0.01);
+        insertSliders(bins, eps);
+    }
+
+    if(state_.restored) {
+        slide_height_->setValue(state_.grid_height);
+        slide_width_->setValue(state_.grid_width);
+        combo_compare_->setCurrentIndex(state_.combo_index);
+        state_.restored = false;
+    }
+
+    container_hist_sliders_ = QtHelper::wrapLayout(internal_layout);
+    layout->addWidget(container_hist_sliders_);
+
+
+}
+
+Memento::Ptr GridCompareHist::getState() const
+{
+    boost::shared_ptr<State> memento(new State);
+    *memento = state_;
+
+    return memento;
+}
+
+void GridCompareHist::setState(Memento::Ptr memento)
+{
+    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
+    assert(m.get());
+    state_ = *m;
+    Q_EMIT modelChanged();
+}
+
+
+
 void GridCompareHist::fill(QBoxLayout *layout)
 {
     GridCompare::fill(layout);
-    layout_ = layout;
+    state_.restored = false;
 
     combo_compare_ = new QComboBox();
     combo_compare_->addItem("Correlation");
@@ -63,39 +127,14 @@ void GridCompareHist::fill(QBoxLayout *layout)
 
     int index = combo_compare_->findText("Correlation");
     index_to_compare_.insert(intPair(index, CV_COMP_CORREL));
-    compare_to_index_.insert(intPair(CV_COMP_CORREL, index));
     index = combo_compare_->findText("Chi-Square");
     index_to_compare_.insert(intPair(index, CV_COMP_CHISQR));
-    compare_to_index_.insert(intPair(CV_COMP_CHISQR, index));
     index = combo_compare_->findText("Intersection");
     index_to_compare_.insert(intPair(index, CV_COMP_INTERSECT));
-    compare_to_index_.insert(intPair(CV_COMP_INTERSECT, index));
     index = combo_compare_->findText("Hellinger");
     index_to_compare_.insert(intPair(index, CV_COMP_BHATTACHARYYA));
-    compare_to_index_.insert(intPair(CV_COMP_BHATTACHARYYA, index));
 
-    layout_->addWidget(combo_compare_);
-}
-
-void GridCompareHist::updateSliders()
-{
-    hist_sliders_.clear();
-    QVBoxLayout *internal_layout;
-    if(container_hist_sliders_ != NULL) {
-        container_hist_sliders_->deleteLater();
-    }
-    internal_layout = new QVBoxLayout;
-
-    for(int i = 0 ; i < channel_count_ ; i++) {
-        std::stringstream ch;
-        ch << i + 1;
-        QSlider *bins = QtHelper::makeSlider(internal_layout, "Ch." + ch.str() + " bins", 32, 0, 1000);
-        QDoubleSlider *eps = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + " eps", 0.0, 0.0, 255.0, 0.01);
-        insertSliders(bins, eps);
-    }
-
-    container_hist_sliders_ = QtHelper::wrapLayout(internal_layout);
-    layout_->addWidget(container_hist_sliders_);
+    layout->addWidget(combo_compare_);
 }
 
 void GridCompareHist::insertSliders(QSlider *bins, QDoubleSlider *eps)
@@ -108,14 +147,17 @@ void GridCompareHist::insertSliders(QSlider *bins, QDoubleSlider *eps)
 
 void GridCompareHist::prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scalar &eps)
 {
-    bins = cv::Mat_<int>(channel_count_, 1);
-    ranges = cv::Mat_<float>(channel_count_ * 2 ,1);
-    for(int i = 0 ; i < channel_count_ ; i++) {
+    bins = cv::Mat_<int>(state_.channel_count, 1);
+    ranges = cv::Mat_<float>(state_.channel_count * 2 ,1);
+    for(int i = 0 ; i < state_.channel_count ; i++) {
         HistSliderPair p = hist_sliders_[i];
         bins.at<int>(i)     = p.first->value();
         ranges.at<float>(2 * i)     = 0.f;
         ranges.at<float>(2 * i + 1) = 256.f;
-        eps[i]          = p.second->value();
+        eps[i]          = p.second->doubleValue();
 
+        /// MEMENTO
+        state_.bins[i] = p.first->value();
+        state_.eps[i] = p.second->doubleValue();
     }
 }

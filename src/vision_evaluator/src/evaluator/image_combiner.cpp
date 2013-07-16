@@ -27,13 +27,16 @@ void ImageCombiner::fill(QBoxLayout* layout)
 {
     if(input_img_a_ == NULL) {
         input_img_a_ = new ConnectorIn(box_, 0);
+        input_img_a_->setLabel("Image 1");
         box_->addInput(input_img_a_);
         input_mask_a_ = new ConnectorIn(box_, 1);
+        input_mask_a_->setLabel("Mask 1");
         box_->addInput(input_mask_a_);
-
         input_img_b_ = new ConnectorIn(box_, 2);
+        input_img_b_->setLabel("Image 2");
         box_->addInput(input_img_b_);
         input_mask_b_ = new ConnectorIn(box_, 3);
+        input_mask_b_->setLabel("Mask 2");
         box_->addInput(input_mask_b_);
 
         output_img_ = new ConnectorOut(box_, 0);
@@ -102,11 +105,12 @@ void ImageCombiner::messageArrived(ConnectorIn* source)
         try {
             img_msg_result->value = combine(img_msg_a->value, mask_msg_a->value, img_msg_b->value, mask_msg_b->value);
             setError(false);
+            output_img_->publish(img_msg_result);
         } catch(cv::Exception& cve) {
             setError(true, cve.what());
+        } catch(std::runtime_error& err){
+            setError(true, err.what());
         }
-
-        output_img_->publish(img_msg_result);
     }
 }
 

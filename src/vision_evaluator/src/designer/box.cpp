@@ -78,6 +78,8 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 
     connect(ui->closebtn, SIGNAL(clicked()), this, SLOT(deleteBox()));
     connect(ui->minimizebtn, SIGNAL(toggled(bool)), this, SLOT(minimizeBox(bool)));
+
+    connect(content, SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
 }
 
 void Box::enableContent(bool enable)
@@ -383,6 +385,11 @@ void Box::refreshStylesheet()
 {
     ui->boxframe->style()->unpolish(ui->boxframe);
     ui->boxframe->style()->polish(ui->boxframe);
+}
+
+void Box::eventModelChanged()
+{
+    content_->updateGui(ui->content);
 }
 
 void Box::minimizeBox(bool minimize)

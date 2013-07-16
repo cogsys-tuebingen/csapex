@@ -37,6 +37,7 @@ public:
     void setBox(Box* box);
 
     virtual void fill(QBoxLayout* layout);
+    virtual void updateGui(QBoxLayout* layout);
 
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);
@@ -55,6 +56,9 @@ public Q_SLOTS:
     virtual void disable(bool e);
     virtual void disable();
     virtual void connectorChanged();
+
+Q_SIGNALS:
+    void modelChanged();
 
 protected:
     void makeThread();

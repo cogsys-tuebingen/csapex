@@ -19,6 +19,7 @@ public:
 
     virtual void fill(QBoxLayout *layout);
 
+    /// MEMENTO
     void         setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
@@ -36,6 +37,7 @@ private:
     bool gotAllArrivals();
     void resetInputArrivals();
 
+    /// MEMENTO
     class State : public Memento {
     public:
         void readYaml(const YAML::Node &node)

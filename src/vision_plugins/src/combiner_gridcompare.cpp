@@ -14,6 +14,8 @@ void GridCompare::fill(QBoxLayout *layout)
     ImageCombiner::fill(layout);
     slide_width_  = QtHelper::makeSlider(layout, "Grid Width",  64, 1, 640);
     slide_height_ = QtHelper::makeSlider(layout, "Grid Height", 48, 1, 640);
+}
 
-
+void GridCompare::updateGui(QBoxLayout *layout)
+{
 }
