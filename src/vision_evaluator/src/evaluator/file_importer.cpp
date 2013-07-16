@@ -16,6 +16,7 @@
 #include <QFileDialog>
 #include <QTimer>
 #include <QtConcurrentRun>
+#include <QCheckBox>
 
 STATIC_INIT(FileImporter, generic, {
     SelectorProxy::ProxyConstructor c; \
@@ -86,6 +87,13 @@ bool FileImporterWorker::import(const QString& path)
     return provider_.get();
 }
 
+void FileImporterWorker::enableBorder(int border)
+{
+    if(provider_) {
+        provider_->enableBorder(border != 0);
+    }
+}
+
 
 FileImporter::FileImporter()
     : worker(NULL)
@@ -126,9 +134,15 @@ void FileImporter::fill(QBoxLayout* layout)
 
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
 
+        QCheckBox* enable_border = new QCheckBox("enable border (if possible)");
+        // @TODO: put border into separate node!!!
+
+        nested->addWidget(enable_border);
+
         makeThread();
         worker->moveToThread(private_thread_);
         connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+        connect(enable_border, SIGNAL(stateChanged(int)), worker, SLOT(enableBorder(int)));
 
         private_thread_->start();
     }

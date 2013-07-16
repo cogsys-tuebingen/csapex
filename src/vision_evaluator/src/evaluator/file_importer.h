@@ -30,6 +30,7 @@ public:
 public Q_SLOTS:
     void publish();
     bool import(const QString& path);
+    void enableBorder(int border);
 
 private:
 

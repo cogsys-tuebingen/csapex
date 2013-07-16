@@ -96,6 +96,11 @@ int ImageProvider::sleepTime()
     return 100;
 }
 
+void ImageProvider::enableBorder(bool border)
+{
+
+}
+
 
 Memento::Ptr ImageProvider::getState() const
 {

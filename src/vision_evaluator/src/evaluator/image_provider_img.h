@@ -28,8 +28,11 @@ public:
     bool hasNext();
     void next(cv::Mat& img, cv::Mat& mask);
 
+    void enableBorder(bool border);
+
 private:
     cv::Mat img_;
+    bool border_;
     bool displayed;
 };
 

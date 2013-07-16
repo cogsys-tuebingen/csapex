@@ -83,6 +83,8 @@ public:
     virtual void next(cv::Mat&, cv::Mat&) = 0;
     virtual int sleepTime();
 
+    virtual void enableBorder(bool border);
+
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);
 
