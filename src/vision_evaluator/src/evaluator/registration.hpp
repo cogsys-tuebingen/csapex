@@ -11,6 +11,7 @@
 /// PROJECT
 #include <designer/selector_proxy.h>
 #include <utils/constructor.hpp>
+#include <utils/stream_interceptor.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
@@ -31,6 +32,7 @@
 
 #define REGISTER_GENERIC(Manager, class_name)\
     STATIC_INIT(Manager, class_name, { \
+        StreamInterceptor::instance();\
         std::cout << "register filter instance " << #class_name << std::endl; \
         Manager::Constructor constructor; \
         constructor.setType(#class_name); \

@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <designer/box_manager.h>
+#include <utils/stream_interceptor.h>
 
 /// SYSTEM
 #include <iostream>
@@ -15,6 +16,7 @@
 #include <QSharedPointer>
 #include <QMetaType>
 #include <QMessageBox>
+#include <QTimer>
 
 Q_DECLARE_METATYPE(cv::Mat)
 Q_DECLARE_METATYPE(std::string)
@@ -46,6 +48,15 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
 
     updateMenu();
     updateTitle();
+
+    hideLog();
+
+
+    timer.setInterval(100);
+    timer.setSingleShot(false);
+    timer.start();
+
+    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(updateLog()));
 }
 
 void EvaluationWindow::start()
@@ -70,6 +81,27 @@ void EvaluationWindow::updateTitle()
     }
 
     setWindowTitle(window.str().c_str());
+}
+
+void EvaluationWindow::updateLog()
+{
+    QTextCursor cursor = ui->logOutput->textCursor();
+    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+
+    std::string latest = StreamInterceptor::instance().getLatest().c_str();
+
+    if(!latest.empty()) {
+        ui->logOutput->setTextCursor(cursor);
+        ui->logOutput->insertPlainText(latest.c_str());
+    }
+}
+
+void EvaluationWindow::hideLog()
+{
+    QList<int> sizes = ui->splitter->sizes();
+    sizes[0] += sizes[1];
+    sizes[1] = 0;
+    ui->splitter->setSizes(sizes);
 }
 
 void EvaluationWindow::closeEvent(QCloseEvent* event)

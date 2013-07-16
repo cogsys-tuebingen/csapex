@@ -396,14 +396,8 @@ void Box::eventModelChanged()
 
 void Box::forwardMessage(ConnectorIn *source)
 {
-//    try {
-        content_->messageArrived(source);
-        content_->setError(false);
-//    } catch(cv::Exception& cve) {
-//        content_->setError(true, cve.what());
-//    } catch(std::runtime_error& err){
-//        content_->setError(true, err.what());
-//    }
+    content_->messageArrived(source);
+    content_->setError(false);
 }
 
 void Box::minimizeBox(bool minimize)

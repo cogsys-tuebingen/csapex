@@ -1,7 +1,9 @@
 #ifndef EVALUATION_WINDOW_H
 #define EVALUATION_WINDOW_H
 
+/// SYSTEM
 #include <QMainWindow>
+#include <QTimer>
 
 namespace Ui
 {
@@ -31,12 +33,16 @@ public:
 private Q_SLOTS:
     void updateMenu();
     void updateTitle();
+    void updateLog();
+    void hideLog();
 
 public Q_SLOTS:
     void start();
 
 private:
     Ui::EvaluationWindow* ui;
+
+    QTimer timer;
 };
 
 } /// NAMESPACE

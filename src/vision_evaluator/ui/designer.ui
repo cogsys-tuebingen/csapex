@@ -16,6 +16,9 @@
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1">
+   <property name="margin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="verticalScrollBarPolicy">
@@ -32,8 +35,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1009</width>
-        <height>631</height>
+        <width>1027</width>
+        <height>649</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_4">

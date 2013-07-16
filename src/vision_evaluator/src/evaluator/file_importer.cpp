@@ -95,6 +95,7 @@ bool FileImporterWorker::import(const QString& path)
 void FileImporterWorker::enableBorder(int border)
 {
     if(provider_) {
+        std::cout << "border: " << border << std::endl;
         provider_->enableBorder(border != 0);
     }
 }

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "constructor.hpp"
+#include "stream_interceptor.h"
 
 /// PROJECT
 #include <designer/boxed_object.h>
@@ -34,6 +35,7 @@ protected:
 
     PluginManagerImp(const std::string& full_name)
         : loader_(new Loader("vision_evaluator", full_name)) {
+        StreamInterceptor::instance();
     }
 
     PluginManagerImp(const PluginManagerImp& rhs);

@@ -13,6 +13,7 @@
 #include "designerio.h"
 #include "command_meta.h"
 #include "command_delete_box.h"
+#include <utils/stream_interceptor.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -26,6 +27,8 @@ using namespace vision_evaluator;
 Designer::Designer(QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer)
 {
+    StreamInterceptor::instance();
+
     ui->setupUi(this);
 
     setCurrentConfig(DesignerIO::default_config);

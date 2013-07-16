@@ -114,6 +114,7 @@ add_library(vision_core
     src/utils/opencv_utils.hpp
     src/utils/plugin_manager.hpp
     src/utils/rectangle_cluster.cpp
+    src/utils/stream_interceptor.cpp
     src/utils/qdouble_slider.cpp
     ${QT_UTIL}
     ${GLOBALS})
@@ -147,6 +148,8 @@ add_library(designer
     ${QT_DESIGNER}
     ${QT_RESOURCES}
 )
+target_link_libraries(designer
+    vision_core)
 
 add_library(vision_evaluation
     src/evaluator/evaluation_window.cpp
