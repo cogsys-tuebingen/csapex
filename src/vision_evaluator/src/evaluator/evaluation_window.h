@@ -26,15 +26,9 @@ public:
      */
     explicit EvaluationWindow(const std::string& directory, QWidget* parent = 0);
 
-    void setSecondaryDirectory(const std::string& directory);
-
-    void setSingleMode();
-    void setDualMode();
-
     void closeEvent(QCloseEvent* event);
 
 private Q_SLOTS:
-    void set_fps(int fps);
     void updateMenu();
     void updateTitle();
 

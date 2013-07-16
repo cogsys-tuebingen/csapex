@@ -16,103 +16,17 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <widget class="QTabWidget" name="mode_tab">
-      <property name="currentIndex">
-       <number>2</number>
+     <widget class="vision_evaluator::Designer" name="designer" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
       </property>
-      <widget class="QWidget" name="single_image_tab">
-       <attribute name="title">
-        <string>One Image</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="vision_evaluator::ImagePanel" name="solo_image" native="true"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="dual_image_tab">
-       <attribute name="title">
-        <string>Two Images</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QSplitter" name="vert_splitter">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="childrenCollapsible">
-           <bool>true</bool>
-          </property>
-          <widget class="QSplitter" name="horiz_splitter">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <widget class="vision_evaluator::ImagePanel" name="left" native="true"/>
-           <widget class="vision_evaluator::ImagePanel" name="right" native="true"/>
-          </widget>
-          <widget class="vision_evaluator::ImageCombinerPanel" name="combiner" native="true"/>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="designer_tab">
-       <attribute name="title">
-        <string>Designer</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="vision_evaluator::Designer" name="designer" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>1</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="acceptDrops">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
      </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="fps">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>30</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Frames / Second</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>
@@ -205,18 +119,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>vision_evaluator::ImagePanel</class>
-   <extends>QWidget</extends>
-   <header location="global">evaluator/image_panel.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>vision_evaluator::ImageCombinerPanel</class>
-   <extends>QWidget</extends>
-   <header location="global">evaluator/image_combiner_panel.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>vision_evaluator::Designer</class>
    <extends>QWidget</extends>

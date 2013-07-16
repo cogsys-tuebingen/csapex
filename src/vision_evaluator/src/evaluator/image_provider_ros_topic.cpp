@@ -1,9 +1,6 @@
 /// HEADER
 #include "image_provider_ros_topic.h"
 
-/// COMPONENT
-#include "viewer.h"
-
 /// SYSTEM
 #include <QtConcurrentRun>
 #include <QPushButton>

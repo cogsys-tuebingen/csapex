@@ -91,9 +91,6 @@ int main(int argc, char** argv)
     if(vm.find("second_directory") != vm.end()) {
         std::string comp_directory = vm["second_directory"].as<std::string>();
         std::cout << "comparation directory is " << comp_directory << std::endl;
-
-        w.setSecondaryDirectory(comp_directory);
-        w.setDualMode();
     }
 
     w.start();

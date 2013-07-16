@@ -3,13 +3,13 @@
 
 /// COMPONENT
 #include "ui_evaluation_window.h"
-#include "image_panel.h"
 
 /// PROJECT
 #include <designer/box_manager.h>
 
 /// SYSTEM
 #include <iostream>
+#include <opencv2/opencv.hpp>
 #include <QCloseEvent>
 #include <QObjectList>
 #include <QSharedPointer>
@@ -30,25 +30,6 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
     ui->setupUi(this);
-    //    setWindowFlags( (windowFlags() | Qt::CustomizeWindowHint));
-
-    QList<ImagePanel*> ips = findChildren<ImagePanel*>(QRegExp(".*"));
-    for(QList<ImagePanel*>::Iterator it = ips.begin(); it != ips.end(); ++it) {
-        (*it)->set_root(directory);
-    }
-
-    QObject::connect(ui->left, SIGNAL(outputMat(cv::Mat, cv::Mat)), ui->combiner, SLOT(input_1(cv::Mat, cv::Mat)));
-    QObject::connect(ui->right, SIGNAL(outputMat(cv::Mat, cv::Mat)), ui->combiner, SLOT(input_2(cv::Mat, cv::Mat)));
-
-    QObject::connect(ui->combiner, SIGNAL(nextImageRequest()), ui->left, SLOT(nextImage()));
-    QObject::connect(ui->combiner, SIGNAL(nextImageRequest()), ui->right, SLOT(nextImage()));
-
-    QObject::connect(ui->combiner, SIGNAL(combinerInstalled()), ui->left, SLOT(setOneShotModeOn()));
-    QObject::connect(ui->combiner, SIGNAL(combinerInstalled()), ui->right, SLOT(setOneShotModeOn()));
-    QObject::connect(ui->combiner, SIGNAL(combinerDeinstalled()), ui->left, SLOT(setOneShotModeOff()));
-    QObject::connect(ui->combiner, SIGNAL(combinerDeinstalled()), ui->right, SLOT(setOneShotModeOff()));
-
-    QObject::connect(ui->fps, SIGNAL(valueChanged(int)), this, SLOT(set_fps(int)));
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), ui->designer, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), ui->designer, SLOT(saveAs()));
@@ -91,14 +72,6 @@ void EvaluationWindow::updateTitle()
     setWindowTitle(window.str().c_str());
 }
 
-void EvaluationWindow::set_fps(int fps)
-{
-    QList<ImagePanel*> ips = findChildren<ImagePanel*>(QRegExp(".*"));
-    for(QList<ImagePanel*>::Iterator it = ips.begin(); it != ips.end(); ++it) {
-        (*it)->set_fps(fps);
-    }
-}
-
 void EvaluationWindow::closeEvent(QCloseEvent* event)
 {
     if(ui->designer->isDirty()) {
@@ -118,30 +91,5 @@ void EvaluationWindow::closeEvent(QCloseEvent* event)
         }
     }
 
-    ui->left->quit();
-    ui->right->quit();
-    ui->solo_image->quit();
-    ui->combiner->quit();
-
-    ui->left->wait();
-    ui->right->wait();
-    ui->solo_image->wait();
-    ui->combiner->wait();
-
     event->accept();
-}
-
-void EvaluationWindow::setSecondaryDirectory(const std::string& directory)
-{
-    ui->right->set_root(directory);
-}
-
-void EvaluationWindow::setSingleMode()
-{
-    ui->mode_tab->setCurrentIndex(1);
-}
-
-void EvaluationWindow::setDualMode()
-{
-    ui->mode_tab->setCurrentIndex(1);
 }

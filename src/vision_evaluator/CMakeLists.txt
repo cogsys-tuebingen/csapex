@@ -159,8 +159,6 @@ add_library(vision_evaluation
     src/evaluator/image_combiner.cpp
     src/evaluator/image_combiner_manager.cpp
     src/evaluator/image_combiner_robust_match.cpp
-    src/evaluator/image_combiner_panel.cpp
-    src/evaluator/image_panel.cpp
     src/evaluator/image_provider.cpp
     src/evaluator/image_provider_bag.cpp
     src/evaluator/image_provider_dir.cpp
@@ -173,9 +171,7 @@ add_library(vision_evaluation
     src/evaluator/global_option_manager.cpp
     src/evaluator/messages_default.hpp
     src/evaluator/output_display.cpp
-    src/evaluator/panel.cpp
     src/evaluator/registration.hpp
-    src/evaluator/viewer.cpp
     src/qt_helper.hpp
     ${QT_EVALUATOR}
 )
