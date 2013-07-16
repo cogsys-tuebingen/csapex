@@ -52,9 +52,6 @@ void Merger::setState(Memento::Ptr memento)
     input_count_->setValue(state_.input_count);
 }
 
-
-
-
 void Merger::messageArrived(ConnectorIn *source)
 {
     input_arrivals_[source] = true;

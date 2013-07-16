@@ -13,11 +13,22 @@ class Equalize : public vision_evaluator::Filter
     Q_OBJECT
 
 public:
+    /**
+     * @brief Equalize default constructor.
+     */
     Equalize();
-
+    /**
+     * @brief ~Equalize destructor.
+     */
     virtual ~Equalize();
 
+    /**
+     * @brief See base class definition.
+     */
     virtual void insert(QBoxLayout *parent);
+    /**
+     * @brief See base class definition.
+     */
     virtual void filter(cv::Mat &img, cv::Mat &mask);
 protected:
     virtual bool usesMask();

@@ -9,14 +9,23 @@ class QSpinBox;
 namespace vision_evaluator {
 
 const static int MERGER_INPUT_MAX = 10;
-
+/**
+ * @brief The Merger class can be used to merge a certain amount of
+ *        images.
+ */
 class Merger : public BoxedObject
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief Merger Constructor.
+     */
     Merger();
 
+    /**
+     * @brief See base class documentation.
+     */
     virtual void fill(QBoxLayout *layout);
 
     /// MEMENTO

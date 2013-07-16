@@ -53,14 +53,9 @@ public:
 };
 
 class AttrHistogram {
-    /*
-        CV_COMP_CORREL Correlation
-        CV_COMP_CHISQR Chi-Square
-        CV_COMP_INTERSECT Intersection
-        CV_COMP_BHATTACHARYYA Bhattacharyya distance
-        CV_COMP_HELLINGER Synonym for CV_COMP_BHATTACHARYYA
-    */
 public:
+    enum ExtendedMethods {CV_COMP_SQRD = -1};
+
     struct Params {
         cv::Mat     bins;
         cv::Mat     ranges;
@@ -72,17 +67,19 @@ public:
     {
     }
 
-    AttrHistogram(const std::vector<cv::MatND> &_histograms, const cv::Scalar & _eps, const int _method) :
+    AttrHistogram(const std::vector<cv::MatND> &_histograms, const cv::Scalar & _eps, const int _method, const double _pixels) :
         histograms(_histograms),
         eps(_eps),
-        method(_method)
+        method(_method),
+        pixels(_pixels)
     {
     }
 
     AttrHistogram(const AttrHistogram &h) :
         histograms(h.histograms),
         eps(h.eps),
-        method(h.method)
+        method(h.method),
+        pixels(h.pixels)
     {
     }
 
@@ -92,32 +89,41 @@ public:
         bool res = true;
 
         for(int i = 0 ; i < histograms.size() ; i++) {
-            res &= cv::compareHist(histograms[i], attr.histograms[i], method) <= eps[i] || i == 0;
-        //  std::cout << "%%%" << cv::compareHist(histograms[i], attr.histograms[i], method) << std::endl;
+            res &= compareHist_(histograms[i], attr.histograms[i], method) <= eps[i];
         }
-
 
         return res;
     }
 
-    //    prepare(bins, ranges);
-    //        const cv::Mat &_bins, const cv::Mat &_ranges,
-    //        const double _eps, const int _method = CV_COMP_CHISQR
     static AttrHistogram generate(const cv::Mat &_img, const AttrHistogram::Params &p)
     {
 
         std::vector<cv::MatND>  histograms;
         cv_histogram::full_channel_histogram(_img, histograms, cv::Mat(), p.bins, p.ranges);
 
-        return AttrHistogram(histograms, p.eps, p.method);
+        return AttrHistogram(histograms, p.eps, p.method, _img.cols * _img.rows);
     }
 
     std::vector<cv::MatND>  histograms;
     cv::Scalar              eps;
     int                     method;
+    double                  pixels;
 
 private:
+    double compareHist_(const cv::MatND &h1, const cv::MatND &h2, const int method) const
+    {
+        if(method >= 0)
+            return cv::compareHist(h1, h2, method);
 
+        if(method == CV_COMP_SQRD) {
+            cv::Mat result;
+            cv::subtract(h1, h2, result);
+            cv::multiply(result, result, result);
+            return cv::sum(result)[0] / pixels;
+        }
+
+        return INFINITY;
+    }
 };
 }
 #endif // GRID_ATTRIBUTES_HPP

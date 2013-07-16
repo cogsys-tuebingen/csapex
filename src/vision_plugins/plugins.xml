@@ -1,4 +1,7 @@
 <library path="libvision_plugins">
+  <class type="vision_plugins::ColorConvert" base_class_type="vision_evaluator::Filter">
+    <description>none yet</description>
+  </class>
   <class type="vision_evaluator::GridCompareValue" base_class_type="vision_evaluator::ImageCombiner">
     <description>none yet</description>
   </class>

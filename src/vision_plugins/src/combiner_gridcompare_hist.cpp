@@ -124,6 +124,7 @@ void GridCompareHist::fill(QBoxLayout *layout)
     combo_compare_->addItem("Chi-Square");
     combo_compare_->addItem("Intersection");
     combo_compare_->addItem("Hellinger");
+    combo_compare_->addItem("Squared Distances");
 
     int index = combo_compare_->findText("Correlation");
     index_to_compare_.insert(intPair(index, CV_COMP_CORREL));
@@ -133,6 +134,8 @@ void GridCompareHist::fill(QBoxLayout *layout)
     index_to_compare_.insert(intPair(index, CV_COMP_INTERSECT));
     index = combo_compare_->findText("Hellinger");
     index_to_compare_.insert(intPair(index, CV_COMP_BHATTACHARYYA));
+    index = combo_compare_->findText("Squared Distances");
+    index_to_compare_.insert(intPair(index, AttrHistogram::CV_COMP_SQRD));
 
     layout->addWidget(combo_compare_);
 }
