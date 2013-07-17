@@ -9,10 +9,10 @@ using namespace vision_evaluator;
 using namespace cv_grid;
 
 GridCompareValue::GridCompareValue() :
-    GridCompare(State::Ptr(new State)),
+    GridCompare(StateValue::Ptr(new StateValue)),
     container_eps_slider_(0)
 {
-    private_state_ = dynamic_cast<State*>(state_.get());
+    private_state_ = dynamic_cast<StateValue*>(state_.get());
     assert(private_state_);
 
 }
@@ -91,20 +91,19 @@ void GridCompareValue::updateGui(QBoxLayout *layout)
 
 Memento::Ptr GridCompareValue::getState() const
 {
-    State::Ptr memento(new State);
-    *memento = *state_;
-
+    StateValue::Ptr memento(new StateValue);
+    *memento = *boost::dynamic_pointer_cast<StateValue>(state_);
     return memento;
 }
 
 void GridCompareValue::setState(Memento::Ptr memento)
 {
-    state_.reset(new State);
-    State::Ptr s = boost::dynamic_pointer_cast<State>(memento);
+    state_.reset(new StateValue);
+    StateValue::Ptr s = boost::dynamic_pointer_cast<StateValue>(memento);
     assert(s.get());
-    *state_ = *s;
+    *boost::dynamic_pointer_cast<StateValue>(state_) = *s;
     assert(state_.get());
-    private_state_ = dynamic_cast<State*>(state_.get());
+    private_state_ = boost::dynamic_pointer_cast<StateValue>(state_).get();
     assert(private_state_);
     Q_EMIT modelChanged();
 }
@@ -133,7 +132,7 @@ void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)
 }
 
 /// MEMENTO
-void GridCompareValue::State::readYaml(const YAML::Node &node)
+void GridCompareValue::StateValue::readYaml(const YAML::Node &node)
 {
     GridCompare::State::readYaml(node);
     const YAML::Node &_eps = node["eps"];
@@ -143,7 +142,7 @@ void GridCompareValue::State::readYaml(const YAML::Node &node)
     }
 }
 
-void GridCompareValue::State::writeYaml(YAML::Emitter &out) const
+void GridCompareValue::StateValue::writeYaml(YAML::Emitter &out) const
 {
     GridCompare::State::writeYaml(out);
     out << YAML::Key << "eps" << YAML::Value << YAML::BeginSeq;

@@ -47,8 +47,9 @@ protected:
     std::vector<QDoubleSlider*> eps_sliders_;
 
     /// MEMENTO
-    class State : public GridCompare::State {
+    class StateValue : public GridCompare::State {
     public:
+        typedef boost::shared_ptr<StateValue> Ptr;
         virtual void readYaml(const YAML::Node &node);
         virtual void writeYaml(YAML::Emitter &out) const;
 
@@ -56,7 +57,7 @@ protected:
         cv::Scalar          eps;
     };
 
-    State *private_state_;
+    StateValue *private_state_;
 };
 }
 #endif // COMBINER_GRIDCOMPARE_VALUE_H

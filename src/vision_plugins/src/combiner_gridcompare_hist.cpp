@@ -10,10 +10,11 @@ using namespace vision_evaluator;
 using namespace cv_grid;
 
 GridCompareHist::GridCompareHist() :
-    GridCompare(State::Ptr(new State)),
+    GridCompare(StateHist::Ptr(new StateHist)),
     container_hist_sliders_(NULL)
 {
-    private_state_ = dynamic_cast<State*>(state_.get());
+
+    private_state_ = dynamic_cast<StateHist*>(state_.get());
     assert(private_state_);
 
 }
@@ -89,28 +90,25 @@ void GridCompareHist::updateGui(QBoxLayout *layout)
 
 Memento::Ptr GridCompareHist::getState() const
 {
-    State::Ptr memento(new State);
-    *memento = *state_;
-
+    StateHist::Ptr memento(new StateHist);
+    *memento = *boost::dynamic_pointer_cast<StateHist>(state_);
     return memento;
 }
 
 void GridCompareHist::setState(Memento::Ptr memento)
 {
-    state_.reset(new State);
-    State::Ptr s = boost::dynamic_pointer_cast<State>(memento);
+    state_.reset(new StateHist);
+    StateHist::Ptr s = boost::dynamic_pointer_cast<StateHist>(memento);
     assert(s.get());
-    *state_ = *s;
+    *boost::dynamic_pointer_cast<StateHist>(state_) = *s;
     assert(state_.get());
-     private_state_ = dynamic_cast<State*>(state_.get());
+    private_state_ = boost::dynamic_pointer_cast<StateHist>(state_).get();
     assert(private_state_);
-
     slide_height_->setValue(private_state_->grid_height);
     slide_width_->setValue(private_state_->grid_width);
     combo_compare_->setCurrentIndex(private_state_->combo_index);
 
     private_state_->restored = true;
-
     Q_EMIT modelChanged();
 }
 
@@ -183,7 +181,7 @@ void GridCompareHist::prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scal
 }
 
 /// MEMENTO
-void GridCompareHist::State::readYaml(const YAML::Node &node)
+void GridCompareHist::StateHist::readYaml(const YAML::Node &node)
 {
     GridCompare::State::readYaml(node);
     node["compare"] >> combo_index;
@@ -203,7 +201,7 @@ void GridCompareHist::State::readYaml(const YAML::Node &node)
     }
 }
 
-void GridCompareHist::State::writeYaml(YAML::Emitter &out) const
+void GridCompareHist::StateHist::writeYaml(YAML::Emitter &out) const
 {
     GridCompare::State::writeYaml(out);
 

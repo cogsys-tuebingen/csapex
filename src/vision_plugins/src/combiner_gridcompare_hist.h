@@ -57,8 +57,9 @@ protected:
     void prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scalar &eps);
 
     /// MEMENTO
-    class State : public GridCompare::State {
+    class StateHist : public GridCompare::State {
     public:
+        typedef boost::shared_ptr<StateHist> Ptr;
         virtual void readYaml(const YAML::Node &node);
         virtual void writeYaml(YAML::Emitter &out) const;
 
@@ -68,7 +69,7 @@ protected:
         std::vector<double> eps;
     };
 
-    State *private_state_;
+    StateHist *private_state_;
 
 };
 }
