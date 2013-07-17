@@ -7,9 +7,6 @@
 /// PROJECT
 #include <designer/box_manager.h>
 #include <utils/stream_interceptor.h>
-#include <evaluator/image_combiner.h>
-#include <evaluator/filter.h>
-
 /// SYSTEM
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -52,11 +49,6 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     updateTitle();
 
     hideLog();
-
-    PluginManager<Filter> fm("vision_evaluator::Filter");
-    fm.reload();
-    PluginManager<ImageCombiner> im("vision_evaluator::ImageCombiner");
-    im.reload();
 
     timer.setInterval(100);
     timer.setSingleShot(false);

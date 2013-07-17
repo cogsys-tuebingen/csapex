@@ -1,19 +1,19 @@
 <library path="libevaluation_plugin">
 
-  <class type="robot_detection::FilterDisplayFeatures" base_class_type="vision_evaluator::Filter">
+  <class type="robot_detection::FilterDisplayFeatures" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
 
-  <class type="robot_detection::ImageCombinerClusterMatch" base_class_type="vision_evaluator::ImageCombiner">
+  <class type="robot_detection::ImageCombinerClusterMatch" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="robot_detection::ImageCombinerClusterMatchEM" base_class_type="vision_evaluator::ImageCombiner">
+  <class type="robot_detection::ImageCombinerClusterMatchEM" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="robot_detection::ImageCombinerPeakMatch" base_class_type="vision_evaluator::ImageCombiner">
+  <class type="robot_detection::ImageCombinerPeakMatch" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="robot_detection::ImageCombinerSimpleMatch" base_class_type="vision_evaluator::ImageCombiner">
+  <class type="robot_detection::ImageCombinerSimpleMatch" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
 

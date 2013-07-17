@@ -9,7 +9,7 @@
 #include <boost/foreach.hpp>
 #include <QPushButton>
 
-PLUGINLIB_EXPORT_CLASS(cip104::LKTracking, vision_evaluator::Filter)
+PLUGINLIB_EXPORT_CLASS(cip104::LKTracking, vision_evaluator::BoxedObject)
 
 using namespace cip104;
 

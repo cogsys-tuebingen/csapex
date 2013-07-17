@@ -8,7 +8,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <boost/foreach.hpp>
 
-PLUGINLIB_EXPORT_CLASS(cip104::HSVSegmentation, vision_evaluator::Filter)
+PLUGINLIB_EXPORT_CLASS(cip104::HSVSegmentation, vision_evaluator::BoxedObject)
 
 using namespace cip104;
 
