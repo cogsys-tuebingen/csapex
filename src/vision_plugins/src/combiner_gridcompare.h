@@ -28,13 +28,11 @@ protected:
         int                 channel_count;
         int                 grid_width;
         int                 grid_height;
-        bool                restored;
-
     };
 
 public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2) = 0;
-    virtual void updateGui(QBoxLayout *layout);
+    virtual void updateDynamicGui(QBoxLayout *layout);
 
     /// MEMENTO
     virtual void         setState(Memento::Ptr memento) = 0;

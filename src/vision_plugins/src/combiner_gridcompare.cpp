@@ -24,7 +24,7 @@ void GridCompare::addSliders(QBoxLayout *layout)
 
 }
 
-void GridCompare::updateGui(QBoxLayout *layout)
+void GridCompare::updateDynamicGui(QBoxLayout *layout)
 {
 }
 
@@ -32,7 +32,6 @@ void GridCompare::updateGui(QBoxLayout *layout)
 GridCompare::State::State()
 {
     channel_count = 0;
-    restored      = false;
     grid_height   = 64;
     grid_width    = 48;
 }
@@ -42,7 +41,6 @@ void GridCompare::State::readYaml(const YAML::Node &node)
     node["channel_count"] >> channel_count;
     node["grid_width"] >> grid_width;
     node["grid_height"] >> grid_height;
-    restored = true;
 }
 
 void GridCompare::State::writeYaml(YAML::Emitter &out) const

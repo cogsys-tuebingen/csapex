@@ -25,13 +25,19 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
     if(!img1.empty() && !img2.empty()) {
         if(img1.channels() != img2.channels())
             throw std::runtime_error("Channel count is not matching!");
+        if(img1.rows != img2.rows || img1.cols != img2.cols)
+            throw std::runtime_error("Dimension is not matching!");
+
 
         if(private_state_->channel_count != img1.channels()) {
             private_state_->channel_count = img1.channels();
             private_state_->bins.clear();
             private_state_->eps.clear();
+
             Q_EMIT modelChanged();
         }
+
+        //// TODO GRIDMAXIMUM
 
         if(hist_sliders_.size() == private_state_->channel_count) {
             GridHist g1, g2;
@@ -54,7 +60,7 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
     return cv::Mat();
 }
 
-void GridCompareHist::updateGui(QBoxLayout *layout)
+void GridCompareHist::updateDynamicGui(QBoxLayout *layout)
 {
     QVBoxLayout *internal_layout;
     if(container_hist_sliders_ != NULL) {
@@ -69,17 +75,17 @@ void GridCompareHist::updateGui(QBoxLayout *layout)
         int    default_bin = 32;
         double default_eps = 0.0;
 
-        if(private_state_->restored) {
-            default_bin = private_state_->bins[i];
-            default_eps = private_state_->eps[i];
-        } else {
+        if(private_state_->bins.size() < private_state_->channel_count ) {
             private_state_->bins.push_back(default_bin);
             private_state_->eps.push_back(default_eps);
+        } else {
+            default_bin = private_state_->bins[i];
+            default_eps = private_state_->eps[i];
         }
 
         QSlider *bins = QtHelper::makeSlider(internal_layout, "Ch." + ch.str() + " bins", default_bin, 1, 1000);
         QDoubleSlider *eps = QtHelper::makeDoubleSlider(internal_layout, "Ch." + ch.str() + " eps", default_eps, 0.0, 255.0, 0.01);
-        insertSliders(bins, eps);
+        addHistSliders(bins, eps);
     }
 
     container_hist_sliders_ = QtHelper::wrapLayout(internal_layout);
@@ -104,21 +110,17 @@ void GridCompareHist::setState(Memento::Ptr memento)
     assert(state_.get());
     private_state_ = boost::dynamic_pointer_cast<StateHist>(state_).get();
     assert(private_state_);
+
     slide_height_->setValue(private_state_->grid_height);
     slide_width_->setValue(private_state_->grid_width);
     combo_compare_->setCurrentIndex(private_state_->combo_index);
 
-    private_state_->restored = true;
     Q_EMIT modelChanged();
 }
 
 void GridCompareHist::updateState(int value)
 {
     private_state_->combo_index = value;
-}
-
-void GridCompareHist::updateState()
-{
     private_state_->grid_width  = slide_width_->value();
     private_state_->grid_height = slide_height_->value();
 }
@@ -126,7 +128,6 @@ void GridCompareHist::updateState()
 void GridCompareHist::fill(QBoxLayout *layout)
 {
     GridCompare::fill(layout);
-    private_state_->restored = false;
 
     combo_compare_ = new QComboBox();
     combo_compare_->addItem("Correlation");
@@ -150,12 +151,12 @@ void GridCompareHist::fill(QBoxLayout *layout)
     private_state_->combo_index = combo_compare_->currentIndex();
 
     connect(combo_compare_, SIGNAL(currentIndexChanged(int)), this, SLOT(updateState(int)));
-    connect(slide_height_, SIGNAL(sliderReleased()), this, SLOT(updateState()));
-    connect(slide_width_, SIGNAL(sliderReleased()), this, SLOT(updateState()));
+    connect(slide_height_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
+    connect(slide_width_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
 
 }
 
-void GridCompareHist::insertSliders(QSlider *bins, QDoubleSlider *eps)
+void GridCompareHist::addHistSliders(QSlider *bins, QDoubleSlider *eps)
 {
     HistSliderPair p;
     p.first = bins;

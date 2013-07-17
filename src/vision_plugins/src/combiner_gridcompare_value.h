@@ -29,7 +29,7 @@ public:
      * @brief Update the gui state.
      * @param layout    the layout
      */
-    virtual void updateGui(QBoxLayout *layout);
+    virtual void updateDynamicGui(QBoxLayout *layout);
 
 
     /// MEMENTO
@@ -37,7 +37,7 @@ public:
     Memento::Ptr getState() const;
 
 protected Q_SLOTS:
-    void updateState();
+    void updateState(int i);
 
 protected:
     virtual void fill(QBoxLayout *layout);
@@ -49,12 +49,15 @@ protected:
     /// MEMENTO
     class StateValue : public GridCompare::State {
     public:
+        StateValue();
+
         typedef boost::shared_ptr<StateValue> Ptr;
         virtual void readYaml(const YAML::Node &node);
         virtual void writeYaml(YAML::Emitter &out) const;
 
     public:
         cv::Scalar          eps;
+        cv::Vec<bool,4>     ignore;
     };
 
     StateValue *private_state_;

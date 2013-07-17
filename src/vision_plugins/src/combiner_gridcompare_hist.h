@@ -30,7 +30,7 @@ public:
      * @brief Update the gui state.
      * @param layout    the layout
      */
-    virtual void updateGui(QBoxLayout *layout);
+    virtual void updateDynamicGui(QBoxLayout *layout);
 
     /// MEMENTO
     void         setState(Memento::Ptr memento);
@@ -38,7 +38,6 @@ public:
 
 protected Q_SLOTS:
     void updateState(int value);
-    void updateState();
 
 protected:
     /// internal typedefs
@@ -53,7 +52,7 @@ protected:
 
     /// fill with specific gui elements
     virtual void fill(QBoxLayout *layout);
-    void insertSliders(QSlider *bins, QDoubleSlider *eps);
+    void addHistSliders(QSlider *bins, QDoubleSlider *eps);
     void prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scalar &eps);
 
     /// MEMENTO

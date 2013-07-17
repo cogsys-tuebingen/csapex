@@ -111,7 +111,7 @@ void BoxedObject::fill(QBoxLayout* layout)
     layout->addWidget(new QLabel(name_.c_str()));
 }
 
-void BoxedObject::updateGui(QBoxLayout *layout)
+void BoxedObject::updateDynamicGui(QBoxLayout *layout)
 {
 }
 

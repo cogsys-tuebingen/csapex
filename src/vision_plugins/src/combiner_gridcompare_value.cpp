@@ -22,27 +22,29 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
     if(!img1.empty() && !img2.empty()) {
         if(img1.channels() != img2.channels())
             throw std::runtime_error("Channel count is not matching!");
+
         if(img1.channels() > 4)
             throw std::runtime_error("Channel limit 4!");
+
+        if(img1.rows != img2.rows || img1.cols != img2.cols)
+            throw std::runtime_error("Dimension is not matching!");
 
         if(private_state_->channel_count != img1.channels()) {
             private_state_->channel_count = img1.channels();
             Q_EMIT modelChanged();
         }
 
+        //// TODO GRIDMAXIMUM
+
         if(eps_sliders_.size() == private_state_->channel_count) {
             GridScalar g1, g2;
             AttrScalar::Params p;
-            prepareParams(p.eps, p.ignore);
 
+            p.eps    = private_state_->eps;
+            p.ignore = private_state_->ignore;
 
-            /// MEMENTO
-            private_state_->eps = p.eps;
-            int height = slide_height_->value();
-            int width =  slide_width_->value();
-
-            cv_grid::prepare_grid<AttrScalar>(g1, img1, height, width, p, mask1, 1.0);
-            cv_grid::prepare_grid<AttrScalar>(g2, img2, height, width, p, mask2, 1.0);
+            cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_->grid_height, private_state_->grid_width, p, mask1, 1.0);
+            cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_->grid_height, private_state_->grid_width, p, mask2, 1.0);
 
             cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
             render_grid(g1, g2, out);
@@ -54,7 +56,7 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
 
 }
 
-void GridCompareValue::updateGui(QBoxLayout *layout)
+void GridCompareValue::updateDynamicGui(QBoxLayout *layout)
 {
     QVBoxLayout *internal_layout;
     if(container_eps_slider_ != NULL) {
@@ -65,23 +67,10 @@ void GridCompareValue::updateGui(QBoxLayout *layout)
         std::stringstream ch;
         ch << "Ch." << i << " eps";
 
-        double default_eps = 0.0;
-
-        if(private_state_->restored) {
-            default_eps = private_state_->eps[i];
-        }
-
-        QDoubleSlider *slider = QtHelper::makeDoubleSlider(internal_layout, ch.str(), default_eps, 0.0, 255.0, 0.01);
+        QDoubleSlider *slider = QtHelper::makeDoubleSlider(internal_layout, ch.str(), private_state_->eps[i], 0.0, 255.0, 0.01);
+        QDoubleSlider::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
         internal_layout->addWidget(slider);
         eps_sliders_.push_back(slider);
-    }
-
-    if(private_state_->restored) {
-        slide_height_->setValue(private_state_->grid_height);
-        slide_width_->setValue(private_state_->grid_height);
-        private_state_->restored = false;
-    } else {
-        private_state_->eps = cv::Scalar::all(0.0);
     }
 
     container_eps_slider_ = QtHelper::wrapLayout(internal_layout);
@@ -105,20 +94,25 @@ void GridCompareValue::setState(Memento::Ptr memento)
     assert(state_.get());
     private_state_ = boost::dynamic_pointer_cast<StateValue>(state_).get();
     assert(private_state_);
+
+    slide_height_->setValue(private_state_->grid_height);
+    slide_width_->setValue(private_state_->grid_height);
+
     Q_EMIT modelChanged();
 }
 
-void GridCompareValue::updateState()
+void GridCompareValue::updateState(int i)
 {
     private_state_->grid_width = slide_width_->value();
     private_state_->grid_height = slide_height_->value();
+    prepareParams(private_state_->eps, private_state_->ignore);
 }
 
 void GridCompareValue::fill(QBoxLayout *layout)
 {
     GridCompare::fill(layout);
-    connect(slide_height_, SIGNAL(sliderReleased()), this, SLOT(updateState()));
-    connect(slide_width_, SIGNAL(sliderReleased()), this, SLOT(updateState()));
+    connect(slide_height_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
+    connect(slide_width_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
 
 }
 
@@ -132,6 +126,13 @@ void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)
 }
 
 /// MEMENTO
+GridCompareValue::StateValue::StateValue() :
+    GridCompare::State(),
+    eps(cv::Scalar::all(0.0)),
+    ignore(false, false, false, false)
+{
+}
+
 void GridCompareValue::StateValue::readYaml(const YAML::Node &node)
 {
     GridCompare::State::readYaml(node);

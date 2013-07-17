@@ -391,7 +391,7 @@ void Box::refreshStylesheet()
 
 void Box::eventModelChanged()
 {
-    content_->updateGui(ui->content);
+    content_->updateDynamicGui(ui->content);
 }
 
 void Box::forwardMessage(ConnectorIn *source)

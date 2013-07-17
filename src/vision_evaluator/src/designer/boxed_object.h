@@ -38,7 +38,7 @@ public:
     void setBox(Box* box);
 
     virtual void fill(QBoxLayout* layout);
-    virtual void updateGui(QBoxLayout* layout);
+    virtual void updateDynamicGui(QBoxLayout* layout);
 
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);

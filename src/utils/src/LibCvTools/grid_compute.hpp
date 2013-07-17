@@ -88,7 +88,7 @@ inline void render_grid_count(const GridT &g1, const GridT &g2, cv::Mat &out, st
         throw std::runtime_error("Image to small to render text!");
     std::stringstream text;
     text << "+" << counts.first << " | -" << counts.second << " | all: " << valid;
-    cv::putText(out, text.str(), cv::Point(0, out.rows - 2), cv::FONT_HERSHEY_SIMPLEX, 1.5, cv::Scalar(0, 255, 255), 2);
+    cv::putText(out, text.str(), cv::Point(0, out.rows - 2), cv::FONT_HERSHEY_SIMPLEX, 1.2, cv::Scalar(0, 255, 255), 2);
 
 }
 
