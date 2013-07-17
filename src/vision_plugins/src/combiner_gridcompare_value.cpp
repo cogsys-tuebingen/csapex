@@ -34,15 +34,12 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
             Q_EMIT modelChanged();
         }
 
-        if(private_state_->img_cols != img1.cols || private_state_->img_rows != img1.rows) {
-            private_state_->img_cols = img1.cols;
-            private_state_->img_rows = img1.rows;
+        if(private_state_->grid_width_max != img1.cols || private_state_->grid_height_max != img1.rows) {
+            private_state_->grid_width_max = img1.cols;
+            private_state_->grid_height_max = img1.rows;
             slide_height_->setMaximum(img1.rows);
             slide_width_->setMaximum(img1.cols);
-
         }
-
-        //// TODO GRIDMAXIMUM
 
         if(eps_sliders_.size() == private_state_->channel_count) {
             GridScalar g1, g2;

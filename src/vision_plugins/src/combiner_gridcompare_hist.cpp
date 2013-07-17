@@ -28,16 +28,19 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
             throw std::runtime_error("Dimension is not matching!");
 
 
-
         if(private_state_->channel_count != img1.channels()) {
             private_state_->channel_count = img1.channels();
             private_state_->bins.clear();
             private_state_->eps.clear();
-
             Q_EMIT modelChanged();
         }
 
-        //// TODO GRIDMAXIMUM
+        if(private_state_->grid_width_max != img1.cols || private_state_->grid_height_max != img1.rows) {
+            private_state_->grid_width_max = img1.cols;
+            private_state_->grid_height_max = img1.rows;
+            slide_height_->setMaximum(img1.rows);
+            slide_width_->setMaximum(img1.cols);
+        }
 
         if(hist_sliders_.size() == private_state_->channel_count) {
             GridHist g1, g2;

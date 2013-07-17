@@ -31,10 +31,10 @@ void GridCompare::updateDynamicGui(QBoxLayout *layout)
 /// MEMENTO ------------------------------------------------------------------------------------
 GridCompare::State::State() :
     channel_count(0),
-    img_rows(0),
-    img_cols(0),
+    grid_width(48),
     grid_height(64),
-    grid_width(48)
+    grid_width_max(640),
+    grid_height_max(480)
 {
 }
 

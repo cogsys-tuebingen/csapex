@@ -26,8 +26,6 @@ protected:
 
     public:
         int                 channel_count;
-        int                 img_rows;
-        int                 img_cols;
         int                 grid_width;
         int                 grid_height;
         int                 grid_width_max;
