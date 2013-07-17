@@ -9,11 +9,11 @@
 #include "image_combiner_robust_match.h"
 
 /// COMPONENT
-#include "image_combiner_manager.h"
+#include "registration.hpp"
 
 using namespace vision_evaluator;
 
-REGISTER_COMBINER(ImageCombinerRobustMatch)
+REGISTER_BOXED_OBJECT(ImageCombinerRobustMatch)
 
 //RobustMatcher class taken from OpenCV2 Computer Vision Application Programming Cookbook Ch 9
 class RobustMatcher

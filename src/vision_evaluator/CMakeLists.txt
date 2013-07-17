@@ -155,12 +155,10 @@ add_library(vision_evaluation
     src/evaluator/evaluation_window.cpp
     src/evaluator/file_importer.cpp
     src/evaluator/filter.cpp
-    src/evaluator/filter_manager.cpp
     src/evaluator/filter_apply_mask.cpp
     src/evaluator/filter_blur.cpp
     src/evaluator/filter_static_mask.cpp
     src/evaluator/image_combiner.cpp
-    src/evaluator/image_combiner_manager.cpp
     src/evaluator/image_combiner_robust_match.cpp
     src/evaluator/image_provider.cpp
     src/evaluator/image_provider_bag.cpp

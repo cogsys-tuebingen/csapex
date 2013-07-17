@@ -2,12 +2,12 @@
 #include "filter_blur.h"
 
 /// COMPONENT
-#include "filter_manager.h"
+#include "registration.hpp"
 
 /// PROJECT
 #include <qt_helper.hpp>
 
-REGISTER_FILTER(FilterBlur)
+REGISTER_BOXED_OBJECT(FilterBlur)
 
 using namespace vision_evaluator;
 

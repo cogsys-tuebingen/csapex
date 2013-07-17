@@ -2,7 +2,7 @@
 #include "filter_static_mask.h"
 
 /// COMPONENT
-#include "filter_manager.h"
+#include "registration.hpp"
 
 /// SYSTEM
 #include <QPixmap>
@@ -11,7 +11,7 @@
 #include <QKeyEvent>
 #include <QPushButton>
 
-REGISTER_FILTER(FilterStaticMask)
+REGISTER_BOXED_OBJECT(FilterStaticMask)
 
 using namespace vision_evaluator;
 

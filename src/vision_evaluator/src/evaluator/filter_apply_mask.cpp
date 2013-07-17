@@ -2,9 +2,9 @@
 #include "filter_apply_mask.h"
 
 /// COMPONENT
-#include "filter_manager.h"
+#include "registration.hpp"
 
-REGISTER_FILTER(FilterApplyMask)
+REGISTER_BOXED_OBJECT(FilterApplyMask)
 
 using namespace vision_evaluator;
 

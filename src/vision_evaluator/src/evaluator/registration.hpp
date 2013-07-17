@@ -30,16 +30,10 @@
     }
 
 
-#define REGISTER_GENERIC(Manager, class_name)\
-    STATIC_INIT(Manager, class_name, { \
+#define REGISTER_BOXED_OBJECT(class_name)\
+    STATIC_INIT(REGISTRATOR, class_name, { \
         StreamInterceptor::instance();\
-        std::cout << "register filter instance " << #class_name << std::endl; \
-        Manager::Constructor constructor; \
-        constructor.setType(#class_name); \
-        constructor.setConstructor(boost::lambda::new_ptr<class_name>()); \
-        vision_evaluator::Manager manager;\
-        manager.registerConstructor(constructor); \
-    \
+        std::cout << "register filter instance " << #class_name << std::endl;\
         SelectorProxy::ProxyConstructor c;\
         c.setType(#class_name);\
         c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<class_name> >(), boost::lambda::_1, (QWidget*) NULL)); \
