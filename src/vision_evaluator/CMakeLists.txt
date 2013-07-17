@@ -116,6 +116,7 @@ add_library(vision_core
     src/utils/rectangle_cluster.cpp
     src/utils/stream_interceptor.cpp
     src/utils/qdouble_slider.cpp
+    src/utils/qwrapper.cpp
     ${QT_UTIL}
     ${GLOBALS})
 target_link_libraries(vision_core yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} ${QT_LIBRARIES})

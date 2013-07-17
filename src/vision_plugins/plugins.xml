@@ -1,11 +1,11 @@
 <library path="libvision_plugins">
-  <class type="vision_plugins::ColorConvert" base_class_type="vision_evaluator::Filter">
+  <class type="vision_plugins::ColorConvert" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="vision_evaluator::GridCompareValue" base_class_type="vision_evaluator::ImageCombiner">
+  <class type="vision_evaluator::GridCompareValue" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="vision_evaluator::GridCompareHist" base_class_type="vision_evaluator::ImageCombiner">
+  <class type="vision_evaluator::GridCompareHist" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
   <class type="vision_evaluator::Merger" base_class_type="vision_evaluator::BoxedObject">
@@ -14,7 +14,7 @@
   <class type="vision_evaluator::Splitter" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="vision_plugins::Equalize" base_class_type="vision_evaluator::Filter">
+  <class type="vision_plugins::Equalize" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
   <class type="vision_evaluator::Histogram" base_class_type="vision_evaluator::BoxedObject">
@@ -23,13 +23,13 @@
   <class type="vision_evaluator::ColorAdjustment" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="vision_plugins::Undistort" base_class_type="vision_evaluator::Filter">
+  <class type="vision_plugins::Undistort" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="vision_plugins::PerspectiveTransform" base_class_type="vision_evaluator::Filter">
+  <class type="vision_plugins::PerspectiveTransform" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
-  <class type="vision_plugins::SimpleImageDifference" base_class_type="vision_evaluator::ImageCombiner">
+  <class type="vision_plugins::SimpleImageDifference" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
   <class type="vision_evaluator::SimpleSink" base_class_type="vision_evaluator::BoxedObject">

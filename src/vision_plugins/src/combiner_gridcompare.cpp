@@ -28,12 +28,14 @@ void GridCompare::updateDynamicGui(QBoxLayout *layout)
 {
 }
 
-/// MEMENTO
-GridCompare::State::State()
+/// MEMENTO ------------------------------------------------------------------------------------
+GridCompare::State::State() :
+    channel_count(0),
+    img_rows(0),
+    img_cols(0),
+    grid_height(64),
+    grid_width(48)
 {
-    channel_count = 0;
-    grid_height   = 64;
-    grid_width    = 48;
 }
 
 void GridCompare::State::readYaml(const YAML::Node &node)
@@ -41,6 +43,8 @@ void GridCompare::State::readYaml(const YAML::Node &node)
     node["channel_count"] >> channel_count;
     node["grid_width"] >> grid_width;
     node["grid_height"] >> grid_height;
+    node["grid_width_max"] >> grid_width_max;
+    node["grid_height_max"] >> grid_height_max;
 }
 
 void GridCompare::State::writeYaml(YAML::Emitter &out) const
@@ -48,4 +52,7 @@ void GridCompare::State::writeYaml(YAML::Emitter &out) const
     out << YAML::Key << "channel_count" << YAML::Value << channel_count;
     out << YAML::Key << "grid_width" << YAML::Value << grid_width;
     out << YAML::Key << "grid_height" << YAML::Value << grid_height;
+    out << YAML::Key << "grid_width_max" << YAML::Value << grid_width_max;
+    out << YAML::Key << "grid_height_max" << YAML::Value << grid_height_max;
+
 }

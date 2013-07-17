@@ -3,7 +3,7 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompareValue, vision_evaluator::ImageCombiner)
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompareValue, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 using namespace cv_grid;
@@ -32,6 +32,14 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         if(private_state_->channel_count != img1.channels()) {
             private_state_->channel_count = img1.channels();
             Q_EMIT modelChanged();
+        }
+
+        if(private_state_->img_cols != img1.cols || private_state_->img_rows != img1.rows) {
+            private_state_->img_cols = img1.cols;
+            private_state_->img_rows = img1.rows;
+            slide_height_->setMaximum(img1.rows);
+            slide_width_->setMaximum(img1.cols);
+
         }
 
         //// TODO GRIDMAXIMUM
@@ -96,14 +104,14 @@ void GridCompareValue::setState(Memento::Ptr memento)
     assert(private_state_);
 
     slide_height_->setValue(private_state_->grid_height);
-    slide_width_->setValue(private_state_->grid_height);
+    slide_width_->setValue(private_state_->grid_width);
 
     Q_EMIT modelChanged();
 }
 
 void GridCompareValue::updateState(int i)
 {
-    private_state_->grid_width = slide_width_->value();
+    private_state_->grid_width  = slide_width_->value();
     private_state_->grid_height = slide_height_->value();
     prepareParams(private_state_->eps, private_state_->ignore);
 }
@@ -111,9 +119,9 @@ void GridCompareValue::updateState(int i)
 void GridCompareValue::fill(QBoxLayout *layout)
 {
     GridCompare::fill(layout);
+
     connect(slide_height_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
     connect(slide_width_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
-
 }
 
 void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)
@@ -125,7 +133,7 @@ void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)
     }
 }
 
-/// MEMENTO
+/// MEMENTO ------------------------------------------------------------------------------------
 GridCompareValue::StateValue::StateValue() :
     GridCompare::State(),
     eps(cv::Scalar::all(0.0)),
@@ -136,6 +144,7 @@ GridCompareValue::StateValue::StateValue() :
 void GridCompareValue::StateValue::readYaml(const YAML::Node &node)
 {
     GridCompare::State::readYaml(node);
+
     const YAML::Node &_eps = node["eps"];
     int i = 0;
     for(YAML::Iterator it = _eps.begin() ; it != _eps.end() ; it++, i++) {

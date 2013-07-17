@@ -8,12 +8,14 @@
 #ifndef QT_HELPER_HPP
 #define QT_HELPER_HPP
 
+/// COMPONENT
+#include <utils/qdouble_slider.h>
+#include <utils/qwrapper.h>
 /// SYSTEM
 #include <QSlider>
 #include <QBoxLayout>
 #include <QSpinBox>
 #include <QLabel>
-#include <utils/qdouble_slider.h>
 #include <QDoubleSpinBox>
 
 class QtHelper
@@ -43,7 +45,7 @@ public:
         slider->setValue(def);
         slider->setMinimumWidth(100);
 
-        QSpinBox* display = new QSpinBox;
+        QWrapper::QSpinBoxExt* display = new QWrapper::QSpinBoxExt;
         display->setMinimum(min);
         display->setMaximum(max);
         display->setValue(def);
@@ -54,8 +56,10 @@ public:
 
         layout->addLayout(internal_layout);
 
-        QObject::connect(slider, SIGNAL(valueChanged(int)), display, SLOT(setValue(int)));
+        QObject::connect(slider, SIGNAL(valueChanged(int)),     display, SLOT(setValue(int)));
+        QObject::connect(slider, SIGNAL(rangeChanged(int,int)), display, SLOT(setRange(int,int)));
         QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
+
 
         return slider;
     }
@@ -69,7 +73,7 @@ public:
         slider->setDoubleValue(def);
         slider->setMinimumWidth(100);
 
-        QDoubleSpinBox* display = new QDoubleSpinBox;
+        QWrapper::QDoubleSpinBoxExt* display = new  QWrapper::QDoubleSpinBoxExt;
         display->setMinimum(min);
         display->setMaximum(max);
         display->setValue(def);
@@ -81,6 +85,7 @@ public:
         layout->addLayout(internal_layout);
 
         QObject::connect(slider, SIGNAL(valueChanged(double)), display, SLOT(setValue(double)));
+        QObject::connect(slider, SIGNAL(rangeChanged(double,double)), display, SLOT(setRange(double, double)));
         QObject::connect(display, SIGNAL(valueChanged(double)), slider, SLOT(setDoubleValue(double)));
 
         return slider;

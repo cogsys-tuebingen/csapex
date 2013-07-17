@@ -8,6 +8,7 @@ QDoubleSlider::QDoubleSlider(Qt::Orientation orientation, double step_size, QWid
     max_(1.0)
 {
     connect(this, SIGNAL(valueChanged(int)), this, SLOT(scaleValue(int)));
+    connect(this, SIGNAL(rangeChanged(int,int)), this, SLOT(emitRangeChanged(int,int)));
 }
 
 QDoubleSlider::~QDoubleSlider()
@@ -32,6 +33,11 @@ int QDoubleSlider::double2int(double val)
 
 void QDoubleSlider::scaleValue(int value)
 {
+    double val = int2double(value);
+    if(val != doubleValue()){
+        setDoubleValue(val);
+    }
+
     Q_EMIT valueChanged(int2double(value));
 }
 
@@ -78,4 +84,14 @@ double QDoubleSlider::doubleMaximum()
 double QDoubleSlider::doubleMinimum()
 {
     return int2double(minimum());
+}
+
+void QDoubleSlider::emitRangeChanged(int min, int max)
+{
+    if(int2double(min) != min_)
+        setDoubleMinimum(int2double(min));
+    if(int2double(max) != max_)
+        setDoubleMaximum(int2double(max));
+
+    Q_EMIT rangeChanged(min_, max_);
 }

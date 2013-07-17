@@ -6,7 +6,7 @@
 #include <QComboBox>
 #include <QLabel>
 
-PLUGINLIB_EXPORT_CLASS(vision_plugins::ColorConvert, vision_evaluator::Filter)
+PLUGINLIB_EXPORT_CLASS(vision_plugins::ColorConvert, vision_evaluator::BoxedObject)
 
 using namespace vision_plugins;
 

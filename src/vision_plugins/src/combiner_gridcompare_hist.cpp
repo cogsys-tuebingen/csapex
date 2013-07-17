@@ -4,7 +4,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <QComboBox>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompareHist, vision_evaluator::ImageCombiner)
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompareHist, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 using namespace cv_grid;
@@ -16,7 +16,6 @@ GridCompareHist::GridCompareHist() :
 
     private_state_ = dynamic_cast<StateHist*>(state_.get());
     assert(private_state_);
-
 }
 
 
@@ -27,6 +26,7 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
             throw std::runtime_error("Channel count is not matching!");
         if(img1.rows != img2.rows || img1.cols != img2.cols)
             throw std::runtime_error("Dimension is not matching!");
+
 
 
         if(private_state_->channel_count != img1.channels()) {
@@ -43,14 +43,10 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
             GridHist g1, g2;
             AttrHistogram::Params p;
             prepareHistParams(p.bins, p.ranges, p.eps);
-            int index = combo_compare_->currentIndex();
-            p.method = index_to_compare_[index];
+            p.method = index_to_compare_[private_state_->combo_index];
 
-            int width = slide_width_->value();
-            int height = slide_height_->value();
-
-            cv_grid::prepare_grid<AttrHistogram>(g1, img1, height, width, p, mask1, 1.0);
-            cv_grid::prepare_grid<AttrHistogram>(g2, img2, height, width, p, mask2, 1.0);
+            cv_grid::prepare_grid<AttrHistogram>(g1, img1, private_state_->grid_height, private_state_->grid_width, p, mask1, 1.0);
+            cv_grid::prepare_grid<AttrHistogram>(g2, img2, private_state_->grid_height, private_state_->grid_width, p, mask2, 1.0);
 
             cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
             render_grid(g1, g2, out);
@@ -120,7 +116,7 @@ void GridCompareHist::setState(Memento::Ptr memento)
 
 void GridCompareHist::updateState(int value)
 {
-    private_state_->combo_index = value;
+    private_state_->combo_index = combo_compare_->currentIndex();
     private_state_->grid_width  = slide_width_->value();
     private_state_->grid_height = slide_height_->value();
 }
@@ -181,7 +177,7 @@ void GridCompareHist::prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scal
     }
 }
 
-/// MEMENTO
+/// MEMENTO ------------------------------------------------------------------------------------
 void GridCompareHist::StateHist::readYaml(const YAML::Node &node)
 {
     GridCompare::State::readYaml(node);
