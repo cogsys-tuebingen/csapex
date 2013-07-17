@@ -86,3 +86,15 @@ void Splitter::setState(Memento::Ptr memento)
 
     updateOutputs();
 }
+
+/// MEMENTO
+void Splitter::State::readYaml(const YAML::Node &node)
+{
+    node["channel_count"] >> channel_count_;
+}
+
+
+void Splitter::State::writeYaml(YAML::Emitter &out) const
+{
+    out << YAML::Key << "channel_count" << YAML::Value << channel_count_;
+}

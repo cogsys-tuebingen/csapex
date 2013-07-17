@@ -59,45 +59,8 @@ private:
     void updateState();
     class State : public Memento {
     public:
-        void readYaml(const YAML::Node &node)
-        {
-            const YAML::Node &min_values = node["mins"];
-            for(YAML::Iterator it = min_values.begin() ; it != min_values.end() ; it++) {
-                double min;
-                *it >> min;
-                mins.push_back(min);
-            }
-
-            const YAML::Node &max_values = node["maxs"];
-            for(YAML::Iterator it = max_values.begin() ; it != max_values.end() ; it++) {
-                double max;
-                *it >> max;
-                maxs.push_back(max);
-            }
-
-            node["channel_count"] >> channel_count;
-            node["normalize"] >> normalize;
-            node["lightness"] >> lightness;
-            node["preset"] >> combo_index;
-        }
-
-        void writeYaml(YAML::Emitter &out) const
-        {
-            out << YAML::Key << "mins" << YAML::Value << YAML::BeginSeq;
-            for(std::vector<double>::const_iterator it = mins.begin() ; it != mins.end() ; it++) {
-                out << *it;
-            }
-            out << YAML::EndSeq;
-            out << YAML::Key << "maxs" << YAML::Value << YAML::BeginSeq;
-            for(std::vector<double>::const_iterator it = maxs.begin() ; it != maxs.end() ; it++) {
-                out << *it;
-            }
-            out << YAML::EndSeq;
-            out << YAML::Key << "channel_count" << YAML::Value << channel_count;
-            out << YAML::Key << "normalize" << YAML::Value << normalize;
-            out << YAML::Key << "preset" << YAML::Value << combo_index;
-            out << YAML::Key << "lightness" << YAML::Value << lightness;
-        }
+        void readYaml(const YAML::Node &node);
+        void writeYaml(YAML::Emitter &out) const;
 
     public:
         std::vector<double> mins;

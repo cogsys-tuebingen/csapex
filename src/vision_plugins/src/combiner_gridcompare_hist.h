@@ -14,6 +14,8 @@ namespace vision_evaluator {
  */
 class GridCompareHist : public GridCompare
 {
+    Q_OBJECT
+
 public:
     /**
      * @brief GridCompareHist default constructor.
@@ -34,6 +36,10 @@ public:
     void         setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
+protected Q_SLOTS:
+    void updateState(int value);
+    void updateState();
+
 protected:
     /// internal typedefs
     typedef std::pair<QSlider*, QDoubleSlider*> HistSliderPair;
@@ -51,64 +57,19 @@ protected:
     void prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scalar &eps);
 
     /// MEMENTO
-    class State : public Memento {
+    class State : public GridCompare::State {
     public:
-        void readYaml(const YAML::Node &node)
-        {
-            node["channel_count"] >> channel_count;
-            node["grid_width"] >> grid_width;
-            node["grid_height"] >> grid_height;
-            node["compare"] >> combo_index;
-
-            const YAML::Node &_bins = node["bins"];
-            for(YAML::Iterator it = _bins.begin() ; it != _bins.end() ; it++) {
-                int bin_val;
-                *it >> bin_val;
-                bins.push_back(bin_val);
-            }
-
-            const YAML::Node &_eps = node["eps"];
-            for(YAML::Iterator it = _eps.begin() ; it != _eps.end() ; it++) {
-                double eps_val;
-                *it >> eps_val;
-                eps.push_back(eps_val);
-            }
-            restored = true;
-        }
-
-        void writeYaml(YAML::Emitter &out) const
-        {
-            out << YAML::Key << "channel_count" << YAML::Value << channel_count;
-            out << YAML::Key << "grid_width" << YAML::Value << grid_width;
-            out << YAML::Key << "grid_height" << YAML::Value << grid_height;
-            out << YAML::Key << "compare" << YAML::Value << combo_index;
-
-            out << YAML::Key << "bins" << YAML::Value << YAML::BeginSeq;
-            for(std::vector<int>::const_iterator it = bins.begin() ; it != bins.end() ; it++) {
-                out << *it;
-            }
-            out << YAML::EndSeq;
-
-            out << YAML::Key << "eps" << YAML::Value << YAML::BeginSeq;
-            for(std::vector<double>::const_iterator it = eps.begin() ; it != eps.end() ; it++) {
-                out << *it;
-            }
-            out << YAML::EndSeq;
-
-        }
+        virtual void readYaml(const YAML::Node &node);
+        virtual void writeYaml(YAML::Emitter &out) const;
 
     public:
         int                 combo_index;
-        int                 channel_count;
-        int                 grid_width;
-        int                 grid_height;
         std::vector<int>    bins;
         std::vector<double> eps;
-        bool                restored;
-
     };
 
-    State state_;
+    State *private_state_;
+
 };
 }
 #endif // COMBINER_GRIDCOMPARE_HIST_H

@@ -53,29 +53,8 @@ private:
     void updateState();
     class State : public Memento {
     public:
-        void readYaml(const YAML::Node &node)
-        {
-            const YAML::Node &values = node["bin_counts"];
-            for(YAML::Iterator it = values.begin() ; it != values.end() ; it++) {
-                int value;
-                *it >> value;
-                bin_counts.push_back(value);
-            }
-            node["channel_count"] >> channel_count;
-            node["zoom"] >> zoom;
-        }
-
-        void writeYaml(YAML::Emitter &out) const
-        {
-            out << YAML::Key << "bin_counts" << YAML::Value << YAML::BeginSeq;
-            for(std::vector<int>::const_iterator it = bin_counts.begin() ; it != bin_counts.end() ; it++) {
-                out << *it;
-            }
-            out << YAML::EndSeq;
-            out << YAML::Key << "channel_count" << YAML::Value << channel_count;
-            out << YAML::Key << "zoom" << YAML::Value << zoom;
-        }
-
+        void readYaml(const YAML::Node &node);
+        void writeYaml(YAML::Emitter &out) const;
     public:
         std::vector<int> bin_counts;
         int     channel_count;

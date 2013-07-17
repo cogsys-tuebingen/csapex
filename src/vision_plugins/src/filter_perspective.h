@@ -38,24 +38,8 @@ private:
 
     class State : public Memento {
     public:
-        void readYaml(const YAML::Node &node)
-        {
-            node["rot_x"] >> rot_x;
-            node["rot_y"] >> rot_y;
-            node["rot_z"] >> rot_z;
-            node["foca"] >> foca;
-            node["dist"] >> dist;
-        }
-
-        void writeYaml(YAML::Emitter &out) const
-        {
-            out << YAML::Key << "rot_x" << YAML::Value << rot_x;
-            out << YAML::Key << "rot_y" << YAML::Value << rot_y;
-            out << YAML::Key << "rot_z" << YAML::Value << rot_z;
-            out << YAML::Key << "foca" << YAML::Value << foca;
-            out << YAML::Key << "dist" << YAML::Value << dist;
-        }
-
+        void readYaml(const YAML::Node &node);
+        void writeYaml(YAML::Emitter &out) const;
     public:
         double rot_x;
         double rot_y;

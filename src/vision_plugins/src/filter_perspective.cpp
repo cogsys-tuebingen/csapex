@@ -72,3 +72,23 @@ void PerspectiveTransform::setState(Memento::Ptr memento)
     slider_distance_->setDoubleValue(state_.dist);
     slider_focal_length_->setDoubleValue(state_.foca);
 }
+
+/// MEMENTO
+void PerspectiveTransform::State::readYaml(const YAML::Node &node)
+{
+    node["rot_x"] >> rot_x;
+    node["rot_y"] >> rot_y;
+    node["rot_z"] >> rot_z;
+    node["foca"] >> foca;
+    node["dist"] >> dist;
+}
+
+void PerspectiveTransform::State::writeYaml(YAML::Emitter &out) const
+{
+    out << YAML::Key << "rot_x" << YAML::Value << rot_x;
+    out << YAML::Key << "rot_y" << YAML::Value << rot_y;
+    out << YAML::Key << "rot_z" << YAML::Value << rot_z;
+    out << YAML::Key << "foca" << YAML::Value << foca;
+    out << YAML::Key << "dist" << YAML::Value << dist;
+}
+

@@ -28,15 +28,8 @@ private:
 
     class State : public Memento {
     public:
-        void readYaml(const YAML::Node &node)
-        {
-            node["channel_count"] >> channel_count_;
-        }
-
-        void writeYaml(YAML::Emitter &out) const
-        {
-            out << YAML::Key << "channel_count" << YAML::Value << channel_count_;
-        }
+        void readYaml(const YAML::Node &node);
+        void writeYaml(YAML::Emitter &out) const;
 
     public:
         int channel_count_;

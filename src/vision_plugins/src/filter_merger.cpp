@@ -125,3 +125,15 @@ void Merger::resetInputArrivals()
         it->second = false;
     }
 }
+
+/// MEMENTO
+void Merger::State::readYaml(const YAML::Node &node)
+{
+    node["input_count"] >> input_count;
+}
+
+void Merger::State::writeYaml(YAML::Emitter &out) const
+{
+    out << YAML::Key << "input_count" << YAML::Value << input_count;
+}
+
