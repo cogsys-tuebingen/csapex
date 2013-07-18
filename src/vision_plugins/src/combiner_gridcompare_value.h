@@ -14,6 +14,21 @@ class GridCompareValue : public GridCompare
 {
     Q_OBJECT
 
+protected:
+    /// MEMENTO
+    class State : public GridCompare::State {
+    public:
+        typedef boost::shared_ptr<State> Ptr;
+
+        State();
+        virtual void readYaml(const YAML::Node &node);
+        virtual void writeYaml(YAML::Emitter &out) const;
+
+    public:
+        cv::Scalar          eps;
+        cv::Vec<bool,4>     ignore;
+    };
+
 public:
     /**
      * @brief GridCompareValue default constructor.
@@ -37,30 +52,21 @@ public:
     Memento::Ptr getState() const;
 
 protected Q_SLOTS:
-    void updateState(int i);
+    virtual void updateState(int i);
 
 protected:
+    GridCompareValue(GridCompare::State::Ptr state);
+
+    /// fill with standard gui elements
     virtual void fill(QBoxLayout *layout);
+
+    /// specific preparation
     void prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore);
 
     QWidget                    *container_eps_slider_;
     std::vector<QDoubleSlider*> eps_sliders_;
 
-    /// MEMENTO
-    class StateValue : public GridCompare::State {
-    public:
-        StateValue();
-
-        typedef boost::shared_ptr<StateValue> Ptr;
-        virtual void readYaml(const YAML::Node &node);
-        virtual void writeYaml(YAML::Emitter &out) const;
-
-    public:
-        cv::Scalar          eps;
-        cv::Vec<bool,4>     ignore;
-    };
-
-    StateValue *private_state_;
+    State *private_state_gcv_;
 };
 }
 #endif // COMBINER_GRIDCOMPARE_VALUE_H

@@ -9,12 +9,20 @@ using namespace vision_evaluator;
 using namespace cv_grid;
 
 GridCompareValue::GridCompareValue() :
-    GridCompare(StateValue::Ptr(new StateValue)),
-    container_eps_slider_(0)
+    GridCompare(State::Ptr(new State)),
+    container_eps_slider_(NULL)
 {
-    private_state_ = dynamic_cast<StateValue*>(state_.get());
-    assert(private_state_);
+    private_state_gcv_ = dynamic_cast<State*>(state_.get());
+    assert(private_state_gcv_);
+}
 
+
+GridCompareValue::GridCompareValue(GridCompare::State::Ptr state) :
+    GridCompare(state),
+    container_eps_slider_(NULL)
+{
+    private_state_gcv_ = dynamic_cast<State*>(state_.get());
+    assert(private_state_gcv_);
 }
 
 cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
@@ -29,27 +37,27 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         if(img1.rows != img2.rows || img1.cols != img2.cols)
             throw std::runtime_error("Dimension is not matching!");
 
-        if(private_state_->channel_count != img1.channels()) {
-            private_state_->channel_count = img1.channels();
+        if(private_state_gcv_->channel_count != img1.channels()) {
+            private_state_gcv_->channel_count = img1.channels();
             Q_EMIT modelChanged();
         }
 
-        if(private_state_->grid_width_max != img1.cols || private_state_->grid_height_max != img1.rows) {
-            private_state_->grid_width_max = img1.cols;
-            private_state_->grid_height_max = img1.rows;
+        if(private_state_gcv_->grid_width_max != img1.cols || private_state_gcv_->grid_height_max != img1.rows) {
+            private_state_gcv_->grid_width_max = img1.cols;
+            private_state_gcv_->grid_height_max = img1.rows;
             slide_height_->setMaximum(img1.rows);
             slide_width_->setMaximum(img1.cols);
         }
 
-        if(eps_sliders_.size() == private_state_->channel_count) {
+        if(eps_sliders_.size() == private_state_gcv_->channel_count) {
             GridScalar g1, g2;
             AttrScalar::Params p;
 
-            p.eps    = private_state_->eps;
-            p.ignore = private_state_->ignore;
+            p.eps    = private_state_gcv_->eps;
+            p.ignore = private_state_gcv_->ignore;
 
-            cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_->grid_height, private_state_->grid_width, p, mask1, 1.0);
-            cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_->grid_height, private_state_->grid_width, p, mask2, 1.0);
+            cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask1, 1.0);
+            cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask2, 1.0);
 
             cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
             render_grid(g1, g2, out);
@@ -68,11 +76,11 @@ void GridCompareValue::updateDynamicGui(QBoxLayout *layout)
         container_eps_slider_->deleteLater();
     }
     internal_layout = new QVBoxLayout;
-    for(int i = 0 ; i < private_state_->channel_count ; i++) {
+    for(int i = 0 ; i < private_state_gcv_->channel_count ; i++) {
         std::stringstream ch;
         ch << "Ch." << i << " eps";
 
-        QDoubleSlider *slider = QtHelper::makeDoubleSlider(internal_layout, ch.str(), private_state_->eps[i], 0.0, 255.0, 0.01);
+        QDoubleSlider *slider = QtHelper::makeDoubleSlider(internal_layout, ch.str(), private_state_gcv_->eps[i], 0.0, 255.0, 0.01);
         QDoubleSlider::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
         internal_layout->addWidget(slider);
         eps_sliders_.push_back(slider);
@@ -85,38 +93,37 @@ void GridCompareValue::updateDynamicGui(QBoxLayout *layout)
 
 Memento::Ptr GridCompareValue::getState() const
 {
-    StateValue::Ptr memento(new StateValue);
-    *memento = *boost::dynamic_pointer_cast<StateValue>(state_);
+    State::Ptr memento(new State);
+    *memento = *boost::dynamic_pointer_cast<State>(state_);
     return memento;
 }
 
 void GridCompareValue::setState(Memento::Ptr memento)
 {
-    state_.reset(new StateValue);
-    StateValue::Ptr s = boost::dynamic_pointer_cast<StateValue>(memento);
+    state_.reset(new State);
+    State::Ptr s = boost::dynamic_pointer_cast<State>(memento);
     assert(s.get());
-    *boost::dynamic_pointer_cast<StateValue>(state_) = *s;
+    *boost::dynamic_pointer_cast<State>(state_) = *s;
     assert(state_.get());
-    private_state_ = boost::dynamic_pointer_cast<StateValue>(state_).get();
-    assert(private_state_);
+    private_state_gcv_ = boost::dynamic_pointer_cast<State>(state_).get();
+    assert(private_state_gcv_);
 
-    slide_height_->setValue(private_state_->grid_height);
-    slide_width_->setValue(private_state_->grid_width);
+    slide_height_->setValue(private_state_gcv_->grid_height);
+    slide_width_->setValue(private_state_gcv_->grid_width);
 
     Q_EMIT modelChanged();
 }
 
 void GridCompareValue::updateState(int i)
 {
-    private_state_->grid_width  = slide_width_->value();
-    private_state_->grid_height = slide_height_->value();
-    prepareParams(private_state_->eps, private_state_->ignore);
+    private_state_gcv_->grid_width  = slide_width_->value();
+    private_state_gcv_->grid_height = slide_height_->value();
+    prepareParams(private_state_gcv_->eps, private_state_gcv_->ignore);
 }
 
 void GridCompareValue::fill(QBoxLayout *layout)
 {
     GridCompare::fill(layout);
-
     connect(slide_height_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
     connect(slide_width_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
 }
@@ -131,14 +138,14 @@ void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)
 }
 
 /// MEMENTO ------------------------------------------------------------------------------------
-GridCompareValue::StateValue::StateValue() :
+GridCompareValue::State::State() :
     GridCompare::State(),
     eps(cv::Scalar::all(0.0)),
     ignore(false, false, false, false)
 {
 }
 
-void GridCompareValue::StateValue::readYaml(const YAML::Node &node)
+void GridCompareValue::State::readYaml(const YAML::Node &node)
 {
     GridCompare::State::readYaml(node);
 
@@ -149,7 +156,7 @@ void GridCompareValue::StateValue::readYaml(const YAML::Node &node)
     }
 }
 
-void GridCompareValue::StateValue::writeYaml(YAML::Emitter &out) const
+void GridCompareValue::State::writeYaml(YAML::Emitter &out) const
 {
     GridCompare::State::writeYaml(out);
     out << YAML::Key << "eps" << YAML::Value << YAML::BeginSeq;

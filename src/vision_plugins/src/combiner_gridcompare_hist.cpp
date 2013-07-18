@@ -10,14 +10,20 @@ using namespace vision_evaluator;
 using namespace cv_grid;
 
 GridCompareHist::GridCompareHist() :
-    GridCompare(StateHist::Ptr(new StateHist)),
+    GridCompare(State::Ptr(new State)),
     container_hist_sliders_(NULL)
 {
-
-    private_state_ = dynamic_cast<StateHist*>(state_.get());
-    assert(private_state_);
+    private_state_gch_ = dynamic_cast<State*>(state_.get());
+    assert(private_state_gch_);
 }
 
+GridCompareHist::GridCompareHist(GridCompare::State::Ptr state) :
+    GridCompare(state),
+    container_hist_sliders_(NULL)
+{
+    private_state_gch_ = dynamic_cast<State*>(state_.get());
+    assert(private_state_gch_);
+}
 
 cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
@@ -28,28 +34,28 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
             throw std::runtime_error("Dimension is not matching!");
 
 
-        if(private_state_->channel_count != img1.channels()) {
-            private_state_->channel_count = img1.channels();
-            private_state_->bins.clear();
-            private_state_->eps.clear();
+        if(private_state_gch_->channel_count != img1.channels()) {
+            private_state_gch_->channel_count = img1.channels();
+            private_state_gch_->bins.clear();
+            private_state_gch_->eps.clear();
             Q_EMIT modelChanged();
         }
 
-        if(private_state_->grid_width_max != img1.cols || private_state_->grid_height_max != img1.rows) {
-            private_state_->grid_width_max = img1.cols;
-            private_state_->grid_height_max = img1.rows;
+        if(private_state_gch_->grid_width_max != img1.cols || private_state_gch_->grid_height_max != img1.rows) {
+            private_state_gch_->grid_width_max = img1.cols;
+            private_state_gch_->grid_height_max = img1.rows;
             slide_height_->setMaximum(img1.rows);
             slide_width_->setMaximum(img1.cols);
         }
 
-        if(hist_sliders_.size() == private_state_->channel_count) {
+        if(hist_sliders_.size() == private_state_gch_->channel_count) {
             GridHist g1, g2;
             AttrHistogram::Params p;
             prepareHistParams(p.bins, p.ranges, p.eps);
-            p.method = index_to_compare_[private_state_->combo_index];
+            p.method = index_to_compare_[private_state_gch_->combo_index];
 
-            cv_grid::prepare_grid<AttrHistogram>(g1, img1, private_state_->grid_height, private_state_->grid_width, p, mask1, 1.0);
-            cv_grid::prepare_grid<AttrHistogram>(g2, img2, private_state_->grid_height, private_state_->grid_width, p, mask2, 1.0);
+            cv_grid::prepare_grid<AttrHistogram>(g1, img1, private_state_gch_->grid_height, private_state_gch_->grid_width, p, mask1, 1.0);
+            cv_grid::prepare_grid<AttrHistogram>(g2, img2, private_state_gch_->grid_height, private_state_gch_->grid_width, p, mask2, 1.0);
 
             cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
             render_grid(g1, g2, out);
@@ -67,19 +73,19 @@ void GridCompareHist::updateDynamicGui(QBoxLayout *layout)
     }
     internal_layout = new QVBoxLayout;
 
-    for(int i = 0 ; i < private_state_->channel_count ; i++) {
+    for(int i = 0 ; i < private_state_gch_->channel_count ; i++) {
         std::stringstream ch;
         ch << i + 1;
 
         int    default_bin = 32;
         double default_eps = 0.0;
 
-        if(private_state_->bins.size() < private_state_->channel_count ) {
-            private_state_->bins.push_back(default_bin);
-            private_state_->eps.push_back(default_eps);
+        if(private_state_gch_->bins.size() < private_state_gch_->channel_count ) {
+            private_state_gch_->bins.push_back(default_bin);
+            private_state_gch_->eps.push_back(default_eps);
         } else {
-            default_bin = private_state_->bins[i];
-            default_eps = private_state_->eps[i];
+            default_bin = private_state_gch_->bins[i];
+            default_eps = private_state_gch_->eps[i];
         }
 
         QSlider *bins = QtHelper::makeSlider(internal_layout, "Ch." + ch.str() + " bins", default_bin, 1, 1000);
@@ -93,35 +99,11 @@ void GridCompareHist::updateDynamicGui(QBoxLayout *layout)
 
 }
 
-Memento::Ptr GridCompareHist::getState() const
-{
-    StateHist::Ptr memento(new StateHist);
-    *memento = *boost::dynamic_pointer_cast<StateHist>(state_);
-    return memento;
-}
-
-void GridCompareHist::setState(Memento::Ptr memento)
-{
-    state_.reset(new StateHist);
-    StateHist::Ptr s = boost::dynamic_pointer_cast<StateHist>(memento);
-    assert(s.get());
-    *boost::dynamic_pointer_cast<StateHist>(state_) = *s;
-    assert(state_.get());
-    private_state_ = boost::dynamic_pointer_cast<StateHist>(state_).get();
-    assert(private_state_);
-
-    slide_height_->setValue(private_state_->grid_height);
-    slide_width_->setValue(private_state_->grid_width);
-    combo_compare_->setCurrentIndex(private_state_->combo_index);
-
-    Q_EMIT modelChanged();
-}
-
 void GridCompareHist::updateState(int value)
 {
-    private_state_->combo_index = combo_compare_->currentIndex();
-    private_state_->grid_width  = slide_width_->value();
-    private_state_->grid_height = slide_height_->value();
+    private_state_gch_->combo_index = combo_compare_->currentIndex();
+    private_state_gch_->grid_width  = slide_width_->value();
+    private_state_gch_->grid_height = slide_height_->value();
 }
 
 void GridCompareHist::fill(QBoxLayout *layout)
@@ -147,7 +129,7 @@ void GridCompareHist::fill(QBoxLayout *layout)
     index_to_compare_.insert(intPair(index, AttrHistogram::CV_COMP_SQRD));
 
     layout->addWidget(combo_compare_);
-    private_state_->combo_index = combo_compare_->currentIndex();
+    private_state_gch_->combo_index = combo_compare_->currentIndex();
 
     connect(combo_compare_, SIGNAL(currentIndexChanged(int)), this, SLOT(updateState(int)));
     connect(slide_height_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
@@ -165,9 +147,9 @@ void GridCompareHist::addHistSliders(QSlider *bins, QDoubleSlider *eps)
 
 void GridCompareHist::prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scalar &eps)
 {
-    bins = cv::Mat_<int>(private_state_->channel_count, 1);
-    ranges = cv::Mat_<float>(private_state_->channel_count * 2 ,1);
-    for(int i = 0 ; i < private_state_->channel_count ; i++) {
+    bins = cv::Mat_<int>(private_state_gch_->channel_count, 1);
+    ranges = cv::Mat_<float>(private_state_gch_->channel_count * 2 ,1);
+    for(int i = 0 ; i < private_state_gch_->channel_count ; i++) {
         HistSliderPair p = hist_sliders_[i];
         bins.at<int>(i)     = p.first->value();
         ranges.at<float>(2 * i)     = 0.f;
@@ -175,13 +157,30 @@ void GridCompareHist::prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scal
         eps[i]          = p.second->doubleValue();
 
         /// MEMENTO
-        private_state_->bins[i] = p.first->value();
-        private_state_->eps[i] = p.second->doubleValue();
+        private_state_gch_->bins[i] = p.first->value();
+        private_state_gch_->eps[i] = p.second->doubleValue();
     }
 }
 
 /// MEMENTO ------------------------------------------------------------------------------------
-void GridCompareHist::StateHist::readYaml(const YAML::Node &node)
+void GridCompareHist::setState(Memento::Ptr memento)
+{
+    state_.reset(new State);
+    State::Ptr s = boost::dynamic_pointer_cast<State>(memento);
+    assert(s.get());
+    *boost::dynamic_pointer_cast<State>(state_) = *s;
+    assert(state_.get());
+    private_state_gch_ = boost::dynamic_pointer_cast<State>(state_).get();
+    assert(private_state_gch_);
+
+    slide_height_->setValue(private_state_gch_->grid_height);
+    slide_width_->setValue(private_state_gch_->grid_width);
+    combo_compare_->setCurrentIndex(private_state_gch_->combo_index);
+
+    Q_EMIT modelChanged();
+}
+
+void GridCompareHist::State::readYaml(const YAML::Node &node)
 {
     GridCompare::State::readYaml(node);
     node["compare"] >> combo_index;
@@ -201,7 +200,20 @@ void GridCompareHist::StateHist::readYaml(const YAML::Node &node)
     }
 }
 
-void GridCompareHist::StateHist::writeYaml(YAML::Emitter &out) const
+GridCompareHist::State::State() :
+    GridCompare::State(),
+    combo_index(0)
+{
+}
+
+Memento::Ptr GridCompareHist::getState() const
+{
+    State::Ptr memento(new State);
+    *memento = *boost::dynamic_pointer_cast<State>(state_);
+    return memento;
+}
+
+void GridCompareHist::State::writeYaml(YAML::Emitter &out) const
 {
     GridCompare::State::writeYaml(out);
 

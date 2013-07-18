@@ -16,6 +16,22 @@ class GridCompareHist : public GridCompare
 {
     Q_OBJECT
 
+protected:
+    /// MEMENTO
+    class State : public GridCompare::State {
+    public:
+        typedef boost::shared_ptr<State> Ptr;
+
+        State();
+        virtual void readYaml(const YAML::Node &node);
+        virtual void writeYaml(YAML::Emitter &out) const;
+
+    public:
+        int                 combo_index;
+        std::vector<int>    bins;
+        std::vector<double> eps;
+    };
+
 public:
     /**
      * @brief GridCompareHist default constructor.
@@ -37,9 +53,11 @@ public:
     Memento::Ptr getState() const;
 
 protected Q_SLOTS:
-    void updateState(int value);
+    virtual void updateState(int value);
 
 protected:
+    GridCompareHist(GridCompare::State::Ptr state);
+
     /// internal typedefs
     typedef std::pair<QSlider*, QDoubleSlider*> HistSliderPair;
     typedef std::vector<HistSliderPair>         HistPreferences;
@@ -50,25 +68,14 @@ protected:
     HistPreferences            hist_sliders_;
     std::map<int, int>         index_to_compare_;
 
-    /// fill with specific gui elements
+    /// fill with standard gui elements
     virtual void fill(QBoxLayout *layout);
+
+    /// dynamic gui
     void addHistSliders(QSlider *bins, QDoubleSlider *eps);
     void prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scalar &eps);
 
-    /// MEMENTO
-    class StateHist : public GridCompare::State {
-    public:
-        typedef boost::shared_ptr<StateHist> Ptr;
-        virtual void readYaml(const YAML::Node &node);
-        virtual void writeYaml(YAML::Emitter &out) const;
-
-    public:
-        int                 combo_index;
-        std::vector<int>    bins;
-        std::vector<double> eps;
-    };
-
-    StateHist *private_state_;
+    State *private_state_gch_;
 
 };
 }

@@ -1,21 +1,21 @@
-#ifndef COMBINER_GRIDHEATMAP_HIST_H
-#define COMBINER_GRIDHEATMAP_HIST_H
+#ifndef COMBINER_GRIDHEATMAP_VALUE_H
+#define COMBINER_GRIDHEATMAP_VALUE_H
 
-#include "combiner_gridcompare_hist.h"
+#include "combiner_gridcompare_value.h"
 
 namespace vision_evaluator {
-class GridHeatMapHist : public GridCompareHist
+class GridHeatMapValue : public GridCompareValue
 {
 
     Q_OBJECT
 
 public:
-    GridHeatMapHist();
+    GridHeatMapValue();
 
     /// TODO : override combine !
 
     /// MEMENTO
-    void         setState(Memento::Ptr memento);
+    void setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
 protected Q_SLOTS:
@@ -31,7 +31,7 @@ protected:
     virtual void fill(QBoxLayout *layout);
 
     /// MEMENTO
-    class State : public GridCompareHist::State {
+    class State : public GridCompareValue::State {
     public:
         State();
 
@@ -46,8 +46,8 @@ protected:
         int grid_height_max_add1;
     };
 
-    State *private_state_ghm_;
+    State *private_state_ghv_;
 
 };
 }
-#endif // COMBINER_GRIDHEATMAP_HIST_H
+#endif // COMBINER_GRIDHEATMAP_VALUE_H
