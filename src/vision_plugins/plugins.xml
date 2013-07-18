@@ -5,7 +5,13 @@
   <class type="vision_evaluator::GridCompareValue" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
+  <class type="vision_evaluator::GridHeatMapValue" base_class_type="vision_evaluator::BoxedObject">
+    <description>none yet</description>
+  </class>
   <class type="vision_evaluator::GridCompareHist" base_class_type="vision_evaluator::BoxedObject">
+    <description>none yet</description>
+  </class>
+  <class type="vision_evaluator::GridHeatMapHist" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
   <class type="vision_evaluator::Merger" base_class_type="vision_evaluator::BoxedObject">

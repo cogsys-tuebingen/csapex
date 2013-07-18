@@ -1,5 +1,10 @@
 #include "combiner_gridheatmap_value.h"
 
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridHeatMapValue, vision_evaluator::BoxedObject)
+
 using namespace vision_evaluator;
 
 GridHeatMapValue::GridHeatMapValue() :
