@@ -24,6 +24,18 @@ void GridCompare::addSliders(QBoxLayout *layout)
 
 }
 
+void GridCompare::updateSliderMaxima(int width, int height)
+{
+    if(state_->grid_height_max != height) {
+        state_->grid_height_max = height;
+        slide_height_->setMaximum(height);
+    }
+    if(state_->grid_width_max != width) {
+        state_->grid_width_max = width;
+        slide_width_->setMaximum(width);
+    }
+}
+
 void GridCompare::updateDynamicGui(QBoxLayout *layout)
 {
 }

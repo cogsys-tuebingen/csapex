@@ -6,12 +6,54 @@
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridHeatMapValue, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
+using namespace QSignalBridges;
+using namespace cv_grid;
 
 GridHeatMapValue::GridHeatMapValue() :
     GridCompareValue(State::Ptr(new State))
 {
     private_state_ghv_ = dynamic_cast<State*>(state_.get());
     assert(private_state_ghv_);
+}
+
+cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
+{
+    if(!img1.empty() && !img2.empty()) {
+        /// PREPARE
+        if(img1.channels() != img2.channels())
+            throw std::runtime_error("Channel count is not matching!");
+        if(img1.channels() > 4)
+            throw std::runtime_error("Channel limit 4!");
+        if(img1.rows > img2.rows || img1.cols > img2.cols)
+            throw std::runtime_error("Image 1 must have smaller or euqal size!");
+
+
+        if(private_state_gcv_->channel_count != img1.channels()) {
+            private_state_gcv_->channel_count = img1.channels();
+            Q_EMIT modelChanged();
+        }
+
+        updateSliderMaxima(img1.cols, img1.rows, img2.cols, img2.rows);
+
+        /// COMPUTE
+//        if(eps_sliders_.size() == private_state_gcv_->channel_count) {
+//            GridScalar g1, g2;
+//            AttrScalar::Params p;
+
+//            p.eps    = private_state_gcv_->eps;
+//            p.ignore = private_state_gcv_->ignore;
+
+//            cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask1, 1.0);
+//            cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask2, 1.0);
+
+//            cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
+//            render_grid(g1, g2, out);
+//            return out;
+//        }
+    }
+
+    return cv::Mat();
+
 }
 
 void GridHeatMapValue::updateState(int value)
@@ -36,8 +78,23 @@ void GridHeatMapValue::fill(QBoxLayout *layout)
     GridCompareValue::fill(layout);
     connect(slide_height_add1_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
     connect(slide_width_add1_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
-//    limit_sliders_height_.reset(new QLimiterSlider(slide_height_add1_, slide_height_));
-//    limit_sliders_width_.reset(new QLimiterSlider(slide_width_add1_, slide_width_));
+
+    limit_sliders_height_.reset(new QAbstractSliderLimiter(slide_height_, slide_height_add1_));
+    limit_sliders_width_.reset(new QAbstractSliderLimiter(slide_width_, slide_width_add1_));
+}
+
+void GridHeatMapValue::updateSliderMaxima(int width, int height, int width_add1, int height_add1)
+{
+    GridCompare::updateSliderMaxima(width, height);
+    if(private_state_ghv_->grid_height_max_add1 != height_add1) {
+        private_state_ghv_->grid_height_max_add1 = height_add1;
+        slide_height_add1_->setMaximum(height_add1);
+    }
+    if(private_state_ghv_->grid_width_max_add1 != width_add1) {
+        private_state_ghv_->grid_width_max_add1 = width_add1;
+        slide_width_add1_->setMaximum(width_add1);
+    }
+
 }
 
 /// MEMENTO ------------------------------------------------------------------------------------

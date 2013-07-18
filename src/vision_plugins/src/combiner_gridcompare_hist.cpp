@@ -28,6 +28,7 @@ GridCompareHist::GridCompareHist(GridCompare::State::Ptr state) :
 cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
     if(!img1.empty() && !img2.empty()) {
+        /// PREPARE
         if(img1.channels() != img2.channels())
             throw std::runtime_error("Channel count is not matching!");
         if(img1.rows != img2.rows || img1.cols != img2.cols)
@@ -41,13 +42,9 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
             Q_EMIT modelChanged();
         }
 
-        if(private_state_gch_->grid_width_max != img1.cols || private_state_gch_->grid_height_max != img1.rows) {
-            private_state_gch_->grid_width_max = img1.cols;
-            private_state_gch_->grid_height_max = img1.rows;
-            slide_height_->setMaximum(img1.rows);
-            slide_width_->setMaximum(img1.cols);
-        }
+        updateSliderMaxima(img1.cols, img1.rows);
 
+        /// COMPUTE
         if(hist_sliders_.size() == private_state_gch_->channel_count) {
             GridHist g1, g2;
             AttrHistogram::Params p;

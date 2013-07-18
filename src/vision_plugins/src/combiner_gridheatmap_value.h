@@ -1,8 +1,9 @@
 #ifndef COMBINER_GRIDHEATMAP_VALUE_H
 #define COMBINER_GRIDHEATMAP_VALUE_H
 
+/// COMPONENT
 #include "combiner_gridcompare_value.h"
-#include <vision_evaluator/qwrapper.h>
+#include <vision_evaluator/qsignal_bridges.h>
 
 namespace vision_evaluator {
 class GridHeatMapValue : public GridCompareValue
@@ -13,10 +14,13 @@ class GridHeatMapValue : public GridCompareValue
 public:
     GridHeatMapValue();
 
-    /// TODO : override combine !
+    /**
+     * @brief combine - see base class information
+     */
+    virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
 
     /// MEMENTO
-    void setState(Memento::Ptr memento);
+    void         setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
 protected Q_SLOTS:
@@ -28,11 +32,12 @@ protected:
     QSlider *slide_width_add1_;
     QSlider *slide_height_add1_;
 
-//    boost::shared_ptr<QLimiterSlider> limit_sliders_width_;
-//    boost::shared_ptr<QLimiterSlider> limit_sliders_height_;
+    QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_width_;
+    QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_height_;
 
     /// fill with standard gui elements
     virtual void fill(QBoxLayout *layout);
+    virtual void updateSliderMaxima(int width, int height, int width1, int height1);
 
     /// MEMENTO
     class State : public GridCompareValue::State {

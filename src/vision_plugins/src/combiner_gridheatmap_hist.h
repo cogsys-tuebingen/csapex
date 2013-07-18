@@ -1,7 +1,9 @@
 #ifndef COMBINER_GRIDHEATMAP_HIST_H
 #define COMBINER_GRIDHEATMAP_HIST_H
 
+/// COMPONENT
 #include "combiner_gridcompare_hist.h"
+#include <vision_evaluator/qsignal_bridges.h>
 
 namespace vision_evaluator {
 class GridHeatMapHist : public GridCompareHist
@@ -12,7 +14,10 @@ class GridHeatMapHist : public GridCompareHist
 public:
     GridHeatMapHist();
 
-    /// TODO : override combine !
+    /**
+     * @brief combine - see base class information
+     */
+    virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);
 
     /// MEMENTO
     void         setState(Memento::Ptr memento);
@@ -27,8 +32,12 @@ protected:
     QSlider *slide_width_add1_;
     QSlider *slide_height_add1_;
 
+    QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_width_;
+    QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_height_;
+
     /// fill with standard gui elements
     virtual void fill(QBoxLayout *layout);
+    virtual void updateSliderMaxima(int width, int height, int width_add1, int height_add1);
 
     /// MEMENTO
     class State : public GridCompareHist::State {

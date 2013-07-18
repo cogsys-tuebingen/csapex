@@ -28,12 +28,11 @@ GridCompareValue::GridCompareValue(GridCompare::State::Ptr state) :
 cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
     if(!img1.empty() && !img2.empty()) {
+        /// PREPARE
         if(img1.channels() != img2.channels())
             throw std::runtime_error("Channel count is not matching!");
-
         if(img1.channels() > 4)
             throw std::runtime_error("Channel limit 4!");
-
         if(img1.rows != img2.rows || img1.cols != img2.cols)
             throw std::runtime_error("Dimension is not matching!");
 
@@ -42,13 +41,9 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
             Q_EMIT modelChanged();
         }
 
-        if(private_state_gcv_->grid_width_max != img1.cols || private_state_gcv_->grid_height_max != img1.rows) {
-            private_state_gcv_->grid_width_max = img1.cols;
-            private_state_gcv_->grid_height_max = img1.rows;
-            slide_height_->setMaximum(img1.rows);
-            slide_width_->setMaximum(img1.cols);
-        }
+        updateSliderMaxima(img1.cols, img1.rows);
 
+        /// COMPUTE
         if(eps_sliders_.size() == private_state_gcv_->channel_count) {
             GridScalar g1, g2;
             AttrScalar::Params p;

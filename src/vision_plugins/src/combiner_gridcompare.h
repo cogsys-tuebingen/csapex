@@ -48,6 +48,7 @@ protected:
 
     virtual void fill(QBoxLayout *layout);
     virtual void addSliders(QBoxLayout *layout);
+    virtual void updateSliderMaxima(int width, int height);
 
     mutable State::Ptr state_;
 };
