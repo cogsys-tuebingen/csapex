@@ -2,6 +2,7 @@
 #define COMBINER_GRIDHEATMAP_VALUE_H
 
 #include "combiner_gridcompare_value.h"
+#include <vision_evaluator/qwrapper.h>
 
 namespace vision_evaluator {
 class GridHeatMapValue : public GridCompareValue
@@ -26,6 +27,9 @@ protected:
 
     QSlider *slide_width_add1_;
     QSlider *slide_height_add1_;
+
+//    boost::shared_ptr<QLimiterSlider> limit_sliders_width_;
+//    boost::shared_ptr<QLimiterSlider> limit_sliders_height_;
 
     /// fill with standard gui elements
     virtual void fill(QBoxLayout *layout);

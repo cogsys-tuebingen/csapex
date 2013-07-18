@@ -28,6 +28,7 @@ void GridHeatMapValue::addSliders(QBoxLayout *layout)
     slide_height_      = QtHelper::makeSlider(layout, "Grid 1 Height", 48, 1, 640);
     slide_width_add1_  = QtHelper::makeSlider(layout, "Grid 2 Width",  64, 1, 640);
     slide_height_add1_ = QtHelper::makeSlider(layout, "Grid 2 Height", 48, 1, 640);
+
 }
 
 void GridHeatMapValue::fill(QBoxLayout *layout)
@@ -35,6 +36,8 @@ void GridHeatMapValue::fill(QBoxLayout *layout)
     GridCompareValue::fill(layout);
     connect(slide_height_add1_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
     connect(slide_width_add1_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
+//    limit_sliders_height_.reset(new QLimiterSlider(slide_height_add1_, slide_height_));
+//    limit_sliders_width_.reset(new QLimiterSlider(slide_width_add1_, slide_width_));
 }
 
 /// MEMENTO ------------------------------------------------------------------------------------
