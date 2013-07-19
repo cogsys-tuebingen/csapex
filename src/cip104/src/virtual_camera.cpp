@@ -17,6 +17,7 @@
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::VirtualCamera, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 VirtualCameraWorker::VirtualCameraWorker(VirtualCamera *parent)
     : state(parent), timer_(NULL), map_msg(new CvMatMessage), view_msg(new CvMatMessage), output_view_(NULL), output_map_(NULL)

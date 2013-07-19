@@ -10,6 +10,7 @@
 #include <designer/box.h>
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 ImageCombiner::ImageCombiner()
     : input_img_a_(NULL), input_mask_a_(NULL), input_img_b_(NULL), input_mask_b_(NULL), output_img_(NULL),

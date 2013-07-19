@@ -19,7 +19,7 @@ const QString Connector::MIME_CREATE = "vision_evaluator/connector/create";
 const QString Connector::MIME_MOVE = "vision_evaluator/connector/move";
 
 Connector::Connector(Box* parent, const std::string& type, int sub_id)
-    : QRadioButton(parent), parent_widget(parent), box_(parent), designer(NULL)
+    : parent_widget(parent), box_(parent), designer(NULL)
 {
     findParents();
     setFocusPolicy(Qt::NoFocus);
@@ -31,6 +31,7 @@ Connector::Connector(Box* parent, const std::string& type, int sub_id)
     uuid_ = ss.str();
 
     setContextMenuPolicy(Qt::PreventContextMenu);
+    setType(ConnectionType::makeDefault());
 }
 
 Connector::~Connector()
@@ -92,7 +93,9 @@ bool Connector::hitButton(const QPoint&) const
 
 bool Connector::canConnectTo(Connector* other_side)
 {
-    return (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
+    bool in_out = (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
+    bool compability = getType()->canConnectTo(other_side->getType());
+    return in_out && compability;
 }
 
 void Connector::dragEnterEvent(QDragEnterEvent* e)
@@ -232,7 +235,12 @@ void Connector::setLabel(const std::string &label)
     label_ = label;
 }
 
-std::string Connector::getTypeName() const
+void Connector::setType(ConnectionType::Ptr type)
 {
-    return "cv::Mat";
+    type_ = type;
+}
+
+ConnectionType::ConstPtr Connector::getType() const
+{
+    return type_;
 }

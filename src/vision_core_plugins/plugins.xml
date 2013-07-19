@@ -1,0 +1,5 @@
+<library path="libvision_core_plugins">
+<class type="vision_evaluator::TextInput" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+</library>

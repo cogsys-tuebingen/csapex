@@ -23,6 +23,7 @@ STATIC_INIT(OutputDisplay, generic, {
 });
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 OutputDisplay::OutputDisplay()
     : input_(NULL), view_(new QGraphicsView), empty(400, 400, QImage::Format_RGB16), painter(&empty), down_(false)

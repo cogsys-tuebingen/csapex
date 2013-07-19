@@ -15,6 +15,7 @@ namespace vision_evaluator
 
 class Box;
 class ConnectorIn;
+class ConnectorOut;
 
 class BoxedObject : public QObject
 {

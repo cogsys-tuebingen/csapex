@@ -15,6 +15,7 @@
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::Splitter, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 Splitter::Splitter() :
     input_(NULL)

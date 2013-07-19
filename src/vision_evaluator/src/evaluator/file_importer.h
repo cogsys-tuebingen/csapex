@@ -58,6 +58,8 @@ private:
 
     QTimer* timer_;
 
+    ConnectorIn* optional_input_filename_;
+
     ConnectorOut* output_img_;
     ConnectorOut* output_mask_;
 };

@@ -223,7 +223,7 @@ void Overlay::drawConnector(Connector *c)
     if(text.length() != 0) {
         text += "\n";
     }
-    text += c->getTypeName().c_str();
+    text += c->getType()->name().c_str();
 
     QFontMetrics metrics(font);
 

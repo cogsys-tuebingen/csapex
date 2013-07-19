@@ -63,7 +63,8 @@ public:
     std::string getLabel() const;
     void setLabel(const std::string& label);
 
-    std::string getTypeName() const;
+    void setType(ConnectionType::Ptr type);
+    ConnectionType::ConstPtr getType() const;
 
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
@@ -96,6 +97,8 @@ protected:
 
     std::string uuid_;
     std::string label_;
+
+    ConnectionType::Ptr type_;
 };
 
 }

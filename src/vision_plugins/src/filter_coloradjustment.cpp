@@ -17,6 +17,8 @@ using namespace vision_evaluator;
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::ColorAdjustment, vision_evaluator::BoxedObject)
 
+using namespace connection_types;
+
 ColorAdjustment::ColorAdjustment() :
     input_(NULL),
     output_(NULL),

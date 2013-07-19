@@ -16,6 +16,7 @@ PLUGINLIB_EXPORT_CLASS(vision_evaluator::SimpleSink, vision_evaluator::BoxedObje
 
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 SimpleSink::SimpleSink()
     : input_(NULL),output_(NULL), sunk(0)

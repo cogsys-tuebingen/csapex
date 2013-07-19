@@ -3,10 +3,13 @@
 
 /// COMPONENT
 #include "ui_evaluation_window.h"
+#include "messages_default.hpp"
 
 /// PROJECT
 #include <designer/box_manager.h>
+#include <designer/connection_type.h>
 #include <utils/stream_interceptor.h>
+
 /// SYSTEM
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -29,6 +32,8 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     qRegisterMetaType<cv::Mat>("cv::Mat");
     qRegisterMetaType<std::string>("std::string");
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
+
+    ConnectionType::default_.reset(new connection_types::CvMatMessage);
 
     ui->setupUi(this);
 

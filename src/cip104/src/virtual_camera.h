@@ -73,8 +73,8 @@ private:
     cv::Mat map_out;
     cv::Mat view;
 
-    CvMatMessage::Ptr map_msg;
-    CvMatMessage::Ptr view_msg;
+    connection_types::CvMatMessage::Ptr map_msg;
+    connection_types::CvMatMessage::Ptr view_msg;
 
     ConnectorOut* output_view_;
     ConnectorOut* output_map_;

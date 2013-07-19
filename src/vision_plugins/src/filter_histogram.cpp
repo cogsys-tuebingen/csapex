@@ -21,6 +21,7 @@
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::Histogram, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 Histogram::Histogram() :
     input_(NULL), output_histogram_(NULL),container_bin_counts_(NULL),channel_count_(0)

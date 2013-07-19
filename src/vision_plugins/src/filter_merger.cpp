@@ -15,6 +15,7 @@
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::Merger, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 Merger::Merger() :
     output_(NULL)

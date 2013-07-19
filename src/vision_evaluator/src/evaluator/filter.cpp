@@ -13,6 +13,7 @@
 #include <QLabel>
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 
 Filter::Filter()

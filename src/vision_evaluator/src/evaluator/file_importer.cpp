@@ -27,6 +27,7 @@ STATIC_INIT(FileImporter, generic, {
 });
 
 using namespace vision_evaluator;
+using namespace connection_types;
 
 FileImporterWorker::FileImporterWorker(FileImporter *parent)
     : state(parent), timer_(NULL), output_img_(NULL), output_mask_(NULL)
@@ -130,6 +131,12 @@ void FileImporter::fill(QBoxLayout* layout)
 
         connect(file_dialog_, SIGNAL(pressed()), this, SLOT(importDialog()));
 
+        worker->optional_input_filename_ = new ConnectorIn(box_, 0);
+        worker->optional_input_filename_->setLabel("File (optional)");
+        worker->optional_input_filename_->setType(ConnectionType::Ptr(new connection_types::StringMessage));
+        box_->addInput(worker->optional_input_filename_);
+
+
         worker->output_img_ = new ConnectorOut(box_, 0);
         worker->output_img_->setLabel("Image");
         box_->addOutput(worker->output_img_);
@@ -165,7 +172,16 @@ void FileImporter::toggle(bool on)
 
 void FileImporter::messageArrived(ConnectorIn *source)
 {
-    // NO INPUT
+    if(!isEnabled()) {
+        return;
+    }
+
+    StringMessage::Ptr msg = boost::dynamic_pointer_cast<StringMessage> (source->getMessage());
+
+    if(msg) {
+        std::cout << "got message: " << msg->value << std::endl;
+        import(msg->value.c_str());
+    }
 }
 
 void FileImporter::import(const QString& filename)
