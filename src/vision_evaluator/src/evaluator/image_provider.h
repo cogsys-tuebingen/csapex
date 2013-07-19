@@ -94,8 +94,6 @@ Q_SIGNALS:
 
 private:
     static std::map<std::string, ProviderConstructor> plugins;
-
-    QThread* private_thread;
 };
 
 } /// NAMESPACE

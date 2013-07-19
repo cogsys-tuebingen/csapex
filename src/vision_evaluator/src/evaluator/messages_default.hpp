@@ -10,9 +10,8 @@
 namespace vision_evaluator {
 namespace connection_types {
 
-template <class Type>
+template <class Type, class Instance>
 struct MessageTemplate : public ConnectionType {
-    typedef MessageTemplate<Type> Instance;
     typedef boost::shared_ptr<Instance> Ptr;
 
     MessageTemplate(const std::string& name)
@@ -20,34 +19,44 @@ struct MessageTemplate : public ConnectionType {
     {}
 
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new Instance(name()));
-        *new_msg = *this;
+        Ptr new_msg(new Instance);
+        new_msg->value = value;
         return new_msg;
     }
 
     Type value;
 };
 
-struct CvMatMessage : public MessageTemplate<cv::Mat>
+struct CvMatMessage : public MessageTemplate<cv::Mat, CvMatMessage>
 {
     CvMatMessage()
-        : MessageTemplate<cv::Mat> ("cv::Mat")
+        : MessageTemplate<cv::Mat, CvMatMessage> ("cv::Mat")
     {}
 
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new Instance(name()));
+        Ptr new_msg(new CvMatMessage());
         value.copyTo(new_msg->value);
 
         return new_msg;
     }
 
+    static ConnectionType::Ptr make(){
+        Ptr new_msg(new CvMatMessage);
+        return new_msg;
+    }
+
 };
 
-struct StringMessage : public MessageTemplate<std::string>
+struct StringMessage : public MessageTemplate<std::string, StringMessage>
 {
     StringMessage()
-        : MessageTemplate<std::string> ("std::string")
+        : MessageTemplate<std::string, StringMessage> ("std::string")
     {}
+
+    static ConnectionType::Ptr make(){
+        Ptr new_msg(new StringMessage);
+        return new_msg;
+    }
 };
 
 }

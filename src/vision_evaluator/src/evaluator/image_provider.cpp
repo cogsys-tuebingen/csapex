@@ -3,7 +3,6 @@
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
-#include <QThread>
 
 namespace bfs = boost::filesystem;
 
@@ -12,19 +11,11 @@ using namespace vision_evaluator;
 std::map<std::string, ImageProvider::ProviderConstructor> ImageProvider::plugins;
 
 ImageProvider::ImageProvider()
-    : private_thread(NULL)
 {
 }
 
 ImageProvider::~ImageProvider()
-{
-    if(private_thread) {
-        private_thread->wait(1000);
-        if(private_thread) {
-            private_thread->terminate();
-        }
-        delete private_thread;
-    }
+{;
 }
 
 bool ImageProvider::canHandle(const std::string& path,

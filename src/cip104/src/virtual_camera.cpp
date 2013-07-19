@@ -283,12 +283,6 @@ void VirtualCamera::fill(QBoxLayout* layout)
         connect(w, SIGNAL(valueChanged(int)), worker, SLOT(updatePose()));
         connect(h, SIGNAL(valueChanged(int)), worker, SLOT(updatePose()));
         connect(focal_length, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
-
-        makeThread();
-        worker->moveToThread(private_thread_);
-        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
-
-        private_thread_->start();
     }
 }
 

@@ -27,7 +27,7 @@ void TextInput::fill(QBoxLayout *layout)
     if(connector_ == NULL) {
         connector_ = new ConnectorOut(box_, 0);
         connector_->setLabel("Text");
-        connector_->setType(ConnectionType::Ptr(new connection_types::StringMessage));
+        connector_->setType(connection_types::StringMessage::make());
 
         box_->addOutput(connector_);
 

@@ -133,7 +133,7 @@ void FileImporter::fill(QBoxLayout* layout)
 
         worker->optional_input_filename_ = new ConnectorIn(box_, 0);
         worker->optional_input_filename_->setLabel("File (optional)");
-        worker->optional_input_filename_->setType(ConnectionType::Ptr(new connection_types::StringMessage));
+        worker->optional_input_filename_->setType(connection_types::StringMessage::make());
         box_->addInput(worker->optional_input_filename_);
 
 
@@ -152,12 +152,7 @@ void FileImporter::fill(QBoxLayout* layout)
 
         nested->addWidget(enable_border);
 
-        makeThread();
-        worker->moveToThread(private_thread_);
-        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
         connect(enable_border, SIGNAL(stateChanged(int)), worker, SLOT(enableBorder(int)));
-
-        private_thread_->start();
     }
 }
 

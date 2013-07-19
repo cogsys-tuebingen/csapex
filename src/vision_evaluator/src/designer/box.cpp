@@ -12,6 +12,7 @@
 /// SYSTEM
 #include <QDragMoveEvent>
 #include <QMenu>
+#include <QThread>
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <opencv2/opencv.hpp>
@@ -20,6 +21,7 @@ using namespace vision_evaluator;
 
 const QString Box::MIME = "vision_evaluator/box";
 const QString Box::MIME_MOVE = "vision_evaluator/box/move";
+
 
 void Box::State::writeYaml(YAML::Emitter &out) const
 {
@@ -54,7 +56,7 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), state(new State(this)), down_(false)
+    : QWidget(parent), ui(new Ui::Box), state(new State(this)), private_thread_(NULL), worker(this), down_(false)
 {
     ui->setupUi(this);
 
@@ -83,6 +85,18 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     connect(content, SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
 }
 
+void Box::makeThread()
+{
+    if(!private_thread_) {
+        private_thread_ = new QThread;
+        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+
+        worker.moveToThread(private_thread_);
+
+        private_thread_->start();
+    }
+}
+
 void Box::enableContent(bool enable)
 {
     content_->enable(enable);
@@ -98,7 +112,20 @@ YAML::Emitter& Box::save(YAML::Emitter& out) const
 
 void Box::stop()
 {
-    content_->stop();
+    if(private_thread_) {
+        private_thread_->quit();
+        private_thread_->wait(1000);
+        if(private_thread_->isRunning()) {
+            std::cout << "terminate thread" << std::endl;
+            private_thread_->terminate();
+        }
+    }
+}
+
+void BoxWorker::forwardMessage(ConnectorIn *source)
+{
+    parent_->content_->messageArrived(source);
+    parent_->content_->setError(false);
 }
 
 void Box::setUUID(const std::string& uuid)
@@ -129,7 +156,7 @@ void Box::addInput(ConnectorIn* in)
     input.push_back(in);
 
     QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
-    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SLOT(forwardMessage(ConnectorIn*)));
+    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), &worker, SLOT(forwardMessage(ConnectorIn*)));
     QObject::connect(in, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::connect(in, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 
@@ -232,6 +259,7 @@ void Box::init(const QPoint& pos)
     //    QBoxLayout* layout = new QVBoxLayout;
     //    ui->content->setLayout(layout);
 
+    makeThread();
     content_->fill(ui->content);
 }
 
@@ -243,6 +271,8 @@ BoxedObject* Box::getContent()
 Box::~Box()
 {
     BoxManager::instance().setDirty(true);
+
+    stop();
 }
 
 bool Box::eventFilter(QObject* o, QEvent* e)
@@ -392,12 +422,6 @@ void Box::refreshStylesheet()
 void Box::eventModelChanged()
 {
     content_->updateDynamicGui(ui->content);
-}
-
-void Box::forwardMessage(ConnectorIn *source)
-{
-    content_->messageArrived(source);
-    content_->setError(false);
 }
 
 void Box::minimizeBox(bool minimize)

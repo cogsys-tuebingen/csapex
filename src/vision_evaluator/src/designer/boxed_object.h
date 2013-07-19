@@ -8,7 +8,6 @@
 #include <string>
 #include <QLayout>
 #include <QObject>
-#include <QThread>
 
 namespace vision_evaluator
 {
@@ -52,7 +51,6 @@ public:
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source) = 0;
 
-    virtual void stop();
     virtual void setError(bool e, const std::string& msg = "");
 
     virtual void enable(bool e);
@@ -65,16 +63,11 @@ Q_SIGNALS:
     void modelChanged();
 
 protected:
-    void makeThread();
-
-protected:
     std::string type_name_;
     std::string name_;
     std::string category_;
 
     Box* box_;
-
-    QThread* private_thread_;
 
     bool enabled_;
     bool error_;

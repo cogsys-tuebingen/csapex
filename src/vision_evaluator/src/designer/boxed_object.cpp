@@ -6,29 +6,21 @@
 
 /// SYSTEM
 #include <QLabel>
-#include <QThread>
 
 using namespace vision_evaluator;
 
 BoxedObject::BoxedObject()
-    : private_thread_(NULL), enabled_(true), error_(false)
+    : enabled_(true), error_(false)
 {
 }
 
 BoxedObject::BoxedObject(const std::string& name)
-    : name_(name), private_thread_(NULL), enabled_(true)
+    : name_(name), enabled_(true)
 {
 }
 
 BoxedObject::~BoxedObject()
 {
-    if(private_thread_) {
-        private_thread_->wait(1000);
-        if(private_thread_->isRunning()) {
-            std::cout << "terminate thread" << std::endl;
-            private_thread_->terminate();
-        }
-    }
 }
 
 bool BoxedObject::isEnabled()
@@ -54,18 +46,6 @@ void BoxedObject::setError(bool e, const std::string& msg)
 bool BoxedObject::isError()
 {
     return error_;
-}
-
-void BoxedObject::stop()
-{
-    if(private_thread_) {
-        private_thread_->quit();
-        private_thread_->wait(1000);
-        if(private_thread_->isRunning()) {
-            std::cout << "terminate thread" << std::endl;
-            private_thread_->terminate();
-        }
-    }
 }
 
 void BoxedObject::setName(const std::string& name)
@@ -113,13 +93,6 @@ void BoxedObject::fill(QBoxLayout* layout)
 
 void BoxedObject::updateDynamicGui(QBoxLayout *layout)
 {
-}
-
-void BoxedObject::makeThread()
-{
-    if(!private_thread_) {
-        private_thread_ = new QThread;
-    }
 }
 
 bool BoxedObject::canBeDisabled() const

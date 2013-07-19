@@ -44,10 +44,6 @@ void ImageCombiner::fill(QBoxLayout* layout)
         box_->addOutput(output_img_);
 
         insert(layout);
-
-        makeThread();
-        this->moveToThread(private_thread_);
-        private_thread_->start();
     }
 }
 

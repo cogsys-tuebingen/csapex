@@ -45,10 +45,6 @@ void Filter::fill(QBoxLayout* parent)
         }
 
         insert(parent);
-
-        makeThread();
-        this->moveToThread(private_thread_);
-        private_thread_->start();
     }
 }
 
@@ -76,7 +72,8 @@ void Filter::messageArrived(ConnectorIn* source)
     has_img = false;
     has_mask = false;
 
-    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_img_->getMessage());
+    ConnectionType::Ptr msg = input_img_->getMessage();
+    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
     CvMatMessage::Ptr mask_msg;
     if(usesMask()) {
         mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_->getMessage());

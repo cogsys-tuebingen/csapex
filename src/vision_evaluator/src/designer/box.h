@@ -6,6 +6,9 @@
 #include "connector_out.h"
 #include "memento.h"
 
+/// PROJECT
+#include <designer/worker.h>
+
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <QWidget>
@@ -23,11 +26,29 @@ namespace vision_evaluator
 
 class BoxedObject;
 
+
+struct BoxWorker : public QObject
+{
+    Q_OBJECT
+
+public:
+    BoxWorker(Box* parent)
+        : parent_(parent)
+    {}
+
+public Q_SLOTS:
+    void forwardMessage(ConnectorIn* source);
+
+private:
+    Box* parent_;
+};
+
 class Box : public QWidget
 {
     Q_OBJECT
 
     friend class DesignerIO;
+    friend class BoxWorker;
 
 public:
     struct MoveOffset : public QObjectUserData {
@@ -119,6 +140,7 @@ protected:
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
     void enabledChange(bool val);
+    void makeThread();
 
 public Q_SLOTS:
     void deleteBox();
@@ -126,7 +148,6 @@ public Q_SLOTS:
     void enableContent(bool enable);
     void refreshStylesheet();
     void eventModelChanged();
-    void forwardMessage(ConnectorIn* source);
 
 Q_SIGNALS:
     void toggled(bool);
@@ -147,7 +168,10 @@ private:
     BoxedObject* content_;
 
     std::vector<ConnectorIn*> input;
-    std::vector<ConnectorOut*> output;
+    std::vector<ConnectorOut*> output;  
+
+    QThread* private_thread_;
+    BoxWorker worker;
 
     bool down_;
 

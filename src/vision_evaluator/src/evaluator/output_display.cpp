@@ -15,12 +15,12 @@
 #include <QGraphicsSceneEvent>
 
 STATIC_INIT(OutputDisplay, generic, {
-    SelectorProxy::ProxyConstructor c; \
-    c.setType("Output Display"); \
-    c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<OutputDisplay> >(), \
-    boost::lambda::_1, (QWidget*) NULL)); \
-    SelectorProxy::registerProxy(c); \
-});
+                SelectorProxy::ProxyConstructor c; \
+                c.setType("Output Display"); \
+                c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<OutputDisplay> >(), \
+                boost::lambda::_1, (QWidget*) NULL)); \
+                SelectorProxy::registerProxy(c); \
+            });
 
 using namespace vision_evaluator;
 using namespace connection_types;
@@ -41,33 +41,33 @@ bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
 {
     QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
 
-        switch(e->type()) {
-        case QEvent::GraphicsSceneMousePress:
-            down_ = true;
+    switch(e->type()) {
+    case QEvent::GraphicsSceneMousePress:
+        down_ = true;
+        last_pos_ = me->screenPos();
+        e->accept();
+        return true;
+    case QEvent::GraphicsSceneMouseRelease:
+        down_ = false;
+        e->accept();
+        return true;
+    case QEvent::GraphicsSceneMouseMove:
+        if(down_) {
+            QPoint delta = me->screenPos() - last_pos_;
+
             last_pos_ = me->screenPos();
-            e->accept();
-            return true;
-        case QEvent::GraphicsSceneMouseRelease:
-            down_ = false;
-            e->accept();
-            return true;
-        case QEvent::GraphicsSceneMouseMove:
-            if(down_) {
-                QPoint delta = me->screenPos() - last_pos_;
 
-                last_pos_ = me->screenPos();
+            state.width = view_->width() + delta.x();
+            state.height = view_->height() + delta.y();
 
-                state.width = view_->width() + delta.x();
-                state.height = view_->height() + delta.y();
-
-                view_->setFixedSize(QSize(state.width, state.height));
-            }
-            e->accept();
-            return true;
-
-        default:
-            break;
+            view_->setFixedSize(QSize(state.width, state.height));
         }
+        e->accept();
+        return true;
+
+    default:
+        break;
+    }
 
     return false;
 }
@@ -92,6 +92,8 @@ void OutputDisplay::fill(QBoxLayout* layout)
         layout->addWidget(view_);
 
         disable();
+
+        connect(this, SIGNAL(displayRequest(QSharedPointer<QImage>)), this, SLOT(display(QSharedPointer<QImage>)));
     }
 }
 
@@ -139,6 +141,26 @@ void OutputDisplay::connectorChanged()
     }
 }
 
+void OutputDisplay::display(QSharedPointer<QImage> img)
+{
+    if(display_is_empty || img->rect() != pixmap_.rect()) {
+        if(view_->scene()) {
+            delete view_->scene();
+        }
+        view_->setScene(new QGraphicsScene());
+        view_->scene()->installEventFilter(this);
+
+        pixmap_ = QPixmap::fromImage(*img);
+        view_->scene()->addPixmap(pixmap_);
+        display_is_empty = false;
+
+    } else {
+        pixmap_.convertFromImage(*img);
+    }
+         view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);
+              view_->scene()->update();
+}
+
 void OutputDisplay::messageArrived(ConnectorIn* source)
 {
     if(!isEnabled()) {
@@ -153,20 +175,6 @@ void OutputDisplay::messageArrived(ConnectorIn* source)
         QSharedPointer<QImage> img = QtCvImageConverter::Converter<QImage, QSharedPointer>::mat2QImage(mat_msg->value);
         enable();
 
-        if(display_is_empty || img->rect() != pixmap_.rect()) {
-            if(view_->scene()) {
-                delete view_->scene();
-            }
-            view_->setScene(new QGraphicsScene());
-            view_->scene()->installEventFilter(this);
-            pixmap_ = QPixmap::fromImage(*img);
-            view_->scene()->addPixmap(pixmap_);
-            display_is_empty = false;
-
-        } else {
-            pixmap_.convertFromImage(*img);
-        }
-        view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);
-        view_->scene()->update();
+        Q_EMIT displayRequest(img);
     }
 }
