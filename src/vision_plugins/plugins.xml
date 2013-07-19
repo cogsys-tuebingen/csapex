@@ -41,4 +41,7 @@
   <class type="vision_evaluator::SimpleSink" base_class_type="vision_evaluator::BoxedObject">
     <description>none yet</description>
   </class>
+  <class type="vision_plugins::Debayer" base_class_type="vision_evaluator::BoxedObject">
+    <description>none yet</description>
+  </class>
 </library>
