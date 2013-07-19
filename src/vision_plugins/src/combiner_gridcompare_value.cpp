@@ -46,16 +46,9 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         /// COMPUTE
         if(eps_sliders_.size() == private_state_gcv_->channel_count) {
             GridScalar g1, g2;
-            AttrScalar::Params p;
-
-            p.eps    = private_state_gcv_->eps;
-            p.ignore = private_state_gcv_->ignore;
-
-            cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask1, 1.0);
-            cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask2, 1.0);
-
-            cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
-            render_grid(g1, g2, out);
+            prepareGrids(g1,g2, img1, img2, mask1, mask2);
+            cv::Mat out;
+            render_grid(g1, g2, cv::Size(10,10), out);
             return out;
         }
     }
@@ -121,6 +114,15 @@ void GridCompareValue::fill(QBoxLayout *layout)
     GridCompare::fill(layout);
     connect(slide_height_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
     connect(slide_width_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
+}
+
+void GridCompareValue::prepareGrids(cv_grid::GridScalar &g1, cv_grid::GridScalar &g2, const cv::Mat &img1, const cv::Mat &img2, const cv::Mat &mask1, const cv::Mat &mask2)
+{
+    AttrScalar::Params p;
+    p.eps    = private_state_gcv_->eps;
+    p.ignore = private_state_gcv_->ignore;
+    cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask1, 1.0);
+    cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask2, 1.0);
 }
 
 void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)

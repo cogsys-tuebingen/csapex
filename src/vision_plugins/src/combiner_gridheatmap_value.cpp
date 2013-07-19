@@ -36,20 +36,17 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         updateSliderMaxima(img1.cols, img1.rows, img2.cols, img2.rows);
 
         /// COMPUTE
-//        if(eps_sliders_.size() == private_state_gcv_->channel_count) {
-//            GridScalar g1, g2;
-//            AttrScalar::Params p;
+        if(eps_sliders_.size() == private_state_gcv_->channel_count) {
+            GridScalar g1, g2;
+            prepareGrids(g1, g2, img1, img2, mask1, mask2);
 
-//            p.eps    = private_state_gcv_->eps;
-//            p.ignore = private_state_gcv_->ignore;
+            cv::Mat values;
+            grid_heatmap(g1, g2, values);
 
-//            cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask1, 1.0);
-//            cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask2, 1.0);
-
-//            cv::Mat out(img1.rows + 40, img1.cols, CV_8UC3, cv::Scalar(0,0,0));
-//            render_grid(g1, g2, out);
-//            return out;
-//        }
+            cv::Mat out;
+            render_heatmap(values, cv::Size(10,10), out);
+            return out;
+        }
     }
 
     return cv::Mat();
