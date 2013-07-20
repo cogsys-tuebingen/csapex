@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <designer/boxed_object.h>
-#include <designer/worker.h>
 #include <vision_evaluator/image_provider.h>
 #include <vision_evaluator/messages_default.hpp>
 #include <qt_helper.hpp>
@@ -19,28 +18,34 @@ namespace vision_evaluator
 
 class ConnectorOut;
 
-class VirtualCamera;
-
-class VirtualCameraWorker : public Worker
+class VirtualCamera : public BoxedObject
 {
     Q_OBJECT
 
-    friend class VirtualCamera;
-    friend class State;
-
 public:
-    VirtualCameraWorker(VirtualCamera* parent);
+    VirtualCamera();
+    ~VirtualCamera();
 
-    BoxedObject* getParent();
+    virtual void fill(QBoxLayout* layout);
+
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
+    void import(const QString& filename);
 
 public Q_SLOTS:
-    void publish();
-    bool import(const QString& path);
+    virtual void messageArrived(ConnectorIn* source);
+    void tick();
 
+    void importDialog();
+    void toggle(bool on);
+    void compute();
     void updatePose();
 
 private:
+    bool doImport(const QString& filename);
 
+private:
     struct State : public Memento {
         State(VirtualCamera* parent)
             : parent(parent)
@@ -65,7 +70,6 @@ private:
     State state;
 
     ImageProvider::Ptr provider_;
-    QTimer* timer_;
 
     PerspectiveTransformer transformer_;
 
@@ -78,34 +82,6 @@ private:
 
     ConnectorOut* output_view_;
     ConnectorOut* output_map_;
-};
-
-class VirtualCamera : public BoxedObject
-{
-    Q_OBJECT
-
-    friend class VirtualCameraWorker;
-    friend class VirtualCameraWorker::State;
-
-public:
-    VirtualCamera();
-    ~VirtualCamera();
-
-    virtual void fill(QBoxLayout* layout);
-
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
-
-    void import(const QString& filename);
-
-public Q_SLOTS:
-    void importDialog();
-    void toggle(bool on);
-    virtual void messageArrived(ConnectorIn* source);
-
-private:
-    VirtualCameraWorker* worker;
-
 
     QSlider* w;
     QSlider* h;
@@ -121,6 +97,8 @@ private:
 
     QHBoxLayout* additional_layout_;
     QPushButton* file_dialog_;
+
+    bool dirty;
 };
 
 }

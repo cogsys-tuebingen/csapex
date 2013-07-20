@@ -29,34 +29,17 @@ STATIC_INIT(FileImporter, generic, {
 using namespace vision_evaluator;
 using namespace connection_types;
 
-FileImporterWorker::FileImporterWorker(FileImporter *parent)
-    : state(parent), timer_(NULL), output_img_(NULL), output_mask_(NULL)
-{
-    timer_ = new QTimer();
-    timer_->setInterval(100);
-    timer_->start();
-
-    state.last_path_ = QDir::currentPath();
-
-    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
-}
-
-BoxedObject* FileImporterWorker::getParent()
-{
-    return state.parent;
-}
-
-void FileImporterWorker::State::writeYaml(YAML::Emitter& out) const {
+void FileImporter::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
 
-    if(parent->worker->provider_.get() && parent->worker->provider_->getState().get()) {
+    if(parent->provider_.get() && parent->provider_->getState().get()) {
         out << YAML::Key << "sub_state";
         out << YAML::Value << YAML::BeginMap;
-        parent->worker->provider_->getState()->writeYaml(out);
+        parent->provider_->getState()->writeYaml(out);
         out << YAML::EndMap;
     }
 }
-void FileImporterWorker::State::readYaml(const YAML::Node& node) {
+void FileImporter::State::readYaml(const YAML::Node& node) {
     std::string path;
     node["path"] >> path;
     std::cout << "read path: " << path << std::endl;
@@ -66,13 +49,13 @@ void FileImporterWorker::State::readYaml(const YAML::Node& node) {
 
     if(node.FindValue("sub_state")) {
         const YAML::Node& sub_state_node = node["sub_state"];
-        sub_state = parent->worker->provider_->getState();
+        sub_state = parent->provider_->getState();
         sub_state->readYaml(sub_state_node);
-//        parent->worker->provider_->setState(sub_state);
+//        parent->provider_->setState(sub_state);
     }
 }
 
-void FileImporterWorker::publish()
+void FileImporter::tick()
 {
     if(provider_.get()) {
         CvMatMessage::Ptr img(new CvMatMessage);
@@ -85,7 +68,7 @@ void FileImporterWorker::publish()
     }
 }
 
-bool FileImporterWorker::import(const QString& path)
+bool FileImporter::doImport(const QString& path)
 {
     state.last_path_ = path;
     provider_ = ImageProvider::Ptr(ImageProvider::create(state.last_path_.toUtf8().constData()));
@@ -93,7 +76,7 @@ bool FileImporterWorker::import(const QString& path)
     return provider_.get();
 }
 
-void FileImporterWorker::enableBorder(int border)
+void FileImporter::enableBorder(int border)
 {
     if(provider_) {
         std::cout << "border: " << border << std::endl;
@@ -103,22 +86,17 @@ void FileImporterWorker::enableBorder(int border)
 
 
 FileImporter::FileImporter()
-    : worker(NULL)
+    : state(this), output_img_(NULL), output_mask_(NULL)
 {
 }
 
 FileImporter::~FileImporter()
 {
-    if(worker != NULL) {
-        delete worker;
-    }
 }
 
 void FileImporter::fill(QBoxLayout* layout)
 {
-    if(worker == NULL) {
-        worker = new FileImporterWorker(this);
-
+    if(file_dialog_ == NULL) {
         file_dialog_ = new QPushButton("Import");
 
         QVBoxLayout* nested = new QVBoxLayout;
@@ -131,19 +109,19 @@ void FileImporter::fill(QBoxLayout* layout)
 
         connect(file_dialog_, SIGNAL(pressed()), this, SLOT(importDialog()));
 
-        worker->optional_input_filename_ = new ConnectorIn(box_, 0);
-        worker->optional_input_filename_->setLabel("File (optional)");
-        worker->optional_input_filename_->setType(connection_types::StringMessage::make());
-        box_->addInput(worker->optional_input_filename_);
+        optional_input_filename_ = new ConnectorIn(box_, 0);
+        optional_input_filename_->setLabel("File (optional)");
+        optional_input_filename_->setType(connection_types::StringMessage::make());
+        box_->addInput(optional_input_filename_);
 
 
-        worker->output_img_ = new ConnectorOut(box_, 0);
-        worker->output_img_->setLabel("Image");
-        box_->addOutput(worker->output_img_);
+        output_img_ = new ConnectorOut(box_, 0);
+        output_img_->setLabel("Image");
+        box_->addOutput(output_img_);
 
-        worker->output_mask_ = new ConnectorOut(box_, 1);
-        worker->output_mask_->setLabel("Mask");
-        box_->addOutput(worker->output_mask_);
+        output_mask_ = new ConnectorOut(box_, 1);
+        output_mask_->setLabel("Mask");
+        box_->addOutput(output_mask_);
 
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
 
@@ -152,17 +130,13 @@ void FileImporter::fill(QBoxLayout* layout)
 
         nested->addWidget(enable_border);
 
-        connect(enable_border, SIGNAL(stateChanged(int)), worker, SLOT(enableBorder(int)));
+        connect(enable_border, SIGNAL(stateChanged(int)), this, SLOT(enableBorder(int)));
     }
 }
 
 void FileImporter::toggle(bool on)
 {
-    if(on && !worker->timer_->isActive()) {
-        worker->timer_->start();
-    } else if(!on && worker->timer_->isActive()) {
-        worker->timer_->stop();
-    }
+
 }
 
 void FileImporter::messageArrived(ConnectorIn *source)
@@ -182,9 +156,9 @@ void FileImporter::messageArrived(ConnectorIn *source)
 void FileImporter::import(const QString& filename)
 {
     if(!filename.isNull()) {
-        if(worker->import(filename)) {
+        if(additional_layout_ && doImport(filename)) {
             QtHelper::clearLayout(additional_layout_);
-            worker->provider_->insert(additional_layout_);
+            provider_->insert(additional_layout_);
 
             file_dialog_->setText(filename);
 
@@ -198,26 +172,26 @@ void FileImporter::import(const QString& filename)
 
 void FileImporter::importDialog()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Input", worker->state.last_path_, "All files (*.*)");
+    QString filename = QFileDialog::getOpenFileName(0, "Input", state.last_path_, "All files (*.*)");
 
     import(filename);
 }
 
 Memento::Ptr FileImporter::getState() const
 {
-    boost::shared_ptr<FileImporterWorker::State> memento(new FileImporterWorker::State((FileImporter*) this));
-    *memento = worker->state;
+    boost::shared_ptr<FileImporter::State> memento(new FileImporter::State((FileImporter*) this));
+    *memento = state;
 
     return memento;
 }
 
 void FileImporter::setState(Memento::Ptr memento)
 {
-    boost::shared_ptr<FileImporterWorker::State> m = boost::dynamic_pointer_cast<FileImporterWorker::State> (memento);
+    boost::shared_ptr<FileImporter::State> m = boost::dynamic_pointer_cast<FileImporter::State> (memento);
     assert(m.get());
 
-    worker->state = *m;
-    import(worker->state.last_path_);
-    worker->provider_->setState(m->sub_state);
+    state = *m;
+    import(state.last_path_);
+    provider_->setState(m->sub_state);
 
 }

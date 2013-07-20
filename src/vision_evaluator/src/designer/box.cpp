@@ -13,6 +13,7 @@
 #include <QDragMoveEvent>
 #include <QMenu>
 #include <QThread>
+#include <QTimer>
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <opencv2/opencv.hpp>
@@ -76,6 +77,13 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 
     ui->content->installEventFilter(this);
 
+    timer_ = new QTimer();
+    timer_->setInterval(100);
+    timer_->start();
+
+    QObject::connect(timer_, SIGNAL(timeout()), &worker, SLOT(tick()));
+
+
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
@@ -99,9 +107,14 @@ void Box::makeThread()
 
 void Box::enableContent(bool enable)
 {
+    if(enable && !timer_->isActive()) {
+        timer_->start();
+    } else if(!enable && timer_->isActive()) {
+        timer_->stop();
+    }
+
     content_->enable(enable);
 }
-
 
 YAML::Emitter& Box::save(YAML::Emitter& out) const
 {
@@ -127,6 +140,12 @@ void BoxWorker::forwardMessage(ConnectorIn *source)
     parent_->content_->messageArrived(source);
     parent_->content_->setError(false);
 }
+
+void BoxWorker::tick()
+{
+    parent_->content_->tick();
+}
+
 
 void Box::setUUID(const std::string& uuid)
 {

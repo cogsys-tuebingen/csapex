@@ -146,7 +146,6 @@ add_library(designer
     src/designer/memento.cpp
     src/designer/overlay.cpp
     src/designer/selector_proxy.cpp
-    src/designer/worker.cpp
     ${QT_DESIGNER}
     ${QT_RESOURCES}
 )

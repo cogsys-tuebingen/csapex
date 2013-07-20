@@ -6,7 +6,6 @@
 
 /// PROJECT
 #include <designer/boxed_object.h>
-#include <designer/worker.h>
 
 /// SYSTEM
 #include <QPushButton>
@@ -16,23 +15,28 @@ namespace vision_evaluator
 
 class ConnectorOut;
 
-class FileImporter;
-
-class FileImporterWorker : public Worker
+class FileImporter : public BoxedObject
 {
     Q_OBJECT
 
-    friend class FileImporter;
-    friend class State;
-
 public:
-    FileImporterWorker(FileImporter* parent);
+    FileImporter();
+    ~FileImporter();
 
-    BoxedObject* getParent();
+    virtual void fill(QBoxLayout* layout);
+
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
+    void import(const QString& filename);
 
 public Q_SLOTS:
-    void publish();
-    bool import(const QString& path);
+    void messageArrived(ConnectorIn* source);
+    void tick();
+
+    void importDialog();
+    void toggle(bool on);
+    bool doImport(const QString& path);
     void enableBorder(int border);
 
 private:
@@ -56,39 +60,10 @@ private:
 
     ImageProvider::Ptr provider_;
 
-    QTimer* timer_;
-
     ConnectorIn* optional_input_filename_;
 
     ConnectorOut* output_img_;
     ConnectorOut* output_mask_;
-};
-
-class FileImporter : public BoxedObject
-{
-    Q_OBJECT
-
-    friend class FileImporterWorker;
-    friend class FileImporterWorker::State;
-
-public:
-    FileImporter();
-    ~FileImporter();
-
-    virtual void fill(QBoxLayout* layout);
-
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
-
-    void import(const QString& filename);
-
-public Q_SLOTS:
-    void importDialog();
-    void toggle(bool on);
-    void messageArrived(ConnectorIn* source);
-
-private:
-    FileImporterWorker* worker;
 
     QHBoxLayout* additional_layout_;
     QPushButton* file_dialog_;

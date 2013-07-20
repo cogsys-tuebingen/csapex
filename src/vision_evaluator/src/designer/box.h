@@ -6,9 +6,6 @@
 #include "connector_out.h"
 #include "memento.h"
 
-/// PROJECT
-#include <designer/worker.h>
-
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <QWidget>
@@ -38,6 +35,7 @@ public:
 
 public Q_SLOTS:
     void forwardMessage(ConnectorIn* source);
+    void tick();
 
 private:
     Box* parent_;
@@ -171,6 +169,7 @@ private:
     std::vector<ConnectorOut*> output;  
 
     QThread* private_thread_;
+    QTimer* timer_;
     BoxWorker worker;
 
     bool down_;

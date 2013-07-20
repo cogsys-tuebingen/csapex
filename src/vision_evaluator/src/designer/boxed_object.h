@@ -59,6 +59,8 @@ public Q_SLOTS:
     virtual void disable();
     virtual void connectorChanged();
 
+    virtual void tick();
+
 Q_SIGNALS:
     void modelChanged();
 

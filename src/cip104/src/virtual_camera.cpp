@@ -19,38 +19,21 @@ PLUGINLIB_EXPORT_CLASS(vision_evaluator::VirtualCamera, vision_evaluator::BoxedO
 using namespace vision_evaluator;
 using namespace connection_types;
 
-VirtualCameraWorker::VirtualCameraWorker(VirtualCamera *parent)
-    : state(parent), timer_(NULL), map_msg(new CvMatMessage), view_msg(new CvMatMessage), output_view_(NULL), output_map_(NULL)
-{
-    timer_ = new QTimer();
-    timer_->setInterval(100);
-    timer_->start();
-
-    state.last_path_ = QDir::currentPath();
-
-    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(publish()));
-}
-
-BoxedObject* VirtualCameraWorker::getParent()
-{
-    return state.parent;
-}
-
-void VirtualCameraWorker::State::writeYaml(YAML::Emitter& out) const {
+void VirtualCamera::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
     out << YAML::Key << "focal_length" << YAML::Value << focal_length;
     out << YAML::Key << "size" << YAML::Value <<  YAML::BeginSeq << w << h << YAML::EndSeq;
     out << YAML::Key << "pos" << YAML::Value << YAML::BeginSeq << pos[0] << pos[1] << pos[2] << YAML::EndSeq;
     out << YAML::Key << "rot" << YAML::Value << YAML::BeginSeq << rot[0] << rot[1] << rot[2] << YAML::EndSeq;
 
-    if(parent->worker->provider_->getState().get()) {
+    if(parent->provider_->getState().get()) {
         out << YAML::Key << "sub_state";
         out << YAML::Value << YAML::BeginMap;
-        parent->worker->provider_->getState()->writeYaml(out);
+        parent->provider_->getState()->writeYaml(out);
         out << YAML::EndMap;
     }
 }
-void VirtualCameraWorker::State::readYaml(const YAML::Node& node) {
+void VirtualCamera::State::readYaml(const YAML::Node& node) {
     std::string path;
     node["path"] >> path;
     std::cout << "read path: " << path << std::endl;
@@ -60,7 +43,7 @@ void VirtualCameraWorker::State::readYaml(const YAML::Node& node) {
 
     if(node.FindValue("sub_state")) {
         const YAML::Node& sub_state_node = node["sub_state"];
-        sub_state = parent->worker->provider_->getState();
+        sub_state = parent->provider_->getState();
         sub_state->readYaml(sub_state_node);
     }
 
@@ -87,7 +70,7 @@ void VirtualCameraWorker::State::readYaml(const YAML::Node& node) {
     }
 }
 
-void VirtualCameraWorker::updatePose()
+void VirtualCamera::updatePose()
 {
     state.pos[0] = state.parent->x->doubleValue();
     state.pos[1] = state.parent->y->doubleValue();
@@ -101,6 +84,11 @@ void VirtualCameraWorker::updatePose()
     state.h = state.parent->h->value();
     state.focal_length = state.parent->focal_length->doubleValue();
 
+    dirty = true;
+}
+
+void VirtualCamera::compute()
+{
 
 
     cv::Point c(map.cols / 2, map.rows / 2);
@@ -196,9 +184,13 @@ void VirtualCameraWorker::updatePose()
     }
 }
 
-void VirtualCameraWorker::publish()
+void VirtualCamera::tick()
 {
     if(provider_.get()) {
+        if(dirty){
+            compute();
+        }
+
         view_msg = CvMatMessage::Ptr(new CvMatMessage);
         map_msg = CvMatMessage::Ptr(new CvMatMessage);
 
@@ -210,7 +202,7 @@ void VirtualCameraWorker::publish()
     }
 }
 
-bool VirtualCameraWorker::import(const QString& path)
+bool VirtualCamera::doImport(const QString& path)
 {
     state.last_path_ = path;
     provider_ = ImageProvider::Ptr(ImageProvider::create(state.last_path_.toUtf8().constData()));
@@ -227,22 +219,18 @@ bool VirtualCameraWorker::import(const QString& path)
 
 
 VirtualCamera::VirtualCamera()
-    : worker(NULL)
+    : state(this), map_msg(new CvMatMessage), view_msg(new CvMatMessage), output_view_(NULL), output_map_(NULL), dirty(true)
 {
+    state.last_path_ = QDir::currentPath();
 }
 
 VirtualCamera::~VirtualCamera()
 {
-    if(worker != NULL) {
-        delete worker;
-    }
 }
 
 void VirtualCamera::fill(QBoxLayout* layout)
 {
-    if(worker == NULL) {
-        worker = new VirtualCameraWorker(this);
-
+    if(output_view_ == NULL) {
         file_dialog_ = new QPushButton("Import");
 
         QVBoxLayout* nested = new QVBoxLayout;
@@ -255,11 +243,11 @@ void VirtualCamera::fill(QBoxLayout* layout)
 
         connect(file_dialog_, SIGNAL(pressed()), this, SLOT(importDialog()));
 
-        worker->output_view_ = new ConnectorOut(box_, 0);
-        box_->addOutput(worker->output_view_);
+        output_view_ = new ConnectorOut(box_, 0);
+        box_->addOutput(output_view_);
 
-        worker->output_map_ = new ConnectorOut(box_, 1);
-        box_->addOutput(worker->output_map_);
+        output_map_ = new ConnectorOut(box_, 1);
+        box_->addOutput(output_map_);
 
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
 
@@ -274,25 +262,21 @@ void VirtualCamera::fill(QBoxLayout* layout)
         h = QtHelper::makeSlider(layout, "h", 480, 10, 2000);
         focal_length = QtHelper::makeDoubleSlider(layout, "focal length", 55.0, 1.0, 100.0, 0.1);
 
-        connect(x, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
-        connect(y, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
-        connect(z, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
-        connect(roll, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
-        connect(pitch, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
-        connect(yaw, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
-        connect(w, SIGNAL(valueChanged(int)), worker, SLOT(updatePose()));
-        connect(h, SIGNAL(valueChanged(int)), worker, SLOT(updatePose()));
-        connect(focal_length, SIGNAL(valueChanged(double)), worker, SLOT(updatePose()));
+        connect(x, SIGNAL(valueChanged(double)), this, SLOT(updatePose()));
+        connect(y, SIGNAL(valueChanged(double)), this, SLOT(updatePose()));
+        connect(z, SIGNAL(valueChanged(double)), this, SLOT(updatePose()));
+        connect(roll, SIGNAL(valueChanged(double)), this, SLOT(updatePose()));
+        connect(pitch, SIGNAL(valueChanged(double)), this, SLOT(updatePose()));
+        connect(yaw, SIGNAL(valueChanged(double)), this, SLOT(updatePose()));
+        connect(w, SIGNAL(valueChanged(int)), this, SLOT(updatePose()));
+        connect(h, SIGNAL(valueChanged(int)), this, SLOT(updatePose()));
+        connect(focal_length, SIGNAL(valueChanged(double)), this, SLOT(updatePose()));
     }
 }
 
 void VirtualCamera::toggle(bool on)
 {
-    if(on && !worker->timer_->isActive()) {
-        worker->timer_->start();
-    } else if(!on && worker->timer_->isActive()) {
-        worker->timer_->stop();
-    }
+
 }
 
 void VirtualCamera::messageArrived(ConnectorIn *source)
@@ -303,9 +287,9 @@ void VirtualCamera::messageArrived(ConnectorIn *source)
 void VirtualCamera::import(const QString& filename)
 {
     if(!filename.isNull()) {
-        if(worker->import(filename)) {
+        if(doImport(filename)) {
             QtHelper::clearLayout(additional_layout_);
-            worker->provider_->insert(additional_layout_);
+            provider_->insert(additional_layout_);
 
             file_dialog_->setText(filename);
 
@@ -319,25 +303,25 @@ void VirtualCamera::import(const QString& filename)
 
 void VirtualCamera::importDialog()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Input", worker->state.last_path_, "All files (*.*)");
+    QString filename = QFileDialog::getOpenFileName(0, "Input", state.last_path_, "All files (*.*)");
 
     import(filename);
 }
 
 Memento::Ptr VirtualCamera::getState() const
 {
-    boost::shared_ptr<VirtualCameraWorker::State> memento(new VirtualCameraWorker::State((VirtualCamera*) this));
-    *memento = worker->state;
+    boost::shared_ptr<VirtualCamera::State> memento(new VirtualCamera::State((VirtualCamera*) this));
+    *memento = state;
 
     return memento;
 }
 
 void VirtualCamera::setState(Memento::Ptr memento)
 {
-    boost::shared_ptr<VirtualCameraWorker::State> m = boost::dynamic_pointer_cast<VirtualCameraWorker::State> (memento);
+    boost::shared_ptr<VirtualCamera::State> m = boost::dynamic_pointer_cast<VirtualCamera::State> (memento);
     assert(m.get());
 
-    worker->state = *m;
+    state = *m;
 
     x->setDoubleValue(m->pos[0]);
     y->setDoubleValue(m->pos[1]);
@@ -347,6 +331,6 @@ void VirtualCamera::setState(Memento::Ptr memento)
     h->setValue(m->h);
     focal_length->setDoubleValue(m->focal_length);
 
-    worker->provider_->setState(m->sub_state);
+    provider_->setState(m->sub_state);
 
 }

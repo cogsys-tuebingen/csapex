@@ -1,7 +1,7 @@
 /// PROJECT
 #include <evaluator/evaluation_window.h>
-#include <designer/worker.h>
 #include <designer/box.h>
+#include <designer/boxed_object.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -32,14 +32,11 @@ struct EvaluationApplication : public QApplication {
         } catch(std::exception& e) {
             BoxedObject* bo = dynamic_cast<BoxedObject*> (receiver);
             Box* box = dynamic_cast<Box*> (receiver);
-            Worker* worker = dynamic_cast<Worker*> (receiver);
 
             if(bo) {
                 bo->setError(true, e.what());
             } else if(box) {
                 box->getContent()->setError(true, e.what());
-            } else if(worker) {
-                worker->getParent()->setError(true, e.what());
             } else {
                 std::cerr << "Uncatched exception:" << e.what() << std::endl;
             }

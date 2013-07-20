@@ -142,3 +142,8 @@ void BoxedObject::connectorChanged()
 {
 
 }
+
+void BoxedObject::tick()
+{
+
+}
