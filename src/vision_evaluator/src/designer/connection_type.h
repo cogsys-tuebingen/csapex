@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
+#include <yaml-cpp/yaml.h>
 
 class ConnectionType
 {
@@ -18,14 +19,25 @@ public:
     static ConnectionType::Ptr makeDefault();
 
     virtual bool canConnectTo(ConnectionType::Ptr other_side);
+    virtual bool acceptsConnectoFrom(ConnectionType* other_side);
 
     std::string name();
 
+    virtual void write(std::ostream& out);
+
+    virtual void writeYaml(YAML::Emitter& yaml) = 0;
+    virtual void readYaml(YAML::Node& node) = 0;
 private:
     std::string name_;
 
 public:
     static ConnectionType::Ptr default_;
 };
+
+inline std::ostream& operator << (std::ostream& out, ConnectionType& obj)
+{
+    obj.write(out);
+    return out;
+}
 
 #endif // CONNECTION_TYPE_H

@@ -49,10 +49,6 @@ void ImageCombiner::fill(QBoxLayout* layout)
 
 void ImageCombiner::messageArrived(ConnectorIn* source)
 {
-    if(!isEnabled()) {
-        return;
-    }
-
     if(source == input_img_a_) {
         has_img_a = true;
     } else if(source == input_mask_a_) {

@@ -163,11 +163,6 @@ void OutputDisplay::display(QSharedPointer<QImage> img)
 
 void OutputDisplay::messageArrived(ConnectorIn* source)
 {
-    if(!isEnabled()) {
-        disable();
-        return;
-    }
-
     ConnectionType::Ptr msg = source->getMessage();
     CvMatMessage::Ptr mat_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
 

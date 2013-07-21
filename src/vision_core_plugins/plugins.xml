@@ -2,4 +2,10 @@
 <class type="vision_evaluator::TextInput" base_class_type="vision_evaluator::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="vision_evaluator::ExportCout" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="vision_evaluator::ImportCin" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
 </library>

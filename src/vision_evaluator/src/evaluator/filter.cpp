@@ -50,10 +50,6 @@ void Filter::fill(QBoxLayout* parent)
 
 void Filter::messageArrived(ConnectorIn* source)
 {
-    if(!isEnabled()) {
-        return;
-    }
-
     if(source == input_img_) {
         has_img = true;
     } else if(source == input_mask_) {

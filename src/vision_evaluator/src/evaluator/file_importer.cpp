@@ -86,7 +86,7 @@ void FileImporter::enableBorder(int border)
 
 
 FileImporter::FileImporter()
-    : state(this), output_img_(NULL), output_mask_(NULL)
+    : state(this), output_img_(NULL), output_mask_(NULL), additional_layout_(NULL), file_dialog_(NULL)
 {
 }
 
@@ -141,10 +141,6 @@ void FileImporter::toggle(bool on)
 
 void FileImporter::messageArrived(ConnectorIn *source)
 {
-    if(!isEnabled()) {
-        return;
-    }
-
     StringMessage::Ptr msg = boost::dynamic_pointer_cast<StringMessage> (source->getMessage());
 
     if(msg) {

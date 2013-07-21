@@ -10,18 +10,54 @@
 namespace vision_evaluator {
 namespace connection_types {
 
+struct Message : public ConnectionType
+{
+protected:
+    Message(const std::string& name)
+        : ConnectionType(name)
+    {}
+
+public:
+    virtual ConnectionType::Ptr clone() {
+        Ptr new_msg(new Message("anything"));
+        return new_msg;
+    }
+
+    static ConnectionType::Ptr make(){
+        Ptr new_msg(new Message("anything"));
+        return new_msg;
+    }
+
+    bool acceptsConnectoFrom(ConnectionType* other_side) {
+        return true;
+    }
+
+    void writeYaml(YAML::Emitter& yaml) {
+
+    }
+    void readYaml(YAML::Node& node) {
+
+    }
+};
+
 template <class Type, class Instance>
-struct MessageTemplate : public ConnectionType {
+struct MessageTemplate : public Message {
     typedef boost::shared_ptr<Instance> Ptr;
 
     MessageTemplate(const std::string& name)
-        : ConnectionType(name)
+        : Message(name)
     {}
 
     virtual ConnectionType::Ptr clone() {
         Ptr new_msg(new Instance);
         new_msg->value = value;
         return new_msg;
+    }
+
+    void writeYaml(YAML::Emitter& yaml) {
+        yaml << YAML::Key << "value" << YAML::Value << "not implemented";
+    }
+    void readYaml(YAML::Node& node) {
     }
 
     Type value;
@@ -34,7 +70,7 @@ struct CvMatMessage : public MessageTemplate<cv::Mat, CvMatMessage>
     {}
 
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new CvMatMessage());
+        Ptr new_msg(new CvMatMessage);
         value.copyTo(new_msg->value);
 
         return new_msg;
@@ -44,7 +80,6 @@ struct CvMatMessage : public MessageTemplate<cv::Mat, CvMatMessage>
         Ptr new_msg(new CvMatMessage);
         return new_msg;
     }
-
 };
 
 struct StringMessage : public MessageTemplate<std::string, StringMessage>
@@ -56,6 +91,13 @@ struct StringMessage : public MessageTemplate<std::string, StringMessage>
     static ConnectionType::Ptr make(){
         Ptr new_msg(new StringMessage);
         return new_msg;
+    }
+
+    void writeYaml(YAML::Emitter& yaml) {
+        yaml << YAML::Key << "value" << YAML::Value << value;
+    }
+    void readYaml(YAML::Node& node) {
+        node["value"] >> value;
     }
 };
 

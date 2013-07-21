@@ -140,6 +140,7 @@ add_library(designer
     src/designer/connector_in.cpp
     src/designer/connector_out.cpp
     src/designer/connection_type.cpp
+    src/designer/connection_type_manager.cpp
     src/designer/design_board.cpp
     src/designer/designer.cpp
     src/designer/designerio.cpp

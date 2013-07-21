@@ -138,13 +138,17 @@ void Box::stop()
 
 void BoxWorker::forwardMessage(ConnectorIn *source)
 {
-    parent_->content_->messageArrived(source);
-    parent_->content_->setError(false);
+    if(parent_->isVisible() && parent_->content_->isEnabled()) {
+        parent_->content_->messageArrived(source);
+        parent_->content_->setError(false);
+    }
 }
 
 void BoxWorker::tick()
 {
-    parent_->content_->tick();
+    if(parent_->isVisible() && parent_->content_->isEnabled()) {
+        parent_->content_->tick();
+    }
 }
 
 

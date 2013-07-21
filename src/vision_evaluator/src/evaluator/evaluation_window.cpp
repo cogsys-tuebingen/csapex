@@ -7,7 +7,7 @@
 
 /// PROJECT
 #include <designer/box_manager.h>
-#include <designer/connection_type.h>
+#include <designer/connection_type_manager.h>
 #include <utils/stream_interceptor.h>
 
 /// SYSTEM
@@ -33,6 +33,10 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     qRegisterMetaType<std::string>("std::string");
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
+    ConnectionTypeManager::registerMessage("std::string", boost::bind(&connection_types::StringMessage::make));
+    ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::CvMatMessage::make));
+
+    /// @TODO: inside ConnectionTypeManager
     ConnectionType::default_.reset(new connection_types::CvMatMessage);
 
     ui->setupUi(this);

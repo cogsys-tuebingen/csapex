@@ -36,6 +36,8 @@ include_directories(include
 
 add_library(vision_core_plugins
     src/text_input.cpp
+    src/import_cin.cpp
+    src/export_cout.cpp
     ${MOC}
 )
 
