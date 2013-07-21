@@ -76,6 +76,7 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     setObjectName(ui->enablebtn->text());
 
     ui->content->installEventFilter(this);
+    ui->enablebtn->installEventFilter(this);
 
     timer_ = new QTimer();
     timer_->setInterval(100);
@@ -297,7 +298,7 @@ Box::~Box()
 bool Box::eventFilter(QObject* o, QEvent* e)
 {
     QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
-    if(o == ui->content) {
+    if(o == ui->content || o == ui->enablebtn) {
         if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
             down_ = true;
         } else if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::LeftButton) {

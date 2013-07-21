@@ -93,9 +93,6 @@ QFrame#boxframe vision_evaluator--Connector {
          <layout class="QHBoxLayout" name="header">
           <item>
            <widget class="QCheckBox" name="enablebtn">
-            <property name="mouseTracking">
-             <bool>true</bool>
-            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
