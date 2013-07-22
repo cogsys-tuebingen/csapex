@@ -12,7 +12,7 @@ namespace cv_grid {
 /**
  * @brief The Grid container.
  */
-class GridT {
+class Grid {
 public:
     /**
      * @brief Return amount of rows.
@@ -32,7 +32,7 @@ public:
         return max_col_ - min_col_;
     }
 
-    void resetROI()
+    virtual void resetROI()
     {
         min_row_= 0;
         min_col_= 0;
@@ -40,7 +40,7 @@ public:
         max_col_= cols_;
     }
 
-    void setROI(int row, int col, int height, int width)
+    virtual void setROI(int row, int col, int height, int width)
     {
         assert(row < rows_);
         assert(col < cols_);
@@ -56,7 +56,7 @@ public:
 
 
 protected:
-    GridT(const int rows, const int cols) :
+    Grid(const int rows, const int cols) :
         rows_(rows),
         cols_(cols),
         min_row_(0),
@@ -159,14 +159,14 @@ public:
  *          It can be observed as a functional wrapper class.
  */
 template<class Cell, class Rect>
-class Grid_ : public GridT
+class Grid_ : public Grid
 {
 public:
     /**
      * @brief Grid default constructor.
      */
     Grid_() :
-        GridT(0,0)
+        Grid(0,0)
     {
     }
 
@@ -176,7 +176,7 @@ public:
      * @param cols      the amount of cols
      */
     Grid_(const int rows, const int cols) :
-        GridT(rows, cols),
+        Grid(rows, cols),
         cells_(new Cell[rows * cols])
     {
     }
@@ -186,7 +186,7 @@ public:
      * @param g         another grid
      */
     Grid_(const Grid_& g, const bool deep_copy = false) :
-        GridT(g.rows(), g.cols())
+        Grid(g.rows(), g.cols())
     {
         if(deep_copy) {
             cells_.reset(new Cell[rows_ * cols_]);
@@ -197,7 +197,7 @@ public:
     }
 
     Grid_(const Grid_& g, const Rect &roi, const bool deep_copy = false) :
-        GridT(g.rows_, g.cols_)
+        Grid(g.rows_, g.cols_)
     {
 
         if(deep_copy) {
@@ -219,7 +219,17 @@ public:
 
     void setROI(Rect roi)
     {
-        GridT::setROI(roi.y, roi.x, roi.height, roi.width);
+        Grid::setROI(roi.y, roi.x, roi.height, roi.width);
+    }
+
+    void setROI(int row, int col, int height, int width)
+    {
+        Grid::setROI(row, col, height, width);
+    }
+
+    void resetROI()
+    {
+        Grids::resetROI();
     }
 
     Grid_& getROI(Rect roi, const bool deep_copy = false)
@@ -244,7 +254,7 @@ public:
 
         int elements = g.cols_ * g.rows_;
         cells_.reset(new Cell[elements]);
-        std::copy(g.cells_, g.cells_ + elements, cells_.get());
+        std::copy(g.cells_.get(), g.cells_.get() + elements, cells_.get());
         return *this;
     }
 
