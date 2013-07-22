@@ -127,17 +127,15 @@ inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
     assert(g1.cols() <= g2.cols());
     assert(g1.rows() <= g2.rows());
 
-    int col_iterations = g2.cols() - g1.cols();
-    int row_iterations = g2.rows() - g1.rows();
+    int col_iterations = g2.cols() - g1.cols() + 1;
+    int row_iterations = g2.rows() - g1.rows() + 1;
 
-    vals = cv::Mat_<float>(row_iterations, col_iterations);
-    vals = cv::Scalar::all(0.0);
-
-    for(int i = 0 ; i < row_iterations ; i++) {
-        for(int j = 0 ; j < col_iterations ; j++) {
+    vals = cv::Mat(row_iterations, col_iterations, CV_32F, cv::Scalar::all(0));
+    for(int i = 0 ; i <  col_iterations ; i++) {
+        for(int j = 0 ; j < row_iterations ; j++) {
             std::pair<int, int> counts;
             int valid;
-            g2.setROI(j,i, g1.cols(), g1.rows());
+            g2.setROI(j,i, g1.rows(), g1.cols());
             grid_count(g1, g2, counts, valid);
             g2.resetROI();
             if(valid > 0) {
@@ -145,7 +143,6 @@ inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
             }
         }
     }
-    vals = cv::Mat();
 }
 
 inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv::Mat &out)

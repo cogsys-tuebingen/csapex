@@ -36,7 +36,8 @@ protected:
     GridT(const int rows, const int cols) :
         rows_(rows),
         cols_(cols),
-        offset_(0),
+        min_row_(0),
+        min_col_(0),
         max_row_(rows),
         max_col_(cols),
         step_(cols)
@@ -45,7 +46,8 @@ protected:
 
     int rows_;          /// amount of rows
     int cols_;          /// amount of cols
-    int offset_;
+    int min_row_;
+    int min_col_;
     int max_row_;
     int max_col_;
     int step_;
@@ -167,7 +169,7 @@ public:
             cells_.reset(new Cell[g.rows_ * g.cols_]);
             std::copy(g.cells_.get(), g.cells_.get() + cols_ * rows_, cells_.get());
         } else {
-            cells_.reset(g.cells_);
+            cells_.reset(g.cells_.get());
         }
     }
 
@@ -176,11 +178,12 @@ public:
     {
 
         if(deep_copy) {
-            int limit = max_row_ * step_ + max_col_;
             cells_.reset(new Cell[roi.width * roi.height]);
-            std::copy(g.cells_.get() + offset_, g.cells_.get() + limit, cells_.get());
+            int limit  = max_row_ * step_+ max_col_;
+            int offset = min_row_ * step_+ min_col_;
+            std::copy(g.cells_.get() + offset, g.cells_.get() + limit, cells_.get());
         } else {
-            cells_.reset(g.cells_);
+            cells_.reset(g.cells_.get());
         }
     }
 
@@ -200,17 +203,19 @@ public:
     {
         assert(row < rows_);
         assert(col < cols_);
-        assert(row + height < rows_);
-        assert(col + width < cols_);
+        assert(row + height <= rows_);
+        assert(col + width <= cols_);
 
-        offset_  = col + row * step_;
+        min_row_ = row;
+        min_col_ = min_col_;
         max_row_ = row + height;
         max_col_ = col + width;
     }
 
     void resetROI()
     {
-        offset_ = 0;
+        min_row_= 0;
+        min_col_= 0;
         max_row_= rows_;
         max_col_= cols_;
     }
@@ -229,12 +234,15 @@ public:
     {
         cols_    = g.cols_;
         rows_    = g.rows_;
-        offset_  = g.offset_;
+        min_row_ = g.min_row_;
+        min_col_ = g.min_col_;
         max_row_ = g.max_row_;
         max_col_ = g.max_col_;
         step_    = g.step_;
 
-        cells_ = g.cells_;
+        int elements = g.cols_ * g.rows_;
+        cells_.reset(new Cell[elements]);
+        std::copy(g.cells_.get(), g.cells_.get() + elements, cells_.get());
         return *this;
     }
 
@@ -246,10 +254,10 @@ public:
      */
     Cell & operator() (const unsigned int row, const unsigned int col)
     {
-        assert(col < max_col_);
-        assert(row < max_row_);
+        assert(min_col_ + col < max_col_);
+        assert(min_row_ + row < max_row_);
 
-        return cells_[offset_ + col + row * step_];
+        return cells_[min_col_ + col + (min_row_ + row) * step_];
     }
 
     /**
@@ -260,10 +268,10 @@ public:
      */
     Cell & operator() (const unsigned int row, const unsigned int col) const
     {
-        assert(col < max_col_);
-        assert(row < max_row_);
+        assert(min_col_ + col < max_col_);
+        assert(min_row_ + row < max_row_);
 
-        return const_cast<Cell&> (cells_[offset_ + col + row * step_]);
+        return const_cast<Cell&> (cells_[min_col_ + col + (min_row_ + row) * step_]);
     }
 
     /**
@@ -273,15 +281,16 @@ public:
      */
     bool operator == (const Grid_<Cell, Rect> &g)
     {
-        assert(cols_ == g.cols_);
-        assert(rows_ == g.rows_);
+        assert(max_col_ - min_col_ == g.cols_);
+        assert(max_row_ - min_row_ == g.rows_);
 
         bool res = true;
 
-        int limit = max_row_ * step_ + max_col_;
-        for(int i = offset_ ; i < limit ; i++)
-            res &= g.cells_[i] == cells_[i];
-
+        for(int i = 0 ; i < g.rows_ ; i++) {
+            for(int j = 0 ; j < g.cols_ ; g++) {
+                res &= g.cells_[(i + g.min_row_) * g.step_ + j + g.min_col_] == cells_[(i + min_row_) * step_ + min_col_ + j];
+            }
+        }
         return res;
     }
 

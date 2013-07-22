@@ -50,6 +50,7 @@ public:
     cv::Scalar      scalar;
     cv::Scalar      eps;
     cv::Vec<bool,4> ignore;
+            int pixels;
 };
 
 class AttrHistogram {
