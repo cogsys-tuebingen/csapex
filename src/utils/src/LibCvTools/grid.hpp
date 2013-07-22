@@ -20,7 +20,7 @@ public:
      */
     int rows() const
     {
-        return rows_;
+        return max_row_ - min_row_;
     }
 
     /**
@@ -29,8 +29,31 @@ public:
      */
     int cols() const
     {
-        return cols_;
+        return max_col_ - min_col_;
     }
+
+    void resetROI()
+    {
+        min_row_= 0;
+        min_col_= 0;
+        max_row_= rows_;
+        max_col_= cols_;
+    }
+
+    void setROI(int row, int col, int height, int width)
+    {
+        assert(row < rows_);
+        assert(col < cols_);
+        assert(row + height <= rows_);
+        assert(col + width <= cols_);
+
+        min_row_ = row;
+        min_col_ = col;
+        max_row_ = row + height;
+        max_col_ = col + width;
+    }
+
+
 
 protected:
     GridT(const int rows, const int cols) :
@@ -163,13 +186,13 @@ public:
      * @param g         another grid
      */
     Grid_(const Grid_& g, const bool deep_copy = false) :
-        GridT(g.rows_, g.cols_)
+        GridT(g.rows(), g.cols())
     {
         if(deep_copy) {
-            cells_.reset(new Cell[g.rows_ * g.cols_]);
-            std::copy(g.cells_.get(), g.cells_.get() + cols_ * rows_, cells_.get());
+            cells_.reset(new Cell[rows_ * cols_]);
+            copy(g);
         } else {
-            cells_.reset(g.cells_.get());
+            cells_ = boost::shared_array<Cell>(g.cells_);
         }
     }
 
@@ -179,11 +202,11 @@ public:
 
         if(deep_copy) {
             cells_.reset(new Cell[roi.width * roi.height]);
-            int limit  = max_row_ * step_+ max_col_;
-            int offset = min_row_ * step_+ min_col_;
-            std::copy(g.cells_.get() + offset, g.cells_.get() + limit, cells_.get());
+            setROI(roi);
+            copy(g);
         } else {
-            cells_.reset(g.cells_.get());
+            cells_ = boost::shared_array<Cell>(g.cells_);
+            setROI(roi);
         }
     }
 
@@ -196,28 +219,7 @@ public:
 
     void setROI(Rect roi)
     {
-        setROI_(roi.y, roi.x, roi.height, roi.width);
-    }
-
-    void setROI(int row, int col, int height, int width)
-    {
-        assert(row < rows_);
-        assert(col < cols_);
-        assert(row + height <= rows_);
-        assert(col + width <= cols_);
-
-        min_row_ = row;
-        min_col_ = min_col_;
-        max_row_ = row + height;
-        max_col_ = col + width;
-    }
-
-    void resetROI()
-    {
-        min_row_= 0;
-        min_col_= 0;
-        max_row_= rows_;
-        max_col_= cols_;
+        GridT::setROI(roi.y, roi.x, roi.height, roi.width);
     }
 
     Grid_& getROI(Rect roi, const bool deep_copy = false)
@@ -242,7 +244,7 @@ public:
 
         int elements = g.cols_ * g.rows_;
         cells_.reset(new Cell[elements]);
-        std::copy(g.cells_.get(), g.cells_.get() + elements, cells_.get());
+        std::copy(g.cells_, g.cells_ + elements, cells_.get());
         return *this;
     }
 
@@ -296,6 +298,16 @@ public:
 
 private:
     boost::shared_array<Cell> cells_;
+
+    void copy(const Grid_& src)
+    {
+        for(int i = 0 ; i < rows_ ; i++) {
+            for(int j = 0 ; j < cols_ ; j++) {
+                cells_[i * step_ + j]  = src.cells_[(i + src.min_row_) * src.step_ + j + src.min_col_];
+            }
+        }
+    }
+
 };
 }
 #endif // GRID_HPP
