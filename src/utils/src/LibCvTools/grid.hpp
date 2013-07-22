@@ -229,7 +229,7 @@ public:
 
     void resetROI()
     {
-        Grids::resetROI();
+        Grid::resetROI();
     }
 
     Grid_& getROI(Rect roi, const bool deep_copy = false)
