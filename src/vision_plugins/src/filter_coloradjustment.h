@@ -23,6 +23,7 @@ public:
 
 private Q_SLOTS:
     virtual void messageArrived(ConnectorIn *source);
+    virtual void updateDynamicGui(QBoxLayout *layout);
     void setPreset(int index);
 
 private:
@@ -39,10 +40,8 @@ private:
     ConnectorOut  *output_;
 
     Preset  active_preset_;
-    int     channel_count_;
 
     /// layout and computation
-    QBoxLayout                 *layout_;
     QCheckBox                  *check_normalize_;
     QSlider                    *slide_lightness_;
     QComboBox                  *combo_preset_;
@@ -53,12 +52,12 @@ private:
     /// helpers
     void addLightness(cv::Mat &img);
     void prepareSliderPair(QDoubleSlider *min, QDoubleSlider *max);
-    void updateSliders();
 
     /// MEMENTO
     void updateState();
     class State : public Memento {
     public:
+        State();
         void readYaml(const YAML::Node &node);
         void writeYaml(YAML::Emitter &out) const;
 

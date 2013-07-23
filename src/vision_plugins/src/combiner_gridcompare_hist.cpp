@@ -31,8 +31,8 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
         /// PREPARE
         if(img1.channels() != img2.channels())
             throw std::runtime_error("Channel count is not matching!");
-//        if(img1.rows != img2.rows || img1.cols != img2.cols)
-//            throw std::runtime_error("Dimension is not matching!");
+        //        if(img1.rows != img2.rows || img1.cols != img2.cols)
+        //            throw std::runtime_error("Dimension is not matching!");
 
 
         if(private_state_gch_->channel_count != img1.channels()) {
@@ -94,9 +94,11 @@ void GridCompareHist::updateDynamicGui(QBoxLayout *layout)
 
 void GridCompareHist::updateState(int value)
 {
-    private_state_gch_->combo_index = combo_compare_->currentIndex();
-    private_state_gch_->grid_width  = slide_width_->value();
-    private_state_gch_->grid_height = slide_height_->value();
+    if(!signalsBlocked()) {
+        private_state_gch_->combo_index = combo_compare_->currentIndex();
+        private_state_gch_->grid_width  = slide_width_->value();
+        private_state_gch_->grid_height = slide_height_->value();
+    }
 }
 
 void GridCompareHist::fill(QBoxLayout *layout)
@@ -174,9 +176,11 @@ void GridCompareHist::setState(Memento::Ptr memento)
     private_state_gch_ = boost::dynamic_pointer_cast<State>(state_).get();
     assert(private_state_gch_);
 
+    blockSignals(true);
     slide_height_->setValue(private_state_gch_->grid_height);
     slide_width_->setValue(private_state_gch_->grid_width);
     combo_compare_->setCurrentIndex(private_state_gch_->combo_index);
+    blockSignals(false);
 
     Q_EMIT modelChanged();
 }

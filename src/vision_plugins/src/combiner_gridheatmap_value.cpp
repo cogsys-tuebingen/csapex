@@ -56,10 +56,13 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
 
 void GridHeatMapValue::updateState(int value)
 {
-    private_state_ghv_->grid_width  = slide_width_->value();
-    private_state_ghv_->grid_height = slide_height_->value();
-    private_state_ghv_->grid_width_add1  = slide_width_add1_->value();
-    private_state_ghv_->grid_height_add1 = slide_height_add1_->value();
+    if(!signalsBlocked()) {
+        private_state_ghv_->grid_width       = slide_width_->value();
+        private_state_ghv_->grid_height      = slide_height_->value();
+        private_state_ghv_->grid_width_add1  = slide_width_add1_->value();
+        private_state_ghv_->grid_height_add1 = slide_height_add1_->value();
+        GridCompareValue::prepareParams(private_state_ghv_->eps,private_state_ghv_->ignore);
+    }
 }
 
 void GridHeatMapValue::addSliders(QBoxLayout *layout)
@@ -115,19 +118,20 @@ void GridHeatMapValue::setState(Memento::Ptr memento)
     private_state_ghv_ = boost::dynamic_pointer_cast<State>(state_).get();
     assert(private_state_ghv_);
 
-
+    blockSignals(true);
     slide_height_->setValue(private_state_ghv_->grid_height);
     slide_width_->setValue(private_state_ghv_->grid_width);
     slide_height_add1_->setValue(private_state_ghv_->grid_height_add1);
     slide_width_add1_->setValue(private_state_ghv_->grid_width_add1);
+    blockSignals(false);
 
     Q_EMIT modelChanged();
 }
 
 GridHeatMapValue::State::State() :
     GridCompareValue::State::State(),
-    grid_width_add1(48),
-    grid_height_add1(64),
+    grid_width_add1(64),
+    grid_height_add1(48),
     grid_width_max_add1(640),
     grid_height_max_add1(480)
 {

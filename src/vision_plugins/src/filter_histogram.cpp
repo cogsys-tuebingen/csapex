@@ -49,7 +49,7 @@ void Histogram::setState(Memento::Ptr memento)
 
     state_ = *m;
     channel_count_ = state_.channel_count;
-    updateSliders();
+    Q_EMIT modelChanged();
     for(int i = 0 ; i < channel_count_ ; i++) {
         bin_counts_[i]->setValue(m->bin_counts[i]);
     }
@@ -60,8 +60,6 @@ void Histogram::setState(Memento::Ptr memento)
 
 void Histogram::fill(QBoxLayout *layout)
 {
-    layout_ = layout;
-
     if(input_ == NULL || output_histogram_ == NULL) {
         /// add input
         input_ = new ConnectorIn(box_, 0);
@@ -75,7 +73,7 @@ void Histogram::fill(QBoxLayout *layout)
         QHBoxLayout *zoom_layout = new QHBoxLayout;
         slide_zoom_ = QtHelper::makeDoubleSlider(zoom_layout, "Zoom ", 1.0, -20.0, 20.0, 0.01);
         container_zoom_ = QtHelper::wrapLayout(zoom_layout);
-        layout_->addWidget(container_zoom_);
+        layout->addWidget(container_zoom_);
 
     }
 }
@@ -87,7 +85,7 @@ void Histogram::messageArrived(ConnectorIn *source)
 
     if(m->value.channels() != channel_count_) {
         channel_count_ = m->value.channels();
-        updateSliders();
+        Q_EMIT modelChanged();
 
         if(channel_count_ > colors_.size())
             colors_.push_back(randomColor());
@@ -95,6 +93,9 @@ void Histogram::messageArrived(ConnectorIn *source)
     }
 
     updateState();
+
+    if(bin_counts_.size() != state_.channel_count)
+        return;
 
     cv::Mat bins, ranges;
     prepare(bins, ranges);
@@ -106,6 +107,25 @@ void Histogram::messageArrived(ConnectorIn *source)
     cv_histogram::render_histogram(histograms, bins, colors_, histogram_img, slide_zoom_->doubleValue());
     histogram->value = histogram_img;
     output_histogram_->publish(histogram);
+}
+
+void Histogram::updateDynamicGui(QBoxLayout *layout)
+{
+    bin_counts_.clear();
+    QVBoxLayout *internal_layout;
+
+    if(container_bin_counts_ != NULL) {
+        container_bin_counts_->deleteLater();
+    }
+
+    internal_layout = new QVBoxLayout;
+    for(int i = 0 ; i < channel_count_; i++) {
+        std::stringstream ch;
+        ch << "Ch." << i+1 << " bins";
+        bin_counts_.push_back(QtHelper::makeSlider(internal_layout, ch.str(), HISTOGRAM_BINS_STD, 1, HISTOGRAM_BINS_MAX));
+    }
+    container_bin_counts_ = QtHelper::wrapLayout(internal_layout);
+    layout->addWidget(container_bin_counts_);
 }
 
 void Histogram::prepare(cv::Mat &bins, cv::Mat &ranges)
@@ -126,25 +146,6 @@ void Histogram::updateState()
     state_.zoom = slide_zoom_->doubleValue();
 }
 
-void Histogram::updateSliders()
-{
-    bin_counts_.clear();
-    QVBoxLayout *internal_layout;
-
-    if(container_bin_counts_ != NULL) {
-        container_bin_counts_->deleteLater();
-    }
-
-    internal_layout = new QVBoxLayout;
-    for(int i = 0 ; i < channel_count_; i++) {
-        std::stringstream ch;
-        ch << "Ch." << i+1 << " bins";
-        bin_counts_.push_back(QtHelper::makeSlider(internal_layout, ch.str(), HISTOGRAM_BINS_STD, 1, HISTOGRAM_BINS_MAX));
-    }
-    container_bin_counts_ = QtHelper::wrapLayout(internal_layout);
-    layout_->addWidget(container_bin_counts_);
-}
-
 cv::Scalar Histogram::randomColor()
 {
     srand(time(0));
@@ -155,7 +156,7 @@ cv::Scalar Histogram::randomColor()
     return s;
 }
 
-/// MEMENTO
+/// MEMENTO ------------------------------------------------------------------------------------
 void Histogram::State::readYaml(const YAML::Node &node)
 {
     const YAML::Node &values = node["bin_counts"];

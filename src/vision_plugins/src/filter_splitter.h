@@ -24,7 +24,7 @@ private Q_SLOTS:
 private:
     ConnectorIn *input_;
 
-    void updateOutputs();
+    virtual void updateDynamicGui(QBoxLayout *layout);
 
     class State : public Memento {
     public:

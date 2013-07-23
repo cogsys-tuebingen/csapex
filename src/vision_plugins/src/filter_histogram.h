@@ -28,7 +28,7 @@ public:
 
 private Q_SLOTS:
     void messageArrived(ConnectorIn* source);
-
+    void updateDynamicGui(QBoxLayout *layout);
 
 private:
     /// connectors
@@ -37,7 +37,6 @@ private:
 
     /// layout and computation
     int            channel_count_;
-    QBoxLayout    *layout_;
     QDoubleSlider *slide_zoom_;
     QWidget       *container_zoom_;
     QWidget       *container_bin_counts_;
@@ -46,7 +45,6 @@ private:
     std::vector<cv::Scalar> colors_;
 
     void prepare(cv::Mat &bins, cv::Mat &ranges);
-    void updateSliders();
     cv::Scalar randomColor();
 
     /// memento

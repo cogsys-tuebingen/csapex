@@ -40,17 +40,17 @@ void Splitter::messageArrived(ConnectorIn *source)
 
     if(state_.channel_count_ != channels.size()) {
         state_.channel_count_ = channels.size();
-        updateOutputs();
+        Q_EMIT modelChanged();
     }
 
-    for(int i = 0 ; i < state_.channel_count_ ; i++) {
+    for(int i = 0 ; i < box_->countOutputs() ; i++) {
         CvMatMessage::Ptr channel_out(new CvMatMessage);
         channel_out->value = channels[i];
         box_->getOutput(i)->publish(channel_out);
     }
 }
 
-void Splitter::updateOutputs()
+void Splitter::updateDynamicGui(QBoxLayout *layout)
 {
     int n = box_->countOutputs();
 
@@ -70,6 +70,7 @@ void Splitter::updateOutputs()
     }
 }
 
+/// MEMENTO ------------------------------------------------------------------------------------
 Memento::Ptr Splitter::getState() const
 {
     boost::shared_ptr<State> memento(new State);
@@ -85,7 +86,7 @@ void Splitter::setState(Memento::Ptr memento)
 
     state_ = *m;
 
-    updateOutputs();
+    Q_EMIT modelChanged();
 }
 
 /// MEMENTO

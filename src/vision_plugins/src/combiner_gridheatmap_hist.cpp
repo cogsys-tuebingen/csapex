@@ -54,11 +54,13 @@ cv::Mat GridHeatMapHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
 
 void GridHeatMapHist::updateState(int value)
 {
-    private_state_ghm_->combo_index = combo_compare_->currentIndex();
-    private_state_ghm_->grid_width  = slide_width_->value();
-    private_state_ghm_->grid_height = slide_height_->value();
-    private_state_ghm_->grid_width_add1  = slide_width_add1_->value();
-    private_state_ghm_->grid_height_add1 = slide_height_add1_->value();
+    if(!signalsBlocked()) {
+        private_state_ghm_->combo_index = combo_compare_->currentIndex();
+        private_state_ghm_->grid_width  = slide_width_->value();
+        private_state_ghm_->grid_height = slide_height_->value();
+        private_state_ghm_->grid_width_add1  = slide_width_add1_->value();
+        private_state_ghm_->grid_height_add1 = slide_height_add1_->value();
+    }
 }
 
 void GridHeatMapHist::addSliders(QBoxLayout *layout)
@@ -113,19 +115,21 @@ void GridHeatMapHist::setState(Memento::Ptr memento)
     assert(private_state_ghm_);
 
 
+    blockSignals(true);
     slide_height_->setValue(private_state_ghm_->grid_height);
     slide_width_->setValue(private_state_ghm_->grid_width);
     slide_height_add1_->setValue(private_state_ghm_->grid_height_add1);
     slide_width_add1_->setValue(private_state_ghm_->grid_width_add1);
     combo_compare_->setCurrentIndex(private_state_ghm_->combo_index);
+    blockSignals(false);
 
     Q_EMIT modelChanged();
 }
 
 GridHeatMapHist::State::State() :
     GridCompareHist::State::State(),
-    grid_width_add1(48),
-    grid_height_add1(64),
+    grid_width_add1(64),
+    grid_height_add1(48),
     grid_width_max_add1(640),
     grid_height_max_add1(480)
 {

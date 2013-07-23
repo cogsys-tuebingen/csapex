@@ -33,8 +33,8 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
             throw std::runtime_error("Channel count is not matching!");
         if(img1.channels() > 4)
             throw std::runtime_error("Channel limit 4!");
-//        if(img1.rows != img2.rows || img1.cols != img2.cols)
-//            throw std::runtime_error("Dimension is not matching!");
+        //        if(img1.rows != img2.rows || img1.cols != img2.cols)
+        //            throw std::runtime_error("Dimension is not matching!");
 
         if(private_state_gcv_->channel_count != img1.channels()) {
             private_state_gcv_->channel_count = img1.channels();
@@ -98,17 +98,21 @@ void GridCompareValue::setState(Memento::Ptr memento)
     private_state_gcv_ = boost::dynamic_pointer_cast<State>(state_).get();
     assert(private_state_gcv_);
 
+    blockSignals(true);
     slide_height_->setValue(private_state_gcv_->grid_height);
     slide_width_->setValue(private_state_gcv_->grid_width);
+    blockSignals(false);
 
     Q_EMIT modelChanged();
 }
 
 void GridCompareValue::updateState(int i)
 {
-    private_state_gcv_->grid_width  = slide_width_->value();
-    private_state_gcv_->grid_height = slide_height_->value();
-    prepareParams(private_state_gcv_->eps, private_state_gcv_->ignore);
+    if(!signalsBlocked()) {
+        private_state_gcv_->grid_width  = slide_width_->value();
+        private_state_gcv_->grid_height = slide_height_->value();
+        prepareParams(private_state_gcv_->eps, private_state_gcv_->ignore);
+    }
 }
 
 void GridCompareValue::fill(QBoxLayout *layout)
@@ -130,8 +134,7 @@ void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)
 {
     for(int i = 0 ; i < eps_sliders_.size() ; i++) {
         eps[i] = eps_sliders_[i]->doubleValue();
-        if(eps[i] == 255.0)
-            ignore[i] = true;
+        ignore[i] = eps[i] == 255.0;
     }
 }
 
