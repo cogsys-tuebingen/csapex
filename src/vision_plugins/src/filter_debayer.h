@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <vision_evaluator/filter.h>
 
+/// SYSTEM
 class QComboBox;
 
 namespace vision_plugins {
@@ -16,14 +17,6 @@ class Debayer : public vision_evaluator::Filter
 
 public:
     /**
-     * @brief Debayer default constructor.
-     */
-    Debayer();
-    /**
-     * @brief ~Debayer destructor.
-     */
-    virtual ~Debayer();
-    /**
      * @brief See base class definition.
      */
     virtual void insert(QBoxLayout *parent);
@@ -33,7 +26,7 @@ public:
     virtual void filter(cv::Mat &img, cv::Mat &mask);
 
     /// MEMENTO
-    void         setState(Memento::Ptr memento);
+    void setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
 protected:
@@ -50,18 +43,10 @@ protected:
     /// MEMENTO
     class State : public Memento {
     public:
-        void readYaml(const YAML::Node &node)
-        {
-            node["input_index"] >> index;
-        }
+        void readYaml(const YAML::Node &node);
+        void writeYaml(YAML::Emitter &out) const;
 
-        void writeYaml(YAML::Emitter &out) const
-        {
-            out << YAML::Key << "input_index" << YAML::Value << index;
-        }
-
-    public:
-        int     index;
+        int index;
     };
 
     State state_;

@@ -10,14 +10,6 @@ PLUGINLIB_EXPORT_CLASS(vision_plugins::Debayer, vision_evaluator::BoxedObject)
 
 using namespace vision_plugins;
 
-Debayer::Debayer()
-{
-}
-
-Debayer::~Debayer()
-{
-}
-
 void Debayer::insert(QBoxLayout *parent)
 {
     combo_mode_ = new QComboBox;
@@ -71,4 +63,14 @@ void Debayer::fillCombo(QComboBox *combo, std::map<int, int> &map)
     map.insert(modePair(combo->findText("BayerRG2RGB"), CV_BayerRG2RGB));
     combo->addItem("BayerGR2RGB");
     map.insert(modePair(combo->findText("BayerGR2RGB"), CV_BayerGR2RGB));
+}
+
+void Debayer::State::readYaml(const YAML::Node &node)
+{
+    node["input_index"] >> index;
+}
+
+void Debayer::State::writeYaml(YAML::Emitter &out) const
+{
+    out << YAML::Key << "input_index" << YAML::Value << index;
 }
