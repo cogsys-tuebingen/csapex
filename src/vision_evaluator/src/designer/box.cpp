@@ -34,6 +34,8 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << uuid_;
     out << YAML::Key << "pos";
     out << YAML::Value << YAML::BeginSeq << parent->pos().x() << parent->pos().y() << YAML::EndSeq;
+    out << YAML::Key << "minimized";
+    out << YAML::Value << minimized;
 
     boxed_state = parent->content_->getState();
     if(boxed_state.get()) {
@@ -48,6 +50,10 @@ void Box::State::writeYaml(YAML::Emitter &out) const
 
 void Box::State::readYaml(const YAML::Node &node)
 {
+    if(node.FindValue("minimized")) {
+        node["minimized"] >> minimized;
+    }
+
     if(node.FindValue("state")) {
         const YAML::Node& state_map = node["state"];
         boxed_state = parent->content_->getState();
@@ -73,7 +79,8 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 
     state->uuid_ = uuid;
 
-    setObjectName(ui->enablebtn->text());
+    setObjectName(uuid.c_str());
+    ui->enablebtn->setText(uuid.c_str());
 
     ui->content->installEventFilter(this);
     ui->enablebtn->installEventFilter(this);
@@ -81,6 +88,8 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     timer_ = new QTimer();
     timer_->setInterval(100);
     timer_->start();
+
+    state->minimized = false;
 
     QObject::connect(timer_, SIGNAL(timeout()), &worker, SLOT(tick()));
 
@@ -151,6 +160,10 @@ void BoxWorker::tick()
     }
 }
 
+Box* BoxWorker::parent()
+{
+    return parent_;
+}
 
 void Box::setUUID(const std::string& uuid)
 {
@@ -335,8 +348,6 @@ void Box::enabledChange(bool val)
 
 void Box::paintEvent(QPaintEvent* e)
 {
-    ui->enablebtn->setText(objectName());
-
     bool change = ui->boxframe->property("error").toBool() != content_->isError();
     ui->boxframe->setProperty("error",content_->isError());
 
@@ -455,11 +466,13 @@ void Box::minimizeBox(bool minimize)
         ui->enablebtn->setText("");
         ui->boxframe->setProperty("content_minimized", true);
         ui->minimizebtn->setIcon(maximize_icon_);
+        state->minimized = true;
     } else {
         ui->frame->show();
         ui->enablebtn->setText(objectName());
         ui->boxframe->setProperty("content_minimized", false);
         ui->minimizebtn->setIcon(minimize_icon_);
+        state->minimized = false;
     }
 
     refreshStylesheet();
@@ -486,8 +499,10 @@ void Box::setState(Memento::Ptr memento)
     state->parent = this;
     if(m->boxed_state != NULL) {
         content_->setState(m->boxed_state);
-
     }
+
+    minimizeBox(state->minimized);
+    ui->minimizebtn->setChecked(state->minimized);
 }
 
 Command::Ptr Box::removeAllConnectionsCmd()

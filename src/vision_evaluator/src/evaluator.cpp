@@ -32,16 +32,20 @@ struct EvaluationApplication : public QApplication {
         } catch(std::exception& e) {
             BoxedObject* bo = dynamic_cast<BoxedObject*> (receiver);
             Box* box = dynamic_cast<Box*> (receiver);
+            BoxWorker* bw = dynamic_cast<BoxWorker*> (receiver);
 
             if(bo) {
                 bo->setError(true, e.what());
             } else if(box) {
                 box->getContent()->setError(true, e.what());
+            } else if(bw) {
+                bw->parent()->getContent()->setError(true, e.what());
             } else {
                 std::cerr << "Uncatched exception:" << e.what() << std::endl;
-            }
+            }            
+
+            return false;
         }
-        return false;
     }
 };
 

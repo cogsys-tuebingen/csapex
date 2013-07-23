@@ -188,6 +188,9 @@ void FileImporter::setState(Memento::Ptr memento)
 
     state = *m;
     import(state.last_path_);
-    provider_->setState(m->sub_state);
+
+    if(provider_) {
+        provider_->setState(m->sub_state);
+    }
 
 }

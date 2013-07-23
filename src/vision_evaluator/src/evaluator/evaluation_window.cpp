@@ -9,6 +9,7 @@
 #include <designer/box_manager.h>
 #include <designer/connection_type_manager.h>
 #include <utils/stream_interceptor.h>
+#include <qt_helper.hpp>
 
 /// SYSTEM
 #include <iostream>
@@ -98,8 +99,14 @@ void EvaluationWindow::updateLog()
     std::string latest = StreamInterceptor::instance().getLatest().c_str();
 
     if(!latest.empty()) {
+        size_t i = 0;
+        while((i = latest.find('\n', i)) != std::string::npos) {
+            latest.replace(i, 1, "<br />");
+            i += 6;
+        }
+
         ui->logOutput->setTextCursor(cursor);
-        ui->logOutput->insertPlainText(latest.c_str());
+        ui->logOutput->insertHtml(latest.c_str());
     }
 }
 
@@ -131,4 +138,14 @@ void EvaluationWindow::closeEvent(QCloseEvent* event)
     }
 
     event->accept();
+
+    if(!StreamInterceptor::instance().close()) {
+        QtHelper::QSleepThread::msleep(2000);
+        kill();
+    }
+}
+
+void EvaluationWindow::kill()
+{
+    StreamInterceptor::instance().kill();
 }

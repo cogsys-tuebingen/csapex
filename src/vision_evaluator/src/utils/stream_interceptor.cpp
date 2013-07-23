@@ -1,25 +1,17 @@
 /// HEADER
 #include "stream_interceptor.h"
 
+/// PROJECT
+#include <qt_helper.hpp>
+
 /// SYSTEM
 #include <iostream>
 #include <QtConcurrentRun>
+#include <unistd.h>
+#include <stdio.h>
+#include <signal.h>
 
 bool StreamInterceptor::running = true;
-
-namespace {
-struct QSleepThread : public QThread{
-    static void sleep(unsigned long t) {
-        QThread::sleep(t);
-    }
-    static void msleep(unsigned long t) {
-        QThread::msleep(t);
-    }
-    static void usleep(unsigned long t) {
-        QThread::usleep(t);
-    }
-};
-}
 
 StreamInterceptor& StreamInterceptor::instance()
 {
@@ -50,7 +42,7 @@ std::string StreamInterceptor::cin()
 }
 
 StreamInterceptor::StreamInterceptor()
-    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf())
+    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()), in_getline(false), had_input(false)
 {
     clog_global_ = std::clog.rdbuf();
     cout_global_ = std::cout.rdbuf();
@@ -65,18 +57,56 @@ StreamInterceptor::StreamInterceptor()
     running = true;
 }
 
+bool StreamInterceptor::close()
+{
+    running = false;
+
+    if(!in_getline) {
+        return true;
+    }
+
+    if(!had_input && in_getline) {
+        // if there never was a message -> kill immediately!
+        kill();
+    }
+
+    return false;
+}
+
+void StreamInterceptor::kill()
+{
+    if(in_getline) {
+        std::cerr << "FATAL: io is blocking shutdown. KILL!" << std::endl;
+        ::kill(getpid(),SIGINT);
+    }
+}
+
 void StreamInterceptor::pollCin() {
+    if (isatty(fileno(stdin))) {
+        std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
+        return;
+
+    } else {
+        std::cout << "<b>std::cin is a file or pipe -> polling</b>" << std::endl;
+    }
+
     while(running) {
-        char line[256];
-        std::cin.getline(line,256);
+        std::string line;
+
+        in_getline = true;
+        std::getline(std::cin,line);
+        in_getline = false;
 
         if(line[0] != '\0') {
+            had_input = true;
+
             cin_mutex.lock();
             cin_ << line;
             cin_mutex.unlock();
-        } else {
-            QSleepThread::msleep(10);
+            continue;
         }
+
+        QtHelper::QSleepThread::msleep(10);
     }
 }
 

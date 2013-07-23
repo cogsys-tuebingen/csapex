@@ -14,6 +14,9 @@ public:
     std::string getLatest();
     std::string cin();
 
+    bool close();
+    void kill();
+
 public:
     std::ostream cout;
     std::ostream cerr;
@@ -24,6 +27,8 @@ private:
     StreamInterceptor();
     ~StreamInterceptor();
 
+    volatile bool in_getline;
+    volatile bool had_input;
     static bool running;
 
     void pollCin();

@@ -8,4 +8,7 @@
 <class type="vision_evaluator::ImportCin" base_class_type="vision_evaluator::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="vision_evaluator::DoubleBuffer" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
 </library>

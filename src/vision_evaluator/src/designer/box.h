@@ -36,6 +36,7 @@ public:
 public Q_SLOTS:
     void forwardMessage(ConnectorIn* source);
     void tick();
+    Box* parent();
 
 private:
     Box* parent_;
@@ -76,6 +77,8 @@ public:
 
         std::string uuid_;
         std::string type_;
+
+        bool minimized;
     };
 
 public:

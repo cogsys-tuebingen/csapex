@@ -17,9 +17,23 @@
 #include <QSpinBox>
 #include <QLabel>
 #include <QDoubleSpinBox>
+#include <QThread>
 
 class QtHelper
 {
+public:
+    struct QSleepThread : public QThread{
+        static void sleep(unsigned long t) {
+            QThread::sleep(t);
+        }
+        static void msleep(unsigned long t) {
+            QThread::msleep(t);
+        }
+        static void usleep(unsigned long t) {
+            QThread::usleep(t);
+        }
+    };
+
 public:
     static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max) {
         QHBoxLayout *internal_layout = new QHBoxLayout;
