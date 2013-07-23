@@ -66,6 +66,8 @@ void GridCompareValue::updateDynamicGui(QBoxLayout *layout)
         container_eps_slider_->deleteLater();
     }
     internal_layout = new QVBoxLayout;
+
+//    blockSignals(true);
     for(int i = 0 ; i < private_state_gcv_->channel_count ; i++) {
         std::stringstream ch;
         ch << "Ch." << i << " eps";
@@ -75,6 +77,7 @@ void GridCompareValue::updateDynamicGui(QBoxLayout *layout)
         internal_layout->addWidget(slider);
         eps_sliders_.push_back(slider);
     }
+//    blockSignals(false);
 
     container_eps_slider_ = QtHelper::wrapLayout(internal_layout);
     layout->addWidget(container_eps_slider_);
@@ -165,5 +168,4 @@ void GridCompareValue::State::writeYaml(YAML::Emitter &out) const
         out << eps[i];
     }
     out << YAML::EndSeq;
-
 }

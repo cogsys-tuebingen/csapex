@@ -139,7 +139,7 @@ GridHeatMapValue::State::State() :
 
 void GridHeatMapValue::State::readYaml(const YAML::Node &node)
 {
-    GridCompare::State::readYaml(node);
+    GridCompareValue::State::readYaml(node);
     node["grid_width_add1"] >> grid_width_add1;
     node["grid_height_add1"] >> grid_height_add1;
     node["grid_width_max_add1"] >> grid_width_max_add1;

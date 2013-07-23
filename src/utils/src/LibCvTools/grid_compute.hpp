@@ -121,6 +121,8 @@ inline void grid_count(const GridT &g1, const GridT &g2, std::pair<int, int> &co
     }
 }
 
+
+
 template<class GridT>
 inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
 {
@@ -149,15 +151,25 @@ inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
     }
 }
 
+const cv::Point3f red(0,0,255);        /// P0
+const cv::Point3f green(0,255,255);     /// P1
+const cv::Point3f blue(255,0,0);       /// p3
+const cv::Point3f fac1 = (blue - 3*green + red);
+const cv::Point3f fac2 = (-2*blue + 2*green);
+
+inline cv::Scalar color_heatmap(const float value)
+{
+    cv::Point3f  col = fac1 * value * value + fac2 * value + blue;
+    return cv::Scalar(std::floor(col.x + .5), std::floor(col.y + .5), std::floor(col.z + .5));
+}
+
 inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv::Mat &out)
 {
-    out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC1);
+    out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3);
     for(int i = 0 ; i < values.rows ; i++) {
         for(int j = 0 ; j < values.cols ; j++) {
-            int value = std::floor(values.at<float>(i,j) * 255 + 0.5);
-            std::cerr << values.at<float>(i,j) << std::endl;
             cv::Rect r  = cv::Rect(j * block_size.width,i * block_size.height,block_size.width,block_size.height);
-            cv::rectangle(out,r,cv::Scalar(value), CV_FILLED);
+            cv::rectangle(out,r,color_heatmap(values.at<float>(i,j)), CV_FILLED);
         }
     }
 }
