@@ -70,7 +70,7 @@ protected:
 
     /// fill with standard gui elements
     virtual void fill(QBoxLayout *layout);
-    void prepareGrids(cv_grid::GridHist &g1, cv_grid::GridHist &g2, const cv::Mat &img1, const cv::Mat &img2, const cv::Mat &mask1, const cv::Mat &mask2);
+    void prepareGrid(cv_grid::GridHist &g, const cv::Mat &img, const cv::Mat &mask, const int width, const int height);
 
     /// dynamic gui
     void addHistSliders(QSlider *bins, QDoubleSlider *eps);

@@ -139,7 +139,11 @@ inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
             grid_count(g1, g2, counts, valid);
             g2.resetROI();
             if(valid > 0) {
-                vals.at<float>(row_iterations, col_iterations) = counts.first / (float) valid;
+                float value = counts.first / (float) valid;
+                vals.at<float>(j, i) = value;
+                /// FOR STACK CHECKING -->
+                float check = vals.at<float>(j, i);
+                /// <-- FOR STACK CHECKING
             }
         }
     }
@@ -151,6 +155,7 @@ inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv
     for(int i = 0 ; i < values.rows ; i++) {
         for(int j = 0 ; j < values.cols ; j++) {
             int value = std::floor(values.at<float>(i,j) * 255 + 0.5);
+            std::cerr << values.at<float>(i,j) << std::endl;
             cv::Rect r  = cv::Rect(j * block_size.width,i * block_size.height,block_size.width,block_size.height);
             cv::rectangle(out,r,cv::Scalar(value), CV_FILLED);
         }

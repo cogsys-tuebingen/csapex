@@ -33,8 +33,8 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
             throw std::runtime_error("Channel count is not matching!");
         if(img1.channels() > 4)
             throw std::runtime_error("Channel limit 4!");
-        if(img1.rows != img2.rows || img1.cols != img2.cols)
-            throw std::runtime_error("Dimension is not matching!");
+//        if(img1.rows != img2.rows || img1.cols != img2.cols)
+//            throw std::runtime_error("Dimension is not matching!");
 
         if(private_state_gcv_->channel_count != img1.channels()) {
             private_state_gcv_->channel_count = img1.channels();
@@ -46,7 +46,9 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         /// COMPUTE
         if(eps_sliders_.size() == private_state_gcv_->channel_count) {
             GridScalar g1, g2;
-            prepareGrids(g1,g2, img1, img2, mask1, mask2);
+            prepareGrid(g1, img1, mask1, private_state_gcv_->grid_width, private_state_gcv_->grid_height);
+            prepareGrid(g2, img2, mask2, private_state_gcv_->grid_width, private_state_gcv_->grid_height);
+
             cv::Mat out;
             render_grid(g1, g2, cv::Size(10,10), out);
             return out;
@@ -116,13 +118,12 @@ void GridCompareValue::fill(QBoxLayout *layout)
     connect(slide_width_, SIGNAL(valueChanged(int)), this, SLOT(updateState(int)));
 }
 
-void GridCompareValue::prepareGrids(cv_grid::GridScalar &g1, cv_grid::GridScalar &g2, const cv::Mat &img1, const cv::Mat &img2, const cv::Mat &mask1, const cv::Mat &mask2)
+void GridCompareValue::prepareGrid(cv_grid::GridScalar &g, const cv::Mat &img, const cv::Mat &mask, const int width, const int height)
 {
     AttrScalar::Params p;
     p.eps    = private_state_gcv_->eps;
     p.ignore = private_state_gcv_->ignore;
-    cv_grid::prepare_grid<AttrScalar>(g1, img1, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask1, 1.0);
-    cv_grid::prepare_grid<AttrScalar>(g2, img2, private_state_gcv_->grid_height, private_state_gcv_->grid_width, p, mask2, 1.0);
+    cv_grid::prepare_grid<AttrScalar>(g, img, height, width, p, mask, 1.0);
 }
 
 void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)

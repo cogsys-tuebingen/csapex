@@ -38,7 +38,8 @@ cv::Mat GridHeatMapHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
         /// COMPUTE
         if(hist_sliders_.size() == private_state_gch_->channel_count) {
             GridHist g1, g2;
-            prepareGrids(g1, g2, img1, img2, mask1, mask2);
+            prepareGrid(g1, img1, mask1, private_state_ghm_->grid_width, private_state_ghm_->grid_height);
+            prepareGrid(g2, img2, mask2, private_state_ghm_->grid_width_add1, private_state_ghm_->grid_height_add1);
 
             cv::Mat values;
             grid_heatmap(g1, g2, values);

@@ -38,7 +38,8 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         /// COMPUTE
         if(eps_sliders_.size() == private_state_gcv_->channel_count) {
             GridScalar g1, g2;
-            prepareGrids(g1, g2, img1, img2, mask1, mask2);
+            prepareGrid(g1, img1, mask1, private_state_ghv_->grid_width, private_state_ghv_->grid_height);
+            prepareGrid(g2, img2, mask2, private_state_ghv_->grid_width_add1, private_state_ghv_->grid_height_add1);
 
             cv::Mat values;
             grid_heatmap(g1, g2, values);
@@ -134,7 +135,7 @@ GridHeatMapValue::State::State() :
 
 void GridHeatMapValue::State::readYaml(const YAML::Node &node)
 {
-    GridHeatMapValue::State::readYaml(node);
+    GridCompare::State::readYaml(node);
     node["grid_width_add1"] >> grid_width_add1;
     node["grid_height_add1"] >> grid_height_add1;
     node["grid_width_max_add1"] >> grid_width_max_add1;
@@ -143,7 +144,7 @@ void GridHeatMapValue::State::readYaml(const YAML::Node &node)
 
 void GridHeatMapValue::State::writeYaml(YAML::Emitter &out) const
 {
-    GridHeatMapValue::State::writeYaml(out);
+    GridCompareValue::State::writeYaml(out);
     out << YAML::Key << "grid_width_add1" << YAML::Value << grid_width_add1;
     out << YAML::Key << "grid_height_add1" << YAML::Value << grid_height_add1;
     out << YAML::Key << "grid_width_max_add1" << YAML::Value << grid_width_max_add1;

@@ -47,7 +47,8 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
         /// COMPUTE
         if(hist_sliders_.size() == private_state_gch_->channel_count) {
             GridHist g1, g2;
-            prepareGrids(g1, g2, img1, img2, mask1, mask2);
+            prepareGrid(g1, img1, mask1, private_state_gch_->grid_width, private_state_gch_->grid_width);
+            prepareGrid(g2, img2, mask2, private_state_gch_->grid_width, private_state_gch_->grid_width);
 
             cv::Mat out;
             render_grid(g1, g2, cv::Size(10,10), out);
@@ -129,14 +130,12 @@ void GridCompareHist::fill(QBoxLayout *layout)
 
 }
 
-void GridCompareHist::prepareGrids(GridHist &g1, GridHist &g2, const cv::Mat &img1, const cv::Mat &img2, const cv::Mat &mask1, const cv::Mat &mask2)
+void GridCompareHist::prepareGrid(GridHist &g, const cv::Mat &img, const cv::Mat &mask, const int width, const int height)
 {
     AttrHistogram::Params p;
     prepareHistParams(p.bins, p.ranges, p.eps);
     p.method = index_to_compare_[private_state_gch_->combo_index];
-
-    cv_grid::prepare_grid<AttrHistogram>(g1, img1, private_state_gch_->grid_height, private_state_gch_->grid_width, p, mask1, 1.0);
-    cv_grid::prepare_grid<AttrHistogram>(g2, img2, private_state_gch_->grid_height, private_state_gch_->grid_width, p, mask2, 1.0);
+    cv_grid::prepare_grid<AttrHistogram>(g, img, height, width, p, mask, 1.0);
 }
 
 void GridCompareHist::addHistSliders(QSlider *bins, QDoubleSlider *eps)
