@@ -31,8 +31,8 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
         /// PREPARE
         if(img1.channels() != img2.channels())
             throw std::runtime_error("Channel count is not matching!");
-        if(img1.rows != img2.rows || img1.cols != img2.cols)
-            throw std::runtime_error("Dimension is not matching!");
+//        if(img1.rows != img2.rows || img1.cols != img2.cols)
+//            throw std::runtime_error("Dimension is not matching!");
 
 
         if(private_state_gch_->channel_count != img1.channels()) {
