@@ -99,6 +99,8 @@ bool ConnectorOut::tryConnect(Connector* other_side)
 
     Q_EMIT connectionFormed(this, input);
 
+    validateConnections();
+
     return true;
 }
 
