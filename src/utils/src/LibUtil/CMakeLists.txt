@@ -36,6 +36,7 @@ add_library (LibUtil SHARED
     DynamicPriorityQueue.hpp
     CDUniTuebingen.hpp
     ExternalVideoWriter.hpp
+    VideoWriter.hpp
 )
 
 target_link_libraries(LibUtil

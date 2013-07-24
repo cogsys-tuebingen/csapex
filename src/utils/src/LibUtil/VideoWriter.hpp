@@ -40,10 +40,11 @@ public:
 
     bool save() {
         std::stringstream command;
-//        command << "ffmpeg -qscale 5 -y -r " << fps_ << " -b " << bitrate_ << " -i " << dir_ << "frame_%06d.png " << filename_;
-        command << "convert -delay 10 -loop 1 " << dir_ << "/frame*.png " << filename_ << ".gif";
-        command << "&& cp " << dir_ << "/$(ls " << dir_ << " | grep .png | sort | head -n1) " << filename_ << ".first.png";
-        command << "&& cp " << dir_ << "/$(ls " << dir_ << " | grep .png | sort -r | head -n1) " << filename_ << ".last.png";
+        command << "ffmpeg -qscale 5 -y -r " << fps_ << " -b " << bitrate_ << " -i " << dir_ << "frame_%06d.png " << filename_;
+
+//        command << "convert -delay 10 -loop 1 " << dir_ << "/frame*.png " << filename_ << ".gif";
+//        command << "&& cp " << dir_ << "/$(ls " << dir_ << " | grep .png | sort | head -n1) " << filename_ << ".first.png";
+//        command << "&& cp " << dir_ << "/$(ls " << dir_ << " | grep .png | sort -r | head -n1) " << filename_ << ".last.png";
 
         int i = system(command.str().c_str());
 
