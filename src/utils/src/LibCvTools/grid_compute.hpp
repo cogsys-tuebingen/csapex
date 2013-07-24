@@ -218,7 +218,7 @@ inline cv::Scalar color_heatmap(const float value)
 inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv::Mat &out)
 {
     if(out.empty())
-        out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3);
+        out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3, cv::Scalar::all(0));
     for(int i = 0 ; i < values.rows ; i++) {
         for(int j = 0 ; j < values.cols ; j++) {
             cv::Rect r  = cv::Rect(j * block_size.width,i * block_size.height,block_size.width,block_size.height);
@@ -230,7 +230,7 @@ inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv
 inline void render_heatmap_row(const cv::Mat &values, const cv::Size &block_size, const int row, cv::Mat &out)
 {
     if(out.empty())
-        out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3);
+        out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3, cv::Scalar::all(0));
     for(int col = 0 ; col < values.cols ; col++) {
         cv::Rect r  = cv::Rect(col * block_size.width, row * block_size.height,block_size.width,block_size.height);
         float value = values.at<float>(row,col);
