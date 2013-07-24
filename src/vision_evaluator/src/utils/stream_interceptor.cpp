@@ -9,9 +9,6 @@
 #include <QtConcurrentRun>
 #include <unistd.h>
 #include <stdio.h>
-#include <signal.h>
-
-bool StreamInterceptor::running = true;
 
 StreamInterceptor& StreamInterceptor::instance()
 {
@@ -33,55 +30,28 @@ std::string StreamInterceptor::getLatest()
 }
 std::string StreamInterceptor::cin()
 {
-    cin_mutex.lock();
-    std::string in = cin_.str();
-    cin_.str(std::string());
-    cin_mutex.unlock();
+    if(!worker) {
+        return "";
+    }
+
+    worker->cin_mutex.lock();
+    std::string in = worker->cin_.str();
+    worker->cin_.str(std::string());
+    worker->cin_mutex.unlock();
 
     return in;
 }
 
-StreamInterceptor::StreamInterceptor()
-    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()), in_getline(false), had_input(false)
+StreamInterceptorWorker::StreamInterceptorWorker()
+    : running(true),  in_getline(false), had_input(false)
 {
-    clog_global_ = std::clog.rdbuf();
-    cout_global_ = std::cout.rdbuf();
 
-    cout.rdbuf(cout_global_);
-
-    fake_cout_.str(std::string());
-
-    std::cout.rdbuf(fake_cout_.rdbuf());
-
-    QtConcurrent::run(this, &StreamInterceptor::pollCin);
-    running = true;
+}
+StreamInterceptorWorker::~StreamInterceptorWorker()
+{
 }
 
-bool StreamInterceptor::close()
-{
-    running = false;
-
-    if(!in_getline) {
-        return true;
-    }
-
-    if(!had_input && in_getline) {
-        // if there never was a message -> kill immediately!
-        kill();
-    }
-
-    return false;
-}
-
-void StreamInterceptor::kill()
-{
-    if(in_getline) {
-        std::cerr << "FATAL: io is blocking shutdown. KILL!" << std::endl;
-        ::kill(getpid(),SIGINT);
-    }
-}
-
-void StreamInterceptor::pollCin() {
+void StreamInterceptorWorker::run() {
     if (isatty(fileno(stdin))) {
         std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
         return;
@@ -112,6 +82,42 @@ void StreamInterceptor::pollCin() {
 
 StreamInterceptor::~StreamInterceptor()
 {
-    running = false;
 }
+
+
+StreamInterceptor::StreamInterceptor()
+    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()), thread(NULL), worker(NULL)
+{
+    clog_global_ = std::clog.rdbuf();
+    cout_global_ = std::cout.rdbuf();
+
+    cout.rdbuf(cout_global_);
+
+    fake_cout_.str(std::string());
+
+    std::cout.rdbuf(fake_cout_.rdbuf());
+}
+
+void StreamInterceptor::start()
+{
+    thread = new QThread;
+    worker = new StreamInterceptorWorker;
+    worker->moveToThread(thread);
+    QObject::connect(thread, SIGNAL(started()), worker, SLOT(run()));
+    QObject::connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
+    QObject::connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+    QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
+}
+
+void StreamInterceptor::stop()
+{
+    if(!worker) {
+        return;
+    }
+
+    worker->running = false;
+    thread->quit();
+}
+
 

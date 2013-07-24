@@ -29,7 +29,7 @@ struct EvaluationApplication : public QApplication {
     virtual bool notify(QObject* receiver, QEvent* event) {
         try {
             return QApplication::notify(receiver, event);
-        } catch(std::exception& e) {
+        } catch(const std::exception& e) {
             BoxedObject* bo = dynamic_cast<BoxedObject*> (receiver);
             Box* box = dynamic_cast<Box*> (receiver);
             BoxWorker* bw = dynamic_cast<BoxWorker*> (receiver);
@@ -42,10 +42,17 @@ struct EvaluationApplication : public QApplication {
                 bw->parent()->getContent()->setError(true, e.what());
             } else {
                 std::cerr << "Uncatched exception:" << e.what() << std::endl;
-            }            
+            }
 
             return false;
+
+        } catch(const std::string& s) {
+            std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
+        } catch(...) {
+            std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
         }
+
+        return true;
     }
 };
 

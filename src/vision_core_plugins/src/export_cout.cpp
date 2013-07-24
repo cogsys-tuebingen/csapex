@@ -35,6 +35,7 @@ void ExportCout::messageArrived(ConnectorIn *source)
 {
     ConnectionType::Ptr msg = source->getMessage();
 
+    std::cout << "writing to cout: ";
     msg->write(std::cout);
     std::cout << std::endl;
 

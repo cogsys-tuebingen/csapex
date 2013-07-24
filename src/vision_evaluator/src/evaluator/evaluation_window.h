@@ -35,7 +35,6 @@ private Q_SLOTS:
     void updateTitle();
     void updateLog();
     void hideLog();
-    void kill();
 
 public Q_SLOTS:
     void start();
@@ -44,7 +43,6 @@ private:
     Ui::EvaluationWindow* ui;
 
     QTimer timer;
-    QTimer kill_timer;
 };
 
 } /// NAMESPACE

@@ -30,6 +30,8 @@ using namespace vision_evaluator;
 EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent) :
     QMainWindow(parent), ui(new Ui::EvaluationWindow)
 {
+    StreamInterceptor::instance().start();
+
     qRegisterMetaType<cv::Mat>("cv::Mat");
     qRegisterMetaType<std::string>("std::string");
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
@@ -139,13 +141,5 @@ void EvaluationWindow::closeEvent(QCloseEvent* event)
 
     event->accept();
 
-    if(!StreamInterceptor::instance().close()) {
-        QtHelper::QSleepThread::msleep(2000);
-        kill();
-    }
-}
-
-void EvaluationWindow::kill()
-{
-    StreamInterceptor::instance().kill();
+    StreamInterceptor::instance().stop();
 }
