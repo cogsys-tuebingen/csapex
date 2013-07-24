@@ -124,6 +124,26 @@ QFrame#boxframe vision_evaluator--Connector {
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="killbtn">
+            <property name="maximumSize">
+             <size>
+              <width>16</width>
+              <height>16</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/resources.qrc">
+              <normaloff>:/stop.png</normaloff>:/stop.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="minimizebtn">
             <property name="maximumSize">
              <size>

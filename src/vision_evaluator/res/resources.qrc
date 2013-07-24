@@ -3,5 +3,6 @@
         <file>minimize.png</file>
         <file>close.png</file>
         <file>maximize.png</file>
+        <file>stop.png</file>
     </qresource>
 </RCC>

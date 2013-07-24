@@ -105,6 +105,7 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 
     connect(ui->closebtn, SIGNAL(clicked()), this, SLOT(deleteBox()));
     connect(ui->minimizebtn, SIGNAL(toggled(bool)), this, SLOT(minimizeBox(bool)));
+    connect(ui->killbtn, SIGNAL(clicked()), this, SLOT(killContent()));
 
     connect(content, SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
 }
@@ -465,6 +466,20 @@ void Box::refreshStylesheet()
 void Box::eventModelChanged()
 {
     content_->updateDynamicGui(ui->content);
+}
+
+void Box::killContent()
+{
+    if(private_thread_) {
+//        private_thread_->quit();
+////        private_thread_->terminate();
+////        private_thread_->deleteLater();
+////        private_thread_ = NULL;
+
+////        worker.moveToThread(thread());
+
+//        makeThread();
+    }
 }
 
 void Box::minimizeBox(bool minimize)
