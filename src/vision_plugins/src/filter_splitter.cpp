@@ -86,6 +86,7 @@ void Splitter::setState(Memento::Ptr memento)
 
     state_ = *m;
 
+    box_->eventModelChanged();
     Q_EMIT modelChanged();
 }
 

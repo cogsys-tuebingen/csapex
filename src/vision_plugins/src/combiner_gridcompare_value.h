@@ -68,6 +68,7 @@ protected:
     std::vector<QDoubleSlider*> eps_sliders_;
 
     State *private_state_gcv_;
+    State state_buffer_gcv_;
 };
 }
 #endif // COMBINER_GRIDCOMPARE_VALUE_H

@@ -25,12 +25,16 @@ public:
 
 protected Q_SLOTS:
     virtual void updateState(int value);
+    virtual void reset();
 
 protected:
     virtual void addSliders(QBoxLayout *layout);
 
     QSlider *slide_width_add1_;
     QSlider *slide_height_add1_;
+    bool     run_renderer_;
+    bool     buffer_image_;
+    cv::Mat  buffered_image_;
 
     QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_width_;
     QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_height_;
@@ -56,6 +60,7 @@ protected:
     };
 
     State *private_state_ghv_;
+    State state_buffer_ghv_;
 
 };
 }

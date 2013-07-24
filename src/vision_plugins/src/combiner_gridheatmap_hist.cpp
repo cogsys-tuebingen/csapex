@@ -1,17 +1,24 @@
 #include "combiner_gridheatmap_hist.h"
 
+/// COMPONENT
+#include <vision_evaluator/connector_out.h>
+#include <vision_evaluator/messages_default.hpp>
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <QComboBox>
+#include <QPushButton>
 
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridHeatMapHist, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 using namespace QSignalBridges;
 using namespace cv_grid;
+using namespace connection_types;
 
 GridHeatMapHist::GridHeatMapHist() :
-    GridCompareHist(State::Ptr(new State))
+    GridCompareHist(State::Ptr(new State)),
+    run_renderer_(true),
+    buffer_image_(false)
 {
     private_state_ghm_ = dynamic_cast<State*>(state_.get());
     assert(private_state_ghm_);
@@ -37,30 +44,50 @@ cv::Mat GridHeatMapHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
 
         /// COMPUTE
         if(hist_sliders_.size() == private_state_gch_->channel_count) {
+            run_renderer_ = true;
+            state_buffer_ghm_ = *private_state_ghm_;
+
             GridHist g1, g2;
-            prepareGrid(g1, img1, mask1, private_state_ghm_->grid_width, private_state_ghm_->grid_height);
-            prepareGrid(g2, img2, mask2, private_state_ghm_->grid_width_add1, private_state_ghm_->grid_height_add1);
+            prepareGrid(g1, img1, mask1, state_buffer_ghm_.grid_width, state_buffer_ghm_.grid_height);
+            prepareGrid(g2, img2, mask2, state_buffer_ghm_.grid_width_add1, state_buffer_ghm_.grid_height_add1);
 
-            cv::Mat values;
-            grid_heatmap(g1, g2, values);
+            cv::Mat  values;
+            cv::Size block_size(10,10);
+            cv::Mat  out;
+            HeatMapCompIterator<GridHist>it(g1, g2);
+            while(run_renderer_ && it.iterate(values)) {
+                render_heatmap_row(values,block_size, it.lastFinishedRow(), out);
 
-            cv::Mat out;
-            render_heatmap(values, cv::Size(10,10), out);
-            return out;
+                CvMatMessage::Ptr img_msg_result(new CvMatMessage);
+                img_msg_result->value = out;
+                output_img_->publish(img_msg_result);
+            }
+
+            buffered_image_ = out;
+            buffer_image_ = true;
         }
+
+        return buffered_image_;
+
     }
     return cv::Mat();
 }
 
 void GridHeatMapHist::updateState(int value)
 {
-    if(!signalsBlocked()) {
+    if(state_mutex_.tryLock()) {
         private_state_ghm_->combo_index = combo_compare_->currentIndex();
         private_state_ghm_->grid_width  = slide_width_->value();
         private_state_ghm_->grid_height = slide_height_->value();
         private_state_ghm_->grid_width_add1  = slide_width_add1_->value();
         private_state_ghm_->grid_height_add1 = slide_height_add1_->value();
+        state_mutex_.unlock();
     }
+}
+
+void GridHeatMapHist::reset()
+{
+    run_renderer_ = false;
 }
 
 void GridHeatMapHist::addSliders(QBoxLayout *layout)
@@ -79,6 +106,10 @@ void GridHeatMapHist::fill(QBoxLayout *layout)
 
     limit_sliders_height_.reset(new QAbstractSliderLimiter(slide_height_, slide_height_add1_));
     limit_sliders_width_.reset(new QAbstractSliderLimiter(slide_width_, slide_width_add1_));
+
+    QPushButton *button_reset = new QPushButton("reset");
+    QPushButton::connect(button_reset, SIGNAL(clicked()), this, SLOT(reset()));
+    layout->addWidget(button_reset);
 }
 
 void GridHeatMapHist::updateSliderMaxima(int width, int height, int width_add1, int height_add1)
@@ -115,13 +146,13 @@ void GridHeatMapHist::setState(Memento::Ptr memento)
     assert(private_state_ghm_);
 
 
-    blockSignals(true);
+    state_mutex_.lock();
     slide_height_->setValue(private_state_ghm_->grid_height);
     slide_width_->setValue(private_state_ghm_->grid_width);
     slide_height_add1_->setValue(private_state_ghm_->grid_height_add1);
     slide_width_add1_->setValue(private_state_ghm_->grid_width_add1);
     combo_compare_->setCurrentIndex(private_state_ghm_->combo_index);
-    blockSignals(false);
+    state_mutex_.unlock();
 
     Q_EMIT modelChanged();
 }

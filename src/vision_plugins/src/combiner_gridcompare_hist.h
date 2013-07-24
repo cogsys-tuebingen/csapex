@@ -77,7 +77,7 @@ protected:
     void prepareHistParams(cv::Mat &bins, cv::Mat &ranges, cv::Scalar &eps);
 
     State *private_state_gch_;
-
+    State  state_buffer_gch_;
 };
 }
 #endif // COMBINER_GRIDCOMPARE_HIST_H

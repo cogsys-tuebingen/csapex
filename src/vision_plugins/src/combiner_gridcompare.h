@@ -8,6 +8,9 @@
 #include <utils/LibCvTools/grid_compute.hpp>
 #include <vision_evaluator/qt_helper.hpp>
 
+/// SYSTEM
+#include <QMutex>
+
 class QSlider;
 
 namespace vision_evaluator {
@@ -50,9 +53,9 @@ protected:
     virtual void addSliders(QBoxLayout *layout);
     virtual void updateSliderMaxima(int width, int height);
 
-
-
+    QMutex  state_mutex_;
     mutable State::Ptr state_;
+
 };
 }
 #endif // COMBINER_GRIDCOMPARE_H

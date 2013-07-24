@@ -1,16 +1,24 @@
 #include "combiner_gridheatmap_value.h"
 
+/// COMPONENT
+#include <vision_evaluator/connector_out.h>
+#include <vision_evaluator/messages_default.hpp>
+
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
+#include <QPushButton>
 
 PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridHeatMapValue, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 using namespace QSignalBridges;
 using namespace cv_grid;
+using namespace connection_types;
 
 GridHeatMapValue::GridHeatMapValue() :
-    GridCompareValue(State::Ptr(new State))
+    GridCompareValue(State::Ptr(new State)),
+    run_renderer_(true),
+    buffer_image_(false)
 {
     private_state_ghv_ = dynamic_cast<State*>(state_.get());
     assert(private_state_ghv_);
@@ -36,18 +44,32 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         updateSliderMaxima(img1.cols, img1.rows, img2.cols, img2.rows);
 
         /// COMPUTE
-        if(eps_sliders_.size() == private_state_gcv_->channel_count) {
+        if(eps_sliders_.size() == private_state_gcv_->channel_count && !buffer_image_) {
+            buffered_image_ = cv::Mat();
+            run_renderer_ = true;
+            state_buffer_ghv_ = *private_state_ghv_;
             GridScalar g1, g2;
-            prepareGrid(g1, img1, mask1, private_state_ghv_->grid_width, private_state_ghv_->grid_height);
-            prepareGrid(g2, img2, mask2, private_state_ghv_->grid_width_add1, private_state_ghv_->grid_height_add1);
+            prepareGrid(g1, img1, mask1, state_buffer_ghv_.grid_width, state_buffer_ghv_.grid_height);
+            prepareGrid(g2, img2, mask2, state_buffer_ghv_.grid_width_add1, state_buffer_ghv_.grid_height_add1);
 
-            cv::Mat values;
-            grid_heatmap(g1, g2, values);
+            cv::Mat  values;
+            cv::Size block_size(10,10);
+            cv::Mat  out;
+            HeatMapCompIterator<GridScalar>it(g1, g2);
 
-            cv::Mat out;
-            render_heatmap(values, cv::Size(10,10), out);
-            return out;
+            while(run_renderer_ && it.iterate(values)) {
+                render_heatmap_row(values,block_size, it.lastFinishedRow(), out);
+
+                CvMatMessage::Ptr img_msg_result(new CvMatMessage);
+                img_msg_result->value = out;
+                output_img_->publish(img_msg_result);
+            }
+
+            buffered_image_ = out;
+            buffer_image_ = true;
         }
+
+        return buffered_image_;
     }
 
     return cv::Mat();
@@ -56,13 +78,20 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
 
 void GridHeatMapValue::updateState(int value)
 {
-    if(!signalsBlocked()) {
+    if(state_mutex_.tryLock()) {
         private_state_ghv_->grid_width       = slide_width_->value();
         private_state_ghv_->grid_height      = slide_height_->value();
         private_state_ghv_->grid_width_add1  = slide_width_add1_->value();
         private_state_ghv_->grid_height_add1 = slide_height_add1_->value();
         GridCompareValue::prepareParams(private_state_ghv_->eps,private_state_ghv_->ignore);
+        state_mutex_.unlock();
     }
+}
+
+void GridHeatMapValue::reset()
+{
+    run_renderer_ = false;
+    buffer_image_ = false;
 }
 
 void GridHeatMapValue::addSliders(QBoxLayout *layout)
@@ -82,6 +111,10 @@ void GridHeatMapValue::fill(QBoxLayout *layout)
 
     limit_sliders_height_.reset(new QAbstractSliderLimiter(slide_height_, slide_height_add1_));
     limit_sliders_width_.reset(new QAbstractSliderLimiter(slide_width_, slide_width_add1_));
+
+    QPushButton *button_reset = new QPushButton("reset");
+    QPushButton::connect(button_reset, SIGNAL(clicked()), this, SLOT(reset()));
+    layout->addWidget(button_reset);
 }
 
 void GridHeatMapValue::updateSliderMaxima(int width, int height, int width_add1, int height_add1)
@@ -118,12 +151,12 @@ void GridHeatMapValue::setState(Memento::Ptr memento)
     private_state_ghv_ = boost::dynamic_pointer_cast<State>(state_).get();
     assert(private_state_ghv_);
 
-    blockSignals(true);
+    state_mutex_.lock();
     slide_height_->setValue(private_state_ghv_->grid_height);
     slide_width_->setValue(private_state_ghv_->grid_width);
     slide_height_add1_->setValue(private_state_ghv_->grid_height_add1);
     slide_width_add1_->setValue(private_state_ghv_->grid_width_add1);
-    blockSignals(false);
+    state_mutex_.unlock();
 
     Q_EMIT modelChanged();
 }

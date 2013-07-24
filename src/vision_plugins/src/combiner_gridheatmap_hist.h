@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "combiner_gridcompare_hist.h"
 #include <vision_evaluator/qsignal_bridges.h>
+#include <QMutex>
 
 namespace vision_evaluator {
 class GridHeatMapHist : public GridCompareHist
@@ -25,12 +26,16 @@ public:
 
 protected Q_SLOTS:
     virtual void updateState(int value);
+    void reset();
 
 protected:
     virtual void addSliders(QBoxLayout *layout);
 
     QSlider *slide_width_add1_;
     QSlider *slide_height_add1_;
+    bool     run_renderer_;
+    bool     buffer_image_;
+    cv::Mat  buffered_image_;
 
     QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_width_;
     QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_height_;
@@ -56,7 +61,7 @@ protected:
     };
 
     State *private_state_ghm_;
-
+    State state_buffer_ghm_;
 };
 }
 #endif // COMBINER_GRIDHEATMAP_HIST_H

@@ -63,10 +63,10 @@ public:
         typedef boost::shared_ptr<State> Ptr;
 
         State()
-            : parent(NULL)
+            : parent(NULL), minimized(false), enabled(true)
         {}
         State(Box* parent)
-            : parent(parent)
+            : parent(parent), minimized(false), enabled(true)
         {}
 
         virtual void writeYaml(YAML::Emitter& out) const;
@@ -80,6 +80,7 @@ public:
         std::string type_;
 
         bool minimized;
+        bool enabled;
     };
 
 public:

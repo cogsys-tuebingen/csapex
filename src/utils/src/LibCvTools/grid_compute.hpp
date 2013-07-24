@@ -143,18 +143,70 @@ inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
             if(valid > 0) {
                 float value = counts.first / (float) valid;
                 vals.at<float>(j, i) = value;
-                /// FOR STACK CHECKING -->
-                float check = vals.at<float>(j, i);
-                /// <-- FOR STACK CHECKING
             }
         }
     }
 }
 
+template<class GridT>
+class HeatMapCompIterator {
+public:
+    HeatMapCompIterator(GridT& g1, GridT& g2) :
+        grid1(g1),
+        grid2(g2),
+        col_iterations(g2.cols() - g1.cols() + 1),
+        row_iterations(g2.rows() - g1.rows() + 1),
+        col_iter(0),
+        row_iter(0),
+        values(row_iterations, col_iterations, CV_32F, cv::Scalar::all(0))
+    {
+    }
+
+    int lastFinishedRow()
+    {
+        return std::max(row_iter-1,0);
+    }
+
+    bool iterate(cv::Mat &vals)
+    {
+        if(row_iter == row_iterations)
+            return false;
+
+        std::pair<int, int> counts;
+        int valid;
+
+        while(col_iter < col_iterations) {
+            grid2.setROI(row_iter,col_iter, grid1.rows(), grid1.cols());
+            grid_count(grid1, grid2, counts, valid);
+            grid2.resetROI();
+            if(valid > 0) {
+                float value = counts.first / (float) valid;
+                values.at<float>(row_iter, col_iter) = value;
+            }
+            col_iter++;;
+        }
+
+        vals = values;
+        row_iter++;
+        col_iter = 0;
+        return true;
+    }
+
+private:
+    GridT& grid1;
+    GridT& grid2;
+    int col_iterations;
+    int row_iterations;
+    int col_iter;
+    int row_iter;
+    cv::Mat values;
+};
+
+
 const cv::Point3f red(0,0,255);        /// P0
-const cv::Point3f green(0,255,255);     /// P1
+const cv::Point3f green(0,255,255);    /// P1
 const cv::Point3f blue(255,0,0);       /// p3
-const cv::Point3f fac1 = (blue - 3*green + red);
+const cv::Point3f fac1 = (blue - 2*green + red);
 const cv::Point3f fac2 = (-2*blue + 2*green);
 
 inline cv::Scalar color_heatmap(const float value)
@@ -165,13 +217,27 @@ inline cv::Scalar color_heatmap(const float value)
 
 inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv::Mat &out)
 {
-    out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3);
+    if(out.empty())
+        out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3);
     for(int i = 0 ; i < values.rows ; i++) {
         for(int j = 0 ; j < values.cols ; j++) {
             cv::Rect r  = cv::Rect(j * block_size.width,i * block_size.height,block_size.width,block_size.height);
             cv::rectangle(out,r,color_heatmap(values.at<float>(i,j)), CV_FILLED);
         }
     }
+}
+
+inline void render_heatmap_row(const cv::Mat &values, const cv::Size &block_size, const int row, cv::Mat &out)
+{
+    if(out.empty())
+        out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3);
+    for(int col = 0 ; col < values.cols ; col++) {
+        cv::Rect r  = cv::Rect(col * block_size.width, row * block_size.height,block_size.width,block_size.height);
+        float value = values.at<float>(row,col);
+        value = std::min(1.f, std::exp(value) - 1);
+        cv::rectangle(out,r,color_heatmap(value), CV_FILLED);
+    }
+
 }
 
 

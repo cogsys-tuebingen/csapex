@@ -45,9 +45,10 @@ cv::Mat GridCompareValue::combine(const cv::Mat img1, const cv::Mat mask1, const
 
         /// COMPUTE
         if(eps_sliders_.size() == private_state_gcv_->channel_count) {
+            state_buffer_gcv_ = *private_state_gcv_;
             GridScalar g1, g2;
-            prepareGrid(g1, img1, mask1, private_state_gcv_->grid_width, private_state_gcv_->grid_height);
-            prepareGrid(g2, img2, mask2, private_state_gcv_->grid_width, private_state_gcv_->grid_height);
+            prepareGrid(g1, img1, mask1, state_buffer_gcv_.grid_width, state_buffer_gcv_.grid_height);
+            prepareGrid(g2, img2, mask2, state_buffer_gcv_.grid_width, state_buffer_gcv_.grid_height);
 
             cv::Mat out;
             render_grid(g1, g2, cv::Size(10,10), out);
@@ -67,7 +68,6 @@ void GridCompareValue::updateDynamicGui(QBoxLayout *layout)
     }
     internal_layout = new QVBoxLayout;
 
-//    blockSignals(true);
     for(int i = 0 ; i < private_state_gcv_->channel_count ; i++) {
         std::stringstream ch;
         ch << "Ch." << i << " eps";
@@ -77,7 +77,6 @@ void GridCompareValue::updateDynamicGui(QBoxLayout *layout)
         internal_layout->addWidget(slider);
         eps_sliders_.push_back(slider);
     }
-//    blockSignals(false);
 
     container_eps_slider_ = QtHelper::wrapLayout(internal_layout);
     layout->addWidget(container_eps_slider_);
@@ -101,20 +100,21 @@ void GridCompareValue::setState(Memento::Ptr memento)
     private_state_gcv_ = boost::dynamic_pointer_cast<State>(state_).get();
     assert(private_state_gcv_);
 
-    blockSignals(true);
+    state_mutex_.lock();
     slide_height_->setValue(private_state_gcv_->grid_height);
     slide_width_->setValue(private_state_gcv_->grid_width);
-    blockSignals(false);
+    state_mutex_.unlock();
 
     Q_EMIT modelChanged();
 }
 
 void GridCompareValue::updateState(int i)
 {
-    if(!signalsBlocked()) {
+    if(state_mutex_.tryLock()) {
         private_state_gcv_->grid_width  = slide_width_->value();
         private_state_gcv_->grid_height = slide_height_->value();
         prepareParams(private_state_gcv_->eps, private_state_gcv_->ignore);
+        state_mutex_.unlock();
     }
 }
 

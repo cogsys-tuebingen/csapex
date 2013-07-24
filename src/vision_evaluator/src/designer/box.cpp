@@ -36,6 +36,8 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << YAML::BeginSeq << parent->pos().x() << parent->pos().y() << YAML::EndSeq;
     out << YAML::Key << "minimized";
     out << YAML::Value << minimized;
+    out << YAML::Key << "enabled";
+    out << YAML::Value << enabled;
 
     boxed_state = parent->content_->getState();
     if(boxed_state.get()) {
@@ -52,6 +54,10 @@ void Box::State::readYaml(const YAML::Node &node)
 {
     if(node.FindValue("minimized")) {
         node["minimized"] >> minimized;
+    }
+
+    if(node.FindValue("enabled")) {
+        node["enabled"] >> enabled;
     }
 
     if(node.FindValue("state")) {
@@ -122,6 +128,8 @@ void Box::enableContent(bool enable)
     } else if(!enable && timer_->isActive()) {
         timer_->stop();
     }
+
+    state->enabled = enable;
 
     content_->enable(enable);
 }
@@ -503,6 +511,10 @@ void Box::setState(Memento::Ptr memento)
 
     minimizeBox(state->minimized);
     ui->minimizebtn->setChecked(state->minimized);
+
+    enableContent(state->enabled);
+    ui->enablebtn->setChecked(state->enabled);
+
 }
 
 Command::Ptr Box::removeAllConnectionsCmd()

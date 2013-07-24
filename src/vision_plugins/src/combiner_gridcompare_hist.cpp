@@ -46,9 +46,10 @@ cv::Mat GridCompareHist::combine(const cv::Mat img1, const cv::Mat mask1, const 
 
         /// COMPUTE
         if(hist_sliders_.size() == private_state_gch_->channel_count) {
+            state_buffer_gch_ = *private_state_gch_;
             GridHist g1, g2;
-            prepareGrid(g1, img1, mask1, private_state_gch_->grid_width, private_state_gch_->grid_width);
-            prepareGrid(g2, img2, mask2, private_state_gch_->grid_width, private_state_gch_->grid_width);
+            prepareGrid(g1, img1, mask1, state_buffer_gch_.grid_width, state_buffer_gch_.grid_width);
+            prepareGrid(g2, img2, mask2, state_buffer_gch_.grid_width, state_buffer_gch_.grid_width);
 
             cv::Mat out;
             render_grid(g1, g2, cv::Size(10,10), out);
@@ -94,10 +95,11 @@ void GridCompareHist::updateDynamicGui(QBoxLayout *layout)
 
 void GridCompareHist::updateState(int value)
 {
-    if(!signalsBlocked()) {
+    if(state_mutex_.tryLock()) {
         private_state_gch_->combo_index = combo_compare_->currentIndex();
         private_state_gch_->grid_width  = slide_width_->value();
         private_state_gch_->grid_height = slide_height_->value();
+        state_mutex_.unlock();
     }
 }
 
@@ -176,11 +178,11 @@ void GridCompareHist::setState(Memento::Ptr memento)
     private_state_gch_ = boost::dynamic_pointer_cast<State>(state_).get();
     assert(private_state_gch_);
 
-    blockSignals(true);
+    state_mutex_.lock();
     slide_height_->setValue(private_state_gch_->grid_height);
     slide_width_->setValue(private_state_gch_->grid_width);
     combo_compare_->setCurrentIndex(private_state_gch_->combo_index);
-    blockSignals(false);
+    state_mutex_.unlock();
 
     Q_EMIT modelChanged();
 }
