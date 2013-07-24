@@ -15,7 +15,7 @@
 using namespace vision_evaluator;
 
 Overlay::Overlay(QWidget* parent)
-    : QWidget(parent)
+    : QWidget(parent), temp_from(NULL)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -47,29 +47,23 @@ Overlay::Overlay(QWidget* parent)
 
 void Overlay::drawTemporaryConnection(Connector *from, const QPoint& end)
 {
-    if(dynamic_cast<ConnectorOut*>(from)) {
-        temp_line = QLine(from->centerPoint(), end);
-    } else {
-        temp_line = QLine(end, from->centerPoint());
-    }
+    temp_from = from;
+    temp_to = end;
 
     repaint();
 }
 
 void Overlay::drawConnectionPreview(Connector *from, Connector *to)
 {
-    if(dynamic_cast<ConnectorOut*>(from)) {
-        temp_line = QLine(from->centerPoint(), to->centerPoint());
-    } else {
-        temp_line = QLine(to->centerPoint(), from->centerPoint());
-    }
+    temp_from = from;
+    temp_to = to->centerPoint();
 
     repaint();
 }
 
 void Overlay::deleteTemporaryConnection()
 {
-    temp_line = QLine();
+    temp_from = NULL;
     repaint();
 }
 
@@ -171,22 +165,36 @@ void Overlay::removeConnection(ConnectorOut* from, ConnectorIn* to)
     repaint();
 }
 
-void Overlay::drawConnection(const QPoint& p1, const QPoint& p2)
+void Overlay::drawConnection(ConnectorOut* from, ConnectorIn* to)
+{
+    QPoint p1 = from->centerPoint();
+    QPoint p2 = to->centerPoint();
+
+    drawConnection(p1, p2, to->isError() || from->isError());
+}
+
+
+void Overlay::drawConnection(QPoint from, QPoint to, bool error)
 {
     QPoint offset(0, 20);
 
-    QPoint diff = (p2 - p1);
+    QPoint diff = (to - from);
     QPoint delta = QPoint(std::max(40, std::abs((0.45 * diff).x())), 0);
-    QPoint cp1 = p1 + delta + offset;
-    QPoint cp2 = p2 - delta + offset;
+    QPoint cp1 = from + delta + offset;
+    QPoint cp2 = to - delta + offset;
 
     QPainterPath path;
-    path.moveTo(p1);
-    path.cubicTo(cp1, cp2, p2);
+    path.moveTo(from);
+    path.cubicTo(cp1, cp2, to);
 
-    QLinearGradient lg(p1, p2);
-    lg.setColorAt(0,color_out_connected.lighter());
-    lg.setColorAt(1,color_in_connected.lighter());
+    QLinearGradient lg(from, to);
+    if(error) {
+        lg.setColorAt(0,Qt::darkRed);
+        lg.setColorAt(1,Qt::red);
+    } else {
+        lg.setColorAt(0,color_out_connected.lighter());
+        lg.setColorAt(1,color_in_connected.lighter());
+    }
     QPen gp = QPen(Qt::black, connector_radius_ * 0.75, Qt::DotLine, Qt::RoundCap,Qt::RoundJoin);
     gp.setBrush(QBrush(lg));
 
@@ -200,10 +208,14 @@ void Overlay::drawConnector(Connector *c)
 
     QColor color;
 
-    if(c->isConnected()){
-        color = output ? color_out_connected : color_in_connected;
+    if(c->isError()) {
+        color= Qt::red;
     } else {
-        color = output ? color_out_disconnected : color_in_disconnected;
+        if(c->isConnected()){
+            color = output ? color_out_connected : color_in_connected;
+        } else {
+            color = output ? color_out_disconnected : color_in_disconnected;
+        }
     }
 
     painter->setBrush(QBrush(color, Qt::SolidPattern));
@@ -283,8 +295,12 @@ void Overlay::paintEvent(QPaintEvent* event)
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(Qt::black, 3));
 
-    if(!temp_line.isNull()) {
-        drawConnection(temp_line.p1(), temp_line.p2());
+    if(temp_from) {
+        if(dynamic_cast<ConnectorIn*> (temp_from)) {
+            drawConnection(temp_to, temp_from->centerPoint());
+        } else {
+            drawConnection(temp_from->centerPoint(), temp_to);
+        }
     }
     for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end(); ++it) {
         std::pair<int, Connector*>& p = *it;
@@ -295,7 +311,7 @@ void Overlay::paintEvent(QPaintEvent* event)
     for(ConnectionList::const_iterator i = connections.begin(); i != connections.end(); ++i) {
         const ConnectionPair& connection = *i;
 
-        drawConnection(connection.first->centerPoint(), connection.second->centerPoint());
+        drawConnection(connection.first, connection.second);
     }
 
     foreach (Connector* connector, connectors_) {

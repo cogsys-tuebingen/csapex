@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "memento.h"
+#include "displayable.h"
 
 /// SYSTEM
 #include <string>
@@ -16,7 +17,7 @@ class Box;
 class ConnectorIn;
 class ConnectorOut;
 
-class BoxedObject : public QObject
+class BoxedObject : public Displayable
 {
     Q_OBJECT
 
@@ -35,23 +36,18 @@ public:
     void setCategory(const std::string& category);
     std::string getCategory();
 
-    void setBox(Box* box);
+    virtual void setState(Memento::Ptr memento);
+    virtual Memento::Ptr getState() const;
 
     virtual void fill(QBoxLayout* layout);
     virtual void updateDynamicGui(QBoxLayout* layout);
 
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
-
     virtual bool canBeDisabled() const;
 
     bool isEnabled();
-    bool isError();
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source) = 0;
-
-    virtual void setError(bool e, const std::string& msg = "");
 
     virtual void enable(bool e);
     virtual void enable();
@@ -65,14 +61,14 @@ Q_SIGNALS:
     void modelChanged();
 
 protected:
+    void errorEvent(bool error);
+
+protected:
     std::string type_name_;
     std::string name_;
     std::string category_;
 
-    Box* box_;
-
     bool enabled_;
-    bool error_;
 };
 
 }

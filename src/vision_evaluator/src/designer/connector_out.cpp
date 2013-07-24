@@ -111,6 +111,13 @@ bool ConnectorOut::isConnected()
     return targets_.size() > 0;
 }
 
+void ConnectorOut::validateConnections()
+{
+    BOOST_FOREACH(ConnectorIn* target, targets_) {
+        target->validateConnections();
+    }
+}
+
 void ConnectorOut::publish(ConnectionType::Ptr message)
 {
     if(targets_.size() == 1) {

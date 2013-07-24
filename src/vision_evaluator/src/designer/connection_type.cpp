@@ -14,10 +14,10 @@ ConnectionType::~ConnectionType()
 
 bool ConnectionType::canConnectTo(ConnectionType::Ptr other_side)
 {
-    return other_side->acceptsConnectoFrom(this);
+    return other_side->acceptsConnectionFrom(this);
 }
 
-bool ConnectionType::acceptsConnectoFrom(ConnectionType *other_side)
+bool ConnectionType::acceptsConnectionFrom(ConnectionType *other_side)
 {
     return name_ == other_side->name();
 }

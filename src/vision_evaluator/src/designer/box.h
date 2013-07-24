@@ -9,6 +9,7 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <QWidget>
+#include <QIcon>
 #include <yaml-cpp/yaml.h>
 
 /// FORWARD DECLARATIONS

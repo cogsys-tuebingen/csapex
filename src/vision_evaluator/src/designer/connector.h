@@ -4,9 +4,7 @@
 /// COMPONENT
 #include "connection_type.h"
 #include "command.h"
-
-/// SYSTEM
-#include <QRadioButton>
+#include "displayable.h"
 
 /// FORWARDS DECLARATION
 namespace vision_evaluator
@@ -14,7 +12,7 @@ namespace vision_evaluator
 class Box;
 class DesignBoard;
 
-class Connector : public QRadioButton
+class Connector : public Displayable
 {
     Q_OBJECT
 
@@ -25,7 +23,6 @@ public:
     static const QString MIME_MOVE;
 
 public:
-    virtual bool hitButton(const QPoint&) const;
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
 
@@ -38,8 +35,7 @@ public:
     virtual bool isConnected() = 0;
     virtual bool tryConnect(Connector* other_side) = 0;
     virtual void removeConnection(Connector* other_side) = 0;
-
-    virtual void paintEvent(QPaintEvent* e);
+    virtual void validateConnections();
 
     virtual bool isOutput() {
         return false;
@@ -48,20 +44,19 @@ public:
         return false;
     }
 
-    std::string UUID();
     void setUUID(const std::string& uuid);
+    std::string UUID();
 
     virtual QPoint centerPoint();
 
-    vision_evaluator::Box* box();
     int connectorID();
 
     QString cssClass() {
         return QString("Connector");
     }
 
-    std::string getLabel() const;
     void setLabel(const std::string& label);
+    std::string getLabel() const;
 
     void setType(ConnectionType::Ptr type);
     ConnectionType::ConstPtr getType() const;
@@ -86,13 +81,14 @@ protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
     virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
+    void errorEvent(bool error);
+
 protected:
     virtual void findParents();
     virtual QPoint topLeft();
 
 protected:
     QWidget* parent_widget;
-    vision_evaluator::Box* box_;
     vision_evaluator::DesignBoard* designer;
 
     std::string uuid_;

@@ -50,11 +50,14 @@ protected:
     void drawActivity(int life, Connector* c);
     void clearActivity(Connector* c);
     void drawConnector(Connector* c);
-    void drawConnection(const QPoint& p1, const QPoint& p2);
+    void drawConnection(ConnectorOut *from, ConnectorIn *to);
+    void drawConnection(QPoint from, QPoint to, bool error = false);
     void paintEvent(QPaintEvent* event);
 
 protected:
-    QLine temp_line;
+    Connector* temp_from;
+    QPoint temp_to;
+
     QPainter* painter;
 
     std::vector<Connector*> connectors_;

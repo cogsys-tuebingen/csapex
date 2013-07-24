@@ -58,6 +58,7 @@ void ConnectorIn::removeAllConnectionsNotUndoable()
     if(input != NULL) {
         input->removeConnection(this);
         input = NULL;
+        setError(false);
         Q_EMIT disconnected(this);
     }
 }
@@ -72,6 +73,18 @@ bool ConnectorIn::isConnected()
     return input != NULL;
 }
 
+void ConnectorIn::validateConnections()
+{
+    bool e = false;
+    if(isConnected()) {
+        if(!input->getType()->canConnectTo(getType())) {
+            e = true;
+        }
+    }
+
+    setError(e);
+}
+
 ConnectorOut* ConnectorIn::getConnected()
 {
     return input;
@@ -79,6 +92,10 @@ ConnectorOut* ConnectorIn::getConnected()
 
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
+    if(isError()) {
+        return;
+    }
+
     message_ = message;
 
     Q_EMIT messageArrived(this);

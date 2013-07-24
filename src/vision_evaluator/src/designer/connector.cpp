@@ -19,8 +19,10 @@ const QString Connector::MIME_CREATE = "vision_evaluator/connector/create";
 const QString Connector::MIME_MOVE = "vision_evaluator/connector/move";
 
 Connector::Connector(Box* parent, const std::string& type, int sub_id)
-    : parent_widget(parent), box_(parent), designer(NULL)
+    : parent_widget(parent), designer(NULL)
 {
+    setBox(parent);
+
     findParents();
     setFocusPolicy(Qt::NoFocus);
     setAcceptDrops(true);
@@ -32,10 +34,17 @@ Connector::Connector(Box* parent, const std::string& type, int sub_id)
 
     setContextMenuPolicy(Qt::PreventContextMenu);
     setType(ConnectionType::makeDefault());
+
+    setFixedSize(16,16);
 }
 
 Connector::~Connector()
 {
+}
+
+void Connector::errorEvent(bool error)
+{
+    box_->getContent()->setError(error);
 }
 
 std::string Connector::UUID()
@@ -65,6 +74,11 @@ void Connector::removeConnection(QObject* other_side)
     }
 }
 
+void Connector::validateConnections()
+{
+
+}
+
 void Connector::removeAllConnectionsUndoable()
 {
     if(isConnected()) {
@@ -84,11 +98,6 @@ void Connector::findParents()
         }
         tmp = tmp->parentWidget();
     }
-}
-
-bool Connector::hitButton(const QPoint&) const
-{
-    return false;
 }
 
 bool Connector::canConnectTo(Connector* other_side)
@@ -212,19 +221,6 @@ QPoint Connector::centerPoint()
     return topLeft() + 0.5 * (geometry().bottomRight() - geometry().topLeft());
 }
 
-void Connector::paintEvent(QPaintEvent* e)
-{
-    setAutoExclusive(false);
-    setChecked(isConnected());
-
-    QRadioButton::paintEvent(e);
-}
-
-vision_evaluator::Box* Connector::box()
-{
-    return box_;
-}
-
 std::string Connector::getLabel() const
 {
     return label_;
@@ -238,6 +234,8 @@ void Connector::setLabel(const std::string &label)
 void Connector::setType(ConnectionType::Ptr type)
 {
     type_ = type;
+
+    validateConnections();
 }
 
 ConnectionType::ConstPtr Connector::getType() const

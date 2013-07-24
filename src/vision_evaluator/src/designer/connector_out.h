@@ -41,6 +41,7 @@ public:
 
     virtual bool canConnect();
     virtual bool isConnected();
+    virtual void validateConnections();
 
     TargetIterator beginTargets();
     TargetIterator endTargets();

@@ -30,6 +30,7 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
 void DeleteConnection::execute()
 {
     from->removeConnection(to);
+    to->setError(false);
     BoxManager::instance().setDirty(true);
 }
 

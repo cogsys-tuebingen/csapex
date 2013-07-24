@@ -18,25 +18,42 @@ protected:
     {}
 
 public:
-    virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new Message("anything"));
-        return new_msg;
-    }
-
-    static ConnectionType::Ptr make(){
-        Ptr new_msg(new Message("anything"));
-        return new_msg;
-    }
-
-    bool acceptsConnectoFrom(ConnectionType* other_side) {
-        return true;
-    }
-
     void writeYaml(YAML::Emitter& yaml) {
 
     }
     void readYaml(YAML::Node& node) {
 
+    }
+};
+
+struct AnyMessage : public Message
+{
+protected:
+    AnyMessage(const std::string& name)
+        : Message(name)
+    {}
+
+public:
+    virtual ConnectionType::Ptr clone() {
+        Ptr new_msg(new AnyMessage("anything"));
+        return new_msg;
+    }
+    virtual ConnectionType::Ptr toType() {
+        Ptr new_msg(new AnyMessage("anything"));
+        return new_msg;
+    }
+
+    static ConnectionType::Ptr make(){
+        Ptr new_msg(new AnyMessage("anything"));
+        return new_msg;
+    }
+
+    bool canConnectTo(Ptr other_side) {
+        return true;
+    }
+
+    bool acceptsConnectionFrom(ConnectionType* other_side) {
+        return true;
     }
 };
 
@@ -52,6 +69,15 @@ struct MessageTemplate : public Message {
         Ptr new_msg(new Instance);
         new_msg->value = value;
         return new_msg;
+    }
+
+    virtual ConnectionType::Ptr toType() {
+        Ptr new_msg(new Instance);
+        return new_msg;
+    }
+
+    bool acceptsConnectionFrom(ConnectionType* other_side) {
+        return name() == other_side->name();
     }
 
     void writeYaml(YAML::Emitter& yaml) {

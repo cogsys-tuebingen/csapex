@@ -25,7 +25,7 @@ void ExportCout::fill(QBoxLayout *layout)
     if(connector_ == NULL) {
         connector_ = new ConnectorIn(box_, 0);
         connector_->setLabel("Anything");
-        connector_->setType(connection_types::Message::make());
+        connector_->setType(connection_types::AnyMessage::make());
 
         box_->addInput(connector_);
     }

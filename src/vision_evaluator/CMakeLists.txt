@@ -144,6 +144,7 @@ add_library(designer
     src/designer/design_board.cpp
     src/designer/designer.cpp
     src/designer/designerio.cpp
+    src/designer/displayable.cpp
     src/designer/memento.cpp
     src/designer/overlay.cpp
     src/designer/selector_proxy.cpp

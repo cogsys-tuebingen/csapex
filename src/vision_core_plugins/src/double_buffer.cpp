@@ -25,11 +25,11 @@ void DoubleBuffer::fill(QBoxLayout *layout)
     if(input_ == NULL) {
         input_ = new ConnectorIn(box_, 0);
         input_->setLabel("Anything");
-        input_->setType(connection_types::Message::make());
+        input_->setType(connection_types::AnyMessage::make());
 
         output_ = new ConnectorOut(box_, 0);
         output_->setLabel("Same as input");
-        output_->setType(connection_types::Message::make());
+        output_->setType(connection_types::AnyMessage::make());
 
         box_->addInput(input_);
         box_->addOutput(output_);
@@ -43,6 +43,11 @@ void DoubleBuffer::messageArrived(ConnectorIn *source)
     state.buffer_back_ = msg;
 
     swapBuffers();
+
+    if(output_->getType()->name() != msg->name()) {
+        std::cout << "changing type to " << msg->name() << std::endl;
+        output_->setType(msg->toType());
+    }
 
     msg->write(std::cout);
     std::cout << std::endl;

@@ -10,7 +10,7 @@
 using namespace vision_evaluator;
 
 BoxedObject::BoxedObject()
-    : enabled_(true), error_(false)
+    : enabled_(true)
 {
 }
 
@@ -28,25 +28,6 @@ bool BoxedObject::isEnabled()
     return enabled_;
 }
 
-void BoxedObject::setError(bool e, const std::string& msg)
-{
-    QString err;
-    if(e) {
-        unsigned line = 60;
-        for(unsigned i = 0; i < msg.size(); ++i) {
-            err += msg[i];
-            if((i%line) == 0 && i != 0) {
-                err += '\n';
-            }
-        }
-    }
-    box_->setToolTip(err);
-    error_ = e;
-}
-bool BoxedObject::isError()
-{
-    return error_;
-}
 
 void BoxedObject::setName(const std::string& name)
 {
@@ -79,11 +60,6 @@ void BoxedObject::setCategory(const std::string &category)
 std::string BoxedObject::getCategory()
 {
     return category_;
-}
-
-void BoxedObject::setBox(Box* box)
-{
-    box_ = box;
 }
 
 void BoxedObject::fill(QBoxLayout* layout)
@@ -146,4 +122,9 @@ void BoxedObject::connectorChanged()
 void BoxedObject::tick()
 {
 
+}
+
+void BoxedObject::errorEvent(bool error)
+{
+    enabled_ = !error;
 }

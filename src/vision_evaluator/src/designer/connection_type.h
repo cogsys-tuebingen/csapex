@@ -16,10 +16,11 @@ public:
     virtual ~ConnectionType();
 
     virtual ConnectionType::Ptr clone() = 0;
+    virtual ConnectionType::Ptr toType() = 0;
     static ConnectionType::Ptr makeDefault();
 
     virtual bool canConnectTo(ConnectionType::Ptr other_side);
-    virtual bool acceptsConnectoFrom(ConnectionType* other_side);
+    virtual bool acceptsConnectionFrom(ConnectionType* other_side);
 
     std::string name();
 
