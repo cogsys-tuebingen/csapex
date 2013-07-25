@@ -188,11 +188,14 @@ bool DesignBoard::eventFilter(QObject* o, QEvent* e)
             QObject::connect(box, SIGNAL(connectorCreated(Connector*)), overlay, SLOT(connectorAdded(Connector*)));
             QObject::connect(box, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(addConnection(ConnectorOut*,ConnectorIn*)));
             QObject::connect(box, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(removeConnection(ConnectorOut*,ConnectorIn*)));
+            QObject::connect(box, SIGNAL(connectorEnabled(Connector*)), overlay, SLOT(connectorEnabled(Connector*)));
+            QObject::connect(box, SIGNAL(connectorDisabled(Connector*)), overlay, SLOT(connectorDisabled(Connector*)));
 
             QObject::connect(box, SIGNAL(messageSent(ConnectorOut*)), overlay, SLOT(showPublisherSignal(ConnectorOut*)));
             QObject::connect(box, SIGNAL(messageArrived(ConnectorIn*)), overlay, SLOT(showPublisherSignal(ConnectorIn*)));
-            QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(drawConnectionPreview(Connector*,Connector*)));
-            QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnection()));
+            QObject::connect(box, SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
+            QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
+            QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
             box->registered();
         }
@@ -239,16 +242,28 @@ void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
         e->acceptProposedAction();
     }
 }
+
 void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
     if(e->mimeData()->text() == Connector::MIME_CREATE) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
-        overlay->drawTemporaryConnection(c, e->pos());
+        overlay->deleteTemporaryConnections();
+        overlay->addTemporaryConnection(c, e->pos());
     }
 
     if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
-        overlay->drawTemporaryConnection(c, e->pos());
+        overlay->deleteTemporaryConnections();
+
+        ConnectorOut* out = dynamic_cast<ConnectorOut*> (c);
+        if(out) {
+            for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+                overlay->addTemporaryConnection(*it, e->pos());
+            }
+        } else {
+            ConnectorIn* in = dynamic_cast<ConnectorIn*> (c);
+            overlay->addTemporaryConnection(in->getConnected(), e->pos());
+        }
     }
 
     if(e->mimeData()->text() == Box::MIME_MOVE) {

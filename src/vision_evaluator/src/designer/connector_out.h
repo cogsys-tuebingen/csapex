@@ -12,6 +12,7 @@ class ConnectorIn;
 
 namespace command {
 class AddConnection;
+class MoveConnection;
 class DeleteConnection;
 }
 
@@ -21,6 +22,7 @@ class ConnectorOut : public Connector
 
     friend class ConnectorIn;
     friend class command::AddConnection;
+    friend class command::MoveConnection;
     friend class command::DeleteConnection;
     friend class DesignerIO;
 
@@ -33,7 +35,7 @@ public:
     ConnectorOut(Box* parent, int sub_id);
     ~ConnectorOut();
 
-    virtual bool isOutput() {
+    virtual bool isOutput() const {
         return true;
     }
 

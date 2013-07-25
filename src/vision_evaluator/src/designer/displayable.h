@@ -13,10 +13,10 @@ class Displayable : public QWidget
 {
 public:
     virtual void setError(bool e, const std::string& msg = "");
-    bool isError();
+    bool isError() const;
 
     virtual void setBox(Box* box);
-    Box* getBox();
+    Box* getBox() const;
 
 protected:
     Displayable();

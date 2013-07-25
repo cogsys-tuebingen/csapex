@@ -28,7 +28,7 @@ void Meta::execute()
 
 bool Meta::undo()
 {
-    BOOST_FOREACH(Command::Ptr cmd, nested) {
+    BOOST_REVERSE_FOREACH(Command::Ptr cmd, nested) {
         if(!cmd->undo()) {
 //            undo_later.push_back(cmd);
         }

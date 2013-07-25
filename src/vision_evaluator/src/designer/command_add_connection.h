@@ -14,7 +14,8 @@ class ConnectorOut;
 namespace command
 {
 
-struct AddConnection : public Command {
+struct AddConnection : public Command
+{
     AddConnection(Connector* a, Connector* b);
 
 protected:

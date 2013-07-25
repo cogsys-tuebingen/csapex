@@ -23,7 +23,7 @@ protected:
     bool undo();
     void redo();
 
-private:
+protected:
     std::vector<Command::Ptr> nested;
     bool locked;
 };

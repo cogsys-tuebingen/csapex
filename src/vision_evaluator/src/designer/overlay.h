@@ -30,17 +30,20 @@ public:
     Overlay(QWidget* parent = 0);
 
 public Q_SLOTS:
-    void connectorRemoved(Connector* c);
     void connectorAdded(Connector* c);
+    void connectorRemoved(Connector* c);
     void connectorAdded(QObject* c);
     void connectorRemoved(QObject* o);
+    void connectorEnabled(Connector* c);
+    void connectorDisabled(Connector* c);
     void showPublisherSignal(Connector* c);
     void showPublisherSignal(ConnectorIn* c);
     void showPublisherSignal(ConnectorOut* c);
 
-    void drawConnectionPreview(Connector* from, Connector* to);
-    void drawTemporaryConnection(Connector *from, const QPoint& end);
-    void deleteTemporaryConnection();
+    void addTemporaryConnection(Connector* from, Connector* to);
+    void addTemporaryConnection(Connector *from, const QPoint& end);
+    void deleteTemporaryConnections();
+    void deleteTemporaryConnectionsAndRepaint();
     void addConnection(ConnectorOut* from, ConnectorIn* to);
     void removeConnection(ConnectorOut* from, ConnectorIn* to);
     void tick();
@@ -55,8 +58,12 @@ protected:
     void paintEvent(QPaintEvent* event);
 
 protected:
-    Connector* temp_from;
-    QPoint temp_to;
+    struct TempConnection {
+        Connector* from;
+        QPoint to;
+    };
+
+    std::vector<TempConnection> temp_;
 
     QPainter* painter;
 

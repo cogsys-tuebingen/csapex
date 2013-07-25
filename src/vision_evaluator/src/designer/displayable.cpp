@@ -29,7 +29,7 @@ void Displayable::setError(bool e, const std::string& msg)
     errorEvent(error_);
 }
 
-bool Displayable::isError()
+bool Displayable::isError() const
 {
     return error_;
 }
@@ -40,7 +40,7 @@ void Displayable::setBox(Box* box)
     box_ = box;
 }
 
-Box* Displayable::getBox()
+Box* Displayable::getBox() const
 {
     return box_;
 }

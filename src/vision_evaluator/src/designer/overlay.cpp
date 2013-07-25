@@ -15,7 +15,7 @@
 using namespace vision_evaluator;
 
 Overlay::Overlay(QWidget* parent)
-    : QWidget(parent), temp_from(NULL)
+    : QWidget(parent)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -45,25 +45,32 @@ Overlay::Overlay(QWidget* parent)
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void Overlay::drawTemporaryConnection(Connector *from, const QPoint& end)
+void Overlay::addTemporaryConnection(Connector *from, const QPoint& end)
 {
-    temp_from = from;
-    temp_to = end;
+    TempConnection temp;
+    temp.from = from;
+    temp.to = end;
 
-    repaint();
+    temp_.push_back(temp);
 }
 
-void Overlay::drawConnectionPreview(Connector *from, Connector *to)
+void Overlay::addTemporaryConnection(Connector *from, Connector *to)
 {
-    temp_from = from;
-    temp_to = to->centerPoint();
+    TempConnection temp;
+    temp.from = from;
+    temp.to = to->centerPoint();
 
-    repaint();
+    temp_.push_back(temp);
 }
 
-void Overlay::deleteTemporaryConnection()
+void Overlay::deleteTemporaryConnections()
 {
-    temp_from = NULL;
+    temp_.clear();
+}
+
+void Overlay::deleteTemporaryConnectionsAndRepaint()
+{
+    deleteTemporaryConnections();
     repaint();
 }
 
@@ -82,6 +89,16 @@ void Overlay::connectorRemoved(QObject* o)
 void Overlay::connectorAdded(QObject* o)
 {
     connectorAdded((Connector*) o);
+}
+
+void Overlay::connectorEnabled(Connector *c)
+{
+//    connectorAdded(c);
+}
+
+void Overlay::connectorDisabled(Connector* c)
+{
+//    connectorRemoved(c);
 }
 
 void Overlay::showPublisherSignal(ConnectorIn *c)
@@ -210,6 +227,8 @@ void Overlay::drawConnector(Connector *c)
 
     if(c->isError()) {
         color= Qt::red;
+    } else if(!c->isEnabled()) {
+        color= Qt::gray;
     } else {
         if(c->isConnected()){
             color = output ? color_out_connected : color_in_connected;
@@ -249,7 +268,7 @@ void Overlay::drawConnector(Connector *c)
 
 void Overlay::drawActivity(int life, Connector* c)
 {
-    if(life > 0) {
+    if(c->isEnabled() && life > 0) {
         int r = std::max(0, activity_marker_max_lifetime_ - life);
         double f = r / (double) activity_marker_max_lifetime_;
         int w = activity_marker_min_width_ + f * (activity_marker_max_width_ - activity_marker_min_width_);
@@ -295,11 +314,14 @@ void Overlay::paintEvent(QPaintEvent* event)
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(Qt::black, 3));
 
-    if(temp_from) {
-        if(dynamic_cast<ConnectorIn*> (temp_from)) {
-            drawConnection(temp_to, temp_from->centerPoint());
-        } else {
-            drawConnection(temp_from->centerPoint(), temp_to);
+    if(!temp_.empty()) {
+        BOOST_FOREACH(TempConnection& temp, temp_) {
+
+            if(dynamic_cast<ConnectorIn*> (temp.from)) {
+                drawConnection(temp.to, temp.from->centerPoint());
+            } else {
+                drawConnection(temp.from->centerPoint(), temp.to);
+            }
         }
     }
     for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end(); ++it) {
@@ -311,7 +333,9 @@ void Overlay::paintEvent(QPaintEvent* event)
     for(ConnectionList::const_iterator i = connections.begin(); i != connections.end(); ++i) {
         const ConnectionPair& connection = *i;
 
-        drawConnection(connection.first, connection.second);
+        if(connection.first->isEnabled() && connection.second->isEnabled()) {
+            drawConnection(connection.first, connection.second);
+        }
     }
 
     foreach (Connector* connector, connectors_) {

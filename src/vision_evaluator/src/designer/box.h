@@ -165,6 +165,13 @@ Q_SIGNALS:
     void messageArrived(ConnectorIn* source);
     void connectionInProgress(Connector*, Connector*);
     void connectionDone();
+    void connectionStart();
+    void connectorEnabled(Connector* source);
+    void connectorDisabled(Connector* source);
+
+private:
+    void connectConnector(Connector* c);
+    void disconnectConnector(Connector* c);
 
 private:
     Ui::Box* ui;

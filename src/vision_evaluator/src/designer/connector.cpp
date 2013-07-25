@@ -6,6 +6,7 @@
 #include "box.h"
 #include "box_manager.h"
 #include "command_add_connection.h"
+#include "command_move_connection.h"
 
 /// SYSTEM
 #include <iostream>
@@ -87,6 +88,18 @@ void Connector::removeAllConnectionsUndoable()
     }
 }
 
+void Connector::disable()
+{
+    setEnabled(false);
+    Q_EMIT disabled(this);
+}
+
+void Connector::enable()
+{
+    setEnabled(true);
+    Q_EMIT enabled(this);
+}
+
 void Connector::findParents()
 {
     QWidget* tmp = this;
@@ -116,22 +129,45 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
         }
     } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        if(from->canConnectTo(this) && canConnectTo(from)) {
-            e->acceptProposedAction();
+        ConnectorOut* out = dynamic_cast<ConnectorOut*> (from);
+
+        if(out) {
+            bool accept = true;
+            for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+                accept &= (*it)->canConnectTo(this) && canConnectTo(*it);
+            }
+
+            if(accept) {
+                e->acceptProposedAction();
+            }
+
+        } else {
+            ConnectorIn* in = dynamic_cast<ConnectorIn*> (from);
+            if(in->getConnected()->canConnectTo(this) && canConnectTo(in->getConnected())) {
+                e->acceptProposedAction();
+            }
         }
     }
 }
 
 void Connector::dragMoveEvent(QDragMoveEvent* e)
 {
+    Q_EMIT(connectionStart());
     if(e->mimeData()->text() == Connector::MIME_CREATE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         Q_EMIT(connectionInProgress(this, from));
     } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-
-        Q_EMIT(connectionInProgress(this, from));
+        ConnectorOut* out = dynamic_cast<ConnectorOut*> (from);
+        if(out) {
+            for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+                Q_EMIT(connectionInProgress(*it, this));
+            }
+        } else {
+            ConnectorIn* in = dynamic_cast<ConnectorIn*> (from);
+            Q_EMIT(connectionInProgress(in->getConnected(), this));
+        }
     }
 }
 
@@ -148,8 +184,9 @@ void Connector::dropEvent(QDropEvent* e)
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
-            Command::Ptr cmd(new command::AddConnection(this, from));
-            //            BoxManager::instance().execute(cmd);
+            Command::Ptr cmd(new command::MoveConnection(from, this));
+            BoxManager::instance().execute(cmd);
+            e->setDropAction(Qt::MoveAction);
         }
     }
 }
@@ -173,15 +210,14 @@ void Connector::mousePressEvent(QMouseEvent* e)
             }
 
             mimeData->setText(Connector::MIME_MOVE);
-            mimeData->setParent(source);
+            mimeData->setParent(this);
             drag->setMimeData(mimeData);
 
-            Command::Ptr remove = source->removeAllConnectionsCmd();
-            BoxManager::instance().execute(remove);
+            source->disable();
 
             drag->exec();
 
-            BoxManager::instance().undo();
+            source->enable();
 
         } else {
             mimeData->setText(Connector::MIME_CREATE);

@@ -37,10 +37,10 @@ public:
     virtual void removeConnection(Connector* other_side) = 0;
     virtual void validateConnections();
 
-    virtual bool isOutput() {
+    virtual bool isOutput() const {
         return false;
     }
-    virtual bool isInput() {
+    virtual bool isInput() const {
         return false;
     }
 
@@ -67,10 +67,15 @@ public Q_SLOTS:
 
     void removeAllConnectionsUndoable();
 
+    virtual void disable();
+    virtual void enable();
 
 
 Q_SIGNALS:
     void disconnected(QObject*);
+    void disabled(Connector* source);
+    void enabled(Connector* source);
+    void connectionStart();
     void connectionInProgress(Connector*, Connector*);
     void connectionDone();
 
