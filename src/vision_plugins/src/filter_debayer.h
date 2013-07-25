@@ -29,7 +29,7 @@ public:
     void setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
-protected:
+private:
     /// internal typdefs
     typedef std::pair<int, int> modePair;
 
@@ -42,10 +42,10 @@ protected:
 
     /// MEMENTO
     class State : public Memento {
-    public:
         void readYaml(const YAML::Node &node);
         void writeYaml(YAML::Emitter &out) const;
 
+    public:
         int index;
     };
 

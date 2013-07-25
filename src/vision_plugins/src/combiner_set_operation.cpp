@@ -15,16 +15,23 @@ SetOperation::SetOperation() :
 
 cv::Mat SetOperation::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
 {
-    if(!img1.empty() && !img2.empty()) {
+    if(!img1.empty()) {
         /// PREPARE
-        if(img1.channels() != 1 || img2.channels() != 1)
+        if(img1.channels() != 1)
+            throw std::runtime_error("No Single Channel!");
+
+        if (state_.operation_index == 0)
+            return ~img1;
+    }
+
+    if(!img2.empty()) {
+        /// PREPARE
+        if(img2.channels() != 1)
             throw std::runtime_error("No Single Channel!");
         if(img1.rows != img2.rows || img1.cols != img2.cols)
             throw std::runtime_error("Dimension is not matching!");
     }
 
-    if (state_.operation_index == 0)
-        return ~img1;
     if (state_.operation_index == 1)
         return img1 & img2;
     if (state_.operation_index == 2)
