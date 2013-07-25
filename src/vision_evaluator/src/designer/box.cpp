@@ -69,7 +69,7 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), state(new State(this)), private_thread_(NULL), worker(this), down_(false)
+    : QWidget(parent), ui(new Ui::Box), state(new State(this)), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false)
 {
     ui->setupUi(this);
 
@@ -97,8 +97,7 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 
     state->minimized = false;
 
-    QObject::connect(timer_, SIGNAL(timeout()), &worker, SLOT(tick()));
-
+    QObject::connect(timer_, SIGNAL(timeout()), worker_, SLOT(tick()));
 
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
@@ -116,7 +115,8 @@ void Box::makeThread()
         private_thread_ = new QThread;
         connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
 
-        worker.moveToThread(private_thread_);
+        assert(worker_);
+        worker_->moveToThread(private_thread_);
 
         private_thread_->start();
     }
@@ -202,7 +202,7 @@ void Box::addInput(ConnectorIn* in)
     input.push_back(in);
 
     QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
-    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), &worker, SLOT(forwardMessage(ConnectorIn*)));
+    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
     QObject::connect(in, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::connect(in, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 
@@ -319,6 +319,8 @@ Box::~Box()
     BoxManager::instance().setDirty(true);
 
     stop();
+
+    delete worker_;
 }
 
 bool Box::eventFilter(QObject* o, QEvent* e)
@@ -470,15 +472,34 @@ void Box::eventModelChanged()
 
 void Box::killContent()
 {
-    if(private_thread_) {
-//        private_thread_->quit();
-////        private_thread_->terminate();
-////        private_thread_->deleteLater();
-////        private_thread_ = NULL;
+    if(private_thread_ && private_thread_->isRunning()) {
+        worker_mutex_.lock();
 
-////        worker.moveToThread(thread());
+        QObject::disconnect(private_thread_);
+        QObject::disconnect(worker_);
 
-//        makeThread();
+        QObject::connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+        QObject::connect(private_thread_, SIGNAL(terminated()), private_thread_, SLOT(deleteLater()));
+
+        QObject::connect(private_thread_, SIGNAL(finished()), worker_, SLOT(deleteLater()));
+        QObject::connect(private_thread_, SIGNAL(terminated()), worker_, SLOT(deleteLater()));
+
+        private_thread_->quit();
+        if(!private_thread_->wait(100)) {
+            private_thread_->terminate();
+        }
+
+        private_thread_ = NULL;
+        worker_ = new BoxWorker(this);
+
+        QObject::connect(timer_, SIGNAL(timeout()), worker_, SLOT(tick()));
+        BOOST_FOREACH(ConnectorIn* in, input) {
+            QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
+        }
+
+        makeThread();
+
+        worker_mutex_.unlock();
     }
 }
 

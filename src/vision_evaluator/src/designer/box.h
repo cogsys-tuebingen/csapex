@@ -10,6 +10,7 @@
 #include <boost/shared_ptr.hpp>
 #include <QWidget>
 #include <QIcon>
+#include <QMutex>
 #include <yaml-cpp/yaml.h>
 
 /// FORWARD DECLARATIONS
@@ -174,9 +175,11 @@ private:
     std::vector<ConnectorIn*> input;
     std::vector<ConnectorOut*> output;  
 
+    QMutex worker_mutex_;
+
     QThread* private_thread_;
     QTimer* timer_;
-    BoxWorker worker;
+    BoxWorker* worker_;
 
     bool down_;
 

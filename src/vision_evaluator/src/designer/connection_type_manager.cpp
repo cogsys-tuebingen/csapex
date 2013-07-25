@@ -14,8 +14,7 @@ ConnectionTypeManager& ConnectionTypeManager::instance()
 ConnectionType::Ptr ConnectionTypeManager::createMessage(const std::string& type)
 {
     if(instance().classes.empty()) {
-        std::cerr << "no connection types registered!" << std::endl;
-        throw;
+        throw std::runtime_error("no connection types registered!");
     }
 
     return instance().classes[type]();
