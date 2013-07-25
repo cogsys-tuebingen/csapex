@@ -451,6 +451,10 @@ void Box::startDrag(QPoint offset)
     mimeData->setUserData(0, new MoveOffset(offset));
     drag->setMimeData(mimeData);
 
+//    if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
+//        return;
+//    }
+
     QPoint start_pos = pos();
     drag->exec();
     QPoint end_pos = pos();

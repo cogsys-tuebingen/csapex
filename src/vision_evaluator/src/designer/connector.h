@@ -24,6 +24,7 @@ public:
 
 public:
     virtual void mousePressEvent(QMouseEvent* e);
+    virtual void mouseMoveEvent(QMouseEvent * e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
 
     void dragEnterEvent(QDragEnterEvent* e);
@@ -100,6 +101,8 @@ protected:
     std::string label_;
 
     ConnectionType::Ptr type_;
+
+    Qt::MouseButtons buttons_down_;
 };
 
 }

@@ -20,7 +20,7 @@ const QString Connector::MIME_CREATE = "vision_evaluator/connector/create";
 const QString Connector::MIME_MOVE = "vision_evaluator/connector/move";
 
 Connector::Connector(Box* parent, const std::string& type, int sub_id)
-    : parent_widget(parent), designer(NULL)
+    : parent_widget(parent), designer(NULL), buttons_down_(0)
 {
     setBox(parent);
 
@@ -37,6 +37,8 @@ Connector::Connector(Box* parent, const std::string& type, int sub_id)
     setType(ConnectionType::makeDefault());
 
     setFixedSize(16,16);
+
+    setMouseTracking(true);
 }
 
 Connector::~Connector()
@@ -193,31 +195,38 @@ void Connector::dropEvent(QDropEvent* e)
 
 void Connector::mousePressEvent(QMouseEvent* e)
 {
-    bool create = e->button() == Qt::LeftButton;
-    bool move = e->button() == Qt::RightButton && isConnected();
+    buttons_down_ = e->buttons();
+}
+
+void Connector::mouseMoveEvent(QMouseEvent* e)
+{
+    if(buttons_down_ == Qt::NoButton) {
+        return;
+    }
+
+    bool left = (buttons_down_ & Qt::LeftButton) != 0;
+    bool right = (buttons_down_ & Qt::RightButton) != 0;
+
+    bool is_input = dynamic_cast<ConnectorIn*>(this) != NULL;
+    bool full_input = is_input && this->isConnected();
+    bool create = left && !full_input;
+    bool move = (right && isConnected()) || (left && full_input);
 
     if(create || move) {
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
 
         if(move) {
-            ConnectorOut* source;
-            if(isOutput()) {
-                source = dynamic_cast<ConnectorOut*>(this);
-            } else {
-                ConnectorIn* self = dynamic_cast<ConnectorIn*>(this);
-                source = dynamic_cast<ConnectorOut*>(self->getConnected());
-            }
 
             mimeData->setText(Connector::MIME_MOVE);
             mimeData->setParent(this);
             drag->setMimeData(mimeData);
 
-            source->disable();
+            disable();
 
             drag->exec();
 
-            source->enable();
+            enable();
 
         } else {
             mimeData->setText(Connector::MIME_CREATE);
@@ -230,13 +239,18 @@ void Connector::mousePressEvent(QMouseEvent* e)
         e->accept();
 
         Q_EMIT connectionDone();
+        buttons_down_ = Qt::NoButton;
     }
     e->accept();
 }
 
 void Connector::mouseReleaseEvent(QMouseEvent* e)
 {
+    buttons_down_ = e->buttons();
+
     if(e->button() == Qt::MiddleButton) {
+        removeAllConnectionsUndoable();
+    } else if(e->button() == Qt::RightButton) {
         removeAllConnectionsUndoable();
     }
 
