@@ -38,8 +38,15 @@ bool DeleteBox::undo()
 
 void DeleteBox::redo()
 {
+    refresh();
+
     doRedo(remove_connections);
 
     box->stop();
     box->deleteLater();
+}
+
+void DeleteBox::refresh()
+{
+    box = BoxManager::instance().findBox(uuid);
 }

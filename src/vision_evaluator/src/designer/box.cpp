@@ -585,6 +585,8 @@ void Box::minimizeBox(bool minimize)
 
 Memento::Ptr Box::getState() const
 {
+    assert(state);
+
     State::Ptr memento(new State);
     *memento = *state;
 

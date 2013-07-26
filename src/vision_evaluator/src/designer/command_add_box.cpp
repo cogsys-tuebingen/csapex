@@ -24,9 +24,12 @@ void AddBox::execute()
 
 bool AddBox::undo()
 {
+    refresh();
+
     saved_state = box->getState();
     box->stop();
     delete box;
+    box = NULL;
 
     return true;
 }
@@ -35,4 +38,9 @@ void AddBox::redo()
 {
     execute();
     box->setState(saved_state);
+}
+
+void AddBox::refresh()
+{
+    box = BoxManager::instance().findBox(uuid);
 }

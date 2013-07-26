@@ -26,6 +26,8 @@ protected:
     bool undo();
     void redo();
 
+    void refresh();
+
 protected:
     Box* box;
     QWidget* parent;

@@ -26,6 +26,8 @@ protected:
     bool undo();
     void redo();
 
+    void refresh();
+
 private:
     SelectorProxy* selector;
     QWidget* parent;
