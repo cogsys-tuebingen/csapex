@@ -40,7 +40,7 @@ void DoubleBuffer::messageArrived(ConnectorIn *source)
 {
     ConnectionType::Ptr msg = source->getMessage();
 
-    state.buffer_back_ = msg;
+    state.buffer_back_ = msg->clone();
 
     swapBuffers();
 

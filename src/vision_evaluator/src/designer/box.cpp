@@ -225,6 +225,7 @@ void Box::addInput(ConnectorIn* in)
     connectConnector(in);
 
     Q_EMIT connectorCreated(in);
+    Q_EMIT changed(this);
 }
 
 void Box::addOutput(ConnectorOut* out)
@@ -240,6 +241,7 @@ void Box::addOutput(ConnectorOut* out)
     connectConnector(out);
 
     Q_EMIT connectorCreated(out);
+    Q_EMIT changed(this);
 }
 void Box::removeInput(ConnectorIn *in)
 {
@@ -290,6 +292,11 @@ void Box::disconnectConnector(Connector *c)
     QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
     QObject::disconnect(c, SIGNAL(enabled(Connector*)), this, SIGNAL(connectorEnabled(Connector*)));
     QObject::disconnect(c, SIGNAL(disabled(Connector*)), this, SIGNAL(connectorDisabled(Connector*)));
+}
+
+void Box::resizeEvent(QResizeEvent *e)
+{
+    Q_EMIT changed(this);
 }
 
 

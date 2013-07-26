@@ -161,6 +161,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void toggled(bool);
     void moved(Box*);
+    void changed(Box*);
     void connectorCreated(Connector*);
     void connectionFormed(ConnectorOut*, ConnectorIn*);
     void connectionDestroyed(ConnectorOut*, ConnectorIn*);
@@ -176,6 +177,8 @@ Q_SIGNALS:
 private:
     void connectConnector(Connector* c);
     void disconnectConnector(Connector* c);
+
+    void resizeEvent(QResizeEvent * e);
 
 private:
     Ui::Box* ui;

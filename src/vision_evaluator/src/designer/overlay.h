@@ -23,8 +23,13 @@ class Overlay : public QWidget
     Q_OBJECT
 
 private:
-    typedef std::pair<ConnectorOut*, ConnectorIn*> ConnectionPair;
-    typedef std::vector<ConnectionPair> ConnectionList;
+    struct Connection {
+        ConnectorOut* from;
+        ConnectorIn* to;
+        int id;
+    };
+
+    typedef std::vector<Connection> ConnectionList;
 
 public:
     Overlay(QWidget* parent = 0);
@@ -49,13 +54,32 @@ public Q_SLOTS:
     void tick();
     void clear();
 
+    void invalidateSchema();
+
+public:
+    bool mouseMoveEventHandler(QMouseEvent * e);
+    bool mousePressEventHandler(QMouseEvent * e);
+    bool mouseReleaseEventHandler(QMouseEvent * e);
+
+    bool keyPressEventHandler(QKeyEvent* e);
+    bool keyReleaseEventHandler(QKeyEvent* e);
+
 protected:
     void drawActivity(int life, Connector* c);
     void clearActivity(Connector* c);
     void drawConnector(Connector* c);
-    void drawConnection(ConnectorOut *from, ConnectorIn *to);
-    void drawConnection(QPoint from, QPoint to, bool error = false);
+    void drawConnection(ConnectorOut *from, ConnectorIn *to, int id);
+    void drawConnection(QPoint from, QPoint to, int id, bool error = false);
+
     void paintEvent(QPaintEvent* event);
+    void resizeEvent(QResizeEvent * event);
+
+    void deleteConnectionById(int id);
+    void selectConnectionById(int id, bool add = false);
+    void deselectConnections();
+    void deselectConnectionById(int id);
+    bool isConnectionWithIdSelected(int id);
+    int noSelectedConnections();
 
 protected:
     struct TempConnection {
@@ -66,9 +90,12 @@ protected:
     std::vector<TempConnection> temp_;
 
     QPainter* painter;
+    QPainter* schematics_painter;
+    QImage schematics;
 
     std::vector<Connector*> connectors_;
     ConnectionList connections;
+    std::vector<int> connections_selected;
 
     QTimer* repainter;
 
@@ -86,6 +113,10 @@ protected:
     QColor color_out_connected;
     QColor color_out_disconnected;
 
+
+    int next_connection_id_;
+    int highlight_connection_id_;
+    bool schema_dirty_;
 
     int connector_radius_;
 

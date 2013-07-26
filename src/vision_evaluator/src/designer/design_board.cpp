@@ -30,6 +30,7 @@ DesignBoard::DesignBoard(QWidget* parent)
 
     installEventFilter(this);
 
+    setMouseTracking(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     BoxManager::instance().setContainer(this);
@@ -88,6 +89,10 @@ void DesignBoard::findMinSize(Box* box)
 
 void DesignBoard::keyPressEvent(QKeyEvent* e)
 {
+    if(!overlay->keyPressEventHandler(e)) {
+        return;
+    }
+
     if(e->key() == Qt::Key_Space) {
         space_ = true;
     }
@@ -95,6 +100,10 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
+    if(!overlay->keyReleaseEventHandler(e)) {
+        return;
+    }
+
     if(!e->isAutoRepeat() && e->key() == Qt::Key_Space) {
         space_ = false;
         drag_ = false;
@@ -103,6 +112,10 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 
 void DesignBoard::mousePressEvent(QMouseEvent* e)
 {
+    if(!overlay->mousePressEventHandler(e)) {
+        return;
+    }
+
     drag_ = true;
     drag_start_pos_ = e->globalPos();
     updateCursor();
@@ -110,12 +123,20 @@ void DesignBoard::mousePressEvent(QMouseEvent* e)
 
 void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 {
+    if(!overlay->mouseReleaseEventHandler(e)) {
+        return;
+    }
+
     drag_ = false;
     updateCursor();
 }
 
 void DesignBoard::mouseMoveEvent(QMouseEvent* e)
 {
+    if(!overlay->mouseMoveEventHandler(e)) {
+        return;
+    }
+
     if(drag_ && space_) {
         QSize minimum = minimumSize();
         if(minimum.width() < size().width()) {
@@ -185,6 +206,8 @@ bool DesignBoard::eventFilter(QObject* o, QEvent* e)
             findMinSize(box);
 
             QObject::connect(box, SIGNAL(moved(Box*)), this, SLOT(findMinSize(Box*)));
+            QObject::connect(box, SIGNAL(moved(Box*)), overlay, SLOT(invalidateSchema()));
+            QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
             QObject::connect(box, SIGNAL(connectorCreated(Connector*)), overlay, SLOT(connectorAdded(Connector*)));
             QObject::connect(box, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(addConnection(ConnectorOut*,ConnectorIn*)));
             QObject::connect(box, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(removeConnection(ConnectorOut*,ConnectorIn*)));

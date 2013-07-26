@@ -28,13 +28,13 @@
 }
 
 QFrame#boxframe {
-	background-color: rgb(230, 200, 146);
+	background-color: rgb(217, 196, 196);
 	border: 1px solid rgb(35, 35, 35);
-	border-radius: 5px;
+	border-radius: 3px;
 	outline-offset:5px;
 }
 QFrame#boxframe[content_minimized=&quot;true&quot;] {
-	background-color: rgb(230, 200, 200);
+	background-color: rgb(238, 238, 238);
 }
 
 QFrame#boxframe[error=&quot;true&quot;] {
