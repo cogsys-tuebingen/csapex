@@ -130,8 +130,12 @@ public:
     void setType(const std::string& type);
     std::string getType() const;
 
-    Memento::Ptr getState() const;
+    void setLabel(const std::string& label);
+    void setLabel(const QString& label);
+    std::string getLabel() const;
+
     void setState(Memento::Ptr memento);
+    Memento::Ptr getState() const;
 
     Command::Ptr removeAllConnectionsCmd();
     Command::Ptr removeAllOutputsCmd();

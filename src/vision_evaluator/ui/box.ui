@@ -96,17 +96,21 @@ QFrame#boxframe vision_evaluator--Connector {
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
             <property name="styleSheet">
-             <string notr="true">QCheckBox {
+             <string notr="true">QLabel {
 	font-size: 8pt;
 	font-weight: bold;
 }</string>
             </property>
             <property name="text">
              <string>unnamed box</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
             </property>
            </widget>
           </item>

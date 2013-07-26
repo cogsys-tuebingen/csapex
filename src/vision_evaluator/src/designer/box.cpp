@@ -86,10 +86,10 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     state->uuid_ = uuid;
 
     setObjectName(uuid.c_str());
-    ui->enablebtn->setText(uuid.c_str());
+    setLabel(uuid);
 
     ui->content->installEventFilter(this);
-    ui->enablebtn->installEventFilter(this);
+    ui->label->installEventFilter(this);
 
     timer_ = new QTimer();
     timer_->setInterval(100);
@@ -177,7 +177,7 @@ Box* BoxWorker::parent()
 void Box::setUUID(const std::string& uuid)
 {
     state->uuid_ = uuid;
-    ui->enablebtn->setText(state->uuid_.c_str());
+    setLabel(state->uuid_);
 }
 
 std::string Box::UUID() const
@@ -193,6 +193,21 @@ void Box::setType(const std::string& type)
 std::string Box::getType() const
 {
     return state->type_;
+}
+
+void Box::setLabel(const std::string& label)
+{
+    ui->label->setText(label.c_str());
+}
+
+void Box::setLabel(const QString &label)
+{
+    ui->label->setText(label);
+}
+
+std::string Box::getLabel() const
+{
+    return ui->label->text().toUtf8().constData();
 }
 
 void Box::addInput(ConnectorIn* in)
@@ -347,7 +362,7 @@ Box::~Box()
 bool Box::eventFilter(QObject* o, QEvent* e)
 {
     QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
-    if(o == ui->content || o == ui->enablebtn) {
+    if(o == ui->content || o == ui->label) {
         if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
             down_ = true;
         } else if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::LeftButton) {
@@ -385,9 +400,9 @@ void Box::paintEvent(QPaintEvent* e)
 
     if(change) {
         if(content_->isError()) {
-            ui->enablebtn->setText("ERROR: " + objectName());
+            setLabel(QString("ERROR: ") + objectName());
         } else {
-            ui->enablebtn->setText(objectName());
+            setLabel(objectName());
         }
 
         refreshStylesheet();
@@ -532,13 +547,13 @@ void Box::minimizeBox(bool minimize)
 {
     if(minimize) {
         ui->frame->hide();
-        ui->enablebtn->setText("");
+        setLabel(std::string());
         ui->boxframe->setProperty("content_minimized", true);
         ui->minimizebtn->setIcon(maximize_icon_);
         state->minimized = true;
     } else {
         ui->frame->show();
-        ui->enablebtn->setText(objectName());
+        setLabel(objectName());
         ui->boxframe->setProperty("content_minimized", false);
         ui->minimizebtn->setIcon(minimize_icon_);
         state->minimized = false;
