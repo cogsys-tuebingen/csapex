@@ -459,14 +459,14 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
                 selectConnectionById(highlight_connection_id_);
             }
         }
+        return false;
+
     } else if(!shift) {
         deselectConnections();
-
-    } else {
-        return true;
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 void Overlay::deleteConnectionById(int id)

@@ -112,10 +112,11 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 
 void DesignBoard::mousePressEvent(QMouseEvent* e)
 {
-    if(!overlay->mousePressEventHandler(e)) {
-        return;
+    if(!drag_ || !space_) {
+        if(!overlay->mousePressEventHandler(e)) {
+            return;
+        }
     }
-
     drag_ = true;
     drag_start_pos_ = e->globalPos();
     updateCursor();
@@ -123,8 +124,10 @@ void DesignBoard::mousePressEvent(QMouseEvent* e)
 
 void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 {
-    if(!overlay->mouseReleaseEventHandler(e)) {
-        return;
+    if(!drag_ || !space_) {
+        if(!overlay->mouseReleaseEventHandler(e)) {
+            return;
+        }
     }
 
     drag_ = false;
@@ -133,10 +136,6 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 
 void DesignBoard::mouseMoveEvent(QMouseEvent* e)
 {
-    if(!overlay->mouseMoveEventHandler(e)) {
-        return;
-    }
-
     if(drag_ && space_) {
         QSize minimum = minimumSize();
         if(minimum.width() < size().width()) {
@@ -193,6 +192,8 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
                 setMinimumSize(minimum);
             }
         }
+    } else if(!overlay->mouseMoveEventHandler(e)) {
+        return;
     }
 }
 
