@@ -78,6 +78,7 @@ public:
         mutable Memento::Ptr boxed_state;
 
         std::string uuid_;
+        std::string label_;
         std::string type_;
 
         bool minimized;
@@ -124,7 +125,6 @@ public:
     ConnectorIn* getInput(const std::string& uuid);
     ConnectorOut* getOutput(const std::string& uuid);
 
-    void setUUID(const std::string& uuid);
     std::string UUID() const;
 
     void setType(const std::string& type);

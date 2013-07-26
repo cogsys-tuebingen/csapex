@@ -45,7 +45,6 @@ public:
         return false;
     }
 
-    void setUUID(const std::string& uuid);
     std::string UUID();
 
     virtual QPoint centerPoint();

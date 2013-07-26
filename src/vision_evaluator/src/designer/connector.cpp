@@ -55,11 +55,6 @@ std::string Connector::UUID()
     return uuid_;
 }
 
-void Connector::setUUID(const std::string& uuid)
-{
-    uuid_ = uuid;
-}
-
 bool Connector::tryConnect(QObject* other_side)
 {
     Connector* c = dynamic_cast<Connector*>(other_side);

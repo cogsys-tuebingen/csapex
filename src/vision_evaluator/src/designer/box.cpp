@@ -11,6 +11,7 @@
 
 /// SYSTEM
 #include <QDragMoveEvent>
+#include <QInputDialog>
 #include <QMenu>
 #include <QThread>
 #include <QTimer>
@@ -32,6 +33,8 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << type_;
     out << YAML::Key << "uuid";
     out << YAML::Value << uuid_;
+    out << YAML::Key << "label";
+    out << YAML::Value << label_;
     out << YAML::Key << "pos";
     out << YAML::Value << YAML::BeginSeq << parent->pos().x() << parent->pos().y() << YAML::EndSeq;
     out << YAML::Key << "minimized";
@@ -60,6 +63,10 @@ void Box::State::readYaml(const YAML::Node &node)
         node["enabled"] >> enabled;
     }
 
+    if(node.FindValue("label")) {
+        node["label"] >> label_;
+    }
+
     if(node.FindValue("state")) {
         const YAML::Node& state_map = node["state"];
         boxed_state = parent->content_->getState();
@@ -86,7 +93,10 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     state->uuid_ = uuid;
 
     setObjectName(uuid.c_str());
-    setLabel(uuid);
+
+    if(getLabel().empty()) {
+        setLabel(state->uuid_);
+    }
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
@@ -174,12 +184,6 @@ Box* BoxWorker::parent()
     return parent_;
 }
 
-void Box::setUUID(const std::string& uuid)
-{
-    state->uuid_ = uuid;
-    setLabel(state->uuid_);
-}
-
 std::string Box::UUID() const
 {
     return state->uuid_;
@@ -197,11 +201,13 @@ std::string Box::getType() const
 
 void Box::setLabel(const std::string& label)
 {
+    state->label_ = label;
     ui->label->setText(label.c_str());
 }
 
 void Box::setLabel(const QString &label)
 {
+    state->label_ = label.toUtf8().constData();
     ui->label->setText(label);
 }
 
@@ -362,6 +368,22 @@ Box::~Box()
 bool Box::eventFilter(QObject* o, QEvent* e)
 {
     QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
+
+    if(o == ui->label) {
+        if(e->type() == QEvent::MouseButtonDblClick) {
+            bool ok;
+            QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, getLabel().c_str(), &ok);
+
+            if(ok) {
+                setLabel(text);
+            }
+
+            e->accept();
+
+            return true;
+        }
+    }
+
     if(o == ui->content || o == ui->label) {
         if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
             down_ = true;
@@ -379,7 +401,6 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             }
         }
     }
-
     return false;
 }
 
@@ -547,13 +568,13 @@ void Box::minimizeBox(bool minimize)
 {
     if(minimize) {
         ui->frame->hide();
-        setLabel(std::string());
+        ui->label->hide();
         ui->boxframe->setProperty("content_minimized", true);
         ui->minimizebtn->setIcon(maximize_icon_);
         state->minimized = true;
     } else {
         ui->frame->show();
-        setLabel(objectName());
+        ui->label->show();
         ui->boxframe->setProperty("content_minimized", false);
         ui->minimizebtn->setIcon(minimize_icon_);
         state->minimized = false;
@@ -591,6 +612,7 @@ void Box::setState(Memento::Ptr memento)
     enableContent(state->enabled);
     ui->enablebtn->setChecked(state->enabled);
 
+    setLabel(state->label_);
 }
 
 Command::Ptr Box::removeAllConnectionsCmd()
