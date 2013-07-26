@@ -28,12 +28,13 @@ protected Q_SLOTS:
     virtual void reset();
 
 protected:
+    enum RunState {RESET, RUNNING, BUFFERING};
+
     virtual void addSliders(QBoxLayout *layout);
 
     QSlider *slide_width_add1_;
     QSlider *slide_height_add1_;
-    bool     run_renderer_;
-    bool     buffer_image_;
+    RunState run_state_;
     cv::Mat  buffered_image_;
 
     QSignalBridges::QAbstractSliderLimiter::Ptr limit_sliders_width_;

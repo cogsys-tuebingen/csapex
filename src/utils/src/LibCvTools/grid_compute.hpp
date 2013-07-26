@@ -1,7 +1,10 @@
 #ifndef CV_GRID_HPP
 #define CV_GRID_HPP
+
+/// COMPONENT
 #include "grid.hpp"
 #include "grid_attributes.hpp"
+#include <utils/LibThreadPool/threadpool.hpp>
 
 /**
  * @namespace Common operations for opencv when a grid is needed.
@@ -103,27 +106,6 @@ inline void render_grid(const GridT &g1, const GridT &g2, const cv::Size &block_
 }
 
 template<class GridT>
-inline void grid_count(const GridT &g1, const GridT &g2, std::pair<int, int> &counts, int &valid)
-{
-    counts.first = 0;
-    counts.second = 0;
-    valid = 0;
-    for(int i = 0 ; i < g1.cols() ; i++) {
-        for(int j = 0 ; j < g1.rows() ; j++) {
-            bool cell_compare = g1(j,i) == g2(j,i);
-            if(cell_compare) {
-                counts.first++;
-            } else {
-                counts.second++;
-            }
-            valid++;
-        }
-    }
-}
-
-
-
-template<class GridT>
 inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
 {
     assert(g1.cols() <= g2.cols());
@@ -174,10 +156,11 @@ public:
 
         std::pair<int, int> counts;
         int valid;
-
+        int grid1_rows = grid1.rows();
+        int grid1_cols = grid1.cols();
         while(col_iter < col_iterations) {
-            grid2.setROI(row_iter,col_iter, grid1.rows(), grid1.cols());
-            grid_count(grid1, grid2, counts, valid);
+            grid2.setROI(row_iter,col_iter, grid1_rows, grid1_cols);
+            grid2.compare(grid1, counts, valid);
             grid2.resetROI();
             if(valid > 0) {
                 float value = counts.first / (float) valid;

@@ -17,8 +17,7 @@ using namespace connection_types;
 
 GridHeatMapValue::GridHeatMapValue() :
     GridCompareValue(State::Ptr(new State)),
-    run_renderer_(true),
-    buffer_image_(false)
+    run_state_(RESET)
 {
     private_state_ghv_ = dynamic_cast<State*>(state_.get());
     assert(private_state_ghv_);
@@ -44,10 +43,11 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
         updateSliderMaxima(img1.cols, img1.rows, img2.cols, img2.rows);
 
         /// COMPUTE
-        if(eps_sliders_.size() == private_state_gcv_->channel_count && !buffer_image_) {
-            buffered_image_ = cv::Mat();
-            run_renderer_ = true;
+        if(eps_sliders_.size() == private_state_gcv_->channel_count && run_state_ == RESET) {
             state_buffer_ghv_ = *private_state_ghv_;
+
+            run_state_ = RUNNING;
+
             GridScalar g1, g2;
             prepareGrid(g1, img1, mask1, state_buffer_ghv_.grid_width, state_buffer_ghv_.grid_height);
             prepareGrid(g2, img2, mask2, state_buffer_ghv_.grid_width_add1, state_buffer_ghv_.grid_height_add1);
@@ -57,8 +57,11 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
             cv::Mat  out;
             HeatMapCompIterator<GridScalar>it(g1, g2);
 
-            while(run_renderer_ && it.iterate(values)) {
+            while(it.iterate(values)) {
                 render_heatmap_row(values,block_size, it.lastFinishedRow(), out);
+
+                if(run_state_ == RESET)
+                    return cv::Mat();
 
                 CvMatMessage::Ptr img_msg_result(new CvMatMessage);
                 img_msg_result->value = out;
@@ -66,10 +69,11 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
             }
 
             buffered_image_ = out;
-            buffer_image_ = true;
+            run_state_ = BUFFERING;
         }
 
-        return buffered_image_;
+        if(run_state_ == BUFFERING)
+            return buffered_image_;
     }
 
     return cv::Mat();
@@ -90,8 +94,7 @@ void GridHeatMapValue::updateState(int value)
 
 void GridHeatMapValue::reset()
 {
-    run_renderer_ = false;
-    buffer_image_ = false;
+    run_state_ = RESET;
 }
 
 void GridHeatMapValue::addSliders(QBoxLayout *layout)

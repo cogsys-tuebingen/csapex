@@ -42,15 +42,15 @@ public:
 
     virtual void setROI(int row, int col, int height, int width)
     {
-        assert(row < rows_);
-        assert(col < cols_);
-        assert(row + height <= rows_);
-        assert(col + width <= cols_);
+        assert(min_row_ + row < rows_);
+        assert(min_col_ + col < cols_);
+        assert(min_row_ + row + height <= rows_);
+        assert(min_col_ + col + width <= cols_);
 
-        min_row_ = row;
-        min_col_ = col;
-        max_row_ = row + height;
-        max_col_ = col + width;
+        min_row_ += row;
+        min_col_ += col;
+        max_row_ = min_row_ + height;
+        max_col_ = min_col_ + width ;
     }
 
 
@@ -232,12 +232,12 @@ public:
         Grid::resetROI();
     }
 
-    Grid_& getROI(Rect roi, const bool deep_copy = false)
+    Grid_ getROI(const Rect roi, const bool deep_copy = false)
     {
-        return Grid_(&this, roi, deep_copy);
+        return Grid_(*this, roi, deep_copy);
     }
 
-    Grid_& getROI(const int x, const int y, const int width, const int height, const bool deep_copy = false)
+    Grid_ getROI(const int y, const int x, const int height, const int width, const bool deep_copy = false)
     {
         return getROI(Rect(x,y,width,height), deep_copy);
     }
@@ -291,20 +291,74 @@ public:
      * @param g         another grid
      * @return          if the grids are equal
      */
-    bool operator == (const Grid_<Cell, Rect> &g)
+    bool operator == (const Grid_<Cell, Rect> &g) const
     {
-        assert(max_col_ - min_col_ == g.cols_);
-        assert(max_row_ - min_row_ == g.rows_);
+        assert(cols() == g.cols());
+        assert(cols() == g.cols());
 
         bool res = true;
 
         for(int i = 0 ; i < g.rows_ ; i++) {
-            for(int j = 0 ; j < g.cols_ ; g++) {
+            for(int j = 0 ; j < g.cols_ ; j++) {
                 res &= g.cells_[(i + g.min_row_) * g.step_ + j + g.min_col_] == cells_[(i + min_row_) * step_ + min_col_ + j];
             }
         }
         return res;
     }
+
+    void compare(const Grid_ &g, std::pair<int, int> &counts, int &valid) const
+    {
+        assert(max_col_ - min_col_ == g.cols());
+        assert(max_row_ - min_row_ == g.rows());
+
+        counts.first = 0;
+        counts.second = 0;
+        valid = 0;
+
+        for(int i = 0 ; i < g.rows() ; i++) {
+            for(int j = 0 ; j < g.cols() ; j++) {
+                int pos_g = (i + g.min_row_) * g.step_ + j + g.min_col_;
+                int pos   = (i + min_row_) * step_ + min_col_ + j;
+
+                if(!(g.cells_[pos_g].enabled && cells_[pos].enabled))
+                    continue;
+
+                bool cell_compare = g.cells_[pos_g] == cells_[pos];
+
+                if(cell_compare) {
+                    counts.first++;
+                } else {
+                    counts.second++;
+                }
+                valid++;
+            }
+        }
+    }
+
+//    void parallel_compare(Grid_ &g, std::pair<int, int> &counts, int &valid)
+//    {
+//        assert(max_col_ - min_col_ == g.cols());
+//        assert(max_row_ - min_row_ == g.rows());
+
+//        counts.first = 0;
+//        counts.second = 0;
+//        valid = 0;
+
+//        for(int i = 0 ; i < g.rows() ; i++) {
+//            Grid_ roi2 = g.getROI(0, i, g.cols(), 1);
+//            Grid_ roi1 = getROI(0, i, cols(), 1);
+//            std::pair<int,int> tmp_counts;
+//            int                tmp_valid;
+//            roi2.compare(roi1, tmp_counts, tmp_valid);
+//            counts.first += tmp_counts.first;
+//            counts.second += tmp_counts.second;
+//            valid += tmp_valid;
+//        }
+//        boost::threadpool::thread_pool p(3);
+//        p.wait(0);
+// Grid_& getROI(const int x, const int y, const int width, const int height, const bool deep_copy = false)
+
+//    }
 
 private:
     boost::shared_array<Cell> cells_;
