@@ -32,7 +32,7 @@ void SelectorProxy::registerProxy(ProxyConstructor c)
     BoxManager::instance().register_box_type(c);
 }
 
-void SelectorProxy::startObjectPositioning()
+void SelectorProxy::startObjectPositioning(const QPoint& offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
@@ -40,10 +40,9 @@ void SelectorProxy::startObjectPositioning()
     mimeData->setParent(this);
     drag->setMimeData(mimeData);
 
-    //    QPixmap pm = prototype_box_->makePixmap(type_);
-
     vision_evaluator::Box* object(new vision_evaluator::Box(makeContent(), ""));
     object->setObjectName(type_.c_str());
+    object->setLabel(type_);
     object->setType(type_);
     object->init(QPoint(0,0));
     object->getContent()->setTypeName(type_);
@@ -53,7 +52,7 @@ void SelectorProxy::startObjectPositioning()
     delete object;
 
     drag->setPixmap(pm);
-    drag->setHotSpot(QPoint(0,0));
+    drag->setHotSpot(-offset);
     drag->exec();
 }
 

@@ -93,10 +93,7 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     state->uuid_ = uuid;
 
     setObjectName(uuid.c_str());
-
-    if(getLabel().empty()) {
-        setLabel(state->uuid_);
-    }
+    setLabel(uuid);
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
@@ -487,9 +484,10 @@ void Box::startDrag(QPoint offset)
     mimeData->setUserData(0, new MoveOffset(offset));
     drag->setMimeData(mimeData);
 
-//    if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
-//        return;
-//    }
+    if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
+        BoxManager::instance().startPlacingBox(getType(), offset);
+        return;
+    }
 
     QPoint start_pos = pos();
     drag->exec();

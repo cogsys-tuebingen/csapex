@@ -64,7 +64,7 @@ public:
     std::string getType();
     std::string getCategory();
 
-    void startObjectPositioning();
+    void startObjectPositioning(const QPoint &offset = QPoint(0,0));
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)

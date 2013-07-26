@@ -32,7 +32,7 @@ public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
     void register_box_type(SelectorProxy::Ptr provider);
 
-    void startPlacingBox(const std::string& type);
+    void startPlacingBox(const std::string& type, const QPoint &offset = QPoint(0,0));
     Box* makeBox(QWidget* parent, QPoint pos, const std::string& type, const std::string& uuid = "");
     Box* findBox(const std::string& uuid);
 

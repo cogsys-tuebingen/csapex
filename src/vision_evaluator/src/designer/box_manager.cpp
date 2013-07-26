@@ -88,11 +88,11 @@ void BoxManager::register_box_type(SelectorProxy::Ptr provider)
     available_elements_prototypes.push_back(provider);
 }
 
-void BoxManager::startPlacingBox(const std::string &type)
+void BoxManager::startPlacingBox(const std::string &type, const QPoint& offset)
 {
     foreach(SelectorProxy::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
-            p->startObjectPositioning();
+            p->startObjectPositioning(offset);
             return;
         }
     }
@@ -208,7 +208,8 @@ void BoxManager::undo()
     Command::Ptr last = done.top();
     done.pop();
 
-    assert(last->undo());
+    bool ret = last->undo();
+    assert(ret);
 
     undone.push(last);
 
