@@ -146,6 +146,9 @@ void QxtSpanSliderPrivate::drawSpan(QStylePainter* painter, const QRect& rect) c
     else
         groove.adjust(0, 0, 0, -1);
 
+    // draw non highlighted groove
+    painter->drawRect(groove);
+
     // pen & brush
     painter->setPen(QPen(p->palette().color(QPalette::Dark).light(110), 0));
     if (opt.orientation == Qt::Horizontal)
@@ -153,7 +156,7 @@ void QxtSpanSliderPrivate::drawSpan(QStylePainter* painter, const QRect& rect) c
     else
         setupPainter(painter, opt.orientation, groove.left(), groove.center().y(), groove.right(), groove.center().y());
 
-    // draw groove
+    // draw highlighted groove
     painter->drawRect(rect.intersected(groove));
 }
 
@@ -707,9 +710,9 @@ void QxtSpanSlider::paintEvent(QPaintEvent* event)
     qxt_d().initStyleOption(&opt);
     opt.sliderValue = 0;
     opt.sliderPosition = 0;
-    opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderTickmarks;
+/*    opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderTickmarks;
     painter.drawComplexControl(QStyle::CC_Slider, opt);
-
+*/
     // handle rects
     opt.sliderPosition = qxt_d().lowerPos;
     const QRect lr = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
@@ -724,9 +727,9 @@ void QxtSpanSlider::paintEvent(QPaintEvent* event)
     const QPoint c = QRect(lr.center(), ur.center()).center();
     QRect spanRect;
     if (orientation() == Qt::Horizontal)
-        spanRect = QRect(QPoint(minv, c.y() - 2), QPoint(maxv, c.y() + 1));
+        spanRect = QRect(QPoint(minv, c.y() - 2), QPoint(maxv, c.y() + 2));
     else
-        spanRect = QRect(QPoint(c.x() - 2, minv), QPoint(c.x() + 1, maxv));
+        spanRect = QRect(QPoint(c.x() - 2, minv), QPoint(c.x() + 2, maxv));
     qxt_d().drawSpan(&painter, spanRect);
 
     // handles
