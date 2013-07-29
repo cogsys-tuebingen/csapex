@@ -343,6 +343,10 @@ bool BoxManager::keyPressEventHandler(QKeyEvent* e)
 bool BoxManager::keyReleaseEventHandler(QKeyEvent* e)
 {
     if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
+        if(selected_boxes.size() == 0) {
+            return true;
+        }
+
         command::Meta::Ptr meta(new command::Meta);
 
         foreach(Box* b, selected_boxes) {

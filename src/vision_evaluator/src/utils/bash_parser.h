@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <string>
+#include <sstream>
 
 class BashParser
 {
