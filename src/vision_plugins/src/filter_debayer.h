@@ -30,15 +30,10 @@ public:
     Memento::Ptr getState() const;
 
 private:
-    /// internal typdefs
-    typedef std::pair<int, int> modePair;
-
-    std::map<int, int> modeFromCombo;
-
     QComboBox *combo_mode_;
 
     virtual bool usesMask();
-    void fillCombo(QComboBox *combo, std::map<int, int> &map);
+    void fillCombo(QComboBox *combo);
 
     /// MEMENTO
     class State : public Memento {

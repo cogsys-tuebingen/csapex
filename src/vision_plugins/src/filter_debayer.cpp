@@ -13,7 +13,7 @@ using namespace vision_plugins;
 void Debayer::insert(QBoxLayout *parent)
 {
     combo_mode_ = new QComboBox;
-    fillCombo(combo_mode_, modeFromCombo);
+    fillCombo(combo_mode_);
 
     parent->addWidget(new QLabel("Input CS"));
     parent->addWidget(combo_mode_);
@@ -24,11 +24,9 @@ void Debayer::filter(cv::Mat &img, cv::Mat &mask)
     /// MEMENTO
     state_.index = combo_mode_->currentIndex();
 
-    int mode = modeFromCombo[state_.index];
-
     cv::Mat gray;
     cv::cvtColor(img, gray, CV_RGB2GRAY);
-    cv::cvtColor(gray, img, mode);
+    cv::cvtColor(gray, img, state_.index);
 }
 
 Memento::Ptr Debayer::getState() const
@@ -53,16 +51,12 @@ bool Debayer::usesMask()
     return false;
 }
 
-void Debayer::fillCombo(QComboBox *combo, std::map<int, int> &map)
+void Debayer::fillCombo(QComboBox *combo)
 {
     combo->addItem("BayerBG2RGB");
-    map.insert(modePair(combo->findText("BayerBG2RGB"), CV_BayerBG2RGB));
     combo->addItem("BayerGB2RGB");
-    map.insert(modePair(combo->findText("BayerGB2RGB"), CV_BayerGB2RGB));
     combo->addItem("BayerRG2RGB");
-    map.insert(modePair(combo->findText("BayerRG2RGB"), CV_BayerRG2RGB));
     combo->addItem("BayerGR2RGB");
-    map.insert(modePair(combo->findText("BayerGR2RGB"), CV_BayerGR2RGB));
 }
 
 void Debayer::State::readYaml(const YAML::Node &node)
