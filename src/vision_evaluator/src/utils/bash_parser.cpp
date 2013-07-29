@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <boost/regex.hpp>
+#include <sstream>
 
 BashParser::BashParser()
 {
