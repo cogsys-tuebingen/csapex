@@ -1,22 +1,14 @@
 /// HEADER
 #include "global_option_panel.h"
 
-/// COMPONENT
-#include "registration.hpp"
-
 /// PROJECT
 #include <utils/plugin_manager.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
+#include <pluginlib/class_list_macros.h>
 
-STATIC_INIT(GlobalOptionPanel, generic, {
-    SelectorProxy::ProxyConstructor c; \
-    c.setType("Global Options Panel"); \
-    c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<GlobalOptionPanel> >(), \
-    boost::lambda::_1, (QWidget*) NULL)); \
-    SelectorProxy::registerProxy(c); \
-});
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::GlobalOptionPanel, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 
@@ -24,7 +16,6 @@ using namespace vision_evaluator;
 GlobalOptionPanel::State::State(GlobalOptionPanel* parent)
     : parent(parent)
 {
-
 }
 
 void GlobalOptionPanel::State::readYaml(const YAML::Node &node)
@@ -48,7 +39,7 @@ void GlobalOptionPanel::State::writeYaml(YAML::Emitter &out) const
 GlobalOptionPanel::GlobalOptionPanel()
     : state(this)
 {
-
+    setIcon(QIcon(":/wrench.png"));
 }
 
 void GlobalOptionPanel::messageArrived(ConnectorIn *source)

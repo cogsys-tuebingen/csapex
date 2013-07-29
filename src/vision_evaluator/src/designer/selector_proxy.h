@@ -51,7 +51,6 @@ public:
         Call constructor;
     };
 
-    static void registerProxy(ProxyConstructor c);
     static void registerProxy(SelectorProxy::Ptr prototype);
 
 public:
@@ -63,6 +62,7 @@ public:
     virtual void mousePressEvent(QMouseEvent* event);
     std::string getType();
     std::string getCategory();
+    QIcon getIcon();
 
     void startObjectPositioning(const QPoint &offset = QPoint(0,0));
 

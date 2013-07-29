@@ -1,8 +1,8 @@
 #ifndef FilterBlur_H
 #define FilterBlur_H
 
-/// COMPONENT
-#include "filter.h"
+/// PROJECT
+#include <vision_evaluator/filter.h>
 
 /// SYSTEM
 #include <QSlider>

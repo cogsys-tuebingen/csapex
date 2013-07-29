@@ -1,11 +1,9 @@
 #ifndef GLOBAL_OPTION_PANEL_H
 #define GLOBAL_OPTION_PANEL_H
 
-/// COMPONENT
-#include "global_option.h"
-
 /// PROJECT
 #include <designer/boxed_object.h>
+#include <vision_evaluator/global_option.h>
 
 namespace vision_evaluator
 {

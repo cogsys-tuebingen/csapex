@@ -18,7 +18,7 @@ StreamInterceptor& StreamInterceptor::instance()
 
 
 
-std::string StreamInterceptor::getLatest()
+std::string StreamInterceptor::getCout()
 {
     std::string res(fake_cout_.str());
 
@@ -28,7 +28,19 @@ std::string StreamInterceptor::getLatest()
     std::clog << res.c_str() << std::flush;
     return res;
 }
-std::string StreamInterceptor::cin()
+
+std::string StreamInterceptor::getCerr()
+{
+    std::string res(fake_cerr_.str());
+
+    fake_cerr_.str(std::string());
+    fake_cerr_.clear();
+
+    cerr << res.c_str() << std::flush;
+    return res;
+}
+
+std::string StreamInterceptor::getCin()
 {
     if(!worker) {
         return "";
@@ -96,6 +108,7 @@ StreamInterceptor::StreamInterceptor()
     fake_cout_.str(std::string());
 
     std::cout.rdbuf(fake_cout_.rdbuf());
+    std::cerr.rdbuf(fake_cerr_.rdbuf());
 }
 
 void StreamInterceptor::start()

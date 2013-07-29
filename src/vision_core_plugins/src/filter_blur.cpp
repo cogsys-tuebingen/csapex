@@ -1,13 +1,14 @@
 /// HEADER
 #include "filter_blur.h"
 
-/// COMPONENT
-#include "registration.hpp"
-
 /// PROJECT
-#include <qt_helper.hpp>
+#include <vision_evaluator/qt_helper.hpp>
 
-REGISTER_BOXED_OBJECT(FilterBlur)
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
+
+
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::FilterBlur, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 

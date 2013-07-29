@@ -1,0 +1,11 @@
+<library path="src">
+  <class name="VisionEvaluator" type="vision_rqt::Vision" base_class_type="rqt_gui_cpp::Plugin">
+    <description>
+    </description>
+    <qtgui>
+      <label>Vision Evaluatior</label>
+      <icon type="theme">system-help</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
+</library>

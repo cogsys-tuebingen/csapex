@@ -1,8 +1,8 @@
 #ifndef FILTER_APPLY_MASK_H
 #define FILTER_APPLY_MASK_H
 
-/// COMPONENT
-#include "filter.h"
+/// PROJECT
+#include <vision_evaluator/filter.h>
 
 namespace vision_evaluator
 {

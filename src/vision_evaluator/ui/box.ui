@@ -170,38 +170,6 @@ QFrame#boxframe vision_evaluator--Connector {
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QPushButton" name="closebtn">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16</width>
-              <height>16</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../res/resources.qrc">
-              <normaloff>:/close.png</normaloff>:/close.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>16</width>
-              <height>16</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
@@ -240,22 +208,6 @@ QFrame#boxframe vision_evaluator--Connector {
   <include location="../res/resources.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>closebtn</sender>
-   <signal>clicked()</signal>
-   <receiver>Box</receiver>
-   <slot>setFocus()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>223</x>
-     <y>12</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>118</x>
-     <y>69</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>minimizebtn</sender>
    <signal>clicked()</signal>

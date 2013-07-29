@@ -98,6 +98,8 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
+    ui->enablebtn->setIcon(content->getIcon());
+
     timer_ = new QTimer();
     timer_->setInterval(100);
     timer_->start();
@@ -109,7 +111,6 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    connect(ui->closebtn, SIGNAL(clicked()), this, SLOT(deleteBox()));
     connect(ui->minimizebtn, SIGNAL(toggled(bool)), this, SLOT(minimizeBox(bool)));
     connect(ui->killbtn, SIGNAL(clicked()), this, SLOT(killContent()));
 
@@ -388,20 +389,37 @@ bool Box::eventFilter(QObject* o, QEvent* e)
         }
     }
 
-    if(o == ui->content || o == ui->label) {
+    if(o == ui->content || o == ui->label || o == this) {
         if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
             down_ = true;
+            start_drag_global_ = em->globalPos();
+            start_drag_ = em->pos();
+
         } else if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::LeftButton) {
             down_ = false;
+            Q_EMIT clicked(this);
+            e->accept();
+            return true;
+
         } else if(e->type() == QEvent::MouseMove) {
+            QPoint delta = em->globalPos() - start_drag_global_;
+
+            bool shift_drag = Qt::ShiftModifier == QApplication::keyboardModifiers();
+
             if(down_) {
-                e->ignore();
+                if(shift_drag) {
+                    if(hypot(delta.x(), delta.y()) > 15) {
+                        BoxManager::instance().startPlacingBox(getType(), -start_drag_);
+                        down_ = false;
+                    }
+                } else {
+                    e->ignore();
 
-                QPoint offset = ui->content->geometry().topLeft();
-                startDrag(-em->pos() - offset);
+                    startDrag(-start_drag_);
 
-                down_ = false;
-                return true;
+                    down_ = false;
+                    return true;
+                }
             }
         }
     }
@@ -438,17 +456,24 @@ void Box::paintEvent(QPaintEvent* e)
 
 void Box::mousePressEvent(QMouseEvent* e)
 {
-    if(e->button() == Qt::LeftButton) {
-        startDrag(-e->pos());
-    }
+    eventFilter(this, e);
+}
+void Box::mouseReleaseEvent(QMouseEvent* e)
+{
+    eventFilter(this, e);
+}
+void Box::mouseMoveEvent(QMouseEvent* e)
+{
+    eventFilter(this, e);
 }
 
 void Box::moveEvent(QMoveEvent* e)
 {
-    QPoint delta = (e->pos() - e->oldPos());
-    if(delta.x() == 0 && delta.y() == 0) {
-        return;
-    }
+    eventFilter(this, e);
+
+    QPoint delta = e->pos() - e->oldPos();
+
+    Q_EMIT moved(this, delta.x(), delta.y());
 }
 
 void Box::registered()
@@ -461,13 +486,13 @@ void Box::registered()
     }
 }
 
-void Box::focusInEvent(QFocusEvent *e)
+void Box::selectEvent()
 {
     ui->boxframe->setProperty("focused",true);
     refreshStylesheet();
 }
 
-void Box::focusOutEvent(QFocusEvent *e)
+void Box::deselectEvent()
 {
     ui->boxframe->setProperty("focused",false);
     refreshStylesheet();
@@ -475,11 +500,7 @@ void Box::focusOutEvent(QFocusEvent *e)
 
 void Box::keyPressEvent(QKeyEvent *e)
 {
-    if(hasFocus()) {
-        if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-            deleteBox();
-        }
-    }
+
 }
 
 void Box::startDrag(QPoint offset)
@@ -502,8 +523,6 @@ void Box::startDrag(QPoint offset)
 
     Command::Ptr cmd(new command::MoveBox(this, start_pos, end_pos));
     BoxManager::instance().execute(cmd);
-
-    Q_EMIT moved(this);
 }
 
 QPixmap Box::makePixmap(const std::string& label)
@@ -574,12 +593,14 @@ void Box::minimizeBox(bool minimize)
     if(minimize) {
         ui->frame->hide();
         ui->label->hide();
+        ui->killbtn->hide();
         ui->boxframe->setProperty("content_minimized", true);
         ui->minimizebtn->setIcon(maximize_icon_);
         state->minimized = true;
     } else {
         ui->frame->show();
         ui->label->show();
+        ui->killbtn->show();
         ui->boxframe->setProperty("content_minimized", false);
         ui->minimizebtn->setIcon(minimize_icon_);
         state->minimized = false;

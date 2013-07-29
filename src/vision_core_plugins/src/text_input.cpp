@@ -20,6 +20,7 @@ TextInput::TextInput()
     : connector_(NULL)
 {
     setCategory("Value Input");
+    setIcon(QIcon(":/pencil.png"));
 }
 
 void TextInput::fill(QBoxLayout *layout)

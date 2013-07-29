@@ -18,6 +18,7 @@ ExportCout::ExportCout()
     : connector_(NULL)
 {
     setCategory("ConsoleIO");
+    setIcon(QIcon(":/terminal.png"));
 }
 
 void ExportCout::fill(QBoxLayout *layout)

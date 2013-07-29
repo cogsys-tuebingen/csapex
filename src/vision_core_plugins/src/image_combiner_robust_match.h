@@ -5,8 +5,8 @@
  *      Author: buck <sebastian.buck@uni-tuebingen.de>
  */
 
-/// COMPONENT
-#include "image_combiner.h"
+/// PROJECT
+#include <vision_evaluator/image_combiner.h>
 
 #ifndef IMAGE_COMBINER_ROBUST_MATCH_H
 #define IMAGE_COMBINER_ROBUST_MATCH_H

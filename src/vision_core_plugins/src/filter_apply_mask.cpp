@@ -1,10 +1,11 @@
 /// HEADER
 #include "filter_apply_mask.h"
 
-/// COMPONENT
-#include "registration.hpp"
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
 
-REGISTER_BOXED_OBJECT(FilterApplyMask)
+
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::FilterApplyMask, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 

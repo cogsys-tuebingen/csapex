@@ -49,7 +49,11 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#if PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 7
+#include <pcl_conversions/pcl_conversions.h>
+#else
 #include <pcl/ros/conversions.h>
+#endif
 
 // Thread suppport
 #include <boost/thread.hpp>

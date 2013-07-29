@@ -17,6 +17,7 @@ ImageCombiner::ImageCombiner()
       has_img_a(false), has_mask_a(false), has_img_b(false), has_mask_b(false)
 {
     setCategory("Image Combiner");
+    setIcon(QIcon(":/combiner.png"));
 }
 
 ImageCombiner::~ImageCombiner()

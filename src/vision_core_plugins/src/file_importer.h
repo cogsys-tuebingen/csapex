@@ -1,10 +1,8 @@
 #ifndef FILE_IMPORTER_H
 #define FILE_IMPORTER_H
 
-/// COMPONENT
-#include "image_provider.h"
-
 /// PROJECT
+#include <vision_evaluator/image_provider.h>
 #include <designer/boxed_object.h>
 
 /// SYSTEM

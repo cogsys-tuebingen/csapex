@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <name>vision_rqt</name>
+  <version>0.0.1</version>
+  <description>The vision_rqt package</description>
+
+  <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
+
+  <license>BSD</license>
+  <author email="sebastian.buck@uni-tuebingen.de">buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>rqt_gui</build_depend>
+  <build_depend>rqt_gui_cpp</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>rqt_gui</run_depend>
+  <run_depend>rqt_gui_cpp</run_depend>
+
+  <export>
+    <!--<rqt_gui plugin="${prefix}/rqt_plugin.xml"/>-->
+  </export>
+</package>

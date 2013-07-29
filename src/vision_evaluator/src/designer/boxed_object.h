@@ -9,6 +9,7 @@
 #include <string>
 #include <QLayout>
 #include <QObject>
+#include <QIcon>
 
 namespace vision_evaluator
 {
@@ -35,6 +36,9 @@ public:
 
     void setCategory(const std::string& category);
     std::string getCategory();
+
+    void setIcon(QIcon icon);
+    QIcon getIcon();
 
     virtual void setState(Memento::Ptr memento);
     virtual Memento::Ptr getState() const;
@@ -67,6 +71,8 @@ protected:
     std::string type_name_;
     std::string name_;
     std::string category_;
+
+    QIcon icon_;
 
     bool enabled_;
 };

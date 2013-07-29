@@ -28,6 +28,8 @@ public:
         return inst;
     }
 
+    static std::string stripNamespace(const std::string& name);
+
 public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
     void register_box_type(SelectorProxy::Ptr provider);
@@ -54,12 +56,25 @@ public:
 
     std::string makeUUID(const std::string& name);
 
-    virtual bool pluginsLoaded();
-    virtual void reload();
+    bool isBoxSelected(Box* box);
+    int noSelectedBoxes();
+
+
+    bool mouseMoveEventHandler(QMouseEvent * e);
+    bool mousePressEventHandler(QMouseEvent * e);
+    bool mouseReleaseEventHandler(QMouseEvent * e);
+
+    bool keyPressEventHandler(QKeyEvent* e);
+    bool keyReleaseEventHandler(QKeyEvent* e);
 
 public Q_SLOTS:
     void undo();
     void redo();
+    void selectBox(Box* box, bool add = false);
+    void deselectBox(Box* box);
+    void deselectBoxes();
+    void toggleBoxSelection(Box* box);
+    void boxMoved(Box* box, int dx, int dy);
 
 Q_SIGNALS:
     void stateChanged();
@@ -71,12 +86,13 @@ protected:
     BoxManager& operator = (const BoxManager& assign);
 
     std::vector<SelectorProxy::Ptr> available_elements_prototypes;
-    std::vector<SelectorProxy::ProxyConstructor> unloaded_elements;
 
     std::stack<Command::Ptr> done;
     std::stack<Command::Ptr> undone;
 
     std::map<std::string, int> uuids;
+
+    std::vector<Box*> selected_boxes;
 
     QWidget* container_;
     bool dirty_;

@@ -1,17 +1,15 @@
 /// HEADER
 #include "filter_static_mask.h"
 
-/// COMPONENT
-#include "registration.hpp"
-
 /// SYSTEM
 #include <QPixmap>
 #include <QGraphicsSceneEvent>
 #include <utils/LibUtil/QtCvImageConverter.h>
 #include <QKeyEvent>
 #include <QPushButton>
+#include <pluginlib/class_list_macros.h>
 
-REGISTER_BOXED_OBJECT(FilterStaticMask)
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::FilterStaticMask, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 

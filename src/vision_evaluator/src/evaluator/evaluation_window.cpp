@@ -9,6 +9,7 @@
 #include <designer/box_manager.h>
 #include <designer/connection_type_manager.h>
 #include <utils/stream_interceptor.h>
+#include <utils/bash_parser.h>
 #include <qt_helper.hpp>
 
 /// SYSTEM
@@ -24,6 +25,7 @@
 Q_DECLARE_METATYPE(cv::Mat)
 Q_DECLARE_METATYPE(std::string)
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
+
 
 using namespace vision_evaluator;
 
@@ -93,22 +95,57 @@ void EvaluationWindow::updateTitle()
     setWindowTitle(window.str().c_str());
 }
 
-void EvaluationWindow::updateLog()
+void EvaluationWindow::scrollDownLog()
 {
     QTextCursor cursor = ui->logOutput->textCursor();
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+    ui->logOutput->setTextCursor(cursor);
+}
 
-    std::string latest = StreamInterceptor::instance().getLatest().c_str();
+void EvaluationWindow::updateLog()
+{
+    std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
+    std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
 
-    if(!latest.empty()) {
+    if(!latest_cout.empty()) {
+        scrollDownLog();
+
+        std::stringstream latest;
+        latest << latest_cout;
+
+
+        std::string line;
+        while (std::getline(latest, line, '\n')) {
+            if(line.substr(0, 8) == "warning:") {
+                line = std::string("<span style='color: #ffcc00;'><b>") + line + "</b></span>";
+            }
+
+            line = BashParser::toHtml(line);
+
+            line += "<br />";
+            ui->logOutput->insertHtml(line.c_str());
+        }
+
+    }
+    if(!latest_cerr.empty()) {
         size_t i = 0;
-        while((i = latest.find('\n', i)) != std::string::npos) {
-            latest.replace(i, 1, "<br />");
+        while((i = latest_cerr.find('\n', i)) != std::string::npos) {
+            latest_cerr.replace(i, 1, "<br />");
             i += 6;
         }
 
-        ui->logOutput->setTextCursor(cursor);
-        ui->logOutput->insertHtml(latest.c_str());
+        latest_cerr = std::string("<span style='color: red'><b>") + latest_cerr + "</b></span>";
+
+        scrollDownLog();
+
+        ui->logOutput->insertHtml(latest_cerr.c_str());
+
+        int height = 50;
+
+        QList<int> sizes = ui->splitter->sizes();
+        sizes[0] -= height;
+        sizes[1] = height;
+        ui->splitter->setSizes(sizes);
     }
 }
 

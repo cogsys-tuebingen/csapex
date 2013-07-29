@@ -97,13 +97,16 @@ public:
     void stop();
 
     virtual void mousePressEvent(QMouseEvent* e);
+    virtual void mouseReleaseEvent(QMouseEvent* e);
+    virtual void mouseMoveEvent(QMouseEvent* e);
+
     virtual QPixmap makePixmap(const std::string& label);
 
     void moveEvent(QMoveEvent*);
     void registered();
 
-    void focusInEvent(QFocusEvent * e);
-    void focusOutEvent(QFocusEvent * e);
+    void selectEvent();
+    void deselectEvent();
 
     void keyPressEvent(QKeyEvent * e);
 
@@ -160,8 +163,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void toggled(bool);
-    void moved(Box*);
+    void moved(Box*, int dx, int dy);
     void changed(Box*);
+    void clicked(Box*);
+
     void connectorCreated(Connector*);
     void connectionFormed(ConnectorOut*, ConnectorIn*);
     void connectionDestroyed(ConnectorOut*, ConnectorIn*);
@@ -196,6 +201,8 @@ private:
     BoxWorker* worker_;
 
     bool down_;
+    QPoint start_drag_;
+    QPoint start_drag_global_;
 
     QIcon minimize_icon_;
     QIcon maximize_icon_;

@@ -38,8 +38,9 @@ class StreamInterceptor : public QObject
 public:
     static StreamInterceptor& instance();
 
-    std::string getLatest();
-    std::string cin();
+    std::string getCout();
+    std::string getCerr();
+    std::string getCin();
 
     void start();
     void stop();
@@ -58,6 +59,7 @@ private:
     std::streambuf *cout_global_;
 
     std::stringstream fake_cout_;
+    std::stringstream fake_cerr_;
 
     QThread* thread;
     StreamInterceptorWorker* worker;

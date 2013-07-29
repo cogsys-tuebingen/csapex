@@ -387,7 +387,14 @@ void Overlay::tick()
 
 bool Overlay::mouseMoveEventHandler(QMouseEvent *e)
 {
-    QRgb rgb = schematics.pixel(e->x(), e->y());
+    int x = e->x();
+    int y = e->y();
+
+    if(x < 0 || x >= schematics.width() || y < 0 || y >= schematics.height()) {
+        return false;
+    }
+
+    QRgb rgb = schematics.pixel(x,y);
 
     unsigned int id = qRed(rgb) + qGreen(rgb) + qBlue(rgb);
 
@@ -467,6 +474,17 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
     }
 
     return true;
+}
+
+void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
+{
+    if(b.x() > a.x()) {
+        selection_a = a;
+        selection_b = b;
+    } else {
+        selection_a = b;
+        selection_b = a;
+    }
 }
 
 void Overlay::deleteConnectionById(int id)
@@ -561,7 +579,13 @@ void Overlay::paintEvent(QPaintEvent* event)
         drawConnector(connector);
     }
 
-    //    painter->setOpacity(0.5);
+    if(!selection_a.isNull() && !selection_b.isNull()) {
+        painter->setPen(QPen(Qt::black, 1));
+        painter->setBrush(QBrush(Qt::white));
+        painter->setOpacity(0.35);
+        painter->drawRect(QRect(selection_a, selection_b));
+    }
+
     //    painter->drawImage(QPoint(0,0), schematics);
 
     painter = NULL;

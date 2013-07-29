@@ -21,6 +21,7 @@ Filter::Filter()
 {
     setName("unnamed filter");
     setCategory("Filter");
+    setIcon(QIcon(":/filter.png"));
 }
 
 Filter::~Filter()

@@ -18,6 +18,7 @@ DoubleBuffer::DoubleBuffer()
     : input_(NULL), output_(NULL)
 {
     setCategory("Buffer");
+    setIcon(QIcon(":/buffer.png"));
 }
 
 void DoubleBuffer::fill(QBoxLayout *layout)

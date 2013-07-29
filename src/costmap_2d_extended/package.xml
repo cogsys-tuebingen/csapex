@@ -28,7 +28,6 @@
 <build_depend>visualization_msgs</build_depend>
 <build_depend>rosbag</build_depend>
 <build_depend>map_server</build_depend>
-<build_depend>pcl</build_depend>
 <build_depend>pcl_ros</build_depend>
 <build_depend>dynamic_reconfigure</build_depend>
 
@@ -45,7 +44,6 @@
 <run_depend>visualization_msgs</run_depend>
 <run_depend>rosbag</run_depend>
 <run_depend>map_server</run_depend>
-<run_depend>pcl</run_depend>
 <run_depend>pcl_ros</run_depend>
 <run_depend>dynamic_reconfigure</run_depend>
 

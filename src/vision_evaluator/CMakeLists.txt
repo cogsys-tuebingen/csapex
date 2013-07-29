@@ -100,6 +100,7 @@ add_library(vision_core
     src/data/matchable_pose.cpp
     src/data/painter.cpp
     src/data/pose.cpp
+    src/utils/bash_parser.cpp
     src/utils/constructor.hpp
     src/utils/extractor.cpp
     src/utils/extractor_factory.cpp
@@ -157,13 +158,8 @@ target_link_libraries(designer
 
 add_library(vision_evaluation
     src/evaluator/evaluation_window.cpp
-    src/evaluator/file_importer.cpp
     src/evaluator/filter.cpp
-    src/evaluator/filter_apply_mask.cpp
-    src/evaluator/filter_blur.cpp
-    src/evaluator/filter_static_mask.cpp
     src/evaluator/image_combiner.cpp
-    src/evaluator/image_combiner_robust_match.cpp
     src/evaluator/image_provider.cpp
     src/evaluator/image_provider_bag.cpp
     src/evaluator/image_provider_dir.cpp
@@ -172,11 +168,8 @@ add_library(vision_evaluation
     src/evaluator/image_provider_set.cpp
     src/evaluator/image_provider_ros_topic.cpp
     src/evaluator/global_option.cpp
-    src/evaluator/global_option_panel.cpp
     src/evaluator/global_option_manager.cpp
     src/evaluator/messages_default.hpp
-    src/evaluator/output_display.cpp
-    src/evaluator/registration.hpp
     src/qt_helper.hpp
     ${QT_EVALUATOR}
 )

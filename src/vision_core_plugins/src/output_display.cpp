@@ -1,26 +1,19 @@
 /// HEADER
 #include "output_display.h"
 
-/// COMPONENT
-#include "registration.hpp"
-#include "messages_default.hpp"
-
 /// PROJECT
 #include <designer/box.h>
 #include <designer/connector_in.h>
 #include <utils/LibUtil/QtCvImageConverter.h>
+#include <vision_evaluator/messages_default.hpp>
 
 /// SYSTEM
 #include <QPainter>
 #include <QGraphicsSceneEvent>
+#include <pluginlib/class_list_macros.h>
 
-STATIC_INIT(OutputDisplay, generic, {
-                SelectorProxy::ProxyConstructor c; \
-                c.setType("Output Display"); \
-                c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<OutputDisplay> >(), \
-                boost::lambda::_1, (QWidget*) NULL)); \
-                SelectorProxy::registerProxy(c); \
-            });
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::OutputDisplay, vision_evaluator::BoxedObject)
+
 
 using namespace vision_evaluator;
 using namespace connection_types;
@@ -31,6 +24,8 @@ OutputDisplay::OutputDisplay()
     painter.setPen(QPen(Qt::red));
     painter.fillRect(QRect(0, 0, empty.width(), empty.height()), Qt::white);
     painter.drawRect(QRect(0, 0, empty.width()-1, empty.height()-1));
+
+    setIcon(QIcon(":/picture.png"));
 }
 
 OutputDisplay::~OutputDisplay()

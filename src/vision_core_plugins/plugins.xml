@@ -8,7 +8,36 @@
 <class type="vision_evaluator::ImportCin" base_class_type="vision_evaluator::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="vision_evaluator::ImportRos" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
 <class type="vision_evaluator::DoubleBuffer" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="vision_evaluator::FileImporter" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="vision_evaluator::OutputDisplay" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="vision_evaluator::FilterBlur" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="vision_evaluator::FilterApplyMask" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="vision_evaluator::FilterStaticMask" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="vision_evaluator::ImageCombinerRobustMatch" base_class_type="vision_evaluator::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="vision_evaluator::GlobalOptionPanel" base_class_type="vision_evaluator::BoxedObject">
   <description>none yet</description>
 </class>
 </library>

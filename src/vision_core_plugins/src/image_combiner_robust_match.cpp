@@ -8,12 +8,12 @@
 /// HEADER
 #include "image_combiner_robust_match.h"
 
-/// COMPONENT
-#include "registration.hpp"
+/// SYSTEM
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::ImageCombinerRobustMatch, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
-
-REGISTER_BOXED_OBJECT(ImageCombinerRobustMatch)
 
 //RobustMatcher class taken from OpenCV2 Computer Vision Application Programming Cookbook Ch 9
 class RobustMatcher

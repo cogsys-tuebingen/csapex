@@ -10,12 +10,12 @@
 using namespace vision_evaluator;
 
 BoxedObject::BoxedObject()
-    : enabled_(true)
+    : icon_(":/plugin.png"), enabled_(true)
 {
 }
 
 BoxedObject::BoxedObject(const std::string& name)
-    : name_(name), enabled_(true)
+    : name_(name), icon_(":/plugin.png"), enabled_(true)
 {
 }
 
@@ -50,8 +50,6 @@ std::string BoxedObject::getTypeName()
     return type_name_;
 }
 
-
-
 void BoxedObject::setCategory(const std::string &category)
 {
     category_ = category;
@@ -60,6 +58,16 @@ void BoxedObject::setCategory(const std::string &category)
 std::string BoxedObject::getCategory()
 {
     return category_;
+}
+
+void BoxedObject::setIcon(QIcon icon)
+{
+    icon_ = icon;
+}
+
+QIcon BoxedObject::getIcon()
+{
+    return icon_;
 }
 
 void BoxedObject::fill(QBoxLayout* layout)

@@ -35,6 +35,7 @@ private Q_SLOTS:
     void updateTitle();
     void updateLog();
     void hideLog();
+    void scrollDownLog();
 
 public Q_SLOTS:
     void start();

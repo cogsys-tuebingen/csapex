@@ -4,5 +4,8 @@
         <file>close.png</file>
         <file>maximize.png</file>
         <file>stop.png</file>
+        <file>plugin.png</file>
+        <file>filter.png</file>
+        <file>combiner.png</file>
     </qresource>
 </RCC>

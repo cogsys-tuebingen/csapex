@@ -142,9 +142,11 @@ void DesignerIO::loadBoxes(Designer* designer, const std::string &file)
 
         Box* box = BoxManager::instance().makeBox(designer->ui->designer, QPoint(x,y), type, uuid);
 
-        Memento::Ptr s = box->getState();
-        s->readYaml(doc);
-        box->setState(s);
+        if(box) {
+            Memento::Ptr s = box->getState();
+            s->readYaml(doc);
+            box->setState(s);
+        }
     }
 }
 
@@ -201,6 +203,11 @@ void DesignerIO::loadConnections(Designer* designer, const std::string &file)
             std::string from_uuid;
             connection["uuid"] >> from_uuid;
             Box* parent = BoxManager::instance().findConnectorOwner(from_uuid);
+
+            if(!parent) {
+                std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
+                continue;
+            }
 
             const YAML::Node& targets = connection["targets"];
             assert(targets.Type() == YAML::NodeType::Sequence);

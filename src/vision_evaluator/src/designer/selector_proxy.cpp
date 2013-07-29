@@ -27,17 +27,14 @@ void SelectorProxy::registerProxy(SelectorProxy::Ptr prototype)
     BoxManager::instance().register_box_type(prototype);
 }
 
-void SelectorProxy::registerProxy(ProxyConstructor c)
-{
-    BoxManager::instance().register_box_type(c);
-}
-
 void SelectorProxy::startObjectPositioning(const QPoint& offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
     mimeData->setText(Box::MIME);
     mimeData->setParent(this);
+    mimeData->setProperty("ox", offset.x());
+    mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
     vision_evaluator::Box* object(new vision_evaluator::Box(makeContent(), ""));
@@ -88,4 +85,9 @@ std::string SelectorProxy::getCategory()
 
     return cat;
 
+}
+
+QIcon SelectorProxy::getIcon()
+{
+    return prototype_box_->getContent()->getIcon();
 }

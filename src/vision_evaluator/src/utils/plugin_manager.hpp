@@ -51,8 +51,6 @@ protected:
     template <class Class>
     typename boost::enable_if<boost::is_base_of<vision_evaluator::BoxedObject, Class> >::type
     loadSelectorProxy(const std::string& name) {
-        std::cout << "loaded instance of boxedobject:" << name << std::endl;
-
         vision_evaluator::SelectorProxy::Ptr dynamic(new vision_evaluator::SelectorProxyDynamic(name, boost::bind(&Loader::createUnmanagedInstance, loader_, name)));
         vision_evaluator::SelectorProxy::registerProxy(dynamic);
     }
@@ -66,7 +64,7 @@ protected:
         try {
             std::vector<std::string> classes = loader_->getDeclaredClasses();
             for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
-                std::cout << "load library for class " << *c << std::endl;
+//                std::cout << "load library for class " << *c << std::endl;
                 loader_->loadLibraryForClass(*c);
 
                 loadSelectorProxy<M>(*c);
@@ -75,10 +73,10 @@ protected:
                 constructor.setType(*c);
                 constructor.setConstructor(boost::bind(&Loader::createUnmanagedInstance, loader_, *c));
                 registerConstructor(constructor);
-                std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;
+//                std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;
             }
         } catch(pluginlib::PluginlibException& ex) {
-            ROS_ERROR("The plugin failed to load for some reason. Error: %s", ex.what());
+            std::cerr << "The plugin failed to load for some reason. Error: " << ex.what() << std::endl;
         }
         plugins_loaded_ = true;
     }

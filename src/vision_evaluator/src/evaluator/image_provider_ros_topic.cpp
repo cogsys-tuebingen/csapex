@@ -51,6 +51,11 @@ ImageProviderRosTopic::~ImageProviderRosTopic()
 
 void ImageProviderRosTopic::checkMasterConnection()
 {
+    if(!ros::isInitialized()) {
+        int c = 0;
+        ros::init(c, (char**) NULL, "vision_evaluator");
+    }
+
     if(!has_connection.isRunning()) {
         has_connection = QtConcurrent::run(ros::master::check);
     }

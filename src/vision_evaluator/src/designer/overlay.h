@@ -64,6 +64,8 @@ public:
     bool keyPressEventHandler(QKeyEvent* e);
     bool keyReleaseEventHandler(QKeyEvent* e);
 
+    void setSelectionRectangle(const QPoint& a, const QPoint& b);
+
 protected:
     void drawActivity(int life, Connector* c);
     void clearActivity(Connector* c);
@@ -121,6 +123,9 @@ protected:
     int connector_radius_;
 
     std::vector<std::pair<int, Connector*> > publisher_signals_;
+
+    QPoint selection_a;
+    QPoint selection_b;
 };
 
 }

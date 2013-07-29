@@ -20,6 +20,7 @@ ImportCin::ImportCin()
     : connector_(NULL)
 {
     setCategory("ConsoleIO");
+    setIcon(QIcon(":/terminal.png"));
 }
 
 void ImportCin::fill(QBoxLayout *layout)
@@ -36,7 +37,7 @@ void ImportCin::fill(QBoxLayout *layout)
 void ImportCin::tick()
 {
     std::string in;
-    in = StreamInterceptor::instance().cin();
+    in = StreamInterceptor::instance().getCin();
     buffer << in;
 
     std::string unused = buffer.str();

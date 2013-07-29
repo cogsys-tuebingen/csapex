@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>vision_evaluator</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>The vision_evaluator package provides a gui for evaluation vision algorithms</description>
 
   <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
@@ -28,7 +28,4 @@
   <run_depend>ros_bag</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>utils</run_depend>
-
-  <export>
-  </export>
 </package>

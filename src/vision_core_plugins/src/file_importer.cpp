@@ -2,8 +2,7 @@
 #include "file_importer.h"
 
 /// COMPONENT
-#include "registration.hpp"
-#include "messages_default.hpp"
+#include <vision_evaluator/messages_default.hpp>
 
 /// PROJECT
 #include <designer/box.h>
@@ -17,14 +16,10 @@
 #include <QTimer>
 #include <QtConcurrentRun>
 #include <QCheckBox>
+#include <QDirIterator>
+#include <pluginlib/class_list_macros.h>
 
-STATIC_INIT(FileImporter, generic, {
-    SelectorProxy::ProxyConstructor c; \
-    c.setType("File Importer"); \
-    c.setConstructor(boost::lambda::bind(boost::lambda::new_ptr<SelectorProxyImp<FileImporter> >(), \
-    boost::lambda::_1, (QWidget*) NULL)); \
-    SelectorProxy::registerProxy(c); \
-});
+PLUGINLIB_EXPORT_CLASS(vision_evaluator::FileImporter, vision_evaluator::BoxedObject)
 
 using namespace vision_evaluator;
 using namespace connection_types;
@@ -88,6 +83,7 @@ void FileImporter::enableBorder(int border)
 FileImporter::FileImporter()
     : state(this), output_img_(NULL), output_mask_(NULL), additional_layout_(NULL), file_dialog_(NULL)
 {
+    setIcon(QIcon(":/folder_picture.png"));
 }
 
 FileImporter::~FileImporter()
