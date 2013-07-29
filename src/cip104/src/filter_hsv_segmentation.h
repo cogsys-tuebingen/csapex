@@ -5,7 +5,7 @@
 #include <vision_evaluator/filter.h>
 
 /// SYSTEM
-#include <QSlider>
+#include <qxtspanslider.h>
 
 namespace cip104
 {
@@ -28,34 +28,18 @@ public Q_SLOTS:
     void update();
 
 private:
-    QSlider* min_h;
-    QSlider* min_s;
-    QSlider* min_v;
-    QSlider* max_h;
-    QSlider* max_s;
-    QSlider* max_v;
+    QxtSpanSlider* sliderHue;
+    QxtSpanSlider* sliderSat;
+    QxtSpanSlider* sliderVal;
 
+    static QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max);
 
     struct State : public Memento {
         cv::Scalar min;
         cv::Scalar max;
 
-        virtual void writeYaml(YAML::Emitter& out) const {
-            out << YAML::Key << "min" << YAML::Value;
-            out << YAML::BeginSeq << min[0] << min[1] << min[2] << YAML::EndSeq;
-            out << YAML::Key << "max" << YAML::Value;
-            out << YAML::BeginSeq << max[0] << max[1] << max[2] << YAML::EndSeq;
-        }
-        virtual void readYaml(const YAML::Node& node) {
-            const YAML::Node& min_ = node["min"];
-            const YAML::Node& max_ = node["max"];
-            assert(min_.Type() == YAML::NodeType::Sequence);
-            assert(max_.Type() == YAML::NodeType::Sequence);
-            for(int i = 0; i < 3; ++i) {
-                min_[i] >> min[i];
-                max_[i] >> max[i];
-            }
-        }
+        virtual void writeYaml(YAML::Emitter& out) const;
+        virtual void readYaml(const YAML::Node& node);
     };
 
     State state;

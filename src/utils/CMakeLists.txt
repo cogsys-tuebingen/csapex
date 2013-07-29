@@ -44,6 +44,7 @@ catkin_package(
      include/utils/LibLaserProcessing/
      include/utils/LibOdoCalib/
      include/utils/LibCvTools/
+     include/utils/LibQxt/
    LIBRARIES
      Gnuplot
      LibUtil
@@ -57,6 +58,7 @@ catkin_package(
      LibLaserProcessing
      LibRosUtil
      LibCvTools
+     LibQxt
    CATKIN_DEPENDS genmsg roscpp sensor_msgs std_msgs costmap_2d_extended
    DEPENDS Eigen OpenCV
 )
