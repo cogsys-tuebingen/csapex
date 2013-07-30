@@ -16,6 +16,8 @@ class Debayer : public vision_evaluator::Filter
     Q_OBJECT
 
 public:
+    Debayer();
+
     /**
      * @brief See base class definition.
      */

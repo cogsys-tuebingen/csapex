@@ -6,5 +6,6 @@
         <file>pencil.png</file>
         <file>terminal.png</file>
         <file>picture.png</file>
+        <file>bayer.png</file>
     </qresource>
 </RCC>

@@ -10,6 +10,12 @@ PLUGINLIB_EXPORT_CLASS(vision_plugins::Debayer, vision_evaluator::BoxedObject)
 
 using namespace vision_plugins;
 
+Debayer::Debayer()
+    : vision_evaluator::Filter()
+{
+    setIcon(QIcon(":/bayer.png"));
+}
+
 void Debayer::insert(QBoxLayout *parent)
 {
     combo_mode_ = new QComboBox;
