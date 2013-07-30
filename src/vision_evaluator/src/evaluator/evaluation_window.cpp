@@ -20,24 +20,14 @@
 #include <QSharedPointer>
 #include <QMetaType>
 #include <QMessageBox>
+#include <QToolBar>
 #include <QTimer>
-
-Q_DECLARE_METATYPE(cv::Mat)
-Q_DECLARE_METATYPE(std::string)
-Q_DECLARE_METATYPE(QSharedPointer<QImage>)
-
 
 using namespace vision_evaluator;
 
-EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent) :
+EvaluationWindow::EvaluationWindow(QWidget* parent) :
     QMainWindow(parent), ui(new Ui::EvaluationWindow)
 {
-    StreamInterceptor::instance().start();
-
-    qRegisterMetaType<cv::Mat>("cv::Mat");
-    qRegisterMetaType<std::string>("std::string");
-    qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
-
     ConnectionTypeManager::registerMessage("std::string", boost::bind(&connection_types::StringMessage::make));
     ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::CvMatMessage::make));
 
@@ -69,6 +59,31 @@ EvaluationWindow::EvaluationWindow(const std::string& directory, QWidget* parent
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(updateLog()));
+}
+
+Designer* EvaluationWindow::getDesigner()
+{
+    return ui->designer;
+}
+
+void EvaluationWindow::showMenu()
+{
+    QVBoxLayout* new_layout = new QVBoxLayout;
+
+    QToolBar* tb = new QToolBar;
+    QMenuBar* mb = menuBar();
+    tb->addActions(mb->actions());
+
+    new_layout->addWidget(tb);
+
+    QLayout* layout = ui->centralwidget->layout();
+    QLayoutItem* item;
+    while((item = layout->takeAt(0)) != NULL) {
+        new_layout->addItem(item);
+    }
+
+    delete layout;
+    ui->centralwidget->setLayout(new_layout);
 }
 
 void EvaluationWindow::start()

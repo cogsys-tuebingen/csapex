@@ -4,7 +4,7 @@ project(vision_rqt)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rqt_gui rqt_gui_cpp)
+find_package(catkin REQUIRED COMPONENTS roscpp rqt_gui rqt_gui_cpp vision_evaluator)
 
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 include(${QT_USE_FILE})
@@ -45,3 +45,6 @@ add_library(vision_rqt
     ${QT_MOC}
 )
 target_link_libraries(vision_rqt ${catkin_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
+
+find_package(class_loader)
+class_loader_hide_library_symbols(vision_rqt)

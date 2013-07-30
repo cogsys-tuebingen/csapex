@@ -13,6 +13,8 @@ class EvaluationWindow;
 namespace vision_evaluator
 {
 
+class Designer;
+
 /**
  * @brief The EvaluationWindow class provides the window for the evaluator program
  */
@@ -23,12 +25,14 @@ class EvaluationWindow : public QMainWindow
 public:
     /**
      * @brief EvaluationWindow
-     * @param directory path to the initial directory for browsers
      * @param parent
      */
-    explicit EvaluationWindow(const std::string& directory, QWidget* parent = 0);
+    explicit EvaluationWindow(QWidget* parent = 0);
 
+    void showMenu();
     void closeEvent(QCloseEvent* event);
+
+    Designer* getDesigner();
 
 private Q_SLOTS:
     void updateMenu();

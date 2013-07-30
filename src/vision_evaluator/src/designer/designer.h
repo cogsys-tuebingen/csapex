@@ -23,6 +23,7 @@ class Designer : public QWidget
 
 public:
     Designer(QWidget* parent = 0);
+    virtual ~Designer();
 
     bool eventFilter(QObject* o, QEvent* e);
     void resizeEvent(QResizeEvent* e);
@@ -47,13 +48,12 @@ public Q_SLOTS:
     void undo();
     void redo();
     void clear();
+    void setCurrentConfig(const std::string& filename);
+
 
 Q_SIGNALS:
     void stateChanged();
     void configChanged();
-
-private:
-    void setCurrentConfig(const std::string& filename);
 
 private:
     Ui::Designer* ui;

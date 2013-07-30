@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     std::cout << "working directory is " << directory << std::endl;
 
     EvaluationApplication app(argc, argv);
-    EvaluationWindow w(directory);
+    EvaluationWindow w;
 
     if(vm.find("second_directory") != vm.end()) {
         std::string comp_directory = vm["second_directory"].as<std::string>();

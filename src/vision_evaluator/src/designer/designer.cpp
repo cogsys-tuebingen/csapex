@@ -24,9 +24,15 @@
 
 using namespace vision_evaluator;
 
+Q_DECLARE_METATYPE(QSharedPointer<QImage>)
+
 Designer::Designer(QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer)
 {
+    StreamInterceptor::instance().start();
+
+    qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
+
     StreamInterceptor::instance();
 
     ui->setupUi(this);
@@ -36,6 +42,11 @@ Designer::Designer(QWidget* parent)
     BoxManager::instance().reload();
 
     QObject::connect(&BoxManager::instance(), SIGNAL(stateChanged()), this, SIGNAL(stateChanged()));
+}
+
+Designer::~Designer()
+{
+    StreamInterceptor::instance().stop();
 }
 
 bool Designer::eventFilter(QObject* o, QEvent* e)
