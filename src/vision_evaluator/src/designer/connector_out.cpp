@@ -50,6 +50,12 @@ void ConnectorOut::removeConnection(Connector* other_side)
     }
 }
 
+Command::Ptr ConnectorOut::removeConnectionCmd(ConnectorIn* other_side) {
+    Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
+
+    return removeThis;
+}
+
 Command::Ptr ConnectorOut::removeAllConnectionsCmd()
 {
     command::Meta::Ptr removeAll(new command::Meta);

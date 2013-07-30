@@ -51,6 +51,7 @@ public:
     void connectForcedWithoutCommand(ConnectorIn* other_side);
 
     virtual Command::Ptr removeAllConnectionsCmd();
+    virtual Command::Ptr removeConnectionCmd(ConnectorIn *other_side);
 
 Q_SIGNALS:
     void connectionFormed(ConnectorOut*, ConnectorIn*);
