@@ -1,7 +1,7 @@
 /// PROJECT
-#include <evaluator/evaluation_window.h>
-#include <designer/box.h>
-#include <designer/boxed_object.h>
+#include <vision_evaluator/evaluation_window.h>
+#include <csapex/box.h>
+#include <csapex/boxed_object.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -13,7 +13,7 @@
 
 namespace po = boost::program_options;
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 void siginthandler(int param)
 {

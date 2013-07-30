@@ -6,9 +6,9 @@
  */
 
 /// HEADER
-#include "global_option.h"
+#include <vision_evaluator/global_option.h>
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 GlobalOption::GlobalOption()
 {

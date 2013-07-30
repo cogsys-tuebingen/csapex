@@ -5,7 +5,7 @@ namespace bfs = boost::filesystem;
 
 REGISTER_IMAGE_PROVIDERS(ImageProviderDir, DIRECTORY)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ImageProviderDir::ImageProviderDir(const std::string& directory)
     : is_right_format(false)//,dir_(directory), dir_it_(directory)

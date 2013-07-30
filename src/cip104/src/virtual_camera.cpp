@@ -2,9 +2,9 @@
 #include "virtual_camera.h"
 
 /// PROJECT
-#include <designer/box.h>
-#include <designer/connector_out.h>
-#include <qt_helper.hpp>
+#include <csapex/box.h>
+#include <csapex/connector_out.h>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -14,9 +14,9 @@
 #include <QTimer>
 #include <QtConcurrentRun>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::VirtualCamera, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::VirtualCamera, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace connection_types;
 
 void VirtualCamera::State::writeYaml(YAML::Emitter& out) const {

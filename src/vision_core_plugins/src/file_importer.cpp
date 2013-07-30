@@ -5,9 +5,9 @@
 #include <vision_evaluator/messages_default.hpp>
 
 /// PROJECT
-#include <designer/box.h>
-#include <designer/connector_out.h>
-#include <qt_helper.hpp>
+#include <csapex/box.h>
+#include <csapex/connector_out.h>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -19,9 +19,9 @@
 #include <QDirIterator>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::FileImporter, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::FileImporter, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace connection_types;
 
 void FileImporter::State::writeYaml(YAML::Emitter& out) const {

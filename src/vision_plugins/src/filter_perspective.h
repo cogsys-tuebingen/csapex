@@ -10,7 +10,7 @@ class QDoubleSlider;
 
 namespace vision_plugins {
 
-class PerspectiveTransform : public vision_evaluator::Filter
+class PerspectiveTransform : public csapex::Filter
 {
     Q_OBJECT
 

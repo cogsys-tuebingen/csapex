@@ -2,12 +2,12 @@
 #define IMAGE_PROVIDER_IMG_H
 
 /// COMPONENT
-#include "image_provider.h"
+#include <vision_evaluator/image_provider.h>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ImageProviderImg : public ImageProvider

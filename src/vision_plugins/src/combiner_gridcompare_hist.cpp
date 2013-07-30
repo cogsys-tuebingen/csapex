@@ -4,9 +4,9 @@
 #include <pluginlib/class_list_macros.h>
 #include <QComboBox>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompareHist, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::GridCompareHist, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace cv_grid;
 
 GridCompareHist::GridCompareHist() :

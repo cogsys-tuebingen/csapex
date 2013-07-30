@@ -2,9 +2,9 @@
 #include "rqt_evaluation.h"
 
 /// PROJECT
-#include <designer/connection_type_manager.h>
-#include <designer/designer.h>
-#include <evaluator/messages_default.hpp>
+#include <csapex/connection_type_manager.h>
+#include <csapex/designer.h>
+#include <vision_evaluator/messages_default.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -25,7 +25,7 @@ void Vision::initPlugin(qt_gui_cpp::PluginContext& context)
 {
     context_ = &context;
 
-    eva_ = new vision_evaluator::EvaluationWindow;
+    eva_ = new csapex::EvaluationWindow;
     eva_->showMenu();
 
     context_->addWidget(eva_);

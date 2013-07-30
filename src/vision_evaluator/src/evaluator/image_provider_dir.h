@@ -2,13 +2,13 @@
 #define IMAGE_PROVIDER_DIR_H
 
 /// COMPONENT
-#include "image_provider.h"
+#include <vision_evaluator/image_provider.h>
 #include "image_provider_img.h"
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ImageProviderDir : public ImageProvider

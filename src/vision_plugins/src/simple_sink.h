@@ -3,15 +3,15 @@
 
 /// COMPONENT
 #include <vision_evaluator/image_combiner.h>
-#include <designer/connector_in.h>
+#include <csapex/connector_in.h>
 
 /// SYSTEM
 #include <QLabel>
 
-namespace vision_evaluator
+namespace csapex
 {
 
-class SimpleSink : public vision_evaluator::BoxedObject
+class SimpleSink : public csapex::BoxedObject
 {
     Q_OBJECT
 

@@ -11,7 +11,7 @@ namespace vision_plugins {
  * @brief The ColorConvert class can be used to convert colored images from one color space
  *        to another.
  */
-class ColorConvert : public vision_evaluator::Filter
+class ColorConvert : public csapex::Filter
 {
     Q_OBJECT
 

@@ -8,7 +8,7 @@
 
 REGISTER_IMAGE_PROVIDERS(ImageProviderBag, bag)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ImageProviderBag::ImageProviderBag(const std::string& file)
     : file_(file), bag(file), view_(NULL), initiated(false)

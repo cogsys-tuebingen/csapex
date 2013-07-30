@@ -7,7 +7,7 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_plugins::Equalize, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(vision_plugins::Equalize, csapex::BoxedObject)
 
 using namespace vision_plugins;
 

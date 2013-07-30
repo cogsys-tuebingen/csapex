@@ -2,10 +2,10 @@
 #define GLOBAL_OPTION_PANEL_H
 
 /// PROJECT
-#include <designer/boxed_object.h>
+#include <csapex/boxed_object.h>
 #include <vision_evaluator/global_option.h>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class GlobalOptionPanel : public BoxedObject

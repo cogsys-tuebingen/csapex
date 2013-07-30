@@ -2,14 +2,14 @@
 #include "filter_lk_tracking.h"
 
 /// PROJECT
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <boost/foreach.hpp>
 #include <QPushButton>
 
-PLUGINLIB_EXPORT_CLASS(cip104::LKTracking, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(cip104::LKTracking, csapex::BoxedObject)
 
 using namespace cip104;
 

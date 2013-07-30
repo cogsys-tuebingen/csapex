@@ -2,7 +2,7 @@
 #define IMAGE_PROVIDER_ROS_TOPIC_H
 
 /// COMPONENT
-#include "image_provider.h"
+#include <vision_evaluator/image_provider.h>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
@@ -12,7 +12,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 // @TODO this should be a "page plugin"

@@ -9,9 +9,9 @@
 #include <QPushButton>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::FilterStaticMask, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::FilterStaticMask, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ModalPainter::ModalPainter()
     : dragging(false)

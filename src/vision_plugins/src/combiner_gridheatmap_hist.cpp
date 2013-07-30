@@ -1,16 +1,16 @@
 #include "combiner_gridheatmap_hist.h"
 
 /// COMPONENT
-#include <vision_evaluator/connector_out.h>
+#include <csapex/connector_out.h>
 #include <vision_evaluator/messages_default.hpp>
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <QComboBox>
 #include <QPushButton>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridHeatMapHist, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::GridHeatMapHist, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace QSignalBridges;
 using namespace cv_grid;
 using namespace connection_types;

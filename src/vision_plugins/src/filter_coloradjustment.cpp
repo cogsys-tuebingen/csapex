@@ -1,22 +1,22 @@
+/// HEADER
 #include "filter_coloradjustment.h"
 
-using namespace vision_evaluator;
-/// SYSTEM
-#include <QComboBox>
-#include <QCheckBox>
-
 /// COMPONENT
-#include <vision_evaluator/qt_helper.hpp>
-#include <evaluator/messages_default.hpp>
-#include <designer/connector_in.h>
-#include <designer/connector_out.h>
-#include <designer/box.h>
+#include <csapex/qt_helper.hpp>
+#include <vision_evaluator/messages_default.hpp>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
+#include <csapex/box.h>
 #include <utils/LibCvTools/histogram.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::ColorAdjustment, vision_evaluator::BoxedObject)
+#include <QComboBox>
+#include <QCheckBox>
 
+PLUGINLIB_EXPORT_CLASS(csapex::ColorAdjustment, csapex::BoxedObject)
+
+using namespace csapex;
 using namespace connection_types;
 
 ColorAdjustment::ColorAdjustment() :

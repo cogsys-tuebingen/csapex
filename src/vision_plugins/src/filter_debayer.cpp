@@ -6,12 +6,12 @@
 #include <QComboBox>
 #include <QLabel>
 
-PLUGINLIB_EXPORT_CLASS(vision_plugins::Debayer, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(vision_plugins::Debayer, csapex::BoxedObject)
 
 using namespace vision_plugins;
 
 Debayer::Debayer()
-    : vision_evaluator::Filter()
+    : csapex::Filter()
 {
     setIcon(QIcon(":/bayer.png"));
 }

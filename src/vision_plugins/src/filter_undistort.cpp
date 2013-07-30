@@ -2,12 +2,12 @@
 #include "filter_undistort.h"
 
 /// COMPONENT
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_plugins::Undistort, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(vision_plugins::Undistort, csapex::BoxedObject)
 
 using namespace vision_plugins;
 

@@ -6,14 +6,14 @@
 #include <utils/LibCvTools/grid.hpp>
 #include <utils/LibCvTools/grid_attributes.hpp>
 #include <utils/LibCvTools/grid_compute.hpp>
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <QMutex>
 
 class QSlider;
 
-namespace vision_evaluator {
+namespace csapex {
 class GridCompare : public ImageCombiner
 {
 protected:

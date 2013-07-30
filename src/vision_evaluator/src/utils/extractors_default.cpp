@@ -7,7 +7,7 @@
 /// SYSTEM
 #include <opencv2/nonfree/nonfree.hpp>
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 /// COMBINATIONS
 

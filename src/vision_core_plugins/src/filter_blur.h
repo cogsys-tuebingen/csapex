@@ -7,7 +7,7 @@
 /// SYSTEM
 #include <QSlider>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class FilterBlur : public Filter

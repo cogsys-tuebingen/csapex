@@ -10,7 +10,7 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 
-namespace vision_evaluator
+namespace csapex
 {
 class ExtractorManager;
 }
@@ -37,7 +37,7 @@ private:
     }
 
 private:
-    boost::shared_ptr<vision_evaluator::ExtractorManager> manager;
+    boost::shared_ptr<csapex::ExtractorManager> manager;
 };
 
 #endif // EXTRACTOR_FACTORY_H

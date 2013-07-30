@@ -4,7 +4,7 @@
 /// SYSTEM
 #include <QHBoxLayout>
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ImageProviderSet::ImageProviderSet()
     : next_frame(-1)

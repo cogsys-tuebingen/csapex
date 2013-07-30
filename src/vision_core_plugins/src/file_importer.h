@@ -3,12 +3,12 @@
 
 /// PROJECT
 #include <vision_evaluator/image_provider.h>
-#include <designer/boxed_object.h>
+#include <csapex/boxed_object.h>
 
 /// SYSTEM
 #include <QPushButton>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ConnectorOut;

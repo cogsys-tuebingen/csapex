@@ -1,9 +1,9 @@
 #include "combiner_gridcompare.h"
 
 /// PROJECT
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 GridCompare::GridCompare(State::Ptr state) :
     state_(state)

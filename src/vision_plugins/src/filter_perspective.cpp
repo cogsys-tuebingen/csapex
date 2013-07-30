@@ -2,12 +2,12 @@
 #include "filter_perspective.h"
 
 /// PROJECT
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_plugins::PerspectiveTransform, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(vision_plugins::PerspectiveTransform, csapex::BoxedObject)
 
 using namespace vision_plugins;
 

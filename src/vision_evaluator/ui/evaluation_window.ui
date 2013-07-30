@@ -23,7 +23,7 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="vision_evaluator::Designer" name="designer" native="true">
+      <widget class="csapex::Designer" name="designer" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -139,9 +139,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>vision_evaluator::Designer</class>
+   <class>csapex::Designer</class>
    <extends>QWidget</extends>
-   <header location="global">designer/designer.h</header>
+   <header location="global">csapex/designer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

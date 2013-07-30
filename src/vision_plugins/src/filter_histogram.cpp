@@ -4,12 +4,12 @@
 /// PROJECT
 #include <utils/LibCvTools/histogram.hpp>
 
-#include <evaluator/messages_default.hpp>
-#include <designer/connector_in.h>
-#include <designer/connector_out.h>
-#include <designer/box.h>
+#include <vision_evaluator/messages_default.hpp>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
+#include <csapex/box.h>
 #include <opencv2/opencv.hpp>
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -18,9 +18,9 @@
 #include <QCheckBox>
 #include <QSpinBox>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::Histogram, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::Histogram, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace connection_types;
 
 Histogram::Histogram() :

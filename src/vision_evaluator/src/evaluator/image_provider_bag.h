@@ -8,7 +8,7 @@
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ImageProviderBag : public ImageProviderSet

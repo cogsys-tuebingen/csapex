@@ -2,15 +2,15 @@
 #include "global_option_panel.h"
 
 /// PROJECT
-#include <utils/plugin_manager.hpp>
+#include <csapex/plugin_manager.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::GlobalOptionPanel, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::GlobalOptionPanel, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 
 GlobalOptionPanel::State::State(GlobalOptionPanel* parent)
@@ -55,7 +55,7 @@ GlobalOptionPanel::~GlobalOptionPanel()
 void GlobalOptionPanel::ensureLoaded()
 {
     if(options.empty()) {
-        PluginManager<GlobalOption> manager("vision_evaluator::GlobalOption");
+        PluginManager<GlobalOption> manager("csapex::GlobalOption");
         if(!manager.pluginsLoaded()) {
             manager.reload();
         }

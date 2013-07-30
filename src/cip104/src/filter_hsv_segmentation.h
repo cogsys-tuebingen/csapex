@@ -10,7 +10,7 @@
 namespace cip104
 {
 
-class HSVSegmentation : public vision_evaluator::Filter
+class HSVSegmentation : public csapex::Filter
 {
     Q_OBJECT
 

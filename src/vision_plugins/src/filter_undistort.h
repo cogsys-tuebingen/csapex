@@ -12,7 +12,7 @@
 #include <QSlider>
 
 namespace vision_plugins {
-class Undistort : public vision_evaluator::Filter
+class Undistort : public csapex::Filter
 {
     Q_OBJECT
 

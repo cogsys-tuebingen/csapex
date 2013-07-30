@@ -2,10 +2,10 @@
 #define VIRTUAL_CAMERA_H
 
 /// PROJECT
-#include <designer/boxed_object.h>
+#include <csapex/boxed_object.h>
 #include <vision_evaluator/image_provider.h>
 #include <vision_evaluator/messages_default.hpp>
-#include <qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 #include <utils/LibCvTools/perspective_transform.h>
 
 /// SYSTEM
@@ -13,7 +13,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ConnectorOut;

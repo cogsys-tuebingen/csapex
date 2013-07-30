@@ -2,12 +2,12 @@
 #define OUTPUT_DISPLAY_H
 
 /// PROJECT
-#include <designer/boxed_object.h>
+#include <csapex/boxed_object.h>
 
 /// SYSTEM
 #include <QGraphicsView>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ConnectorIn;

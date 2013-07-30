@@ -7,7 +7,7 @@
 namespace vision_plugins
 {
 
-class SimpleImageDifference : public vision_evaluator::ImageCombiner
+class SimpleImageDifference : public csapex::ImageCombiner
 {
 public:
     SimpleImageDifference();

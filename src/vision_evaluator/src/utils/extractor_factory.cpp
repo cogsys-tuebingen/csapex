@@ -5,7 +5,7 @@
 #include "extractor_manager.h"
 
 ExtractorFactory::ExtractorFactory()
-    : manager(new vision_evaluator::ExtractorManager)
+    : manager(new csapex::ExtractorManager)
 {
 }
 

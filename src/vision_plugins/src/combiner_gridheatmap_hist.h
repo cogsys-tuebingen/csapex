@@ -3,10 +3,10 @@
 
 /// COMPONENT
 #include "combiner_gridcompare_hist.h"
-#include <vision_evaluator/qsignal_bridges.h>
+#include <csapex/qsignal_bridges.h>
 #include <QMutex>
 
-namespace vision_evaluator {
+namespace csapex {
 class GridHeatMapHist : public GridCompareHist
 {
 

@@ -4,7 +4,7 @@
 /// PROJECT
 #include <vision_evaluator/filter.h>
 
-namespace vision_evaluator
+namespace csapex
 {
 class FilterApplyMask : public Filter
 {

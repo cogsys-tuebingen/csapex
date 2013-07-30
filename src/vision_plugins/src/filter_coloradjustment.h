@@ -7,8 +7,8 @@ class QDoubleSlider;
 class QCheckBox;
 class QComboBox;
 
-namespace vision_evaluator {
-class ColorAdjustment : public vision_evaluator::BoxedObject
+namespace csapex {
+class ColorAdjustment : public csapex::BoxedObject
 {
     Q_OBJECT
 

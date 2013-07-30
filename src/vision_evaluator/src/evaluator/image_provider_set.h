@@ -2,13 +2,13 @@
 #define IMAGE_PROVIDER_SET_H
 
 /// COMPONENT
-#include "image_provider.h"
+#include <vision_evaluator/image_provider.h>
 
 /// SYSTEM
 #include <QPushButton>
 #include <QSlider>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ImageProviderSet : public ImageProvider

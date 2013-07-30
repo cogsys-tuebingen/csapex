@@ -9,12 +9,12 @@ class QSlider;
 #include <vision_evaluator/filter.h>
 
 
-namespace vision_evaluator {
+namespace csapex {
 /// constants
 static int HISTOGRAM_BINS_MAX = 512;
 static int HISTOGRAM_BINS_STD = 256;
 
-class Histogram : public vision_evaluator::BoxedObject
+class Histogram : public csapex::BoxedObject
 {
     Q_OBJECT
 

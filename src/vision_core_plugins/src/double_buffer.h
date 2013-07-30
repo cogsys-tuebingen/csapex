@@ -2,13 +2,13 @@
 #define DOUBLE_BUFFER_H
 
 /// PROJECT
-#include <designer/boxed_object.h>
-#include <designer/connection_type.h>
+#include <csapex/boxed_object.h>
+#include <csapex/connection_type.h>
 
 /// SYSTEM
 #include <QMutex>
 
-namespace vision_evaluator {
+namespace csapex {
 
 class DoubleBuffer : public BoxedObject
 {

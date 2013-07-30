@@ -2,8 +2,8 @@
 #include "output_display.h"
 
 /// PROJECT
-#include <designer/box.h>
-#include <designer/connector_in.h>
+#include <csapex/box.h>
+#include <csapex/connector_in.h>
 #include <utils/LibUtil/QtCvImageConverter.h>
 #include <vision_evaluator/messages_default.hpp>
 
@@ -12,10 +12,10 @@
 #include <QGraphicsSceneEvent>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::OutputDisplay, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::OutputDisplay, csapex::BoxedObject)
 
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace connection_types;
 
 OutputDisplay::OutputDisplay()

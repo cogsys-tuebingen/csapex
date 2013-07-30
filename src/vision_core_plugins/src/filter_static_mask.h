@@ -10,7 +10,7 @@
 #include <QPushButton>
 #include <fstream>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ModalPainter;

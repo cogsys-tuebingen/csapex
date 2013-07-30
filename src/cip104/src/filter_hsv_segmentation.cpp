@@ -2,13 +2,13 @@
 #include "filter_hsv_segmentation.h"
 
 /// PROJECT
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <boost/foreach.hpp>
 
-PLUGINLIB_EXPORT_CLASS(cip104::HSVSegmentation, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(cip104::HSVSegmentation, csapex::BoxedObject)
 
 using namespace cip104;
 

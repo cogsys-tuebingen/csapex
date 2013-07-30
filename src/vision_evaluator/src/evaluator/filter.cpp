@@ -1,18 +1,18 @@
 /// HEADER
-#include "filter.h"
+#include <vision_evaluator/filter.h>
 
 /// COMPONENT
-#include "messages_default.hpp"
+#include <vision_evaluator/messages_default.hpp>
 
 /// PROJECT
-#include <designer/connector_in.h>
-#include <designer/connector_out.h>
-#include <designer/box.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
+#include <csapex/box.h>
 
 /// SYSTEM
 #include <QLabel>
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace connection_types;
 
 

@@ -2,17 +2,17 @@
 #include "double_buffer.h"
 
 /// PROJECT
-#include <designer/box.h>
-#include <designer/connector_in.h>
-#include <designer/connector_out.h>
+#include <csapex/box.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
 #include <vision_evaluator/messages_default.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::DoubleBuffer, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::DoubleBuffer, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 DoubleBuffer::DoubleBuffer()
     : input_(NULL), output_(NULL)

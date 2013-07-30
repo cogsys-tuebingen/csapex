@@ -11,7 +11,7 @@
 #ifndef IMAGE_COMBINER_ROBUST_MATCH_H
 #define IMAGE_COMBINER_ROBUST_MATCH_H
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ImageCombinerRobustMatch : public ImageCombiner

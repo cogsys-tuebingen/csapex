@@ -22,7 +22,7 @@ public:
 private:
     qt_gui_cpp::PluginContext* context_;
 
-    vision_evaluator::EvaluationWindow* eva_;
+    csapex::EvaluationWindow* eva_;
 };
 
 }

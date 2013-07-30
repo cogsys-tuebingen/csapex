@@ -8,7 +8,7 @@ namespace vision_plugins {
 /**
  * @brief The equalization plugin represents the cv function to euqalize an image using histograms.
  */
-class Equalize : public vision_evaluator::Filter
+class Equalize : public csapex::Filter
 {
     Q_OBJECT
 

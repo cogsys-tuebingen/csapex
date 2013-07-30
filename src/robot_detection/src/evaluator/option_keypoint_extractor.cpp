@@ -6,12 +6,12 @@
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
-PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointExtractor, vision_evaluator::GlobalOption)
+PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointExtractor, csapex::GlobalOption)
 
 using namespace robot_detection;
-using namespace vision_evaluator;
+using namespace csapex;
 
 
 OptionKeypointExtractor::OptionKeypointExtractor()

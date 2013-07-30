@@ -11,10 +11,10 @@
 /// SYSTEM
 #include <boost/foreach.hpp>
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 GlobalOptionManager::GlobalOptionManager()
-    : PluginManager<vision_evaluator::GlobalOption>("vision_evaluator::GlobalOption")
+    : PluginManager<csapex::GlobalOption>("csapex::GlobalOption")
 {
 }
 

@@ -2,19 +2,19 @@
 #include "import_cin.h"
 
 /// PROJECT
-#include <designer/box.h>
-#include <designer/connector_out.h>
-#include <designer/connection_type_manager.h>
-#include <utils/stream_interceptor.h>
+#include <csapex/box.h>
+#include <csapex/connector_out.h>
+#include <csapex/connection_type_manager.h>
+#include <csapex/stream_interceptor.h>
 #include <vision_evaluator/messages_default.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <yaml-cpp/eventhandler.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::ImportCin, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::ImportCin, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ImportCin::ImportCin()
     : connector_(NULL)

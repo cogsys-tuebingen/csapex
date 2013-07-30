@@ -2,8 +2,8 @@
 #include "text_input.h"
 
 /// PROJECT
-#include <designer/box.h>
-#include <designer/connector_out.h>
+#include <csapex/box.h>
+#include <csapex/connector_out.h>
 #include <vision_evaluator/messages_default.hpp>
 
 /// SYSTEM
@@ -12,9 +12,9 @@
 #include <QPushButton>
 #include <QBoxLayout>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::TextInput, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::TextInput, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 TextInput::TextInput()
     : connector_(NULL)

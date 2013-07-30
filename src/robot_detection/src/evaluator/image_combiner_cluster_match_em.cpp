@@ -11,7 +11,7 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(robot_detection::ImageCombinerClusterMatchEM, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(robot_detection::ImageCombinerClusterMatchEM, csapex::BoxedObject)
 
 using namespace lib_clustering;
 using namespace robot_detection;

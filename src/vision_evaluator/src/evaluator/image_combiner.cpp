@@ -1,15 +1,15 @@
 /// HEADER
-#include "image_combiner.h"
+#include <vision_evaluator/image_combiner.h>
 
 /// COMPONENT
-#include "messages_default.hpp"
+#include <vision_evaluator/messages_default.hpp>
 
 /// PROJECT
-#include <designer/connector_in.h>
-#include <designer/connector_out.h>
-#include <designer/box.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
+#include <csapex/box.h>
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace connection_types;
 
 ImageCombiner::ImageCombiner()

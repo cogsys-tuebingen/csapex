@@ -1,20 +1,20 @@
 #include "filter_merger.h"
 
 /// PROJECT
-#include <designer/box.h>
-#include <vision_evaluator/box_manager.h>
-#include <evaluator/messages_default.hpp>
-#include <designer/connector_in.h>
-#include <designer/connector_out.h>
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/box.h>
+#include <csapex/box_manager.h>
+#include <vision_evaluator//messages_default.hpp>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <QLabel>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::Merger, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::Merger, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace connection_types;
 
 Merger::Merger() :

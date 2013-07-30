@@ -11,9 +11,9 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::ImageCombinerRobustMatch, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::ImageCombinerRobustMatch, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 //RobustMatcher class taken from OpenCV2 Computer Vision Application Programming Cookbook Ch 9
 class RobustMatcher

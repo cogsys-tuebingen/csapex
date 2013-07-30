@@ -13,7 +13,7 @@
 namespace robot_detection
 {
 
-class OptionKeypointDescriptor : public vision_evaluator::GlobalOption, public Reconfigurable
+class OptionKeypointDescriptor : public csapex::GlobalOption, public Reconfigurable
 {
     Q_OBJECT
 

@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <vision_evaluator/filter.h>
 
-namespace vision_evaluator {
-class Splitter : public vision_evaluator::BoxedObject
+namespace csapex {
+class Splitter : public csapex::BoxedObject
 {
     Q_OBJECT
 

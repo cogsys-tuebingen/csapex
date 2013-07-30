@@ -6,7 +6,7 @@
 
 class QSpinBox;
 
-namespace vision_evaluator {
+namespace csapex {
 
 const static int MERGER_INPUT_MAX = 10;
 /**

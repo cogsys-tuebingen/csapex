@@ -4,7 +4,7 @@
 REGISTER_IMAGE_PROVIDERS(ImageProviderMov, mov, mpeg)
 REGISTER_IMAGE_PROVIDERS(ImageProviderMov, mpg, mp4, avi)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ImageProviderMov::ImageProviderMov(const std::string& movie_file)
     : capture_(movie_file)

@@ -10,7 +10,7 @@
 namespace robot_detection
 {
 
-class ImageCombinerSimpleMatch : public vision_evaluator::ImageCombiner, public Reconfigurable
+class ImageCombinerSimpleMatch : public csapex::ImageCombiner, public Reconfigurable
 {
     Q_OBJECT
 

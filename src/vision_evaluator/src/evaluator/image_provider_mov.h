@@ -4,7 +4,7 @@
 /// COMPONENT
 #include "image_provider_set.h"
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class ImageProviderMov : public ImageProviderSet

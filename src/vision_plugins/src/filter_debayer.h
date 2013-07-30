@@ -11,7 +11,7 @@ namespace vision_plugins {
 /**
  * @brief The Debayer class can be used to debayer raw images to get color images.
  */
-class Debayer : public vision_evaluator::Filter
+class Debayer : public csapex::Filter
 {
     Q_OBJECT
 

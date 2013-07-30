@@ -3,9 +3,9 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::GridCompareValue, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::GridCompareValue, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 using namespace cv_grid;
 
 GridCompareValue::GridCompareValue() :

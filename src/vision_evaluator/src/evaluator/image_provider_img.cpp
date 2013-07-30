@@ -3,7 +3,7 @@
 
 REGISTER_IMAGE_PROVIDERS(ImageProviderImg, jpg, png, gif, ppm, pgm)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 
 boost::function<bool(ImageProvider*)> ImageProviderImg::Identity

@@ -5,7 +5,7 @@
 #include <vision_evaluator/image_combiner.h>
 class QComboBox;
 
-namespace vision_evaluator {
+namespace csapex {
 /**
  * @brief The SetOperation class can be used to compare two images using a grid
  *        overlay. The Feature observed in this case is the mean value of values given

@@ -6,7 +6,7 @@
 
 class QComboBox;
 
-namespace vision_evaluator {
+namespace csapex {
 /**
  * @brief The GridCompareHist class can be used to compare two images using a grid
  *        overlay. The Feature observed in this case is the histogram calculated on the

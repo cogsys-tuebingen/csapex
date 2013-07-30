@@ -2,13 +2,13 @@
 #define IMPORT_ROS_H
 
 /// PROJECT
-#include <designer/boxed_object.h>
+#include <csapex/boxed_object.h>
 
 /// SYSTEM
 #include <ros/ros.h>
 #include <QFuture>
 
-namespace vision_evaluator {
+namespace csapex {
 
 class ImportRos : public BoxedObject
 {

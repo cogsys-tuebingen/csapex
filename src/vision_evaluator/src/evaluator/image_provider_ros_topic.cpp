@@ -12,7 +12,7 @@
 
 //REGISTER_META_PLUGIN(ImageProviderRosTopic)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 boost::function<bool(ImageProvider*)> ImageProviderRosTopic::Identity
 = boost::bind(&ImageProviderRosTopic::checkIdentity, _1);

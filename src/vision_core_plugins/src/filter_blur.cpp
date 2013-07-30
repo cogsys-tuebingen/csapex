@@ -2,15 +2,15 @@
 #include "filter_blur.h"
 
 /// PROJECT
-#include <vision_evaluator/qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::FilterBlur, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::FilterBlur, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 FilterBlur::FilterBlur()
 {

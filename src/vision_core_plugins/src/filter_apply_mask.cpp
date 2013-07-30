@@ -5,9 +5,9 @@
 #include <pluginlib/class_list_macros.h>
 
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::FilterApplyMask, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::FilterApplyMask, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 FilterApplyMask::FilterApplyMask()
 {

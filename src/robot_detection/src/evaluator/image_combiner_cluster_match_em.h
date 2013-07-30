@@ -24,7 +24,7 @@ typedef KMeans<4, PlusPlusInitialization, EuclideanDistance, SparseNonUnique, Po
 namespace robot_detection
 {
 
-class ImageCombinerClusterMatchEM : public vision_evaluator::ImageCombiner, public Reconfigurable
+class ImageCombinerClusterMatchEM : public csapex::ImageCombiner, public Reconfigurable
 {
     Q_OBJECT
 

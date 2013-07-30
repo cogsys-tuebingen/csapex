@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy std_msgs rosbag cv_bridge  utils)
+find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy std_msgs rosbag cv_bridge  utils csapex)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
@@ -31,18 +31,16 @@ include(${QT_USE_FILE})
 
 
 file(GLOB         QT_FORMS RELATIVE   ${CMAKE_CURRENT_SOURCE_DIR}                 ui/*.ui)
-file(GLOB_RECURSE QT_MOC_EVA RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/evaluator/*.h)
-file(GLOB_RECURSE QT_MOC_DES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/designer/*.h)
+file(GLOB_RECURSE QT_MOC_EVA RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/evaluator/*.h include/vision_evaluator/*.h)
 file(GLOB_RECURSE QT_MOC_UTI RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/utils/*.h)
 
 QT4_WRAP_CPP(QT_MOC_EVA ${QT_MOC_EVA})
 QT4_WRAP_CPP(QT_MOC_DES ${QT_MOC_DES})
 QT4_WRAP_CPP(QT_MOC_UTI ${QT_MOC_UTI})
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
-QT4_ADD_RESOURCES(QT_RESOURCES res/resources.qrc)
+QT4_ADD_RESOURCES(QT_RESOURCES res/vision_evaluator_resources.qrc)
 
 set(QT_EVALUATOR ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_EVA})
-set(QT_DESIGNER ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_DES})
 set(QT_UTIL ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_MOC_UTI})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -59,7 +57,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include src
    LIBRARIES vision_core logger vision_evaluation
-   CATKIN_DEPENDS pluginlib roscpp std_msgs
+   CATKIN_DEPENDS pluginlib roscpp std_msgs csapex
    DEPENDS Qt4 OpenCV
 )
 
@@ -101,7 +99,6 @@ add_library(vision_core
     src/data/painter.cpp
     src/data/pose.cpp
     src/utils/bash_parser.cpp
-    src/utils/constructor.hpp
     src/utils/extractor.cpp
     src/utils/extractor_factory.cpp
     src/utils/extractor_manager.cpp
@@ -113,48 +110,12 @@ add_library(vision_core
     src/utils/match_scorer_reprojection.cpp
     src/utils/match_scorer_factory.cpp
     src/utils/opencv_utils.hpp
-    src/utils/plugin_manager.hpp
     src/utils/rectangle_cluster.cpp
-    src/utils/stream_interceptor.cpp
-    src/utils/qdouble_slider.cpp
-    src/utils/qwrapper.cpp
-    src/utils/qsignal_bridges.cpp
     ${QT_UTIL}
     ${GLOBALS})
 target_link_libraries(vision_core yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} ${QT_LIBRARIES})
 target_link_libraries(vision_core logger)
 
-##### EVALUATION
-add_library(designer
-    src/designer/box.cpp
-    src/designer/boxed_object.cpp
-    src/designer/box_manager.cpp
-    src/designer/command.cpp
-    src/designer/command_meta.cpp
-    src/designer/command_add_box.cpp
-    src/designer/command_add_connection.cpp
-    src/designer/command_move_connection.cpp
-    src/designer/command_delete_box.cpp
-    src/designer/command_delete_connection.cpp
-    src/designer/command_delete_connector.cpp
-    src/designer/command_move_box.cpp
-    src/designer/connector.cpp
-    src/designer/connector_in.cpp
-    src/designer/connector_out.cpp
-    src/designer/connection_type.cpp
-    src/designer/connection_type_manager.cpp
-    src/designer/design_board.cpp
-    src/designer/designer.cpp
-    src/designer/designerio.cpp
-    src/designer/displayable.cpp
-    src/designer/memento.cpp
-    src/designer/overlay.cpp
-    src/designer/selector_proxy.cpp
-    ${QT_DESIGNER}
-    ${QT_RESOURCES}
-)
-target_link_libraries(designer
-    vision_core)
 
 add_library(vision_evaluation
     src/evaluator/evaluation_window.cpp
@@ -169,24 +130,15 @@ add_library(vision_evaluation
     src/evaluator/image_provider_ros_topic.cpp
     src/evaluator/global_option.cpp
     src/evaluator/global_option_manager.cpp
-    src/evaluator/messages_default.hpp
-    src/qt_helper.hpp
+
+    include/vision_evaluator/messages_default.hpp
     ${QT_EVALUATOR}
+    ${QT_RESOURCES}
 )
-target_link_libraries(vision_evaluation
-    designer
+target_link_libraries(vision_evaluation vision_core
     yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 
 add_executable(vision_evaluator
     src/evaluator.cpp)
 target_link_libraries(vision_evaluator vision_evaluation)
-
-# INSTALL INCLUDE HEADERS
-string(REGEX REPLACE ".*/src/([^/]+)" "\\1" lib ${CMAKE_CURRENT_SOURCE_DIR})
-file(GLOB_RECURSE headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h *.hpp)
-foreach(h ${headers})
-    get_filename_component(dir ${h} PATH)
-    file(COPY ${h} DESTINATION ${PROJECT_SOURCE_DIR}/include/${lib}/)
-    #message("file(COPY ${h} DESTINATION ${PROJECT_SOURCE_DIR}/include/${lib}/)")
-endforeach()

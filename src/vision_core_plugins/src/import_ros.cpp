@@ -2,12 +2,12 @@
 #include "import_ros.h"
 
 /// PROJECT
-#include <designer/box.h>
-#include <designer/connector_out.h>
-#include <designer/connection_type_manager.h>
-#include <utils/stream_interceptor.h>
+#include <csapex/box.h>
+#include <csapex/connector_out.h>
+#include <csapex/connection_type_manager.h>
+#include <csapex/stream_interceptor.h>
 #include <vision_evaluator/messages_default.hpp>
-#include <qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -19,9 +19,9 @@
 #include <QtConcurrentRun>
 #include <QLabel>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::ImportRos, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::ImportRos, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ImportRos::ImportRos()
     : connector_(NULL), initialized_(false)

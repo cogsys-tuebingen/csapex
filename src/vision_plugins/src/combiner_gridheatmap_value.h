@@ -3,9 +3,9 @@
 
 /// COMPONENT
 #include "combiner_gridcompare_value.h"
-#include <vision_evaluator/qsignal_bridges.h>
+#include <csapex/qsignal_bridges.h>
 
-namespace vision_evaluator {
+namespace csapex {
 class GridHeatMapValue : public GridCompareValue
 {
 

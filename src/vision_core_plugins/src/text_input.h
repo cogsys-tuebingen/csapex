@@ -2,12 +2,12 @@
 #define TEXT_INPUT_H
 
 /// PROJECT
-#include <designer/boxed_object.h>
+#include <csapex/boxed_object.h>
 
 /// SYSTEM
 #include <QLineEdit>
 
-namespace vision_evaluator {
+namespace csapex {
 
 class TextInput : public BoxedObject
 {

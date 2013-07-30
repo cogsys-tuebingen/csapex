@@ -1,12 +1,12 @@
 /// HEADER
-#include "image_provider.h"
+#include <vision_evaluator/image_provider.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
 
 namespace bfs = boost::filesystem;
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 std::map<std::string, ImageProvider::ProviderConstructor> ImageProvider::plugins;
 

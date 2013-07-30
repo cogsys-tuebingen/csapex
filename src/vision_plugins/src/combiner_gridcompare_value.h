@@ -4,7 +4,7 @@
 /// COMPONENT
 #include "combiner_gridcompare.h"
 
-namespace vision_evaluator {
+namespace csapex {
 /**
  * @brief The GridCompareValue class can be used to compare two images using a grid
  *        overlay. The Feature observed in this case is the mean value of values given

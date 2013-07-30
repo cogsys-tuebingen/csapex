@@ -4,9 +4,9 @@
 #include <pluginlib/class_list_macros.h>
 #include <QComboBox>
 
-PLUGINLIB_EXPORT_CLASS(vision_evaluator::SetOperation, vision_evaluator::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::SetOperation, csapex::BoxedObject)
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 SetOperation::SetOperation() :
     ImageCombiner()

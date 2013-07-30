@@ -8,11 +8,11 @@
 #include <algorithm>
 #include <boost/foreach.hpp>
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 ExtractorManager::ExtractorManager()
-    : available_keypoints("vision_evaluator::ExtractorManager::KeypointInitializerManager"),
-      available_descriptors("vision_evaluator::ExtractorManager::DescriptorInitializerManager")
+    : available_keypoints("csapex::ExtractorManager::KeypointInitializerManager"),
+      available_descriptors("csapex::ExtractorManager::DescriptorInitializerManager")
 {
 }
 

@@ -6,7 +6,7 @@
 
 using namespace vision_plugins;
 
-PLUGINLIB_EXPORT_CLASS(vision_plugins::SimpleImageDifference, vision_evaluator::BoxedObject);
+PLUGINLIB_EXPORT_CLASS(vision_plugins::SimpleImageDifference, csapex::BoxedObject);
 
 SimpleImageDifference::SimpleImageDifference()
 {

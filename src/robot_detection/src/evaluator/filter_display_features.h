@@ -14,7 +14,7 @@
 namespace robot_detection
 {
 
-class FilterDisplayFeatures : public vision_evaluator::Filter, public Reconfigurable
+class FilterDisplayFeatures : public csapex::Filter, public Reconfigurable
 {
     Q_OBJECT
 

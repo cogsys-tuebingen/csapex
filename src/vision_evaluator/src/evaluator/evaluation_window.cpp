@@ -1,16 +1,16 @@
 /// HEADER
-#include "evaluation_window.h"
+#include <vision_evaluator/evaluation_window.h>
 
 /// COMPONENT
 #include "ui_evaluation_window.h"
-#include "messages_default.hpp"
+#include <vision_evaluator/messages_default.hpp>
 
 /// PROJECT
-#include <designer/box_manager.h>
-#include <designer/connection_type_manager.h>
-#include <utils/stream_interceptor.h>
+#include <csapex/box_manager.h>
+#include <csapex/connection_type_manager.h>
+#include <csapex/stream_interceptor.h>
 #include <utils/bash_parser.h>
-#include <qt_helper.hpp>
+#include <csapex/qt_helper.hpp>
 
 /// SYSTEM
 #include <iostream>
@@ -23,7 +23,7 @@
 #include <QToolBar>
 #include <QTimer>
 
-using namespace vision_evaluator;
+using namespace csapex;
 
 EvaluationWindow::EvaluationWindow(QWidget* parent) :
     QMainWindow(parent), ui(new Ui::EvaluationWindow)
@@ -101,7 +101,7 @@ void EvaluationWindow::updateMenu()
 void EvaluationWindow::updateTitle()
 {
     std::stringstream window;
-    window << "Vision Evaluator (" << ui->designer->getConfig() << ")";
+    window << "CS::APEX (" << ui->designer->getConfig() << ")";
 
     if(BoxManager::instance().isDirty()) {
         window << " *";

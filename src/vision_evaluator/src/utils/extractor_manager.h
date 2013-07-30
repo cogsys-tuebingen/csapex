@@ -5,14 +5,14 @@
 #include "extractor.h"
 
 /// PROJECT
-#include <utils/plugin_manager.hpp>
+#include <csapex/plugin_manager.hpp>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
 #include <boost/function.hpp>
 #include <boost/foreach.hpp>
 
-namespace vision_evaluator
+namespace csapex
 {
 template <typename Any>
 class DetectorTraits
@@ -42,7 +42,7 @@ public:
 
 #define REGISTER_FEATURE_DETECTOR(class_name, impname)\
     const std::string class_name::name(#impname); \
-    namespace vision_evaluator { \
+    namespace csapex { \
     class _____##class_name##impname##_registrator { \
         static _____##class_name##impname##_registrator instance; \
         _____##class_name##impname##_registrator () {\
@@ -50,26 +50,26 @@ public:
             registerDescriptorConstructor<class_name>();\
         }\
         template <class T>\
-        static void registerKeypointConstructor(typename boost::enable_if_c<vision_evaluator::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {\
+        static void registerKeypointConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {\
             ExtractorManager manager;\
             manager.registerKeypointConstructor(T::name, boost::bind(&T::keypoint, _1, _2)); \
         }\
         template <class T>\
-        static void registerKeypointConstructor(typename boost::disable_if_c<vision_evaluator::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {}\
+        static void registerKeypointConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {}\
         template <class T>\
-        static void registerDescriptorConstructor(typename boost::enable_if_c<vision_evaluator::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {\
+        static void registerDescriptorConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {\
             ExtractorManager manager;\
             manager.registerDescriptorConstructor(T::name, boost::bind(&T::descriptor, _1)); \
         }\
         template <class T>\
-        static void registerDescriptorConstructor(typename boost::disable_if_c<vision_evaluator::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {}\
+        static void registerDescriptorConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {}\
     };\
     _____##class_name##impname##_registrator _____##class_name##impname##_registrator::instance;\
     }
 
 
 
-namespace vision_evaluator
+namespace csapex
 {
 /**
  * @brief The ExtractorManager class manages all instances of feature detectors and descriptor extractors.

@@ -9,12 +9,12 @@
 #define GLOBAL_OPTION_MANAGER_H
 
 /// COMPONENT
-#include "global_option.h"
+#include <vision_evaluator/global_option.h>
 
 /// PROJECT
-#include <utils/plugin_manager.hpp>
+#include <csapex/plugin_manager.hpp>
 
-namespace vision_evaluator
+namespace csapex
 {
 
 class GlobalOptionManager : public GlobalOption, PluginManager<GlobalOption>
