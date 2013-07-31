@@ -1,6 +1,6 @@
 #ifndef FILTER_COLORCHANNEL_H
 #define FILTER_COLORCHANNEL_H
-#include <vision_evaluator/filter.h>
+#include <csapex_vision/filter.h>
 
 class QSlider;
 class QDoubleSlider;

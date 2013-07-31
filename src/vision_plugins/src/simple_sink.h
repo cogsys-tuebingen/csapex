@@ -2,7 +2,7 @@
 #define SIMPLE_SINK_H
 
 /// COMPONENT
-#include <vision_evaluator/image_combiner.h>
+#include <csapex_vision/image_combiner.h>
 #include <csapex/connector_in.h>
 
 /// SYSTEM

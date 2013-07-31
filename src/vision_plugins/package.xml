@@ -8,13 +8,15 @@
 
  <buildtool_depend>catkin</buildtool_depend>
 
- <build_depend>vision_evaluator</build_depend>
+ <build_depend>csapex_vision</build_depend>
+ <build_depend>csapex</build_depend>
  <build_depend>utils</build_depend>
  <build_depend>roscpp</build_depend>
 
- <run_depend>vision_evaluator</run_depend>
+ <run_depend>csapex_vision</run_depend>
+ <run_depend>csapex</run_depend>
 
  <export>
-   <vision_evaluator plugin="${prefix}/plugins.xml" />
+   <csapex plugin="${prefix}/plugins.xml" />
  </export>
 </package>

@@ -2,7 +2,7 @@
 #define IMAGE_COMBINER_PEAK_MATCH_H
 
 /// COMPONENT
-#include <vision_evaluator/image_combiner.h>
+#include <csapex_vision/image_combiner.h>
 #include "histogram_viewer_widget.h"
 #include "option_clustering.h"
 

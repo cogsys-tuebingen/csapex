@@ -2,7 +2,7 @@
 #define IMAGE_COMBINER_SIMPLE_MATCH_H
 
 /// COMPONENT
-#include <vision_evaluator/image_combiner.h>
+#include <csapex_vision/image_combiner.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>

@@ -29,6 +29,7 @@ std::string ConnectionType::name()
 
 ConnectionType::Ptr ConnectionType::makeDefault()
 {
+    assert(default_);
     ConnectionType::Ptr res = default_->clone();
     assert(res);
     return res;

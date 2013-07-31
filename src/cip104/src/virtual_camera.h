@@ -3,8 +3,8 @@
 
 /// PROJECT
 #include <csapex/boxed_object.h>
-#include <vision_evaluator/image_provider.h>
-#include <vision_evaluator/messages_default.hpp>
+#include <csapex_vision/image_provider.h>
+#include <csapex_vision/messages_default.hpp>
 #include <csapex/qt_helper.hpp>
 #include <utils/LibCvTools/perspective_transform.h>
 

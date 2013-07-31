@@ -2,7 +2,7 @@
 #define FILTER_EQUALIZE_H
 
 /// COMPONENT
-#include <vision_evaluator/filter.h>
+#include <csapex_vision/filter.h>
 
 namespace vision_plugins {
 /**

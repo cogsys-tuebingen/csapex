@@ -16,8 +16,8 @@
 
 using namespace csapex;
 
-const QString Connector::MIME_CREATE = "vision_evaluator/connector/create";
-const QString Connector::MIME_MOVE = "vision_evaluator/connector/move";
+const QString Connector::MIME_CREATE = "csapex/connector/create";
+const QString Connector::MIME_MOVE = "csapex/connector/move";
 
 Connector::Connector(Box* parent, const std::string& type, int sub_id)
     : parent_widget(parent), designer(NULL), buttons_down_(0)

@@ -2,7 +2,7 @@
 #define FILTER_SPLITTER_H
 
 /// COMPONENT
-#include <vision_evaluator/filter.h>
+#include <csapex_vision/filter.h>
 
 namespace csapex {
 class Splitter : public csapex::BoxedObject

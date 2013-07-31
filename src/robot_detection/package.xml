@@ -16,7 +16,8 @@
   <build_depend>background_subtraction</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>utils</build_depend>
-  <build_depend>vision_evaluator</build_depend>
+  <build_depend>csapex</build_depend>
+  <build_depend>csapex_vision</build_depend>
   <build_depend>tf_conversions</build_depend>
 
   <run_depend>angles</run_depend>
@@ -25,11 +26,12 @@
   <run_depend>background_subtraction</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>utils</run_depend>
-  <run_depend>vision_evaluator</run_depend>
+  <run_depend>csapex</run_depend>
+  <run_depend>csapex_vision</run_depend>
   <run_depend>tf_conversions</run_depend>
 
   <export>
-    <vision_evaluator plugin="${prefix}/plugins.xml" />
+    <csapex plugin="${prefix}/plugins.xml" />
   </export>
 
 </package>

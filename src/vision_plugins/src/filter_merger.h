@@ -2,7 +2,7 @@
 #define FILTER_MERGER_H
 
 /// COMPONENT
-#include <vision_evaluator/filter.h>
+#include <csapex_vision/filter.h>
 
 class QSpinBox;
 

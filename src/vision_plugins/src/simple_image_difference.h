@@ -2,7 +2,7 @@
 #define SIMPLE_IMAGE_DIFFERENCE_H
 
 /// COMPONENT
-#include <vision_evaluator/image_combiner.h>
+#include <csapex_vision/image_combiner.h>
 
 namespace vision_plugins
 {

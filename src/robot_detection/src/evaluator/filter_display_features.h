@@ -2,7 +2,7 @@
 #define FILTERDISPLAYFEATURES_H
 
 /// COMPONENT
-#include <vision_evaluator/filter.h>
+#include <csapex_vision/filter.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>

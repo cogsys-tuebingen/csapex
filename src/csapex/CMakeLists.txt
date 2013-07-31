@@ -55,6 +55,7 @@ add_library(csapex SHARED
     src/box.cpp
     src/boxed_object.cpp
     src/box_manager.cpp
+    src/core_plugin.cpp
     src/command.cpp
     src/command_meta.cpp
     src/command_add_box.cpp
@@ -69,10 +70,12 @@ add_library(csapex SHARED
     src/connector_out.cpp
     src/connection_type.cpp
     src/connection_type_manager.cpp
+    src/csapex_window.cpp
     src/design_board.cpp
     src/designer.cpp
     src/designerio.cpp
     src/displayable.cpp
+    src/message.cpp
     src/memento.cpp
     src/overlay.cpp
     src/selector_proxy.cpp
@@ -85,7 +88,12 @@ add_library(csapex SHARED
     src/qdouble_slider.cpp
     src/qwrapper.cpp
     src/qsignal_bridges.cpp
+    src/bash_parser.cpp
     ${QT}
 )
 target_link_libraries(csapex
     yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable(csapex_node
+    src/csapex.cpp)
+target_link_libraries(csapex_node csapex)

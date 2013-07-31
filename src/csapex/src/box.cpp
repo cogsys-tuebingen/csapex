@@ -21,8 +21,8 @@
 
 using namespace csapex;
 
-const QString Box::MIME = "vision_evaluator/box";
-const QString Box::MIME_MOVE = "vision_evaluator/box/move";
+const QString Box::MIME = "csapex/box";
+const QString Box::MIME_MOVE = "csapex/box/move";
 
 
 void Box::State::writeYaml(YAML::Emitter &out) const

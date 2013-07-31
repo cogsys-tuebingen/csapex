@@ -31,7 +31,8 @@ protected:
     typedef pluginlib::ClassLoader<M> Loader;
 
     PluginManagerImp(const std::string& full_name)
-        : loader_(new Loader("vision_evaluator", full_name)) {
+        : loader_(new Loader("csapex", full_name)), plugins_loaded_(false)
+    {
         StreamInterceptor::instance();
     }
 
@@ -59,6 +60,10 @@ protected:
 
     void reload() {
         try {
+            if(plugins_loaded_) {
+                /// @TODO: init library
+            }
+
             std::vector<std::string> classes = loader_->getDeclaredClasses();
             for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
 //                std::cout << "load library for class " << *c << std::endl;
@@ -79,8 +84,8 @@ protected:
     }
 
 protected:
-    bool plugins_loaded_;
     Loader* loader_;
+    bool plugins_loaded_;
 
     Constructors available_classes;
 };

@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs cv_bridge dynamic_reconfigure tf vision_evaluator background_subtraction tf_conversions utils)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs cv_bridge dynamic_reconfigure tf csapex_vision background_subtraction tf_conversions utils)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGL)
 include(${QT_USE_FILE})
