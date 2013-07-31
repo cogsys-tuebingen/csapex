@@ -21,9 +21,9 @@ bool Meta::execute()
 {
     locked = true;
 
-    bool change = false;
+    bool change = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change |= cmd->execute();
+        change &= cmd->execute();
     }
     return change;
 }
@@ -41,9 +41,9 @@ bool Meta::undo()
 
 bool Meta::redo()
 {
-    bool change = false;
+    bool change = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change |= cmd->redo();
+        change &= cmd->redo();
     }
     return change;
 }
