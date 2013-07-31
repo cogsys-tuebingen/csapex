@@ -1,9 +1,9 @@
-<library path="lib/libvision_rqt">
-  <class name="vision_rqt/Vision" type="vision_rqt::Vision" base_class_type="rqt_gui_cpp::Plugin">
+<library path="lib/libcsapex_rqt">
+  <class name="csapex_rqt/CsApex" type="csapex_rqt::CsApex" base_class_type="rqt_gui_cpp::Plugin">
     <description>
     </description>
     <qtgui>
-      <label>Vision Evaluator</label>
+      <label>CS::APEX</label>
       <icon type="theme">applications-science</icon>
       <statustip></statustip>
     </qtgui>

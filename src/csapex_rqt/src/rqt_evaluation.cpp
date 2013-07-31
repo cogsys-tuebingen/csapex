@@ -10,16 +10,16 @@
 #include <QMenuBar>
 #include <QBoxLayout>
 
-PLUGINLIB_DECLARE_CLASS(vision_rqt, Vision, vision_rqt::Vision, rqt_gui_cpp::Plugin)
+PLUGINLIB_DECLARE_CLASS(csapex_rqt, CsApex, csapex_rqt::CsApex, rqt_gui_cpp::Plugin)
 
-using namespace vision_rqt;
+using namespace csapex_rqt;
 
-Vision::Vision()
+CsApex::CsApex()
 {
 }
 
 
-void Vision::initPlugin(qt_gui_cpp::PluginContext& context)
+void CsApex::initPlugin(qt_gui_cpp::PluginContext& context)
 {
     context_ = &context;
 
@@ -29,16 +29,16 @@ void Vision::initPlugin(qt_gui_cpp::PluginContext& context)
     context_->addWidget(eva_);
 }
 
-void Vision::shutdownPlugin()
+void CsApex::shutdownPlugin()
 {
 }
 
-void Vision::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
+void CsApex::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
 {
     instance_settings.setValue("file", eva_->getDesigner()->getConfig().c_str());
 }
 
-void Vision::restoreSettings(const qt_gui_cpp::Settings& plugin_settings, const qt_gui_cpp::Settings& instance_settings)
+void CsApex::restoreSettings(const qt_gui_cpp::Settings& plugin_settings, const qt_gui_cpp::Settings& instance_settings)
 {
     QString file = instance_settings.value("file").toString();
     if(!file.isEmpty()) {

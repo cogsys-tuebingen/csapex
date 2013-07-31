@@ -7,12 +7,12 @@
 /// SYSTEM
 #include <rqt_gui_cpp/plugin.h>
 
-namespace vision_rqt {
+namespace csapex_rqt {
 
-class Vision : public rqt_gui_cpp::Plugin
+class CsApex : public rqt_gui_cpp::Plugin
 {
 public:
-    Vision();
+    CsApex();
 
     virtual void initPlugin(qt_gui_cpp::PluginContext& context);
     virtual void shutdownPlugin();
