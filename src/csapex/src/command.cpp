@@ -6,12 +6,13 @@ using namespace csapex;
 std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command()
+    : after_save_point_(false), before_save_point_(false)
 {
 }
 
-void Command::doExecute(Command::Ptr other)
+bool Command::doExecute(Command::Ptr other)
 {
-    other->execute();
+    return other->execute();
 }
 bool Command::doUndo(Command::Ptr other)
 {
@@ -23,7 +24,27 @@ bool Command::doUndo(Command::Ptr other)
     return true;
 }
 
-void Command::doRedo(Command::Ptr other)
+bool Command::doRedo(Command::Ptr other)
 {
-    other->redo();
+    return other->redo();
+}
+
+void Command::setAfterSavepoint(bool save)
+{
+    after_save_point_ = save;
+}
+
+bool Command::isAfterSavepoint()
+{
+    return after_save_point_;
+}
+
+void Command::setBeforeSavepoint(bool save)
+{
+    before_save_point_ = save;
+}
+
+bool Command::isBeforeSavepoint()
+{
+    return before_save_point_;
 }

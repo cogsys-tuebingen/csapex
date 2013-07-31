@@ -26,11 +26,12 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
     to_uuid = to->UUID();
 }
 
-void DeleteConnection::execute()
+bool DeleteConnection::execute()
 {
     from->removeConnection(to);
     to->setError(false);
-    BoxManager::instance().setDirty(true);
+
+    return true;
 }
 
 bool DeleteConnection::undo()
@@ -40,16 +41,16 @@ bool DeleteConnection::undo()
     }
 
     if(from->tryConnect(to)) {
-        BoxManager::instance().setDirty(true);
         return true;
     }
 
     return false;
 }
-void DeleteConnection::redo()
+
+bool DeleteConnection::redo()
 {
     refresh();
-    execute();
+    return execute();
 }
 
 bool DeleteConnection::refresh()

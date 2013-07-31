@@ -363,8 +363,6 @@ BoxedObject* Box::getContent()
 
 Box::~Box()
 {
-    BoxManager::instance().setDirty(true);
-
     stop();
 
     delete worker_;
@@ -430,7 +428,6 @@ void Box::enabledChange(bool val)
 {
     if(val)  {
         content_->enable();
-        BoxManager::instance().setDirty(true);
     } else {
         content_->disable();
     }

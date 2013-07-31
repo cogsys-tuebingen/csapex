@@ -29,25 +29,23 @@ AddConnection::AddConnection(Connector* a, Connector* b)
     to_uuid = to->UUID();
 }
 
-void AddConnection::execute()
+bool AddConnection::execute()
 {
-    if(from->tryConnect(to)) {
-        BoxManager::instance().setDirty(true);
-    }
+    return from->tryConnect(to);
 }
 
 bool AddConnection::undo()
 {
     refresh();
     from->removeConnection(to);
-    BoxManager::instance().setDirty(true);
 
     return true;
 }
-void AddConnection::redo()
+
+bool AddConnection::redo()
 {
     refresh();
-    execute();
+    return execute();
 }
 
 void AddConnection::refresh()

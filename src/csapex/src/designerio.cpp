@@ -10,19 +10,67 @@
 /// SYSTEM
 #include <QMessageBox>
 #include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 #include <QScrollBar>
+#include <sys/types.h>
+#include <pwd.h>
 
 using namespace csapex;
 
-const std::string DesignerIO::extension = ".vecfg";
-const std::string DesignerIO::default_config = "default" + DesignerIO::extension;
-const std::string DesignerIO::config_selector = "Configs (*" + DesignerIO::extension + ")";
+const std::string DesignerIO::extension = ".apex";
+const std::string DesignerIO::default_config = DesignerIO::defaultConfigFile();
+const std::string DesignerIO::config_selector = "Configs (*" + DesignerIO::extension + "), LegacyConfigs(*.vecfg)";
+
+std::string DesignerIO::defaultConfigPath()
+{
+    struct passwd *pw = getpwuid(getuid());
+    return std::string(pw->pw_dir) + "/.csapex/";
+}
+
+std::string DesignerIO::defaultConfigFile()
+{
+    std::string dir = DesignerIO::defaultConfigPath();
+
+    if(!boost::filesystem3::exists(dir)) {
+        boost::filesystem3::create_directories(dir);
+    }
+
+    std::string file = dir + "default" + DesignerIO::extension;
+
+    if(!boost::filesystem3::exists(file)) {
+        createDefaultConfig(file);
+    }
+
+    return file;
+}
 
 DesignerIO::DesignerIO()
 {
+}
+
+void DesignerIO::createDefaultConfig(const std::string& file)
+{
+    std::cout << "warning: creating default config at '" << file << "'" << std::endl;
+
+    YAML::Emitter yaml;
+
+    QSize window_size(400, 300);
+    QPoint window_pos(-1, -1);
+
+    // settings
+    yaml << YAML::BeginMap; // settings map
+
+    saveSettings(window_pos, window_size, yaml);
+
+    yaml << YAML::EndMap; // settings map
+
+    std::ofstream ofs(file.c_str());
+    ofs << yaml.c_str();
+
+    BoxManager::instance().resetDirtyPoint();
 }
 
 void DesignerIO::save(Designer* designer, const std::string& file)
@@ -34,19 +82,13 @@ void DesignerIO::save(Designer* designer, const std::string& file)
 
     YAML::Emitter yaml;
 
+    QSize window_size = designer->window()->size();
+    QPoint window_pos = designer->window()->pos();
+
     // settings
     yaml << YAML::BeginMap; // settings map
 
-    QSize window_size = designer->window()->size();
-    yaml << YAML::Key << "window_size";
-    yaml << YAML::Value << YAML::BeginSeq << window_size.width() << window_size.height() << YAML::EndSeq;
-
-    QPoint window_pos = designer->window()->pos();
-    yaml << YAML::Key << "window_pos";
-    yaml << YAML::Value << YAML::BeginSeq << window_pos.x() << window_pos.y() << YAML::EndSeq;
-
-    yaml << YAML::Key << "uuid_map";
-    yaml << YAML::Value << BoxManager::instance().uuids;
+    saveSettings(window_pos, window_size, yaml);
 
 
     QList<csapex::Box*> boxes = designer->findChildren<csapex::Box*> ();
@@ -66,7 +108,7 @@ void DesignerIO::save(Designer* designer, const std::string& file)
 
     std::cout << "save: " << yaml.c_str() << std::endl;
 
-    BoxManager::instance().setDirty(false);
+    BoxManager::instance().resetDirtyPoint();
 }
 
 void DesignerIO::load(Designer* designer, const std::string& file)
@@ -87,7 +129,21 @@ void DesignerIO::load(Designer* designer, const std::string& file)
     loadBoxes(designer, file);
     loadConnections(designer, file);
 
-    BoxManager::instance().setDirty(false);
+    BoxManager::instance().resetDirtyPoint();
+}
+
+
+
+void DesignerIO::saveSettings(QPoint window_pos, QSize window_size, YAML::Emitter& yaml)
+{
+    yaml << YAML::Key << "window_size";
+    yaml << YAML::Value << YAML::BeginSeq << window_size.width() << window_size.height() << YAML::EndSeq;
+
+    yaml << YAML::Key << "window_pos";
+    yaml << YAML::Value << YAML::BeginSeq << window_pos.x() << window_pos.y() << YAML::EndSeq;
+
+    yaml << YAML::Key << "uuid_map";
+    yaml << YAML::Value << BoxManager::instance().uuids;
 }
 
 void DesignerIO::loadSettings(Designer* designer, YAML::Node &doc)

@@ -47,7 +47,6 @@ public:
     void execute(Command::Ptr command);
 
     bool isDirty();
-    void setDirty(bool dirty);
 
     bool canUndo();
     bool canRedo();
@@ -73,10 +72,16 @@ public Q_SLOTS:
     void deselectBoxes();
     void toggleBoxSelection(Box* box);
     void boxMoved(Box* box, int dx, int dy);
+    void setDirty();
+    void resetDirtyPoint();
+    void clearSavepoints();
 
 Q_SIGNALS:
     void stateChanged();
     void dirtyChanged(bool);
+
+private:
+    void setDirty(bool dirty);
 
 protected:
     BoxManager();
@@ -85,8 +90,8 @@ protected:
 
     std::vector<SelectorProxy::Ptr> available_elements_prototypes;
 
-    std::stack<Command::Ptr> done;
-    std::stack<Command::Ptr> undone;
+    std::deque<Command::Ptr> done;
+    std::deque<Command::Ptr> undone;
 
     std::map<std::string, int> uuids;
 

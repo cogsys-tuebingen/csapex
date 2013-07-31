@@ -22,9 +22,9 @@ public:
     DeleteBox(Box* box);
 
 protected:
-    void execute();
+    bool execute();
     bool undo();
-    void redo();
+    bool redo();
 
     void refresh();
 

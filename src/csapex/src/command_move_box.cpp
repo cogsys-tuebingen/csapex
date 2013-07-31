@@ -13,9 +13,11 @@ MoveBox::MoveBox(Box *box, QPoint from, QPoint to)
     uuid = box->UUID();
 }
 
-void MoveBox::execute()
+bool MoveBox::execute()
 {
     box->move(to);
+
+    return true;
 }
 
 bool MoveBox::undo()
@@ -26,8 +28,8 @@ bool MoveBox::undo()
     return true;
 }
 
-void MoveBox::redo()
+bool MoveBox::redo()
 {
     box = BoxManager::instance().findBox(uuid);
-    execute();
+    return execute();
 }

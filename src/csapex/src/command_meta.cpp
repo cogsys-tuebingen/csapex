@@ -17,13 +17,15 @@ void Meta::add(Command::Ptr cmd)
     nested.push_back(cmd);
 }
 
-void Meta::execute()
+bool Meta::execute()
 {
     locked = true;
 
+    bool change = false;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        cmd->execute();
+        change |= cmd->execute();
     }
+    return change;
 }
 
 bool Meta::undo()
@@ -37,9 +39,11 @@ bool Meta::undo()
     return true;
 }
 
-void Meta::redo()
+bool Meta::redo()
 {
+    bool change = false;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        cmd->redo();
+        change |= cmd->redo();
     }
+    return change;
 }

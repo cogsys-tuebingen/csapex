@@ -23,16 +23,25 @@ public:
 public:
     Command();
 
-protected:
-    virtual void execute() = 0;
-    virtual bool undo() = 0;
-    virtual void redo() = 0;
+    void setAfterSavepoint(bool save);
+    bool isAfterSavepoint();
 
-    void doExecute(Ptr other);
+    void setBeforeSavepoint(bool save);
+    bool isBeforeSavepoint();
+
+protected:
+    virtual bool execute() = 0;
+    virtual bool undo() = 0;
+    virtual bool redo() = 0;
+
+    bool doExecute(Ptr other);
     bool doUndo(Ptr other);
-    void doRedo(Ptr other);
+    bool doRedo(Ptr other);
 
     static std::vector<Command::Ptr> undo_later;
+
+    bool before_save_point_;
+    bool after_save_point_;
 };
 
 }

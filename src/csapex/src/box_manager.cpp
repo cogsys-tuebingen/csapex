@@ -174,14 +174,21 @@ QWidget* BoxManager::container()
 
 void BoxManager::execute(Command::Ptr command)
 {
-    command->execute();
-    done.push(command);
-
-    while(!undone.empty()) {
-        undone.pop();
+    if(!isDirty()) {
+        command->setAfterSavepoint(true);
     }
 
-    Q_EMIT stateChanged();
+    bool change = command->execute();
+    done.push_back(command);
+
+    while(!undone.empty()) {
+        undone.pop_back();
+    }
+
+    if(change) {
+        setDirty();
+        Q_EMIT stateChanged();
+    }
 }
 
 std::string BoxManager::makeUUID(const std::string& name)
@@ -200,9 +207,40 @@ bool BoxManager::isDirty()
     return dirty_;
 }
 
+void BoxManager::resetDirtyPoint()
+{
+    setDirty(false);
+
+    clearSavepoints();
+
+    if(!done.empty()) {
+        done.back()->setBeforeSavepoint(true);
+    }
+    if(!undone.empty()) {
+        undone.back()->setAfterSavepoint(true);
+    }
+}
+
+void BoxManager::clearSavepoints()
+{
+    foreach(Command::Ptr cmd, done) {
+        cmd->setAfterSavepoint(false);
+        cmd->setBeforeSavepoint(false);
+    }
+    foreach(Command::Ptr cmd, undone) {
+        cmd->setAfterSavepoint(false);
+        cmd->setBeforeSavepoint(false);
+    }
+}
+
+void BoxManager::setDirty()
+{
+    setDirty(true);
+}
+
 void BoxManager::setDirty(bool dirty)
 {
-    bool change = (dirty != dirty_);
+    bool change = dirty_ != dirty;
 
     dirty_ = dirty;
 
@@ -228,13 +266,15 @@ void BoxManager::undo()
         return;
     }
 
-    Command::Ptr last = done.top();
-    done.pop();
+    Command::Ptr last = done.back();
+    done.pop_back();
 
     bool ret = last->undo();
     assert(ret);
 
-    undone.push(last);
+    setDirty(!last->isAfterSavepoint());
+
+    undone.push_back(last);
 
     Q_EMIT stateChanged();
 }
@@ -245,12 +285,14 @@ void BoxManager::redo()
         return;
     }
 
-    Command::Ptr last = undone.top();
-    undone.pop();
+    Command::Ptr last = undone.back();
+    undone.pop_back();
 
     last->redo();
 
-    done.push(last);
+    done.push_back(last);
+
+    setDirty(!last->isBeforeSavepoint());
 
     Q_EMIT stateChanged();
 }

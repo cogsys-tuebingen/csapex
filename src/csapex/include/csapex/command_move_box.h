@@ -20,9 +20,9 @@ public:
     MoveBox(Box* box, QPoint from, QPoint to);
 
 protected:
-    void execute();
+    bool execute();
     bool undo();
-    void redo();
+    bool redo();
 
 protected:
     Box* box;

@@ -20,12 +20,16 @@ DeleteBox::DeleteBox(Box *box)
     remove_connections = box->removeAllConnectionsCmd();
 }
 
-void DeleteBox::execute()
+bool DeleteBox::execute()
 {
-    doExecute(remove_connections);
+    if(doExecute(remove_connections)) {
+        box->stop();
+        box->deleteLater();
 
-    box->stop();
-    box->deleteLater();
+        return true;
+    }
+
+    return false;
 }
 
 bool DeleteBox::undo()
@@ -36,14 +40,19 @@ bool DeleteBox::undo()
     return doUndo(remove_connections);
 }
 
-void DeleteBox::redo()
+bool DeleteBox::redo()
 {
     refresh();
 
-    doRedo(remove_connections);
+    if(doRedo(remove_connections)) {
 
-    box->stop();
-    box->deleteLater();
+        box->stop();
+        box->deleteLater();
+
+        return true;
+    }
+
+    return false;
 }
 
 void DeleteBox::refresh()

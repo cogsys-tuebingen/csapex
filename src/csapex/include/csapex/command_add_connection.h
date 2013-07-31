@@ -19,9 +19,9 @@ struct AddConnection : public Command
     AddConnection(Connector* a, Connector* b);
 
 protected:
-    void execute();
+    bool execute();
     bool undo();
-    void redo();
+    bool redo();
 
     void refresh();
 

@@ -19,9 +19,9 @@ struct Meta : public Command {
     void add(Command::Ptr cmd);
 
 protected:
-    void execute();
+    bool execute();
     bool undo();
-    void redo();
+    bool redo();
 
 protected:
     std::vector<Command::Ptr> nested;

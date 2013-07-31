@@ -18,9 +18,9 @@ struct DeleteConnection : public Command {
     DeleteConnection(Connector* a, Connector* b);
 
 protected:
-    void execute();
+    bool execute();
     bool undo();
-    void redo();
+    bool redo();
 
     bool refresh();
 

@@ -15,7 +15,7 @@ DeleteConnector::DeleteConnector(Connector *_c) :
     c_uuid = c->UUID();
 }
 
-void DeleteConnector::execute()
+bool DeleteConnector::execute()
 {
     Box* box_c = BoxManager::instance().findConnectorOwner(c_uuid);
 
@@ -34,7 +34,7 @@ void DeleteConnector::execute()
         box_c->removeOutput((ConnectorOut*) c);
     }
 
-    BoxManager::instance().setDirty(true);
+    return true;
 }
 
 bool DeleteConnector::undo()
@@ -46,9 +46,9 @@ bool DeleteConnector::undo()
     return false;
 }
 
-void DeleteConnector::redo()
+bool DeleteConnector::redo()
 {
-
+    return false;
 }
 
 bool DeleteConnector::refresh()
