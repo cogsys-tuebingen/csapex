@@ -284,7 +284,7 @@ void DesignBoard::showContextMenu(const QPoint& pos)
     QAction* selectedItem = menu.exec(globalPos);
 
     if(selectedItem) {
-        std::string selected = selectedItem->text().toUtf8().constData();
+        std::string selected = selectedItem->data().toString().toUtf8().constData();
         BoxManager::instance().startPlacingBox(selected);
     }
 }

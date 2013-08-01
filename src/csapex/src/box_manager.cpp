@@ -30,6 +30,14 @@ void BoxManager::fill(QLayout* layout)
     }
 }
 
+namespace {
+bool compare (SelectorProxy::Ptr a, SelectorProxy::Ptr b) {
+    const std::string& as = BoxManager::stripNamespace(a->getType());
+    const std::string& bs = BoxManager::stripNamespace(b->getType());
+    return as.compare(bs) < 0;
+}
+}
+
 void BoxManager::fill(QMenu* menu)
 {
     if(!pluginsLoaded()) {
@@ -56,9 +64,12 @@ void BoxManager::fill(QMenu* menu)
         QMenu* submenu = new QMenu(cat.c_str());
         menu->addMenu(submenu);
 
+        std::sort(map[cat].begin(), map[cat].end(), compare);
+
         foreach(const SelectorProxy::Ptr& proxy, map[cat]) {
             QIcon icon = proxy->getIcon();
-            QAction* action = new QAction(proxy->getType().c_str(), submenu);
+            QAction* action = new QAction(stripNamespace(proxy->getType()).c_str(), submenu);
+            action->setData(QString(proxy->getType().c_str()));
             if(!icon.isNull()) {
                 action->setIcon(icon);
                 action->setIconVisibleInMenu(true);
