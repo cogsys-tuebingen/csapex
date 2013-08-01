@@ -16,24 +16,20 @@
 #include <QObjectList>
 #include <QSharedPointer>
 #include <QMessageBox>
+#include <QStatusBar>
 #include <QToolBar>
 #include <QTimer>
 
 using namespace csapex;
 
 EvaluationWindow::EvaluationWindow(QWidget* parent) :
-    QMainWindow(parent), ui(new Ui::EvaluationWindow)
+    QMainWindow(parent), ui(new Ui::EvaluationWindow), init_(false)
 {
-    PluginManager<CorePlugin> core("csapex::CorePlugin");
-    core.reload();
-
-    typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-    foreach(PAIR cp, core.availableClasses()) {
-        CorePlugin::Ptr plugin = cp.second();
-        plugin->init();
-    }
+    StreamInterceptor::instance().start();
 
     ui->setupUi(this);
+
+    ui->designer->hide();
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), ui->designer, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), ui->designer, SLOT(saveAs()));
@@ -47,6 +43,8 @@ EvaluationWindow::EvaluationWindow(QWidget* parent) :
 
     QObject::connect(ui->designer, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&BoxManager::instance(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
+
+    QObject::connect(this, SIGNAL(initialize()), this, SLOT(init()), Qt::QueuedConnection);
 
     updateMenu();
     updateTitle();
@@ -87,8 +85,13 @@ void EvaluationWindow::showMenu()
 
 void EvaluationWindow::start()
 {
+    statusBar()->showMessage("initialized");
+
+    ui->splitter->hide();
+
+    resize(250,120);
+
     show();
-    ui->designer->reload();
 }
 
 void EvaluationWindow::updateMenu()
@@ -193,4 +196,48 @@ void EvaluationWindow::closeEvent(QCloseEvent* event)
     event->accept();
 
     StreamInterceptor::instance().stop();
+}
+
+void EvaluationWindow::init()
+{
+    if(!init_) {
+        init_ = true;
+
+        statusBar()->showMessage("loading core plugins");
+
+        PluginManager<CorePlugin> core("csapex::CorePlugin");
+        core.reload();
+
+        typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
+        foreach(PAIR cp, core.availableClasses()) {
+            CorePlugin::Ptr plugin = cp.second();
+
+            plugin->init();
+        }
+
+        statusBar()->showMessage("loading boxedobject plugins");
+
+        BoxManager::instance().reload();
+
+        statusBar()->showMessage("loading config");
+
+        resize(400,400);
+
+        ui->designer->reload();
+        statusBar()->hide();
+        ui->loading->hide();
+        repaint();
+        ui->designer->show();
+        ui->splitter->show();
+        hideLog();
+    }
+}
+
+void EvaluationWindow::paintEvent(QPaintEvent *e)
+{
+    QMainWindow::paintEvent(e);
+
+    if(!init_) {
+        Q_EMIT initialize();
+    }
 }

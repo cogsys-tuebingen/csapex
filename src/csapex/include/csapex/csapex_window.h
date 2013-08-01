@@ -31,6 +31,7 @@ public:
 
     void showMenu();
     void closeEvent(QCloseEvent* event);
+    void paintEvent(QPaintEvent * e);
 
     Designer* getDesigner();
 
@@ -40,14 +41,20 @@ private Q_SLOTS:
     void updateLog();
     void hideLog();
     void scrollDownLog();
+    void init();
 
 public Q_SLOTS:
     void start();
+
+Q_SIGNALS:
+    void initialize();
 
 private:
     Ui::EvaluationWindow* ui;
 
     QTimer timer;
+
+    bool init_;
 };
 
 } /// NAMESPACE

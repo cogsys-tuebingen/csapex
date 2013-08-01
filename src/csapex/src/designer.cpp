@@ -29,15 +29,11 @@ Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 Designer::Designer(QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer)
 {
-    StreamInterceptor::instance().start();
-
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
     ui->setupUi(this);
 
     setCurrentConfig(DesignerIO::default_config);
-
-    BoxManager::instance().reload();
 
     QObject::connect(&BoxManager::instance(), SIGNAL(stateChanged()), this, SIGNAL(stateChanged()));
 }
