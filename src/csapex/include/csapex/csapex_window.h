@@ -45,6 +45,7 @@ private Q_SLOTS:
 
 public Q_SLOTS:
     void start();
+    void showStatusMessage(const std::string& msg);
 
 Q_SIGNALS:
     void initialize();

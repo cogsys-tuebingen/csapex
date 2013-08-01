@@ -137,6 +137,12 @@ bool ModalPainter::eventFilter(QObject* obj, QEvent* event)
     return QObject::eventFilter(obj, event);
 }
 
+void ModalPainter::setMask(cv::Mat mask)
+{
+    if(!mask.empty()) {
+        mask.copyTo(this->mask);
+    }
+}
 
 void ModalPainter::input(cv::Mat img)
 {
@@ -166,7 +172,7 @@ FilterStaticMask::~FilterStaticMask()
 }
 
 void FilterStaticMask::State::writeYaml(YAML::Emitter& out) const {
-    std::string file = parent->box_->UUID() + ".ppm"; // TODO: also use random part
+    std::string file = parent->box_->UUID() + ".ppm";
     out << YAML::Key << "mask" << YAML::Value << file;
     cv::imwrite(file, mask_);
 
@@ -185,6 +191,10 @@ void FilterStaticMask::showPainter()
 {
     painter = new ModalPainter;
     painter->run();
+
+    if(!state.mask_.empty()) {
+        painter->setMask(state.mask_);
+    }
 
     QObject::connect(this, SIGNAL(input(cv::Mat)), painter, SLOT(input(cv::Mat)));
     QObject::connect(painter, SIGNAL(new_mask(cv::Mat)), this, SLOT(new_mask(cv::Mat)));
@@ -231,6 +241,10 @@ void FilterStaticMask::setState(Memento::Ptr memento)
     assert(m.get());
 
     state = *m;
+
+    if(painter) {
+        painter->setMask(state.mask_);
+    }
 
     Q_EMIT filter_changed();
 }

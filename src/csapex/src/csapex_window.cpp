@@ -198,6 +198,11 @@ void EvaluationWindow::closeEvent(QCloseEvent* event)
     StreamInterceptor::instance().stop();
 }
 
+void EvaluationWindow::showStatusMessage(const std::string &msg)
+{
+    statusBar()->showMessage(msg.c_str());
+}
+
 void EvaluationWindow::init()
 {
     if(!init_) {
@@ -217,7 +222,11 @@ void EvaluationWindow::init()
 
         statusBar()->showMessage("loading boxedobject plugins");
 
-        BoxManager::instance().reload();
+        BoxManager& bm = BoxManager::instance();
+
+        bm.loaded.connect(boost::bind(&EvaluationWindow::showStatusMessage, this, _1));
+
+        bm.reload();
 
         statusBar()->showMessage("loading config");
 

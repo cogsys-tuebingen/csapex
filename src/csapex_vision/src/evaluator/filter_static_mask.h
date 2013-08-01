@@ -78,6 +78,7 @@ public Q_SLOTS:
     void input(cv::Mat img);
     void publish_mask();
     void reset_mask();
+    void setMask(cv::Mat mask);
 
 Q_SIGNALS:
     void new_mask(cv::Mat);

@@ -58,6 +58,8 @@ protected:
             std::vector<std::string> classes = loader_->getDeclaredClasses();
             for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
 //                std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;
+                std::string msg = std::string("loading ") + *c;
+                loaded(msg);
 
                 loader_->loadLibraryForClass(*c);
 
@@ -73,6 +75,9 @@ protected:
         }
         plugins_loaded_ = true;
     }
+
+protected:
+    boost::signals2::signal<void(const std::string&)> loaded;
 
 protected:
     Loader* loader_;
@@ -93,7 +98,9 @@ public:
 
     PluginManager(const std::string& full_name)
         : instance(Parent::instance(full_name))
-    {}
+    {
+        instance.loaded.connect(loaded);
+    }
 
     virtual ~PluginManager()
     {}
@@ -124,6 +131,9 @@ public:
     Constructor& availableClasses(const std::string& key) {
         return instance.available_classes[key];
     }
+
+public:
+    boost::signals2::signal<void(const std::string&)> loaded;
 
 protected:
     Parent& instance;
