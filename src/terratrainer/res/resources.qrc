@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/buttons">
+        <file>reload.png</file>
+        <file>marker.png</file>
+        <file>arrow_move.png</file>
+        <file>save.png</file>
+        <file>clear.png</file>
+        <file>trash_full.png</file>
+        <file>trash.png</file>
+        <file>delete.png</file>
+        <file>select.png</file>
+        <file>selectAll.png</file>
+        <file>deselect.png</file>
+        <file>fire.png</file>
+        <file>arrow_up.png</file>
+        <file>zoom_out.png</file>
+        <file>zoom_in.png</file>
+        <file>magnifier.png</file>
+        <file>checkmark.png</file>
+        <file>plus.png</file>
+        <file>minus.png</file>
+    </qresource>
+</RCC>
