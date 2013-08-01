@@ -6,7 +6,7 @@
  */
 
 /// HEADER
-#include "global_option_manager.h"
+#include <csapex/global_option_manager.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

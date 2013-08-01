@@ -2,8 +2,6 @@
 #define PLUGIN_MANAGER_HPP
 
 /// COMPONENT
-//#include <csapex/boxed_object.h>
-//#include "selector_proxy.h"
 #include <utils_plugin/constructor.hpp>
 
 /// SYSTEM
@@ -57,10 +55,6 @@ protected:
 
     void reload() {
         try {
-            if(plugins_loaded_) {
-                /// @TODO: init library
-            }
-
             std::vector<std::string> classes = loader_->getDeclaredClasses();
             for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
 //                std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;

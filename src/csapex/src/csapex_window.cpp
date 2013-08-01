@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include "ui_evaluation_window.h"
-#include "bash_parser.h"
+#include <csapex/bash_parser.h>
 #include <csapex/core_plugin.h>
 #include <csapex/box_manager.h>
 #include <csapex/stream_interceptor.h>
