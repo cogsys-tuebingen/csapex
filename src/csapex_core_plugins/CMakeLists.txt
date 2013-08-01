@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(csapex_core_plugins)
 
-find_package(catkin REQUIRED COMPONENTS roscpp csapex csapex_vision utils)
+find_package(catkin REQUIRED COMPONENTS roscpp csapex utils utils_plugin)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
@@ -23,7 +23,7 @@ QT4_WRAP_CPP(MOC ${MOC})
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES
-  CATKIN_DEPENDS csapex csapex_vision
+  CATKIN_DEPENDS csapex
 #  DEPENDS
 )
 
@@ -38,17 +38,14 @@ include_directories(include
 add_library(csapex_core_plugins
     src/double_buffer.cpp
     src/export_cout.cpp
+    src/file_importer.cpp
     src/import_cin.cpp
     src/import_ros.cpp
     src/ros_message_conversion.cpp
-    src/file_importer.cpp
-    src/filter_blur.cpp
-    src/filter_apply_mask.cpp
-    src/filter_static_mask.cpp
     src/global_option_panel.cpp
-    src/image_combiner_robust_match.cpp
-    src/output_display.cpp
     src/text_input.cpp
+    src/string_message.cpp
+    src/register_core_plugins.cpp
     ${QT_RESOURCES}
     ${MOC}
 )

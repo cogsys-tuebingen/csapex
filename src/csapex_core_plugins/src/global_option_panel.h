@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/boxed_object.h>
-#include <csapex_vision/global_option.h>
+#include <csapex/global_option.h>
 
 namespace csapex
 {

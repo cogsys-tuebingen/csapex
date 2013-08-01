@@ -2,9 +2,9 @@
 #define PLUGIN_MANAGER_HPP
 
 /// COMPONENT
-#include <csapex/stream_interceptor.h>
-#include <csapex/boxed_object.h>
-#include "selector_proxy.h"
+//#include <csapex/boxed_object.h>
+//#include "selector_proxy.h"
+#include <utils_plugin/constructor.hpp>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
@@ -12,11 +12,23 @@
 #include <boost/lambda/construct.hpp>
 #include <pluginlib/class_loader.h>
 
+namespace plugin_manager {
+template <class C>
+struct InstallConstructor
+{
+    template <class M, class L>
+    static void installConstructor(M* instance, L* loader, const std::string& name) {}
+};
+}
+
 template <class M, class C>
 class PluginManagerImp
 {
     template <class, class>
     friend class PluginManager;
+
+public:
+    typedef pluginlib::ClassLoader<M> Loader;
 
 protected:
     typedef C Constructor;
@@ -28,12 +40,9 @@ protected:
     }
 
 protected:
-    typedef pluginlib::ClassLoader<M> Loader;
-
     PluginManagerImp(const std::string& full_name)
         : loader_(new Loader("csapex", full_name)), plugins_loaded_(false)
     {
-        StreamInterceptor::instance();
     }
 
     PluginManagerImp(const PluginManagerImp& rhs);
@@ -46,18 +55,6 @@ protected:
         available_classes[constructor.getType()] = constructor;
     }
 
-    template <class Class>
-    typename boost::enable_if<boost::is_base_of<csapex::BoxedObject, Class> >::type
-    loadSelectorProxy(const std::string& name) {
-        csapex::SelectorProxy::Ptr dynamic(new csapex::SelectorProxyDynamic(name, boost::bind(&Loader::createUnmanagedInstance, loader_, name)));
-        csapex::SelectorProxy::registerProxy(dynamic);
-    }
-
-    template <class Class>
-    typename boost::disable_if<boost::is_base_of<csapex::BoxedObject, Class> >::type
-    loadSelectorProxy(const std::string& name) {
-    }
-
     void reload() {
         try {
             if(plugins_loaded_) {
@@ -66,16 +63,16 @@ protected:
 
             std::vector<std::string> classes = loader_->getDeclaredClasses();
             for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
-//                std::cout << "load library for class " << *c << std::endl;
+//                std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;
+
                 loader_->loadLibraryForClass(*c);
 
-                loadSelectorProxy<M>(*c);
+                plugin_manager::InstallConstructor<M>::installConstructor(this, loader_, *c);
 
                 Constructor constructor;
                 constructor.setType(*c);
                 constructor.setConstructor(boost::bind(&Loader::createUnmanagedInstance, loader_, *c));
                 registerConstructor(constructor);
-//                std::cout << "loaded " << typeid(M).name() << " class " << *c << std::endl;
             }
         } catch(pluginlib::PluginlibException& ex) {
             std::cerr << "The plugin failed to load for some reason. Error: " << ex.what() << std::endl;

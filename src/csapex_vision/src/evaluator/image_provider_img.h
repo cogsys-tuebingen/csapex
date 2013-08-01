@@ -14,8 +14,10 @@ class ImageProviderImg : public ImageProvider
 {
     Q_OBJECT
 
-protected:
-    ImageProviderImg(const std::string& path);
+public:
+    ImageProviderImg();
+    void load(const std::string& file);
+
 
 public:
     static boost::function<bool(ImageProvider*)> Identity;
@@ -23,10 +25,12 @@ private:
     static bool checkIdentity(ImageProvider*);
 
 public:
-    static ImageProvider* createInstance(const std::string& path);
+//    static ImageProvider* createInstance(const std::string& path);
 
     bool hasNext();
     void next(cv::Mat& img, cv::Mat& mask);
+
+    std::vector<std::string> getExtensions() const;
 
     void enableBorder(bool border);
 

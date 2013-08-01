@@ -1,14 +1,21 @@
 /// HEADER
 #include "image_provider_mov.h"
 
-REGISTER_IMAGE_PROVIDERS(ImageProviderMov, mov, mpeg)
-REGISTER_IMAGE_PROVIDERS(ImageProviderMov, mpg, mp4, avi)
+/// SYSTEM
+#include <boost/assign.hpp>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(csapex::ImageProviderMov, csapex::MessageProvider)
 
 using namespace csapex;
 
-ImageProviderMov::ImageProviderMov(const std::string& movie_file)
-    : capture_(movie_file)
+ImageProviderMov::ImageProviderMov()
 {
+}
+
+void ImageProviderMov::load(const std::string& movie_file)
+{
+    capture_.open(movie_file);
     fps_ = capture_.get(CV_CAP_PROP_FPS);
     frames_ = capture_.get(CV_CAP_PROP_FRAME_COUNT);
 }
@@ -18,9 +25,9 @@ ImageProviderMov::~ImageProviderMov()
     capture_.release();
 }
 
-ImageProvider* ImageProviderMov::createInstance(const std::string& path)
+std::vector<std::string> ImageProviderMov::getExtensions() const
 {
-    return new ImageProviderMov(path);
+    return boost::assign::list_of<std::string> (".avi")(".mpg")(".mp4")(".mov")(".flv");
 }
 
 bool ImageProviderMov::hasNext()

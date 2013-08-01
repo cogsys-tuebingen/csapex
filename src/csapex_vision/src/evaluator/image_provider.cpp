@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex_vision/image_provider.h>
 
+/// COMPONENT
+#include <csapex_vision/messages_default.hpp>
+
 /// SYSTEM
 #include <boost/filesystem.hpp>
 
@@ -12,6 +15,7 @@ std::map<std::string, ImageProvider::ProviderConstructor> ImageProvider::plugins
 
 ImageProvider::ImageProvider()
 {
+    setType(connection_types::CvMatMessage::make());
 }
 
 ImageProvider::~ImageProvider()
@@ -72,13 +76,20 @@ void ImageProvider::init()
     doInit();
 }
 
-void ImageProvider::next()
+connection_types::Message::Ptr ImageProvider::next()
 {
-    cv::Mat img, mask;
+    cv::Mat mask;
 
-    next(img, mask);
+    connection_types::CvMatMessage::Ptr msg(new connection_types::CvMatMessage);
 
-    new_image(img, mask);
+    next(msg->value, mask);
+
+    return msg;
+}
+
+std::vector<std::string> ImageProvider::getExtensions() const
+{
+    return std::vector<std::string> ();
 }
 
 int ImageProvider::sleepTime()

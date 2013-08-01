@@ -1,2 +1,36 @@
 <library path="libcsapex_vision">
+<class type="csapex::RegisterPlugin" base_class_type="csapex::CorePlugin">
+  <description>none yet</description>
+</class>
+<class type="csapex::OutputDisplay" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="csapex::FilterBlur" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::FilterApplyMask" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::FilterStaticMask" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="csapex::ImageCombinerRobustMatch" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+
+<class type="csapex::ImageProviderBag" base_class_type="csapex::MessageProvider">
+  <description>none yet</description>
+</class>
+<class type="csapex::ImageProviderDir" base_class_type="csapex::MessageProvider">
+  <description>none yet</description>
+</class>
+<class type="csapex::ImageProviderImg" base_class_type="csapex::MessageProvider">
+  <description>none yet</description>
+</class>
+<class type="csapex::ImageProviderMov" base_class_type="csapex::MessageProvider">
+  <description>none yet</description>
+</class>
+
 </library>

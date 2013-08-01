@@ -2,7 +2,7 @@
 #define FILE_IMPORTER_H
 
 /// PROJECT
-#include <csapex_vision/image_provider.h>
+#include <csapex/message_provider.h>
 #include <csapex/boxed_object.h>
 
 /// SYSTEM
@@ -56,12 +56,11 @@ private:
 
     State state;
 
-    ImageProvider::Ptr provider_;
+    MessageProvider::Ptr provider_;
 
     ConnectorIn* optional_input_filename_;
 
-    ConnectorOut* output_img_;
-    ConnectorOut* output_mask_;
+    ConnectorOut* output_;
 
     QHBoxLayout* additional_layout_;
     QPushButton* file_dialog_;

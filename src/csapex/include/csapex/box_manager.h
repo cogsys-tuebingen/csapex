@@ -4,12 +4,27 @@
 /// COMPONENT
 #include <csapex/selector_proxy.h>
 #include <csapex/command.h>
-#include "plugin_manager.hpp"
+#include <csapex/boxed_object.h>
+#include <utils_plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <QLayout>
 #include <QMenu>
 #include <vector>
+
+
+
+namespace plugin_manager {
+template <>
+struct InstallConstructor<csapex::BoxedObject>
+{
+    template <class M, class L>
+    static void installConstructor(M* instance, L* loader, const std::string& name) {
+        csapex::SelectorProxy::Ptr dynamic(new csapex::SelectorProxyDynamic(name, boost::bind(&M::Loader::createUnmanagedInstance, loader, name)));
+        csapex::SelectorProxy::registerProxy(dynamic);
+    }
+};
+}
 
 namespace csapex
 {

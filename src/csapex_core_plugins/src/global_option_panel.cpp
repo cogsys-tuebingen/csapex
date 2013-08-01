@@ -2,7 +2,7 @@
 #include "global_option_panel.h"
 
 /// PROJECT
-#include <csapex/plugin_manager.hpp>
+#include <utils_plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

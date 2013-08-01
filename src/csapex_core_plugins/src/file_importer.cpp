@@ -1,13 +1,12 @@
 /// HEADER
 #include "file_importer.h"
 
-/// COMPONENT
-#include <csapex_vision/messages_default.hpp>
-
 /// PROJECT
 #include <csapex/box.h>
 #include <csapex/connector_out.h>
 #include <csapex/qt_helper.hpp>
+#include <csapex_core_plugins/string_message.h>
+#include <csapex/message_provider_manager.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -46,27 +45,28 @@ void FileImporter::State::readYaml(const YAML::Node& node) {
         const YAML::Node& sub_state_node = node["sub_state"];
         sub_state = parent->provider_->getState();
         sub_state->readYaml(sub_state_node);
-//        parent->provider_->setState(sub_state);
+        parent->provider_->setState(sub_state);
     }
 }
 
 void FileImporter::tick()
 {
     if(provider_.get()) {
-        CvMatMessage::Ptr img(new CvMatMessage);
-        CvMatMessage::Ptr mask(new CvMatMessage);
 
-        provider_->next(img->value, mask->value);
-
-        output_img_->publish(img);
-        output_mask_->publish(mask);
+        Message::Ptr msg = provider_->next();
+        if(msg.get()) {
+            output_->setType(provider_->getType());
+            output_->setLabel(provider_->getType()->name());
+            output_->publish(msg);
+        }
     }
 }
 
 bool FileImporter::doImport(const QString& path)
 {
     state.last_path_ = path;
-    provider_ = ImageProvider::Ptr(ImageProvider::create(state.last_path_.toUtf8().constData()));
+    provider_ = MessageProviderManager::createMessageProvider(path.toUtf8().constData());
+    provider_->load(path.toUtf8().constData());
 
     return provider_.get();
 }
@@ -75,13 +75,13 @@ void FileImporter::enableBorder(int border)
 {
     if(provider_) {
         std::cout << "border: " << border << std::endl;
-        provider_->enableBorder(border != 0);
+//        provider_->enableBorder(border != 0);
     }
 }
 
 
 FileImporter::FileImporter()
-    : state(this), output_img_(NULL), output_mask_(NULL), additional_layout_(NULL), file_dialog_(NULL)
+    : state(this), output_(NULL), additional_layout_(NULL), file_dialog_(NULL)
 {
     setIcon(QIcon(":/folder_picture.png"));
 }
@@ -111,13 +111,9 @@ void FileImporter::fill(QBoxLayout* layout)
         box_->addInput(optional_input_filename_);
 
 
-        output_img_ = new ConnectorOut(box_, 0);
-        output_img_->setLabel("Image");
-        box_->addOutput(output_img_);
-
-        output_mask_ = new ConnectorOut(box_, 1);
-        output_mask_->setLabel("Mask");
-        box_->addOutput(output_mask_);
+        output_ = new ConnectorOut(box_, 0);
+        output_->setLabel("Unknown");
+        box_->addOutput(output_);
 
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
 
@@ -166,7 +162,9 @@ void FileImporter::importDialog()
 {
     QString filename = QFileDialog::getOpenFileName(0, "Input", state.last_path_, "All files (*.*)");
 
-    import(filename);
+    if(!filename.isEmpty()) {
+        import(filename);
+    }
 }
 
 Memento::Ptr FileImporter::getState() const

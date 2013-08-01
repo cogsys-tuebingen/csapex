@@ -1,7 +1,12 @@
 /// HEADER
 #include "image_provider_img.h"
 
-REGISTER_IMAGE_PROVIDERS(ImageProviderImg, jpg, png, gif, ppm, pgm)
+/// SYSTEM
+#include <boost/assign.hpp>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(csapex::ImageProviderImg, csapex::MessageProvider)
+
 
 using namespace csapex;
 
@@ -9,14 +14,19 @@ using namespace csapex;
 boost::function<bool(ImageProvider*)> ImageProviderImg::Identity
 = boost::bind(&ImageProviderImg::checkIdentity, _1);
 
-ImageProviderImg::ImageProviderImg(const std::string& path)
-    : img_(cv::imread(path)), border_(false), displayed(false)
+ImageProviderImg::ImageProviderImg()
+    : border_(false), displayed(false)
 {
 }
 
-ImageProvider* ImageProviderImg::createInstance(const std::string& path)
+void ImageProviderImg::load(const std::string& path)
 {
-    return new ImageProviderImg(path);
+    img_ = cv::imread(path);
+}
+
+std::vector<std::string> ImageProviderImg::getExtensions() const
+{
+    return boost::assign::list_of<std::string> (".jpg")(".jpeg")(".gif")(".png")(".tiff")(".pgm")(".ppm");
 }
 
 bool ImageProviderImg::checkIdentity(ImageProvider* other)

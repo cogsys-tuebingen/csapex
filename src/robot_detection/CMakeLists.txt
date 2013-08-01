@@ -15,7 +15,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs cv_bridge dynamic_reconfigure tf csapex_vision background_subtraction tf_conversions utils)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs cv_bridge dynamic_reconfigure tf tf_conversions utils utils_vision)
+find_package(csapex_vision REQUIRED)
+find_package(background_subtraction REQUIRED)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGL)
 include(${QT_USE_FILE})
@@ -51,6 +53,8 @@ endif()
 generate_dynamic_reconfigure_options(cfg/Global.cfg cfg/TfCreator.cfg)
 
 include_directories(${catkin_INCLUDE_DIRS})
+include_directories(${background_subtraction_INCLUDE_DIRS})
+include_directories(${csapex_vision_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/cfg/cpp/)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
@@ -183,7 +187,7 @@ add_library(evaluation_plugin
 )
 
 target_link_libraries(evaluation_plugin
-    ${catkin_LIBRARIES}
+    ${catkin_LIBRARIES} ${csapex_vision_LIBRARIES}
     ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES}  ${GLUT_LIBRARY})
 
 ##### ADAPTER
@@ -217,7 +221,7 @@ add_library(ros
     src/ros/trainer_adapter_ros.cpp
     src/ros/tracker_adapter_ros.cpp
     ${GLOBALS})
-target_link_libraries(ros adapter tracker ${catkin_LIBRARIES})
+target_link_libraries(ros adapter tracker ${catkin_LIBRARIES} ${background_subtraction_LIBRARIES})
 
 
 ########################

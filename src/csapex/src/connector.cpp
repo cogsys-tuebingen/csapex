@@ -114,6 +114,7 @@ bool Connector::canConnectTo(Connector* other_side)
 {
     bool in_out = (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
     bool compability = getType()->canConnectTo(other_side->getType());
+    std::cout << getType()->name() << " vs. " << other_side->getType()->name() << " => " << (in_out && compability) << std::endl;
     return in_out && compability;
 }
 
@@ -121,8 +122,10 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
 {
     if(e->mimeData()->text() == Connector::MIME_CREATE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        if(from->canConnectTo(this) && canConnectTo(from)) {
-            e->acceptProposedAction();
+        if(from->canConnectTo(this)) {
+            if(canConnectTo(from)) {
+                e->acceptProposedAction();
+            }
         }
     } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());

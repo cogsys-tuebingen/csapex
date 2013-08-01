@@ -11,15 +11,19 @@ class ImageProviderMov : public ImageProviderSet
 {
     Q_OBJECT
 
-protected:
-    ImageProviderMov(const std::string& movie_file);
+public:
+    ImageProviderMov();
+    void load(const std::string& movie_file);
+
     ~ImageProviderMov();
 
 public:
-    static ImageProvider* createInstance(const std::string& path);
+//    static ImageProvider* createInstance(const std::string& path);
 
     virtual bool hasNext();
     virtual void reallyNext(cv::Mat& img, cv::Mat& mask);
+
+    std::vector<std::string> getExtensions() const;
 
 private:
     void display();

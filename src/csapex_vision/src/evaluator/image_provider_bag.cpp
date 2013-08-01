@@ -5,20 +5,26 @@
 #include <boost/assign.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
+#include <pluginlib/class_list_macros.h>
 
-REGISTER_IMAGE_PROVIDERS(ImageProviderBag, bag)
+PLUGINLIB_EXPORT_CLASS(csapex::ImageProviderBag, csapex::MessageProvider)
 
 using namespace csapex;
 
-ImageProviderBag::ImageProviderBag(const std::string& file)
-    : file_(file), bag(file), view_(NULL), initiated(false)
+ImageProviderBag::ImageProviderBag()
+    : view_(NULL), initiated(false)
 {
     frames_ = 0;
 }
 
-ImageProvider* ImageProviderBag::createInstance(const std::string& path)
+void ImageProviderBag::load(const std::string& file)
 {
-    return new ImageProviderBag(path);
+    bag.open(file);
+}
+
+std::vector<std::string> ImageProviderBag::getExtensions() const
+{
+    return boost::assign::list_of<std::string> (".bag");
 }
 
 bool ImageProviderBag::hasNext()

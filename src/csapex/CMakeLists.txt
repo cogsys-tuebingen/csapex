@@ -7,7 +7,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy utils)
+find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy utils utils_vision utils_plugin)
 
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
@@ -28,6 +28,7 @@ set(QT ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_RESOURCES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${catkin_INCLUDE_DIRS})
 
 ###################################
 ## catkin specific configuration ##
@@ -75,20 +76,21 @@ add_library(csapex SHARED
     src/designer.cpp
     src/designerio.cpp
     src/displayable.cpp
+    src/global_option.cpp
+    src/global_option_manager.cpp
     src/message.cpp
+    src/message_provider.cpp
+    src/message_provider_manager.cpp
     src/memento.cpp
     src/overlay.cpp
     src/selector_proxy.cpp
     src/stream_interceptor.cpp
-
-    include/csapex/plugin_manager.hpp
-    include/csapex/constructor.hpp
-    include/csapex/qt_helper.hpp
-
     src/qdouble_slider.cpp
     src/qwrapper.cpp
     src/qsignal_bridges.cpp
     src/bash_parser.cpp
+
+    include/csapex/qt_helper.hpp
     ${QT}
 )
 target_link_libraries(csapex

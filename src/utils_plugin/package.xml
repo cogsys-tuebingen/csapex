@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>utils_plugin</name>
+  <version>0.0.1</version>
+  <description>The utils_vision package</description>
+
+  <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
+
+  <license>BSD</license>
+  <author email="sebastian.buck@uni-tuebingen.de">buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>pluginlib</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>pluginlib</run_depend>
+</package>

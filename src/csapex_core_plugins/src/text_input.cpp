@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/box.h>
 #include <csapex/connector_out.h>
-#include <csapex_vision/messages_default.hpp>
+#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

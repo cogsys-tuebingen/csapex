@@ -5,7 +5,8 @@
 #include "extractor.h"
 
 /// PROJECT
-#include <csapex/plugin_manager.hpp>
+#include <utils_plugin/plugin_manager.hpp>
+#include <utils_plugin/constructor.hpp>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>

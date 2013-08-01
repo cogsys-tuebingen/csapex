@@ -9,6 +9,11 @@ Message::Message(const std::string& name)
 {
 }
 
+Message::~Message()
+{
+
+}
+
 void Message::writeYaml(YAML::Emitter& yaml) {
 
 }
@@ -36,7 +41,7 @@ ConnectionType::Ptr AnyMessage::make(){
     return new_msg;
 }
 
-bool AnyMessage::canConnectTo(Ptr other_side) {
+bool AnyMessage::canConnectTo(ConnectionType::Ptr other_side) {
     return true;
 }
 

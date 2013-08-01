@@ -56,8 +56,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include src
-   LIBRARIES vision_core logger csapex_vision
-   CATKIN_DEPENDS pluginlib roscpp std_msgs csapex
+   LIBRARIES logger csapex_vision
+   CATKIN_DEPENDS pluginlib roscpp std_msgs csapex utils_plugin
    DEPENDS Qt4 OpenCV
 )
 
@@ -72,50 +72,6 @@ include_directories(include
 )
 
 
-##### COMMON
-set(GLOBALS
-    src/common/global.hpp)
-
-##### LOGGER
-add_library(logger
-    src/common/global.hpp
-    src/common/logger.cpp)
-
-##### CORE
-add_library(vision_core
-    src/utils/extractors_default.cpp
-
-    src/config/config.cpp
-    src/config/configurated_tools.cpp
-    src/config/reconfigurable.cpp
-    src/config/types.cpp
-    src/data/angle.cpp
-    src/data/directory_io.cpp
-    src/data/frame.cpp
-    src/data/frame_buffer.cpp
-    src/data/frame_io.cpp
-    src/data/matchable.cpp
-    src/data/matchable_pose.cpp
-    src/data/painter.cpp
-    src/data/pose.cpp
-    src/utils/extractor.cpp
-    src/utils/extractor_factory.cpp
-    src/utils/extractor_manager.cpp
-    src/utils/hough_peak.cpp
-    src/utils/matcher.cpp
-    src/utils/match_scorer.cpp
-    src/utils/match_scorer_homography.cpp
-    src/utils/match_scorer_clustering.cpp
-    src/utils/match_scorer_reprojection.cpp
-    src/utils/match_scorer_factory.cpp
-    src/utils/opencv_utils.hpp
-    src/utils/rectangle_cluster.cpp
-    ${QT_UTIL}
-    ${GLOBALS})
-target_link_libraries(vision_core yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} ${QT_LIBRARIES})
-target_link_libraries(vision_core logger)
-
-
 add_library(csapex_vision
     src/evaluator/filter.cpp
     src/evaluator/image_combiner.cpp
@@ -125,16 +81,18 @@ add_library(csapex_vision
     src/evaluator/image_provider_img.cpp
     src/evaluator/image_provider_mov.cpp
     src/evaluator/image_provider_set.cpp
-    src/evaluator/image_provider_ros_topic.cpp
-    src/evaluator/global_option.cpp
-    src/evaluator/global_option_manager.cpp
     src/evaluator/register_plugin.cpp
+    src/evaluator/filter_blur.cpp
+    src/evaluator/filter_apply_mask.cpp
+    src/evaluator/filter_static_mask.cpp
+    src/evaluator/image_combiner_robust_match.cpp
+    src/evaluator/output_display.cpp
 
     include/csapex_vision/messages_default.hpp
     ${QT_EVALUATOR}
     ${QT_RESOURCES}
 )
-target_link_libraries(csapex_vision vision_core
+target_link_libraries(csapex_vision
     yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 

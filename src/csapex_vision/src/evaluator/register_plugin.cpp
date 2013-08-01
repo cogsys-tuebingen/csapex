@@ -21,7 +21,6 @@ RegisterPlugin::RegisterPlugin()
 
 void RegisterPlugin::init()
 {
-    ConnectionTypeManager::registerMessage("std::string", boost::bind(&connection_types::StringMessage::make));
     ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::CvMatMessage::make));
 
     ConnectionType::default_.reset(new connection_types::CvMatMessage);

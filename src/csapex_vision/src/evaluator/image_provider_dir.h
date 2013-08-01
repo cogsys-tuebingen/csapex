@@ -15,8 +15,10 @@ class ImageProviderDir : public ImageProvider
 {
     Q_OBJECT
 
-protected:
-    ImageProviderDir(const std::string& directory);
+public:
+    ImageProviderDir();
+    void load(const std::string& dir);
+
 
 public:
     virtual ~ImageProviderDir();
@@ -26,6 +28,9 @@ public:
 
     virtual bool hasNext();
     void next(cv::Mat& img, cv::Mat& mask);
+
+    std::vector<std::string> getExtensions() const;
+
 
 private:
     bool is_right_format;

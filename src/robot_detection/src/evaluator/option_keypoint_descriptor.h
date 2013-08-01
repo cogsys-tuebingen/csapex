@@ -2,7 +2,7 @@
 #define OPTION_KEYPOINT_DESCRIPTOR_H
 
 /// COMPONENT
-#include <csapex_vision/global_option.h>
+#include <csapex/global_option.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>

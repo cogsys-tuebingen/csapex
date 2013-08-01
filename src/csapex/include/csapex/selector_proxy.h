@@ -2,7 +2,7 @@
 #define SELECTOR_PROXY_H
 
 /// COMPONENT
-#include <csapex/constructor.hpp>
+#include <utils_plugin/constructor.hpp>
 
 /// SYSTEM
 #include <QGraphicsView>

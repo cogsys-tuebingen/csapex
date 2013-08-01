@@ -1,14 +1,23 @@
 /// HEADER
 #include "image_provider_dir.h"
 
-namespace bfs = boost::filesystem;
+/// SYSTEM
+#include <boost/assign.hpp>
+#include <pluginlib/class_list_macros.h>
 
-REGISTER_IMAGE_PROVIDERS(ImageProviderDir, DIRECTORY)
+PLUGINLIB_EXPORT_CLASS(csapex::ImageProviderDir, csapex::MessageProvider)
+
+
+namespace bfs = boost::filesystem;
 
 using namespace csapex;
 
-ImageProviderDir::ImageProviderDir(const std::string& directory)
-    : is_right_format(false)//,dir_(directory), dir_it_(directory)
+ImageProviderDir::ImageProviderDir()
+    : is_right_format(false)
+{
+}
+
+void ImageProviderDir::load(const std::string& directory)
 {
     std::cout << directory << "!!!" << std::endl;
 
@@ -37,9 +46,9 @@ ImageProviderDir::~ImageProviderDir()
 {
 }
 
-ImageProvider* ImageProviderDir::createInstance(const std::string& path)
+std::vector<std::string> ImageProviderDir::getExtensions() const
 {
-    return new ImageProviderDir(path);
+    return boost::assign::list_of<std::string> (".DIRECTORY");
 }
 
 bool ImageProviderDir::hasNext()

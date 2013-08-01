@@ -6,7 +6,7 @@
  */
 
 /// HEADER
-#include <csapex_vision/global_option.h>
+#include <csapex/global_option.h>
 
 using namespace csapex;
 

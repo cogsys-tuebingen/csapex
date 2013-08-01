@@ -9,10 +9,10 @@
 #define GLOBAL_OPTION_MANAGER_H
 
 /// COMPONENT
-#include <csapex_vision/global_option.h>
+#include <csapex/global_option.h>
 
 /// PROJECT
-#include <csapex/plugin_manager.hpp>
+#include <utils_plugin/plugin_manager.hpp>
 
 namespace csapex
 {
