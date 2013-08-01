@@ -17,7 +17,6 @@ catkin_package(
     CATKIN_DEPENDS utils_plugin
 )
 
-message("!!!! ${catkin_INCLUDE_DIRS}")
 include_directories(
     ${catkin_INCLUDE_DIRS}
     src

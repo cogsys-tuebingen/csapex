@@ -24,13 +24,18 @@ public:
     static MessageProvider::Ptr createMessageProvider(const std::string& path);
     static MessageProviderManager& instance();
 
+    std::string supportedTypes();
+
 private:
     MessageProviderManager();
     MessageProvider::Ptr createMessageProviderHelper(const std::string& path);
+
     void fullReload();
 
 private:
     std::map<std::string, Constructor> classes;
+
+    std::string supported_types_;
 };
 
 }

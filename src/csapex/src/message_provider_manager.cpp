@@ -24,6 +24,8 @@ void MessageProviderManager::fullReload()
 
     classes.clear();
 
+    supported_types_ = "";
+
     typedef std::pair<std::string, PluginManager<csapex::MessageProvider>::Constructor> PAIR;
     foreach(PAIR pair, availableClasses()) {
         MessageProvider::Ptr prov(pair.second());
@@ -31,8 +33,12 @@ void MessageProviderManager::fullReload()
             std::string ext = extension;
             std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
             registerMessageProvider(ext, pair.second);
+
+            supported_types_ += std::string("*") + ext + " ";
         }
     }
+
+    supported_types_ = supported_types_.substr(0, supported_types_.length()-1);
 }
 
 MessageProvider::Ptr MessageProviderManager::createMessageProvider(const std::string& path)
@@ -69,4 +75,13 @@ MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const s
 void MessageProviderManager::registerMessageProvider(const std::string &type, Constructor constructor)
 {
     instance().classes[type] = constructor;
+}
+
+std::string MessageProviderManager::supportedTypes()
+{
+    if(!pluginsLoaded()) {
+        fullReload();
+    }
+
+    return supported_types_;
 }

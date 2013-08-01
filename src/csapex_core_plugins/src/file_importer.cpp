@@ -143,7 +143,7 @@ void FileImporter::messageArrived(ConnectorIn *source)
 
 void FileImporter::import(const QString& filename)
 {
-    if(!filename.isNull()) {
+    if(!filename.isNull() && !filename.isEmpty()) {
         if(additional_layout_ && doImport(filename)) {
             QtHelper::clearLayout(additional_layout_);
             provider_->insert(additional_layout_);
@@ -160,7 +160,8 @@ void FileImporter::import(const QString& filename)
 
 void FileImporter::importDialog()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Input", state.last_path_, "All files (*.*)");
+    QString filter = QString("Supported files (") + MessageProviderManager::instance().supportedTypes().c_str() + ");;All files (*.*)";
+    QString filename = QFileDialog::getOpenFileName(0, "Input", state.last_path_, filter);
 
     if(!filename.isEmpty()) {
         import(filename);
