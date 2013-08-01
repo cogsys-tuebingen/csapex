@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <boost/bind.hpp>
 #include <pluginlib/class_list_macros.h>
+#include <QMetaType>
 
 PLUGINLIB_EXPORT_CLASS(csapex::RegisterPlugin, csapex::CorePlugin)
 
@@ -21,6 +22,8 @@ RegisterPlugin::RegisterPlugin()
 
 void RegisterPlugin::init()
 {
+    qRegisterMetaType<cv::Mat>("cv::Mat");
+
     ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::CvMatMessage::make));
 
     ConnectionType::default_.reset(new connection_types::CvMatMessage);

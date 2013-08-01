@@ -33,8 +33,6 @@ Designer::Designer(QWidget* parent)
 
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
-    StreamInterceptor::instance();
-
     ui->setupUi(this);
 
     setCurrentConfig(DesignerIO::default_config);

@@ -1,6 +1,9 @@
 /// HEADER
 #include "filter_static_mask.h"
 
+/// PROJECT
+#include <csapex/box.h>
+
 /// SYSTEM
 #include <QPixmap>
 #include <QGraphicsSceneEvent>
@@ -160,6 +163,22 @@ FilterStaticMask::FilterStaticMask()
 FilterStaticMask::~FilterStaticMask()
 {
     delete painter;
+}
+
+void FilterStaticMask::State::writeYaml(YAML::Emitter& out) const {
+    std::string file = parent->box_->UUID() + ".ppm"; // TODO: also use random part
+    out << YAML::Key << "mask" << YAML::Value << file;
+    cv::imwrite(file, mask_);
+
+}
+
+void FilterStaticMask::State::readYaml(const YAML::Node& node) {
+    if(!node.FindValue("mask")){
+        return;
+    }
+    std::string file;
+    node["mask"] >> file;
+    mask_ = cv::imread(file, 0);
 }
 
 void FilterStaticMask::showPainter()

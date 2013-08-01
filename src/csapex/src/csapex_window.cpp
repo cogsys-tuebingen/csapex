@@ -15,7 +15,6 @@
 #include <QCloseEvent>
 #include <QObjectList>
 #include <QSharedPointer>
-#include <QMetaType>
 #include <QMessageBox>
 #include <QToolBar>
 #include <QTimer>
