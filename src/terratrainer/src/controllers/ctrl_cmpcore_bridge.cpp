@@ -87,22 +87,22 @@ void CMPCoreBridge::setExtractorParams(CMPParams &params)
 {
     switch(params.type) {
     case CMPParams::ORB:
-        cc_->createORB(static_cast<CMPParamsORB&>(params));
+        cc_->create(static_cast<CMPParamsORB&>(params));
         break;
     case CMPParams::SURF:
-        cc_->createSURF(static_cast<CMPParamsSURF&>(params));
+        cc_->create(static_cast<CMPParamsSURF&>(params));
         break;
     case CMPParams::SIFT:
-        cc_->createSIFT(static_cast<CMPParamsSIFT&>(params));
+        cc_->create(static_cast<CMPParamsSIFT&>(params));
         break;
     case CMPParams::BRIEF:
-        cc_->createBRIEF(static_cast<CMPParamsBRIEF&>(params));
+        cc_->create(static_cast<CMPParamsBRIEF&>(params));
         break;
     case CMPParams::BRISK:
-        cc_->createBRISK(static_cast<CMPParamsBRISK&>(params));
+        cc_->create(static_cast<CMPParamsBRISK&>(params));
         break;
     case CMPParams::FREAK:
-        cc_->createFREAK(static_cast<CMPParamsFREAK&>(params));
+        cc_->create(static_cast<CMPParamsFREAK&>(params));
         break;
     }
 }

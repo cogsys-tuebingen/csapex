@@ -1,11 +1,14 @@
 #ifndef CMP_CORE_H
 #define CMP_CORE_H
 /// COMPONENT
-#include <computation/params.hpp>
+#include "params.hpp"
+#include "cmp_extractor.h"
+#include "extractors.hpp"
 /// SYSTEM
 #include <opencv2/opencv.hpp>
-#include <opencv2/nonfree/features2d.hpp>
 #include <boost/shared_ptr.hpp>
+#include <utils/LibCvTools/grid.hpp>
+#include <utils/LibCvTools/quad_tree.hpp>
 
 class CMPCore
 {
@@ -24,20 +27,23 @@ public:
     bool    load(const std::string image_path);
     cv::Mat getImage() const;
 
+
     void addROI(const ROI  &roi);
 
-    void setParams(CMPParams &params);
 
-    void createORB  (CMPParamsORB &params);
-    void createSIFT (CMPParamsSIFT &params);
-    void createSURF (CMPParamsSURF &params);
-    void createBRISK(CMPParamsBRISK &params);
-    void createBRIEF(CMPParamsBRIEF &params);
-    void createFREAK(CMPParamsFREAK &params);
+
+    template<class Parameters>
+    void create(Parameters &param)
+    {
+        cv::DescriptorExtractor* ptr = CMPExtractors::create(param);
+        if(param.opp)
+            CMPExtractors::makeOpp(ptr);
+        extractor_->set(ptr);
+    }
 
 private:
-    cv::Mat      raw_image_;
-    cv::DescriptorExtractor* extractor_;
+    cv::Mat                  raw_image_;
+    CMPExtractor::Ptr        extractor_;
 
     void makeOPP();
 };

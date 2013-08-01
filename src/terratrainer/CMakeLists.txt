@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(terratrainer)
 
 set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package(catkin REQUIRED COMPONENTS csapex csapex_vision)
+find_package(catkin REQUIRED COMPONENTS utils)
 ## System dependencies are found with CMake's conventions
 find_package(QT4    COMPONENTS QtCore QtGui REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -57,7 +57,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 ## Declare a cpp executable
 add_executable(TerraTrainer
                 src/computation/params.hpp
+                src/computation/extractors.hpp
                 src/computation/cmp_core.cpp
+                src/computation/cmp_extractor.cpp
                 src/controllers/ctrl_factory.cpp
                 src/controllers/ctrl_main_menu.cpp
                 src/controllers/ctrl_map_view.cpp
@@ -76,6 +78,7 @@ add_executable(TerraTrainer
                 ${QT_TERRA})
 
 target_link_libraries(TerraTrainer
+                        yaml-cpp
                         ${QT_LIBRARIES}
                         ${OpenCV_LIBS}
                         ${Boost_LIBRARIES})
