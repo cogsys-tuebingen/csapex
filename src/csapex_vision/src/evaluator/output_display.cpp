@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <QPainter>
 #include <QGraphicsSceneEvent>
+#include <QGraphicsPixmapItem>
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(csapex::OutputDisplay, csapex::BoxedObject)
@@ -19,7 +20,7 @@ using namespace csapex;
 using namespace connection_types;
 
 OutputDisplay::OutputDisplay()
-    : input_(NULL), view_(new QGraphicsView), empty(400, 400, QImage::Format_RGB16), painter(&empty), down_(false)
+    : input_(NULL), pixmap_(NULL), view_(new QGraphicsView), empty(400, 400, QImage::Format_RGB16), painter(&empty), down_(false)
 {
     painter.setPen(QPen(Qt::red));
     painter.fillRect(QRect(0, 0, empty.width(), empty.height()), Qt::white);
@@ -83,7 +84,6 @@ void OutputDisplay::fill(QBoxLayout* layout)
             scene->installEventFilter(this);
         }
 
-        display_is_empty = false;
         layout->addWidget(view_);
 
         disable();
@@ -116,14 +116,10 @@ void OutputDisplay::enable()
 
 void OutputDisplay::disable()
 {
-    if(!display_is_empty) {
-        pixmap_ = QPixmap::fromImage(empty);
-        view_->setScene(new QGraphicsScene());
-        view_->scene()->addPixmap(pixmap_);
+    if(pixmap_ != NULL) {
+        pixmap_->setPixmap(QPixmap::fromImage(empty));
         view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);
         view_->scene()->update();
-
-        display_is_empty = true;
     }
 }
 
@@ -138,22 +134,21 @@ void OutputDisplay::connectorChanged()
 
 void OutputDisplay::display(QSharedPointer<QImage> img)
 {
-    if(display_is_empty || img->rect() != pixmap_.rect()) {
+    if(pixmap_ == NULL) {
         if(view_->scene()) {
             delete view_->scene();
         }
         view_->setScene(new QGraphicsScene());
         view_->scene()->installEventFilter(this);
 
-        pixmap_ = QPixmap::fromImage(*img);
-        view_->scene()->addPixmap(pixmap_);
-        display_is_empty = false;
+        pixmap_ = view_->scene()->addPixmap(QPixmap::fromImage(*img));
 
     } else {
-        pixmap_.convertFromImage(*img);
+        pixmap_->setPixmap(QPixmap::fromImage(*img));
     }
-         view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);
-              view_->scene()->update();
+
+    view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);
+    view_->scene()->update();
 }
 
 void OutputDisplay::messageArrived(ConnectorIn* source)

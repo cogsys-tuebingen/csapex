@@ -61,14 +61,12 @@ private:
 
     State state;
     ConnectorIn* input_;
-    QPixmap pixmap_;
+    QGraphicsPixmapItem* pixmap_;
 
     QGraphicsView* view_;
 
     QImage empty;
     QPainter painter;
-
-    bool display_is_empty;
 
     bool down_;
     QPoint last_pos_;
