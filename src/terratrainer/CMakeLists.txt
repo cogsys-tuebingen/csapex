@@ -6,7 +6,7 @@ find_package(catkin REQUIRED COMPONENTS utils)
 ## System dependencies are found with CMake's conventions
 find_package(QT4    COMPONENTS QtCore QtGui REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(Boost  COMPONENTS regex random REQUIRED)
+find_package(Boost  COMPONENTS regex REQUIRED)
 
 set (CMAKE_BUILD_TYPE Debug)
 ###################################
