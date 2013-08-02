@@ -44,8 +44,7 @@ public:
 
     /// GENERAL SETTINGS
     void setExtractorParams(CMPParams &params);
-    void setInput(const std::vector<QROI> &rois);
-
+    void compute(const std::vector<CMPCore::ROI> &rois);
 
 Q_SIGNALS:
     void imageLoaded();

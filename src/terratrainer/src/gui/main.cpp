@@ -12,15 +12,8 @@ int main(int argc, char *argv[])
 
 /*************
  * boxes to select
- * - resizeable
  * - rotatable
- * - class setable
- *
- * class list
- * - extendable
- * - renable
- * - id setable
- *
+
  * render Grid
  * render Quadtree segmentation
  *

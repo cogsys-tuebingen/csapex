@@ -8,6 +8,7 @@
 #include <QMainWindow>
 #include <QComboBox>
 #include <QPainter>
+#include <QDoubleSpinBox>
 #include <cmath>
 
 CtrlToolPanel::CtrlToolPanel(QMainWindow *tool_panel, CMPCoreBridge::Ptr bridge) :
@@ -22,8 +23,18 @@ CtrlToolPanel::CtrlToolPanel(QMainWindow *tool_panel, CMPCoreBridge::Ptr bridge)
 void CtrlToolPanel::setupUI(Ui::ToolPanel *ui)
 {
     class_selection_ = ui->classes;
+    featu_selection_ = ui->features;
     button_compute_  = ui->compile;
     button_trash_    = ui->trash;
+    size_            = ui->sizeBox;
+}
+
+void CtrlToolPanel::sync()
+{
+    Q_EMIT featuSelected(featu_selection_->currentText());
+    if(class_selection_->count() > 1)
+        Q_EMIT classSelected(class_selection_->currentIndex());
+    Q_EMIT boxSize(size_->value());
 }
 
 void CtrlToolPanel::zoomIn()
@@ -50,7 +61,7 @@ void CtrlToolPanel::zoomUpdate(double factor)
     zoom_ = factor;
 }
 
-void CtrlToolPanel::classChangend(int index)
+void CtrlToolPanel::classChanged(int index)
 {
     if(index == -1)
         return;
@@ -59,46 +70,43 @@ void CtrlToolPanel::classChangend(int index)
     Q_EMIT classSelected(v.toInt());
 }
 
+void CtrlToolPanel::featuChanged(int index)
+{
+    Q_EMIT featuSelected(featu_selection_->currentText());
+}
+
 void CtrlToolPanel::buttonMov(bool checked)
 {
-    if(checked) {
         Q_EMIT uncheckAdd(false);
         Q_EMIT uncheckDel(false);
         Q_EMIT uncheckSel(false);
-    }
 }
 
 void CtrlToolPanel::buttonAdd(bool checked)
 {
-    if(checked){
         Q_EMIT uncheckMov(false);
         Q_EMIT uncheckDel(false);
         Q_EMIT uncheckSel(false);
-    }
 }
 
 void CtrlToolPanel::buttonDel(bool checked)
 {
-    if(checked) {
         Q_EMIT uncheckAdd(false);
         Q_EMIT uncheckMov(false);
         Q_EMIT uncheckSel(false);
-    }
 }
 
 void CtrlToolPanel::buttonSel(bool checked)
 {
-    if(checked) {
         Q_EMIT uncheckAdd(false);
         Q_EMIT uncheckMov(false);
         Q_EMIT uncheckDel(false);
-    }
 }
 
 void CtrlToolPanel::buttonCompute()
 {
-    button_compute_->setDisabled(true);
-    button_trash_->setDisabled(true);
+//    button_compute_->setDisabled(true);
+//    button_trash_->setDisabled(true);
 
     Q_EMIT compute();
 }

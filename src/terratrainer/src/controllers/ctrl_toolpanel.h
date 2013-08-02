@@ -10,6 +10,7 @@
 class QMainWindow;
 class QComboBox;
 class QPushButton;
+class QDoubleSpinBox;
 namespace Ui {
 class ToolPanel;
 }
@@ -24,6 +25,7 @@ public:
     CtrlToolPanel(QMainWindow *tool_bar, CMPCoreBridge::Ptr bridge);
 
     void setupUI(Ui::ToolPanel *ui);
+    void sync();
 
 Q_SIGNALS:
     void zoom(double factor);
@@ -33,6 +35,7 @@ Q_SIGNALS:
     void uncheckDel(bool check);
     void uncheckSel(bool check);
     void classSelected(int id);
+    void featuSelected(QString feat);
     void compute();
 
 public Q_SLOTS:
@@ -40,7 +43,8 @@ public Q_SLOTS:
     void zoomOut();
     void zoomReset();
     void zoomUpdate(double factor);
-    void classChangend(int index);
+    void classChanged(int index);
+    void featuChanged(int index);
 
     void buttonMov(bool checked);
     void buttonAdd(bool checked);
@@ -53,9 +57,11 @@ public Q_SLOTS:
 
 
 private:
-    CMPCoreBridge::Ptr  bridge_;
+    CMPCoreBridge::Ptr      bridge_;
     QMainWindow            *tool_bar_;
     QComboBox              *class_selection_;
+    QComboBox              *featu_selection_;
+    QDoubleSpinBox         *size_;
     QPen                    BlackPen;
     QPushButton            *button_compute_;
     QPushButton            *button_trash_;

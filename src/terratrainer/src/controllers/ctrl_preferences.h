@@ -79,7 +79,6 @@ private:
     /// BRISK SPECIAL
     void updateBriskNumbers();
     void updateBriskRadi();
-
 };
 
 #endif // CTRL_PREFERENCES_H

@@ -1,10 +1,7 @@
 #ifndef CMP_EXTRACTOR_H
 #define CMP_EXTRACTOR_H
 #include <boost/shared_ptr.hpp>
-
-namespace cv {
-class DescriptorExtractor;
-}
+#include <opencv2/nonfree/features2d.hpp>
 
 class CMPExtractor
 {
@@ -15,6 +12,8 @@ public:
     CMPExtractor();
 
     void set(cv::DescriptorExtractor* extractor);
+    void extract(const cv::Mat &image, cv::Mat &descriptors);
+    void extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors);
 
 private:
     CvExPtr extractor_;

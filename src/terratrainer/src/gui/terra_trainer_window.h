@@ -44,7 +44,7 @@ private:
     Controller::Map              controllers_;
 
     void init();
-
+    void createDir();
     void initSignalConnections();
 };
 

@@ -34,7 +34,7 @@ private:
     static  void produceMenuController   (TerraTrainerWindow *mainWindow);
     static  void produceToolBarController(TerraTrainerWindow *mainWindow);
     static  void produceClassEdController(TerraTrainerWindow *mainWindow);
-    static  void produceSettingContorller(TerraTrainerWindow *mainWindow);
+    static  void produceSettingController(TerraTrainerWindow *mainWindow);
 
 private:
     CtrlFactory(){}

@@ -12,6 +12,37 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
 {
     brisk_number_list_ = ui->combo_numberBrisk;
     brisk_radius_list_ = ui->combo_radiusBrisk;
+
+    /// SYNC GUI WITH PARAMS
+    /// ORB
+    ui->orbBox->setChecked(orb_.opp);
+    ui->spinBox_levelOrb->setValue(orb_.levels);
+    ui->spinBox_scaleOrb->setValue(orb_.scale);
+    ui->spinBox_patchOrb->setValue(orb_.patchSize);
+    ui->spinBox_WTAOrb->setValue(orb_.WTA_K);
+    /// SURF
+    ui->surfBox->setChecked(surf_.opp);
+    ui->spinBox_layersSurf->setValue(surf_.octaveLayers);
+    ui->spinBox_octavesSurf->setValue(surf_.octaves);
+    ui->checkBox_extendedSurf->setChecked(surf_.extended);
+    /// SIFT
+    ui->siftBox->setChecked(sift_.opp);
+    ui->spinBox_magSift->setValue(sift_.magnification);
+    ui->spinBox_octavesSift->setValue(sift_.octaves);
+    ui->checkBox_angSift->setChecked(sift_.recalculateAngles);
+    /// BRISK
+    ui->briskBox->setChecked(brisk_.opp);
+    ui->spinBox_dMaxBrisk->setValue(brisk_.dMax);
+    ui->spinBox_dMinBrisk->setValue(brisk_.dMin);
+    /// BRIEF
+    ui->briefBox->setChecked(brief_.opp);
+    /// FREAK
+    ui->freakBox->setChecked(freak_.opp);
+    ui->checkBox_oriNormFreak->setChecked(freak_.orientationNormalized);
+    ui->checkBox_scaleNormFreak->setChecked(freak_.scaleNormalized);
+    ui->spinBox_patternFreak->setValue(freak_.patternScale);
+    ui->spinBox_octavesFreak->setValue(freak_.octaves);
+
 }
 
 void CtrlPreferences::orbOppChanged(bool checked)

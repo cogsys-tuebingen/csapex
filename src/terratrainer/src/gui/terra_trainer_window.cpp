@@ -9,6 +9,7 @@
 /// SYSTEM
 #include <iostream>
 #include <QWidget>
+#include <QDir>
 
 TerraTrainerWindow::TerraTrainerWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -46,8 +47,12 @@ TerraTrainerWindow::~TerraTrainerWindow()
 
 void TerraTrainerWindow::init()
 {
+    std::cout << "Preparing directories!" << std::endl;
+    createDir();
     std::cout << "Starting computation core!" << std::endl;
     core_.reset(new CMPCore());
+    QString work_path = QDir::homePath() + "/.terratrainer/tmp";
+    core_->setWorkPath(work_path.toUtf8().constData());
 
     std::cout << "Firing Controllers up!" << std::endl;
     CtrlFactory::produdeBridgeController(this);
@@ -55,7 +60,18 @@ void TerraTrainerWindow::init()
     CtrlFactory::produceMenuController(this);
     CtrlFactory::produceToolBarController(this);
     CtrlFactory::produceClassEdController(this);
-    CtrlFactory::produceSettingContorller(this);
+    CtrlFactory::produceSettingController(this);
+}
+
+void TerraTrainerWindow::createDir()
+{
+    QDir dir(QDir::homePath());
+
+    if(!dir.exists(".terratrainer")) {
+        std::cout << "Creating .terratrainer in home dir!" << std::endl;
+        dir.mkdir(".terratrainer");
+        dir.mkdir(".terratrainer/tmp");
+    }
 }
 
 void TerraTrainerWindow::initSignalConnections()

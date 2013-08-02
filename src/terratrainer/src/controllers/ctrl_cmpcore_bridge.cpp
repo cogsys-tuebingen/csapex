@@ -73,7 +73,7 @@ int CMPCoreBridge::getClassCount()
 
 void CMPCoreBridge::loadImage(const QString path)
 {
-    if(cc_->load(path.toUtf8().data()))
+    if(cc_->loadImage(path.toUtf8().data()))
         Q_EMIT imageLoaded();
 }
 
@@ -107,7 +107,8 @@ void CMPCoreBridge::setExtractorParams(CMPParams &params)
     }
 }
 
-void CMPCoreBridge::setInput(const std::vector<QROI> &rois)
+void CMPCoreBridge::compute(const std::vector<CMPCore::ROI> &rois)
 {
-    std::cout << rois.size() << std::endl;
+    cc_->setRois(rois);
+    cc_->compute();
 }

@@ -106,7 +106,8 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QPushButton::connect(ctrl,          SIGNAL(uncheckMov(bool)),    tp->movBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckDel(bool)),    tp->delBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckSel(bool)),    tp->selBoxes,   SLOT(setChecked(bool)));
-    QComboBox::connect(tp->classes,     SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(classChangend(int)));
+    QComboBox::connect(tp->classes,     SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(classChanged(int)));
+    QComboBox::connect(tp->features,    SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(featuChanged(int)));
 
     QObject::connect(br.get(),          SIGNAL(classUpdate()),       ctrl,           SLOT(classUpdate()));
     QObject::connect(tp->addBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateAdd()));
@@ -160,14 +161,19 @@ void CtrlFactory::produceClassEdController(TerraTrainerWindow *mainWindow)
     mainWindow->controllers_.insert(entry);
 }
 
-void CtrlFactory::produceSettingContorller(TerraTrainerWindow *mainWindow)
+void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
 {
     Ui::TerraPreferences    *tf = mainWindow->preferences_ui_;
-    Ui::ToolPanel           *tp = mainWindow->tool_panel_ui_;
     CMPCoreBridge::Ptr   br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
+    CtrlToolPanel::Ptr   tp = Controller::to<CtrlToolPanel>(mainWindow->controllers_[ToolPanel]);
 
     if(br == NULL) {
-        std::cerr << "Bridge Controller not yet initialized, therefore cancelling ToolPanel Controller initialization!" << std::endl;
+        std::cerr << "Bridge Controller not yet initialized, therefore cancelling Settings Controller initialization!" << std::endl;
+        return;
+    }
+
+    if(tp  == NULL) {
+        std::cerr << "Toolpanel Controller not yet initialized, cancelling Settings Controller initialization!" << std::endl;
         return;
     }
 
@@ -199,7 +205,7 @@ void CtrlFactory::produceSettingContorller(TerraTrainerWindow *mainWindow)
     QComboBox::connect(tf->combo_numberBrisk, SIGNAL(editTextChanged(QString)),  ctrl, SLOT(briskNumberListChanged(QString)));
     QComboBox::connect(tf->combo_radiusBrisk, SIGNAL(editTextChanged(QString)),  ctrl, SLOT(briskRadiusListChanged(QString)));
     QSpinBox::connect( tf->spinBox_dMaxBrisk, SIGNAL(valueChanged(double)),      ctrl, SLOT(briskdMaxChanged(double)));
-    QSpinBox::connect( tf->spinBox_dMinBrisk,  SIGNAL(valueChanged(double)),     ctrl, SLOT(briskdMinChanged(double)));
+    QSpinBox::connect( tf->spinBox_dMinBrisk, SIGNAL(valueChanged(double)),      ctrl, SLOT(briskdMinChanged(double)));
     tf->combo_numberBrisk->installEventFilter(ctrl);
     tf->combo_radiusBrisk->installEventFilter(ctrl);
 
@@ -215,8 +221,8 @@ void CtrlFactory::produceSettingContorller(TerraTrainerWindow *mainWindow)
     QCheckBox::connect(tf->checkBox_scaleNormFreak, SIGNAL(clicked(bool)),        ctrl, SLOT(freakScaleNormChanged(bool)));
 
     /// PRESET
-    QComboBox::connect(tp->features, SIGNAL(currentIndexChanged(QString)),        ctrl, SLOT(activateSetting(QString)));
-
+    QObject::connect(tp.get(), SIGNAL(featuSelected(QString)), ctrl, SLOT(activateSetting(QString)));
+    tp->sync();
     /// TREE
 
 

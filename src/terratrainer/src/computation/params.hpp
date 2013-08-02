@@ -5,14 +5,23 @@
 
 struct CMPParams {
     enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK};
-    CMPParams(const Type t) : type(t){}
+    CMPParams(const Type t) :
+        type(t),
+        opp(false){}
+
     Type type;
     bool opp;
 };
 
 struct CMPParamsORB : public CMPParams
 {
-    CMPParamsORB() : CMPParams(ORB){}
+    CMPParamsORB() :
+        CMPParams(ORB),
+        levels(8),
+        scale(1.2),
+        WTA_K(2),
+        patchSize(31){}
+
     int    levels;
     double scale;
     int    WTA_K;
@@ -21,7 +30,12 @@ struct CMPParamsORB : public CMPParams
 
 struct CMPParamsSURF : public CMPParams
 {
-    CMPParamsSURF() : CMPParams(SURF){}
+    CMPParamsSURF() :
+        CMPParams(SURF),
+        octaves(4),
+        octaveLayers(3),
+        extended(true){}
+
     int  octaves;
     int  octaveLayers;
     bool extended;
@@ -29,7 +43,13 @@ struct CMPParamsSURF : public CMPParams
 
 struct CMPParamsSIFT : public CMPParams
 {
-    CMPParamsSIFT() : CMPParams(SIFT){}
+    CMPParamsSIFT() :
+        CMPParams(SIFT),
+        magnification(0.0),
+        octaves(3),
+        normalize(true),
+        recalculateAngles(true){}
+
     double magnification;
     int    octaves;
     bool   normalize;
@@ -39,7 +59,11 @@ struct CMPParamsSIFT : public CMPParams
 
 struct CMPParamsBRISK : public CMPParams
 {
-    CMPParamsBRISK() : CMPParams(BRISK){}
+    CMPParamsBRISK() :
+        CMPParams(BRISK),
+        dMax(5.85),
+        dMin(8.2){}
+
     std::vector<float>   radiusList;
     std::vector<int>     numberList;
     double               dMax;
@@ -49,13 +73,22 @@ struct CMPParamsBRISK : public CMPParams
 
 struct CMPParamsBRIEF : public CMPParams
 {
-    CMPParamsBRIEF() : CMPParams(BRIEF){}
+    CMPParamsBRIEF() :
+        CMPParams(BRIEF),
+        bytes(16){}
+
     int bytes;  /// 16 32 64
 };
 
 struct CMPParamsFREAK : public CMPParams
 {
-    CMPParamsFREAK() : CMPParams(FREAK){}
+    CMPParamsFREAK() :
+        CMPParams(FREAK),
+        orientationNormalized(true),
+        scaleNormalized(true),
+        patternScale(22.0),
+        octaves(4){}
+
     bool   orientationNormalized;
     bool   scaleNormalized;
     double patternScale;

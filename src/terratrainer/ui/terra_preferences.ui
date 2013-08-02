@@ -255,7 +255,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_octavesSurf"/>
+           <widget class="QSpinBox" name="spinBox_octavesSurf">
+            <property name="maximum">
+             <number>10</number>
+            </property>
+            <property name="value">
+             <number>4</number>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="spacer_octavesSurf">
@@ -283,12 +290,22 @@
              </size>
             </property>
             <property name="text">
-             <string>Octabe Layers</string>
+             <string>Octave Layers</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_layersSurf"/>
+           <widget class="QSpinBox" name="spinBox_layersSurf">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="spacer_layersSurf">
@@ -311,6 +328,9 @@
            <widget class="QCheckBox" name="checkBox_extendedSurf">
             <property name="text">
              <string>extended</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -389,6 +409,15 @@
               <height>0</height>
              </size>
             </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10</number>
+            </property>
+            <property name="value">
+             <number>3</number>
+            </property>
            </widget>
           </item>
           <item>
@@ -423,6 +452,9 @@
            <widget class="QCheckBox" name="checkBox_angSift">
             <property name="text">
              <string>Recalculate angles</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

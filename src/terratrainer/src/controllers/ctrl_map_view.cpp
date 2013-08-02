@@ -128,22 +128,26 @@ bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
 
 void CtrlMapView::compute()
 {
-    std::vector<CMPCoreBridge::QROI> to_compute;
+    std::vector<CMPCore::ROI> to_compute;
 
-    QList<QGraphicsItem*>         items = map_view_scene_->selectedItems();
+    QList<QGraphicsItem*>  items = map_view_scene_->selectedItems();
     foreach(QGraphicsItem* item, items) {
         QInteractiveItem* ptr = dynamic_cast<QInteractiveItem*>(item);
         if(ptr != NULL) {
-            CMPCoreBridge::QROI roi;
-            roi.bounding = ptr->rect();
-            roi.rotation = 0.0;
-            roi.classId  = ptr->getClass();
+            CMPCore::ROI roi;
+            QRectF bounding = ptr->rect();
+            roi.bounding.x      = std::floor(bounding.x() + 0.5);
+            roi.bounding.y      = std::floor(bounding.y() + 0.5);
+            roi.bounding.width  = std::floor(bounding.width() + 0.5);
+            roi.bounding.height = std::floor(bounding.height() + 0.5);
+            roi.rotation        = 0.0;
+            roi.classId         = ptr->getClass();
             to_compute.push_back(roi);
         }
 
     }
 
-    bridge_->setInput(to_compute);
+    bridge_->compute(to_compute);
 }
 
 void CtrlMapView::computationFinished()
