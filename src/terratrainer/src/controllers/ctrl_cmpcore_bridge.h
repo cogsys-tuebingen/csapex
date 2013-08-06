@@ -55,9 +55,11 @@ Q_SIGNALS:
 public Q_SLOTS:
     void loadImage(const QString path);
     void loadClass(const QString path);
-
+    bool saveClass(const QString path, const QString filename);
 private:
    CMPCore::Ptr cc_;
+
+   bool updateMetaForestPath(const std::string &meta_file, const std::string &forest_name);
 
    std::map<int, int>      classes_;
    std::vector<QColor>     classes_colors_;

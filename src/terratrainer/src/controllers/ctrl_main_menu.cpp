@@ -28,7 +28,7 @@ void CtrlMenu::loadClass()
                 0,
                 tr("Open Classifier"),
                 QDir::currentPath(),
-                tr("Classifier *.jpg;;*.png);;(.pgm);;All files (*.*)") );
+                tr("Classifier *.meta.yaml);;All files (*.*)") );
 
     if(!filename.isNull()) {
         classifier_path_ = filename;

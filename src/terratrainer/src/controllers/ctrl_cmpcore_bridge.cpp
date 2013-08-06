@@ -1,6 +1,9 @@
 #include "ctrl_cmpcore_bridge.h"
 #include <iostream>
+#include <fstream>
 #include <common/QtCvImageConverter.h>
+#include <QFileInfo>
+#include <QDir>
 
 typedef QtCvImageConverter::Converter<QImage, boost::shared_ptr> QImageConverter;
 
@@ -20,6 +23,7 @@ void CMPCoreBridge::removeClass(int id)
     classes_.erase(entry);
     cc_->removeClass(id);
     Q_EMIT classUpdate();
+    saveClass("/tmp/", "test");
 }
 
 void CMPCoreBridge::addClass(const int classID, const int colorID)
@@ -81,8 +85,27 @@ void CMPCoreBridge::loadImage(const QString path)
 
 void CMPCoreBridge::loadClass(const QString path)
 {
-    std::string path_ = path.toUtf8().data();
-    /// TODO LOAD CLASS
+    QFileInfo info(path);
+    QString dir  = info.dir().absolutePath();
+    QString meta = info.fileName();
+    cc_->loadForest(dir.toUtf8().constData(), meta.toUtf8().constData());
+}
+
+bool CMPCoreBridge::saveClass(const QString path, const QString filename)
+{
+    /// "/" !!!
+    bool copied = true;
+    QFile meta(cc_->metaPath().c_str());
+    QFile forest(cc_->forestPath().c_str());
+
+    std::string path_       = path.toUtf8().constData();
+    std::string filename_   = filename.toUtf8().constData();
+    std::string meta_path   =  path_ + filename_ + ".meta.yaml";
+    std::string forest_name = filename_ + ".forest.yaml";
+    copied &= meta.copy(meta_path.c_str());
+    updateMetaForestPath(meta_path, forest_name);
+    copied &= forest.copy((path_ + forest_name).c_str());
+    return copied;
 }
 
 void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
@@ -113,4 +136,50 @@ void CMPCoreBridge::compute(const std::vector<CMPCore::ROI> &rois)
 {
     cc_->setRois(rois);
     cc_->compute();
+}
+
+bool CMPCoreBridge::updateMetaForestPath(const std::string &meta_file, const std::string &forest_name)
+{
+    std::ifstream in(meta_file.c_str());
+    if(!in.is_open()) {
+        std::cerr << "Error opening file to update! READING" << std::endl;
+        return false;
+    }
+
+    try {
+        YAML::Parser  parser(in);
+        YAML::Node    doc;
+        parser.GetNextDocument(doc);
+
+        int classCount;
+        doc["classCount"] >> classCount;
+
+        YAML::Emitter emitter;
+        emitter << YAML::BeginMap;
+        emitter << YAML::Key << "classCount" << classCount;
+        emitter << YAML::Key << "forest" << YAML::Value << forest_name;
+        emitter << YAML::Key << "classes";
+        emitter << YAML::BeginSeq;
+        const YAML::Node &node = doc["classes"];
+        for(YAML::Iterator it = node.begin() ; it != node.end(); it++)  {
+            int classID;
+            *it >> classID;
+            emitter << classID;
+        }
+        emitter << YAML::EndSeq;
+        emitter << YAML::EndMap;
+        in.close();
+
+        std::ofstream of(meta_file.c_str());
+        if(!of.is_open()) {
+            std::cerr << "Error opening file to update! WRITING" << std::endl;
+            return false;
+        }
+        of << emitter.c_str();
+        of.close();
+    } catch (YAML::Exception e) {
+        std::cerr << "Error update file! " << e.what() << std::endl;
+        return false;
+    }
+    return true;
 }

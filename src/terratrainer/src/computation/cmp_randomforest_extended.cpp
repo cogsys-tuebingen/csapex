@@ -33,7 +33,7 @@ void CMPRandomForestExt::setParams(const CMPForestParams &params)
     is_trained_ = false;
 }
 
-void CMPRandomForestExt::train(const cv::Mat &data, const cv::Mat &classes, const cv::Mat &var_type, std::vector<int> &classIDs)
+void CMPRandomForestExt::train(const cv::Mat &data, const cv::Mat &classes, const cv::Mat &var_type)
 {
     try {
         is_trained_ = forest_->train(data, CV_ROW_SAMPLE, classes, cv::Mat(), cv::Mat(), var_type, cv::Mat(), params_);
@@ -47,9 +47,8 @@ bool CMPRandomForestExt::trainFromData(const std::string &path)
     cv::Mat classes;
     cv::Mat data;
     cv::Mat var_type;
-    std::vector<int> classIDs;
-    readTrainingData(path, data, classes, var_type, classIDs);
-    train(data, classes, var_type, classIDs);
+    readTrainingData(path, data, classes, var_type);
+    train(data, classes, var_type);
     return isTrained();
 }
 
@@ -58,7 +57,7 @@ void CMPRandomForestExt::save(const std::string &path)
     forest_->save(path.c_str());
 }
 
-bool CMPRandomForestExt::readTrainingData(const std::string &training_data, cv::Mat &data, cv::Mat &classes, cv::Mat &var_type, std::vector<int> &classIDs)
+bool CMPRandomForestExt::readTrainingData(const std::string &training_data, cv::Mat &data, cv::Mat &classes, cv::Mat &var_type)
 {
     std::ifstream in(training_data.c_str());
     if(!in.is_open()) {
@@ -69,48 +68,41 @@ bool CMPRandomForestExt::readTrainingData(const std::string &training_data, cv::
     YAML::Parser parser(in);
     YAML::Node   doc;
 
-    parser.GetNextDocument(doc);
-
     /// METADATA
-    int classCount;
-    doc["classCount"] >> classCount;
-
-    const YAML::Node &docClasses = doc["classes"];
-    for(YAML::Iterator it = docClasses.begin() ; it != docClasses.end() ; it++) {
-        const YAML::Node &entry = (*it);
-        int classID;
-        entry >> classID;
-        classIDs.push_back(classID);
-    }
-
     std::vector<float>  descriptor_classIDs;
     std::vector<float>  descriptors;
     int   data_step = 0;
-    const YAML::Node &docData = doc["data"];
-    for(YAML::Iterator it = docData.begin() ; it != docData.end() ; it++) {
-        const YAML::Node &entry = (*it);
+    try {
+        parser.GetNextDocument(doc);
+        const YAML::Node &docData = doc["data"];
+        for(YAML::Iterator it = docData.begin() ; it != docData.end() ; it++) {
+            const YAML::Node &entry = (*it);
 
-        int classID;
-        int descr_step;
+            int classID;
+            int descr_step;
 
-        entry["class"]      >> classID;
-        entry["descrStep"]  >> descr_step;
+            entry["class"]      >> classID;
+            entry["descrStep"]  >> descr_step;
 
-        if(data_step == 0) {
-            data_step = descr_step;
-        } else if(data_step != descr_step) {
-            std::cerr << "Dropped descriptor due to variing length!" << std::endl;
-            continue;
+            if(data_step == 0) {
+                data_step = descr_step;
+            } else if(data_step != descr_step) {
+                std::cerr << "Dropped descriptor due to variing length!" << std::endl;
+                continue;
+            }
+
+            descriptor_classIDs.push_back(classID);
+
+            const YAML::Node &descriptor = entry["descr"];
+            for(YAML::Iterator it = descriptor.begin() ; it != descriptor.end() ; it++){
+                float value;
+                (*it) >> value;
+                descriptors.push_back(value);
+            }
         }
-
-        descriptor_classIDs.push_back(classID);
-
-        const YAML::Node &descriptor = entry["descr"];
-        for(YAML::Iterator it = descriptor.begin() ; it != descriptor.end() ; it++){
-            float value;
-            (*it) >> value;
-            descriptors.push_back(value);
-        }
+    } catch (YAML::Exception e) {
+        std::cerr << "Curropt training file! " << e.what() << std::endl;
+        return false;
     }
 
     if(data_step == 0 || descriptors.size() == 0 || descriptor_classIDs.size() == 0) {

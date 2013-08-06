@@ -20,12 +20,16 @@ public:
     typedef boost::shared_ptr<CMPCore> Ptr;
 
     CMPCore();
-    void    setWorkPath(const std::string &work_path);
+    void        setWorkPath(const std::string &work_path);
 
     ///     IMAGE
-    bool    loadImage(const std::string image_path);
-    cv::Mat getImage() const;
-    bool    loadClass(const std::string class_path);
+    bool        loadImage(const std::string image_path);
+    cv::Mat     getImage() const;
+    ///     CLASSIFIER
+    bool        loadForest(const std::string path, const std::string filename);
+    std::string metaPath();
+    std::string forestPath();
+
 
     ///     COMPUTATION
     void    compute();
@@ -58,12 +62,15 @@ private:
 
     std::string              work_path_;
     std::string              file_extraction_;
-    std::string              file_tree_;
+    std::string              file_forest_;
+    std::string              file_forest_meta_;
     std::vector<ROI>         rois_;
     std::vector<int>         classIDs_;
 
     void extract();
     void train();
+    void writeClasses(YAML::Emitter &emitter);
+    void writeMetaFile();
 };
 
 #endif // CMP_CORE_H
