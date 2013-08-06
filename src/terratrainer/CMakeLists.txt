@@ -60,7 +60,9 @@ add_executable(TerraTrainer
                 src/computation/extractors.hpp
                 src/computation/cmp_core.cpp
                 src/computation/cmp_extractor.cpp
+                src/computation/cmp_extractor_extended.cpp
                 src/computation/cmp_randomforest.cpp
+                src/computation/cmp_randomforest_extended.cpp
                 src/controllers/ctrl_factory.cpp
                 src/controllers/ctrl_main_menu.cpp
                 src/controllers/ctrl_map_view.cpp
@@ -82,7 +84,8 @@ target_link_libraries(TerraTrainer
                         yaml-cpp
                         ${QT_LIBRARIES}
                         ${OpenCV_LIBS}
-                        ${Boost_LIBRARIES})
+                        ${Boost_LIBRARIES}
+                        ${catkin_LIBRARIES})
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(terratrainer_node terratrainer_generate_messages_cpp)

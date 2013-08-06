@@ -2,8 +2,8 @@
 #define CMP_CORE_H
 /// COMPONENT
 #include "params.hpp"
-#include "cmp_extractor.h"
-#include "cmp_randomforest.h"
+#include "cmp_extractor_extended.h"
+#include "cmp_randomforest_extended.h"
 #include "extractors.hpp"
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -16,30 +16,23 @@
 class CMPCore
 {
 public:
-    struct ROI {
-        cv::Rect    bounding;
-        int         id;
-        int         classID;
-        double      rotation;
-    };
-
+    typedef CMPExtractorExt::ROI       ROI;
     typedef boost::shared_ptr<CMPCore> Ptr;
 
     CMPCore();
+    void    setWorkPath(const std::string &work_path);
 
-    /// IMAGE
+    ///     IMAGE
     bool    loadImage(const std::string image_path);
     cv::Mat getImage() const;
     bool    loadClass(const std::string class_path);
 
-    /// EXTRACTION
-    void    setRois(const std::vector<ROI> &rois);
-    void    addClass(int classID);
-    void    removeClass(int classID);
+    ///     COMPUTATION
     void    compute();
-    void    setWorkPath(const std::string &work_path);
 
-    /// CREATE EXTRACTOR
+    ///     EXTRACTION  PREPARATION
+    void    setRois(const std::vector<ROI> &rois);
+
     template<class Parameters>
     void setExtractorParameters(Parameters &param)
     {
@@ -50,17 +43,17 @@ public:
         type_ = param.type;
     }
 
-    /// SET TREE PARAMS
-    void setRandomForestParams(const CMPForestParams &params);
-
+    ///     TRAINING PREPARATION
+    void    addClass(int classID);
+    void    removeClass(int classID);
+    void    setRandomForestParams(const CMPForestParams &params);
 
 private:
-    typedef std::vector<cv::KeyPoint> Keys;
-
-    cv::Mat                  raw_image_;
-    CMPExtractor::Ptr        extractor_;
-    CMPExtractorParams::Type type_;
-    CMPRandomForest::Ptr     random_;
+    typedef CMPExtractorExt::KeyPoints KeyPoints;
+    cv::Mat                     raw_image_;
+    CMPExtractorExt::Ptr        extractor_;
+    CMPExtractorParams::Type    type_;
+    CMPRandomForestExt::Ptr     random_;
 
 
     std::string              work_path_;
@@ -71,9 +64,6 @@ private:
 
     void extract();
     void train();
-    bool readTrainingData(cv::Mat &data, cv::Mat &classes, cv::Mat &var_type, std::vector<int> &classIDs);
-    void writeMatrix(const cv::Mat &mat, YAML::Emitter &emitter);
-    Keys prepareKeypoint(cv::Rect rect);
 };
 
 #endif // CMP_CORE_H

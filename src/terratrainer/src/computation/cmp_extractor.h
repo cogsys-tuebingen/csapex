@@ -6,8 +6,16 @@
 class CMPExtractor
 {
 public:
-    typedef boost::shared_ptr<CMPExtractor> Ptr;
-    typedef boost::shared_ptr<cv::DescriptorExtractor> CvExPtr;
+    typedef boost::shared_ptr<CMPExtractor>             Ptr;
+    typedef boost::shared_ptr<cv::DescriptorExtractor>  CvExPtr;
+    typedef std::vector<cv::KeyPoint>                   KeyPoints;
+
+    struct ROI {
+        cv::Rect    bounding;
+        int         id;
+        int         classID;
+        double      rotation;
+    };
 
     CMPExtractor();
 
@@ -15,8 +23,11 @@ public:
     void extract(const cv::Mat &image, cv::Mat &descriptors);
     void extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors);
 
-private:
-    CvExPtr extractor_;
+protected:
+    CvExPtr          extractor_;
+
+    KeyPoints prepareKeypoint(cv::Rect rect);
+
 };
 
 #endif // CMP_EXTRACTOR_H

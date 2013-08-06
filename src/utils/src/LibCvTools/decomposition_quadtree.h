@@ -57,15 +57,15 @@ public:
 
     virtual ~QuadtreeDecomposition();
 private:
-    cv::Mat                 image_;
-    cv::Size                min_region_size_;
+    cv::Mat                     image_;
+    cv::Size                    min_region_size_;
     DecompositionClassifier    &classfier_;
-    CVQt                    quadtree_root_;
-    CVQtNodesList           quadtree_nodes_;
+    CVQt                        quadtree_root_;
+    CVQtNodesList               quadtree_nodes_;
 
-    bool                    auto_iterate_;
-    cv::Size                debug_size_;
-    cv::Scalar              debug_color_;
+    bool                        auto_iterate_;
+    cv::Size                    debug_size_;
+    cv::Scalar                  debug_color_;
 
     void    process_active_nodes();
     void    render_debug();
