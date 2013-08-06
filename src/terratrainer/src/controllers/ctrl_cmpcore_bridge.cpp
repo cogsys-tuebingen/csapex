@@ -18,6 +18,7 @@ void CMPCoreBridge::removeClass(int id)
 {
     std::map<int, int>::iterator entry = classes_.find(id);
     classes_.erase(entry);
+    cc_->removeClass(id);
     Q_EMIT classUpdate();
 }
 
@@ -25,6 +26,7 @@ void CMPCoreBridge::addClass(const int classID, const int colorID)
 {
     std::pair<int, int> entry(classID, colorID);
     classes_.insert(entry);
+    cc_->addClass(classID);
     Q_EMIT classUpdate();
 }
 
@@ -80,29 +82,29 @@ void CMPCoreBridge::loadImage(const QString path)
 void CMPCoreBridge::loadClass(const QString path)
 {
     std::string path_ = path.toUtf8().data();
-    std::cout << path_ << std::endl;
+    /// TODO LOAD CLASS
 }
 
-void CMPCoreBridge::setExtractorParams(CMPParams &params)
+void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
 {
     switch(params.type) {
-    case CMPParams::ORB:
-        cc_->create(static_cast<CMPParamsORB&>(params));
+    case CMPExtractorParams::ORB:
+        cc_->setExtractorParameters(static_cast<CMPParamsORB&>(params));
         break;
-    case CMPParams::SURF:
-        cc_->create(static_cast<CMPParamsSURF&>(params));
+    case CMPExtractorParams::SURF:
+        cc_->setExtractorParameters(static_cast<CMPParamsSURF&>(params));
         break;
-    case CMPParams::SIFT:
-        cc_->create(static_cast<CMPParamsSIFT&>(params));
+    case CMPExtractorParams::SIFT:
+        cc_->setExtractorParameters(static_cast<CMPParamsSIFT&>(params));
         break;
-    case CMPParams::BRIEF:
-        cc_->create(static_cast<CMPParamsBRIEF&>(params));
+    case CMPExtractorParams::BRIEF:
+        cc_->setExtractorParameters(static_cast<CMPParamsBRIEF&>(params));
         break;
-    case CMPParams::BRISK:
-        cc_->create(static_cast<CMPParamsBRISK&>(params));
+    case CMPExtractorParams::BRISK:
+        cc_->setExtractorParameters(static_cast<CMPParamsBRISK&>(params));
         break;
-    case CMPParams::FREAK:
-        cc_->create(static_cast<CMPParamsFREAK&>(params));
+    case CMPExtractorParams::FREAK:
+        cc_->setExtractorParameters(static_cast<CMPParamsFREAK&>(params));
         break;
     }
 }

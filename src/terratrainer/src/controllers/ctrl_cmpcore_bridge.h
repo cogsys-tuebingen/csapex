@@ -43,7 +43,7 @@ public:
     int              getClassCount();
 
     /// GENERAL SETTINGS
-    void setExtractorParams(CMPParams &params);
+    void setExtractorParams(CMPExtractorParams &params);
     void compute(const std::vector<CMPCore::ROI> &rois);
 
 Q_SIGNALS:

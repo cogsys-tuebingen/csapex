@@ -141,7 +141,7 @@ void CtrlMapView::compute()
             roi.bounding.width  = std::floor(bounding.width() + 0.5);
             roi.bounding.height = std::floor(bounding.height() + 0.5);
             roi.rotation        = 0.0;
-            roi.classId         = ptr->getClass();
+            roi.classID         = ptr->getClass();
             to_compute.push_back(roi);
         }
 

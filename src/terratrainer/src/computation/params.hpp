@@ -3,9 +3,37 @@
 /// SYSTEM
 #include <vector>
 
-struct CMPParams {
+struct CMPForestParams {
+    /**
+     *CV_TERMCRIT_ITER = 1;
+     *CV_TERMCRIT_EPS  = 2;
+     */
+
+    CMPForestParams() :
+        max_depth(25), min_samples(5), regression(0),
+        surrogates(false), max_categories(15),
+        priors(0), variable_importance(false),
+        nactive_variables(4), max_trees(100),
+        accurracy(0.01f),
+        termination_criteria(1 | 2){}
+
+    int                max_depth;
+    int                min_samples;
+    float              regression;
+    bool               surrogates;
+    int                max_categories;
+    std::vector<float> priors;
+    bool               variable_importance;
+    int                nactive_variables;
+    int                max_trees;
+    float              accurracy;
+    int                termination_criteria;
+};
+
+
+struct CMPExtractorParams {
     enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK};
-    CMPParams(const Type t) :
+    CMPExtractorParams(const Type t) :
         type(t),
         opp(false){}
 
@@ -13,10 +41,10 @@ struct CMPParams {
     bool opp;
 };
 
-struct CMPParamsORB : public CMPParams
+struct CMPParamsORB : public CMPExtractorParams
 {
     CMPParamsORB() :
-        CMPParams(ORB),
+        CMPExtractorParams(ORB),
         levels(8),
         scale(1.2),
         WTA_K(2),
@@ -28,10 +56,10 @@ struct CMPParamsORB : public CMPParams
     int    patchSize;
 };
 
-struct CMPParamsSURF : public CMPParams
+struct CMPParamsSURF : public CMPExtractorParams
 {
     CMPParamsSURF() :
-        CMPParams(SURF),
+        CMPExtractorParams(SURF),
         octaves(4),
         octaveLayers(3),
         extended(true){}
@@ -41,10 +69,10 @@ struct CMPParamsSURF : public CMPParams
     bool extended;
 };
 
-struct CMPParamsSIFT : public CMPParams
+struct CMPParamsSIFT : public CMPExtractorParams
 {
     CMPParamsSIFT() :
-        CMPParams(SIFT),
+        CMPExtractorParams(SIFT),
         magnification(0.0),
         octaves(3),
         normalize(true),
@@ -57,10 +85,10 @@ struct CMPParamsSIFT : public CMPParams
 };
 
 
-struct CMPParamsBRISK : public CMPParams
+struct CMPParamsBRISK : public CMPExtractorParams
 {
     CMPParamsBRISK() :
-        CMPParams(BRISK),
+        CMPExtractorParams(BRISK),
         dMax(5.85),
         dMin(8.2){}
 
@@ -71,19 +99,19 @@ struct CMPParamsBRISK : public CMPParams
 
 };
 
-struct CMPParamsBRIEF : public CMPParams
+struct CMPParamsBRIEF : public CMPExtractorParams
 {
     CMPParamsBRIEF() :
-        CMPParams(BRIEF),
+        CMPExtractorParams(BRIEF),
         bytes(16){}
 
     int bytes;  /// 16 32 64
 };
 
-struct CMPParamsFREAK : public CMPParams
+struct CMPParamsFREAK : public CMPExtractorParams
 {
     CMPParamsFREAK() :
-        CMPParams(FREAK),
+        CMPExtractorParams(FREAK),
         orientationNormalized(true),
         scaleNormalized(true),
         patternScale(22.0),
