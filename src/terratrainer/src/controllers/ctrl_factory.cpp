@@ -42,8 +42,11 @@ void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
     }
 
     CtrlMapView *ctrl = new CtrlMapView(ui->mapView, br);
-    QObject::connect(br.get(), SIGNAL(imageLoaded()), ctrl, SLOT(imageUpdate()));
+    QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()));
     QObject::connect(br.get(), SIGNAL(computationFinished()), ctrl, SLOT(computationFinished()));
+    QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)));
+    QObject::connect(br.get(), SIGNAL(classUpdate(int,int)),  ctrl, SLOT(classUpdated(int,int)));
+    QObject::connect(br.get(), SIGNAL(colorUpdate(int)),      ctrl, SLOT(colorUpdate(int)));
 
     IDPtr entry(MapView, Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
@@ -61,15 +64,19 @@ void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
         return;
     }
 
-    QAction::connect(ui->action_LoadImage,      SIGNAL(triggered()), ctrl, SLOT(loadImage()));
-    QAction::connect(ui->action_LoadClassifier, SIGNAL(triggered()), ctrl, SLOT(loadClass()));
-    QAction::connect(ui->action_ZoomIn,         SIGNAL(triggered()), ctrl, SLOT(zoomIn()));
-    QAction::connect(ui->action_ZoomOut,        SIGNAL(triggered()), ctrl, SLOT(zoomOut()));
-    QAction::connect(ui->action_ZoomReset,      SIGNAL(triggered()), ctrl, SLOT(zoomReset()));
-    QObject::connect(mv.get(),                  SIGNAL(zoomUpdated(double)), ctrl, SLOT(zoomUpdate(double)));
-    QObject::connect(ctrl,                      SIGNAL(zoom(double)), mv.get(), SLOT(zoom(double)));
-    QObject::connect(ctrl,                      SIGNAL(imagePath(QString)), br.get(), SLOT(loadImage(QString)));
-    QObject::connect(ctrl,                      SIGNAL(classPath(QString)), br.get(), SLOT(loadClass(QString)));
+    QAction::connect(ui->action_LoadImage,          SIGNAL(triggered()), ctrl, SLOT(loadImage()));
+    QAction::connect(ui->action_LoadClassifier,     SIGNAL(triggered()), ctrl, SLOT(loadClassifier()));
+    QAction::connect(ui->action_SaveClassifier,     SIGNAL(triggered()), ctrl, SLOT(saveClassifier()));
+    QAction::connect(ui->action_SaveClassifier_raw, SIGNAL(triggered()), ctrl, SLOT(saveClassifierRaw()));
+    QAction::connect(ui->action_ZoomIn,             SIGNAL(triggered()), ctrl, SLOT(zoomIn()));
+    QAction::connect(ui->action_ZoomOut,            SIGNAL(triggered()), ctrl, SLOT(zoomOut()));
+    QAction::connect(ui->action_ZoomReset,          SIGNAL(triggered()), ctrl, SLOT(zoomReset()));
+    QObject::connect(mv.get(),                      SIGNAL(zoomUpdated(double)), ctrl, SLOT(zoomUpdate(double)));
+    QObject::connect(ctrl,                          SIGNAL(zoom(double)), mv.get(), SLOT(zoom(double)));
+    QObject::connect(ctrl,                          SIGNAL(loadImage(QString)),      br.get(), SLOT(loadImage(QString)));
+    QObject::connect(ctrl,                          SIGNAL(loadClassifier(QString)), br.get(), SLOT(loadClassifier(QString)));
+    QObject::connect(ctrl,                          SIGNAL(saveClassifier(QString)), br.get(), SLOT(saveClassifier(QString)));
+    QObject::connect(ctrl,                          SIGNAL(saveClassifierRaw(QString)), br.get(), SLOT(saveClassifierRaw(QString)));
 
     IDPtr entry(Menu, Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
@@ -109,7 +116,11 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QComboBox::connect(tp->classes,     SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(classChanged(int)));
     QComboBox::connect(tp->features,    SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(featuChanged(int)));
 
-    QObject::connect(br.get(),          SIGNAL(classUpdate()),       ctrl,           SLOT(classUpdate()));
+    QObject::connect(br.get(),          SIGNAL(classifierReloaded()),ctrl,           SLOT(classifierLoaded()));
+    QObject::connect(br.get(),          SIGNAL(classAdded(int)),     ctrl,           SLOT(classAdded(int)));
+    QObject::connect(br.get(),          SIGNAL(classRemoved(int)),   ctrl,           SLOT(classRemoved(int)));
+    QObject::connect(br.get(),          SIGNAL(classUpdate(int,int)),ctrl,           SLOT(classUpdated(int,int)));
+    QObject::connect(br.get(),          SIGNAL(colorUpdate(int)),    ctrl,           SLOT(colorUpdate(int)));
     QObject::connect(tp->addBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateAdd()));
     QObject::connect(tp->movBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateMove()));
     QObject::connect(tp->delBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateDelete()));

@@ -18,27 +18,47 @@ void CtrlMenu::loadImage()
 
     if(!filename.isNull()) {
         image_path_ = filename;
-        Q_EMIT imagePath(image_path_);
+        Q_EMIT loadImage(image_path_);
     }
 }
 
-void CtrlMenu::loadClass()
+void CtrlMenu::loadClassifier()
 {
     QString filename = QFileDialog::getOpenFileName(
                 0,
                 tr("Open Classifier"),
                 QDir::currentPath(),
-                tr("Classifier *.meta.yaml);;All files (*.*)") );
+                tr("(*.yaml);;All files (*.*)") );
 
     if(!filename.isNull()) {
-        classifier_path_ = filename;
-        Q_EMIT classPath(classifier_path_);
+        Q_EMIT loadClassifier(filename);
     }
 }
 
-void CtrlMenu::saveClass()
+void CtrlMenu::saveClassifier()
 {
+    QString filename = QFileDialog::getSaveFileName(
+                0,
+                tr("Save Classifier with class infos!"),
+                QDir::currentPath(),
+                tr("(*.yaml)") );
+    if( !filename.isNull() )
+    {
+        Q_EMIT saveClassifier(filename);
+    }
+}
 
+void CtrlMenu::saveClassifierRaw()
+{
+    QString filename = QFileDialog::getSaveFileName(
+                0,
+                tr("Save Classifier!"),
+                QDir::currentPath(),
+                tr("(*.yaml)") );
+    if( !filename.isNull() )
+    {
+        saveClassifierRaw(filename);
+    }
 }
 
 void CtrlMenu::zoomIn()

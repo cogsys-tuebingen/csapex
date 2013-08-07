@@ -181,11 +181,10 @@ bool CtrlClassEdit::saveEntry()
     selection[2]->setText(entered_name);
 
     if(entered_id_ != selected_id_) {
-        bridge_->removeClass(selected_id_);
-        bridge_->addClass(entered_id_, entered_color_);
+        bridge_->updateClass(selected_id_, entered_id_);
         selected_id_ = entered_id_;
     } else {
-        bridge_->updateClassColor(selected_id_, entered_color_);
+        bridge_->updateColor(selected_id_, entered_color_);
     }
 
     return true;

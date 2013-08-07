@@ -53,7 +53,12 @@ public Q_SLOTS:
     void buttonCompute();
 
     void computationFinished();
-    void classUpdate();
+    void classifierLoaded();
+    void classAdded(int id);
+    void classRemoved(int id);
+    void classUpdated(int oldID, int newID);
+    void colorUpdate(int id);
+
 
 
 private:

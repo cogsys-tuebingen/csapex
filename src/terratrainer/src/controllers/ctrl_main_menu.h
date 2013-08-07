@@ -15,15 +15,18 @@ public:
 
 
 Q_SIGNALS:
-    void classPath(QString path);
-    void imagePath(QString path);
+    void loadClassifier(QString path);
+    void loadImage(QString path);
+    void saveClassifier(QString path);
+    void saveClassifierRaw(QString path);
     void zoom(double factor);
 
 
 public Q_SLOTS:
     void loadImage();
-    void loadClass();
-    void saveClass();
+    void loadClassifier();
+    void saveClassifier();
+    void saveClassifierRaw();
     void zoomIn();
     void zoomOut();
     void zoomReset();

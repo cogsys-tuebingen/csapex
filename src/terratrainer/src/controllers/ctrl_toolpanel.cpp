@@ -117,7 +117,7 @@ void CtrlToolPanel::computationFinished()
     button_trash_->setEnabled(true);
 }
 
-void CtrlToolPanel::classUpdate()
+void CtrlToolPanel::classifierLoaded()
 {
     class_selection_->clear();
     std::vector<int> ids = bridge_->getClassIDs();
@@ -125,6 +125,38 @@ void CtrlToolPanel::classUpdate()
         class_selection_->addItem(QIcon(renderColorIcon(id)), QString::number(id), QVariant(id));
     }
 }
+
+
+void CtrlToolPanel::classAdded(int id)
+{
+    class_selection_->addItem(QIcon(renderColorIcon(id)), QString::number(id), QVariant(id));
+}
+
+void CtrlToolPanel::classRemoved(int id)
+{
+    int item_index = class_selection_->findData(QVariant(id));
+    if(item_index != -1) {
+        class_selection_->removeItem(item_index);
+    }
+}
+
+void CtrlToolPanel::classUpdated(int oldID, int newID)
+{
+    int item_index = class_selection_->findData(QVariant(oldID));
+    if(item_index != -1) {
+        class_selection_->setItemData(item_index, QVariant(newID));
+        class_selection_->setItemText(item_index, QString::number(newID));
+    }
+}
+
+void CtrlToolPanel::colorUpdate(int id)
+{
+    int item_index = class_selection_->findData(QVariant(id));
+    if(item_index != -1) {
+        class_selection_->setItemIcon(item_index, QIcon(renderColorIcon(id)));
+    }
+}
+
 
 void CtrlToolPanel::snapZoom()
 {

@@ -22,14 +22,13 @@ public:
     CMPCore();
     void        setWorkPath(const std::string &work_path);
 
-    ///     IMAGE
+    ///         IMAGE
     bool        loadImage(const std::string image_path);
     cv::Mat     getImage() const;
-    ///     CLASSIFIER
-    bool        loadForest(const std::string path, const std::string filename);
+    ///         CLASSIFIER
+    bool        load(const std::string path, const std::vector<int> &classRegister);
     std::string metaPath();
     std::string forestPath();
-
 
     ///     COMPUTATION
     void    compute();
@@ -50,6 +49,8 @@ public:
     ///     TRAINING PREPARATION
     void    addClass(int classID);
     void    removeClass(int classID);
+    void    getClasses(std::vector<int> &classes);
+
     void    setRandomForestParams(const CMPForestParams &params);
 
 private:
@@ -59,18 +60,14 @@ private:
     CMPExtractorParams::Type    type_;
     CMPRandomForestExt::Ptr     random_;
 
-
     std::string              work_path_;
     std::string              file_extraction_;
     std::string              file_forest_;
-    std::string              file_forest_meta_;
     std::vector<ROI>         rois_;
     std::vector<int>         classIDs_;
 
     void extract();
     void train();
-    void writeClasses(YAML::Emitter &emitter);
-    void writeMetaFile();
 };
 
 #endif // CMP_CORE_H

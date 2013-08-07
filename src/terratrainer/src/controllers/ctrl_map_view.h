@@ -43,7 +43,10 @@ public Q_SLOTS:
     void selectAll();
     void deselectAll();
     void changeClass(int id);
-    void classUpdate();
+
+    void classRemoved(int id);
+    void classUpdated(int oldID, int newID);
+    void colorUpdate(int id);
 
     /// INVOKE COMPUTATION
     void compute();

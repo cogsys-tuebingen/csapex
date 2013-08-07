@@ -4,6 +4,7 @@
 #include <common/QtCvImageConverter.h>
 #include <QFileInfo>
 #include <QDir>
+#include <computation/yaml.hpp>
 
 typedef QtCvImageConverter::Converter<QImage, boost::shared_ptr> QImageConverter;
 
@@ -17,28 +18,40 @@ boost::shared_ptr<QImage> CMPCoreBridge::rawImage()
     return QImageConverter::mat2QImage(cc_->getImage());
 }
 
+void CMPCoreBridge::load(const std::map<int,int>& classes, const std::vector<QColor> &colors, const std::string forestPath)
+{
+    classes_ = classes;
+    cc_->load(forestPath,getClassIDs());
+    classes_colors_ = colors;
+}
+
+void CMPCoreBridge::updateClass(const int oldID, const int newID)
+{
+    if(classes_.find(oldID) == classes_.end())
+        return;
+    int colorID = classes_[oldID];
+    removeClassIndex(oldID);
+    addClassIndex(newID, colorID);
+    Q_EMIT classUpdate(oldID, newID);
+}
+
 void CMPCoreBridge::removeClass(int id)
 {
-    std::map<int, int>::iterator entry = classes_.find(id);
-    classes_.erase(entry);
-    cc_->removeClass(id);
-    Q_EMIT classUpdate();
-    saveClass("/tmp/", "test");
+    removeClassIndex(id);
+    Q_EMIT classRemoved(id);
 }
 
 void CMPCoreBridge::addClass(const int classID, const int colorID)
 {
-    std::pair<int, int> entry(classID, colorID);
-    classes_.insert(entry);
-    cc_->addClass(classID);
-    Q_EMIT classUpdate();
+    addClassIndex(classID, colorID);
+    Q_EMIT classAdded(classID);
 }
 
-void CMPCoreBridge::updateClassColor(const int classID, const int colorID)
+void CMPCoreBridge::updateColor(const int classID, const int colorID)
 {
     if(classes_.find(classID) != classes_.end())
         classes_[classID] = colorID;
-    Q_EMIT classUpdate();
+    Q_EMIT colorUpdate(classID);
 }
 
 int CMPCoreBridge::getColorRef(const int classID)
@@ -77,35 +90,51 @@ int CMPCoreBridge::getClassCount()
     return classes_.size();
 }
 
+void CMPCoreBridge::getClassIndex(std::map<int,int>  &map)
+{
+    map = classes_;
+}
+
+void CMPCoreBridge::getColorPalette(std::vector<QColor> &palette)
+{
+    palette = classes_colors_;
+}
+
 void CMPCoreBridge::loadImage(const QString path)
 {
     if(cc_->loadImage(path.toUtf8().data()))
         Q_EMIT imageLoaded();
 }
 
-void CMPCoreBridge::loadClass(const QString path)
+void CMPCoreBridge::loadClassifier(const QString path)
 {
-    QFileInfo info(path);
-    QString dir  = info.dir().absolutePath();
-    QString meta = info.fileName();
-    cc_->loadForest(dir.toUtf8().constData(), meta.toUtf8().constData());
+    std::ifstream in(path.toUtf8().constData());
+    CMPYAML::readFile(in, cc_.get(), this);
+    in.close();
+    Q_EMIT classifierReloaded();
 }
 
-bool CMPCoreBridge::saveClass(const QString path, const QString filename)
+void CMPCoreBridge::saveClassifier(const QString path)
 {
-    /// "/" !!!
-    bool copied = true;
-    QFile meta(cc_->metaPath().c_str());
-    QFile forest(cc_->forestPath().c_str());
+    std::ofstream out(path.toUtf8().constData());
+    if(!out.is_open()) {
+        std::cerr << "Couldn't write file!" << std::endl;
+    }
 
-    std::string path_       = path.toUtf8().constData();
-    std::string filename_   = filename.toUtf8().constData();
-    std::string meta_path   =  path_ + filename_ + ".meta.yaml";
-    std::string forest_name = filename_ + ".forest.yaml";
-    copied &= meta.copy(meta_path.c_str());
-    updateMetaForestPath(meta_path, forest_name);
-    copied &= forest.copy((path_ + forest_name).c_str());
-    return copied;
+    CMPYAML::writeFile(out, cc_.get(), this);
+    out.close();
+}
+
+void CMPCoreBridge::saveClassifierRaw(const QString path)
+{
+    QFile file(cc_->forestPath().c_str());
+    if(file.exists()) {
+        if(!file.copy(path)) {
+            std::cerr << "File couldn't be saved! Check your rights!" << std::endl;
+        }
+    } else {
+        std::cerr << "No forest computed yet!" << std::endl;
+    }
 }
 
 void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
@@ -132,54 +161,27 @@ void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
     }
 }
 
+void CMPCoreBridge::setClassifierParams(CMPForestParams &params)
+{
+    cc_->setRandomForestParams(params);
+}
+
 void CMPCoreBridge::compute(const std::vector<CMPCore::ROI> &rois)
 {
     cc_->setRois(rois);
     cc_->compute();
 }
 
-bool CMPCoreBridge::updateMetaForestPath(const std::string &meta_file, const std::string &forest_name)
+void CMPCoreBridge::removeClassIndex(const int id)
 {
-    std::ifstream in(meta_file.c_str());
-    if(!in.is_open()) {
-        std::cerr << "Error opening file to update! READING" << std::endl;
-        return false;
-    }
+    std::map<int, int>::iterator entry = classes_.find(id);
+    classes_.erase(entry);
+    cc_->removeClass(id);
+}
 
-    try {
-        YAML::Parser  parser(in);
-        YAML::Node    doc;
-        parser.GetNextDocument(doc);
-
-        int classCount;
-        doc["classCount"] >> classCount;
-
-        YAML::Emitter emitter;
-        emitter << YAML::BeginMap;
-        emitter << YAML::Key << "classCount" << classCount;
-        emitter << YAML::Key << "forest" << YAML::Value << forest_name;
-        emitter << YAML::Key << "classes";
-        emitter << YAML::BeginSeq;
-        const YAML::Node &node = doc["classes"];
-        for(YAML::Iterator it = node.begin() ; it != node.end(); it++)  {
-            int classID;
-            *it >> classID;
-            emitter << classID;
-        }
-        emitter << YAML::EndSeq;
-        emitter << YAML::EndMap;
-        in.close();
-
-        std::ofstream of(meta_file.c_str());
-        if(!of.is_open()) {
-            std::cerr << "Error opening file to update! WRITING" << std::endl;
-            return false;
-        }
-        of << emitter.c_str();
-        of.close();
-    } catch (YAML::Exception e) {
-        std::cerr << "Error update file! " << e.what() << std::endl;
-        return false;
-    }
-    return true;
+void CMPCoreBridge::addClassIndex(const int id, const int colorId)
+{
+    std::pair<int, int> entry(id, colorId);
+    classes_.insert(entry);
+    cc_->addClass(id);
 }

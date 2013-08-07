@@ -96,12 +96,64 @@ void CtrlMapView::changeClass(int id)
     current_class_sel_pen_.setColor(color);
 }
 
-void CtrlMapView::classUpdate()
+void CtrlMapView::classRemoved(int id)
 {
-    if(bridge_->getClassCount() > 0)
-        return;
+    if(current_class_id_ = id)
+        current_class_id_ = -1;
 
-    current_class_id_ = -1;
+    QList<QGraphicsItem*> items = map_view_scene_->items();
+    foreach (QGraphicsItem *item, items) {
+        QInteractiveItem *interactive = dynamic_cast<QInteractiveItem*>(item);
+        if(interactive != NULL) {
+            if(interactive->getClass() == id) {
+                map_view_scene_->removeItem(interactive);
+            }
+        }
+    }
+}
+
+void CtrlMapView::classUpdated(int oldID, int newID)
+{
+    if(current_class_id_ == oldID)
+        current_class_id_ = newID;
+
+    QList<QGraphicsItem*> items = map_view_scene_->items();
+    foreach (QGraphicsItem *item, items) {
+        QInteractiveItem *interactive = dynamic_cast<QInteractiveItem*>(item);
+        if(interactive != NULL) {
+            if(interactive->getClass() == oldID) {
+                interactive->setClass(newID);
+            }
+        }
+    }
+}
+
+void CtrlMapView::colorUpdate(int id)
+{
+    QColor color  = bridge_->getColorByClass(id);
+    if(current_class_id_ = id) {
+        current_class_pen_.setColor(color);
+        current_class_sel_pen_.setColor(color);
+    }
+
+
+    QList<QGraphicsItem*> items = map_view_scene_->items();
+    QPen   defPen = current_class_pen_;
+    QPen   selPen = current_class_sel_pen_;
+    defPen.setColor(color);
+    selPen.setColor(color);
+
+    foreach (QGraphicsItem *item, items) {
+        QInteractiveItem *interactive = dynamic_cast<QInteractiveItem*>(item);
+        if(interactive != NULL) {
+            if(interactive->getClass() == id) {
+                interactive->setPen(defPen);
+                interactive->setSelectPen(selPen);
+            }
+        }
+    }
+
+    map_view_->repaint();
 }
 
 bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
