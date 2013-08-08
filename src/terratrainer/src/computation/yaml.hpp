@@ -19,6 +19,16 @@ inline void writeClassIndex(YAML::Emitter &emitter, std::map<int,int> &classes)
     emitter << YAML::EndSeq;
 }
 
+inline void writeClassInfos(YAML::Emitter &emitter, std::map<int, QString> &infos)
+{
+    emitter << YAML::BeginSeq;
+    for(std::map<int,QString>::iterator it = infos.begin() ; it != infos.end() ;it++) {
+        emitter << it->first;
+        emitter << it->second.toUtf8().constData();
+    }
+    emitter << YAML::EndSeq;
+}
+
 inline void writeColors(YAML::Emitter &emitter, std::vector<QColor> &colors)
 {
 
@@ -59,6 +69,8 @@ inline void writeFile(std::ofstream &out, CMPCore *core, CMPCoreBridge *bridge)
     /// PREPARE CLASSES
     std::map<int,int> class_index;
     bridge->getClassIndex(class_index);
+    std::map<int, QString> class_infos;
+    bridge->getClassInfos(class_infos);
     std::vector<QColor> colors;
     bridge->getColorPalette(colors);
 
@@ -68,6 +80,8 @@ inline void writeFile(std::ofstream &out, CMPCore *core, CMPCoreBridge *bridge)
     emitter << YAML::Key << "date"      << YAML::Value << asctime(timeinfo);    /// only for info
     emitter << YAML::Key << "classes"   << YAML::Value << YAML::Flow;
     writeClassIndex(emitter,class_index);
+    emitter << YAML::Key << "class_infos" << YAML::Value;
+    writeClassInfos(emitter, class_infos);
     emitter << YAML::Key << "colorSize" << YAML::Value << 3;                    /// only for info
     emitter << YAML::Key << "colors"    << YAML::Value << YAML::Flow;
     writeColors(emitter,colors);
@@ -88,6 +102,23 @@ inline void readClassIndex(YAML::Node &doc, std::map<int,int> &class_index)
         } else {
             *it >> entry.second;
              class_index.insert(entry);
+        }
+    }
+}
+
+inline void readClassInfos(YAML::Node &doc, std::map<int, QString> &class_infos)
+{
+    const YAML::Node &data = doc["class_infos"];
+    int pos = 0;
+    std::pair<int,QString> entry;
+    for(YAML::Iterator it = data.begin() ; it != data.end() ; it++, pos++) {
+        if(pos % 2 == 0) {
+            *it >> entry.first;
+        } else {
+            std::string buf;
+            *it >> buf;
+             entry.second = buf.c_str();
+             class_infos.insert(entry);
         }
     }
 }
@@ -144,17 +175,19 @@ inline void readFile(std::ifstream &in, CMPCore *core, CMPCoreBridge *bridge)
 
         ///  READ THE DOCUMENT
         parser.GetNextDocument(doc);
-        std::string         date;
-        std::map<int,int>   class_index;
+        std::string             date;
+        std::map<int,int>       class_index;
+        std::map<int, QString>  class_infos;
         std::vector<QColor> colors;
         doc["date"] >> date;
         readClassIndex(doc, class_index);
+        readClassInfos(doc, class_infos);
         readColors(doc, colors);
         readForest(doc, out);
         out.close();
 
         /// SET THE CLASS STATE
-        bridge->load(class_index, colors, core->forestPath());
+        bridge->load(class_index, class_infos, colors, core->forestPath());
 
     } catch (YAML::Exception e) {
         std::cerr << "Error reading classifier file! " << e.what() << std::endl;

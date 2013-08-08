@@ -34,7 +34,7 @@ void CtrlClassEdit::setupUI(Ui::TerraClasses *class_content)
     current_row_    = -1;
     entered_id_     = -1;
     selected_id_    = -1;
-    entered_name    = "";
+    entered_info_    = "";
 
     /// EVENT HANDLING
     class_ID_->installEventFilter(this);
@@ -72,7 +72,7 @@ void CtrlClassEdit::cellClicked(int row, int col)
 
 void CtrlClassEdit::nameEdited(QString text)
 {
-    entered_name = text;
+    entered_info_ = text;
 }
 
 void CtrlClassEdit::IDEdited(QString id)
@@ -87,15 +87,15 @@ void CtrlClassEdit::IDEdited(QString id)
 
 void CtrlClassEdit::accept()
 {
-    if(entered_name == "" || !uniqueID()) {
+    if(entered_info_ == "" || !uniqueID()) {
         return;
     }
 
     if(current_row_ != -1) {
         saveEntry();
     } else {
-        if(newEntry())
-            resetEdit();
+        newEntry();
+        resetEdit();
     }
 }
 
@@ -121,15 +121,31 @@ void CtrlClassEdit::colorIndex(int index)
     entered_color_ = index;
 }
 
+void CtrlClassEdit::classesLoaded()
+{
+    /// CLEAN UP
+    while (class_table_->rowCount() > 0)
+    {
+        class_table_->removeRow(0);
+    }
+    resetEdit();
+
+    /// LOAD
+    std::vector<int> classes = bridge_->getClassIDs();
+    for(std::vector<int>::iterator it = classes.begin() ; it != classes.end() ; it++) {
+        newTableEntry(*it, bridge_->getColorID(*it), bridge_->getInfo(*it));
+    }
+}
+
 bool CtrlClassEdit::eventFilter(QObject *obj, QEvent *event)
 {
-    if(event->type() == QEvent::FocusIn && entered_id_ == -1 && entered_name == "") {
+    if(event->type() == QEvent::FocusIn && entered_id_ == -1 && entered_info_ == "") {
         event->accept();
         class_ID_->setText("");
         class_name_->setText("");
         Q_EMIT enableAdd(true);
     }
-    if(event->type() == QEvent::FocusOut && entered_id_ == -1 && entered_name == "") {
+    if(event->type() == QEvent::FocusOut && entered_id_ == -1 && entered_info_ == "") {
         event->accept();
         class_ID_->setText("ID");
         class_name_->setText("NAME");
@@ -144,19 +160,19 @@ void CtrlClassEdit::loadSelection()
     QList<QTableWidgetItem*> selection = class_table_->selectedItems();
     selected_id_   = selection[0]->text().toInt();
     entered_id_    = selected_id_;
-    entered_color_ = bridge_->getColorRef(entered_id_);
-    entered_name  = selection[2]->text();
+    entered_color_ = bridge_->getColorID(entered_id_);
+    entered_info_  = selection[2]->text();
     color_combo_->setCurrentIndex(entered_color_);
 
     class_ID_->setText(QString::number(entered_id_));
-    class_name_->setText(entered_name);
+    class_name_->setText(entered_info_);
 
 }
 
 void CtrlClassEdit::resetEdit()
 {
     current_row_  = -1;
-    entered_name = "";
+    entered_info_ = "";
     entered_id_   = -1;
     selected_id_  = -1;
     accecpt_button_->setIcon(QIcon(":/buttons/plus.png"));
@@ -169,7 +185,26 @@ void CtrlClassEdit::resetEdit()
     Q_EMIT enableAdd(false);
 }
 
-bool CtrlClassEdit::saveEntry()
+void CtrlClassEdit::newTableEntry(int classID, int color, QString info)
+{
+    /// ROW CONTENT
+    QTableWidgetItem *id   = new QTableWidgetItem(QString::number(classID));
+    QTableWidgetItem *name = new QTableWidgetItem();
+    QTableWidgetItem *icon = new QTableWidgetItem();
+
+    icon->setData(Qt::DecorationRole, renderColorIcon(color).scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    name->setText(info);
+    /// INSERT
+    class_table_->insertRow(class_table_->rowCount());
+
+    /// SET DATA
+    int row = class_table_->rowCount() - 1;
+    class_table_->setItem(row, 0, id);
+    class_table_->setItem(row, 1, icon);
+    class_table_->setItem(row, 2, name);
+}
+
+void CtrlClassEdit::saveEntry()
 {
     QList<QTableWidgetItem*> selection = class_table_->selectedItems();
 
@@ -178,39 +213,26 @@ bool CtrlClassEdit::saveEntry()
     /// COLOR
     selection[1]->setData(Qt::DecorationRole, renderColorIcon(entered_color_).scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     /// NAME
-    selection[2]->setText(entered_name);
+    selection[2]->setText(entered_info_);
 
     if(entered_id_ != selected_id_) {
         bridge_->updateClass(selected_id_, entered_id_);
         selected_id_ = entered_id_;
-    } else {
-        bridge_->updateColor(selected_id_, entered_color_);
     }
+    if(entered_color_ != bridge_->getColorID(entered_id_))
+        bridge_->updateColor(selected_id_, entered_color_);
 
-    return true;
+    if(entered_info_ != "" && entered_info_ != bridge_->getInfo(entered_id_))
+        bridge_->updateInfo(entered_id_, entered_info_);
 }
 
-bool CtrlClassEdit::newEntry()
+void CtrlClassEdit::newEntry()
 {
-
-    QTableWidgetItem *id   = new QTableWidgetItem(QString::number(entered_id_));
-    QTableWidgetItem *name = new QTableWidgetItem();
-    QTableWidgetItem *icon = new QTableWidgetItem();
-    /// CONTENT
-    icon->setData(Qt::DecorationRole, renderColorIcon(entered_color_).scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    name->setText(entered_name);
-
-
-    /// COLOR MANAGEMENT
+    newTableEntry(entered_id_, entered_color_, entered_info_);
     bridge_->addClass(entered_id_, entered_color_);
-    class_table_->insertRow(class_table_->rowCount());
+    if(entered_info_ != "")
+        bridge_->addInfo(entered_id_, entered_info_);
 
-    /// INSERT
-    int row = class_table_->rowCount() - 1;
-    class_table_->setItem(row, 0, id);
-    class_table_->setItem(row, 1, icon);
-    class_table_->setItem(row, 2, name);
-    return true;
 }
 
 bool CtrlClassEdit::uniqueID()

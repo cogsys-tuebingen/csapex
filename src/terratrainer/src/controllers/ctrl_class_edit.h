@@ -46,6 +46,7 @@ public Q_SLOTS:
     void accept();
     void remove();
     void colorIndex(int index);
+    void classesLoaded();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -62,7 +63,7 @@ private:
 
     int                     current_row_;
     int                     entered_id_;
-    QString                 entered_name;
+    QString                 entered_info_;
     int                     entered_color_;
     int                     selected_id_;
 
@@ -71,8 +72,9 @@ private:
     /// INTERNAL INTERACTION
     void    loadSelection();
     void    resetEdit();
-    bool    saveEntry();
-    bool    newEntry();
+    void    newTableEntry(int classID, int color, QString info);
+    void    saveEntry();
+    void    newEntry();
     bool    uniqueID();
 
     /// GRAPHICAL FUNCTIONS

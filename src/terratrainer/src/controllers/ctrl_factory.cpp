@@ -145,7 +145,7 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
 
 void CtrlFactory::produceClassEdController(TerraTrainerWindow *mainWindow)
 {
-    Ui::TerraClasses        *tc = mainWindow->classes_ui_;
+    Ui::TerraClasses    *tc = mainWindow->classes_ui_;
     CMPCoreBridge::Ptr   br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
 
     if(br == NULL) {
@@ -167,6 +167,7 @@ void CtrlFactory::produceClassEdController(TerraTrainerWindow *mainWindow)
     QPushButton::connect(ctrl,         SIGNAL(enableAdd(bool)), tc->addClass,   SLOT(setEnabled(bool)));
 
     QTableWidget::connect(tc->tableClasses, SIGNAL(cellClicked(int,int)), ctrl, SLOT(cellClicked(int,int)));
+    QObject::connect(br.get(), SIGNAL(classifierReloaded()), ctrl, SLOT(classesLoaded()));
 
     IDPtr entry(Class, Ptr(ctrl));
     mainWindow->controllers_.insert(entry);

@@ -30,16 +30,19 @@ public:
     boost::shared_ptr<QImage> rawImage();
 
     /// CLASS SETTINGS
-    void   load (const std::map<int, int> &classes,
+    void   load (const std::map<int, int> &classes, const std::map<int, QString> &infos,
                  const std::vector<QColor> &colors,
                  const std::string forestPath);
 
-    void   updateClass      (const int oldID, const int newID);
-    void   removeClass      (const int id);
-    void   addClass         (const int classID, const int colorID);
-    void   updateColor      (const int classID, const int colorID);
-    int    getColorRef      (const int classID);
-    void   extendPallete    (const QColor &color);
+    void    updateClass      (const int oldID, const int newID);
+    void    removeClass      (const int id);
+    void    addClass         (const int classID, const int colorID);
+    void    addInfo          (const int classID, const QString &class_info);
+    void    updateColor      (const int classID, const int colorID);
+    void    updateInfo       (const int classID, const QString &class_info);
+    int     getColorID       (const int classID);
+    QString getInfo          (const int classID);
+    void    extendPallete    (const QColor &color);
 
     QColor getColor       (const int pal_index);
     QColor getColorByClass(const int class_ID);
@@ -49,6 +52,7 @@ public:
 
     /// RETURN THE STATE
     void getClassIndex(std::map<int, int> &map);
+    void getClassInfos(std::map<int, QString> &map);
     void getColorPalette (std::vector<QColor> &palette);
 
     /// GENERAL SETTINGS
@@ -73,11 +77,14 @@ public Q_SLOTS:
 private:
    CMPCore::Ptr cc_;
 
-   std::map<int, int>      classes_;
-   std::vector<QColor>     classes_colors_;
+   std::map<int, int>           classes_;
+   std::map<int, QString>       class_infos_;
+   std::vector<QColor>          classes_colors_;
 
    void removeClassIndex(const int id);
    void addClassIndex(const int id, const int colorId);
+   void removeClassInfo(const int id);
+   void addClassInfo(const int id, const QString &info);
 
 };
 

@@ -18,17 +18,25 @@ boost::shared_ptr<QImage> CMPCoreBridge::rawImage()
     return QImageConverter::mat2QImage(cc_->getImage());
 }
 
-void CMPCoreBridge::load(const std::map<int,int>& classes, const std::vector<QColor> &colors, const std::string forestPath)
+void CMPCoreBridge::load(const std::map<int,int>& classes, const std::map<int, QString> &infos,
+                         const std::vector<QColor> &colors, const std::string forestPath)
 {
-    classes_ = classes;
-    cc_->load(forestPath,getClassIDs());
+    classes_        = classes;
+    class_infos_    = infos;
     classes_colors_ = colors;
+    cc_->load(forestPath,getClassIDs());
 }
 
 void CMPCoreBridge::updateClass(const int oldID, const int newID)
 {
     if(classes_.find(oldID) == classes_.end())
         return;
+    if(class_infos_.find(oldID) != class_infos_.end()) {
+        QString info = class_infos_[oldID];
+        removeClassInfo(oldID);
+        addClassInfo(newID, info);
+    }
+
     int colorID = classes_[oldID];
     removeClassIndex(oldID);
     addClassIndex(newID, colorID);
@@ -47,6 +55,11 @@ void CMPCoreBridge::addClass(const int classID, const int colorID)
     Q_EMIT classAdded(classID);
 }
 
+void CMPCoreBridge::addInfo(const int classID, const QString &class_info)
+{
+    addClassInfo(classID, class_info);
+}
+
 void CMPCoreBridge::updateColor(const int classID, const int colorID)
 {
     if(classes_.find(classID) != classes_.end())
@@ -54,9 +67,22 @@ void CMPCoreBridge::updateColor(const int classID, const int colorID)
     Q_EMIT colorUpdate(classID);
 }
 
-int CMPCoreBridge::getColorRef(const int classID)
+void CMPCoreBridge::updateInfo(const int classID, const QString &class_info)
+{
+    if(class_infos_.find(classID) != class_infos_.end())
+        class_infos_[classID] = class_info;
+}
+
+int CMPCoreBridge::getColorID(const int classID)
 {
     return classes_[classID];
+}
+
+QString CMPCoreBridge::getInfo(const int classID)
+{
+    if(class_infos_.find(classID) != class_infos_.end())
+        return class_infos_[classID];
+    return "";
 }
 
 void CMPCoreBridge::extendPallete(const QColor &color)
@@ -93,6 +119,11 @@ int CMPCoreBridge::getClassCount()
 void CMPCoreBridge::getClassIndex(std::map<int,int>  &map)
 {
     map = classes_;
+}
+
+void CMPCoreBridge::getClassInfos(std::map<int, QString> &map)
+{
+    map = class_infos_;
 }
 
 void CMPCoreBridge::getColorPalette(std::vector<QColor> &palette)
@@ -185,3 +216,17 @@ void CMPCoreBridge::addClassIndex(const int id, const int colorId)
     classes_.insert(entry);
     cc_->addClass(id);
 }
+
+void CMPCoreBridge::removeClassInfo(const int id)
+{
+    std::map<int, QString>::iterator entry = class_infos_.find(id);
+    class_infos_.erase(entry);
+    cc_->removeClass(id);
+}
+
+void CMPCoreBridge::addClassInfo(const int id, const QString &info)
+{
+    std::pair<int, QString> entry(id, info);
+    class_infos_.insert(entry);
+}
+
