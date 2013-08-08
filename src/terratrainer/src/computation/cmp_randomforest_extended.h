@@ -1,9 +1,9 @@
 #ifndef CMP_RANDOMFOREST_EXTENDED_H
 #define CMP_RANDOMFOREST_EXTENDED_H
-#include "cmp_randomforest.h"
+#include <utils/LibCvTools/randomforest.h>
 #include "params.hpp"
 
-class CMPRandomForestExt : public CMPRandomForest
+class CMPRandomForestExt : public RandomForest
 {
 public:
     typedef boost::shared_ptr<CMPRandomForestExt> Ptr;

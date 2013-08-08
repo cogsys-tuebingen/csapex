@@ -27,15 +27,14 @@ public:
     cv::Mat     getImage() const;
     ///         CLASSIFIER
     bool        load(const std::string path, const std::vector<int> &classRegister);
-    std::string metaPath();
     std::string forestPath();
 
     ///     COMPUTATION
     void    compute();
+    void    computeGrid(int cell_size);
+    void    computeQuadtree(int min_cell_size);
 
-    ///     EXTRACTION  PREPARATION
-    void    setRois(const std::vector<ROI> &rois);
-
+    ///     PARAMETERS
     template<class Parameters>
     void setExtractorParameters(Parameters &param)
     {
@@ -45,13 +44,14 @@ public:
         extractor_->set(ptr);
         type_ = param.type;
     }
+    void    setRandomForestParams(const CMPForestParams &params);
 
     ///     TRAINING PREPARATION
+    void    setRois(const std::vector<ROI> &rois);
     void    addClass(int classID);
     void    removeClass(int classID);
     void    getClasses(std::vector<int> &classes);
 
-    void    setRandomForestParams(const CMPForestParams &params);
 
 private:
     typedef CMPExtractorExt::KeyPoints KeyPoints;

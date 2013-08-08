@@ -11,8 +11,6 @@
 #include <QImage>
 #include <QColor>
 
-
-
 class CMPCoreBridge : public QObject
 {
     Q_OBJECT
@@ -29,11 +27,12 @@ public:
     /// GETTING IMAGES
     boost::shared_ptr<QImage> rawImage();
 
-    /// CLASS SETTINGS
+    /// LOAD CLASSIFIER AND CLASSES
     void   load (const std::map<int, int> &classes, const std::map<int, QString> &infos,
                  const std::vector<QColor> &colors,
                  const std::string forestPath);
 
+    /// CLASS UPDATES AND COLOR MANAGEMENT
     void    updateClass      (const int oldID, const int newID);
     void    removeClass      (const int id);
     void    addClass         (const int classID, const int colorID);
@@ -44,47 +43,54 @@ public:
     QString getInfo          (const int classID);
     void    extendPallete    (const QColor &color);
 
-    QColor getColor       (const int pal_index);
-    QColor getColorByClass(const int class_ID);
+    QColor getColor          (const int pal_index);
+    QColor getColorByClass   (const int class_ID);
 
     std::vector<int> getClassIDs();
     int              getClassCount();
 
     /// RETURN THE STATE
-    void getClassIndex(std::map<int, int> &map);
-    void getClassInfos(std::map<int, QString> &map);
-    void getColorPalette (std::vector<QColor> &palette);
+    void getClassIndex  (std::map<int, int> &map);
+    void getClassInfos  (std::map<int, QString> &map);
+    void getColorPalette(std::vector<QColor> &palette);
 
-    /// GENERAL SETTINGS
-    void setExtractorParams(CMPExtractorParams &params);
+
+    /// PARAMETERS
+    void setExtractorParams (CMPExtractorParams &params);
     void setClassifierParams(CMPForestParams &params);
-    void compute(const std::vector<CMPCore::ROI> &rois);
+
+    /// COMPUTATION
+    void compute            (const std::vector<CMPCore::ROI> &rois);
+    void computeGrid        ();
+    void computeQuadtree    ();
 
 Q_SIGNALS:
-    void imageLoaded();
-    void classifierReloaded();
-    void classAdded  (int newID);
-    void classUpdate (int oldID, int newID);
-    void classRemoved(int classID);
-    void colorUpdate (int classID);
+    void imageLoaded        ();
+    void classifierReloaded ();
+    void classAdded         (int newID);
+    void classUpdate        (int oldID, int newID);
+    void classRemoved       (int classID);
+    void colorUpdate        (int classID);
     void computationFinished();
 
 public Q_SLOTS:
-    void loadImage(const QString path);
-    void loadClassifier(const QString path);
-    void saveClassifier(const QString path);
-    void saveClassifierRaw(const QString path);
+    void loadImage          (const QString path);
+    void loadClassifier     (const QString path);
+    void saveClassifier     (const QString path);
+    void saveClassifierRaw  (const QString path);
 private:
    CMPCore::Ptr cc_;
 
+   /// STORAGE
    std::map<int, int>           classes_;
    std::map<int, QString>       class_infos_;
    std::vector<QColor>          classes_colors_;
 
-   void removeClassIndex(const int id);
-   void addClassIndex(const int id, const int colorId);
-   void removeClassInfo(const int id);
-   void addClassInfo(const int id, const QString &info);
+   /// CLASS MANAGEMENT
+   void removeClassIndex    (const int id);
+   void addClassIndex       (const int id, const int colorId);
+   void removeClassInfo     (const int id);
+   void addClassInfo        (const int id, const QString &info);
 
 };
 

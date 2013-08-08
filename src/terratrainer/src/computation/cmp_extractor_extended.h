@@ -1,12 +1,12 @@
 #ifndef CMP_EXTRACTOR_EXTENDED_H
 #define CMP_EXTRACTOR_EXTENDED_H
-#include "cmp_extractor.h"
+#include <utils/LibCvTools/extractor.h>
 #include <yaml-cpp/yaml.h>
 
-class CMPExtractorExt : public CMPExtractor
+class CMPExtractorExt : public Extractor
 {
 public:
-    typedef CMPExtractor::ROI ROI;
+    typedef Extractor::ROI ROI;
     typedef boost::shared_ptr<CMPExtractorExt> Ptr;
 
     CMPExtractorExt();

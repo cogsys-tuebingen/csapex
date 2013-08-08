@@ -37,6 +37,12 @@ bool CMPCore::load(const std::string path, const std::vector<int> &classRegister
     return random_->load(path.c_str());
 }
 
+
+std::string CMPCore::forestPath()
+{
+    return work_path_ + file_forest_;
+}
+
 void CMPCore::compute()
 {
     /// STEP 1 - THE EXTRACTION
@@ -45,9 +51,19 @@ void CMPCore::compute()
     train();
 }
 
-std::string CMPCore::forestPath()
+void CMPCore::computeGrid(int cell_size)
 {
-    return work_path_ + file_forest_;
+
+}
+
+void CMPCore::computeQuadtree(int min_cell_size)
+{
+
+}
+
+void CMPCore::setRandomForestParams(const CMPForestParams &params)
+{
+    random_->setParams(params);
 }
 
 void CMPCore::setRois(const std::vector<ROI> &rois)
@@ -71,11 +87,6 @@ void CMPCore::removeClass(int classID)
 void CMPCore::getClasses(std::vector<int> &classes)
 {
     classes = classIDs_;
-}
-
-void CMPCore::setRandomForestParams(const CMPForestParams &params)
-{
-    random_->setParams(params);
 }
 
 void CMPCore::extract()

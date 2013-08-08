@@ -3,7 +3,7 @@
 #include <fstream>
 
 CMPRandomForestExt::CMPRandomForestExt() :
-    CMPRandomForest()
+    RandomForest()
 {
     setParams(CMPForestParams());
 }

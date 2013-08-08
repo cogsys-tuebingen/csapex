@@ -203,6 +203,16 @@ void CMPCoreBridge::compute(const std::vector<CMPCore::ROI> &rois)
     cc_->compute();
 }
 
+void CMPCoreBridge::computeGrid()
+{
+
+}
+
+void CMPCoreBridge::computeQuadtree()
+{
+
+}
+
 void CMPCoreBridge::removeClassIndex(const int id)
 {
     std::map<int, int>::iterator entry = classes_.find(id);
