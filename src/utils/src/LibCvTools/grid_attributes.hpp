@@ -1,7 +1,10 @@
 #ifndef GRID_ATTRIBUTES_HPP
 #define GRID_ATTRIBUTES_HPP
 #include <opencv2/opencv.hpp>
+#include <opencv2/nonfree/nonfree.hpp>
 #include "histogram.hpp"
+#include "extractor.h"
+#include "randomforest.h"
 /**
  * @class This can be used as an attribute to attach to a grid cell.
  */
@@ -125,6 +128,51 @@ private:
 
         return INFINITY;
     }
+};
+
+class AttrTerrainClass {
+public:
+    struct Params {
+        Extractor    *extractor;
+        RandomForest *classifier;
+    };
+
+    AttrTerrainClass()
+    {
+    }
+
+    AttrTerrainClass(const int _classID, const float _probability) :
+        classID(_classID),
+        probability(_probability)
+    {
+    }
+
+    AttrTerrainClass(const AttrTerrainClass &t) :
+        classID(t.classID),
+        probability(t.probability)
+    {
+    }
+
+    bool operator == (const AttrTerrainClass &attr) const
+    {
+        return classID == attr.classID;
+    }
+
+    static AttrTerrainClass generate(const cv::Mat &_img, const AttrTerrainClass::Params &p)
+    {
+        /// EXTRACT
+        cv::Mat descriptors;
+        p.extractor->extract(_img, descriptors);
+        /// PREDICT
+        int   classID;
+        float prob;
+        p.classifier->predictClassProb(descriptors, classID, prob);
+
+        return AttrTerrainClass(classID, prob);
+    }
+
+    int     classID;
+    float   probability;
 };
 }
 #endif // GRID_ATTRIBUTES_HPP

@@ -58,6 +58,15 @@ typedef Grid_<GridCellScalar, cv::Rect>         GridScalar;        /// a grid ba
 typedef GridCell<cv::Rect, AttrHistogram>       GridCellHist;
 typedef Grid_<GridCellHist, cv::Rect>           GridHist;
 
+/**
+ * @brief Render a grid and parallely count the positve and negative matches.
+ * @param g1            the first grid
+ * @param g2            the second grid
+ * @param block_size    the size to render on grid cell comparision
+ * @param out           the image to render the context in
+ * @param counts        the counts of negative and positive matches
+ * @param valid         the amount of cells that where found valid / were enabled
+ */
 template<class GridT>
 inline void render_grid_count(const GridT &g1, const GridT &g2, const cv::Size &block_size, cv::Mat &out, std::pair<int, int> &counts, int &valid)
 {
@@ -94,6 +103,13 @@ inline void render_grid_count(const GridT &g1, const GridT &g2, const cv::Size &
 
 }
 
+/**
+ * @brief Render the grid comparision without counting negatives and positives.
+ * @param g1            the first grid
+ * @param g2            the second grid
+ * @param block_size    the size to render
+ * @param out           the image to render the context in
+ */
 template<class GridT>
 inline void render_grid(const GridT &g1, const GridT &g2, const cv::Size &block_size, cv::Mat &out)
 {
@@ -102,8 +118,13 @@ inline void render_grid(const GridT &g1, const GridT &g2, const cv::Size &block_
     render_grid_count<GridT>(g1, g2, block_size, out, c, v);
 }
 
-}
-
+/**
+ * @brief Calculate a heatmap, comparing a template to different regions of a bigger
+ *        grid.
+ * @param g1    the first grid
+ * @param g2    the second grid
+ * @param vals  the heatmap represented by an array of values
+ */
 template<class GridT>
 inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
 {
@@ -129,10 +150,18 @@ inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
     }
 }
 
+/**
+ * @class Iterative generation of a heatmap.
+ */
 template<class GridT>
-class HeatMapCompIterator {
+class IterativeHeatMapGenerator {
 public:
-    HeatMapCompIterator(GridT& g1, GridT& g2) :
+    /**
+     * @brief IterativeHeatMapGenerator constructor.
+     * @param g1    the template
+     * @param g2    the big grid
+     */
+    IterativeHeatMapGenerator(GridT& g1, GridT& g2) :
         grid1(g1),
         grid2(g2),
         col_iterations(g2.cols() - g1.cols() + 1),
@@ -143,11 +172,20 @@ public:
     {
     }
 
+    /**
+     * @brief Return the last finished row.
+     * @return
+     */
     int lastFinishedRow()
     {
         return std::max(row_iter-1,0);
     }
 
+    /**
+     * @brief The next iteration step.
+     * @param vals      the matrix to write the results to
+     * @return          if more iterations are required
+     */
     bool iterate(cv::Mat &vals)
     {
         if(row_iter == row_iterations)
@@ -175,28 +213,39 @@ public:
     }
 
 private:
-    GridT& grid1;
-    GridT& grid2;
-    int col_iterations;
-    int row_iterations;
-    int col_iter;
-    int row_iter;
-    cv::Mat values;
+    GridT& grid1;                   /// the template
+    GridT& grid2;                   /// the big grid
+    int col_iterations;             /// required column iterations
+    int row_iterations;             /// required row iterations
+    int col_iter;                   /// the column iterator (pos)
+    int row_iter;                   /// the row iterator (pos)
+    cv::Mat values;                 /// the matrix containing the calculated values so far
 };
 
+/// COLOR VALUES AND FACTORS FOR HEATMAP RENDERING  //////
+const cv::Point3f red(0,0,255);                     /// P0
+const cv::Point3f green(0,255,255);                 /// P1
+const cv::Point3f blue(255,0,0);                    /// p3
+const cv::Point3f fac1 = (blue - 2*green + red);    ///
+const cv::Point3f fac2 = (-2*blue + 2*green);       ///
 
-const cv::Point3f red(0,0,255);        /// P0
-const cv::Point3f green(0,255,255);    /// P1
-const cv::Point3f blue(255,0,0);       /// p3
-const cv::Point3f fac1 = (blue - 2*green + red);
-const cv::Point3f fac2 = (-2*blue + 2*green);
-
+/**
+ * @brief Calculate a color for a given value of a heatmap.
+ * @param value     the heatmap value
+ * @return          the color
+ */
 inline cv::Scalar color_heatmap(const float value)
 {
     cv::Point3f  col = fac1 * value * value + fac2 * value + blue;
     return cv::Scalar(std::floor(col.x + .5), std::floor(col.y + .5), std::floor(col.z + .5));
 }
 
+/**
+ * @brief Render a heatmap.
+ * @param values        the values of the heatmap
+ * @param block_size    the render block size
+ * @param out           the image to render context to
+ */
 inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv::Mat &out)
 {
     if(out.empty())
@@ -209,6 +258,13 @@ inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv
     }
 }
 
+/**
+ * @brief Render a heat map row.
+ * @param values        the values of the heatmap
+ * @param block_size    the render block size
+ * @param row           the row
+ * @param out           the image to render context to
+ */
 inline void render_heatmap_row(const cv::Mat &values, const cv::Size &block_size, const int row, cv::Mat &out)
 {
     if(out.empty())
@@ -221,6 +277,5 @@ inline void render_heatmap_row(const cv::Mat &values, const cv::Size &block_size
     }
 
 }
-
-
+}
 #endif // CV_GRID_HPP
