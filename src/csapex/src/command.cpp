@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/command.h>
 
+/// COMPONENT
+#include <csapex/graph.h>
+
 using namespace csapex;
 
 std::vector<Command::Ptr> Command::undo_later;
@@ -10,13 +13,13 @@ Command::Command()
 {
 }
 
-bool Command::doExecute(Command::Ptr other)
+bool Command::doExecute(Graph& graph, Command::Ptr other)
 {
-    return other->execute();
+    return other->execute(graph);
 }
-bool Command::doUndo(Command::Ptr other)
+bool Command::doUndo(Graph& graph, Command::Ptr other)
 {
-    if(!other->undo()) {
+    if(!other->undo(graph)) {
         undo_later.push_back(other);
         return false;
     }
@@ -24,9 +27,9 @@ bool Command::doUndo(Command::Ptr other)
     return true;
 }
 
-bool Command::doRedo(Command::Ptr other)
+bool Command::doRedo(Graph &graph, Command::Ptr other)
 {
-    return other->redo();
+    return other->redo(graph);
 }
 
 void Command::setAfterSavepoint(bool save)

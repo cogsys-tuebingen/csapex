@@ -22,11 +22,11 @@ struct AddBox : public Command
     AddBox(SelectorProxy* selector, QWidget* parent, QPoint pos);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool execute(Graph& graph);
+    bool undo(Graph& graph);
+    bool redo(Graph& graph);
 
-    void refresh();
+    void refresh(Graph& graph);
 
 private:
     SelectorProxy* selector;

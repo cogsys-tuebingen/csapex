@@ -2,9 +2,9 @@
 #define BOX_H
 
 /// COMPONENT
-#include <csapex/connector_in.h>
-#include <csapex/connector_out.h>
 #include <csapex/memento.h>
+#include <csapex/command.h>
+#include <csapex/selectable.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -23,7 +23,11 @@ class Box;
 namespace csapex
 {
 
+class Box;
 class BoxedObject;
+class Connector;
+class ConnectorIn;
+class ConnectorOut;
 
 
 struct BoxWorker : public QObject
@@ -44,11 +48,12 @@ private:
     Box* parent_;
 };
 
-class Box : public QWidget
+class Box : public QWidget, public Selectable
 {
     Q_OBJECT
 
     friend class DesignerIO;
+    friend class GraphIO;
     friend class BoxWorker;
 
 public:
@@ -160,19 +165,19 @@ public Q_SLOTS:
     void refreshStylesheet();
     void eventModelChanged();
     void killContent();
+    void tick();
 
 Q_SIGNALS:
     void toggled(bool);
     void moved(Box*, int dx, int dy);
     void changed(Box*);
     void clicked(Box*);
+    void tickRequest();
 
     void connectorCreated(Connector*);
     void connectionFormed(ConnectorOut*, ConnectorIn*);
     void connectionDestroyed(ConnectorOut*, ConnectorIn*);
 
-    void messageSent(ConnectorOut* source);
-    void messageArrived(ConnectorIn* source);
     void connectionInProgress(Connector*, Connector*);
     void connectionDone();
     void connectionStart();
@@ -197,7 +202,6 @@ private:
     QMutex worker_mutex_;
 
     QThread* private_thread_;
-    QTimer* timer_;
     BoxWorker* worker_;
 
     bool down_;
@@ -207,11 +211,6 @@ private:
     QIcon minimize_icon_;
     QIcon maximize_icon_;
 };
-
-inline YAML::Emitter& operator << (YAML::Emitter& out, const Box& box)
-{
-    return box.save(out);
-}
 
 }
 #endif // BOX_H

@@ -6,11 +6,17 @@
 #include <csapex/bash_parser.h>
 #include <csapex/core_plugin.h>
 #include <csapex/box_manager.h>
+#include <csapex/command_dispatcher.h>
+#include <csapex/designer.h>
+#include <csapex/graph.h>
 #include <csapex/stream_interceptor.h>
 #include <csapex/qt_helper.hpp>
+#include <csapex/designerio.h>
+#include <csapex/graphio.h>
 
 /// SYSTEM
 #include <iostream>
+#include <fstream>
 #include <opencv2/opencv.hpp>
 #include <QCloseEvent>
 #include <QObjectList>
@@ -19,30 +25,37 @@
 #include <QStatusBar>
 #include <QToolBar>
 #include <QTimer>
+#include <QFileDialog>
 
 using namespace csapex;
 
-EvaluationWindow::EvaluationWindow(QWidget* parent) :
-    QMainWindow(parent), ui(new Ui::EvaluationWindow), init_(false)
+CsApexWindow::CsApexWindow(Graph& graph, QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::EvaluationWindow), graph_(graph), init_(false)
 {
     StreamInterceptor::instance().start();
 
     ui->setupUi(this);
 
-    ui->designer->hide();
+    designer_ = new Designer(graph);
+    designer_->hide();
+    ui->splitter->addWidget(designer_);
+    ui->splitter->addWidget(ui->logOutput);
 
-    QObject::connect(ui->actionSave, SIGNAL(triggered()), ui->designer, SLOT(save()));
-    QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), ui->designer, SLOT(saveAs()));
-    QObject::connect(ui->actionLoad, SIGNAL(triggered()), ui->designer, SLOT(load()));
-    QObject::connect(ui->actionReload, SIGNAL(triggered()), ui->designer, SLOT(reload()));
-    QObject::connect(ui->actionUndo, SIGNAL(triggered()), ui->designer, SLOT(undo()));
-    QObject::connect(ui->actionRedo, SIGNAL(triggered()), ui->designer, SLOT(redo()));
-    QObject::connect(ui->actionClear, SIGNAL(triggered()), ui->designer, SLOT(clear()));
+    QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
+    QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
+    QObject::connect(ui->actionLoad, SIGNAL(triggered()), this,  SLOT(load()));
+    QObject::connect(ui->actionReload, SIGNAL(triggered()), this,  SLOT(reload()));
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), &graph,  SLOT(undo()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), &graph,  SLOT(redo()));
+    QObject::connect(ui->actionClear, SIGNAL(triggered()), &graph,  SLOT(clear()));
 
-    QObject::connect(ui->designer, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
+    QObject::connect(&graph, SIGNAL(boxAdded(Box*)), designer_, SLOT(addBox(Box*)));
+    QObject::connect(&graph, SIGNAL(boxDeleted(Box*)), designer_, SLOT(deleteBox(Box*)));
+    QObject::connect(&graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
+    QObject::connect(&graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
-    QObject::connect(ui->designer, SIGNAL(configChanged()), this, SLOT(updateTitle()));
-    QObject::connect(&BoxManager::instance(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
+    QObject::connect(this, SIGNAL(configChanged()), this, SLOT(updateTitle()));
+    QObject::connect(&CommandDispatcher::instance(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
     QObject::connect(this, SIGNAL(initialize()), this, SLOT(init()), Qt::QueuedConnection);
 
@@ -55,15 +68,12 @@ EvaluationWindow::EvaluationWindow(QWidget* parent) :
     timer.setSingleShot(false);
     timer.start();
 
+    setCurrentConfig(GraphIO::default_config);
+
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(updateLog()));
 }
 
-Designer* EvaluationWindow::getDesigner()
-{
-    return ui->designer;
-}
-
-void EvaluationWindow::showMenu()
+void CsApexWindow::showMenu()
 {
     QVBoxLayout* new_layout = new QVBoxLayout;
 
@@ -83,7 +93,7 @@ void EvaluationWindow::showMenu()
     ui->centralwidget->setLayout(new_layout);
 }
 
-void EvaluationWindow::start()
+void CsApexWindow::start()
 {
     statusBar()->showMessage("initialized");
 
@@ -94,32 +104,32 @@ void EvaluationWindow::start()
     show();
 }
 
-void EvaluationWindow::updateMenu()
+void CsApexWindow::updateMenu()
 {
-    ui->actionUndo->setDisabled(!ui->designer->canUndo());
-    ui->actionRedo->setDisabled(!ui->designer->canRedo());
+    ui->actionUndo->setDisabled(!graph_.canUndo());
+    ui->actionRedo->setDisabled(!graph_.canRedo());
 }
 
-void EvaluationWindow::updateTitle()
+void CsApexWindow::updateTitle()
 {
     std::stringstream window;
-    window << "CS::APEX (" << ui->designer->getConfig() << ")";
+    window << "CS::APEX (" << getConfig() << ")";
 
-    if(BoxManager::instance().isDirty()) {
+    if(CommandDispatcher::instance().isDirty()) {
         window << " *";
     }
 
     setWindowTitle(window.str().c_str());
 }
 
-void EvaluationWindow::scrollDownLog()
+void CsApexWindow::scrollDownLog()
 {
     QTextCursor cursor = ui->logOutput->textCursor();
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     ui->logOutput->setTextCursor(cursor);
 }
 
-void EvaluationWindow::updateLog()
+void CsApexWindow::updateLog()
 {
     std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
     std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
@@ -166,7 +176,7 @@ void EvaluationWindow::updateLog()
     }
 }
 
-void EvaluationWindow::hideLog()
+void CsApexWindow::hideLog()
 {
     QList<int> sizes = ui->splitter->sizes();
     sizes[0] += sizes[1];
@@ -174,16 +184,16 @@ void EvaluationWindow::hideLog()
     ui->splitter->setSizes(sizes);
 }
 
-void EvaluationWindow::closeEvent(QCloseEvent* event)
+void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    if(ui->designer->isDirty()) {
+    if(graph_.isDirty()) {
         int r = QMessageBox::warning(this, tr("Vision Designer"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if(r == QMessageBox::Save) {
             std::cout << "save" << std::endl;
 
-            ui->designer->save();
+            save();
             event->accept();
         } else if(r == QMessageBox::Discard) {
             event->accept();
@@ -198,12 +208,12 @@ void EvaluationWindow::closeEvent(QCloseEvent* event)
     StreamInterceptor::instance().stop();
 }
 
-void EvaluationWindow::showStatusMessage(const std::string &msg)
+void CsApexWindow::showStatusMessage(const std::string &msg)
 {
     statusBar()->showMessage(msg.c_str());
 }
 
-void EvaluationWindow::init()
+void CsApexWindow::init()
 {
     if(!init_) {
         init_ = true;
@@ -224,7 +234,7 @@ void EvaluationWindow::init()
 
         BoxManager& bm = BoxManager::instance();
 
-        bm.loaded.connect(boost::bind(&EvaluationWindow::showStatusMessage, this, _1));
+        bm.loaded.connect(boost::bind(&CsApexWindow::showStatusMessage, this, _1));
 
         bm.reload();
 
@@ -232,21 +242,133 @@ void EvaluationWindow::init()
 
         resize(400,400);
 
-        ui->designer->reload();
+        reload();
+
         statusBar()->hide();
         ui->loading->hide();
         repaint();
-        ui->designer->show();
+        designer_->show();
         ui->splitter->show();
         hideLog();
     }
 }
 
-void EvaluationWindow::paintEvent(QPaintEvent *e)
+void CsApexWindow::paintEvent(QPaintEvent *e)
 {
     QMainWindow::paintEvent(e);
 
     if(!init_) {
         Q_EMIT initialize();
     }
+}
+
+void CsApexWindow::save()
+{
+    saveAs(current_config_);
+}
+
+void CsApexWindow::setCurrentConfig(const std::string& filename)
+{
+    current_config_ = filename;
+
+    std::string dir = current_config_.substr(0, current_config_.find_last_of('/')+1);
+    chdir(dir.c_str());
+
+    Q_EMIT configChanged();
+}
+
+std::string CsApexWindow::getConfig() const
+{
+    return current_config_;
+}
+
+void CsApexWindow::saveAs()
+{
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", current_config_.c_str(), GraphIO::config_selector.c_str());
+
+    if(!filename.isEmpty()) {
+        saveAs(filename.toUtf8().constData());
+        setCurrentConfig(filename.toUtf8().constData());
+    }
+}
+
+void CsApexWindow::load()
+{
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", current_config_.c_str(), GraphIO::config_selector.c_str());
+
+    if(QFile(filename).exists()) {
+        setCurrentConfig(filename.toUtf8().constData());
+
+        reload();
+    }
+}
+
+void CsApexWindow::saveAs(const std::string &file)
+{
+    std::string dir = file.substr(0, file.find_last_of('/')+1);
+    chdir(dir.c_str());
+
+    YAML::Emitter yaml;
+
+    yaml << YAML::BeginMap; // settings map
+
+    GraphIO graphio(graph_);
+    DesignerIO designerio(*designer_);
+
+    designerio.saveSettings(yaml);
+    graphio.saveSettings(yaml);
+    graphio.saveConnections(yaml);
+
+    yaml << YAML::EndMap; // settings map
+
+    graphio.saveBoxes(yaml);
+
+    std::ofstream ofs(file.c_str());
+    ofs << yaml.c_str();
+
+    std::cout << "save: " << yaml.c_str() << std::endl;
+
+    CommandDispatcher::instance().setClean();
+    CommandDispatcher::instance().resetDirtyPoint();
+}
+
+
+void CsApexWindow::reload()
+{
+    graph_.clear();
+
+    GraphIO graphio(graph_);
+    DesignerIO designerio(*designer_);
+
+    {
+        std::ifstream ifs(current_config_.c_str());
+        YAML::Parser parser(ifs);
+
+        YAML::Node doc;
+
+        if(!parser.GetNextDocument(doc)) {
+            std::cerr << "cannot read the config" << std::endl;
+            return;
+        }
+
+        designerio.loadSettings(doc);
+        graphio.loadSettings(doc);
+
+        graphio.loadBoxes(parser);
+    }
+    {
+        std::ifstream ifs(current_config_.c_str());
+        YAML::Parser parser(ifs);
+
+        YAML::Node doc;
+
+        if(!parser.GetNextDocument(doc)) {
+            std::cerr << "cannot read the config" << std::endl;
+            return;
+        }
+        graphio.loadConnections(doc);
+    }
+
+    CommandDispatcher::instance().setClean();
+    CommandDispatcher::instance().resetDirtyPoint();
 }

@@ -68,7 +68,7 @@ public:
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)
-    virtual csapex::Box* spawnObject(QWidget* parent, const QPoint& pos, const std::string &type, const std::string& uuid);
+    virtual csapex::Box* create(const QPoint& pos, const std::string &type, const std::string& uuid);
 
 protected:
     virtual BoxedObject* makeContent() = 0;

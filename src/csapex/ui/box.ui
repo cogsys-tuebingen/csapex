@@ -42,6 +42,11 @@ QFrame#boxframe[error=&quot;true&quot;] {
 	border: 3px solid rgb(180, 0, 0);
 }
 
+QFrame#boxframe[warning=&quot;true&quot;] {
+	background-color: rgb(230, 180, 50);
+	border: 3px solid rgb(180, 60, 0);
+}
+
 QFrame#boxframe[focused=&quot;true&quot;] {
 	border: 3px solid rgb(35, 35, 35);
 	outline-offset:3px;
@@ -139,7 +144,7 @@ QFrame#boxframe csapex--Connector {
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="../res/resources.qrc">
+             <iconset resource="../res/csapex_resources.qrc">
               <normaloff>:/stop.png</normaloff>:/stop.png</iconset>
             </property>
             <property name="flat">
@@ -159,7 +164,7 @@ QFrame#boxframe csapex--Connector {
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="../res/resources.qrc">
+             <iconset resource="../res/csapex_resources.qrc">
               <normaloff>:/minimize.png</normaloff>:/minimize.png</iconset>
             </property>
             <property name="checkable">
@@ -205,7 +210,7 @@ QFrame#boxframe csapex--Connector {
   </layout>
  </widget>
  <resources>
-  <include location="../res/resources.qrc"/>
+  <include location="../res/csapex_resources.qrc"/>
  </resources>
  <connections>
   <connection>

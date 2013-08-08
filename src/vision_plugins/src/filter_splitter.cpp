@@ -3,7 +3,6 @@
 /// PROJECT
 #include <csapex/box.h>
 #include <csapex/command_meta.h>
-#include <csapex/box_manager.h>
 #include <csapex_vision/messages_default.hpp>
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>

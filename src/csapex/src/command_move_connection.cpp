@@ -3,8 +3,8 @@
 
 /// COMPONENT
 #include <csapex/command.h>
-#include <csapex/box.h>
-#include <csapex/box_manager.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
 #include <csapex/command_meta.h>
 #include <csapex/command_delete_connection.h>
 #include <csapex/command_add_connection.h>

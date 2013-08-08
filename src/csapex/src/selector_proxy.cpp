@@ -60,9 +60,9 @@ void SelectorProxy::mousePressEvent(QMouseEvent* event)
     }
 }
 
-csapex::Box* SelectorProxy::spawnObject(QWidget* parent, const QPoint& pos, const std::string& type, const std::string& uuid)
+csapex::Box* SelectorProxy::create(const QPoint& pos, const std::string& type, const std::string& uuid)
 {
-    csapex::Box* object(new csapex::Box(makeContent(), uuid, parent));
+    csapex::Box* object(new csapex::Box(makeContent(), uuid));
     object->setObjectName(uuid.c_str());
     object->setType(type);
     object->init(pos);

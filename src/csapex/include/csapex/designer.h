@@ -13,7 +13,9 @@ class Designer;
 namespace csapex
 {
 
+class DesignBoard;
 class Box;
+class Graph;
 
 class Designer : public QWidget
 {
@@ -22,47 +24,29 @@ class Designer : public QWidget
     friend class DesignerIO;
 
 public:
-    Designer(QWidget* parent = 0);
+    Designer(csapex::Graph &graph, QWidget* parent = 0);
     virtual ~Designer();
 
     bool eventFilter(QObject* o, QEvent* e);
     void resizeEvent(QResizeEvent* e);
-
-    bool isDirty();
-
-    bool canUndo();
-    bool canRedo();
 
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
 
     void updateCursor();
 
-    std::string getConfig();
-
 public Q_SLOTS:
-    void save();
-    void saveAs();
-    void load();
-    void reload();
-    void undo();
-    void redo();
-    void clear();
-    void setCurrentConfig(const std::string& filename);
-
-
-Q_SIGNALS:
-    void stateChanged();
-    void configChanged();
+    void addBox(Box* box);
+    void deleteBox(Box* box);
+    void stateChangedEvent();
 
 private:
     Ui::Designer* ui;
+    DesignBoard* designer_board;
 
     bool space_;
     bool drag_;
     QPoint drag_start_pos_;
-
-    std::string current_config_;
 };
 
 }

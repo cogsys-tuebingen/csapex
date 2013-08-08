@@ -6,6 +6,7 @@
 #include <csapex/command_meta.h>
 #include <csapex/command_delete_box.h>
 #include <csapex/box.h>
+#include <csapex/graph.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -15,11 +16,11 @@
 using namespace csapex;
 
 BoxManager::BoxManager()
-    : PluginManager<csapex::BoxedObject>("csapex::BoxedObject"), dirty_(false)
+    : PluginManager<csapex::BoxedObject>("csapex::BoxedObject")
 {
 }
 
-void BoxManager::fill(QLayout* layout)
+void BoxManager::insertAvailableBoxedObjects(QLayout* layout)
 {
     if(!pluginsLoaded()) {
         reload();
@@ -38,7 +39,7 @@ bool compare (SelectorProxy::Ptr a, SelectorProxy::Ptr b) {
 }
 }
 
-void BoxManager::fill(QMenu* menu)
+void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 {
     if(!pluginsLoaded()) {
         reload();
@@ -103,7 +104,7 @@ std::string BoxManager::stripNamespace(const std::string &name)
     return name.substr(from != name.npos ? from + 2 : 0);
 }
 
-Box* BoxManager::makeBox(QWidget* parent, QPoint pos, const std::string& target_type, const std::string& uuid)
+Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::string& uuid)
 {
     std::string type = target_type;
     if(type.find_first_of(" ") != type.npos) {
@@ -120,7 +121,9 @@ Box* BoxManager::makeBox(QWidget* parent, QPoint pos, const std::string& target_
             if(uuid_.empty()) {
                 uuid_ = makeUUID(type);
             }
-            return p->spawnObject(parent, pos, type, uuid);
+            Box* box = p->create(pos, type, uuid);
+            //box->setParent(parent);
+            return box;
         }
     }
 
@@ -136,7 +139,9 @@ Box* BoxManager::makeBox(QWidget* parent, QPoint pos, const std::string& target_
                 uuid_ = makeUUID(type);
             }
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
-            return p->spawnObject(parent, pos, p->getType(), uuid);
+            Box* box = p->create(pos, p->getType(), uuid);
+            //box->setParent(parent);
+            return box;
         }
     }
 
@@ -148,30 +153,6 @@ Box* BoxManager::makeBox(QWidget* parent, QPoint pos, const std::string& target_
     return NULL;
 }
 
-Box* BoxManager::findBox(const std::string &uuid)
-{
-    BOOST_FOREACH(Box* b, container_->findChildren<Box*>()) {
-        if(b->UUID() == uuid) {
-            return b;
-        }
-    }
-
-    return NULL;
-}
-
-Box* BoxManager::findConnectorOwner(const std::string &uuid)
-{
-    BOOST_FOREACH(Box* b, container_->findChildren<Box*>()) {
-        if(b->getInput(uuid)) {
-            return b;
-        }
-        if(b->getOutput(uuid)) {
-            return b;
-        }
-    }
-
-    return NULL;
-}
 
 void BoxManager::setContainer(QWidget *c)
 {
@@ -183,25 +164,6 @@ QWidget* BoxManager::container()
     return container_;
 }
 
-void BoxManager::execute(Command::Ptr command)
-{
-    if(!isDirty()) {
-        command->setAfterSavepoint(true);
-    }
-
-    bool change = command->execute();
-    done.push_back(command);
-
-    while(!undone.empty()) {
-        undone.pop_back();
-    }
-
-    if(change) {
-        setDirty();
-        Q_EMIT stateChanged();
-    }
-}
-
 std::string BoxManager::makeUUID(const std::string& name)
 {
     int& last_id = uuids[name];
@@ -211,219 +173,4 @@ std::string BoxManager::makeUUID(const std::string& name)
     ss << name << "_" << last_id;
 
     return ss.str();
-}
-
-bool BoxManager::isDirty()
-{
-    return dirty_;
-}
-
-void BoxManager::resetDirtyPoint()
-{
-    setDirty(false);
-
-    clearSavepoints();
-
-    if(!done.empty()) {
-        done.back()->setBeforeSavepoint(true);
-    }
-    if(!undone.empty()) {
-        undone.back()->setAfterSavepoint(true);
-    }
-}
-
-void BoxManager::clearSavepoints()
-{
-    foreach(Command::Ptr cmd, done) {
-        cmd->setAfterSavepoint(false);
-        cmd->setBeforeSavepoint(false);
-    }
-    foreach(Command::Ptr cmd, undone) {
-        cmd->setAfterSavepoint(false);
-        cmd->setBeforeSavepoint(false);
-    }
-}
-
-void BoxManager::setDirty()
-{
-    setDirty(true);
-}
-
-void BoxManager::setDirty(bool dirty)
-{
-    bool change = dirty_ != dirty;
-
-    dirty_ = dirty;
-
-    if(change) {
-        Q_EMIT dirtyChanged(dirty_);
-    }
-}
-
-
-bool BoxManager::canUndo()
-{
-    return !done.empty();
-}
-
-bool BoxManager::canRedo()
-{
-    return !undone.empty();
-}
-
-void BoxManager::undo()
-{
-    if(!canUndo()) {
-        return;
-    }
-
-    Command::Ptr last = done.back();
-    done.pop_back();
-
-    bool ret = last->undo();
-    assert(ret);
-
-    setDirty(!last->isAfterSavepoint());
-
-    undone.push_back(last);
-
-    Q_EMIT stateChanged();
-}
-
-void BoxManager::redo()
-{
-    if(!canRedo()) {
-        return;
-    }
-
-    Command::Ptr last = undone.back();
-    undone.pop_back();
-
-    last->redo();
-
-    done.push_back(last);
-
-    setDirty(!last->isBeforeSavepoint());
-
-    Q_EMIT stateChanged();
-}
-
-bool BoxManager::isBoxSelected(Box *box)
-{
-    return std::find(selected_boxes.begin(), selected_boxes.end(), box) != selected_boxes.end();
-}
-
-int BoxManager::noSelectedBoxes()
-{
-    return selected_boxes.size();
-}
-
-void BoxManager::selectBox(Box *box, bool add)
-{
-    assert(!isBoxSelected(box));
-
-    if(!add) {
-        deselectBoxes();
-        assert(selected_boxes.empty());
-    }
-
-    selected_boxes.push_back(box);
-
-    box->selectEvent();
-}
-
-
-void BoxManager::deselectBox(Box *box)
-{
-    assert(isBoxSelected(box));
-
-    selected_boxes.erase(std::find(selected_boxes.begin(), selected_boxes.end(), box));
-
-    box->deselectEvent();
-}
-void BoxManager::deselectBoxes()
-{
-    foreach(Box* b, selected_boxes) {
-        deselectBox(b);
-        b->deselectEvent();
-    }
-}
-
-
-void BoxManager::toggleBoxSelection(Box *box)
-{
-    bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
-
-    if(shift) {
-        if(isBoxSelected(box)) {
-            deselectBox(box);
-        } else {
-            selectBox(box, true);
-        }
-    } else {
-        if(isBoxSelected(box)) {
-            deselectBoxes();
-            if(noSelectedBoxes() != 1) {
-                selectBox(box);
-            }
-        } else {
-            selectBox(box);
-        }
-    }
-}
-
-void BoxManager::boxMoved(Box *box, int dx, int dy)
-{
-    if(isBoxSelected(box) && box->hasFocus()) {
-        foreach(Box* b, selected_boxes) {
-            if(b != box) {
-                b->move(b->x() + dx, b->y() + dy);
-            }
-        }
-    }
-}
-
-bool BoxManager::mouseMoveEventHandler(QMouseEvent *e)
-{
-    return true;
-}
-
-bool BoxManager::keyPressEventHandler(QKeyEvent* e)
-{
-    return true;
-}
-
-bool BoxManager::keyReleaseEventHandler(QKeyEvent* e)
-{
-    if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        if(selected_boxes.size() == 0) {
-            return true;
-        }
-
-        command::Meta::Ptr meta(new command::Meta);
-
-        foreach(Box* b, selected_boxes) {
-            meta->add(Command::Ptr(new command::DeleteBox(b)));
-        }
-
-        deselectBoxes();
-
-        execute(meta);
-
-        return false;
-    }
-
-    return true;
-}
-
-bool BoxManager::mousePressEventHandler(QMouseEvent *e)
-{
-    return true;
-}
-
-bool BoxManager::mouseReleaseEventHandler(QMouseEvent *e)
-{
-    deselectBoxes();
-
-    return true;
 }

@@ -3,7 +3,10 @@
 
 /// COMPONENT
 #include <csapex/box.h>
-#include <csapex/box_manager.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
+#include <csapex/graph.h>
+#include <csapex/command_dispatcher.h>
 
 using namespace csapex;
 
@@ -15,9 +18,9 @@ DeleteConnector::DeleteConnector(Connector *_c) :
     c_uuid = c->UUID();
 }
 
-bool DeleteConnector::execute()
+bool DeleteConnector::execute(Graph& graph)
 {
-    Box* box_c = BoxManager::instance().findConnectorOwner(c_uuid);
+    Box* box_c = graph.findConnectorOwner(c_uuid);
 
     if(c->isConnected()) {
         if(in) {
@@ -25,7 +28,7 @@ bool DeleteConnector::execute()
         } else {
             delete_connections = ((ConnectorOut*) c)->removeAllConnectionsCmd();
         }
-        BoxManager::instance().execute(delete_connections);
+        CommandDispatcher::execute(delete_connections);
     }
 
     if(in) {
@@ -37,23 +40,23 @@ bool DeleteConnector::execute()
     return true;
 }
 
-bool DeleteConnector::undo()
+bool DeleteConnector::undo(Graph& graph)
 {
-    if(!refresh()) {
+    if(!refresh(graph)) {
         return false;
     }
 
     return false;
 }
 
-bool DeleteConnector::redo()
+bool DeleteConnector::redo(Graph& graph)
 {
     return false;
 }
 
-bool DeleteConnector::refresh()
+bool DeleteConnector::refresh(Graph& graph)
 {
-    Box* box_c = BoxManager::instance().findConnectorOwner(c_uuid);
+    Box* box_c = graph.findConnectorOwner(c_uuid);
 
     if(!box_c) {
         return false;

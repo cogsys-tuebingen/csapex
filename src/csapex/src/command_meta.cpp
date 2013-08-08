@@ -17,33 +17,38 @@ void Meta::add(Command::Ptr cmd)
     nested.push_back(cmd);
 }
 
-bool Meta::execute()
+int Meta::commands() const
+{
+    return nested.size();
+}
+
+bool Meta::execute(Graph& graph)
 {
     locked = true;
 
     bool change = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change &= cmd->execute();
+        change &= cmd->execute(graph);
     }
     return change;
 }
 
-bool Meta::undo()
+bool Meta::undo(Graph& graph)
 {
     BOOST_REVERSE_FOREACH(Command::Ptr cmd, nested) {
-        if(!cmd->undo()) {
-//            undo_later.push_back(cmd);
+        if(!cmd->undo(graph)) {
+            undo_later.push_back(cmd);
         }
     }
 
     return true;
 }
 
-bool Meta::redo()
+bool Meta::redo(Graph& graph)
 {
     bool change = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change &= cmd->redo();
+        change &= cmd->redo(graph);
     }
     return change;
 }

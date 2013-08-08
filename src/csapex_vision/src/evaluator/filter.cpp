@@ -84,8 +84,9 @@ void Filter::messageArrived(ConnectorIn* source)
         filter(img_msg->value, mask_msg->value);
 
         output_img_->publish(img_msg);
-        if(usesMask())
+        if(usesMask()) {
             output_mask_->publish(mask_msg);
+        }
     }
 }
 

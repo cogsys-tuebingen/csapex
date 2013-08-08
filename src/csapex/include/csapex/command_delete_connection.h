@@ -18,11 +18,11 @@ struct DeleteConnection : public Command {
     DeleteConnection(Connector* a, Connector* b);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool execute(Graph& graph);
+    bool undo(Graph& graph);
+    bool redo(Graph& graph);
 
-    bool refresh();
+    bool refresh(Graph &graph);
 
 private:
     ConnectorOut* from;

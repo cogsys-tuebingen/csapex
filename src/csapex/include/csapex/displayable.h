@@ -12,8 +12,14 @@ class Box;
 class Displayable : public QWidget
 {
 public:
-    virtual void setError(bool e, const std::string& msg = "");
+    enum ErrorLevel {
+        EL_ERROR, EL_WARNING
+    };
+
+public:
+    virtual void setError(bool e, const std::string& msg = "", ErrorLevel level = EL_ERROR);
     bool isError() const;
+    ErrorLevel errorLevel() const;
 
     virtual void setBox(Box* box);
     Box* getBox() const;
@@ -21,11 +27,12 @@ public:
 protected:
     Displayable();
 
-    virtual void errorEvent(bool error);
+    virtual void errorEvent(bool error, ErrorLevel level);
 
 protected:
     Box* box_;
     bool error_;
+    ErrorLevel level_;
 };
 
 }

@@ -132,7 +132,9 @@ void BoxedObject::tick()
 
 }
 
-void BoxedObject::errorEvent(bool error)
+void BoxedObject::errorEvent(bool error, ErrorLevel level)
 {
-    enabled_ = !error;
+    if(enabled_ && error && level == EL_ERROR) {
+        box_->enableContent(false);
+    }
 }

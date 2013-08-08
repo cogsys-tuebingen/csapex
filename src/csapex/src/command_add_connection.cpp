@@ -4,8 +4,10 @@
 /// COMPONENT
 #include <csapex/command.h>
 #include <csapex/selector_proxy.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
 #include <csapex/box.h>
-#include <csapex/box_manager.h>
+#include <csapex/graph.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -29,29 +31,30 @@ AddConnection::AddConnection(Connector* a, Connector* b)
     to_uuid = to->UUID();
 }
 
-bool AddConnection::execute()
+bool AddConnection::execute(Graph& graph)
 {
-    return from->tryConnect(to);
+    return graph.addConnection(Connection::Ptr(new Connection(from, to)));
 }
 
-bool AddConnection::undo()
+bool AddConnection::undo(Graph& graph)
 {
-    refresh();
-    from->removeConnection(to);
+    refresh(graph);
+
+    graph.deleteConnection(Connection::Ptr(new Connection(from, to)));
 
     return true;
 }
 
-bool AddConnection::redo()
+bool AddConnection::redo(Graph& graph)
 {
-    refresh();
-    return execute();
+    refresh(graph);
+    return execute(graph);
 }
 
-void AddConnection::refresh()
+void AddConnection::refresh(Graph& graph)
 {
-    from = BoxManager::instance().findConnectorOwner(from_uuid)->getOutput(from_uuid);
-    to = BoxManager::instance().findConnectorOwner(to_uuid)->getInput(to_uuid);
+    from = graph.findConnectorOwner(from_uuid)->getOutput(from_uuid);
+    to = graph.findConnectorOwner(to_uuid)->getInput(to_uuid);
 
     assert(from);
     assert(to);

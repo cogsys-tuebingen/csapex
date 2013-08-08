@@ -68,10 +68,21 @@ bool ConnectorIn::canConnect()
     return input == NULL;
 }
 
+bool ConnectorIn::targetsCanConnectTo(Connector* other_side)
+{
+    return getConnected()->canConnectTo(other_side) && canConnectTo(getConnected());
+}
+
 bool ConnectorIn::isConnected()
 {
     return input != NULL;
 }
+
+void ConnectorIn::connectionMovePreview(Connector *other_side)
+{
+    Q_EMIT(connectionInProgress(getConnected(), other_side));
+}
+
 
 void ConnectorIn::validateConnections()
 {

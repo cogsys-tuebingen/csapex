@@ -18,10 +18,12 @@ struct Meta : public Command {
     Meta();
     void add(Command::Ptr cmd);
 
+    int commands() const;
+
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool execute(Graph& graph);
+    bool undo(Graph& graph);
+    bool redo(Graph& graph);
 
 protected:
     std::vector<Command::Ptr> nested;

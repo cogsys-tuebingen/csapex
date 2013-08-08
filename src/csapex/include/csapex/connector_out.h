@@ -21,6 +21,7 @@ class ConnectorOut : public Connector
     Q_OBJECT
 
     friend class ConnectorIn;
+    friend class Graph;
     friend class command::AddConnection;
     friend class command::MoveConnection;
     friend class command::DeleteConnection;
@@ -42,7 +43,10 @@ public:
     virtual void publish(ConnectionType::Ptr message);
 
     virtual bool canConnect();
+    virtual bool targetsCanConnectTo(Connector *other_side);
     virtual bool isConnected();
+
+    virtual void connectionMovePreview(Connector* other_side);
     virtual void validateConnections();
 
     TargetIterator beginTargets();

@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/box.h>
+#include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
 #include <csapex/qt_helper.hpp>
 #include <csapex_core_plugins/string_message.h>

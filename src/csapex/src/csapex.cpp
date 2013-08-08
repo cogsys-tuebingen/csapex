@@ -2,6 +2,7 @@
 #include <csapex/csapex_window.h>
 #include <csapex/box.h>
 #include <csapex/boxed_object.h>
+#include <csapex/graph.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -21,8 +22,8 @@ void siginthandler(int param)
     exit(1);
 }
 
-struct EvaluationApplication : public QApplication {
-    EvaluationApplication(int& argc, char** argv)
+struct CsApexApp : public QApplication {
+    CsApexApp(int& argc, char** argv)
         : QApplication(argc, argv)
     {}
 
@@ -73,9 +74,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    EvaluationApplication app(argc, argv);
-    EvaluationWindow w;
+    CsApexApp app(argc, argv);
 
+    Graph graph;
+
+    CsApexWindow w(graph);
     w.start();
 
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));

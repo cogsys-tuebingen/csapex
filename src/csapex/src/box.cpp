@@ -5,9 +5,12 @@
 #include "ui_box.h"
 #include <csapex/boxed_object.h>
 #include <csapex/box_manager.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
 #include <csapex/command_move_box.h>
 #include <csapex/command_delete_box.h>
 #include <csapex/command_meta.h>
+#include <csapex/command_dispatcher.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -100,13 +103,9 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
 
     ui->enablebtn->setIcon(content->getIcon());
 
-    timer_ = new QTimer();
-    timer_->setInterval(100);
-    timer_->start();
-
     state->minimized = false;
 
-    QObject::connect(timer_, SIGNAL(timeout()), worker_, SLOT(tick()));
+    QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
 
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
@@ -132,15 +131,10 @@ void Box::makeThread()
 
 void Box::enableContent(bool enable)
 {
-    if(enable && !timer_->isActive()) {
-        timer_->start();
-    } else if(!enable && timer_->isActive()) {
-        timer_->stop();
-    }
-
     state->enabled = enable;
 
     content_->enable(enable);
+    ui->label->setEnabled(enable);
 }
 
 YAML::Emitter& Box::save(YAML::Emitter& out) const
@@ -220,7 +214,6 @@ void Box::addInput(ConnectorIn* in)
     ui->input_layout->addWidget(in);
     input.push_back(in);
 
-    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
     QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
 
     connectConnector(in);
@@ -235,7 +228,6 @@ void Box::addOutput(ConnectorOut* out)
     ui->output_layout->addWidget(out);
     output.push_back(out);
 
-    QObject::connect(out, SIGNAL(messageSent(ConnectorOut*)), this, SIGNAL(messageSent(ConnectorOut*)));
     QObject::connect(out, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)));
     QObject::connect(out, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)));
 
@@ -435,12 +427,20 @@ void Box::enabledChange(bool val)
 
 void Box::paintEvent(QPaintEvent* e)
 {
-    bool change = ui->boxframe->property("error").toBool() != content_->isError();
-    ui->boxframe->setProperty("error",content_->isError());
+    bool is_error = content_->isError() && content_->errorLevel() == Displayable::EL_ERROR;
+    bool is_warn = content_->isError() && content_->errorLevel() == Displayable::EL_WARNING;
 
-    if(change) {
-        if(content_->isError()) {
+    bool error_change = ui->boxframe->property("error").toBool() != is_error;
+    bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
+
+    ui->boxframe->setProperty("error", is_error);
+    ui->boxframe->setProperty("warning", is_warn);
+
+    if(error_change || warning_change) {
+        if(is_error) {
             setLabel(QString("ERROR: ") + objectName());
+        } else if(is_warn) {
+            setLabel(QString("WARNING: ") + objectName());
         } else {
             setLabel(objectName());
         }
@@ -519,7 +519,7 @@ void Box::startDrag(QPoint offset)
     QPoint end_pos = pos();
 
     Command::Ptr cmd(new command::MoveBox(this, start_pos, end_pos));
-    BoxManager::instance().execute(cmd);
+    CommandDispatcher::execute(cmd);
 }
 
 QPixmap Box::makePixmap(const std::string& label)
@@ -538,7 +538,7 @@ QPixmap Box::makePixmap(const std::string& label)
 void Box::deleteBox()
 {
     Command::Ptr cmd(new command::DeleteBox(this));
-    BoxManager::instance().execute(cmd);
+    CommandDispatcher::execute(cmd);
 }
 
 void Box::refreshStylesheet()
@@ -550,6 +550,13 @@ void Box::refreshStylesheet()
 void Box::eventModelChanged()
 {
     content_->updateDynamicGui(ui->content);
+}
+
+void Box::tick()
+{
+    if(state->enabled) {
+        Q_EMIT tickRequest();
+    }
 }
 
 void Box::killContent()
@@ -574,7 +581,7 @@ void Box::killContent()
         private_thread_ = NULL;
         worker_ = new BoxWorker(this);
 
-        QObject::connect(timer_, SIGNAL(timeout()), worker_, SLOT(tick()));
+        QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
         BOOST_FOREACH(ConnectorIn* in, input) {
             QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
         }

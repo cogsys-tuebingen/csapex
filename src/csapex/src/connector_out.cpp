@@ -114,9 +114,27 @@ bool ConnectorOut::canConnect()
 {
     return true;
 }
+
+bool ConnectorOut::targetsCanConnectTo(Connector* other_side)
+{
+    for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
+        if(!(*it)->canConnectTo(other_side) || !canConnectTo(*it)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ConnectorOut::isConnected()
 {
     return targets_.size() > 0;
+}
+
+void ConnectorOut::connectionMovePreview(Connector *other_side)
+{
+    for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
+        Q_EMIT(connectionInProgress(*it, other_side));
+    }
 }
 
 void ConnectorOut::validateConnections()

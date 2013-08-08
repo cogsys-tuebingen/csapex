@@ -1,10 +1,6 @@
 #ifndef DESIGN_BOARD_H
 #define DESIGN_BOARD_H
 
-/// COMPONENT
-#include "overlay.h"
-#include <csapex/connector.h>
-
 /// SYSTEM
 #include <QWidget>
 
@@ -17,13 +13,17 @@ class DesignBoard;
 namespace csapex
 {
 
+class Overlay;
+class Box;
+class Graph;
+
 class DesignBoard : public QWidget
 {
     Q_OBJECT
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    DesignBoard(QWidget* parent = 0);
+    DesignBoard(Graph &graph, QWidget* parent = 0);
     virtual ~DesignBoard();
 
     void paintEvent(QPaintEvent*);
@@ -41,8 +41,6 @@ public:
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
 
-    Overlay* getOverlay();
-
     QString cssClass() {
         return QString("DesignBoard");
     }
@@ -52,8 +50,12 @@ public Q_SLOTS:
     void showContextMenu(const QPoint& pos);
     void findMinSize(Box* box);
 
+    void addBoxEvent(Box* box);
+    void refresh();
+
 private:
     Ui::DesignBoard* ui;
+    Graph& graph_;
 
     Overlay* overlay;
 

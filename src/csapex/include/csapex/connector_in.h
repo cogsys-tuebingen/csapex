@@ -37,8 +37,10 @@ public:
     virtual ConnectionType::Ptr getMessage();
 
     virtual bool canConnect();
+    virtual bool targetsCanConnectTo(Connector* other_side);
     virtual bool isConnected();
 
+    virtual void connectionMovePreview(Connector* other_side);
     virtual void validateConnections();
 
     ConnectorOut* getConnected();

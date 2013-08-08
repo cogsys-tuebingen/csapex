@@ -19,11 +19,11 @@ struct AddConnection : public Command
     AddConnection(Connector* a, Connector* b);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool execute(Graph& graph);
+    bool undo(Graph& graph);
+    bool redo(Graph& graph);
 
-    void refresh();
+    void refresh(Graph &graph);
 
 private:
     ConnectorOut* from;

@@ -175,7 +175,6 @@ void FilterStaticMask::State::writeYaml(YAML::Emitter& out) const {
     std::string file = parent->box_->UUID() + ".ppm";
     out << YAML::Key << "mask" << YAML::Value << file;
     cv::imwrite(file, mask_);
-
 }
 
 void FilterStaticMask::State::readYaml(const YAML::Node& node) {
@@ -209,8 +208,13 @@ void FilterStaticMask::filter(cv::Mat& img, cv::Mat& mask)
 {
     Q_EMIT input(img);
 
+    if(state.mask_.size != img.size) {
+        setError(true, "The mask has not the same size as the image size", EL_WARNING);
+        return;
+    }
+
     if(!state.mask_.empty()) {
-        if(mask.empty()) {
+        if(mask.empty() || mask.size != state.mask_.size) {
             state.mask_.copyTo(mask);
         } else {
             mask = cv::min(mask, state.mask_);

@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/memento.h>
-#include <csapex/connection_type.h>
 #include <csapex/message.h>
 
 /// SYSTEM

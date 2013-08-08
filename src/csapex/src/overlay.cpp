@@ -2,15 +2,18 @@
 #include <csapex/overlay.h>
 
 /// COMPONENT
+#include <csapex/connection.h>
+#include <csapex/graph.h>
 #include <csapex/connector_out.h>
 #include <csapex/connector_in.h>
 #include <csapex/command_meta.h>
 #include <csapex/command_delete_connection.h>
-#include <csapex/box_manager.h>
+#include <csapex/box.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <iostream>
+#include <cmath>
 #include <QApplication>
 #include <QTimer>
 #include <QPainter>
@@ -19,8 +22,24 @@
 
 using namespace csapex;
 
-Overlay::Overlay(QWidget* parent)
-    : QWidget(parent), next_connection_id_(0), highlight_connection_id_(-1), schema_dirty_(true)
+namespace {
+QRgb id2rgb(int id)
+{
+    return qRgb(qRed(id), qGreen(id), qBlue(id));
+}
+
+int rgb2id(QRgb rgb)
+{
+    int raw = (rgb & 0xFFFFFF);
+    if(raw >= 0xFFFFFF) {
+        return -1;
+    }
+    return raw;
+}
+}
+
+Overlay::Overlay(Graph &graph, QWidget* parent)
+    : QWidget(parent), graph_(graph), highlight_connection_id_(-1), schema_dirty_(true)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -30,12 +49,10 @@ Overlay::Overlay(QWidget* parent)
     repainter->setInterval(125);
     repainter->start();
 
-    activity_marker_max_lifetime_ = 5;
-    activity_marker_min_width_ = 12;
-    activity_marker_max_width_ = 18;
+    activity_marker_min_width_ = 6;
+    activity_marker_max_width_ = 10;
     activity_marker_min_opacity_ = 25;
-    activity_marker_max_opacity_ = 100;
-
+    activity_marker_max_opacity_ = 75;
 
     connector_radius_ = 7;
 
@@ -80,137 +97,26 @@ void Overlay::deleteTemporaryConnectionsAndRepaint()
     repaint();
 }
 
-void Overlay::addConnection(ConnectorOut* from, ConnectorIn* to)
+void Overlay::drawConnection(Connection& connection)
 {
-    Connection c;
-    c.from = from;
-    c.to = to;
-    c.id = next_connection_id_;
+    ConnectorOut* from = connection.from();
+    ConnectorIn* to = connection.to();
 
-    ++next_connection_id_;
-
-    connections.push_back(c);
-
-    invalidateSchema();
-
-    repaint();
-}
-
-void Overlay::connectorRemoved(QObject* o)
-{
-    connectorRemoved((Connector*) o);
-}
-
-void Overlay::connectorAdded(QObject* o)
-{
-    connectorAdded((Connector*) o);
-}
-
-void Overlay::connectorEnabled(Connector *c)
-{
-    //    connectorAdded(c);
-}
-
-void Overlay::connectorDisabled(Connector* c)
-{
-    //    connectorRemoved(c);
-}
-
-void Overlay::showPublisherSignal(ConnectorIn *c)
-{
-    showPublisherSignal((Connector*) c);
-}
-
-void Overlay::showPublisherSignal(ConnectorOut *c)
-{
-    showPublisherSignal((Connector*) c);
-}
-
-void Overlay::showPublisherSignal(Connector* c)
-{
-    publisher_signals_.push_back(std::make_pair(activity_marker_max_lifetime_, c));
-}
-
-void Overlay::clear()
-{
-    publisher_signals_.clear();
-}
-
-
-void Overlay::connectorAdded(Connector *c)
-{
-    connectors_.push_back(c);
-
-    connect(c, SIGNAL(destroyed(QObject*)), this, SLOT(connectorRemoved(QObject*)));
-    connect(c, SIGNAL(disconnected(QObject*)), this, SLOT(connectorRemoved(QObject*)));
-}
-
-void Overlay::connectorRemoved(Connector* c)
-{
-    for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
-        const Connection& connection = *i;
-
-        if(connection.from == c || connection.to == c) {
-            i = connections.erase(i);
-        } else {
-            ++i;
-        }
-    }
-
-    invalidateSchema();
-
-    connectors_.erase(std::find(connectors_.begin(), connectors_.end(), c));
-
-    clearActivity(c);
-
-    repaint();
-}
-
-
-
-void Overlay::removeConnection(ConnectorOut* from, ConnectorIn* to)
-{
-    bool found = false;
-    for(ConnectionList::iterator i = connections.begin(); i != connections.end();) {
-        Connection& connection = *i;
-
-        if(connection.from == from && connection.to == to) {
-            i = connections.erase(i);
-            found = true;
-        } else {
-            ++i;
-        }
-    }
-
-    if(!found) {
-        std::cerr << "could not remove connection between " << from->UUID() << " and " << to->UUID() << std::endl;
-        std::cerr << "connections are:" << std::endl;
-        BOOST_FOREACH(Connection& connection, connections) {
-            std::cerr << " -" << connection.from->UUID() << " > " << connection.to->UUID() << std::endl;
-        }
-    }
-
-    invalidateSchema();
-
-    clearActivity(from);
-    clearActivity(to);
-
-    from->update();
-    to->update();
-
-    repaint();
-}
-
-void Overlay::drawConnection(ConnectorOut* from, ConnectorIn* to, int id)
-{
     QPoint p1 = from->centerPoint();
     QPoint p2 = to->centerPoint();
 
-    drawConnection(p1, p2, id, to->isError() || from->isError());
+    int id = connection.id();
+
+    drawConnection(p1, p2, id, connection.isSelected(), highlight_connection_id_ == id, to->isError() || from->isError());
+
+    int f = connection.activity();
+
+    drawActivity(f, from);
+    drawActivity(f, to);
 }
 
 
-void Overlay::drawConnection(QPoint from, QPoint to, int id, bool error)
+void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, bool selected, bool highlighted, bool error)
 {
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;
@@ -245,7 +151,7 @@ void Overlay::drawConnection(QPoint from, QPoint to, int id, bool error)
         lg.setColorAt(1,color_in_connected.lighter());
     }
 
-    if(highlight_connection_id_ == id) {
+    if(highlighted) {
         painter->setPen(QPen(Qt::black, connector_radius_ * 1.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
 
@@ -253,7 +159,7 @@ void Overlay::drawConnection(QPoint from, QPoint to, int id, bool error)
         painter->drawPath(path);
     }
 
-    if(isConnectionWithIdSelected(id)) {
+    if(selected) {
         painter->setPen(QPen(Qt::black, connector_radius_ * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
 
@@ -281,15 +187,7 @@ void Overlay::drawConnection(QPoint from, QPoint to, int id, bool error)
     }
 
     if(schema_dirty_) {
-
-        int rest = id;
-        int r = std::min(255, rest); rest -= r;
-        int g = std::min(255, rest); rest -= g;
-        int b = std::min(255, rest); rest -= b;
-
-        QRgb rgb = qRgb(r, g, b);
-
-        QPen schema_pen = QPen(QColor(rgb), connector_radius_ * 2, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
+        QPen schema_pen = QPen(QColor(id2rgb(id)), connector_radius_ * 2, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
         schematics_painter->setPen(schema_pen);
         schematics_painter->drawPath(path);
     }
@@ -345,44 +243,31 @@ void Overlay::drawConnector(Connector *c)
 void Overlay::drawActivity(int life, Connector* c)
 {
     if(c->isEnabled() && life > 0) {
-        int r = std::max(0, activity_marker_max_lifetime_ - life);
-        double f = r / (double) activity_marker_max_lifetime_;
-        int w = activity_marker_min_width_ + f * (activity_marker_max_width_ - activity_marker_min_width_);
+        int r = std::min(Connection::activity_marker_max_lifetime_, life);
+        double f = r / (double) Connection::activity_marker_max_lifetime_;
+        double w = activity_marker_min_width_ + f * (activity_marker_max_width_ - activity_marker_min_width_);
 
         QColor color = c->isOutput() ? color_out_connected : color_in_connected;
-        color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * (1-f));
+        color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
         painter->setPen(QPen(color, w));
-        painter->drawEllipse(c->centerPoint(), r, r);
-    }
-}
-
-void Overlay::clearActivity(Connector *c)
-{
-    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
-        std::pair<int, Connector*>& p = *it;
-
-        if(p.second == c) {
-            it = publisher_signals_.erase(it);
-        } else {
-            ++it;
-        }
+        painter->drawEllipse(QPointF(c->centerPoint()), w, w);
     }
 }
 
 void Overlay::tick()
 {
-    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
-        std::pair<int, Connector*>& p = *it;
+    //    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
+    //        std::pair<int, Connector*>& p = *it;
 
-        --p.first;
+    //        --p.first;
 
-        if(p.first <= 0) {
-            it = publisher_signals_.erase(it);
-        } else {
-            ++it;
-        }
-    }
+    //        if(p.first <= 0) {
+    //            it = publisher_signals_.erase(it);
+    //        } else {
+    //            ++it;
+    //        }
+    //    }
 }
 
 bool Overlay::mouseMoveEventHandler(QMouseEvent *e)
@@ -394,9 +279,7 @@ bool Overlay::mouseMoveEventHandler(QMouseEvent *e)
         return false;
     }
 
-    QRgb rgb = schematics.pixel(x,y);
-
-    unsigned int id = qRed(rgb) + qGreen(rgb) + qBlue(rgb);
+    unsigned int id = rgb2id(schematics.pixel(x,y));
 
     if(id != 3*255) {
         highlight_connection_id_ = id;
@@ -416,17 +299,9 @@ bool Overlay::keyPressEventHandler(QKeyEvent* e)
 bool Overlay::keyReleaseEventHandler(QKeyEvent* e)
 {
     if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        command::Meta::Ptr meta(new command::Meta);
+        graph_.deleteSelectedConnections();
 
-        for(ConnectionList::const_iterator i = connections.begin(); i != connections.end(); ++i) {
-            if(isConnectionWithIdSelected(i->id)) {
-                meta->add(Command::Ptr(new command::DeleteConnection(i->from, i->to)));
-            }
-        }
-
-        deselectConnections();
-
-        BoxManager::instance().execute(meta);
+        repaint();
 
         return false;
     }
@@ -443,37 +318,16 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
 {
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
 
-    if(highlight_connection_id_ != -1) {
-        if(e->button() == Qt::MiddleButton) {
-            deleteConnectionById(highlight_connection_id_);
-            return false;
-        }
-
-        if(shift) {
-            if(isConnectionWithIdSelected(highlight_connection_id_)) {
-                deselectConnectionById(highlight_connection_id_);
-            } else {
-                selectConnectionById(highlight_connection_id_, true);
-            }
-        } else {
-            if(isConnectionWithIdSelected(highlight_connection_id_)) {
-                if(noSelectedConnections() == 1) {
-                    deselectConnectionById(highlight_connection_id_);
-                } else {
-                    selectConnectionById(highlight_connection_id_);
-                }
-            } else {
-                selectConnectionById(highlight_connection_id_);
-            }
-        }
-        return false;
-
-    } else if(!shift) {
-        deselectConnections();
+    if(highlight_connection_id_ != -1 && e->button() == Qt::MiddleButton) {
+        graph_.deleteConnectionById(highlight_connection_id_);
         return false;
     }
 
-    return true;
+    bool result = graph_.handleConnectionSelection(highlight_connection_id_, shift);
+
+    repaint();
+
+    return result;
 }
 
 void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
@@ -485,54 +339,6 @@ void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
         selection_a = b;
         selection_b = a;
     }
-}
-
-void Overlay::deleteConnectionById(int id)
-{
-    for(ConnectionList::const_iterator i = connections.begin(); i != connections.end(); ++i) {
-        if(i->id == id) {
-            BoxManager::instance().execute(Command::Ptr(new command::DeleteConnection(i->from, i->to)));
-            return;
-        }
-    }
-}
-
-void Overlay::selectConnectionById(int id, bool add)
-{
-    if(!add) {
-        connections_selected.clear();
-    }
-    connections_selected.push_back(id);
-
-    repaint();
-}
-
-void Overlay::deselectConnectionById(int id)
-{
-    std::vector<int>::iterator it = std::find(connections_selected.begin(), connections_selected.end(), id);
-    if(it != connections_selected.end()) {
-        connections_selected.erase(it);
-
-        repaint();
-    }
-}
-
-
-void Overlay::deselectConnections()
-{
-    connections_selected.clear();
-
-    repaint();
-}
-
-bool Overlay::isConnectionWithIdSelected(int id)
-{
-    return std::find(connections_selected.begin(), connections_selected.end(), id) != connections_selected.end();
-}
-
-int Overlay::noSelectedConnections()
-{
-    return connections_selected.size();
 }
 
 void Overlay::paintEvent(QPaintEvent* event)
@@ -554,39 +360,39 @@ void Overlay::paintEvent(QPaintEvent* event)
         BOOST_FOREACH(TempConnection& temp, temp_) {
 
             if(dynamic_cast<ConnectorIn*> (temp.from)) {
-                drawConnection(temp.to, temp.from->centerPoint(), -1);
+                drawConnection(temp.to, temp.from->centerPoint(), false, true, -1);
             } else {
-                drawConnection(temp.from->centerPoint(), temp.to, -1);
+                drawConnection(temp.from->centerPoint(), temp.to, false, true, -1);
             }
         }
     }
 
-    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end(); ++it) {
-        std::pair<int, Connector*>& p = *it;
-
-        drawActivity(p.first, p.second);
-    }
-
-    for(ConnectionList::const_iterator i = connections.begin(); i != connections.end(); ++i) {
-        const Connection& connection = *i;
-
-        if(connection.from->isEnabled() && connection.to->isEnabled()) {
-            drawConnection(connection.from, connection.to, connection.id);
+    foreach(const Connection::Ptr& connection, graph_.connections) {
+        if(connection->from()->isEnabled() && connection->to()->isEnabled()) {
+            drawConnection(*connection);
         }
     }
 
-    foreach (Connector* connector, connectors_) {
-        drawConnector(connector);
+    foreach (Box* box, graph_.boxes_) {
+        for(int id = 0; id < box->countInputs(); ++id) {
+            drawConnector(box->getInput(id));
+        }
+        for(int id = 0; id < box->countOutputs(); ++id) {
+            drawConnector(box->getOutput(id));
+        }
     }
+
+    painter->setOpacity(0.35);
 
     if(!selection_a.isNull() && !selection_b.isNull()) {
         painter->setPen(QPen(Qt::black, 1));
         painter->setBrush(QBrush(Qt::white));
-        painter->setOpacity(0.35);
         painter->drawRect(QRect(selection_a, selection_b));
     }
 
-    //    painter->drawImage(QPoint(0,0), schematics);
+//    painter->drawImage(QPoint(0,0), schematics);
+
+    schema_dirty_ = false;
 
     painter = NULL;
     schematics_painter = NULL;
@@ -595,6 +401,11 @@ void Overlay::paintEvent(QPaintEvent* event)
 void Overlay::invalidateSchema()
 {
     schema_dirty_ = true;
+}
+
+void Overlay::refresh()
+{
+    invalidateSchema();
 }
 
 void Overlay::resizeEvent(QResizeEvent *event)

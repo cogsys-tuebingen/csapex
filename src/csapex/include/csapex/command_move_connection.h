@@ -2,7 +2,6 @@
 #define COMMAND_MOVE_CONNECTION_H
 
 /// COMPONENT
-#include "command.h"
 #include "command_meta.h"
 
 namespace csapex

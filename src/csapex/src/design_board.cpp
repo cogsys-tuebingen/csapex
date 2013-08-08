@@ -6,8 +6,13 @@
 #include <csapex/connector.h>
 #include <csapex/selector_proxy.h>
 #include <csapex/box.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
 #include <csapex/command_add_box.h>
 #include <csapex/box_manager.h>
+#include <csapex/command_dispatcher.h>
+#include <csapex/overlay.h>
+#include <csapex/graph.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -21,12 +26,12 @@
 
 using namespace csapex;
 
-DesignBoard::DesignBoard(QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), space_(false), drag_(false)
+DesignBoard::DesignBoard(Graph& graph, QWidget* parent)
+    : QWidget(parent), ui(new Ui::DesignBoard), graph_(graph), space_(false), drag_(false)
 {
     ui->setupUi(this);
 
-    overlay = new Overlay(this);
+    overlay = new Overlay(graph, this);
 
     installEventFilter(this);
 
@@ -87,11 +92,38 @@ void DesignBoard::findMinSize(Box* box)
     setMinimumSize(minimum);
 }
 
+void DesignBoard::addBoxEvent(Box *box)
+{
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay, SLOT(invalidateSchema()));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), &graph_, SLOT(boxMoved(Box*, int, int)));
+    QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
+    QObject::connect(box, SIGNAL(clicked(Box*)), &graph_, SLOT(toggleBoxSelection(Box*)));
+    //    QObject::connect(box, SIGNAL(connectorCreated(Connector*)), overlay, SLOT(connectorAdded(Connector*)));
+    //    QObject::connect(box, SIGNAL(connectorEnabled(Connector*)), overlay, SLOT(connectorEnabled(Connector*)));
+    //    QObject::connect(box, SIGNAL(connectorDisabled(Connector*)), overlay, SLOT(connectorDisabled(Connector*)));
+
+    QObject::connect(box, SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
+    QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
+    QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
+
+    box->setParent(this);
+    box->show();
+
+    //    layout()->addWidget(box);
+
+    overlay->raise();
+    repaint();
+}
+
+void DesignBoard::refresh()
+{
+    overlay->refresh();
+    overlay->raise();
+}
+
 void DesignBoard::keyPressEvent(QKeyEvent* e)
 {
-    if(!BoxManager::instance().keyPressEventHandler(e)) {
-        return;
-    }
     if(!overlay->keyPressEventHandler(e)) {
         return;
     }
@@ -103,9 +135,14 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
-    if(!BoxManager::instance().keyReleaseEventHandler(e)) {
-        return;
+    // BOXES
+    if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
+        if(graph_.noSelectedBoxes() != 0) {
+            graph_.deleteSelectedBoxes();
+            return;
+        }
     }
+
     if(!overlay->keyReleaseEventHandler(e)) {
         return;
     }
@@ -119,9 +156,6 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 void DesignBoard::mousePressEvent(QMouseEvent* e)
 {
     if(!drag_ || !space_) {
-        if(!BoxManager::instance().mousePressEventHandler(e)) {
-            return;
-        }
         if(!overlay->mousePressEventHandler(e)) {
             return;
         }
@@ -142,11 +176,11 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
         overlay->setSelectionRectangle(QPoint(),QPoint());
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            BoxManager::instance().deselectBoxes();
+            graph_.deselectBoxes();
 
             BOOST_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    BoxManager::instance().selectBox(box, true);
+                    graph_.selectBox(box, true);
                 }
             }
 
@@ -154,10 +188,12 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
         }
     }
 
-
-    if(!BoxManager::instance().mouseReleaseEventHandler(e)) {
-        return;
+    // BOXES
+    bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
+    if(!shift) {
+        graph_.deselectBoxes();
     }
+
     if(!overlay->mouseReleaseEventHandler(e)) {
         return;
     }
@@ -230,9 +266,7 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
     } else if(!overlay->mouseMoveEventHandler(e)) {
         return;
     }
-    if(!BoxManager::instance().mouseMoveEventHandler(e)) {
-        return;
-    }
+
     if(!overlay->mouseMoveEventHandler(e)) {
         return;
     }
@@ -240,36 +274,6 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
 
 bool DesignBoard::eventFilter(QObject* o, QEvent* e)
 {
-    if(e->type() == QEvent::ChildPolished) {
-        QChildEvent* ch = dynamic_cast<QChildEvent*>(e);
-        QObject* child = ch->child();
-        Box* box = dynamic_cast<Box*>(child);
-        if(box) {
-            findMinSize(box);
-
-            QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
-            QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay, SLOT(invalidateSchema()));
-            QObject::connect(box, SIGNAL(moved(Box*, int, int)), &BoxManager::instance(), SLOT(boxMoved(Box*, int, int)));
-            QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
-            QObject::connect(box, SIGNAL(clicked(Box*)), &BoxManager::instance(), SLOT(toggleBoxSelection(Box*)));
-            QObject::connect(box, SIGNAL(connectorCreated(Connector*)), overlay, SLOT(connectorAdded(Connector*)));
-            QObject::connect(box, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(addConnection(ConnectorOut*,ConnectorIn*)));
-            QObject::connect(box, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), overlay, SLOT(removeConnection(ConnectorOut*,ConnectorIn*)));
-            QObject::connect(box, SIGNAL(connectorEnabled(Connector*)), overlay, SLOT(connectorEnabled(Connector*)));
-            QObject::connect(box, SIGNAL(connectorDisabled(Connector*)), overlay, SLOT(connectorDisabled(Connector*)));
-
-            QObject::connect(box, SIGNAL(messageSent(ConnectorOut*)), overlay, SLOT(showPublisherSignal(ConnectorOut*)));
-            QObject::connect(box, SIGNAL(messageArrived(ConnectorIn*)), overlay, SLOT(showPublisherSignal(ConnectorIn*)));
-            QObject::connect(box, SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
-            QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
-            QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
-
-            box->registered();
-        }
-
-        overlay->raise();
-    }
-
     return false;
 }
 
@@ -279,7 +283,7 @@ void DesignBoard::showContextMenu(const QPoint& pos)
     QPoint globalPos = mapToGlobal(pos);
 
     QMenu menu;
-    BoxManager::instance().fill(&menu);
+    BoxManager::instance().insertAvailableBoxedObjects(&menu);
 
     QAction* selectedItem = menu.exec(globalPos);
 
@@ -316,9 +320,9 @@ void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
         overlay->addTemporaryConnection(c, e->pos());
-    }
+        overlay->repaint();
 
-    if(e->mimeData()->text() == Connector::MIME_MOVE) {
+    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
 
@@ -331,9 +335,9 @@ void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
             ConnectorIn* in = dynamic_cast<ConnectorIn*> (c);
             overlay->addTemporaryConnection(in->getConnected(), e->pos());
         }
-    }
+        overlay->repaint();
 
-    if(e->mimeData()->text() == Box::MIME_MOVE) {
+    } else if(e->mimeData()->text() == Box::MIME_MOVE) {
         Box* box = dynamic_cast<Box*>(e->mimeData()->parent());
         Box::MoveOffset* offset = dynamic_cast<Box::MoveOffset*>(e->mimeData()->userData(0));
         box->move(e->pos() + offset->value);
@@ -358,7 +362,7 @@ void DesignBoard::dropEvent(QDropEvent* e)
         QPoint pos = e->pos() + offset;
 
         Command::Ptr add_box(new command::AddBox(selector, this, pos));
-        BoxManager::instance().execute(add_box);
+        CommandDispatcher::execute(add_box);
     }
 
     if(e->mimeData()->text() == Connector::MIME_CREATE) {
@@ -367,9 +371,4 @@ void DesignBoard::dropEvent(QDropEvent* e)
     if(e->mimeData()->text() == Connector::MIME_MOVE) {
         e->ignore();
     }
-}
-
-Overlay* DesignBoard::getOverlay()
-{
-    return overlay;
 }

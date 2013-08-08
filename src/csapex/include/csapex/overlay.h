@@ -12,49 +12,26 @@ namespace csapex
 class Connector;
 class ConnectorOut;
 class ConnectorIn;
-
-namespace command
-{
-class AddConnection;
-}
+class Connection;
+class Graph;
 
 class Overlay : public QWidget
 {
     Q_OBJECT
 
-private:
-    struct Connection {
-        ConnectorOut* from;
-        ConnectorIn* to;
-        int id;
-    };
-
-    typedef std::vector<Connection> ConnectionList;
-
 public:
-    Overlay(QWidget* parent = 0);
+    Overlay(Graph& graph, QWidget* parent = 0);
 
 public Q_SLOTS:
-    void connectorAdded(Connector* c);
-    void connectorRemoved(Connector* c);
-    void connectorAdded(QObject* c);
-    void connectorRemoved(QObject* o);
-    void connectorEnabled(Connector* c);
-    void connectorDisabled(Connector* c);
-    void showPublisherSignal(Connector* c);
-    void showPublisherSignal(ConnectorIn* c);
-    void showPublisherSignal(ConnectorOut* c);
-
     void addTemporaryConnection(Connector* from, Connector* to);
     void addTemporaryConnection(Connector *from, const QPoint& end);
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
-    void addConnection(ConnectorOut* from, ConnectorIn* to);
-    void removeConnection(ConnectorOut* from, ConnectorIn* to);
+
     void tick();
-    void clear();
 
     void invalidateSchema();
+    void refresh();
 
 public:
     bool mouseMoveEventHandler(QMouseEvent * e);
@@ -68,20 +45,12 @@ public:
 
 protected:
     void drawActivity(int life, Connector* c);
-    void clearActivity(Connector* c);
     void drawConnector(Connector* c);
-    void drawConnection(ConnectorOut *from, ConnectorIn *to, int id);
-    void drawConnection(QPoint from, QPoint to, int id, bool error = false);
+    void drawConnection(Connection& connection);
+    void drawConnection(const QPoint& from, const QPoint& to, int id, bool selected, bool highlighted, bool error = false);
 
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent * event);
-
-    void deleteConnectionById(int id);
-    void selectConnectionById(int id, bool add = false);
-    void deselectConnections();
-    void deselectConnectionById(int id);
-    bool isConnectionWithIdSelected(int id);
-    int noSelectedConnections();
 
 protected:
     struct TempConnection {
@@ -89,19 +58,16 @@ protected:
         QPoint to;
     };
 
+    Graph& graph_;
+
     std::vector<TempConnection> temp_;
 
     QPainter* painter;
     QPainter* schematics_painter;
     QImage schematics;
 
-    std::vector<Connector*> connectors_;
-    ConnectionList connections;
-    std::vector<int> connections_selected;
-
     QTimer* repainter;
 
-    int activity_marker_max_lifetime_;
     int activity_marker_min_width_;
     int activity_marker_max_width_;
     int activity_marker_min_opacity_;
@@ -116,13 +82,10 @@ protected:
     QColor color_out_disconnected;
 
 
-    int next_connection_id_;
     int highlight_connection_id_;
     bool schema_dirty_;
 
     int connector_radius_;
-
-    std::vector<std::pair<int, Connector*> > publisher_signals_;
 
     QPoint selection_a;
     QPoint selection_b;

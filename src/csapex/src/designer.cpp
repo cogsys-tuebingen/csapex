@@ -1,46 +1,31 @@
 /// HEADER
 #include <csapex/designer.h>
 
-/// PROJECT
-#include "ui_designer.h"
-#include <csapex/connector.h>
-#include <csapex/connector_in.h>
-#include <csapex/connector_out.h>
-#include <csapex/selector_proxy.h>
-#include <csapex/box_manager.h>
+/// COMPONENT
 #include <csapex/box.h>
-#include <csapex/qt_helper.hpp>
-#include <csapex/designerio.h>
-#include <csapex/command_meta.h>
-#include <csapex/command_delete_box.h>
-#include <csapex/stream_interceptor.h>
-
-/// SYSTEM
-#include <boost/foreach.hpp>
-#include <QResizeEvent>
-#include <QMenu>
-#include <QScrollBar>
-#include <QFileDialog>
+#include <csapex/command_dispatcher.h>
+#include <csapex/design_board.h>
+#include "ui_designer.h"
 
 using namespace csapex;
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
-Designer::Designer(QWidget* parent)
+Designer::Designer(Graph &graph, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer)
 {
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
     ui->setupUi(this);
 
-    setCurrentConfig(DesignerIO::default_config);
+    designer_board = new DesignBoard(graph);
+    ui->scrollArea->setWidget(designer_board);
 
-    QObject::connect(&BoxManager::instance(), SIGNAL(stateChanged()), this, SIGNAL(stateChanged()));
+    CommandDispatcher::instance().setGraph(&graph);
 }
 
 Designer::~Designer()
 {
-    StreamInterceptor::instance().stop();
 }
 
 bool Designer::eventFilter(QObject* o, QEvent* e)
@@ -50,94 +35,32 @@ bool Designer::eventFilter(QObject* o, QEvent* e)
 
 void Designer::keyPressEvent(QKeyEvent* e)
 {
-    ui->designer->keyPressEvent(e);
+    designer_board->keyPressEvent(e);
 }
 
 void Designer::keyReleaseEvent(QKeyEvent* e)
 {
-    ui->designer->keyReleaseEvent(e);
+    designer_board->keyReleaseEvent(e);
 }
 
 void Designer::resizeEvent(QResizeEvent* e)
 {
 }
 
-bool Designer::isDirty()
+void Designer::addBox(Box *box)
 {
-    return BoxManager::instance().isDirty();
+//    box->setParent(this);
+
+    designer_board->addBoxEvent(box);
 }
 
 
-bool Designer::canUndo()
+void Designer::deleteBox(Box *box)
 {
-    return BoxManager::instance().canUndo();
+    designer_board->refresh();
 }
 
-bool Designer::canRedo()
+void Designer::stateChangedEvent()
 {
-    return BoxManager::instance().canRedo();
-}
-
-void Designer::save()
-{
-    DesignerIO::save(this, current_config_);
-}
-
-void Designer::setCurrentConfig(const std::string& filename)
-{
-    current_config_ = filename;
-
-    Q_EMIT configChanged();
-}
-
-std::string Designer::getConfig()
-{
-    return current_config_;
-}
-
-void Designer::saveAs()
-{
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", current_config_.c_str(), DesignerIO::config_selector.c_str());
-
-    if(!filename.isEmpty()) {
-        DesignerIO::save(this, filename.toUtf8().constData());
-        setCurrentConfig(filename.toUtf8().constData());
-    }
-}
-
-void Designer::load()
-{
-    QString filename = QFileDialog::getOpenFileName(0, "Load config", current_config_.c_str(), DesignerIO::config_selector.c_str());
-
-    if(QFile(filename).exists()) {
-        DesignerIO::load(this, filename.toUtf8().constData());
-        setCurrentConfig(filename.toUtf8().constData());
-    }
-}
-
-void Designer::reload()
-{
-    DesignerIO::load(this, current_config_);
-}
-
-void Designer::undo()
-{
-    BoxManager::instance().undo();
-}
-
-void Designer::redo()
-{
-    BoxManager::instance().redo();
-}
-
-void Designer::clear()
-{
-    command::Meta::Ptr clear(new command::Meta);
-
-    QList<csapex::Box*> boxes = findChildren<csapex::Box*> ();
-    BOOST_FOREACH(csapex::Box* box, boxes) {
-        Command::Ptr cmd(new command::DeleteBox(box));
-        clear->add(cmd);
-    }
-    BoxManager::instance().execute(clear);
+    designer_board->refresh();
 }

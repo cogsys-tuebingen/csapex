@@ -3,8 +3,8 @@
 
 /// COMPONENT
 #include <csapex/connection_type.h>
-#include "command.h"
-#include "displayable.h"
+#include <csapex/command.h>
+#include <csapex/displayable.h>
 
 /// FORWARDS DECLARATION
 namespace csapex
@@ -33,10 +33,13 @@ public:
 
     virtual bool canConnect() = 0;
     virtual bool canConnectTo(Connector* other_side);
+    virtual bool targetsCanConnectTo(Connector* other_side) = 0;
     virtual bool isConnected() = 0;
     virtual bool tryConnect(Connector* other_side) = 0;
     virtual void removeConnection(Connector* other_side) = 0;
     virtual void validateConnections();
+
+    virtual void connectionMovePreview(Connector* other_side) = 0;
 
     virtual bool isOutput() const {
         return false;
@@ -86,7 +89,7 @@ protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
     virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
-    void errorEvent(bool error);
+    void errorEvent(bool error, ErrorLevel level);
 
 protected:
     virtual void findParents();

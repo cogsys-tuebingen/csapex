@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/csapex_window.h>
+#include <csapex/graph.h>
 
 /// SYSTEM
 #include <rqt_gui_cpp/plugin.h>
@@ -13,6 +14,7 @@ class CsApex : public rqt_gui_cpp::Plugin
 {
 public:
     CsApex();
+    virtual ~CsApex();
 
     virtual void initPlugin(qt_gui_cpp::PluginContext& context);
     virtual void shutdownPlugin();
@@ -22,7 +24,8 @@ public:
 private:
     qt_gui_cpp::PluginContext* context_;
 
-    csapex::EvaluationWindow* eva_;
+    csapex::Graph graph_;
+    csapex::CsApexWindow* eva_;
 };
 
 }

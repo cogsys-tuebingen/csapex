@@ -65,7 +65,7 @@ Q_SIGNALS:
     void modelChanged();
 
 protected:
-    void errorEvent(bool error);
+    void errorEvent(bool error, ErrorLevel level);
 
 protected:
     std::string type_name_;

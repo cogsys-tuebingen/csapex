@@ -11,7 +11,7 @@ Displayable::Displayable()
 {
 }
 
-void Displayable::setError(bool e, const std::string& msg)
+void Displayable::setError(bool e, const std::string& msg, ErrorLevel level)
 {
     QString err;
     if(e) {
@@ -25,8 +25,9 @@ void Displayable::setError(bool e, const std::string& msg)
     }
     box_->setToolTip(err);
     error_ = e;
+    level_ = level;
 
-    errorEvent(error_);
+    errorEvent(error_, level_);
 }
 
 bool Displayable::isError() const
@@ -34,6 +35,10 @@ bool Displayable::isError() const
     return error_;
 }
 
+Displayable::ErrorLevel Displayable::errorLevel() const
+{
+    return level_;
+}
 
 void Displayable::setBox(Box* box)
 {
@@ -45,7 +50,7 @@ Box* Displayable::getBox() const
     return box_;
 }
 
-void Displayable::errorEvent(bool error)
+void Displayable::errorEvent(bool error, ErrorLevel level)
 {
 
 }

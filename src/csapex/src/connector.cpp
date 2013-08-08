@@ -4,7 +4,8 @@
 /// COMPONENT
 #include <csapex/design_board.h>
 #include <csapex/box.h>
-#include <csapex/box_manager.h>
+#include <csapex/boxed_object.h>
+#include <csapex/command_dispatcher.h>
 #include <csapex/command_add_connection.h>
 #include <csapex/command_move_connection.h>
 
@@ -45,9 +46,9 @@ Connector::~Connector()
 {
 }
 
-void Connector::errorEvent(bool error)
+void Connector::errorEvent(bool error, ErrorLevel level)
 {
-    box_->getContent()->setError(error);
+    box_->getContent()->setError(error, "Connector Error", level);
 }
 
 std::string Connector::UUID()
@@ -81,7 +82,7 @@ void Connector::removeAllConnectionsUndoable()
 {
     if(isConnected()) {
         Command::Ptr cmd = removeAllConnectionsCmd();
-        BoxManager::instance().execute(cmd);
+        CommandDispatcher::execute(cmd);
     }
 }
 
@@ -114,7 +115,7 @@ bool Connector::canConnectTo(Connector* other_side)
 {
     bool in_out = (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
     bool compability = getType()->canConnectTo(other_side->getType());
-    std::cout << getType()->name() << " vs. " << other_side->getType()->name() << " => " << (in_out && compability) << std::endl;
+
     return in_out && compability;
 }
 
@@ -129,23 +130,9 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
         }
     } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        ConnectorOut* out = dynamic_cast<ConnectorOut*> (from);
 
-        if(out) {
-            bool accept = true;
-            for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-                accept &= (*it)->canConnectTo(this) && canConnectTo(*it);
-            }
-
-            if(accept) {
-                e->acceptProposedAction();
-            }
-
-        } else {
-            ConnectorIn* in = dynamic_cast<ConnectorIn*> (from);
-            if(in->getConnected()->canConnectTo(this) && canConnectTo(in->getConnected())) {
-                e->acceptProposedAction();
-            }
+        if(from->targetsCanConnectTo(this)) {
+            e->acceptProposedAction();
         }
     }
 }
@@ -155,19 +142,12 @@ void Connector::dragMoveEvent(QDragMoveEvent* e)
     Q_EMIT(connectionStart());
     if(e->mimeData()->text() == Connector::MIME_CREATE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-
         Q_EMIT(connectionInProgress(this, from));
+
     } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        ConnectorOut* out = dynamic_cast<ConnectorOut*> (from);
-        if(out) {
-            for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-                Q_EMIT(connectionInProgress(*it, this));
-            }
-        } else {
-            ConnectorIn* in = dynamic_cast<ConnectorIn*> (from);
-            Q_EMIT(connectionInProgress(in->getConnected(), this));
-        }
+
+        from->connectionMovePreview(this);
     }
 }
 
@@ -178,14 +158,14 @@ void Connector::dropEvent(QDropEvent* e)
 
         if(from && from != this) {
             Command::Ptr cmd(new command::AddConnection(this, from));
-            BoxManager::instance().execute(cmd);
+            CommandDispatcher::execute(cmd);
         }
     } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
             Command::Ptr cmd(new command::MoveConnection(from, this));
-            BoxManager::instance().execute(cmd);
+            CommandDispatcher::execute(cmd);
             e->setDropAction(Qt::MoveAction);
         }
     }
@@ -205,8 +185,7 @@ void Connector::mouseMoveEvent(QMouseEvent* e)
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
     bool right = (buttons_down_ & Qt::RightButton) != 0;
 
-    bool is_input = dynamic_cast<ConnectorIn*>(this) != NULL;
-    bool full_input = is_input && this->isConnected();
+    bool full_input = isInput() && this->isConnected();
     bool create = left && !full_input;
     bool move = (right && isConnected()) || (left && full_input);
 

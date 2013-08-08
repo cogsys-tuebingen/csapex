@@ -2,10 +2,14 @@
 #include <csapex/command_delete_connection.h>
 
 /// COMPONENT
-#include <boost/foreach.hpp>
 #include <csapex/command.h>
 #include <csapex/box.h>
-#include <csapex/box_manager.h>
+#include <csapex/connector_in.h>
+#include <csapex/connector_out.h>
+#include <csapex/graph.h>
+
+/// SYSTEM
+#include <boost/foreach.hpp>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -26,37 +30,36 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
     to_uuid = to->UUID();
 }
 
-bool DeleteConnection::execute()
+bool DeleteConnection::execute(Graph& graph)
 {
-    from->removeConnection(to);
-    to->setError(false);
+    graph.deleteConnection(Connection::Ptr(new Connection(from, to)));
 
     return true;
 }
 
-bool DeleteConnection::undo()
+bool DeleteConnection::undo(Graph& graph)
 {
-    if(!refresh()) {
+    if(!refresh(graph)) {
         return false;
     }
+    return graph.addConnection(Connection::Ptr(new Connection(from, to)));
+}
 
-    if(from->tryConnect(to)) {
-        return true;
+bool DeleteConnection::redo(Graph& graph)
+{
+    if(!refresh(graph)) {
+        throw std::runtime_error("cannot redo DeleteConnection");
     }
-
-    return false;
+    return execute(graph);
 }
 
-bool DeleteConnection::redo()
+bool DeleteConnection::refresh(Graph& graph)
 {
-    refresh();
-    return execute();
-}
+    Box* from_box = graph.findConnectorOwner(from_uuid);
+    Box* to_box = graph.findConnectorOwner(to_uuid);
 
-bool DeleteConnection::refresh()
-{
-    Box* from_box = BoxManager::instance().findConnectorOwner(from_uuid);
-    Box* to_box = BoxManager::instance().findConnectorOwner(to_uuid);
+    from = NULL;
+    to = NULL;
 
     if(!from_box || !to_box) {
         return false;

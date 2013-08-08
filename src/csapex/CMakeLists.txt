@@ -58,6 +58,7 @@ add_library(csapex SHARED
     src/box_manager.cpp
     src/core_plugin.cpp
     src/command.cpp
+    src/command_dispatcher.cpp
     src/command_meta.cpp
     src/command_add_box.cpp
     src/command_add_connection.cpp
@@ -66,6 +67,7 @@ add_library(csapex SHARED
     src/command_delete_connection.cpp
     src/command_delete_connector.cpp
     src/command_move_box.cpp
+    src/connection.cpp
     src/connector.cpp
     src/connector_in.cpp
     src/connector_out.cpp
@@ -78,12 +80,15 @@ add_library(csapex SHARED
     src/displayable.cpp
     src/global_option.cpp
     src/global_option_manager.cpp
+    src/graph.cpp
+    src/graphio.cpp
     src/message.cpp
     src/message_provider.cpp
     src/message_provider_manager.cpp
     src/memento.cpp
     src/overlay.cpp
     src/selector_proxy.cpp
+    src/selectable.cpp
     src/stream_interceptor.cpp
     src/qdouble_slider.cpp
     src/qwrapper.cpp

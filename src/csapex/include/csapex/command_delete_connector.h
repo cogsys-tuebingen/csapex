@@ -15,11 +15,11 @@ struct DeleteConnector : public Command
     DeleteConnector(Connector *_c);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool execute(Graph& graph);
+    bool undo(Graph& graph);
+    bool redo(Graph& graph);
 
-    bool refresh();
+    bool refresh(Graph &graph);
 
 private:
     bool       in;

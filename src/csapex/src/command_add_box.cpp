@@ -6,6 +6,7 @@
 #include <csapex/selector_proxy.h>
 #include <csapex/box.h>
 #include <csapex/box_manager.h>
+#include <csapex/graph.h>
 
 using namespace csapex::command;
 
@@ -16,28 +17,27 @@ AddBox::AddBox(SelectorProxy* selector, QWidget* parent, QPoint pos)
     type = selector->getType();
 }
 
-bool AddBox::execute()
+bool AddBox::execute(Graph& graph)
 {
-    box = selector->spawnObject(parent, pos, type, uuid);
+    box = BoxManager::instance().makeBox(pos, type, uuid);
+    graph.addBox(box);
 
     return true;
 }
 
-bool AddBox::undo()
+bool AddBox::undo(Graph& graph)
 {
-    refresh();
+    refresh(graph);
 
     saved_state = box->getState();
-    box->stop();
-    delete box;
-    box = NULL;
+    graph.deleteBox(box);
 
     return true;
 }
 
-bool AddBox::redo()
+bool AddBox::redo(Graph& graph)
 {
-    if(execute()) {
+    if(execute(graph)) {
         box->setState(saved_state);
         return true;
     }
@@ -45,7 +45,7 @@ bool AddBox::redo()
     return false;
 }
 
-void AddBox::refresh()
+void AddBox::refresh(Graph& graph)
 {
-    box = BoxManager::instance().findBox(uuid);
+    box = graph.findBox(uuid);
 }

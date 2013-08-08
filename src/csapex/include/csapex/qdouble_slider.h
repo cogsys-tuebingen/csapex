@@ -1,6 +1,7 @@
 #ifndef QDOUBLE_SLIDER_H
 #define QDOUBLE_SLIDER_H
 
+/// SYSTEM
 #include <QSlider>
 
 class QDoubleSlider : public QSlider
