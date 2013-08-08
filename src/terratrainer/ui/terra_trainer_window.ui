@@ -77,6 +77,8 @@
     <addaction name="action_LoadImage"/>
     <addaction name="separator"/>
     <addaction name="action_LoadClassifier"/>
+    <addaction name="action_SaveClassifier"/>
+    <addaction name="action_SaveClassifier_raw"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -163,6 +165,16 @@
   <action name="action_Quit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="action_SaveClassifier">
+   <property name="text">
+    <string>Save Classifier</string>
+   </property>
+  </action>
+  <action name="action_SaveClassifier_raw">
+   <property name="text">
+    <string>Save Classifier (raw)</string>
    </property>
   </action>
  </widget>
