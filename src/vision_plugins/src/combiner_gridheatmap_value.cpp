@@ -55,7 +55,7 @@ cv::Mat GridHeatMapValue::combine(const cv::Mat img1, const cv::Mat mask1, const
             cv::Mat  values;
             cv::Size block_size(10,10);
             cv::Mat  out;
-            HeatMapCompIterator<GridScalar>it(g1, g2);
+            IterativeHeatMapGenerator<GridScalar>it(g1, g2);
 
             while(it.iterate(values)) {
                 render_heatmap_row(values,block_size, it.lastFinishedRow(), out);
