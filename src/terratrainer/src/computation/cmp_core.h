@@ -12,6 +12,7 @@
 #include <boost/thread/mutex.hpp>
 #include <utils/LibCvTools/grid.hpp>
 #include <utils/LibCvTools/quad_tree.hpp>
+#include <utils/LibCvTools/grid_compute.hpp>
 
 class CMPCore
 {
@@ -65,6 +66,8 @@ private:
     std::string              file_forest_;
     std::vector<ROI>         rois_;
     std::vector<int>         classIDs_;
+
+    cv_grid::GridTerra       grid_;
 
     void extract();
     void train();

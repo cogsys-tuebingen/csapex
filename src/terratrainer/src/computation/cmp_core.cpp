@@ -53,7 +53,16 @@ void CMPCore::compute()
 
 void CMPCore::computeGrid(int cell_size)
 {
+    /// PARAMETERS
+    cv_grid::AttrTerrainClass::Params p;
+    p.extractor  = extractor_.get();
+    p.classifier = random_.get();
 
+    /// CALCULATE GRID SIZE
+    int height = raw_image_.rows / cell_size;
+    int width  = raw_image_.cols / cell_size;
+
+    cv_grid::prepare_grid<cv_grid::AttrTerrainClass>(grid_, raw_image_, height, width, p);
 }
 
 void CMPCore::computeQuadtree(int min_cell_size)
