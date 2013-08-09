@@ -42,7 +42,6 @@ public:
      */
     void    regions(std::vector<cv::Rect> &regions)
     {
-
         CVQtNodesList leaves;
         quadtree_root_.collect_leaves(leaves);
         for(CVQtNodesList::iterator it = leaves.begin() ; it != leaves.end() ; it++) {
@@ -51,7 +50,6 @@ public:
             limit(rect, image_.cols, image_.rows);
             regions.push_back(rect);
         }
-
     }
 
 
