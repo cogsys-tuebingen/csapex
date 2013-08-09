@@ -19,7 +19,7 @@ public:
      * @param _min_region_size      the minimal region size
      * @param _classifier           the classifier to be used
      */
-    QuadtreeDecomposition(const cv::Mat &image, const cv::Size &_min_region_size, DecompositionClassifier &_classifier);
+    QuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size, DecompositionClassifier &_classifier);
 
     /**
      * @brief Instant generation of the decomposition without single steps done.
