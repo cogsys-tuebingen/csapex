@@ -3,12 +3,12 @@
 QuadtreeDecomposition::QuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size, DecompositionClassifier &_classifier) :
     image_(_image),
     min_region_size_(_min_region_size),
-    classfier_(_classifier),
+    classifier_(_classifier),
     quadtree_root_(cv::Rect(0,0,_image.cols, _image.rows)),
     auto_iterate_(false),
     debug_size_(-1,-1)
 {
-    classfier_.set_image(_image);
+    classifier_.set_image(_image);
 }
 
 QuadtreeDecomposition::~QuadtreeDecomposition()
@@ -23,8 +23,10 @@ void QuadtreeDecomposition::auto_iterate()
 bool QuadtreeDecomposition::iterate()
 {
     if(quadtree_nodes_.size() == 0) {
-         if(classfier_.classify(quadtree_root_))
+         if(classifier_.classify(quadtree_root_))
             split_and_activate(quadtree_root_);
+         else
+             leaves_.push_back(&quadtree_root_);
     } else {
         process_active_nodes();
     }
@@ -42,6 +44,18 @@ void QuadtreeDecomposition::enable_debug_out_put(const cv::Size &window_size, co
     debug_color_ = debug_color;
 }
 
+void QuadtreeDecomposition::regions(std::vector<cv::Rect> &regions)
+{
+//    CVQtNodesList leaves;
+//    quadtree_root_.collect_leaves(leaves);
+    for(CVQtNodesList::iterator it = leaves_.begin() ; it != leaves_.end() ; it++) {
+        CVQt *node = *it;
+        cv::Rect rect = *node;
+        limit(rect, image_.cols, image_.rows);
+        regions.push_back(rect);
+    }
+}
+
 void QuadtreeDecomposition::process_active_nodes()
 {
     CVQtNodesList list = quadtree_nodes_;
@@ -49,8 +63,10 @@ void QuadtreeDecomposition::process_active_nodes()
 
     for(CVQtNodesList::iterator it = list.begin() ; it != list.end() ; it++){
         CVQt *node = *it;
-        if(!min_size_reached(*node) && classfier_.classify(*node)) {
+        if(!min_size_reached(*node) && classifier_.classify(*node)) {
             split_and_activate(*node);
+        } else {
+            leaves_.push_back(node);
         }
     }
 }

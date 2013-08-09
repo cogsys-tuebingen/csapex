@@ -1,6 +1,8 @@
 #ifndef CV_DECOMPOSITION_CLASSIFIER_HPP
 #define CV_DECOMPOSITION_CLASSIFIER_HPP
 #include <opencv2/core/core.hpp>
+#include "randomforest.h"
+#include "extractor.h"
 
 /**
  * @brief The DecompositionClassifier class is used for classification of rectangular areas
@@ -61,5 +63,54 @@ public:
 private:
     int     threshold_;
     cv::Mat grey_image_;
+};
+
+class TerraDecomClassifier : public DecompositionClassifier
+{
+public :
+    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor) :
+        classifier(_classifier),
+        extractor(_extractor),
+        threshold(_threshold)
+    {
+    }
+
+    virtual ~TerraDecomClassifier()
+    {
+    }
+
+    bool classify(const cv::Rect &roi)
+    {
+        cv::Mat descriptors;
+        cv::Mat img_roi(image, roi);
+        extractor->extract(img_roi, descriptors);
+        classifier->predictClassProb(descriptors, last_id_, last_prob_);
+
+        return last_prob_ < threshold;
+
+    }
+
+    float get_prob()
+    {
+        return last_prob_;
+    }
+
+    int get_id()
+    {
+        return last_id_;
+    }
+
+    void set_image(const cv::Mat &_image)
+    {
+        image = _image;
+    }
+
+private:
+    RandomForest *classifier;
+    Extractor    *extractor;
+    float         threshold;
+    cv::Mat       image;
+    float         last_prob_;
+    int           last_id_;
 };
 #endif // DECOMPOSITION_CLASSIFIER_HPP

@@ -9,9 +9,6 @@
  */
 class QuadtreeDecomposition
 {
-    typedef Quadtree<cv::Vec2i, cv::Rect>                CVQt;              /// template init for quadtree
-    typedef std::vector<CVQt*>                           CVQtNodesList;     /// a node list
-
 public:
     /**
      * @brief QuadtreeDecomposition constructor.
@@ -29,7 +26,7 @@ public:
      * @brief Do next computation step.
      * @return  if there are more steps to be done
      */
-    bool    iterate();
+    virtual bool    iterate();
     /**
      * @brief This method will spawn a window to observe the single steps in the decomposition.
      * @param window_size       this will be the debug output window size
@@ -40,33 +37,27 @@ public:
      * @brief Extract regions as rects.
      * @param regions       the vector the results will be written to
      */
-    void    regions(std::vector<cv::Rect> &regions)
-    {
-        CVQtNodesList leaves;
-        quadtree_root_.collect_leaves(leaves);
-        for(CVQtNodesList::iterator it = leaves.begin() ; it != leaves.end() ; it++) {
-            CVQt *node = *it;
-            cv::Rect rect = *node;
-            limit(rect, image_.cols, image_.rows);
-            regions.push_back(rect);
-        }
-    }
-
+    void regions(std::vector<cv::Rect> &regions);
 
     virtual ~QuadtreeDecomposition();
-private:
+
+protected:
+    typedef Quadtree<cv::Vec2i, cv::Rect>                CVQt;              /// template init for quadtree
+    typedef std::vector<CVQt*>                           CVQtNodesList;     /// a node list
+
     cv::Mat                     image_;
     cv::Size                    min_region_size_;
-    DecompositionClassifier    &classfier_;
+    DecompositionClassifier    &classifier_;
     CVQt                        quadtree_root_;
     CVQtNodesList               quadtree_nodes_;
+    CVQtNodesList               leaves_;
 
     bool                        auto_iterate_;
     cv::Size                    debug_size_;
     cv::Scalar                  debug_color_;
 
-    void    process_active_nodes();
-    void    render_debug();
+    virtual void    process_active_nodes();
+    void            render_debug();
 
 
     void limit(cv::Rect &rect, const int cols, const int rows)
