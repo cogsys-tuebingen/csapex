@@ -62,49 +62,4 @@ private:
     int     threshold_;
     cv::Mat grey_image_;
 };
-
-class PredictinoClassifier : public DecompositionClassifier
-{
-public :
-    PredictinoClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor) :
-        classifier(_classifier),
-        extractor(_extractor),
-        threshold(_threshold)
-    {
-    }
-
-    virtual ~PredictinoClassifier()
-    {
-    }
-
-    bool classify(const cv::Rect &roi)
-    {
-        int id;
-        return classify(roi, id);
-    }
-
-    bool classify(const cv::Rect &roi, int &id)
-    {
-        cv::Mat descriptors;
-        cv::Mat img_roi(image, roi);
-        extractor->extract(img_roi, descriptors);
-        float prob;
-        classifier->predictClassProb(descriptors, id, prob);
-
-        return prob < threshold;
-
-    }
-
-    void set_image(const cv::Mat &_image)
-    {
-        image = _image;
-    }
-
-private:
-    RandomForest *classifier;
-    Extractor    *extractor;
-    float   threshold;
-    cv::Mat image;
-};
-
 #endif // DECOMPOSITION_CLASSIFIER_HPP

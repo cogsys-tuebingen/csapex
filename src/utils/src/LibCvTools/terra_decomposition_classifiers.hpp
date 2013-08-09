@@ -3,17 +3,17 @@
 #include "decomposition_classifiers.hpp"
 #include "randomforest.h"
 #include "extractor.h"
-class PredictinoClassifier : public DecompositionClassifier
+class PredictionClassifier : public DecompositionClassifier
 {
 public :
-    PredictinoClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor) :
+    PredictionClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor) :
         classifier(_classifier),
         extractor(_extractor),
         threshold(_threshold)
     {
     }
 
-    virtual ~PredictinoClassifier()
+    virtual ~PredictionClassifier()
     {
     }
 
