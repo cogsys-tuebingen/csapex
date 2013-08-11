@@ -7,7 +7,6 @@ add_library (LibCvTools SHARED
     undistorter.cpp
     perspective_transform.cpp
     terra_decomposition_quadtree.cpp
-    terra_decomposition_classifiers.hpp
     grid.hpp
     grid_attributes.hpp
     grid_compute.hpp
