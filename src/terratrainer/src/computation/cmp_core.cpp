@@ -69,12 +69,15 @@ void CMPCore::computeGrid()
 void CMPCore::computeQuadtree()
 {
     cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
-    TerraDecomClassifier        classifier(quad_params_.min_prob, random_.get(), extractor_.get());
+    TerraDecomClassifier       *classifier = new TerraDecomClassifier(quad_params_.min_prob, random_.get(), extractor_.get());
     TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
     quad_decom_.reset(decom);
+    std::cout << " " << std::endl;
 
     /// ITERATE
-    quad_decom_->auto_iterate();
+    while(decom->iterate());
+
+//    decom->auto_iterate();
 }
 
 bool CMPCore::hasComputedModel()

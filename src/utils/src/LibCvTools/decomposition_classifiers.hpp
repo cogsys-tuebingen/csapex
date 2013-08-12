@@ -13,6 +13,7 @@
 class DecompositionClassifier
 {
 public:
+    typedef boost::shared_ptr<DecompositionClassifier> Ptr;
     /**
      * @brief Classify a region within in an image.
      * @param roi       an region of interest
@@ -67,11 +68,14 @@ private:
 
 class TerraDecomClassifier : public DecompositionClassifier
 {
+    ///
 public :
     TerraDecomClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor) :
         classifier(_classifier),
         extractor(_extractor),
-        threshold(_threshold)
+        threshold(_threshold),
+        last_prob_(0.0),
+        last_id_(-1)
     {
     }
 

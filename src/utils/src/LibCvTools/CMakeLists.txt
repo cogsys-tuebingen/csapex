@@ -3,6 +3,8 @@
 # Load OpenCV cmake module, if wasn't looked for or found yet
 find_package(OpenCV REQUIRED)
 
+SET(CMAKE_BUILD_TYPE Debug)
+
 add_library (LibCvTools SHARED
     undistorter.cpp
     perspective_transform.cpp

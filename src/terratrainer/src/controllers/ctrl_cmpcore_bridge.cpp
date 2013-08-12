@@ -219,7 +219,7 @@ void CMPCoreBridge::compute(const std::vector<cv_roi::TerraROI> &rois)
         p.cell_width  = 10;
         p1.min_height = 10;
         p1.min_width  = 10;
-        p1.min_prob   = 0.5;
+        p1.min_prob   = 0.9;
 
         cc_->setGridParameters(p);
         cc_->setQuadParameters(p1);

@@ -1,6 +1,6 @@
 #include "decomposition_quadtree.h"
 
-QuadtreeDecomposition::QuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size, DecompositionClassifier &_classifier) :
+QuadtreeDecomposition::QuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size, DecompositionClassifier *_classifier) :
     image_(_image),
     min_region_size_(_min_region_size),
     classifier_(_classifier),
@@ -8,7 +8,7 @@ QuadtreeDecomposition::QuadtreeDecomposition(const cv::Mat &_image, const cv::Si
     auto_iterate_(false),
     debug_size_(-1,-1)
 {
-    classifier_.set_image(_image);
+    classifier_->set_image(_image);
 }
 
 QuadtreeDecomposition::~QuadtreeDecomposition()
@@ -23,7 +23,7 @@ void QuadtreeDecomposition::auto_iterate()
 bool QuadtreeDecomposition::iterate()
 {
     if(quadtree_nodes_.size() == 0) {
-         if(classifier_.classify(quadtree_root_))
+         if(classifier_->classify(quadtree_root_))
             split_and_activate(quadtree_root_);
          else
              quadtree_leaves_.push_back(&quadtree_root_);
@@ -63,7 +63,7 @@ void QuadtreeDecomposition::process_active_nodes()
 
     for(CVQtNodesList::iterator it = list.begin() ; it != list.end() ; it++){
         CVQt *node = *it;
-        if(!min_size_reached(*node) && classifier_.classify(*node)) {
+        if(!min_size_reached(*node) && classifier_->classify(*node)) {
             split_and_activate(*node);
         } else {
             quadtree_leaves_.push_back(node);

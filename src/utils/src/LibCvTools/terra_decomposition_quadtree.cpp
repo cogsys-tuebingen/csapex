@@ -1,20 +1,21 @@
 #include "terra_decomposition_quadtree.h"
 
 TerraQuadtreeDecomposition::TerraQuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size,
-                                                       TerraDecomClassifier &_classifier) :
+                                                       TerraDecomClassifier *_classifier) :
     QuadtreeDecomposition(_image, _min_region_size, _classifier)
 {
+    std::cout << " b " << std::endl;
 }
 
 bool TerraQuadtreeDecomposition::iterate()
 {
-    TerraDecomClassifier       &terra_classifier_ = *((TerraDecomClassifier *) &classifier_);
+    TerraDecomClassifier *terra_classifier = dynamic_cast<TerraDecomClassifier*>(classifier_.get());
 
     if(quadtree_nodes_.size() == 0) {
-         if(classifier_.classify(quadtree_root_))
+         if(terra_classifier->classify(quadtree_root_))
             split_and_activate(quadtree_root_);
          else {
-
+            quadtree_leaves_.push_back(&quadtree_root_);
          }
     } else {
         process_active_nodes();
@@ -38,20 +39,21 @@ void TerraQuadtreeDecomposition::regions(std::vector<cv_roi::TerraROI> &regions)
 
 void TerraQuadtreeDecomposition::process_active_nodes()
 {
-    TerraDecomClassifier &terra_classifier_ = *((TerraDecomClassifier *) &classifier_);
+    TerraDecomClassifier *terra_classifier = dynamic_cast<TerraDecomClassifier*>(classifier_.get());
 
     CVQtNodesList list = quadtree_nodes_;
     quadtree_nodes_.clear();
 
     for(CVQtNodesList::iterator it = list.begin() ; it != list.end() ; it++){
         CVQt *node = *it;
-        if(!min_size_reached(*node) && terra_classifier_.classify(*node)) {
+        if(!min_size_reached(*node) && terra_classifier->classify(*node)) {
             split_and_activate(*node);
         } else {
             cv_roi::TerraID p;
-            p.id    = terra_classifier_.get_id();
-            p.prob  = terra_classifier_.get_prob();
+            p.id    = terra_classifier->get_id();
+            p.prob  = terra_classifier->get_prob();
             classifications_.insert(ClassificationEntry(node, p));
+            quadtree_leaves_.push_back(node);
         }
     }
 }
