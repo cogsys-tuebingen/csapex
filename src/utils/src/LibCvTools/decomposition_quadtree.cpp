@@ -26,7 +26,7 @@ bool QuadtreeDecomposition::iterate()
          if(classifier_.classify(quadtree_root_))
             split_and_activate(quadtree_root_);
          else
-             leaves_.push_back(&quadtree_root_);
+             quadtree_leaves_.push_back(&quadtree_root_);
     } else {
         process_active_nodes();
     }
@@ -48,7 +48,7 @@ void QuadtreeDecomposition::regions(std::vector<cv::Rect> &regions)
 {
 //    CVQtNodesList leaves;
 //    quadtree_root_.collect_leaves(leaves);
-    for(CVQtNodesList::iterator it = leaves_.begin() ; it != leaves_.end() ; it++) {
+    for(CVQtNodesList::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; it++) {
         CVQt *node = *it;
         cv::Rect rect = *node;
         limit(rect, image_.cols, image_.rows);
@@ -66,7 +66,7 @@ void QuadtreeDecomposition::process_active_nodes()
         if(!min_size_reached(*node) && classifier_.classify(*node)) {
             split_and_activate(*node);
         } else {
-            leaves_.push_back(node);
+            quadtree_leaves_.push_back(node);
         }
     }
 }
@@ -75,9 +75,7 @@ void QuadtreeDecomposition::render_debug()
 {
     cv::Mat img_out = image_.clone();
 
-    CVQtNodesList leaves;
-    quadtree_root_.collect_leaves(leaves);
-    for(CVQtNodesList::iterator it = leaves.begin() ; it != leaves.end() ; it++) {
+    for(CVQtNodesList::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; it++) {
         CVQt *node = *it;
         cv::Rect rect = *node;
         limit(rect, img_out.cols, img_out.rows);

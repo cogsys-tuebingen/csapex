@@ -6,16 +6,9 @@
 class Extractor
 {
 public:
-    typedef boost::shared_ptr<Extractor>             Ptr;
+    typedef boost::shared_ptr<Extractor>                Ptr;
     typedef boost::shared_ptr<cv::DescriptorExtractor>  CvExPtr;
     typedef std::vector<cv::KeyPoint>                   KeyPoints;
-
-    struct ROI {
-        cv::Rect    bounding;
-        int         id;
-        int         classID;
-        double      rotation;
-    };
 
     Extractor();
 

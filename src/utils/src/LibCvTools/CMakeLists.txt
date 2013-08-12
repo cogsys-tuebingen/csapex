@@ -16,6 +16,7 @@ add_library (LibCvTools SHARED
     decomposition_classifiers.hpp
     extractor.cpp
     randomforest.cpp
+    roi.hpp
 )
 
 target_link_libraries(LibCvTools

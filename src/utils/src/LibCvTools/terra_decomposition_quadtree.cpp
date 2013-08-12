@@ -26,11 +26,11 @@ bool TerraQuadtreeDecomposition::iterate()
     return quadtree_nodes_.size() != 0;
 }
 
-void TerraQuadtreeDecomposition::regions(std::vector<TerraRect> &regions)
+void TerraQuadtreeDecomposition::regions(std::vector<cv_roi::TerraROI> &regions)
 {
-    for(CVQtNodesList::iterator it = leaves_.begin() ; it != leaves_.end() ; it++) {
-        TerraRect tr;
-        tr.rect = *(*it);
+    for(CVQtNodesList::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; it++) {
+        cv_roi::TerraROI tr;
+        tr.roi.rect = *(*it);
         tr.id = classifications_[*it];
         regions.push_back(tr);
     }
@@ -38,7 +38,7 @@ void TerraQuadtreeDecomposition::regions(std::vector<TerraRect> &regions)
 
 void TerraQuadtreeDecomposition::process_active_nodes()
 {
-    TerraDecomClassifier       &terra_classifier_ = *((TerraDecomClassifier *) &classifier_);
+    TerraDecomClassifier &terra_classifier_ = *((TerraDecomClassifier *) &classifier_);
 
     CVQtNodesList list = quadtree_nodes_;
     quadtree_nodes_.clear();
@@ -48,7 +48,7 @@ void TerraQuadtreeDecomposition::process_active_nodes()
         if(!min_size_reached(*node) && terra_classifier_.classify(*node)) {
             split_and_activate(*node);
         } else {
-            TerraID p;
+            cv_roi::TerraID p;
             p.id    = terra_classifier_.get_id();
             p.prob  = terra_classifier_.get_prob();
             classifications_.insert(ClassificationEntry(node, p));

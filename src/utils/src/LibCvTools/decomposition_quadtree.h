@@ -1,6 +1,9 @@
 #ifndef CV_QUADTREE_DECOMPOSITION_H
 #define CV_QUADTREE_DECOMPOSITION_H
+/// SYSTEM
 #include <opencv2/opencv.hpp>
+#include <boost/shared_ptr.hpp>
+/// COMPONENT
 #include "quad_tree.hpp"
 #include "decomposition_classifiers.hpp"
 /**
@@ -50,7 +53,7 @@ protected:
     DecompositionClassifier    &classifier_;
     CVQt                        quadtree_root_;
     CVQtNodesList               quadtree_nodes_;
-    CVQtNodesList               leaves_;
+    CVQtNodesList               quadtree_leaves_;
 
     bool                        auto_iterate_;
     cv::Size                    debug_size_;
