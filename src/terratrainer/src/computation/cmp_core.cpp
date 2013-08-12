@@ -72,12 +72,9 @@ void CMPCore::computeQuadtree()
     TerraDecomClassifier       *classifier = new TerraDecomClassifier(quad_params_.min_prob, random_.get(), extractor_.get());
     TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
     quad_decom_.reset(decom);
-    std::cout << " " << std::endl;
 
     /// ITERATE
-    while(decom->iterate());
-
-//    decom->auto_iterate();
+    decom->auto_iterate();
 }
 
 bool CMPCore::hasComputedModel()

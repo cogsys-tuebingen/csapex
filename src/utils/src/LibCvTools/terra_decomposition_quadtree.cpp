@@ -4,7 +4,6 @@ TerraQuadtreeDecomposition::TerraQuadtreeDecomposition(const cv::Mat &_image, co
                                                        TerraDecomClassifier *_classifier) :
     QuadtreeDecomposition(_image, _min_region_size, _classifier)
 {
-    std::cout << " b " << std::endl;
 }
 
 bool TerraQuadtreeDecomposition::iterate()
