@@ -111,10 +111,15 @@ void CtrlToolPanel::buttonCompute()
     Q_EMIT compute();
 }
 
-void CtrlToolPanel::computationFinished()
+void CtrlToolPanel::trainingFinished()
 {
     button_compute_->setEnabled(true);
     button_trash_->setEnabled(true);
+}
+
+void CtrlToolPanel::feedbackFinished()
+{
+
 }
 
 void CtrlToolPanel::classifierLoaded()

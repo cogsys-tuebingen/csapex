@@ -30,6 +30,16 @@ struct CMPForestParams {
     int                termination_criteria;
 };
 
+struct CMPGridParams {
+    int    cell_height;
+    int    cell_width;
+};
+
+struct CMPQuadParams {
+    int     min_height;
+    int     min_width;
+    float   min_prob;
+};
 
 struct CMPExtractorParams {
     enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK};

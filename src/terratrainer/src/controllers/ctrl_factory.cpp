@@ -43,7 +43,8 @@ void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
 
     CtrlMapView *ctrl = new CtrlMapView(ui->mapView, br);
     QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()));
-    QObject::connect(br.get(), SIGNAL(computationFinished()), ctrl, SLOT(computationFinished()));
+    QObject::connect(br.get(), SIGNAL(trainingFinished()),    ctrl, SLOT(trainingFinished()));
+    QObject::connect(br.get(), SIGNAL(feedbackFinished()),    ctrl, SLOT(feedbackFinished()));
     QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)));
     QObject::connect(br.get(), SIGNAL(classUpdate(int,int)),  ctrl, SLOT(classUpdated(int,int)));
     QObject::connect(br.get(), SIGNAL(colorUpdate(int)),      ctrl, SLOT(colorUpdate(int)));

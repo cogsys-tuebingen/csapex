@@ -50,7 +50,8 @@ public Q_SLOTS:
 
     /// INVOKE COMPUTATION
     void compute();
-    void computationFinished();
+    void trainingFinished();
+    void feedbackFinished();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -60,7 +61,7 @@ private:
     QInteractiveScene        *map_view_scene_;
     QGraphicsPixmapItem      *map_image_;
     boost::shared_ptr<QImage> cache_;
-    CMPCoreBridge::Ptr    bridge_;
+    CMPCoreBridge::Ptr        bridge_;
     double                    zoom_;
     double                    min_zoom_;
     double                    box_size_;
@@ -70,7 +71,6 @@ private:
     int                       current_class_id_;
 
     QBrush                    DarkBrush;
-    QList<QGraphicsItem*>     selection_;
 
     void initGUI();
     QInteractiveItem * addRectangle(const QPointF pos, const qreal width, const qreal height);

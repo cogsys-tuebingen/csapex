@@ -57,12 +57,17 @@ public:
 
     /// PARAMETERS
     void setExtractorParams (CMPExtractorParams &params);
-    void setClassifierParams(CMPForestParams &params);
+    void setClassifierParams(const CMPForestParams &params);
+    void setGridParams      (const CMPGridParams &params);
+    void setQuadParams      (const CMPQuadParams &params);
 
     /// COMPUTATION
-    void compute            (const std::vector<CMPCore::ROI> &rois);
+    void compute            (const std::vector<cv_roi::TerraROI> &rois);
     void computeGrid        ();
     void computeQuadtree    ();
+
+    void getGrid(std::vector<cv_roi::TerraROI> &cells);
+    void getQuadtree(std::vector<cv_roi::TerraROI> &regions);
 
 Q_SIGNALS:
     void imageLoaded        ();
@@ -71,20 +76,22 @@ Q_SIGNALS:
     void classUpdate        (int oldID, int newID);
     void classRemoved       (int classID);
     void colorUpdate        (int classID);
-    void computationFinished();
+    void trainingFinished   ();
+    void feedbackFinished   ();
 
 public Q_SLOTS:
     void loadImage          (const QString path);
     void loadClassifier     (const QString path);
     void saveClassifier     (const QString path);
     void saveClassifierRaw  (const QString path);
+
 private:
-   CMPCore::Ptr cc_;
+   CMPCore::Ptr              cc_;
 
    /// STORAGE
-   std::map<int, int>           classes_;
-   std::map<int, QString>       class_infos_;
-   std::vector<QColor>          classes_colors_;
+   std::map<int, int>        classes_;
+   std::map<int, QString>    class_infos_;
+   std::vector<QColor>       classes_colors_;
 
    /// CLASS MANAGEMENT
    void removeClassIndex    (const int id);

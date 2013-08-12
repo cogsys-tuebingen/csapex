@@ -230,9 +230,7 @@ void CtrlClassEdit::newEntry()
 {
     newTableEntry(entered_id_, entered_color_, entered_info_);
     bridge_->addClass(entered_id_, entered_color_);
-    if(entered_info_ != "")
-        bridge_->addInfo(entered_id_, entered_info_);
-
+    bridge_->addInfo(entered_id_, entered_info_);
 }
 
 bool CtrlClassEdit::uniqueID()

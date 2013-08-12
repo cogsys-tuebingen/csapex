@@ -10,28 +10,37 @@ public:
 
     QInteractiveScene(QGraphicsView *parent);
 
+
+    void clearAll();
+
+    void setBackground(QGraphicsItem *item);
+    void removeBackground();
+
+    QList<QGraphicsItem *> interactive() const;
+    void addInteractive(QGraphicsItem *item);
+    void removeInteractive(QGraphicsItem *item);
+
+    void addOverlay(QGraphicsItemGroup *overlay);
+    void clearOverlay();
+
     bool collision(QGraphicsItem *item);
 
     bool onBackground(QGraphicsItem *item);
 
-    void setBackgroudPixmap(QGraphicsPixmapItem *bg);
-
     void selectAll();
 
     void deselectAll();
-
-    void clear();
 
     void setMode(const Mode mode);
 
     Mode getMode();
 
 protected:
+    typedef QList<QGraphicsItem*> Layer;
     Mode                 mode_;
-    QGraphicsPixmapItem *background;
-
-
-
+    Layer interactive_;
+    Layer overlay_;
+    QGraphicsItem* background_;
 
 };
 #endif // QINTERACTIVE_SCENE_H

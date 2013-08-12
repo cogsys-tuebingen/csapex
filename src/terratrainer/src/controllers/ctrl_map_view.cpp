@@ -23,7 +23,7 @@ CtrlMapView::~CtrlMapView()
 
 void CtrlMapView::imageUpdate(bool cached)
 {
-    map_view_scene_->clear();
+    map_view_scene_->clearAll();
 
     if(!cached)
         cache_ = bridge_->rawImage();
@@ -32,7 +32,7 @@ void CtrlMapView::imageUpdate(bool cached)
         return;
 
     map_image_ = new QGraphicsPixmapItem(QPixmap::fromImage(*cache_));
-    map_view_scene_->setBackgroudPixmap(map_image_);
+    map_view_scene_->setBackground(map_image_);
     map_view_->show();
 }
 
@@ -101,7 +101,7 @@ void CtrlMapView::classRemoved(int id)
     if(current_class_id_ = id)
         current_class_id_ = -1;
 
-    QList<QGraphicsItem*> items = map_view_scene_->items();
+    QList<QGraphicsItem*> items = map_view_scene_->interactive();
     foreach (QGraphicsItem *item, items) {
         QInteractiveItem *interactive = dynamic_cast<QInteractiveItem*>(item);
         if(interactive != NULL) {
@@ -117,7 +117,7 @@ void CtrlMapView::classUpdated(int oldID, int newID)
     if(current_class_id_ == oldID)
         current_class_id_ = newID;
 
-    QList<QGraphicsItem*> items = map_view_scene_->items();
+    QList<QGraphicsItem*> items = map_view_scene_->interactive();
     foreach (QGraphicsItem *item, items) {
         QInteractiveItem *interactive = dynamic_cast<QInteractiveItem*>(item);
         if(interactive != NULL) {
@@ -137,7 +137,7 @@ void CtrlMapView::colorUpdate(int id)
     }
 
 
-    QList<QGraphicsItem*> items = map_view_scene_->items();
+    QList<QGraphicsItem*> items = map_view_scene_->interactive();
     QPen   defPen = current_class_pen_;
     QPen   selPen = current_class_sel_pen_;
     defPen.setColor(color);
@@ -180,20 +180,20 @@ bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
 
 void CtrlMapView::compute()
 {
-    std::vector<CMPCore::ROI> to_compute;
+    std::vector<cv_roi::TerraROI> to_compute;
 
     QList<QGraphicsItem*>  items = map_view_scene_->selectedItems();
     foreach(QGraphicsItem* item, items) {
         QInteractiveItem* ptr = dynamic_cast<QInteractiveItem*>(item);
         if(ptr != NULL) {
-            CMPCore::ROI roi;
+            cv_roi::TerraROI roi;
             QRectF bounding = ptr->rect();
-            roi.bounding.x      = std::floor(bounding.x() + 0.5);
-            roi.bounding.y      = std::floor(bounding.y() + 0.5);
-            roi.bounding.width  = std::floor(bounding.width() + 0.5);
-            roi.bounding.height = std::floor(bounding.height() + 0.5);
-            roi.rotation        = 0.0;
-            roi.classID         = ptr->getClass();
+            roi.roi.rect.x      = std::floor(bounding.x() + 0.5);
+            roi.roi.rect.y      = std::floor(bounding.y() + 0.5);
+            roi.roi.rect.width  = std::floor(bounding.width() + 0.5);
+            roi.roi.rect.height = std::floor(bounding.height() + 0.5);
+            roi.roi.rotation    = 0.0;
+            roi.id.id           = ptr->getClass();
             to_compute.push_back(roi);
         }
 
@@ -202,7 +202,12 @@ void CtrlMapView::compute()
     bridge_->compute(to_compute);
 }
 
-void CtrlMapView::computationFinished()
+void CtrlMapView::trainingFinished()
+{
+
+}
+
+void CtrlMapView::feedbackFinished()
 {
 
 }
@@ -238,18 +243,12 @@ QInteractiveItem *CtrlMapView::addRectangle(const QPointF pos, const qreal width
     rect->setPen(current_class_pen_);
     rect->setSelectPen(current_class_sel_pen_);
     rect->setClass(current_class_id_);
-
-    if(!map_view_scene_->collision(rect) && map_view_scene_->onBackground(rect))
-        map_view_scene_->addItem(rect);
-
-    /// update model here
+    map_view_scene_->addInteractive(rect);
 }
 
 void CtrlMapView::removeItem(const QPointF &pos)
 {
     QGraphicsItem *to_remove = map_view_scene_->itemAt(pos);
-    if(to_remove != map_image_ && to_remove != NULL)
-        map_view_scene_->removeItem(to_remove);
-
-    /// update model here
+    if(to_remove != NULL)
+        map_view_scene_->removeInteractive(to_remove);
 }

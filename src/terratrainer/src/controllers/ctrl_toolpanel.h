@@ -52,7 +52,8 @@ public Q_SLOTS:
     void buttonSel(bool checked);
     void buttonCompute();
 
-    void computationFinished();
+    void trainingFinished();
+    void feedbackFinished();
     void classifierLoaded();
     void classAdded(int id);
     void classRemoved(int id);

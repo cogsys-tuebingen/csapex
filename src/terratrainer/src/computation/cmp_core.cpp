@@ -9,6 +9,7 @@
 CMPCore::CMPCore() :
     extractor_(new CMPExtractorExt),
     random_(new CMPRandomForestExt),
+    grid_(new cv_grid::GridTerra),
     work_path_("/tmp"),
     file_extraction_("/extract.yaml"),
     file_forest_("/forest.yaml")
@@ -51,7 +52,7 @@ void CMPCore::compute()
     train();
 }
 
-void CMPCore::computeGrid(int cell_size)
+void CMPCore::computeGrid()
 {
     /// PARAMETERS
     cv_grid::AttrTerrainClass::Params p;
@@ -59,15 +60,46 @@ void CMPCore::computeGrid(int cell_size)
     p.classifier = random_.get();
 
     /// CALCULATE GRID SIZE
-    int height = raw_image_.rows / cell_size;
-    int width  = raw_image_.cols / cell_size;
+    int height = raw_image_.rows / grid_params_.cell_height;
+    int width  = raw_image_.cols / grid_params_.cell_width;
 
-    cv_grid::prepare_grid<cv_grid::AttrTerrainClass>(grid_, raw_image_, height, width, p);
+    cv_grid::prepare_grid<cv_grid::AttrTerrainClass>(*grid_, raw_image_, height, width, p);
 }
 
-void CMPCore::computeQuadtree(int min_cell_size)
+void CMPCore::computeQuadtree()
 {
+    cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
+    TerraDecomClassifier        classifier(quad_params_.min_prob, random_.get(), extractor_.get());
+    TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
+    quad_decom_.reset(decom);
 
+    /// ITERATE
+    quad_decom_->auto_iterate();
+}
+
+bool CMPCore::hasComputedModel()
+{
+    return random_->isTrained();
+}
+
+void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
+{
+    cv_grid::GridTerra &terra = *grid_;
+    for(int i = 0 ; i < terra.rows() ; i++) {
+        for(int j = 0 ; j < terra.cols() ; j++) {
+            cv_grid::GridCellTerra &cell = terra(i,j);
+            cv_roi::TerraROI tr;
+            tr.roi.rect = cell.bounding;
+            tr.id.id    = cell.attributes.classID;
+            tr.id.prob  = cell.attributes.probability;
+            cells.push_back(tr);
+        }
+    }
+}
+
+void CMPCore::getQuad(std::vector<cv_roi::TerraROI> &regions)
+{
+    quad_decom_->regions(regions);
 }
 
 void CMPCore::setRandomForestParams(const CMPForestParams &params)
@@ -75,7 +107,17 @@ void CMPCore::setRandomForestParams(const CMPForestParams &params)
     random_->setParams(params);
 }
 
-void CMPCore::setRois(const std::vector<ROI> &rois)
+void CMPCore::setGridParameters(const CMPGridParams &params)
+{
+    grid_params_ = params;
+}
+
+void CMPCore::setQuadParameters(const CMPQuadParams &params)
+{
+    quad_params_ = params;
+}
+
+void CMPCore::setRois(const std::vector<cv_roi::TerraROI> &rois)
 {
     rois_ = rois;
 }

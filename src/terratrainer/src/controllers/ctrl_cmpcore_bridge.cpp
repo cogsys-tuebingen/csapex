@@ -192,25 +192,67 @@ void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
     }
 }
 
-void CMPCoreBridge::setClassifierParams(CMPForestParams &params)
+void CMPCoreBridge::setClassifierParams(const CMPForestParams &params)
 {
     cc_->setRandomForestParams(params);
 }
 
-void CMPCoreBridge::compute(const std::vector<CMPCore::ROI> &rois)
+void CMPCoreBridge::setGridParams(const CMPGridParams &params)
+{
+    cc_->setGridParameters(params);
+}
+
+void CMPCoreBridge::setQuadParams(const CMPQuadParams &params)
+{
+    cc_->setQuadParameters(params);
+}
+
+void CMPCoreBridge::compute(const std::vector<cv_roi::TerraROI> &rois)
 {
     cc_->setRois(rois);
     cc_->compute();
+
+    if(cc_->hasComputedModel()) {
+        CMPGridParams p;
+        CMPQuadParams p1;
+        p.cell_height = 10;
+        p.cell_width  = 10;
+        p1.min_height = 10;
+        p1.min_width  = 10;
+        p1.min_prob   = 0.5;
+
+        cc_->setGridParameters(p);
+        cc_->setQuadParameters(p1);
+        cc_->computeGrid();
+        cc_->computeQuadtree();
+
+        std::vector<cv_roi::TerraROI> tr;
+        cc_->getGrid(tr);
+        std::cout << "+++ " << tr.size() << std::endl;
+        tr.clear();
+        cc_->getQuad(tr);
+        std::cout << "---" << tr.size() << std::endl;
+    }
 }
 
 void CMPCoreBridge::computeGrid()
 {
-
+    cc_->computeGrid();
 }
 
 void CMPCoreBridge::computeQuadtree()
 {
+    cc_->computeQuadtree();
+}
 
+void CMPCoreBridge::getGrid(std::vector<cv_roi::TerraROI> &cells)
+{
+    cc_->getGrid(cells);
+}
+
+void CMPCoreBridge::getQuadtree(std::vector<cv_roi::TerraROI> &regions)
+{
+    cc_->getQuad(regions);
 }
 
 void CMPCoreBridge::removeClassIndex(const int id)

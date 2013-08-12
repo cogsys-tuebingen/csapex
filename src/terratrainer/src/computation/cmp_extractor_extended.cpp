@@ -4,14 +4,14 @@ CMPExtractorExt::CMPExtractorExt()
 {
 }
 
-void CMPExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<ROI> &rois)
+void CMPExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois)
 {
     emitter << YAML::BeginSeq;
-    for(std::vector<ROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
+    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
         emitter << YAML::BeginMap;
-        emitter << YAML::Key << "class" << YAML::Value << it->classID;
-        KeyPoints k = prepareKeypoint(it->bounding);
-        cv::Mat roi(img, it->bounding);
+        emitter << YAML::Key << "class" << YAML::Value << it->id.id;
+        KeyPoints k = prepareKeypoint(it->roi.rect);
+        cv::Mat roi(img, it->roi.rect);
         cv::Mat desc;
         extract(roi,k, desc);
         emitter << YAML::Key << "descrStep" << YAML::Value << desc.cols;

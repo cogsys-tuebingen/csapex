@@ -5,20 +5,21 @@
 #include "cmp_extractor_extended.h"
 #include "cmp_randomforest_extended.h"
 #include "extractors.hpp"
+#include "roi.hpp"
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <opencv2/opencv.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <utils/LibCvTools/grid.hpp>
-#include <utils/LibCvTools/quad_tree.hpp>
+#include <utils/LibCvTools/terra_decomposition_quadtree.h>
 #include <utils/LibCvTools/grid_compute.hpp>
+
 
 class CMPCore
 {
 public:
-    typedef CMPExtractorExt::ROI       ROI;
-    typedef boost::shared_ptr<CMPCore> Ptr;
+    typedef boost::shared_ptr<CMPCore>                          Ptr;
 
     CMPCore();
     void        setWorkPath(const std::string &work_path);
@@ -32,8 +33,13 @@ public:
 
     ///     COMPUTATION
     void    compute();
-    void    computeGrid(int cell_size);
-    void    computeQuadtree(int min_cell_size);
+    void    computeGrid();
+    void    computeQuadtree();
+    bool    hasComputedModel();
+
+    ///     GET VISUALIZABLE RESULTS
+    void    getGrid(std::vector<cv_roi::TerraROI> &cells);
+    void    getQuad(std::vector<cv_roi::TerraROI> &regions);
 
     ///     PARAMETERS
     template<class Parameters>
@@ -46,9 +52,11 @@ public:
         type_ = param.type;
     }
     void    setRandomForestParams(const CMPForestParams &params);
+    void    setGridParameters(const CMPGridParams &params);
+    void    setQuadParameters(const CMPQuadParams &params);
 
     ///     TRAINING PREPARATION
-    void    setRois(const std::vector<ROI> &rois);
+    void    setRois(const std::vector<cv_roi::TerraROI> &rois);
     void    addClass(int classID);
     void    removeClass(int classID);
     void    getClasses(std::vector<int> &classes);
@@ -56,18 +64,24 @@ public:
 
 private:
     typedef CMPExtractorExt::KeyPoints KeyPoints;
-    cv::Mat                     raw_image_;
-    CMPExtractorExt::Ptr        extractor_;
-    CMPExtractorParams::Type    type_;
-    CMPRandomForestExt::Ptr     random_;
 
-    std::string              work_path_;
-    std::string              file_extraction_;
-    std::string              file_forest_;
-    std::vector<ROI>         rois_;
-    std::vector<int>         classIDs_;
+    cv::Mat                                 raw_image_;
+    CMPExtractorExt::Ptr                    extractor_;
+    CMPExtractorParams::Type                type_;
+    CMPRandomForestExt::Ptr                 random_;
 
-    cv_grid::GridTerra       grid_;
+    TerraQuadtreeDecomposition::Ptr         quad_decom_;
+    CMPQuadParams                           quad_params_;
+
+    boost::shared_ptr<cv_grid::GridTerra>   grid_;
+    CMPGridParams                           grid_params_;
+
+    std::string                     work_path_;
+    std::string                     file_extraction_;
+    std::string                     file_forest_;
+    std::vector<cv_roi::TerraROI>   rois_;
+    std::vector<int>                classIDs_;
+
 
     void extract();
     void train();
