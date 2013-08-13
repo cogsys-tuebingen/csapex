@@ -43,11 +43,12 @@ void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
 
     CtrlMapView *ctrl = new CtrlMapView(ui->mapView, br);
     QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()));
-    QObject::connect(br.get(), SIGNAL(trainingFinished()),    ctrl, SLOT(trainingFinished()));
-    QObject::connect(br.get(), SIGNAL(feedbackFinished()),    ctrl, SLOT(feedbackFinished()));
+//    QObject::connect(br.get(), SIGNAL(trainingFinished()),    ctrl, SLOT(trainingFinished()));
+//    QObject::connect(br.get(), SIGNAL(feedbackFinished()),    ctrl, SLOT(feedbackFinished()));
     QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)));
     QObject::connect(br.get(), SIGNAL(classUpdate(int,int)),  ctrl, SLOT(classUpdated(int,int)));
     QObject::connect(br.get(), SIGNAL(colorUpdate(int)),      ctrl, SLOT(colorUpdate(int)));
+    QObject::connect(br.get(), SIGNAL(computationFinished()), ctrl, SLOT(computationFinished()));
 
     IDPtr entry(MapView, Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
@@ -106,16 +107,17 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QPushButton::connect(tp->zoomIn,    SIGNAL(clicked()),           ctrl,           SLOT(zoomIn()));
     QPushButton::connect(tp->zoomOut,   SIGNAL(clicked()),           ctrl,           SLOT(zoomOut()));
 
-    QPushButton::connect(tp->addBoxes,  SIGNAL(clicked(bool)),       ctrl,           SLOT(buttonAdd(bool)));
-    QPushButton::connect(tp->movBoxes,  SIGNAL(clicked(bool)),       ctrl,           SLOT(buttonMov(bool)));
-    QPushButton::connect(tp->delBoxes,  SIGNAL(clicked(bool)),       ctrl,           SLOT(buttonDel(bool)));
-    QPushButton::connect(tp->selBoxes,  SIGNAL(clicked(bool)),       ctrl,           SLOT(buttonSel(bool)));
+    QPushButton::connect(tp->addBoxes,  SIGNAL(clicked()),                ctrl,      SLOT(buttonAdd()));
+    QPushButton::connect(tp->movBoxes,  SIGNAL(clicked()),                ctrl,      SLOT(buttonMov()));
+    QPushButton::connect(tp->delBoxes,  SIGNAL(clicked()),                ctrl,      SLOT(buttonDel()));
+    QPushButton::connect(tp->selBoxes,  SIGNAL(clicked()),                ctrl,      SLOT(buttonSel()));
+    QPushButton::connect(tp->compile,   SIGNAL(clicked()),                ctrl,      SLOT(buttonComp()));
+    QComboBox::connect  (tp->classes,   SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(classChanged(int)));
+    QComboBox::connect  (tp->features,  SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(featuChanged(int)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckAdd(bool)),    tp->addBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckMov(bool)),    tp->movBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckDel(bool)),    tp->delBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckSel(bool)),    tp->selBoxes,   SLOT(setChecked(bool)));
-    QComboBox::connect(tp->classes,     SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(classChanged(int)));
-    QComboBox::connect(tp->features,    SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(featuChanged(int)));
 
     QObject::connect(br.get(),          SIGNAL(classifierReloaded()),ctrl,           SLOT(classifierLoaded()));
     QObject::connect(br.get(),          SIGNAL(classAdded(int)),     ctrl,           SLOT(classAdded(int)));
@@ -129,12 +131,12 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QObject::connect(tp->trash,         SIGNAL(clicked()),           mv.get(),       SLOT(activateTrash()));
     QObject::connect(tp->selAll,        SIGNAL(clicked()),           mv.get(),       SLOT(selectAll()));
     QObject::connect(tp->deselAll,      SIGNAL(clicked()),           mv.get(),       SLOT(deselectAll()));
-    QObject::connect(tp->compile,       SIGNAL(clicked()),           ctrl,           SLOT(buttonCompute()));
+    QObject::connect(tp->showTree,      SIGNAL(clicked()),           mv.get(),       SLOT(showTreeOverlay()));
+    QObject::connect(tp->showGrid,      SIGNAL(clicked()),           mv.get(),       SLOT(showGridOverlay()));
     QObject::connect(mv.get(),          SIGNAL(zoomUpdated(double)), ctrl,           SLOT(zoomUpdate(double)));
+    QObject::connect(ctrl,              SIGNAL(compute()),           mv.get(),       SLOT(compute()));
     QObject::connect(ctrl,              SIGNAL(zoom(double)),        mv.get(),       SLOT(zoom(double)));
     QObject::connect(ctrl,              SIGNAL(classSelected(int)),  mv.get(),       SLOT(changeClass(int)));
-    QObject::connect(ctrl,              SIGNAL(compute()),           mv.get(),       SLOT(compute()));
-    QObject::connect(br.get(),          SIGNAL(computationFinished()), ctrl,         SLOT(computationFinished()));
     QDoubleSpinBox::connect(tp->zoomBox,SIGNAL(valueChanged(double)),mv.get(),       SLOT(zoom(double)));
     QDoubleSpinBox::connect(mv.get(),   SIGNAL(zoomUpdated(double)), tp->zoomBox,    SLOT(setValue(double)));
     QDoubleSpinBox::connect(tp->sizeBox,SIGNAL(valueChanged(double)),mv.get(),       SLOT(size(double)));

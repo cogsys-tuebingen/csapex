@@ -44,6 +44,7 @@ void CMPRandomForestExt::train(const cv::Mat &data, const cv::Mat &classes, cons
 
 bool CMPRandomForestExt::trainFromData(const std::string &path)
 {
+    is_trained_ = false;
     cv::Mat classes;
     cv::Mat data;
     cv::Mat var_type;

@@ -33,6 +33,8 @@ public Q_SLOTS:
     void imageUpdate(bool cached = false);
     void zoom(double factor);
     void size(double size);
+    void showTreeOverlay();
+    void showGridOverlay();
 
     /// INPUT SLOTS FOR GUI INTERACTION
     void activateAdd();
@@ -50,16 +52,21 @@ public Q_SLOTS:
 
     /// INVOKE COMPUTATION
     void compute();
-    void trainingFinished();
-    void feedbackFinished();
+    void computationFinished();
+
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+    enum Overlay {NONE, GRID, QUAD};
+    Overlay                   overlay_;
+
     QGraphicsView            *map_view_;
     QInteractiveScene        *map_view_scene_;
     QGraphicsPixmapItem      *map_image_;
+    QInteractiveScene::Layer  rendered_tree_;
+    QInteractiveScene::Layer  rendered_grid_;
     boost::shared_ptr<QImage> cache_;
     CMPCoreBridge::Ptr        bridge_;
     double                    zoom_;
@@ -71,14 +78,19 @@ private:
     int                       current_class_id_;
 
     QBrush                    DarkBrush;
+    bool                      mouse_move_;
 
     void initGUI();
-    QInteractiveItem * addRectangle(const QPointF pos, const qreal width, const qreal height);
+    QInteractiveItem  *addRectangle(const QPointF pos, const qreal width, const qreal height);
     void removeItem(const QPointF &pos);
 
     void renderGrid();
     void renderTree();
 
+    QGraphicsRectItem* renderBox(cv_roi::TerraROI &roi);
+    void clearRendered(QInteractiveScene::Layer &rendered);
+    void clearAll();
+    void clearOverlay();
 };
 
 #endif // CTRL_MAP_VIEW_H

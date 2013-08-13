@@ -29,6 +29,10 @@ void CtrlToolPanel::setupUI(Ui::ToolPanel *ui)
     size_            = ui->sizeBox;
     button_tree_     = ui->showTree;
     button_grid_     = ui->showGrid;
+    button_add_      = ui->addBoxes;
+    button_mov_      = ui->movBoxes;
+    button_sel_      = ui->selBoxes;
+    button_del_      = ui->delBoxes;
 }
 
 void CtrlToolPanel::sync()
@@ -77,39 +81,41 @@ void CtrlToolPanel::featuChanged(int index)
     Q_EMIT featuSelected(featu_selection_->currentText());
 }
 
-void CtrlToolPanel::buttonMov(bool checked)
+void CtrlToolPanel::buttonMov()
 {
+        Q_EMIT uncheckMov(true);
         Q_EMIT uncheckAdd(false);
         Q_EMIT uncheckDel(false);
         Q_EMIT uncheckSel(false);
 }
 
-void CtrlToolPanel::buttonAdd(bool checked)
+void CtrlToolPanel::buttonAdd()
 {
+        Q_EMIT uncheckAdd(true);
         Q_EMIT uncheckMov(false);
         Q_EMIT uncheckDel(false);
         Q_EMIT uncheckSel(false);
 }
 
-void CtrlToolPanel::buttonDel(bool checked)
+void CtrlToolPanel::buttonDel()
 {
+        Q_EMIT uncheckDel(true);
         Q_EMIT uncheckAdd(false);
         Q_EMIT uncheckMov(false);
         Q_EMIT uncheckSel(false);
 }
 
-void CtrlToolPanel::buttonSel(bool checked)
+void CtrlToolPanel::buttonSel()
 {
+        Q_EMIT uncheckSel(true);
         Q_EMIT uncheckAdd(false);
         Q_EMIT uncheckMov(false);
         Q_EMIT uncheckDel(false);
 }
 
-void CtrlToolPanel::buttonCompute()
+void CtrlToolPanel::buttonComp()
 {
-//    button_compute_->setDisabled(true);
-//    button_trash_->setDisabled(true);
-
+    Q_EMIT featuSelected(featu_selection_->currentText());
     Q_EMIT compute();
 }
 

@@ -63,11 +63,11 @@ public:
 
     /// COMPUTATION
     void compute            (const std::vector<cv_roi::TerraROI> &rois);
-    void computeGrid        ();
-    void computeQuadtree    ();
 
     void getGrid(std::vector<cv_roi::TerraROI> &cells);
     void getQuadtree(std::vector<cv_roi::TerraROI> &regions);
+    void computeGrid        ();
+    void computeQuadtree    ();
 
 Q_SIGNALS:
     void imageLoaded        ();
@@ -76,8 +76,7 @@ Q_SIGNALS:
     void classUpdate        (int oldID, int newID);
     void classRemoved       (int classID);
     void colorUpdate        (int classID);
-    void trainingFinished   ();
-    void feedbackFinished   ();
+    void computationFinished();
 
 public Q_SLOTS:
     void loadImage          (const QString path);

@@ -13,7 +13,7 @@ void Extractor::set(cv::DescriptorExtractor *extractor)
 void Extractor::extract(const cv::Mat &image, cv::Mat &descriptors)
 {
     std::vector<cv::KeyPoint> key_points;
-    cv::KeyPoint k(image.cols / 2.0, image.rows / 2.0, std::max(image.cols, image.rows));
+    cv::KeyPoint k(image.cols / 2.0, image.rows / 2.0, 5.0);
     k.octave = 0;
     key_points.push_back(k);
     extract(image, key_points, descriptors);

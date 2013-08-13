@@ -41,8 +41,15 @@ struct CMPQuadParams {
     float   min_prob;
 };
 
+struct CMPKeypointParams {
+    CMPKeypointParams() : angle(0.f), size(5.f){}
+
+    float angle;
+    float size;
+};
+
 struct CMPExtractorParams {
-    enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK};
+    enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP};
     CMPExtractorParams(const Type t) :
         type(t),
         opp(false){}
@@ -133,6 +140,17 @@ struct CMPParamsFREAK : public CMPExtractorParams
     int    octaves;
 };
 
+struct CMPParamsLTP : public CMPExtractorParams
+{
+    CMPParamsLTP() :
+        CMPExtractorParams(LTP){}
+};
+
+struct CMPParamsTSURF : public CMPExtractorParams
+{
+    CMPParamsTSURF() :
+        CMPExtractorParams(TSURF){}
+};
 
 
 #endif // PARAMS_HPP

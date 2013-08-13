@@ -68,13 +68,19 @@ private:
     QComboBox *brisk_radius_list_;
     QComboBox *brisk_number_list_;
 
-    CMPCoreBridge::Ptr  bridge_;
+    CMPCoreBridge::Ptr      bridge_;
     CMPParamsORB            orb_;
     CMPParamsSURF           surf_;
     CMPParamsSIFT           sift_;
     CMPParamsBRIEF          brief_;
     CMPParamsBRISK          brisk_;
     CMPParamsFREAK          freak_;
+    CMPParamsLTP            ltp_;
+    CMPParamsTSURF          tsurf;
+    CMPKeypointParams       key_;
+    CMPForestParams         forest_;
+    CMPQuadParams           quad_;
+    CMPGridParams           grid_;
 
     /// BRISK SPECIAL
     void updateBriskNumbers();

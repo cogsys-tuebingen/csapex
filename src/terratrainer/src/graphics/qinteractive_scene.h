@@ -6,6 +6,7 @@
 class QInteractiveScene : public QGraphicsScene
 {
 public:
+    typedef QList<QGraphicsItem*> Layer;
     enum Mode{NONE, ADD, MOVE, SELECT, REMOVE};
 
     QInteractiveScene(QGraphicsView *parent);
@@ -18,11 +19,12 @@ public:
 
     QList<QGraphicsItem *> interactive() const;
     void addInteractive(QGraphicsItem *item);
+    void setInteractiveVisible(bool visible = true);
     void removeInteractive(QGraphicsItem *item);
 
     void addOverlay(QGraphicsItem *item);
-    /// METHOD TO HIDE OVERLAY
-    /// METHOD TO HIDE BACKGROUND LAYER
+    void setOverlay(const Layer &layer);
+    void setOverlayVisible(bool visible = false);
     void clearOverlay();
 
     bool collision(QGraphicsItem *item);
@@ -38,7 +40,6 @@ public:
     Mode getMode();
 
 protected:
-    typedef QList<QGraphicsItem*> Layer;
     Mode                 mode_;
     Layer                interactive_;
     Layer                overlay_;

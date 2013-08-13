@@ -42,7 +42,9 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->checkBox_scaleNormFreak->setChecked(freak_.scaleNormalized);
     ui->spinBox_patternFreak->setValue(freak_.patternScale);
     ui->spinBox_octavesFreak->setValue(freak_.octaves);
+    /// KEYPOINT
 
+    /// FOREST
 }
 
 void CtrlPreferences::orbOppChanged(bool checked)

@@ -46,11 +46,11 @@ public Q_SLOTS:
     void classChanged(int index);
     void featuChanged(int index);
 
-    void buttonMov(bool checked);
-    void buttonAdd(bool checked);
-    void buttonDel(bool checked);
-    void buttonSel(bool checked);
-    void buttonCompute();
+    void buttonMov();
+    void buttonAdd();
+    void buttonDel();
+    void buttonSel();
+    void buttonComp();
 
     void trainingFinished();
     void feedbackFinished();
@@ -73,6 +73,11 @@ private:
     QPushButton            *button_trash_;
     QPushButton            *button_tree_;
     QPushButton            *button_grid_;
+    QPushButton            *button_add_;
+    QPushButton            *button_sel_;
+    QPushButton            *button_mov_;
+    QPushButton            *button_del_;
+
 
     double zoom_;
 

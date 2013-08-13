@@ -46,6 +46,7 @@ std::string CMPCore::forestPath()
 
 void CMPCore::compute()
 {
+
     /// STEP 1 - THE EXTRACTION
     extract();
     /// STEP 2 - THE TRAINING
@@ -156,7 +157,12 @@ void CMPCore::train()
 {
     bool trained = random_->trainFromData(work_path_ + file_extraction_);
     if(trained) {
-        random_->save(work_path_ + file_forest_);
+        try {
+            random_->save(work_path_ + file_forest_);
+        } catch (cv::Exception e) {
+            std::cerr << "ERROR : " << e.what() << std::endl;
+        }
+
     } else {
         std::cerr << "Couldn't train classifier!" << std::endl;
     }

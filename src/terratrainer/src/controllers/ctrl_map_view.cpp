@@ -6,13 +6,15 @@
 /// SYSTEM
 
 CtrlMapView::CtrlMapView(QGraphicsView *mapView, CMPCoreBridge::Ptr bridge) :
+    overlay_(NONE),
     map_view_(mapView),
     map_view_scene_(new QInteractiveScene(map_view_)),
     map_image_(NULL),
     bridge_(bridge),
     zoom_(100.0),
     box_size_(20.0),
-    current_class_id_(-1)
+    current_class_id_(-1),
+    mouse_move_(false)
 {
     initGUI();
 }
@@ -23,7 +25,8 @@ CtrlMapView::~CtrlMapView()
 
 void CtrlMapView::imageUpdate(bool cached)
 {
-    map_view_scene_->clearAll();
+    /// CLEAR
+    clearAll();
 
     if(!cached)
         cache_ = bridge_->rawImage();
@@ -51,6 +54,42 @@ void CtrlMapView::size(double size)
 {
     box_size_ = size;
     Q_EMIT sizeUpdated(size);
+}
+
+void CtrlMapView::showTreeOverlay()
+{
+    if(overlay_ != QUAD) {
+        map_view_scene_->clearOverlay();
+        if(rendered_grid_.size() > 0) {
+            map_view_scene_->setInteractiveVisible(false);
+            map_view_scene_->setOverlay(rendered_tree_);
+            overlay_ = QUAD;
+        } else {
+            std::cerr << "No quadtree segmentation rendered so far!" << std::endl;
+        }
+    } else {
+        map_view_scene_->clearOverlay();
+        map_view_scene_->setInteractiveVisible(true);
+        overlay_ = NONE;
+    }
+}
+
+void CtrlMapView::showGridOverlay()
+{
+    if(overlay_ != GRID) {
+        map_view_scene_->clearOverlay();
+        if(rendered_grid_.size() > 0) {
+            map_view_scene_->setInteractiveVisible(false);
+            map_view_scene_->setOverlay(rendered_grid_);
+            overlay_ = GRID;
+        } else {
+            std::cerr << "No grid rendered so far!" << std::endl;
+        }
+    } else {
+        map_view_scene_->clearOverlay();
+        map_view_scene_->setInteractiveVisible(true);
+        overlay_ = NONE;
+    }
 }
 
 void CtrlMapView::activateAdd()
@@ -94,6 +133,7 @@ void CtrlMapView::changeClass(int id)
     QColor color = bridge_->getColorByClass(id);
     current_class_pen_.setColor(color);
     current_class_sel_pen_.setColor(color);
+    clearOverlay();
 }
 
 void CtrlMapView::classRemoved(int id)
@@ -110,6 +150,7 @@ void CtrlMapView::classRemoved(int id)
             }
         }
     }
+    clearOverlay();
 }
 
 void CtrlMapView::classUpdated(int oldID, int newID)
@@ -126,6 +167,7 @@ void CtrlMapView::classUpdated(int oldID, int newID)
             }
         }
     }
+    clearOverlay();
 }
 
 void CtrlMapView::colorUpdate(int id)
@@ -152,24 +194,28 @@ void CtrlMapView::colorUpdate(int id)
             }
         }
     }
-
     map_view_->repaint();
+    clearOverlay();
 }
 
 bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
 {
     QGraphicsSceneMouseEvent *m = dynamic_cast<QGraphicsSceneMouseEvent*>(event);
     if(m != NULL && map_image_ != NULL) {
-        if(m->type() == QEvent::GraphicsSceneMousePress) {
-            if(m->button() == Qt::LeftButton) {
-                if(map_view_scene_->getMode() == QInteractiveScene::ADD){
-                    addRectangle(m->scenePos(), box_size_, box_size_);
-                }
-                if(map_view_scene_->getMode() == QInteractiveScene::REMOVE){
-                    removeItem(m->scenePos());
-                }
-                event->accept();
+        if(m->type() == QEvent::GraphicsSceneMouseRelease)
+            mouse_move_ = false;
+
+        if(m->type() == QEvent::GraphicsSceneMousePress && m->button() == Qt::LeftButton || mouse_move_) {
+
+            mouse_move_ = true;
+            if(map_view_scene_->getMode() == QInteractiveScene::ADD){
+                addRectangle(m->scenePos(), box_size_, box_size_);
             }
+            if(map_view_scene_->getMode() == QInteractiveScene::REMOVE){
+                removeItem(m->scenePos());
+            }
+            event->accept();
+
         }
     }
 
@@ -180,8 +226,9 @@ bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
 
 void CtrlMapView::compute()
 {
-    std::vector<cv_roi::TerraROI> to_compute;
+    /// CLEAR THE OLD OVERLAY
 
+    std::vector<cv_roi::TerraROI> to_compute;
     QList<QGraphicsItem*>  items = map_view_scene_->selectedItems();
     foreach(QGraphicsItem* item, items) {
         QInteractiveItem* ptr = dynamic_cast<QInteractiveItem*>(item);
@@ -202,14 +249,12 @@ void CtrlMapView::compute()
     bridge_->compute(to_compute);
 }
 
-void CtrlMapView::trainingFinished()
+void CtrlMapView::computationFinished()
 {
-
-}
-
-void CtrlMapView::feedbackFinished()
-{
-
+    clearOverlay();
+    clearOverlay();
+    renderGrid();
+    renderTree();
 }
 
 void CtrlMapView::initGUI()
@@ -255,14 +300,66 @@ void CtrlMapView::removeItem(const QPointF &pos)
 
 void CtrlMapView::renderGrid()
 {
+
     std::vector<cv_roi::TerraROI> grid;
     bridge_->getGrid(grid);
+    /// RENDER
+    for(std::vector<cv_roi::TerraROI>::iterator it = grid.begin() ; it != grid.end() ; it++) {
+        rendered_grid_.push_back(renderBox(*it));
+    }
 
+    std::cout << "INFO : " << rendered_grid_.size() << " grid cells have been rendered." << std::endl;
 }
 
 void CtrlMapView::renderTree()
 {
+    map_view_scene_->clearOverlay();
     std::vector<cv_roi::TerraROI> tree;
     bridge_->getQuadtree(tree);
 
+    /// RENDER
+    for(std::vector<cv_roi::TerraROI>::iterator it = tree.begin() ; it != tree.end() ; it++) {
+        rendered_tree_.push_back(renderBox(*it));
+    }
+
+    std::cout << "INFO : " << rendered_tree_.size() << " quad tree regions have been rendered." << std::endl;
+}
+
+QGraphicsRectItem *CtrlMapView::renderBox(cv_roi::TerraROI &roi)
+{
+    QPen pen;
+    pen.setColor(bridge_->getColorByClass(roi.id.id));
+    QRectF rect(roi.roi.rect.x,
+                roi.roi.rect.y,
+                roi.roi.rect.width,
+                roi.roi.rect.height);
+
+    QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
+    rectItem->setData(0, QVariant(roi.id.id));
+    rectItem->setPen(pen);
+    rectItem->setToolTip(QString::number(roi.id.prob));
+
+    return rectItem;
+}
+
+void CtrlMapView::clearRendered(QInteractiveScene::Layer &rendered)
+{
+    for(QInteractiveScene::Layer::Iterator it = rendered.begin() ; it != rendered.end() ; it++) {
+        delete (*it);
+    }
+    rendered.clear();
+}
+
+void CtrlMapView::clearAll()
+{
+    map_view_scene_->clearAll();
+    clearOverlay();
+}
+
+void CtrlMapView::clearOverlay()
+{
+    overlay_ = NONE;
+    clearRendered(rendered_grid_);
+    clearRendered(rendered_tree_);
+    map_view_scene_->clearOverlay();
 }

@@ -38,10 +38,16 @@ QList<QGraphicsItem*> QInteractiveScene::interactive() const
 
 void QInteractiveScene::addInteractive(QGraphicsItem *item)
 {
-    if(!collision(item) && onBackground(item)) {
+    if(onBackground(item)) {
         interactive_.push_back(item);
         addItem(item);
     }
+}
+
+void QInteractiveScene::setInteractiveVisible(bool visible)
+{
+    for(Layer::Iterator it = interactive_.begin() ; it != interactive_.end() ; it++)
+        (*it)->setVisible(visible);
 }
 
 void QInteractiveScene::removeInteractive(QGraphicsItem *item)
@@ -53,16 +59,27 @@ void QInteractiveScene::removeInteractive(QGraphicsItem *item)
     }
 }
 
-
-
-
 void QInteractiveScene::addOverlay(QGraphicsItem *item)
 {
     for(Layer::Iterator it = interactive_.begin() ; it != interactive_.end() ; it++)
         (*it)->setVisible(false);
 
+    item->setVisible(false);
     overlay_.push_back(item);
     addItem(item);
+}
+
+void QInteractiveScene::setOverlay(const Layer &layer)
+{
+    overlay_ = layer;
+    for(Layer::ConstIterator it = layer.begin() ; it != layer.end() ; it++)
+        addItem(*it);
+}
+
+void QInteractiveScene::setOverlayVisible(bool visible)
+{
+    for(Layer::Iterator it = overlay_.begin() ; it != overlay_.end() ; it++)
+        (*it)->setVisible(visible);
 }
 
 void QInteractiveScene::clearOverlay()
