@@ -76,6 +76,9 @@ private:
     QInteractiveItem * addRectangle(const QPointF pos, const qreal width, const qreal height);
     void removeItem(const QPointF &pos);
 
+    void renderGrid();
+    void renderTree();
+
 };
 
 #endif // CTRL_MAP_VIEW_H

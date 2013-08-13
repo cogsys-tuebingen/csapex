@@ -71,6 +71,8 @@ private:
     QPen                    BlackPen;
     QPushButton            *button_compute_;
     QPushButton            *button_trash_;
+    QPushButton            *button_tree_;
+    QPushButton            *button_grid_;
 
     double zoom_;
 

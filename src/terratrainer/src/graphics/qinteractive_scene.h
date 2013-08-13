@@ -20,7 +20,9 @@ public:
     void addInteractive(QGraphicsItem *item);
     void removeInteractive(QGraphicsItem *item);
 
-    void addOverlay(QGraphicsItemGroup *overlay);
+    void addOverlay(QGraphicsItem *item);
+    /// METHOD TO HIDE OVERLAY
+    /// METHOD TO HIDE BACKGROUND LAYER
     void clearOverlay();
 
     bool collision(QGraphicsItem *item);
@@ -38,8 +40,8 @@ public:
 protected:
     typedef QList<QGraphicsItem*> Layer;
     Mode                 mode_;
-    Layer interactive_;
-    Layer overlay_;
+    Layer                interactive_;
+    Layer                overlay_;
     QGraphicsItem* background_;
 
 };

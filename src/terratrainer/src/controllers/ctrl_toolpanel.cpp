@@ -27,6 +27,8 @@ void CtrlToolPanel::setupUI(Ui::ToolPanel *ui)
     button_compute_  = ui->compile;
     button_trash_    = ui->trash;
     size_            = ui->sizeBox;
+    button_tree_     = ui->showTree;
+    button_grid_     = ui->showGrid;
 }
 
 void CtrlToolPanel::sync()

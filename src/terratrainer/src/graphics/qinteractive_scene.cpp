@@ -54,20 +54,23 @@ void QInteractiveScene::removeInteractive(QGraphicsItem *item)
 }
 
 
-void QInteractiveScene::addOverlay(QGraphicsItemGroup *overlay)
+
+
+void QInteractiveScene::addOverlay(QGraphicsItem *item)
 {
     for(Layer::Iterator it = interactive_.begin() ; it != interactive_.end() ; it++)
         (*it)->setVisible(false);
 
-    overlay_.push_back(overlay);
-    addItem(overlay);
+    overlay_.push_back(item);
+    addItem(item);
 }
 
 void QInteractiveScene::clearOverlay()
 {
     for(Layer::Iterator it = interactive_.begin() ; it != interactive_.end() ; it++)
         (*it)->setVisible(true);
-
+    for(Layer::Iterator it = overlay_.begin() ; it != overlay_.end() ; it++)
+        removeItem(*it);
     overlay_.clear();
 }
 

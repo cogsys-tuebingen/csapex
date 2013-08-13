@@ -252,3 +252,17 @@ void CtrlMapView::removeItem(const QPointF &pos)
     if(to_remove != NULL)
         map_view_scene_->removeInteractive(to_remove);
 }
+
+void CtrlMapView::renderGrid()
+{
+    std::vector<cv_roi::TerraROI> grid;
+    bridge_->getGrid(grid);
+
+}
+
+void CtrlMapView::renderTree()
+{
+    std::vector<cv_roi::TerraROI> tree;
+    bridge_->getQuadtree(tree);
+
+}

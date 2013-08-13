@@ -85,9 +85,9 @@ void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
 
 void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
 {
-    Ui::ToolPanel          *tp = mainWindow->tool_panel_ui_;
+    Ui::ToolPanel      *tp = mainWindow->tool_panel_ui_;
     CMPCoreBridge::Ptr  br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
-    CtrlMapView::Ptr        mv = Controller::to<CtrlMapView>(mainWindow->controllers_[MapView]);
+    CtrlMapView::Ptr    mv = Controller::to<CtrlMapView>(mainWindow->controllers_[MapView]);
 
     if(br == NULL) {
         std::cerr << "Bridge Controller not yet initialized, therefore cancelling ToolPanel Controller initialization!" << std::endl;

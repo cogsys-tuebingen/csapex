@@ -19,5 +19,8 @@
         <file>checkmark.png</file>
         <file>plus.png</file>
         <file>minus.png</file>
+        <file>grid.png</file>
+        <file>tree.png</file>
+        <file>tree_cross.png</file>
     </qresource>
 </RCC>

@@ -226,12 +226,12 @@ void CMPCoreBridge::compute(const std::vector<cv_roi::TerraROI> &rois)
         cc_->computeGrid();
         cc_->computeQuadtree();
 
-        std::vector<cv_roi::TerraROI> tr;
-        cc_->getGrid(tr);
-        std::cout << "+++ " << tr.size() << std::endl;
-        tr.clear();
-        cc_->getQuad(tr);
-        std::cout << "---" << tr.size() << std::endl;
+        std::vector<cv_roi::TerraROI> grid;
+        std::vector<cv_roi::TerraROI> tree;
+        cc_->getGrid(grid);
+        cc_->getQuad(tree);
+
+
     }
 }
 
