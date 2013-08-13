@@ -143,6 +143,9 @@ void CtrlToolPanel::classifierLoaded()
 void CtrlToolPanel::classAdded(int id)
 {
     class_selection_->addItem(QIcon(renderColorIcon(id)), QString::number(id), QVariant(id));
+
+    QVariant v = class_selection_->itemData(class_selection_->currentIndex());
+    Q_EMIT classSelected(v.toInt());
 }
 
 void CtrlToolPanel::classRemoved(int id)

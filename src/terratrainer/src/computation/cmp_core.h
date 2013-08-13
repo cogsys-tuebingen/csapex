@@ -57,6 +57,7 @@ public:
 
     ///     TRAINING PREPARATION
     void    setRois(const std::vector<cv_roi::TerraROI> &rois);
+    void    saveRois(const std::string path);
     void    addClass(int classID);
     void    removeClass(int classID);
     void    getClasses(std::vector<int> &classes);

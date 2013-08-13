@@ -80,6 +80,8 @@
     <addaction name="action_SaveClassifier"/>
     <addaction name="action_SaveClassifier_raw"/>
     <addaction name="separator"/>
+    <addaction name="action_SaveROIs"/>
+    <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
    <widget class="QMenu" name="edit">
@@ -175,6 +177,11 @@
   <action name="action_SaveClassifier_raw">
    <property name="text">
     <string>Save Classifier (raw)</string>
+   </property>
+  </action>
+  <action name="action_SaveROIs">
+   <property name="text">
+    <string>Save ROIs</string>
    </property>
   </action>
  </widget>

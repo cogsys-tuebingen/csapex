@@ -201,12 +201,11 @@ void CtrlMapView::colorUpdate(int id)
 bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
 {
     QGraphicsSceneMouseEvent *m = dynamic_cast<QGraphicsSceneMouseEvent*>(event);
-    if(m != NULL && map_image_ != NULL) {
+    if(m != NULL && map_image_ != NULL && overlay_ == NONE) {
         if(m->type() == QEvent::GraphicsSceneMouseRelease)
             mouse_move_ = false;
 
         if(m->type() == QEvent::GraphicsSceneMousePress && m->button() == Qt::LeftButton || mouse_move_) {
-
             mouse_move_ = true;
             if(map_view_scene_->getMode() == QInteractiveScene::ADD){
                 addRectangle(m->scenePos(), box_size_, box_size_);
@@ -227,7 +226,28 @@ bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
 void CtrlMapView::compute()
 {
     /// CLEAR THE OLD OVERLAY
+    clearOverlay();
+    setCurrentSelected();
+    bridge_->compute();
+}
 
+void CtrlMapView::saveROIs(QString path)
+{
+    setCurrentSelected();
+    bridge_->saveROIs(path);
+}
+
+
+void CtrlMapView::computationFinished()
+{
+    clearOverlay();
+    clearOverlay();
+    renderGrid();
+    renderTree();
+}
+
+void CtrlMapView::setCurrentSelected()
+{
     std::vector<cv_roi::TerraROI> to_compute;
     QList<QGraphicsItem*>  items = map_view_scene_->selectedItems();
     foreach(QGraphicsItem* item, items) {
@@ -245,16 +265,7 @@ void CtrlMapView::compute()
         }
 
     }
-
-    bridge_->compute(to_compute);
-}
-
-void CtrlMapView::computationFinished()
-{
-    clearOverlay();
-    clearOverlay();
-    renderGrid();
-    renderTree();
+    bridge_->setROIs(to_compute);
 }
 
 void CtrlMapView::initGUI()

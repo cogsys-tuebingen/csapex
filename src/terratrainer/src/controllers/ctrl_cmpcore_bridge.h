@@ -62,7 +62,9 @@ public:
     void setQuadParams      (const CMPQuadParams &params);
 
     /// COMPUTATION
-    void compute            (const std::vector<cv_roi::TerraROI> &rois);
+    void compute            ();
+    void setROIs            (const std::vector<cv_roi::TerraROI> &rois);
+    void saveROIs           (QString path);
 
     void getGrid(std::vector<cv_roi::TerraROI> &cells);
     void getQuadtree(std::vector<cv_roi::TerraROI> &regions);

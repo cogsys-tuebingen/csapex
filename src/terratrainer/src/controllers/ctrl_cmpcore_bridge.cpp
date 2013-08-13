@@ -207,9 +207,8 @@ void CMPCoreBridge::setQuadParams(const CMPQuadParams &params)
     cc_->setQuadParameters(params);
 }
 
-void CMPCoreBridge::compute(const std::vector<cv_roi::TerraROI> &rois)
+void CMPCoreBridge::compute()
 {
-    cc_->setRois(rois);
     cc_->compute();
 
     if(cc_->hasComputedModel()) {
@@ -232,6 +231,26 @@ void CMPCoreBridge::compute(const std::vector<cv_roi::TerraROI> &rois)
         cc_->getQuad(tree);
         Q_EMIT computationFinished();
     }
+}
+
+void CMPCoreBridge::setROIs(const std::vector<cv_roi::TerraROI> &rois)
+{
+    cc_->setRois(rois);
+}
+
+void CMPCoreBridge::saveROIs(QString path)
+{
+    /// SAVE
+    for(std::map<int,int>::iterator it = classes_.begin() ; it != classes_.end() ; it++) {
+        int id = it->first;
+        QString id_path = path + "/" + QString::number(id);
+        QDir directory(id_path);
+        if(!directory.exists() && !QDir().mkdir(id_path)) {
+            std::cerr << "Folder cannot be created '" << id_path.toUtf8().constData() << "' !" << std::endl;
+            return;
+        }
+    }
+    cc_->saveRois(std::string(path.toUtf8().constData()) + "/");
 }
 
 void CMPCoreBridge::computeGrid()

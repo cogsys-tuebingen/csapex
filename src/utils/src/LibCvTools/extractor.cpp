@@ -28,7 +28,7 @@ Extractor::KeyPoints Extractor::prepareKeypoint(cv::Rect rect)
 {
     /// TODO : CHECK THE KEYPOINT PROPERTIES FOR DIFFERENT EXTRACTORS
     KeyPoints key_points;
-    cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height);
+    cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, std::min(rect.height, rect.width) / 2.0);
     k.octave = 0;
     k.angle  = 0;
     key_points.push_back(k);

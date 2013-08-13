@@ -73,12 +73,14 @@ void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
     QAction::connect(ui->action_ZoomIn,             SIGNAL(triggered()), ctrl, SLOT(zoomIn()));
     QAction::connect(ui->action_ZoomOut,            SIGNAL(triggered()), ctrl, SLOT(zoomOut()));
     QAction::connect(ui->action_ZoomReset,          SIGNAL(triggered()), ctrl, SLOT(zoomReset()));
+    QAction::connect(ui->action_SaveROIs,           SIGNAL(triggered()), ctrl, SLOT(saveROIs()));
     QObject::connect(mv.get(),                      SIGNAL(zoomUpdated(double)), ctrl, SLOT(zoomUpdate(double)));
     QObject::connect(ctrl,                          SIGNAL(zoom(double)), mv.get(), SLOT(zoom(double)));
     QObject::connect(ctrl,                          SIGNAL(loadImage(QString)),      br.get(), SLOT(loadImage(QString)));
     QObject::connect(ctrl,                          SIGNAL(loadClassifier(QString)), br.get(), SLOT(loadClassifier(QString)));
     QObject::connect(ctrl,                          SIGNAL(saveClassifier(QString)), br.get(), SLOT(saveClassifier(QString)));
     QObject::connect(ctrl,                          SIGNAL(saveClassifierRaw(QString)), br.get(), SLOT(saveClassifierRaw(QString)));
+    QObject::connect(ctrl,                          SIGNAL(saveROIs(QString)), mv.get(), SLOT(saveROIs(QString)));
 
     IDPtr entry(Menu, Ptr(ctrl));
     mainWindow->controllers_.insert(entry);

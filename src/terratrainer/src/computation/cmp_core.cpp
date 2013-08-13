@@ -123,6 +123,23 @@ void CMPCore::setRois(const std::vector<cv_roi::TerraROI> &rois)
     rois_ = rois;
 }
 
+void CMPCore::saveRois(const std::string path)
+{
+    std::map<int,int> counts;
+
+    foreach (cv_roi::TerraROI roi, rois_) {
+        if(counts.find(roi.id.id) != counts.end())
+            counts[roi.id.id]++;
+        else
+            counts.insert(std::pair<int,int>(roi.id.id, 0));
+
+        std::stringstream roi_path;
+        roi_path << path << roi.id.id << "/" << counts[roi.id.id] << ".jpg";
+        cv::Mat cv_roi(raw_image_, roi.roi.rect);
+        cv::imwrite(roi_path.str(), cv_roi);
+    }
+}
+
 void CMPCore::addClass(int classID)
 {
     classIDs_.push_back(classID);

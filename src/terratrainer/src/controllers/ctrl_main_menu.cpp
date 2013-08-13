@@ -61,6 +61,17 @@ void CtrlMenu::saveClassifierRaw()
     }
 }
 
+void CtrlMenu::saveROIs()
+{
+    QString dir = QFileDialog::getExistingDirectory(
+                0,
+                tr("Choose directory"),
+                QDir::currentPath());
+    if(!dir.isNull()) {
+        Q_EMIT saveROIs(dir);
+    }
+}
+
 void CtrlMenu::zoomIn()
 {
     zoom_ += 12.5;

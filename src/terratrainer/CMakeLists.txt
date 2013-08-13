@@ -89,6 +89,12 @@ add_library(ExtFeatureExtraction SHARED
                 src/ext/LTP.cpp
                 src/ext/surf.cpp
                 src/ext/utils.cpp)
+
+add_executable(YAMLTrainConverter
+                src/tools/yaml_train_converter.cpp)
+
+#### LINKING
+
 target_link_libraries(ExtFeatureExtraction
                         ${QT_LIBRARIES}
                         ${OpenCV_LIBS})
@@ -99,6 +105,10 @@ target_link_libraries(TerraTrainer
                         ${OpenCV_LIBS}
                         ${Boost_LIBRARIES}
                         ${catkin_LIBRARIES})
+
+target_link_libraries(YAMLTrainConverter
+                        yaml-cpp)
+
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(terratrainer_node terratrainer_generate_messages_cpp)

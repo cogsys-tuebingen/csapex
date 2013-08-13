@@ -52,6 +52,7 @@ public Q_SLOTS:
 
     /// INVOKE COMPUTATION
     void compute();
+    void saveROIs(QString path);
     void computationFinished();
 
 
@@ -79,6 +80,8 @@ private:
 
     QBrush                    DarkBrush;
     bool                      mouse_move_;
+
+    void setCurrentSelected();
 
     void initGUI();
     QInteractiveItem  *addRectangle(const QPointF pos, const qreal width, const qreal height);
