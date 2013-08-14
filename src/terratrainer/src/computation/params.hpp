@@ -31,11 +31,13 @@ struct CMPForestParams {
 };
 
 struct CMPGridParams {
+    CMPGridParams() : cell_height(10), cell_width(10){}
     int    cell_height;
     int    cell_width;
 };
 
 struct CMPQuadParams {
+    CMPQuadParams() : min_height(10), min_width(10), min_prob(0.75){}
     int     min_height;
     int     min_width;
     float   min_prob;

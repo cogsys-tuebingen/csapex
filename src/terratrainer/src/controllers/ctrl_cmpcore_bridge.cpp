@@ -142,6 +142,7 @@ void CMPCoreBridge::loadClassifier(const QString path)
     std::ifstream in(path.toUtf8().constData());
     CMPYAML::readFile(in, cc_.get(), this);
     in.close();
+    cc_->computeQuadtree();
     Q_EMIT classifierReloaded();
 }
 
@@ -212,13 +213,14 @@ void CMPCoreBridge::compute()
     cc_->compute();
 
     if(cc_->hasComputedModel()) {
+/// TODO
         CMPGridParams p;
         CMPQuadParams p1;
         p.cell_height = 10;
         p.cell_width  = 10;
         p1.min_height = 10;
         p1.min_width  = 10;
-        p1.min_prob   = 0.75;
+        p1.min_prob   = 0.80;
 
         cc_->setGridParameters(p);
         cc_->setQuadParameters(p1);
