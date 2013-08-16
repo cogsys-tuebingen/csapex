@@ -4,7 +4,8 @@
 /// PROJECT
 #include <common/global.hpp>
 
-Extractor::Extractor()
+Extractor::Extractor(int)
+    : keypoint("none"), descriptor("none")
 {
 }
 

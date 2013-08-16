@@ -43,7 +43,7 @@ private:
     /**
      * @brief Extractor
      */
-    Extractor();
+    Extractor(int id);
 
 public:
     /**
