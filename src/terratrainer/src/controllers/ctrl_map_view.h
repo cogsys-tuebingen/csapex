@@ -33,8 +33,6 @@ public Q_SLOTS:
     void imageUpdate(bool cached = false);
     void zoom(double factor);
     void size(double size);
-    void showTreeOverlay();
-    void showGridOverlay();
 
     /// INPUT SLOTS FOR GUI INTERACTION
     void activateAdd();
@@ -52,8 +50,13 @@ public Q_SLOTS:
 
     /// INVOKE COMPUTATION
     void compute();
+    void computeQuad();
+    void computeGrid();
+    void computeFinished();
+    void computeGridFinished();
+    void computeQuadFinished();
     void saveROIs(QString path);
-    void computationFinished();
+
 
 
 protected:
@@ -81,7 +84,7 @@ private:
     QBrush                    DarkBrush;
     bool                      mouse_move_;
 
-    void setCurrentSelected();
+    void setCurrentSelectedROIs();
 
     void initGUI();
     QInteractiveItem  *addRectangle(const QPointF pos, const qreal width, const qreal height);

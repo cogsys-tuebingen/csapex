@@ -55,6 +55,11 @@ void CMPCore::compute()
 
 void CMPCore::computeGrid()
 {
+    if(!random_->isTrained()) {
+        std::cerr << "No trained random forest! - Therefore not compitung grid!" << std::endl;
+        return;
+    }
+
     /// PARAMETERS
     cv_grid::AttrTerrainClass::Params p;
     p.extractor  = extractor_.get();
@@ -64,13 +69,21 @@ void CMPCore::computeGrid()
     int height = raw_image_.rows / grid_params_.cell_height;
     int width  = raw_image_.cols / grid_params_.cell_width;
 
-    cv_grid::prepare_grid<cv_grid::AttrTerrainClass>(*grid_, raw_image_, height, width, p);
+    cv_grid::prepare_grid<cv_grid::AttrTerrainClass>(*grid_, raw_image_, height, width, p, cv::Mat(), 1.0, keypoint_params_.soft_crop);
 }
 
 void CMPCore::computeQuadtree()
 {
+    if(!random_->isTrained()) {
+        std::cerr << "No trained random forest! - Therefore not compitung quad tree decomposition!" << std::endl;
+        return;
+    }
     cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
-    TerraDecomClassifier       *classifier = new TerraDecomClassifier(quad_params_.min_prob, random_.get(), extractor_.get());
+    TerraDecomClassifier       *classifier = new TerraDecomClassifier(quad_params_.min_prob,
+                                                                      random_.get(),
+                                                                      extractor_.get(),
+                                                                      keypoint_params_.soft_crop);
+
     TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
     quad_decom_.reset(decom);
 
@@ -116,6 +129,11 @@ void CMPCore::setGridParameters(const CMPGridParams &params)
 void CMPCore::setQuadParameters(const CMPQuadParams &params)
 {
     quad_params_ = params;
+}
+
+void CMPCore::setKeyPointParameters(const CMPKeypointParams &params)
+{
+    keypoint_params_ = params;
 }
 
 void CMPCore::setRois(const std::vector<cv_roi::TerraROI> &rois)

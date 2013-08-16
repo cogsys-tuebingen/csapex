@@ -31,9 +31,11 @@ struct CMPForestParams {
 };
 
 struct CMPGridParams {
-    CMPGridParams() : cell_height(10), cell_width(10){}
+    CMPGridParams() : cell_height(10), cell_width(10), height(48), width(64){}
     int    cell_height;
     int    cell_width;
+    int    height;
+    int    width;
 };
 
 struct CMPQuadParams {
@@ -44,10 +46,11 @@ struct CMPQuadParams {
 };
 
 struct CMPKeypointParams {
-    CMPKeypointParams() : angle(0.f), size(5.f){}
+    CMPKeypointParams() : angle(0.f), size(5.f), soft_crop(true){}
 
     float angle;
     float size;
+    bool  soft_crop;
 };
 
 struct CMPExtractorParams {

@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 
 CtrlPreferences::CtrlPreferences(QMainWindow *preferences, CMPCoreBridge::Ptr bridge) :
+    dirty_(CLEAN),
     bridge_(bridge)
 {
 }
@@ -42,9 +43,30 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->checkBox_scaleNormFreak->setChecked(freak_.scaleNormalized);
     ui->spinBox_patternFreak->setValue(freak_.patternScale);
     ui->spinBox_octavesFreak->setValue(freak_.octaves);
+    /// TREE
+    ui->spinBox_treeMaxDepth->setValue(forest_.max_depth);
+    ui->spinBox_treeMinSampels->setValue(forest_.min_samples);
+    ui->spinBox_treeRegression->setValue(forest_.regression);
+    ui->checkBox_treeSurrogates->setChecked(forest_.surrogates);
+    ui->spinBox_treeCategories->setValue(forest_.max_categories);
+    ui->checkBox_treeVariableImportance->setChecked(forest_.variable_importance);
+    ui->spinBox_treeNactiveVariables->setValue(forest_.nactive_variables);
+    ui->spinBox_treeMaxTrees->setValue(forest_.max_trees);
+    ui->spinBox_treeAccuracy->setValue(forest_.accurracy);
     /// KEYPOINT
+    ui->spinBox_sizeKeypoint->setValue(key_.size);
+    ui->spinBox_angleKeypoint->setValue(key_.angle);
+    ui->checkBox_softCrop->setChecked(key_.soft_crop);
+    /// FEEDBACK
 
-    /// FOREST
+
+
+
+    bridge_->setKeyPointParams(key_);
+    bridge_->setForestParams(forest_);
+    bridge_->setGridParams(grid_);
+    bridge_->setQuadParams(quad_);
+
 }
 
 void CtrlPreferences::orbOppChanged(bool checked)
@@ -181,7 +203,100 @@ void CtrlPreferences::freakOctavesChanged(int octaves)
     freak_.octaves = octaves;
 }
 
-void CtrlPreferences::activateSetting(QString setting)
+void CtrlPreferences::keypointSizeChanged(double size)
+{
+    key_.size = size;
+ }
+
+void CtrlPreferences::keypointAngleChanged(double angle)
+{
+    key_.angle = angle;
+}
+
+void CtrlPreferences::keypointCropChanged(bool crop)
+{
+    key_.soft_crop = crop;
+}
+
+void CtrlPreferences::forest_depthChanged(int depth)
+{
+    forest_.max_depth = depth;
+}
+
+void CtrlPreferences::forest_samplesChanged(int samples)
+{
+    forest_.min_samples = samples;
+}
+
+void CtrlPreferences::forest_regressionChanged(double value)
+{
+    forest_.regression = value;
+}
+
+void CtrlPreferences::forest_surrogatesChanged(bool checked)
+{
+    forest_.surrogates = checked;
+}
+
+void CtrlPreferences::forest_categoriesChanged(int amount)
+{
+    forest_.max_categories = amount;
+}
+
+void CtrlPreferences::forest_importanceChanged(bool checked)
+{
+    forest_.variable_importance = checked;
+}
+
+void CtrlPreferences::forest_nactivesChanged(int amount)
+{
+    forest_.nactive_variables = amount;
+}
+
+void CtrlPreferences::forest_maxTreesChanged(int trees)
+{
+    forest_.max_trees = trees;
+}
+
+void CtrlPreferences::forest_accuracyChanged(double accuracy)
+{
+    forest_.accurracy = accuracy;
+}
+
+void CtrlPreferences::feedback_gridCellChanged(int size)
+{
+    grid_.cell_height = size;
+    grid_.cell_width  = size;
+    dirty_ = GRID_DIRTY;
+}
+
+void CtrlPreferences::feedback_gridHeightChanged(int height)
+{
+    grid_.height = height;
+    dirty_ = GRID_DIRTY;
+}
+
+void CtrlPreferences::feedback_gridWidthChanged(int width)
+{
+    grid_.width = width;
+    dirty_ = GRID_DIRTY;
+}
+
+void CtrlPreferences::feedback_quadMinSizeChanged(int size)
+{
+    quad_.min_height = size;
+    quad_.min_width  = size;
+    dirty_ = QUAD_DIRTY;
+}
+
+void CtrlPreferences::feedback_quadMinProbChanged(double prob)
+{
+    quad_.min_prob = prob;
+    dirty_ = QUAD_DIRTY;
+}
+
+
+void CtrlPreferences::applyExtratorParams(QString setting)
 {
     if(setting == "ORB")
         bridge_->setExtractorParams(orb_);
@@ -195,6 +310,33 @@ void CtrlPreferences::activateSetting(QString setting)
         bridge_->setExtractorParams(brisk_);
     if(setting == "FREAK")
         bridge_->setExtractorParams(freak_);
+  ///  if(setting == "LTP")
+
+    bridge_->setKeyPointParams(key_);
+    bridge_->setForestParams(forest_);
+    dirty_ = DIRTY;
+}
+
+void CtrlPreferences::applyGridParams()
+{
+    if(dirty_ == DIRTY) {
+        bridge_->setGridParams(grid_);
+        dirty_ = QUAD_DIRTY;
+    } else if(dirty_ == GRID_DIRTY) {
+        bridge_->setGridParams(grid_);
+        dirty_ = CLEAN;
+    }
+}
+
+void CtrlPreferences::applyQuadParams()
+{
+    if(dirty_ == DIRTY) {
+        bridge_->setQuadParams(quad_);
+        dirty_ = GRID_DIRTY;
+    } else if(dirty_ == QUAD_DIRTY) {
+        bridge_->setQuadParams(quad_);
+        dirty_ = CLEAN;
+    }
 }
 
 bool CtrlPreferences::eventFilter(QObject *obj, QEvent *event)

@@ -9,6 +9,7 @@
 typedef QtCvImageConverter::Converter<QImage, boost::shared_ptr> QImageConverter;
 
 CMPCoreBridge::CMPCoreBridge(CMPCore::Ptr ptr) :
+    dirty_(CLEAN),
     cc_(ptr)
 {
 }
@@ -193,13 +194,15 @@ void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
     }
 }
 
-void CMPCoreBridge::setClassifierParams(const CMPForestParams &params)
+void CMPCoreBridge::setForestParams(const CMPForestParams &params)
 {
+    dirty_ = QUAD_DIRTY;
     cc_->setRandomForestParams(params);
 }
 
 void CMPCoreBridge::setGridParams(const CMPGridParams &params)
 {
+    dirty_ = GRID_DIRTY;
     cc_->setGridParameters(params);
 }
 
@@ -208,31 +211,9 @@ void CMPCoreBridge::setQuadParams(const CMPQuadParams &params)
     cc_->setQuadParameters(params);
 }
 
-void CMPCoreBridge::compute()
+void CMPCoreBridge::setKeyPointParams(const CMPKeypointParams &params)
 {
-    cc_->compute();
-
-    if(cc_->hasComputedModel()) {
-/// TODO
-        CMPGridParams p;
-        CMPQuadParams p1;
-        p.cell_height = 10;
-        p.cell_width  = 10;
-        p1.min_height = 10;
-        p1.min_width  = 10;
-        p1.min_prob   = 0.80;
-
-        cc_->setGridParameters(p);
-        cc_->setQuadParameters(p1);
-        cc_->computeGrid();
-        cc_->computeQuadtree();
-
-        std::vector<cv_roi::TerraROI> grid;
-        std::vector<cv_roi::TerraROI> tree;
-        cc_->getGrid(grid);
-        cc_->getQuad(tree);
-        Q_EMIT computationFinished();
-    }
+    cc_->setKeyPointParameters(params);
 }
 
 void CMPCoreBridge::setROIs(const std::vector<cv_roi::TerraROI> &rois)
@@ -255,14 +236,34 @@ void CMPCoreBridge::saveROIs(QString path)
     cc_->saveRois(std::string(path.toUtf8().constData()) + "/");
 }
 
+
+void CMPCoreBridge::compute()
+{
+    cc_->compute();
+    dirty_ = DIRTY;
+    Q_EMIT computeFinished();
+}
+
 void CMPCoreBridge::computeGrid()
 {
-    cc_->computeGrid();
+    if(dirty_ == DIRTY) {
+        cc_->computeGrid();
+        dirty_ = QUAD_DIRTY;
+    } else if(dirty_ == GRID_DIRTY) {
+        cc_->computeGrid();
+        dirty_ = CLEAN;
+    }
 }
 
 void CMPCoreBridge::computeQuadtree()
 {
-    cc_->computeQuadtree();
+    if(dirty_ == DIRTY) {
+        cc_->computeQuadtree();
+        dirty_ = GRID_DIRTY;
+    } else if(dirty_ == QUAD_DIRTY) {
+        cc_->computeQuadtree();
+        dirty_ = CLEAN;
+    }
 }
 
 void CMPCoreBridge::getGrid(std::vector<cv_roi::TerraROI> &cells)

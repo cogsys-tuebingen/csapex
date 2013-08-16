@@ -43,12 +43,12 @@ void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
 
     CtrlMapView *ctrl = new CtrlMapView(ui->mapView, br);
     QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()));
-//    QObject::connect(br.get(), SIGNAL(trainingFinished()),    ctrl, SLOT(trainingFinished()));
-//    QObject::connect(br.get(), SIGNAL(feedbackFinished()),    ctrl, SLOT(feedbackFinished()));
     QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)));
     QObject::connect(br.get(), SIGNAL(classUpdate(int,int)),  ctrl, SLOT(classUpdated(int,int)));
     QObject::connect(br.get(), SIGNAL(colorUpdate(int)),      ctrl, SLOT(colorUpdate(int)));
-    QObject::connect(br.get(), SIGNAL(computationFinished()), ctrl, SLOT(computationFinished()));
+    QObject::connect(br.get(), SIGNAL(computeFinished()),     ctrl, SLOT(computeFinished()));
+    QObject::connect(br.get(), SIGNAL(computeGridFinished()), ctrl, SLOT(computeGridFinished()));
+    QObject::connect(br.get(), SIGNAL(computeQuadFinished()), ctrl, SLOT(computeQuadFinished()));
 
     IDPtr entry(MapView, Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
@@ -113,9 +113,17 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QPushButton::connect(tp->movBoxes,  SIGNAL(clicked()),                ctrl,      SLOT(buttonMov()));
     QPushButton::connect(tp->delBoxes,  SIGNAL(clicked()),                ctrl,      SLOT(buttonDel()));
     QPushButton::connect(tp->selBoxes,  SIGNAL(clicked()),                ctrl,      SLOT(buttonSel()));
-    QPushButton::connect(tp->compile,   SIGNAL(clicked()),                ctrl,      SLOT(buttonComp()));
+
+    /// computation
+    QPushButton::connect(tp->compile,     SIGNAL(clicked()), ctrl,      SLOT(buttonCompute()));
+    QPushButton::connect(tp->computeGrid, SIGNAL(clicked()), ctrl,      SLOT(buttonGrid()));
+    QPushButton::connect(tp->computeTree, SIGNAL(clicked()), ctrl,      SLOT(buttonQuad()));
+    QObject::connect(ctrl,                SIGNAL(compute()), mv.get(), SLOT(compute()));
+    QObject::connect(ctrl,                SIGNAL(grid()),    mv.get(), SLOT(computeGrid()));
+    QObject::connect(ctrl,                SIGNAL(quad()),    mv.get(), SLOT(computeQuad()));
+
     QComboBox::connect  (tp->classes,   SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(classChanged(int)));
-    QComboBox::connect  (tp->features,  SIGNAL(currentIndexChanged(int)), ctrl,      SLOT(featuChanged(int)));
+
     QPushButton::connect(ctrl,          SIGNAL(uncheckAdd(bool)),    tp->addBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckMov(bool)),    tp->movBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckDel(bool)),    tp->delBoxes,   SLOT(setChecked(bool)));
@@ -133,10 +141,8 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QObject::connect(tp->trash,         SIGNAL(clicked()),           mv.get(),       SLOT(activateTrash()));
     QObject::connect(tp->selAll,        SIGNAL(clicked()),           mv.get(),       SLOT(selectAll()));
     QObject::connect(tp->deselAll,      SIGNAL(clicked()),           mv.get(),       SLOT(deselectAll()));
-    QObject::connect(tp->showTree,      SIGNAL(clicked()),           mv.get(),       SLOT(showTreeOverlay()));
-    QObject::connect(tp->showGrid,      SIGNAL(clicked()),           mv.get(),       SLOT(showGridOverlay()));
+
     QObject::connect(mv.get(),          SIGNAL(zoomUpdated(double)), ctrl,           SLOT(zoomUpdate(double)));
-    QObject::connect(ctrl,              SIGNAL(compute()),           mv.get(),       SLOT(compute()));
     QObject::connect(ctrl,              SIGNAL(zoom(double)),        mv.get(),       SLOT(zoom(double)));
     QObject::connect(ctrl,              SIGNAL(classSelected(int)),  mv.get(),       SLOT(changeClass(int)));
     QDoubleSpinBox::connect(tp->zoomBox,SIGNAL(valueChanged(double)),mv.get(),       SLOT(zoom(double)));
@@ -237,8 +243,35 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QCheckBox::connect(tf->checkBox_oriNormFreak,   SIGNAL(clicked(bool)),        ctrl, SLOT(freakOriNormChanged(bool)));
     QCheckBox::connect(tf->checkBox_scaleNormFreak, SIGNAL(clicked(bool)),        ctrl, SLOT(freakScaleNormChanged(bool)));
 
+    /// LTP
+
+    /// KEYPOINT
+    QSpinBox::connect(tf->spinBox_sizeKeypoint,     SIGNAL(valueChanged(double)), ctrl, SLOT(keypointSizeChanged(double)));
+    QSpinBox::connect(tf->spinBox_angleKeypoint,    SIGNAL(valueChanged(double)), ctrl, SLOT(keypointAngleChanged(double)));
+    QCheckBox::connect(tf->checkBox_softCrop,       SIGNAL(clicked(bool)),        ctrl, SLOT(keypointCropChanged(bool)));
+    /// FOREST
+    QSpinBox::connect(tf->spinBox_treeMaxDepth,     SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_depthChanged(int)));
+    QSpinBox::connect(tf->spinBox_treeMinSampels,   SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_samplesChanged(int)));
+    QSpinBox::connect(tf->spinBox_treeRegression,   SIGNAL(valueChanged(double)), ctrl, SLOT(forest_regressionChanged(double)));
+    QCheckBox::connect(tf->checkBox_treeSurrogates, SIGNAL(clicked(bool)),        ctrl, SLOT(forest_surrogatesChanged(bool)));
+    QSpinBox::connect(tf->spinBox_treeCategories,   SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_categoriesChanged(int)));
+    QCheckBox::connect(tf->checkBox_treeVariableImportance, SIGNAL(clicked(bool)),ctrl, SLOT(forest_importanceChanged(bool)));
+    QSpinBox::connect(tf->spinBox_treeNactiveVariables, SIGNAL(valueChanged(int)),ctrl, SLOT(forest_nactivesChanged(int)));
+    QSpinBox::connect(tf->spinBox_treeMaxTrees,     SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_maxTreesChanged(int)));
+    QSpinBox::connect(tf->spinBox_treeAccuracy,     SIGNAL(valueChanged(double)), ctrl, SLOT(forest_accuracyChanged(double)));
+
+    /// FEEDBACK
+    QSpinBox::connect(tf->spinBox_gridCellSize,     SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_gridCellChanged(int)));
+    QSpinBox::connect(tf->spinBox_gridWidth,        SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_gridHeightChanged(int)));
+    QSpinBox::connect(tf->spinBox_gridHeight,       SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_gridWidthChanged(int)));
+    QSpinBox::connect(tf->spinBox_quadCellSize,     SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_quadMinSizeChanged(int)));
+    QSpinBox::connect(tf->spinBox_quadProbTh,       SIGNAL(valueChanged(double)), ctrl, SLOT(feedback_quadMinProbChanged(double)));
+
     /// PRESET
-    QObject::connect(tp.get(), SIGNAL(featuSelected(QString)), ctrl, SLOT(activateSetting(QString)));
+    QObject::connect(tp.get(), SIGNAL(setExtrParams(QString)), ctrl, SLOT(applyExtratorParams(QString)));
+    QObject::connect(tp.get(), SIGNAL(setGridParams()),        ctrl, SLOT(applyGridParams()));
+    QObject::connect(tp.get(), SIGNAL(setQuadParams()),        ctrl, SLOT(applyQuadParams()));
+
     tp->sync();
     /// TREE
 

@@ -472,7 +472,7 @@
     <item>
      <layout class="QHBoxLayout" name="layout_overlay">
       <item>
-       <widget class="QPushButton" name="showGrid">
+       <widget class="QPushButton" name="computeGrid">
         <property name="minimumSize">
          <size>
           <width>32</width>
@@ -504,7 +504,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="showTree">
+       <widget class="QPushButton" name="computeTree">
         <property name="minimumSize">
          <size>
           <width>32</width>

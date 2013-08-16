@@ -36,7 +36,12 @@ Q_SIGNALS:
     void uncheckSel(bool check);
     void classSelected(int id);
     void featuSelected(QString feat);
+    void setGridParams      ();
+    void setQuadParams      ();
+    void setExtrParams      (QString name);
     void compute();
+    void grid();
+    void quad();
 
 public Q_SLOTS:
     void zoomIn();
@@ -44,13 +49,14 @@ public Q_SLOTS:
     void zoomReset();
     void zoomUpdate(double factor);
     void classChanged(int index);
-    void featuChanged(int index);
 
     void buttonMov();
     void buttonAdd();
     void buttonDel();
     void buttonSel();
-    void buttonComp();
+    void buttonCompute();
+    void buttonGrid();
+    void buttonQuad();
 
     void trainingFinished();
     void feedbackFinished();
@@ -66,7 +72,7 @@ private:
     CMPCoreBridge::Ptr      bridge_;
     QMainWindow            *tool_bar_;
     QComboBox              *class_selection_;
-    QComboBox              *featu_selection_;
+    QComboBox              *extractor_selection_;
     QDoubleSpinBox         *size_;
     QPen                    BlackPen;
     QPushButton            *button_compute_;

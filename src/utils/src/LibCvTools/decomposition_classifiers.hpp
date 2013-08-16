@@ -70,12 +70,13 @@ class TerraDecomClassifier : public DecompositionClassifier
 {
     ///
 public :
-    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor) :
+    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor, const bool soft_crop = false) :
         classifier(_classifier),
         extractor(_extractor),
         threshold(_threshold),
-        last_prob_(0.0),
-        last_id_(-1)
+        last_prob(0.0),
+        last_id(-1),
+        soft_crop(soft_crop)
     {
     }
 
@@ -86,22 +87,27 @@ public :
     bool classify(const cv::Rect &roi)
     {
         cv::Mat descriptors;
-        cv::Mat img_roi(image, roi);
-        extractor->extract(img_roi, descriptors);
-        classifier->predictClassProb(descriptors, last_id_, last_prob_);
+        cv::Mat img_roi;
+        if(soft_crop)
+            img_roi = image;
+        else
+            img_roi = cv::Mat(image, roi);
 
-        return last_prob_ < threshold;
+        extractor->extract(img_roi, descriptors);
+        classifier->predictClassProb(descriptors, last_id, last_prob);
+
+        return last_prob < threshold;
 
     }
 
     float get_prob()
     {
-        return last_prob_;
+        return last_prob;
     }
 
     int get_id()
     {
-        return last_id_;
+        return last_id;
     }
 
     void set_image(const cv::Mat &_image)
@@ -114,7 +120,8 @@ private:
     Extractor    *extractor;
     float         threshold;
     cv::Mat       image;
-    float         last_prob_;
-    int           last_id_;
+    float         last_prob;
+    int           last_id;
+    bool          soft_crop;
 };
 #endif // DECOMPOSITION_CLASSIFIER_HPP

@@ -57,16 +57,44 @@ public Q_SLOTS:
     void freakScaleNormChanged   (bool checked);
     void freakOriNormChanged     (bool checked);
     void freakOctavesChanged     (int octaves);
+    /// LTP
+
+    /// KEYPOINT
+    void keypointSizeChanged     (double size);
+    void keypointAngleChanged    (double angle);
+    void keypointCropChanged     (bool crop);
+    /// FOREST
+    void forest_depthChanged     (int depth);
+    void forest_samplesChanged   (int samples);
+    void forest_regressionChanged(double value);
+    void forest_surrogatesChanged(bool checked);
+    void forest_categoriesChanged(int amount);
+    void forest_importanceChanged(bool checked);
+    void forest_nactivesChanged (int amount);
+    void forest_maxTreesChanged  (int trees);
+    void forest_accuracyChanged  (double accuracy);
+    /// FEEDBACK
+    void feedback_gridCellChanged(int size);
+    void feedback_gridHeightChanged(int height);
+    void feedback_gridWidthChanged(int width);
+    void feedback_quadMinSizeChanged(int size);
+    void feedback_quadMinProbChanged(double prob);
 
     /// GENERAL
-    void activateSetting(QString setting);
+    void applyExtratorParams(QString setting);
+    void applyGridParams();
+    void applyQuadParams();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+    enum Dirty {CLEAN, DIRTY, GRID_DIRTY, QUAD_DIRTY};
+    Dirty dirty_;
+
     QComboBox *brisk_radius_list_;
     QComboBox *brisk_number_list_;
+
 
     CMPCoreBridge::Ptr      bridge_;
     CMPParamsORB            orb_;

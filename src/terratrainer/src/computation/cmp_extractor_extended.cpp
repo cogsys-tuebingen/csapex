@@ -4,7 +4,8 @@ CMPExtractorExt::CMPExtractorExt()
 {
 }
 
-void CMPExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois, const bool soft_crop)
+void CMPExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois,
+                                    const float angle, const float scale, const bool soft_crop )
 {
     emitter << YAML::BeginSeq;
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {

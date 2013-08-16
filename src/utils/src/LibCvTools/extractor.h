@@ -19,8 +19,8 @@ public:
 protected:
     CvExPtr          extractor_;
 
-    KeyPoints prepareKeypoint(cv::Rect rect);
-
+    KeyPoints prepareKeypoint(const cv::Rect &rect, const float angle = 0.f, const float scale = 1.f);
+    KeyPoints prepareOctaveKeyPoints(cv:: Rect rect, const float angle = 0.f, const float scale = 1.f);
 };
 
 #endif // CMP_EXTRACTOR_H

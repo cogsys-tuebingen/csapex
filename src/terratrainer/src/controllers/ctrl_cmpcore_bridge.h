@@ -57,17 +57,18 @@ public:
 
     /// PARAMETERS
     void setExtractorParams (CMPExtractorParams &params);
-    void setClassifierParams(const CMPForestParams &params);
+    void setForestParams    (const CMPForestParams &params);
     void setGridParams      (const CMPGridParams &params);
     void setQuadParams      (const CMPQuadParams &params);
+    void setKeyPointParams  (const CMPKeypointParams &params);
 
     /// COMPUTATION
-    void compute            ();
     void setROIs            (const std::vector<cv_roi::TerraROI> &rois);
     void saveROIs           (QString path);
 
     void getGrid(std::vector<cv_roi::TerraROI> &cells);
     void getQuadtree(std::vector<cv_roi::TerraROI> &regions);
+    void compute            ();
     void computeGrid        ();
     void computeQuadtree    ();
 
@@ -78,7 +79,9 @@ Q_SIGNALS:
     void classUpdate        (int oldID, int newID);
     void classRemoved       (int classID);
     void colorUpdate        (int classID);
-    void computationFinished();
+    void computeFinished();
+    void computeGridFinished();
+    void computeQuadFinished();
 
 public Q_SLOTS:
     void loadImage          (const QString path);
@@ -87,18 +90,21 @@ public Q_SLOTS:
     void saveClassifierRaw  (const QString path);
 
 private:
-   CMPCore::Ptr              cc_;
+    enum Dirty{CLEAN, DIRTY, QUAD_DIRTY, GRID_DIRTY};
+    Dirty dirty_;
 
-   /// STORAGE
-   std::map<int, int>        classes_;
-   std::map<int, QString>    class_infos_;
-   std::vector<QColor>       classes_colors_;
+    CMPCore::Ptr              cc_;
 
-   /// CLASS MANAGEMENT
-   void removeClassIndex    (const int id);
-   void addClassIndex       (const int id, const int colorId);
-   void removeClassInfo     (const int id);
-   void addClassInfo        (const int id, const QString &info);
+    /// STORAGE
+    std::map<int, int>        classes_;
+    std::map<int, QString>    class_infos_;
+    std::vector<QColor>       classes_colors_;
+
+    /// CLASS MANAGEMENT
+    void removeClassIndex    (const int id);
+    void addClassIndex       (const int id, const int colorId);
+    void removeClassInfo     (const int id);
+    void addClassInfo        (const int id, const QString &info);
 
 };
 

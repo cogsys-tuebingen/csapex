@@ -56,42 +56,6 @@ void CtrlMapView::size(double size)
     Q_EMIT sizeUpdated(size);
 }
 
-void CtrlMapView::showTreeOverlay()
-{
-    if(overlay_ != QUAD) {
-        map_view_scene_->clearOverlay();
-        if(rendered_grid_.size() > 0) {
-            map_view_scene_->setInteractiveVisible(false);
-            map_view_scene_->setOverlay(rendered_tree_);
-            overlay_ = QUAD;
-        } else {
-            std::cerr << "No quadtree segmentation rendered so far!" << std::endl;
-        }
-    } else {
-        map_view_scene_->clearOverlay();
-        map_view_scene_->setInteractiveVisible(true);
-        overlay_ = NONE;
-    }
-}
-
-void CtrlMapView::showGridOverlay()
-{
-    if(overlay_ != GRID) {
-        map_view_scene_->clearOverlay();
-        if(rendered_grid_.size() > 0) {
-            map_view_scene_->setInteractiveVisible(false);
-            map_view_scene_->setOverlay(rendered_grid_);
-            overlay_ = GRID;
-        } else {
-            std::cerr << "No grid rendered so far!" << std::endl;
-        }
-    } else {
-        map_view_scene_->clearOverlay();
-        map_view_scene_->setInteractiveVisible(true);
-        overlay_ = NONE;
-    }
-}
-
 void CtrlMapView::activateAdd()
 {
     map_view_scene_->setMode(QInteractiveScene::ADD);
@@ -227,26 +191,70 @@ void CtrlMapView::compute()
 {
     /// CLEAR THE OLD OVERLAY
     clearOverlay();
-    setCurrentSelected();
+    setCurrentSelectedROIs();
     bridge_->compute();
+}
+
+void CtrlMapView::computeQuad()
+{
+    computeQuad();
+}
+
+void CtrlMapView::computeGrid()
+{
+    bridge_->computeGrid();
+}
+
+void CtrlMapView::computeFinished()
+{
+    std::cout << "Finished computation!" << std::endl;
+}
+
+void CtrlMapView::computeGridFinished()
+{
+    renderGrid();
+    if(overlay_ != GRID) {
+        map_view_scene_->clearOverlay();
+        if(rendered_grid_.size() > 0) {
+            map_view_scene_->setInteractiveVisible(false);
+            map_view_scene_->setOverlay(rendered_grid_);
+            overlay_ = GRID;
+        } else {
+            std::cerr << "No grid rendered so far!" << std::endl;
+        }
+    } else {
+        map_view_scene_->clearOverlay();
+        map_view_scene_->setInteractiveVisible(true);
+        overlay_ = NONE;
+    }
+}
+
+void CtrlMapView::computeQuadFinished()
+{
+    renderTree();
+    if(overlay_ != QUAD) {
+        map_view_scene_->clearOverlay();
+        if(rendered_grid_.size() > 0) {
+            map_view_scene_->setInteractiveVisible(false);
+            map_view_scene_->setOverlay(rendered_tree_);
+            overlay_ = QUAD;
+        } else {
+            std::cerr << "No quadtree segmentation rendered so far!" << std::endl;
+        }
+    } else {
+        map_view_scene_->clearOverlay();
+        map_view_scene_->setInteractiveVisible(true);
+        overlay_ = NONE;
+    }
 }
 
 void CtrlMapView::saveROIs(QString path)
 {
-    setCurrentSelected();
+    setCurrentSelectedROIs();
     bridge_->saveROIs(path);
 }
 
-
-void CtrlMapView::computationFinished()
-{
-    clearOverlay();
-    clearOverlay();
-    renderGrid();
-    renderTree();
-}
-
-void CtrlMapView::setCurrentSelected()
+void CtrlMapView::setCurrentSelectedROIs()
 {
     std::vector<cv_roi::TerraROI> to_compute;
     QList<QGraphicsItem*>  items = map_view_scene_->selectedItems();

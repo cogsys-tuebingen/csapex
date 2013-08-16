@@ -23,12 +23,12 @@ CtrlToolPanel::CtrlToolPanel(QMainWindow *tool_panel, CMPCoreBridge::Ptr bridge)
 void CtrlToolPanel::setupUI(Ui::ToolPanel *ui)
 {
     class_selection_ = ui->classes;
-    featu_selection_ = ui->features;
+    extractor_selection_ = ui->features;
     button_compute_  = ui->compile;
     button_trash_    = ui->trash;
     size_            = ui->sizeBox;
-    button_tree_     = ui->showTree;
-    button_grid_     = ui->showGrid;
+    button_tree_     = ui->computeTree;
+    button_grid_     = ui->computeGrid;
     button_add_      = ui->addBoxes;
     button_mov_      = ui->movBoxes;
     button_sel_      = ui->selBoxes;
@@ -37,7 +37,7 @@ void CtrlToolPanel::setupUI(Ui::ToolPanel *ui)
 
 void CtrlToolPanel::sync()
 {
-    Q_EMIT featuSelected(featu_selection_->currentText());
+    Q_EMIT featuSelected(extractor_selection_->currentText());
     if(class_selection_->count() > 1)
         Q_EMIT classSelected(class_selection_->currentIndex());
     Q_EMIT boxSize(size_->value());
@@ -76,11 +76,6 @@ void CtrlToolPanel::classChanged(int index)
     Q_EMIT classSelected(v.toInt());
 }
 
-void CtrlToolPanel::featuChanged(int index)
-{
-    Q_EMIT featuSelected(featu_selection_->currentText());
-}
-
 void CtrlToolPanel::buttonMov()
 {
         Q_EMIT uncheckMov(true);
@@ -113,9 +108,9 @@ void CtrlToolPanel::buttonSel()
         Q_EMIT uncheckDel(false);
 }
 
-void CtrlToolPanel::buttonComp()
+void CtrlToolPanel::buttonCompute()
 {
-    Q_EMIT featuSelected(featu_selection_->currentText());
+    Q_EMIT setExtrParams(extractor_selection_->currentText());
     Q_EMIT compute();
 }
 
@@ -123,6 +118,18 @@ void CtrlToolPanel::trainingFinished()
 {
     button_compute_->setEnabled(true);
     button_trash_->setEnabled(true);
+}
+
+void CtrlToolPanel::buttonGrid()
+{
+    Q_EMIT setGridParams();
+    Q_EMIT grid();
+}
+
+void CtrlToolPanel::buttonQuad()
+{
+    Q_EMIT setQuadParams();
+    Q_EMIT quad();
 }
 
 void CtrlToolPanel::feedbackFinished()

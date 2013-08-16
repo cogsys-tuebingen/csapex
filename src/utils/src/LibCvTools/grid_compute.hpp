@@ -18,7 +18,8 @@ namespace cv_grid {
  * @param eps       the mean error
  */
 template<class Attribute, class GridT, class Params>
-inline void  prepare_grid(GridT &grid, const cv::Mat &img, const int rows, const int cols, const Params &p, const cv::Mat &mask = cv::Mat(), const double thresh = 1.0)
+inline void  prepare_grid(GridT &grid, const cv::Mat &img, const int rows, const int cols, const Params &p,
+                          const cv::Mat &mask = cv::Mat(), const double thresh = 1.0, const bool soft_crop = false)
 {
     grid = GridT(rows,cols);
 
@@ -46,7 +47,12 @@ inline void  prepare_grid(GridT &grid, const cv::Mat &img, const int rows, const
                 }
             }
 
-            cv::Mat img_roi(img, r);
+            cv::Mat img_roi;
+            if(soft_crop)
+                img_roi = img;
+            else
+                img_roi = cv::Mat(img, r);
+
             Attribute attr = Attribute::generate(img_roi, p);
             grid(j,i) = GridCell<cv::Rect, Attribute>(r, attr);
         }

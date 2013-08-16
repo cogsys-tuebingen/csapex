@@ -24,14 +24,19 @@ void Extractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_poi
     extractor_->compute(image, key_points, descriptors);
 }
 
-Extractor::KeyPoints Extractor::prepareKeypoint(cv::Rect rect)
+Extractor::KeyPoints Extractor::prepareKeypoint(const cv::Rect &rect, const float angle, const float scale)
 {
     /// TODO : CHECK THE KEYPOINT PROPERTIES FOR DIFFERENT EXTRACTORS
     KeyPoints key_points;
-    cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, std::min(rect.height, rect.width) / 2.0);
+    cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * scale, angle);
     k.octave = 0;
     k.angle  = 0;
     key_points.push_back(k);
     return key_points;
 }
 
+
+Extractor::KeyPoints Extractor::prepareOctaveKeyPoints(cv::Rect rect, const float angle, const float scale)
+{
+    /// MULTIOCTAVE KEYPOINTS
+}

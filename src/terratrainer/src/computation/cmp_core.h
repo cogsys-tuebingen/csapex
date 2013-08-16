@@ -51,9 +51,13 @@ public:
         extractor_->set(ptr);
         type_ = param.type;
     }
+
+    ///     PARAMS
     void    setRandomForestParams(const CMPForestParams &params);
     void    setGridParameters(const CMPGridParams &params);
     void    setQuadParameters(const CMPQuadParams &params);
+    void    setKeyPointParameters(const CMPKeypointParams &params);
+
 
     ///     TRAINING PREPARATION
     void    setRois(const std::vector<cv_roi::TerraROI> &rois);
@@ -70,6 +74,8 @@ private:
     CMPExtractorExt::Ptr                    extractor_;
     CMPExtractorParams::Type                type_;
     CMPRandomForestExt::Ptr                 random_;
+
+    CMPKeypointParams                       keypoint_params_;
 
     TerraQuadtreeDecomposition::Ptr         quad_decom_;
     CMPQuadParams                           quad_params_;
