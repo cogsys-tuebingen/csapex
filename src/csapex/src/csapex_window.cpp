@@ -287,8 +287,8 @@ void CsApexWindow::saveAs()
     QString filename = QFileDialog::getSaveFileName(0, "Save config", current_config_.c_str(), GraphIO::config_selector.c_str());
 
     if(!filename.isEmpty()) {
-        saveAs(filename.toUtf8().constData());
-        setCurrentConfig(filename.toUtf8().constData());
+        saveAs(filename.toStdString());
+        setCurrentConfig(filename.toStdString());
     }
 }
 
@@ -297,7 +297,7 @@ void CsApexWindow::load()
     QString filename = QFileDialog::getOpenFileName(0, "Load config", current_config_.c_str(), GraphIO::config_selector.c_str());
 
     if(QFile(filename).exists()) {
-        setCurrentConfig(filename.toUtf8().constData());
+        setCurrentConfig(filename.toStdString());
 
         reload();
     }

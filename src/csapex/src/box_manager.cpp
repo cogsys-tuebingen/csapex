@@ -11,6 +11,7 @@
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <QApplication>
+#include <QTreeWidget>
 #include <stack>
 
 using namespace csapex;
@@ -39,14 +40,9 @@ bool compare (SelectorProxy::Ptr a, SelectorProxy::Ptr b) {
 }
 }
 
-void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
+void BoxManager::reload()
 {
-    if(!pluginsLoaded()) {
-        reload();
-    }
-
-    std::map<std::string, std::vector<SelectorProxy::Ptr> > map;
-    std::set<std::string> categories;
+    PluginManager<BoxedObject>::reload();
 
     std::string no_cat = "General";
 
@@ -62,10 +58,19 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
     }
 
     foreach(const std::string& cat, categories) {
+        std::sort(map[cat].begin(), map[cat].end(), compare);
+    }
+}
+
+void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
+{
+    if(!pluginsLoaded()) {
+        reload();
+    }
+
+    foreach(const std::string& cat, categories) {
         QMenu* submenu = new QMenu(cat.c_str());
         menu->addMenu(submenu);
-
-        std::sort(map[cat].begin(), map[cat].end(), compare);
 
         foreach(const SelectorProxy::Ptr& proxy, map[cat]) {
             QIcon icon = proxy->getIcon();
@@ -81,6 +86,34 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 
     menu->menuAction()->setIconVisibleInMenu(true);
 
+}
+
+void BoxManager::insertAvailableBoxedObjects(QTreeWidget* menu)
+{
+    if(!pluginsLoaded()) {
+        reload();
+    }
+
+    menu->setHeaderHidden(true);
+    menu->setDragEnabled(true);
+
+    foreach(const std::string& cat, categories) {
+        QTreeWidgetItem* submenu = new QTreeWidgetItem;
+        submenu->setText(0, cat.c_str());
+        menu->addTopLevelItem(submenu);
+
+        foreach(const SelectorProxy::Ptr& proxy, map[cat]) {
+            QIcon icon = proxy->getIcon();
+            std::string name = stripNamespace(proxy->getType());
+
+            QTreeWidgetItem* child = new QTreeWidgetItem;
+            child->setIcon(0, icon);
+            child->setText(0, name.c_str());
+            child->setData(0, Qt::UserRole, proxy->getType().c_str());
+
+            submenu->addChild(child);
+        }
+    }
 }
 
 void BoxManager::register_box_type(SelectorProxy::Ptr provider)

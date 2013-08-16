@@ -140,7 +140,7 @@ void ImportRos::changeTopic(const QString& topic)
     ros::master::getTopics(topics);
 
     for(ros::master::V_TopicInfo::iterator it = topics.begin(); it != topics.end(); ++it) {
-        if(it->name == topic.toUtf8().constData()) {
+        if(it->name == topic.toStdString()) {
             setTopic(*it);
             return;
         }

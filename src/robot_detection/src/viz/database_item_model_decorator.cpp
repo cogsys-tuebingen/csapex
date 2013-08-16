@@ -157,11 +157,11 @@ void DatabaseItemModelDecorator::cleanItems()
 void DatabaseItemModelDecorator::save()
 {
     if(!current_db_file.open(QIODevice::WriteOnly)) {
-        ERROR("Unable to open file " << current_db_file.fileName().toUtf8().constData());
+        ERROR("Unable to open file " << current_db_file.fileName().toStdString());
     } else {
-        INFO("save to " << current_db_file.fileName().toUtf8().constData());
+        INFO("save to " << current_db_file.fileName().toStdString());
         Config c = db->getConfig();
-        c.db_file = current_db_file.fileName().toUtf8().constData();
+        c.db_file = current_db_file.fileName().toStdString();
         db->applyConfig(c);
         DatabaseIO::save(c.db_file, db);
 
@@ -181,7 +181,7 @@ void DatabaseItemModelDecorator::saveAs()
 
 void DatabaseItemModelDecorator::loadCurrentFile()
 {
-    std::string file = current_db_file.fileName().toUtf8().constData();
+    std::string file = current_db_file.fileName().toStdString();
 
     Config cfg = db->getConfig();
     if(cfg.db_file != file) {
@@ -204,7 +204,7 @@ void DatabaseItemModelDecorator::load()
         current_db_file.setFileName(f);
 
         if(!current_db_file.open(QIODevice::ReadOnly)) {
-            ERROR("Unable to open file " << current_db_file.fileName().toUtf8().constData());
+            ERROR("Unable to open file " << current_db_file.fileName().toStdString());
         } else {
             loadCurrentFile();
         }

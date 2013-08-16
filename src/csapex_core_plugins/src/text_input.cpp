@@ -54,7 +54,7 @@ void TextInput::messageArrived(ConnectorIn *source)
 
 void TextInput::setText(QString text)
 {
-    state.message = text.toUtf8().constData();
+    state.message = text.toStdString();
 }
 
 void TextInput::publish()

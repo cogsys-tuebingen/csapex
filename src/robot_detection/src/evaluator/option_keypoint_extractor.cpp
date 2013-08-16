@@ -32,7 +32,7 @@ void OptionKeypointExtractor::update_type(int slot)
         return;
     }
 
-    config.setKeypointType(selection->itemText(slot).toUtf8().constData());
+    config.setKeypointType(selection->itemText(slot).toStdString());
     config.replaceGlobal();
 }
 

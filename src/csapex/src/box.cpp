@@ -199,13 +199,13 @@ void Box::setLabel(const std::string& label)
 
 void Box::setLabel(const QString &label)
 {
-    state->label_ = label.toUtf8().constData();
+    state->label_ = label.toStdString();
     ui->label->setText(label);
 }
 
 std::string Box::getLabel() const
 {
-    return ui->label->text().toUtf8().constData();
+    return ui->label->text().toStdString();
 }
 
 void Box::addInput(ConnectorIn* in)

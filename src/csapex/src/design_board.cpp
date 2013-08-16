@@ -288,7 +288,7 @@ void DesignBoard::showContextMenu(const QPoint& pos)
     QAction* selectedItem = menu.exec(globalPos);
 
     if(selectedItem) {
-        std::string selected = selectedItem->data().toString().toUtf8().constData();
+        std::string selected = selectedItem->data().toString().toStdString();
         BoxManager::instance().startPlacingBox(selected);
     }
 }
@@ -302,15 +302,32 @@ void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
 {
     if(e->mimeData()->text() == Box::MIME) {
         e->acceptProposedAction();
-    }
-    if(e->mimeData()->text() == Box::MIME_MOVE) {
+
+    } else if(e->mimeData()->text() == Box::MIME_MOVE) {
         e->acceptProposedAction();
-    }
-    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+
+    } else if(e->mimeData()->text() == Connector::MIME_CREATE) {
         e->acceptProposedAction();
-    }
-    if(e->mimeData()->text() == Connector::MIME_MOVE) {
+
+    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
         e->acceptProposedAction();
+
+    } else {
+        std::cout << "warning: drag enter: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
+        if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+
+            QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
+            QDataStream stream(&itemData, QIODevice::ReadOnly);
+
+            int r, c;
+            QMap<int, QVariant> v;
+            stream >> r >> c >> v;
+
+            std::string type = v[Qt::UserRole].toString().toStdString();
+            e->accept();
+
+            BoxManager::instance().startPlacingBox(type, QPoint(0,0));
+        }
     }
 }
 

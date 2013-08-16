@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <QWidget>
+#include <QTreeWidget>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -47,6 +48,8 @@ private:
     bool space_;
     bool drag_;
     QPoint drag_start_pos_;
+
+    QTreeWidget* menu;
 };
 
 }

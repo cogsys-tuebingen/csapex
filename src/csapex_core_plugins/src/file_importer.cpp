@@ -25,7 +25,7 @@ using namespace csapex;
 using namespace connection_types;
 
 void FileImporter::State::writeYaml(YAML::Emitter& out) const {
-    out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
+    out << YAML::Key << "path" << YAML::Value << last_path_.toStdString();
 
     if(parent->provider_.get() && parent->provider_->getState().get()) {
         out << YAML::Key << "sub_state";
@@ -66,8 +66,8 @@ void FileImporter::tick()
 bool FileImporter::doImport(const QString& path)
 {
     state.last_path_ = path;
-    provider_ = MessageProviderManager::createMessageProvider(path.toUtf8().constData());
-    provider_->load(path.toUtf8().constData());
+    provider_ = MessageProviderManager::createMessageProvider(path.toStdString());
+    provider_->load(path.toStdString());
 
     return provider_.get();
 }

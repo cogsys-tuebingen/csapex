@@ -5,6 +5,7 @@
 #include <csapex/box.h>
 #include <csapex/command_dispatcher.h>
 #include <csapex/design_board.h>
+#include <csapex/box_manager.h>
 #include "ui_designer.h"
 
 using namespace csapex;
@@ -12,7 +13,7 @@ using namespace csapex;
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
 Designer::Designer(Graph &graph, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer)
+    : QWidget(parent), ui(new Ui::Designer), menu(NULL)
 {
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
@@ -45,11 +46,21 @@ void Designer::keyReleaseEvent(QKeyEvent* e)
 
 void Designer::resizeEvent(QResizeEvent* e)
 {
+    if(menu == NULL) {
+
+        menu = new QTreeWidget;
+
+        QWidget* boxes = ui->page;
+        boxes->setLayout(new QVBoxLayout);
+        BoxManager::instance().insertAvailableBoxedObjects(menu);
+
+        boxes->layout()->addWidget(menu);
+    }
 }
 
 void Designer::addBox(Box *box)
 {
-//    box->setParent(this);
+    //    box->setParent(this);
 
     designer_board->addBoxEvent(box);
 }

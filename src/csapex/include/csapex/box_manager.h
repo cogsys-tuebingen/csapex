@@ -12,7 +12,7 @@
 #include <QLayout>
 #include <QMenu>
 #include <vector>
-
+#include <QTreeWidget>
 
 
 namespace plugin_manager {
@@ -45,6 +45,8 @@ public:
 
     static std::string stripNamespace(const std::string& name);
 
+    virtual void reload();
+
 public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
     void register_box_type(SelectorProxy::Ptr provider);
@@ -57,6 +59,7 @@ public:
 
     void insertAvailableBoxedObjects(QLayout* layout);
     void insertAvailableBoxedObjects(QMenu* menu);
+    void insertAvailableBoxedObjects(QTreeWidget *tree);
 
     std::string makeUUID(const std::string& name);
 
@@ -70,6 +73,9 @@ protected:
     std::map<std::string, int> uuids;
 
     QWidget* container_;
+
+    std::map<std::string, std::vector<SelectorProxy::Ptr> > map;
+    std::set<std::string> categories;
 };
 
 }

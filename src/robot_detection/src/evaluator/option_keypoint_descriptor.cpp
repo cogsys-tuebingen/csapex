@@ -34,7 +34,7 @@ void OptionKeypointDescriptor::update(int slot)
 
     std::cout << slot << std::endl;
 
-    config.setDescriptorType(selection->itemText(slot).toUtf8().constData());
+    config.setDescriptorType(selection->itemText(slot).toStdString());
     config.replaceGlobal();
 }
 

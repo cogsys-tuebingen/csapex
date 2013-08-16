@@ -20,7 +20,7 @@ using namespace csapex;
 using namespace connection_types;
 
 void VirtualCamera::State::writeYaml(YAML::Emitter& out) const {
-    out << YAML::Key << "path" << YAML::Value << last_path_.toUtf8().constData();
+    out << YAML::Key << "path" << YAML::Value << last_path_.toStdString();
     out << YAML::Key << "focal_length" << YAML::Value << focal_length;
     out << YAML::Key << "size" << YAML::Value <<  YAML::BeginSeq << w << h << YAML::EndSeq;
     out << YAML::Key << "pos" << YAML::Value << YAML::BeginSeq << pos[0] << pos[1] << pos[2] << YAML::EndSeq;
@@ -205,7 +205,7 @@ void VirtualCamera::tick()
 bool VirtualCamera::doImport(const QString& path)
 {
     state.last_path_ = path;
-    provider_ = ImageProvider::Ptr(ImageProvider::create(state.last_path_.toUtf8().constData()));
+    provider_ = ImageProvider::Ptr(ImageProvider::create(state.last_path_.toStdString()));
 
     if(!provider_.get()) {
         return false;

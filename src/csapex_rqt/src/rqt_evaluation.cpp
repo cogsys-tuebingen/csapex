@@ -48,7 +48,7 @@ void CsApex::restoreSettings(const qt_gui_cpp::Settings& plugin_settings, const 
 {
     QString file = instance_settings.value("file").toString();
     if(!file.isEmpty()) {
-        eva_->setCurrentConfig(file.toUtf8().constData());
+        eva_->setCurrentConfig(file.toStdString());
         eva_->reload();
     }
 }

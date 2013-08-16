@@ -54,8 +54,9 @@ catkin_package(
 ##### EVALUATION
 add_library(csapex SHARED
     src/box.cpp
-    src/boxed_object.cpp
+    src/box_meta.cpp
     src/box_manager.cpp
+    src/boxed_object.cpp
     src/core_plugin.cpp
     src/command.cpp
     src/command_dispatcher.cpp
