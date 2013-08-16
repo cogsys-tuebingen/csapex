@@ -5,6 +5,8 @@
 #include <boost/shared_ptr.hpp>
 #include <yaml-cpp/yaml.h>
 
+namespace csapex {
+
 class ConnectionType
 {
 public:
@@ -35,7 +37,9 @@ public:
     static ConnectionType::Ptr default_;
 };
 
-inline std::ostream& operator << (std::ostream& out, ConnectionType& obj)
+}
+
+inline std::ostream& operator << (std::ostream& out, csapex::ConnectionType& obj)
 {
     obj.write(out);
     return out;

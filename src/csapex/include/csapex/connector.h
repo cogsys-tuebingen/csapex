@@ -22,6 +22,8 @@ public:
     static const QString MIME_CREATE;
     static const QString MIME_MOVE;
 
+    static std::string makeUUID(const std::string &box_uuid, bool in, int sub_id);
+
 public:
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent * e);
@@ -48,11 +50,11 @@ public:
         return false;
     }
 
+    bool isForwarding() const;
+
     std::string UUID();
 
     virtual QPoint centerPoint();
-
-    int connectorID();
 
     QString cssClass() {
         return QString("Connector");
@@ -63,6 +65,8 @@ public:
 
     void setType(ConnectionType::Ptr type);
     ConnectionType::ConstPtr getType() const;
+
+    virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
@@ -83,13 +87,13 @@ Q_SIGNALS:
     void connectionDone();
 
 protected:
-    Connector(Box* parent, const std::string& type, int sub_id);
+    Connector(Box* parent, const std::string &uuid);
     virtual ~Connector();
 
     virtual void removeAllConnectionsNotUndoable() = 0;
-    virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
     void errorEvent(bool error, ErrorLevel level);
+    void paintEvent(QPaintEvent* event);
 
 protected:
     virtual void findParents();
@@ -99,12 +103,12 @@ protected:
     QWidget* parent_widget;
     csapex::DesignBoard* designer;
 
+    Qt::MouseButtons buttons_down_;
+
     std::string uuid_;
     std::string label_;
 
     ConnectionType::Ptr type_;
-
-    Qt::MouseButtons buttons_down_;
 };
 
 }

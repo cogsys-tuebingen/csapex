@@ -9,6 +9,7 @@
 PLUGINLIB_EXPORT_CLASS(vision_plugins::ColorConvert, csapex::BoxedObject)
 
 using namespace vision_plugins;
+using namespace csapex;
 
 ColorConvert::ColorConvert()
 {

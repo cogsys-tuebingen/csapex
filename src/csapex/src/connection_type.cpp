@@ -1,6 +1,11 @@
 /// HEADER
 #include <csapex/connection_type.h>
 
+/// COMPONENT
+#include <csapex/message.h>
+
+using namespace csapex;
+
 ConnectionType::Ptr ConnectionType::default_;
 
 ConnectionType::ConnectionType(const std::string& name)
@@ -29,7 +34,10 @@ std::string ConnectionType::name()
 
 ConnectionType::Ptr ConnectionType::makeDefault()
 {
-    assert(default_);
+    if(!default_) {
+        ConnectionType::default_ = connection_types::AnyMessage::make();
+    }
+
     ConnectionType::Ptr res = default_->clone();
     assert(res);
     return res;

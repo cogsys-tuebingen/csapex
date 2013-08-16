@@ -75,7 +75,7 @@ void BoxedObject::fill(QBoxLayout* layout)
     layout->addWidget(new QLabel(name_.c_str()));
 }
 
-void BoxedObject::updateDynamicGui(QBoxLayout *layout)
+void BoxedObject::updateDynamicGui(QBoxLayout *)
 {
 }
 
@@ -89,7 +89,7 @@ Memento::Ptr BoxedObject::getState() const
     return Memento::Ptr((Memento*) NULL);
 }
 
-void BoxedObject::setState(Memento::Ptr memento)
+void BoxedObject::setState(Memento::Ptr)
 {
 
 }

@@ -2,6 +2,7 @@
 #include <csapex/connector_out.h>
 
 /// COMPONENT
+#include <csapex/box.h>
 #include <csapex/connector_in.h>
 #include <csapex/design_board.h>
 #include <csapex/command_meta.h>
@@ -14,9 +15,18 @@
 
 using namespace csapex;
 
-ConnectorOut::ConnectorOut(Box* parent, int sub_id)
-    : Connector(parent, "out", sub_id)
+ConnectorOut::ConnectorOut(Box* parent, const std::string& uuid)
+    : Connector(parent, uuid), guard1(0xDEADBEEF), guard2(0xDEADBEEF)
 {
+    assert(guard1 == 0xDEADBEEF);
+    assert(guard2 == 0xDEADBEEF);
+}
+
+ConnectorOut::ConnectorOut(Box* parent, int sub_id)
+    : Connector(parent, Connector::makeUUID(parent->UUID(), false, sub_id)), guard1(0xDEADBEEF), guard2(0xDEADBEEF)
+{
+    assert(guard1 == 0xDEADBEEF);
+    assert(guard2 == 0xDEADBEEF);
 }
 
 ConnectorOut::~ConnectorOut()
@@ -146,6 +156,8 @@ void ConnectorOut::validateConnections()
 
 void ConnectorOut::publish(ConnectionType::Ptr message)
 {
+    message_ = message;
+
     if(targets_.size() == 1) {
         targets_[0]->inputMessage(message);
     } else if(targets_.size() > 1) {
@@ -157,4 +169,10 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     }
 
     Q_EMIT messageSent(this);
+}
+
+void ConnectorOut::relayMessage(ConnectorOut*)
+{
+    std::cout << "relay" << std::endl;
+    publish(message_);
 }

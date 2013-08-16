@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
+using namespace csapex;
+
 StreamInterceptor& StreamInterceptor::instance()
 {
     static StreamInterceptor instance;
@@ -108,7 +110,7 @@ StreamInterceptor::StreamInterceptor()
     fake_cout_.str(std::string());
 
     std::cout.rdbuf(fake_cout_.rdbuf());
-    std::cerr.rdbuf(fake_cerr_.rdbuf());
+//    std::cerr.rdbuf(fake_cerr_.rdbuf());
 }
 
 void StreamInterceptor::start()

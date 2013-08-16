@@ -2,6 +2,7 @@
 #include <csapex/connector_in.h>
 
 /// COMPONENT
+#include <csapex/box.h>
 #include <csapex/connector_out.h>
 #include <csapex/command_delete_connection.h>
 
@@ -11,15 +12,20 @@
 
 using namespace csapex;
 
+ConnectorIn::ConnectorIn(Box* parent, const std::string &uuid)
+    : Connector(parent, uuid), target(NULL)
+{
+}
+
 ConnectorIn::ConnectorIn(Box* parent, int sub_id)
-    : Connector(parent, "in", sub_id), input(NULL)
+    : Connector(parent, makeUUID(parent->UUID(), true, sub_id)), target(NULL)
 {
 }
 
 ConnectorIn::~ConnectorIn()
 {
-    if(input != NULL) {
-        input->removeConnection(this);
+    if(target != NULL) {
+        target->removeConnection(this);
     }
 }
 
@@ -34,30 +40,30 @@ bool ConnectorIn::tryConnect(Connector* other_side)
 
 bool ConnectorIn::acknowledgeConnection(Connector* other_side)
 {
-    input = dynamic_cast<ConnectorOut*>(other_side);
+    target = dynamic_cast<ConnectorOut*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
     return true;
 }
 
 void ConnectorIn::removeConnection(Connector* other_side)
 {
-    if(input != NULL) {
-        assert(other_side == input);
-        input = NULL;
+    if(target != NULL) {
+        assert(other_side == target);
+        target = NULL;
     }
 }
 
 Command::Ptr ConnectorIn::removeAllConnectionsCmd()
 {
-    Command::Ptr cmd(new command::DeleteConnection(input, this));
+    Command::Ptr cmd(new command::DeleteConnection(target, this));
     return cmd;
 }
 
 void ConnectorIn::removeAllConnectionsNotUndoable()
 {
-    if(input != NULL) {
-        input->removeConnection(this);
-        input = NULL;
+    if(target != NULL) {
+        target->removeConnection(this);
+        target = NULL;
         setError(false);
         Q_EMIT disconnected(this);
     }
@@ -65,7 +71,7 @@ void ConnectorIn::removeAllConnectionsNotUndoable()
 
 bool ConnectorIn::canConnect()
 {
-    return input == NULL;
+    return target == NULL;
 }
 
 bool ConnectorIn::targetsCanConnectTo(Connector* other_side)
@@ -75,7 +81,7 @@ bool ConnectorIn::targetsCanConnectTo(Connector* other_side)
 
 bool ConnectorIn::isConnected()
 {
-    return input != NULL;
+    return target != NULL;
 }
 
 void ConnectorIn::connectionMovePreview(Connector *other_side)
@@ -88,7 +94,7 @@ void ConnectorIn::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
-        if(!input->getType()->canConnectTo(getType())) {
+        if(!target->getType()->canConnectTo(getType())) {
             e = true;
         }
     }
@@ -96,9 +102,9 @@ void ConnectorIn::validateConnections()
     setError(e);
 }
 
-ConnectorOut* ConnectorIn::getConnected()
+Connector *ConnectorIn::getConnected()
 {
-    return input;
+    return target;
 }
 
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
@@ -115,4 +121,10 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 ConnectionType::Ptr ConnectorIn::getMessage()
 {
     return message_;
+}
+
+void ConnectorIn::relayMessage(ConnectorIn *source)
+{
+    message_ = source->getMessage();
+    Q_EMIT messageArrived(this);
 }

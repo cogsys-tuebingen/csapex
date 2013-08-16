@@ -24,7 +24,7 @@ Memento::Ptr GlobalOption::getState() const
     return Memento::Ptr((Memento*) NULL);
 }
 
-void GlobalOption::setState(Memento::Ptr memento)
+void GlobalOption::setState(Memento::Ptr)
 {
 
 }

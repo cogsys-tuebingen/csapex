@@ -7,6 +7,9 @@
 #include <QThread>
 #include <sstream>
 
+namespace csapex
+{
+
 class StreamInterceptorWorker : public QObject {
     Q_OBJECT
 
@@ -64,5 +67,7 @@ private:
     QThread* thread;
     StreamInterceptorWorker* worker;
 };
+
+}
 
 #endif // STREAM_INTERCEPTOR_H

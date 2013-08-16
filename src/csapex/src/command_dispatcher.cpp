@@ -20,13 +20,26 @@ void CommandDispatcher::execute(Command::Ptr command)
     instance().doExecute(command);
 }
 
+void CommandDispatcher::executeLater(Command::Ptr command)
+{
+    instance().later.push_back(command);
+}
+
+void CommandDispatcher::executeLater()
+{
+    foreach(Command::Ptr cmd, instance().later) {
+        instance().doExecute(cmd);
+    }
+    instance().later.clear();
+}
+
 void CommandDispatcher::doExecute(Command::Ptr command)
 {
     if(!isDirty()) {
         command->setAfterSavepoint(true);
     }
 
-    bool change = command->execute(*graph_);
+    bool change = command->execute();
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -111,7 +124,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = last->undo(*graph_);
+    bool ret = last->undo();
     assert(ret);
 
 //    while(!Command::undo_later.empty()) {
@@ -141,7 +154,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    last->redo(*graph_);
+    last->redo();
 
     done.push_back(last);
 

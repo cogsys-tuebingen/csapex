@@ -54,6 +54,7 @@ class Box : public QWidget, public Selectable
 
     friend class DesignerIO;
     friend class GraphIO;
+    friend class Graph;
     friend class BoxWorker;
 
 public:
@@ -121,6 +122,9 @@ public:
     void addInput(ConnectorIn* in);
     void addOutput(ConnectorOut* out);
 
+    int nextInputId();
+    int nextOutputId();
+
     void removeInput(ConnectorIn *in);
     void removeOutput(ConnectorOut *out);
 
@@ -145,11 +149,19 @@ public:
     void setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
+    void setGraph(Graph* graph);
+    Graph* getGraph();
+
+    virtual bool hasSubGraph();
+    virtual Graph* getSubGraph();
+
     Command::Ptr removeAllConnectionsCmd();
     Command::Ptr removeAllOutputsCmd();
     Command::Ptr removeAllInputsCmd();
 
     YAML::Emitter& save(YAML::Emitter& out) const;
+
+protected:
 
 protected:
     void startDrag(QPoint offset);
@@ -173,6 +185,7 @@ Q_SIGNALS:
     void changed(Box*);
     void clicked(Box*);
     void tickRequest();
+    void moveSelectionToBox(Box*);
 
     void connectorCreated(Connector*);
     void connectionFormed(ConnectorOut*, ConnectorIn*);
@@ -184,15 +197,16 @@ Q_SIGNALS:
     void connectorEnabled(Connector* source);
     void connectorDisabled(Connector* source);
 
-private:
+protected:
     void connectConnector(Connector* c);
     void disconnectConnector(Connector* c);
 
     void resizeEvent(QResizeEvent * e);
 
-private:
+protected:
     Ui::Box* ui;
 
+    Graph *graph_;
     State::Ptr state;
     BoxedObject* content_;
 
@@ -210,6 +224,8 @@ private:
 
     QIcon minimize_icon_;
     QIcon maximize_icon_;
+
+    int next_sub_id_;
 };
 
 }

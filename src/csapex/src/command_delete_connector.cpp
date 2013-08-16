@@ -9,6 +9,7 @@
 #include <csapex/command_dispatcher.h>
 
 using namespace csapex;
+using namespace command;
 
 DeleteConnector::DeleteConnector(Connector *_c) :
     in(_c->isInput()),
@@ -16,11 +17,13 @@ DeleteConnector::DeleteConnector(Connector *_c) :
 {
     assert(c);
     c_uuid = c->UUID();
+
+    graph = _c->getBox()->getGraph();
 }
 
-bool DeleteConnector::execute(Graph& graph)
+bool DeleteConnector::execute()
 {
-    Box* box_c = graph.findConnectorOwner(c_uuid);
+    Box* box_c = graph->findConnectorOwner(c_uuid);
 
     if(c->isConnected()) {
         if(in) {
@@ -40,23 +43,23 @@ bool DeleteConnector::execute(Graph& graph)
     return true;
 }
 
-bool DeleteConnector::undo(Graph& graph)
+bool DeleteConnector::undo()
 {
-    if(!refresh(graph)) {
+    if(!refresh()) {
         return false;
     }
 
     return false;
 }
 
-bool DeleteConnector::redo(Graph& graph)
+bool DeleteConnector::redo()
 {
     return false;
 }
 
-bool DeleteConnector::refresh(Graph& graph)
+bool DeleteConnector::refresh()
 {
-    Box* box_c = graph.findConnectorOwner(c_uuid);
+    Box* box_c = graph->findConnectorOwner(c_uuid);
 
     if(!box_c) {
         return false;

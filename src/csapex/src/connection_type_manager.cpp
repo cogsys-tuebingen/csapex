@@ -1,6 +1,8 @@
 /// HEADER
 #include <csapex/connection_type_manager.h>
 
+using namespace csapex;
+
 ConnectionTypeManager::ConnectionTypeManager()
 {
 }

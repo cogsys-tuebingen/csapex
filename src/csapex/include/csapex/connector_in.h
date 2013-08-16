@@ -21,13 +21,15 @@ class ConnectorIn : public Connector
     Q_OBJECT
 
     friend class ConnectorOut;
+    friend class ConnectorInForward;
     friend class command::AddConnection;
     friend class command::MoveConnection;
     friend class command::DeleteConnection;
 
 public:
+    ConnectorIn(Box* parent, const std::string& uuid);
     ConnectorIn(Box* parent, int sub_id);
-    ~ConnectorIn();
+    virtual ~ConnectorIn();
 
     virtual bool isInput() const {
         return true;
@@ -43,11 +45,11 @@ public:
     virtual void connectionMovePreview(Connector* other_side);
     virtual void validateConnections();
 
-    ConnectorOut* getConnected();
+    virtual Connector* getConnected();
 
     virtual Command::Ptr removeAllConnectionsCmd();
 
-private:
+protected:
     virtual bool tryConnect(Connector* other_side);
     virtual bool acknowledgeConnection(Connector* other_side);
     virtual void removeConnection(Connector* other_side);
@@ -56,8 +58,11 @@ private:
 Q_SIGNALS:
     void messageArrived(ConnectorIn* source);
 
+public Q_SLOTS:
+    void relayMessage(ConnectorIn* source);
+
 private:
-    ConnectorOut* input;
+    Connector* target;
 
     ConnectionType::Ptr message_;
 };

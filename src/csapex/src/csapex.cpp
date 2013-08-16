@@ -16,11 +16,14 @@ namespace po = boost::program_options;
 
 using namespace csapex;
 
-void siginthandler(int param)
+void siginthandler(int)
 {
     printf("User pressed Ctrl+C\n");
     exit(1);
 }
+
+namespace csapex
+{
 
 struct CsApexApp : public QApplication {
     CsApexApp(int& argc, char** argv)
@@ -58,6 +61,8 @@ struct CsApexApp : public QApplication {
         return true;
     }
 };
+
+}
 
 int main(int argc, char** argv)
 {

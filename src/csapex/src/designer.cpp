@@ -29,9 +29,9 @@ Designer::~Designer()
 {
 }
 
-bool Designer::eventFilter(QObject* o, QEvent* e)
+bool Designer::eventFilter(QObject*, QEvent*)
 {
-    return true;
+    return false;
 }
 
 void Designer::keyPressEvent(QKeyEvent* e)
@@ -44,7 +44,7 @@ void Designer::keyReleaseEvent(QKeyEvent* e)
     designer_board->keyReleaseEvent(e);
 }
 
-void Designer::resizeEvent(QResizeEvent* e)
+void Designer::resizeEvent(QResizeEvent*)
 {
     if(menu == NULL) {
 
@@ -66,7 +66,7 @@ void Designer::addBox(Box *box)
 }
 
 
-void Designer::deleteBox(Box *box)
+void Designer::deleteBox(Box *)
 {
     designer_board->refresh();
 }

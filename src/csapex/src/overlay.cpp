@@ -99,8 +99,12 @@ void Overlay::deleteTemporaryConnectionsAndRepaint()
 
 void Overlay::drawConnection(Connection& connection)
 {
-    ConnectorOut* from = connection.from();
-    ConnectorIn* to = connection.to();
+    if(connection.from()->isInput() || connection.to()->isOutput()) {
+        return;
+    }
+
+    ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
+    ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
 
     QPoint p1 = from->centerPoint();
     QPoint p2 = to->centerPoint();
@@ -216,6 +220,9 @@ void Overlay::drawConnector(Connector *c)
 
     int font_size = 10;
     int lines = 3;
+    if(c->isForwarding()) {
+        painter->setPen(QPen(QBrush(color.darker()), 2, Qt::DotLine));
+    }
     painter->drawEllipse(c->centerPoint(), connector_radius_, connector_radius_);
 
     QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
@@ -291,7 +298,7 @@ bool Overlay::mouseMoveEventHandler(QMouseEvent *e)
     return true;
 }
 
-bool Overlay::keyPressEventHandler(QKeyEvent* e)
+bool Overlay::keyPressEventHandler(QKeyEvent*)
 {
     return true;
 }
@@ -309,7 +316,7 @@ bool Overlay::keyReleaseEventHandler(QKeyEvent* e)
     return true;
 }
 
-bool Overlay::mousePressEventHandler(QMouseEvent *e)
+bool Overlay::mousePressEventHandler(QMouseEvent *)
 {
     return true;
 }
@@ -341,7 +348,7 @@ void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
     }
 }
 
-void Overlay::paintEvent(QPaintEvent* event)
+void Overlay::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
     QPainter ps(&schematics);

@@ -20,8 +20,8 @@ public:
     virtual void filter(cv::Mat &img, cv::Mat &mask);
     virtual void insert(QBoxLayout *parent);
 
-    void setState(Memento::Ptr memento);
-    Memento::Ptr getState() const;
+    void setState(csapex::Memento::Ptr memento);
+    csapex::Memento::Ptr getState() const;
 
 public Q_SLOTS:
     void update();
@@ -36,7 +36,7 @@ private:
     QDoubleSlider *slider_distance_;
     QDoubleSlider *slider_focal_length_;
 
-    class State : public Memento {
+    class State : public csapex::Memento {
     public:
         void readYaml(const YAML::Node &node);
         void writeYaml(YAML::Emitter &out) const;

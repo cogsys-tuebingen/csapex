@@ -5,7 +5,8 @@
 #include <string>
 #include <QWidget>
 
-namespace csapex {
+namespace csapex
+{
 
 class Box;
 
@@ -26,6 +27,7 @@ public:
 
 protected:
     Displayable();
+    virtual ~Displayable();
 
     virtual void errorEvent(bool error, ErrorLevel level);
 

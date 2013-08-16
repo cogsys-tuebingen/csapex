@@ -10,6 +10,7 @@ namespace csapex
 class Connector;
 class ConnectorIn;
 class ConnectorOut;
+class Box;
 
 namespace command
 {
@@ -17,17 +18,20 @@ namespace command
 struct AddConnection : public Command
 {
     AddConnection(Connector* a, Connector* b);
+    AddConnection(Box* parent, const std::string& from_uuid, const std::string& to_uuid);
 
 protected:
-    bool execute(Graph& graph);
-    bool undo(Graph& graph);
-    bool redo(Graph& graph);
+    bool execute();
+    bool undo();
+    bool redo();
 
-    void refresh(Graph &graph);
+    void refresh();
 
 private:
     ConnectorOut* from;
     ConnectorIn* to;
+
+    Graph* graph;
 
     std::string from_uuid;
     std::string to_uuid;

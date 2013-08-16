@@ -6,6 +6,7 @@
 #include <csapex/connector.h>
 #include <csapex/selector_proxy.h>
 #include <csapex/box.h>
+#include <csapex/box_group.h>
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
 #include <csapex/command_add_box.h>
@@ -272,7 +273,7 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
     }
 }
 
-bool DesignBoard::eventFilter(QObject* o, QEvent* e)
+bool DesignBoard::eventFilter(QObject*, QEvent*)
 {
     return false;
 }
@@ -300,16 +301,16 @@ void DesignBoard::resizeEvent(QResizeEvent* e)
 
 void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->text() == Box::MIME) {
+    if(e->mimeData()->hasFormat(Box::MIME)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->text() == Box::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->text() == Connector::MIME_CREATE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         e->acceptProposedAction();
 
     } else {
@@ -326,20 +327,25 @@ void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
             std::string type = v[Qt::UserRole].toString().toStdString();
             e->accept();
 
-            BoxManager::instance().startPlacingBox(type, QPoint(0,0));
+            if(type == BoxGroup::MIME.toStdString()) {
+                BoxManager::instance().startPlacingMetaBox(this, QPoint(0,0));
+
+            } else {
+                BoxManager::instance().startPlacingBox(type, QPoint(0,0));
+            }
         }
     }
 }
 
 void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
         overlay->addTemporaryConnection(c, e->pos());
         overlay->repaint();
 
-    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
 
@@ -354,7 +360,7 @@ void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
         }
         overlay->repaint();
 
-    } else if(e->mimeData()->text() == Box::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
         Box* box = dynamic_cast<Box*>(e->mimeData()->parent());
         Box::MoveOffset* offset = dynamic_cast<Box::MoveOffset*>(e->mimeData()->userData(0));
         box->move(e->pos() + offset->value);
@@ -365,12 +371,15 @@ void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 
 void DesignBoard::dropEvent(QDropEvent* e)
 {
-    if(e->mimeData()->text() == Box::MIME) {
-        SelectorProxy* selector = dynamic_cast<SelectorProxy*>(e->mimeData()->parent());
+    if(e->mimeData()->hasFormat(Box::MIME)) {
+        QByteArray b = e->mimeData()->data(Box::MIME);
+        SelectorProxy::Ptr* selectorptr = (SelectorProxy::Ptr*)b.toULongLong();
 
-        if(!selector) {
+        if(!selectorptr) {
             return;
         }
+
+        SelectorProxy::Ptr selector = *selectorptr;
 
         e->setDropAction(Qt::CopyAction);
         e->accept();
@@ -378,14 +387,15 @@ void DesignBoard::dropEvent(QDropEvent* e)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPoint pos = e->pos() + offset;
 
-        Command::Ptr add_box(new command::AddBox(selector, this, pos));
+        Command::Ptr add_box(new command::AddBox(graph_, selector, pos));
         CommandDispatcher::execute(add_box);
-    }
 
-    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->ignore();
-    }
-    if(e->mimeData()->text() == Connector::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         e->ignore();
+    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
+        e->acceptProposedAction();
+        e->setDropAction(Qt::MoveAction);
     }
 }

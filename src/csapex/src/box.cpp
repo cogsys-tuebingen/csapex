@@ -79,7 +79,7 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), state(new State(this)), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false)
+    : QWidget(parent), ui(new Ui::Box), state(new State(this)), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0)
 {
     ui->setupUi(this);
 
@@ -94,6 +94,7 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     setFocusPolicy(Qt::ClickFocus);
 
     state->uuid_ = uuid;
+    ui->label->setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
     setLabel(uuid);
@@ -146,6 +147,17 @@ YAML::Emitter& Box::save(YAML::Emitter& out) const
 
 void Box::stop()
 {
+    foreach(ConnectorIn* i, input) {
+        disconnectConnector(i);
+    }
+    foreach(ConnectorOut* i, output) {
+        disconnectConnector(i);
+    }
+
+    QObject::disconnect(private_thread_);
+    QObject::disconnect(worker_);
+    QObject::disconnect(this);
+
     if(private_thread_) {
         private_thread_->quit();
         private_thread_->wait(1000);
@@ -224,7 +236,10 @@ void Box::addInput(ConnectorIn* in)
 
 void Box::addOutput(ConnectorOut* out)
 {
+    assert(out);
     out->setParent(NULL);
+    assert(ui);
+    assert(ui->output_layout);
     ui->output_layout->addWidget(out);
     output.push_back(out);
 
@@ -236,14 +251,31 @@ void Box::addOutput(ConnectorOut* out)
     Q_EMIT connectorCreated(out);
     Q_EMIT changed(this);
 }
+
+int Box::nextInputId()
+{
+    int nextId = next_sub_id_;
+
+    next_sub_id_ = nextId + 1;
+
+    return nextId;
+}
+
+int Box::nextOutputId()
+{
+    int nextId = next_sub_id_;
+
+    next_sub_id_ = nextId + 1;
+
+    return nextId;
+}
+
 void Box::removeInput(ConnectorIn *in)
 {
     std::vector<ConnectorIn*>::iterator it;
     it = std::find(input.begin(), input.end(), in);
 
     assert(*it == in);
-
-    QObject::disconnect(in, SIGNAL(messageArrived(ConnectorIn*)), this, SIGNAL(messageArrived(ConnectorIn*)));
 
     disconnectConnector(in);
 
@@ -287,7 +319,7 @@ void Box::disconnectConnector(Connector *c)
     QObject::disconnect(c, SIGNAL(disabled(Connector*)), this, SIGNAL(connectorDisabled(Connector*)));
 }
 
-void Box::resizeEvent(QResizeEvent *e)
+void Box::resizeEvent(QResizeEvent *)
 {
     Q_EMIT changed(this);
 }
@@ -425,7 +457,7 @@ void Box::enabledChange(bool val)
     }
 }
 
-void Box::paintEvent(QPaintEvent* e)
+void Box::paintEvent(QPaintEvent*)
 {
     bool is_error = content_->isError() && content_->errorLevel() == Displayable::EL_ERROR;
     bool is_warn = content_->isError() && content_->errorLevel() == Displayable::EL_WARNING;
@@ -495,7 +527,7 @@ void Box::deselectEvent()
     refreshStylesheet();
 }
 
-void Box::keyPressEvent(QKeyEvent *e)
+void Box::keyPressEvent(QKeyEvent *)
 {
 
 }
@@ -504,22 +536,33 @@ void Box::startDrag(QPoint offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
-    mimeData->setText(Box::MIME_MOVE);
     mimeData->setParent(this);
+    mimeData->setData(Box::MIME_MOVE, QByteArray());
     mimeData->setUserData(0, new MoveOffset(offset));
     drag->setMimeData(mimeData);
+
+    lower();
 
     if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
         BoxManager::instance().startPlacingBox(getType(), offset);
         return;
     }
 
+    if(!isSelected()) {
+        Q_EMIT clicked(this);
+    }
+
     QPoint start_pos = pos();
-    drag->exec();
+    Qt::DropAction action = drag->exec();
+
     QPoint end_pos = pos();
 
     Command::Ptr cmd(new command::MoveBox(this, start_pos, end_pos));
     CommandDispatcher::execute(cmd);
+
+    if(action == Qt::IgnoreAction) {
+        CommandDispatcher::instance().undo();
+    }
 }
 
 QPixmap Box::makePixmap(const std::string& label)
@@ -615,6 +658,26 @@ void Box::minimizeBox(bool minimize)
     resize(sizeHint());
 }
 
+void Box::setGraph(Graph *graph)
+{
+    graph_ = graph;
+}
+
+Graph* Box::getGraph()
+{
+    return graph_;
+}
+
+bool Box::hasSubGraph()
+{
+    return false;
+}
+
+Graph* Box::getSubGraph()
+{
+    return NULL;
+}
+
 Memento::Ptr Box::getState() const
 {
     assert(state);
@@ -645,6 +708,7 @@ void Box::setState(Memento::Ptr memento)
     ui->enablebtn->setChecked(state->enabled);
 
     setLabel(state->label_);
+    ui->label->setToolTip(state->uuid_.c_str());
 }
 
 Command::Ptr Box::removeAllConnectionsCmd()

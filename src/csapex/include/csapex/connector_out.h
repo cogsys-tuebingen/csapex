@@ -33,6 +33,7 @@ public:
     typedef TargetList::iterator TargetIterator;
 
 public:
+    ConnectorOut(Box* parent, const std::string& uuid);
     ConnectorOut(Box* parent, int sub_id);
     ~ConnectorOut();
 
@@ -62,14 +63,21 @@ Q_SIGNALS:
     void connectionDestroyed(ConnectorOut*, ConnectorIn*);
     void messageSent(ConnectorOut* source);
 
-private:
+public Q_SLOTS:
+    void relayMessage(ConnectorOut* source);
+
+protected:
     /// PRIVATE: Use command to create a connection (undoable)
     virtual bool tryConnect(Connector* other_side);
     virtual void removeConnection(Connector* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
 protected:
-    TargetList targets_;
+    long guard1;
+    std::vector<ConnectorIn*> targets_;
+    long guard2;
+//    char dummy[128];
+    ConnectionType::Ptr message_;
 };
 
 }

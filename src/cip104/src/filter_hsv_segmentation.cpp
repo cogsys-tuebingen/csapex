@@ -11,6 +11,7 @@
 PLUGINLIB_EXPORT_CLASS(cip104::HSVSegmentation, csapex::BoxedObject)
 
 using namespace cip104;
+using namespace csapex;
 
 HSVSegmentation::HSVSegmentation()
     : sliderHue(NULL)

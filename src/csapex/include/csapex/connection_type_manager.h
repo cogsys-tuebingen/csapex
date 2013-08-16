@@ -9,6 +9,8 @@
 #include <string>
 #include <boost/function.hpp>
 
+namespace csapex {
+
 class ConnectionTypeManager
 {
 public:
@@ -25,5 +27,7 @@ private:
 private:
     std::map<std::string, Constructor> classes;
 };
+
+}
 
 #endif // CONNECTION_TYPE_MANAGER_H

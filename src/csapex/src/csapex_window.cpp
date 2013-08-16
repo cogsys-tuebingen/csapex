@@ -70,7 +70,7 @@ CsApexWindow::CsApexWindow(Graph& graph, QWidget *parent)
 
     setCurrentConfig(GraphIO::default_config);
 
-    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(updateLog()));
+    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void CsApexWindow::showMenu()
@@ -129,8 +129,10 @@ void CsApexWindow::scrollDownLog()
     ui->logOutput->setTextCursor(cursor);
 }
 
-void CsApexWindow::updateLog()
+void CsApexWindow::tick()
 {
+    CommandDispatcher::executeLater();
+
     std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
     std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
 

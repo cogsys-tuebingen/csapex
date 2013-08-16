@@ -22,21 +22,21 @@ int Meta::commands() const
     return nested.size();
 }
 
-bool Meta::execute(Graph& graph)
+bool Meta::execute()
 {
     locked = true;
 
-    bool change = true;
+    bool change = false;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change &= cmd->execute(graph);
+        change |= cmd->execute();
     }
     return change;
 }
 
-bool Meta::undo(Graph& graph)
+bool Meta::undo()
 {
     BOOST_REVERSE_FOREACH(Command::Ptr cmd, nested) {
-        if(!cmd->undo(graph)) {
+        if(!cmd->undo()) {
             undo_later.push_back(cmd);
         }
     }
@@ -44,11 +44,11 @@ bool Meta::undo(Graph& graph)
     return true;
 }
 
-bool Meta::redo(Graph& graph)
+bool Meta::redo()
 {
-    bool change = true;
+    bool change = false;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change &= cmd->redo(graph);
+        change |= cmd->redo();
     }
     return change;
 }

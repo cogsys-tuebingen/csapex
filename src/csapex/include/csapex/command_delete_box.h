@@ -22,14 +22,16 @@ public:
     DeleteBox(Box* box);
 
 protected:
-    bool execute(Graph& graph);
-    bool undo(Graph& graph);
-    bool redo(Graph& graph);
+    bool execute();
+    bool undo();
+    bool redo();
 
-    void refresh(Graph &graph);
+    void refresh();
 
 protected:
     Box* box;
+
+    Graph* graph;
     QWidget* parent;
     QPoint pos;
 

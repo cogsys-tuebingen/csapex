@@ -32,13 +32,13 @@ public:
     bool isBeforeSavepoint();
 
 protected:
-    virtual bool execute(Graph& graph) = 0;
-    virtual bool undo(Graph& graph) = 0;
-    virtual bool redo(Graph& graph) = 0;
+    virtual bool execute() = 0;
+    virtual bool undo() = 0;
+    virtual bool redo() = 0;
 
-    bool doExecute(Graph& graph, Ptr other);
-    bool doUndo(Graph& graph, Ptr other);
-    bool doRedo(Graph& graph, Ptr other);
+    bool doExecute(Ptr other);
+    bool doUndo(Ptr other);
+    bool doRedo(Ptr other);
 
     static std::vector<Command::Ptr> undo_later;
 

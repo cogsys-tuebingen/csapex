@@ -31,6 +31,7 @@ class SelectorProxy : public QGraphicsView
 
 public:
     typedef boost::shared_ptr<SelectorProxy> Ptr;
+    static const Ptr NullPtr;
 
 public:
     struct ProxyConstructor : public Constructor {
@@ -64,7 +65,7 @@ public:
     std::string getCategory();
     QIcon getIcon();
 
-    void startObjectPositioning(const QPoint &offset = QPoint(0,0));
+    void startObjectPositioning(Ptr instance, const QPoint &offset = QPoint(0,0));
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)

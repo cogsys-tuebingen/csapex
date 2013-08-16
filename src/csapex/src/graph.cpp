@@ -6,10 +6,19 @@
 #include <csapex/connector.h>
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
+#include <csapex/command_meta.h>
+#include <csapex/command_add_box.h>
+#include <csapex/command_delete_box.h>
+#include <csapex/command_add_connection.h>
+#include <csapex/command_add_connection_forwarding.h>
 #include <csapex/command_delete_connection.h>
+#include <csapex/command_add_connector.h>
+#include <csapex/command_delete_connector.h>
 #include <csapex/selector_proxy.h>
 #include <csapex/command_dispatcher.h>
+#include <csapex/box_manager.h>
 #include <csapex/box.h>
+#include <csapex/box_group.h>
 #include <csapex/qt_helper.hpp>
 #include <csapex/command_meta.h>
 #include <csapex/command_delete_box.h>
@@ -24,6 +33,8 @@
 
 
 using namespace csapex;
+
+const std::string Graph::namespace_separator = ":/:";
 
 Graph::Graph()
 {
@@ -45,6 +56,10 @@ void Graph::addBox(Box *box)
 {
     boxes_.push_back(box);
 
+    box->setGraph(this);
+
+    QObject::connect(box, SIGNAL(moveSelectionToBox(Box*)), this, SLOT(moveSelectionToBox(Box*)));
+
     Q_EMIT boxAdded(box);
 }
 
@@ -56,9 +71,124 @@ void Graph::deleteBox(Box *box)
     if(it != boxes_.end()) {
         boxes_.erase(it);
     }
-    box->deleteLater();
 
     Q_EMIT boxDeleted(box);
+
+    box->deleteLater();
+}
+
+void Graph::moveSelectionToBox(Box *box)
+{
+    if(!box->hasSubGraph()) {
+        return;
+    }
+
+    Graph* sub_graph = box->getSubGraph();
+    assert(sub_graph);
+
+    command::Meta::Ptr meta(new command::Meta);
+
+    std::vector<Box*> selected;
+
+    command::Meta::Ptr add_connectors(new command::Meta);
+    command::Meta::Ptr add_connections(new command::Meta);
+
+    std::map<Box*, std::string> box2uuid;
+
+    foreach(Box* b, boxes_) {
+        // iterate selected boxes
+        if(b->isSelected()) {
+            selected.push_back(b);
+            std::cout << "selected: " << b->UUID() << std::endl;
+
+            // move this box top the sub graph
+            SelectorProxy::Ptr selector = BoxManager::instance().getSelector(b->getType());
+            Memento::Ptr state = b->getState();
+
+            std::string uuid = box->UUID() + namespace_separator + b->UUID();
+            box2uuid[b] = uuid;
+
+            meta->add(Command::Ptr(new command::DeleteBox(b)));
+            meta->add(Command::Ptr(new command::AddBox(*sub_graph, selector, b->pos(), state, uuid)));
+        }
+    }
+
+    foreach(Box* b, boxes_) {
+        if(b->isSelected()) {
+            // iterate all connections for this selected box
+            // connections leading to a selected box will be kept
+            // connections leading to a non-selected box must be split
+
+            // for each connection to split:
+            // - create pseudo connector for the sub graph
+            // - split original connection using the new pseudo connector
+
+            foreach(ConnectorIn* in, b->input) {
+                if(in->isConnected()) {
+                    Connector* target = in->getConnected();
+                    Box* owner = target->getBox();
+                    bool is_selected = false;
+                    foreach(Box* b, selected) {
+                        is_selected |= (b == owner);
+                    }
+                    bool is_external = !is_selected;
+                    // internal connections are done by the next loop
+                    // external connections should be split
+                    if(is_external) {
+                        std::cout << "split connection between " << in->UUID() << " and " << target->UUID() << std::endl;
+
+                        std::string new_connector_uuid = Connector::makeUUID(box->UUID(), true, box->nextInputId());
+
+                        // create new separator connector
+                        add_connectors->add(Command::Ptr(new command::AddConnector(box, true, new_connector_uuid, true)));
+                        // connect old output to the new connector
+                        add_connections->add(Command::Ptr(new command::AddConnection(box, target->UUID(), new_connector_uuid)));
+                        // connect the new connector to the old input
+                        //here we need a new type of connector!!!! input -> input is not possible... out -> out is also needed later
+                        add_connections->add(Command::Ptr(new command::AddConnectionForwarding(box, new_connector_uuid, box->UUID() + Graph::namespace_separator + in->UUID())));
+                    }
+                }
+            }
+            foreach(ConnectorOut* out, b->output) {
+                bool external_connector_added = false;
+                std::string new_connector_uuid;
+
+                for(std::vector<ConnectorIn*>::iterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+                    ConnectorIn* in = *it;
+                    Box* owner = in->getBox();
+                    bool is_selected = false;
+                    foreach(Box* b, selected) {
+                        is_selected |= (b == owner);
+                    }
+                    bool is_external = !is_selected;
+                    if(is_external) {
+                        // external connections are split
+                        std::cerr << "split connection between " << in->UUID() << " and " << out->UUID() << std::endl;
+
+                        if(!external_connector_added) {
+                            external_connector_added = true;
+                            new_connector_uuid = Connector::makeUUID(box->UUID(), false, box->nextOutputId());
+                            add_connectors->add(Command::Ptr(new command::AddConnector(box, false, new_connector_uuid, true)));
+                        }
+
+                        add_connections->add(Command::Ptr(new command::AddConnection(box, new_connector_uuid, in->UUID())));
+
+                    } else {
+                        // internal connections are kept
+                        std::cerr << "keep connection between " << in->UUID() << " and " << out->UUID() << std::endl;
+                    }
+                }
+            }
+
+        }
+    }
+
+    meta->add(add_connectors);
+    meta->add(add_connections);
+
+    if(meta->commands() > 0) {
+        CommandDispatcher::executeLater(meta);
+    }
 }
 
 bool Graph::addConnection(Connection::Ptr connection)
@@ -130,19 +260,53 @@ void Graph::clear()
 }
 
 
-Box* Graph::findBox(const std::string &uuid)
+Box* Graph::findBox(const std::string &uuid, const std::string& ns)
 {
+    if(uuid.find(namespace_separator) != uuid.npos && ns.empty()) {
+        return findBox(uuid, uuid);
+    }
+
     foreach(Box* b, boxes_) {
         if(b->UUID() == uuid) {
             return b;
         }
     }
 
+    if(ns.find(namespace_separator) != ns.npos) {
+        std::string parent = ns.substr(0, ns.find(namespace_separator));
+        std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
+
+        Box* meta = findBox(parent);
+        BoxGroup* bm = dynamic_cast<BoxGroup*> (meta);
+
+        assert(bm);
+
+        return bm->getSubGraph()->findBox(uuid, rest);
+    }
+
     return NULL;
 }
 
-Box* Graph::findConnectorOwner(const std::string &uuid)
+Box* Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
 {
+    if(uuid.find(namespace_separator) != uuid.npos && ns.empty()) {
+        return findConnectorOwner(uuid, uuid);
+    }
+
+    if(ns.find(namespace_separator) != ns.npos) {
+        std::string parent = ns.substr(0, ns.find(namespace_separator));
+        std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
+
+        Box* meta = findBox(parent);
+        assert(meta);
+
+        BoxGroup* bm = dynamic_cast<BoxGroup*> (meta);
+
+        assert(bm);
+
+        return bm->getSubGraph()->findConnectorOwner(uuid, rest);
+    }
+
     foreach(Box* b, boxes_) {
         if(b->getInput(uuid)) {
             return b;
@@ -152,7 +316,40 @@ Box* Graph::findConnectorOwner(const std::string &uuid)
         }
     }
 
+    std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
+
+    foreach(Box* b, boxes_) {
+        std::cerr << "box: " << b->UUID() << "\n";
+        std::cerr << "inputs: " << "\n";
+        foreach(ConnectorIn* in, b->input) {
+            std::cerr << "\t" << in->UUID() << "\n";
+        }
+        std::cerr << "outputs: " << "\n";
+        foreach(ConnectorOut* out, b->output) {
+            std::cerr << "\t" << out->UUID() << "\n";
+        }
+    }
+
+    std::cerr << std::flush;
+
     return NULL;
+}
+
+Connector* Graph::findConnector(const std::string &uuid, const std::string &ns)
+{
+    Box* owner = findConnectorOwner(uuid, ns);
+    assert(owner);
+
+    Connector* result = NULL;
+    result = owner->getInput(uuid);
+
+    if(result == NULL) {
+        result = owner->getOutput(uuid);
+    }
+
+    assert(result);
+
+    return result;
 }
 
 bool Graph::handleConnectionSelection(int id, bool add)

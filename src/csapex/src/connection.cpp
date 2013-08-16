@@ -15,15 +15,22 @@ const Connection::Ptr Connection::NullPtr;
 Connection::Connection(ConnectorOut *from, ConnectorIn *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {
+    std::cout << "make connection between " << from->UUID() << " and " << to->UUID() << std::endl;
     QObject::connect(from_, SIGNAL(messageSent(ConnectorOut*)), this, SLOT(messageSentEvent()));
 }
 
-ConnectorOut* Connection::from() const
+Connection::Connection(Connector *from, Connector *to)
+    : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
+{
+    std::cout << "make raw connection between " << from->UUID() << " and " << to->UUID() << std::endl;
+}
+
+Connector* Connection::from() const
 {
     return from_;
 }
 
-ConnectorIn* Connection::to() const
+Connector* Connection::to() const
 {
     return to_;
 }

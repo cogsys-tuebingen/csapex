@@ -40,7 +40,7 @@ public:
 private Q_SLOTS:
     void updateMenu();
     void updateTitle();
-    void updateLog();
+    void tick();
     void hideLog();
     void scrollDownLog();
     void init();

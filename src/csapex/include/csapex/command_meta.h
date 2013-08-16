@@ -21,9 +21,9 @@ struct Meta : public Command {
     int commands() const;
 
 protected:
-    bool execute(Graph& graph);
-    bool undo(Graph& graph);
-    bool redo(Graph& graph);
+    bool execute();
+    bool undo();
+    bool redo();
 
 protected:
     std::vector<Command::Ptr> nested;

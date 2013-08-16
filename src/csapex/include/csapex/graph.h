@@ -13,6 +13,7 @@ namespace csapex {
 namespace command {
 class AddBox;
 class AddConnection;
+class AddConnectionForwarding;
 class DeleteConnection;
 class DeleteBox;
 }
@@ -26,9 +27,14 @@ class Graph : public QObject
     friend class GraphIO;
     friend class command::AddBox;
     friend class command::AddConnection;
+    friend class command::AddConnectionForwarding;
     friend class command::DeleteConnection;
     friend class command::DeleteBox;
     friend class Overlay;
+    friend class BoxMeta;
+
+public:
+    static const std::string namespace_separator;
 
 public:
     Graph();
@@ -39,8 +45,9 @@ public:
     bool canUndo();
     bool canRedo();
 
-    Box* findBox(const std::string& uuid);
-    Box* findConnectorOwner(const std::string &uuid);
+    Box* findBox(const std::string& uuid, const std::string &ns = "");
+    Box* findConnectorOwner(const std::string &uuid, const std::string &ns = "");
+    Connector* findConnector(const std::string &uuid, const std::string &ns = "");
 
     bool handleConnectionSelection(int id, bool add);
     void deleteConnectionById(int id);
@@ -62,6 +69,7 @@ public Q_SLOTS:
 
     void toggleBoxSelection(Box* box);
     void boxMoved(Box* box, int dx, int dy);
+    void moveSelectionToBox(Box* box);
 
 Q_SIGNALS:
     void stateChanged();

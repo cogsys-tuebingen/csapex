@@ -3,10 +3,13 @@
 
 /// COMPONENT
 #include <csapex/box.h>
+#include <csapex/box_group.h>
 #include <csapex/boxed_object.h>
 #include <csapex/box_manager.h>
 
 using namespace csapex;
+
+const SelectorProxy::Ptr SelectorProxy::NullPtr;
 
 SelectorProxy::SelectorProxy(const std::string& type, BoxedObject* prototype, QWidget* parent)
     : QGraphicsView(parent), type_(type), prototype_box_(new csapex::Box(prototype, type))
@@ -27,17 +30,27 @@ void SelectorProxy::registerProxy(SelectorProxy::Ptr prototype)
     BoxManager::instance().register_box_type(prototype);
 }
 
-void SelectorProxy::startObjectPositioning(const QPoint& offset)
+void SelectorProxy::startObjectPositioning(SelectorProxy::Ptr instance, const QPoint& offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
-    mimeData->setText(Box::MIME);
-    mimeData->setParent(this);
+
+
+    quintptr address=(quintptr)&instance;
+    QByteArray b(QString::number(address).toAscii());
+    mimeData->setData(Box::MIME, b);
     mimeData->setProperty("ox", offset.x());
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    csapex::Box* object(new csapex::Box(makeContent(), ""));
+    csapex::Box* object;
+
+    if(type_ == "::meta") {
+        object = new csapex::BoxGroup(makeContent(), "");
+    } else {
+        object = new csapex::Box(makeContent(), "");
+    }
+
     object->setObjectName(type_.c_str());
     object->setLabel(type_);
     object->setType(type_);
@@ -56,13 +69,20 @@ void SelectorProxy::startObjectPositioning(const QPoint& offset)
 void SelectorProxy::mousePressEvent(QMouseEvent* event)
 {
     if(event->button() == Qt::LeftButton) {
-        startObjectPositioning();
+//        startObjectPositioning();
     }
 }
 
 csapex::Box* SelectorProxy::create(const QPoint& pos, const std::string& type, const std::string& uuid)
 {
-    csapex::Box* object(new csapex::Box(makeContent(), uuid));
+    csapex::Box* object;
+
+    if(type_ == "::meta") {
+        object = new csapex::BoxGroup(makeContent(), uuid);
+    } else {
+        object = new csapex::Box(makeContent(), uuid);
+    }
+
     object->setObjectName(uuid.c_str());
     object->setType(type);
     object->init(pos);

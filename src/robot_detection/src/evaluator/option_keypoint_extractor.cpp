@@ -13,7 +13,6 @@ PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointExtractor, csapex::GlobalO
 using namespace robot_detection;
 using namespace csapex;
 
-
 OptionKeypointExtractor::OptionKeypointExtractor()
     : selection(NULL), threshold(NULL)
 {

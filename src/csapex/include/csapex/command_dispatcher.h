@@ -22,6 +22,8 @@ public:
     }
 
     static void execute(Command::Ptr command);
+    static void executeLater(Command::Ptr command);
+    static void executeLater();
 
     void setGraph(Graph* graph);
 
@@ -52,6 +54,8 @@ protected:
     CommandDispatcher& operator = (const CommandDispatcher& assign);
 
 private:
+    std::vector<Command::Ptr> later;
+
     std::deque<Command::Ptr> done;
     std::deque<Command::Ptr> undone;
     bool dirty_;

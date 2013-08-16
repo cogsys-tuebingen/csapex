@@ -34,8 +34,8 @@ public:
     virtual void filter(cv::Mat &img, cv::Mat &mask);
 
     /// MEMENTO
-    void         setState(Memento::Ptr memento);
-    Memento::Ptr getState() const;
+    void                 setState(csapex::Memento::Ptr memento);
+    csapex::Memento::Ptr getState() const;
 
 protected:
     /// internal typdefs
@@ -56,7 +56,7 @@ protected:
     void fillCombo(QComboBox *combo, std::map<int, ColorSpace> &map);
 
     /// MEMENTO
-    class State : public Memento {
+    class State : public csapex::Memento {
     public:
         void readYaml(const YAML::Node &node)
         {

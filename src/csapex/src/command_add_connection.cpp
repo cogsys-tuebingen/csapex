@@ -29,32 +29,47 @@ AddConnection::AddConnection(Connector* a, Connector* b)
 
     from_uuid = from->UUID();
     to_uuid = to->UUID();
+
+    graph = a->getBox()->getGraph();
 }
 
-bool AddConnection::execute(Graph& graph)
+AddConnection::AddConnection(Box* parent, const std::string &from_uuid, const std::string &to_uuid)
+    : from(NULL), to(NULL), graph(graph), from_uuid(from_uuid), to_uuid(to_uuid)
 {
-    return graph.addConnection(Connection::Ptr(new Connection(from, to)));
+    graph = parent->getGraph();
 }
 
-bool AddConnection::undo(Graph& graph)
+bool AddConnection::execute()
 {
-    refresh(graph);
+    if(from == NULL) {
+        refresh();
+    }
 
-    graph.deleteConnection(Connection::Ptr(new Connection(from, to)));
+    return graph->addConnection(Connection::Ptr(new Connection(from, to)));
+}
+
+bool AddConnection::undo()
+{
+    refresh();
+
+    graph->deleteConnection(Connection::Ptr(new Connection(from, to)));
 
     return true;
 }
 
-bool AddConnection::redo(Graph& graph)
+bool AddConnection::redo()
 {
-    refresh(graph);
-    return execute(graph);
+    refresh();
+    return execute();
 }
 
-void AddConnection::refresh(Graph& graph)
+void AddConnection::refresh()
 {
-    from = graph.findConnectorOwner(from_uuid)->getOutput(from_uuid);
-    to = graph.findConnectorOwner(to_uuid)->getInput(to_uuid);
+    assert(graph->findConnectorOwner(from_uuid));
+    assert(graph->findConnectorOwner(to_uuid));
+
+    from = graph->findConnectorOwner(from_uuid)->getOutput(from_uuid);
+    to = graph->findConnectorOwner(to_uuid)->getInput(to_uuid);
 
     assert(from);
     assert(to);

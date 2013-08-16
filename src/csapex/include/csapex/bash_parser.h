@@ -5,6 +5,9 @@
 #include <string>
 #include <sstream>
 
+namespace csapex
+{
+
 class BashParser
 {
 public:
@@ -16,5 +19,7 @@ private:
     static std::string set(int code);
     static std::string color(int code);
 };
+
+}
 
 #endif // BASE_PARSER_H

@@ -37,7 +37,15 @@ void Config::init()
     setDescriptorType(descriptor_name);
     setKeypointType(keypoint_name);
 
-    config_dir = std::string(getenv("RABOT")) + "/Config/RobotDetection/";
+    std::string rabot;
+    if(getenv("RABOT")) {
+        rabot = getenv("RABOT");
+    } else {
+        WARN("RABOT environment variable not found!!!!");
+    }
+
+
+    config_dir = rabot + "/Config/RobotDetection/";
     result_dir = config_dir + "results/";
     batch_dir = config_dir + "feature_data_training/";
     ref_dir = config_dir + "reference/";

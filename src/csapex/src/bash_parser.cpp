@@ -5,6 +5,8 @@
 #include <boost/regex.hpp>
 #include <sstream>
 
+using namespace csapex;
+
 BashParser::BashParser()
 {
 }

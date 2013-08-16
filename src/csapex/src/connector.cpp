@@ -14,25 +14,30 @@
 #include <sstream>
 #include <typeinfo>
 #include <QDragEnterEvent>
+#include <QPainter>
 
 using namespace csapex;
 
 const QString Connector::MIME_CREATE = "csapex/connector/create";
 const QString Connector::MIME_MOVE = "csapex/connector/move";
 
-Connector::Connector(Box* parent, const std::string& type, int sub_id)
-    : parent_widget(parent), designer(NULL), buttons_down_(0)
+
+std::string Connector::makeUUID(const std::string& box_uuid, bool in, int sub_id) {
+    std::stringstream ss;
+    ss << box_uuid << "_" << (in ? "in" : "out") << "_" << sub_id;
+    return ss.str();
+}
+
+Connector::Connector(Box* parent, const std::string& uuid)
+    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(uuid)
 {
+    std::cout << "make connector with uuid " << uuid_ << std::endl;
+
     setBox(parent);
 
     findParents();
     setFocusPolicy(Qt::NoFocus);
     setAcceptDrops(true);
-
-    std::stringstream ss;
-    ss << box_->UUID() << "_" << type << "_" << sub_id;
-
-    uuid_ = ss.str();
 
     setContextMenuPolicy(Qt::PreventContextMenu);
     setType(ConnectionType::makeDefault());
@@ -49,6 +54,11 @@ Connector::~Connector()
 void Connector::errorEvent(bool error, ErrorLevel level)
 {
     box_->getContent()->setError(error, "Connector Error", level);
+}
+
+bool Connector::isForwarding() const
+{
+    return false;
 }
 
 std::string Connector::UUID()
@@ -121,14 +131,14 @@ bool Connector::canConnectTo(Connector* other_side)
 
 void Connector::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
         if(from->canConnectTo(this)) {
             if(canConnectTo(from)) {
                 e->acceptProposedAction();
             }
         }
-    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from->targetsCanConnectTo(this)) {
@@ -140,11 +150,11 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
 void Connector::dragMoveEvent(QDragMoveEvent* e)
 {
     Q_EMIT(connectionStart());
-    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
         Q_EMIT(connectionInProgress(this, from));
 
-    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         from->connectionMovePreview(this);
@@ -153,14 +163,14 @@ void Connector::dragMoveEvent(QDragMoveEvent* e)
 
 void Connector::dropEvent(QDropEvent* e)
 {
-    if(e->mimeData()->text() == Connector::MIME_CREATE) {
+    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
             Command::Ptr cmd(new command::AddConnection(this, from));
             CommandDispatcher::execute(cmd);
         }
-    } else if(e->mimeData()->text() == Connector::MIME_MOVE) {
+    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
@@ -194,8 +204,7 @@ void Connector::mouseMoveEvent(QMouseEvent* e)
         QMimeData* mimeData = new QMimeData;
 
         if(move) {
-
-            mimeData->setText(Connector::MIME_MOVE);
+            mimeData->setData(Connector::MIME_MOVE, QByteArray());
             mimeData->setParent(this);
             drag->setMimeData(mimeData);
 
@@ -206,7 +215,7 @@ void Connector::mouseMoveEvent(QMouseEvent* e)
             enable();
 
         } else {
-            mimeData->setText(Connector::MIME_CREATE);
+            mimeData->setData(Connector::MIME_CREATE, QByteArray());
             mimeData->setParent(this);
             drag->setMimeData(mimeData);
 
@@ -268,4 +277,13 @@ void Connector::setType(ConnectionType::Ptr type)
 ConnectionType::ConstPtr Connector::getType() const
 {
     return type_;
+}
+
+
+void Connector::paintEvent(QPaintEvent*)
+{
+    QPainter p(this);
+    p.setBrush(Qt::black);
+    p.setOpacity(0.35);
+    p.drawEllipse(contentsRect().center(), 2, 2);
 }

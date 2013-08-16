@@ -28,8 +28,8 @@ public:
     virtual void filter(cv::Mat &img, cv::Mat &mask);
 
     /// MEMENTO
-    void setState(Memento::Ptr memento);
-    Memento::Ptr getState() const;
+    void setState(csapex::Memento::Ptr memento);
+    csapex::Memento::Ptr getState() const;
 
 private:
     typedef std::pair<int, int> modePair;
@@ -43,7 +43,7 @@ private:
     void debayerAndResize(cv::Mat& source, cv::Mat& dest);
 
     /// MEMENTO
-    class State : public Memento {
+    class State : public csapex::Memento {
         void readYaml(const YAML::Node &node);
         void writeYaml(YAML::Emitter &out) const;
 

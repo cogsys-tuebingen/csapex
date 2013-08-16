@@ -9,6 +9,7 @@
 PLUGINLIB_EXPORT_CLASS(vision_plugins::Debayer, csapex::BoxedObject)
 
 using namespace vision_plugins;
+using namespace csapex;
 
 Debayer::Debayer()
     : csapex::Filter()

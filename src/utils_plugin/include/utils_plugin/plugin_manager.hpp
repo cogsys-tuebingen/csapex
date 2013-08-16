@@ -15,7 +15,7 @@ template <class C>
 struct InstallConstructor
 {
     template <class M, class L>
-    static void installConstructor(M* instance, L* loader, const std::string& name) {}
+    static void installConstructor(M*, L*, const std::string&) {}
 };
 }
 
@@ -54,13 +54,13 @@ protected:
     }
 
     void reload() {
-        try {
-            std::vector<std::string> classes = loader_->getDeclaredClasses();
-            for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
-//                std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;
-                std::string msg = std::string("loading ") + *c;
-                loaded(msg);
+        std::vector<std::string> classes = loader_->getDeclaredClasses();
+        for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
+            //                std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;
+            std::string msg = std::string("loading ") + *c;
+            loaded(msg);
 
+            try {
                 loader_->loadLibraryForClass(*c);
 
                 plugin_manager::InstallConstructor<M>::installConstructor(this, loader_, *c);
@@ -69,9 +69,11 @@ protected:
                 constructor.setType(*c);
                 constructor.setConstructor(boost::bind(&Loader::createUnmanagedInstance, loader_, *c));
                 registerConstructor(constructor);
+            } catch(const pluginlib::PluginlibException& ex) {
+                std::cerr << "The plugin " << *c << " failed to load for some reason. Error: " << ex.what() << std::endl;
+            } catch(const std::exception& ex) {
+                std::cerr << "The plugin " << *c << " failed to load for some reason. Error: " << ex.what() << std::endl;
             }
-        } catch(pluginlib::PluginlibException& ex) {
-            std::cerr << "The plugin failed to load for some reason. Error: " << ex.what() << std::endl;
         }
         plugins_loaded_ = true;
     }

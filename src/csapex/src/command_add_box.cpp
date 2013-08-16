@@ -10,34 +10,47 @@
 
 using namespace csapex::command;
 
-AddBox::AddBox(SelectorProxy* selector, QWidget* parent, QPoint pos)
-    : selector(selector), parent(parent), pos(pos)
+AddBox::AddBox(Graph& graph, SelectorProxy::Ptr selector, QPoint pos, Memento::Ptr state, const std::string& _uuid)
+    : graph_(graph), selector(selector), pos(pos)
 {
-    uuid = BoxManager::instance().makeUUID(selector->getType());
+    if(state != Memento::NullPtr) {
+        Box::State::Ptr bs = boost::dynamic_pointer_cast<Box::State> (state);
+        if(!_uuid.empty()) {
+            bs->uuid_ = _uuid;
+        }
+        saved_state = bs;
+    }
+
+    uuid = _uuid.empty() ? BoxManager::instance().makeUUID(selector->getType()) : _uuid;
     type = selector->getType();
 }
 
-bool AddBox::execute(Graph& graph)
+bool AddBox::execute()
 {
     box = BoxManager::instance().makeBox(pos, type, uuid);
-    graph.addBox(box);
+
+    if(saved_state) {
+        box->setState(saved_state);
+    }
+
+    graph_.addBox(box);
 
     return true;
 }
 
-bool AddBox::undo(Graph& graph)
+bool AddBox::undo()
 {
-    refresh(graph);
+    refresh();
 
     saved_state = box->getState();
-    graph.deleteBox(box);
+    graph_.deleteBox(box);
 
     return true;
 }
 
-bool AddBox::redo(Graph& graph)
+bool AddBox::redo()
 {
-    if(execute(graph)) {
+    if(execute()) {
         box->setState(saved_state);
         return true;
     }
@@ -45,7 +58,7 @@ bool AddBox::redo(Graph& graph)
     return false;
 }
 
-void AddBox::refresh(Graph& graph)
+void AddBox::refresh()
 {
-    box = graph.findBox(uuid);
+    box = graph_.findBox(uuid);
 }

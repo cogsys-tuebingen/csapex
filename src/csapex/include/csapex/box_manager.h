@@ -20,7 +20,7 @@ template <>
 struct InstallConstructor<csapex::BoxedObject>
 {
     template <class M, class L>
-    static void installConstructor(M* instance, L* loader, const std::string& name) {
+    static void installConstructor(M*, L* loader, const std::string& name) {
         csapex::SelectorProxy::Ptr dynamic(new csapex::SelectorProxyDynamic(name, boost::bind(&M::Loader::createUnmanagedInstance, loader, name)));
         csapex::SelectorProxy::registerProxy(dynamic);
     }
@@ -51,8 +51,10 @@ public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
     void register_box_type(SelectorProxy::Ptr provider);
 
+    void startPlacingMetaBox(QWidget *parent, const QPoint &offset = QPoint(0,0));
     void startPlacingBox(const std::string& type, const QPoint &offset = QPoint(0,0));
     Box* makeBox(QPoint pos, const std::string& type, const std::string& uuid = "");
+    SelectorProxy::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
     QWidget* container();

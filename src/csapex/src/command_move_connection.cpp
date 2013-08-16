@@ -51,7 +51,7 @@ void MoveConnection::makeCommand()
     } else {
         ConnectorIn* in = dynamic_cast<ConnectorIn*>(from);
 
-        ConnectorOut* target = in->getConnected();
+        Connector* target = in->getConnected();
         add(Command::Ptr(new DeleteConnection(from, target)));
         add(Command::Ptr(new AddConnection(to, target)));
     }

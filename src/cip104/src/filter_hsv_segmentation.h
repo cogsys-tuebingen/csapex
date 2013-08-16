@@ -21,8 +21,8 @@ public:
     virtual void filter(cv::Mat& img, cv::Mat& mask);
     virtual void insert(QBoxLayout* layout);
 
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
+    virtual csapex::Memento::Ptr getState() const;
+    virtual void setState(csapex::Memento::Ptr memento);
 
 public Q_SLOTS:
     void update();
@@ -34,7 +34,7 @@ private:
 
     static QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max);
 
-    struct State : public Memento {
+    struct State : public csapex::Memento {
         cv::Scalar min;
         cv::Scalar max;
 

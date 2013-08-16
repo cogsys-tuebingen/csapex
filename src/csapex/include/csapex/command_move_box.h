@@ -20,12 +20,14 @@ public:
     MoveBox(Box* box, QPoint from, QPoint to);
 
 protected:
-    bool execute(Graph& graph);
-    bool undo(Graph& graph);
-    bool redo(Graph& graph);
+    bool execute();
+    bool undo();
+    bool redo();
 
 protected:
     Box* box;
+    Graph* graph;
+
     QPoint from;
     QPoint to;
 

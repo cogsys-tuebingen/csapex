@@ -31,8 +31,8 @@ public:
 public:
     Connection(ConnectorOut* from, ConnectorIn* to);
 
-    ConnectorOut* from() const;
-    ConnectorIn* to() const;
+    Connector* from() const;
+    Connector* to() const;
     int id() const;
 
     bool contains(Connector* c) const;
@@ -46,9 +46,13 @@ private Q_SLOTS:
 public:
     bool operator == (const Connection& c) const;
 
-private:
-    ConnectorOut* from_;
-    ConnectorIn* to_;
+protected:
+    Connection(Connector* from, Connector* to);
+
+protected:
+    Connector* from_;
+    Connector* to_;
+
     int id_;
 
     int message_count;

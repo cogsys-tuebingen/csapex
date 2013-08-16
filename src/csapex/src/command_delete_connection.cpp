@@ -28,35 +28,37 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
 
     from_uuid = from->UUID();
     to_uuid = to->UUID();
+
+    graph = a->getBox()->getGraph();
 }
 
-bool DeleteConnection::execute(Graph& graph)
+bool DeleteConnection::execute()
 {
-    graph.deleteConnection(Connection::Ptr(new Connection(from, to)));
+    graph->deleteConnection(Connection::Ptr(new Connection(from, to)));
 
     return true;
 }
 
-bool DeleteConnection::undo(Graph& graph)
+bool DeleteConnection::undo()
 {
-    if(!refresh(graph)) {
+    if(!refresh()) {
         return false;
     }
-    return graph.addConnection(Connection::Ptr(new Connection(from, to)));
+    return graph->addConnection(Connection::Ptr(new Connection(from, to)));
 }
 
-bool DeleteConnection::redo(Graph& graph)
+bool DeleteConnection::redo()
 {
-    if(!refresh(graph)) {
+    if(!refresh()) {
         throw std::runtime_error("cannot redo DeleteConnection");
     }
-    return execute(graph);
+    return execute();
 }
 
-bool DeleteConnection::refresh(Graph& graph)
+bool DeleteConnection::refresh()
 {
-    Box* from_box = graph.findConnectorOwner(from_uuid);
-    Box* to_box = graph.findConnectorOwner(to_uuid);
+    Box* from_box = graph->findConnectorOwner(from_uuid);
+    Box* to_box = graph->findConnectorOwner(to_uuid);
 
     from = NULL;
     to = NULL;

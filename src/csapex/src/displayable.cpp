@@ -11,6 +11,11 @@ Displayable::Displayable()
 {
 }
 
+Displayable::~Displayable()
+{
+
+}
+
 void Displayable::setError(bool e, const std::string& msg, ErrorLevel level)
 {
     QString err;
@@ -50,7 +55,7 @@ Box* Displayable::getBox() const
     return box_;
 }
 
-void Displayable::errorEvent(bool error, ErrorLevel level)
+void Displayable::errorEvent(bool, ErrorLevel)
 {
 
 }

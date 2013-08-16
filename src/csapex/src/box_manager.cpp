@@ -6,7 +6,9 @@
 #include <csapex/command_meta.h>
 #include <csapex/command_delete_box.h>
 #include <csapex/box.h>
+#include <csapex/box_group.h>
 #include <csapex/graph.h>
+#include <csapex/sub_graph.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -60,6 +62,10 @@ void BoxManager::reload()
     foreach(const std::string& cat, categories) {
         std::sort(map[cat].begin(), map[cat].end(), compare);
     }
+
+    SelectorProxy::Ptr meta(new SelectorProxyImp<SubGraph>("::meta"));
+    csapex::SelectorProxy::registerProxy(meta);
+
 }
 
 void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
@@ -98,6 +104,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* menu)
     menu->setDragEnabled(true);
 
     foreach(const std::string& cat, categories) {
+
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
         submenu->setText(0, cat.c_str());
         menu->addTopLevelItem(submenu);
@@ -114,6 +121,18 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* menu)
             submenu->addChild(child);
         }
     }
+
+
+    QTreeWidgetItem* meta = new QTreeWidgetItem;
+
+    QTreeWidgetItem* new_meta = new QTreeWidgetItem;
+    new_meta->setText(0, "new meta box");
+    new_meta->setData(0, Qt::UserRole, BoxGroup::MIME);
+
+    meta->addChild(new_meta);
+    meta->setText(0, "Meta Boxes");
+
+    menu->addTopLevelItem(meta);
 }
 
 void BoxManager::register_box_type(SelectorProxy::Ptr provider)
@@ -121,11 +140,19 @@ void BoxManager::register_box_type(SelectorProxy::Ptr provider)
     available_elements_prototypes.push_back(provider);
 }
 
+void BoxManager::startPlacingMetaBox(QWidget*, const QPoint& offset)
+{
+    std::cout << "meta" << std::endl;
+
+    startPlacingBox("::meta", offset);
+}
+
+
 void BoxManager::startPlacingBox(const std::string &type, const QPoint& offset)
 {
     foreach(SelectorProxy::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
-            p->startObjectPositioning(offset);
+            p->startObjectPositioning(p, offset);
             return;
         }
     }
@@ -184,6 +211,17 @@ Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::
     }
     std::cerr << std::endl;
     return NULL;
+}
+
+SelectorProxy::Ptr BoxManager::getSelector(const std::string &type)
+{
+    BOOST_FOREACH(SelectorProxy::Ptr p, available_elements_prototypes) {
+        if(p->getType() == type) {
+            return p;
+        }
+    }
+
+    return SelectorProxy::NullPtr;
 }
 
 

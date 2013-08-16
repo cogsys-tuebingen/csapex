@@ -18,15 +18,17 @@ struct DeleteConnection : public Command {
     DeleteConnection(Connector* a, Connector* b);
 
 protected:
-    bool execute(Graph& graph);
-    bool undo(Graph& graph);
-    bool redo(Graph& graph);
+    bool execute();
+    bool undo();
+    bool redo();
 
-    bool refresh(Graph &graph);
+    bool refresh();
 
 private:
     ConnectorOut* from;
     ConnectorIn* to;
+
+    Graph* graph;
 
     std::string from_uuid;
     std::string to_uuid;

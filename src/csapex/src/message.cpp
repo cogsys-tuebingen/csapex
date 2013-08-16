@@ -14,10 +14,10 @@ Message::~Message()
 
 }
 
-void Message::writeYaml(YAML::Emitter& yaml) {
+void Message::writeYaml(YAML::Emitter&) {
 
 }
-void Message::readYaml(YAML::Node& node) {
+void Message::readYaml(YAML::Node&) {
 
 }
 
@@ -41,10 +41,10 @@ ConnectionType::Ptr AnyMessage::make(){
     return new_msg;
 }
 
-bool AnyMessage::canConnectTo(ConnectionType::Ptr other_side) {
+bool AnyMessage::canConnectTo(ConnectionType::Ptr) {
     return true;
 }
 
-bool AnyMessage::acceptsConnectionFrom(ConnectionType* other_side) {
+bool AnyMessage::acceptsConnectionFrom(ConnectionType*) {
     return true;
 }

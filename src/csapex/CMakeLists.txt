@@ -4,10 +4,12 @@ project(csapex)
 set(CMAKE_BUILD_TYPE Debug)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+add_definitions(-W -Wall)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy utils utils_vision utils_plugin)
+find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy utils utils_plugin)
 
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
@@ -54,7 +56,7 @@ catkin_package(
 ##### EVALUATION
 add_library(csapex SHARED
     src/box.cpp
-    src/box_meta.cpp
+    src/box_group.cpp
     src/box_manager.cpp
     src/boxed_object.cpp
     src/core_plugin.cpp
@@ -63,15 +65,20 @@ add_library(csapex SHARED
     src/command_meta.cpp
     src/command_add_box.cpp
     src/command_add_connection.cpp
+    src/command_add_connection_forwarding.cpp
+    src/command_add_connector.cpp
     src/command_move_connection.cpp
     src/command_delete_box.cpp
     src/command_delete_connection.cpp
     src/command_delete_connector.cpp
     src/command_move_box.cpp
     src/connection.cpp
+    src/connection_forwarding.cpp
     src/connector.cpp
     src/connector_in.cpp
+    src/connector_in_forward.cpp
     src/connector_out.cpp
+    src/connector_out_forward.cpp
     src/connection_type.cpp
     src/connection_type_manager.cpp
     src/csapex_window.cpp
@@ -91,6 +98,7 @@ add_library(csapex SHARED
     src/selector_proxy.cpp
     src/selectable.cpp
     src/stream_interceptor.cpp
+    src/sub_graph.cpp
     src/qdouble_slider.cpp
     src/qwrapper.cpp
     src/qsignal_bridges.cpp
@@ -105,3 +113,7 @@ target_link_libraries(csapex
 add_executable(csapex_node
     src/csapex.cpp)
 target_link_libraries(csapex_node csapex)
+
+add_executable(csapex_testsuite
+    src/csapex_testsuite.cpp)
+target_link_libraries(csapex_testsuite csapex)

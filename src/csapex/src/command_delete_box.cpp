@@ -18,44 +18,47 @@ DeleteBox::DeleteBox(Box *box)
     uuid = box->UUID();
 }
 
-bool DeleteBox::execute(Graph& graph)
+bool DeleteBox::execute()
 {    
+    graph = box->getGraph();
+
+    pos = box->pos();
     remove_connections = box->removeAllConnectionsCmd();
 
-    if(doExecute(graph, remove_connections)) {
+    if(doExecute(remove_connections)) {
         saved_state = box->getState();
 
-        graph.deleteBox(box);
+        graph->deleteBox(box);
         return true;
     }
 
     return false;
 }
 
-bool DeleteBox::undo(Graph& graph)
+bool DeleteBox::undo()
 {
     box = BoxManager::instance().makeBox(pos, type, uuid);
-    graph.addBox(box);
+    graph->addBox(box);
     box->setState(saved_state);
 
-    return doUndo(graph, remove_connections);
+    return doUndo(remove_connections);
 }
 
-bool DeleteBox::redo(Graph& graph)
+bool DeleteBox::redo()
 {
-    refresh(graph);
+    refresh();
 
-    if(doRedo(graph, remove_connections)) {
+    if(doRedo(remove_connections)) {
         saved_state = box->getState();
 
-        graph.deleteBox(box);
+        graph->deleteBox(box);
         return true;
     }
 
     return false;
 }
 
-void DeleteBox::refresh(Graph& graph)
+void DeleteBox::refresh()
 {
-    box = graph.findBox(uuid);
+    box = graph->findBox(uuid);
 }
