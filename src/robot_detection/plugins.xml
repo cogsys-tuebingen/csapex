@@ -1,10 +1,10 @@
 <library path="libevaluation_plugin">
 
-  <class type="robot_detection::FilterDisplayFeatures" base_class_type="csapex::BoxedObject">
+  <!--    <class type="robot_detection::FilterDisplayFeatures" base_class_type="csapex::BoxedObject">
     <description>none yet</description>
   </class>
 
-  <!--  <class type="robot_detection::ImageCombinerClusterMatch" base_class_type="csapex::BoxedObject">
+  <class type="robot_detection::ImageCombinerClusterMatch" base_class_type="csapex::BoxedObject">
     <description>none yet</description>
   </class>
   <class type="robot_detection::ImageCombinerClusterMatchEM" base_class_type="csapex::BoxedObject">
@@ -15,8 +15,8 @@
   </class>
   <class type="robot_detection::ImageCombinerSimpleMatch" base_class_type="csapex::BoxedObject">
     <description>none yet</description>
-  </class>-->
-
+  </class>
+  -->
   <class type="robot_detection::OptionKeypointExtractor" base_class_type="csapex::GlobalOption">
     <description>none yet</description>
   </class>

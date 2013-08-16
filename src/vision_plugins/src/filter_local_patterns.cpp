@@ -10,6 +10,7 @@
 PLUGINLIB_EXPORT_CLASS(vision_plugins::LocalPatterns, csapex::BoxedObject)
 
 using namespace vision_plugins;
+using namespace csapex;
 
 LocalPatterns::LocalPatterns()
 {
