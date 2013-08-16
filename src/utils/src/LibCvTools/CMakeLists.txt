@@ -19,6 +19,7 @@ add_library (LibCvTools SHARED
     extractor.cpp
     randomforest.cpp
     roi.hpp
+    local_patterns.hpp
 )
 
 target_link_libraries(LibCvTools

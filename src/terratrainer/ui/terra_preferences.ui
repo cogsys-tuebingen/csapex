@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
+    <width>600</width>
     <height>250</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>550</width>
+    <width>600</width>
     <height>250</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>640</width>
+    <width>600</width>
     <height>250</height>
    </size>
   </property>
@@ -34,7 +34,7 @@
    </property>
    <property name="maximumSize">
     <size>
-     <width>500</width>
+     <width>600</width>
      <height>250</height>
     </size>
    </property>
@@ -44,8 +44,20 @@
       <property name="enabled">
        <bool>true</bool>
       </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>600</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="currentIndex">
-       <number>10</number>
+       <number>8</number>
       </property>
       <widget class="QWidget" name="orb">
        <attribute name="title">
@@ -1097,13 +1109,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>125</width>
+              <width>160</width>
               <height>24</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>125</width>
+              <width>160</width>
               <height>24</height>
              </size>
             </property>

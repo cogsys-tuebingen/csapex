@@ -35,6 +35,9 @@
   <class type="vision_plugins::PerspectiveTransform" base_class_type="csapex::BoxedObject">
     <description>none yet</description>
   </class>
+  <class type="vision_plugins::LocalPatterns" base_class_type="csapex::BoxedObject">
+    <description>none yet</description>
+  </class>
   <class type="vision_plugins::SimpleImageDifference" base_class_type="csapex::BoxedObject">
     <description>none yet</description>
   </class>
