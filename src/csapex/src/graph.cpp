@@ -144,7 +144,6 @@ void Graph::moveSelectionToBox(Box *box)
                         // connect old output to the new connector
                         add_connections->add(Command::Ptr(new command::AddConnection(box, target->UUID(), new_connector_uuid)));
                         // connect the new connector to the old input
-                        //here we need a new type of connector!!!! input -> input is not possible... out -> out is also needed later
                         add_connections->add(Command::Ptr(new command::AddConnectionForwarding(box, new_connector_uuid, box->UUID() + Graph::namespace_separator + in->UUID())));
                     }
                 }
@@ -172,10 +171,13 @@ void Graph::moveSelectionToBox(Box *box)
                         }
 
                         add_connections->add(Command::Ptr(new command::AddConnection(box, new_connector_uuid, in->UUID())));
+                        add_connections->add(Command::Ptr(new command::AddConnectionForwarding(box, box->UUID() + Graph::namespace_separator + out->UUID(), new_connector_uuid)));
 
                     } else {
                         // internal connections are kept
                         std::cerr << "keep connection between " << in->UUID() << " and " << out->UUID() << std::endl;
+
+                        add_connections->add(Command::Ptr(new command::AddConnection(box, box->UUID() + Graph::namespace_separator + out->UUID(), box->UUID() + Graph::namespace_separator + in->UUID())));
                     }
                 }
             }

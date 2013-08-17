@@ -20,6 +20,10 @@ BoxGroup::BoxGroup(BoxedObject *content, const std::string &uuid, QWidget *paren
 void BoxGroup::dragEnterEvent(QDragEnterEvent *e)
 {
     if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
+        if(e->source() == this) {
+            return;
+        }
+
         e->accept();
         ui->boxframe->setProperty("highlight", true);
         refreshStylesheet();

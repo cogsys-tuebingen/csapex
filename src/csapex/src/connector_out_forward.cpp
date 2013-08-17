@@ -17,3 +17,13 @@ bool ConnectorOutForward::isForwarding() const
 {
     return true;
 }
+
+
+void ConnectorOutForward::relayMessage(ConnectorOut* from)
+{
+    if(from->noTargets() == 0) {
+        publish(from->getMessage());
+    } else {
+        publish(from->getMessage()->clone());
+    }
+}

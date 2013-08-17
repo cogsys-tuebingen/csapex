@@ -16,17 +16,13 @@
 using namespace csapex;
 
 ConnectorOut::ConnectorOut(Box* parent, const std::string& uuid)
-    : Connector(parent, uuid), guard1(0xDEADBEEF), guard2(0xDEADBEEF)
+    : Connector(parent, uuid), force_send_message_(false)
 {
-    assert(guard1 == 0xDEADBEEF);
-    assert(guard2 == 0xDEADBEEF);
 }
 
 ConnectorOut::ConnectorOut(Box* parent, int sub_id)
-    : Connector(parent, Connector::makeUUID(parent->UUID(), false, sub_id)), guard1(0xDEADBEEF), guard2(0xDEADBEEF)
+    : Connector(parent, Connector::makeUUID(parent->UUID(), false, sub_id)), force_send_message_(false)
 {
-    assert(guard1 == 0xDEADBEEF);
-    assert(guard2 == 0xDEADBEEF);
 }
 
 ConnectorOut::~ConnectorOut()
@@ -35,6 +31,11 @@ ConnectorOut::~ConnectorOut()
         i->removeConnection(this);
         Q_EMIT connectionDestroyed(this, i);
     }
+}
+
+int ConnectorOut::noTargets()
+{
+    return targets_.size();
 }
 
 ConnectorOut::TargetIterator ConnectorOut::beginTargets()
@@ -164,15 +165,19 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         BOOST_FOREACH(ConnectorIn* i, targets_) {
             i->inputMessage(message->clone());
         }
-    } else {
+    } else if(!force_send_message_){
         return;
     }
 
     Q_EMIT messageSent(this);
 }
 
-void ConnectorOut::relayMessage(ConnectorOut*)
+void ConnectorOut::forceSendMessage(bool force)
 {
-    std::cout << "relay" << std::endl;
-    publish(message_);
+    force_send_message_ = force;
+}
+
+ConnectionType::Ptr ConnectorOut::getMessage()
+{
+    return message_;
 }

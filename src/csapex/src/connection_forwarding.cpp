@@ -9,10 +9,11 @@
 
 using namespace csapex;
 
-ConnectionForwarding::ConnectionForwarding(ConnectorOutForward* from, ConnectorOut* to)
+ConnectionForwarding::ConnectionForwarding(ConnectorOut *from, ConnectorOutForward *to)
     : Connection(from, to), in(false)
 {
-    QObject::connect(from, SIGNAL(messageSent(ConnectorOut*)), to, SIGNAL(relayMessage(ConnectorOut*)));
+    QObject::connect(from, SIGNAL(messageSent(ConnectorOut*)), to, SLOT(relayMessage(ConnectorOut*)));
+    from->forceSendMessage();
 }
 
 ConnectionForwarding::ConnectionForwarding(ConnectorInForward* from, ConnectorIn* to)

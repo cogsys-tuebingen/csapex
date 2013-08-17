@@ -34,13 +34,13 @@ private:
     union {
         Connector* from;
         ConnectorInForward* from_in;
-        ConnectorOutForward* from_out;
+        ConnectorOut* from_out;
     };
 
     union {
         Connector* to;
         ConnectorIn* to_in;
-        ConnectorOut* to_out;
+        ConnectorOutForward* to_out;
     };
 
     Graph* graph;

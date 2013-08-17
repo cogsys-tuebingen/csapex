@@ -50,7 +50,7 @@ public:
         return false;
     }
 
-    bool isForwarding() const;
+    virtual bool isForwarding() const;
 
     std::string UUID();
 

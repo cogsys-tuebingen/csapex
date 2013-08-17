@@ -9,11 +9,17 @@ namespace csapex
 
 class ConnectorOutForward : public ConnectorOut
 {
+    Q_OBJECT
+
 public:
     ConnectorOutForward(Box* parent, const std::string& uuid);
     ConnectorOutForward(Box* parent, int sub_id);
 
     virtual bool isForwarding() const;
+
+public Q_SLOTS:
+    void relayMessage(ConnectorOut* source);
+
 };
 
 }

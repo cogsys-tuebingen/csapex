@@ -292,7 +292,6 @@ void Box::removeOutput(ConnectorOut *out)
 
     QObject::disconnect(out, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)));
     QObject::disconnect(out, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)));
-    QObject::disconnect(out, SIGNAL(messageSent(ConnectorOut*)), this, SIGNAL(messageSent(ConnectorOut*)));
 
     disconnectConnector(out);
 

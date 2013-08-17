@@ -12,7 +12,7 @@ class ConnectorOutForward;
 class ConnectionForwarding : public Connection
 {
 public:
-    ConnectionForwarding(ConnectorOutForward* from, ConnectorOut* to);
+    ConnectionForwarding(ConnectorOut* from, ConnectorOutForward* to);
     ConnectionForwarding(ConnectorInForward* from, ConnectorIn* to);
 
 private:

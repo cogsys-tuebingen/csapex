@@ -50,6 +50,7 @@ public:
     virtual void connectionMovePreview(Connector* other_side);
     virtual void validateConnections();
 
+    int noTargets();
     TargetIterator beginTargets();
     TargetIterator endTargets();
 
@@ -58,13 +59,13 @@ public:
     virtual Command::Ptr removeAllConnectionsCmd();
     virtual Command::Ptr removeConnectionCmd(ConnectorIn *other_side);
 
+    void forceSendMessage(bool force = true);
+    ConnectionType::Ptr getMessage();
+
 Q_SIGNALS:
     void connectionFormed(ConnectorOut*, ConnectorIn*);
     void connectionDestroyed(ConnectorOut*, ConnectorIn*);
     void messageSent(ConnectorOut* source);
-
-public Q_SLOTS:
-    void relayMessage(ConnectorOut* source);
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
@@ -73,10 +74,9 @@ protected:
     virtual void removeAllConnectionsNotUndoable();
 
 protected:
-    long guard1;
     std::vector<ConnectorIn*> targets_;
-    long guard2;
-//    char dummy[128];
+    bool force_send_message_;
+
     ConnectionType::Ptr message_;
 };
 

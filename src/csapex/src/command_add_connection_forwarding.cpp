@@ -74,8 +74,8 @@ void AddConnectionForwarding::refresh()
         from_in = dynamic_cast<ConnectorInForward*> (f);
         to_in  = dynamic_cast<ConnectorIn*> (t);
     } else {
-        from_out = dynamic_cast<ConnectorOutForward*> (f);
-        to_out = dynamic_cast<ConnectorOut*> (t);
+        from_out = dynamic_cast<ConnectorOut*> (f);
+        to_out = dynamic_cast<ConnectorOutForward*> (t);
     }
 
     assert(from);
