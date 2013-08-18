@@ -99,7 +99,7 @@ void Graph::moveSelectionToBox(Box *box)
         // iterate selected boxes
         if(b->isSelected()) {
             selected.push_back(b);
-            std::cout << "selected: " << b->UUID() << std::endl;
+            std::cerr << "selected: " << b->UUID() << std::endl;
 
             // move this box top the sub graph
             SelectorProxy::Ptr selector = BoxManager::instance().getSelector(b->getType());
@@ -135,16 +135,16 @@ void Graph::moveSelectionToBox(Box *box)
                     // internal connections are done by the next loop
                     // external connections should be split
                     if(is_external) {
-                        std::cout << "split connection between " << in->UUID() << " and " << target->UUID() << std::endl;
+                        std::cerr << "split connection between " << in->UUID() << " and " << target->UUID() << std::endl;
 
-                        std::string new_connector_uuid = Connector::makeUUID(box->UUID(), true, box->nextInputId());
+                        std::string new_connector_uuid = Connector::makeUUID(box->UUID(), Connector::TYPE_MISC, box->nextInputId());
 
                         // create new separator connector
                         add_connectors->add(Command::Ptr(new command::AddConnector(box, true, new_connector_uuid, true)));
                         // connect old output to the new connector
                         add_connections->add(Command::Ptr(new command::AddConnection(box, target->UUID(), new_connector_uuid)));
                         // connect the new connector to the old input
-                        add_connections->add(Command::Ptr(new command::AddConnectionForwarding(box, new_connector_uuid, box->UUID() + Graph::namespace_separator + in->UUID())));
+                        add_connections->add(Command::Ptr(new command::AddConnection(box, new_connector_uuid, box->UUID() + Graph::namespace_separator + in->UUID())));
                     }
                 }
             }
@@ -166,12 +166,12 @@ void Graph::moveSelectionToBox(Box *box)
 
                         if(!external_connector_added) {
                             external_connector_added = true;
-                            new_connector_uuid = Connector::makeUUID(box->UUID(), false, box->nextOutputId());
+                            new_connector_uuid = Connector::makeUUID(box->UUID(), Connector::TYPE_MISC, box->nextOutputId());
                             add_connectors->add(Command::Ptr(new command::AddConnector(box, false, new_connector_uuid, true)));
                         }
 
                         add_connections->add(Command::Ptr(new command::AddConnection(box, new_connector_uuid, in->UUID())));
-                        add_connections->add(Command::Ptr(new command::AddConnectionForwarding(box, box->UUID() + Graph::namespace_separator + out->UUID(), new_connector_uuid)));
+                        add_connections->add(Command::Ptr(new command::AddConnection(box, box->UUID() + Graph::namespace_separator + out->UUID(), new_connector_uuid)));
 
                     } else {
                         // internal connections are kept
@@ -195,7 +195,9 @@ void Graph::moveSelectionToBox(Box *box)
 
 bool Graph::addConnection(Connection::Ptr connection)
 {
+    std::cerr << "try to make connection between " << connection->from()->UUID() << " and " << connection->to()->UUID() << std::endl;
     if(connection->from()->tryConnect(connection->to())) {
+        std::cerr << "make connection between " << connection->from()->UUID() << " and " << connection->to()->UUID() << std::endl;
         connections.push_back(connection);
 
         return true;

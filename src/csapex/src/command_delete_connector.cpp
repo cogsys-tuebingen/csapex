@@ -27,17 +27,18 @@ bool DeleteConnector::execute()
 
     if(c->isConnected()) {
         if(in) {
-            delete_connections = ((ConnectorIn*) c)->removeAllConnectionsCmd();
+//            delete_connections = ((ConnectorIn*) c)->removeAllConnectionsCmd();
+            delete_connections = dynamic_cast<ConnectorIn*>(c)->removeAllConnectionsCmd();
         } else {
-            delete_connections = ((ConnectorOut*) c)->removeAllConnectionsCmd();
+            delete_connections = dynamic_cast<ConnectorOut*>(c)->removeAllConnectionsCmd();
         }
         CommandDispatcher::execute(delete_connections);
     }
 
     if(in) {
-        box_c->removeInput((ConnectorIn*) c);
+        box_c->removeInput(dynamic_cast<ConnectorIn*>(c));
     } else {
-        box_c->removeOutput((ConnectorOut*) c);
+        box_c->removeOutput(dynamic_cast<ConnectorOut*>(c));
     }
 
     return true;

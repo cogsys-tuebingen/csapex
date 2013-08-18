@@ -22,7 +22,13 @@ public:
     static const QString MIME_CREATE;
     static const QString MIME_MOVE;
 
-    static std::string makeUUID(const std::string &box_uuid, bool in, int sub_id);
+    enum {
+        TYPE_IN = 1,
+        TYPE_OUT = 0,
+        TYPE_MISC = -1
+    };
+
+    static std::string makeUUID(const std::string &box_uuid, int type, int sub_id);
 
 public:
     virtual void mousePressEvent(QMouseEvent* e);
@@ -86,9 +92,17 @@ Q_SIGNALS:
     void connectionInProgress(Connector*, Connector*);
     void connectionDone();
 
+Q_SIGNALS:
+    void connectionFormed(Connector*, Connector*);
+    void connectionDestroyed(Connector*, Connector*);
+    void messageSent(Connector* source);
+    void messageArrived(Connector* source);
+
 protected:
     Connector(Box* parent, const std::string &uuid);
+    Connector(Box* parent, int sub_id, int type);
     virtual ~Connector();
+    void init(Box* parent);
 
     virtual void removeAllConnectionsNotUndoable() = 0;
 
@@ -98,6 +112,9 @@ protected:
 protected:
     virtual void findParents();
     virtual QPoint topLeft();
+
+    virtual bool shouldMove(bool left, bool right);
+    virtual bool shouldCreate(bool left, bool right);
 
 protected:
     QWidget* parent_widget;

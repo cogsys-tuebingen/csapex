@@ -9,9 +9,8 @@ namespace csapex
 
 class Connector;
 class ConnectorIn;
-class ConnectorInForward;
 class ConnectorOut;
-class ConnectorOutForward;
+class ConnectorForward;
 class Box;
 
 namespace command
@@ -33,14 +32,14 @@ private:
 
     union {
         Connector* from;
-        ConnectorInForward* from_in;
+        ConnectorForward* from_in;
         ConnectorOut* from_out;
     };
 
     union {
         Connector* to;
         ConnectorIn* to_in;
-        ConnectorOutForward* to_out;
+        ConnectorForward* to_out;
     };
 
     Graph* graph;

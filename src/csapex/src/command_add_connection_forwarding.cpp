@@ -4,9 +4,7 @@
 /// COMPONENT
 #include <csapex/command.h>
 #include <csapex/selector_proxy.h>
-#include <csapex/connector_in_forward.h>
-#include <csapex/connector_out_forward.h>
-#include <csapex/connection_forwarding.h>
+#include <csapex/connector_forward.h>
 #include <csapex/box.h>
 #include <csapex/graph.h>
 
@@ -29,9 +27,9 @@ bool AddConnectionForwarding::execute()
     }
 
     if(in) {
-        return graph->addConnection(Connection::Ptr(new ConnectionForwarding(from_in, to_in)));
+        return graph->addConnection(Connection::Ptr(new Connection(from_in, to_in)));
     } else {
-        return graph->addConnection(Connection::Ptr(new ConnectionForwarding(from_out, to_out)));
+        return graph->addConnection(Connection::Ptr(new Connection(from_out, to_out)));
     }
     return true;
 }
@@ -42,9 +40,9 @@ bool AddConnectionForwarding::undo()
 
 
     if(in) {
-        graph->deleteConnection(Connection::Ptr(new ConnectionForwarding(from_in, to_in)));
+        graph->deleteConnection(Connection::Ptr(new Connection(from_in, to_in)));
     } else {
-        graph->deleteConnection(Connection::Ptr(new ConnectionForwarding(from_out, to_out)));
+        graph->deleteConnection(Connection::Ptr(new Connection(from_out, to_out)));
     }
 
     return true;
@@ -71,11 +69,11 @@ void AddConnectionForwarding::refresh()
     in = f->isInput();
 
     if(in) {
-        from_in = dynamic_cast<ConnectorInForward*> (f);
+        from_in = dynamic_cast<ConnectorForward*> (f);
         to_in  = dynamic_cast<ConnectorIn*> (t);
     } else {
         from_out = dynamic_cast<ConnectorOut*> (f);
-        to_out = dynamic_cast<ConnectorOutForward*> (t);
+        to_out = dynamic_cast<ConnectorForward*> (t);
     }
 
     assert(from);

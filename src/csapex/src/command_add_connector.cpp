@@ -5,8 +5,9 @@
 #include <csapex/box.h>
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
-#include <csapex/connector_in_forward.h>
-#include <csapex/connector_out_forward.h>
+#include <csapex/connector_forward.h>
+//#include <csapex/connector_in_forward.h>
+//#include <csapex/connector_out_forward.h>
 #include <csapex/graph.h>
 #include <csapex/command_dispatcher.h>
 
@@ -23,20 +24,20 @@ AddConnector::AddConnector(Box* box, bool input, const std::string &uuid, bool f
 bool AddConnector::execute()
 {
     if(input) {
-        std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), true, box->nextInputId()) : c_uuid;
+        std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_IN, box->nextInputId()) : c_uuid;
         ConnectorIn* in;
         if(forward) {
-            in = new ConnectorInForward(box, uuid);
+            in = new ConnectorForward(box, true, uuid);
         } else {
             in = new ConnectorIn(box, uuid);
         }
         c = in;
         box->addInput(in);
     } else {
-        std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), false, box->nextOutputId()) : c_uuid;
+        std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_OUT, box->nextOutputId()) : c_uuid;
         ConnectorOut* out;
         if(forward) {
-            out = new ConnectorOutForward(box, uuid);
+            out = new ConnectorForward(box, false, uuid);
         } else {
             out = new ConnectorOut(box, uuid);
         }

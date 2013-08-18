@@ -21,7 +21,7 @@ ConnectorOut::ConnectorOut(Box* parent, const std::string& uuid)
 }
 
 ConnectorOut::ConnectorOut(Box* parent, int sub_id)
-    : Connector(parent, Connector::makeUUID(parent->UUID(), false, sub_id)), force_send_message_(false)
+    : Connector(parent, sub_id, TYPE_OUT), force_send_message_(false)
 {
 }
 

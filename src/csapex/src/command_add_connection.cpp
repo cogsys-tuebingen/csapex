@@ -68,8 +68,8 @@ void AddConnection::refresh()
     assert(graph->findConnectorOwner(from_uuid));
     assert(graph->findConnectorOwner(to_uuid));
 
-    from = graph->findConnectorOwner(from_uuid)->getOutput(from_uuid);
-    to = graph->findConnectorOwner(to_uuid)->getInput(to_uuid);
+    from = dynamic_cast<ConnectorOut*> (graph->findConnector(from_uuid));
+    to =  dynamic_cast<ConnectorIn*> (graph->findConnector(to_uuid));
 
     assert(from);
     assert(to);

@@ -75,6 +75,9 @@ protected:
 
     QColor color_connection;
 
+    QColor color_connected;
+    QColor color_disconnected;
+
     QColor color_in_connected;
     QColor color_in_disconnected;
 

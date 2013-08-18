@@ -73,12 +73,10 @@ add_library(csapex SHARED
     src/command_delete_connector.cpp
     src/command_move_box.cpp
     src/connection.cpp
-    src/connection_forwarding.cpp
     src/connector.cpp
     src/connector_in.cpp
-    src/connector_in_forward.cpp
     src/connector_out.cpp
-    src/connector_out_forward.cpp
+    src/connector_forward.cpp
     src/connection_type.cpp
     src/connection_type_manager.cpp
     src/csapex_window.cpp

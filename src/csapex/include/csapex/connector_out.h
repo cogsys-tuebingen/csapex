@@ -16,10 +16,8 @@ class MoveConnection;
 class DeleteConnection;
 }
 
-class ConnectorOut : public Connector
+class ConnectorOut : public virtual Connector
 {
-    Q_OBJECT
-
     friend class ConnectorIn;
     friend class Graph;
     friend class command::AddConnection;
@@ -62,10 +60,6 @@ public:
     void forceSendMessage(bool force = true);
     ConnectionType::Ptr getMessage();
 
-Q_SIGNALS:
-    void connectionFormed(ConnectorOut*, ConnectorIn*);
-    void connectionDestroyed(ConnectorOut*, ConnectorIn*);
-    void messageSent(ConnectorOut* source);
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)

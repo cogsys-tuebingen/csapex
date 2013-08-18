@@ -16,7 +16,7 @@ class MoveConnection;
 class DeleteConnection;
 }
 
-class ConnectorIn : public Connector
+class ConnectorIn : public virtual Connector
 {
     Q_OBJECT
 
@@ -55,13 +55,10 @@ protected:
     virtual void removeConnection(Connector* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
-Q_SIGNALS:
-    void messageArrived(ConnectorIn* source);
+//public Q_SLOTS:
+//    void relayMessage(ConnectorIn* source);
 
-public Q_SLOTS:
-    void relayMessage(ConnectorIn* source);
-
-private:
+protected:
     Connector* target;
 
     ConnectionType::Ptr message_;

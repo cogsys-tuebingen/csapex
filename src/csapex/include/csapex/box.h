@@ -40,7 +40,7 @@ public:
     {}
 
 public Q_SLOTS:
-    void forwardMessage(ConnectorIn* source);
+    void forwardMessage(Connector* source);
     void tick();
     Box* parent();
 
@@ -188,8 +188,8 @@ Q_SIGNALS:
     void moveSelectionToBox(Box*);
 
     void connectorCreated(Connector*);
-    void connectionFormed(ConnectorOut*, ConnectorIn*);
-    void connectionDestroyed(ConnectorOut*, ConnectorIn*);
+    void connectionFormed(Connector*, Connector*);
+    void connectionDestroyed(Connector*, Connector*);
 
     void connectionInProgress(Connector*, Connector*);
     void connectionDone();

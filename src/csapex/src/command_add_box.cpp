@@ -33,6 +33,8 @@ bool AddBox::execute()
         box->setState(saved_state);
     }
 
+    box->hide();
+
     graph_.addBox(box);
 
     return true;

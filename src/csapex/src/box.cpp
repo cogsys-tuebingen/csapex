@@ -168,17 +168,17 @@ void Box::stop()
     }
 }
 
-void BoxWorker::forwardMessage(ConnectorIn *source)
+void BoxWorker::forwardMessage(Connector *source)
 {
-    if(parent_->isVisible() && parent_->content_->isEnabled()) {
-        parent_->content_->messageArrived(source);
+    if(parent_->content_->isEnabled()) {
+        parent_->content_->messageArrived(dynamic_cast<ConnectorIn*>(source));
         parent_->content_->setError(false);
     }
 }
 
 void BoxWorker::tick()
 {
-    if(parent_->isVisible() && parent_->content_->isEnabled()) {
+    if(parent_->content_->isEnabled()) {
         parent_->content_->tick();
     }
 }
@@ -226,7 +226,7 @@ void Box::addInput(ConnectorIn* in)
     ui->input_layout->addWidget(in);
     input.push_back(in);
 
-    QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
+    QObject::connect(in, SIGNAL(messageArrived(Connector*)), worker_, SLOT(forwardMessage(Connector*)));
 
     connectConnector(in);
 
@@ -243,8 +243,8 @@ void Box::addOutput(ConnectorOut* out)
     ui->output_layout->addWidget(out);
     output.push_back(out);
 
-    QObject::connect(out, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)));
-    QObject::connect(out, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)));
+    QObject::connect(out, SIGNAL(connectionFormed(Connector*,Connector*)), this, SIGNAL(connectionFormed(Connector*,Connector*)));
+    QObject::connect(out, SIGNAL(connectionDestroyed(Connector*,Connector*)), this, SIGNAL(connectionDestroyed(Connector*,Connector*)));
 
     connectConnector(out);
 

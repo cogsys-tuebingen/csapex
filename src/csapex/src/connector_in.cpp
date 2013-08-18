@@ -18,7 +18,7 @@ ConnectorIn::ConnectorIn(Box* parent, const std::string &uuid)
 }
 
 ConnectorIn::ConnectorIn(Box* parent, int sub_id)
-    : Connector(parent, makeUUID(parent->UUID(), true, sub_id)), target(NULL)
+    : Connector(parent, sub_id, TYPE_IN), target(NULL)
 {
 }
 
@@ -123,8 +123,8 @@ ConnectionType::Ptr ConnectorIn::getMessage()
     return message_;
 }
 
-void ConnectorIn::relayMessage(ConnectorIn *source)
-{
-    message_ = source->getMessage();
-    Q_EMIT messageArrived(this);
-}
+//void ConnectorIn::relayMessage(ConnectorIn *source)
+//{
+//    message_ = source->getMessage();
+//    Q_EMIT messageArrived(this);
+//}

@@ -56,6 +56,9 @@ Overlay::Overlay(Graph &graph, QWidget* parent)
 
     connector_radius_ = 7;
 
+    color_connected = QColor(0x33, 0x33, 0x33, 0xAA);
+    color_disconnected = color_in_connected.darker();
+
     color_in_connected = QColor(0x33, 0x33, 0xFF, 0xAA);
     color_in_disconnected = color_in_connected.darker();
 
@@ -99,12 +102,16 @@ void Overlay::deleteTemporaryConnectionsAndRepaint()
 
 void Overlay::drawConnection(Connection& connection)
 {
-    if(connection.from()->isInput() || connection.to()->isOutput()) {
+    if(!connection.from()->isOutput() || !connection.to()->isInput()) {
         return;
     }
 
     ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
     ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
+
+    if(from->getBox()->isHidden() || to->getBox()->isHidden()) {
+        return;
+    }
 
     QPoint p1 = from->centerPoint();
     QPoint p2 = to->centerPoint();
@@ -200,6 +207,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, bool 
 void Overlay::drawConnector(Connector *c)
 {
     bool output = c->isOutput();
+    bool input = c->isInput();
 
     QColor color;
 
@@ -209,9 +217,9 @@ void Overlay::drawConnector(Connector *c)
         color= Qt::gray;
     } else {
         if(c->isConnected()){
-            color = output ? color_out_connected : color_in_connected;
+            color = output ? (input ? color_connected : color_out_connected) : color_in_connected;
         } else {
-            color = output ? color_out_disconnected : color_in_disconnected;
+            color = output ? (input ? color_disconnected : color_out_disconnected) : color_in_disconnected;
         }
     }
 
@@ -254,7 +262,7 @@ void Overlay::drawActivity(int life, Connector* c)
         double f = r / (double) Connection::activity_marker_max_lifetime_;
         double w = activity_marker_min_width_ + f * (activity_marker_max_width_ - activity_marker_min_width_);
 
-        QColor color = c->isOutput() ? color_out_connected : color_in_connected;
+        QColor color = c->isOutput() ? (c->isInput() ? color_connected : color_out_connected) : color_in_connected;
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
         painter->setPen(QPen(color, w));
@@ -264,17 +272,6 @@ void Overlay::drawActivity(int life, Connector* c)
 
 void Overlay::tick()
 {
-    //    for(std::vector<std::pair<int, Connector*> >::iterator it = publisher_signals_.begin(); it != publisher_signals_.end();) {
-    //        std::pair<int, Connector*>& p = *it;
-
-    //        --p.first;
-
-    //        if(p.first <= 0) {
-    //            it = publisher_signals_.erase(it);
-    //        } else {
-    //            ++it;
-    //        }
-    //    }
 }
 
 bool Overlay::mouseMoveEventHandler(QMouseEvent *e)

@@ -182,7 +182,6 @@ Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::
                 uuid_ = makeUUID(type);
             }
             Box* box = p->create(pos, type, uuid);
-            //box->setParent(parent);
             return box;
         }
     }
@@ -200,7 +199,6 @@ Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::
             }
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
             Box* box = p->create(pos, p->getType(), uuid);
-            //box->setParent(parent);
             return box;
         }
     }

@@ -22,16 +22,27 @@ const QString Connector::MIME_CREATE = "csapex/connector/create";
 const QString Connector::MIME_MOVE = "csapex/connector/move";
 
 
-std::string Connector::makeUUID(const std::string& box_uuid, bool in, int sub_id) {
+std::string Connector::makeUUID(const std::string& box_uuid, int type, int sub_id) {
     std::stringstream ss;
-    ss << box_uuid << "_" << (in ? "in" : "out") << "_" << sub_id;
+    ss << box_uuid << "_" << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
     return ss.str();
 }
 
 Connector::Connector(Box* parent, const std::string& uuid)
     : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(uuid)
 {
-    std::cout << "make connector with uuid " << uuid_ << std::endl;
+    init(parent);
+}
+
+Connector::Connector(Box *parent, int sub_id, int type)
+    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id))
+{
+    init(parent);
+}
+
+void Connector::init(Box* parent)
+{
+    std::cerr << "make connector with uuid " << uuid_ << std::endl;
 
     setBox(parent);
 
@@ -46,6 +57,7 @@ Connector::Connector(Box* parent, const std::string& uuid)
 
     setMouseTracking(true);
 }
+
 
 Connector::~Connector()
 {
@@ -186,6 +198,18 @@ void Connector::mousePressEvent(QMouseEvent* e)
     buttons_down_ = e->buttons();
 }
 
+bool Connector::shouldCreate(bool left, bool)
+{
+    bool full_input = isInput() && isConnected();
+    return left && !full_input;
+}
+
+bool Connector::shouldMove(bool left, bool right)
+{
+    bool full_input = isInput() && isConnected();
+    return (right && isConnected()) || (left && full_input);
+}
+
 void Connector::mouseMoveEvent(QMouseEvent* e)
 {
     if(buttons_down_ == Qt::NoButton) {
@@ -195,9 +219,8 @@ void Connector::mouseMoveEvent(QMouseEvent* e)
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
     bool right = (buttons_down_ & Qt::RightButton) != 0;
 
-    bool full_input = isInput() && this->isConnected();
-    bool create = left && !full_input;
-    bool move = (right && isConnected()) || (left && full_input);
+    bool create = shouldCreate(left, right);
+    bool move = shouldMove(left, right);
 
     if(create || move) {
         QDrag* drag = new QDrag(this);
