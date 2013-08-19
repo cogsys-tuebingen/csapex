@@ -22,10 +22,10 @@ public:
     void dropEvent(QDropEvent* e);
 
     virtual bool hasSubGraph();
-    virtual Graph* getSubGraph();
+    virtual Graph::Ptr getSubGraph();
 
 protected:
-    Graph sub_graph;
+    Graph::Ptr sub_graph;
 };
 
 }

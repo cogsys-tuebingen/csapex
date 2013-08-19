@@ -40,6 +40,7 @@ GlobalOptionPanel::GlobalOptionPanel()
     : state(this)
 {
     setIcon(QIcon(":/wrench.png"));
+    addTag(Tag::get("General"));
 }
 
 void GlobalOptionPanel::messageArrived(ConnectorIn *source)

@@ -4,16 +4,10 @@
 using namespace csapex;
 
 CommandDispatcher::CommandDispatcher()
-    : dirty_(false), graph_(NULL)
+    : dirty_(false)
 {
 
 }
-
-void CommandDispatcher::setGraph(Graph *graph)
-{
-    graph_ = graph;
-}
-
 
 void CommandDispatcher::execute(Command::Ptr command)
 {
@@ -39,14 +33,14 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool change = command->execute();
+    bool success = command->execute();
     done.push_back(command);
 
     while(!undone.empty()) {
         undone.pop_back();
     }
 
-    if(change) {
+    if(success) {
         setDirty();
         Q_EMIT stateChanged();
     }

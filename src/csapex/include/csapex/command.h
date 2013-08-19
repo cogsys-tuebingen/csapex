@@ -8,8 +8,6 @@
 namespace csapex
 {
 
-class Graph;
-
 namespace command {
 class Meta;
 }

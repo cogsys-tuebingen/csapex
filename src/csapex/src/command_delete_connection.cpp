@@ -28,13 +28,11 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
 
     from_uuid = from->UUID();
     to_uuid = to->UUID();
-
-    graph = a->getBox()->getGraph();
 }
 
 bool DeleteConnection::execute()
 {
-    graph->deleteConnection(Connection::Ptr(new Connection(from, to)));
+    Graph::root()->deleteConnection(Connection::Ptr(new Connection(from, to)));
 
     return true;
 }
@@ -44,7 +42,7 @@ bool DeleteConnection::undo()
     if(!refresh()) {
         return false;
     }
-    return graph->addConnection(Connection::Ptr(new Connection(from, to)));
+    return Graph::root()->addConnection(Connection::Ptr(new Connection(from, to)));
 }
 
 bool DeleteConnection::redo()
@@ -57,8 +55,8 @@ bool DeleteConnection::redo()
 
 bool DeleteConnection::refresh()
 {
-    Box* from_box = graph->findConnectorOwner(from_uuid);
-    Box* to_box = graph->findConnectorOwner(to_uuid);
+    Box* from_box = Graph::root()->findConnectorOwner(from_uuid);
+    Box* to_box = Graph::root()->findConnectorOwner(to_uuid);
 
     from = NULL;
     to = NULL;

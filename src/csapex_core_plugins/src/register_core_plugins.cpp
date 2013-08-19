@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <csapex/connection_type_manager.h>
+#include <csapex/tag.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
@@ -21,5 +22,12 @@ RegisterCorePlugins::RegisterCorePlugins()
 
 void RegisterCorePlugins::init()
 {
+    Tag::createIfNotExists("Buffer");
+    Tag::createIfNotExists("General");
+    Tag::createIfNotExists("Input");
+    Tag::createIfNotExists("Output");
+    Tag::createIfNotExists("RosIO");
+    Tag::createIfNotExists("ConsoleIO");
+
     ConnectionTypeManager::registerMessage("std::string", boost::bind(&connection_types::StringMessage::make));
 }

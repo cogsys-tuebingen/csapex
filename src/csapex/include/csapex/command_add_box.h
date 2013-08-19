@@ -12,14 +12,13 @@
 namespace csapex
 {
 class Box;
-class Graph;
 
 namespace command
 {
 
 struct AddBox : public Command
 {
-    AddBox(Graph& graph, SelectorProxy::Ptr selector, QPoint pos, Memento::Ptr state = Memento::NullPtr, const std::string& uuid = "");
+    AddBox(SelectorProxy::Ptr selector_, QPoint pos_, Memento::Ptr state = Memento::NullPtr, const std::string& parent_uuid_ = "", const std::string& uuid_ = "");
 
 protected:
     bool execute();
@@ -29,16 +28,15 @@ protected:
     void refresh();
 
 private:
-    Graph& graph_;
-    SelectorProxy::Ptr selector;
-    QPoint pos;
+    SelectorProxy::Ptr selector_;
+    QPoint pos_;
 
-    std::string type;
-    std::string uuid;
+    std::string parent_uuid_;
+    std::string uuid_;
 
-    csapex::Box* box;
+    csapex::Box* box_;
 
-    Memento::Ptr saved_state;
+    Memento::Ptr saved_state_;
 };
 }
 }

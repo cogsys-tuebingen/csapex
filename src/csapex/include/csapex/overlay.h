@@ -13,14 +13,13 @@ class Connector;
 class ConnectorOut;
 class ConnectorIn;
 class Connection;
-class Graph;
 
 class Overlay : public QWidget
 {
     Q_OBJECT
 
 public:
-    Overlay(Graph& graph, QWidget* parent = 0);
+    Overlay(QWidget* parent = 0);
 
 public Q_SLOTS:
     void addTemporaryConnection(Connector* from, Connector* to);
@@ -57,8 +56,6 @@ protected:
         Connector* from;
         QPoint to;
     };
-
-    Graph& graph_;
 
     std::vector<TempConnection> temp_;
 

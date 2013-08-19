@@ -12,7 +12,7 @@ using namespace csapex;
 const QString BoxGroup::MIME = "csapex/boxmeta";
 
 BoxGroup::BoxGroup(BoxedObject *content, const std::string &uuid, QWidget *parent)
-    : Box(content, uuid, parent)
+    : Box(content, uuid, parent), sub_graph(new Graph)
 {
     setAcceptDrops(true);
 }
@@ -52,7 +52,7 @@ bool BoxGroup::hasSubGraph()
     return true;
 }
 
-Graph* BoxGroup::getSubGraph()
+Graph::Ptr BoxGroup::getSubGraph()
 {
-    return &sub_graph;
+    return sub_graph;
 }

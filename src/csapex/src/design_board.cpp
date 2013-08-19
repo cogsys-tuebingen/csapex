@@ -27,12 +27,12 @@
 
 using namespace csapex;
 
-DesignBoard::DesignBoard(Graph& graph, QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), graph_(graph), space_(false), drag_(false)
+DesignBoard::DesignBoard(QWidget* parent)
+    : QWidget(parent), ui(new Ui::DesignBoard), space_(false), drag_(false)
 {
     ui->setupUi(this);
 
-    overlay = new Overlay(graph, this);
+    overlay = new Overlay(this);
 
     installEventFilter(this);
 
@@ -97,9 +97,9 @@ void DesignBoard::addBoxEvent(Box *box)
 {
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), &graph_, SLOT(boxMoved(Box*, int, int)));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), Graph::root().get(), SLOT(boxMoved(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(clicked(Box*)), &graph_, SLOT(toggleBoxSelection(Box*)));
+    QObject::connect(box, SIGNAL(clicked(Box*)), Graph::root().get(), SLOT(toggleBoxSelection(Box*)));
     //    QObject::connect(box, SIGNAL(connectorCreated(Connector*)), overlay, SLOT(connectorAdded(Connector*)));
     //    QObject::connect(box, SIGNAL(connectorEnabled(Connector*)), overlay, SLOT(connectorEnabled(Connector*)));
     //    QObject::connect(box, SIGNAL(connectorDisabled(Connector*)), overlay, SLOT(connectorDisabled(Connector*)));
@@ -136,10 +136,16 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
+    Graph::Ptr graph_ = Graph::root();
     // BOXES
     if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        if(graph_.noSelectedBoxes() != 0) {
-            graph_.deleteSelectedBoxes();
+        if(graph_->noSelectedBoxes() != 0) {
+            graph_->deleteSelectedBoxes();
+            return;
+        }
+    } else  if(e->key() == Qt::Key_G && Qt::ControlModifier == QApplication::keyboardModifiers()) {
+        if(graph_->noSelectedBoxes() != 0) {
+            graph_->groupSelectedBoxes();
             return;
         }
     }
@@ -171,17 +177,19 @@ void DesignBoard::mousePressEvent(QMouseEvent* e)
 
 void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 {
+    Graph::Ptr graph_ = Graph::root();
+
     if(e->button() == Qt::LeftButton) {
         drag_ = false;
 
         overlay->setSelectionRectangle(QPoint(),QPoint());
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            graph_.deselectBoxes();
+            graph_->deselectBoxes();
 
             BOOST_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    graph_.selectBox(box, true);
+                    graph_->selectBox(box, true);
                 }
             }
 
@@ -192,7 +200,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     // BOXES
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
     if(!shift) {
-        graph_.deselectBoxes();
+        graph_->deselectBoxes();
     }
 
     if(!overlay->mouseReleaseEventHandler(e)) {
@@ -371,6 +379,8 @@ void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 
 void DesignBoard::dropEvent(QDropEvent* e)
 {
+    Graph::Ptr graph_ = Graph::root();
+
     if(e->mimeData()->hasFormat(Box::MIME)) {
         QByteArray b = e->mimeData()->data(Box::MIME);
         SelectorProxy::Ptr* selectorptr = (SelectorProxy::Ptr*)b.toULongLong();
@@ -387,7 +397,7 @@ void DesignBoard::dropEvent(QDropEvent* e)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPoint pos = e->pos() + offset;
 
-        Command::Ptr add_box(new command::AddBox(graph_, selector, pos));
+        Command::Ptr add_box(new command::AddBox(selector, pos));
         CommandDispatcher::execute(add_box);
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {

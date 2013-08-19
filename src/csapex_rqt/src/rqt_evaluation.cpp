@@ -29,7 +29,7 @@ void CsApex::initPlugin(qt_gui_cpp::PluginContext& context)
 {
     context_ = &context;
 
-    eva_ = new csapex::CsApexWindow(graph_);
+    eva_ = new csapex::CsApexWindow();
     eva_->showMenu();
 
     context_->addWidget(eva_);

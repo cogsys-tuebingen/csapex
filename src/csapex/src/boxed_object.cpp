@@ -52,12 +52,20 @@ std::string BoxedObject::getTypeName()
 
 void BoxedObject::setCategory(const std::string &category)
 {
-    category_ = category;
+    if(!Tag::exists(category)) {
+        Tag::create(category);
+    }
+    addTag(Tag::get(category));
 }
 
-std::string BoxedObject::getCategory()
+void BoxedObject::addTag(const Tag &tag)
 {
-    return category_;
+    tags_.push_back(tag);
+}
+
+std::vector<Tag> BoxedObject::getTags() const
+{
+    return tags_;
 }
 
 void BoxedObject::setIcon(QIcon icon)

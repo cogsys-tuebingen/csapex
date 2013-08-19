@@ -31,7 +31,6 @@ protected:
 protected:
     Box* box;
 
-    Graph* graph;
     QWidget* parent;
     QPoint pos;
 

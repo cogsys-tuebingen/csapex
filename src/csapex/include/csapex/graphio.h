@@ -1,6 +1,9 @@
 #ifndef GRAPHIO_H
 #define GRAPHIO_H
 
+/// COMPONENT
+#include <csapex/graph.h>
+
 /// SYSTEM
 #include <map>
 #include <string>
@@ -13,13 +16,12 @@
 
 namespace csapex
 {
-class Graph;
 class Box;
 
 class GraphIO
 {
 public:
-    GraphIO(Graph& graph);
+    GraphIO(Graph::Ptr graph);
 
 public:
     static const std::string extension;
@@ -40,7 +42,7 @@ public:
     void loadConnections(YAML::Node& doc);
 
 private:
-    Graph& graph_;
+    Graph::Ptr graph_;
 };
 
 }

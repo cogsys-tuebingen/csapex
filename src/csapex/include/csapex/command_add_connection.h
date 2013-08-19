@@ -18,7 +18,7 @@ namespace command
 struct AddConnection : public Command
 {
     AddConnection(Connector* a, Connector* b);
-    AddConnection(Box* parent, const std::string& from_uuid, const std::string& to_uuid);
+    AddConnection(const std::string& from_uuid, const std::string& to_uuid);
 
 protected:
     bool execute();
@@ -30,8 +30,6 @@ protected:
 private:
     ConnectorOut* from;
     ConnectorIn* to;
-
-    Graph* graph;
 
     std::string from_uuid;
     std::string to_uuid;

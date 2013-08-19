@@ -26,11 +26,15 @@ bool Meta::execute()
 {
     locked = true;
 
-    bool change = false;
+    bool success = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change |= cmd->execute();
+        bool s = cmd->execute();
+        if(!s) {
+            std::cerr << "command failed to execute! (" << typeid(*cmd).name() << ")" << std::endl;
+        }
+        success &= s;
     }
-    return change;
+    return success;
 }
 
 bool Meta::undo()
@@ -46,9 +50,9 @@ bool Meta::undo()
 
 bool Meta::redo()
 {
-    bool change = false;
+    bool success = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        change |= cmd->redo();
+        success &= cmd->redo();
     }
-    return change;
+    return success;
 }

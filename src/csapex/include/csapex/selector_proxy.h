@@ -18,6 +18,7 @@ namespace csapex
 
 class Box;
 class BoxedObject;
+class Tag;
 
 namespace command
 {
@@ -62,7 +63,7 @@ public:
 
     virtual void mousePressEvent(QMouseEvent* event);
     std::string getType();
-    std::string getCategory();
+    std::vector<Tag> getTags();
     QIcon getIcon();
 
     void startObjectPositioning(Ptr instance, const QPoint &offset = QPoint(0,0));

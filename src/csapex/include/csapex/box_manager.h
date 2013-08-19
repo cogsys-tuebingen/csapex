@@ -76,8 +76,8 @@ protected:
 
     QWidget* container_;
 
-    std::map<std::string, std::vector<SelectorProxy::Ptr> > map;
-    std::set<std::string> categories;
+    std::map<Tag, std::vector<SelectorProxy::Ptr> > map;
+    std::set<Tag> tags;
 };
 
 }

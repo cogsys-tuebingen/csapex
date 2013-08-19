@@ -94,6 +94,7 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     setFocusPolicy(Qt::ClickFocus);
 
     state->uuid_ = uuid;
+    setToolTip(uuid.c_str());
     ui->label->setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -657,24 +658,14 @@ void Box::minimizeBox(bool minimize)
     resize(sizeHint());
 }
 
-void Box::setGraph(Graph *graph)
-{
-    graph_ = graph;
-}
-
-Graph* Box::getGraph()
-{
-    return graph_;
-}
-
 bool Box::hasSubGraph()
 {
     return false;
 }
 
-Graph* Box::getSubGraph()
+Graph::Ptr Box::getSubGraph()
 {
-    return NULL;
+    throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
 }
 
 Memento::Ptr Box::getState() const

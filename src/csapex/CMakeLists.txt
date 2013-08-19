@@ -65,7 +65,6 @@ add_library(csapex SHARED
     src/command_meta.cpp
     src/command_add_box.cpp
     src/command_add_connection.cpp
-    src/command_add_connection_forwarding.cpp
     src/command_add_connector.cpp
     src/command_move_connection.cpp
     src/command_delete_box.cpp
@@ -97,6 +96,7 @@ add_library(csapex SHARED
     src/selectable.cpp
     src/stream_interceptor.cpp
     src/sub_graph.cpp
+    src/tag.cpp
     src/qdouble_slider.cpp
     src/qwrapper.cpp
     src/qsignal_bridges.cpp

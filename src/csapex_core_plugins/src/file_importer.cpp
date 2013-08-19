@@ -85,6 +85,8 @@ FileImporter::FileImporter()
     : state(this), output_(NULL), additional_layout_(NULL), file_dialog_(NULL)
 {
     setIcon(QIcon(":/folder_picture.png"));
+    addTag(Tag::get("General"));
+    addTag(Tag::get("Input"));
 }
 
 FileImporter::~FileImporter()
@@ -119,7 +121,7 @@ void FileImporter::fill(QBoxLayout* layout)
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
 
         QCheckBox* enable_border = new QCheckBox("enable border (if possible)");
-        // @TODO: put border into separate node!!!
+        // TODO: put border into separate node!!!
 
         nested->addWidget(enable_border);
 

@@ -13,6 +13,7 @@
 #include <csapex/qt_helper.hpp>
 #include <csapex/designerio.h>
 #include <csapex/graphio.h>
+#include <csapex/tag.h>
 
 /// SYSTEM
 #include <iostream>
@@ -29,30 +30,34 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(Graph& graph, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::EvaluationWindow), graph_(graph), init_(false)
+CsApexWindow::CsApexWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::EvaluationWindow), init_(false)
 {
+    Graph::Ptr graph = Graph::root();
+
     StreamInterceptor::instance().start();
 
     ui->setupUi(this);
 
-    designer_ = new Designer(graph);
+    designer_ = new Designer;
     designer_->hide();
     ui->splitter->addWidget(designer_);
     ui->splitter->addWidget(ui->logOutput);
+
+    Tag::createIfNotExists("General");
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
     QObject::connect(ui->actionLoad, SIGNAL(triggered()), this,  SLOT(load()));
     QObject::connect(ui->actionReload, SIGNAL(triggered()), this,  SLOT(reload()));
-    QObject::connect(ui->actionUndo, SIGNAL(triggered()), &graph,  SLOT(undo()));
-    QObject::connect(ui->actionRedo, SIGNAL(triggered()), &graph,  SLOT(redo()));
-    QObject::connect(ui->actionClear, SIGNAL(triggered()), &graph,  SLOT(clear()));
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), graph.get(),  SLOT(undo()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), graph.get(),  SLOT(redo()));
+    QObject::connect(ui->actionClear, SIGNAL(triggered()), graph.get(),  SLOT(clear()));
 
-    QObject::connect(&graph, SIGNAL(boxAdded(Box*)), designer_, SLOT(addBox(Box*)));
-    QObject::connect(&graph, SIGNAL(boxDeleted(Box*)), designer_, SLOT(deleteBox(Box*)));
-    QObject::connect(&graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
-    QObject::connect(&graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
+    QObject::connect(graph.get(), SIGNAL(boxAdded(Box*)), designer_, SLOT(addBox(Box*)));
+    QObject::connect(graph.get(), SIGNAL(boxDeleted(Box*)), designer_, SLOT(deleteBox(Box*)));
+    QObject::connect(graph.get(), SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
+    QObject::connect(graph.get(), SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
     QObject::connect(this, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&CommandDispatcher::instance(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
@@ -106,8 +111,9 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    ui->actionUndo->setDisabled(!graph_.canUndo());
-    ui->actionRedo->setDisabled(!graph_.canRedo());
+    Graph::Ptr graph_ = Graph::root();
+    ui->actionUndo->setDisabled(!graph_->canUndo());
+    ui->actionRedo->setDisabled(!graph_->canRedo());
 }
 
 void CsApexWindow::updateTitle()
@@ -188,7 +194,8 @@ void CsApexWindow::hideLog()
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    if(graph_.isDirty()) {
+    Graph::Ptr graph_ = Graph::root();
+    if(graph_->isDirty()) {
         int r = QMessageBox::warning(this, tr("Vision Designer"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -314,7 +321,7 @@ void CsApexWindow::saveAs(const std::string &file)
 
     yaml << YAML::BeginMap; // settings map
 
-    GraphIO graphio(graph_);
+    GraphIO graphio(Graph::root());
     DesignerIO designerio(*designer_);
 
     designerio.saveSettings(yaml);
@@ -337,7 +344,8 @@ void CsApexWindow::saveAs(const std::string &file)
 
 void CsApexWindow::reload()
 {
-    graph_.clear();
+    Graph::Ptr graph_ = Graph::root();
+    graph_->clear();
 
     GraphIO graphio(graph_);
     DesignerIO designerio(*designer_);

@@ -19,7 +19,8 @@ using namespace csapex;
 TextInput::TextInput()
     : connector_(NULL)
 {
-    setCategory("Value Input");
+    addTag(Tag::get("Input"));
+    addTag(Tag::get("General"));
     setIcon(QIcon(":/pencil.png"));
 }
 

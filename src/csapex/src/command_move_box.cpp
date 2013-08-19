@@ -11,7 +11,6 @@ MoveBox::MoveBox(Box *box, QPoint from, QPoint to)
     : box(box), from(from), to(to)
 {
     uuid = box->UUID();
-    graph = box->getGraph();
 }
 
 bool MoveBox::execute()
@@ -23,7 +22,7 @@ bool MoveBox::execute()
 
 bool MoveBox::undo()
 {
-    box = graph->findBox(uuid);
+    box = Graph::root()->findBox(uuid);
     box->move(from);
 
     return true;
@@ -31,6 +30,6 @@ bool MoveBox::undo()
 
 bool MoveBox::redo()
 {
-    box = graph->findBox(uuid);
+    box = Graph::root()->findBox(uuid);
     return execute();
 }

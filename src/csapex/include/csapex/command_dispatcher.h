@@ -25,8 +25,6 @@ public:
     static void executeLater(Command::Ptr command);
     static void executeLater();
 
-    void setGraph(Graph* graph);
-
     bool isDirty();
 
     bool canUndo();
@@ -59,8 +57,6 @@ private:
     std::deque<Command::Ptr> done;
     std::deque<Command::Ptr> undone;
     bool dirty_;
-
-    Graph* graph_;
 };
 
 }

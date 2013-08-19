@@ -19,7 +19,9 @@ using namespace csapex;
 ImportCin::ImportCin()
     : connector_(NULL)
 {
-    setCategory("ConsoleIO");
+    addTag(Tag::get("ConsoleIO"));
+    addTag(Tag::get("General"));
+    addTag(Tag::get("Input"));
     setIcon(QIcon(":/terminal.png"));
 }
 

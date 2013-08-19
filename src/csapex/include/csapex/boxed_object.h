@@ -2,8 +2,9 @@
 #define BOXED_OBJECT_H
 
 /// COMPONENT
-#include "memento.h"
-#include "displayable.h"
+#include <csapex/memento.h>
+#include <csapex/displayable.h>
+#include <csapex/tag.h>
 
 /// SYSTEM
 #include <string>
@@ -22,10 +23,11 @@ class BoxedObject : public Displayable
 {
     Q_OBJECT
 
-public:
+protected:
     BoxedObject();
     BoxedObject(const std::string& name);
 
+public:
     virtual ~BoxedObject();
 
     void setName(const std::string& name);
@@ -34,8 +36,10 @@ public:
     void setTypeName(const std::string& type_name);
     std::string getTypeName();
 
-    void setCategory(const std::string& category);
-    std::string getCategory();
+    void setCategory(const std::string& category) __attribute__ ((deprecated));
+
+    void addTag(const Tag& tag);
+    std::vector<Tag> getTags() const;
 
     void setIcon(QIcon icon);
     QIcon getIcon();
@@ -70,7 +74,8 @@ protected:
 protected:
     std::string type_name_;
     std::string name_;
-    std::string category_;
+
+    std::vector<Tag> tags_;
 
     QIcon icon_;
 

@@ -35,7 +35,7 @@ AnalyzerWindow::AnalyzerWindow(AnalyzerAdapter* analyzer_node, QWidget* parent)
 {
     ui->setupUi(this);
 
-    /// @TODO: ugly
+    /// TODO: ugly
     Trainer* trainer = dynamic_cast<Trainer*>(&analyzer);
     if(trainer) {
         show_controls = true;

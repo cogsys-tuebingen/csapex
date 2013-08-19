@@ -17,13 +17,11 @@ DeleteConnector::DeleteConnector(Connector *_c) :
 {
     assert(c);
     c_uuid = c->UUID();
-
-    graph = _c->getBox()->getGraph();
 }
 
 bool DeleteConnector::execute()
 {
-    Box* box_c = graph->findConnectorOwner(c_uuid);
+    Box* box_c = Graph::root()->findConnectorOwner(c_uuid);
 
     if(c->isConnected()) {
         if(in) {
@@ -60,7 +58,7 @@ bool DeleteConnector::redo()
 
 bool DeleteConnector::refresh()
 {
-    Box* box_c = graph->findConnectorOwner(c_uuid);
+    Box* box_c = Graph::root()->findConnectorOwner(c_uuid);
 
     if(!box_c) {
         return false;

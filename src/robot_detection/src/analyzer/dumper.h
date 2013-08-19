@@ -34,7 +34,7 @@ protected:
      */
     void dumpCurrentRoiAsImage();
 
-    // @TODO: encapsulate
+    // TODO: encapsulate
 public:
     bool dump_vj_data;
     bool dump_feature_data;

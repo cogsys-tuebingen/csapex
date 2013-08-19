@@ -56,6 +56,8 @@ void Connector::init(Box* parent)
     setFixedSize(16,16);
 
     setMouseTracking(true);
+
+    setToolTip(uuid_.c_str());
 }
 
 

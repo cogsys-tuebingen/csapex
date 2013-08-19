@@ -10,32 +10,38 @@
 
 using namespace csapex::command;
 
-AddBox::AddBox(Graph& graph, SelectorProxy::Ptr selector, QPoint pos, Memento::Ptr state, const std::string& _uuid)
-    : graph_(graph), selector(selector), pos(pos)
+AddBox::AddBox(SelectorProxy::Ptr selector, QPoint pos, Memento::Ptr state, const std::string &parent_uuid, const std::string& uuid)
+    : selector_(selector), pos_(pos), parent_uuid_(parent_uuid)
 {
     if(state != Memento::NullPtr) {
         Box::State::Ptr bs = boost::dynamic_pointer_cast<Box::State> (state);
-        if(!_uuid.empty()) {
-            bs->uuid_ = _uuid;
+        if(!uuid.empty()) {
+            bs->uuid_ = uuid;
         }
-        saved_state = bs;
+        saved_state_ = bs;
     }
 
-    uuid = _uuid.empty() ? BoxManager::instance().makeUUID(selector->getType()) : _uuid;
-    type = selector->getType();
+    uuid_ = uuid.empty() ? BoxManager::instance().makeUUID(selector->getType()) : uuid;
 }
 
 bool AddBox::execute()
 {
-    box = BoxManager::instance().makeBox(pos, type, uuid);
+    box_ = BoxManager::instance().makeBox(pos_, selector_->getType(), uuid_);
 
-    if(saved_state) {
-        box->setState(saved_state);
+    if(saved_state_) {
+        box_->setState(saved_state_);
     }
 
-    box->hide();
+    box_->hide();
 
-    graph_.addBox(box);
+
+    Graph::Ptr parent;
+    if(parent_uuid_.empty()) {
+        parent = Graph::root();
+    } else {
+        parent = Graph::root()->findSubGraph(parent_uuid_);
+    }
+    parent->addBox(box_);
 
     return true;
 }
@@ -44,8 +50,15 @@ bool AddBox::undo()
 {
     refresh();
 
-    saved_state = box->getState();
-    graph_.deleteBox(box);
+    saved_state_ = box_->getState();
+
+    Graph::Ptr parent;
+    if(parent_uuid_.empty()) {
+        parent = Graph::root();
+    } else {
+        parent = Graph::root()->findSubGraph(parent_uuid_);
+    }
+    parent->deleteBox(box_);
 
     return true;
 }
@@ -53,7 +66,7 @@ bool AddBox::undo()
 bool AddBox::redo()
 {
     if(execute()) {
-        box->setState(saved_state);
+        box_->setState(saved_state_);
         return true;
     }
 
@@ -62,5 +75,5 @@ bool AddBox::redo()
 
 void AddBox::refresh()
 {
-    box = graph_.findBox(uuid);
+    box_ = Graph::root()->findBox(uuid_);
 }

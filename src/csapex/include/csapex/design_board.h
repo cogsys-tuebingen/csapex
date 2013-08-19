@@ -15,7 +15,6 @@ namespace csapex
 
 class Overlay;
 class Box;
-class Graph;
 
 class DesignBoard : public QWidget
 {
@@ -23,7 +22,7 @@ class DesignBoard : public QWidget
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    DesignBoard(Graph &graph, QWidget* parent = 0);
+    DesignBoard(QWidget* parent = 0);
     virtual ~DesignBoard();
 
     void paintEvent(QPaintEvent*);
@@ -55,7 +54,6 @@ public Q_SLOTS:
 
 private:
     Ui::DesignBoard* ui;
-    Graph& graph_;
 
     Overlay* overlay;
 

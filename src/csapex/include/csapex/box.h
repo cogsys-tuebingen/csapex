@@ -5,6 +5,7 @@
 #include <csapex/memento.h>
 #include <csapex/command.h>
 #include <csapex/selectable.h>
+#include <csapex/graph.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -19,7 +20,6 @@ namespace Ui
 class Box;
 }
 
-
 namespace csapex
 {
 
@@ -28,7 +28,6 @@ class BoxedObject;
 class Connector;
 class ConnectorIn;
 class ConnectorOut;
-
 
 struct BoxWorker : public QObject
 {
@@ -149,11 +148,8 @@ public:
     void setState(Memento::Ptr memento);
     Memento::Ptr getState() const;
 
-    void setGraph(Graph* graph);
-    Graph* getGraph();
-
     virtual bool hasSubGraph();
-    virtual Graph* getSubGraph();
+    virtual Graph::Ptr getSubGraph();
 
     Command::Ptr removeAllConnectionsCmd();
     Command::Ptr removeAllOutputsCmd();

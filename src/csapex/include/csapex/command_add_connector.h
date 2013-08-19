@@ -14,20 +14,20 @@ namespace command
 
 struct AddConnector : public Command
 {
-    AddConnector(csapex::Box *box, bool input, const std::string& uuid, bool forward = false);
+    AddConnector(const std::string& box_uuid, bool input, const std::string& uuid, bool forward = false);
 
 protected:
     bool execute();
     bool undo();
     bool redo();
 
+    void refresh();
+
 private:
     Box* box;
     bool input;
 
     Connector* c;
-
-    Graph* graph;
 
     std::string b_uuid;
     std::string c_uuid;

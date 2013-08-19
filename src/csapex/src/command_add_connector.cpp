@@ -14,15 +14,16 @@
 using namespace csapex;
 using namespace command;
 
-AddConnector::AddConnector(Box* box, bool input, const std::string &uuid, bool forward)
-    : box(box), input(input), c(NULL), c_uuid(uuid), forward(forward)
+AddConnector::AddConnector(const std::string &box_uuid, bool input, const std::string &uuid, bool forward)
+    : box(NULL), input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid), forward(forward)
 {
-    graph = box->getGraph();
-    b_uuid = box->UUID();
+
 }
 
 bool AddConnector::execute()
-{
+{ 
+    refresh();
+
     if(input) {
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_IN, box->nextInputId()) : c_uuid;
         ConnectorIn* in;
@@ -52,8 +53,8 @@ bool AddConnector::execute()
 
 bool AddConnector::undo()
 {
-    box = graph->findBox(b_uuid);
-    assert(box);
+    refresh();
+
     if(input) {
         box->removeInput(box->getInput(c_uuid));
     } else {
@@ -64,10 +65,14 @@ bool AddConnector::undo()
 
 bool AddConnector::redo()
 {
-    box = graph->findBox(b_uuid);
-
-    assert(box);
+    refresh();
 
     execute();
     return false;
+}
+
+void AddConnector::refresh()
+{
+    box = Graph::root()->findBox(b_uuid);
+    assert(box);
 }

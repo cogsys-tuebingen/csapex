@@ -28,8 +28,6 @@ private:
     ConnectorOut* from;
     ConnectorIn* to;
 
-    Graph* graph;
-
     std::string from_uuid;
     std::string to_uuid;
 };

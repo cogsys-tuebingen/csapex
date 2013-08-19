@@ -31,7 +31,7 @@ Detector::Detector()
         ERROR("couldn't load the database");
     }
 
-    // @TODO: make factory
+    // TODO: make factory
     roi_manager->maintain(new NthFullFrameRoi(0));
 //    roi_manager->maintain(new ViolaJonesRoi);
 //    roi_manager->maintain(new ScreenSpaceRoiTracker);
@@ -99,7 +99,7 @@ void Detector::handle_pose(MatchablePose* best_match, Frame::Ptr frame, const Ro
     double distance = best_match->distance;
     if(distance <= 0) {
         INFO("WARNING: no distance measurement");
-        // @TODO: find a way around this evil hack
+        // TODO: find a way around this evil hack
         distance = 3;
     } else {
         INFO("distance: " << distance << " m");

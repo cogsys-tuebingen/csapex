@@ -46,20 +46,16 @@ void BoxManager::reload()
 {
     PluginManager<BoxedObject>::reload();
 
-    std::string no_cat = "General";
-
-    categories.insert(no_cat);
+    Tag::createIfNotExists("General");
 
     foreach(SelectorProxy::Ptr p, available_elements_prototypes) {
-        std::string cat = p->getCategory();
-        if(cat.empty()) {
-            cat = no_cat;
+        foreach(const Tag& tag, p->getTags()) {
+            map[tag].push_back(p);
+            tags.insert(tag);
         }
-        map[cat].push_back(p);
-        categories.insert(cat);
     }
 
-    foreach(const std::string& cat, categories) {
+    foreach(const Tag& cat, tags) {
         std::sort(map[cat].begin(), map[cat].end(), compare);
     }
 
@@ -74,11 +70,11 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
         reload();
     }
 
-    foreach(const std::string& cat, categories) {
-        QMenu* submenu = new QMenu(cat.c_str());
+    foreach(const Tag& tag, tags) {
+        QMenu* submenu = new QMenu(tag.getName().c_str());
         menu->addMenu(submenu);
 
-        foreach(const SelectorProxy::Ptr& proxy, map[cat]) {
+        foreach(const SelectorProxy::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
             QAction* action = new QAction(stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
@@ -103,13 +99,13 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* menu)
     menu->setHeaderHidden(true);
     menu->setDragEnabled(true);
 
-    foreach(const std::string& cat, categories) {
+    foreach(const Tag& tag, tags) {
 
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
-        submenu->setText(0, cat.c_str());
+        submenu->setText(0, tag.getName().c_str());
         menu->addTopLevelItem(submenu);
 
-        foreach(const SelectorProxy::Ptr& proxy, map[cat]) {
+        foreach(const SelectorProxy::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
             std::string name = stripNamespace(proxy->getType());
 

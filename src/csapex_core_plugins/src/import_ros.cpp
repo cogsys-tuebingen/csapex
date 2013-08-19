@@ -26,7 +26,9 @@ using namespace csapex;
 ImportRos::ImportRos()
     : connector_(NULL), initialized_(false)
 {
-    setCategory("RosIO");
+    addTag(Tag::get("RosIO"));
+    addTag(Tag::get("General"));
+    addTag(Tag::get("Input"));
     setIcon(QIcon(":/terminal.png"));
 }
 

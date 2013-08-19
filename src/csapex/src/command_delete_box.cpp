@@ -19,16 +19,14 @@ DeleteBox::DeleteBox(Box *box)
 }
 
 bool DeleteBox::execute()
-{    
-    graph = box->getGraph();
-
+{
     pos = box->pos();
     remove_connections = box->removeAllConnectionsCmd();
 
     if(doExecute(remove_connections)) {
         saved_state = box->getState();
 
-        graph->deleteBox(box);
+        Graph::root()->deleteBox(box);
         return true;
     }
 
@@ -38,7 +36,7 @@ bool DeleteBox::execute()
 bool DeleteBox::undo()
 {
     box = BoxManager::instance().makeBox(pos, type, uuid);
-    graph->addBox(box);
+    Graph::root()->addBox(box);
     box->setState(saved_state);
 
     return doUndo(remove_connections);
@@ -51,7 +49,7 @@ bool DeleteBox::redo()
     if(doRedo(remove_connections)) {
         saved_state = box->getState();
 
-        graph->deleteBox(box);
+        Graph::root()->deleteBox(box);
         return true;
     }
 
@@ -60,5 +58,5 @@ bool DeleteBox::redo()
 
 void DeleteBox::refresh()
 {
-    box = graph->findBox(uuid);
+    box = Graph::root()->findBox(uuid);
 }

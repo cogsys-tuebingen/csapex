@@ -97,10 +97,10 @@ std::string SelectorProxy::getType()
     return type_;
 }
 
-std::string SelectorProxy::getCategory()
+std::vector<Tag> SelectorProxy::getTags()
 {
     BoxedObject* b = makeContent();
-    std::string cat = b->getCategory();
+    const std::vector<Tag>& cat = b->getTags();
     delete b;
 
     return cat;

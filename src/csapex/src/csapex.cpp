@@ -81,9 +81,10 @@ int main(int argc, char** argv)
 
     CsApexApp app(argc, argv);
 
-    Graph graph;
+    Graph::Ptr graph(new Graph);
+    Graph::setRoot(graph);
 
-    CsApexWindow w(graph);
+    CsApexWindow w;
     w.start();
 
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));

@@ -14,7 +14,6 @@ namespace csapex
 {
 
 class Designer;
-class Graph;
 
 /**
  * @brief The EvaluationWindow class provides the window for the evaluator program
@@ -28,7 +27,7 @@ public:
      * @brief EvaluationWindow
      * @param parent
      */
-    explicit CsApexWindow(Graph &graph, QWidget* parent = 0);
+    explicit CsApexWindow(QWidget* parent = 0);
 
     void showMenu();
     void closeEvent(QCloseEvent* event);
@@ -68,7 +67,6 @@ private:
 
     Designer* designer_;
 
-    Graph& graph_;
     QTimer timer;
 
     bool init_;

@@ -16,7 +16,6 @@ namespace csapex
 
 class DesignBoard;
 class Box;
-class Graph;
 
 class Designer : public QWidget
 {
@@ -25,7 +24,7 @@ class Designer : public QWidget
     friend class DesignerIO;
 
 public:
-    Designer(csapex::Graph &graph, QWidget* parent = 0);
+    Designer(QWidget* parent = 0);
     virtual ~Designer();
 
     bool eventFilter(QObject* o, QEvent* e);

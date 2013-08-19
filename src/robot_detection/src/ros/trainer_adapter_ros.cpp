@@ -27,7 +27,7 @@ TrainerAdapterRos::TrainerAdapterRos(Trainer& trainer)
     nh.param("use_tf", use_tf, true);
     nh.param("use_distance", use_distance, true);
 
-    // @TODO make all directories configurable
+    // TODO make all directories configurable
     nh.param("references_dir", config.ref_dir, config.ref_dir);
 
     trainer.tick_sig.connect(boost::bind(&TrainerAdapterRos::tick, this, _1));
@@ -51,7 +51,7 @@ void TrainerAdapterRos::imu_callback(const sensor_msgs::ImuConstPtr& msg)
 {
     tf::quaternionMsgToTF(msg->orientation, last_imu_orientation);
 
-    // @TODO: why is the imu rotated?
+    // TODO: why is the imu rotated?
     tf::Quaternion rot = tf::createQuaternionFromRPY(0, M_PI, 0);
     last_imu_orientation = rot * last_imu_orientation;
 

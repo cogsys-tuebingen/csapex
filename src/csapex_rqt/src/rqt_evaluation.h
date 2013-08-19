@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <csapex/csapex_window.h>
-#include <csapex/graph.h>
 
 /// SYSTEM
 #include <rqt_gui_cpp/plugin.h>
@@ -24,7 +23,6 @@ public:
 private:
     qt_gui_cpp::PluginContext* context_;
 
-    csapex::Graph graph_;
     csapex::CsApexWindow* eva_;
 };
 

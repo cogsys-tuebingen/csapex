@@ -262,7 +262,7 @@ void Bin::filter()
 
     // measure on validation set
     // variance on the max_dist until tp rate is too low
-    // @TODO: make parameter
+    // TODO: make parameter
 //    int delta = 5;
 
 //    double last_ratio = 1.0;
@@ -287,7 +287,7 @@ void Bin::filter()
 
 //        last_ratio = correct / (double) validation_count;
 
-//        // @TODO: make parameter
+//        // TODO: make parameter
 //        if(last_ratio < 0.95 || max_bin_dist < 2 * delta){
 //            // ratio now to small
 //            break;

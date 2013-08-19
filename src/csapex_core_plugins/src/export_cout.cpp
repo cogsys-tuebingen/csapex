@@ -17,7 +17,9 @@ using namespace csapex;
 ExportCout::ExportCout()
     : connector_(NULL)
 {
-    setCategory("ConsoleIO");
+    addTag(Tag::get("ConsoleIO"));
+    addTag(Tag::get("General"));
+    addTag(Tag::get("Output"));
     setIcon(QIcon(":/terminal.png"));
 }
 

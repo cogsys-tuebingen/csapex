@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/connection.h>
+#include <csapex/command_meta.h>
 
 /// SYSTEM
 #include <QObject>
@@ -13,7 +14,6 @@ namespace csapex {
 namespace command {
 class AddBox;
 class AddConnection;
-class AddConnectionForwarding;
 class DeleteConnection;
 class DeleteBox;
 }
@@ -27,7 +27,6 @@ class Graph : public QObject
     friend class GraphIO;
     friend class command::AddBox;
     friend class command::AddConnection;
-    friend class command::AddConnectionForwarding;
     friend class command::DeleteConnection;
     friend class command::DeleteBox;
     friend class Overlay;
@@ -35,6 +34,15 @@ class Graph : public QObject
 
 public:
     static const std::string namespace_separator;
+
+    typedef boost::shared_ptr<Graph> Ptr;
+
+public:
+    static Graph::Ptr root();
+    static void setRoot(Graph::Ptr root);
+
+private:
+    static Graph::Ptr root_;
 
 public:
     Graph();
@@ -45,6 +53,7 @@ public:
     bool canUndo();
     bool canRedo();
 
+    Graph::Ptr findSubGraph(const std::string& uuid);
     Box* findBox(const std::string& uuid, const std::string &ns = "");
     Box* findConnectorOwner(const std::string &uuid, const std::string &ns = "");
     Connector* findConnector(const std::string &uuid, const std::string &ns = "");
@@ -56,6 +65,7 @@ public:
 
     void handleBoxSelection(Box* box, bool add);
     void deleteSelectedBoxes();
+    void groupSelectedBoxes();
     void selectBox(Box* box, bool add = false);
     void deselectBoxes();
     int noSelectedBoxes();
@@ -82,6 +92,8 @@ private:
     void deselectConnectionById(int id);
     void selectConnectionById(int id, bool add = false);
     bool isConnectionWithIdSelected(int id);
+
+    command::Meta::Ptr moveSelectionToBoxCommands(const std::string& box_uuid);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addBox(Box* box);

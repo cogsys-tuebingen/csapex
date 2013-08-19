@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <csapex/connection_type_manager.h>
+#include <csapex/tag.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
@@ -22,6 +23,10 @@ RegisterPlugin::RegisterPlugin()
 
 void RegisterPlugin::init()
 {
+    Tag::createIfNotExists("Vision");
+    Tag::createIfNotExists("Filter");
+    Tag::createIfNotExists("Image Combiner");
+
     qRegisterMetaType<cv::Mat>("cv::Mat");
 
     ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::CvMatMessage::make));

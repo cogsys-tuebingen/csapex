@@ -38,8 +38,8 @@ int rgb2id(QRgb rgb)
 }
 }
 
-Overlay::Overlay(Graph &graph, QWidget* parent)
-    : QWidget(parent), graph_(graph), highlight_connection_id_(-1), schema_dirty_(true)
+Overlay::Overlay(QWidget* parent)
+    : QWidget(parent), highlight_connection_id_(-1), schema_dirty_(true)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -303,7 +303,7 @@ bool Overlay::keyPressEventHandler(QKeyEvent*)
 bool Overlay::keyReleaseEventHandler(QKeyEvent* e)
 {
     if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        graph_.deleteSelectedConnections();
+        Graph::root()->deleteSelectedConnections();
 
         repaint();
 
@@ -320,14 +320,16 @@ bool Overlay::mousePressEventHandler(QMouseEvent *)
 
 bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
 {
+    Graph::Ptr graph_ = Graph::root();
+
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
 
     if(highlight_connection_id_ != -1 && e->button() == Qt::MiddleButton) {
-        graph_.deleteConnectionById(highlight_connection_id_);
+        graph_->deleteConnectionById(highlight_connection_id_);
         return false;
     }
 
-    bool result = graph_.handleConnectionSelection(highlight_connection_id_, shift);
+    bool result = graph_->handleConnectionSelection(highlight_connection_id_, shift);
 
     repaint();
 
@@ -347,6 +349,8 @@ void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
 
 void Overlay::paintEvent(QPaintEvent*)
 {
+    Graph::Ptr graph_ = Graph::root();
+
     QPainter p(this);
     QPainter ps(&schematics);
 
@@ -371,13 +375,13 @@ void Overlay::paintEvent(QPaintEvent*)
         }
     }
 
-    foreach(const Connection::Ptr& connection, graph_.connections) {
+    foreach(const Connection::Ptr& connection, graph_->connections) {
         if(connection->from()->isEnabled() && connection->to()->isEnabled()) {
             drawConnection(*connection);
         }
     }
 
-    foreach (Box* box, graph_.boxes_) {
+    foreach (Box* box, graph_->boxes_) {
         for(int id = 0; id < box->countInputs(); ++id) {
             drawConnector(box->getInput(id));
         }

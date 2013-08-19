@@ -12,17 +12,15 @@ using namespace csapex;
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
-Designer::Designer(Graph &graph, QWidget* parent)
+Designer::Designer(QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer), menu(NULL)
 {
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
     ui->setupUi(this);
 
-    designer_board = new DesignBoard(graph);
+    designer_board = new DesignBoard;
     ui->scrollArea->setWidget(designer_board);
-
-    CommandDispatcher::instance().setGraph(&graph);
 }
 
 Designer::~Designer()

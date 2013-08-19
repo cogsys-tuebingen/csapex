@@ -111,7 +111,7 @@ void Matcher::match(const Matchable* a, const Matchable* b, std::vector<std::vec
             } else {
                 ++it;
                 // here we drop all matches that are "worse"
-                // @TODO: somehow also use the other matches, if they are not "too bad"
+                // TODO: somehow also use the other matches, if they are not "too bad"
                 while(matches.size() > 1) {
                     matches.pop_back();
                 }

@@ -71,7 +71,7 @@ Frame::Ptr Frame::getScaledCopy(double scale) const
     Frame::Ptr tmp = FrameIO::convert(img);
 
     tmp->orientation = orientation;
-    tmp->distance = distance / scale; // @TODO real perspective transformation
+    tmp->distance = distance / scale; // TODO real perspective transformation
 
     return tmp;
 }
@@ -177,7 +177,7 @@ cv::Mat Frame::getImageRoi()
 
 cv::Mat Frame::getDebugImage()
 {
-    // @TODO: crashes sometimes... does the recursive_mutex work at all?
+    // TODO: crashes sometimes... does the recursive_mutex work at all?
     boost::recursive_mutex::scoped_lock lock(mutex);
 
     cv::Mat out;

@@ -26,7 +26,6 @@ protected:
 
 protected:
     Box* box;
-    Graph* graph;
 
     QPoint from;
     QPoint to;

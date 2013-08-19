@@ -28,8 +28,6 @@ private:
     bool       in;
     Connector* c;
 
-    Graph* graph;
-
     Command::Ptr    delete_connections;
 
     std::string c_uuid;
