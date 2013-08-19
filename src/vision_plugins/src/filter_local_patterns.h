@@ -8,6 +8,7 @@
 //class QDoubleSilder;
 class QComboBox;
 class QDoubleSlider;
+class QLabel;
 
 namespace vision_plugins {
 
@@ -24,13 +25,17 @@ public:
     void setState(csapex::Memento::Ptr memento);
     csapex::Memento::Ptr getState() const;
 
+Q_SIGNALS:
+    void timeUpdate(double value);
+
 public Q_SLOTS:
     void update();
-
+    void updateTime(double value);
 private:
     cv_local_patterns::LBP lbp_;
     cv_local_patterns::LTP ltp_;
 
+    QLabel        *time_;
     QDoubleSlider *slider_k_;
     QComboBox *combo_pattern_;
 
@@ -44,6 +49,8 @@ private:
     };
 
     State state_;
+    std::vector<cv::Scalar> colors_;
+
 
 };
 

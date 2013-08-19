@@ -20,6 +20,7 @@ protected:
 
 private:
     cv::RandomTreeParams params_;
+    bool    combine_descriptors_;
 };
 
 #endif // CMP_RANDOMFOREST_EXTENDED_H

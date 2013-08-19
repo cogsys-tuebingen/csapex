@@ -104,7 +104,7 @@ void Histogram::messageArrived(ConnectorIn *source)
     cv_histogram::full_channel_histogram(m->value, histograms, cv::Mat(), bins, ranges);
 
     cv::Mat histogram_img(600,800,CV_8UC3, cv::Scalar(0,0,0));
-    cv_histogram::render_histogram(histograms, bins, colors_, histogram_img, slide_zoom_->doubleValue());
+    cv_histogram::render_histogram<float>(histograms, bins, colors_, histogram_img, slide_zoom_->doubleValue());
     histogram->value = histogram_img;
     output_histogram_->publish(histogram);
 }

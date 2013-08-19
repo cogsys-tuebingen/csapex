@@ -57,7 +57,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 ## Declare a cpp executable
 add_executable(TerraTrainer
                 src/computation/params.hpp
-                src/computation/extractors.hpp
+                src/computation/cmp_extractors.hpp
                 src/computation/yaml.hpp
                 src/computation/cmp_core.cpp
                 src/computation/cmp_extractor_extended.cpp

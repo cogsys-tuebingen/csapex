@@ -70,7 +70,7 @@ class TerraDecomClassifier : public DecompositionClassifier
 {
     ///
 public :
-    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, Extractor *_extractor, const bool soft_crop = false) :
+    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, CVExtractor *_extractor, const bool soft_crop = false) :
         classifier(_classifier),
         extractor(_extractor),
         threshold(_threshold),
@@ -117,7 +117,7 @@ public :
 
 private:
     RandomForest *classifier;
-    Extractor    *extractor;
+    CVExtractor    *extractor;
     float         threshold;
     cv::Mat       image;
     float         last_prob;

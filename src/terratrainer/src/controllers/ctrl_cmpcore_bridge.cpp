@@ -172,26 +172,7 @@ void CMPCoreBridge::saveClassifierRaw(const QString path)
 
 void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
 {
-    switch(params.type) {
-    case CMPExtractorParams::ORB:
-        cc_->setExtractorParameters(static_cast<CMPParamsORB&>(params));
-        break;
-    case CMPExtractorParams::SURF:
-        cc_->setExtractorParameters(static_cast<CMPParamsSURF&>(params));
-        break;
-    case CMPExtractorParams::SIFT:
-        cc_->setExtractorParameters(static_cast<CMPParamsSIFT&>(params));
-        break;
-    case CMPExtractorParams::BRIEF:
-        cc_->setExtractorParameters(static_cast<CMPParamsBRIEF&>(params));
-        break;
-    case CMPExtractorParams::BRISK:
-        cc_->setExtractorParameters(static_cast<CMPParamsBRISK&>(params));
-        break;
-    case CMPExtractorParams::FREAK:
-        cc_->setExtractorParameters(static_cast<CMPParamsFREAK&>(params));
-        break;
-    }
+    cc_->setExtractorParameters(params);
 }
 
 void CMPCoreBridge::setForestParams(const CMPForestParams &params)

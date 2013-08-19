@@ -132,6 +132,7 @@ inline void normalize(const cv::Mat &src, cv::Mat &dst, const std::vector<double
  * @param histogram_color   the histogram specific color to be used
  * @param dst               the image to write to
  */
+template<class _Tp>
 inline void render_histogram(const std::vector<cv::Mat> &histograms, const std::vector<int> bins, const std::vector<cv::Scalar> histogram_colors, cv::Mat &dst, const double scale = 1.0)
 {
     assert(!dst.empty());
@@ -157,8 +158,8 @@ inline void render_histogram(const std::vector<cv::Mat> &histograms, const std::
         for( int j = 1; j < bins[i]; j++ )
         {
             cv::line(dst,
-                     cv::Point(bin_w*(j-1), dst.rows - cvRound(histogram.at<float>(j - 1))),
-                     cv::Point(bin_w*j, dst.rows - cvRound(histogram.at<float>(j))),
+                     cv::Point(bin_w*(j-1), dst.rows - cvRound(histogram.at<_Tp>(j - 1))),
+                     cv::Point(bin_w*j, dst.rows - cvRound(histogram.at<_Tp>(j))),
                      histogram_colors[i]);
         }
     }

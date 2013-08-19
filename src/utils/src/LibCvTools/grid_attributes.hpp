@@ -133,7 +133,7 @@ private:
 class AttrTerrainClass {
 public:
     struct Params {
-        Extractor    *extractor;
+        CVExtractor    *extractor;
         RandomForest *classifier;
     };
 

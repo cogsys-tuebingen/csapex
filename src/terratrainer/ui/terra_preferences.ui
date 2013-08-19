@@ -57,7 +57,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>8</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="orb">
        <attribute name="title">
@@ -65,22 +65,12 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QCheckBox" name="orbBox">
-          <property name="toolTip">
-           <string>Compute descriptors in the Opponent Color Space</string>
-          </property>
-          <property name="text">
-           <string>OpponentColorDescriptor</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_levelOrb">
-          <item>
+         <layout class="QFormLayout" name="layout_orb">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_levelOrb">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -89,7 +79,7 @@
             </property>
            </widget>
           </item>
-          <item>
+          <item row="3" column="1">
            <widget class="QSpinBox" name="spinBox_levelOrb">
             <property name="minimumSize">
              <size>
@@ -97,30 +87,29 @@
               <height>0</height>
              </size>
             </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="spacer_levelOrb">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+            <property name="maximumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>64</width>
+              <height>16777215</height>
              </size>
             </property>
-           </spacer>
+           </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_scaleOrb">
-          <item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="orbBox">
+            <property name="toolTip">
+             <string>Compute descriptors in the Opponent Color Space</string>
+            </property>
+            <property name="text">
+             <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
            <widget class="QLabel" name="label_scaleOrb">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -129,7 +118,7 @@
             </property>
            </widget>
           </item>
-          <item>
+          <item row="4" column="1">
            <widget class="QDoubleSpinBox" name="spinBox_scaleOrb">
             <property name="minimumSize">
              <size>
@@ -137,30 +126,19 @@
               <height>0</height>
              </size>
             </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="spacer_scaleOrb">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+            <property name="maximumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>64</width>
+              <height>16777215</height>
              </size>
             </property>
-           </spacer>
+           </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_WTAOrb">
-          <item>
+          <item row="5" column="0">
            <widget class="QLabel" name="label_WTAOrb">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -169,38 +147,11 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QSpinBox" name="spinBox_WTAOrb">
-            <property name="minimumSize">
-             <size>
-              <width>48</width>
-              <height>0</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="spacer_WTAOrb">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_patchOrb">
-          <item>
+          <item row="6" column="0">
            <widget class="QLabel" name="label_patchOrb">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -209,7 +160,23 @@
             </property>
            </widget>
           </item>
-          <item>
+          <item row="5" column="1">
+           <widget class="QSpinBox" name="spinBox_WTAOrb">
+            <property name="minimumSize">
+             <size>
+              <width>48</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
            <widget class="QSpinBox" name="spinBox_patchOrb">
             <property name="minimumSize">
              <size>
@@ -217,20 +184,27 @@
               <height>0</height>
              </size>
             </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="spacer_patchOrb">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+            <property name="maximumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>64</width>
+              <height>16777215</height>
              </size>
             </property>
-           </spacer>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtOrb">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox_combineOrb">
+            <property name="text">
+             <string>Combine octave descriptors</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -245,32 +219,28 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QCheckBox" name="surfBox">
-          <property name="toolTip">
-           <string>Compute descriptors in the Opponent Color Space</string>
+         <layout class="QFormLayout" name="layout_surf">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
           </property>
-          <property name="text">
-           <string>OpponentColorDescriptor</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_octavesSurf">
-          <item>
-           <widget class="QLabel" name="label_octavesSurf">
-            <property name="minimumSize">
-             <size>
-              <width>75</width>
-              <height>0</height>
-             </size>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="surfBox">
+            <property name="toolTip">
+             <string>Compute descriptors in the Opponent Color Space</string>
             </property>
             <property name="text">
-             <string>Octaves</string>
+             <string>OpponentColorDescriptor</string>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="4" column="1">
            <widget class="QSpinBox" name="spinBox_octavesSurf">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="maximum">
              <number>10</number>
             </property>
@@ -279,38 +249,24 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="spacer_octavesSurf">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_layersSurf">
-          <item>
-           <widget class="QLabel" name="label_layerSurf">
-            <property name="minimumSize">
-             <size>
-              <width>75</width>
-              <height>0</height>
-             </size>
-            </property>
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="checkBox_extendedSurf">
             <property name="text">
-             <string>Octave Layers</string>
+             <string>extended</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="3" column="1">
            <widget class="QSpinBox" name="spinBox_layersSurf">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -322,30 +278,43 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="spacer_layersSurf">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_layerSurf">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>80</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_extendedSurf">
-          <item>
-           <widget class="QCheckBox" name="checkBox_extendedSurf">
             <property name="text">
-             <string>extended</string>
+             <string>Octave Layers</string>
             </property>
-            <property name="checked">
-             <bool>true</bool>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_octavesSurf">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Octaves</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtSurf">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox_combineSurf">
+            <property name="text">
+             <string>Combine octave descriptors</string>
             </property>
            </widget>
           </item>
@@ -359,22 +328,35 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QCheckBox" name="siftBox">
-          <property name="toolTip">
-           <string>Compute descriptors in the Opponent Color Space</string>
+         <layout class="QFormLayout" name="layout_sift">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
           </property>
-          <property name="text">
-           <string>OpponentColorDescriptor</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_magSift">
-          <item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="siftBox">
+            <property name="toolTip">
+             <string>Compute descriptors in the Opponent Color Space</string>
+            </property>
+            <property name="text">
+             <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_magSift">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
            <widget class="QLabel" name="label_magSift">
             <property name="minimumSize">
              <size>
-              <width>75</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -383,45 +365,18 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="spinBox_magSift"/>
-          </item>
-          <item>
-           <spacer name="spacer_MagSift">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_octavesSift">
-          <item>
-           <widget class="QLabel" name="label_octavesSift">
-            <property name="minimumSize">
-             <size>
-              <width>75</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Octaves</string>
-            </property>
-           </widget>
-          </item>
-          <item>
+          <item row="4" column="1">
            <widget class="QSpinBox" name="spinBox_octavesSift">
             <property name="minimumSize">
              <size>
               <width>48</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="minimum">
@@ -435,41 +390,47 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="spacer_octavesSift">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_octavesSift">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>80</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
+            <property name="text">
+             <string>Octaves</string>
+            </property>
+           </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_normSift">
-          <item>
+          <item row="5" column="1">
            <widget class="QCheckBox" name="checkBox_normSift">
             <property name="text">
              <string>Normalize</string>
             </property>
            </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_angSift">
-          <item>
+          <item row="6" column="1">
            <widget class="QCheckBox" name="checkBox_angSift">
             <property name="text">
              <string>Recalculate angles</string>
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtSift">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox_combineSift">
+            <property name="text">
+             <string>Combine octave descriptors</string>
             </property>
            </widget>
           </item>
@@ -483,22 +444,41 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QCheckBox" name="briskBox">
-          <property name="toolTip">
-           <string>Compute descriptors in the Opponent Color Space</string>
-          </property>
-          <property name="text">
-           <string>OpponentColorDescriptor</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_radiusBrisk">
-          <item>
+         <layout class="QFormLayout" name="layout_brisk">
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="briskBox">
+            <property name="toolTip">
+             <string>Compute descriptors in the Opponent Color Space</string>
+            </property>
+            <property name="text">
+             <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="combo_radiusBrisk">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="editable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
            <widget class="QLabel" name="label_radiusBrisk">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -507,41 +487,11 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QComboBox" name="combo_radiusBrisk">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="editable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="spacer_radiusBrisk">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_numberBrisk">
-          <item>
+          <item row="3" column="0">
            <widget class="QLabel" name="label_numberBrisk">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -550,7 +500,7 @@
             </property>
            </widget>
           </item>
-          <item>
+          <item row="3" column="1">
            <widget class="QComboBox" name="combo_numberBrisk">
             <property name="minimumSize">
              <size>
@@ -558,33 +508,22 @@
               <height>0</height>
              </size>
             </property>
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="editable">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="spacer_numberBrisk">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_dMaxBrisk">
-          <item>
+          <item row="4" column="0">
            <widget class="QLabel" name="label_dMaxBrisk">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -593,31 +532,21 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="spinBox_dMaxBrisk"/>
-          </item>
-          <item>
-           <spacer name="spacer_dMaxBrisk">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_dMaxBrisk">
+            <property name="maximumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>64</width>
+              <height>16777215</height>
              </size>
             </property>
-           </spacer>
+           </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_dMinBrisk">
-          <item>
+          <item row="5" column="0">
            <widget class="QLabel" name="label_dMInBrisk">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -626,21 +555,22 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="spinBox_dMinBrisk"/>
-          </item>
-          <item>
-           <spacer name="spacer_dMinBrisk">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_dMinBrisk">
+            <property name="maximumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>64</width>
+              <height>16777215</height>
              </size>
             </property>
-           </spacer>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtBrisk">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -652,25 +582,8 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <widget class="QCheckBox" name="briefBox">
-          <property name="toolTip">
-           <string>Compute descriptors in the Opponent Color Space</string>
-          </property>
-          <property name="text">
-           <string>OpponentColorDescriptor</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_bytesBrief">
-          <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Bytes</string>
-            </property>
-           </widget>
-          </item>
-          <item>
+         <layout class="QFormLayout" name="layout_brief">
+          <item row="2" column="1">
            <widget class="QComboBox" name="comboBox_Brief">
             <item>
              <property name="text">
@@ -689,33 +602,37 @@
             </item>
            </widget>
           </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="briefBox">
+            <property name="toolTip">
+             <string>Compute descriptors in the Opponent Color Space</string>
             </property>
-            <property name="sizeHint" stdset="0">
+            <property name="text">
+             <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>80</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
+            <property name="text">
+             <string>Bytes</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtBrief">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_Brief">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
@@ -725,19 +642,12 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <widget class="QCheckBox" name="freakBox">
-          <property name="text">
-           <string>OpponentColorDescriptor</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_octavesFreak">
-          <item>
+         <layout class="QFormLayout" name="layout_freak">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_octavesFreak">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -746,7 +656,7 @@
             </property>
            </widget>
           </item>
-          <item>
+          <item row="3" column="1">
            <widget class="QSpinBox" name="spinBox_octavesFreak">
             <property name="minimumSize">
              <size>
@@ -754,30 +664,19 @@
               <height>0</height>
              </size>
             </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="spacer_octavesFreak">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+            <property name="maximumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>64</width>
+              <height>16777215</height>
              </size>
             </property>
-           </spacer>
+           </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_patternFreak">
-          <item>
+          <item row="4" column="0">
            <widget class="QLabel" name="label_patternFreak">
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -786,41 +685,54 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="spinBox_patternFreak"/>
-          </item>
-          <item>
-           <spacer name="spacer_pattternFreak">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_patternFreak">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>64</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_scaleNormFreak">
-          <item>
+          <item row="6" column="1">
            <widget class="QCheckBox" name="checkBox_scaleNormFreak">
             <property name="text">
              <string>Scale normalization</string>
             </property>
            </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layout_oriNormFreak">
-          <item>
+          <item row="5" column="1">
            <widget class="QCheckBox" name="checkBox_oriNormFreak">
             <property name="text">
              <string>Orientataion normalization</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="freakBox">
+            <property name="text">
+             <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtFreak">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox_combineFreak">
+            <property name="text">
+             <string>Combine octave descriptors</string>
             </property>
            </widget>
           </item>
@@ -828,10 +740,90 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="ltp">
+      <widget class="QWidget" name="ltp_lbp">
        <attribute name="title">
         <string>LTP</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="QGroupBox" name="groupBox_lbp">
+          <property name="title">
+           <string>LBP - Local Binary Patterns</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_5">
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkBox_colExtlbp">
+             <property name="text">
+              <string>Color Extension</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <spacer name="space_lbp">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>80</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_ltp">
+          <property name="title">
+           <string>LTP - Local Ternary Patterns</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_4">
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkBox_colExtltp">
+             <property name="text">
+              <string>Color Extension</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_kltp">
+             <property name="minimumSize">
+              <size>
+               <width>80</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>k</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="spinBox_kltp">
+             <property name="maximumSize">
+              <size>
+               <width>64</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="maximum">
+              <double>128.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QCheckBox" name="checkBox_combineLTP">
+             <property name="text">
+              <string>Combine histogram descriptors</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tsurf">
        <attribute name="title">
@@ -845,6 +837,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <layout class="QFormLayout" name="treeparams_1_layout">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
           <property name="rightMargin">
            <number>5</number>
           </property>
@@ -912,6 +907,13 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_regression">
+            <property name="text">
+             <string>Regression</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="spinBox_treeRegression">
             <property name="minimumSize">
@@ -925,13 +927,6 @@
               <width>60</width>
               <height>24</height>
              </size>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_regression">
-            <property name="text">
-             <string>Regression</string>
             </property>
            </widget>
           </item>
@@ -1147,57 +1142,11 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
-         <layout class="QHBoxLayout" name="keypoint_size_layout">
-          <item>
-           <widget class="QLabel" name="label_sizeKeypoint">
-            <property name="minimumSize">
-             <size>
-              <width>35</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>35</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Size</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="spinBox_sizeKeypoint">
-            <property name="minimumSize">
-             <size>
-              <width>64</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="minimum">
-             <double>0.010000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="spacer_sizeKeypoint">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="keypoint_angle_layout">
-          <item>
+         <layout class="QFormLayout" name="layoutKeypoint">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
+          <item row="0" column="0">
            <widget class="QLabel" name="label_angleKeypoint">
             <property name="minimumSize">
              <size>
@@ -1216,34 +1165,94 @@
             </property>
            </widget>
           </item>
-          <item>
+          <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spinBox_angleKeypoint">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="maximum">
              <double>359.990000000000009</double>
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="spacer_angleKeypoint">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_sizeKeypoint">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>35</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
+            <property name="maximumSize">
+             <size>
+              <width>35</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Size</string>
+            </property>
+           </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="keypoint_softCrop_layout">
-          <item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_sizeKeypoint">
+            <property name="minimumSize">
+             <size>
+              <width>64</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_useOctaveKeypoint">
+            <property name="text">
+             <string>Use octave</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="spinBox_useOctaveKeypoint">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="minimum">
+             <number>-1</number>
+            </property>
+            <property name="maximum">
+             <number>8</number>
+            </property>
+            <property name="value">
+             <number>-1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_SoftCropKeypoint">
+            <property name="text">
+             <string>Soft crop</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
            <widget class="QCheckBox" name="checkBox_softCrop">
             <property name="text">
-             <string>Soft Crop</string>
+             <string/>
             </property>
            </widget>
           </item>

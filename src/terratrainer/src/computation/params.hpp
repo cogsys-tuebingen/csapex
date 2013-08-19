@@ -46,21 +46,29 @@ struct CMPQuadParams {
 };
 
 struct CMPKeypointParams {
-    CMPKeypointParams() : angle(0.f), size(5.f), soft_crop(true){}
+    CMPKeypointParams() : angle(0.f), scale(5.f), octave(-1), soft_crop(true){}
 
     float angle;
-    float size;
+    float scale;
+    int   octave;
     bool  soft_crop;
 };
 
 struct CMPExtractorParams {
-    enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP};
-    CMPExtractorParams(const Type t) :
+    enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP, LBP};
+    CMPExtractorParams(const Type t, const int o = 0) :
         type(t),
-        opp(false){}
+        opp(false),
+        colorExtension(false),
+        octaves(o),
+        combine_descriptors(false){}
 
     Type type;
     bool opp;
+    bool colorExtension;
+    int  octaves;
+    bool combine_descriptors;
+
 };
 
 struct CMPParamsORB : public CMPExtractorParams
@@ -81,8 +89,7 @@ struct CMPParamsORB : public CMPExtractorParams
 struct CMPParamsSURF : public CMPExtractorParams
 {
     CMPParamsSURF() :
-        CMPExtractorParams(SURF),
-        octaves(4),
+        CMPExtractorParams(SURF, 4),
         octaveLayers(3),
         extended(true){}
 
@@ -94,9 +101,8 @@ struct CMPParamsSURF : public CMPExtractorParams
 struct CMPParamsSIFT : public CMPExtractorParams
 {
     CMPParamsSIFT() :
-        CMPExtractorParams(SIFT),
+        CMPExtractorParams(SIFT, 3),
         magnification(0.0),
-        octaves(3),
         normalize(true),
         recalculateAngles(true){}
 
@@ -133,11 +139,10 @@ struct CMPParamsBRIEF : public CMPExtractorParams
 struct CMPParamsFREAK : public CMPExtractorParams
 {
     CMPParamsFREAK() :
-        CMPExtractorParams(FREAK),
+        CMPExtractorParams(FREAK, 4),
         orientationNormalized(true),
         scaleNormalized(true),
-        patternScale(22.0),
-        octaves(4){}
+        patternScale(22.0){}
 
     bool   orientationNormalized;
     bool   scaleNormalized;
@@ -148,7 +153,19 @@ struct CMPParamsFREAK : public CMPExtractorParams
 struct CMPParamsLTP : public CMPExtractorParams
 {
     CMPParamsLTP() :
-        CMPExtractorParams(LTP){}
+        CMPExtractorParams(LTP),
+        k(0.0)
+    {
+        combine_descriptors = true;
+    }
+
+    double k;
+};
+
+struct CMPParamsLBP : public CMPExtractorParams
+{
+    CMPParamsLBP() :
+        CMPExtractorParams(LBP){}
 };
 
 struct CMPParamsTSURF : public CMPExtractorParams

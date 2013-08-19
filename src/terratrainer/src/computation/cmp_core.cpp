@@ -3,11 +3,12 @@
 #include <fstream>
 #include <set>
 #include <time.h>
-#include "extractors.hpp"
+#include "cmp_extractors.hpp"
 #include "yaml.hpp"
 
 CMPCore::CMPCore() :
-    extractor_(new CMPExtractorExt),
+    cv_extractor_(new CMPCVExtractorExt),
+    pt_extractor_(new CMPPatternExtractorExt),
     random_(new CMPRandomForestExt),
     grid_(new cv_grid::GridTerra),
     work_path_("/tmp"),
@@ -62,7 +63,7 @@ void CMPCore::computeGrid()
 
     /// PARAMETERS
     cv_grid::AttrTerrainClass::Params p;
-    p.extractor  = extractor_.get();
+    p.extractor  = cv_extractor_.get();
     p.classifier = random_.get();
 
     /// CALCULATE GRID SIZE
@@ -81,7 +82,7 @@ void CMPCore::computeQuadtree()
     cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
     TerraDecomClassifier       *classifier = new TerraDecomClassifier(quad_params_.min_prob,
                                                                       random_.get(),
-                                                                      extractor_.get(),
+                                                                      cv_extractor_.get(),
                                                                       keypoint_params_.soft_crop);
 
     TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
@@ -114,6 +115,40 @@ void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
 void CMPCore::getQuad(std::vector<cv_roi::TerraROI> &regions)
 {
     quad_decom_->regions(regions);
+}
+
+void CMPCore::setExtractorParameters(CMPExtractorParams &params)
+{
+    switch(params.type) {
+    case CMPExtractorParams::ORB:
+        cv_extractor_->setParams(static_cast<CMPParamsORB&>(params));
+        break;
+    case CMPExtractorParams::SURF:
+        cv_extractor_->setParams(static_cast<CMPParamsSURF&>(params));
+        break;
+    case CMPExtractorParams::SIFT:
+        cv_extractor_->setParams(static_cast<CMPParamsSIFT&>(params));
+        break;
+    case CMPExtractorParams::BRIEF:
+        cv_extractor_->setParams(static_cast<CMPParamsBRIEF&>(params));
+        break;
+    case CMPExtractorParams::BRISK:
+        cv_extractor_->setParams(static_cast<CMPParamsBRISK&>(params));
+        break;
+    case CMPExtractorParams::FREAK:
+        cv_extractor_->setParams(static_cast<CMPParamsFREAK&>(params));
+        break;
+    case CMPExtractorParams::LBP:
+        pt_extractor_->setParams(static_cast<CMPParamsLBP&>(params));
+        break;
+    case CMPExtractorParams::LTP:
+        pt_extractor_->setParams(static_cast<CMPParamsLTP&>(params));
+        break;
+    }
+
+    cv_extractor_->setKeyPointParams(keypoint_params_);
+    type_ = params.type;
+
 }
 
 void CMPCore::setRandomForestParams(const CMPForestParams &params)
@@ -182,7 +217,11 @@ void CMPCore::extract()
     YAML::Emitter  emitter;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
-    extractor_->extractToYAML(emitter, raw_image_, rois_);
+    if(type_ != CMPExtractorParams::LBP && type_ != CMPExtractorParams::LTP)
+        cv_extractor_->extractToYAML(emitter, raw_image_, rois_);
+    else
+        pt_extractor_->extractToYAML(emitter, raw_image_, rois_);
+
     emitter << YAML::EndMap;
     out << emitter.c_str();
     out.close();

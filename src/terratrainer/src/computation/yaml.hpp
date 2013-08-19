@@ -6,9 +6,10 @@
 #include <computation/cmp_core.h>
 #include <controllers/ctrl_cmpcore_bridge.h>
 #include <time.h>
+#include <QColor>
+#include <QString>
 
 namespace CMPYAML {
-
 inline void writeClassIndex(YAML::Emitter &emitter, std::map<int,int> &classes)
 {
     emitter << YAML::BeginSeq;
@@ -193,6 +194,37 @@ inline void readFile(std::ifstream &in, CMPCore *core, CMPCoreBridge *bridge)
         std::cerr << "Error reading classifier file! " << e.what() << std::endl;
         return;
     }
+}
+
+template<class _Tp>
+inline void writeMatrix(const cv::Mat &mat, YAML::Emitter &emitter)
+{
+    for(int i = 0 ; i < mat.rows ; i++) {
+        for(int j = 0 ; j < mat.cols ; j++) {
+            emitter << mat.at<_Tp>(i,j);
+        }
+    }
+
+}
+
+template<class _Tp>
+inline void writeDescriptor(const cv::Mat &desc, const int id, const cv::Scalar &mean, const bool color_extension,
+                            YAML::Emitter &emitter)
+{
+    emitter << YAML::BeginMap;
+    emitter << YAML::Key << "class" << YAML::Value << id;
+
+    int step = desc.rows * desc.cols;
+    if(color_extension)
+        step += 3;
+    emitter << YAML::Key << "descrStep" << YAML::Value << step;
+    emitter << YAML::Key << "descr" << YAML::Value << YAML::Flow << YAML::BeginSeq;
+    writeMatrix<_Tp>(desc, emitter);
+    if(color_extension) {
+        emitter << mean[0] << mean[1] << mean[2];
+    }
+    emitter << YAML::EndSeq;
+    emitter << YAML::EndMap;
 }
 }
 #endif // YAML_HPP

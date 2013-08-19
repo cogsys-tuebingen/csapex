@@ -17,33 +17,49 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     /// SYNC GUI WITH PARAMS
     /// ORB
     ui->orbBox->setChecked(orb_.opp);
+    ui->checkBox_colExtOrb->setChecked(orb_.colorExtension);
     ui->spinBox_levelOrb->setValue(orb_.levels);
     ui->spinBox_scaleOrb->setValue(orb_.scale);
     ui->spinBox_patchOrb->setValue(orb_.patchSize);
     ui->spinBox_WTAOrb->setValue(orb_.WTA_K);
+    ui->checkBox_combineOrb->setChecked(orb_.combine_descriptors);
     /// SURF
     ui->surfBox->setChecked(surf_.opp);
+    ui->checkBox_extendedSurf->setChecked(surf_.colorExtension);
     ui->spinBox_layersSurf->setValue(surf_.octaveLayers);
     ui->spinBox_octavesSurf->setValue(surf_.octaves);
     ui->checkBox_extendedSurf->setChecked(surf_.extended);
+    ui->checkBox_combineSurf->setChecked(surf_.combine_descriptors);
     /// SIFT
     ui->siftBox->setChecked(sift_.opp);
+    ui->checkBox_angSift->setChecked(sift_.colorExtension);
     ui->spinBox_magSift->setValue(sift_.magnification);
     ui->spinBox_octavesSift->setValue(sift_.octaves);
     ui->checkBox_angSift->setChecked(sift_.recalculateAngles);
+    ui->checkBox_combineSift->setChecked(sift_.combine_descriptors);
     /// BRISK
     ui->briskBox->setChecked(brisk_.opp);
+    ui->checkBox_colExtBrisk->setChecked(brisk_.colorExtension);
     ui->spinBox_dMaxBrisk->setValue(brisk_.dMax);
     ui->spinBox_dMinBrisk->setValue(brisk_.dMin);
     /// BRIEF
     ui->briefBox->setChecked(brief_.opp);
+    ui->checkBox_colExtBrief->setChecked(brief_.colorExtension);
     /// FREAK
     ui->freakBox->setChecked(freak_.opp);
+    ui->checkBox_colExtFreak->setChecked(freak_.colorExtension);
     ui->checkBox_oriNormFreak->setChecked(freak_.orientationNormalized);
     ui->checkBox_scaleNormFreak->setChecked(freak_.scaleNormalized);
     ui->spinBox_patternFreak->setValue(freak_.patternScale);
     ui->spinBox_octavesFreak->setValue(freak_.octaves);
-    /// TREE
+    ui->checkBox_combineFreak->setChecked(freak_.combine_descriptors);
+    /// LBP / LTP
+    ui->checkBox_colExtlbp->setChecked(lbp_.colorExtension);
+    ui->checkBox_colExtltp->setChecked(ltp_.colorExtension);
+    ui->spinBox_kltp->setValue(ltp_.k);
+    ui->checkBox_combineLTP->setChecked(ltp_.combine_descriptors);
+
+    /// FOREST
     ui->spinBox_treeMaxDepth->setValue(forest_.max_depth);
     ui->spinBox_treeMinSampels->setValue(forest_.min_samples);
     ui->spinBox_treeRegression->setValue(forest_.regression);
@@ -54,13 +70,10 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_treeMaxTrees->setValue(forest_.max_trees);
     ui->spinBox_treeAccuracy->setValue(forest_.accurracy);
     /// KEYPOINT
-    ui->spinBox_sizeKeypoint->setValue(key_.size);
+    ui->spinBox_sizeKeypoint->setValue(key_.scale);
     ui->spinBox_angleKeypoint->setValue(key_.angle);
     ui->checkBox_softCrop->setChecked(key_.soft_crop);
     /// FEEDBACK
-
-
-
 
     bridge_->setKeyPointParams(key_);
     bridge_->setForestParams(forest_);
@@ -72,6 +85,11 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
 void CtrlPreferences::orbOppChanged(bool checked)
 {
     orb_.opp = checked;
+}
+
+void CtrlPreferences::orbColorExtChanged(bool checked)
+{
+    orb_.colorExtension = checked;
 }
 
 void CtrlPreferences::orbLevelChanged(int levels)
@@ -94,9 +112,19 @@ void CtrlPreferences::orbPatchChanged(int size)
     orb_.patchSize = size;
 }
 
+void CtrlPreferences::orbCombineChanged(bool checked)
+{
+    orb_.combine_descriptors = checked;
+}
+
 void CtrlPreferences::surfOppChanged(bool checked)
 {
     surf_.opp = checked;
+}
+
+void CtrlPreferences::surfColorExtChanged(bool checked)
+{
+    surf_.colorExtension = checked;
 }
 
 void CtrlPreferences::surfOctavesChanged(int octaves)
@@ -114,9 +142,19 @@ void CtrlPreferences::surfExtendeChanged(bool checked)
     surf_.extended = checked;
 }
 
+void CtrlPreferences::surfCombineChanged(bool checked)
+{
+    surf_.combine_descriptors = checked;
+}
+
 void CtrlPreferences::siftOppChanged(bool checked)
 {
     sift_.opp = checked;
+}
+
+void CtrlPreferences::siftColorExtChanged(bool checked)
+{
+    sift_.colorExtension = checked;
 }
 
 void CtrlPreferences::siftMagnificationChanged(double magnification)
@@ -139,9 +177,19 @@ void CtrlPreferences::siftRecalcAnglesChanged(bool checked)
     sift_.recalculateAngles = checked;
 }
 
+void CtrlPreferences::siftCombineChanged(bool checked)
+{
+    sift_.combine_descriptors = checked;
+}
+
 void CtrlPreferences::briskOppChanged(bool checked)
 {
     brisk_.opp = checked;
+}
+
+void CtrlPreferences::briskColorExtChanged(bool checked)
+{
+    brisk_.colorExtension = checked;
 }
 
 void CtrlPreferences::briskRadiusListChanged(QString value)
@@ -173,6 +221,11 @@ void CtrlPreferences::briefOppChanged(bool checked)
     brief_.opp = checked;
 }
 
+void CtrlPreferences::briefColorExtChanged(bool checked)
+{
+    brief_.colorExtension = checked;
+}
+
 void CtrlPreferences::briefBytesChanged(QString bytes)
 {
     brief_.bytes = bytes.toInt();
@@ -181,6 +234,11 @@ void CtrlPreferences::briefBytesChanged(QString bytes)
 void CtrlPreferences::freakOppChanged(bool checked)
 {
     freak_.opp = checked;
+}
+
+void CtrlPreferences::freakColorExtChanged(bool checked)
+{
+    freak_.colorExtension = checked;
 }
 
 void CtrlPreferences::freakPatternScaleChanged(double scale)
@@ -203,10 +261,35 @@ void CtrlPreferences::freakOctavesChanged(int octaves)
     freak_.octaves = octaves;
 }
 
+void CtrlPreferences::freakCombineChanged(bool checked)
+{
+    freak_.combine_descriptors = checked;
+}
+
 void CtrlPreferences::keypointSizeChanged(double size)
 {
-    key_.size = size;
- }
+    key_.scale = size;
+}
+
+void CtrlPreferences::lbpColorExtChanged(bool checked)
+{
+    lbp_.colorExtension = checked;
+}
+
+void CtrlPreferences::ltpColorExtChanged(bool checked)
+{
+    ltp_.colorExtension = checked;
+}
+
+void CtrlPreferences::ltpKChanged(double value)
+{
+    ltp_.k = value;
+}
+
+void CtrlPreferences::ltpCombineChanged(bool checked)
+{
+    ltp_.combine_descriptors = checked;
+}
 
 void CtrlPreferences::keypointAngleChanged(double angle)
 {
@@ -310,7 +393,10 @@ void CtrlPreferences::applyExtratorParams(QString setting)
         bridge_->setExtractorParams(brisk_);
     if(setting == "FREAK")
         bridge_->setExtractorParams(freak_);
-  ///  if(setting == "LTP")
+    if(setting == "LBP")
+        bridge_->setExtractorParams(lbp_);
+    if(setting == "LTP")
+        bridge_->setExtractorParams(ltp_);
 
     bridge_->setKeyPointParams(key_);
     bridge_->setForestParams(forest_);

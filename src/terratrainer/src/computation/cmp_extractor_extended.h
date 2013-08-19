@@ -3,19 +3,53 @@
 #include <utils/LibCvTools/extractor.h>
 #include <yaml-cpp/yaml.h>
 #include <roi.hpp>
+#include "params.hpp"
 
-class CMPExtractorExt : public Extractor
+class CMPCVExtractorExt : public CVExtractor
 {
 public:
-    typedef boost::shared_ptr<CMPExtractorExt> Ptr;
+    typedef boost::shared_ptr<CMPCVExtractorExt> Ptr;
 
-    CMPExtractorExt();
-    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois,
-                       const float angle = 0.f , const float scale = 1.f, const bool soft_crop = true);
+    CMPCVExtractorExt();
+    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
+
+    void setParams(CMPParamsORB &params);
+    void setParams(CMPParamsSURF  &params);
+    void setParams(CMPParamsSIFT  &params);
+    void setParams(CMPParamsBRISK &params);
+    void setParams(CMPParamsBRIEF &params);
+    void setParams(CMPParamsFREAK &params);
+    void setKeyPointParams(CMPKeypointParams &key);
+    void reset();
 
 private:
-    void      writeMatrix(const cv::Mat &mat, YAML::Emitter &emitter);
+    float angle_;
+    float scale_;
+    float soft_crop_;
+    float octave_;
+    float max_octave_;
+    bool  color_extension_;
+    bool  combine_descriptors_;
 
+    void  writeSeperated(const Mat &desc, const int id, const Scalar &mean, YAML::Emitter &emitter);
 };
+
+class CMPPatternExtractorExt : public PatternExtractor
+{
+public:
+    typedef boost::shared_ptr<CMPPatternExtractorExt> Ptr;
+    CMPPatternExtractorExt();
+
+    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
+
+    void setParams(const CMPParamsLBP &params);
+    void setParams(const CMPParamsLTP &params);
+private:
+    bool  color_extension_;
+    bool  combine_descriptors_;
+
+    void writeSeperated(const Mat &desc, const int id, const Scalar &mean, YAML::Emitter &emitter);
+};
+
 
 #endif // CMP_EXTRACTOR_EXTENDED_H

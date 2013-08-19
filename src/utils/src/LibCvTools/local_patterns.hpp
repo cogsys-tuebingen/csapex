@@ -5,7 +5,14 @@
 using namespace cv;
 
 namespace cv_local_patterns {
-class LBP {
+
+class LocalPattern {
+protected :
+    LocalPattern(){}
+};
+
+class LBP : public LocalPattern
+{
 public:
     LBP() :
         histogram(cv::Mat_<int>(256, 1, 0))
@@ -24,18 +31,18 @@ public:
 
     cv::Mat getHistogram()
     {
-        return histogram;
+        return histogram.clone();
     }
 
     template <typename _Tp>
-    void olbp(InputArray _src) {
+    void stdExtraction(InputArray _src, const _Tp k = 0) {
         histogram.setTo(0);
         // get matrices
         Mat src = _src.getMat();
         // calculate patterns
         for(int i=1;i<src.rows-1;i++) {
             for(int j=1;j<src.cols-1;j++) {
-                _Tp center = src.at<_Tp>(i,j);
+                _Tp center = src.at<_Tp>(i,j) + k;
                 unsigned char histgram_pos = 0;
 
                 histgram_pos += (src.at<_Tp>(i-1,j-1)   >= center) << 7;
@@ -53,7 +60,7 @@ public:
     }
 
     template <typename _Tp>
-    inline void elbp(InputArray _src, const int radius, const int neighbors) {
+    inline void extExtraction(InputArray _src, const int radius, const int neighbors, const _Tp k = 0) {
         //get matrices
         Mat src = _src.getMat();
         for(int n=0; n<neighbors; n++) {
@@ -79,7 +86,7 @@ public:
                     // calculate interpolated value
                     float t = static_cast<float>(w1*src.at<_Tp>(i+fy,j+fx) + w2*src.at<_Tp>(i+fy,j+cx) + w3*src.at<_Tp>(i+cy,j+fx) + w4*src.at<_Tp>(i+cy,j+cx));
                     // floating point precision, so check some machine-dependent epsilon
-                    _Tp center = src.at<_Tp>(i,j);
+                    _Tp center = src.at<_Tp>(i,j) + k;
                     unsigned char histogram_pos = 0;
                     histogram_pos += (t >= center) << n;
                     histogram.at<int>(histogram_pos)++;
@@ -93,7 +100,8 @@ private:
     cv::Mat histogram;
 };
 
-class LTP {
+class LTP  : public LocalPattern
+{
 public :
     LTP() :
         pos_(cv::Mat_<int>(256, 1, 0)),
@@ -114,16 +122,16 @@ public :
 
     cv::Mat getPos()
     {
-        return pos_;
+        return pos_.clone();
     }
 
     cv::Mat getNeg()
     {
-        return neg_;
+        return neg_.clone();
     }
 
     template <typename _Tp>
-    void oltp(InputArray _src, const _Tp k) {
+    void stdExtraction(InputArray _src, const _Tp k) {
         pos_.setTo(0);
         neg_.setTo(0);
         // get matrices
@@ -161,7 +169,7 @@ public :
     }
 
     template <typename _Tp>
-    inline void eltp(InputArray _src, const int radius, const int neighbors, const _Tp k) {
+    inline void extExtraction(InputArray _src, const int radius, const int neighbors, const _Tp k) {
         //get matrices
         Mat src = _src.getMat();
         for(int n=0; n<neighbors; n++) {

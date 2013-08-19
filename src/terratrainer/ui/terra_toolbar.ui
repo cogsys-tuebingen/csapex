@@ -156,6 +156,16 @@
         <string>FREAK</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>LBP</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>LTP</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item>

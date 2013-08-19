@@ -27,37 +27,52 @@ public:
 public Q_SLOTS:
     /// ORB
     void orbOppChanged           (bool checked);
+    void orbColorExtChanged      (bool checked);
     void orbLevelChanged         (int levels);
     void orbScaleChanged         (double scale);
     void orbWTA_KChanged         (int wta_k);
     void orbPatchChanged         (int size);
+    void orbCombineChanged       (bool checked);
     /// SURF
     void surfOppChanged          (bool checked);
+    void surfColorExtChanged     (bool checked);
     void surfOctavesChanged      (int octaves);
     void surfOctaveLayersChanged (int layers);
     void surfExtendeChanged      (bool checked);
+    void surfCombineChanged      (bool checked);
     /// SIFT
     void siftOppChanged          (bool checked);
+    void siftColorExtChanged     (bool checked);
     void siftMagnificationChanged(double magnification);
     void siftOctavesChanged      (int ocataves);
     void siftNormalizeChanged    (bool checked);
     void siftRecalcAnglesChanged (bool checked);
+    void siftCombineChanged      (bool checked);
     /// BRISK
     void briskOppChanged         (bool checked);
+    void briskColorExtChanged    (bool checked);
     void briskRadiusListChanged  (QString value);
     void briskNumberListChanged  (QString value);
     void briskdMaxChanged        (double dMax);
     void briskdMinChanged        (double dMIn);
     /// BRIEF
     void briefOppChanged         (bool checked);
+    void briefColorExtChanged    (bool checked);
     void briefBytesChanged       (QString bytes);
     /// FREAK
     void freakOppChanged         (bool checked);
+    void freakColorExtChanged    (bool checked);
     void freakPatternScaleChanged(double scale);
     void freakScaleNormChanged   (bool checked);
     void freakOriNormChanged     (bool checked);
-    void freakOctavesChanged     (int octaves);
+    void freakOctavesChanged     (int  octaves);
+    void freakCombineChanged     (bool checked);
+    /// LBP
+    void lbpColorExtChanged     (bool checked);
     /// LTP
+    void ltpColorExtChanged     (bool checked);
+    void ltpKChanged            (double value);
+    void ltpCombineChanged      (bool checked);
 
     /// KEYPOINT
     void keypointSizeChanged     (double size);
@@ -70,7 +85,7 @@ public Q_SLOTS:
     void forest_surrogatesChanged(bool checked);
     void forest_categoriesChanged(int amount);
     void forest_importanceChanged(bool checked);
-    void forest_nactivesChanged (int amount);
+    void forest_nactivesChanged  (int amount);
     void forest_maxTreesChanged  (int trees);
     void forest_accuracyChanged  (double accuracy);
     /// FEEDBACK
@@ -104,6 +119,7 @@ private:
     CMPParamsBRISK          brisk_;
     CMPParamsFREAK          freak_;
     CMPParamsLTP            ltp_;
+    CMPParamsLBP            lbp_;
     CMPParamsTSURF          tsurf;
     CMPKeypointParams       key_;
     CMPForestParams         forest_;

@@ -4,7 +4,7 @@
 #include "params.hpp"
 #include "cmp_extractor_extended.h"
 #include "cmp_randomforest_extended.h"
-#include "extractors.hpp"
+#include "cmp_extractors.hpp"
 #include "roi.hpp"
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -42,22 +42,13 @@ public:
     void    getQuad(std::vector<cv_roi::TerraROI> &regions);
 
     ///     PARAMETERS
-    template<class Parameters>
-    void setExtractorParameters(Parameters &param)
-    {
-        cv::DescriptorExtractor* ptr = CMPExtractors::create(param);
-        if(param.opp)
-            CMPExtractors::makeOpp(ptr);
-        extractor_->set(ptr);
-        type_ = param.type;
-    }
+    void    setExtractorParameters(CMPExtractorParams &params);
 
     ///     PARAMS
     void    setRandomForestParams(const CMPForestParams &params);
     void    setGridParameters(const CMPGridParams &params);
     void    setQuadParameters(const CMPQuadParams &params);
     void    setKeyPointParameters(const CMPKeypointParams &params);
-
 
     ///     TRAINING PREPARATION
     void    setRois(const std::vector<cv_roi::TerraROI> &rois);
@@ -68,10 +59,11 @@ public:
 
 
 private:
-    typedef CMPExtractorExt::KeyPoints KeyPoints;
+    typedef CMPCVExtractorExt::KeyPoints KeyPoints;
 
     cv::Mat                                 raw_image_;
-    CMPExtractorExt::Ptr                    extractor_;
+    CMPCVExtractorExt::Ptr                  cv_extractor_;
+    CMPPatternExtractorExt::Ptr             pt_extractor_;
     CMPExtractorParams::Type                type_;
     CMPRandomForestExt::Ptr                 random_;
 
