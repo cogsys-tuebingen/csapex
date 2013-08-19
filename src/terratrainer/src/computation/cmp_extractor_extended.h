@@ -13,7 +13,7 @@ public:
     CMPCVExtractorExt();
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
 
-    void setParams(CMPParamsORB &params);
+    void setParams(CMPParamsORB   &params);
     void setParams(CMPParamsSURF  &params);
     void setParams(CMPParamsSIFT  &params);
     void setParams(CMPParamsBRISK &params);
@@ -23,6 +23,7 @@ public:
     void reset();
 
 private:
+    CMPExtractorParams::Type type_;
     float angle_;
     float scale_;
     float soft_crop_;
@@ -45,10 +46,9 @@ public:
     void setParams(const CMPParamsLBP &params);
     void setParams(const CMPParamsLTP &params);
 private:
+    CMPExtractorParams::Type type_;
     bool  color_extension_;
     bool  combine_descriptors_;
-
-    void writeSeperated(const Mat &desc, const int id, const Scalar &mean, YAML::Emitter &emitter);
 };
 
 

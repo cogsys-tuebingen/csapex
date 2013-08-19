@@ -78,6 +78,7 @@ public Q_SLOTS:
     void keypointSizeChanged     (double size);
     void keypointAngleChanged    (double angle);
     void keypointCropChanged     (bool crop);
+    void keypointOctavesChanged  (int value);
     /// FOREST
     void forest_depthChanged     (int depth);
     void forest_samplesChanged   (int samples);

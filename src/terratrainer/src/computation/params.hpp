@@ -46,7 +46,7 @@ struct CMPQuadParams {
 };
 
 struct CMPKeypointParams {
-    CMPKeypointParams() : angle(0.f), scale(5.f), octave(-1), soft_crop(true){}
+    CMPKeypointParams() : angle(0.f), scale(0.5f), octave(-1), soft_crop(true){}
 
     float angle;
     float scale;
@@ -93,7 +93,6 @@ struct CMPParamsSURF : public CMPExtractorParams
         octaveLayers(3),
         extended(true){}
 
-    int  octaves;
     int  octaveLayers;
     bool extended;
 };
@@ -107,7 +106,6 @@ struct CMPParamsSIFT : public CMPExtractorParams
         recalculateAngles(true){}
 
     double magnification;
-    int    octaves;
     bool   normalize;
     bool   recalculateAngles;
 };
@@ -147,7 +145,6 @@ struct CMPParamsFREAK : public CMPExtractorParams
     bool   orientationNormalized;
     bool   scaleNormalized;
     double patternScale;
-    int    octaves;
 };
 
 struct CMPParamsLTP : public CMPExtractorParams

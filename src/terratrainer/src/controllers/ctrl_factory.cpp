@@ -265,6 +265,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QSpinBox::connect(tf->spinBox_sizeKeypoint,     SIGNAL(valueChanged(double)), ctrl, SLOT(keypointSizeChanged(double)));
     QSpinBox::connect(tf->spinBox_angleKeypoint,    SIGNAL(valueChanged(double)), ctrl, SLOT(keypointAngleChanged(double)));
     QCheckBox::connect(tf->checkBox_softCrop,       SIGNAL(clicked(bool)),        ctrl, SLOT(keypointCropChanged(bool)));
+    QSpinBox::connect(tf->spinBox_useOctaveKeypoint,SIGNAL(valueChanged(int)),    ctrl, SLOT(keypointOctavesChanged(int)));
     /// FOREST
     QSpinBox::connect(tf->spinBox_treeMaxDepth,     SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_depthChanged(int)));
     QSpinBox::connect(tf->spinBox_treeMinSampels,   SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_samplesChanged(int)));

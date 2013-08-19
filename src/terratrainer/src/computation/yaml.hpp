@@ -6,8 +6,10 @@
 #include <computation/cmp_core.h>
 #include <controllers/ctrl_cmpcore_bridge.h>
 #include <time.h>
+#include <math.h>
 #include <QColor>
 #include <QString>
+#include <cfloat>
 
 namespace CMPYAML {
 inline void writeClassIndex(YAML::Emitter &emitter, std::map<int,int> &classes)
@@ -196,18 +198,20 @@ inline void readFile(std::ifstream &in, CMPCore *core, CMPCoreBridge *bridge)
     }
 }
 
-template<class _Tp>
+template<typename _Tp, typename _Tw>
 inline void writeMatrix(const cv::Mat &mat, YAML::Emitter &emitter)
 {
     for(int i = 0 ; i < mat.rows ; i++) {
         for(int j = 0 ; j < mat.cols ; j++) {
-            emitter << mat.at<_Tp>(i,j);
+            _Tw value = (_Tw) mat.at<_Tp>(i,j);
+
+            emitter << value;
         }
     }
 
 }
 
-template<class _Tp>
+template<typename _Tp, typename _Tw>
 inline void writeDescriptor(const cv::Mat &desc, const int id, const cv::Scalar &mean, const bool color_extension,
                             YAML::Emitter &emitter)
 {
@@ -219,12 +223,23 @@ inline void writeDescriptor(const cv::Mat &desc, const int id, const cv::Scalar 
         step += 3;
     emitter << YAML::Key << "descrStep" << YAML::Value << step;
     emitter << YAML::Key << "descr" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-    writeMatrix<_Tp>(desc, emitter);
+    writeMatrix<_Tp, _Tw>(desc, emitter);
     if(color_extension) {
         emitter << mean[0] << mean[1] << mean[2];
     }
     emitter << YAML::EndSeq;
     emitter << YAML::EndMap;
 }
+
+template<typename _Tp, typename _Tw>
+inline void writeDescriptorsSeperated(const Mat &desc, const int id, const Scalar &mean, const bool color_extension,
+                                      YAML::Emitter &emitter)
+{
+    for(int j = 0 ; j < desc.rows ; j++) {
+        cv::Mat roi(desc, cv::Rect(0,j,desc.cols,1));
+        CMPYAML::writeDescriptor<_Tp, _Tw>(roi, id, mean, color_extension, emitter);
+    }
 }
+}
+
 #endif // YAML_HPP

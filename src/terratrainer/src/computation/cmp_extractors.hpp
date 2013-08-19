@@ -65,6 +65,8 @@ inline cv::DescriptorExtractor* prepare(CMPParamsBRIEF &params)
 }
 inline cv::DescriptorExtractor* prepare(CMPParamsFREAK &params)
 {
+
+
     cv::DescriptorExtractor *ptr =
             new cv::FREAK(params.orientationNormalized,
                           params.scaleNormalized,
@@ -72,6 +74,7 @@ inline cv::DescriptorExtractor* prepare(CMPParamsFREAK &params)
                           params.octaves);
     if(params.opp)
         CMPExtractors::makeOpp(ptr);
+
 
     return ptr;
 }

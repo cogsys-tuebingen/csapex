@@ -133,8 +133,10 @@ private:
 class AttrTerrainClass {
 public:
     struct Params {
-        CVExtractor    *extractor;
-        RandomForest *classifier;
+        CVExtractor   *extractor;
+        RandomForest  *classifier;
+        float         angle;
+        float         scale;
     };
 
     AttrTerrainClass()
@@ -162,7 +164,9 @@ public:
     {
         /// EXTRACT
         cv::Mat descriptors;
-        p.extractor->extract(_img, descriptors);
+        cv::Rect roi(0,0, _img.cols, _img.rows);
+        CVExtractor::KeyPoints k = p.extractor->prepareKeypoint(roi, p.scale);
+        p.extractor->extract(_img, k, descriptors);
         /// PREDICT
         int   classID;
         float prob;

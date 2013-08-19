@@ -15,7 +15,7 @@ class LBP : public LocalPattern
 {
 public:
     LBP() :
-        histogram(cv::Mat_<int>(256, 1, 0))
+        histogram(cv::Mat_<int>(1, 256, 0))
     {
     }
 
@@ -104,8 +104,8 @@ class LTP  : public LocalPattern
 {
 public :
     LTP() :
-        pos_(cv::Mat_<int>(256, 1, 0)),
-        neg_(cv::Mat_<int>(256, 1, 0))
+        pos_(cv::Mat_<int>(1, 256, 0)),
+        neg_(cv::Mat_<int>(1, 256, 0))
     {
     }
 

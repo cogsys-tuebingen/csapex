@@ -18,17 +18,39 @@ void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &im
     emitter << YAML::BeginSeq;
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
         /// CALCULATION
-        cv::Mat     roi(img, it->roi.rect);
-        cv::Scalar  mean = extractMeanColorRGBHSV(roi);
-
-
-        /// COLOR EXTENSION
-        cv::Mat desc;
-        extract(roi, desc);
-        if(combine_descriptors_)
-            CMPYAML::writeDescriptor<float>(desc, it->id.id, mean, color_extension_, emitter);
+        cv::Mat     roi;
+        cv::Mat     roi_col(img, it->roi.rect);
+        cv::Scalar  mean = extractMeanColorRGBHSV(roi_col);
+        if(soft_crop_)
+            roi = img;
         else
-            writeSeperated(desc, it->id.id, mean, emitter);
+            roi = roi_col;
+
+        cv::Mat desc;
+
+        /// MULTIOCTAVE
+        CVExtractor::KeyPoints k;
+        if(type_ == CMPExtractorParams::SURF || type_ == CMPExtractorParams::SIFT)
+            k = prepareKeypoint(it->roi.rect, soft_crop_, scale_, angle_);
+        else
+            k = prepareNeighbouredKeypoint(it->roi.rect, soft_crop_, scale_, angle_);
+
+        extract(roi, k, desc);
+        if(combine_descriptors_) {
+            if(type_ == CMPExtractorParams::FREAK) {
+                CMPYAML::writeDescriptor<uchar, int>(desc, it->id.id, mean, color_extension_, emitter);
+            } else  {
+                CMPYAML::writeDescriptor<float, float>(desc, it->id.id, mean, color_extension_, emitter);
+            }
+        } else {
+            if(type_ == CMPExtractorParams::FREAK) {
+                CMPYAML::writeDescriptorsSeperated<uchar, int>(desc, it->id.id, mean, color_extension_, emitter);
+            } else  {
+                CMPYAML::writeDescriptorsSeperated<float, float>(desc, it->id.id, mean, color_extension_, emitter);
+            }
+
+
+        }
     }
     emitter << YAML::EndSeq;
 }
@@ -37,6 +59,7 @@ void CMPCVExtractorExt::setParams(CMPParamsORB &params)
 {
     CVExtractor::set(CMPExtractors::prepare(params));
     color_extension_ = params.colorExtension;
+    type_ = params.type;
 }
 
 void CMPCVExtractorExt::setParams(CMPParamsSURF &params)
@@ -44,6 +67,7 @@ void CMPCVExtractorExt::setParams(CMPParamsSURF &params)
     CVExtractor::set(CMPExtractors::prepare(params));
     max_octave_ = params.octaves;
     color_extension_ = params.colorExtension;
+    type_ = params.type;
 }
 
 void CMPCVExtractorExt::setParams(CMPParamsSIFT &params)
@@ -51,6 +75,7 @@ void CMPCVExtractorExt::setParams(CMPParamsSIFT &params)
     CVExtractor::set(CMPExtractors::prepare(params));
     max_octave_ = params.octaves;
     color_extension_ = params.colorExtension;
+    type_ = params.type;
 }
 
 void CMPCVExtractorExt::setParams(CMPParamsBRISK &params)
@@ -58,6 +83,7 @@ void CMPCVExtractorExt::setParams(CMPParamsBRISK &params)
     CVExtractor::set(CMPExtractors::prepare(params));
     max_octave_ = params.octaves;
     color_extension_ = params.colorExtension;
+    type_ = params.type;
 }
 
 void CMPCVExtractorExt::setParams(CMPParamsBRIEF &params)
@@ -65,6 +91,7 @@ void CMPCVExtractorExt::setParams(CMPParamsBRIEF &params)
     CVExtractor::set(CMPExtractors::prepare(params));
     max_octave_ = params.octaves;
     color_extension_ = params.colorExtension;
+    type_ = params.type;
 }
 
 void CMPCVExtractorExt::setParams(CMPParamsFREAK &params)
@@ -72,6 +99,7 @@ void CMPCVExtractorExt::setParams(CMPParamsFREAK &params)
     CVExtractor::set(CMPExtractors::prepare(params));
     max_octave_ = params.octaves;
     color_extension_ = params.colorExtension;
+    type_ = params.type;
 }
 
 void CMPCVExtractorExt::setKeyPointParams(CMPKeypointParams &key)
@@ -80,15 +108,6 @@ void CMPCVExtractorExt::setKeyPointParams(CMPKeypointParams &key)
     scale_           = key.scale;
     octave_          = key.octave;
     soft_crop_       = key.soft_crop;
-}
-
-
-void CMPCVExtractorExt::writeSeperated(const Mat &desc, const int id, const Scalar &mean, YAML::Emitter &emitter)
-{
-    for(int j = 0 ; j < desc.rows ; j++) {
-        cv::Mat roi(desc, cv::Rect(0,j,desc.cols,1));
-        CMPYAML::writeDescriptor<float>(roi, id, mean, color_extension_, emitter);
-    }
 }
 
 void CMPCVExtractorExt::reset()
@@ -119,9 +138,9 @@ void CMPPatternExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Ma
         cv::Mat desc;
         extract(roi, desc);
         if(combine_descriptors_)
-            CMPYAML::writeDescriptor<int>(desc, it->id.id, mean, color_extension_, emitter);
+            CMPYAML::writeDescriptor<int, int>(desc, it->id.id, mean, color_extension_, emitter);
         else
-            writeSeperated(desc, it->id.id, mean, emitter);
+            CMPYAML::writeDescriptorsSeperated<int, int>(desc, it->id.id, mean, color_extension_, emitter);
     }
     emitter << YAML::EndSeq;
 }
@@ -130,21 +149,13 @@ void CMPPatternExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Ma
 void CMPPatternExtractorExt::setParams(const CMPParamsLBP &params)
 {
     PatternExtractor::set(new cv_local_patterns::LBP);
-    k_ = 0;
+    k = 0;
     color_extension_ = params.colorExtension;
 }
 
 void CMPPatternExtractorExt::setParams(const CMPParamsLTP &params)
 {
     PatternExtractor::set(new cv_local_patterns::LTP);
-    k_ = params.k;
+    k = params.k;
     color_extension_ = params.colorExtension;
-}
-
-void CMPPatternExtractorExt::writeSeperated(const cv::Mat &desc, const int id, const cv::Scalar &mean, YAML::Emitter &emitter)
-{
-    for(int j = 0 ; j < desc.cols ; j++) {
-        cv::Mat roi(desc, cv::Rect(j,0,1,desc.rows));
-        CMPYAML::writeDescriptor<int>(roi, id, mean, color_extension_, emitter);
-    }
 }

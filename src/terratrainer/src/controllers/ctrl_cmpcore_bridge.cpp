@@ -143,7 +143,6 @@ void CMPCoreBridge::loadClassifier(const QString path)
     std::ifstream in(path.toUtf8().constData());
     CMPYAML::readFile(in, cc_.get(), this);
     in.close();
-    cc_->computeQuadtree();
     Q_EMIT classifierReloaded();
 }
 

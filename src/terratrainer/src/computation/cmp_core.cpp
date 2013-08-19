@@ -3,6 +3,7 @@
 #include <fstream>
 #include <set>
 #include <time.h>
+
 #include "cmp_extractors.hpp"
 #include "yaml.hpp"
 
@@ -65,6 +66,8 @@ void CMPCore::computeGrid()
     cv_grid::AttrTerrainClass::Params p;
     p.extractor  = cv_extractor_.get();
     p.classifier = random_.get();
+    p.angle = keypoint_params_.angle;
+    p.scale = keypoint_params_.scale;
 
     /// CALCULATE GRID SIZE
     int height = raw_image_.rows / grid_params_.cell_height;
@@ -83,7 +86,9 @@ void CMPCore::computeQuadtree()
     TerraDecomClassifier       *classifier = new TerraDecomClassifier(quad_params_.min_prob,
                                                                       random_.get(),
                                                                       cv_extractor_.get(),
-                                                                      keypoint_params_.soft_crop);
+                                                                      keypoint_params_.soft_crop,
+                                                                      keypoint_params_.scale,
+                                                                      keypoint_params_.angle);
 
     TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
     quad_decom_.reset(decom);

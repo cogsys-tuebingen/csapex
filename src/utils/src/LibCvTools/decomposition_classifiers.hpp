@@ -70,13 +70,16 @@ class TerraDecomClassifier : public DecompositionClassifier
 {
     ///
 public :
-    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, CVExtractor *_extractor, const bool soft_crop = false) :
+    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, CVExtractor *_extractor,
+                         const bool soft_crop = false, const float scale = 1.f, const float angle = 0.f) :
         classifier(_classifier),
         extractor(_extractor),
         threshold(_threshold),
         last_prob(0.0),
         last_id(-1),
-        soft_crop(soft_crop)
+        soft_crop(soft_crop),
+        key_point_angle(angle),
+        key_point_scale(scale)
     {
     }
 
@@ -93,7 +96,8 @@ public :
         else
             img_roi = cv::Mat(image, roi);
 
-        extractor->extract(img_roi, descriptors);
+        CVExtractor::KeyPoints k = extractor->prepareKeypoint(roi, soft_crop, key_point_scale, key_point_angle);
+        extractor->extract(img_roi, k, descriptors);
         classifier->predictClassProb(descriptors, last_id, last_prob);
 
         return last_prob < threshold;
@@ -123,5 +127,7 @@ private:
     float         last_prob;
     int           last_id;
     bool          soft_crop;
+    float         key_point_angle;
+    float         key_point_scale;
 };
 #endif // DECOMPOSITION_CLASSIFIER_HPP

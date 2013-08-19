@@ -301,6 +301,11 @@ void CtrlPreferences::keypointCropChanged(bool crop)
     key_.soft_crop = crop;
 }
 
+void CtrlPreferences::keypointOctavesChanged(int value)
+{
+    key_.octave = value;
+}
+
 void CtrlPreferences::forest_depthChanged(int depth)
 {
     forest_.max_depth = depth;
