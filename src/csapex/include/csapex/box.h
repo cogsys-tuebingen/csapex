@@ -170,6 +170,8 @@ public Q_SLOTS:
     void deleteBox();
     void minimizeBox(bool minimize);
     void enableContent(bool enable);
+    void enableIO(bool enable);
+    void setIOError(bool error);
     void refreshStylesheet();
     void eventModelChanged();
     void killContent();

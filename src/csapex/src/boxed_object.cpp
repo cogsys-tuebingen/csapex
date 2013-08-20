@@ -65,6 +65,9 @@ void BoxedObject::addTag(const Tag &tag)
 
 std::vector<Tag> BoxedObject::getTags() const
 {
+    if(tags_.empty()) {
+        tags_.push_back(Tag::get("General"));
+    }
     return tags_;
 }
 
@@ -143,6 +146,8 @@ void BoxedObject::tick()
 void BoxedObject::errorEvent(bool error, ErrorLevel level)
 {
     if(enabled_ && error && level == EL_ERROR) {
-        box_->enableContent(false);
+        box_->setIOError(true);
+    } else {
+        box_->setIOError(false);
     }
 }

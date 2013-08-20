@@ -23,17 +23,6 @@ BoxManager::BoxManager()
 {
 }
 
-void BoxManager::insertAvailableBoxedObjects(QLayout* layout)
-{
-    if(!pluginsLoaded()) {
-        reload();
-    }
-
-    BOOST_FOREACH(SelectorProxy::Ptr p, available_elements_prototypes) {
-        layout->addWidget(p->clone());
-    }
-}
-
 namespace {
 bool compare (SelectorProxy::Ptr a, SelectorProxy::Ptr b) {
     const std::string& as = BoxManager::stripNamespace(a->getType());
@@ -136,19 +125,19 @@ void BoxManager::register_box_type(SelectorProxy::Ptr provider)
     available_elements_prototypes.push_back(provider);
 }
 
-void BoxManager::startPlacingMetaBox(QWidget*, const QPoint& offset)
+void BoxManager::startPlacingMetaBox(QWidget* parent, const QPoint& offset)
 {
     std::cout << "meta" << std::endl;
 
-    startPlacingBox("::meta", offset);
+    startPlacingBox(parent, "::meta", offset);
 }
 
 
-void BoxManager::startPlacingBox(const std::string &type, const QPoint& offset)
+void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset)
 {
     foreach(SelectorProxy::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
-            p->startObjectPositioning(p, offset);
+            p->startObjectPositioning(parent, p, offset);
             return;
         }
     }

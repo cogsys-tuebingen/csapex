@@ -5,7 +5,7 @@
 #include <csapex/box.h>
 #include <csapex/connector_in.h>
 #include <utils/LibUtil/QtCvImageConverter.h>
-#include <csapex_vision/messages_default.hpp>
+#include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
 #include <QPainter>

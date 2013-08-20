@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS  genmsg roscpp sensor_msgs cv_bridge dynamic_reconfigure utils)
+find_package(catkin REQUIRED COMPONENTS  genmsg roscpp sensor_msgs cv_bridge dynamic_reconfigure utils csapex csapex_vision)
 
 find_package(OpenCV REQUIRED)
 
@@ -28,6 +28,10 @@ set(QT_MOC_BG_REMOVE src/background_remover_window.h src/background_remover_node
 QT4_WRAP_CPP(QT_MOC_HPP_BG_REMOVE ${QT_MOC_BG_REMOVE})
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
 set(QT ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP}   ${QT_MOC_HPP_BG_REMOVE} )
+
+
+set(QT_MOC_PLUGIN src/background_subtraction.h)
+QT4_WRAP_CPP(QT_PLUGIN ${QT_MOC_PLUGIN})
 
 file(GLOB INCLUDES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/background_subtraction/*.h)
 set(headers ${INCLUDES})
@@ -143,6 +147,20 @@ add_executable(masked2img
     src/masked_2_img_node.cpp
 )
 target_link_libraries(masked2img
+    bg_sub
+    ${catkin_LIBRARIES}
+)
+
+add_library(bgsubplugin
+    src/background_subtraction.cpp
+    src/csapex_plugin.cpp
+    src/background_remover.cpp
+    src/adaptive_background_remover.cpp
+    src/simple_background_remover.cpp
+    src/opencv_background_remover.cpp
+    ${QT_PLUGIN}
+)
+target_link_libraries(bgsubplugin
     bg_sub
     ${catkin_LIBRARIES}
 )

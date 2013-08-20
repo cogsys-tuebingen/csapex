@@ -105,7 +105,12 @@ public:
      * @brief applyConfig
      * @param config
      */
-    virtual void applyConfig(background_subtraction::GlobalConfig& config) {};
+    virtual void applyConfig(background_subtraction::GlobalConfig& config) {
+        difference_threshold = config.threshold;
+        open_iterations = config.open;
+        close_iterations = config.close;
+        triggerChanged();
+    };
 
     /**
      * @brief setThreshold Setter

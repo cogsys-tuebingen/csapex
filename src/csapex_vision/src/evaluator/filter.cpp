@@ -2,7 +2,7 @@
 #include <csapex_vision/filter.h>
 
 /// COMPONENT
-#include <csapex_vision/messages_default.hpp>
+#include <csapex_vision/cv_mat_message.h>
 
 /// PROJECT
 #include <csapex/connector_in.h>

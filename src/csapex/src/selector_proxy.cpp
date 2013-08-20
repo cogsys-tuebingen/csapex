@@ -11,14 +11,10 @@ using namespace csapex;
 
 const SelectorProxy::Ptr SelectorProxy::NullPtr;
 
-SelectorProxy::SelectorProxy(const std::string& type, BoxedObject* prototype, QWidget* parent)
-    : QGraphicsView(parent), type_(type), prototype_box_(new csapex::Box(prototype, type))
+SelectorProxy::SelectorProxy(const std::string& type, BoxedObject* prototype)
+    : type_(type), prototype_(prototype)
 {
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    QSize size(80, 80);
 
-    setScene(new QGraphicsScene(QRectF(QPoint(), size)));
-    scene()->addPixmap(prototype_box_->makePixmap(type_));
 }
 
 SelectorProxy::~SelectorProxy()
@@ -30,9 +26,9 @@ void SelectorProxy::registerProxy(SelectorProxy::Ptr prototype)
     BoxManager::instance().register_box_type(prototype);
 }
 
-void SelectorProxy::startObjectPositioning(SelectorProxy::Ptr instance, const QPoint& offset)
+void SelectorProxy::startObjectPositioning(QWidget* parent, SelectorProxy::Ptr instance, const QPoint& offset)
 {
-    QDrag* drag = new QDrag(this);
+    QDrag* drag = new QDrag(parent);
     QMimeData* mimeData = new QMimeData;
 
 
@@ -99,9 +95,7 @@ std::string SelectorProxy::getType()
 
 std::vector<Tag> SelectorProxy::getTags()
 {
-    BoxedObject* b = makeContent();
-    const std::vector<Tag>& cat = b->getTags();
-    delete b;
+    const std::vector<Tag>& cat = prototype_->getTags();
 
     return cat;
 
@@ -109,5 +103,5 @@ std::vector<Tag> SelectorProxy::getTags()
 
 QIcon SelectorProxy::getIcon()
 {
-    return prototype_box_->getContent()->getIcon();
+    return prototype_->getIcon();
 }

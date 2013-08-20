@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/qt_helper.hpp>
-#include <csapex_vision/messages_default.hpp>
+#include <csapex_vision/cv_mat_message.h>
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
 #include <csapex/box.h>

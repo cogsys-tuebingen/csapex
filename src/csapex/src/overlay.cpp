@@ -2,6 +2,7 @@
 #include <csapex/overlay.h>
 
 /// COMPONENT
+#include <csapex/boxed_object.h>
 #include <csapex/connection.h>
 #include <csapex/graph.h>
 #include <csapex/connector_out.h>
@@ -118,7 +119,22 @@ void Overlay::drawConnection(Connection& connection)
 
     int id = connection.id();
 
-    drawConnection(p1, p2, id, connection.isSelected(), highlight_connection_id_ == id, to->isError() || from->isError());
+    int flags = FLAG_NONE;
+
+    if(highlight_connection_id_ == id) {
+        flags |= FLAG_HIGHLIGHT;
+    }
+    if(to->isError() || from->isError()) {
+        flags |= FLAG_ERROR;
+    }
+    if(connection.isSelected()) {
+        flags |= FLAG_SELECTED;
+    }
+    if(!from->isEnabled() || !to->isEnabled()) {
+        flags |= FLAG_DISABLED;
+    }
+
+    drawConnection(p1, p2, id, flags);
 
     int f = connection.activity();
 
@@ -127,8 +143,13 @@ void Overlay::drawConnection(Connection& connection)
 }
 
 
-void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, bool selected, bool highlighted, bool error)
+void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, int flags)
 {
+    bool selected = (flags & FLAG_SELECTED) != 0;
+    bool highlighted = (flags & FLAG_HIGHLIGHT) != 0;
+    bool error = (flags & FLAG_ERROR) != 0;
+    bool disabled = (flags & FLAG_DISABLED) != 0;
+
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;
     double slack_smooth_distance = 300.0;
@@ -153,14 +174,6 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, bool 
     path.moveTo(from);
     path.cubicTo(cp1, cp2, to);
 
-    QLinearGradient lg(from, to);
-    if(error) {
-        lg.setColorAt(0,Qt::darkRed);
-        lg.setColorAt(1,Qt::red);
-    } else {
-        lg.setColorAt(0,color_out_connected.lighter());
-        lg.setColorAt(1,color_in_connected.lighter());
-    }
 
     if(highlighted) {
         painter->setPen(QPen(Qt::black, connector_radius_ * 1.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -168,9 +181,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, bool 
 
         painter->setPen(QPen(Qt::white, connector_radius_ * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
-    }
-
-    if(selected) {
+    } else  if(selected) {
         painter->setPen(QPen(Qt::black, connector_radius_ * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
 
@@ -188,6 +199,18 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, bool 
     }
 
     Qt::PenStyle penstyle = from.x() > to.x() ? Qt::DotLine : Qt::SolidLine;
+    QLinearGradient lg(from, to);
+    if(error) {
+        lg.setColorAt(0,Qt::darkRed);
+        lg.setColorAt(1,Qt::red);
+    } else if(disabled) {
+        lg.setColorAt(0,Qt::darkGray);
+        lg.setColorAt(1,Qt::gray);
+    } else {
+        lg.setColorAt(0,color_out_connected.lighter());
+        lg.setColorAt(1,color_in_connected.lighter());
+    }
+
     QPen gp = QPen(QBrush(lg), connector_radius_ * 0.75, penstyle, Qt::RoundCap, Qt::RoundJoin);
 
     painter->setPen(gp);
@@ -233,7 +256,6 @@ void Overlay::drawConnector(Connector *c)
     }
     painter->drawEllipse(c->centerPoint(), connector_radius_, connector_radius_);
 
-    QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
 
     QFont font;
     font.setPixelSize(font_size);
@@ -252,6 +274,7 @@ void Overlay::drawConnector(Connector *c)
 
     QRectF rect(c->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
 
+    QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
     painter->drawText(rect, text, opt);
 }
 
@@ -368,20 +391,32 @@ void Overlay::paintEvent(QPaintEvent*)
         BOOST_FOREACH(TempConnection& temp, temp_) {
 
             if(dynamic_cast<ConnectorIn*> (temp.from)) {
-                drawConnection(temp.to, temp.from->centerPoint(), false, true, -1);
+                drawConnection(temp.to, temp.from->centerPoint(), -1, FLAG_SELECTED);
             } else {
-                drawConnection(temp.from->centerPoint(), temp.to, false, true, -1);
+                drawConnection(temp.from->centerPoint(), temp.to, -1, FLAG_SELECTED);
             }
         }
     }
 
     foreach(const Connection::Ptr& connection, graph_->connections) {
-        if(connection->from()->isEnabled() && connection->to()->isEnabled()) {
+//        if(connection->from()->isEnabled() && connection->to()->isEnabled()) {
             drawConnection(*connection);
-        }
+//        }
     }
 
     foreach (Box* box, graph_->boxes_) {
+        if(box->getContent()->isError()) {
+            QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
+
+            QFont font;
+            font.setPixelSize(8);
+            painter->setFont(font);
+            painter->setPen(Qt::red);
+
+            QTextOption opt(Qt::AlignTop | Qt::AlignHCenter);
+            painter->drawText(rect, box->getContent()->errorMessage().c_str(), opt);
+        }
+
         for(int id = 0; id < box->countInputs(); ++id) {
             drawConnector(box->getInput(id));
         }

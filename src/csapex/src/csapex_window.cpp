@@ -212,6 +212,8 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
         }
     }
 
+    graph_->stop();
+
     event->accept();
 
     StreamInterceptor::instance().stop();

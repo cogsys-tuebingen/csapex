@@ -157,6 +157,10 @@ void ConnectorOut::validateConnections()
 
 void ConnectorOut::publish(ConnectionType::Ptr message)
 {
+    if(!isEnabled()){
+        return;
+    }
+
     message_ = message;
 
     if(targets_.size() == 1) {

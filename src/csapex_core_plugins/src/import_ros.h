@@ -6,7 +6,7 @@
 
 /// SYSTEM
 #include <ros/ros.h>
-#include <QFuture>
+#include <QComboBox>
 
 namespace csapex {
 
@@ -22,30 +22,32 @@ public:
     virtual void tick();
 
 public Q_SLOTS:
-    void checkMasterConnection();
     void refresh();
-    void initHandle(bool try_only = false);
     void changeTopic(const QString &topic);
+
+protected:
+    struct State : public Memento {
+        std::string topic_;
+
+        virtual void writeYaml(YAML::Emitter& out) const;
+        virtual void readYaml(const YAML::Node& node);
+    };
+
+    State state;
+
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
 
 private:
     void setTopic(const ros::master::TopicInfo& topic);
-
-    template <class T>
-    void callback(const typename T::ConstPtr& msg);
 
 private:
     ConnectorOut* connector_;
 
     QVBoxLayout* dynamic_layout;
-
-    boost::shared_ptr<ros::NodeHandle> nh;
+    QComboBox* topic_list;
 
     ros::Subscriber current_subscriber;
-
-    bool initialized_;
-    QFuture<bool> has_connection;
-
-    std::string topic_;
 };
 
 }

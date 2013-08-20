@@ -75,7 +75,7 @@ protected:
     std::string type_name_;
     std::string name_;
 
-    std::vector<Tag> tags_;
+    mutable std::vector<Tag> tags_;
 
     QIcon icon_;
 

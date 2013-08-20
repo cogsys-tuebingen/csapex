@@ -8,7 +8,7 @@ include(${QT_USE_FILE})
 
 set(CMAKE_BUILD_TYPE Debug)
 
-file(GLOB_RECURSE MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
+file(GLOB_RECURSE MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h include/*.h)
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_core_resources.qrc)
 QT4_WRAP_CPP(MOC ${MOC})
 
@@ -41,6 +41,7 @@ add_library(csapex_core_plugins
     src/file_importer.cpp
     src/import_cin.cpp
     src/import_ros.cpp
+    src/ros_handler.cpp
     src/ros_message_conversion.cpp
     src/global_option_panel.cpp
     src/text_input.cpp

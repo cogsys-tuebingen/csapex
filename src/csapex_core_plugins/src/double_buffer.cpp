@@ -58,12 +58,10 @@ void DoubleBuffer::messageArrived(ConnectorIn *source)
 
 void DoubleBuffer::swapBuffers()
 {
-    mutex_.lock();
+    QMutexLocker lock(&mutex_);
 
     state.buffer_front_ = state.buffer_back_;
     state.buffer_back_.reset();
-
-    mutex_.unlock();
 }
 
 void DoubleBuffer::tick()
@@ -72,11 +70,11 @@ void DoubleBuffer::tick()
         return;
     }
 
-    mutex_.lock();
-
-    ConnectionType::Ptr msg = state.buffer_front_;
-
-    mutex_.unlock();
+    ConnectionType::Ptr msg;
+    {
+        QMutexLocker lock(&mutex_);
+        msg = state.buffer_front_;
+    }
 
     output_->publish(msg);
 }

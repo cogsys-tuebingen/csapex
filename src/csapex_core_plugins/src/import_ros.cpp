@@ -1,6 +1,10 @@
 /// HEADER
 #include "import_ros.h"
 
+/// COMPONENT
+#include <csapex_core_plugins/ros_handler.h>
+#include <csapex_core_plugins/ros_message_conversion.h>
+
 /// PROJECT
 #include <csapex/box.h>
 #include <csapex/connector_out.h>
@@ -16,7 +20,6 @@
 #include <QAction>
 #include <QComboBox>
 #include <QPushButton>
-#include <QtConcurrentRun>
 #include <QLabel>
 
 PLUGINLIB_EXPORT_CLASS(csapex::ImportRos, csapex::BoxedObject)
@@ -24,7 +27,7 @@ PLUGINLIB_EXPORT_CLASS(csapex::ImportRos, csapex::BoxedObject)
 using namespace csapex;
 
 ImportRos::ImportRos()
-    : connector_(NULL), initialized_(false)
+    : connector_(NULL), topic_list(NULL)
 {
     addTag(Tag::get("RosIO"));
     addTag(Tag::get("General"));
@@ -35,8 +38,6 @@ ImportRos::ImportRos()
 void ImportRos::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        initHandle(true);
-
         connector_ = new ConnectorOut(box_, 0);
         connector_->setLabel("Something");
         connector_->setType(connection_types::AnyMessage::make());
@@ -56,26 +57,31 @@ void ImportRos::updateDynamicGui(QBoxLayout *layout)
 {
     QtHelper::clearLayout(dynamic_layout);
 
-    if(nh) {
+    if(!state.topic_.empty()) {
+        ROSHandler::instance().refresh();
+    }
+
+    if(ROSHandler::instance().nh()) {
         ros::master::V_TopicInfo topics;
         ros::master::getTopics(topics);
 
         int topic_count = 0;
-        QComboBox* combo = new QComboBox;
+        topic_list = new QComboBox;
 
-        combo->addItem("");
+        topic_list->addItem("");
 
         for(ros::master::V_TopicInfo::iterator it = topics.begin(); it != topics.end(); ++it) {
-            combo->addItem(it->name.c_str());
+            topic_list->addItem(it->name.c_str());
 
-            if(it->name == topic_) {
-                combo->setCurrentIndex(topic_count + 1);
+            if(it->name == state.topic_) {
+                topic_list->setCurrentIndex(topic_count + 1);
+                changeTopic(QString(it->name.c_str()));
             }
 
             ++topic_count;
         }
 
-        QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), this, SLOT(changeTopic(QString)));
+        QObject::connect(topic_list, SIGNAL(currentIndexChanged(QString)), this, SLOT(changeTopic(QString)));
 
         if(topic_count == 0) {
             QLabel* label = new QLabel("no topics found");
@@ -83,7 +89,7 @@ void ImportRos::updateDynamicGui(QBoxLayout *layout)
             dynamic_layout->addWidget(label);
 
         } else {
-            dynamic_layout->addWidget(combo);
+            dynamic_layout->addWidget(topic_list);
         }
 
     } else {
@@ -99,22 +105,7 @@ void ImportRos::tick()
 
 void ImportRos::refresh()
 {
-    has_connection.waitForFinished();
-
-    std::cout << "refreshing topics" << std::endl;
-
-    checkMasterConnection();
-
-    if(nh != NULL) {
-        // connection was there
-        has_connection.waitForFinished();
-        if(!has_connection.result()) {
-            // connection no longer there
-            nh->shutdown();
-        }
-    }
-
-    initHandle();
+    ROSHandler::instance().refresh();
 
     Q_EMIT modelChanged();
 }
@@ -122,18 +113,6 @@ void ImportRos::refresh()
 void ImportRos::messageArrived(ConnectorIn *source)
 {
     // NO INPUT
-}
-
-void ImportRos::checkMasterConnection()
-{
-    if(!ros::isInitialized()) {
-        int c = 0;
-        ros::init(c, (char**) NULL, "csapex");
-    }
-
-    if(!has_connection.isRunning()) {
-        has_connection = QtConcurrent::run(ros::master::check);
-    }
 }
 
 void ImportRos::changeTopic(const QString& topic)
@@ -151,45 +130,47 @@ void ImportRos::changeTopic(const QString& topic)
 
 void ImportRos::setTopic(const ros::master::TopicInfo &topic)
 {
-    if(topic.datatype == "sensor_msgs/Image") {
+    current_subscriber.shutdown();
+
+    if(RosMessageConversion::instance().canHandle(topic)) {
+        setError(false);
+        state.topic_ = topic.name;
+
         std::cout << "warning: topic is " << topic.name << std::endl;
-
-        ros::SubscribeOptions so;
-
-        current_subscriber = nh->subscribe(so);
-
-//        nh->subscribe<sensor_msgs::Image>(topic_, 1, boost::bind(&ImportRos::callback<sensor_msgs::Image>, this));
-
+        current_subscriber = RosMessageConversion::instance().subscribe(topic, 1, connector_);
 
     } else {
+        state.topic_ = "";
         setError(true, std::string("cannot import topic of type ") + topic.datatype);
         return;
     }
 
-    setError(false);
-    topic_ = topic.name;
 }
 
-template <class T>
-void ImportRos::callback(const typename T::ConstPtr& msg)
+
+void ImportRos::State::writeYaml(YAML::Emitter& out) const {
+    out << YAML::Key << "topic" << YAML::Value << topic_;
+}
+
+void ImportRos::State::readYaml(const YAML::Node& node) {
+    node["topic"] >> topic_;
+}
+
+Memento::Ptr ImportRos::getState() const
 {
+    boost::shared_ptr<ImportRos::State> memento(new ImportRos::State);
+    *memento = state;
 
+    return memento;
 }
 
-void ImportRos::initHandle(bool try_only)
+void ImportRos::setState(Memento::Ptr memento)
 {
-    if(!initialized_) {
-        checkMasterConnection();
-    }
+    boost::shared_ptr<ImportRos::State> m = boost::dynamic_pointer_cast<ImportRos::State> (memento);
+    assert(m.get());
 
-    if(try_only && has_connection.isRunning()) {
-        std::cout << "init handle: still probing master" << std::endl;
-        return;
-    }
+    state = *m;
 
-    if(has_connection.result()) {
-        nh.reset(new ros::NodeHandle("~"));
-    } else {
-        std::cout << "init handle: no ros connection" << std::endl;
-    }
+    Q_EMIT modelChanged();
 }
+

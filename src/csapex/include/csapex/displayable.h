@@ -19,8 +19,11 @@ public:
 
 public:
     virtual void setError(bool e, const std::string& msg = "", ErrorLevel level = EL_ERROR);
+    void setErrorSilent(bool e, const std::string& msg = "", ErrorLevel level = EL_ERROR);
+
     bool isError() const;
     ErrorLevel errorLevel() const;
+    std::string errorMessage() const;
 
     virtual void setBox(Box* box);
     Box* getBox() const;
@@ -34,6 +37,7 @@ protected:
 protected:
     Box* box_;
     bool error_;
+    std::string error_msg_;
     ErrorLevel level_;
 };
 

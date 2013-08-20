@@ -48,10 +48,10 @@ std::string StreamInterceptor::getCin()
         return "";
     }
 
-    worker->cin_mutex.lock();
+    QMutexLocker(&worker->cin_mutex);
+
     std::string in = worker->cin_.str();
     worker->cin_.str(std::string());
-    worker->cin_mutex.unlock();
 
     return in;
 }
@@ -84,9 +84,8 @@ void StreamInterceptorWorker::run() {
         if(line[0] != '\0') {
             had_input = true;
 
-            cin_mutex.lock();
+            QMutexLocker lock(&cin_mutex);
             cin_ << line;
-            cin_mutex.unlock();
             continue;
         }
 

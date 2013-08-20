@@ -298,7 +298,7 @@ void DesignBoard::showContextMenu(const QPoint& pos)
 
     if(selectedItem) {
         std::string selected = selectedItem->data().toString().toStdString();
-        BoxManager::instance().startPlacingBox(selected);
+        BoxManager::instance().startPlacingBox(this, selected);
     }
 }
 
@@ -339,7 +339,7 @@ void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
                 BoxManager::instance().startPlacingMetaBox(this, QPoint(0,0));
 
             } else {
-                BoxManager::instance().startPlacingBox(type, QPoint(0,0));
+                BoxManager::instance().startPlacingBox(this, type, QPoint(0,0));
             }
         }
     }

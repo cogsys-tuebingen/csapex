@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QDoubleSpinBox>
 #include <QThread>
+#include <cmath>
 
 class QtHelper
 {
@@ -89,6 +90,7 @@ public:
         slider->setMinimumWidth(100);
 
         QWrapper::QDoubleSpinBoxExt* display = new  QWrapper::QDoubleSpinBoxExt;
+        display->setDecimals(std::log10(1.0 / step_size));
         display->setMinimum(min);
         display->setMaximum(max);
         display->setValue(def);

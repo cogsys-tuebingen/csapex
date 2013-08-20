@@ -25,7 +25,7 @@ namespace command
 class AddBox;
 }
 
-class SelectorProxy : public QGraphicsView
+class SelectorProxy/* : public QGraphicsView*/
 {
     friend class command::AddBox;
     friend class BoxManager;
@@ -56,7 +56,7 @@ public:
     static void registerProxy(SelectorProxy::Ptr prototype);
 
 public:
-    SelectorProxy(const std::string& type, BoxedObject* prototype, QWidget* parent = 0);
+    SelectorProxy(const std::string& type, BoxedObject* prototype);
     virtual ~SelectorProxy();
 
     virtual SelectorProxy* clone() = 0;
@@ -66,7 +66,7 @@ public:
     std::vector<Tag> getTags();
     QIcon getIcon();
 
-    void startObjectPositioning(Ptr instance, const QPoint &offset = QPoint(0,0));
+    void startObjectPositioning(QWidget *parent, Ptr instance, const QPoint &offset = QPoint(0,0));
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)
@@ -77,15 +77,15 @@ protected:
 
 protected:
     std::string type_;
-    boost::shared_ptr<csapex::Box> prototype_box_;
+    BoxedObject* prototype_;
 };
 
 template <class T>
 class SelectorProxyImp : public SelectorProxy
 {
 public:
-    SelectorProxyImp(const std::string& type, QWidget* parent = 0)
-        : SelectorProxy(type, new T, parent)
+    SelectorProxyImp(const std::string& type)
+        : SelectorProxy(type, new T)
     {}
 
     virtual ~SelectorProxyImp()
@@ -96,7 +96,7 @@ public:
     }
 
     virtual SelectorProxy* clone() {
-        return new SelectorProxyImp<T>(type_, parentWidget());
+        return new SelectorProxyImp<T>(type_);
     }
 };
 
@@ -106,8 +106,8 @@ public:
     typedef boost::function<BoxedObject*()> Make;
 
 public:
-    SelectorProxyDynamic(const std::string& name, Make c, QWidget* parent = 0)
-        : SelectorProxy(name, c(), parent), c(c)
+    SelectorProxyDynamic(const std::string& name, Make c)
+        : SelectorProxy(name, c()), c(c)
     {}
 
     virtual ~SelectorProxyDynamic()

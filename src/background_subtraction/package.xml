@@ -17,6 +17,8 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>utils</build_depend>
+  <build_depend>csapex</build_depend>
+  <build_depend>csapex_vision</build_depend>
 
   <run_depend>message_runtime</run_depend>
   <run_depend>roscpp</run_depend>
@@ -24,9 +26,11 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>utils</run_depend>
+  <run_depend>csapex</run_depend>
+  <run_depend>csapex_vision</run_depend>
 
   <export>
-   <!-- <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -lbg_sub"/>-->
+    <csapex plugin="${prefix}/bg_sub_plugins.xml" />
   </export>
 </package>
 

@@ -245,6 +245,13 @@ bool Graph::isDirty()
     return CommandDispatcher::instance().isDirty();
 }
 
+void Graph::stop()
+{
+    foreach(Box* box, boxes_) {
+        box->stop();
+    }
+}
+
 
 bool Graph::canUndo()
 {

@@ -2,7 +2,7 @@
 #include <csapex_vision/image_provider.h>
 
 /// COMPONENT
-#include <csapex_vision/messages_default.hpp>
+#include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>

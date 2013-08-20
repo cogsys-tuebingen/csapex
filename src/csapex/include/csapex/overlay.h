@@ -46,7 +46,7 @@ protected:
     void drawActivity(int life, Connector* c);
     void drawConnector(Connector* c);
     void drawConnection(Connection& connection);
-    void drawConnection(const QPoint& from, const QPoint& to, int id, bool selected, bool highlighted, bool error = false);
+    void drawConnection(const QPoint& from, const QPoint& to, int id, int flags);
 
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent * event);
@@ -55,6 +55,14 @@ protected:
     struct TempConnection {
         Connector* from;
         QPoint to;
+    };
+
+    enum Flags {
+        FLAG_NONE = 0,
+        FLAG_ERROR = 1,
+        FLAG_HIGHLIGHT = 2,
+        FLAG_SELECTED = 4,
+        FLAG_DISABLED = 8
     };
 
     std::vector<TempConnection> temp_;

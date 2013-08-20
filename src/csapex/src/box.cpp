@@ -131,8 +131,31 @@ void Box::makeThread()
     }
 }
 
+void Box::enableIO(bool enable)
+{
+    foreach(ConnectorIn* i, input) {
+        i->setEnabled(enable);
+    }
+    foreach(ConnectorOut* i, output) {
+        i->setEnabled(enable);
+    }
+}
+
+void Box::setIOError(bool error)
+{
+    foreach(ConnectorIn* i, input) {
+        i->setErrorSilent(error);
+    }
+    foreach(ConnectorOut* i, output) {
+        i->setErrorSilent(error);
+    }
+    enableIO(!error);
+}
+
 void Box::enableContent(bool enable)
 {
+    enableIO(enable);
+
     state->enabled = enable;
 
     content_->enable(enable);
@@ -390,6 +413,7 @@ Box::~Box()
     stop();
 
     delete worker_;
+    delete content_;
 }
 
 bool Box::eventFilter(QObject* o, QEvent* e)
@@ -431,7 +455,7 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             if(down_) {
                 if(shift_drag) {
                     if(hypot(delta.x(), delta.y()) > 15) {
-                        BoxManager::instance().startPlacingBox(getType(), -start_drag_);
+                        BoxManager::instance().startPlacingBox(parentWidget(), getType(), -start_drag_);
                         down_ = false;
                     }
                 } else {
@@ -471,10 +495,13 @@ void Box::paintEvent(QPaintEvent*)
     if(error_change || warning_change) {
         if(is_error) {
             setLabel(QString("ERROR: ") + objectName());
+            ui->label->setToolTip(content_->errorMessage().c_str());
         } else if(is_warn) {
             setLabel(QString("WARNING: ") + objectName());
+            ui->label->setToolTip(content_->errorMessage().c_str());
         } else {
             setLabel(objectName());
+            ui->label->setToolTip(UUID().c_str());
         }
 
         refreshStylesheet();
@@ -544,7 +571,7 @@ void Box::startDrag(QPoint offset)
     lower();
 
     if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
-        BoxManager::instance().startPlacingBox(getType(), offset);
+        BoxManager::instance().startPlacingBox(parentWidget(), getType(), offset);
         return;
     }
 
@@ -605,7 +632,8 @@ void Box::tick()
 void Box::killContent()
 {
     if(private_thread_ && private_thread_->isRunning()) {
-        worker_mutex_.lock();
+
+        QMutexLocker lock(&worker_mutex_);
 
         QObject::disconnect(private_thread_);
         QObject::disconnect(worker_);
@@ -630,8 +658,6 @@ void Box::killContent()
         }
 
         makeThread();
-
-        worker_mutex_.unlock();
     }
 }
 

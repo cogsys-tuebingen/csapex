@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy std_msgs rosbag cv_bridge  utils csapex)
+find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy std_msgs rosbag cv_bridge  utils csapex csapex_core_plugins)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
@@ -87,8 +87,8 @@ add_library(csapex_vision
     src/evaluator/filter_static_mask.cpp
     src/evaluator/image_combiner_robust_match.cpp
     src/evaluator/output_display.cpp
+    src/evaluator/cv_mat_message.cpp
 
-    include/csapex_vision/messages_default.hpp
     ${QT_EVALUATOR}
     ${QT_RESOURCES}
 )

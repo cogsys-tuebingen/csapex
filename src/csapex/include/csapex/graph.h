@@ -50,6 +50,7 @@ public:
 
     bool isDirty();
 
+    void stop();
     bool canUndo();
     bool canRedo();
 

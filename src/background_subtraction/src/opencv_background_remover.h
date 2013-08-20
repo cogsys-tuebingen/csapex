@@ -38,6 +38,9 @@ public:
      */
     virtual void setBackground(const cv::Mat& frame);
 
+    void setHistory(int history);
+    void setRate(float rate);
+
 protected:
     /**
      * @brief segmentation Template method for subclasses
@@ -52,6 +55,9 @@ private:
 private:
     cv::BackgroundSubtractor* subtractor;
     bool has_frames;
+
+    int history;
+    float rate;
 };
 }
 

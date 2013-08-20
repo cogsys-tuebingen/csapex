@@ -34,7 +34,8 @@ bool ImageProviderBag::hasNext()
 
 void ImageProviderBag::doInit()
 {
-    view_ = new rosbag::View(bag, rosbag::TopicQuery("/camera/image_raw"));
+    // TODO: make indepenant of topic, show list of all possible topics
+    view_ = new rosbag::View(bag, rosbag::TopicQuery("/marlin/camera/image_raw"));
     for(rosbag::View::iterator it = view_->begin(); it != view_->end(); ++it) {
         frames_++;
     }

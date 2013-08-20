@@ -84,6 +84,11 @@ int main(int argc, char** argv)
     Graph::Ptr graph(new Graph);
     Graph::setRoot(graph);
 
+    /*
+     * There seems to be a bug in Qt4:
+     *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
+     *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
+     */
     CsApexWindow w;
     w.start();
 

@@ -38,6 +38,8 @@ inline void reset_pixel(int ws, int i, int j, int n, double* mean_data, double* 
 
 void AdaptiveBackgroundRemover::applyConfig(GlobalConfig &config)
 {
+    BackgroundRemover::applyConfig(config);
+
     setMaxDistance(config.max_dist);
     setMaxStdDev(config.max_std_dev);
     setDecay(config.decay);
@@ -211,7 +213,7 @@ void AdaptiveBackgroundRemover::updateBackground(const cv::Mat& frame, const cv:
         replaceBackground(background);
     }
 
-    std::cout << "changed " << changed << " pixels" << std::endl;
+//    std::cout << "changed " << changed << " pixels" << std::endl;
 }
 
 void AdaptiveBackgroundRemover::segmentation(const cv::Mat& frame_big, cv::Mat& mask_big)
@@ -235,7 +237,7 @@ void AdaptiveBackgroundRemover::segmentation(const cv::Mat& frame_big, cv::Mat& 
     if(takes == 0) {
         Stopwatch w;
         updateBackground(frame, blured);
-        std::cout << "updating background: " << w.msElapsed() << "ms" << std::endl;
+//        std::cout << "updating background: " << w.msElapsed() << "ms" << std::endl;
     }
 
     cv::Mat diff(blured.rows, blured.cols, CV_8U);;

@@ -172,7 +172,7 @@ void BackgroundRemoverNode::imageCB(const sensor_msgs::ImageConstPtr& msg)
     std::cout << "time for processing: " << ms << "ms = " << (1000.0 / ms) << " fps" << std::endl;
 
     /// update qimages for visualization
-    img_mutex.lock();
+    QMutexLocker lock(&img_mutex);
 
     has_images = false;
 
@@ -194,8 +194,6 @@ void BackgroundRemoverNode::imageCB(const sensor_msgs::ImageConstPtr& msg)
     debug_ = QtCvImageConverter::Converter<QImage, QSharedPointer>::mat2QImage(debug);
 
     has_images = true;
-
-    img_mutex.unlock();
 
     Q_EMIT imageChanged();
 }

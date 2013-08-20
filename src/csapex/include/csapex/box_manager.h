@@ -52,14 +52,13 @@ public:
     void register_box_type(SelectorProxy::Ptr provider);
 
     void startPlacingMetaBox(QWidget *parent, const QPoint &offset = QPoint(0,0));
-    void startPlacingBox(const std::string& type, const QPoint &offset = QPoint(0,0));
+    void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
     Box* makeBox(QPoint pos, const std::string& type, const std::string& uuid = "");
     SelectorProxy::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
     QWidget* container();
 
-    void insertAvailableBoxedObjects(QLayout* layout);
     void insertAvailableBoxedObjects(QMenu* menu);
     void insertAvailableBoxedObjects(QTreeWidget *tree);
 
