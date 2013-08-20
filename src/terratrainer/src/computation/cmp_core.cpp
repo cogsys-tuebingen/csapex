@@ -83,7 +83,7 @@ void CMPCore::computeQuadtree()
         return;
     }
     cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
-    TerraDecomClassifier       *classifier = new TerraDecomClassifier(quad_params_.min_prob,
+    TerraDecomClassifierCV       *classifier = new TerraDecomClassifierCV(quad_params_.min_prob,
                                                                       random_.get(),
                                                                       cv_extractor_.get(),
                                                                       keypoint_params_.soft_crop,

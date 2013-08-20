@@ -12,7 +12,7 @@ public:
     typedef std::pair<CVQt*, cv_roi::TerraID>             ClassificationEntry;
 
     TerraQuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size,
-                               TerraDecomClassifier *_classifier);
+                               TerraDecomClassifierCV *_classifier);
 
     virtual bool iterate();
 

@@ -66,11 +66,11 @@ private:
     cv::Mat grey_image_;
 };
 
-class TerraDecomClassifier : public DecompositionClassifier
+class TerraDecomClassifierCV : public DecompositionClassifier
 {
     ///
 public :
-    TerraDecomClassifier(const float _threshold, RandomForest *_classifier, CVExtractor *_extractor,
+    TerraDecomClassifierCV(const float _threshold, RandomForest *_classifier, CVExtractor *_extractor,
                          const bool soft_crop = false, const float scale = 1.f, const float angle = 0.f) :
         classifier(_classifier),
         extractor(_extractor),
@@ -83,7 +83,7 @@ public :
     {
     }
 
-    virtual ~TerraDecomClassifier()
+    virtual ~TerraDecomClassifierCV()
     {
     }
 
@@ -130,4 +130,57 @@ private:
     float         key_point_angle;
     float         key_point_scale;
 };
+
+class TerraDecomClassifierPattern : public DecompositionClassifier
+{
+    ///
+public :
+    TerraDecomClassifierPattern(const float _threshold, RandomForest *_classifier, PatternExtractor *_extractor) :
+        classifier(_classifier),
+        extractor(_extractor),
+        threshold(_threshold),
+        last_prob(0.0),
+        last_id(-1)
+    {
+    }
+
+    virtual ~TerraDecomClassifierPattern()
+    {
+    }
+
+    bool classify(const cv::Rect &roi)
+    {
+        cv::Mat descriptors;
+        cv::Mat img_roi(image, roi);
+        extractor->extract(img_roi, descriptors);
+        classifier->predictClassProb(descriptors, last_id, last_prob);
+
+        return last_prob < threshold;
+
+    }
+
+    float get_prob()
+    {
+        return last_prob;
+    }
+
+    int get_id()
+    {
+        return last_id;
+    }
+
+    void set_image(const cv::Mat &_image)
+    {
+        image = _image;
+    }
+
+private:
+    RandomForest        *classifier;
+    PatternExtractor    *extractor;
+    float                threshold;
+    cv::Mat              image;
+    float                last_prob;
+    int                  last_id;
+};
+
 #endif // DECOMPOSITION_CLASSIFIER_HPP
