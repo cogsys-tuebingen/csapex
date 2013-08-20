@@ -26,6 +26,9 @@ OutputDisplay::OutputDisplay()
     painter.fillRect(QRect(0, 0, empty.width(), empty.height()), Qt::white);
     painter.drawRect(QRect(0, 0, empty.width()-1, empty.height()-1));
 
+    addTag(Tag::get("General"));
+    addTag(Tag::get("Vision"));
+
     setIcon(QIcon(":/picture.png"));
 }
 
