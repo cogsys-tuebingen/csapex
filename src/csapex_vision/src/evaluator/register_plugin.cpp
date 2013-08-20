@@ -29,12 +29,31 @@ RegisterPlugin::RegisterPlugin()
 
 struct Image2CvMat
 {
-    static void convert(const sensor_msgs::Image::ConstPtr &ros_msg, connection_types::CvMatMessage::Ptr& out) {
+    static void ros2apex(const sensor_msgs::Image::ConstPtr &ros_msg, connection_types::CvMatMessage::Ptr& out) {
         try {
             cv_bridge::toCvShare(ros_msg, sensor_msgs::image_encodings::BGR8)->image.copyTo(out->value);
+            out->frame_id = ros_msg->header.frame_id;
         } catch (cv_bridge::Exception& e) {
             ROS_ERROR("cv_bridge exception: %s", e.what());
         }
+    }
+    static void apex2ros(const connection_types::CvMatMessage::Ptr& apex_msg, sensor_msgs::Image::Ptr &out) {
+        cv_bridge::CvImage cvb;
+        cvb.image = apex_msg->value;
+
+        switch(apex_msg->value.type()) {
+        case CV_8UC1:
+            cvb.encoding = sensor_msgs::image_encodings::MONO8;
+            break;
+        default:
+        case CV_8UC3:
+            cvb.encoding = sensor_msgs::image_encodings::BGR8;
+            break;
+        }
+
+        cvb.header.frame_id = apex_msg->frame_id;
+        cvb.header.stamp = ros::Time::now();
+        out = cvb.toImageMsg();
     }
 };
 
@@ -48,7 +67,8 @@ void RegisterPlugin::init()
 
     ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::CvMatMessage::make));
 
-    RosMessageConversion::registerConversion("sensor_msgs/Image", RosMessageConversion::Convertor::Ptr(new RosMessageConversion::ConverterTemplate<sensor_msgs::Image, connection_types::CvMatMessage, Image2CvMat>));
+    typedef RosMessageConversion::ConverterTemplate<sensor_msgs::Image, connection_types::CvMatMessage, Image2CvMat> Imp;
+    RosMessageConversion::registerConversion(RosMessageConversion::Convertor::Ptr(new Imp));
 
     ConnectionType::default_.reset(new connection_types::CvMatMessage);
 }

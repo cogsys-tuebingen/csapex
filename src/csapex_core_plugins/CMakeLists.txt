@@ -38,6 +38,7 @@ include_directories(include
 add_library(csapex_core_plugins
     src/double_buffer.cpp
     src/export_cout.cpp
+    src/export_ros.cpp
     src/file_importer.cpp
     src/import_cin.cpp
     src/import_ros.cpp

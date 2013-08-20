@@ -196,7 +196,10 @@ void BoxWorker::forwardMessage(Connector *source)
 {
     if(parent_->content_->isEnabled()) {
         parent_->content_->messageArrived(dynamic_cast<ConnectorIn*>(source));
-        parent_->content_->setError(false);
+
+        if(!parent_->content_->isError() || parent_->content_->errorLevel() != Displayable::EL_ERROR) {
+            parent_->content_->setError(false);
+        }
     }
 }
 

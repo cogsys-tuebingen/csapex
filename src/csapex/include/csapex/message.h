@@ -19,6 +19,9 @@ protected:
 public:
     void writeYaml(YAML::Emitter& yaml);
     void readYaml(YAML::Node& node);
+
+public:
+    std::string frame_id;
 };
 
 struct AnyMessage : public Message

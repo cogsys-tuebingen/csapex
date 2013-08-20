@@ -212,7 +212,11 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
         }
     }
 
-    graph_->stop();
+    try {
+        graph_->stop();
+    } catch(...) {
+        std::abort();
+    }
 
     event->accept();
 
