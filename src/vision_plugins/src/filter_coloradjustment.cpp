@@ -25,7 +25,7 @@ ColorAdjustment::ColorAdjustment() :
     active_preset_(NONE),
     container_ch_sliders_(NULL)
 {
-    setCategory("Filter");
+    addTag(Tag::get("Filter"));
 }
 
 ColorAdjustment::~ColorAdjustment()

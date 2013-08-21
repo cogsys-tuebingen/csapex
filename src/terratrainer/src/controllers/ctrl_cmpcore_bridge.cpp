@@ -233,6 +233,7 @@ void CMPCoreBridge::computeGrid()
         cc_->computeGrid();
         dirty_ = CLEAN;
     }
+    Q_EMIT computeGridFinished();
 }
 
 void CMPCoreBridge::computeQuadtree()
@@ -244,6 +245,8 @@ void CMPCoreBridge::computeQuadtree()
         cc_->computeQuadtree();
         dirty_ = CLEAN;
     }
+
+    Q_EMIT computeQuadFinished();
 }
 
 void CMPCoreBridge::getGrid(std::vector<cv_roi::TerraROI> &cells)

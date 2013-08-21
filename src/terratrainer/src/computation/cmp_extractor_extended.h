@@ -19,20 +19,17 @@ public:
     void setParams(CMPParamsBRISK &params);
     void setParams(CMPParamsBRIEF &params);
     void setParams(CMPParamsFREAK &params);
-    void setKeyPointParams(CMPKeypointParams &key);
-    void reset();
+    void setKeyPointParams(KeypointParams &key);
 
 private:
     CMPExtractorParams::Type type_;
-    float angle_;
-    float scale_;
-    float soft_crop_;
-    float octave_;
-    float max_octave_;
-    bool  color_extension_;
-    bool  combine_descriptors_;
+    KeypointParams           key_;
+    int                      max_octave_;
+    bool                     color_extension_;
+    bool                     combine_descriptors_;
 
-    void  writeSeperated(const Mat &desc, const int id, const Scalar &mean, YAML::Emitter &emitter);
+    void  setCommonParameters(CMPExtractorParams &params);
+
 };
 
 class CMPPatternExtractorExt : public PatternExtractor

@@ -11,6 +11,10 @@
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
 
+namespace Ui {
+class TerraTrainerWindow;
+}
+
 static const double MAX_ZOOM(200.0);
 static const double MIN_ZOOM(0.25);
 
@@ -21,8 +25,10 @@ class CtrlMapView : public QObject
 public:
     typedef boost::shared_ptr<CtrlMapView> Ptr;
 
-    CtrlMapView(QGraphicsView *mapView, CMPCoreBridge::Ptr bridge);
+    CtrlMapView(CMPCoreBridge::Ptr bridge);
     virtual ~CtrlMapView();
+
+    void setupUI(Ui::TerraTrainerWindow *ui);
 
 Q_SIGNALS:
     void zoomUpdated(double factor);
@@ -66,6 +72,7 @@ private:
     enum Overlay {NONE, GRID, QUAD};
     Overlay                   overlay_;
 
+    QWidget                  *central_widget_;
     QGraphicsView            *map_view_;
     QInteractiveScene        *map_view_scene_;
     QGraphicsPixmapItem      *map_image_;

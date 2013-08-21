@@ -71,15 +71,17 @@ class TerraDecomClassifierCV : public DecompositionClassifier
     ///
 public :
     TerraDecomClassifierCV(const float _threshold, RandomForest *_classifier, CVExtractor *_extractor,
-                         const bool soft_crop = false, const float scale = 1.f, const float angle = 0.f) :
+                           const Extractor::KeypointParams &_key, const bool _color_extension, const bool _large,
+                           const int _max_octave) :
         classifier(_classifier),
         extractor(_extractor),
         threshold(_threshold),
         last_prob(0.0),
         last_id(-1),
-        soft_crop(soft_crop),
-        key_point_angle(angle),
-        key_point_scale(scale)
+        key(_key),
+        color(_color_extension),
+        large(_large),
+        max_octave(_max_octave)
     {
     }
 
@@ -89,16 +91,23 @@ public :
 
     bool classify(const cv::Rect &roi)
     {
+        /// EXTRACT
         cv::Mat descriptors;
-        cv::Mat img_roi;
-        if(soft_crop)
-            img_roi = image;
-        else
-            img_roi = cv::Mat(image, roi);
+        extractor->extract(image, roi,
+                           key, max_octave,
+                           color, large,
+                           descriptors);
 
-        CVExtractor::KeyPoints k = extractor->prepareKeypoint(roi, soft_crop, key_point_scale, key_point_angle);
-        extractor->extract(img_roi, k, descriptors);
-        classifier->predictClassProb(descriptors, last_id, last_prob);
+        /// PREDICT
+        if(descriptors.empty()) {
+            return false;
+        }
+
+        if(descriptors.rows > 1) {
+            classifier->predictClassProbMultiSample(descriptors, last_id, last_prob);
+        } else {
+            classifier->predictClassProb(descriptors, last_id, last_prob);
+        }
 
         return last_prob < threshold;
 
@@ -120,15 +129,16 @@ public :
     }
 
 private:
-    RandomForest *classifier;
-    CVExtractor    *extractor;
-    float         threshold;
-    cv::Mat       image;
-    float         last_prob;
-    int           last_id;
-    bool          soft_crop;
-    float         key_point_angle;
-    float         key_point_scale;
+    RandomForest               *classifier;
+    CVExtractor                *extractor;
+    float                       threshold;
+    cv::Mat                     image;
+    float                       last_prob;
+    int                         last_id;
+    Extractor::KeypointParams   key;
+    bool                        large;
+    bool                        color;
+    int                         max_octave;
 };
 
 class TerraDecomClassifierPattern : public DecompositionClassifier
@@ -150,6 +160,7 @@ public :
 
     bool classify(const cv::Rect &roi)
     {
+
         cv::Mat descriptors;
         cv::Mat img_roi(image, roi);
         extractor->extract(img_roi, descriptors);

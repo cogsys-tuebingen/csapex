@@ -66,6 +66,9 @@ public Q_SLOTS:
     void classUpdated(int oldID, int newID);
     void colorUpdate(int id);
 
+    void paramsQuadApplied();
+    void paramsGridApplied();
+    void paramsExtrApplied();
 
 
 private:

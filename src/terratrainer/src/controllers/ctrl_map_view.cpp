@@ -2,13 +2,14 @@
 #include "ctrl_map_view.h"
 #include <QGraphicsRectItem>
 #include <QGraphicsSceneMouseEvent>
-
+#include <QWidget>
+#include <ui_terra_trainer_window.h>
 /// SYSTEM
 
-CtrlMapView::CtrlMapView(QGraphicsView *mapView, CMPCoreBridge::Ptr bridge) :
+CtrlMapView::CtrlMapView(CMPCoreBridge::Ptr bridge) :
     overlay_(NONE),
-    map_view_(mapView),
-    map_view_scene_(new QInteractiveScene(map_view_)),
+    map_view_(NULL),
+    map_view_scene_(NULL),
     map_image_(NULL),
     bridge_(bridge),
     zoom_(100.0),
@@ -16,11 +17,30 @@ CtrlMapView::CtrlMapView(QGraphicsView *mapView, CMPCoreBridge::Ptr bridge) :
     current_class_id_(-1),
     mouse_move_(false)
 {
-    initGUI();
+    /// PENS 'N' BRUSHES
+    DarkBrush.setStyle(Qt::SolidPattern);
+    DarkBrush.setColor(QColor(50,50,50));
+
+    current_class_pen_.setWidth(1);
+    current_class_pen_.setCosmetic(true);
+    current_class_sel_pen_.setWidth(1);
+    current_class_sel_pen_.setCosmetic(true);
+    current_class_sel_pen_.setStyle(Qt::DashLine);
+    current_class_sel_pen_.setDashOffset(3.0);
+
 }
 
 CtrlMapView::~CtrlMapView()
 {
+}
+
+void CtrlMapView::setupUI(Ui::TerraTrainerWindow *ui)
+{
+    central_widget_ = ui->centralWidget;
+    map_view_       = ui->mapView;
+
+    /// INIT GUI
+    initGUI();
 }
 
 void CtrlMapView::imageUpdate(bool cached)
@@ -28,11 +48,14 @@ void CtrlMapView::imageUpdate(bool cached)
     /// CLEAR
     clearAll();
 
-    if(!cached)
+    if(!cached) {
         cache_ = bridge_->rawImage();
+        initGUI();
+    }
 
     if(cache_.get() == NULL)
         return;
+
 
     map_image_ = new QGraphicsPixmapItem(QPixmap::fromImage(*cache_));
     map_view_scene_->setBackground(map_image_);
@@ -197,7 +220,7 @@ void CtrlMapView::compute()
 
 void CtrlMapView::computeQuad()
 {
-    computeQuad();
+    bridge_->computeQuadtree();
 }
 
 void CtrlMapView::computeGrid()
@@ -278,20 +301,23 @@ void CtrlMapView::setCurrentSelectedROIs()
 
 void CtrlMapView::initGUI()
 {
-    /// PENS 'N' BRUSHES
-    DarkBrush.setStyle(Qt::SolidPattern);
-    DarkBrush.setColor(QColor(50,50,50));
 
-    current_class_pen_.setWidth(1);
-    current_class_pen_.setCosmetic(true);
-    current_class_sel_pen_.setWidth(1);
-    current_class_sel_pen_.setCosmetic(true);
-    current_class_sel_pen_.setStyle(Qt::DashLine);
-    current_class_sel_pen_.setDashOffset(3.0);
+    /// CLEAN UP
+    if(map_view_scene_ != NULL)
+        map_view_scene_->deleteLater();
+
+    if(map_view_ != NULL)
+        map_view_->deleteLater();
+
+    /// ...
+    map_view_       = new QGraphicsView();
+    map_view_scene_ = new QInteractiveScene(map_view_);
+
+    central_widget_->layout()->addWidget(map_view_);
+
 
     /// GUI
     map_view_scene_->installEventFilter(this);
-    map_view_->setAcceptDrops(true);
     map_view_->setBackgroundBrush(DarkBrush);
     map_view_->setScene(map_view_scene_);
     map_view_->fitInView(map_view_scene_->itemsBoundingRect(), Qt::KeepAspectRatio);

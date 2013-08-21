@@ -31,7 +31,7 @@ Histogram::Histogram() :
     colors_.push_back(cv_histogram::COLOR_CYAN);
     colors_.push_back(cv_histogram::COLOR_RED);
 
-    setCategory("Analysis");
+    addTag(Tag::get("Analysis"));
 }
 
 Memento::Ptr Histogram::getState() const

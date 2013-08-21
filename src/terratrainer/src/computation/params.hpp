@@ -46,17 +46,18 @@ struct CMPQuadParams {
 };
 
 struct CMPKeypointParams {
-    CMPKeypointParams() : angle(0.f), scale(0.5f), octave(-1), soft_crop(true){}
+    CMPKeypointParams() : angle(0.f), scale(0.5f), octave(-1), soft_crop(true), calc_angle(false){}
 
     float angle;
     float scale;
     int   octave;
     bool  soft_crop;
+    bool  calc_angle;
 };
 
 struct CMPExtractorParams {
-    enum Type   {ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP, LBP};
-    CMPExtractorParams(const Type t, const int o = 0) :
+    enum Type   {NONE, ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP, LBP};
+    CMPExtractorParams(const Type t = NONE, const int o = 1) :
         type(t),
         opp(false),
         colorExtension(false),
@@ -74,16 +75,16 @@ struct CMPExtractorParams {
 struct CMPParamsORB : public CMPExtractorParams
 {
     CMPParamsORB() :
-        CMPExtractorParams(ORB),
-        levels(8),
+        CMPExtractorParams(ORB, 8),
         scale(1.2),
         WTA_K(2),
-        patchSize(31){}
+        patchSize(31),
+        edge_threshold(0){}
 
-    int    levels;
     double scale;
     int    WTA_K;
     int    patchSize;
+    int    edge_threshold;
 };
 
 struct CMPParamsSURF : public CMPExtractorParams
@@ -114,14 +115,12 @@ struct CMPParamsSIFT : public CMPExtractorParams
 struct CMPParamsBRISK : public CMPExtractorParams
 {
     CMPParamsBRISK() :
-        CMPExtractorParams(BRISK),
-        dMax(5.85),
-        dMin(8.2){}
+        CMPExtractorParams(BRISK, 3),
+        thresh(30),
+        scale(1.f){}
 
-    std::vector<float>   radiusList;
-    std::vector<int>     numberList;
-    double               dMax;
-    double               dMin;
+    int     thresh;
+    float   scale;
 
 };
 

@@ -45,6 +45,44 @@ void RandomForest::predictClassProbs(const cv::Mat &sample, std::vector<int> &cl
     }
 }
 
+void RandomForest::predictClassProbMultiSample(const cv::Mat &samples, int &classID, float &prob)
+{
+    AccProbIndex index;
+
+    for(int i = 0 ; i < samples.rows ; i++) {
+        cv::Mat descr(samples.row(i));
+        int tmp_id   = -1;
+        int tmp_prob = 0.f;
+        predictClassProb(descr, tmp_id, prob);
+
+        if(tmp_id != -1) {
+            if(index.find(tmp_id) != index.end()) {
+                AccProb acc;
+                acc.norm = 1;
+                acc.prob = tmp_prob;
+                index.insert(AccProbEntry(tmp_id, acc));
+            } else {
+                index[tmp_id].prob += tmp_prob;
+                index[tmp_id].norm++;
+            }
+        }
+    }
+
+    classID = -1;
+    prob    =  0.f;
+
+    for(AccProbIndex::iterator it = index.begin() ; it != index.end() ; it++) {
+        AccProbEntry e = *it;
+
+        double tmp_prob = e.second.prob / e.second.norm;
+        if(tmp_prob > prob) {
+            prob    = tmp_prob;
+            classID = e.first;
+        }
+    }
+
+}
+
 void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs, int &maxClassID)
 {
     int ntrees = forest_->get_tree_count();

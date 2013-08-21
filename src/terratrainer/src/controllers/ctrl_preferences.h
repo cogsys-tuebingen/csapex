@@ -28,18 +28,20 @@ public Q_SLOTS:
     /// ORB
     void orbOppChanged           (bool checked);
     void orbColorExtChanged      (bool checked);
-    void orbLevelChanged         (int levels);
+    void orbLevelChanged         (int   levels);
     void orbScaleChanged         (double scale);
-    void orbWTA_KChanged         (int wta_k);
-    void orbPatchChanged         (int size);
-    void orbCombineChanged       (bool checked);
+    void orbWTA_KChanged         (int    wta_k);
+    void orbPatchChanged         (int     size);
+    void orbCombineChanged       (bool  enable);
+
     /// SURF
     void surfOppChanged          (bool checked);
     void surfColorExtChanged     (bool checked);
-    void surfOctavesChanged      (int octaves);
-    void surfOctaveLayersChanged (int layers);
+    void surfOctavesChanged      (int  octaves);
+    void surfOctaveLayersChanged (int   layers);
     void surfExtendeChanged      (bool checked);
-    void surfCombineChanged      (bool checked);
+    void surfCombineChanged      (bool  enable);
+
     /// SIFT
     void siftOppChanged          (bool checked);
     void siftColorExtChanged     (bool checked);
@@ -47,17 +49,18 @@ public Q_SLOTS:
     void siftOctavesChanged      (int ocataves);
     void siftNormalizeChanged    (bool checked);
     void siftRecalcAnglesChanged (bool checked);
-    void siftCombineChanged      (bool checked);
+    void siftCombineChanged      (bool  enable);
+
     /// BRISK
     void briskOppChanged         (bool checked);
     void briskColorExtChanged    (bool checked);
-    void briskRadiusListChanged  (QString value);
-    void briskNumberListChanged  (QString value);
-    void briskdMaxChanged        (double dMax);
-    void briskdMinChanged        (double dMIn);
+    void briskOctavesChanged     (int  octaves);
+    void briskThresholdChanged   (int   thresh);
+    void briskScaleChanged       (double scale);
+    void briskCombineChanged     (bool  enable);
     /// BRIEF
-    void briefOppChanged         (bool checked);
-    void briefColorExtChanged    (bool checked);
+    void briefOppChanged         (bool  checked);
+    void briefColorExtChanged    (bool  checked);
     void briefBytesChanged       (QString bytes);
     /// FREAK
     void freakOppChanged         (bool checked);
@@ -66,7 +69,8 @@ public Q_SLOTS:
     void freakScaleNormChanged   (bool checked);
     void freakOriNormChanged     (bool checked);
     void freakOctavesChanged     (int  octaves);
-    void freakCombineChanged     (bool checked);
+    void freakCombineChanged     (bool  enable);
+
     /// LBP
     void lbpColorExtChanged     (bool checked);
     /// LTP
@@ -79,6 +83,7 @@ public Q_SLOTS:
     void keypointAngleChanged    (double angle);
     void keypointCropChanged     (bool crop);
     void keypointOctavesChanged  (int value);
+    void keypointCalcAngleChanged(bool enabled);
     /// FOREST
     void forest_depthChanged     (int depth);
     void forest_samplesChanged   (int samples);
@@ -101,16 +106,14 @@ public Q_SLOTS:
     void applyGridParams();
     void applyQuadParams();
 
-protected:
-    bool eventFilter(QObject *obj, QEvent *event);
+Q_SIGNALS:
+    void paramsGridApplied();
+    void paramsQuadApplied();
+    void paramsExtrApplied();
 
 private:
     enum Dirty {CLEAN, DIRTY, GRID_DIRTY, QUAD_DIRTY};
     Dirty dirty_;
-
-    QComboBox *brisk_radius_list_;
-    QComboBox *brisk_number_list_;
-
 
     CMPCoreBridge::Ptr      bridge_;
     CMPParamsORB            orb_;
@@ -126,10 +129,6 @@ private:
     CMPForestParams         forest_;
     CMPQuadParams           quad_;
     CMPGridParams           grid_;
-
-    /// BRISK SPECIAL
-    void updateBriskNumbers();
-    void updateBriskRadi();
 };
 
 #endif // CTRL_PREFERENCES_H

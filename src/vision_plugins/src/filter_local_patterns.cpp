@@ -21,7 +21,7 @@ LocalPatterns::LocalPatterns()
     colors_.push_back(cv_histogram::COLOR_CYAN);
     colors_.push_back(cv_histogram::COLOR_RED);
 
-    setCategory("Analysis");
+    addTag(Tag::get("Analysis"));
 }
 
 void LocalPatterns::filter(Mat &img, Mat &mask)

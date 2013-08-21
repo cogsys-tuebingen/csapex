@@ -11,18 +11,16 @@ CtrlPreferences::CtrlPreferences(QMainWindow *preferences, CMPCoreBridge::Ptr br
 
 void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
 {
-    brisk_number_list_ = ui->combo_numberBrisk;
-    brisk_radius_list_ = ui->combo_radiusBrisk;
-
     /// SYNC GUI WITH PARAMS
     /// ORB
     ui->orbBox->setChecked(orb_.opp);
     ui->checkBox_colExtOrb->setChecked(orb_.colorExtension);
-    ui->spinBox_levelOrb->setValue(orb_.levels);
+    ui->spinBox_levelOrb->setValue(orb_.octaves);
     ui->spinBox_scaleOrb->setValue(orb_.scale);
     ui->spinBox_patchOrb->setValue(orb_.patchSize);
     ui->spinBox_WTAOrb->setValue(orb_.WTA_K);
     ui->checkBox_combineOrb->setChecked(orb_.combine_descriptors);
+
     /// SURF
     ui->surfBox->setChecked(surf_.opp);
     ui->checkBox_extendedSurf->setChecked(surf_.colorExtension);
@@ -30,21 +28,26 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_octavesSurf->setValue(surf_.octaves);
     ui->checkBox_extendedSurf->setChecked(surf_.extended);
     ui->checkBox_combineSurf->setChecked(surf_.combine_descriptors);
+
     /// SIFT
     ui->siftBox->setChecked(sift_.opp);
     ui->checkBox_angSift->setChecked(sift_.colorExtension);
     ui->spinBox_magSift->setValue(sift_.magnification);
     ui->spinBox_octavesSift->setValue(sift_.octaves);
     ui->checkBox_angSift->setChecked(sift_.recalculateAngles);
-    ui->checkBox_combineSift->setChecked(sift_.combine_descriptors);
+
     /// BRISK
     ui->briskBox->setChecked(brisk_.opp);
     ui->checkBox_colExtBrisk->setChecked(brisk_.colorExtension);
-    ui->spinBox_dMaxBrisk->setValue(brisk_.dMax);
-    ui->spinBox_dMinBrisk->setValue(brisk_.dMin);
+    ui->spinBox_octavesBrisk->setValue(brisk_.octaves);
+    ui->spinBox_threshBrisk->setValue(brisk_.thresh);
+    ui->spinBox_scaleBrisk->setValue(brisk_.scale);
+    ui->checkBox_combineBrisk->setChecked(brisk_.combine_descriptors);
+
     /// BRIEF
     ui->briefBox->setChecked(brief_.opp);
     ui->checkBox_colExtBrief->setChecked(brief_.colorExtension);
+
     /// FREAK
     ui->freakBox->setChecked(freak_.opp);
     ui->checkBox_colExtFreak->setChecked(freak_.colorExtension);
@@ -53,6 +56,7 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_patternFreak->setValue(freak_.patternScale);
     ui->spinBox_octavesFreak->setValue(freak_.octaves);
     ui->checkBox_combineFreak->setChecked(freak_.combine_descriptors);
+
     /// LBP / LTP
     ui->checkBox_colExtlbp->setChecked(lbp_.colorExtension);
     ui->checkBox_colExtltp->setChecked(ltp_.colorExtension);
@@ -69,12 +73,14 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_treeNactiveVariables->setValue(forest_.nactive_variables);
     ui->spinBox_treeMaxTrees->setValue(forest_.max_trees);
     ui->spinBox_treeAccuracy->setValue(forest_.accurracy);
+
     /// KEYPOINT
     ui->spinBox_sizeKeypoint->setValue(key_.scale);
     ui->spinBox_angleKeypoint->setValue(key_.angle);
     ui->checkBox_softCrop->setChecked(key_.soft_crop);
-    /// FEEDBACK
+    ui->checkBox_calcAngleKeypoint->setChecked(key_.calc_angle);
 
+    /// FEEDBACK
     bridge_->setKeyPointParams(key_);
     bridge_->setForestParams(forest_);
     bridge_->setGridParams(grid_);
@@ -94,7 +100,7 @@ void CtrlPreferences::orbColorExtChanged(bool checked)
 
 void CtrlPreferences::orbLevelChanged(int levels)
 {
-    orb_.levels = levels;
+    orb_.octaves = levels;
 }
 
 void CtrlPreferences::orbScaleChanged(double scale)
@@ -112,9 +118,9 @@ void CtrlPreferences::orbPatchChanged(int size)
     orb_.patchSize = size;
 }
 
-void CtrlPreferences::orbCombineChanged(bool checked)
+void CtrlPreferences::orbCombineChanged(bool enable)
 {
-    orb_.combine_descriptors = checked;
+    orb_.combine_descriptors = enable;
 }
 
 void CtrlPreferences::surfOppChanged(bool checked)
@@ -142,9 +148,9 @@ void CtrlPreferences::surfExtendeChanged(bool checked)
     surf_.extended = checked;
 }
 
-void CtrlPreferences::surfCombineChanged(bool checked)
+void CtrlPreferences::surfCombineChanged(bool enable)
 {
-    surf_.combine_descriptors = checked;
+    surf_.combine_descriptors = enable;
 }
 
 void CtrlPreferences::siftOppChanged(bool checked)
@@ -177,9 +183,9 @@ void CtrlPreferences::siftRecalcAnglesChanged(bool checked)
     sift_.recalculateAngles = checked;
 }
 
-void CtrlPreferences::siftCombineChanged(bool checked)
+void CtrlPreferences::siftCombineChanged(bool enable)
 {
-    sift_.combine_descriptors = checked;
+    sift_.combine_descriptors = enable;
 }
 
 void CtrlPreferences::briskOppChanged(bool checked)
@@ -192,28 +198,24 @@ void CtrlPreferences::briskColorExtChanged(bool checked)
     brisk_.colorExtension = checked;
 }
 
-void CtrlPreferences::briskRadiusListChanged(QString value)
+void CtrlPreferences::briskOctavesChanged(int octaves)
 {
-    QRegExp rx("[^0-9\\.]");
-    value.replace(rx, "");
-    brisk_radius_list_->setEditText(value);
+    brisk_.octaves = octaves;
 }
 
-void CtrlPreferences::briskNumberListChanged(QString value)
+void CtrlPreferences::briskThresholdChanged(int thresh)
 {
-    QRegExp rx("[^0-9\\.]");
-    value.replace(rx, "");
-    brisk_number_list_->setEditText(value);
+    brisk_.thresh = thresh;
 }
 
-void CtrlPreferences::briskdMaxChanged(double dMax)
+void CtrlPreferences::briskScaleChanged(double scale)
 {
-    brisk_.dMax = dMax;
+    brisk_.scale = scale;
 }
 
-void CtrlPreferences::briskdMinChanged(double dMIn)
+void CtrlPreferences::briskCombineChanged(bool enable)
 {
-    brisk_.dMin = dMIn;
+    brisk_.combine_descriptors = enable;
 }
 
 void CtrlPreferences::briefOppChanged(bool checked)
@@ -261,9 +263,9 @@ void CtrlPreferences::freakOctavesChanged(int octaves)
     freak_.octaves = octaves;
 }
 
-void CtrlPreferences::freakCombineChanged(bool checked)
+void CtrlPreferences::freakCombineChanged(bool enable)
 {
-    freak_.combine_descriptors = checked;
+    freak_.combine_descriptors = enable;
 }
 
 void CtrlPreferences::keypointSizeChanged(double size)
@@ -304,6 +306,11 @@ void CtrlPreferences::keypointCropChanged(bool crop)
 void CtrlPreferences::keypointOctavesChanged(int value)
 {
     key_.octave = value;
+}
+
+void CtrlPreferences::keypointCalcAngleChanged(bool enabled)
+{
+    key_.calc_angle = enabled;
 }
 
 void CtrlPreferences::forest_depthChanged(int depth)
@@ -406,6 +413,8 @@ void CtrlPreferences::applyExtratorParams(QString setting)
     bridge_->setKeyPointParams(key_);
     bridge_->setForestParams(forest_);
     dirty_ = DIRTY;
+
+    Q_EMIT paramsExtrApplied();
 }
 
 void CtrlPreferences::applyGridParams()
@@ -417,6 +426,8 @@ void CtrlPreferences::applyGridParams()
         bridge_->setGridParams(grid_);
         dirty_ = CLEAN;
     }
+
+    Q_EMIT paramsGridApplied();
 }
 
 void CtrlPreferences::applyQuadParams()
@@ -428,44 +439,6 @@ void CtrlPreferences::applyQuadParams()
         bridge_->setQuadParams(quad_);
         dirty_ = CLEAN;
     }
-}
 
-bool CtrlPreferences::eventFilter(QObject *obj, QEvent *event)
-{
-    QComboBox *combo = dynamic_cast<QComboBox*>(obj);
-    if(combo != NULL) {
-        if( event->type() == QEvent::KeyPress) {
-            int index = combo->currentIndex();
-            if(index > -1) {
-                QKeyEvent *key = static_cast<QKeyEvent*>(event);
-                if(key->key() == Qt::Key_Delete)
-                    combo->removeItem(index);
-                if(key->key() == Qt::Key_Enter) {
-                    updateBriskNumbers();
-                    updateBriskRadi();
-                }
-            }
-        }
-    }
-
-    if(brisk_number_list_->count() != brisk_.numberList.size())
-        updateBriskNumbers();
-    if(brisk_radius_list_->count() != brisk_.radiusList.size())
-        updateBriskRadi();
-
-    return QObject::eventFilter(obj, event);
-}
-
-void CtrlPreferences::updateBriskNumbers()
-{
-    brisk_.numberList.clear();
-    for(int i = 0 ; i < brisk_number_list_->count() ; i++)
-        brisk_.numberList.push_back(brisk_number_list_->itemText(i).toInt());
-}
-
-void CtrlPreferences::updateBriskRadi()
-{
-    brisk_.radiusList.clear();
-    for(int i = 0 ; i < brisk_radius_list_->count() ; i++)
-        brisk_.radiusList.push_back(brisk_radius_list_->itemText(i).toFloat());
+    Q_EMIT paramsQuadApplied();
 }

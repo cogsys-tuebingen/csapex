@@ -79,25 +79,10 @@ add_executable(TerraTrainer
 # ---------------------------
                 ${QT_TERRA})
 
-add_library(ExtFeatureExtraction SHARED
-                src/ext/fasthessian.cpp
-                src/ext/featureextraction.cpp
-                src/ext/imagefeatureextraction.cpp
-                src/ext/integral.cpp
-                src/ext/ipoint.cpp
-                src/ext/LBP.cpp
-                src/ext/LTP.cpp
-                src/ext/surf.cpp
-                src/ext/utils.cpp)
-
 #add_executable(YAMLTrainConverter
 #               src/tools/yaml_train_converter.cpp)
 
 #### LINKING
-
-target_link_libraries(ExtFeatureExtraction
-                        ${QT_LIBRARIES}
-                        ${OpenCV_LIBS})
 
 target_link_libraries(TerraTrainer
                         yaml-cpp

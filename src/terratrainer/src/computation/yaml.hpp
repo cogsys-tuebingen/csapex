@@ -212,32 +212,24 @@ inline void writeMatrix(const cv::Mat &mat, YAML::Emitter &emitter)
 }
 
 template<typename _Tp, typename _Tw>
-inline void writeDescriptor(const cv::Mat &desc, const int id, const cv::Scalar &mean, const bool color_extension,
-                            YAML::Emitter &emitter)
+inline void writeDescriptor(const cv::Mat &desc, const int id, YAML::Emitter &emitter)
 {
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "class" << YAML::Value << id;
-
     int step = desc.rows * desc.cols;
-    if(color_extension)
-        step += 3;
     emitter << YAML::Key << "descrStep" << YAML::Value << step;
     emitter << YAML::Key << "descr" << YAML::Value << YAML::Flow << YAML::BeginSeq;
     writeMatrix<_Tp, _Tw>(desc, emitter);
-    if(color_extension) {
-        emitter << mean[0] << mean[1] << mean[2];
-    }
     emitter << YAML::EndSeq;
     emitter << YAML::EndMap;
 }
 
 template<typename _Tp, typename _Tw>
-inline void writeDescriptorsSeperated(const Mat &desc, const int id, const Scalar &mean, const bool color_extension,
-                                      YAML::Emitter &emitter)
+inline void writeDescriptorRows(const Mat &desc, const int id, YAML::Emitter &emitter)
 {
     for(int j = 0 ; j < desc.rows ; j++) {
         cv::Mat roi(desc, cv::Rect(0,j,desc.cols,1));
-        CMPYAML::writeDescriptor<_Tp, _Tw>(roi, id, mean, color_extension, emitter);
+        CMPYAML::writeDescriptor<_Tp, _Tw>(roi, id, emitter);
     }
 }
 }

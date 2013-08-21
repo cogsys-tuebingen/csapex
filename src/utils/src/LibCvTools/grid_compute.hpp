@@ -19,7 +19,7 @@ namespace cv_grid {
  */
 template<class Attribute, class GridT, class Params>
 inline void  prepare_grid(GridT &grid, const cv::Mat &img, const int rows, const int cols, const Params &p,
-                          const cv::Mat &mask = cv::Mat(), const double thresh = 1.0, const bool soft_crop = false)
+                          const cv::Mat &mask = cv::Mat(), const double thresh = 1.0)
 {
     grid = GridT(rows,cols);
 
@@ -47,13 +47,7 @@ inline void  prepare_grid(GridT &grid, const cv::Mat &img, const int rows, const
                 }
             }
 
-            cv::Mat img_roi;
-            if(soft_crop)
-                img_roi = img;
-            else
-                img_roi = cv::Mat(img, r);
-
-            Attribute attr = Attribute::generate(img_roi, p);
+            Attribute attr = Attribute::generate(img, r, p);
             grid(j,i) = GridCell<cv::Rect, Attribute>(r, attr);
         }
     }
@@ -63,7 +57,7 @@ typedef GridCell<cv::Rect, AttrScalar>          GridCellScalar;    /// a grid ce
 typedef Grid_<GridCellScalar, cv::Rect>         GridScalar;        /// a grid based on hls grid cells
 typedef GridCell<cv::Rect, AttrHistogram>       GridCellHist;
 typedef Grid_<GridCellHist, cv::Rect>           GridHist;
-typedef GridCell<cv::Rect, AttrTerrainClass>    GridCellTerra;
+typedef GridCell<cv::Rect, AttrTerrainClassCV>    GridCellTerra;
 typedef Grid_<GridCellTerra, cv::Rect>          GridTerra;
 
 /**

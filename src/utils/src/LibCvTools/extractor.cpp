@@ -10,68 +10,107 @@ void CVExtractor::set(cv::DescriptorExtractor *extractor)
     extractor_.reset(extractor);
 }
 
-void CVExtractor::extract(const cv::Mat &image, cv::Mat &descriptors)
-{
-    std::vector<cv::KeyPoint> key_points;
-    cv::KeyPoint k(image.cols / 2.0, image.rows / 2.0, 5.0);
-    k.octave = 0;
-    key_points.push_back(k);
-    extract(image, key_points, descriptors);
-}
-
 void CVExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors)
 {
     extractor_->compute(image, key_points, descriptors);
+
+    if(descriptors.empty() || descriptors.rows == 0) {
+        std::cerr << "Something while extraction went wrong!" << std::endl;
+    }
 }
 
-CVExtractor::KeyPoints CVExtractor::prepareKeypoint(const cv::Rect &rect, const bool soft_crop, const float scale, const float angle)
+void CVExtractor::extract(const Mat &image, const cv::Rect roi, const KeypointParams &params, const int max_octave,
+                          const bool color_extension, const bool large,
+                          cv::Mat &descriptors)
+{
+    cv::Mat         roi_img;
+    cv::Mat         roi_col(image, roi);
+    cv::Scalar      mean = extractMeanColorRGBHSV(roi_col);
+    KeypointParams  kp = params;
+
+    if(kp.soft_crop)
+        roi_img = image;
+    else
+        roi_img = roi_col;
+
+    if(kp.calc_angle)
+        kp.angle = calcAngle(roi_col);
+
+    CVExtractor::KeyPoints k;
+    if(kp.octave == -1 && max_octave != 1) {
+        k = prepareOctaveKeypoints(roi, kp, max_octave);
+    } else {
+        k = prepareKeypoint(roi, kp);
+    }
+
+    extract(roi_img, k, descriptors);
+
+    if(large && !k.empty()) {
+        descriptors = descriptors.reshape(0, 1);
+    }
+
+    if(color_extension) {
+        addColorExtension(descriptors, mean);
+    }
+}
+
+CVExtractor::KeyPoints CVExtractor::prepareKeypoint(const cv::Rect &rect, const KeypointParams &params)
 {
     /// TODO : CHECK THE KEYPOINT PROPERTIES FOR DIFFERENT EXTRACTORS
     KeyPoints key_points;
-    cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * scale, angle);
-    if(soft_crop) {
+    cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * params.scale, params.angle);
+    if(params.soft_crop) {
+        k.pt.x += rect.x;
+        k.pt.y += rect.y;
+    }
+    k.octave = params.octave;
+
+    key_points.push_back(k);
+    return key_points;
+}
+
+CVExtractor::KeyPoints CVExtractor::prepareOctaveKeypoints(const cv::Rect &rect, const KeypointParams &params, const int max_octave)
+{
+    KeyPoints key_points;
+    cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * params.scale, params.angle);
+    if(params.soft_crop) {
         k.pt.x += rect.x;
         k.pt.y += rect.y;
     }
 
-    key_points.push_back(k);
+    for(int octave = 0 ; octave < max_octave ; octave++) {
+        k.octave = octave;
+        key_points.push_back(k);
+    }
     return key_points;
 }
 
-CVExtractor::KeyPoints CVExtractor::prepareNeighbouredKeypoint(const Rect &rect, const bool soft_crop, const float scale, const float angle)
+double CVExtractor::calcAngle(const Mat &image)
 {
-    KeyPoints key_points;
-    double scaled = rect.height / 2.0 * scale;
-    cv::KeyPoint center(rect.width / 2.0, rect.height / 2.0, scaled, angle);
-    cv::KeyPoint leftUp(0, 0, scaled, angle);
-    cv::KeyPoint leftLo(0, rect.height, scaled, angle);
-    cv::KeyPoint RightUp(rect.width, 0, scaled, angle);
-    cv::KeyPoint RightLo(rect.width,rect.height, scaled, angle);
-
-    if(soft_crop) {
-        center.pt.x += rect.x;
-        center.pt.y += rect.y;
-        leftUp.pt.x += rect.x;
-        leftUp.pt.y += rect.y;
-        leftLo.pt.x += rect.x;
-        leftLo.pt.y += rect.y;
-        RightUp.pt.x += rect.x;
-        RightUp.pt.y += rect.y;
-        RightLo.pt.x += rect.x;
-        RightLo.pt.y += rect.y;
+    cv::Mat process;
+    if(image.type() == CV_8UC3) {
+        cv::cvtColor(image, process, CV_BGR2GRAY);
     }
 
-    key_points.push_back(center);
-    key_points.push_back(leftUp);
-    key_points.push_back(leftLo);
-    key_points.push_back(RightUp);
-    key_points.push_back(RightLo);
+    bool zero_continue_y = image.rows % 2 == 1;
+    bool zero_continue_x = image.cols % 2 == 1;
 
-    return key_points;
-}
+    double m10 = 0;
+    double m01 = 0;
+    int y = -image.rows / 2;
+    int x = -image.cols / 2;
 
-CVExtractor::KeyPoints CVExtractor::prepareOctavedKeypoint(const Rect &rect, const float scale, const float angle)
-{
+    for(int i = 0 ; i < image.rows ; i++) {
+        for(int j = 0 ; j < image.cols ; j++){
+            if(!zero_continue_x || x + j != 0)
+                m10 += (x + j) * process.at<uchar>(i,j);
+            if(!zero_continue_y || y + i != 0)
+                m01 += (y + i) * process.at<uchar>(i,j);
+
+        }
+    }
+
+    return std::atan2(m01, m10);
 
 }
 
@@ -92,6 +131,25 @@ void PatternExtractor::extract(const cv::Mat &image, cv::Mat &descriptors)
         break;
     default:
         std::cerr << "No pattern set, computation not possible!" << std::endl;
+    }
+}
+
+void PatternExtractor::extract(const Mat &image,
+                               const bool color_extension,
+                               const bool large, Mat &descriptors)
+{
+    extract(image, descriptors);
+    if(color_extension) {
+        cv::Scalar  mean = extractMeanColorRGBHSV(image);
+
+        if(large) {
+            descriptors.reshape(0, 1);
+        }
+
+        if(color_extension) {
+            addColorExtension(descriptors, mean);
+        }
+
     }
 }
 

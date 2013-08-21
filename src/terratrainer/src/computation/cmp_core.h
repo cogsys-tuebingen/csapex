@@ -63,11 +63,11 @@ private:
 
     cv::Mat                                 raw_image_;
     CMPCVExtractorExt::Ptr                  cv_extractor_;
+    CMPExtractorParams                      ex_params_;
     CMPPatternExtractorExt::Ptr             pt_extractor_;
-    CMPExtractorParams::Type                type_;
     CMPRandomForestExt::Ptr                 random_;
 
-    CMPKeypointParams                       keypoint_params_;
+    Extractor::KeypointParams               keypoint_params_;
 
     TerraQuadtreeDecomposition::Ptr         quad_decom_;
     CMPQuadParams                           quad_params_;

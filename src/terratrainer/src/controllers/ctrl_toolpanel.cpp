@@ -111,7 +111,6 @@ void CtrlToolPanel::buttonSel()
 void CtrlToolPanel::buttonCompute()
 {
     Q_EMIT setExtrParams(extractor_selection_->currentText());
-    Q_EMIT compute();
 }
 
 void CtrlToolPanel::trainingFinished()
@@ -123,13 +122,11 @@ void CtrlToolPanel::trainingFinished()
 void CtrlToolPanel::buttonGrid()
 {
     Q_EMIT setGridParams();
-    Q_EMIT grid();
 }
 
 void CtrlToolPanel::buttonQuad()
 {
     Q_EMIT setQuadParams();
-    Q_EMIT quad();
 }
 
 void CtrlToolPanel::feedbackFinished()
@@ -180,6 +177,20 @@ void CtrlToolPanel::colorUpdate(int id)
     }
 }
 
+void CtrlToolPanel::paramsGridApplied()
+{
+    Q_EMIT grid();
+}
+
+void CtrlToolPanel::paramsQuadApplied()
+{
+    Q_EMIT quad();
+}
+
+void CtrlToolPanel::paramsExtrApplied()
+{
+    Q_EMIT compute();
+}
 
 void CtrlToolPanel::snapZoom()
 {

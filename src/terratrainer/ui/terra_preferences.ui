@@ -57,7 +57,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>9</number>
       </property>
       <widget class="QWidget" name="orb">
        <attribute name="title">
@@ -66,6 +66,26 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QFormLayout" name="layout_orb">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtOrb">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="orbBox">
+            <property name="toolTip">
+             <string>Compute descriptors in the Opponent Color Space</string>
+            </property>
+            <property name="text">
+             <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_levelOrb">
             <property name="minimumSize">
@@ -93,15 +113,11 @@
               <height>16777215</height>
              </size>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="orbBox">
-            <property name="toolTip">
-             <string>Compute descriptors in the Opponent Color Space</string>
+            <property name="minimum">
+             <number>1</number>
             </property>
-            <property name="text">
-             <string>OpponentColorDescriptor</string>
+            <property name="maximum">
+             <number>10</number>
             </property>
            </widget>
           </item>
@@ -132,6 +148,9 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
            </widget>
           </item>
           <item row="5" column="0">
@@ -144,19 +163,6 @@
             </property>
             <property name="text">
              <string>WTA_K</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_patchOrb">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Patch Size</string>
             </property>
            </widget>
           </item>
@@ -174,6 +180,25 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="minimum">
+             <number>2</number>
+            </property>
+            <property name="maximum">
+             <number>4</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_patchOrb">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Patch Size</string>
+            </property>
            </widget>
           </item>
           <item row="6" column="1">
@@ -190,19 +215,15 @@
               <height>16777215</height>
              </size>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_colExtOrb">
-            <property name="text">
-             <string>Color Extension</string>
+            <property name="minimum">
+             <number>1</number>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
            <widget class="QCheckBox" name="checkBox_combineOrb">
             <property name="text">
-             <string>Combine octave descriptors</string>
+             <string>Combine to big descriptor</string>
             </property>
            </widget>
           </item>
@@ -223,6 +244,13 @@
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
           </property>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtSurf">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="1">
            <widget class="QCheckBox" name="surfBox">
             <property name="toolTip">
@@ -230,6 +258,51 @@
             </property>
             <property name="text">
              <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_layerSurf">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Octave Layers</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="spinBox_layersSurf">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_octavesSurf">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Octaves</string>
             </property>
            </widget>
           </item>
@@ -259,62 +332,10 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QSpinBox" name="spinBox_layersSurf">
-            <property name="maximumSize">
-             <size>
-              <width>64</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>10</number>
-            </property>
-            <property name="value">
-             <number>2</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_layerSurf">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Octave Layers</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_octavesSurf">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Octaves</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_colExtSurf">
-            <property name="text">
-             <string>Color Extension</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QCheckBox" name="checkBox_combineSurf">
             <property name="text">
-             <string>Combine octave descriptors</string>
+             <string>Combine to big descriptor</string>
             </property>
            </widget>
           </item>
@@ -332,6 +353,13 @@
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
           </property>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtSift">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="1">
            <widget class="QCheckBox" name="siftBox">
             <property name="toolTip">
@@ -339,16 +367,6 @@
             </property>
             <property name="text">
              <string>OpponentColorDescriptor</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="spinBox_magSift">
-            <property name="maximumSize">
-             <size>
-              <width>64</width>
-              <height>16777215</height>
-             </size>
             </property>
            </widget>
           </item>
@@ -362,6 +380,29 @@
             </property>
             <property name="text">
              <string>Magnification</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_magSift">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_octavesSift">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Octaves</string>
             </property>
            </widget>
           </item>
@@ -390,19 +431,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_octavesSift">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Octaves</string>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="1">
            <widget class="QCheckBox" name="checkBox_normSift">
             <property name="text">
@@ -420,17 +448,10 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_colExtSift">
-            <property name="text">
-             <string>Color Extension</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QCheckBox" name="checkBox_combineSift">
             <property name="text">
-             <string>Combine octave descriptors</string>
+             <string>Combine to big descriptor</string>
             </property>
            </widget>
           </item>
@@ -445,6 +466,16 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QFormLayout" name="layout_brisk">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtBrisk">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="1">
            <widget class="QCheckBox" name="briskBox">
             <property name="toolTip">
@@ -455,40 +486,8 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="combo_radiusBrisk">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>64</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="editable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_radiusBrisk">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Radius list</string>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_numberBrisk">
+           <widget class="QLabel" name="label_octavesBrisk">
             <property name="minimumSize">
              <size>
               <width>80</width>
@@ -496,31 +495,28 @@
              </size>
             </property>
             <property name="text">
-             <string>Number list</string>
+             <string>Octaves</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QComboBox" name="combo_numberBrisk">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>0</height>
-             </size>
-            </property>
+           <widget class="QSpinBox" name="spinBox_octavesBrisk">
             <property name="maximumSize">
              <size>
               <width>64</width>
               <height>16777215</height>
              </size>
             </property>
-            <property name="editable">
-             <bool>true</bool>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10</number>
             </property>
            </widget>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="label_dMaxBrisk">
+           <widget class="QLabel" name="label_threshBrisk">
             <property name="minimumSize">
              <size>
               <width>80</width>
@@ -528,22 +524,12 @@
              </size>
             </property>
             <property name="text">
-             <string>dMax</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QDoubleSpinBox" name="spinBox_dMaxBrisk">
-            <property name="maximumSize">
-             <size>
-              <width>64</width>
-              <height>16777215</height>
-             </size>
+             <string>Threshold</string>
             </property>
            </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QLabel" name="label_dMInBrisk">
+           <widget class="QLabel" name="label_scaleBrisk">
             <property name="minimumSize">
              <size>
               <width>80</width>
@@ -551,12 +537,12 @@
              </size>
             </property>
             <property name="text">
-             <string>dMin</string>
+             <string>Scale</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QDoubleSpinBox" name="spinBox_dMinBrisk">
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="spinBox_threshBrisk">
             <property name="maximumSize">
              <size>
               <width>64</width>
@@ -565,10 +551,23 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_colExtBrisk">
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_scaleBrisk">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox_combineBrisk">
             <property name="text">
-             <string>Color Extension</string>
+             <string>Combine to big descriptor</string>
             </property>
            </widget>
           </item>
@@ -583,23 +582,14 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QFormLayout" name="layout_brief">
-          <item row="2" column="1">
-           <widget class="QComboBox" name="comboBox_Brief">
-            <item>
-             <property name="text">
-              <string>16</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>32</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>64</string>
-             </property>
-            </item>
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtBrief">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="1">
@@ -625,11 +615,29 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_colExtBrief">
-            <property name="text">
-             <string>Color Extension</string>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="comboBox_Brief">
+            <property name="maximumSize">
+             <size>
+              <width>64</width>
+              <height>16777215</height>
+             </size>
             </property>
+            <item>
+             <property name="text">
+              <string>16</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>32</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>64</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -643,6 +651,23 @@
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <layout class="QFormLayout" name="layout_freak">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_colExtFreak">
+            <property name="text">
+             <string>Color Extension</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="freakBox">
+            <property name="text">
+             <string>OpponentColorDescriptor</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_octavesFreak">
             <property name="minimumSize">
@@ -669,6 +694,12 @@
               <width>64</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10</number>
             </property>
            </widget>
           </item>
@@ -699,12 +730,8 @@
               <height>16777215</height>
              </size>
             </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QCheckBox" name="checkBox_scaleNormFreak">
-            <property name="text">
-             <string>Scale normalization</string>
+            <property name="minimum">
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -715,24 +742,17 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="freakBox">
+          <item row="6" column="1">
+           <widget class="QCheckBox" name="checkBox_scaleNormFreak">
             <property name="text">
-             <string>OpponentColorDescriptor</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_colExtFreak">
-            <property name="text">
-             <string>Color Extension</string>
+             <string>Scale normalization</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
            <widget class="QCheckBox" name="checkBox_combineFreak">
             <property name="text">
-             <string>Combine octave descriptors</string>
+             <string>Combine to big descriptor</string>
             </property>
            </widget>
           </item>
@@ -1173,6 +1193,9 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
             <property name="maximum">
              <double>359.990000000000009</double>
             </property>
@@ -1253,6 +1276,20 @@
            <widget class="QCheckBox" name="checkBox_softCrop">
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="checkBox_calcAngleKeypoint">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_calcAngleKeypoint">
+            <property name="text">
+             <string>Calc. angle</string>
             </property>
            </widget>
           </item>

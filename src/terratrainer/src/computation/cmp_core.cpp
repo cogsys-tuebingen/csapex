@@ -63,17 +63,19 @@ void CMPCore::computeGrid()
     }
 
     /// PARAMETERS
-    cv_grid::AttrTerrainClass::Params p;
-    p.extractor  = cv_extractor_.get();
-    p.classifier = random_.get();
-    p.angle = keypoint_params_.angle;
-    p.scale = keypoint_params_.scale;
+    cv_grid::AttrTerrainClassCV::Params p;
+    p.extractor       = cv_extractor_.get();
+    p.classifier      = random_.get();
+    p.key             = keypoint_params_;
+    p.color_extension = ex_params_.colorExtension;
+    p.large_descriptor= ex_params_.combine_descriptors;
+    p.max_octave      = ex_params_.octaves;
 
     /// CALCULATE GRID SIZE
     int height = raw_image_.rows / grid_params_.cell_height;
     int width  = raw_image_.cols / grid_params_.cell_width;
 
-    cv_grid::prepare_grid<cv_grid::AttrTerrainClass>(*grid_, raw_image_, height, width, p, cv::Mat(), 1.0, keypoint_params_.soft_crop);
+    cv_grid::prepare_grid<cv_grid::AttrTerrainClassCV>(*grid_, raw_image_, height, width, p, cv::Mat());
 }
 
 void CMPCore::computeQuadtree()
@@ -83,12 +85,13 @@ void CMPCore::computeQuadtree()
         return;
     }
     cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
-    TerraDecomClassifierCV       *classifier = new TerraDecomClassifierCV(quad_params_.min_prob,
+    TerraDecomClassifierCV   *classifier = new TerraDecomClassifierCV(quad_params_.min_prob,
                                                                       random_.get(),
                                                                       cv_extractor_.get(),
-                                                                      keypoint_params_.soft_crop,
-                                                                      keypoint_params_.scale,
-                                                                      keypoint_params_.angle);
+                                                                      keypoint_params_,
+                                                                      ex_params_.combine_descriptors,
+                                                                      ex_params_.colorExtension,
+                                                                      ex_params_.octaves);
 
     TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
     quad_decom_.reset(decom);
@@ -152,7 +155,7 @@ void CMPCore::setExtractorParameters(CMPExtractorParams &params)
     }
 
     cv_extractor_->setKeyPointParams(keypoint_params_);
-    type_ = params.type;
+    ex_params_ = params;
 
 }
 
@@ -173,7 +176,11 @@ void CMPCore::setQuadParameters(const CMPQuadParams &params)
 
 void CMPCore::setKeyPointParameters(const CMPKeypointParams &params)
 {
-    keypoint_params_ = params;
+    keypoint_params_.angle      = params.angle;
+    keypoint_params_.octave     = params.octave;
+    keypoint_params_.scale      = params.scale;
+    keypoint_params_.soft_crop  = params.soft_crop;
+    keypoint_params_.calc_angle = params.calc_angle;
 }
 
 void CMPCore::setRois(const std::vector<cv_roi::TerraROI> &rois)
@@ -222,7 +229,7 @@ void CMPCore::extract()
     YAML::Emitter  emitter;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
-    if(type_ != CMPExtractorParams::LBP && type_ != CMPExtractorParams::LTP)
+    if(ex_params_.type != CMPExtractorParams::LBP && ex_params_.type != CMPExtractorParams::LTP)
         cv_extractor_->extractToYAML(emitter, raw_image_, rois_);
     else
         pt_extractor_->extractToYAML(emitter, raw_image_, rois_);

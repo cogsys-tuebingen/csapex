@@ -41,7 +41,8 @@ void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
         return;
     }
 
-    CtrlMapView *ctrl = new CtrlMapView(ui->mapView, br);
+    CtrlMapView *ctrl = new CtrlMapView(br);
+    ctrl->setupUI(ui);
     QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()));
     QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)));
     QObject::connect(br.get(), SIGNAL(classUpdate(int,int)),  ctrl, SLOT(classUpdated(int,int)));
@@ -204,41 +205,37 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     ctrl->setupUI(tf);
 
     /// ORB
-    QCheckBox::connect(tf->orbBox, SIGNAL(clicked(bool)), ctrl, SLOT(orbOppChanged(bool)));
-    QCheckBox::connect(tf->checkBox_colExtOrb, SIGNAL(clicked(bool)),        ctrl, SLOT(orbColorExtChanged(bool)));
-    QCheckBox::connect(tf->checkBox_combineOrb, SIGNAL(clicked(bool)), ctrl, SLOT(orbCombineChanged(bool)));
-    QSpinBox::connect (tf->spinBox_levelOrb, SIGNAL(valueChanged(int)),      ctrl, SLOT(orbLevelChanged(int)));
-    QSpinBox::connect (tf->spinBox_scaleOrb, SIGNAL(valueChanged(double)),   ctrl, SLOT(orbScaleChanged(double)));
-    QSpinBox::connect (tf->spinBox_WTAOrb,   SIGNAL(valueChanged(int)),      ctrl, SLOT(orbWTA_KChanged(int)));
-    QSpinBox::connect (tf->spinBox_patchOrb, SIGNAL(valueChanged(int)),      ctrl, SLOT(orbPatchChanged(int)));
-
+    QCheckBox::connect(tf->orbBox,              SIGNAL(clicked(bool)),            ctrl, SLOT(orbOppChanged(bool)));
+    QCheckBox::connect(tf->checkBox_colExtOrb,  SIGNAL(clicked(bool)),            ctrl, SLOT(orbColorExtChanged(bool)));
+    QSpinBox::connect (tf->spinBox_levelOrb,    SIGNAL(valueChanged(int)),        ctrl, SLOT(orbLevelChanged(int)));
+    QSpinBox::connect (tf->spinBox_scaleOrb,    SIGNAL(valueChanged(double)),     ctrl, SLOT(orbScaleChanged(double)));
+    QSpinBox::connect (tf->spinBox_WTAOrb,      SIGNAL(valueChanged(int)),        ctrl, SLOT(orbWTA_KChanged(int)));
+    QSpinBox::connect (tf->spinBox_patchOrb,    SIGNAL(valueChanged(int)),        ctrl, SLOT(orbPatchChanged(int)));
+    QCheckBox::connect(tf->checkBox_combineOrb, SIGNAL(clicked(bool)),            ctrl, SLOT(orbCombineChanged(bool)));
 
     /// SURF
-    QCheckBox::connect(tf->surfBox,               SIGNAL(clicked(bool)),     ctrl, SLOT(surfOppChanged(bool)));
-    QCheckBox::connect(tf->checkBox_colExtSurf,   SIGNAL(clicked(bool)),     ctrl, SLOT(surfColorExtChanged(bool)));
-    QCheckBox::connect(tf->checkBox_combineSurf,  SIGNAL(clicked(bool)),     ctrl, SLOT(surfCombineChanged(bool)));
-    QSpinBox::connect (tf->spinBox_octavesSurf,   SIGNAL(valueChanged(int)), ctrl, SLOT(surfOctavesChanged(int)));
-    QSpinBox::connect (tf->spinBox_layersSurf,    SIGNAL(valueChanged(int)), ctrl, SLOT(surfOctaveLayersChanged(int)));
-    QCheckBox::connect(tf->checkBox_extendedSurf, SIGNAL(clicked(bool)),     ctrl, SLOT(surfExtendeChanged(bool)));
-
+    QCheckBox::connect(tf->surfBox,               SIGNAL(clicked(bool)),          ctrl, SLOT(surfOppChanged(bool)));
+    QCheckBox::connect(tf->checkBox_colExtSurf,   SIGNAL(clicked(bool)),          ctrl, SLOT(surfColorExtChanged(bool)));
+    QSpinBox::connect (tf->spinBox_octavesSurf,   SIGNAL(valueChanged(int)),      ctrl, SLOT(surfOctavesChanged(int)));
+    QSpinBox::connect (tf->spinBox_layersSurf,    SIGNAL(valueChanged(int)),      ctrl, SLOT(surfOctaveLayersChanged(int)));
+    QCheckBox::connect(tf->checkBox_extendedSurf, SIGNAL(clicked(bool)),          ctrl, SLOT(surfExtendeChanged(bool)));
+    QCheckBox::connect(tf->checkBox_combineSurf,  SIGNAL(clicked(bool)),          ctrl, SLOT(surfCombineChanged(bool)));
     /// SIFT
-    QCheckBox::connect(tf->siftBox,               SIGNAL(clicked(bool)),        ctrl, SLOT(siftOppChanged(bool)));
-    QCheckBox::connect(tf->checkBox_colExtSift,   SIGNAL(clicked(bool)),        ctrl, SLOT(siftColorExtChanged(bool)));
-    QCheckBox::connect(tf->checkBox_combineSift,  SIGNAL(clicked(bool)),        ctrl, SLOT(siftCombineChanged(bool)));
-    QSpinBox::connect (tf->spinBox_magSift,       SIGNAL(valueChanged(double)), ctrl, SLOT(siftMagnificationChanged(double)));
-    QSpinBox::connect (tf->spinBox_octavesSift,   SIGNAL(valueChanged(int)),    ctrl, SLOT(siftOctavesChanged(int)));
-    QCheckBox::connect(tf->checkBox_angSift,      SIGNAL(clicked(bool)),        ctrl, SLOT(siftRecalcAnglesChanged(bool)));
-    QCheckBox::connect(tf->checkBox_normSift,     SIGNAL(clicked(bool)),        ctrl, SLOT(siftNormalizeChanged(bool)));
+    QCheckBox::connect(tf->siftBox,               SIGNAL(clicked(bool)),          ctrl, SLOT(siftOppChanged(bool)));
+    QCheckBox::connect(tf->checkBox_colExtSift,   SIGNAL(clicked(bool)),          ctrl, SLOT(siftColorExtChanged(bool)));
+    QSpinBox::connect (tf->spinBox_magSift,       SIGNAL(valueChanged(double)),   ctrl, SLOT(siftMagnificationChanged(double)));
+    QSpinBox::connect (tf->spinBox_octavesSift,   SIGNAL(valueChanged(int)),      ctrl, SLOT(siftOctavesChanged(int)));
+    QCheckBox::connect(tf->checkBox_angSift,      SIGNAL(clicked(bool)),          ctrl, SLOT(siftRecalcAnglesChanged(bool)));
+    QCheckBox::connect(tf->checkBox_normSift,     SIGNAL(clicked(bool)),          ctrl, SLOT(siftNormalizeChanged(bool)));
+    QCheckBox::connect(tf->checkBox_combineSift,  SIGNAL(clicked(bool)),          ctrl, SLOT(siftCombineChanged(bool)));
 
     /// BRISK
-    QCheckBox::connect(tf->briskBox,          SIGNAL(clicked(bool)),             ctrl, SLOT(briskOppChanged(bool)));
-    QCheckBox::connect(tf->checkBox_colExtBrisk, SIGNAL(clicked(bool)),          ctrl, SLOT(briskColorExtChanged(bool)));
-    QComboBox::connect(tf->combo_numberBrisk, SIGNAL(editTextChanged(QString)),  ctrl, SLOT(briskNumberListChanged(QString)));
-    QComboBox::connect(tf->combo_radiusBrisk, SIGNAL(editTextChanged(QString)),  ctrl, SLOT(briskRadiusListChanged(QString)));
-    QSpinBox::connect( tf->spinBox_dMaxBrisk, SIGNAL(valueChanged(double)),      ctrl, SLOT(briskdMaxChanged(double)));
-    QSpinBox::connect( tf->spinBox_dMinBrisk, SIGNAL(valueChanged(double)),      ctrl, SLOT(briskdMinChanged(double)));
-    tf->combo_numberBrisk->installEventFilter(ctrl);
-    tf->combo_radiusBrisk->installEventFilter(ctrl);
+    QCheckBox::connect(tf->briskBox,               SIGNAL(clicked(bool)),         ctrl, SLOT(briskOppChanged(bool)));
+    QCheckBox::connect(tf->checkBox_colExtBrisk,   SIGNAL(clicked(bool)),         ctrl, SLOT(briskColorExtChanged(bool)));
+    QSpinBox::connect(tf->spinBox_octavesBrisk,    SIGNAL(valueChanged(int)),     ctrl, SLOT(briskOctavesChanged(int)));
+    QSpinBox::connect(tf->spinBox_threshBrisk,     SIGNAL(valueChanged(int)),     ctrl, SLOT(briskThresholdChanged(int)));
+    QSpinBox::connect(tf->spinBox_scaleBrisk,      SIGNAL(valueChanged(double)),  ctrl, SLOT(briskScaleChanged(double)));
+    QCheckBox::connect(tf->checkBox_combineBrisk,  SIGNAL(clicked(bool)),         ctrl, SLOT(briskCombineChanged(bool)));
 
     /// BRIEF
     QCheckBox::connect(tf->briefBox,                SIGNAL(clicked(bool)),                 ctrl, SLOT(briefOppChanged(bool)));
@@ -248,11 +245,11 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     /// FREAK
     QCheckBox::connect(tf->freakBox,                SIGNAL(clicked(bool)),        ctrl, SLOT(freakOppChanged(bool)));
     QCheckBox::connect(tf->checkBox_colExtFreak,    SIGNAL(clicked(bool)),        ctrl, SLOT(freakColorExtChanged(bool)));
-    QCheckBox::connect(tf->checkBox_combineFreak,   SIGNAL(clicked(bool)),        ctrl, SLOT(freakCombineChanged(bool)));
     QSpinBox::connect( tf->spinBox_octavesFreak,    SIGNAL(valueChanged(int)),    ctrl, SLOT(freakOctavesChanged(int)));
     QSpinBox::connect( tf->spinBox_patternFreak,    SIGNAL(valueChanged(double)), ctrl, SLOT(freakPatternScaleChanged(double)));
     QCheckBox::connect(tf->checkBox_oriNormFreak,   SIGNAL(clicked(bool)),        ctrl, SLOT(freakOriNormChanged(bool)));
     QCheckBox::connect(tf->checkBox_scaleNormFreak, SIGNAL(clicked(bool)),        ctrl, SLOT(freakScaleNormChanged(bool)));
+    QCheckBox::connect(tf->checkBox_combineFreak,   SIGNAL(clicked(bool)),        ctrl, SLOT(freakCombineChanged(bool)));
 
     /// LBP
     QCheckBox::connect(tf->checkBox_colExtlbp,      SIGNAL(clicked(bool)),        ctrl, SLOT(lbpColorExtChanged(bool)));
@@ -266,6 +263,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QSpinBox::connect(tf->spinBox_angleKeypoint,    SIGNAL(valueChanged(double)), ctrl, SLOT(keypointAngleChanged(double)));
     QCheckBox::connect(tf->checkBox_softCrop,       SIGNAL(clicked(bool)),        ctrl, SLOT(keypointCropChanged(bool)));
     QSpinBox::connect(tf->spinBox_useOctaveKeypoint,SIGNAL(valueChanged(int)),    ctrl, SLOT(keypointOctavesChanged(int)));
+    QCheckBox::connect(tf->checkBox_calcAngleKeypoint, SIGNAL(clicked(bool)),     ctrl, SLOT(keypointCalcAngleChanged(bool)));
     /// FOREST
     QSpinBox::connect(tf->spinBox_treeMaxDepth,     SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_depthChanged(int)));
     QSpinBox::connect(tf->spinBox_treeMinSampels,   SIGNAL(valueChanged(int)),    ctrl, SLOT(forest_samplesChanged(int)));
@@ -285,9 +283,12 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QSpinBox::connect(tf->spinBox_quadProbTh,       SIGNAL(valueChanged(double)), ctrl, SLOT(feedback_quadMinProbChanged(double)));
 
     /// PRESET
-    QObject::connect(tp.get(), SIGNAL(setExtrParams(QString)), ctrl, SLOT(applyExtratorParams(QString)));
-    QObject::connect(tp.get(), SIGNAL(setGridParams()),        ctrl, SLOT(applyGridParams()));
-    QObject::connect(tp.get(), SIGNAL(setQuadParams()),        ctrl, SLOT(applyQuadParams()));
+    QObject::connect(tp.get(), SIGNAL(setExtrParams(QString)),                    ctrl,     SLOT(applyExtratorParams(QString)));
+    QObject::connect(tp.get(), SIGNAL(setGridParams()),                           ctrl,     SLOT(applyGridParams()));
+    QObject::connect(tp.get(), SIGNAL(setQuadParams()),                           ctrl,     SLOT(applyQuadParams()));
+    QObject::connect(ctrl,     SIGNAL(paramsExtrApplied()),                       tp.get(), SLOT(paramsExtrApplied()));
+    QObject::connect(ctrl,     SIGNAL(paramsGridApplied()),                       tp.get(), SLOT(paramsGridApplied()));
+    QObject::connect(ctrl,     SIGNAL(paramsQuadApplied()),                       tp.get(), SLOT(paramsQuadApplied()));
 
     tp->sync();
     /// TREE
