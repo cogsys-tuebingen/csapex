@@ -103,6 +103,10 @@ public :
             return false;
         }
 
+        if(descriptors.type() != CV_32FC1) {
+            descriptors.convertTo(descriptors, CV_32FC1);
+        }
+
         if(descriptors.rows > 1) {
             classifier->predictClassProbMultiSample(descriptors, last_id, last_prob);
         } else {

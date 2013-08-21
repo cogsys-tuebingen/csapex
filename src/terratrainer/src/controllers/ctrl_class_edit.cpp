@@ -87,7 +87,7 @@ void CtrlClassEdit::IDEdited(QString id)
 
 void CtrlClassEdit::accept()
 {
-    if(entered_info_ == "" || !uniqueID()) {
+    if(class_ID_->text() == "" || entered_info_ == "" || !uniqueID()) {
         return;
     }
 

@@ -70,6 +70,7 @@ void CMPCore::computeGrid()
     p.color_extension = ex_params_.colorExtension;
     p.large_descriptor= ex_params_.combine_descriptors;
     p.max_octave      = ex_params_.octaves;
+    p.use_max_prob    = ex_params_.use_max_prob;
 
     /// CALCULATE GRID SIZE
     int height = raw_image_.rows / grid_params_.cell_height;
@@ -97,7 +98,8 @@ void CMPCore::computeQuadtree()
     quad_decom_.reset(decom);
 
     /// ITERATE
-    decom->auto_iterate();
+    quad_decom_->auto_iterate();
+    int i = 1;
 }
 
 bool CMPCore::hasComputedModel()

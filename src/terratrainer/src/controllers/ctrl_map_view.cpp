@@ -257,7 +257,7 @@ void CtrlMapView::computeQuadFinished()
     renderTree();
     if(overlay_ != QUAD) {
         map_view_scene_->clearOverlay();
-        if(rendered_grid_.size() > 0) {
+        if(rendered_tree_.size() > 0) {
             map_view_scene_->setInteractiveVisible(false);
             map_view_scene_->setOverlay(rendered_tree_);
             overlay_ = QUAD;
@@ -389,9 +389,6 @@ QGraphicsRectItem *CtrlMapView::renderBox(cv_roi::TerraROI &roi)
 
 void CtrlMapView::clearRendered(QInteractiveScene::Layer &rendered)
 {
-    for(QInteractiveScene::Layer::Iterator it = rendered.begin() ; it != rendered.end() ; it++) {
-        delete (*it);
-    }
     rendered.clear();
 }
 

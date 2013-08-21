@@ -20,7 +20,7 @@ class CtrlPreferences : public QObject
 public:
     typedef boost::shared_ptr<CtrlPreferences> Ptr;
 
-    CtrlPreferences(QMainWindow *preferences, CMPCoreBridge::Ptr bridge);
+    CtrlPreferences(CMPCoreBridge::Ptr bridge);
 
     void setupUI(Ui::TerraPreferences *ui);
 
@@ -33,6 +33,7 @@ public Q_SLOTS:
     void orbWTA_KChanged         (int    wta_k);
     void orbPatchChanged         (int     size);
     void orbCombineChanged       (bool  enable);
+    void orbMaxProbChanged       (bool  enable);
 
     /// SURF
     void surfOppChanged          (bool checked);
@@ -41,6 +42,7 @@ public Q_SLOTS:
     void surfOctaveLayersChanged (int   layers);
     void surfExtendeChanged      (bool checked);
     void surfCombineChanged      (bool  enable);
+    void surfMaxProbChanged      (bool  enable);
 
     /// SIFT
     void siftOppChanged          (bool checked);
@@ -50,6 +52,7 @@ public Q_SLOTS:
     void siftNormalizeChanged    (bool checked);
     void siftRecalcAnglesChanged (bool checked);
     void siftCombineChanged      (bool  enable);
+    void siftMaxProbChanged      (bool  enable);
 
     /// BRISK
     void briskOppChanged         (bool checked);
@@ -58,6 +61,7 @@ public Q_SLOTS:
     void briskThresholdChanged   (int   thresh);
     void briskScaleChanged       (double scale);
     void briskCombineChanged     (bool  enable);
+    void briskMaxProbChanged     (bool  enable);
     /// BRIEF
     void briefOppChanged         (bool  checked);
     void briefColorExtChanged    (bool  checked);
@@ -70,6 +74,7 @@ public Q_SLOTS:
     void freakOriNormChanged     (bool checked);
     void freakOctavesChanged     (int  octaves);
     void freakCombineChanged     (bool  enable);
+    void freakMaxProbChanged     (bool  enable);
 
     /// LBP
     void lbpColorExtChanged     (bool checked);

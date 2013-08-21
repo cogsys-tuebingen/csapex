@@ -62,13 +62,15 @@ struct CMPExtractorParams {
         opp(false),
         colorExtension(false),
         octaves(o),
-        combine_descriptors(false){}
+        combine_descriptors(false),
+        use_max_prob(false){}
 
     Type type;
     bool opp;
     bool colorExtension;
     int  octaves;
     bool combine_descriptors;
+    bool use_max_prob;
 
 };
 

@@ -201,7 +201,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
         return;
     }
 
-    CtrlPreferences         *ctrl = new CtrlPreferences(mainWindow->preferences_window_, br);
+    CtrlPreferences         *ctrl = new CtrlPreferences(br);
     ctrl->setupUI(tf);
 
     /// ORB
@@ -212,6 +212,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QSpinBox::connect (tf->spinBox_WTAOrb,      SIGNAL(valueChanged(int)),        ctrl, SLOT(orbWTA_KChanged(int)));
     QSpinBox::connect (tf->spinBox_patchOrb,    SIGNAL(valueChanged(int)),        ctrl, SLOT(orbPatchChanged(int)));
     QCheckBox::connect(tf->checkBox_combineOrb, SIGNAL(clicked(bool)),            ctrl, SLOT(orbCombineChanged(bool)));
+    QCheckBox::connect(tf->checkBox_maxProbOrb, SIGNAL(clicked(bool)),            ctrl, SLOT(orbMaxProbChanged(bool)));
 
     /// SURF
     QCheckBox::connect(tf->surfBox,               SIGNAL(clicked(bool)),          ctrl, SLOT(surfOppChanged(bool)));
@@ -220,6 +221,8 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QSpinBox::connect (tf->spinBox_layersSurf,    SIGNAL(valueChanged(int)),      ctrl, SLOT(surfOctaveLayersChanged(int)));
     QCheckBox::connect(tf->checkBox_extendedSurf, SIGNAL(clicked(bool)),          ctrl, SLOT(surfExtendeChanged(bool)));
     QCheckBox::connect(tf->checkBox_combineSurf,  SIGNAL(clicked(bool)),          ctrl, SLOT(surfCombineChanged(bool)));
+    QCheckBox::connect(tf->checkBox_maxProbSurf,  SIGNAL(clicked(bool)),          ctrl, SLOT(surfMaxProbChanged(bool)));
+
     /// SIFT
     QCheckBox::connect(tf->siftBox,               SIGNAL(clicked(bool)),          ctrl, SLOT(siftOppChanged(bool)));
     QCheckBox::connect(tf->checkBox_colExtSift,   SIGNAL(clicked(bool)),          ctrl, SLOT(siftColorExtChanged(bool)));
@@ -228,6 +231,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QCheckBox::connect(tf->checkBox_angSift,      SIGNAL(clicked(bool)),          ctrl, SLOT(siftRecalcAnglesChanged(bool)));
     QCheckBox::connect(tf->checkBox_normSift,     SIGNAL(clicked(bool)),          ctrl, SLOT(siftNormalizeChanged(bool)));
     QCheckBox::connect(tf->checkBox_combineSift,  SIGNAL(clicked(bool)),          ctrl, SLOT(siftCombineChanged(bool)));
+    QCheckBox::connect(tf->checkBox_maxProbSift,  SIGNAL(clicked(bool)),          ctrl, SLOT(siftMaxProbChanged(bool)));
 
     /// BRISK
     QCheckBox::connect(tf->briskBox,               SIGNAL(clicked(bool)),         ctrl, SLOT(briskOppChanged(bool)));
@@ -236,6 +240,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QSpinBox::connect(tf->spinBox_threshBrisk,     SIGNAL(valueChanged(int)),     ctrl, SLOT(briskThresholdChanged(int)));
     QSpinBox::connect(tf->spinBox_scaleBrisk,      SIGNAL(valueChanged(double)),  ctrl, SLOT(briskScaleChanged(double)));
     QCheckBox::connect(tf->checkBox_combineBrisk,  SIGNAL(clicked(bool)),         ctrl, SLOT(briskCombineChanged(bool)));
+    QCheckBox::connect(tf->checkBox_maxProbBrisk,  SIGNAL(clicked(bool)),         ctrl, SLOT(briskMaxProbChanged(bool)));
 
     /// BRIEF
     QCheckBox::connect(tf->briefBox,                SIGNAL(clicked(bool)),                 ctrl, SLOT(briefOppChanged(bool)));
@@ -250,6 +255,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QCheckBox::connect(tf->checkBox_oriNormFreak,   SIGNAL(clicked(bool)),        ctrl, SLOT(freakOriNormChanged(bool)));
     QCheckBox::connect(tf->checkBox_scaleNormFreak, SIGNAL(clicked(bool)),        ctrl, SLOT(freakScaleNormChanged(bool)));
     QCheckBox::connect(tf->checkBox_combineFreak,   SIGNAL(clicked(bool)),        ctrl, SLOT(freakCombineChanged(bool)));
+    QCheckBox::connect(tf->checkBox_maxProbFreak,   SIGNAL(clicked(bool)),        ctrl, SLOT(freakMaxProbChanged(bool)));
 
     /// LBP
     QCheckBox::connect(tf->checkBox_colExtlbp,      SIGNAL(clicked(bool)),        ctrl, SLOT(lbpColorExtChanged(bool)));

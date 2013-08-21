@@ -140,6 +140,7 @@ public:
         int                       max_octave;
         bool                      color_extension;
         bool                      large_descriptor;
+        bool                      use_max_prob;
         Extractor::KeypointParams key;
     };
 
@@ -177,14 +178,18 @@ public:
         /// PREDICT
         if(descriptors.empty())
             return AttrTerrainClassCV(-1, -1.f);
+
         if(descriptors.type() != CV_32FC1) {
             descriptors.convertTo(descriptors, CV_32FC1);
         }
 
-        int   classID;
-        float prob;
+        int   classID = -1;
+        float prob    = 0.f;
         if(descriptors.rows > 1) {
-            p_.classifier->predictClassProbMultiSample(descriptors, classID, prob);
+            if(p_.use_max_prob)
+                p_.classifier->predictClassProbMultiSampleMax(descriptors, classID, prob);
+            else
+                p_.classifier->predictClassProbMultiSample(descriptors, classID, prob);
         } else {
             p_.classifier->predictClassProb(descriptors, classID, prob);
         }

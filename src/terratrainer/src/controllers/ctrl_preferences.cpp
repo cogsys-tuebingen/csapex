@@ -3,7 +3,7 @@
 #include <ui_terra_preferences.h>
 #include <QKeyEvent>
 
-CtrlPreferences::CtrlPreferences(QMainWindow *preferences, CMPCoreBridge::Ptr bridge) :
+CtrlPreferences::CtrlPreferences(CMPCoreBridge::Ptr bridge) :
     dirty_(CLEAN),
     bridge_(bridge)
 {
@@ -11,6 +11,7 @@ CtrlPreferences::CtrlPreferences(QMainWindow *preferences, CMPCoreBridge::Ptr br
 
 void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
 {
+
     /// SYNC GUI WITH PARAMS
     /// ORB
     ui->orbBox->setChecked(orb_.opp);
@@ -20,6 +21,7 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_patchOrb->setValue(orb_.patchSize);
     ui->spinBox_WTAOrb->setValue(orb_.WTA_K);
     ui->checkBox_combineOrb->setChecked(orb_.combine_descriptors);
+    ui->checkBox_maxProbOrb->setChecked(orb_.use_max_prob);
 
     /// SURF
     ui->surfBox->setChecked(surf_.opp);
@@ -28,6 +30,7 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_octavesSurf->setValue(surf_.octaves);
     ui->checkBox_extendedSurf->setChecked(surf_.extended);
     ui->checkBox_combineSurf->setChecked(surf_.combine_descriptors);
+    ui->checkBox_maxProbSurf->setChecked(surf_.use_max_prob);
 
     /// SIFT
     ui->siftBox->setChecked(sift_.opp);
@@ -35,6 +38,7 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_magSift->setValue(sift_.magnification);
     ui->spinBox_octavesSift->setValue(sift_.octaves);
     ui->checkBox_angSift->setChecked(sift_.recalculateAngles);
+    ui->checkBox_maxProbSift->setChecked(sift_.use_max_prob);
 
     /// BRISK
     ui->briskBox->setChecked(brisk_.opp);
@@ -43,6 +47,7 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_threshBrisk->setValue(brisk_.thresh);
     ui->spinBox_scaleBrisk->setValue(brisk_.scale);
     ui->checkBox_combineBrisk->setChecked(brisk_.combine_descriptors);
+    ui->checkBox_maxProbBrisk->setChecked(brisk_.use_max_prob);
 
     /// BRIEF
     ui->briefBox->setChecked(brief_.opp);
@@ -56,6 +61,7 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
     ui->spinBox_patternFreak->setValue(freak_.patternScale);
     ui->spinBox_octavesFreak->setValue(freak_.octaves);
     ui->checkBox_combineFreak->setChecked(freak_.combine_descriptors);
+    ui->checkBox_maxProbFreak->setChecked(freak_.use_max_prob);
 
     /// LBP / LTP
     ui->checkBox_colExtlbp->setChecked(lbp_.colorExtension);
@@ -123,6 +129,11 @@ void CtrlPreferences::orbCombineChanged(bool enable)
     orb_.combine_descriptors = enable;
 }
 
+void CtrlPreferences::orbMaxProbChanged(bool enable)
+{
+    orb_.use_max_prob = enable;
+}
+
 void CtrlPreferences::surfOppChanged(bool checked)
 {
     surf_.opp = checked;
@@ -151,6 +162,11 @@ void CtrlPreferences::surfExtendeChanged(bool checked)
 void CtrlPreferences::surfCombineChanged(bool enable)
 {
     surf_.combine_descriptors = enable;
+}
+
+void CtrlPreferences::surfMaxProbChanged(bool enable)
+{
+    surf_.use_max_prob = enable;
 }
 
 void CtrlPreferences::siftOppChanged(bool checked)
@@ -188,6 +204,11 @@ void CtrlPreferences::siftCombineChanged(bool enable)
     sift_.combine_descriptors = enable;
 }
 
+void CtrlPreferences::siftMaxProbChanged(bool enable)
+{
+    sift_.use_max_prob = enable;
+}
+
 void CtrlPreferences::briskOppChanged(bool checked)
 {
     brisk_.opp = checked;
@@ -216,6 +237,11 @@ void CtrlPreferences::briskScaleChanged(double scale)
 void CtrlPreferences::briskCombineChanged(bool enable)
 {
     brisk_.combine_descriptors = enable;
+}
+
+void CtrlPreferences::briskMaxProbChanged(bool enable)
+{
+    brisk_.use_max_prob = enable;
 }
 
 void CtrlPreferences::briefOppChanged(bool checked)
@@ -266,6 +292,11 @@ void CtrlPreferences::freakOctavesChanged(int octaves)
 void CtrlPreferences::freakCombineChanged(bool enable)
 {
     freak_.combine_descriptors = enable;
+}
+
+void CtrlPreferences::freakMaxProbChanged(bool enable)
+{
+    freak_.use_max_prob = enable;
 }
 
 void CtrlPreferences::keypointSizeChanged(double size)
