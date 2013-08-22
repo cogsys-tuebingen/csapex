@@ -36,9 +36,9 @@ Q_SIGNALS:
     void uncheckSel(bool check);
     void classSelected(int id);
     void featuSelected(QString feat);
-    void setGridParams      ();
-    void setQuadParams      ();
-    void setExtrParams      (QString name);
+    void setGridParams();
+    void setQuadParams();
+    void setExtrParams(QString name);
     void compute();
     void grid();
     void quad();
@@ -58,6 +58,7 @@ public Q_SLOTS:
     void buttonGrid();
     void buttonQuad();
 
+    void image_loaded();
     void trainingFinished();
     void feedbackFinished();
     void classifierLoaded();

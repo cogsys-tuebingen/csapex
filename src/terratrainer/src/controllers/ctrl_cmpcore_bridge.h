@@ -66,6 +66,8 @@ public:
     void setROIs            (const std::vector<cv_roi::TerraROI> &rois);
     void saveROIs           (QString path);
 
+    bool recalcGrid();
+    bool recalcQuad();
     void getGrid(std::vector<cv_roi::TerraROI> &cells);
     void getQuadtree(std::vector<cv_roi::TerraROI> &regions);
     void compute            ();
@@ -92,6 +94,9 @@ public Q_SLOTS:
 private:
     enum Dirty{CLEAN, DIRTY, QUAD_DIRTY, GRID_DIRTY};
     Dirty dirty_;
+
+    bool                      recalc_quad_;
+    bool                      recalc_grid_;
 
     CMPCore::Ptr              cc_;
 

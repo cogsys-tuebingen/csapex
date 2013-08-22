@@ -81,6 +81,7 @@
     <addaction name="action_SaveClassifier_raw"/>
     <addaction name="separator"/>
     <addaction name="action_SaveROIs"/>
+    <addaction name="actionSave_ROIs"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -180,6 +181,11 @@
    </property>
   </action>
   <action name="action_SaveROIs">
+   <property name="text">
+    <string>Save crops</string>
+   </property>
+  </action>
+  <action name="actionSave_ROIs">
    <property name="text">
     <string>Save ROIs</string>
    </property>

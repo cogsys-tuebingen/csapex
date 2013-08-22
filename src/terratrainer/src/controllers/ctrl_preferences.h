@@ -101,8 +101,6 @@ public Q_SLOTS:
     void forest_accuracyChanged  (double accuracy);
     /// FEEDBACK
     void feedback_gridCellChanged(int size);
-    void feedback_gridHeightChanged(int height);
-    void feedback_gridWidthChanged(int width);
     void feedback_quadMinSizeChanged(int size);
     void feedback_quadMinProbChanged(double prob);
 

@@ -26,6 +26,10 @@ void CMPCore::setWorkPath(const std::string &work_path)
 bool CMPCore::loadImage(const std::string image_path)
 {
     raw_image_ = cv::imread(image_path);
+
+    random_.reset(new CMPRandomForestExt);
+    grid_.reset(new cv_grid::GridTerra);
+
     return !raw_image_.empty();
 }
 
@@ -99,7 +103,6 @@ void CMPCore::computeQuadtree()
 
     /// ITERATE
     quad_decom_->auto_iterate();
-    int i = 1;
 }
 
 bool CMPCore::hasComputedModel()

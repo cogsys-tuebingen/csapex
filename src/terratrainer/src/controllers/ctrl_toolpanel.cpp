@@ -113,6 +113,14 @@ void CtrlToolPanel::buttonCompute()
     Q_EMIT setExtrParams(extractor_selection_->currentText());
 }
 
+void CtrlToolPanel::image_loaded()
+{
+    Q_EMIT uncheckSel(false);
+    Q_EMIT uncheckAdd(false);
+    Q_EMIT uncheckMov(false);
+    Q_EMIT uncheckDel(false);
+}
+
 void CtrlToolPanel::trainingFinished()
 {
     button_compute_->setEnabled(true);

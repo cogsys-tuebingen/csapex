@@ -135,6 +135,7 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QObject::connect(br.get(),          SIGNAL(classRemoved(int)),   ctrl,           SLOT(classRemoved(int)));
     QObject::connect(br.get(),          SIGNAL(classUpdate(int,int)),ctrl,           SLOT(classUpdated(int,int)));
     QObject::connect(br.get(),          SIGNAL(colorUpdate(int)),    ctrl,           SLOT(colorUpdate(int)));
+    QObject::connect(br.get(),          SIGNAL(imageLoaded()),       ctrl,           SLOT(image_loaded()));
     QObject::connect(tp->addBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateAdd()));
     QObject::connect(tp->movBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateMove()));
     QObject::connect(tp->delBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateDelete()));
@@ -283,8 +284,6 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
 
     /// FEEDBACK
     QSpinBox::connect(tf->spinBox_gridCellSize,     SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_gridCellChanged(int)));
-    QSpinBox::connect(tf->spinBox_gridWidth,        SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_gridHeightChanged(int)));
-    QSpinBox::connect(tf->spinBox_gridHeight,       SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_gridWidthChanged(int)));
     QSpinBox::connect(tf->spinBox_quadCellSize,     SIGNAL(valueChanged(int)),    ctrl, SLOT(feedback_quadMinSizeChanged(int)));
     QSpinBox::connect(tf->spinBox_quadProbTh,       SIGNAL(valueChanged(double)), ctrl, SLOT(feedback_quadMinProbChanged(double)));
 
@@ -295,10 +294,6 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QObject::connect(ctrl,     SIGNAL(paramsExtrApplied()),                       tp.get(), SLOT(paramsExtrApplied()));
     QObject::connect(ctrl,     SIGNAL(paramsGridApplied()),                       tp.get(), SLOT(paramsGridApplied()));
     QObject::connect(ctrl,     SIGNAL(paramsQuadApplied()),                       tp.get(), SLOT(paramsQuadApplied()));
-
-    tp->sync();
-    /// TREE
-
 
     IDPtr entry(Preferences, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);

@@ -9,7 +9,8 @@
 typedef QtCvImageConverter::Converter<QImage, boost::shared_ptr> QImageConverter;
 
 CMPCoreBridge::CMPCoreBridge(CMPCore::Ptr ptr) :
-    dirty_(CLEAN),
+    recalc_quad_(true),
+    recalc_grid_(true),
     cc_(ptr)
 {
 }
@@ -143,6 +144,7 @@ void CMPCoreBridge::loadClassifier(const QString path)
     std::ifstream in(path.toUtf8().constData());
     CMPYAML::readFile(in, cc_.get(), this);
     in.close();
+
     Q_EMIT classifierReloaded();
 }
 
@@ -176,18 +178,18 @@ void CMPCoreBridge::setExtractorParams(CMPExtractorParams &params)
 
 void CMPCoreBridge::setForestParams(const CMPForestParams &params)
 {
-    dirty_ = QUAD_DIRTY;
     cc_->setRandomForestParams(params);
 }
 
 void CMPCoreBridge::setGridParams(const CMPGridParams &params)
 {
-    dirty_ = GRID_DIRTY;
+    recalc_grid_ = true;
     cc_->setGridParameters(params);
 }
 
 void CMPCoreBridge::setQuadParams(const CMPQuadParams &params)
 {
+    recalc_quad_ = true;
     cc_->setQuadParameters(params);
 }
 
@@ -220,33 +222,49 @@ void CMPCoreBridge::saveROIs(QString path)
 void CMPCoreBridge::compute()
 {
     cc_->compute();
-    dirty_ = DIRTY;
+
+    recalc_quad_ = true;
+    recalc_grid_ = true;
+
     Q_EMIT computeFinished();
 }
 
 void CMPCoreBridge::computeGrid()
 {
-    if(dirty_ == DIRTY) {
-        cc_->computeGrid();
-        dirty_ = QUAD_DIRTY;
-    } else if(dirty_ == GRID_DIRTY) {
-        cc_->computeGrid();
-        dirty_ = CLEAN;
+    if(recalc_grid_) {
+        if(cc_->hasComputedModel()) {
+            cc_->computeGrid();
+            recalc_grid_ = false;
+        } else {
+            std::cerr << "No valid classifier model available!" << std::endl;
+        }
     }
+
     Q_EMIT computeGridFinished();
 }
 
 void CMPCoreBridge::computeQuadtree()
 {
-    if(dirty_ == DIRTY) {
-        cc_->computeQuadtree();
-        dirty_ = GRID_DIRTY;
-    } else if(dirty_ == QUAD_DIRTY) {
-        cc_->computeQuadtree();
-        dirty_ = CLEAN;
+    if(recalc_quad_) {
+        if(cc_->hasComputedModel()) {
+            cc_->computeQuadtree();
+            recalc_quad_ = false;
+        } else {
+            std::cerr << "No valid classifier model available!" << std::endl;
+        }
     }
 
     Q_EMIT computeQuadFinished();
+}
+
+bool CMPCoreBridge::recalcGrid()
+{
+    return recalc_grid_;
+}
+
+bool CMPCoreBridge::recalcQuad()
+{
+    return recalc_quad_;
 }
 
 void CMPCoreBridge::getGrid(std::vector<cv_roi::TerraROI> &cells)

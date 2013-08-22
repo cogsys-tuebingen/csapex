@@ -76,7 +76,7 @@ private:
     QGraphicsView            *map_view_;
     QInteractiveScene        *map_view_scene_;
     QGraphicsPixmapItem      *map_image_;
-    QInteractiveScene::Layer  rendered_tree_;
+    QInteractiveScene::Layer  rendered_quad_;
     QInteractiveScene::Layer  rendered_grid_;
     boost::shared_ptr<QImage> cache_;
     CMPCoreBridge::Ptr        bridge_;
@@ -98,10 +98,12 @@ private:
     void removeItem(const QPointF &pos);
 
     void renderGrid();
-    void renderTree();
+    void renderQuad();
+    void loadOverlay(const Overlay overlay, const QInteractiveScene::Layer &layer);
 
     QGraphicsRectItem* renderBox(cv_roi::TerraROI &roi);
-    void clearRendered(QInteractiveScene::Layer &rendered);
+
+    void clearRenderedLayer(QInteractiveScene::Layer &rendered);
     void clearAll();
     void clearOverlay();
 };

@@ -396,18 +396,6 @@ void CtrlPreferences::feedback_gridCellChanged(int size)
     dirty_ = GRID_DIRTY;
 }
 
-void CtrlPreferences::feedback_gridHeightChanged(int height)
-{
-    grid_.height = height;
-    dirty_ = GRID_DIRTY;
-}
-
-void CtrlPreferences::feedback_gridWidthChanged(int width)
-{
-    grid_.width = width;
-    dirty_ = GRID_DIRTY;
-}
-
 void CtrlPreferences::feedback_quadMinSizeChanged(int size)
 {
     quad_.min_height = size;
