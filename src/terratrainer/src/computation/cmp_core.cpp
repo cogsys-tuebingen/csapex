@@ -26,9 +26,6 @@ bool CMPCore::loadImage(const std::string image_path)
 {
     raw_image_ = cv::imread(image_path);
 
-    random_.reset(new CMPRandomForestExt);
-    grid_.reset(new cv_grid::GridTerra);
-
     return !raw_image_.empty();
 }
 
@@ -65,6 +62,9 @@ void CMPCore::computeGrid()
         std::cerr << "No trained random forest! - Therefore not compitung grid!" << std::endl;
         return;
     }
+
+    if(grid_ == NULL)
+        grid_.reset(new cv_grid::GridTerra);
 
     /// PARAMETERS
     cv_grid::AttrTerrainFeature::Params p;
@@ -112,6 +112,9 @@ bool CMPCore::hasComputedModel()
 
 void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
 {
+    if(grid_ == NULL)
+        return;
+
     cv_grid::GridTerra &terra = *grid_;
     for(int i = 0 ; i < terra.rows() ; i++) {
         for(int j = 0 ; j < terra.cols() ; j++) {
@@ -127,7 +130,8 @@ void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
 
 void CMPCore::getQuad(std::vector<cv_roi::TerraROI> &regions)
 {
-    quad_decom_->regions(regions);
+    if(quad_decom_ != NULL)
+        quad_decom_->regions(regions);
 }
 
 void CMPCore::setExtractorParameters(cv_extraction::ExtractorParams &params)
@@ -173,6 +177,8 @@ void CMPCore::setExtractorParameters(cv_extraction::ExtractorParams &params)
 
 void CMPCore::setKeyPointParameters(const cv_extraction::KeypointParams &params)
 {
+    quad_decom_.reset();
+    grid_.reset();
     keypoint_params_.angle      = params.angle;
     keypoint_params_.octave     = params.octave;
     keypoint_params_.scale      = params.scale;
@@ -183,7 +189,8 @@ void CMPCore::setKeyPointParameters(const cv_extraction::KeypointParams &params)
 void CMPCore::write(YAML::Emitter &emitter) const
 {
     keypoint_params_.write(emitter);
-    ex_params_->write(emitter);
+    if(ex_params_ != NULL)
+        ex_params_->write(emitter);
 }
 
 void CMPCore::setRandomForestParams(const CMPForestParams &params)
@@ -193,11 +200,13 @@ void CMPCore::setRandomForestParams(const CMPForestParams &params)
 
 void CMPCore::setGridParameters(const CMPGridParams &params)
 {
+    grid_.reset();
     grid_params_ = params;
 }
 
 void CMPCore::setQuadParameters(const CMPQuadParams &params)
 {
+    quad_decom_.reset();
     quad_params_ = params;
 }
 

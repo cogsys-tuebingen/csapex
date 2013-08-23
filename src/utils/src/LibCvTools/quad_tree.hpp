@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 
+
 /**
  * @class Represenation of a quad tree, given regions with origins.
  */
@@ -167,5 +168,4 @@ private:
     Rect    region_;
     std::vector<Quadtree<Point, Rect> > sub_regions_;
 };
-
 #endif // QUAD_TREE_HPP

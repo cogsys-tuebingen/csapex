@@ -28,7 +28,10 @@ Q_SIGNALS:
 public Q_SLOTS:
     void loadImage();
     void loadClassifier();
-    void saveClassifier();
+    void loadSettings();
+    void loadROIs();
+    void saveSettings();
+    void saveClassifierProject();
     void saveClassifierRaw();
     void saveCrops();
     void saveROIs();

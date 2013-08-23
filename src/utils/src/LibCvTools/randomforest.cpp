@@ -24,7 +24,11 @@ bool RandomForest::isTrained()
 
 void RandomForest::predictClass(const cv::Mat &sample, int &classID)
 {
-    classID = forest_->predict(sample);
+    try {
+        classID = forest_->predict(sample);
+    } catch (cv::Exception e) {
+        std::cerr << "predictClass " << e.what() << std::endl;
+    }
 }
 
 void RandomForest::predictClassProb(const cv::Mat &sample, int &classID, float &prob)
@@ -108,28 +112,35 @@ void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs
     std::map<int,float> votes;
 
     /// COUNT
-    int max_vote = 0;
-    for(int i = 0 ; i < ntrees ; i++) {
-        CvDTreeNode* prediction = forest_->get_tree(i)->predict(sample);
-        int tree_classID = prediction->value;
+    try {
+        int max_vote = 0;
+        for(int i = 0 ; i < ntrees ; i++) {
 
-        if(votes.find(tree_classID) == votes.end()) {
-            votes.insert(std::pair<int,float>(tree_classID, 0));
+            CvDTreeNode* prediction = forest_->get_tree(i)->predict(sample);
+            int tree_classID = prediction->value;
+
+            if(votes.find(tree_classID) == votes.end()) {
+                votes.insert(std::pair<int,float>(tree_classID, 0));
+            }
+
+            votes[tree_classID] += 1;
+            if(votes[tree_classID] > max_vote) {
+                max_vote    = votes[tree_classID];
+                maxClassID  = tree_classID;
+            }
         }
 
-        votes[tree_classID] += 1;
-        if(votes[tree_classID] > max_vote) {
-            max_vote    = votes[tree_classID];
-            maxClassID  = tree_classID;
+        /// NORMALIZE
+        for(std::map<int,float>::iterator it = votes.begin() ; it != votes.end() ; it++) {
+            it->second /= (float) ntrees;
         }
-    }
 
-    /// NORMALIZE
-    for(std::map<int,float>::iterator it = votes.begin() ; it != votes.end() ; it++) {
-        it->second /= (float) ntrees;
+    } catch (cv::Exception e) {
+        std::cerr << "predictClass " << e.what() << std::endl;
     }
-
     probs = votes;
+
+
 }
 
 

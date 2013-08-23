@@ -51,6 +51,16 @@ ExtractorParams::ExtractorParams(const Type t, const int o) :
 {
 }
 
+ExtractorParams::ExtractorParams(const ExtractorParams &p) :
+    type(p.type),
+    opp(p.opp),
+    color_extension(p.color_extension),
+    octaves(p.octaves),
+    combine_descriptors(p.combine_descriptors),
+    use_max_prob(p.use_max_prob)
+{
+}
+
 void ExtractorParams::write(YAML::Emitter &emitter) const
 {
     emitter << YAML::Key << "opp"       << YAML::Value << opp;
@@ -63,9 +73,8 @@ void ExtractorParams::write(YAML::Emitter &emitter) const
 bool ExtractorParams::read(const YAML::Node &document)
 {
     try {
-
-        document["opp"]         >> opp;
         document["color"]       >> color_extension;
+        document["opp"]         >> opp;
         document["octaves"]     >> octaves;
         document["combine"]     >> combine_descriptors;
         document["max_prob"]    >> use_max_prob;
@@ -86,7 +95,7 @@ ParamsORB::ParamsORB() :
 }
 
 ParamsORB::ParamsORB(const ParamsORB &p) :
-    ExtractorParams(ORB, p.octaves),
+    ExtractorParams(p),
     scale(p.scale),
     WTA_K(p.WTA_K),
     patch_size(p.patch_size),
@@ -112,12 +121,11 @@ bool ParamsORB::read(const YAML::Node &document)
     try {
 
         const YAML::Node &data = document["ORB"];
-
         data["scale"]          >> scale;
         data["wta_k"]          >> WTA_K;
         data["patch_size"]     >> patch_size;
         data["edge_threshold"] >> edge_threshold;
-        return ExtractorParams::read(document);
+        return ExtractorParams::read(data);
 
     } catch (YAML::Exception e) {
         std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
@@ -133,7 +141,7 @@ ParamsSURF::ParamsSURF() :
 }
 
 ParamsSURF::ParamsSURF(const ParamsSURF &p) :
-    ExtractorParams(SURF, p.octaves),
+    ExtractorParams(p),
     octave_layers(p.octave_layers),
     extended(p.extended)
 {
@@ -152,15 +160,14 @@ void ParamsSURF::write(YAML::Emitter &emitter) const
 bool ParamsSURF::read(const YAML::Node &document)
 {
     try {
-
         const YAML::Node &data = document["SURF"];
 
         data["layers"]          >> octave_layers;
         data["extended"]        >> extended;
-        return ExtractorParams::read(document);
+        return ExtractorParams::read(data);
 
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "SURF Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
     }
 }
@@ -174,7 +181,7 @@ ParamsSIFT::ParamsSIFT() :
 }
 
 ParamsSIFT::ParamsSIFT(const ParamsSIFT &p) :
-    ExtractorParams(SIFT, p.octaves),
+    ExtractorParams(p),
     magnification(p.magnification),
     normalize(p.normalize),
     recalculate_angles(p.recalculate_angles)
@@ -201,10 +208,10 @@ bool ParamsSIFT::read(const YAML::Node &document)
         data["magnification"]   >> magnification;
         data["normalize"]       >> normalize;
         data["recalc_angles"]   >> recalculate_angles;
-        return  ExtractorParams::read(document);
+        return  ExtractorParams::read(data);
 
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "SIFT Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
     }
 }
@@ -217,7 +224,7 @@ ParamsBRISK::ParamsBRISK() :
 }
 
 ParamsBRISK::ParamsBRISK(const ParamsBRISK &p) :
-    ExtractorParams(BRISK, p.octaves),
+    ExtractorParams(p),
     thresh(p.thresh),
     scale(p.scale)
 {
@@ -240,10 +247,10 @@ bool ParamsBRISK::read(const YAML::Node &document)
 
         data["thresh"]   >> thresh;
         data["scale"]    >> scale;
-        return ExtractorParams::read(document);
+        return ExtractorParams::read(data);
 
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "BRISK Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
     }
 }
@@ -275,10 +282,10 @@ bool ParamsBRIEF::read(const YAML::Node &document)
         const YAML::Node &data = document["BRIEF"];
 
         data["bytes"]   >> bytes;
-        return ExtractorParams::read(document);
+        return ExtractorParams::read(data);
 
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "BRIEF Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
     }
 
@@ -293,7 +300,7 @@ ParamsFREAK::ParamsFREAK() :
 }
 
 ParamsFREAK::ParamsFREAK(const ParamsFREAK &p) :
-    ExtractorParams(FREAK, p.octaves),
+    ExtractorParams(p),
     orientation_normalized(p.orientation_normalized),
     scale_normalized(p.scale_normalized),
     pattern_scale(p.pattern_scale)
@@ -320,10 +327,10 @@ bool ParamsFREAK::read(const YAML::Node &document)
         data["orientation_norm"] >> orientation_normalized;
         data["scale_normalized"] >> scale_normalized;
         data["pattern_scale"]    >> pattern_scale;
-        return ExtractorParams::read(document);
+        return ExtractorParams::read(data);
 
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "FREAK Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
     }
 
@@ -358,7 +365,7 @@ bool ParamsLTP::read(const YAML::Node &document)
         data["k"] >> k;
         return true;
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "LTP Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
     }
 }
@@ -385,7 +392,7 @@ bool ParamsLBP::read(const YAML::Node &document)
         const YAML::Node &data = document["LBP"];
         return true;
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "LBP Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
     }
 }

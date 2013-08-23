@@ -68,17 +68,19 @@ void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
         return;
     }
 
-    QAction::connect(ui->action_LoadImage,          SIGNAL(triggered()), ctrl, SLOT(loadImage()));
-    QAction::connect(ui->action_LoadClassifier,     SIGNAL(triggered()), ctrl, SLOT(loadClassifier()));
-    QAction::connect(ui->action_SaveClassifier,     SIGNAL(triggered()), ctrl, SLOT(saveClassifier()));
-    QAction::connect(ui->action_SaveClassifier_raw, SIGNAL(triggered()), ctrl, SLOT(saveClassifierRaw()));
-    QAction::connect(ui->action_ZoomIn,             SIGNAL(triggered()), ctrl, SLOT(zoomIn()));
-    QAction::connect(ui->action_ZoomOut,            SIGNAL(triggered()), ctrl, SLOT(zoomOut()));
-    QAction::connect(ui->action_ZoomReset,          SIGNAL(triggered()), ctrl, SLOT(zoomReset()));
-    QAction::connect(ui->action_SaveCrops,          SIGNAL(triggered()), ctrl, SLOT(saveCrops()));
-    QAction::connect(ui->action_SaveROIs,           SIGNAL(triggered()), ctrl, SLOT(saveROIs()));
-    QObject::connect(mv.get(),                      SIGNAL(zoomUpdated(double)), ctrl, SLOT(zoomUpdate(double)));
-    QObject::connect(ctrl,                          SIGNAL(zoom(double)), mv.get(), SLOT(zoom(double)));
+    QAction::connect(ui->action_LoadImage,              SIGNAL(triggered()), ctrl, SLOT(loadImage()));
+    QAction::connect(ui->action_LoadClassifier,         SIGNAL(triggered()), ctrl, SLOT(loadClassifier()));
+    QAction::connect(ui->action_SaveClassifierProject,  SIGNAL(triggered()), ctrl, SLOT(saveClassifierProject()));
+    QAction::connect(ui->action_SaveClassifierRaw,      SIGNAL(triggered()), ctrl, SLOT(saveClassifierRaw()));
+    QAction::connect(ui->action_ZoomIn,                 SIGNAL(triggered()), ctrl, SLOT(zoomIn()));
+    QAction::connect(ui->action_ZoomOut,                SIGNAL(triggered()), ctrl, SLOT(zoomOut()));
+    QAction::connect(ui->action_ZoomReset,              SIGNAL(triggered()), ctrl, SLOT(zoomReset()));
+    QAction::connect(ui->action_SaveCrops,              SIGNAL(triggered()), ctrl, SLOT(saveCrops()));
+    QAction::connect(ui->action_SaveROIs,               SIGNAL(triggered()), ctrl, SLOT(saveROIs()));
+    QAction::connect(ui->action_LoadSettings,           SIGNAL(triggered()), ctrl, SLOT(loadSettings()));
+    QAction::connect(ui->action_SaveSettings,           SIGNAL(triggered()), ctrl, SLOT(saveSettings()));
+    QObject::connect(mv.get(),                          SIGNAL(zoomUpdated(double)), ctrl, SLOT(zoomUpdate(double)));
+    QObject::connect(ctrl,                              SIGNAL(zoom(double)), mv.get(), SLOT(zoom(double)));
 
     Controller::IDPtr entry(Controller::Menu, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);

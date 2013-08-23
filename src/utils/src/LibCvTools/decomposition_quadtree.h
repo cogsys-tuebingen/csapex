@@ -46,14 +46,15 @@ public:
 
 protected:
     typedef Quadtree<cv::Vec2i, cv::Rect>                CVQt;              /// template init for quadtree
-    typedef std::vector<CVQt*>                           CVQtNodesList;     /// a node list
+    typedef std::vector<CVQt>                            CVQtNodesList;     ///
+    typedef std::vector<CVQt*>                           CVQtNodesListPtr;  /// a node list
 
     cv::Mat                      image_;
     cv::Size                     min_region_size_;
     DecompositionClassifier::Ptr classifier_;
-    CVQt                         quadtree_root_;
-    CVQtNodesList                quadtree_nodes_;
-    CVQtNodesList                quadtree_leaves_;
+    CVQtNodesList                quadtree_roots_;
+    CVQtNodesListPtr             quadtree_nodes_;
+    CVQtNodesListPtr             quadtree_leaves_;
 
     bool                         auto_iterate_;
     cv::Size                     debug_size_;
@@ -78,6 +79,17 @@ protected:
         quadtree_nodes_.push_back(&node[1]);
         quadtree_nodes_.push_back(&node[2]);
         quadtree_nodes_.push_back(&node[3]);
+    }
+
+    int gcd(int a, int b)
+    {
+        int temp;
+        while (b != 0) {
+            temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
     }
 
     bool min_size_reached(CVQt &node)

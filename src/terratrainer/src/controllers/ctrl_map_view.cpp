@@ -298,12 +298,14 @@ void CtrlMapView::computeFinished()
 void CtrlMapView::computeGridFinished()
 {
     renderGrid();
+    unloadOverlay();
     loadOverlay(GRID, rendered_grid_);
 }
 
 void CtrlMapView::computeQuadFinished()
 {
     renderQuad();
+    unloadOverlay();
     loadOverlay(QUAD, rendered_quad_);
 }
 
@@ -454,7 +456,13 @@ void CtrlMapView::loadOverlay(const Overlay overlay, const QInteractiveScene::La
         map_view_scene_->setInteractiveVisible(true);
         overlay_ = NONE;
     }
+}
 
+void CtrlMapView::unloadOverlay()
+{
+    map_view_scene_->clearOverlay();
+    map_view_scene_->setInteractiveVisible(true);
+    overlay_ = NONE;
 }
 
 QGraphicsRectItem *CtrlMapView::renderBox(cv_roi::TerraROI &roi)

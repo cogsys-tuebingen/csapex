@@ -67,7 +67,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="files">
@@ -75,14 +75,15 @@
      <string>Files</string>
     </property>
     <addaction name="action_LoadImage"/>
-    <addaction name="actionLoad_Settings"/>
-    <addaction name="actionSave_Settings"/>
+    <addaction name="action_LoadSettings"/>
+    <addaction name="action_SaveSettings"/>
     <addaction name="separator"/>
     <addaction name="action_LoadClassifier"/>
-    <addaction name="action_SaveClassifier"/>
+    <addaction name="action_SaveClassifierProject"/>
     <addaction name="separator"/>
     <addaction name="action_SaveCrops"/>
     <addaction name="action_SaveROIs"/>
+    <addaction name="action_SaveClassifierRaw"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -164,9 +165,12 @@
     <string>Quit</string>
    </property>
   </action>
-  <action name="action_SaveClassifier">
+  <action name="action_SaveClassifierRaw">
    <property name="text">
-    <string>Save Classifier</string>
+    <string>Save Classifier (raw)</string>
+   </property>
+   <property name="toolTip">
+    <string>Save the least of information needed to classify.</string>
    </property>
   </action>
   <action name="action_SaveClassifier_raw">
@@ -181,17 +185,25 @@
   </action>
   <action name="action_SaveROIs">
    <property name="text">
-    <string>Save ROIs</string>
+    <string>Save rois</string>
    </property>
   </action>
-  <action name="actionLoad_Settings">
+  <action name="action_LoadSettings">
    <property name="text">
     <string>Load Settings</string>
    </property>
   </action>
-  <action name="actionSave_Settings">
+  <action name="action_SaveSettings">
    <property name="text">
     <string>Save Settings</string>
+   </property>
+  </action>
+  <action name="action_SaveClassifierProject">
+   <property name="text">
+    <string>Save Classifier (project)</string>
+   </property>
+   <property name="toolTip">
+    <string>Save classifier and class preferences.</string>
    </property>
   </action>
  </widget>

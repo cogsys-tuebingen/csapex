@@ -16,8 +16,14 @@ public:
     typedef std::pair<ControllerID, Ptr> IDPtr;
     typedef std::map <ControllerID, Ptr> Map;
 
-    virtual void read(const YAML::Node & document){}
-    virtual void write(YAML::Emitter &emitter)const {}
+    virtual void read(const YAML::Node & document)
+    {
+        std::cout << "YAML: Called default reading method!" << std::endl;
+    }
+    virtual void write(YAML::Emitter &emitter)const
+    {
+        std::cout << "YAML: Called default writing method!" << std::endl;
+    }
 
 
     template<class T, class U>

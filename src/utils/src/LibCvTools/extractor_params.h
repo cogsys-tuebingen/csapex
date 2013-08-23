@@ -26,6 +26,7 @@ struct ExtractorParams {
 
     enum Type   {NONE, ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP, LBP};
     ExtractorParams(const Type t = NONE, const int o = 1);
+    ExtractorParams(const ExtractorParams &p);
 
     Type type;
     bool opp;

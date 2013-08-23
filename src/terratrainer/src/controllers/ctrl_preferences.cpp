@@ -132,14 +132,15 @@ void CtrlPreferences::read(const YAML::Node &document)
         grid_.read(data);
 
     } catch (YAML::Exception e) {
-        std::cerr << "Problems reading preferences : '" << e.what() <<"' !" << std::endl;
+        if(!readClassfierLoad(document))
+            std::cerr << "Problems reading preferences : '" << e.what() <<"' !" << std::endl;
     }
 
     setupUI(ui_);
     dirty_ = DIRTY;
 }
 
-void CtrlPreferences::readClassfierLoad(const YAML::Node &document)
+bool CtrlPreferences::readClassfierLoad(const YAML::Node &document)
 {
     try {
         const YAML::Node &data = document["CLASSIFIER"];
@@ -162,9 +163,11 @@ void CtrlPreferences::readClassfierLoad(const YAML::Node &document)
 
         key_.read(data);
         bridge_->setKeyPointParams(key_);
+        return true;
 
     } catch (YAML::Exception e) {
         std::cerr << "Problems reading preferences : '" << e.what() <<"' !" << std::endl;
+        return false;
     }
 
     setupUI(ui_);
@@ -470,22 +473,30 @@ void CtrlPreferences::feedback_gridCellChanged(int size)
 {
     grid_.cell_height = size;
     grid_.cell_width  = size;
-    dirty_ = GRID_DIRTY;
+    if(dirty_ == CLEAN)
+        dirty_ = GRID_DIRTY;
+    else
+        dirty_ = DIRTY;
 }
 
 void CtrlPreferences::feedback_quadMinSizeChanged(int size)
 {
     quad_.min_height = size;
     quad_.min_width  = size;
-    dirty_ = QUAD_DIRTY;
+    if(dirty_ == CLEAN)
+        dirty_ = QUAD_DIRTY;
+    else
+        dirty_ = DIRTY;
 }
 
 void CtrlPreferences::feedback_quadMinProbChanged(double prob)
 {
     quad_.min_prob = prob;
-    dirty_ = QUAD_DIRTY;
+    if(dirty_ == CLEAN)
+        dirty_ = QUAD_DIRTY;
+    else
+        dirty_ = DIRTY;
 }
-
 
 void CtrlPreferences::applyExtratorParams(QString setting)
 {

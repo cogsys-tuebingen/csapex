@@ -77,7 +77,7 @@ void CtrlClassEdit::write(YAML::Emitter &emitter) const
     }
     emitter << YAML::EndSeq;
     emitter << YAML::Key << "CLASSES_PALETTE" << YAML::Value;
-    emitter << YAML::BeginSeq;
+    emitter << YAML::BeginSeq << YAML::Flow;
     for(std::vector<QColor>::const_iterator it = palette_.begin() ; it != palette_.end() ; it++) {
         emitter << it->red();
         emitter << it->green();
@@ -119,7 +119,7 @@ void CtrlClassEdit::read(const YAML::Node &document)
             (*it)["info"]  >> info;
 
             tableNewEntry(class_id, color, info.c_str());
-            bridge_->classAdd(class_id, color);
+            bridge_->classAdd(class_id, palette_[color]);
         }
     } catch (YAML::Exception e) {
         std::cerr << "Class Editor cannot read config : '" << e.what() <<"' !" << std::endl;

@@ -104,6 +104,7 @@ private:
     void renderGrid();
     void renderQuad();
     void loadOverlay(const Overlay overlay, const QInteractiveScene::Layer &layer);
+    void unloadOverlay();
 
     QGraphicsRectItem* renderBox(cv_roi::TerraROI &roi);
 

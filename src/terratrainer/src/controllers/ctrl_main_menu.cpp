@@ -38,16 +38,95 @@ void CtrlMainWindow::loadClassifier()
 {
     QString filename = QFileDialog::getOpenFileName(
                 0,
-                tr("Open Classifier"),
+                tr("Choose file..."),
                 QDir::currentPath(),
                 tr("(*.yaml);;All files (*.*)") );
 
     if(!filename.isNull()) {
+        Controller::Ptr class_ed = main_window_->controllers_[Controller::Class];
+        Controller::Ptr bridge   = main_window_->controllers_[Controller::Bridge];
+        Controller::Ptr pref     = main_window_->controllers_[Controller::Preferences];
+
+        if(bridge != NULL || class_ed != NULL || pref != NULL) {
+            std::ifstream in(filename.toUtf8().constData());
+            if(!in.is_open()) {
+                std::cerr << "File couldn't be openened!" << std::endl;
+                return;
+            }
+
+            YAML::Parser p(in);
+            YAML::Node document;
+            p.GetNextDocument(document);
+            class_ed->read(document);
+            pref->read(document);
+            bridge->read(document);
+            in.close();
+        }
 
     }
 }
 
-void CtrlMainWindow::saveClassifier()
+void CtrlMainWindow::loadSettings()
+{
+    QString filename = QFileDialog::getOpenFileName(
+                0,
+                tr("Choose file..."),
+                QDir::currentPath(),
+                tr("(*.yaml);;All files (*.*)") );
+
+    if(!filename.isNull()) {
+        Controller::Ptr class_ed = main_window_->controllers_[Controller::Class];
+        Controller::Ptr pref     = main_window_->controllers_[Controller::Preferences];
+
+        if(class_ed != NULL || pref != NULL) {
+            std::ifstream in(filename.toUtf8().constData());
+            if(!in.is_open()) {
+                std::cerr << "File couldn't be openened!" << std::endl;
+                return;
+            }
+
+            YAML::Parser p(in);
+            YAML::Node document;
+            p.GetNextDocument(document);
+            class_ed->read(document);
+            pref->read(document);
+            in.close();
+        }
+
+    }
+}
+
+void CtrlMainWindow::loadROIs()
+{
+    QString filename = QFileDialog::getOpenFileName(
+                0,
+                tr("Choose file..."),
+                QDir::currentPath(),
+                tr("(*.yaml);;All files (*.*)") );
+
+    if(!filename.isNull()) {
+        Controller::Ptr view        = main_window_->controllers_[Controller::MapView];
+        Controller::Ptr class_ed    = main_window_->controllers_[Controller::Class];
+
+        if(view != NULL || class_ed != NULL) {
+            std::ifstream in(filename.toUtf8().constData());
+            if(!in.is_open()) {
+                std::cerr << "File couldn't be openened!" << std::endl;
+                return;
+            }
+
+            YAML::Parser p(in);
+            YAML::Node document;
+            p.GetNextDocument(document);
+            class_ed->read(document);
+            view->read(document);
+            in.close();
+        }
+
+    }
+}
+
+void CtrlMainWindow::saveSettings()
 {
     QString filename = QFileDialog::getSaveFileName(
                 0,
@@ -56,15 +135,53 @@ void CtrlMainWindow::saveClassifier()
                 tr("(*.yaml)") );
     if( !filename.isNull() )
     {
-        Controller::Ptr bridge = main_window_->controllers_[Controller::Bridge];
+        Controller::Ptr class_ed = main_window_->controllers_[Controller::Class];
+        Controller::Ptr pref = main_window_->controllers_[Controller::Preferences];
 
-        if(bridge != NULL) {
+        if(pref != NULL || class_ed != NULL) {
             YAML::Emitter emitter;
             emitter << YAML::BeginMap;
+            class_ed->write(emitter);
+            pref->write(emitter);
+            emitter << YAML::EndMap;
+
+            QRegExp rx (".+(\\.yaml$)");
+            if(!rx.exactMatch(filename))
+                filename += ".yaml";
+
+            std::ofstream out(filename.toUtf8().constData());
+            if(!out.is_open()) {
+                std::cerr << "File couldn't be openened!" << std::endl;
+                return;
+            }
+
+            out << emitter.c_str();
+            out.close();
+        }
+    }
+
+}
+
+void CtrlMainWindow::saveClassifierProject()
+{
+    QString filename = QFileDialog::getSaveFileName(
+                0,
+                tr("Choose destination..."),
+                QDir::currentPath(),
+                tr("(*.yaml)") );
+    if( !filename.isNull() )
+    {
+        Controller::Ptr class_ed = main_window_->controllers_[Controller::Class];
+        Controller::Ptr bridge = main_window_->controllers_[Controller::Bridge];
+
+        if(bridge != NULL || class_ed != NULL) {
+            YAML::Emitter emitter;
+            emitter << YAML::BeginMap;
+            class_ed->write(emitter);
             bridge->write(emitter);
             emitter << YAML::EndMap;
 
-            QRegExp rx (".+((\\.yaml$)");
+            QRegExp rx (".+(\\.yaml$)");
             if(!rx.exactMatch(filename))
                 filename += ".yaml";
 
@@ -85,11 +202,32 @@ void CtrlMainWindow::saveClassifierRaw()
 {
     QString filename = QFileDialog::getSaveFileName(
                 0,
-                tr("Save Classifier!"),
+                tr("Choose destination..."),
                 QDir::currentPath(),
                 tr("(*.yaml)") );
     if( !filename.isNull() )
     {
+        Controller::Ptr bridge = main_window_->controllers_[Controller::Bridge];
+
+        if(bridge != NULL) {
+            YAML::Emitter emitter;
+            emitter << YAML::BeginMap;
+            bridge->write(emitter);
+            emitter << YAML::EndMap;
+
+            QRegExp rx (".+(\\.yaml$)");
+            if(!rx.exactMatch(filename))
+                filename += ".yaml";
+
+            std::ofstream out(filename.toUtf8().constData());
+            if(!out.is_open()) {
+                std::cerr << "File couldn't be openened!" << std::endl;
+                return;
+            }
+
+            out << emitter.c_str();
+            out.close();
+        }
     }
 }
 

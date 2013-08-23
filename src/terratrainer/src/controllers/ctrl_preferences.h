@@ -26,7 +26,7 @@ public:
     void setupUI(Ui::TerraPreferences *ui);
     void write(YAML::Emitter &emitter) const;
     void read (const YAML::Node &document);
-    void readClassfierLoad(const YAML::Node &document);
+    bool readClassfierLoad(const YAML::Node &document);
 
 public Q_SLOTS:
     /// ORB

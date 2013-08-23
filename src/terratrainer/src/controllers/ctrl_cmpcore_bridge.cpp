@@ -1,6 +1,7 @@
 #include "ctrl_cmpcore_bridge.h"
 #include <iostream>
 #include <fstream>
+#include <ios>
 #include <common/QtCvImageConverter.h>
 #include <QFileInfo>
 #include <QDir>
@@ -50,11 +51,12 @@ void CMPCoreBridge::write(YAML::Emitter &emitter) const
 
     std::stringstream buf;
     buf << in.rdbuf();
+
     emitter << YAML::Key << "CLASSIFIER" << YAML::Value;
     emitter << YAML::BeginMap;
     cc_->write(emitter);
     emitter << YAML::Key << "DATA" << YAML::Value;
-    emitter << buf.str().c_str();
+    emitter << buf.str();
     emitter << YAML::EndMap;
     in.close();
 }
@@ -129,41 +131,11 @@ int CMPCoreBridge::getClassCount()
 
 void CMPCoreBridge::loadImage(const QString path)
 {
+    recalc_grid_ = true;
+    recalc_quad_ = true;
     if(cc_->loadImage(path.toUtf8().data()))
         Q_EMIT imageLoaded();
 }
-
-//void CMPCoreBridge::loadClassifier(const QString path)
-//{
-//    std::ifstream in(path.toUtf8().constData());
-//    CMPYAML::readFile(in, cc_.get(), this);
-//    in.close();
-
-//    Q_EMIT classifierReloaded();
-//}
-
-//void CMPCoreBridge::saveClassifier(const QString path)
-//{
-//    std::ofstream out(path.toUtf8().constData());
-//    if(!out.is_open()) {
-//        std::cerr << "Couldn't write file!" << std::endl;
-//    }
-
-//    CMPYAML::writeFile(out, cc_.get(), this);
-//    out.close();
-//}
-
-//void CMPCoreBridge::saveClassifierRaw(const QString path)
-//{
-//    QFile file(cc_->forestPath().c_str());
-//    if(file.exists()) {
-//        if(!file.copy(path)) {
-//            std::cerr << "File couldn't be saved! Check your rights!" << std::endl;
-//        }
-//    } else {
-//        std::cerr << "No forest computed yet!" << std::endl;
-//    }
-//}
 
 void CMPCoreBridge::setExtractorParams(cv_extraction::ExtractorParams &params)
 {

@@ -8,7 +8,7 @@ class TerraQuadtreeDecomposition : public QuadtreeDecomposition
 public:
     typedef boost::shared_ptr<TerraQuadtreeDecomposition> Ptr;
     typedef QuadtreeDecomposition::CVQt                   CVQt;
-    typedef QuadtreeDecomposition::CVQtNodesList          CVQtNodesList;
+    typedef QuadtreeDecomposition::CVQtNodesListPtr          CVQtNodesListPtr;
     typedef std::pair<CVQt*, cv_roi::TerraID>             ClassificationEntry;
 
     TerraQuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size,
