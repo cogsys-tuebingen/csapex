@@ -11,80 +11,81 @@ CtrlPreferences::CtrlPreferences(CMPCoreBridge::Ptr bridge) :
 
 void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
 {
+    ui_ = ui;
 
     /// SYNC GUI WITH PARAMS
     /// ORB
-    ui->orbBox->setChecked(orb_.opp);
-    ui->checkBox_colExtOrb->setChecked(orb_.colorExtension);
-    ui->spinBox_levelOrb->setValue(orb_.octaves);
-    ui->spinBox_scaleOrb->setValue(orb_.scale);
-    ui->spinBox_patchOrb->setValue(orb_.patchSize);
-    ui->spinBox_WTAOrb->setValue(orb_.WTA_K);
-    ui->checkBox_combineOrb->setChecked(orb_.combine_descriptors);
-    ui->checkBox_maxProbOrb->setChecked(orb_.use_max_prob);
+    ui_->orbBox->setChecked(orb_.opp);
+    ui_->checkBox_colExtOrb->setChecked(orb_.color_extension);
+    ui_->spinBox_levelOrb->setValue(orb_.octaves);
+    ui_->spinBox_scaleOrb->setValue(orb_.scale);
+    ui_->spinBox_patchOrb->setValue(orb_.patch_size);
+    ui_->spinBox_WTAOrb->setValue(orb_.WTA_K);
+    ui_->checkBox_combineOrb->setChecked(orb_.combine_descriptors);
+    ui_->checkBox_maxProbOrb->setChecked(orb_.use_max_prob);
 
     /// SURF
-    ui->surfBox->setChecked(surf_.opp);
-    ui->checkBox_extendedSurf->setChecked(surf_.colorExtension);
-    ui->spinBox_layersSurf->setValue(surf_.octaveLayers);
-    ui->spinBox_octavesSurf->setValue(surf_.octaves);
-    ui->checkBox_extendedSurf->setChecked(surf_.extended);
-    ui->checkBox_combineSurf->setChecked(surf_.combine_descriptors);
-    ui->checkBox_maxProbSurf->setChecked(surf_.use_max_prob);
+    ui_->surfBox->setChecked(surf_.opp);
+    ui_->checkBox_extendedSurf->setChecked(surf_.color_extension);
+    ui_->spinBox_layersSurf->setValue(surf_.octave_layers);
+    ui_->spinBox_octavesSurf->setValue(surf_.octaves);
+    ui_->checkBox_extendedSurf->setChecked(surf_.extended);
+    ui_->checkBox_combineSurf->setChecked(surf_.combine_descriptors);
+    ui_->checkBox_maxProbSurf->setChecked(surf_.use_max_prob);
 
     /// SIFT
-    ui->siftBox->setChecked(sift_.opp);
-    ui->checkBox_angSift->setChecked(sift_.colorExtension);
-    ui->spinBox_magSift->setValue(sift_.magnification);
-    ui->spinBox_octavesSift->setValue(sift_.octaves);
-    ui->checkBox_angSift->setChecked(sift_.recalculateAngles);
-    ui->checkBox_maxProbSift->setChecked(sift_.use_max_prob);
+    ui_->siftBox->setChecked(sift_.opp);
+    ui_->checkBox_angSift->setChecked(sift_.color_extension);
+    ui_->spinBox_magSift->setValue(sift_.magnification);
+    ui_->spinBox_octavesSift->setValue(sift_.octaves);
+    ui_->checkBox_angSift->setChecked(sift_.recalculate_angles);
+    ui_->checkBox_maxProbSift->setChecked(sift_.use_max_prob);
 
     /// BRISK
-    ui->briskBox->setChecked(brisk_.opp);
-    ui->checkBox_colExtBrisk->setChecked(brisk_.colorExtension);
-    ui->spinBox_octavesBrisk->setValue(brisk_.octaves);
-    ui->spinBox_threshBrisk->setValue(brisk_.thresh);
-    ui->spinBox_scaleBrisk->setValue(brisk_.scale);
-    ui->checkBox_combineBrisk->setChecked(brisk_.combine_descriptors);
-    ui->checkBox_maxProbBrisk->setChecked(brisk_.use_max_prob);
+    ui_->briskBox->setChecked(brisk_.opp);
+    ui_->checkBox_colExtBrisk->setChecked(brisk_.color_extension);
+    ui_->spinBox_octavesBrisk->setValue(brisk_.octaves);
+    ui_->spinBox_threshBrisk->setValue(brisk_.thresh);
+    ui_->spinBox_scaleBrisk->setValue(brisk_.scale);
+    ui_->checkBox_combineBrisk->setChecked(brisk_.combine_descriptors);
+    ui_->checkBox_maxProbBrisk->setChecked(brisk_.use_max_prob);
 
     /// BRIEF
-    ui->briefBox->setChecked(brief_.opp);
-    ui->checkBox_colExtBrief->setChecked(brief_.colorExtension);
+    ui_->briefBox->setChecked(brief_.opp);
+    ui_->checkBox_colExtBrief->setChecked(brief_.color_extension);
 
     /// FREAK
-    ui->freakBox->setChecked(freak_.opp);
-    ui->checkBox_colExtFreak->setChecked(freak_.colorExtension);
-    ui->checkBox_oriNormFreak->setChecked(freak_.orientationNormalized);
-    ui->checkBox_scaleNormFreak->setChecked(freak_.scaleNormalized);
-    ui->spinBox_patternFreak->setValue(freak_.patternScale);
-    ui->spinBox_octavesFreak->setValue(freak_.octaves);
-    ui->checkBox_combineFreak->setChecked(freak_.combine_descriptors);
-    ui->checkBox_maxProbFreak->setChecked(freak_.use_max_prob);
+    ui_->freakBox->setChecked(freak_.opp);
+    ui_->checkBox_colExtFreak->setChecked(freak_.color_extension);
+    ui_->checkBox_oriNormFreak->setChecked(freak_.orientation_normalized);
+    ui_->checkBox_scaleNormFreak->setChecked(freak_.scale_normalized);
+    ui_->spinBox_patternFreak->setValue(freak_.pattern_scale);
+    ui_->spinBox_octavesFreak->setValue(freak_.octaves);
+    ui_->checkBox_combineFreak->setChecked(freak_.combine_descriptors);
+    ui_->checkBox_maxProbFreak->setChecked(freak_.use_max_prob);
 
     /// LBP / LTP
-    ui->checkBox_colExtlbp->setChecked(lbp_.colorExtension);
-    ui->checkBox_colExtltp->setChecked(ltp_.colorExtension);
-    ui->spinBox_kltp->setValue(ltp_.k);
-    ui->checkBox_combineLTP->setChecked(ltp_.combine_descriptors);
+    ui_->checkBox_colExtlbp->setChecked(lbp_.color_extension);
+    ui_->checkBox_colExtltp->setChecked(ltp_.color_extension);
+    ui_->spinBox_kltp->setValue(ltp_.k);
+    ui_->checkBox_combineLTP->setChecked(ltp_.combine_descriptors);
 
     /// FOREST
-    ui->spinBox_treeMaxDepth->setValue(forest_.max_depth);
-    ui->spinBox_treeMinSampels->setValue(forest_.min_samples);
-    ui->spinBox_treeRegression->setValue(forest_.regression);
-    ui->checkBox_treeSurrogates->setChecked(forest_.surrogates);
-    ui->spinBox_treeCategories->setValue(forest_.max_categories);
-    ui->checkBox_treeVariableImportance->setChecked(forest_.variable_importance);
-    ui->spinBox_treeNactiveVariables->setValue(forest_.nactive_variables);
-    ui->spinBox_treeMaxTrees->setValue(forest_.max_trees);
-    ui->spinBox_treeAccuracy->setValue(forest_.accurracy);
+    ui_->spinBox_treeMaxDepth->setValue(forest_.max_depth);
+    ui_->spinBox_treeMinSampels->setValue(forest_.min_samples);
+    ui_->spinBox_treeRegression->setValue(forest_.regression);
+    ui_->checkBox_treeSurrogates->setChecked(forest_.surrogates);
+    ui_->spinBox_treeCategories->setValue(forest_.max_categories);
+    ui_->checkBox_treeVariableImportance->setChecked(forest_.variable_importance);
+    ui_->spinBox_treeNactiveVariables->setValue(forest_.nactive_variables);
+    ui_->spinBox_treeMaxTrees->setValue(forest_.max_trees);
+    ui_->spinBox_treeAccuracy->setValue(forest_.accurracy);
 
     /// KEYPOINT
-    ui->spinBox_sizeKeypoint->setValue(key_.scale);
-    ui->spinBox_angleKeypoint->setValue(key_.angle);
-    ui->checkBox_softCrop->setChecked(key_.soft_crop);
-    ui->checkBox_calcAngleKeypoint->setChecked(key_.calc_angle);
+    ui_->spinBox_sizeKeypoint->setValue(key_.scale);
+    ui_->spinBox_angleKeypoint->setValue(key_.angle);
+    ui_->checkBox_softCrop->setChecked(key_.soft_crop);
+    ui_->checkBox_calcAngleKeypoint->setChecked(key_.calc_angle);
 
     /// FEEDBACK
     bridge_->setKeyPointParams(key_);
@@ -94,6 +95,82 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
 
 }
 
+void CtrlPreferences::write(YAML::Emitter &emitter) const
+{
+    emitter << YAML::Key << "PREFERENCES" << YAML::Value;
+    emitter << YAML::BeginMap;
+    orb_.write(emitter);
+    surf_.write(emitter);
+    sift_.write(emitter);
+    brisk_.write(emitter);
+    brief_.write(emitter);
+    freak_.write(emitter);
+    lbp_.write(emitter);
+    ltp_.write(emitter);
+    key_.write(emitter);
+    forest_.write(emitter);
+    quad_.write(emitter);
+    grid_.write(emitter);
+    emitter << YAML::EndMap;
+}
+
+void CtrlPreferences::read(const YAML::Node &document)
+{
+    try {
+        const YAML::Node &data = document["PREFERENCES"];
+        orb_.read(data);
+        surf_.read(data);
+        sift_.read(data);
+        brisk_.read(data);
+        brief_.read(data);
+        freak_.read(data);
+        lbp_.read(data);
+        ltp_.read(data);
+        key_.read(data);
+        forest_.read(data);
+        quad_.read(data);
+        grid_.read(data);
+
+    } catch (YAML::Exception e) {
+        std::cerr << "Problems reading preferences : '" << e.what() <<"' !" << std::endl;
+    }
+
+    setupUI(ui_);
+    dirty_ = DIRTY;
+}
+
+void CtrlPreferences::readClassfierLoad(const YAML::Node &document)
+{
+    try {
+        const YAML::Node &data = document["CLASSIFIER"];
+        if(orb_.read(data))
+            bridge_->setExtractorParams(orb_);
+        if(surf_.read(data))
+            bridge_->setExtractorParams(surf_);
+        if(sift_.read(data))
+            bridge_->setExtractorParams(sift_);
+        if(brisk_.read(data))
+            bridge_->setExtractorParams(brisk_);
+        if(brief_.read(data))
+            bridge_->setExtractorParams(brief_);
+        if(freak_.read(data))
+            bridge_->setExtractorParams(freak_);
+        if(lbp_.read(data))
+            bridge_->setExtractorParams(lbp_);
+        if(ltp_.read(data))
+            bridge_->setExtractorParams(ltp_);
+
+        key_.read(data);
+        bridge_->setKeyPointParams(key_);
+
+    } catch (YAML::Exception e) {
+        std::cerr << "Problems reading preferences : '" << e.what() <<"' !" << std::endl;
+    }
+
+    setupUI(ui_);
+    dirty_ = DIRTY;
+}
+
 void CtrlPreferences::orbOppChanged(bool checked)
 {
     orb_.opp = checked;
@@ -101,7 +178,7 @@ void CtrlPreferences::orbOppChanged(bool checked)
 
 void CtrlPreferences::orbColorExtChanged(bool checked)
 {
-    orb_.colorExtension = checked;
+    orb_.color_extension = checked;
 }
 
 void CtrlPreferences::orbLevelChanged(int levels)
@@ -121,7 +198,7 @@ void CtrlPreferences::orbWTA_KChanged(int wta_k)
 
 void CtrlPreferences::orbPatchChanged(int size)
 {
-    orb_.patchSize = size;
+    orb_.patch_size = size;
 }
 
 void CtrlPreferences::orbCombineChanged(bool enable)
@@ -141,7 +218,7 @@ void CtrlPreferences::surfOppChanged(bool checked)
 
 void CtrlPreferences::surfColorExtChanged(bool checked)
 {
-    surf_.colorExtension = checked;
+    surf_.color_extension = checked;
 }
 
 void CtrlPreferences::surfOctavesChanged(int octaves)
@@ -151,7 +228,7 @@ void CtrlPreferences::surfOctavesChanged(int octaves)
 
 void CtrlPreferences::surfOctaveLayersChanged(int layers)
 {
-    surf_.octaveLayers = layers;
+    surf_.octave_layers = layers;
 }
 
 void CtrlPreferences::surfExtendeChanged(bool checked)
@@ -176,7 +253,7 @@ void CtrlPreferences::siftOppChanged(bool checked)
 
 void CtrlPreferences::siftColorExtChanged(bool checked)
 {
-    sift_.colorExtension = checked;
+    sift_.color_extension = checked;
 }
 
 void CtrlPreferences::siftMagnificationChanged(double magnification)
@@ -196,7 +273,7 @@ void CtrlPreferences::siftNormalizeChanged(bool checked)
 
 void CtrlPreferences::siftRecalcAnglesChanged(bool checked)
 {
-    sift_.recalculateAngles = checked;
+    sift_.recalculate_angles = checked;
 }
 
 void CtrlPreferences::siftCombineChanged(bool enable)
@@ -216,7 +293,7 @@ void CtrlPreferences::briskOppChanged(bool checked)
 
 void CtrlPreferences::briskColorExtChanged(bool checked)
 {
-    brisk_.colorExtension = checked;
+    brisk_.color_extension = checked;
 }
 
 void CtrlPreferences::briskOctavesChanged(int octaves)
@@ -251,7 +328,7 @@ void CtrlPreferences::briefOppChanged(bool checked)
 
 void CtrlPreferences::briefColorExtChanged(bool checked)
 {
-    brief_.colorExtension = checked;
+    brief_.color_extension = checked;
 }
 
 void CtrlPreferences::briefBytesChanged(QString bytes)
@@ -266,22 +343,22 @@ void CtrlPreferences::freakOppChanged(bool checked)
 
 void CtrlPreferences::freakColorExtChanged(bool checked)
 {
-    freak_.colorExtension = checked;
+    freak_.color_extension = checked;
 }
 
 void CtrlPreferences::freakPatternScaleChanged(double scale)
 {
-    freak_.patternScale = scale;
+    freak_.pattern_scale = scale;
 }
 
 void CtrlPreferences::freakScaleNormChanged(bool checked)
 {
-    freak_.scaleNormalized = checked;
+    freak_.scale_normalized = checked;
 }
 
 void CtrlPreferences::freakOriNormChanged(bool checked)
 {
-    freak_.orientationNormalized = checked;
+    freak_.orientation_normalized = checked;
 }
 
 void CtrlPreferences::freakOctavesChanged(int octaves)
@@ -306,12 +383,12 @@ void CtrlPreferences::keypointSizeChanged(double size)
 
 void CtrlPreferences::lbpColorExtChanged(bool checked)
 {
-    lbp_.colorExtension = checked;
+    lbp_.color_extension = checked;
 }
 
 void CtrlPreferences::ltpColorExtChanged(bool checked)
 {
-    ltp_.colorExtension = checked;
+    ltp_.color_extension = checked;
 }
 
 void CtrlPreferences::ltpKChanged(double value)

@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <controllers/ctrl_factory.h>
-#include <controllers/ctrl_cmpcore_bridge.h>
 /// SYSTEM
 #include <QMainWindow>
 /// DECLARATIONS
@@ -20,6 +19,7 @@ class TerraTrainerWindow : public QMainWindow
     Q_OBJECT
 
     friend class CtrlFactory;
+    friend class CtrlMainWindow;
 
 public:
     explicit TerraTrainerWindow(QWidget *parent = 0);

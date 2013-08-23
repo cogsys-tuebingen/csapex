@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "ctrl_cmpcore_bridge.h"
+#include "controller.hpp"
 /// SYSTEM
 #include <QObject>
 #include <QPen>
@@ -15,7 +16,7 @@ namespace Ui {
 class ToolPanel;
 }
 
-class CtrlToolPanel : public QObject
+class CtrlToolPanel : public QObject, public Controller
 {
     Q_OBJECT
 
@@ -61,7 +62,6 @@ public Q_SLOTS:
     void image_loaded();
     void trainingFinished();
     void feedbackFinished();
-    void classifierLoaded();
     void classAdded(int id);
     void classRemoved(int id);
     void classUpdated(int oldID, int newID);

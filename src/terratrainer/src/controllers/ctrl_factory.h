@@ -11,19 +11,19 @@
 class TerraTrainerWindow;
 
 /// CONTROLLERS
-namespace Controller {
-    typedef boost::shared_ptr<QObject> Ptr;
-    enum ControllerID {ToolPanel, Menu, MapView, Bridge, Class, Preferences};
-    typedef std::pair<ControllerID, Ptr> IDPtr;
-    typedef std::map <ControllerID, Ptr> Map;
+//namespace Controller {
+//    typedef boost::shared_ptr<QObject> Ptr;
+//    enum ControllerID {ToolPanel, Menu, MapView, Bridge, Class, Preferences};
+//    typedef std::pair<ControllerID, Ptr> IDPtr;
+//    typedef std::map <ControllerID, Ptr> Map;
 
-    template<class T, class U>
-    boost::shared_ptr<T> to(boost::shared_ptr<U> const & r)
-    {
-       return boost::dynamic_pointer_cast<T>(r);
-    }
+//    template<class T, class U>
+//    boost::shared_ptr<T> to(boost::shared_ptr<U> const & r)
+//    {
+//       return boost::dynamic_pointer_cast<T>(r);
+//    }
 
-}
+//}
 
 class CtrlFactory
 {

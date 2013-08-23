@@ -5,6 +5,7 @@
 #include <graphics/qinteractive_rect.h>
 #include <graphics/qinteractive_scene.h>
 #include "ctrl_cmpcore_bridge.h"
+#include "controller.hpp"
 
 /// SYSTEM
 #include <QObject>
@@ -18,7 +19,7 @@ class TerraTrainerWindow;
 static const double MAX_ZOOM(200.0);
 static const double MIN_ZOOM(0.25);
 
-class CtrlMapView : public QObject
+class CtrlMapView : public QObject, public Controller
 {
     Q_OBJECT
 
@@ -29,6 +30,11 @@ public:
     virtual ~CtrlMapView();
 
     void setupUI(Ui::TerraTrainerWindow *ui);
+    void write(YAML::Emitter &emitter) const;
+    void read(const YAML::Node &document);
+
+    void saveSelectedCrops(QString path);
+
 
 Q_SIGNALS:
     void zoomUpdated(double factor);
@@ -61,8 +67,6 @@ public Q_SLOTS:
     void computeFinished();
     void computeGridFinished();
     void computeQuadFinished();
-    void saveROIs(QString path);
-
 
 
 protected:

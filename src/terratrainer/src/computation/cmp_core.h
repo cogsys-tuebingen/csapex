@@ -1,19 +1,20 @@
 #ifndef CMP_CORE_H
 #define CMP_CORE_H
 /// COMPONENT
-#include "params.hpp"
 #include "cmp_extractor_extended.h"
 #include "cmp_randomforest_extended.h"
-#include "cmp_extractors.hpp"
 #include "roi.hpp"
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <opencv2/opencv.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <utils/LibCvTools/grid.hpp>
 #include <utils/LibCvTools/terra_decomposition_quadtree.h>
 #include <utils/LibCvTools/grid_compute.hpp>
+
+namespace YAML {
+class Emitter;
+}
 
 
 class CMPCore
@@ -28,7 +29,7 @@ public:
     bool        loadImage(const std::string image_path);
     cv::Mat     getImage() const;
     ///         CLASSIFIER
-    bool        load(const std::string path, const std::vector<int> &classRegister);
+    void        reload();
     std::string forestPath();
 
     ///     COMPUTATION
@@ -42,32 +43,33 @@ public:
     void    getQuad(std::vector<cv_roi::TerraROI> &regions);
 
     ///     PARAMETERS
-    void    setExtractorParameters(CMPExtractorParams &params);
+    void    setExtractorParameters(cv_extraction::ExtractorParams &params);
+    void    setRandomForestParams(const CMPForestParams &params);
+    void    setKeyPointParameters(const cv_extraction::KeypointParams &params);
+    void    write(YAML::Emitter &emitter) const;
 
     ///     PARAMS
-    void    setRandomForestParams(const CMPForestParams &params);
     void    setGridParameters(const CMPGridParams &params);
     void    setQuadParameters(const CMPQuadParams &params);
-    void    setKeyPointParameters(const CMPKeypointParams &params);
 
     ///     TRAINING PREPARATION
     void    setRois(const std::vector<cv_roi::TerraROI> &rois);
-    void    saveRois(const std::string path);
     void    addClass(int classID);
     void    removeClass(int classID);
     void    getClasses(std::vector<int> &classes);
 
 
 private:
-    typedef CMPCVExtractorExt::KeyPoints KeyPoints;
+    typedef CMPCVExtractorExt::KeyPoints                      KeyPoints;
+    typedef boost::shared_ptr<cv_extraction::ExtractorParams> Params;
 
     cv::Mat                                 raw_image_;
     CMPCVExtractorExt::Ptr                  cv_extractor_;
-    CMPExtractorParams                      ex_params_;
     CMPPatternExtractorExt::Ptr             pt_extractor_;
     CMPRandomForestExt::Ptr                 random_;
 
-    Extractor::KeypointParams               keypoint_params_;
+    cv_extraction::KeypointParams           keypoint_params_;
+    Params                                  ex_params_;
 
     TerraQuadtreeDecomposition::Ptr         quad_decom_;
     CMPQuadParams                           quad_params_;

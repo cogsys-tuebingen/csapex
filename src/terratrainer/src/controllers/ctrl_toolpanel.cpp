@@ -142,16 +142,6 @@ void CtrlToolPanel::feedbackFinished()
 
 }
 
-void CtrlToolPanel::classifierLoaded()
-{
-    class_selection_->clear();
-    std::vector<int> ids = bridge_->getClassIDs();
-    foreach(int id, ids) {
-        class_selection_->addItem(QIcon(renderColorIcon(id)), QString::number(id), QVariant(id));
-    }
-}
-
-
 void CtrlToolPanel::classAdded(int id)
 {
     class_selection_->addItem(QIcon(renderColorIcon(id)), QString::number(id), QVariant(id));
@@ -208,7 +198,7 @@ void CtrlToolPanel::snapZoom()
 
 QPixmap CtrlToolPanel::renderColorIcon(const int class_ID)
 {
-    QColor   color = bridge_->getColorByClass(class_ID);
+    QColor   color = bridge_->colorGet(class_ID);
     QPixmap  pixmap(60,20);
     QPainter paintr(&pixmap);
     paintr.setBrush(color);

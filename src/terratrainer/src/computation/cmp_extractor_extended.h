@@ -1,11 +1,11 @@
 #ifndef CMP_EXTRACTOR_EXTENDED_H
 #define CMP_EXTRACTOR_EXTENDED_H
-#include <utils/LibCvTools/extractor.h>
-#include <yaml-cpp/yaml.h>
+#include <utils/LibCvTools/feature_extractor.h>
+#include <utils/LibCvTools/pattern_extractor.h>
+#include <utils/LibCvTools/extractor_params.h>
 #include <roi.hpp>
-#include "params.hpp"
 
-class CMPCVExtractorExt : public CVExtractor
+class CMPCVExtractorExt : public cv_extraction::FeatureExtractor
 {
 public:
     typedef boost::shared_ptr<CMPCVExtractorExt> Ptr;
@@ -13,26 +13,26 @@ public:
     CMPCVExtractorExt();
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
 
-    void setParams(CMPParamsORB   &params);
-    void setParams(CMPParamsSURF  &params);
-    void setParams(CMPParamsSIFT  &params);
-    void setParams(CMPParamsBRISK &params);
-    void setParams(CMPParamsBRIEF &params);
-    void setParams(CMPParamsFREAK &params);
-    void setKeyPointParams(KeypointParams &key);
+    void setParams(const cv_extraction::ParamsORB              &params);
+    void setParams(const cv_extraction::ParamsSURF             &params);
+    void setParams(const cv_extraction::ParamsSIFT             &params);
+    void setParams(const cv_extraction::ParamsBRISK            &params);
+    void setParams(const cv_extraction::ParamsBRIEF            &params);
+    void setParams(const cv_extraction::ParamsFREAK            &params);
+    void setKeyPointParams(const cv_extraction::KeypointParams &key);
 
 private:
-    CMPExtractorParams::Type type_;
-    KeypointParams           key_;
-    int                      max_octave_;
-    bool                     color_extension_;
-    bool                     combine_descriptors_;
+    cv_extraction::ExtractorParams::Type type_;
+    cv_extraction::KeypointParams        key_;
+    int                                  max_octave_;
+    bool                                 color_extension_;
+    bool                                 combine_descriptors_;
 
-    void  setCommonParameters(CMPExtractorParams &params);
+    void  setCommonParameters(const cv_extraction::ExtractorParams &params);
 
 };
 
-class CMPPatternExtractorExt : public PatternExtractor
+class CMPPatternExtractorExt : public cv_extraction::PatternExtractor
 {
 public:
     typedef boost::shared_ptr<CMPPatternExtractorExt> Ptr;
@@ -40,12 +40,12 @@ public:
 
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
 
-    void setParams(const CMPParamsLBP &params);
-    void setParams(const CMPParamsLTP &params);
+    void setParams(const cv_extraction::ParamsLBP &params);
+    void setParams(const cv_extraction::ParamsLTP &params);
 private:
-    CMPExtractorParams::Type type_;
-    bool  color_extension_;
-    bool  combine_descriptors_;
+    cv_extraction::ExtractorParams::Type type_;
+    bool                                 color_extension_;
+    bool                                 combine_descriptors_;
 };
 
 

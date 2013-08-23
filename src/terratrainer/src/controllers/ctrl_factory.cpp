@@ -9,14 +9,13 @@
 
 
 /// CONTROLLERS
+#include "controller.hpp"
 #include <controllers/ctrl_cmpcore_bridge.h>
 #include <controllers/ctrl_main_menu.h>
 #include <controllers/ctrl_map_view.h>
 #include <controllers/ctrl_toolpanel.h>
 #include <controllers/ctrl_class_edit.h>
 #include <controllers/ctrl_preferences.h>
-
-using namespace Controller;
 
 void CtrlFactory::produdeBridgeController(TerraTrainerWindow *mainWindow)
 {
@@ -27,14 +26,14 @@ void CtrlFactory::produdeBridgeController(TerraTrainerWindow *mainWindow)
 
     CMPCoreBridge *ctrl = new CMPCoreBridge(mainWindow->core_);
 
-    IDPtr entry(Bridge, Controller::Ptr(ctrl));
+    Controller::IDPtr entry(Controller::Bridge, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
 }
 
 void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
 {
     Ui::TerraTrainerWindow *ui = mainWindow->ui_;
-    CMPCoreBridge::Ptr  br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
+    CMPCoreBridge::Ptr  br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Controller::Bridge]);
 
     if(br == NULL) {
         std::cerr << "Bridge Controller not yet initialzed, cancelling Map View Controller init!" << std::endl;
@@ -45,22 +44,24 @@ void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
     ctrl->setupUI(ui);
     QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()));
     QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)));
-    QObject::connect(br.get(), SIGNAL(classUpdate(int,int)),  ctrl, SLOT(classUpdated(int,int)));
+    QObject::connect(br.get(), SIGNAL(classUpdated(int,int)), ctrl, SLOT(classUpdated(int,int)));
     QObject::connect(br.get(), SIGNAL(colorUpdate(int)),      ctrl, SLOT(colorUpdate(int)));
     QObject::connect(br.get(), SIGNAL(computeFinished()),     ctrl, SLOT(computeFinished()));
     QObject::connect(br.get(), SIGNAL(computeGridFinished()), ctrl, SLOT(computeGridFinished()));
     QObject::connect(br.get(), SIGNAL(computeQuadFinished()), ctrl, SLOT(computeQuadFinished()));
 
-    IDPtr entry(MapView, Controller::Ptr(ctrl));
+    Controller::IDPtr entry(Controller::MapView, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
 }
 
 void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
 {
     Ui::TerraTrainerWindow *ui = mainWindow->ui_;
-    CtrlMenu               *ctrl = new CtrlMenu(ui->menu);
-    CMPCoreBridge::Ptr  br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
-    CtrlMapView::Ptr        mv = Controller::to<CtrlMapView>(mainWindow->controllers_[MapView]);
+    CtrlMainWindow         *ctrl = new CtrlMainWindow(mainWindow);
+    CMPCoreBridge::Ptr      br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Controller::Bridge]);
+    CtrlMapView::Ptr        mv = Controller::to<CtrlMapView>(mainWindow->controllers_[Controller::MapView]);
+
+    ctrl->setupUi(ui);
 
     if(mv == NULL){
         std::cerr << "Map View Controller not yet initialized, therefore cancelling Menu Controller initialization!" << std::endl;
@@ -74,24 +75,20 @@ void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
     QAction::connect(ui->action_ZoomIn,             SIGNAL(triggered()), ctrl, SLOT(zoomIn()));
     QAction::connect(ui->action_ZoomOut,            SIGNAL(triggered()), ctrl, SLOT(zoomOut()));
     QAction::connect(ui->action_ZoomReset,          SIGNAL(triggered()), ctrl, SLOT(zoomReset()));
+    QAction::connect(ui->action_SaveCrops,          SIGNAL(triggered()), ctrl, SLOT(saveCrops()));
     QAction::connect(ui->action_SaveROIs,           SIGNAL(triggered()), ctrl, SLOT(saveROIs()));
     QObject::connect(mv.get(),                      SIGNAL(zoomUpdated(double)), ctrl, SLOT(zoomUpdate(double)));
     QObject::connect(ctrl,                          SIGNAL(zoom(double)), mv.get(), SLOT(zoom(double)));
-    QObject::connect(ctrl,                          SIGNAL(loadImage(QString)),      br.get(), SLOT(loadImage(QString)));
-    QObject::connect(ctrl,                          SIGNAL(loadClassifier(QString)), br.get(), SLOT(loadClassifier(QString)));
-    QObject::connect(ctrl,                          SIGNAL(saveClassifier(QString)), br.get(), SLOT(saveClassifier(QString)));
-    QObject::connect(ctrl,                          SIGNAL(saveClassifierRaw(QString)), br.get(), SLOT(saveClassifierRaw(QString)));
-    QObject::connect(ctrl,                          SIGNAL(saveROIs(QString)), mv.get(), SLOT(saveROIs(QString)));
 
-    IDPtr entry(Menu, Controller::Ptr(ctrl));
+    Controller::IDPtr entry(Controller::Menu, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
 }
 
 void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
 {
     Ui::ToolPanel      *tp = mainWindow->tool_panel_ui_;
-    CMPCoreBridge::Ptr  br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
-    CtrlMapView::Ptr    mv = Controller::to<CtrlMapView>(mainWindow->controllers_[MapView]);
+    CMPCoreBridge::Ptr  br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Controller::Bridge]);
+    CtrlMapView::Ptr    mv = Controller::to<CtrlMapView>(mainWindow->controllers_[Controller::MapView]);
 
     if(br == NULL) {
         std::cerr << "Bridge Controller not yet initialized, therefore cancelling ToolPanel Controller initialization!" << std::endl;
@@ -130,12 +127,11 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QPushButton::connect(ctrl,          SIGNAL(uncheckDel(bool)),    tp->delBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckSel(bool)),    tp->selBoxes,   SLOT(setChecked(bool)));
 
-    QObject::connect(br.get(),          SIGNAL(classifierReloaded()),ctrl,           SLOT(classifierLoaded()));
-    QObject::connect(br.get(),          SIGNAL(classAdded(int)),     ctrl,           SLOT(classAdded(int)));
-    QObject::connect(br.get(),          SIGNAL(classRemoved(int)),   ctrl,           SLOT(classRemoved(int)));
-    QObject::connect(br.get(),          SIGNAL(classUpdate(int,int)),ctrl,           SLOT(classUpdated(int,int)));
-    QObject::connect(br.get(),          SIGNAL(colorUpdate(int)),    ctrl,           SLOT(colorUpdate(int)));
-    QObject::connect(br.get(),          SIGNAL(imageLoaded()),       ctrl,           SLOT(image_loaded()));
+    QObject::connect(br.get(),          SIGNAL(classAdded(int)),      ctrl,           SLOT(classAdded(int)));
+    QObject::connect(br.get(),          SIGNAL(classRemoved(int)),    ctrl,           SLOT(classRemoved(int)));
+    QObject::connect(br.get(),          SIGNAL(classUpdated(int,int)),ctrl,           SLOT(classUpdated(int,int)));
+    QObject::connect(br.get(),          SIGNAL(colorUpdate(int)),     ctrl,           SLOT(colorUpdate(int)));
+    QObject::connect(br.get(),          SIGNAL(imageLoaded()),        ctrl,           SLOT(image_loaded()));
     QObject::connect(tp->addBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateAdd()));
     QObject::connect(tp->movBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateMove()));
     QObject::connect(tp->delBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateDelete()));
@@ -152,14 +148,14 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QDoubleSpinBox::connect(tp->sizeBox,SIGNAL(valueChanged(double)),mv.get(),       SLOT(size(double)));
     QDoubleSpinBox::connect(mv.get(),   SIGNAL(sizeUpdated(double)), tp->sizeBox,    SLOT(setValue(double)));
 
-    IDPtr entry(ToolPanel, Controller::Ptr(ctrl));
+    Controller::IDPtr entry(Controller::ToolPanel, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
 }
 
 void CtrlFactory::produceClassEdController(TerraTrainerWindow *mainWindow)
 {
     Ui::TerraClasses    *tc = mainWindow->classes_ui_;
-    CMPCoreBridge::Ptr   br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
+    CMPCoreBridge::Ptr   br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Controller::Bridge]);
 
     if(br == NULL) {
         std::cerr << "Bridge Controller not yet initialized, therefore cancelling ToolPanel Controller initialization!" << std::endl;
@@ -169,8 +165,8 @@ void CtrlFactory::produceClassEdController(TerraTrainerWindow *mainWindow)
     CtrlClassEdit           *ctrl = new CtrlClassEdit(mainWindow->classes_window_, br);
     ctrl->setupUI(mainWindow->classes_ui_);
 
-    QLineEdit::connect(tc->className,  SIGNAL(textEdited(QString)), ctrl,       SLOT(nameEdited(QString)));
-    QLineEdit::connect(tc->classID,    SIGNAL(textEdited(QString)), ctrl,       SLOT(IDEdited(QString)));
+    QLineEdit::connect(tc->className,  SIGNAL(textEdited(QString)), ctrl,       SLOT(editInfo(QString)));
+    QLineEdit::connect(tc->classID,    SIGNAL(textEdited(QString)), ctrl,       SLOT(editId(QString)));
 
     QComboBox::connect(tc->classColor, SIGNAL(currentIndexChanged(int)), ctrl, SLOT(colorIndex(int)));
 
@@ -180,17 +176,16 @@ void CtrlFactory::produceClassEdController(TerraTrainerWindow *mainWindow)
     QPushButton::connect(ctrl,         SIGNAL(enableAdd(bool)), tc->addClass,   SLOT(setEnabled(bool)));
 
     QTableWidget::connect(tc->tableClasses, SIGNAL(cellClicked(int,int)), ctrl, SLOT(cellClicked(int,int)));
-    QObject::connect(br.get(), SIGNAL(classifierReloaded()), ctrl, SLOT(classesLoaded()));
 
-    IDPtr entry(Class, Controller::Ptr(ctrl));
+    Controller::IDPtr entry(Controller::Class, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
 }
 
 void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
 {
     Ui::TerraPreferences    *tf = mainWindow->preferences_ui_;
-    CMPCoreBridge::Ptr   br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Bridge]);
-    CtrlToolPanel::Ptr   tp = Controller::to<CtrlToolPanel>(mainWindow->controllers_[ToolPanel]);
+    CMPCoreBridge::Ptr   br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Controller::Bridge]);
+    CtrlToolPanel::Ptr   tp = Controller::to<CtrlToolPanel>(mainWindow->controllers_[Controller::ToolPanel]);
 
     if(br == NULL) {
         std::cerr << "Bridge Controller not yet initialized, therefore cancelling Settings Controller initialization!" << std::endl;
@@ -295,6 +290,6 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QObject::connect(ctrl,     SIGNAL(paramsGridApplied()),                       tp.get(), SLOT(paramsGridApplied()));
     QObject::connect(ctrl,     SIGNAL(paramsQuadApplied()),                       tp.get(), SLOT(paramsQuadApplied()));
 
-    IDPtr entry(Preferences, Controller::Ptr(ctrl));
+    Controller::IDPtr entry(Controller::Preferences, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
 }

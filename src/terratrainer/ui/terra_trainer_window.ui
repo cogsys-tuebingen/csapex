@@ -75,21 +75,16 @@
      <string>Files</string>
     </property>
     <addaction name="action_LoadImage"/>
+    <addaction name="actionLoad_Settings"/>
+    <addaction name="actionSave_Settings"/>
     <addaction name="separator"/>
     <addaction name="action_LoadClassifier"/>
     <addaction name="action_SaveClassifier"/>
-    <addaction name="action_SaveClassifier_raw"/>
     <addaction name="separator"/>
+    <addaction name="action_SaveCrops"/>
     <addaction name="action_SaveROIs"/>
-    <addaction name="actionSave_ROIs"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
-   </widget>
-   <widget class="QMenu" name="edit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-    <addaction name="action_Restore"/>
    </widget>
    <widget class="QMenu" name="tools">
     <property name="title">
@@ -105,7 +100,6 @@
     <addaction name="separator"/>
    </widget>
    <addaction name="files"/>
-   <addaction name="edit"/>
    <addaction name="tools"/>
   </widget>
   <action name="action_LoadImage">
@@ -180,14 +174,24 @@
     <string>Save Classifier (raw)</string>
    </property>
   </action>
-  <action name="action_SaveROIs">
+  <action name="action_SaveCrops">
    <property name="text">
     <string>Save crops</string>
    </property>
   </action>
-  <action name="actionSave_ROIs">
+  <action name="action_SaveROIs">
    <property name="text">
     <string>Save ROIs</string>
+   </property>
+  </action>
+  <action name="actionLoad_Settings">
+   <property name="text">
+    <string>Load Settings</string>
+   </property>
+  </action>
+  <action name="actionSave_Settings">
+   <property name="text">
+    <string>Save Settings</string>
    </property>
   </action>
  </widget>

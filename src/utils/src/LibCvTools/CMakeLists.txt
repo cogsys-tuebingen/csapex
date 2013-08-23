@@ -16,10 +16,13 @@ add_library (LibCvTools SHARED
     quad_tree.hpp
     decomposition_quadtree.cpp
     decomposition_classifiers.hpp
-    extractor.cpp
     randomforest.cpp
     roi.hpp
     local_patterns.hpp
+    extractor.hpp
+    pattern_extractor.cpp
+    feature_extractor.cpp
+    extractor_params.cpp
 )
 
 target_link_libraries(LibCvTools

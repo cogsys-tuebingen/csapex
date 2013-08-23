@@ -1,10 +1,12 @@
 /// HEADER
 #include "ctrl_map_view.h"
+/// SYSTEM
 #include <QGraphicsRectItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QWidget>
+#include <QDir>
+/// COMPONENT
 #include <ui_terra_trainer_window.h>
-/// SYSTEM
 
 CtrlMapView::CtrlMapView(CMPCoreBridge::Ptr bridge) :
     overlay_(NONE),
@@ -41,6 +43,60 @@ void CtrlMapView::setupUI(Ui::TerraTrainerWindow *ui)
 
     /// INIT GUI
     initGUI();
+}
+
+void CtrlMapView::write(YAML::Emitter &emitter) const
+{
+    emitter << YAML::Key << "ROIS" << YAML::Value;
+    emitter << YAML::BeginSeq;
+    QList<QGraphicsItem*> items = map_view_scene_->selectedItems();
+    foreach(QGraphicsItem *item, items) {
+        QInteractiveItem *roi = dynamic_cast<QInteractiveItem*>(item);
+
+        if(roi != NULL) {
+            emitter << YAML::BeginMap;
+            emitter << YAML::Key << "class" << YAML::Value << roi->getClass();
+            QRectF bounding = roi->rect();
+            emitter << YAML::Key << "x" << YAML::Value << bounding.x();
+            emitter << YAML::Key << "y" << YAML::Value << bounding.y();
+            emitter << YAML::Key << "w" << YAML::Value << bounding.width();
+            emitter << YAML::Key << "h" << YAML::Value << bounding.height();
+            emitter << YAML::EndMap;
+        }
+    }
+
+    emitter << YAML::EndSeq;
+}
+
+void CtrlMapView::read(const YAML::Node &document)
+{
+    if(map_view_ == NULL) {
+        std::cerr << "Mapview wasn't initialized so far!" << std::endl;
+        return;
+    }
+
+    map_view_->setEnabled(false);
+    clearAll();
+    try {
+        const YAML::Node &colors = document["ROIS"];
+        for(YAML::Iterator it = colors.begin() ; it != colors.end(); it++) {
+            double x,y,w,h;
+            int id;
+            (*it)["class"] >> id;
+            (*it)["x"] >> x;
+            (*it)["y"] >> y;
+            (*it)["w"] >> w;
+            (*it)["h"] >> h;
+
+            changeClass(id);
+            QPointF pos(x,y);
+            addRectangle(pos, w, h);
+        }
+    } catch (YAML::Exception e) {
+        std::cerr << "Class Editor cannot read config : '" << e.what() <<"' !" << std::endl;
+    }
+
+    map_view_->setEnabled(true);
 }
 
 void CtrlMapView::imageUpdate(bool cached)
@@ -117,7 +173,7 @@ void CtrlMapView::deselectAll()
 void CtrlMapView::changeClass(int id)
 {
     current_class_id_ = id;
-    QColor color = bridge_->getColorByClass(id);
+    QColor color = bridge_->colorGet(id);
     current_class_pen_.setColor(color);
     current_class_sel_pen_.setColor(color);
     clearOverlay();
@@ -159,7 +215,7 @@ void CtrlMapView::classUpdated(int oldID, int newID)
 
 void CtrlMapView::colorUpdate(int id)
 {
-    QColor color  = bridge_->getColorByClass(id);
+    QColor color  = bridge_->colorGet(id);
     if(current_class_id_ = id) {
         current_class_pen_.setColor(color);
         current_class_sel_pen_.setColor(color);
@@ -251,10 +307,39 @@ void CtrlMapView::computeQuadFinished()
     loadOverlay(QUAD, rendered_quad_);
 }
 
-void CtrlMapView::saveROIs(QString path)
+void CtrlMapView::saveSelectedCrops(QString path)
 {
-    setCurrentSelectedROIs();
-    bridge_->saveROIs(path);
+    /// PREPARE FOLDERS
+    std::vector<int> registered_classes = bridge_->getClassIDs();
+    foreach(int id , registered_classes) {
+
+        QString id_path = path + "/" + QString::number(id);
+        QDir directory(id_path);
+        if(!directory.exists() && !QDir().mkdir(id_path)) {
+            std::cerr << "Folder cannot be created '" << id_path.toUtf8().constData() << "' !" << std::endl;
+            return;
+        }
+    }
+    std::map<int, int> counts;
+    QList<QGraphicsItem*> rects = map_view_scene_->selectedItems();
+    foreach (QGraphicsItem* item, rects) {
+        QInteractiveItem *rect = dynamic_cast<QInteractiveItem*>(item);
+
+        if(rect != NULL) {
+            /// COUNTS
+            int id = rect->getClass();
+            if(counts.find(id) != counts.end())
+                counts[id]++;
+            else
+                counts.insert(std::pair<int,int>(id, 0));
+
+            QString file_path = path + "/" + QString::number(id) + "/" + QString::number(counts[id]) + ".jpg";
+            QRectF crop_rectf = rect->rect();
+            QRect  crop_rect(crop_rectf.x(), crop_rectf.y(), crop_rectf.width(), crop_rectf.height());
+            QImage  crop = cache_->copy(crop_rect);
+            crop.save(file_path);
+        }
+    }
 }
 
 void CtrlMapView::setCurrentSelectedROIs()
@@ -375,7 +460,7 @@ void CtrlMapView::loadOverlay(const Overlay overlay, const QInteractiveScene::La
 QGraphicsRectItem *CtrlMapView::renderBox(cv_roi::TerraROI &roi)
 {
     QPen pen;
-    pen.setColor(bridge_->getColorByClass(roi.id.id));
+    pen.setColor(bridge_->colorGet(roi.id.id));
     QRectF rect(roi.roi.rect.x,
                 roi.roi.rect.y,
                 roi.roi.rect.width,

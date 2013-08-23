@@ -1,14 +1,14 @@
 #include "terra_decomposition_quadtree.h"
 
 TerraQuadtreeDecomposition::TerraQuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size,
-                                                       TerraDecomClassifierCV *_classifier) :
+                                                       TerraDecomClassifierFeature *_classifier) :
     QuadtreeDecomposition(_image, _min_region_size, _classifier)
 {
 }
 
 bool TerraQuadtreeDecomposition::iterate()
 {
-    TerraDecomClassifierCV *terra_classifier = dynamic_cast<TerraDecomClassifierCV*>(classifier_.get());
+    TerraDecomClassifierFeature *terra_classifier = dynamic_cast<TerraDecomClassifierFeature*>(classifier_.get());
 
     if(quadtree_nodes_.size() == 0) {
          if(terra_classifier->classify(quadtree_root_))
@@ -38,7 +38,7 @@ void TerraQuadtreeDecomposition::regions(std::vector<cv_roi::TerraROI> &regions)
 
 void TerraQuadtreeDecomposition::process_active_nodes()
 {
-    TerraDecomClassifierCV *terra_classifier = dynamic_cast<TerraDecomClassifierCV*>(classifier_.get());
+    TerraDecomClassifierFeature *terra_classifier = dynamic_cast<TerraDecomClassifierFeature*>(classifier_.get());
 
     CVQtNodesList list = quadtree_nodes_;
     quadtree_nodes_.clear();

@@ -2,7 +2,8 @@
 #define CV_DECOMPOSITION_CLASSIFIER_HPP
 #include <opencv2/core/core.hpp>
 #include "randomforest.h"
-#include "extractor.h"
+#include "feature_extractor.h"
+#include "pattern_extractor.h"
 
 /**
  * @brief The DecompositionClassifier class is used for classification of rectangular areas
@@ -66,12 +67,12 @@ private:
     cv::Mat grey_image_;
 };
 
-class TerraDecomClassifierCV : public DecompositionClassifier
+class TerraDecomClassifierFeature : public DecompositionClassifier
 {
     ///
 public :
-    TerraDecomClassifierCV(const float _threshold, RandomForest *_classifier, CVExtractor *_extractor,
-                           const Extractor::KeypointParams &_key, const bool _color_extension, const bool _large,
+    TerraDecomClassifierFeature(const float _threshold, RandomForest *_classifier, cv_extraction::FeatureExtractor *_extractor,
+                           const cv_extraction::KeypointParams &_key, const bool _color_extension, const bool _large,
                            const int _max_octave) :
         classifier(_classifier),
         extractor(_extractor),
@@ -85,7 +86,7 @@ public :
     {
     }
 
-    virtual ~TerraDecomClassifierCV()
+    virtual ~TerraDecomClassifierFeature()
     {
     }
 
@@ -133,23 +134,23 @@ public :
     }
 
 private:
-    RandomForest               *classifier;
-    CVExtractor                *extractor;
-    float                       threshold;
-    cv::Mat                     image;
-    float                       last_prob;
-    int                         last_id;
-    Extractor::KeypointParams   key;
-    bool                        large;
-    bool                        color;
-    int                         max_octave;
+    RandomForest                    *classifier;
+    cv_extraction::FeatureExtractor *extractor;
+    float                           threshold;
+    cv::Mat                         image;
+    float                           last_prob;
+    int                             last_id;
+    cv_extraction::KeypointParams   key;
+    bool                            large;
+    bool                            color;
+    int                             max_octave;
 };
 
 class TerraDecomClassifierPattern : public DecompositionClassifier
 {
     ///
 public :
-    TerraDecomClassifierPattern(const float _threshold, RandomForest *_classifier, PatternExtractor *_extractor) :
+    TerraDecomClassifierPattern(const float _threshold, RandomForest *_classifier, cv_extraction::PatternExtractor *_extractor) :
         classifier(_classifier),
         extractor(_extractor),
         threshold(_threshold),
@@ -190,12 +191,12 @@ public :
     }
 
 private:
-    RandomForest        *classifier;
-    PatternExtractor    *extractor;
-    float                threshold;
-    cv::Mat              image;
-    float                last_prob;
-    int                  last_id;
+    RandomForest                       *classifier;
+    cv_extraction::PatternExtractor    *extractor;
+    float                               threshold;
+    cv::Mat                             image;
+    float                               last_prob;
+    int                                 last_id;
 };
 
 #endif // DECOMPOSITION_CLASSIFIER_HPP

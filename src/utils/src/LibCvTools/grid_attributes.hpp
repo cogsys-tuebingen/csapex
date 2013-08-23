@@ -3,7 +3,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
 #include "histogram.hpp"
-#include "extractor.h"
+#include "feature_extractor.h"
+#include "pattern_extractor.h"
 #include "randomforest.h"
 /**
  * @class This can be used as an attribute to attach to a grid cell.
@@ -132,42 +133,42 @@ private:
     }
 };
 
-class AttrTerrainClassCV {
+class AttrTerrainFeature {
 public:
     struct Params {
-        CVExtractor              *extractor;
-        RandomForest             *classifier;
-        int                       max_octave;
-        bool                      color_extension;
-        bool                      large_descriptor;
-        bool                      use_max_prob;
-        Extractor::KeypointParams key;
+        cv_extraction::FeatureExtractor *extractor;
+        RandomForest                    *classifier;
+        int                             max_octave;
+        bool                            color_extension;
+        bool                            large_descriptor;
+        bool                            use_max_prob;
+        cv_extraction::KeypointParams   key;
     };
 
-    AttrTerrainClassCV()
+    AttrTerrainFeature()
     {
     }
 
-    AttrTerrainClassCV(const int _classID, const float _probability) :
+    AttrTerrainFeature(const int _classID, const float _probability) :
         classID(_classID),
         probability(_probability)
     {
     }
 
-    AttrTerrainClassCV(const AttrTerrainClassCV &t) :
+    AttrTerrainFeature(const AttrTerrainFeature &t) :
         classID(t.classID),
         probability(t.probability)
     {
     }
 
-    bool operator == (const AttrTerrainClassCV &attr) const
+    bool operator == (const AttrTerrainFeature &attr) const
     {
         return classID == attr.classID;
     }
 
-    static AttrTerrainClassCV generate(const cv::Mat &_img, const cv::Rect &_roi,  const AttrTerrainClassCV::Params &p)
+    static AttrTerrainFeature generate(const cv::Mat &_img, const cv::Rect &_roi,  const AttrTerrainFeature::Params &p)
     {
-        AttrTerrainClassCV::Params p_ = p;
+        AttrTerrainFeature::Params p_ = p;
         /// EXTRACT
         cv::Mat descriptors;
         p.extractor->extract(_img, _roi,
@@ -177,7 +178,7 @@ public:
 
         /// PREDICT
         if(descriptors.empty())
-            return AttrTerrainClassCV(-1, -1.f);
+            return AttrTerrainFeature(-1, -1.f);
 
         if(descriptors.type() != CV_32FC1) {
             descriptors.convertTo(descriptors, CV_32FC1);
@@ -194,7 +195,7 @@ public:
             p_.classifier->predictClassProb(descriptors, classID, prob);
         }
 
-        return AttrTerrainClassCV(classID, prob);
+        return AttrTerrainFeature(classID, prob);
     }
 
     int     classID;
@@ -204,7 +205,7 @@ public:
 class AttrTerrainClassPt {
 public:
     struct Params {
-        PatternExtractor   *extractor;
+        cv_extraction::PatternExtractor   *extractor;
         RandomForest       *classifier;
     };
 
@@ -218,13 +219,13 @@ public:
     {
     }
 
-    AttrTerrainClassPt(const AttrTerrainClassCV &t) :
+    AttrTerrainClassPt(const AttrTerrainFeature &t) :
         classID(t.classID),
         probability(t.probability)
     {
     }
 
-    bool operator == (const AttrTerrainClassCV &attr) const
+    bool operator == (const AttrTerrainFeature &attr) const
     {
         return classID == attr.classID;
     }

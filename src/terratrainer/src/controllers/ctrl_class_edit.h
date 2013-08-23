@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <controllers/ctrl_cmpcore_bridge.h>
+#include "controller.hpp"
 
 /// SYSTEM
 #include <QObject>
@@ -22,8 +23,13 @@ namespace Ui {
 class TerraClasses;
 }
 
+namespace YAML {
+class Emitter;
+class Node;
+}
 
-class CtrlClassEdit : public QObject
+
+class CtrlClassEdit : public QObject, public Controller
 {
     Q_OBJECT
 
@@ -34,6 +40,8 @@ public:
     virtual ~CtrlClassEdit();
 
     void setupUI(Ui::TerraClasses *class_content);
+    void write(YAML::Emitter &emitter) const;
+    void read(const YAML::Node &document);
 
 Q_SIGNALS:
     void enableDel(bool enabled);
@@ -41,18 +49,17 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void cellClicked(int row, int col);
-    void nameEdited(QString text);
-    void IDEdited(QString id);
+    void editInfo(QString text);
+    void editId(QString id);
     void accept();
     void remove();
     void colorIndex(int index);
-    void classesLoaded();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
-    CMPCoreBridge::Ptr  bridge_;
+    CMPCoreBridge::Ptr      bridge_;
 
     QTableWidget           *class_table_;
     QMainWindow            *class_window_;
@@ -60,6 +67,7 @@ private:
     QLineEdit              *class_ID_;
     QLineEdit              *class_name_;
     QComboBox              *color_combo_;
+    std::vector<QColor>     palette_;
 
     int                     current_row_;
     int                     entered_id_;
@@ -72,13 +80,12 @@ private:
     /// INTERNAL INTERACTION
     void    loadSelection();
     void    resetEdit();
-    void    newTableEntry(int classID, int color, QString info);
-    void    saveEntry();
-    void    newEntry();
-    bool    uniqueID();
+    void    tableNewEntry(int classID, int color, QString info);
+    void    tableSaveEntry();
+    bool    uniqueIDCheck();
 
     /// GRAPHICAL FUNCTIONS
-    QPixmap renderColorIcon(const int pal_index);
+    QPixmap renderColorIcon(int color);
 };
 
 #endif // CTRL_CLASS_EDIT_H

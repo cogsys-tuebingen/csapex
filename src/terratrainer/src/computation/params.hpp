@@ -2,6 +2,7 @@
 #define PARAMS_HPP
 /// SYSTEM
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 struct CMPForestParams {
     /**
@@ -28,14 +29,71 @@ struct CMPForestParams {
     int                max_trees;
     float              accurracy;
     int                termination_criteria;
+
+    void write(YAML::Emitter &emitter) const
+    {
+        emitter << YAML::Key << "FOREST" << YAML::Value;
+        emitter << YAML::BeginMap;
+        emitter << YAML::Key << "max_depth"             << YAML::Value << max_depth;
+        emitter << YAML::Key << "min_samples"           << YAML::Value << min_samples;
+        emitter << YAML::Key << "regression"            << YAML::Value << regression;
+        emitter << YAML::Key << "max_categories"        << YAML::Value << max_categories;
+        emitter << YAML::Key << "variable_importance"   << YAML::Value << variable_importance;
+        emitter << YAML::Key << "nactive_variables"     << YAML::Value << nactive_variables;
+        emitter << YAML::Key << "max_trees"             << YAML::Value << max_trees;
+        emitter << YAML::Key << "accurracy"             << YAML::Value << accurracy;
+        emitter << YAML::Key << "termination_criteria"  << YAML::Value << termination_criteria;
+        emitter << YAML::EndMap;
+    }
+
+    void read(const YAML::Node &document)
+    {
+        try {
+
+            const YAML::Node &data = document["FOREST"];
+
+            data["max_depth"]            >> max_depth;
+            data["min_samples"]          >> min_samples;
+            data["regression"]           >> regression;
+            data["max_categories"]       >> max_categories;
+            data["variable_importance"]  >> variable_importance;
+            data["nactive_variables"]    >> nactive_variables;
+            data["max_trees"]            >> max_trees;
+            data["accurracy"]            >> accurracy;
+            data["termination_criteria"] >> termination_criteria;
+
+        } catch (YAML::Exception e) {
+            std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        }
+    }
 };
 
 struct CMPGridParams {
-    CMPGridParams() : cell_height(10), cell_width(10), height(48), width(64){}
+    CMPGridParams() : cell_height(10), cell_width(10){}
     int    cell_height;
     int    cell_width;
-    int    height;
-    int    width;
+
+    void write(YAML::Emitter &emitter) const
+    {
+        emitter << YAML::Key << "GRID" << YAML::Value;
+        emitter << YAML::BeginMap;
+        emitter << YAML::Key << "cell_height" << YAML::Value << cell_height;
+        emitter << YAML::Key << "cell_width"  << YAML::Value  << cell_width;
+        emitter << YAML::EndMap;
+    }
+    void read(const YAML::Node &document)
+    {
+        try {
+
+            const YAML::Node &data = document["GRID"];
+
+            data["cell_height"] >> cell_height;
+            data["cell_width"]  >> cell_width;
+
+        } catch (YAML::Exception e) {
+            std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        }
+    }
 };
 
 struct CMPQuadParams {
@@ -43,134 +101,31 @@ struct CMPQuadParams {
     int     min_height;
     int     min_width;
     float   min_prob;
-};
 
-struct CMPKeypointParams {
-    CMPKeypointParams() : angle(0.f), scale(0.5f), octave(-1), soft_crop(true), calc_angle(false){}
-
-    float angle;
-    float scale;
-    int   octave;
-    bool  soft_crop;
-    bool  calc_angle;
-};
-
-struct CMPExtractorParams {
-    enum Type   {NONE, ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP, LBP};
-    CMPExtractorParams(const Type t = NONE, const int o = 1) :
-        type(t),
-        opp(false),
-        colorExtension(false),
-        octaves(o),
-        combine_descriptors(false),
-        use_max_prob(false){}
-
-    Type type;
-    bool opp;
-    bool colorExtension;
-    int  octaves;
-    bool combine_descriptors;
-    bool use_max_prob;
-
-};
-
-struct CMPParamsORB : public CMPExtractorParams
-{
-    CMPParamsORB() :
-        CMPExtractorParams(ORB, 8),
-        scale(1.2),
-        WTA_K(2),
-        patchSize(31),
-        edge_threshold(0){}
-
-    double scale;
-    int    WTA_K;
-    int    patchSize;
-    int    edge_threshold;
-};
-
-struct CMPParamsSURF : public CMPExtractorParams
-{
-    CMPParamsSURF() :
-        CMPExtractorParams(SURF, 4),
-        octaveLayers(3),
-        extended(true){}
-
-    int  octaveLayers;
-    bool extended;
-};
-
-struct CMPParamsSIFT : public CMPExtractorParams
-{
-    CMPParamsSIFT() :
-        CMPExtractorParams(SIFT, 3),
-        magnification(0.0),
-        normalize(true),
-        recalculateAngles(true){}
-
-    double magnification;
-    bool   normalize;
-    bool   recalculateAngles;
-};
-
-
-struct CMPParamsBRISK : public CMPExtractorParams
-{
-    CMPParamsBRISK() :
-        CMPExtractorParams(BRISK, 3),
-        thresh(30),
-        scale(1.f){}
-
-    int     thresh;
-    float   scale;
-
-};
-
-struct CMPParamsBRIEF : public CMPExtractorParams
-{
-    CMPParamsBRIEF() :
-        CMPExtractorParams(BRIEF),
-        bytes(16){}
-
-    int bytes;  /// 16 32 64
-};
-
-struct CMPParamsFREAK : public CMPExtractorParams
-{
-    CMPParamsFREAK() :
-        CMPExtractorParams(FREAK, 4),
-        orientationNormalized(true),
-        scaleNormalized(true),
-        patternScale(22.0){}
-
-    bool   orientationNormalized;
-    bool   scaleNormalized;
-    double patternScale;
-};
-
-struct CMPParamsLTP : public CMPExtractorParams
-{
-    CMPParamsLTP() :
-        CMPExtractorParams(LTP),
-        k(0.0)
+    void write(YAML::Emitter &emitter) const
     {
-        combine_descriptors = true;
+        emitter << YAML::Key << "QUAD" << YAML::Value;
+        emitter << YAML::BeginMap;
+        emitter << YAML::Key << "min_height"    << YAML::Value << min_height;
+        emitter << YAML::Key << "min_width"     << YAML::Value << min_width;
+        emitter << YAML::Key << "min_prob"      << YAML::Value << min_prob;
+        emitter << YAML::EndMap;
     }
 
-    double k;
-};
+    void read(const YAML::Node &document)
+    {
+        try {
 
-struct CMPParamsLBP : public CMPExtractorParams
-{
-    CMPParamsLBP() :
-        CMPExtractorParams(LBP){}
-};
+            const YAML::Node &data = document["GRID"];
 
-struct CMPParamsTSURF : public CMPExtractorParams
-{
-    CMPParamsTSURF() :
-        CMPExtractorParams(TSURF){}
-};
+            data["min_height"] >> min_height;
+            data["min_width"]  >> min_width;
+            data["min_prob"]   >> min_prob;
 
+        } catch (YAML::Exception e) {
+            std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        }
+    }
+};
 
 #endif // PARAMS_HPP

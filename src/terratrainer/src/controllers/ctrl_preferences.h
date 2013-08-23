@@ -2,6 +2,7 @@
 #define CTRL_PREFERENCES_H
 /// COMPONENT
 #include "ctrl_cmpcore_bridge.h"
+#include "controller.hpp"
 /// SYSTEM
 #include <QObject>
 /// DECLARATIONS
@@ -12,7 +13,7 @@ class TerraPreferences;
 }
 
 
-class CtrlPreferences : public QObject
+class CtrlPreferences : public QObject, public Controller
 {
 
     Q_OBJECT
@@ -23,6 +24,9 @@ public:
     CtrlPreferences(CMPCoreBridge::Ptr bridge);
 
     void setupUI(Ui::TerraPreferences *ui);
+    void write(YAML::Emitter &emitter) const;
+    void read (const YAML::Node &document);
+    void readClassfierLoad(const YAML::Node &document);
 
 public Q_SLOTS:
     /// ORB
@@ -118,20 +122,21 @@ private:
     enum Dirty {CLEAN, DIRTY, GRID_DIRTY, QUAD_DIRTY};
     Dirty dirty_;
 
-    CMPCoreBridge::Ptr      bridge_;
-    CMPParamsORB            orb_;
-    CMPParamsSURF           surf_;
-    CMPParamsSIFT           sift_;
-    CMPParamsBRIEF          brief_;
-    CMPParamsBRISK          brisk_;
-    CMPParamsFREAK          freak_;
-    CMPParamsLTP            ltp_;
-    CMPParamsLBP            lbp_;
-    CMPParamsTSURF          tsurf;
-    CMPKeypointParams       key_;
-    CMPForestParams         forest_;
-    CMPQuadParams           quad_;
-    CMPGridParams           grid_;
+    CMPCoreBridge::Ptr                  bridge_;
+    Ui::TerraPreferences               *ui_;
+
+    cv_extraction::ParamsORB            orb_;
+    cv_extraction::ParamsSURF           surf_;
+    cv_extraction::ParamsSIFT           sift_;
+    cv_extraction::ParamsBRIEF          brief_;
+    cv_extraction::ParamsBRISK          brisk_;
+    cv_extraction::ParamsFREAK          freak_;
+    cv_extraction::ParamsLTP            ltp_;
+    cv_extraction::ParamsLBP            lbp_;
+    cv_extraction::KeypointParams       key_;
+    CMPForestParams                     forest_;
+    CMPQuadParams                       quad_;
+    CMPGridParams                       grid_;
 };
 
 #endif // CTRL_PREFERENCES_H
