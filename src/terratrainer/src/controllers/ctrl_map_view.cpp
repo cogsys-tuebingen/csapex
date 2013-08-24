@@ -76,7 +76,12 @@ void CtrlMapView::read(const YAML::Node &document)
     }
 
     map_view_->setEnabled(false);
-    clearAll();
+
+    if(!imageUpdate(true)) {
+        std::cerr << "Couldn't load rois on empty image!" << std::endl;
+        return;
+    }
+
     try {
         const YAML::Node &colors = document["ROIS"];
         for(YAML::Iterator it = colors.begin() ; it != colors.end(); it++) {
@@ -89,7 +94,9 @@ void CtrlMapView::read(const YAML::Node &document)
             (*it)["h"] >> h;
 
             changeClass(id);
-            QPointF pos(x,y);
+            QPointF pos;
+            pos.setX(x);
+            pos.setY(y);
             addRectangle(pos, w, h);
         }
     } catch (YAML::Exception e) {
@@ -99,7 +106,7 @@ void CtrlMapView::read(const YAML::Node &document)
     map_view_->setEnabled(true);
 }
 
-void CtrlMapView::imageUpdate(bool cached)
+bool CtrlMapView::imageUpdate(bool cached)
 {
     /// CLEAR
     clearAll();
@@ -110,12 +117,13 @@ void CtrlMapView::imageUpdate(bool cached)
     }
 
     if(cache_.get() == NULL)
-        return;
+        return false;
 
 
     map_image_ = new QGraphicsPixmapItem(QPixmap::fromImage(*cache_));
     map_view_scene_->setBackground(map_image_);
     map_view_->show();
+    return true;
 }
 
 void CtrlMapView::zoom(double factor)
@@ -271,13 +279,16 @@ void CtrlMapView::compute()
     /// CLEAR THE OLD OVERLAY
     clearOverlay();
     setCurrentSelectedROIs();
-    bridge_->compute();
+    Q_EMIT computeROIS();
+
+    /// bridge_->compute();
 }
 
 void CtrlMapView::computeQuad()
 {
     if(bridge_->recalcQuad())
-        bridge_->computeQuadtree();
+        Q_EMIT computeQUAD();
+        //bridge_->computeQuadtree();
     else
         loadOverlay(QUAD, rendered_quad_);
 }
@@ -285,7 +296,8 @@ void CtrlMapView::computeQuad()
 void CtrlMapView::computeGrid()
 {
     if(bridge_->recalcGrid())
-        bridge_->computeGrid();
+        Q_EMIT computeGRID();
+        //       bridge_->computeGrid();
     else
         loadOverlay(GRID, rendered_grid_);
 }

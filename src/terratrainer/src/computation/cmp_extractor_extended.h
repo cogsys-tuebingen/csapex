@@ -4,6 +4,7 @@
 #include <utils/LibCvTools/pattern_extractor.h>
 #include <utils/LibCvTools/extractor_params.h>
 #include <roi.hpp>
+#include "cmp_state_publisher.hpp"
 
 class CMPCVExtractorExt : public cv_extraction::FeatureExtractor
 {
@@ -11,7 +12,10 @@ public:
     typedef boost::shared_ptr<CMPCVExtractorExt> Ptr;
 
     CMPCVExtractorExt();
-    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
+    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois);
+    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois,
+                       CMPStatePublisher::Ptr state);
+
 
     void setParams(const cv_extraction::ParamsORB              &params);
     void setParams(const cv_extraction::ParamsSURF             &params);
@@ -39,6 +43,9 @@ public:
     CMPPatternExtractorExt();
 
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
+    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois,
+                       CMPStatePublisher::Ptr state);
+
 
     void setParams(const cv_extraction::ParamsLBP &params);
     void setParams(const cv_extraction::ParamsLTP &params);

@@ -67,6 +67,8 @@ void CMPCore::computeGrid()
         grid_.reset(new cv_grid::GridTerra);
 
     /// PARAMETERS
+    prepareExtractor();
+
     cv_grid::AttrTerrainFeature::Params p;
     p.extractor       = cv_extractor_.get();
     p.classifier      = random_.get();
@@ -85,6 +87,7 @@ void CMPCore::computeGrid()
 
 void CMPCore::computeQuadtree()
 {
+    prepareExtractor();
     if(!random_->isTrained()) {
         std::cerr << "No trained random forest! - Therefore not compitung quad tree decomposition!" << std::endl;
         return;
@@ -138,47 +141,34 @@ void CMPCore::setExtractorParameters(cv_extraction::ExtractorParams &params)
 {
     switch(params.type) {
     case cv_extraction::ExtractorParams::ORB:
-        cv_extractor_->setParams(static_cast<cv_extraction::ParamsORB&>(params));
         ex_params_.reset(new cv_extraction::ParamsORB(static_cast<cv_extraction::ParamsORB&>(params)));
         break;
     case cv_extraction::ExtractorParams::SURF:
-        cv_extractor_->setParams(static_cast<cv_extraction::ParamsSURF&>(params));
         ex_params_.reset(new cv_extraction::ParamsSURF(static_cast<cv_extraction::ParamsSURF&>(params)));
         break;
     case cv_extraction::ExtractorParams::SIFT:
-        cv_extractor_->setParams(static_cast<cv_extraction::ParamsSIFT&>(params));
         ex_params_.reset(new cv_extraction::ParamsSIFT(static_cast<cv_extraction::ParamsSIFT&>(params)));
         break;
     case cv_extraction::ExtractorParams::BRIEF:
-        cv_extractor_->setParams(static_cast<cv_extraction::ParamsBRIEF&>(params));
         ex_params_.reset(new cv_extraction::ParamsBRIEF(static_cast<cv_extraction::ParamsBRIEF&>(params)));
         break;
     case cv_extraction::ExtractorParams::BRISK:
-        cv_extractor_->setParams(static_cast<cv_extraction::ParamsBRISK&>(params));
         ex_params_.reset(new cv_extraction::ParamsBRISK(static_cast<cv_extraction::ParamsBRISK&>(params)));
         break;
     case cv_extraction::ExtractorParams::FREAK:
-        cv_extractor_->setParams(static_cast<cv_extraction::ParamsFREAK&>(params));
         ex_params_.reset(new cv_extraction::ParamsFREAK(static_cast<cv_extraction::ParamsFREAK&>(params)));
         break;
     case cv_extraction::ExtractorParams::LBP:
-        pt_extractor_->setParams(static_cast<cv_extraction::ParamsLBP&>(params));
         ex_params_.reset(new cv_extraction::ParamsLBP(static_cast<cv_extraction::ParamsLBP&>(params)));
         break;
     case cv_extraction::ExtractorParams::LTP:
-        pt_extractor_->setParams(static_cast<cv_extraction::ParamsLTP&>(params));
         ex_params_.reset(new cv_extraction::ParamsLTP(static_cast<cv_extraction::ParamsLTP&>(params)));
         break;
     }
-
-    cv_extractor_->setKeyPointParams(keypoint_params_);
-
 }
 
 void CMPCore::setKeyPointParameters(const cv_extraction::KeypointParams &params)
 {
-    quad_decom_.reset();
-    grid_.reset();
     keypoint_params_.angle      = params.angle;
     keypoint_params_.octave     = params.octave;
     keypoint_params_.scale      = params.scale;
@@ -200,13 +190,11 @@ void CMPCore::setRandomForestParams(const CMPForestParams &params)
 
 void CMPCore::setGridParameters(const CMPGridParams &params)
 {
-    grid_.reset();
     grid_params_ = params;
 }
 
 void CMPCore::setQuadParameters(const CMPQuadParams &params)
 {
-    quad_decom_.reset();
     quad_params_ = params;
 }
 
@@ -215,35 +203,67 @@ void CMPCore::setRois(const std::vector<cv_roi::TerraROI> &rois)
     rois_ = rois;
 }
 
-void CMPCore::addClass(int classID)
+void CMPCore::setStatePublisher(CMPStatePublisher::Ptr ptr)
 {
-    classIDs_.push_back(classID);
+    state_ = ptr;
 }
 
-void CMPCore::removeClass(int classID)
+void CMPCore::unsetStatePublisher()
 {
-    std::vector<int>::iterator it = std::find(classIDs_.begin(), classIDs_.end(), classID);
-    if(it != classIDs_.end()) {
-        classIDs_.erase(it);
+    state_.reset();
+}
+
+void CMPCore::prepareExtractor()
+{
+    switch(ex_params_->type) {
+    case cv_extraction::ExtractorParams::ORB:
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsORB>(ex_params_));
+        break;
+    case cv_extraction::ExtractorParams::SURF:
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSURF>(ex_params_));
+        break;
+    case cv_extraction::ExtractorParams::SIFT:
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSIFT>(ex_params_));
+        break;
+    case cv_extraction::ExtractorParams::BRIEF:
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRIEF>(ex_params_));
+        break;
+    case cv_extraction::ExtractorParams::BRISK:
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRISK>(ex_params_));
+        break;
+    case cv_extraction::ExtractorParams::FREAK:
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsFREAK>(ex_params_));
+        break;
+    case cv_extraction::ExtractorParams::LBP:
+        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLBP>(ex_params_));
+        break;
+    case cv_extraction::ExtractorParams::LTP:
+        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLTP>(ex_params_));
+        break;
     }
-}
-
-void CMPCore::getClasses(std::vector<int> &classes)
-{
-    classes = classIDs_;
+    cv_extractor_->setKeyPointParams(keypoint_params_);
 }
 
 void CMPCore::extract()
 {
+    prepareExtractor();
+
     std::ofstream  out((work_path_ + file_extraction_).c_str());
     YAML::Emitter  emitter;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
     if(ex_params_->type != cv_extraction::ExtractorParams::LBP &&
-            ex_params_->type != cv_extraction::ExtractorParams::LTP)
-        cv_extractor_->extractToYAML(emitter, raw_image_, rois_);
-    else
-        pt_extractor_->extractToYAML(emitter, raw_image_, rois_);
+            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+        if(state_ != NULL)
+            cv_extractor_->extractToYAML(emitter, raw_image_, rois_, state_);
+        else
+            cv_extractor_->extractToYAML(emitter, raw_image_, rois_);
+    } else {
+        if(state_ != NULL)
+            pt_extractor_->extractToYAML(emitter, raw_image_, rois_, state_);
+        else
+            pt_extractor_->extractToYAML(emitter, raw_image_, rois_);
+    }
 
     emitter << YAML::EndMap;
     out << emitter.c_str();

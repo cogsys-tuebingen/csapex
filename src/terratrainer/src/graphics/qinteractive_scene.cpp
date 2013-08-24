@@ -38,6 +38,7 @@ QList<QGraphicsItem*> QInteractiveScene::interactive() const
 
 void QInteractiveScene::addInteractive(QGraphicsItem *item)
 {
+
     if(onBackground(item)) {
         interactive_.push_back(item);
         addItem(item);
@@ -105,6 +106,7 @@ void QInteractiveScene::deselectAll()
 
 bool QInteractiveScene::onBackground(QGraphicsItem *item)
 {
+    int test = this->items().size();
     return background_->sceneBoundingRect().contains(item->sceneBoundingRect());
 }
 

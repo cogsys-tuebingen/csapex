@@ -24,6 +24,7 @@ public:
 
 Q_SIGNALS:
     void zoom(double factor);
+    void loadIMAGE(QString path);
 
 public Q_SLOTS:
     void loadImage();

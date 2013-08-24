@@ -78,7 +78,7 @@ void QInteractiveItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     moveBy(offset.x(), offset.y());
 
     QInteractiveScene *s = dynamic_cast<QInteractiveScene*>(scene());
-    if(s != NULL && !s->onBackground(this)) {
+    if(s != NULL && !s->    onBackground(this)) {
         moveBy(-offset.x(), -offset.y());
         interaction_ = STOPPED;
     }

@@ -4,6 +4,7 @@
 #include "cmp_extractor_extended.h"
 #include "cmp_randomforest_extended.h"
 #include "roi.hpp"
+#include "cmp_state_publisher.hpp"
 /// SYSTEM
 #include <opencv2/opencv.hpp>
 #include <boost/shared_ptr.hpp>
@@ -54,10 +55,9 @@ public:
 
     ///     TRAINING PREPARATION
     void    setRois(const std::vector<cv_roi::TerraROI> &rois);
-    void    addClass(int classID);
-    void    removeClass(int classID);
-    void    getClasses(std::vector<int> &classes);
 
+    void    setStatePublisher(CMPStatePublisher::Ptr ptr);
+    void    unsetStatePublisher();
 
 private:
     typedef CMPCVExtractorExt::KeyPoints                      KeyPoints;
@@ -67,6 +67,7 @@ private:
     CMPCVExtractorExt::Ptr                  cv_extractor_;
     CMPPatternExtractorExt::Ptr             pt_extractor_;
     CMPRandomForestExt::Ptr                 random_;
+    CMPStatePublisher::Ptr                  state_;
 
     cv_extraction::KeypointParams           keypoint_params_;
     Params                                  ex_params_;
@@ -81,9 +82,8 @@ private:
     std::string                     file_extraction_;
     std::string                     file_forest_;
     std::vector<cv_roi::TerraROI>   rois_;
-    std::vector<int>                classIDs_;
 
-
+    void prepareExtractor();
     void extract();
     void train();
 };

@@ -30,7 +30,7 @@ void CtrlMainWindow::loadImage()
         CMPCoreBridge::Ptr bridge = boost::shared_dynamic_cast<CMPCoreBridge>(main_window_->controllers_[Controller::Bridge]);
 
         if(bridge != NULL)
-            bridge->loadImage(image_path_);
+            Q_EMIT loadIMAGE(image_path_);
     }
 }
 
@@ -265,7 +265,7 @@ void CtrlMainWindow::saveROIs()
             map_view->write(emitter);
             emitter << YAML::EndMap;
 
-            QRegExp rx (".+((\\.yaml$)");
+            QRegExp rx (".+(\\.yaml$)");
             if(!rx.exactMatch(filename))
                 filename += ".yaml";
 

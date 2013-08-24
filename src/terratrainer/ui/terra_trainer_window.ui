@@ -67,7 +67,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="files">
@@ -81,6 +81,7 @@
     <addaction name="action_LoadClassifier"/>
     <addaction name="action_SaveClassifierProject"/>
     <addaction name="separator"/>
+    <addaction name="action_LoadRois"/>
     <addaction name="action_SaveCrops"/>
     <addaction name="action_SaveROIs"/>
     <addaction name="action_SaveClassifierRaw"/>
@@ -204,6 +205,11 @@
    </property>
    <property name="toolTip">
     <string>Save classifier and class preferences.</string>
+   </property>
+  </action>
+  <action name="action_LoadRois">
+   <property name="text">
+    <string>Load rois</string>
    </property>
   </action>
  </widget>

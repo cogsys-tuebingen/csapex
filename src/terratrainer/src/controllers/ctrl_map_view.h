@@ -39,10 +39,13 @@ public:
 Q_SIGNALS:
     void zoomUpdated(double factor);
     void sizeUpdated(double size);
+    void computeROIS();
+    void computeGRID();
+    void computeQUAD();
 
 public Q_SLOTS:
     /// GRAPHICAL INTERACTION
-    void imageUpdate(bool cached = false);
+    bool imageUpdate(bool cached = false);
     void zoom(double factor);
     void size(double size);
 

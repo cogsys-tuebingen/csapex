@@ -42,13 +42,17 @@ void CtrlFactory::produceMapViewController(TerraTrainerWindow *mainWindow)
 
     CtrlMapView *ctrl = new CtrlMapView(br);
     ctrl->setupUI(ui);
-    QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()));
-    QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)));
-    QObject::connect(br.get(), SIGNAL(classUpdated(int,int)), ctrl, SLOT(classUpdated(int,int)));
-    QObject::connect(br.get(), SIGNAL(colorUpdate(int)),      ctrl, SLOT(colorUpdate(int)));
-    QObject::connect(br.get(), SIGNAL(computeFinished()),     ctrl, SLOT(computeFinished()));
-    QObject::connect(br.get(), SIGNAL(computeGridFinished()), ctrl, SLOT(computeGridFinished()));
-    QObject::connect(br.get(), SIGNAL(computeQuadFinished()), ctrl, SLOT(computeQuadFinished()));
+    QObject::connect(br.get(), SIGNAL(imageLoaded()),         ctrl, SLOT(imageUpdate()),         Qt::QueuedConnection);
+    QObject::connect(br.get(), SIGNAL(classRemoved(int)),     ctrl, SLOT(classRemoved(int)),     Qt::QueuedConnection);
+    QObject::connect(br.get(), SIGNAL(classUpdated(int,int)), ctrl, SLOT(classUpdated(int,int)), Qt::QueuedConnection);
+    QObject::connect(br.get(), SIGNAL(colorUpdate(int)),      ctrl, SLOT(colorUpdate(int)),      Qt::QueuedConnection);
+    QObject::connect(br.get(), SIGNAL(computeFinished()),     ctrl, SLOT(computeFinished()),     Qt::QueuedConnection);
+    QObject::connect(br.get(), SIGNAL(computeGridFinished()), ctrl, SLOT(computeGridFinished()), Qt::QueuedConnection);
+    QObject::connect(br.get(), SIGNAL(computeQuadFinished()), ctrl, SLOT(computeQuadFinished()), Qt::QueuedConnection);
+    QObject::connect(ctrl,     SIGNAL(computeROIS()),         br.get(), SLOT(computeROIS()),         Qt::QueuedConnection);
+    QObject::connect(ctrl,     SIGNAL(computeGRID()),         br.get(), SLOT(computeGRID()),         Qt::QueuedConnection);
+    QObject::connect(ctrl,     SIGNAL(computeQUAD()),         br.get(), SLOT(computeQUAD()),         Qt::QueuedConnection);
+
 
     Controller::IDPtr entry(Controller::MapView, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
@@ -79,8 +83,10 @@ void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
     QAction::connect(ui->action_SaveROIs,               SIGNAL(triggered()), ctrl, SLOT(saveROIs()));
     QAction::connect(ui->action_LoadSettings,           SIGNAL(triggered()), ctrl, SLOT(loadSettings()));
     QAction::connect(ui->action_SaveSettings,           SIGNAL(triggered()), ctrl, SLOT(saveSettings()));
+    QAction::connect(ui->action_LoadRois,               SIGNAL(triggered()), ctrl, SLOT(loadROIs()));
     QObject::connect(mv.get(),                          SIGNAL(zoomUpdated(double)), ctrl, SLOT(zoomUpdate(double)));
     QObject::connect(ctrl,                              SIGNAL(zoom(double)), mv.get(), SLOT(zoom(double)));
+    QObject::connect(ctrl,                              SIGNAL(loadIMAGE(QString)), br.get(), SLOT(loadIMAGE(QString)));
 
     Controller::IDPtr entry(Controller::Menu, Controller::Ptr(ctrl));
     mainWindow->controllers_.insert(entry);
@@ -129,11 +135,11 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QPushButton::connect(ctrl,          SIGNAL(uncheckDel(bool)),    tp->delBoxes,   SLOT(setChecked(bool)));
     QPushButton::connect(ctrl,          SIGNAL(uncheckSel(bool)),    tp->selBoxes,   SLOT(setChecked(bool)));
 
-    QObject::connect(br.get(),          SIGNAL(classAdded(int)),      ctrl,           SLOT(classAdded(int)));
-    QObject::connect(br.get(),          SIGNAL(classRemoved(int)),    ctrl,           SLOT(classRemoved(int)));
-    QObject::connect(br.get(),          SIGNAL(classUpdated(int,int)),ctrl,           SLOT(classUpdated(int,int)));
-    QObject::connect(br.get(),          SIGNAL(colorUpdate(int)),     ctrl,           SLOT(colorUpdate(int)));
-    QObject::connect(br.get(),          SIGNAL(imageLoaded()),        ctrl,           SLOT(image_loaded()));
+    QObject::connect(br.get(),          SIGNAL(classAdded(int)),      ctrl,           SLOT(classAdded(int)),       Qt::QueuedConnection);
+    QObject::connect(br.get(),          SIGNAL(classRemoved(int)),    ctrl,           SLOT(classRemoved(int)),     Qt::QueuedConnection);
+    QObject::connect(br.get(),          SIGNAL(classUpdated(int,int)),ctrl,           SLOT(classUpdated(int,int)), Qt::QueuedConnection);
+    QObject::connect(br.get(),          SIGNAL(colorUpdate(int)),     ctrl,           SLOT(colorUpdate(int)),      Qt::QueuedConnection);
+    QObject::connect(br.get(),          SIGNAL(imageLoaded()),        ctrl,           SLOT(image_loaded()),        Qt::QueuedConnection);
     QObject::connect(tp->addBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateAdd()));
     QObject::connect(tp->movBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateMove()));
     QObject::connect(tp->delBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateDelete()));

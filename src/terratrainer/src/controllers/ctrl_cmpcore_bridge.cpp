@@ -1,25 +1,39 @@
 #include "ctrl_cmpcore_bridge.h"
+#include <common/QtCvImageConverter.h>
+#include <boost/thread/thread.hpp>
 #include <iostream>
 #include <fstream>
-#include <ios>
-#include <common/QtCvImageConverter.h>
-#include <QFileInfo>
-#include <QDir>
-#include <computation/yaml.hpp>
+#include <QImage>
+#include <QCoreApplication>
 
 typedef QtCvImageConverter::Converter<QImage, boost::shared_ptr> QImageConverter;
 
 CMPCoreBridge::CMPCoreBridge(CMPCore::Ptr ptr) :
+    cc_(ptr),
+    publisher_(new QStatePublisher),
+    state_display_(new QStateDisplay),
     recalc_quad_(true),
-    recalc_grid_(true),
-    cc_(ptr)
+    recalc_grid_(true)
 {
+    thread_ = new QThread;
+    moveToThread(thread_);
+
+    state_display_->moveToThread(QCoreApplication::instance()->thread());
+    publisher_->registerListener(state_display_.get());
+    cc_->setStatePublisher(publisher_);
+
+    connect(this, SIGNAL(spawnBar(QString)), state_display_.get(), SLOT(spawnBar(QString)), Qt::QueuedConnection);
+    connect(this, SIGNAL(despawnBar()), state_display_.get(), SLOT(despawnBar()), Qt::QueuedConnection);
+    connect(this, SIGNAL(destroyed()), thread_, SLOT(deleteLater()));
+    connect(thread_, SIGNAL(finished()), SLOT(deleteLater()));
+
+    thread_->start(QThread::HighPriority);
+
 }
 
 void CMPCoreBridge::read(const YAML::Node &document)
 {
     try {
-
         const YAML::Node &data = document["CLASSIFIER"];
         std::ofstream out(cc_->forestPath().c_str());
 
@@ -33,7 +47,11 @@ void CMPCoreBridge::read(const YAML::Node &document)
         out << buf;
         out.close();
 
-        cc_->reload();
+        boost::mutex::scoped_try_lock lock(cc_mutex_);
+        if(lock) {
+            cc_->reload();
+            lock.unlock();
+        }
 
     } catch (YAML::Exception e) {
         std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
@@ -51,10 +69,14 @@ void CMPCoreBridge::write(YAML::Emitter &emitter) const
 
     std::stringstream buf;
     buf << in.rdbuf();
-
     emitter << YAML::Key << "CLASSIFIER" << YAML::Value;
     emitter << YAML::BeginMap;
-    cc_->write(emitter);
+
+    boost::mutex::scoped_try_lock lock(cc_mutex_);
+    if(lock) {
+        cc_->write(emitter);
+        lock.unlock();
+    }
     emitter << YAML::Key << "DATA" << YAML::Value;
     emitter << buf.str();
     emitter << YAML::EndMap;
@@ -77,8 +99,6 @@ void CMPCoreBridge::classUpdate(const int oldID, const int newID)
 
     std::pair<int, QColor> entry(newID, color);
     classes_.insert(entry);
-    cc_->removeClass(oldID);
-    cc_->addClass(newID);
 
     Q_EMIT classUpdated(oldID, newID);
 }
@@ -93,7 +113,6 @@ void CMPCoreBridge::classAdd(const int classID, const QColor &color)
 {
     std::pair<int, QColor> entry(classID, color);
     classes_.insert(entry);
-    cc_->addClass(classID);
 
     Q_EMIT classAdded(classID);
 }
@@ -129,12 +148,16 @@ int CMPCoreBridge::getClassCount()
     return classes_.size();
 }
 
-void CMPCoreBridge::loadImage(const QString path)
+void CMPCoreBridge::loadIMAGE(const QString path)
 {
-    recalc_grid_ = true;
-    recalc_quad_ = true;
-    if(cc_->loadImage(path.toUtf8().data()))
-        Q_EMIT imageLoaded();
+    boost::mutex::scoped_try_lock lock(cc_mutex_);
+    if(lock) {
+        if(cc_->loadImage(path.toUtf8().data()))
+            Q_EMIT imageLoaded();
+        lock.unlock();
+        recalc_grid_ = true;
+        recalc_quad_ = true;
+    }
 }
 
 void CMPCoreBridge::setExtractorParams(cv_extraction::ExtractorParams &params)
@@ -169,38 +192,49 @@ void CMPCoreBridge::setROIs(const std::vector<cv_roi::TerraROI> &rois)
     cc_->setRois(rois);
 }
 
-void CMPCoreBridge::compute()
+void CMPCoreBridge::computeROIS()
 {
-    cc_->compute();
-
-    recalc_quad_ = true;
-    recalc_grid_ = true;
-
+    boost::mutex::scoped_try_lock lock(cc_mutex_);
+    if(lock) {
+        Q_EMIT spawnBar("Compute ROIS");
+        cc_->compute();
+        recalc_quad_ = true;
+        recalc_grid_ = true;
+        Q_EMIT despawnBar();
+    }
     Q_EMIT computeFinished();
 }
 
-void CMPCoreBridge::computeGrid()
+void CMPCoreBridge::computeGRID()
 {
     if(recalc_grid_) {
-        if(cc_->hasComputedModel()) {
-            cc_->computeGrid();
-            recalc_grid_ = false;
-        } else {
-            std::cerr << "No valid classifier model available!" << std::endl;
+        boost::mutex::scoped_try_lock lock(cc_mutex_);
+        if(lock) {
+            if(cc_->hasComputedModel()) {
+                cc_->computeGrid();
+                recalc_grid_ = false;
+            } else {
+                std::cerr << "No valid classifier model available!" << std::endl;
+            }
+            lock.unlock();
         }
     }
 
     Q_EMIT computeGridFinished();
 }
 
-void CMPCoreBridge::computeQuadtree()
+void CMPCoreBridge::computeQUAD()
 {
     if(recalc_quad_) {
-        if(cc_->hasComputedModel()) {
-            cc_->computeQuadtree();
-            recalc_quad_ = false;
-        } else {
-            std::cerr << "No valid classifier model available!" << std::endl;
+        boost::mutex::scoped_try_lock lock(cc_mutex_);
+        if(lock) {
+            if(cc_->hasComputedModel()) {
+                cc_->computeQuadtree();
+                recalc_quad_ = false;
+            } else {
+                std::cerr << "No valid classifier model available!" << std::endl;
+            }
+            lock.unlock();
         }
     }
 
@@ -219,17 +253,24 @@ bool CMPCoreBridge::recalcQuad()
 
 void CMPCoreBridge::getGrid(std::vector<cv_roi::TerraROI> &cells)
 {
-    cc_->getGrid(cells);
+    boost::mutex::scoped_try_lock lock(cc_mutex_);
+    if(lock) {
+        cc_->getGrid(cells);
+        lock.unlock();
+    }
 }
 
 void CMPCoreBridge::getQuadtree(std::vector<cv_roi::TerraROI> &regions)
 {
-    cc_->getQuad(regions);
+    boost::mutex::scoped_try_lock lock(cc_mutex_);
+    if(lock) {
+        cc_->getQuad(regions);
+        lock.unlock();
+    }
 }
 
 void CMPCoreBridge::removeClassIndex(const int id)
 {
     std::map<int, QColor>::iterator entry = classes_.find(id);
     classes_.erase(entry);
-    cc_->removeClass(id);
 }

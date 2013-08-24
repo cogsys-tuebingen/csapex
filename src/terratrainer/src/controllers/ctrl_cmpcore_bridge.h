@@ -1,16 +1,22 @@
 #ifndef CTRL_CMPCORE_BRIDGE_H
 #define CTRL_CMPCORE_BRIDGE_H
+
+class QImage;
+
 /// COMPONENT
 #include <computation/cmp_core.h>
 #include <computation/params.hpp>
 #include <graphics/qinteractive_rect.h>
 #include "controller.hpp"
+#include "ctrl_state_publisher.h"
+#include "ctrl_state_display.h"
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <QObject>
-#include <QImage>
 #include <QColor>
+#include <QThread>
 
 class CMPCoreBridge : public QObject, public Controller
 {
@@ -31,11 +37,6 @@ public:
 
     /// GETTING IMAGES
     boost::shared_ptr<QImage> rawImage();
-
-    /// LOAD CLASSIFIER AND CLASSES
-    void   load (const std::map<int, int> &classes, const std::map<int, QString> &infos,
-                 const std::vector<QColor> &colors,
-                 const std::string forestPath);
 
     /// CLASS UPDATES AND COLOR MANAGEMENT
     void    classUpdate      (const int oldID, const int newID);
@@ -63,11 +64,12 @@ public:
     bool recalcQuad();
     void getGrid(std::vector<cv_roi::TerraROI> &cells);
     void getQuadtree(std::vector<cv_roi::TerraROI> &regions);
-    void compute            ();
-    void computeGrid        ();
-    void computeQuadtree    ();
 
-    void loadImage          (const QString path);
+public Q_SLOTS:
+    void computeROIS();
+    void computeGRID();
+    void computeQUAD();
+    void loadIMAGE  (const QString path);
 
 Q_SIGNALS:
     void imageLoaded        ();
@@ -79,23 +81,29 @@ Q_SIGNALS:
     void computeFinished();
     void computeGridFinished();
     void computeQuadFinished();
+    void spawnBar(QString title);
+    void despawnBar();
 
 
 private:
+    /// THREADING
+    QThread                *thread_;
+    mutable boost::mutex    cc_mutex_;
+    CMPCore::Ptr            cc_;
+    QStatePublisher::Ptr    publisher_;
+    QStateDisplay::Ptr      state_display_;
+
     enum Dirty{CLEAN, DIRTY, QUAD_DIRTY, GRID_DIRTY};
     Dirty dirty_;
 
     bool                      recalc_quad_;
     bool                      recalc_grid_;
 
-    CMPCore::Ptr              cc_;
-
     /// STORAGE
     std::map<int, QColor>     classes_;
 
     /// CLASS MANAGEMENT
     void removeClassIndex    (const int id);
-    //void addClassIndex       (const int id, const int colorId);
 
 };
 

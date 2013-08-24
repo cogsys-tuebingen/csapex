@@ -10,7 +10,7 @@ CMPCVExtractorExt::CMPCVExtractorExt() :
 {
 }
 
-void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois)
+void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois)
 {
     emitter << YAML::BeginSeq;
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
@@ -22,6 +22,28 @@ void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &im
         } else  {
             CMPYAML::writeDescriptorRows<uchar, int>(desc, it->id.id, emitter);
         }
+    }
+
+    emitter << YAML::EndSeq;
+}
+
+void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois,
+                                      CMPStatePublisher::Ptr state)
+{
+    std::pair<int,int> counts(0, rois.size());
+
+    emitter << YAML::BeginSeq;
+    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++, counts.first++) {
+        cv::Mat desc;
+        extract(img, it->roi.rect, key_, max_octave_, color_extension_, combine_descriptors_, desc);
+
+        if(type_ == ExtractorParams::SURF || type_ == ExtractorParams::SIFT) {
+            CMPYAML::writeDescriptorRows<float, float>(desc, it->id.id, emitter);
+        } else  {
+            CMPYAML::writeDescriptorRows<uchar, int>(desc, it->id.id, emitter);
+        }
+
+        state->publish(counts);
     }
 
     emitter << YAML::EndSeq;
@@ -98,6 +120,25 @@ void CMPPatternExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Ma
     emitter << YAML::EndSeq;
 }
 
+void CMPPatternExtractorExt::extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois,
+                   CMPStatePublisher::Ptr state)
+{
+    std::pair<int,int> counts(0, rois.size());
+
+    emitter << YAML::BeginSeq;
+    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++, counts.first++) {
+        /// CALCULATION
+        cv::Mat     roi(img, it->roi.rect);
+
+        /// COLOR EXTENSION
+        cv::Mat desc;
+        extract(roi, color_extension_, combine_descriptors_, desc);
+        CMPYAML::writeDescriptorRows<int, int>(desc, it->id.id, emitter);
+        state->publish(counts);
+    }
+    emitter << YAML::EndSeq;
+}
+
 
 void CMPPatternExtractorExt::setParams(const cv_extraction::ParamsLBP &params)
 {
@@ -114,3 +155,4 @@ void CMPPatternExtractorExt::setParams(const cv_extraction::ParamsLTP &params)
     color_extension_ = params.color_extension;
     combine_descriptors_ = params.combine_descriptors;
 }
+

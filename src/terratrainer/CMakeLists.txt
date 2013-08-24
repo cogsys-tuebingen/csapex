@@ -40,8 +40,8 @@ include_directories(
 ### QT
 include(${QT_USE_FILE})
 file(GLOB         QT_FORMS   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}                 ui/*.ui)
-file(GLOB_RECURSE QT_MOC_GUI RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/gui/*.h)
-file(GLOB_RECURSE QT_MOC_CTR RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/controllers/*.h)
+file(GLOB_RECURSE QT_MOC_GUI RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/gui/*.h src/gui/*.hpp)
+file(GLOB_RECURSE QT_MOC_CTR RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/controllers/*.h src/controllers/*.hpp)
 
 QT4_WRAP_CPP(QT_MOC_GUI  ${QT_MOC_GUI})
 QT4_WRAP_CPP(QT_MOC_CTR  ${QT_MOC_CTR})
@@ -61,6 +61,7 @@ add_executable(TerraTrainer
                 src/computation/cmp_core.cpp
                 src/computation/cmp_extractor_extended.cpp
                 src/computation/cmp_randomforest_extended.cpp
+                src/computation/cmp_state_publisher.hpp
                 src/controllers/ctrl_factory.cpp
                 src/controllers/ctrl_main_menu.cpp
                 src/controllers/ctrl_map_view.cpp
@@ -68,6 +69,8 @@ add_executable(TerraTrainer
                 src/controllers/ctrl_cmpcore_bridge.cpp
                 src/controllers/ctrl_class_edit.cpp
                 src/controllers/ctrl_preferences.cpp
+                src/controllers/ctrl_state_publisher.cpp
+                src/controllers/ctrl_state_display.cpp
                 src/gui/main.cpp
                 src/gui/terra_trainer_window.cpp
                 src/gui/terra_sub_window.cpp
