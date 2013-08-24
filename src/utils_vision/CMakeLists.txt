@@ -13,7 +13,7 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS src
-    LIBRARIES utils_vision
+    LIBRARIES utils_vision logger
     CATKIN_DEPENDS utils_plugin
 )
 

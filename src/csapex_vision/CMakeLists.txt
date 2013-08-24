@@ -57,7 +57,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include src
    LIBRARIES logger csapex_vision
-   CATKIN_DEPENDS pluginlib roscpp std_msgs csapex utils_plugin
+   CATKIN_DEPENDS pluginlib roscpp std_msgs csapex utils_plugin utils_vision
    DEPENDS Qt4 OpenCV
 )
 
