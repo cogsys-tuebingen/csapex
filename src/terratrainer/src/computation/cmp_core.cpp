@@ -272,6 +272,8 @@ void CMPCore::extract()
 
 void CMPCore::train()
 {
+    state_->publish(std::make_pair(0,0));
+
     bool trained = random_->trainFromData(work_path_ + file_extraction_);
     if(trained) {
         try {

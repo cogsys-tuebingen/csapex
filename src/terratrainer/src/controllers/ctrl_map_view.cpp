@@ -256,7 +256,8 @@ bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
         if(m->type() == QEvent::GraphicsSceneMouseRelease)
             mouse_move_ = false;
 
-        if(m->type() == QEvent::GraphicsSceneMousePress && m->button() == Qt::LeftButton || mouse_move_) {
+        if(m->type() == QEvent::GraphicsSceneMousePress && m->button() == Qt::LeftButton
+                || mouse_move_) {
             mouse_move_ = true;
             if(map_view_scene_->getMode() == QInteractiveScene::ADD){
                 addRectangle(m->scenePos(), box_size_, box_size_);
