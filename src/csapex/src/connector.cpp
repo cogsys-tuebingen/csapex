@@ -34,7 +34,7 @@ Connector::Connector(Box* parent, const std::string& uuid)
     init(parent);
 }
 
-Connector::Connector(Box *parent, int sub_id, int type)
+Connector::Connector(Box* parent, int sub_id, int type)
     : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id))
 {
     init(parent);
@@ -42,8 +42,6 @@ Connector::Connector(Box *parent, int sub_id, int type)
 
 void Connector::init(Box* parent)
 {
-    std::cerr << "make connector with uuid " << uuid_ << std::endl;
-
     setBox(parent);
 
     findParents();

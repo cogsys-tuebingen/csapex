@@ -1,6 +1,9 @@
 #ifndef DESIGN_BOARD_H
 #define DESIGN_BOARD_H
 
+/// COMPONENT
+#include <csapex/csapex_fwd.h>
+
 /// SYSTEM
 #include <QWidget>
 
@@ -12,9 +15,6 @@ class DesignBoard;
 
 namespace csapex
 {
-
-class Overlay;
-class Box;
 
 class DesignBoard : public QWidget
 {

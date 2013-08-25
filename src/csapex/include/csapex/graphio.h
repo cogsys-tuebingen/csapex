@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/graph.h>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <map>
@@ -16,7 +17,6 @@
 
 namespace csapex
 {
-class Box;
 
 class GraphIO
 {

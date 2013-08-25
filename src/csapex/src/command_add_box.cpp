@@ -26,7 +26,7 @@ AddBox::AddBox(SelectorProxy::Ptr selector, QPoint pos, Memento::Ptr state, cons
 
 bool AddBox::execute()
 {
-    box_ = BoxManager::instance().makeBox(pos_, selector_->getType(), uuid_);
+    Box::Ptr box_ = BoxManager::instance().makeBox(pos_, selector_->getType(), uuid_);
 
     if(saved_state_) {
         box_->setState(saved_state_);
@@ -48,7 +48,7 @@ bool AddBox::execute()
 
 bool AddBox::undo()
 {
-    refresh();
+    Box::Ptr box_ = Graph::root()->findBox(uuid_);
 
     saved_state_ = box_->getState();
 
@@ -58,7 +58,7 @@ bool AddBox::undo()
     } else {
         parent = Graph::root()->findSubGraph(parent_uuid_);
     }
-    parent->deleteBox(box_);
+    parent->deleteBox(box_->UUID());
 
     return true;
 }
@@ -66,14 +66,11 @@ bool AddBox::undo()
 bool AddBox::redo()
 {
     if(execute()) {
+        Box::Ptr box_ = Graph::root()->findBox(uuid_);
+
         box_->setState(saved_state_);
         return true;
     }
 
     return false;
-}
-
-void AddBox::refresh()
-{
-    box_ = Graph::root()->findBox(uuid_);
 }

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <utils_plugin/constructor.hpp>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -12,18 +13,10 @@
 #include <QMouseEvent>
 #include <typeinfo>
 #include <boost/function.hpp>
+#include <QIcon>
 
 namespace csapex
 {
-
-class Box;
-class BoxedObject;
-class Tag;
-
-namespace command
-{
-class AddBox;
-}
 
 class SelectorProxy/* : public QGraphicsView*/
 {
@@ -36,10 +29,10 @@ public:
 
 public:
     struct ProxyConstructor : public Constructor {
-        typedef boost::function<SelectorProxy* (const std::string)> Call;
+        typedef boost::function<SelectorProxy::Ptr (const std::string)> Call;
 
-        SelectorProxy* operator()() {
-            SelectorProxy* res(constructor(type));
+        SelectorProxy::Ptr operator()() {
+            SelectorProxy::Ptr res(constructor(type));
             assert(res != NULL);
             return res;
         }
@@ -56,7 +49,7 @@ public:
     static void registerProxy(SelectorProxy::Ptr prototype);
 
 public:
-    SelectorProxy(const std::string& type, BoxedObject* prototype);
+    SelectorProxy(const std::string& type, boost::shared_ptr<BoxedObject> prototype);
     virtual ~SelectorProxy();
 
     virtual SelectorProxy* clone() = 0;
@@ -70,14 +63,15 @@ public:
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)
-    virtual csapex::Box* create(const QPoint& pos, const std::string &type, const std::string& uuid);
+    virtual BoxPtr create(const QPoint& pos, const std::string &type, const std::string& uuid);
 
 protected:
-    virtual BoxedObject* makeContent() = 0;
+    virtual BoxedObjectPtr makeContent() = 0;
 
 protected:
     std::string type_;
-    BoxedObject* prototype_;
+    QIcon icon;
+    std::vector<Tag> cat;
 };
 
 template <class T>
@@ -85,14 +79,14 @@ class SelectorProxyImp : public SelectorProxy
 {
 public:
     SelectorProxyImp(const std::string& type)
-        : SelectorProxy(type, new T)
+        : SelectorProxy(type, boost::shared_ptr<BoxedObject>(new T))
     {}
 
     virtual ~SelectorProxyImp()
     {}
 
-    virtual BoxedObject* makeContent() {
-        return new T;
+    virtual boost::shared_ptr<BoxedObject> makeContent() {
+        return boost::shared_ptr<BoxedObject>(new T);
     }
 
     virtual SelectorProxy* clone() {
@@ -103,7 +97,7 @@ public:
 class SelectorProxyDynamic : public SelectorProxy
 {
 public:
-    typedef boost::function<BoxedObject*()> Make;
+    typedef boost::function< boost::shared_ptr<BoxedObject>()> Make;
 
 public:
     SelectorProxyDynamic(const std::string& name, Make c)
@@ -113,7 +107,7 @@ public:
     virtual ~SelectorProxyDynamic()
     {}
 
-    virtual BoxedObject* makeContent() {
+    virtual boost::shared_ptr<BoxedObject> makeContent() {
         return c();
     }
 

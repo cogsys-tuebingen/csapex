@@ -1,6 +1,9 @@
 #ifndef STREAM_INTERCEPTOR_H
 #define STREAM_INTERCEPTOR_H
 
+/// PROJECT
+#include <utils_plugin/singleton.hpp>
+
 /// SYSTEM
 #include <QWidget>
 #include <QMutex>
@@ -34,13 +37,13 @@ public:
     std::stringstream cin_;
 };
 
-class StreamInterceptor : public QObject
+class StreamInterceptor : public QObject, public Singleton<StreamInterceptor>
 {
     Q_OBJECT
 
-public:
-    static StreamInterceptor& instance();
+    friend class Singleton<StreamInterceptor>;
 
+public:
     std::string getCout();
     std::string getCerr();
     std::string getCin();

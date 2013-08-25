@@ -10,12 +10,6 @@ RosMessageConversion::RosMessageConversion()
 {
 }
 
-RosMessageConversion& RosMessageConversion::instance()
-{
-    static RosMessageConversion instance;
-    return instance;
-}
-
 bool RosMessageConversion::canHandle(const ros::master::TopicInfo &topic)
 {
     return converters_.find(topic.datatype) != converters_.end();

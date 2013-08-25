@@ -68,7 +68,7 @@ void GraphIO::loadSettings(YAML::Node &doc)
 
 void GraphIO::saveBoxes(YAML::Emitter &yaml)
 {
-    BOOST_FOREACH(csapex::Box* box, graph_->boxes_) {
+    BOOST_FOREACH(csapex::Box::Ptr box, graph_->boxes_) {
         box->save(yaml);
     }
 }
@@ -86,12 +86,16 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
         doc["pos"][0] >> x;
         doc["pos"][1] >> y;
 
-        Box* box = BoxManager::instance().makeBox(QPoint(x,y), type, uuid);
+        Box::Ptr box = BoxManager::instance().makeBox(QPoint(x,y), type, uuid);
 
         if(box) {
-            Memento::Ptr s = box->getState();
-            s->readYaml(doc);
-            box->setState(s);
+            try {
+                Memento::Ptr s = box->getState();
+                s->readYaml(doc);
+                box->setState(s);
+            } catch(const std::exception& e) {
+                std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
+            }
 
             graph_->addBox(box);
         }
@@ -103,7 +107,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Key << "connections";
     yaml << YAML::Value << YAML::BeginSeq; // connections seq
 
-    BOOST_FOREACH(csapex::Box* box, graph_->boxes_) {
+    BOOST_FOREACH(csapex::Box::Ptr box, graph_->boxes_) {
         if(!box->output.empty()) {
             BOOST_FOREACH(ConnectorOut* o, box->output) {
                 if(o->beginTargets() == o->endTargets()) {
@@ -140,7 +144,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
             std::string from_uuid;
             connection["uuid"] >> from_uuid;
-            Box* parent = graph_->findConnectorOwner(from_uuid);
+            Box::Ptr parent = graph_->findConnectorOwner(from_uuid);
 
             if(!parent) {
                 std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
@@ -160,7 +164,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
                     continue;
                 }
 
-                Box* target_box = graph_->findConnectorOwner(to_uuid);
+                Box::Ptr target_box = graph_->findConnectorOwner(to_uuid);
                 if(target_box == NULL) {
                     std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
                     continue;

@@ -12,12 +12,6 @@ ROSHandler::ROSHandler()
     initHandle(true);
 }
 
-ROSHandler& ROSHandler::instance()
-{
-    static ROSHandler instance;
-    return instance;
-}
-
 ROSHandler::~ROSHandler()
 {
     spinner_->stop();

@@ -9,18 +9,33 @@
 
 using namespace csapex;
 
+int BoxedObject::active_objects_ = 0;
+QMutex BoxedObject::active_mutex;
+
 BoxedObject::BoxedObject()
     : icon_(":/plugin.png"), enabled_(true)
 {
+    QMutexLocker lock(&active_mutex);
+
+    ++active_objects_;
 }
 
 BoxedObject::BoxedObject(const std::string& name)
     : name_(name), icon_(":/plugin.png"), enabled_(true)
 {
+    QMutexLocker lock(&active_mutex);
+
+    ++active_objects_;
 }
 
 BoxedObject::~BoxedObject()
 {
+    QMutexLocker lock(&active_mutex);
+
+    --active_objects_;
+    if(active_objects_ == 0) {
+        std::cout << "destroyed BoxedObject, active objects left: " << active_objects_ << std::endl;
+    }
 }
 
 bool BoxedObject::isEnabled()

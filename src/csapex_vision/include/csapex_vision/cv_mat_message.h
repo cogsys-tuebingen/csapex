@@ -15,7 +15,6 @@ struct CvMatMessage : public MessageTemplate<cv::Mat, CvMatMessage>
 {
     CvMatMessage();
     virtual ConnectionType::Ptr clone();
-    static ConnectionType::Ptr make();
 };
 
 }

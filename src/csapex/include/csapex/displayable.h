@@ -1,14 +1,15 @@
 #ifndef DISPLAYABLE_H
 #define DISPLAYABLE_H
 
+/// COMPONENT
+#include <csapex/csapex_fwd.h>
+
 /// SYSTEM
 #include <string>
 #include <QWidget>
 
 namespace csapex
 {
-
-class Box;
 
 class Displayable : public QWidget
 {

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "background_remover.h"
 #include <background_subtraction/GlobalConfig.h>
+#include <csapex/csapex_fwd.h>
 
 /// PROJECT
 #include <csapex/boxed_object.h>
@@ -18,9 +19,6 @@
 
 namespace csapex
 {
-
-class ConnectorIn;
-class ConnectorOut;
 
 class BackgroundSubtraction : public BoxedObject
 {

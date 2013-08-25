@@ -21,7 +21,7 @@ DeleteConnector::DeleteConnector(Connector *_c) :
 
 bool DeleteConnector::execute()
 {
-    Box* box_c = Graph::root()->findConnectorOwner(c_uuid);
+    Box::Ptr box_c = Graph::root()->findConnectorOwner(c_uuid);
 
     if(c->isConnected()) {
         if(in) {
@@ -58,7 +58,7 @@ bool DeleteConnector::redo()
 
 bool DeleteConnector::refresh()
 {
-    Box* box_c = Graph::root()->findConnectorOwner(c_uuid);
+    Box::Ptr box_c = Graph::root()->findConnectorOwner(c_uuid);
 
     if(!box_c) {
         return false;

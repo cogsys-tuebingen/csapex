@@ -16,7 +16,9 @@ using namespace csapex::command;
 
 MoveConnection::MoveConnection(Connector *a, Connector *b)
 {
-    from = dynamic_cast<ConnectorOut*>(a);
+    Connector* from = dynamic_cast<ConnectorOut*>(a);
+    Connector* to = NULL;
+
     if(from) {
         to = dynamic_cast<ConnectorOut*>(b);
         output = true;
@@ -32,11 +34,6 @@ MoveConnection::MoveConnection(Connector *a, Connector *b)
     from_uuid = from->UUID();
     to_uuid = to->UUID();
 
-    makeCommand();
-}
-
-void MoveConnection::makeCommand()
-{
     nested.clear();
     locked = false;
 

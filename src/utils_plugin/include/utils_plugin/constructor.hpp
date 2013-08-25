@@ -29,7 +29,7 @@ protected:
 template <class M>
 struct DefaultConstructor : public Constructor {
 
-    typedef boost::function<M*()> Call;
+    typedef boost::function<typename boost::shared_ptr<M>()> Call;
 
     typename boost::shared_ptr<M> operator()() const {
         return construct();

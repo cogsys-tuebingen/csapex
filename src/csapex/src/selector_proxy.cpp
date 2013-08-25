@@ -11,10 +11,11 @@ using namespace csapex;
 
 const SelectorProxy::Ptr SelectorProxy::NullPtr;
 
-SelectorProxy::SelectorProxy(const std::string& type, BoxedObject* prototype)
-    : type_(type), prototype_(prototype)
+SelectorProxy::SelectorProxy(const std::string& type, boost::shared_ptr<BoxedObject> prototype)
+    : type_(type)
 {
-
+    icon = prototype->getIcon();
+    cat = prototype->getTags();
 }
 
 SelectorProxy::~SelectorProxy()
@@ -69,14 +70,14 @@ void SelectorProxy::mousePressEvent(QMouseEvent* event)
     }
 }
 
-csapex::Box* SelectorProxy::create(const QPoint& pos, const std::string& type, const std::string& uuid)
+Box::Ptr SelectorProxy::create(const QPoint& pos, const std::string& type, const std::string& uuid)
 {
-    csapex::Box* object;
+    csapex::Box::Ptr object;
 
     if(type_ == "::meta") {
-        object = new csapex::BoxGroup(makeContent(), uuid);
+        object.reset(new csapex::BoxGroup(makeContent(), uuid));
     } else {
-        object = new csapex::Box(makeContent(), uuid);
+        object.reset(new csapex::Box(makeContent(), uuid));
     }
 
     object->setObjectName(uuid.c_str());
@@ -95,13 +96,11 @@ std::string SelectorProxy::getType()
 
 std::vector<Tag> SelectorProxy::getTags()
 {
-    const std::vector<Tag>& cat = prototype_->getTags();
-
     return cat;
 
 }
 
 QIcon SelectorProxy::getIcon()
 {
-    return prototype_->getIcon();
+    return icon;
 }

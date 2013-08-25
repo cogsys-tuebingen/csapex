@@ -10,7 +10,6 @@
 #define REGISTER_REMOVER(classname)\
     class classname##registerer {\
         classname##registerer() {\
-            std::cout << "registering " << #classname << std::endl;\
             background_subtraction::BackgroundRemover* i = new classname();\
             background_subtraction::BackgroundRemover::metaInstance().instances.push_back(i);\
         }\

@@ -4,9 +4,11 @@
 /// COMPONENT
 #include <csapex/selector_proxy.h>
 #include <csapex/boxed_object.h>
+#include <csapex/csapex_fwd.h>
 
 /// PROJECT
 #include <utils_plugin/plugin_manager.hpp>
+#include <utils_plugin/singleton.hpp>
 
 /// SYSTEM
 #include <QLayout>
@@ -21,7 +23,7 @@ struct InstallConstructor<csapex::BoxedObject>
 {
     template <class M, class L>
     static void installConstructor(M*, L* loader, const std::string& name) {
-        csapex::SelectorProxy::Ptr dynamic(new csapex::SelectorProxyDynamic(name, boost::bind(&M::Loader::createUnmanagedInstance, loader, name)));
+        csapex::SelectorProxy::Ptr dynamic(new csapex::SelectorProxyDynamic(name, boost::bind(&M::Loader::createInstance, loader, name)));
         csapex::SelectorProxy::registerProxy(dynamic);
     }
 };
@@ -30,22 +32,19 @@ struct InstallConstructor<csapex::BoxedObject>
 namespace csapex
 {
 
-class BoxManager : public QObject, public PluginManager<BoxedObject>
+class BoxManager : public QObject, public Singleton<BoxManager>
 {
     Q_OBJECT
 
+    friend class Singleton<BoxManager>;
     friend class DesignerIO;
     friend class GraphIO;
 
 public:
-    static BoxManager& instance() {
-        static BoxManager inst;
-        return inst;
-    }
-
     static std::string stripNamespace(const std::string& name);
 
     virtual void reload();
+    ~BoxManager();
 
 public:
     void register_box_type(SelectorProxy::ProxyConstructor provider);
@@ -53,7 +52,7 @@ public:
 
     void startPlacingMetaBox(QWidget *parent, const QPoint &offset = QPoint(0,0));
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
-    Box* makeBox(QPoint pos, const std::string& type, const std::string& uuid = "");
+    BoxPtr makeBox(QPoint pos, const std::string& type, const std::string& uuid = "");
     SelectorProxy::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
@@ -63,6 +62,11 @@ public:
     void insertAvailableBoxedObjects(QTreeWidget *tree);
 
     std::string makeUUID(const std::string& name);
+    void stop();
+
+public:
+    boost::signals2::signal<void(const std::string&)> loaded;
+
 
 protected:
     BoxManager();
@@ -77,6 +81,8 @@ protected:
 
     std::map<Tag, std::vector<SelectorProxy::Ptr> > map;
     std::set<Tag> tags;
+
+    PluginManager<BoxedObject>* manager_;
 };
 
 }

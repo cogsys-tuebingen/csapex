@@ -12,13 +12,6 @@
 
 using namespace csapex;
 
-StreamInterceptor& StreamInterceptor::instance()
-{
-    static StreamInterceptor instance;
-    return instance;
-}
-
-
 
 std::string StreamInterceptor::getCout()
 {

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/box.h>
+#include <csapex/boxed_object.h>
 #include <csapex/graph.h>
 
 namespace csapex
@@ -15,7 +16,7 @@ public:
     static const QString MIME;
 
 public:
-    BoxGroup(BoxedObject* content, const std::string& uuid = "", QWidget* parent = 0);
+    BoxGroup(BoxedObject::Ptr content, const std::string& uuid = "", QWidget* parent = 0);
 
     void dragEnterEvent(QDragEnterEvent* e);
     void dragLeaveEvent(QDragLeaveEvent* e);

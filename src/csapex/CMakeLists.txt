@@ -44,7 +44,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex
-   CATKIN_DEPENDS pluginlib roscpp
+   CATKIN_DEPENDS pluginlib roscpp utils_plugin
    DEPENDS Qt4
 )
 
@@ -52,6 +52,9 @@ catkin_package(
 ## Build ##
 ###########
 
+include_directories(include
+    ${catkin_INCLUDE_DIRS}
+)
 
 ##### EVALUATION
 add_library(csapex SHARED
@@ -111,7 +114,3 @@ target_link_libraries(csapex
 add_executable(csapex_node
     src/csapex.cpp)
 target_link_libraries(csapex_node csapex)
-
-add_executable(csapex_testsuite
-    src/csapex_testsuite.cpp)
-target_link_libraries(csapex_testsuite csapex)

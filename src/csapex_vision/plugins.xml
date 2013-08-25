@@ -1,4 +1,4 @@
-<library path="libcsapex_vision">
+<library path="libcsapex_vision_plugin">
 <class type="csapex::RegisterPlugin" base_class_type="csapex::CorePlugin">
   <description>none yet</description>
 </class>
@@ -19,7 +19,6 @@
 <class type="csapex::ImageCombinerRobustMatch" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
-
 <class type="csapex::ImageProviderBag" base_class_type="csapex::MessageProvider">
   <description>none yet</description>
 </class>
@@ -32,5 +31,4 @@
 <class type="csapex::ImageProviderMov" base_class_type="csapex::MessageProvider">
   <description>none yet</description>
 </class>
-
 </library>

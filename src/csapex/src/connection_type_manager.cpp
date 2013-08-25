@@ -7,12 +7,6 @@ ConnectionTypeManager::ConnectionTypeManager()
 {
 }
 
-ConnectionTypeManager& ConnectionTypeManager::instance()
-{
-    static ConnectionTypeManager instance;
-    return instance;
-}
-
 ConnectionType::Ptr ConnectionTypeManager::createMessage(const std::string& type)
 {
     if(instance().classes.empty()) {

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/connection.h>
 #include <csapex/command_meta.h>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <QObject>
@@ -12,13 +13,8 @@
 namespace csapex {
 
 namespace command {
-class AddBox;
-class AddConnection;
-class DeleteConnection;
-class DeleteBox;
 }
 
-class Box;
 
 class Graph : public QObject
 {
@@ -55,8 +51,8 @@ public:
     bool canRedo();
 
     Graph::Ptr findSubGraph(const std::string& uuid);
-    Box* findBox(const std::string& uuid, const std::string &ns = "");
-    Box* findConnectorOwner(const std::string &uuid, const std::string &ns = "");
+    BoxPtr findBox(const std::string& uuid, const std::string &ns = "");
+    BoxPtr findConnectorOwner(const std::string &uuid, const std::string &ns = "");
     Connector* findConnector(const std::string &uuid, const std::string &ns = "");
 
     bool handleConnectionSelection(int id, bool add);
@@ -97,14 +93,14 @@ private:
     command::Meta::Ptr moveSelectionToBoxCommands(const std::string& box_uuid);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
-    void addBox(Box* box);
-    void deleteBox(Box* box);
+    void addBox(BoxPtr box);
+    void deleteBox(const std::string &uuid);
 
     bool addConnection(Connection::Ptr connection);
     void deleteConnection(Connection::Ptr connection);
 
 protected:
-    std::vector<Box*> boxes_;
+    std::vector<BoxPtr> boxes_;
     std::vector<Connector*> connectors_;
     std::vector<Connection::Ptr> connections;
 

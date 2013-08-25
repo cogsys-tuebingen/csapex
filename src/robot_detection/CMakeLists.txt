@@ -174,7 +174,6 @@ add_library(tracker
 
 ##### EVALUATION
 add_library(evaluation_plugin
-    src/evaluator/filter_display_features.cpp
     src/evaluator/histogram_viewer_widget.cpp
     src/evaluator/image_combiner_cluster_match.cpp
     src/evaluator/image_combiner_cluster_match_em.cpp

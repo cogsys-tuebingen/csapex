@@ -1,9 +1,4 @@
 <library path="libevaluation_plugin">
-
-  <class type="robot_detection::FilterDisplayFeatures" base_class_type="csapex::BoxedObject">
-    <description>none yet</description>
-  </class>
-
   <class type="robot_detection::ImageCombinerClusterMatch" base_class_type="csapex::BoxedObject">
     <description>none yet</description>
   </class>

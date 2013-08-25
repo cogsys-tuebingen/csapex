@@ -4,6 +4,9 @@
 /// COMPONENT
 #include <csapex/command.h>
 
+/// PROJECT
+#include <utils_plugin/singleton.hpp>
+
 /// SYSTEM
 #include <deque>
 #include <QObject>
@@ -11,16 +14,13 @@
 namespace csapex
 {
 
-class CommandDispatcher : public QObject
+class CommandDispatcher : public QObject, public Singleton<CommandDispatcher>
 {
     Q_OBJECT
 
-public:
-    static CommandDispatcher& instance() {
-        static CommandDispatcher inst;
-        return inst;
-    }
+    friend class Singleton<CommandDispatcher>;
 
+public:
     static void execute(Command::Ptr command);
     static void executeLater(Command::Ptr command);
     static void executeLater();

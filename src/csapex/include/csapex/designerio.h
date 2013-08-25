@@ -1,6 +1,9 @@
 #ifndef DESIGNERIO_H
 #define DESIGNERIO_H
 
+/// COMPONENT
+#include <csapex/csapex_fwd.h>
+
 /// SYSTEM
 #include <map>
 #include <string>
@@ -13,8 +16,6 @@
 
 namespace csapex
 {
-class Box;
-class Designer;
 
 class DesignerIO
 {

@@ -27,6 +27,7 @@ using namespace csapex;
 const QString Box::MIME = "csapex/box";
 const QString Box::MIME_MOVE = "csapex/box/move";
 
+const Box::Ptr Box::NullPtr;
 
 void Box::State::writeYaml(YAML::Emitter &out) const
 {
@@ -78,7 +79,7 @@ void Box::State::readYaml(const YAML::Node &node)
 }
 
 
-Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
+Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), state(new State(this)), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0)
 {
     ui->setupUi(this);
@@ -115,7 +116,7 @@ Box::Box(BoxedObject* content, const std::string& uuid, QWidget* parent)
     connect(ui->minimizebtn, SIGNAL(toggled(bool)), this, SLOT(minimizeBox(bool)));
     connect(ui->killbtn, SIGNAL(clicked()), this, SLOT(killContent()));
 
-    connect(content, SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
+    connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
 }
 
 void Box::makeThread()
@@ -264,6 +265,7 @@ void Box::addInput(ConnectorIn* in)
 void Box::addOutput(ConnectorOut* out)
 {
     assert(out);
+
     out->setParent(NULL);
     assert(ui);
     assert(ui->output_layout);
@@ -406,7 +408,7 @@ void Box::init(const QPoint& pos)
     content_->fill(ui->content);
 }
 
-BoxedObject* Box::getContent()
+BoxedObject::Ptr Box::getContent()
 {
     return content_;
 }
@@ -415,8 +417,9 @@ Box::~Box()
 {
     stop();
 
+    // TODO: remove from graph!!!!
+
     delete worker_;
-    delete content_;
 }
 
 bool Box::eventFilter(QObject* o, QEvent* e)
@@ -610,7 +613,7 @@ QPixmap Box::makePixmap(const std::string& label)
 
 void Box::deleteBox()
 {
-    Command::Ptr cmd(new command::DeleteBox(this));
+    Command::Ptr cmd(new command::DeleteBox(UUID()));
     CommandDispatcher::execute(cmd);
 }
 

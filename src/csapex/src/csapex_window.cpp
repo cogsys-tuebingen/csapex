@@ -31,7 +31,7 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::EvaluationWindow), init_(false)
+    : QMainWindow(parent), ui(new Ui::EvaluationWindow), core_plugin_manager("csapex::CorePlugin"), init_(false)
 {
     Graph::Ptr graph = Graph::root();
 
@@ -221,6 +221,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     event->accept();
 
     StreamInterceptor::instance().stop();
+    BoxManager::instance().stop();
 }
 
 void CsApexWindow::showStatusMessage(const std::string &msg)
@@ -235,11 +236,10 @@ void CsApexWindow::init()
 
         statusBar()->showMessage("loading core plugins");
 
-        PluginManager<CorePlugin> core("csapex::CorePlugin");
-        core.reload();
+        core_plugin_manager.reload();
 
         typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-        foreach(PAIR cp, core.availableClasses()) {
+        foreach(PAIR cp, core_plugin_manager.availableClasses()) {
             CorePlugin::Ptr plugin = cp.second();
 
             plugin->init();

@@ -16,8 +16,6 @@ void OpenCvBackgroundRemover::make()
     if(subtractor)
         delete subtractor;
 
-    std::cout << "threshold: " << difference_threshold << std::endl;
-
     subtractor = new cv::BackgroundSubtractorMOG2(history, difference_threshold);
 }
 

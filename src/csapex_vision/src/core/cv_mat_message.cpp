@@ -15,8 +15,3 @@ ConnectionType::Ptr CvMatMessage::clone() {
 
     return new_msg;
 }
-
-ConnectionType::Ptr CvMatMessage::make(){
-    Ptr new_msg(new CvMatMessage);
-    return new_msg;
-}

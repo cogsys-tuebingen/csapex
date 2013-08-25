@@ -10,6 +10,7 @@ public:
     typedef boost::shared_ptr<CorePlugin> Ptr;
 
 public:
+    virtual ~CorePlugin();
     virtual void init() = 0;
 
     void setName(const std::string& name);

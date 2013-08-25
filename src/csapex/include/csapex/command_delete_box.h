@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "command.h"
 #include "memento.h"
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <QPoint>
@@ -12,25 +13,19 @@
 namespace csapex
 {
 
-class Box;
-
 namespace command
 {
 class DeleteBox : public Command
 {
 public:
-    DeleteBox(Box* box);
+    DeleteBox(const std::string &uuid);
 
 protected:
     bool execute();
     bool undo();
     bool redo();
 
-    void refresh();
-
 protected:
-    Box* box;
-
     QWidget* parent;
     QPoint pos;
 

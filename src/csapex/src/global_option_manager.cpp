@@ -14,19 +14,19 @@
 using namespace csapex;
 
 GlobalOptionManager::GlobalOptionManager()
-    : PluginManager<csapex::GlobalOption>("csapex::GlobalOption")
+    : manager("csapex::GlobalOption")
 {
 }
 
 void GlobalOptionManager::insert(QBoxLayout* parent)
 {
     if(options.empty()) {
-        if(!pluginsLoaded()) {
-            reload();
+        if(!manager.pluginsLoaded()) {
+            manager.reload();
         }
 
-        typedef const std::pair<std::string, Constructor> PAIR;
-        BOOST_FOREACH(PAIR& pair, availableClasses()) {
+        typedef const std::pair<std::string, DefaultConstructor<GlobalOption> > PAIR;
+        BOOST_FOREACH(PAIR& pair, manager.availableClasses()) {
             options.push_back(pair.second.construct());
         }
     }

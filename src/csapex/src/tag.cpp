@@ -11,12 +11,6 @@ Tag::Manager::Manager()
 
 }
 
-Tag::Manager& Tag::Manager::instance()
-{
-    static Tag::Manager instance;
-    return instance;
-}
-
 Tag::Tag(const std::string &name)
     : name_(name)
 {

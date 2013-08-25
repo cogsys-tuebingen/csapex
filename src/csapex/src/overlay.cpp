@@ -269,7 +269,7 @@ void Overlay::drawConnector(Connector *c)
 
     QFontMetrics metrics(font);
 
-    int dx = 80;
+    int dx = 160;
     int dy = lines * metrics.height();
 
     QRectF rect(c->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
@@ -399,12 +399,10 @@ void Overlay::paintEvent(QPaintEvent*)
     }
 
     foreach(const Connection::Ptr& connection, graph_->connections) {
-//        if(connection->from()->isEnabled() && connection->to()->isEnabled()) {
-            drawConnection(*connection);
-//        }
+        drawConnection(*connection);
     }
 
-    foreach (Box* box, graph_->boxes_) {
+    foreach (Box::Ptr box, graph_->boxes_) {
         if(box->getContent()->isError()) {
             QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
 

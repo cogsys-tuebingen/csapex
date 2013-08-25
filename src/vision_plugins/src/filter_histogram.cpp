@@ -31,6 +31,8 @@ Histogram::Histogram() :
     colors_.push_back(cv_histogram::COLOR_CYAN);
     colors_.push_back(cv_histogram::COLOR_RED);
 
+    /// FIXME: this should be done in a CorePlugin!!!!
+    Tag::createIfNotExists("Analysis");
     addTag(Tag::get("Analysis"));
 }
 

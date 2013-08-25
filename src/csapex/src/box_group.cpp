@@ -1,5 +1,6 @@
 /// HEADER
 #include <csapex/box_group.h>
+#include <csapex/boxed_object.h>
 
 /// COMPONENT
 #include "ui_box.h"
@@ -11,7 +12,7 @@ using namespace csapex;
 
 const QString BoxGroup::MIME = "csapex/boxmeta";
 
-BoxGroup::BoxGroup(BoxedObject *content, const std::string &uuid, QWidget *parent)
+BoxGroup::BoxGroup(BoxedObject::Ptr content, const std::string &uuid, QWidget *parent)
     : Box(content, uuid, parent), sub_graph(new Graph)
 {
     setAcceptDrops(true);

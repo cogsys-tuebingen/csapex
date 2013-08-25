@@ -63,25 +63,27 @@ void Graph::setRoot(Graph::Ptr root)
     root_ = root;
 }
 
-void Graph::addBox(Box *box)
+void Graph::addBox(Box::Ptr box)
 {
     boxes_.push_back(box);
 
-    QObject::connect(box, SIGNAL(moveSelectionToBox(Box*)), this, SLOT(moveSelectionToBox(Box*)));
+    QObject::connect(box.get(), SIGNAL(moveSelectionToBox(Box*)), this, SLOT(moveSelectionToBox(Box*)));
 
-    Q_EMIT boxAdded(box);
+    Q_EMIT boxAdded(box.get());
 }
 
-void Graph::deleteBox(Box *box)
+void Graph::deleteBox(const std::string& uuid)
 {
+    Box::Ptr box = Graph::root()->findBox(uuid);
+
     box->stop();
 
-    std::vector<Box*>::iterator it = std::find(boxes_.begin(), boxes_.end(), box);
+    std::vector<Box::Ptr>::iterator it = std::find(boxes_.begin(), boxes_.end(), box);
     if(it != boxes_.end()) {
         boxes_.erase(it);
     }
 
-    Q_EMIT boxDeleted(box);
+    Q_EMIT boxDeleted(box.get());
 
     box->deleteLater();
 }
@@ -98,10 +100,10 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
     std::map<Box*, std::string> box2uuid;
 
 
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         // iterate selected boxes
         if(b->isSelected()) {
-            selected.push_back(b);
+            selected.push_back(b.get());
             std::cerr << "selected: " << b->UUID() << std::endl;
 
             // move this box top the sub graph
@@ -109,16 +111,16 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
             Memento::Ptr state = b->getState();
 
             std::string uuid = box_uuid + namespace_separator + b->UUID();
-            box2uuid[b] = uuid;
+            box2uuid[b.get()] = uuid;
 
-            meta->add(Command::Ptr(new command::DeleteBox(b)));
+            meta->add(Command::Ptr(new command::DeleteBox(b->UUID())));
             meta->add(Command::Ptr(new command::AddBox(selector, b->pos(), state, box_uuid, uuid)));
         }
     }
 
     int next_connector_sub_id = 0;
 
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
             // iterate all connections for this selected box
             // connections leading to a selected box will be kept
@@ -213,9 +215,7 @@ void Graph::moveSelectionToBox(Box *box)
 
 bool Graph::addConnection(Connection::Ptr connection)
 {
-    std::cerr << "try to make connection between " << connection->from()->UUID() << " and " << connection->to()->UUID() << std::endl;
     if(connection->from()->tryConnect(connection->to())) {
-        std::cerr << "make connection between " << connection->from()->UUID() << " and " << connection->to()->UUID() << std::endl;
         connections.push_back(connection);
 
         return true;
@@ -247,9 +247,11 @@ bool Graph::isDirty()
 
 void Graph::stop()
 {
-    foreach(Box* box, boxes_) {
+    foreach(Box::Ptr box, boxes_) {
         box->stop();
     }
+
+    boxes_.clear();
 }
 
 
@@ -278,8 +280,8 @@ void Graph::clear()
 {
     command::Meta::Ptr clear(new command::Meta);
 
-    foreach(Box* box, boxes_) {
-        Command::Ptr cmd(new command::DeleteBox(box));
+    foreach(Box::Ptr box, boxes_) {
+        Command::Ptr cmd(new command::DeleteBox(box->UUID()));
         clear->add(cmd);
     }
 
@@ -290,19 +292,19 @@ void Graph::clear()
 
 Graph::Ptr Graph::findSubGraph(const std::string& uuid)
 {
-    Box* bg = findBox(uuid);
+    Box::Ptr bg = findBox(uuid);
     assert(bg->hasSubGraph());
 
     return bg->getSubGraph();
 }
 
-Box* Graph::findBox(const std::string &uuid, const std::string& ns)
+Box::Ptr Graph::findBox(const std::string &uuid, const std::string& ns)
 {
     if(uuid.find(namespace_separator) != uuid.npos && ns.empty()) {
         return findBox(uuid, uuid);
     }
 
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         if(b->UUID() == uuid) {
             return b;
         }
@@ -312,16 +314,16 @@ Box* Graph::findBox(const std::string &uuid, const std::string& ns)
         std::string parent = ns.substr(0, ns.find(namespace_separator));
         std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
 
-        Box* meta = findBox(parent);
+        Box::Ptr meta = findBox(parent);
         assert(meta->hasSubGraph());
 
         return meta->getSubGraph()->findBox(uuid, rest);
     }
 
-    return NULL;
+    return Box::NullPtr;
 }
 
-Box* Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
+Box::Ptr Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
 {
     if(uuid.find(namespace_separator) != uuid.npos && ns.empty()) {
         return findConnectorOwner(uuid, uuid);
@@ -331,13 +333,13 @@ Box* Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
         std::string parent = ns.substr(0, ns.find(namespace_separator));
         std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
 
-        Box* meta = findBox(parent);
+        Box::Ptr meta = findBox(parent);
         assert(meta->hasSubGraph());
 
         return meta->getSubGraph()->findConnectorOwner(uuid, rest);
     }
 
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         if(b->getInput(uuid)) {
             return b;
         }
@@ -348,7 +350,7 @@ Box* Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
 
     std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
 
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         std::cerr << "box: " << b->UUID() << "\n";
         std::cerr << "inputs: " << "\n";
         foreach(ConnectorIn* in, b->input) {
@@ -362,12 +364,12 @@ Box* Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
 
     std::cerr << std::flush;
 
-    return NULL;
+    return Box::NullPtr;
 }
 
 Connector* Graph::findConnector(const std::string &uuid, const std::string &ns)
 {
-    Box* owner = findConnectorOwner(uuid, ns);
+    Box::Ptr owner = findConnectorOwner(uuid, ns);
     assert(owner);
 
     Connector* result = NULL;
@@ -536,9 +538,9 @@ void Graph::deleteSelectedBoxes()
 {
     command::Meta::Ptr meta(new command::Meta);
 
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteBox(b)));
+            meta->add(Command::Ptr(new command::DeleteBox(b->UUID())));
         }
     }
 
@@ -551,7 +553,7 @@ void Graph::groupSelectedBoxes()
 {
     // TODO: grouping does not work recursively, because groups cannot yet be deleted / created via commands
     QPoint tl(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
             QPoint pos = b->pos();
             if(pos.x() < tl.x()) {
@@ -586,7 +588,7 @@ int Graph::noSelectedBoxes()
 {
     int c = 0;
 
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
             ++c;
         }
@@ -598,8 +600,8 @@ int Graph::noSelectedBoxes()
 void Graph::boxMoved(Box *box, int dx, int dy)
 {
     if(box->isSelected() && box->hasFocus()) {
-        foreach(Box* b, boxes_) {
-            if(b != box && b->isSelected()) {
+        foreach(Box::Ptr b, boxes_) {
+            if(b.get() != box && b->isSelected()) {
                 b->move(b->x() + dx, b->y() + dy);
             }
         }
@@ -609,7 +611,7 @@ void Graph::boxMoved(Box *box, int dx, int dy)
 
 void Graph::deselectBoxes()
 {
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
             b->setSelected(false);
         }
@@ -629,7 +631,7 @@ void Graph::selectBox(Box *box, bool add)
 
 void Graph::tick()
 {
-    foreach(Box* b, boxes_) {
+    foreach(Box::Ptr b, boxes_) {
         b->tick();
     }
     foreach(const Connection::Ptr& connection, connections) {

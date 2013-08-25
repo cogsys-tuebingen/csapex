@@ -1,6 +1,9 @@
 #ifndef DESIGNER_H
 #define DESIGNER_H
 
+/// COMPONENT
+#include <csapex/csapex_fwd.h>
+
 /// SYSTEM
 #include <QWidget>
 #include <QTreeWidget>
@@ -13,9 +16,6 @@ class Designer;
 
 namespace csapex
 {
-
-class DesignBoard;
-class Box;
 
 class Designer : public QWidget
 {

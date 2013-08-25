@@ -5,23 +5,24 @@
 #include <csapex/memento.h>
 #include <csapex/displayable.h>
 #include <csapex/tag.h>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <string>
 #include <QLayout>
 #include <QObject>
 #include <QIcon>
+#include <QMutex>
 
 namespace csapex
 {
 
-class Box;
-class ConnectorIn;
-class ConnectorOut;
-
 class BoxedObject : public Displayable
 {
     Q_OBJECT
+
+public:
+    typedef boost::shared_ptr<BoxedObject> Ptr;
 
 protected:
     BoxedObject();
@@ -80,6 +81,9 @@ protected:
     QIcon icon_;
 
     bool enabled_;
+
+    static int active_objects_;
+    static QMutex active_mutex;
 };
 
 }

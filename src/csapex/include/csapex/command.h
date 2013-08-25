@@ -1,16 +1,15 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+/// COMPONENT
+#include <csapex/csapex_fwd.h>
+
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace csapex
 {
-
-namespace command {
-class Meta;
-}
 
 class Command
 {

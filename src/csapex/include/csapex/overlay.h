@@ -1,18 +1,15 @@
 #ifndef OVERLAY_H
 #define OVERLAY_H
 
+/// COMPONENT
+#include <csapex/csapex_fwd.h>
+
 /// SYSTEM
 #include <QWidget>
 #include <QPainter>
 
 namespace csapex
 {
-
-/// FORWARD DECLARATION
-class Connector;
-class ConnectorOut;
-class ConnectorIn;
-class Connection;
 
 class Overlay : public QWidget
 {

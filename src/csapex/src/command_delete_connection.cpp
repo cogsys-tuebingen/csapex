@@ -55,8 +55,8 @@ bool DeleteConnection::redo()
 
 bool DeleteConnection::refresh()
 {
-    Box* from_box = Graph::root()->findConnectorOwner(from_uuid);
-    Box* to_box = Graph::root()->findConnectorOwner(to_uuid);
+    Box::Ptr from_box = Graph::root()->findConnectorOwner(from_uuid);
+    Box::Ptr to_box = Graph::root()->findConnectorOwner(to_uuid);
 
     from = NULL;
     to = NULL;

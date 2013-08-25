@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(utils_vision)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 find_package(catkin REQUIRED COMPONENTS cv_bridge utils utils_plugin)
 
 find_package(OpenCV REQUIRED)

@@ -7,6 +7,7 @@
 #include <csapex_vision/cv_mat_message.h>
 #include <csapex/qt_helper.hpp>
 #include <utils/LibCvTools/perspective_transform.h>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <QPushButton>
@@ -15,8 +16,6 @@
 
 namespace csapex
 {
-
-class ConnectorOut;
 
 class VirtualCamera : public BoxedObject
 {

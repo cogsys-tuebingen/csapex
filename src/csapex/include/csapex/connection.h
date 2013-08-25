@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/selectable.h>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -11,11 +12,6 @@
 
 namespace csapex
 {
-
-/// FORWARD DECLARATION
-class Connector;
-class ConnectorOut;
-class ConnectorIn;
 
 class Connection : public QObject, public Selectable {
 

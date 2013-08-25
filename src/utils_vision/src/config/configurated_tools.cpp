@@ -15,8 +15,6 @@ ConfiguratedTools::ConfiguratedTools(const Config& config)
     : extractor(ExtractorFactory::create(config.getKeypointType(), config.getDescriptorType())),
       matcher(new Matcher(extractor->binary())), scorer(MatchScorerFactory::create(*matcher))
 {
-    INFO("made tools");
-
     assert(extractor);
     assert(extractor->valid());
     assert(matcher);
@@ -37,8 +35,8 @@ ConfiguratedTools::Ptr ConfiguratedTools::create(const Config& config)
             tool_chache_hash = hash;
 
         } catch(std::exception& e) {
-            ERROR("failed to construct tools");
-            exit(EXIT_FAILURE);
+            ERROR("failed to construct tools: " << e.what());
+            std::abort();
         }
     }
 

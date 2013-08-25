@@ -17,7 +17,7 @@
 namespace csapex
 {
 
-class GlobalOptionManager : public GlobalOption, PluginManager<GlobalOption>
+class GlobalOptionManager : public GlobalOption
 {
     Q_OBJECT
 
@@ -28,6 +28,8 @@ public:
 
 private:
     std::vector<GlobalOption::Ptr> options;
+
+    PluginManager<GlobalOption> manager;
 };
 
 }

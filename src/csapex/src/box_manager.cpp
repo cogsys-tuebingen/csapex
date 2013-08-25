@@ -19,8 +19,9 @@
 using namespace csapex;
 
 BoxManager::BoxManager()
-    : PluginManager<csapex::BoxedObject>("csapex::BoxedObject")
+    : manager_(new PluginManager<BoxedObject> ("csapex::BoxedObject"))
 {
+    manager_->loaded.connect(loaded);
 }
 
 namespace {
@@ -31,9 +32,22 @@ bool compare (SelectorProxy::Ptr a, SelectorProxy::Ptr b) {
 }
 }
 
+void BoxManager::stop()
+{
+    if(manager_) {
+        delete manager_;
+        manager_ = NULL;
+    }
+}
+
+BoxManager::~BoxManager()
+{
+    stop();
+}
+
 void BoxManager::reload()
 {
-    PluginManager<BoxedObject>::reload();
+    manager_->reload();
 
     Tag::createIfNotExists("General");
 
@@ -55,8 +69,8 @@ void BoxManager::reload()
 
 void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 {
-    if(!pluginsLoaded()) {
-        reload();
+    if(!manager_->pluginsLoaded()) {
+        manager_->reload();
     }
 
     foreach(const Tag& tag, tags) {
@@ -79,20 +93,20 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 
 }
 
-void BoxManager::insertAvailableBoxedObjects(QTreeWidget* menu)
+void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
 {
-    if(!pluginsLoaded()) {
-        reload();
+    if(!manager_->pluginsLoaded()) {
+        manager_->reload();
     }
 
-    menu->setHeaderHidden(true);
-    menu->setDragEnabled(true);
+    tree->setHeaderHidden(true);
+    tree->setDragEnabled(true);
 
     foreach(const Tag& tag, tags) {
 
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
         submenu->setText(0, tag.getName().c_str());
-        menu->addTopLevelItem(submenu);
+        tree->addTopLevelItem(submenu);
 
         foreach(const SelectorProxy::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
@@ -117,7 +131,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* menu)
     meta->addChild(new_meta);
     meta->setText(0, "Meta Boxes");
 
-    menu->addTopLevelItem(meta);
+    tree->addTopLevelItem(meta);
 }
 
 void BoxManager::register_box_type(SelectorProxy::Ptr provider)
@@ -149,7 +163,7 @@ std::string BoxManager::stripNamespace(const std::string &name)
     return name.substr(from != name.npos ? from + 2 : 0);
 }
 
-Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::string& uuid)
+Box::Ptr BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::string& uuid)
 {
     std::string type = target_type;
     if(type.find_first_of(" ") != type.npos) {
@@ -166,8 +180,7 @@ Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::
             if(uuid_.empty()) {
                 uuid_ = makeUUID(type);
             }
-            Box* box = p->create(pos, type, uuid);
-            return box;
+            return p->create(pos, type, uuid);
         }
     }
 
@@ -183,8 +196,7 @@ Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::
                 uuid_ = makeUUID(type);
             }
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
-            Box* box = p->create(pos, p->getType(), uuid);
-            return box;
+            return p->create(pos, p->getType(), uuid);
         }
     }
 
@@ -193,7 +205,7 @@ Box* BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::
         std::cerr << p->getType() << '\n';
     }
     std::cerr << std::endl;
-    return NULL;
+    return Box::NullPtr;
 }
 
 SelectorProxy::Ptr BoxManager::getSelector(const std::string &type)

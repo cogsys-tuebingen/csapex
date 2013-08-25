@@ -5,13 +5,13 @@
 #include <csapex/command.h>
 #include <csapex/memento.h>
 #include <csapex/selector_proxy.h>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <QWidget>
 
 namespace csapex
 {
-class Box;
 
 namespace command
 {
@@ -25,16 +25,12 @@ protected:
     bool undo();
     bool redo();
 
-    void refresh();
-
 private:
     SelectorProxy::Ptr selector_;
     QPoint pos_;
 
     std::string parent_uuid_;
     std::string uuid_;
-
-    csapex::Box* box_;
 
     Memento::Ptr saved_state_;
 };

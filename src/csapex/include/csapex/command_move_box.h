@@ -3,14 +3,13 @@
 
 /// COMPONENT
 #include "command.h"
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <QPoint>
 
 namespace csapex
 {
-
-class Box;
 
 namespace command
 {
@@ -25,8 +24,6 @@ protected:
     bool redo();
 
 protected:
-    Box* box;
-
     QPoint from;
     QPoint to;
 

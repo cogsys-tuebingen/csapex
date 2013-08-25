@@ -1,0 +1,13 @@
+<library path="libcsapex_vision_features_plugin">
+<class type="csapex::RegisterVisionFeaturePlugin" base_class_type="csapex::CorePlugin">
+  <description>none yet</description>
+</class>
+
+<class type="csapex::ExtractFeatures" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::DisplayFeatures" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+
+</library>

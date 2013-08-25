@@ -3,18 +3,10 @@
 
 /// COMPONENT
 #include "connector.h"
+#include <csapex/csapex_fwd.h>
 
 namespace csapex
 {
-
-/// FORWARD DECLARATION
-class ConnectorIn;
-
-namespace command {
-class AddConnection;
-class MoveConnection;
-class DeleteConnection;
-}
 
 class ConnectorOut : public virtual Connector
 {

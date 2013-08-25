@@ -7,10 +7,6 @@
 namespace csapex
 {
 
-class Connector;
-class ConnectorIn;
-class ConnectorOut;
-
 namespace command
 {
 

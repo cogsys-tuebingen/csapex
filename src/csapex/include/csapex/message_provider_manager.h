@@ -5,6 +5,7 @@
 #include <csapex/message_provider.h>
 
 /// PROJECT
+#include <utils_plugin/singleton.hpp>
 #include <utils_plugin/plugin_manager.hpp>
 
 /// SYSTEM
@@ -14,15 +15,16 @@
 
 namespace csapex {
 
-class MessageProviderManager : public PluginManager<MessageProvider>
+class MessageProviderManager : public Singleton<MessageProviderManager>
 {
+    friend class Singleton<MessageProviderManager>;
+
 public:
     typedef boost::function<MessageProvider::Ptr()>  Constructor;
 
 public:
     static void registerMessageProvider(const std::string& type, Constructor constructor);
     static MessageProvider::Ptr createMessageProvider(const std::string& path);
-    static MessageProviderManager& instance();
 
     std::string supportedTypes();
 
@@ -36,6 +38,8 @@ private:
     std::map<std::string, Constructor> classes;
 
     std::string supported_types_;
+
+    PluginManager<MessageProvider> manager_;
 };
 
 }

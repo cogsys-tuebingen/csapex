@@ -5,6 +5,9 @@
 #include <csapex_core_plugins/ros_handler.h>
 #include <csapex/connection_type.h>
 
+/// PROJECT
+#include <utils_plugin/singleton.hpp>
+
 /// SYSTEM
 #include <ros/master.h>
 #include <ros/subscriber.h>
@@ -16,8 +19,10 @@ namespace csapex
 
 class ConnectorOut;
 
-class RosMessageConversion
+class RosMessageConversion : public Singleton<RosMessageConversion>
 {
+    friend class Singleton<RosMessageConversion>;
+
 public:
     class Convertor
     {
@@ -74,8 +79,6 @@ private:
     RosMessageConversion();
 
 public:
-    static RosMessageConversion& instance();
-
     static void registerConversion(Convertor::Ptr c);
 
     bool canHandle(const ros::master::TopicInfo &topic);

@@ -1,6 +1,9 @@
 #ifndef TAG_H
 #define TAG_H
 
+/// PROJECT
+#include <utils_plugin/singleton.hpp>
+
 /// SYSTEM
 #include <string>
 #include <map>
@@ -11,9 +14,10 @@ namespace csapex
 class Tag
 {
 private:
-    class Manager {
+    class Manager : public Singleton<Manager> {
+        friend class Singleton<Manager>;
+
     public:
-        static Manager& instance();
         const Tag get(const std::string& name) const;
         bool exists(const std::string& name) const;
         void create(const std::string &name);

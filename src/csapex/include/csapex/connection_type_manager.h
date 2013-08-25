@@ -4,6 +4,9 @@
 /// COMPONENT
 #include <csapex/connection_type.h>
 
+/// PROJECT
+#include <utils_plugin/singleton.hpp>
+
 /// SYSTEM
 #include <map>
 #include <string>
@@ -11,15 +14,16 @@
 
 namespace csapex {
 
-class ConnectionTypeManager
+class ConnectionTypeManager : public Singleton<ConnectionTypeManager>
 {
+    friend class Singleton<ConnectionTypeManager>;
+
 public:
     typedef boost::function<ConnectionType::Ptr()>  Constructor;
 
 public:
     static void registerMessage(const std::string& type, Constructor constructor);
     static ConnectionType::Ptr createMessage(const std::string& type);
-    static ConnectionTypeManager& instance();
 
 private:
     ConnectionTypeManager();

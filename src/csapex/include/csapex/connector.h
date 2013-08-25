@@ -5,12 +5,11 @@
 #include <csapex/connection_type.h>
 #include <csapex/command.h>
 #include <csapex/displayable.h>
+#include <csapex/csapex_fwd.h>
 
 /// FORWARDS DECLARATION
 namespace csapex
 {
-class Box;
-class DesignBoard;
 
 class Connector : public Displayable
 {

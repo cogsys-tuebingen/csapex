@@ -3,6 +3,11 @@
 
 using namespace csapex;
 
+CorePlugin::~CorePlugin()
+{
+
+}
+
 void CorePlugin::setName(const std::string& name)
 {
     name_ = name;

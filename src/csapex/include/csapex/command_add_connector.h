@@ -3,12 +3,10 @@
 
 /// COMPONENT
 #include "command.h"
+#include <csapex/csapex_fwd.h>
 
 namespace csapex
 {
-class Box;
-class Connector;
-
 namespace command
 {
 
@@ -24,7 +22,7 @@ protected:
     void refresh();
 
 private:
-    Box* box;
+    BoxPtr box;
     bool input;
 
     Connector* c;

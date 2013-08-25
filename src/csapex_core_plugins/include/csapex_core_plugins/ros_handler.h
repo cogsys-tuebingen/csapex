@@ -1,18 +1,21 @@
 #ifndef ROS_HANDLER_H
 #define ROS_HANDLER_H
 
+/// PROJECT
+#include <utils_plugin/singleton.hpp>
+
 /// SYSTEM
-#include <boost/noncopyable.hpp>
 #include <ros/ros.h>
 #include <QFuture>
 
 namespace csapex
 {
 
-class ROSHandler : public boost::noncopyable
+class ROSHandler : public Singleton<ROSHandler>
 {
+    friend class Singleton<ROSHandler>;
+
 public:
-    static ROSHandler& instance();
     ~ROSHandler();
 
     boost::shared_ptr<ros::NodeHandle> nh();

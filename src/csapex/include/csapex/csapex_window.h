@@ -1,6 +1,13 @@
 #ifndef EVALUATION_WINDOW_H
 #define EVALUATION_WINDOW_H
 
+/// COMPONENT
+#include <csapex/core_plugin.h>
+#include <csapex/csapex_fwd.h>
+
+/// PROJECT
+#include <utils_plugin/plugin_manager.hpp>
+
 /// SYSTEM
 #include <QMainWindow>
 #include <QTimer>
@@ -12,8 +19,6 @@ class EvaluationWindow;
 
 namespace csapex
 {
-
-class Designer;
 
 /**
  * @brief The EvaluationWindow class provides the window for the evaluator program
@@ -66,6 +71,7 @@ private:
     std::string current_config_;
 
     Designer* designer_;
+    PluginManager<CorePlugin> core_plugin_manager;
 
     QTimer timer;
 

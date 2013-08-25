@@ -15,6 +15,7 @@ catkin_package(
 )
 
 add_library(utils_plugin
+    include/utils_plugin/singleton.hpp
     include/utils_plugin/plugin_manager.hpp
     include/utils_plugin/constructor.hpp
 )

@@ -3,14 +3,11 @@
 
 /// COMPONENT
 #include "command.h"
+#include <csapex/csapex_fwd.h>
 
 namespace csapex
 {
 
-class Connector;
-class ConnectorIn;
-class ConnectorOut;
-class Box;
 
 namespace command
 {

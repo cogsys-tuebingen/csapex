@@ -2,10 +2,12 @@
 #define BOX_H
 
 /// COMPONENT
+#include <csapex/boxed_object.h>
 #include <csapex/memento.h>
 #include <csapex/command.h>
 #include <csapex/selectable.h>
 #include <csapex/graph.h>
+#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -22,12 +24,6 @@ class Box;
 
 namespace csapex
 {
-
-class Box;
-class BoxedObject;
-class Connector;
-class ConnectorIn;
-class ConnectorOut;
 
 struct BoxWorker : public QObject
 {
@@ -55,6 +51,10 @@ class Box : public QWidget, public Selectable
     friend class GraphIO;
     friend class Graph;
     friend class BoxWorker;
+
+public:
+    typedef boost::shared_ptr<Box> Ptr;
+    static const Ptr NullPtr;
 
 public:
     struct MoveOffset : public QObjectUserData {
@@ -96,7 +96,7 @@ public:
 
 
 public:
-    Box(BoxedObject* content, const std::string& uuid = "", QWidget* parent = 0);
+    Box(BoxedObject::Ptr content, const std::string& uuid = "", QWidget* parent = 0);
     virtual ~Box();
 
     void stop();
@@ -116,7 +116,7 @@ public:
     void keyPressEvent(QKeyEvent * e);
 
     virtual void init(const QPoint& pos);
-    BoxedObject* getContent();
+    BoxedObject::Ptr getContent();
 
     void addInput(ConnectorIn* in);
     void addOutput(ConnectorOut* out);
@@ -206,7 +206,7 @@ protected:
 
     Graph *graph_;
     State::Ptr state;
-    BoxedObject* content_;
+    BoxedObject::Ptr content_;
 
     std::vector<ConnectorIn*> input;
     std::vector<ConnectorOut*> output;  

@@ -15,7 +15,7 @@ using namespace csapex;
 using namespace command;
 
 AddConnector::AddConnector(const std::string &box_uuid, bool input, const std::string &uuid, bool forward)
-    : box(NULL), input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid), forward(forward)
+    : input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid), forward(forward)
 {
 
 }
@@ -28,9 +28,9 @@ bool AddConnector::execute()
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_IN, box->nextInputId()) : c_uuid;
         ConnectorIn* in;
         if(forward) {
-            in = new ConnectorForward(box, true, uuid);
+            in = new ConnectorForward(box.get(), true, uuid);
         } else {
-            in = new ConnectorIn(box, uuid);
+            in = new ConnectorIn(box.get(), uuid);
         }
         c = in;
         box->addInput(in);
@@ -38,9 +38,9 @@ bool AddConnector::execute()
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_OUT, box->nextOutputId()) : c_uuid;
         ConnectorOut* out;
         if(forward) {
-            out = new ConnectorForward(box, false, uuid);
+            out = new ConnectorForward(box.get(), false, uuid);
         } else {
-            out = new ConnectorOut(box, uuid);
+            out = new ConnectorOut(box.get(), uuid);
         }
         c = out;
         box->addOutput(out);

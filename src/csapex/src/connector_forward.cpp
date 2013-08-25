@@ -3,13 +3,13 @@
 
 using namespace csapex;
 
-ConnectorForward::ConnectorForward(Box *parent, bool primary_function_is_input, const std::string &uuid)
+ConnectorForward::ConnectorForward(Box* parent, bool primary_function_is_input, const std::string &uuid)
     : Connector(parent, uuid), ConnectorIn(parent, uuid), ConnectorOut(parent, uuid), primary_function_is_input(primary_function_is_input)
 {
 
 }
 
-ConnectorForward::ConnectorForward(Box *parent, bool primary_function_is_input, int sub_id)
+ConnectorForward::ConnectorForward(Box* parent, bool primary_function_is_input, int sub_id)
     : Connector(parent, sub_id, TYPE_MISC), ConnectorIn(parent, sub_id), ConnectorOut(parent, sub_id), primary_function_is_input(primary_function_is_input)
 {
 

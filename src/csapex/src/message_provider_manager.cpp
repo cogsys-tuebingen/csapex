@@ -8,33 +8,31 @@ namespace bfs = boost::filesystem;
 using namespace csapex;
 
 MessageProviderManager::MessageProviderManager()
-    : PluginManager<csapex::MessageProvider>("csapex::MessageProvider")
+    : manager_("csapex::MessageProvider")
 {
-}
-
-MessageProviderManager& MessageProviderManager::instance()
-{
-    static MessageProviderManager instance;
-    return instance;
 }
 
 void MessageProviderManager::fullReload()
 {
-    instance().reload();
+    instance().manager_.reload();
 
     classes.clear();
 
     supported_types_ = "";
 
     typedef std::pair<std::string, PluginManager<csapex::MessageProvider>::Constructor> PAIR;
-    foreach(PAIR pair, availableClasses()) {
-        MessageProvider::Ptr prov(pair.second());
-        foreach(const std::string& extension, prov->getExtensions()) {
-            std::string ext = extension;
-            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-            registerMessageProvider(ext, pair.second);
+    foreach(PAIR pair, manager_.availableClasses()) {
+        try {
+            MessageProvider::Ptr prov(pair.second());
+            foreach(const std::string& extension, prov->getExtensions()) {
+                std::string ext = extension;
+                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                registerMessageProvider(ext, pair.second);
 
-            supported_types_ += std::string("*") + ext + " ";
+                supported_types_ += std::string("*") + ext + " ";
+            }
+        } catch(const std::exception& e) {
+            std::cerr << "cannot load message provider " << pair.first << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
         }
     }
 
@@ -48,7 +46,7 @@ MessageProvider::Ptr MessageProviderManager::createMessageProvider(const std::st
 
 MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const std::string& path)
 {
-    if(!pluginsLoaded()) {
+    if(!manager_.pluginsLoaded()) {
         fullReload();
     }
 
@@ -79,7 +77,7 @@ void MessageProviderManager::registerMessageProvider(const std::string &type, Co
 
 std::string MessageProviderManager::supportedTypes()
 {
-    if(!pluginsLoaded()) {
+    if(!manager_.pluginsLoaded()) {
         fullReload();
     }
 

@@ -8,9 +8,11 @@ include(${QT_USE_FILE})
 
 set(CMAKE_BUILD_TYPE Debug)
 
-file(GLOB_RECURSE MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h include/*.h)
+file(GLOB_RECURSE MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/*.h)
+file(GLOB_RECURSE MOC_PLUG RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_core_resources.qrc)
-QT4_WRAP_CPP(MOC ${MOC})
+QT4_WRAP_CPP(MOC_CORE ${MOC_CORE})
+QT4_WRAP_CPP(MOC_PLUG ${MOC_PLUG})
 
 ###################################
 ## catkin specific configuration ##
@@ -22,7 +24,7 @@ QT4_WRAP_CPP(MOC ${MOC})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES
+  LIBRARIES csapex_core_lib
   CATKIN_DEPENDS csapex
 #  DEPENDS
 )
@@ -35,6 +37,18 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
 
+add_library(csapex_core_lib
+    src/ros_handler.cpp
+    src/ros_message_conversion.cpp
+    src/string_message.cpp
+    ${QT_RESOURCES}
+    ${MOC_CORE}
+)
+
+target_link_libraries(csapex_core_lib
+    ${catkin_LIBRARIES}
+)
+
 add_library(csapex_core_plugins
     src/double_buffer.cpp
     src/export_cout.cpp
@@ -42,16 +56,13 @@ add_library(csapex_core_plugins
     src/file_importer.cpp
     src/import_cin.cpp
     src/import_ros.cpp
-    src/ros_handler.cpp
-    src/ros_message_conversion.cpp
     src/global_option_panel.cpp
     src/text_input.cpp
-    src/string_message.cpp
     src/register_core_plugins.cpp
     ${QT_RESOURCES}
-    ${MOC}
+    ${MOC_PLUG}
 )
 
-target_link_libraries(csapex_core_plugins
+target_link_libraries(csapex_core_plugins csapex_core_lib
     ${catkin_LIBRARIES}
 )

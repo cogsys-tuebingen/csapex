@@ -7,14 +7,15 @@
 
 using namespace csapex::command;
 
-MoveBox::MoveBox(Box *box, QPoint from, QPoint to)
-    : box(box), from(from), to(to)
+MoveBox::MoveBox(Box* box, QPoint from, QPoint to)
+    : from(from), to(to)
 {
     uuid = box->UUID();
 }
 
 bool MoveBox::execute()
 {
+    Box::Ptr box = Graph::root()->findBox(uuid);
     box->move(to);
 
     return true;
@@ -22,7 +23,7 @@ bool MoveBox::execute()
 
 bool MoveBox::undo()
 {
-    box = Graph::root()->findBox(uuid);
+    Box::Ptr box = Graph::root()->findBox(uuid);
     box->move(from);
 
     return true;
@@ -30,6 +31,5 @@ bool MoveBox::undo()
 
 bool MoveBox::redo()
 {
-    box = Graph::root()->findBox(uuid);
     return execute();
 }
