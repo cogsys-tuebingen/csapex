@@ -37,7 +37,7 @@ private:
     }
 
 private:
-    boost::shared_ptr<csapex::ExtractorManager> manager;
+    csapex::ExtractorManager& manager;
 };
 
 #endif // EXTRACTOR_FACTORY_H

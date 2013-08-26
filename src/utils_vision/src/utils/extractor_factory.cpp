@@ -5,7 +5,7 @@
 #include "extractor_manager.h"
 
 ExtractorFactory::ExtractorFactory()
-    : manager(new csapex::ExtractorManager)
+    : manager(csapex::ExtractorManager::instance())
 {
 }
 
@@ -13,7 +13,7 @@ Extractor::Ptr ExtractorFactory::create(const std::string& keypoint, const std::
 {
     Extractor::Ptr e(new Extractor(0));
 
-    instance().manager->getInitializer(keypoint, descriptor)->init(e.get());
+    instance().manager.getInitializer(keypoint, descriptor)->init(e.get());
 
     return e;
 }

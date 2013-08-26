@@ -7,6 +7,7 @@
 /// PROJECT
 #include <utils_plugin/plugin_manager.hpp>
 #include <utils_plugin/constructor.hpp>
+#include <utils_plugin/singleton.hpp>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
@@ -52,15 +53,13 @@ public:
         }\
         template <class T>\
         static void registerKeypointConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {\
-            ExtractorManager manager;\
-            manager.registerKeypointConstructor(T::name, boost::bind(&T::keypoint, _1, _2)); \
+            ExtractorManager::instance().registerKeypointConstructor(T::name, boost::bind(&T::keypoint, _1, _2)); \
         }\
         template <class T>\
         static void registerKeypointConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {}\
         template <class T>\
         static void registerDescriptorConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {\
-            ExtractorManager manager;\
-            manager.registerDescriptorConstructor(T::name, boost::bind(&T::descriptor, _1)); \
+            ExtractorManager::instance().registerDescriptorConstructor(T::name, boost::bind(&T::descriptor, _1)); \
         }\
         template <class T>\
         static void registerDescriptorConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {}\
@@ -76,8 +75,10 @@ namespace csapex
  * @brief The ExtractorManager class manages all instances of feature detectors and descriptor extractors.
  *        It functions like a proxy to the underlying singleton classes.
  */
-class ExtractorManager
+class ExtractorManager : public Singleton<ExtractorManager>
 {
+    friend class Singleton<ExtractorManager>;
+
 public:
     /**
      * @brief The ExtractorInitializer
@@ -111,12 +112,13 @@ public:
     typedef PluginManager<Extractor, KeypointInitializer> KeypointInitializerManager;
     typedef PluginManager<Extractor, DescriptorInitializer> DescriptorInitializerManager;
 
-public:
+private:
     /**
      * @brief ExtractorManager functions like a proxy to the underlying singleton classes.
      */
     ExtractorManager();
 
+public:
     /**
      * @brief ~ExtractorManager
      */

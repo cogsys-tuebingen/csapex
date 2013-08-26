@@ -53,9 +53,19 @@ public:
     Config getConfig();
 
 protected:
+    struct Manager {
+        Manager();
+        boost::signals2::connection tools_updater;
+        boost::signals2::signal<void(const Config&)> g_tools_replaced;
+
+        ConfiguratedTools::Ptr latest_tools;
+    };
+
+    static Manager& instance();
+
     static void replaceTools(const Config& cfg);
-    static boost::signals2::connection tools_updater;
-    static boost::signals2::signal<void(const Config&)> tools_replaced;
+
+    boost::signals2::signal<void(const Config&)> tools_replaced;
 
 protected:
     /**
@@ -68,7 +78,6 @@ protected:
     ConfiguratedTools::Ptr tools;
 
 private:
-    static ConfiguratedTools::Ptr latest_tools;
     boost::signals2::connection connection;
 };
 

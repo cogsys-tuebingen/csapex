@@ -93,7 +93,7 @@ void ExtractFeatures::fill(QBoxLayout* layout)
         out_des->setLabel("Descriptors");
         box_->addOutput(out_des);
 
-        ExtractorManager manager;
+        ExtractorManager& manager = ExtractorManager::instance();
 
         selection_key = new QComboBox;
         typedef std::pair<std::string, ExtractorManager::ExtractorInitializer> Pair;

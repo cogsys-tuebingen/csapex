@@ -42,7 +42,7 @@ void OptionKeypointDescriptor::insert(QBoxLayout* layout)
 {
     selection = new QComboBox;
 
-    ExtractorManager manager;
+    ExtractorManager& manager = ExtractorManager::instance();
     typedef std::pair<std::string, ExtractorManager::ExtractorInitializer> Pair;
     BOOST_FOREACH(Pair fc, manager.descriptorExtractors()) {
         selection->addItem(fc.second.getType().c_str());
