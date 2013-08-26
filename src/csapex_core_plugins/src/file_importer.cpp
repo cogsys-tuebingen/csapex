@@ -43,7 +43,7 @@ void FileImporter::State::readYaml(const YAML::Node& node) {
     last_path_ = QString::fromUtf8(path.c_str());
     parent->import(last_path_);
 
-    if(node.FindValue("sub_state")) {
+    if(node.FindValue("sub_state") && parent->provider_) {
         const YAML::Node& sub_state_node = node["sub_state"];
         sub_state = parent->provider_->getState();
         sub_state->readYaml(sub_state_node);
