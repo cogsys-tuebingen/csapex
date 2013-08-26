@@ -116,8 +116,6 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
                 std::cout << pair.first << ":\t" << pair.second.toString().toStdString() << '\n';
             }
             std::cout << std::endl;
-
-            e->accept();
         }
     }
 

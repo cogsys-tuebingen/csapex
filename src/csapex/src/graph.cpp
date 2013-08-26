@@ -65,6 +65,8 @@ void Graph::setRoot(Graph::Ptr root)
 
 void Graph::addBox(Box::Ptr box)
 {
+    assert(!box->UUID().empty());
+
     boxes_.push_back(box);
 
     QObject::connect(box.get(), SIGNAL(moveSelectionToBox(Box*)), this, SLOT(moveSelectionToBox(Box*)));

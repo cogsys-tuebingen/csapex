@@ -717,12 +717,17 @@ void Box::setState(Memento::Ptr memento)
     boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
     assert(m.get());
 
+    std::string old_uuid = state->uuid_;
     std::string old_label = state->label_;
 
     *state = *m;
 
     if(state->label_.empty()) {
         state->label_ = old_label;
+    }
+
+    if(state->uuid_.empty()) {
+        state->uuid_ = old_uuid;
     }
 
     state->parent = this;
