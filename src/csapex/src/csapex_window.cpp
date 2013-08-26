@@ -56,6 +56,8 @@ CsApexWindow::CsApexWindow(QWidget *parent)
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), graph.get(),  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), graph.get(),  SLOT(redo()));
     QObject::connect(ui->actionClear, SIGNAL(triggered()), graph.get(),  SLOT(clear()));
+    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph.get(),  SLOT(clearSelection()));
+    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph.get(),  SLOT(selectAll()));
 
     QObject::connect(graph.get(), SIGNAL(boxAdded(Box*)), designer_, SLOT(addBox(Box*)));
     QObject::connect(graph.get(), SIGNAL(boxDeleted(Box*)), designer_, SLOT(deleteBox(Box*)));

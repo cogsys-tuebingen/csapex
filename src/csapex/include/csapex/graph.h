@@ -72,7 +72,8 @@ public Q_SLOTS:
     void redo();
     void clear();
     void tick();
-
+    void clearSelection();
+    void selectAll();
 
     void toggleBoxSelection(Box* box);
     void boxMoved(Box* box, int dx, int dy);

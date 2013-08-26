@@ -43,6 +43,8 @@ void DragIO::doRegisterDropHandler(HandlerDrop::Ptr h)
 
 void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 {
+    std::cout << "warning: drag enter: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
+
     if(e->mimeData()->hasFormat(Box::MIME)) {
         e->acceptProposedAction();
 
@@ -56,7 +58,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
         e->acceptProposedAction();
 
     } else {
-        std::cout << "warning: drag enter: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
+//        std::cout << "warning: drag enter: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
         if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
@@ -99,17 +101,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
         std::string cmd = v[Qt::UserRole].toString().toStdString();
 
-        if(cmd == Box::MIME.toStdString()) {
-            e->accept();
-
-            std::string type = v[Qt::UserRole+1].toString().toStdString();
-            if(type == BoxGroup::MIME.toStdString()) {
-                BoxManager::instance().startPlacingMetaBox(src, QPoint(0,0));
-            } else {
-                BoxManager::instance().startPlacingBox(src, type, QPoint(0,0));
-            }
-
-        } else {
+        if(cmd != Box::MIME.toStdString()) {
             std::cout << "warning: data is ";
             typedef const std::pair<int, QVariant> PAIR;
             foreach(PAIR& pair, v.toStdMap()) {
@@ -123,6 +115,8 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
 void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 {
+    std::cout << "warning: drag move: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
+
     if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
@@ -162,6 +156,8 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 
 void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 {
+    std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
+
     Graph::Ptr graph_ = Graph::root();
 
     if(e->mimeData()->hasFormat(Box::MIME)) {

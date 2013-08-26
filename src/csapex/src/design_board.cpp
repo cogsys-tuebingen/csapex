@@ -322,3 +322,8 @@ void DesignBoard::dropEvent(QDropEvent* e)
 {
     drag_io.dropEvent(this, overlay, e);
 }
+
+void DesignBoard::dragLeaveEvent(QDragLeaveEvent *e)
+{
+    std::cout << "warning: drag leave" << std::endl;
+}

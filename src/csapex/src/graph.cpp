@@ -578,6 +578,20 @@ void Graph::groupSelectedBoxes()
 }
 
 
+void Graph::selectAll()
+{
+    foreach(Box::Ptr b, boxes_) {
+        b->setSelected(true);
+    }
+}
+
+void Graph::clearSelection()
+{
+    foreach(Box::Ptr b, boxes_) {
+        b->setSelected(false);
+    }
+}
+
 void Graph::toggleBoxSelection(Box *box)
 {
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
