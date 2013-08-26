@@ -18,6 +18,7 @@
 #include <QCheckBox>
 #include <QDirIterator>
 #include <pluginlib/class_list_macros.h>
+#include <QUrl>
 
 PLUGINLIB_EXPORT_CLASS(csapex::FileImporter, csapex::BoxedObject)
 
@@ -63,8 +64,25 @@ void FileImporter::tick()
     }
 }
 
-bool FileImporter::doImport(const QString& path)
+bool FileImporter::doImport(const QString& _path)
 {
+    QString path;
+    QFile file(path);
+    if(file.exists()) {
+        path = _path;
+    } else {
+        QFile urlfile(QUrl(_path).toLocalFile());
+
+        if(urlfile.exists()) {
+            path = urlfile.fileName();
+        } else {
+            setError(true, std::string("the file ") + _path.toStdString() + " couldn't be opened");
+            return false;
+        }
+    }
+
+    setError(false);
+
     state.last_path_ = path;
     provider_ = MessageProviderManager::createMessageProvider(path.toStdString());
     provider_->load(path.toStdString());

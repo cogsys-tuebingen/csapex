@@ -43,8 +43,6 @@ void DragIO::doRegisterDropHandler(HandlerDrop::Ptr h)
 
 void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 {
-    std::cout << "warning: drag enter: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
-
     if(e->mimeData()->hasFormat(Box::MIME)) {
         e->acceptProposedAction();
 
@@ -58,8 +56,6 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
         e->acceptProposedAction();
 
     } else {
-//        std::cout << "warning: drag enter: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
-
         if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
             QDataStream stream(&itemData, QIODevice::ReadOnly);
@@ -115,8 +111,6 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
 void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 {
-    std::cout << "warning: drag move: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
-
     if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();

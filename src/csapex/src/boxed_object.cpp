@@ -34,7 +34,7 @@ BoxedObject::~BoxedObject()
 
     --active_objects_;
     if(active_objects_ == 0) {
-        std::cout << "destroyed BoxedObject, active objects left: " << active_objects_ << std::endl;
+//        std::cout << "destroyed BoxedObject, active objects left: " << active_objects_ << std::endl;
     }
 }
 
@@ -133,7 +133,6 @@ void BoxedObject::enable(bool e)
 void BoxedObject::enable()
 {
     enabled_ = true;
-    setError(false);
 }
 
 void BoxedObject::disable(bool d)

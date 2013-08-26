@@ -22,6 +22,7 @@ ROSHandler::~ROSHandler()
 
 boost::shared_ptr<ros::NodeHandle> ROSHandler::nh()
 {
+    refresh();
     return nh_;
 }
 
