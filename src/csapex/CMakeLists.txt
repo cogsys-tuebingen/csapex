@@ -82,6 +82,7 @@ add_library(csapex SHARED
     src/connection_type.cpp
     src/connection_type_manager.cpp
     src/csapex_window.cpp
+    src/drag_io.cpp
     src/design_board.cpp
     src/designer.cpp
     src/designerio.cpp

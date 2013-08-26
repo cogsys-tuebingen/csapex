@@ -25,6 +25,8 @@ FWD(Graph);
 class Designer;
 class DesignBoard;
 
+class DragIO;
+
 class Overlay;
 
 class Tag;

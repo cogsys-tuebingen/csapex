@@ -13,6 +13,7 @@ namespace csapex {
 class ImportRos : public BoxedObject
 {
     Q_OBJECT
+
 public:
     ImportRos();
 
@@ -25,14 +26,17 @@ public Q_SLOTS:
     void refresh();
     void changeTopic(const QString &topic);
 
-protected:
+public:
     struct State : public Memento {
+        typedef boost::shared_ptr<State> Ptr;
+
         std::string topic_;
 
         virtual void writeYaml(YAML::Emitter& out) const;
         virtual void readYaml(const YAML::Node& node);
     };
 
+private:
     State state;
 
     virtual Memento::Ptr getState() const;

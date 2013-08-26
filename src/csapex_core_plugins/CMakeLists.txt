@@ -3,6 +3,7 @@ project(csapex_core_plugins)
 
 find_package(catkin REQUIRED COMPONENTS roscpp utils utils_plugin csapex)
 
+find_package(Boost REQUIRED)
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 

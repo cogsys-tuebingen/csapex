@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/connection_type_manager.h>
 #include <csapex/designer.h>
+#include <csapex/graph.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -14,6 +15,7 @@
 PLUGINLIB_DECLARE_CLASS(csapex_rqt, CsApex, csapex_rqt::CsApex, rqt_gui_cpp::Plugin)
 
 using namespace csapex_rqt;
+using namespace csapex;
 
 CsApex::CsApex()
 {
@@ -27,9 +29,12 @@ CsApex::~CsApex()
 
 void CsApex::initPlugin(qt_gui_cpp::PluginContext& context)
 {
+    Graph::Ptr graph(new Graph);
+    Graph::setRoot(graph);
+
     context_ = &context;
 
-    eva_ = new csapex::CsApexWindow();
+    eva_ = new CsApexWindow();
     eva_->showMenu();
 
     context_->addWidget(eva_);

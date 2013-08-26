@@ -14,7 +14,9 @@ ROSHandler::ROSHandler()
 
 ROSHandler::~ROSHandler()
 {
-    spinner_->stop();
+    if(spinner_) {
+        spinner_->stop();
+    }
     ros::shutdown();
 }
 
@@ -42,6 +44,22 @@ void ROSHandler::initHandle(bool try_only)
     } else {
         std::cout << "init handle: no ros connection" << std::endl;
     }
+}
+
+bool ROSHandler::topicExists(const std::string &topic)
+{
+    refresh();
+
+    ros::master::V_TopicInfo topics;
+    ros::master::getTopics(topics);
+
+    for(ros::master::V_TopicInfo::iterator it = topics.begin(); it != topics.end(); ++it) {
+        if(it->name == topic) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 

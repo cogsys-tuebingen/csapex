@@ -126,7 +126,10 @@ void ImportRos::changeTopic(const QString& topic)
             return;
         }
     }
+
+    setError(true, std::string("cannot set topic, ") + topic.toStdString() + " doesn't exist.");
 }
+
 
 void ImportRos::setTopic(const ros::master::TopicInfo &topic)
 {

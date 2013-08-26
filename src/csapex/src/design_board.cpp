@@ -10,13 +10,13 @@
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
 #include <csapex/command_add_box.h>
+#include <csapex/drag_io.h>
 #include <csapex/box_manager.h>
 #include <csapex/command_dispatcher.h>
 #include <csapex/overlay.h>
 #include <csapex/graph.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
 #include <QResizeEvent>
 #include <QMenu>
 #include <iostream>
@@ -25,10 +25,11 @@
 #include <QScrollArea>
 #include <QScrollBar>
 
+
 using namespace csapex;
 
 DesignBoard::DesignBoard(QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), space_(false), drag_(false)
+    : QWidget(parent), ui(new Ui::DesignBoard), drag_io(DragIO::instance()), space_(false), drag_(false)
 {
     ui->setupUi(this);
 
@@ -81,7 +82,7 @@ void DesignBoard::findMinSize(Box* box)
     int movey = box->y() < 0 ? -box->y() : 0;
 
     if(movex != 0 || movey != 0) {
-        BOOST_FOREACH(csapex::Box* b, findChildren<csapex::Box*>()) {
+        foreach(csapex::Box* b, findChildren<csapex::Box*>()) {
             if(b != box) {
                 b->move(b->x() + movex, b->y() + movey);
             }
@@ -187,7 +188,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
             graph_->deselectBoxes();
 
-            BOOST_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
+            foreach(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
                     graph_->selectBox(box, true);
                 }
@@ -260,7 +261,7 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
                     int movey = dy < 0 ? -dy : 0;
 
                     if(movex != 0 || movey != 0) {
-                        BOOST_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
+                        foreach(csapex::Box* box, findChildren<csapex::Box*>()) {
                             box->move(box->x() + movex, box->y() + movey);
                         }
                     }
@@ -309,103 +310,15 @@ void DesignBoard::resizeEvent(QResizeEvent* e)
 
 void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->hasFormat(Box::MIME)) {
-        e->acceptProposedAction();
-
-    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
-        e->acceptProposedAction();
-
-    } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
-        e->acceptProposedAction();
-
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        e->acceptProposedAction();
-
-    } else {
-        std::cout << "warning: drag enter: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
-        if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
-
-            QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
-            QDataStream stream(&itemData, QIODevice::ReadOnly);
-
-            int r, c;
-            QMap<int, QVariant> v;
-            stream >> r >> c >> v;
-
-            std::string type = v[Qt::UserRole].toString().toStdString();
-            e->accept();
-
-            if(type == BoxGroup::MIME.toStdString()) {
-                BoxManager::instance().startPlacingMetaBox(this, QPoint(0,0));
-
-            } else {
-                BoxManager::instance().startPlacingBox(this, type, QPoint(0,0));
-            }
-        }
-    }
+    drag_io.dragEnterEvent(this, overlay, e);
 }
 
 void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
-        Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
-        overlay->deleteTemporaryConnections();
-        overlay->addTemporaryConnection(c, e->pos());
-        overlay->repaint();
-
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
-        overlay->deleteTemporaryConnections();
-
-        ConnectorOut* out = dynamic_cast<ConnectorOut*> (c);
-        if(out) {
-            for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-                overlay->addTemporaryConnection(*it, e->pos());
-            }
-        } else {
-            ConnectorIn* in = dynamic_cast<ConnectorIn*> (c);
-            overlay->addTemporaryConnection(in->getConnected(), e->pos());
-        }
-        overlay->repaint();
-
-    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
-        Box* box = dynamic_cast<Box*>(e->mimeData()->parent());
-        Box::MoveOffset* offset = dynamic_cast<Box::MoveOffset*>(e->mimeData()->userData(0));
-        box->move(e->pos() + offset->value);
-
-        overlay->repaint();
-    }
+    drag_io.dragMoveEvent(this, overlay, e);
 }
 
 void DesignBoard::dropEvent(QDropEvent* e)
 {
-    Graph::Ptr graph_ = Graph::root();
-
-    if(e->mimeData()->hasFormat(Box::MIME)) {
-        QByteArray b = e->mimeData()->data(Box::MIME);
-        SelectorProxy::Ptr* selectorptr = (SelectorProxy::Ptr*)b.toULongLong();
-
-        if(!selectorptr) {
-            return;
-        }
-
-        SelectorProxy::Ptr selector = *selectorptr;
-
-        e->setDropAction(Qt::CopyAction);
-        e->accept();
-
-        QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
-        QPoint pos = e->pos() + offset;
-
-        Command::Ptr add_box(new command::AddBox(selector, pos));
-        CommandDispatcher::execute(add_box);
-
-    } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
-        e->ignore();
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        e->ignore();
-    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
-        e->acceptProposedAction();
-        e->setDropAction(Qt::MoveAction);
-    }
+    drag_io.dropEvent(this, overlay, e);
 }

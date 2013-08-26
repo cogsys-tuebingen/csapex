@@ -115,7 +115,8 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
             QTreeWidgetItem* child = new QTreeWidgetItem;
             child->setIcon(0, icon);
             child->setText(0, name.c_str());
-            child->setData(0, Qt::UserRole, proxy->getType().c_str());
+            child->setData(0, Qt::UserRole, Box::MIME);
+            child->setData(0, Qt::UserRole + 1, proxy->getType().c_str());
 
             submenu->addChild(child);
         }

@@ -56,6 +56,7 @@ private:
     Ui::DesignBoard* ui;
 
     Overlay* overlay;
+    DragIO& drag_io;
 
     bool space_;
     bool drag_;

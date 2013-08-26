@@ -14,6 +14,9 @@
 #include <csapex/designerio.h>
 #include <csapex/graphio.h>
 #include <csapex/tag.h>
+#include <csapex/drag_io.h>
+#include <csapex/box.h>
+#include <csapex/connector.h>
 
 /// SYSTEM
 #include <iostream>
