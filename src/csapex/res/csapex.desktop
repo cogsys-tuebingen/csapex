@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=0.1
+Name=cs::APEX
+Comment=Algorithm Prototyper and EXperimentor
+Exec=${exe}
+Icon=${img}
+Terminal=true
+Type=Application
+Categories=Utility;Application;

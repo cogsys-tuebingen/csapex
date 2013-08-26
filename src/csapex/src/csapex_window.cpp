@@ -30,6 +30,8 @@
 #include <QToolBar>
 #include <QTimer>
 #include <QFileDialog>
+#include <QGraphicsScene>
+#include <QGraphicsTextItem>
 
 using namespace csapex;
 
@@ -41,6 +43,14 @@ CsApexWindow::CsApexWindow(QWidget *parent)
     StreamInterceptor::instance().start();
 
     ui->setupUi(this);
+
+    QGraphicsScene* scene = new QGraphicsScene;
+    QImage splash(":/apex_splash.png");
+    scene->addPixmap(QPixmap::fromImage(splash));
+    ui->loading->setScene(scene);
+    ui->loading->setFixedSize(splash.size());
+    ui->loading->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->loading->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     designer_ = new Designer;
     designer_->hide();
@@ -105,7 +115,7 @@ void CsApexWindow::showMenu()
 
 void CsApexWindow::start()
 {
-    statusBar()->showMessage("initialized");
+    showStatusMessage("initialized");
 
     ui->splitter->hide();
 
@@ -239,7 +249,7 @@ void CsApexWindow::init()
     if(!init_) {
         init_ = true;
 
-        statusBar()->showMessage("loading core plugins");
+        showStatusMessage("loading core plugins");
 
         core_plugin_manager.reload();
 
@@ -250,7 +260,7 @@ void CsApexWindow::init()
             plugin->init();
         }
 
-        statusBar()->showMessage("loading boxedobject plugins");
+        showStatusMessage("loading boxedobject plugins");
 
         BoxManager& bm = BoxManager::instance();
 
@@ -258,7 +268,7 @@ void CsApexWindow::init()
 
         bm.reload();
 
-        statusBar()->showMessage("loading config");
+        showStatusMessage("loading config");
 
         resize(400,400);
 

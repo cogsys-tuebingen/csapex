@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy utils utils_plugi
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
+find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui   )
 include(${QT_USE_FILE})
 
 
@@ -115,3 +115,5 @@ target_link_libraries(csapex
 add_executable(csapex_node
     src/csapex.cpp)
 target_link_libraries(csapex_node csapex)
+
+execute_process(COMMAND ./setup.sh ${CATKIN_DEVEL_PREFIX} ${CATKIN_PACKAGE_BIN_DESTINATION} csapex_node WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
