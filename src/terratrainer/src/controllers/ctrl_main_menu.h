@@ -19,12 +19,15 @@ class CtrlMainWindow : public QObject, public Controller
     Q_OBJECT
 
 public:
+    typedef boost::shared_ptr<CtrlMainWindow> Ptr;
+
     CtrlMainWindow(TerraTrainerWindow *main_window);
     void setupUi(Ui::TerraTrainerWindow *ui);
 
 Q_SIGNALS:
     void zoom(double factor);
     void loadIMAGE(QString path);
+    void syncSettingsCore();
 
 public Q_SLOTS:
     void loadImage();
@@ -36,10 +39,12 @@ public Q_SLOTS:
     void saveClassifierRaw();
     void saveCrops();
     void saveROIs();
+    void saveBatchTemplate();
     void zoomIn();
     void zoomOut();
     void zoomReset();
     void zoomUpdate(double factor);
+
 
 private:
     TerraTrainerWindow *main_window_;

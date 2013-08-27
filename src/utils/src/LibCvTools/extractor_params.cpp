@@ -356,6 +356,7 @@ void ParamsLTP::write(YAML::Emitter &emitter) const
     emitter << YAML::Key << "LTP" << YAML::Value;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "k" << YAML::Value << k;
+    emitter << YAML::EndMap;
 }
 
 bool ParamsLTP::read(const YAML::Node &document)
@@ -383,7 +384,7 @@ ParamsLBP::ParamsLBP(const ParamsLBP &p) :
 
 void ParamsLBP::write(YAML::Emitter &emitter) const
 {
-    emitter << YAML::Key << "LBP" << YAML::Value << "";
+    emitter << YAML::Key << "LBP" << YAML::Value << "NO PARAMS";
 }
 
 bool ParamsLBP::read(const YAML::Node &document)

@@ -1,6 +1,6 @@
 #ifndef EXTRACTOR_PARAMS_HPP
 #define EXTRACTOR_PARAMS_HPP
-
+#include <boost/shared_ptr.hpp>
 /// SPARE DIRECT YAML INCLUSION
 namespace YAML {
 struct Emitter;
@@ -23,6 +23,7 @@ struct KeypointParams {
 };
 
 struct ExtractorParams {
+    typedef boost::shared_ptr<ExtractorParams> Ptr;
 
     enum Type   {NONE, ORB, BRISK, SIFT, SURF, BRIEF, FREAK, TSURF, LTP, LBP};
     ExtractorParams(const Type t = NONE, const int o = 1);

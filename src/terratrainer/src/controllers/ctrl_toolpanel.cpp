@@ -14,6 +14,7 @@
 CtrlToolPanel::CtrlToolPanel(QMainWindow *tool_panel, CMPCoreBridge::Ptr bridge) :
     tool_bar_(tool_panel),
     bridge_(bridge),
+    mask_compute_invoke_(false),
     zoom_(100.0)
 {
     BlackPen.setColor(Qt::black);
@@ -175,9 +176,10 @@ void CtrlToolPanel::colorUpdate(int id)
     }
 }
 
-void CtrlToolPanel::paramsGridApplied()
+void CtrlToolPanel::syncExtractorParams()
 {
-    Q_EMIT grid();
+    mask_compute_invoke_ = true;
+    Q_EMIT setExtrParams(extractor_selection_->currentText());
 }
 
 void CtrlToolPanel::paramsQuadApplied()
@@ -185,9 +187,17 @@ void CtrlToolPanel::paramsQuadApplied()
     Q_EMIT quad();
 }
 
+void CtrlToolPanel::paramsGridApplied()
+{
+    Q_EMIT grid();
+}
+
 void CtrlToolPanel::paramsExtrApplied()
 {
-    Q_EMIT compute();
+    if(!mask_compute_invoke_)
+        Q_EMIT compute();
+
+    mask_compute_invoke_ = false;
 }
 
 void CtrlToolPanel::snapZoom()

@@ -282,6 +282,45 @@ void CtrlMainWindow::saveROIs()
 
 }
 
+void CtrlMainWindow::saveBatchTemplate()
+{
+    QString filename = QFileDialog::getSaveFileName(
+                0,
+                tr("Choose destination..."),
+                QDir::currentPath(),
+                tr("(*.yaml)") );
+    if( !filename.isNull() )
+    {
+        Controller::Ptr class_ed = main_window_->controllers_[Controller::Class];
+        CMPCoreBridge::Ptr bridge  = boost::dynamic_pointer_cast<CMPCoreBridge>(main_window_->controllers_[Controller::Bridge]);
+
+        if(bridge != NULL && class_ed != NULL) {
+            Q_EMIT syncSettingsCore();
+            YAML::Emitter emitter;
+            emitter << YAML::BeginMap;
+            class_ed->write(emitter);
+            bridge->writeCore(emitter);
+            emitter << YAML::Key << "ROI_FILES" << YAML::Value << YAML::BeginSeq;
+            emitter << "path to roi file ...";
+            emitter << YAML::EndSeq;
+            emitter << YAML::EndMap;
+
+            QRegExp rx (".+(\\.yaml$)");
+            if(!rx.exactMatch(filename))
+                filename += ".yaml";
+
+            std::ofstream out(filename.toUtf8().constData());
+            if(!out.is_open()) {
+                std::cerr << "File couldn't be openened!" << std::endl;
+                return;
+            }
+
+            out << emitter.c_str();
+            out.close();
+        }
+    }
+}
+
 void CtrlMainWindow::zoomIn()
 {
     zoom_ += 12.5;

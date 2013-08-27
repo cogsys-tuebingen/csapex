@@ -83,6 +83,14 @@ void CMPCoreBridge::write(YAML::Emitter &emitter) const
     in.close();
 }
 
+void CMPCoreBridge::writeCore(YAML::Emitter &emitter) const
+{
+    boost::mutex::scoped_try_lock lock(cc_mutex_);
+    if(lock) {
+        cc_->write(emitter);
+        lock.unlock();
+    }
+}
 
 boost::shared_ptr<QImage> CMPCoreBridge::rawImage()
 {

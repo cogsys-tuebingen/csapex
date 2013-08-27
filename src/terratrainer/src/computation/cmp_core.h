@@ -61,7 +61,6 @@ public:
 
 private:
     typedef CMPCVExtractorExt::KeyPoints                      KeyPoints;
-    typedef boost::shared_ptr<cv_extraction::ExtractorParams> Params;
 
     cv::Mat                                 raw_image_;
     CMPCVExtractorExt::Ptr                  cv_extractor_;
@@ -70,7 +69,7 @@ private:
     CMPStatePublisher::Ptr                  state_;
 
     cv_extraction::KeypointParams           keypoint_params_;
-    Params                                  ex_params_;
+    cv_extraction::ExtractorParams::Ptr     ex_params_;
 
     TerraQuadtreeDecomposition::Ptr         quad_decom_;
     CMPQuadParams                           quad_params_;

@@ -55,7 +55,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 
 
 ## Declare a cpp executable
-add_executable(TerraTrainer
+add_executable(terratrainer
                 src/computation/params.hpp
                 src/computation/yaml.hpp
                 src/computation/cmp_core.cpp
@@ -81,14 +81,23 @@ add_executable(TerraTrainer
 # ---------------------------
                 ${QT_TERRA})
 
+add_executable(terraBatchtrainer
+                src/tools/terra_batch_trainer.cpp)
+
 #add_executable(YAMLTrainConverter
 #               src/tools/yaml_train_converter.cpp)
 
 #### LINKING
 
-target_link_libraries(TerraTrainer
+target_link_libraries(terratrainer
                         yaml-cpp
                         ${QT_LIBRARIES}
+                        ${OpenCV_LIBS}
+                        ${Boost_LIBRARIES}
+                        ${catkin_LIBRARIES})
+
+target_link_libraries(terraBatchtrainer
+                        yaml-cpp
                         ${OpenCV_LIBS}
                         ${Boost_LIBRARIES}
                         ${catkin_LIBRARIES})

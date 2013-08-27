@@ -67,6 +67,7 @@ public Q_SLOTS:
     void classUpdated(int oldID, int newID);
     void colorUpdate(int id);
 
+    void syncExtractorParams();
     void paramsQuadApplied();
     void paramsGridApplied();
     void paramsExtrApplied();
@@ -88,7 +89,7 @@ private:
     QPushButton            *button_mov_;
     QPushButton            *button_del_;
 
-
+    bool   mask_compute_invoke_;
     double zoom_;
 
     void snapZoom();

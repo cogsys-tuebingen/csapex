@@ -81,6 +81,7 @@ void CtrlFactory::produceMenuController(TerraTrainerWindow *mainWindow)
     QAction::connect(ui->action_ZoomReset,              SIGNAL(triggered()), ctrl, SLOT(zoomReset()));
     QAction::connect(ui->action_SaveCrops,              SIGNAL(triggered()), ctrl, SLOT(saveCrops()));
     QAction::connect(ui->action_SaveROIs,               SIGNAL(triggered()), ctrl, SLOT(saveROIs()));
+    QAction::connect(ui->action_SaveBatchTemplate,      SIGNAL(triggered()), ctrl, SLOT(saveBatchTemplate()));
     QAction::connect(ui->action_LoadSettings,           SIGNAL(triggered()), ctrl, SLOT(loadSettings()));
     QAction::connect(ui->action_SaveSettings,           SIGNAL(triggered()), ctrl, SLOT(saveSettings()));
     QAction::connect(ui->action_LoadRois,               SIGNAL(triggered()), ctrl, SLOT(loadROIs()));
@@ -97,6 +98,7 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     Ui::ToolPanel      *tp = mainWindow->tool_panel_ui_;
     CMPCoreBridge::Ptr  br = Controller::to<CMPCoreBridge>(mainWindow->controllers_[Controller::Bridge]);
     CtrlMapView::Ptr    mv = Controller::to<CtrlMapView>(mainWindow->controllers_[Controller::MapView]);
+    CtrlMainWindow::Ptr mm = Controller::to<CtrlMainWindow>(mainWindow->controllers_[Controller::Menu]);
 
     if(br == NULL) {
         std::cerr << "Bridge Controller not yet initialized, therefore cancelling ToolPanel Controller initialization!" << std::endl;
@@ -148,6 +150,7 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QObject::connect(tp->selAll,        SIGNAL(clicked()),           mv.get(),       SLOT(selectAll()));
     QObject::connect(tp->deselAll,      SIGNAL(clicked()),           mv.get(),       SLOT(deselectAll()));
 
+    QObject::connect(mm.get(),          SIGNAL(syncSettingsCore()),  ctrl,           SLOT(syncExtractorParams()));
     QObject::connect(mv.get(),          SIGNAL(zoomUpdated(double)), ctrl,           SLOT(zoomUpdate(double)));
     QObject::connect(ctrl,              SIGNAL(zoom(double)),        mv.get(),       SLOT(zoom(double)));
     QObject::connect(ctrl,              SIGNAL(classSelected(int)),  mv.get(),       SLOT(changeClass(int)));

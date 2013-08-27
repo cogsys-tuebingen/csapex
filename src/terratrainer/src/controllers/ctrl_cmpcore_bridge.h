@@ -33,7 +33,7 @@ public:
 
     void read(const YAML::Node &document);
     void write(YAML::Emitter &emitter) const;
-
+    void writeCore(YAML::Emitter &emitter) const;
 
     /// GETTING IMAGES
     boost::shared_ptr<QImage> rawImage();
