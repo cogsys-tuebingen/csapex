@@ -22,7 +22,7 @@ using namespace csapex;
 
 const std::string GraphIO::extension = ".apex";
 const std::string GraphIO::default_config = GraphIO::defaultConfigFile();
-const std::string GraphIO::config_selector = "Configs (*" + GraphIO::extension + "), LegacyConfigs(*.vecfg)";
+const std::string GraphIO::config_selector = "Configs(*" + GraphIO::extension + ");;LegacyConfigs(*.vecfg)";
 
 std::string GraphIO::defaultConfigPath()
 {
