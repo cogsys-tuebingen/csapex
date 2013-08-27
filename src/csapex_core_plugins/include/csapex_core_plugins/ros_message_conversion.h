@@ -56,10 +56,20 @@ public:
         }
 
         ros::Subscriber subscribe(const ros::master::TopicInfo &topic, int queue, ConnectorOut* output) {
-            return ROSHandler::instance().nh()->subscribe<ROS>(topic.name, queue, boost::bind(&Self::callback, this, output, _1));
+            boost::shared_ptr<ros::NodeHandle> nh = ROSHandler::instance().nh();
+            if(!nh) {
+                throw std::runtime_error("no ros connection");
+            }
+
+            return nh->subscribe<ROS>(topic.name, queue, boost::bind(&Self::callback, this, output, _1));
         }
         ros::Publisher advertise(const std::string& topic, int queue, bool latch = false) {
-            return ROSHandler::instance().nh()->advertise<ROS>(topic, queue, latch);
+            boost::shared_ptr<ros::NodeHandle> nh = ROSHandler::instance().nh();
+            if(!nh) {
+                throw std::runtime_error("no ros connection");
+            }
+
+            return nh->advertise<ROS>(topic, queue, latch);
         }
         void publish(ros::Publisher& pub, ConnectionType::Ptr apex_msg_raw) {
             typename APEX::Ptr apex_msg = boost::dynamic_pointer_cast<APEX> (apex_msg_raw);

@@ -23,6 +23,7 @@ ROSHandler::~ROSHandler()
 boost::shared_ptr<ros::NodeHandle> ROSHandler::nh()
 {
     refresh();
+    waitForConnection();
     return nh_;
 }
 
@@ -42,8 +43,6 @@ void ROSHandler::initHandle(bool try_only)
         nh_.reset(new ros::NodeHandle("~"));
         spinner_.reset(new ros::AsyncSpinner(2));
         spinner_->start();
-    } else {
-        std::cout << "init handle: no ros connection" << std::endl;
     }
 }
 
