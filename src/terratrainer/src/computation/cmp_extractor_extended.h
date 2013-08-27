@@ -6,12 +6,12 @@
 #include <roi.hpp>
 #include "cmp_state_publisher.hpp"
 
-class CMPCVExtractorExt : public cv_extraction::FeatureExtractor
+class CMPFeatureExtractorExt : public cv_extraction::FeatureExtractor
 {
 public:
-    typedef boost::shared_ptr<CMPCVExtractorExt> Ptr;
+    typedef boost::shared_ptr<CMPFeatureExtractorExt> Ptr;
 
-    CMPCVExtractorExt();
+    CMPFeatureExtractorExt();
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois);
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois,
                        CMPStatePublisher::Ptr state);

@@ -40,6 +40,7 @@ Q_SIGNALS:
     void setGridParams();
     void setQuadParams();
     void setExtrParams(QString name);
+    void setForestParams();
     void compute();
     void grid();
     void quad();
@@ -71,7 +72,7 @@ public Q_SLOTS:
     void paramsQuadApplied();
     void paramsGridApplied();
     void paramsExtrApplied();
-
+    void paramsForeApplied();
 
 private:
     CMPCoreBridge::Ptr      bridge_;
@@ -89,7 +90,7 @@ private:
     QPushButton            *button_mov_;
     QPushButton            *button_del_;
 
-    bool   mask_compute_invoke_;
+    bool   wait_for_extractor_;
     double zoom_;
 
     void snapZoom();

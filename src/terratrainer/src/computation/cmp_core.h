@@ -60,16 +60,17 @@ public:
     void    unsetStatePublisher();
 
 private:
-    typedef CMPCVExtractorExt::KeyPoints                      KeyPoints;
+    typedef CMPFeatureExtractorExt::KeyPoints                      KeyPoints;
 
     cv::Mat                                 raw_image_;
-    CMPCVExtractorExt::Ptr                  cv_extractor_;
+    CMPFeatureExtractorExt::Ptr             cv_extractor_;
     CMPPatternExtractorExt::Ptr             pt_extractor_;
     CMPRandomForestExt::Ptr                 random_;
     CMPStatePublisher::Ptr                  state_;
 
     cv_extraction::KeypointParams           keypoint_params_;
     cv_extraction::ExtractorParams::Ptr     ex_params_;
+    CMPForestParams                         forest_params_;
 
     TerraQuadtreeDecomposition::Ptr         quad_decom_;
     CMPQuadParams                           quad_params_;

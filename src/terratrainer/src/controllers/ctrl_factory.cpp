@@ -294,9 +294,11 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     QSpinBox::connect(tf->spinBox_quadProbTh,       SIGNAL(valueChanged(double)), ctrl, SLOT(feedback_quadMinProbChanged(double)));
 
     /// PRESET
+    QObject::connect(tp.get(), SIGNAL(setForestParams()),                         ctrl,     SLOT(applyForestParams()));
     QObject::connect(tp.get(), SIGNAL(setExtrParams(QString)),                    ctrl,     SLOT(applyExtratorParams(QString)));
     QObject::connect(tp.get(), SIGNAL(setGridParams()),                           ctrl,     SLOT(applyGridParams()));
     QObject::connect(tp.get(), SIGNAL(setQuadParams()),                           ctrl,     SLOT(applyQuadParams()));
+    QObject::connect(ctrl,     SIGNAL(paramsForeApplied()),                       tp.get(), SLOT(paramsForeApplied()));
     QObject::connect(ctrl,     SIGNAL(paramsExtrApplied()),                       tp.get(), SLOT(paramsExtrApplied()));
     QObject::connect(ctrl,     SIGNAL(paramsGridApplied()),                       tp.get(), SLOT(paramsGridApplied()));
     QObject::connect(ctrl,     SIGNAL(paramsQuadApplied()),                       tp.get(), SLOT(paramsQuadApplied()));

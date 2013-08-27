@@ -82,6 +82,8 @@ add_executable(terratrainer
                 ${QT_TERRA})
 
 add_executable(terraBatchtrainer
+                src/computation/cmp_extractor_extended.cpp
+                src/computation/cmp_randomforest_extended.cpp
                 src/tools/terra_batch_trainer.cpp)
 
 #add_executable(YAMLTrainConverter

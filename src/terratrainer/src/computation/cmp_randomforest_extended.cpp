@@ -103,7 +103,7 @@ bool CMPRandomForestExt::readTrainingData(const std::string &training_data, cv::
             }
         }
     } catch (YAML::Exception e) {
-        std::cerr << "Curropt training file! " << e.what() << std::endl;
+        std::cerr << "Corrupt training file! " << e.what() << std::endl;
         return false;
     }
 

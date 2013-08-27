@@ -518,10 +518,16 @@ void CtrlPreferences::applyExtratorParams(QString setting)
         bridge_->setExtractorParams(ltp_);
 
     bridge_->setKeyPointParams(key_);
-    bridge_->setForestParams(forest_);
     dirty_ = DIRTY;
 
     Q_EMIT paramsExtrApplied();
+}
+
+void CtrlPreferences::applyForestParams()
+{
+    bridge_->setForestParams(forest_);
+
+    Q_EMIT paramsForeApplied();
 }
 
 void CtrlPreferences::applyGridParams()

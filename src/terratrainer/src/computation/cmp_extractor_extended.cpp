@@ -3,16 +3,15 @@
 
 using namespace cv_extraction;
 
-CMPCVExtractorExt::CMPCVExtractorExt() :
+CMPFeatureExtractorExt::CMPFeatureExtractorExt() :
     max_octave_(0),
     color_extension_(false),
     combine_descriptors_(false)
 {
 }
 
-void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois)
+void CMPFeatureExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois)
 {
-    emitter << YAML::BeginSeq;
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
         cv::Mat desc;
         extract(img, it->roi.rect, key_, max_octave_, color_extension_, combine_descriptors_, desc);
@@ -24,15 +23,13 @@ void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &im
         }
     }
 
-    emitter << YAML::EndSeq;
 }
 
-void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois,
+void CMPFeatureExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois,
                                       CMPStatePublisher::Ptr state)
 {
     std::pair<int,int> counts(0, rois.size());
 
-    emitter << YAML::BeginSeq;
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++, counts.first++) {
         cv::Mat desc;
         extract(img, it->roi.rect, key_, max_octave_, color_extension_, combine_descriptors_, desc);
@@ -46,51 +43,50 @@ void CMPCVExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &im
         state->publish(counts);
     }
 
-    emitter << YAML::EndSeq;
 }
 
-void CMPCVExtractorExt::setParams(const ParamsORB &params)
+void CMPFeatureExtractorExt::setParams(const ParamsORB &params)
 {
     FeatureExtractor::set(getExtractor(params));
     setCommonParameters(params);
 }
 
-void CMPCVExtractorExt::setParams(const ParamsSURF &params)
+void CMPFeatureExtractorExt::setParams(const ParamsSURF &params)
 {
     FeatureExtractor::set(getExtractor(params));
     setCommonParameters(params);
 }
 
-void CMPCVExtractorExt::setParams(const ParamsSIFT &params)
+void CMPFeatureExtractorExt::setParams(const ParamsSIFT &params)
 {
     FeatureExtractor::set(getExtractor(params));
     setCommonParameters(params);
 }
 
-void CMPCVExtractorExt::setParams(const ParamsBRISK &params)
+void CMPFeatureExtractorExt::setParams(const ParamsBRISK &params)
 {
     FeatureExtractor::set(getExtractor(params));
     setCommonParameters(params);
 }
 
-void CMPCVExtractorExt::setParams(const ParamsBRIEF &params)
+void CMPFeatureExtractorExt::setParams(const ParamsBRIEF &params)
 {
     FeatureExtractor::set(getExtractor(params));
     setCommonParameters(params);
 }
 
-void CMPCVExtractorExt::setParams(const ParamsFREAK &params)
+void CMPFeatureExtractorExt::setParams(const ParamsFREAK &params)
 {
     FeatureExtractor::set(getExtractor(params));
     setCommonParameters(params);
 }
 
-void CMPCVExtractorExt::setKeyPointParams(const KeypointParams &key)
+void CMPFeatureExtractorExt::setKeyPointParams(const KeypointParams &key)
 {
     key_ = key;
 }
 
-void CMPCVExtractorExt::setCommonParameters(const cv_extraction::ExtractorParams &params)
+void CMPFeatureExtractorExt::setCommonParameters(const cv_extraction::ExtractorParams &params)
 {
     max_octave_             = params.octaves;
     type_                   = params.type;
@@ -107,7 +103,6 @@ CMPPatternExtractorExt::CMPPatternExtractorExt() :
 
 void CMPPatternExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois)
 {
-    emitter << YAML::BeginSeq;
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
         /// CALCULATION
         cv::Mat     roi(img, it->roi.rect);
@@ -117,7 +112,6 @@ void CMPPatternExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Ma
         extract(roi, color_extension_, combine_descriptors_, desc);
         CMPYAML::writeDescriptorRows<int, int>(desc, it->id.id, emitter);
     }
-    emitter << YAML::EndSeq;
 }
 
 void CMPPatternExtractorExt::extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois,
@@ -125,7 +119,6 @@ void CMPPatternExtractorExt::extractToYAML(YAML::Emitter &emitter, const cv::Mat
 {
     std::pair<int,int> counts(0, rois.size());
 
-    emitter << YAML::BeginSeq;
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++, counts.first++) {
         /// CALCULATION
         cv::Mat     roi(img, it->roi.rect);
@@ -136,7 +129,6 @@ void CMPPatternExtractorExt::extractToYAML(YAML::Emitter &emitter, const cv::Mat
         CMPYAML::writeDescriptorRows<int, int>(desc, it->id.id, emitter);
         state->publish(counts);
     }
-    emitter << YAML::EndSeq;
 }
 
 

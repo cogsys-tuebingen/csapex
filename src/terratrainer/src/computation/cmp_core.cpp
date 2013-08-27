@@ -7,7 +7,7 @@
 #include "yaml.hpp"
 
 CMPCore::CMPCore() :
-    cv_extractor_(new CMPCVExtractorExt),
+    cv_extractor_(new CMPFeatureExtractorExt),
     pt_extractor_(new CMPPatternExtractorExt),
     random_(new CMPRandomForestExt),
     grid_(new cv_grid::GridTerra),
@@ -179,12 +179,15 @@ void CMPCore::setKeyPointParameters(const cv_extraction::KeypointParams &params)
 void CMPCore::write(YAML::Emitter &emitter) const
 {
     keypoint_params_.write(emitter);
+    forest_params_.write(emitter);
     if(ex_params_ != NULL)
         ex_params_->write(emitter);
+
 }
 
 void CMPCore::setRandomForestParams(const CMPForestParams &params)
 {
+    forest_params_ = params;
     random_->setParams(params);
 }
 
@@ -252,6 +255,7 @@ void CMPCore::extract()
     YAML::Emitter  emitter;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
+    emitter << YAML::BeginSeq;
     if(ex_params_->type != cv_extraction::ExtractorParams::LBP &&
             ex_params_->type != cv_extraction::ExtractorParams::LTP) {
         if(state_ != NULL)
@@ -264,7 +268,7 @@ void CMPCore::extract()
         else
             pt_extractor_->extractToYAML(emitter, raw_image_, rois_);
     }
-
+    emitter << YAML::EndSeq;
     emitter << YAML::EndMap;
     out << emitter.c_str();
     out.close();

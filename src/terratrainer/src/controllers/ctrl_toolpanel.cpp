@@ -14,7 +14,7 @@
 CtrlToolPanel::CtrlToolPanel(QMainWindow *tool_panel, CMPCoreBridge::Ptr bridge) :
     tool_bar_(tool_panel),
     bridge_(bridge),
-    mask_compute_invoke_(false),
+    wait_for_extractor_(false),
     zoom_(100.0)
 {
     BlackPen.setColor(Qt::black);
@@ -111,7 +111,9 @@ void CtrlToolPanel::buttonSel()
 
 void CtrlToolPanel::buttonCompute()
 {
+    wait_for_extractor_ = true;
     Q_EMIT setExtrParams(extractor_selection_->currentText());
+    Q_EMIT setForestParams();
 }
 
 void CtrlToolPanel::image_loaded()
@@ -130,11 +132,13 @@ void CtrlToolPanel::trainingFinished()
 
 void CtrlToolPanel::buttonGrid()
 {
+    Q_EMIT setExtrParams(extractor_selection_->currentText());
     Q_EMIT setGridParams();
 }
 
 void CtrlToolPanel::buttonQuad()
 {
+    Q_EMIT setExtrParams(extractor_selection_->currentText());
     Q_EMIT setQuadParams();
 }
 
@@ -178,7 +182,6 @@ void CtrlToolPanel::colorUpdate(int id)
 
 void CtrlToolPanel::syncExtractorParams()
 {
-    mask_compute_invoke_ = true;
     Q_EMIT setExtrParams(extractor_selection_->currentText());
 }
 
@@ -194,10 +197,13 @@ void CtrlToolPanel::paramsGridApplied()
 
 void CtrlToolPanel::paramsExtrApplied()
 {
-    if(!mask_compute_invoke_)
-        Q_EMIT compute();
+    wait_for_extractor_ = false;
+}
 
-    mask_compute_invoke_ = false;
+void CtrlToolPanel::paramsForeApplied()
+{
+    if(!wait_for_extractor_)
+        Q_EMIT compute();
 }
 
 void CtrlToolPanel::snapZoom()

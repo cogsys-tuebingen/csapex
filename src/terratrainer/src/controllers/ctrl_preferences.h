@@ -110,6 +110,7 @@ public Q_SLOTS:
 
     /// GENERAL
     void applyExtratorParams(QString setting);
+    void applyForestParams();
     void applyGridParams();
     void applyQuadParams();
 
@@ -117,6 +118,7 @@ Q_SIGNALS:
     void paramsGridApplied();
     void paramsQuadApplied();
     void paramsExtrApplied();
+    void paramsForeApplied();
 
 private:
     enum Dirty {CLEAN, DIRTY, GRID_DIRTY, QUAD_DIRTY};

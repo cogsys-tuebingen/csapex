@@ -8,6 +8,8 @@
 namespace cv_extraction {
 class Extractor {
 public:
+    typedef boost::shared_ptr<Extractor> Ptr;
+
     virtual void extract(const cv::Mat &image, cv::Mat &descriptors){}
     virtual void extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors){}
 
