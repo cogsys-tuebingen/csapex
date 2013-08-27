@@ -46,6 +46,7 @@ CsApexWindow::CsApexWindow(QWidget *parent)
 
     QGraphicsScene* scene = new QGraphicsScene;
     QImage splash(":/apex_splash.png");
+    splash = splash.scaled(splash.width()/2, splash.height() / 2);
     scene->addPixmap(QPixmap::fromImage(splash));
     ui->loading->setScene(scene);
     ui->loading->setFixedSize(splash.size());
