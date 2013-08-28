@@ -4,6 +4,7 @@
 #include "randomforest.h"
 #include "feature_extractor.h"
 #include "pattern_extractor.h"
+#include "extractor_params.h"
 
 /**
  * @brief The DecompositionClassifier class is used for classification of rectangular areas
@@ -72,17 +73,14 @@ class TerraDecomClassifierFeature : public DecompositionClassifier
     ///
 public :
     TerraDecomClassifierFeature(const float _threshold, RandomForest *_classifier, cv_extraction::FeatureExtractor *_extractor,
-                           const cv_extraction::KeypointParams &_key, const bool _color_extension, const bool _large,
-                           const int _max_octave) :
+                           const cv_extraction::KeypointParams &_key, const cv_extraction::ExtractorParams &_params) :
         classifier(_classifier),
         extractor(_extractor),
         threshold(_threshold),
         last_prob(0.0),
         last_id(-1),
         key(_key),
-        color(_color_extension),
-        large(_large),
-        max_octave(_max_octave)
+        params(_params)
     {
     }
 
@@ -94,10 +92,7 @@ public :
     {
         /// EXTRACT
         cv::Mat descriptors;
-        extractor->extract(image, roi,
-                           key, max_octave,
-                           color, large,
-                           descriptors);
+        extractor->extract(image, roi, descriptors);
 
         /// PREDICT
         if(descriptors.empty()) {
@@ -141,9 +136,7 @@ private:
     float                           last_prob;
     int                             last_id;
     cv_extraction::KeypointParams   key;
-    bool                            large;
-    bool                            color;
-    int                             max_octave;
+    cv_extraction::ExtractorParams  params;
 };
 
 class TerraDecomClassifierPattern : public DecompositionClassifier

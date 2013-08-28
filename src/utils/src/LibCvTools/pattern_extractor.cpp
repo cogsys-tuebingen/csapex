@@ -1,16 +1,17 @@
 #include "pattern_extractor.h"
+#include "extractor_params.h"
 
 using namespace cv_extraction;
 
 PatternExtractor::PatternExtractor() :
-    type(NOT_SET),
+    type_(NOT_SET),
     k(0.0)
 {
 }
 
-void PatternExtractor::extract(const cv::Mat &image, cv::Mat &descriptors)
+void PatternExtractor::extract(const Mat &image, cv::Mat &descriptors)
 {
-    switch(type) {
+    switch(type_) {
     case LBP:
         extractLBP(image, descriptors);
         break;
@@ -20,54 +21,40 @@ void PatternExtractor::extract(const cv::Mat &image, cv::Mat &descriptors)
     default:
         std::cerr << "No pattern set, computation not possible!" << std::endl;
     }
-}
 
-void PatternExtractor::extract(const Mat &image,
-                               const bool color_extension,
-                               const bool large, Mat &descriptors)
-{
-    extract(image, descriptors);
-    if(color_extension) {
-        cv::Scalar  mean = extractMeanColorRGBHSV(image);
-
-        if(large) {
-            descriptors = descriptors.reshape(0, 1);
-        }
-
-        if(color_extension) {
-            addColorExtension(descriptors, mean);
-        }
-
+    if(ext_params_->combine_descriptors) {
+        descriptors = descriptors.reshape(0, 1);
     }
+
+    if(ext_params_->color_extension) {
+        cv::Scalar  mean = extractMeanColorRGBHSV(image);
+        addColorExtension(descriptors, mean);
+    }
+
 }
 
 void PatternExtractor::set(cv_local_patterns::LBP *bp)
 {
-    type = LBP;
-    pattern = bp;
+    type_ = LBP;
+    pattern_.reset(bp);
 }
 
 void PatternExtractor::set(cv_local_patterns::LTP *tp)
 {
-    type = LTP;
-    pattern = tp;
-}
-
-void PatternExtractor::setK(const double value)
-{
-    k = value;
+    type_ = LTP;
+    pattern_.reset(tp);
 }
 
 void PatternExtractor::extractLBP(const Mat &image, Mat &descriptors)
 {
-    cv_local_patterns::LBP *ptr = static_cast<cv_local_patterns::LBP*>(pattern);
+    cv_local_patterns::LBP *ptr = static_cast<cv_local_patterns::LBP*>(pattern_.get());
     ptr->stdExtraction<uchar>(image);
     descriptors = ptr->getHistogram();
 }
 
 void PatternExtractor::extractLTP(const Mat &image, Mat &descriptors)
 {
-    cv_local_patterns::LTP *ptr = static_cast<cv_local_patterns::LTP*>(pattern);
+    cv_local_patterns::LTP *ptr = static_cast<cv_local_patterns::LTP*>(pattern_.get());
     ptr->stdExtraction<uchar>(image, k);
     cv::Mat pos = ptr->getPos();
     cv::Mat neg = ptr->getNeg();
@@ -79,3 +66,34 @@ void PatternExtractor::extractLTP(const Mat &image, Mat &descriptors)
     neg.copyTo(roi_neg);
 
 }
+
+void PatternExtractor::setK(const double value)
+{
+    k = value;
+}
+
+void PatternExtractor::setParams(const ParamsLBP &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+}
+
+void PatternExtractor::setParams(const ParamsLTP &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+    setK(params.k);
+}
+
+cv_local_patterns::LBP * PatternExtractor::getExtractor(const cv_extraction::ParamsLBP &params)
+{
+    cv_local_patterns::LBP *lbp = new cv_local_patterns::LBP;
+    return lbp;
+}
+
+cv_local_patterns::LTP *PatternExtractor::getExtractor(const cv_extraction::ParamsLTP &params)
+{
+    cv_local_patterns::LTP *ltp = new cv_local_patterns::LTP;
+    return ltp;
+}
+

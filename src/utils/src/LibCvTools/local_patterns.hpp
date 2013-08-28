@@ -1,12 +1,15 @@
 #ifndef LBP_HPP
 #define LBP_HPP
 #include <opencv2/opencv.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace cv;
 
 namespace cv_local_patterns {
 
 class LocalPattern {
+public:
+    typedef boost::shared_ptr<LocalPattern> Ptr;
 protected :
     LocalPattern(){}
 };
@@ -14,6 +17,8 @@ protected :
 class LBP : public LocalPattern
 {
 public:
+    typedef boost::shared_ptr<LBP> Ptr;
+
     LBP() :
         histogram(cv::Mat_<int>(1, 256, 0))
     {
@@ -103,6 +108,8 @@ private:
 class LTP  : public LocalPattern
 {
 public :
+    typedef boost::shared_ptr<LTP> Ptr;
+
     LTP() :
         pos_(cv::Mat_<int>(1, 256, 0)),
         neg_(cv::Mat_<int>(1, 256, 0))

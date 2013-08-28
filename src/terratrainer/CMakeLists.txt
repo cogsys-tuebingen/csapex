@@ -86,6 +86,9 @@ add_executable(terraBatchtrainer
                 src/computation/cmp_randomforest_extended.cpp
                 src/tools/terra_batch_trainer.cpp)
 
+add_executable(terraCVMAPgenerator
+                src/tools/terra_mapcv_generator.cpp)
+
 #add_executable(YAMLTrainConverter
 #               src/tools/yaml_train_converter.cpp)
 
@@ -99,6 +102,12 @@ target_link_libraries(terratrainer
                         ${catkin_LIBRARIES})
 
 target_link_libraries(terraBatchtrainer
+                        yaml-cpp
+                        ${OpenCV_LIBS}
+                        ${Boost_LIBRARIES}
+                        ${catkin_LIBRARIES})
+
+target_link_libraries(terraCVMAPgenerator
                         yaml-cpp
                         ${OpenCV_LIBS}
                         ${Boost_LIBRARIES}

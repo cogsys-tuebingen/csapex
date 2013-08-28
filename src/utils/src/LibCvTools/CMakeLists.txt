@@ -23,12 +23,23 @@ add_library (LibCvTools SHARED
     pattern_extractor.cpp
     feature_extractor.cpp
     extractor_params.cpp
+    terra_map.hpp
+    terra_mat.cpp
 )
 
 target_link_libraries(LibCvTools
     ${OpenCV_LIBS}
     ${Boost_LIBRARIES}
 )
+
+# Rotated template test
+add_executable(rotated_template
+    rotated_template.cpp
+    terra_mat.cpp)
+
+target_link_libraries(rotated_template
+    LibParticleFilter
+    ${OpenCV_LIBS})
 
 install(TARGETS LibCvTools LIBRARY DESTINATION lib)
 

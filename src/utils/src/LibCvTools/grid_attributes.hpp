@@ -5,6 +5,7 @@
 #include "histogram.hpp"
 #include "feature_extractor.h"
 #include "pattern_extractor.h"
+#include "extractor_params.h"
 #include "randomforest.h"
 /**
  * @class This can be used as an attribute to attach to a grid cell.
@@ -138,9 +139,6 @@ public:
     struct Params {
         cv_extraction::FeatureExtractor *extractor;
         RandomForest                    *classifier;
-        int                             max_octave;
-        bool                            color_extension;
-        bool                            large_descriptor;
         bool                            use_max_prob;
         cv_extraction::KeypointParams   key;
     };
@@ -171,10 +169,7 @@ public:
         AttrTerrainFeature::Params p_ = p;
         /// EXTRACT
         cv::Mat descriptors;
-        p.extractor->extract(_img, _roi,
-                             p.key, p.max_octave,
-                             p.color_extension, p.large_descriptor,
-                             descriptors);
+        p.extractor->extract(_img, _roi, descriptors);
 
         /// PREDICT
         if(descriptors.empty())
@@ -237,7 +232,7 @@ public:
         cv::Mat descriptors;
         cv::Mat img_roi(_img, _roi);
 
-        p.extractor->extract(img_roi, p.color_extension, p.large_descriptors, descriptors);
+        p.extractor->extract(img_roi, descriptors);
 
         if(descriptors.type() != CV_32FC1) {
             descriptors.convertTo(descriptors, CV_32FC1);

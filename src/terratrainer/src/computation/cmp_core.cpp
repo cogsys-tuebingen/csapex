@@ -72,8 +72,8 @@ void CMPCore::computeGrid()
     int height = raw_image_.rows / grid_params_.cell_height;
     int width  = raw_image_.cols / grid_params_.cell_width;
 
-    if(ex_params_->type != cv_extraction::ExtractorParams::LBP &&
-            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+    if(ext_params_->type != cv_extraction::ExtractorParams::LBP &&
+            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
 
         grid_.reset(new cv_grid::GridTerraFeat);
 
@@ -81,10 +81,7 @@ void CMPCore::computeGrid()
         p.extractor       = cv_extractor_.get();
         p.classifier      = random_.get();
         p.key             = keypoint_params_;
-        p.color_extension = ex_params_->color_extension;
-        p.large_descriptor= ex_params_->combine_descriptors;
-        p.max_octave      = ex_params_->octaves;
-        p.use_max_prob    = ex_params_->use_max_prob;
+        p.use_max_prob    = ext_params_->use_max_prob;
 
         cv_grid::prepare_grid<cv_grid::AttrTerrainFeature>
                 (*boost::dynamic_pointer_cast<cv_grid::GridTerraFeat>(grid_), raw_image_, height, width, p, cv::Mat());
@@ -94,8 +91,8 @@ void CMPCore::computeGrid()
         cv_grid::AttrTerrainClassPt::Params p;
         p.extractor  = pt_extractor_.get();
         p.classifier = random_.get();
-        p.color_extension = ex_params_->color_extension;
-        p.large_descriptors           = ex_params_->combine_descriptors;
+        p.color_extension = ext_params_->color_extension;
+        p.large_descriptors           = ext_params_->combine_descriptors;
 
         cv_grid::prepare_grid<cv_grid::AttrTerrainClassPt>
                 (*boost::dynamic_pointer_cast<cv_grid::GridTerraPatt>(grid_), raw_image_, height, width, p, cv::Mat());
@@ -110,8 +107,8 @@ void CMPCore::computeQuadtree()
         return;
     }
 
-    if(ex_params_->type != cv_extraction::ExtractorParams::LBP &&
-            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+    if(ext_params_->type != cv_extraction::ExtractorParams::LBP &&
+            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
         cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
 
 
@@ -119,9 +116,7 @@ void CMPCore::computeQuadtree()
                                                                                     random_.get(),
                                                                                     cv_extractor_.get(),
                                                                                     keypoint_params_,
-                                                                                    ex_params_->combine_descriptors,
-                                                                                    ex_params_->color_extension,
-                                                                                    ex_params_->octaves);
+                                                                                    *ext_params_);
 
         TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
         quad_decom_.reset(decom);
@@ -143,8 +138,8 @@ void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
     if(grid_ == NULL)
         return;
 
-    if(ex_params_->type != cv_extraction::ExtractorParams::LBP  &&
-            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+    if(ext_params_->type != cv_extraction::ExtractorParams::LBP  &&
+            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
 
         cv_grid::GridTerraFeat &terra = *boost::dynamic_pointer_cast<cv_grid::GridTerraFeat>(grid_);
         for(int i = 0 ; i < terra.rows() ; i++) {
@@ -182,28 +177,28 @@ void CMPCore::setExtractorParameters(cv_extraction::ExtractorParams &params)
 {
     switch(params.type) {
     case cv_extraction::ExtractorParams::ORB:
-        ex_params_.reset(new cv_extraction::ParamsORB(static_cast<cv_extraction::ParamsORB&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsORB(static_cast<cv_extraction::ParamsORB&>(params)));
         break;
     case cv_extraction::ExtractorParams::SURF:
-        ex_params_.reset(new cv_extraction::ParamsSURF(static_cast<cv_extraction::ParamsSURF&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsSURF(static_cast<cv_extraction::ParamsSURF&>(params)));
         break;
     case cv_extraction::ExtractorParams::SIFT:
-        ex_params_.reset(new cv_extraction::ParamsSIFT(static_cast<cv_extraction::ParamsSIFT&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsSIFT(static_cast<cv_extraction::ParamsSIFT&>(params)));
         break;
     case cv_extraction::ExtractorParams::BRIEF:
-        ex_params_.reset(new cv_extraction::ParamsBRIEF(static_cast<cv_extraction::ParamsBRIEF&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsBRIEF(static_cast<cv_extraction::ParamsBRIEF&>(params)));
         break;
     case cv_extraction::ExtractorParams::BRISK:
-        ex_params_.reset(new cv_extraction::ParamsBRISK(static_cast<cv_extraction::ParamsBRISK&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsBRISK(static_cast<cv_extraction::ParamsBRISK&>(params)));
         break;
     case cv_extraction::ExtractorParams::FREAK:
-        ex_params_.reset(new cv_extraction::ParamsFREAK(static_cast<cv_extraction::ParamsFREAK&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsFREAK(static_cast<cv_extraction::ParamsFREAK&>(params)));
         break;
     case cv_extraction::ExtractorParams::LBP:
-        ex_params_.reset(new cv_extraction::ParamsLBP(static_cast<cv_extraction::ParamsLBP&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsLBP(static_cast<cv_extraction::ParamsLBP&>(params)));
         break;
     case cv_extraction::ExtractorParams::LTP:
-        ex_params_.reset(new cv_extraction::ParamsLTP(static_cast<cv_extraction::ParamsLTP&>(params)));
+        ext_params_.reset(new cv_extraction::ParamsLTP(static_cast<cv_extraction::ParamsLTP&>(params)));
         break;
     }
 }
@@ -221,8 +216,8 @@ void CMPCore::write(YAML::Emitter &emitter) const
 {
     keypoint_params_.write(emitter);
     forest_params_.write(emitter);
-    if(ex_params_ != NULL)
-        ex_params_->write(emitter);
+    if(ext_params_ != NULL)
+        ext_params_->write(emitter);
 
 }
 
@@ -259,30 +254,30 @@ void CMPCore::unsetStatePublisher()
 
 void CMPCore::prepareExtractor()
 {
-    switch(ex_params_->type) {
+    switch(ext_params_->type) {
     case cv_extraction::ExtractorParams::ORB:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsORB>(ex_params_));
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsORB>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::SURF:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSURF>(ex_params_));
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSURF>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::SIFT:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSIFT>(ex_params_));
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSIFT>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::BRIEF:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRIEF>(ex_params_));
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRIEF>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::BRISK:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRISK>(ex_params_));
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRISK>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::FREAK:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsFREAK>(ex_params_));
+        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsFREAK>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::LBP:
-        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLBP>(ex_params_));
+        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLBP>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::LTP:
-        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLTP>(ex_params_));
+        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLTP>(ext_params_));
         break;
     }
     cv_extractor_->setKeyPointParams(keypoint_params_);
@@ -297,8 +292,8 @@ void CMPCore::extract()
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
     emitter << YAML::BeginSeq;
-    if(ex_params_->type != cv_extraction::ExtractorParams::LBP &&
-            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+    if(ext_params_->type != cv_extraction::ExtractorParams::LBP &&
+            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
         if(state_ != NULL)
             cv_extractor_->extractToYAML(emitter, raw_image_, rois_, state_);
         else

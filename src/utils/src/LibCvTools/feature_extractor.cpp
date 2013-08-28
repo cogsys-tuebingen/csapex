@@ -1,4 +1,5 @@
 #include "feature_extractor.h"
+#include "extractor_params.h"
 #include <cmath>
 
 using namespace cv_extraction;
@@ -21,14 +22,13 @@ void FeatureExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &
     }
 }
 
-void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect roi, const KeypointParams &params, const int max_octave,
-                          const bool color_extension, const bool large,
-                          cv::Mat &descriptors)
+void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect roi, cv::Mat &descriptors)
 {
     cv::Mat         roi_img;
     cv::Mat         roi_col(image, roi);
     cv::Scalar      mean = extractMeanColorRGBHSV(roi_col);
-    KeypointParams  kp = params;
+    KeypointParams  kp = *key_params_;
+    ExtractorParams ep = *ext_params_;
 
     if(kp.soft_crop)
         roi_img = image;
@@ -39,22 +39,65 @@ void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect roi, const K
         kp.angle = calcAngle(roi_col);
 
     FeatureExtractor::KeyPoints k;
-    if(kp.octave == -1 && max_octave != 1) {
-        k = prepareOctaveKeypoints(roi, kp, max_octave);
+    if(kp.octave == -1 && ep.octaves != 1) {
+        k = prepareOctaveKeypoints(roi, kp, ep.octaves);
     } else {
         k = prepareKeypoint(roi, kp);
     }
 
     extract(roi_img, k, descriptors);
 
-    if(large && !k.empty()) {
+    if(ep.combine_descriptors && !k.empty()) {
         descriptors = descriptors.reshape(0, 1);
     }
 
-    if(color_extension) {
+    if(ep.color_extension) {
         addColorExtension(descriptors, mean);
     }
 }
+
+void FeatureExtractor::setParams(const ParamsORB &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+}
+
+void FeatureExtractor::setParams(const ParamsSURF &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+}
+
+void FeatureExtractor::setParams(const ParamsSIFT &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+}
+
+void FeatureExtractor::setParams(const ParamsBRISK &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+}
+
+void FeatureExtractor::setParams(const ParamsBRIEF &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+}
+
+void FeatureExtractor::setParams(const ParamsFREAK &params)
+{
+    set(getExtractor(params));
+    ext_params_.reset(new ExtractorParams(params));
+}
+
+void FeatureExtractor::setKeyPointParams(const KeypointParams &key)
+{
+    key_params_.reset(new KeypointParams(key));
+}
+
+
 
 FeatureExtractor::KeyPoints FeatureExtractor::prepareKeypoint(const cv::Rect &rect, const KeypointParams &params)
 {

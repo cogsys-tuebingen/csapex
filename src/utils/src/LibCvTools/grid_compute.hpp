@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "grid.hpp"
 #include "grid_attributes.hpp"
+#include <opencv2/opencv.hpp>
 
 /**
  * @namespace Common operations for opencv when a grid is needed.

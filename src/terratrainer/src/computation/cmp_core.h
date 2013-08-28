@@ -69,7 +69,7 @@ private:
     CMPStatePublisher::Ptr                  state_;
 
     cv_extraction::KeypointParams           keypoint_params_;
-    cv_extraction::ExtractorParams::Ptr     ex_params_;
+    cv_extraction::ExtractorParams::Ptr     ext_params_;
     CMPForestParams                         forest_params_;
 
     TerraQuadtreeDecomposition::Ptr         quad_decom_;

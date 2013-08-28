@@ -6,6 +6,7 @@ include_directories (
     LibRobot
     LibRandom/include/
     LibCvTools
+    LibParticleFilter
 )
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
@@ -23,5 +24,6 @@ add_subdirectory (LibRandom)
 add_subdirectory (LibGeneric)
 add_subdirectory (LibClustering)
 add_subdirectory (LibRosUtil)
+add_subdirectory (LibParticleFilter)
 add_subdirectory (LibCvTools)
 add_subdirectory (LibQxt)
