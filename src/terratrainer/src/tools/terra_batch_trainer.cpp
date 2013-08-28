@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <stdio.h>
 
 TerraBatchTrainer::TerraBatchTrainer(const std::string &path) :
     EXTRACTION_PATH("extraction.yaml"),
@@ -18,11 +19,15 @@ void TerraBatchTrainer::run()
         std::cerr << "Couldn't open file !" << std::endl;
         return;
     }
+
+    std::cout << "============= LOAD  =============" << std::endl;
     read(in);
     in.close();
+    std::cout << "============= EXTR. =============" << std::endl;
     extract();
+    std::cout << "============= TRAIN =============" << std::endl;
     train();
-
+    std::cout << "============= WRITE =============" << std::endl;
     std::ofstream out(CLASSIFIER_PATH.c_str());
     if(!out.is_open()) {
         std::cerr << "Couldn't write file !" << std::endl;
@@ -97,7 +102,8 @@ void TerraBatchTrainer::read(std::ifstream &in)
         /// KEYPOINT PARAMS
         keypoint_params_.read(document);
         forest_params_.read(document);
-        feature_extractor_->setKeyPointParams(keypoint_params_);
+        if(feature_extractor_ != NULL)
+            feature_extractor_->setKeyPointParams(keypoint_params_);
 
         /// PATHS TO THE FILES
         const YAML::Node &paths = document["ROI_FILES"];

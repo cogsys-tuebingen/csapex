@@ -17,7 +17,7 @@ struct KeypointParams {
     int   octave;
     bool  soft_crop;
     bool  calc_angle;
-
+    bool  dirty;
     void write(YAML::Emitter &emitter) const;
     void read(const YAML::Node &document);
 };
@@ -35,6 +35,7 @@ struct ExtractorParams {
     int  octaves;
     bool combine_descriptors;
     bool use_max_prob;
+    bool dirty;
 
     virtual void write(YAML::Emitter &emitter) const;
     virtual bool read(const YAML::Node &document);

@@ -8,7 +8,8 @@ KeypointParams::KeypointParams() :
     scale(0.5f),
     octave(-1),
     soft_crop(true),
-    calc_angle(false)
+    calc_angle(false),
+    dirty(true)
 {
 }
 
@@ -47,7 +48,8 @@ ExtractorParams::ExtractorParams(const Type t, const int o) :
     color_extension(false),
     octaves(o),
     combine_descriptors(false),
-    use_max_prob(false)
+    use_max_prob(false),
+    dirty(true)
 {
 }
 
@@ -57,7 +59,8 @@ ExtractorParams::ExtractorParams(const ExtractorParams &p) :
     color_extension(p.color_extension),
     octaves(p.octaves),
     combine_descriptors(p.combine_descriptors),
-    use_max_prob(p.use_max_prob)
+    use_max_prob(p.use_max_prob),
+    dirty(true)
 {
 }
 
@@ -344,7 +347,7 @@ ParamsLTP::ParamsLTP() :
 }
 
 ParamsLTP::ParamsLTP(const ParamsLTP &p) :
-    ExtractorParams(LTP),
+    ExtractorParams(p),
     k(p.k)
 {
     combine_descriptors = p.combine_descriptors;
@@ -356,6 +359,7 @@ void ParamsLTP::write(YAML::Emitter &emitter) const
     emitter << YAML::Key << "LTP" << YAML::Value;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "k" << YAML::Value << k;
+    ExtractorParams::write(emitter);
     emitter << YAML::EndMap;
 }
 
@@ -364,7 +368,7 @@ bool ParamsLTP::read(const YAML::Node &document)
     try {
         const YAML::Node &data = document["LTP"];
         data["k"] >> k;
-        return true;
+        return ExtractorParams::read(data);
     } catch (YAML::Exception e) {
         std::cerr << "LTP Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;
@@ -378,20 +382,23 @@ ParamsLBP::ParamsLBP() :
 }
 
 ParamsLBP::ParamsLBP(const ParamsLBP &p) :
-    ExtractorParams(LBP)
+    ExtractorParams(p)
 {
 }
 
 void ParamsLBP::write(YAML::Emitter &emitter) const
 {
-    emitter << YAML::Key << "LBP" << YAML::Value << "NO PARAMS";
+    emitter << YAML::Key << "LBP" << YAML::Value;
+    emitter << YAML::BeginMap;
+    ExtractorParams::write(emitter);
+    emitter << YAML::EndMap;
 }
 
 bool ParamsLBP::read(const YAML::Node &document)
 {
     try {
         const YAML::Node &data = document["LBP"];
-        return true;
+        return ExtractorParams::read(data);
     } catch (YAML::Exception e) {
         std::cerr << "LBP Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
         return false;

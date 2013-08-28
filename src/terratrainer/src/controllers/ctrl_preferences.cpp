@@ -4,7 +4,6 @@
 #include <QKeyEvent>
 
 CtrlPreferences::CtrlPreferences(CMPCoreBridge::Ptr bridge) :
-    dirty_(CLEAN),
     bridge_(bridge)
 {
 }
@@ -137,30 +136,45 @@ void CtrlPreferences::read(const YAML::Node &document)
     }
 
     setupUI(ui_);
-    dirty_ = DIRTY;
 }
 
 bool CtrlPreferences::readClassfierLoad(const YAML::Node &document)
 {
     try {
         const YAML::Node &data = document["CLASSIFIER"];
-        if(orb_.read(data))
+        if(orb_.read(data)) {
             bridge_->setExtractorParams(orb_);
-        if(surf_.read(data))
+            orb_.dirty = false;
+        }
+        if(surf_.read(data)) {
             bridge_->setExtractorParams(surf_);
-        if(sift_.read(data))
+            surf_.dirty = false;
+        }
+        if(sift_.read(data)) {
             bridge_->setExtractorParams(sift_);
-        if(brisk_.read(data))
+            sift_.dirty = false;
+        }
+        if(brisk_.read(data)) {
             bridge_->setExtractorParams(brisk_);
-        if(brief_.read(data))
+            brisk_.dirty = false;
+        }
+        if(brief_.read(data)) {
             bridge_->setExtractorParams(brief_);
-        if(freak_.read(data))
+            brief_.dirty = false;
+        }
+        if(freak_.read(data)) {
             bridge_->setExtractorParams(freak_);
-        if(lbp_.read(data))
+            freak_.dirty = false;
+        }
+        if(lbp_.read(data)) {
             bridge_->setExtractorParams(lbp_);
-        if(ltp_.read(data))
-            bridge_->setExtractorParams(ltp_);
+            lbp_.dirty = false;
+        }
 
+        if(ltp_.read(data)) {
+            bridge_->setExtractorParams(ltp_);
+            ltp_.dirty = false;
+        }
         key_.read(data);
         bridge_->setKeyPointParams(key_);
         return true;
@@ -171,212 +185,252 @@ bool CtrlPreferences::readClassfierLoad(const YAML::Node &document)
     }
 
     setupUI(ui_);
-    dirty_ = DIRTY;
 }
 
 void CtrlPreferences::orbOppChanged(bool checked)
 {
     orb_.opp = checked;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::orbColorExtChanged(bool checked)
 {
     orb_.color_extension = checked;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::orbLevelChanged(int levels)
 {
     orb_.octaves = levels;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::orbScaleChanged(double scale)
 {
     orb_.scale = scale;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::orbWTA_KChanged(int wta_k)
 {
     orb_.WTA_K = wta_k;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::orbPatchChanged(int size)
 {
     orb_.patch_size = size;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::orbCombineChanged(bool enable)
 {
     orb_.combine_descriptors = enable;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::orbMaxProbChanged(bool enable)
 {
     orb_.use_max_prob = enable;
+    orb_.dirty = true;
 }
 
 void CtrlPreferences::surfOppChanged(bool checked)
 {
     surf_.opp = checked;
+    surf_.dirty = true;
 }
 
 void CtrlPreferences::surfColorExtChanged(bool checked)
 {
     surf_.color_extension = checked;
+    surf_.dirty = true;
 }
 
 void CtrlPreferences::surfOctavesChanged(int octaves)
 {
     surf_.octaves = octaves;
+    surf_.dirty = true;
 }
 
 void CtrlPreferences::surfOctaveLayersChanged(int layers)
 {
     surf_.octave_layers = layers;
+    surf_.dirty = true;
 }
 
 void CtrlPreferences::surfExtendeChanged(bool checked)
 {
     surf_.extended = checked;
+    surf_.dirty = true;
 }
 
 void CtrlPreferences::surfCombineChanged(bool enable)
 {
     surf_.combine_descriptors = enable;
+    surf_.dirty = true;
 }
 
 void CtrlPreferences::surfMaxProbChanged(bool enable)
 {
     surf_.use_max_prob = enable;
+    surf_.dirty = true;
 }
 
 void CtrlPreferences::siftOppChanged(bool checked)
 {
     sift_.opp = checked;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::siftColorExtChanged(bool checked)
 {
     sift_.color_extension = checked;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::siftMagnificationChanged(double magnification)
 {
     sift_.magnification = magnification;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::siftOctavesChanged(int ocataves)
 {
     sift_.octaves = ocataves;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::siftNormalizeChanged(bool checked)
 {
     sift_.normalize = checked;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::siftRecalcAnglesChanged(bool checked)
 {
     sift_.recalculate_angles = checked;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::siftCombineChanged(bool enable)
 {
     sift_.combine_descriptors = enable;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::siftMaxProbChanged(bool enable)
 {
     sift_.use_max_prob = enable;
+    sift_.dirty = true;
 }
 
 void CtrlPreferences::briskOppChanged(bool checked)
 {
     brisk_.opp = checked;
+    brisk_.dirty = true;
 }
 
 void CtrlPreferences::briskColorExtChanged(bool checked)
 {
     brisk_.color_extension = checked;
+    brisk_.dirty = true;
 }
 
 void CtrlPreferences::briskOctavesChanged(int octaves)
 {
     brisk_.octaves = octaves;
+    brisk_.dirty = true;
 }
 
 void CtrlPreferences::briskThresholdChanged(int thresh)
 {
     brisk_.thresh = thresh;
+    brisk_.dirty = true;
 }
 
 void CtrlPreferences::briskScaleChanged(double scale)
 {
     brisk_.scale = scale;
+    brisk_.dirty = true;
 }
 
 void CtrlPreferences::briskCombineChanged(bool enable)
 {
     brisk_.combine_descriptors = enable;
+    brisk_.dirty = true;
 }
 
 void CtrlPreferences::briskMaxProbChanged(bool enable)
 {
     brisk_.use_max_prob = enable;
+    brisk_.dirty = true;
 }
 
 void CtrlPreferences::briefOppChanged(bool checked)
 {
     brief_.opp = checked;
+    brief_.dirty = true;
 }
 
 void CtrlPreferences::briefColorExtChanged(bool checked)
 {
     brief_.color_extension = checked;
+    brief_.dirty = true;
 }
 
 void CtrlPreferences::briefBytesChanged(QString bytes)
 {
     brief_.bytes = bytes.toInt();
+    brief_.dirty = true;
 }
 
 void CtrlPreferences::freakOppChanged(bool checked)
 {
     freak_.opp = checked;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::freakColorExtChanged(bool checked)
 {
     freak_.color_extension = checked;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::freakPatternScaleChanged(double scale)
 {
     freak_.pattern_scale = scale;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::freakScaleNormChanged(bool checked)
 {
     freak_.scale_normalized = checked;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::freakOriNormChanged(bool checked)
 {
     freak_.orientation_normalized = checked;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::freakOctavesChanged(int octaves)
 {
     freak_.octaves = octaves;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::freakCombineChanged(bool enable)
 {
     freak_.combine_descriptors = enable;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::freakMaxProbChanged(bool enable)
 {
     freak_.use_max_prob = enable;
+    freak_.dirty = true;
 }
 
 void CtrlPreferences::keypointSizeChanged(double size)
@@ -387,138 +441,162 @@ void CtrlPreferences::keypointSizeChanged(double size)
 void CtrlPreferences::lbpColorExtChanged(bool checked)
 {
     lbp_.color_extension = checked;
+    lbp_.dirty = true;
 }
 
 void CtrlPreferences::ltpColorExtChanged(bool checked)
 {
     ltp_.color_extension = checked;
+    ltp_.dirty = true;
 }
 
 void CtrlPreferences::ltpKChanged(double value)
 {
     ltp_.k = value;
+    ltp_.dirty = true;
 }
 
 void CtrlPreferences::ltpCombineChanged(bool checked)
 {
     ltp_.combine_descriptors = checked;
+    ltp_.dirty = true;
 }
 
 void CtrlPreferences::keypointAngleChanged(double angle)
 {
     key_.angle = angle;
+    key_.dirty = true;
 }
 
 void CtrlPreferences::keypointCropChanged(bool crop)
 {
     key_.soft_crop = crop;
+    key_.dirty = true;
 }
 
 void CtrlPreferences::keypointOctavesChanged(int value)
 {
     key_.octave = value;
+    key_.dirty = true;
 }
 
 void CtrlPreferences::keypointCalcAngleChanged(bool enabled)
 {
     key_.calc_angle = enabled;
+    key_.dirty = true;
 }
 
 void CtrlPreferences::forest_depthChanged(int depth)
 {
     forest_.max_depth = depth;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_samplesChanged(int samples)
 {
     forest_.min_samples = samples;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_regressionChanged(double value)
 {
     forest_.regression = value;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_surrogatesChanged(bool checked)
 {
     forest_.surrogates = checked;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_categoriesChanged(int amount)
 {
     forest_.max_categories = amount;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_importanceChanged(bool checked)
 {
     forest_.variable_importance = checked;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_nactivesChanged(int amount)
 {
     forest_.nactive_variables = amount;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_maxTreesChanged(int trees)
 {
     forest_.max_trees = trees;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::forest_accuracyChanged(double accuracy)
 {
     forest_.accurracy = accuracy;
+    forest_.dirty = true;
 }
 
 void CtrlPreferences::feedback_gridCellChanged(int size)
 {
     grid_.cell_height = size;
     grid_.cell_width  = size;
-    if(dirty_ == CLEAN)
-        dirty_ = GRID_DIRTY;
-    else
-        dirty_ = DIRTY;
+    grid_.dirty       = true;
 }
 
 void CtrlPreferences::feedback_quadMinSizeChanged(int size)
 {
     quad_.min_height = size;
     quad_.min_width  = size;
-    if(dirty_ == CLEAN)
-        dirty_ = QUAD_DIRTY;
-    else
-        dirty_ = DIRTY;
+    quad_.dirty      = true;
 }
 
 void CtrlPreferences::feedback_quadMinProbChanged(double prob)
 {
-    quad_.min_prob = prob;
-    if(dirty_ == CLEAN)
-        dirty_ = QUAD_DIRTY;
-    else
-        dirty_ = DIRTY;
+    quad_.min_prob  = prob;
+    quad_.dirty     = true;
 }
 
 void CtrlPreferences::applyExtratorParams(QString setting)
 {
-    if(setting == "ORB")
+    if(setting == "ORB") {
         bridge_->setExtractorParams(orb_);
-    if(setting == "SURF")
+        orb_.dirty = false;
+    }
+    if(setting == "SURF") {
         bridge_->setExtractorParams(surf_);
-    if(setting == "SIFT")
+        surf_.dirty = false;
+    }
+    if(setting == "SIFT") {
         bridge_->setExtractorParams(sift_);
-    if(setting == "BRIEF")
+        sift_.dirty = false;
+    }
+    if(setting == "BRIEF") {
         bridge_->setExtractorParams(brief_);
-    if(setting == "BRISK")
-        bridge_->setExtractorParams(brisk_);
-    if(setting == "FREAK")
+        brief_.dirty = false;
+    }
+    if(setting == "BRISK") {
+        if(brisk_.dirty)
+            bridge_->setExtractorParams(brisk_);
+        brisk_.dirty = false;
+    }
+    if(setting == "FREAK") {
         bridge_->setExtractorParams(freak_);
-    if(setting == "LBP")
+        freak_.dirty = false;
+    }
+    if(setting == "LBP") {
         bridge_->setExtractorParams(lbp_);
-    if(setting == "LTP")
+        lbp_.dirty = false;
+    }
+    if(setting == "LTP") {
         bridge_->setExtractorParams(ltp_);
+        ltp_.dirty = false;
+    }
 
     bridge_->setKeyPointParams(key_);
-    dirty_ = DIRTY;
 
     Q_EMIT paramsExtrApplied();
 }
@@ -526,32 +604,20 @@ void CtrlPreferences::applyExtratorParams(QString setting)
 void CtrlPreferences::applyForestParams()
 {
     bridge_->setForestParams(forest_);
-
+    forest_.dirty = false;
     Q_EMIT paramsForeApplied();
 }
 
 void CtrlPreferences::applyGridParams()
 {
-    if(dirty_ == DIRTY) {
-        bridge_->setGridParams(grid_);
-        dirty_ = QUAD_DIRTY;
-    } else if(dirty_ == GRID_DIRTY) {
-        bridge_->setGridParams(grid_);
-        dirty_ = CLEAN;
-    }
-
+    bridge_->setGridParams(grid_);
+    grid_.dirty = false;
     Q_EMIT paramsGridApplied();
 }
 
 void CtrlPreferences::applyQuadParams()
 {
-    if(dirty_ == DIRTY) {
-        bridge_->setQuadParams(quad_);
-        dirty_ = GRID_DIRTY;
-    } else if(dirty_ == QUAD_DIRTY) {
-        bridge_->setQuadParams(quad_);
-        dirty_ = CLEAN;
-    }
-
+    bridge_->setQuadParams(quad_);
+    quad_.dirty = false;
     Q_EMIT paramsQuadApplied();
 }

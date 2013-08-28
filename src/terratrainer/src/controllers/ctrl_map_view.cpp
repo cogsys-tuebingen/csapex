@@ -311,14 +311,12 @@ void CtrlMapView::computeFinished()
 void CtrlMapView::computeGridFinished()
 {
     renderGrid();
-    unloadOverlay();
     loadOverlay(GRID, rendered_grid_);
 }
 
 void CtrlMapView::computeQuadFinished()
 {
     renderQuad();
-    unloadOverlay();
     loadOverlay(QUAD, rendered_quad_);
 }
 

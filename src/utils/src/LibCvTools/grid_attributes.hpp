@@ -207,6 +207,8 @@ public:
     struct Params {
         cv_extraction::PatternExtractor   *extractor;
         RandomForest       *classifier;
+        bool                color_extension;
+        bool                large_descriptors;
     };
 
     AttrTerrainClassPt()
@@ -234,7 +236,12 @@ public:
     {
         cv::Mat descriptors;
         cv::Mat img_roi(_img, _roi);
-        p.extractor->extract(img_roi, descriptors);
+
+        p.extractor->extract(img_roi, p.color_extension, p.large_descriptors, descriptors);
+
+        if(descriptors.type() != CV_32FC1) {
+            descriptors.convertTo(descriptors, CV_32FC1);
+        }
 
         /// PREDICT
         int   classID;

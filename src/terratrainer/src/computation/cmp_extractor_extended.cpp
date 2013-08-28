@@ -143,8 +143,8 @@ void CMPPatternExtractorExt::setParams(const cv_extraction::ParamsLBP &params)
 void CMPPatternExtractorExt::setParams(const cv_extraction::ParamsLTP &params)
 {
     PatternExtractor::set(new cv_local_patterns::LTP);
-    k = params.k;
-    color_extension_ = params.color_extension;
+    k                    = params.k;
+    color_extension_     = params.color_extension;
     combine_descriptors_ = params.combine_descriptors;
 }
 

@@ -31,7 +31,7 @@ void PatternExtractor::extract(const Mat &image,
         cv::Scalar  mean = extractMeanColorRGBHSV(image);
 
         if(large) {
-            descriptors.reshape(0, 1);
+            descriptors = descriptors.reshape(0, 1);
         }
 
         if(color_extension) {

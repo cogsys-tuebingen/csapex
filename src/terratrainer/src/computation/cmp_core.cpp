@@ -10,7 +10,7 @@ CMPCore::CMPCore() :
     cv_extractor_(new CMPFeatureExtractorExt),
     pt_extractor_(new CMPPatternExtractorExt),
     random_(new CMPRandomForestExt),
-    grid_(new cv_grid::GridTerra),
+    grid_(new cv_grid::GridTerraFeat),
     work_path_("/tmp"),
     file_extraction_("/extract.yaml"),
     file_forest_("/forest.yaml")
@@ -63,26 +63,43 @@ void CMPCore::computeGrid()
         return;
     }
 
-    if(grid_ == NULL)
-        grid_.reset(new cv_grid::GridTerra);
+
 
     /// PARAMETERS
     prepareExtractor();
-
-    cv_grid::AttrTerrainFeature::Params p;
-    p.extractor       = cv_extractor_.get();
-    p.classifier      = random_.get();
-    p.key             = keypoint_params_;
-    p.color_extension = ex_params_->color_extension;
-    p.large_descriptor= ex_params_->combine_descriptors;
-    p.max_octave      = ex_params_->octaves;
-    p.use_max_prob    = ex_params_->use_max_prob;
 
     /// CALCULATE GRID SIZE
     int height = raw_image_.rows / grid_params_.cell_height;
     int width  = raw_image_.cols / grid_params_.cell_width;
 
-    cv_grid::prepare_grid<cv_grid::AttrTerrainFeature>(*grid_, raw_image_, height, width, p, cv::Mat());
+    if(ex_params_->type != cv_extraction::ExtractorParams::LBP &&
+            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+
+        grid_.reset(new cv_grid::GridTerraFeat);
+
+        cv_grid::AttrTerrainFeature::Params p;
+        p.extractor       = cv_extractor_.get();
+        p.classifier      = random_.get();
+        p.key             = keypoint_params_;
+        p.color_extension = ex_params_->color_extension;
+        p.large_descriptor= ex_params_->combine_descriptors;
+        p.max_octave      = ex_params_->octaves;
+        p.use_max_prob    = ex_params_->use_max_prob;
+
+        cv_grid::prepare_grid<cv_grid::AttrTerrainFeature>
+                (*boost::dynamic_pointer_cast<cv_grid::GridTerraFeat>(grid_), raw_image_, height, width, p, cv::Mat());
+    } else {
+        grid_.reset(new cv_grid::GridTerraPatt);
+
+        cv_grid::AttrTerrainClassPt::Params p;
+        p.extractor  = pt_extractor_.get();
+        p.classifier = random_.get();
+        p.color_extension = ex_params_->color_extension;
+        p.large_descriptors           = ex_params_->combine_descriptors;
+
+        cv_grid::prepare_grid<cv_grid::AttrTerrainClassPt>
+                (*boost::dynamic_pointer_cast<cv_grid::GridTerraPatt>(grid_), raw_image_, height, width, p, cv::Mat());
+    }
 }
 
 void CMPCore::computeQuadtree()
@@ -92,22 +109,30 @@ void CMPCore::computeQuadtree()
         std::cerr << "No trained random forest! - Therefore not compitung quad tree decomposition!" << std::endl;
         return;
     }
-    cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
-    TerraDecomClassifierFeature   *classifier = new TerraDecomClassifierFeature(quad_params_.min_prob,
-                                                                                random_.get(),
-                                                                                cv_extractor_.get(),
-                                                                                keypoint_params_,
-                                                                                ex_params_->combine_descriptors,
-                                                                                ex_params_->color_extension,
-                                                                                ex_params_->octaves);
 
-    TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
-    quad_decom_.reset(decom);
+    if(ex_params_->type != cv_extraction::ExtractorParams::LBP &&
+            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+        cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
 
-    /// ITERATE
-    quad_decom_->auto_iterate();
+
+        TerraDecomClassifierFeature   *classifier = new TerraDecomClassifierFeature(quad_params_.min_prob,
+                                                                                    random_.get(),
+                                                                                    cv_extractor_.get(),
+                                                                                    keypoint_params_,
+                                                                                    ex_params_->combine_descriptors,
+                                                                                    ex_params_->color_extension,
+                                                                                    ex_params_->octaves);
+
+        TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
+        quad_decom_.reset(decom);
+
+        /// ITERATE
+        quad_decom_->auto_iterate();
+
+    } else {
+        std::cerr << "Pattern classifier currently not supported!" << std::endl;
+    }
 }
-
 bool CMPCore::hasComputedModel()
 {
     return random_->isTrained();
@@ -118,15 +143,31 @@ void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
     if(grid_ == NULL)
         return;
 
-    cv_grid::GridTerra &terra = *grid_;
-    for(int i = 0 ; i < terra.rows() ; i++) {
-        for(int j = 0 ; j < terra.cols() ; j++) {
-            cv_grid::GridCellTerra &cell = terra(i,j);
-            cv_roi::TerraROI tr;
-            tr.roi.rect = cell.bounding;
-            tr.id.id    = cell.attributes.classID;
-            tr.id.prob  = cell.attributes.probability;
-            cells.push_back(tr);
+    if(ex_params_->type != cv_extraction::ExtractorParams::LBP  &&
+            ex_params_->type != cv_extraction::ExtractorParams::LTP) {
+
+        cv_grid::GridTerraFeat &terra = *boost::dynamic_pointer_cast<cv_grid::GridTerraFeat>(grid_);
+        for(int i = 0 ; i < terra.rows() ; i++) {
+            for(int j = 0 ; j < terra.cols() ; j++) {
+                cv_grid::GridCellTerraFeat &cell = terra(i,j);
+                cv_roi::TerraROI tr;
+                tr.roi.rect = cell.bounding;
+                tr.id.id    = cell.attributes.classID;
+                tr.id.prob  = cell.attributes.probability;
+                cells.push_back(tr);
+            }
+        }
+    } else {
+        cv_grid::GridTerraPatt &terra = *boost::dynamic_pointer_cast<cv_grid::GridTerraPatt>(grid_);
+        for(int i = 0 ; i < terra.rows() ; i++) {
+            for(int j = 0 ; j < terra.cols() ; j++) {
+                cv_grid::GridCellTerraPatt &cell = terra(i,j);
+                cv_roi::TerraROI tr;
+                tr.roi.rect = cell.bounding;
+                tr.id.id    = cell.attributes.classID;
+                tr.id.prob  = cell.attributes.probability;
+                cells.push_back(tr);
+            }
         }
     }
 }

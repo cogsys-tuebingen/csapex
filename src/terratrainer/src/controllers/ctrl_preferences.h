@@ -121,9 +121,6 @@ Q_SIGNALS:
     void paramsForeApplied();
 
 private:
-    enum Dirty {CLEAN, DIRTY, GRID_DIRTY, QUAD_DIRTY};
-    Dirty dirty_;
-
     CMPCoreBridge::Ptr                  bridge_;
     Ui::TerraPreferences               *ui_;
 

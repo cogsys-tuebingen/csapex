@@ -187,12 +187,14 @@ void CtrlToolPanel::syncExtractorParams()
 
 void CtrlToolPanel::paramsQuadApplied()
 {
-    Q_EMIT quad();
+    if(!wait_for_extractor_)
+        Q_EMIT quad();
 }
 
 void CtrlToolPanel::paramsGridApplied()
 {
-    Q_EMIT grid();
+    if(!wait_for_extractor_)
+        Q_EMIT grid();
 }
 
 void CtrlToolPanel::paramsExtrApplied()

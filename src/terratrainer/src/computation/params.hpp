@@ -16,7 +16,8 @@ struct CMPForestParams {
         priors(0), variable_importance(false),
         nactive_variables(4), max_trees(100),
         accurracy(0.01f),
-        termination_criteria(1 | 2){}
+        termination_criteria(1 | 2),
+        dirty(true){}
 
     int                max_depth;
     int                min_samples;
@@ -29,6 +30,7 @@ struct CMPForestParams {
     int                max_trees;
     float              accurracy;
     int                termination_criteria;
+    bool               dirty;
 
     void write(YAML::Emitter &emitter) const
     {
@@ -69,9 +71,10 @@ struct CMPForestParams {
 };
 
 struct CMPGridParams {
-    CMPGridParams() : cell_height(10), cell_width(10){}
+    CMPGridParams() : cell_height(10), cell_width(10), dirty(true){}
     int    cell_height;
     int    cell_width;
+    bool   dirty;
 
     void write(YAML::Emitter &emitter) const
     {
@@ -97,10 +100,11 @@ struct CMPGridParams {
 };
 
 struct CMPQuadParams {
-    CMPQuadParams() : min_height(10), min_width(10), min_prob(0.75){}
+    CMPQuadParams() : min_height(10), min_width(10), min_prob(0.75),dirty(true){}
     int     min_height;
     int     min_width;
     float   min_prob;
+    bool    dirty;
 
     void write(YAML::Emitter &emitter) const
     {

@@ -170,28 +170,34 @@ void CMPCoreBridge::loadIMAGE(const QString path)
 
 void CMPCoreBridge::setExtractorParams(cv_extraction::ExtractorParams &params)
 {
+    recalc_grid_ = params.dirty;
+    recalc_quad_ = params.dirty;
     cc_->setExtractorParameters(params);
 }
 
 void CMPCoreBridge::setForestParams(const CMPForestParams &params)
 {
+    recalc_grid_ = params.dirty;
+    recalc_quad_ = params.dirty;
     cc_->setRandomForestParams(params);
 }
 
 void CMPCoreBridge::setGridParams(const CMPGridParams &params)
 {
-    recalc_grid_ = true;
+    recalc_grid_ = params.dirty;
     cc_->setGridParameters(params);
 }
 
 void CMPCoreBridge::setQuadParams(const CMPQuadParams &params)
 {
-    recalc_quad_ = true;
+    recalc_quad_ = params.dirty;
     cc_->setQuadParameters(params);
 }
 
 void CMPCoreBridge::setKeyPointParams(const cv_extraction::KeypointParams &params)
 {
+    recalc_grid_ = params.dirty;
+    recalc_quad_ = params.dirty;
     cc_->setKeyPointParameters(params);
 }
 
