@@ -35,12 +35,10 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::EvaluationWindow), core_plugin_manager("csapex::CorePlugin"), init_(false)
+CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
+    : QMainWindow(parent), core(core), ui(new Ui::EvaluationWindow), init_(false)
 {
     Graph::Ptr graph = Graph::root();
-
-    StreamInterceptor::instance().start();
 
     ui->setupUi(this);
 
@@ -58,10 +56,9 @@ CsApexWindow::CsApexWindow(QWidget *parent)
     ui->splitter->addWidget(designer_);
     ui->splitter->addWidget(ui->logOutput);
 
-    Tag::createIfNotExists("General");
-
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
+    QObject::connect(ui->actionSaveAsCopy, SIGNAL(triggered()), this,  SLOT(saveAsCopy()));
     QObject::connect(ui->actionLoad, SIGNAL(triggered()), this,  SLOT(load()));
     QObject::connect(ui->actionReload, SIGNAL(triggered()), this,  SLOT(reload()));
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), graph.get(),  SLOT(undo()));
@@ -75,7 +72,11 @@ CsApexWindow::CsApexWindow(QWidget *parent)
     QObject::connect(graph.get(), SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
     QObject::connect(graph.get(), SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
-    QObject::connect(this, SIGNAL(configChanged()), this, SLOT(updateTitle()));
+    QObject::connect(&core, SIGNAL(configChanged()), this, SLOT(updateTitle()));
+    QObject::connect(&core, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
+    QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
+    QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
+
     QObject::connect(&CommandDispatcher::instance(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
     QObject::connect(this, SIGNAL(initialize()), this, SLOT(init()), Qt::QueuedConnection);
@@ -88,8 +89,6 @@ CsApexWindow::CsApexWindow(QWidget *parent)
     timer.setInterval(100);
     timer.setSingleShot(false);
     timer.start();
-
-    setCurrentConfig(GraphIO::default_config);
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
@@ -135,7 +134,7 @@ void CsApexWindow::updateMenu()
 void CsApexWindow::updateTitle()
 {
     std::stringstream window;
-    window << "CS::APEX (" << getConfig() << ")";
+    window << "CS::APEX (" << core.getConfig() << ")";
 
     if(CommandDispatcher::instance().isDirty()) {
         window << " *";
@@ -235,9 +234,6 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     }
 
     event->accept();
-
-    StreamInterceptor::instance().stop();
-    BoxManager::instance().stop();
 }
 
 void CsApexWindow::showStatusMessage(const std::string &msg)
@@ -247,41 +243,16 @@ void CsApexWindow::showStatusMessage(const std::string &msg)
 
 void CsApexWindow::init()
 {
-    if(!init_) {
-        init_ = true;
+    init_ = true;
 
-        showStatusMessage("loading core plugins");
+    core.init();
 
-        core_plugin_manager.reload();
-
-        typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-        foreach(PAIR cp, core_plugin_manager.availableClasses()) {
-            CorePlugin::Ptr plugin = cp.second();
-
-            plugin->init();
-        }
-
-        showStatusMessage("loading boxedobject plugins");
-
-        BoxManager& bm = BoxManager::instance();
-
-        bm.loaded.connect(boost::bind(&CsApexWindow::showStatusMessage, this, _1));
-
-        bm.reload();
-
-        showStatusMessage("loading config");
-
-        resize(400,400);
-
-        reload();
-
-        statusBar()->hide();
-        ui->loading->hide();
-        repaint();
-        designer_->show();
-        ui->splitter->show();
-        hideLog();
-    }
+    statusBar()->hide();
+    ui->loading->hide();
+    repaint();
+    designer_->show();
+    ui->splitter->show();
+    hideLog();
 }
 
 void CsApexWindow::paintEvent(QPaintEvent *e)
@@ -295,112 +266,51 @@ void CsApexWindow::paintEvent(QPaintEvent *e)
 
 void CsApexWindow::save()
 {
-    saveAs(current_config_);
-}
-
-void CsApexWindow::setCurrentConfig(const std::string& filename)
-{
-    current_config_ = filename;
-
-    std::string dir = current_config_.substr(0, current_config_.find_last_of('/')+1);
-    chdir(dir.c_str());
-
-    Q_EMIT configChanged();
-}
-
-std::string CsApexWindow::getConfig() const
-{
-    return current_config_;
+    core.saveAs(core.getConfig());
 }
 
 void CsApexWindow::saveAs()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", current_config_.c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", core.getConfig().c_str(), GraphIO::config_selector.c_str());
 
     if(!filename.isEmpty()) {
-        saveAs(filename.toStdString());
-        setCurrentConfig(filename.toStdString());
+        core.saveAs(filename.toStdString());
+        core.setCurrentConfig(filename.toStdString());
     }
+}
+
+
+void CsApexWindow::saveAsCopy()
+{
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", core.getConfig().c_str(), GraphIO::config_selector.c_str());
+
+    if(!filename.isEmpty()) {
+        core.saveAs(filename.toStdString());
+    }
+}
+
+void CsApexWindow::reload()
+{
+    core.load(core.getConfig());
 }
 
 void CsApexWindow::load()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Load config", current_config_.c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", core.getConfig().c_str(), GraphIO::config_selector.c_str());
 
     if(QFile(filename).exists()) {
-        setCurrentConfig(filename.toStdString());
-
-        reload();
+        core.load(filename.toStdString());
     }
 }
 
-void CsApexWindow::saveAs(const std::string &file)
+void CsApexWindow::saveSettings(YAML::Emitter &e)
 {
-    std::string dir = file.substr(0, file.find_last_of('/')+1);
-    chdir(dir.c_str());
-
-    YAML::Emitter yaml;
-
-    yaml << YAML::BeginMap; // settings map
-
-    GraphIO graphio(Graph::root());
     DesignerIO designerio(*designer_);
-
-    designerio.saveSettings(yaml);
-    graphio.saveSettings(yaml);
-    graphio.saveConnections(yaml);
-
-    yaml << YAML::EndMap; // settings map
-
-    graphio.saveBoxes(yaml);
-
-    std::ofstream ofs(file.c_str());
-    ofs << yaml.c_str();
-
-    std::cout << "save: " << yaml.c_str() << std::endl;
-
-    CommandDispatcher::instance().setClean();
-    CommandDispatcher::instance().resetDirtyPoint();
+    designerio.saveSettings(e);
 }
 
-
-void CsApexWindow::reload()
+void CsApexWindow::loadSettings(YAML::Node &doc)
 {
-    Graph::Ptr graph_ = Graph::root();
-    graph_->clear();
-
-    GraphIO graphio(graph_);
     DesignerIO designerio(*designer_);
-
-    {
-        std::ifstream ifs(current_config_.c_str());
-        YAML::Parser parser(ifs);
-
-        YAML::Node doc;
-
-        if(!parser.GetNextDocument(doc)) {
-            std::cerr << "cannot read the config" << std::endl;
-            return;
-        }
-
-        designerio.loadSettings(doc);
-        graphio.loadSettings(doc);
-
-        graphio.loadBoxes(parser);
-    }
-    {
-        std::ifstream ifs(current_config_.c_str());
-        YAML::Parser parser(ifs);
-
-        YAML::Node doc;
-
-        if(!parser.GetNextDocument(doc)) {
-            std::cerr << "cannot read the config" << std::endl;
-            return;
-        }
-        graphio.loadConnections(doc);
-    }
-
-    CommandDispatcher::instance().setClean();
-    CommandDispatcher::instance().resetDirtyPoint();
+    designerio.loadSettings(doc);
 }

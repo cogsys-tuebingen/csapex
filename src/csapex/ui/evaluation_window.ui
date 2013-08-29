@@ -59,6 +59,7 @@
     </property>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
+    <addaction name="actionSaveAsCopy"/>
     <addaction name="actionLoad"/>
     <addaction name="actionReload"/>
     <addaction name="separator"/>
@@ -153,6 +154,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
+   </property>
+  </action>
+  <action name="actionSaveAsCopy">
+   <property name="text">
+    <string>Save As Copy</string>
    </property>
   </action>
  </widget>

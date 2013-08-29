@@ -207,3 +207,8 @@ void RegisterCorePlugins::init()
 
     ConnectionTypeManager::registerMessage("std::string", boost::bind(&connection_types::StringMessage::make));
 }
+
+void RegisterCorePlugins::shutdown()
+{
+    ROSHandler::instance().stop();
+}

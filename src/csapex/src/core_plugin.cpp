@@ -8,6 +8,11 @@ CorePlugin::~CorePlugin()
 
 }
 
+void CorePlugin::shutdown()
+{
+
+}
+
 void CorePlugin::setName(const std::string& name)
 {
     name_ = name;

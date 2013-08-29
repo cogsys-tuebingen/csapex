@@ -23,6 +23,7 @@ public:
 private:
     qt_gui_cpp::PluginContext* context_;
 
+    csapex::CsApexCore core_;
     csapex::CsApexWindow* eva_;
 };
 

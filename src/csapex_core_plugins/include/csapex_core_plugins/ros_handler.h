@@ -17,6 +17,7 @@ class ROSHandler : public Singleton<ROSHandler>
 
 public:
     ~ROSHandler();
+    void stop();
 
     boost::shared_ptr<ros::NodeHandle> nh();
     void initHandle(bool try_only = false);

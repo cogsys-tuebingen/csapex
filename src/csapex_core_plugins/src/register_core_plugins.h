@@ -12,6 +12,7 @@ public:
     RegisterCorePlugins();
 
     void init();
+    void shutdown();
 };
 
 }

@@ -12,6 +12,7 @@ public:
 public:
     virtual ~CorePlugin();
     virtual void init() = 0;
+    virtual void shutdown();
 
     void setName(const std::string& name);
     std::string getName();

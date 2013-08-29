@@ -2,11 +2,8 @@
 #define EVALUATION_WINDOW_H
 
 /// COMPONENT
-#include <csapex/core_plugin.h>
 #include <csapex/csapex_fwd.h>
-
-/// PROJECT
-#include <utils_plugin/plugin_manager.hpp>
+#include <csapex/csapex_core.h>
 
 /// SYSTEM
 #include <QMainWindow>
@@ -32,14 +29,11 @@ public:
      * @brief EvaluationWindow
      * @param parent
      */
-    explicit CsApexWindow(QWidget* parent = 0);
+    explicit CsApexWindow(CsApexCore &core, QWidget* parent = 0);
 
     void showMenu();
     void closeEvent(QCloseEvent* event);
     void paintEvent(QPaintEvent * e);
-
-    std::string getConfig() const;
-    void setCurrentConfig(const std::string& filename);
 
 private Q_SLOTS:
     void updateMenu();
@@ -52,26 +46,26 @@ private Q_SLOTS:
 public Q_SLOTS:
     void save();
     void saveAs();
+    void saveAsCopy();
     void load();
     void reload();
 
     void start();
     void showStatusMessage(const std::string& msg);
 
+    void saveSettings(YAML::Emitter& e);
+    void loadSettings(YAML::Node& doc);
+
 Q_SIGNALS:
     void initialize();
-    void configChanged();
+
 
 private:
-    void saveAs(const std::string& file);
+    CsApexCore& core;
 
-private:
     Ui::EvaluationWindow* ui;
 
-    std::string current_config_;
-
     Designer* designer_;
-    PluginManager<CorePlugin> core_plugin_manager;
 
     QTimer timer;
 

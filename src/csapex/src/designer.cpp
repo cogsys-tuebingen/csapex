@@ -10,13 +10,9 @@
 
 using namespace csapex;
 
-Q_DECLARE_METATYPE(QSharedPointer<QImage>)
-
 Designer::Designer(QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer), menu(NULL)
 {
-    qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
-
     ui->setupUi(this);
 
     designer_board = new DesignBoard;
@@ -61,6 +57,7 @@ void Designer::addBox(Box *box)
     //    box->setParent(this);
 
     designer_board->addBoxEvent(box);
+    box->show();
 }
 
 

@@ -50,7 +50,7 @@ else()
     add_definitions(-DWITH_VIOLA_JONES)
 endif()
 
-generate_dynamic_reconfigure_options(cfg/Global.cfg cfg/TfCreator.cfg)
+generate_dynamic_reconfigure_options(cfg/Global.cfg)# cfg/TfCreator.cfg)
 
 include_directories(${catkin_INCLUDE_DIRS})
 include_directories(${background_subtraction_INCLUDE_DIRS})
@@ -226,9 +226,9 @@ target_link_libraries(ros adapter tracker ${catkin_LIBRARIES} ${background_subtr
 ########################
 ########################
 ##### NODES AND PROGRAMS
-add_executable(manual_tf_creator src/manual_tf_creator.cpp)
-target_link_libraries(manual_tf_creator logger ${catkin_LIBRARIES})
-add_dependencies(manual_tf_creator ${catkin_EXPORTED_TARGETS} robot_detection_gencfg)
+#add_executable(manual_tf_creator src/manual_tf_creator.cpp)
+#target_link_libraries(manual_tf_creator logger ${catkin_LIBRARIES})
+#add_dependencies(manual_tf_creator ${catkin_EXPORTED_TARGETS} robot_detection_gencfg)
 
 #add_executable(antifilter_test src/anti_filter_test.cpp)
 #target_link_libraries(antifilter_test viz ${catkin_LIBRARIES})
@@ -236,8 +236,8 @@ add_dependencies(manual_tf_creator ${catkin_EXPORTED_TARGETS} robot_detection_ge
 #add_executable(test_suite src/test_suite.cpp)
 #target_link_libraries(test_suite viz ${catkin_LIBRARIES})
 
-add_executable(merge_test src/merge_test.cpp)
-target_link_libraries(merge_test ${catkin_LIBRARIES})
+#add_executable(merge_test src/merge_test.cpp)
+#target_link_libraries(merge_test ${catkin_LIBRARIES})
 
 #add_executable(test_rectangle  src/test/test_rectangle.cpp)
 #target_link_libraries(test_rectangle ${catkin_LIBRARIES})
@@ -245,14 +245,14 @@ target_link_libraries(merge_test ${catkin_LIBRARIES})
 #add_executable(stats_feat_dist src/stats_feat_per_distance.cpp)
 #target_link_libraries(stats_feat_dist viz ${catkin_LIBRARIES})
 
-add_executable(rerouter src/rerouter.cpp)
-target_link_libraries(rerouter ${catkin_LIBRARIES})
+#add_executable(rerouter src/rerouter.cpp)
+#target_link_libraries(rerouter ${catkin_LIBRARIES})
 
-add_executable(tf_importer src/tf_importer.cpp)
-target_link_libraries(tf_importer ${catkin_LIBRARIES})
+#add_executable(tf_importer src/tf_importer.cpp)
+#target_link_libraries(tf_importer ${catkin_LIBRARIES})
 
-add_executable(pose2tf src/pose_2_tf.cpp)
-target_link_libraries(pose2tf ${catkin_LIBRARIES})
+#add_executable(pose2tf src/pose_2_tf.cpp)
+#target_link_libraries(pose2tf ${catkin_LIBRARIES})
 
 add_executable(roc_viewer src/roc_viewer.cpp)
 target_link_libraries(roc_viewer roc ${catkin_LIBRARIES})

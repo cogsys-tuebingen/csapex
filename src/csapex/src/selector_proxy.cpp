@@ -83,7 +83,6 @@ Box::Ptr SelectorProxy::create(const QPoint& pos, const std::string& type, const
     object->setObjectName(uuid.c_str());
     object->setType(type);
     object->init(pos);
-    object->show();
     object->getContent()->setTypeName(type_);
 
     return object;

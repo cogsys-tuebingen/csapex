@@ -1,8 +1,8 @@
 /// PROJECT
+#include <csapex/csapex_core.h>
 #include <csapex/csapex_window.h>
 #include <csapex/box.h>
 #include <csapex/boxed_object.h>
-#include <csapex/graph.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -65,41 +65,62 @@ struct CsApexApp : public QApplication {
 
 }
 
-int main(int argc, char** argv)
+int run(CsApexApp& app)
 {
-//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
-    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_INFO);
-
-    po::options_description desc("Allowed options");
-    desc.add_options()
-            ("help", "show help message")
-            ;
-
-    po::variables_map vm;
-    po::notify(vm);
-
-    if(vm.count("help")) {
-        std::cout << desc << std::endl;
-        return 1;
-    }
-
-    CsApexApp app(argc, argv);
-
-    Graph::Ptr graph(new Graph);
-    Graph::setRoot(graph);
-
-    /*
-     * There seems to be a bug in Qt4:
-     *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
-     *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
-     */
-    CsApexWindow w;
-    w.start();
-
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
     signal(SIGINT, siginthandler);
     int result = app.exec();
 
     return result;
+}
+
+int main(int argc, char** argv)
+{
+    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_INFO);
+
+    po::options_description desc("Allowed options");
+    desc.add_options()
+            ("help", "show help message")
+            ("headless", "run without gui")
+            ;
+
+    // filters all qt parameters from argv
+    CsApexApp app(argc, argv);
+
+    po::variables_map vm;
+    try {
+        po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
+
+    } catch(po::unknown_option& e) {
+        std::cerr << "Error parsing parameters: " << e.what() << "\n";
+        std::cerr << desc << std::endl;
+        return 2;
+    }
+
+    po::notify(vm);
+
+    if(vm.count("help")) {
+        std::cerr << desc << std::endl;
+        return 1;
+    }
+
+    CsApexCore core;
+
+    if(!vm.count("headless")) {
+        /*
+         * There seems to be a bug in Qt4:
+         *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
+         *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
+         */
+        CsApexWindow w(core);
+        w.start();
+
+        return run(app);
+
+    } else {
+        core.init();
+        return run(app);
+    }
 }
 

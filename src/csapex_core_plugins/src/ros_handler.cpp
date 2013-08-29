@@ -14,10 +14,16 @@ ROSHandler::ROSHandler()
 
 ROSHandler::~ROSHandler()
 {
-    if(spinner_) {
-        spinner_->stop();
-    }
+    stop();
     ros::shutdown();
+}
+
+void ROSHandler::stop()
+{
+//    spinner_->stop();
+    spinner_.reset(static_cast<ros::AsyncSpinner*>(NULL));
+    nh_->shutdown();
+    nh_.reset((static_cast<ros::NodeHandle*>(NULL)));
 }
 
 boost::shared_ptr<ros::NodeHandle> ROSHandler::nh()
@@ -39,7 +45,7 @@ void ROSHandler::initHandle(bool try_only)
         return;
     }
 
-    if(has_connection.result()) {
+    if(has_connection.result() && !nh_) {
         nh_.reset(new ros::NodeHandle("~"));
         spinner_.reset(new ros::AsyncSpinner(2));
         spinner_->start();
@@ -93,8 +99,7 @@ void ROSHandler::refresh()
         has_connection.waitForFinished();
         if(!has_connection.result()) {
             // connection no longer there
-            spinner_->stop();
-            nh_->shutdown();
+            stop();
         }
     }
 

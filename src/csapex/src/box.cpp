@@ -117,6 +117,8 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     connect(ui->killbtn, SIGNAL(clicked()), this, SLOT(killContent()));
 
     connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
+
+    setVisible(false);
 }
 
 void Box::makeThread()
