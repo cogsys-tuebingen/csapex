@@ -16,7 +16,7 @@ public:
     PatternExtractor();
     void set (cv_local_patterns::LBP *bp);
     void set (cv_local_patterns::LTP *tp);
-    void extract(const cv::Mat &image, cv::Mat &descriptors);
+    void extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors);
 
     void setK(const double value);
     void setParams(const cv_extraction::ParamsLBP &params);

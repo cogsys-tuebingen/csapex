@@ -1,4 +1,5 @@
 #include "terra_batch_trainer.h"
+#include <computation/cmp_extraction.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -41,69 +42,67 @@ void TerraBatchTrainer::run()
 
 void TerraBatchTrainer::read(std::ifstream &in)
 {
+    cv_extraction::FeatureExtractor::Ptr feat(new cv_extraction::FeatureExtractor);
+    cv_extraction::PatternExtractor::Ptr patt(new cv_extraction::PatternExtractor);
     try {
         YAML::Parser parser(in);
         YAML::Node   document;
         parser.GetNextDocument(document);
 
-        /// EXTRACTOR PARAMS
-        pattern_extractor_.reset(new CMPPatternExtractorExt);
-        feature_extractor_.reset(new CMPFeatureExtractorExt);
-
         cv_extraction::ParamsORB  orb;
         if(orb.read(document)) {
-            pattern_extractor_.reset();
-            feature_extractor_->setParams(orb);
+            feat->setParams(orb);
+            extractor_ = feat;
             extracto_params_.reset(new cv_extraction::ParamsORB(orb));
         }
         cv_extraction::ParamsSURF surf;
         if(surf.read(document)) {
-            pattern_extractor_.reset();
-            feature_extractor_->setParams(surf);
+            feat->setParams(surf);
+            extractor_ = feat;
             extracto_params_.reset(new cv_extraction::ParamsSURF(surf));
         }
         cv_extraction::ParamsSIFT sift;
         if(sift.read(document)) {
-            pattern_extractor_.reset();
-            feature_extractor_->setParams(sift);
+            feat->setParams(sift);
+            extractor_ = feat;
             extracto_params_.reset(new cv_extraction::ParamsSIFT(sift));
         }
         cv_extraction::ParamsBRISK brisk;
         if(brisk.read(document)) {
-            pattern_extractor_.reset();
-            feature_extractor_->setParams(brisk);
+            feat->setParams(brisk);
+            extractor_ = feat;
             extracto_params_.reset(new cv_extraction::ParamsBRISK(brisk));
         }
         cv_extraction::ParamsBRIEF brief;
         if(brief.read(document)) {
-            pattern_extractor_.reset();
-            feature_extractor_->setParams(brief);
+            feat->setParams(brief);
+            extractor_ = feat;
             extracto_params_.reset(new cv_extraction::ParamsBRIEF(brief));
         }
         cv_extraction::ParamsFREAK freak;
         if(freak.read(document)) {
-            pattern_extractor_.reset();
-            feature_extractor_->setParams(freak);
+            feat->setParams(freak);
+            extractor_ = feat;
             extracto_params_.reset(new cv_extraction::ParamsFREAK(freak));
         }
         cv_extraction::ParamsLBP lbp;
         if(lbp.read(document)) {
-            feature_extractor_.reset();
-            pattern_extractor_->setParams(lbp);
+            patt->setParams(lbp);
+            extractor_ = patt;
             extracto_params_.reset(new cv_extraction::ParamsLBP(lbp));
         }
         cv_extraction::ParamsLTP ltp;
         if(ltp.read(document)) {
-            feature_extractor_.reset();
-            pattern_extractor_->setParams(ltp);
+            patt->setParams(ltp);
+            extractor_ = patt;
             extracto_params_.reset(new cv_extraction::ParamsLTP(ltp));
         }
 
         /// KEYPOINT PARAMS
         keypoint_params_.read(document);
         forest_params_.read(document);
-        if(feature_extractor_ != NULL)
-            feature_extractor_->setKeyPointParams(keypoint_params_);
+
+        feat->setKeyPointParams(keypoint_params_);
 
         /// PATHS TO THE FILES
         const YAML::Node &paths = document["ROI_FILES"];
@@ -211,14 +210,8 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
         return;
     }
 
-    if(pattern_extractor_ != NULL) {
-        pattern_extractor_->extractToYAML(emitter, image, terra_rois);
-    }
 
-    if(feature_extractor_ != NULL) {
-        feature_extractor_->extractToYAML(emitter, image, terra_rois);
-    }
-
+    CMPExtraction::extractToYAML(emitter,image, extractor_, terra_rois);
 }
 
 void TerraBatchTrainer::train()

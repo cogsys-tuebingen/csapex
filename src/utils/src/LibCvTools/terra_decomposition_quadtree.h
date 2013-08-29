@@ -1,6 +1,7 @@
 #ifndef TERRA_DECOMPOSITION_QUADTREE_H
 #define TERRA_DECOMPOSITION_QUADTREE_H
 #include "decomposition_quadtree.h"
+#include "terra_decomposition_classifier.h"
 #include "roi.hpp"
 
 class TerraQuadtreeDecomposition : public QuadtreeDecomposition
@@ -8,11 +9,11 @@ class TerraQuadtreeDecomposition : public QuadtreeDecomposition
 public:
     typedef boost::shared_ptr<TerraQuadtreeDecomposition> Ptr;
     typedef QuadtreeDecomposition::CVQt                   CVQt;
-    typedef QuadtreeDecomposition::CVQtNodesListPtr          CVQtNodesListPtr;
+    typedef QuadtreeDecomposition::CVQtNodesListPtr       CVQtNodesListPtr;
     typedef std::pair<CVQt*, cv_roi::TerraID>             ClassificationEntry;
 
     TerraQuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size,
-                               TerraDecomClassifierFeature *_classifier);
+                               TerraDecomClassifier::Ptr _classifier);
 
     virtual bool iterate();
 

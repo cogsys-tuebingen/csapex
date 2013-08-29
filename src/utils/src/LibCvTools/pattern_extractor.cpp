@@ -9,14 +9,16 @@ PatternExtractor::PatternExtractor() :
 {
 }
 
-void PatternExtractor::extract(const Mat &image, cv::Mat &descriptors)
+void PatternExtractor::extract(const Mat &image, const Rect &roi, cv::Mat &descriptors)
 {
+    cv::Mat img_roi = cv::Mat(image, roi);
+
     switch(type_) {
     case LBP:
-        extractLBP(image, descriptors);
+        extractLBP(img_roi, descriptors);
         break;
     case LTP:
-        extractLTP(image, descriptors);
+        extractLTP(img_roi, descriptors);
         break;
     default:
         std::cerr << "No pattern set, computation not possible!" << std::endl;
@@ -27,7 +29,7 @@ void PatternExtractor::extract(const Mat &image, cv::Mat &descriptors)
     }
 
     if(ext_params_->color_extension) {
-        cv::Scalar  mean = extractMeanColorRGBHSV(image);
+        cv::Scalar  mean = extractMeanColorRGBHSV(img_roi);
         addColorExtension(descriptors, mean);
     }
 

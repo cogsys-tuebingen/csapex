@@ -1,19 +1,22 @@
-#include "cmp_extractor_extended.h"
+#ifndef CMP_EXTRACTION_HPP
+#define CMP_EXTRACTION_HPP
+#include <utils/LibCvTools/extractor.hpp>
+#include <utils/LibCvTools/extractor_params.h>
+#include <roi.hpp>
 #include "yaml.hpp"
+#include "cmp_state_publisher.hpp"
 
 using namespace cv_extraction;
 
-CMPFeatureExtractorExt::CMPFeatureExtractorExt()
-{
-}
-
-void CMPFeatureExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois)
+namespace CMPExtraction {
+void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, const cv_extraction::Extractor::Ptr extractor,
+                   std::vector<cv_roi::TerraROI> rois)
 {
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
         cv::Mat desc;
-        extract(img, it->roi.rect, desc);
+        extractor->extract(img, it->roi.rect, desc);
 
-        switch(ext_params_->type) {
+        switch(extractor->params().type) {
         case ExtractorParams::SURF:
             CMPYAML::writeDescriptorRows<float, float>(desc, it->id.id, emitter);
             break;
@@ -32,16 +35,16 @@ void CMPFeatureExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Ma
     }
 }
 
-void CMPFeatureExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois,
-                                           CMPStatePublisher::Ptr state)
+void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img,  const cv_extraction::Extractor::Ptr extractor,
+                   std::vector<cv_roi::TerraROI> rois, CMPStatePublisher::Ptr state)
 {
     std::pair<int,int> counts(0, rois.size());
 
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++, counts.first++) {
         cv::Mat desc;
-        extract(img, it->roi.rect, desc);
+        extractor->extract(img, it->roi.rect, desc);
 
-        switch(ext_params_->type) {
+        switch(extractor->params().type) {
         case ExtractorParams::SURF:
             CMPYAML::writeDescriptorRows<float, float>(desc, it->id.id, emitter);
             break;
@@ -62,3 +65,7 @@ void CMPFeatureExtractorExt::extractToYAML(YAML::Emitter  &emitter, const cv::Ma
     }
 
 }
+
+}
+
+#endif // CMP_EXTRACTION_HPP

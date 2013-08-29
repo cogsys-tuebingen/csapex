@@ -597,6 +597,7 @@ void CtrlPreferences::applyExtratorParams(QString setting)
     }
 
     bridge_->setKeyPointParams(key_);
+    key_.dirty = false;
 
     Q_EMIT paramsExtrApplied();
 }

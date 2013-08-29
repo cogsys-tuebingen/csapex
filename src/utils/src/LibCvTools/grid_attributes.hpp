@@ -134,46 +134,46 @@ private:
     }
 };
 
-class AttrTerrainFeature {
+class AttrTerrain {
 public:
     struct Params {
-        cv_extraction::FeatureExtractor *extractor;
-        RandomForest                    *classifier;
-        bool                            use_max_prob;
-        cv_extraction::KeypointParams   key;
+        cv_extraction::Extractor::Ptr    extractor;
+        cv_extraction::KeypointParams    key;
+        RandomForest::Ptr                classifier;
+        bool                             use_max_prob;
     };
 
-    AttrTerrainFeature()
+    AttrTerrain()
     {
     }
 
-    AttrTerrainFeature(const int _classID, const float _probability) :
+    AttrTerrain(const int _classID, const float _probability) :
         classID(_classID),
         probability(_probability)
     {
     }
 
-    AttrTerrainFeature(const AttrTerrainFeature &t) :
+    AttrTerrain(const AttrTerrain &t) :
         classID(t.classID),
         probability(t.probability)
     {
     }
 
-    bool operator == (const AttrTerrainFeature &attr) const
+    bool operator == (const AttrTerrain &attr) const
     {
         return classID == attr.classID;
     }
 
-    static AttrTerrainFeature generate(const cv::Mat &_img, const cv::Rect &_roi,  const AttrTerrainFeature::Params &p)
+    static AttrTerrain generate(const cv::Mat &_img, const cv::Rect &_roi,  const AttrTerrain::Params &p)
     {
-        AttrTerrainFeature::Params p_ = p;
+        AttrTerrain::Params p_ = p;
         /// EXTRACT
         cv::Mat descriptors;
         p.extractor->extract(_img, _roi, descriptors);
 
         /// PREDICT
         if(descriptors.empty())
-            return AttrTerrainFeature(-1, -1.f);
+            return AttrTerrain(-1, -1.f);
 
         if(descriptors.type() != CV_32FC1) {
             descriptors.convertTo(descriptors, CV_32FC1);
@@ -190,60 +190,7 @@ public:
             p_.classifier->predictClassProb(descriptors, classID, prob);
         }
 
-        return AttrTerrainFeature(classID, prob);
-    }
-
-    int     classID;
-    float   probability;
-};
-
-class AttrTerrainClassPt {
-public:
-    struct Params {
-        cv_extraction::PatternExtractor   *extractor;
-        RandomForest       *classifier;
-        bool                color_extension;
-        bool                large_descriptors;
-    };
-
-    AttrTerrainClassPt()
-    {
-    }
-
-    AttrTerrainClassPt(const int _classID, const float _probability) :
-        classID(_classID),
-        probability(_probability)
-    {
-    }
-
-    AttrTerrainClassPt(const AttrTerrainFeature &t) :
-        classID(t.classID),
-        probability(t.probability)
-    {
-    }
-
-    bool operator == (const AttrTerrainFeature &attr) const
-    {
-        return classID == attr.classID;
-    }
-
-    static AttrTerrainClassPt generate(const cv::Mat &_img, const cv::Rect &_roi,  const AttrTerrainClassPt::Params &p)
-    {
-        cv::Mat descriptors;
-        cv::Mat img_roi(_img, _roi);
-
-        p.extractor->extract(img_roi, descriptors);
-
-        if(descriptors.type() != CV_32FC1) {
-            descriptors.convertTo(descriptors, CV_32FC1);
-        }
-
-        /// PREDICT
-        int   classID;
-        float prob;
-        p.classifier->predictClassProb(descriptors, classID, prob);
-
-        return AttrTerrainClassPt(classID, prob);
+        return AttrTerrain(classID, prob);
     }
 
     int     classID;

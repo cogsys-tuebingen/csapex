@@ -22,7 +22,7 @@ void FeatureExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &
     }
 }
 
-void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect roi, cv::Mat &descriptors)
+void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors)
 {
     cv::Mat         roi_img;
     cv::Mat         roi_col(image, roi);

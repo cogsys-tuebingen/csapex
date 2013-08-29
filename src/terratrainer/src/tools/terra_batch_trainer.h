@@ -35,8 +35,7 @@ private:
     cv_extraction::KeypointParams           keypoint_params_;
     cv_extraction::ExtractorParams::Ptr     extracto_params_;
     CMPForestParams                         forest_params_;
-    CMPPatternExtractorExt::Ptr             pattern_extractor_;
-    CMPFeatureExtractorExt::Ptr             feature_extractor_;
+    cv_extraction::Extractor::Ptr           extractor_;
 
     void read(std::ifstream &in);
     void write(std::ofstream &out);

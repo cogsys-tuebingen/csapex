@@ -5,12 +5,12 @@
 #include <time.h>
 
 #include "yaml.hpp"
+#include "cmp_extraction.hpp"
+#include <utils/LibCvTools/terra_decomposition_classifier.h>
 
 CMPCore::CMPCore() :
-    cv_extractor_(new CMPFeatureExtractorExt),
-    pt_extractor_(new CMPPatternExtractorExt),
     random_(new CMPRandomForestExt),
-    grid_(new cv_grid::GridTerraFeat),
+    grid_(new cv_grid::GridTerra),
     work_path_("/tmp"),
     file_extraction_("/extract.yaml"),
     file_forest_("/forest.yaml")
@@ -63,8 +63,6 @@ void CMPCore::computeGrid()
         return;
     }
 
-
-
     /// PARAMETERS
     prepareExtractor();
 
@@ -72,31 +70,14 @@ void CMPCore::computeGrid()
     int height = raw_image_.rows / grid_params_.cell_height;
     int width  = raw_image_.cols / grid_params_.cell_width;
 
-    if(ext_params_->type != cv_extraction::ExtractorParams::LBP &&
-            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
-
-        grid_.reset(new cv_grid::GridTerraFeat);
-
-        cv_grid::AttrTerrainFeature::Params p;
-        p.extractor       = cv_extractor_.get();
-        p.classifier      = random_.get();
-        p.key             = keypoint_params_;
-        p.use_max_prob    = ext_params_->use_max_prob;
-
-        cv_grid::prepare_grid<cv_grid::AttrTerrainFeature>
-                (*boost::dynamic_pointer_cast<cv_grid::GridTerraFeat>(grid_), raw_image_, height, width, p, cv::Mat());
-    } else {
-        grid_.reset(new cv_grid::GridTerraPatt);
-
-        cv_grid::AttrTerrainClassPt::Params p;
-        p.extractor  = pt_extractor_.get();
-        p.classifier = random_.get();
-        p.color_extension = ext_params_->color_extension;
-        p.large_descriptors           = ext_params_->combine_descriptors;
-
-        cv_grid::prepare_grid<cv_grid::AttrTerrainClassPt>
-                (*boost::dynamic_pointer_cast<cv_grid::GridTerraPatt>(grid_), raw_image_, height, width, p, cv::Mat());
-    }
+    grid_.reset(new cv_grid::GridTerra);
+    cv_grid::AttrTerrain::Params p;
+    p.extractor       = extractor_;
+    p.classifier      = random_;
+    p.key             = keypoint_params_;
+    p.use_max_prob    = ext_params_->use_max_prob;
+    cv_grid::prepare_grid<cv_grid::AttrTerrain>
+            (*boost::dynamic_pointer_cast<cv_grid::GridTerra>(grid_), raw_image_, height, width, p, cv::Mat());
 }
 
 void CMPCore::computeQuadtree()
@@ -107,26 +88,16 @@ void CMPCore::computeQuadtree()
         return;
     }
 
-    if(ext_params_->type != cv_extraction::ExtractorParams::LBP &&
-            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
         cv::Size min_size(quad_params_.min_width, quad_params_.min_height);
-
-
-        TerraDecomClassifierFeature   *classifier = new TerraDecomClassifierFeature(quad_params_.min_prob,
-                                                                                    random_.get(),
-                                                                                    cv_extractor_.get(),
-                                                                                    keypoint_params_,
-                                                                                    *ext_params_);
-
-        TerraQuadtreeDecomposition *decom = new TerraQuadtreeDecomposition(raw_image_,min_size, classifier);
-        quad_decom_.reset(decom);
+        TerraDecomClassifier::Ptr classifier(new TerraDecomClassifier(quad_params_.min_prob));
+        classifier->setClassifier(random_);
+        classifier->setExtractor(extractor_);
+        classifier->setUseMaxProb(ext_params_->use_max_prob);
+        quad_decom_.reset(new TerraQuadtreeDecomposition(raw_image_,min_size, classifier));
 
         /// ITERATE
         quad_decom_->auto_iterate();
 
-    } else {
-        std::cerr << "Pattern classifier currently not supported!" << std::endl;
-    }
 }
 bool CMPCore::hasComputedModel()
 {
@@ -138,31 +109,15 @@ void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
     if(grid_ == NULL)
         return;
 
-    if(ext_params_->type != cv_extraction::ExtractorParams::LBP  &&
-            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
-
-        cv_grid::GridTerraFeat &terra = *boost::dynamic_pointer_cast<cv_grid::GridTerraFeat>(grid_);
-        for(int i = 0 ; i < terra.rows() ; i++) {
-            for(int j = 0 ; j < terra.cols() ; j++) {
-                cv_grid::GridCellTerraFeat &cell = terra(i,j);
-                cv_roi::TerraROI tr;
-                tr.roi.rect = cell.bounding;
-                tr.id.id    = cell.attributes.classID;
-                tr.id.prob  = cell.attributes.probability;
-                cells.push_back(tr);
-            }
-        }
-    } else {
-        cv_grid::GridTerraPatt &terra = *boost::dynamic_pointer_cast<cv_grid::GridTerraPatt>(grid_);
-        for(int i = 0 ; i < terra.rows() ; i++) {
-            for(int j = 0 ; j < terra.cols() ; j++) {
-                cv_grid::GridCellTerraPatt &cell = terra(i,j);
-                cv_roi::TerraROI tr;
-                tr.roi.rect = cell.bounding;
-                tr.id.id    = cell.attributes.classID;
-                tr.id.prob  = cell.attributes.probability;
-                cells.push_back(tr);
-            }
+    cv_grid::GridTerra &terra = *grid_;
+    for(int i = 0 ; i < terra.rows() ; i++) {
+        for(int j = 0 ; j < terra.cols() ; j++) {
+            cv_grid::GridCellTerra &cell = terra(i,j);
+            cv_roi::TerraROI tr;
+            tr.roi.rect = cell.bounding;
+            tr.id.id    = cell.attributes.classID;
+            tr.id.prob  = cell.attributes.probability;
+            cells.push_back(tr);
         }
     }
 }
@@ -254,33 +209,52 @@ void CMPCore::unsetStatePublisher()
 
 void CMPCore::prepareExtractor()
 {
+    cv_extraction::FeatureExtractor *feat;
+    cv_extraction::PatternExtractor *patt;
+
+    if(ext_params_->type == cv_extraction::ExtractorParams::LBP ||
+            ext_params_->type == cv_extraction::ExtractorParams::LTP) {
+        patt = new cv_extraction::PatternExtractor;
+        extractor_.reset(patt);
+    } else {
+        feat = new cv_extraction::FeatureExtractor;
+        extractor_.reset(feat);
+    }
+
+
     switch(ext_params_->type) {
     case cv_extraction::ExtractorParams::ORB:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsORB>(ext_params_));
+        feat->setParams(*boost::shared_static_cast<cv_extraction::ParamsORB>(ext_params_));
+        feat->setKeyPointParams(keypoint_params_);
         break;
     case cv_extraction::ExtractorParams::SURF:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSURF>(ext_params_));
+        feat->setParams(*boost::shared_static_cast<cv_extraction::ParamsSURF>(ext_params_));
+        feat->setKeyPointParams(keypoint_params_);
         break;
     case cv_extraction::ExtractorParams::SIFT:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsSIFT>(ext_params_));
+        feat->setParams(*boost::shared_static_cast<cv_extraction::ParamsSIFT>(ext_params_));
+        feat->setKeyPointParams(keypoint_params_);
         break;
     case cv_extraction::ExtractorParams::BRIEF:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRIEF>(ext_params_));
+        feat->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRIEF>(ext_params_));
+        feat->setKeyPointParams(keypoint_params_);
         break;
     case cv_extraction::ExtractorParams::BRISK:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRISK>(ext_params_));
+        feat->setParams(*boost::shared_static_cast<cv_extraction::ParamsBRISK>(ext_params_));
+        feat->setKeyPointParams(keypoint_params_);
         break;
     case cv_extraction::ExtractorParams::FREAK:
-        cv_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsFREAK>(ext_params_));
+        feat->setParams(*boost::shared_static_cast<cv_extraction::ParamsFREAK>(ext_params_));
+        feat->setKeyPointParams(keypoint_params_);
         break;
     case cv_extraction::ExtractorParams::LBP:
-        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLBP>(ext_params_));
+        patt->setParams(*boost::shared_static_cast<cv_extraction::ParamsLBP>(ext_params_));
         break;
     case cv_extraction::ExtractorParams::LTP:
-        pt_extractor_->setParams(*boost::shared_static_cast<cv_extraction::ParamsLTP>(ext_params_));
+        patt->setParams(*boost::shared_static_cast<cv_extraction::ParamsLTP>(ext_params_));
         break;
     }
-    cv_extractor_->setKeyPointParams(keypoint_params_);
+
 }
 
 void CMPCore::extract()
@@ -292,18 +266,10 @@ void CMPCore::extract()
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
     emitter << YAML::BeginSeq;
-    if(ext_params_->type != cv_extraction::ExtractorParams::LBP &&
-            ext_params_->type != cv_extraction::ExtractorParams::LTP) {
-        if(state_ != NULL)
-            cv_extractor_->extractToYAML(emitter, raw_image_, rois_, state_);
-        else
-            cv_extractor_->extractToYAML(emitter, raw_image_, rois_);
-    } else {
-        if(state_ != NULL)
-            pt_extractor_->extractToYAML(emitter, raw_image_, rois_, state_);
-        else
-            pt_extractor_->extractToYAML(emitter, raw_image_, rois_);
-    }
+    if(state_ != NULL)
+        CMPExtraction::extractToYAML(emitter, raw_image_, extractor_, rois_, state_);
+    else
+        CMPExtraction::extractToYAML(emitter, raw_image_, extractor_, rois_);
     emitter << YAML::EndSeq;
     emitter << YAML::EndMap;
     out << emitter.c_str();

@@ -15,22 +15,6 @@ public:
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois);
     void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> rois,
                        CMPStatePublisher::Ptr state);
-
-
-};
-
-class CMPPatternExtractorExt : public cv_extraction::PatternExtractor
-{
-public:
-    typedef boost::shared_ptr<CMPPatternExtractorExt> Ptr;
-    CMPPatternExtractorExt();
-
-    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois);
-    void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, std::vector<cv_roi::TerraROI> &rois,
-                       CMPStatePublisher::Ptr state);
-
-private:
-    cv_extraction::ExtractorParams params_;
 };
 
 

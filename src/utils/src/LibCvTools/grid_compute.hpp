@@ -58,10 +58,8 @@ typedef GridCell<cv::Rect, AttrScalar>          GridCellScalar;    /// a grid ce
 typedef Grid_<GridCellScalar, cv::Rect>         GridScalar;        /// a grid based on hls grid cells
 typedef GridCell<cv::Rect, AttrHistogram>       GridCellHist;
 typedef Grid_<GridCellHist, cv::Rect>           GridHist;
-typedef GridCell<cv::Rect, AttrTerrainFeature>  GridCellTerraFeat;
-typedef Grid_<GridCellTerraFeat, cv::Rect>      GridTerraFeat;
-typedef GridCell<cv::Rect, AttrTerrainClassPt>  GridCellTerraPatt;
-typedef Grid_<GridCellTerraPatt, cv::Rect>      GridTerraPatt;
+typedef GridCell<cv::Rect, AttrTerrain>         GridCellTerra;
+typedef Grid_<GridCellTerra, cv::Rect>          GridTerra;
 
 
 /**

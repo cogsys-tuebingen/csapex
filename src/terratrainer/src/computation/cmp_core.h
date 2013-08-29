@@ -63,8 +63,7 @@ private:
     typedef CMPFeatureExtractorExt::KeyPoints                      KeyPoints;
 
     cv::Mat                                 raw_image_;
-    CMPFeatureExtractorExt::Ptr             cv_extractor_;
-    CMPPatternExtractorExt::Ptr             pt_extractor_;
+    cv_extraction::Extractor::Ptr           extractor_;
     CMPRandomForestExt::Ptr                 random_;
     CMPStatePublisher::Ptr                  state_;
 
@@ -75,7 +74,7 @@ private:
     TerraQuadtreeDecomposition::Ptr         quad_decom_;
     CMPQuadParams                           quad_params_;
 
-    boost::shared_ptr<cv_grid::Grid>        grid_;
+    boost::shared_ptr<cv_grid::GridTerra>   grid_;
     CMPGridParams                           grid_params_;
 
     std::string                     work_path_;

@@ -1,21 +1,29 @@
 #include "terra_decomposition_quadtree.h"
 
 TerraQuadtreeDecomposition::TerraQuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size,
-                                                       TerraDecomClassifierFeature *_classifier) :
+                                                       TerraDecomClassifier::Ptr _classifier) :
     QuadtreeDecomposition(_image, _min_region_size, _classifier)
 {
 }
 
 bool TerraQuadtreeDecomposition::iterate()
 {
-    TerraDecomClassifierFeature *terra_classifier = dynamic_cast<TerraDecomClassifierFeature*>(classifier_.get());
+    TerraDecomClassifier *terra_classifier = dynamic_cast<TerraDecomClassifier*>(classifier_.get());
 
     if(quadtree_nodes_.size() == 0) {
         for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; it++) {
-            if(terra_classifier->classify(*it))
+            bool classify     =  terra_classifier->classify(*it);
+            bool not_reached  =  !min_size_reached(*it);
+            if(classify && not_reached)
                 split_and_activate(*it);
-            else
-                quadtree_leaves_.push_back(&(*it));
+            else {
+                CVQt *node = &(*it);
+                cv_roi::TerraID p;
+                p.id    = terra_classifier->get_id();
+                p.prob  = terra_classifier->get_prob();
+                classifications_.insert(ClassificationEntry(node, p));
+                quadtree_leaves_.push_back(node);
+            }
         }
     } else {
         process_active_nodes();
@@ -40,7 +48,7 @@ void TerraQuadtreeDecomposition::regions(std::vector<cv_roi::TerraROI> &regions)
 
 void TerraQuadtreeDecomposition::process_active_nodes()
 {
-    TerraDecomClassifierFeature *terra_classifier = dynamic_cast<TerraDecomClassifierFeature*>(classifier_.get());
+    TerraDecomClassifier *terra_classifier = dynamic_cast<TerraDecomClassifier*>(classifier_.get());
 
     CVQtNodesListPtr list = quadtree_nodes_;
     quadtree_nodes_.clear();

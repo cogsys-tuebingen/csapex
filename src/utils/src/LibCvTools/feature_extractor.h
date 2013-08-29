@@ -24,7 +24,7 @@ public:
     /// SET THE PARAMETERS UP
     void set(cv::DescriptorExtractor* extractor);
     void extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors);
-    void extract(const cv::Mat &image, const cv::Rect roi, cv::Mat &descriptors);
+    void extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors);
 
     void setParams(const cv_extraction::ParamsORB              &params);
     void setParams(const cv_extraction::ParamsSURF             &params);
@@ -49,7 +49,6 @@ public:
 
 protected:
     CvExPtr                             extractor_;
-    boost::shared_ptr<ExtractorParams>  ext_params_;
     boost::shared_ptr<KeypointParams>   key_params_;
 
 };

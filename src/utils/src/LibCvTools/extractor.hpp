@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "extractor_params.h"
 
 namespace cv_extraction {
 class Extractor {
@@ -11,7 +12,13 @@ public:
     typedef boost::shared_ptr<Extractor> Ptr;
 
     virtual void extract(const cv::Mat &image, cv::Mat &descriptors){}
-    virtual void extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors){}
+    virtual void extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors){}
+
+    ExtractorParams params()
+    {
+        return *ext_params_;
+    }
+
 
     static cv::Scalar extractMeanColorRGBHSV(const cv::Mat &img)
     {
@@ -35,6 +42,7 @@ public:
 
 protected:
     Extractor(){}
+    boost::shared_ptr<ExtractorParams>  ext_params_;
 };
 
 }

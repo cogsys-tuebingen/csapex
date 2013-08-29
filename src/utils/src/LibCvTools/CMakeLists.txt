@@ -8,7 +8,6 @@ SET(CMAKE_BUILD_TYPE Debug)
 add_library (LibCvTools SHARED
     undistorter.cpp
     perspective_transform.cpp
-    terra_decomposition_quadtree.cpp
     grid.hpp
     grid_attributes.hpp
     grid_compute.hpp
@@ -25,6 +24,8 @@ add_library (LibCvTools SHARED
     extractor_params.cpp
     terra_map.hpp
     terra_mat.cpp
+    terra_decomposition_quadtree.cpp
+    terra_decomposition_classifier.cpp
 )
 
 target_link_libraries(LibCvTools

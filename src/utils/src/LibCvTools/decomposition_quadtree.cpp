@@ -1,6 +1,6 @@
 #include "decomposition_quadtree.h"
 
-QuadtreeDecomposition::QuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size, DecompositionClassifier *_classifier) :
+QuadtreeDecomposition::QuadtreeDecomposition(const cv::Mat &_image, const cv::Size &_min_region_size, DecompositionClassifier::Ptr _classifier) :
     image_(_image),
     min_region_size_(_min_region_size),
     classifier_(_classifier),
@@ -37,7 +37,7 @@ bool QuadtreeDecomposition::iterate()
 {
     if(quadtree_nodes_.size() == 0) {
         for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; it++) {
-            if(classifier_->classify(*it))
+            if(classifier_->classify(*it) && !min_size_reached(*it))
                 split_and_activate(*it);
             else
                 quadtree_leaves_.push_back(&(*it));
