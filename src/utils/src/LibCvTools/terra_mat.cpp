@@ -1,32 +1,50 @@
 #include "terra_mat.h"
 
-TerraMat::TerraMat(int width, int height)
-    :
-      Mat(zeros(height, width, CV_32FC(NO_OF_TERRAIN_CLASSES))) {
+TerraMat::TerraMat()
+{
 }
 
-void TerraMat::addTerrainClass(TerrainClass terrainClass) {
-    if (legend.size() < NO_OF_TERRAIN_CLASSES)
-        legend.push_back(terrainClass);
-    else
-        std::cerr << "Maximum no. of terrain classes exceeded!" << std::endl;
+TerraMat::TerraMat(const cv::Mat &terra_mat, const std::map<uchar, uchar> &mapping) :
+    channels_(terra_mat.channels()),
+    step_(terra_mat.step / terra_mat.elemSize1()),
+    mapping_(mapping),
+    terra_mat_(terra_mat)
+{
+}
+
+TerraMat::TerraMat(const cv::Mat &terra_mat) :
+    channels_(terra_mat.channels()),
+    step_(terra_mat.step / terra_mat.elemSize1()),
+    terra_mat_(terra_mat)
+{
+    for(uchar i = 0 ; i < channels_ ; i++)
+        mapping_.insert(std::make_pair(i,i));
+}
+
+void TerraMat::addTerrainClass(TerrainClass terrainClass)
+{
+    legend_.insert(std::make_pair(terrainClass.id, terrainClass));
 }
 
 // exports an uchar image, each pixel containing the id of the favorite terrain class
-cv::Mat TerraMat::getFavorites() const {
-    Mat result(zeros(this->rows, this->cols, CV_8UC1));
+cv::Mat TerraMat::getFavorites()
+{
+    cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC1, cv::Scalar::all(0));
 
-    for (int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++) {
+    float* data = (float*) terra_mat_.data;
+    for (int i = 0; i < terra_mat_.rows; i++)
+        for (int j = 0; j < terra_mat_.cols; j++) {
 
             // get terrain class with maximum probability
             uchar id = 0;
             float maxProb = 0.0f;
-            for (int k = 0; k < NO_OF_TERRAIN_CLASSES; k++) {
-                cv::Vec<float, NO_OF_TERRAIN_CLASSES> pixel = this->at< cv::Vec<float, NO_OF_TERRAIN_CLASSES> >(i,j);
-                if (pixel[k] > maxProb) {
-                    maxProb = pixel[k];
-                    id = k;
+            /// step[1] == elemsize()
+            int pixel_pos = step_ * i + j * channels_;
+            for (int k = 0; k < channels_ ; k++) {
+                float prob = data[pixel_pos + k];
+                if(prob > maxProb) {
+                    maxProb = prob;
+                    id = mapping_[k];
                 }
             }
             result.at<uchar>(i,j) = id;
@@ -36,13 +54,23 @@ cv::Mat TerraMat::getFavorites() const {
 }
 
 // exports an rgb image showing the color of the favorite terrain class in each pixel
-cv::Mat TerraMat::getFavoritesRGB() const {
-    Mat result(zeros(this->rows, this->cols, CV_8UC3));
-    Mat favorites = getFavorites();
+cv::Mat TerraMat::getFavoritesRGB() {
+    cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC3, cv::Scalar::all(0));
+    cv::Mat favorites = getFavorites();
 
-    for (int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
-            result.at<cv::Vec3b>(i,j) = legend[favorites.at<uchar>(i,j)].color;
+    if(channels_ > legend_.size()) {
+        std::cerr << "You have to add a legend with minimum size of channel amount!" << std::endl;
+        return cv::Mat();
+    }
+
+    for (int i = 0; i < terra_mat_.rows; i++)
+        for (int j = 0; j < terra_mat_.cols; j++)
+            result.at<cv::Vec3b>(i,j) = legend_[favorites.at<uchar>(i,j)].color;
 
     return result;
+}
+
+TerraMat::operator cv::Mat()
+{
+    return terra_mat_;
 }

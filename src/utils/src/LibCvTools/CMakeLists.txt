@@ -22,10 +22,11 @@ add_library (LibCvTools SHARED
     pattern_extractor.cpp
     feature_extractor.cpp
     extractor_params.cpp
-    terra_map.hpp
     terra_mat.cpp
+    terra_mat_generation.hpp
     terra_decomposition_quadtree.cpp
     terra_decomposition_classifier.cpp
+    math.hpp
 )
 
 target_link_libraries(LibCvTools

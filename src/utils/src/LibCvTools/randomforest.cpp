@@ -38,6 +38,13 @@ void RandomForest::predictClassProb(const cv::Mat &sample, int &classID, float &
     prob    = probs[classID];
 }
 
+void RandomForest::predictClassProbs(const cv::Mat &sample, std::map<int, float> &probs)
+{
+    probs.clear();
+    int classID;
+    prediction(sample, probs, classID);
+}
+
 void RandomForest::predictClassProbs(const cv::Mat &sample, std::vector<int> &classIDs, std::vector<float> &probs)
 {
     std::map<int, float> probs_map;

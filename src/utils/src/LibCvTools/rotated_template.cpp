@@ -203,12 +203,13 @@ int main(int argc, char** argv) {
 		}
 //*////////////////
 
-    TerraMat terraMatrix(640, 480);
-    terraMatrix.addTerrainClass(TerrainClass("Grass", cv::Vec3b(  0, 255, 255)));
-    terraMatrix.addTerrainClass(TerrainClass("Bush",  cv::Vec3b(255,   0,   0)));
-    terraMatrix.addTerrainClass(TerrainClass("Road",  cv::Vec3b(128, 128, 128)));
-    terraMatrix.addTerrainClass(TerrainClass("Roof",  cv::Vec3b(  0,   0, 255)));
-    terraMatrix.addTerrainClass(TerrainClass("Other", cv::Vec3b(255, 255, 255)));
+    cv::Mat  terrain(480, 640, CV_32FC(5), cv::Scalar::all(0));
+    TerraMat terraMatrix(terrain);
+    terraMatrix.addTerrainClass(TerrainClass(0, "Grass", cv::Vec3b(  0, 255, 255)));
+    terraMatrix.addTerrainClass(TerrainClass(1, "Bush",  cv::Vec3b(255,   0,   0)));
+    terraMatrix.addTerrainClass(TerrainClass(2, "Road",  cv::Vec3b(128, 128, 128)));
+    terraMatrix.addTerrainClass(TerrainClass(3, "Roof",  cv::Vec3b(  0,   0, 255)));
+    terraMatrix.addTerrainClass(TerrainClass(4, "Other", cv::Vec3b(255, 255, 255)));
 
 
     Vec<float, 5> pix = terraMatrix.at<float>(3,4);

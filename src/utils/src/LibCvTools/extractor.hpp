@@ -23,7 +23,7 @@ public:
     static cv::Scalar extractMeanColorRGBHSV(const cv::Mat &img)
     {
         cv::Mat convert;
-        cv::cvtColor(img, convert, CV_BGR2HSV);
+        cv::cvtColor(img, convert, CV_BGR2YUV);
 
         return cv::mean(convert);
     }
@@ -31,9 +31,8 @@ public:
     static void addColorExtension(cv::Mat &descriptor, const cv::Scalar &color)
     {
 
-        cv::Mat tmp(descriptor.rows, descriptor.cols + 3, descriptor.type(),cv::Scalar::all(0));
+        cv::Mat tmp(descriptor.rows, descriptor.cols + 2, descriptor.type(),cv::Scalar::all(0));
         cv::Mat tmp_roi(tmp, cv::Rect(0,0, descriptor.cols, descriptor.rows));
-        tmp.col(tmp.cols - 3).setTo(color[0]);
         tmp.col(tmp.cols - 2).setTo(color[1]);
         tmp.col(tmp.cols - 1).setTo(color[2]);
         descriptor.copyTo(tmp_roi);

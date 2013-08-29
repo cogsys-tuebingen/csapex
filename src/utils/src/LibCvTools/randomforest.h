@@ -19,8 +19,8 @@ public:
     /// USAGE
     void predictClass(const cv::Mat &sample, int &classID);
     void predictClassProb(const cv::Mat &sample, int &classID, float &prob);
+    void predictClassProbs(const cv::Mat &sample, std::map<int, float> &probs);
     void predictClassProbs(const cv::Mat &sample, std::vector<int> &classIDs, std::vector<float> &probs);
-
     void predictClassProbMultiSample    (const cv::Mat &samples, int &classID, float &prob);
     void predictClassProbMultiSampleMax (const cv::Mat &samples, int &classID, float &prob);
 protected:

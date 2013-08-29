@@ -6,32 +6,53 @@
 #include <vector>
 
 struct TerrainClass {
-    TerrainClass(std::string name, cv::Vec3b color)
+    TerrainClass(uchar id, std::string name, cv::Vec3b color)
         :
+          id(id),
           name(name),
           color(color) {
     }
 
+    TerrainClass()
+    {
+    }
+
+    uchar       id;
     std::string name;
-    cv::Vec3b color;
+    cv::Vec3b   color;
 };
 
-#define NO_OF_TERRAIN_CLASSES 5
 
-class TerraMat: public cv::Mat
+class TerraMat
 {
 public:
-    TerraMat(int width, int height);
+    TerraMat();
+    TerraMat(const cv::Mat &terra_mat);
+    TerraMat(const cv::Mat &terra_mat, const std::map<uchar, uchar> &mapping);
 
     void addTerrainClass(TerrainClass terrainClass);
 
     // exports an uchar image, each pixel containing the id of the favorite terrain class
-    Mat getFavorites() const;
+    cv::Mat getFavorites();
 
     // exports an rgb image showing the color of the favorite terrain class in each pixel
-    Mat getFavoritesRGB() const;
+    cv::Mat getFavoritesRGB();
 
-    std::vector<TerrainClass> legend;
+    operator cv::Mat();
+
+    template<typename _Tp>
+    _Tp& at(int i, int j)
+    {
+        return terra_mat_.at<_Tp>(i,j);
+    }
+
+private:
+    int                         channels_;
+    int                         step_;
+    std::map<uchar,uchar>       mapping_;
+    std::map<uchar,TerrainClass>legend_;
+    cv::Mat                     terra_mat_;
+
 };
 
 
