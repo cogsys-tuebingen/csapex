@@ -79,3 +79,13 @@ TerraMat::operator cv::Mat()
 {
     return terra_mat_;
 }
+
+void TerraMat::read(std::string filename) {
+    cv::FileStorage fs(filename, cv::FileStorage::READ);
+    fs["terramat"] >> terra_mat_;
+}
+
+void TerraMat::write(std::string filename) {
+    cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+    fs << "terramat" << terra_mat_;
+}

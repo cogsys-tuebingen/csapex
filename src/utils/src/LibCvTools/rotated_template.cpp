@@ -203,24 +203,23 @@ int main(int argc, char** argv) {
 		}
 //*////////////////
 
-    cv::Mat  terrain(480, 640, CV_32FC(5), cv::Scalar::all(0));
+    const int noOfClasses = 4;
+    cv::Mat  terrain(480, 640, CV_32FC(noOfClasses), cv::Scalar::all(0));
     TerraMat terraMatrix(terrain);
     terraMatrix.addTerrainClass(TerrainClass(0, "Grass", cv::Vec3b(  0, 255, 255)));
     terraMatrix.addTerrainClass(TerrainClass(1, "Bush",  cv::Vec3b(255,   0,   0)));
     terraMatrix.addTerrainClass(TerrainClass(2, "Road",  cv::Vec3b(128, 128, 128)));
     terraMatrix.addTerrainClass(TerrainClass(3, "Roof",  cv::Vec3b(  0,   0, 255)));
-    terraMatrix.addTerrainClass(TerrainClass(4, "Other", cv::Vec3b(255, 255, 255)));
+//    terraMatrix.addTerrainClass(TerrainClass(4, "Other", cv::Vec3b(255, 255, 255)));
 
+    terraMatrix.at< Vec<float, noOfClasses> >(3,4)[1] = 256.3;
+    terraMatrix.at< Vec<float, noOfClasses> >(5,4)[3] = 256.3;
 
-    Vec<float, 5> pix = terraMatrix.at<float>(3,4);
-    terraMatrix.at< Vec<float, 5> >(3,4)[1] = 256.3;
-    terraMatrix.at< Vec<float, 5> >(5,4)[3] = 256.3;
+    terraMatrix.write("test.yml");
+    terraMatrix.read("test.yml");
 
-    std::cout << terraMatrix.at< Vec<float, 5> >(3,4)[0] << " "
-              << pix[1] << " "
-              << pix[2] << " "
-//              << pix[3] << " "
-//              << rgbMatrix.at< Vec<float, 5> >(3,4)[4]
+    std::cout << terraMatrix.at< Vec<float, noOfClasses> >(3,4)[0] << " "
+//              << rgbMatrix.at< Vec<float, noOfClasses> >(3,4)[4]
               << (int)terraMatrix.getFavorites().at<uchar>(5,4) << " "
             << std::endl;
 
