@@ -32,6 +32,16 @@ public:
 
     void addTerrainClass(TerrainClass terrainClass);
 
+    void read(std::string filename) {
+        cv::FileStorage fs(filename, cv::FileStorage::READ);
+        fs["terramat"] >> terra_mat_;
+    }
+
+    void write(std::string filename) {
+        cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+        fs << "terramat" << terra_mat_;
+    }
+
     // exports an uchar image, each pixel containing the id of the favorite terrain class
     cv::Mat getFavorites();
 
@@ -47,12 +57,11 @@ public:
     }
 
 private:
-    int                         channels_;
+    const int                   channels_;
     int                         step_;
     std::map<uchar,uchar>       mapping_;
     std::map<uchar,TerrainClass>legend_;
     cv::Mat                     terra_mat_;
-
 };
 
 

@@ -1,6 +1,8 @@
 #include "terra_mat.h"
 
 TerraMat::TerraMat()
+    :
+      channels_(0)
 {
 }
 
@@ -23,7 +25,10 @@ TerraMat::TerraMat(const cv::Mat &terra_mat) :
 
 void TerraMat::addTerrainClass(TerrainClass terrainClass)
 {
-    legend_.insert(std::make_pair(terrainClass.id, terrainClass));
+    if (legend_.size() < channels_)
+        legend_.insert(std::make_pair(terrainClass.id, terrainClass));
+    else
+        std::cerr << "noOfTerrainClasses exceeded" << std::endl;
 }
 
 // exports an uchar image, each pixel containing the id of the favorite terrain class
