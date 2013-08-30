@@ -62,7 +62,7 @@ void BoxManager::reload()
         std::sort(map[cat].begin(), map[cat].end(), compare);
     }
 
-    SelectorProxy::Ptr meta(new SelectorProxyImp<SubGraph>("::meta"));
+    SelectorProxy::Ptr meta(new SelectorProxyImp<SubGraph>("::meta", ""));
     csapex::SelectorProxy::registerProxy(meta);
 
 }
@@ -85,6 +85,7 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
                 action->setIcon(icon);
                 action->setIconVisibleInMenu(true);
             }
+            action->setToolTip(proxy->getDescription().c_str());
             submenu->addAction(action);
         }
     }
@@ -113,6 +114,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
             std::string name = stripNamespace(proxy->getType());
 
             QTreeWidgetItem* child = new QTreeWidgetItem;
+            child->setToolTip(0, proxy->getDescription().c_str());
             child->setIcon(0, icon);
             child->setText(0, name.c_str());
             child->setData(0, Qt::UserRole, Box::MIME);

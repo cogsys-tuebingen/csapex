@@ -20,8 +20,17 @@ struct Constructor {
         type = n;
     }
 
+    std::string getDescription() const {
+        return descr;
+    }
+
+    void setDescription(const std::string& n) {
+        descr = n;
+    }
+
 protected:
     std::string type;
+    std::string descr;
     bool valid_;
     bool has_constructor;
 };

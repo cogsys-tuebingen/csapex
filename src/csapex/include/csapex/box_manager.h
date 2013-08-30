@@ -22,8 +22,8 @@ template <>
 struct InstallConstructor<csapex::BoxedObject>
 {
     template <class M, class L>
-    static void installConstructor(M*, L* loader, const std::string& name) {
-        csapex::SelectorProxy::Ptr dynamic(new csapex::SelectorProxyDynamic(name, boost::bind(&M::Loader::createInstance, loader, name)));
+    static void installConstructor(M*, L* loader, const std::string& name, const std::string& description) {
+        csapex::SelectorProxy::Ptr dynamic(new csapex::SelectorProxyDynamic(name, description, boost::bind(&M::Loader::createInstance, loader, name)));
         csapex::SelectorProxy::registerProxy(dynamic);
     }
 };

@@ -49,7 +49,7 @@ public:
     static void registerProxy(SelectorProxy::Ptr prototype);
 
 public:
-    SelectorProxy(const std::string& type, boost::shared_ptr<BoxedObject> prototype);
+    SelectorProxy(const std::string& type, const std::string &description, boost::shared_ptr<BoxedObject> prototype);
     virtual ~SelectorProxy();
 
     virtual SelectorProxy* clone() = 0;
@@ -58,6 +58,7 @@ public:
     std::string getType();
     std::vector<Tag> getTags();
     QIcon getIcon();
+    std::string getDescription();
 
     void startObjectPositioning(QWidget *parent, Ptr instance, const QPoint &offset = QPoint(0,0));
 
@@ -70,6 +71,7 @@ protected:
 
 protected:
     std::string type_;
+    std::string descr_;
     QIcon icon;
     std::vector<Tag> cat;
 };
@@ -78,8 +80,8 @@ template <class T>
 class SelectorProxyImp : public SelectorProxy
 {
 public:
-    SelectorProxyImp(const std::string& type)
-        : SelectorProxy(type, boost::shared_ptr<BoxedObject>(new T))
+    SelectorProxyImp(const std::string& type, const std::string& description)
+        : SelectorProxy(type, description, boost::shared_ptr<BoxedObject>(new T))
     {}
 
     virtual ~SelectorProxyImp()
@@ -90,7 +92,7 @@ public:
     }
 
     virtual SelectorProxy* clone() {
-        return new SelectorProxyImp<T>(type_);
+        return new SelectorProxyImp<T>(type_, descr_);
     }
 };
 
@@ -100,8 +102,8 @@ public:
     typedef boost::function< boost::shared_ptr<BoxedObject>()> Make;
 
 public:
-    SelectorProxyDynamic(const std::string& name, Make c)
-        : SelectorProxy(name, c()), c(c)
+    SelectorProxyDynamic(const std::string& name, const std::string& description, Make c)
+        : SelectorProxy(name, description, c()), c(c)
     {}
 
     virtual ~SelectorProxyDynamic()
@@ -112,7 +114,7 @@ public:
     }
 
     virtual SelectorProxy* clone() {
-        return new SelectorProxyDynamic(getType(), c);
+        return new SelectorProxyDynamic(getType(), getDescription(), c);
     }
 
 protected:

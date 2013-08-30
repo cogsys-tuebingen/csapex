@@ -11,8 +11,8 @@ using namespace csapex;
 
 const SelectorProxy::Ptr SelectorProxy::NullPtr;
 
-SelectorProxy::SelectorProxy(const std::string& type, boost::shared_ptr<BoxedObject> prototype)
-    : type_(type)
+SelectorProxy::SelectorProxy(const std::string& type, const std::string& description, boost::shared_ptr<BoxedObject> prototype)
+    : type_(type), descr_(description)
 {
     icon = prototype->getIcon();
     cat = prototype->getTags();
@@ -102,4 +102,9 @@ std::vector<Tag> SelectorProxy::getTags()
 QIcon SelectorProxy::getIcon()
 {
     return icon;
+}
+
+std::string SelectorProxy::getDescription()
+{
+    return descr_;
 }

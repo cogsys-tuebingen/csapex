@@ -15,7 +15,7 @@ template <class C>
 struct InstallConstructor
 {
     template <class M, class L>
-    static void installConstructor(M*, L*, const std::string&) {}
+    static void installConstructor(M*, L*, const std::string&, const std::string&) {}
 };
 }
 
@@ -65,10 +65,11 @@ protected:
             try {
                 loader_.loadLibraryForClass(*c);
 
-                plugin_manager::InstallConstructor<M>::installConstructor(this, &loader_, *c);
+                plugin_manager::InstallConstructor<M>::installConstructor(this, &loader_, *c, loader_.getClassDescription(*c));
 
                 Constructor constructor;
                 constructor.setType(*c);
+                constructor.setDescription(loader_.getClassDescription(*c));
                 constructor.setConstructor(boost::bind(&Loader::createInstance, &loader_, *c));
 
                 registerConstructor(constructor);
