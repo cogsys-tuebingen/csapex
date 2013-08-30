@@ -172,18 +172,32 @@ FilterStaticMask::~FilterStaticMask()
 }
 
 void FilterStaticMask::State::writeYaml(YAML::Emitter& out) const {
-    std::string file = parent->box_->UUID() + ".ppm";
-    out << YAML::Key << "mask" << YAML::Value << file;
-    cv::imwrite(file, mask_);
-}
+    out << YAML::Key << "rows" << YAML::Value << mask_.rows;
+    out << YAML::Key << "cols" << YAML::Value << mask_.cols;
+
+    assert(mask_.type() == CV_8UC1);
+
+    QByteArray raw = qCompress(mask_.data, mask_.rows * mask_.cols);
+    out << YAML::Key << "rawdata" << YAML::Value << raw.toBase64().data();
+ }
 
 void FilterStaticMask::State::readYaml(const YAML::Node& node) {
-    if(!node.FindValue("mask")){
-        return;
+    if(node.FindValue("rawdata")){
+        int rows, cols;
+        node["rows"] >> rows;
+        node["cols"] >> cols;
+
+        std::string data;
+        node["rawdata"] >> data;
+        QByteArray raw = qUncompress(QByteArray::fromBase64(data.data()));
+
+        cv::Mat(rows, cols, CV_8UC1, raw.data()).copyTo(mask_);
+
+    } else  if(node.FindValue("mask")) {
+        std::string file;
+        node["mask"] >> file;
+        mask_ = cv::imread(file, 0);
     }
-    std::string file;
-    node["mask"] >> file;
-    mask_ = cv::imread(file, 0);
 }
 
 void FilterStaticMask::showPainter()
