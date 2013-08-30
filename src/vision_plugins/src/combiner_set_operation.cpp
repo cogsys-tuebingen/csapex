@@ -46,10 +46,7 @@ void SetOperation::updateDynamicGui(QBoxLayout *layout)
 
 Memento::Ptr SetOperation::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state_;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state_));
 }
 
 void SetOperation::setState(Memento::Ptr memento)

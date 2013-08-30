@@ -46,10 +46,7 @@ void ColorAdjustment::setState(Memento::Ptr memento)
 
 Memento::Ptr ColorAdjustment::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state_;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state_));
 }
 
 void ColorAdjustment::fill(QBoxLayout *parent)

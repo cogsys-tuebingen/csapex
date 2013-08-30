@@ -98,10 +98,7 @@ void OutputDisplay::fill(QBoxLayout* layout)
 
 Memento::Ptr OutputDisplay::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void OutputDisplay::setState(Memento::Ptr memento)

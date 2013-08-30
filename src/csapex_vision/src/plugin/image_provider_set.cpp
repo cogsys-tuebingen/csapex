@@ -77,10 +77,7 @@ void ImageProviderSet::showFrame()
 
 Memento::Ptr ImageProviderSet::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void ImageProviderSet::setState(Memento::Ptr memento)

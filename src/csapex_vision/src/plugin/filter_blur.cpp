@@ -41,10 +41,7 @@ void FilterBlur::update(int slot)
 
 Memento::Ptr FilterBlur::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void FilterBlur::setState(Memento::Ptr memento)

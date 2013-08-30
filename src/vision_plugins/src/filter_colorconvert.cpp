@@ -72,10 +72,7 @@ void ColorConvert::filter(cv::Mat &img, cv::Mat &mask)
 
 Memento::Ptr ColorConvert::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state_;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state_));
 }
 
 void ColorConvert::setState(Memento::Ptr memento)

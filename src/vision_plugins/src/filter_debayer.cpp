@@ -48,10 +48,7 @@ void Debayer::filter(cv::Mat &img, cv::Mat &mask)
 
 Memento::Ptr Debayer::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state_;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state_));
 }
 
 void Debayer::setState(Memento::Ptr memento)

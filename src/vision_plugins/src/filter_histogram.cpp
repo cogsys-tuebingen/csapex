@@ -38,10 +38,7 @@ Histogram::Histogram() :
 
 Memento::Ptr Histogram::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state_;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state_));
 }
 
 void Histogram::setState(Memento::Ptr memento)

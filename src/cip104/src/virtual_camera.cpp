@@ -310,10 +310,7 @@ void VirtualCamera::importDialog()
 
 Memento::Ptr VirtualCamera::getState() const
 {
-    boost::shared_ptr<VirtualCamera::State> memento(new VirtualCamera::State((VirtualCamera*) this));
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void VirtualCamera::setState(Memento::Ptr memento)

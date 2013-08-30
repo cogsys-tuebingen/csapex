@@ -247,10 +247,7 @@ void FilterStaticMask::insert(QBoxLayout* layout)
 
 Memento::Ptr FilterStaticMask::getState() const
 {
-    boost::shared_ptr<State> memento(new State((FilterStaticMask*) this));
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void FilterStaticMask::setState(Memento::Ptr memento)

@@ -75,10 +75,7 @@ void TextInput::State::readYaml(const YAML::Node& node) {
 
 Memento::Ptr TextInput::getState() const
 {
-    boost::shared_ptr<TextInput::State> memento(new TextInput::State);
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void TextInput::setState(Memento::Ptr memento)

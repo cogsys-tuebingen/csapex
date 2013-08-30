@@ -239,10 +239,7 @@ void BackgroundSubtraction::State::readYaml(const YAML::Node& node)
 
 Memento::Ptr BackgroundSubtraction::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void BackgroundSubtraction::setState(Memento::Ptr memento)

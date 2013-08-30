@@ -191,10 +191,7 @@ void FileImporter::importDialog()
 
 Memento::Ptr FileImporter::getState() const
 {
-    boost::shared_ptr<FileImporter::State> memento(new FileImporter::State((FileImporter*) this));
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void FileImporter::setState(Memento::Ptr memento)

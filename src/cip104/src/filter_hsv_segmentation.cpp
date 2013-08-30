@@ -60,10 +60,7 @@ void HSVSegmentation::insert(QBoxLayout* layout)
 
 Memento::Ptr HSVSegmentation::getState() const
 {
-    boost::shared_ptr<State> memento(new State);
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void HSVSegmentation::setState(Memento::Ptr memento)

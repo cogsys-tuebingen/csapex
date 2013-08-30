@@ -94,10 +94,7 @@ void ExportRos::State::readYaml(const YAML::Node& node) {
 
 Memento::Ptr ExportRos::getState() const
 {
-    boost::shared_ptr<ExportRos::State> memento(new ExportRos::State);
-    *memento = state;
-
-    return memento;
+    return boost::shared_ptr<State>(new State(state));
 }
 
 void ExportRos::setState(Memento::Ptr memento)
