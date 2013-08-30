@@ -9,6 +9,7 @@ struct Node;
 
 namespace cv_extraction {
 struct KeypointParams {
+    typedef boost::shared_ptr<KeypointParams> Ptr;
 
     KeypointParams();
 

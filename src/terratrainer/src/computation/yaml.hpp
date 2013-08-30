@@ -41,6 +41,28 @@ inline void writeDescriptorRows(const Mat &desc, const int id, YAML::Emitter &em
         CMPYAML::writeDescriptor<_Tp, _Tw>(roi, id, emitter);
     }
 }
+
+template<class T>
+void readSequence(const YAML::Iterator &begin, const YAML::Iterator &end,
+                  std::vector<T> &buffer)
+{
+    for(YAML::Iterator it = begin ; it != end ; it++) {
+        T value;
+        (*it) >> value;
+        buffer.push_back(value);
+    }
+}
+
+template<class T>
+void writeSequence(YAML::Emitter &emitter, const std::vector<T> &buffer)
+{
+    emitter << YAML::BeginSeq;
+    for(typename std::vector<T>::const_iterator it = buffer.begin() ; it != buffer.end() ; it++)
+        emitter << *it;
+    emitter << YAML::EndSeq;
+}
+
+
 }
 
 #endif // YAML_HPP

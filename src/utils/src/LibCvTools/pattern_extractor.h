@@ -1,7 +1,7 @@
 #ifndef PATTERN_EXTRACTOR_H
 #define PATTERN_EXTRACTOR_H
 
-#include "extractor.hpp"
+#include "extractor.h"
 #include "local_patterns.hpp"
 namespace cv_extraction {
 class ExtractorParams;

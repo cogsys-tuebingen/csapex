@@ -1,5 +1,6 @@
 #include "terra_batch_trainer.h"
 #include <computation/cmp_extraction.hpp>
+#include <computation/yaml.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -49,64 +50,14 @@ void TerraBatchTrainer::read(std::ifstream &in)
         YAML::Node   document;
         parser.GetNextDocument(document);
 
-        cv_extraction::ParamsORB  orb;
-        if(orb.read(document)) {
-            feat->setParams(orb);
-            extractor_ = feat;
-            extracto_params_.reset(new cv_extraction::ParamsORB(orb));
-        }
-        cv_extraction::ParamsSURF surf;
-        if(surf.read(document)) {
-            feat->setParams(surf);
-            extractor_ = feat;
-            extracto_params_.reset(new cv_extraction::ParamsSURF(surf));
-        }
-        cv_extraction::ParamsSIFT sift;
-        if(sift.read(document)) {
-            feat->setParams(sift);
-            extractor_ = feat;
-            extracto_params_.reset(new cv_extraction::ParamsSIFT(sift));
-        }
-        cv_extraction::ParamsBRISK brisk;
-        if(brisk.read(document)) {
-            feat->setParams(brisk);
-            extractor_ = feat;
-            extracto_params_.reset(new cv_extraction::ParamsBRISK(brisk));
-        }
-        cv_extraction::ParamsBRIEF brief;
-        if(brief.read(document)) {
-            feat->setParams(brief);
-            extractor_ = feat;
-            extracto_params_.reset(new cv_extraction::ParamsBRIEF(brief));
-        }
-        cv_extraction::ParamsFREAK freak;
-        if(freak.read(document)) {
-            feat->setParams(freak);
-            extractor_ = feat;
-            extracto_params_.reset(new cv_extraction::ParamsFREAK(freak));
-        }
-        cv_extraction::ParamsLBP lbp;
-        if(lbp.read(document)) {
-            patt->setParams(lbp);
-            extractor_ = patt;
-            extracto_params_.reset(new cv_extraction::ParamsLBP(lbp));
-        }
-        cv_extraction::ParamsLTP ltp;
-        if(ltp.read(document)) {
-            patt->setParams(ltp);
-            extractor_ = patt;
-            extracto_params_.reset(new cv_extraction::ParamsLTP(ltp));
-        }
+        Extractor::read(document, extractor_, extracto_params_, keypoint_params_);
 
-        /// KEYPOINT PARAMS
-        keypoint_params_.read(document);
+        /// FOREST PARAMS
         forest_params_.read(document);
-
-        feat->setKeyPointParams(keypoint_params_);
 
         /// PATHS TO THE FILES
         const YAML::Node &paths = document["ROI_FILES"];
-        readSequence<std::string>(paths.begin(), paths.end() , buf_roi_paths_);
+        CMPYAML::readSequence<std::string>(paths.begin(), paths.end() , buf_roi_paths_);
 
         /// BUFFER CLASSES
         const YAML::Node &classes = document["CLASSES"];
@@ -114,7 +65,7 @@ void TerraBatchTrainer::read(std::ifstream &in)
 
         /// BUFFER COLORS
         const YAML::Node &colors = document["CLASSES_PALETTE"];
-        readSequence<int>(colors.begin(), colors.end(), buf_colors_);
+        CMPYAML::readSequence<int>(colors.begin(), colors.end(), buf_colors_);
 
         std::cout << "Loaded settings and roi file pathes!" << std::endl;
     } catch (YAML::Exception e) {
@@ -135,7 +86,7 @@ void TerraBatchTrainer::write(std::ofstream &out)
     emitter << YAML::Key << "CLASSES" << YAML::Value;
     writeClasses(emitter);
     emitter << YAML::Key << "CLASSES_PALETTE" << YAML::Value;
-    writeSequence<int>(emitter, buf_colors_);
+    CMPYAML::writeSequence<int>(emitter, buf_colors_);
     emitter << YAML::Key << "CLASSIFIER" << YAML::Value;
     emitter << YAML::BeginMap;
     keypoint_params_.write(emitter);
@@ -230,6 +181,37 @@ void TerraBatchTrainer::train()
     } else {
         std::cerr << "Couldn't train classifier!" << std::endl;
     }
+}
+
+void TerraBatchTrainer::readClasses(const YAML::Iterator &begin, const YAML::Iterator &end)
+{
+
+    for(YAML::Iterator it = begin ; it != end ; it++) {
+        int class_id;
+        int color;
+        std::string info;
+
+        (*it)["id"] >> class_id;
+        (*it)["color"] >> color;
+        (*it)["info"]  >> info;
+
+        buf_classes_.push_back(class_id);
+        buf_classes_colors_.push_back(color);
+        buf_classes_infos_.push_back(info);
+    }
+}
+
+void TerraBatchTrainer::writeClasses(YAML::Emitter &emitter)
+{
+    emitter << YAML::BeginSeq;
+    for(int i = 0 ; i < buf_classes_.size() ; i++) {
+        emitter << YAML::BeginMap;
+        emitter << YAML::Key << "id"   << YAML::Value << buf_classes_[i];
+        emitter << YAML::Key << "color"<< YAML::Value << buf_classes_colors_[i];
+        emitter << YAML::Key << "info" << YAML::Value << buf_classes_infos_[i];
+        emitter << YAML::EndMap;
+    }
+    emitter << YAML::EndSeq;
 }
 
 int main(int argc, char *argv[])

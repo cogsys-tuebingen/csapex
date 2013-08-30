@@ -1,7 +1,7 @@
 #ifndef FEATURE_EXTRACTOR_H
 #define FEATURE_EXTRACTOR_H
 
-#include "extractor.hpp"
+#include "extractor.h"
 namespace cv_extraction {
 class ExtractorParams;
 class KeypointParams;
@@ -33,6 +33,7 @@ public:
     void setParams(const cv_extraction::ParamsBRIEF            &params);
     void setParams(const cv_extraction::ParamsFREAK            &params);
     void setKeyPointParams(const cv_extraction::KeypointParams &key);
+    KeypointParams keypointParams();
 
     /// PUBLIC STATIC METHODS
     static KeyPoints prepareKeypoint(const cv::Rect &rect, const KeypointParams &params);

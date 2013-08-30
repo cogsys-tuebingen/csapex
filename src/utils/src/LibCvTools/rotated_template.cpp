@@ -206,10 +206,10 @@ int main(int argc, char** argv) {
     const int noOfClasses = 4;
     cv::Mat  terrain(480, 640, CV_32FC(noOfClasses), cv::Scalar::all(0));
     TerraMat terraMatrix(terrain);
-    terraMatrix.addTerrainClass(TerrainClass(0, "Grass", cv::Vec3b(  0, 255, 255)));
-    terraMatrix.addTerrainClass(TerrainClass(1, "Bush",  cv::Vec3b(255,   0,   0)));
-    terraMatrix.addTerrainClass(TerrainClass(2, "Road",  cv::Vec3b(128, 128, 128)));
-    terraMatrix.addTerrainClass(TerrainClass(3, "Roof",  cv::Vec3b(  0,   0, 255)));
+    terraMatrix.addLegendEntry(TerrainClass(0, "Grass", cv::Vec3b(  0, 255, 255)));
+    terraMatrix.addLegendEntry(TerrainClass(1, "Bush",  cv::Vec3b(255,   0,   0)));
+    terraMatrix.addLegendEntry(TerrainClass(2, "Road",  cv::Vec3b(128, 128, 128)));
+    terraMatrix.addLegendEntry(TerrainClass(3, "Roof",  cv::Vec3b(  0,   0, 255)));
 //    terraMatrix.addTerrainClass(TerrainClass(4, "Other", cv::Vec3b(255, 255, 255)));
 
     terraMatrix.at< Vec<float, noOfClasses> >(3,4)[1] = 256.3;

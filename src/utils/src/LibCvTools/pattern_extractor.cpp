@@ -29,7 +29,7 @@ void PatternExtractor::extract(const Mat &image, const Rect &roi, cv::Mat &descr
     }
 
     if(ext_params_->color_extension) {
-        cv::Scalar  mean = extractMeanColorRGBHSV(img_roi);
+        cv::Scalar  mean = extractMeanColorRGBYUV(img_roi);
         addColorExtension(descriptors, mean);
     }
 

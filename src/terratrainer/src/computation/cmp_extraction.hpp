@@ -1,6 +1,6 @@
 #ifndef CMP_EXTRACTION_HPP
 #define CMP_EXTRACTION_HPP
-#include <utils/LibCvTools/extractor.hpp>
+#include <utils/LibCvTools/extractor.h>
 #include <utils/LibCvTools/extractor_params.h>
 #include <roi.hpp>
 #include "yaml.hpp"

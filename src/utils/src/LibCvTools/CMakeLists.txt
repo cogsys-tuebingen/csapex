@@ -18,7 +18,7 @@ add_library (LibCvTools SHARED
     randomforest.cpp
     roi.hpp
     local_patterns.hpp
-    extractor.hpp
+    extractor.cpp
     pattern_extractor.cpp
     feature_extractor.cpp
     extractor_params.cpp
@@ -32,6 +32,7 @@ add_library (LibCvTools SHARED
 target_link_libraries(LibCvTools
     ${OpenCV_LIBS}
     ${Boost_LIBRARIES}
+    yaml-cpp
 )
 
 # Rotated template test
@@ -41,6 +42,13 @@ add_executable(rotated_template
 
 target_link_libraries(rotated_template
     LibParticleFilter
+    ${OpenCV_LIBS})
+
+add_executable(test_terra_map
+    test_terra_mat.cpp)
+
+target_link_libraries(test_terra_map
+    LibCvTools
     ${OpenCV_LIBS})
 
 install(TARGETS LibCvTools LIBRARY DESTINATION lib)

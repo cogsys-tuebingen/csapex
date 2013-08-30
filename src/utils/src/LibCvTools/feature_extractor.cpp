@@ -26,7 +26,7 @@ void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect &roi, cv::Ma
 {
     cv::Mat         roi_img;
     cv::Mat         roi_col(image, roi);
-    cv::Scalar      mean = extractMeanColorRGBHSV(roi_col);
+    cv::Scalar      mean = extractMeanColorRGBYUV(roi_col);
     KeypointParams  kp = *key_params_;
     ExtractorParams ep = *ext_params_;
 
@@ -97,7 +97,10 @@ void FeatureExtractor::setKeyPointParams(const KeypointParams &key)
     key_params_.reset(new KeypointParams(key));
 }
 
-
+KeypointParams FeatureExtractor::keypointParams()
+{
+    return *key_params_;
+}
 
 FeatureExtractor::KeyPoints FeatureExtractor::prepareKeypoint(const cv::Rect &rect, const KeypointParams &params)
 {

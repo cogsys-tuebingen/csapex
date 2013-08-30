@@ -3,7 +3,7 @@
 #include <opencv2/core/core.hpp>
 #include <iostream>
 #include "math.hpp"
-#include "extractor.hpp"
+#include "extractor.h"
 #include "randomforest.h"
 
 using namespace cv_extraction;
@@ -18,6 +18,16 @@ inline void check_dimension(const int rows, const int cols, const int cell_size)
     }
 }
 
+/**
+ * @brief As dynamic size implementation according to classes parameter.
+ * @param img                   - the image to generate a terramat of
+ * @param cell_size             - the cellsize the regions should have
+ * @param classes               - the amount of classes that are required
+ * @param extractor             - the extractor to use
+ * @param classifier            - the classifier to
+ * @param terraMat              - the terramatrix
+ * @param channel_mapping       - the channel class id mapping
+ */
 inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const int classes,
                                Extractor::Ptr extractor, RandomForest::Ptr classifier,
                                cv::Mat terraMat, std::map<uchar, uchar> &channel_mapping)
@@ -72,10 +82,19 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
     cv::merge(layers, terraMat);
 }
 
+/**
+ * @brief As fixed size implementation according to template parameter.
+ * @param img                   - the image to generate a terramat of
+ * @param cell_size             - the cellsize the regions should have
+ * @param extractor             - the extractor to use
+ * @param classifier            - the classifier to
+ * @param terraMat              - the terramatrix
+ * @param channel_mapping       - the channel class id mapping
+ */
 template<int classes = 5>
-inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const int classes,
+inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size,
                                Extractor::Ptr extractor, RandomForest::Ptr classifier,
-                               cv::Mat &terraMat, std::map<int, int> &channel_mapping)
+                               cv::Mat &terraMat, std::map<uchar, uchar> &channel_mapping)
 {
     /// PREPARE MATRICES
     int map_rows = img.rows / cell_size;
@@ -121,58 +140,4 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
         }
     }
 }
-
-
-
-
-//void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect roi, const KeypointParams &params, const int max_octave,
-//                          const bool color_extension, const bool large,
-//                          cv::Mat &descriptors)
-
-//AttrTerrainFeature::Params p_ = p;
-///// EXTRACT
-//cv::Mat descriptors;
-//p.extractor->extract(_img, _roi,
-//                     p.key, p.max_octave,
-//                     p.color_extension, p.large_descriptor,
-//                     descriptors);
-
-///// PREDICT
-//if(descriptors.empty())
-//    return AttrTerrainFeature(-1, -1.f);
-
-//if(descriptors.type() != CV_32FC1) {
-//    descriptors.convertTo(descriptors, CV_32FC1);
-//}
-
-//int   classID = -1;
-//float prob    = 0.f;
-//if(descriptors.rows > 1) {
-//    if(p_.use_max_prob)
-//        p_.classifier->predictClassProbMultiSampleMax(descriptors, classID, prob);
-//    else
-//        p_.classifier->predictClassProbMultiSample(descriptors, classID, prob);
-//} else {
-//    p_.classifier->predictClassProb(descriptors, classID, prob);
-//}
-
-//return AttrTerrainFeature(classID, prob);
-//cv::Rect roi(cell_size * j, cell_size * i, cell_size, cell_size);
-
-//cv::Mat descriptors;
-//cv::Mat img_roi(_img, _roi);
-
-//p.extractor->extract(img_roi, p.color_extension, p.large_descriptors, descriptors);
-
-//if(descriptors.type() != CV_32FC1) {
-//    descriptors.convertTo(descriptors, CV_32FC1);
-//}
-
-///// PREDICT
-//int   classID;
-//float prob;
-//p.classifier->predictClassProb(descriptors, classID, prob);
-
-//return AttrTerrainClassPt(classID, prob)
-
 #endif // TERRA_MAP_HPP
