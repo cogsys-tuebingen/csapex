@@ -57,10 +57,10 @@ private:
         void publish_apex(ConnectorOut* output, csapex::ConnectionType::Ptr msg);
     };
 
-    template <typename ROS, typename APEX, typename CONVERTION>
+    template <typename ROS, typename APEX, typename Converter>
     class ConverterTemplate : public RosMessageConversion::Convertor
     {
-        typedef ConverterTemplate<ROS, APEX, CONVERTION> Self;
+        typedef ConverterTemplate<ROS, APEX, Converter> Self;
 
     public:
         std::string rosType() {
@@ -89,13 +89,13 @@ private:
         void publish(ros::Publisher& pub, ConnectionType::Ptr apex_msg_raw) {
             typename APEX::Ptr apex_msg = boost::dynamic_pointer_cast<APEX> (apex_msg_raw);
             typename ROS::Ptr ros_msg(new ROS);
-            CONVERTION::apex2ros(apex_msg, ros_msg);
+            Converter::apex2ros(apex_msg, ros_msg);
             return pub.publish(ros_msg);
         }
 
         void callback(ConnectorOut* output, const typename ROS::ConstPtr& ros_msg) {
             typename APEX::Ptr apex_msg(new APEX);
-            CONVERTION::ros2apex(ros_msg, apex_msg);
+            Converter::ros2apex(ros_msg, apex_msg);
             publish_apex(output, apex_msg);
         }
     };

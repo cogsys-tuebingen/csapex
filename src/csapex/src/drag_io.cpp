@@ -120,9 +120,11 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
         overlay->repaint();
 
     } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
-        Box* box = dynamic_cast<Box*>(e->mimeData()->parent());
-        Box::MoveOffset* offset = dynamic_cast<Box::MoveOffset*>(e->mimeData()->userData(0));
-        box->move(e->pos() + offset->value);
+        std::string uuid = e->mimeData()->text().toStdString();
+        Box::Ptr box = Graph::root()->findBox(uuid);
+        QPoint offset_value(e->mimeData()->data(Box::MIME_MOVE + "/x").toInt(),
+                            e->mimeData()->data(Box::MIME_MOVE + "/y").toInt());
+        box->move(e->pos() + offset_value);
 
         overlay->repaint();
 

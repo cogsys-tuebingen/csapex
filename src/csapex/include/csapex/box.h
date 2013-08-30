@@ -57,14 +57,6 @@ public:
     static const Ptr NullPtr;
 
 public:
-    struct MoveOffset : public QObjectUserData {
-        MoveOffset(const QPoint& o)
-            : value(o)
-        {}
-
-        QPoint value;
-    };
-
     struct State : public Memento {
         typedef boost::shared_ptr<State> Ptr;
 
@@ -156,8 +148,6 @@ public:
     Command::Ptr removeAllInputsCmd();
 
     YAML::Emitter& save(YAML::Emitter& out) const;
-
-protected:
 
 protected:
     void startDrag(QPoint offset);

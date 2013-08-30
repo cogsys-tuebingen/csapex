@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/box_manager.h>
+#include <csapex/core_plugin.h>
 #include <csapex/graphio.h>
 #include <csapex/stream_interceptor.h>
 #include <csapex/command_dispatcher.h>

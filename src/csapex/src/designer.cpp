@@ -54,8 +54,6 @@ void Designer::resizeEvent(QResizeEvent*)
 
 void Designer::addBox(Box *box)
 {
-    //    box->setParent(this);
-
     designer_board->addBoxEvent(box);
     box->show();
 }

@@ -4,8 +4,6 @@
 /// COMPONENT
 #include "ui_evaluation_window.h"
 #include <csapex/bash_parser.h>
-#include <csapex/core_plugin.h>
-#include <csapex/box_manager.h>
 #include <csapex/command_dispatcher.h>
 #include <csapex/designer.h>
 #include <csapex/graph.h>
@@ -13,18 +11,12 @@
 #include <csapex/qt_helper.hpp>
 #include <csapex/designerio.h>
 #include <csapex/graphio.h>
-#include <csapex/tag.h>
 #include <csapex/drag_io.h>
 #include <csapex/box.h>
-#include <csapex/connector.h>
 
 /// SYSTEM
 #include <iostream>
-#include <fstream>
-#include <opencv2/opencv.hpp>
 #include <QCloseEvent>
-#include <QObjectList>
-#include <QSharedPointer>
 #include <QMessageBox>
 #include <QStatusBar>
 #include <QToolBar>
@@ -61,6 +53,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
     QObject::connect(ui->actionSaveAsCopy, SIGNAL(triggered()), this,  SLOT(saveAsCopy()));
     QObject::connect(ui->actionLoad, SIGNAL(triggered()), this,  SLOT(load()));
     QObject::connect(ui->actionReload, SIGNAL(triggered()), this,  SLOT(reload()));
+
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), graph.get(),  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), graph.get(),  SLOT(redo()));
     QObject::connect(ui->actionClear, SIGNAL(triggered()), graph.get(),  SLOT(clear()));

@@ -2,13 +2,12 @@
 #define CSAPEX_CORE_H
 
 /// COMPONENT
-#include <csapex/core_plugin.h>
+#include <csapex/csapex_fwd.h>
 
 /// PROJECT
 #include <utils_plugin/plugin_manager.hpp>
 
 /// SYSTEM
-#include <boost/signals2.hpp>
 #include <QObject>
 #include <yaml-cpp/yaml.h>
 

@@ -12,6 +12,8 @@
 
 namespace csapex
 {
+class CorePlugin;
+
 FWD(Box);
 FWD(BoxedObject);
 

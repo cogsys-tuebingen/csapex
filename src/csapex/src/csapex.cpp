@@ -7,10 +7,8 @@
 /// SYSTEM
 #include <boost/program_options.hpp>
 #include <QtGui>
-#include <opencv2/opencv.hpp>
 #include <QApplication>
 #include <signal.h>
-#include <X11/Xlib.h>
 #include <console_bridge/console.h>
 
 namespace po = boost::program_options;

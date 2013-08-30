@@ -14,13 +14,13 @@
 
 /// SYSTEM
 #include <QDragMoveEvent>
+#include <QGraphicsSceneDragDropEvent>
 #include <QInputDialog>
 #include <QMenu>
 #include <QThread>
 #include <QTimer>
 #include <iostream>
 #include <boost/foreach.hpp>
-#include <opencv2/opencv.hpp>
 
 using namespace csapex;
 
@@ -571,9 +571,18 @@ void Box::startDrag(QPoint offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
-    mimeData->setParent(this);
+    mimeData->setText(UUID().c_str());
+
+    QByteArray ox;
+    QByteArray oy;
+
+    ox.setNum(offset.x());
+    oy.setNum(offset.y());
+
     mimeData->setData(Box::MIME_MOVE, QByteArray());
-    mimeData->setUserData(0, new MoveOffset(offset));
+    mimeData->setData(Box::MIME_MOVE + "/x", ox);
+    mimeData->setData(Box::MIME_MOVE + "/y", oy);
+
     drag->setMimeData(mimeData);
 
     lower();

@@ -80,6 +80,7 @@ void OutputDisplay::fill(QBoxLayout* layout)
 
         view_->setFixedSize(QSize(state.width, state.height));
         view_->setMouseTracking(true);
+        view_->setAcceptDrops(false);
         QGraphicsScene* scene = view_->scene();
         if(scene == NULL) {
             scene = new QGraphicsScene();
