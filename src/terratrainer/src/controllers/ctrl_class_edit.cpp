@@ -151,8 +151,11 @@ void CtrlClassEdit::editId(QString id)
     /// RESTRICT TO NUMBERS
     QRegExp rx("[^0-9\\.]");
     id.replace(rx, "");
-    class_ID_->setText(id);
 
+    if(id.toInt() > 255)
+        id = "";
+
+    class_ID_->setText(id);
     entered_id_ = id.toInt();
 }
 

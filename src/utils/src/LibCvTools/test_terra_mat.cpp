@@ -29,22 +29,22 @@ int main(int argc, char *argv[])
 
     TerraMat test_terra2;
     test_terra2.read("/tmp/test_terra_mat.yaml");
-    std::map<uchar, uchar>        mapping = test_terra2.getMapping();
-    std::map<uchar, TerrainClass> legend = test_terra2.getLegend();
+    std::map<int, int>        mapping = test_terra2.getMapping();
+    std::map<int, TerrainClass> legend = test_terra2.getLegend();
 
     std::cout << "==== MAPPING =======================" << std::endl;
-    for(std::map<uchar, uchar>::iterator it = mapping.begin() ; it != mapping.end() ; it++) {
-        std::cout << (int) it->first << " " << (int) it->second << std::endl;
+    for(std::map<int, int>::iterator it = mapping.begin() ; it != mapping.end() ; it++) {
+        std::cout << it->first << " " << it->second << std::endl;
     }
 
     std::cout << "==== LEGEND ========================" << std::endl;
-    for(std::map<uchar, TerrainClass>::iterator it = legend.begin() ; it != legend.end() ; it++) {
-        std::cout << (int) it->first << " " << (int) it->second.id << std::endl;
+    for(std::map<int, TerrainClass>::iterator it = legend.begin() ; it != legend.end() ; it++) {
+        std::cout <<  it->first << " " <<  it->second.id << std::endl;
         std::cout << it->second.name << std::endl;
         std::cout << "["
-                  << (int) it->second.color[0] << " "
-                  << (int) it->second.color[1] << " "
-                  << (int) it->second.color[2] << "]" << std::endl;
+                  <<  it->second.color[0] << " "
+                  <<  it->second.color[1] << " "
+                  <<  it->second.color[2] << "]" << std::endl;
     }
 
     std::cout << "==== MATRIX ========================" << std::endl;

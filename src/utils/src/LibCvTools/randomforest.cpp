@@ -1,6 +1,7 @@
 #include "randomforest.h"
 
 RandomForest::RandomForest() :
+    forest_(new cv::RandomTrees()),
     is_trained_(false)
 {
 }
@@ -56,6 +57,8 @@ void RandomForest::predictClassProbs(const cv::Mat &sample, std::vector<int> &cl
     }
 }
 
+
+
 void RandomForest::predictClassProbMultiSample(const cv::Mat &samples, int &classID, float &prob)
 {
     AccProbIndex index;
@@ -69,7 +72,7 @@ void RandomForest::predictClassProbMultiSample(const cv::Mat &samples, int &clas
         predictClassProb(descr, tmp_id, tmp_prob);
 
         if(tmp_id != -1) {
-            if(index.find(tmp_id) != index.end()) {
+            if(index.find(tmp_id) == index.end()) {
                 AccProb acc;
                 acc.norm = 1;
                 acc.prob = tmp_prob;
@@ -91,7 +94,6 @@ void RandomForest::predictClassProbMultiSample(const cv::Mat &samples, int &clas
             classID = e.first;
         }
     }
-
 }
 
 void RandomForest::predictClassProbMultiSampleMax(const cv::Mat &samples, int &classID, float &prob)
@@ -110,7 +112,55 @@ void RandomForest::predictClassProbMultiSampleMax(const cv::Mat &samples, int &c
             classID = tmp_id;
         }
     }
+}
 
+void RandomForest::predictClassProbsMultiSample(const cv::Mat &samples, std::map<int, float> &probs)
+{
+    AccProbIndex index;
+    for(int i = 0 ; i < samples.rows ; i++) {
+        cv::Mat descr(samples.row(i));
+        std::map<int, float> pred;
+        predictClassProbs(descr, pred);
+
+        for(std::map<int, float>::iterator it = pred.begin() ; it != pred.end() ; it++) {
+            if(index.find(it->first) == index.end()) {
+                AccProb acc;
+                acc.norm = 1;
+                acc.prob = it->second;
+                index.insert(AccProbEntry(it->first, acc));
+            } else {
+                index[it->first].prob += it->second;
+                index[it->first].norm++;
+            }
+        }
+    }
+
+
+    for(AccProbIndex::iterator it = index.begin() ; it != index.end() ; it++) {
+        AccProbEntry e = *it;
+
+        double tmp_prob = e.second.prob / e.second.norm;
+        probs.insert(std::make_pair(e.first, (float) tmp_prob));
+    }
+}
+
+void RandomForest::predictClassProbsMultiSampleMax(const cv::Mat &samples, std::map<int, float> &probs)
+{
+    for(int i = 0 ; i < samples.rows ; i++) {
+        cv::Mat descr(samples.row(i));
+        std::map<int, float> tmp_probs;
+        predictClassProbs(descr,tmp_probs);
+
+        for(std::map<int, float>::iterator it = tmp_probs.begin() ; it != tmp_probs.end() ; it++) {
+            if(probs.find(it->first) == probs.end()) {
+                probs.insert(*it);
+            } else {
+                if(probs[it->first] < it->second) {
+                    probs[it->first] = it->second;
+                }
+            }
+        }
+    }
 }
 
 void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs, int &maxClassID)
@@ -146,8 +196,6 @@ void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs
         std::cerr << "predictClass " << e.what() << std::endl;
     }
     probs = votes;
-
-
 }
 
 

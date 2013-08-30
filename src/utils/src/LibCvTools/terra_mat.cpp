@@ -15,7 +15,7 @@ TerraMat::TerraMat(const cv::Mat &terra_mat) :
         mapping_.insert(std::make_pair(i,i));
 }
 
-TerraMat::TerraMat(const cv::Mat &terra_mat, const std::map<uchar, uchar> &mapping) :
+TerraMat::TerraMat(const cv::Mat &terra_mat, const std::map<int, int> &mapping) :
     channels_(terra_mat.channels()),
     step_(terra_mat.step / terra_mat.elemSize1()),
     mapping_(mapping),
@@ -33,7 +33,7 @@ void TerraMat::setMatrix(const cv::Mat &terra_mat)
 
 }
 
-void TerraMat::setMatrix(const cv::Mat &terra_mat, const std::map<uchar, uchar> &mapping)
+void TerraMat::setMatrix(const cv::Mat &terra_mat, const std::map<int, int> &mapping)
 {
     channels_   = terra_mat.channels();
     step_       = terra_mat.step / terra_mat.elemSize1();
@@ -46,7 +46,7 @@ cv::Mat TerraMat::getMatrix() const
     return terra_mat_.clone();
 }
 
-void TerraMat::setMapping(const std::map<uchar, uchar> &mapping)
+void TerraMat::setMapping(const std::map<int, int> &mapping)
 {
     if(mapping.size() != channels_) {
         std::cerr << "Setting that mapping is impossible due to difference to amount of channels!" << std::endl;
@@ -56,7 +56,7 @@ void TerraMat::setMapping(const std::map<uchar, uchar> &mapping)
     mapping_ = mapping;
 }
 
-std::map<uchar, uchar> TerraMat::getMapping() const
+std::map<int, int> TerraMat::getMapping() const
 {
     return mapping_;
 }
@@ -69,7 +69,7 @@ void TerraMat::addLegendEntry(TerrainClass terrainClass)
         std::cerr << "noOfTerrainClasses exceeded" << std::endl;
 }
 
-std::map<uchar, TerrainClass> TerraMat::getLegend() const
+std::map<int, TerrainClass> TerraMat::getLegend() const
 {
     return legend_;
 }
@@ -90,7 +90,6 @@ void TerraMat::write(const std::string &filename) const {
     fs << "terramat" << terra_mat_;
 }
 
-
 // exports an uchar image, each pixel containing the id of the favorite terrain class
 cv::Mat TerraMat::getFavorites()
 {
@@ -101,13 +100,13 @@ cv::Mat TerraMat::getFavorites()
         for (int j = 0; j < terra_mat_.cols; j++) {
 
             // get terrain class with maximum probability
-            uchar id = 0;
+            int id = 0;
             float maxProb = 0.0f;
             /// step[1] == elemsize()
             int pixel_pos = step_ * i + j * channels_;
             for (int k = 0; k < channels_ ; k++) {
                 float prob = data[pixel_pos + k];
-                if(prob > maxProb) {
+                if(prob >= maxProb) {
                     maxProb = prob;
                     id = mapping_[k];
                 }
@@ -128,10 +127,11 @@ cv::Mat TerraMat::getFavoritesRGB() {
         return cv::Mat();
     }
 
-    for (int i = 0; i < terra_mat_.rows; i++)
-        for (int j = 0; j < terra_mat_.cols; j++)
-            result.at<cv::Vec3b>(i,j) = legend_[favorites.at<uchar>(i,j)].color;
-
+    for (int i = 0; i < terra_mat_.rows; i++) {
+        for (int j = 0; j < terra_mat_.cols; j++) {
+            result.at<cv::Vec3b>(i,j) = legend_[(int) favorites.at<uchar>(i,j)].color;
+        }
+    }
     return result;
 }
 
@@ -153,7 +153,7 @@ TerraMat::operator cv::Mat &()
 void TerraMat::writeMapping(cv::FileStorage &fs) const
 {
     fs << "mapping" << "[:";
-    for(std::map<uchar, uchar>::const_iterator it = mapping_.begin() ; it != mapping_.end() ; it++)
+    for(std::map<int, int>::const_iterator it = mapping_.begin() ; it != mapping_.end() ; it++)
         fs << it->first << it->second;
     fs << "]";
 }
@@ -174,7 +174,7 @@ void TerraMat::readMapping(const cv::FileStorage &fs)
 void TerraMat::writeLegend(cv::FileStorage &fs) const
 {
     fs << "legend" << "[";
-    for(std::map<uchar,TerrainClass>::const_iterator it = legend_.begin() ; it != legend_.end() ; it++) {
+    for(std::map<int,TerrainClass>::const_iterator it = legend_.begin() ; it != legend_.end() ; it++) {
         it->second.write(fs);
     }
     fs << "]";

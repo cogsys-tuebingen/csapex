@@ -23,6 +23,8 @@ public:
     void predictClassProbs(const cv::Mat &sample, std::vector<int> &classIDs, std::vector<float> &probs);
     void predictClassProbMultiSample    (const cv::Mat &samples, int &classID, float &prob);
     void predictClassProbMultiSampleMax (const cv::Mat &samples, int &classID, float &prob);
+    void predictClassProbsMultiSample   (const cv::Mat &samples, std::map<int, float> &probs);
+    void predictClassProbsMultiSampleMax(const cv::Mat &samples, std::map<int, float> &probs);
 protected:
     struct AccProb {
         AccProb() : prob(0), norm(1){}

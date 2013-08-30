@@ -54,7 +54,7 @@ void CMPCoreBridge::read(const YAML::Node &document)
         }
 
     } catch (YAML::Exception e) {
-        std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        std::cerr << "Classifier cannot be read : '" << e.what() <<"' !" << std::endl;
     }
 
 }

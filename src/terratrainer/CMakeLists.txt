@@ -62,6 +62,7 @@ add_executable(terratrainer
                 src/computation/cmp_extractor_extended.cpp
                 src/computation/cmp_randomforest_extended.cpp
                 src/computation/cmp_state_publisher.hpp
+                src/computation/cmp_extraction.hpp
                 src/controllers/ctrl_factory.cpp
                 src/controllers/ctrl_main_menu.cpp
                 src/controllers/ctrl_map_view.cpp

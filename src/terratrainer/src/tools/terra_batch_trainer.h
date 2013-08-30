@@ -24,6 +24,7 @@ public:
 private:
     typedef std::vector<std::string>        VecStr;
     typedef std::vector<int>                VecInt;
+    typedef std::vector<uchar>              VecUCh;
 
     const std::string                       EXTRACTION_PATH;
     const std::string                       CLASSIFIER_PATH;
@@ -32,7 +33,7 @@ private:
 
     std::string                             roi_lib_path_;
     VecStr                                  buf_roi_paths_;
-    VecInt                                  buf_classes_;
+    VecUCh                                  buf_classes_;
     VecInt                                  buf_classes_colors_;
     VecStr                                  buf_classes_infos_;
     VecInt                                  buf_colors_;

@@ -47,16 +47,16 @@ class TerraMat
 public:
     TerraMat();
     TerraMat(const cv::Mat &terra_mat);
-    TerraMat(const cv::Mat &terra_mat, const std::map<uchar, uchar> &mapping);
+    TerraMat(const cv::Mat &terra_mat, const std::map<int, int> &mapping);
 
 
     void setMatrix(const cv::Mat &terra_mat);
-    void setMatrix(const cv::Mat &terra_mat, const std::map<uchar, uchar> &mapping);
+    void setMatrix(const cv::Mat &terra_mat, const std::map<int, int> &mapping);
     cv::Mat getMatrix() const;
-    void setMapping(const std::map<uchar, uchar> &mapping);
-    std::map<uchar, uchar> getMapping() const;
+    void setMapping(const std::map<int, int> &mapping);
+    std::map<int, int> getMapping() const;
     void addLegendEntry(TerrainClass terrainClass);
-    std::map<uchar, TerrainClass> getLegend() const;
+    std::map<int, TerrainClass> getLegend() const;
 
     /// I / O - Persistence
     void read(const std::string &filename);
@@ -81,8 +81,8 @@ public:
 private:
     int                         channels_;
     int                         step_;
-    std::map<uchar,uchar>       mapping_;
-    std::map<uchar,TerrainClass>legend_;
+    std::map<int,int>           mapping_;
+    std::map<int,TerrainClass>  legend_;
     cv::Mat                     terra_mat_;
 
     void writeMapping(cv::FileStorage &fs) const;

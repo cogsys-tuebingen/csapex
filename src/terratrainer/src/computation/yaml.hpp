@@ -61,8 +61,6 @@ void writeSequence(YAML::Emitter &emitter, const std::vector<T> &buffer)
         emitter << *it;
     emitter << YAML::EndSeq;
 }
-
-
 }
 
 #endif // YAML_HPP

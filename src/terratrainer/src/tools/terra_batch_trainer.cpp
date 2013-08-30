@@ -43,8 +43,6 @@ void TerraBatchTrainer::run()
 
 void TerraBatchTrainer::read(std::ifstream &in)
 {
-    cv_extraction::FeatureExtractor::Ptr feat(new cv_extraction::FeatureExtractor);
-    cv_extraction::PatternExtractor::Ptr patt(new cv_extraction::PatternExtractor);
     try {
         YAML::Parser parser(in);
         YAML::Node   document;
@@ -185,15 +183,18 @@ void TerraBatchTrainer::train()
 
 void TerraBatchTrainer::readClasses(const YAML::Iterator &begin, const YAML::Iterator &end)
 {
+    buf_classes_.clear();
+    buf_classes_colors_.clear();
+    buf_classes_infos_.clear();
 
     for(YAML::Iterator it = begin ; it != end ; it++) {
-        int class_id;
+        uchar class_id;
         int color;
         std::string info;
 
-        (*it)["id"] >> class_id;
-        (*it)["color"] >> color;
-        (*it)["info"]  >> info;
+        (*it)["id"]     >> class_id;
+        (*it)["color"]  >> color;
+        (*it)["info"]   >> info;
 
         buf_classes_.push_back(class_id);
         buf_classes_colors_.push_back(color);
