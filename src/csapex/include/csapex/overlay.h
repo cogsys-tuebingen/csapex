@@ -43,7 +43,7 @@ protected:
     void drawActivity(int life, Connector* c);
     void drawConnector(Connector* c);
     void drawConnection(Connection& connection);
-    void drawConnection(const QPoint& from, const QPoint& to, int id, int flags);
+    void drawConnection(const QPoint& from, const QPoint& to, int id, unsigned flags);
 
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent * event);
@@ -59,7 +59,9 @@ protected:
         FLAG_ERROR = 1,
         FLAG_HIGHLIGHT = 2,
         FLAG_SELECTED = 4,
-        FLAG_DISABLED = 8
+        FLAG_DISABLED = 8,
+        FLAG_MINIMIZED_FROM = 16,
+        FLAG_MINIMIZED_TO = 32
     };
 
     std::vector<TempConnection> temp_;

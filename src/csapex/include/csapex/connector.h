@@ -71,6 +71,9 @@ public:
     void setType(ConnectionType::Ptr type);
     ConnectionType::ConstPtr getType() const;
 
+    void setMinimizedSize(bool mini);
+    bool isMinimizedSize() const;
+
     virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
 public Q_SLOTS:
@@ -125,6 +128,8 @@ protected:
     std::string label_;
 
     ConnectionType::Ptr type_;
+
+    bool minimized_;
 };
 
 }

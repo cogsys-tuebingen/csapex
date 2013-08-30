@@ -678,22 +678,35 @@ void Box::killContent()
     }
 }
 
-void Box::minimizeBox(bool minimize)
+bool Box::isMinimizedSize() const
 {
+    return state->minimized;
+}
+
+void Box::minimizeBox(bool minimize)
+{    
+    state->minimized = minimize;
+
+    BOOST_FOREACH(ConnectorIn* i, input){
+        i->setMinimizedSize(minimize);
+    }
+    BOOST_FOREACH(ConnectorOut* i, output) {
+        i->setMinimizedSize(minimize);
+    }
+
     if(minimize) {
         ui->frame->hide();
         ui->label->hide();
         ui->killbtn->hide();
         ui->boxframe->setProperty("content_minimized", true);
         ui->minimizebtn->setIcon(maximize_icon_);
-        state->minimized = true;
+
     } else {
         ui->frame->show();
         ui->label->show();
         ui->killbtn->show();
         ui->boxframe->setProperty("content_minimized", false);
         ui->minimizebtn->setIcon(minimize_icon_);
-        state->minimized = false;
     }
 
     refreshStylesheet();

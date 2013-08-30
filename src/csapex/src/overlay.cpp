@@ -133,6 +133,12 @@ void Overlay::drawConnection(Connection& connection)
     if(!from->isEnabled() || !to->isEnabled()) {
         flags |= FLAG_DISABLED;
     }
+    if(from->isMinimizedSize()) {
+        flags |= FLAG_MINIMIZED_FROM;
+    }
+    if(to->isMinimizedSize()) {
+        flags |= FLAG_MINIMIZED_TO;
+    }
 
     drawConnection(p1, p2, id, flags);
 
@@ -143,12 +149,18 @@ void Overlay::drawConnection(Connection& connection)
 }
 
 
-void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, int flags)
+void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, unsigned flags)
 {
     bool selected = (flags & FLAG_SELECTED) != 0;
     bool highlighted = (flags & FLAG_HIGHLIGHT) != 0;
     bool error = (flags & FLAG_ERROR) != 0;
     bool disabled = (flags & FLAG_DISABLED) != 0;
+    bool minimized_from = (flags & FLAG_MINIMIZED_FROM) != 0;
+    bool minimized_to = (flags & FLAG_MINIMIZED_TO) != 0;
+
+    bool minimized = minimized_from || minimized_to;
+
+    double r = minimized ? 3 : connector_radius_;
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;
@@ -176,13 +188,13 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, int f
 
 
     if(highlighted) {
-        painter->setPen(QPen(Qt::black, connector_radius_ * 1.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(Qt::black, r * 1.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
 
-        painter->setPen(QPen(Qt::white, connector_radius_ * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(Qt::white, r * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
     } else  if(selected) {
-        painter->setPen(QPen(Qt::black, connector_radius_ * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(Qt::black, r * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
 
         QLinearGradient lg(from, to);
@@ -194,7 +206,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, int f
             lg.setColorAt(1,color_in_connected.lighter(175));
         }
 
-        painter->setPen(QPen(QBrush(lg), connector_radius_ * 1.3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(QBrush(lg), r * 1.3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(path);
     }
 
@@ -211,7 +223,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, int f
         lg.setColorAt(1,color_in_connected.lighter());
     }
 
-    QPen gp = QPen(QBrush(lg), connector_radius_ * 0.75, penstyle, Qt::RoundCap, Qt::RoundJoin);
+    QPen gp = QPen(QBrush(lg), r * 0.75, penstyle, Qt::RoundCap, Qt::RoundJoin);
 
     painter->setPen(gp);
     painter->drawPath(path);
@@ -254,36 +266,45 @@ void Overlay::drawConnector(Connector *c)
     if(c->isForwarding()) {
         painter->setPen(QPen(QBrush(color.darker()), 2, Qt::DotLine));
     }
-    painter->drawEllipse(c->centerPoint(), connector_radius_, connector_radius_);
+    int r = c->isMinimizedSize() ? 4 : connector_radius_;
+    painter->drawEllipse(c->centerPoint(), r, r);
 
 
-    QFont font;
-    font.setPixelSize(font_size);
-    painter->setFont(font);
+    if(!c->isMinimizedSize()) {
+        QFont font;
+        font.setPixelSize(font_size);
+        painter->setFont(font);
 
-    QString text = c->getLabel().c_str();
-    if(text.length() != 0) {
-        text += "\n";
+        QString text = c->getLabel().c_str();
+
+        if(text.length() != 0) {
+            text += "\n";
+        }
+        text += c->getType()->name().c_str();
+
+        QFontMetrics metrics(font);
+
+        int dx = 160;
+        int dy = lines * metrics.height();
+
+        QRectF rect(c->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
+
+        QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
+        painter->drawText(rect, text, opt);
     }
-    text += c->getType()->name().c_str();
-
-    QFontMetrics metrics(font);
-
-    int dx = 160;
-    int dy = lines * metrics.height();
-
-    QRectF rect(c->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
-
-    QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
-    painter->drawText(rect, text, opt);
 }
 
 void Overlay::drawActivity(int life, Connector* c)
 {
     if(c->isEnabled() && life > 0) {
         int r = std::min(Connection::activity_marker_max_lifetime_, life);
-        double f = r / (double) Connection::activity_marker_max_lifetime_;
-        double w = activity_marker_min_width_ + f * (activity_marker_max_width_ - activity_marker_min_width_);
+        double f = r / static_cast<double> (Connection::activity_marker_max_lifetime_);
+
+        bool mini = c->isMinimizedSize();
+
+        int min = mini ? 4 : activity_marker_min_width_;
+        int max = mini ? 8 : activity_marker_max_width_;
+        double w = min + f * (max - min);
 
         QColor color = c->isOutput() ? (c->isInput() ? color_connected : color_out_connected) : color_in_connected;
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
@@ -431,7 +452,7 @@ void Overlay::paintEvent(QPaintEvent*)
         painter->drawRect(QRect(selection_a, selection_b));
     }
 
-//    painter->drawImage(QPoint(0,0), schematics);
+    //    painter->drawImage(QPoint(0,0), schematics);
 
     schema_dirty_ = false;
 

@@ -149,6 +149,8 @@ public:
 
     YAML::Emitter& save(YAML::Emitter& out) const;
 
+    bool isMinimizedSize() const;
+
 protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);

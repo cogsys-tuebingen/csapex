@@ -29,13 +29,13 @@ std::string Connector::makeUUID(const std::string& box_uuid, int type, int sub_i
 }
 
 Connector::Connector(Box* parent, const std::string& uuid)
-    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(uuid)
+    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(uuid), minimized_(false)
 {
     init(parent);
 }
 
 Connector::Connector(Box* parent, int sub_id, int type)
-    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id))
+    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false)
 {
     init(parent);
 }
@@ -51,7 +51,7 @@ void Connector::init(Box* parent)
     setContextMenuPolicy(Qt::PreventContextMenu);
     setType(ConnectionType::makeDefault());
 
-    setFixedSize(16,16);
+    setMinimizedSize(minimized_);
 
     setMouseTracking(true);
 
@@ -302,6 +302,21 @@ ConnectionType::ConstPtr Connector::getType() const
     return type_;
 }
 
+void Connector::setMinimizedSize(bool mini)
+{
+    minimized_ = mini;
+
+    if(mini) {
+        setFixedSize(8,8);
+    } else {
+        setFixedSize(16,16);
+    }
+}
+
+bool Connector::isMinimizedSize() const
+{
+    return minimized_;
+}
 
 void Connector::paintEvent(QPaintEvent*)
 {
