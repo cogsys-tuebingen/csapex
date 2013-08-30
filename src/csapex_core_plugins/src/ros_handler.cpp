@@ -20,10 +20,14 @@ ROSHandler::~ROSHandler()
 
 void ROSHandler::stop()
 {
-//    spinner_->stop();
-    spinner_.reset(static_cast<ros::AsyncSpinner*>(NULL));
-    nh_->shutdown();
-    nh_.reset((static_cast<ros::NodeHandle*>(NULL)));
+    if(spinner_) {
+        spinner_->stop();
+        spinner_.reset(static_cast<ros::AsyncSpinner*>(NULL));
+    }
+    if(nh_) {
+        nh_->shutdown();
+        nh_.reset((static_cast<ros::NodeHandle*>(NULL)));
+    }
 }
 
 boost::shared_ptr<ros::NodeHandle> ROSHandler::nh()

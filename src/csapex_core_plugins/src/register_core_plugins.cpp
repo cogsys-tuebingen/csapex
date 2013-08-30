@@ -190,22 +190,11 @@ void RegisterCorePlugins::init()
     Tag::createIfNotExists("Output");
     Tag::createIfNotExists("RosIO");
     Tag::createIfNotExists("ConsoleIO");
-    {
-        boost::shared_ptr<RosHandler> handler(new RosHandler);
 
-        DragIO::registerEnterHandler(handler);
-        DragIO::registerMoveHandler(handler);
-        DragIO::registerDropHandler(handler);
-    }
-    {
-        boost::shared_ptr<FileHandler> handler(new FileHandler);
+    DragIO::registerHandler<RosHandler>();
+    DragIO::registerHandler<FileHandler>();
 
-        DragIO::registerEnterHandler(handler);
-        DragIO::registerMoveHandler(handler);
-        DragIO::registerDropHandler(handler);
-    }
-
-    ConnectionTypeManager::registerMessage("std::string", boost::bind(&connection_types::StringMessage::make));
+    ConnectionTypeManager::registerMessage<connection_types::StringMessage>("std::string");
 }
 
 void RegisterCorePlugins::shutdown()

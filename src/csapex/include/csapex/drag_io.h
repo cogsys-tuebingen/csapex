@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <QDragEnterEvent>
 #include <vector>
+#include <boost/type_traits.hpp>
 
 namespace csapex{
 
@@ -39,14 +40,21 @@ public:
     void dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e);
     void dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e);
 
-    static void registerEnterHandler(HandlerEnter::Ptr h);
-    static void registerMoveHandler(HandlerMove::Ptr h);
-    static void registerDropHandler(HandlerDrop::Ptr h);
+    template <typename H>
+    static void registerHandler() {
+        boost::shared_ptr<H> handler(new H);
+        if(boost::is_base_of<HandlerEnter,H>::value)
+            instance().registerEnterHandler(boost::static_pointer_cast<HandlerEnter>(handler));
+        if(boost::is_base_of<HandlerMove,H>::value)
+            instance().registerMoveHandler(boost::static_pointer_cast<HandlerMove>(handler));
+        if(boost::is_base_of<HandlerDrop,H>::value)
+            instance().registerDropHandler(boost::static_pointer_cast<HandlerDrop>(handler));
+    }
 
 private:
-    void doRegisterEnterHandler(HandlerEnter::Ptr h);
-    void doRegisterMoveHandler(HandlerMove::Ptr h);
-    void doRegisterDropHandler(HandlerDrop::Ptr h);
+    void registerEnterHandler(HandlerEnter::Ptr h);
+    void registerMoveHandler(HandlerMove::Ptr h);
+    void registerDropHandler(HandlerDrop::Ptr h);
 
     std::vector<HandlerEnter::Ptr> handler_enter;
     std::vector<HandlerMove::Ptr> handler_move;

@@ -65,10 +65,9 @@ void RegisterPlugin::init()
 
     qRegisterMetaType<cv::Mat>("cv::Mat");
 
-    ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::CvMatMessage::make));
+    ConnectionTypeManager::registerMessage<connection_types::CvMatMessage>("cv::Mat");
 
-    typedef RosMessageConversion::ConverterTemplate<sensor_msgs::Image, connection_types::CvMatMessage, Image2CvMat> Imp;
-    RosMessageConversion::registerConversion(RosMessageConversion::Convertor::Ptr(new Imp));
+    RosMessageConversion::registerConversion<sensor_msgs::Image, connection_types::CvMatMessage, Image2CvMat>();
 
-    ConnectionType::default_.reset(new connection_types::CvMatMessage);
+    ConnectionType::setDefaultConnectionType<connection_types::CvMatMessage>();
 }

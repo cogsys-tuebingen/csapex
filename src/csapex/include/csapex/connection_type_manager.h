@@ -11,6 +11,7 @@
 #include <map>
 #include <string>
 #include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 namespace csapex {
 
@@ -22,11 +23,17 @@ public:
     typedef boost::function<ConnectionType::Ptr()>  Constructor;
 
 public:
-    static void registerMessage(const std::string& type, Constructor constructor);
+    template <typename M>
+    static void registerMessage(const std::string& type) {
+        registerMessage(type, boost::bind(&M::make));
+    }
+
     static ConnectionType::Ptr createMessage(const std::string& type);
 
 private:
     ConnectionTypeManager();
+
+    static void registerMessage(const std::string& type, Constructor constructor);
 
 private:
     std::map<std::string, Constructor> classes;

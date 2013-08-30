@@ -23,7 +23,22 @@ class RosMessageConversion : public Singleton<RosMessageConversion>
 {
     friend class Singleton<RosMessageConversion>;
 
+private:
+    RosMessageConversion();
+
 public:
+    template <typename ROS, typename APEX, typename Converter>
+    static void registerConversion() {
+        instance().doRegisterConversion(Convertor::Ptr(new ConverterTemplate<ROS, APEX, Converter>));
+    }
+
+    bool canHandle(const ros::master::TopicInfo &topic);
+
+    ros::Subscriber subscribe(const ros::master::TopicInfo &topic, int queue, ConnectorOut *output);
+    ros::Publisher advertise(ConnectionType::Ptr, const std::string& topic,  int queue, bool latch = false);
+    void publish(ros::Publisher& pub, ConnectionType::Ptr msg);    
+
+private:
     class Convertor
     {
     public:
@@ -84,19 +99,6 @@ public:
             publish_apex(output, apex_msg);
         }
     };
-
-private:
-    RosMessageConversion();
-
-public:
-    static void registerConversion(Convertor::Ptr c);
-
-    bool canHandle(const ros::master::TopicInfo &topic);
-
-    ros::Subscriber subscribe(const ros::master::TopicInfo &topic, int queue, ConnectorOut *output);
-    ros::Publisher advertise(ConnectionType::Ptr, const std::string& topic,  int queue, bool latch = false);
-    void publish(ros::Publisher& pub, ConnectionType::Ptr msg);
-
 
 private:
     void doRegisterConversion(Convertor::Ptr c);

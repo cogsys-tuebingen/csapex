@@ -17,6 +17,11 @@ ConnectionType::~ConnectionType()
 {
 }
 
+ConnectionType::Ptr ConnectionType::getDefaultConnectionType()
+{
+    return default_->clone();
+}
+
 bool ConnectionType::canConnectTo(ConnectionType::Ptr other_side)
 {
     return other_side->acceptsConnectionFrom(this);

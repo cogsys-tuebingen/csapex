@@ -17,26 +17,13 @@ using namespace csapex;
 
 void DragIO::registerEnterHandler(HandlerEnter::Ptr h)
 {
-    instance().doRegisterEnterHandler(h);
+    handler_enter.push_back(h);
 }
 void DragIO::registerMoveHandler(HandlerMove::Ptr h)
 {
-    instance().doRegisterMoveHandler(h);
-}
-void DragIO::registerDropHandler(HandlerDrop::Ptr h)
-{
-    instance().doRegisterDropHandler(h);
-}
-
-void DragIO::doRegisterEnterHandler(HandlerEnter::Ptr h)
-{
-    handler_enter.push_back(h);
-}
-void DragIO::doRegisterMoveHandler(HandlerMove::Ptr h)
-{
     handler_move.push_back(h);
 }
-void DragIO::doRegisterDropHandler(HandlerDrop::Ptr h)
+void DragIO::registerDropHandler(HandlerDrop::Ptr h)
 {
     handler_drop.push_back(h);
 }

@@ -15,11 +15,6 @@ bool RosMessageConversion::canHandle(const ros::master::TopicInfo &topic)
     return converters_.find(topic.datatype) != converters_.end();
 }
 
-void RosMessageConversion::registerConversion(Convertor::Ptr c)
-{
-    instance().doRegisterConversion(c);
-}
-
 void RosMessageConversion::doRegisterConversion(Convertor::Ptr c)
 {
     converters_.insert(std::make_pair(c->rosType(), c));

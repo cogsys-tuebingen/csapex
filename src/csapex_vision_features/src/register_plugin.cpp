@@ -24,6 +24,6 @@ void RegisterVisionFeaturePlugin::init()
 {
     Tag::createIfNotExists("Features");
 
-    ConnectionTypeManager::registerMessage("std::vector<cv::KeyPoint>", boost::bind(&connection_types::KeypointMessage::make));
-    ConnectionTypeManager::registerMessage("cv::Mat", boost::bind(&connection_types::DescriptorMessage::make));
+    ConnectionTypeManager::registerMessage<connection_types::KeypointMessage>("std::vector<cv::KeyPoint>");
+    ConnectionTypeManager::registerMessage<connection_types::DescriptorMessage>("cv::Mat");
 }
