@@ -114,7 +114,7 @@ void CtrlClassEdit::read(const YAML::Node &document)
             int color;
             std::string info;
 
-            (*it)["id"] >> class_id;
+            (*it)["id"]    >> class_id;
             (*it)["color"] >> color;
             (*it)["info"]  >> info;
 

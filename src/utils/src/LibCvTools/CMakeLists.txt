@@ -44,10 +44,19 @@ target_link_libraries(rotated_template
     LibParticleFilter
     ${OpenCV_LIBS})
 
+# terra map test
 add_executable(test_terra_map
     test_terra_mat.cpp)
 
 target_link_libraries(test_terra_map
+    LibCvTools
+    ${OpenCV_LIBS})
+
+# random forest loading test
+add_executable(randomforest_loading_test
+    randomforest_loading_test.cpp)
+
+target_link_libraries(randomforest_loading_test
     LibCvTools
     ${OpenCV_LIBS})
 

@@ -3,6 +3,10 @@
 /// SYSTEM
 #include <vector>
 #include <yaml-cpp/yaml.h>
+#include "yaml.hpp"
+
+#define CV_TERMCRIT_ITER 1
+#define CV_TERMCRIT_EPS  2
 
 struct CMPForestParams {
     /**
@@ -13,11 +17,11 @@ struct CMPForestParams {
     CMPForestParams() :
         max_depth(25), min_samples(5), regression(0),
         surrogates(false), max_categories(15),
-        priors(0), variable_importance(false),
+        variable_importance(false),
         nactive_variables(4), max_trees(100),
         accurracy(0.01f),
-        termination_criteria(1 | 2),
-        dirty(true){}
+        termination_criteria(CV_TERMCRIT_ITER |	CV_TERMCRIT_EPS),
+        dirty(true){fillPriors();}
 
     int                max_depth;
     int                min_samples;
@@ -51,9 +55,7 @@ struct CMPForestParams {
     void read(const YAML::Node &document)
     {
         try {
-
             const YAML::Node &data = document["FOREST"];
-
             data["max_depth"]            >> max_depth;
             data["min_samples"]          >> min_samples;
             data["regression"]           >> regression;
@@ -63,9 +65,17 @@ struct CMPForestParams {
             data["max_trees"]            >> max_trees;
             data["accurracy"]            >> accurracy;
             data["termination_criteria"] >> termination_criteria;
+            fillPriors();
 
         } catch (YAML::Exception e) {
             std::cerr << "ORB Parameters cannot read config : '" << e.what() <<"' !" << std::endl;
+        }
+    }
+
+    void fillPriors() {
+        priors.clear();
+        for(int i = 0 ; i < max_categories ; i++) {
+            priors.push_back(1.f);
         }
     }
 };

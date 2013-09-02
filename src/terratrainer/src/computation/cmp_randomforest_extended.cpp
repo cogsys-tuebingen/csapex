@@ -113,9 +113,9 @@ bool CMPRandomForestExt::readTrainingData(const std::string &training_data, cv::
     }
 
     /// FILL MATRICES
-    classes = cv::Mat(descriptor_classIDs.size(), 1, CV_32F);
-    data    = cv::Mat(descriptors.size() / data_step, data_step, CV_32F);
-    var_type= cv::Mat(data_step + 1, 1, CV_8U);
+    classes = cv::Mat(descriptor_classIDs.size(), 1, CV_32FC1);
+    data    = cv::Mat(descriptors.size() / data_step, data_step, CV_32FC1);
+    var_type= cv::Mat(data_step + 1, 1, CV_8UC1);
     memcpy(classes.data, descriptor_classIDs.data(), sizeof(float) * descriptor_classIDs.size());
     memcpy(data.data, descriptors.data(), sizeof(float) * descriptors.size());
     var_type.setTo(cv::Scalar(CV_VAR_NUMERICAL));

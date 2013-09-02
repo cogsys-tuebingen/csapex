@@ -34,7 +34,7 @@ private:
     std::string                             work_path_;
     std::string                             roi_lib_path_;
     VecStr                                  buf_roi_paths_;
-    VecUCh                                  buf_classes_;
+    VecInt                                  buf_classes_;
     VecInt                                  buf_classes_colors_;
     VecStr                                  buf_classes_infos_;
     VecInt                                  buf_colors_;

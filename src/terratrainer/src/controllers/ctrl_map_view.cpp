@@ -407,7 +407,7 @@ QInteractiveItem *CtrlMapView::addRectangle(const QPointF pos, const qreal width
     if(current_class_id_ == -1)
         return NULL;
 
-    QInteractiveItem *rect = new QInteractiveItem(QRectF(pos.x() - 10, pos.y() - 10, width, height));
+    QInteractiveItem *rect = new QInteractiveItem(QRectF(pos.x(), pos.y(), width, height));
     rect->setPen(current_class_pen_);
     rect->setSelectPen(current_class_sel_pen_);
     rect->setClass(current_class_id_);

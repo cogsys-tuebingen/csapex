@@ -34,7 +34,7 @@ inline void writeDescriptor(const cv::Mat &desc, const int id, YAML::Emitter &em
 }
 
 template<typename _Tp, typename _Tw>
-inline void writeDescriptorRows(const Mat &desc, const int id, YAML::Emitter &emitter)
+inline void writeDescriptorRows(const cv::Mat &desc, const int id, YAML::Emitter &emitter)
 {
     for(int j = 0 ; j < desc.rows ; j++) {
         cv::Mat roi(desc, cv::Rect(0,j,desc.cols,1));

@@ -75,12 +75,30 @@ void QInteractiveItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
+
+    QRectF rect = sceneBoundingRect();
+    QPointF p = mapToScene(pos().x(), pos().y());
+    QPointF r = mapToItem(this, p);
+    std::cout << pos().x() << " +++ " << pos().y() << std::endl;
+    std::cout << p.x() << " --- " << p.y() << std::endl;
+    std::cout << r.x() << " +-+ " << r.y() << std::endl;
+
     moveBy(offset.x(), offset.y());
+    std::cout << sceneBoundingRect().x() << " " << sceneBoundingRect().y() << std::endl;
 
     QInteractiveScene *s = dynamic_cast<QInteractiveScene*>(scene());
-    if(s != NULL && !s->    onBackground(this)) {
-        moveBy(-offset.x(), -offset.y());
+    if(s != NULL && !s->onBackground(this)) {
+        QRectF bounding = sceneBoundingRect();
+        qreal x = std::min(s->sceneRect().x(), std::max(0.0, bounding.x() - bounding.width()));
+        qreal y = std::min(s->sceneRect().y(), std::max(0.0, bounding.y() - bounding.height()));
+
+        std::cout << " +++ " << mapFromScene(x,y).x() << " " << mapFromScene(x,y).y() << std::endl;
+        setPos(x,y);
+//        moveBy(-offset.x(), -offset.y());
         interaction_ = STOPPED;
+    }
+    if(s != NULL) {
+        std::cout << s->sceneRect().x() << " " << s->sceneRect().y() << std::endl;
     }
 
 }

@@ -201,7 +201,7 @@ void TerraBatchTrainer::readClasses(const YAML::Iterator &begin, const YAML::Ite
     buf_classes_infos_.clear();
 
     for(YAML::Iterator it = begin ; it != end ; it++) {
-        uchar class_id;
+        int class_id;
         int color;
         std::string info;
 
@@ -227,57 +227,6 @@ void TerraBatchTrainer::writeClasses(YAML::Emitter &emitter)
     }
     emitter << YAML::EndSeq;
 }
-
-namespace input {
-//int parse(int argc, char **argv, double &latitude, double &longitude, int &zoom, int &margin, std::string &file_names)
-//{
-//    boost::regex e_double("-?[0-9]*.[0-9]*");
-//    boost::regex e_int("[0-9]*");
-
-//    if(argc == 1) {
-//        msg_out::info("Parameters: lat<double> long<double> zoom<int> margin<int> [file_names<string>]");
-//        return 1;
-//    }
-
-//    if(argc < 5) {
-//        msg_out::error("Supply at least latitude and longitude, margin and zoom.");
-//        return 1;
-//    }
-
-//    file_names = "map";
-//    boost::cmatch what;
-//    bool validated_input = true;
-
-//    if(boost::regex_match(argv[1], what, e_double) && what[0].matched) {
-//        latitude = atof(argv[1]);
-//    } else
-//      validated_input &= false;
-//    if(boost::regex_match(argv[2], what, e_double) && what[0].matched) {
-//        longitude = atof(argv[2]);
-//    } else
-//      validated_input &= false;
-//    if(boost::regex_match(argv[3], what, e_int) && what[0].matched) {
-//        zoom = atoi(argv[3]);
-//    } else
-//      validated_input &= false;
-//    if(boost::regex_match(argv[4], what, e_int) && what[0].matched) {
-//        margin = atoi(argv[4]);
-//    } else
-//      validated_input &= false;
-
-//    if(argc == 6)
-//        file_names = argv[5];
-
-//    if(!validated_input){
-//        msg_out::error("Wrong parameters!");
-//        msg_out::info("Parameters: lat<double> long<double> zoom<int> margin<int> [file_names<string>]");
-//        return 1;
-//    }
-//    return 0;
-//}
-}
-
-
 
 int main(int argc, char *argv[])
 {

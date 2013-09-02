@@ -604,6 +604,7 @@ void CtrlPreferences::applyExtratorParams(QString setting)
 
 void CtrlPreferences::applyForestParams()
 {
+    forest_.fillPriors();
     bridge_->setForestParams(forest_);
     forest_.dirty = false;
     Q_EMIT paramsForeApplied();

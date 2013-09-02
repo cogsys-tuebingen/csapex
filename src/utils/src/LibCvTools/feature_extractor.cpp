@@ -24,6 +24,9 @@ void FeatureExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &
 
 void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors)
 {
+    if(image.empty())
+        return;
+
     cv::Mat         roi_img;
     cv::Mat         roi_col(image, roi);
     cv::Scalar      mean = extractMeanColorRGBYUV(roi_col);
