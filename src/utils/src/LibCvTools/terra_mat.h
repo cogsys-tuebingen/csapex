@@ -89,6 +89,8 @@ private:
     void readMapping(const cv::FileStorage &fs);
     void writeLegend(cv::FileStorage &fs) const;
     void readLegend(const cv::FileStorage &fs);
+    void writeMatrix(cv::FileStorage &fs) const;
+    void readMatrix(const cv::FileStorage &fs);
 };
 
 

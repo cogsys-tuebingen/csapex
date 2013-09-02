@@ -31,6 +31,7 @@ private:
     const std::string                       FOREST_PATH;
 
 
+    std::string                             work_path_;
     std::string                             roi_lib_path_;
     VecStr                                  buf_roi_paths_;
     VecUCh                                  buf_classes_;

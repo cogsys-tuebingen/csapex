@@ -300,6 +300,7 @@ void CtrlMainWindow::saveBatchTemplate()
             emitter << YAML::BeginMap;
             class_ed->write(emitter);
             bridge->writeCore(emitter);
+            emitter << YAML::Key << "WORK_PATH" << YAML::Value << "";
             emitter << YAML::Key << "ROI_FILES" << YAML::Value << YAML::BeginSeq;
             emitter << "path to roi file ...";
             emitter << YAML::EndSeq;

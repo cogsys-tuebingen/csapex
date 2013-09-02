@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <opencv2/highgui/highgui.hpp>
+#include <boost/regex.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace cv_extraction;
 
@@ -22,7 +24,7 @@ void TerraImageGenerator::read(std::ifstream &in)
         YAML::Node   document;
         parser.GetNextDocument(document);
 
-        /// READ CLASSIFIE
+        /// READ CLASSIFIER
         const YAML::Node &classifier_data = document["CLASSIFIER"];
         readForest(classifier_data);
 
@@ -62,6 +64,7 @@ void TerraImageGenerator::setCellSize(const int value)
 void TerraImageGenerator::run()
 {
     cv::Mat tmp;
+    terra_mat_ = TerraMat();
 
     std::map<int,int> ids_to_channel;
     std::map<int,int> channel_to_ids;
@@ -126,8 +129,8 @@ void TerraImageGenerator::readForest(const YAML::Node &data)
 {
     std::ofstream out(FOREST_PATH.c_str());
     if(!out.is_open()) {
-       std::cerr << "Couldn't open forest file!" << std::endl;
-       return;
+        std::cerr << "Couldn't open forest file!" << std::endl;
+        return;
     }
 
     std::string buf;
@@ -136,20 +139,100 @@ void TerraImageGenerator::readForest(const YAML::Node &data)
     out.close();
 
     random_forest_->load(FOREST_PATH);
+}
 
+namespace input {
+bool readYAML(const std::string &yaml, std::vector<std::string> &images)
+{
+    std::ifstream in(yaml.c_str());
+    if(!in.is_open())
+        return false;
+
+    YAML::Parser p(in);
+    YAML::Node document;
+    p.GetNextDocument(document);
+    for(YAML::Iterator it = document.begin() ; it != document.end() ; it++) {
+        std::string path;
+        *it >> path;
+        images.push_back(path);
+    }
+    in.close();
+    return images.size() > 0;
+}
+
+int parse(int argc, char **argv, std::string &workpath, std::string &classifier, int &cell_size, std::vector<std::string> &images)
+{
+
+
+    boost::regex e_imag(".*\\.(jpg|png|tiff|pgm)");
+    boost::regex e_yaml(".*\\.(yaml)");
+    boost::regex e_int("[0-9]*");
+
+    if(argc == 1) {
+        std::cout << "Arguments : <classifier> <cellsize> <image | images.yaml> <outpath>" << std::endl;
+        return 1;
+    }
+
+    if(argc < 4) {
+        std::cerr << "Not engough arguments!" << std::endl;
+        std::cerr << "Arguments : <classifier> <cellsize> <image | images.yaml> <outpath>" << std::endl;
+        return 1;
+    }
+
+
+
+    boost::cmatch what;
+    bool validated_input = true;
+
+    classifier = argv[1];
+
+    if(boost::regex_match(argv[2], what, e_int) && what[0].matched) {
+        cell_size = atoi(argv[2]);
+    } else
+        validated_input &= false;
+
+    if(boost::regex_match(argv[3], what, e_imag) && what[0].matched) {
+        images.push_back(argv[3]);
+    } else if(boost::regex_match(argv[3], what, e_yaml) && what[0].matched) {
+        validated_input &= readYAML(argv[3], images);
+    } else
+        validated_input &= false;
+
+    if(argc == 5) {
+        if(boost::filesystem3::exists(argv[4])) {
+            workpath = argv[4];
+        } else
+            validated_input &= false;
+    } else {
+        boost::filesystem3::path path(boost::filesystem3::current_path());
+        workpath = path.string();
+    }
+
+    if(!validated_input){
+        std::cerr << "Some arguments couldn't be used! Check your input!" << std::endl;
+        std::cerr << "Arguments : <classifier> <cellsize> <image | images.yaml> <outpath>" << std::endl;
+        return 1;
+    }
+    return 0;
+}
 }
 
 int main(int argc, char *argv[])
 {
-    TerraImageGenerator t;
+    std::string workpath;
+    std::string classifier;
+    std::vector<std::string> images;
+    int cell_size = 10;
 
-    if(argc != 4) {
-        std::cerr << "Not engough arguments!" << std::endl;
-        std::cerr << "Arguments : <classifier> <image> <cellsize>" << std::endl;
-        return 1;
+    int validation = input::parse(argc, argv, workpath, classifier, cell_size, images);
+
+    if(validation > 0) {
+        return validation;
     }
 
-    std::ifstream in(argv[1]);
+    TerraImageGenerator t;
+    t.setCellSize(cell_size);
+    std::ifstream in(classifier.c_str());
     if(in.is_open()) {
         t.read(in);
     } else {
@@ -157,19 +240,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    cv::Mat tmp = cv::imread(argv[2]);
-    if(tmp.empty()) {
-        std::cerr << "Couldn't open classifier file '" << argv[2] << "'!" << std::endl;
-        return 1;
+
+    for(std::vector<std::string>::iterator it = images.begin() ; it != images.end() ; it++) {
+        cv::Mat tmp = cv::imread(*it);
+        if(tmp.empty()) {
+            std::cerr << "Unknown image file '" << *it << "'!" << std::endl;
+            continue;
+        }
+        t.setImage(tmp);
+        t.run();
+        boost::filesystem3::path save_to(*it);
+        t.write(workpath + save_to.filename().string() + ".yml");
     }
-    t.setImage(tmp);
-    t.setCellSize(atoi(argv[3]));
-    t.run();
-    t.write("result.yml");
-
-    TerraMat mat = t.getTerraMat();
-    cv::imshow("Generation", mat.getFavoritesRGB());
-    cv::waitKey(0);
-
     return 0;
 }

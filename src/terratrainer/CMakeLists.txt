@@ -90,6 +90,9 @@ add_executable(terraBatchtrainer
 add_executable(terraImagegenerator
                 src/tools/terra_image_generator.cpp)
 
+add_executable(terraImageViewer
+                src/tools/terra_image_viewer.cpp)
+
 #add_executable(YAMLTrainConverter
 #               src/tools/yaml_train_converter.cpp)
 
@@ -109,6 +112,12 @@ target_link_libraries(terraBatchtrainer
                         ${catkin_LIBRARIES})
 
 target_link_libraries(terraImagegenerator
+                        yaml-cpp
+                        ${OpenCV_LIBS}
+                        ${Boost_LIBRARIES}
+                        ${catkin_LIBRARIES})
+
+target_link_libraries(terraImageViewer
                         yaml-cpp
                         ${OpenCV_LIBS}
                         ${Boost_LIBRARIES}

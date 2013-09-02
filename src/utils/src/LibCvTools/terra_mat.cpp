@@ -78,7 +78,7 @@ void TerraMat::read(const std::string &filename) {
     cv::FileStorage fs(filename, cv::FileStorage::READ);
     readMapping(fs);
     readLegend(fs);
-    fs["terramat"] >> terra_mat_;
+    readMatrix(fs);
     channels_   = terra_mat_.channels();
     step_       = terra_mat_.step / terra_mat_.elemSize1();
 }
@@ -87,7 +87,7 @@ void TerraMat::write(const std::string &filename) const {
     cv::FileStorage fs(filename, cv::FileStorage::WRITE);
     writeMapping(fs);
     writeLegend(fs);
-    fs << "terramat" << terra_mat_;
+    writeMatrix(fs);
 }
 
 // exports an uchar image, each pixel containing the id of the favorite terrain class
@@ -190,4 +190,29 @@ void TerraMat::readLegend(const cv::FileStorage &store)
         entry.first = entry.second.id;
         legend_.insert(entry);
     }
+}
+
+void TerraMat::writeMatrix(cv::FileStorage &fs) const
+{
+    std::vector<cv::Mat> terra_mat_channels;
+    cv::split(terra_mat_, terra_mat_channels);
+    fs << "terra_mat" << "[";
+    for(std::vector<cv::Mat>::iterator it = terra_mat_channels.begin() ; it != terra_mat_channels.end() ; it++)
+        fs << *it;
+    fs << "]";
+}
+
+void TerraMat::readMatrix(const cv::FileStorage &fs)
+{
+    fs["terramat"] >> terra_mat_;
+    cv::FileNode terra_mat = fs["terra_mat"];
+    std::vector<cv::Mat> terra_mat_channels;
+
+    for(cv::FileNodeIterator it = terra_mat.begin() ; it != terra_mat.end() ; it++) {
+        cv::Mat channel;
+        *it >> channel;
+        terra_mat_channels.push_back(channel);
+    }
+
+    cv::merge(terra_mat_channels, terra_mat_);
 }

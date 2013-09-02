@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 #include <stdio.h>
+#include <boost/regex.hpp>
+#include <boost/filesystem.hpp>
 
 TerraBatchTrainer::TerraBatchTrainer(const std::string &path) :
     EXTRACTION_PATH("extraction.yaml"),
@@ -30,7 +32,7 @@ void TerraBatchTrainer::run()
     std::cout << "============= TRAIN =============" << std::endl;
     train();
     std::cout << "============= WRITE =============" << std::endl;
-    std::ofstream out(CLASSIFIER_PATH.c_str());
+    std::ofstream out((work_path_ + CLASSIFIER_PATH).c_str());
     if(!out.is_open()) {
         std::cerr << "Couldn't write file !" << std::endl;
         return;
@@ -53,6 +55,19 @@ void TerraBatchTrainer::read(std::ifstream &in)
         /// FOREST PARAMS
         forest_params_.read(document);
 
+        /// READ WORK PATH
+        std::string work_path;
+        document["WORK_PATH"] >> work_path;
+
+        if(boost::filesystem3::exists(work_path) && boost::filesystem3::is_directory(work_path)) {
+            if(work_path.length() > 0 && work_path[work_path.length() - 1] != '/')
+                work_path += '/';
+
+            work_path_ = work_path;
+        } else {
+            std::cerr << "WORK_PATH was not valid, using cwd!" << std::endl;
+        }
+
         /// PATHS TO THE FILES
         const YAML::Node &paths = document["ROI_FILES"];
         CMPYAML::readSequence<std::string>(paths.begin(), paths.end() , buf_roi_paths_);
@@ -73,7 +88,7 @@ void TerraBatchTrainer::read(std::ifstream &in)
 
 void TerraBatchTrainer::write(std::ofstream &out)
 {
-    std::ifstream in(FOREST_PATH.c_str());
+    std::ifstream in((work_path_ + FOREST_PATH).c_str());
     if(!in.is_open()) {
         std::cerr << "Resulting forest couldn't be opened!" << std::endl;
         return;
@@ -100,7 +115,7 @@ void TerraBatchTrainer::write(std::ofstream &out)
 
 void TerraBatchTrainer::extract()
 {
-    std::ofstream out(EXTRACTION_PATH.c_str());
+    std::ofstream out((work_path_ + EXTRACTION_PATH).c_str());
     if(!out.is_open()) {
         std::cerr << "Couldn't not write extraction file!" << std::endl;
         return;
@@ -149,6 +164,7 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
             terra_rois.push_back(roi);
         }
 
+        CMPExtraction::extractToYAML(emitter,image, extractor_, terra_rois);
     } catch(YAML::Exception e) {
         std::cerr << "Error reading document '" << e.what() << "' !" << std::endl;
         return;
@@ -158,9 +174,6 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
         std::cerr << "Image couldn't be opened!" << std::endl;
         return;
     }
-
-
-    CMPExtraction::extractToYAML(emitter,image, extractor_, terra_rois);
 }
 
 void TerraBatchTrainer::train()
@@ -168,10 +181,10 @@ void TerraBatchTrainer::train()
     CMPRandomForestExt::Ptr random_forest(new CMPRandomForestExt);
     random_forest->setParams(forest_params_);
 
-    bool trained = random_forest->trainFromData(EXTRACTION_PATH);
+    bool trained = random_forest->trainFromData(work_path_ + EXTRACTION_PATH);
     if(trained) {
         try {
-            random_forest->save(FOREST_PATH);
+            random_forest->save(work_path_ + FOREST_PATH);
         } catch (cv::Exception e) {
             std::cerr << "ERROR : " << e.what() << std::endl;
         }
@@ -214,6 +227,57 @@ void TerraBatchTrainer::writeClasses(YAML::Emitter &emitter)
     }
     emitter << YAML::EndSeq;
 }
+
+namespace input {
+//int parse(int argc, char **argv, double &latitude, double &longitude, int &zoom, int &margin, std::string &file_names)
+//{
+//    boost::regex e_double("-?[0-9]*.[0-9]*");
+//    boost::regex e_int("[0-9]*");
+
+//    if(argc == 1) {
+//        msg_out::info("Parameters: lat<double> long<double> zoom<int> margin<int> [file_names<string>]");
+//        return 1;
+//    }
+
+//    if(argc < 5) {
+//        msg_out::error("Supply at least latitude and longitude, margin and zoom.");
+//        return 1;
+//    }
+
+//    file_names = "map";
+//    boost::cmatch what;
+//    bool validated_input = true;
+
+//    if(boost::regex_match(argv[1], what, e_double) && what[0].matched) {
+//        latitude = atof(argv[1]);
+//    } else
+//      validated_input &= false;
+//    if(boost::regex_match(argv[2], what, e_double) && what[0].matched) {
+//        longitude = atof(argv[2]);
+//    } else
+//      validated_input &= false;
+//    if(boost::regex_match(argv[3], what, e_int) && what[0].matched) {
+//        zoom = atoi(argv[3]);
+//    } else
+//      validated_input &= false;
+//    if(boost::regex_match(argv[4], what, e_int) && what[0].matched) {
+//        margin = atoi(argv[4]);
+//    } else
+//      validated_input &= false;
+
+//    if(argc == 6)
+//        file_names = argv[5];
+
+//    if(!validated_input){
+//        msg_out::error("Wrong parameters!");
+//        msg_out::info("Parameters: lat<double> long<double> zoom<int> margin<int> [file_names<string>]");
+//        return 1;
+//    }
+//    return 0;
+//}
+}
+
+
 
 int main(int argc, char *argv[])
 {
