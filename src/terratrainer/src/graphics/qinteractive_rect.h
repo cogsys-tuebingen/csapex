@@ -10,11 +10,12 @@ class QStyleOptionGraphicsItem;
 
 class QInteractiveItem : public QGraphicsRectItem {
 public:
-    QInteractiveItem (const QRectF &rect);
-    void setPen      (const QPen &pen);
-    void setSelectPen(const QPen &pen);
-    void setClass    (const int classID_);
+    QInteractiveItem  (const QRectF &rect);
+    void setPen       (const QPen &pen);
+    void setSelectPen (const QPen &pen);
+    void setClass     (const int classID_);
     int  getClass();
+    void setLimitedPos(const QPointF& next_pos);
 
 protected:
     enum Interaction{INIT, NONE, MOVING, STOPPED};
@@ -28,6 +29,9 @@ protected:
     QPen                pen_;
     QPen                pen_selected_;
     Interaction         interaction_;
+
+    QPointF             drag_start_rect_pos_;
+    QPointF             drag_start_mouse_pos_;
 };
 
 #endif // QINTERACTIVE_RECT_H

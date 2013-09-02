@@ -106,8 +106,8 @@ void QInteractiveScene::deselectAll()
 
 bool QInteractiveScene::onBackground(QGraphicsItem *item)
 {
-    int test = this->items().size();
-    return background_->sceneBoundingRect().contains(item->sceneBoundingRect());
+//    return background_->sceneBoundingRect().contains(item->sceneBoundingRect());
+    return sceneRect().contains(item->sceneBoundingRect());
 }
 
 bool QInteractiveScene::collision(QGraphicsItem *item)
