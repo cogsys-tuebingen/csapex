@@ -27,6 +27,7 @@ add_library (LibCvTools SHARED
     terra_decomposition_quadtree.cpp
     terra_decomposition_classifier.cpp
     math.hpp
+    messages.hpp
 )
 
 target_link_libraries(LibCvTools
@@ -35,6 +36,21 @@ target_link_libraries(LibCvTools
     yaml-cpp
 )
 
+####### Tools #######
+add_executable(undistort
+    undistort.cpp)
+
+target_link_libraries(undistort
+    ${OpenCV_LIBS}
+    LibCvTools)
+
+add_executable(scale
+    scale.cpp)
+
+target_link_libraries(scale
+    ${OpenCV_LIBS})
+
+####### Tests #######
 # Rotated template test
 add_executable(rotated_template
     rotated_template.cpp

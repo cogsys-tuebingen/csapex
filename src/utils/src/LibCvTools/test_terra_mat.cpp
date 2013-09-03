@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
         test_terra.addLegendEntry(cl);
     }
 
-    cv::Mat render = test_terra.getFavoritesRGB();
+    cv::Mat render = test_terra.getFavoritesBGR();
     cv::imshow("testterra", render);
     cv::waitKey(0);
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         std::cout << val[i] << std::endl;
     }
 
-    render = test_terra2.getFavoritesRGB();
+    render = test_terra2.getFavoritesBGR();
     cv::imshow("testterra", render);
     cv::waitKey(0);
 

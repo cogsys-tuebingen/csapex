@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
             << std::endl;
 
     namedWindow("Display rgbMatrix", CV_WINDOW_AUTOSIZE);
-    imshow("Display rgbMatrix", terraMatrix.getFavoritesRGB());
+    imshow("Display rgbMatrix", terraMatrix.getFavoritesBGR());
 
 /*//
     namedWindow("Display matchMatrix", CV_WINDOW_AUTOSIZE);

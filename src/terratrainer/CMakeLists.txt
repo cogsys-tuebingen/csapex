@@ -93,6 +93,9 @@ add_executable(terraImagegenerator
 add_executable(terraImageViewer
                 src/tools/terra_image_viewer.cpp)
 
+add_executable(key_tester
+                src/tools/key_test.cpp)
+
 #add_executable(YAMLTrainConverter
 #               src/tools/yaml_train_converter.cpp)
 
@@ -122,6 +125,9 @@ target_link_libraries(terraImageViewer
                         ${OpenCV_LIBS}
                         ${Boost_LIBRARIES}
                         ${catkin_LIBRARIES})
+
+target_link_libraries(key_tester
+                        ${OpenCV_LIBS})
 
 #target_link_libraries(YAMLTrainConverter
 #                        yaml-cpp)

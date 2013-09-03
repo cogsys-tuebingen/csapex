@@ -66,7 +66,7 @@ public:
     cv::Mat getFavorites();
 
     // exports an rgb image showing the color of the favorite terrain class in each pixel
-    cv::Mat getFavoritesRGB();
+    cv::Mat getFavoritesBGR();
 
     operator cv::Mat();
     operator cv::Mat&();

@@ -118,7 +118,7 @@ cv::Mat TerraMat::getFavorites()
 }
 
 // exports an rgb image showing the color of the favorite terrain class in each pixel
-cv::Mat TerraMat::getFavoritesRGB() {
+cv::Mat TerraMat::getFavoritesBGR() {
     cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC3, cv::Scalar::all(0));
     cv::Mat favorites = getFavorites();
 
@@ -197,8 +197,13 @@ void TerraMat::writeMatrix(cv::FileStorage &fs) const
     std::vector<cv::Mat> terra_mat_channels;
     cv::split(terra_mat_, terra_mat_channels);
     fs << "terra_mat" << "[";
-    for(std::vector<cv::Mat>::iterator it = terra_mat_channels.begin() ; it != terra_mat_channels.end() ; it++)
+    for(std::vector<cv::Mat>::iterator it = terra_mat_channels.begin() ; it != terra_mat_channels.end() ; it++) {
+//        /// TESTING
+//        cv::fastNlMeansDenoising(*it, *it);
+//        /// TESTING
         fs << *it;
+
+    }
     fs << "]";
 }
 
