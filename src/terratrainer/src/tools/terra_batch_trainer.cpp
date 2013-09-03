@@ -155,18 +155,24 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
 
         const YAML::Node &rois = doc["ROIS"];
         for(YAML::Iterator it = rois.begin() ; it != rois.end() ; it++) {
+            double x,y,w,h;
             cv_roi::TerraROI roi;
             (*it)["class"] >> roi.id.id;
-            (*it)["x"]     >> roi.roi.rect.x;
-            (*it)["y"]     >> roi.roi.rect.y;
-            (*it)["w"]     >> roi.roi.rect.width;
-            (*it)["h"]     >> roi.roi.rect.height;
+            (*it)["x"]     >> x;
+            (*it)["y"]     >> y;
+            (*it)["w"]     >> w;
+            (*it)["h"]     >> h;
+            roi.roi.rect.x = std::floor(x + 0.5);
+            roi.roi.rect.y = std::floor(y + 0.5);
+            roi.roi.rect.width = std::floor(w + 0.5);
+            roi.roi.rect.height = std::floor(h + 0.5);
+
             terra_rois.push_back(roi);
         }
 
         CMPExtraction::extractToYAML(emitter,image, extractor_, terra_rois);
     } catch(YAML::Exception e) {
-        std::cerr << "Error reading document '" << e.what() << "' !" << std::endl;
+        std::cerr << "Error reading document '" << path << "'" << e.what() << "' !" << std::endl;
         return;
     }
 

@@ -30,7 +30,6 @@ protected:
     enum Type{NOT_SET, LBP, LTP};
     Type type_;
     cv_local_patterns::LocalPattern::Ptr pattern_;
-    boost::shared_ptr<ExtractorParams>   ext_params_;
 
     double k;
 

@@ -56,11 +56,12 @@ void CtrlMapView::write(YAML::Emitter &emitter) const
         if(roi != NULL) {
             emitter << YAML::BeginMap;
             emitter << YAML::Key << "class" << YAML::Value << roi->getClass();
-            QRectF bounding = roi->rect();
-            emitter << YAML::Key << "x" << YAML::Value << bounding.x();
-            emitter << YAML::Key << "y" << YAML::Value << bounding.y();
-            emitter << YAML::Key << "w" << YAML::Value << bounding.width();
-            emitter << YAML::Key << "h" << YAML::Value << bounding.height();
+            QPointF pos  = roi->scenePos();
+            QRectF  geom = roi->rect();
+            emitter << YAML::Key << "x" << YAML::Value << pos.x();
+            emitter << YAML::Key << "y" << YAML::Value << pos.y();
+            emitter << YAML::Key << "w" << YAML::Value << geom.width();
+            emitter << YAML::Key << "h" << YAML::Value << geom.height();
             emitter << YAML::EndMap;
         }
     }
@@ -260,7 +261,7 @@ bool CtrlMapView::eventFilter(QObject *obj, QEvent *event)
                 || mouse_move_) {
             mouse_move_ = true;
             if(map_view_scene_->getMode() == QInteractiveScene::ADD){
-                addRectangle(m->scenePos(), box_size_, box_size_);
+                addRectangle(m->scenePos() - QPointF(box_size_ / 2.0, box_size_ / 2.0), box_size_, box_size_);
             }
             if(map_view_scene_->getMode() == QInteractiveScene::REMOVE){
                 removeItem(m->scenePos());
