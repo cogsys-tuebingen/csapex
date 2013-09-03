@@ -21,8 +21,8 @@ void Dumper::stopTraining()
     Trainer::stopTraining();
 
     if(dump_reference_images) {
-        bfs::create_directories(config.ref_dir);
-        db_strategy->dumpReference(config.ref_dir);
+        bfs::create_directories(config("ref_dir").as<std::string>());
+        db_strategy->dumpReference(config("ref_dir"));
     }
 }
 
@@ -40,6 +40,6 @@ void Dumper::dumpCurrentRoiAsImage()
 {
     if(dump_feature_data) {
         INFO("dump");
-        FrameIO::exportFrame(current_frame.get(), config.batch_dir, feature++);
+        FrameIO::exportFrame(current_frame.get(), config("batch_dir"), feature++);
     }
 }

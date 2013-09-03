@@ -111,6 +111,7 @@ void DesignBoard::addBoxEvent(Box *box)
 
     box->setParent(this);
     box->show();
+    box->triggerPlaced();
 
     //    layout()->addWidget(box);
 

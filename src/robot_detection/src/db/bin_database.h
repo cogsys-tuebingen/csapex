@@ -71,7 +71,7 @@ private:
     friend class boost::serialization::access;
 
     template<class Archive>
-    void save(Archive& ar, const unsigned int version) const {
+    void save(Archive& ar, const unsigned int /*version*/) const {
         ar& boost::serialization::base_object<Database>(*this);
 
         ar << bins;
@@ -82,14 +82,14 @@ private:
     }
 
     template<class Archive>
-    void load(Archive& ar, const unsigned int version) {
+    void load(Archive& ar, const unsigned int /*version*/) {
         ar& boost::serialization::base_object<Database>(*this);
 
         bins.clear();
         ar >> bins;
 
-        config.bin_count = bins.size();
-        config.replaceGlobal();
+        config["bin_count"] = static_cast<int>(bins.size());
+        config.replaceInstance();
 
         for(std::vector<Bin>::const_iterator it = bins.begin(); it != bins.end(); ++it) {
             (*it).setSaved(true);

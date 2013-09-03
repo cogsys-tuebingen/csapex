@@ -17,9 +17,10 @@ DatabaseStrategyFactory::DatabaseStrategyFactory()
 
 DatabaseStrategyInterface::Ptr DatabaseStrategyFactory::create()
 {
-    Config cfg = Config::getGlobal();
+    Config cfg = Config::instance();
 
-    switch(cfg.db_type) {
+    int type = cfg("db_type");
+    switch(type) {
     case Types::Strategy::BIN:
         return DatabaseStrategyInterface::Ptr(new BinDatabaseStrategy);
 

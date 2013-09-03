@@ -26,7 +26,7 @@ enum EVENT {
 
 EVENT userevent = NONE;
 
-void mouse(int event, int x, int y, int flags, void* param)
+void mouse(int event, int x, int y, int/* flags*/, void* /*param*/)
 {
     if(x != mx || y != my) {
         mx = x;

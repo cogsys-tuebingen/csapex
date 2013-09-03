@@ -25,7 +25,7 @@ bool DatabaseIO::save(const std::string& file, const Database* db)
 //        boost::archive::binary_oarchive archive(out_filter_stream);
         boost::archive::text_oarchive archive(ofs);
 
-        Config cfg = Config::getGlobal();
+        Config cfg = Config::instance();
 
         try {
             archive << cfg;
@@ -58,7 +58,7 @@ bool DatabaseIO::load(const std::string& file, Database*& db)
 
         boost::archive::text_iarchive archive(ifs);
 
-        Config cfg = Config::getGlobal();
+        Config cfg = Config::instance();
 
         try {
             // load config data but ignore them

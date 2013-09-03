@@ -12,8 +12,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh("~");
 
     Config cfg = RosConfig::importFromNodeHandle(nh);
-    cfg.name = "Online Detector";
-    cfg.replaceGlobal();
+    cfg["name"] = "Online Detector";
+    cfg.replaceInstance();
 
     Detector detector;
     DetectorAdapterRos node(detector);

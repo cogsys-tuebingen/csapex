@@ -82,7 +82,7 @@ void StreamInterceptorWorker::run() {
             continue;
         }
 
-        QtHelper::QSleepThread::msleep(10);
+        qt_helper::QSleepThread::msleep(10);
     }
 }
 

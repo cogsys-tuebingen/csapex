@@ -105,6 +105,10 @@ void BoxedObject::updateDynamicGui(QBoxLayout *)
 {
 }
 
+void BoxedObject::updateModel()
+{
+}
+
 bool BoxedObject::canBeDisabled() const
 {
     return true;

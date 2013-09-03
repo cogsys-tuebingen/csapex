@@ -12,8 +12,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh("~");
 
     Config cfg = RosConfig::importFromNodeHandle(nh);
-    cfg.name = "Online Trainer";
-    cfg.replaceGlobal();
+    cfg["name"] = "Online Trainer";
+    cfg.replaceInstance();
 
     TrainerOnline trainer;
     TrainerAdapterRos node(trainer);

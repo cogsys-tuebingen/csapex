@@ -46,7 +46,7 @@ namespace serialization
 
 /*** Mat ***/
 template<class Archive>
-void save(Archive& ar, const cv::Mat& m, const unsigned int version)
+void save(Archive& ar, const cv::Mat& m, const unsigned int /*version*/)
 {
     size_t elemSize = m.elemSize(), elemType = m.type();
 
@@ -62,7 +62,7 @@ void save(Archive& ar, const cv::Mat& m, const unsigned int version)
 }
 
 template<class Archive>
-void load(Archive& ar, cv::Mat& m, const unsigned int version)
+void load(Archive& ar, cv::Mat& m, const unsigned int /*version*/)
 {
     int cols, rows;
     size_t elemSize, elemType;
@@ -83,7 +83,7 @@ void load(Archive& ar, cv::Mat& m, const unsigned int version)
 
 /*** Keypoint ***/
 template<class Archive>
-void save(Archive& ar, const cv::KeyPoint& k, const unsigned int version)
+void save(Archive& ar, const cv::KeyPoint& k, const unsigned int /*version*/)
 {
     ar& k.angle;
     ar& k.class_id;
@@ -94,7 +94,7 @@ void save(Archive& ar, const cv::KeyPoint& k, const unsigned int version)
 }
 
 template<class Archive>
-void load(Archive& ar, cv::KeyPoint& k, const unsigned int version)
+void load(Archive& ar, cv::KeyPoint& k, const unsigned int /*version*/)
 {
     ar& k.angle;
     ar& k.class_id;
@@ -107,14 +107,14 @@ void load(Archive& ar, cv::KeyPoint& k, const unsigned int version)
 
 /*** Point ***/
 template<class Archive>
-void save(Archive& ar, const cv::Point2f& p, const unsigned int version)
+void save(Archive& ar, const cv::Point2f& p, const unsigned int /*version*/)
 {
     ar& p.x;
     ar& p.y;
 }
 
 template<class Archive>
-void load(Archive& ar, cv::Point2f& p, const unsigned int version)
+void load(Archive& ar, cv::Point2f& p, const unsigned int /*version*/)
 {
     ar& p.x;
     ar& p.y;

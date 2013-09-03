@@ -161,7 +161,7 @@ bool EvaluationStrategyDecorator::outputTestResults(std::ostream& out)
 
 
     /// VECTOR STATS
-    std::string prefix = config.result_dir + config.getDescription();
+    std::string prefix = config("result_dir").as<std::string>() + config.getDescription();
 
     std::ofstream fcf_out((prefix + ".stats_fcf").c_str());
     std::ofstream fcr_out((prefix + ".stats_fcr").c_str());
@@ -200,8 +200,8 @@ bool EvaluationStrategyDecorator::outputTestResults(std::ostream& out)
     roc_creator->score_selected.connect(boost::bind(&EvaluationStrategyDecorator::setThresholdScoreCB,
                                         this, _1, _2, _3, &out));
 
-    roc_creator->save(config.result_dir + config.getDescription() + ".png");
-    if(config.interactive) {
+    roc_creator->save(config("result_dir").as<std::string>() + config.getDescription() + ".png");
+    if(config("interactive")) {
         roc_creator->displayInteractive();
     }
     return repeat_evaluation;
@@ -210,8 +210,8 @@ bool EvaluationStrategyDecorator::outputTestResults(std::ostream& out)
 void EvaluationStrategyDecorator::setThresholdScoreCB(RocCreator* roc_creator, const RocCreator::Data* score, bool save, std::ostream* out)
 {
     INFO("set threshold to " << score->score);
-    config.score_threshold = score->score;
-    config.replaceGlobal();
+    config["score_threshold"] = score->score;
+    config.replaceInstance();
 
     if(!score->user_data.empty()) {
         cv::Mat img = score->user_data;
@@ -235,7 +235,7 @@ void EvaluationStrategyDecorator::setThresholdScoreCB(RocCreator* roc_creator, c
     }
 
     if(save) {
-        std::ofstream etheta((config.result_dir + config.getDescription() + ".stats_etheta").c_str());
+        std::ofstream etheta((config("result_dir").as<std::string>() + config.getDescription() + ".stats_etheta").c_str());
         for(int i = 0, count = error_theta.size(); i < count; ++i) {
             etheta << error_theta[i] << '\n';
         }

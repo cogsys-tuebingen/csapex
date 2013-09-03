@@ -24,22 +24,22 @@ OptionKeypointExtractor::~OptionKeypointExtractor()
 
 void OptionKeypointExtractor::update_type(int slot)
 {
-    Config config = Config::getGlobal();
+    Config config = Config::instance();
 
-    QString target = config.getKeypointType().c_str();
+    QString target = config("keypointType").as<std::string>().c_str();
     if(target == selection->itemText(slot)) {
         return;
     }
 
     config.setKeypointType(selection->itemText(slot).toStdString());
-    config.replaceGlobal();
+    config.replaceInstance();
 }
 
 void OptionKeypointExtractor::update_threshold(int t)
 {
-    Config current = Config::getGlobal();
-    current.extractor_threshold = t;
-    current.replaceGlobal();
+    Config current = Config::instance();
+    current["extractor_threshold"] = t;
+    current.replaceInstance();
 }
 
 void OptionKeypointExtractor::insert(QBoxLayout* layout)
@@ -53,8 +53,8 @@ void OptionKeypointExtractor::insert(QBoxLayout* layout)
     }
     layout->addLayout(QtHelper::wrap("Keypoint", selection));
 
-    Config config = Config::getGlobal();
-    QString target = config.getKeypointType().c_str();
+    Config config = Config::instance();
+    QString target = config("keypointType").as<std::string>().c_str();
 
     if(selection != NULL) {
         for(int i = 0; i < selection->count(); ++i) {
@@ -67,7 +67,7 @@ void OptionKeypointExtractor::insert(QBoxLayout* layout)
 
     QObject::connect(selection, SIGNAL(currentIndexChanged(int)), this, SLOT(update_type(int)));
 
-    threshold = QtHelper::makeSlider(layout, "threshold", config.extractor_threshold, 1, 200);
+    threshold = QtHelper::makeSlider(layout, "threshold", config("extractor_threshold"), 1, 200);
     layout->addWidget(threshold);
 
     QObject::connect(threshold, SIGNAL(valueChanged(int)), this, SLOT(update_threshold(int)));
@@ -75,13 +75,13 @@ void OptionKeypointExtractor::insert(QBoxLayout* layout)
 
 void OptionKeypointExtractor::configChanged()
 {
-//    if(config.getKeypointType() < 0) {
+//    if(config("keypointType") < 0) {
 //        return;
 //    }
 
-    QString target = config.getKeypointType().c_str();
+    QString target = config("keypointType").as<std::string>().c_str();
 
-    threshold->setValue(config.extractor_threshold);
+    threshold->setValue(config("extractor_threshold"));
     if(selection != NULL) {
         for(int i = 0; i < selection->count(); ++i) {
             if(selection->itemText(i) == target) {
@@ -111,11 +111,11 @@ struct OptionKeypointExtractorState : public Memento {
 
 Memento::Ptr OptionKeypointExtractor::getState() const
 {
-    Config current = Config::getGlobal();
+    Config current = Config::instance();
 
     OptionKeypointExtractorState::Ptr res(new OptionKeypointExtractorState);
-    res->threshold = current.extractor_threshold;
-    res->keypoint_name = current.keypoint_name;
+    res->threshold = current("extractor_threshold");
+    res->keypoint_name = current("keypointType").as<std::string>();
 
     return res;
 }
@@ -125,10 +125,10 @@ void OptionKeypointExtractor::setState(Memento::Ptr memento)
     OptionKeypointExtractorState::Ptr m = boost::dynamic_pointer_cast<OptionKeypointExtractorState> (memento);
     assert(m.get());
 
-    Config current = Config::getGlobal();
-    current.extractor_threshold = m->threshold;
-    current.keypoint_name = m->keypoint_name;
-    current.replaceGlobal();
+    Config current = Config::instance();
+    current["extractor_threshold"] = m->threshold;
+    current["keypointType"] = m->keypoint_name;
+    current.replaceInstance();
 
     threshold->setValue(m->threshold);
 }

@@ -21,6 +21,8 @@ const std::string DatabaseItemModelDecorator::FILE_EXTENSION("Database (*.db)");
 DatabaseItemModelDecorator::DatabaseItemModelDecorator(Database* db, QTreeWidget* list)
     : db(db), tree(list), current_target(NULL), image_size(128, 128)
 {
+    assert(db);
+
     delete_shortcut = new QShortcut(list);
     delete_shortcut->setKey(QKeySequence("Del"));
 
@@ -40,7 +42,7 @@ DatabaseItemModelDecorator::DatabaseItemModelDecorator(Database* db, QTreeWidget
 
     QObject::connect(delete_shortcut, SIGNAL(activated()), this, SLOT(deleteCurrentRow()));
 
-    current_db_file.setFileName(db->getConfig().db_file.c_str());
+    current_db_file.setFileName(db->getConfig()("db_file").as<std::string>().c_str());
 
     if(current_db_file.exists()) {
         loadCurrentFile();
@@ -161,9 +163,9 @@ void DatabaseItemModelDecorator::save()
     } else {
         INFO("save to " << current_db_file.fileName().toStdString());
         Config c = db->getConfig();
-        c.db_file = current_db_file.fileName().toStdString();
+        c["db_file"] = current_db_file.fileName().toStdString();
         db->applyConfig(c);
-        DatabaseIO::save(c.db_file, db);
+        DatabaseIO::save(c("db_file"), db);
 
         current_db_file.close();
     }
@@ -184,15 +186,15 @@ void DatabaseItemModelDecorator::loadCurrentFile()
     std::string file = current_db_file.fileName().toStdString();
 
     Config cfg = db->getConfig();
-    if(cfg.db_file != file) {
+    if(cfg("db_file").as<std::string>() != file) {
         INFO("load " << file);
-        cfg.db_file = file;
+        cfg["db_file"] = file;
 
         if(db != NULL) {
             delete db;
         }
 
-        DatabaseIO::load(cfg.db_file, db);
+        DatabaseIO::load(cfg("db_file"), db);
     }
     current_db_file.close();
 }

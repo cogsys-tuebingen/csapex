@@ -4,9 +4,6 @@
 /// COMPONENT
 #include "extractor.h"
 
-/// PROJECT
-#include <config/config.h>
-
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 
@@ -26,7 +23,7 @@ public:
      * @throws Extractor::IllegalDescriptorException iff <b>descriptor</b> is not recognized
      * @return new instance
      */
-    static Extractor::Ptr create(const std::string& keypoint, const std::string& descriptor);
+    static Extractor::Ptr create(const std::string& keypoint, const std::string& descriptor, const vision::ParameterProvider &param);
 
 private:
     ExtractorFactory();

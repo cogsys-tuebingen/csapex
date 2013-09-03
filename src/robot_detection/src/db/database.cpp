@@ -45,7 +45,8 @@ MatchablePose* Database::getBestMatch(Matchable* current_frame, double* score_ou
     return best_pose;
 }
 
-void Database::traversePoses(boost::function<void (int, const std::string&)> composite_callback, boost::function<void (int, MatchablePose*)> leaf_callback)
+void Database::traversePoses(boost::function<void (int, const std::string&)> /*composite_callback*/,
+                             boost::function<void (int, MatchablePose*)> /*leaf_callback*/)
 {
     ERROR("not implemented");
     throw;

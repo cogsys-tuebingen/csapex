@@ -16,27 +16,41 @@
 namespace csapex
 {
 
-class ExtractFeatures : public csapex::BoxedObject
+class ExtractKeypoints : public csapex::BoxedObject
 {
     Q_OBJECT
 
 public:
-    ExtractFeatures();
+    ExtractKeypoints();
 
 public:
     virtual void fill(QBoxLayout* layout);
 
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
+    void updateDynamicGui(QBoxLayout *layout);
 
 private Q_SLOTS:
     void update(int slot);
     void update();
+    void updateModel();
+
+private:
+    template <typename T>
+    void updateParam(const std::string& name, T value);
 
     // TODO: state
 private:
     QComboBox* selection_key;
-    QComboBox* selection_des;
+
+    bool change;
+
+    std::vector<QObject*> callbacks;
+
+    QFrame* opt;
 
     QMutex extractor_mutex;
     Extractor::Ptr extractor;
@@ -44,10 +58,20 @@ private:
     ConnectorIn* in_img;
     ConnectorIn* in_mask;
     ConnectorOut* out_key;
-    ConnectorOut* out_des;
 
     bool has_img;
     bool has_mask;
+
+    struct State : public Memento {
+        std::string key;
+        std::map<std::string, std::vector<vision::Parameter> > params;
+
+        virtual void writeYaml(YAML::Emitter& out) const;
+        virtual void readYaml(const YAML::Node& node);
+    };
+
+    State state;
+
 };
 
 }

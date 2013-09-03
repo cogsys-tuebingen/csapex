@@ -61,7 +61,7 @@ private:
     friend class boost::serialization::access;
 
     template<class Archive>
-    void save(Archive& ar, const unsigned int version) const {
+    void save(Archive& ar, const unsigned int /*version*/) const {
         ar& boost::serialization::base_object<Database>(*this);
 
         ar << poses;
@@ -72,7 +72,7 @@ private:
     }
 
     template<class Archive>
-    void load(Archive& ar, const unsigned int version) {
+    void load(Archive& ar, const unsigned int /*version*/) {
         poses.clear();
         ar >> poses;
 

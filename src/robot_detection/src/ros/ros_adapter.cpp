@@ -11,7 +11,7 @@
 RosAdapter::RosAdapter()
     :  nh("~")
 {
-    f = boost::bind(&Config::replaceGlobal, boost::bind(&RosConfig::import, _1, _2));
+    f = boost::bind(&Config::replaceInstance, boost::bind(&RosConfig::import, _1, _2));
     server.setCallback(f);
 }
 

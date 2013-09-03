@@ -15,7 +15,7 @@ class QMainWindow;
 
 namespace
 {
-void siginthandler(int param)
+void siginthandler(int /*param*/)
 {
     WARN("User pressed Ctrl+C");
     exit(1);
@@ -49,7 +49,7 @@ public:
      */
     template <class WindowType>
     int run(int argc, char** argv) {
-        bool gui = config.gui_enabled && (argc <= 1 || std::string(argv[1]) != "--no-gui");
+        bool gui = config("gui_enabled") && (argc <= 1 || std::string(argv[1]) != "--no-gui");
 
         if(!gui) {
             runHeadless();

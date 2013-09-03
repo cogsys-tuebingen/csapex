@@ -36,6 +36,7 @@ public:
 
 public Q_SLOTS:
     void forwardMessage(Connector* source);
+    void eventGuiChanged();
     void tick();
     Box* parent();
 
@@ -100,7 +101,7 @@ public:
     virtual QPixmap makePixmap(const std::string& label);
 
     void moveEvent(QMoveEvent*);
-    void registered();
+    void triggerPlaced();
 
     void selectEvent();
     void deselectEvent();
@@ -170,6 +171,7 @@ public Q_SLOTS:
     void tick();
 
 Q_SIGNALS:
+    void placed();
     void toggled(bool);
     void moved(Box*, int dx, int dy);
     void changed(Box*);

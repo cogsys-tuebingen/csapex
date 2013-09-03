@@ -189,7 +189,7 @@ public:
         std::cout << "labels=" << labels.rows << ", centers=" << centers.rows << ", clusters=" << clusters.size() << std::endl;
     }
 
-    inline void vote(int itheta, int isigma, int itx, int ity) {
+    inline void vote(int /*itheta*/, int /*isigma*/, int itx, int ity) {
         assert(0 <= ity + padding);
         assert(ity < debug.rows + padding);
         assert(0 <= itx + padding);
@@ -257,7 +257,7 @@ cv::Mat ImageCombinerClusterMatchEM::combine(const cv::Mat img1, const cv::Mat m
 
     WARN("got " << matches.size() << " matches");
 
-    HoughEM h(options.k, config.octaves, a, b);
+    HoughEM h(options.k, config("octaves").as<int>(), a, b);
 
     std::vector<KMeansAlgorithm::ClusterT> clusters;
     h.filter(matches, clusters);

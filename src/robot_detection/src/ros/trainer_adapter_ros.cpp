@@ -28,7 +28,10 @@ TrainerAdapterRos::TrainerAdapterRos(Trainer& trainer)
     nh.param("use_distance", use_distance, true);
 
     // TODO make all directories configurable
-    nh.param("references_dir", config.ref_dir, config.ref_dir);
+    std::string ref_dir;
+    nh.param("references_dir", ref_dir, ref_dir);
+
+    config["ref_dir"] = ref_dir;
 
     trainer.tick_sig.connect(boost::bind(&TrainerAdapterRos::tick, this, _1));
 }
@@ -154,6 +157,6 @@ void TrainerAdapterRos::get_transformation(const ros::Time& time, const Angle& y
 
 
     // apply constant offset
-    tf::Quaternion offset = tf::createQuaternionFromYaw(angles::from_degrees(config.angle_offset));
+    tf::Quaternion offset = tf::createQuaternionFromYaw(angles::from_degrees(config("angle_offset").as<double>()));
     rot = offset * rot;
 }

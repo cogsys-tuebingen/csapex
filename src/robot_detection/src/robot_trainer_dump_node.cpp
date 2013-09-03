@@ -69,8 +69,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh("~");
 
     Config cfg = RosConfig::importFromNodeHandle(nh);
-    cfg.name = "Feature Dumper";
-    cfg.replaceGlobal();
+    cfg["name"] = "Feature Dumper";
+    cfg.replaceInstance();
 
     Dumper dumper;
 

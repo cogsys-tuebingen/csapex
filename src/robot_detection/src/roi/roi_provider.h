@@ -39,7 +39,7 @@ public:
      * @brief roiContainsTarget
      * @param roi
      */
-    virtual void roiContainsTarget(const Roi& roi) {}
+    virtual void roiContainsTarget(const Roi& /*roi*/) {}
 
     /**
      * @brief setFrameSize setter for the maximum roi area

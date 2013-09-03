@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "extractor.h"
+#include "config/parameter_provider.h"
 
 /// PROJECT
 #include <utils_plugin/plugin_manager.hpp>
@@ -13,6 +14,7 @@
 #include <opencv2/opencv.hpp>
 #include <boost/function.hpp>
 #include <boost/foreach.hpp>
+#include <map>
 
 namespace csapex
 {
@@ -46,23 +48,25 @@ public:
     const std::string class_name::name(#impname); \
     namespace csapex { \
     class _____##class_name##impname##_registrator { \
-        static _____##class_name##impname##_registrator instance; \
-        _____##class_name##impname##_registrator () {\
-            registerKeypointConstructor<class_name>();\
-            registerDescriptorConstructor<class_name>();\
-        }\
-        template <class T>\
-        static void registerKeypointConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {\
-            ExtractorManager::instance().registerKeypointConstructor(T::name, boost::bind(&T::keypoint, _1, _2)); \
-        }\
-        template <class T>\
-        static void registerKeypointConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {}\
-        template <class T>\
-        static void registerDescriptorConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {\
-            ExtractorManager::instance().registerDescriptorConstructor(T::name, boost::bind(&T::descriptor, _1)); \
-        }\
-        template <class T>\
-        static void registerDescriptorConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {}\
+    static _____##class_name##impname##_registrator instance; \
+    _____##class_name##impname##_registrator () {\
+    registerKeypointConstructor<class_name>();\
+    registerDescriptorConstructor<class_name>();\
+    }\
+    template <class T>\
+    static void registerKeypointConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {\
+    ExtractorManager::instance().registerKeypointConstructor(T::name, boost::bind(&T::keypoint, _1, _2, _3)); \
+    ExtractorManager::instance().registerKeypointParameters(T::name, boost::bind(&T::usedParameters)); \
+    }\
+    template <class T>\
+    static void registerKeypointConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasKeypoint, T>::type* dummy = 0) {}\
+    template <class T>\
+    static void registerDescriptorConstructor(typename boost::enable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {\
+    ExtractorManager::instance().registerDescriptorConstructor(T::name, boost::bind(&T::descriptor, _1, _2)); \
+    ExtractorManager::instance().registerDescriptorParameters(T::name, boost::bind(&T::usedParameters)); \
+    }\
+    template <class T>\
+    static void registerDescriptorConstructor(typename boost::disable_if_c<csapex::DetectorTraits<T>::HasDescriptor, T>::type* dummy = 0) {}\
     };\
     _____##class_name##impname##_registrator _____##class_name##impname##_registrator::instance;\
     }
@@ -84,14 +88,16 @@ public:
      * @brief The ExtractorInitializer
      */
     struct ExtractorInitializer : public Constructor {
-        typedef boost::function<void(Extractor*, bool)> Call;
+        typedef boost::function<void(Extractor*, const vision::ParameterProvider&, bool)> Call;
 
-        void operator()(Extractor* r, bool complete = false) const {
-            return construct(r, complete);
+        void operator()(Extractor* r, const vision::ParameterProvider& param, bool complete = false) const {
+            return construct(r, param, complete);
         }
 
-        void construct(Extractor* r, bool complete = false) const {
-            constructor(r, complete);
+        void construct(Extractor* r, const vision::ParameterProvider& param, bool complete = false) const {
+            if(has_constructor) {
+                constructor(r, param, complete);
+            }
         }
 
         void setConstructor(Call c) {
@@ -103,6 +109,25 @@ public:
         Call constructor;
     };
 
+    struct Params {
+        template <typename T>
+        T read(const vision::ParameterProvider& param, const std::string& name) {
+            try {
+                return param(name);
+            } catch (const std::exception& e) {
+                BOOST_FOREACH(const vision::Parameter& p, params) {
+                    if(p.name() == name) {
+                        return p.as<T>();
+                    }
+                }
+
+                throw std::out_of_range(std::string("parameter ") + name + " doesn't exist.");
+            }
+        }
+
+        std::vector<vision::Parameter> params;
+    };
+
     class KeypointInitializer : public ExtractorInitializer {};
     class DescriptorInitializer : public ExtractorInitializer {};
 
@@ -111,6 +136,8 @@ public:
 
     typedef PluginManager<Extractor, KeypointInitializer> KeypointInitializerManager;
     typedef PluginManager<Extractor, DescriptorInitializer> DescriptorInitializerManager;
+
+    typedef boost::function<std::vector<vision::Parameter>() > ParameterFunction;
 
 private:
     /**
@@ -138,6 +165,10 @@ public:
      */
     void registerDescriptorConstructor(const std::string& key, DescriptorInit dc);
 
+
+    void registerKeypointParameters(const std::string& key, ParameterFunction f);
+    void registerDescriptorParameters(const std::string& des, ParameterFunction f);
+
     /**
      * @brief getInitializer get a functor to initialize an Extractor
      * @param keypoint name of the keypoint detector
@@ -156,6 +187,9 @@ public:
         return available_keypoints.availableClasses();
     }
 
+    std::vector<vision::Parameter> featureDetectorParameters(const std::string& keypoint);
+    std::vector<vision::Parameter> featureDescriptorParameters(const std::string& keypoint);
+
     /**
      * @brief descriptorExtractors get a container of all extractors
      * @return
@@ -170,13 +204,13 @@ protected:
             : kc_(kc), dc_(dc), complete_(complete)
         {}
 
-        virtual void init(Extractor* e) {
+        virtual void init(Extractor* e, const vision::ParameterProvider& param) {
             if(complete_) {
-                kc_(e, true);
+                kc_(e, param, true);
                 // dc_ == kc_
             } else {
-                kc_(e);
-                dc_(e);
+                kc_(e, param);
+                dc_(e, param);
             }
         }
     private:
@@ -188,6 +222,9 @@ protected:
 protected:
     KeypointInitializerManager available_keypoints;
     DescriptorInitializerManager available_descriptors;
+
+    std::map<std::string, ParameterFunction> param_key;
+    std::map<std::string, ParameterFunction> param_des;
 };
 }
 

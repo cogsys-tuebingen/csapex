@@ -67,22 +67,22 @@ void ImageCombinerPeakMatch::insert(QBoxLayout *layout)
 }
 
 
-void ImageCombinerPeakMatch::mousePressEvent(QMouseEvent* event)
+void ImageCombinerPeakMatch::mousePressEvent(QMouseEvent* /*event*/)
 {
 //    histviewer->mousePressEvent(event);
 }
 
-void ImageCombinerPeakMatch::mouseMoveEvent(QMouseEvent* event)
+void ImageCombinerPeakMatch::mouseMoveEvent(QMouseEvent* /*event*/)
 {
 //    histviewer->mouseMoveEvent(event);
 }
 
-void ImageCombinerPeakMatch::wheelEvent(QWheelEvent* event)
+void ImageCombinerPeakMatch::wheelEvent(QWheelEvent* /*event*/)
 {
 //    histviewer->wheelEvent(event);
 }
 
-void ImageCombinerPeakMatch::keyEvent(QKeyEvent* event)
+void ImageCombinerPeakMatch::keyEvent(QKeyEvent* /*event*/)
 {
 //    histviewer->keyEvent(event);
 }
@@ -204,9 +204,9 @@ cv::Mat ImageCombinerPeakMatch::combine(const cv::Mat img1, const cv::Mat mask1,
     HoughAlgorithm* h;
 
     if(tools->getExtractor()->hasOrientation()) {
-        h = new HoughTheta(options.k, options.scaling, config.octaves, *a, *b);
+        h = new HoughTheta(options.k, options.scaling, config("octaves").as<int>(), *a, *b);
     } else {
-        h = new HoughNoTheta(options.k, options.scaling, config.octaves, *a, *b);
+        h = new HoughNoTheta(options.k, options.scaling, config("octaves").as<int>(), *a, *b);
     }
 
 

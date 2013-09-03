@@ -54,7 +54,7 @@ double Bin::findBestMatch(Matchable* current_frame, MatchablePose *& out, int* n
 
 void Bin::add(MatchablePose* pose)
 {
-    if((int) pose->keypoints.size() < config.min_points) {
+    if((int) pose->keypoints.size() < config("min_points").as<int>()) {
         return;
     }
 
@@ -151,7 +151,7 @@ void Bin::filter()
 
             tools->getMatcher()->matchFiltered(candidate, compare, filtered_candidate_keypoints, filtered_compare_keypoints);
 
-            if((int) filtered_candidate_keypoints.size() >= 1.5 * config.min_points) {
+            if((int) filtered_candidate_keypoints.size() >= 1.5 * config("min_points").as<int>()) {
                 covers[candidate].push_back(compare);
                 covers[compare].push_back(candidate);
             }

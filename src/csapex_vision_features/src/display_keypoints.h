@@ -12,15 +12,18 @@
 namespace csapex
 {
 
-class DisplayFeatures : public csapex::BoxedObject
+class DisplayKeypoints : public csapex::BoxedObject
 {
     Q_OBJECT
 
 public:
-    DisplayFeatures();
+    DisplayKeypoints();
 
 public:
     virtual void fill(QBoxLayout* layout);
+
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
@@ -36,14 +39,22 @@ private:
 
     ConnectorOut* out_img;
 
-    cv::Scalar color;
-    int flags;
-
     QComboBox* colorbox;
     QCheckBox* richbox;
 
     bool has_img;
     bool has_key;
+
+    struct State : public Memento {
+        cv::Scalar color;
+        int flags;
+
+        virtual void writeYaml(YAML::Emitter& out) const;
+        virtual void readYaml(const YAML::Node& node);
+    };
+
+    State state;
+
 };
 
 }

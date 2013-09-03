@@ -23,14 +23,14 @@ void NaiveDatabaseStrategy::train(Frame::Ptr frame)
     double score = INFINITY;
     db->getBestMatch(frame.get(), &score);
 
-    bool enough_points = (int) frame->keypoints.size() > config.min_points;
+    bool enough_points = (int) frame->keypoints.size() > config("min_points").as<int>();
     INFO("score=" << score);
-    if(score > config.score_threshold && enough_points) {
+    if(score > config("score_threshold").as<double>() && enough_points) {
         addFrame(frame);
     }
 }
 
-void NaiveDatabaseStrategy::addValidationExample(Frame::Ptr frame)
+void NaiveDatabaseStrategy::addValidationExample(Frame::Ptr /*frame*/)
 {
     // nothing to do
 }

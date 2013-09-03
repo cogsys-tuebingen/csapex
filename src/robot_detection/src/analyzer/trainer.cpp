@@ -20,7 +20,7 @@ Trainer::Trainer()
 
     // import references
     bfs::directory_iterator end; // default construction yields past-the-end
-    for(bfs::directory_iterator it(config.ref_dir); it != end; ++it) {
+    for(bfs::directory_iterator it(config("ref_dir").as<std::string>()); it != end; ++it) {
         std::string path(it->path().string());
         std::string file(it->path().filename().c_str());
         std::string yaw_str = file.substr(0, file.find_first_of('_'));
@@ -39,7 +39,7 @@ Trainer::~Trainer()
 {
 }
 
-bool Trainer::addNegativeExample(Frame::Ptr frame)
+bool Trainer::addNegativeExample(Frame::Ptr /*frame*/)
 {
     assert(state == TRAINING);
 //    context.negative_examples_.push_back(frame);
@@ -121,7 +121,7 @@ void Trainer::training(Frame::Ptr frame)
     Painter(frame.get()).drawRoi();
 }
 
-void Trainer::stopped(Frame::Ptr frame)
+void Trainer::stopped(Frame::Ptr /*frame*/)
 {
     if(state_changed_) {
         db_strategy->validate();

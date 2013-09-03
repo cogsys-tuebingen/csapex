@@ -49,7 +49,9 @@ public:
     virtual Memento::Ptr getState() const;
 
     virtual void fill(QBoxLayout* layout);
+
     virtual void updateDynamicGui(QBoxLayout* layout);
+    virtual void updateModel();
 
     virtual bool canBeDisabled() const;
 
@@ -68,6 +70,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void modelChanged();
+    void guiChanged();
 
 protected:
     void errorEvent(bool error, ErrorLevel level);

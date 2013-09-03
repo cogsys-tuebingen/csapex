@@ -15,12 +15,12 @@ BowDatabase::~BowDatabase()
 {
 }
 
-MatchablePose* BowDatabase::getPoseByAngle(const double yaw, int* index) const
+MatchablePose* BowDatabase::getPoseByAngle(const double /*yaw*/, int* /*index*/) const
 {
     throw;
 }
 
-double BowDatabase::findBestMatch(Matchable* current_frame, MatchablePose *&out, int* no_of_features) const
+double BowDatabase::findBestMatch(Matchable* /*current_frame*/, MatchablePose *&/*out*/, int* /*no_of_features*/) const
 {
     throw;
 }

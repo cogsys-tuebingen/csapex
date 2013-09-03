@@ -62,7 +62,7 @@ public:
      * @return
      */
     std::string getName() {
-        return config.name;
+        return config("name");
     }
 
     /**

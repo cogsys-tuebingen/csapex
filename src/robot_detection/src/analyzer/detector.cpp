@@ -39,7 +39,7 @@ Detector::Detector()
 
 void Detector::configChanged()
 {
-    INFO("config now: " << config.score_threshold);
+    INFO("config now: " << config("score_threshold").as<double>());
 }
 
 Detector::~Detector()
@@ -71,9 +71,9 @@ void Detector::analyzeRoi(Frame::Ptr frame, const Roi& roi)
     double score;
     MatchablePose* best_match = db_strategy->detect(frame, best_roi, &score);
 
-    INFO("best score: " << score << ",\tthreshold: " << config.score_threshold);
+    INFO("best score: " << score << ",\tthreshold: " << config("score_threshold").as<double>());
 
-    if(best_match != MatchablePose::NULL_POSE && score <= 2 * config.score_threshold) {
+    if(best_match != MatchablePose::NULL_POSE && score <= 2 * config("score_threshold").as<double>()) {
         if(best_roi.width < 10 || best_roi.height < 10) {
             WARN("found a target in an area of "
                  << best_roi.width << "x" << best_roi.height << "px, ignoring...");

@@ -173,7 +173,7 @@ private:
         return result;
     }
 
-    void initialize(const InputDataTypeT& input, const LimitPairList& limits) {
+    void initialize(const InputDataTypeT& /*input*/, const LimitPairList& limits) {
         srand(seed_);
 
         init(K, limits);

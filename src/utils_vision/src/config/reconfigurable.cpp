@@ -5,7 +5,7 @@
 #include <data/matchable_pose.h>
 
 Reconfigurable::Reconfigurable()
-    : config(Config::getGlobal()), tools(instance().latest_tools)
+    : config(Config::instance()), tools(instance().latest_tools)
 {
     instance().g_tools_replaced.connect(tools_replaced);
     connection = tools_replaced.connect(boost::bind(&Reconfigurable::applyConfig, this, _1));
@@ -44,7 +44,7 @@ Reconfigurable::~Reconfigurable()
 
 void Reconfigurable::replaceTools(const Config& cfg)
 {
-    MatchablePose::IMAGE_PATH = cfg.db_imgs;
+    MatchablePose::IMAGE_PATH = cfg("db_imgs").as<std::string>();
 
     instance().latest_tools = ConfiguratedTools::create(cfg);
     instance().g_tools_replaced(cfg);
@@ -66,7 +66,7 @@ Config Reconfigurable::getConfig()
 Reconfigurable::Manager::Manager()
 {
     tools_updater = Config::replace.connect(&Reconfigurable::replaceTools);
-    latest_tools = ConfiguratedTools::create(Config::getGlobal());
+    latest_tools = ConfiguratedTools::create(Config::instance());
 }
 
 Reconfigurable::Manager& Reconfigurable::instance()

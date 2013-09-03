@@ -16,13 +16,13 @@ Bag::Bag()
 
 Bag* Bag::create()
 {
-    const Config cfg = Config::getGlobal();
+    const Config cfg = Config::instance();
 
-    if(cfg.getDescriptorType() == "ORB") {
+    if(cfg("descriptorType").as<std::string>() == "ORB") {
         return new BagImplementation<DBoW2::FOrb::TDescriptor, DBoW2::FOrb>();
 
     } else {
-        ERROR("descriptor type " << cfg.getDescriptorType() << " not supported with bag database...");
+        ERROR("descriptor type " << cfg("descriptorType").as<std::string>() << " not supported with bag database...");
         throw Extractor::IllegalDescriptorException();
     }
 

@@ -2,7 +2,7 @@
 #define EXTRACTOR_H
 
 /// PROJECT
-#include <config/config.h>
+#include <config/parameter_provider.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -26,7 +26,7 @@ public:
     struct Initializer {
         typedef boost::shared_ptr<Initializer> Ptr;
 
-        virtual void init(Extractor*) = 0;
+        virtual void init(Extractor*, const vision::ParameterProvider&) = 0;
     };
 
     /**
@@ -56,6 +56,22 @@ public:
     void extract(const cv::Mat& frame, const cv::Mat& mask_roi, std::vector<cv::KeyPoint> &keypoints, cv::Mat& descriptors) const;
 
     /**
+     * @brief extractKeypoints extract keypoints from an image
+     * @param frame the image to extract from
+     * @param mask_roi mask to use when extracting
+     * @param keypoints output variable for found keypoints
+     */
+    void extractKeypoints(const cv::Mat& frame, const cv::Mat& mask_roi, std::vector<cv::KeyPoint> &keypoints) const;
+
+    /**
+     * @brief extractDescriptors extract keypoints and descriptors from an image
+     * @param frame the image to extract from
+     * @param keypoints input variable for keypoints
+     * @param descriptors output variable for appropriate descriptors
+     */
+    void extractDescriptors(const cv::Mat& frame, std::vector<cv::KeyPoint> &keypoints, cv::Mat& descriptors) const;
+
+    /**
      * @brief binary
      * @return true, iff descriptors are binary
      */
@@ -70,12 +86,6 @@ public:
     bool hasOrientation() const {
         return has_orientation;
     }
-
-    /**
-     * @brief valid
-     * @return <b>true</b>, iff detector and extractor are valid
-     */
-    bool valid() const;
 
 public:
     cv::Ptr<cv::FeatureDetector> detector;

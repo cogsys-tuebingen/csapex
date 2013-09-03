@@ -9,11 +9,12 @@ ExtractorFactory::ExtractorFactory()
 {
 }
 
-Extractor::Ptr ExtractorFactory::create(const std::string& keypoint, const std::string& descriptor)
+Extractor::Ptr ExtractorFactory::create(const std::string& keypoint, const std::string& descriptor,
+                                        const vision::ParameterProvider& param)
 {
     Extractor::Ptr e(new Extractor(0));
 
-    instance().manager.getInitializer(keypoint, descriptor)->init(e.get());
+    instance().manager.getInitializer(keypoint, descriptor)->init(e.get(), param);
 
     return e;
 }

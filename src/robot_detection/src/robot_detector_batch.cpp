@@ -5,15 +5,15 @@
 
 int main(int argc, char** argv)
 {
-    Config cfg = Config::getGlobal();
-    cfg.name = "Batch Detector";
-    cfg.replaceGlobal();
+    Config cfg = Config::instance();
+    cfg["name"] = "Batch Detector";
+    cfg.replaceInstance();
 
     Detector detector;
     DetectorAdapterStatic node(detector);
 
 //    node.test_on(cfg_path + "feature_data_training/negative");
-    node.test_on(cfg.config_dir + "feature_data_training/kiste_braun/positive");
+    node.test_on(cfg("config_dir").as<std::string>() + "feature_data_training/kiste_braun/positive");
 
     return node.run<AnalyzerWindow>(argc, argv);
 }

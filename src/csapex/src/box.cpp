@@ -117,6 +117,7 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     connect(ui->killbtn, SIGNAL(clicked()), this, SLOT(killContent()));
 
     connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
+    connect(content.get(), SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
 
     setVisible(false);
 }
@@ -212,6 +213,13 @@ void BoxWorker::tick()
         parent_->content_->tick();
     }
 }
+void BoxWorker::eventGuiChanged()
+{
+    if(parent_->content_->isEnabled()) {
+        parent_->content_->updateModel();
+    }
+}
+
 
 Box* BoxWorker::parent()
 {
@@ -540,7 +548,7 @@ void Box::moveEvent(QMoveEvent* e)
     Q_EMIT moved(this, delta.x(), delta.y());
 }
 
-void Box::registered()
+void Box::triggerPlaced()
 {
     foreach(ConnectorIn* i, input) {
         Q_EMIT connectorCreated(i);
@@ -548,6 +556,7 @@ void Box::registered()
     foreach(ConnectorOut* i, output) {
         Q_EMIT connectorCreated(i);
     }
+    Q_EMIT placed();
 }
 
 void Box::selectEvent()

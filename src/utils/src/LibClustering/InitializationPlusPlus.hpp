@@ -39,7 +39,7 @@ struct PlusPlusInitialization :
      * @param K the number of clusters
      * @param limits pairs of limits for each dimension
      */
-    void init(unsigned K, const std::vector<std::pair<VectorIndexType, VectorIndexType> >& limits) {
+    void init(unsigned K, const std::vector<std::pair<VectorIndexType, VectorIndexType> >& /*limits*/) {
         // select one random input item
         unsigned first = rand() % data.size();
         clusters.push_back(ClusterT(data[first]));

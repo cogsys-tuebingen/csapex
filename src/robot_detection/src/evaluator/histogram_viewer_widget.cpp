@@ -18,7 +18,7 @@
 #include <utils/LibUtil/MathHelper.h>
 
 
-HistogramViewerWidget::HistogramViewerWidget(QWidget* parent)
+HistogramViewerWidget::HistogramViewerWidget(QWidget* /*parent*/)
     : phi(0), theta(0.1), r(25), has_list(false)
 {
     //    repainter = new QTimer();

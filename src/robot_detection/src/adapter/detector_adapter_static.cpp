@@ -36,7 +36,7 @@ void DetectorAdapterStatic::test_on_callback(std::vector<Frame::Ptr >& frames)
     usleep(2.0 * 1e6);
 }
 
-void DetectorAdapterStatic::tick(double dt)
+void DetectorAdapterStatic::tick(double /*dt*/)
 {
     if(has_path) {
 //        boost::function<void(std::vector<Frame::Ptr >&)> callback = boost::bind(&DetectorAdapterStatic::test_on_callback, this, _1);

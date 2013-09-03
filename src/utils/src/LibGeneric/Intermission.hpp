@@ -47,7 +47,7 @@ struct CallbackIntermission<0, start_step> {
 
 struct NoIntermission {
     template <class Ignore, class A>
-    static void callAndCopy(Ignore& i, const A& from, A& to) {}
+    static void callAndCopy(Ignore& /*i*/, const A& /*from*/, A& /*to*/) {}
     template <class Ignore>
     static void call(Ignore& i) {}
 };

@@ -28,7 +28,7 @@ void BagDatabase::configChanged()
     bag = Bag::create();
 }
 
-MatchablePose* BagDatabase::getPoseByAngle(const double yaw, int* index) const
+MatchablePose* BagDatabase::getPoseByAngle(const double /*yaw*/, int* /*index*/) const
 {
     throw;
 }

@@ -25,9 +25,9 @@ OptionKeypointDescriptor::~OptionKeypointDescriptor()
 
 void OptionKeypointDescriptor::update(int slot)
 {
-    Config config = Config::getGlobal();
+    Config config = Config::instance();
 
-    QString target = config.getDescriptorType().c_str();
+    QString target = config("descriptorType").as<std::string>().c_str();
     if(target == selection->itemText(slot)) {
         return;
     }
@@ -35,7 +35,7 @@ void OptionKeypointDescriptor::update(int slot)
     std::cout << slot << std::endl;
 
     config.setDescriptorType(selection->itemText(slot).toStdString());
-    config.replaceGlobal();
+    config.replaceInstance();
 }
 
 void OptionKeypointDescriptor::insert(QBoxLayout* layout)
@@ -49,8 +49,8 @@ void OptionKeypointDescriptor::insert(QBoxLayout* layout)
     }
     layout->addLayout(QtHelper::wrap("Descriptor", selection));
 
-    Config config = Config::getGlobal();
-    QString target = config.getDescriptorType().c_str();
+    Config config = Config::instance();
+    QString target = config("descriptorType").as<std::string>().c_str();
 
     if(selection != NULL) {
         for(int i = 0; i < selection->count(); ++i) {
@@ -65,11 +65,11 @@ void OptionKeypointDescriptor::insert(QBoxLayout* layout)
 
 void OptionKeypointDescriptor::configChanged()
 {
-//    if(config.getDescriptorType() < 0) {
+//    if(config("descriptorType").as<std::string>() < 0) {
 //        return;
 //    }
 
-    QString target = config.getDescriptorType().c_str();
+    QString target = config("descriptorType").as<std::string>().c_str();
 
     if(selection != NULL) {
         for(int i = 0; i < selection->count(); ++i) {
@@ -97,10 +97,10 @@ struct OptionKeypointDescriptorState : public Memento {
 
 Memento::Ptr OptionKeypointDescriptor::getState() const
 {
-    Config current = Config::getGlobal();
+    Config current = Config::instance();
 
     OptionKeypointDescriptorState::Ptr res(new OptionKeypointDescriptorState);
-    res->descriptor_name = current.descriptor_name;
+    res->descriptor_name = config("descriptorType").as<std::string>();;
     return res;
 }
 
@@ -109,8 +109,8 @@ void OptionKeypointDescriptor::setState(Memento::Ptr memento)
     OptionKeypointDescriptorState::Ptr m = boost::dynamic_pointer_cast<OptionKeypointDescriptorState> (memento);
     assert(m.get());
 
-    Config current = Config::getGlobal();
-    current.descriptor_name = m->descriptor_name;
-    current.replaceGlobal();
+    Config current = Config::instance();
+    current["descriptorType"] = m->descriptor_name;
+    current.replaceInstance();
 }
 

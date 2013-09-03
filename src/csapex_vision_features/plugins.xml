@@ -3,10 +3,13 @@
   <description>none yet</description>
 </class>
 
-<class type="csapex::ExtractFeatures" base_class_type="csapex::BoxedObject">
+<class type="csapex::ExtractKeypoints" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
-<class type="csapex::DisplayFeatures" base_class_type="csapex::BoxedObject">
+<class type="csapex::ExtractDescriptors" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::DisplayKeypoints" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
 

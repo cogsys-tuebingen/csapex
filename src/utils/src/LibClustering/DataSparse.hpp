@@ -62,7 +62,7 @@ struct SparseNonUnique : public DataStructure<Cluster, InputDataType> {
      * @param raw the sparse data
      * @param limits pairs of limits for each dimension
      */
-    void prepare(const InputDataType& raw, const std::vector<std::pair<VectorIndexType, VectorIndexType> >& limits) {
+    void prepare(const InputDataType& raw, const std::vector<std::pair<VectorIndexType, VectorIndexType> >& /*limits*/) {
         DataStruct::clear();
 
         for(unsigned idx = 0; idx < raw.size(); ++idx) {

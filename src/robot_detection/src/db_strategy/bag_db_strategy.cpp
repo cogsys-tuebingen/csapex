@@ -23,12 +23,12 @@ void BagDatabaseStrategy::train(Frame::Ptr frame)
         return;
     }
 
-    if((int) frame->keypoints.size() > config.min_points) {
+    if((int) frame->keypoints.size() > config("min_points").as<int>()) {
         addFrame(frame);
     }
 }
 
-void BagDatabaseStrategy::addValidationExample(Frame::Ptr frame)
+void BagDatabaseStrategy::addValidationExample(Frame::Ptr /*frame*/)
 {
 }
 

@@ -11,7 +11,7 @@ find_package(Eigen REQUIRED)
 include_directories(${EIGEN_INCLUDE_DIRS})
 
 find_package(Boost REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS program_options serialization REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS src
@@ -39,6 +39,9 @@ add_library(utils_vision
 
     src/config/config.cpp
     src/config/configurated_tools.cpp
+    src/config/parameter.cpp
+    src/config/parameter_map.cpp
+    src/config/parameter_provider.cpp
     src/config/reconfigurable.cpp
     src/config/types.cpp
     src/data/angle.cpp

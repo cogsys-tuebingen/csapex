@@ -86,7 +86,7 @@ private:
     friend class boost::serialization::access;
 
     template<class Archive>
-    void save(Archive& ar, const unsigned int version) const {
+    void save(Archive& ar, const unsigned int /*version*/) const {
         ar& descriptors;
         ar& keypoints;
 
@@ -107,7 +107,7 @@ private:
     }
 
     template<class Archive>
-    void load(Archive& ar, const unsigned int version) {
+    void load(Archive& ar, const unsigned int /*version*/) {
         ar& descriptors;
         ar& keypoints;
 

@@ -30,12 +30,12 @@ public:
 
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2) = 0;
 
-    virtual void update_gui(QFrame* additional_holder) {}
+    virtual void update_gui(QFrame* /*additional_holder*/) {}
 
-    virtual void mousePressEvent(QMouseEvent* event) {}
-    virtual void mouseMoveEvent(QMouseEvent* event) {}
-    virtual void wheelEvent(QWheelEvent* event) {}
-    virtual void keyEvent(QKeyEvent* event) {}
+    virtual void mousePressEvent(QMouseEvent* /*event*/) {}
+    virtual void mouseMoveEvent(QMouseEvent* /*event*/) {}
+    virtual void wheelEvent(QWheelEvent* /*event*/) {}
+    virtual void keyEvent(QKeyEvent* /*event*/) {}
 
 private Q_SLOTS:
     void messageArrived(ConnectorIn* source);

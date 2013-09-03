@@ -71,8 +71,9 @@ target_link_libraries(csapex_vision_features
 
 add_library(csapex_vision_features_plugin
     src/register_plugin.cpp
-    src/extract_features.cpp
-    src/display_features.cpp
+    src/extract_keypoints.cpp
+    src/extract_descriptors.cpp
+    src/display_keypoints.cpp
     ${QT}
 )
 target_link_libraries(csapex_vision_features_plugin csapex_vision_features

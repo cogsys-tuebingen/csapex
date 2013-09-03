@@ -15,19 +15,19 @@
 BinDatabase::BinDatabase()
     : bin_max_dist_(100)
 {
-    Config initial = Config::getGlobal();
-    assert(initial.bin_count > 0);
+    Config initial = Config::instance();
+    assert(initial["bin_count"].as<int>() > 0);
 
     makeBins(bin_max_dist_);
 }
 
-void BinDatabase::makeBins(int max_dist)
+void BinDatabase::makeBins(int /*max_dist*/)
 {
-    double slice = 2 * M_PI / config.bin_count;
-    for(int i = 0; i < config.bin_count; ++i) {
+    double slice = 2 * M_PI / config["bin_count"].as<int>();
+    for(int i = 0; i < config["bin_count"].as<int>(); ++i) {
         double angle_low = i * slice;
         double angle_high = (i+1) * slice;
-        Bin b(angle_low, angle_high, config.bin_max_poses_count);
+        Bin b(angle_low, angle_high, config["bin_max_poses_count"].as<int>());
 
         bins.push_back(b);
     }
@@ -87,10 +87,10 @@ int BinDatabase::angle2index(double angle) const
 
     double theta = angles::normalize_angle_positive(angle);
     // 0 <= theta <= 2 PI
-    int index = round(theta / (2.0 * M_PI) * (config.bin_count - 1));
+    int index = round(theta / (2.0 * M_PI) * (config("bin_count").as<int>() - 1));
 
     assert(index >= 0);
-    assert(index < config.bin_count);
+    assert(index < config("bin_count").as<int>());
 
     return index;
 }

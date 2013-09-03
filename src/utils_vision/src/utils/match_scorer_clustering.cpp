@@ -20,11 +20,11 @@ MatchScorerClustering::MatchScorerClustering(Matcher& matcher)
 
 double MatchScorerClustering::calculateScore(Matchable& frame, Matchable& reference, int* no_of_features) const
 {
-    Config cfg = Config::getGlobal();
+    Config cfg = Config::instance();
 
     int k = 8;
     int scaling = 20;
-    HoughPeak<false,true> hough_imp(k, scaling, cfg.octaves, reference, frame);
+    HoughPeak<false,true> hough_imp(k, scaling, cfg("octaves"), reference, frame);
     HoughAlgorithm& hough = hough_imp;
     hough.min_count = 8;
 

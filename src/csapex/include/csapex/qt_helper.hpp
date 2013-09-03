@@ -20,22 +20,46 @@
 #include <QDoubleSpinBox>
 #include <QThread>
 #include <cmath>
+#include <boost/function.hpp>
+
+namespace qt_helper {
+
+struct Call : public QObject
+{
+    Q_OBJECT
+
+    typedef boost::function<void()> CB;
+
+public:
+    Call(CB cb)
+        : cb_(cb)
+    {}
+
+public Q_SLOTS:
+    void call() {
+        cb_();
+    }
+
+private:
+    CB cb_;
+};
+
+struct QSleepThread : public QThread {
+    static void sleep(unsigned long t) {
+        QThread::sleep(t);
+    }
+    static void msleep(unsigned long t) {
+        QThread::msleep(t);
+    }
+    static void usleep(unsigned long t) {
+        QThread::usleep(t);
+    }
+};
+
+}
 
 class QtHelper
 {
-public:
-    struct QSleepThread : public QThread{
-        static void sleep(unsigned long t) {
-            QThread::sleep(t);
-        }
-        static void msleep(unsigned long t) {
-            QThread::msleep(t);
-        }
-        static void usleep(unsigned long t) {
-            QThread::usleep(t);
-        }
-    };
-
 public:
     static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max) {
         QHBoxLayout *internal_layout = new QHBoxLayout;

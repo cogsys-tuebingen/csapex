@@ -72,7 +72,7 @@ void readKeypointDescriptor(YAML::Node& doc, Config& cfg)
 
 Config read_parameters(int argc, char** argv)
 {
-    Config cfg = Config::getGlobal();
+    Config cfg = Config::instance();
 
     DirectoryIO::MAX_IMPORT_PER_DIR = 1500;
     bin_count = 32;
@@ -96,18 +96,36 @@ Config read_parameters(int argc, char** argv)
 
         readKeypointDescriptor(doc, cfg);
 
-        readInto(doc, "extractor_threshold", cfg.extractor_threshold);
-        readInto(doc, "matcher_threshold", cfg.matcher_threshold);
-        readInto(doc, "min_points", cfg.min_points);
-        readInto(doc, "octaves", cfg.octaves);
+        double matcher_threshold = cfg("matcher_threshold");
+        readInto(doc, "matcher_threshold", matcher_threshold);
+        cfg["matcher_threshold"] = matcher_threshold;
+
+        int extractor_threshold = cfg("extractor_threshold");
+        readInto(doc, "extractor_threshold", extractor_threshold);
+        cfg["extractor_threshold"] = extractor_threshold;
+
+        int min_points = cfg("min_points");
+        readInto(doc, "min_points", min_points);
+        cfg["min_points"] = min_points;
+
+        int octaves = cfg("octaves");
+        readInto(doc, "octaves", octaves);
+        cfg["octaves"] = octaves;
+
         readInto(doc, "bin_count", bin_count);
+
         readInto(doc, "max_import_per_dir", DirectoryIO::MAX_IMPORT_PER_DIR);
 
         DirectoryIO::MAX_IMPORT_PER_DIR = std::max(0, DirectoryIO::MAX_IMPORT_PER_DIR);
 
-        cfg.use_pruning = readBool(doc, "use_pruning", true);
-        cfg.crop_test = readBool(doc, "crop_test", false);
-        cfg.interactive = readBool(doc, "interactive", true);
+        bool use_pruning = true;
+        cfg["use_pruning"] = readBool(doc, "use_pruning", use_pruning);
+
+        bool crop_test = false;
+        cfg["crop_test"]= readBool(doc, "crop_test", crop_test);
+
+        bool interactive = true;
+        cfg["interactive"] = readBool(doc, "interactive", interactive);
 
 
         std::string scorer_type = read(doc, "scorer", std::string("homography"));
@@ -124,7 +142,7 @@ Config read_parameters(int argc, char** argv)
             throw;
         }
 
-        cfg.db_type = Types::Strategy::read(db_type);
+        cfg["db_type"] = static_cast<int> (Types::Strategy::read(db_type));
 
 
         //'{descriptor_type: BRISK, keypoint_type: BRISK, extractor_threshold: 40, min_points: 3, octaves: 4, max_import_per_dir: 150, bin_count: 16}'
@@ -143,7 +161,7 @@ int main(int argc, char** argv)
 
     // TODO: don't assert that /Config/RobotDetection is used -> move to Config  /****
     std::string name = cfg.getDescription();
-    std::string result_path = cfg.result_dir;
+    std::string result_path = cfg("result_dir");
     std::string db_file = result_path + name + ".db";
     std::string db_imgs = result_path + name + "_imgs/";
     std::string result_file = result_path + name + ".txt";
@@ -155,13 +173,13 @@ int main(int argc, char** argv)
     }
     bfs::create_directories(db_imgs);
 
-    cfg.db_file = db_file;
-    cfg.db_imgs = db_imgs;
+    cfg["db_file"] = db_file;
+    cfg["db_imgs"] = db_imgs;
     /****/
 
-    cfg.gui_enabled = false;
-    cfg.name = "Batch Trainer";
-    cfg.replaceGlobal();
+    cfg["gui_enabled"] = false;
+    cfg["name"] = "Batch Trainer";
+    cfg.replaceInstance();
 
     // prepare result output
     std::ofstream out(result_file.c_str());

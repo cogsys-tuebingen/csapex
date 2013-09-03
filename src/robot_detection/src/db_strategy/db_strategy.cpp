@@ -29,21 +29,29 @@ DatabaseStrategy::~DatabaseStrategy()
 {
     if(db != NULL) {
         delete db;
+        db = NULL;
     }
 }
 
 bool DatabaseStrategy::load()
 {
-    if(db != NULL) {
-        delete db;
-    }
+    Database* db_old = db;
+    db = NULL;
 
-    return DatabaseIO::load(config.db_file, db);
+    bool result = DatabaseIO::load(config("db_file"), db);
+
+    if(db != NULL) {
+        delete db_old;
+
+    } else {
+        db = db_old;
+    }
+    return result;
 }
 
 bool DatabaseStrategy::save()
 {
-    return DatabaseIO::save(config.db_file, db);
+    return DatabaseIO::save(config("db_file"), db);
 }
 
 void DatabaseStrategy::clear()
@@ -53,14 +61,14 @@ void DatabaseStrategy::clear()
 
 bool DatabaseStrategy::loadConfig()
 {
-    Config output = Config::getGlobal();
+    Config output = Config::instance();
 
-    bool loadOk = DatabaseIO::loadConfig(config.db_file, output);
+    bool loadOk = DatabaseIO::loadConfig(config("db_file"), output);
 
     if(loadOk) {
-        output.replaceGlobal();
+        output.replaceInstance();
 
-        WARN(output.db_imgs);
+        WARN(config("db_file").as<std::string>());
     }
 
     return loadOk;
@@ -104,7 +112,7 @@ void DatabaseStrategy::addFrame(Frame::Ptr f, double scale)
 }
 
 
-MatchablePose* DatabaseStrategy::getPoseByAngle(const double yaw, int* index) const
+MatchablePose* DatabaseStrategy::getPoseByAngle(const double yaw, int* /*index*/) const
 {
     double closestDistance = INFINITY;
     MatchablePose* closestPose = MatchablePose::NULL_POSE;
@@ -127,7 +135,7 @@ MatchablePose* DatabaseStrategy::getPoseByAngle(const double yaw, int* index) co
     return closestPose;
 }
 
-void DatabaseStrategy::dumpReference(const std::string& path)
+void DatabaseStrategy::dumpReference(const std::string& /*path*/)
 {
     ERROR("reimplement");
     throw;

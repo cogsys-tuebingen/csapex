@@ -27,7 +27,7 @@ void ClusteringOptions::insert(QBoxLayout* layout)
 {
     k_slider = QtHelper::makeSlider(layout, "k Clusters", k, 1,32);
     scaling_slider = QtHelper::makeSlider(layout, "scaling", scaling, 1,32);
-    threshold_slider = QtHelper::makeSlider(layout, "(global) matcher threshold", Config::getGlobal().matcher_threshold * 100, 1,100);
+    threshold_slider = QtHelper::makeSlider(layout, "(global) matcher threshold", Config::instance()("matcher_threshold").as<double>() * 100, 1,100);
     min_slider = QtHelper::makeSlider(layout, "min cluster size", 4, 1,32);
 
     QObject::connect(k_slider, SIGNAL(valueChanged(int)), this, SLOT(updateSliders()));
@@ -52,16 +52,16 @@ void ClusteringOptions::updateSliders()
 
 void ClusteringOptions::updateThreshold(int value)
 {
-    Config config = Config::getGlobal();
+    Config config = Config::instance();
 
     double t = value / 100.0;
 
-    if(config.matcher_threshold == t) {
+    if(config("matcher_threshold").as<double>() == t) {
         return;
     }
 
-    config.matcher_threshold = t;
-    config.replaceGlobal();
+    config["matcher_threshold"] = t;
+    config.replaceInstance();
 
     plugin_changed();
 }

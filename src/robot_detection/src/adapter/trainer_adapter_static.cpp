@@ -43,10 +43,10 @@ void TrainerAdapterStatic::importTest()
         for(unsigned i = 0; i < max; ++i) {
             DirectoryIO pos, neg;
             if(i < p) {
-                pos = DirectoryIO::import_fullsized(config.batch_dir + test_positive[i] + "/positive/", false, func_pos);
+                pos = DirectoryIO::import_fullsized(config("batch_dir").as<std::string>() + test_positive[i] + "/positive/", false, func_pos);
             }
             if(i < n) {
-                neg = DirectoryIO::import_raw(config.batch_dir + test_negative[i], func_neg);
+                neg = DirectoryIO::import_raw(config("batch_dir").as<std::string>() + test_negative[i], func_neg);
             }
 
             while(pos.next() | neg.next());
@@ -71,24 +71,24 @@ void import_helper(boost::function<DirectoryIO(const std::string&, boost::functi
 void TrainerAdapterStatic::importNegative()
 {
     INFO("importing negative examples");
-    import_helper(boost::bind(&DirectoryIO::import_raw, _1, _2), config.batch_dir, negative, "", boost::bind(&Trainer::addNegativeExample, &trainer, _1));
+    import_helper(boost::bind(&DirectoryIO::import_raw, _1, _2), config("batch_dir"), negative, "", boost::bind(&Trainer::addNegativeExample, &trainer, _1));
 }
 
 void TrainerAdapterStatic::importPositive()
 {
     INFO("importing training examples");
-    import_helper(boost::bind(&DirectoryIO::import_cropped, _1, true, _2), config.batch_dir, training, "/positive/", boost::bind(&Trainer::analyze, &trainer, _1));
+    import_helper(boost::bind(&DirectoryIO::import_cropped, _1, true, _2), config("batch_dir"), training, "/positive/", boost::bind(&Trainer::analyze, &trainer, _1));
 }
 
 void TrainerAdapterStatic::importValidation()
 {
     INFO("importing validation examples");
-    import_helper(boost::bind(&DirectoryIO::import_cropped, _1, true, _2), config.batch_dir, validation, "/positive/", boost::bind(&Trainer::addValidationExample, &trainer, _1));
+    import_helper(boost::bind(&DirectoryIO::import_cropped, _1, true, _2), config("batch_dir"), validation, "/positive/", boost::bind(&Trainer::addValidationExample, &trainer, _1));
 }
 
 void TrainerAdapterStatic::import()
 {
-    std::string p = config.batch_dir + "/training.yaml";
+    std::string p = config("batch_dir").as<std::string>() + "/training.yaml";
     std::ifstream ifs(p.c_str());
     YAML::Parser parser(ifs);
     YAML::Node doc;
@@ -110,7 +110,7 @@ void TrainerAdapterStatic::import()
     importNegative();
     importPositive();
 
-    if(config.use_pruning) {
+    if(config("use_pruning")) {
         importValidation();
     }
 

@@ -19,10 +19,10 @@ Matcher::Matcher(bool binary)
         descriptor_matcher = new cv::FlannBasedMatcher();
     }
 
-    const Config config = Config::getGlobal();
+    const Config config = Config::instance();
 
-    min_points = config.min_points;
-    threshold = config.matcher_threshold;
+    min_points = config("min_points");
+    threshold = config("matcher_threshold");
 }
 
 double Matcher::matchFiltered(Matchable* a, const Matchable* b,

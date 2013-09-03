@@ -217,7 +217,7 @@ cv::Mat ImageCombinerClusterMatch::combine(const cv::Mat img1, const cv::Mat mas
     WARN("got " << matches.size() << " matches");
 
 
-    Hough h(options.k, config.octaves, a, b);
+    Hough h(options.k, config("octaves").as<int>(), a, b);
 
     std::vector<KMeansAlgorithm::ClusterT> clusters;
     h.filter(matches, clusters);
