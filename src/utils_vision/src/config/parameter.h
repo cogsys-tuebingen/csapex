@@ -145,7 +145,6 @@ private:
 
 namespace YAML
 {
-template <>
 inline void operator >> (const Node& node, vision::Parameter& value) {
     value.read(node);
 }
