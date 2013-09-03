@@ -90,14 +90,6 @@ bool FileImporter::doImport(const QString& _path)
     return provider_.get();
 }
 
-void FileImporter::enableBorder(int border)
-{
-    if(provider_) {
-        std::cout << "border: " << border << std::endl;
-//        provider_->enableBorder(border != 0);
-    }
-}
-
 
 FileImporter::FileImporter()
     : state(this), output_(NULL), additional_layout_(NULL), file_dialog_(NULL)
@@ -137,13 +129,6 @@ void FileImporter::fill(QBoxLayout* layout)
         box_->addOutput(output_);
 
         QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
-
-        QCheckBox* enable_border = new QCheckBox("enable border (if possible)");
-        // TODO: put border into separate node!!!
-
-        nested->addWidget(enable_border);
-
-        connect(enable_border, SIGNAL(stateChanged(int)), this, SLOT(enableBorder(int)));
     }
 }
 

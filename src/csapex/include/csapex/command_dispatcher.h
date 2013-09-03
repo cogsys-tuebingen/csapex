@@ -38,6 +38,8 @@ public Q_SLOTS:
     void resetDirtyPoint();
     void clearSavepoints();
 
+    void reset();
+
 Q_SIGNALS:
     void stateChanged();
     void dirtyChanged(bool);

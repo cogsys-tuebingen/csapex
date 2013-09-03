@@ -20,7 +20,7 @@ using namespace csapex;
 using namespace connection_types;
 
 OutputDisplay::OutputDisplay()
-    : input_(NULL), pixmap_(NULL), view_(new QGraphicsView), empty(400, 400, QImage::Format_RGB16), painter(&empty), down_(false)
+    : input_(NULL), pixmap_(NULL), view_(new QGraphicsView), empty(32, 32, QImage::Format_RGB16), painter(&empty), down_(false)
 {
     painter.setPen(QPen(Qt::red));
     painter.fillRect(QRect(0, 0, empty.width(), empty.height()), Qt::white);
@@ -56,8 +56,8 @@ bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
 
             last_pos_ = me->screenPos();
 
-            state.width = view_->width() + delta.x();
-            state.height = view_->height() + delta.y();
+            state.width = std::max(32, view_->width() + delta.x());
+            state.height = std::max(32, view_->height() + delta.y());
 
             view_->setFixedSize(QSize(state.width, state.height));
         }
@@ -148,6 +148,8 @@ void OutputDisplay::display(QSharedPointer<QImage> img)
         pixmap_->setPixmap(QPixmap::fromImage(*img));
     }
 
+
+    view_->scene()->setSceneRect(img->rect());
     view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);
     view_->scene()->update();
 }

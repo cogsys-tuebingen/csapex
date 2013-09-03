@@ -35,7 +35,6 @@ public Q_SLOTS:
     void importDialog();
     void toggle(bool on);
     bool doImport(const QString& path);
-    void enableBorder(int border);
 
 private:
 

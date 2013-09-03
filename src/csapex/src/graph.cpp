@@ -292,6 +292,13 @@ void Graph::clear()
     }
 }
 
+void Graph::reset()
+{
+    boxes_.clear();
+    connectors_.clear();
+    connections.clear();
+}
+
 Graph::Ptr Graph::findSubGraph(const std::string& uuid)
 {
     Box::Ptr bg = findBox(uuid);

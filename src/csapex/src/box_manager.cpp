@@ -40,6 +40,11 @@ void BoxManager::stop()
     }
 }
 
+void BoxManager::reset()
+{
+    uuids.clear();
+}
+
 BoxManager::~BoxManager()
 {
     stop();

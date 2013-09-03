@@ -88,6 +88,16 @@ std::string CsApexCore::getConfig() const
     return current_config_;
 }
 
+void CsApexCore::reset()
+{
+    Graph::Ptr graph_ = Graph::root();
+    graph_->reset();
+
+    CommandDispatcher::instance().reset();
+
+    BoxManager::instance().reset();
+}
+
 
 void CsApexCore::saveAs(const std::string &file)
 {

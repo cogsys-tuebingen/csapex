@@ -9,6 +9,14 @@ CommandDispatcher::CommandDispatcher()
 
 }
 
+void CommandDispatcher::reset()
+{
+    later.clear();
+    done.clear();
+    undone.clear();
+    dirty_ = false;
+}
+
 void CommandDispatcher::execute(Command::Ptr command)
 {
     instance().doExecute(command);

@@ -22,6 +22,7 @@ public:
     boost::shared_ptr<ros::NodeHandle> nh();
     void initHandle(bool try_only = false);
 
+    bool isConnected();
     bool topicExists(const std::string& topic);
 
     void checkMasterConnection();

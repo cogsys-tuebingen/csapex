@@ -53,6 +53,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
     QObject::connect(ui->actionSaveAsCopy, SIGNAL(triggered()), this,  SLOT(saveAsCopy()));
     QObject::connect(ui->actionLoad, SIGNAL(triggered()), this,  SLOT(load()));
     QObject::connect(ui->actionReload, SIGNAL(triggered()), this,  SLOT(reload()));
+    QObject::connect(ui->actionReset, SIGNAL(triggered()), this,  SLOT(reset()));
 
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), graph.get(),  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), graph.get(),  SLOT(redo()));
@@ -204,7 +205,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 {
     Graph::Ptr graph_ = Graph::root();
     if(graph_->isDirty()) {
-        int r = QMessageBox::warning(this, tr("Vision Designer"),
+        int r = QMessageBox::warning(this, tr("cs::APEX"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if(r == QMessageBox::Save) {
@@ -285,6 +286,16 @@ void CsApexWindow::saveAsCopy()
 void CsApexWindow::reload()
 {
     core.load(core.getConfig());
+}
+
+void CsApexWindow::reset()
+{
+    int r = QMessageBox::warning(this, tr("cs::APEX"),
+                                 tr("Do you really want to reset? This <b>cannot</b> be undone!"),
+                                 QMessageBox::Ok | QMessageBox::Cancel);
+    if(r == QMessageBox::Ok) {
+        core.reset();
+    }
 }
 
 void CsApexWindow::load()

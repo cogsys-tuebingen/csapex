@@ -5,6 +5,9 @@
 <class type="csapex::OutputDisplay" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::ImagePadding" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 
 <class type="csapex::FilterBlur" base_class_type="csapex::BoxedObject">
   <description>none yet</description>

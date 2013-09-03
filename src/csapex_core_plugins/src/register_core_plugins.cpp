@@ -52,7 +52,7 @@ class RosHandler
             bool cmd_could_be_topic = boost::regex_match(cmd, fmt);
 
             if(cmd_could_be_topic) {
-                if(ROSHandler::instance().topicExists(cmd)) {
+                if(ROSHandler::instance().isConnected() && ROSHandler::instance().topicExists(cmd)) {
                     e->accept();
                     return true;
                 }

@@ -30,6 +30,8 @@ public:
     void load(const std::string& file);
     void saveAs(const std::string& file);
 
+    void reset();
+
 Q_SIGNALS:
     void configChanged();
     void showStatusMessage(const std::string& msg);

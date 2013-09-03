@@ -71,6 +71,7 @@ public Q_SLOTS:
     void undo();
     void redo();
     void clear();
+    void reset();
     void tick();
     void clearSelection();
     void selectAll();

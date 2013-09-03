@@ -63,6 +63,7 @@
     <addaction name="actionLoad"/>
     <addaction name="actionReload"/>
     <addaction name="separator"/>
+    <addaction name="actionReset"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -159,6 +160,11 @@
   <action name="actionSaveAsCopy">
    <property name="text">
     <string>Save As Copy</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>Reset</string>
    </property>
   </action>
  </widget>

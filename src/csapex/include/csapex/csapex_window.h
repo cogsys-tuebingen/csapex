@@ -49,6 +49,7 @@ public Q_SLOTS:
     void saveAsCopy();
     void load();
     void reload();
+    void reset();
 
     void start();
     void showStatusMessage(const std::string& msg);

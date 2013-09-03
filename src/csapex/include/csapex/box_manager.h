@@ -63,6 +63,7 @@ public:
 
     std::string makeUUID(const std::string& name);
     void stop();
+    void reset();
 
 public:
     boost::signals2::signal<void(const std::string&)> loaded;

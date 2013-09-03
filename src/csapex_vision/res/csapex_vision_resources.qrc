@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>filter.png</file>
         <file>combiner.png</file>
+        <file>border.png</file>
     </qresource>
 </RCC>

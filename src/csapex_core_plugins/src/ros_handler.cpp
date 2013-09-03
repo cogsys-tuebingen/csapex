@@ -56,6 +56,15 @@ void ROSHandler::initHandle(bool try_only)
     }
 }
 
+bool ROSHandler::isConnected()
+{
+    if(has_connection.isRunning()) {
+        return false;
+    } else {
+        return has_connection.result();
+    }
+}
+
 bool ROSHandler::topicExists(const std::string &topic)
 {
     refresh();
