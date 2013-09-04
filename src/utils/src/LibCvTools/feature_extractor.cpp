@@ -103,17 +103,13 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
 
 
     cv::Mat buffer(ep.octaves, d.cols, d.type());
+    int mean_index = 0;
     for(std::vector<std::pair<int,int> >::iterator it = entry_idx.begin() ; it != entry_idx.end() ; ) {
         /// FETCH DESCRIPTORS
-        for(int i = 0 ; i < ep.octaves; ++i) {
+        for(int i = 0 ; i < ep.octaves && it != entry_idx.end(); ++i) {
             d.row(it->second).copyTo(buffer.row(i));
 
             ++it;
-
-            if(it == entry_idx.end()) {
-                std::cerr << "Not all keypoints could be extracted!" << std::endl;
-                continue;
-            }
         }
 
         /// MAKE READY FOR RETURNING
@@ -121,12 +117,16 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
         if(ep.combine_descriptors && !descr.empty() && kp.octave != -1) {
             descr = descr.reshape(0, 1);
         }
-        if(ext_params_->color_extension)
-            cv_extraction::Extractor::addColorExtension(descr, means[it->first / ep.octaves]);
+
+        if(ext_params_->color_extension) {
+            assert(mean_index < means.size());
+            cv_extraction::Extractor::addColorExtension(descr, means[mean_index]);
+        }
         if(descr.type() != CV_32FC1) {
             descr.convertTo(descr, CV_32FC1);
         }
         descriptors.push_back(descr);
+        ++mean_index;
     }
 }
 
