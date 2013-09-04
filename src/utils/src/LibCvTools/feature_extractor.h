@@ -25,6 +25,7 @@ public:
     void set(cv::DescriptorExtractor* extractor);
     void extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors);
     void extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors);
+    void extract(const cv::Mat &image, const std::vector<cv::Rect> &rois, std::vector<cv::Mat> &descriptors);
 
     void setParams(const cv_extraction::ParamsORB              &params);
     void setParams(const cv_extraction::ParamsSURF             &params);
@@ -36,7 +37,8 @@ public:
     KeypointParams keypointParams();
 
     /// PUBLIC STATIC METHODS
-    static KeyPoints prepareKeypoint(const cv::Rect &rect, const KeypointParams &params);
+    static cv::KeyPoint prepareKeypoint(const cv::Rect &rect, const KeypointParams &params);
+    static KeyPoints prepareKeypointVec(const cv::Rect &rect, const KeypointParams &params);
     static KeyPoints prepareOctaveKeypoints(const cv::Rect &rect, const KeypointParams &params, const int max_octave);
     static double    calcAngle(const cv::Mat &image);
 

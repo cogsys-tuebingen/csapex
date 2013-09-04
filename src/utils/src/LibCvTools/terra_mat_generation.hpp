@@ -5,11 +5,21 @@
 #include "math.hpp"
 #include "extractor.h"
 #include "randomforest.h"
-#include <ros/time.h>
-#include <ros/ros.h>
 
 using namespace cv_extraction;
 
+
+inline void getRois(const int rows, const int cols, const int cell_size, std::vector<cv::Rect> &rois)
+{
+    cv::Rect roi(0,0, cell_size, cell_size);
+    for(int i = 0 ; i < rows ; i++) {
+        for(int j = 0 ; j < cols ; j++) {
+            roi.x = cell_size * j;
+            roi.y = cell_size * i;
+            rois.push_back(roi);
+        }
+    }
+}
 
 inline void check_dimension(const int rows, const int cols, const int cell_size)
 {
@@ -33,12 +43,8 @@ inline void check_dimension(const int rows, const int cols, const int cell_size)
 inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const int classes,
                                Extractor::Ptr extractor, RandomForest::Ptr classifier,
                                cv::Mat &terraMat, std::map<int, int> &channel_mapping,
-                               bool use_max_prob, bool use_color)
+                               bool use_max_prob)
 {
-//    ros::Time::init();
-    cv::Mat gray_img;
-    cv::cvtColor(img, gray_img, CV_BGR2GRAY);
-
     /// PREPARE MATRICES
     int map_rows = img.rows / cell_size;
     int map_cols = img.cols / cell_size;
@@ -49,46 +55,25 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
     }
 
     /// CALCULATE
-    cv::Rect roi(0,0,cell_size,cell_size);
-    std::map<int, float>probs;
+    std::map<int, float>    probs;
+    std::vector<cv::Rect>   rois;
+    std::vector<cv::Mat>    descriptors;
+    getRois(map_rows, map_cols, cell_size, rois);
+    extractor->extract(img, rois, descriptors);
 
     for(int i = 0 ; i < map_rows ; i++) {
         for(int j = 0 ; j < map_cols ; j++) {
-            /// PREPARE
-            roi.x = cell_size * j;
-            roi.y = cell_size * i;
             probs.clear();
-            /// EXTRACT
-            cv::Mat descriptors;
-//            ros::Time s_ext = ros::Time::now();
-            extractor->extract(gray_img, roi, descriptors);
-
-//            ROS_WARN_STREAM("TOOK EXT1 :" << (ros::Time::now() - s_ext).toSec() * 1000);
-
-            if(use_color) {
-                cv::Mat     img_roi(img, roi);
-                cv::Vec2b   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
-                cv_extraction::Extractor::addColorExtension(descriptors, mean);
-            }
-
-//          ROS_WARN_STREAM("TOOK EXT2 :" << (ros::Time::now() - s_ext).toSec() * 1000);
-
-            if(descriptors.type() != CV_32FC1) {
-                descriptors.convertTo(descriptors, CV_32FC1);
-            }
-
-//            ROS_WARN_STREAM("TOOK EXT3 :" << (ros::Time::now() - s_ext).toSec() * 1000);
+            cv::Mat &d = descriptors[i * map_cols + j];
 
             /// CLASSIFY
-            if(descriptors.rows > 1) {
+            if(d.rows > 1) {
                 if(use_max_prob) {
-                    ros::Time start = ros::Time::now();
-                    classifier->predictClassProbsMultiSampleMax(descriptors, probs);
-//                    ROS_WARN_STREAM("TOOK :" << (ros::Time::now() - start).toSec() * 1000);
+                    classifier->predictClassProbsMultiSampleMax(d, probs);
                 } else
-                    classifier->predictClassProbsMultiSample(descriptors, probs);
+                    classifier->predictClassProbsMultiSample(d, probs);
             } else {
-                classifier->predictClassProbs(descriptors, probs);
+                classifier->predictClassProbs(d, probs);
             }
             /// ENTER
             for(std::map<int, float>::iterator it = probs.begin() ; it != probs.end() ; it++) {
@@ -114,7 +99,7 @@ template<int classes>
 inline void  prepare_terra_mat_fixed(const cv::Mat &img, const int cell_size,
                                      Extractor::Ptr extractor, RandomForest::Ptr classifier,
                                      cv::Mat &terra_mat, std::map<uchar, uchar> &channel_mapping,
-                                     bool use_max_prob, bool use_color)
+                                     bool use_max_prob)
 {
     cv::Mat gray_img;
     cv::cvtColor(img, gray_img, CV_BGR2GRAY);
@@ -124,8 +109,13 @@ inline void  prepare_terra_mat_fixed(const cv::Mat &img, const int cell_size,
     int map_cols = img.cols / cell_size;
     terra_mat = cv::Mat(map_rows, map_cols, CV_32FC(classes), cv::Scalar::all(0));
 
+    std::vector<cv::Rect>   rois;
+    std::vector<cv::Mat>    descriptors;
+    getRois(map_rows, map_cols, cell_size, rois);
+    extractor->extract(img, rois, descriptors);
+
+
     /// CALCULATE
-    cv::Rect roi(0,0,cell_size,cell_size);
     std::map<int, float>probs;
     int    step     = terra_mat.step / terra_mat.elemSize1();
     int    channels = terra_mat.channels();
@@ -133,32 +123,18 @@ inline void  prepare_terra_mat_fixed(const cv::Mat &img, const int cell_size,
     for(int i = 0 ; i < map_rows ; i++) {
         for(int j = 0 ; j < map_cols ; j++) {
             int pixel_pos = step * i + j * channels;
-
-            /// PREPARE
-            roi.x = cell_size * j;
-            roi.y = cell_size * i;
             probs.clear();
             /// EXTRACT
-            cv::Mat descriptors;
-            extractor->extract(gray_img, roi, descriptors);
+            cv::Mat &d = descriptors[i * map_cols + j];
+
             /// CLASSIFY
-            if(descriptors.rows > 1) {
+            if(d.rows > 1) {
                 if(use_max_prob)
-                    classifier->predictClassProbsMultiSampleMax(descriptors, probs);
+                    classifier->predictClassProbsMultiSampleMax(d, probs);
                 else
-                    classifier->predictClassProbsMultiSample(descriptors, probs);
+                    classifier->predictClassProbsMultiSample(d, probs);
             } else {
-                classifier->predictClassProbs(descriptors, probs);
-            }
-
-            if(use_color) {
-                cv::Mat     img_roi(img, roi);
-                cv::Vec2b   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
-                cv_extraction::Extractor::addColorExtension(descriptors, mean);
-            }
-
-            if(descriptors.type() != CV_32FC1) {
-                descriptors.convertTo(descriptors, CV_32FC1);
+                classifier->predictClassProbs(d, probs);
             }
 
             /// ENTER

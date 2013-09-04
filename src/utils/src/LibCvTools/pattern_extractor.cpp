@@ -35,6 +35,25 @@ void PatternExtractor::extract(const Mat &image, const Rect &roi, cv::Mat &descr
 
 }
 
+void PatternExtractor::extract(const Mat &image, const std::vector<cv::Rect> &rois, std::vector<Mat> &descriptors)
+{
+    cv::Mat gray_image;
+    cv::cvtColor(image, gray_image, CV_BGR2GRAY);
+    bool use_color = ext_params_->color_extension;
+    for(std::vector<cv::Rect>::const_iterator it = rois.begin() ; it != rois.end() ; it++) {
+        cv::Mat d;
+        extract(gray_image, *it, d);
+        if(use_color) {
+            cv::Mat     img_roi(image, *it);
+            cv::Vec2b   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
+            cv_extraction::Extractor::addColorExtension(d, mean);
+        }
+
+        d.convertTo(d, CV_32FC1);
+        descriptors.push_back(d);
+    }
+}
+
 void PatternExtractor::set(cv_local_patterns::LBP *bp)
 {
     type_ = LBP;

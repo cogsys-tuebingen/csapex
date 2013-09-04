@@ -15,6 +15,7 @@ public :
     void  setExtractor       (cv_extraction::Extractor::Ptr _extractor);
     void  setUseMaxProb      (bool value);
     void  setUseColorExt     (bool value);
+    void  classify           (const std::vector<cv::Rect> rois, std::vector<bool> classification);
     bool  classify           (const cv::Rect &roi);
     float get_prob           ();
     int   get_id             ();
@@ -28,7 +29,6 @@ private:
     bool                                 use_max_prob;
     bool                                 color_ext;
     cv::Mat                              image;
-    cv::Mat                              gray_image;
     float                                last_prob;
     int                                  last_id;
 };

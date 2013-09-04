@@ -9,75 +9,38 @@
 using namespace cv_extraction;
 
 namespace CMPExtraction {
-void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img_gray, const cv::Mat &img, const bool color_ext, const cv_extraction::Extractor::Ptr extractor,
+void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, const cv_extraction::Extractor::Ptr extractor,
                    std::vector<cv_roi::TerraROI> rois)
 {
-    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
-        cv::Mat desc;
-        extractor->extract(img_gray, it->roi.rect, desc);
+    std::vector<cv::Rect> rects;
+    std::vector<cv::Mat>  descriptors;
+    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++)
+        rects.push_back(it->roi.rect);
 
-        if(color_ext) {
-            cv::Mat     img_roi(img, it->roi.rect);
-            cv::Vec2f   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
-            cv_extraction::Extractor::addColorExtension(desc, mean);
-        }
-
-        switch(extractor->params().type) {
-        case ExtractorParams::SURF:
-            CMPYAML::writeDescriptorRows<float, float>(desc, it->id.id, emitter);
-            break;
-        case ExtractorParams::SIFT:
-            CMPYAML::writeDescriptorRows<float, float>(desc, it->id.id, emitter);
-            break;
-        case ExtractorParams::LBP:
-            CMPYAML::writeDescriptorRows<int, int>(desc, it->id.id, emitter);
-            break;
-        case ExtractorParams::LTP:
-            CMPYAML::writeDescriptorRows<int, int>(desc, it->id.id, emitter);
-            break;
-        default:
-            CMPYAML::writeDescriptorRows<uchar, int>(desc, it->id.id, emitter);
-        }
+    extractor->extract(img, rects, descriptors);
+    for(int i = 0 ; i < descriptors.size() ; i++) {
+        cv::Mat desc = descriptors[i];
+        CMPYAML::writeDescriptorRows<float, float>(desc, rois[i].id.id, emitter);
     }
 }
 
-void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img_gray, const cv::Mat &img, const bool color_ext, const cv_extraction::Extractor::Ptr extractor,
+void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, const cv_extraction::Extractor::Ptr extractor,
                    std::vector<cv_roi::TerraROI> rois, CMPStatePublisher::Ptr state)
 {
-    std::pair<int,int> counts(0, rois.size());
+    std::vector<cv::Rect> rects;
+    std::vector<cv::Mat>  descriptors;
+    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++)
+        rects.push_back(it->roi.rect);
 
-    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++, counts.first++) {
-        cv::Mat desc;
-        extractor->extract(img_gray, it->roi.rect, desc);
+    state->publish(std::make_pair(0,0));
+    extractor->extract(img, rects, descriptors);
 
-        if(color_ext) {
-            cv::Mat     img_roi(img, it->roi.rect);
-            cv::Vec2f   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
-            cv_extraction::Extractor::addColorExtension(desc, mean);
-        }
-
-        switch(extractor->params().type) {
-        case ExtractorParams::SURF:
-            CMPYAML::writeDescriptorRows<float, float>(desc, it->id.id, emitter);
-            break;
-        case ExtractorParams::SIFT:
-            CMPYAML::writeDescriptorRows<float, float>(desc, it->id.id, emitter);
-            break;
-        case ExtractorParams::LBP:
-            CMPYAML::writeDescriptorRows<int, int>(desc, it->id.id, emitter);
-            break;
-        case ExtractorParams::LTP:
-            CMPYAML::writeDescriptorRows<int, int>(desc, it->id.id, emitter);
-            break;
-        default:
-            CMPYAML::writeDescriptorRows<uchar, int>(desc, it->id.id, emitter);
-        }
-
-        state->publish(counts);
+    for(int i = 0 ; i < descriptors.size() ; i++) {
+        cv::Mat desc = descriptors[i];
+        CMPYAML::writeDescriptorRows<float, float>(desc, rois[i].id.id, emitter);
+        state->publish(std::make_pair(0,i));
     }
-
 }
-
 }
 
 #endif // CMP_EXTRACTION_HPP

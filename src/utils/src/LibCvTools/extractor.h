@@ -13,6 +13,7 @@ public:
 
     virtual void extract(const cv::Mat &image, cv::Mat &descriptors){}
     virtual void extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors){}
+    virtual void extract(const cv::Mat &image, const std::vector<cv::Rect> &rois, std::vector<cv::Mat> &descriptors){}
 
     ExtractorParams params();
     static cv::Vec2b extractMeanColorRGBYUV(const cv::Mat &img);

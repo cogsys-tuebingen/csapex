@@ -74,7 +74,7 @@ private:
     TerraQuadtreeDecomposition::Ptr         quad_decom_;
     CMPQuadParams                           quad_params_;
 
-    boost::shared_ptr<cv_grid::GridTerra>   grid_;
+    std::vector<cv_roi::TerraROI>           grid_;
     CMPGridParams                           grid_params_;
 
     std::string                     work_path_;

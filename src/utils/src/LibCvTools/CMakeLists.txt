@@ -2,8 +2,8 @@
 
 # Load OpenCV cmake module, if wasn't looked for or found yet
 find_package(OpenCV REQUIRED)
-
-SET(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_CXX_FLAGS "-O3")
 
 add_library (LibCvTools SHARED
     undistorter.cpp

@@ -16,7 +16,6 @@ void FeatureExtractor::set(cv::DescriptorExtractor *extractor)
 void FeatureExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key_points, cv::Mat &descriptors)
 {
     extractor_->compute(image, key_points, descriptors);
-
     if(descriptors.empty() || descriptors.rows == 0) {
         std::cerr << "Something while extraction went wrong!" << std::endl;
     }
@@ -25,7 +24,7 @@ void FeatureExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &
 void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors)
 {
     if(image.empty())
-       return;
+        return;
     if(image.type() != CV_8UC1) {
         std::cerr << "img.type != CV_8UC1" << std::endl;
         return;
@@ -48,13 +47,69 @@ void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect &roi, cv::Ma
     if(kp.octave == -1 && ep.octaves != 1) {
         k = prepareOctaveKeypoints(roi, kp, ep.octaves);
     } else {
-        k = prepareKeypoint(roi, kp);
+        k = prepareKeypointVec(roi, kp);
     }
 
     extract(roi_img, k, descriptors);
 
     if(ep.combine_descriptors && !k.empty()) {
         descriptors = descriptors.reshape(0, 1);
+    }
+
+    if(descriptors.type() != CV_32FC1) {
+        descriptors.convertTo(descriptors, CV_32FC1);
+    }
+}
+
+void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect> &rois, std::vector<cv::Mat> &descriptors)
+{
+    if(image.empty())
+        return;
+
+    cv::Mat image_gray;
+    cv::cvtColor(image, image_gray, CV_BGR2GRAY);
+
+    KeypointParams              kp = *key_params_;
+    ExtractorParams             ep = *ext_params_;
+    FeatureExtractor::KeyPoints keys;
+    std::vector<cv::Vec2b>      means;
+    cv::Mat                     d;
+    for(std::vector<cv::Rect>::const_iterator it = rois.begin() ; it != rois.end() ; it++) {
+        if(kp.octave == -1 && ep.octaves != 1) {
+            FeatureExtractor::KeyPoints oct_keys = prepareOctaveKeypoints(*it, kp, ep.octaves);
+            keys.insert(keys.end(), oct_keys.begin(), oct_keys.end());
+        } else {
+            keys.push_back(prepareKeypoint(*it, kp));
+        }
+
+        if(ep.color_extension) {
+            cv::Mat     img_roi(image, *it);
+            means.push_back(cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi));
+        }
+
+    }
+
+    extract(image_gray, keys, d);
+
+    int tuples = d.rows / ep.octaves;
+
+    if(ep.combine_descriptors && !d.empty() && kp.octave == -1) {
+        d = d.reshape(0, tuples);
+    }
+
+    cv::Rect roi(0,0, d.cols, ep.octaves);
+
+    for(int i = 0 ; i < tuples ; i++) {
+        roi.y = i * ep.octaves;
+        cv::Mat roi_tuple(d, roi);
+        cv::Mat descr = roi_tuple.clone();
+        if(ext_params_->color_extension)
+            cv_extraction::Extractor::addColorExtension(descr, means[i]);
+
+        if(descr.type() != CV_32FC1) {
+            descr.convertTo(descr, CV_32FC1);
+        }
+        descriptors.push_back(descr);
     }
 }
 
@@ -104,18 +159,23 @@ KeypointParams FeatureExtractor::keypointParams()
     return *key_params_;
 }
 
-FeatureExtractor::KeyPoints FeatureExtractor::prepareKeypoint(const cv::Rect &rect, const KeypointParams &params)
+cv::KeyPoint FeatureExtractor::prepareKeypoint(const cv::Rect &rect, const KeypointParams &params)
 {
-    /// TODO : CHECK THE KEYPOINT PROPERTIES FOR DIFFERENT EXTRACTORS
-    KeyPoints key_points;
     cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * params.scale, params.angle);
     if(params.soft_crop) {
         k.pt.x += rect.x;
         k.pt.y += rect.y;
     }
     k.octave = params.octave;
+    return k;
+}
 
-    key_points.push_back(k);
+
+FeatureExtractor::KeyPoints FeatureExtractor::prepareKeypointVec(const cv::Rect &rect, const KeypointParams &params)
+{
+    /// TODO : CHECK THE KEYPOINT PROPERTIES FOR DIFFERENT EXTRACTORS
+    KeyPoints key_points;
+    key_points.push_back(prepareKeypoint(rect, params));
     return key_points;
 }
 

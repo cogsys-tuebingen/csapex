@@ -10,7 +10,6 @@
 
 CMPCore::CMPCore() :
     random_(new CMPRandomForestExt),
-    grid_(new cv_grid::GridTerra),
     work_path_("/tmp"),
     file_extraction_("/extract.yaml"),
     file_forest_("/forest.yaml")
@@ -49,9 +48,9 @@ std::string CMPCore::forestPath()
 
 void CMPCore::compute()
 {
-
     /// STEP 1 - THE EXTRACTION
     extract();
+    state_->publish(std::make_pair(0,0));
     /// STEP 2 - THE TRAINING
     train();
 }
@@ -63,24 +62,45 @@ void CMPCore::computeGrid()
         return;
     }
 
-    /// PARAMETERS
+    /// PARAMETER
     prepareExtractor();
+    grid_.clear();
 
     /// CALCULATE GRID SIZE
     int height = raw_image_.rows / grid_params_.cell_height;
     int width  = raw_image_.cols / grid_params_.cell_width;
 
-    grid_.reset(new cv_grid::GridTerra);
-    cv_grid::AttrTerrain::Params p;
-    p.extractor       = extractor_;
-    p.classifier      = random_;
-    p.key             = keypoint_params_;
-    p.use_max_prob    = ext_params_->use_max_prob;
-    p.color_ext       = ext_params_->color_extension;
-    p.image           = raw_image_;
-    cv::cvtColor(raw_image_, p.image_gray, CV_BGR2GRAY);
-    cv_grid::prepare_grid<cv_grid::AttrTerrain>
-            (*boost::dynamic_pointer_cast<cv_grid::GridTerra>(grid_), height, width, p, cv::Mat());
+    std::vector<cv::Rect> rects;
+    std::vector<cv::Mat>  descriptors;
+    cv::Rect roi(0,0, grid_params_.cell_width, grid_params_.cell_height);
+    for(int i = 0 ; i < height ; i++) {
+        for(int j = 0 ; j < width ; j++) {
+            roi.x = j * grid_params_.cell_width;
+            roi.y = i * grid_params_.cell_height;
+            rects.push_back(roi);
+        }
+    }
+
+    //state->publish(std::make_pair(0,0));
+    extractor_->extract(raw_image_, rects, descriptors);
+    for(int i = 0 ; i < height ; i++) {
+        for(int j = 0 ; j < width ; j++) {
+            cv::Mat d = descriptors[(i * width + j) / ext_params_->octaves];
+            cv_roi::TerraROI r;
+            r.id.id    = -1;
+            r.id.prob  = 0.f;
+            r.roi.rect = rects[i * width + j];
+            if(d.rows > 1) {
+                if(ext_params_->use_max_prob)
+                    random_->predictClassProbMultiSampleMax(d, r.id.id , r.id.prob);
+                else
+                    random_->predictClassProbMultiSample(d, r.id.id , r.id.prob);
+            } else {
+                random_->predictClassProb(d, r.id.id , r.id.prob);
+            }
+            grid_.push_back(r);
+        }
+    }
 }
 
 void CMPCore::computeQuadtree()
@@ -109,20 +129,10 @@ bool CMPCore::hasComputedModel()
 
 void CMPCore::getGrid(std::vector<cv_roi::TerraROI> &cells)
 {
-    if(grid_ == NULL)
+    if(grid_.size() == 0)
         return;
 
-    cv_grid::GridTerra &terra = *grid_;
-    for(int i = 0 ; i < terra.rows() ; i++) {
-        for(int j = 0 ; j < terra.cols() ; j++) {
-            cv_grid::GridCellTerra &cell = terra(i,j);
-            cv_roi::TerraROI tr;
-            tr.roi.rect = cell.bounding;
-            tr.id.id    = cell.attributes.classID;
-            tr.id.prob  = cell.attributes.probability;
-            cells.push_back(tr);
-        }
-    }
+     cells = grid_;
 }
 
 void CMPCore::getQuad(std::vector<cv_roi::TerraROI> &regions)
@@ -263,18 +273,15 @@ void CMPCore::prepareExtractor()
 void CMPCore::extract()
 {
     prepareExtractor();
-    cv::Mat gray_img;
-    cv::cvtColor(raw_image_, gray_img, CV_BGR2GRAY);
-
     std::ofstream  out((work_path_ + file_extraction_).c_str());
     YAML::Emitter  emitter;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
     emitter << YAML::BeginSeq;
     if(state_ != NULL)
-        CMPExtraction::extractToYAML(emitter, gray_img, raw_image_, ext_params_->color_extension, extractor_, rois_, state_);
+        CMPExtraction::extractToYAML(emitter, raw_image_, extractor_, rois_, state_);
     else
-        CMPExtraction::extractToYAML(emitter, gray_img, raw_image_, ext_params_->color_extension, extractor_, rois_);
+        CMPExtraction::extractToYAML(emitter, raw_image_, extractor_, rois_);
     emitter << YAML::EndSeq;
     emitter << YAML::EndMap;
     out << emitter.c_str();

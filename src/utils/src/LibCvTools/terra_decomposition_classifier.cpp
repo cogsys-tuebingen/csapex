@@ -31,11 +31,32 @@ void TerraDecomClassifier::setUseColorExt(bool value)
     color_ext = value;
 }
 
+void TerraDecomClassifier::classify(const std::vector<Rect> rois, std::vector<bool> classification)
+{
+    std::vector<cv::Mat> descriptors;
+    extractor->extract(image, rois, descriptors);
+
+    for(int i = 0 ; i < rois.size() ; i++) {
+        cv::Mat &d = descriptors[i];
+
+        if(d.rows > 1) {
+            if(use_max_prob)
+                classifier->predictClassProbMultiSampleMax(d, last_id, last_prob);
+            else
+                classifier->predictClassProbMultiSample(d, last_id, last_prob);
+        } else {
+            classifier->predictClassProb(d, last_id, last_prob);
+        }
+
+        classification.push_back(last_prob < threshold);
+    }
+}
+
 bool TerraDecomClassifier::classify(const Rect &roi)
 {
     /// EXTRACT
     cv::Mat descriptors;
-    extractor->extract(gray_image, roi, descriptors);
+    extractor->extract(image, roi, descriptors);
 
     /// PREDICT
     if(descriptors.empty()) {
@@ -79,5 +100,4 @@ int TerraDecomClassifier::get_id()
 void TerraDecomClassifier::set_image(const Mat &_image)
 {
     image = _image;
-    cv::cvtColor(image, gray_image, CV_BGR2GRAY);
 }

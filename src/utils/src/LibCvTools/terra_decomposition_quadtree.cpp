@@ -11,24 +11,29 @@ bool TerraQuadtreeDecomposition::iterate()
     TerraDecomClassifier *terra_classifier = dynamic_cast<TerraDecomClassifier*>(classifier_.get());
 
     if(quadtree_nodes_.size() == 0) {
-        for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; it++) {
-            bool classify     =  terra_classifier->classify(*it);
-            bool not_reached  =  !min_size_reached(*it);
-            if(classify && not_reached)
-                split_and_activate(*it);
+        std::vector<cv::Rect> regions;
+        std::vector<bool>     classifications;
+        for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; it++)
+            regions.push_back(*it);
+
+        terra_classifier->classify(regions, classifications);
+
+        for(int i = 0 ; i < quadtree_roots_.size() ; i++) {
+            if(classifications[i] && !min_size_reached(quadtree_roots_[i]))
+                split_and_activate(quadtree_roots_[i]);
             else {
-                CVQt *node = &(*it);
+                CVQt *node = &(quadtree_roots_[i]);
                 cv_roi::TerraID p;
                 p.id    = terra_classifier->get_id();
                 p.prob  = terra_classifier->get_prob();
                 classifications_.insert(ClassificationEntry(node, p));
                 quadtree_leaves_.push_back(node);
             }
+
         }
     } else {
         process_active_nodes();
     }
-
 
     if(debug_size_.width != -1 && debug_size_.height != -1)
         render_debug();
