@@ -15,6 +15,7 @@ class AttrScalar {
 public:
     struct Params {
         cv::Scalar       eps;
+        cv::Mat          image;
         cv::Vec<bool, 4> ignore;
     };
 
@@ -46,9 +47,9 @@ public:
         return res;
     }
 
-    static AttrScalar generate(const cv::Mat &_img, const cv::Rect &_roi, const AttrScalar::Params &p)
+    static AttrScalar generate(const cv::Rect &_roi, const AttrScalar::Params &p)
     {
-        cv::Mat img_roi(_img, _roi);
+        cv::Mat img_roi(p.image, _roi);
         cv::Scalar value = cv::mean(img_roi);
         return AttrScalar(value, p.eps, p.ignore);
     }
@@ -67,6 +68,7 @@ public:
         cv::Mat     bins;
         cv::Mat     ranges;
         cv::Scalar  eps;
+        cv::Mat     image;
         int         method;
     };
 
@@ -102,10 +104,10 @@ public:
         return res;
     }
 
-    static AttrHistogram generate(const cv::Mat &_img, const cv::Rect &_roi, const AttrHistogram::Params &p)
+    static AttrHistogram generate(const cv::Rect &_roi, const AttrHistogram::Params &p)
     {
 
-        cv::Mat img_roi(_img, _roi);
+        cv::Mat img_roi(p.image, _roi);
         std::vector<cv::MatND>  histograms;
         cv_histogram::full_channel_histogram(img_roi, histograms, cv::Mat(), p.bins, p.ranges);
 
@@ -139,8 +141,11 @@ public:
     struct Params {
         cv_extraction::Extractor::Ptr    extractor;
         cv_extraction::KeypointParams    key;
+        cv::Mat                          image;
+        cv::Mat                          image_gray;
         RandomForest::Ptr                classifier;
         bool                             use_max_prob;
+        bool                             color_ext;
     };
 
     AttrTerrain()
@@ -164,12 +169,12 @@ public:
         return classID == attr.classID;
     }
 
-    static AttrTerrain generate(const cv::Mat &_img, const cv::Rect &_roi,  const AttrTerrain::Params &p)
+    static AttrTerrain generate(const cv::Rect &_roi,  const AttrTerrain::Params &p)
     {
         AttrTerrain::Params p_ = p;
         /// EXTRACT
         cv::Mat descriptors;
-        p.extractor->extract(_img, _roi, descriptors);
+        p.extractor->extract(p.image_gray, _roi, descriptors);
 
         /// PREDICT
         if(descriptors.empty())
@@ -177,6 +182,12 @@ public:
 
         if(descriptors.type() != CV_32FC1) {
             descriptors.convertTo(descriptors, CV_32FC1);
+        }
+
+        if(p.color_ext) {
+            cv::Mat     img_roi(p.image, _roi);
+            cv::Vec2b   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
+            cv_extraction::Extractor::addColorExtension(descriptors, mean);
         }
 
         int   classID = -1;

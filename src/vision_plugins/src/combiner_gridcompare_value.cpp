@@ -130,7 +130,8 @@ void GridCompareValue::prepareGrid(cv_grid::GridScalar &g, const cv::Mat &img, c
     AttrScalar::Params p;
     p.eps    = private_state_gcv_->eps;
     p.ignore = private_state_gcv_->ignore;
-    cv_grid::prepare_grid<AttrScalar>(g, img, height, width, p, mask, 1.0);
+    p.image  = img;
+    cv_grid::prepare_grid<AttrScalar>(g, height, width, p, mask, 1.0);
 }
 
 void GridCompareValue::prepareParams(cv::Scalar &eps, cv::Vec<bool, 4> &ignore)

@@ -15,11 +15,15 @@ public:
     virtual void extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors){}
 
     ExtractorParams params();
-    static cv::Scalar extractMeanColorRGBYUV(const cv::Mat &img);
-    static void addColorExtension(cv::Mat &descriptor, const cv::Scalar &color);
+    static cv::Vec2b extractMeanColorRGBYUV(const cv::Mat &img);
+    static void      addColorExtension(cv::Mat &descriptor, const cv::Vec2b &color);
 
     static void read(const YAML::Node &document, Extractor::Ptr &extractor,
                      ExtractorParams::Ptr &params, KeypointParams &key);
+
+    /**
+     * color image + descriptors roi -> color extension
+     */
 
 protected:
     Extractor(){}

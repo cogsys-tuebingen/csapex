@@ -13,6 +13,11 @@ void PatternExtractor::extract(const Mat &image, const Rect &roi, cv::Mat &descr
 {
     cv::Mat img_roi = cv::Mat(image, roi);
 
+    if(image.type() != CV_8UC1) {
+        std::cerr << "img.type != CV_8UC1" << std::endl;
+        return;
+    }
+
     switch(type_) {
     case LBP:
         extractLBP(img_roi, descriptors);
@@ -26,11 +31,6 @@ void PatternExtractor::extract(const Mat &image, const Rect &roi, cv::Mat &descr
 
     if(ext_params_->combine_descriptors) {
         descriptors = descriptors.reshape(0, 1);
-    }
-
-    if(ext_params_->color_extension) {
-        cv::Scalar  mean = extractMeanColorRGBYUV(img_roi);
-        addColorExtension(descriptors, mean);
     }
 
 }

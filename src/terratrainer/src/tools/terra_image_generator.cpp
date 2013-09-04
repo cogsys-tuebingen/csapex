@@ -73,7 +73,8 @@ void TerraImageGenerator::run()
         channel_to_ids.insert(std::make_pair(i, ids_[i]));
     }
 
-    prepare_terra_mat(image_, cell_size_, ids_.size(), extractor_, random_forest_, tmp, ids_to_channel, extractor_params_->use_max_prob);
+    prepare_terra_mat(image_, cell_size_, ids_.size(), extractor_, random_forest_, tmp, ids_to_channel,
+                      extractor_params_->use_max_prob, extractor_params_->color_extension);
     terra_mat_.setMatrix(tmp, channel_to_ids);
 
     for(int i = 0 ; i < ids_.size() ; i++) {

@@ -5,6 +5,8 @@
 #include "math.hpp"
 #include "extractor.h"
 #include "randomforest.h"
+#include <ros/time.h>
+#include <ros/ros.h>
 
 using namespace cv_extraction;
 
@@ -31,8 +33,12 @@ inline void check_dimension(const int rows, const int cols, const int cell_size)
 inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const int classes,
                                Extractor::Ptr extractor, RandomForest::Ptr classifier,
                                cv::Mat &terraMat, std::map<int, int> &channel_mapping,
-                               bool use_max_prob = true)
+                               bool use_max_prob, bool use_color)
 {
+//    ros::Time::init();
+    cv::Mat gray_img;
+    cv::cvtColor(img, gray_img, CV_BGR2GRAY);
+
     /// PREPARE MATRICES
     int map_rows = img.rows / cell_size;
     int map_cols = img.cols / cell_size;
@@ -54,18 +60,32 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
             probs.clear();
             /// EXTRACT
             cv::Mat descriptors;
-            extractor->extract(img, roi, descriptors);
+//            ros::Time s_ext = ros::Time::now();
+            extractor->extract(gray_img, roi, descriptors);
+
+//            ROS_WARN_STREAM("TOOK EXT1 :" << (ros::Time::now() - s_ext).toSec() * 1000);
+
+            if(use_color) {
+                cv::Mat     img_roi(img, roi);
+                cv::Vec2b   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
+                cv_extraction::Extractor::addColorExtension(descriptors, mean);
+            }
+
+//          ROS_WARN_STREAM("TOOK EXT2 :" << (ros::Time::now() - s_ext).toSec() * 1000);
 
             if(descriptors.type() != CV_32FC1) {
                 descriptors.convertTo(descriptors, CV_32FC1);
             }
 
+//            ROS_WARN_STREAM("TOOK EXT3 :" << (ros::Time::now() - s_ext).toSec() * 1000);
 
             /// CLASSIFY
             if(descriptors.rows > 1) {
-                if(use_max_prob)
+                if(use_max_prob) {
+                    ros::Time start = ros::Time::now();
                     classifier->predictClassProbsMultiSampleMax(descriptors, probs);
-                else
+//                    ROS_WARN_STREAM("TOOK :" << (ros::Time::now() - start).toSec() * 1000);
+                } else
                     classifier->predictClassProbsMultiSample(descriptors, probs);
             } else {
                 classifier->predictClassProbs(descriptors, probs);
@@ -94,8 +114,11 @@ template<int classes>
 inline void  prepare_terra_mat_fixed(const cv::Mat &img, const int cell_size,
                                      Extractor::Ptr extractor, RandomForest::Ptr classifier,
                                      cv::Mat &terra_mat, std::map<uchar, uchar> &channel_mapping,
-                                     bool use_max_prob = true)
+                                     bool use_max_prob, bool use_color)
 {
+    cv::Mat gray_img;
+    cv::cvtColor(img, gray_img, CV_BGR2GRAY);
+
     /// PREPARE MATRICES
     int map_rows = img.rows / cell_size;
     int map_cols = img.cols / cell_size;
@@ -117,7 +140,7 @@ inline void  prepare_terra_mat_fixed(const cv::Mat &img, const int cell_size,
             probs.clear();
             /// EXTRACT
             cv::Mat descriptors;
-            extractor->extract(img, roi, descriptors);
+            extractor->extract(gray_img, roi, descriptors);
             /// CLASSIFY
             if(descriptors.rows > 1) {
                 if(use_max_prob)
@@ -126,6 +149,12 @@ inline void  prepare_terra_mat_fixed(const cv::Mat &img, const int cell_size,
                     classifier->predictClassProbsMultiSample(descriptors, probs);
             } else {
                 classifier->predictClassProbs(descriptors, probs);
+            }
+
+            if(use_color) {
+                cv::Mat     img_roi(img, roi);
+                cv::Vec2b   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
+                cv_extraction::Extractor::addColorExtension(descriptors, mean);
             }
 
             if(descriptors.type() != CV_32FC1) {

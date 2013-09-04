@@ -19,15 +19,15 @@ namespace cv_grid {
  * @param eps       the mean error
  */
 template<class Attribute, class GridT, class Params>
-inline void  prepare_grid(GridT &grid, const cv::Mat &img, const int rows, const int cols, const Params &p,
+inline void  prepare_grid(GridT &grid, const int rows, const int cols, const Params &p,
                           const cv::Mat &mask = cv::Mat(), const double thresh = 1.0)
 {
     grid = GridT(rows,cols);
 
-    int cell_height      = img.rows / rows;
-    int cell_width       = img.cols / cols;
-    int cell_height_rest = img.rows % rows;
-    int cell_width_rest  = img.cols % cols;
+    int cell_height      = p.image.rows / rows;
+    int cell_width       = p.image.cols / cols;
+    int cell_height_rest = p.image.rows % rows;
+    int cell_width_rest  = p.image.cols % cols;
 
     for(int i = 0 ; i < cols ; i++) {
         for(int j = 0 ; j < rows ; j++) {
@@ -48,7 +48,7 @@ inline void  prepare_grid(GridT &grid, const cv::Mat &img, const int rows, const
                 }
             }
 
-            Attribute attr = Attribute::generate(img, r, p);
+            Attribute attr = Attribute::generate(r, p);
             grid(j,i) = GridCell<cv::Rect, Attribute>(r, attr);
         }
     }

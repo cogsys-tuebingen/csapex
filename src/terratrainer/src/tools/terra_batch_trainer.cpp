@@ -169,8 +169,9 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
 
             terra_rois.push_back(roi);
         }
-
-        CMPExtraction::extractToYAML(emitter,image, extractor_, terra_rois);
+        cv::Mat gray_img;
+        cv::cvtColor(image, gray_img, CV_BGR2GRAY);
+        CMPExtraction::extractToYAML(emitter,gray_img, image, extracto_params_->color_extension, extractor_, terra_rois);
     } catch(YAML::Exception e) {
         std::cerr << "Error reading document '" << path << "'" << e.what() << "' !" << std::endl;
         return;

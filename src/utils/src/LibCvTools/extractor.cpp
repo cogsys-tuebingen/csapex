@@ -10,20 +10,20 @@ ExtractorParams Extractor::params()
     return *ext_params_;
 }
 
-cv::Scalar Extractor::extractMeanColorRGBYUV(const cv::Mat &img)
+cv::Vec2b Extractor::extractMeanColorRGBYUV(const cv::Mat &img)
 {
-    cv::Mat convert;
-    cv::cvtColor(img, convert, CV_BGR2YUV);
-
-    return cv::mean(convert);
+    cv::Mat yuv;
+    cv::cvtColor(img, yuv, CV_BGR2YUV);
+    cv::Scalar mean = cv::mean(yuv);
+    return cv::Vec2b(mean[1], mean[2]);
 }
 
-void Extractor::addColorExtension(cv::Mat &descriptor, const cv::Scalar &color)
+void Extractor::addColorExtension(cv::Mat &descriptor, const cv::Vec2b &color)
 {
     cv::Mat tmp(descriptor.rows, descriptor.cols + 2, descriptor.type(),cv::Scalar::all(0));
     cv::Mat tmp_roi(tmp, cv::Rect(0,0, descriptor.cols, descriptor.rows));
-    tmp.col(tmp.cols - 2).setTo(color[1]);
-    tmp.col(tmp.cols - 1).setTo(color[2]);
+    tmp.col(tmp.cols - 2).setTo(color[0]);
+    tmp.col(tmp.cols - 1).setTo(color[1]);
     descriptor.copyTo(tmp_roi);
     tmp.copyTo(descriptor);
 }

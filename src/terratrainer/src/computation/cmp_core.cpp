@@ -76,8 +76,11 @@ void CMPCore::computeGrid()
     p.classifier      = random_;
     p.key             = keypoint_params_;
     p.use_max_prob    = ext_params_->use_max_prob;
+    p.color_ext       = ext_params_->color_extension;
+    p.image           = raw_image_;
+    cv::cvtColor(raw_image_, p.image_gray, CV_BGR2GRAY);
     cv_grid::prepare_grid<cv_grid::AttrTerrain>
-            (*boost::dynamic_pointer_cast<cv_grid::GridTerra>(grid_), raw_image_, height, width, p, cv::Mat());
+            (*boost::dynamic_pointer_cast<cv_grid::GridTerra>(grid_), height, width, p, cv::Mat());
 }
 
 void CMPCore::computeQuadtree()
@@ -260,6 +263,8 @@ void CMPCore::prepareExtractor()
 void CMPCore::extract()
 {
     prepareExtractor();
+    cv::Mat gray_img;
+    cv::cvtColor(raw_image_, gray_img, CV_BGR2GRAY);
 
     std::ofstream  out((work_path_ + file_extraction_).c_str());
     YAML::Emitter  emitter;
@@ -267,9 +272,9 @@ void CMPCore::extract()
     emitter << YAML::Key << "data" << YAML::Value;
     emitter << YAML::BeginSeq;
     if(state_ != NULL)
-        CMPExtraction::extractToYAML(emitter, raw_image_, extractor_, rois_, state_);
+        CMPExtraction::extractToYAML(emitter, gray_img, raw_image_, ext_params_->color_extension, extractor_, rois_, state_);
     else
-        CMPExtraction::extractToYAML(emitter, raw_image_, extractor_, rois_);
+        CMPExtraction::extractToYAML(emitter, gray_img, raw_image_, ext_params_->color_extension, extractor_, rois_);
     emitter << YAML::EndSeq;
     emitter << YAML::EndMap;
     out << emitter.c_str();

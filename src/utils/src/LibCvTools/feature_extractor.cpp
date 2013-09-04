@@ -25,21 +25,24 @@ void FeatureExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &
 void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect &roi, cv::Mat &descriptors)
 {
     if(image.empty())
+       return;
+    if(image.type() != CV_8UC1) {
+        std::cerr << "img.type != CV_8UC1" << std::endl;
         return;
+    }
+
 
     cv::Mat         roi_img;
-    cv::Mat         roi_col(image, roi);
-    cv::Scalar      mean = extractMeanColorRGBYUV(roi_col);
     KeypointParams  kp = *key_params_;
     ExtractorParams ep = *ext_params_;
 
     if(kp.soft_crop)
         roi_img = image;
     else
-        roi_img = roi_col;
+        roi_img = cv::Mat(image, roi);
 
     if(kp.calc_angle)
-        kp.angle = calcAngle(roi_col);
+        kp.angle = calcAngle(roi_img);
 
     FeatureExtractor::KeyPoints k;
     if(kp.octave == -1 && ep.octaves != 1) {
@@ -52,10 +55,6 @@ void FeatureExtractor::extract(const cv::Mat &image, const cv::Rect &roi, cv::Ma
 
     if(ep.combine_descriptors && !k.empty()) {
         descriptors = descriptors.reshape(0, 1);
-    }
-
-    if(ep.color_extension) {
-        addColorExtension(descriptors, mean);
     }
 }
 

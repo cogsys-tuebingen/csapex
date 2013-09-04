@@ -2,7 +2,8 @@
 
 TerraDecomClassifier::TerraDecomClassifier(const float _threshold) :
     threshold(_threshold),
-    use_max_prob(false)
+    use_max_prob(false),
+    color_ext(false)
 {
 }
 
@@ -25,16 +26,28 @@ void TerraDecomClassifier::setUseMaxProb(bool value)
     use_max_prob = value;
 }
 
+void TerraDecomClassifier::setUseColorExt(bool value)
+{
+    color_ext = value;
+}
+
 bool TerraDecomClassifier::classify(const Rect &roi)
 {
     /// EXTRACT
     cv::Mat descriptors;
-    extractor->extract(image, roi, descriptors);
+    extractor->extract(gray_image, roi, descriptors);
 
     /// PREDICT
     if(descriptors.empty()) {
         return false;
     }
+
+    if(color_ext) {
+        cv::Mat     img_roi(image, roi);
+        cv::Vec2b   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
+        cv_extraction::Extractor::addColorExtension(descriptors, mean);
+    }
+
 
     if(descriptors.type() != CV_32FC1) {
         descriptors.convertTo(descriptors, CV_32FC1);
@@ -66,4 +79,5 @@ int TerraDecomClassifier::get_id()
 void TerraDecomClassifier::set_image(const Mat &_image)
 {
     image = _image;
+    cv::cvtColor(image, gray_image, CV_BGR2GRAY);
 }

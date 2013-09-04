@@ -9,12 +9,18 @@
 using namespace cv_extraction;
 
 namespace CMPExtraction {
-void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, const cv_extraction::Extractor::Ptr extractor,
+void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img_gray, const cv::Mat &img, const bool color_ext, const cv_extraction::Extractor::Ptr extractor,
                    std::vector<cv_roi::TerraROI> rois)
 {
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++) {
         cv::Mat desc;
-        extractor->extract(img, it->roi.rect, desc);
+        extractor->extract(img_gray, it->roi.rect, desc);
+
+        if(color_ext) {
+            cv::Mat     img_roi(img, it->roi.rect);
+            cv::Vec2f   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
+            cv_extraction::Extractor::addColorExtension(desc, mean);
+        }
 
         switch(extractor->params().type) {
         case ExtractorParams::SURF:
@@ -35,14 +41,20 @@ void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, const cv_extracti
     }
 }
 
-void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img,  const cv_extraction::Extractor::Ptr extractor,
+void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img_gray, const cv::Mat &img, const bool color_ext, const cv_extraction::Extractor::Ptr extractor,
                    std::vector<cv_roi::TerraROI> rois, CMPStatePublisher::Ptr state)
 {
     std::pair<int,int> counts(0, rois.size());
 
     for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++, counts.first++) {
         cv::Mat desc;
-        extractor->extract(img, it->roi.rect, desc);
+        extractor->extract(img_gray, it->roi.rect, desc);
+
+        if(color_ext) {
+            cv::Mat     img_roi(img, it->roi.rect);
+            cv::Vec2f   mean = cv_extraction::Extractor::extractMeanColorRGBYUV(img_roi);
+            cv_extraction::Extractor::addColorExtension(desc, mean);
+        }
 
         switch(extractor->params().type) {
         case ExtractorParams::SURF:

@@ -139,7 +139,8 @@ void GridCompareHist::prepareGrid(GridHist &g, const cv::Mat &img, const cv::Mat
     AttrHistogram::Params p;
     prepareHistParams(p.bins, p.ranges, p.eps);
     p.method = index_to_compare_[private_state_gch_->combo_index];
-    cv_grid::prepare_grid<AttrHistogram>(g, img, height, width, p, mask, 1.0);
+    p.image  = img;
+    cv_grid::prepare_grid<AttrHistogram>(g, height, width, p, mask, 1.0);
 }
 
 void GridCompareHist::addHistSliders(QSlider *bins, QDoubleSlider *eps)

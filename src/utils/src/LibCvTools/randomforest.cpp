@@ -67,6 +67,7 @@ void RandomForest::predictClassProbMultiSample(const cv::Mat &samples, int &clas
 
     for(int i = 0 ; i < samples.rows ; i++) {
         cv::Mat descr(samples.row(i));
+
         int   tmp_id   = -1;
         float tmp_prob = 0.f;
         predictClassProb(descr, tmp_id, tmp_prob);
