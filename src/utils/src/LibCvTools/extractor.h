@@ -16,8 +16,8 @@ public:
     virtual void extract(const cv::Mat &image, const std::vector<cv::Rect> &rois, std::vector<cv::Mat> &descriptors){}
 
     ExtractorParams params();
-    static cv::Vec2b extractMeanColorRGBYUV(const cv::Mat &img);
-    static void      addColorExtension(cv::Mat &descriptor, const cv::Vec2b &color);
+    static cv::Vec2b  extractMeanColorRGBYUV(const cv::Mat &img);
+    static void       addColorExtension(cv::Mat &descriptor, const cv::Vec2b &color);
 
     static void read(const YAML::Node &document, Extractor::Ptr &extractor,
                      ExtractorParams::Ptr &params, KeypointParams &key);

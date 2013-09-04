@@ -364,9 +364,10 @@ void CtrlMapView::setCurrentSelectedROIs()
         QInteractiveItem* ptr = dynamic_cast<QInteractiveItem*>(item);
         if(ptr != NULL) {
             cv_roi::TerraROI roi;
-            QRectF bounding = ptr->rect();
-            roi.roi.rect.x      = std::floor(bounding.x() + 0.5);
-            roi.roi.rect.y      = std::floor(bounding.y() + 0.5);
+            QPointF pos = ptr->scenePos();
+            QRectF  bounding = ptr->rect();
+            roi.roi.rect.x      = std::floor(pos.x() + 0.5);
+            roi.roi.rect.y      = std::floor(pos.y() + 0.5);
             roi.roi.rect.width  = std::floor(bounding.width() + 0.5);
             roi.roi.rect.height = std::floor(bounding.height() + 0.5);
             roi.roi.rotation    = 0.0;

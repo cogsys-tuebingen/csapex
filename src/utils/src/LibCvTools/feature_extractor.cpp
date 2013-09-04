@@ -74,9 +74,11 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
     FeatureExtractor::KeyPoints keys;
     std::vector<cv::Vec2b>      means;
     cv::Mat                     d;
-    for(std::vector<cv::Rect>::const_iterator it = rois.begin() ; it != rois.end() ; it++) {
+
+    int tupel_start_idx = 0;
+    for(std::vector<cv::Rect>::const_iterator it = rois.begin() ; it != rois.end() ; ++it, tupel_start_idx += ep.octaves) {
         if(kp.octave == -1 && ep.octaves != 1) {
-            FeatureExtractor::KeyPoints oct_keys = prepareOctaveKeypoints(*it, kp, ep.octaves);
+            FeatureExtractor::KeyPoints oct_keys = prepareOctaveKeypoints(*it, kp, ep.octaves, tupel_start_idx);
             keys.insert(keys.end(), oct_keys.begin(), oct_keys.end());
         } else {
             keys.push_back(prepareKeypoint(*it, kp));
@@ -91,21 +93,36 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
 
     extract(image_gray, keys, d);
 
-    int tuples = d.rows / ep.octaves;
 
-    if(ep.combine_descriptors && !d.empty() && kp.octave == -1) {
-        d = d.reshape(0, tuples);
+    /// KEYPOINT DESCRIPTOR MAPPING
+    std::vector<std::pair<int, int> > entry_idx;
+    for(int i = 0 ; i < keys.size() ; ++i) {
+        entry_idx.push_back(std::make_pair(keys[i].class_id, i));
     }
+    std::sort(entry_idx.begin(), entry_idx.end());
 
-    cv::Rect roi(0,0, d.cols, ep.octaves);
 
-    for(int i = 0 ; i < tuples ; i++) {
-        roi.y = i * ep.octaves;
-        cv::Mat roi_tuple(d, roi);
-        cv::Mat descr = roi_tuple.clone();
+    cv::Mat buffer(ep.octaves, d.cols, d.type());
+    for(std::vector<std::pair<int,int> >::iterator it = entry_idx.begin() ; it != entry_idx.end() ; ) {
+        /// FETCH DESCRIPTORS
+        for(int i = 0 ; i < ep.octaves; ++i) {
+            d.row(it->second).copyTo(buffer.row(i));
+
+            ++it;
+
+            if(it == entry_idx.end()) {
+                std::cerr << "Not all keypoints could be extracted!" << std::endl;
+                continue;
+            }
+        }
+
+        /// MAKE READY FOR RETURNING
+        cv::Mat descr = buffer.clone();
+        if(ep.combine_descriptors && !descr.empty() && kp.octave != -1) {
+            descr = descr.reshape(0, 1);
+        }
         if(ext_params_->color_extension)
-            cv_extraction::Extractor::addColorExtension(descr, means[i]);
-
+            cv_extraction::Extractor::addColorExtension(descr, means[it->first / ep.octaves]);
         if(descr.type() != CV_32FC1) {
             descr.convertTo(descr, CV_32FC1);
         }
@@ -179,7 +196,8 @@ FeatureExtractor::KeyPoints FeatureExtractor::prepareKeypointVec(const cv::Rect 
     return key_points;
 }
 
-FeatureExtractor::KeyPoints FeatureExtractor::prepareOctaveKeypoints(const cv::Rect &rect, const KeypointParams &params, const int max_octave)
+FeatureExtractor::KeyPoints FeatureExtractor::prepareOctaveKeypoints(const cv::Rect &rect, const KeypointParams &params,
+                                                                     const int max_octave, const int tupel_start_idx)
 {
     KeyPoints key_points;
     cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * params.scale, params.angle);
@@ -189,7 +207,8 @@ FeatureExtractor::KeyPoints FeatureExtractor::prepareOctaveKeypoints(const cv::R
     }
 
     for(int octave = 0 ; octave < max_octave ; octave++) {
-        k.octave = octave;
+        k.octave    = octave;
+        k.class_id  = tupel_start_idx + octave;
         key_points.push_back(k);
     }
     return key_points;
@@ -210,8 +229,8 @@ double FeatureExtractor::calcAngle(const cv::Mat &image)
     int y = -image.rows / 2;
     int x = -image.cols / 2;
 
-    for(int i = 0 ; i < image.rows ; i++) {
-        for(int j = 0 ; j < image.cols ; j++){
+    for(int i = 0 ; i < image.rows ; ++i) {
+        for(int j = 0 ; j < image.cols ; ++j){
             if(!zero_continue_x || x + j != 0)
                 m10 += (x + j) * process.at<uchar>(i,j);
             if(!zero_continue_y || y + i != 0)

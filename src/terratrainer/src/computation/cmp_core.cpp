@@ -85,7 +85,7 @@ void CMPCore::computeGrid()
     extractor_->extract(raw_image_, rects, descriptors);
     for(int i = 0 ; i < height ; i++) {
         for(int j = 0 ; j < width ; j++) {
-            cv::Mat d = descriptors[(i * width + j) / ext_params_->octaves];
+            cv::Mat d = descriptors[(i * width + j)];
             cv_roi::TerraROI r;
             r.id.id    = -1;
             r.id.prob  = 0.f;
