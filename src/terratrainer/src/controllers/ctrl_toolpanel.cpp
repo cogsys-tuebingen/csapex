@@ -163,6 +163,11 @@ void CtrlToolPanel::classRemoved(int id)
     }
 }
 
+void CtrlToolPanel::classesCleared()
+{
+    class_selection_->clear();
+}
+
 void CtrlToolPanel::classUpdated(int oldID, int newID)
 {
     int item_index = class_selection_->findData(QVariant(oldID));

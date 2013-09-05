@@ -93,8 +93,8 @@ void CtrlClassEdit::read(const YAML::Node &document)
         class_table_->removeRow(0);
     }
     resetEdit();
-
     palette_.clear();
+    bridge_->classClear();
 
     try {
         const YAML::Node &colors = document["CLASSES_PALETTE"];

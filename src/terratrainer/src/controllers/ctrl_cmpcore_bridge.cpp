@@ -125,6 +125,16 @@ void CMPCoreBridge::classAdd(const int classID, const QColor &color)
     Q_EMIT classAdded(classID);
 }
 
+void CMPCoreBridge::classClear()
+{
+    std::map<int, QColor> tmp = classes_;
+    for(std::map<int, QColor>::iterator it = tmp.begin() ; it != tmp.end() ; ++it) {
+        removeClassIndex(it->first);
+    }
+
+    Q_EMIT classesCleared();
+}
+
 void CMPCoreBridge::colorUpdate(const int classID, const QColor &color)
 {
     if(classes_.find(classID) != classes_.end())

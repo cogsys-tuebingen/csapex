@@ -142,6 +142,7 @@ void CtrlFactory::produceToolBarController(TerraTrainerWindow *mainWindow)
     QObject::connect(br.get(),          SIGNAL(classUpdated(int,int)),ctrl,           SLOT(classUpdated(int,int)), Qt::QueuedConnection);
     QObject::connect(br.get(),          SIGNAL(colorUpdate(int)),     ctrl,           SLOT(colorUpdate(int)),      Qt::QueuedConnection);
     QObject::connect(br.get(),          SIGNAL(imageLoaded()),        ctrl,           SLOT(image_loaded()),        Qt::QueuedConnection);
+    QObject::connect(br.get(),          SIGNAL(classesCleared()),     ctrl,           SLOT(classesCleared()),      Qt::QueuedConnection);
     QObject::connect(tp->addBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateAdd()));
     QObject::connect(tp->movBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateMove()));
     QObject::connect(tp->delBoxes,      SIGNAL(clicked()),           mv.get(),       SLOT(activateDelete()));

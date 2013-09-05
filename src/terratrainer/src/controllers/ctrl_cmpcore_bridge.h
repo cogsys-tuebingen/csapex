@@ -83,7 +83,7 @@ Q_SIGNALS:
     void computeQuadFinished();
     void spawnBar(QString title);
     void despawnBar();
-
+    void classesCleared();
 
 private:
     /// THREADING

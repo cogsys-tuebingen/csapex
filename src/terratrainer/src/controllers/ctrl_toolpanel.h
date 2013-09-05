@@ -65,6 +65,7 @@ public Q_SLOTS:
     void feedbackFinished();
     void classAdded(int id);
     void classRemoved(int id);
+    void classesCleared();
     void classUpdated(int oldID, int newID);
     void colorUpdate(int id);
 
