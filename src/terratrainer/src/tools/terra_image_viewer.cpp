@@ -1,4 +1,5 @@
 #include <utils/LibCvTools/terra_mat.h>
+#include <algorithm>
 #include <opencv2/opencv.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
@@ -30,7 +31,8 @@ int main(int argc, char *argv[])
                 if (filesystem3::is_regular_file( dir_itr->status())) {
                     std::string current = dir_itr->path().string();
                     if(boost::regex_match(current.c_str(), what, e_yaml) && what[0].matched) {
-                        paths.push_back(current);
+                        if(current != "")
+                            paths.push_back(current);
                     }
                 }
             }
@@ -56,6 +58,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::sort(paths.begin(), paths.end());
+
     cv::namedWindow("Generation");
     bool end = false;
     int  pos = 0;
@@ -67,8 +71,8 @@ int main(int argc, char *argv[])
         if(!mat.getMatrix().empty()) {
             cv::Mat rgb = mat.getFavoritesBGR();
             render = cv::Mat(rgb.rows * zoom , rgb.cols * zoom , CV_8UC3, cv::Scalar::all(0));
-            for(int i = 0 ; i < rgb.rows ; i++) {
-                for(int j = 0 ; j < rgb.cols ; j++) {
+            for(int i = 0 ; i < rgb.rows ; ++i) {
+                for(int j = 0 ; j < rgb.cols ; ++j) {
                     cv::Rect rect(j * zoom, i * zoom , zoom, zoom);
                     cv::Vec3b  bgr_val = rgb.at<cv::Vec3b>(i,j);
                     cv::Scalar color(bgr_val[0] , bgr_val[1], bgr_val[2]);

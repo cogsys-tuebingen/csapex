@@ -29,8 +29,8 @@ inline void  prepare_grid(GridT &grid, const int rows, const int cols, const Par
     int cell_height_rest = p.image.rows % rows;
     int cell_width_rest  = p.image.cols % cols;
 
-    for(int i = 0 ; i < cols ; i++) {
-        for(int j = 0 ; j < rows ; j++) {
+    for(int i = 0 ; i < cols ; ++i) {
+        for(int j = 0 ; j < rows ; ++j) {
             cv::Rect r(cell_width * i, cell_height * j, cell_width, cell_height);
 
             if(i == cols - 1)
@@ -78,8 +78,8 @@ inline void render_grid_count(const GridT &g1, const GridT &g2, const cv::Size &
     counts.first = 0;
     counts.second = 0;
     valid = 0;
-    for(int i = 0 ; i < g1.rows() ; i++) {
-        for(int j = 0 ; j < g1.cols() ; j++) {
+    for(int i = 0 ; i < g1.rows() ; ++i) {
+        for(int j = 0 ; j < g1.cols() ; ++j) {
 
             cv::Rect r = cv::Rect(j * block_size.width, i * block_size.height , block_size.width, block_size.height);
             if(!g1(i,j).enabled || !g2(i,j).enabled) {
@@ -139,8 +139,8 @@ inline void grid_heatmap(GridT &g1, GridT &g2, cv::Mat &vals)
     int row_iterations = g2.rows() - g1.rows() + 1;
 
     vals = cv::Mat(row_iterations, col_iterations, CV_32F, cv::Scalar::all(0));
-    for(int i = 0 ; i <  col_iterations ; i++) {
-        for(int j = 0 ; j < row_iterations ; j++) {
+    for(int i = 0 ; i <  col_iterations ; ++i) {
+        for(int j = 0 ; j < row_iterations ; ++j) {
             std::pair<int, int> counts;
             int valid;
             g2.setROI(j,i, g1.rows(), g1.cols());
@@ -254,8 +254,8 @@ inline void render_heatmap(const cv::Mat &values, const cv::Size &block_size, cv
 {
     if(out.empty())
         out = cv::Mat(values.rows * block_size.height, values.cols * block_size.width, CV_8UC3, cv::Scalar::all(0));
-    for(int i = 0 ; i < values.rows ; i++) {
-        for(int j = 0 ; j < values.cols ; j++) {
+    for(int i = 0 ; i < values.rows ; ++i) {
+        for(int j = 0 ; j < values.cols ; ++j) {
             cv::Rect r  = cv::Rect(j * block_size.width,i * block_size.height,block_size.width,block_size.height);
             cv::rectangle(out,r,color_heatmap(values.at<float>(i,j)), CV_FILLED);
         }

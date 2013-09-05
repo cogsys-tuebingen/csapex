@@ -12,8 +12,8 @@ using namespace cv_extraction;
 inline void getRois(const int rows, const int cols, const int cell_size, std::vector<cv::Rect> &rois)
 {
     cv::Rect roi(0,0, cell_size, cell_size);
-    for(int i = 0 ; i < rows ; i++) {
-        for(int j = 0 ; j < cols ; j++) {
+    for(int i = 0 ; i < rows ; ++i) {
+        for(int j = 0 ; j < cols ; ++j) {
             roi.x = cell_size * j;
             roi.y = cell_size * i;
             rois.push_back(roi);
@@ -50,7 +50,7 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
     int map_cols = img.cols / cell_size;
 
     std::vector<cv::Mat> layers;
-    for(int i = 0 ; i < classes ; i++) {
+    for(int i = 0 ; i < classes ; ++i) {
         layers.push_back(cv::Mat(map_rows, map_cols, CV_32FC1, cv::Scalar::all(0)));
     }
 
@@ -61,8 +61,8 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
     getRois(map_rows, map_cols, cell_size, rois);
     extractor->extract(img, rois, descriptors);
 
-    for(int i = 0 ; i < map_rows ; i++) {
-        for(int j = 0 ; j < map_cols ; j++) {
+    for(int i = 0 ; i < map_rows ; ++i) {
+        for(int j = 0 ; j < map_cols ; ++j) {
             probs.clear();
             cv::Mat &d = descriptors[i * map_cols + j];
 
@@ -120,8 +120,8 @@ inline void  prepare_terra_mat_fixed(const cv::Mat &img, const int cell_size,
     int    step     = terra_mat.step / terra_mat.elemSize1();
     int    channels = terra_mat.channels();
     float *data     = (float*) terra_mat.data;
-    for(int i = 0 ; i < map_rows ; i++) {
-        for(int j = 0 ; j < map_cols ; j++) {
+    for(int i = 0 ; i < map_rows ; ++i) {
+        for(int j = 0 ; j < map_cols ; ++j) {
             int pixel_pos = step * i + j * channels;
             probs.clear();
             /// EXTRACT

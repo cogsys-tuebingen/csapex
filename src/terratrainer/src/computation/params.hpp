@@ -74,7 +74,7 @@ struct CMPForestParams {
 
     void fillPriors() {
         priors.clear();
-        for(int i = 0 ; i < max_categories ; i++) {
+        for(int i = 0 ; i < max_categories ; ++i) {
             priors.push_back(1.f);
         }
     }

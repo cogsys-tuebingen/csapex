@@ -51,7 +51,7 @@ void RandomForest::predictClassProbs(const cv::Mat &sample, std::vector<int> &cl
     std::map<int, float> probs_map;
     int classID;
     prediction(sample, probs_map, classID);
-    for(std::map<int, float>::iterator it = probs_map.begin() ; it != probs_map.end() ; it++) {
+    for(std::map<int, float>::iterator it = probs_map.begin() ; it != probs_map.end() ; ++it) {
         classIDs.push_back(it->first);
         probs.push_back(it->second);
     }
@@ -65,7 +65,7 @@ void RandomForest::predictClassProbMultiSample(const cv::Mat &samples, int &clas
     classID = -1;
     prob    =  0.f;
 
-    for(int i = 0 ; i < samples.rows ; i++) {
+    for(int i = 0 ; i < samples.rows ; ++i) {
         cv::Mat descr(samples.row(i));
 
         int   tmp_id   = -1;
@@ -86,7 +86,7 @@ void RandomForest::predictClassProbMultiSample(const cv::Mat &samples, int &clas
     }
 
 
-    for(AccProbIndex::iterator it = index.begin() ; it != index.end() ; it++) {
+    for(AccProbIndex::iterator it = index.begin() ; it != index.end() ; ++it) {
         AccProbEntry e = *it;
 
         double tmp_prob = e.second.prob / e.second.norm;
@@ -102,7 +102,7 @@ void RandomForest::predictClassProbMultiSampleMax(const cv::Mat &samples, int &c
     classID = -1;
     prob    =  0.f;
 
-    for(int i = 0 ; i < samples.rows ; i++) {
+    for(int i = 0 ; i < samples.rows ; ++i) {
         cv::Mat descr(samples.row(i));
         int   tmp_id   = -1;
         float tmp_prob = 0.f;
@@ -118,12 +118,12 @@ void RandomForest::predictClassProbMultiSampleMax(const cv::Mat &samples, int &c
 void RandomForest::predictClassProbsMultiSample(const cv::Mat &samples, std::map<int, float> &probs)
 {
     AccProbIndex index;
-    for(int i = 0 ; i < samples.rows ; i++) {
+    for(int i = 0 ; i < samples.rows ; ++i) {
         cv::Mat descr(samples.row(i));
         std::map<int, float> pred;
         predictClassProbs(descr, pred);
 
-        for(std::map<int, float>::iterator it = pred.begin() ; it != pred.end() ; it++) {
+        for(std::map<int, float>::iterator it = pred.begin() ; it != pred.end() ; ++it) {
             if(index.find(it->first) == index.end()) {
                 AccProb acc;
                 acc.norm = 1;
@@ -137,7 +137,7 @@ void RandomForest::predictClassProbsMultiSample(const cv::Mat &samples, std::map
     }
 
 
-    for(AccProbIndex::iterator it = index.begin() ; it != index.end() ; it++) {
+    for(AccProbIndex::iterator it = index.begin() ; it != index.end() ; ++it) {
         AccProbEntry e = *it;
 
         double tmp_prob = e.second.prob / e.second.norm;
@@ -147,12 +147,12 @@ void RandomForest::predictClassProbsMultiSample(const cv::Mat &samples, std::map
 
 void RandomForest::predictClassProbsMultiSampleMax(const cv::Mat &samples, std::map<int, float> &probs)
 {
-    for(int i = 0 ; i < samples.rows ; i++) {
+    for(int i = 0 ; i < samples.rows ; ++i) {
         cv::Mat descr(samples.row(i));
         std::map<int, float> tmp_probs;
         predictClassProbs(descr,tmp_probs);
 
-        for(std::map<int, float>::iterator it = tmp_probs.begin() ; it != tmp_probs.end() ; it++) {
+        for(std::map<int, float>::iterator it = tmp_probs.begin() ; it != tmp_probs.end() ; ++it) {
             if(probs.find(it->first) == probs.end()) {
                 probs.insert(*it);
             } else {
@@ -172,7 +172,7 @@ void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs
     /// COUNT
     try {
         int max_vote = 0;
-        for(int i = 0 ; i < ntrees ; i++) {
+        for(int i = 0 ; i < ntrees ; ++i) {
 
             CvDTreeNode* prediction = forest_->get_tree(i)->predict(sample);
             int tree_classID = prediction->value;
@@ -189,7 +189,7 @@ void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs
         }
 
         /// NORMALIZE
-        for(std::map<int,float>::iterator it = votes.begin() ; it != votes.end() ; it++) {
+        for(std::map<int,float>::iterator it = votes.begin() ; it != votes.end() ; ++it) {
             it->second /= (float) ntrees;
         }
 

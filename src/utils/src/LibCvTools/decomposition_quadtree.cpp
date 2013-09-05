@@ -14,8 +14,8 @@ QuadtreeDecomposition::QuadtreeDecomposition(const cv::Mat &_image, const cv::Si
     region.width = _image.cols / x;
     region.height = _image.rows / y;
 
-    for(int i = 0 ; i < x ; i++) {
-        for(int j = 0 ; j < y ; j++) {
+    for(int i = 0 ; i < x ; ++i) {
+        for(int j = 0 ; j < y ; ++j) {
             region.x = i * region.width;
             region.y = j * region.height;
             quadtree_roots_.push_back(CVQt(region));
@@ -36,7 +36,7 @@ void QuadtreeDecomposition::auto_iterate()
 bool QuadtreeDecomposition::iterate()
 {
     if(quadtree_nodes_.size() == 0) {
-        for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; it++) {
+        for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; ++it) {
             if(classifier_->classify(*it) && !min_size_reached(*it))
                 split_and_activate(*it);
             else
@@ -61,7 +61,7 @@ void QuadtreeDecomposition::enable_debug_out_put(const cv::Size &window_size, co
 
 void QuadtreeDecomposition::regions(std::vector<cv::Rect> &regions)
 {
-    for(CVQtNodesListPtr::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; it++) {
+    for(CVQtNodesListPtr::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; ++it) {
         CVQt *node = *it;
         cv::Rect rect = *node;
         limit(rect, image_.cols, image_.rows);
@@ -74,7 +74,7 @@ void QuadtreeDecomposition::process_active_nodes()
     CVQtNodesListPtr list = quadtree_nodes_;
     quadtree_nodes_.clear();
 
-    for(CVQtNodesListPtr::iterator it = list.begin() ; it != list.end() ; it++){
+    for(CVQtNodesListPtr::iterator it = list.begin() ; it != list.end() ; ++it){
         CVQt *node = *it;
         if(!min_size_reached(*node) && classifier_->classify(*node)) {
             split_and_activate(*node);
@@ -88,7 +88,7 @@ void QuadtreeDecomposition::render_debug()
 {
     cv::Mat img_out = image_.clone();
 
-    for(CVQtNodesListPtr::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; it++) {
+    for(CVQtNodesListPtr::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; ++it) {
         CVQt *node = *it;
         cv::Rect rect = *node;
         limit(rect, img_out.cols, img_out.rows);

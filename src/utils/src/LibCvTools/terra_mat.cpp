@@ -11,7 +11,7 @@ TerraMat::TerraMat(const cv::Mat &terra_mat) :
     step_(terra_mat.step / terra_mat.elemSize1()),
     terra_mat_(terra_mat)
 {
-    for(uchar i = 0 ; i < channels_ ; i++)
+    for(uchar i = 0 ; i < channels_ ; ++i)
         mapping_.insert(std::make_pair(i,i));
 }
 
@@ -28,7 +28,7 @@ void TerraMat::setMatrix(const cv::Mat &terra_mat)
     channels_   = terra_mat.channels();
     step_       = terra_mat.step / terra_mat.elemSize1();
     terra_mat_  = terra_mat;
-    for(uchar i = 0 ; i < channels_ ; i++)
+    for(uchar i = 0 ; i < channels_ ; ++i)
         mapping_.insert(std::make_pair(i,i));
 
 }
@@ -96,8 +96,8 @@ cv::Mat TerraMat::getFavorites()
     cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC1, cv::Scalar::all(0));
 
     float* data = (float*) terra_mat_.data;
-    for (int i = 0; i < terra_mat_.rows; i++)
-        for (int j = 0; j < terra_mat_.cols; j++) {
+    for (int i = 0; i < terra_mat_.rows; ++i)
+        for (int j = 0; j < terra_mat_.cols; ++j) {
 
             // get terrain class with maximum probability
             int id = 0;
@@ -127,8 +127,8 @@ cv::Mat TerraMat::getFavoritesBGR() {
         return cv::Mat();
     }
 
-    for (int i = 0; i < terra_mat_.rows; i++) {
-        for (int j = 0; j < terra_mat_.cols; j++) {
+    for (int i = 0; i < terra_mat_.rows; ++i) {
+        for (int j = 0; j < terra_mat_.cols; ++j) {
             result.at<cv::Vec3b>(i,j) = legend_[(int) favorites.at<uchar>(i,j)].color;
         }
     }

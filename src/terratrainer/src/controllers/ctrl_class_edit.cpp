@@ -65,7 +65,7 @@ void CtrlClassEdit::write(YAML::Emitter &emitter) const
 {
     emitter << YAML::Key << "CLASSES" << YAML::Value;
     emitter << YAML::BeginSeq;
-    for(int i = 0 ; i < class_table_->rowCount() ; i++) {
+    for(int i = 0 ; i < class_table_->rowCount() ; ++i) {
         int     class_id    = class_table_->item(i, 0)->data(Qt::UserRole).toInt();
         int     class_color = class_table_->item(i, 1)->data(Qt::UserRole).toInt();
         QString class_info  = class_table_->item(i, 2)->text();
@@ -294,7 +294,7 @@ bool CtrlClassEdit::uniqueIDCheck()
     unique &= entered_id_ != -1;
 
     int row_count = class_table_->rowCount();
-    for(int i = 0 ; i < row_count ; i++) {
+    for(int i = 0 ; i < row_count ; ++i) {
         QTableWidgetItem *item = class_table_->item(i, 0);
         unique &= entered_id_ != item->text().toInt();
     }

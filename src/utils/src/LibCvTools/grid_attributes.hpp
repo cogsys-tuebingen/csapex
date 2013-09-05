@@ -97,7 +97,7 @@ public:
         assert(histograms.size() == attr.histograms.size());
         bool res = true;
 
-        for(int i = 0 ; i < histograms.size() ; i++) {
+        for(int i = 0 ; i < histograms.size() ; ++i) {
             res &= compareHist_(histograms[i], attr.histograms[i], method) <= eps[i];
         }
 

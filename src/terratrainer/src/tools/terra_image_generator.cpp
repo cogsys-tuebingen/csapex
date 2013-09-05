@@ -68,7 +68,7 @@ void TerraImageGenerator::run()
 
     std::map<int,int> ids_to_channel;
     std::map<int,int> channel_to_ids;
-    for(int i = 0 ; i < ids_.size() ; i++) {
+    for(int i = 0 ; i < ids_.size() ; ++i) {
         ids_to_channel.insert(std::make_pair(ids_[i], i));
         channel_to_ids.insert(std::make_pair(i, ids_[i]));
     }
@@ -77,7 +77,7 @@ void TerraImageGenerator::run()
                       extractor_params_->use_max_prob);
     terra_mat_.setMatrix(tmp, channel_to_ids);
 
-    for(int i = 0 ; i < ids_.size() ; i++) {
+    for(int i = 0 ; i < ids_.size() ; ++i) {
         TerrainClass t;
         t.id    = ids_[i];
         t.color = colors_[color_index_[i]];
@@ -94,7 +94,7 @@ TerraMat TerraImageGenerator::getTerraMat()
 
 void TerraImageGenerator::readClasses(const YAML::Iterator &begin, const YAML::Iterator &end)
 {
-    for(YAML::Iterator it = begin ; it != end ; it++) {
+    for(YAML::Iterator it = begin ; it != end ; ++it) {
         int class_id;
         int color;
         std::string info;
@@ -112,14 +112,14 @@ void TerraImageGenerator::readClasses(const YAML::Iterator &begin, const YAML::I
 void TerraImageGenerator::readColors(const YAML::Iterator &begin, const YAML::Iterator &end)
 {
     cv::Vec3b color;
-    for(YAML::Iterator it = begin ; it != end ; it++) {
+    for(YAML::Iterator it = begin ; it != end ; ++it) {
         int buf;
         *it >> buf;
         color[2] = (uchar) buf;
-        it++;
+        ++it;
         *it >> buf;
         color[1] = (uchar) buf;
-        it++;
+        ++it;
         *it >> buf;
         color[0] = (uchar) buf;
         colors_.push_back(color);
@@ -152,7 +152,7 @@ bool readYAML(const std::string &yaml, std::vector<std::string> &images)
     YAML::Parser p(in);
     YAML::Node document;
     p.GetNextDocument(document);
-    for(YAML::Iterator it = document.begin() ; it != document.end() ; it++) {
+    for(YAML::Iterator it = document.begin() ; it != document.end() ; ++it) {
         std::string path;
         *it >> path;
         images.push_back(path);
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
     }
 
 
-    for(std::vector<std::string>::iterator it = images.begin() ; it != images.end() ; it++) {
+    for(std::vector<std::string>::iterator it = images.begin() ; it != images.end() ; ++it) {
         cv::Mat tmp = cv::imread(*it);
         if(tmp.empty()) {
             std::cerr << "Unknown image file '" << *it << "'!" << std::endl;

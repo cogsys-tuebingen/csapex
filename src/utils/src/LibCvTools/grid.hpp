@@ -298,8 +298,8 @@ public:
 
         bool res = true;
 
-        for(int i = 0 ; i < g.rows_ ; i++) {
-            for(int j = 0 ; j < g.cols_ ; j++) {
+        for(int i = 0 ; i < g.rows_ ; ++i) {
+            for(int j = 0 ; j < g.cols_ ; ++j) {
                 res &= g.cells_[(i + g.min_row_) * g.step_ + j + g.min_col_] == cells_[(i + min_row_) * step_ + min_col_ + j];
             }
         }
@@ -315,8 +315,8 @@ public:
         counts.second = 0;
         valid = 0;
 
-        for(int i = 0 ; i < g.rows() ; i++) {
-            for(int j = 0 ; j < g.cols() ; j++) {
+        for(int i = 0 ; i < g.rows() ; ++i) {
+            for(int j = 0 ; j < g.cols() ; ++j) {
                 int pos_g = (i + g.min_row_) * g.step_ + j + g.min_col_;
                 int pos   = (i + min_row_) * step_ + min_col_ + j;
 
@@ -344,7 +344,7 @@ public:
 //        counts.second = 0;
 //        valid = 0;
 
-//        for(int i = 0 ; i < g.rows() ; i++) {
+//        for(int i = 0 ; i < g.rows() ; ++i) {
 //            Grid_ roi2 = g.getROI(0, i, g.cols(), 1);
 //            Grid_ roi1 = getROI(0, i, cols(), 1);
 //            std::pair<int,int> tmp_counts;
@@ -365,8 +365,8 @@ private:
 
     void copy(const Grid_& src)
     {
-        for(int i = 0 ; i < rows_ ; i++) {
-            for(int j = 0 ; j < cols_ ; j++) {
+        for(int i = 0 ; i < rows_ ; ++i) {
+            for(int j = 0 ; j < cols_ ; ++j) {
                 cells_[i * step_ + j]  = src.cells_[(i + src.min_row_) * src.step_ + j + src.min_col_];
             }
         }

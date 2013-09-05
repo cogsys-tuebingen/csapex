@@ -125,7 +125,7 @@ void TerraBatchTrainer::extract()
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "data" << YAML::Value;
     emitter << YAML::BeginSeq;
-    for(VecStr::iterator it = buf_roi_paths_.begin() ; it != buf_roi_paths_.end() ; it++) {
+    for(VecStr::iterator it = buf_roi_paths_.begin() ; it != buf_roi_paths_.end() ; ++it) {
         extractROIS(*it, emitter);
     }
     emitter << YAML::EndSeq;
@@ -154,7 +154,7 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
         image = cv::imread(image_path);
 
         const YAML::Node &rois = doc["ROIS"];
-        for(YAML::Iterator it = rois.begin() ; it != rois.end() ; it++) {
+        for(YAML::Iterator it = rois.begin() ; it != rois.end() ; ++it) {
             double x,y,w,h;
             cv_roi::TerraROI roi;
             (*it)["class"] >> roi.id.id;
@@ -206,7 +206,7 @@ void TerraBatchTrainer::readClasses(const YAML::Iterator &begin, const YAML::Ite
     buf_classes_colors_.clear();
     buf_classes_infos_.clear();
 
-    for(YAML::Iterator it = begin ; it != end ; it++) {
+    for(YAML::Iterator it = begin ; it != end ; ++it) {
         int class_id;
         int color;
         std::string info;
@@ -224,7 +224,7 @@ void TerraBatchTrainer::readClasses(const YAML::Iterator &begin, const YAML::Ite
 void TerraBatchTrainer::writeClasses(YAML::Emitter &emitter)
 {
     emitter << YAML::BeginSeq;
-    for(int i = 0 ; i < buf_classes_.size() ; i++) {
+    for(int i = 0 ; i < buf_classes_.size() ; ++i) {
         emitter << YAML::BeginMap;
         emitter << YAML::Key << "id"   << YAML::Value << buf_classes_[i];
         emitter << YAML::Key << "color"<< YAML::Value << buf_classes_colors_[i];

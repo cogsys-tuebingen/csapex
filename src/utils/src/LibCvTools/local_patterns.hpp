@@ -45,8 +45,8 @@ public:
         // get matrices
         Mat src = _src.getMat();
         // calculate patterns
-        for(int i=1;i<src.rows-1;i++) {
-            for(int j=1;j<src.cols-1;j++) {
+        for(int i=1;i<src.rows-1;++i) {
+            for(int j=1;j<src.cols-1;++j) {
                 _Tp center = src.at<_Tp>(i,j) + k;
                 unsigned char histgram_pos = 0;
 
@@ -86,8 +86,8 @@ public:
             float w3 = (1 - tx) *      ty;
             float w4 =      tx  *      ty;
             // iterate through your data
-            for(int i=radius; i < src.rows-radius;i++) {
-                for(int j=radius;j < src.cols-radius;j++) {
+            for(int i=radius; i < src.rows-radius;++i) {
+                for(int j=radius;j < src.cols-radius;++j) {
                     // calculate interpolated value
                     float t = static_cast<float>(w1*src.at<_Tp>(i+fy,j+fx) + w2*src.at<_Tp>(i+fy,j+cx) + w3*src.at<_Tp>(i+cy,j+fx) + w4*src.at<_Tp>(i+cy,j+cx));
                     // floating point precision, so check some machine-dependent epsilon
@@ -144,8 +144,8 @@ public :
         // get matrices
         Mat src = _src.getMat();
         // calculate patterns
-        for(int i=1;i<src.rows-1;i++) {
-            for(int j=1;j<src.cols-1;j++) {
+        for(int i=1;i<src.rows-1;++i) {
+            for(int j=1;j<src.cols-1;++j) {
                 _Tp center = src.at<_Tp>(i,j);
                 unsigned char hist_neg_it = 0;
                 unsigned char hist_pos_it = 0;
@@ -197,8 +197,8 @@ public :
             float w3 = (1 - tx) *      ty;
             float w4 =      tx  *      ty;
             // iterate through your data
-            for(int i=radius; i < src.rows-radius;i++) {
-                for(int j=radius;j < src.cols-radius;j++) {
+            for(int i=radius; i < src.rows-radius;++i) {
+                for(int j=radius;j < src.cols-radius;++j) {
                     // calculate interpolated value
                     float t = static_cast<float>(w1*src.at<_Tp>(i+fy,j+fx) + w2*src.at<_Tp>(i+fy,j+cx) + w3*src.at<_Tp>(i+cy,j+fx) + w4*src.at<_Tp>(i+cy,j+cx));
                     // floating point precision, so check some machine-dependent epsilon

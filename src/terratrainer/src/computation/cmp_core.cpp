@@ -73,8 +73,8 @@ void CMPCore::computeGrid()
     std::vector<cv::Rect> rects;
     std::vector<cv::Mat>  descriptors;
     cv::Rect roi(0,0, grid_params_.cell_width, grid_params_.cell_height);
-    for(int i = 0 ; i < height ; i++) {
-        for(int j = 0 ; j < width ; j++) {
+    for(int i = 0 ; i < height ; ++i) {
+        for(int j = 0 ; j < width ; ++j) {
             roi.x = j * grid_params_.cell_width;
             roi.y = i * grid_params_.cell_height;
             rects.push_back(roi);
@@ -83,8 +83,8 @@ void CMPCore::computeGrid()
 
     //state->publish(std::make_pair(0,0));
     extractor_->extract(raw_image_, rects, descriptors);
-    for(int i = 0 ; i < height ; i++) {
-        for(int j = 0 ; j < width ; j++) {
+    for(int i = 0 ; i < height ; ++i) {
+        for(int j = 0 ; j < width ; ++j) {
             cv::Mat d = descriptors[(i * width + j)];
             cv_roi::TerraROI r;
             r.id.id    = -1;

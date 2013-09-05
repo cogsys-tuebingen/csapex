@@ -36,7 +36,7 @@ void TerraDecomClassifier::classify(const std::vector<Rect> rois, std::vector<bo
     std::vector<cv::Mat> descriptors;
     extractor->extract(image, rois, descriptors);
 
-    for(int i = 0 ; i < rois.size() ; i++) {
+    for(int i = 0 ; i < rois.size() ; ++i) {
         cv::Mat &d = descriptors[i];
 
         if(d.rows > 1) {

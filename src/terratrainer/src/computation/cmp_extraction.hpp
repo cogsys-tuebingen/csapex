@@ -14,11 +14,11 @@ void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, const cv_extracti
 {
     std::vector<cv::Rect> rects;
     std::vector<cv::Mat>  descriptors;
-    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++)
+    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; ++it)
         rects.push_back(it->roi.rect);
 
     extractor->extract(img, rects, descriptors);
-    for(int i = 0 ; i < descriptors.size() ; i++) {
+    for(int i = 0 ; i < descriptors.size() ; ++i) {
         cv::Mat desc = descriptors[i];
         CMPYAML::writeDescriptorRows<float, float>(desc, rois[i].id.id, emitter);
     }
@@ -29,13 +29,13 @@ void extractToYAML(YAML::Emitter &emitter, const cv::Mat &img, const cv_extracti
 {
     std::vector<cv::Rect> rects;
     std::vector<cv::Mat>  descriptors;
-    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; it++)
+    for(std::vector<cv_roi::TerraROI>::iterator it = rois.begin() ; it != rois.end() ; ++it)
         rects.push_back(it->roi.rect);
 
     state->publish(std::make_pair(0,0));
     extractor->extract(img, rects, descriptors);
 
-    for(int i = 0 ; i < descriptors.size() ; i++) {
+    for(int i = 0 ; i < descriptors.size() ; ++i) {
         cv::Mat desc = descriptors[i];
         CMPYAML::writeDescriptorRows<float, float>(desc, rois[i].id.id, emitter);
         state->publish(std::make_pair(0,i));

@@ -13,12 +13,12 @@ bool TerraQuadtreeDecomposition::iterate()
     if(quadtree_nodes_.size() == 0) {
         std::vector<cv::Rect> regions;
         std::vector<bool>     classifications;
-        for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; it++)
+        for(CVQtNodesList::iterator it = quadtree_roots_.begin() ; it != quadtree_roots_.end() ; ++it)
             regions.push_back(*it);
 
         terra_classifier->classify(regions, classifications);
 
-        for(int i = 0 ; i < quadtree_roots_.size() ; i++) {
+        for(int i = 0 ; i < quadtree_roots_.size() ; ++i) {
             if(classifications[i] && !min_size_reached(quadtree_roots_[i]))
                 split_and_activate(quadtree_roots_[i]);
             else {
@@ -43,7 +43,7 @@ bool TerraQuadtreeDecomposition::iterate()
 
 void TerraQuadtreeDecomposition::regions(std::vector<cv_roi::TerraROI> &regions)
 {
-    for(CVQtNodesListPtr::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; it++) {
+    for(CVQtNodesListPtr::iterator it = quadtree_leaves_.begin() ; it != quadtree_leaves_.end() ; ++it) {
         cv_roi::TerraROI tr;
         tr.roi.rect = *(*it);
         tr.id = classifications_[*it];
@@ -58,7 +58,7 @@ void TerraQuadtreeDecomposition::process_active_nodes()
     CVQtNodesListPtr list = quadtree_nodes_;
     quadtree_nodes_.clear();
 
-    for(CVQtNodesListPtr::iterator it = list.begin() ; it != list.end() ; it++){
+    for(CVQtNodesListPtr::iterator it = list.begin() ; it != list.end() ; ++it){
         CVQt *node = *it;
         if(!min_size_reached(*node) && terra_classifier->classify(*node)) {
             split_and_activate(*node);
