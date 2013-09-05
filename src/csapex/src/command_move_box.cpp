@@ -7,8 +7,8 @@
 
 using namespace csapex::command;
 
-MoveBox::MoveBox(Box* box, QPoint from, QPoint to)
-    : from(from), to(to)
+MoveBox::MoveBox(Box* box, QPoint to)
+    : from(box->key_point), to(to)
 {
     uuid = box->UUID();
 }
@@ -16,7 +16,9 @@ MoveBox::MoveBox(Box* box, QPoint from, QPoint to)
 bool MoveBox::execute()
 {
     Box::Ptr box = Graph::root()->findBox(uuid);
+    box->clearFocus();
     box->move(to);
+    box->key_point = to;
 
     return true;
 }
@@ -24,7 +26,9 @@ bool MoveBox::execute()
 bool MoveBox::undo()
 {
     Box::Ptr box = Graph::root()->findBox(uuid);
+    box->clearFocus();
     box->move(from);
+    box->key_point = from;
 
     return true;
 }

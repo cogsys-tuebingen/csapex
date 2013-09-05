@@ -44,6 +44,7 @@ public:
     QString cssClass() {
         return QString("DesignBoard");
     }
+    void enableGrid(bool);
 
 public Q_SLOTS:
     void updateCursor();

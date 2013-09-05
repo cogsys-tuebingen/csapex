@@ -411,6 +411,8 @@ void Box::init(const QPoint& pos)
 {
     move(pos);
 
+    key_point = pos;
+
     //    QBoxLayout* layout = new QVBoxLayout;
     //    ui->content->setLayout(layout);
 
@@ -606,16 +608,16 @@ void Box::startDrag(QPoint offset)
     }
 
     QPoint start_pos = pos();
-    Qt::DropAction action = drag->exec();
+    /*Qt::DropAction action = */drag->exec();
 
     QPoint end_pos = pos();
 
-    Command::Ptr cmd(new command::MoveBox(this, start_pos, end_pos));
-    CommandDispatcher::execute(cmd);
+    QPoint delta = end_pos - start_pos;
+    Graph::root()->moveSelectedBoxes(delta);
 
-    if(action == Qt::IgnoreAction) {
-        CommandDispatcher::instance().undo();
-    }
+//    if(action == Qt::IgnoreAction) {
+//        CommandDispatcher::instance().undo();
+//    }
 }
 
 QPixmap Box::makePixmap(const std::string& label)

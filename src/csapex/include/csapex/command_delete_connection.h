@@ -21,6 +21,10 @@ protected:
     bool refresh();
 
 private:
+    Command::Ptr remove_fulcrums;
+
+    int connection_id;
+
     ConnectorOut* from;
     ConnectorIn* to;
 

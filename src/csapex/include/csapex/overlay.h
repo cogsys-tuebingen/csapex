@@ -5,6 +5,7 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
+#include <map>
 #include <QWidget>
 #include <QPainter>
 
@@ -24,13 +25,20 @@ public Q_SLOTS:
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
 
+    void connectionAdded(Connection*);
+    void connectionDeleted(Connection*);
+
+    void fulcrumAdded(Connection*);
+    void fulcrumMoved(Connection*);
+    void fulcrumDeleted(Connection*);
+
     void tick();
 
     void invalidateSchema();
     void refresh();
 
 public:
-    bool mouseMoveEventHandler(QMouseEvent * e);
+    bool mouseMoveEventHandler(bool drag, QMouseEvent * e);
     bool mousePressEventHandler(QMouseEvent * e);
     bool mouseReleaseEventHandler(QMouseEvent * e);
 
@@ -39,14 +47,24 @@ public:
 
     void setSelectionRectangle(const QPoint& a, const QPoint& b);
 
+    bool hasTempConnectionHandle() const;
+    bool showContextMenu(const QPoint& pos);
+
 protected:
+    bool showConnectionContextMenu(const QPoint& pos);
+    bool showFulcrumContextMenu(const QPoint& pos);
+
     void drawActivity(int life, Connector* c);
     void drawConnector(Connector* c);
     void drawConnection(Connection& connection);
-    void drawConnection(const QPoint& from, const QPoint& to, int id, unsigned flags);
+
+    void drawConnection(const QPoint& from, const QPoint& to, int id);
 
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent * event);
+
+    QPen makeLinePen(const QPoint &from, const QPoint &to);
+    QPen makeSelectedLinePen(const QPoint &from, const QPoint &to);
 
 protected:
     struct TempConnection {
@@ -54,15 +72,19 @@ protected:
         QPoint to;
     };
 
-    enum Flags {
-        FLAG_NONE = 0,
-        FLAG_ERROR = 1,
-        FLAG_HIGHLIGHT = 2,
-        FLAG_SELECTED = 4,
-        FLAG_DISABLED = 8,
-        FLAG_MINIMIZED_FROM = 16,
-        FLAG_MINIMIZED_TO = 32
+    struct CurrentConnectionState {
+        bool selected;
+        bool highlighted;
+        bool error;
+        bool disabled;
+        bool minimized_from;
+        bool minimized_to;
+        bool minimized;
+
+        double r;
     };
+
+    CurrentConnectionState ccs;
 
     std::vector<TempConnection> temp_;
 
@@ -96,6 +118,15 @@ protected:
 
     QPoint selection_a;
     QPoint selection_b;
+
+    QPoint drag_connection_handle_;
+    QPoint current_splicing_handle_;
+    int drag_sub_section_;
+    int drag_connection_;
+    bool fulcrum_is_hovered_;
+
+    bool splicing_requested;
+    bool splicing;
 };
 
 }

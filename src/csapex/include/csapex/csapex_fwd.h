@@ -40,9 +40,13 @@ namespace command
 class Meta;
 class AddBox;
 class DeleteBox;
+class MoveBox;
 class AddConnection;
 class MoveConnection;
 class DeleteConnection;
+class AddFulcrum;
+class MoveFulcrum;
+class DeleteFulcrum;
 }
 
 

@@ -130,6 +130,32 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     }
 
     yaml << YAML::EndSeq; // connections seq
+
+
+    yaml << YAML::Key << "fulcrums";
+    yaml << YAML::Value << YAML::BeginSeq; // fulcrums seq
+
+    BOOST_FOREACH(const Connection::Ptr& connection, graph_->connections) {
+        if(connection->getFulcrumCount() == 0) {
+            continue;
+        }
+
+        yaml << YAML::BeginMap;
+
+        yaml << YAML::Key << "from" << YAML::Value << connection->from()->UUID();
+        yaml << YAML::Key << "to" << YAML::Value << connection->to()->UUID();
+
+        yaml << YAML::Key << "pts" << YAML::Value << YAML::Flow << YAML::BeginSeq;
+        foreach(const QPoint& pt, connection->getFulcrums()) {
+            yaml << YAML::Flow << YAML::BeginSeq << pt.x() << pt.y() << YAML::EndSeq;
+        }
+
+        yaml << YAML::EndSeq;
+
+        yaml << YAML::EndMap;
+    }
+
+    yaml << YAML::EndSeq; // fulcrums seq
 }
 
 void GraphIO::loadConnections(YAML::Node &doc)
@@ -174,6 +200,44 @@ void GraphIO::loadConnections(YAML::Node &doc)
                 assert(to); // if parent box has been found, this should never happen
 
                 graph_->addConnection(Connection::Ptr(new Connection(from, to)));
+            }
+        }
+    }
+
+    if(doc.FindValue("fulcrums")) {
+        const YAML::Node& fulcrums = doc["fulcrums"];
+        assert(fulcrums.Type() == YAML::NodeType::Sequence);
+
+
+        for(unsigned i = 0; i < fulcrums.size(); ++i) {
+            const YAML::Node& fulcrum = fulcrums[i];
+            assert(fulcrum.Type() == YAML::NodeType::Map);
+
+            std::string from_uuid;
+            fulcrum["from"] >> from_uuid;
+            std::string to_uuid;
+            fulcrum["to"] >> to_uuid;
+
+            ConnectorOut* from = dynamic_cast<ConnectorOut*>(graph_->findConnector(from_uuid));
+            if(from == NULL) {
+                std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+                continue;
+            }
+
+            ConnectorIn* to = dynamic_cast<ConnectorIn*>(graph_->findConnector(to_uuid));
+            if(to == NULL) {
+                std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
+                continue;
+            }
+
+            Connection::Ptr connection = graph_->getConnection(Connection::Ptr(new Connection(from, to)));
+
+            std::vector< std::vector<int> > pts;
+            fulcrum["pts"] >> pts;
+
+            int n = pts.size();
+            for(int i = 0; i < n; ++i) {
+                connection->addFulcrum(i, QPoint(pts[i][0], pts[i][1]));
             }
         }
     }

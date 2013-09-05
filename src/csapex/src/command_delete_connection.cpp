@@ -32,7 +32,16 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
 
 bool DeleteConnection::execute()
 {
-    Graph::root()->deleteConnection(Connection::Ptr(new Connection(from, to)));
+    Connection::Ptr connection(new Connection(from, to));
+
+    Graph::Ptr graph = Graph::root();
+
+    connection_id = graph->getConnectionId(connection);
+    remove_fulcrums = graph->deleteAllConnectionFulcrumsCommand(connection);
+
+    if(doExecute(remove_fulcrums)) {
+        graph->deleteConnection(connection);
+    }
 
     return true;
 }
@@ -42,7 +51,9 @@ bool DeleteConnection::undo()
     if(!refresh()) {
         return false;
     }
-    return Graph::root()->addConnection(Connection::Ptr(new Connection(from, to)));
+    Graph::root()->addConnection(Connection::Ptr(new Connection(from, to, connection_id)));
+
+    return doUndo(remove_fulcrums);
 }
 
 bool DeleteConnection::redo()

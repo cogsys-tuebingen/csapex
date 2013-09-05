@@ -68,3 +68,8 @@ void Designer::stateChangedEvent()
 {
     designer_board->refresh();
 }
+
+void Designer::enableGrid(bool grid)
+{
+    designer_board->enableGrid(grid);
+}

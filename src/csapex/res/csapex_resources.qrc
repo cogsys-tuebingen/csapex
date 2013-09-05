@@ -7,5 +7,6 @@
         <file>plugin.png</file>
         <file>apex_logo.png</file>
         <file>apex_splash.png</file>
+        <file>background.png</file>
     </qresource>
 </RCC>

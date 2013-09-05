@@ -74,6 +74,9 @@ add_library(csapex SHARED
     src/command_delete_connection.cpp
     src/command_delete_connector.cpp
     src/command_move_box.cpp
+    src/command_add_fulcrum.cpp
+    src/command_move_fulcrum.cpp
+    src/command_delete_fulcrum.cpp
     src/connection.cpp
     src/connector.cpp
     src/connector_in.cpp

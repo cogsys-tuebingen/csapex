@@ -8,11 +8,15 @@
 #include <csapex/connector_out.h>
 #include <csapex/command_meta.h>
 #include <csapex/command_add_box.h>
+#include <csapex/command_move_box.h>
 #include <csapex/command_delete_box.h>
 #include <csapex/command_add_connection.h>
 #include <csapex/command_delete_connection.h>
 #include <csapex/command_add_connector.h>
 #include <csapex/command_delete_connector.h>
+#include <csapex/command_add_fulcrum.h>
+#include <csapex/command_delete_fulcrum.h>
+#include <csapex/command_move_fulcrum.h>
 #include <csapex/selector_proxy.h>
 #include <csapex/command_dispatcher.h>
 #include <csapex/box_manager.h>
@@ -215,11 +219,35 @@ void Graph::moveSelectionToBox(Box *box)
     }
 }
 
+void Graph::moveSelectedBoxes(const QPoint& delta)
+{
+    command::Meta::Ptr meta(new command::Meta);
+
+    foreach(Box::Ptr b, boxes_) {
+        if(b->isSelected()) {
+            meta->add(Command::Ptr(new command::MoveBox(b.get(), b->pos())));
+        }
+    }
+
+    foreach(const Connection::Ptr& connection, connections) {
+        if(connection->from()->getBox()->isSelected() && connection->to()->getBox()->isSelected()) {
+            int n = connection->getFulcrumCount();
+            for(int i = 0; i < n; ++i) {
+                QPoint pos = connection->getFulcrum(i);
+                meta->add(Command::Ptr(new command::MoveFulcrum(connection->id(), i, pos - delta, pos)));
+            }
+        }
+    }
+
+    CommandDispatcher::execute(meta);
+}
+
 bool Graph::addConnection(Connection::Ptr connection)
 {
     if(connection->from()->tryConnect(connection->to())) {
         connections.push_back(connection);
 
+        Q_EMIT connectionAdded(connection.get());
         return true;
     }
 
@@ -234,6 +262,8 @@ void Graph::deleteConnection(Connection::Ptr connection)
         if(*connection == **c) {
             connections.erase(c);
             connection->to()->setError(false);
+
+            Q_EMIT connectionDeleted(connection.get());
         } else {
             ++c;
         }
@@ -459,6 +489,32 @@ Connection::Ptr Graph::getConnectionWithId(int id)
     return Connection::NullPtr;
 }
 
+Connection::Ptr Graph::getConnection(Connection::Ptr c)
+{
+    BOOST_FOREACH(Connection::Ptr& connection, connections) {
+        if(*connection == *c) {
+            return connection;
+        }
+    }
+
+    std::cerr << "error: cannot get connection for " << *c << std::endl;
+
+    return Connection::NullPtr;
+}
+
+int Graph::getConnectionId(Connection::Ptr c)
+{
+    Connection::Ptr internal = getConnection(c);
+
+    if(internal != Connection::NullPtr) {
+        return internal->id();
+    }
+
+    std::cerr << "error: cannot get connection id for " << *c << std::endl;
+
+    return -1;
+}
+
 int Graph::noSelectedConnections()
 {
     int c = 0;
@@ -478,13 +534,45 @@ void Graph::deselectConnections()
     }
 }
 
-void Graph::deleteConnectionById(int id)
+Command::Ptr Graph::deleteConnectionByIdCommand(int id)
 {
     foreach(const Connection::Ptr& connection, connections) {
         if(connection->id() == id) {
-            CommandDispatcher::execute(Command::Ptr(new command::DeleteConnection(connection->from(), connection->to())));
-            return;
+            return Command::Ptr(new command::DeleteConnection(connection->from(), connection->to()));
         }
+    }
+
+    return Command::Ptr();
+}
+
+Command::Ptr Graph::deleteConnectionFulcrumCommand(int connection, int fulcrum)
+{
+    return Command::Ptr(new command::DeleteFulcrum(connection, fulcrum));
+}
+
+Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(int connection)
+{
+    command::Meta::Ptr meta(new command::Meta);
+    int n = Graph::root()->getConnectionWithId(connection)->getFulcrumCount();
+    for(int i = n - 1; i >= 0; --i) {
+        meta->add(Graph::root()->deleteConnectionFulcrumCommand(connection, i));
+    }
+
+    return meta;
+}
+
+Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(Connection::Ptr connection)
+{
+    return deleteAllConnectionFulcrumsCommand(getConnectionId(connection));
+}
+
+
+void Graph::deleteConnectionById(int id)
+{
+    Command::Ptr cmd(deleteConnectionByIdCommand(id));
+
+    if(cmd) {
+        CommandDispatcher::execute(cmd);
     }
 }
 
@@ -626,6 +714,14 @@ void Graph::boxMoved(Box *box, int dx, int dy)
         foreach(Box::Ptr b, boxes_) {
             if(b.get() != box && b->isSelected()) {
                 b->move(b->x() + dx, b->y() + dy);
+            }
+        }
+        foreach(const Connection::Ptr& connection, connections) {
+            if(connection->from()->getBox()->isSelected() && connection->to()->getBox()->isSelected()) {
+                int n = connection->getFulcrumCount();
+                for(int i = 0; i < n; ++i) {
+                    connection->moveFulcrum(i, connection->getFulcrum(i) + QPoint(dx,dy));
+                }
             }
         }
     }

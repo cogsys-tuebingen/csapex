@@ -21,7 +21,7 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
             params.push_back(Parameter::declare("levels", 1, 20, 8, 1));
             params.push_back(Parameter::declare("edgeThreshold", 0, 64, 0, 1));
             params.push_back(Parameter::declare("first_level", 0, 8, 0, 1));
-            params.push_back(Parameter::declare("WTA_K", 0, 8, 2, 1));
+            params.push_back(Parameter::declare("WTA_K", 2, 4, 2, 1));
             params.push_back(Parameter::declare("patch_size", 0, 128, 31, 1));
 
             params.push_back(Parameter::declare("scale", 0.5, 2.0, 1.2, 0.05));

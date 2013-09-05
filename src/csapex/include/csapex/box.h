@@ -52,6 +52,7 @@ class Box : public QWidget, public Selectable
     friend class GraphIO;
     friend class Graph;
     friend class BoxWorker;
+    friend class command::MoveBox;
 
 public:
     typedef boost::shared_ptr<Box> Ptr;
@@ -218,6 +219,8 @@ protected:
     QIcon maximize_icon_;
 
     int next_sub_id_;
+
+    QPoint key_point;
 };
 
 }

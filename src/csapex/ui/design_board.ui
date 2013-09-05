@@ -19,6 +19,11 @@
   <property name="acceptDrops">
    <bool>true</bool>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget#DesignBoard[grid=&quot;true&quot;] {
+	background: url(:/background.png)
+}</string>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout"/>
  </widget>
  <resources/>

@@ -16,7 +16,7 @@ namespace command
 class MoveBox : public Command
 {
 public:
-    MoveBox(Box* box, QPoint from, QPoint to);
+    MoveBox(Box* box, QPoint to);
 
 protected:
     bool execute();

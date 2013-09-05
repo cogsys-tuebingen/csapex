@@ -37,6 +37,10 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::doExecute(Command::Ptr command)
 {
+    if(!command) {
+        return;
+    }
+
     if(!isDirty()) {
         command->setAfterSavepoint(true);
     }

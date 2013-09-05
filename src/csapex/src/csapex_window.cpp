@@ -55,6 +55,8 @@ CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
     QObject::connect(ui->actionReload, SIGNAL(triggered()), this,  SLOT(reload()));
     QObject::connect(ui->actionReset, SIGNAL(triggered()), this,  SLOT(reset()));
 
+    QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
+
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), graph.get(),  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), graph.get(),  SLOT(redo()));
     QObject::connect(ui->actionClear, SIGNAL(triggered()), graph.get(),  SLOT(clear()));

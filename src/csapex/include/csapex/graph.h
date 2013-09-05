@@ -56,6 +56,13 @@ public:
     Connector* findConnector(const std::string &uuid, const std::string &ns = "");
 
     bool handleConnectionSelection(int id, bool add);
+    Command::Ptr deleteConnectionByIdCommand(int id);
+
+    Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
+
+    Command::Ptr deleteAllConnectionFulcrumsCommand(int connection);
+    Command::Ptr deleteAllConnectionFulcrumsCommand(Connection::Ptr connection);
+
     void deleteConnectionById(int id);
     void deleteSelectedConnections();
     int noSelectedConnections();
@@ -66,6 +73,10 @@ public:
     void selectBox(Box* box, bool add = false);
     void deselectBoxes();
     int noSelectedBoxes();
+
+    Connection::Ptr getConnectionWithId(int id);
+    Connection::Ptr getConnection(Connection::Ptr);
+    int getConnectionId(Connection::Ptr);
 
 public Q_SLOTS:
     void undo();
@@ -80,13 +91,16 @@ public Q_SLOTS:
     void boxMoved(Box* box, int dx, int dy);
     void moveSelectionToBox(Box* box);
 
+    void moveSelectedBoxes(const QPoint& delta);
+
 Q_SIGNALS:
     void stateChanged();
     void boxAdded(Box*);
     void boxDeleted(Box*);
+    void connectionAdded(Connection*);
+    void connectionDeleted(Connection*);
 
 private:
-    Connection::Ptr getConnectionWithId(int id);
     void deselectConnections();
     void deselectConnectionById(int id);
     void selectConnectionById(int id, bool add = false);

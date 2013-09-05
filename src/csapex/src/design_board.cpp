@@ -45,6 +45,14 @@ DesignBoard::DesignBoard(QWidget* parent)
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
+void DesignBoard::enableGrid(bool grid)
+{
+    setProperty("grid", grid);
+
+    style()->unpolish(this);
+    style()->polish(this);
+}
+
 DesignBoard::~DesignBoard()
 {}
 
@@ -78,17 +86,16 @@ void DesignBoard::findMinSize(Box* box)
     minimum.setWidth(std::max(minimum.width(), box->pos().x() + box->width()));
     minimum.setHeight(std::max(minimum.height(), box->pos().y() + box->height()));
 
-    int movex = box->x() < 0 ? -box->x() : 0;
-    int movey = box->y() < 0 ? -box->y() : 0;
+    QPoint pos = box->pos();
 
-    if(movex != 0 || movey != 0) {
-        foreach(csapex::Box* b, findChildren<csapex::Box*>()) {
-            if(b != box) {
-                b->move(b->x() + movex, b->y() + movey);
-            }
+    if(pos.x() < 0 || pos.y() < 0) {
+        if(pos.x() < 0) {
+            pos.setX(0);
         }
-        minimum.setWidth(minimum.width() + movex);
-        minimum.setHeight(minimum.height() + movey);
+        if(pos.y() < 0) {
+            pos.setY(0);
+        }
+        box->move(pos);
     }
 
     setMinimumSize(minimum);
@@ -101,10 +108,6 @@ void DesignBoard::addBoxEvent(Box *box)
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), Graph::root().get(), SLOT(boxMoved(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
     QObject::connect(box, SIGNAL(clicked(Box*)), Graph::root().get(), SLOT(toggleBoxSelection(Box*)));
-    //    QObject::connect(box, SIGNAL(connectorCreated(Connector*)), overlay, SLOT(connectorAdded(Connector*)));
-    //    QObject::connect(box, SIGNAL(connectorEnabled(Connector*)), overlay, SLOT(connectorEnabled(Connector*)));
-    //    QObject::connect(box, SIGNAL(connectorDisabled(Connector*)), overlay, SLOT(connectorDisabled(Connector*)));
-
     QObject::connect(box, SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
     QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
     QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
@@ -112,8 +115,6 @@ void DesignBoard::addBoxEvent(Box *box)
     box->setParent(this);
     box->show();
     box->triggerPlaced();
-
-    //    layout()->addWidget(box);
 
     overlay->raise();
     repaint();
@@ -179,12 +180,19 @@ void DesignBoard::mousePressEvent(QMouseEvent* e)
 
 void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 {
-    Graph::Ptr graph_ = Graph::root();
 
     if(e->button() == Qt::LeftButton) {
         drag_ = false;
-
         overlay->setSelectionRectangle(QPoint(),QPoint());
+    }
+
+    if(!overlay->mouseReleaseEventHandler(e)) {
+        return;
+    }
+
+    Graph::Ptr graph_ = Graph::root();
+
+    if(e->button() == Qt::LeftButton) {
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
             graph_->deselectBoxes();
@@ -205,9 +213,6 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
         graph_->deselectBoxes();
     }
 
-    if(!overlay->mouseReleaseEventHandler(e)) {
-        return;
-    }
     updateCursor();
 }
 
@@ -249,6 +254,12 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
                 int sbh_after = parent_scroll->horizontalScrollBar()->value();
                 int sbv_after = parent_scroll->verticalScrollBar()->value();
 
+                if(delta.x() > 0) {
+                    delta.setX(0);
+                }
+                if(delta.y() > 0) {
+                    delta.setY(0);
+                }
                 int dx = sbh - delta.x() - sbh_after;
                 int dy = sbv - delta.y() - sbv_after;
 
@@ -258,28 +269,18 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
                     minimum.setWidth(minimum.width() + std::abs(dx));
                     minimum.setHeight(minimum.height() + std::abs(dy));
 
-                    int movex = dx < 0 ? -dx : 0;
-                    int movey = dy < 0 ? -dy : 0;
-
-                    if(movex != 0 || movey != 0) {
-                        foreach(csapex::Box* box, findChildren<csapex::Box*>()) {
-                            box->move(box->x() + movex, box->y() + movey);
-                        }
-                    }
-
                     setMinimumSize(minimum);
                 }
             }
-        } else {
-            overlay->setSelectionRectangle(overlay->mapFromGlobal(drag_start_pos_), overlay->mapFromGlobal(e->globalPos()));
-            overlay->repaint();
         }
-    } else if(!overlay->mouseMoveEventHandler(e)) {
-        return;
     }
 
-    if(!overlay->mouseMoveEventHandler(e)) {
+    if(!overlay->mouseMoveEventHandler(drag_, e)) {
         return;
+    }
+    if(drag_ && !space_) {
+        overlay->setSelectionRectangle(overlay->mapFromGlobal(drag_start_pos_), overlay->mapFromGlobal(e->globalPos()));
+        overlay->repaint();
     }
 }
 
@@ -291,6 +292,10 @@ bool DesignBoard::eventFilter(QObject*, QEvent*)
 
 void DesignBoard::showContextMenu(const QPoint& pos)
 {
+    if(overlay->showContextMenu(pos)) {
+        return;
+    }
+
     QPoint globalPos = mapToGlobal(pos);
 
     QMenu menu;

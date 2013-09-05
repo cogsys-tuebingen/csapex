@@ -40,6 +40,8 @@ public Q_SLOTS:
     void deleteBox(Box* box);
     void stateChangedEvent();
 
+    void enableGrid(bool);
+
 private:
     Ui::Designer* ui;
     DesignBoard* designer_board;

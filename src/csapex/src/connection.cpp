@@ -21,6 +21,13 @@ Connection::Connection(ConnectorOut *from, ConnectorIn *to)
 Connection::Connection(Connector *from, Connector *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {
+    QObject::connect(from_, SIGNAL(messageSent(Connector*)), this, SLOT(messageSentEvent()));
+}
+
+Connection::Connection(ConnectorOut *from, ConnectorIn *to, int id)
+    : from_(from), to_(to), id_(id), message_count(0)
+{
+    QObject::connect(from_, SIGNAL(messageSent(Connector*)), this, SLOT(messageSentEvent()));
 }
 
 Connector* Connection::from() const
@@ -61,4 +68,41 @@ void Connection::messageSentEvent()
 void Connection::tick()
 {
     message_count = std::max(0, message_count - 1);
+}
+
+std::vector<QPoint> Connection::getFulcrums() const
+{
+    return fulcrums_;
+}
+
+int Connection::getFulcrumCount() const
+{
+    return fulcrums_.size();
+}
+
+QPoint Connection::getFulcrum(int fulcrum_id)
+{
+    return fulcrums_[fulcrum_id];
+}
+
+void Connection::addFulcrum(int subsection, const QPoint &pos)
+{
+    std::size_t before = fulcrums_.size();
+    fulcrums_.insert(fulcrums_.begin() + subsection, pos);
+    assert(before == fulcrums_.size() - 1);
+    Q_EMIT fulcrum_added(this);
+}
+
+void Connection::moveFulcrum(int fulcrum_id, const QPoint &pos)
+{
+    fulcrums_[fulcrum_id] = pos;
+    Q_EMIT fulcrum_moved(this);
+}
+
+void Connection::deleteFulcrum(int fulcrum_id)
+{
+    std::size_t before = fulcrums_.size();
+    fulcrums_.erase(fulcrums_.begin() + fulcrum_id);
+    assert(before == fulcrums_.size() + 1);
+    Q_EMIT fulcrum_deleted(this);
 }
