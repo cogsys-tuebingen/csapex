@@ -50,6 +50,24 @@ add_executable(scale
 target_link_libraries(scale
     ${OpenCV_LIBS})
 
+add_executable(equalize
+    equalize.cpp)
+
+target_link_libraries(equalize
+    ${OpenCV_LIBS})
+
+add_executable(gamma_correct
+    gamma.cpp)
+
+target_link_libraries(gamma_correct
+    ${OpenCV_LIBS})
+
+add_executable(y_extract
+    y_extract.cpp)
+
+target_link_libraries(y_extract
+    ${OpenCV_LIBS})
+
 ####### Tests #######
 # Rotated template test
 add_executable(rotated_template

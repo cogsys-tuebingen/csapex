@@ -86,8 +86,6 @@ int main(int argc, char *argv[])
 
         cv::imshow("Generation", render);
         int key = cv::waitKey(0);
-
-        end = key == 27 || key == 1048603;
         switch(key) {
         case 27:
             end = true;

@@ -81,10 +81,10 @@ void CMPCore::computeGrid()
         }
     }
 
-    //state->publish(std::make_pair(0,0));
     extractor_->extract(raw_image_, rects, descriptors);
     for(int i = 0 ; i < height ; ++i) {
         for(int j = 0 ; j < width ; ++j) {
+            state_->publish(std::make_pair(i * width + j, height * width));
             cv::Mat d = descriptors[(i * width + j)];
             cv_roi::TerraROI r;
             r.id.id    = -1;

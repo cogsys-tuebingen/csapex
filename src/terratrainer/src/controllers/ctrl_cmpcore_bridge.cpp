@@ -234,6 +234,7 @@ void CMPCoreBridge::computeGRID()
     if(recalc_grid_) {
         boost::mutex::scoped_try_lock lock(cc_mutex_);
         if(lock) {
+            Q_EMIT spawnBar("Compute Grid");
             if(cc_->hasComputedModel()) {
                 cc_->computeGrid();
                 recalc_grid_ = false;
@@ -241,6 +242,7 @@ void CMPCoreBridge::computeGRID()
                 std::cerr << "No valid classifier model available!" << std::endl;
             }
             lock.unlock();
+            Q_EMIT despawnBar();
         }
     }
 

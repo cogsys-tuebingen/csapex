@@ -101,16 +101,19 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
     }
     std::sort(entry_idx.begin(), entry_idx.end());
 
+    int used_octves = 1;
+    if(kp.octave == -1)
+        used_octves = ep.octaves;
 
-    cv::Mat buffer(ep.octaves, d.cols, d.type());
+    cv::Mat buffer(used_octves, d.cols, d.type());
     int mean_index = 0;
     for(std::vector<std::pair<int,int> >::iterator it = entry_idx.begin() ; it != entry_idx.end() ; ) {
         /// FETCH DESCRIPTORS
-        for(int i = 0 ; i < ep.octaves && it != entry_idx.end(); ++i) {
+        for(int i = 0 ; i < used_octves && it != entry_idx.end(); ++i) {
             d.row(it->second).copyTo(buffer.row(i));
-
             ++it;
         }
+
 
         /// MAKE READY FOR RETURNING
         cv::Mat descr = buffer.clone();
