@@ -204,7 +204,6 @@ void ExtractKeypoints::update()
 
     QMutexLocker lock(&extractor_mutex);
     extractor = next;
-    std::cout << "warning: set!" << std::endl;
 }
 
 Memento::Ptr ExtractKeypoints::getState() const

@@ -119,6 +119,9 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
     connect(content.get(), SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
 
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
     setVisible(false);
 }
 
@@ -224,6 +227,22 @@ void BoxWorker::eventGuiChanged()
 Box* BoxWorker::parent()
 {
     return parent_;
+}
+
+
+void Box::showContextMenu(const QPoint& pos)
+{
+    QPoint globalPos = mapToGlobal(pos);
+
+    QMenu menu;
+    QAction* del = new QAction("delete box", &menu);
+    menu.addAction(del);
+
+    QAction* selectedItem = menu.exec(globalPos);
+
+    if(selectedItem == del) {
+        deleteBox();
+    }
 }
 
 std::string Box::UUID() const

@@ -170,6 +170,7 @@ public Q_SLOTS:
     void eventModelChanged();
     void killContent();
     void tick();
+    void showContextMenu(const QPoint& pos);
 
 Q_SIGNALS:
     void placed();

@@ -25,8 +25,6 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
             params.push_back(Parameter::declare("patch_size", 0, 128, 31, 1));
 
             params.push_back(Parameter::declare("scale", 0.5, 2.0, 1.2, 0.05));
-
-            params.push_back(Parameter::declare("test", false));
         }
     };
     static KeyParams& params() {
