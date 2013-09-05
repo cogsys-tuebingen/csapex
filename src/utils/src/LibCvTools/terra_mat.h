@@ -68,6 +68,12 @@ public:
     // exports an rgb image showing the color of the favorite terrain class in each pixel
     cv::Mat getFavoritesBGR();
 
+    // exports an rgb image showing the weighted mean color of the terrain class in each pixel
+    cv::Mat getMeanBGR();
+
+    // exports a hybrid rgb image of getMeanBGR and getFavoritesBGR
+    cv::Mat getBGR();
+
     operator cv::Mat();
     operator cv::Mat&();
     operator const cv::Mat&();

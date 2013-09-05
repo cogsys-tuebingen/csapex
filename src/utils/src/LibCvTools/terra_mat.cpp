@@ -135,6 +135,41 @@ cv::Mat TerraMat::getFavoritesBGR() {
     return result;
 }
 
+// exports an rgb image showing the weighted mean color of the terrain class in each pixel
+cv::Mat TerraMat::getMeanBGR() {
+    cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC3, cv::Scalar::all(0));
+
+    if(channels_ > legend_.size()) {
+        std::cerr << "You have to add a legend with minimum size of channel amount!" << std::endl;
+        return cv::Mat();
+    }
+
+    float* data = (float*) terra_mat_.data;
+    for (int i = 0; i < terra_mat_.rows; ++i)
+        for (int j = 0; j < terra_mat_.cols; ++j) {
+
+            // get mean color
+            /// step[1] == elemsize()
+            int pixel_pos = step_ * i + j * channels_;
+            cv::Vec3b meanColor;
+            for (int k = 0; k < channels_ ; k++) {
+                float prob = data[pixel_pos + k];
+                meanColor += prob*legend_[k].color;
+            }
+            result.at<cv::Vec3b>(i,j) = meanColor;
+        }
+
+    return result;
+}
+
+// exports a hybrid rgb image of getMeanBGR and getFavoritesBGR 
+cv::Mat TerraMat::getBGR() {
+    cv::Mat a = getMeanBGR();
+    cv::Mat b = getFavoritesBGR();
+
+    return 0.5*a + 0.5*b;
+}
+
 TerraMat::operator cv::Mat()
 {
     return terra_mat_;

@@ -8,12 +8,12 @@
 
 using namespace cv;
 
-Mat getRotatedCrop(Mat src, Point2f pos, Size size, float angle) {
+Mat getRotatedCrop(Mat src, Point2f pos, Size size, float angle, float scale) {
     const RotatedRect rect(pos, size, angle);
 
     // create bounding box of rotated and unrotated rectangle
-    Size2f boundingBoxSize(std::max(rect.boundingRect().width,  size.width),
-                           std::max(rect.boundingRect().height, size.height));
+    Size2f boundingBoxSize(std::max(rect.boundingRect().width/scale,  size.width/scale),
+                           std::max(rect.boundingRect().height/scale, size.height/scale));
     Rect boundingBox = RotatedRect(pos, boundingBoxSize, 0).boundingRect();
 
     //Point a cv::Mat header at it (no allocation is done)
@@ -23,7 +23,7 @@ Mat getRotatedCrop(Mat src, Point2f pos, Size size, float angle) {
     Point2f boundingBoxCenter(boundingBox.width/2.0f, boundingBox.height/2.0f);
 
     // get the rotation matrix
-    Mat M = getRotationMatrix2D(boundingBoxCenter, rect.angle, 1.0);
+    Mat M = getRotationMatrix2D(boundingBoxCenter, rect.angle, scale);
 
     // perform the affine transformation
     Mat rotated;
@@ -35,9 +35,9 @@ Mat getRotatedCrop(Mat src, Point2f pos, Size size, float angle) {
     return cropped;
 }
 
-float match(Mat queryImage, Mat map, Point2f pos, float angle) {
+float match(Mat queryImage, Mat map, Point2f pos, float angle, float scale) {
     Mat result, result2;
-    Mat cropped = getRotatedCrop(map, pos, Size2f(queryImage.cols, queryImage.rows), angle);
+    Mat cropped = getRotatedCrop(map, pos, Size2f(queryImage.cols, queryImage.rows), angle, scale);
 
     matchTemplate(cropped, queryImage, result, CV_TM_SQDIFF);
 
@@ -76,7 +76,7 @@ public:
     }
 
     virtual double probfunc(Particle* particle) const {
-        float dist = match(templat, src, Point2f(particle->state.posX, particle->state.posY), -45) / 10000;
+        float dist = match(templat, src, Point2f(particle->state.posX, particle->state.posY), -45, 2.0f) / 10000;
         return exp(-dist*dist);
     }
 };
@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
             ++pos.x;
             ++pos.y;
 //            Mat templat = src(Rect(pos.x-64/2+1, pos.y-48/2+1, 64, 48));
-            Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45);
+            Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 2.0f);
 
         //*//
             namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
     terraMatrix.at< Vec<float, noOfClasses> >(5,4)[3] = 256.3;
 
     terraMatrix.write("test.yml");
-    terraMatrix.read("test.yml");
+    terraMatrix.read("/localhome/masselli/svn/rabot/trunk/Utils/andreas/mapstest_cropped.jpg.yml");
 
     std::cout << terraMatrix.at< Vec<float, noOfClasses> >(3,4)[0] << " "
 //              << rgbMatrix.at< Vec<float, noOfClasses> >(3,4)[4]
@@ -232,6 +232,8 @@ int main(int argc, char** argv) {
     moveWindow("Display matchMatrix", 0, templat.rows+64);
 //*/
 
+    waitKey(0);
+    imshow("Display rgbMatrix", terraMatrix.getBGR());
     waitKey(0);
 
     return 0;
