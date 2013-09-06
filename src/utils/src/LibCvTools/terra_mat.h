@@ -65,8 +65,13 @@ public:
     // exports an uchar image, each pixel containing the id of the favorite terrain class
     cv::Mat getFavorites();
 
+    cv::Mat getFavorites(cv::Mat &validity, const float thresh = 0.5f);
+
     // exports an rgb image showing the color of the favorite terrain class in each pixel
     cv::Mat getFavoritesBGR();
+
+    cv::Mat getFavoritesBGRRaw();
+
 
     // exports an rgb image showing the weighted mean color of the terrain class in each pixel
     cv::Mat getMeanBGR();
@@ -90,6 +95,8 @@ private:
     std::map<int,int>           mapping_;
     std::map<int,TerrainClass>  legend_;
     cv::Mat                     terra_mat_;
+
+    cv::Vec3b            COLOR_INVALID;
 
     void writeMapping(cv::FileStorage &fs) const;
     void readMapping(const cv::FileStorage &fs);

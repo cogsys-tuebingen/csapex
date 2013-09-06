@@ -2,14 +2,16 @@
 
 TerraMat::TerraMat()
     :
-      channels_(0)
+      channels_(0),
+      COLOR_INVALID(127,127,127)
 {
 }
 
 TerraMat::TerraMat(const cv::Mat &terra_mat) :
     channels_(terra_mat.channels()),
     step_(terra_mat.step / terra_mat.elemSize1()),
-    terra_mat_(terra_mat)
+    terra_mat_(terra_mat),
+    COLOR_INVALID(127,127,127)
 {
     for(uchar i = 0 ; i < channels_ ; ++i)
         mapping_.insert(std::make_pair(i,i));
@@ -19,7 +21,8 @@ TerraMat::TerraMat(const cv::Mat &terra_mat, const std::map<int, int> &mapping) 
     channels_(terra_mat.channels()),
     step_(terra_mat.step / terra_mat.elemSize1()),
     mapping_(mapping),
-    terra_mat_(terra_mat)
+    terra_mat_(terra_mat),
+    COLOR_INVALID(127,127,127)
 {
 }
 
@@ -117,8 +120,58 @@ cv::Mat TerraMat::getFavorites()
     return result;
 }
 
+cv::Mat TerraMat::getFavorites(cv::Mat &validity, const float thresh)
+{
+    cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC1, cv::Scalar::all(0));
+    validity = cv::Mat(terra_mat_.rows, terra_mat_.cols, CV_8UC1, cv::Scalar::all(1));
+
+    float* data = (float*) terra_mat_.data;
+    for (int i = 0; i < terra_mat_.rows; ++i)
+        for (int j = 0; j < terra_mat_.cols; ++j) {
+            // get terrain class with maximum probability
+            int id = 0;
+            float maxProb = 0.0f;
+            /// step[1] == elemsize()
+            int pixel_pos = step_ * i + j * channels_;
+            for (int k = 0; k < channels_ ; k++) {
+                float prob = data[pixel_pos + k];
+                if(prob >= maxProb) {
+                    maxProb = prob;
+                    id = mapping_[k];
+                }
+            }
+
+            validity.at<uchar>(i,j) = maxProb < thresh ? 0 : 1;
+            result.at<uchar>(i,j) = id;
+        }
+
+    return result;
+}
+
 // exports an rgb image showing the color of the favorite terrain class in each pixel
 cv::Mat TerraMat::getFavoritesBGR() {
+    cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC3, cv::Scalar::all(0));
+    cv::Mat validity;
+    cv::Mat favorites = getFavorites(validity, 0.6f);
+
+    if(channels_ > legend_.size()) {
+        std::cerr << "You have to add a legend with minimum size of channel amount!" << std::endl;
+        return cv::Mat();
+    }
+
+    for (int i = 0; i < terra_mat_.rows; ++i) {
+        for (int j = 0; j < terra_mat_.cols; ++j) {
+            int valid = (int) validity.at<uchar>(i,j);
+            if(valid == 1)
+                result.at<cv::Vec3b>(i,j) = legend_[(int) favorites.at<uchar>(i,j)].color;
+            else
+                result.at<cv::Vec3b>(i,j) = COLOR_INVALID;
+        }
+    }
+    return result;
+}
+
+cv::Mat TerraMat::getFavoritesBGRRaw() {
     cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC3, cv::Scalar::all(0));
     cv::Mat favorites = getFavorites();
 

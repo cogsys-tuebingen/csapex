@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     std::string path = argv[1];
 
     if(argc == 1) {
-        std::cout << "Arguments : <terrr_mat> [<zoom>]" << std::endl;
+        std::cout << "Arguments : <terrr_mat> [<zoom>] [<raw>]" << std::endl;
         return 1;
     }
 
@@ -45,8 +45,13 @@ int main(int argc, char *argv[])
     }
 
     int zoom = 1;
+    int raw  = 0;
     if(argc > 2) {
         zoom = atoi(argv[2]);
+    }
+
+    if(argc > 3) {
+        raw = atoi(argv[3]);
     }
 
     /// up : 1113938 65362
@@ -69,12 +74,17 @@ int main(int argc, char *argv[])
         mat.read(paths[pos]);
 
         if(!mat.getMatrix().empty()) {
-            cv::Mat rgb = mat.getFavoritesBGR();
-            render = cv::Mat(rgb.rows * zoom , rgb.cols * zoom , CV_8UC3, cv::Scalar::all(0));
-            for(int i = 0 ; i < rgb.rows ; ++i) {
-                for(int j = 0 ; j < rgb.cols ; ++j) {
+            cv::Mat bgr;
+            if(raw == 0)
+                bgr = mat.getFavoritesBGR();
+            else
+                bgr = mat.getFavoritesBGRRaw();
+
+            render = cv::Mat(bgr.rows * zoom , bgr.cols * zoom , CV_8UC3, cv::Scalar::all(0));
+            for(int i = 0 ; i < bgr.rows ; ++i) {
+                for(int j = 0 ; j < bgr.cols ; ++j) {
                     cv::Rect rect(j * zoom, i * zoom , zoom, zoom);
-                    cv::Vec3b  bgr_val = rgb.at<cv::Vec3b>(i,j);
+                    cv::Vec3b  bgr_val = bgr.at<cv::Vec3b>(i,j);
                     cv::Scalar color(bgr_val[0] , bgr_val[1], bgr_val[2]);
                     cv::rectangle(render, rect, color, CV_FILLED);
                 }
