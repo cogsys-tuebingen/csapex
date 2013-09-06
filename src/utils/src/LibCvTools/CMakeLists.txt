@@ -68,6 +68,13 @@ add_executable(y_extract
 target_link_libraries(y_extract
     ${OpenCV_LIBS})
 
+add_executable(terramatRenderer
+    terra_mat_renderer.cpp)
+
+target_link_libraries(terramatRenderer
+    ${OpenCV_LIBS}
+    LibCvTools)
+
 ####### Tests #######
 # Rotated template test
 add_executable(rotated_template
