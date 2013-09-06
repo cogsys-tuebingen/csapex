@@ -8,16 +8,18 @@
 
 using namespace cv;
 
-Mat getRotatedCrop(Mat src, Point2f pos, Size size, float angle, float scale) {
+Mat getRotatedCrop(const Mat& src, Point2f pos, Size size, float angle, float scale) {
+    pos.x = (int)pos.x;
+    pos.y = (int)pos.y;
     const RotatedRect rect(pos, size, angle);
 
     // create bounding box of rotated and unrotated rectangle
-    Size2f boundingBoxSize(std::max(rect.boundingRect().width/scale,  size.width/scale),
-                           std::max(rect.boundingRect().height/scale, size.height/scale));
+    Size2f boundingBoxSize(std::max((int)(rect.boundingRect().width/scale+0.5f),  size.width),
+                           std::max((int)(rect.boundingRect().height/scale+0.5f), size.height));
     Rect boundingBox = RotatedRect(pos, boundingBoxSize, 0).boundingRect();
 
     //Point a cv::Mat header at it (no allocation is done)
-    Mat cropped = src(boundingBox);
+    Mat cropped(src, boundingBox);
 
     // center relative to cropped region
     Point2f boundingBoxCenter(boundingBox.width/2.0f, boundingBox.height/2.0f);
@@ -27,12 +29,13 @@ Mat getRotatedCrop(Mat src, Point2f pos, Size size, float angle, float scale) {
 
     // perform the affine transformation
     Mat rotated;
-    warpAffine(cropped, rotated, M, boundingBoxSize, INTER_NEAREST);
+    warpAffine(cropped, rotated, M, cv::Size(cropped.cols, cropped.rows), INTER_NEAREST);
 
     // crop the resulting image
-    getRectSubPix(rotated, size, boundingBoxCenter, cropped);
+    Rect outRect = RotatedRect(boundingBoxCenter, Size2f(size.width-1, size.height-1), 0).boundingRect();
+    Mat cropped2(rotated, outRect);
 
-    return cropped;
+    return cropped2;
 }
 
 float match(Mat queryImage, Mat map, Point2f pos, float angle, float scale) {
@@ -76,7 +79,7 @@ public:
     }
 
     virtual double probfunc(Particle* particle) const {
-        float dist = match(templat, src, Point2f(particle->state.posX, particle->state.posY), -45, 2.0f) / 10000;
+        float dist = match(templat, src, Point2f(particle->state.posX, particle->state.posY), -45, 1.0f) / 10000;
         return exp(-dist*dist);
     }
 };
@@ -91,20 +94,28 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    TerraMat mapTest;
+    mapTest.read("/localhome/masselli/svn/rabot/trunk/Utils/andreas/mapstest_cropped.jpg.yml");
+
     Mat src;
-    src = imread(argv[1], 1);
+//*//
+    src = imread(argv[1], 1); /*/
+    src = mapTest.getMatrix();
+//*/
+
+    std::cout << "Map: " << src.cols << "x" << src.rows << std::endl;
 
     if(!src.data) {
         printf("No image data \n");
         return -1;
     }
 
-    int w = 500;
-    int h = 500;
-    int sx = argc < 3 ? 2300 : atoi(argv[2]);
-    int sy = argc < 4 ? 1400 : atoi(argv[3]);
+    int sx = src.cols/6;//argc < 3 ? 2300 : atoi(argv[2]);
+    int sy = src.rows/6;//argc < 4 ? 1400 : atoi(argv[3]);
+    int w = std::min(src.cols/2, 500);
+    int h = std::min(src.rows/2, 500);
 
-    Point2f pos(sx+70, sy+70);
+    Point2f pos(sx+7, sy+7);
 
 //    std::cout << match(templat, src, pos,  0) << std::endl;
 //    std::cout << match(templat, src, pos, 10) << std::endl;
@@ -132,18 +143,19 @@ int main(int argc, char** argv) {
 //*/
 
 //*////////////////
-        MyParticleFilter pfilter(src, sx, sx+w, sy, sy+h, 260, 7.0f);
+
+        MyParticleFilter pfilter(src, sx, sx+w, sy, sy+h, 260, 1.0f);
 
         for (int i = 0; i < 6000; ++i) {
-            ++pos.x;
-            ++pos.y;
+            pos.x += 0.1;
+            pos.y += 0.1;
 //            Mat templat = src(Rect(pos.x-64/2+1, pos.y-48/2+1, 64, 48));
-            Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 2.0f);
+            Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 1.0f);
 
         //*//
             namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
             imshow("Display templat", templat);
-            moveWindow("Display templat", templat.cols+64, 0);
+            //moveWindow("Display templat", templat.cols+64, 0);
         //*/
 
 
@@ -152,55 +164,55 @@ int main(int argc, char** argv) {
 
         Pose meanPose = pfilter.getMean(13).state;
 
-	    // output
+        // output
 /*//        cout.precision(5);
-	    for (int j=0; j < pfilter.getParticles().size(); ++j) {
-	        std::cout << pfilter.getParticles()[j].state.posX << "\t";
-	        std::cout << pfilter.getParticles()[j].state.posY << "\n";
-	    }
-	    std::cout << std::endl;
+        for (int j=0; j < pfilter.getParticles().size(); ++j) {
+            std::cout << pfilter.getParticles()[j].state.posX << "\t";
+            std::cout << pfilter.getParticles()[j].state.posY << "\n";
+        }
+        std::cout << std::endl;
 //*/
-	    // debug output
+        // debug output
 //            std::cout << "." << std::flush;
 
-	    //*//
-	    Mat display(src(Rect(sx, sy, w, h)).clone());
-	    for (int j=0; j < pfilter.getParticles().size(); ++j) {
-	        //std::cout << pfilter.getParticles()[j].state.posX << "\t";
-	        //std::cout << pfilter.getParticles()[j].state.posY << "\n";
-	        cv::circle(display,
-	                 cvPoint(pfilter.getParticles()[j].state.posX-sx,
-	                         pfilter.getParticles()[j].state.posY-sy),
-	                 1,
-	                 cvScalar(255, 128, 0),
-	                 2);
-	    }
+        //*//
+        Mat display(src(Rect(sx, sy, w, h)).clone());
+        for (int j=0; j < pfilter.getParticles().size(); ++j) {
+            //std::cout << pfilter.getParticles()[j].state.posX << "\t";
+            //std::cout << pfilter.getParticles()[j].state.posY << "\n";
+            cv::circle(display,
+                     cvPoint(pfilter.getParticles()[j].state.posX-sx,
+                             pfilter.getParticles()[j].state.posY-sy),
+                     1,
+                     cvScalar(255, 128, 0),
+                     2);
+        }
 
-		// show mean pose
-		cv::circle(display,
-		         cvPoint(meanPose.posX-sx,
-		                 meanPose.posY-sy),
-		         1,
-		         cvScalar(0, 128, 255),
-		         2);
+        // show mean pose
+        cv::circle(display,
+                 cvPoint(meanPose.posX-sx,
+                         meanPose.posY-sy),
+                 1,
+                 cvScalar(0, 128, 255),
+                 2);
 
-	    // show ground truth pose
-	    cv::circle(display,
-	             cvPoint(pos.x-sx,
-	                     pos.y-sy),
-	             1,
-	             cvScalar(0, 0, 255),
-	             2);
+        // show ground truth pose
+        cv::circle(display,
+                 cvPoint(pos.x-sx,
+                         pos.y-sy),
+                 1,
+                 cvScalar(0, 0, 255),
+                 2);
 
  //           std::cout << dist(pos, Point2f(meanPose.posX, meanPose.posY)) << std::endl;
 
-		    namedWindow("Display Image", CV_WINDOW_AUTOSIZE);
-		    imshow("Display Image", display);
-		    moveWindow("Display Image", 0, templat.rows+64);
-		//*/
-		    if (waitKey(1) != -1)
-		        break;
-		}
+            namedWindow("Display Image", CV_WINDOW_AUTOSIZE);
+            imshow("Display Image", display);
+            //moveWindow("Display Image", 0, templat.rows+64);
+        //*/
+            if (waitKey(1) != -1)
+                break;
+        }
 //*////////////////
 
     const int noOfClasses = 4;
@@ -216,13 +228,13 @@ int main(int argc, char** argv) {
     terraMatrix.at< Vec<float, noOfClasses> >(5,4)[3] = 256.3;
 
     terraMatrix.write("test.yml");
-    terraMatrix.read("/localhome/masselli/svn/rabot/trunk/Utils/andreas/mapstest_cropped.jpg.yml");
+    terraMatrix.read("test.yml");
 
-    std::cout << terraMatrix.at< Vec<float, noOfClasses> >(3,4)[0] << " "
+/*    std::cout << terraMatrix.at< Vec<float, noOfClasses> >(3,4)[0] << " "
 //              << rgbMatrix.at< Vec<float, noOfClasses> >(3,4)[4]
               << (int)terraMatrix.getFavorites().at<uchar>(5,4) << " "
             << std::endl;
-
+*/
     namedWindow("Display rgbMatrix", CV_WINDOW_AUTOSIZE);
     imshow("Display rgbMatrix", terraMatrix.getFavoritesBGR());
 
