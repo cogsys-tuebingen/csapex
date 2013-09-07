@@ -6,6 +6,7 @@
 struct Pose {
 	float posX;
 	float posY;
+    float posZ;
     float oriZ; // in radians
 };
 
@@ -18,7 +19,9 @@ struct Particle {
 
 class ParticleFilter {
 public:
-    ParticleFilter(float xmin, float xmax, float ymin, float ymax,
+    ParticleFilter(float xmin, float xmax,
+                   float ymin, float ymax,
+                   float zmin, float zmax,
                    unsigned int numParticles, float diffuseTrans = 1.0f);
 
     std::vector<Particle> getParticles() const {
@@ -34,7 +37,7 @@ protected:
     virtual double probfunc(Particle* particle) const;
 
 private:
-    const float mXmin, mXmax, mYmin, mYmax; // bounding rect
+    const float mXmin, mXmax, mYmin, mYmax, mZmin, mZmax; // boundaries
 	
     float mDiffuseTrans;
     float mDiffuseOri;

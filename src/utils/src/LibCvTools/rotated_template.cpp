@@ -65,10 +65,14 @@ private:
 
 public:
     MyParticleFilter(Mat src,
-                     float xmin, float xmax, float ymin, float ymax,
+                     float xmin, float xmax,
+                     float ymin, float ymax,
+                     float zmin, float zmax,
                    unsigned int numParticles, float diffuseTrans = 1.0f)
         :
-          ParticleFilter(xmin, xmax, ymin, ymax,
+          ParticleFilter(xmin, xmax,
+                         ymin, ymax,
+                         zmin, zmax,
                          numParticles, diffuseTrans),
           src(src)
     {
@@ -79,7 +83,11 @@ public:
     }
 
     virtual double probfunc(Particle* particle) const {
-        float dist = match(templat, src, Point2f(particle->state.posX, particle->state.posY), -45, 1.0f) / 10000;
+        float dist = match(templat,
+                           src,
+                           Point2f(particle->state.posX, particle->state.posY),
+                           -45,
+                           particle->state.posZ) / 10000;
         return exp(-dist*dist);
     }
 };
@@ -100,7 +108,7 @@ int main(int argc, char** argv) {
     Mat src;
 /*//
     src = imread(argv[1], 1); /*/
-    src = mapTest.getMatrix();
+    src = mapTest.getBGR();
 //*/
 
     std::cout << "Map: " << src.cols << "x" << src.rows << std::endl;
@@ -125,13 +133,17 @@ int main(int argc, char** argv) {
 
 //*////////////////
 
-    MyParticleFilter pfilter(src, sx, sx+w, sy, sy+h, 260, 1.0f);
+    MyParticleFilter pfilter(src,
+                             sx, sx+w,
+                             sy, sy+h,
+                             1.3f, 2.7f,
+                             260, 1.0f);
 
     for (int i = 0; i < 6000; ++i) {
         pos.x += 0.1;
         pos.y += 0.1;
 //            Mat templat = src(Rect(pos.x-64/2+1, pos.y-48/2+1, 64, 48));
-        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 1.0f);
+        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 1.5f);
 
 //*//
         namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
@@ -143,6 +155,7 @@ int main(int argc, char** argv) {
         pfilter.update();
 
         Pose meanPose = pfilter.getMean(13).state;
+        std::cout << meanPose.posZ <<  std::endl;
 
         // output
 /*//        cout.precision(5);
@@ -228,10 +241,10 @@ int main(int argc, char** argv) {
     Mat matchMatrix = Mat::zeros(h, w, CV_32FC(1));
 //*//
     src = mapTest.getBGR();
-    Mat template4Matrix = getRotatedCrop(src, pos, Size(64, 48), -45, 1.0f);
+    Mat template4Matrix = getRotatedCrop(src, pos, Size(64, 48), -45, 2.0f);
     for (int x = sx; x < sx+w; ++x) {
         for (int y = sy; y < sy+h; ++y) {
-            float dist = match(template4Matrix, src, Point2f(x, y), -45, 1.0f) / 15000;
+            float dist = match(template4Matrix, src, Point2f(x, y), -40, 2.0f) / 15000;
             matchMatrix.at< cv::Vec<float, 1> >(y-sy, x-sx)[0] = exp(-dist);
         }
         std::cout << (int)(((float)(x-sx))/w*100) << "%" << std::endl;
