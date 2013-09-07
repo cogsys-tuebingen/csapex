@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
     mapTest.read("/localhome/masselli/svn/rabot/trunk/Utils/andreas/mapstest_cropped.jpg.yml");
 
     Mat src;
-//*//
+/*//
     src = imread(argv[1], 1); /*/
     src = mapTest.getMatrix();
 //*/
@@ -112,8 +112,8 @@ int main(int argc, char** argv) {
 
     int sx = src.cols/6;//argc < 3 ? 2300 : atoi(argv[2]);
     int sy = src.rows/6;//argc < 4 ? 1400 : atoi(argv[3]);
-    int w = std::min(src.cols/2, 500);
-    int h = std::min(src.rows/2, 500);
+    int w = std::min(src.cols/2, 300);
+    int h = std::min(src.rows/2, 300);
 
     Point2f pos(sx+7, sy+7);
 
@@ -123,41 +123,21 @@ int main(int argc, char** argv) {
 //    std::cout << match(templat, src, pos, 20) << std::endl;
 //    std::cout << match(templat, src, pos,-20) << std::endl;
 
-//    Mat matchMatrix = Mat::zeros(h, w, CV_32FC(1));
-/*
-    for (int x = sx; x < sx+w; ++x) {
-        for (int y = sy; y < sy+h; ++y) {
-            float dist = match(templat, src, Point2f(x, y), 0) / 15000;
-            matchMatrix.at< cv::Vec<float, 1> >(y-sy, x-sx)[0] = exp(-dist);
-        }
-        std::cout << (int)(((float)(x-sx))/w*100) << "%" << std::endl;
-    }
-//*/
-
-/*//
-    for (int x = sx; x < sx+w; ++x)
-        for (int y = sy; y < sy+h; ++y) {
-            Vec<float, 1> pix = matchMatrix.at< Vec<float, 1> >(y-sy, x-sx);
-            std::cout << pix[0] << std::endl;
-        }
-//*/
-
 //*////////////////
 
-        MyParticleFilter pfilter(src, sx, sx+w, sy, sy+h, 260, 1.0f);
+    MyParticleFilter pfilter(src, sx, sx+w, sy, sy+h, 260, 1.0f);
 
-        for (int i = 0; i < 6000; ++i) {
-            pos.x += 0.1;
-            pos.y += 0.1;
+    for (int i = 0; i < 6000; ++i) {
+        pos.x += 0.1;
+        pos.y += 0.1;
 //            Mat templat = src(Rect(pos.x-64/2+1, pos.y-48/2+1, 64, 48));
-            Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 1.0f);
+        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 1.0f);
 
-        //*//
-            namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
-            imshow("Display templat", templat);
-            //moveWindow("Display templat", templat.cols+64, 0);
-        //*/
-
+//*//
+        namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
+        imshow("Display templat", templat);
+        //moveWindow("Display templat", templat.cols+64, 0);
+//*/
 
         pfilter.setTemplate(templat);
         pfilter.update();
@@ -206,15 +186,16 @@ int main(int argc, char** argv) {
 
  //           std::cout << dist(pos, Point2f(meanPose.posX, meanPose.posY)) << std::endl;
 
-            namedWindow("Display Image", CV_WINDOW_AUTOSIZE);
-            imshow("Display Image", display);
-            //moveWindow("Display Image", 0, templat.rows+64);
-        //*/
-            if (waitKey(1) != -1)
-                break;
-        }
+        namedWindow("Display Image", CV_WINDOW_AUTOSIZE);
+        imshow("Display Image", display);
+        //moveWindow("Display Image", 0, templat.rows+64);
+    //*/
+        if (waitKey(1) != -1)
+            break;
+    }
 //*////////////////
 
+/*  // test terramat
     const int noOfClasses = 4;
     cv::Mat  terrain(480, 640, CV_32FC(noOfClasses), cv::Scalar::all(0));
     TerraMat terraMatrix(terrain);
@@ -230,22 +211,47 @@ int main(int argc, char** argv) {
     terraMatrix.write("test.yml");
     terraMatrix.read("test.yml");
 
-/*    std::cout << terraMatrix.at< Vec<float, noOfClasses> >(3,4)[0] << " "
+    std::cout << terraMatrix.at< Vec<float, noOfClasses> >(3,4)[0] << " "
 //              << rgbMatrix.at< Vec<float, noOfClasses> >(3,4)[4]
               << (int)terraMatrix.getFavorites().at<uchar>(5,4) << " "
             << std::endl;
-*/
+
     namedWindow("Display rgbMatrix", CV_WINDOW_AUTOSIZE);
     imshow("Display rgbMatrix", terraMatrix.getFavoritesBGR());
+    waitKey(0);
 
-/*//
+    imshow("Display rgbMatrix", terraMatrix.getBGR());
+    waitKey(0);
+*/
+
+    // create match matrix (brute force match)
+    Mat matchMatrix = Mat::zeros(h, w, CV_32FC(1));
+//*//
+    src = mapTest.getBGR();
+    Mat template4Matrix = getRotatedCrop(src, pos, Size(64, 48), -45, 1.0f);
+    for (int x = sx; x < sx+w; ++x) {
+        for (int y = sy; y < sy+h; ++y) {
+            float dist = match(template4Matrix, src, Point2f(x, y), -45, 1.0f) / 15000;
+            matchMatrix.at< cv::Vec<float, 1> >(y-sy, x-sx)[0] = exp(-dist);
+        }
+        std::cout << (int)(((float)(x-sx))/w*100) << "%" << std::endl;
+        if (waitKey(1) != -1)
+            break;
+    }
+
     namedWindow("Display matchMatrix", CV_WINDOW_AUTOSIZE);
     imshow("Display matchMatrix", matchMatrix);
-    moveWindow("Display matchMatrix", 0, templat.rows+64);
+    moveWindow("Display matchMatrix", 0, template4Matrix.rows+64);
 //*/
 
-    waitKey(0);
-    imshow("Display rgbMatrix", terraMatrix.getBGR());
+/*//
+    for (int x = sx; x < sx+w; ++x)
+        for (int y = sy; y < sy+h; ++y) {
+            Vec<float, 1> pix = matchMatrix.at< Vec<float, 1> >(y-sy, x-sx);
+            std::cout << pix[0] << std::endl;
+        }
+//*/
+
     waitKey(0);
 
     return 0;
