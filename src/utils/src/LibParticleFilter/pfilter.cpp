@@ -204,7 +204,7 @@ void ParticleFilter::update() {
 
     // apply laplacian smoothing
     for (int i = 0; i < mParticles.size(); ++i)
-        mParticles[i].prob += 0.000001;
+        mParticles[i].prob += 0.001;
 
 	////////////////////////////////////////////////////////
     // normalize
