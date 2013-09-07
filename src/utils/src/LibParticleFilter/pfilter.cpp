@@ -26,11 +26,15 @@ Particle ParticleFilter::getMean(int noOfParticles) const {
     mean.state.posX = 0.0f;
     mean.state.posY = 0.0f;
     mean.state.posZ = 0.0f;
+    double oriZx = 0.0f;
+    double oriZy = 0.0f;
     mean.prob = 0.0;
     for (int i = 0; i < noOfParticles; ++i) {
         mean.state.posX += A[i].state.posX;
         mean.state.posY += A[i].state.posY;
         mean.state.posZ += A[i].state.posZ;
+        oriZx += cos(A[i].state.oriZ);
+        oriZy += sin(A[i].state.oriZ);
         mean.prob += A[i].prob;
 
         //std::cout << A[i].prob <<  " ";
@@ -38,6 +42,7 @@ Particle ParticleFilter::getMean(int noOfParticles) const {
     mean.state.posX /= noOfParticles;
     mean.state.posY /= noOfParticles;
     mean.state.posZ /= noOfParticles;
+    mean.state.oriZ = atan2(oriZy, oriZx);
     mean.prob /= noOfParticles;
     //std::cout << "\n" << std::endl;
 
@@ -55,8 +60,11 @@ double ParticleFilter::probfunc(Particle* particle) const {
     return particle->state.posX+100.0;
 }
 
-ParticleFilter::ParticleFilter(float xmin, float xmax, float ymin, float ymax,
-                               float zmin, float zmax, unsigned int numParticles, float diffuseTrans)
+ParticleFilter::ParticleFilter(float xmin, float xmax,
+                               float ymin, float ymax,
+                               float zmin, float zmax,
+                               Angle oriZleft, Angle oriZright,
+                               unsigned int numParticles, float diffuseTrans)
 :
   mXmin(xmin),
   mXmax(xmax),
@@ -64,6 +72,8 @@ ParticleFilter::ParticleFilter(float xmin, float xmax, float ymin, float ymax,
   mYmax(ymax),
   mZmin(zmin),
   mZmax(zmax),
+  mOriZleft(oriZleft),
+  mOriZright(oriZright),
   mDiffuseTrans(diffuseTrans),
   mDiffuseOri(1.0f),
   confidence(0.0)
@@ -90,7 +100,7 @@ void ParticleFilter::initParticles(int noOfParticles) {
         mParticles[i].state.posX = RANDOM * (mXmax-mXmin) + mXmin;
         mParticles[i].state.posY = RANDOM * (mYmax-mYmin) + mYmin;
         mParticles[i].state.posZ = RANDOM * (mZmax-mZmin) + mZmin;
-    //	mParticles[i].state.oriZ = RANDOM * ;//todo
+        mParticles[i].state.oriZ = RANDOM * (mOriZleft-mOriZright) + mOriZright;
 
         // probability of particle
         mParticles[i].prob = 1.0/(double)mParticles.size();
@@ -144,7 +154,7 @@ void ParticleFilter::move() {
         mParticles[i].state.posX += randGaussian() * mDiffuseTrans * alpha;
         mParticles[i].state.posY += randGaussian() * mDiffuseTrans * alpha;
         mParticles[i].state.posZ += randGaussian() * mDiffuseTrans * alpha*0.1;//todo: zalpha
-        mParticles[i].state.oriZ += randGaussian() * mDiffuseOri   * alpha;
+        mParticles[i].state.oriZ += randGaussian() * mDiffuseOri   * alpha*0.3;
 
         // clip to keep within bounding values
         if (mParticles[i].state.posX < mXmin) mParticles[i].state.posX = mXmin;

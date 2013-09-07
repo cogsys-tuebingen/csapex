@@ -68,11 +68,13 @@ public:
                      float xmin, float xmax,
                      float ymin, float ymax,
                      float zmin, float zmax,
-                   unsigned int numParticles, float diffuseTrans = 1.0f)
+                     Angle oriZleft, Angle oriZright,
+                     unsigned int numParticles, float diffuseTrans = 1.0f)
         :
           ParticleFilter(xmin, xmax,
                          ymin, ymax,
                          zmin, zmax,
+                         oriZleft, oriZright,
                          numParticles, diffuseTrans),
           src(src)
     {
@@ -86,7 +88,7 @@ public:
         float dist = match(templat,
                            src,
                            Point2f(particle->state.posX, particle->state.posY),
-                           -45,
+                           particle->state.oriZ.getDegrees(),
                            particle->state.posZ) / 10000;
         return exp(-dist*dist);
     }
@@ -137,13 +139,14 @@ int main(int argc, char** argv) {
                              sx, sx+w,
                              sy, sy+h,
                              1.3f, 2.7f,
+                             Angle(-20, 1), Angle(-60, 1),
                              260, 1.0f);
 
     for (int i = 0; i < 6000; ++i) {
         pos.x += 0.1;
         pos.y += 0.1;
 //            Mat templat = src(Rect(pos.x-64/2+1, pos.y-48/2+1, 64, 48));
-        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 1.5f);
+        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 2.5f);
 
 //*//
         namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
@@ -155,7 +158,8 @@ int main(int argc, char** argv) {
         pfilter.update();
 
         Pose meanPose = pfilter.getMean(13).state;
-        std::cout << meanPose.posZ <<  std::endl;
+        //std::cout << "meanPose.posZ " << meanPose.posZ <<  std::endl;
+        std::cout << "meanPose.oriZ " << meanPose.oriZ.getDegrees() <<  std::endl;
 
         // output
 /*//        cout.precision(5);
