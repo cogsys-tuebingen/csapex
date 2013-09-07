@@ -1,13 +1,15 @@
 // Author: Andreas Masselli
 
 #include <vector>
-#include <string>
+//#include <string>
+
+#include <rangle.h>
 
 struct Pose {
 	float posX;
 	float posY;
     float posZ;
-    float oriZ; // in radians
+    Angle oriZ; // in radians, normalized from 0 to 2*pi
 };
 
 struct Particle {
@@ -22,6 +24,7 @@ public:
     ParticleFilter(float xmin, float xmax,
                    float ymin, float ymax,
                    float zmin, float zmax,
+                   Angle oriZleft, Angle oriZright,
                    unsigned int numParticles, float diffuseTrans = 1.0f);
 
     std::vector<Particle> getParticles() const {
@@ -37,7 +40,9 @@ protected:
     virtual double probfunc(Particle* particle) const;
 
 private:
-    const float mXmin, mXmax, mYmin, mYmax, mZmin, mZmax; // boundaries
+    // boundaries
+    const float mXmin, mXmax, mYmin, mYmax, mZmin, mZmax;
+    Angle mOriZleft, mOriZright;
 	
     float mDiffuseTrans;
     float mDiffuseOri;

@@ -55,8 +55,11 @@ double ParticleFilter::probfunc(Particle* particle) const {
     return particle->state.posX+100.0;
 }
 
-ParticleFilter::ParticleFilter(float xmin, float xmax, float ymin, float ymax,
-                               float zmin, float zmax, unsigned int numParticles, float diffuseTrans)
+ParticleFilter::ParticleFilter(float xmin, float xmax,
+                               float ymin, float ymax,
+                               float zmin, float zmax,
+                               Angle oriZleft, Angle oriZright,
+                               unsigned int numParticles, float diffuseTrans)
 :
   mXmin(xmin),
   mXmax(xmax),
@@ -64,6 +67,8 @@ ParticleFilter::ParticleFilter(float xmin, float xmax, float ymin, float ymax,
   mYmax(ymax),
   mZmin(zmin),
   mZmax(zmax),
+  mOriZleft(oriZleft),
+  mOriZrigth(oriZrigth),
   mDiffuseTrans(diffuseTrans),
   mDiffuseOri(1.0f),
   confidence(0.0)
@@ -90,7 +95,7 @@ void ParticleFilter::initParticles(int noOfParticles) {
         mParticles[i].state.posX = RANDOM * (mXmax-mXmin) + mXmin;
         mParticles[i].state.posY = RANDOM * (mYmax-mYmin) + mYmin;
         mParticles[i].state.posZ = RANDOM * (mZmax-mZmin) + mZmin;
-    //	mParticles[i].state.oriZ = RANDOM * ;//todo
+        mParticles[i].state.oriZ = RANDOM * (mOriZleft-mOriZright) + mOriZright;
 
         // probability of particle
         mParticles[i].prob = 1.0/(double)mParticles.size();
