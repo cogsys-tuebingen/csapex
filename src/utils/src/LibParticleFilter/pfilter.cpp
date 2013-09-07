@@ -165,6 +165,15 @@ void ParticleFilter::move() {
 
         if (mParticles[i].state.posZ < mZmin) mParticles[i].state.posZ = mZmin;
         if (mParticles[i].state.posZ > mZmax) mParticles[i].state.posZ = mZmax;
+
+        if (!mParticles[i].state.oriZ.isInRange(mOriZleft, mOriZright)) {
+            if (mParticles[i].state.oriZ.shortest_angular_distance(mOriZleft)
+                    < mParticles[i].state.oriZ.shortest_angular_distance(mOriZright))
+                mParticles[i].state.oriZ = mOriZleft;
+            else
+                mParticles[i].state.oriZ = mOriZright;
+        }
+
         // todo: handle ori
     }
 }

@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     int w = std::min(src.cols/2, 300);
     int h = std::min(src.rows/2, 300);
 
-    Point2f pos(sx+7, sy+7);
+    Point2f pos(sx+70, sy+7);
 
 //    std::cout << match(templat, src, pos,  0) << std::endl;
 //    std::cout << match(templat, src, pos, 10) << std::endl;
