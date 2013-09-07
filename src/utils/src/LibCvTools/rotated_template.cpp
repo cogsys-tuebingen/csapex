@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
         pos.x += 0.1;
         pos.y += 0.1;
 //            Mat templat = src(Rect(pos.x-64/2+1, pos.y-48/2+1, 64, 48));
-        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 2.5f);
+        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 1.5f);
 
 //*//
         namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
