@@ -44,6 +44,12 @@ float match(Mat queryImage, Mat map, Point2f pos, float angle, float scale) {
 
     matchTemplate(cropped, queryImage, result, CV_TM_SQDIFF);
 
+//    Mat diff = cropped - queryImage;
+//    Mat sq = diff.mul(diff);
+//    cv::Scalar summe = cv::sum(sq);
+
+//    std::cout << cv::sum(summe)[0]*70 << " " << result.at<float>(0,0) << std::endl;
+
  /*   cv::subtract(cropped, queryImage, result2);
     cv::multiply(result2, result2, result2);
     std::cout << cv::sum(result2) << " " << result.at<float>(0,0) << std::endl;
@@ -54,7 +60,10 @@ float match(Mat queryImage, Mat map, Point2f pos, float angle, float scale) {
     imshow("Display cropped", cropped);
 //*/
 
-    return result.at<float>(0,0) / (queryImage.cols * queryImage.rows);
+//*//
+    return result.at<float>(0,0) / (queryImage.cols * queryImage.rows); /*/
+    return cv::sum(summe)[0]*60 / (queryImage.cols * queryImage.rows);
+//*/
 }
 
 class MyParticleFilter: public ParticleFilter
@@ -107,6 +116,9 @@ int main(int argc, char** argv) {
     TerraMat mapTest;
     mapTest.read("/localhome/masselli/svn/rabot/trunk/Utils/andreas/mapstest_cropped.jpg.yml");
 
+    TerraMat testTemplate;
+    testTemplate.read("/localhome/masselli/svn/rabot/trunk/Utils/andreas/terra_undist_640/undistlog- 100.774.jpg.640.jpg.yml");
+
     Mat src;
 /*//
     src = imread(argv[1], 1); /*/
@@ -125,7 +137,7 @@ int main(int argc, char** argv) {
     int w = std::min(src.cols/2, 300);
     int h = std::min(src.rows/2, 300);
 
-    Point2f pos(sx+70, sy+7);
+    Point2f pos(sx+75, sy+75);
 
 //    std::cout << match(templat, src, pos,  0) << std::endl;
 //    std::cout << match(templat, src, pos, 10) << std::endl;
@@ -143,10 +155,14 @@ int main(int argc, char** argv) {
                              260, 1.0f);
 
     for (int i = 0; i < 6000; ++i) {
-        pos.x += 0.1;
-        pos.y += 0.1;
+//        pos.x += 0.1;
+  //      pos.y += 0.1;
 //            Mat templat = src(Rect(pos.x-64/2+1, pos.y-48/2+1, 64, 48));
-        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 2.5f);
+
+/*//
+        Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 2.5f); /*/
+        Mat templat = testTemplate.getBGR();
+//*/
 
 //*//
         namedWindow("Display templat", CV_WINDOW_AUTOSIZE);
@@ -157,7 +173,7 @@ int main(int argc, char** argv) {
         pfilter.setTemplate(templat);
         pfilter.update();
 
-        Pose meanPose = pfilter.getMean(13).state;
+        Pose meanPose = pfilter.getMean(3).state;
         //std::cout << "meanPose.posZ " << meanPose.posZ <<  std::endl;
         std::cout << "meanPose.oriZ " << meanPose.oriZ.getDegrees() <<  std::endl;
 
@@ -245,10 +261,14 @@ int main(int argc, char** argv) {
     Mat matchMatrix = Mat::zeros(h, w, CV_32FC(1));
 //*//
     src = mapTest.getBGR();
-    Mat template4Matrix = getRotatedCrop(src, pos, Size(64, 48), -45, 2.0f);
+/*//
+    Mat template4Matrix = getRotatedCrop(src, pos, Size(64, 48), -45, 2.0f); /*/
+    Mat template4Matrix = testTemplate.getBGR();
+//*/
+
     for (int x = sx; x < sx+w; ++x) {
         for (int y = sy; y < sy+h; ++y) {
-            float dist = match(template4Matrix, src, Point2f(x, y), -40, 2.0f) / 15000;
+            float dist = match(template4Matrix, src, Point2f(x, y), -19, 2.0f) / 15000;
             matchMatrix.at< cv::Vec<float, 1> >(y-sy, x-sx)[0] = exp(-dist);
         }
         std::cout << (int)(((float)(x-sx))/w*100) << "%" << std::endl;

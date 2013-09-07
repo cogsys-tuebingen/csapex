@@ -30,18 +30,18 @@ Particle ParticleFilter::getMean(int noOfParticles) const {
     double oriZy = 0.0f;
     mean.prob = 0.0;
     for (int i = 0; i < noOfParticles; ++i) {
-        mean.state.posX += A[i].state.posX;
-        mean.state.posY += A[i].state.posY;
-        mean.state.posZ += A[i].state.posZ;
-        oriZx += cos(A[i].state.oriZ);
-        oriZy += sin(A[i].state.oriZ);
+        mean.state.posX += A[i].state.posX*A[i].prob;
+        mean.state.posY += A[i].state.posY*A[i].prob;;
+        mean.state.posZ += A[i].state.posZ*A[i].prob;;
+        oriZx += cos(A[i].state.oriZ)*A[i].prob;;
+        oriZy += sin(A[i].state.oriZ)*A[i].prob;;
         mean.prob += A[i].prob;
 
         //std::cout << A[i].prob <<  " ";
     }
-    mean.state.posX /= noOfParticles;
-    mean.state.posY /= noOfParticles;
-    mean.state.posZ /= noOfParticles;
+    mean.state.posX /= mean.prob;
+    mean.state.posY /= mean.prob;
+    mean.state.posZ /= mean.prob;
     mean.state.oriZ = atan2(oriZy, oriZx);
     mean.prob /= noOfParticles;
     //std::cout << "\n" << std::endl;
