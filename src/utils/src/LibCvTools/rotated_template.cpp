@@ -44,16 +44,19 @@ float match(Mat queryImage, Mat map, Point2f pos, float angle, float scale) {
 
     matchTemplate(cropped, queryImage, result, CV_TM_SQDIFF);
 
-//    Mat diff = cropped - queryImage;
-//    Mat sq = diff.mul(diff);
-//    cv::Scalar summe = cv::sum(sq);
+/*//
+    Mat diff = cropped - queryImage;
+    Mat sq = diff.mul(diff);
+    cv::Scalar summe = cv::sum(sq);
+    std::cout << cv::sum(summe)[0]*70 << " " << result.at<float>(0,0) << std::endl;
+//*/
 
-//    std::cout << cv::sum(summe)[0]*70 << " " << result.at<float>(0,0) << std::endl;
-
- /*   cv::subtract(cropped, queryImage, result2);
+/*//
+    cv::subtract(cropped, queryImage, result2);
     cv::multiply(result2, result2, result2);
-    std::cout << cv::sum(result2) << " " << result.at<float>(0,0) << std::endl;
-*/
+    std::cout << cv::sum(result2) << " " << summe << " " << result.at<float>(0,0) << std::endl;
+//*/
+
 //    std::cout << result.rows << " " << result.cols << std::endl;
 /*//
     namedWindow("Display cropped", CV_WINDOW_AUTOSIZE);
@@ -119,6 +122,8 @@ int main(int argc, char** argv) {
     TerraMat testTemplate;
     testTemplate.read("/localhome/masselli/svn/rabot/trunk/Utils/andreas/terra_undist_640/undistlog- 100.774.jpg.640.jpg.yml");
 
+//  /localhome/masselli/svn/rabot/trunk/Utils/andreas/terra_undist_640/undistlog- 100.774.jpg.640.jpg.yml
+
     Mat src;
 /*//
     src = imread(argv[1], 1); /*/
@@ -133,7 +138,7 @@ int main(int argc, char** argv) {
     }
 
     int sx = src.cols/6;//argc < 3 ? 2300 : atoi(argv[2]);
-    int sy = src.rows/6;//argc < 4 ? 1400 : atoi(argv[3]);
+    int sy = src.rows/3;//argc < 4 ? 1400 : atoi(argv[3]);
     int w = std::min(src.cols/2, 300);
     int h = std::min(src.rows/2, 300);
 
@@ -162,6 +167,7 @@ int main(int argc, char** argv) {
 /*//
         Mat templat = getRotatedCrop(src, pos, Size(64, 48), -45, 2.5f); /*/
         Mat templat = testTemplate.getBGR();
+            templat = templat(Rect(17/1.5625, 13/1.5625, 64/1.5625, 48/1.5625));
 //*/
 
 //*//
@@ -174,8 +180,8 @@ int main(int argc, char** argv) {
         pfilter.update();
 
         Pose meanPose = pfilter.getMean(3).state;
-        //std::cout << "meanPose.posZ " << meanPose.posZ <<  std::endl;
-        std::cout << "meanPose.oriZ " << meanPose.oriZ.getDegrees() <<  std::endl;
+        std::cout << "meanPose.posZ " << meanPose.posZ
+                  << "\tmeanPose.oriZ " << meanPose.oriZ.getDegrees() <<  std::endl;
 
         // output
 /*//        cout.precision(5);
@@ -209,7 +215,7 @@ int main(int argc, char** argv) {
                  cvScalar(0, 128, 255),
                  2);
 
-        // show ground truth pose
+/*/        // show ground truth pose
         cv::circle(display,
                  cvPoint(pos.x-sx,
                          pos.y-sy),
@@ -218,7 +224,7 @@ int main(int argc, char** argv) {
                  2);
 
  //           std::cout << dist(pos, Point2f(meanPose.posX, meanPose.posY)) << std::endl;
-
+*/
         namedWindow("Display Image", CV_WINDOW_AUTOSIZE);
         imshow("Display Image", display);
         //moveWindow("Display Image", 0, templat.rows+64);
