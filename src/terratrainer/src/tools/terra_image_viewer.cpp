@@ -132,6 +132,14 @@ int main(int argc, char *argv[])
             image = cv::imread(jpg_paths[jpg_pos]);
         }
 
+        cv::Mat canvas;
+        if(image.empty())
+            canvas = cv::Mat(((cv::Mat) mat).rows * cell_height, ((cv::Mat) mat).cols * cell_width , CV_8UC3, cv::Scalar::all(0));
+        else {
+            canvas = image.clone();
+            cv::resize(canvas, canvas, cv::Size(((cv::Mat) mat).cols * cell_width, ((cv::Mat) mat).rows * cell_height));
+        }
+
         if(!((cv::Mat) mat).empty()) {
             bool active_mat = true;
             while(active_mat) {
@@ -147,8 +155,8 @@ int main(int argc, char *argv[])
                                 int grid_x = change[0] / cell_width + dx;
                                 int grid_y = change[1] / cell_height + dy;
 
-                                int cols = 64;
-                                int rows = 48;
+                                int cols = ((cv::Mat) mat).cols;
+                                int rows = ((cv::Mat) mat).rows;
                                 if(grid_x < 0 || grid_x >= cols || grid_y < 0 || grid_y >= rows)
                                     continue;
 
@@ -171,13 +179,7 @@ int main(int argc, char *argv[])
                 else
                     bgr = mat.getFavoritesBGRRaw();
 
-                if(image.empty())
-                    render = cv::Mat(bgr.rows * cell_height, bgr.cols * cell_width , CV_8UC3, cv::Scalar::all(0));
-                else {
-                    render = image.clone();
-                    cv::resize(render, render, cv::Size(bgr.cols * cell_width, bgr.rows * cell_height));
-                }
-
+                canvas.copyTo(render);
 
                 for(int i = 0 ; i < bgr.rows ; ++i) {
                     for(int j = 0 ; j < bgr.cols ; ++j) {
@@ -186,7 +188,7 @@ int main(int argc, char *argv[])
                         cv::Scalar color(bgr_val[0] , bgr_val[1], bgr_val[2]);
                         if(!image.empty()) {
                             if(filled == 0)
-                                cv::rectangle(render, rect, color, 1);
+                                cv::rectangle(render, rect, color, 2);
                             if(filled == 1)
                                 cv::rectangle(render, rect, color, CV_FILLED);
                         } else {
@@ -256,9 +258,9 @@ int main(int argc, char *argv[])
         } else {
             render = cv::Mat(480,640, CV_8UC3);
         }
-        yml_pos %= yml_paths.size();
+        yml_pos = (yml_pos + yml_paths.size()) % yml_paths.size();
         if(use_jpg)
-            jpg_pos %= jpg_paths.size();
+            jpg_pos = (jpg_pos + jpg_paths.size()) % jpg_paths.size();
 
     }
 
