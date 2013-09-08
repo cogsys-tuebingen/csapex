@@ -24,6 +24,8 @@ FWD(Connection);
 
 FWD(Graph);
 
+FWD(ConnectionType);
+
 class Designer;
 class DesignBoard;
 

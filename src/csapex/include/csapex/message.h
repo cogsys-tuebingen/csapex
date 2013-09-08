@@ -38,8 +38,8 @@ public:
 
     static ConnectionType::Ptr make();
 
-    bool canConnectTo(ConnectionType::Ptr other_side);
-    bool acceptsConnectionFrom(ConnectionType* other_side);
+    bool canConnectTo(const ConnectionType::ConstPtr other_side) const;
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const;
 };
 
 template <class Type, class Instance>
@@ -66,7 +66,7 @@ struct MessageTemplate : public Message {
         return new_msg;
     }
 
-    bool acceptsConnectionFrom(ConnectionType* other_side) {
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const {
         return name() == other_side->name();
     }
 

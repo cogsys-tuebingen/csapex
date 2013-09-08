@@ -1,0 +1,15 @@
+<library path="libcsapex_boolean_plugin">
+<class type="csapex::boolean::RegisterPlugin" base_class_type="csapex::CorePlugin">
+  <description>none yet</description>
+</class>
+
+<class type="csapex::boolean::NAND" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::boolean::Toggle" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::boolean::Indicator" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+</library>

@@ -84,9 +84,6 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
 {
     ui->setupUi(this);
 
-    minimize_icon_ = ui->minimizebtn->icon();
-    maximize_icon_ = QIcon(":/maximize.png");
-
     content_ = content;
     content_->setBox(this);
 
@@ -112,9 +109,6 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
 
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
-
-    connect(ui->minimizebtn, SIGNAL(toggled(bool)), this, SLOT(minimizeBox(bool)));
-    connect(ui->killbtn, SIGNAL(clicked()), this, SLOT(killContent()));
 
     connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
     connect(content.get(), SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
@@ -235,13 +229,40 @@ void Box::showContextMenu(const QPoint& pos)
     QPoint globalPos = mapToGlobal(pos);
 
     QMenu menu;
-    QAction* del = new QAction("delete box", &menu);
+    QAction* min = new QAction("minimize", &menu);
+    QAction* max = new QAction("maximize", &menu);
+    QAction* del = new QAction("delete", &menu);
+    QAction* term = new QAction("terminate thread", &menu);
+
+    min->setIcon(QIcon(":/minimize.png"));
+    min->setIconVisibleInMenu(true);
+    max->setIcon(QIcon(":/maximize.png"));
+    max->setIconVisibleInMenu(true);
+    del->setIcon(QIcon(":/close.png"));
+    del->setIconVisibleInMenu(true);
+    term->setIcon(QIcon(":/stop.png"));
+    term->setIconVisibleInMenu(true);
+
+    if(isMinimizedSize()) {
+        menu.addAction(max);
+    } else {
+        menu.addAction(min);
+    }
+    menu.addSeparator();
+    menu.addAction(term);
+    menu.addSeparator();
     menu.addAction(del);
 
     QAction* selectedItem = menu.exec(globalPos);
 
     if(selectedItem == del) {
         deleteBox();
+    } else if(selectedItem == term) {
+        killContent();
+    } else if(selectedItem == min) {
+        minimizeBox(true);
+    } else if(selectedItem == max) {
+        minimizeBox(false);
     }
 }
 
@@ -727,16 +748,12 @@ void Box::minimizeBox(bool minimize)
     if(minimize) {
         ui->frame->hide();
         ui->label->hide();
-        ui->killbtn->hide();
         ui->boxframe->setProperty("content_minimized", true);
-        ui->minimizebtn->setIcon(maximize_icon_);
 
     } else {
         ui->frame->show();
         ui->label->show();
-        ui->killbtn->show();
         ui->boxframe->setProperty("content_minimized", false);
-        ui->minimizebtn->setIcon(minimize_icon_);
     }
 
     refreshStylesheet();
@@ -790,7 +807,6 @@ void Box::setState(Memento::Ptr memento)
     }
 
     minimizeBox(state->minimized);
-    ui->minimizebtn->setChecked(state->minimized);
 
     enableContent(state->enabled);
     ui->enablebtn->setChecked(state->enabled);

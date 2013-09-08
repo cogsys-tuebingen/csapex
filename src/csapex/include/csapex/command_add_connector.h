@@ -12,18 +12,18 @@ namespace command
 
 struct AddConnector : public Command
 {
-    AddConnector(const std::string& box_uuid, bool input, const std::string& uuid, bool forward = false);
+    AddConnector(const std::string& box_uuid, const std::string& label, ConnectionTypeConstPtr type, bool input, const std::string& uuid, bool forward = false);
 
 protected:
     bool execute();
     bool undo();
     bool redo();
 
-    void refresh();
-
 private:
-    BoxPtr box;
+    ConnectionTypeConstPtr type;
+    std::string label;
     bool input;
+
 
     Connector* c;
 

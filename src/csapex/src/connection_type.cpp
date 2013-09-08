@@ -22,17 +22,17 @@ ConnectionType::Ptr ConnectionType::getDefaultConnectionType()
     return default_->clone();
 }
 
-bool ConnectionType::canConnectTo(ConnectionType::Ptr other_side)
+bool ConnectionType::canConnectTo(ConnectionType::ConstPtr other_side) const
 {
     return other_side->acceptsConnectionFrom(this);
 }
 
-bool ConnectionType::acceptsConnectionFrom(ConnectionType *other_side)
+bool ConnectionType::acceptsConnectionFrom(const ConnectionType *other_side) const
 {
     return name_ == other_side->name();
 }
 
-std::string ConnectionType::name()
+std::string ConnectionType::name() const
 {
     return name_;
 }

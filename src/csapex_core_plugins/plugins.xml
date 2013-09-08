@@ -23,6 +23,9 @@
 <class type="csapex::DoubleBuffer" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::Relay" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 
 <class type="csapex::FileImporter" base_class_type="csapex::BoxedObject">
   <description>none yet</description>

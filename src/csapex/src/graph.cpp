@@ -153,7 +153,7 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
                         std::string new_connector_uuid = Connector::makeUUID(box_uuid, Connector::TYPE_MISC, next_connector_sub_id++);
 
                         // create new separator connector
-                        add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, true, new_connector_uuid, true)));
+                        add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, in->getLabel(), in->getType(), true, new_connector_uuid, true)));
                         // connect old output to the new connector
                         add_connections->add(Command::Ptr(new command::AddConnection(target->UUID(), new_connector_uuid)));
                         // connect the new connector to the old input
@@ -180,7 +180,7 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
                         if(!external_connector_added) {
                             external_connector_added = true;
                             new_connector_uuid = Connector::makeUUID(box_uuid, Connector::TYPE_MISC, next_connector_sub_id++);
-                            add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, false, new_connector_uuid, true)));
+                            add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, out->getLabel(), in->getType(), false, new_connector_uuid, true)));
                         }
 
                         add_connections->add(Command::Ptr(new command::AddConnection(new_connector_uuid, in->UUID())));

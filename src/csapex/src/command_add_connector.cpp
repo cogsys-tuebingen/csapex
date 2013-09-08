@@ -6,23 +6,23 @@
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
 #include <csapex/connector_forward.h>
-//#include <csapex/connector_in_forward.h>
-//#include <csapex/connector_out_forward.h>
+#include <csapex/connection_type.h>
 #include <csapex/graph.h>
 #include <csapex/command_dispatcher.h>
 
 using namespace csapex;
 using namespace command;
 
-AddConnector::AddConnector(const std::string &box_uuid, bool input, const std::string &uuid, bool forward)
-    : input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid), forward(forward)
+AddConnector::AddConnector(const std::string &box_uuid, const std::string& label, ConnectionType::ConstPtr type, bool input, const std::string &uuid, bool forward)
+    : type(type), label(label), input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid), forward(forward)
 {
 
 }
 
 bool AddConnector::execute()
-{ 
-    refresh();
+{
+    Box::Ptr box = Graph::root()->findBox(b_uuid);
+    assert(box);
 
     if(input) {
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_IN, box->nextInputId()) : c_uuid;
@@ -46,6 +46,8 @@ bool AddConnector::execute()
         box->addOutput(out);
     }
 
+    c->setType(type);
+    c->setLabel(label);
     c_uuid = c->UUID();
 
     return true;
@@ -53,7 +55,8 @@ bool AddConnector::execute()
 
 bool AddConnector::undo()
 {
-    refresh();
+    Box::Ptr box = Graph::root()->findBox(b_uuid);
+    assert(box);
 
     if(input) {
         box->removeInput(box->getInput(c_uuid));
@@ -65,14 +68,5 @@ bool AddConnector::undo()
 
 bool AddConnector::redo()
 {
-    refresh();
-
-    execute();
-    return false;
-}
-
-void AddConnector::refresh()
-{
-    box = Graph::root()->findBox(b_uuid);
-    assert(box);
+    return execute();
 }

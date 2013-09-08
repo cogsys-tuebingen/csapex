@@ -39,7 +39,7 @@ public:
     void dropEvent(QDropEvent* e);
 
     virtual bool canConnect() = 0;
-    virtual bool canConnectTo(Connector* other_side);
+    virtual bool canConnectTo(Connector* other_side) const;
     virtual bool targetsCanConnectTo(Connector* other_side) = 0;
     virtual bool isConnected() = 0;
     virtual bool tryConnect(Connector* other_side) = 0;
@@ -68,7 +68,7 @@ public:
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
-    void setType(ConnectionType::Ptr type);
+    void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
 
     void setMinimizedSize(bool mini);
@@ -127,7 +127,7 @@ protected:
     std::string uuid_;
     std::string label_;
 
-    ConnectionType::Ptr type_;
+    ConnectionType::ConstPtr type_;
 
     bool minimized_;
 };

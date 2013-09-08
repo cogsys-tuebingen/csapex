@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>csapex_boolean</name>
+  <version>0.0.1</version>
+  <description>The csapex_boolean package</description>
+
+  <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
+
+  <license>BSD</license>
+  <author email="sebastian.buck@uni-tuebingen.de">buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>csapex</build_depend>
+  <build_depend>csapex_core_plugins</build_depend>
+
+  <run_depend>csapex</run_depend>
+  <run_depend>csapex_core_plugins</run_depend>
+
+  <export>
+     <csapex plugin="${prefix}/plugins.xml" />
+  </export>
+</package>

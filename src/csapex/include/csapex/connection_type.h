@@ -11,7 +11,7 @@ class ConnectionType
 {
 public:
     typedef boost::shared_ptr<ConnectionType> Ptr;
-    typedef const boost::shared_ptr<ConnectionType> ConstPtr;
+    typedef boost::shared_ptr<const ConnectionType> ConstPtr;
 
 public:
     template <typename C>
@@ -29,10 +29,10 @@ public:
     virtual ConnectionType::Ptr toType() = 0;
     static ConnectionType::Ptr makeDefault();
 
-    virtual bool canConnectTo(ConnectionType::Ptr other_side);
-    virtual bool acceptsConnectionFrom(ConnectionType* other_side);
+    virtual bool canConnectTo(ConnectionType::ConstPtr other_side) const;
+    virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 
-    std::string name();
+    std::string name() const;
 
     virtual void write(std::ostream& out);
 

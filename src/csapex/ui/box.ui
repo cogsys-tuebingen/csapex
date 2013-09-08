@@ -136,49 +136,6 @@ QFrame#boxframe csapex--Connector {
             </property>
            </spacer>
           </item>
-          <item>
-           <widget class="QPushButton" name="killbtn">
-            <property name="maximumSize">
-             <size>
-              <width>16</width>
-              <height>16</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../res/csapex_resources.qrc">
-              <normaloff>:/stop.png</normaloff>:/stop.png</iconset>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="minimizebtn">
-            <property name="maximumSize">
-             <size>
-              <width>16</width>
-              <height>16</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../res/csapex_resources.qrc">
-              <normaloff>:/minimize.png</normaloff>:/minimize.png</iconset>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
@@ -213,26 +170,8 @@ QFrame#boxframe csapex--Connector {
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../res/csapex_resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
-  <connection>
-   <sender>minimizebtn</sender>
-   <signal>clicked()</signal>
-   <receiver>Box</receiver>
-   <slot>setFocus()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>201</x>
-     <y>12</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>118</x>
-     <y>69</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>enablebtn</sender>
    <signal>clicked()</signal>

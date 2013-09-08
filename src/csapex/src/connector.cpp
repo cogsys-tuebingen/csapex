@@ -133,8 +133,12 @@ void Connector::findParents()
     }
 }
 
-bool Connector::canConnectTo(Connector* other_side)
+bool Connector::canConnectTo(Connector* other_side) const
 {
+    if(other_side == this) {
+        return false;
+    }
+
     bool in_out = (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
     bool compability = getType()->canConnectTo(other_side->getType());
 
@@ -290,7 +294,7 @@ void Connector::setLabel(const std::string &label)
     label_ = label;
 }
 
-void Connector::setType(ConnectionType::Ptr type)
+void Connector::setType(ConnectionType::ConstPtr type)
 {
     type_ = type;
 
