@@ -322,9 +322,6 @@ void Box::addOutput(ConnectorOut* out)
     ui->output_layout->addWidget(out);
     output.push_back(out);
 
-    QObject::connect(out, SIGNAL(connectionFormed(Connector*,Connector*)), this, SIGNAL(connectionFormed(Connector*,Connector*)));
-    QObject::connect(out, SIGNAL(connectionDestroyed(Connector*,Connector*)), this, SIGNAL(connectionDestroyed(Connector*,Connector*)));
-
     connectConnector(out);
 
     Q_EMIT connectorCreated(out);
@@ -369,9 +366,6 @@ void Box::removeOutput(ConnectorOut *out)
 
     assert(*it == out);
 
-    QObject::disconnect(out, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionFormed(ConnectorOut*,ConnectorIn*)));
-    QObject::disconnect(out, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)), this, SIGNAL(connectionDestroyed(ConnectorOut*,ConnectorIn*)));
-
     disconnectConnector(out);
 
     out->deleteLater();
@@ -380,6 +374,8 @@ void Box::removeOutput(ConnectorOut *out)
 
 void Box::connectConnector(Connector *c)
 {
+    QObject::connect(c, SIGNAL(connectionFormed(Connector*,Connector*)), this, SIGNAL(connectionFormed(Connector*,Connector*)));
+    QObject::connect(c, SIGNAL(connectionDestroyed(Connector*,Connector*)), this, SIGNAL(connectionDestroyed(Connector*,Connector*)));
     QObject::connect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
@@ -390,6 +386,8 @@ void Box::connectConnector(Connector *c)
 
 void Box::disconnectConnector(Connector *c)
 {
+    QObject::disconnect(c, SIGNAL(connectionFormed(Connector*,Connector*)), this, SIGNAL(connectionFormed(Connector*,Connector*)));
+    QObject::disconnect(c, SIGNAL(connectionDestroyed(Connector*,Connector*)), this, SIGNAL(connectionDestroyed(Connector*,Connector*)));
     QObject::disconnect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));

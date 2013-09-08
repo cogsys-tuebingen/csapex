@@ -18,7 +18,7 @@ namespace command
 
 struct AddBox : public Command
 {
-    AddBox(SelectorProxy::Ptr selector_, QPoint pos_, Memento::Ptr state = Memento::NullPtr, const std::string& parent_uuid_ = "", const std::string& uuid_ = "");
+    AddBox(SelectorProxy::Ptr selector_, QPoint pos_, const std::string& parent_uuid_, const std::string& uuid_, Memento::Ptr state = Memento::NullPtr);
 
 protected:
     bool execute();

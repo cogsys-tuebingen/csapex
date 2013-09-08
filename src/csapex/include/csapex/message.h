@@ -30,7 +30,7 @@ public:
     typedef boost::shared_ptr<AnyMessage> Ptr;
 
 protected:
-    AnyMessage(const std::string& name);
+    AnyMessage();
 
 public:
     virtual ConnectionType::Ptr clone() ;

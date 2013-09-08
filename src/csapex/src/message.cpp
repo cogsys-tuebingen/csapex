@@ -24,25 +24,25 @@ void Message::readYaml(YAML::Node&)
 }
 
 
-AnyMessage::AnyMessage(const std::string& name)
-    : Message(name)
+AnyMessage::AnyMessage()
+    : Message("anything")
 {}
 
 ConnectionType::Ptr AnyMessage::clone()
 {
-    AnyMessage::Ptr new_msg(new AnyMessage("anything"));
+    AnyMessage::Ptr new_msg(new AnyMessage);
     return new_msg;
 }
 
 ConnectionType::Ptr AnyMessage::toType()
 {
-    Ptr new_msg(new AnyMessage("anything"));
+    Ptr new_msg(new AnyMessage);
     return new_msg;
 }
 
 ConnectionType::Ptr AnyMessage::make()
 {
-    Ptr new_msg(new AnyMessage("anything"));
+    Ptr new_msg(new AnyMessage);
     return new_msg;
 }
 

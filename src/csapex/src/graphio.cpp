@@ -56,13 +56,13 @@ GraphIO::GraphIO(Graph::Ptr graph)
 void GraphIO::saveSettings(YAML::Emitter& yaml)
 {
     yaml << YAML::Key << "uuid_map";
-    yaml << YAML::Value << BoxManager::instance().uuids;
+    yaml << YAML::Value << graph_->uuids;
 }
 
 void GraphIO::loadSettings(YAML::Node &doc)
 {
     if(doc.FindValue("uuid_map")) {
-        doc["uuid_map"] >> BoxManager::instance().uuids;
+        doc["uuid_map"] >> graph_->uuids;
     }
 }
 

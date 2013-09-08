@@ -159,7 +159,7 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPoint pos = e->pos() + offset;
 
-        Command::Ptr add_box(new command::AddBox(selector, pos));
+        Command::Ptr add_box(new command::AddBox(selector, pos, "", graph_->makeUUID(selector->getType())));
         CommandDispatcher::execute(add_box);
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {

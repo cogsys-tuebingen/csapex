@@ -12,7 +12,7 @@ namespace command
 
 struct AddConnector : public Command
 {
-    AddConnector(const std::string& box_uuid, const std::string& label, ConnectionTypeConstPtr type, bool input, const std::string& uuid, bool forward = false);
+    AddConnector(const std::string& box_uuid, const std::string& label, const std::string& type, bool input, const std::string& uuid, bool forward = false);
 
 protected:
     bool execute();
@@ -20,7 +20,7 @@ protected:
     bool redo();
 
 private:
-    ConnectionTypeConstPtr type;
+    std::string type;
     std::string label;
     bool input;
 

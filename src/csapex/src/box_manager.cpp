@@ -42,7 +42,6 @@ void BoxManager::stop()
 
 void BoxManager::reset()
 {
-    uuids.clear();
 }
 
 BoxManager::~BoxManager()
@@ -173,6 +172,8 @@ std::string BoxManager::stripNamespace(const std::string &name)
 
 Box::Ptr BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::string& uuid)
 {
+    assert(!uuid.empty());
+
     std::string type = target_type;
     if(type.find_first_of(" ") != type.npos) {
         std::cout << "warning: type '" << type << "' contains spaces, stripping them!" << std::endl;
@@ -182,12 +183,8 @@ Box::Ptr BoxManager::makeBox(QPoint pos, const std::string& target_type, const s
     }
 
 
-    std::string uuid_ = uuid;
     BOOST_FOREACH(SelectorProxy::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
-            if(uuid_.empty()) {
-                uuid_ = makeUUID(type);
-            }
             return p->create(pos, type, uuid);
         }
     }
@@ -200,9 +197,6 @@ Box::Ptr BoxManager::makeBox(QPoint pos, const std::string& target_type, const s
         std::string p_type_wo_ns = stripNamespace(p->getType());
 
         if(p_type_wo_ns == type_wo_ns) {
-            if(uuid_.empty()) {
-                uuid_ = makeUUID(type);
-            }
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
             return p->create(pos, p->getType(), uuid);
         }
@@ -236,15 +230,4 @@ void BoxManager::setContainer(QWidget *c)
 QWidget* BoxManager::container()
 {
     return container_;
-}
-
-std::string BoxManager::makeUUID(const std::string& name)
-{
-    int& last_id = uuids[name];
-    ++last_id;
-
-    std::stringstream ss;
-    ss << name << "_" << last_id;
-
-    return ss.str();
 }

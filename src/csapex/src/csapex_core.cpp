@@ -7,6 +7,8 @@
 #include <csapex/graphio.h>
 #include <csapex/stream_interceptor.h>
 #include <csapex/command_dispatcher.h>
+#include <csapex/message.h>
+#include <csapex/connection_type_manager.h>
 
 /// SYSTEM
 #include <fstream>
@@ -21,6 +23,8 @@ CsApexCore::CsApexCore()
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
 
     StreamInterceptor::instance().start();
+
+    ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ("anything");
 
     Graph::Ptr graph(new Graph);
     Graph::setRoot(graph);

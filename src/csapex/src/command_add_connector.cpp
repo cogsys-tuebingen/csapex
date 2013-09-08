@@ -9,11 +9,12 @@
 #include <csapex/connection_type.h>
 #include <csapex/graph.h>
 #include <csapex/command_dispatcher.h>
+#include <csapex/connection_type_manager.h>
 
 using namespace csapex;
 using namespace command;
 
-AddConnector::AddConnector(const std::string &box_uuid, const std::string& label, ConnectionType::ConstPtr type, bool input, const std::string &uuid, bool forward)
+AddConnector::AddConnector(const std::string &box_uuid, const std::string& label, const std::string& type, bool input, const std::string &uuid, bool forward)
     : type(type), label(label), input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid), forward(forward)
 {
 
@@ -46,7 +47,7 @@ bool AddConnector::execute()
         box->addOutput(out);
     }
 
-    c->setType(type);
+    c->setType(ConnectionTypeManager::createMessage(type));
     c->setLabel(label);
     c_uuid = c->UUID();
 

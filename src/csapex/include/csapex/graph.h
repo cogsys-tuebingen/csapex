@@ -9,6 +9,7 @@
 /// SYSTEM
 #include <QObject>
 #include <QTimer>
+#include <map>
 
 namespace csapex {
 
@@ -78,6 +79,8 @@ public:
     Connection::Ptr getConnection(Connection::Ptr);
     int getConnectionId(Connection::Ptr);
 
+    std::string makeUUID(const std::string& name);
+
 public Q_SLOTS:
     void undo();
     void redo();
@@ -119,6 +122,9 @@ protected:
     std::vector<BoxPtr> boxes_;
     std::vector<Connector*> connectors_;
     std::vector<Connection::Ptr> connections;
+
+
+    std::map<std::string, int> uuids;
 
     QTimer* timer_;
 };

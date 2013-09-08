@@ -10,9 +10,11 @@
 
 using namespace csapex::command;
 
-AddBox::AddBox(SelectorProxy::Ptr selector, QPoint pos, Memento::Ptr state, const std::string &parent_uuid, const std::string& uuid)
-    : selector_(selector), pos_(pos), parent_uuid_(parent_uuid)
+AddBox::AddBox(SelectorProxy::Ptr selector, QPoint pos, const std::string &parent_uuid, const std::string& uuid, Memento::Ptr state)
+    : selector_(selector), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
+    assert(!uuid.empty());
+
     if(state != Memento::NullPtr) {
         Box::State::Ptr bs = boost::dynamic_pointer_cast<Box::State> (state);
         if(!uuid.empty()) {
@@ -20,8 +22,6 @@ AddBox::AddBox(SelectorProxy::Ptr selector, QPoint pos, Memento::Ptr state, cons
         }
         saved_state_ = bs;
     }
-
-    uuid_ = uuid.empty() ? BoxManager::instance().makeUUID(selector->getType()) : uuid;
 }
 
 bool AddBox::execute()

@@ -67,6 +67,18 @@ void Graph::setRoot(Graph::Ptr root)
     root_ = root;
 }
 
+std::string Graph::makeUUID(const std::string& name)
+{
+    int& last_id = uuids[name];
+    ++last_id;
+
+    std::stringstream ss;
+    ss << name << "_" << last_id;
+
+    return ss.str();
+}
+
+
 void Graph::addBox(Box::Ptr box)
 {
     assert(!box->UUID().empty());
@@ -120,7 +132,7 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
             box2uuid[b.get()] = uuid;
 
             meta->add(Command::Ptr(new command::DeleteBox(b->UUID())));
-            meta->add(Command::Ptr(new command::AddBox(selector, b->pos(), state, box_uuid, uuid)));
+            meta->add(Command::Ptr(new command::AddBox(selector, b->pos(), box_uuid, uuid, state)));
         }
     }
 
@@ -153,7 +165,7 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
                         std::string new_connector_uuid = Connector::makeUUID(box_uuid, Connector::TYPE_MISC, next_connector_sub_id++);
 
                         // create new separator connector
-                        add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, in->getLabel(), in->getType(), true, new_connector_uuid, true)));
+                        add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, in->getLabel(), in->getType()->name(), true, new_connector_uuid, true)));
                         // connect old output to the new connector
                         add_connections->add(Command::Ptr(new command::AddConnection(target->UUID(), new_connector_uuid)));
                         // connect the new connector to the old input
@@ -180,7 +192,7 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
                         if(!external_connector_added) {
                             external_connector_added = true;
                             new_connector_uuid = Connector::makeUUID(box_uuid, Connector::TYPE_MISC, next_connector_sub_id++);
-                            add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, out->getLabel(), in->getType(), false, new_connector_uuid, true)));
+                            add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, out->getLabel(), in->getType()->name(), false, new_connector_uuid, true)));
                         }
 
                         add_connections->add(Command::Ptr(new command::AddConnection(new_connector_uuid, in->UUID())));
@@ -324,6 +336,7 @@ void Graph::clear()
 
 void Graph::reset()
 {
+    uuids.clear();
     boxes_.clear();
     connectors_.clear();
     connections.clear();
@@ -663,11 +676,11 @@ void Graph::groupSelectedBoxes()
     }
 
     SelectorProxy::Ptr selector = BoxManager::instance().getSelector("::meta");
-    const std::string& box = BoxManager::instance().makeUUID(selector->getType());
+    std::string uuid = makeUUID(selector->getType());
 
     command::Meta::Ptr meta(new command::Meta());
-    meta->add(command::AddBox::Ptr(new command::AddBox(selector, tl, Memento::NullPtr, "", box)));
-    meta->add(moveSelectionToBoxCommands(box));
+    meta->add(command::AddBox::Ptr(new command::AddBox(selector, tl, "", uuid)));
+    meta->add(moveSelectionToBoxCommands(uuid));
 
     CommandDispatcher::execute(meta);
 }

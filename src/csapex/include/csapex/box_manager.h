@@ -61,7 +61,6 @@ public:
     void insertAvailableBoxedObjects(QMenu* menu);
     void insertAvailableBoxedObjects(QTreeWidget *tree);
 
-    std::string makeUUID(const std::string& name);
     void stop();
     void reset();
 
@@ -75,8 +74,6 @@ protected:
     BoxManager& operator = (const BoxManager& assign);
 
     std::vector<SelectorProxy::Ptr> available_elements_prototypes;
-
-    std::map<std::string, int> uuids;
 
     QWidget* container_;
 

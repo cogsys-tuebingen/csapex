@@ -86,7 +86,9 @@ class RosHandler
                         state = tmp->getState();
                     }
 
-                    CommandDispatcher::execute(Command::Ptr(new command::AddBox(BoxManager::instance().getSelector("csapex::ImportRos"), pos, state)));
+                    std::string type("csapex::ImportRos");
+                    std::string uuid = Graph::root()->makeUUID(type);
+                    CommandDispatcher::execute(Command::Ptr(new command::AddBox(BoxManager::instance().getSelector(type), pos, "", uuid, state)));
 
                     return true;
                 }
@@ -164,7 +166,9 @@ class FileHandler
                     state = tmp->getState();
                 }
 
-                CommandDispatcher::execute(Command::Ptr(new command::AddBox(BoxManager::instance().getSelector("csapex::FileImporter"), pos, state)));
+                std::string type("csapex::FileImporter");
+                std::string uuid = Graph::root()->makeUUID(type);
+                CommandDispatcher::execute(Command::Ptr(new command::AddBox(BoxManager::instance().getSelector(type), pos, "", uuid, state)));
 
                 e->accept();
                 return true;
