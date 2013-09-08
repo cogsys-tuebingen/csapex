@@ -6,20 +6,34 @@
 
 using namespace boost;
 
+int brush_width = 0;
+
+std::vector<cv::Vec<int,5> > changes;
+
 void mouse_event(int event, int x , int y , int flags, void *param)
 {
     cv::Vec<int,5> *vec = (cv::Vec<int,5>*) param;
 
-    if(event == CV_EVENT_LBUTTONDOWN || event == CV_EVENT_MOUSEMOVE && (*vec)[4] == 1) {
+    bool drag = event == CV_EVENT_MOUSEMOVE && (*vec)[4] == 1;
+
+    if(event == CV_EVENT_LBUTTONDOWN || event == CV_EVENT_RBUTTONDOWN || drag) {
         (*vec)[0] = x;
         (*vec)[1] = y;
         (*vec)[3] = 1;
         (*vec)[4] = 1;
+
+        if(event == CV_EVENT_LBUTTONDOWN)
+            brush_width = 0;
+        if(event == CV_EVENT_RBUTTONDOWN)
+            brush_width = 1;
     }
 
-    if(event == CV_EVENT_LBUTTONUP)
+    if(event == CV_EVENT_LBUTTONUP || event == CV_EVENT_RBUTTONUP)
         (*vec)[4] = 0;
 
+    if(event == CV_EVENT_LBUTTONDOWN || event == CV_EVENT_RBUTTONDOWN || drag) {
+        changes.push_back(cv::Vec<int,5>(*vec));
+    }
 }
 
 int main(int argc, char *argv[])
@@ -101,6 +115,7 @@ int main(int argc, char *argv[])
     int  cell_height = zoom;
     int  cell_width  = zoom;
     bool use_jpg = jpg_paths.size() > 0;
+    int filled = 0;
     while(!end) {
         TerraMat mat_original;
         cv::Mat image;
@@ -119,17 +134,34 @@ int main(int argc, char *argv[])
 
         if(!((cv::Mat) mat).empty()) {
             bool active_mat = true;
-            int filled = 0;
             while(active_mat) {
-                if(update_vec[3] != 0) {
-                    int grid_x = update_vec[0] / cell_width;
-                    int grid_y = update_vec[1] / cell_height;
-                    if(update_vec[2] < channel_set) {
-                        mat.setAbsolut(grid_y, grid_x, update_vec[2]);
-                    } else {
-                        mat.setUnknown(grid_y, grid_x);
+                if(!changes.empty()) {
+                    size_t n_changes = changes.size();
+                    for(size_t change_i = 0; change_i < n_changes; ++change_i) {
+                        const cv::Vec<int,5>& change = changes[change_i];
+
+                        int d = brush_width;
+
+                        for(int dx=-d; dx <= d; ++dx) {
+                            for(int dy=-d; dy <= d; ++dy) {
+                                int grid_x = change[0] / cell_width + dx;
+                                int grid_y = change[1] / cell_height + dy;
+
+                                int cols = 64;
+                                int rows = 48;
+                                if(grid_x < 0 || grid_x >= cols || grid_y < 0 || grid_y >= rows)
+                                    continue;
+
+                                if(change[2] < channel_set) {
+                                    mat.setAbsolut(grid_y, grid_x, change[2]);
+                                } else {
+                                    mat.setUnknown(grid_y, grid_x);
+                                }
+                            }
+                        }
+
+                        changes.clear();
                     }
-                    update_vec[3] = 0;
 
                 }
 
@@ -219,7 +251,7 @@ int main(int argc, char *argv[])
                     update_vec[2]--;
                     break;
                 }
-                update_vec[2] %= channel_set;
+                update_vec[2] = (update_vec[2] + channel_set) % channel_set;
             }
         } else {
             render = cv::Mat(480,640, CV_8UC3);
