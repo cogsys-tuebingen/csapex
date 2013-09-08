@@ -64,14 +64,24 @@ public:
 
     // exports an uchar image, each pixel containing the id of the favorite terrain class
     cv::Mat getFavorites();
-
     cv::Mat getFavorites(cv::Mat &validity, const float thresh = 0.5f);
+
+    // get channel related to a terrain id
+    int     getChannelOfId(const int id);
 
     // exports an rgb image showing the color of the favorite terrain class in each pixel
     cv::Mat getFavoritesBGR();
-
+    // exports the maximum aknowledge classes
     cv::Mat getFavoritesBGRRaw();
 
+    // matrix where probabilities are absolut, there for one channel holding prob = 1.f
+    void getAbsolut(TerraMat &abs);
+
+    // set a channel as absolut
+    void setAbsolut(const int row, const int col, const int channel);
+
+    // set all channels zero, so that terrain class is unknown
+    void setUnknown(const int row, const int col);
 
     // exports an rgb image showing the weighted mean color of the terrain class in each pixel
     cv::Mat getMeanBGR();
@@ -81,7 +91,6 @@ public:
 
     operator cv::Mat();
     operator cv::Mat&();
-    operator const cv::Mat&();
 
     template<typename _Tp>
     _Tp& at(int i, int j)
@@ -93,10 +102,11 @@ private:
     int                         channels_;
     int                         step_;
     std::map<int,int>           mapping_;
+    std::map<int,int>           reverse_mapping_;
     std::map<int,TerrainClass>  legend_;
     cv::Mat                     terra_mat_;
 
-    cv::Vec3b            COLOR_INVALID;
+    cv::Vec3b                   COLOR_INVALID;
 
     void writeMapping(cv::FileStorage &fs) const;
     void readMapping(const cv::FileStorage &fs);
@@ -104,6 +114,7 @@ private:
     void readLegend(const cv::FileStorage &fs);
     void writeMatrix(cv::FileStorage &fs) const;
     void readMatrix(const cv::FileStorage &fs);
+    void calcReversMapping();
 };
 
 

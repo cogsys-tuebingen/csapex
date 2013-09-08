@@ -13,8 +13,10 @@ TerraMat::TerraMat(const cv::Mat &terra_mat) :
     terra_mat_(terra_mat),
     COLOR_INVALID(127,127,127)
 {
-    for(uchar i = 0 ; i < channels_ ; ++i)
+    for(int i = 0 ; i < channels_ ; ++i) {
         mapping_.insert(std::make_pair(i,i));
+        reverse_mapping_.insert(std::make_pair(i,i));
+    }
 }
 
 TerraMat::TerraMat(const cv::Mat &terra_mat, const std::map<int, int> &mapping) :
@@ -24,6 +26,7 @@ TerraMat::TerraMat(const cv::Mat &terra_mat, const std::map<int, int> &mapping) 
     terra_mat_(terra_mat),
     COLOR_INVALID(127,127,127)
 {
+    calcReversMapping();
 }
 
 void TerraMat::setMatrix(const cv::Mat &terra_mat)
@@ -31,9 +34,10 @@ void TerraMat::setMatrix(const cv::Mat &terra_mat)
     channels_   = terra_mat.channels();
     step_       = terra_mat.step / terra_mat.elemSize1();
     terra_mat_  = terra_mat;
-    for(uchar i = 0 ; i < channels_ ; ++i)
+    for(int i = 0 ; i < channels_ ; ++i) {
         mapping_.insert(std::make_pair(i,i));
-
+        reverse_mapping_.insert(std::make_pair(i,i));
+    }
 }
 
 void TerraMat::setMatrix(const cv::Mat &terra_mat, const std::map<int, int> &mapping)
@@ -42,6 +46,7 @@ void TerraMat::setMatrix(const cv::Mat &terra_mat, const std::map<int, int> &map
     step_       = terra_mat.step / terra_mat.elemSize1();
     terra_mat_  = terra_mat;
     mapping_    = mapping;
+    calcReversMapping();
 }
 
 cv::Mat TerraMat::getMatrix() const
@@ -57,6 +62,7 @@ void TerraMat::setMapping(const std::map<int, int> &mapping)
     }
 
     mapping_ = mapping;
+    calcReversMapping();
 }
 
 std::map<int, int> TerraMat::getMapping() const
@@ -148,6 +154,11 @@ cv::Mat TerraMat::getFavorites(cv::Mat &validity, const float thresh)
     return result;
 }
 
+int TerraMat::getChannelOfId(const int id)
+{
+    return reverse_mapping_[id];
+}
+
 // exports an rgb image showing the color of the favorite terrain class in each pixel
 cv::Mat TerraMat::getFavoritesBGR() {
     cv::Mat result(terra_mat_.rows, terra_mat_.cols, CV_8UC3, cv::Scalar::all(0));
@@ -186,6 +197,52 @@ cv::Mat TerraMat::getFavoritesBGRRaw() {
         }
     }
     return result;
+}
+
+void TerraMat::getAbsolut(TerraMat &abs)
+{
+    abs.step_            = step_;
+    abs.mapping_         = mapping_;
+    abs.reverse_mapping_ = reverse_mapping_;
+    abs.channels_        = channels_;
+    abs.legend_          = legend_;
+
+    abs.terra_mat_ = cv::Mat(terra_mat_.rows, terra_mat_.cols, terra_mat_.type(), cv::Scalar::all(0));
+    cv::Mat validity;
+    cv::Mat favourites = getFavorites(validity, 0.01);
+
+    float* data = (float*) abs.terra_mat_.data;
+    uchar* valid = (uchar*) validity.data;
+    for(int i = 0 ; i < favourites.rows ; ++i) {
+        for(int j = 0 ; j < favourites.cols; ++j) {
+            int channel = reverse_mapping_[(int) favourites.at<uchar>(i,j)];
+            int pixel_pos = step_ * i + j * channels_;
+            if(valid[validity.step * i + j] == 1)
+                data[pixel_pos + channel] = 1.f;
+        }
+    }
+}
+
+void TerraMat::setAbsolut(const int row, const int col, const int channel)
+{
+    float* data = (float*) terra_mat_.data;
+    for(int k = 0 ; k < channels_ ; ++k) {
+        int pixel_pos = step_ * row + col * channels_;
+        if(k != channel)
+            data[pixel_pos + k] = 0.f;
+        else
+            data[pixel_pos + k] = 1.f;
+    }
+}
+
+void TerraMat::setUnknown(const int row, const int col)
+{
+    float* data = (float*) terra_mat_.data;
+    for(int k = 0 ; k < channels_ ; ++k) {
+        int pixel_pos = step_ * row + col * channels_;
+        data[pixel_pos + k] = 0.f;
+
+    }
 }
 
 // exports an rgb image showing the weighted mean color of the terrain class in each pixel
@@ -228,11 +285,6 @@ TerraMat::operator cv::Mat()
     return terra_mat_;
 }
 
-TerraMat::operator const cv::Mat&()
-{
-    return terra_mat_;
-}
-
 TerraMat::operator cv::Mat &()
 {
     return terra_mat_;
@@ -257,6 +309,7 @@ void TerraMat::readMapping(const cv::FileStorage &fs)
         *it >> entry.second;
         mapping_.insert(entry);
     }
+    calcReversMapping();
 }
 
 void TerraMat::writeLegend(cv::FileStorage &fs) const
@@ -286,9 +339,9 @@ void TerraMat::writeMatrix(cv::FileStorage &fs) const
     cv::split(terra_mat_, terra_mat_channels);
     fs << "terra_mat" << "[";
     for(std::vector<cv::Mat>::iterator it = terra_mat_channels.begin() ; it != terra_mat_channels.end() ; it++) {
-//        /// TESTING
-//        cv::fastNlMeansDenoising(*it, *it);
-//        /// TESTING
+        //        /// TESTING
+        //cv::fastNlMeansDenoising(*it, *it);
+        //        /// TESTING
         fs << *it;
 
     }
@@ -304,8 +357,19 @@ void TerraMat::readMatrix(const cv::FileStorage &fs)
     for(cv::FileNodeIterator it = terra_mat.begin() ; it != terra_mat.end() ; it++) {
         cv::Mat channel;
         *it >> channel;
+        /// TESTING
+        //cv::fastNlMeansDenoising(channel, channel);
+        /// TESTING
         terra_mat_channels.push_back(channel);
     }
 
     cv::merge(terra_mat_channels, terra_mat_);
+}
+
+void TerraMat::calcReversMapping()
+{
+    reverse_mapping_.clear();
+    for(std::map<int,int>::iterator it = mapping_.begin() ; it != mapping_.end() ; ++it) {
+        reverse_mapping_.insert(std::make_pair(it->second, it->first));
+    }
 }
