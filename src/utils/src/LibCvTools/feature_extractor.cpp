@@ -1,5 +1,6 @@
 #include "feature_extractor.h"
 #include "extractor_params.h"
+#include <iostream>
 #include <cmath>
 
 using namespace cv_extraction;

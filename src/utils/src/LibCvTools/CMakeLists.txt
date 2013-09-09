@@ -3,6 +3,8 @@
 # Load OpenCV cmake module, if wasn't looked for or found yet
 find_package(OpenCV REQUIRED)
 set(CMAKE_BUILD_TYPE Debug)
+
+#set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_CXX_FLAGS "-O3")
 
 add_library (LibCvTools SHARED
@@ -33,6 +35,7 @@ add_library (LibCvTools SHARED
 target_link_libraries(LibCvTools
     ${OpenCV_LIBS}
     ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
     yaml-cpp
 )
 

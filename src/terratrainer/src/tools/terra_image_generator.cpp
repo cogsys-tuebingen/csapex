@@ -241,6 +241,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::cout << " ... multi prob predict ... | extract time | prediction time" << std::endl;
 
     for(std::vector<std::string>::iterator it = images.begin() ; it != images.end() ; ++it) {
         cv::Mat tmp = cv::imread(*it);

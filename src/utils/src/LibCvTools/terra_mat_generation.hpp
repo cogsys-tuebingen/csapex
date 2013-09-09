@@ -1,6 +1,7 @@
 #ifndef TERRA_MAP_HPP
 #define TERRA_MAP_HPP
 #include <opencv2/core/core.hpp>
+#include <ros/ros.h>
 #include <iostream>
 #include "math.hpp"
 #include "extractor.h"
@@ -45,6 +46,7 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
                                cv::Mat &terraMat, std::map<int, int> &channel_mapping,
                                bool use_max_prob)
 {
+    ros::Time::init();
     /// PREPARE MATRICES
     int map_rows = img.rows / cell_size;
     int map_cols = img.cols / cell_size;
@@ -59,7 +61,17 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
     std::vector<cv::Rect>   rois;
     std::vector<cv::Mat>    descriptors;
     getRois(map_rows, map_cols, cell_size, rois);
+
+    /// TESTING
+    ros::Time start = ros::Time::now();
+    /// TESTING
+
     extractor->extract(img, rois, descriptors);
+
+    /// TESTING
+    ros::Time step  = ros::Time::now();
+    /// TESTING
+    std::stringstream buf;
 
     for(int i = 0 ; i < map_rows ; ++i) {
         for(int j = 0 ; j < map_cols ; ++j) {
@@ -69,7 +81,16 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
             /// CLASSIFY
             if(d.rows > 1) {
                 if(use_max_prob) {
+                    /// TESTING
+                    ros::Time predict_start = ros::Time::now();
+                    /// TESTING
+
                     classifier->predictClassProbsMultiSampleMax(d, probs);
+
+                    /// TESTING
+                    buf << (ros::Time::now() - predict_start).toSec()  * 1000 << " ";
+                    /// TESTING
+
                 } else
                     classifier->predictClassProbsMultiSample(d, probs);
             } else {
@@ -80,8 +101,14 @@ inline void  prepare_terra_mat(const cv::Mat &img, const int cell_size, const in
                 int channel = channel_mapping[it->first];
                 layers[channel].at<float>(i,j) = it->second;
             }
+            buf << std::endl;
         }
     }
+
+    /// TESTING
+    std::cout << buf.str();
+    std::cout << "--- sum [extr] [classification] : " << (step - start).toSec() * 1000 << " " << (ros::Time::now() - step).toSec() * 1000 << std::endl;
+    /// TESTING
 
     cv::merge(layers, terraMat);
 }
