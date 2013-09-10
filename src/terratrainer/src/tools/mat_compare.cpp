@@ -24,12 +24,14 @@ int main(int argc, char *argv[])
 
     for(int i = 0 ; i < mat_m1.rows ; ++i) {
         for(int j = 0 ; j < mat_m1.cols ; ++j) {
-            if(val_m1.at<uchar>(i,j) == 0 && val_m1.at<uchar>(i,j) == val_m2.at<uchar>(i,j))
-                pos++;
-            else if(mat_m1.at<uchar>(i,j) == mat_m2.at<uchar>(i,j))
-                pos++;
-            else
-                neg++;
+
+            /// ONLY CHECK ON MATCHABLES
+            if(val_m1.at<uchar>(i,j) == 1 && val_m2.at<uchar>(i,j) == 1) {
+                if(mat_m1.at<uchar>(i,j) == mat_m2.at<uchar>(i,j))
+                    pos++;
+                else
+                    neg++;
+            }
         }
     }
 

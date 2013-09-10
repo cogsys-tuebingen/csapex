@@ -6,9 +6,10 @@ find_package(catkin REQUIRED COMPONENTS utils)
 ## System dependencies are found with CMake's conventions
 find_package(QT4    COMPONENTS QtCore QtGui REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(Boost  COMPONENTS regex REQUIRED)
-set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CSS_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+find_package(Boost  COMPONENTS regex filesystem system REQUIRED)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_CSS_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -99,6 +100,9 @@ add_executable(key_tester
 add_executable(mat_compare
                 src/tools/mat_compare.cpp)
 
+add_executable(prepare_set
+                src/tools/terra_prepare_set.cpp)
+
 #add_executable(YAMLTrainConverter
 #               src/tools/yaml_train_converter.cpp)
 
@@ -137,6 +141,9 @@ target_link_libraries(mat_compare
                         ${OpenCV_LIBS}
                         ${Boost_LIBRARIES}
                         ${catkin_LIBRARIES})
+
+target_link_libraries(prepare_set
+                        ${Boost_LIBRARIES})
 
 #target_link_libraries(YAMLTrainConverter
 #                        yaml-cpp)
