@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex_vision/image_combiner.h>
-#include <csapex/connector_in.h>
+#include <csapex/model/connector_in.h>
 
 /// SYSTEM
 #include <QLabel>

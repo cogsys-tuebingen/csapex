@@ -2,10 +2,10 @@
 #include "export_cout.h"
 
 /// PROJECT
-#include <csapex/box.h>
-#include <csapex/connector_in.h>
-#include <csapex/stream_interceptor.h>
-#include <csapex/message.h>
+#include <csapex/model/box.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/utility/stream_interceptor.h>
+#include <csapex/model/message.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

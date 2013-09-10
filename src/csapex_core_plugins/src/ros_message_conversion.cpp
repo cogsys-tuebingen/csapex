@@ -2,7 +2,7 @@
 #include <csapex_core_plugins/ros_message_conversion.h>
 
 /// PROJECT
-#include <csapex/connector_out.h>
+#include <csapex/model/connector_out.h>
 
 using namespace csapex;
 

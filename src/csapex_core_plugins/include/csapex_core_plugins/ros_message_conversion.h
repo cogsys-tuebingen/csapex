@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex_core_plugins/ros_handler.h>
-#include <csapex/connection_type.h>
+#include <csapex/model/connection_type.h>
 
 /// PROJECT
 #include <utils_plugin/singleton.hpp>

@@ -2,7 +2,7 @@
 #define BOOLEAN_MESSAGE_H
 
 /// PROJECT
-#include <csapex/message.h>
+#include <csapex/model/message.h>
 
 namespace csapex {
 namespace connection_types {

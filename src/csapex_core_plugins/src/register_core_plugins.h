@@ -2,7 +2,7 @@
 #define REGISTER_CORE_PLUGINS_H
 
 /// HEADER
-#include <csapex/core_plugin.h>
+#include <csapex/core/core_plugin.h>
 
 namespace csapex {
 

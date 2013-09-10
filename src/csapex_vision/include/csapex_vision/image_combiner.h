@@ -2,7 +2,7 @@
 #define IMAGE_COMBINER_H
 
 /// PROJECT
-#include <csapex/boxed_object.h>
+#include <csapex/model/boxed_object.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>

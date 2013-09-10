@@ -6,8 +6,8 @@
 #include <csapex_vision_features/descriptor_message.h>
 
 /// PROJECT
-#include <csapex/connection_type_manager.h>
-#include <csapex/tag.h>
+#include <csapex/manager/connection_type_manager.h>
+#include <csapex/model/tag.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

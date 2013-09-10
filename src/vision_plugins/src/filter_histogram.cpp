@@ -5,11 +5,11 @@
 #include <utils/LibCvTools/histogram.hpp>
 
 #include <csapex_vision/cv_mat_message.h>
-#include <csapex/connector_in.h>
-#include <csapex/connector_out.h>
-#include <csapex/box.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/model/box.h>
 #include <opencv2/opencv.hpp>
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

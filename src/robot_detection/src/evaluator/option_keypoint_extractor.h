@@ -2,7 +2,7 @@
 #define OPTION_KEYPOINT_EXTRACTOR_H
 
 /// COMPONENT
-#include <csapex/global_option.h>
+#include <csapex/deprecated/global_option.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>

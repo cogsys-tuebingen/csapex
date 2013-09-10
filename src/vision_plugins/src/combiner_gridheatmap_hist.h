@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include "combiner_gridcompare_hist.h"
-#include <csapex/qsignal_bridges.h>
+#include <csapex/utility/qsignal_bridges.h>
 #include <QMutex>
 
 namespace csapex {

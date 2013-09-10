@@ -1,7 +1,7 @@
 #include "combiner_gridcompare.h"
 
 /// PROJECT
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 
 using namespace csapex;
 

@@ -2,9 +2,9 @@
 #include "virtual_camera.h"
 
 /// PROJECT
-#include <csapex/box.h>
-#include <csapex/connector_out.h>
-#include <csapex/qt_helper.hpp>
+#include <csapex/model/box.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

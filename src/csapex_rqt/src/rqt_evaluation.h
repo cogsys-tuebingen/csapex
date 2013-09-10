@@ -2,7 +2,7 @@
 #define RQT_EVALUATION_H
 
 /// PROJECT
-#include <csapex/csapex_window.h>
+#include <csapex/view/csapex_window.h>
 
 /// SYSTEM
 #include <rqt_gui_cpp/plugin.h>

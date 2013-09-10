@@ -2,8 +2,8 @@
 #define FILE_IMPORTER_H
 
 /// PROJECT
-#include <csapex/message_provider.h>
-#include <csapex/boxed_object.h>
+#include <csapex/model/message_provider.h>
+#include <csapex/model/boxed_object.h>
 
 /// SYSTEM
 #include <QPushButton>

@@ -2,7 +2,7 @@
 #define EXTRACT_FEATURES_H
 
 /// COMPONENT
-#include <csapex/boxed_object.h>
+#include <csapex/model/boxed_object.h>
 
 /// PROJECT
 #include <config/reconfigurable.h>

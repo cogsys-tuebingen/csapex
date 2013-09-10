@@ -2,9 +2,9 @@
 #include "rqt_evaluation.h"
 
 /// PROJECT
-#include <csapex/connection_type_manager.h>
-#include <csapex/designer.h>
-#include <csapex/graph.h>
+#include <csapex/manager/connection_type_manager.h>
+#include <csapex/view/designer.h>
+#include <csapex/model/graph.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

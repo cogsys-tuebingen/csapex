@@ -5,8 +5,8 @@
 #include <csapex_boolean/boolean_message.h>
 
 /// PROJECT
-#include <csapex/tag.h>
-#include <csapex/connection_type_manager.h>
+#include <csapex/model/tag.h>
+#include <csapex/manager/connection_type_manager.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

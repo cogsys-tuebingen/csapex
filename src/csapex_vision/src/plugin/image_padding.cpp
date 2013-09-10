@@ -2,10 +2,10 @@
 #include "image_padding.h"
 
 /// PROJECT
-#include <csapex/qt_helper.hpp>
-#include <csapex/connector_in.h>
-#include <csapex/connector_out.h>
-#include <csapex/box.h>
+#include <csapex/utility/qt_helper.hpp>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/model/box.h>
 #include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM

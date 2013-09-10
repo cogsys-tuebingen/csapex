@@ -2,10 +2,10 @@
 #define VIRTUAL_CAMERA_H
 
 /// PROJECT
-#include <csapex/boxed_object.h>
+#include <csapex/model/boxed_object.h>
 #include <csapex_vision/image_provider.h>
 #include <csapex_vision/cv_mat_message.h>
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 #include <utils/LibCvTools/perspective_transform.h>
 #include <csapex/csapex_fwd.h>
 

@@ -1,8 +1,8 @@
 /// PROJECT
-#include <csapex/csapex_core.h>
-#include <csapex/csapex_window.h>
-#include <csapex/box.h>
-#include <csapex/boxed_object.h>
+#include <csapex/core/csapex_core.h>
+#include <csapex/view/csapex_window.h>
+#include <csapex/model/box.h>
+#include <csapex/model/boxed_object.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>

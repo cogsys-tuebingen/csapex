@@ -6,7 +6,7 @@
 #include <utils/LibCvTools/grid.hpp>
 #include <utils/LibCvTools/grid_attributes.hpp>
 #include <utils/LibCvTools/grid_compute.hpp>
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <QMutex>

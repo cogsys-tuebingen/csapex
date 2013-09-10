@@ -1,11 +1,11 @@
 #include "filter_splitter.h"
 
 /// PROJECT
-#include <csapex/box.h>
-#include <csapex/command_meta.h>
+#include <csapex/model/box.h>
+#include <csapex/command/meta.h>
 #include <csapex_vision/cv_mat_message.h>
-#include <csapex/connector_in.h>
-#include <csapex/connector_out.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
 
 
 /// SYSTEM

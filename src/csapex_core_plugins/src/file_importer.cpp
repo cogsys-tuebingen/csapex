@@ -2,12 +2,12 @@
 #include "file_importer.h"
 
 /// PROJECT
-#include <csapex/box.h>
-#include <csapex/connector_in.h>
-#include <csapex/connector_out.h>
-#include <csapex/qt_helper.hpp>
+#include <csapex/model/box.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/utility/qt_helper.hpp>
 #include <csapex_core_plugins/string_message.h>
-#include <csapex/message_provider_manager.h>
+#include <csapex/manager/message_provider_manager.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

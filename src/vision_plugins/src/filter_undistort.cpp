@@ -2,7 +2,7 @@
 #include "filter_undistort.h"
 
 /// COMPONENT
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

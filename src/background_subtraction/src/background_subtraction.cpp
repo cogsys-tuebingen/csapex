@@ -7,10 +7,10 @@
 #include "simple_background_remover.h"
 
 /// PROJECT
-#include <csapex/box.h>
-#include <csapex/connector_out.h>
-#include <csapex/connector_in.h>
-#include <csapex/qt_helper.hpp>
+#include <csapex/model/box.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

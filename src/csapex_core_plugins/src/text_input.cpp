@@ -2,8 +2,8 @@
 #include "text_input.h"
 
 /// PROJECT
-#include <csapex/box.h>
-#include <csapex/connector_out.h>
+#include <csapex/model/box.h>
+#include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM

@@ -2,8 +2,8 @@
 #define GLOBAL_OPTION_PANEL_H
 
 /// PROJECT
-#include <csapex/boxed_object.h>
-#include <csapex/global_option.h>
+#include <csapex/model/boxed_object.h>
+#include <csapex/deprecated/global_option.h>
 
 namespace csapex
 {

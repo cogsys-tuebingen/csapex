@@ -2,7 +2,7 @@
 #define STRING_MESSAGE_H
 
 /// PROJECT
-#include <csapex/message.h>
+#include <csapex/model/message.h>
 
 /// SYSTEM
 #include <string>

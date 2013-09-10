@@ -2,7 +2,7 @@
 #define EXPORTROS_H
 
 /// PROJECT
-#include <csapex/boxed_object.h>
+#include <csapex/model/boxed_object.h>
 
 /// SYSTEM
 #include <QLineEdit>

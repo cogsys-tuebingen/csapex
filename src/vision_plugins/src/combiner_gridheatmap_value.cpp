@@ -1,7 +1,7 @@
 #include "combiner_gridheatmap_value.h"
 
 /// COMPONENT
-#include <csapex/connector_out.h>
+#include <csapex/model/connector_out.h>
 #include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM

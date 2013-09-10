@@ -2,7 +2,7 @@
 #define MESSAGES_DEFAULT_HPP
 
 /// PROJECT
-#include <csapex/message.h>
+#include <csapex/model/message.h>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>

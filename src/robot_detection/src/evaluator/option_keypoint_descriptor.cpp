@@ -6,7 +6,7 @@
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 
 PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointDescriptor, csapex::GlobalOption)
 

@@ -58,62 +58,67 @@ include_directories(include
 
 ##### EVALUATION
 add_library(csapex SHARED
-    src/box.cpp
-    src/box_group.cpp
-    src/box_manager.cpp
-    src/boxed_object.cpp
-    src/core_plugin.cpp
-    src/command.cpp
-    src/command_dispatcher.cpp
-    src/command_meta.cpp
-    src/command_add_box.cpp
-    src/command_add_connection.cpp
-    src/command_add_connector.cpp
-    src/command_move_connection.cpp
-    src/command_delete_box.cpp
-    src/command_delete_connection.cpp
-    src/command_delete_connector.cpp
-    src/command_move_box.cpp
-    src/command_add_fulcrum.cpp
-    src/command_move_fulcrum.cpp
-    src/command_delete_fulcrum.cpp
-    src/command_instanciate_subgraph_template.cpp
-    src/connection.cpp
-    src/connector.cpp
-    src/connector_in.cpp
-    src/connector_out.cpp
-    src/connector_forward.cpp
-    src/connection_type.cpp
-    src/connection_type_manager.cpp
-    src/csapex_core.cpp
-    src/csapex_window.cpp
-    src/drag_io.cpp
-    src/design_board.cpp
-    src/designer.cpp
-    src/designerio.cpp
-    src/displayable.cpp
-    src/global_option.cpp
-    src/global_option_manager.cpp
-    src/graph.cpp
-    src/graphio.cpp
-    src/message.cpp
-    src/message_provider.cpp
-    src/message_provider_manager.cpp
-    src/memento.cpp
-    src/overlay.cpp
-    src/selector_proxy.cpp
-    src/selectable.cpp
-    src/stream_interceptor.cpp
-    src/sub_graph.cpp
-    src/sub_graph_template.cpp
-    src/template_manager.cpp
-    src/tag.cpp
-    src/qdouble_slider.cpp
-    src/qwrapper.cpp
-    src/qsignal_bridges.cpp
-    src/bash_parser.cpp
+    src/core/core_plugin.cpp
+    src/core/csapex_core.cpp
+    src/core/graphio.cpp
+    src/core/designerio.cpp
+    src/core/drag_io.cpp
 
-    include/csapex/qt_helper.hpp
+    src/command/command.cpp
+    src/command/dispatcher.cpp
+    src/command/meta.cpp
+    src/command/add_box.cpp
+    src/command/add_connection.cpp
+    src/command/add_connector.cpp
+    src/command/move_connection.cpp
+    src/command/delete_box.cpp
+    src/command/delete_connection.cpp
+    src/command/delete_connector.cpp
+    src/command/move_box.cpp
+    src/command/add_fulcrum.cpp
+    src/command/move_fulcrum.cpp
+    src/command/delete_fulcrum.cpp
+    src/command/instanciate_subgraph_template.cpp
+
+    src/model/box.cpp
+    src/model/box_group.cpp
+    src/model/boxed_object.cpp
+    src/model/boxed_object_constructor.cpp
+    src/model/graph.cpp
+    src/model/connection.cpp
+    src/model/connector.cpp
+    src/model/connector_in.cpp
+    src/model/connector_out.cpp
+    src/model/connector_forward.cpp
+    src/model/connection_type.cpp
+    src/model/memento.cpp
+    src/model/message.cpp
+    src/model/message_provider.cpp
+    src/model/tag.cpp
+    src/model/template.cpp
+
+    src/manager/box_manager.cpp
+    src/manager/connection_type_manager.cpp
+    src/manager/message_provider_manager.cpp
+    src/manager/template_manager.cpp
+
+    src/view/csapex_window.cpp
+    src/view/design_board.cpp
+    src/view/designer.cpp
+    src/view/displayable.cpp
+    src/view/overlay.cpp
+    src/view/selectable.cpp
+
+    src/utility/bash_parser.cpp
+    src/utility/qdouble_slider.cpp
+    src/utility/qsignal_bridges.cpp
+    src/utility/qwrapper.cpp
+    src/utility/stream_interceptor.cpp
+    include/csapex/utility/qt_helper.hpp
+
+    src/deprecated/global_option.cpp
+    src/deprecated/global_option_manager.cpp
+
     ${QT}
 )
 target_link_libraries(csapex

@@ -7,9 +7,9 @@
 #include <csapex/csapex_fwd.h>
 
 /// PROJECT
-#include <csapex/boxed_object.h>
+#include <csapex/model/boxed_object.h>
 #include <csapex_vision/cv_mat_message.h>
-#include <csapex/qdouble_slider.h>
+#include <csapex/utility/qdouble_slider.h>
 
 /// SYSTEM
 #include <QPushButton>

@@ -5,8 +5,8 @@
 #include <csapex_vision/cv_mat_message.h>
 
 /// PROJECT
-#include <csapex/connection_type_manager.h>
-#include <csapex/tag.h>
+#include <csapex/manager/connection_type_manager.h>
+#include <csapex/model/tag.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>

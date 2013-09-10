@@ -2,8 +2,8 @@
 #define IMAGE_PROVIDER_H
 
 /// PROJECT
-#include <csapex/memento.h>
-#include <csapex/message_provider.h>
+#include <csapex/model/memento.h>
+#include <csapex/model/message_provider.h>
 
 /// SYSTEM
 #include <boost/algorithm/string.hpp>

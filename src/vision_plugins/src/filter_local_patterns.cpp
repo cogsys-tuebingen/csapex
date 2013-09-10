@@ -1,7 +1,7 @@
 #include "filter_local_patterns.h"
 
 /// COMPONENT
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 #include <utils/LibCvTools/histogram.hpp>
 
 /// SYSTEM

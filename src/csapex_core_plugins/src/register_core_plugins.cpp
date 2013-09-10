@@ -8,13 +8,13 @@
 #include "file_importer.h"
 
 /// PROJECT
-#include <csapex/connection_type_manager.h>
-#include <csapex/tag.h>
-#include <csapex/drag_io.h>
-#include <csapex/command_add_box.h>
-#include <csapex/command_dispatcher.h>
-#include <csapex/box_manager.h>
-#include <csapex/box.h>
+#include <csapex/manager/connection_type_manager.h>
+#include <csapex/model/tag.h>
+#include <csapex/core/drag_io.h>
+#include <csapex/command/add_box.h>
+#include <csapex/command/dispatcher.h>
+#include <csapex/manager/box_manager.h>
+#include <csapex/model/box.h>
 
 /// SYSTEM
 #include <boost/regex.hpp>

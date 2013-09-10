@@ -2,8 +2,8 @@
 #define RELAY_H
 
 /// PROJECT
-#include <csapex/boxed_object.h>
-#include <csapex/connection_type.h>
+#include <csapex/model/boxed_object.h>
+#include <csapex/model/connection_type.h>
 
 /// SYSTEM
 #include <QMutex>

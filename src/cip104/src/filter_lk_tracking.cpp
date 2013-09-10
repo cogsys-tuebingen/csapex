@@ -2,7 +2,7 @@
 #include "filter_lk_tracking.h"
 
 /// PROJECT
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>

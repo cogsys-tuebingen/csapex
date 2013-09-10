@@ -1,11 +1,11 @@
 #include "filter_merger.h"
 
 /// PROJECT
-#include <csapex/box.h>
+#include <csapex/model/box.h>
 #include <csapex_vision/cv_mat_message.h>
-#include <csapex/connector_in.h>
-#include <csapex/connector_out.h>
-#include <csapex/qt_helper.hpp>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <QLabel>

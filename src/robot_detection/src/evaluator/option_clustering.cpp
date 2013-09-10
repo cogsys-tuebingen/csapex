@@ -12,7 +12,7 @@
 #include <config/config.h>
 
 /// SYSTEM
-#include <csapex/qt_helper.hpp>
+#include <csapex/utility/qt_helper.hpp>
 #include <QLabel>
 
 

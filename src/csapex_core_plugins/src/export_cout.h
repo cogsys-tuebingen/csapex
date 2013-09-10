@@ -2,7 +2,7 @@
 #define EXPORT_COUT_H
 
 /// PROJECT
-#include <csapex/boxed_object.h>
+#include <csapex/model/boxed_object.h>
 
 namespace csapex {
 
