@@ -9,9 +9,10 @@
 #include <csapex/connector_in.h>
 #include <csapex/box_manager.h>
 #include <csapex/overlay.h>
-
+#include <csapex/template_manager.h>
 #include <csapex/command_add_box.h>
 #include <csapex/command_dispatcher.h>
+#include <csapex/command_instanciate_subgraph_template.h>
 
 using namespace csapex;
 
@@ -145,13 +146,7 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 
     if(e->mimeData()->hasFormat(Box::MIME)) {
         QByteArray b = e->mimeData()->data(Box::MIME);
-        SelectorProxy::Ptr* selectorptr = (SelectorProxy::Ptr*)b.toULongLong();
-
-        if(!selectorptr) {
-            return;
-        }
-
-        SelectorProxy::Ptr selector = *selectorptr;
+        std::string type = (QString(b)).toStdString();
 
         e->setDropAction(Qt::CopyAction);
         e->accept();
@@ -159,8 +154,21 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPoint pos = e->pos() + offset;
 
-        Command::Ptr add_box(new command::AddBox(selector, pos, "", graph_->makeUUID(selector->getType())));
-        CommandDispatcher::execute(add_box);
+        std::string uuid = graph_->makeUUID(type);
+
+        command::Meta::Ptr meta(new command::Meta);
+        if(type == "::meta" && e->mimeData()->hasFormat(SubGraphTemplate::MIME)) {
+            QByteArray t = e->mimeData()->data(SubGraphTemplate::MIME);
+            std::string templ = (QString(t)).toStdString();
+            if(!templ.empty()) {
+                meta->add(Command::Ptr(new command::InstanciateSubGraphTemplate(TemplateManager::instance().get(templ), uuid, pos)));
+            }
+        }
+
+        if(meta->commands() == 0) {
+            meta->add(Command::Ptr(new command::AddBox(type, pos, "", uuid)));
+        }
+        CommandDispatcher::execute(meta);
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->ignore();

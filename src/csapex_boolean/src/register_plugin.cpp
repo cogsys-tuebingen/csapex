@@ -25,5 +25,5 @@ void RegisterPlugin::init()
 {
     Tag::createIfNotExists("Boolean");
 
-    ConnectionTypeManager::registerMessage<connection_types::BooleanMessage>("bool");
+    ConnectionTypeManager::registerMessage<connection_types::BooleanMessage>("boolean");
 }

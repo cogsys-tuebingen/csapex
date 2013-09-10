@@ -42,7 +42,7 @@ MoveConnection::MoveConnection(Connector *a, Connector *b)
 
         for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
             add(Command::Ptr(new DeleteConnection(from, *it)));
-            add(Command::Ptr(new AddConnection(to, *it)));
+            add(Command::Ptr(new AddConnection(to_uuid, (*it)->UUID())));
         }
 
     } else {
@@ -50,6 +50,6 @@ MoveConnection::MoveConnection(Connector *a, Connector *b)
 
         Connector* target = in->getConnected();
         add(Command::Ptr(new DeleteConnection(from, target)));
-        add(Command::Ptr(new AddConnection(to, target)));
+        add(Command::Ptr(new AddConnection(target->UUID(), to_uuid)));
     }
 }

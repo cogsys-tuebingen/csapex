@@ -17,6 +17,7 @@
 #include <csapex/command_add_fulcrum.h>
 #include <csapex/command_delete_fulcrum.h>
 #include <csapex/command_move_fulcrum.h>
+#include <csapex/command_instanciate_subgraph_template.h>
 #include <csapex/selector_proxy.h>
 #include <csapex/command_dispatcher.h>
 #include <csapex/box_manager.h>
@@ -26,6 +27,8 @@
 #include <csapex/command_meta.h>
 #include <csapex/command_delete_box.h>
 #include <csapex/stream_interceptor.h>
+#include <csapex/sub_graph_template.h>
+#include <csapex/template_manager.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -40,6 +43,20 @@ using namespace csapex;
 const std::string Graph::namespace_separator = ":/:";
 
 Graph::Ptr Graph::root_;
+
+namespace {
+void split_first(const std::string& haystack, const std::string& needle,
+                 /* OUTPUTS: */ std::string& lhs, std::string& rhs)
+{
+    size_t pos = haystack.find(needle);
+    if(pos == haystack.npos) {
+        return;
+    }
+
+    lhs = haystack.substr(0, pos);
+    rhs = haystack.substr(pos + needle.length());
+}
+}
 
 Graph::Graph()
 {
@@ -85,8 +102,6 @@ void Graph::addBox(Box::Ptr box)
 
     boxes_.push_back(box);
 
-    QObject::connect(box.get(), SIGNAL(moveSelectionToBox(Box*)), this, SLOT(moveSelectionToBox(Box*)));
-
     Q_EMIT boxAdded(box.get());
 }
 
@@ -106,48 +121,36 @@ void Graph::deleteBox(const std::string& uuid)
     box->deleteLater();
 }
 
-command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid)
+SubGraphTemplate::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr& post, const std::string& group_uuid)
 {
-    command::Meta::Ptr meta(new command::Meta);
+    SubGraphTemplate::Ptr sub_graph_templ = TemplateManager::instance().createNewTemporaryTemplate();
+
+    command::Meta::Ptr delete_boxes(new command::Meta);
+    command::Meta::Ptr add_connections(new command::Meta);
 
     std::vector<Box*> selected;
 
-    command::Meta::Ptr add_connectors(new command::Meta);
-    command::Meta::Ptr add_connections(new command::Meta);
-
-    std::map<Box*, std::string> box2uuid;
-
+    std::map<std::string, std::string> old_box_to_new_box;
 
     foreach(Box::Ptr b, boxes_) {
         // iterate selected boxes
         if(b->isSelected()) {
             selected.push_back(b.get());
-            std::cerr << "selected: " << b->UUID() << std::endl;
 
-            // move this box top the sub graph
-            SelectorProxy::Ptr selector = BoxManager::instance().getSelector(b->getType());
-            Memento::Ptr state = b->getState();
+            delete_boxes->add(Command::Ptr(new command::DeleteBox(b->UUID())));
 
-            std::string uuid = box_uuid + namespace_separator + b->UUID();
-            box2uuid[b.get()] = uuid;
+            Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
+            std::string new_uuid = sub_graph_templ->addBox(b->getType(), b->pos(), state);
 
-            meta->add(Command::Ptr(new command::DeleteBox(b->UUID())));
-            meta->add(Command::Ptr(new command::AddBox(selector, b->pos(), box_uuid, uuid, state)));
+            size_t start_pos = new_uuid.find(SubGraphTemplate::PARENT_PREFIX_PATTERN);
+            assert(start_pos != std::string::npos);
+
+            old_box_to_new_box[b->UUID()] = new_uuid;
         }
     }
 
-    int next_connector_sub_id = 0;
-
     foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
-            // iterate all connections for this selected box
-            // connections leading to a selected box will be kept
-            // connections leading to a non-selected box must be split
-
-            // for each connection to split:
-            // - create pseudo connector for the sub graph
-            // - split original connection using the new pseudo connector
-
             foreach(ConnectorIn* in, b->input) {
                 if(in->isConnected()) {
                     Connector* target = in->getConnected();
@@ -160,22 +163,22 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
                     // internal connections are done by the next loop
                     // external connections should be split
                     if(is_external) {
-                        std::cerr << "split connection between " << in->UUID() << " and " << target->UUID() << std::endl;
+                        std::cerr << "  > split incoming connection between " << in->UUID() << " and " << target->UUID() << std::endl;
 
-                        std::string new_connector_uuid = Connector::makeUUID(box_uuid, Connector::TYPE_MISC, next_connector_sub_id++);
+                        std::string new_connector_uuid = sub_graph_templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
 
-                        // create new separator connector
-                        add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, in->getLabel(), in->getType()->name(), true, new_connector_uuid, true)));
-                        // connect old output to the new connector
-                        add_connections->add(Command::Ptr(new command::AddConnection(target->UUID(), new_connector_uuid)));
-                        // connect the new connector to the old input
-                        add_connections->add(Command::Ptr(new command::AddConnection(new_connector_uuid, box_uuid + Graph::namespace_separator + in->UUID())));
+                        std::string in_box, in_connector;
+                        split_first(in->UUID(), Connector::namespace_separator, in_box, in_connector);
+                        sub_graph_templ->addConnection(new_connector_uuid, old_box_to_new_box[b->UUID()] + Connector::namespace_separator + in_connector);
+
+                        std::string explicit_connector_uuid = SubGraphTemplate::fillInTemplate(new_connector_uuid, group_uuid);
+                        add_connections->add(Command::Ptr(new command::AddConnection(target->UUID(), explicit_connector_uuid)));
                     }
                 }
             }
             foreach(ConnectorOut* out, b->output) {
-                bool external_connector_added = false;
                 std::string new_connector_uuid;
+                std::string explicit_new_connector_uuid;
 
                 for(std::vector<ConnectorIn*>::iterator it = out->beginTargets(); it != out->endTargets(); ++it) {
                     ConnectorIn* in = *it;
@@ -187,22 +190,33 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
                     bool is_external = !is_selected;
                     if(is_external) {
                         // external connections are split
-                        std::cerr << "split connection between " << in->UUID() << " and " << out->UUID() << std::endl;
+                        std::cerr << "  > split outgoing connection between " << in->UUID() << " and " << out->UUID() << std::endl;
 
-                        if(!external_connector_added) {
-                            external_connector_added = true;
-                            new_connector_uuid = Connector::makeUUID(box_uuid, Connector::TYPE_MISC, next_connector_sub_id++);
-                            add_connectors->add(Command::Ptr(new command::AddConnector(box_uuid, out->getLabel(), in->getType()->name(), false, new_connector_uuid, true)));
+                        if(new_connector_uuid.empty()) {
+                            new_connector_uuid = sub_graph_templ->addConnector(out->getLabel(), out->getType()->name(), false, true);
+                            explicit_new_connector_uuid = SubGraphTemplate::fillInTemplate(new_connector_uuid, group_uuid);
                         }
 
-                        add_connections->add(Command::Ptr(new command::AddConnection(new_connector_uuid, in->UUID())));
-                        add_connections->add(Command::Ptr(new command::AddConnection(box_uuid + Graph::namespace_separator + out->UUID(), new_connector_uuid)));
+                        std::string out_box, out_connector;
+                        split_first(out->UUID(), Connector::namespace_separator, out_box, out_connector);
+                        sub_graph_templ->addConnection(old_box_to_new_box[b->UUID()] + Connector::namespace_separator + out_connector, new_connector_uuid);
+
+                        add_connections->add(Command::Ptr(new command::AddConnection(explicit_new_connector_uuid, in->UUID())));
 
                     } else {
                         // internal connections are kept
-                        std::cerr << "keep connection between " << in->UUID() << " and " << out->UUID() << std::endl;
+                        std::cerr << "  > keep internal connection between " << in->UUID() << " and " << out->UUID() << std::endl;
 
-                        add_connections->add(Command::Ptr(new command::AddConnection(box_uuid + Graph::namespace_separator + out->UUID(), box_uuid + Graph::namespace_separator + in->UUID())));
+                        std::string in_box, in_connector;
+                        split_first(in->UUID(), Connector::namespace_separator, in_box, in_connector);
+
+                        std::string out_box, out_connector;
+                        split_first(out->UUID(), Connector::namespace_separator, out_box, out_connector);
+
+                        std::string in = old_box_to_new_box[in_box] + Connector::namespace_separator + in_connector;
+                        std::string out = old_box_to_new_box[out_box] + Connector::namespace_separator + out_connector;
+
+                        sub_graph_templ->addConnection(out, in);
                     }
                 }
             }
@@ -210,25 +224,10 @@ command::Meta::Ptr Graph::moveSelectionToBoxCommands(const std::string& box_uuid
         }
     }
 
-    meta->add(add_connectors);
-    meta->add(add_connections);
+    pre = delete_boxes;
+    post = add_connections;
 
-    return meta;
-}
-
-void Graph::moveSelectionToBox(Box *box)
-{
-    if(!box->hasSubGraph()) {
-        return;
-    }
-
-    const std::string box_uuid = box->UUID();
-
-    command::Meta::Ptr meta = moveSelectionToBoxCommands(box_uuid);
-
-    if(meta->commands() > 0) {
-        CommandDispatcher::executeLater(meta);
-    }
+    return sub_graph_templ;
 }
 
 void Graph::moveSelectedBoxes(const QPoint& delta)
@@ -241,7 +240,7 @@ void Graph::moveSelectedBoxes(const QPoint& delta)
         }
     }
 
-    foreach(const Connection::Ptr& connection, connections) {
+    foreach(const Connection::Ptr& connection, visible_connections) {
         if(connection->from()->getBox()->isSelected() && connection->to()->getBox()->isSelected()) {
             int n = connection->getFulcrumCount();
             for(int i = 0; i < n; ++i) {
@@ -257,7 +256,15 @@ void Graph::moveSelectedBoxes(const QPoint& delta)
 bool Graph::addConnection(Connection::Ptr connection)
 {
     if(connection->from()->tryConnect(connection->to())) {
-        connections.push_back(connection);
+        Connector* from = findConnector(connection->from()->UUID());
+        Connector* to = findConnector(connection->to()->UUID());
+
+        Box* graph_from = from->getBox();
+        Box* graph_to = to->getBox();
+
+        if(!graph_from->isHidden() && !graph_to->isHidden()) {
+            visible_connections.push_back(connection);
+        }
 
         Q_EMIT connectionAdded(connection.get());
         return true;
@@ -270,9 +277,9 @@ void Graph::deleteConnection(Connection::Ptr connection)
 {
     connection->from()->removeConnection(connection->to());
 
-    for(std::vector<Connection::Ptr>::iterator c = connections.begin(); c != connections.end();) {
+    for(std::vector<Connection::Ptr>::iterator c = visible_connections.begin(); c != visible_connections.end();) {
         if(*connection == **c) {
-            connections.erase(c);
+            visible_connections.erase(c);
             connection->to()->setError(false);
 
             Q_EMIT connectionDeleted(connection.get());
@@ -339,7 +346,7 @@ void Graph::reset()
     uuids.clear();
     boxes_.clear();
     connectors_.clear();
-    connections.clear();
+    visible_connections.clear();
 }
 
 Graph::Ptr Graph::findSubGraph(const std::string& uuid)
@@ -386,6 +393,7 @@ Box::Ptr Graph::findConnectorOwner(const std::string &uuid, const std::string& n
         std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
 
         Box::Ptr meta = findBox(parent);
+        assert(meta);
         assert(meta->hasSubGraph());
 
         return meta->getSubGraph()->findConnectorOwner(uuid, rest);
@@ -493,7 +501,7 @@ void Graph::handleBoxSelection(Box* box, bool add)
 
 Connection::Ptr Graph::getConnectionWithId(int id)
 {
-    BOOST_FOREACH(Connection::Ptr& connection, connections) {
+    BOOST_FOREACH(Connection::Ptr& connection, visible_connections) {
         if(connection->id() == id) {
             return connection;
         }
@@ -504,7 +512,7 @@ Connection::Ptr Graph::getConnectionWithId(int id)
 
 Connection::Ptr Graph::getConnection(Connection::Ptr c)
 {
-    BOOST_FOREACH(Connection::Ptr& connection, connections) {
+    BOOST_FOREACH(Connection::Ptr& connection, visible_connections) {
         if(*connection == *c) {
             return connection;
         }
@@ -531,7 +539,7 @@ int Graph::getConnectionId(Connection::Ptr c)
 int Graph::noSelectedConnections()
 {
     int c = 0;
-    foreach(const Connection::Ptr& connection, connections) {
+    foreach(const Connection::Ptr& connection, visible_connections) {
         if(connection->isSelected()) {
             ++c;
         }
@@ -542,14 +550,14 @@ int Graph::noSelectedConnections()
 
 void Graph::deselectConnections()
 {
-    BOOST_FOREACH(Connection::Ptr& connection, connections) {
+    BOOST_FOREACH(Connection::Ptr& connection, visible_connections) {
         connection->setSelected(false);
     }
 }
 
 Command::Ptr Graph::deleteConnectionByIdCommand(int id)
 {
-    foreach(const Connection::Ptr& connection, connections) {
+    foreach(const Connection::Ptr& connection, visible_connections) {
         if(connection->id() == id) {
             return Command::Ptr(new command::DeleteConnection(connection->from(), connection->to()));
         }
@@ -593,7 +601,7 @@ void Graph::deleteSelectedConnections()
 {
     command::Meta::Ptr meta(new command::Meta);
 
-    foreach(const Connection::Ptr& connection, connections) {
+    foreach(const Connection::Ptr& connection, visible_connections) {
         if(isConnectionWithIdSelected(connection->id())) {
             meta->add(Command::Ptr(new command::DeleteConnection(connection->from(), connection->to())));
         }
@@ -607,7 +615,7 @@ void Graph::deleteSelectedConnections()
 void Graph::selectConnectionById(int id, bool add)
 {
     if(!add) {
-        BOOST_FOREACH(Connection::Ptr& connection, connections) {
+        BOOST_FOREACH(Connection::Ptr& connection, visible_connections) {
             connection->setSelected(false);
         }
     }
@@ -620,7 +628,7 @@ void Graph::selectConnectionById(int id, bool add)
 
 void Graph::deselectConnectionById(int id)
 {
-    BOOST_FOREACH(Connection::Ptr& connection, connections) {
+    BOOST_FOREACH(Connection::Ptr& connection, visible_connections) {
         if(connection->id() == id) {
             connection->setSelected(false);
         }
@@ -634,7 +642,7 @@ bool Graph::isConnectionWithIdSelected(int id)
         return false;
     }
 
-    foreach(const Connection::Ptr& connection, connections) {
+    foreach(const Connection::Ptr& connection, visible_connections) {
         if(connection->id() == id) {
             return connection->isSelected();
         }
@@ -675,12 +683,15 @@ void Graph::groupSelectedBoxes()
         }
     }
 
-    SelectorProxy::Ptr selector = BoxManager::instance().getSelector("::meta");
-    std::string uuid = makeUUID(selector->getType());
+    std::string group_uuid = makeUUID("::meta");
 
-    command::Meta::Ptr meta(new command::Meta());
-    meta->add(command::AddBox::Ptr(new command::AddBox(selector, tl, "", uuid)));
-    meta->add(moveSelectionToBoxCommands(uuid));
+    Command::Ptr del, connect;
+    SubGraphTemplate::Ptr templ = convertSelectionToTemplate(del, connect, group_uuid);
+
+    command::Meta::Ptr meta(new command::Meta);
+    meta->add(del);
+    meta->add(Command::Ptr(new command::InstanciateSubGraphTemplate(templ, group_uuid, tl)));
+    meta->add(connect);
 
     CommandDispatcher::execute(meta);
 }
@@ -729,7 +740,7 @@ void Graph::boxMoved(Box *box, int dx, int dy)
                 b->move(b->x() + dx, b->y() + dy);
             }
         }
-        foreach(const Connection::Ptr& connection, connections) {
+        foreach(const Connection::Ptr& connection, visible_connections) {
             if(connection->from()->getBox()->isSelected() && connection->to()->getBox()->isSelected()) {
                 int n = connection->getFulcrumCount();
                 for(int i = 0; i < n; ++i) {
@@ -766,7 +777,7 @@ void Graph::tick()
     foreach(Box::Ptr b, boxes_) {
         b->tick();
     }
-    foreach(const Connection::Ptr& connection, connections) {
+    foreach(const Connection::Ptr& connection, visible_connections) {
         connection->tick();
     }
 }

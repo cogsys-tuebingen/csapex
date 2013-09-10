@@ -77,6 +77,7 @@ add_library(csapex SHARED
     src/command_add_fulcrum.cpp
     src/command_move_fulcrum.cpp
     src/command_delete_fulcrum.cpp
+    src/command_instanciate_subgraph_template.cpp
     src/connection.cpp
     src/connector.cpp
     src/connector_in.cpp
@@ -104,6 +105,8 @@ add_library(csapex SHARED
     src/selectable.cpp
     src/stream_interceptor.cpp
     src/sub_graph.cpp
+    src/sub_graph_template.cpp
+    src/template_manager.cpp
     src/tag.cpp
     src/qdouble_slider.cpp
     src/qwrapper.cpp

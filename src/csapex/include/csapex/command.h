@@ -15,6 +15,7 @@ class Command
 {
     friend class CommandDispatcher;
     friend class command::Meta;
+    friend class GraphIO;
 
 public:
     typedef boost::shared_ptr<Command> Ptr;
@@ -33,9 +34,9 @@ protected:
     virtual bool undo() = 0;
     virtual bool redo() = 0;
 
-    bool doExecute(Ptr other);
-    bool doUndo(Ptr other);
-    bool doRedo(Ptr other);
+    static bool doExecute(Ptr other);
+    static bool doUndo(Ptr other);
+    static bool doRedo(Ptr other);
 
     static std::vector<Command::Ptr> undo_later;
 

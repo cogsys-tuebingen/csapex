@@ -5,12 +5,18 @@
 #include <csapex/box.h>
 #include <csapex/boxed_object.h>
 #include <csapex/graph.h>
+#include <csapex/sub_graph_template.h>
+
+/// SYSTEM
+#include <QLabel>
 
 namespace csapex
 {
 
 class BoxGroup : public Box
 {
+public:
+    typedef boost::shared_ptr<BoxGroup> Ptr;
 
 public:
     static const QString MIME;
@@ -18,15 +24,18 @@ public:
 public:
     BoxGroup(BoxedObject::Ptr content, const std::string& uuid = "", QWidget* parent = 0);
 
-    void dragEnterEvent(QDragEnterEvent* e);
-    void dragLeaveEvent(QDragLeaveEvent* e);
-    void dropEvent(QDropEvent* e);
-
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
 
+    void setTemplate(SubGraphTemplate::Ptr templ);
+    SubGraphTemplate::Ptr getTemplate();
+
 protected:
     Graph::Ptr sub_graph;
+
+    SubGraphTemplate::Ptr templ_;
+
+    QLabel* icon_;
 };
 
 }

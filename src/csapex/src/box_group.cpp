@@ -1,8 +1,8 @@
 /// HEADER
 #include <csapex/box_group.h>
-#include <csapex/boxed_object.h>
 
 /// COMPONENT
+#include <csapex/boxed_object.h>
 #include "ui_box.h"
 
 /// SYSTEM
@@ -15,38 +15,11 @@ const QString BoxGroup::MIME = "csapex/boxmeta";
 BoxGroup::BoxGroup(BoxedObject::Ptr content, const std::string &uuid, QWidget *parent)
     : Box(content, uuid, parent), sub_graph(new Graph)
 {
-    setAcceptDrops(true);
+    icon_ = new QLabel();
+    QIcon img(":/group.png");
+    icon_->setPixmap(img.pixmap(QSize(16,16)));
+    ui->additional_layout->addWidget(icon_);
 }
-
-void BoxGroup::dragEnterEvent(QDragEnterEvent *e)
-{
-    if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
-        if(e->source() == this) {
-            return;
-        }
-
-        e->accept();
-        ui->boxframe->setProperty("highlight", true);
-        refreshStylesheet();
-    }
-}
-
-void BoxGroup::dragLeaveEvent(QDragLeaveEvent *)
-{
-    ui->boxframe->setProperty("highlight", false);
-    refreshStylesheet();
-}
-
-void BoxGroup::dropEvent(QDropEvent *e)
-{
-    ui->boxframe->setProperty("highlight", false);
-    refreshStylesheet();
-
-    e->setDropAction(Qt::IgnoreAction);
-
-    Q_EMIT moveSelectionToBox(this);
-}
-
 
 bool BoxGroup::hasSubGraph()
 {
@@ -56,4 +29,17 @@ bool BoxGroup::hasSubGraph()
 Graph::Ptr BoxGroup::getSubGraph()
 {
     return sub_graph;
+}
+
+void BoxGroup::setTemplate(SubGraphTemplate::Ptr templ)
+{
+    templ_ = templ;
+    icon_->setToolTip((std::string("template: ") + templ_->getName().c_str()).c_str());
+
+    state->template_ = templ_->getName();
+}
+
+SubGraphTemplate::Ptr BoxGroup::getTemplate()
+{
+    return templ_;
 }

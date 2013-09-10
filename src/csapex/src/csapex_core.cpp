@@ -73,7 +73,11 @@ void CsApexCore::init()
 
         showStatusMessage("loading config");
 
-        load(getConfig());
+        try {
+            load(getConfig());
+        } catch(const std::exception& e) {
+            std::cerr << "error loading the config: " << e.what() << std::endl;
+        }
     }
 }
 
@@ -118,6 +122,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     graphio.saveSettings(yaml);
     graphio.saveConnections(yaml);
+    graphio.saveTemplates(yaml);
 
     yaml << YAML::EndMap; // settings map
 
@@ -137,8 +142,9 @@ void CsApexCore::load(const std::string &file)
 {
     setCurrentConfig(file);
 
+    reset();
+
     Graph::Ptr graph_ = Graph::root();
-    graph_->clear();
 
     GraphIO graphio(graph_);
 
@@ -155,6 +161,7 @@ void CsApexCore::load(const std::string &file)
 
         Q_EMIT loadSettingsRequest(doc);
         graphio.loadSettings(doc);
+        graphio.loadTemplates(doc);
 
         graphio.loadBoxes(parser);
     }

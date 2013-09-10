@@ -15,21 +15,6 @@
 using namespace csapex;
 using namespace csapex::command;
 
-AddConnection::AddConnection(Connector* a, Connector* b)
-{
-    from = dynamic_cast<ConnectorOut*>(a);
-    if(from) {
-        to = dynamic_cast<ConnectorIn*>(b);
-    } else {
-        from = dynamic_cast<ConnectorOut*>(b);
-        to = dynamic_cast<ConnectorIn*>(a);
-    }
-    assert(from);
-    assert(to);
-
-    from_uuid = from->UUID();
-    to_uuid = to->UUID();
-}
 
 AddConnection::AddConnection(const std::string &from_uuid, const std::string &to_uuid)
     : from(NULL), to(NULL), from_uuid(from_uuid), to_uuid(to_uuid)
@@ -62,8 +47,18 @@ bool AddConnection::redo()
 
 void AddConnection::refresh()
 {
-    from = dynamic_cast<ConnectorOut*> (Graph::root()->findConnector(from_uuid));
-    to =  dynamic_cast<ConnectorIn*> (Graph::root()->findConnector(to_uuid));
+    Connector* f = Graph::root()->findConnector(from_uuid);
+    Connector* t = Graph::root()->findConnector(to_uuid);
+
+    if(f->isOutput() && t->isInput()) {
+        from = dynamic_cast<ConnectorOut*> (f);
+        to =  dynamic_cast<ConnectorIn*> (t);
+    } else {
+        from_uuid.swap(to_uuid);
+
+        from = dynamic_cast<ConnectorOut*> (t);
+        to =  dynamic_cast<ConnectorIn*> (f);
+    }
 
     assert(from);
     assert(to);

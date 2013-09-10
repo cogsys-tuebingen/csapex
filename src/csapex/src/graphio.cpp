@@ -6,6 +6,7 @@
 #include <csapex/box_manager.h>
 #include <csapex/connector_in.h>
 #include <csapex/connector_out.h>
+#include <csapex/template_manager.h>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -41,7 +42,7 @@ std::string GraphIO::defaultConfigFile()
     std::string file = dir + "default" + GraphIO::extension;
 
     if(!boost::filesystem3::exists(file)) {
-//        createDefaultConfig(file);
+        //        createDefaultConfig(file);
     }
 
     return file;
@@ -57,12 +58,17 @@ void GraphIO::saveSettings(YAML::Emitter& yaml)
 {
     yaml << YAML::Key << "uuid_map";
     yaml << YAML::Value << graph_->uuids;
+    yaml << YAML::Key << "next_template_id";
+    yaml << YAML::Value << TemplateManager::instance().next_id;
 }
 
 void GraphIO::loadSettings(YAML::Node &doc)
 {
     if(doc.FindValue("uuid_map")) {
         doc["uuid_map"] >> graph_->uuids;
+    }
+    if(doc.FindValue("next_template_id")) {
+        doc["next_template_id"] >> TemplateManager::instance().next_id;
     }
 }
 
@@ -90,14 +96,21 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
 
         if(box) {
             try {
-                Memento::Ptr s = box->getState();
-                s->readYaml(doc);
-                box->setState(s);
+                box->read(doc);
+
             } catch(const std::exception& e) {
                 std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
             }
 
             graph_->addBox(box);
+
+            if(type == "::meta" && !box->state->template_.empty()) {
+                SubGraphTemplate::Ptr templ = TemplateManager::instance().get(box->state->template_);
+                command::Meta::Ptr meta(new command::Meta);
+                templ->createCommands(meta.get(), uuid);
+
+                Command::doExecute(meta);
+            }
         }
     }
 }
@@ -135,7 +148,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Key << "fulcrums";
     yaml << YAML::Value << YAML::BeginSeq; // fulcrums seq
 
-    BOOST_FOREACH(const Connection::Ptr& connection, graph_->connections) {
+    BOOST_FOREACH(const Connection::Ptr& connection, graph_->visible_connections) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }
@@ -170,6 +183,10 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
             std::string from_uuid;
             connection["uuid"] >> from_uuid;
+            if(from_uuid.find(Connector::namespace_separator) == from_uuid.npos) {
+                // legacy import
+                from_uuid.replace(from_uuid.find("_out_"), 1, Connector::namespace_separator);
+            }
             Box::Ptr parent = graph_->findConnectorOwner(from_uuid);
 
             if(!parent) {
@@ -183,6 +200,11 @@ void GraphIO::loadConnections(YAML::Node &doc)
             for(unsigned j=0; j<targets.size(); ++j) {
                 std::string to_uuid;
                 targets[j] >> to_uuid;
+
+                if(to_uuid.find(Connector::namespace_separator) == to_uuid.npos) {
+                    // legacy import
+                    to_uuid.replace(to_uuid.find("_in_"), 1, Connector::namespace_separator);
+                }
 
                 ConnectorOut* from = parent->getOutput(from_uuid);
                 if(from == NULL) {
@@ -243,3 +265,22 @@ void GraphIO::loadConnections(YAML::Node &doc)
     }
 }
 
+
+void GraphIO::saveTemplates(YAML::Emitter &yaml)
+{
+    TemplateManager& manager = TemplateManager::instance();
+
+    if(manager.temporary_templates.empty()) {
+        return;
+    }
+    yaml << YAML::Key << "temporary_templates";
+    yaml << YAML::Value << manager.temporary_templates;
+}
+
+void GraphIO::loadTemplates(YAML::Node &doc)
+{
+    TemplateManager& manager = TemplateManager::instance();
+    if(doc.FindValue("temporary_templates")) {
+        doc["temporary_templates"] >> manager.temporary_templates;
+    }
+}

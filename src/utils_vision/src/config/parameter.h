@@ -32,6 +32,10 @@ public:
         return e;
     }
 
+    friend void operator >> (const YAML::Node& node, vision::Parameter& value) {
+        value.read(node);
+    }
+
 public:
     Parameter();
     explicit Parameter(const std::string& name);
@@ -142,11 +146,4 @@ private:
 
 }
 
-
-namespace YAML
-{
-inline void operator >> (const Node& node, vision::Parameter& value) {
-    value.read(node);
-}
-}
 #endif // PARAMETER_H

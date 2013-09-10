@@ -519,7 +519,7 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
             Graph::Ptr graph = Graph::root();
 
             double closest_dist = 15;
-            foreach(const Connection::Ptr& connection, graph->connections) {
+            foreach(const Connection::Ptr& connection, graph->visible_connections) {
                 int sub_section = 0;
 
                 foreach(const QPoint& fulcrum, connection->getFulcrums()) {
@@ -650,7 +650,7 @@ void Overlay::paintEvent(QPaintEvent*)
         }
     }
 
-    foreach(const Connection::Ptr& connection, graph_->connections) {
+    foreach(Connection::Ptr connection, graph_->visible_connections) {
         drawConnection(*connection);
     }
 

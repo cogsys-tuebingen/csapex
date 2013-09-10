@@ -21,10 +21,12 @@ using namespace csapex;
 const QString Connector::MIME_CREATE = "csapex/connector/create";
 const QString Connector::MIME_MOVE = "csapex/connector/move";
 
+const std::string Connector::namespace_separator = ":|:";
+
 
 std::string Connector::makeUUID(const std::string& box_uuid, int type, int sub_id) {
     std::stringstream ss;
-    ss << box_uuid << "_" << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
+    ss << box_uuid << namespace_separator << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
     return ss.str();
 }
 
@@ -183,7 +185,7 @@ void Connector::dropEvent(QDropEvent* e)
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
-            Command::Ptr cmd(new command::AddConnection(this, from));
+            Command::Ptr cmd(new command::AddConnection(UUID(), from->UUID()));
             CommandDispatcher::execute(cmd);
         }
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
@@ -311,9 +313,9 @@ void Connector::setMinimizedSize(bool mini)
     minimized_ = mini;
 
     if(mini) {
-        setFixedSize(8,8);
+        setFixedSize(16,8);
     } else {
-        setFixedSize(16,16);
+        setFixedSize(24,16);
     }
 }
 

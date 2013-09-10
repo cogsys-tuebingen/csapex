@@ -136,6 +136,13 @@ QFrame#boxframe csapex--Connector {
             </property>
            </spacer>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="additional_layout">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+           </layout>
+          </item>
          </layout>
         </item>
         <item>

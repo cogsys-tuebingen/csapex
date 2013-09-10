@@ -154,11 +154,12 @@ void BoxManager::startPlacingMetaBox(QWidget* parent, const QPoint& offset)
 }
 
 
-void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset)
+void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset, const std::string& template_)
 {
     foreach(SelectorProxy::Ptr p, available_elements_prototypes) {
+        std::cerr << p->getType() << " vs. " << type << std::endl;
         if(p->getType() == type) {
-            p->startObjectPositioning(parent, p, offset);
+            p->startObjectPositioning(parent, offset, template_);
             return;
         }
     }

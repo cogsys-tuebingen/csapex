@@ -29,5 +29,10 @@ void ConnectionTypeManager::registerMessage(const std::string &type, Constructor
     std::map<std::string, Constructor>::const_iterator it = i.classes.find(type);
     assert(it == i.classes.end());
 
+    std::string name = constructor()->name();
+    if(name != type) {
+        throw std::logic_error(name + " cannot be registered as a connection type, its name is different from the specified type: " + type);
+    }
+
     i.classes[type] = constructor;
 }

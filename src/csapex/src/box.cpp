@@ -40,13 +40,21 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     out << YAML::Key << "label";
     out << YAML::Value << label_;
     out << YAML::Key << "pos";
-    out << YAML::Value << YAML::BeginSeq << parent->pos().x() << parent->pos().y() << YAML::EndSeq;
+    out << YAML::Value << YAML::BeginSeq << pos.x() << pos.y() << YAML::EndSeq;
     out << YAML::Key << "minimized";
     out << YAML::Value << minimized;
     out << YAML::Key << "enabled";
     out << YAML::Value << enabled;
 
-    boxed_state = parent->content_->getState();
+    if(!template_.empty()) {
+        out << YAML::Key << "template";
+        out << YAML::Value << template_;
+    }
+
+    if(parent) {
+        boxed_state = parent->content_->getState();
+    }
+
     if(boxed_state.get()) {
         out << YAML::Key << "state";
         out << YAML::Value << YAML::BeginMap;
@@ -55,6 +63,15 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     }
 
     out << YAML::EndMap;
+}
+
+void Box::State::copyFrom(const Box::State::Ptr& rhs)
+{
+    operator =(*rhs);
+    boxed_state = parent->content_->getState();
+    if(rhs->boxed_state) {
+        *boxed_state = *rhs->boxed_state;
+    }
 }
 
 void Box::State::readYaml(const YAML::Node &node)
@@ -69,6 +86,10 @@ void Box::State::readYaml(const YAML::Node &node)
 
     if(node.FindValue("label")) {
         node["label"] >> label_;
+    }
+
+    if(node.FindValue("template")) {
+        node["template"] >> template_;
     }
 
     if(node.FindValue("state")) {
@@ -168,6 +189,13 @@ YAML::Emitter& Box::save(YAML::Emitter& out) const
     state->writeYaml(out);
 
     return out;
+}
+
+void Box::read(YAML::Node &doc)
+{
+    Memento::Ptr s = getState();
+    s->readYaml(doc);
+    setState(s);
 }
 
 void Box::stop()
@@ -511,7 +539,7 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             if(down_) {
                 if(shift_drag) {
                     if(hypot(delta.x(), delta.y()) > 15) {
-                        BoxManager::instance().startPlacingBox(parentWidget(), getType(), -start_drag_);
+                        BoxManager::instance().startPlacingBox(parentWidget(), getType(), -start_drag_, state->template_);
                         down_ = false;
                     }
                 } else {
@@ -585,6 +613,8 @@ void Box::moveEvent(QMoveEvent* e)
 
     QPoint delta = e->pos() - e->oldPos();
 
+    state->pos = e->pos();
+
     Q_EMIT moved(this, delta.x(), delta.y());
 }
 
@@ -637,7 +667,7 @@ void Box::startDrag(QPoint offset)
     lower();
 
     if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
-        BoxManager::instance().startPlacingBox(parentWidget(), getType(), offset);
+        BoxManager::instance().startPlacingBox(parentWidget(), getType(), offset, state->template_);
         return;
     }
 
@@ -653,9 +683,9 @@ void Box::startDrag(QPoint offset)
     QPoint delta = end_pos - start_pos;
     Graph::root()->moveSelectedBoxes(delta);
 
-//    if(action == Qt::IgnoreAction) {
-//        CommandDispatcher::instance().undo();
-//    }
+    //    if(action == Qt::IgnoreAction) {
+    //        CommandDispatcher::instance().undo();
+    //    }
 }
 
 QPixmap Box::makePixmap(const std::string& label)

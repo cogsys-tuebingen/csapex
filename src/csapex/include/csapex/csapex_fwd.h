@@ -26,6 +26,8 @@ FWD(Graph);
 
 FWD(ConnectionType);
 
+FWD(SubGraphTemplate);
+
 class Designer;
 class DesignBoard;
 
@@ -49,6 +51,7 @@ class DeleteConnection;
 class AddFulcrum;
 class MoveFulcrum;
 class DeleteFulcrum;
+class InstanciateSubGraphTemplate;
 }
 
 

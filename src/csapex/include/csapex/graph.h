@@ -92,7 +92,6 @@ public Q_SLOTS:
 
     void toggleBoxSelection(Box* box);
     void boxMoved(Box* box, int dx, int dy);
-    void moveSelectionToBox(Box* box);
 
     void moveSelectedBoxes(const QPoint& delta);
 
@@ -109,7 +108,7 @@ private:
     void selectConnectionById(int id, bool add = false);
     bool isConnectionWithIdSelected(int id);
 
-    command::Meta::Ptr moveSelectionToBoxCommands(const std::string& box_uuid);
+    SubGraphTemplatePtr convertSelectionToTemplate(Command::Ptr &pre, Command::Ptr &post, const std::string &group_uuid);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addBox(BoxPtr box);
@@ -121,7 +120,7 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
 protected:
     std::vector<BoxPtr> boxes_;
     std::vector<Connector*> connectors_;
-    std::vector<Connection::Ptr> connections;
+    std::vector<Connection::Ptr> visible_connections;
 
 
     std::map<std::string, int> uuids;

@@ -53,6 +53,7 @@ class Box : public QWidget, public Selectable
     friend class Graph;
     friend class BoxWorker;
     friend class command::MoveBox;
+    friend class command::DeleteBox;
 
 public:
     typedef boost::shared_ptr<Box> Ptr;
@@ -69,6 +70,8 @@ public:
             : parent(parent), minimized(false), enabled(true)
         {}
 
+        void copyFrom (const Ptr &rhs);
+
         virtual void writeYaml(YAML::Emitter& out) const;
         virtual void readYaml(const YAML::Node& node);
 
@@ -79,6 +82,10 @@ public:
         std::string uuid_;
         std::string label_;
         std::string type_;
+
+        std::string template_;
+
+        QPoint pos;
 
         bool minimized;
         bool enabled;
@@ -150,6 +157,7 @@ public:
     Command::Ptr removeAllInputsCmd();
 
     YAML::Emitter& save(YAML::Emitter& out) const;
+    void read(YAML::Node& doc);
 
     bool isMinimizedSize() const;
 

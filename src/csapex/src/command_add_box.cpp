@@ -10,8 +10,8 @@
 
 using namespace csapex::command;
 
-AddBox::AddBox(SelectorProxy::Ptr selector, QPoint pos, const std::string &parent_uuid, const std::string& uuid, Memento::Ptr state)
-    : selector_(selector), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
+AddBox::AddBox(const std::string &type, QPoint pos, const std::string &parent_uuid, const std::string& uuid, Memento::Ptr state)
+    : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
     assert(!uuid.empty());
 
@@ -26,7 +26,7 @@ AddBox::AddBox(SelectorProxy::Ptr selector, QPoint pos, const std::string &paren
 
 bool AddBox::execute()
 {
-    Box::Ptr box_ = BoxManager::instance().makeBox(pos_, selector_->getType(), uuid_);
+    Box::Ptr box_ = BoxManager::instance().makeBox(pos_, type_, uuid_);
 
     if(saved_state_) {
         box_->setState(saved_state_);

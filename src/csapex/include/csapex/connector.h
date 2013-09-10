@@ -21,6 +21,8 @@ public:
     static const QString MIME_CREATE;
     static const QString MIME_MOVE;
 
+    static const std::string namespace_separator;
+
     enum {
         TYPE_IN = 1,
         TYPE_OUT = 0,

@@ -6,5 +6,5 @@ using namespace connection_types;
 
 
 BooleanMessage::BooleanMessage()
-    : MessageTemplate<bool, BooleanMessage> ("bool")
+    : MessageTemplate<bool, BooleanMessage> ("boolean")
 {}

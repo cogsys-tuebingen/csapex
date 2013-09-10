@@ -6,6 +6,6 @@ using namespace connection_types;
 
 
 DescriptorMessage::DescriptorMessage()
-    : MessageTemplate<cv::Mat, DescriptorMessage> ("cv::Mat")
+    : MessageTemplate<cv::Mat, DescriptorMessage> ("cv::Mat (descriptors)")
 {}
 

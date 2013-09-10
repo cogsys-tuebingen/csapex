@@ -14,6 +14,7 @@ Meta::Meta()
 void Meta::add(Command::Ptr cmd)
 {
     assert(!locked);
+    assert(cmd);
     nested.push_back(cmd);
 }
 

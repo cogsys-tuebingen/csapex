@@ -60,7 +60,7 @@ public:
     QIcon getIcon();
     std::string getDescription();
 
-    void startObjectPositioning(QWidget *parent, Ptr instance, const QPoint &offset = QPoint(0,0));
+    void startObjectPositioning(QWidget *parent, const QPoint &offset = QPoint(0,0), const std::string& template_ = "");
 
 private:
     /// PRIVATE: Use command to spawn objects (undoable)

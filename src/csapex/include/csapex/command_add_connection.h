@@ -14,7 +14,6 @@ namespace command
 
 struct AddConnection : public Command
 {
-    AddConnection(Connector* a, Connector* b);
     AddConnection(const std::string& from_uuid, const std::string& to_uuid);
 
 protected:

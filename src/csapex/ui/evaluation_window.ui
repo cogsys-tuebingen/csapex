@@ -182,7 +182,7 @@
     <string>Display Grid</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+G</string>
+    <string>Ctrl+Shift+G</string>
    </property>
   </action>
  </widget>

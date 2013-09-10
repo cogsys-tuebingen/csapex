@@ -27,15 +27,13 @@ void SelectorProxy::registerProxy(SelectorProxy::Ptr prototype)
     BoxManager::instance().register_box_type(prototype);
 }
 
-void SelectorProxy::startObjectPositioning(QWidget* parent, SelectorProxy::Ptr instance, const QPoint& offset)
+void SelectorProxy::startObjectPositioning(QWidget* parent, const QPoint& offset, const std::string& template_)
 {
     QDrag* drag = new QDrag(parent);
     QMimeData* mimeData = new QMimeData;
 
-
-    quintptr address=(quintptr)&instance;
-    QByteArray b(QString::number(address).toAscii());
-    mimeData->setData(Box::MIME, b);
+    QString type(type_.c_str());
+    mimeData->setData(Box::MIME, type_.c_str());
     mimeData->setProperty("ox", offset.x());
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
@@ -44,6 +42,7 @@ void SelectorProxy::startObjectPositioning(QWidget* parent, SelectorProxy::Ptr i
 
     if(type_ == "::meta") {
         object = new csapex::BoxGroup(makeContent(), "");
+        mimeData->setData(SubGraphTemplate::MIME, template_.c_str());
     } else {
         object = new csapex::Box(makeContent(), "");
     }
