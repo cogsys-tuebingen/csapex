@@ -3,6 +3,7 @@
 #include <boost/regex.hpp>
 #include <utils/LibCvTools/random_generator.hpp>
 #include <vector>
+#include <set>
 
 namespace files {
 
@@ -47,8 +48,6 @@ inline bool read_yml_img(const std::string &path, std::vector<std::string> &imgs
 }
 
 }
-
-
 
 int main(int argc, char *argv[])
 {
@@ -101,7 +100,8 @@ int main(int argc, char *argv[])
     std::sort(img_paths.begin(), img_paths.end());
 
     /// SAMPLE 30% TRAIN DATA AND 70% VALIDATION DATA
-    std::set<int>              sample_indeces;
+
+    std::set<int>  sample_indeces;
     int sample_elements = .3 * img_paths.size();
     RandomGeneratorInt         generator(0, img_paths.size() - 1);
     while(sample_indeces.size() < sample_elements) {
