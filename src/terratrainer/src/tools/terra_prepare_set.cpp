@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     std::sort(yml_paths.begin(), yml_paths.end());
     std::sort(img_paths.begin(), img_paths.end());
 
-    /// SAMPLE 30% TRAIN DATA AND 70% VALIDATION DATA
+    /// SAMPLE 70% TRAIN DATA AND 30% VALIDATION DATA
 
     std::set<int>  sample_indeces;
     int sample_elements = .3 * img_paths.size();
