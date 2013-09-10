@@ -9,7 +9,7 @@ add_definitions(-W -Wall)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pluginlib roscpp rospy utils utils_plugin)
+find_package(catkin REQUIRED COMPONENTS pluginlib utils_plugin)
 
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
@@ -44,7 +44,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex
-   CATKIN_DEPENDS pluginlib roscpp utils_plugin
+   CATKIN_DEPENDS pluginlib utils_plugin
    DEPENDS Qt4
 )
 

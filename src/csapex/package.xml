@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>csapex</name>
-  <version>0.0.2</version>
+  <version>0.1.0</version>
   <description>The csapex package provides a gui for prototyping algorithms and experimenting</description>
 
   <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
@@ -12,14 +12,8 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>pluginlib</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>utils</build_depend>
   <build_depend>utils_plugin</build_depend>
 
   <run_depend>pluginlib</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>utils</run_depend>
   <run_depend>utils_plugin</run_depend>
 </package>
