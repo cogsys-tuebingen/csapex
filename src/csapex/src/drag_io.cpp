@@ -9,7 +9,6 @@
 #include <csapex/connector_in.h>
 #include <csapex/box_manager.h>
 #include <csapex/overlay.h>
-#include <csapex/template_manager.h>
 #include <csapex/command_add_box.h>
 #include <csapex/command_dispatcher.h>
 #include <csapex/command_instanciate_subgraph_template.h>
@@ -161,7 +160,7 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
             QByteArray t = e->mimeData()->data(SubGraphTemplate::MIME);
             std::string templ = (QString(t)).toStdString();
             if(!templ.empty()) {
-                meta->add(Command::Ptr(new command::InstanciateSubGraphTemplate(TemplateManager::instance().get(templ), uuid, pos)));
+                meta->add(Command::Ptr(new command::InstanciateSubGraphTemplate(templ, uuid, pos)));
             }
         }
 

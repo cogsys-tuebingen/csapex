@@ -31,15 +31,9 @@ Graph::Ptr BoxGroup::getSubGraph()
     return sub_graph;
 }
 
-void BoxGroup::setTemplate(SubGraphTemplate::Ptr templ)
+void BoxGroup::setTemplateName(const std::string &templ)
 {
-    templ_ = templ;
-    icon_->setToolTip((std::string("template: ") + templ_->getName().c_str()).c_str());
+    Box::setTemplateName(templ);
 
-    state->template_ = templ_->getName();
-}
-
-SubGraphTemplate::Ptr BoxGroup::getTemplate()
-{
-    return templ_;
+    icon_->setToolTip((std::string("template: ") + state->template_).c_str());
 }

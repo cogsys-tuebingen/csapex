@@ -7,7 +7,6 @@
 #include <csapex/box.h>
 #include <csapex/box_manager.h>
 #include <csapex/graph.h>
-#include <csapex/template_manager.h>
 #include <csapex/command_instanciate_subgraph_template.h>
 
 using namespace csapex::command;
@@ -44,12 +43,7 @@ bool DeleteBox::undo()
     box->setState(saved_state);
 
     if(!box->state->template_.empty()) {
-        SubGraphTemplate::Ptr templ = TemplateManager::instance().get(box->state->template_);
-//        command::Meta::Ptr meta(new command::Meta);
-//        templ->createCommands(meta.get(), uuid);
-//        Command::doExecute(meta);
-
-        doExecute(Command::Ptr(new command::InstanciateSubGraphTemplate(templ, uuid, pos)));
+        doExecute(Command::Ptr(new command::InstanciateSubGraphTemplate(box->state->template_, uuid, pos)));
 
     } else {
         Graph::root()->addBox(box);

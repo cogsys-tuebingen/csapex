@@ -164,10 +164,10 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     message_ = message;
 
     if(targets_.size() == 1) {
-        targets_[0]->inputMessage(message);
+        targets_[0]->inputMessage(message_);
     } else if(targets_.size() > 1) {
         BOOST_FOREACH(ConnectorIn* i, targets_) {
-            i->inputMessage(message->clone());
+            i->inputMessage(message_->clone());
         }
     } else if(!force_send_message_){
         return;

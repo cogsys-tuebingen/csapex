@@ -140,7 +140,7 @@ SubGraphTemplate::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Comma
             delete_boxes->add(Command::Ptr(new command::DeleteBox(b->UUID())));
 
             Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
-            std::string new_uuid = sub_graph_templ->addBox(b->getType(), b->pos(), state);
+            std::string new_uuid = sub_graph_templ->addBox(b->getType(), b->getTemplateName(), b->pos(), state);
 
             size_t start_pos = new_uuid.find(SubGraphTemplate::PARENT_PREFIX_PATTERN);
             assert(start_pos != std::string::npos);
@@ -393,7 +393,9 @@ Box::Ptr Graph::findConnectorOwner(const std::string &uuid, const std::string& n
         std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
 
         Box::Ptr meta = findBox(parent);
-        assert(meta);
+        if(!meta) {
+            throw std::runtime_error(std::string("the box ") + parent + " doesn't exist");
+        }
         assert(meta->hasSubGraph());
 
         return meta->getSubGraph()->findConnectorOwner(uuid, rest);
@@ -690,7 +692,7 @@ void Graph::groupSelectedBoxes()
 
     command::Meta::Ptr meta(new command::Meta);
     meta->add(del);
-    meta->add(Command::Ptr(new command::InstanciateSubGraphTemplate(templ, group_uuid, tl)));
+    meta->add(Command::Ptr(new command::InstanciateSubGraphTemplate(templ->getName(), group_uuid, tl)));
     meta->add(connect);
 
     CommandDispatcher::execute(meta);

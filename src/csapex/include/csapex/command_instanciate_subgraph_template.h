@@ -7,7 +7,6 @@
 #include <csapex/command_meta.h>
 #include <csapex/selector_proxy.h>
 #include <csapex/csapex_fwd.h>
-#include <csapex/sub_graph_template.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -20,12 +19,12 @@ namespace command
 
 struct InstanciateSubGraphTemplate : public Meta
 {
-    InstanciateSubGraphTemplate(SubGraphTemplate::Ptr templ, const std::string& parent_uuid, const QPoint& pos);
+    InstanciateSubGraphTemplate(const std::string& templ, const std::string& parent_uuid, const QPoint& pos);
 
     bool execute();
 
 private:
-    SubGraphTemplate::Ptr templ;
+    std::string templ;
     std::string parent;
     QPoint pos;
 };

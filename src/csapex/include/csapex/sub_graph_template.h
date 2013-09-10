@@ -29,7 +29,7 @@ private:
     explicit SubGraphTemplate(const std::string& name);
 
 public:
-    std::string addBox(const std::string& type, const QPoint& pos, Box::State::Ptr state);
+    std::string addBox(const std::string& type, const std::string &templ, const QPoint& pos, Box::State::Ptr state);
     std::string addConnector(const std::string& label, const std::string& type, bool input, bool forward = false);
     std::string addConnection(const std::string& from_uuid, const std::string& to_uuid);
 
@@ -70,6 +70,7 @@ private:
         QPoint pos;
         std::string uuid;
         Box::State state;
+        std::string templ;
 
         friend void operator << (YAML::Emitter& e, const BoxTemplate& box) {
             e << YAML::BeginMap;
@@ -78,6 +79,9 @@ private:
             e << YAML::Key << "pos" << YAML::Value << YAML::Flow << YAML::BeginSeq <<  box.pos.x() << box.pos.y() << YAML::EndSeq;
             e << YAML::Key << "state" << YAML::Value;
             box.state.writeYaml(e);
+            if(!box.templ.empty()) {
+                e << YAML::Key << "template" << YAML::Value << box.templ;
+            }
             e << YAML::EndMap;
         }
         friend void operator >> (const YAML::Node& node, BoxTemplate& box) {
@@ -89,6 +93,10 @@ private:
             std::vector<int> pos;
             node["pos"] >> pos;
             box.pos = QPoint(pos[0], pos[1]);
+
+            if(node.FindValue("template")) {
+                node["template"] >> box.templ;
+            }
 
             Box::Ptr tmp = BoxManager::instance().makeBox(QPoint(), box.type, box.uuid);
             box.state.parent = tmp.get();

@@ -799,6 +799,16 @@ Graph::Ptr Box::getSubGraph()
     throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
 }
 
+void Box::setTemplateName(const std::string& name)
+{
+    state->template_ = name;
+}
+
+std::string Box::getTemplateName()
+{
+    return state->template_;
+}
+
 Memento::Ptr Box::getState() const
 {
     assert(state);

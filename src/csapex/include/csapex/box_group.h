@@ -27,8 +27,7 @@ public:
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
 
-    void setTemplate(SubGraphTemplate::Ptr templ);
-    SubGraphTemplate::Ptr getTemplate();
+    void setTemplateName(const std::string& templ);
 
 protected:
     Graph::Ptr sub_graph;

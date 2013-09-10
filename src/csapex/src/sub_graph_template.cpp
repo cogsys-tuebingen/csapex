@@ -6,6 +6,7 @@
 #include <csapex/command_add_box.h>
 #include <csapex/command_add_connector.h>
 #include <csapex/command_add_connection.h>
+#include <csapex/command_instanciate_subgraph_template.h>
 
 using namespace csapex;
 
@@ -18,13 +19,13 @@ SubGraphTemplate::SubGraphTemplate(const std::string& name)
 {
 }
 
-std::string SubGraphTemplate::addBox(const std::string &type, const QPoint &pos, Box::State::Ptr state)
+std::string SubGraphTemplate::addBox(const std::string &type, const std::string &templ, const QPoint &pos, Box::State::Ptr state)
 {
     assert(!locked);
 
     std::string uuid = PARENT_PREFIX_PATTERN + Graph::namespace_separator + tmp_graph.makeUUID(type);
 
-    std::cerr << "adding box to template: " << uuid << " (" << type << ")" << std::endl;
+    std::cerr << "adding box " << (templ.empty() ? "" : ( std::string("(") + templ + ")")) << " to template: " << uuid << " (" << type << ")" << std::endl;
 
     BoxTemplate box;
     box.type = type;
@@ -32,6 +33,7 @@ std::string SubGraphTemplate::addBox(const std::string &type, const QPoint &pos,
     box.uuid = uuid;
     box.state.copyFrom(state);
     box.state.parent = NULL;
+    box.templ = templ;
 
     boxes.push_back(box);
 
@@ -90,7 +92,12 @@ void SubGraphTemplate::createCommands(command::Meta* meta, const std::string& pa
     foreach (const SubGraphTemplate::BoxTemplate& box, boxes) {
         std::string uuid = fillInTemplate(box.uuid, parent);
         Box::State::Ptr state(new Box::State(box.state));
-        meta->add(Command::Ptr(new command::AddBox(box.type, box.pos, parent, uuid, state)));
+
+        if(box.templ.empty()) {
+            meta->add(Command::Ptr(new command::AddBox(box.type, box.pos, parent, uuid, state)));
+        } else {
+            meta->add(Command::Ptr(new command::InstanciateSubGraphTemplate(box.templ, uuid, box.pos)));
+        }
     }
 
     foreach (const SubGraphTemplate::ConnectorTemplate& c, connectors) {

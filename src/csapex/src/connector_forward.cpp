@@ -32,7 +32,25 @@ void ConnectorForward::inputMessage(ConnectionType::Ptr message)
 
 bool ConnectorForward::tryConnect(Connector* other_side)
 {
-    if(other_side->isOutput()) {
+    bool use_in = false;
+
+    if(other_side->isInput() && other_side->isOutput()) {
+        // other side is forwarding as well
+        ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
+        assert(other);
+
+        if(primary_function_is_input == other->primary_function_is_input) {
+            return false;
+        }
+
+        use_in = !other->primary_function_is_input;
+
+    } else {
+        // other side is normal connector
+        use_in = other_side->isOutput();
+    }
+
+    if(use_in) {
         // connection from "left"
         return ConnectorIn::tryConnect(other_side);
     } else {
@@ -47,8 +65,25 @@ bool ConnectorForward::acknowledgeConnection(Connector* other_side)
 }
 
 void ConnectorForward::removeConnection(Connector* other_side)
-{
-    if(other_side->isOutput()) {
+{    bool use_in = false;
+
+     if(other_side->isInput() && other_side->isOutput()) {
+         // other side is forwarding as well
+         ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
+         assert(other);
+
+         if(primary_function_is_input == other->primary_function_is_input) {
+             return;
+         }
+
+         use_in = !other->primary_function_is_input;
+
+     } else {
+         // other side is normal connector
+         use_in = other_side->isOutput();
+     }
+
+     if(use_in) {
         ConnectorIn::removeConnection(other_side);
     } else {
         ConnectorOut::removeConnection(other_side);
