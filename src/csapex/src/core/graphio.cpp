@@ -21,9 +21,10 @@
 
 using namespace csapex;
 
-const std::string GraphIO::extension = ".apex";
+const std::string GraphIO::config_extension = ".apex";
+const std::string GraphIO::template_extension = ".apext";
 const std::string GraphIO::default_config = GraphIO::defaultConfigFile();
-const std::string GraphIO::config_selector = "Configs(*" + GraphIO::extension + ");;LegacyConfigs(*.vecfg)";
+const std::string GraphIO::config_selector = "Configs(*" + GraphIO::config_extension + ");;LegacyConfigs(*.vecfg)";
 
 std::string GraphIO::defaultConfigPath()
 {
@@ -39,7 +40,7 @@ std::string GraphIO::defaultConfigFile()
         boost::filesystem3::create_directories(dir);
     }
 
-    std::string file = dir + "default" + GraphIO::extension;
+    std::string file = dir + "default" + GraphIO::config_extension;
 
     if(!boost::filesystem3::exists(file)) {
         //        createDefaultConfig(file);
@@ -104,8 +105,8 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
 
             graph_->addBox(box);
 
-            if(type == "::meta" && !box->state->template_.empty()) {
-                Template::Ptr templ = TemplateManager::instance().get(box->state->template_);
+            if(type == "::meta" && !box->getTemplateName().empty()) {
+                Template::Ptr templ = TemplateManager::instance().get(box->getTemplateName());
                 command::Meta::Ptr meta(new command::Meta);
                 templ->createCommands(meta.get(), uuid);
 

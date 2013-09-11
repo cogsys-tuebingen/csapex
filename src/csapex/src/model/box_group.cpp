@@ -35,5 +35,5 @@ void BoxGroup::setTemplateName(const std::string &templ)
 {
     Box::setTemplateName(templ);
 
-    icon_->setToolTip((std::string("template: ") + state->template_).c_str());
+    icon_->setToolTip((std::string("template: ") + templ).c_str());
 }

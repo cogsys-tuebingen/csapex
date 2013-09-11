@@ -23,6 +23,9 @@ public:
     ConnectorIn(Box* parent, int sub_id);
     virtual ~ConnectorIn();
 
+    virtual bool canInput() const {
+        return true;
+    }
     virtual bool isInput() const {
         return true;
     }

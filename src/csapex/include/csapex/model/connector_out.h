@@ -27,6 +27,9 @@ public:
     ConnectorOut(Box* parent, int sub_id);
     ~ConnectorOut();
 
+    virtual bool canOutput() const {
+        return true;
+    }
     virtual bool isOutput() const {
         return true;
     }

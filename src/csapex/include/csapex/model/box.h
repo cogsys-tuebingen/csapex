@@ -53,7 +53,7 @@ class Box : public QWidget, public Selectable
     friend class Graph;
     friend class BoxWorker;
     friend class command::MoveBox;
-    friend class command::DeleteBox;
+//    friend class command::DeleteBox;
 
 public:
     typedef boost::shared_ptr<Box> Ptr;

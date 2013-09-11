@@ -114,9 +114,9 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
 
     state->uuid_ = uuid;
     setToolTip(uuid.c_str());
-    ui->label->setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
+
     setLabel(uuid);
 
     ui->content->installEventFilter(this);
@@ -313,6 +313,7 @@ void Box::setLabel(const std::string& label)
 {
     state->label_ = label;
     ui->label->setText(label.c_str());
+    ui->label->setToolTip(label.c_str());
 }
 
 void Box::setLabel(const QString &label)
@@ -830,6 +831,8 @@ void Box::setState(Memento::Ptr memento)
     if(m->boxed_state != NULL) {
         content_->setState(m->boxed_state);
     }
+
+    setTemplateName(state->template_);
 
     minimizeBox(state->minimized);
 

@@ -153,18 +153,19 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPoint pos = e->pos() + offset;
 
-        std::string uuid = graph_->makeUUID(type);
 
         command::Meta::Ptr meta(new command::Meta);
         if(type == "::meta" && e->mimeData()->hasFormat(Template::MIME)) {
             QByteArray t = e->mimeData()->data(Template::MIME);
             std::string templ = (QString(t)).toStdString();
             if(!templ.empty()) {
+                std::string uuid = graph_->makeUUID(templ);
                 meta->add(Command::Ptr(new command::InstanciateTemplate(templ, uuid, pos)));
             }
         }
 
         if(meta->commands() == 0) {
+            std::string uuid = graph_->makeUUID(type);
             meta->add(Command::Ptr(new command::AddBox(type, pos, "", uuid)));
         }
         CommandDispatcher::execute(meta);

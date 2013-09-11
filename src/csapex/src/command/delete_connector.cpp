@@ -12,7 +12,7 @@ using namespace csapex;
 using namespace command;
 
 DeleteConnector::DeleteConnector(Connector *_c) :
-    in(_c->isInput()),
+    in(_c->canInput()),
     c(_c)
 {
     assert(c);

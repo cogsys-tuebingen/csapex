@@ -24,6 +24,7 @@
 #include <QFileDialog>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
+#include <QDesktopWidget>
 
 using namespace csapex;
 
@@ -116,6 +117,7 @@ void CsApexWindow::start()
     ui->splitter->hide();
 
     resize(250,120);
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), QApplication::desktop()->screenGeometry()));
 
     show();
 }

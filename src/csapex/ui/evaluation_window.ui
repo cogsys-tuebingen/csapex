@@ -10,6 +10,13 @@
     <height>368</height>
    </rect>
   </property>
+  <property name="windowTitle">
+   <string>cs::APEX</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../res/csapex_resources.qrc">
+    <normaloff>:/apex_logo.png</normaloff>:/apex_logo.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="enabled">
     <bool>true</bool>
@@ -186,6 +193,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../res/csapex_resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

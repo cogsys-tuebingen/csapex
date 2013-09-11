@@ -141,7 +141,7 @@ bool Connector::canConnectTo(Connector* other_side) const
         return false;
     }
 
-    bool in_out = (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
+    bool in_out = (canOutput() && other_side->canInput()) || (canInput() && other_side->canOutput());
     bool compability = getType()->canConnectTo(other_side->getType());
 
     return in_out && compability;
@@ -206,13 +206,13 @@ void Connector::mousePressEvent(QMouseEvent* e)
 
 bool Connector::shouldCreate(bool left, bool)
 {
-    bool full_input = isInput() && isConnected();
+    bool full_input = canInput() && isConnected();
     return left && !full_input;
 }
 
 bool Connector::shouldMove(bool left, bool right)
 {
-    bool full_input = isInput() && isConnected();
+    bool full_input = canInput() && isConnected();
     return (right && isConnected()) || (left && full_input);
 }
 

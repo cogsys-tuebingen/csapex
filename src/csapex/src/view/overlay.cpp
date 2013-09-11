@@ -150,7 +150,7 @@ void Overlay::deleteTemporaryConnectionsAndRepaint()
 
 void Overlay::drawConnection(Connection& connection)
 {
-    if(!connection.from()->isOutput() || !connection.to()->isInput()) {
+    if(!connection.from()->canOutput() || !connection.to()->canInput()) {
         return;
     }
 
@@ -325,7 +325,6 @@ QPen Overlay::makeLinePen(const QPoint& from, const QPoint& to)
 void Overlay::drawConnector(Connector *c)
 {
     bool output = c->isOutput();
-    bool input = c->isInput();
 
     QColor color;
 
@@ -335,9 +334,9 @@ void Overlay::drawConnector(Connector *c)
         color= Qt::gray;
     } else {
         if(c->isConnected()){
-            color = output ? (input ? color_connected : color_out_connected) : color_in_connected;
+            color = output ? color_out_connected : color_in_connected;
         } else {
-            color = output ? (input ? color_disconnected : color_out_disconnected) : color_in_disconnected;
+            color = output ? color_out_disconnected : color_in_disconnected;
         }
     }
 
@@ -389,7 +388,7 @@ void Overlay::drawActivity(int life, Connector* c)
         int max = mini ? 8 : activity_marker_max_width_;
         double w = min + f * (max - min);
 
-        QColor color = c->isOutput() ? (c->isInput() ? color_connected : color_out_connected) : color_in_connected;
+        QColor color = c->isOutput() ? color_out_connected : color_in_connected;
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
         painter->setPen(QPen(color, w));

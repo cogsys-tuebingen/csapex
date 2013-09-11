@@ -50,6 +50,12 @@ public:
 
     virtual void connectionMovePreview(Connector* other_side) = 0;
 
+    virtual bool canOutput() const {
+        return false;
+    }
+    virtual bool canInput() const {
+        return false;
+    }
     virtual bool isOutput() const {
         return false;
     }

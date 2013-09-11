@@ -50,7 +50,7 @@ void AddConnection::refresh()
     Connector* f = Graph::root()->findConnector(from_uuid);
     Connector* t = Graph::root()->findConnector(to_uuid);
 
-    if(f->isOutput() && t->isInput()) {
+    if(f->canOutput() && t->canInput()) {
         from = dynamic_cast<ConnectorOut*> (f);
         to =  dynamic_cast<ConnectorIn*> (t);
     } else {

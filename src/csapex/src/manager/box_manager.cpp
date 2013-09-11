@@ -151,7 +151,7 @@ void BoxManager::startPlacingMetaBox(QWidget* parent, const QPoint& offset)
 }
 
 namespace {
-QPixmap createPixmap(const std::string& type, const BoxedObjectPtr& content)
+QPixmap createPixmap(const std::string& type, const std::string& label, const BoxedObjectPtr& content)
 {
     csapex::Box::Ptr object;
 
@@ -162,7 +162,7 @@ QPixmap createPixmap(const std::string& type, const BoxedObjectPtr& content)
     }
 
     object->setObjectName(type.c_str());
-    object->setLabel(type);
+    object->setLabel(label);
     object->setType(type);
     object->init(QPoint(0,0));
     object->getContent()->setTypeName(type);
@@ -173,8 +173,10 @@ QPixmap createPixmap(const std::string& type, const BoxedObjectPtr& content)
 
 void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset, const std::string& template_)
 {
+    bool is_meta = type == "::meta";
+
     BoxedObject::Ptr content;
-    if(type == "::meta") {
+    if(is_meta) {
         content.reset(new NullBoxedObject);
     } else {
         foreach(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
@@ -188,7 +190,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         QDrag* drag = new QDrag(parent);
         QMimeData* mimeData = new QMimeData;
 
-        if(type == "::meta") {
+        if(is_meta) {
             mimeData->setData(Template::MIME, template_.c_str());
         }
         mimeData->setData(Box::MIME, type.c_str());
@@ -196,7 +198,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         mimeData->setProperty("oy", offset.y());
         drag->setMimeData(mimeData);
 
-        drag->setPixmap(createPixmap(type, content));
+        drag->setPixmap(createPixmap(type, is_meta ? template_ : type, content));
         drag->setHotSpot(-offset);
         drag->exec();
         return;

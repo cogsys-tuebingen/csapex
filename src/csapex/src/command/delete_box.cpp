@@ -42,8 +42,8 @@ bool DeleteBox::undo()
     Box::Ptr box = BoxManager::instance().makeBox(pos, type, uuid);
     box->setState(saved_state);
 
-    if(!box->state->template_.empty()) {
-        doExecute(Command::Ptr(new command::InstanciateTemplate(box->state->template_, uuid, pos)));
+    if(!box->getTemplateName().empty()) {
+        doExecute(Command::Ptr(new command::InstanciateTemplate(box->getTemplateName(), uuid, pos)));
 
     } else {
         Graph::root()->addBox(box);

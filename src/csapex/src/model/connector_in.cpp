@@ -31,7 +31,7 @@ ConnectorIn::~ConnectorIn()
 
 bool ConnectorIn::tryConnect(Connector* other_side)
 {
-    if(!other_side->isOutput()) {
+    if(!other_side->canOutput()) {
         return false;
     }
 

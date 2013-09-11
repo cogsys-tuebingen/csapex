@@ -17,13 +17,16 @@ public:
     ConnectorForward(Box* parent, bool primary_function_is_input, int sub_id);
     virtual ~ConnectorForward();
 
-    virtual bool isInput() const {
+    virtual bool canInput() const {
         return true;
     }
-    virtual bool isOutput() const {
+    virtual bool canOutput() const {
         return true;
     }
     virtual bool isForwarding() const;
+
+    virtual bool isOutput() const;
+    virtual bool isInput() const;
 
 
     virtual void inputMessage(ConnectionType::Ptr message);

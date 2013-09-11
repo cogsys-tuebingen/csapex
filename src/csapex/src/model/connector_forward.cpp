@@ -25,6 +25,15 @@ bool ConnectorForward::isForwarding() const
     return true;
 }
 
+bool ConnectorForward::isOutput() const
+{
+    return !primary_function_is_input;
+}
+bool ConnectorForward::isInput() const
+{
+    return primary_function_is_input;
+}
+
 void ConnectorForward::inputMessage(ConnectionType::Ptr message)
 {
     publish(message);
@@ -34,7 +43,7 @@ bool ConnectorForward::tryConnect(Connector* other_side)
 {
     bool use_in = false;
 
-    if(other_side->isInput() && other_side->isOutput()) {
+    if(other_side->canInput() && other_side->canOutput()) {
         // other side is forwarding as well
         ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
         assert(other);
@@ -47,7 +56,7 @@ bool ConnectorForward::tryConnect(Connector* other_side)
 
     } else {
         // other side is normal connector
-        use_in = other_side->isOutput();
+        use_in = other_side->canOutput();
     }
 
     if(use_in) {
@@ -67,7 +76,7 @@ bool ConnectorForward::acknowledgeConnection(Connector* other_side)
 void ConnectorForward::removeConnection(Connector* other_side)
 {    bool use_in = false;
 
-     if(other_side->isInput() && other_side->isOutput()) {
+     if(other_side->canInput() && other_side->canOutput()) {
          // other side is forwarding as well
          ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
          assert(other);
@@ -80,7 +89,7 @@ void ConnectorForward::removeConnection(Connector* other_side)
 
      } else {
          // other side is normal connector
-         use_in = other_side->isOutput();
+         use_in = other_side->canOutput();
      }
 
      if(use_in) {

@@ -22,9 +22,12 @@ public:
     Template::Ptr createNewTemporaryTemplate();
     Template::Ptr get(const std::string& name);
 
+    void load(const std::string& path);
+
 private:
     int next_id;
     std::vector<Template::Ptr> temporary_templates;
+    std::map<std::string, Template::Ptr> named_templates;
 };
 
 }

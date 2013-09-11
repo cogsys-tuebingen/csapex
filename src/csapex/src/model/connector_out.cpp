@@ -97,7 +97,7 @@ void ConnectorOut::connectForcedWithoutCommand(ConnectorIn *other_side)
 
 bool ConnectorOut::tryConnect(Connector* other_side)
 {
-    if(!other_side->isInput()) {
+    if(!other_side->canInput()) {
         return false;
     }
     if(!other_side->canConnect()) {

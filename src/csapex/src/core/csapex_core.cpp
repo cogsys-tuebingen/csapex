@@ -9,6 +9,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/model/message.h>
 #include <csapex/manager/connection_type_manager.h>
+#include <csapex/manager/template_manager.h>
 
 /// SYSTEM
 #include <fstream>
@@ -53,9 +54,7 @@ void CsApexCore::init()
         init_ = true;
 
         showStatusMessage("loading core plugins");
-
         core_plugin_manager.reload();
-
         typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
         foreach(PAIR cp, core_plugin_manager.availableClasses()) {
             CorePlugin::Ptr plugin = cp.second();
@@ -64,15 +63,14 @@ void CsApexCore::init()
         }
 
         showStatusMessage("loading boxedobject plugins");
-
         BoxManager& bm = BoxManager::instance();
-
         bm.loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
-
         bm.reload();
 
-        showStatusMessage("loading config");
+        showStatusMessage("loading templates");
+        TemplateManager::instance().load(GraphIO::defaultConfigPath() + "templates/");
 
+        showStatusMessage("loading config");
         try {
             load(getConfig());
         } catch(const std::exception& e) {
