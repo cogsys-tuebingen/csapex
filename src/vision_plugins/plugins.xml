@@ -50,4 +50,7 @@
   <class type="csapex::SetOperation" base_class_type="csapex::BoxedObject">
     <description>none yet</description>
   </class>
+<class type="csapex::ObjectDetection" base_class_type="csapex::BoxedObject">
+    <description>none yet</description>
+  </class>
 </library>

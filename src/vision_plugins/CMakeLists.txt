@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+    cmake_minimum_required(VERSION 2.8.3)
 project(vision_plugins)
 
 find_package(catkin REQUIRED roscpp csapex_vision utils)
@@ -54,6 +54,8 @@ add_library(vision_plugins
     src/filter_local_patterns.cpp
     src/simple_image_difference.cpp
     src/simple_sink.cpp 
+    src/object_detection.cpp
+    src/object_homography.cpp
    ${MOC}
 )
 
