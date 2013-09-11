@@ -8,7 +8,7 @@
 #ifndef GLOBAL_OPTION_MANAGER_H
 #define GLOBAL_OPTION_MANAGER_H
 
-//#warning This file should not be used anymore!
+#warning This file should not be used anymore!
 
 /// COMPONENT
 #include <csapex/deprecated/global_option.h>

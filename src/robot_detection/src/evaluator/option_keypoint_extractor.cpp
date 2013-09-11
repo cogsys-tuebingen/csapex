@@ -7,7 +7,6 @@
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
 #include <csapex/utility/qt_helper.hpp>
-#include <boost/foreach.hpp>
 
 PLUGINLIB_EXPORT_CLASS(robot_detection::OptionKeypointExtractor, csapex::GlobalOption)
 
