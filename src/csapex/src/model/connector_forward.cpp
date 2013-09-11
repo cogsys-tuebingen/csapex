@@ -43,16 +43,12 @@ bool ConnectorForward::tryConnect(Connector* other_side)
 {
     bool use_in = false;
 
-    if(other_side->canInput() && other_side->canOutput()) {
-        // other side is forwarding as well
-        ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
-        assert(other);
-
-        if(primary_function_is_input == other->primary_function_is_input) {
+    if(other_side->isForwarding()) {
+        if(isOutput() == other_side->isOutput()) {
             return false;
         }
 
-        use_in = !other->primary_function_is_input;
+        use_in = other_side->isOutput();
 
     } else {
         // other side is normal connector
@@ -76,16 +72,12 @@ bool ConnectorForward::acknowledgeConnection(Connector* other_side)
 void ConnectorForward::removeConnection(Connector* other_side)
 {    bool use_in = false;
 
-     if(other_side->canInput() && other_side->canOutput()) {
-         // other side is forwarding as well
-         ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
-         assert(other);
-
-         if(primary_function_is_input == other->primary_function_is_input) {
+     if(other_side->isForwarding()) {
+         if(isOutput() == other_side->isOutput()) {
              return;
          }
 
-         use_in = !other->primary_function_is_input;
+         use_in = other_side->isOutput();
 
      } else {
          // other side is normal connector
@@ -108,7 +100,7 @@ void ConnectorForward::removeAllConnectionsNotUndoable()
     }
 }
 
-bool ConnectorForward::canConnect()
+bool ConnectorForward::canConnect() const
 {
     if(primary_function_is_input) {
         return ConnectorIn::canConnect();
@@ -117,7 +109,7 @@ bool ConnectorForward::canConnect()
     }
 }
 
-bool ConnectorForward::isConnected()
+bool ConnectorForward::isConnected() const
 {
     if(primary_function_is_input) {
         return ConnectorIn::isConnected();
@@ -135,7 +127,7 @@ void ConnectorForward::validateConnections()
     }
 }
 
-bool ConnectorForward::targetsCanConnectTo(Connector *other_side)
+bool ConnectorForward::targetsCanConnectTo(Connector *other_side) const
 {
     if(primary_function_is_input) {
         return ConnectorIn::targetsCanConnectTo(other_side);
@@ -165,17 +157,4 @@ Command::Ptr ConnectorForward::removeAllConnectionsCmd()
 void ConnectorForward::setPrimaryFunction(bool input)
 {
     primary_function_is_input = input;
-}
-
-
-bool ConnectorForward::shouldCreate(bool left, bool)
-{
-    bool full_input = primary_function_is_input && isConnected();
-    return left && !full_input;
-}
-
-bool ConnectorForward::shouldMove(bool left, bool right)
-{
-    bool full_input = primary_function_is_input && isConnected();
-    return (right && isConnected()) || (left && full_input);
 }

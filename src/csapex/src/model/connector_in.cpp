@@ -69,17 +69,17 @@ void ConnectorIn::removeAllConnectionsNotUndoable()
     }
 }
 
-bool ConnectorIn::canConnect()
+bool ConnectorIn::canConnect() const
 {
     return target == NULL;
 }
 
-bool ConnectorIn::targetsCanConnectTo(Connector* other_side)
+bool ConnectorIn::targetsCanConnectTo(Connector* other_side) const
 {
-    return getConnected()->canConnectTo(other_side) && canConnectTo(getConnected());
+    return target->canConnectTo(other_side) /*&& canConnectTo(getConnected())*/;
 }
 
-bool ConnectorIn::isConnected()
+bool ConnectorIn::isConnected() const
 {
     return target != NULL;
 }
@@ -102,7 +102,7 @@ void ConnectorIn::validateConnections()
     setError(e);
 }
 
-Connector *ConnectorIn::getConnected()
+Connector *ConnectorIn::getConnected() const
 {
     return target;
 }
@@ -113,18 +113,16 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
         return;
     }
 
-    message_ = message;
+    {
+        QMutexLocker lock(&io_mutex);
+        message_ = message;
+    }
 
     Q_EMIT messageArrived(this);
 }
 
 ConnectionType::Ptr ConnectorIn::getMessage()
 {
+    QMutexLocker lock(&io_mutex);
     return message_;
 }
-
-//void ConnectorIn::relayMessage(ConnectorIn *source)
-//{
-//    message_ = source->getMessage();
-//    Q_EMIT messageArrived(this);
-//}

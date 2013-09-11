@@ -108,8 +108,8 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
 
-        ConnectorOut* out = dynamic_cast<ConnectorOut*> (c);
-        if(out) {
+        if(c->isOutput()) {
+            ConnectorOut* out = dynamic_cast<ConnectorOut*> (c);
             for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
                 overlay->addTemporaryConnection(*it, e->pos());
             }

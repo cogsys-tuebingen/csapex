@@ -21,6 +21,8 @@ Connection::Connection(ConnectorOut *from, ConnectorIn *to)
 Connection::Connection(Connector *from, Connector *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {
+    assert(from->isOutput());
+    assert(to->isInput());
     QObject::connect(from_, SIGNAL(messageSent(Connector*)), this, SLOT(messageSentEvent()));
 }
 

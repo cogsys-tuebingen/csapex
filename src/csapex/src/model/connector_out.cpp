@@ -38,11 +38,11 @@ int ConnectorOut::noTargets()
     return targets_.size();
 }
 
-ConnectorOut::TargetIterator ConnectorOut::beginTargets()
+ConnectorOut::TargetIterator ConnectorOut::beginTargets() const
 {
     return targets_.begin();
 }
-ConnectorOut::TargetIterator ConnectorOut::endTargets()
+ConnectorOut::TargetIterator ConnectorOut::endTargets() const
 {
     return targets_.end();
 }
@@ -121,22 +121,22 @@ bool ConnectorOut::tryConnect(Connector* other_side)
     return true;
 }
 
-bool ConnectorOut::canConnect()
+bool ConnectorOut::canConnect() const
 {
     return true;
 }
 
-bool ConnectorOut::targetsCanConnectTo(Connector* other_side)
+bool ConnectorOut::targetsCanConnectTo(Connector* other_side) const
 {
     for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
-        if(!(*it)->canConnectTo(other_side) || !canConnectTo(*it)) {
+        if(!(*it)->canConnectTo(other_side)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
     return true;
 }
 
-bool ConnectorOut::isConnected()
+bool ConnectorOut::isConnected() const
 {
     return targets_.size() > 0;
 }

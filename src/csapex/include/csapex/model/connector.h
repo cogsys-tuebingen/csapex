@@ -40,10 +40,11 @@ public:
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
 
-    virtual bool canConnect() = 0;
-    virtual bool canConnectTo(Connector* other_side) const;
-    virtual bool targetsCanConnectTo(Connector* other_side) = 0;
-    virtual bool isConnected() = 0;
+    bool canConnectTo(Connector* other_side) const;
+
+    virtual bool canConnect() const = 0;
+    virtual bool targetsCanConnectTo(Connector* other_side) const = 0;
+    virtual bool isConnected() const = 0;
     virtual bool tryConnect(Connector* other_side) = 0;
     virtual void removeConnection(Connector* other_side) = 0;
     virtual void validateConnections();
@@ -65,7 +66,7 @@ public:
 
     virtual bool isForwarding() const;
 
-    std::string UUID();
+    std::string UUID() const;
 
     virtual QPoint centerPoint();
 

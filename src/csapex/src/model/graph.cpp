@@ -180,7 +180,7 @@ Template::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr&
                 std::string new_connector_uuid;
                 std::string explicit_new_connector_uuid;
 
-                for(std::vector<ConnectorIn*>::iterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+                for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
                     ConnectorIn* in = *it;
                     Box* owner = in->getBox();
                     bool is_selected = false;

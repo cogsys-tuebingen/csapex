@@ -75,7 +75,7 @@ bool Connector::isForwarding() const
     return false;
 }
 
-std::string Connector::UUID()
+std::string Connector::UUID() const
 {
     return uuid_;
 }
@@ -124,6 +124,7 @@ void Connector::enable()
 
 void Connector::findParents()
 {
+    // TODO: remove this !!!
     QWidget* tmp = this;
     while(tmp != NULL) {
         if(dynamic_cast<csapex::Box*>(tmp)) {
@@ -157,9 +158,9 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
             }
         }
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
+        Connector* original_connector = dynamic_cast<Connector*>(e->mimeData()->parent());
 
-        if(from->targetsCanConnectTo(this)) {
+        if(original_connector->targetsCanConnectTo(this)) {
             e->acceptProposedAction();
         }
     }
@@ -191,7 +192,7 @@ void Connector::dropEvent(QDropEvent* e)
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
-        if(from && from != this) {
+        if(from) {
             Command::Ptr cmd(new command::MoveConnection(from, this));
             CommandDispatcher::execute(cmd);
             e->setDropAction(Qt::MoveAction);
@@ -206,13 +207,13 @@ void Connector::mousePressEvent(QMouseEvent* e)
 
 bool Connector::shouldCreate(bool left, bool)
 {
-    bool full_input = canInput() && isConnected();
+    bool full_input = isInput() && isConnected();
     return left && !full_input;
 }
 
 bool Connector::shouldMove(bool left, bool right)
 {
-    bool full_input = canInput() && isConnected();
+    bool full_input = isInput() && isConnected();
     return (right && isConnected()) || (left && full_input);
 }
 

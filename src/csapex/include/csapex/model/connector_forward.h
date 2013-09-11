@@ -32,13 +32,13 @@ public:
     virtual void inputMessage(ConnectionType::Ptr message);
 
 
-    virtual bool canConnect();
-    virtual bool isConnected();
+    virtual bool canConnect() const;
+    virtual bool isConnected() const;
 
     virtual void validateConnections();
 
 
-    virtual bool targetsCanConnectTo(Connector* other_side);
+    virtual bool targetsCanConnectTo(Connector* other_side) const;
 
     virtual void connectionMovePreview(Connector* other_side);
 
@@ -51,9 +51,6 @@ protected:
     virtual bool acknowledgeConnection(Connector* other_side);
     virtual void removeConnection(Connector* other_side);
     virtual void removeAllConnectionsNotUndoable();
-
-    virtual bool shouldMove(bool left, bool right);
-    virtual bool shouldCreate(bool left, bool right);
 
 private:
     bool primary_function_is_input;

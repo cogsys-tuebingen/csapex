@@ -20,7 +20,7 @@ class ConnectorOut : public virtual Connector
     typedef std::vector<ConnectorIn*> TargetList;
 
 public:
-    typedef TargetList::iterator TargetIterator;
+    typedef TargetList::const_iterator TargetIterator;
 
 public:
     ConnectorOut(Box* parent, const std::string& uuid);
@@ -36,16 +36,16 @@ public:
 
     virtual void publish(ConnectionType::Ptr message);
 
-    virtual bool canConnect();
-    virtual bool targetsCanConnectTo(Connector *other_side);
-    virtual bool isConnected();
+    virtual bool canConnect() const;
+    virtual bool targetsCanConnectTo(Connector *other_side) const;
+    virtual bool isConnected() const;
 
     virtual void connectionMovePreview(Connector* other_side);
     virtual void validateConnections();
 
     int noTargets();
-    TargetIterator beginTargets();
-    TargetIterator endTargets();
+    TargetIterator beginTargets() const;
+    TargetIterator endTargets() const;
 
     void connectForcedWithoutCommand(ConnectorIn* other_side);
 

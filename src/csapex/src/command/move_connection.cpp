@@ -14,22 +14,14 @@
 
 using namespace csapex::command;
 
-MoveConnection::MoveConnection(Connector *a, Connector *b)
+MoveConnection::MoveConnection(Connector *from, Connector *to)
 {
-    Connector* from = dynamic_cast<ConnectorOut*>(a);
-    Connector* to = NULL;
-
-    if(from) {
-        to = dynamic_cast<ConnectorOut*>(b);
-        output = true;
-
-    } else {
-        from = dynamic_cast<ConnectorIn*>(a);
-        to = dynamic_cast<ConnectorIn*>(b);
-        output = false;
-    }
     assert(from);
     assert(to);
+    assert((from->isOutput() && to->isOutput()) ||
+           (from->isInput() && to->isInput()));
+
+    output = from->isOutput();
 
     from_uuid = from->UUID();
     to_uuid = to->UUID();
@@ -49,7 +41,7 @@ MoveConnection::MoveConnection(Connector *a, Connector *b)
         ConnectorIn* in = dynamic_cast<ConnectorIn*>(from);
 
         Connector* target = in->getConnected();
-        add(Command::Ptr(new DeleteConnection(from, target)));
+        add(Command::Ptr(new DeleteConnection(target, from)));
         add(Command::Ptr(new AddConnection(target->UUID(), to_uuid)));
     }
 }

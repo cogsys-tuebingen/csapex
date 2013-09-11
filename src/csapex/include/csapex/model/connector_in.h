@@ -5,6 +5,9 @@
 #include "connector.h"
 #include <csapex/csapex_fwd.h>
 
+/// SYSTEM
+#include <QMutex>
+
 namespace csapex
 {
 
@@ -33,14 +36,14 @@ public:
     virtual void inputMessage(ConnectionType::Ptr message);
     virtual ConnectionType::Ptr getMessage();
 
-    virtual bool canConnect();
-    virtual bool targetsCanConnectTo(Connector* other_side);
-    virtual bool isConnected();
+    virtual bool canConnect() const;
+    virtual bool targetsCanConnectTo(Connector* other_side) const;
+    virtual bool isConnected() const;
 
     virtual void connectionMovePreview(Connector* other_side);
     virtual void validateConnections();
 
-    virtual Connector* getConnected();
+    Connector* getConnected() const;
 
     virtual Command::Ptr removeAllConnectionsCmd();
 
@@ -57,6 +60,8 @@ protected:
     Connector* target;
 
     ConnectionType::Ptr message_;
+
+    QMutex io_mutex;
 };
 
 }

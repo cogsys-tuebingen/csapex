@@ -150,7 +150,7 @@ void Overlay::deleteTemporaryConnectionsAndRepaint()
 
 void Overlay::drawConnection(Connection& connection)
 {
-    if(!connection.from()->canOutput() || !connection.to()->canInput()) {
+    if(!connection.from()->isOutput() || !connection.to()->isInput()) {
         return;
     }
 
@@ -641,7 +641,7 @@ void Overlay::paintEvent(QPaintEvent*)
             ccs = CurrentConnectionState();
             ccs.selected = true;
 
-            if(dynamic_cast<ConnectorIn*> (temp.from)) {
+            if(temp.from->isInput()) {
                 drawConnection(temp.to, temp.from->centerPoint(), -1);
             } else {
                 drawConnection(temp.from->centerPoint(), temp.to, -1);
