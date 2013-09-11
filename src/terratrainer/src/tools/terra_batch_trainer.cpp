@@ -59,6 +59,8 @@ void TerraBatchTrainer::read(std::ifstream &in)
         std::string work_path;
         document["WORK_PATH"] >> work_path;
 
+        std::cout << work_path << std::endl;
+
         if(boost::filesystem3::exists(work_path) && boost::filesystem3::is_directory(work_path)) {
             if(work_path.length() > 0 && work_path[work_path.length() - 1] != '/')
                 work_path += '/';

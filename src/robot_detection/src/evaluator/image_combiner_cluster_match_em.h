@@ -2,6 +2,7 @@
 #define IMAGE_COMBINER_CLUSTER_MATCH_EM_H
 
 /// COMPONENT
+#include <boost/config/suffix.hpp>
 #include <csapex_vision/image_combiner.h>
 #include "option_clustering.h"
 
@@ -26,7 +27,7 @@ namespace robot_detection
 
 class ImageCombinerClusterMatchEM : public csapex::ImageCombiner, public Reconfigurable
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2);

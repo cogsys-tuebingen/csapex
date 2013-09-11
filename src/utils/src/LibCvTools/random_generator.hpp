@@ -1,9 +1,11 @@
 #ifndef RANDOM_GENERATOR_H
 #define RANDOM_GENERATOR_H
 #include <time.h>
+#include <boost/date_time.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/shared_ptr.hpp>
 /**
  * @brief   The RandomGenerator class is used to save a initialized boost random
  *          generator.
@@ -16,6 +18,12 @@ typedef boost::uniform_real<>              dist_real;
 template<class Generator, class Distribution, class T>
 class RandomGenerator {
 public:
+    typedef boost::posix_time::ptime                    Time;
+    typedef boost::posix_time::microsec_clock           Clock;
+    typedef boost::posix_time::time_duration            Duration;
+    typedef boost::shared_ptr<RandomGenerator<Generator, Distribution, T> > Ptr;
+
+
     /**
      * @brief RandomGenerator.
      * @param min - type T minimum bound
@@ -26,7 +34,21 @@ public:
         min_(min),
         max_(max)
     {
-        seed_ = time(0);
+
+        Time        time(Clock::local_time());
+        Duration    dur(time.time_of_day());
+        seed_ = dur.total_milliseconds();
+        random_gen_.seed(seed_);
+    }
+
+    RandomGenerator() :
+        distribuation_(0,1),
+        min_(0),
+        max_(1)
+    {
+        Time        time(Clock::local_time());
+        Duration    dur(time.time_of_day());
+        seed_ = dur.total_milliseconds();
         random_gen_.seed(seed_);
     }
 
@@ -52,6 +74,21 @@ public:
         return distribuation_(random_gen_);
     }
 
+    void reset(const T &min, const T &max, const long &seed = time(0))
+    {
+        min_ = min;
+        max_ = max;
+        distribuation_ = Distribution(min, max);
+        seed_  = seed;
+        random_gen_.random_gen_.seed(seed_);
+    }
+
+    static T generate_on_the_fly(const T &min, const T &max)
+    {
+        RandomGenerator<Generator, Distribution, T> rand(min, max);
+        return rand.generate();
+    }
+
 private:
     Generator       random_gen_;
     Distribution    distribuation_;
@@ -63,6 +100,5 @@ private:
 typedef RandomGenerator<mt32, dist_int, int>     RandomGeneratorInt;
 typedef RandomGenerator<mt64, dist_real, double> RandomGeneratorDouble;
 typedef RandomGenerator<mt32, dist_real, float>  RandomGeneratorFloat;
-
 
 #endif // RANDOM_GENERATOR_H

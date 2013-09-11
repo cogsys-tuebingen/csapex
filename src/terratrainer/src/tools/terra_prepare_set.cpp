@@ -19,10 +19,11 @@ inline bool create_on_check(const std::string &path)
     return true;
 }
 
-inline bool read_yml_img(const std::string &path, std::vector<std::string> &imgs, std::vector<std::string> &ymls)
+inline bool read_yml_img(const std::string &path, std::vector<std::string> &imgs, std::vector<std::string> &rois, std::vector<std::string> &ymls)
 {
     boost::regex e_yaml(".*\\.(yml)");
     boost::regex e_jpg(".*\\.(jpg)");
+    boost::regex e_roi(".*\\.(rois\\.yaml)");
     if(boost::filesystem3::is_directory(path)) {
         boost::filesystem3::directory_iterator end_iter;
         for(boost::filesystem3::directory_iterator dir_itr( path ); dir_itr != end_iter; ++dir_itr) {
@@ -36,6 +37,9 @@ inline bool read_yml_img(const std::string &path, std::vector<std::string> &imgs
                     if(boost::regex_match(current.c_str(), what, e_jpg) && what[0].matched) {
                         imgs.push_back(current);
                     }
+                    if(boost::regex_match(current.c_str(), what, e_roi) && what[0].matched) {
+                        rois.push_back(current);
+                    }
                 }
             }
             catch ( const std::exception & ex ){
@@ -44,7 +48,7 @@ inline bool read_yml_img(const std::string &path, std::vector<std::string> &imgs
         }
     }
 
-    return imgs.size() > 0 && imgs.size() == ymls.size();
+    return !imgs.empty() && imgs.size() == ymls.size() && imgs.size() == rois.size();
 }
 
 }
@@ -84,34 +88,44 @@ int main(int argc, char *argv[])
 
     std::vector<std::string> img_paths;
     std::vector<std::string> yml_paths;
-    if(!files::read_yml_img(path, img_paths, yml_paths) || yml_paths.size() == 0 || img_paths.size() == 0) {
+    std::vector<std::string> roi_paths;
+    if(!files::read_yml_img(path, img_paths, roi_paths, yml_paths) || yml_paths.empty() || img_paths.empty() || roi_paths.empty()) {
         std::cerr << "Directory not readable, no files given or the amount of .yml and .img files is not matching!" << std::endl;
-        if(yml_paths.size() == 0) {
+        if(yml_paths.empty()) {
             std::cerr << "No yml paths found !" << std::endl;
         }
 
-        if(img_paths.size() == 0) {
+        if(img_paths.empty()) {
             std::cout << "No images where found!" << std::endl;
         }
+
+        if(roi_paths.empty())
+            std::cout << "No rois where found!" << std::endl;
+
         return 1;
     }
 
     std::sort(yml_paths.begin(), yml_paths.end());
     std::sort(img_paths.begin(), img_paths.end());
+    std::sort(roi_paths.begin(), roi_paths.end());
 
-    /// SAMPLE 70% TRAIN DATA AND 30% VALIDATION DATA
+    /// SAMPLE 50% TRAIN DATA AND 50% VALIDATION DATA
 
     std::set<int>  sample_indeces;
-    int sample_elements = .3 * img_paths.size();
+    int sample_elements = .5 * img_paths.size();
     RandomGeneratorInt         generator(0, img_paths.size() - 1);
     while(sample_indeces.size() < sample_elements) {
-        sample_indeces.insert(generator.generate());
+        int index = generator.generate();
+        sample_indeces.insert(index);
     }
 
+
     std::vector<std::string> train_images;
+    std::vector<std::string> train_rois;
     for(std::set<int>::iterator it = sample_indeces.begin() ; it != sample_indeces.end() ; ++it) {
         train_images.push_back(img_paths[*it]);
-     }
+        train_rois.push_back(roi_paths[*it]);
+    }
 
     for(std::set<int>::iterator it = sample_indeces.begin() ; it != sample_indeces.end() ; ++it) {
         img_paths.erase(img_paths.begin() + *it);
@@ -121,17 +135,21 @@ int main(int argc, char *argv[])
 
     /// DO THE COPY STUFF
     /// TRAIN
-    for(std::vector<std::string>::iterator it = train_images.begin() ; it != train_images.end() ; ++it) {
-        boost::filesystem3::path src(*it);
-        boost::filesystem3::path dst(path_train + src.filename().string());
-        boost::filesystem3::copy_file(src, dst, boost::filesystem3::copy_option::overwrite_if_exists);
+    for(int i = 0 ; i < train_images.size() ; ++i) {
+        boost::filesystem3::path src_img(train_images[i]);
+        boost::filesystem3::path dst_img(path_train + src_img.filename().string());
+        boost::filesystem3::path src_roi(train_rois[i]);
+        boost::filesystem3::path dst_roi(path_train + src_roi.filename().string());
+        boost::filesystem3::copy_file(src_img, dst_img, boost::filesystem3::copy_option::overwrite_if_exists);
+        boost::filesystem3::copy_file(src_roi, dst_roi, boost::filesystem3::copy_option::overwrite_if_exists);
     }
 
+    /// VALIDATION
     for(int i = 0 ; i < img_paths.size() ; ++i) {
         boost::filesystem3::path src_img(img_paths[i]);
         boost::filesystem3::path src_yml(yml_paths[i]);
         boost::filesystem3::path dst_img(path_valid + src_img.filename().string());
-        boost::filesystem3::path dst_yml(path_valid + src_yml.filename().string());
+        boost::filesystem3::path dst_yml(path_valid + "gt_" + src_yml.filename().string());
         boost::filesystem3::copy_file(src_img, dst_img, boost::filesystem3::copy_option::overwrite_if_exists);
         boost::filesystem3::copy_file(src_yml, dst_yml, boost::filesystem3::copy_option::overwrite_if_exists);
 
