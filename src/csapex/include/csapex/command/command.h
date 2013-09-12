@@ -15,7 +15,8 @@ class Command
 {
     friend class CommandDispatcher;
     friend class command::Meta;
-    friend class GraphIO;
+    friend class BoxGroup;
+    friend class BoxManager;
 
 public:
     typedef boost::shared_ptr<Command> Ptr;

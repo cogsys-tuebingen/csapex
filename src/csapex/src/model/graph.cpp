@@ -140,7 +140,7 @@ Template::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr&
             delete_boxes->add(Command::Ptr(new command::DeleteBox(b->UUID())));
 
             Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
-            std::string new_uuid = sub_graph_templ->addBox(b->getType(), b->getTemplateName(), b->pos(), state);
+            std::string new_uuid = sub_graph_templ->addBox(b->getType(), b->pos(), state);
 
             size_t start_pos = new_uuid.find(Template::PARENT_PREFIX_PATTERN);
             assert(start_pos != std::string::npos);
@@ -352,6 +352,7 @@ void Graph::reset()
 Graph::Ptr Graph::findSubGraph(const std::string& uuid)
 {
     Box::Ptr bg = findBox(uuid);
+    assert(bg);
     assert(bg->hasSubGraph());
 
     return bg->getSubGraph();
@@ -379,7 +380,7 @@ Box::Ptr Graph::findBox(const std::string &uuid, const std::string& ns)
         return meta->getSubGraph()->findBox(uuid, rest);
     }
 
-    return Box::NullPtr;
+    throw std::runtime_error(std::string("cannot find box \"") + uuid + " in namespace " + ns);
 }
 
 Box::Ptr Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
@@ -426,7 +427,7 @@ Box::Ptr Graph::findConnectorOwner(const std::string &uuid, const std::string& n
 
     std::cerr << std::flush;
 
-    return Box::NullPtr;
+    throw std::runtime_error(std::string("cannot connector \"") + uuid + " in namespace " + ns);
 }
 
 Connector* Graph::findConnector(const std::string &uuid, const std::string &ns)
@@ -685,14 +686,15 @@ void Graph::groupSelectedBoxes()
         }
     }
 
-    std::string group_uuid = makeUUID("::meta");
+    std::string group_uuid = makeUUID("::template::temporary");
 
     Command::Ptr del, connect;
     Template::Ptr templ = convertSelectionToTemplate(del, connect, group_uuid);
 
     command::Meta::Ptr meta(new command::Meta);
     meta->add(del);
-    meta->add(Command::Ptr(new command::InstanciateTemplate(templ->getName(), group_uuid, tl)));
+    meta->add(command::AddBox::Ptr(new command::AddBox("::template::temporary", tl, "", group_uuid)));
+    meta->add(Command::Ptr(new command::InstanciateTemplate(templ->getName(), group_uuid)));
     meta->add(connect);
 
     CommandDispatcher::execute(meta);

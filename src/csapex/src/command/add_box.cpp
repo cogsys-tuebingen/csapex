@@ -26,7 +26,7 @@ AddBox::AddBox(const std::string &type, QPoint pos, const std::string &parent_uu
 
 bool AddBox::execute()
 {
-    Box::Ptr box_ = BoxManager::instance().makeBox(pos_, type_, uuid_);
+    Box::Ptr box_ = BoxManager::instance().makeBox(type_, uuid_);
 
     if(saved_state_) {
         box_->setState(saved_state_);
@@ -42,6 +42,8 @@ bool AddBox::execute()
         parent = Graph::root()->findSubGraph(parent_uuid_);
     }
     parent->addBox(box_);
+
+    box_->init(pos_);
 
     return true;
 }

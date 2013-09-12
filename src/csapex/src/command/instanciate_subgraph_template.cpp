@@ -11,10 +11,11 @@
 
 using namespace csapex::command;
 
-InstanciateTemplate::InstanciateTemplate(const std::string &templ, const std::string &parent_uuid, const QPoint &pos)
-    : templ(templ), parent(parent_uuid), pos(pos)
+
+// TODO: the command should be renamed to something like "instanciate template into"
+InstanciateTemplate::InstanciateTemplate(const std::string &templ, const std::string &parent_uuid)
+    : templ(templ), parent(parent_uuid)
 {
-    add(command::AddBox::Ptr(new command::AddBox("::meta", pos, "", parent)));
     TemplateManager::instance().get(templ)->createCommands(this, parent);
 }
 
@@ -27,8 +28,6 @@ bool InstanciateTemplate::execute()
 
     BoxGroup::Ptr group = boost::dynamic_pointer_cast<BoxGroup> (box);
     assert(group);
-
-    group->setTemplateName(templ);
 
     return r;
 }

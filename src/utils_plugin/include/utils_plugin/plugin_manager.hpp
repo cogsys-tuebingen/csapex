@@ -6,8 +6,6 @@
 
 /// SYSTEM
 #include <boost/signals2.hpp>
-#include <boost/lambda/bind.hpp>
-#include <boost/lambda/construct.hpp>
 #include <pluginlib/class_loader.h>
 
 namespace plugin_manager {

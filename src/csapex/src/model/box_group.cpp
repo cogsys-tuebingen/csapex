@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/boxed_object.h>
+#include <csapex/manager/template_manager.h>
 #include "ui_box.h"
 
 /// SYSTEM
@@ -12,8 +13,8 @@ using namespace csapex;
 
 const QString BoxGroup::MIME = "csapex/model/boxmeta";
 
-BoxGroup::BoxGroup(BoxedObject::Ptr content, const std::string &uuid, QWidget *parent)
-    : Box(content, uuid, parent), sub_graph(new Graph)
+BoxGroup::BoxGroup(const std::string &uuid, QWidget *parent)
+    : Box(BoxedObject::Ptr(new NullBoxedObject), uuid, parent), sub_graph(new Graph)
 {
     icon_ = new QLabel();
     QIcon img(":/group.png");
@@ -31,9 +32,13 @@ Graph::Ptr BoxGroup::getSubGraph()
     return sub_graph;
 }
 
-void BoxGroup::setTemplateName(const std::string &templ)
+void BoxGroup::init(const QPoint &pos)
 {
-    Box::setTemplateName(templ);
+    Box::init(pos);
 
-    icon_->setToolTip((std::string("template: ") + templ).c_str());
+    Template::Ptr templ = TemplateManager::instance().get(BoxManager::getTemplateName(getType()));
+    command::Meta::Ptr meta(new command::Meta);
+    templ->createCommands(meta.get(), UUID());
+
+    Command::doExecute(meta);
 }

@@ -19,13 +19,13 @@ Template::Template(const std::string& name)
 {
 }
 
-std::string Template::addBox(const std::string &type, const std::string &templ, const QPoint &pos, Box::State::Ptr state)
+std::string Template::addBox(const std::string &type, const QPoint &pos, Box::State::Ptr state)
 {
     assert(!locked);
 
     std::string uuid = PARENT_PREFIX_PATTERN + Graph::namespace_separator + tmp_graph.makeUUID(type);
 
-    std::cerr << "adding box " << (templ.empty() ? "" : ( std::string("(") + templ + ")")) << " to template: " << uuid << " (" << type << ")" << std::endl;
+    std::cerr << "adding box to template: " << uuid << " (" << type << ")" << std::endl;
 
     BoxTemplate box;
     box.type = type;
@@ -33,7 +33,6 @@ std::string Template::addBox(const std::string &type, const std::string &templ, 
     box.uuid = uuid;
     box.state.copyFrom(state);
     box.state.parent = NULL;
-    box.templ = templ;
 
     boxes.push_back(box);
 
@@ -93,11 +92,7 @@ void Template::createCommands(command::Meta* meta, const std::string& parent) co
         std::string uuid = fillInTemplate(box.uuid, parent);
         Box::State::Ptr state(new Box::State(box.state));
 
-        if(box.templ.empty()) {
-            meta->add(Command::Ptr(new command::AddBox(box.type, box.pos, parent, uuid, state)));
-        } else {
-            meta->add(Command::Ptr(new command::InstanciateTemplate(box.templ, uuid, box.pos)));
-        }
+        meta->add(Command::Ptr(new command::AddBox(box.type, box.pos, parent, uuid, state)));
     }
 
     foreach (const Template::ConnectorTemplate& c, connectors) {

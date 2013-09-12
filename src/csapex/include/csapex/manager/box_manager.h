@@ -29,17 +29,17 @@ class BoxManager : public QObject, public Singleton<BoxManager>
 
 public:
     static std::string stripNamespace(const std::string& name);
+    static bool typeIsTemplate(const std::string& type);
+    static std::string getTemplateName(const std::string& type);
 
     virtual void reload();
     ~BoxManager();
 
 public:
-    void register_box_type(BoxedObjectConstructor::ProxyConstructor provider);
     void register_box_type(BoxedObjectConstructor::Ptr provider);
 
-    void startPlacingMetaBox(QWidget *parent, const QPoint &offset = QPoint(0,0));
-    void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0), const std::string &template_ = "");
-    BoxPtr makeBox(QPoint pos, const std::string& type, const std::string& uuid = "");
+    void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
+    BoxPtr makeBox(const std::string& type, const std::string& uuid = "");
     BoxedObjectConstructor::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
@@ -60,7 +60,10 @@ protected:
     BoxManager(const BoxManager& copy);
     BoxManager& operator = (const BoxManager& assign);
 
-    BoxPtr make(BoxedObject::Ptr content, QPoint pos, const std::string uuid, const std::string type);
+    void rebuildMap();
+
+    BoxPtr makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid, const std::string type);
+    BoxPtr makeTemplateBox(const std::string uuid, const std::string type);
 
 protected:
     std::vector<BoxedObjectConstructor::Ptr> available_elements_prototypes;
@@ -71,6 +74,8 @@ protected:
     std::set<Tag> tags;
 
     PluginManager<BoxedObject>* manager_;
+
+    bool dirty_;
 };
 
 }

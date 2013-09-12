@@ -75,7 +75,7 @@ class RosHandler
 
                     Memento::Ptr state;
                     {
-                        Box::Ptr tmp = BoxManager::instance().makeBox(QPoint(), "csapex::ImportRos");
+                        Box::Ptr tmp = BoxManager::instance().makeBox("csapex::ImportRos");
                         assert(tmp);
 
                         boost::shared_ptr<ImportRos> inst = boost::dynamic_pointer_cast<ImportRos> (tmp->getContent());
@@ -154,7 +154,7 @@ class FileHandler
 
                 Memento::Ptr state;
                 {
-                    Box::Ptr tmp = BoxManager::instance().makeBox(QPoint(), "csapex::FileImporter");
+                    Box::Ptr tmp = BoxManager::instance().makeBox("csapex::FileImporter");
                     assert(tmp);
 
                     boost::shared_ptr<FileImporter> inst = boost::dynamic_pointer_cast<FileImporter> (tmp->getContent());

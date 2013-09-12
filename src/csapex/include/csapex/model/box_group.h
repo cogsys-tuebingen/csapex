@@ -22,12 +22,12 @@ public:
     static const QString MIME;
 
 public:
-    BoxGroup(BoxedObject::Ptr content, const std::string& uuid = "", QWidget* parent = 0);
+    BoxGroup(const std::string& uuid = "", QWidget* parent = 0);
 
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
 
-    void setTemplateName(const std::string& templ);
+    virtual void init(const QPoint& pos);
 
 protected:
     Graph::Ptr sub_graph;

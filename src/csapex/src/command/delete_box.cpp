@@ -39,16 +39,12 @@ bool DeleteBox::execute()
 
 bool DeleteBox::undo()
 {
-    Box::Ptr box = BoxManager::instance().makeBox(pos, type, uuid);
+    Box::Ptr box = BoxManager::instance().makeBox(type, uuid);
     box->setState(saved_state);
 
-    if(!box->getTemplateName().empty()) {
-        doExecute(Command::Ptr(new command::InstanciateTemplate(box->getTemplateName(), uuid, pos)));
+    Graph::root()->addBox(box);
 
-    } else {
-        Graph::root()->addBox(box);
-    }
-
+    box->init(pos);
 
     return doUndo(remove_connections);
 }

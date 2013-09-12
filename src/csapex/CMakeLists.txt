@@ -96,6 +96,7 @@ add_library(csapex SHARED
     src/model/message_provider.cpp
     src/model/tag.cpp
     src/model/template.cpp
+    src/model/template_constructor.cpp
 
     src/manager/box_manager.cpp
     src/manager/connection_type_manager.cpp

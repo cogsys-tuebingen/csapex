@@ -160,7 +160,7 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* original_connector = dynamic_cast<Connector*>(e->mimeData()->parent());
 
-        if(original_connector->targetsCanConnectTo(this)) {
+        if(original_connector->targetsCanConnectTo(this) && this->canConnect()) {
             e->acceptProposedAction();
         }
     }

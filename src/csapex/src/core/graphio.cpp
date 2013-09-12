@@ -93,7 +93,7 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
         doc["pos"][0] >> x;
         doc["pos"][1] >> y;
 
-        Box::Ptr box = BoxManager::instance().makeBox(QPoint(x,y), type, uuid);
+        Box::Ptr box = BoxManager::instance().makeBox(type, uuid);
 
         if(box) {
             try {
@@ -105,13 +105,7 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
 
             graph_->addBox(box);
 
-            if(type == "::meta" && !box->getTemplateName().empty()) {
-                Template::Ptr templ = TemplateManager::instance().get(box->getTemplateName());
-                command::Meta::Ptr meta(new command::Meta);
-                templ->createCommands(meta.get(), uuid);
-
-                Command::doExecute(meta);
-            }
+            box->init(QPoint(x,y));
         }
     }
 }

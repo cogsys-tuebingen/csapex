@@ -20,7 +20,7 @@
 using namespace csapex;
 
 BoxManager::BoxManager()
-    : manager_(new PluginManager<BoxedObject> ("csapex::BoxedObject"))
+    : manager_(new PluginManager<BoxedObject> ("csapex::BoxedObject")), dirty_(false)
 {
     manager_->loaded.connect(loaded);
 }
@@ -54,24 +54,47 @@ void BoxManager::reload()
 {
     manager_->reload();
 
+    rebuildMap();
+}
+
+void BoxManager::rebuildMap()
+{
     Tag::createIfNotExists("General");
+    Tag general = Tag::get("General");
+
+    map.clear();
+    tags.clear();
+
+    tags.insert(general);
 
     foreach(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
+        bool has_tag = false;
         foreach(const Tag& tag, p->getTags()) {
             map[tag].push_back(p);
             tags.insert(tag);
+            has_tag = true;
+        }
+
+        if(!has_tag) {
+            map[general].push_back(p);
         }
     }
 
     foreach(const Tag& cat, tags) {
         std::sort(map[cat].begin(), map[cat].end(), compare);
     }
+
+    dirty_ = false;
 }
 
 void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 {
     if(!manager_->pluginsLoaded()) {
         manager_->reload();
+    }
+
+    if(dirty_) {
+        rebuildMap();
     }
 
     foreach(const Tag& tag, tags) {
@@ -101,6 +124,10 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
         manager_->reload();
     }
 
+    if(dirty_) {
+        rebuildMap();
+    }
+
     tree->setHeaderHidden(true);
     tree->setDragEnabled(true);
 
@@ -115,7 +142,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
             std::string name = stripNamespace(proxy->getType());
 
             QTreeWidgetItem* child = new QTreeWidgetItem;
-            child->setToolTip(0, proxy->getDescription().c_str());
+            child->setToolTip(0, (proxy->getType() + ": " + proxy->getDescription()).c_str());
             child->setIcon(0, icon);
             child->setText(0, name.c_str());
             child->setData(0, Qt::UserRole, Box::MIME);
@@ -141,13 +168,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
 void BoxManager::register_box_type(BoxedObjectConstructor::Ptr provider)
 {
     available_elements_prototypes.push_back(provider);
-}
-
-void BoxManager::startPlacingMetaBox(QWidget* parent, const QPoint& offset)
-{
-    std::cout << "meta" << std::endl;
-
-    startPlacingBox(parent, "::meta", offset);
+    dirty_ = true;
 }
 
 namespace {
@@ -155,8 +176,8 @@ QPixmap createPixmap(const std::string& type, const std::string& label, const Bo
 {
     csapex::Box::Ptr object;
 
-    if(type == "::meta") {
-        object.reset(new csapex::BoxGroup(content, ""));
+    if(BoxManager::typeIsTemplate(type)) {
+        object.reset(new csapex::BoxGroup(""));
     } else {
         object.reset(new csapex::Box(content, ""));
     }
@@ -164,24 +185,34 @@ QPixmap createPixmap(const std::string& type, const std::string& label, const Bo
     object->setObjectName(type.c_str());
     object->setLabel(label);
     object->setType(type);
-    object->init(QPoint(0,0));
     object->getContent()->setTypeName(type);
 
     return QPixmap::grabWidget(object.get());
 }
 }
 
-void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset, const std::string& template_)
+bool BoxManager::typeIsTemplate(const std::string &type)
 {
-    bool is_meta = type == "::meta";
+    return type.substr(0,12) == "::template::";
+}
+
+std::string BoxManager::getTemplateName(const std::string &type)
+{
+    assert(typeIsTemplate(type));
+    return type.substr(12);
+}
+
+void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset)
+{
+    bool is_template = BoxManager::typeIsTemplate(type);
 
     BoxedObject::Ptr content;
-    if(is_meta) {
+    if(is_template) {
         content.reset(new NullBoxedObject);
     } else {
         foreach(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
             if(p->getType() == type) {
-                content = p->makeContent();
+                content = p->makePrototypeContent();
             }
         }
     }
@@ -190,15 +221,15 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         QDrag* drag = new QDrag(parent);
         QMimeData* mimeData = new QMimeData;
 
-        if(is_meta) {
-            mimeData->setData(Template::MIME, template_.c_str());
+        if(is_template) {
+            mimeData->setData(Template::MIME, "");
         }
         mimeData->setData(Box::MIME, type.c_str());
         mimeData->setProperty("ox", offset.x());
         mimeData->setProperty("oy", offset.y());
         drag->setMimeData(mimeData);
 
-        drag->setPixmap(createPixmap(type, is_meta ? template_ : type, content));
+        drag->setPixmap(createPixmap(type, type, content));
         drag->setHotSpot(-offset);
         drag->exec();
         return;
@@ -207,37 +238,41 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
 
 std::string BoxManager::stripNamespace(const std::string &name)
 {
-    size_t from = name.find_first_of("::");
+    size_t from = name.rfind("::");
     return name.substr(from != name.npos ? from + 2 : 0);
 }
 
-Box::Ptr BoxManager::make(BoxedObject::Ptr content, QPoint pos, const std::string uuid, const std::string type)
+Box::Ptr BoxManager::makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid, const std::string type)
 {
-    csapex::Box::Ptr object;
+    assert(!BoxManager::typeIsTemplate(type));
 
-    if(type == "::meta") {
-        object.reset(new csapex::BoxGroup(content, uuid));
-    } else {
-        object.reset(new csapex::Box(content, uuid));
-    }
+    csapex::Box::Ptr box(new csapex::Box(content->makeContent(), uuid));
 
-    object->setObjectName(uuid.c_str());
-    object->setType(type);
+    box->setObjectName(uuid.c_str());
+    box->setType(type);
 
-    if(type != "::meta") {
-        object->getContent()->setTypeName(type);
-    }
-    object->init(pos);
-
-    return object;
+    return box;
 }
 
-Box::Ptr BoxManager::makeBox(QPoint pos, const std::string& target_type, const std::string& uuid)
+Box::Ptr BoxManager::makeTemplateBox(const std::string uuid, const std::string type)
+{
+    assert(BoxManager::typeIsTemplate(type));
+
+    csapex::Box::Ptr group(new csapex::BoxGroup(uuid));
+
+    group->setObjectName(uuid.c_str());
+    group->setType(type);
+
+    return group;
+}
+
+Box::Ptr BoxManager::makeBox(const std::string& target_type, const std::string& uuid)
 {
     assert(!uuid.empty());
 
-    if(target_type == "::meta") {
-        return make(BoxedObject::Ptr(new NullBoxedObject), pos, uuid, target_type);
+
+    if(BoxManager::typeIsTemplate(target_type)) {
+        return makeTemplateBox(uuid, target_type);
     }
 
     std::string type = target_type;
@@ -251,7 +286,7 @@ Box::Ptr BoxManager::makeBox(QPoint pos, const std::string& target_type, const s
 
     BOOST_FOREACH(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
-            return make(p->makeContent(), pos, uuid, type);
+            return makeSingleBox(p, uuid, type);
         }
     }
 
@@ -264,7 +299,7 @@ Box::Ptr BoxManager::makeBox(QPoint pos, const std::string& target_type, const s
 
         if(p_type_wo_ns == type_wo_ns) {
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
-            return make(p->makeContent(), pos, uuid, type);
+            return makeSingleBox(p, uuid, type);
         }
     }
 

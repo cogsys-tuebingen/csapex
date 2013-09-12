@@ -113,7 +113,6 @@ void DesignBoard::addBoxEvent(Box *box)
     QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
     box->setParent(this);
-    box->show();
     box->triggerPlaced();
 
     overlay->raise();

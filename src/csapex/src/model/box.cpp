@@ -46,11 +46,6 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     out << YAML::Key << "enabled";
     out << YAML::Value << enabled;
 
-    if(!template_.empty()) {
-        out << YAML::Key << "template";
-        out << YAML::Value << template_;
-    }
-
     if(parent) {
         boxed_state = parent->content_->getState();
     }
@@ -86,10 +81,6 @@ void Box::State::readYaml(const YAML::Node &node)
 
     if(node.FindValue("label")) {
         node["label"] >> label_;
-    }
-
-    if(node.FindValue("template")) {
-        node["template"] >> template_;
     }
 
     if(node.FindValue("state")) {
@@ -138,6 +129,9 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
     setVisible(false);
+
+
+    content_->fill(ui->content);
 }
 
 void Box::makeThread()
@@ -476,15 +470,14 @@ ConnectorOut* Box::getOutput(const std::string& uuid)
 
 void Box::init(const QPoint& pos)
 {
-    move(pos);
+    if(parent()) {
+        setVisible(true);
+    }
 
+    move(pos);
     key_point = pos;
 
-    //    QBoxLayout* layout = new QVBoxLayout;
-    //    ui->content->setLayout(layout);
-
     makeThread();
-    content_->fill(ui->content);
 }
 
 BoxedObject::Ptr Box::getContent()
@@ -540,7 +533,7 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             if(down_) {
                 if(shift_drag) {
                     if(hypot(delta.x(), delta.y()) > 15) {
-                        BoxManager::instance().startPlacingBox(parentWidget(), getType(), -start_drag_, state->template_);
+                        BoxManager::instance().startPlacingBox(parentWidget(), getType(), -start_drag_);
                         down_ = false;
                     }
                 } else {
@@ -668,7 +661,7 @@ void Box::startDrag(QPoint offset)
     lower();
 
     if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
-        BoxManager::instance().startPlacingBox(parentWidget(), getType(), offset, state->template_);
+        BoxManager::instance().startPlacingBox(parentWidget(), getType(), offset);
         return;
     }
 
@@ -787,16 +780,6 @@ Graph::Ptr Box::getSubGraph()
     throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
 }
 
-void Box::setTemplateName(const std::string& name)
-{
-    state->template_ = name;
-}
-
-std::string Box::getTemplateName()
-{
-    return state->template_;
-}
-
 Memento::Ptr Box::getState() const
 {
     assert(state);
@@ -831,8 +814,6 @@ void Box::setState(Memento::Ptr memento)
     if(m->boxed_state != NULL) {
         content_->setState(m->boxed_state);
     }
-
-    setTemplateName(state->template_);
 
     minimizeBox(state->minimized);
 

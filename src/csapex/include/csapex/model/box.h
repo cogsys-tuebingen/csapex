@@ -83,8 +83,6 @@ public:
         std::string label_;
         std::string type_;
 
-        std::string template_;
-
         QPoint pos;
 
         bool minimized;
@@ -149,9 +147,6 @@ public:
 
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
-
-    virtual void setTemplateName(const std::string& templ);
-    virtual std::string getTemplateName();
 
     Command::Ptr removeAllConnectionsCmd();
     Command::Ptr removeAllOutputsCmd();

@@ -57,12 +57,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
                 e->accept();
 
                 std::string type = v[Qt::UserRole+1].toString().toStdString();
-                if(type == BoxGroup::MIME.toStdString()) {
-                    BoxManager::instance().startPlacingMetaBox(src, QPoint(0,0));
-                } else {
-                    BoxManager::instance().startPlacingBox(src, type, QPoint(0,0));
-                }
-
+                BoxManager::instance().startPlacingBox(src, type, QPoint(0,0));
             }
         }
     }
@@ -154,21 +149,8 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         QPoint pos = e->pos() + offset;
 
 
-        command::Meta::Ptr meta(new command::Meta);
-        if(type == "::meta" && e->mimeData()->hasFormat(Template::MIME)) {
-            QByteArray t = e->mimeData()->data(Template::MIME);
-            std::string templ = (QString(t)).toStdString();
-            if(!templ.empty()) {
-                std::string uuid = graph_->makeUUID(templ);
-                meta->add(Command::Ptr(new command::InstanciateTemplate(templ, uuid, pos)));
-            }
-        }
-
-        if(meta->commands() == 0) {
-            std::string uuid = graph_->makeUUID(type);
-            meta->add(Command::Ptr(new command::AddBox(type, pos, "", uuid)));
-        }
-        CommandDispatcher::execute(meta);
+        std::string uuid = graph_->makeUUID(type);
+        CommandDispatcher::execute(Command::Ptr(new command::AddBox(type, pos, "", uuid)));
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->ignore();

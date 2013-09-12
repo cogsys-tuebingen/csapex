@@ -3,6 +3,8 @@
 
 /// COMPONENT
 #include <csapex/core/graphio.h>
+#include <csapex/manager/box_manager.h>
+#include <csapex/model/template_constructor.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -38,7 +40,7 @@ Template::Ptr TemplateManager::createNewTemporaryTemplate()
 {
 
     std::stringstream name;
-    name << "unnamed template #" << next_id;
+    name << "unnamed_template_#" << next_id;
 
     Template::Ptr res(new Template(name.str()));
     ++next_id;
@@ -69,6 +71,10 @@ void TemplateManager::load(const std::string &path)
             tmp->read(doc);
 
             named_templates[tmp->getName()] = tmp;
+
+            // TODO: allow description
+            TemplateConstructor::Ptr constructor(new TemplateConstructor(std::string("::template::") + tmp->getName(), "no description"));
+            BoxManager::instance().register_box_type(constructor);
         }
     }
 }

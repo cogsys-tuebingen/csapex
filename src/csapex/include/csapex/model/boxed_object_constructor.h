@@ -24,24 +24,7 @@ public:
     typedef boost::shared_ptr<BoxedObjectConstructor> Ptr;
     static const Ptr NullPtr;
 
-public:
-    struct ProxyConstructor : public Constructor {
-        typedef boost::function<BoxedObjectConstructor::Ptr (const std::string)> Call;
-
-        BoxedObjectConstructor::Ptr operator()() {
-            BoxedObjectConstructor::Ptr res(constructor(type));
-            assert(res != NULL);
-            return res;
-        }
-
-        void setConstructor(Call c) {
-            constructor = c;
-            has_constructor = true;
-        }
-
-    private:
-        Call constructor;
-    };
+    static BoxedObjectPtr makeNull();
 
 public:
     BoxedObjectConstructor(const std::string& type, const std::string& description, Make c);
@@ -53,13 +36,21 @@ public:
     QIcon getIcon() const;
     std::string getDescription() const;
 
-    BoxedObjectPtr makeContent() const;
+    virtual BoxedObjectPtr makePrototypeContent() const;
+    virtual BoxedObjectPtr makeContent() const;
+
+protected:
+    BoxedObjectConstructor(const std::string& type, const std::string& description);
+
+    virtual void load() const;
 
 protected:
     std::string type_;
     std::string descr_;
-    QIcon icon;
-    std::vector<Tag> cat;
+
+    mutable bool is_loaded;
+    mutable QIcon icon;
+    mutable std::vector<Tag> cat;
 
     Make c;
 };

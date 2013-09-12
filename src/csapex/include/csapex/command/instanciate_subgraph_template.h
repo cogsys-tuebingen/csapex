@@ -19,14 +19,13 @@ namespace command
 
 struct InstanciateTemplate : public Meta
 {
-    InstanciateTemplate(const std::string& templ, const std::string& parent_uuid, const QPoint& pos);
+    InstanciateTemplate(const std::string& templ, const std::string& parent_uuid);
 
     bool execute();
 
 private:
     std::string templ;
     std::string parent;
-    QPoint pos;
 };
 }
 }
