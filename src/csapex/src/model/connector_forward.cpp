@@ -76,9 +76,19 @@ bool ConnectorForward::tryConnect(Connector* other_side)
             }
 
             if(isInput()) {
-                return other->connect(this);
+                // both are input -> connect parent to nested
+                if(i_am_father) {
+                    connect(other);
+                } else {
+                    return other->connect(this);
+                }
             } else {
-                return connect(other);
+                // both are output -> connect nested to parent
+                if(i_am_child) {
+                    connect(other);
+                } else {
+                    return other->connect(this);
+                }
             }
         }
 

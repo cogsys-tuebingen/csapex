@@ -271,10 +271,11 @@ bool Graph::addConnection(Connection::Ptr connection)
         Connector* from = findConnector(connection->from()->UUID());
         Connector* to = findConnector(connection->to()->UUID());
 
-        Box* graph_from = from->getBox();
-        Box* graph_to = to->getBox();
+        Graph::Ptr graph_from = from->getBox()->getCommandDispatcher()->getGraph();
+        Graph::Ptr graph_to = to->getBox()->getCommandDispatcher()->getGraph();
 
-        if(!graph_from->isHidden() && !graph_to->isHidden()) {
+//        if(!graph_from->isHidden() && !graph_to->isHidden()) {
+        if(graph_from.get() == this && graph_to.get() == this) {
             visible_connections.push_back(connection);
         }
 

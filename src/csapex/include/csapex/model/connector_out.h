@@ -35,7 +35,7 @@ public:
         return true;
     }
 
-    virtual void publish(ConnectionType::Ptr message);
+    void publish(ConnectionType::Ptr message);
 
     virtual bool targetsCanConnectTo(Connector *other_side) const;
     virtual bool isConnected() const;
