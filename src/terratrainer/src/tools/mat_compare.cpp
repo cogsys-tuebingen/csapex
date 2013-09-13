@@ -70,16 +70,22 @@ int main(int argc, char *argv[])
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "NAME" << YAML::Value << mat_name;
     emitter << YAML::Key << "RESULTS" << YAML::Value;
-    emitter << YAML::BeginMap;
+    emitter << YAML::BeginSeq;
     for(std::map<int, std::map<int, int> >::iterator it = matches.begin() ; it != matches.end() ; ++it) {
-        emitter << YAML::Key << it->first << YAML::Value;
         emitter << YAML::BeginMap;
+        emitter << YAML::Key << "id" << YAML::Value << it->first;
+        emitter << YAML::Key << "cts" << YAML::Value;
+        emitter << YAML::BeginSeq;
         for(std::map<int,int>::iterator in_it = it->second.begin() ; in_it != it->second.end() ; ++in_it) {
-            emitter << YAML::Key << in_it->first << YAML::Value << in_it->second;
+            emitter << YAML::BeginMap;
+            emitter << YAML::Key << "id" << YAML::Value << in_it->first;
+            emitter << YAML::Key << "ct" << YAML::Value << in_it->second;
+            emitter << YAML::EndMap;
         }
+        emitter << YAML::EndSeq;
         emitter << YAML::EndMap;
     }
-    emitter << YAML::EndMap;
+    emitter << YAML::EndSeq;
     emitter << YAML::Key << "POS" << YAML::Value << pos;
     emitter << YAML::Key << "NEG" << YAML::Value << neg;
     emitter << YAML::Key << "IGN" << YAML::Value << ign;

@@ -57,21 +57,30 @@ int main(int argc, char *argv[])
 {
     std::string path = boost::filesystem3::current_path().string();
 
-    if(argc < 3 ) {
-        std::cout << "Arguments : [<src path>] <train set> <validation set>" << std::endl;
+    if(argc < 4 ) {
+        std::cout << "Arguments : [<src path>] <train set> <validation set> <fold>" << std::endl;
         return 1;
     }
 
+    /// 10 FOLD CROSS OR 2 FOLD CROSS
+
+    int         fold       = atoi(argv[3]);
     std::string path_train = argv[1];
     std::string path_valid = argv[2];
-    if(argc == 4) {
+    if(argc == 5) {
         path        = argv[1];
         path_train  = argv[2];
         path_valid  = argv[3];
+        fold        = atoi(argv[4]);
     }
 
     if(path_train == "" || path_valid == "") {
         std::cerr << "Path length was 0 !" << std::endl;
+        return 1;
+    }
+
+    if(fold != 2 && fold != 10 && fold != -10) {
+        std::cerr << "Fold must be 2 or 10 for 2-fold or 10-fold cross validation!" << std::endl;
         return 1;
     }
 
@@ -81,10 +90,8 @@ int main(int argc, char *argv[])
     if(path_valid[path_valid.length() - 1] != '/')
         path_valid += '/';
 
-    if(!files::create_on_check(path_train))
-        return 1;
-    if(!files::create_on_check(path_valid))
-        return 1;
+    if(path[path.length() - 1] != '/')
+        path += '/';
 
     std::vector<std::string> img_paths;
     std::vector<std::string> yml_paths;
@@ -105,56 +112,100 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    /// MAKE SURE THAT EVERYTHING THAT BELONGS TOGETHER IS IN SAME ORDER
     std::sort(yml_paths.begin(), yml_paths.end());
     std::sort(img_paths.begin(), img_paths.end());
     std::sort(roi_paths.begin(), roi_paths.end());
 
-    /// SAMPLE 50% TRAIN DATA AND 50% VALIDATION DATA
-
-    std::set<int>  sample_indeces;
-    int sample_elements = .5 * img_paths.size();
+    /// PERMUTATION
     RandomGeneratorInt         generator(0, img_paths.size() - 1);
-    while(sample_indeces.size() < sample_elements) {
-        int index = generator.generate();
-        sample_indeces.insert(index);
+    std::vector<int>           permutation;
+    for(int i = 0 ; i < img_paths.size() ; i++) {
+        permutation.push_back(i);
     }
 
-
-    std::vector<std::string> train_images;
-    std::vector<std::string> train_rois;
-    for(std::set<int>::iterator it = sample_indeces.begin() ; it != sample_indeces.end() ; ++it) {
-        train_images.push_back(img_paths[*it]);
-        train_rois.push_back(roi_paths[*it]);
-    }
-
-    for(std::set<int>::iterator it = sample_indeces.begin() ; it != sample_indeces.end() ; ++it) {
-        img_paths.erase(img_paths.begin() + *it);
-        yml_paths.erase(yml_paths.begin() + *it);
-    }
-
-
-    /// DO THE COPY STUFF
-    /// TRAIN
-    for(int i = 0 ; i < train_images.size() ; ++i) {
-        boost::filesystem3::path src_img(train_images[i]);
-        boost::filesystem3::path dst_img(path_train + src_img.filename().string());
-        boost::filesystem3::path src_roi(train_rois[i]);
-        boost::filesystem3::path dst_roi(path_train + src_roi.filename().string());
-        boost::filesystem3::copy_file(src_img, dst_img, boost::filesystem3::copy_option::overwrite_if_exists);
-        boost::filesystem3::copy_file(src_roi, dst_roi, boost::filesystem3::copy_option::overwrite_if_exists);
-    }
-
-    /// VALIDATION
+    generator.shuffle(permutation);
+    /// RESORTING / SHUFFLING
+    std::vector<std::pair<int, std::string> > roi_resort;
+    std::vector<std::pair<int, std::string> > img_resort;
+    std::vector<std::pair<int, std::string> > yml_resort;
     for(int i = 0 ; i < img_paths.size() ; ++i) {
-        boost::filesystem3::path src_img(img_paths[i]);
-        boost::filesystem3::path src_yml(yml_paths[i]);
-        boost::filesystem3::path dst_img(path_valid + src_img.filename().string());
-        boost::filesystem3::path dst_yml(path_valid + "gt_" + src_yml.filename().string());
-        boost::filesystem3::copy_file(src_img, dst_img, boost::filesystem3::copy_option::overwrite_if_exists);
-        boost::filesystem3::copy_file(src_yml, dst_yml, boost::filesystem3::copy_option::overwrite_if_exists);
-
+        roi_resort.push_back(std::make_pair(permutation[i], roi_paths[i]));
+        yml_resort.push_back(std::make_pair(permutation[i], yml_paths[i]));
+        img_resort.push_back(std::make_pair(permutation[i], img_paths[i]));
     }
 
+    std::sort(roi_resort.begin(), roi_resort.end());
+    std::sort(yml_resort.begin(), yml_resort.end());
+    std::sort(img_resort.begin(), img_resort.end());
+
+    /// TODO : 10 FOLD and 2 FOLD cross validation sets!
+    /// 10 FOLD
+    int reverse = std::abs(fold) / fold;
+    fold = std::abs(fold);
+    int step = img_paths.size() / fold;
+    for(int i = 0 ; i < fold ; ++i) {
+        /// PATH BUFFERS
+        std::vector<std::string> train_images;
+        std::vector<std::string> train_rois;
+        std::vector<std::string> valid_images;
+        std::vector<std::string> valid_ymls;
+
+        /// PREPARE FOLDERS
+        std::stringstream s;
+        s << path << "set" << i << "/";
+        std::string set_path_train = s.str() + path_train;
+        std::string set_path_valid = s.str() + path_valid;
+
+        if(!files::create_on_check(s.str()))
+            return 1;
+        if(!files::create_on_check(set_path_train))
+            return 1;
+        if(!files::create_on_check(set_path_valid))
+            return 1;
+
+        /// GETTING THE SETS
+        for(int j = 0 ; j < img_paths.size() ; ++j) {
+            if(j < i * step || j >= (i+1)*step) {
+                if(reverse < 0) {
+                    valid_images.push_back(img_resort[j].second);
+                    valid_ymls.push_back(yml_resort[j].second);
+                } else {
+                    train_images.push_back(img_resort[j].second);
+                    train_rois.push_back(roi_resort[j].second);
+                }
+            } else {
+                if(reverse < 0) {
+                    train_images.push_back(img_resort[j].second);
+                    train_rois.push_back(roi_resort[j].second);
+                } else {
+                    valid_images.push_back(img_resort[j].second);
+                    valid_ymls.push_back(yml_resort[j].second);
+                }
+            }
+        }
+
+
+
+        /// WRITING THEM OUT
+        for(int i = 0 ; i < train_images.size() ; ++i) {
+            boost::filesystem3::path src_img(train_images[i]);
+            boost::filesystem3::path dst_img(set_path_train + src_img.filename().string());
+            boost::filesystem3::path src_roi(train_rois[i]);
+            boost::filesystem3::path dst_roi(set_path_train + src_roi.filename().string());
+            boost::filesystem3::copy_file(src_img, dst_img, boost::filesystem3::copy_option::overwrite_if_exists);
+            boost::filesystem3::copy_file(src_roi, dst_roi, boost::filesystem3::copy_option::overwrite_if_exists);
+        }
+
+        for(int i = 0 ; i < valid_images.size() ; ++i) {
+            boost::filesystem3::path src_img(valid_images[i]);
+            boost::filesystem3::path src_yml(valid_ymls[i]);
+            boost::filesystem3::path dst_img(set_path_valid + src_img.filename().string());
+            boost::filesystem3::path dst_yml(set_path_valid + "gt_" + src_yml.filename().string());
+            boost::filesystem3::copy_file(src_img, dst_img, boost::filesystem3::copy_option::overwrite_if_exists);
+            boost::filesystem3::copy_file(src_yml, dst_yml, boost::filesystem3::copy_option::overwrite_if_exists);
+        }
+    }
     std::cout << "Sets were generated!" << std::endl;
     return 0;
 }
