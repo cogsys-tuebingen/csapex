@@ -55,6 +55,10 @@ Template::Ptr TemplateManager::createNewTemporaryTemplate()
 
 void TemplateManager::load(const std::string &path)
 {
+    if(!bfs::exists(path)) {
+        return;
+    }
+
     bfs::directory_iterator end; // default construction yields past-the-end
     for(bfs::directory_iterator it(path); it != end; ++it) {
         if(it->path().extension() == GraphIO::template_extension) {
