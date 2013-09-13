@@ -1,11 +1,11 @@
 #ifndef RANDOM_GENERATOR_H
 #define RANDOM_GENERATOR_H
-#include <time.h>
 #include <boost/date_time.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_ptr.hpp>
+
 /**
  * @brief   The RandomGenerator class is used to save a initialized boost random
  *          generator.
@@ -72,6 +72,24 @@ public:
     T generate()
     {
         return distribuation_(random_gen_);
+    }
+
+    T gen(const T)
+    {
+        return generate();
+    }
+
+    void shuffle(std::vector<T> &to_shuffle)
+    {
+        typename std::vector<T>::iterator first  = to_shuffle.begin();
+        typename std::vector<T>::iterator last   = to_shuffle.end();
+        typename std::vector<T>::difference_type i,n;
+        n = (last-first);
+        for (i=n-1; i>0; --i) {
+            std::swap (first[i],first[gen(i+1)]);
+        }
+
+//        std::random_shuffle(to_shuffle.begin(), to_shuffle.end(), *this);
     }
 
     void reset(const T &min, const T &max, const long &seed = time(0))
