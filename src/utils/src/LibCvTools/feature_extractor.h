@@ -37,10 +37,12 @@ public:
     KeypointParams keypointParams();
 
     /// PUBLIC STATIC METHODS
-    static cv::KeyPoint prepareKeypoint(const cv::Rect &rect, const KeypointParams &params);
+    static cv::KeyPoint prepareKeypoint(const cv::Rect &rect, const KeypointParams &params,
+                                        const int x_offset = 0, const int y_offset = 0);
     static KeyPoints prepareKeypointVec(const cv::Rect &rect, const KeypointParams &params);
     static KeyPoints prepareOctaveKeypoints(const cv::Rect &rect, const KeypointParams &params,
-                                            const int max_octave, const int tupel_start_idx = 0);
+                                            const int max_octave, const int tupel_start_idx = 0,
+                                            const int x_offset = 0, const int y_offset = 0);
     static double    calcAngle(const cv::Mat &image);
 
     static cv::DescriptorExtractor *getExtractor(const ParamsORB   &params);

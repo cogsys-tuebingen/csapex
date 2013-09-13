@@ -70,6 +70,15 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
     cv::Mat image_gray;
     cv::cvtColor(image, image_gray, CV_BGR2GRAY);
 
+    int x_offset = 0;
+    int y_offset = 0;
+    if(ext_params_->type == ExtractorParams::BRIEF) {
+        ParamsBRIEF *brief = static_cast<ParamsBRIEF*>(ext_params_.get());
+        x_offset = brief->bytes / 2;
+        y_offset = x_offset;
+        cv::copyMakeBorder(image_gray, image_gray, y_offset, y_offset, x_offset, x_offset, cv::BORDER_CONSTANT);
+    }
+
     KeypointParams              kp = *key_params_;
     ExtractorParams             ep = *ext_params_;
     FeatureExtractor::KeyPoints keys;
@@ -79,10 +88,10 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
     int tupel_start_idx = 0;
     for(std::vector<cv::Rect>::const_iterator it = rois.begin() ; it != rois.end() ; ++it, tupel_start_idx += ep.octaves) {
         if(kp.octave == -1 && ep.octaves != 1) {
-            FeatureExtractor::KeyPoints oct_keys = prepareOctaveKeypoints(*it, kp, ep.octaves, tupel_start_idx);
+            FeatureExtractor::KeyPoints oct_keys = prepareOctaveKeypoints(*it, kp, ep.octaves, tupel_start_idx, x_offset, y_offset);
             keys.insert(keys.end(), oct_keys.begin(), oct_keys.end());
         } else {
-            keys.push_back(prepareKeypoint(*it, kp));
+            keys.push_back(prepareKeypoint(*it, kp, x_offset, y_offset));
         }
 
         if(ep.color_extension) {
@@ -118,7 +127,7 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
 
         /// MAKE READY FOR RETURNING
         cv::Mat descr = buffer.clone();
-        if(ep.combine_descriptors && !descr.empty() && kp.octave != -1) {
+        if(ep.combine_descriptors && !descr.empty() && kp.octave == -1) {
             descr = descr.reshape(0, 1);
         }
 
@@ -137,37 +146,37 @@ void FeatureExtractor::extract(const cv::Mat &image, const std::vector<cv::Rect>
 void FeatureExtractor::setParams(const ParamsORB &params)
 {
     set(getExtractor(params));
-    ext_params_.reset(new ExtractorParams(params));
+    ext_params_.reset(new ParamsORB(params));
 }
 
 void FeatureExtractor::setParams(const ParamsSURF &params)
 {
     set(getExtractor(params));
-    ext_params_.reset(new ExtractorParams(params));
+    ext_params_.reset(new ParamsSURF(params));
 }
 
 void FeatureExtractor::setParams(const ParamsSIFT &params)
 {
     set(getExtractor(params));
-    ext_params_.reset(new ExtractorParams(params));
+    ext_params_.reset(new ParamsSIFT(params));
 }
 
 void FeatureExtractor::setParams(const ParamsBRISK &params)
 {
     set(getExtractor(params));
-    ext_params_.reset(new ExtractorParams(params));
+    ext_params_.reset(new ParamsBRISK(params));
 }
 
 void FeatureExtractor::setParams(const ParamsBRIEF &params)
 {
     set(getExtractor(params));
-    ext_params_.reset(new ExtractorParams(params));
+    ext_params_.reset(new ParamsBRIEF(params));
 }
 
 void FeatureExtractor::setParams(const ParamsFREAK &params)
 {
     set(getExtractor(params));
-    ext_params_.reset(new ExtractorParams(params));
+    ext_params_.reset(new ParamsFREAK(params));
 }
 
 void FeatureExtractor::setKeyPointParams(const KeypointParams &key)
@@ -180,12 +189,12 @@ KeypointParams FeatureExtractor::keypointParams()
     return *key_params_;
 }
 
-cv::KeyPoint FeatureExtractor::prepareKeypoint(const cv::Rect &rect, const KeypointParams &params)
+cv::KeyPoint FeatureExtractor::prepareKeypoint(const cv::Rect &rect, const KeypointParams &params, const int x_offset, const int y_offset)
 {
     cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * params.scale, params.angle);
     if(params.soft_crop) {
-        k.pt.x += rect.x;
-        k.pt.y += rect.y;
+        k.pt.x += rect.x + x_offset;
+        k.pt.y += rect.y + y_offset;
     }
     k.octave = params.octave;
     return k;
@@ -201,13 +210,14 @@ FeatureExtractor::KeyPoints FeatureExtractor::prepareKeypointVec(const cv::Rect 
 }
 
 FeatureExtractor::KeyPoints FeatureExtractor::prepareOctaveKeypoints(const cv::Rect &rect, const KeypointParams &params,
-                                                                     const int max_octave, const int tupel_start_idx)
+                                                                     const int max_octave, const int tupel_start_idx,
+                                                                     const int x_offset, const int y_offset)
 {
     KeyPoints key_points;
     cv::KeyPoint k(rect.width / 2.0, rect.height / 2.0, rect.height / 2.0 * params.scale, params.angle);
     if(params.soft_crop) {
-        k.pt.x += rect.x;
-        k.pt.y += rect.y;
+        k.pt.x += rect.x + x_offset;
+        k.pt.y += rect.y + y_offset ;
     }
 
     for(int octave = 0 ; octave < max_octave ; octave++) {
