@@ -265,7 +265,7 @@ ParamsBRIEF::ParamsBRIEF() :
 }
 
 ParamsBRIEF::ParamsBRIEF(const ParamsBRIEF &p) :
-    ExtractorParams(BRIEF),
+    ExtractorParams(p),
     bytes(p.bytes)
 {
 }
