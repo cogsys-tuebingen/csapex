@@ -252,7 +252,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
 
     /// BRIEF
     QCheckBox::connect(tf->briefBox,                SIGNAL(clicked(bool)),                 ctrl, SLOT(briefOppChanged(bool)));
-    QCheckBox::connect(tf->checkBox_colExtBrief,    SIGNAL(clicked(bool)),                 ctrl, SLOT(briskColorExtChanged(bool)));
+    QCheckBox::connect(tf->checkBox_colExtBrief,    SIGNAL(clicked(bool)),                 ctrl, SLOT(briefColorExtChanged(bool)));
     QComboBox::connect(tf->comboBox_Brief,          SIGNAL(currentIndexChanged(QString)),  ctrl, SLOT(briefBytesChanged(QString)));
 
     /// FREAK
