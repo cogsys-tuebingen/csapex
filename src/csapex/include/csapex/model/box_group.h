@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/model/box.h>
 #include <csapex/model/boxed_object.h>
-#include <csapex/model/graph.h>
 #include <csapex/model/template.h>
+#include <csapex/command/dispatcher.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -15,6 +15,8 @@ namespace csapex
 
 class BoxGroup : public Box
 {
+    Q_OBJECT
+
 public:
     typedef boost::shared_ptr<BoxGroup> Ptr;
 
@@ -24,13 +26,20 @@ public:
 public:
     BoxGroup(const std::string& uuid = "", QWidget* parent = 0);
 
+
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
 
     virtual void init(const QPoint& pos);
 
+Q_SIGNALS:
+    void open_sub_graph(BoxGroup*);
+
 protected:
-    Graph::Ptr sub_graph;
+    bool eventFilter(QObject*, QEvent*);
+
+protected:
+    CommandDispatcher cmd_dispatcher;
 
     Template::Ptr templ_;
 

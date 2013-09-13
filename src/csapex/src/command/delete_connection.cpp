@@ -30,44 +30,42 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
     to_uuid = to->UUID();
 }
 
-bool DeleteConnection::execute()
+bool DeleteConnection::doExecute()
 {
     Connection::Ptr connection(new Connection(from, to));
 
-    Graph::Ptr graph = Graph::root();
+    connection_id = graph_->getConnectionId(connection);
+    remove_fulcrums = graph_->deleteAllConnectionFulcrumsCommand(connection);
 
-    connection_id = graph->getConnectionId(connection);
-    remove_fulcrums = graph->deleteAllConnectionFulcrumsCommand(connection);
-
-    if(doExecute(remove_fulcrums)) {
-        graph->deleteConnection(connection);
+    if(Command::executeCommand(graph_, remove_fulcrums)) {
+        graph_->deleteConnection(connection);
     }
 
     return true;
 }
 
-bool DeleteConnection::undo()
+bool DeleteConnection::doUndo()
 {
     if(!refresh()) {
         return false;
     }
-    Graph::root()->addConnection(Connection::Ptr(new Connection(from, to, connection_id)));
+    graph_->addConnection(Connection::Ptr(new Connection(from, to, connection_id)));
 
-    return doUndo(remove_fulcrums);
+    return Command::undoCommand(graph_, remove_fulcrums);
 }
 
-bool DeleteConnection::redo()
+bool DeleteConnection::doRedo()
 {
     if(!refresh()) {
         throw std::runtime_error("cannot redo DeleteConnection");
     }
-    return execute();
+    return doExecute();
 }
 
 bool DeleteConnection::refresh()
 {
-    Box::Ptr from_box = Graph::root()->findConnectorOwner(from_uuid);
-    Box::Ptr to_box = Graph::root()->findConnectorOwner(to_uuid);
+    Box::Ptr from_box = graph_->findConnectorOwner(from_uuid);
+    Box::Ptr to_box = graph_->findConnectorOwner(to_uuid);
 
     from = NULL;
     to = NULL;

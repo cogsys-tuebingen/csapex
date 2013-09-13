@@ -11,6 +11,7 @@ namespace csapex
 class ConnectorOut : public virtual Connector
 {
     friend class ConnectorIn;
+    friend class ConnectorForward;
     friend class Graph;
     friend class command::AddConnection;
     friend class command::MoveConnection;
@@ -36,7 +37,6 @@ public:
 
     virtual void publish(ConnectionType::Ptr message);
 
-    virtual bool canConnect() const;
     virtual bool targetsCanConnectTo(Connector *other_side) const;
     virtual bool isConnected() const;
 
@@ -61,6 +61,8 @@ protected:
     virtual bool tryConnect(Connector* other_side);
     virtual void removeConnection(Connector* other_side);
     virtual void removeAllConnectionsNotUndoable();
+
+    bool connect(Connector* other_side);
 
 protected:
     std::vector<ConnectorIn*> targets_;

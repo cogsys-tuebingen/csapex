@@ -18,9 +18,9 @@ struct DeleteFulcrum : public Command
     DeleteFulcrum(int connection_id, int fulcrum_id);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 private:
     int connection_id;

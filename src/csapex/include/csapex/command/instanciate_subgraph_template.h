@@ -21,7 +21,7 @@ struct InstanciateTemplate : public Meta
 {
     InstanciateTemplate(const std::string& templ, const std::string& parent_uuid);
 
-    bool execute();
+    bool doExecute();
 
 private:
     std::string templ;

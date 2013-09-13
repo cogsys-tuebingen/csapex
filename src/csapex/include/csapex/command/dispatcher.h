@@ -14,25 +14,33 @@
 namespace csapex
 {
 
-class CommandDispatcher : public QObject, public Singleton<CommandDispatcher>
+class CommandDispatcher : public QObject
 {
     Q_OBJECT
 
-    friend class Singleton<CommandDispatcher>;
+public:
+    typedef boost::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    static void execute(Command::Ptr command);
-    static void executeLater(Command::Ptr command);
-    static void executeLater();
+    CommandDispatcher();
+
+    void execute(Command::Ptr command);
+    void executeLater(Command::Ptr command);
+    void executeLater();
 
     bool isDirty();
 
     bool canUndo();
     bool canRedo();
 
-public Q_SLOTS:
     void undo();
     void redo();
+
+    GraphPtr getGraph();
+
+    void executeNotUndoable(Command::Ptr command);
+
+public Q_SLOTS:
     void setDirty();
     void setClean();
     void resetDirtyPoint();
@@ -49,11 +57,12 @@ private:
     void setDirty(bool dirty);
 
 protected:
-    CommandDispatcher();
     CommandDispatcher(const CommandDispatcher& copy);
     CommandDispatcher& operator = (const CommandDispatcher& assign);
 
 private:
+    GraphPtr graph_;
+
     std::vector<Command::Ptr> later;
 
     std::deque<Command::Ptr> done;

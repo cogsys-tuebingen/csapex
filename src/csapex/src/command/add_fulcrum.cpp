@@ -13,20 +13,20 @@ AddFulcrum::AddFulcrum(int connection_id, int sub_section_to_split, const QPoint
 
 }
 
-bool AddFulcrum::execute()
+bool AddFulcrum::doExecute()
 {
-    Graph::root()->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos);
+    graph_->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos);
     return true;
 }
 
-bool AddFulcrum::undo()
+bool AddFulcrum::doUndo()
 {
-    Graph::root()->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
+    graph_->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
     return true;
 }
 
-bool AddFulcrum::redo()
+bool AddFulcrum::doRedo()
 {
-    return execute();
+    return doExecute();
 }
 

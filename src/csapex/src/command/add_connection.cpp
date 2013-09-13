@@ -21,34 +21,34 @@ AddConnection::AddConnection(const std::string &from_uuid, const std::string &to
 {
 }
 
-bool AddConnection::execute()
+bool AddConnection::doExecute()
 {
     if(from == NULL) {
         refresh();
     }
 
-    return Graph::root()->addConnection(Connection::Ptr(new Connection(from, to)));
+    return graph_->addConnection(Connection::Ptr(new Connection(from, to)));
 }
 
-bool AddConnection::undo()
+bool AddConnection::doUndo()
 {
     refresh();
 
-    Graph::root()->deleteConnection(Connection::Ptr(new Connection(from, to)));
+    graph_->deleteConnection(Connection::Ptr(new Connection(from, to)));
 
     return true;
 }
 
-bool AddConnection::redo()
+bool AddConnection::doRedo()
 {
     refresh();
-    return execute();
+    return doExecute();
 }
 
 void AddConnection::refresh()
 {
-    Connector* f = Graph::root()->findConnector(from_uuid);
-    Connector* t = Graph::root()->findConnector(to_uuid);
+    Connector* f = graph_->findConnector(from_uuid);
+    Connector* t = graph_->findConnector(to_uuid);
 
     bool f_in = f->isInput();
     bool f_out = f->isOutput();

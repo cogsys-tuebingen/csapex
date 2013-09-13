@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/core/drag_io.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -22,7 +23,7 @@ class DesignBoard : public QWidget
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    DesignBoard(QWidget* parent = 0);
+    DesignBoard(CommandDispatcher *dispatcher, QWidget* parent = 0);
     virtual ~DesignBoard();
 
     void paintEvent(QPaintEvent*);
@@ -57,8 +58,9 @@ public Q_SLOTS:
 private:
     Ui::DesignBoard* ui;
 
+    CommandDispatcher* dispatcher_;
     Overlay* overlay;
-    DragIO& drag_io;
+    DragIO::Handler drag_io;
 
     bool space_;
     bool drag_;

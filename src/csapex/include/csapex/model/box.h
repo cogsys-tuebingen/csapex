@@ -157,6 +157,9 @@ public:
 
     bool isMinimizedSize() const;
 
+    CommandDispatcher* getCommandDispatcher() const;
+    void setCommandDispatcher(CommandDispatcher* d);
+
 protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
@@ -204,7 +207,8 @@ protected:
 protected:
     Ui::Box* ui;
 
-    Graph *graph_;
+    CommandDispatcher* dispatcher_;
+
     State::Ptr state;
     BoxedObject::Ptr content_;
 

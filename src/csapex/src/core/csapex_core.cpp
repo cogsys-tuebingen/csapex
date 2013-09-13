@@ -19,21 +19,27 @@ using namespace csapex;
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
 CsApexCore::CsApexCore()
-    : core_plugin_manager("csapex::CorePlugin")
+    : cmd_dispatch(new CommandDispatcher), core_plugin_manager("csapex::CorePlugin")
 {
-    qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
+    destruct = true;
 
+    qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
+    ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ("anything");
     StreamInterceptor::instance().start();
 
-    ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ("anything");
-
-    Graph::Ptr graph(new Graph);
-    Graph::setRoot(graph);
-
     Tag::createIfNotExists("General");
+    Tag::createIfNotExists("Template");
 
     setCurrentConfig(GraphIO::default_config);
 }
+
+CsApexCore::CsApexCore(CommandDispatcher* dispatcher)
+    : cmd_dispatch(dispatcher), core_plugin_manager("csapex::CorePlugin")
+{
+    destruct = false;
+    init_ = true;
+}
+
 
 CsApexCore::~CsApexCore()
 {
@@ -46,6 +52,10 @@ CsApexCore::~CsApexCore()
 
     StreamInterceptor::instance().stop();
     BoxManager::instance().stop();
+
+    if(destruct) {
+        delete cmd_dispatch;
+    }
 }
 
 void CsApexCore::init()
@@ -94,12 +104,21 @@ std::string CsApexCore::getConfig() const
     return current_config_;
 }
 
+Graph::Ptr CsApexCore::getTopLevelGraph()
+{
+    return cmd_dispatch->getGraph();
+}
+
+CommandDispatcher* CsApexCore::getCommandDispatcher()
+{
+    return cmd_dispatch;
+}
+
 void CsApexCore::reset()
 {
-    Graph::Ptr graph_ = Graph::root();
-    graph_->reset();
+    getTopLevelGraph()->reset();
 
-    CommandDispatcher::instance().reset();
+    cmd_dispatch->reset();
 
     BoxManager::instance().reset();
 }
@@ -114,7 +133,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     yaml << YAML::BeginMap; // settings map
 
-    GraphIO graphio(Graph::root());
+    GraphIO graphio(getTopLevelGraph());
 
     Q_EMIT saveSettingsRequest(yaml);
 
@@ -131,8 +150,8 @@ void CsApexCore::saveAs(const std::string &file)
 
     std::cout << "save: " << yaml.c_str() << std::endl;
 
-    CommandDispatcher::instance().setClean();
-    CommandDispatcher::instance().resetDirtyPoint();
+    cmd_dispatch->setClean();
+    cmd_dispatch->resetDirtyPoint();
 }
 
 
@@ -142,9 +161,7 @@ void CsApexCore::load(const std::string &file)
 
     reset();
 
-    Graph::Ptr graph_ = Graph::root();
-
-    GraphIO graphio(graph_);
+    GraphIO graphio(getTopLevelGraph());
 
     {
         std::ifstream ifs(file.c_str());
@@ -176,6 +193,6 @@ void CsApexCore::load(const std::string &file)
         graphio.loadConnections(doc);
     }
 
-    CommandDispatcher::instance().setClean();
-    CommandDispatcher::instance().resetDirtyPoint();
+    cmd_dispatch->setClean();
+    cmd_dispatch->resetDirtyPoint();
 }

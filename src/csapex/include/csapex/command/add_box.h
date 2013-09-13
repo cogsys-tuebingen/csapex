@@ -20,9 +20,9 @@ struct AddBox : public Command
     AddBox(const std::string& type, QPoint pos_, const std::string& parent_uuid_, const std::string& uuid_, Memento::Ptr state = Memento::NullPtr);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 private:
     std::string type_;

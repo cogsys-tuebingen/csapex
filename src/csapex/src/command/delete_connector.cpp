@@ -19,9 +19,9 @@ DeleteConnector::DeleteConnector(Connector *_c) :
     c_uuid = c->UUID();
 }
 
-bool DeleteConnector::execute()
+bool DeleteConnector::doExecute()
 {
-    Box::Ptr box_c = Graph::root()->findConnectorOwner(c_uuid);
+    Box::Ptr box_c = graph_->findConnectorOwner(c_uuid);
 
     if(c->isConnected()) {
         if(in) {
@@ -30,7 +30,7 @@ bool DeleteConnector::execute()
         } else {
             delete_connections = dynamic_cast<ConnectorOut*>(c)->removeAllConnectionsCmd();
         }
-        CommandDispatcher::execute(delete_connections);
+        Command::executeCommand(graph_, delete_connections);
     }
 
     if(in) {
@@ -42,7 +42,7 @@ bool DeleteConnector::execute()
     return true;
 }
 
-bool DeleteConnector::undo()
+bool DeleteConnector::doUndo()
 {
     if(!refresh()) {
         return false;
@@ -51,14 +51,14 @@ bool DeleteConnector::undo()
     return false;
 }
 
-bool DeleteConnector::redo()
+bool DeleteConnector::doRedo()
 {
     return false;
 }
 
 bool DeleteConnector::refresh()
 {
-    Box::Ptr box_c = Graph::root()->findConnectorOwner(c_uuid);
+    Box::Ptr box_c = graph_->findConnectorOwner(c_uuid);
 
     if(!box_c) {
         return false;

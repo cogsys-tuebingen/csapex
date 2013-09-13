@@ -19,11 +19,11 @@ InstanciateTemplate::InstanciateTemplate(const std::string &templ, const std::st
     TemplateManager::instance().get(templ)->createCommands(this, parent);
 }
 
-bool InstanciateTemplate::execute()
+bool InstanciateTemplate::doExecute()
 {
-    bool r = Meta::execute();
+    bool r = Meta::doExecute();
 
-    Box::Ptr box = Graph::root()->findBox(parent);
+    Box::Ptr box = graph_->findBox(parent);
     assert(box);
 
     BoxGroup::Ptr group = boost::dynamic_pointer_cast<BoxGroup> (box);

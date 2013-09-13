@@ -95,34 +95,37 @@ void ConnectorOut::connectForcedWithoutCommand(ConnectorIn *other_side)
     tryConnect(other_side);
 }
 
-bool ConnectorOut::tryConnect(Connector* other_side)
+bool ConnectorOut::tryConnect(Connector *other_side)
+{
+    return connect(other_side);
+}
+
+bool ConnectorOut::connect(Connector *other_side)
 {
     if(!other_side->canInput()) {
+        std::cerr << "cannot connect, other side can't input" << std::endl;
         return false;
     }
-    if(!other_side->canConnect()) {
+    if(!other_side->canConnectTo(this)) {
+        std::cerr << "cannot connect, other side can't connect" << std::endl;
         return false;
     }
 
     ConnectorIn* input = dynamic_cast<ConnectorIn*>(other_side);
 
     if(!input->acknowledgeConnection(this)) {
+        std::cerr << "cannot connect, other side doesn't acknowledge" << std::endl;
         return false;
     }
 
     targets_.push_back(input);
 
-    connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
+    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
 
     Q_EMIT connectionFormed(this, input);
 
     validateConnections();
 
-    return true;
-}
-
-bool ConnectorOut::canConnect() const
-{
     return true;
 }
 

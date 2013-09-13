@@ -36,13 +36,12 @@
 #include <QMenu>
 #include <QScrollBar>
 #include <QFileDialog>
+#include <boost/algorithm/string.hpp>
 
 
 using namespace csapex;
 
 const std::string Graph::namespace_separator = ":/:";
-
-Graph::Ptr Graph::root_;
 
 namespace {
 void split_first(const std::string& haystack, const std::string& needle,
@@ -56,12 +55,38 @@ void split_first(const std::string& haystack, const std::string& needle,
     lhs = haystack.substr(0, pos);
     rhs = haystack.substr(pos + needle.length());
 }
+
+//void tokenize(const std::string& str, std::deque<std::string>& tokens,
+//              const std::string& delimiter)
+//{
+//    std::string::size_type first = 0;
+//    std::string::size_type last = 0;
+//    while(first < str.length()) {
+//        last = str.find(delimiter, first);
+//        if(last == str.npos) {
+//            last = str.length();
+//        }
+//        tokens.push_back(str.substr(first, last - first));
+
+//        first = last + delimiter.length();
+//    }
+
+
+//    std::string combined;
+//    foreach(const std::string& part, tokens) {
+//        combined += part + delimiter;
+//    }
+
+//    combined = combined.substr(0, combined.size() - delimiter.length());
+
+//    assert(combined == str);
+//}
+
 }
 
 Graph::Graph()
+    : dispatcher_(NULL)
 {
-    QObject::connect(&CommandDispatcher::instance(), SIGNAL(stateChanged()), this, SIGNAL(stateChanged()));
-
     timer_ = new QTimer();
     timer_->setInterval(100);
     timer_->start();
@@ -74,14 +99,10 @@ Graph::~Graph()
 
 }
 
-Graph::Ptr Graph::root()
+void Graph::init(CommandDispatcher *dispatcher)
 {
-    return root_;
-}
-
-void Graph::setRoot(Graph::Ptr root)
-{
-    root_ = root;
+    dispatcher_ = dispatcher;
+    assert(dispatcher_);
 }
 
 std::string Graph::makeUUID(const std::string& name)
@@ -99,15 +120,17 @@ std::string Graph::makeUUID(const std::string& name)
 void Graph::addBox(Box::Ptr box)
 {
     assert(!box->UUID().empty());
+    assert(dispatcher_);
 
     boxes_.push_back(box);
+    box->setCommandDispatcher(dispatcher_);
 
     Q_EMIT boxAdded(box.get());
 }
 
 void Graph::deleteBox(const std::string& uuid)
 {
-    Box::Ptr box = Graph::root()->findBox(uuid);
+    Box::Ptr box = findBox(uuid);
 
     box->stop();
 
@@ -121,12 +144,9 @@ void Graph::deleteBox(const std::string& uuid)
     box->deleteLater();
 }
 
-Template::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr& post, const std::string& group_uuid)
+Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> >& connections)
 {
     Template::Ptr sub_graph_templ = TemplateManager::instance().createNewTemporaryTemplate();
-
-    command::Meta::Ptr delete_boxes(new command::Meta);
-    command::Meta::Ptr add_connections(new command::Meta);
 
     std::vector<Box*> selected;
 
@@ -136,8 +156,6 @@ Template::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr&
         // iterate selected boxes
         if(b->isSelected()) {
             selected.push_back(b.get());
-
-            delete_boxes->add(Command::Ptr(new command::DeleteBox(b->UUID())));
 
             Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
             std::string new_uuid = sub_graph_templ->addBox(b->getType(), b->pos(), state);
@@ -171,14 +189,12 @@ Template::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr&
                         split_first(in->UUID(), Connector::namespace_separator, in_box, in_connector);
                         sub_graph_templ->addConnection(new_connector_uuid, old_box_to_new_box[b->UUID()] + Connector::namespace_separator + in_connector);
 
-                        std::string explicit_connector_uuid = Template::fillInTemplate(new_connector_uuid, group_uuid);
-                        add_connections->add(Command::Ptr(new command::AddConnection(target->UUID(), explicit_connector_uuid)));
+                        connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
                     }
                 }
             }
             foreach(ConnectorOut* out, b->output) {
                 std::string new_connector_uuid;
-                std::string explicit_new_connector_uuid;
 
                 for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
                     ConnectorIn* in = *it;
@@ -194,14 +210,13 @@ Template::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr&
 
                         if(new_connector_uuid.empty()) {
                             new_connector_uuid = sub_graph_templ->addConnector(out->getLabel(), out->getType()->name(), false, true);
-                            explicit_new_connector_uuid = Template::fillInTemplate(new_connector_uuid, group_uuid);
                         }
 
                         std::string out_box, out_connector;
                         split_first(out->UUID(), Connector::namespace_separator, out_box, out_connector);
                         sub_graph_templ->addConnection(old_box_to_new_box[b->UUID()] + Connector::namespace_separator + out_connector, new_connector_uuid);
 
-                        add_connections->add(Command::Ptr(new command::AddConnection(explicit_new_connector_uuid, in->UUID())));
+                        connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
 
                     } else {
                         // internal connections are kept
@@ -224,13 +239,10 @@ Template::Ptr Graph::convertSelectionToTemplate(Command::Ptr& pre, Command::Ptr&
         }
     }
 
-    pre = delete_boxes;
-    post = add_connections;
-
     return sub_graph_templ;
 }
 
-void Graph::moveSelectedBoxes(const QPoint& delta)
+Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
 {
     command::Meta::Ptr meta(new command::Meta);
 
@@ -250,7 +262,7 @@ void Graph::moveSelectedBoxes(const QPoint& delta)
         }
     }
 
-    CommandDispatcher::execute(meta);
+    return meta;
 }
 
 bool Graph::addConnection(Connection::Ptr connection)
@@ -270,6 +282,7 @@ bool Graph::addConnection(Connection::Ptr connection)
         return true;
     }
 
+    std::cerr << "cannot connect " << connection->from()->UUID() << " (" <<( connection->from()->isInput() ? "i": "o" )<< ") to " << connection->to()->UUID() << " (" <<( connection->to()->isInput() ? "i": "o" )<< ")"  << std::endl;
     return false;
 }
 
@@ -291,11 +304,6 @@ void Graph::deleteConnection(Connection::Ptr connection)
     Q_EMIT stateChanged();
 }
 
-bool Graph::isDirty()
-{
-    return CommandDispatcher::instance().isDirty();
-}
-
 void Graph::stop()
 {
     foreach(Box::Ptr box, boxes_) {
@@ -306,28 +314,7 @@ void Graph::stop()
 }
 
 
-bool Graph::canUndo()
-{
-    return CommandDispatcher::instance().canUndo();
-}
-
-bool Graph::canRedo()
-{
-    return CommandDispatcher::instance().canRedo();
-}
-
-
-void Graph::undo()
-{
-    CommandDispatcher::instance().undo();
-}
-
-void Graph::redo()
-{
-    CommandDispatcher::instance().redo();
-}
-
-void Graph::clear()
+Command::Ptr Graph::clear()
 {
     command::Meta::Ptr clear(new command::Meta);
 
@@ -336,9 +323,7 @@ void Graph::clear()
         clear->add(cmd);
     }
 
-    if(clear->commands() > 0) {
-        CommandDispatcher::execute(clear);
-    }
+    return clear;
 }
 
 void Graph::reset()
@@ -358,81 +343,81 @@ Graph::Ptr Graph::findSubGraph(const std::string& uuid)
     return bg->getSubGraph();
 }
 
-Box::Ptr Graph::findBox(const std::string &uuid, const std::string& ns)
+Box::Ptr Graph::findBox(const std::string &box_uuid)
 {
-    if(uuid.find(namespace_separator) != uuid.npos && ns.empty()) {
-        return findBox(uuid, uuid);
+    Box::Ptr box = findBoxNoThrow(box_uuid);
+
+    if(box) {
+        return box;
     }
 
+    std::cerr << "cannot find box \"" << box_uuid << "\n";
+    std::cerr << "available boxes:\n";
     foreach(Box::Ptr b, boxes_) {
-        if(b->UUID() == uuid) {
-            return b;
-        }
+        std::cerr << b->UUID() << '\n';
     }
+    std::cerr << std::endl;
+    throw std::runtime_error("cannot find box");
 
-    if(ns.find(namespace_separator) != ns.npos) {
-        std::string parent = ns.substr(0, ns.find(namespace_separator));
-        std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
-
-        Box::Ptr meta = findBox(parent);
-        assert(meta->hasSubGraph());
-
-        return meta->getSubGraph()->findBox(uuid, rest);
-    }
-
-    throw std::runtime_error(std::string("cannot find box \"") + uuid + " in namespace " + ns);
 }
 
-Box::Ptr Graph::findConnectorOwner(const std::string &uuid, const std::string& ns)
+Box::Ptr Graph::findBoxNoThrow(const std::string &box_uuid)
 {
-    if(uuid.find(namespace_separator) != uuid.npos && ns.empty()) {
-        return findConnectorOwner(uuid, uuid);
-    }
-
-    if(ns.find(namespace_separator) != ns.npos) {
-        std::string parent = ns.substr(0, ns.find(namespace_separator));
-        std::string rest = ns.substr(ns.find(namespace_separator)+namespace_separator.length());
-
-        Box::Ptr meta = findBox(parent);
-        if(!meta) {
-            throw std::runtime_error(std::string("the box ") + parent + " doesn't exist");
-        }
-        assert(meta->hasSubGraph());
-
-        return meta->getSubGraph()->findConnectorOwner(uuid, rest);
-    }
-
     foreach(Box::Ptr b, boxes_) {
-        if(b->getInput(uuid)) {
-            return b;
-        }
-        if(b->getOutput(uuid)) {
+        if(b->UUID() == box_uuid) {
             return b;
         }
     }
 
-    std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
-
     foreach(Box::Ptr b, boxes_) {
-        std::cerr << "box: " << b->UUID() << "\n";
-        std::cerr << "inputs: " << "\n";
-        foreach(ConnectorIn* in, b->input) {
-            std::cerr << "\t" << in->UUID() << "\n";
-        }
-        std::cerr << "outputs: " << "\n";
-        foreach(ConnectorOut* out, b->output) {
-            std::cerr << "\t" << out->UUID() << "\n";
+        BoxGroup::Ptr grp = boost::dynamic_pointer_cast<BoxGroup> (b);
+        if(grp) {
+            Box::Ptr tmp = grp->getSubGraph()->findBoxNoThrow(box_uuid);
+            if(tmp) {
+                return tmp;
+            }
         }
     }
 
-    std::cerr << std::flush;
-
-    throw std::runtime_error(std::string("cannot connector \"") + uuid + " in namespace " + ns);
+    return Box::NullPtr;
 }
 
-Connector* Graph::findConnector(const std::string &uuid, const std::string &ns)
+
+Box::Ptr Graph::findConnectorOwner(const std::string &uuid)
 {
-    Box::Ptr owner = findConnectorOwner(uuid, ns);
+    std::string l, r;
+    split_first(uuid, Connector::namespace_separator, l, r);
+
+    try {
+        return findBox(l);
+
+    } catch(const std::exception& e) {
+        std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
+
+        foreach(Box::Ptr b, boxes_) {
+            std::cerr << "box: " << b->UUID() << "\n";
+            std::cerr << "inputs: " << "\n";
+            foreach(ConnectorIn* in, b->input) {
+                std::cerr << "\t" << in->UUID() << "\n";
+            }
+            std::cerr << "outputs: " << "\n";
+            foreach(ConnectorOut* out, b->output) {
+                std::cerr << "\t" << out->UUID() << "\n";
+            }
+        }
+
+        std::cerr << std::flush;
+
+        throw std::runtime_error(std::string("cannot find owner of connector \"") + uuid);
+    }
+}
+
+Connector* Graph::findConnector(const std::string &uuid)
+{
+    std::string l, r;
+    split_first(uuid, Connector::namespace_separator, l, r);
+
+    Box::Ptr owner = findBox(l);
     assert(owner);
 
     Connector* result = NULL;
@@ -577,9 +562,9 @@ Command::Ptr Graph::deleteConnectionFulcrumCommand(int connection, int fulcrum)
 Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(int connection)
 {
     command::Meta::Ptr meta(new command::Meta);
-    int n = Graph::root()->getConnectionWithId(connection)->getFulcrumCount();
+    int n = getConnectionWithId(connection)->getFulcrumCount();
     for(int i = n - 1; i >= 0; --i) {
-        meta->add(Graph::root()->deleteConnectionFulcrumCommand(connection, i));
+        meta->add(deleteConnectionFulcrumCommand(connection, i));
     }
 
     return meta;
@@ -591,16 +576,14 @@ Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(Connection::Ptr connectio
 }
 
 
-void Graph::deleteConnectionById(int id)
+Command::Ptr Graph::deleteConnectionById(int id)
 {
     Command::Ptr cmd(deleteConnectionByIdCommand(id));
 
-    if(cmd) {
-        CommandDispatcher::execute(cmd);
-    }
+    return cmd;
 }
 
-void Graph::deleteSelectedConnections()
+Command::Ptr Graph::deleteSelectedConnections()
 {
     command::Meta::Ptr meta(new command::Meta);
 
@@ -612,7 +595,7 @@ void Graph::deleteSelectedConnections()
 
     deselectConnections();
 
-    CommandDispatcher::execute(meta);
+    return meta;
 }
 
 void Graph::selectConnectionById(int id, bool add)
@@ -655,7 +638,7 @@ bool Graph::isConnectionWithIdSelected(int id)
     throw std::runtime_error(ss.str());
 }
 
-void Graph::deleteSelectedBoxes()
+Command::Ptr Graph::deleteSelectedBoxes()
 {
     command::Meta::Ptr meta(new command::Meta);
 
@@ -667,10 +650,10 @@ void Graph::deleteSelectedBoxes()
 
     deselectBoxes();
 
-    CommandDispatcher::execute(meta);
+    return meta;
 }
 
-void Graph::groupSelectedBoxes()
+Command::Ptr Graph::groupSelectedBoxes()
 {
     // TODO: grouping does not work recursively, because groups cannot yet be deleted / created via commands
     QPoint tl(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
@@ -686,18 +669,35 @@ void Graph::groupSelectedBoxes()
         }
     }
 
-    std::string group_uuid = makeUUID("::template::temporary");
 
-    Command::Ptr del, connect;
-    Template::Ptr templ = convertSelectionToTemplate(del, connect, group_uuid);
+    std::vector<std::pair<std::string, std::string> > connections;
+    Template::Ptr templ = convertSelectionToTemplate(connections);
+
+    std::string type = std::string("::template::") + templ->getName();
+
+    std::string group_uuid = makeUUID(type);
 
     command::Meta::Ptr meta(new command::Meta);
-    meta->add(del);
-    meta->add(command::AddBox::Ptr(new command::AddBox("::template::temporary", tl, "", group_uuid)));
-    meta->add(Command::Ptr(new command::InstanciateTemplate(templ->getName(), group_uuid)));
-    meta->add(connect);
 
-    CommandDispatcher::execute(meta);
+    foreach(Box::Ptr b, boxes_) {
+        if(b->isSelected()) {
+            meta->add(Command::Ptr(new command::DeleteBox(b->UUID())));
+        }
+    }
+
+    meta->add(command::AddBox::Ptr(new command::AddBox(type, tl, "", group_uuid)));
+
+    typedef std::pair<std::string, std::string> PAIR;
+    foreach(const PAIR& c, connections) {
+        std::string from = Template::fillInTemplate(c.first, group_uuid);
+        std::string to = Template::fillInTemplate(c.second, group_uuid);
+        meta->add(Command::Ptr(new command::AddConnection(from, to)));
+    }
+
+    //    meta->add(Command::Ptr(new command::InstanciateTemplate(templ->getName(), group_uuid)));
+    //meta->add(connect);
+
+    return meta;
 }
 
 

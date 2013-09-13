@@ -28,7 +28,13 @@ void DragIO::registerDropHandler(HandlerDrop::Ptr h)
     handler_drop.push_back(h);
 }
 
-void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
+DragIO::Handler::Handler(CommandDispatcher* dispatcher)
+    : dispatcher_(dispatcher)
+{
+
+}
+
+void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 {
     if(e->mimeData()->hasFormat(Box::MIME)) {
         e->acceptProposedAction();
@@ -63,8 +69,8 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
     }
 
 
-    foreach(HandlerEnter::Ptr h, handler_enter) {
-        if(h->handle(src, overlay, e)) {
+    foreach(HandlerEnter::Ptr h, DragIO::instance().handler_enter) {
+        if(h->handle(dispatcher_, src, overlay, e)) {
             return;
         }
     }
@@ -91,7 +97,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
 }
 
-void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
+void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 {
     if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
@@ -116,7 +122,7 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 
     } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
         std::string uuid = e->mimeData()->text().toStdString();
-        Box::Ptr box = Graph::root()->findBox(uuid);
+        Box::Ptr box = dispatcher_->getGraph()->findBox(uuid);
         QPoint offset_value(e->mimeData()->data(Box::MIME_MOVE + "/x").toInt(),
                             e->mimeData()->data(Box::MIME_MOVE + "/y").toInt());
         box->move(e->pos() + offset_value);
@@ -124,19 +130,19 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
         overlay->repaint();
 
     } else {
-        foreach(HandlerMove::Ptr h, handler_move) {
-            if(h->handle(src, overlay, e)) {
+        foreach(HandlerMove::Ptr h, DragIO::instance().handler_move) {
+            if(h->handle(dispatcher_, src, overlay, e)) {
                 return;
             }
         }
     }
 }
 
-void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
+void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 {
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
-    Graph::Ptr graph_ = Graph::root();
+    Graph::Ptr graph_ = dispatcher_->getGraph();
 
     if(e->mimeData()->hasFormat(Box::MIME)) {
         QByteArray b = e->mimeData()->data(Box::MIME);
@@ -150,7 +156,7 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 
 
         std::string uuid = graph_->makeUUID(type);
-        CommandDispatcher::execute(Command::Ptr(new command::AddBox(type, pos, "", uuid)));
+        dispatcher_->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid)));
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->ignore();
@@ -160,8 +166,8 @@ void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         e->acceptProposedAction();
         e->setDropAction(Qt::MoveAction);
     } else {
-        foreach(HandlerDrop::Ptr h, handler_drop) {
-            if(h->handle(src, overlay, e)) {
+        foreach(HandlerDrop::Ptr h, DragIO::instance().handler_drop) {
+            if(h->handle(dispatcher_, src, overlay, e)) {
                 return;
             }
         }

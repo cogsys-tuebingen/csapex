@@ -10,12 +10,12 @@
 
 using namespace csapex;
 
-Designer::Designer(QWidget* parent)
+Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer), menu(NULL)
 {
     ui->setupUi(this);
 
-    designer_board = new DesignBoard;
+    designer_board = new DesignBoard(dispatcher);
     ui->scrollArea->setWidget(designer_board);
 }
 

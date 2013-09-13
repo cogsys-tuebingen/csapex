@@ -22,9 +22,9 @@ struct Meta : public Command {
     int commands() const;
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 protected:
     std::vector<Command::Ptr> nested;

@@ -22,23 +22,31 @@ public:
     struct HandlerEnter {
         typedef boost::shared_ptr<HandlerEnter> Ptr;
         virtual ~HandlerEnter() {}
-        virtual bool handle(QWidget *src, Overlay* overlay, QDragEnterEvent* e) = 0;
+        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragEnterEvent* e) = 0;
     };
     struct HandlerMove {
         typedef boost::shared_ptr<HandlerMove> Ptr;
         virtual ~HandlerMove() {}
-        virtual bool handle(QWidget *src, Overlay* overlay, QDragMoveEvent* e) = 0;
+        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragMoveEvent* e) = 0;
     };
     struct HandlerDrop {
         typedef boost::shared_ptr<HandlerDrop> Ptr;
         virtual ~HandlerDrop() {}
-        virtual bool handle(QWidget *src, Overlay* overlay, QDropEvent* e) = 0;
+        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDropEvent* e) = 0;
     };
 
+    class Handler {
+    public:
+        Handler(CommandDispatcher* dispatcher);
+
+        void dragEnterEvent(QWidget *src, Overlay* overlay, QDragEnterEvent* e);
+        void dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e);
+        void dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e);
+
+    private:
+        CommandDispatcher* dispatcher_;
+    };
 public:
-    void dragEnterEvent(QWidget *src, Overlay* overlay, QDragEnterEvent* e);
-    void dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e);
-    void dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e);
 
     template <typename H>
     static void registerHandler() {

@@ -9,9 +9,10 @@ ParameterMap::ParameterMap()
 
 Parameter& ParameterMap::operator [] (const std::string &name)
 {
-    try {
-        return map_.at(name);
-    } catch(const std::out_of_range& e) {
+    std::map<std::string, Parameter>::iterator it = map_.find(name);
+    if(it != map_.end()) {
+        return it->second;
+    } else {
         map_[name] = Parameter(name);
         return operator [](name);
     }
@@ -21,10 +22,20 @@ Parameter& ParameterMap::operator [] (const std::string &name)
 
 Parameter& ParameterMap::at(const std::string &name)
 {
-    return map_.at(name);
+    std::map<std::string, Parameter>::iterator it = map_.find(name);
+    if(it != map_.end()) {
+        return it->second;
+    }
+
+    throw std::out_of_range(std::string("parameter ") + name + " not found");
 }
 
 const Parameter& ParameterMap::at(const std::string &name) const
 {
-    return map_.at(name);
+    std::map<std::string, Parameter>::const_iterator it = map_.find(name);
+    if(it != map_.end()) {
+        return it->second;
+    }
+
+    throw std::out_of_range(std::string("parameter ") + name + " not found");
 }

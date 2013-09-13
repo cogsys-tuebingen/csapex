@@ -1,12 +1,18 @@
 /// HEADER
 #include <csapex/command/dispatcher.h>
 
+/// COMPONENT
+#include <csapex/model/graph.h>
+
 using namespace csapex;
 
 CommandDispatcher::CommandDispatcher()
-    : dirty_(false)
+    : graph_(new Graph), dirty_(false)
 {
+    graph_->init(this);
 
+    QObject::connect(this, SIGNAL(stateChanged()), graph_.get(), SIGNAL(stateChanged()));
+    QObject::connect(this, SIGNAL(dirtyChanged(bool)), graph_.get(), SIGNAL(dirtyChanged(bool)));
 }
 
 void CommandDispatcher::reset()
@@ -19,21 +25,28 @@ void CommandDispatcher::reset()
 
 void CommandDispatcher::execute(Command::Ptr command)
 {
-    instance().doExecute(command);
+    doExecute(command);
 }
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
-    instance().later.push_back(command);
+    command->setGraph(graph_);
+    later.push_back(command);
 }
 
 void CommandDispatcher::executeLater()
 {
-    foreach(Command::Ptr cmd, instance().later) {
-        instance().doExecute(cmd);
+    foreach(Command::Ptr cmd, later) {
+        doExecute(cmd);
     }
-    instance().later.clear();
+    later.clear();
 }
+
+void CommandDispatcher::executeNotUndoable(Command::Ptr command)
+{
+    Command::Access::executeCommand(graph_, command);
+}
+
 
 void CommandDispatcher::doExecute(Command::Ptr command)
 {
@@ -45,7 +58,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = command->execute();
+    bool success = Command::Access::executeCommand(graph_, command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -133,7 +146,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = last->undo();
+    bool ret = Command::Access::undoCommand(graph_, last);
     assert(ret);
 
 //    while(!Command::undo_later.empty()) {
@@ -163,7 +176,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    last->redo();
+    Command::Access::redoCommand(graph_, last);
 
     done.push_back(last);
 
@@ -172,3 +185,7 @@ void CommandDispatcher::redo()
     Q_EMIT stateChanged();
 }
 
+Graph::Ptr CommandDispatcher::getGraph()
+{
+    return graph_;
+}

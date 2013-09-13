@@ -151,18 +151,6 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
             submenu->addChild(child);
         }
     }
-
-
-    QTreeWidgetItem* meta = new QTreeWidgetItem;
-
-    QTreeWidgetItem* new_meta = new QTreeWidgetItem;
-    new_meta->setText(0, "new meta box");
-    new_meta->setData(0, Qt::UserRole, BoxGroup::MIME);
-
-    meta->addChild(new_meta);
-    meta->setText(0, "Meta Boxes");
-
-    tree->addTopLevelItem(meta);
 }
 
 void BoxManager::register_box_type(BoxedObjectConstructor::Ptr provider)
@@ -244,7 +232,7 @@ std::string BoxManager::stripNamespace(const std::string &name)
 
 Box::Ptr BoxManager::makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid, const std::string type)
 {
-    assert(!BoxManager::typeIsTemplate(type));
+    assert(!BoxManager::typeIsTemplate(type) && type != "::group");
 
     csapex::Box::Ptr box(new csapex::Box(content->makeContent(), uuid));
 
@@ -256,7 +244,7 @@ Box::Ptr BoxManager::makeSingleBox(BoxedObjectConstructor::Ptr content, const st
 
 Box::Ptr BoxManager::makeTemplateBox(const std::string uuid, const std::string type)
 {
-    assert(BoxManager::typeIsTemplate(type));
+    assert(BoxManager::typeIsTemplate(type) || type == "::group");
 
     csapex::Box::Ptr group(new csapex::BoxGroup(uuid));
 
@@ -271,7 +259,7 @@ Box::Ptr BoxManager::makeBox(const std::string& target_type, const std::string& 
     assert(!uuid.empty());
 
 
-    if(BoxManager::typeIsTemplate(target_type)) {
+    if(BoxManager::typeIsTemplate(target_type) || target_type == "::group") {
         return makeTemplateBox(uuid, target_type);
     }
 

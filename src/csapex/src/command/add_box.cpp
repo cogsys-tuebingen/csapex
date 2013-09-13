@@ -24,8 +24,12 @@ AddBox::AddBox(const std::string &type, QPoint pos, const std::string &parent_uu
     }
 }
 
-bool AddBox::execute()
+bool AddBox::doExecute()
 {
+    if(uuid_.empty()) {
+        uuid_ = graph_->makeUUID(type_);
+    }
+
     Box::Ptr box_ = BoxManager::instance().makeBox(type_, uuid_);
 
     if(saved_state_) {
@@ -35,40 +39,37 @@ bool AddBox::execute()
     box_->hide();
 
 
-    Graph::Ptr parent;
     if(parent_uuid_.empty()) {
-        parent = Graph::root();
+        graph_->addBox(box_);
     } else {
-        parent = Graph::root()->findSubGraph(parent_uuid_);
+        graph_->findSubGraph(parent_uuid_)->addBox(box_);
     }
-    parent->addBox(box_);
 
     box_->init(pos_);
 
     return true;
 }
 
-bool AddBox::undo()
+bool AddBox::doUndo()
 {
-    Box::Ptr box_ = Graph::root()->findBox(uuid_);
+    Box::Ptr box_ = graph_->findBox(uuid_);
 
     saved_state_ = box_->getState();
 
-    Graph::Ptr parent;
+
     if(parent_uuid_.empty()) {
-        parent = Graph::root();
+        graph_->deleteBox(box_->UUID());
     } else {
-        parent = Graph::root()->findSubGraph(parent_uuid_);
+        graph_->findSubGraph(parent_uuid_)->deleteBox(box_->UUID());
     }
-    parent->deleteBox(box_->UUID());
 
     return true;
 }
 
-bool AddBox::redo()
+bool AddBox::doRedo()
 {
-    if(execute()) {
-        Box::Ptr box_ = Graph::root()->findBox(uuid_);
+    if(doExecute()) {
+        Box::Ptr box_ = graph_->findBox(uuid_);
 
         box_->setState(saved_state_);
         return true;

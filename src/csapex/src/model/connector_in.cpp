@@ -32,6 +32,7 @@ ConnectorIn::~ConnectorIn()
 bool ConnectorIn::tryConnect(Connector* other_side)
 {
     if(!other_side->canOutput()) {
+        std::cerr << "cannot connect, other side can't output" << std::endl;
         return false;
     }
 
@@ -67,11 +68,6 @@ void ConnectorIn::removeAllConnectionsNotUndoable()
         setError(false);
         Q_EMIT disconnected(this);
     }
-}
-
-bool ConnectorIn::canConnect() const
-{
-    return target == NULL;
 }
 
 bool ConnectorIn::targetsCanConnectTo(Connector* other_side) const

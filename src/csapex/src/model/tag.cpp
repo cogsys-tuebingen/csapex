@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <assert.h>
+#include <iostream>
 
 using namespace csapex;
 
@@ -39,7 +40,12 @@ std::string Tag::getName() const
 
 const Tag Tag::Manager::get(const std::string &name) const
 {
-    return tags_.at(name);
+    try {
+        return tags_.at(name);
+    } catch(const std::exception& e) {
+        std::cerr << "tag doesn't exist: " << name << std::endl;
+        throw e;
+    }
 }
 
 bool Tag::Manager::exists(const std::string &name) const

@@ -17,9 +17,9 @@ struct AddConnection : public Command
     AddConnection(const std::string& from_uuid, const std::string& to_uuid);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
     void refresh();
 

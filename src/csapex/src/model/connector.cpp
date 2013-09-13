@@ -105,8 +105,7 @@ void Connector::validateConnections()
 void Connector::removeAllConnectionsUndoable()
 {
     if(isConnected()) {
-        Command::Ptr cmd = removeAllConnectionsCmd();
-        CommandDispatcher::execute(cmd);
+        getBox()->getCommandDispatcher()->execute(removeAllConnectionsCmd());
     }
 }
 
@@ -160,7 +159,7 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* original_connector = dynamic_cast<Connector*>(e->mimeData()->parent());
 
-        if(original_connector->targetsCanConnectTo(this) && this->canConnect()) {
+        if(original_connector->targetsCanConnectTo(this)) {
             e->acceptProposedAction();
         }
     }
@@ -186,15 +185,14 @@ void Connector::dropEvent(QDropEvent* e)
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
-            Command::Ptr cmd(new command::AddConnection(UUID(), from->UUID()));
-            CommandDispatcher::execute(cmd);
+            getBox()->getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(UUID(), from->UUID())));
         }
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from) {
             Command::Ptr cmd(new command::MoveConnection(from, this));
-            CommandDispatcher::execute(cmd);
+            getBox()->getCommandDispatcher()->execute(cmd);
             e->setDropAction(Qt::MoveAction);
         }
     }

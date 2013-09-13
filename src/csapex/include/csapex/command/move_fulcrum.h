@@ -18,9 +18,9 @@ struct MoveFulcrum : public Command
     MoveFulcrum(int connection_id, int fulcrum_id, const QPoint& from, const QPoint& to);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 private:
     int connection_id;

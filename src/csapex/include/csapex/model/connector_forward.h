@@ -32,7 +32,6 @@ public:
     virtual void inputMessage(ConnectionType::Ptr message);
 
 
-    virtual bool canConnect() const;
     virtual bool isConnected() const;
 
     virtual void validateConnections();

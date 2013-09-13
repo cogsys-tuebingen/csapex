@@ -13,16 +13,27 @@ namespace csapex
 
 class Command
 {
-    friend class CommandDispatcher;
-    friend class command::Meta;
-    friend class BoxGroup;
-    friend class BoxManager;
+
+public:
+    class Access {
+        friend class BoxGroup;
+        friend class CommandDispatcher;
+        friend class command::Meta;
+
+    private:
+        static bool executeCommand(GraphPtr graph, CommandPtr cmd);
+        static bool undoCommand(GraphPtr graph, CommandPtr cmd);
+        static bool redoCommand(GraphPtr graph, CommandPtr cmd);
+    };
 
 public:
     typedef boost::shared_ptr<Command> Ptr;
 
 public:
     Command();
+
+    void setGraph(GraphPtr graph);
+    GraphPtr getGraph();
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -31,13 +42,16 @@ public:
     bool isBeforeSavepoint();
 
 protected:
-    virtual bool execute() = 0;
-    virtual bool undo() = 0;
-    virtual bool redo() = 0;
+    static bool executeCommand(GraphPtr graph, CommandPtr cmd);
+    static bool undoCommand(GraphPtr graph, CommandPtr cmd);
+    static bool redoCommand(GraphPtr graph, CommandPtr cmd);
 
-    static bool doExecute(Ptr other);
-    static bool doUndo(Ptr other);
-    static bool doRedo(Ptr other);
+    virtual bool doExecute() = 0;
+    virtual bool doUndo() = 0;
+    virtual bool doRedo() = 0;
+
+protected:
+    GraphPtr graph_;
 
     static std::vector<Command::Ptr> undo_later;
 

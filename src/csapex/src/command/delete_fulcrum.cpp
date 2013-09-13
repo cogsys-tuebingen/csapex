@@ -10,24 +10,24 @@ using namespace csapex::command;
 DeleteFulcrum::DeleteFulcrum(int connection_id, int fulcrum_id)
     : connection_id(connection_id), fulcrum_id(fulcrum_id)
 {
-    pos = Graph::root()->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
 }
 
-bool DeleteFulcrum::execute()
+bool DeleteFulcrum::doExecute()
 {
-    Graph::root()->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
+    pos = graph_->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
+    graph_->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
     return true;
 }
 
-bool DeleteFulcrum::undo()
+bool DeleteFulcrum::doUndo()
 {
-    Graph::root()->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos);
+    graph_->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos);
     return true;
 }
 
-bool DeleteFulcrum::redo()
+bool DeleteFulcrum::doRedo()
 {
-    return execute();
+    return doExecute();
 }
 
 

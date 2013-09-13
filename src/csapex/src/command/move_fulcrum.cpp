@@ -12,19 +12,19 @@ MoveFulcrum::MoveFulcrum(int connection_id, int fulcrum_id, const QPoint &from, 
 {
 }
 
-bool MoveFulcrum::execute()
+bool MoveFulcrum::doExecute()
 {
-    Graph::root()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to);
+    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to);
     return true;
 }
 
-bool MoveFulcrum::undo()
+bool MoveFulcrum::doUndo()
 {
-    Graph::root()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from);
+    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from);
     return true;
 }
 
-bool MoveFulcrum::redo()
+bool MoveFulcrum::doRedo()
 {
-    return execute();
+    return doExecute();
 }

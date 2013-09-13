@@ -39,7 +39,7 @@ public:
     void register_box_type(BoxedObjectConstructor::Ptr provider);
 
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
-    BoxPtr makeBox(const std::string& type, const std::string& uuid = "");
+    BoxPtr makeBox(const std::string& type, const std::string& uuid);
     BoxedObjectConstructor::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);

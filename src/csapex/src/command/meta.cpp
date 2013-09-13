@@ -23,13 +23,13 @@ int Meta::commands() const
     return nested.size();
 }
 
-bool Meta::execute()
+bool Meta::doExecute()
 {
     locked = true;
 
     bool success = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        bool s = cmd->execute();
+        bool s = Access::executeCommand(graph_, cmd);
         if(!s) {
             std::cerr << "command failed to execute! (" << typeid(*cmd).name() << ")" << std::endl;
         }
@@ -38,10 +38,11 @@ bool Meta::execute()
     return success;
 }
 
-bool Meta::undo()
+bool Meta::doUndo()
 {
     BOOST_REVERSE_FOREACH(Command::Ptr cmd, nested) {
-        if(!cmd->undo()) {
+        bool s = Access::undoCommand(graph_, cmd);
+        if(!s) {
             undo_later.push_back(cmd);
         }
     }
@@ -49,11 +50,12 @@ bool Meta::undo()
     return true;
 }
 
-bool Meta::redo()
+bool Meta::doRedo()
 {
     bool success = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        success &= cmd->redo();
+        bool s = Access::redoCommand(graph_, cmd);
+        success &= s;
     }
     return success;
 }

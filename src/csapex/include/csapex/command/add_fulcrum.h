@@ -18,9 +18,9 @@ struct AddFulcrum : public Command
     AddFulcrum(int connection_id, int sub_section_to_split, const QPoint& pos);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 private:
     int connection_id;

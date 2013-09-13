@@ -24,7 +24,7 @@ class Designer : public QWidget
     friend class DesignerIO;
 
 public:
-    Designer(QWidget* parent = 0);
+    Designer(CommandDispatcher* dispatcher, QWidget* parent = 0);
     virtual ~Designer();
 
     bool eventFilter(QObject* o, QEvent* e);

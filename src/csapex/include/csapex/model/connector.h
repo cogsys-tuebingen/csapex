@@ -42,7 +42,6 @@ public:
 
     bool canConnectTo(Connector* other_side) const;
 
-    virtual bool canConnect() const = 0;
     virtual bool targetsCanConnectTo(Connector* other_side) const = 0;
     virtual bool isConnected() const = 0;
     virtual bool tryConnect(Connector* other_side) = 0;

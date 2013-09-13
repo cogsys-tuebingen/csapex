@@ -52,8 +52,8 @@ std::pair<int,int> rgb2id(QRgb rgb)
 }
 }
 
-Overlay::Overlay(QWidget* parent)
-    : QWidget(parent), highlight_connection_id_(-1), schema_dirty_(true), drag_connection_(-1), splicing_requested(false), splicing(false)
+Overlay::Overlay(CommandDispatcher *dispatcher, QWidget* parent)
+    : QWidget(parent), dispatcher_(dispatcher_), graph_(dispatcher->getGraph()), highlight_connection_id_(-1), schema_dirty_(true), drag_connection_(-1), splicing_requested(false), splicing(false)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -84,9 +84,8 @@ Overlay::Overlay(QWidget* parent)
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(repaint()));
     QObject::connect(repainter, SIGNAL(timeout()), this, SLOT(tick()));
 
-    Graph::Ptr graph = Graph::root();
-    QObject::connect(graph.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)));
-    QObject::connect(graph.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)));
+    QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)));
+    QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)));
 }
 
 
@@ -214,7 +213,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
 
     std::vector<QPoint> targets;
     if(id >= 0) {
-        targets = Graph::root()->getConnectionWithId(id)->getFulcrums();
+        targets = graph_->getConnectionWithId(id)->getFulcrums();
     }
     targets.push_back(to);
 
@@ -413,7 +412,7 @@ bool Overlay::keyPressEventHandler(QKeyEvent*)
 bool Overlay::keyReleaseEventHandler(QKeyEvent* e)
 {
     if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        Graph::root()->deleteSelectedConnections();
+        dispatcher_->execute(graph_->deleteSelectedConnections());
 
         repaint();
 
@@ -431,8 +430,8 @@ bool Overlay::mousePressEventHandler(QMouseEvent *)
 bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
 {
     if(splicing) {
-        QPoint from = Graph::root()->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
-        CommandDispatcher::execute(Command::Ptr(new command::MoveFulcrum(drag_connection_, drag_sub_section_, from, current_splicing_handle_)));
+        QPoint from = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
+        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(drag_connection_, drag_sub_section_, from, current_splicing_handle_)));
 
         splicing = false;
         splicing_requested = false;
@@ -443,15 +442,12 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
         return false;
 
     } else {
-        Graph::Ptr graph_ = Graph::root();
-
         if(highlight_connection_id_ != -1) {
             if(e->button() == Qt::MiddleButton) {
                 if(fulcrum_is_hovered_) {
-                    Command::Ptr cmd(graph_->deleteConnectionFulcrumCommand(drag_connection_, drag_sub_section_));
-                    CommandDispatcher::execute(cmd);
+                    dispatcher_->execute(Command::Ptr(graph_->deleteConnectionFulcrumCommand(drag_connection_, drag_sub_section_)));
                 } else {
-                    graph_->deleteConnectionById(highlight_connection_id_);
+                    dispatcher_->execute(graph_->deleteConnectionById(highlight_connection_id_));
                 }
                 return false;
 
@@ -487,7 +483,7 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
 
             } else {
                 Command::Ptr make_fulcrum(new command::AddFulcrum(highlight_connection_id_, drag_sub_section_, drag_connection_handle_));
-                CommandDispatcher::execute(make_fulcrum);
+                dispatcher_->execute(make_fulcrum);
             }
             return false;
 
@@ -515,10 +511,8 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
             drag_sub_section_ = subsection;
             drag_connection_ = id;
 
-            Graph::Ptr graph = Graph::root();
-
             double closest_dist = 15;
-            foreach(const Connection::Ptr& connection, graph->visible_connections) {
+            foreach(const Connection::Ptr& connection, graph_->visible_connections) {
                 int sub_section = 0;
 
                 foreach(const QPoint& fulcrum, connection->getFulcrums()) {
@@ -574,10 +568,10 @@ bool Overlay::showConnectionContextMenu(const QPoint& pos)
         QAction* selectedItem = menu.exec(globalPos);
 
         if(selectedItem == del) {
-            Graph::root()->deleteConnectionById(id);
+            dispatcher_->execute(graph_->deleteConnectionById(id));
 
         } else if(selectedItem == reset) {
-            CommandDispatcher::execute(Graph::root()->deleteAllConnectionFulcrumsCommand(id));
+            dispatcher_->execute(graph_->deleteAllConnectionFulcrumsCommand(id));
         }
 
         return true;
@@ -597,7 +591,7 @@ bool Overlay::showFulcrumContextMenu(const QPoint& pos)
     QAction* selectedItem = menu.exec(globalPos);
 
     if(selectedItem == del) {
-        CommandDispatcher::execute(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
+        dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
     } else {
         fulcrum_is_hovered_ = false;
         drag_connection_handle_ = QPoint();
@@ -620,8 +614,6 @@ void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
 
 void Overlay::paintEvent(QPaintEvent*)
 {
-    Graph::Ptr graph_ = Graph::root();
-
     QPainter p(this);
     QPainter ps(&schematics);
 

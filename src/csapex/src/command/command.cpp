@@ -13,23 +13,54 @@ Command::Command()
 {
 }
 
-bool Command::doExecute(Command::Ptr other)
+
+bool Command::Access::executeCommand(GraphPtr graph, Command::Ptr cmd)
 {
-    return other->execute();
+    return Command::executeCommand(graph, cmd);
 }
-bool Command::doUndo(Command::Ptr other)
+bool Command::Access::undoCommand(GraphPtr graph, Command::Ptr cmd)
 {
-    if(!other->undo()) {
-        undo_later.push_back(other);
+    return Command::undoCommand(graph, cmd);
+}
+bool Command::Access::redoCommand(GraphPtr graph, Command::Ptr cmd)
+{
+    return Command::redoCommand(graph, cmd);
+}
+
+void Command::setGraph(Graph::Ptr graph)
+{
+    graph_ = graph;
+}
+Graph::Ptr Command::getGraph()
+{
+    return graph_;
+}
+
+bool Command::executeCommand(GraphPtr graph, Command::Ptr cmd)
+{
+    cmd->graph_ = graph;
+    assert(cmd->graph_);
+    return cmd->doExecute();
+}
+bool Command::undoCommand(GraphPtr graph, Command::Ptr cmd)
+{
+    cmd->graph_ = graph;
+    assert(cmd->graph_);
+    if(!cmd->doUndo()) {
+        undo_later.push_back(cmd);
         return false;
     }
 
     return true;
 }
-
-bool Command::doRedo(Command::Ptr other)
+bool Command::redoCommand(GraphPtr graph, Command::Ptr cmd)
 {
-    return other->redo();
+    if(graph) {
+        cmd->graph_ = graph;
+    }
+
+    assert(cmd->graph_);
+    return cmd->doRedo();
 }
 
 void Command::setAfterSavepoint(bool save)

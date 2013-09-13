@@ -21,9 +21,9 @@ public:
     DeleteBox(const std::string &uuid);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 protected:
     QWidget* parent;

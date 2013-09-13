@@ -13,9 +13,9 @@ MoveBox::MoveBox(Box* box, QPoint to)
     uuid = box->UUID();
 }
 
-bool MoveBox::execute()
+bool MoveBox::doExecute()
 {
-    Box::Ptr box = Graph::root()->findBox(uuid);
+    Box::Ptr box = graph_->findBox(uuid);
     box->clearFocus();
     box->move(to);
     box->key_point = to;
@@ -23,9 +23,9 @@ bool MoveBox::execute()
     return true;
 }
 
-bool MoveBox::undo()
+bool MoveBox::doUndo()
 {
-    Box::Ptr box = Graph::root()->findBox(uuid);
+    Box::Ptr box = graph_->findBox(uuid);
     box->clearFocus();
     box->move(from);
     box->key_point = from;
@@ -33,7 +33,7 @@ bool MoveBox::undo()
     return true;
 }
 
-bool MoveBox::redo()
+bool MoveBox::doRedo()
 {
-    return execute();
+    return doExecute();
 }

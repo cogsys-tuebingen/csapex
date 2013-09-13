@@ -15,9 +15,9 @@ struct AddConnector : public Command
     AddConnector(const std::string& box_uuid, const std::string& label, const std::string& type, bool input, const std::string& uuid, bool forward = false);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 private:
     std::string type;

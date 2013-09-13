@@ -28,12 +28,12 @@
 
 using namespace csapex;
 
-DesignBoard::DesignBoard(QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), drag_io(DragIO::instance()), space_(false), drag_(false)
+DesignBoard::DesignBoard(CommandDispatcher* dispatcher, QWidget* parent)
+    : QWidget(parent), ui(new Ui::DesignBoard), dispatcher_(dispatcher), drag_io(dispatcher), space_(false), drag_(false)
 {
     ui->setupUi(this);
 
-    overlay = new Overlay(this);
+    overlay = new Overlay(dispatcher, this);
 
     installEventFilter(this);
 
@@ -105,15 +105,16 @@ void DesignBoard::addBoxEvent(Box *box)
 {
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), Graph::root().get(), SLOT(boxMoved(Box*, int, int)));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), dispatcher_->getGraph().get(), SLOT(boxMoved(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(clicked(Box*)), Graph::root().get(), SLOT(toggleBoxSelection(Box*)));
+    QObject::connect(box, SIGNAL(clicked(Box*)), dispatcher_->getGraph().get(), SLOT(toggleBoxSelection(Box*)));
     QObject::connect(box, SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
     QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
     QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
     box->setParent(this);
     box->triggerPlaced();
+    box->setCommandDispatcher(dispatcher_);
 
     overlay->raise();
     repaint();
@@ -138,16 +139,17 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
-    Graph::Ptr graph_ = Graph::root();
+    Graph::Ptr graph = dispatcher_->getGraph();
+
     // BOXES
     if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        if(graph_->noSelectedBoxes() != 0) {
-            graph_->deleteSelectedBoxes();
+        if(graph->noSelectedBoxes() != 0) {
+            dispatcher_->execute(graph->deleteSelectedBoxes());
             return;
         }
     } else  if(e->key() == Qt::Key_G && Qt::ControlModifier == QApplication::keyboardModifiers()) {
-        if(graph_->noSelectedBoxes() != 0) {
-            graph_->groupSelectedBoxes();
+        if(graph->noSelectedBoxes() != 0) {
+            dispatcher_->execute(graph->groupSelectedBoxes());
             return;
         }
     }
@@ -189,16 +191,14 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
         return;
     }
 
-    Graph::Ptr graph_ = Graph::root();
-
     if(e->button() == Qt::LeftButton) {
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            graph_->deselectBoxes();
+            dispatcher_->getGraph()->deselectBoxes();
 
             foreach(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    graph_->selectBox(box, true);
+                    dispatcher_->getGraph()->selectBox(box, true);
                 }
             }
 
@@ -209,7 +209,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     // BOXES
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
     if(!shift) {
-        graph_->deselectBoxes();
+        dispatcher_->getGraph()->deselectBoxes();
     }
 
     updateCursor();

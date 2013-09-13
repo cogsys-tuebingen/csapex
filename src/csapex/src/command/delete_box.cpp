@@ -14,48 +14,47 @@ using namespace csapex::command;
 DeleteBox::DeleteBox(const std::string &uuid)
     : uuid(uuid)
 {
-    Box::Ptr box = Graph::root()->findBox(uuid);
+}
+
+bool DeleteBox::doExecute()
+{
+    Box::Ptr box = graph_->findBox(uuid);
 
     parent = box->parentWidget();
     type = box->getType();
-}
-
-bool DeleteBox::execute()
-{
-    Box::Ptr box = Graph::root()->findBox(uuid);
 
     pos = box->pos();
     remove_connections = box->removeAllConnectionsCmd();
 
-    if(doExecute(remove_connections)) {
+    if(Command::executeCommand(graph_, remove_connections)) {
         saved_state = box->getState();
 
-        Graph::root()->deleteBox(box->UUID());
+        graph_->deleteBox(box->UUID());
         return true;
     }
 
     return false;
 }
 
-bool DeleteBox::undo()
+bool DeleteBox::doUndo()
 {
     Box::Ptr box = BoxManager::instance().makeBox(type, uuid);
     box->setState(saved_state);
 
-    Graph::root()->addBox(box);
+    graph_->addBox(box);
 
     box->init(pos);
 
-    return doUndo(remove_connections);
+    return Command::undoCommand(graph_, remove_connections);
 }
 
-bool DeleteBox::redo()
+bool DeleteBox::doRedo()
 {
-    if(doRedo(remove_connections)) {
-        Box::Ptr box = Graph::root()->findBox(uuid);
+    if(Command::redoCommand(graph_, remove_connections)) {
+        Box::Ptr box = graph_->findBox(uuid);
         saved_state = box->getState();
 
-        Graph::root()->deleteBox(box->UUID());
+        graph_->deleteBox(box->UUID());
         return true;
     }
 

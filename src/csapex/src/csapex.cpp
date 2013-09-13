@@ -21,6 +21,8 @@ void siginthandler(int)
     exit(1);
 }
 
+#define DEBUG 0
+
 namespace csapex
 {
 
@@ -46,15 +48,23 @@ struct CsApexApp : public QApplication {
                 bw->parent()->getContent()->setError(true, e.what());
             } else {
                 std::cerr << "Uncatched exception:" << e.what() << std::endl;
+#if DEBUG
+                throw;
+#endif
             }
 
             return false;
 
         } catch(const std::string& s) {
             std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
+#if DEBUG
+                throw;
+#endif
         } catch(...) {
             std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-            throw;
+#if DEBUG
+                throw;
+#endif
         }
 
         return true;

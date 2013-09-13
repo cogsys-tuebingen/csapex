@@ -15,9 +15,9 @@ struct DeleteConnector : public Command
     DeleteConnector(Connector *_c);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
     bool refresh();
 

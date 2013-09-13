@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/command/dispatcher.h>
 
 /// PROJECT
 #include <utils_plugin/plugin_manager.hpp>
@@ -20,6 +21,7 @@ class CsApexCore : public QObject
 
 public:
     CsApexCore();
+    CsApexCore(CommandDispatcher* dispatcher);
     virtual ~CsApexCore();
 
     void init();
@@ -32,6 +34,9 @@ public:
 
     void reset();
 
+    GraphPtr getTopLevelGraph();
+    CommandDispatcher* getCommandDispatcher();
+
 Q_SIGNALS:
     void configChanged();
     void showStatusMessage(const std::string& msg);
@@ -40,6 +45,9 @@ Q_SIGNALS:
     void loadSettingsRequest(YAML::Node& n);
 
 private:
+    bool destruct;
+    CommandDispatcher* cmd_dispatch;
+
     PluginManager<CorePlugin> core_plugin_manager;
 
     std::string current_config_;

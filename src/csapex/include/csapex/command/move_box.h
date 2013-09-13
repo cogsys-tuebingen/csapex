@@ -19,9 +19,9 @@ public:
     MoveBox(Box* box, QPoint to);
 
 protected:
-    bool execute();
-    bool undo();
-    bool redo();
+    bool doExecute();
+    bool doUndo();
+    bool doRedo();
 
 protected:
     QPoint from;

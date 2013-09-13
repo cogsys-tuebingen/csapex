@@ -47,6 +47,9 @@ Template::Ptr TemplateManager::createNewTemporaryTemplate()
 
     temporary_templates.push_back(res);
 
+    TemplateConstructor::Ptr constructor(new TemplateConstructor(std::string("::template::") + res->getName(), "no description"));
+    BoxManager::instance().register_box_type(constructor);
+
     return res;
 }
 

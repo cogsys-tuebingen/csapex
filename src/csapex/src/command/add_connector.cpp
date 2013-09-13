@@ -20,9 +20,9 @@ AddConnector::AddConnector(const std::string &box_uuid, const std::string& label
 
 }
 
-bool AddConnector::execute()
+bool AddConnector::doExecute()
 {
-    Box::Ptr box = Graph::root()->findBox(b_uuid);
+    Box::Ptr box = graph_->findBox(b_uuid);
     assert(box);
 
     if(input) {
@@ -54,9 +54,9 @@ bool AddConnector::execute()
     return true;
 }
 
-bool AddConnector::undo()
+bool AddConnector::doUndo()
 {
-    Box::Ptr box = Graph::root()->findBox(b_uuid);
+    Box::Ptr box = graph_->findBox(b_uuid);
     assert(box);
 
     if(input) {
@@ -67,7 +67,7 @@ bool AddConnector::undo()
     return false;
 }
 
-bool AddConnector::redo()
+bool AddConnector::doRedo()
 {
-    return execute();
+    return doExecute();
 }

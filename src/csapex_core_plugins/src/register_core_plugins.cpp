@@ -45,7 +45,7 @@ class RosHandler
         return v[Qt::UserRole].toString().toStdString();
     }
 
-    virtual bool handle(QWidget *src, Overlay* overlay, QDragEnterEvent* e) {
+    virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragEnterEvent* e) {
         if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             std::string cmd = getCmd(e);
 
@@ -60,10 +60,10 @@ class RosHandler
         }
         return false;
     }
-    virtual bool handle(QWidget *src, Overlay* overlay, QDragMoveEvent* e){
+    virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragMoveEvent* e){
         return false;
     }
-    virtual bool handle(QWidget *src, Overlay* overlay, QDropEvent* e) {
+    virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDropEvent* e) {
         if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             std::string cmd = getCmd(e);
 
@@ -73,9 +73,11 @@ class RosHandler
                 if(ROSHandler::instance().topicExists(cmd)) {
                     QPoint pos = e->pos();
 
+                    std::string uuid = dispatcher->getGraph()->makeUUID("csapex::ImportRos");
+
                     Memento::Ptr state;
                     {
-                        Box::Ptr tmp = BoxManager::instance().makeBox("csapex::ImportRos");
+                        Box::Ptr tmp = BoxManager::instance().makeBox("csapex::ImportRos", uuid);
                         assert(tmp);
 
                         boost::shared_ptr<ImportRos> inst = boost::dynamic_pointer_cast<ImportRos> (tmp->getContent());
@@ -87,8 +89,7 @@ class RosHandler
                     }
 
                     std::string type("csapex::ImportRos");
-                    std::string uuid = Graph::root()->makeUUID(type);
-                    CommandDispatcher::execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));
+                    dispatcher->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));
 
                     return true;
                 }
@@ -121,7 +122,7 @@ class FileHandler
         return e->mimeData()->urls();
     }
 
-    virtual bool handle(QWidget *src, Overlay* overlay, QDragEnterEvent* e) {
+    virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragEnterEvent* e) {
         if(e->mimeData()->hasFormat(format.c_str())) {
             QList<QUrl> files = getFiles(e);
 
@@ -132,10 +133,10 @@ class FileHandler
         }
         return false;
     }
-    virtual bool handle(QWidget *src, Overlay* overlay, QDragMoveEvent* e){
+    virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragMoveEvent* e){
         return false;
     }
-    virtual bool handle(QWidget *src, Overlay* overlay, QDropEvent* e) {
+    virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDropEvent* e) {
         if(e->mimeData()->hasFormat(format.c_str())) {
             QList<QUrl> files = getFiles(e);
 
@@ -152,9 +153,11 @@ class FileHandler
             if(file.exists()) {
                 QPoint pos = e->pos();
 
+                std::string uuid = dispatcher->getGraph()->makeUUID("csapex::FileImporter");
+
                 Memento::Ptr state;
                 {
-                    Box::Ptr tmp = BoxManager::instance().makeBox("csapex::FileImporter");
+                    Box::Ptr tmp = BoxManager::instance().makeBox("csapex::FileImporter", uuid);
                     assert(tmp);
 
                     boost::shared_ptr<FileImporter> inst = boost::dynamic_pointer_cast<FileImporter> (tmp->getContent());
@@ -167,8 +170,7 @@ class FileHandler
                 }
 
                 std::string type("csapex::FileImporter");
-                std::string uuid = Graph::root()->makeUUID(type);
-                CommandDispatcher::execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));
+                dispatcher->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));
 
                 e->accept();
                 return true;

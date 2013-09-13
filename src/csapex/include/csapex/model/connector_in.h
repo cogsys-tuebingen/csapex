@@ -36,7 +36,6 @@ public:
     virtual void inputMessage(ConnectionType::Ptr message);
     virtual ConnectionType::Ptr getMessage();
 
-    virtual bool canConnect() const;
     virtual bool targetsCanConnectTo(Connector* other_side) const;
     virtual bool isConnected() const;
 

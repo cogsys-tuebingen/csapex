@@ -50,6 +50,9 @@ public Q_SLOTS:
     void load();
     void reload();
     void reset();
+    void clear();
+    void undo();
+    void redo();
 
     void start();
     void showStatusMessage(const std::string& msg);
@@ -57,12 +60,19 @@ public Q_SLOTS:
     void saveSettings(YAML::Emitter& e);
     void loadSettings(YAML::Node& doc);
 
+    void boxAdded(Box* box);
+    void openSubGraph(BoxGroup* grp);
+
 Q_SIGNALS:
     void initialize();
 
+private:
+    void construct();
 
 private:
     CsApexCore& core;
+
+    GraphPtr graph_;
 
     Ui::EvaluationWindow* ui;
 

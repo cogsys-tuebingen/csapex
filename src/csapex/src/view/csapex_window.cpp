@@ -13,6 +13,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/core/drag_io.h>
 #include <csapex/model/box.h>
+#include <csapex/model/box_group.h>
 
 /// SYSTEM
 #include <iostream>
@@ -29,10 +30,15 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
-    : QMainWindow(parent), core(core), ui(new Ui::EvaluationWindow), init_(false)
+    : QMainWindow(parent), core(core), graph_(core.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false)
 {
-    Graph::Ptr graph = Graph::root();
+    construct();
+}
 
+
+
+void CsApexWindow::construct()
+{
     ui->setupUi(this);
 
     QGraphicsScene* scene = new QGraphicsScene;
@@ -44,7 +50,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
     ui->loading->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->loading->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    designer_ = new Designer;
+    designer_ = new Designer(core.getCommandDispatcher());
     designer_->hide();
     ui->splitter->addWidget(designer_);
     ui->splitter->addWidget(ui->logOutput);
@@ -55,26 +61,28 @@ CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
     QObject::connect(ui->actionLoad, SIGNAL(triggered()), this,  SLOT(load()));
     QObject::connect(ui->actionReload, SIGNAL(triggered()), this,  SLOT(reload()));
     QObject::connect(ui->actionReset, SIGNAL(triggered()), this,  SLOT(reset()));
+    QObject::connect(ui->actionClear, SIGNAL(triggered()), this,  SLOT(clear()));
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this,  SLOT(undo()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this,  SLOT(redo()));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
 
-    QObject::connect(ui->actionUndo, SIGNAL(triggered()), graph.get(),  SLOT(undo()));
-    QObject::connect(ui->actionRedo, SIGNAL(triggered()), graph.get(),  SLOT(redo()));
-    QObject::connect(ui->actionClear, SIGNAL(triggered()), graph.get(),  SLOT(clear()));
-    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph.get(),  SLOT(clearSelection()));
-    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph.get(),  SLOT(selectAll()));
+    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph_.get(),  SLOT(clearSelection()));
+    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph_.get(),  SLOT(selectAll()));
 
-    QObject::connect(graph.get(), SIGNAL(boxAdded(Box*)), designer_, SLOT(addBox(Box*)));
-    QObject::connect(graph.get(), SIGNAL(boxDeleted(Box*)), designer_, SLOT(deleteBox(Box*)));
-    QObject::connect(graph.get(), SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
-    QObject::connect(graph.get(), SIGNAL(stateChanged()), this, SLOT(updateMenu()));
+    QObject::connect(graph_.get(), SIGNAL(boxAdded(Box*)), designer_, SLOT(addBox(Box*)));
+    QObject::connect(graph_.get(), SIGNAL(boxDeleted(Box*)), designer_, SLOT(deleteBox(Box*)));
+    QObject::connect(graph_.get(), SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
+
+    QObject::connect(graph_.get(), SIGNAL(stateChanged()), this, SLOT(updateMenu()));
+    QObject::connect(graph_.get(), SIGNAL(boxAdded(Box*)), this, SLOT(boxAdded(Box*)));
 
     QObject::connect(&core, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&core, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
     QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
 
-    QObject::connect(&CommandDispatcher::instance(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
+    QObject::connect(graph_.get(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
     QObject::connect(this, SIGNAL(initialize()), this, SLOT(init()), Qt::QueuedConnection);
 
@@ -124,9 +132,8 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    Graph::Ptr graph_ = Graph::root();
-    ui->actionUndo->setDisabled(!graph_->canUndo());
-    ui->actionRedo->setDisabled(!graph_->canRedo());
+    ui->actionUndo->setDisabled(!core.getCommandDispatcher()->canUndo());
+    ui->actionRedo->setDisabled(!core.getCommandDispatcher()->canRedo());
 }
 
 void CsApexWindow::updateTitle()
@@ -134,7 +141,7 @@ void CsApexWindow::updateTitle()
     std::stringstream window;
     window << "CS::APEX (" << core.getConfig() << ")";
 
-    if(CommandDispatcher::instance().isDirty()) {
+    if(core.getCommandDispatcher()->isDirty()) {
         window << " *";
     }
 
@@ -150,7 +157,7 @@ void CsApexWindow::scrollDownLog()
 
 void CsApexWindow::tick()
 {
-    CommandDispatcher::executeLater();
+    core.getCommandDispatcher()->executeLater();
 
     std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
     std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
@@ -207,8 +214,7 @@ void CsApexWindow::hideLog()
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    Graph::Ptr graph_ = Graph::root();
-    if(graph_->isDirty()) {
+    if(core.getCommandDispatcher()->isDirty()) {
         int r = QMessageBox::warning(this, tr("cs::APEX"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -226,7 +232,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     }
 
     try {
-        graph_->stop();
+        core.getCommandDispatcher()->getGraph()->stop();
     } catch(...) {
         std::abort();
     }
@@ -302,6 +308,21 @@ void CsApexWindow::reset()
     }
 }
 
+void CsApexWindow::clear()
+{
+    core.getCommandDispatcher()->execute(core.getCommandDispatcher()->getGraph()->clear());
+}
+
+void CsApexWindow::undo()
+{
+    core.getCommandDispatcher()->undo();
+}
+
+void CsApexWindow::redo()
+{
+    core.getCommandDispatcher()->redo();
+}
+
 void CsApexWindow::load()
 {
     QString filename = QFileDialog::getOpenFileName(0, "Load config", core.getConfig().c_str(), GraphIO::config_selector.c_str());
@@ -321,4 +342,22 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
 {
     DesignerIO designerio(*designer_);
     designerio.loadSettings(doc);
+}
+
+void CsApexWindow::boxAdded(Box *box)
+{
+    BoxGroup* grp = dynamic_cast<BoxGroup*> (box);
+
+    if(grp) {
+        QObject::connect(grp, SIGNAL(open_sub_graph(BoxGroup*)), this, SLOT(openSubGraph(BoxGroup*)));
+    }
+}
+
+void CsApexWindow::openSubGraph(BoxGroup */*grp*/)
+{
+// TODO: create "graph editor" window to use in csapexwindow AND here for editing templates!!
+
+//    CsApexCore* sub_core = new CsApexCore(grp->getCommandDispatcher());
+//    CsApexWindow* sub = new CsApexWindow(*sub_core);
+//    sub->show();
 }

@@ -17,7 +17,7 @@ class Overlay : public QWidget
     Q_OBJECT
 
 public:
-    Overlay(QWidget* parent = 0);
+    Overlay(CommandDispatcher* dispatcher, QWidget* parent = 0);
 
 public Q_SLOTS:
     void addTemporaryConnection(Connector* from, Connector* to);
@@ -67,6 +67,9 @@ protected:
     QPen makeSelectedLinePen(const QPoint &from, const QPoint &to);
 
 protected:
+    CommandDispatcher* dispatcher_;
+    GraphPtr graph_;
+
     struct TempConnection {
         Connector* from;
         QPoint to;

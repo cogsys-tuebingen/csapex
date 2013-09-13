@@ -92,7 +92,7 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), state(new State(this)), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0)
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), state(new State(this)), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0)
 {
     ui->setupUi(this);
 
@@ -675,17 +675,12 @@ void Box::startDrag(QPoint offset)
     QPoint end_pos = pos();
 
     QPoint delta = end_pos - start_pos;
-    Graph::root()->moveSelectedBoxes(delta);
-
-    //    if(action == Qt::IgnoreAction) {
-    //        CommandDispatcher::instance().undo();
-    //    }
+    dispatcher_->execute(dispatcher_->getGraph()->moveSelectedBoxes(delta));
 }
 
 void Box::deleteBox()
 {
-    Command::Ptr cmd(new command::DeleteBox(UUID()));
-    CommandDispatcher::execute(cmd);
+    dispatcher_->execute(Command::Ptr(new command::DeleteBox(UUID())));
 }
 
 void Box::refreshStylesheet()
@@ -867,4 +862,12 @@ Command::Ptr Box::removeAllInputsCmd()
     return cmd;
 }
 
+CommandDispatcher* Box::getCommandDispatcher() const
+{
+    return dispatcher_;
+}
 
+void Box::setCommandDispatcher(CommandDispatcher *d)
+{
+    dispatcher_ = d;
+}

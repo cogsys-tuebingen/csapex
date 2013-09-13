@@ -1,6 +1,10 @@
 /// HEADER
 #include <csapex/model/connector_forward.h>
 
+/// COMPONENT
+#include <csapex/model/box_group.h>
+#include <csapex/command/dispatcher.h>
+
 using namespace csapex;
 
 ConnectorForward::ConnectorForward(Box* parent, bool primary_function_is_input, const std::string &uuid)
@@ -44,8 +48,38 @@ bool ConnectorForward::tryConnect(Connector* other_side)
     bool use_in = false;
 
     if(other_side->isForwarding()) {
-        if(isOutput() == other_side->isOutput()) {
-            return false;
+        ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
+
+        if(isOutput() == other->isOutput()) {
+
+            // only if one is in a subgraph of the other
+            BoxGroup* this_meta_box = dynamic_cast<BoxGroup*> (getBox());
+            BoxGroup* other_meta_box = dynamic_cast<BoxGroup*> (other->getBox());
+
+            assert(this_meta_box);
+            assert(other_meta_box);
+
+            Graph::Ptr this_sub_graph = this_meta_box->getSubGraph();
+            Graph::Ptr other_sub_graph = other_meta_box->getSubGraph();
+
+            Graph::Ptr this_graph = this_meta_box->getCommandDispatcher()->getGraph();
+            Graph::Ptr other_graph = other_meta_box->getCommandDispatcher()->getGraph();
+
+            bool i_am_father = this_sub_graph == other_graph;
+            bool i_am_child = other_sub_graph == this_graph;
+
+            bool one_is_child_of_the_other = i_am_child || i_am_father;
+
+            if(!one_is_child_of_the_other) {
+                std::cerr << "cannot connect, connectors are not siblings" << std::endl;
+                return false;
+            }
+
+            if(isInput()) {
+                return other->connect(this);
+            } else {
+                return connect(other);
+            }
         }
 
         use_in = other_side->isOutput();
@@ -73,9 +107,9 @@ void ConnectorForward::removeConnection(Connector* other_side)
 {    bool use_in = false;
 
      if(other_side->isForwarding()) {
-         if(isOutput() == other_side->isOutput()) {
-             return;
-         }
+//         if(isOutput() == other_side->isOutput()) {
+//             return;
+//         }
 
          use_in = other_side->isOutput();
 
@@ -97,15 +131,6 @@ void ConnectorForward::removeAllConnectionsNotUndoable()
         ConnectorIn::removeAllConnectionsNotUndoable();
     } else {
         ConnectorOut::removeAllConnectionsNotUndoable();
-    }
-}
-
-bool ConnectorForward::canConnect() const
-{
-    if(primary_function_is_input) {
-        return ConnectorIn::canConnect();
-    } else {
-        return ConnectorOut::canConnect();
     }
 }
 

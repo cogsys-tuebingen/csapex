@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QTimer>
 #include <map>
+#include <deque>
 
 namespace csapex {
 
@@ -29,32 +30,30 @@ class Graph : public QObject
     friend class Overlay;
     friend class BoxMeta;
 
+    friend class Template;
+    friend class CommandDispatcher;
+
 public:
     static const std::string namespace_separator;
 
     typedef boost::shared_ptr<Graph> Ptr;
 
-public:
-    static Graph::Ptr root();
-    static void setRoot(Graph::Ptr root);
-
 private:
-    static Graph::Ptr root_;
+    Graph();
 
 public:
-    Graph();
     virtual ~Graph();
 
-    bool isDirty();
-
+    void init(CommandDispatcher* dispatcher);
     void stop();
-    bool canUndo();
-    bool canRedo();
 
     Graph::Ptr findSubGraph(const std::string& uuid);
-    BoxPtr findBox(const std::string& uuid, const std::string &ns = "");
-    BoxPtr findConnectorOwner(const std::string &uuid, const std::string &ns = "");
-    Connector* findConnector(const std::string &uuid, const std::string &ns = "");
+
+    BoxPtr findBox(const std::string& uuid);
+    BoxPtr findBoxNoThrow(const std::string& uuid);
+    BoxPtr findConnectorOwner(const std::string &uuid);
+    Connector* findConnector(const std::string &uuid);
+
 
     bool handleConnectionSelection(int id, bool add);
     Command::Ptr deleteConnectionByIdCommand(int id);
@@ -64,13 +63,13 @@ public:
     Command::Ptr deleteAllConnectionFulcrumsCommand(int connection);
     Command::Ptr deleteAllConnectionFulcrumsCommand(Connection::Ptr connection);
 
-    void deleteConnectionById(int id);
-    void deleteSelectedConnections();
+    Command::Ptr deleteConnectionById(int id);
+    Command::Ptr deleteSelectedConnections();
     int noSelectedConnections();
 
     void handleBoxSelection(Box* box, bool add);
-    void deleteSelectedBoxes();
-    void groupSelectedBoxes();
+    Command::Ptr deleteSelectedBoxes();
+    Command::Ptr groupSelectedBoxes();
     void selectBox(Box* box, bool add = false);
     void deselectBoxes();
     int noSelectedBoxes();
@@ -81,10 +80,9 @@ public:
 
     std::string makeUUID(const std::string& name);
 
+    Command::Ptr clear();
+
 public Q_SLOTS:
-    void undo();
-    void redo();
-    void clear();
     void reset();
     void tick();
     void clearSelection();
@@ -93,10 +91,12 @@ public Q_SLOTS:
     void toggleBoxSelection(Box* box);
     void boxMoved(Box* box, int dx, int dy);
 
-    void moveSelectedBoxes(const QPoint& delta);
+    Command::Ptr moveSelectedBoxes(const QPoint& delta);
 
 Q_SIGNALS:
     void stateChanged();
+    void dirtyChanged(bool);
+
     void boxAdded(Box*);
     void boxDeleted(Box*);
     void connectionAdded(Connection*);
@@ -108,7 +108,7 @@ private:
     void selectConnectionById(int id, bool add = false);
     bool isConnectionWithIdSelected(int id);
 
-    TemplatePtr convertSelectionToTemplate(Command::Ptr &pre, Command::Ptr &post, const std::string &group_uuid);
+    TemplatePtr convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> > &connections);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addBox(BoxPtr box);
@@ -122,6 +122,7 @@ protected:
     std::vector<Connector*> connectors_;
     std::vector<Connection::Ptr> visible_connections;
 
+    CommandDispatcher* dispatcher_;
 
     std::map<std::string, int> uuids;
 

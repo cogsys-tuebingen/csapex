@@ -15,6 +15,7 @@ namespace csapex
 class CorePlugin;
 
 FWD(Box);
+FWD(BoxGroup);
 FWD(BoxedObject);
 
 FWD(Connector);
@@ -38,6 +39,8 @@ class Overlay;
 class Tag;
 
 FWD(Command);
+
+FWD(CommandDispatcher);
 
 namespace command
 {

@@ -10,6 +10,8 @@ TemplateConstructor::TemplateConstructor(const std::string &type, const std::str
     : BoxedObjectConstructor(type, description)
 {
     icon = QIcon(":/group.png");
+    cat.push_back(Tag::get("General"));
+    cat.push_back(Tag::get("Template"));
 }
 
 BoxedObjectPtr TemplateConstructor::makeContent() const
