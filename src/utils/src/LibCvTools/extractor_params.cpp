@@ -275,6 +275,7 @@ void ParamsBRIEF::write(YAML::Emitter &emitter) const
     emitter << YAML::Key << "BRIEF"   << YAML::Value;
     emitter << YAML::BeginMap;
     emitter << YAML::Key << "bytes"   << YAML::Value << bytes;
+    ExtractorParams::write(emitter);
     emitter << YAML::EndMap;
 }
 
