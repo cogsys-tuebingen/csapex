@@ -61,7 +61,9 @@ protected:
             loaded(msg);
 
             try {
-                loader_.loadLibraryForClass(*c);
+                if(!loader_.isClassLoaded(*c)) {
+                    loader_.loadLibraryForClass(*c);
+                }
 
                 plugin_manager::InstallConstructor<M>::installConstructor(this, &loader_, *c, loader_.getClassDescription(*c));
 

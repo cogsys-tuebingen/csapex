@@ -251,41 +251,49 @@ void Box::showContextMenu(const QPoint& pos)
     QPoint globalPos = mapToGlobal(pos);
 
     QMenu menu;
-    QAction* min = new QAction("minimize", &menu);
-    QAction* max = new QAction("maximize", &menu);
-    QAction* del = new QAction("delete", &menu);
-    QAction* term = new QAction("terminate thread", &menu);
+    std::map<QAction*, boost::function<void()> > handler;
 
-    min->setIcon(QIcon(":/minimize.png"));
-    min->setIconVisibleInMenu(true);
-    max->setIcon(QIcon(":/maximize.png"));
-    max->setIconVisibleInMenu(true);
-    del->setIcon(QIcon(":/close.png"));
-    del->setIconVisibleInMenu(true);
-    term->setIcon(QIcon(":/stop.png"));
-    term->setIconVisibleInMenu(true);
-
-    if(isMinimizedSize()) {
-        menu.addAction(max);
-    } else {
-        menu.addAction(min);
-    }
-    menu.addSeparator();
-    menu.addAction(term);
-    menu.addSeparator();
-    menu.addAction(del);
+    fillContextMenu(&menu, handler);
 
     QAction* selectedItem = menu.exec(globalPos);
 
-    if(selectedItem == del) {
-        deleteBox();
-    } else if(selectedItem == term) {
-        killContent();
-    } else if(selectedItem == min) {
-        minimizeBox(true);
-    } else if(selectedItem == max) {
-        minimizeBox(false);
+    if(selectedItem) {
+        handler[selectedItem]();
     }
+}
+
+void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
+{
+    if(isMinimizedSize()) {
+        QAction* max = new QAction("maximize", menu);
+        max->setIcon(QIcon(":/maximize.png"));
+        max->setIconVisibleInMenu(true);
+        handler[max] = boost::bind(&Box::minimizeBox, this, false);
+        menu->addAction(max);
+
+    } else {
+        QAction* min = new QAction("minimize", menu);
+        min->setIcon(QIcon(":/minimize.png"));
+        min->setIconVisibleInMenu(true);
+        handler[min] = boost::bind(&Box::minimizeBox, this, true);
+        menu->addAction(min);
+    }
+
+    menu->addSeparator();
+
+    QAction* term = new QAction("terminate thread", menu);
+    term->setIcon(QIcon(":/stop.png"));
+    term->setIconVisibleInMenu(true);
+    handler[term] = boost::bind(&Box::killContent, this);
+    menu->addAction(term);
+
+    menu->addSeparator();
+
+    QAction* del = new QAction("delete", menu);
+    del->setIcon(QIcon(":/close.png"));
+    del->setIconVisibleInMenu(true);
+    handler[del] = boost::bind(&Box::deleteBox, this);
+    menu->addAction(del);
 }
 
 std::string Box::UUID() const

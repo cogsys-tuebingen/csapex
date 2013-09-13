@@ -35,8 +35,12 @@ public:
 Q_SIGNALS:
     void open_sub_graph(BoxGroup*);
 
+public Q_SLOTS:
+    void saveAsTemplate();
+
 protected:
     bool eventFilter(QObject*, QEvent*);
+    virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 protected:
     CommandDispatcher cmd_dispatcher;

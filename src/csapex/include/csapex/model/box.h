@@ -11,9 +11,11 @@
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
-#include <QWidget>
+#include <boost/function.hpp>
 #include <QIcon>
+#include <QMenu>
 #include <QMutex>
+#include <QWidget>
 #include <yaml-cpp/yaml.h>
 
 /// FORWARD DECLARATIONS
@@ -166,6 +168,8 @@ protected:
     bool eventFilter(QObject*, QEvent*);
     void enabledChange(bool val);
     void makeThread();
+
+    virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 public Q_SLOTS:
     void deleteBox();

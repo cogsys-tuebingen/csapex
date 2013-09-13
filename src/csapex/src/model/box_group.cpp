@@ -61,3 +61,21 @@ void BoxGroup::init(const QPoint &pos)
 
     dispatcher_->executeNotUndoable(meta);
 }
+
+void BoxGroup::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
+{
+    Box::fillContextMenu(menu, handler);
+
+    menu->addSeparator();
+
+    QAction* del = new QAction("save as template", menu);
+    del->setIcon(QIcon(":/group.png"));
+    del->setIconVisibleInMenu(true);
+    handler[del] = boost::bind(&BoxGroup::saveAsTemplate, this);
+    menu->addAction(del);
+}
+
+void BoxGroup::saveAsTemplate()
+{
+    std::cout << "!SAVE!" << std::endl;
+}
