@@ -25,6 +25,7 @@ void CtrlPreferences::setupUI(Ui::TerraPreferences *ui)
 
     /// SURF
     ui_->surfBox->setChecked(surf_.opp);
+    ui_->spinBox_threshSurf->setValue(surf_.threshold);
     ui_->checkBox_extendedSurf->setChecked(surf_.color_extension);
     ui_->spinBox_layersSurf->setValue(surf_.octave_layers);
     ui_->spinBox_octavesSurf->setValue(surf_.octaves);
@@ -244,6 +245,12 @@ void CtrlPreferences::surfOppChanged(bool checked)
 void CtrlPreferences::surfColorExtChanged(bool checked)
 {
     surf_.color_extension = checked;
+    surf_.dirty = true;
+}
+
+void CtrlPreferences::surfThresholdChanged(double value)
+{
+    surf_.threshold = value;
     surf_.dirty = true;
 }
 

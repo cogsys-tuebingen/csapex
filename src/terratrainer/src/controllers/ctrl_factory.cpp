@@ -225,6 +225,7 @@ void CtrlFactory::produceSettingController(TerraTrainerWindow *mainWindow)
     /// SURF
     QCheckBox::connect(tf->surfBox,               SIGNAL(clicked(bool)),          ctrl, SLOT(surfOppChanged(bool)));
     QCheckBox::connect(tf->checkBox_colExtSurf,   SIGNAL(clicked(bool)),          ctrl, SLOT(surfColorExtChanged(bool)));
+    QSpinBox::connect (tf->spinBox_threshSurf,    SIGNAL(valueChanged(double)),   ctrl, SLOT(surfThresholdChanged(double)));
     QSpinBox::connect (tf->spinBox_octavesSurf,   SIGNAL(valueChanged(int)),      ctrl, SLOT(surfOctavesChanged(int)));
     QSpinBox::connect (tf->spinBox_layersSurf,    SIGNAL(valueChanged(int)),      ctrl, SLOT(surfOctaveLayersChanged(int)));
     QCheckBox::connect(tf->checkBox_extendedSurf, SIGNAL(clicked(bool)),          ctrl, SLOT(surfExtendeChanged(bool)));

@@ -42,6 +42,7 @@ public Q_SLOTS:
     /// SURF
     void surfOppChanged          (bool checked);
     void surfColorExtChanged     (bool checked);
+    void surfThresholdChanged    (double value);
     void surfOctavesChanged      (int  octaves);
     void surfOctaveLayersChanged (int   layers);
     void surfExtendeChanged      (bool checked);
