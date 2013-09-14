@@ -38,6 +38,10 @@ public:
 
 public Q_SLOTS:
     void forwardMessage(Connector* source);
+
+    void forwardMessageDirectly(ConnectorIn* source);
+    void forwardMessageSynchronized(ConnectorIn* source);
+
     void eventGuiChanged();
     void tick();
     Box* parent();
@@ -83,7 +87,6 @@ public:
 
         std::string uuid_;
         std::string label_;
-        std::string type_;
 
         QPoint pos;
 
@@ -137,7 +140,6 @@ public:
 
     std::string UUID() const;
 
-    void setType(const std::string& type);
     std::string getType() const;
 
     void setLabel(const std::string& label);
@@ -158,6 +160,8 @@ public:
     void read(YAML::Node& doc);
 
     bool isMinimizedSize() const;
+
+    void setSynchronizedInputs(bool sync);
 
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);
@@ -217,12 +221,18 @@ protected:
     BoxedObject::Ptr content_;
 
     std::vector<ConnectorIn*> input;
-    std::vector<ConnectorOut*> output;  
+    std::map<ConnectorIn*, bool> has_msg;
+
+    std::vector<ConnectorOut*> output;
+
+    bool synchronized_inputs_;
 
     QMutex worker_mutex_;
 
     QThread* private_thread_;
     BoxWorker* worker_;
+
+    std::deque<int> timer_history_;
 
     bool down_;
     QPoint start_drag_;

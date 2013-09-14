@@ -70,9 +70,15 @@ void ConnectorIn::removeAllConnectionsNotUndoable()
     }
 }
 
-bool ConnectorIn::targetsCanConnectTo(Connector* other_side) const
+
+bool ConnectorIn::canConnectTo(Connector* other_side, bool move) const
 {
-    return target->canConnectTo(other_side) /*&& canConnectTo(getConnected())*/;
+    return Connector::canConnectTo(other_side, move) && (move || !isConnected());
+}
+
+bool ConnectorIn::targetsCanBeMovedTo(Connector* other_side) const
+{
+    return target->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
 bool ConnectorIn::isConnected() const
@@ -90,7 +96,7 @@ void ConnectorIn::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
-        if(!target->getType()->canConnectTo(getType())) {
+        if(!target->getType()->canConnectTo(getType(), true)) {
             e = true;
         }
     }
@@ -113,6 +119,8 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
         QMutexLocker lock(&io_mutex);
         message_ = message;
     }
+
+    count_++;
 
     Q_EMIT messageArrived(this);
 }

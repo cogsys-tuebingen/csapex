@@ -5,6 +5,9 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 
+/// SYSTEM
+#include <cmath>
+
 using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
@@ -59,17 +62,17 @@ bool Connection::operator == (const Connection& c) const
 
 int Connection::activity() const
 {
-    return message_count / 3;
+    return std::ceil(message_count);
 }
 
 void Connection::messageSentEvent()
 {
-    message_count = std::min(Connection::activity_marker_max_lifetime_ * 3, message_count + 3);
+    message_count = std::min(static_cast<double> (Connection::activity_marker_max_lifetime_), message_count + 1);
 }
 
 void Connection::tick()
 {
-    message_count = std::max(0, message_count - 1);
+    message_count = std::max(0.0, message_count - 0.1);
 }
 
 std::vector<QPoint> Connection::getFulcrums() const

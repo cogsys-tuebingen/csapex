@@ -12,5 +12,8 @@
 <class type="csapex::DisplayKeypoints" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::RobustMatch" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 
 </library>

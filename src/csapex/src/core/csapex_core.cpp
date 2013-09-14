@@ -29,6 +29,7 @@ CsApexCore::CsApexCore()
 
     Tag::createIfNotExists("General");
     Tag::createIfNotExists("Template");
+    Tag::createIfNotExists("Temporary");
 
     setCurrentConfig(GraphIO::default_config);
 }
@@ -75,10 +76,11 @@ void CsApexCore::init()
         showStatusMessage("loading boxedobject plugins");
         BoxManager& bm = BoxManager::instance();
         bm.loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
+        bm.new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
         bm.reload();
 
         showStatusMessage("loading templates");
-        TemplateManager::instance().load(GraphIO::defaultConfigPath() + "templates/");
+        TemplateManager::instance().load(TemplateManager::defaultTemplatePath());
 
         showStatusMessage("loading config");
         try {

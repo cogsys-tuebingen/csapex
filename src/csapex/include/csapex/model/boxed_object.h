@@ -27,16 +27,12 @@ public:
 
 protected:
     BoxedObject();
-    BoxedObject(const std::string& name);
 
 public:
     virtual ~BoxedObject();
 
-    void setName(const std::string& name);
-    std::string getName();
-
-    void setTypeName(const std::string& type_name);
-    std::string getTypeName();
+    void setType(const std::string& type);
+    std::string getType();
 
     void setCategory(const std::string& category) __attribute__ ((deprecated));
 
@@ -59,7 +55,8 @@ public:
     bool isEnabled();
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source) = 0;
+    virtual void messageArrived(ConnectorIn* source);
+    virtual void allConnectorsArrived();
 
     virtual void enable(bool e);
     virtual void enable();
@@ -77,8 +74,7 @@ protected:
     void errorEvent(bool error, ErrorLevel level);
 
 protected:
-    std::string type_name_;
-    std::string name_;
+    std::string type_;
 
     mutable std::vector<Tag> tags_;
 
@@ -94,6 +90,12 @@ protected:
 
 class NullBoxedObject : public BoxedObject {
     Q_OBJECT
+
+public:
+    NullBoxedObject(const std::string& type)
+    {
+        type_ = type;
+    }
 
 public:
     virtual void fill(QBoxLayout*) {}

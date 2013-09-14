@@ -17,6 +17,7 @@ void Extractor::extract(const cv::Mat& frame, const cv::Mat& mask_roi, std::vect
 
 void Extractor::extractDescriptors(const cv::Mat &frame, std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors) const
 {
+    assert(descriptor_extractor);
     try {
         descriptor_extractor->compute(frame, keypoints, descriptors);
     } catch(cv::Exception& e) {

@@ -37,7 +37,7 @@ public:
     virtual void validateConnections();
 
 
-    virtual bool targetsCanConnectTo(Connector* other_side) const;
+    virtual bool targetsCanBeMovedTo(Connector* other_side) const;
 
     virtual void connectionMovePreview(Connector* other_side);
 

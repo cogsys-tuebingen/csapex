@@ -40,6 +40,7 @@ public:
 Q_SIGNALS:
     void configChanged();
     void showStatusMessage(const std::string& msg);
+    void reloadBoxMenues();
 
     void saveSettingsRequest(YAML::Emitter& e);
     void loadSettingsRequest(YAML::Node& n);

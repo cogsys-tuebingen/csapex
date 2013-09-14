@@ -39,6 +39,7 @@ public Q_SLOTS:
     void addBox(Box* box);
     void deleteBox(Box* box);
     void stateChangedEvent();
+    void reloadBoxMenues();
 
     void enableGrid(bool);
 

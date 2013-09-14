@@ -82,6 +82,8 @@ public:
 
     Command::Ptr clear();
 
+    TemplatePtr toTemplate(const std::string& name) const;
+
 public Q_SLOTS:
     void reset();
     void tick();
@@ -108,7 +110,9 @@ private:
     void selectConnectionById(int id, bool add = false);
     bool isConnectionWithIdSelected(int id);
 
-    TemplatePtr convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> > &connections);
+    TemplatePtr convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> > &connections) const;
+
+    TemplatePtr generateTemplate(TemplatePtr templ, std::vector<std::pair<std::string, std::string> > &connections, bool only_selected) const;
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addBox(BoxPtr box);

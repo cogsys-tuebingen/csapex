@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "extractor_manager.h"
+#include "grusig_descriptor.h"
 
 /// SYSTEM
 #include <opencv2/nonfree/nonfree.hpp>
@@ -435,5 +436,33 @@ struct Freak : public ExtractorManager::ExtractorInitializer {
 REGISTER_FEATURE_DETECTOR(Freak, FREAK);
 BOOST_STATIC_ASSERT(!DetectorTraits<Freak>::HasKeypoint);
 BOOST_STATIC_ASSERT(DetectorTraits<Freak>::HasDescriptor);
+
+
+struct Grusig : public ExtractorManager::ExtractorInitializer {
+    EXTRACTOR_IMPLEMENTATION
+
+    struct KeyParams : public ExtractorManager::Params  {
+        KeyParams() {
+            params.push_back(Parameter::declare("dimension", 1, 35, 10, 1));
+        }
+    };
+    static KeyParams& params() {
+        static KeyParams p;
+        return p;
+    }
+    static std::vector<Parameter> usedParameters() {
+        return params().params;
+    }
+    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+        int dim = params().read<int>   (param, "dimension");
+
+        e->is_binary = true;
+        e->descriptor = "grusig";
+        e->descriptor_extractor = new cv::GRUSIG(dim);
+    }
+};
+REGISTER_FEATURE_DETECTOR(Grusig, GRUSIG);
+BOOST_STATIC_ASSERT(!DetectorTraits<Grusig>::HasKeypoint);
+BOOST_STATIC_ASSERT(DetectorTraits<Grusig>::HasDescriptor);
 
 #endif // EXTRACTORS_DEFAULT_HPP

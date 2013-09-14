@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <string>
 #include <QWidget>
+#include <QMutex>
 
 namespace csapex
 {
@@ -36,6 +37,7 @@ protected:
     virtual void errorEvent(bool error, ErrorLevel level);
 
 protected:
+    mutable QMutex mutex;
     Box* box_;
     bool error_;
     std::string error_msg_;

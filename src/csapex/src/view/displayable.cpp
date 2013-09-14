@@ -18,7 +18,7 @@ Displayable::~Displayable()
 
 void Displayable::setError(bool e, const std::string& msg, ErrorLevel level)
 {
-    if(!error_ && !e) {
+    if(!isError() && !e) {
         return;
     }
 
@@ -29,6 +29,8 @@ void Displayable::setError(bool e, const std::string& msg, ErrorLevel level)
 
 void Displayable::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
 {
+    QMutexLocker lock(&mutex);
+
     if(!error_ && !e) {
         return;
     }
@@ -51,26 +53,31 @@ void Displayable::setErrorSilent(bool e, const std::string &msg, ErrorLevel leve
 
 bool Displayable::isError() const
 {
+    QMutexLocker lock(&mutex);
     return error_;
 }
 
 Displayable::ErrorLevel Displayable::errorLevel() const
 {
+    QMutexLocker lock(&mutex);
     return level_;
 }
 
 std::string Displayable::errorMessage() const
 {
+    QMutexLocker lock(&mutex);
     return error_msg_;
 }
 
 void Displayable::setBox(Box* box)
 {
+    QMutexLocker lock(&mutex);
     box_ = box;
 }
 
 Box* Displayable::getBox() const
 {
+    QMutexLocker lock(&mutex);
     return box_;
 }
 

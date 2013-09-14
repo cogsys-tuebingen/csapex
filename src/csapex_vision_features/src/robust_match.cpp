@@ -6,23 +6,31 @@
  */
 
 /// HEADER
-#include "image_combiner_robust_match.h"
+#include "robust_match.h"
+
+/// COMPONENT
+#include <csapex_vision_features/keypoint_message.h>
+#include <csapex_vision_features/descriptor_message.h>
+
+/// PROJECT
+#include <csapex/model/box.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/model/connector_in.h>
+#include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
+#include <opencv2/opencv.hpp>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ImageCombinerRobustMatch, csapex::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::RobustMatch, csapex::BoxedObject)
 
 using namespace csapex;
+using namespace connection_types;
 
 //RobustMatcher class taken from OpenCV2 Computer Vision Application Programming Cookbook Ch 9
 class RobustMatcher
 {
 private:
-    // pointer to the feature point detector object
-    cv::Ptr<cv::FeatureDetector> detector;
-    // pointer to the feature descriptor extractor object
-    cv::Ptr<cv::DescriptorExtractor> extractor;
     // pointer to the matcher object
     cv::Ptr<cv::DescriptorMatcher > matcher;
     float ratio; // max ratio between 1st and 2nd NN
@@ -30,24 +38,11 @@ private:
     double confidence; // confidence level (probability)
     double distance; // min distance to epipolar
 public:
-    RobustMatcher() : ratio(0.75f), refineF(true),
+    RobustMatcher(cv::Ptr<cv::DescriptorMatcher > m) : ratio(0.75f), refineF(true),
         confidence(0.99), distance(3.0) {
-        // ORB is the default feature
-        detector= new cv::ORB();
-        extractor= new cv::ORB();
-        matcher= new cv::BFMatcher(cv::NORM_HAMMING);
+        matcher= m;
     }
 
-    // Set the feature detector
-    void setFeatureDetector(
-        cv::Ptr<cv::FeatureDetector>& detect) {
-        detector= detect;
-    }
-    // Set the descriptor extractor
-    void setDescriptorExtractor(
-        cv::Ptr<cv::DescriptorExtractor>& desc) {
-        extractor= desc;
-    }
     // Set the matcher
     void setDescriptorMatcher(
         cv::Ptr<cv::DescriptorMatcher>& match) {
@@ -207,27 +202,43 @@ public:
     // Match feature points using symmetry test and RANSAC
     // returns fundemental matrix
     cv::Mat match(const cv::Mat& image1,
-                  const cv::Mat& image2, // input images
-                  // output matches and keypoints
+                  const cv::Mat& image2,
                   std::vector<cv::DMatch>& matches,
                   std::vector<cv::KeyPoint>& keypoints1,
-                  std::vector<cv::KeyPoint>& keypoints2) {
-        // 1a. Detection of the SURF features
-        detector->detect(image1,keypoints1);
-        detector->detect(image2,keypoints2);
-        // 1b. Extraction of the SURF descriptors
-        cv::Mat descriptors1, descriptors2;
-        extractor->compute(image1,keypoints1,descriptors1);
-        extractor->compute(image2,keypoints2,descriptors2);
+                  std::vector<cv::KeyPoint>& keypoints2,
+                  cv::Mat& descriptors1,
+                  cv::Mat& descriptors2) {
         // 2. Match the two image descriptors
         // Construction of the matcher
         //cv::BruteForceMatcher<cv::L2<float>> matcher;
         // from image 1 to image 2
         // based on k nearest neighbours (with k=2)
+//        std::cerr << "d1: \n";
+//        for(size_t r = 0; r < descriptors1.rows; ++r) {
+//            for(size_t c = 0; c < descriptors1.cols; ++c) {
+//                std::cerr << descriptors1.at<float>(r,c) <<"\t";
+//            }
+//            std::cerr << "\n";
+//        }
+
+//        std::cerr << std::endl;
+
+
+//        std::cerr << "d2: \n";
+//        for(size_t r = 0; r < descriptors2.rows; ++r) {
+//            for(size_t c = 0; c < descriptors2.cols; ++c) {
+//                std::cerr << descriptors2.at<float>(r,c) <<"\t";
+//            }
+//            std::cerr << "\n";
+//        }
+
+//        std::cerr << std::endl;
+
         std::vector<std::vector<cv::DMatch> > matches1;
         matcher->knnMatch(descriptors1,descriptors2,
                           matches1, // vector of matches (up to 2 per entry)
                           2);        // return 2 nearest neighbours
+
         // from image 2 to image 1
         // based on k nearest neighbours (with k=2)
         std::vector<std::vector<cv::DMatch> > matches2;
@@ -253,21 +264,73 @@ public:
     }
 };
 
-
-cv::Mat ImageCombinerRobustMatch::combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2)
+RobustMatch::RobustMatch()
+    : in_img_1(NULL)
 {
+    addTag(Tag::get("Features"));
+}
 
-    std::vector<cv::KeyPoint> key1;
-    std::vector<cv::KeyPoint> key2;
+
+void RobustMatch::allConnectorsArrived()
+{
+    CvMatMessage::Ptr img1 = boost::dynamic_pointer_cast<CvMatMessage> (in_img_1->getMessage());
+    CvMatMessage::Ptr img2 = boost::dynamic_pointer_cast<CvMatMessage> (in_img_2->getMessage());
+
+    KeypointMessage::Ptr key1 = boost::dynamic_pointer_cast<KeypointMessage> (in_key_1->getMessage());
+    KeypointMessage::Ptr key2 = boost::dynamic_pointer_cast<KeypointMessage> (in_key_2->getMessage());
+
+    DescriptorMessage::Ptr des1 = boost::dynamic_pointer_cast<DescriptorMessage> (in_des_1->getMessage());
+    DescriptorMessage::Ptr des2 = boost::dynamic_pointer_cast<DescriptorMessage> (in_des_2->getMessage());
 
     std::vector<cv::DMatch> matches;
 
-    RobustMatcher rmatcher;
-    rmatcher.match(img1, img2, matches, key1, key2);
+    cv::Ptr<cv::DescriptorMatcher > matcher;
+    if(des1->value.type() == CV_8U) {
+        matcher = new cv::BFMatcher(cv::NORM_HAMMING);
+    } else {
+        matcher = new cv::BFMatcher(cv::NORM_L2);
+    }
+    RobustMatcher m(matcher);
+    m.match(img1->value, img2->value, matches, key1->value, key2->value, des1->value, des2->value);
 
-    cv::Mat out;
+    CvMatMessage::Ptr out(new CvMatMessage);
+    cv::drawMatches(img1->value, key1->value, img2->value, key2->value, matches, out->value, cv::Scalar(0,0,255), cv::Scalar::all(0), cv::vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
-    cv::drawMatches(img1, key1, img2, key2, matches, out, cv::Scalar(0,0,255), cv::Scalar::all(0), cv::vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    out_img->publish(out);
+}
 
-    return out;
+
+void RobustMatch::fill(QBoxLayout* layout)
+{
+    if(in_img_1 == NULL) {
+        box_->setSynchronizedInputs(true);
+
+        in_img_1 = new ConnectorIn(box_, 0);
+        in_img_1->setLabel("Image 1");
+        box_->addInput(in_img_1);
+        in_key_1 = new ConnectorIn(box_, 1);
+        in_key_1->setType(csapex::connection_types::KeypointMessage::make());
+        in_key_1->setLabel("Keypoints 1");
+        box_->addInput(in_key_1);
+        in_des_1 = new ConnectorIn(box_, 2);
+        in_des_1->setType(csapex::connection_types::DescriptorMessage::make());
+        in_des_1->setLabel("Descriptor 1");
+        box_->addInput(in_des_1);
+
+        in_img_2 = new ConnectorIn(box_, 3);
+        in_img_2->setLabel("Image 1");
+        box_->addInput(in_img_2);
+        in_key_2 = new ConnectorIn(box_, 4);
+        in_key_2->setType(csapex::connection_types::KeypointMessage::make());
+        in_key_2->setLabel("Keypoints 1");
+        box_->addInput(in_key_2);
+        in_des_2 = new ConnectorIn(box_, 5);
+        in_des_2->setType(csapex::connection_types::DescriptorMessage::make());
+        in_des_2->setLabel("Descriptor 1");
+        box_->addInput(in_des_2);
+
+        out_img = new ConnectorOut(box_, 0);
+        out_img->setLabel("Debug View");
+        box_->addOutput(out_img);
+    }
 }

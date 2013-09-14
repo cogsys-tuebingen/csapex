@@ -22,13 +22,13 @@ BoxedObject::BoxedObject()
     ++active_objects_;
 }
 
-BoxedObject::BoxedObject(const std::string& name)
-    : name_(name), icon_(":/plugin.png"), enabled_(true)
-{
-    QMutexLocker lock(&active_mutex);
+//BoxedObject::BoxedObject(const std::string& type)
+//    : type_(type), icon_(":/plugin.png"), enabled_(true)
+//{
+//    QMutexLocker lock(&active_mutex);
 
-    ++active_objects_;
-}
+//    ++active_objects_;
+//}
 
 BoxedObject::~BoxedObject()
 {
@@ -45,26 +45,14 @@ bool BoxedObject::isEnabled()
     return enabled_;
 }
 
-
-void BoxedObject::setName(const std::string& name)
+void BoxedObject::setType(const std::string &type)
 {
-    name_ = name;
+    type_ = type;
 }
 
-std::string BoxedObject::getName()
+std::string BoxedObject::getType()
 {
-    return name_;
-}
-
-
-void BoxedObject::setTypeName(const std::string& type_name)
-{
-    type_name_ = type_name;
-}
-
-std::string BoxedObject::getTypeName()
-{
-    return type_name_;
+    return type_;
 }
 
 void BoxedObject::setCategory(const std::string &category)
@@ -98,9 +86,8 @@ QIcon BoxedObject::getIcon()
     return icon_;
 }
 
-void BoxedObject::fill(QBoxLayout* layout)
+void BoxedObject::fill(QBoxLayout*)
 {
-    layout->addWidget(new QLabel(name_.c_str()));
 }
 
 void BoxedObject::updateDynamicGui(QBoxLayout *)
@@ -114,6 +101,15 @@ void BoxedObject::updateModel()
 bool BoxedObject::canBeDisabled() const
 {
     return true;
+}
+
+void BoxedObject::messageArrived(ConnectorIn *)
+{
+
+}
+void BoxedObject::allConnectorsArrived()
+{
+
 }
 
 Memento::Ptr BoxedObject::getState() const

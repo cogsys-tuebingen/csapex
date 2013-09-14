@@ -53,7 +53,7 @@ std::pair<int,int> rgb2id(QRgb rgb)
 }
 
 Overlay::Overlay(CommandDispatcher *dispatcher, QWidget* parent)
-    : QWidget(parent), dispatcher_(dispatcher_), graph_(dispatcher->getGraph()), highlight_connection_id_(-1), schema_dirty_(true), drag_connection_(-1), splicing_requested(false), splicing(false)
+    : QWidget(parent), dispatcher_(dispatcher), graph_(dispatcher->getGraph()), highlight_connection_id_(-1), schema_dirty_(true), drag_connection_(-1), splicing_requested(false), splicing(false)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);

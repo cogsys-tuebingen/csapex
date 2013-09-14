@@ -120,6 +120,7 @@ std::string Graph::makeUUID(const std::string& name)
 void Graph::addBox(Box::Ptr box)
 {
     assert(!box->UUID().empty());
+    assert(!box->getType().empty());
     assert(dispatcher_);
 
     boxes_.push_back(box);
@@ -144,21 +145,39 @@ void Graph::deleteBox(const std::string& uuid)
     box->deleteLater();
 }
 
-Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> >& connections)
+Template::Ptr Graph::toTemplate(const std::string& name) const
+{
+    Template::Ptr sub_graph_templ = TemplateManager::instance().createNewNamedTemplate(name);
+    std::vector<std::pair<std::string, std::string> > connections;
+    generateTemplate(sub_graph_templ, connections, false);
+
+    return sub_graph_templ;
+}
+
+Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> >& connections) const
 {
     Template::Ptr sub_graph_templ = TemplateManager::instance().createNewTemporaryTemplate();
+    generateTemplate(sub_graph_templ, connections, true);
 
+    return sub_graph_templ;
+}
+
+
+Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<std::string, std::string> >& connections, bool only_selected) const
+{
     std::vector<Box*> selected;
 
     std::map<std::string, std::string> old_box_to_new_box;
 
     foreach(Box::Ptr b, boxes_) {
         // iterate selected boxes
-        if(b->isSelected()) {
-            selected.push_back(b.get());
+        if(b->isSelected() || !only_selected) {
+//            if(only_selected) {
+                selected.push_back(b.get());
+//            }
 
             Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
-            std::string new_uuid = sub_graph_templ->addBox(b->getType(), b->pos(), state);
+            std::string new_uuid = templ->addBox(b->getType(), b->pos(), state);
 
             size_t start_pos = new_uuid.find(Template::PARENT_PREFIX_PATTERN);
             assert(start_pos != std::string::npos);
@@ -168,26 +187,28 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
     }
 
     foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
+        if(b->isSelected() || !only_selected) {
             foreach(ConnectorIn* in, b->input) {
                 if(in->isConnected()) {
                     Connector* target = in->getConnected();
                     Box* owner = target->getBox();
-                    bool is_selected = false;
-                    foreach(Box* b, selected) {
-                        is_selected |= (b == owner);
-                    }
-                    bool is_external = !is_selected;
+
+                    bool owner_is_selected = false;
+                        foreach(Box* b, selected) {
+                            owner_is_selected |= (b == owner);
+                        }
+
+                    bool is_external = !owner_is_selected;
                     // internal connections are done by the next loop
                     // external connections should be split
                     if(is_external) {
                         std::cerr << "  > split incoming connection between " << in->UUID() << " and " << target->UUID() << std::endl;
 
-                        std::string new_connector_uuid = sub_graph_templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
+                        std::string new_connector_uuid = templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
 
                         std::string in_box, in_connector;
                         split_first(in->UUID(), Connector::namespace_separator, in_box, in_connector);
-                        sub_graph_templ->addConnection(new_connector_uuid, old_box_to_new_box[b->UUID()] + Connector::namespace_separator + in_connector);
+                        templ->addConnection(new_connector_uuid, old_box_to_new_box[b->UUID()] + Connector::namespace_separator + in_connector);
 
                         connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
                     }
@@ -199,22 +220,24 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
                 for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
                     ConnectorIn* in = *it;
                     Box* owner = in->getBox();
+
                     bool is_selected = false;
-                    foreach(Box* b, selected) {
-                        is_selected |= (b == owner);
-                    }
+                        foreach(Box* b, selected) {
+                            is_selected |= (b == owner);
+                        }
+
                     bool is_external = !is_selected;
                     if(is_external) {
                         // external connections are split
                         std::cerr << "  > split outgoing connection between " << in->UUID() << " and " << out->UUID() << std::endl;
 
                         if(new_connector_uuid.empty()) {
-                            new_connector_uuid = sub_graph_templ->addConnector(out->getLabel(), out->getType()->name(), false, true);
+                            new_connector_uuid = templ->addConnector(out->getLabel(), out->getType()->name(), false, true);
                         }
 
                         std::string out_box, out_connector;
                         split_first(out->UUID(), Connector::namespace_separator, out_box, out_connector);
-                        sub_graph_templ->addConnection(old_box_to_new_box[b->UUID()] + Connector::namespace_separator + out_connector, new_connector_uuid);
+                        templ->addConnection(old_box_to_new_box[b->UUID()] + Connector::namespace_separator + out_connector, new_connector_uuid);
 
                         connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
 
@@ -231,7 +254,7 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
                         std::string in = old_box_to_new_box[in_box] + Connector::namespace_separator + in_connector;
                         std::string out = old_box_to_new_box[out_box] + Connector::namespace_separator + out_connector;
 
-                        sub_graph_templ->addConnection(out, in);
+                        templ->addConnection(out, in);
                     }
                 }
             }
@@ -239,7 +262,7 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
         }
     }
 
-    return sub_graph_templ;
+    return templ;
 }
 
 Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)

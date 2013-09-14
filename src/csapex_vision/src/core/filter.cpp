@@ -19,7 +19,6 @@ using namespace connection_types;
 Filter::Filter()
     : input_img_(NULL), input_mask_(NULL), output_img_(NULL), output_mask_(NULL), has_img(false), has_mask(false), guard(0xDEADBEEFL)
 {
-    setName("unnamed filter");
     addTag(Tag::get("Filter"));
     addTag(Tag::get("Vision"));
     setIcon(QIcon(":/filter.png"));

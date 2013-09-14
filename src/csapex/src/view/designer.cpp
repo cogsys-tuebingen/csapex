@@ -41,14 +41,7 @@ void Designer::keyReleaseEvent(QKeyEvent* e)
 void Designer::resizeEvent(QResizeEvent*)
 {
     if(menu == NULL) {
-
-        menu = new QTreeWidget;
-
-        QWidget* boxes = ui->page;
-        boxes->setLayout(new QVBoxLayout);
-        BoxManager::instance().insertAvailableBoxedObjects(menu);
-
-        boxes->layout()->addWidget(menu);
+        reloadBoxMenues();
     }
 }
 
@@ -66,6 +59,25 @@ void Designer::deleteBox(Box *)
 void Designer::stateChangedEvent()
 {
     designer_board->refresh();
+}
+
+void Designer::reloadBoxMenues()
+{
+    if(menu) {
+        delete menu;
+        menu = NULL;
+    }
+
+    menu = new QTreeWidget;
+
+    QWidget* boxes = ui->page;
+
+    if(!boxes->layout()) {
+        boxes->setLayout(new QVBoxLayout);
+    }
+    BoxManager::instance().insertAvailableBoxedObjects(menu);
+
+    boxes->layout()->addWidget(menu);
 }
 
 void Designer::enableGrid(bool grid)

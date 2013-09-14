@@ -19,10 +19,8 @@
 namespace csapex
 {
 
-class BoxManager : public QObject, public Singleton<BoxManager>
+class BoxManager : public Singleton<BoxManager>
 {
-    Q_OBJECT
-
     friend class Singleton<BoxManager>;
     friend class DesignerIO;
     friend class GraphIO;
@@ -36,7 +34,7 @@ public:
     ~BoxManager();
 
 public:
-    void register_box_type(BoxedObjectConstructor::Ptr provider);
+    void register_box_type(BoxedObjectConstructor::Ptr provider, bool suppress_signals = false);
 
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
     BoxPtr makeBox(const std::string& type, const std::string& uuid);
@@ -53,6 +51,7 @@ public:
 
 public:
     boost::signals2::signal<void(const std::string&)> loaded;
+    boost::signals2::signal<void()> new_box_type;
 
 
 protected:
@@ -62,7 +61,7 @@ protected:
 
     void rebuildMap();
 
-    BoxPtr makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid, const std::string type);
+    BoxPtr makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid);
     BoxPtr makeTemplateBox(const std::string uuid, const std::string type);
 
 protected:
@@ -88,7 +87,7 @@ struct InstallConstructor<csapex::BoxedObject>
     template <class M, class L>
     static void installConstructor(M*, L* loader, const std::string& name, const std::string& description) {
         csapex::BoxedObjectConstructor::Ptr prototype(new csapex::BoxedObjectConstructor(name, description, boost::bind(&M::Loader::createInstance, loader, name)));
-        csapex::BoxManager::instance().register_box_type(prototype);
+        csapex::BoxManager::instance().register_box_type(prototype, true);
     }
 };
 }

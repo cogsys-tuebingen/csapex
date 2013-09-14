@@ -81,7 +81,7 @@ protected:
 
     int id_;
 
-    int message_count;
+    double message_count;
 
     static int next_connection_id_;
 };

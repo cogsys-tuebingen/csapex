@@ -23,6 +23,8 @@ ExtractorManager::~ExtractorManager()
 
 Extractor::Initializer::Ptr ExtractorManager::getInitializer(const std::string& keypoint, const std::string& descriptor)
 {
+    assert(!keypoint.empty() || !descriptor.empty());
+
     std::string keypoint_lower = keypoint;
     std::transform(keypoint_lower.begin(), keypoint_lower.end(), keypoint_lower.begin(), ::tolower);
 

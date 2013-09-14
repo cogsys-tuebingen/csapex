@@ -47,10 +47,37 @@ Template::Ptr TemplateManager::createNewTemporaryTemplate()
 
     temporary_templates.push_back(res);
 
-    TemplateConstructor::Ptr constructor(new TemplateConstructor(std::string("::template::") + res->getName(), "no description"));
+    TemplateConstructor::Ptr constructor(new TemplateConstructor(true, std::string("::template::") + res->getName(), "no description"));
     BoxManager::instance().register_box_type(constructor);
 
     return res;
+}
+
+Template::Ptr TemplateManager::createNewNamedTemplate(const std::string &name)
+{
+    Template::Ptr res(new Template(name));
+    named_templates[name] = res;
+
+    TemplateConstructor::Ptr constructor(new TemplateConstructor(false, std::string("::template::") + res->getName(), "no description"));
+    BoxManager::instance().register_box_type(constructor);
+
+    return res;
+}
+
+bool TemplateManager::templateExists(const std::string &name)
+{
+    foreach(const Template::Ptr& templ, temporary_templates) {
+        if(templ->name_ == name) {
+            return true;
+        }
+    }
+
+    return named_templates.find(name) != named_templates.end();
+}
+
+std::string TemplateManager::defaultTemplatePath()
+{
+    return GraphIO::defaultConfigPath() + "templates/";
 }
 
 void TemplateManager::load(const std::string &path)
@@ -77,11 +104,28 @@ void TemplateManager::load(const std::string &path)
             Template::Ptr tmp(new Template(it->path().string()));
             tmp->read(doc);
 
+            std::cerr << "template " << file << " contains " << tmp->getName() << std::endl;
             named_templates[tmp->getName()] = tmp;
 
-            // TODO: allow description
-            TemplateConstructor::Ptr constructor(new TemplateConstructor(std::string("::template::") + tmp->getName(), "no description"));
+            TemplateConstructor::Ptr constructor(new TemplateConstructor(false, std::string("::template::") + tmp->getName(), "no description"));
             BoxManager::instance().register_box_type(constructor);
         }
     }
+}
+
+bool TemplateManager::save(const std::string &path, Template::Ptr templ)
+{
+    if(bfs::exists(path)) {
+        std::cerr << "cannot save template to " << path << ", already exists!" << std::endl;
+        return false;
+    }
+
+    YAML::Emitter yaml;
+
+    yaml << templ;
+
+    std::ofstream ofs(path.c_str());
+    ofs << yaml.c_str();
+
+    return true;
 }

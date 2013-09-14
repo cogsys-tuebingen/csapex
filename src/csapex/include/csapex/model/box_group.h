@@ -24,7 +24,7 @@ public:
     static const QString MIME;
 
 public:
-    BoxGroup(const std::string& uuid = "", QWidget* parent = 0);
+    BoxGroup(const std::string& type, const std::string& uuid = "", QWidget* parent = 0);
 
 
     virtual bool hasSubGraph();

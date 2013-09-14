@@ -4,7 +4,9 @@
 /// COMPONENT
 #include <csapex/model/boxed_object.h>
 #include <csapex/manager/template_manager.h>
+#include <csapex/core/graphio.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/view/template_dialog.h>
 #include "ui_box.h"
 
 /// SYSTEM
@@ -15,8 +17,8 @@ using namespace csapex;
 
 const QString BoxGroup::MIME = "csapex/model/boxmeta";
 
-BoxGroup::BoxGroup(const std::string &uuid, QWidget *parent)
-    : Box(BoxedObject::Ptr(new NullBoxedObject), uuid, parent)
+BoxGroup::BoxGroup(const std::string &type, const std::string &uuid, QWidget *parent)
+    : Box(BoxedObject::Ptr(new NullBoxedObject(type)), uuid, parent)
 {
     icon_ = new QLabel();
     QIcon img(":/group.png");
@@ -32,6 +34,7 @@ bool BoxGroup::eventFilter(QObject * o, QEvent * e)
         if (me->button() == Qt::LeftButton) {
             if(o != ui->label) {
                 Q_EMIT open_sub_graph(this);
+
                 return true;
             }
         }
@@ -77,5 +80,14 @@ void BoxGroup::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<v
 
 void BoxGroup::saveAsTemplate()
 {
-    std::cout << "!SAVE!" << std::endl;
+    TemplateDialog diag;
+    int r = diag.exec();
+
+    if(r) {
+        std::cout << "!SAVE! " << diag.getName() << std::endl;
+        Template::Ptr templ = cmd_dispatcher.getGraph()->toTemplate(diag.getName());
+        std::string path = TemplateManager::defaultTemplatePath() + diag.getName() + GraphIO::template_extension;
+
+        TemplateManager::instance().save(path, templ);
+    }
 }

@@ -10,7 +10,7 @@ namespace csapex
 class TemplateConstructor : public BoxedObjectConstructor
 {
 public:
-    TemplateConstructor(const std::string& type, const std::string& description);
+    TemplateConstructor(bool temporary, const std::string& type, const std::string& description);
 
     virtual BoxedObjectPtr makePrototypeContent() const;
     virtual BoxedObjectPtr makeContent() const;

@@ -109,12 +109,14 @@ add_library(csapex SHARED
     src/view/displayable.cpp
     src/view/overlay.cpp
     src/view/selectable.cpp
+    src/view/template_dialog.cpp
 
     src/utility/bash_parser.cpp
     src/utility/qdouble_slider.cpp
     src/utility/qsignal_bridges.cpp
     src/utility/qwrapper.cpp
     src/utility/stream_interceptor.cpp
+    src/utility/timer.cpp
     include/csapex/utility/qt_helper.hpp
 
     src/deprecated/global_option.cpp

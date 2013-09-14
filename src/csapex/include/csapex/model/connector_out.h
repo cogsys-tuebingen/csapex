@@ -37,7 +37,7 @@ public:
 
     void publish(ConnectionType::Ptr message);
 
-    virtual bool targetsCanConnectTo(Connector *other_side) const;
+    virtual bool targetsCanBeMovedTo(Connector *other_side) const;
     virtual bool isConnected() const;
 
     virtual void connectionMovePreview(Connector* other_side);

@@ -22,6 +22,7 @@ Template::Template(const std::string& name)
 std::string Template::addBox(const std::string &type, const QPoint &pos, Box::State::Ptr state)
 {
     assert(!locked);
+    assert(!type.empty());
 
     std::string uuid = PARENT_PREFIX_PATTERN + Graph::namespace_separator + tmp_graph.makeUUID(type);
 
@@ -32,6 +33,7 @@ std::string Template::addBox(const std::string &type, const QPoint &pos, Box::St
     box.pos = pos;
     box.uuid = uuid;
     box.state.copyFrom(state);
+    box.state.uuid_ = "";
     box.state.parent = NULL;
 
     boxes.push_back(box);

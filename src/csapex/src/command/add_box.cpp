@@ -31,6 +31,7 @@ bool AddBox::doExecute()
     }
 
     Box::Ptr box_ = BoxManager::instance().makeBox(type_, uuid_);
+    assert(box_->getType() == type_);
 
     if(saved_state_) {
         box_->setState(saved_state_);

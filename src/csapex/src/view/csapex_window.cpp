@@ -79,6 +79,7 @@ void CsApexWindow::construct()
 
     QObject::connect(&core, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&core, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
+    QObject::connect(&core, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
     QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
 
@@ -243,6 +244,11 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 void CsApexWindow::showStatusMessage(const std::string &msg)
 {
     statusBar()->showMessage(msg.c_str());
+}
+
+void CsApexWindow::reloadBoxMenues()
+{
+    designer_->reloadBoxMenues();
 }
 
 void CsApexWindow::init()

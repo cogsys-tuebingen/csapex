@@ -64,6 +64,7 @@ add_library(utils_vision
     src/utils/match_scorer_reprojection.cpp
     src/utils/match_scorer_factory.cpp
     src/utils/opencv_utils.hpp
+    src/utils/grusig_descriptor.cpp
     src/utils/rectangle_cluster.cpp
     ${QT_UTIL}
     ${GLOBALS})

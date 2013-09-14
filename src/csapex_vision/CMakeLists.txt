@@ -87,7 +87,6 @@ add_library(csapex_vision_plugin
     src/plugin/filter_blur.cpp
     src/plugin/filter_apply_mask.cpp
     src/plugin/filter_static_mask.cpp
-    src/plugin/image_combiner_robust_match.cpp
     src/plugin/output_display.cpp
     src/plugin/image_provider_bag.cpp
     src/plugin/image_provider_dir.cpp

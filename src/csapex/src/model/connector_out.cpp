@@ -106,7 +106,7 @@ bool ConnectorOut::connect(Connector *other_side)
         std::cerr << "cannot connect, other side can't input" << std::endl;
         return false;
     }
-    if(!other_side->canConnectTo(this)) {
+    if(!other_side->canConnectTo(this, false)) {
         std::cerr << "cannot connect, other side can't connect" << std::endl;
         return false;
     }
@@ -129,10 +129,10 @@ bool ConnectorOut::connect(Connector *other_side)
     return true;
 }
 
-bool ConnectorOut::targetsCanConnectTo(Connector* other_side) const
+bool ConnectorOut::targetsCanBeMovedTo(Connector* other_side) const
 {
     for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
-        if(!(*it)->canConnectTo(other_side)/* || !canConnectTo(*it)*/) {
+        if(!(*it)->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
@@ -176,6 +176,7 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         return;
     }
 
+    count_++;
     Q_EMIT messageSent(this);
 }
 

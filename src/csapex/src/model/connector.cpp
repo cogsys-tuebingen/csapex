@@ -58,6 +58,8 @@ void Connector::init(Box* parent)
     setMouseTracking(true);
 
     setToolTip(uuid_.c_str());
+
+    count_ = 0;
 }
 
 
@@ -135,14 +137,14 @@ void Connector::findParents()
     }
 }
 
-bool Connector::canConnectTo(Connector* other_side) const
+bool Connector::canConnectTo(Connector* other_side, bool move) const
 {
     if(other_side == this) {
         return false;
     }
 
     bool in_out = (canOutput() && other_side->canInput()) || (canInput() && other_side->canOutput());
-    bool compability = getType()->canConnectTo(other_side->getType());
+    bool compability = getType()->canConnectTo(other_side->getType(), move);
 
     return in_out && compability;
 }
@@ -151,15 +153,19 @@ void Connector::dragEnterEvent(QDragEnterEvent* e)
 {
     if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        if(from->canConnectTo(this)) {
-            if(canConnectTo(from)) {
+        if(from == this) {
+            return;
+        }
+
+        if(from->canConnectTo(this, false)) {
+            if(canConnectTo(from, false)) {
                 e->acceptProposedAction();
             }
         }
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* original_connector = dynamic_cast<Connector*>(e->mimeData()->parent());
 
-        if(original_connector->targetsCanConnectTo(this)) {
+        if(original_connector->targetsCanBeMovedTo(this)) {
             e->acceptProposedAction();
         }
     }
@@ -217,6 +223,10 @@ bool Connector::shouldMove(bool left, bool right)
 
 void Connector::mouseMoveEvent(QMouseEvent* e)
 {
+    std::stringstream tt;
+    tt << uuid_ << " " << count_;
+    setToolTip(tt.str().c_str());
+
     if(buttons_down_ == Qt::NoButton) {
         return;
     }

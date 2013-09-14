@@ -5,7 +5,6 @@
 #include <csapex/model/boxed_object.h>
 
 /// PROJECT
-#include <config/reconfigurable.h>
 #include <utils/extractor.h>
 
 /// SYSTEM
@@ -26,8 +25,12 @@ public:
 public:
     virtual void fill(QBoxLayout* layout);
 
+    virtual Memento::Ptr getState() const;
+    virtual void setState(Memento::Ptr memento);
+
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
+    void updateDynamicGui(QBoxLayout *layout);
 
 private Q_SLOTS:
     void update(int slot);
@@ -44,8 +47,6 @@ private:
 
     bool change;
 
-    std::string des;
-    std::vector<vision::Parameter> params;
     std::vector<QObject*> callbacks;
 
     QFrame* opt;
@@ -59,6 +60,16 @@ private:
 
     bool has_img;
     bool has_kp;
+
+    struct State : public Memento {
+        std::string des;
+        std::map<std::string, std::vector<vision::Parameter> > params;
+
+        virtual void writeYaml(YAML::Emitter& out) const;
+        virtual void readYaml(const YAML::Node& node);
+    };
+
+    State state;
 };
 
 }

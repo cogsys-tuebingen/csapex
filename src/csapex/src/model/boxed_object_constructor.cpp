@@ -14,7 +14,7 @@ const BoxedObjectConstructor::Ptr BoxedObjectConstructor::NullPtr
 
 BoxedObject::Ptr BoxedObjectConstructor::makeNull()
 {
-    return BoxedObject::Ptr (new NullBoxedObject);
+    return BoxedObject::Ptr (new NullBoxedObject("void"));
 }
 
 BoxedObjectConstructor::BoxedObjectConstructor(const std::string &type, const std::string &description, Make c)
@@ -67,10 +67,14 @@ std::string BoxedObjectConstructor::getDescription() const
 
 BoxedObject::Ptr BoxedObjectConstructor::makePrototypeContent() const
 {
-    return c();
+    BoxedObject::Ptr res = c();
+    res->setType(type_);
+    return res;
 }
 
 BoxedObject::Ptr BoxedObjectConstructor::makeContent() const
 {
-    return c();
+    BoxedObject::Ptr res = c();
+    res->setType(type_);
+    return res;
 }

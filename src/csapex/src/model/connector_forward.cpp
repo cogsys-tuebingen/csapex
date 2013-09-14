@@ -162,12 +162,12 @@ void ConnectorForward::validateConnections()
     }
 }
 
-bool ConnectorForward::targetsCanConnectTo(Connector *other_side) const
+bool ConnectorForward::targetsCanBeMovedTo(Connector *other_side) const
 {
     if(primary_function_is_input) {
-        return ConnectorIn::targetsCanConnectTo(other_side);
+        return ConnectorIn::targetsCanBeMovedTo(other_side);
     } else {
-        return ConnectorOut::targetsCanConnectTo(other_side);
+        return ConnectorOut::targetsCanBeMovedTo(other_side);
     }
 }
 

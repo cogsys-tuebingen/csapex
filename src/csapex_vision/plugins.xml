@@ -19,9 +19,6 @@
   <description>none yet</description>
 </class>
 
-<class type="csapex::ImageCombinerRobustMatch" base_class_type="csapex::BoxedObject">
-  <description>none yet</description>
-</class>
 <class type="csapex::ImageProviderBag" base_class_type="csapex::MessageProvider">
   <description>none yet</description>
 </class>

@@ -11,6 +11,7 @@
 #include <csapex/command/delete_box.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/utility/timer.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -33,8 +34,10 @@ void Box::State::writeYaml(YAML::Emitter &out) const
 {
     out << YAML::Flow;
     out << YAML::BeginMap;
-    out << YAML::Key << "type";
-    out << YAML::Value << type_;
+    if(parent) {
+        out << YAML::Key << "type";
+        out << YAML::Value << parent->content_->getType();
+    }
     out << YAML::Key << "uuid";
     out << YAML::Value << uuid_;
     out << YAML::Key << "label";
@@ -92,7 +95,7 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), state(new State(this)), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0)
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), state(new State(this)), synchronized_inputs_(false), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0)
 {
     ui->setupUi(this);
 
@@ -215,14 +218,48 @@ void Box::stop()
     }
 }
 
-void BoxWorker::forwardMessage(Connector *source)
+void BoxWorker::forwardMessage(Connector *s)
 {
-    if(parent_->content_->isEnabled()) {
-        parent_->content_->messageArrived(dynamic_cast<ConnectorIn*>(source));
+    ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
+    assert(source);
 
-        if(!parent_->content_->isError() || parent_->content_->errorLevel() != Displayable::EL_ERROR) {
-            parent_->content_->setError(false);
+    if(parent_->content_->isEnabled()) {
+        if(parent_->synchronized_inputs_) {
+            forwardMessageSynchronized(source);
+        } else {
+            forwardMessageDirectly(source);
         }
+    }
+
+
+    if(!parent_->content_->isError() || parent_->content_->errorLevel() != Displayable::EL_ERROR) {
+        parent_->content_->setError(false);
+    }
+}
+
+void BoxWorker::forwardMessageDirectly(ConnectorIn *source)
+{
+    parent_->content_->messageArrived(source);
+}
+
+void BoxWorker::forwardMessageSynchronized(ConnectorIn *source)
+{
+    parent_->has_msg[source] = true;
+
+    typedef std::pair<ConnectorIn*, bool> PAIR;
+    foreach(const PAIR& pair, parent_->has_msg) {
+        if(!pair.second) {
+            return;
+        }
+    }
+
+    Timer t;
+    parent_->content_->allConnectorsArrived();
+    parent_->timer_history_.push_back(t.elapsedMs());
+
+
+    foreach(const PAIR& pair, parent_->has_msg) {
+        parent_->has_msg[pair.first] = false;
     }
 }
 
@@ -301,14 +338,9 @@ std::string Box::UUID() const
     return state->uuid_;
 }
 
-void Box::setType(const std::string& type)
-{
-    state->type_ = type;
-}
-
 std::string Box::getType() const
 {
-    return state->type_;
+    return content_->getType();
 }
 
 void Box::setLabel(const std::string& label)
@@ -338,6 +370,8 @@ void Box::addInput(ConnectorIn* in)
     QObject::connect(in, SIGNAL(messageArrived(Connector*)), worker_, SLOT(forwardMessage(Connector*)));
 
     connectConnector(in);
+
+    has_msg[in] = false;
 
     Q_EMIT connectorCreated(in);
     Q_EMIT changed(this);
@@ -746,6 +780,11 @@ bool Box::isMinimizedSize() const
     return state->minimized;
 }
 
+void Box::setSynchronizedInputs(bool sync)
+{
+    synchronized_inputs_ = sync;
+}
+
 void Box::minimizeBox(bool minimize)
 {    
     state->minimized = minimize;
@@ -808,7 +847,6 @@ void Box::setState(Memento::Ptr memento)
     if(state->label_.empty()) {
         state->label_ = old_label;
     }
-
     if(state->uuid_.empty()) {
         state->uuid_ = old_uuid;
     }

@@ -29,7 +29,7 @@ public:
     virtual ConnectionType::Ptr toType() = 0;
     static ConnectionType::Ptr makeDefault();
 
-    virtual bool canConnectTo(ConnectionType::ConstPtr other_side) const;
+    virtual bool canConnectTo(ConnectionType::ConstPtr other_side, bool move) const;
     virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 
     std::string name() const;

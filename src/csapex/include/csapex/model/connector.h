@@ -40,9 +40,9 @@ public:
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
 
-    bool canConnectTo(Connector* other_side) const;
+    virtual bool canConnectTo(Connector* other_side, bool move) const;
 
-    virtual bool targetsCanConnectTo(Connector* other_side) const = 0;
+    virtual bool targetsCanBeMovedTo(Connector* other_side) const = 0;
     virtual bool isConnected() const = 0;
     virtual bool tryConnect(Connector* other_side) = 0;
     virtual void removeConnection(Connector* other_side) = 0;
@@ -138,6 +138,7 @@ protected:
     ConnectionType::ConstPtr type_;
 
     bool minimized_;
+    int count_;
 };
 
 }

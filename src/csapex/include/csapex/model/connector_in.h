@@ -33,10 +33,12 @@ public:
         return true;
     }
 
+    virtual bool canConnectTo(Connector* other_side, bool move) const;
+
     virtual void inputMessage(ConnectionType::Ptr message);
     virtual ConnectionType::Ptr getMessage();
 
-    virtual bool targetsCanConnectTo(Connector* other_side) const;
+    virtual bool targetsCanBeMovedTo(Connector* other_side) const;
     virtual bool isConnected() const;
 
     virtual void connectionMovePreview(Connector* other_side);

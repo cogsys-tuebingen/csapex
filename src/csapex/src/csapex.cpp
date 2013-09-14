@@ -62,9 +62,7 @@ struct CsApexApp : public QApplication {
 #endif
         } catch(...) {
             std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-#if DEBUG
                 throw;
-#endif
         }
 
         return true;
