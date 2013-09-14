@@ -138,6 +138,7 @@ bool ParamsORB::read(const YAML::Node &document)
 
 ParamsSURF::ParamsSURF() :
     ExtractorParams(SURF, 4),
+    threshold(100),
     octave_layers(3),
     extended(true)
 {
@@ -154,6 +155,7 @@ void ParamsSURF::write(YAML::Emitter &emitter) const
 {
     emitter << YAML::Key << "SURF"           << YAML::Value;
     emitter << YAML::BeginMap;
+    emitter << YAML::Key << "threshold"      << YAML::Value << threshold;
     emitter << YAML::Key << "layers"         << YAML::Value << octave_layers;
     emitter << YAML::Key << "extended"       << YAML::Value << extended;
     ExtractorParams::write(emitter);
@@ -165,6 +167,7 @@ bool ParamsSURF::read(const YAML::Node &document)
     try {
         const YAML::Node &data = document["SURF"];
 
+        data["threshold"]       >> threshold;
         data["layers"]          >> octave_layers;
         data["extended"]        >> extended;
         return ExtractorParams::read(data);

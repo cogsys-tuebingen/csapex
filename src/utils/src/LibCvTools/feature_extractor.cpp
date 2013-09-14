@@ -278,7 +278,8 @@ cv::DescriptorExtractor *FeatureExtractor::getExtractor(const ParamsORB &params)
 cv::DescriptorExtractor *FeatureExtractor::getExtractor(const ParamsSURF &params)
 {
     cv::DescriptorExtractor* ptr  =
-            new cv::SurfDescriptorExtractor(params.octaves,
+            new cv::SurfDescriptorExtractor(params.threshold,
+                                            params.octaves,
                                             params.octave_layers,
                                             params.extended);
     if(params.opp)

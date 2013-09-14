@@ -63,8 +63,9 @@ struct ParamsSURF : public ExtractorParams
     ParamsSURF();
     ParamsSURF(const ParamsSURF &p);
 
-    int  octave_layers;
-    bool extended;
+    double  threshold;
+    int     octave_layers;
+    bool    extended;
 
     void write(YAML::Emitter &emitter) const;
     bool read(const YAML::Node &document);
