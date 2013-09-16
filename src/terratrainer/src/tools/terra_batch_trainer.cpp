@@ -146,12 +146,11 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
 
     std::vector<cv_roi::TerraROI> terra_rois;
     cv::Mat image;
-
+    std::string image_path;
     try {
         YAML::Parser p(in);
         YAML::Node   doc;
         p.GetNextDocument(doc);
-        std::string image_path;
         doc["IMAGE"] >> image_path;
         image = cv::imread(image_path);
 
@@ -179,7 +178,7 @@ void TerraBatchTrainer::extractROIS(const std::string &path, YAML::Emitter &emit
     }
 
     if(image.empty()) {
-        std::cerr << "Image couldn't be opened!" << std::endl;
+        std::cerr << "Couldn't load Image '" << image_path << "' !" << std::endl;
         return;
     }
 }
