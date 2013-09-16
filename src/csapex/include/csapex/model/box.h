@@ -59,6 +59,7 @@ class Box : public QWidget, public Selectable
     friend class Graph;
     friend class BoxWorker;
     friend class command::MoveBox;
+    friend class ProfilingWidget;
 //    friend class command::DeleteBox;
 
 public:
@@ -184,6 +185,7 @@ public Q_SLOTS:
     void refreshStylesheet();
     void eventModelChanged();
     void killContent();
+    void showProfiling();
     void tick();
     void showContextMenu(const QPoint& pos);
 
@@ -232,6 +234,7 @@ protected:
     QThread* private_thread_;
     BoxWorker* worker_;
 
+    static const unsigned timer_history_length_;
     std::deque<int> timer_history_;
 
     bool down_;

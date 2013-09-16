@@ -12,6 +12,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/utility/timer.h>
+#include <csapex/view/profiling_widget.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -29,6 +30,8 @@ const QString Box::MIME = "csapex/model/box";
 const QString Box::MIME_MOVE = "csapex/model/box/move";
 
 const Box::Ptr Box::NullPtr;
+
+const unsigned Box::timer_history_length_ = 30;
 
 void Box::State::writeYaml(YAML::Emitter &out) const
 {
@@ -239,7 +242,10 @@ void BoxWorker::forwardMessage(Connector *s)
 
 void BoxWorker::forwardMessageDirectly(ConnectorIn *source)
 {
+    Timer t;
     parent_->content_->messageArrived(source);
+    parent_->timer_history_.push_back(t.elapsedMs());
+
 }
 
 void BoxWorker::forwardMessageSynchronized(ConnectorIn *source)
@@ -323,6 +329,12 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
     term->setIconVisibleInMenu(true);
     handler[term] = boost::bind(&Box::killContent, this);
     menu->addAction(term);
+
+    QAction* prof = new QAction("profiling", menu);
+    prof->setIcon(QIcon(":/profiling.png"));
+    prof->setIconVisibleInMenu(true);
+    handler[prof] = boost::bind(&Box::showProfiling, this);
+    menu->addAction(prof);
 
     menu->addSeparator();
 
@@ -738,9 +750,18 @@ void Box::eventModelChanged()
 
 void Box::tick()
 {
+    while(timer_history_.size() > timer_history_length_) {
+        timer_history_.pop_front();
+    }
     if(state->enabled) {
         Q_EMIT tickRequest();
     }
+}
+
+void Box::showProfiling()
+{
+    ProfilingWidget* prof = new ProfilingWidget(parentWidget(), this);
+    prof->show();
 }
 
 void Box::killContent()

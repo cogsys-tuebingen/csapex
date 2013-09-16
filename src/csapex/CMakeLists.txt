@@ -110,6 +110,7 @@ add_library(csapex SHARED
     src/view/overlay.cpp
     src/view/selectable.cpp
     src/view/template_dialog.cpp
+    src/view/profiling_widget.cpp
 
     src/utility/bash_parser.cpp
     src/utility/qdouble_slider.cpp
