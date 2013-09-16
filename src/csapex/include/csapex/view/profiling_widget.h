@@ -26,8 +26,6 @@ protected:
 private:
     Box* box_;
 
-    int maxt_;
-
     int w_;
     int h_;
 };

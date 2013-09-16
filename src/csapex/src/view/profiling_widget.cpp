@@ -10,7 +10,7 @@
 using namespace csapex;
 
 ProfilingWidget::ProfilingWidget(QWidget *parent, Box *box)
-    : QWidget(parent), box_(box), maxt_(1)
+    : QWidget(parent), box_(box)
 {
     w_ = 200;
     h_ = 75;
@@ -65,12 +65,8 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     if(n > 0) {
         int maxt = *std::max_element(box_->timer_history_.begin(), box_->timer_history_.end());
 
-        if(maxt > maxt_) {
-            maxt_ = maxt;
-        }
-
         std::stringstream txt;
-        txt << maxt_ << " ms";
+        txt << maxt << " ms";
 
 
         QFont font;
@@ -84,10 +80,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         QTextOption opt(Qt::AlignRight);
 
         p.setPen(QPen(QColor(20, 20, 20)));
-        p.drawText(QRect(padding, up, left - 2 * padding, dy), txt.str().c_str(), opt);
-        p.drawText(QRect(padding, bottom - dy, left - 2 * padding, dy), "0 ms", opt);
+        p.drawText(QRect(0, up, left -padding, dy), txt.str().c_str(), opt);
+        p.drawText(QRect(0, bottom - dy, left - padding, dy), "0 ms", opt);
 
-        double maxt_f = maxt_;
+        double maxt_f = maxt;
 
         double x = left + padding + (max - n) * indiv_width;
         for(int i = 0; i < n; ++i) {
