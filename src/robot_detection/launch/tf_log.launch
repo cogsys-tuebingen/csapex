@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-	<node pkg="tf" type="static_transform_publisher" name="base_link_to_ptz_link" args="0.08 0 0.45 0 0 0 /base_link /ptz_link 10" />
-	<node pkg="tf" type="static_transform_publisher" name="ptz_link_to_camera" args="0 0 0 0 0 0 /ptz_link /camera 10" />
-</launch>

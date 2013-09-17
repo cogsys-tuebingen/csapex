@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-<launch>
-  <node name="extract" pkg="image_view" type="extract_images" respawn="false" output="screen" cwd="node">
-    <remap from="image" to="/camera/image_raw"/>
-  </node>
-</launch>

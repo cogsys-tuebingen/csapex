@@ -1,9 +1,0 @@
-<library path="libbgsubplugin">
-  <class type="csapex::CSAPEXPlugin" base_class_type="csapex::CorePlugin">
-    <description>none yet</description>
-  </class>
-
-  <class type="csapex::BackgroundSubtraction" base_class_type="csapex::BoxedObject">
-    <description>none yet</description>
-  </class>
-</library>
