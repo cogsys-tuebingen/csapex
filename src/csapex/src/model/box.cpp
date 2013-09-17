@@ -98,7 +98,7 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), state(new State(this)), synchronized_inputs_(false), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0)
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), state(new State(this)), synchronized_inputs_(false), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0), profiling_(false)
 {
     ui->setupUi(this);
 
@@ -760,8 +760,15 @@ void Box::tick()
 
 void Box::showProfiling()
 {
-    ProfilingWidget* prof = new ProfilingWidget(parentWidget(), this);
-    prof->show();
+    profiling_ = !profiling_;
+
+    if(profiling_) {
+        prof = new ProfilingWidget(parentWidget(), this);
+        prof->show();
+    } else {
+        delete prof;
+    }
+
 }
 
 void Box::killContent()

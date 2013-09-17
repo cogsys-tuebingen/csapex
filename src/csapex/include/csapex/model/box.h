@@ -247,6 +247,9 @@ protected:
     int next_sub_id_;
 
     QPoint key_point;
+
+    bool profiling_;
+    ProfilingWidget* prof;
 };
 
 }

@@ -19,6 +19,7 @@ ProfilingWidget::ProfilingWidget(QWidget *parent, Box *box)
 
     reposition(box_);
 
+    connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
     connect(box_, SIGNAL(moved(Box*,int,int)), this, SLOT(reposition(Box*)));
 }
@@ -83,7 +84,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         p.drawText(QRect(0, up, left -padding, dy), txt.str().c_str(), opt);
         p.drawText(QRect(0, bottom - dy, left - padding, dy), "0 ms", opt);
 
-        double maxt_f = maxt;
+        double maxt_f = std::max(1, maxt);
 
         double x = left + padding + (max - n) * indiv_width;
         for(int i = 0; i < n; ++i) {

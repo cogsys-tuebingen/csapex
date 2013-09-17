@@ -42,6 +42,8 @@ FWD(Command);
 
 FWD(CommandDispatcher);
 
+class ProfilingWidget;
+
 namespace command
 {
 class Meta;
