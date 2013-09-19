@@ -9,7 +9,6 @@
 #include <QtGui>
 #include <QApplication>
 #include <signal.h>
-#include <console_bridge/console.h>
 
 namespace po = boost::program_options;
 
@@ -82,9 +81,6 @@ int run(CsApexApp& app)
 
 int main(int argc, char** argv)
 {
-    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
-    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_INFO);
-
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "show help message")
