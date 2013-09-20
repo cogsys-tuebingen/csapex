@@ -6,9 +6,8 @@
 #include "config/parameter_provider.h"
 
 /// PROJECT
-#include <utils_plugin/plugin_manager.hpp>
-#include <utils_plugin/constructor.hpp>
 #include <utils_plugin/singleton.hpp>
+#include <utils_plugin/constructor.hpp>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
@@ -95,14 +94,13 @@ public:
         }
 
         void construct(Extractor* r, const vision::ParameterProvider& param, bool complete = false) const {
-            if(has_constructor) {
+            if(!constructor.empty()) {
                 constructor(r, param, complete);
             }
         }
 
         void setConstructor(Call c) {
             constructor = c;
-            has_constructor = true;
         }
 
     private:
@@ -133,9 +131,6 @@ public:
 
     typedef typename KeypointInitializer::Call KeypointInit;
     typedef typename DescriptorInitializer::Call DescriptorInit;
-
-    typedef PluginManager<Extractor, KeypointInitializer> KeypointInitializerManager;
-    typedef PluginManager<Extractor, DescriptorInitializer> DescriptorInitializerManager;
 
     typedef boost::function<std::vector<vision::Parameter>() > ParameterFunction;
 
@@ -183,8 +178,8 @@ public:
      * @brief featureDetectors get a container of all detectors
      * @return
      */
-    KeypointInitializerManager::Constructors featureDetectors() {
-        return available_keypoints.availableClasses();
+    std::map<std::string, KeypointInitializer> featureDetectors() {
+        return available_keypoints;
     }
 
     std::vector<vision::Parameter> featureDetectorParameters(const std::string& keypoint);
@@ -194,8 +189,8 @@ public:
      * @brief descriptorExtractors get a container of all extractors
      * @return
      */
-    DescriptorInitializerManager::Constructors descriptorExtractors() {
-        return available_descriptors.availableClasses();
+    std::map<std::string, DescriptorInitializer> descriptorExtractors() {
+        return available_descriptors;
     }
 
 protected:
@@ -220,8 +215,8 @@ protected:
     };
 
 protected:
-    KeypointInitializerManager available_keypoints;
-    DescriptorInitializerManager available_descriptors;
+    std::map<std::string, KeypointInitializer> available_keypoints;
+    std::map<std::string, DescriptorInitializer> available_descriptors;
 
     std::map<std::string, ParameterFunction> param_key;
     std::map<std::string, ParameterFunction> param_des;

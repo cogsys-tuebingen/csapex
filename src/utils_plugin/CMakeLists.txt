@@ -4,13 +4,13 @@ project(utils_plugin)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS class_loader)
+find_package(catkin REQUIRED COMPONENTS pluginlib)
 
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES utils_plugin
-  CATKIN_DEPENDS class_loader
+  CATKIN_DEPENDS pluginlib
 #  DEPENDS system_lib
 )
 

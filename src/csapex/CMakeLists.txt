@@ -14,8 +14,6 @@ find_package(catkin REQUIRED COMPONENTS utils_plugin)
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
-find_package(TinyXML REQUIRED)
-
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
@@ -133,9 +131,7 @@ target_link_libraries(csapex
     yaml-cpp
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
-    #${catkin_LIBRARIES}
-    class_loader
-    ${TINYXML_LIBRARIES}
+    ${catkin_LIBRARIES}
 )
 
 add_executable(csapex_node

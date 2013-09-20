@@ -119,10 +119,6 @@ public:
         }
     }
 
-    virtual void registerConstructor(Constructor constructor) {
-        instance->registerConstructor(constructor);
-    }
-
     virtual bool pluginsLoaded() const {
         return instance->plugins_loaded_;
     }

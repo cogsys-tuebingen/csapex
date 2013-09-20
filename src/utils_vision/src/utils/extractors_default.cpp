@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <opencv2/nonfree/nonfree.hpp>
+#include <boost/bind.hpp>
 
 using namespace csapex;
 using namespace vision;
