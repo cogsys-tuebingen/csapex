@@ -20,6 +20,7 @@ BoxedObject::Ptr BoxedObjectConstructor::makeNull()
 BoxedObjectConstructor::BoxedObjectConstructor(const std::string &type, const std::string &description, Make c)
     : type_(type), descr_(description), is_loaded(false), c(c)
 {
+    assert(!c.empty());
 }
 
 BoxedObjectConstructor::BoxedObjectConstructor(const std::string &type, const std::string &description)

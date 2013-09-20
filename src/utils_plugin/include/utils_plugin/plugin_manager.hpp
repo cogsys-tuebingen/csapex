@@ -3,41 +3,29 @@
 
 /// COMPONENT
 #include <utils_plugin/constructor.hpp>
+#include <utils_plugin/plugin_loader.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
 #include <pluginlib/class_loader.h>
+#include <set>
 
-namespace plugin_manager {
-template <class C>
-struct InstallConstructor
-{
-    template <class M, class L>
-    static void installConstructor(M*, L*, const std::string&, const std::string&) {}
-};
-}
-
-template <class M, class C>
+template <class M>
 class PluginManagerImp
 {
-    template <class, class>
+    template <class>
     friend class PluginManager;
 
 public:
     typedef pluginlib::ClassLoader<M> Loader;
 
 protected:
-    typedef C Constructor;
+    typedef DefaultConstructor<M> Constructor;
     typedef std::map<std::string, Constructor> Constructors;
-
-//    static PluginManagerImp<M,C>& instance(const std::string& full_name) {
-//        static boost::shared_ptr<PluginManagerImp<M,C> > i(new PluginManagerImp<M,C>(full_name));
-//        return *i;
-//    }
 
 protected:
     PluginManagerImp(const std::string& full_name)
-        : loader_("csapex", full_name), plugins_loaded_(false)
+        : plugins_loaded_(false), full_name_(full_name)
     {
     }
 
@@ -54,23 +42,34 @@ protected:
     }
 
     void reload() {
-        std::vector<std::string> classes = loader_.getDeclaredClasses();
+        loaded(std::string("searching for plugin libraries"));
+
+        std::set<std::string> libs;
+        {
+            pluginlib::ClassLoader<M> loader("csapex", full_name_);
+            loader.refreshDeclaredClasses();
+            std::vector<std::string> classes = loader.getDeclaredClasses();
+            foreach(const std::string& c, classes) {
+                libs.insert(loader.getClassLibraryPath(c));
+            }
+        }
+
+        foreach(const std::string& lib, libs) {
+
+            if(!PluginLoader::instance().isLoaded(lib)) {
+                loaded(std::string("loading ") + lib);
+
+                PluginLoader::instance().load(lib);
+            }
+        }
+
+        std::vector<std::string> classes = PluginLoader::instance().getAvailableClasses<M>();
         for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
-            //                std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;
-            std::string msg = std::string("loading ") + *c;
-            loaded(msg);
-
             try {
-                if(!loader_.isClassLoaded(*c)) {
-                    loader_.loadLibraryForClass(*c);
-                }
-
-                plugin_manager::InstallConstructor<M>::installConstructor(this, &loader_, *c, loader_.getClassDescription(*c));
-
                 Constructor constructor;
                 constructor.setType(*c);
-                constructor.setDescription(loader_.getClassDescription(*c));
-                constructor.setConstructor(boost::bind(&Loader::createInstance, &loader_, *c));
+//                constructor.setDescription(loader_.getClassDescription(*c));
+                constructor.setConstructor(boost::bind(&PluginLoader::createInstance<M>, *c));
 
                 registerConstructor(constructor);
             } catch(const pluginlib::PluginlibException& ex) {
@@ -86,17 +85,17 @@ protected:
     boost::signals2::signal<void(const std::string&)> loaded;
 
 protected:
-    Loader loader_;
     bool plugins_loaded_;
 
+    std::string full_name_;
     Constructors available_classes;
 };
 
-template <class M, class C = DefaultConstructor<M> >
+template <class M>
 class PluginManager
 {
 protected:
-    typedef PluginManagerImp<M, C> Parent;
+    typedef PluginManagerImp<M> Parent;
 
 public:
     typedef typename Parent::Constructor Constructor;
@@ -146,15 +145,13 @@ public:
     boost::signals2::signal<void(const std::string&)> loaded;
 
 protected:
-//    Parent& instance;
-
     static int i_count;
     static Parent* instance;
 };
 
-template <class M, class C>
-int PluginManager<M,C>::i_count = 0;
-template <class M, class C>
-typename PluginManager<M,C>::Parent* PluginManager<M,C>::instance(NULL);
+template <class M>
+int PluginManager<M>::i_count = 0;
+template <class M>
+typename PluginManager<M>::Parent* PluginManager<M>::instance(NULL);
 
 #endif // PLUGIN_MANAGER_HPP

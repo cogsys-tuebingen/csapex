@@ -14,10 +14,13 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+include_directories(include)
+
 add_library(utils_plugin
     include/utils_plugin/singleton.hpp
     include/utils_plugin/plugin_manager.hpp
     include/utils_plugin/constructor.hpp
+    src/plugin_loader.cpp
 )
 set_target_properties(utils_plugin PROPERTIES LINKER_LANGUAGE CXX)
 

@@ -59,9 +59,12 @@ protected:
     BoxManager(const BoxManager& copy);
     BoxManager& operator = (const BoxManager& assign);
 
+    void ensureLoaded();
+    void rebuildPrototypes();
     void rebuildMap();
 
     BoxPtr makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid);
+
     BoxPtr makeTemplateBox(const std::string uuid, const std::string type);
 
 protected:
@@ -78,19 +81,5 @@ protected:
 };
 
 }
-
-
-namespace plugin_manager {
-template <>
-struct InstallConstructor<csapex::BoxedObject>
-{
-    template <class M, class L>
-    static void installConstructor(M*, L* loader, const std::string& name, const std::string& description) {
-        csapex::BoxedObjectConstructor::Ptr prototype(new csapex::BoxedObjectConstructor(name, description, boost::bind(&M::Loader::createInstance, loader, name)));
-        csapex::BoxManager::instance().register_box_type(prototype, true);
-    }
-};
-}
-
 
 #endif // BOX_MANAGER_H

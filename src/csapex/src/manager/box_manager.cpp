@@ -53,8 +53,22 @@ BoxManager::~BoxManager()
 void BoxManager::reload()
 {
     manager_->reload();
+    rebuildPrototypes();
 
     rebuildMap();
+}
+
+void BoxManager::rebuildPrototypes()
+{
+    available_elements_prototypes.clear();
+
+    typedef std::pair<std::string, DefaultConstructor<BoxedObject> > PAIR;
+    foreach(const PAIR& p, manager_->availableClasses()) {
+        csapex::BoxedObjectConstructor::Ptr constructor(new csapex::BoxedObjectConstructor(
+                                                            p.second.getType(), p.second.getDescription(),
+                                                            p.second));
+        register_box_type(constructor, true);
+    }
 }
 
 void BoxManager::rebuildMap()
@@ -87,15 +101,23 @@ void BoxManager::rebuildMap()
     dirty_ = false;
 }
 
-void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
+void BoxManager::ensureLoaded()
 {
     if(!manager_->pluginsLoaded()) {
         manager_->reload();
+        rebuildPrototypes();
+
+        dirty_ = true;
     }
 
     if(dirty_) {
         rebuildMap();
     }
+}
+
+void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
+{
+    ensureLoaded();
 
     foreach(const Tag& tag, tags) {
         QMenu* submenu = new QMenu(tag.getName().c_str());
@@ -120,13 +142,7 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 
 void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
 {
-    if(!manager_->pluginsLoaded()) {
-        manager_->reload();
-    }
-
-    if(dirty_) {
-        rebuildMap();
-    }
+    ensureLoaded();
 
     tree->setHeaderHidden(true);
     tree->setDragEnabled(true);
