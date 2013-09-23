@@ -29,7 +29,7 @@ public:
     virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void allConnectorsArrived();
     void updateDynamicGui(QBoxLayout *layout);
 
 private Q_SLOTS:
@@ -57,9 +57,6 @@ private:
     ConnectorIn* in_img;
     ConnectorIn* in_key;
     ConnectorOut* out_des;
-
-    bool has_img;
-    bool has_kp;
 
     struct State : public Memento {
         std::string des;

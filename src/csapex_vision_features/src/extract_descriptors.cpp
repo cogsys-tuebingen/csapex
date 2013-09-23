@@ -25,45 +25,34 @@ using namespace csapex;
 using namespace connection_types;
 
 ExtractDescriptors::ExtractDescriptors()
-    : selection_des(NULL), change(false), has_img(false), has_kp(false)
+    : selection_des(NULL), change(false)
 {
     addTag(Tag::get("Features"));
 }
 
-void ExtractDescriptors::messageArrived(ConnectorIn *source)
+void ExtractDescriptors::allConnectorsArrived()
 {
-    if(source == in_img) {
-        has_img = true;
-    } else if(source == in_key) {
-        has_kp = true;
-    }
-
     if(!extractor) {
         setError(true, "no extractor set");
         return;
     }
 
-    if(has_img && has_kp) {
-        setError(false);
+    setError(false);
 
-        has_img = false;
-        has_kp = false;
+    ConnectionType::Ptr msg = in_img->getMessage();
+    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
 
-        ConnectionType::Ptr msg = in_img->getMessage();
-        CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
+    DescriptorMessage::Ptr des_msg(new DescriptorMessage);
 
-        DescriptorMessage::Ptr des_msg(new DescriptorMessage);
+    {
+        QMutexLocker lock(&extractor_mutex);
+        ConnectionType::Ptr msg = in_key->getMessage();
+        KeypointMessage::Ptr key_msg = boost::dynamic_pointer_cast<KeypointMessage>(msg);
 
-        {
-            QMutexLocker lock(&extractor_mutex);
-            ConnectionType::Ptr msg = in_key->getMessage();
-            KeypointMessage::Ptr key_msg = boost::dynamic_pointer_cast<KeypointMessage>(msg);
-
-            extractor->extractDescriptors(img_msg->value, key_msg->value, des_msg->value);
-        }
-
-        out_des->publish(des_msg);
+        extractor->extractDescriptors(img_msg->value, key_msg->value, des_msg->value);
     }
+
+    out_des->publish(des_msg);
 }
 
 
