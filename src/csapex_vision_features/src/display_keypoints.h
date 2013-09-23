@@ -26,7 +26,7 @@ public:
     virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void allConnectorsArrived();
 
 private Q_SLOTS:
     void update(int slot);
@@ -41,9 +41,6 @@ private:
 
     QComboBox* colorbox;
     QCheckBox* richbox;
-
-    bool has_img;
-    bool has_key;
 
     struct State : public Memento {
         cv::Scalar color;

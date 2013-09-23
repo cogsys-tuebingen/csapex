@@ -17,7 +17,7 @@ using namespace connection_types;
 
 
 Filter::Filter()
-    : input_img_(NULL), input_mask_(NULL), output_img_(NULL), output_mask_(NULL), has_img(false), has_mask(false), guard(0xDEADBEEFL)
+    : input_img_(NULL), input_mask_(NULL), output_img_(NULL), output_mask_(NULL)
 {
     addTag(Tag::get("Filter"));
     addTag(Tag::get("Vision"));
@@ -31,11 +31,13 @@ Filter::~Filter()
 void Filter::fill(QBoxLayout* parent)
 {
     if(input_img_ == NULL) {
+        box_->setSynchronizedInputs(true);
 
         input_img_ = new ConnectorIn(box_, 0);
         box_->addInput(input_img_);
         if(usesMask()) {
             input_mask_ = new ConnectorIn(box_, 1);
+            input_mask_->setOptional(true);
             box_->addInput(input_mask_);
         }
         output_img_ = new ConnectorOut(box_, 0);
@@ -49,30 +51,12 @@ void Filter::fill(QBoxLayout* parent)
     }
 }
 
-void Filter::messageArrived(ConnectorIn* source)
+void Filter::allConnectorsArrived()
 {
-    if(source == input_img_) {
-        has_img = true;
-    } else if(source == input_mask_) {
-        has_mask = true;
-    }
-
-    if(!usesMask() || !input_mask_->isConnected()) {
-        has_mask = true;
-    }
-
-
-    if(!has_mask || !has_img) {
-        return;
-    }
-
-    has_img = false;
-    has_mask = false;
-
     ConnectionType::Ptr msg = input_img_->getMessage();
     CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
     CvMatMessage::Ptr mask_msg;
-    if(usesMask()) {
+    if(usesMask() && input_mask_->isConnected()) {
         mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_->getMessage());
     }
 
@@ -84,7 +68,7 @@ void Filter::messageArrived(ConnectorIn* source)
         filter(img_msg->value, mask_msg->value);
 
         output_img_->publish(img_msg);
-        if(usesMask()) {
+        if(usesMask() && mask_msg.get()) {
             output_mask_->publish(mask_msg);
         }
     }

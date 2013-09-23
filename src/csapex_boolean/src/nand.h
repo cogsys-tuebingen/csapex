@@ -19,16 +19,12 @@ public:
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void allConnectorsArrived();
 
 private:
     ConnectorIn* in_a;
     ConnectorIn* in_b;
     ConnectorOut* out;
-
-    bool has_a;
-    bool has_b;
-
 };
 
 }

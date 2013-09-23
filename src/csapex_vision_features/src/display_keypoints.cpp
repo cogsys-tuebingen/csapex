@@ -18,37 +18,27 @@ using namespace csapex;
 using namespace connection_types;
 
 DisplayKeypoints::DisplayKeypoints()
-    : in_key(NULL), has_img(false), has_key(false)
+    : in_key(NULL)
 {
     state.color = cv::Scalar::all(-1);
     addTag(Tag::get("Features"));
 }
 
-void DisplayKeypoints::messageArrived(ConnectorIn *source)
+void DisplayKeypoints::allConnectorsArrived()
 {
-    if(source == in_img) {
-        has_img = true;
-    } else if(source == in_key) {
-        has_key = true;
-    }
+    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (in_img->getMessage());
+    KeypointMessage::Ptr key_msg = boost::dynamic_pointer_cast<KeypointMessage> (in_key->getMessage());
 
-    if(has_key && has_img) {
-        has_key = false;
-        has_img = false;
+    CvMatMessage::Ptr out(new CvMatMessage);
+    cv::drawKeypoints(img_msg->value, key_msg->value, out->value, state.color, state.flags);
 
-        CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (in_img->getMessage());
-        KeypointMessage::Ptr key_msg = boost::dynamic_pointer_cast<KeypointMessage> (in_key->getMessage());
-
-        CvMatMessage::Ptr out(new CvMatMessage);
-        cv::drawKeypoints(img_msg->value, key_msg->value, out->value, state.color, state.flags);
-
-        out_img->publish(out);
-    }
+    out_img->publish(out);
 }
 
 void DisplayKeypoints::fill(QBoxLayout* layout)
 {
     if(in_key == NULL) {
+        box_->setSynchronizedInputs(true);
 
         in_img = new ConnectorIn(box_, 0);
         in_img->setType(csapex::connection_types::CvMatMessage::make());

@@ -35,7 +35,7 @@ public Q_SLOTS:
     virtual void insert(QBoxLayout* parent) = 0;
 
 private Q_SLOTS:
-    void messageArrived(ConnectorIn* source);
+    void allConnectorsArrived();
 
 protected:
     Filter();
@@ -47,10 +47,6 @@ protected:
 
     ConnectorOut* output_img_;
     ConnectorOut* output_mask_;
-
-    bool has_img;
-    bool has_mask;
-    long guard;
 };
 
 } /// NAMESPACE
