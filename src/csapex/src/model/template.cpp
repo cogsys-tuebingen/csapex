@@ -6,7 +6,6 @@
 #include <csapex/command/add_box.h>
 #include <csapex/command/add_connector.h>
 #include <csapex/command/add_connection.h>
-#include <csapex/command/instanciate_subgraph_template.h>
 
 using namespace csapex;
 

@@ -17,7 +17,6 @@
 #include <csapex/command/add_fulcrum.h>
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/move_fulcrum.h>
-#include <csapex/command/instanciate_subgraph_template.h>
 #include <csapex/model/boxed_object_constructor.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
@@ -717,9 +716,6 @@ Command::Ptr Graph::groupSelectedBoxes()
         std::string to = Template::fillInTemplate(c.second, group_uuid);
         meta->add(Command::Ptr(new command::AddConnection(from, to)));
     }
-
-    //    meta->add(Command::Ptr(new command::InstanciateTemplate(templ->getName(), group_uuid)));
-    //meta->add(connect);
 
     return meta;
 }

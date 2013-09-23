@@ -7,7 +7,6 @@
 #include <csapex/model/box.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
-#include <csapex/command/instanciate_subgraph_template.h>
 
 using namespace csapex::command;
 

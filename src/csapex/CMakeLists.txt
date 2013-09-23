@@ -78,7 +78,6 @@ add_library(csapex SHARED
     src/command/add_fulcrum.cpp
     src/command/move_fulcrum.cpp
     src/command/delete_fulcrum.cpp
-    src/command/instanciate_subgraph_template.cpp
 
     src/model/box.cpp
     src/model/box_group.cpp

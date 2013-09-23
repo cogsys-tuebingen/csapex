@@ -56,7 +56,6 @@ class DeleteConnection;
 class AddFulcrum;
 class MoveFulcrum;
 class DeleteFulcrum;
-class InstanciateTemplate;
 }
 
 

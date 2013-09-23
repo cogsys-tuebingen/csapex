@@ -11,7 +11,6 @@
 #include <csapex/view/overlay.h>
 #include <csapex/command/add_box.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/command/instanciate_subgraph_template.h>
 
 using namespace csapex;
 
