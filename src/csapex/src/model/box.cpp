@@ -254,8 +254,21 @@ void BoxWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     typedef std::pair<ConnectorIn*, bool> PAIR;
     foreach(const PAIR& pair, parent_->has_msg) {
+        ConnectorIn* c = pair.first;
         if(!pair.second) {
-            return;
+            // connector doesn't have a message
+            if(c->isOptional()) {
+                if(c->isConnected()) {
+                    // c is optional and connected, so we have to wait for a message
+                    return;
+                } else {
+                    // c is optinal and not connected, so we can proceed
+                    /* do nothing */
+                }
+            } else {
+                // c is mandatory, so we have to wait for a message
+                return;
+            }
         }
     }
 

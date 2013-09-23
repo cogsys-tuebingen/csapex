@@ -59,6 +59,8 @@ void ExtractDescriptors::allConnectorsArrived()
 void ExtractDescriptors::fill(QBoxLayout* layout)
 {
     if(selection_des == NULL) {
+        box_->setSynchronizedInputs(true);
+
         in_img = new ConnectorIn(box_, 0);
         in_img->setLabel("Image");
         box_->addInput(in_img);

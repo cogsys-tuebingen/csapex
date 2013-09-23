@@ -24,19 +24,13 @@ using namespace csapex;
 using namespace connection_types;
 
 ExtractKeypoints::ExtractKeypoints()
-    : selection_key(NULL), change(false), has_img(false), has_mask(false)
+    : selection_key(NULL), change(false)
 {
     addTag(Tag::get("Features"));
 }
 
-void ExtractKeypoints::messageArrived(ConnectorIn *source)
+void ExtractKeypoints::allConnectorsArrived()
 {
-    if(source == in_img) {
-        has_img = true;
-    } else if(source == in_mask) {
-        has_mask = true;
-    }
-
     if(!extractor) {
         setError(true, "no extractor set");
         return;
@@ -46,44 +40,41 @@ void ExtractKeypoints::messageArrived(ConnectorIn *source)
         return;
     }
 
-    bool use_mask = in_mask->isConnected();
-    if(has_img && (has_mask || !use_mask)) {
-        setError(false);
+    setError(false);
 
-        has_img = false;
-        has_mask = false;
+    ConnectionType::Ptr msg = in_img->getMessage();
+    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
 
-        ConnectionType::Ptr msg = in_img->getMessage();
-        CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
+    KeypointMessage::Ptr key_msg(new KeypointMessage);
 
-        KeypointMessage::Ptr key_msg(new KeypointMessage);
+    {
+        QMutexLocker lock(&extractor_mutex);
+        if(in_mask->isConnected()) {
+            ConnectionType::Ptr msg = in_mask->getMessage();
+            CvMatMessage::Ptr mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
 
-        {
-            QMutexLocker lock(&extractor_mutex);
-            if(use_mask) {
-                ConnectionType::Ptr msg = in_mask->getMessage();
-                CvMatMessage::Ptr mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
+            extractor->extractKeypoints(img_msg->value, mask_msg->value, key_msg->value);
 
-                extractor->extractKeypoints(img_msg->value, mask_msg->value, key_msg->value);
-
-            } else {
-                extractor->extractKeypoints(img_msg->value, cv::Mat(), key_msg->value);
-            }
+        } else {
+            extractor->extractKeypoints(img_msg->value, cv::Mat(), key_msg->value);
         }
-
-        out_key->publish(key_msg);
     }
+
+    out_key->publish(key_msg);
 }
 
 
 void ExtractKeypoints::fill(QBoxLayout* layout)
 {
     if(selection_key == NULL) {
+        box_->setSynchronizedInputs(true);
+
         in_img = new ConnectorIn(box_, 0);
         in_img->setLabel("Image");
         box_->addInput(in_img);
         in_mask = new ConnectorIn(box_, 1);
         in_mask->setLabel("Mask (opt.)");
+        in_mask->setOptional(true);
         box_->addInput(in_mask);
 
         out_key = new ConnectorOut(box_, 0);

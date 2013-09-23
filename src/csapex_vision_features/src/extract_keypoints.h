@@ -30,7 +30,7 @@ public:
     virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void allConnectorsArrived();
     void updateDynamicGui(QBoxLayout *layout);
 
 private Q_SLOTS:
@@ -58,9 +58,6 @@ private:
     ConnectorIn* in_img;
     ConnectorIn* in_mask;
     ConnectorOut* out_key;
-
-    bool has_img;
-    bool has_mask;
 
     struct State : public Memento {
         std::string key;

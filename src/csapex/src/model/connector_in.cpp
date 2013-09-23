@@ -13,12 +13,12 @@
 using namespace csapex;
 
 ConnectorIn::ConnectorIn(Box* parent, const std::string &uuid)
-    : Connector(parent, uuid), target(NULL)
+    : Connector(parent, uuid), target(NULL), optional_(false)
 {
 }
 
 ConnectorIn::ConnectorIn(Box* parent, int sub_id)
-    : Connector(parent, sub_id, TYPE_IN), target(NULL)
+    : Connector(parent, sub_id, TYPE_IN), target(NULL), optional_(false)
 {
 }
 
@@ -58,6 +58,16 @@ Command::Ptr ConnectorIn::removeAllConnectionsCmd()
 {
     Command::Ptr cmd(new command::DeleteConnection(target, this));
     return cmd;
+}
+
+void ConnectorIn::setOptional(bool optional)
+{
+    optional_ = optional;
+}
+
+bool ConnectorIn::isOptional() const
+{
+    return optional_;
 }
 
 void ConnectorIn::removeAllConnectionsNotUndoable()

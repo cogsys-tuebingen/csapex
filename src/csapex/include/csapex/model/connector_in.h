@@ -48,6 +48,9 @@ public:
 
     virtual Command::Ptr removeAllConnectionsCmd();
 
+    bool isOptional() const;
+    void setOptional(bool optional);
+
 protected:
     virtual bool tryConnect(Connector* other_side);
     virtual bool acknowledgeConnection(Connector* other_side);
@@ -63,6 +66,8 @@ protected:
     ConnectionType::Ptr message_;
 
     QMutex io_mutex;
+
+    bool optional_;
 };
 
 }
