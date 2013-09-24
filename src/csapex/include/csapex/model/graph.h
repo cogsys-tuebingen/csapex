@@ -9,8 +9,10 @@
 /// SYSTEM
 #include <QObject>
 #include <QTimer>
+#include <QMenu>
 #include <map>
 #include <deque>
+#include <boost/function.hpp>
 
 namespace csapex {
 
@@ -93,6 +95,7 @@ public Q_SLOTS:
     void toggleBoxSelection(Box* box);
     void boxMoved(Box* box, int dx, int dy);
 
+    void showContextMenu(const QPoint& global_pos);
     Command::Ptr moveSelectedBoxes(const QPoint& delta);
 
 Q_SIGNALS:
@@ -111,8 +114,10 @@ private:
     bool isConnectionWithIdSelected(int id);
 
     TemplatePtr convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> > &connections) const;
-
     TemplatePtr generateTemplate(TemplatePtr templ, std::vector<std::pair<std::string, std::string> > &connections, bool only_selected) const;
+
+    void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
+    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addBox(BoxPtr box);

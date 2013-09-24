@@ -125,14 +125,15 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
 
     QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
 
-    connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
-    connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
+    QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+    QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
-    connect(content.get(), SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+    QObject::connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
+    QObject::connect(content.get(), SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
+    QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     setVisible(false);
 
@@ -304,18 +305,7 @@ Box* BoxWorker::parent()
 
 void Box::showContextMenu(const QPoint& pos)
 {
-    QPoint globalPos = mapToGlobal(pos);
-
-    QMenu menu;
-    std::map<QAction*, boost::function<void()> > handler;
-
-    fillContextMenu(&menu, handler);
-
-    QAction* selectedItem = menu.exec(globalPos);
-
-    if(selectedItem) {
-        handler[selectedItem]();
-    }
+    Q_EMIT showContextMenuForBox(mapToGlobal(pos));
 }
 
 void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)

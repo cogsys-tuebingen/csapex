@@ -167,14 +167,14 @@ public:
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);
 
+    virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
+
 protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
     void enabledChange(bool val);
     void makeThread();
-
-    virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 public Q_SLOTS:
     void deleteBox();
@@ -187,6 +187,7 @@ public Q_SLOTS:
     void killContent();
     void showProfiling();
     void tick();
+
     void showContextMenu(const QPoint& pos);
 
 Q_SIGNALS:
@@ -207,6 +208,8 @@ Q_SIGNALS:
     void connectionStart();
     void connectorEnabled(Connector* source);
     void connectorDisabled(Connector* source);
+
+    void showContextMenuForBox(const QPoint& pos);
 
 protected:
     void connectConnector(Connector* c);

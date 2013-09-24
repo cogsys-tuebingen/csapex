@@ -30,6 +30,7 @@
 #include <csapex/manager/template_manager.h>
 
 /// SYSTEM
+#include <boost/bind/protect.hpp>
 #include <boost/foreach.hpp>
 #include <QResizeEvent>
 #include <QMenu>
@@ -124,6 +125,8 @@ void Graph::addBox(Box::Ptr box)
 
     boxes_.push_back(box);
     box->setCommandDispatcher(dispatcher_);
+
+    connect(box.get(), SIGNAL(showContextMenuForBox(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     Q_EMIT boxAdded(box.get());
 }
@@ -262,6 +265,111 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
     }
 
     return templ;
+}
+
+void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::function<void ()> > &handler)
+{
+    bool has_minimized = false;
+     bool has_maximized = false;
+
+     foreach(Box::Ptr b, boxes_) {
+         if(b->isSelected()) {
+             if(b->isMinimizedSize()) {
+                 has_minimized = true;
+             } else {
+                 has_maximized = true;
+             }
+         }
+     }
+
+    boost::function<bool(Box*)> pred_selected = boost::bind(&Box::isSelected, _1);
+
+    if(has_minimized) {
+        QAction* max = new QAction("maximize all", menu);
+        max->setIcon(QIcon(":/maximize.png"));
+        max->setIconVisibleInMenu(true);
+        handler[max] = boost::bind(&Graph::foreachBox, this, boost::protect(boost::bind(&Box::minimizeBox, _1, false)), pred_selected);
+        menu->addAction(max);
+    }
+
+    if(has_maximized){
+        QAction* max = new QAction("minimize all", menu);
+        max->setIcon(QIcon(":/minimize.png"));
+        max->setIconVisibleInMenu(true);
+        handler[max] = boost::bind(&Graph::foreachBox, this, boost::protect(boost::bind(&Box::minimizeBox, _1, true)), pred_selected);
+        menu->addAction(max);
+    }
+
+    menu->addSeparator();
+
+    QAction* group = new QAction("group", menu);
+    group->setIcon(QIcon(":/group.png"));
+    group->setIconVisibleInMenu(true);
+    handler[group] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::groupSelectedBoxes, this)));
+    menu->addAction(group);
+
+    menu->addSeparator();
+
+    QAction* term = new QAction("terminate thread", menu);
+    term->setIcon(QIcon(":/stop.png"));
+    term->setIconVisibleInMenu(true);
+    handler[term] = boost::bind(&Graph::foreachBox, this, boost::protect(boost::bind(&Box::killContent, _1)), pred_selected);
+    menu->addAction(term);
+
+    QAction* prof = new QAction("profiling", menu);
+    prof->setIcon(QIcon(":/profiling.png"));
+    prof->setIconVisibleInMenu(true);
+    handler[prof] = boost::bind(&Graph::foreachBox, this, boost::protect(boost::bind(&Box::showProfiling, _1)), pred_selected);
+    menu->addAction(prof);
+
+    menu->addSeparator();
+
+    QAction* del = new QAction("delete all", menu);
+    del->setIcon(QIcon(":/close.png"));
+    del->setIconVisibleInMenu(true);
+    handler[del] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::deleteSelectedBoxes, this)));
+    menu->addAction(del);
+}
+
+void Graph::showContextMenu(const QPoint &global_pos)
+{
+    std::vector<Box::Ptr> selected;
+    foreach(Box::Ptr b, boxes_) {
+        if(b->isSelected()) {
+            selected.push_back(b);
+        }
+    }
+
+    if(selected.empty()) {
+        return;
+    }
+
+    QMenu menu;
+    std::map<QAction*, boost::function<void()> > handler;
+
+
+    if(selected.size() == 1) {
+        selected[0]->fillContextMenu(&menu, handler);
+
+    } else {
+        fillContextMenuForSelection(&menu, handler);
+    }
+
+    QAction* selectedItem = menu.exec(global_pos);
+
+    if(selectedItem) {
+        handler[selectedItem]();
+    }
+
+}
+
+void Graph::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred)
+{
+    foreach(Box::Ptr b, boxes_) {
+        if(pred(b.get())) {
+            f(b.get());
+        }
+    }
 }
 
 Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
