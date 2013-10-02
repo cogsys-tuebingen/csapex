@@ -35,6 +35,38 @@ protected:
     bool has_constructor;
 };
 
+
+
+template <typename Any>
+class HasName
+{
+    typedef char Small;
+    class Big { char dummy[2]; };
+
+    template <typename Class> static Small test(typeof(&Class::setName)) ;
+    template <typename Class> static Big test(...);
+
+public:
+    enum { value = sizeof(test<Any>(0)) == sizeof(Small) };
+};
+
+namespace impl {
+template <typename M>
+typename boost::enable_if<HasName<M>, void>::type
+setType(boost::shared_ptr<M> res, const std::string& type)
+{
+    res->setName(type);
+}
+
+template <typename M>
+typename boost::disable_if<HasName<M>, void>::type
+setType(boost::shared_ptr<M> res, const std::string& type)
+{
+    res->setType(type);
+}
+
+}
+
 template <class M>
 struct DefaultConstructor : public Constructor {
 
@@ -44,9 +76,9 @@ struct DefaultConstructor : public Constructor {
         return construct();
     }
 
-    typename boost::shared_ptr<M> construct() const {
+    boost::shared_ptr<M> construct() const {
         boost::shared_ptr<M> res(constructor());
-        res->setName(type);
+        impl::setType<M>(res, type);
         assert(res.get() != NULL);
         return res;
     }

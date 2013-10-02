@@ -12,8 +12,6 @@
 using namespace csapex;
 
 ExtractorManager::ExtractorManager()
-    : available_keypoints("csapex::ExtractorManager::KeypointInitializerManager"),
-      available_descriptors("csapex::ExtractorManager::DescriptorInitializerManager")
 {
 }
 
@@ -31,23 +29,25 @@ Extractor::Initializer::Ptr ExtractorManager::getInitializer(const std::string& 
     std::string descriptor_lower = descriptor;
     std::transform(descriptor_lower.begin(), descriptor_lower.end(), descriptor_lower.begin(), ::tolower);
 
-    KeypointInitializerManager::Constructor kc;
-    DescriptorInitializerManager::Constructor dc;
+    KeypointInitializer kc;
+    DescriptorInitializer dc;
 
     if(!keypoint.empty()) {
-        kc = available_keypoints.availableClasses(keypoint_lower);
-        if(kc.valid())
+        try {
+            kc = available_keypoints.at(keypoint_lower);
+        } catch(...) {
             FATAL("invalid keypoint type: '" << keypoint_lower << "'");
-        if(kc.valid())
             throw Extractor::IllegalKeypointException();
+        }
     }
 
     if(!descriptor.empty()) {
-        dc = available_descriptors.availableClasses(descriptor_lower);
-        if(dc.valid())
+        try {
+            dc = available_descriptors.at(descriptor_lower);
+        } catch(...) {
             FATAL("invalid descriptor type: '" << descriptor_lower << "'");
-        if(dc.valid())
             throw Extractor::IllegalDescriptorException();
+        }
     }
 
     bool complete_set = (keypoint_lower == descriptor_lower) && (!keypoint.empty());
@@ -65,7 +65,7 @@ void ExtractorManager::registerKeypointConstructor(const std::string& key, Keypo
     KeypointInitializer c;
     c.setType(key_lower);
     c.setConstructor(kc);
-    available_keypoints.availableClasses(key_lower) = c;
+    available_keypoints[key_lower] = c;
 }
 
 
@@ -77,7 +77,7 @@ void ExtractorManager::registerDescriptorConstructor(const std::string& key, Des
     DescriptorInitializer c;
     c.setType(key_lower);
     c.setConstructor(dc);
-    available_descriptors.availableClasses(key_lower) = c;
+    available_descriptors[key_lower] = c;
 }
 
 

@@ -9,12 +9,12 @@ add_definitions(-W -Wall)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS pluginlib utils_plugin)
+find_package(catkin REQUIRED COMPONENTS utils_plugin)
 
 find_package(Boost REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui   )
+find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
 
@@ -44,7 +44,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex
-   CATKIN_DEPENDS pluginlib utils_plugin
+   CATKIN_DEPENDS utils_plugin
    DEPENDS Qt4
 )
 
@@ -121,11 +121,17 @@ add_library(csapex SHARED
 
     src/deprecated/global_option.cpp
     src/deprecated/global_option_manager.cpp
-
     ${QT}
 )
+
+message(${catkin_LIBRARIES})
+
 target_link_libraries(csapex
-    yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp
+    ${QT_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
 
 add_executable(csapex_node
     src/csapex.cpp)

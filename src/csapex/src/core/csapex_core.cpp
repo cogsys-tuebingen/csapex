@@ -53,6 +53,7 @@ CsApexCore::~CsApexCore()
 
     StreamInterceptor::instance().stop();
     BoxManager::instance().stop();
+    PluginLoader::instance().stop();
 
     if(destruct) {
         delete cmd_dispatch;
