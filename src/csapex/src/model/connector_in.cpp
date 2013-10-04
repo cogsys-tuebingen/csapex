@@ -133,7 +133,14 @@ void ConnectorIn::wait()
     QMutexLocker lock(&reserve_mutex);
 
     while(!can_process) {
+        std::cout << "warning: " << UUID() << "can't process" << std::endl;
         can_process_cond.wait(&reserve_mutex);
+
+        if(!can_process) {
+            std::cout << "warning: called wait on a busy input connector" << std::endl;
+        } else {
+            std::cout << "warning: done waiting  " << UUID() << std::endl;
+        }
     }
 }
 
@@ -143,11 +150,7 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
         return;
     }
 
-    {
-        QMutexLocker lock(&reserve_mutex);
-        assert(can_process);
-        can_process = false;
-    }
+    wait();
 
     {
         QMutexLocker lock(&io_mutex);
