@@ -22,7 +22,7 @@ ConnectionType::Ptr ConnectionType::getDefaultConnectionType()
     return default_->clone();
 }
 
-bool ConnectionType::canConnectTo(ConnectionType::ConstPtr other_side, bool move) const
+bool ConnectionType::canConnectTo(ConnectionType::ConstPtr /*other_side*/, bool /*move*/) const
 {
     return true;//other_side->acceptsConnectionFrom(this);
 }
@@ -59,4 +59,9 @@ void ConnectionType::write(std::ostream &out)
     yaml << YAML::EndMap;
 
     out << yaml.c_str();
+}
+
+void ConnectionType::writeRaw(const std::string &file, const std::string& suffix)
+{
+    std::cerr << "error: writeRaw not implemented for message type " << name() << std::endl;
 }

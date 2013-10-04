@@ -55,6 +55,7 @@ add_library(csapex_core_plugins
     src/relay.cpp
     src/export_cout.cpp
     src/export_ros.cpp
+    src/export_file.cpp
     src/file_importer.cpp
     src/import_cin.cpp
     src/import_ros.cpp
