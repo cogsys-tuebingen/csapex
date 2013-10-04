@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <QMutex>
+#include <QWaitCondition>
 
 namespace csapex
 {
@@ -35,7 +36,9 @@ public:
 
     virtual bool canConnectTo(Connector* other_side, bool move) const;
 
-    virtual void inputMessage(ConnectionType::Ptr message);
+    void notify();
+    void wait();
+    void inputMessage(ConnectionType::Ptr message);
     virtual ConnectionType::Ptr getMessage();
 
     virtual bool targetsCanBeMovedTo(Connector* other_side) const;
@@ -66,6 +69,9 @@ protected:
     ConnectionType::Ptr message_;
 
     QMutex io_mutex;
+    QMutex reserve_mutex;
+    bool can_process;
+    QWaitCondition can_process_cond;
 
     bool optional_;
 };

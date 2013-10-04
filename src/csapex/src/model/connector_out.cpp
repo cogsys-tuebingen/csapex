@@ -166,6 +166,10 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
 
     message_ = message;
 
+    BOOST_FOREACH(ConnectorIn* i, targets_) {
+        i->wait();
+    }
+
     if(targets_.size() == 1) {
         targets_[0]->inputMessage(message_);
     } else if(targets_.size() > 1) {

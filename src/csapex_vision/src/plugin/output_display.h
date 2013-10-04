@@ -30,7 +30,7 @@ public:
     virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
-    void messageArrived(ConnectorIn* source);
+    void allConnectorsArrived();
     void display(QSharedPointer<QImage> img);
 
 Q_SIGNALS:

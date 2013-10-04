@@ -78,6 +78,8 @@ void OutputDisplay::fill(QBoxLayout* layout)
         input_->setLabel("Image");
         box_->addInput(input_);
 
+        box_->setSynchronizedInputs(true);
+
         view_->setFixedSize(QSize(state.width, state.height));
         view_->setMouseTracking(true);
         view_->setAcceptDrops(false);
@@ -154,9 +156,9 @@ void OutputDisplay::display(QSharedPointer<QImage> img)
     view_->scene()->update();
 }
 
-void OutputDisplay::messageArrived(ConnectorIn* source)
+void OutputDisplay::allConnectorsArrived()
 {
-    ConnectionType::Ptr msg = source->getMessage();
+    ConnectionType::Ptr msg = input_->getMessage();
     CvMatMessage::Ptr mat_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
 
     if(mat_msg.get() && !mat_msg->value.empty()) {

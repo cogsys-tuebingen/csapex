@@ -175,6 +175,7 @@ protected:
     bool eventFilter(QObject*, QEvent*);
     void enabledChange(bool val);
     void makeThread();
+    void messageProcessed();
 
 public Q_SLOTS:
     void deleteBox();
@@ -210,6 +211,7 @@ Q_SIGNALS:
     void connectorDisabled(Connector* source);
 
     void showContextMenuForBox(const QPoint& pos);
+
 
 protected:
     void connectConnector(Connector* c);

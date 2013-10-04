@@ -13,12 +13,12 @@
 using namespace csapex;
 
 ConnectorIn::ConnectorIn(Box* parent, const std::string &uuid)
-    : Connector(parent, uuid), target(NULL), optional_(false)
+    : Connector(parent, uuid), target(NULL), can_process(true), optional_(false)
 {
 }
 
 ConnectorIn::ConnectorIn(Box* parent, int sub_id)
-    : Connector(parent, sub_id, TYPE_IN), target(NULL), optional_(false)
+    : Connector(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false)
 {
 }
 
@@ -119,10 +119,34 @@ Connector *ConnectorIn::getConnected() const
     return target;
 }
 
+void ConnectorIn::notify()
+{
+    {
+        QMutexLocker lock(&reserve_mutex);
+        can_process = true;
+    }
+    can_process_cond.wakeAll();
+}
+
+void ConnectorIn::wait()
+{
+    QMutexLocker lock(&reserve_mutex);
+
+    while(!can_process) {
+        can_process_cond.wait(&reserve_mutex);
+    }
+}
+
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
     if(isError()) {
         return;
+    }
+
+    {
+        QMutexLocker lock(&reserve_mutex);
+        assert(can_process);
+        can_process = false;
     }
 
     {

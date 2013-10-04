@@ -141,6 +141,13 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     content_->fill(ui->content);
 }
 
+void Box::messageProcessed()
+{
+    foreach(ConnectorIn* i, input) {
+        i->notify();
+    }
+}
+
 void Box::makeThread()
 {
     if(!private_thread_) {
@@ -247,6 +254,8 @@ void BoxWorker::forwardMessageDirectly(ConnectorIn *source)
     parent_->content_->messageArrived(source);
     parent_->timer_history_.push_back(t.elapsedMs());
 
+    std::cout << "warning: using deprecated message forwarding in " << parent_->getType() << std::endl;
+    parent_->messageProcessed();
 }
 
 void BoxWorker::forwardMessageSynchronized(ConnectorIn *source)
@@ -276,6 +285,8 @@ void BoxWorker::forwardMessageSynchronized(ConnectorIn *source)
     Timer t;
     parent_->content_->allConnectorsArrived();
     parent_->timer_history_.push_back(t.elapsedMs());
+
+    parent_->messageProcessed();
 
 
     foreach(const PAIR& pair, parent_->has_msg) {
