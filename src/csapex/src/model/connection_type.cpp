@@ -61,7 +61,7 @@ void ConnectionType::write(std::ostream &out)
     out << yaml.c_str();
 }
 
-void ConnectionType::writeRaw(const std::string &file, const std::string& suffix)
+void ConnectionType::writeRaw(const std::string &/*file*/, const std::string& /*suffix*/)
 {
     std::cerr << "error: writeRaw not implemented for message type " << name() << std::endl;
 }

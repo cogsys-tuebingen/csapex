@@ -32,7 +32,7 @@ public:
     virtual bool canConnectTo(ConnectionType::ConstPtr other_side, bool move) const;
     virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 
-    std::string name() const;
+    virtual std::string name() const;
 
     virtual void write(std::ostream& out);
     virtual void writeRaw(const std::string& file, const std::string &suffix);

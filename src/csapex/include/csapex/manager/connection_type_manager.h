@@ -25,7 +25,13 @@ public:
 public:
     template <typename M>
     static void registerMessage(const std::string& type) {
-        registerMessage(type, boost::bind(&M::make));
+        std::cout << "warning: using deprecated register function to register " << type << std::endl;
+        registerMessage<M>();
+    }
+
+    template <typename M>
+    static void registerMessage() {
+        registerMessage(boost::bind(&M::make));
     }
 
     static ConnectionType::Ptr createMessage(const std::string& type);
@@ -33,7 +39,7 @@ public:
 private:
     ConnectionTypeManager();
 
-    static void registerMessage(const std::string& type, Constructor constructor);
+    static void registerMessage(Constructor constructor);
 
 private:
     std::map<std::string, Constructor> classes;

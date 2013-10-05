@@ -103,6 +103,16 @@ private:
 private:
     void doRegisterConversion(Convertor::Ptr c);
 
+//    template <typename R>
+//    R findHandler(const std::string& type, boost::function<R(Convertor::Ptr)> cb) {
+//        try {
+//            return cb(converters_.at(type));
+
+//        } catch(const std::exception& e) {
+//            throw std::logic_error(std::string("cannot convert message of type ") + type + "(" + e.what() + ")");
+//        }
+//    }
+
 private:
     std::map<std::string, Convertor::Ptr> converters_;
     std::map<std::string, Convertor::Ptr> converters_inv_;

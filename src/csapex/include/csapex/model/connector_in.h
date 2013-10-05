@@ -39,6 +39,12 @@ public:
     void notify();
     void wait();
     void inputMessage(ConnectionType::Ptr message);
+
+    template <typename R>
+    typename R::Ptr getMessage() {
+        return boost::dynamic_pointer_cast<R> (getMessage());
+    }
+
     virtual ConnectionType::Ptr getMessage();
 
     virtual bool targetsCanBeMovedTo(Connector* other_side) const;

@@ -35,6 +35,8 @@ void ExportRos::fill(QBoxLayout *layout)
         connector_->setLabel("Anything");
         connector_->setType(connection_types::AnyMessage::make());
 
+        box_->setSynchronizedInputs(true);
+
         topic_ = new QLineEdit;
         QPushButton* send = new QPushButton("set");
 
@@ -51,13 +53,13 @@ void ExportRos::fill(QBoxLayout *layout)
     }
 }
 
-void ExportRos::messageArrived(ConnectorIn *source)
+void ExportRos::allConnectorsArrived()
 {
     if(state.topic.empty()) {
         return;
     }
 
-    ConnectionType::Ptr msg = source->getMessage();
+    ConnectionType::Ptr msg = connector_->getMessage();
 
     if(create_pub) {
         pub = RosMessageConversion::instance().advertise(msg->toType(), state.topic, 1, true);

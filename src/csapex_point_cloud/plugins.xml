@@ -1,0 +1,5 @@
+<library path="libcsapex_point_cloud_plugin">
+<class type="csapex::RegisterPointCloudPlugin" base_class_type="csapex::CorePlugin">
+  <description>none yet</description>
+</class>
+</library>

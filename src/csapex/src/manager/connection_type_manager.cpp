@@ -22,17 +22,16 @@ ConnectionType::Ptr ConnectionTypeManager::createMessage(const std::string& type
     return i.classes[type]();
 }
 
-void ConnectionTypeManager::registerMessage(const std::string &type, Constructor constructor)
+void ConnectionTypeManager::registerMessage(Constructor constructor)
 {
     ConnectionTypeManager& i = instance();
 
+    std::string type = constructor()->name();
     std::map<std::string, Constructor>::const_iterator it = i.classes.find(type);
     assert(it == i.classes.end());
-
-    std::string name = constructor()->name();
-    if(name != type) {
-        throw std::logic_error(name + " cannot be registered as a connection type, its name is different from the specified type: " + type);
-    }
+//    if(name != type) {
+//        throw std::logic_error(name + " cannot be registered as a connection type, its name is different from the specified type: " + type);
+//    }
 
     i.classes[type] = constructor;
 }
