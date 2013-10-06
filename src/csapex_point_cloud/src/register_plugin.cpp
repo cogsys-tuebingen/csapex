@@ -81,6 +81,7 @@ struct Sensor2Cloud
             typename pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
             pcl::fromROSMsg(*ros_msg_, *cloud);
             out_->value = cloud;
+            out_->type = connection_types::traits::name<PointT>();
         }
 
         const sensor_msgs::PointCloud2::ConstPtr &ros_msg_;

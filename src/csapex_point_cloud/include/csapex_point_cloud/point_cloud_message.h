@@ -20,6 +20,14 @@ pcl::PointXYZI,
 pcl::PointXYZRGB
 > PointCloudPointTypes;
 
+namespace traits {
+template <typename T> inline std::string name() { return ""; }
+
+template <> inline std::string name<pcl::PointXYZ>() { return "PointXYZ"; }
+template <> inline std::string name<pcl::PointXYZI>() { return "PointXYZI"; }
+template <> inline std::string name<pcl::PointXYZRGB>() { return "PointXYZRGB"; }
+}
+
 template<class T>
 struct add_point_cloud_ptr
 {
@@ -77,6 +85,17 @@ struct PointCloudMessage : public Message
         return new_msg;
     }
 
+
+    virtual std::string name() const
+    {
+        if(type.empty()) {
+            return Message::name();
+        } else {
+            return Message::name() +  "<" + type + ">";
+        }
+    }
+
+
     bool acceptsConnectionFrom(const ConnectionType* other_side) const {
         return name() == other_side->name();
     }
@@ -88,6 +107,7 @@ struct PointCloudMessage : public Message
     }
 
     variant value;
+    std::string type;
 };
 
 }
