@@ -30,13 +30,14 @@ void ExportCout::fill(QBoxLayout *layout)
         connector_->setLabel("Anything");
         connector_->setType(connection_types::AnyMessage::make());
 
+        box_->setSynchronizedInputs(true);
         box_->addInput(connector_);
     }
 }
 
-void ExportCout::messageArrived(ConnectorIn *source)
+void ExportCout::allConnectorsArrived()
 {
-    ConnectionType::Ptr msg = source->getMessage();
+    ConnectionType::Ptr msg = connector_->getMessage();
 
     std::cout << "writing to cout: ";
     msg->write(std::cout);

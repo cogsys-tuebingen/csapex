@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(csapex_point_cloud)
+project(csapex_transform)
+
 
 add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function)
 
@@ -16,7 +17,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins pcl_ros)
+find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins tf)
 
 find_package(Boost REQUIRED)
 
@@ -24,7 +25,7 @@ find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
 
-file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h include/csapex_point_cloud/*.h)
+file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h include/csapex_transform/*.h)
 
 QT4_WRAP_CPP(QT_MOC ${QT_MOC})
 
@@ -43,18 +44,18 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(csapex_point_cloud
-    src/point_cloud_message.cpp
+add_library(csapex_transform
+    src/transform_message.cpp
     ${QT}
 )
-target_link_libraries(csapex_point_cloud
+target_link_libraries(csapex_transform
     yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-add_library(csapex_point_cloud_plugin
+add_library(csapex_transform_plugin
     src/register_plugin.cpp
-    src/point_count.cpp
+    src/static_transform.cpp
     ${QT}
 )
-target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
+target_link_libraries(csapex_transform_plugin csapex_transform
     yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 

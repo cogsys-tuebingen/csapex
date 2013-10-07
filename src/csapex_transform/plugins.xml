@@ -1,0 +1,9 @@
+<library path="libcsapex_transform_plugin">
+<class type="csapex::RegisterTransformPlugin" base_class_type="csapex::CorePlugin">
+  <description>none yet</description>
+</class>
+
+<class type="csapex::StaticTransform" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+</library>

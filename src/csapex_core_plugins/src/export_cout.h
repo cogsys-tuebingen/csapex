@@ -14,7 +14,7 @@ public:
     ExportCout();
 
     virtual void fill(QBoxLayout* layout);
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void allConnectorsArrived();
 
 private:
     ConnectorIn* connector_;
