@@ -28,6 +28,7 @@ void PointCount::fill(QBoxLayout *layout)
     input_->setType(connection_types::PointCloudMessage::make());
 
     number_ = new QLCDNumber;
+    number_->setDigitCount(8);
     layout->addWidget(number_);
 
     box_->addInput(input_);
@@ -44,6 +45,5 @@ template <class PointT>
 void PointCount::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
     int c = cloud->points.size();
-
     number_->display(c);
 }
