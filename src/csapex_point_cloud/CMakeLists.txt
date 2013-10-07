@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(csapex_point_cloud)
 
 add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function)
+ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
 
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
@@ -16,7 +17,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins pcl_ros)
+find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins csapex_transform pcl_ros)
 
 find_package(Boost REQUIRED)
 
@@ -53,6 +54,7 @@ target_link_libraries(csapex_point_cloud
 add_library(csapex_point_cloud_plugin
     src/register_plugin.cpp
     src/point_count.cpp
+    src/transform_cloud.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins

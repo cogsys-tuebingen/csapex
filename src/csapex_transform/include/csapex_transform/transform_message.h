@@ -1,5 +1,5 @@
-#ifndef POINT_CLOUD_MESSAGE_H
-#define POINT_CLOUD_MESSAGE_H
+#ifndef TRANSFORM_MESSAGE_H
+#define TRANSFORM_MESSAGE_H
 
 /// PROJECT
 #include <csapex/model/message.h>
@@ -22,4 +22,4 @@ struct TransformMessage : public MessageTemplate<tf::Transform, TransformMessage
 }
 }
 
-#endif // POINT_CLOUD_MESSAGE_H
+#endif // TRANSFORM_MESSAGE_H

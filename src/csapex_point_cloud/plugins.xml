@@ -2,4 +2,11 @@
 <class type="csapex::RegisterPointCloudPlugin" base_class_type="csapex::CorePlugin">
   <description>none yet</description>
 </class>
+
+<class type="csapex::PointCount" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::TransformCloud" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 </library>
