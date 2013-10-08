@@ -38,6 +38,7 @@ struct CsApexApp : public QApplication {
             BoxedObject* bo = dynamic_cast<BoxedObject*> (receiver);
             Box* box = dynamic_cast<Box*> (receiver);
             BoxWorker* bw = dynamic_cast<BoxWorker*> (receiver);
+            QObject* qo = dynamic_cast<QObject*> (receiver);
 
             if(bo) {
                 bo->setError(true, e.what());

@@ -46,7 +46,13 @@ void DynamicTransform::publishTransform(const ros::Time& time)
 
     tf::StampedTransform t;
 
-    Listener::instance().tfl.lookupTransform(state.to_, state.from_, time, t);
+    Listener* l = Listener::instance();
+
+    if(l) {
+        l->tfl.lookupTransform(state.to_, state.from_, time, t);
+    } else {
+        return;
+    }
 
     connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
     msg->value = t;
@@ -83,6 +89,7 @@ void DynamicTransform::fill(QBoxLayout* layout)
     QObject::connect(to_box_, SIGNAL(currentIndexChanged(int)), this, SLOT(update()));
     QObject::connect(to_box_, SIGNAL(editTextChanged(QString)), this, SLOT(update()));
 
+    QObject::connect(box_, SIGNAL(placed()), this, SLOT(updateFrames()));
 
     updateFrames();
 }
@@ -90,7 +97,13 @@ void DynamicTransform::fill(QBoxLayout* layout)
 void DynamicTransform::updateFrames()
 {
     std::vector<std::string> frames;
-    Listener::instance().tfl.getFrameStrings(frames);
+
+    Listener* l = Listener::instance();
+    if(l) {
+        l->tfl.getFrameStrings(frames);
+    } else {
+        return;
+    }
 
     blockSignals(true);
 
@@ -132,6 +145,14 @@ void DynamicTransform::updateFrames()
 void DynamicTransform::update()
 {
     if(signalsBlocked()) {
+        return;
+    }
+
+    if(from_box_->currentText().length() == 0 || to_box_->currentText().length() == 0) {
+        return;
+    }
+
+    if(from_box_->model()->rowCount() == 0 || to_box_->model()->rowCount() == 0) {
         return;
     }
 

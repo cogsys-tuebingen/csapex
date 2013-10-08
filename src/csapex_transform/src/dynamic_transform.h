@@ -37,9 +37,11 @@ private:
     struct Listener {
         tf::TransformListener tfl;
 
-        static Listener& instance() {
-            ROSHandler::instance().waitForConnection();
-            static Listener l; return l; }
+        static Listener* instance() {
+            if(!ROSHandler::instance().isConnected()) {
+                return NULL;
+            }
+            static Listener l; return &l; }
     private:
         Listener() {}
     };
