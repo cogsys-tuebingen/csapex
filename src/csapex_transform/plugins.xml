@@ -6,4 +6,7 @@
 <class type="csapex::StaticTransform" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::DynamicTransform" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 </library>

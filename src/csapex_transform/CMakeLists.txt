@@ -58,6 +58,7 @@ target_link_libraries(csapex_transform
 add_library(csapex_transform_plugin
     src/register_plugin.cpp
     src/static_transform.cpp
+    src/dynamic_transform.cpp
     ${QT_PLUG}
 )
 target_link_libraries(csapex_transform_plugin csapex_transform

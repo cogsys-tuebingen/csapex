@@ -142,15 +142,17 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
     Graph::Ptr graph = dispatcher_->getGraph();
 
     // BOXES
-    if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        if(graph->noSelectedBoxes() != 0) {
-            dispatcher_->execute(graph->deleteSelectedBoxes());
-            return;
-        }
-    } else  if(e->key() == Qt::Key_G && Qt::ControlModifier == QApplication::keyboardModifiers()) {
-        if(graph->noSelectedBoxes() != 0) {
-            dispatcher_->execute(graph->groupSelectedBoxes());
-            return;
+    if(Qt::ControlModifier == QApplication::keyboardModifiers()) {
+        if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
+            if(graph->noSelectedBoxes() != 0) {
+                dispatcher_->execute(graph->deleteSelectedBoxes());
+                return;
+            }
+        } else  if(e->key() == Qt::Key_G) {
+            if(graph->noSelectedBoxes() != 0) {
+                dispatcher_->execute(graph->groupSelectedBoxes());
+                return;
+            }
         }
     }
 
