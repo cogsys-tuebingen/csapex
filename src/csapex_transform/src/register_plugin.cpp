@@ -23,6 +23,7 @@ RegisterTransformPlugin::RegisterTransformPlugin()
 void RegisterTransformPlugin::init()
 {
     Tag::createIfNotExists("Transform");
+    Tag::createIfNotExists("Time");
 
     ConnectionTypeManager::registerMessage<connection_types::TransformMessage>();
 }

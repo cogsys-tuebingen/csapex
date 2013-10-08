@@ -3,10 +3,12 @@
 
 /// COMPONENT
 #include <csapex_transform/transform_message.h>
+#include <csapex_transform/time_stamp_message.h>
 
 /// PROJECT
 #include <csapex/model/box.h>
 #include <csapex/model/connector_out.h>
+#include <csapex/model/connector_in.h>
 #include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
@@ -23,27 +25,46 @@ DynamicTransform::DynamicTransform()
     addTag(Tag::get("Transform"));
 }
 
+void DynamicTransform::allConnectorsArrived()
+{
+    connection_types::TimeStampMessage::Ptr time_msg = time_in_->getMessage<connection_types::TimeStampMessage>();
+    publishTransform(time_msg->value);
+}
+
 void DynamicTransform::tick()
 {
+    if(time_in_->isConnected()) {
+        return;
+    }
+
+    publishTransform(ros::Time(0));
+}
+
+void DynamicTransform::publishTransform(const ros::Time& time)
+{
+    setError(false);
+
     tf::StampedTransform t;
-    // TODO: Time as input message!!!
-    ros::Time time(0);
+
     Listener::instance().tfl.lookupTransform(state.to_, state.from_, time, t);
 
     connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
     msg->value = t;
     output_->publish(msg);
-
-    setError(false);
 }
-
 
 void DynamicTransform::fill(QBoxLayout* layout)
 {
     box_->setSynchronizedInputs(true);
 
+    time_in_ = new ConnectorIn(box_, 0);
+    time_in_->setOptional(true);
+    time_in_->setType(connection_types::TimeStampMessage::make());
+    box_->addInput(time_in_);
+
     output_ = new ConnectorOut(box_, 0);
     output_->setType(connection_types::TransformMessage::make());
+    box_->addOutput(output_);
 
     from_box_ = new QComboBox;
     from_box_->setEditable(true);
@@ -62,7 +83,6 @@ void DynamicTransform::fill(QBoxLayout* layout)
     QObject::connect(to_box_, SIGNAL(currentIndexChanged(int)), this, SLOT(update()));
     QObject::connect(to_box_, SIGNAL(editTextChanged(QString)), this, SLOT(update()));
 
-    box_->addOutput(output_);
 
     updateFrames();
 }

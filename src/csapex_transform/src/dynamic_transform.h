@@ -24,12 +24,16 @@ public:
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);
 
+
 public Q_SLOTS:
+    virtual void allConnectorsArrived();
     virtual void tick();
     void update();
     void updateFrames();
 
 private:
+    void publishTransform(const ros::Time& time);
+
     struct Listener {
         tf::TransformListener tfl;
 
@@ -42,6 +46,7 @@ private:
 
 private:
     ConnectorOut* output_;
+    ConnectorIn* time_in_;
 
     QComboBox* from_box_;
     QComboBox* to_box_;

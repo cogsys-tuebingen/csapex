@@ -146,10 +146,6 @@ void ConnectorIn::wait()
 
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
-    if(isError()) {
-        return;
-    }
-
     wait();
 
     {
