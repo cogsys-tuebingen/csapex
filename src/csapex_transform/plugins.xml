@@ -9,4 +9,13 @@
 <class type="csapex::DynamicTransform" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::Clock" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::TransformCombiner" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::TransformInverter" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 </library>
