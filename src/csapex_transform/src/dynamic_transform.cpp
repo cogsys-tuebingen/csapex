@@ -177,7 +177,7 @@ void DynamicTransform::setState(Memento::Ptr memento)
 
 void DynamicTransform::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "from" << YAML::Value << from_;
-    out << YAML::Key << "to" << YAML::Value << to_;;
+    out << YAML::Key << "to" << YAML::Value << to_;
 }
 void DynamicTransform::State::readYaml(const YAML::Node& node) {
     if(node.FindValue("from")) {
