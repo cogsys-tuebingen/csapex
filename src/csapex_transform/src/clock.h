@@ -6,10 +6,8 @@
 #include <csapex_core_plugins/ros_handler.h>
 
 /// SYSTEM
-#include <QComboBox>
 #include <QPushButton>
 #include <QLabel>
-#include <tf/transform_listener.h>
 
 namespace csapex {
 

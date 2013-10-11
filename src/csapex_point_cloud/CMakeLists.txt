@@ -56,6 +56,8 @@ add_library(csapex_point_cloud_plugin
     src/point_count.cpp
     src/transform_cloud.cpp
     src/voxel_grid.cpp
+    src/extract_timestamp.cpp
+    src/set_timestamp.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
