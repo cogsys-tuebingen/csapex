@@ -48,6 +48,10 @@ private:
 
 private:
     ConnectorOut* output_;
+    ConnectorOut* output_frame_;
+
+    ConnectorIn* frame_in_from_;
+    ConnectorIn* frame_in_to_;
     ConnectorIn* time_in_;
 
     QComboBox* from_box_;

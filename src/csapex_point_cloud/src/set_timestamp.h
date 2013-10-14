@@ -26,6 +26,7 @@ public:
 private:
     ConnectorIn* input_;
     ConnectorIn* input_time_;
+    ConnectorIn* input_frame_;
     ConnectorOut* output_;
 };
 

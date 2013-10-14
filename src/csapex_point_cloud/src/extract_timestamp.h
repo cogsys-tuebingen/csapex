@@ -26,6 +26,7 @@ public:
 private:
     ConnectorIn* input_;
     ConnectorOut* output_;
+    ConnectorOut* output_frame_;
 };
 
 }

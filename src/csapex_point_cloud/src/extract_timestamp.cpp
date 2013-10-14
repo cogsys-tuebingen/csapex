@@ -6,6 +6,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex_transform/time_stamp_message.h>
+#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -33,8 +34,14 @@ void ExtractTimeStamp::fill(QBoxLayout *layout)
     output_->setLabel("Time");
     output_->setType(connection_types::TimeStampMessage::make());
 
+    output_frame_ = new ConnectorOut(box_, 1);
+    output_frame_->setType(connection_types::StringMessage::make());
+    output_frame_->setLabel("Target Frame");
+    box_->addOutput(output_frame_);
+
     box_->addInput(input_);
     box_->addOutput(output_);
+    box_->addOutput(output_frame_);
 }
 
 void ExtractTimeStamp::allConnectorsArrived()
@@ -49,6 +56,9 @@ void ExtractTimeStamp::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
     connection_types::TimeStampMessage::Ptr time(new connection_types::TimeStampMessage);
     time->value = time->value.fromNSec(cloud->header.stamp * 1000);
-
     output_->publish(time);
+
+    connection_types::StringMessage::Ptr frame(new connection_types::StringMessage);
+    frame->value = cloud->header.frame_id;
+    output_frame_->publish(frame);
 }

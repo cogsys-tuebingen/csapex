@@ -10,6 +10,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -27,6 +28,35 @@ DynamicTransform::DynamicTransform()
 
 void DynamicTransform::allConnectorsArrived()
 {
+    bool update = false;
+    if(frame_in_from_->isConnected()) {
+        std::string from = frame_in_from_->getMessage<connection_types::StringMessage>()->value;
+
+        if(state.from_ != from) {
+            state.from_ = from;
+            update = true;
+        }
+        from_box_->setEnabled(false);
+    } else {
+        from_box_->setEnabled(true);
+    }
+
+    if(frame_in_to_->isConnected()) {
+        std::string to = frame_in_to_->getMessage<connection_types::StringMessage>()->value;
+
+        if(state.to_ != to) {
+            state.to_ = to;
+            update = true;
+        }
+        to_box_->setEnabled(false);
+    } else {
+        to_box_->setEnabled(true);
+    }
+
+    if(update) {
+        updateFrames();
+    }
+
     connection_types::TimeStampMessage::Ptr time_msg = time_in_->getMessage<connection_types::TimeStampMessage>();
     publishTransform(time_msg->value);
 }
@@ -57,6 +87,10 @@ void DynamicTransform::publishTransform(const ros::Time& time)
     connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
     msg->value = t;
     output_->publish(msg);
+
+    connection_types::StringMessage::Ptr frame(new connection_types::StringMessage);
+    frame->value = state.to_;
+    output_frame_->publish(frame);
 }
 
 void DynamicTransform::fill(QBoxLayout* layout)
@@ -68,9 +102,26 @@ void DynamicTransform::fill(QBoxLayout* layout)
     time_in_->setType(connection_types::TimeStampMessage::make());
     box_->addInput(time_in_);
 
+    frame_in_from_ = new ConnectorIn(box_, 1);
+    frame_in_from_->setOptional(true);
+    frame_in_from_->setLabel("Origin Frame");
+    frame_in_from_->setType(connection_types::StringMessage::make());
+    box_->addInput(frame_in_from_);
+
+    frame_in_to_ = new ConnectorIn(box_, 2);
+    frame_in_to_->setOptional(true);
+    frame_in_to_->setLabel("Target Frame");
+    frame_in_to_->setType(connection_types::StringMessage::make());
+    box_->addInput(frame_in_to_);
+
     output_ = new ConnectorOut(box_, 0);
     output_->setType(connection_types::TransformMessage::make());
     box_->addOutput(output_);
+
+    output_frame_ = new ConnectorOut(box_, 1);
+    output_frame_->setType(connection_types::StringMessage::make());
+    output_frame_->setLabel("Target Frame");
+    box_->addOutput(output_frame_);
 
     from_box_ = new QComboBox;
     from_box_->setEditable(true);
