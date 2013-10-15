@@ -79,7 +79,7 @@ void DynamicTransform::publishTransform(const ros::Time& time)
     Listener* l = Listener::instance();
 
     if(l) {
-        l->tfl.lookupTransform(state.to_, state.from_, time, t);
+        l->tfl->lookupTransform(state.to_, state.from_, time, t);
     } else {
         return;
     }
@@ -153,7 +153,7 @@ void DynamicTransform::resetTf()
 {
     Listener* l = Listener::instance();
     if(l) {
-        l->tfl.clear();
+        l->reset();
     }
 }
 
@@ -163,7 +163,7 @@ void DynamicTransform::updateFrames()
 
     Listener* l = Listener::instance();
     if(l) {
-        l->tfl.getFrameStrings(frames);
+        l->tfl->getFrameStrings(frames);
     } else {
         return;
     }
