@@ -59,14 +59,34 @@ void PassThrough::fill(QBoxLayout *layout)
     update();
 }
 
+void PassThrough::updateFields(const std::vector<std::string>& fields)
+{
+    bool rebuild = false;
+    for(int i = 0, n = field->count(); i < n; ++i) {
+        std::string f = field->itemData(i, Qt::DisplayRole).toString().toStdString();
+        if(std::find(fields.begin(), fields.end(), f) == fields.end()) {
+            rebuild = true;
+            break;
+        }
+    }
+    if(rebuild) {
+        field->clear();
+
+        int i = 0;
+        BOOST_FOREACH (const std::string& f, fields) {
+            field->addItem(f.c_str());
+            if(f == state.field) {
+                field->setCurrentIndex(i);
+            }
+            ++i;
+        }
+    }
+}
+
 void PassThrough::updateFields()
 {
-
     if(field->count() == 0) {
         field->addItem("");
-        field->addItem("x");
-        field->addItem("y");
-        field->addItem("z");
     }
 
     if(field->currentText() != "") {
@@ -81,6 +101,10 @@ void PassThrough::updateFields()
                 return;
             }
         }
+
+        // field not there
+        field->addItem(state.field.c_str());
+        field->setCurrentIndex(field->count()-1);
     }
 }
 
@@ -102,6 +126,18 @@ void PassThrough::allConnectorsArrived()
 template <class PointT>
 void PassThrough::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
+    std::vector<pcl::PCLPointField> fields;
+    std::vector<std::string> field_names;
+    pcl::for_each_type<typename pcl::traits::fieldList<PointT>::type>(pcl::detail::FieldAdder<PointT>(fields));
+
+    for(size_t d = 0; d < fields.size (); ++d) {
+        field_names.push_back(fields[d].name);
+    }
+
+    updateFields(field_names);
+
+
+    // check available fields!
     pcl::PassThrough<PointT> pass;
     pass.setFilterFieldName (state.field);
     pass.setFilterLimits (state.min_, state.max_);

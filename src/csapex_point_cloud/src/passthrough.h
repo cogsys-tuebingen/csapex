@@ -30,6 +30,7 @@ public:
 public Q_SLOTS:
     virtual void update();
     void updateFields();
+    void updateFields(const std::vector<std::string> &fields);
 
 private:
     ConnectorIn* input_cloud_;
