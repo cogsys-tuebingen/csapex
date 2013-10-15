@@ -59,6 +59,7 @@ add_library(csapex_point_cloud_plugin
     src/extract_timestamp.cpp
     src/set_timestamp.cpp
     src/crop_box.cpp
+    src/passthrough.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins

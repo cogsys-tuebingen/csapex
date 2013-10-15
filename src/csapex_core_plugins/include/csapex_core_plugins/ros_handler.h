@@ -36,6 +36,7 @@ private:
     boost::shared_ptr<ros::AsyncSpinner> spinner_;
 
     bool initialized_;
+    QMutex has_connection_mutex;
     QFuture<bool> has_connection;
 };
 

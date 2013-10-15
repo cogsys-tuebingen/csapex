@@ -33,7 +33,6 @@ void ROSHandler::stop()
 boost::shared_ptr<ros::NodeHandle> ROSHandler::nh()
 {
     refresh();
-    waitForConnection();
     return nh_;
 }
 
@@ -92,20 +91,22 @@ void ROSHandler::checkMasterConnection()
     if(!has_connection.isRunning()) {
         has_connection = QtConcurrent::run(ros::master::check);
     }
+    initialized_ = true;
 }
 
 bool ROSHandler::waitForConnection()
 {
+    if(!initialized_) {
+        checkMasterConnection();
+    }
+
     has_connection.waitForFinished();
     return has_connection.result();
 }
 
 void ROSHandler::refresh()
 {
-
     waitForConnection();
-
-    checkMasterConnection();
 
     if(nh_) {
         // connection was there

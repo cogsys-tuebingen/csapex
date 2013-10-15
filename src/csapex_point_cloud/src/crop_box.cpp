@@ -99,6 +99,7 @@ void CropBox::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     if(output_pos_->isConnected()) {
         typename pcl::PointCloud<PointT>::Ptr out(new pcl::PointCloud<PointT>);
         crop.filter(*out);
+        out->header = cloud->header;
 
         PointCloudMessage::Ptr msg(new PointCloudMessage);
         msg->value = out;
@@ -109,6 +110,7 @@ void CropBox::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         typename pcl::PointCloud<PointT>::Ptr out(new pcl::PointCloud<PointT>);
         crop.setNegative(true);
         crop.filter(*out);
+        out->header = cloud->header;
 
         PointCloudMessage::Ptr msg(new PointCloudMessage);
         msg->value = out;
