@@ -135,6 +135,10 @@ void DynamicTransform::fill(QBoxLayout* layout)
     QObject::connect(refresh_, SIGNAL(clicked()), this, SLOT(updateFrames()));
     layout->addWidget(refresh_);
 
+    reset_tf_ = new QPushButton("reset tf");
+    QObject::connect(reset_tf_, SIGNAL(clicked()), this, SLOT(resetTf()));
+    layout->addWidget(reset_tf_);
+
     QObject::connect(from_box_, SIGNAL(currentIndexChanged(int)), this, SLOT(update()));
     QObject::connect(from_box_, SIGNAL(editTextChanged(QString)), this, SLOT(update()));
     QObject::connect(to_box_, SIGNAL(currentIndexChanged(int)), this, SLOT(update()));
@@ -143,6 +147,14 @@ void DynamicTransform::fill(QBoxLayout* layout)
     QObject::connect(box_, SIGNAL(placed()), this, SLOT(updateFrames()));
 
     updateFrames();
+}
+
+void DynamicTransform::resetTf()
+{
+    Listener* l = Listener::instance();
+    if(l) {
+        l->tfl.clear();
+    }
 }
 
 void DynamicTransform::updateFrames()

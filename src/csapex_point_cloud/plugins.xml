@@ -12,6 +12,9 @@
 <class type="csapex::VoxelGrid" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::CropBox" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 <class type="csapex::ExtractTimestamp" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>

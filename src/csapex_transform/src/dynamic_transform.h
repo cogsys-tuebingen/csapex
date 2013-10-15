@@ -30,6 +30,7 @@ public Q_SLOTS:
     virtual void tick();
     void update();
     void updateFrames();
+    void resetTf();
 
 private:
     void publishTransform(const ros::Time& time);
@@ -58,6 +59,7 @@ private:
     QComboBox* to_box_;
 
     QPushButton* refresh_;
+    QPushButton* reset_tf_;
 
     struct State : public Memento {
         std::string from_;
