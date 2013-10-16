@@ -12,6 +12,9 @@
 <class type="csapex::FilterBlur" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::Segmentation" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 <class type="csapex::FilterApplyMask" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
