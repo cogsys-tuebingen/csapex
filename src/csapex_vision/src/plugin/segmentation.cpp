@@ -3,6 +3,9 @@
 
 /// PROJECT
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/model/box.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -11,6 +14,7 @@
 PLUGINLIB_EXPORT_CLASS(csapex::Segmentation, csapex::BoxedObject)
 
 using namespace csapex;
+using namespace csapex::connection_types;
 
 Segmentation::Segmentation()
 {
@@ -18,22 +22,43 @@ Segmentation::Segmentation()
     state.max = cv::Scalar::all(255);
 }
 
-void Segmentation::filter(cv::Mat& img, cv::Mat& mask)
+void Segmentation::allConnectorsArrived()
 {
-    if(static_cast<unsigned>(img.channels()) != sliders.size()) {
-        state.channels = img.channels();
+    CvMatMessage::Ptr img = input_img_->getMessage<CvMatMessage>();
+
+    bool recompute = false;
+    if(static_cast<unsigned>(img->encoding.size()) != sliders.size()) {
+        recompute = true;
+    } else {
+        for(int i = 0, n = img->encoding.size(); i < n; ++i) {
+            if(img->encoding[i].name != state.encoding[i].name) {
+                recompute = true;
+                break;
+            }
+        }
+    }
+
+    if(recompute) {
+        state.channels = img->value.channels();
+        state.encoding = img->encoding;
+
         Q_EMIT modelChanged();
         return;
     }
 
     cv::Mat bw;
-    cv::inRange(img, state.min, state.max, bw);
+    cv::inRange(img->value, state.min, state.max, bw);
 
-    if(mask.empty()) {
-        mask = bw;
+    CvMatMessage::Ptr out_mask(new CvMatMessage);
+
+    if(input_mask_->isConnected()) {
+        CvMatMessage::Ptr mask = input_mask_->getMessage<CvMatMessage>();
+        cv::min(mask->value, bw, out_mask->value);
     } else {
-        cv::min(mask, bw, mask);
+        out_mask->value = bw;
     }
+
+    output_mask_->publish(out_mask);
 }
 
 void Segmentation::update()
@@ -49,17 +74,23 @@ void Segmentation::update()
     }
 }
 
-void Segmentation::insert(QBoxLayout* layout)
+void Segmentation::fill(QBoxLayout* layout)
 {
+    box_->setSynchronizedInputs(true);
+
+    input_img_ = box_->addInput<CvMatMessage>("Image");
+    input_mask_ = box_->addInput<CvMatMessage>("Mask", true);
+    output_mask_ = box_->addOutput<CvMatMessage>("Mask");
 }
 
 void Segmentation::updateDynamicGui(QBoxLayout *layout)
 {
     sliders.clear();
+    QtHelper::clearLayout(layout);
     for(int i = 0; i < state.channels; ++i) {
-        std::stringstream name;
-        name << "channel " << i;
-        QxtSpanSlider * slider = Segmentation::makeSpanSlider(layout, name.str().c_str(), state.min[i], state.max[i], 0,255);
+        QxtSpanSlider * slider = Segmentation::makeSpanSlider(layout, state.encoding[i].name,
+                                                              state.min[i], state.max[i],
+                                                              state.encoding[i].min, state.encoding[i].max);
         connect(slider, SIGNAL(lowerValueChanged(int)), this, SLOT(update()));
         connect(slider, SIGNAL(upperValueChanged(int)), this, SLOT(update()));
 
@@ -79,8 +110,6 @@ void Segmentation::setState(Memento::Ptr memento)
     assert(m.get());
 
     state = *m;
-
-    Q_EMIT filter_changed();
 }
 
 void Segmentation::State::writeYaml(YAML::Emitter& out) const {

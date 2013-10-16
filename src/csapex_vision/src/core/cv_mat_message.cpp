@@ -6,7 +6,7 @@ using namespace connection_types;
 
 
 CvMatMessage::CvMatMessage()
-    : MessageTemplate<cv::Mat, CvMatMessage> ("cv::Mat")
+    : MessageTemplate<cv::Mat, CvMatMessage> ("cv::Mat"), encoding(enc::bgr)
 {}
 
 ConnectionType::Ptr CvMatMessage::clone() {

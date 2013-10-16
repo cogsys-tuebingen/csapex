@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex_vision/filter.h>
+#include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
 #include <qxtspanslider.h>
@@ -10,7 +11,7 @@
 namespace csapex
 {
 
-class Segmentation : public csapex::Filter
+class Segmentation : public csapex::BoxedObject
 {
     Q_OBJECT
 
@@ -18,8 +19,8 @@ public:
     Segmentation();
 
 public:
-    virtual void filter(cv::Mat& img, cv::Mat& mask);
-    virtual void insert(QBoxLayout* layout);
+    virtual void allConnectorsArrived();
+    virtual void fill(QBoxLayout *layout);
     virtual void updateDynamicGui(QBoxLayout *layout);
 
     virtual csapex::Memento::Ptr getState() const;
@@ -33,8 +34,15 @@ private:
 
     static QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max);
 
+    ConnectorIn* input_img_;
+    ConnectorIn* input_mask_;
+
+    ConnectorOut* output_mask_;
+
     struct State : public csapex::Memento {
         int channels;
+        Encoding encoding;
+
         cv::Scalar min;
         cv::Scalar max;
 
