@@ -22,6 +22,7 @@ file(GLOB_RECURSE QT_MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLIN
 file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 QT4_WRAP_CPP(QT_MOC_CORE ${QT_MOC_CORE})
 QT4_WRAP_CPP(QT_MOC ${QT_MOC})
+QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_boolean_resources.qrc)
 
 ###################################
 ## catkin specific configuration ##
@@ -60,6 +61,7 @@ add_library(csapex_boolean_plugin
     src/indicator.cpp
 
     ${QT_MOC}
+    ${QT_RESOURCES}
 )
 target_link_libraries(csapex_boolean_plugin csapex_boolean_core
     yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})

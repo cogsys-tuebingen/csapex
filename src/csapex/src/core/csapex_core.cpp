@@ -13,6 +13,7 @@
 
 /// SYSTEM
 #include <fstream>
+#include <boost/foreach.hpp>
 
 using namespace csapex;
 
@@ -81,7 +82,14 @@ void CsApexCore::init()
         bm.reload();
 
         showStatusMessage("loading templates");
+        // default template path is where custom templates are kept
         TemplateManager::instance().load(TemplateManager::defaultTemplatePath());
+        // import plugin templates
+        std::vector<std::string> template_paths;
+        ros::package::getPlugins("csapex", "template_paths", template_paths);
+        BOOST_FOREACH(const std::string& path, template_paths) {
+            TemplateManager::instance().load(path);
+        }
 
         showStatusMessage("loading config");
         try {

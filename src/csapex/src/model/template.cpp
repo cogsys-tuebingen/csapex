@@ -7,6 +7,10 @@
 #include <csapex/command/add_connector.h>
 #include <csapex/command/add_connection.h>
 
+/// SYSTEM
+#include <boost/foreach.hpp>
+#include <QFile>
+
 using namespace csapex;
 
 const std::string Template::PARENT_PREFIX_PATTERN = "${parent}";
@@ -136,5 +140,27 @@ void Template::read(const YAML::Node &doc)
     doc["boxes"] >> boxes;
     doc["connectors"] >> connectors;
     doc["connections"] >> connections;
+
+    if(doc.FindValue("tags")) {
+        std::vector<std::string> t;
+        doc["tags"] >> t;
+
+        BOOST_FOREACH(const std::string& tag, t) {
+            Tag::createIfNotExists(tag);
+            tags.push_back(Tag::get(tag));
+
+        }
+    }
+    if(doc.FindValue("icon")) {
+        std::string i;
+        doc["icon"] >> i;
+        std::string file = std::string(":/") + i;
+        if(!QFile::exists(file.c_str())) {
+            std::cerr << "error: cannot load the icon \"" << i << "\"" << std::endl;
+            icon = QIcon(":/group.png");
+        } else {
+            icon = QIcon(file.c_str());
+        }
+    }
 }
 

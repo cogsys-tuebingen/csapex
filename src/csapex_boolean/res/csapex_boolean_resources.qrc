@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>boolean.png</file>
+    </qresource>
+</RCC>

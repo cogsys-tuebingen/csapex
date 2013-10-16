@@ -1,0 +1,38 @@
+name: "boolean::and"
+tags: ["Boolean"]
+icon: "boolean.png"
+boxes:
+  - type: csapex::boolean::NAND
+    uuid: ${parent}:/:csapex::boolean::NAND_1
+    pos: [521, 95]
+    state: {type: "", uuid: "", label: A, pos: [0, 0], minimized: false, enabled: true}
+  - type: csapex::boolean::NAND
+    uuid: ${parent}:/:csapex::boolean::NAND_2
+    pos: [528, 172]
+    state: {type: "", uuid: "", label: B, pos: [0, 0], minimized: false, enabled: true}
+  - type: csapex::boolean::NAND
+    uuid: ${parent}:/:csapex::boolean::NAND_3
+    pos: [748, 140]
+    state: {type: "", uuid: "", label: AB, pos: [0, 0], minimized: false, enabled: true}
+  - type: csapex::Relay
+    uuid: ${parent}:/:csapex::Relay_1
+    pos: [263, 93]
+    state: {type: "", uuid: "", label: R1, pos: [0, 0], minimized: false, enabled: true}
+  - type: csapex::Relay
+    uuid: ${parent}:/:csapex::Relay_2
+    pos: [264, 178]
+    state: {type: "", uuid: "", label: R2, pos: [0, 0], minimized: false, enabled: true}
+connectors:
+  - {type: boolean, uuid: "${parent}:|:~_0", label: A nand B, input: false, forward: true}
+  - {type: anything, uuid: "${parent}:|:~_1", label: Anything, input: true, forward: true}
+  - {type: anything, uuid: "${parent}:|:~_2", label: Anything, input: true, forward: true}
+connections:
+  - {from_uuid: "${parent}:/:csapex::boolean::NAND_1:|:out_0", to_uuid: "${parent}:/:csapex::boolean::NAND_3:|:in_0"}
+  - {from_uuid: "${parent}:/:csapex::boolean::NAND_2:|:out_0", to_uuid: "${parent}:/:csapex::boolean::NAND_3:|:in_1"}
+  - {from_uuid: "${parent}:/:csapex::boolean::NAND_3:|:out_0", to_uuid: "${parent}:|:~_0"}
+  - {from_uuid: "${parent}:|:~_1", to_uuid: "${parent}:/:csapex::Relay_1:|:in_0"}
+  - {from_uuid: "${parent}:/:csapex::Relay_1:|:out_0", to_uuid: "${parent}:/:csapex::boolean::NAND_1:|:in_0"}
+  - {from_uuid: "${parent}:/:csapex::Relay_1:|:out_0", to_uuid: "${parent}:/:csapex::boolean::NAND_2:|:in_0"}
+  - {from_uuid: "${parent}:|:~_2", to_uuid: "${parent}:/:csapex::Relay_2:|:in_0"}
+  - {from_uuid: "${parent}:/:csapex::Relay_2:|:out_0", to_uuid: "${parent}:/:csapex::boolean::NAND_1:|:in_1"}
+  - {from_uuid: "${parent}:/:csapex::Relay_2:|:out_0", to_uuid: "${parent}:/:csapex::boolean::NAND_2:|:in_1"}

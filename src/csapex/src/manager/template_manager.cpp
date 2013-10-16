@@ -90,25 +90,31 @@ void TemplateManager::load(const std::string &path)
     for(bfs::directory_iterator it(path); it != end; ++it) {
         if(it->path().extension() == GraphIO::template_extension) {
             const std::string& file(it->path().string());
-            std::cerr << "loading template " << file << std::endl;
 
-            std::ifstream ifs(file.c_str());
-            YAML::Parser parser(ifs);
+            try {
+                std::cerr << "loading template " << file << std::endl;
 
-            YAML::Node doc;
-            if(!parser.GetNextDocument(doc)) {
-                std::cerr << "cannot read the template" << file << std::endl;
-                continue;
+                std::ifstream ifs(file.c_str());
+                YAML::Parser parser(ifs);
+
+                YAML::Node doc;
+                if(!parser.GetNextDocument(doc)) {
+                    std::cerr << "cannot read the template" << file << std::endl;
+                    continue;
+                }
+
+                Template::Ptr tmp(new Template(it->path().string()));
+                tmp->read(doc);
+
+                std::cerr << "template " << file << " contains " << tmp->getName() << std::endl;
+                named_templates[tmp->getName()] = tmp;
+
+                TemplateConstructor::Ptr constructor(new TemplateConstructor(false, std::string("::template::") + tmp->getName(), "no description"));
+                BoxManager::instance().register_box_type(constructor);
+
+            } catch(const std::exception& e){
+                std::cerr << "cannot load template " << file << ": " << e.what() << std::endl;
             }
-
-            Template::Ptr tmp(new Template(it->path().string()));
-            tmp->read(doc);
-
-            std::cerr << "template " << file << " contains " << tmp->getName() << std::endl;
-            named_templates[tmp->getName()] = tmp;
-
-            TemplateConstructor::Ptr constructor(new TemplateConstructor(false, std::string("::template::") + tmp->getName(), "no description"));
-            BoxManager::instance().register_box_type(constructor);
         }
     }
 }

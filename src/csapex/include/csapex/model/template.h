@@ -16,6 +16,7 @@ namespace csapex
 class Template
 {
     friend class TemplateManager;
+    friend class TemplateConstructor;
 
 public:
     typedef boost::shared_ptr<Template> Ptr;
@@ -149,6 +150,8 @@ private:
     std::vector<BoxTemplate> boxes;
     std::vector<ConnectorTemplate> connectors;
     std::vector<ConnectionTemplate> connections;
+    std::vector<Tag> tags;
+    QIcon icon;
 
     bool locked;
 };
