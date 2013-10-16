@@ -542,19 +542,18 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
     return true;
 }
 
-bool Overlay::showContextMenu(const QPoint &pos)
+bool Overlay::showContextMenu(const QPoint &global_pos)
 {
     if(fulcrum_is_hovered_) {
-        return showFulcrumContextMenu(pos);
+        return showFulcrumContextMenu(global_pos);
     } else {
-        return showConnectionContextMenu(pos);
+        return showConnectionContextMenu(global_pos);
     }
 }
 
-bool Overlay::showConnectionContextMenu(const QPoint& pos)
+bool Overlay::showConnectionContextMenu(const QPoint& global_pos)
 {
-    QPoint globalPos = mapToGlobal(pos);
-
+    QPoint pos = mapFromGlobal(global_pos);
     std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
     int id = data.first;
 
@@ -565,7 +564,7 @@ bool Overlay::showConnectionContextMenu(const QPoint& pos)
         QAction* del = new QAction("delete connection", &menu);
         menu.addAction(del);
 
-        QAction* selectedItem = menu.exec(globalPos);
+        QAction* selectedItem = menu.exec(global_pos);
 
         if(selectedItem == del) {
             dispatcher_->execute(graph_->deleteConnectionById(id));
@@ -580,15 +579,13 @@ bool Overlay::showConnectionContextMenu(const QPoint& pos)
     return false;
 }
 
-bool Overlay::showFulcrumContextMenu(const QPoint& pos)
+bool Overlay::showFulcrumContextMenu(const QPoint& global_pos)
 {
-    QPoint globalPos = mapToGlobal(pos);
-
     QMenu menu;
     QAction* del = new QAction("delete fulcrum", &menu);
     menu.addAction(del);
 
-    QAction* selectedItem = menu.exec(globalPos);
+    QAction* selectedItem = menu.exec(global_pos);
 
     if(selectedItem == del) {
         dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));

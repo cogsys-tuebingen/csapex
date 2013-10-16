@@ -316,7 +316,7 @@ Box* BoxWorker::parent()
 
 void Box::showContextMenu(const QPoint& pos)
 {
-    Q_EMIT showContextMenuForBox(mapToGlobal(pos));
+    Q_EMIT showContextMenuForBox(this, mapToGlobal(pos));
 }
 
 void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
@@ -600,7 +600,7 @@ bool Box::eventFilter(QObject* o, QEvent* e)
     QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
 
     if(o == ui->label) {
-        if(e->type() == QEvent::MouseButtonDblClick) {
+        if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
             bool ok;
             QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, getLabel().c_str(), &ok);
 
@@ -648,6 +648,12 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             }
         }
     }
+
+//    if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::RightButton && !isSelected()) {
+//        Q_EMIT clicked(this);
+//        Q_EMIT showContextMenuForBox(this, em->globalPos());
+//    }
+
     return false;
 }
 

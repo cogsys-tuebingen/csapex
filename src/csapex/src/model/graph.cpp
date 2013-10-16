@@ -126,8 +126,6 @@ void Graph::addBox(Box::Ptr box)
     boxes_.push_back(box);
     box->setCommandDispatcher(dispatcher_);
 
-    connect(box.get(), SIGNAL(showContextMenuForBox(QPoint)), this, SLOT(showContextMenu(QPoint)));
-
     Q_EMIT boxAdded(box.get());
 }
 
@@ -156,6 +154,27 @@ Template::Ptr Graph::toTemplate(const std::string& name) const
     return sub_graph_templ;
 }
 
+bool Graph::hasSelectedBox() const
+{
+    foreach(Box::Ptr b, boxes_) {
+        if(b->isSelected()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<Box::Ptr> Graph::getSelectedBoxes() const
+{
+    std::vector<Box::Ptr>  selected;
+    foreach(Box::Ptr b, boxes_) {
+        if(b->isSelected()) {
+            selected.push_back(b);
+        }
+    }
+    return selected;
+}
+
 Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> >& connections) const
 {
     Template::Ptr sub_graph_templ = TemplateManager::instance().createNewTemporaryTemplate();
@@ -174,9 +193,9 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
     foreach(Box::Ptr b, boxes_) {
         // iterate selected boxes
         if(b->isSelected() || !only_selected) {
-//            if(only_selected) {
-                selected.push_back(b.get());
-//            }
+            //            if(only_selected) {
+            selected.push_back(b.get());
+            //            }
 
             Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
             std::string new_uuid = templ->addBox(b->getType(), b->pos(), state);
@@ -196,9 +215,9 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
                     Box* owner = target->getBox();
 
                     bool owner_is_selected = false;
-                        foreach(Box* b, selected) {
-                            owner_is_selected |= (b == owner);
-                        }
+                    foreach(Box* b, selected) {
+                        owner_is_selected |= (b == owner);
+                    }
 
                     bool is_external = !owner_is_selected;
                     // internal connections are done by the next loop
@@ -224,9 +243,9 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
                     Box* owner = in->getBox();
 
                     bool is_selected = false;
-                        foreach(Box* b, selected) {
-                            is_selected |= (b == owner);
-                        }
+                    foreach(Box* b, selected) {
+                        is_selected |= (b == owner);
+                    }
 
                     bool is_external = !is_selected;
                     if(is_external) {
@@ -270,17 +289,17 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
 void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::function<void ()> > &handler)
 {
     bool has_minimized = false;
-     bool has_maximized = false;
+    bool has_maximized = false;
 
-     foreach(Box::Ptr b, boxes_) {
-         if(b->isSelected()) {
-             if(b->isMinimizedSize()) {
-                 has_minimized = true;
-             } else {
-                 has_maximized = true;
-             }
-         }
-     }
+    foreach(Box::Ptr b, boxes_) {
+        if(b->isSelected()) {
+            if(b->isMinimizedSize()) {
+                has_minimized = true;
+            } else {
+                has_maximized = true;
+            }
+        }
+    }
 
     boost::function<bool(Box*)> pred_selected = boost::bind(&Box::isSelected, _1);
 
@@ -331,38 +350,6 @@ void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::
     menu->addAction(del);
 }
 
-void Graph::showContextMenu(const QPoint &global_pos)
-{
-    std::vector<Box::Ptr> selected;
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            selected.push_back(b);
-        }
-    }
-
-    if(selected.empty()) {
-        return;
-    }
-
-    QMenu menu;
-    std::map<QAction*, boost::function<void()> > handler;
-
-
-    if(selected.size() == 1) {
-        selected[0]->fillContextMenu(&menu, handler);
-
-    } else {
-        fillContextMenuForSelection(&menu, handler);
-    }
-
-    QAction* selectedItem = menu.exec(global_pos);
-
-    if(selectedItem) {
-        handler[selectedItem]();
-    }
-
-}
-
 void Graph::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred)
 {
     foreach(Box::Ptr b, boxes_) {
@@ -404,7 +391,7 @@ bool Graph::addConnection(Connection::Ptr connection)
         Graph::Ptr graph_from = from->getBox()->getCommandDispatcher()->getGraph();
         Graph::Ptr graph_to = to->getBox()->getCommandDispatcher()->getGraph();
 
-//        if(!graph_from->isHidden() && !graph_to->isHidden()) {
+        //        if(!graph_from->isHidden() && !graph_to->isHidden()) {
         if(graph_from.get() == this && graph_to.get() == this) {
             visible_connections.push_back(connection);
         }

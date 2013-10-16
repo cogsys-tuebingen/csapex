@@ -112,6 +112,8 @@ void DesignBoard::addBoxEvent(Box *box)
     QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
     QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
+    QObject::connect(box, SIGNAL(showContextMenuForBox(Box*, QPoint)), this, SLOT(showContextMenuEditBox(Box*, QPoint)));
+
     box->setParent(this);
     box->triggerPlaced();
     box->setCommandDispatcher(dispatcher_);
@@ -291,18 +293,62 @@ bool DesignBoard::eventFilter(QObject*, QEvent*)
 }
 
 
-void DesignBoard::showContextMenu(const QPoint& pos)
+void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
 {
-    if(overlay->showContextMenu(pos)) {
+    if(overlay->showContextMenu(global_pos)) {
         return;
     }
 
-    QPoint globalPos = mapToGlobal(pos);
+    /// BOXES
+    Graph::Ptr graph = dispatcher_->getGraph();
+    if(graph->hasSelectedBox()) {
+        /// DEFAULT
+        showContextMenuAddBox(global_pos);
 
+    } else {
+        showContextMenuEditBox(NULL, global_pos);
+    }
+}
+
+void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
+{
+    QMenu menu;
+    std::map<QAction*, boost::function<void()> > handler;
+
+    Graph::Ptr graph = dispatcher_->getGraph();
+
+    if(box != NULL && !box->isSelected()) {
+        graph->deselectBoxes();
+        box->setSelected(true);
+    }
+
+    std::vector<Box::Ptr> selected = graph->getSelectedBoxes();
+
+    if(selected.size() == 1) {
+        box->fillContextMenu(&menu, handler);
+
+    } else {
+        graph->fillContextMenuForSelection(&menu, handler);
+    }
+
+    QAction* selectedItem = menu.exec(global_pos);
+
+    if(selectedItem) {
+        handler[selectedItem]();
+    }
+}
+
+void DesignBoard::showContextMenu(const QPoint& pos)
+{
+    showContextMenuGlobal(mapToGlobal(pos));
+}
+
+void DesignBoard::showContextMenuAddBox(const QPoint &global_pos)
+{
     QMenu menu;
     BoxManager::instance().insertAvailableBoxedObjects(&menu);
 
-    QAction* selectedItem = menu.exec(globalPos);
+    QAction* selectedItem = menu.exec(global_pos);
 
     if(selectedItem) {
         std::string selected = selectedItem->data().toString().toStdString();

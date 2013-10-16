@@ -49,7 +49,10 @@ public:
 
 public Q_SLOTS:
     void updateCursor();
+    void showContextMenuGlobal(const QPoint& pos);
     void showContextMenu(const QPoint& pos);
+    void showContextMenuEditBox(Box* box, const QPoint& pos);
+    void showContextMenuAddBox(const QPoint& global_pos);
     void findMinSize(Box* box);
 
     void addBoxEvent(Box* box);

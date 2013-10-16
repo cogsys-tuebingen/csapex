@@ -223,7 +223,7 @@ Q_SIGNALS:
     void connectorEnabled(Connector* source);
     void connectorDisabled(Connector* source);
 
-    void showContextMenuForBox(const QPoint& pos);
+    void showContextMenuForBox(Box* box, const QPoint& pos);
 
 
 protected:
