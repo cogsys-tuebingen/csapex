@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex_transform/transform_message.h>
+#include "listener.h"
 
 /// PROJECT
 #include <csapex/manager/connection_type_manager.h>
@@ -26,4 +27,6 @@ void RegisterTransformPlugin::init()
     Tag::createIfNotExists("Time");
 
     ConnectionTypeManager::registerMessage<connection_types::TransformMessage>();
+
+    ROSHandler::instance().registerConnectionCallback(boost::bind(&Listener::start));
 }

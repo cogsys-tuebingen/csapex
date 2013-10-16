@@ -52,6 +52,10 @@ void ROSHandler::initHandle(bool try_only)
         nh_.reset(new ros::NodeHandle("~"));
         spinner_.reset(new ros::AsyncSpinner(2));
         spinner_->start();
+
+        foreach (const boost::function<void()>& f, callbacks_) {
+            f();
+        }
     }
 }
 
@@ -78,6 +82,11 @@ bool ROSHandler::topicExists(const std::string &topic)
     }
 
     return false;
+}
+
+void ROSHandler::registerConnectionCallback(boost::function<void ()> f)
+{
+    callbacks_.push_back(f);
 }
 
 

@@ -29,6 +29,8 @@ public:
     bool waitForConnection();
     void refresh();
 
+    void registerConnectionCallback(boost::function<void()>);
+
 private:
     ROSHandler();
 
@@ -38,6 +40,8 @@ private:
     bool initialized_;
     QMutex has_connection_mutex;
     QFuture<bool> has_connection;
+
+    std::vector<boost::function<void()> > callbacks_;
 };
 
 }
