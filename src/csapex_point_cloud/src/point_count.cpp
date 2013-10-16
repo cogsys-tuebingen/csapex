@@ -23,15 +23,12 @@ void PointCount::fill(QBoxLayout *layout)
 {
     box_->setSynchronizedInputs(true);
 
-    input_ = new ConnectorIn(box_, 0);
-    input_->setLabel("PointCloud");
-    input_->setType(connection_types::PointCloudMessage::make());
+    input_ = box_->addInput<PointCloudMessage>("PointCloud");
 
     number_ = new QLCDNumber;
     number_->setDigitCount(8);
     layout->addWidget(number_);
 
-    box_->addInput(input_);
 }
 
 void PointCount::allConnectorsArrived()

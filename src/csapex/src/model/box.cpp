@@ -387,7 +387,40 @@ std::string Box::getLabel() const
     return ui->label->text().toStdString();
 }
 
-void Box::addInput(ConnectorIn* in)
+ConnectorIn* Box::addInput(ConnectionType::Ptr type, const std::string& label, bool optional) {
+    int id = input.size();
+    ConnectorIn* c = new ConnectorIn(this, id);
+    c->setLabel(label);
+    c->setOptional(optional);
+    c->setType(type);
+
+    registerInput(c);
+
+    return c;
+}
+
+ConnectorOut* Box::addOutput(ConnectionType::Ptr type, const std::string& label) {
+    int id = output.size();
+    ConnectorOut* c = new ConnectorOut(this, id);
+    c->setLabel(label);
+    c->setType(type);
+
+    registerOutput(c);
+
+    return c;
+}
+
+void Box::addInput(ConnectorIn* in) // LEGACY
+{
+    registerInput(in);
+}
+
+void Box::addOutput(ConnectorOut* out) // LEGACY
+{
+    registerOutput(out);
+}
+
+void Box::registerInput(ConnectorIn* in)
 {
     in->setParent(NULL);
     ui->input_layout->addWidget(in);
@@ -403,7 +436,7 @@ void Box::addInput(ConnectorIn* in)
     Q_EMIT changed(this);
 }
 
-void Box::addOutput(ConnectorOut* out)
+void Box::registerOutput(ConnectorOut* out)
 {
     assert(out);
 

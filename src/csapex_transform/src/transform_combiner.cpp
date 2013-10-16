@@ -35,15 +35,8 @@ void TransformCombiner::fill(QBoxLayout* layout)
 {
     box_->setSynchronizedInputs(true);
 
-    output_ = new ConnectorOut(box_, 0);
-    output_->setType(connection_types::TransformMessage::make());
-    box_->addOutput(output_);
+    input_a_ = box_->addInput<connection_types::TransformMessage>("A");
+    input_b_ = box_->addInput<connection_types::TransformMessage>("B");
 
-    input_a_ = new ConnectorIn(box_, 0);
-    input_a_->setType(connection_types::TransformMessage::make());
-    box_->addInput(input_a_);
-
-    input_b_ = new ConnectorIn(box_, 1);
-    input_b_->setType(connection_types::TransformMessage::make());
-    box_->addInput(input_b_);
+    output_ = box_->addOutput<connection_types::TransformMessage>("A*B");
 }

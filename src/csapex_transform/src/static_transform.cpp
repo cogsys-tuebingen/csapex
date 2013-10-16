@@ -34,8 +34,7 @@ void StaticTransform::fill(QBoxLayout* layout)
 {
     box_->setSynchronizedInputs(true);
 
-    output_ = new ConnectorOut(box_, 0);
-    output_->setType(connection_types::TransformMessage::make());
+    output_ = box_->addOutput<connection_types::TransformMessage>("Transformation");
 
     double p = 3.1415;
     roll_ = QtHelper::makeDoubleSlider(layout,  "roll",  0.0, -p, p, 0.001);
@@ -54,7 +53,6 @@ void StaticTransform::fill(QBoxLayout* layout)
     QObject::connect(y_, SIGNAL(valueChanged(double)), this, SLOT(update()));
     QObject::connect(z_, SIGNAL(valueChanged(double)), this, SLOT(update()));
 
-    box_->addOutput(output_);
 }
 
 void StaticTransform::update()

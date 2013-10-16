@@ -22,7 +22,6 @@ public:
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source);
     void setSignal(bool signal);
 
     void tick();

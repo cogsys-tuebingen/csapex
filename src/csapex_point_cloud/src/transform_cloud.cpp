@@ -26,21 +26,11 @@ void TransformCloud::fill(QBoxLayout *layout)
 {
     box_->setSynchronizedInputs(true);
 
-    input_cloud_ = new ConnectorIn(box_, 0);
-    input_cloud_->setLabel("PointCloud");
-    input_cloud_->setType(PointCloudMessage::make());
+    input_cloud_ = box_->addInput<PointCloudMessage>("PointCloud");
 
-    input_transform_ = new ConnectorIn(box_, 1);
-    input_transform_->setLabel("Transformation");
-    input_transform_->setType(TransformMessage::make());
+    input_transform_ = box_->addInput<TransformMessage>("Transformation");
 
-    output_ = new ConnectorOut(box_, 0);
-    output_->setLabel("PointCloud");
-    output_->setType(PointCloudMessage::make());
-
-    box_->addInput(input_cloud_);
-    box_->addInput(input_transform_);
-    box_->addOutput(output_);
+    output_ = box_->addOutput<PointCloudMessage>("PointCloud");
 }
 
 void TransformCloud::allConnectorsArrived()

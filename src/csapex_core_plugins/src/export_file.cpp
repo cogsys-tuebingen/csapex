@@ -29,14 +29,9 @@ ExportFile::ExportFile()
 void ExportFile::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = new ConnectorIn(box_, 0);
-        connector_->setLabel("Anything");
-        connector_->setType(connection_types::AnyMessage::make());
+        connector_ = box_->addInput<connection_types::AnyMessage>("Anything");
 
         box_->setSynchronizedInputs(true);
-
-        box_->addInput(connector_);
-
 
         file_dialog_ = new QPushButton("Export");
         QObject::connect(file_dialog_, SIGNAL(pressed()), this, SLOT(exportDialog()));
@@ -83,7 +78,7 @@ void ExportFile::allConnectorsArrived()
         return;
     }
 
-    ConnectionType::Ptr msg = connector_->getMessage();
+    ConnectionType::Ptr msg = connector_->getMessage<ConnectionType>();
 
     std::stringstream ss;
     ss << "_" << suffix_;

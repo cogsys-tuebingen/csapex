@@ -26,22 +26,14 @@ DoubleBuffer::DoubleBuffer()
 void DoubleBuffer::fill(QBoxLayout *layout)
 {
     if(input_ == NULL) {
-        input_ = new ConnectorIn(box_, 0);
-        input_->setLabel("Anything");
-        input_->setType(connection_types::AnyMessage::make());
-
-        output_ = new ConnectorOut(box_, 0);
-        output_->setLabel("Same as input");
-        output_->setType(connection_types::AnyMessage::make());
-
-        box_->addInput(input_);
-        box_->addOutput(output_);
+        input_ = box_->addInput<connection_types::AnyMessage>("Anything");
+        output_ = box_->addOutput<connection_types::AnyMessage>("Same as input");
     }
 }
 
 void DoubleBuffer::messageArrived(ConnectorIn *source)
 {
-    ConnectionType::Ptr msg = source->getMessage();
+    ConnectionType::Ptr msg = source->getMessage<ConnectionType>();
 
     state.buffer_back_ = msg->clone();
 

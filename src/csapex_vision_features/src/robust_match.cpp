@@ -273,14 +273,14 @@ RobustMatch::RobustMatch()
 
 void RobustMatch::allConnectorsArrived()
 {
-    CvMatMessage::Ptr img1 = boost::dynamic_pointer_cast<CvMatMessage> (in_img_1->getMessage());
-    CvMatMessage::Ptr img2 = boost::dynamic_pointer_cast<CvMatMessage> (in_img_2->getMessage());
+    CvMatMessage::Ptr img1 = in_img_1->getMessage<CvMatMessage>();
+    CvMatMessage::Ptr img2 = in_img_2->getMessage<CvMatMessage>();
 
-    KeypointMessage::Ptr key1 = boost::dynamic_pointer_cast<KeypointMessage> (in_key_1->getMessage());
-    KeypointMessage::Ptr key2 = boost::dynamic_pointer_cast<KeypointMessage> (in_key_2->getMessage());
+    KeypointMessage::Ptr key1 = in_key_1->getMessage<KeypointMessage>();
+    KeypointMessage::Ptr key2 = in_key_2->getMessage<KeypointMessage>();
 
-    DescriptorMessage::Ptr des1 = boost::dynamic_pointer_cast<DescriptorMessage> (in_des_1->getMessage());
-    DescriptorMessage::Ptr des2 = boost::dynamic_pointer_cast<DescriptorMessage> (in_des_2->getMessage());
+    DescriptorMessage::Ptr des1 = in_des_1->getMessage<DescriptorMessage>();
+    DescriptorMessage::Ptr des2 = in_des_2->getMessage<DescriptorMessage>();
 
     std::vector<cv::DMatch> matches;
 
@@ -305,32 +305,14 @@ void RobustMatch::fill(QBoxLayout* layout)
     if(in_img_1 == NULL) {
         box_->setSynchronizedInputs(true);
 
-        in_img_1 = new ConnectorIn(box_, 0);
-        in_img_1->setLabel("Image 1");
-        box_->addInput(in_img_1);
-        in_key_1 = new ConnectorIn(box_, 1);
-        in_key_1->setType(csapex::connection_types::KeypointMessage::make());
-        in_key_1->setLabel("Keypoints 1");
-        box_->addInput(in_key_1);
-        in_des_1 = new ConnectorIn(box_, 2);
-        in_des_1->setType(csapex::connection_types::DescriptorMessage::make());
-        in_des_1->setLabel("Descriptor 1");
-        box_->addInput(in_des_1);
+        in_img_1 = box_->addInput<CvMatMessage>("Image 1");
+        in_key_1 = box_->addInput<KeypointMessage>("Keypoints 1");
+        in_des_1 = box_->addInput<DescriptorMessage>("Descriptor 1");
 
-        in_img_2 = new ConnectorIn(box_, 3);
-        in_img_2->setLabel("Image 1");
-        box_->addInput(in_img_2);
-        in_key_2 = new ConnectorIn(box_, 4);
-        in_key_2->setType(csapex::connection_types::KeypointMessage::make());
-        in_key_2->setLabel("Keypoints 1");
-        box_->addInput(in_key_2);
-        in_des_2 = new ConnectorIn(box_, 5);
-        in_des_2->setType(csapex::connection_types::DescriptorMessage::make());
-        in_des_2->setLabel("Descriptor 1");
-        box_->addInput(in_des_2);
+        in_img_2 = box_->addInput<CvMatMessage>("Image 2");
+        in_key_2 = box_->addInput<KeypointMessage>("Keypoints 2");
+        in_des_2 = box_->addInput<DescriptorMessage>("Descriptor 2");
 
-        out_img = new ConnectorOut(box_, 0);
-        out_img->setLabel("Debug View");
-        box_->addOutput(out_img);
+        out_img = box_->addOutput<CvMatMessage>("Debug View");
     }
 }

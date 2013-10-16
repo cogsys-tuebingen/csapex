@@ -34,17 +34,10 @@ void ImagePadding::fill(QBoxLayout *layout)
         slider = QtHelper::makeSlider(layout, "border width", 0, 0, 500);
         connect(slider, SIGNAL(valueChanged(int)), this, SLOT(update()));
 
-        input_ = new ConnectorIn(box_, 0);
-        input_->setLabel("Image");
-        box_->addInput(input_);
+        input_ = box_->addInput<CvMatMessage>("Image");
 
-        output_ = new ConnectorOut(box_, 0);
-        output_->setLabel("Expanded Image");
-        box_->addOutput(output_);
-
-        output_mask_ = new ConnectorOut(box_, 1);
-        output_mask_->setLabel("Expanded Mask");
-        box_->addOutput(output_mask_);
+        output_ = box_->addOutput<CvMatMessage>("Expanded Image");
+        output_mask_ = box_->addOutput<CvMatMessage>("Expanded Mask");
     }
 }
 
@@ -59,9 +52,7 @@ void ImagePadding::messageArrived(ConnectorIn *source)
         return;
     }
 
-    ConnectionType::Ptr msg = input_->getMessage();
-    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
-
+    CvMatMessage::Ptr img_msg = input_->getMessage<CvMatMessage>();
 
     int rows = img_msg->value.rows;
     int cols = img_msg->value.cols;

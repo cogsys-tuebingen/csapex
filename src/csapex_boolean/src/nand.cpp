@@ -27,30 +27,18 @@ void NAND::fill(QBoxLayout *layout)
 {
     box_->setSynchronizedInputs(true);
 
-    in_a = new ConnectorIn(box_, 0);
-    in_a->setType(BooleanMessage::make());
-    in_a->setLabel("A");
-    box_->addInput(in_a);
+    in_a = box_->addInput<BooleanMessage>("A");
+    in_b = box_->addInput<BooleanMessage>("B");
 
-    in_b = new ConnectorIn(box_, 1);
-    in_b->setType(BooleanMessage::make());
-    in_b->setLabel("B");
-    box_->addInput(in_b);
-
-    out = new ConnectorOut(box_, 0);
-    out->setType(BooleanMessage::make());
-    out->setLabel("A nand B");
-    box_->addOutput(out);
+    out = box_->addOutput<BooleanMessage>("A nand B");
 }
 
 void NAND::allConnectorsArrived()
 {
-    ConnectionType::Ptr msg_a = in_a->getMessage();
-    BooleanMessage::Ptr a = boost::dynamic_pointer_cast<BooleanMessage> (msg_a);
+    BooleanMessage::Ptr a = in_a->getMessage<BooleanMessage>();
     assert(a);
 
-    ConnectionType::Ptr msg_b = in_b->getMessage();
-    BooleanMessage::Ptr b = boost::dynamic_pointer_cast<BooleanMessage> (msg_b);
+    BooleanMessage::Ptr b = in_b->getMessage<BooleanMessage>();
     assert(b);
 
     BooleanMessage::Ptr msg(new BooleanMessage);

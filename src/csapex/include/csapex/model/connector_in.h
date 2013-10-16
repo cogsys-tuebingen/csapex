@@ -42,10 +42,11 @@ public:
 
     template <typename R>
     typename R::Ptr getMessage() {
-        return boost::dynamic_pointer_cast<R> (getMessage());
+        QMutexLocker lock(&io_mutex);
+        return boost::dynamic_pointer_cast<R> (message_);
     }
 
-    virtual ConnectionType::Ptr getMessage();
+    virtual ConnectionType::Ptr getMessage()  __attribute__ ((deprecated));
 
     virtual bool targetsCanBeMovedTo(Connector* other_side) const;
     virtual bool isConnected() const;

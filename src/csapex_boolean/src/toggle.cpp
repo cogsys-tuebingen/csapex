@@ -24,10 +24,7 @@ Toggle::Toggle()
 
 void Toggle::fill(QBoxLayout *layout)
 {
-    out = new ConnectorOut(box_, 0);
-    out->setType(csapex::connection_types::BooleanMessage::make());
-    out->setLabel("Signal");
-    box_->addOutput(out);
+    out = box_->addOutput<connection_types::BooleanMessage>("Signal");
 
     btn = new QPushButton();
     btn->setCheckable(true);
@@ -43,11 +40,6 @@ void Toggle::tick()
     csapex::connection_types::BooleanMessage::Ptr msg(new csapex::connection_types::BooleanMessage);
     msg->value = signal_;
     out->publish(msg);
-}
-
-void Toggle::messageArrived(ConnectorIn *source)
-{
-    // NO INPUT
 }
 
 void Toggle::setSignal(bool signal)

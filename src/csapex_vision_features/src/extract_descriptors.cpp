@@ -39,15 +39,13 @@ void ExtractDescriptors::allConnectorsArrived()
 
     setError(false);
 
-    ConnectionType::Ptr msg = in_img->getMessage();
-    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
+    CvMatMessage::Ptr img_msg = in_img->getMessage<CvMatMessage>();
 
     DescriptorMessage::Ptr des_msg(new DescriptorMessage);
 
     {
         QMutexLocker lock(&extractor_mutex);
-        ConnectionType::Ptr msg = in_key->getMessage();
-        KeypointMessage::Ptr key_msg = boost::dynamic_pointer_cast<KeypointMessage>(msg);
+        KeypointMessage::Ptr key_msg = in_key->getMessage<KeypointMessage>();
 
         extractor->extractDescriptors(img_msg->value, key_msg->value, des_msg->value);
     }
@@ -61,18 +59,10 @@ void ExtractDescriptors::fill(QBoxLayout* layout)
     if(selection_des == NULL) {
         box_->setSynchronizedInputs(true);
 
-        in_img = new ConnectorIn(box_, 0);
-        in_img->setLabel("Image");
-        box_->addInput(in_img);
-        in_key = new ConnectorIn(box_, 1);
-        in_key->setType(csapex::connection_types::KeypointMessage::make());
-        in_key->setLabel("Keypoints");
-        box_->addInput(in_key);
+        in_img = box_->addInput<CvMatMessage>("Image");
+        in_key = box_->addInput<KeypointMessage>("Keypoints");
 
-        out_des = new ConnectorOut(box_, 0);
-        out_des->setLabel("Descriptors");
-        out_des->setType(csapex::connection_types::DescriptorMessage::make());
-        box_->addOutput(out_des);
+        out_des = box_->addOutput<DescriptorMessage>("Descriptors");
 
         ExtractorManager& manager = ExtractorManager::instance();
 

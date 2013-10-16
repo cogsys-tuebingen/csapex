@@ -38,9 +38,7 @@ ImportRos::ImportRos()
 void ImportRos::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = new ConnectorOut(box_, 0);
-        connector_->setLabel("Something");
-        connector_->setType(connection_types::AnyMessage::make());
+        connector_ = box_->addOutput<connection_types::AnyMessage>("Something");
 
         dynamic_layout = new QVBoxLayout;
         layout->addLayout(dynamic_layout);
@@ -48,8 +46,6 @@ void ImportRos::fill(QBoxLayout *layout)
         QPushButton* refresh = new QPushButton("refresh");
         layout->addWidget(refresh);
         connect(refresh, SIGNAL(clicked()), this, SLOT(refresh()));
-
-        box_->addOutput(connector_);
     }
 }
 

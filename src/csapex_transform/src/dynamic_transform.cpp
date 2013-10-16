@@ -98,31 +98,12 @@ void DynamicTransform::fill(QBoxLayout* layout)
 {
     box_->setSynchronizedInputs(true);
 
-    time_in_ = new ConnectorIn(box_, 0);
-    time_in_->setOptional(true);
-    time_in_->setType(connection_types::TimeStampMessage::make());
-    box_->addInput(time_in_);
+    time_in_ = box_->addInput<connection_types::TimeStampMessage>("Time", true);
+    frame_in_from_ = box_->addInput<connection_types::StringMessage>("Origin Frame", true);
+    frame_in_to_ = box_->addInput<connection_types::StringMessage>("Target Frame", true);
 
-    frame_in_from_ = new ConnectorIn(box_, 1);
-    frame_in_from_->setOptional(true);
-    frame_in_from_->setLabel("Origin Frame");
-    frame_in_from_->setType(connection_types::StringMessage::make());
-    box_->addInput(frame_in_from_);
-
-    frame_in_to_ = new ConnectorIn(box_, 2);
-    frame_in_to_->setOptional(true);
-    frame_in_to_->setLabel("Target Frame");
-    frame_in_to_->setType(connection_types::StringMessage::make());
-    box_->addInput(frame_in_to_);
-
-    output_ = new ConnectorOut(box_, 0);
-    output_->setType(connection_types::TransformMessage::make());
-    box_->addOutput(output_);
-
-    output_frame_ = new ConnectorOut(box_, 1);
-    output_frame_->setType(connection_types::StringMessage::make());
-    output_frame_->setLabel("Target Frame");
-    box_->addOutput(output_frame_);
+    output_ = box_->addOutput<connection_types::TransformMessage>("Transform");
+    output_frame_ = box_->addOutput<connection_types::StringMessage>("Target Frame");
 
     from_box_ = new QComboBox;
     from_box_->setEditable(true);

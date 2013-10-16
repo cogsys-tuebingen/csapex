@@ -33,18 +33,13 @@ void Filter::fill(QBoxLayout* parent)
     if(input_img_ == NULL) {
         box_->setSynchronizedInputs(true);
 
-        input_img_ = new ConnectorIn(box_, 0);
-        box_->addInput(input_img_);
+        input_img_ = box_->addInput<CvMatMessage>("Image");
         if(usesMask()) {
-            input_mask_ = new ConnectorIn(box_, 1);
-            input_mask_->setOptional(true);
-            box_->addInput(input_mask_);
+            input_mask_ = box_->addInput<CvMatMessage>("Mask", true);
         }
-        output_img_ = new ConnectorOut(box_, 0);
-        box_->addOutput(output_img_);
+        output_img_ = box_->addOutput<CvMatMessage>("Image");
         if(usesMask()) {
-            output_mask_ = new ConnectorOut(box_, 1);
-            box_->addOutput(output_mask_);
+            output_mask_ = box_->addOutput<CvMatMessage>("Mask");
         }
 
         insert(parent);
@@ -53,11 +48,10 @@ void Filter::fill(QBoxLayout* parent)
 
 void Filter::allConnectorsArrived()
 {
-    ConnectionType::Ptr msg = input_img_->getMessage();
-    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
+    CvMatMessage::Ptr img_msg = input_img_->getMessage<CvMatMessage>();
     CvMatMessage::Ptr mask_msg;
     if(usesMask() && input_mask_->isConnected()) {
-        mask_msg = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_->getMessage());
+        mask_msg = input_mask_->getMessage<CvMatMessage>();
     }
 
     if(img_msg.get() && !img_msg->value.empty()) {

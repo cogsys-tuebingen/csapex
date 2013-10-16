@@ -28,21 +28,10 @@ void CropBox::fill(QBoxLayout *layout)
 {
     box_->setSynchronizedInputs(true);
 
-    input_cloud_ = new ConnectorIn(box_, 0);
-    input_cloud_->setLabel("PointCloud");
-    input_cloud_->setType(PointCloudMessage::make());
+    input_cloud_ = box_->addInput<PointCloudMessage>("PointCloud");
 
-    output_pos_ = new ConnectorOut(box_, 0);
-    output_pos_->setLabel("cropped PointCloud (+)");
-    output_pos_->setType(PointCloudMessage::make());
-
-    output_neg_ = new ConnectorOut(box_, 1);
-    output_neg_->setLabel("cropped PointCloud (-)");
-    output_neg_->setType(PointCloudMessage::make());
-
-    box_->addInput(input_cloud_);
-    box_->addOutput(output_pos_);
-    box_->addOutput(output_neg_);
+    output_pos_ = box_->addOutput<PointCloudMessage>("cropped PointCloud (+)");
+    output_neg_ = box_->addOutput<PointCloudMessage>("cropped PointCloud (-)");
 
     x_ = QtHelper::makeDoubleSlider(layout, "origin/x", 0.0, -5.0, 5.0, 0.01);
     y_ = QtHelper::makeDoubleSlider(layout, "origin/y", 0.0, -5.0, 5.0, 0.01);

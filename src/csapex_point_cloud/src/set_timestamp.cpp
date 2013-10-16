@@ -26,27 +26,11 @@ void SetTimeStamp::fill(QBoxLayout *layout)
 {
     box_->setSynchronizedInputs(true);
 
-    input_ = new ConnectorIn(box_, 0);
-    input_->setLabel("PointCloud");
-    input_->setType(connection_types::PointCloudMessage::make());
+    input_ = box_->addInput<connection_types::PointCloudMessage>("PointCloud");
+    input_frame_ = box_->addInput<connection_types::StringMessage>("Frame", true);
+    input_time_ = box_->addInput<connection_types::TimeStampMessage>("Time");
 
-    input_time_ = new ConnectorIn(box_, 1);
-    input_time_->setLabel("Time");
-    input_time_->setType(connection_types::TimeStampMessage::make());
-
-    input_frame_ = new ConnectorIn(box_, 2);
-    input_frame_->setOptional(true);
-    input_frame_->setLabel("Frame");
-    input_frame_->setType(connection_types::StringMessage::make());
-
-    output_ = new ConnectorOut(box_, 0);
-    output_->setLabel("PointCloud");
-    output_->setType(connection_types::PointCloudMessage::make());
-
-    box_->addInput(input_);
-    box_->addInput(input_time_);
-    box_->addInput(input_frame_);
-    box_->addOutput(output_);
+    output_ = box_->addOutput<connection_types::PointCloudMessage>("PointCloud");
 }
 
 void SetTimeStamp::allConnectorsArrived()

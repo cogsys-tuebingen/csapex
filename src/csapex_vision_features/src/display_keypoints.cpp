@@ -26,8 +26,8 @@ DisplayKeypoints::DisplayKeypoints()
 
 void DisplayKeypoints::allConnectorsArrived()
 {
-    CvMatMessage::Ptr img_msg = boost::dynamic_pointer_cast<CvMatMessage> (in_img->getMessage());
-    KeypointMessage::Ptr key_msg = boost::dynamic_pointer_cast<KeypointMessage> (in_key->getMessage());
+    CvMatMessage::Ptr img_msg = in_img->getMessage<CvMatMessage>();
+    KeypointMessage::Ptr key_msg = in_key->getMessage<KeypointMessage>();
 
     CvMatMessage::Ptr out(new CvMatMessage);
     cv::drawKeypoints(img_msg->value, key_msg->value, out->value, state.color, state.flags);
@@ -40,19 +40,10 @@ void DisplayKeypoints::fill(QBoxLayout* layout)
     if(in_key == NULL) {
         box_->setSynchronizedInputs(true);
 
-        in_img = new ConnectorIn(box_, 0);
-        in_img->setType(csapex::connection_types::CvMatMessage::make());
-        in_img->setLabel("Image");
-        box_->addInput(in_img);
+        in_img = box_->addInput<CvMatMessage>("Image");
+        in_key = box_->addInput<KeypointMessage> ("Keypoints");
 
-        in_key = new ConnectorIn(box_, 1);
-        in_key->setType(csapex::connection_types::KeypointMessage::make());
-        in_key->setLabel("Keypoints");
-        box_->addInput(in_key);
-
-        out_img = new ConnectorOut(box_, 2);
-        out_img->setLabel("Image");
-        box_->addOutput(out_img);
+        out_img = box_->addOutput<CvMatMessage>("Image");
 
         colorbox = new QComboBox;
         colorbox->addItem("Random Color");

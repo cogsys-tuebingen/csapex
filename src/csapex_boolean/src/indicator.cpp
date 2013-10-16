@@ -25,10 +25,9 @@ Indicator::Indicator()
 
 void Indicator::fill(QBoxLayout *layout)
 {
-    in = new ConnectorIn(box_, 0);
-    in->setType(csapex::connection_types::BooleanMessage::make());
-    in->setLabel("Signal");
-    box_->addInput(in);
+    box_->setSynchronizedInputs(true);
+
+    in = box_->addInput<BooleanMessage>("Signal");
 
     indicator_ = new QCheckBox("signal");
 
@@ -40,10 +39,9 @@ void Indicator::fill(QBoxLayout *layout)
     layout->addWidget(indicator_);
 }
 
-void Indicator::messageArrived(ConnectorIn *source)
+void Indicator::allConnectorsArrived()
 {
-    ConnectionType::Ptr msg = in->getMessage();
-    BooleanMessage::Ptr a = boost::dynamic_pointer_cast<BooleanMessage> (msg);
+    BooleanMessage::Ptr a = in->getMessage<BooleanMessage>();
     assert(a);
 
     indicator_->setChecked(a->value);

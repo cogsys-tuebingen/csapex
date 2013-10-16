@@ -25,14 +25,10 @@ ImportCin::ImportCin()
     setIcon(QIcon(":/terminal.png"));
 }
 
-void ImportCin::fill(QBoxLayout *layout)
+void ImportCin::fill(QBoxLayout *)
 {
     if(connector_ == NULL) {
-        connector_ = new ConnectorOut(box_, 0);
-        connector_->setLabel("Anything");
-        connector_->setType(connection_types::AnyMessage::make());
-
-        box_->addOutput(connector_);
+        connector_ = box_->addOutput<connection_types::AnyMessage>("Anything");
     }
 }
 
@@ -101,9 +97,4 @@ void ImportCin::tick()
         std::cout << "YAML::ParserException: " << e.what() << "\n";
     }
 
-}
-
-void ImportCin::messageArrived(ConnectorIn *source)
-{
-    // NO INPUT
 }

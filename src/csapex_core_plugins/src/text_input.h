@@ -17,7 +17,6 @@ public:
     TextInput();
 
     virtual void fill(QBoxLayout* layout);
-    virtual void messageArrived(ConnectorIn* source);
 
 public Q_SLOTS:
     void setText(QString text);

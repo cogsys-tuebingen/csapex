@@ -29,21 +29,12 @@ ImageCombiner::~ImageCombiner()
 void ImageCombiner::fill(QBoxLayout* layout)
 {
     if(input_img_a_ == NULL) {
-        input_img_a_ = new ConnectorIn(box_, 0);
-        input_img_a_->setLabel("Image 1");
-        box_->addInput(input_img_a_);
-        input_mask_a_ = new ConnectorIn(box_, 1);
-        input_mask_a_->setLabel("Mask 1");
-        box_->addInput(input_mask_a_);
-        input_img_b_ = new ConnectorIn(box_, 2);
-        input_img_b_->setLabel("Image 2");
-        box_->addInput(input_img_b_);
-        input_mask_b_ = new ConnectorIn(box_, 3);
-        input_mask_b_->setLabel("Mask 2");
-        box_->addInput(input_mask_b_);
+        input_img_a_ = box_->addInput<CvMatMessage>("Image 1");
+        input_mask_a_ = box_->addInput<CvMatMessage>("Mask 1");
+        input_img_b_ = box_->addInput<CvMatMessage>("Image 2");
+        input_mask_b_ = box_->addInput<CvMatMessage>("Mask 2");
 
-        output_img_ = new ConnectorOut(box_, 0);
-        box_->addOutput(output_img_);
+        output_img_ = box_->addOutput<CvMatMessage>("Image");
 
         insert(layout);
     }
@@ -78,10 +69,10 @@ void ImageCombiner::messageArrived(ConnectorIn* source)
     has_img_b = false;
     has_mask_b = false;
 
-    CvMatMessage::Ptr img_msg_a = boost::dynamic_pointer_cast<CvMatMessage> (input_img_a_->getMessage());
-    CvMatMessage::Ptr mask_msg_a = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_a_->getMessage());
-    CvMatMessage::Ptr img_msg_b = boost::dynamic_pointer_cast<CvMatMessage> (input_img_b_->getMessage());
-    CvMatMessage::Ptr mask_msg_b = boost::dynamic_pointer_cast<CvMatMessage> (input_mask_b_->getMessage());
+    CvMatMessage::Ptr img_msg_a  = input_img_a_-> getMessage<CvMatMessage>();
+    CvMatMessage::Ptr mask_msg_a = input_mask_a_->getMessage<CvMatMessage>();
+    CvMatMessage::Ptr img_msg_b  = input_img_b_-> getMessage<CvMatMessage>();
+    CvMatMessage::Ptr mask_msg_b = input_mask_b_->getMessage<CvMatMessage>();
 
     if(img_msg_a.get() && !img_msg_a->value.empty() && img_msg_b.get() && !img_msg_b->value.empty()) {
         if(!mask_msg_a.get()) {

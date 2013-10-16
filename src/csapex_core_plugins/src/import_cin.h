@@ -13,7 +13,6 @@ public:
     ImportCin();
 
     virtual void fill(QBoxLayout* layout);
-    virtual void messageArrived(ConnectorIn* source);
     virtual void tick();
 
 private:

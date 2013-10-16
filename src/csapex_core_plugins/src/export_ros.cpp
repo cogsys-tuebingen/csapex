@@ -31,9 +31,7 @@ ExportRos::ExportRos()
 void ExportRos::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = new ConnectorIn(box_, 0);
-        connector_->setLabel("Anything");
-        connector_->setType(connection_types::AnyMessage::make());
+        connector_ = box_->addInput<connection_types::AnyMessage>("Anything");
 
         box_->setSynchronizedInputs(true);
 
@@ -49,7 +47,6 @@ void ExportRos::fill(QBoxLayout *layout)
 
         connect(send, SIGNAL(clicked()), this, SLOT(updateTopic()));
 
-        box_->addInput(connector_);
     }
 }
 
@@ -59,7 +56,7 @@ void ExportRos::allConnectorsArrived()
         return;
     }
 
-    ConnectionType::Ptr msg = connector_->getMessage();
+    ConnectionType::Ptr msg = connector_->getMessage<ConnectionType>();
 
     if(create_pub) {
         pub = RosMessageConversion::instance().advertise(msg->toType(), state.topic, 1, true);

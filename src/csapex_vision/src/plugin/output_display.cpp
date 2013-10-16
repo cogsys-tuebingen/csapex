@@ -74,9 +74,7 @@ bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
 void OutputDisplay::fill(QBoxLayout* layout)
 {
     if(input_ == NULL) {
-        input_ = new ConnectorIn(box_, 0);
-        input_->setLabel("Image");
-        box_->addInput(input_);
+        input_ = box_->addInput<CvMatMessage>("Image");
 
         box_->setSynchronizedInputs(true);
 
@@ -158,8 +156,7 @@ void OutputDisplay::display(QSharedPointer<QImage> img)
 
 void OutputDisplay::allConnectorsArrived()
 {
-    ConnectionType::Ptr msg = input_->getMessage();
-    CvMatMessage::Ptr mat_msg = boost::dynamic_pointer_cast<CvMatMessage> (msg);
+    CvMatMessage::Ptr mat_msg = input_->getMessage<CvMatMessage>();
 
     if(mat_msg.get() && !mat_msg->value.empty()) {
         QSharedPointer<QImage> img = QtCvImageConverter::Converter<QImage, QSharedPointer>::mat2QImage(mat_msg->value);

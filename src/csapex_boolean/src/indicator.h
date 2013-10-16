@@ -22,7 +22,7 @@ public:
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void allConnectorsArrived();
 
 private:
     ConnectorIn* in;

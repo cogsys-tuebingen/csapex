@@ -34,7 +34,7 @@ bool AddConnector::doExecute()
             in = new ConnectorIn(box.get(), uuid);
         }
         c = in;
-        box->addInput(in);
+        box->registerInput(in);
     } else {
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_OUT, box->nextOutputId()) : c_uuid;
         ConnectorOut* out;
@@ -44,7 +44,7 @@ bool AddConnector::doExecute()
             out = new ConnectorOut(box.get(), uuid);
         }
         c = out;
-        box->addOutput(out);
+        box->registerOutput(out);
     }
 
     c->setType(ConnectionTypeManager::createMessage(type));

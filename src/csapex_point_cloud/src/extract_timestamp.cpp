@@ -26,22 +26,10 @@ void ExtractTimeStamp::fill(QBoxLayout *layout)
 {
     box_->setSynchronizedInputs(true);
 
-    input_ = new ConnectorIn(box_, 0);
-    input_->setLabel("PointCloud");
-    input_->setType(connection_types::PointCloudMessage::make());
+    input_ = box_->addInput<PointCloudMessage>("PointCloud");
 
-    output_ = new ConnectorOut(box_, 0);
-    output_->setLabel("Time");
-    output_->setType(connection_types::TimeStampMessage::make());
-
-    output_frame_ = new ConnectorOut(box_, 1);
-    output_frame_->setType(connection_types::StringMessage::make());
-    output_frame_->setLabel("Target Frame");
-    box_->addOutput(output_frame_);
-
-    box_->addInput(input_);
-    box_->addOutput(output_);
-    box_->addOutput(output_frame_);
+    output_ = box_->addOutput<TimeStampMessage>("Time");
+    output_frame_ = box_->addOutput<StringMessage>("Target Frame");
 }
 
 void ExtractTimeStamp::allConnectorsArrived()

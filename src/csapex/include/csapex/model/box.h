@@ -58,9 +58,9 @@ class Box : public QWidget, public Selectable
     friend class GraphIO;
     friend class Graph;
     friend class BoxWorker;
-    friend class command::MoveBox;
     friend class ProfilingWidget;
-//    friend class command::DeleteBox;
+    friend class command::MoveBox;
+    friend class command::AddConnector;
 
 public:
     typedef boost::shared_ptr<Box> Ptr;
@@ -121,8 +121,21 @@ public:
     virtual void init(const QPoint& pos);
     BoxedObject::Ptr getContent();
 
-    void addInput(ConnectorIn* in);
-    void addOutput(ConnectorOut* out);
+    template <typename T>
+    ConnectorIn* addInput(const std::string& label, bool optional = false) {
+        return addInput(T::make(), label, optional);
+    }
+
+    template <typename T>
+    ConnectorOut* addOutput(const std::string& label) {
+        return addOutput(T::make(), label);
+    }
+
+    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
+    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
+
+    void addInput(ConnectorIn* in) __attribute__ ((deprecated));
+    void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
 
     int nextInputId();
     int nextOutputId();
@@ -218,6 +231,9 @@ protected:
     void disconnectConnector(Connector* c);
 
     void resizeEvent(QResizeEvent * e);
+
+    void registerInput(ConnectorIn* in);
+    void registerOutput(ConnectorOut* out);
 
 protected:
     Ui::Box* ui;
