@@ -84,6 +84,8 @@ connection_types::Message::Ptr ImageProvider::next()
 
     next(msg->value, mask);
 
+    msg->encoding = (msg->value.channels() == 1) ? enc::mono : enc::bgr;
+
     return msg;
 }
 

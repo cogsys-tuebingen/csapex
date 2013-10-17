@@ -301,7 +301,7 @@ void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
 
     /// BOXES
     Graph::Ptr graph = dispatcher_->getGraph();
-    if(graph->hasSelectedBox()) {
+    if(!graph->hasSelectedBox()) {
         /// DEFAULT
         showContextMenuAddBox(global_pos);
 

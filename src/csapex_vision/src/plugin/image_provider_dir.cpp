@@ -19,8 +19,6 @@ ImageProviderDir::ImageProviderDir()
 
 void ImageProviderDir::load(const std::string& directory)
 {
-    std::cout << directory << "!!!" << std::endl;
-
     boost::filesystem::directory_iterator dir(directory);
     boost::filesystem::directory_iterator end;
 
@@ -28,11 +26,11 @@ void ImageProviderDir::load(const std::string& directory)
         bfs::path path = dir->path();
         if(path.filename() == "img.ppm") {
             std::cout << "image" << std::endl;
-            img_ = cv::imread(path.string());
+            img_ = cv::imread(path.string(), 0);
 
         } else if(path.filename() == "mask.ppm") {
             std::cout << "mask" << std::endl;
-            mask_ = cv::imread(path.string());
+            mask_ = cv::imread(path.string(), 0);
         }
     }
 
