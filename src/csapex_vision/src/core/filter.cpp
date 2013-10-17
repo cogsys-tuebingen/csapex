@@ -61,6 +61,8 @@ void Filter::allConnectorsArrived()
 
         filter(img_msg->value, mask_msg->value);
 
+        mask_msg->encoding = enc::mono;
+
         output_img_->publish(img_msg);
         if(usesMask() && mask_msg.get()) {
             output_mask_->publish(mask_msg);

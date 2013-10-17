@@ -38,6 +38,8 @@ void Segmentation::allConnectorsArrived()
         }
     }
 
+
+
     if(recompute) {
         state.channels = img->value.channels();
         state.encoding = img->encoding;
@@ -57,6 +59,8 @@ void Segmentation::allConnectorsArrived()
     } else {
         out_mask->value = bw;
     }
+
+    out_mask->encoding = enc::mono;
 
     output_mask_->publish(out_mask);
 }

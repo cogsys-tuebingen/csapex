@@ -21,6 +21,9 @@ struct Channel {
 typedef std::vector<Channel> Encoding;
 
 namespace enc {
+static const Encoding mono = boost::assign::list_of
+        (Channel("gray",0,255));
+
 static const Encoding bgr = boost::assign::list_of
         (Channel("b",0,255))
         (Channel("g",0,255))

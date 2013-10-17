@@ -324,7 +324,7 @@ void Connector::setMinimizedSize(bool mini)
     if(mini) {
         setFixedSize(16,8);
     } else {
-        setFixedSize(24,16);
+        setFixedSize(24,24);
     }
 }
 

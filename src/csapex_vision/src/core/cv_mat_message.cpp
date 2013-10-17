@@ -12,7 +12,7 @@ CvMatMessage::CvMatMessage()
 ConnectionType::Ptr CvMatMessage::clone() {
     Ptr new_msg(new CvMatMessage);
     value.copyTo(new_msg->value);
-
+    new_msg->encoding = encoding;
     return new_msg;
 }
 
