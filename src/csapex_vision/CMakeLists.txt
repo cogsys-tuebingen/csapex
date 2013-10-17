@@ -83,6 +83,7 @@ target_link_libraries(csapex_vision
 
 add_library(csapex_vision_plugin
     src/plugin/register_plugin.cpp
+    src/plugin/camera.cpp
     src/plugin/image_padding.cpp
     src/plugin/segmentation.cpp
     src/plugin/filter_blur.cpp

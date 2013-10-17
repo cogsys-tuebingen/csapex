@@ -2,6 +2,9 @@
 <class type="csapex::RegisterPlugin" base_class_type="csapex::CorePlugin">
   <description>none yet</description>
 </class>
+<class type="csapex::Camera" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 <class type="csapex::OutputDisplay" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
