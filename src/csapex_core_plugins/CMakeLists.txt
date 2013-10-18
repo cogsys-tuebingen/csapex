@@ -61,6 +61,8 @@ add_library(csapex_core_plugins
     src/import_ros.cpp
     src/global_option_panel.cpp
     src/text_input.cpp
+    src/text_display.cpp
+    src/say_text.cpp
     src/register_core_plugins.cpp
     ${QT_RESOURCES}
     ${MOC_PLUG}

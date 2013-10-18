@@ -8,6 +8,12 @@
 <class type="csapex::TextInput" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::TextDisplay" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
+<class type="csapex::SayText" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 <class type="csapex::ExportCout" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>

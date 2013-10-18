@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <name>csapex_bar_code</name>
+  <version>0.0.1</version>
+  <description>The csapex_bar_code package</description>
+
+  <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
+
+  <license>BSD</license>
+  <author email="sebastian.buck@uni-tuebingen.de">buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>csapex</build_depend>
+  <build_depend>csapex_vision</build_depend>
+  <build_depend>utils_vision</build_depend>
+
+  <run_depend>csapex</run_depend>
+  <run_depend>csapex_vision</run_depend>
+  <run_depend>utils_vision</run_depend>
+
+  <export>
+    <csapex plugin="${prefix}/plugins.xml" />
+  </export>
+</package>
