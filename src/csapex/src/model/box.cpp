@@ -31,8 +31,6 @@ const QString Box::MIME_MOVE = "csapex/model/box/move";
 
 const Box::Ptr Box::NullPtr;
 
-const unsigned Box::timer_history_length_ = 30;
-
 void Box::State::writeYaml(YAML::Emitter &out) const
 {
     out << YAML::Flow;
@@ -98,7 +96,8 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), content_(content), state(new State(this)), synchronized_inputs_(false), private_thread_(NULL), worker_(new NodeWorker(this)), down_(false), next_sub_id_(0), profiling_(false)
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), content_(content), state(new State(this)),
+      private_thread_(NULL), worker_(new NodeWorker(content)), down_(false), next_sub_id_(0), profiling_(false)
 {
     ui->setupUi(this);
 
@@ -123,6 +122,8 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     state->minimized = false;
 
     QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
+
+    QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
@@ -343,8 +344,6 @@ void Box::registerInput(ConnectorIn* in)
     QObject::connect(in, SIGNAL(messageArrived(Connector*)), worker_, SLOT(forwardMessage(Connector*)));
 
     connectConnector(in);
-
-//    has_msg[in] = false;
 
     Q_EMIT connectorCreated(in);
     Q_EMIT changed(this);
@@ -717,12 +716,14 @@ void Box::eventModelChanged()
 
 void Box::tick()
 {
-    while(timer_history_.size() > timer_history_length_) {
-        timer_history_.pop_front();
-    }
     if(state->enabled) {
         Q_EMIT tickRequest();
     }
+}
+
+NodeWorker* Box::getNodeWorker()
+{
+    return worker_;
 }
 
 void Box::showProfiling()
@@ -759,7 +760,7 @@ void Box::killContent()
         }
 
         private_thread_ = NULL;
-        worker_ = new NodeWorker(this);
+        worker_ = new NodeWorker(content_);
 
         QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
         BOOST_FOREACH(ConnectorIn* in, input) {
@@ -777,7 +778,7 @@ bool Box::isMinimizedSize() const
 
 void Box::setSynchronizedInputs(bool sync)
 {
-    synchronized_inputs_ = sync;
+    worker_->setSynchronizedInputs(sync);
 }
 
 void Box::minimizeBox(bool minimize)
@@ -875,31 +876,6 @@ Command::Ptr Box::removeAllConnectionsCmd()
         }
     }
 
-    return cmd;
-}
-
-Command::Ptr Box::removeAllOutputsCmd()
-{
-    command::Meta::Ptr cmd(new command::Meta);
-
-    BOOST_FOREACH(ConnectorOut* i, output) {
-        if(i->isConnected()) {
-            cmd->add(i->removeAllConnectionsCmd());
-        }
-    }
-
-    return cmd;
-}
-
-Command::Ptr Box::removeAllInputsCmd()
-{
-    command::Meta::Ptr cmd(new command::Meta);
-
-    BOOST_FOREACH(ConnectorIn* i, input) {
-        if(i->isConnected()) {
-            cmd->add(i->removeAllConnectionsCmd());
-        }
-    }
     return cmd;
 }
 

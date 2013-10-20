@@ -5,16 +5,21 @@
 #include <csapex/model/boxed_object.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/model/box.h>
 #include <csapex/utility/timer.h>
 
 using namespace csapex;
 
-NodeWorker::NodeWorker(Box *parent)
-    : parent_(parent)
+const unsigned NodeWorker::timer_history_length_ = 30;
+
+NodeWorker::NodeWorker(BoxedObject::Ptr node)
+    : node_(node), synchronized_inputs_(false)
 {
-    node_ = parent_->getContent();
     assert(node_);
+}
+
+void NodeWorker::setSynchronizedInputs(bool s)
+{
+    synchronized_inputs_ = s;
 }
 
 void NodeWorker::forwardMessage(Connector *s)
@@ -23,7 +28,7 @@ void NodeWorker::forwardMessage(Connector *s)
     assert(source);
 
     if(node_->isEnabled()) {
-        if(parent_->synchronized_inputs_) {
+        if(synchronized_inputs_) {
             forwardMessageSynchronized(source);
         } else {
             forwardMessageDirectly(source);
@@ -40,18 +45,17 @@ void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
 {
     Timer t;
     node_->messageArrived(source);
-    parent_->timer_history_.push_back(t.elapsedMs());
+    timer_history_.push_back(t.elapsedMs());
 
-    std::cout << "warning: using deprecated message forwarding in " << parent_->getType() << std::endl;
-    parent_->messageProcessed();
+    Q_EMIT messageProcessed();
 }
 
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
-    parent_->has_msg[source] = true;
+    has_msg_[source] = true;
 
     typedef std::pair<ConnectorIn*, bool> PAIR;
-    foreach(const PAIR& pair, parent_->has_msg) {
+    foreach(const PAIR& pair, has_msg_) {
         ConnectorIn* c = pair.first;
         if(!pair.second) {
             // connector doesn't have a message
@@ -72,13 +76,13 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     Timer t;
     node_->allConnectorsArrived();
-    parent_->timer_history_.push_back(t.elapsedMs());
+    timer_history_.push_back(t.elapsedMs());
 
-    parent_->messageProcessed();
+    Q_EMIT messageProcessed();
 
 
-    foreach(const PAIR& pair, parent_->has_msg) {
-        parent_->has_msg[pair.first] = false;
+    foreach(const PAIR& pair, has_msg_) {
+        has_msg_[pair.first] = false;
     }
 }
 
@@ -86,6 +90,10 @@ void NodeWorker::tick()
 {
     if(node_->isEnabled()) {
         node_->tick();
+    }
+
+    while(timer_history_.size() > timer_history_length_) {
+        timer_history_.pop_front();
     }
 }
 void NodeWorker::eventGuiChanged()

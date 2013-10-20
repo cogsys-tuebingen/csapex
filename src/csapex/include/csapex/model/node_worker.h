@@ -6,6 +6,8 @@
 
 /// SYSTEM
 #include <QObject>
+#include <map>
+#include <deque>
 
 namespace csapex {
 
@@ -13,8 +15,13 @@ struct NodeWorker : public QObject
 {
     Q_OBJECT
 
+    friend class ProfilingWidget;
+
 public:
-    NodeWorker(Box* parent);
+    typedef boost::shared_ptr<NodeWorker> Ptr;
+
+public:
+    NodeWorker(BoxedObjectPtr node);
 
 public Q_SLOTS:
     void forwardMessage(Connector* source);
@@ -27,9 +34,21 @@ public Q_SLOTS:
 
     void triggerError(bool e, const std::string& what);
 
+    void setSynchronizedInputs(bool s);
+
+Q_SIGNALS:
+    void messageProcessed();
+
+public:
+    static const unsigned timer_history_length_;
+
 private:
     BoxedObjectPtr node_;
-    Box* parent_;
+
+    bool synchronized_inputs_;
+    std::map<ConnectorIn*, bool> has_msg_;
+
+    std::deque<int> timer_history_;
 };
 
 }

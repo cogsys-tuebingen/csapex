@@ -25,6 +25,7 @@ protected:
 
 private:
     Box* box_;
+    NodeWorker* node_worker_;
 
     int w_;
     int h_;

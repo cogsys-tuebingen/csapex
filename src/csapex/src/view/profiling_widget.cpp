@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/box.h>
+#include <csapex/model/node_worker.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -10,7 +11,7 @@
 using namespace csapex;
 
 ProfilingWidget::ProfilingWidget(QWidget *parent, Box *box)
-    : QWidget(parent), box_(box)
+    : QWidget(parent), box_(box), node_worker_(box->getNodeWorker())
 {
     w_ = 200;
     h_ = 75;
@@ -49,7 +50,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     int bottom = h_ - padding;
 
     double content_width = right - left - 2 * padding;
-    double indiv_width = content_width / box_->timer_history_length_;
+    double indiv_width = content_width / node_worker_->timer_history_length_;
     int content_height = bottom - up - 2 * padding;
 
     p.setPen(QPen(Qt::black));
@@ -60,11 +61,11 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     // y-axis
     p.drawLine(left, bottom, left, up);
 
-    size_t max = box_->timer_history_length_;
-    int n = std::min(max, box_->timer_history_.size());
+    size_t max = node_worker_->timer_history_length_;
+    int n = std::min(max, node_worker_->timer_history_.size());
 
     if(n > 0) {
-        int maxt = *std::max_element(box_->timer_history_.begin(), box_->timer_history_.end());
+        int maxt = *std::max_element(node_worker_->timer_history_.begin(), node_worker_->timer_history_.end());
 
         std::stringstream txt;
         txt << maxt << " ms";
@@ -88,7 +89,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
         double x = left + padding + (max - n) * indiv_width;
         for(int i = 0; i < n; ++i) {
-            int time = box_->timer_history_[i];
+            int time = node_worker_->timer_history_[i];
 
             double f = time / maxt_f;
             assert(0.0 <= f);

@@ -36,7 +36,6 @@ class Box : public QWidget, public Selectable
     friend class GraphIO;
     friend class Graph;
     friend class NodeWorker;
-    friend class ProfilingWidget;
     friend class command::MoveBox;
     friend class command::AddConnector;
 
@@ -145,8 +144,6 @@ public:
     virtual Graph::Ptr getSubGraph();
 
     Command::Ptr removeAllConnectionsCmd();
-    Command::Ptr removeAllOutputsCmd();
-    Command::Ptr removeAllInputsCmd();
 
     YAML::Emitter& save(YAML::Emitter& out) const;
     void read(YAML::Node& doc);
@@ -160,13 +157,14 @@ public:
 
     virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
+    NodeWorker* getNodeWorker();
+
 protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
     void enabledChange(bool val);
     void makeThread();
-    void messageProcessed();
 
 public Q_SLOTS:
     void deleteBox();
@@ -180,6 +178,7 @@ public Q_SLOTS:
     void showProfiling();
     void tick();
 
+    void messageProcessed();
     void showContextMenu(const QPoint& pos);
 
 Q_SIGNALS:
@@ -213,28 +212,24 @@ protected:
     void registerInput(ConnectorIn* in);
     void registerOutput(ConnectorOut* out);
 
+
 protected:
     Ui::Box* ui;
 
     CommandDispatcher* dispatcher_;
 
-    State::Ptr state;
     BoxedObject::Ptr content_;
+    State::Ptr state;
 
     std::vector<ConnectorIn*> input;
-    std::map<ConnectorIn*, bool> has_msg;
 
     std::vector<ConnectorOut*> output;
 
-    bool synchronized_inputs_;
 
     QMutex worker_mutex_;
 
     QThread* private_thread_;
     NodeWorker* worker_;
-
-    static const unsigned timer_history_length_;
-    std::deque<int> timer_history_;
 
     bool down_;
     QPoint start_drag_;
