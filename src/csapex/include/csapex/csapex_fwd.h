@@ -29,6 +29,8 @@ FWD(ConnectionType);
 
 FWD(Template);
 
+class NodeWorker;
+
 class Designer;
 class DesignBoard;
 

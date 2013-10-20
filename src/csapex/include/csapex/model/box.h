@@ -27,28 +27,6 @@ class Box;
 namespace csapex
 {
 
-struct BoxWorker : public QObject
-{
-    Q_OBJECT
-
-public:
-    BoxWorker(Box* parent)
-        : parent_(parent)
-    {}
-
-public Q_SLOTS:
-    void forwardMessage(Connector* source);
-
-    void forwardMessageDirectly(ConnectorIn* source);
-    void forwardMessageSynchronized(ConnectorIn* source);
-
-    void eventGuiChanged();
-    void tick();
-    Box* parent();
-
-private:
-    Box* parent_;
-};
 
 class Box : public QWidget, public Selectable
 {
@@ -57,7 +35,7 @@ class Box : public QWidget, public Selectable
     friend class DesignerIO;
     friend class GraphIO;
     friend class Graph;
-    friend class BoxWorker;
+    friend class NodeWorker;
     friend class ProfilingWidget;
     friend class command::MoveBox;
     friend class command::AddConnector;
@@ -253,7 +231,7 @@ protected:
     QMutex worker_mutex_;
 
     QThread* private_thread_;
-    BoxWorker* worker_;
+    NodeWorker* worker_;
 
     static const unsigned timer_history_length_;
     std::deque<int> timer_history_;

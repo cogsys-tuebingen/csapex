@@ -7,11 +7,11 @@
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/delete_box.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/utility/timer.h>
 #include <csapex/view/profiling_widget.h>
 
 /// SYSTEM
@@ -98,11 +98,10 @@ void Box::State::readYaml(const YAML::Node &node)
 
 
 Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), state(new State(this)), synchronized_inputs_(false), private_thread_(NULL), worker_(new BoxWorker(this)), down_(false), next_sub_id_(0), profiling_(false)
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), content_(content), state(new State(this)), synchronized_inputs_(false), private_thread_(NULL), worker_(new NodeWorker(this)), down_(false), next_sub_id_(0), profiling_(false)
 {
     ui->setupUi(this);
 
-    content_ = content;
     content_->setBox(this);
 
     ui->enablebtn->setCheckable(content_->canBeDisabled());
@@ -229,91 +228,6 @@ void Box::stop()
     }
 }
 
-void BoxWorker::forwardMessage(Connector *s)
-{
-    ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
-    assert(source);
-
-    if(parent_->content_->isEnabled()) {
-        if(parent_->synchronized_inputs_) {
-            forwardMessageSynchronized(source);
-        } else {
-            forwardMessageDirectly(source);
-        }
-    }
-
-
-    if(!parent_->content_->isError() || parent_->content_->errorLevel() != Displayable::EL_ERROR) {
-        parent_->content_->setError(false);
-    }
-}
-
-void BoxWorker::forwardMessageDirectly(ConnectorIn *source)
-{
-    Timer t;
-    parent_->content_->messageArrived(source);
-    parent_->timer_history_.push_back(t.elapsedMs());
-
-    std::cout << "warning: using deprecated message forwarding in " << parent_->getType() << std::endl;
-    parent_->messageProcessed();
-}
-
-void BoxWorker::forwardMessageSynchronized(ConnectorIn *source)
-{
-    parent_->has_msg[source] = true;
-
-    typedef std::pair<ConnectorIn*, bool> PAIR;
-    foreach(const PAIR& pair, parent_->has_msg) {
-        ConnectorIn* c = pair.first;
-        if(!pair.second) {
-            // connector doesn't have a message
-            if(c->isOptional()) {
-                if(c->isConnected()) {
-                    // c is optional and connected, so we have to wait for a message
-                    return;
-                } else {
-                    // c is optinal and not connected, so we can proceed
-                    /* do nothing */
-                }
-            } else {
-                // c is mandatory, so we have to wait for a message
-                return;
-            }
-        }
-    }
-
-    Timer t;
-    parent_->content_->allConnectorsArrived();
-    parent_->timer_history_.push_back(t.elapsedMs());
-
-    parent_->messageProcessed();
-
-
-    foreach(const PAIR& pair, parent_->has_msg) {
-        parent_->has_msg[pair.first] = false;
-    }
-}
-
-void BoxWorker::tick()
-{
-    if(parent_->content_->isEnabled()) {
-        parent_->content_->tick();
-    }
-}
-void BoxWorker::eventGuiChanged()
-{
-    if(parent_->content_->isEnabled()) {
-        parent_->content_->updateModel();
-    }
-}
-
-
-Box* BoxWorker::parent()
-{
-    return parent_;
-}
-
-
 void Box::showContextMenu(const QPoint& pos)
 {
     Q_EMIT showContextMenuForBox(this, mapToGlobal(pos));
@@ -430,7 +344,7 @@ void Box::registerInput(ConnectorIn* in)
 
     connectConnector(in);
 
-    has_msg[in] = false;
+//    has_msg[in] = false;
 
     Q_EMIT connectorCreated(in);
     Q_EMIT changed(this);
@@ -845,7 +759,7 @@ void Box::killContent()
         }
 
         private_thread_ = NULL;
-        worker_ = new BoxWorker(this);
+        worker_ = new NodeWorker(this);
 
         QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
         BOOST_FOREACH(ConnectorIn* in, input) {

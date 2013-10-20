@@ -80,6 +80,7 @@ add_library(csapex SHARED
     src/command/delete_fulcrum.cpp
 
     src/model/box.cpp
+    src/model/node_worker.cpp
     src/model/box_group.cpp
     src/model/boxed_object.cpp
     src/model/boxed_object_constructor.cpp

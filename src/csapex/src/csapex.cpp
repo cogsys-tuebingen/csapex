@@ -3,6 +3,7 @@
 #include <csapex/view/csapex_window.h>
 #include <csapex/model/box.h>
 #include <csapex/model/boxed_object.h>
+#include <csapex/model/node_worker.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -37,14 +38,14 @@ struct CsApexApp : public QApplication {
         } catch(const std::exception& e) {
             BoxedObject* bo = dynamic_cast<BoxedObject*> (receiver);
             Box* box = dynamic_cast<Box*> (receiver);
-            BoxWorker* bw = dynamic_cast<BoxWorker*> (receiver);
+            NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
 
             if(bo) {
                 bo->setError(true, e.what());
             } else if(box) {
                 box->getContent()->setError(true, e.what());
             } else if(bw) {
-                bw->parent()->getContent()->setError(true, e.what());
+                bw->triggerError(true, e.what());
             } else {
                 std::cerr << "Uncatched exception:" << e.what() << std::endl;
 #if DEBUG
