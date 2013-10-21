@@ -21,7 +21,7 @@ ImageProviderImg::ImageProviderImg()
 
 void ImageProviderImg::load(const std::string& path)
 {
-    img_ = cv::imread(path, 0);
+    img_ = cv::imread(path, CV_LOAD_IMAGE_UNCHANGED);
 }
 
 std::vector<std::string> ImageProviderImg::getExtensions() const

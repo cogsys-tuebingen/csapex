@@ -26,11 +26,11 @@ void ImageProviderDir::load(const std::string& directory)
         bfs::path path = dir->path();
         if(path.filename() == "img.ppm") {
             std::cout << "image" << std::endl;
-            img_ = cv::imread(path.string(), 0);
+            img_ = cv::imread(path.string(), CV_LOAD_IMAGE_UNCHANGED);
 
         } else if(path.filename() == "mask.ppm") {
             std::cout << "mask" << std::endl;
-            mask_ = cv::imread(path.string(), 0);
+            mask_ = cv::imread(path.string(), CV_LOAD_IMAGE_GRAYSCALE);
         }
     }
 
