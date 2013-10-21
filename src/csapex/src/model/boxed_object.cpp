@@ -86,14 +86,6 @@ QIcon BoxedObject::getIcon()
     return icon_;
 }
 
-void BoxedObject::fill(QBoxLayout*)
-{
-}
-
-void BoxedObject::updateDynamicGui(QBoxLayout *)
-{
-}
-
 void BoxedObject::updateModel()
 {
 }

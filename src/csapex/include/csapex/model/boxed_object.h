@@ -3,13 +3,14 @@
 
 /// COMPONENT
 #include <csapex/model/memento.h>
-#include <csapex/view/displayable.h>
+#include <csapex/model/node.h>
 #include <csapex/model/tag.h>
+#include <csapex/view/displayable.h>
+#include <csapex/view/node_adapter.h>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <string>
-#include <QLayout>
 #include <QObject>
 #include <QIcon>
 #include <QMutex>
@@ -17,7 +18,7 @@
 namespace csapex
 {
 
-class BoxedObject : public Displayable
+class BoxedObject : public Node, public Displayable, public NodeAdapter
 {
     Q_OBJECT
 
@@ -45,9 +46,6 @@ public:
     virtual void setState(Memento::Ptr memento);
     virtual Memento::Ptr getState() const;
 
-    virtual void fill(QBoxLayout* layout);
-
-    virtual void updateDynamicGui(QBoxLayout* layout);
     virtual void updateModel();
 
     virtual bool canBeDisabled() const;

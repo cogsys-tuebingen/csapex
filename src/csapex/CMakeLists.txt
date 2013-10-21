@@ -80,7 +80,6 @@ add_library(csapex SHARED
     src/command/delete_fulcrum.cpp
 
     src/model/box.cpp
-    src/model/node_worker.cpp
     src/model/box_group.cpp
     src/model/boxed_object.cpp
     src/model/boxed_object_constructor.cpp
@@ -94,6 +93,8 @@ add_library(csapex SHARED
     src/model/memento.cpp
     src/model/message.cpp
     src/model/message_provider.cpp
+    src/model/node.cpp
+    src/model/node_worker.cpp
     src/model/tag.cpp
     src/model/template.cpp
     src/model/template_constructor.cpp
@@ -107,6 +108,7 @@ add_library(csapex SHARED
     src/view/design_board.cpp
     src/view/designer.cpp
     src/view/displayable.cpp
+    src/view/node_adapter.cpp
     src/view/overlay.cpp
     src/view/selectable.cpp
     src/view/template_dialog.cpp

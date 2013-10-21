@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class Displayable : public QWidget
+class Displayable
 {
 public:
     enum ErrorLevel {

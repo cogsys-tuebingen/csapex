@@ -64,7 +64,7 @@ void ExportFile::setExportPath(const QString& path)
 
 void ExportFile::exportDialog()
 {
-    QString path = QFileDialog::getExistingDirectory(this, "Output directory", state.path_.c_str(), QFileDialog::ShowDirsOnly);
+    QString path = QFileDialog::getExistingDirectory(NULL, "Output directory", state.path_.c_str(), QFileDialog::ShowDirsOnly);
 
     if(!path.isEmpty()) {
         setExportPath(path);

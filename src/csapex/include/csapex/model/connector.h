@@ -11,7 +11,7 @@
 namespace csapex
 {
 
-class Connector : public Displayable
+class Connector : public QWidget, public Displayable
 {
     Q_OBJECT
 
