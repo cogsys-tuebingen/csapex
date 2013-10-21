@@ -300,14 +300,8 @@ void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
     }
 
     /// BOXES
-    Graph::Ptr graph = dispatcher_->getGraph();
-    if(!graph->hasSelectedBox()) {
-        /// DEFAULT
-        showContextMenuAddBox(global_pos);
-
-    } else {
-        showContextMenuEditBox(NULL, global_pos);
-    }
+    dispatcher_->getGraph()->deselectBoxes();
+    showContextMenuAddBox(global_pos);
 }
 
 void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
