@@ -25,7 +25,7 @@ CsApexCore::CsApexCore()
     destruct = true;
 
     qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
-    ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ("anything");
+    ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ();
     StreamInterceptor::instance().start();
 
     Tag::createIfNotExists("General");

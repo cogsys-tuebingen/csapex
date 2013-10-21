@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/memento.h>
 #include <csapex/model/node.h>
-#include <csapex/model/tag.h>
 #include <csapex/view/displayable.h>
 #include <csapex/view/node_adapter.h>
 #include <csapex/csapex_fwd.h>
@@ -12,7 +11,6 @@
 /// SYSTEM
 #include <string>
 #include <QObject>
-#include <QIcon>
 #include <QMutex>
 
 namespace csapex
@@ -31,17 +29,6 @@ protected:
 
 public:
     virtual ~BoxedObject();
-
-    void setType(const std::string& type);
-    std::string getType();
-
-    void setCategory(const std::string& category) __attribute__ ((deprecated));
-
-    void addTag(const Tag& tag);
-    std::vector<Tag> getTags() const;
-
-    void setIcon(QIcon icon);
-    QIcon getIcon();
 
     virtual void setState(Memento::Ptr memento);
     virtual Memento::Ptr getState() const;
@@ -72,11 +59,6 @@ protected:
     void errorEvent(bool error, ErrorLevel level);
 
 protected:
-    std::string type_;
-
-    mutable std::vector<Tag> tags_;
-
-    QIcon icon_;
 
     bool enabled_;
 

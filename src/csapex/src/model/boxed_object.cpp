@@ -15,7 +15,7 @@ QMutex BoxedObject::active_mutex;
 const BoxedObject::Ptr BoxedObject::NullPtr;
 
 BoxedObject::BoxedObject()
-    : icon_(":/plugin.png"), enabled_(true)
+    : enabled_(true)
 {
     QMutexLocker lock(&active_mutex);
 
@@ -45,46 +45,6 @@ bool BoxedObject::isEnabled()
     return enabled_;
 }
 
-void BoxedObject::setType(const std::string &type)
-{
-    type_ = type;
-}
-
-std::string BoxedObject::getType()
-{
-    return type_;
-}
-
-void BoxedObject::setCategory(const std::string &category)
-{
-    if(!Tag::exists(category)) {
-        Tag::create(category);
-    }
-    addTag(Tag::get(category));
-}
-
-void BoxedObject::addTag(const Tag &tag)
-{
-    tags_.push_back(tag);
-}
-
-std::vector<Tag> BoxedObject::getTags() const
-{
-    if(tags_.empty()) {
-        tags_.push_back(Tag::get("General"));
-    }
-    return tags_;
-}
-
-void BoxedObject::setIcon(QIcon icon)
-{
-    icon_ = icon;
-}
-
-QIcon BoxedObject::getIcon()
-{
-    return icon_;
-}
 
 void BoxedObject::updateModel()
 {

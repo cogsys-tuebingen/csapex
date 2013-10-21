@@ -200,7 +200,7 @@ void RegisterCorePlugins::init()
     DragIO::registerHandler<RosHandler>();
     DragIO::registerHandler<FileHandler>();
 
-    ConnectionTypeManager::registerMessage<connection_types::StringMessage>("std::string");
+    ConnectionTypeManager::registerMessage<connection_types::StringMessage>();
 }
 
 void RegisterCorePlugins::shutdown()
