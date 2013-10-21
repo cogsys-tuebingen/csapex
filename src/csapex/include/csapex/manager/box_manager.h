@@ -7,7 +7,6 @@
 #include <csapex/csapex_fwd.h>
 
 /// PROJECT
-#include <utils_plugin/plugin_manager.hpp>
 #include <utils_plugin/singleton.hpp>
 
 /// SYSTEM
@@ -15,6 +14,7 @@
 #include <QMenu>
 #include <vector>
 #include <QTreeWidget>
+#include <boost/signals2.hpp>
 
 namespace csapex
 {

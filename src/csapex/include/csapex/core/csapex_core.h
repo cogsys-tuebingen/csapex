@@ -5,9 +5,6 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/command/dispatcher.h>
 
-/// PROJECT
-#include <utils_plugin/plugin_manager.hpp>
-
 /// SYSTEM
 #include <QObject>
 #include <yaml-cpp/yaml.h>
@@ -49,7 +46,7 @@ private:
     bool destruct;
     CommandDispatcher* cmd_dispatch;
 
-    PluginManager<CorePlugin> core_plugin_manager;
+    PluginManager<CorePlugin>* core_plugin_manager;
 
     std::string current_config_;
 

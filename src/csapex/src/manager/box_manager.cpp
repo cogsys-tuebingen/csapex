@@ -8,6 +8,7 @@
 #include <csapex/model/box.h>
 #include <csapex/model/box_group.h>
 #include <csapex/model/graph.h>
+#include <utils_plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

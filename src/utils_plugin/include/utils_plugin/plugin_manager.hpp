@@ -47,7 +47,8 @@ protected:
         std::set<std::string> libs;
         {
             pluginlib::ClassLoader<M> loader("csapex", full_name_);
-            loader.refreshDeclaredClasses();
+
+            // TODO: THIS IS WAY TOO SLOW!!!!!!!!
             std::vector<std::string> classes = loader.getDeclaredClasses();
             foreach(const std::string& c, classes) {
                 libs.insert(loader.getClassLibraryPath(c));

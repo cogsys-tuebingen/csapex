@@ -4,7 +4,7 @@
 using namespace csapex;
 
 Node::Node()
-    : icon_(":/plugin.png")
+    : icon_(":/plugin.png"), enabled_(true)
 {
 
 }
@@ -53,4 +53,63 @@ void Node::setIcon(QIcon icon)
 QIcon Node::getIcon()
 {
     return icon_;
+}
+
+bool Node::canBeDisabled() const
+{
+    return true;
+}
+
+bool Node::isEnabled()
+{
+    return enabled_;
+}
+void Node::messageArrived(ConnectorIn *)
+{
+
+}
+void Node::allConnectorsArrived()
+{
+
+}
+
+Memento::Ptr Node::getState() const
+{
+    return Memento::Ptr((Memento*) NULL);
+}
+
+void Node::setState(Memento::Ptr)
+{
+
+}
+
+void Node::enable(bool e)
+{
+    enabled_ = e;
+    if(e) {
+        enable();
+    } else {
+        disable();
+    }
+}
+
+void Node::enable()
+{
+    enabled_ = true;
+}
+
+void Node::disable(bool d)
+{
+    enable(!d);
+}
+
+
+void Node::disable()
+{
+    enabled_ = false;
+}
+
+void Node::connectorChanged()
+{
+
 }

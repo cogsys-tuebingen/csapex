@@ -30,26 +30,12 @@ protected:
 public:
     virtual ~BoxedObject();
 
-    virtual void setState(Memento::Ptr memento);
-    virtual Memento::Ptr getState() const;
-
     virtual void updateModel();
 
-    virtual bool canBeDisabled() const;
-
-    bool isEnabled();
 
 public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn* source);
-    virtual void allConnectorsArrived();
-
-    virtual void enable(bool e);
-    virtual void enable();
-    virtual void disable(bool e);
-    virtual void disable();
-    virtual void connectorChanged();
-
     virtual void tick();
+    virtual void disable();
 
 Q_SIGNALS:
     void modelChanged();
@@ -59,11 +45,6 @@ protected:
     void errorEvent(bool error, ErrorLevel level);
 
 protected:
-
-    bool enabled_;
-
-    static int active_objects_;
-    static QMutex active_mutex;
 };
 
 
@@ -76,12 +57,6 @@ public:
     {
         type_ = type;
     }
-
-public:
-    virtual void fill(QBoxLayout*) {}
-
-public Q_SLOTS:
-    virtual void messageArrived(ConnectorIn*) {}
 };
 
 }

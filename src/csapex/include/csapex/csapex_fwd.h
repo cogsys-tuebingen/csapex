@@ -10,6 +10,9 @@
     typedef boost::shared_ptr<const name> name##ConstPtr
 
 
+template <typename T>
+class PluginManager;
+
 namespace csapex
 {
 class CorePlugin;

@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <class_loader/multi_library_class_loader.h>
+#include <set>
 
 class PluginLoader : public Singleton<PluginLoader> {
 public:

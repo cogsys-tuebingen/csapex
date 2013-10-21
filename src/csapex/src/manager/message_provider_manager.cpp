@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/manager/message_provider_manager.h>
 
+/// COMPONENT
+#include <utils_plugin/plugin_manager.hpp>
+
 /// SYSTEM
 #include <boost/filesystem.hpp>
 
@@ -8,20 +11,25 @@ namespace bfs = boost::filesystem;
 using namespace csapex;
 
 MessageProviderManager::MessageProviderManager()
-    : manager_("csapex::MessageProvider")
+    : manager_(new PluginManager<MessageProvider>("csapex::MessageProvider"))
 {
+}
+
+MessageProviderManager::~MessageProviderManager()
+{
+    delete manager_;
 }
 
 void MessageProviderManager::fullReload()
 {
-    instance().manager_.reload();
+    instance().manager_->reload();
 
     classes.clear();
 
     supported_types_ = "";
 
     typedef std::pair<std::string, PluginManager<csapex::MessageProvider>::Constructor> PAIR;
-    foreach(PAIR pair, manager_.availableClasses()) {
+    foreach(PAIR pair, manager_->availableClasses()) {
         try {
             MessageProvider::Ptr prov(pair.second());
             foreach(const std::string& extension, prov->getExtensions()) {
@@ -46,7 +54,7 @@ MessageProvider::Ptr MessageProviderManager::createMessageProvider(const std::st
 
 MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const std::string& path)
 {
-    if(!manager_.pluginsLoaded()) {
+    if(!manager_->pluginsLoaded()) {
         fullReload();
     }
 
@@ -77,7 +85,7 @@ void MessageProviderManager::registerMessageProvider(const std::string &type, Co
 
 std::string MessageProviderManager::supportedTypes()
 {
-    if(!manager_.pluginsLoaded()) {
+    if(!manager_->pluginsLoaded()) {
         fullReload();
     }
 

@@ -10,6 +10,7 @@
 #include <csapex/model/message.h>
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/manager/template_manager.h>
+#include <utils_plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <fstream>
@@ -20,7 +21,7 @@ using namespace csapex;
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
 CsApexCore::CsApexCore()
-    : cmd_dispatch(new CommandDispatcher), core_plugin_manager("csapex::CorePlugin")
+    : cmd_dispatch(new CommandDispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin"))
 {
     destruct = true;
 
@@ -36,7 +37,7 @@ CsApexCore::CsApexCore()
 }
 
 CsApexCore::CsApexCore(CommandDispatcher* dispatcher)
-    : cmd_dispatch(dispatcher), core_plugin_manager("csapex::CorePlugin")
+    : cmd_dispatch(dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin"))
 {
     destruct = false;
     init_ = true;
@@ -46,7 +47,7 @@ CsApexCore::CsApexCore(CommandDispatcher* dispatcher)
 CsApexCore::~CsApexCore()
 {
     typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-    foreach(PAIR cp, core_plugin_manager.availableClasses()) {
+    foreach(PAIR cp, core_plugin_manager->availableClasses()) {
         CorePlugin::Ptr plugin = cp.second();
 
         plugin->shutdown();
@@ -58,6 +59,7 @@ CsApexCore::~CsApexCore()
 
     if(destruct) {
         delete cmd_dispatch;
+        delete core_plugin_manager;
     }
 }
 
@@ -67,9 +69,9 @@ void CsApexCore::init()
         init_ = true;
 
         showStatusMessage("loading core plugins");
-        core_plugin_manager.reload();
+        core_plugin_manager->reload();
         typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-        foreach(PAIR cp, core_plugin_manager.availableClasses()) {
+        foreach(PAIR cp, core_plugin_manager->availableClasses()) {
             CorePlugin::Ptr plugin = cp.second();
 
             plugin->init();

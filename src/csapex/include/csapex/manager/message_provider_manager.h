@@ -3,10 +3,10 @@
 
 /// COMPONENT
 #include <csapex/model/message_provider.h>
+#include <csapex/csapex_fwd.h>
 
 /// PROJECT
 #include <utils_plugin/singleton.hpp>
-#include <utils_plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <map>
@@ -30,6 +30,7 @@ public:
 
 private:
     MessageProviderManager();
+    ~MessageProviderManager();
     MessageProvider::Ptr createMessageProviderHelper(const std::string& path);
 
     void fullReload();
@@ -39,7 +40,7 @@ private:
 
     std::string supported_types_;
 
-    PluginManager<MessageProvider> manager_;
+    PluginManager<MessageProvider>* manager_;
 };
 
 }
