@@ -4,14 +4,14 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 #include <csapex/command/command.h>
-#include <csapex/view/displayable.h>
+#include <csapex/model/error_state.h>
 #include <csapex/csapex_fwd.h>
 
 /// FORWARDS DECLARATION
 namespace csapex
 {
 
-class Connector : public QWidget, public Displayable
+class Connector : public QWidget, public ErrorState
 {
     Q_OBJECT
 

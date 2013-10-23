@@ -36,7 +36,7 @@ void NodeWorker::forwardMessage(Connector *s)
     }
 
 
-    if(!node_->isError() || node_->errorLevel() != Displayable::EL_ERROR) {
+    if(!node_->isError() || node_->errorLevel() != ErrorState::EL_ERROR) {
         node_->setError(false);
     }
 }

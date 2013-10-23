@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class Displayable
+class ErrorState
 {
 public:
     enum ErrorLevel {
@@ -31,8 +31,8 @@ public:
     Box* getBox() const;
 
 protected:
-    Displayable();
-    virtual ~Displayable();
+    ErrorState();
+    virtual ~ErrorState();
 
     virtual void errorEvent(bool error, ErrorLevel level);
 

@@ -7,7 +7,7 @@
 #include <csapex/view/selectable.h>
 #include <csapex/model/graph.h>
 #include <csapex/csapex_fwd.h>
-#include <csapex/view/displayable.h>
+#include <csapex/model/error_state.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -160,9 +160,9 @@ public:
 
 
     bool isError() const;
-    Displayable::ErrorLevel errorLevel() const;
+    ErrorState::ErrorLevel errorLevel() const;
     std::string errorMessage() const;
-    void setError(bool e, const std::string& msg, Displayable::ErrorLevel level = Displayable::EL_ERROR);
+    void setError(bool e, const std::string& msg, ErrorState::ErrorLevel level = ErrorState::EL_ERROR);
 
 protected:
     void startDrag(QPoint offset);

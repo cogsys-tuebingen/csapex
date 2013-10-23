@@ -83,6 +83,7 @@ add_library(csapex SHARED
     src/model/box_group.cpp
     src/model/boxed_object.cpp
     src/model/boxed_object_constructor.cpp
+    src/model/error_state.cpp
     src/model/graph.cpp
     src/model/connection.cpp
     src/model/connector.cpp
@@ -107,7 +108,6 @@ add_library(csapex SHARED
     src/view/csapex_window.cpp
     src/view/design_board.cpp
     src/view/designer.cpp
-    src/view/displayable.cpp
     src/view/node_adapter.cpp
     src/view/overlay.cpp
     src/view/selectable.cpp

@@ -5,7 +5,7 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/memento.h>
-#include <csapex/view/displayable.h>
+#include <csapex/model/error_state.h>
 
 /// SYSTEM
 #include <QObject>
@@ -13,7 +13,7 @@
 
 namespace csapex {
 
-class Node : public QObject, public Displayable
+class Node : public QObject, public ErrorState
 {
     Q_OBJECT
 

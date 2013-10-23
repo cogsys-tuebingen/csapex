@@ -36,12 +36,12 @@ struct CsApexApp : public QApplication {
             return QApplication::notify(receiver, event);
 
         } catch(const std::exception& e) {
-            BoxedObject* bo = dynamic_cast<BoxedObject*> (receiver);
+            ErrorState* er = dynamic_cast<ErrorState*> (receiver);
             Box* box = dynamic_cast<Box*> (receiver);
             NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
 
-            if(bo) {
-                bo->setError(true, e.what());
+            if(er) {
+                er->setError(true, e.what());
             } else if(box) {
                 box->setError(true, e.what());
             } else if(bw) {

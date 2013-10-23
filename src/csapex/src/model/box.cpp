@@ -285,7 +285,7 @@ bool Box::isError() const
 {
     return content_->isError();
 }
-Displayable::ErrorLevel Box::errorLevel() const
+ErrorState::ErrorLevel Box::errorLevel() const
 {
     return content_->errorLevel();
 }
@@ -293,7 +293,7 @@ std::string Box::errorMessage() const
 {
     return content_->errorMessage();
 }
-void Box::setError(bool e, const std::string &msg, Displayable::ErrorLevel level)
+void Box::setError(bool e, const std::string &msg, ErrorState::ErrorLevel level)
 {
     content_->setError(e, msg, level);
 }
@@ -595,8 +595,8 @@ void Box::enabledChange(bool val)
 
 void Box::paintEvent(QPaintEvent*)
 {
-    bool is_error = content_->isError() && content_->errorLevel() == Displayable::EL_ERROR;
-    bool is_warn = content_->isError() && content_->errorLevel() == Displayable::EL_WARNING;
+    bool is_error = content_->isError() && content_->errorLevel() == ErrorState::EL_ERROR;
+    bool is_warn = content_->isError() && content_->errorLevel() == ErrorState::EL_WARNING;
 
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;

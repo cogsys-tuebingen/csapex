@@ -1,22 +1,22 @@
 /// HEADER
-#include <csapex/view/displayable.h>
+#include <csapex/model/error_state.h>
 
 /// COMPONENT
 #include <csapex/model/box.h>
 
 using namespace csapex;
 
-Displayable::Displayable()
+ErrorState::ErrorState()
     : error_(false)
 {
 }
 
-Displayable::~Displayable()
+ErrorState::~ErrorState()
 {
 
 }
 
-void Displayable::setError(bool e, const std::string& msg, ErrorLevel level)
+void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
 {
     if(!isError() && !e) {
         return;
@@ -27,7 +27,7 @@ void Displayable::setError(bool e, const std::string& msg, ErrorLevel level)
     errorEvent(error_, level_);
 }
 
-void Displayable::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
+void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
 {
     QMutexLocker lock(&mutex);
 
@@ -51,37 +51,37 @@ void Displayable::setErrorSilent(bool e, const std::string &msg, ErrorLevel leve
     error_msg_ = msg;
 }
 
-bool Displayable::isError() const
+bool ErrorState::isError() const
 {
     QMutexLocker lock(&mutex);
     return error_;
 }
 
-Displayable::ErrorLevel Displayable::errorLevel() const
+ErrorState::ErrorLevel ErrorState::errorLevel() const
 {
     QMutexLocker lock(&mutex);
     return level_;
 }
 
-std::string Displayable::errorMessage() const
+std::string ErrorState::errorMessage() const
 {
     QMutexLocker lock(&mutex);
     return error_msg_;
 }
 
-void Displayable::setBox(Box* box)
+void ErrorState::setBox(Box* box)
 {
     QMutexLocker lock(&mutex);
     box_ = box;
 }
 
-Box* Displayable::getBox() const
+Box* ErrorState::getBox() const
 {
     QMutexLocker lock(&mutex);
     return box_;
 }
 
-void Displayable::errorEvent(bool, ErrorLevel)
+void ErrorState::errorEvent(bool, ErrorLevel)
 {
 
 }
