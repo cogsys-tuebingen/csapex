@@ -1,0 +1,12 @@
+[submodule "plugins/vision_plugins"]
+	path = plugins/vision_plugins
+	url = gitlab@gitlab.cs.uni-tuebingen.de:csapex/vision-plugins.git
+[submodule "plugins/background_subtraction"]
+	path = plugins/background_subtraction
+	url = gitlab@gitlab.cs.uni-tuebingen.de:csapex/backgroundsubtraction.git
+[submodule "plugins/robot_detection"]
+	path = plugins/robot_detection
+	url = gitlab@gitlab.cs.uni-tuebingen.de:csapex/robot-detection.git
+[submodule "plugins/cip104"]
+	path = plugins/cip104
+	url = gitlab@gitlab.cs.uni-tuebingen.de:csapex/cip104.git
