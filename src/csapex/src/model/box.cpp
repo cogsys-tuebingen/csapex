@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include "ui_box.h"
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
@@ -96,8 +96,8 @@ void Box::State::readYaml(const YAML::Node &node)
 }
 
 
-Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), content_(content), state(new State(this)),
+Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), content_(content), adapter_(adapter), state(new State(this)),
       private_thread_(NULL), worker_(new NodeWorker(content)), down_(false), next_sub_id_(0), profiling_(false)
 {
     ui->setupUi(this);
@@ -139,7 +139,7 @@ Box::Box(BoxedObject::Ptr content, const std::string& uuid, QWidget* parent)
     setVisible(false);
 
 
-    content_->fill(ui->content);
+    adapter_->fill(ui->content);
 }
 
 void Box::messageProcessed()
@@ -725,7 +725,7 @@ void Box::refreshStylesheet()
 
 void Box::eventModelChanged()
 {
-    content_->updateDynamicGui(ui->content);
+    adapter_->updateDynamicGui(ui->content);
 }
 
 void Box::tick()

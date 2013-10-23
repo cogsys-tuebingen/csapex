@@ -3,12 +3,16 @@
 
 /// SYSTEM
 #include <QLayout>
+#include <boost/shared_ptr.hpp>
 
 namespace csapex
 {
 
 class NodeAdapter
 {
+public:
+    typedef boost::shared_ptr<NodeAdapter> Ptr;
+
 public:
     virtual ~NodeAdapter();
 

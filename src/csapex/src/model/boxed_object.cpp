@@ -28,21 +28,10 @@ BoxedObject::~BoxedObject()
 }
 
 
-void BoxedObject::updateModel()
-{
-}
-
-
-
 void BoxedObject::disable()
 {
     Node::disable();
     setError(false);
-}
-
-void BoxedObject::tick()
-{
-
 }
 
 void BoxedObject::errorEvent(bool error, ErrorLevel level)

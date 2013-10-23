@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/memento.h>
 #include <csapex/model/node.h>
-#include <csapex/view/displayable.h>
 #include <csapex/view/node_adapter.h>
 #include <csapex/csapex_fwd.h>
 
@@ -16,7 +15,7 @@
 namespace csapex
 {
 
-class BoxedObject : public Node, public Displayable, public NodeAdapter
+class BoxedObject : public Node, public NodeAdapter
 {
     Q_OBJECT
 
@@ -30,11 +29,8 @@ protected:
 public:
     virtual ~BoxedObject();
 
-    virtual void updateModel();
-
 
 public Q_SLOTS:
-    virtual void tick();
     virtual void disable();
 
 Q_SIGNALS:

@@ -2,7 +2,7 @@
 #include <csapex/model/node_worker.h>
 
 /// COMPONENT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/timer.h>
@@ -11,7 +11,7 @@ using namespace csapex;
 
 const unsigned NodeWorker::timer_history_length_ = 30;
 
-NodeWorker::NodeWorker(BoxedObject::Ptr node)
+NodeWorker::NodeWorker(Node::Ptr node)
     : node_(node), synchronized_inputs_(false)
 {
     assert(node_);

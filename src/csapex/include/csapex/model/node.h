@@ -5,6 +5,7 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/memento.h>
+#include <csapex/view/displayable.h>
 
 /// SYSTEM
 #include <QObject>
@@ -12,9 +13,12 @@
 
 namespace csapex {
 
-class Node : public QObject
+class Node : public QObject, public Displayable
 {
     Q_OBJECT
+
+public:
+    typedef boost::shared_ptr<Node> Ptr;
 
 public:
     Node();
@@ -49,7 +53,9 @@ public Q_SLOTS:
     virtual void disable();
     virtual void connectorChanged();
 
+    virtual void tick();
 
+    virtual void updateModel();
 
 protected:
     std::string type_;

@@ -113,3 +113,13 @@ void Node::connectorChanged()
 {
 
 }
+
+void Node::tick()
+{
+
+}
+
+void Node::updateModel()
+{
+}
+

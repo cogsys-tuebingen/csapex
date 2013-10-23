@@ -188,7 +188,7 @@ QPixmap createPixmap(const std::string& label, const BoxedObjectPtr& content)
     if(BoxManager::typeIsTemplate(content->getType())) {
         object.reset(new csapex::BoxGroup(""));
     } else {
-        object.reset(new csapex::Box(content, ""));
+        object.reset(new csapex::Box(content, content, ""));
     }
 
     object->setObjectName(content->getType().c_str());
@@ -253,7 +253,8 @@ Box::Ptr BoxManager::makeSingleBox(BoxedObjectConstructor::Ptr content, const st
 {
     assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
 
-    csapex::Box::Ptr box(new csapex::Box(content->makeContent(), uuid));
+    BoxedObject::Ptr bo = content->makeContent();
+    csapex::Box::Ptr box(new csapex::Box(bo, bo, uuid));
 
     box->setObjectName(uuid.c_str());
 

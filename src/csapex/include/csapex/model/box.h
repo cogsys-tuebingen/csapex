@@ -2,12 +2,12 @@
 #define BOX_H
 
 /// COMPONENT
-#include <csapex/model/boxed_object.h>
 #include <csapex/model/memento.h>
 #include <csapex/command/command.h>
 #include <csapex/view/selectable.h>
 #include <csapex/model/graph.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/view/displayable.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -78,7 +78,7 @@ public:
 
 
 public:
-    Box(BoxedObject::Ptr content, const std::string& uuid = "", QWidget* parent = 0);
+    Box(NodePtr content, NodeAdapterPtr adapter, const std::string& uuid = "", QWidget* parent = 0);
     virtual ~Box();
 
     void stop();
@@ -223,7 +223,9 @@ protected:
 
     CommandDispatcher* dispatcher_;
 
-    BoxedObject::Ptr content_;
+    NodePtr content_;
+    NodeAdapterPtr adapter_;
+
     State::Ptr state;
 
     std::vector<ConnectorIn*> input;

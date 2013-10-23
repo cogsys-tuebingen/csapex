@@ -21,7 +21,7 @@ public:
     typedef boost::shared_ptr<NodeWorker> Ptr;
 
 public:
-    NodeWorker(BoxedObjectPtr node);
+    NodeWorker(NodePtr node);
 
 public Q_SLOTS:
     void forwardMessage(Connector* source);
@@ -43,7 +43,7 @@ public:
     static const unsigned timer_history_length_;
 
 private:
-    BoxedObjectPtr node_;
+    NodePtr node_;
 
     bool synchronized_inputs_;
     std::map<ConnectorIn*, bool> has_msg_;
