@@ -43,7 +43,7 @@ struct CsApexApp : public QApplication {
             if(bo) {
                 bo->setError(true, e.what());
             } else if(box) {
-                box->getContent()->setError(true, e.what());
+                box->setError(true, e.what());
             } else if(bw) {
                 bw->triggerError(true, e.what());
             } else {

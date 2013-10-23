@@ -92,8 +92,10 @@ bool FileImporter::doImport(const QString& _path)
 
 
 FileImporter::FileImporter()
-    : state(this), output_(NULL), additional_layout_(NULL), file_dialog_(NULL)
+    : output_(NULL), additional_layout_(NULL), file_dialog_(NULL)
 {
+    state.parent = this;
+
     setIcon(QIcon(":/folder_picture.png"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));

@@ -75,18 +75,11 @@ class RosHandler
 
                     std::string uuid = dispatcher->getGraph()->makeUUID("csapex::ImportRos");
 
-                    Memento::Ptr state;
-                    {
-                        Box::Ptr tmp = BoxManager::instance().makeBox("csapex::ImportRos", uuid);
-                        assert(tmp);
+                    ImportRos::State::Ptr sub_state(new ImportRos::State());
+                    sub_state->topic_ = cmd;
 
-                        boost::shared_ptr<ImportRos> inst = boost::dynamic_pointer_cast<ImportRos> (tmp->getContent());
-                        assert(inst);
-
-                        inst->changeTopic(cmd.c_str());
-
-                        state = tmp->getState();
-                    }
+                    Box::State::Ptr state(new Box::State);
+                    state->boxed_state = sub_state;
 
                     std::string type("csapex::ImportRos");
                     dispatcher->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));
@@ -155,19 +148,11 @@ class FileHandler
 
                 std::string uuid = dispatcher->getGraph()->makeUUID("csapex::FileImporter");
 
-                Memento::Ptr state;
-                {
-                    Box::Ptr tmp = BoxManager::instance().makeBox("csapex::FileImporter", uuid);
-                    assert(tmp);
+                FileImporter::State::Ptr sub_state(new FileImporter::State);
+                sub_state->last_path_ = files.first().toString();
 
-                    boost::shared_ptr<FileImporter> inst = boost::dynamic_pointer_cast<FileImporter> (tmp->getContent());
-                    assert(inst);
-
-                    // TODO: allow multiple files
-                    inst->import(files.first().toString());
-
-                    state = tmp->getState();
-                }
+                Box::State::Ptr state(new Box::State);
+                state->boxed_state = sub_state;
 
                 std::string type("csapex::FileImporter");
                 dispatcher->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));

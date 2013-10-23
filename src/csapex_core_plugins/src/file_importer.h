@@ -36,12 +36,9 @@ public Q_SLOTS:
     void toggle(bool on);
     bool doImport(const QString& path);
 
-private:
-
+public:
     struct State : public Memento {
-        State(FileImporter* parent)
-            : parent(parent)
-        {}
+        typedef boost::shared_ptr<State> Ptr;
 
         FileImporter* parent;
 
@@ -53,6 +50,7 @@ private:
         virtual void readYaml(const YAML::Node& node);
     };
 
+private:
     State state;
 
     MessageProvider::Ptr provider_;

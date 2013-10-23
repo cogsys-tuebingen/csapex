@@ -643,7 +643,7 @@ void Overlay::paintEvent(QPaintEvent*)
     }
 
     foreach (Box::Ptr box, graph_->boxes_) {
-        if(box->getContent()->isError()) {
+        if(box->isError()) {
             QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
 
             QFont font;
@@ -652,7 +652,7 @@ void Overlay::paintEvent(QPaintEvent*)
             painter->setPen(Qt::red);
 
             QTextOption opt(Qt::AlignTop | Qt::AlignHCenter);
-            painter->drawText(rect, box->getContent()->errorMessage().c_str(), opt);
+            painter->drawText(rect, box->errorMessage().c_str(), opt);
         }
 
         for(int id = 0; id < box->countInputs(); ++id) {

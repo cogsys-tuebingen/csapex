@@ -69,7 +69,7 @@ Connector::~Connector()
 
 void Connector::errorEvent(bool error, ErrorLevel level)
 {
-    box_->getContent()->setError(error, "Connector Error", level);
+    box_->setError(error, "Connector Error", level);
 }
 
 bool Connector::isForwarding() const

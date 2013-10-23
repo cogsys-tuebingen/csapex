@@ -280,6 +280,24 @@ std::string Box::UUID() const
     return state->uuid_;
 }
 
+
+bool Box::isError() const
+{
+    return content_->isError();
+}
+Displayable::ErrorLevel Box::errorLevel() const
+{
+    return content_->errorLevel();
+}
+std::string Box::errorMessage() const
+{
+    return content_->errorMessage();
+}
+void Box::setError(bool e, const std::string &msg, Displayable::ErrorLevel level)
+{
+    content_->setError(e, msg, level);
+}
+
 std::string Box::getType() const
 {
     return content_->getType();
@@ -493,11 +511,6 @@ void Box::init(const QPoint& pos)
     key_point = pos;
 
     makeThread();
-}
-
-BoxedObject::Ptr Box::getContent()
-{
-    return content_;
 }
 
 Box::~Box()

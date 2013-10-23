@@ -96,7 +96,6 @@ public:
     void keyPressEvent(QKeyEvent * e);
 
     virtual void init(const QPoint& pos);
-    BoxedObject::Ptr getContent();
 
     template <typename T>
     ConnectorIn* addInput(const std::string& label, bool optional = false) {
@@ -158,6 +157,12 @@ public:
     virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
     NodeWorker* getNodeWorker();
+
+
+    bool isError() const;
+    Displayable::ErrorLevel errorLevel() const;
+    std::string errorMessage() const;
+    void setError(bool e, const std::string& msg, Displayable::ErrorLevel level = Displayable::EL_ERROR);
 
 protected:
     void startDrag(QPoint offset);
