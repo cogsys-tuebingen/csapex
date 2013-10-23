@@ -13,9 +13,9 @@
 
 /// SYSTEM
 #include <QPushButton>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ExportRos, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ExportRos, csapex::BoxedObject)
 
 using namespace csapex;
 

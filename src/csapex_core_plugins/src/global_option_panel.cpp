@@ -6,9 +6,9 @@
 
 /// SYSTEM
 #include <boost/foreach.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::GlobalOptionPanel, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::GlobalOptionPanel, csapex::BoxedObject)
 
 using namespace csapex;
 

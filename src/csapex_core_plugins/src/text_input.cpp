@@ -7,12 +7,12 @@
 #include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QBoxLayout>
 
-PLUGINLIB_EXPORT_CLASS(csapex::TextInput, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::TextInput, csapex::BoxedObject)
 
 using namespace csapex;
 

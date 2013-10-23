@@ -10,9 +10,9 @@
 #include <utils/LibUtil/QtCvImageConverter.h>
 #include <QKeyEvent>
 #include <QPushButton>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::FilterStaticMask, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::FilterStaticMask, csapex::BoxedObject)
 
 using namespace csapex;
 

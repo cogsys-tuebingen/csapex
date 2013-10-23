@@ -9,9 +9,9 @@
 #include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ExtractTimeStamp, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ExtractTimeStamp, csapex::BoxedObject)
 
 using namespace csapex;
 using namespace csapex::connection_types;

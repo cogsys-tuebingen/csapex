@@ -2,10 +2,10 @@
 #include "filter_apply_mask.h"
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
 
-PLUGINLIB_EXPORT_CLASS(csapex::FilterApplyMask, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::FilterApplyMask, csapex::BoxedObject)
 
 using namespace csapex;
 

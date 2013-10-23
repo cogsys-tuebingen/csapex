@@ -9,12 +9,12 @@
 #include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <boost/mpl/for_each.hpp>
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/crop_box.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::CropBox, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::CropBox, csapex::BoxedObject)
 
 using namespace csapex;
 using namespace csapex::connection_types;

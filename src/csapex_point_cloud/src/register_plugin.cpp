@@ -10,7 +10,7 @@
 #include <csapex_core_plugins/ros_message_conversion.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
@@ -18,7 +18,7 @@
 #include <pcl/common/impl/io.hpp>
 #include <boost/mpl/for_each.hpp>
 
-PLUGINLIB_EXPORT_CLASS(csapex::RegisterPointCloudPlugin, csapex::CorePlugin)
+CSAPEX_REGISTER_CLASS(csapex::RegisterPointCloudPlugin, csapex::CorePlugin)
 
 using namespace csapex;
 

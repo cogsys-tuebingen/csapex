@@ -17,9 +17,9 @@
 
 /// SYSTEM
 #include <QFrame>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ExtractDescriptors, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ExtractDescriptors, csapex::BoxedObject)
 
 using namespace csapex;
 using namespace connection_types;

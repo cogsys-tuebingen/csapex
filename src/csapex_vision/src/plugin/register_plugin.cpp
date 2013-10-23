@@ -13,13 +13,13 @@
 
 /// SYSTEM
 #include <boost/bind.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <QMetaType>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::RegisterPlugin, csapex::CorePlugin)
+CSAPEX_REGISTER_CLASS(csapex::RegisterPlugin, csapex::CorePlugin)
 
 using namespace csapex;
 

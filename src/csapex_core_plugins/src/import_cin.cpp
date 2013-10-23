@@ -9,10 +9,10 @@
 #include <csapex/model/message.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <yaml-cpp/eventhandler.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ImportCin, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ImportCin, csapex::BoxedObject)
 
 using namespace csapex;
 

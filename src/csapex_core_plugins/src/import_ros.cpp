@@ -14,7 +14,7 @@
 #include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <yaml-cpp/eventhandler.h>
 #include <sensor_msgs/Image.h>
 #include <QAction>
@@ -22,7 +22,7 @@
 #include <QPushButton>
 #include <QLabel>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ImportRos, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ImportRos, csapex::BoxedObject)
 
 using namespace csapex;
 

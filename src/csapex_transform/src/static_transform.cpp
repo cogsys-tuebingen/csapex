@@ -11,9 +11,9 @@
 
 /// SYSTEM
 #include <tf/transform_datatypes.h>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::StaticTransform, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::StaticTransform, csapex::BoxedObject)
 
 using namespace csapex;
 

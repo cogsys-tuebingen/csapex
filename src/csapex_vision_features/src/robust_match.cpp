@@ -19,10 +19,10 @@
 #include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <opencv2/opencv.hpp>
 
-PLUGINLIB_EXPORT_CLASS(csapex::RobustMatch, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::RobustMatch, csapex::BoxedObject)
 
 using namespace csapex;
 using namespace connection_types;

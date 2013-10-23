@@ -10,9 +10,9 @@
 #include <csapex/model/connector_in.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::boolean::NAND, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::boolean::NAND, csapex::BoxedObject)
 
 using namespace csapex;
 using namespace csapex::boolean;

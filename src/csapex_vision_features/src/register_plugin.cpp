@@ -10,9 +10,9 @@
 #include <csapex/model/tag.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::RegisterVisionFeaturePlugin, csapex::CorePlugin)
+CSAPEX_REGISTER_CLASS(csapex::RegisterVisionFeaturePlugin, csapex::CorePlugin)
 
 using namespace csapex;
 

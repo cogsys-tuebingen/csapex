@@ -5,9 +5,9 @@
 #include <boost/assign.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ImageProviderBag, csapex::MessageProvider)
+CSAPEX_REGISTER_CLASS(csapex::ImageProviderBag, csapex::MessageProvider)
 
 using namespace csapex;
 

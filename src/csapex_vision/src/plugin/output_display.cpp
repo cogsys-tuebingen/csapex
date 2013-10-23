@@ -11,9 +11,9 @@
 #include <QPainter>
 #include <QGraphicsSceneEvent>
 #include <QGraphicsPixmapItem>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::OutputDisplay, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::OutputDisplay, csapex::BoxedObject)
 
 
 using namespace csapex;

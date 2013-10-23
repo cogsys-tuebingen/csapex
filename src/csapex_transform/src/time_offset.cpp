@@ -11,9 +11,9 @@
 #include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::TimeOffset, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::TimeOffset, csapex::BoxedObject)
 
 using namespace csapex;
 

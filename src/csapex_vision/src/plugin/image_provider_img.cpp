@@ -3,9 +3,9 @@
 
 /// SYSTEM
 #include <boost/assign.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::ImageProviderImg, csapex::MessageProvider)
+CSAPEX_REGISTER_CLASS(csapex::ImageProviderImg, csapex::MessageProvider)
 
 
 using namespace csapex;

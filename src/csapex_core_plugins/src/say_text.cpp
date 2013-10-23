@@ -7,9 +7,9 @@
 #include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::SayText, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::SayText, csapex::BoxedObject)
 
 using namespace csapex;
 

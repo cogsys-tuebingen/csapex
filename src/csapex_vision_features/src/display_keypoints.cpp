@@ -10,9 +10,9 @@
 #include <csapex_vision_features/keypoint_message.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::DisplayKeypoints, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::DisplayKeypoints, csapex::BoxedObject)
 
 using namespace csapex;
 using namespace connection_types;

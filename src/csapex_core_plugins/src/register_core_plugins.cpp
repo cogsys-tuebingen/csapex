@@ -19,11 +19,11 @@
 /// SYSTEM
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <QStringList>
 #include <QUrl>
 
-PLUGINLIB_EXPORT_CLASS(csapex::RegisterCorePlugins, csapex::CorePlugin)
+CSAPEX_REGISTER_CLASS(csapex::RegisterCorePlugins, csapex::CorePlugin)
 
 using namespace csapex;
 

@@ -17,10 +17,10 @@
 #include <QtConcurrentRun>
 #include <QCheckBox>
 #include <QDirIterator>
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 #include <QUrl>
 
-PLUGINLIB_EXPORT_CLASS(csapex::FileImporter, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::FileImporter, csapex::BoxedObject)
 
 using namespace csapex;
 using namespace connection_types;

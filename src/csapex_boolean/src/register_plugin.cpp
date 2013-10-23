@@ -9,9 +9,9 @@
 #include <csapex/manager/connection_type_manager.h>
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <csapex/utility/register_apex_plugin.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::boolean::RegisterPlugin, csapex::CorePlugin)
+CSAPEX_REGISTER_CLASS(csapex::boolean::RegisterPlugin, csapex::CorePlugin)
 
 using namespace csapex;
 using namespace boolean;
