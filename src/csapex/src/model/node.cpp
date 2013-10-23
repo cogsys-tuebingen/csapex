@@ -151,3 +151,82 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
         box_->setIOError(false);
     }
 }
+
+
+
+ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
+{
+    return box_->addInput(type, label, optional);
+}
+
+ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
+{
+    return box_->addOutput(type, label);
+}
+
+void Node::addInput(ConnectorIn* in)
+{
+    box_->addInput(in);
+}
+
+void Node::addOutput(ConnectorOut* out)
+{
+    box_->addOutput(out);
+}
+
+void Node::setSynchronizedInputs(bool sync)
+{
+    box_->setSynchronizedInputs(sync);
+}
+
+int Node::countInputs()
+{
+    return box_->countInputs();
+}
+
+int Node::countOutputs()
+{
+    return box_->countOutputs();
+}
+
+ConnectorIn* Node::getInput(const unsigned int index)
+{
+    return box_->getInput(index);
+}
+ConnectorOut* Node::getOutput(const unsigned int index)
+{
+    return box_->getOutput(index);
+}
+
+ConnectorIn* Node::getInput(const std::string& uuid)
+{
+    return box_->getInput(uuid);
+}
+ConnectorOut* Node::getOutput(const std::string& uuid)
+{
+    return box_->getOutput(uuid);
+}
+
+void Node::removeInput(ConnectorIn *in)
+{
+    box_->removeInput(in);
+}
+void Node::removeOutput(ConnectorOut *out)
+{
+    box_->removeOutput(out);
+}
+
+
+void Node::registerInput(ConnectorIn* in)
+{
+    input.push_back(in);
+
+    box_->registerInputEvent(in);
+}
+
+void Node::registerOutput(ConnectorOut* out)
+{
+    output.push_back(out);
+
+    box_->registerOutputEvent(out);
+}

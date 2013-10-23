@@ -38,7 +38,7 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     out << YAML::BeginMap;
     if(parent) {
         out << YAML::Key << "type";
-        out << YAML::Value << parent->content_->getType();
+        out << YAML::Value << parent->node_->getType();
     }
     out << YAML::Key << "uuid";
     out << YAML::Value << uuid_;
@@ -52,7 +52,7 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << enabled;
 
     if(parent) {
-        boxed_state = parent->content_->getState();
+        boxed_state = parent->node_->getState();
     }
 
     if(boxed_state.get()) {
@@ -68,7 +68,7 @@ void Box::State::writeYaml(YAML::Emitter &out) const
 void Box::State::copyFrom(const Box::State::Ptr& rhs)
 {
     operator =(*rhs);
-    boxed_state = parent->content_->getState();
+    boxed_state = parent->node_->getState();
     if(rhs->boxed_state) {
         *boxed_state = *rhs->boxed_state;
     }
@@ -90,21 +90,21 @@ void Box::State::readYaml(const YAML::Node &node)
 
     if(node.FindValue("state")) {
         const YAML::Node& state_map = node["state"];
-        boxed_state = parent->content_->getState();
+        boxed_state = parent->node_->getState();
         boxed_state->readYaml(state_map);
     }
 }
 
 
 Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), content_(content), adapter_(adapter), state(new State(this)),
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), node_(content), adapter_(adapter), state(new State(this)),
       private_thread_(NULL), worker_(new NodeWorker(content)), down_(false), next_sub_id_(0), profiling_(false)
 {
     ui->setupUi(this);
 
-    content_->setBox(this);
+    node_->setBox(this);
 
-    ui->enablebtn->setCheckable(content_->canBeDisabled());
+    ui->enablebtn->setCheckable(node_->canBeDisabled());
 
     setFocusPolicy(Qt::ClickFocus);
 
@@ -123,8 +123,8 @@ Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, Q
     state->minimized = false;
 
     QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
-    QObject::connect(this, SIGNAL(toggled(bool)), content_.get(), SIGNAL(toggled(bool)));
-    QObject::connect(this, SIGNAL(placed()), content_.get(), SIGNAL(started()));
+    QObject::connect(this, SIGNAL(toggled(bool)), node_.get(), SIGNAL(toggled(bool)));
+    QObject::connect(this, SIGNAL(placed()), node_.get(), SIGNAL(started()));
 
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
 
@@ -144,9 +144,14 @@ Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, Q
     adapter_->fill(ui->content);
 }
 
+NodePtr Box::getNode()
+{
+    return node_;
+}
+
 void Box::messageProcessed()
 {
-    foreach(ConnectorIn* i, input) {
+    foreach(ConnectorIn* i, node_->input) {
         i->notify();
     }
 }
@@ -166,20 +171,20 @@ void Box::makeThread()
 
 void Box::enableIO(bool enable)
 {
-    foreach(ConnectorIn* i, input) {
+    foreach(ConnectorIn* i, node_->input) {
         i->setEnabled(enable);
     }
-    foreach(ConnectorOut* i, output) {
+    foreach(ConnectorOut* i, node_->output) {
         i->setEnabled(enable);
     }
 }
 
 void Box::setIOError(bool error)
 {
-    foreach(ConnectorIn* i, input) {
+    foreach(ConnectorIn* i, node_->input) {
         i->setErrorSilent(error);
     }
-    foreach(ConnectorOut* i, output) {
+    foreach(ConnectorOut* i, node_->output) {
         i->setErrorSilent(error);
     }
     enableIO(!error);
@@ -191,7 +196,7 @@ void Box::enableContent(bool enable)
 
     state->enabled = enable;
 
-    content_->enable(enable);
+    node_->enable(enable);
     ui->label->setEnabled(enable);
 }
 
@@ -211,10 +216,10 @@ void Box::read(YAML::Node &doc)
 
 void Box::stop()
 {
-    foreach(ConnectorIn* i, input) {
+    foreach(ConnectorIn* i, node_->input) {
         disconnectConnector(i);
     }
-    foreach(ConnectorOut* i, output) {
+    foreach(ConnectorOut* i, node_->output) {
         disconnectConnector(i);
     }
 
@@ -285,25 +290,25 @@ std::string Box::UUID() const
 
 bool Box::isError() const
 {
-    return content_->isError();
+    return node_->isError();
 }
 ErrorState::ErrorLevel Box::errorLevel() const
 {
-    return content_->errorLevel();
+    return node_->errorLevel();
 }
 std::string Box::errorMessage() const
 {
-    return content_->errorMessage();
+    return node_->errorMessage();
 }
 void Box::setError(bool e, const std::string &msg, ErrorState::ErrorLevel level)
 {
     setToolTip(msg.c_str());
-    content_->setError(e, msg, level);
+    node_->setError(e, msg, level);
 }
 
 std::string Box::getType() const
 {
-    return content_->getType();
+    return node_->getType();
 }
 
 void Box::setLabel(const std::string& label)
@@ -325,45 +330,44 @@ std::string Box::getLabel() const
 }
 
 ConnectorIn* Box::addInput(ConnectionType::Ptr type, const std::string& label, bool optional) {
-    int id = input.size();
+    int id = node_->input.size();
     ConnectorIn* c = new ConnectorIn(this, id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
 
-    registerInput(c);
+    node_->registerInput(c);
 
     return c;
 }
 
 ConnectorOut* Box::addOutput(ConnectionType::Ptr type, const std::string& label) {
-    int id = output.size();
+    int id = node_->output.size();
     ConnectorOut* c = new ConnectorOut(this, id);
     c->setLabel(label);
     c->setType(type);
 
-    registerOutput(c);
+    node_->registerOutput(c);
 
     return c;
 }
 
 void Box::addInput(ConnectorIn* in) // LEGACY
 {
-    registerInput(in);
+    node_->registerInput(in);
 }
 
 void Box::addOutput(ConnectorOut* out) // LEGACY
 {
-    registerOutput(out);
+    node_->registerOutput(out);
 }
 
-void Box::registerInput(ConnectorIn* in)
+void Box::registerInputEvent(ConnectorIn* in)
 {
     worker_->addInput(in);
 
     in->setParent(NULL);
     ui->input_layout->addWidget(in);
-    input.push_back(in);
 
     QObject::connect(in, SIGNAL(messageArrived(Connector*)), worker_, SLOT(forwardMessage(Connector*)));
 
@@ -373,7 +377,7 @@ void Box::registerInput(ConnectorIn* in)
     Q_EMIT changed(this);
 }
 
-void Box::registerOutput(ConnectorOut* out)
+void Box::registerOutputEvent(ConnectorOut* out)
 {
     assert(out);
 
@@ -381,7 +385,6 @@ void Box::registerOutput(ConnectorOut* out)
     assert(ui);
     assert(ui->output_layout);
     ui->output_layout->addWidget(out);
-    output.push_back(out);
 
     connectConnector(out);
 
@@ -410,27 +413,27 @@ int Box::nextOutputId()
 void Box::removeInput(ConnectorIn *in)
 {
     std::vector<ConnectorIn*>::iterator it;
-    it = std::find(input.begin(), input.end(), in);
+    it = std::find(node_->input.begin(), node_->input.end(), in);
 
     assert(*it == in);
 
     disconnectConnector(in);
 
     in->deleteLater();
-    input.erase(it);
+    node_->input.erase(it);
 }
 
 void Box::removeOutput(ConnectorOut *out)
 {
     std::vector<ConnectorOut*>::iterator it;
-    it = std::find(output.begin(), output.end(), out);
+    it = std::find(node_->output.begin(), node_->output.end(), out);
 
     assert(*it == out);
 
     disconnectConnector(out);
 
     out->deleteLater();
-    output.erase(it);
+    node_->output.erase(it);
 }
 
 void Box::connectConnector(Connector *c)
@@ -464,29 +467,29 @@ void Box::resizeEvent(QResizeEvent *)
 
 int Box::countInputs()
 {
-    return input.size();
+    return node_->input.size();
 }
 
 int Box::countOutputs()
 {
-    return output.size();
+    return node_->output.size();
 }
 
 ConnectorIn* Box::getInput(const unsigned int index)
 {
-    assert(index < input.size());
-    return input[index];
+    assert(index < node_->input.size());
+    return node_->input[index];
 }
 
 ConnectorOut* Box::getOutput(const unsigned int index)
 {
-    assert(index < output.size());
-    return output[index];
+    assert(index < node_->output.size());
+    return node_->output[index];
 }
 
 ConnectorIn* Box::getInput(const std::string& uuid)
 {
-    BOOST_FOREACH(ConnectorIn* in, input) {
+    BOOST_FOREACH(ConnectorIn* in, node_->input) {
         if(in->UUID() == uuid) {
             return in;
         }
@@ -497,7 +500,7 @@ ConnectorIn* Box::getInput(const std::string& uuid)
 
 ConnectorOut* Box::getOutput(const std::string& uuid)
 {
-    BOOST_FOREACH(ConnectorOut* out, output) {
+    BOOST_FOREACH(ConnectorOut* out, node_->output) {
         if(out->UUID() == uuid) {
             return out;
         }
@@ -592,16 +595,16 @@ bool Box::eventFilter(QObject* o, QEvent* e)
 void Box::enabledChange(bool val)
 {
     if(val)  {
-        content_->enable();
+        node_->enable();
     } else {
-        content_->disable();
+        node_->disable();
     }
 }
 
 void Box::paintEvent(QPaintEvent*)
 {
-    bool is_error = content_->isError() && content_->errorLevel() == ErrorState::EL_ERROR;
-    bool is_warn = content_->isError() && content_->errorLevel() == ErrorState::EL_WARNING;
+    bool is_error = node_->isError() && node_->errorLevel() == ErrorState::EL_ERROR;
+    bool is_warn = node_->isError() && node_->errorLevel() == ErrorState::EL_WARNING;
 
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
@@ -612,10 +615,10 @@ void Box::paintEvent(QPaintEvent*)
     if(error_change || warning_change) {
         if(is_error) {
             setLabel(QString("ERROR: ") + objectName());
-            ui->label->setToolTip(content_->errorMessage().c_str());
+            ui->label->setToolTip(node_->errorMessage().c_str());
         } else if(is_warn) {
             setLabel(QString("WARNING: ") + objectName());
-            ui->label->setToolTip(content_->errorMessage().c_str());
+            ui->label->setToolTip(node_->errorMessage().c_str());
         } else {
             setLabel(objectName());
             ui->label->setToolTip(UUID().c_str());
@@ -653,10 +656,10 @@ void Box::moveEvent(QMoveEvent* e)
 
 void Box::triggerPlaced()
 {
-    foreach(ConnectorIn* i, input) {
+    foreach(ConnectorIn* i, node_->input) {
         Q_EMIT connectorCreated(i);
     }
-    foreach(ConnectorOut* i, output) {
+    foreach(ConnectorOut* i, node_->output) {
         Q_EMIT connectorCreated(i);
     }
     Q_EMIT placed();
@@ -779,10 +782,10 @@ void Box::killContent()
         }
 
         private_thread_ = NULL;
-        worker_ = new NodeWorker(content_);
+        worker_ = new NodeWorker(node_);
 
         QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
-        BOOST_FOREACH(ConnectorIn* in, input) {
+        BOOST_FOREACH(ConnectorIn* in, node_->input) {
             QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
         }
 
@@ -804,10 +807,10 @@ void Box::minimizeBox(bool minimize)
 {    
     state->minimized = minimize;
 
-    BOOST_FOREACH(ConnectorIn* i, input){
+    BOOST_FOREACH(ConnectorIn* i, node_->input){
         i->setMinimizedSize(minimize);
     }
-    BOOST_FOREACH(ConnectorOut* i, output) {
+    BOOST_FOREACH(ConnectorOut* i, node_->output) {
         i->setMinimizedSize(minimize);
     }
 
@@ -844,7 +847,7 @@ Memento::Ptr Box::getState() const
     State::Ptr memento(new State);
     *memento = *state;
 
-    memento->boxed_state = content_->getState();
+    memento->boxed_state = node_->getState();
 
     return memento;
 }
@@ -868,7 +871,7 @@ void Box::setState(Memento::Ptr memento)
 
     state->parent = this;
     if(m->boxed_state != NULL) {
-        content_->setState(m->boxed_state);
+        node_->setState(m->boxed_state);
     }
 
     minimizeBox(state->minimized);
@@ -884,12 +887,12 @@ Command::Ptr Box::removeAllConnectionsCmd()
 {
     command::Meta::Ptr cmd(new command::Meta);
 
-    BOOST_FOREACH(ConnectorIn* i, input) {
+    BOOST_FOREACH(ConnectorIn* i, node_->input) {
         if(i->isConnected()) {
             cmd->add(i->removeAllConnectionsCmd());
         }
     }
-    BOOST_FOREACH(ConnectorOut* i, output) {
+    BOOST_FOREACH(ConnectorOut* i, node_->output) {
         if(i->isConnected()) {
             cmd->add(i->removeAllConnectionsCmd());
         }

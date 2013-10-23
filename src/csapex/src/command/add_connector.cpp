@@ -8,6 +8,7 @@
 #include <csapex/model/connector_forward.h>
 #include <csapex/model/connection_type.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/connection_type_manager.h>
 
@@ -34,7 +35,7 @@ bool AddConnector::doExecute()
             in = new ConnectorIn(box.get(), uuid);
         }
         c = in;
-        box->registerInput(in);
+        box->getNode()->registerInput(in);
     } else {
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_OUT, box->nextOutputId()) : c_uuid;
         ConnectorOut* out;
@@ -44,7 +45,7 @@ bool AddConnector::doExecute()
             out = new ConnectorOut(box.get(), uuid);
         }
         c = out;
-        box->registerOutput(out);
+        box->getNode()->registerOutput(out);
     }
 
     c->setType(ConnectionTypeManager::createMessage(type));

@@ -18,6 +18,12 @@ class Node : public QObject, public ErrorState
 {
     Q_OBJECT
 
+    friend class Box;
+    friend class GraphIO;
+    friend class Graph;
+
+    friend class command::AddConnector;
+
 public:
     typedef boost::shared_ptr<Node> Ptr;
 
@@ -57,58 +63,31 @@ public:
         return addOutput(T::make(), label);
     }
 
-    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional) {
-        return box_->addInput(type, label, optional);
-    }
+    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
+    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
 
-    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label) {
-        return box_->addOutput(type, label);
-    }
+    void addInput(ConnectorIn* in) __attribute__ ((deprecated));
+    void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
 
-    void addInput(ConnectorIn* in) __attribute__ ((deprecated)) {
-        box_->addInput(in);
-    }
+    int countInputs();
+    int countOutputs();
 
-    void addOutput(ConnectorOut* out) __attribute__ ((deprecated)) {
-        box_->addOutput(out);
-    }
+    ConnectorIn* getInput(const unsigned int index);
+    ConnectorOut *getOutput(const unsigned int index);
 
-    void setSynchronizedInputs(bool sync) {
-        box_->setSynchronizedInputs(sync);
-    }
+    ConnectorIn* getInput(const std::string& uuid);
+    ConnectorOut* getOutput(const std::string& uuid);
 
-    int countInputs() {
-        return box_->countInputs();
-    }
+    void removeInput(ConnectorIn *in);
+    void removeOutput(ConnectorOut *out);
 
-    int countOutputs() {
-        return box_->countOutputs();
-    }
-
-    ConnectorIn* getInput(const unsigned int index) {
-        return box_->getInput(index);
-    }
-    ConnectorOut *getOutput(const unsigned int index) {
-        return box_->getOutput(index);
-    }
-
-    ConnectorIn* getInput(const std::string& uuid) {
-        return box_->getInput(uuid);
-    }
-    ConnectorOut* getOutput(const std::string& uuid) {
-        return box_->getOutput(uuid);
-    }
-
-    void removeInput(ConnectorIn *in) {
-        box_->removeInput(in);
-    }
-    void removeOutput(ConnectorOut *out) {
-        box_->removeOutput(out);
-    }
-
+    void setSynchronizedInputs(bool sync);
 
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+
+    void registerInput(ConnectorIn* in);
+    void registerOutput(ConnectorOut* out);
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
@@ -137,6 +116,10 @@ protected:
 
 private:
     Box* box_;
+
+    std::vector<ConnectorIn*> input;
+
+    std::vector<ConnectorOut*> output;
 };
 
 }

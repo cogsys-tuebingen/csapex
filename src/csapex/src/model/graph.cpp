@@ -56,32 +56,6 @@ void split_first(const std::string& haystack, const std::string& needle,
     rhs = haystack.substr(pos + needle.length());
 }
 
-//void tokenize(const std::string& str, std::deque<std::string>& tokens,
-//              const std::string& delimiter)
-//{
-//    std::string::size_type first = 0;
-//    std::string::size_type last = 0;
-//    while(first < str.length()) {
-//        last = str.find(delimiter, first);
-//        if(last == str.npos) {
-//            last = str.length();
-//        }
-//        tokens.push_back(str.substr(first, last - first));
-
-//        first = last + delimiter.length();
-//    }
-
-
-//    std::string combined;
-//    foreach(const std::string& part, tokens) {
-//        combined += part + delimiter;
-//    }
-
-//    combined = combined.substr(0, combined.size() - delimiter.length());
-
-//    assert(combined == str);
-//}
-
 }
 
 Graph::Graph()
@@ -193,9 +167,7 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
     foreach(Box::Ptr b, boxes_) {
         // iterate selected boxes
         if(b->isSelected() || !only_selected) {
-            //            if(only_selected) {
             selected.push_back(b.get());
-            //            }
 
             Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
             std::string new_uuid = templ->addBox(b->getType(), b->pos(), state);
@@ -209,7 +181,7 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
 
     foreach(Box::Ptr b, boxes_) {
         if(b->isSelected() || !only_selected) {
-            foreach(ConnectorIn* in, b->input) {
+            foreach(ConnectorIn* in, b->getNode()->input) {
                 if(in->isConnected()) {
                     Connector* target = in->getConnected();
                     Box* owner = target->getBox();
@@ -235,7 +207,7 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
                     }
                 }
             }
-            foreach(ConnectorOut* out, b->output) {
+            foreach(ConnectorOut* out, b->getNode()->output) {
                 std::string new_connector_uuid;
 
                 for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
@@ -515,11 +487,11 @@ Box::Ptr Graph::findConnectorOwner(const std::string &uuid)
         foreach(Box::Ptr b, boxes_) {
             std::cerr << "box: " << b->UUID() << "\n";
             std::cerr << "inputs: " << "\n";
-            foreach(ConnectorIn* in, b->input) {
+            foreach(ConnectorIn* in, b->getNode()->input) {
                 std::cerr << "\t" << in->UUID() << "\n";
             }
             std::cerr << "outputs: " << "\n";
-            foreach(ConnectorOut* out, b->output) {
+            foreach(ConnectorOut* out, b->getNode()->output) {
                 std::cerr << "\t" << out->UUID() << "\n";
             }
         }

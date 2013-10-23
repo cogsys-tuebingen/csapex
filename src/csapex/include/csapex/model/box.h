@@ -36,6 +36,7 @@ class Box : public QWidget, public Selectable
     friend class GraphIO;
     friend class Graph;
     friend class NodeWorker;
+    friend class Node;
     friend class command::MoveBox;
     friend class command::AddConnector;
 
@@ -111,6 +112,8 @@ public:
 
     int  countInputs();
     int  countOutputs();
+
+    NodePtr getNode();
 
     ConnectorIn* getInput(const unsigned int index);
     ConnectorOut *getOutput(const unsigned int index);
@@ -204,8 +207,8 @@ protected:
 
     void resizeEvent(QResizeEvent * e);
 
-    void registerInput(ConnectorIn* in);
-    void registerOutput(ConnectorOut* out);
+    void registerInputEvent(ConnectorIn* in);
+    void registerOutputEvent(ConnectorOut* out);
 
 
 protected:
@@ -213,15 +216,10 @@ protected:
 
     CommandDispatcher* dispatcher_;
 
-    NodePtr content_;
+    NodePtr node_;
     NodeAdapterPtr adapter_;
 
     State::Ptr state;
-
-    std::vector<ConnectorIn*> input;
-
-    std::vector<ConnectorOut*> output;
-
 
     QMutex worker_mutex_;
 

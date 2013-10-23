@@ -116,8 +116,8 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Value << YAML::BeginSeq; // connections seq
 
     BOOST_FOREACH(csapex::Box::Ptr box, graph_->boxes_) {
-        if(!box->output.empty()) {
-            BOOST_FOREACH(ConnectorOut* o, box->output) {
+        if(!box->getNode()->output.empty()) {
+            BOOST_FOREACH(ConnectorOut* o, box->getNode()->output) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
                 }
