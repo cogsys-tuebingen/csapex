@@ -120,11 +120,11 @@ void FileImporter::fill(QBoxLayout* layout)
 
         connect(file_dialog_, SIGNAL(pressed()), this, SLOT(importDialog()));
 
-        optional_input_filename_ = box_->addInput<connection_types::StringMessage>("File", true);
+        optional_input_filename_ = addInput<connection_types::StringMessage>("File", true);
 
-        output_ = box_->addOutput<connection_types::AnyMessage>("Unknown");
+        output_ = addOutput<connection_types::AnyMessage>("Unknown");
 
-        QObject::connect(box_, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
+        QObject::connect(this, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
     }
 }
 

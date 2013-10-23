@@ -38,12 +38,12 @@ void DisplayKeypoints::allConnectorsArrived()
 void DisplayKeypoints::fill(QBoxLayout* layout)
 {
     if(in_key == NULL) {
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
-        in_img = box_->addInput<CvMatMessage>("Image");
-        in_key = box_->addInput<KeypointMessage> ("Keypoints");
+        in_img = addInput<CvMatMessage>("Image");
+        in_key = addInput<KeypointMessage> ("Keypoints");
 
-        out_img = box_->addOutput<CvMatMessage>("Image");
+        out_img = addOutput<CvMatMessage>("Image");
 
         colorbox = new QComboBox;
         colorbox->addItem("Random Color");

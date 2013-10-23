@@ -21,9 +21,9 @@ PointCount::PointCount()
 
 void PointCount::fill(QBoxLayout *layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_ = box_->addInput<PointCloudMessage>("PointCloud");
+    input_ = addInput<PointCloudMessage>("PointCloud");
 
     number_ = new QLCDNumber;
     number_->setDigitCount(8);

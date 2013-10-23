@@ -26,11 +26,11 @@ VoxelGrid::VoxelGrid()
 
 void VoxelGrid::fill(QBoxLayout *layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_cloud_ = box_->addInput<PointCloudMessage>("PointCloud");
+    input_cloud_ = addInput<PointCloudMessage>("PointCloud");
 
-    output_ = box_->addOutput<PointCloudMessage>("PointCloud");
+    output_ = addOutput<PointCloudMessage>("PointCloud");
 
     res_ = QtHelper::makeDoubleSlider(layout, "resolution", 0.1, 0.01, 1.0, 0.01);
     QObject::connect(res_, SIGNAL(valueChanged(double)), this, SLOT(update()));

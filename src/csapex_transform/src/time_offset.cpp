@@ -35,10 +35,10 @@ void TimeOffset::allConnectorsArrived()
 
 void TimeOffset::fill(QBoxLayout* layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_ = box_->addInput<connection_types::TimeStampMessage>("Time");
-    output_ = box_->addOutput<connection_types::TimeStampMessage>("Time");
+    input_ = addInput<connection_types::TimeStampMessage>("Time");
+    output_ = addOutput<connection_types::TimeStampMessage>("Time");
 
     offset_ = QtHelper::makeDoubleSlider(layout, "offset (ms)", 0.0, -5000.0, 5000.0, 0.5);
     QObject::connect(offset_, SIGNAL(valueChanged(double)), this, SLOT(update()));

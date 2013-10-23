@@ -41,9 +41,9 @@ void Clock::tick()
 
 void Clock::fill(QBoxLayout* layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    output_ = box_->addOutput<connection_types::TimeStampMessage>("Time");
+    output_ = addOutput<connection_types::TimeStampMessage>("Time");
 
     time_type_ = new QPushButton;
     time_type_->setCheckable(true);

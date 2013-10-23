@@ -27,7 +27,7 @@ TextInput::TextInput()
 void TextInput::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = box_->addOutput<connection_types::StringMessage>("Text");
+        connector_ = addOutput<connection_types::StringMessage>("Text");
 
         txt_ = new QLineEdit;
         QPushButton* send = new QPushButton("ok");

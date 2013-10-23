@@ -96,14 +96,14 @@ void DynamicTransform::publishTransform(const ros::Time& time)
 
 void DynamicTransform::fill(QBoxLayout* layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    time_in_ = box_->addInput<connection_types::TimeStampMessage>("Time", true);
-    frame_in_from_ = box_->addInput<connection_types::StringMessage>("Origin Frame", true);
-    frame_in_to_ = box_->addInput<connection_types::StringMessage>("Target Frame", true);
+    time_in_ = addInput<connection_types::TimeStampMessage>("Time", true);
+    frame_in_from_ = addInput<connection_types::StringMessage>("Origin Frame", true);
+    frame_in_to_ = addInput<connection_types::StringMessage>("Target Frame", true);
 
-    output_ = box_->addOutput<connection_types::TransformMessage>("Transform");
-    output_frame_ = box_->addOutput<connection_types::StringMessage>("Target Frame");
+    output_ = addOutput<connection_types::TransformMessage>("Transform");
+    output_frame_ = addOutput<connection_types::StringMessage>("Target Frame");
 
     from_box_ = new QComboBox;
     from_box_->setEditable(true);
@@ -126,7 +126,7 @@ void DynamicTransform::fill(QBoxLayout* layout)
     QObject::connect(to_box_, SIGNAL(currentIndexChanged(int)), this, SLOT(update()));
     QObject::connect(to_box_, SIGNAL(editTextChanged(QString)), this, SLOT(update()));
 
-    QObject::connect(box_, SIGNAL(placed()), this, SLOT(updateFrames()));
+    QObject::connect(this, SIGNAL(started()), this, SLOT(updateFrames()));
 
     updateFrames();
 }

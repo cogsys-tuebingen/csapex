@@ -24,12 +24,12 @@ ExtractTimeStamp::ExtractTimeStamp()
 
 void ExtractTimeStamp::fill(QBoxLayout *layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_ = box_->addInput<PointCloudMessage>("PointCloud");
+    input_ = addInput<PointCloudMessage>("PointCloud");
 
-    output_ = box_->addOutput<TimeStampMessage>("Time");
-    output_frame_ = box_->addOutput<StringMessage>("Target Frame");
+    output_ = addOutput<TimeStampMessage>("Time");
+    output_frame_ = addOutput<StringMessage>("Target Frame");
 }
 
 void ExtractTimeStamp::allConnectorsArrived()

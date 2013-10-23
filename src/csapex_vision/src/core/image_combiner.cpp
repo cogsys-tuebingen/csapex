@@ -29,12 +29,12 @@ ImageCombiner::~ImageCombiner()
 void ImageCombiner::fill(QBoxLayout* layout)
 {
     if(input_img_a_ == NULL) {
-        input_img_a_ = box_->addInput<CvMatMessage>("Image 1");
-        input_mask_a_ = box_->addInput<CvMatMessage>("Mask 1");
-        input_img_b_ = box_->addInput<CvMatMessage>("Image 2");
-        input_mask_b_ = box_->addInput<CvMatMessage>("Mask 2");
+        input_img_a_ = addInput<CvMatMessage>("Image 1");
+        input_mask_a_ = addInput<CvMatMessage>("Mask 1");
+        input_img_b_ = addInput<CvMatMessage>("Image 2");
+        input_mask_b_ = addInput<CvMatMessage>("Mask 2");
 
-        output_img_ = box_->addOutput<CvMatMessage>("Image");
+        output_img_ = addOutput<CvMatMessage>("Image");
 
         insert(layout);
     }

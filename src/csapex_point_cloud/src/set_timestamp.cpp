@@ -24,13 +24,13 @@ SetTimeStamp::SetTimeStamp()
 
 void SetTimeStamp::fill(QBoxLayout *layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_ = box_->addInput<connection_types::PointCloudMessage>("PointCloud");
-    input_frame_ = box_->addInput<connection_types::StringMessage>("Frame", true);
-    input_time_ = box_->addInput<connection_types::TimeStampMessage>("Time");
+    input_ = addInput<connection_types::PointCloudMessage>("PointCloud");
+    input_frame_ = addInput<connection_types::StringMessage>("Frame", true);
+    input_time_ = addInput<connection_types::TimeStampMessage>("Time");
 
-    output_ = box_->addOutput<connection_types::PointCloudMessage>("PointCloud");
+    output_ = addOutput<connection_types::PointCloudMessage>("PointCloud");
 }
 
 void SetTimeStamp::allConnectorsArrived()

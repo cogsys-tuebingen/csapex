@@ -31,15 +31,15 @@ Filter::~Filter()
 void Filter::fill(QBoxLayout* parent)
 {
     if(input_img_ == NULL) {
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
-        input_img_ = box_->addInput<CvMatMessage>("Image");
+        input_img_ = addInput<CvMatMessage>("Image");
         if(usesMask()) {
-            input_mask_ = box_->addInput<CvMatMessage>("Mask", true);
+            input_mask_ = addInput<CvMatMessage>("Mask", true);
         }
-        output_img_ = box_->addOutput<CvMatMessage>("Image");
+        output_img_ = addOutput<CvMatMessage>("Image");
         if(usesMask()) {
-            output_mask_ = box_->addOutput<CvMatMessage>("Mask");
+            output_mask_ = addOutput<CvMatMessage>("Mask");
         }
 
         insert(parent);

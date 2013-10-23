@@ -97,21 +97,11 @@ public:
 
     virtual void init(const QPoint& pos);
 
-    template <typename T>
-    ConnectorIn* addInput(const std::string& label, bool optional = false) {
-        return addInput(T::make(), label, optional);
-    }
-
-    template <typename T>
-    ConnectorOut* addOutput(const std::string& label) {
-        return addOutput(T::make(), label);
-    }
-
     ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
 
-    void addInput(ConnectorIn* in) __attribute__ ((deprecated));
-    void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
+    void addInput(ConnectorIn* in);
+    void addOutput(ConnectorOut* out);
 
     int nextInputId();
     int nextOutputId();

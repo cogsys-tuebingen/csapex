@@ -32,9 +32,9 @@ void StaticTransform::tick()
 
 void StaticTransform::fill(QBoxLayout* layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    output_ = box_->addOutput<connection_types::TransformMessage>("Transformation");
+    output_ = addOutput<connection_types::TransformMessage>("Transformation");
 
     double p = 3.1415;
     roll_ = QtHelper::makeDoubleSlider(layout,  "roll",  0.0, -p, p, 0.001);

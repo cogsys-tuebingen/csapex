@@ -65,12 +65,12 @@ void ExtractKeypoints::allConnectorsArrived()
 void ExtractKeypoints::fill(QBoxLayout* layout)
 {
     if(selection_key == NULL) {
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
-        in_img = box_->addInput<CvMatMessage>("Image");
-        in_mask = box_->addInput<CvMatMessage>("Mask", true);
+        in_img = addInput<CvMatMessage>("Image");
+        in_mask = addInput<CvMatMessage>("Mask", true);
 
-        out_key = box_->addOutput<csapex::connection_types::KeypointMessage>("Keypoints");
+        out_key = addOutput<csapex::connection_types::KeypointMessage>("Keypoints");
 
         ExtractorManager& manager = ExtractorManager::instance();
 
@@ -90,7 +90,7 @@ void ExtractKeypoints::fill(QBoxLayout* layout)
 
         QObject::connect(selection_key, SIGNAL(currentIndexChanged(int)), this, SLOT(update(int)));
 
-        QObject::connect(box_, SIGNAL(placed()), this, SIGNAL(modelChanged()));
+        QObject::connect(this, SIGNAL(started()), this, SIGNAL(modelChanged()));
     }
 }
 

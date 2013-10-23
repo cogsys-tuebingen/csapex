@@ -24,9 +24,9 @@ TextDisplay::TextDisplay()
 void TextDisplay::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
-        connector_ = box_->addInput<connection_types::StringMessage>("Text");
+        connector_ = addInput<connection_types::StringMessage>("Text");
         txt_ = new QLabel("<i>no input yet</i>");
         layout->addWidget(txt_);
     }

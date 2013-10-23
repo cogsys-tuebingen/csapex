@@ -26,12 +26,12 @@ PassThrough::PassThrough()
 
 void PassThrough::fill(QBoxLayout *layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_cloud_ = box_->addInput<PointCloudMessage>("PointCloud");
+    input_cloud_ = addInput<PointCloudMessage>("PointCloud");
 
-    output_pos_ = box_->addOutput<PointCloudMessage>("cropped PointCloud (+)");
-    output_neg_ = box_->addOutput<PointCloudMessage>("cropped PointCloud (-)");
+    output_pos_ = addOutput<PointCloudMessage>("cropped PointCloud (+)");
+    output_neg_ = addOutput<PointCloudMessage>("cropped PointCloud (-)");
 
     min_ = QtHelper::makeDoubleSlider(layout, "min", 0.0, -5.0, 5.0, 0.01);
     max_ = QtHelper::makeDoubleSlider(layout, "max", 0.0, -5.0, 5.0, 0.01);

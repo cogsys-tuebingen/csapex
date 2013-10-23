@@ -24,7 +24,7 @@ Toggle::Toggle()
 
 void Toggle::fill(QBoxLayout *layout)
 {
-    out = box_->addOutput<connection_types::BooleanMessage>("Signal");
+    out = addOutput<connection_types::BooleanMessage>("Signal");
 
     btn = new QPushButton();
     btn->setCheckable(true);

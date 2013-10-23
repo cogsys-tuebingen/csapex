@@ -28,7 +28,7 @@ ImportCin::ImportCin()
 void ImportCin::fill(QBoxLayout *)
 {
     if(connector_ == NULL) {
-        connector_ = box_->addOutput<connection_types::AnyMessage>("Anything");
+        connector_ = addOutput<connection_types::AnyMessage>("Anything");
     }
 }
 

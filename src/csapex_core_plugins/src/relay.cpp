@@ -26,8 +26,8 @@ Relay::Relay()
 void Relay::fill(QBoxLayout *layout)
 {
     if(input_ == NULL) {
-        input_ = box_->addInput<connection_types::AnyMessage>("Anything");
-        output_ = box_->addOutput<connection_types::AnyMessage>("Same as input");
+        input_ = addInput<connection_types::AnyMessage>("Anything");
+        output_ = addOutput<connection_types::AnyMessage>("Same as input");
     }
 }
 

@@ -84,11 +84,11 @@ void Segmentation::update()
 
 void Segmentation::fill(QBoxLayout* layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_img_ = box_->addInput<CvMatMessage>("Image");
-    input_mask_ = box_->addInput<CvMatMessage>("Mask", true);
-    output_mask_ = box_->addOutput<CvMatMessage>("Mask");
+    input_img_ = addInput<CvMatMessage>("Image");
+    input_mask_ = addInput<CvMatMessage>("Mask", true);
+    output_mask_ = addOutput<CvMatMessage>("Mask");
 }
 
 void Segmentation::updateDynamicGui(QBoxLayout *layout)

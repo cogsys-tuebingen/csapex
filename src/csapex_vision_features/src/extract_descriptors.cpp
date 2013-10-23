@@ -57,12 +57,12 @@ void ExtractDescriptors::allConnectorsArrived()
 void ExtractDescriptors::fill(QBoxLayout* layout)
 {
     if(selection_des == NULL) {
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
-        in_img = box_->addInput<CvMatMessage>("Image");
-        in_key = box_->addInput<KeypointMessage>("Keypoints");
+        in_img = addInput<CvMatMessage>("Image");
+        in_key = addInput<KeypointMessage>("Keypoints");
 
-        out_des = box_->addOutput<DescriptorMessage>("Descriptors");
+        out_des = addOutput<DescriptorMessage>("Descriptors");
 
         ExtractorManager& manager = ExtractorManager::instance();
 
@@ -83,7 +83,7 @@ void ExtractDescriptors::fill(QBoxLayout* layout)
 
         QObject::connect(selection_des, SIGNAL(currentIndexChanged(int)), this, SLOT(update(int)));
 
-        QObject::connect(box_, SIGNAL(placed()), this, SIGNAL(modelChanged()));
+        QObject::connect(this, SIGNAL(started()), this, SIGNAL(modelChanged()));
     }
 }
 

@@ -74,9 +74,9 @@ bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
 void OutputDisplay::fill(QBoxLayout* layout)
 {
     if(input_ == NULL) {
-        input_ = box_->addInput<CvMatMessage>("Image");
+        input_ = addInput<CvMatMessage>("Image");
 
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
         view_->setFixedSize(QSize(state.width, state.height));
         view_->setMouseTracking(true);

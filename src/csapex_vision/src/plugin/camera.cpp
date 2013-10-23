@@ -33,7 +33,7 @@ void Camera::tick()
 
 void Camera::fill(QBoxLayout* layout)
 {
-    output_ = box_->addOutput<connection_types::CvMatMessage>("Image");
+    output_ = addOutput<connection_types::CvMatMessage>("Image");
 
     cap_.open(0);
 }

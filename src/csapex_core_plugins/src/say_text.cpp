@@ -24,9 +24,9 @@ SayText::SayText()
 void SayText::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
-        connector_ = box_->addInput<connection_types::StringMessage>("Text");
+        connector_ = addInput<connection_types::StringMessage>("Text");
     }
 }
 

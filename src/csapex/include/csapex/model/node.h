@@ -6,6 +6,7 @@
 #include <csapex/model/tag.h>
 #include <csapex/model/memento.h>
 #include <csapex/model/error_state.h>
+#include <csapex/model/box.h>
 
 /// SYSTEM
 #include <QObject>
@@ -46,6 +47,66 @@ public:
     virtual void setBox(Box* box);
     Box* getBox() const;
 
+    template <typename T>
+    ConnectorIn* addInput(const std::string& label, bool optional = false) {
+        return addInput(T::make(), label, optional);
+    }
+
+    template <typename T>
+    ConnectorOut* addOutput(const std::string& label) {
+        return addOutput(T::make(), label);
+    }
+
+    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional) {
+        return box_->addInput(type, label, optional);
+    }
+
+    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label) {
+        return box_->addOutput(type, label);
+    }
+
+    void addInput(ConnectorIn* in) __attribute__ ((deprecated)) {
+        box_->addInput(in);
+    }
+
+    void addOutput(ConnectorOut* out) __attribute__ ((deprecated)) {
+        box_->addOutput(out);
+    }
+
+    void setSynchronizedInputs(bool sync) {
+        box_->setSynchronizedInputs(sync);
+    }
+
+    int countInputs() {
+        return box_->countInputs();
+    }
+
+    int countOutputs() {
+        return box_->countOutputs();
+    }
+
+    ConnectorIn* getInput(const unsigned int index) {
+        return box_->getInput(index);
+    }
+    ConnectorOut *getOutput(const unsigned int index) {
+        return box_->getOutput(index);
+    }
+
+    ConnectorIn* getInput(const std::string& uuid) {
+        return box_->getInput(uuid);
+    }
+    ConnectorOut* getOutput(const std::string& uuid) {
+        return box_->getOutput(uuid);
+    }
+
+    void removeInput(ConnectorIn *in) {
+        box_->removeInput(in);
+    }
+    void removeOutput(ConnectorOut *out) {
+        box_->removeOutput(out);
+    }
+
+
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
@@ -65,17 +126,17 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void modelChanged();
+    void toggled(bool);
+    void started();
 
 protected:
-    Box* box_;
-
     std::string type_;
-
     mutable std::vector<Tag> tags_;
-
     QIcon icon_;
-
     bool enabled_;
+
+private:
+    Box* box_;
 };
 
 }

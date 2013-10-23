@@ -29,9 +29,9 @@ ExportFile::ExportFile()
 void ExportFile::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = box_->addInput<connection_types::AnyMessage>("Anything");
+        connector_ = addInput<connection_types::AnyMessage>("Anything");
 
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
         file_dialog_ = new QPushButton("Export");
         QObject::connect(file_dialog_, SIGNAL(pressed()), this, SLOT(exportDialog()));

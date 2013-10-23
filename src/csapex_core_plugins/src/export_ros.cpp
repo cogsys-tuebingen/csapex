@@ -31,9 +31,9 @@ ExportRos::ExportRos()
 void ExportRos::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = box_->addInput<connection_types::AnyMessage>("Anything");
+        connector_ = addInput<connection_types::AnyMessage>("Anything");
 
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
         topic_ = new QLineEdit;
         QPushButton* send = new QPushButton("set");

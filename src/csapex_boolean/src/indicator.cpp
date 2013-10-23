@@ -25,9 +25,9 @@ Indicator::Indicator()
 
 void Indicator::fill(QBoxLayout *layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    in = box_->addInput<BooleanMessage>("Signal");
+    in = addInput<BooleanMessage>("Signal");
 
     indicator_ = new QCheckBox("signal");
 

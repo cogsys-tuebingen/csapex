@@ -31,9 +31,9 @@ void TransformInverter::allConnectorsArrived()
 
 void TransformInverter::fill(QBoxLayout* layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    input_ = box_->addInput<connection_types::TransformMessage>("T");
+    input_ = addInput<connection_types::TransformMessage>("T");
 
-    output_ = box_->addOutput<connection_types::TransformMessage>("T^-1");
+    output_ = addOutput<connection_types::TransformMessage>("T^-1");
 }

@@ -26,9 +26,9 @@ ExportCout::ExportCout()
 void ExportCout::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = box_->addInput<connection_types::AnyMessage>("Anything");
+        connector_ = addInput<connection_types::AnyMessage>("Anything");
 
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
     }
 }
 

@@ -303,16 +303,16 @@ void RobustMatch::allConnectorsArrived()
 void RobustMatch::fill(QBoxLayout* layout)
 {
     if(in_img_1 == NULL) {
-        box_->setSynchronizedInputs(true);
+        setSynchronizedInputs(true);
 
-        in_img_1 = box_->addInput<CvMatMessage>("Image 1");
-        in_key_1 = box_->addInput<KeypointMessage>("Keypoints 1");
-        in_des_1 = box_->addInput<DescriptorMessage>("Descriptor 1");
+        in_img_1 = addInput<CvMatMessage>("Image 1");
+        in_key_1 = addInput<KeypointMessage>("Keypoints 1");
+        in_des_1 = addInput<DescriptorMessage>("Descriptor 1");
 
-        in_img_2 = box_->addInput<CvMatMessage>("Image 2");
-        in_key_2 = box_->addInput<KeypointMessage>("Keypoints 2");
-        in_des_2 = box_->addInput<DescriptorMessage>("Descriptor 2");
+        in_img_2 = addInput<CvMatMessage>("Image 2");
+        in_key_2 = addInput<KeypointMessage>("Keypoints 2");
+        in_des_2 = addInput<DescriptorMessage>("Descriptor 2");
 
-        out_img = box_->addOutput<CvMatMessage>("Debug View");
+        out_img = addOutput<CvMatMessage>("Debug View");
     }
 }

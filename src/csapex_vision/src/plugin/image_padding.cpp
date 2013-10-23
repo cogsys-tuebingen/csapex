@@ -34,10 +34,10 @@ void ImagePadding::fill(QBoxLayout *layout)
         slider = QtHelper::makeSlider(layout, "border width", 0, 0, 500);
         connect(slider, SIGNAL(valueChanged(int)), this, SLOT(update()));
 
-        input_ = box_->addInput<CvMatMessage>("Image");
+        input_ = addInput<CvMatMessage>("Image");
 
-        output_ = box_->addOutput<CvMatMessage>("Expanded Image");
-        output_mask_ = box_->addOutput<CvMatMessage>("Expanded Mask");
+        output_ = addOutput<CvMatMessage>("Expanded Image");
+        output_mask_ = addOutput<CvMatMessage>("Expanded Mask");
     }
 }
 

@@ -123,6 +123,8 @@ Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, Q
     state->minimized = false;
 
     QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
+    QObject::connect(this, SIGNAL(toggled(bool)), content_.get(), SIGNAL(toggled(bool)));
+    QObject::connect(this, SIGNAL(placed()), content_.get(), SIGNAL(started()));
 
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
 

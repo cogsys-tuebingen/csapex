@@ -25,12 +25,12 @@ NAND::NAND()
 
 void NAND::fill(QBoxLayout *layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    in_a = box_->addInput<BooleanMessage>("A");
-    in_b = box_->addInput<BooleanMessage>("B");
+    in_a = addInput<BooleanMessage>("A");
+    in_b = addInput<BooleanMessage>("B");
 
-    out = box_->addOutput<BooleanMessage>("A nand B");
+    out = addOutput<BooleanMessage>("A nand B");
 }
 
 void NAND::allConnectorsArrived()

@@ -38,7 +38,7 @@ ImportRos::ImportRos()
 void ImportRos::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = box_->addOutput<connection_types::AnyMessage>("Something");
+        connector_ = addOutput<connection_types::AnyMessage>("Something");
 
         dynamic_layout = new QVBoxLayout;
         layout->addLayout(dynamic_layout);
