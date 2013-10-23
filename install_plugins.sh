@@ -1,5 +1,11 @@
 #!/bin/bash
 if [[ -f .gitmodules ]]; then
+	echo "updating submodules"
+else
+	echo "installing submodules"
+fi
+
+if [[ -f .gitmodules ]]; then
 	git submodule init
 	git submodule update
 else
