@@ -13,8 +13,6 @@ QAbstractSliderLimiter::QAbstractSliderLimiter(QAbstractSlider *limitMin, QAbstr
 
 QAbstractSliderLimiter::~QAbstractSliderLimiter()
 {
-    QObject::disconnect(limitMin_, SIGNAL(valueChanged(int)), this, SLOT(limitMin(int)));
-    QObject::disconnect(limitMax_, SIGNAL(valueChanged(int)), this, SLOT(limitMax(int)));
 }
 
 void QAbstractSliderLimiter::limitMin(int limit)
