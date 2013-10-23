@@ -29,6 +29,8 @@ public Q_SLOTS:
     void forwardMessageDirectly(ConnectorIn* source);
     void forwardMessageSynchronized(ConnectorIn* source);
 
+    void addInput(ConnectorIn* source);
+
     void eventGuiChanged();
     void tick();
 

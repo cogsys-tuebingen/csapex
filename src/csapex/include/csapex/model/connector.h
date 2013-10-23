@@ -84,6 +84,9 @@ public:
 
     virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
+    virtual void setBox(Box* box);
+    Box* getBox() const;
+
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
     virtual void removeConnection(QObject* other_side);
@@ -116,7 +119,7 @@ protected:
 
     virtual void removeAllConnectionsNotUndoable() = 0;
 
-    void errorEvent(bool error, ErrorLevel level);
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
     void paintEvent(QPaintEvent* event);
 
 protected:
@@ -127,6 +130,8 @@ protected:
     virtual bool shouldCreate(bool left, bool right);
 
 protected:
+    Box* box_;
+
     QWidget* parent_widget;
     csapex::DesignBoard* designer;
 

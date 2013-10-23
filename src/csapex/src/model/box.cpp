@@ -130,7 +130,7 @@ Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, Q
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
     QObject::connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
-    QObject::connect(content.get(), SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+    QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -295,6 +295,7 @@ std::string Box::errorMessage() const
 }
 void Box::setError(bool e, const std::string &msg, ErrorState::ErrorLevel level)
 {
+    setToolTip(msg.c_str());
     content_->setError(e, msg, level);
 }
 
@@ -356,6 +357,8 @@ void Box::addOutput(ConnectorOut* out) // LEGACY
 
 void Box::registerInput(ConnectorIn* in)
 {
+    worker_->addInput(in);
+
     in->setParent(NULL);
     ui->input_layout->addWidget(in);
     input.push_back(in);

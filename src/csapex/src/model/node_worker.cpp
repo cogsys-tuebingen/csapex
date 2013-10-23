@@ -50,6 +50,11 @@ void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
     Q_EMIT messageProcessed();
 }
 
+void NodeWorker::addInput(ConnectorIn *source)
+{
+    has_msg_[source] = false;
+}
+
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
     has_msg_[source] = true;

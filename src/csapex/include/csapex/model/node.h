@@ -42,6 +42,12 @@ public:
     virtual void setState(Memento::Ptr memento);
     virtual Memento::Ptr getState() const;
 
+    /// TODO: get rid of this
+    virtual void setBox(Box* box);
+    Box* getBox() const;
+
+private:
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
@@ -57,7 +63,12 @@ public Q_SLOTS:
 
     virtual void updateModel();
 
+Q_SIGNALS:
+    void modelChanged();
+
 protected:
+    Box* box_;
+
     std::string type_;
 
     mutable std::vector<Tag> tags_;

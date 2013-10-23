@@ -24,7 +24,7 @@ void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
 
     setErrorSilent(e, msg, level);
 
-    errorEvent(error_, level_);
+    errorEvent(error_, msg, level_);
 }
 
 void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
@@ -45,7 +45,6 @@ void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level
             }
         }
     }
-    box_->setToolTip(err);
     error_ = e;
     level_ = level;
     error_msg_ = msg;
@@ -69,19 +68,7 @@ std::string ErrorState::errorMessage() const
     return error_msg_;
 }
 
-void ErrorState::setBox(Box* box)
-{
-    QMutexLocker lock(&mutex);
-    box_ = box;
-}
-
-Box* ErrorState::getBox() const
-{
-    QMutexLocker lock(&mutex);
-    return box_;
-}
-
-void ErrorState::errorEvent(bool, ErrorLevel)
+void ErrorState::errorEvent(bool, const std::string &, ErrorLevel)
 {
 
 }

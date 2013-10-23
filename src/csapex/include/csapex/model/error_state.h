@@ -27,18 +27,14 @@ public:
     ErrorLevel errorLevel() const;
     std::string errorMessage() const;
 
-    virtual void setBox(Box* box);
-    Box* getBox() const;
-
 protected:
     ErrorState();
     virtual ~ErrorState();
 
-    virtual void errorEvent(bool error, ErrorLevel level);
+    virtual void errorEvent(bool error, const std::string& msg, ErrorLevel level);
 
 protected:
     mutable QMutex mutex;
-    Box* box_;
     bool error_;
     std::string error_msg_;
     ErrorLevel level_;

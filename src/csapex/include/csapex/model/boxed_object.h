@@ -28,19 +28,6 @@ protected:
 
 public:
     virtual ~BoxedObject();
-
-
-public Q_SLOTS:
-    virtual void disable();
-
-Q_SIGNALS:
-    void modelChanged();
-    void guiChanged();
-
-protected:
-    void errorEvent(bool error, ErrorLevel level);
-
-protected:
 };
 
 

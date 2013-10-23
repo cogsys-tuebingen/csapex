@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/model/node.h>
 
+/// COMPONENT
+#include <csapex/model/box.h>
+
 using namespace csapex;
 
 Node::Node()
@@ -107,6 +110,7 @@ void Node::disable(bool d)
 void Node::disable()
 {
     enabled_ = false;
+    setError(false);
 }
 
 void Node::connectorChanged()
@@ -123,3 +127,27 @@ void Node::updateModel()
 {
 }
 
+
+
+void Node::setBox(Box* box)
+{
+    QMutexLocker lock(&mutex);
+    box_ = box;
+}
+
+Box* Node::getBox() const
+{
+    QMutexLocker lock(&mutex);
+    return box_;
+}
+
+
+void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+{
+    box_->setError(error, msg, level);
+    if(enabled_ && error && level == EL_ERROR) {
+        box_->setIOError(true);
+    } else {
+        box_->setIOError(false);
+    }
+}

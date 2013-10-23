@@ -8,6 +8,18 @@
 namespace csapex
 {
 
+class NodeAdapterBridge : public QObject
+{
+    Q_OBJECT
+
+Q_SIGNALS:
+    void guiChanged();
+
+public:
+    void triggerGuiChanged();
+
+};
+
 class NodeAdapter
 {
 public:
@@ -18,6 +30,12 @@ public:
 
     virtual void fill(QBoxLayout* layout);
     virtual void updateDynamicGui(QBoxLayout* layout);
+
+protected:
+    void guiChanged();
+
+public:
+    NodeAdapterBridge bridge;
 };
 
 }

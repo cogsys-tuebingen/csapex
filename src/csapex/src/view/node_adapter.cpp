@@ -17,3 +17,13 @@ void NodeAdapter::updateDynamicGui(QBoxLayout *)
 {
 
 }
+
+void NodeAdapter::guiChanged()
+{
+    bridge.triggerGuiChanged();
+}
+
+void NodeAdapterBridge::triggerGuiChanged()
+{
+    Q_EMIT guiChanged();
+}

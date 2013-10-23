@@ -44,7 +44,7 @@ Connector::Connector(Box* parent, int sub_id, int type)
 
 void Connector::init(Box* parent)
 {
-    setBox(parent);
+    box_ = parent;
 
     findParents();
     setFocusPolicy(Qt::NoFocus);
@@ -67,9 +67,9 @@ Connector::~Connector()
 {
 }
 
-void Connector::errorEvent(bool error, ErrorLevel level)
+void Connector::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    box_->setError(error, "Connector Error", level);
+    box_->setError(error, msg, level);
 }
 
 bool Connector::isForwarding() const
@@ -340,3 +340,16 @@ void Connector::paintEvent(QPaintEvent*)
     p.setOpacity(0.35);
     p.drawEllipse(contentsRect().center(), 2, 2);
 }
+
+void Connector::setBox(Box* box)
+{
+    QMutexLocker lock(&mutex);
+    box_ = box;
+}
+
+Box* Connector::getBox() const
+{
+    QMutexLocker lock(&mutex);
+    return box_;
+}
+
