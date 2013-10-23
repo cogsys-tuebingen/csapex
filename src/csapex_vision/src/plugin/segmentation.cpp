@@ -20,6 +20,10 @@ Segmentation::Segmentation()
 {
     state.min = cv::Scalar::all(0);
     state.max = cv::Scalar::all(255);
+
+    addTag(Tag::get("Vision"));
+    Tag::createIfNotExists("Segmentation");
+    addTag(Tag::get("Segmentation"));
 }
 
 void Segmentation::allConnectorsArrived()
