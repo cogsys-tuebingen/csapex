@@ -108,6 +108,12 @@ Q_SIGNALS:
     void toggled(bool);
     void started();
 
+    void connectorCreated(Connector*);
+    void connectorRemoved(Connector*);
+
+    void connectorEnabled(Connector*);
+    void connectorDisabled(Connector*);
+
 protected:
     std::string type_;
     mutable std::vector<Tag> tags_;

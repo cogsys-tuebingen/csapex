@@ -96,9 +96,9 @@ void Box::State::readYaml(const YAML::Node &node)
 }
 
 
-Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), node_(content), adapter_(adapter), state(new State(this)),
-      private_thread_(NULL), worker_(new NodeWorker(content)), down_(false), next_sub_id_(0), profiling_(false)
+Box::Box(Node::Ptr node, NodeAdapter::Ptr adapter, const std::string& uuid, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), node_(node), adapter_(adapter), state(new State(this)),
+      private_thread_(NULL), worker_(new NodeWorker(node)), down_(false), profiling_(false)
 {
     ui->setupUi(this);
 
@@ -118,7 +118,7 @@ Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, Q
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
-    ui->enablebtn->setIcon(content->getIcon());
+    ui->enablebtn->setIcon(node->getIcon());
 
     state->minimized = false;
 
@@ -131,7 +131,9 @@ Box::Box(Node::Ptr content, NodeAdapter::Ptr adapter, const std::string& uuid, Q
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    QObject::connect(content.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()), Qt::QueuedConnection);
+    QObject::connect(node_.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()));
+    QObject::connect(node_.get(), SIGNAL(connectorCreated(Connector*)), this, SLOT(registerEvent(Connector*)));
+    QObject::connect(node_.get(), SIGNAL(connectorRemoved(Connector*)), this, SLOT(unregisterEvent(Connector*)));
     QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -329,37 +331,22 @@ std::string Box::getLabel() const
     return ui->label->text().toStdString();
 }
 
-ConnectorIn* Box::addInput(ConnectionType::Ptr type, const std::string& label, bool optional) {
-    int id = node_->input.size();
-    ConnectorIn* c = new ConnectorIn(this, id);
-    c->setLabel(label);
-    c->setOptional(optional);
-    c->setType(type);
-
-    node_->registerInput(c);
-
-    return c;
-}
-
-ConnectorOut* Box::addOutput(ConnectionType::Ptr type, const std::string& label) {
-    int id = node_->output.size();
-    ConnectorOut* c = new ConnectorOut(this, id);
-    c->setLabel(label);
-    c->setType(type);
-
-    node_->registerOutput(c);
-
-    return c;
-}
-
-void Box::addInput(ConnectorIn* in) // LEGACY
+void Box::registerEvent(Connector * c)
 {
-    node_->registerInput(in);
+    if(c->isOutput()) {
+        registerOutputEvent(dynamic_cast<ConnectorOut*>(c));
+    } else {
+        registerInputEvent(dynamic_cast<ConnectorIn*>(c));
+    }
 }
 
-void Box::addOutput(ConnectorOut* out) // LEGACY
+void Box::unregisterEvent(Connector * c)
 {
-    node_->registerOutput(out);
+    if(c->isOutput()) {
+        removeOutputEvent(dynamic_cast<ConnectorOut*>(c));
+    } else {
+        removeInputEvent(dynamic_cast<ConnectorIn*>(c));
+    }
 }
 
 void Box::registerInputEvent(ConnectorIn* in)
@@ -373,7 +360,6 @@ void Box::registerInputEvent(ConnectorIn* in)
 
     connectConnector(in);
 
-    Q_EMIT connectorCreated(in);
     Q_EMIT changed(this);
 }
 
@@ -388,52 +374,27 @@ void Box::registerOutputEvent(ConnectorOut* out)
 
     connectConnector(out);
 
-    Q_EMIT connectorCreated(out);
     Q_EMIT changed(this);
 }
 
 int Box::nextInputId()
 {
-    int nextId = next_sub_id_;
-
-    next_sub_id_ = nextId + 1;
-
-    return nextId;
+    return node_->input.size();
 }
 
 int Box::nextOutputId()
 {
-    int nextId = next_sub_id_;
-
-    next_sub_id_ = nextId + 1;
-
-    return nextId;
+    return node_->output.size();
 }
 
-void Box::removeInput(ConnectorIn *in)
+void Box::removeInputEvent(ConnectorIn *in)
 {
-    std::vector<ConnectorIn*>::iterator it;
-    it = std::find(node_->input.begin(), node_->input.end(), in);
-
-    assert(*it == in);
-
     disconnectConnector(in);
-
-    in->deleteLater();
-    node_->input.erase(it);
 }
 
-void Box::removeOutput(ConnectorOut *out)
+void Box::removeOutputEvent(ConnectorOut *out)
 {
-    std::vector<ConnectorOut*>::iterator it;
-    it = std::find(node_->output.begin(), node_->output.end(), out);
-
-    assert(*it == out);
-
     disconnectConnector(out);
-
-    out->deleteLater();
-    node_->output.erase(it);
 }
 
 void Box::connectConnector(Connector *c)
@@ -443,8 +404,6 @@ void Box::connectConnector(Connector *c)
     QObject::connect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
-    QObject::connect(c, SIGNAL(enabled(Connector*)), this, SIGNAL(connectorEnabled(Connector*)));
-    QObject::connect(c, SIGNAL(disabled(Connector*)), this, SIGNAL(connectorDisabled(Connector*)));
 }
 
 
@@ -455,8 +414,6 @@ void Box::disconnectConnector(Connector *c)
     QObject::disconnect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
     QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
-    QObject::disconnect(c, SIGNAL(enabled(Connector*)), this, SIGNAL(connectorEnabled(Connector*)));
-    QObject::disconnect(c, SIGNAL(disabled(Connector*)), this, SIGNAL(connectorDisabled(Connector*)));
 }
 
 void Box::resizeEvent(QResizeEvent *)
@@ -473,40 +430,6 @@ int Box::countInputs()
 int Box::countOutputs()
 {
     return node_->output.size();
-}
-
-ConnectorIn* Box::getInput(const unsigned int index)
-{
-    assert(index < node_->input.size());
-    return node_->input[index];
-}
-
-ConnectorOut* Box::getOutput(const unsigned int index)
-{
-    assert(index < node_->output.size());
-    return node_->output[index];
-}
-
-ConnectorIn* Box::getInput(const std::string& uuid)
-{
-    BOOST_FOREACH(ConnectorIn* in, node_->input) {
-        if(in->UUID() == uuid) {
-            return in;
-        }
-    }
-
-    return NULL;
-}
-
-ConnectorOut* Box::getOutput(const std::string& uuid)
-{
-    BOOST_FOREACH(ConnectorOut* out, node_->output) {
-        if(out->UUID() == uuid) {
-            return out;
-        }
-    }
-
-    return NULL;
 }
 
 void Box::init(const QPoint& pos)
@@ -656,12 +579,6 @@ void Box::moveEvent(QMoveEvent* e)
 
 void Box::triggerPlaced()
 {
-    foreach(ConnectorIn* i, node_->input) {
-        Q_EMIT connectorCreated(i);
-    }
-    foreach(ConnectorOut* i, node_->output) {
-        Q_EMIT connectorCreated(i);
-    }
     Q_EMIT placed();
 }
 

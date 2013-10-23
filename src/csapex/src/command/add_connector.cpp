@@ -61,9 +61,9 @@ bool AddConnector::doUndo()
     assert(box);
 
     if(input) {
-        box->removeInput(box->getInput(c_uuid));
+        box->getNode()->removeInput(box->getNode()->getInput(c_uuid));
     } else {
-        box->removeOutput(box->getOutput(c_uuid));
+        box->getNode()->removeOutput(box->getNode()->getOutput(c_uuid));
     }
     return false;
 }

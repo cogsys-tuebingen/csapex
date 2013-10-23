@@ -3,6 +3,11 @@
 
 /// COMPONENT
 #include <csapex/model/box.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+
+/// SYSTEM
+#include <boost/foreach.hpp>
 
 using namespace csapex;
 
@@ -156,22 +161,37 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 
 ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
 {
-    return box_->addInput(type, label, optional);
+    int id = input.size();
+    ConnectorIn* c = new ConnectorIn(box_, id);
+    c->setLabel(label);
+    c->setOptional(optional);
+    c->setType(type);
+
+    registerInput(c);
+
+    return c;
 }
 
 ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 {
-    return box_->addOutput(type, label);
+    int id = output.size();
+    ConnectorOut* c = new ConnectorOut(box_, id);
+    c->setLabel(label);
+    c->setType(type);
+
+    registerOutput(c);
+
+    return c;
 }
 
 void Node::addInput(ConnectorIn* in)
 {
-    box_->addInput(in);
+    registerInput(in);
 }
 
 void Node::addOutput(ConnectorOut* out)
 {
-    box_->addOutput(out);
+    registerOutput(out);
 }
 
 void Node::setSynchronizedInputs(bool sync)
@@ -191,29 +211,61 @@ int Node::countOutputs()
 
 ConnectorIn* Node::getInput(const unsigned int index)
 {
-    return box_->getInput(index);
+    assert(index < input.size());
+    return input[index];
 }
+
 ConnectorOut* Node::getOutput(const unsigned int index)
 {
-    return box_->getOutput(index);
+    assert(index < output.size());
+    return output[index];
 }
 
 ConnectorIn* Node::getInput(const std::string& uuid)
 {
-    return box_->getInput(uuid);
-}
-ConnectorOut* Node::getOutput(const std::string& uuid)
-{
-    return box_->getOutput(uuid);
+    BOOST_FOREACH(ConnectorIn* in, input) {
+        if(in->UUID() == uuid) {
+            return in;
+        }
+    }
+
+    return NULL;
 }
 
+ConnectorOut* Node::getOutput(const std::string& uuid)
+{
+    BOOST_FOREACH(ConnectorOut* out, output) {
+        if(out->UUID() == uuid) {
+            return out;
+        }
+    }
+
+    return NULL;
+}
 void Node::removeInput(ConnectorIn *in)
 {
-    box_->removeInput(in);
+    std::vector<ConnectorIn*>::iterator it;
+    it = std::find(input.begin(), input.end(), in);
+
+    assert(*it == in);
+
+    in->deleteLater();
+    input.erase(it);
+
+    Q_EMIT connectorRemoved(in);
 }
+
 void Node::removeOutput(ConnectorOut *out)
 {
-    box_->removeOutput(out);
+    std::vector<ConnectorOut*>::iterator it;
+    it = std::find(output.begin(), output.end(), out);
+
+    assert(*it == out);
+
+    out->deleteLater();
+    output.erase(it);
+
+    Q_EMIT connectorRemoved(out);
 }
 
 
@@ -221,12 +273,12 @@ void Node::registerInput(ConnectorIn* in)
 {
     input.push_back(in);
 
-    box_->registerInputEvent(in);
+    Q_EMIT connectorCreated(in);
 }
 
 void Node::registerOutput(ConnectorOut* out)
 {
     output.push_back(out);
 
-    box_->registerOutputEvent(out);
+    Q_EMIT connectorCreated(out);
 }

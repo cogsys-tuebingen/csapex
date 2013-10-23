@@ -7,6 +7,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -74,8 +75,8 @@ bool DeleteConnection::refresh()
         return false;
     }
 
-    from = from_box->getOutput(from_uuid);
-    to = to_box->getInput(to_uuid);
+    from = from_box->getNode()->getOutput(from_uuid);
+    to = to_box->getNode()->getInput(to_uuid);
 
     assert(from);
     assert(to);

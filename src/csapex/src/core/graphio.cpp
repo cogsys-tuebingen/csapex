@@ -201,7 +201,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
                     to_uuid.replace(to_uuid.find("_in_"), 1, Connector::namespace_separator);
                 }
 
-                ConnectorOut* from = parent->getOutput(from_uuid);
+                ConnectorOut* from = parent->getNode()->getOutput(from_uuid);
                 if(from == NULL) {
                     std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                     continue;
@@ -213,7 +213,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
                     continue;
                 }
 
-                ConnectorIn* to = target_box->getInput(to_uuid);
+                ConnectorIn* to = target_box->getNode()->getInput(to_uuid);
                 assert(to); // if parent box has been found, this should never happen
 
                 graph_->addConnection(Connection::Ptr(new Connection(from, to)));

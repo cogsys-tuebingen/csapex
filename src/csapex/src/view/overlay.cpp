@@ -656,10 +656,10 @@ void Overlay::paintEvent(QPaintEvent*)
         }
 
         for(int id = 0; id < box->countInputs(); ++id) {
-            drawConnector(box->getInput(id));
+            drawConnector(box->getNode()->getInput(id));
         }
         for(int id = 0; id < box->countOutputs(); ++id) {
-            drawConnector(box->getOutput(id));
+            drawConnector(box->getNode()->getOutput(id));
         }
     }
 

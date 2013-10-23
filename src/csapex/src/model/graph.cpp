@@ -511,10 +511,10 @@ Connector* Graph::findConnector(const std::string &uuid)
     assert(owner);
 
     Connector* result = NULL;
-    result = owner->getInput(uuid);
+    result = owner->getNode()->getInput(uuid);
 
     if(result == NULL) {
-        result = owner->getOutput(uuid);
+        result = owner->getNode()->getOutput(uuid);
     }
 
     assert(result);

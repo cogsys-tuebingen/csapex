@@ -6,6 +6,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 
 using namespace csapex;
@@ -34,9 +35,9 @@ bool DeleteConnector::doExecute()
     }
 
     if(in) {
-        box_c->removeInput(dynamic_cast<ConnectorIn*>(c));
+        box_c->getNode()->removeInput(dynamic_cast<ConnectorIn*>(c));
     } else {
-        box_c->removeOutput(dynamic_cast<ConnectorOut*>(c));
+        box_c->getNode()->removeOutput(dynamic_cast<ConnectorOut*>(c));
     }
 
     return true;
@@ -65,9 +66,9 @@ bool DeleteConnector::refresh()
     }
 
     if(in) {
-        c = box_c->getInput(c_uuid);
+        c = box_c->getNode()->getInput(c_uuid);
     } else {
-        c = box_c->getOutput(c_uuid);
+        c = box_c->getNode()->getOutput(c_uuid);
     }
 
     assert(c);

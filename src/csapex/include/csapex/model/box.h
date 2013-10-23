@@ -98,28 +98,16 @@ public:
 
     virtual void init(const QPoint& pos);
 
-    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
-    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
-
-    void addInput(ConnectorIn* in);
-    void addOutput(ConnectorOut* out);
-
     int nextInputId();
     int nextOutputId();
 
-    void removeInput(ConnectorIn *in);
-    void removeOutput(ConnectorOut *out);
+    void removeInputEvent(ConnectorIn *in);
+    void removeOutputEvent(ConnectorOut *out);
 
     int  countInputs();
     int  countOutputs();
 
     NodePtr getNode();
-
-    ConnectorIn* getInput(const unsigned int index);
-    ConnectorOut *getOutput(const unsigned int index);
-
-    ConnectorIn* getInput(const std::string& uuid);
-    ConnectorOut* getOutput(const std::string& uuid);
 
     std::string UUID() const;
 
@@ -179,6 +167,9 @@ public Q_SLOTS:
     void messageProcessed();
     void showContextMenu(const QPoint& pos);
 
+    void registerEvent(Connector*);
+    void unregisterEvent(Connector*);
+
 Q_SIGNALS:
     void placed();
     void toggled(bool);
@@ -188,15 +179,12 @@ Q_SIGNALS:
     void tickRequest();
     void moveSelectionToBox(Box*);
 
-    void connectorCreated(Connector*);
     void connectionFormed(Connector*, Connector*);
     void connectionDestroyed(Connector*, Connector*);
 
     void connectionInProgress(Connector*, Connector*);
     void connectionDone();
     void connectionStart();
-    void connectorEnabled(Connector* source);
-    void connectorDisabled(Connector* source);
 
     void showContextMenuForBox(Box* box, const QPoint& pos);
 
@@ -232,8 +220,6 @@ protected:
 
     QIcon minimize_icon_;
     QIcon maximize_icon_;
-
-    int next_sub_id_;
 
     QPoint key_point;
 
