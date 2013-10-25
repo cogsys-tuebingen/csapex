@@ -24,12 +24,6 @@ public:
 
 public:
     template <typename M>
-    static void registerMessage(const std::string& type) {
-        std::cout << "warning: using deprecated register function to register " << type << std::endl;
-        registerMessage<M>();
-    }
-
-    template <typename M>
     static void registerMessage() {
         registerMessage(boost::bind(&M::make));
     }
