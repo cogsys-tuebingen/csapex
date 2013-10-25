@@ -1,5 +1,5 @@
-#ifndef COMMAND_DELETE_BOX_H
-#define COMMAND_DELETE_BOX_H
+#ifndef COMMAND_DELETE_NODE_H
+#define COMMAND_DELETE_NODE_H
 
 /// COMPONENT
 #include <csapex/command/command.h>
@@ -15,10 +15,10 @@ namespace csapex
 
 namespace command
 {
-class DeleteBox : public Command
+class DeleteNode : public Command
 {
 public:
-    DeleteBox(const std::string &uuid);
+    DeleteNode(const std::string &uuid);
 
 protected:
     bool doExecute();
@@ -39,4 +39,4 @@ protected:
 
 }
 }
-#endif // COMMAND_DELETE_BOX_H
+#endif // COMMAND_DELETE_NODE_H

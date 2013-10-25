@@ -25,10 +25,10 @@ class Graph : public QObject
     Q_OBJECT
 
     friend class GraphIO;
-    friend class command::AddBox;
+    friend class command::AddNode;
     friend class command::AddConnection;
     friend class command::DeleteConnection;
-    friend class command::DeleteBox;
+    friend class command::DeleteNode;
     friend class Overlay;
     friend class BoxMeta;
 
@@ -71,12 +71,6 @@ public:
     Command::Ptr deleteSelectedConnections();
     int noSelectedConnections();
 
-    void handleBoxSelection(Box* box, bool add);
-    Command::Ptr deleteSelectedBoxes();
-    Command::Ptr groupSelectedBoxes();
-    void selectBox(Box* box, bool add = false);
-    void deselectBoxes();
-    int noSelectedBoxes();
 
     Connection::Ptr getConnectionWithId(int id);
     Connection::Ptr getConnection(Connection::Ptr);
@@ -88,10 +82,18 @@ public:
 
     TemplatePtr toTemplate(const std::string& name) const;
 
-    bool hasSelectedBox() const;
-    std::vector<BoxPtr> getSelectedBoxes() const;
     void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
+
+
+    void handleBoxSelection(Box* box, bool add);
+    Command::Ptr deleteSelectedBoxes();
+    Command::Ptr groupSelectedBoxes();
+    void selectBox(Box* box, bool add = false);
+    void deselectBoxes();
+    int noSelectedBoxes();
+    bool hasSelectedBox() const;
     void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
+    std::vector<BoxPtr> getSelectedBoxes() const;
 
 public Q_SLOTS:
     void reset();

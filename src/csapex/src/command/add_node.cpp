@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/command/add_box.h>
+#include <csapex/command/add_node.h>
 
 /// COMPONENT
 #include <csapex/command/command.h>
@@ -10,7 +10,7 @@
 
 using namespace csapex::command;
 
-AddBox::AddBox(const std::string &type, QPoint pos, const std::string &parent_uuid, const std::string& uuid, Memento::Ptr state)
+AddNode::AddNode(const std::string &type, QPoint pos, const std::string &parent_uuid, const std::string& uuid, Memento::Ptr state)
     : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
     assert(!uuid.empty());
@@ -21,7 +21,7 @@ AddBox::AddBox(const std::string &type, QPoint pos, const std::string &parent_uu
     }
 }
 
-bool AddBox::doExecute()
+bool AddNode::doExecute()
 {
     if(uuid_.empty()) {
         uuid_ = graph_->makeUUID(type_);
@@ -48,7 +48,7 @@ bool AddBox::doExecute()
     return true;
 }
 
-bool AddBox::doUndo()
+bool AddNode::doUndo()
 {
     Box* box_ = graph_->findNode(uuid_)->getBox();
 
@@ -64,7 +64,7 @@ bool AddBox::doUndo()
     return true;
 }
 
-bool AddBox::doRedo()
+bool AddNode::doRedo()
 {
     if(doExecute()) {
         Box* box_ = graph_->findNode(uuid_)->getBox();

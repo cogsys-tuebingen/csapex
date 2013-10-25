@@ -9,7 +9,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/command/move_box.h>
-#include <csapex/command/delete_box.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/profiling_widget.h>
@@ -627,7 +627,7 @@ void Box::startDrag(QPoint offset)
 
 void Box::deleteBox()
 {
-    dispatcher_->execute(Command::Ptr(new command::DeleteBox(UUID())));
+    dispatcher_->execute(Command::Ptr(new command::DeleteNode(UUID())));
 }
 
 void Box::refreshStylesheet()

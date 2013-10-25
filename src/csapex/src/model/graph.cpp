@@ -7,9 +7,9 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/command/meta.h>
-#include <csapex/command/add_box.h>
+#include <csapex/command/add_node.h>
 #include <csapex/command/move_box.h>
-#include <csapex/command/delete_box.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/add_connector.h>
@@ -24,7 +24,7 @@
 #include <csapex/model/box_group.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/command/meta.h>
-#include <csapex/command/delete_box.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/model/template.h>
 #include <csapex/manager/template_manager.h>
@@ -410,7 +410,7 @@ Command::Ptr Graph::clear()
     command::Meta::Ptr clear(new command::Meta);
 
     foreach(Box::Ptr box, boxes_) {
-        Command::Ptr cmd(new command::DeleteBox(box->UUID()));
+        Command::Ptr cmd(new command::DeleteNode(box->UUID()));
         clear->add(cmd);
     }
 
@@ -733,7 +733,7 @@ Command::Ptr Graph::deleteSelectedBoxes()
 
     foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteBox(b->UUID())));
+            meta->add(Command::Ptr(new command::DeleteNode(b->UUID())));
         }
     }
 
@@ -770,11 +770,11 @@ Command::Ptr Graph::groupSelectedBoxes()
 
     foreach(Box::Ptr b, boxes_) {
         if(b->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteBox(b->UUID())));
+            meta->add(Command::Ptr(new command::DeleteNode(b->UUID())));
         }
     }
 
-    meta->add(command::AddBox::Ptr(new command::AddBox(type, tl, "", group_uuid)));
+    meta->add(command::AddNode::Ptr(new command::AddNode(type, tl, "", group_uuid)));
 
     typedef std::pair<std::string, std::string> PAIR;
     foreach(const PAIR& c, connections) {

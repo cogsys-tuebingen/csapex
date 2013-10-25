@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/boxed_object_constructor.h>
 #include <csapex/command/meta.h>
-#include <csapex/command/delete_box.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/model/box.h>
 #include <csapex/model/box_group.h>
 #include <csapex/model/graph.h>

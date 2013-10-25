@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connector.h>
-#include <csapex/command/add_box.h>
+#include <csapex/command/add_node.h>
 #include <csapex/command/add_connector.h>
 #include <csapex/command/add_connection.h>
 
@@ -96,7 +96,7 @@ void Template::createCommands(command::Meta* meta, const std::string& parent) co
         std::string uuid = fillInTemplate(box.uuid, parent);
         Box::State::Ptr state(new Box::State(box.state));
 
-        meta->add(Command::Ptr(new command::AddBox(box.type, box.pos, parent, uuid, state)));
+        meta->add(Command::Ptr(new command::AddNode(box.type, box.pos, parent, uuid, state)));
     }
 
     foreach (const Template::ConnectorTemplate& c, connectors) {

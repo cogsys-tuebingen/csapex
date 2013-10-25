@@ -9,7 +9,7 @@
 #include <csapex/model/box_group.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/command/add_box.h>
+#include <csapex/command/add_node.h>
 #include <csapex/core/drag_io.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/command/dispatcher.h>
@@ -301,7 +301,7 @@ void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
 
     /// BOXES
     dispatcher_->getGraph()->deselectBoxes();
-    showContextMenuAddBox(global_pos);
+    showContextMenuAddNode(global_pos);
 }
 
 void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
@@ -337,7 +337,7 @@ void DesignBoard::showContextMenu(const QPoint& pos)
     showContextMenuGlobal(mapToGlobal(pos));
 }
 
-void DesignBoard::showContextMenuAddBox(const QPoint &global_pos)
+void DesignBoard::showContextMenuAddNode(const QPoint &global_pos)
 {
     QMenu menu;
     BoxManager::instance().insertAvailableBoxedObjects(&menu);

@@ -55,8 +55,8 @@ namespace command
 {
 class Meta;
 
-class AddBox;
-class DeleteBox;
+class AddNode;
+class DeleteNode;
 class MoveBox;
 
 class AddConnection;

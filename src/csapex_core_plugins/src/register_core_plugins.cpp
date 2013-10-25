@@ -11,7 +11,7 @@
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/model/tag.h>
 #include <csapex/core/drag_io.h>
-#include <csapex/command/add_box.h>
+#include <csapex/command/add_node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/box.h>
@@ -82,7 +82,7 @@ class RosHandler
                     state->boxed_state = sub_state;
 
                     std::string type("csapex::ImportRos");
-                    dispatcher->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));
+                    dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid, state)));
 
                     return true;
                 }
@@ -155,7 +155,7 @@ class FileHandler
                 state->boxed_state = sub_state;
 
                 std::string type("csapex::FileImporter");
-                dispatcher->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid, state)));
+                dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid, state)));
 
                 e->accept();
                 return true;

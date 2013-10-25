@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/command/delete_box.h>
+#include <csapex/command/delete_node.h>
 
 /// COMPONENT
 #include <csapex/command/delete_connection.h>
@@ -10,12 +10,12 @@
 
 using namespace csapex::command;
 
-DeleteBox::DeleteBox(const std::string &uuid)
+DeleteNode::DeleteNode(const std::string &uuid)
     : uuid(uuid)
 {
 }
 
-bool DeleteBox::doExecute()
+bool DeleteNode::doExecute()
 {
     Box* box = graph_->findNode(uuid)->getBox();
 
@@ -35,7 +35,7 @@ bool DeleteBox::doExecute()
     return false;
 }
 
-bool DeleteBox::doUndo()
+bool DeleteNode::doUndo()
 {
     Box::Ptr box = BoxManager::instance().makeBox(type, uuid);
     box->setState(saved_state);
@@ -47,7 +47,7 @@ bool DeleteBox::doUndo()
     return Command::undoCommand(graph_, remove_connections);
 }
 
-bool DeleteBox::doRedo()
+bool DeleteNode::doRedo()
 {
     if(Command::redoCommand(graph_, remove_connections)) {
         Box* box = graph_->findNode(uuid)->getBox();

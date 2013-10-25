@@ -1,5 +1,5 @@
-#ifndef COMMAND_ADD_BOX_HPP
-#define COMMAND_ADD_BOX_HPP
+#ifndef COMMAND_ADD_NODE_HPP
+#define COMMAND_ADD_NODE_HPP
 
 /// COMPONENT
 #include <csapex/command/command.h>
@@ -15,9 +15,9 @@ namespace csapex
 namespace command
 {
 
-struct AddBox : public Command
+struct AddNode : public Command
 {
-    AddBox(const std::string& type, QPoint pos_, const std::string& parent_uuid_, const std::string& uuid_, Memento::Ptr state = Memento::NullPtr);
+    AddNode(const std::string& type, QPoint pos_, const std::string& parent_uuid_, const std::string& uuid_, Memento::Ptr state = Memento::NullPtr);
 
 protected:
     bool doExecute();
@@ -36,4 +36,4 @@ private:
 }
 }
 
-#endif // COMMAND_ADD_BOX_HPP
+#endif // COMMAND_ADD_NODE_HPP

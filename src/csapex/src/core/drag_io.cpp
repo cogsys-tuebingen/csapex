@@ -9,7 +9,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/view/overlay.h>
-#include <csapex/command/add_box.h>
+#include <csapex/command/add_node.h>
 #include <csapex/command/dispatcher.h>
 
 using namespace csapex;
@@ -155,7 +155,7 @@ void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 
 
         std::string uuid = graph_->makeUUID(type);
-        dispatcher_->execute(Command::Ptr(new command::AddBox(type, pos, "", uuid)));
+        dispatcher_->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid)));
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->ignore();

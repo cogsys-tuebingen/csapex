@@ -67,11 +67,11 @@ add_library(csapex SHARED
     src/command/command.cpp
     src/command/dispatcher.cpp
     src/command/meta.cpp
-    src/command/add_box.cpp
+    src/command/add_node.cpp
     src/command/add_connection.cpp
     src/command/add_connector.cpp
     src/command/move_connection.cpp
-    src/command/delete_box.cpp
+    src/command/delete_node.cpp
     src/command/delete_connection.cpp
     src/command/delete_connector.cpp
     src/command/move_box.cpp

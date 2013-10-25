@@ -15,7 +15,7 @@ namespace csapex
 
 class BoxedObjectConstructor
 {
-    friend class command::AddBox;
+    friend class command::AddNode;
     friend class BoxManager;
 
 public:
