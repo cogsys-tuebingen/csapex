@@ -156,7 +156,7 @@ void Overlay::drawConnection(Connection& connection)
     ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
     ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
 
-    if(from->getBox()->isHidden() || to->getBox()->isHidden()) {
+    if(from->getNode()->getBox()->isHidden() || to->getNode()->getBox()->isHidden()) {
         return;
     }
 

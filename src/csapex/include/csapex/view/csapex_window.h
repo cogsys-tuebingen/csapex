@@ -71,7 +71,7 @@ private:
     void construct();
 
 private:
-    CsApexCore& core;
+    CsApexCore& core_;
 
     GraphPtr graph_;
 

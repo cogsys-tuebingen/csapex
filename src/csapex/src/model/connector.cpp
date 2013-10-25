@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/design_board.h>
-#include <csapex/model/box.h>
+#include <csapex/model/node.h>
 #include <csapex/model/boxed_object.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_connection.h>
@@ -30,23 +30,22 @@ std::string Connector::makeUUID(const std::string& box_uuid, int type, int sub_i
     return ss.str();
 }
 
-Connector::Connector(Box* parent, const std::string& uuid)
-    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(uuid), minimized_(false)
+Connector::Connector(Node* parent, const std::string& uuid)
+    : buttons_down_(0), uuid_(uuid), minimized_(false)
 {
     init(parent);
 }
 
-Connector::Connector(Box* parent, int sub_id, int type)
-    : parent_widget(parent), designer(NULL), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false)
+Connector::Connector(Node* parent, int sub_id, int type)
+    : buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false)
 {
     init(parent);
 }
 
-void Connector::init(Box* parent)
+void Connector::init(Node* parent)
 {
-    box_ = parent;
+    node_ = parent;
 
-    findParents();
     setFocusPolicy(Qt::NoFocus);
     setAcceptDrops(true);
 
@@ -69,7 +68,7 @@ Connector::~Connector()
 
 void Connector::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    box_->setError(error, msg, level);
+    node_->setError(error, msg, level);
 }
 
 bool Connector::isForwarding() const
@@ -107,7 +106,7 @@ void Connector::validateConnections()
 void Connector::removeAllConnectionsUndoable()
 {
     if(isConnected()) {
-        getBox()->getCommandDispatcher()->execute(removeAllConnectionsCmd());
+        getNode()->getCommandDispatcher()->execute(removeAllConnectionsCmd());
     }
 }
 
@@ -121,20 +120,6 @@ void Connector::enable()
 {
     setEnabled(true);
     Q_EMIT enabled(this);
-}
-
-void Connector::findParents()
-{
-    // TODO: remove this !!!
-    QWidget* tmp = this;
-    while(tmp != NULL) {
-        if(dynamic_cast<csapex::Box*>(tmp)) {
-            box_ = dynamic_cast<csapex::Box*>(tmp);
-        } else if(dynamic_cast<csapex::DesignBoard*>(tmp)) {
-            designer = dynamic_cast<csapex::DesignBoard*>(tmp);
-        }
-        tmp = tmp->parentWidget();
-    }
 }
 
 bool Connector::canConnectTo(Connector* other_side, bool move) const
@@ -191,14 +176,14 @@ void Connector::dropEvent(QDropEvent* e)
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from && from != this) {
-            getBox()->getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(UUID(), from->UUID())));
+            getNode()->getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(UUID(), from->UUID())));
         }
     } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
         Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
 
         if(from) {
             Command::Ptr cmd(new command::MoveConnection(from, this));
-            getBox()->getCommandDispatcher()->execute(cmd);
+            getNode()->getCommandDispatcher()->execute(cmd);
             e->setDropAction(Qt::MoveAction);
         }
     }
@@ -283,11 +268,7 @@ void Connector::mouseReleaseEvent(QMouseEvent* e)
 
 QPoint Connector::topLeft()
 {
-    if(box_ == NULL) {
-        findParents();
-    }
-
-    return box_->geometry().topLeft() + pos();
+    return node_->getBox()->geometry().topLeft() + pos();
 }
 
 QPoint Connector::centerPoint()
@@ -341,15 +322,9 @@ void Connector::paintEvent(QPaintEvent*)
     p.drawEllipse(contentsRect().center(), 2, 2);
 }
 
-void Connector::setBox(Box* box)
+Node* Connector::getNode() const
 {
     QMutexLocker lock(&mutex);
-    box_ = box;
-}
-
-Box* Connector::getBox() const
-{
-    QMutexLocker lock(&mutex);
-    return box_;
+    return node_;
 }
 

@@ -23,8 +23,8 @@ class ConnectorIn : public virtual Connector
     friend class command::DeleteConnection;
 
 public:
-    ConnectorIn(Box* parent, const std::string& uuid);
-    ConnectorIn(Box* parent, int sub_id);
+    ConnectorIn(Node* parent, const std::string& uuid);
+    ConnectorIn(Node* parent, int sub_id);
     virtual ~ConnectorIn();
 
     virtual bool canInput() const {

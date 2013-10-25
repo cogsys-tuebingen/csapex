@@ -42,6 +42,8 @@ public:
     void setIcon(QIcon icon);
     QIcon getIcon();
 
+    std::string UUID() const;
+
 
     virtual bool canBeDisabled() const;
     bool isEnabled();
@@ -83,6 +85,12 @@ public:
 
     void setSynchronizedInputs(bool sync);
 
+    int nextInputId();
+    int nextOutputId();
+
+
+    CommandDispatcher* getCommandDispatcher() const;
+
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
@@ -122,6 +130,7 @@ protected:
 
 private:
     Box* box_;
+    std::string uuid_;
 
     std::vector<ConnectorIn*> input;
 

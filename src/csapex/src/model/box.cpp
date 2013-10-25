@@ -39,9 +39,9 @@ void Box::State::writeYaml(YAML::Emitter &out) const
     if(parent) {
         out << YAML::Key << "type";
         out << YAML::Value << parent->node_->getType();
+        out << YAML::Key << "uuid";
+        out << YAML::Value << parent->node_->uuid_;
     }
-    out << YAML::Key << "uuid";
-    out << YAML::Value << uuid_;
     out << YAML::Key << "label";
     out << YAML::Value << label_;
     out << YAML::Key << "pos";
@@ -108,7 +108,7 @@ Box::Box(Node::Ptr node, NodeAdapter::Ptr adapter, const std::string& uuid, QWid
 
     setFocusPolicy(Qt::ClickFocus);
 
-    state->uuid_ = uuid;
+    node_->uuid_ = uuid;
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -286,7 +286,7 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
 
 std::string Box::UUID() const
 {
-    return state->uuid_;
+    return node_->UUID();
 }
 
 
@@ -375,16 +375,6 @@ void Box::registerOutputEvent(ConnectorOut* out)
     connectConnector(out);
 
     Q_EMIT changed(this);
-}
-
-int Box::nextInputId()
-{
-    return node_->input.size();
-}
-
-int Box::nextOutputId()
-{
-    return node_->output.size();
 }
 
 void Box::removeInputEvent(ConnectorIn *in)
@@ -774,7 +764,7 @@ void Box::setState(Memento::Ptr memento)
     boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
     assert(m.get());
 
-    std::string old_uuid = state->uuid_;
+    std::string old_uuid = getNode()->UUID();
     std::string old_label = state->label_;
 
     *state = *m;
@@ -782,8 +772,8 @@ void Box::setState(Memento::Ptr memento)
     if(state->label_.empty()) {
         state->label_ = old_label;
     }
-    if(state->uuid_.empty()) {
-        state->uuid_ = old_uuid;
+    if(getNode()->uuid_ .empty()) {
+        getNode()->uuid_ = old_uuid;
     }
 
     state->parent = this;
@@ -797,7 +787,7 @@ void Box::setState(Memento::Ptr memento)
     ui->enablebtn->setChecked(state->enabled);
 
     setLabel(state->label_);
-    ui->label->setToolTip(state->uuid_.c_str());
+    ui->label->setToolTip(getNode()->UUID().c_str());
 }
 
 Command::Ptr Box::removeAllConnectionsCmd()

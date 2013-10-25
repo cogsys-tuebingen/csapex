@@ -84,8 +84,7 @@ public:
 
     virtual Command::Ptr removeAllConnectionsCmd() = 0;
 
-    virtual void setBox(Box* box);
-    Box* getBox() const;
+    Node* getNode() const;
 
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
@@ -112,10 +111,10 @@ Q_SIGNALS:
     void messageArrived(Connector* source);
 
 protected:
-    Connector(Box* parent, const std::string &uuid);
-    Connector(Box* parent, int sub_id, int type);
+    Connector(Node* parent, const std::string &uuid);
+    Connector(Node* parent, int sub_id, int type);
     virtual ~Connector();
-    void init(Box* parent);
+    void init(Node* parent);
 
     virtual void removeAllConnectionsNotUndoable() = 0;
 
@@ -123,16 +122,14 @@ protected:
     void paintEvent(QPaintEvent* event);
 
 protected:
-    virtual void findParents();
     virtual QPoint topLeft();
 
     virtual bool shouldMove(bool left, bool right);
     virtual bool shouldCreate(bool left, bool right);
 
 protected:
-    Box* box_;
+    Node* node_;
 
-    QWidget* parent_widget;
     csapex::DesignBoard* designer;
 
     Qt::MouseButtons buttons_down_;

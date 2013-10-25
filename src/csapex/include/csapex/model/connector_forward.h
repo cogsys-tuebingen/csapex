@@ -13,8 +13,8 @@ class ConnectorForward : public ConnectorIn, public ConnectorOut
     Q_OBJECT
 
 public:
-    ConnectorForward(Box* parent, bool primary_function_is_input, const std::string& uuid);
-    ConnectorForward(Box* parent, bool primary_function_is_input, int sub_id);
+    ConnectorForward(Node* parent, bool primary_function_is_input, const std::string& uuid);
+    ConnectorForward(Node* parent, bool primary_function_is_input, int sub_id);
     virtual ~ConnectorForward();
 
     virtual bool canInput() const {

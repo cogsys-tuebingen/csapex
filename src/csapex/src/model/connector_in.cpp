@@ -2,7 +2,7 @@
 #include <csapex/model/connector_in.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/model/node.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/command/delete_connection.h>
 
@@ -12,12 +12,12 @@
 
 using namespace csapex;
 
-ConnectorIn::ConnectorIn(Box* parent, const std::string &uuid)
+ConnectorIn::ConnectorIn(Node* parent, const std::string &uuid)
     : Connector(parent, uuid), target(NULL), can_process(true), optional_(false)
 {
 }
 
-ConnectorIn::ConnectorIn(Box* parent, int sub_id)
+ConnectorIn::ConnectorIn(Node* parent, int sub_id)
     : Connector(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false)
 {
 }

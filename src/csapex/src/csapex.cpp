@@ -64,8 +64,8 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
     return true;
 }
 
-Main::Main(CsApexApp& app)
-    : app(app)
+Main::Main(CsApexApp& a)
+    : app(a), splash(NULL)
 {
 
 }

@@ -29,7 +29,7 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
-    : QMainWindow(parent), core(core), graph_(core.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false)
+    : QMainWindow(parent), core_(core), graph_(core_.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false)
 {
 }
 
@@ -39,7 +39,7 @@ void CsApexWindow::construct()
 {
     ui->setupUi(this);
 
-    designer_ = new Designer(core.getCommandDispatcher());
+    designer_ = new Designer(core_.getCommandDispatcher());
     designer_->hide();
     ui->splitter->addWidget(designer_);
     ui->splitter->addWidget(ui->logOutput);
@@ -66,11 +66,11 @@ void CsApexWindow::construct()
     QObject::connect(graph_.get(), SIGNAL(stateChanged()), this, SLOT(updateMenu()));
     QObject::connect(graph_.get(), SIGNAL(boxAdded(Box*)), this, SLOT(boxAdded(Box*)));
 
-    QObject::connect(&core, SIGNAL(configChanged()), this, SLOT(updateTitle()));
-    QObject::connect(&core, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
-    QObject::connect(&core, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
-    QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
-    QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
+    QObject::connect(&core_, SIGNAL(configChanged()), this, SLOT(updateTitle()));
+    QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
+    QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
+    QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
+    QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
 
     QObject::connect(graph_.get(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
@@ -118,16 +118,16 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    ui->actionUndo->setDisabled(!core.getCommandDispatcher()->canUndo());
-    ui->actionRedo->setDisabled(!core.getCommandDispatcher()->canRedo());
+    ui->actionUndo->setDisabled(!core_.getCommandDispatcher()->canUndo());
+    ui->actionRedo->setDisabled(!core_.getCommandDispatcher()->canRedo());
 }
 
 void CsApexWindow::updateTitle()
 {
     std::stringstream window;
-    window << "CS::APEX (" << core.getConfig() << ")";
+    window << "CS::APEX (" << core_.getConfig() << ")";
 
-    if(core.getCommandDispatcher()->isDirty()) {
+    if(core_.getCommandDispatcher()->isDirty()) {
         window << " *";
     }
 
@@ -143,7 +143,7 @@ void CsApexWindow::scrollDownLog()
 
 void CsApexWindow::tick()
 {
-    core.getCommandDispatcher()->executeLater();
+    core_.getCommandDispatcher()->executeLater();
 
     std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
     std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
@@ -200,7 +200,7 @@ void CsApexWindow::hideLog()
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    if(core.getCommandDispatcher()->isDirty()) {
+    if(core_.getCommandDispatcher()->isDirty()) {
         int r = QMessageBox::warning(this, tr("cs::APEX"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -218,7 +218,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     }
 
     try {
-        core.getCommandDispatcher()->getGraph()->stop();
+        core_.getCommandDispatcher()->getGraph()->stop();
     } catch(...) {
         std::abort();
     }
@@ -240,7 +240,7 @@ void CsApexWindow::init()
 {
     init_ = true;
 
-    core.init();
+    core_.init();
 
     designer_->show();
     show();
@@ -249,32 +249,32 @@ void CsApexWindow::init()
 
 void CsApexWindow::save()
 {
-    core.saveAs(core.getConfig());
+    core_.saveAs(core_.getConfig());
 }
 
 void CsApexWindow::saveAs()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", core.getConfig().c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getConfig().c_str(), GraphIO::config_selector.c_str());
 
     if(!filename.isEmpty()) {
-        core.saveAs(filename.toStdString());
-        core.setCurrentConfig(filename.toStdString());
+        core_.saveAs(filename.toStdString());
+        core_.setCurrentConfig(filename.toStdString());
     }
 }
 
 
 void CsApexWindow::saveAsCopy()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", core.getConfig().c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getConfig().c_str(), GraphIO::config_selector.c_str());
 
     if(!filename.isEmpty()) {
-        core.saveAs(filename.toStdString());
+        core_.saveAs(filename.toStdString());
     }
 }
 
 void CsApexWindow::reload()
 {
-    core.load(core.getConfig());
+    core_.load(core_.getConfig());
 }
 
 void CsApexWindow::reset()
@@ -283,31 +283,31 @@ void CsApexWindow::reset()
                                  tr("Do you really want to reset? This <b>cannot</b> be undone!"),
                                  QMessageBox::Ok | QMessageBox::Cancel);
     if(r == QMessageBox::Ok) {
-        core.reset();
+        core_.reset();
     }
 }
 
 void CsApexWindow::clear()
 {
-    core.getCommandDispatcher()->execute(core.getCommandDispatcher()->getGraph()->clear());
+    core_.getCommandDispatcher()->execute(core_.getCommandDispatcher()->getGraph()->clear());
 }
 
 void CsApexWindow::undo()
 {
-    core.getCommandDispatcher()->undo();
+    core_.getCommandDispatcher()->undo();
 }
 
 void CsApexWindow::redo()
 {
-    core.getCommandDispatcher()->redo();
+    core_.getCommandDispatcher()->redo();
 }
 
 void CsApexWindow::load()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Load config", core.getConfig().c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", core_.getConfig().c_str(), GraphIO::config_selector.c_str());
 
     if(QFile(filename).exists()) {
-        core.load(filename.toStdString());
+        core_.load(filename.toStdString());
     }
 }
 

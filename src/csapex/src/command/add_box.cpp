@@ -17,9 +17,6 @@ AddBox::AddBox(const std::string &type, QPoint pos, const std::string &parent_uu
 
     if(state != Memento::NullPtr) {
         Box::State::Ptr bs = boost::dynamic_pointer_cast<Box::State> (state);
-        if(!uuid.empty()) {
-            bs->uuid_ = uuid;
-        }
         saved_state_ = bs;
     }
 }

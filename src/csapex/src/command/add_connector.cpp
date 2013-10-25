@@ -23,29 +23,29 @@ AddConnector::AddConnector(const std::string &box_uuid, const std::string& label
 
 bool AddConnector::doExecute()
 {
-    Box::Ptr box = graph_->findBox(b_uuid);
-    assert(box);
+    Node::Ptr node = graph_->findNode(b_uuid);
+    assert(node);
 
     if(input) {
-        std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_IN, box->nextInputId()) : c_uuid;
+        std::string uuid = c_uuid.empty() ? Connector::makeUUID(node->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_IN, node->nextInputId()) : c_uuid;
         ConnectorIn* in;
         if(forward) {
-            in = new ConnectorForward(box.get(), true, uuid);
+            in = new ConnectorForward(node.get(), true, uuid);
         } else {
-            in = new ConnectorIn(box.get(), uuid);
+            in = new ConnectorIn(node.get(), uuid);
         }
         c = in;
-        box->getNode()->registerInput(in);
+        node->registerInput(in);
     } else {
-        std::string uuid = c_uuid.empty() ? Connector::makeUUID(box->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_OUT, box->nextOutputId()) : c_uuid;
+        std::string uuid = c_uuid.empty() ? Connector::makeUUID(node->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_OUT, node->nextOutputId()) : c_uuid;
         ConnectorOut* out;
         if(forward) {
-            out = new ConnectorForward(box.get(), false, uuid);
+            out = new ConnectorForward(node.get(), false, uuid);
         } else {
-            out = new ConnectorOut(box.get(), uuid);
+            out = new ConnectorOut(node.get(), uuid);
         }
         c = out;
-        box->getNode()->registerOutput(out);
+        node->registerOutput(out);
     }
 
     c->setType(ConnectionTypeManager::createMessage(type));

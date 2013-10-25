@@ -95,7 +95,7 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
 
         Box::Ptr box = BoxManager::instance().makeBox(type, uuid);
 
-        if(box) {
+        if(box && box != Box::NullPtr) {
             try {
                 box->read(doc);
 
@@ -182,7 +182,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
                 // legacy import
                 from_uuid.replace(from_uuid.find("_out_"), 1, Connector::namespace_separator);
             }
-            Box::Ptr parent = graph_->findConnectorOwner(from_uuid);
+            Node::Ptr parent = graph_->findNodeForConnector(from_uuid);
 
             if(!parent) {
                 std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
@@ -201,19 +201,19 @@ void GraphIO::loadConnections(YAML::Node &doc)
                     to_uuid.replace(to_uuid.find("_in_"), 1, Connector::namespace_separator);
                 }
 
-                ConnectorOut* from = parent->getNode()->getOutput(from_uuid);
+                ConnectorOut* from = parent->getOutput(from_uuid);
                 if(from == NULL) {
                     std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                     continue;
                 }
 
-                Box::Ptr target_box = graph_->findConnectorOwner(to_uuid);
+                Node::Ptr target_box = graph_->findNodeForConnector(to_uuid);
                 if(target_box == NULL) {
                     std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
                     continue;
                 }
 
-                ConnectorIn* to = target_box->getNode()->getInput(to_uuid);
+                ConnectorIn* to = target_box->getInput(to_uuid);
                 assert(to); // if parent box has been found, this should never happen
 
                 graph_->addConnection(Connection::Ptr(new Connection(from, to)));

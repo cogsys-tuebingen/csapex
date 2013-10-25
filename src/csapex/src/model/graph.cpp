@@ -160,14 +160,14 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
 
 Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<std::string, std::string> >& connections, bool only_selected) const
 {
-    std::vector<Box*> selected;
+    std::vector<Node::Ptr> selected;
 
     std::map<std::string, std::string> old_box_to_new_box;
 
     foreach(Box::Ptr b, boxes_) {
         // iterate selected boxes
         if(b->isSelected() || !only_selected) {
-            selected.push_back(b.get());
+            selected.push_back(b->getNode());
 
             Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
             std::string new_uuid = templ->addBox(b->getType(), b->pos(), state);
@@ -184,11 +184,11 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
             foreach(ConnectorIn* in, b->getNode()->input) {
                 if(in->isConnected()) {
                     Connector* target = in->getConnected();
-                    Box* owner = target->getBox();
+                    Node* owner = target->getNode();
 
                     bool owner_is_selected = false;
-                    foreach(Box* b, selected) {
-                        owner_is_selected |= (b == owner);
+                    foreach(Node::Ptr b, selected) {
+                        owner_is_selected |= (b.get() == owner);
                     }
 
                     bool is_external = !owner_is_selected;
@@ -212,11 +212,11 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
 
                 for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
                     ConnectorIn* in = *it;
-                    Box* owner = in->getBox();
+                    Node* owner = in->getNode();
 
                     bool is_selected = false;
-                    foreach(Box* b, selected) {
-                        is_selected |= (b == owner);
+                    foreach(Node::Ptr b, selected) {
+                        is_selected |= (b.get() == owner);
                     }
 
                     bool is_external = !is_selected;
@@ -342,7 +342,7 @@ Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
     }
 
     foreach(const Connection::Ptr& connection, visible_connections) {
-        if(connection->from()->getBox()->isSelected() && connection->to()->getBox()->isSelected()) {
+        if(connection->from()->getNode()->getBox()->isSelected() && connection->to()->getNode()->getBox()->isSelected()) {
             int n = connection->getFulcrumCount();
             for(int i = 0; i < n; ++i) {
                 QPoint pos = connection->getFulcrum(i);
@@ -360,8 +360,8 @@ bool Graph::addConnection(Connection::Ptr connection)
         Connector* from = findConnector(connection->from()->UUID());
         Connector* to = findConnector(connection->to()->UUID());
 
-        Graph::Ptr graph_from = from->getBox()->getCommandDispatcher()->getGraph();
-        Graph::Ptr graph_to = to->getBox()->getCommandDispatcher()->getGraph();
+        Graph::Ptr graph_from = from->getNode()->getBox()->getCommandDispatcher()->getGraph();
+        Graph::Ptr graph_to = to->getNode()->getBox()->getCommandDispatcher()->getGraph();
 
         //        if(!graph_from->isHidden() && !graph_to->isHidden()) {
         if(graph_from.get() == this && graph_to.get() == this) {
@@ -433,6 +433,11 @@ Graph::Ptr Graph::findSubGraph(const std::string& uuid)
     return bg->getSubGraph();
 }
 
+Node::Ptr Graph::findNode(const std::string &uuid)
+{
+    return findBox(uuid)->getNode();
+}
+
 Box::Ptr Graph::findBox(const std::string &box_uuid)
 {
     Box::Ptr box = findBoxNoThrow(box_uuid);
@@ -449,6 +454,11 @@ Box::Ptr Graph::findBox(const std::string &box_uuid)
     std::cerr << std::endl;
     throw std::runtime_error("cannot find box");
 
+}
+
+Node::Ptr Graph::findNodeNoThrow(const std::string &uuid)
+{
+    return findBoxNoThrow(uuid)->getNode();
 }
 
 Box::Ptr Graph::findBoxNoThrow(const std::string &box_uuid)
@@ -472,6 +482,10 @@ Box::Ptr Graph::findBoxNoThrow(const std::string &box_uuid)
     return Box::NullPtr;
 }
 
+Node::Ptr Graph::findNodeForConnector(const std::string &uuid)
+{
+    return findConnectorOwner(uuid)->getNode();
+}
 
 Box::Ptr Graph::findConnectorOwner(const std::string &uuid)
 {
@@ -832,7 +846,7 @@ void Graph::boxMoved(Box *box, int dx, int dy)
             }
         }
         foreach(const Connection::Ptr& connection, visible_connections) {
-            if(connection->from()->getBox()->isSelected() && connection->to()->getBox()->isSelected()) {
+            if(connection->from()->getNode()->getBox()->isSelected() && connection->to()->getNode()->getBox()->isSelected()) {
                 int n = connection->getFulcrumCount();
                 for(int i = 0; i < n; ++i) {
                     connection->moveFulcrum(i, connection->getFulcrum(i) + QPoint(dx,dy));

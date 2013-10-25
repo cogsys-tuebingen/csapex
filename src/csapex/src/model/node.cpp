@@ -22,6 +22,11 @@ Node::~Node()
 
 }
 
+std::string Node::UUID() const
+{
+    return uuid_;
+}
+
 void Node::setType(const std::string &type)
 {
     type_ = type;
@@ -162,7 +167,7 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
 {
     int id = input.size();
-    ConnectorIn* c = new ConnectorIn(box_, id);
+    ConnectorIn* c = new ConnectorIn(this, id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
@@ -175,7 +180,7 @@ ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bo
 ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 {
     int id = output.size();
-    ConnectorOut* c = new ConnectorOut(box_, id);
+    ConnectorOut* c = new ConnectorOut(this, id);
     c->setLabel(label);
     c->setType(type);
 
@@ -281,4 +286,19 @@ void Node::registerOutput(ConnectorOut* out)
     output.push_back(out);
 
     Q_EMIT connectorCreated(out);
+}
+
+int Node::nextInputId()
+{
+    return input.size();
+}
+
+int Node::nextOutputId()
+{
+    return output.size();
+}
+
+CommandDispatcher* Node::getCommandDispatcher() const
+{
+    return box_->getCommandDispatcher();
 }

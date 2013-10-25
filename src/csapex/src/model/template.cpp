@@ -36,7 +36,6 @@ std::string Template::addBox(const std::string &type, const QPoint &pos, Box::St
     box.pos = pos;
     box.uuid = uuid;
     box.state.copyFrom(state);
-    box.state.uuid_ = "";
     box.state.parent = NULL;
 
     boxes.push_back(box);

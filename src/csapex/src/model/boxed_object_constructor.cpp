@@ -24,7 +24,7 @@ BoxedObjectConstructor::BoxedObjectConstructor(const std::string &type, const st
 }
 
 BoxedObjectConstructor::BoxedObjectConstructor(const std::string &type, const std::string &description)
-    : type_(type), descr_(description)
+    : type_(type), descr_(description), is_loaded(false)
 {
 }
 

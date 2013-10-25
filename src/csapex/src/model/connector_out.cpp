@@ -2,7 +2,7 @@
 #include <csapex/model/connector_out.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/model/node.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/view/design_board.h>
 #include <csapex/command/meta.h>
@@ -15,12 +15,12 @@
 
 using namespace csapex;
 
-ConnectorOut::ConnectorOut(Box* parent, const std::string& uuid)
+ConnectorOut::ConnectorOut(Node* parent, const std::string& uuid)
     : Connector(parent, uuid), force_send_message_(false)
 {
 }
 
-ConnectorOut::ConnectorOut(Box* parent, int sub_id)
+ConnectorOut::ConnectorOut(Node* parent, int sub_id)
     : Connector(parent, sub_id, TYPE_OUT), force_send_message_(false)
 {
 }

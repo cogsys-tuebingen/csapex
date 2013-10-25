@@ -64,7 +64,6 @@ public:
 
         mutable Memento::Ptr boxed_state;
 
-        std::string uuid_;
         std::string label_;
 
         QPoint pos;
@@ -96,10 +95,7 @@ public:
 
     void keyPressEvent(QKeyEvent * e);
 
-    virtual void init(const QPoint& pos);
-
-    int nextInputId();
-    int nextOutputId();
+    void init(const QPoint& pos);
 
     void removeInputEvent(ConnectorIn *in);
     void removeOutputEvent(ConnectorOut *out);

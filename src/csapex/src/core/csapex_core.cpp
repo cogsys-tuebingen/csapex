@@ -37,10 +37,9 @@ CsApexCore::CsApexCore()
 }
 
 CsApexCore::CsApexCore(CommandDispatcher* dispatcher)
-    : cmd_dispatch(dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin"))
+    : cmd_dispatch(dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = false;
-    init_ = true;
 }
 
 
