@@ -438,8 +438,6 @@ Box::~Box()
 {
     stop();
 
-    // TODO: remove from graph!!!!
-
     delete worker_;
 }
 

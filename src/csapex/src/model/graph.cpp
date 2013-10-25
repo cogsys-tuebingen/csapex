@@ -105,18 +105,19 @@ void Graph::addBox(Box::Ptr box)
 
 void Graph::deleteBox(const std::string& uuid)
 {
-    Box::Ptr box = findBox(uuid);
+    Box* box = findNode(uuid)->getBox();
 
     box->stop();
 
-    std::vector<Box::Ptr>::iterator it = std::find(boxes_.begin(), boxes_.end(), box);
-    if(it != boxes_.end()) {
-        boxes_.erase(it);
+    for(std::vector<Box::Ptr>::iterator it = boxes_.begin(); it != boxes_.end();) {
+        if((*it).get() == box) {
+            it = boxes_.erase(it);
+        } else {
+            ++it;
+        }
     }
 
-    Q_EMIT boxDeleted(box.get());
-
-    box->deleteLater();
+    Q_EMIT boxDeleted(box);
 }
 
 Template::Ptr Graph::toTemplate(const std::string& name) const
@@ -426,74 +427,58 @@ void Graph::reset()
 
 Graph::Ptr Graph::findSubGraph(const std::string& uuid)
 {
-    Box::Ptr bg = findBox(uuid);
+    Box* bg = findNode(uuid)->getBox();
     assert(bg);
     assert(bg->hasSubGraph());
 
     return bg->getSubGraph();
 }
 
-Node::Ptr Graph::findNode(const std::string &uuid)
+Node* Graph::findNode(const std::string &uuid)
 {
-    return findBox(uuid)->getNode();
-}
+    Node* node = findNodeNoThrow(uuid);
 
-Box::Ptr Graph::findBox(const std::string &box_uuid)
-{
-    Box::Ptr box = findBoxNoThrow(box_uuid);
-
-    if(box) {
-        return box;
+    if(node) {
+        return node;
     }
 
-    std::cerr << "cannot find box \"" << box_uuid << "\n";
+    std::cerr << "cannot find box \"" << uuid << "\n";
     std::cerr << "available boxes:\n";
     foreach(Box::Ptr b, boxes_) {
         std::cerr << b->UUID() << '\n';
     }
     std::cerr << std::endl;
     throw std::runtime_error("cannot find box");
-
 }
 
-Node::Ptr Graph::findNodeNoThrow(const std::string &uuid)
-{
-    return findBoxNoThrow(uuid)->getNode();
-}
-
-Box::Ptr Graph::findBoxNoThrow(const std::string &box_uuid)
+Node* Graph::findNodeNoThrow(const std::string &uuid)
 {
     foreach(Box::Ptr b, boxes_) {
-        if(b->UUID() == box_uuid) {
-            return b;
+        if(b->UUID() == uuid) {
+            return b->getNode().get();
         }
     }
 
     foreach(Box::Ptr b, boxes_) {
         BoxGroup::Ptr grp = boost::dynamic_pointer_cast<BoxGroup> (b);
         if(grp) {
-            Box::Ptr tmp = grp->getSubGraph()->findBoxNoThrow(box_uuid);
+            Node* tmp = grp->getSubGraph()->findNodeNoThrow(uuid);
             if(tmp) {
                 return tmp;
             }
         }
     }
 
-    return Box::NullPtr;
+    return NULL;
 }
 
-Node::Ptr Graph::findNodeForConnector(const std::string &uuid)
-{
-    return findConnectorOwner(uuid)->getNode();
-}
-
-Box::Ptr Graph::findConnectorOwner(const std::string &uuid)
+Node* Graph::findNodeForConnector(const std::string &uuid)
 {
     std::string l, r;
     split_first(uuid, Connector::namespace_separator, l, r);
 
     try {
-        return findBox(l);
+        return findNode(l);
 
     } catch(const std::exception& e) {
         std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
@@ -521,7 +506,7 @@ Connector* Graph::findConnector(const std::string &uuid)
     std::string l, r;
     split_first(uuid, Connector::namespace_separator, l, r);
 
-    Box::Ptr owner = findBox(l);
+    Box* owner = findNode(l)->getBox();
     assert(owner);
 
     Connector* result = NULL;

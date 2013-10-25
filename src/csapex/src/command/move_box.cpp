@@ -2,6 +2,7 @@
 #include <csapex/command/move_box.h>
 
 /// COMPONENT
+#include <csapex/model/node.h>
 #include <csapex/model/box.h>
 #include <csapex/model/graph.h>
 
@@ -15,7 +16,7 @@ MoveBox::MoveBox(Box* box, QPoint to)
 
 bool MoveBox::doExecute()
 {
-    Box::Ptr box = graph_->findBox(uuid);
+    Box* box = graph_->findNode(uuid)->getBox();
     box->clearFocus();
     box->move(to);
     box->key_point = to;
@@ -25,7 +26,7 @@ bool MoveBox::doExecute()
 
 bool MoveBox::doUndo()
 {
-    Box::Ptr box = graph_->findBox(uuid);
+    Box* box = graph_->findNode(uuid)->getBox();
     box->clearFocus();
     box->move(from);
     box->key_point = from;

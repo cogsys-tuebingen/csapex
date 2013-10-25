@@ -182,7 +182,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
                 // legacy import
                 from_uuid.replace(from_uuid.find("_out_"), 1, Connector::namespace_separator);
             }
-            Node::Ptr parent = graph_->findNodeForConnector(from_uuid);
+            Node* parent = graph_->findNodeForConnector(from_uuid);
 
             if(!parent) {
                 std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
@@ -207,7 +207,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
                     continue;
                 }
 
-                Node::Ptr target_box = graph_->findNodeForConnector(to_uuid);
+                Node* target_box = graph_->findNodeForConnector(to_uuid);
                 if(target_box == NULL) {
                     std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
                     continue;

@@ -17,7 +17,7 @@ DeleteBox::DeleteBox(const std::string &uuid)
 
 bool DeleteBox::doExecute()
 {
-    Box::Ptr box = graph_->findBox(uuid);
+    Box* box = graph_->findNode(uuid)->getBox();
 
     parent = box->parentWidget();
     type = box->getType();
@@ -50,7 +50,7 @@ bool DeleteBox::doUndo()
 bool DeleteBox::doRedo()
 {
     if(Command::redoCommand(graph_, remove_connections)) {
-        Box::Ptr box = graph_->findBox(uuid);
+        Box* box = graph_->findNode(uuid)->getBox();
         saved_state = box->getState();
 
         graph_->deleteBox(box->UUID());

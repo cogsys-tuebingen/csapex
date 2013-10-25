@@ -23,16 +23,16 @@ AddConnector::AddConnector(const std::string &box_uuid, const std::string& label
 
 bool AddConnector::doExecute()
 {
-    Node::Ptr node = graph_->findNode(b_uuid);
+    Node* node = graph_->findNode(b_uuid);
     assert(node);
 
     if(input) {
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(node->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_IN, node->nextInputId()) : c_uuid;
         ConnectorIn* in;
         if(forward) {
-            in = new ConnectorForward(node.get(), true, uuid);
+            in = new ConnectorForward(node, true, uuid);
         } else {
-            in = new ConnectorIn(node.get(), uuid);
+            in = new ConnectorIn(node, uuid);
         }
         c = in;
         node->registerInput(in);
@@ -40,9 +40,9 @@ bool AddConnector::doExecute()
         std::string uuid = c_uuid.empty() ? Connector::makeUUID(node->UUID(), forward ? Connector::TYPE_MISC : Connector::TYPE_OUT, node->nextOutputId()) : c_uuid;
         ConnectorOut* out;
         if(forward) {
-            out = new ConnectorForward(node.get(), false, uuid);
+            out = new ConnectorForward(node, false, uuid);
         } else {
-            out = new ConnectorOut(node.get(), uuid);
+            out = new ConnectorOut(node, uuid);
         }
         c = out;
         node->registerOutput(out);
@@ -57,7 +57,7 @@ bool AddConnector::doExecute()
 
 bool AddConnector::doUndo()
 {
-    Box::Ptr box = graph_->findBox(b_uuid);
+    Box* box = graph_->findNode(b_uuid)->getBox();
     assert(box);
 
     if(input) {

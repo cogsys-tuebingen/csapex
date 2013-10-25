@@ -22,7 +22,7 @@ DeleteConnector::DeleteConnector(Connector *_c) :
 
 bool DeleteConnector::doExecute()
 {
-    Box::Ptr box_c = graph_->findConnectorOwner(c_uuid);
+    Node* node = graph_->findNodeForConnector(c_uuid);
 
     if(c->isConnected()) {
         if(in) {
@@ -35,9 +35,9 @@ bool DeleteConnector::doExecute()
     }
 
     if(in) {
-        box_c->getNode()->removeInput(dynamic_cast<ConnectorIn*>(c));
+        node->removeInput(dynamic_cast<ConnectorIn*>(c));
     } else {
-        box_c->getNode()->removeOutput(dynamic_cast<ConnectorOut*>(c));
+        node->removeOutput(dynamic_cast<ConnectorOut*>(c));
     }
 
     return true;
@@ -59,16 +59,16 @@ bool DeleteConnector::doRedo()
 
 bool DeleteConnector::refresh()
 {
-    Box::Ptr box_c = graph_->findConnectorOwner(c_uuid);
+    Node* node = graph_->findNodeForConnector(c_uuid);
 
-    if(!box_c) {
+    if(!node) {
         return false;
     }
 
     if(in) {
-        c = box_c->getNode()->getInput(c_uuid);
+        c = node->getInput(c_uuid);
     } else {
-        c = box_c->getNode()->getOutput(c_uuid);
+        c = node->getOutput(c_uuid);
     }
 
     assert(c);

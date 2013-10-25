@@ -65,18 +65,18 @@ bool DeleteConnection::doRedo()
 
 bool DeleteConnection::refresh()
 {
-    Box::Ptr from_box = graph_->findConnectorOwner(from_uuid);
-    Box::Ptr to_box = graph_->findConnectorOwner(to_uuid);
+    Node* from_node = graph_->findNodeForConnector(from_uuid);
+    Node* to_node = graph_->findNodeForConnector(to_uuid);
 
     from = NULL;
     to = NULL;
 
-    if(!from_box || !to_box) {
+    if(!from_node || !to_node) {
         return false;
     }
 
-    from = from_box->getNode()->getOutput(from_uuid);
-    to = to_box->getNode()->getInput(to_uuid);
+    from = from_node->getOutput(from_uuid);
+    to = to_node->getInput(to_uuid);
 
     assert(from);
     assert(to);

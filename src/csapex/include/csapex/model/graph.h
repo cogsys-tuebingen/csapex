@@ -51,13 +51,9 @@ public:
 
     Graph::Ptr findSubGraph(const std::string& uuid);
 
-    BoxPtr findBox(const std::string& uuid) __attribute__ ((deprecated));
-    BoxPtr findBoxNoThrow(const std::string& uuid) __attribute__ ((deprecated));
-    BoxPtr findConnectorOwner(const std::string &uuid) __attribute__ ((deprecated));
-
-    NodePtr findNode(const std::string& uuid);
-    NodePtr findNodeNoThrow(const std::string& uuid);
-    NodePtr findNodeForConnector(const std::string &uuid);
+    Node* findNode(const std::string& uuid);
+    Node* findNodeNoThrow(const std::string& uuid);
+    Node* findNodeForConnector(const std::string &uuid);
 
 
     Connector* findConnector(const std::string &uuid);

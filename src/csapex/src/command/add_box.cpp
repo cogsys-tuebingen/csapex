@@ -50,7 +50,7 @@ bool AddBox::doExecute()
 
 bool AddBox::doUndo()
 {
-    Box::Ptr box_ = graph_->findBox(uuid_);
+    Box* box_ = graph_->findNode(uuid_)->getBox();
 
     saved_state_ = box_->getState();
 
@@ -67,7 +67,7 @@ bool AddBox::doUndo()
 bool AddBox::doRedo()
 {
     if(doExecute()) {
-        Box::Ptr box_ = graph_->findBox(uuid_);
+        Box* box_ = graph_->findNode(uuid_)->getBox();
 
         box_->setState(saved_state_);
         return true;
