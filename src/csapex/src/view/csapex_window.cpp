@@ -19,7 +19,6 @@
 #include <iostream>
 #include <QCloseEvent>
 #include <QMessageBox>
-#include <QStatusBar>
 #include <QToolBar>
 #include <QTimer>
 #include <QFileDialog>
@@ -32,7 +31,6 @@ using namespace csapex;
 CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
     : QMainWindow(parent), core(core), graph_(core.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false)
 {
-    construct();
 }
 
 
@@ -40,15 +38,6 @@ CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
 void CsApexWindow::construct()
 {
     ui->setupUi(this);
-
-    QGraphicsScene* scene = new QGraphicsScene;
-    QImage splash(":/apex_splash.png");
-    splash = splash.scaled(splash.width()/2, splash.height() / 2);
-    scene->addPixmap(QPixmap::fromImage(splash));
-    ui->loading->setScene(scene);
-    ui->loading->setFixedSize(splash.size());
-    ui->loading->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->loading->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     designer_ = new Designer(core.getCommandDispatcher());
     designer_->hide();
@@ -121,14 +110,10 @@ void CsApexWindow::showMenu()
 
 void CsApexWindow::start()
 {
-    showStatusMessage("initialized");
-
-    ui->splitter->hide();
-
-    resize(250,120);
-    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), QApplication::desktop()->screenGeometry()));
-
-    show();
+    showStatusMessage("building ui");
+    construct();
+    showStatusMessage("initializing");
+    init();
 }
 
 void CsApexWindow::updateMenu()
@@ -243,7 +228,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 
 void CsApexWindow::showStatusMessage(const std::string &msg)
 {
-    statusBar()->showMessage(msg.c_str());
+    Q_EMIT statusChanged(QString(msg.c_str()));
 }
 
 void CsApexWindow::reloadBoxMenues()
@@ -257,21 +242,9 @@ void CsApexWindow::init()
 
     core.init();
 
-    statusBar()->hide();
-    ui->loading->hide();
-    repaint();
     designer_->show();
-    ui->splitter->show();
+    show();
     hideLog();
-}
-
-void CsApexWindow::paintEvent(QPaintEvent *e)
-{
-    QMainWindow::paintEvent(e);
-
-    if(!init_) {
-        Q_EMIT initialize();
-    }
 }
 
 void CsApexWindow::save()

@@ -29,9 +29,6 @@
      <number>5</number>
     </property>
     <item>
-     <widget class="QGraphicsView" name="loading"/>
-    </item>
-    <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>

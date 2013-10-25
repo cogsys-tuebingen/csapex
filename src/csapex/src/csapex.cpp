@@ -1,3 +1,6 @@
+/// HEADER
+#include <csapex.h>
+
 /// PROJECT
 #include <csapex/core/csapex_core.h>
 #include <csapex/view/csapex_window.h>
@@ -8,7 +11,6 @@
 /// SYSTEM
 #include <boost/program_options.hpp>
 #include <QtGui>
-#include <QApplication>
 #include <signal.h>
 
 namespace po = boost::program_options;
@@ -21,57 +23,54 @@ void siginthandler(int)
     exit(1);
 }
 
-#define DEBUG 0
+CsApexApp::CsApexApp(int& argc, char** argv)
+    : QApplication(argc, argv)
+{}
 
-namespace csapex
-{
+bool CsApexApp::notify(QObject* receiver, QEvent* event) {
+    try {
+        return QApplication::notify(receiver, event);
 
-struct CsApexApp : public QApplication {
-    CsApexApp(int& argc, char** argv)
-        : QApplication(argc, argv)
-    {}
+    } catch(const std::exception& e) {
+        ErrorState* er = dynamic_cast<ErrorState*> (receiver);
+        Box* box = dynamic_cast<Box*> (receiver);
+        NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
 
-    virtual bool notify(QObject* receiver, QEvent* event) {
-        try {
-            return QApplication::notify(receiver, event);
-
-        } catch(const std::exception& e) {
-            ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-            Box* box = dynamic_cast<Box*> (receiver);
-            NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
-
-            if(er) {
-                er->setError(true, e.what());
-            } else if(box) {
-                box->setError(true, e.what());
-            } else if(bw) {
-                bw->triggerError(true, e.what());
-            } else {
-                std::cerr << "Uncatched exception:" << e.what() << std::endl;
+        if(er) {
+            er->setError(true, e.what());
+        } else if(box) {
+            box->setError(true, e.what());
+        } else if(bw) {
+            bw->triggerError(true, e.what());
+        } else {
+            std::cerr << "Uncatched exception:" << e.what() << std::endl;
 #if DEBUG
-                throw;
+            throw;
 #endif
-            }
-
-            return false;
-
-        } catch(const std::string& s) {
-            std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-#if DEBUG
-                throw;
-#endif
-        } catch(...) {
-            std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-                throw;
         }
 
-        return true;
+        return false;
+
+    } catch(const std::string& s) {
+        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
+#if DEBUG
+        throw;
+#endif
+    } catch(...) {
+        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
+        throw;
     }
-};
+
+    return true;
+}
+
+Main::Main(CsApexApp& app)
+    : app(app)
+{
 
 }
 
-int run(CsApexApp& app)
+int Main::run()
 {
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
     signal(SIGINT, siginthandler);
@@ -79,6 +78,44 @@ int run(CsApexApp& app)
 
     return result;
 }
+
+int Main::main(bool headless)
+{
+    CsApexCore core;
+
+    if(!headless) {
+        /*
+             * There seems to be a bug in Qt4:
+             *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
+             *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
+             */
+        QPixmap pm(":/apex_splash.png");
+        splash = new QSplashScreen(pm);
+        splash->show();
+
+        app.processEvents();
+
+        CsApexWindow w(core);
+        QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
+        w.start();
+
+        splash->finish(&w);
+        delete splash;
+
+        return run();
+
+    } else {
+        core.init();
+        return run();
+    }
+}
+
+void Main::showMessage(const QString& msg)
+{
+    splash->showMessage(msg, Qt::AlignBottom | Qt::AlignRight, Qt::black);
+    app.processEvents();
+}
+
 
 int main(int argc, char** argv)
 {
@@ -108,22 +145,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    CsApexCore core;
 
-    if(!vm.count("headless")) {
-        /*
-         * There seems to be a bug in Qt4:
-         *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
-         *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
-         */
-        CsApexWindow w(core);
-        w.start();
-
-        return run(app);
-
-    } else {
-        core.init();
-        return run(app);
-    }
+    Main m(app);
+    return m.main(vm.count("headless"));
 }
 

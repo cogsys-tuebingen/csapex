@@ -33,7 +33,6 @@ public:
 
     void showMenu();
     void closeEvent(QCloseEvent* event);
-    void paintEvent(QPaintEvent * e);
 
 private Q_SLOTS:
     void updateMenu();
@@ -66,6 +65,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void initialize();
+    void statusChanged(const QString& status);
 
 private:
     void construct();
