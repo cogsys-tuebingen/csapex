@@ -202,7 +202,7 @@ std::string Box::errorMessage() const
 void Box::setError(bool e, const std::string &msg, ErrorState::ErrorLevel level)
 {
     setToolTip(msg.c_str());
-    node_->setError(e, msg, level);
+    node_->setErrorSilent(e, msg, level);
 }
 
 std::string Box::getType() const

@@ -54,7 +54,6 @@ private:
 public:
     std::string UUID() const;
 
-
     virtual bool canBeDisabled() const;
     bool isEnabled();
 

@@ -47,6 +47,8 @@ void Connector::init(Node* parent)
 {
     node_ = parent;
 
+    setParent(node_->getBox());
+
     setFocusPolicy(Qt::NoFocus);
     setAcceptDrops(true);
 
