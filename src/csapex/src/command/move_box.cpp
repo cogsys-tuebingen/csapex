@@ -11,7 +11,7 @@ using namespace csapex::command;
 MoveBox::MoveBox(Box* box, QPoint to)
     : from(box->key_point), to(to)
 {
-    uuid = box->UUID();
+    uuid = box->getNode()->UUID();
 }
 
 bool MoveBox::doExecute()

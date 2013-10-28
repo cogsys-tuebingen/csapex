@@ -67,7 +67,7 @@ void Box::construct(Node* node)
 
     ui->enablebtn->setIcon(node->getIcon());
 
-    node_->getNodeState()->minimized = false;
+    node_->setMinimized(false);
 
     QObject::connect(this, SIGNAL(toggled(bool)), node_, SIGNAL(toggled(bool)));
     QObject::connect(this, SIGNAL(placed()), node_, SIGNAL(started()));
@@ -100,34 +100,11 @@ Node* Box::getNode()
     return node_;
 }
 
-void Box::enableIO(bool enable)
-{
-    foreach(ConnectorIn* i, node_->input) {
-        i->setEnabled(enable);
-    }
-    foreach(ConnectorOut* i, node_->output) {
-        i->setEnabled(enable);
-    }
-}
-
-void Box::setIOError(bool error)
-{
-    foreach(ConnectorIn* i, node_->input) {
-        i->setErrorSilent(error);
-    }
-    foreach(ConnectorOut* i, node_->output) {
-        i->setErrorSilent(error);
-    }
-    enableIO(!error);
-}
-
 void Box::enableContent(bool enable)
 {
-    enableIO(enable);
-
-    node_->getNodeState()->enabled = enable;
-
+    node_->enableIO(enable);
     node_->enable(enable);
+
     ui->label->setEnabled(enable);
 }
 
@@ -181,12 +158,6 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
     menu->addAction(del);
 }
 
-std::string Box::UUID() const
-{
-    return node_->UUID();
-}
-
-
 bool Box::isError() const
 {
     return node_->isError();
@@ -205,22 +176,17 @@ void Box::setError(bool e, const std::string &msg, ErrorState::ErrorLevel level)
     node_->setErrorSilent(e, msg, level);
 }
 
-std::string Box::getType() const
-{
-    return node_->getType();
-}
-
 void Box::setLabel(const std::string& label)
 {
     assert(node_->getNodeState());
-    node_->getNodeState()->label_ = label;
+    node_->setLabel(label);
     ui->label->setText(label.c_str());
     ui->label->setToolTip(label.c_str());
 }
 
 void Box::setLabel(const QString &label)
 {
-    node_->getNodeState()->label_ = label.toStdString();
+    node_->setLabel(label.toStdString());
     ui->label->setText(label);
 }
 
@@ -229,7 +195,7 @@ std::string Box::getLabel() const
     return ui->label->text().toStdString();
 }
 
-void Box::registerEvent(Connector * c)
+void Box::registerEvent(Connector* c)
 {
     if(c->isOutput()) {
         registerOutputEvent(dynamic_cast<ConnectorOut*>(c));
@@ -238,7 +204,7 @@ void Box::registerEvent(Connector * c)
     }
 }
 
-void Box::unregisterEvent(Connector * c)
+void Box::unregisterEvent(Connector*)
 {
 }
 
@@ -324,7 +290,7 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             if(down_) {
                 if(shift_drag) {
                     if(hypot(delta.x(), delta.y()) > 15) {
-                        BoxManager::instance().startPlacingBox(parentWidget(), getType(), -start_drag_);
+                        BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), -start_drag_);
                         down_ = false;
                     }
                 } else {
@@ -376,7 +342,7 @@ void Box::paintEvent(QPaintEvent*)
             ui->label->setToolTip(node_->errorMessage().c_str());
         } else {
             setLabel(objectName());
-            ui->label->setToolTip(UUID().c_str());
+            ui->label->setToolTip(node_->UUID().c_str());
         }
 
         refreshStylesheet();
@@ -404,7 +370,7 @@ void Box::moveEvent(QMoveEvent* e)
 
     QPoint delta = e->pos() - e->oldPos();
 
-    node_->getNodeState()->pos = e->pos();
+    node_->setPosition(e->pos());
 
     Q_EMIT moved(this, delta.x(), delta.y());
 }
@@ -435,7 +401,7 @@ void Box::startDrag(QPoint offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
-    mimeData->setText(UUID().c_str());
+    mimeData->setText(node_->UUID().c_str());
 
     QByteArray ox;
     QByteArray oy;
@@ -452,7 +418,7 @@ void Box::startDrag(QPoint offset)
     lower();
 
     if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
-        BoxManager::instance().startPlacingBox(parentWidget(), getType(), offset);
+        BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), offset);
         return;
     }
 
@@ -471,7 +437,7 @@ void Box::startDrag(QPoint offset)
 
 void Box::deleteBox()
 {
-    node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(UUID())));
+    node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(node_->UUID())));
 }
 
 void Box::refreshStylesheet()
@@ -514,7 +480,7 @@ bool Box::isMinimizedSize() const
 
 void Box::minimizeBox(bool minimize)
 {    
-    node_->getNodeState()->minimized = minimize;
+    node_->setMinimized(minimize);
 
     BOOST_FOREACH(ConnectorIn* i, node_->input){
         i->setMinimizedSize(minimize);
@@ -557,7 +523,9 @@ void Box::nodeStateChanged()
     ui->enablebtn->setChecked(node_->getNodeState()->enabled);
 
     setLabel(node_->getNodeState()->label_);
-    ui->label->setToolTip(UUID().c_str());
+    ui->label->setToolTip(node_->UUID().c_str());
+
+    move(node_->getPosition());
 }
 
 CommandDispatcher* Box::getCommandDispatcher() const

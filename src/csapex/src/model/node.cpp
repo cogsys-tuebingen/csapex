@@ -232,6 +232,37 @@ void Node::disable()
     setError(false);
 }
 
+void Node::enableIO(bool enable)
+{
+    foreach(ConnectorIn* i, input) {
+        i->setEnabled(enable);
+    }
+    foreach(ConnectorOut* i, output) {
+        i->setEnabled(enable);
+    }
+}
+
+void Node::setIOError(bool error)
+{
+    foreach(ConnectorIn* i, input) {
+        i->setErrorSilent(error);
+    }
+    foreach(ConnectorOut* i, output) {
+        i->setErrorSilent(error);
+    }
+    enableIO(!error);
+}
+
+void Node::setLabel(const std::string &label)
+{
+    state->label_ = label;
+}
+
+void Node::setMinimized(bool min)
+{
+    state->minimized = min;
+}
+
 void Node::connectorChanged()
 {
 
@@ -279,9 +310,9 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
     box_->setError(error, msg, level);
     if(state->enabled && error && level == EL_ERROR) {
-        box_->setIOError(true);
+        setIOError(true);
     } else {
-        box_->setIOError(false);
+        setIOError(false);
     }
 }
 

@@ -149,6 +149,11 @@ public Q_SLOTS:
 
     void killContent();
 
+    void enableIO(bool enable);
+    void setIOError(bool error);
+    void setLabel(const std::string& label);
+    void setMinimized(bool min);
+
 Q_SIGNALS:
     void stateChanged();
     void modelChanged();

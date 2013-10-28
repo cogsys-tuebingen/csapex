@@ -48,12 +48,40 @@ public:
     static const QString MIME_MOVE;
 
 public:
+    /// CONSTRUCTION
     Box(BoxedObject *content, QWidget* parent = 0);
     Box(Node* content, NodeAdapterPtr adapter, QWidget* parent = 0);
     virtual ~Box();
+    void construct(Node* node);
+    void init();
 
+    /// CONTROL
     void stop();
 
+    /// ACCESSORS
+    Node* getNode();
+
+    CommandDispatcher* getCommandDispatcher() const;
+    void setCommandDispatcher(CommandDispatcher* d);
+
+    virtual bool hasSubGraph();
+    virtual Graph::Ptr getSubGraph();
+
+    void setLabel(const std::string& label);
+    void setLabel(const QString& label);
+    std::string getLabel() const;
+
+    bool isMinimizedSize() const;
+
+    bool isError() const;
+    ErrorState::ErrorLevel errorLevel() const;
+    std::string errorMessage() const;
+    void setError(bool e, const std::string& msg, ErrorState::ErrorLevel level = ErrorState::EL_ERROR);
+
+    /// UI
+    virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
+
+    /// UI CALLBACKS
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
@@ -66,34 +94,6 @@ public:
 
     void keyPressEvent(QKeyEvent * e);
 
-    Node* getNode();
-
-    std::string UUID() const;
-
-    std::string getType() const;
-
-    void setLabel(const std::string& label);
-    void setLabel(const QString& label);
-    std::string getLabel() const;
-
-    virtual bool hasSubGraph();
-    virtual Graph::Ptr getSubGraph();
-
-    bool isMinimizedSize() const;
-
-    CommandDispatcher* getCommandDispatcher() const;
-    void setCommandDispatcher(CommandDispatcher* d);
-
-    virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
-
-    bool isError() const;
-    ErrorState::ErrorLevel errorLevel() const;
-    std::string errorMessage() const;
-    void setError(bool e, const std::string& msg, ErrorState::ErrorLevel level = ErrorState::EL_ERROR);
-
-    void construct(Node* node);
-    void init();
-
 protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
@@ -104,8 +104,6 @@ public Q_SLOTS:
     void deleteBox();
     void minimizeBox(bool minimize);
     void enableContent(bool enable);
-    void enableIO(bool enable);
-    void setIOError(bool error);
     void refreshStylesheet();
     void eventModelChanged();
     void killContent();
