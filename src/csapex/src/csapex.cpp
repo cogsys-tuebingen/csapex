@@ -100,9 +100,12 @@ int Main::main(bool headless)
         w.start();
 
         splash->finish(&w);
+
+        int res = run();
+
         delete splash;
 
-        return run();
+        return res;
 
     } else {
         core.init();
@@ -112,7 +115,9 @@ int Main::main(bool headless)
 
 void Main::showMessage(const QString& msg)
 {
-    splash->showMessage(msg, Qt::AlignBottom | Qt::AlignRight, Qt::black);
+    if(splash->isVisible()) {
+        splash->showMessage(msg, Qt::AlignBottom | Qt::AlignRight, Qt::black);
+    }
     app.processEvents();
 }
 
