@@ -22,8 +22,14 @@ class BoxedObject : public Node, public NodeAdapter
 public:
     typedef boost::shared_ptr<BoxedObject> Ptr;
 
+    virtual void setup();
+
+protected:
+    virtual void setupUi(QBoxLayout* layout);
+
 protected:
     BoxedObject(const std::string& uuid = "");
+    virtual void fill(QBoxLayout* layout);
 
 public:
     virtual ~BoxedObject();

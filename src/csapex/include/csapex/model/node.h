@@ -31,6 +31,7 @@ public:
 public:
     Node(const std::string& uuid);
     virtual ~Node();
+    virtual void setup();
 
     void setType(const std::string& type);
     std::string getType();
@@ -57,8 +58,11 @@ public:
     virtual bool canBeDisabled() const;
     bool isEnabled();
 
-
+private:
     void setNodeState(NodeStatePtr memento);
+
+public:
+    void setNodeStateLater(NodeStatePtr state);
     NodeStatePtr getNodeState();
 
     /// TODO: get rid of this

@@ -103,10 +103,6 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
             node->setPosition(QPoint(x,y));
         }
         graph_->addNode(node);
-
-        //        Box::Ptr box(new Box(tmp, NodeAdapter::Ptr(new NodeAdapter), uuid));
-        //graph_->addBox(box);
-        //box->init(QPoint(x,y));
     }
 }
 

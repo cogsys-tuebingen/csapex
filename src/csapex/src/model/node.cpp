@@ -49,6 +49,11 @@ std::string Node::UUID() const
     return uuid_;
 }
 
+void Node::setup()
+{
+
+}
+
 void Node::setType(const std::string &type)
 {
     type_ = type;
@@ -183,6 +188,13 @@ void Node::setNodeState(NodeState::Ptr memento)
     Q_EMIT stateChanged();
 }
 
+void Node::setNodeStateLater(NodeStatePtr s)
+{
+    *state = *s;
+    //    setNodeState(s);
+    loaded_state_available_ = true;
+}
+
 Memento::Ptr Node::getState() const
 {
     return Memento::Ptr((Memento*) NULL);
@@ -237,6 +249,11 @@ void Node::updateModel()
 void Node::eventGuiChanged()
 {
     worker_->eventGuiChanged();
+
+    if(loaded_state_available_) {
+        loaded_state_available_ = false;
+        setNodeState(state);
+    }
 }
 
 
@@ -244,11 +261,6 @@ void Node::setBox(Box* box)
 {
     QMutexLocker lock(&mutex);
     box_ = box;
-
-    if(loaded_state_available_) {
-        loaded_state_available_ = false;
-        setNodeState(state);
-    }
 }
 
 Box* Node::getBox() const
@@ -507,6 +519,5 @@ void Node::read(const YAML::Node &doc)
     NodeState::Ptr s = getNodeState();
     s->readYaml(doc);
 
-    //    setNodeState(s);
-    loaded_state_available_ = true;
+    setNodeStateLater(s);
 }

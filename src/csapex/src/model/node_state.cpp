@@ -34,6 +34,9 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(node.FindValue("label")) {
         node["label"] >> label_;
+        if(label_.empty()) {
+            label_ = parent->UUID();
+        }
     }
 
     if(node.FindValue("pos")) {

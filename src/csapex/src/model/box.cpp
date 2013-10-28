@@ -88,10 +88,10 @@ void Box::construct(Node* node)
 
     if(adapter_) {
         QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
-        adapter_->fill(ui->content);
+        adapter_->doSetupUi(ui->content);
     } else {
         QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
-        adapter_shared_->fill(ui->content);
+        adapter_shared_->doSetupUi(ui->content);
     }
 }
 
@@ -283,7 +283,6 @@ void Box::init()
 
 Box::~Box()
 {
-    stop();
 }
 
 bool Box::eventFilter(QObject* o, QEvent* e)

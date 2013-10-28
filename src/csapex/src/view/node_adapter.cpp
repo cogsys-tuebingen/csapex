@@ -8,7 +8,14 @@ NodeAdapter::~NodeAdapter()
 
 }
 
-void NodeAdapter::fill(QBoxLayout *)
+void NodeAdapter::doSetupUi(QBoxLayout *layout)
+{
+    setupUi(layout);
+
+    guiChanged();
+}
+
+void NodeAdapter::setupUi(QBoxLayout *)
 {
 
 }

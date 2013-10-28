@@ -26,7 +26,7 @@ bool DeleteNode::doExecute()
     if(Command::executeCommand(graph_, remove_connections)) {
         saved_state = node->getNodeState();
 
-//        graph_->deleteBox(box->UUID());
+        graph_->deleteNode(node->UUID());
         return true;
     }
 
@@ -36,7 +36,8 @@ bool DeleteNode::doExecute()
 bool DeleteNode::doUndo()
 {
     Node::Ptr node = BoxManager::instance().makeNode(type, uuid);
-    node->setNodeState(saved_state);
+
+    node->setNodeStateLater(saved_state);
 
     graph_->addNode(node);
 
@@ -49,7 +50,7 @@ bool DeleteNode::doRedo()
         Node* node = graph_->findNode(uuid);
         saved_state = node->getNodeState();
 
-//        graph_->deleteBox(box->UUID());
+        graph_->deleteNode(node->UUID());
         return true;
     }
 

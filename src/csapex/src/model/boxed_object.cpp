@@ -17,3 +17,16 @@ BoxedObject::BoxedObject(const std::string &uuid)
 BoxedObject::~BoxedObject()
 {
 }
+
+void BoxedObject::setupUi(QBoxLayout *layout)
+{
+    fill(layout);
+}
+
+void BoxedObject::setup()
+{
+}
+
+void BoxedObject::fill(QBoxLayout *)
+{
+}

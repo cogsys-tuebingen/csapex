@@ -98,6 +98,7 @@ void Graph::addNode(Node::Ptr node)
 
     nodes_.push_back(node);
     node->setCommandDispatcher(dispatcher_);
+    node->setup();
 
     Q_EMIT nodeAdded(node.get());
 }

@@ -28,8 +28,11 @@ public:
 public:
     virtual ~NodeAdapter();
 
-    virtual void fill(QBoxLayout* layout);
+    void doSetupUi(QBoxLayout* layout);
     virtual void updateDynamicGui(QBoxLayout* layout);
+
+protected:
+    virtual void setupUi(QBoxLayout* layout);
 
 protected:
     void guiChanged();
