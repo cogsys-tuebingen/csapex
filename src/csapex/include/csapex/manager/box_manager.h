@@ -63,8 +63,8 @@ protected:
     void rebuildPrototypes();
     void rebuildMap();
 
-    NodePtr makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string uuid);
-    NodePtr makeTemplateNode(const std::string uuid, const std::string type);
+    NodePtr makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string& uuid);
+    NodePtr makeTemplateNode(const std::string& uuid, const std::string& type);
 
 protected:
     std::vector<BoxedObjectConstructor::Ptr> available_elements_prototypes;

@@ -184,7 +184,7 @@ private:
     NodeWorker* worker_;
     std::string uuid_;
 
-    NodeStatePtr state;
+    NodeStatePtr node_state_;
 
     std::vector<ConnectorIn*> input;
 

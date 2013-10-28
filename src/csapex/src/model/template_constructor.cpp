@@ -26,7 +26,7 @@ TemplateConstructor::TemplateConstructor(bool temporary, const std::string &type
     cat.insert(cat.end(), t->tags.begin(), t->tags.end());
 }
 
-BoxedObjectPtr TemplateConstructor::makeContent(const std::string& uuid) const
+BoxedObjectPtr TemplateConstructor::makeContent(const std::string&) const
 {
     return BoxedObjectPtr(new NullBoxedObject("void"));
 }

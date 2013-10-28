@@ -3,6 +3,12 @@
 
 using namespace csapex;
 
+NodeAdapter::NodeAdapter()
+    : is_gui_setup_(false)
+{
+
+}
+
 NodeAdapter::~NodeAdapter()
 {
 
@@ -10,9 +16,12 @@ NodeAdapter::~NodeAdapter()
 
 void NodeAdapter::doSetupUi(QBoxLayout *layout)
 {
-    setupUi(layout);
+    if(!is_gui_setup_) {
+        is_gui_setup_ = true;
+        setupUi(layout);
 
-    guiChanged();
+        guiChanged();
+    }
 }
 
 void NodeAdapter::setupUi(QBoxLayout *)

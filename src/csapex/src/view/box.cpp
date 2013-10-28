@@ -33,16 +33,27 @@ const QString Box::MIME_MOVE = "csapex/model/box/move";
 
 Box::Box(Node* node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
-      down_(false), profiling_(false)
+      down_(false), profiling_(false), is_placed_(false)
 {
     construct(node);
 }
 
 Box::Box(BoxedObject* node, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_shared_(node),
-      down_(false), profiling_(false)
+      down_(false), profiling_(false), is_placed_(false)
 {
     construct(node);
+}
+
+void Box::setupUi()
+{
+    if(adapter_) {
+        QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+        adapter_->doSetupUi(ui->content);
+    } else {
+        QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+        adapter_shared_->doSetupUi(ui->content);
+    }
 }
 
 void Box::construct(Node* node)
@@ -85,14 +96,7 @@ void Box::construct(Node* node)
 
     QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
-
-    if(adapter_) {
-        QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
-        adapter_->doSetupUi(ui->content);
-    } else {
-        QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
-        adapter_shared_->doSetupUi(ui->content);
-    }
+    setupUi();
 }
 
 Node* Box::getNode()
@@ -305,10 +309,10 @@ bool Box::eventFilter(QObject* o, QEvent* e)
         }
     }
 
-//    if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::RightButton && !isSelected()) {
-//        Q_EMIT clicked(this);
-//        Q_EMIT showContextMenuForBox(this, em->globalPos());
-//    }
+    //    if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::RightButton && !isSelected()) {
+    //        Q_EMIT clicked(this);
+    //        Q_EMIT showContextMenuForBox(this, em->globalPos());
+    //    }
 
     return false;
 }
@@ -366,6 +370,11 @@ void Box::mouseMoveEvent(QMouseEvent* e)
 
 void Box::moveEvent(QMoveEvent* e)
 {
+    if(!is_placed_) {
+        is_placed_ = true;
+        return;
+    }
+
     eventFilter(this, e);
 
     QPoint delta = e->pos() - e->oldPos();
@@ -448,6 +457,12 @@ void Box::refreshStylesheet()
 
 void Box::eventModelChanged()
 {
+    //    if(is_updating_gui_) {
+    //        return;
+    //    }
+
+    setupUi();
+
     if(adapter_) {
         adapter_->updateDynamicGui(ui->content);
     } else {

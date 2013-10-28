@@ -128,25 +128,17 @@ Template::Ptr Graph::toTemplate(const std::string& name) const
     return sub_graph_templ;
 }
 
-bool Graph::hasSelectedBox() const
+int Graph::noSelectedNodes()
 {
-    foreach(Node::Ptr b, nodes_) {
-        if(b->getBox()->isSelected()) {
-            return true;
-        }
-    }
-    return false;
-}
+    int c = 0;
 
-std::vector<Box*> Graph::getSelectedBoxes() const
-{
-    std::vector<Box*>  selected;
-    foreach(Node::Ptr b, nodes_) {
-        if(b->getBox()->isSelected()) {
-            selected.push_back(b->getBox());
+    foreach(Node::Ptr n, nodes_) {
+        if(n->getBox()->isSelected()) {
+            ++c;
         }
     }
-    return selected;
+
+    return c;
 }
 
 Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> >& connections) const
@@ -296,7 +288,7 @@ void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::
     QAction* group = new QAction("group", menu);
     group->setIcon(QIcon(":/group.png"));
     group->setIconVisibleInMenu(true);
-    handler[group] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::groupSelectedBoxes, this)));
+    handler[group] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::groupSelectedNodesCmd, this)));
     menu->addAction(group);
 
     menu->addSeparator();
@@ -318,7 +310,7 @@ void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::
     QAction* del = new QAction("delete all", menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::deleteSelectedBoxes, this)));
+    handler[del] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::deleteSelectedNodesCmd, this)));
     menu->addAction(del);
 }
 
@@ -550,27 +542,27 @@ bool Graph::handleConnectionSelection(int id, bool add)
     return true;
 }
 
-void Graph::handleBoxSelection(Box* box, bool add)
+void Graph::handleNodeSelection(Node* node, bool add)
 {
-    if(box != NULL) {
+    if(node != NULL) {
         if(add) {
-            if(box->isSelected()) {
-                box->setSelected(false);
+            if(node->getBox()->isSelected()) {
+                node->getBox()->setSelected(false);
             } else {
-                selectBox(box, true);
+                selectNode(node, true);
             }
         } else {
-            if(box->isSelected()) {
-                deselectBoxes();
-                if(noSelectedBoxes() != 1) {
-                    selectBox(box);
+            if(node->getBox()->isSelected()) {
+                deselectNodes();
+                if(noSelectedNodes() != 1) {
+                    selectNode(node->getBox()->getNode());
                 }
             } else {
-                selectBox(box);
+                selectNode(node->getBox()->getNode());
             }
         }
     } else if(!add) {
-        deselectBoxes();
+        deselectNodes();
     }
 }
 
@@ -671,7 +663,7 @@ Command::Ptr Graph::deleteConnectionById(int id)
     return cmd;
 }
 
-Command::Ptr Graph::deleteSelectedConnections()
+Command::Ptr Graph::deleteSelectedConnectionsCmd()
 {
     command::Meta::Ptr meta(new command::Meta);
 
@@ -726,7 +718,7 @@ bool Graph::isConnectionWithIdSelected(int id)
     throw std::runtime_error(ss.str());
 }
 
-Command::Ptr Graph::deleteSelectedBoxes()
+Command::Ptr Graph::deleteSelectedNodesCmd()
 {
     command::Meta::Ptr meta(new command::Meta);
 
@@ -736,12 +728,12 @@ Command::Ptr Graph::deleteSelectedBoxes()
         }
     }
 
-    deselectBoxes();
+    deselectNodes();
 
     return meta;
 }
 
-Command::Ptr Graph::groupSelectedBoxes()
+Command::Ptr Graph::groupSelectedNodesCmd()
 {
     QPoint tl(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     foreach(Node::Ptr n, nodes_) {
@@ -803,21 +795,7 @@ void Graph::toggleBoxSelection(Box *box)
 {
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
 
-    handleBoxSelection(box, shift);
-}
-
-
-int Graph::noSelectedBoxes()
-{
-    int c = 0;
-
-    foreach(Node::Ptr n, nodes_) {
-        if(n->getBox()->isSelected()) {
-            ++c;
-        }
-    }
-
-    return c;
+    handleNodeSelection(box->getNode(), shift);
 }
 
 void Graph::boxMoved(Box *box, int dx, int dy)
@@ -841,7 +819,7 @@ void Graph::boxMoved(Box *box, int dx, int dy)
 }
 
 
-void Graph::deselectBoxes()
+void Graph::deselectNodes()
 {
     foreach(Node::Ptr n, nodes_) {
         if(n->getBox()->isSelected()) {
@@ -850,15 +828,15 @@ void Graph::deselectBoxes()
     }
 }
 
-void Graph::selectBox(Box *box, bool add)
+void Graph::selectNode(Node *node, bool add)
 {
-    assert(!box->isSelected());
+    assert(!node->getBox()->isSelected());
 
     if(!add) {
-        deselectBoxes();
+        deselectNodes();
     }
 
-    box->setSelected(true);
+    node->getBox()->setSelected(true);
 }
 
 void Graph::tick()

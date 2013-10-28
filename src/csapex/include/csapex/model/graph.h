@@ -67,7 +67,7 @@ public:
     Command::Ptr deleteAllConnectionFulcrumsCommand(Connection::Ptr connection);
 
     Command::Ptr deleteConnectionById(int id);
-    Command::Ptr deleteSelectedConnections();
+    Command::Ptr deleteSelectedConnectionsCmd();
     int noSelectedConnections();
 
 
@@ -84,15 +84,17 @@ public:
     void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 
-    void handleBoxSelection(Box* box, bool add) __attribute__ ((deprecated));
-    Command::Ptr deleteSelectedBoxes() __attribute__ ((deprecated));
-    Command::Ptr groupSelectedBoxes() __attribute__ ((deprecated));
-    void selectBox(Box* box, bool add = false) __attribute__ ((deprecated));
-    void deselectBoxes() __attribute__ ((deprecated));
-    int noSelectedBoxes() __attribute__ ((deprecated));
-    bool hasSelectedBox() const __attribute__ ((deprecated));
+    int noSelectedNodes();
+    void selectNode(Node* node, bool add = false);
+    void deselectNodes();
+
+    Command::Ptr deleteSelectedNodesCmd();
+    Command::Ptr groupSelectedNodesCmd();
+
+    void handleNodeSelection(Node* node, bool add);
+
+    /// TODO: REFACTOR!
     void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred) __attribute__ ((deprecated));
-    std::vector<Box*> getSelectedBoxes() const __attribute__ ((deprecated));
 
 public Q_SLOTS:
     void reset();

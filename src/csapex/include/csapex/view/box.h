@@ -95,6 +95,7 @@ public:
     void keyPressEvent(QKeyEvent * e);
 
 protected:
+    void setupUi();
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
@@ -153,6 +154,8 @@ protected:
 
     bool profiling_;
     ProfilingWidget* prof;
+
+    bool is_placed_;
 };
 
 }

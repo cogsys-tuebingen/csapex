@@ -412,7 +412,7 @@ bool Overlay::keyPressEventHandler(QKeyEvent*)
 bool Overlay::keyReleaseEventHandler(QKeyEvent* e)
 {
     if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-        dispatcher_->execute(graph_->deleteSelectedConnections());
+        dispatcher_->execute(graph_->deleteSelectedConnectionsCmd());
 
         repaint();
 

@@ -42,10 +42,7 @@ DesignBoard::DesignBoard(CommandDispatcher* dispatcher, QWidget* parent)
 
     BoxManager::instance().setContainer(this);
 
-    Graph* graph = dispatcher->getGraph().get();
-
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
-//    connect(graph, SIGNAL(nodeAdded(Node*)), this, SLOT(addNodeEvent(Node*)));
 }
 
 void DesignBoard::enableGrid(bool grid)
@@ -156,13 +153,13 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
     // BOXES
     if(Qt::ControlModifier == QApplication::keyboardModifiers()) {
         if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-            if(graph->noSelectedBoxes() != 0) {
-                dispatcher_->execute(graph->deleteSelectedBoxes());
+            if(graph->noSelectedNodes() != 0) {
+                dispatcher_->execute(graph->deleteSelectedNodesCmd());
                 return;
             }
         } else  if(e->key() == Qt::Key_G) {
-            if(graph->noSelectedBoxes() != 0) {
-                dispatcher_->execute(graph->groupSelectedBoxes());
+            if(graph->noSelectedNodes() != 0) {
+                dispatcher_->execute(graph->groupSelectedNodesCmd());
                 return;
             }
         }
@@ -208,11 +205,11 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     if(e->button() == Qt::LeftButton) {
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            dispatcher_->getGraph()->deselectBoxes();
+            dispatcher_->getGraph()->deselectNodes();
 
             foreach(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    dispatcher_->getGraph()->selectBox(box, true);
+                    dispatcher_->getGraph()->selectNode(box->getNode(), true);
                 }
             }
 
@@ -223,7 +220,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     // BOXES
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
     if(!shift) {
-        dispatcher_->getGraph()->deselectBoxes();
+        dispatcher_->getGraph()->deselectNodes();
     }
 
     updateCursor();
@@ -310,7 +307,7 @@ void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
     }
 
     /// BOXES
-    dispatcher_->getGraph()->deselectBoxes();
+    dispatcher_->getGraph()->deselectNodes();
     showContextMenuAddNode(global_pos);
 }
 
@@ -322,13 +319,11 @@ void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
     Graph::Ptr graph = dispatcher_->getGraph();
 
     if(box != NULL && !box->isSelected()) {
-        graph->deselectBoxes();
+        graph->deselectNodes();
         box->setSelected(true);
     }
 
-    std::vector<Box*> selected = graph->getSelectedBoxes();
-
-    if(selected.size() == 1) {
+    if(graph->noSelectedNodes() == 1) {
         box->fillContextMenu(&menu, handler);
 
     } else {

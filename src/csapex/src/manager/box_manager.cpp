@@ -249,7 +249,7 @@ std::string BoxManager::stripNamespace(const std::string &name)
     return name.substr(from != name.npos ? from + 2 : 0);
 }
 
-Node::Ptr BoxManager::makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string uuid)
+Node::Ptr BoxManager::makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string& uuid)
 {
     assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
 
@@ -258,7 +258,7 @@ Node::Ptr BoxManager::makeSingleNode(BoxedObjectConstructor::Ptr content, const 
     return bo;
 }
 
-Node::Ptr BoxManager::makeTemplateNode(const std::string uuid, const std::string type)
+Node::Ptr BoxManager::makeTemplateNode(const std::string& /*uuid*/, const std::string& type)
 {
     assert(BoxManager::typeIsTemplate(type) || type == "::group");
 

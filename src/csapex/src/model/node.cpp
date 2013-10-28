@@ -16,7 +16,7 @@ using namespace csapex;
 
 Node::Node(const std::string &uuid)
     : icon_(":/plugin.png"), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
-      uuid_(uuid), state(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
+      uuid_(uuid), node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
 }
@@ -102,7 +102,7 @@ bool Node::canBeDisabled() const
 
 bool Node::isEnabled()
 {
-    return state->enabled;
+    return node_state_->enabled;
 }
 void Node::messageArrived(ConnectorIn *)
 {
@@ -153,10 +153,10 @@ void Node::killContent()
 
 NodeState::Ptr Node::getNodeState()
 {
-    assert(state);
+    assert(node_state_);
 
     NodeState::Ptr memento(new NodeState(this));
-    *memento = *state;
+    *memento = *node_state_;
 
     memento->boxed_state = getState();
 
@@ -169,18 +169,18 @@ void Node::setNodeState(NodeState::Ptr memento)
     assert(m.get());
 
     std::string old_uuid = UUID();
-    std::string old_label = state->label_;
+    std::string old_label = node_state_->label_;
 
-    *state = *m;
+    *node_state_ = *m;
 
-    if(state->label_.empty()) {
-        state->label_ = old_label;
+    if(node_state_->label_.empty()) {
+        node_state_->label_ = old_label;
     }
     if(uuid_.empty()) {
         uuid_ = old_uuid;
     }
 
-    state->parent = this;
+    node_state_->parent = this;
     if(m->boxed_state != NULL) {
         setState(m->boxed_state);
     }
@@ -190,7 +190,7 @@ void Node::setNodeState(NodeState::Ptr memento)
 
 void Node::setNodeStateLater(NodeStatePtr s)
 {
-    *state = *s;
+    *node_state_ = *s;
     //    setNodeState(s);
     loaded_state_available_ = true;
 }
@@ -207,7 +207,7 @@ void Node::setState(Memento::Ptr)
 
 void Node::enable(bool e)
 {
-    state->enabled = e;
+    node_state_->enabled = e;
     if(e) {
         enable();
     } else {
@@ -217,7 +217,7 @@ void Node::enable(bool e)
 
 void Node::enable()
 {
-    state->enabled = true;
+    node_state_->enabled = true;
 }
 
 void Node::disable(bool d)
@@ -228,7 +228,7 @@ void Node::disable(bool d)
 
 void Node::disable()
 {
-    state->enabled = false;
+    node_state_->enabled = false;
     setError(false);
 }
 
@@ -255,12 +255,12 @@ void Node::setIOError(bool error)
 
 void Node::setLabel(const std::string &label)
 {
-    state->label_ = label;
+    node_state_->label_ = label;
 }
 
 void Node::setMinimized(bool min)
 {
-    state->minimized = min;
+    node_state_->minimized = min;
 }
 
 void Node::connectorChanged()
@@ -283,7 +283,7 @@ void Node::eventGuiChanged()
 
     if(loaded_state_available_) {
         loaded_state_available_ = false;
-        setNodeState(state);
+        setNodeState(node_state_);
     }
 }
 
@@ -309,7 +309,7 @@ NodeWorker* Node::getNodeWorker() const
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
     box_->setError(error, msg, level);
-    if(state->enabled && error && level == EL_ERROR) {
+    if(node_state_->enabled && error && level == EL_ERROR) {
         setIOError(true);
     } else {
         setIOError(false);
@@ -481,12 +481,12 @@ int Node::nextOutputId()
 
 void Node::setPosition(const QPoint &pos)
 {
-    state->pos = pos;
+    node_state_->pos = pos;
 }
 
 QPoint Node::getPosition() const
 {
-    return state->pos;
+    return node_state_->pos;
 }
 
 CommandDispatcher* Node::getCommandDispatcher() const
@@ -540,7 +540,7 @@ void Node::disconnectConnector(Connector *c)
 
 YAML::Emitter& Node::save(YAML::Emitter& out) const
 {
-    state->writeYaml(out);
+    node_state_->writeYaml(out);
 
     return out;
 }

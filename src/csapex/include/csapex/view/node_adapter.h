@@ -26,6 +26,7 @@ public:
     typedef boost::shared_ptr<NodeAdapter> Ptr;
 
 public:
+    NodeAdapter();
     virtual ~NodeAdapter();
 
     void doSetupUi(QBoxLayout* layout);
@@ -39,6 +40,7 @@ protected:
 
 public:
     NodeAdapterBridge bridge;
+    bool is_gui_setup_;
 };
 
 }
