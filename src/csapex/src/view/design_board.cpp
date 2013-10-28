@@ -6,7 +6,7 @@
 #include <csapex/model/connector.h>
 #include <csapex/model/boxed_object_constructor.h>
 #include <csapex/model/box.h>
-#include <csapex/model/box_group.h>
+#include <csapex/model/group.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/command/add_node.h>
@@ -42,7 +42,10 @@ DesignBoard::DesignBoard(CommandDispatcher* dispatcher, QWidget* parent)
 
     BoxManager::instance().setContainer(this);
 
+    Graph* graph = dispatcher->getGraph().get();
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+//    connect(graph, SIGNAL(nodeAdded(Node*)), this, SLOT(addNodeEvent(Node*)));
 }
 
 void DesignBoard::enableGrid(bool grid)
@@ -108,18 +111,25 @@ void DesignBoard::addBoxEvent(Box *box)
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), dispatcher_->getGraph().get(), SLOT(boxMoved(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
     QObject::connect(box, SIGNAL(clicked(Box*)), dispatcher_->getGraph().get(), SLOT(toggleBoxSelection(Box*)));
-    QObject::connect(box, SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
-    QObject::connect(box, SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
-    QObject::connect(box, SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
+    QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
+    QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
+    QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(Box*, QPoint)), this, SLOT(showContextMenuEditBox(Box*, QPoint)));
 
     box->setParent(this);
+    box->init();
     box->triggerPlaced();
     box->setCommandDispatcher(dispatcher_);
+    box->show();
 
     overlay->raise();
     repaint();
+}
+
+void DesignBoard::removeBoxEvent(Box *box)
+{
+    delete box;
 }
 
 void DesignBoard::refresh()
@@ -316,7 +326,7 @@ void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
         box->setSelected(true);
     }
 
-    std::vector<Box::Ptr> selected = graph->getSelectedBoxes();
+    std::vector<Box*> selected = graph->getSelectedBoxes();
 
     if(selected.size() == 1) {
         box->fillContextMenu(&menu, handler);

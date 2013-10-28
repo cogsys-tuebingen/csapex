@@ -56,6 +56,7 @@ public Q_SLOTS:
     void findMinSize(Box* box);
 
     void addBoxEvent(Box* box);
+    void removeBoxEvent(Box* box);
     void refresh();
 
 private:

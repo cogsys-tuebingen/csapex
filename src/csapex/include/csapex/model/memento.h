@@ -12,7 +12,6 @@ class Memento
 {
 public:
     typedef boost::shared_ptr<Memento> Ptr;
-    static const Ptr NullPtr;
 
 public:
     Memento();

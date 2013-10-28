@@ -8,7 +8,7 @@
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/model/box.h>
+
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>

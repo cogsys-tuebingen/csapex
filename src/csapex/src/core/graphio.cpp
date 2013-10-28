@@ -2,7 +2,7 @@
 #include <csapex/core/graphio.h>
 
 /// PROJECT
-#include <csapex/model/box.h>
+#include <csapex/model/node.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
@@ -75,8 +75,8 @@ void GraphIO::loadSettings(YAML::Node &doc)
 
 void GraphIO::saveBoxes(YAML::Emitter &yaml)
 {
-    BOOST_FOREACH(csapex::Box::Ptr box, graph_->boxes_) {
-        box->save(yaml);
+    BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
+        node->save(yaml);
     }
 }
 
@@ -93,20 +93,20 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
         doc["pos"][0] >> x;
         doc["pos"][1] >> y;
 
-        Box::Ptr box = BoxManager::instance().makeBox(type, uuid);
-
-        if(box && box != Box::NullPtr) {
-            try {
-                box->read(doc);
-
-            } catch(const std::exception& e) {
-                std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
-            }
-
-            graph_->addBox(box);
-
-            box->init(QPoint(x,y));
+        Node::Ptr node = BoxManager::instance().makeNode(type, uuid);
+        try {
+            node->read(doc);
+        } catch(const std::exception& e) {
+            std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
         }
+        if(x != 0 || y != 0) {
+            node->setPosition(QPoint(x,y));
+        }
+        graph_->addNode(node);
+
+        //        Box::Ptr box(new Box(tmp, NodeAdapter::Ptr(new NodeAdapter), uuid));
+        //graph_->addBox(box);
+        //box->init(QPoint(x,y));
     }
 }
 
@@ -115,9 +115,9 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Key << "connections";
     yaml << YAML::Value << YAML::BeginSeq; // connections seq
 
-    BOOST_FOREACH(csapex::Box::Ptr box, graph_->boxes_) {
-        if(!box->getNode()->output.empty()) {
-            BOOST_FOREACH(ConnectorOut* o, box->getNode()->output) {
+    BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
+        if(!node->output.empty()) {
+            BOOST_FOREACH(ConnectorOut* o, node->output) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
                 }

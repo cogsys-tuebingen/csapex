@@ -13,7 +13,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/core/drag_io.h>
 #include <csapex/model/box.h>
-#include <csapex/model/box_group.h>
+#include <csapex/model/group.h>
 
 /// SYSTEM
 #include <iostream>
@@ -59,18 +59,16 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph_.get(),  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph_.get(),  SLOT(selectAll()));
 
-    QObject::connect(graph_.get(), SIGNAL(boxAdded(Box*)), designer_, SLOT(addBox(Box*)));
-    QObject::connect(graph_.get(), SIGNAL(boxDeleted(Box*)), designer_, SLOT(deleteBox(Box*)));
     QObject::connect(graph_.get(), SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
-
     QObject::connect(graph_.get(), SIGNAL(stateChanged()), this, SLOT(updateMenu()));
-    QObject::connect(graph_.get(), SIGNAL(boxAdded(Box*)), this, SLOT(boxAdded(Box*)));
 
     QObject::connect(&core_, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
     QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
     QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
+    QObject::connect(graph_.get(), SIGNAL(nodeAdded(Node*)), this, SLOT(nodeAdded(Node*)));
+    QObject::connect(graph_.get(), SIGNAL(nodeRemoved(NodePtr)), this, SLOT(nodeRemoved(NodePtr)));
 
     QObject::connect(graph_.get(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
@@ -323,16 +321,32 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
     designerio.loadSettings(doc);
 }
 
-void CsApexWindow::boxAdded(Box *box)
+void CsApexWindow::nodeAdded(Node *node)
 {
-    BoxGroup* grp = dynamic_cast<BoxGroup*> (box);
+    Box* box;
+    BoxedObject* bo = dynamic_cast<BoxedObject*>(node);
+    if(bo) {
+        box = new Box(bo);
+    } else {
+        // TODO: spawn default node adapter
+        box = new Box(node, NodeAdapter::Ptr(new NodeAdapter));
+    }
+
+    designer_->addBox(box);
+
+    Group* grp = dynamic_cast<Group*> (box);
 
     if(grp) {
-        QObject::connect(grp, SIGNAL(open_sub_graph(BoxGroup*)), this, SLOT(openSubGraph(BoxGroup*)));
+        QObject::connect(grp, SIGNAL(open_sub_graph(Group*)), this, SLOT(openSubGraph(Group*)));
     }
 }
 
-void CsApexWindow::openSubGraph(BoxGroup */*grp*/)
+void CsApexWindow::nodeRemoved(NodePtr node)
+{
+    designer_->removeBox(node->getBox());
+}
+
+void CsApexWindow::openSubGraph(Group */*grp*/)
 {
 // TODO: create "graph editor" window to use in csapexwindow AND here for editing templates!!
 

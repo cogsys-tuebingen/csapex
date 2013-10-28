@@ -5,7 +5,7 @@
 #include <csapex_transform/transform_message.h>
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/qt_helper.hpp>
 

@@ -642,9 +642,9 @@ void Overlay::paintEvent(QPaintEvent*)
         drawConnection(*connection);
     }
 
-    foreach (Box::Ptr box, graph_->boxes_) {
-        if(box->isError()) {
-            QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
+    foreach (Node::Ptr node, graph_->nodes_) {
+        if(node->isError()) {
+            QRectF rect(node->getBox()->pos() + QPoint(0, node->getBox()->height() + 8), QSize(node->getBox()->width(), 64));
 
             QFont font;
             font.setPixelSize(8);
@@ -652,14 +652,14 @@ void Overlay::paintEvent(QPaintEvent*)
             painter->setPen(Qt::red);
 
             QTextOption opt(Qt::AlignTop | Qt::AlignHCenter);
-            painter->drawText(rect, box->errorMessage().c_str(), opt);
+            painter->drawText(rect, node->errorMessage().c_str(), opt);
         }
 
-        for(int id = 0; id < box->countInputs(); ++id) {
-            drawConnector(box->getNode()->getInput(id));
+        for(int id = 0; id < node->countInputs(); ++id) {
+            drawConnector(node->getInput(id));
         }
-        for(int id = 0; id < box->countOutputs(); ++id) {
-            drawConnector(box->getNode()->getOutput(id));
+        for(int id = 0; id < node->countOutputs(); ++id) {
+            drawConnector(node->getOutput(id));
         }
     }
 

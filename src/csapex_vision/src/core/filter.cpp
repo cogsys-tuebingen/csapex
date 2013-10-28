@@ -7,7 +7,7 @@
 /// PROJECT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/model/box.h>
+
 
 /// SYSTEM
 #include <QLabel>

@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/model/boxed_object_constructor.h>
-#include <csapex/model/boxed_object.h>
 #include <csapex/csapex_fwd.h>
 
 /// PROJECT
@@ -15,6 +14,7 @@
 #include <vector>
 #include <QTreeWidget>
 #include <boost/signals2.hpp>
+#include <set>
 
 namespace csapex
 {
@@ -37,7 +37,7 @@ public:
     void register_box_type(BoxedObjectConstructor::Ptr provider, bool suppress_signals = false);
 
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
-    BoxPtr makeBox(const std::string& type, const std::string& uuid);
+    NodePtr makeNode(const std::string& type, const std::string& uuid);
     BoxedObjectConstructor::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
@@ -63,9 +63,8 @@ protected:
     void rebuildPrototypes();
     void rebuildMap();
 
-    BoxPtr makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid);
-
-    BoxPtr makeTemplateBox(const std::string uuid, const std::string type);
+    NodePtr makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string uuid);
+    NodePtr makeTemplateNode(const std::string uuid, const std::string type);
 
 protected:
     std::vector<BoxedObjectConstructor::Ptr> available_elements_prototypes;

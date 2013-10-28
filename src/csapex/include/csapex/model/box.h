@@ -42,43 +42,14 @@ class Box : public QWidget, public Selectable
 
 public:
     typedef boost::shared_ptr<Box> Ptr;
-    static const Ptr NullPtr;
-
-public:
-    struct State : public Memento {
-        typedef boost::shared_ptr<State> Ptr;
-
-        State()
-            : parent(NULL), minimized(false), enabled(true)
-        {}
-        State(Box* parent)
-            : parent(parent), minimized(false), enabled(true)
-        {}
-
-        void copyFrom (const Ptr &rhs);
-
-        virtual void writeYaml(YAML::Emitter& out) const;
-        virtual void readYaml(const YAML::Node& node);
-
-        Box* parent;
-
-        mutable Memento::Ptr boxed_state;
-
-        std::string label_;
-
-        QPoint pos;
-
-        bool minimized;
-        bool enabled;
-    };
 
 public:
     static const QString MIME;
     static const QString MIME_MOVE;
 
-
 public:
-    Box(NodePtr content, NodeAdapterPtr adapter, const std::string& uuid = "", QWidget* parent = 0);
+    Box(BoxedObject *content, QWidget* parent = 0);
+    Box(Node* content, NodeAdapterPtr adapter, QWidget* parent = 0);
     virtual ~Box();
 
     void stop();
@@ -95,15 +66,7 @@ public:
 
     void keyPressEvent(QKeyEvent * e);
 
-    void init(const QPoint& pos);
-
-    void removeInputEvent(ConnectorIn *in);
-    void removeOutputEvent(ConnectorOut *out);
-
-    int  countInputs();
-    int  countOutputs();
-
-    NodePtr getNode();
+    Node* getNode();
 
     std::string UUID() const;
 
@@ -113,40 +76,29 @@ public:
     void setLabel(const QString& label);
     std::string getLabel() const;
 
-    void setState(Memento::Ptr memento);
-    Memento::Ptr getState() const;
-
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
 
-    Command::Ptr removeAllConnectionsCmd();
-
-    YAML::Emitter& save(YAML::Emitter& out) const;
-    void read(YAML::Node& doc);
-
     bool isMinimizedSize() const;
-
-    void setSynchronizedInputs(bool sync);
 
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);
 
     virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
-    NodeWorker* getNodeWorker();
-
-
     bool isError() const;
     ErrorState::ErrorLevel errorLevel() const;
     std::string errorMessage() const;
     void setError(bool e, const std::string& msg, ErrorState::ErrorLevel level = ErrorState::EL_ERROR);
+
+    void construct(Node* node);
+    void init();
 
 protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
     void enabledChange(bool val);
-    void makeThread();
 
 public Q_SLOTS:
     void deleteBox();
@@ -158,13 +110,14 @@ public Q_SLOTS:
     void eventModelChanged();
     void killContent();
     void showProfiling();
-    void tick();
 
-    void messageProcessed();
     void showContextMenu(const QPoint& pos);
 
     void registerEvent(Connector*);
     void unregisterEvent(Connector*);
+
+    void nodeStateChanged();
+
 
 Q_SIGNALS:
     void placed();
@@ -172,23 +125,12 @@ Q_SIGNALS:
     void moved(Box*, int dx, int dy);
     void changed(Box*);
     void clicked(Box*);
-    void tickRequest();
     void moveSelectionToBox(Box*);
-
-    void connectionFormed(Connector*, Connector*);
-    void connectionDestroyed(Connector*, Connector*);
-
-    void connectionInProgress(Connector*, Connector*);
-    void connectionDone();
-    void connectionStart();
 
     void showContextMenuForBox(Box* box, const QPoint& pos);
 
 
 protected:
-    void connectConnector(Connector* c);
-    void disconnectConnector(Connector* c);
-
     void resizeEvent(QResizeEvent * e);
 
     void registerInputEvent(ConnectorIn* in);
@@ -198,17 +140,9 @@ protected:
 protected:
     Ui::Box* ui;
 
-    CommandDispatcher* dispatcher_;
-
-    NodePtr node_;
+    Node* node_;
     NodeAdapterPtr adapter_;
-
-    State::Ptr state;
-
-    QMutex worker_mutex_;
-
-    QThread* private_thread_;
-    NodeWorker* worker_;
+    NodeAdapter* adapter_shared_;
 
     bool down_;
     QPoint start_drag_;

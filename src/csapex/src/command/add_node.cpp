@@ -4,19 +4,20 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/boxed_object_constructor.h>
-#include <csapex/model/box.h>
+#include <csapex/model/node_state.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/node.h>
 
 using namespace csapex::command;
 
-AddNode::AddNode(const std::string &type, QPoint pos, const std::string &parent_uuid, const std::string& uuid, Memento::Ptr state)
+AddNode::AddNode(const std::string &type, QPoint pos, const std::string &parent_uuid, const std::string& uuid, NodeState::Ptr state)
     : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
     assert(!uuid.empty());
 
-    if(state != Memento::NullPtr) {
-        Box::State::Ptr bs = boost::dynamic_pointer_cast<Box::State> (state);
+    if(state != MementoNullPtr) {
+        NodeState::Ptr bs = boost::dynamic_pointer_cast<NodeState> (state);
         saved_state_ = bs;
     }
 }
@@ -27,38 +28,34 @@ bool AddNode::doExecute()
         uuid_ = graph_->makeUUID(type_);
     }
 
-    Box::Ptr box_ = BoxManager::instance().makeBox(type_, uuid_);
-    assert(box_->getType() == type_);
+    Node::Ptr node = BoxManager::instance().makeNode(type_, uuid_);
+
+    assert(node->getType() == type_);
 
     if(saved_state_) {
-        box_->setState(saved_state_);
+        node->setNodeState(saved_state_);
     }
 
-    box_->hide();
-
-
-    if(parent_uuid_.empty()) {
-        graph_->addBox(box_);
-    } else {
-        graph_->findSubGraph(parent_uuid_)->addBox(box_);
-    }
-
-    box_->init(pos_);
+//    if(parent_uuid_.empty()) {
+        graph_->addNode(node);
+//    } else {
+//        graph_->findSubGraph(parent_uuid_)->addBox(box);
+//    }
 
     return true;
 }
 
 bool AddNode::doUndo()
 {
-    Box* box_ = graph_->findNode(uuid_)->getBox();
+    Node* node_ = graph_->findNode(uuid_);
 
-    saved_state_ = box_->getState();
+    saved_state_ = node_->getNodeState();
 
 
     if(parent_uuid_.empty()) {
-        graph_->deleteBox(box_->UUID());
+//        graph_->deleteBox(box_->UUID());
     } else {
-        graph_->findSubGraph(parent_uuid_)->deleteBox(box_->UUID());
+//        graph_->findSubGraph(parent_uuid_)->deleteBox(box_->UUID());
     }
 
     return true;
@@ -67,9 +64,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        Box* box_ = graph_->findNode(uuid_)->getBox();
-
-        box_->setState(saved_state_);
+        graph_->findNode(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

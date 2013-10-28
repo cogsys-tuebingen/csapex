@@ -2,7 +2,7 @@
 #include "say_text.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_in.h>
 #include <csapex_core_plugins/string_message.h>
 

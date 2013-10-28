@@ -16,7 +16,7 @@ class Command
 
 public:
     class Access {
-        friend class BoxGroup;
+        friend class Group;
         friend class CommandDispatcher;
         friend class command::Meta;
 

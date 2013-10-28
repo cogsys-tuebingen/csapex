@@ -9,9 +9,6 @@
 
 using namespace csapex;
 
-const BoxedObjectConstructor::Ptr BoxedObjectConstructor::NullPtr
-    (new BoxedObjectConstructor("void", "", boost::bind(&BoxedObjectConstructor::makeNull)));
-
 BoxedObject::Ptr BoxedObjectConstructor::makeNull()
 {
     return BoxedObject::Ptr (new NullBoxedObject("void"));
@@ -73,9 +70,10 @@ BoxedObject::Ptr BoxedObjectConstructor::makePrototypeContent() const
     return res;
 }
 
-BoxedObject::Ptr BoxedObjectConstructor::makeContent() const
+BoxedObject::Ptr BoxedObjectConstructor::makeContent(const std::string& uuid) const
 {
     BoxedObject::Ptr res = c();
     res->setType(type_);
+    res->setUUID(uuid);
     return res;
 }

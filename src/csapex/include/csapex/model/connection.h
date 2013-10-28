@@ -28,7 +28,6 @@ public:
     typedef boost::shared_ptr<Connection> Ptr;
 
 public:
-    static const Connection::Ptr NullPtr;
     static const int activity_marker_max_lifetime_;
 
     friend std::ostream& operator << (std::ostream& out, const Connection& c) {

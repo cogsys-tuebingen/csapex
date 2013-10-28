@@ -2,7 +2,7 @@
 #include "output_display.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_in.h>
 #include <utils/LibUtil/QtCvImageConverter.h>
 #include <csapex_vision/cv_mat_message.h>

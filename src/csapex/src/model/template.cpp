@@ -6,6 +6,7 @@
 #include <csapex/command/add_node.h>
 #include <csapex/command/add_connector.h>
 #include <csapex/command/add_connection.h>
+#include <csapex/model/tag.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -22,7 +23,7 @@ Template::Template(const std::string& name)
 {
 }
 
-std::string Template::addBox(const std::string &type, const QPoint &pos, Box::State::Ptr state)
+std::string Template::addBox(const std::string &type, const QPoint &pos, NodeState::Ptr state)
 {
     assert(!locked);
     assert(!type.empty());
@@ -94,7 +95,7 @@ void Template::createCommands(command::Meta* meta, const std::string& parent) co
 {
     foreach (const Template::BoxTemplate& box, boxes) {
         std::string uuid = fillInTemplate(box.uuid, parent);
-        Box::State::Ptr state(new Box::State(box.state));
+        NodeState::Ptr state(new NodeState(box.state));
 
         meta->add(Command::Ptr(new command::AddNode(box.type, box.pos, parent, uuid, state)));
     }

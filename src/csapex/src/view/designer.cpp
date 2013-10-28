@@ -50,11 +50,11 @@ void Designer::addBox(Box *box)
     designer_board->addBoxEvent(box);
 }
 
-
-void Designer::deleteBox(Box *)
+void Designer::removeBox(Box *box)
 {
-    designer_board->refresh();
+    designer_board->removeBoxEvent(box);
 }
+
 
 void Designer::stateChangedEvent()
 {

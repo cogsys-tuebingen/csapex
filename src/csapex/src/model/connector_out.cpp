@@ -29,7 +29,6 @@ ConnectorOut::~ConnectorOut()
 {
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         i->removeConnection(this);
-        Q_EMIT connectionDestroyed(this, i);
     }
 }
 
@@ -52,7 +51,6 @@ void ConnectorOut::removeConnection(Connector* other_side)
     for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
             other_side->removeConnection(this);
-            Q_EMIT connectionDestroyed(this, *i);
 
             i = targets_.erase(i);
         } else {
@@ -83,7 +81,6 @@ void ConnectorOut::removeAllConnectionsNotUndoable()
 {
     for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
         (*i)->removeConnection(this);
-        Q_EMIT connectionDestroyed(this, *i);
         i = targets_.erase(i);
     }
 
@@ -121,8 +118,6 @@ bool ConnectorOut::connect(Connector *other_side)
     targets_.push_back(input);
 
     QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
-
-    Q_EMIT connectionFormed(this, input);
 
     validateConnections();
 

@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/memento.h>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
@@ -26,7 +25,6 @@ protected:
     bool doRedo();
 
 protected:
-    QWidget* parent;
     QPoint pos;
 
     std::string type;
@@ -34,7 +32,7 @@ protected:
 
     Command::Ptr remove_connections;
 
-    Memento::Ptr saved_state;
+    NodeStatePtr saved_state;
 };
 
 }

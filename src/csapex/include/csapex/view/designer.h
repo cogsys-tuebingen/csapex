@@ -37,7 +37,7 @@ public:
 
 public Q_SLOTS:
     void addBox(Box* box);
-    void deleteBox(Box* box);
+    void removeBox(Box* box);
     void stateChangedEvent();
     void reloadBoxMenues();
 

@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/box_group.h>
+#include <csapex/model/group.h>
 
 /// COMPONENT
 #include <csapex/model/boxed_object.h>
@@ -15,10 +15,10 @@
 
 using namespace csapex;
 
-const QString BoxGroup::MIME = "csapex/model/boxmeta";
+const QString Group::MIME = "csapex/model/boxmeta";
 
-BoxGroup::BoxGroup(const std::string &type, const std::string &uuid, QWidget *parent)
-    : Box(BoxedObject::Ptr(new NullBoxedObject(type)), BoxedObject::Ptr(new NullBoxedObject(type)), uuid, parent)
+Group::Group(const std::string &type, const std::string &uuid, QWidget *parent)
+    : Box(NULL, BoxedObject::Ptr(new NullBoxedObject(type)), parent)
 {
     icon_ = new QLabel();
     QIcon img(":/group.png");
@@ -26,7 +26,7 @@ BoxGroup::BoxGroup(const std::string &type, const std::string &uuid, QWidget *pa
     ui->additional_layout->addWidget(icon_);
 }
 
-bool BoxGroup::eventFilter(QObject * o, QEvent * e)
+bool Group::eventFilter(QObject * o, QEvent * e)
 {
     if (e->type() == QEvent::MouseButtonDblClick) {
         QMouseEvent * me = static_cast <QMouseEvent *> (e);
@@ -43,29 +43,29 @@ bool BoxGroup::eventFilter(QObject * o, QEvent * e)
     return Box::eventFilter(o, e);
 }
 
-bool BoxGroup::hasSubGraph()
+bool Group::hasSubGraph()
 {
     return true;
 }
 
-Graph::Ptr BoxGroup::getSubGraph()
+Graph::Ptr Group::getSubGraph()
 {
     return cmd_dispatcher.getGraph();
 }
 
-void BoxGroup::init(const QPoint &pos)
-{
-    Box::init(pos);
+//void Group::init()
+//{
+//    Box::init();
 
-    Template::Ptr templ = TemplateManager::instance().get(BoxManager::getTemplateName(getType()));
-    assert(templ);
-    command::Meta::Ptr meta(new command::Meta);
-    templ->createCommands(meta.get(), UUID());
+//    Template::Ptr templ = TemplateManager::instance().get(BoxManager::getTemplateName(getType()));
+//    assert(templ);
+//    command::Meta::Ptr meta(new command::Meta);
+//    templ->createCommands(meta.get(), UUID());
 
-    dispatcher_->executeNotUndoable(meta);
-}
+//    node_->getCommandDispatcher()->executeNotUndoable(meta);
+//}
 
-void BoxGroup::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
+void Group::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
 {
     Box::fillContextMenu(menu, handler);
 
@@ -74,11 +74,11 @@ void BoxGroup::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<v
     QAction* del = new QAction("save as template", menu);
     del->setIcon(QIcon(":/group.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = boost::bind(&BoxGroup::saveAsTemplate, this);
+    handler[del] = boost::bind(&Group::saveAsTemplate, this);
     menu->addAction(del);
 }
 
-void BoxGroup::saveAsTemplate()
+void Group::saveAsTemplate()
 {
     TemplateDialog diag;
     int r = diag.exec();

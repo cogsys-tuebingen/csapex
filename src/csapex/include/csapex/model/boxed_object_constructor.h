@@ -22,7 +22,6 @@ public:
     typedef boost::function<BoxedObjectPtr()> Make;
 
     typedef boost::shared_ptr<BoxedObjectConstructor> Ptr;
-    static const Ptr NullPtr;
 
     static BoxedObjectPtr makeNull();
 
@@ -37,7 +36,7 @@ public:
     std::string getDescription() const;
 
     virtual BoxedObjectPtr makePrototypeContent() const;
-    virtual BoxedObjectPtr makeContent() const;
+    virtual BoxedObjectPtr makeContent(const std::string& uuid) const;
 
 protected:
     BoxedObjectConstructor(const std::string& type, const std::string& description);

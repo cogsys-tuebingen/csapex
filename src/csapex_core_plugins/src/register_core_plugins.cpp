@@ -14,7 +14,8 @@
 #include <csapex/command/add_node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/model/box.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <boost/regex.hpp>
@@ -78,7 +79,7 @@ class RosHandler
                     ImportRos::State::Ptr sub_state(new ImportRos::State());
                     sub_state->topic_ = cmd;
 
-                    Box::State::Ptr state(new Box::State);
+                    NodeState::Ptr state(new NodeState(NULL));
                     state->boxed_state = sub_state;
 
                     std::string type("csapex::ImportRos");
@@ -92,7 +93,7 @@ class RosHandler
     }
 };
 
-const boost::regex RosHandler::fmt("[a-zA-Z_\\-/]+");
+const boost::regex RosHandler::fmt("[a-zA-Z0-9_\\-/]+");
 
 
 
@@ -151,7 +152,7 @@ class FileHandler
                 FileImporter::State::Ptr sub_state(new FileImporter::State);
                 sub_state->last_path_ = files.first().toString();
 
-                Box::State::Ptr state(new Box::State);
+                NodeState::Ptr state(new NodeState(NULL));
                 state->boxed_state = sub_state;
 
                 std::string type("csapex::FileImporter");

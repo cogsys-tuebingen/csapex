@@ -13,27 +13,27 @@
 namespace csapex
 {
 
-class BoxGroup : public Box
+class Group : public Box
 {
     Q_OBJECT
 
 public:
-    typedef boost::shared_ptr<BoxGroup> Ptr;
+    typedef boost::shared_ptr<Group> Ptr;
 
 public:
     static const QString MIME;
 
 public:
-    BoxGroup(const std::string& type, const std::string& uuid = "", QWidget* parent = 0);
+    Group(const std::string& type, const std::string& uuid = "", QWidget* parent = 0);
 
 
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
 
-    virtual void init(const QPoint& pos);
+//    virtual void init();
 
 Q_SIGNALS:
-    void open_sub_graph(BoxGroup*);
+    void open_sub_graph(Group*);
 
 public Q_SLOTS:
     void saveAsTemplate();

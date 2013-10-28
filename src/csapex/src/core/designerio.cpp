@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/view/designer.h>
-#include <csapex/model/box.h>
+
 #include "ui_designer.h"
 
 /// SYSTEM

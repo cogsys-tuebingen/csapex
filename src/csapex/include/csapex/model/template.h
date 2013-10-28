@@ -6,6 +6,8 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/graph.h>
 #include <csapex/manager/box_manager.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/tag.h>
 
 /// SYSTEM
 #include <QPoint>
@@ -30,7 +32,7 @@ private:
     explicit Template(const std::string& name);
 
 public:
-    std::string addBox(const std::string& type, const QPoint& pos, Box::State::Ptr state);
+    std::string addBox(const std::string& type, const QPoint& pos, NodeStatePtr state);
     std::string addConnector(const std::string& label, const std::string& type, bool input, bool forward = false);
     std::string addConnection(const std::string& from_uuid, const std::string& to_uuid);
 
@@ -70,7 +72,12 @@ private:
         std::string type;
         QPoint pos;
         std::string uuid;
-        Box::State state;
+        NodeState state;
+
+        BoxTemplate()
+            : state(NULL)
+        {
+        }
 
         friend void operator << (YAML::Emitter& e, const BoxTemplate& box) {
             e << YAML::BeginMap;
@@ -92,9 +99,9 @@ private:
             box.pos = QPoint(pos[0], pos[1]);
 
 
-            Box::Ptr tmp = BoxManager::instance().makeBox(box.type, box.uuid);
+            NodePtr tmp = BoxManager::instance().makeNode(box.type, box.uuid);
             box.state.parent = tmp.get();
-            box.state.readYaml(node["state"]);
+            box.state.readYaml(node);
             box.state.parent = NULL;
         }
     };

@@ -21,8 +21,6 @@ public:
     typedef boost::shared_ptr<MessageProvider> Ptr;
 
 public:
-    static const MessageProvider::Ptr NullPtr;
-
     ConnectionType::ConstPtr getType() const;
 
     virtual void load(const std::string& file) = 0;

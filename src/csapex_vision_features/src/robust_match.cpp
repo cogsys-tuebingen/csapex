@@ -13,7 +13,7 @@
 #include <csapex_vision_features/descriptor_message.h>
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex_vision/cv_mat_message.h>

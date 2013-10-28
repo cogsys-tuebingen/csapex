@@ -7,7 +7,7 @@
 #include "listener.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/utility/qt_helper.hpp>

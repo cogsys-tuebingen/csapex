@@ -2,7 +2,7 @@
 #include <csapex/model/connector_forward.h>
 
 /// COMPONENT
-#include <csapex/model/box_group.h>
+#include <csapex/model/group.h>
 #include <csapex/command/dispatcher.h>
 
 using namespace csapex;
@@ -53,8 +53,8 @@ bool ConnectorForward::tryConnect(Connector* other_side)
         if(isOutput() == other->isOutput()) {
 
             // only if one is in a subgraph of the other
-            BoxGroup* this_meta_box = dynamic_cast<BoxGroup*> (getNode()->getBox());
-            BoxGroup* other_meta_box = dynamic_cast<BoxGroup*> (other->getNode()->getBox());
+            Group* this_meta_box = dynamic_cast<Group*> (getNode()->getBox());
+            Group* other_meta_box = dynamic_cast<Group*> (other->getNode()->getBox());
 
             assert(this_meta_box);
             assert(other_meta_box);

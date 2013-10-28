@@ -79,8 +79,7 @@ add_library(csapex SHARED
     src/command/move_fulcrum.cpp
     src/command/delete_fulcrum.cpp
 
-    src/model/box.cpp
-    src/model/box_group.cpp
+    src/model/group.cpp
     src/model/boxed_object.cpp
     src/model/boxed_object_constructor.cpp
     src/model/error_state.cpp
@@ -95,6 +94,7 @@ add_library(csapex SHARED
     src/model/message.cpp
     src/model/message_provider.cpp
     src/model/node.cpp
+    src/model/node_state.cpp
     src/model/node_worker.cpp
     src/model/tag.cpp
     src/model/template.cpp
@@ -105,6 +105,7 @@ add_library(csapex SHARED
     src/manager/message_provider_manager.cpp
     src/manager/template_manager.cpp
 
+    src/model/box.cpp
     src/view/csapex_window.cpp
     src/view/design_board.cpp
     src/view/designer.cpp

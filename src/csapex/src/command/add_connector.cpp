@@ -2,7 +2,7 @@
 #include <csapex/command/add_connector.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_forward.h>
@@ -57,13 +57,13 @@ bool AddConnector::doExecute()
 
 bool AddConnector::doUndo()
 {
-    Box* box = graph_->findNode(b_uuid)->getBox();
-    assert(box);
+    Node* node = graph_->findNode(b_uuid);
+    assert(node);
 
     if(input) {
-        box->getNode()->removeInput(box->getNode()->getInput(c_uuid));
+        node->removeInput(node->getInput(c_uuid));
     } else {
-        box->getNode()->removeOutput(box->getNode()->getOutput(c_uuid));
+        node->removeOutput(node->getOutput(c_uuid));
     }
     return false;
 }

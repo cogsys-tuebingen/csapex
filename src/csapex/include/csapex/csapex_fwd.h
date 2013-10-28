@@ -7,7 +7,8 @@
 #define FWD(name) \
     class name;\
     typedef boost::shared_ptr<name> name##Ptr;\
-    typedef boost::shared_ptr<const name> name##ConstPtr
+    typedef boost::shared_ptr<const name> name##ConstPtr;\
+    static const name##Ptr name##NullPtr
 
 
 template <typename T>
@@ -18,8 +19,9 @@ namespace csapex
 class CorePlugin;
 
 FWD(Box);
-FWD(BoxGroup);
+FWD(Group);
 FWD(BoxedObject);
+FWD(BoxedObjectConstructor);
 
 FWD(Connector);
 FWD(ConnectorIn);
@@ -32,7 +34,11 @@ FWD(ConnectionType);
 
 FWD(Template);
 
+FWD(Memento);
+FWD(MessageProvider);
+
 FWD(Node);
+FWD(NodeState);
 FWD(NodeWorker);
 FWD(NodeAdapter);
 

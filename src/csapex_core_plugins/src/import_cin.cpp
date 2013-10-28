@@ -2,7 +2,7 @@
 #include "import_cin.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_out.h>
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/utility/stream_interceptor.h>

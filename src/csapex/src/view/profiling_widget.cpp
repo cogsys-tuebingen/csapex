@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/box.h>
+#include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 
 /// SYSTEM
@@ -11,7 +12,7 @@
 using namespace csapex;
 
 ProfilingWidget::ProfilingWidget(QWidget *parent, Box *box)
-    : QWidget(parent), box_(box), node_worker_(box->getNodeWorker())
+    : QWidget(parent), box_(box), node_worker_(box->getNode()->getNodeWorker())
 {
     w_ = 200;
     h_ = 75;

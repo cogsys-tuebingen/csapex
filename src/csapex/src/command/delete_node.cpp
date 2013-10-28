@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/command/delete_connection.h>
 #include <csapex/model/boxed_object_constructor.h>
-#include <csapex/model/box.h>
+#include <csapex/model/node.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
 
@@ -17,18 +17,16 @@ DeleteNode::DeleteNode(const std::string &uuid)
 
 bool DeleteNode::doExecute()
 {
-    Box* box = graph_->findNode(uuid)->getBox();
+    Node* node = graph_->findNode(uuid);
 
-    parent = box->parentWidget();
-    type = box->getType();
+    type = node->getType();
 
-    pos = box->pos();
-    remove_connections = box->removeAllConnectionsCmd();
+    remove_connections = node->removeAllConnectionsCmd();
 
     if(Command::executeCommand(graph_, remove_connections)) {
-        saved_state = box->getState();
+        saved_state = node->getNodeState();
 
-        graph_->deleteBox(box->UUID());
+//        graph_->deleteBox(box->UUID());
         return true;
     }
 
@@ -37,12 +35,10 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    Box::Ptr box = BoxManager::instance().makeBox(type, uuid);
-    box->setState(saved_state);
+    Node::Ptr node = BoxManager::instance().makeNode(type, uuid);
+    node->setNodeState(saved_state);
 
-    graph_->addBox(box);
-
-    box->init(pos);
+    graph_->addNode(node);
 
     return Command::undoCommand(graph_, remove_connections);
 }
@@ -50,10 +46,10 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Command::redoCommand(graph_, remove_connections)) {
-        Box* box = graph_->findNode(uuid)->getBox();
-        saved_state = box->getState();
+        Node* node = graph_->findNode(uuid);
+        saved_state = node->getNodeState();
 
-        graph_->deleteBox(box->UUID());
+//        graph_->deleteBox(box->UUID());
         return true;
     }
 

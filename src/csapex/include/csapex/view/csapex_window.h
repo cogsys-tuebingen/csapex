@@ -60,8 +60,10 @@ public Q_SLOTS:
     void saveSettings(YAML::Emitter& e);
     void loadSettings(YAML::Node& doc);
 
-    void boxAdded(Box* box);
-    void openSubGraph(BoxGroup* grp);
+    void nodeAdded(Node* node);
+    void nodeRemoved(NodePtr node);
+
+    void openSubGraph(Group* grp);
 
 Q_SIGNALS:
     void initialize();

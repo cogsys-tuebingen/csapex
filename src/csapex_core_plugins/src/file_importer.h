@@ -38,6 +38,8 @@ public Q_SLOTS:
 
 public:
     struct State : public Memento {
+        State();
+
         typedef boost::shared_ptr<State> Ptr;
 
         FileImporter* parent;
@@ -61,6 +63,8 @@ private:
 
     QHBoxLayout* additional_layout_;
     QPushButton* file_dialog_;
+
+    QString to_import_;
 };
 
 }

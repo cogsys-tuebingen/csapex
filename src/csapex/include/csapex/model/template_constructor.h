@@ -13,7 +13,7 @@ public:
     TemplateConstructor(bool temporary, const std::string& type, const std::string& description);
 
     virtual BoxedObjectPtr makePrototypeContent() const;
-    virtual BoxedObjectPtr makeContent() const;
+    virtual BoxedObjectPtr makeContent(const std::string& uuid) const;
 
 protected:
     virtual void load() const;

@@ -21,10 +21,9 @@ class BoxedObject : public Node, public NodeAdapter
 
 public:
     typedef boost::shared_ptr<BoxedObject> Ptr;
-    static const Ptr NullPtr;
 
 protected:
-    BoxedObject();
+    BoxedObject(const std::string& uuid = "");
 
 public:
     virtual ~BoxedObject();

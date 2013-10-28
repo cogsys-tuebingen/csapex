@@ -5,6 +5,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/template_constructor.h>
+#include <csapex/model/tag.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>

@@ -2,7 +2,7 @@
 #include "point_count.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_in.h>
 
 /// SYSTEM

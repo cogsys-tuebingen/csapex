@@ -18,8 +18,10 @@
 namespace csapex
 {
 
-class GraphIO
+class GraphIO : public QObject
 {
+    Q_OBJECT
+
 public:
     GraphIO(Graph::Ptr graph);
 

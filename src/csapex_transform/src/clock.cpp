@@ -5,7 +5,7 @@
 #include <csapex_transform/time_stamp_message.h>
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/ros_handler.h>
 

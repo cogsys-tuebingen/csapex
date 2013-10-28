@@ -105,8 +105,6 @@ Q_SIGNALS:
     void connectionDone();
 
 Q_SIGNALS:
-    void connectionFormed(Connector*, Connector*);
-    void connectionDestroyed(Connector*, Connector*);
     void messageSent(Connector* source);
     void messageArrived(Connector* source);
 

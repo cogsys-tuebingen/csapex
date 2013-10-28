@@ -5,7 +5,7 @@
 #include <csapex_boolean/boolean_message.h>
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 

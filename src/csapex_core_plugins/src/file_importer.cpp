@@ -2,7 +2,7 @@
 #include "file_importer.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/qt_helper.hpp>
@@ -25,6 +25,12 @@ CSAPEX_REGISTER_CLASS(csapex::FileImporter, csapex::BoxedObject)
 using namespace csapex;
 using namespace connection_types;
 
+FileImporter::State::State()
+    : parent(NULL)
+{
+
+}
+
 void FileImporter::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "path" << YAML::Value << last_path_.toStdString();
 
@@ -41,6 +47,7 @@ void FileImporter::State::readYaml(const YAML::Node& node) {
     std::cout << "read path: " << path << std::endl;
 
     last_path_ = QString::fromUtf8(path.c_str());
+    assert(parent);
     parent->import(last_path_);
 
     if(node.FindValue("sub_state") && parent->provider_) {
@@ -125,6 +132,10 @@ void FileImporter::fill(QBoxLayout* layout)
         output_ = addOutput<connection_types::AnyMessage>("Unknown");
 
         QObject::connect(this, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
+
+        if(to_import_.length() > 0) {
+            import(to_import_);
+        }
     }
 }
 
@@ -145,18 +156,22 @@ void FileImporter::messageArrived(ConnectorIn *source)
 
 void FileImporter::import(const QString& filename)
 {
-    if(!filename.isNull() && !filename.isEmpty()) {
-        if(additional_layout_ && doImport(filename)) {
-            QtHelper::clearLayout(additional_layout_);
-            provider_->insert(additional_layout_);
+    if(!file_dialog_) {
+        to_import_ = filename;
+    } else {
+        if(!filename.isNull() && !filename.isEmpty()) {
+            if(additional_layout_ && doImport(filename)) {
+                QtHelper::clearLayout(additional_layout_);
+                provider_->insert(additional_layout_);
 
-            file_dialog_->setText(filename);
+                file_dialog_->setText(filename);
 
+            } else {
+                file_dialog_->setText("Import");
+            }
         } else {
             file_dialog_->setText("Import");
         }
-    } else {
-        file_dialog_->setText("Import");
     }
 }
 

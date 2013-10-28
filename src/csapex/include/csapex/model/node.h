@@ -6,7 +6,6 @@
 #include <csapex/model/tag.h>
 #include <csapex/model/memento.h>
 #include <csapex/model/error_state.h>
-#include <csapex/model/box.h>
 
 /// SYSTEM
 #include <QObject>
@@ -18,9 +17,11 @@ class Node : public QObject, public ErrorState
 {
     Q_OBJECT
 
+    friend class NodeState;
     friend class Box;
     friend class GraphIO;
     friend class Graph;
+    friend class BoxedObjectConstructor;
 
     friend class command::AddConnector;
 
@@ -28,7 +29,7 @@ public:
     typedef boost::shared_ptr<Node> Ptr;
 
 public:
-    Node();
+    Node(const std::string& uuid);
     virtual ~Node();
 
     void setType(const std::string& type);
@@ -42,18 +43,29 @@ public:
     void setIcon(QIcon icon);
     QIcon getIcon();
 
+    void stop();
+
+private:
+    void setUUID(const std::string& uuid);
+
+    void connectConnector(Connector* c);
+    void disconnectConnector(Connector* c);
+
+public:
     std::string UUID() const;
 
 
     virtual bool canBeDisabled() const;
     bool isEnabled();
 
-    virtual void setState(Memento::Ptr memento);
-    virtual Memento::Ptr getState() const;
+
+    void setNodeState(NodeStatePtr memento);
+    NodeStatePtr getNodeState();
 
     /// TODO: get rid of this
     virtual void setBox(Box* box);
     Box* getBox() const;
+    NodeWorker* getNodeWorker() const;
 
     template <typename T>
     ConnectorIn* addInput(const std::string& label, bool optional = false) {
@@ -88,8 +100,26 @@ public:
     int nextInputId();
     int nextOutputId();
 
+    QPoint getPosition() const;
+    void setPosition(const QPoint& pos);
 
     CommandDispatcher* getCommandDispatcher() const;
+    void setCommandDispatcher(CommandDispatcher* d);
+
+    CommandPtr removeAllConnectionsCmd();
+
+    ///
+    /// IO
+    ///
+
+    YAML::Emitter& save(YAML::Emitter& out) const;
+    void read(const YAML::Node &doc);
+
+protected:
+    virtual void setState(Memento::Ptr memento);
+    virtual Memento::Ptr getState() const;
+
+    void makeThread();
 
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
@@ -110,11 +140,21 @@ public Q_SLOTS:
     virtual void tick();
 
     virtual void updateModel();
+    void eventGuiChanged();
+
+    void messageProcessed();
+
+    void killContent();
 
 Q_SIGNALS:
+    void stateChanged();
     void modelChanged();
     void toggled(bool);
     void started();
+
+    void connectionInProgress(Connector*, Connector*);
+    void connectionDone();
+    void connectionStart();
 
     void connectorCreated(Connector*);
     void connectorRemoved(Connector*);
@@ -126,15 +166,25 @@ protected:
     std::string type_;
     mutable std::vector<Tag> tags_;
     QIcon icon_;
-    bool enabled_;
 
 private:
     Box* box_;
+
+    QThread* private_thread_;
+    QMutex worker_mutex_;
+
+    NodeWorker* worker_;
     std::string uuid_;
+
+    NodeStatePtr state;
 
     std::vector<ConnectorIn*> input;
 
     std::vector<ConnectorOut*> output;
+
+    CommandDispatcher* dispatcher_;
+
+    bool loaded_state_available_;
 };
 
 }

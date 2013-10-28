@@ -11,7 +11,7 @@ using namespace csapex;
 
 const unsigned NodeWorker::timer_history_length_ = 30;
 
-NodeWorker::NodeWorker(Node::Ptr node)
+NodeWorker::NodeWorker(Node* node)
     : node_(node), synchronized_inputs_(false)
 {
     assert(node_);

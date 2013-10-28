@@ -2,7 +2,7 @@
 #include "filter_static_mask.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 
 /// SYSTEM
 #include <QPixmap>

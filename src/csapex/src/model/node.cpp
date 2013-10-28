@@ -5,21 +5,43 @@
 #include <csapex/model/box.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/node_worker.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
+#include <QThread>
 
 using namespace csapex;
 
-Node::Node()
-    : icon_(":/plugin.png"), enabled_(true)
+Node::Node(const std::string &uuid)
+    : icon_(":/plugin.png"), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+      uuid_(uuid), state(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
-
+    QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
 }
 
 Node::~Node()
 {
+    delete worker_;
+}
 
+void Node::makeThread()
+{
+    if(!private_thread_) {
+        private_thread_ = new QThread;
+        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+
+        assert(worker_);
+        worker_->moveToThread(private_thread_);
+
+        private_thread_->start();
+    }
+}
+
+void Node::setUUID(const std::string &uuid)
+{
+    uuid_ = uuid;
 }
 
 std::string Node::UUID() const
@@ -75,7 +97,7 @@ bool Node::canBeDisabled() const
 
 bool Node::isEnabled()
 {
-    return enabled_;
+    return state->enabled;
 }
 void Node::messageArrived(ConnectorIn *)
 {
@@ -84,6 +106,81 @@ void Node::messageArrived(ConnectorIn *)
 void Node::allConnectorsArrived()
 {
 
+}
+
+void Node::messageProcessed()
+{
+    foreach(ConnectorIn* i, input) {
+        i->notify();
+    }
+}
+
+void Node::killContent()
+{
+    if(private_thread_ && private_thread_->isRunning()) {
+
+        QMutexLocker lock(&worker_mutex_);
+
+        QObject::disconnect(private_thread_);
+        QObject::disconnect(worker_);
+
+        QObject::connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+        QObject::connect(private_thread_, SIGNAL(terminated()), private_thread_, SLOT(deleteLater()));
+
+        QObject::connect(private_thread_, SIGNAL(finished()), worker_, SLOT(deleteLater()));
+        QObject::connect(private_thread_, SIGNAL(terminated()), worker_, SLOT(deleteLater()));
+
+        private_thread_->quit();
+        if(!private_thread_->wait(100)) {
+            private_thread_->terminate();
+        }
+
+        private_thread_ = NULL;
+        worker_ = new NodeWorker(this);
+
+        BOOST_FOREACH(ConnectorIn* in, input) {
+            QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
+        }
+
+        makeThread();
+    }
+}
+
+NodeState::Ptr Node::getNodeState()
+{
+    assert(state);
+
+    NodeState::Ptr memento(new NodeState(this));
+    *memento = *state;
+
+    memento->boxed_state = getState();
+
+    return memento;
+}
+
+void Node::setNodeState(NodeState::Ptr memento)
+{
+    boost::shared_ptr<NodeState> m = boost::dynamic_pointer_cast<NodeState> (memento);
+    assert(m.get());
+
+    std::string old_uuid = UUID();
+    std::string old_label = state->label_;
+
+    *state = *m;
+
+    if(state->label_.empty()) {
+        state->label_ = old_label;
+    }
+    if(uuid_.empty()) {
+        uuid_ = old_uuid;
+    }
+
+    state->parent = this;
+    if(m->boxed_state != NULL) {
+        setState(m->boxed_state);
+    }
+
+    Q_EMIT stateChanged();
 }
 
 Memento::Ptr Node::getState() const
@@ -98,7 +195,7 @@ void Node::setState(Memento::Ptr)
 
 void Node::enable(bool e)
 {
-    enabled_ = e;
+    state->enabled = e;
     if(e) {
         enable();
     } else {
@@ -108,7 +205,7 @@ void Node::enable(bool e)
 
 void Node::enable()
 {
-    enabled_ = true;
+    state->enabled = true;
 }
 
 void Node::disable(bool d)
@@ -119,7 +216,7 @@ void Node::disable(bool d)
 
 void Node::disable()
 {
-    enabled_ = false;
+    state->enabled = false;
     setError(false);
 }
 
@@ -137,12 +234,21 @@ void Node::updateModel()
 {
 }
 
+void Node::eventGuiChanged()
+{
+    worker_->eventGuiChanged();
+}
 
 
 void Node::setBox(Box* box)
 {
     QMutexLocker lock(&mutex);
     box_ = box;
+
+    if(loaded_state_available_) {
+        loaded_state_available_ = false;
+        setNodeState(state);
+    }
 }
 
 Box* Node::getBox() const
@@ -151,11 +257,16 @@ Box* Node::getBox() const
     return box_;
 }
 
+NodeWorker* Node::getNodeWorker() const
+{
+    return worker_;
+}
+
 
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
     box_->setError(error, msg, level);
-    if(enabled_ && error && level == EL_ERROR) {
+    if(state->enabled && error && level == EL_ERROR) {
         box_->setIOError(true);
     } else {
         box_->setIOError(false);
@@ -201,17 +312,17 @@ void Node::addOutput(ConnectorOut* out)
 
 void Node::setSynchronizedInputs(bool sync)
 {
-    box_->setSynchronizedInputs(sync);
+    worker_->setSynchronizedInputs(sync);
 }
 
 int Node::countInputs()
 {
-    return box_->countInputs();
+    return input.size();
 }
 
 int Node::countOutputs()
 {
-    return box_->countOutputs();
+    return output.size();
 }
 
 ConnectorIn* Node::getInput(const unsigned int index)
@@ -257,6 +368,7 @@ void Node::removeInput(ConnectorIn *in)
     in->deleteLater();
     input.erase(it);
 
+    disconnectConnector(in);
     Q_EMIT connectorRemoved(in);
 }
 
@@ -270,7 +382,27 @@ void Node::removeOutput(ConnectorOut *out)
     out->deleteLater();
     output.erase(it);
 
+    disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
+}
+
+
+Command::Ptr Node::removeAllConnectionsCmd()
+{
+    command::Meta::Ptr cmd(new command::Meta);
+
+    BOOST_FOREACH(ConnectorIn* i, input) {
+        if(i->isConnected()) {
+            cmd->add(i->removeAllConnectionsCmd());
+        }
+    }
+    BOOST_FOREACH(ConnectorOut* i, output) {
+        if(i->isConnected()) {
+            cmd->add(i->removeAllConnectionsCmd());
+        }
+    }
+
+    return cmd;
 }
 
 
@@ -278,12 +410,18 @@ void Node::registerInput(ConnectorIn* in)
 {
     input.push_back(in);
 
+    worker_->addInput(in);
+    connectConnector(in);
+    QObject::connect(in, SIGNAL(messageArrived(Connector*)), worker_, SLOT(forwardMessage(Connector*)));
+
     Q_EMIT connectorCreated(in);
 }
 
 void Node::registerOutput(ConnectorOut* out)
 {
     output.push_back(out);
+
+    connectConnector(out);
 
     Q_EMIT connectorCreated(out);
 }
@@ -298,7 +436,77 @@ int Node::nextOutputId()
     return output.size();
 }
 
+void Node::setPosition(const QPoint &pos)
+{
+    state->pos = pos;
+}
+
+QPoint Node::getPosition() const
+{
+    return state->pos;
+}
+
 CommandDispatcher* Node::getCommandDispatcher() const
 {
-    return box_->getCommandDispatcher();
+    return dispatcher_;
+}
+
+void Node::setCommandDispatcher(CommandDispatcher *d)
+{
+    dispatcher_ = d;
+}
+
+void Node::stop()
+{
+    foreach(ConnectorIn* i, input) {
+        disconnectConnector(i);
+    }
+    foreach(ConnectorOut* i, output) {
+        disconnectConnector(i);
+    }
+
+    QObject::disconnect(private_thread_);
+    QObject::disconnect(worker_);
+    QObject::disconnect(this);
+
+    if(private_thread_) {
+        private_thread_->quit();
+        private_thread_->wait(1000);
+        if(private_thread_->isRunning()) {
+            std::cout << "terminate thread" << std::endl;
+            private_thread_->terminate();
+        }
+    }
+}
+
+void Node::connectConnector(Connector *c)
+{
+    QObject::connect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
+    QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+}
+
+
+void Node::disconnectConnector(Connector *c)
+{
+    QObject::disconnect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
+    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+}
+
+
+YAML::Emitter& Node::save(YAML::Emitter& out) const
+{
+    state->writeYaml(out);
+
+    return out;
+}
+
+void Node::read(const YAML::Node &doc)
+{
+    NodeState::Ptr s = getNodeState();
+    s->readYaml(doc);
+
+    //    setNodeState(s);
+    loaded_state_available_ = true;
 }

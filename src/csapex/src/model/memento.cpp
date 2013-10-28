@@ -3,8 +3,6 @@
 
 using namespace csapex;
 
-const Memento::Ptr Memento::NullPtr;
-
 Memento::Memento()
 {
 }

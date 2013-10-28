@@ -2,7 +2,7 @@
 #include <csapex/command/delete_connector.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/graph.h>

@@ -13,8 +13,6 @@ using namespace csapex;
 int Connection::next_connection_id_ = 0;
 const int Connection::activity_marker_max_lifetime_ = 10;
 
-const Connection::Ptr Connection::NullPtr;
-
 Connection::Connection(ConnectorOut *from, ConnectorIn *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {

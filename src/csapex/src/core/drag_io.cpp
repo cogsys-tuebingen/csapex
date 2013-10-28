@@ -2,8 +2,8 @@
 #include <csapex/core/drag_io.h>
 
 /// PROJECT
-#include <csapex/model/box.h>
-#include <csapex/model/box_group.h>
+
+#include <csapex/model/group.h>
 #include <csapex/model/connector.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
@@ -155,7 +155,7 @@ void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 
 
         std::string uuid = graph_->makeUUID(type);
-        dispatcher_->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid)));
+        dispatcher_->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->ignore();

@@ -4,22 +4,23 @@
 /// COMPONENT
 #include "ui_box.h"
 #include <csapex/model/node.h>
+#include <csapex/model/boxed_object.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/command/move_box.h>
+#include <csapex/model/node_state.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/profiling_widget.h>
+#include <csapex/view/node_adapter.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
 #include <QGraphicsSceneDragDropEvent>
 #include <QInputDialog>
 #include <QMenu>
-#include <QThread>
 #include <QTimer>
 #include <iostream>
 #include <boost/foreach.hpp>
@@ -30,75 +31,21 @@ using namespace csapex;
 const QString Box::MIME = "csapex/model/box";
 const QString Box::MIME_MOVE = "csapex/model/box/move";
 
-const Box::Ptr Box::NullPtr;
-
-void Box::State::writeYaml(YAML::Emitter &out) const
+Box::Box(Node* node, NodeAdapter::Ptr adapter, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
+      down_(false), profiling_(false)
 {
-    out << YAML::Flow;
-    out << YAML::BeginMap;
-    if(parent) {
-        out << YAML::Key << "type";
-        out << YAML::Value << parent->node_->getType();
-        out << YAML::Key << "uuid";
-        out << YAML::Value << parent->node_->uuid_;
-    }
-    out << YAML::Key << "label";
-    out << YAML::Value << label_;
-    out << YAML::Key << "pos";
-    out << YAML::Value << YAML::BeginSeq << pos.x() << pos.y() << YAML::EndSeq;
-    out << YAML::Key << "minimized";
-    out << YAML::Value << minimized;
-    out << YAML::Key << "enabled";
-    out << YAML::Value << enabled;
-
-    if(parent) {
-        boxed_state = parent->node_->getState();
-    }
-
-    if(boxed_state.get()) {
-        out << YAML::Key << "state";
-        out << YAML::Value << YAML::BeginMap;
-        boxed_state->writeYaml(out);
-        out << YAML::EndMap;
-    }
-
-    out << YAML::EndMap;
+    construct(node);
 }
 
-void Box::State::copyFrom(const Box::State::Ptr& rhs)
+Box::Box(BoxedObject* node, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_shared_(node),
+      down_(false), profiling_(false)
 {
-    operator =(*rhs);
-    boxed_state = parent->node_->getState();
-    if(rhs->boxed_state) {
-        *boxed_state = *rhs->boxed_state;
-    }
+    construct(node);
 }
 
-void Box::State::readYaml(const YAML::Node &node)
-{
-    if(node.FindValue("minimized")) {
-        node["minimized"] >> minimized;
-    }
-
-    if(node.FindValue("enabled")) {
-        node["enabled"] >> enabled;
-    }
-
-    if(node.FindValue("label")) {
-        node["label"] >> label_;
-    }
-
-    if(node.FindValue("state")) {
-        const YAML::Node& state_map = node["state"];
-        boxed_state = parent->node_->getState();
-        boxed_state->readYaml(state_map);
-    }
-}
-
-
-Box::Box(Node::Ptr node, NodeAdapter::Ptr adapter, const std::string& uuid, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), dispatcher_(NULL), node_(node), adapter_(adapter), state(new State(this)),
-      private_thread_(NULL), worker_(new NodeWorker(node)), down_(false), profiling_(false)
+void Box::construct(Node* node)
 {
     ui->setupUi(this);
 
@@ -108,7 +55,7 @@ Box::Box(Node::Ptr node, NodeAdapter::Ptr adapter, const std::string& uuid, QWid
 
     setFocusPolicy(Qt::ClickFocus);
 
-    node_->uuid_ = uuid;
+    const std::string& uuid = node_->uuid_;
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -120,55 +67,37 @@ Box::Box(Node::Ptr node, NodeAdapter::Ptr adapter, const std::string& uuid, QWid
 
     ui->enablebtn->setIcon(node->getIcon());
 
-    state->minimized = false;
+    node_->getNodeState()->minimized = false;
 
-    QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
-    QObject::connect(this, SIGNAL(toggled(bool)), node_.get(), SIGNAL(toggled(bool)));
-    QObject::connect(this, SIGNAL(placed()), node_.get(), SIGNAL(started()));
-
-    QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
+    QObject::connect(this, SIGNAL(toggled(bool)), node_, SIGNAL(toggled(bool)));
+    QObject::connect(this, SIGNAL(placed()), node_, SIGNAL(started()));
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    QObject::connect(node_.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()));
-    QObject::connect(node_.get(), SIGNAL(connectorCreated(Connector*)), this, SLOT(registerEvent(Connector*)));
-    QObject::connect(node_.get(), SIGNAL(connectorRemoved(Connector*)), this, SLOT(unregisterEvent(Connector*)));
-    QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), worker_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+    QObject::connect(node_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    QObject::connect(node_, SIGNAL(modelChanged()), this, SLOT(eventModelChanged()));
+    QObject::connect(node_, SIGNAL(connectorCreated(Connector*)), this, SLOT(registerEvent(Connector*)));
+    QObject::connect(node_, SIGNAL(connectorRemoved(Connector*)), this, SLOT(unregisterEvent(Connector*)));
+    QObject::connect(node_, SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
-    setVisible(false);
 
-
-    adapter_->fill(ui->content);
+    if(adapter_) {
+        QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+        adapter_->fill(ui->content);
+    } else {
+        QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+        adapter_shared_->fill(ui->content);
+    }
 }
 
-NodePtr Box::getNode()
+Node* Box::getNode()
 {
     return node_;
-}
-
-void Box::messageProcessed()
-{
-    foreach(ConnectorIn* i, node_->input) {
-        i->notify();
-    }
-}
-
-void Box::makeThread()
-{
-    if(!private_thread_) {
-        private_thread_ = new QThread;
-        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
-
-        assert(worker_);
-        worker_->moveToThread(private_thread_);
-
-        private_thread_->start();
-    }
 }
 
 void Box::enableIO(bool enable)
@@ -196,47 +125,15 @@ void Box::enableContent(bool enable)
 {
     enableIO(enable);
 
-    state->enabled = enable;
+    node_->getNodeState()->enabled = enable;
 
     node_->enable(enable);
     ui->label->setEnabled(enable);
 }
 
-YAML::Emitter& Box::save(YAML::Emitter& out) const
-{
-    state->writeYaml(out);
-
-    return out;
-}
-
-void Box::read(YAML::Node &doc)
-{
-    Memento::Ptr s = getState();
-    s->readYaml(doc);
-    setState(s);
-}
-
 void Box::stop()
 {
-    foreach(ConnectorIn* i, node_->input) {
-        disconnectConnector(i);
-    }
-    foreach(ConnectorOut* i, node_->output) {
-        disconnectConnector(i);
-    }
-
-    QObject::disconnect(private_thread_);
-    QObject::disconnect(worker_);
-    QObject::disconnect(this);
-
-    if(private_thread_) {
-        private_thread_->quit();
-        private_thread_->wait(1000);
-        if(private_thread_->isRunning()) {
-            std::cout << "terminate thread" << std::endl;
-            private_thread_->terminate();
-        }
-    }
+    node_->stop();
 }
 
 void Box::showContextMenu(const QPoint& pos)
@@ -315,14 +212,15 @@ std::string Box::getType() const
 
 void Box::setLabel(const std::string& label)
 {
-    state->label_ = label;
+    assert(node_->getNodeState());
+    node_->getNodeState()->label_ = label;
     ui->label->setText(label.c_str());
     ui->label->setToolTip(label.c_str());
 }
 
 void Box::setLabel(const QString &label)
 {
-    state->label_ = label.toStdString();
+    node_->getNodeState()->label_ = label.toStdString();
     ui->label->setText(label);
 }
 
@@ -342,23 +240,12 @@ void Box::registerEvent(Connector * c)
 
 void Box::unregisterEvent(Connector * c)
 {
-    if(c->isOutput()) {
-        removeOutputEvent(dynamic_cast<ConnectorOut*>(c));
-    } else {
-        removeInputEvent(dynamic_cast<ConnectorIn*>(c));
-    }
 }
 
 void Box::registerInputEvent(ConnectorIn* in)
 {
-    worker_->addInput(in);
-
     in->setParent(NULL);
     ui->input_layout->addWidget(in);
-
-    QObject::connect(in, SIGNAL(messageArrived(Connector*)), worker_, SLOT(forwardMessage(Connector*)));
-
-    connectConnector(in);
 
     Q_EMIT changed(this);
 }
@@ -372,38 +259,7 @@ void Box::registerOutputEvent(ConnectorOut* out)
     assert(ui->output_layout);
     ui->output_layout->addWidget(out);
 
-    connectConnector(out);
-
     Q_EMIT changed(this);
-}
-
-void Box::removeInputEvent(ConnectorIn *in)
-{
-    disconnectConnector(in);
-}
-
-void Box::removeOutputEvent(ConnectorOut *out)
-{
-    disconnectConnector(out);
-}
-
-void Box::connectConnector(Connector *c)
-{
-    QObject::connect(c, SIGNAL(connectionFormed(Connector*,Connector*)), this, SIGNAL(connectionFormed(Connector*,Connector*)));
-    QObject::connect(c, SIGNAL(connectionDestroyed(Connector*,Connector*)), this, SIGNAL(connectionDestroyed(Connector*,Connector*)));
-    QObject::connect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
-    QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
-    QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
-}
-
-
-void Box::disconnectConnector(Connector *c)
-{
-    QObject::disconnect(c, SIGNAL(connectionFormed(Connector*,Connector*)), this, SIGNAL(connectionFormed(Connector*,Connector*)));
-    QObject::disconnect(c, SIGNAL(connectionDestroyed(Connector*,Connector*)), this, SIGNAL(connectionDestroyed(Connector*,Connector*)));
-    QObject::disconnect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
-    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
-    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }
 
 void Box::resizeEvent(QResizeEvent *)
@@ -411,34 +267,23 @@ void Box::resizeEvent(QResizeEvent *)
     Q_EMIT changed(this);
 }
 
-
-int Box::countInputs()
-{
-    return node_->input.size();
-}
-
-int Box::countOutputs()
-{
-    return node_->output.size();
-}
-
-void Box::init(const QPoint& pos)
+void Box::init()
 {
     if(parent()) {
         setVisible(true);
+    } else {
+        setVisible(false);
     }
 
-    move(pos);
-    key_point = pos;
+    key_point = node_->getNodeState()->pos;
+    move(key_point);
 
-    makeThread();
+    node_->makeThread();
 }
 
 Box::~Box()
 {
     stop();
-
-    delete worker_;
 }
 
 bool Box::eventFilter(QObject* o, QEvent* e)
@@ -560,7 +405,7 @@ void Box::moveEvent(QMoveEvent* e)
 
     QPoint delta = e->pos() - e->oldPos();
 
-    state->pos = e->pos();
+    node_->getNodeState()->pos = e->pos();
 
     Q_EMIT moved(this, delta.x(), delta.y());
 }
@@ -622,12 +467,12 @@ void Box::startDrag(QPoint offset)
     QPoint end_pos = pos();
 
     QPoint delta = end_pos - start_pos;
-    dispatcher_->execute(dispatcher_->getGraph()->moveSelectedBoxes(delta));
+    node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
 }
 
 void Box::deleteBox()
 {
-    dispatcher_->execute(Command::Ptr(new command::DeleteNode(UUID())));
+    node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(UUID())));
 }
 
 void Box::refreshStylesheet()
@@ -638,19 +483,11 @@ void Box::refreshStylesheet()
 
 void Box::eventModelChanged()
 {
-    adapter_->updateDynamicGui(ui->content);
-}
-
-void Box::tick()
-{
-    if(state->enabled) {
-        Q_EMIT tickRequest();
+    if(adapter_) {
+        adapter_->updateDynamicGui(ui->content);
+    } else {
+        adapter_shared_->updateDynamicGui(ui->content);
     }
-}
-
-NodeWorker* Box::getNodeWorker()
-{
-    return worker_;
 }
 
 void Box::showProfiling()
@@ -668,49 +505,17 @@ void Box::showProfiling()
 
 void Box::killContent()
 {
-    if(private_thread_ && private_thread_->isRunning()) {
-
-        QMutexLocker lock(&worker_mutex_);
-
-        QObject::disconnect(private_thread_);
-        QObject::disconnect(worker_);
-
-        QObject::connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
-        QObject::connect(private_thread_, SIGNAL(terminated()), private_thread_, SLOT(deleteLater()));
-
-        QObject::connect(private_thread_, SIGNAL(finished()), worker_, SLOT(deleteLater()));
-        QObject::connect(private_thread_, SIGNAL(terminated()), worker_, SLOT(deleteLater()));
-
-        private_thread_->quit();
-        if(!private_thread_->wait(100)) {
-            private_thread_->terminate();
-        }
-
-        private_thread_ = NULL;
-        worker_ = new NodeWorker(node_);
-
-        QObject::connect(this, SIGNAL(tickRequest()), worker_, SLOT(tick()));
-        BOOST_FOREACH(ConnectorIn* in, node_->input) {
-            QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
-        }
-
-        makeThread();
-    }
+    node_->killContent();
 }
 
 bool Box::isMinimizedSize() const
 {
-    return state->minimized;
-}
-
-void Box::setSynchronizedInputs(bool sync)
-{
-    worker_->setSynchronizedInputs(sync);
+    return node_->getNodeState()->minimized;
 }
 
 void Box::minimizeBox(bool minimize)
 {    
-    state->minimized = minimize;
+    node_->getNodeState()->minimized = minimize;
 
     BOOST_FOREACH(ConnectorIn* i, node_->input){
         i->setMinimizedSize(minimize);
@@ -745,73 +550,23 @@ Graph::Ptr Box::getSubGraph()
     throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
 }
 
-Memento::Ptr Box::getState() const
+void Box::nodeStateChanged()
 {
-    assert(state);
+    minimizeBox(node_->getNodeState()->minimized);
 
-    State::Ptr memento(new State);
-    *memento = *state;
+    enableContent(node_->getNodeState()->enabled);
+    ui->enablebtn->setChecked(node_->getNodeState()->enabled);
 
-    memento->boxed_state = node_->getState();
-
-    return memento;
-}
-
-void Box::setState(Memento::Ptr memento)
-{
-    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
-    assert(m.get());
-
-    std::string old_uuid = getNode()->UUID();
-    std::string old_label = state->label_;
-
-    *state = *m;
-
-    if(state->label_.empty()) {
-        state->label_ = old_label;
-    }
-    if(getNode()->uuid_ .empty()) {
-        getNode()->uuid_ = old_uuid;
-    }
-
-    state->parent = this;
-    if(m->boxed_state != NULL) {
-        node_->setState(m->boxed_state);
-    }
-
-    minimizeBox(state->minimized);
-
-    enableContent(state->enabled);
-    ui->enablebtn->setChecked(state->enabled);
-
-    setLabel(state->label_);
-    ui->label->setToolTip(getNode()->UUID().c_str());
-}
-
-Command::Ptr Box::removeAllConnectionsCmd()
-{
-    command::Meta::Ptr cmd(new command::Meta);
-
-    BOOST_FOREACH(ConnectorIn* i, node_->input) {
-        if(i->isConnected()) {
-            cmd->add(i->removeAllConnectionsCmd());
-        }
-    }
-    BOOST_FOREACH(ConnectorOut* i, node_->output) {
-        if(i->isConnected()) {
-            cmd->add(i->removeAllConnectionsCmd());
-        }
-    }
-
-    return cmd;
+    setLabel(node_->getNodeState()->label_);
+    ui->label->setToolTip(UUID().c_str());
 }
 
 CommandDispatcher* Box::getCommandDispatcher() const
 {
-    return dispatcher_;
+    return node_->getCommandDispatcher();
 }
 
 void Box::setCommandDispatcher(CommandDispatcher *d)
 {
-    dispatcher_ = d;
+    node_->setCommandDispatcher(d);
 }

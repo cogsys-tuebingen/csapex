@@ -6,7 +6,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/model/box.h>
-#include <csapex/model/box_group.h>
+#include <csapex/model/group.h>
 #include <csapex/model/graph.h>
 #include <utils_plugin/plugin_manager.hpp>
 
@@ -186,9 +186,9 @@ QPixmap createPixmap(const std::string& label, const BoxedObjectPtr& content)
     csapex::Box::Ptr object;
 
     if(BoxManager::typeIsTemplate(content->getType())) {
-        object.reset(new csapex::BoxGroup(""));
+        object.reset(new csapex::Group(""));
     } else {
-        object.reset(new csapex::Box(content, content, ""));
+        object.reset(new csapex::Box(content.get(), content));
     }
 
     object->setObjectName(content->getType().c_str());
@@ -249,36 +249,35 @@ std::string BoxManager::stripNamespace(const std::string &name)
     return name.substr(from != name.npos ? from + 2 : 0);
 }
 
-Box::Ptr BoxManager::makeSingleBox(BoxedObjectConstructor::Ptr content, const std::string uuid)
+Node::Ptr BoxManager::makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string uuid)
 {
     assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
 
-    BoxedObject::Ptr bo = content->makeContent();
-    csapex::Box::Ptr box(new csapex::Box(bo, bo, uuid));
+    BoxedObject::Ptr bo = content->makeContent(uuid);
 
-    box->setObjectName(uuid.c_str());
-
-    return box;
+    return bo;
 }
 
-Box::Ptr BoxManager::makeTemplateBox(const std::string uuid, const std::string type)
+Node::Ptr BoxManager::makeTemplateNode(const std::string uuid, const std::string type)
 {
     assert(BoxManager::typeIsTemplate(type) || type == "::group");
 
-    csapex::Box::Ptr group(new csapex::BoxGroup(type, uuid));
+//    csapex::Group::Ptr group(new csapex::Group(type, uuid));
 
-    group->setObjectName(uuid.c_str());
+//    group->setObjectName(uuid.c_str());
 
-    return group;
+//    return group;
+    std::cerr << "WARNING: reimplement!" << std::endl;
+    return Node::Ptr(new Node(""));
 }
 
-Box::Ptr BoxManager::makeBox(const std::string& target_type, const std::string& uuid)
+Node::Ptr BoxManager::makeNode(const std::string& target_type, const std::string& uuid)
 {
     assert(!uuid.empty());
 
 
     if(BoxManager::typeIsTemplate(target_type) || target_type == "::group") {
-        return makeTemplateBox(uuid, target_type);
+        return makeTemplateNode(uuid, target_type);
     }
 
     std::string type = target_type;
@@ -292,7 +291,7 @@ Box::Ptr BoxManager::makeBox(const std::string& target_type, const std::string& 
 
     BOOST_FOREACH(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
-            return makeSingleBox(p, uuid);
+            return makeSingleNode(p, uuid);
         }
     }
 
@@ -305,7 +304,7 @@ Box::Ptr BoxManager::makeBox(const std::string& target_type, const std::string& 
 
         if(p_type_wo_ns == type_wo_ns) {
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
-            return makeSingleBox(p, uuid);
+            return makeSingleNode(p, uuid);
         }
     }
 
@@ -314,7 +313,7 @@ Box::Ptr BoxManager::makeBox(const std::string& target_type, const std::string& 
         std::cerr << p->getType() << '\n';
     }
     std::cerr << std::endl;
-    return Box::NullPtr;
+    return NodeNullPtr;
 }
 
 BoxedObjectConstructor::Ptr BoxManager::getSelector(const std::string &type)
@@ -325,7 +324,7 @@ BoxedObjectConstructor::Ptr BoxManager::getSelector(const std::string &type)
         }
     }
 
-    return BoxedObjectConstructor::NullPtr;
+    return BoxedObjectConstructorNullPtr;
 }
 
 

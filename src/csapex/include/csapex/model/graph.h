@@ -30,7 +30,6 @@ class Graph : public QObject
     friend class command::DeleteConnection;
     friend class command::DeleteNode;
     friend class Overlay;
-    friend class BoxMeta;
 
     friend class Template;
     friend class CommandDispatcher;
@@ -85,15 +84,15 @@ public:
     void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 
-    void handleBoxSelection(Box* box, bool add);
-    Command::Ptr deleteSelectedBoxes();
-    Command::Ptr groupSelectedBoxes();
-    void selectBox(Box* box, bool add = false);
-    void deselectBoxes();
-    int noSelectedBoxes();
-    bool hasSelectedBox() const;
-    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
-    std::vector<BoxPtr> getSelectedBoxes() const;
+    void handleBoxSelection(Box* box, bool add) __attribute__ ((deprecated));
+    Command::Ptr deleteSelectedBoxes() __attribute__ ((deprecated));
+    Command::Ptr groupSelectedBoxes() __attribute__ ((deprecated));
+    void selectBox(Box* box, bool add = false) __attribute__ ((deprecated));
+    void deselectBoxes() __attribute__ ((deprecated));
+    int noSelectedBoxes() __attribute__ ((deprecated));
+    bool hasSelectedBox() const __attribute__ ((deprecated));
+    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred) __attribute__ ((deprecated));
+    std::vector<Box*> getSelectedBoxes() const __attribute__ ((deprecated));
 
 public Q_SLOTS:
     void reset();
@@ -109,11 +108,11 @@ public Q_SLOTS:
 Q_SIGNALS:
     void stateChanged();
     void dirtyChanged(bool);
-
-    void boxAdded(Box*);
-    void boxDeleted(Box*);
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
+
+    void nodeAdded(Node*);
+    void nodeRemoved(NodePtr);
 
 private:
     void deselectConnections();
@@ -126,14 +125,14 @@ private:
 
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
-    void addBox(BoxPtr box);
-    void deleteBox(const std::string &uuid);
+    void addNode(NodePtr node);
+    void deleteNode(const std::string &uuid);
 
     bool addConnection(Connection::Ptr connection);
     void deleteConnection(Connection::Ptr connection);
 
 protected:
-    std::vector<BoxPtr> boxes_;
+    std::vector<NodePtr> nodes_;
     std::vector<Connector*> connectors_;
     std::vector<Connection::Ptr> visible_connections;
 

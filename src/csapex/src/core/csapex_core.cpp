@@ -11,6 +11,7 @@
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/manager/template_manager.h>
 #include <utils_plugin/plugin_manager.hpp>
+#include <csapex/model/tag.h>
 
 /// SYSTEM
 #include <fstream>

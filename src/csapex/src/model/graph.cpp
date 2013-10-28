@@ -21,7 +21,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/box.h>
-#include <csapex/model/box_group.h>
+#include <csapex/model/group.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_node.h>
@@ -90,34 +90,32 @@ std::string Graph::makeUUID(const std::string& name)
     return ss.str();
 }
 
-
-void Graph::addBox(Box::Ptr box)
+void Graph::addNode(Node::Ptr node)
 {
-    assert(!box->UUID().empty());
-    assert(!box->getType().empty());
+    assert(!node->UUID().empty());
+    assert(!node->getType().empty());
     assert(dispatcher_);
 
-    boxes_.push_back(box);
-    box->setCommandDispatcher(dispatcher_);
+    nodes_.push_back(node);
+    node->setCommandDispatcher(dispatcher_);
 
-    Q_EMIT boxAdded(box.get());
+    Q_EMIT nodeAdded(node.get());
 }
 
-void Graph::deleteBox(const std::string& uuid)
+void Graph::deleteNode(const std::string& uuid)
 {
-    Box* box = findNode(uuid)->getBox();
+    Node* node = findNode(uuid);
 
-    box->stop();
+    node->stop();
 
-    for(std::vector<Box::Ptr>::iterator it = boxes_.begin(); it != boxes_.end();) {
-        if((*it).get() == box) {
-            it = boxes_.erase(it);
+    for(std::vector<Node::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
+        if((*it).get() == node) {
+            Q_EMIT nodeRemoved(*it);
+            it = nodes_.erase(it);
         } else {
             ++it;
         }
     }
-
-    Q_EMIT boxDeleted(box);
 }
 
 Template::Ptr Graph::toTemplate(const std::string& name) const
@@ -131,20 +129,20 @@ Template::Ptr Graph::toTemplate(const std::string& name) const
 
 bool Graph::hasSelectedBox() const
 {
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
+    foreach(Node::Ptr b, nodes_) {
+        if(b->getBox()->isSelected()) {
             return true;
         }
     }
     return false;
 }
 
-std::vector<Box::Ptr> Graph::getSelectedBoxes() const
+std::vector<Box*> Graph::getSelectedBoxes() const
 {
-    std::vector<Box::Ptr>  selected;
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            selected.push_back(b);
+    std::vector<Box*>  selected;
+    foreach(Node::Ptr b, nodes_) {
+        if(b->getBox()->isSelected()) {
+            selected.push_back(b->getBox());
         }
     }
     return selected;
@@ -161,35 +159,35 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
 
 Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<std::string, std::string> >& connections, bool only_selected) const
 {
-    std::vector<Node::Ptr> selected;
+    std::vector<Node*> selected;
 
     std::map<std::string, std::string> old_box_to_new_box;
 
-    foreach(Box::Ptr b, boxes_) {
+    foreach(Node::Ptr n, nodes_) {
         // iterate selected boxes
-        if(b->isSelected() || !only_selected) {
-            selected.push_back(b->getNode());
+        if(n->getBox()->isSelected() || !only_selected) {
+            selected.push_back(n.get());
 
-            Box::State::Ptr state = boost::dynamic_pointer_cast<Box::State>(b->getState());
-            std::string new_uuid = templ->addBox(b->getType(), b->pos(), state);
+            NodeState::Ptr state = boost::dynamic_pointer_cast<NodeState>(n->getState());
+            std::string new_uuid = templ->addBox(n->getType(), n->getBox()->pos(), state);
 
             size_t start_pos = new_uuid.find(Template::PARENT_PREFIX_PATTERN);
             assert(start_pos != std::string::npos);
 
-            old_box_to_new_box[b->UUID()] = new_uuid;
+            old_box_to_new_box[n->UUID()] = new_uuid;
         }
     }
 
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected() || !only_selected) {
-            foreach(ConnectorIn* in, b->getNode()->input) {
+    foreach(Node::Ptr n, nodes_) {
+        if(n->getBox()->isSelected() || !only_selected) {
+            foreach(ConnectorIn* in, n->input) {
                 if(in->isConnected()) {
                     Connector* target = in->getConnected();
                     Node* owner = target->getNode();
 
                     bool owner_is_selected = false;
-                    foreach(Node::Ptr b, selected) {
-                        owner_is_selected |= (b.get() == owner);
+                    foreach(Node* b, selected) {
+                        owner_is_selected |= (b == owner);
                     }
 
                     bool is_external = !owner_is_selected;
@@ -202,13 +200,13 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
 
                         std::string in_box, in_connector;
                         split_first(in->UUID(), Connector::namespace_separator, in_box, in_connector);
-                        templ->addConnection(new_connector_uuid, old_box_to_new_box[b->UUID()] + Connector::namespace_separator + in_connector);
+                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + Connector::namespace_separator + in_connector);
 
                         connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
                     }
                 }
             }
-            foreach(ConnectorOut* out, b->getNode()->output) {
+            foreach(ConnectorOut* out, n->output) {
                 std::string new_connector_uuid;
 
                 for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
@@ -216,8 +214,8 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
                     Node* owner = in->getNode();
 
                     bool is_selected = false;
-                    foreach(Node::Ptr b, selected) {
-                        is_selected |= (b.get() == owner);
+                    foreach(Node* b, selected) {
+                        is_selected |= (b == owner);
                     }
 
                     bool is_external = !is_selected;
@@ -231,7 +229,7 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
 
                         std::string out_box, out_connector;
                         split_first(out->UUID(), Connector::namespace_separator, out_box, out_connector);
-                        templ->addConnection(old_box_to_new_box[b->UUID()] + Connector::namespace_separator + out_connector, new_connector_uuid);
+                        templ->addConnection(old_box_to_new_box[n->UUID()] + Connector::namespace_separator + out_connector, new_connector_uuid);
 
                         connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
 
@@ -264,9 +262,9 @@ void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::
     bool has_minimized = false;
     bool has_maximized = false;
 
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            if(b->isMinimizedSize()) {
+    foreach(Node::Ptr b, nodes_) {
+        if(b->getBox()->isSelected()) {
+            if(b->getBox()->isMinimizedSize()) {
                 has_minimized = true;
             } else {
                 has_maximized = true;
@@ -325,9 +323,9 @@ void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::
 
 void Graph::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred)
 {
-    foreach(Box::Ptr b, boxes_) {
-        if(pred(b.get())) {
-            f(b.get());
+    foreach(Node::Ptr b, nodes_) {
+        if(pred(b->getBox())) {
+            f(b->getBox());
         }
     }
 }
@@ -336,9 +334,9 @@ Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
 {
     command::Meta::Ptr meta(new command::Meta);
 
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            meta->add(Command::Ptr(new command::MoveBox(b.get(), b->pos())));
+    foreach(Node::Ptr b, nodes_) {
+        if(b->getBox()->isSelected()) {
+            meta->add(Command::Ptr(new command::MoveBox(b->getBox(), b->getBox()->pos())));
         }
     }
 
@@ -397,11 +395,11 @@ void Graph::deleteConnection(Connection::Ptr connection)
 
 void Graph::stop()
 {
-    foreach(Box::Ptr box, boxes_) {
-        box->stop();
+    foreach(Node::Ptr node, nodes_) {
+        node->stop();
     }
 
-    boxes_.clear();
+    nodes_.clear();
 }
 
 
@@ -409,8 +407,8 @@ Command::Ptr Graph::clear()
 {
     command::Meta::Ptr clear(new command::Meta);
 
-    foreach(Box::Ptr box, boxes_) {
-        Command::Ptr cmd(new command::DeleteNode(box->UUID()));
+    foreach(Node::Ptr node, nodes_) {
+        Command::Ptr cmd(new command::DeleteNode(node->UUID()));
         clear->add(cmd);
     }
 
@@ -420,7 +418,7 @@ Command::Ptr Graph::clear()
 void Graph::reset()
 {
     uuids.clear();
-    boxes_.clear();
+    nodes_.clear();
     connectors_.clear();
     visible_connections.clear();
 }
@@ -443,9 +441,9 @@ Node* Graph::findNode(const std::string &uuid)
     }
 
     std::cerr << "cannot find box \"" << uuid << "\n";
-    std::cerr << "available boxes:\n";
-    foreach(Box::Ptr b, boxes_) {
-        std::cerr << b->UUID() << '\n';
+    std::cerr << "available nodes:\n";
+    foreach(Node::Ptr n, nodes_) {
+        std::cerr << n->UUID() << '\n';
     }
     std::cerr << std::endl;
     throw std::runtime_error("cannot find box");
@@ -453,14 +451,14 @@ Node* Graph::findNode(const std::string &uuid)
 
 Node* Graph::findNodeNoThrow(const std::string &uuid)
 {
-    foreach(Box::Ptr b, boxes_) {
+    foreach(Node::Ptr b, nodes_) {
         if(b->UUID() == uuid) {
-            return b->getNode().get();
+            return b.get();
         }
     }
 
-    foreach(Box::Ptr b, boxes_) {
-        BoxGroup::Ptr grp = boost::dynamic_pointer_cast<BoxGroup> (b);
+    foreach(Node::Ptr b, nodes_) {
+        Group::Ptr grp = boost::dynamic_pointer_cast<Group> (b);
         if(grp) {
             Node* tmp = grp->getSubGraph()->findNodeNoThrow(uuid);
             if(tmp) {
@@ -483,14 +481,14 @@ Node* Graph::findNodeForConnector(const std::string &uuid)
     } catch(const std::exception& e) {
         std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
 
-        foreach(Box::Ptr b, boxes_) {
-            std::cerr << "box: " << b->UUID() << "\n";
+        foreach(Node::Ptr n, nodes_) {
+            std::cerr << "node: " << n->UUID() << "\n";
             std::cerr << "inputs: " << "\n";
-            foreach(ConnectorIn* in, b->getNode()->input) {
+            foreach(ConnectorIn* in, n->input) {
                 std::cerr << "\t" << in->UUID() << "\n";
             }
             std::cerr << "outputs: " << "\n";
-            foreach(ConnectorOut* out, b->getNode()->output) {
+            foreach(ConnectorOut* out, n->output) {
                 std::cerr << "\t" << out->UUID() << "\n";
             }
         }
@@ -584,7 +582,7 @@ Connection::Ptr Graph::getConnectionWithId(int id)
         }
     }
 
-    return Connection::NullPtr;
+    return ConnectionNullPtr;
 }
 
 Connection::Ptr Graph::getConnection(Connection::Ptr c)
@@ -597,14 +595,14 @@ Connection::Ptr Graph::getConnection(Connection::Ptr c)
 
     std::cerr << "error: cannot get connection for " << *c << std::endl;
 
-    return Connection::NullPtr;
+    return ConnectionNullPtr;
 }
 
 int Graph::getConnectionId(Connection::Ptr c)
 {
     Connection::Ptr internal = getConnection(c);
 
-    if(internal != Connection::NullPtr) {
+    if(internal != ConnectionNullPtr) {
         return internal->id();
     }
 
@@ -695,7 +693,7 @@ void Graph::selectConnectionById(int id, bool add)
         }
     }
     Connection::Ptr c = getConnectionWithId(id);
-    if(c != Connection::NullPtr) {
+    if(c != ConnectionNullPtr) {
         c->setSelected(true);
     }
 }
@@ -731,9 +729,9 @@ Command::Ptr Graph::deleteSelectedBoxes()
 {
     command::Meta::Ptr meta(new command::Meta);
 
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteNode(b->UUID())));
+    foreach(Node::Ptr n, nodes_) {
+        if(n->getBox()->isSelected()) {
+            meta->add(Command::Ptr(new command::DeleteNode(n->UUID())));
         }
     }
 
@@ -744,11 +742,10 @@ Command::Ptr Graph::deleteSelectedBoxes()
 
 Command::Ptr Graph::groupSelectedBoxes()
 {
-    // TODO: grouping does not work recursively, because groups cannot yet be deleted / created via commands
     QPoint tl(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            QPoint pos = b->pos();
+    foreach(Node::Ptr n, nodes_) {
+        if(n->getBox()->isSelected()) {
+            QPoint pos = n->getBox()->pos();
             if(pos.x() < tl.x()) {
                 tl.setX(pos.x());
             }
@@ -768,13 +765,13 @@ Command::Ptr Graph::groupSelectedBoxes()
 
     command::Meta::Ptr meta(new command::Meta);
 
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteNode(b->UUID())));
+    foreach(Node::Ptr n, nodes_) {
+        if(n->getBox()->isSelected()) {
+            meta->add(Command::Ptr(new command::DeleteNode(n->UUID())));
         }
     }
 
-    meta->add(command::AddNode::Ptr(new command::AddNode(type, tl, "", group_uuid)));
+    meta->add(command::AddNode::Ptr(new command::AddNode(type, tl, "", group_uuid, NodeStateNullPtr)));
 
     typedef std::pair<std::string, std::string> PAIR;
     foreach(const PAIR& c, connections) {
@@ -789,15 +786,15 @@ Command::Ptr Graph::groupSelectedBoxes()
 
 void Graph::selectAll()
 {
-    foreach(Box::Ptr b, boxes_) {
-        b->setSelected(true);
+    foreach(Node::Ptr n, nodes_) {
+        n->getBox()->setSelected(true);
     }
 }
 
 void Graph::clearSelection()
 {
-    foreach(Box::Ptr b, boxes_) {
-        b->setSelected(false);
+    foreach(Node::Ptr n, nodes_) {
+        n->getBox()->setSelected(false);
     }
 }
 
@@ -813,8 +810,8 @@ int Graph::noSelectedBoxes()
 {
     int c = 0;
 
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
+    foreach(Node::Ptr n, nodes_) {
+        if(n->getBox()->isSelected()) {
             ++c;
         }
     }
@@ -825,8 +822,9 @@ int Graph::noSelectedBoxes()
 void Graph::boxMoved(Box *box, int dx, int dy)
 {
     if(box->isSelected() && box->hasFocus()) {
-        foreach(Box::Ptr b, boxes_) {
-            if(b.get() != box && b->isSelected()) {
+        foreach(Node::Ptr n, nodes_) {
+            Box* b = n->getBox();
+            if(b != box && b->isSelected()) {
                 b->move(b->x() + dx, b->y() + dy);
             }
         }
@@ -844,9 +842,9 @@ void Graph::boxMoved(Box *box, int dx, int dy)
 
 void Graph::deselectBoxes()
 {
-    foreach(Box::Ptr b, boxes_) {
-        if(b->isSelected()) {
-            b->setSelected(false);
+    foreach(Node::Ptr n, nodes_) {
+        if(n->getBox()->isSelected()) {
+            n->getBox()->setSelected(false);
         }
     }
 }
@@ -864,8 +862,10 @@ void Graph::selectBox(Box *box, bool add)
 
 void Graph::tick()
 {
-    foreach(Box::Ptr b, boxes_) {
-        b->tick();
+    foreach(Node::Ptr n, nodes_) {
+        if(n->isEnabled()) {
+            n->tick();
+        }
     }
     foreach(const Connection::Ptr& connection, visible_connections) {
         connection->tick();

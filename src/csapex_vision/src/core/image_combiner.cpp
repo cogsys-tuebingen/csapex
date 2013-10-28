@@ -7,7 +7,7 @@
 /// PROJECT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/model/box.h>
+
 
 using namespace csapex;
 using namespace connection_types;

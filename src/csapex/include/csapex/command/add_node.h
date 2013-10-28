@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/memento.h>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
@@ -17,7 +16,7 @@ namespace command
 
 struct AddNode : public Command
 {
-    AddNode(const std::string& type, QPoint pos_, const std::string& parent_uuid_, const std::string& uuid_, Memento::Ptr state = Memento::NullPtr);
+    AddNode(const std::string& type, QPoint pos_, const std::string& parent_uuid_, const std::string& uuid_, NodeStatePtr state);
 
 protected:
     bool doExecute();
@@ -31,7 +30,7 @@ private:
     std::string parent_uuid_;
     std::string uuid_;
 
-    Memento::Ptr saved_state_;
+    NodeStatePtr saved_state_;
 };
 }
 }

@@ -2,7 +2,7 @@
 #include "export_file.h"
 
 /// PROJECT
-#include <csapex/model/box.h>
+
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connection_type.h>

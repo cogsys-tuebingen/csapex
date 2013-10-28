@@ -66,7 +66,7 @@ MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const s
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
     if(path.empty()) {
-        return MessageProvider::NullPtr;
+        return MessageProviderNullPtr;
     }
 
     std::cout << "extension is " << ext << std::endl;
