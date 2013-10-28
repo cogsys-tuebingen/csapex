@@ -15,10 +15,10 @@
 <class type="csapex::CropBox" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
-<class type="csapex::ExtractTimestamp" base_class_type="csapex::BoxedObject">
+<class type="csapex::ExtractTimeStamp" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
-<class type="csapex::SetTimestamp" base_class_type="csapex::BoxedObject">
+<class type="csapex::SetTimeStamp" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
 </library>

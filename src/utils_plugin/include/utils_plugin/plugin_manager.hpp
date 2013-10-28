@@ -25,7 +25,7 @@ protected:
 
 protected:
     PluginManagerImp(const std::string& full_name)
-        : plugins_loaded_(false), full_name_(full_name)
+        : loader_("csapex", full_name), plugins_loaded_(false), full_name_(full_name)
     {
     }
 
@@ -40,37 +40,22 @@ protected:
     void registerConstructor(Constructor constructor) {
         available_classes[constructor.getType()] = constructor;
     }
-
     void reload() {
-        loaded(std::string("searching for plugin libraries"));
-
-        std::set<std::string> libs;
-        {
-            pluginlib::ClassLoader<M> loader("csapex", full_name_);
-
-            // TODO: THIS IS WAY TOO SLOW!!!!!!!!
-            std::vector<std::string> classes = loader.getDeclaredClasses();
-            foreach(const std::string& c, classes) {
-                libs.insert(loader.getClassLibraryPath(c));
-            }
-        }
-
-        foreach(const std::string& lib, libs) {
-
-            if(!PluginLoader::instance().isLoaded(lib)) {
-                loaded(std::string("loading ") + lib);
-
-                PluginLoader::instance().load(lib);
-            }
-        }
-
-        std::vector<std::string> classes = PluginLoader::instance().getAvailableClasses<M>();
+        std::vector<std::string> classes = loader_.getDeclaredClasses();
         for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
+            // std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;
+            std::string msg = std::string("loading ") + *c;
+            loaded(msg);
+
             try {
+                if(!loader_.isClassLoaded(*c)) {
+                    loader_.loadLibraryForClass(*c);
+                }
+
                 Constructor constructor;
                 constructor.setType(*c);
-//                constructor.setDescription(loader_.getClassDescription(*c));
-                constructor.setConstructor(boost::bind(&PluginLoader::createInstance<M>, *c));
+                constructor.setDescription(loader_.getClassDescription(*c));
+                constructor.setConstructor(boost::bind(&Loader::createInstance, &loader_, *c));
 
                 registerConstructor(constructor);
             } catch(const pluginlib::PluginlibException& ex) {
@@ -79,13 +64,13 @@ protected:
                 std::cerr << "The plugin " << *c << " failed to load for some reason. Error: " << ex.what() << std::endl;
             }
         }
-        plugins_loaded_ = true;
     }
 
 protected:
     boost::signals2::signal<void(const std::string&)> loaded;
 
 protected:
+    Loader loader_;
     bool plugins_loaded_;
 
     std::string full_name_;

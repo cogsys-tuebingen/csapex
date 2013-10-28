@@ -37,12 +37,17 @@ std::string BoxedObjectConstructor::getType() const
 
 void BoxedObjectConstructor::load() const
 {
-    BoxedObject::Ptr prototype = c();
+    try {
+        BoxedObject::Ptr prototype = c();
 
-    icon = prototype->getIcon();
-    cat = prototype->getTags();
+        icon = prototype->getIcon();
+        cat = prototype->getTags();
 
-    is_loaded = true;
+        is_loaded = true;
+    } catch(const std::exception& e) {
+        std::cerr << "cannot load object of type '" << type_ << "': " << e.what() << std::endl;
+        is_loaded = false;
+    }
 }
 
 std::vector<Tag> BoxedObjectConstructor::getTags() const

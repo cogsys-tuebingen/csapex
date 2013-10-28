@@ -5,7 +5,7 @@
 #include <csapex_core_plugins/string_message.h>
 
 /// PROJECT
-#include <csapex/model/box.h>
+#include <csapex/model/node.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex_vision/cv_mat_message.h>
@@ -91,9 +91,9 @@ void BarCodeReader::allConnectorsArrived()
 
 void BarCodeReader::fill(QBoxLayout* layout)
 {
-    box_->setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-    in_img = box_->addInput<CvMatMessage>("Image");
+    in_img = addInput<CvMatMessage>("Image");
 
-    out_str = box_->addOutput<StringMessage>("String");
+    out_str = addOutput<StringMessage>("String");
 }
