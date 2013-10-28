@@ -2,7 +2,7 @@
 #define BOX_META_H
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/boxed_object.h>
 #include <csapex/model/template.h>
 #include <csapex/command/dispatcher.h>

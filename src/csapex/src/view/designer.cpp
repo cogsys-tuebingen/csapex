@@ -2,7 +2,7 @@
 #include <csapex/view/designer.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/design_board.h>
 #include <csapex/manager/box_manager.h>

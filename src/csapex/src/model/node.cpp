@@ -2,7 +2,7 @@
 #include <csapex/model/node.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_state.h>

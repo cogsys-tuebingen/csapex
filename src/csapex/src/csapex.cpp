@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/core/csapex_core.h>
 #include <csapex/view/csapex_window.h>
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/boxed_object.h>
 #include <csapex/model/node_worker.h>
 

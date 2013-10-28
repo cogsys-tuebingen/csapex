@@ -2,7 +2,7 @@
 #define TEMPLATE_H
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/graph.h>
 #include <csapex/manager/box_manager.h>

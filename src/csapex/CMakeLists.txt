@@ -105,7 +105,7 @@ add_library(csapex SHARED
     src/manager/message_provider_manager.cpp
     src/manager/template_manager.cpp
 
-    src/model/box.cpp
+    src/view/box.cpp
     src/view/csapex_window.cpp
     src/view/design_board.cpp
     src/view/designer.cpp

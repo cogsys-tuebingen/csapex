@@ -2,7 +2,7 @@
 #include <csapex/model/error_state.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 
 using namespace csapex;
 

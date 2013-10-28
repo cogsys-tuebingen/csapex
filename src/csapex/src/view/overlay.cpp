@@ -13,7 +13,7 @@
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

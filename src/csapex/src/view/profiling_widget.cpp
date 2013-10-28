@@ -2,7 +2,7 @@
 #include <csapex/view/profiling_widget.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 

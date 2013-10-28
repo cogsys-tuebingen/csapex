@@ -20,7 +20,7 @@
 #include <csapex/model/boxed_object_constructor.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/group.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/command/meta.h>

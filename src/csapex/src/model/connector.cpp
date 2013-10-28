@@ -2,7 +2,7 @@
 #include <csapex/model/connector.h>
 
 /// COMPONENT
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/view/design_board.h>
 #include <csapex/model/node.h>
 #include <csapex/model/boxed_object.h>

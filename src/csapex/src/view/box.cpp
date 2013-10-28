@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 
 /// COMPONENT
 #include "ui_box.h"

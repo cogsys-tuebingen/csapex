@@ -5,7 +5,7 @@
 #include "ui_design_board.h"
 #include <csapex/model/connector.h>
 #include <csapex/model/boxed_object_constructor.h>
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/group.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>

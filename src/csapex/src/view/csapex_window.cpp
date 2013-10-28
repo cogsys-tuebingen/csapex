@@ -12,7 +12,7 @@
 #include <csapex/core/designerio.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/drag_io.h>
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/group.h>
 
 /// SYSTEM

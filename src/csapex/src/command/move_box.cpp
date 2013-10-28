@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
-#include <csapex/model/box.h>
+#include <csapex/view/box.h>
 #include <csapex/model/graph.h>
 
 using namespace csapex::command;
