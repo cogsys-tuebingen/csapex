@@ -1,0 +1,43 @@
+* {
+   font-size: 8pt;
+}
+
+QFrame#boxframe QLabel#label {
+  font-weight: bold;
+}
+
+QFrame#boxframe {
+        /*background-color: rgb(217, 196, 196);*/
+        background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 rgb(255,255,255), stop:1 rgb(225,225,255));
+        border: 1px solid rgb(35, 35, 35);
+        border-radius: 5px;
+        outline-offset: 5px;
+        padding: 0 -12px 0 -12px;
+}
+QFrame#boxframe[content_minimized="true"] {
+        background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 rgb(255,255,255), stop:1 rgb(235,235,235));
+}
+QFrame#boxframe[disabled="true"] {
+        background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 rgb(255,255,255), stop:1 rgb(125,125,125));
+}
+
+QFrame#boxframe[error="true"] {
+        background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 rgb(255,255,255), stop:1 rgb(200,0,0));
+        border: 3px solid rgb(180, 0, 0);
+}
+
+QFrame#boxframe[warning="true"] {
+        background-color: rgb(230, 180, 50);
+        border: 3px solid rgb(180, 60, 0);
+}
+
+QFrame#boxframe[highlight="true"] {
+        border: 5px solid rgb(180, 60, 0) !important;
+}
+
+QFrame#boxframe[focused="true"] {
+        border: 3px solid rgb(35, 35, 35);
+        outline-offset:3px;
+}
+QFrame#boxframe csapex--Connector {
+}

@@ -218,6 +218,10 @@ void Node::enable(bool e)
 void Node::enable()
 {
     node_state_->enabled = true;
+
+    if(box_) {
+        box_->enabledChange(node_state_->enabled);
+    }
 }
 
 void Node::disable(bool d)
@@ -230,6 +234,10 @@ void Node::disable()
 {
     node_state_->enabled = false;
     setError(false);
+
+    if(box_) {
+        box_->enabledChange(node_state_->enabled);
+    }
 }
 
 void Node::enableIO(bool enable)

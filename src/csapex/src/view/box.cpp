@@ -60,6 +60,8 @@ void Box::construct(Node* node)
 {
     ui->setupUi(this);
 
+    ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
+
     node_->setBox(this);
 
     ui->enablebtn->setCheckable(node_->canBeDisabled());
@@ -319,11 +321,9 @@ bool Box::eventFilter(QObject* o, QEvent* e)
 
 void Box::enabledChange(bool val)
 {
-    if(val)  {
-        node_->enable();
-    } else {
-        node_->disable();
-    }
+    ui->boxframe->setProperty("disabled", !val);
+
+    refreshStylesheet();
 }
 
 void Box::paintEvent(QPaintEvent*)

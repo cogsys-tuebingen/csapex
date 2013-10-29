@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <QMainWindow>
 #include <QTimer>
+#include <QFileSystemWatcher>
 
 namespace Ui
 {
@@ -41,6 +42,7 @@ private Q_SLOTS:
     void hideLog();
     void scrollDownLog();
     void init();
+    void loadStyleSheet(const QString& path);
 
 public Q_SLOTS:
     void save();
@@ -71,6 +73,7 @@ Q_SIGNALS:
 
 private:
     void construct();
+    void loadStyleSheet();
 
 private:
     CsApexCore& core_;
@@ -84,6 +87,9 @@ private:
     QTimer timer;
 
     bool init_;
+
+    QString style_sheet_;
+    QFileSystemWatcher* style_sheet_watcher_;
 };
 
 } /// NAMESPACE

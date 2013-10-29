@@ -29,14 +29,14 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
-    : QMainWindow(parent), core_(core), graph_(core_.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false)
+    : QMainWindow(parent), core_(core), graph_(core_.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false), style_sheet_watcher_(NULL)
 {
 }
 
-
-
 void CsApexWindow::construct()
 {
+    loadStyleSheet();
+
     ui->setupUi(this);
 
     designer_ = new Designer(core_.getCommandDispatcher());
@@ -84,6 +84,33 @@ void CsApexWindow::construct()
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+}
+
+void CsApexWindow::loadStyleSheet(const QString& path)
+{
+    std::cout << "loading stylesheet " << path.toStdString() << std::endl;
+
+    QFile file(path);
+    file.open(QFile::ReadOnly);
+    style_sheet_ = QString(file.readAll());
+    QWidget::setStyleSheet(style_sheet_);
+
+    if(style_sheet_watcher_) {
+        delete style_sheet_watcher_;
+    }
+
+    style_sheet_watcher_ = new QFileSystemWatcher(this);
+    style_sheet_watcher_->addPath(path);
+
+    QObject::connect(style_sheet_watcher_, SIGNAL(fileChanged(const QString&)),
+             this, SLOT(loadStyleSheet(const QString&)));
+}
+
+void CsApexWindow::loadStyleSheet()
+{
+    std::string cfg = GraphIO::defaultConfigPath() + "cfg/style.css";
+
+    loadStyleSheet(cfg.c_str());
 }
 
 void CsApexWindow::showMenu()

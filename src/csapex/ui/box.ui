@@ -22,42 +22,6 @@
    </property>
    <item>
     <widget class="QFrame" name="boxframe">
-     <property name="styleSheet">
-      <string notr="true">* {
-   font-size: 8pt;
-}
-
-QFrame#boxframe {
-	background-color: rgb(217, 196, 196);
-	border: 1px solid rgb(35, 35, 35);
-	border-radius: 3px;
-	outline-offset:5px;
-}
-QFrame#boxframe[content_minimized=&quot;true&quot;] {
-	background-color: rgb(238, 238, 238);
-}
-
-QFrame#boxframe[error=&quot;true&quot;] {
-	background-color: rgb(230, 50, 50);
-	border: 3px solid rgb(180, 0, 0);
-}
-
-QFrame#boxframe[warning=&quot;true&quot;] {
-	background-color: rgb(230, 180, 50);
-	border: 3px solid rgb(180, 60, 0);
-}
-
-QFrame#boxframe[highlight=&quot;true&quot;] {
-	border: 5px solid rgb(180, 60, 0) !important;
-}
-
-QFrame#boxframe[focused=&quot;true&quot;] {
-	border: 3px solid rgb(35, 35, 35);
-	outline-offset:3px;
-}
-QFrame#boxframe csapex--Connector {
-}</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::WinPanel</enum>
      </property>
@@ -112,12 +76,6 @@ QFrame#boxframe csapex--Connector {
           </item>
           <item>
            <widget class="QLabel" name="label">
-            <property name="styleSheet">
-             <string notr="true">QLabel {
-	font-size: 8pt;
-	font-weight: bold;
-}</string>
-            </property>
             <property name="text">
              <string>unnamed box</string>
             </property>
