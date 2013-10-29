@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <QObject>
 #include <QIcon>
+#include <QTreeWidgetItem>
 
 namespace csapex {
 
@@ -34,7 +35,7 @@ public:
     virtual void setup();
 
     void setType(const std::string& type);
-    std::string getType();
+    std::string getType() const;
 
     void setCategory(const std::string& category) __attribute__ ((deprecated));
 
@@ -42,7 +43,7 @@ public:
     std::vector<Tag> getTags() const;
 
     void setIcon(QIcon icon);
-    QIcon getIcon();
+    QIcon getIcon() const;
 
     void stop();
 
@@ -86,14 +87,14 @@ public:
     void addInput(ConnectorIn* in) __attribute__ ((deprecated));
     void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
 
-    int countInputs();
-    int countOutputs();
+    int countInputs() const;
+    int countOutputs() const;
 
-    ConnectorIn* getInput(const unsigned int index);
-    ConnectorOut *getOutput(const unsigned int index);
+    ConnectorIn* getInput(const unsigned int index) const;
+    ConnectorOut* getOutput(const unsigned int index) const;
 
-    ConnectorIn* getInput(const std::string& uuid);
-    ConnectorOut* getOutput(const std::string& uuid);
+    ConnectorIn* getInput(const std::string& uuid) const;
+    ConnectorOut* getOutput(const std::string& uuid) const;
 
     void removeInput(ConnectorIn *in);
     void removeOutput(ConnectorOut *out);
@@ -110,6 +111,8 @@ public:
     void setCommandDispatcher(CommandDispatcher* d);
 
     CommandPtr removeAllConnectionsCmd();
+
+    QTreeWidgetItem* createDebugInformation() const;
 
     ///
     /// IO
@@ -129,6 +132,8 @@ private:
 
     void registerInput(ConnectorIn* in);
     void registerOutput(ConnectorOut* out);
+
+    QTreeWidgetItem * createDebugInformationConnector(Connector *connector) const;
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);

@@ -115,7 +115,7 @@ void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEve
             }
         } else {
             ConnectorIn* in = dynamic_cast<ConnectorIn*> (c);
-            overlay->addTemporaryConnection(in->getConnected(), e->pos());
+            overlay->addTemporaryConnection(in->getSource(), e->pos());
         }
         overlay->repaint();
 

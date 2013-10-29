@@ -98,7 +98,7 @@ bool ConnectorIn::isConnected() const
 
 void ConnectorIn::connectionMovePreview(Connector *other_side)
 {
-    Q_EMIT(connectionInProgress(getConnected(), other_side));
+    Q_EMIT(connectionInProgress(getSource(), other_side));
 }
 
 
@@ -114,7 +114,7 @@ void ConnectorIn::validateConnections()
     setError(e);
 }
 
-Connector *ConnectorIn::getConnected() const
+Connector *ConnectorIn::getSource() const
 {
     return target;
 }

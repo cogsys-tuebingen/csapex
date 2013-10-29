@@ -10,5 +10,7 @@
         <file>background.png</file>
         <file>group.png</file>
         <file>profiling.png</file>
+        <file>connector.png</file>
+        <file>disconnected.png</file>
     </qresource>
 </RCC>

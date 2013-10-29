@@ -40,6 +40,7 @@ public Q_SLOTS:
     void removeBox(Box* box);
     void stateChangedEvent();
     void reloadBoxMenues();
+    void updateDebugInfo();
 
     void enableGrid(bool);
 
@@ -47,11 +48,14 @@ private:
     Ui::Designer* ui;
     DesignBoard* designer_board;
 
+    CommandDispatcher* dispatcher_;
+
     bool space_;
     bool drag_;
     QPoint drag_start_pos_;
 
     QTreeWidget* menu;
+    QTreeWidget* debug;
 };
 
 }

@@ -59,7 +59,7 @@ void Node::setType(const std::string &type)
     type_ = type;
 }
 
-std::string Node::getType()
+std::string Node::getType() const
 {
     return type_;
 }
@@ -90,7 +90,7 @@ void Node::setIcon(QIcon icon)
     icon_ = icon;
 }
 
-QIcon Node::getIcon()
+QIcon Node::getIcon() const
 {
     return icon_;
 }
@@ -358,29 +358,29 @@ void Node::setSynchronizedInputs(bool sync)
     worker_->setSynchronizedInputs(sync);
 }
 
-int Node::countInputs()
+int Node::countInputs() const
 {
     return input.size();
 }
 
-int Node::countOutputs()
+int Node::countOutputs() const
 {
     return output.size();
 }
 
-ConnectorIn* Node::getInput(const unsigned int index)
+ConnectorIn* Node::getInput(const unsigned int index) const
 {
     assert(index < input.size());
     return input[index];
 }
 
-ConnectorOut* Node::getOutput(const unsigned int index)
+ConnectorOut* Node::getOutput(const unsigned int index) const
 {
     assert(index < output.size());
     return output[index];
 }
 
-ConnectorIn* Node::getInput(const std::string& uuid)
+ConnectorIn* Node::getInput(const std::string& uuid) const
 {
     BOOST_FOREACH(ConnectorIn* in, input) {
         if(in->UUID() == uuid) {
@@ -391,7 +391,7 @@ ConnectorIn* Node::getInput(const std::string& uuid)
     return NULL;
 }
 
-ConnectorOut* Node::getOutput(const std::string& uuid)
+ConnectorOut* Node::getOutput(const std::string& uuid) const
 {
     BOOST_FOREACH(ConnectorOut* out, output) {
         if(out->UUID() == uuid) {
@@ -448,6 +448,93 @@ Command::Ptr Node::removeAllConnectionsCmd()
     return cmd;
 }
 
+QTreeWidgetItem * Node::createDebugInformationConnector(Connector* connector) const
+{
+    QTreeWidgetItem* connector_widget = new QTreeWidgetItem;
+    connector_widget->setText(0, "Connector");
+    connector_widget->setIcon(0, QIcon(":/connector.png"));
+
+    QTreeWidgetItem* uuid = new QTreeWidgetItem;
+    uuid->setText(0, "UUID");
+    uuid->setText(1, connector->UUID().c_str());
+    connector_widget->addChild(uuid);
+
+    QTreeWidgetItem* label = new QTreeWidgetItem;
+    label->setText(0, "Label");
+    label->setText(1, connector->getLabel().c_str());
+    connector_widget->addChild(label);
+
+
+    QTreeWidgetItem* type = new QTreeWidgetItem;
+    type->setText(0, "Type");
+    type->setText(1, connector->getType()->name().c_str());
+    connector_widget->addChild(type);
+
+    return connector_widget;
+}
+
+QTreeWidgetItem* Node::createDebugInformation() const
+{
+    QTreeWidgetItem* tl = new QTreeWidgetItem;
+    tl->setText(0, UUID().c_str());
+    tl->setIcon(0, getIcon());
+
+    {
+        QTreeWidgetItem* connectors = new QTreeWidgetItem;
+        connectors->setText(0, "Inputs");
+        for(int i = 0, n = countInputs(); i < n; ++i) {
+            ConnectorIn* connector = getInput(i);
+
+            QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
+
+            QTreeWidgetItem* input = new QTreeWidgetItem;
+            input->setText(0, "Input");
+
+            QTreeWidgetItem* target_widget = new QTreeWidgetItem;
+            if(connector->isConnected()) {
+                Connector* target = connector->getSource();
+                target_widget->setText(0, target->UUID().c_str());
+                target_widget->setIcon(1, target->getNode()->getIcon());
+                target_widget->setText(1, target->getNode()->getType().c_str());
+            } else {
+                target_widget->setText(0, "not connected");
+                target_widget->setIcon(1, QIcon(":/disconnected.png"));
+            }
+            input->addChild(target_widget);
+
+            connector_widget->addChild(input);
+
+            connectors->addChild(connector_widget);
+        }
+        tl->addChild(connectors);
+    }
+    {
+        QTreeWidgetItem* connectors = new QTreeWidgetItem;
+        connectors->setText(0, "Outputs");
+        for(int i = 0, n = countOutputs(); i < n; ++i) {
+            ConnectorOut* connector = getOutput(i);
+
+            QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
+
+            QTreeWidgetItem* targets = new QTreeWidgetItem;
+            targets->setText(0, "Target");
+            for(ConnectorOut::TargetIterator it = connector->beginTargets(); it != connector->endTargets(); ++it) {
+                ConnectorIn* target = *it;
+                QTreeWidgetItem* target_widget = new QTreeWidgetItem;
+                target_widget->setText(0, target->UUID().c_str());
+                target_widget->setIcon(1, target->getNode()->getIcon());
+                target_widget->setText(1, target->getNode()->getType().c_str());
+                targets->addChild(target_widget);
+            }
+            connector_widget->addChild(targets);
+
+            connectors->addChild(connector_widget);
+        }
+        tl->addChild(connectors);
+    }
+
+    return tl;
+}
 
 void Node::registerInput(ConnectorIn* in)
 {

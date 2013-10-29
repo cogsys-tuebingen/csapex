@@ -24,19 +24,13 @@
    </property>
    <item>
     <widget class="QSplitter" name="splitter">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="QToolBox" name="toolBox">
       <property name="maximumSize">
        <size>
-        <width>256</width>
+        <width>720</width>
         <height>16777215</height>
        </size>
       </property>
@@ -48,7 +42,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>256</width>
+         <width>720</width>
          <height>620</height>
         </rect>
        </property>
@@ -72,7 +66,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>765</width>
+         <width>301</width>
          <height>649</height>
         </rect>
        </property>

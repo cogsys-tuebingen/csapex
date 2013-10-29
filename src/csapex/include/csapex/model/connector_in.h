@@ -54,7 +54,7 @@ public:
     virtual void connectionMovePreview(Connector* other_side);
     virtual void validateConnections();
 
-    Connector* getConnected() const;
+    Connector* getSource() const;
 
     virtual Command::Ptr removeAllConnectionsCmd();
 

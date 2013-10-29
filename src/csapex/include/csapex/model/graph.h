@@ -93,8 +93,8 @@ public:
 
     void handleNodeSelection(Node* node, bool add);
 
-    /// TODO: REFACTOR!
-    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred) __attribute__ ((deprecated));
+    void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
+    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
 
 public Q_SLOTS:
     void reset();
@@ -110,6 +110,8 @@ public Q_SLOTS:
 Q_SIGNALS:
     void stateChanged();
     void dirtyChanged(bool);
+    void selectionChanged();
+
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
 

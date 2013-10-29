@@ -40,7 +40,7 @@ MoveConnection::MoveConnection(Connector *from, Connector *to)
     } else {
         ConnectorIn* in = dynamic_cast<ConnectorIn*>(from);
 
-        Connector* target = in->getConnected();
+        Connector* target = in->getSource();
         add(Command::Ptr(new DeleteConnection(target, from)));
         add(Command::Ptr(new AddConnection(target->UUID(), to_uuid)));
     }

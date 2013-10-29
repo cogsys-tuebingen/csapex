@@ -2,6 +2,9 @@
 #include <csapex/view/designer.h>
 
 /// COMPONENT
+#include <csapex/model/node.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
 #include <csapex/view/box.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/design_board.h>
@@ -11,9 +14,12 @@
 using namespace csapex;
 
 Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), menu(NULL)
+    : QWidget(parent), ui(new Ui::Designer), dispatcher_(dispatcher), menu(NULL)
 {
     ui->setupUi(this);
+
+    ui->splitter->setStretchFactor(0, 0);
+    ui->splitter->setStretchFactor(1, 1);
 
     designer_board = new DesignBoard(dispatcher);
     ui->scrollArea->setWidget(designer_board);
@@ -61,23 +67,46 @@ void Designer::stateChangedEvent()
     designer_board->refresh();
 }
 
+void Designer::updateDebugInfo()
+{
+    Graph::Ptr graph = dispatcher_->getGraph();
+    std::vector<Box*> selected;
+    boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
+    graph->foreachBox(append, boost::bind(&Box::isSelected, _1));
+
+    debug->clear();
+
+    foreach (Box* box, selected) {
+        Node* node = box->getNode();
+        QObject::connect(node, SIGNAL(stateChanged()), this, SLOT(updateDebugInfo()));
+        debug->addTopLevelItem(node->createDebugInformation());
+    }
+
+    debug->expandAll();
+
+}
+
 void Designer::reloadBoxMenues()
 {
-    if(menu) {
-        delete menu;
-        menu = NULL;
+    while(ui->toolBox->count() > 0) {
+        ui->toolBox->removeItem(0);
     }
 
     menu = new QTreeWidget;
-
-    QWidget* boxes = ui->page;
-
-    if(!boxes->layout()) {
-        boxes->setLayout(new QVBoxLayout);
-    }
     BoxManager::instance().insertAvailableBoxedObjects(menu);
+    ui->toolBox->addItem(menu, "Insert Nodes");
 
-    boxes->layout()->addWidget(menu);
+
+    debug = new QTreeWidget();
+    QStringList labels;
+    labels.append("Property");
+    labels.append("Value");
+    debug->setHeaderLabels(labels);
+    debug->setColumnCount(2);
+    ui->toolBox->addItem(debug, "Debug");
+
+    Graph::Ptr graph = dispatcher_->getGraph();
+    QObject::connect(graph.get(), SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
 }
 
 void Designer::enableGrid(bool grid)

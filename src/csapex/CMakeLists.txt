@@ -30,7 +30,6 @@ set(QT ${QT_SOURCES} ${QT_FORMS_HPP} ${QT_RESOURCES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${catkin_INCLUDE_DIRS})
 
 ###################################
 ## catkin specific configuration ##
@@ -127,8 +126,6 @@ add_library(csapex SHARED
     src/deprecated/global_option_manager.cpp
     ${QT}
 )
-
-message(${catkin_LIBRARIES})
 
 target_link_libraries(csapex
     yaml-cpp

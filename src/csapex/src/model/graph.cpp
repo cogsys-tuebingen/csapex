@@ -175,7 +175,7 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
         if(n->getBox()->isSelected() || !only_selected) {
             foreach(ConnectorIn* in, n->input) {
                 if(in->isConnected()) {
-                    Connector* target = in->getConnected();
+                    Connector* target = in->getSource();
                     Node* owner = target->getNode();
 
                     bool owner_is_selected = false;
@@ -312,6 +312,15 @@ void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::
     del->setIconVisibleInMenu(true);
     handler[del] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::deleteSelectedNodesCmd, this)));
     menu->addAction(del);
+}
+
+void Graph::foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred)
+{
+    foreach(Node::Ptr b, nodes_) {
+        if(pred(b.get())) {
+            f(b.get());
+        }
+    }
 }
 
 void Graph::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred)
@@ -782,6 +791,7 @@ void Graph::selectAll()
     foreach(Node::Ptr n, nodes_) {
         n->getBox()->setSelected(true);
     }
+    Q_EMIT selectionChanged();
 }
 
 void Graph::clearSelection()
@@ -789,6 +799,7 @@ void Graph::clearSelection()
     foreach(Node::Ptr n, nodes_) {
         n->getBox()->setSelected(false);
     }
+    Q_EMIT selectionChanged();
 }
 
 void Graph::toggleBoxSelection(Box *box)
@@ -826,6 +837,7 @@ void Graph::deselectNodes()
             n->getBox()->setSelected(false);
         }
     }
+    Q_EMIT selectionChanged();
 }
 
 void Graph::selectNode(Node *node, bool add)
@@ -837,6 +849,8 @@ void Graph::selectNode(Node *node, bool add)
     }
 
     node->getBox()->setSelected(true);
+
+    Q_EMIT selectionChanged();
 }
 
 void Graph::tick()
