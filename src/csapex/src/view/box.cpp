@@ -60,6 +60,7 @@ void Box::construct(Node* node)
 {
     ui->setupUi(this);
 
+    ui->input_layout->addSpacerItem(new QSpacerItem(16, 0));
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
     node_->setBox(this);

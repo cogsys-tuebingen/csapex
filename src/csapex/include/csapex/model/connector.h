@@ -117,7 +117,7 @@ protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
-    void paintEvent(QPaintEvent* event);
+//    void paintEvent(QPaintEvent* event);
 
 protected:
     virtual QPoint topLeft();

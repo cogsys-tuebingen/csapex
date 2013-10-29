@@ -12,5 +12,7 @@
         <file>profiling.png</file>
         <file>connector.png</file>
         <file>disconnected.png</file>
+        <file>checkbox_checked.png</file>
+        <file>checkbox_unchecked.png</file>
     </qresource>
 </RCC>

@@ -317,13 +317,13 @@ bool Connector::isMinimizedSize() const
     return minimized_;
 }
 
-void Connector::paintEvent(QPaintEvent*)
-{
-    QPainter p(this);
-    p.setBrush(Qt::black);
-    p.setOpacity(0.35);
-    p.drawEllipse(contentsRect().center(), 2, 2);
-}
+//void Connector::paintEvent(QPaintEvent*)
+//{
+//    QPainter p(this);
+//    p.setBrush(Qt::black);
+//    p.setOpacity(0.35);
+//    p.drawEllipse(contentsRect().center(), 2, 2);
+//}
 
 Node* Connector::getNode() const
 {

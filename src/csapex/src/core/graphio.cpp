@@ -94,6 +94,9 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
         doc["pos"][1] >> y;
 
         Node::Ptr node = BoxManager::instance().makeNode(type, uuid);
+        if(!node) {
+            continue;
+        }
         try {
             node->read(doc);
         } catch(const std::exception& e) {

@@ -18,7 +18,15 @@ QFrame#boxframe {
 }
 QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{
         color: white;
-}
+} 
+
+QCheckBox::indicator:unchecked {
+     image: url(:/checkbox_unchecked.png);
+ }
+
+ QCheckBox::indicator:checked {
+     image: url(:/checkbox_checked.png);
+ }
 
 /* minimized box */
 QFrame#boxframe[content_minimized="true"] {
