@@ -7,11 +7,14 @@
 #include <csapex/model/error_state.h>
 #include <csapex/csapex_fwd.h>
 
+/// SYSTEM
+#include <QFrame>
+
 /// FORWARDS DECLARATION
 namespace csapex
 {
 
-class Connector : public QWidget, public ErrorState
+class Connector : public QFrame, public ErrorState
 {
     Q_OBJECT
 
@@ -112,18 +115,21 @@ protected:
     Connector(Node* parent, const std::string &uuid);
     Connector(Node* parent, int sub_id, int type);
     virtual ~Connector();
-    void init(Node* parent);
+    void init();
 
     virtual void removeAllConnectionsNotUndoable() = 0;
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
-//    void paintEvent(QPaintEvent* event);
+    void errorChanged(bool error);
+    void paintEvent(QPaintEvent *);
 
 protected:
     virtual QPoint topLeft();
 
     virtual bool shouldMove(bool left, bool right);
     virtual bool shouldCreate(bool left, bool right);
+
+    void refreshStylesheet();
 
 protected:
     Node* node_;
@@ -139,6 +145,8 @@ protected:
 
     bool minimized_;
     int count_;
+
+    bool refresh_style_sheet_;
 };
 
 }

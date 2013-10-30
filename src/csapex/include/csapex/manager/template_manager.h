@@ -25,6 +25,8 @@ public:
     Template::Ptr createNewNamedTemplate(const std::string& name);
     Template::Ptr get(const std::string& name);
 
+    void reset();
+
     void load(const std::string& path);
     bool save(const std::string& path, Template::Ptr templ);
     bool templateExists(const std::string& name);

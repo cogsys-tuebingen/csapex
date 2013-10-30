@@ -15,6 +15,9 @@
 <class type="csapex::CropBox" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>
+<class type="csapex::PassThrough" base_class_type="csapex::BoxedObject">
+  <description>none yet</description>
+</class>
 <class type="csapex::ExtractTimeStamp" base_class_type="csapex::BoxedObject">
   <description>none yet</description>
 </class>

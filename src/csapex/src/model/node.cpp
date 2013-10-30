@@ -208,6 +208,7 @@ void Node::setState(Memento::Ptr)
 void Node::enable(bool e)
 {
     node_state_->enabled = e;
+    enableIO(e);
     if(e) {
         enable();
     } else {
@@ -243,10 +244,18 @@ void Node::disable()
 void Node::enableIO(bool enable)
 {
     foreach(ConnectorIn* i, input) {
-        i->setEnabled(enable);
+        if(enable) {
+            i->enable();
+        } else {
+            i->disable();
+        }
     }
     foreach(ConnectorOut* i, output) {
-        i->setEnabled(enable);
+        if(enable) {
+            i->enable();
+        } else {
+            i->disable();
+        }
     }
 }
 

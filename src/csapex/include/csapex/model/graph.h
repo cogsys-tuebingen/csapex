@@ -84,7 +84,8 @@ public:
     void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 
-    int noSelectedNodes();
+    int countNodes();
+    int countSelectedNodes();
     void selectNode(Node* node, bool add = false);
     void deselectNodes();
 

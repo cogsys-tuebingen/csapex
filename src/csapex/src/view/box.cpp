@@ -31,11 +31,15 @@ using namespace csapex;
 const QString Box::MIME = "csapex/model/box";
 const QString Box::MIME_MOVE = "csapex/model/box/move";
 
+int Box::g_instances = 0;
+
 Box::Box(Node* node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), profiling_(false), is_placed_(false)
 {
     construct(node);
+
+    ++g_instances;
 }
 
 Box::Box(BoxedObject* node, QWidget* parent)
@@ -43,7 +47,15 @@ Box::Box(BoxedObject* node, QWidget* parent)
       down_(false), profiling_(false), is_placed_(false)
 {
     construct(node);
+
+    ++g_instances;
 }
+
+Box::~Box()
+{
+    --g_instances;
+}
+
 
 void Box::setupUi()
 {
@@ -109,7 +121,6 @@ Node* Box::getNode()
 
 void Box::enableContent(bool enable)
 {
-    node_->enableIO(enable);
     node_->enable(enable);
 
     ui->label->setEnabled(enable);
@@ -253,11 +264,6 @@ void Box::init()
 
     node_->makeThread();
 }
-
-Box::~Box()
-{
-}
-
 bool Box::eventFilter(QObject* o, QEvent* e)
 {
     QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
@@ -452,8 +458,7 @@ void Box::deleteBox()
 
 void Box::refreshStylesheet()
 {
-    ui->boxframe->style()->unpolish(ui->boxframe);
-    ui->boxframe->style()->polish(ui->boxframe);
+    setStyleSheet(styleSheet());
 }
 
 void Box::eventModelChanged()

@@ -348,7 +348,7 @@ void Overlay::drawConnector(Connector *c)
         painter->setPen(QPen(QBrush(color.darker()), 2, Qt::DotLine));
     }
     int r = c->isMinimizedSize() ? 4 : connector_radius_;
-    painter->drawEllipse(c->centerPoint(), r, r);
+//    painter->drawEllipse(c->centerPoint(), r, r);
 
 
     if(!c->isMinimizedSize()) {
@@ -391,7 +391,7 @@ void Overlay::drawActivity(int life, Connector* c)
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
         painter->setPen(QPen(color, w));
-        painter->drawEllipse(QPointF(c->centerPoint()), w, w);
+//        painter->drawEllipse(QPointF(c->centerPoint()), w, w);
     }
 }
 

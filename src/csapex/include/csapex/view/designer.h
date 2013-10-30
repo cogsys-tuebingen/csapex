@@ -43,6 +43,7 @@ public Q_SLOTS:
     void updateDebugInfo();
 
     void enableGrid(bool);
+    void reset();
 
 private:
     Ui::Designer* ui;

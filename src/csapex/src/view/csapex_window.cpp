@@ -31,6 +31,12 @@ using namespace csapex;
 CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
     : QMainWindow(parent), core_(core), graph_(core_.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false), style_sheet_watcher_(NULL)
 {
+    core_.addListener(this);
+}
+
+CsApexWindow::~CsApexWindow()
+{
+    core_.removeListener(this);
 }
 
 void CsApexWindow::construct()
@@ -84,6 +90,11 @@ void CsApexWindow::construct()
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+}
+
+void CsApexWindow::resetSignal()
+{
+    designer_->reset();
 }
 
 void CsApexWindow::loadStyleSheet(const QString& path)

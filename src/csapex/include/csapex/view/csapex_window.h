@@ -21,7 +21,7 @@ namespace csapex
 /**
  * @brief The EvaluationWindow class provides the window for the evaluator program
  */
-class CsApexWindow : public QMainWindow
+class CsApexWindow : public QMainWindow, public CsApexCore::Listener
 {
     Q_OBJECT
 
@@ -31,9 +31,12 @@ public:
      * @param parent
      */
     explicit CsApexWindow(CsApexCore &core, QWidget* parent = 0);
+    virtual ~CsApexWindow();
 
     void showMenu();
     void closeEvent(QCloseEvent* event);
+
+    void resetSignal();
 
 private Q_SLOTS:
     void updateMenu();

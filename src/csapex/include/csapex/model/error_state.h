@@ -32,6 +32,7 @@ protected:
     virtual ~ErrorState();
 
     virtual void errorEvent(bool error, const std::string& msg, ErrorLevel level);
+    virtual void errorChanged(bool error);
 
 protected:
     mutable QMutex mutex;

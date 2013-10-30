@@ -47,6 +47,8 @@ public:
     static const QString MIME;
     static const QString MIME_MOVE;
 
+    static int g_instances;
+
 public:
     /// CONSTRUCTION
     Box(BoxedObject *content, QWidget* parent = 0);

@@ -21,6 +21,11 @@ TemplateManager::TemplateManager()
 
 }
 
+void TemplateManager::reset()
+{
+    temporary_templates.clear();
+}
+
 Template::Ptr TemplateManager::get(const std::string &name)
 {
     foreach(const Template::Ptr& templ, temporary_templates) {

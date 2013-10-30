@@ -126,13 +126,25 @@ void DesignBoard::addBoxEvent(Box *box)
 
 void DesignBoard::removeBoxEvent(Box *box)
 {
-    delete box;
+    box->deleteLater();
 }
 
 void DesignBoard::refresh()
 {
     overlay->refresh();
     overlay->raise();
+}
+
+void DesignBoard::reset()
+{
+    bool has_child = true;
+    while(has_child) {
+        Box* b = findChild<Box*>();
+        has_child = b != NULL;
+        if(has_child) {
+            delete b;
+        }
+    }
 }
 
 void DesignBoard::keyPressEvent(QKeyEvent* e)
@@ -153,12 +165,12 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
     // BOXES
     if(Qt::ControlModifier == QApplication::keyboardModifiers()) {
         if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-            if(graph->noSelectedNodes() != 0) {
+            if(graph->countSelectedNodes() != 0) {
                 dispatcher_->execute(graph->deleteSelectedNodesCmd());
                 return;
             }
         } else  if(e->key() == Qt::Key_G) {
-            if(graph->noSelectedNodes() != 0) {
+            if(graph->countSelectedNodes() != 0) {
                 dispatcher_->execute(graph->groupSelectedNodesCmd());
                 return;
             }
@@ -323,7 +335,7 @@ void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
         box->setSelected(true);
     }
 
-    if(graph->noSelectedNodes() == 1) {
+    if(graph->countSelectedNodes() == 1) {
         box->fillContextMenu(&menu, handler);
 
     } else {

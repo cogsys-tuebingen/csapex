@@ -58,6 +58,7 @@ public Q_SLOTS:
     void addBoxEvent(Box* box);
     void removeBoxEvent(Box* box);
     void refresh();
+    void reset();
 
 private:
     Ui::DesignBoard* ui;

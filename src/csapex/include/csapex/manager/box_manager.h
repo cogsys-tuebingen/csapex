@@ -47,7 +47,6 @@ public:
     void insertAvailableBoxedObjects(QTreeWidget *tree);
 
     void stop();
-    void reset();
 
 public:
     boost::signals2::signal<void(const std::string&)> loaded;

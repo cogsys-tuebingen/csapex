@@ -14,7 +14,8 @@ QFrame#boxframe {
         border: 1px solid rgb(35, 35, 35);
         border-radius: 5px;
         outline-offset: 5px;
-        padding: 0 -12px 0 -12px;
+        padding: 0;
+/*        padding: 0 -12px 0 -12px;*/
 }
 QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{
         color: white;
@@ -70,6 +71,18 @@ QWidget#DesignBoard[grid="true"] {
         background: url(:/background.png) rgb(255, 255, 255);
 }
 
+csapex--Connector {
 /* connectors */
-QFrame#boxframe csapex--Connector {
+        border: 2px solid rgb(0, 0, 0);
+        background: rgb(255,255,255);
+        border-radius: 8px;
+}
+
+csapex--Connector[disabled="true"]  {
+        border: 2px solid rgb(128, 128, 128);
+        background: rgb(200,200,200);
+}
+csapex--Connector[error="true"]  {
+        border: 2px solid rgb(165,30,55);
+        background: rgb(255,200,200);
 }

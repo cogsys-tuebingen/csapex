@@ -17,6 +17,11 @@ class CsApexCore : public QObject
     Q_OBJECT
 
 public:
+    struct Listener {
+        virtual void resetSignal() = 0;
+    };
+
+public:
     CsApexCore();
     CsApexCore(CommandDispatcher* dispatcher);
     virtual ~CsApexCore();
@@ -30,6 +35,9 @@ public:
     void saveAs(const std::string& file);
 
     void reset();
+
+    void addListener(Listener* l);
+    void removeListener(Listener* l);
 
     GraphPtr getTopLevelGraph();
     CommandDispatcher* getCommandDispatcher();
@@ -47,6 +55,7 @@ private:
     CommandDispatcher* cmd_dispatch;
 
     PluginManager<CorePlugin>* core_plugin_manager;
+    std::vector<Listener*> listener_;
 
     std::string current_config_;
 

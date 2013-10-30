@@ -42,10 +42,6 @@ void BoxManager::stop()
     }
 }
 
-void BoxManager::reset()
-{
-}
-
 BoxManager::~BoxManager()
 {
     stop();

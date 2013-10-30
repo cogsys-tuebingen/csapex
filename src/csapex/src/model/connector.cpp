@@ -32,21 +32,19 @@ std::string Connector::makeUUID(const std::string& box_uuid, int type, int sub_i
 }
 
 Connector::Connector(Node* parent, const std::string& uuid)
-    : buttons_down_(0), uuid_(uuid), minimized_(false)
+    : node_(parent), buttons_down_(0), uuid_(uuid), minimized_(false), refresh_style_sheet_(false)
 {
-    init(parent);
+    init();
 }
 
 Connector::Connector(Node* parent, int sub_id, int type)
-    : buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false)
+    : node_(parent), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false), refresh_style_sheet_(false)
 {
-    init(parent);
+    init();
 }
 
-void Connector::init(Node* parent)
+void Connector::init()
 {
-    node_ = parent;
-
     setParent(node_->getBox());
 
     setFocusPolicy(Qt::NoFocus);
@@ -72,6 +70,22 @@ Connector::~Connector()
 void Connector::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
     node_->setError(error, msg, level);
+}
+
+void Connector::errorChanged(bool error)
+{
+    setProperty("error", error);
+    refreshStylesheet();
+}
+
+void Connector::paintEvent(QPaintEvent *e)
+{
+    if(refresh_style_sheet_) {
+        refresh_style_sheet_ = false;
+        setStyleSheet(styleSheet());
+    }
+
+    QFrame::paintEvent(e);
 }
 
 bool Connector::isForwarding() const
@@ -117,12 +131,21 @@ void Connector::disable()
 {
     setEnabled(false);
     Q_EMIT disabled(this);
+    setProperty("disabled", true);
+    refreshStylesheet();
 }
 
 void Connector::enable()
 {
     setEnabled(true);
     Q_EMIT enabled(this);
+    setProperty("disabled", false);
+    refreshStylesheet();
+}
+
+void Connector::refreshStylesheet()
+{
+    refresh_style_sheet_ = true;
 }
 
 bool Connector::canConnectTo(Connector* other_side, bool move) const
@@ -306,9 +329,9 @@ void Connector::setMinimizedSize(bool mini)
     minimized_ = mini;
 
     if(mini) {
-        setFixedSize(16,8);
+        setFixedSize(8,8);
     } else {
-        setFixedSize(24,24);
+        setFixedSize(16,16);
     }
 }
 
@@ -316,14 +339,6 @@ bool Connector::isMinimizedSize() const
 {
     return minimized_;
 }
-
-//void Connector::paintEvent(QPaintEvent*)
-//{
-//    QPainter p(this);
-//    p.setBrush(Qt::black);
-//    p.setOpacity(0.35);
-//    p.drawEllipse(contentsRect().center(), 2, 2);
-//}
 
 Node* Connector::getNode() const
 {

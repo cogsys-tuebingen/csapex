@@ -128,7 +128,12 @@ Template::Ptr Graph::toTemplate(const std::string& name) const
     return sub_graph_templ;
 }
 
-int Graph::noSelectedNodes()
+int Graph::countNodes()
+{
+    return nodes_.size();
+}
+
+int Graph::countSelectedNodes()
 {
     int c = 0;
 
@@ -419,8 +424,9 @@ Command::Ptr Graph::clear()
 
 void Graph::reset()
 {
+    stop();
+
     uuids.clear();
-    nodes_.clear();
     connectors_.clear();
     visible_connections.clear();
 }
@@ -563,7 +569,7 @@ void Graph::handleNodeSelection(Node* node, bool add)
         } else {
             if(node->getBox()->isSelected()) {
                 deselectNodes();
-                if(noSelectedNodes() != 1) {
+                if(countSelectedNodes() != 1) {
                     selectNode(node->getBox()->getNode());
                 }
             } else {

@@ -29,25 +29,34 @@ void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
 
 void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
 {
-    QMutexLocker lock(&mutex);
+    {
+        QMutexLocker lock(&mutex);
 
-    if(!error_ && !e) {
-        return;
-    }
+        if(!error_ && !e) {
+            return;
+        }
 
-    QString err;
-    if(e) {
-        unsigned line = 60;
-        for(unsigned i = 0; i < msg.size(); ++i) {
-            err += msg[i];
-            if((i%line) == 0 && i != 0) {
-                err += '\n';
+        QString err;
+        if(e) {
+            unsigned line = 60;
+            for(unsigned i = 0; i < msg.size(); ++i) {
+                err += msg[i];
+                if((i%line) == 0 && i != 0) {
+                    err += '\n';
+                }
             }
         }
+        error_ = e;
+        level_ = level;
+        error_msg_ = msg;
     }
-    error_ = e;
-    level_ = level;
-    error_msg_ = msg;
+
+    errorChanged(error_);
+}
+
+void ErrorState::errorChanged(bool)
+{
+
 }
 
 bool ErrorState::isError() const

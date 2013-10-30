@@ -133,7 +133,24 @@ void CsApexCore::reset()
 
     cmd_dispatch->reset();
 
-    BoxManager::instance().reset();
+    TemplateManager::instance().reset();
+
+    foreach(Listener* l, listener_) {
+        l->resetSignal();
+    }
+}
+
+void CsApexCore::addListener(Listener *l)
+{
+    listener_.push_back(l);
+}
+
+void CsApexCore::removeListener(Listener *l)
+{
+    std::vector<Listener*>::iterator it = std::find(listener_.begin(), listener_.end(), l);
+    if(it != listener_.end()) {
+        listener_.erase(it);
+    }
 }
 
 
@@ -173,6 +190,8 @@ void CsApexCore::load(const std::string &file)
     setCurrentConfig(file);
 
     reset();
+
+    assert(cmd_dispatch->getGraph()->countNodes() == 0);
 
     GraphIO graphio(getTopLevelGraph());
 
