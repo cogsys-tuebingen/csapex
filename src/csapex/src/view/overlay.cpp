@@ -65,19 +65,10 @@ Overlay::Overlay(CommandDispatcher *dispatcher, QWidget* parent)
 
     activity_marker_min_width_ = 3;
     activity_marker_max_width_ = 8;
-    activity_marker_min_opacity_ = 25;
-    activity_marker_max_opacity_ = 75;
+    activity_marker_min_opacity_ = 50;
+    activity_marker_max_opacity_ = 90;
 
     connector_radius_ = 7;
-
-    color_connected = QColor(0x33, 0x33, 0x33, 0xFF);
-    color_disconnected = color_in_connected.darker();
-
-    color_in_connected = QColor(0x33, 0x33, 0xFF, 0xFF);
-    color_in_disconnected = color_in_connected.darker();
-
-    color_out_connected = QColor(0x33, 0xFF, 0x33, 0xFF);
-    color_out_disconnected = color_out_connected.darker();
 
     setMouseTracking(true);
 
@@ -295,8 +286,8 @@ QPen Overlay::makeSelectedLinePen(const QPoint& from, const QPoint& to)
         lg.setColorAt(0, Qt::darkRed);
         lg.setColorAt(1, Qt::red);
     } else {
-        lg.setColorAt(0, color_out_connected.lighter(175));
-        lg.setColorAt(1, color_in_connected.lighter(175));
+        lg.setColorAt(0, palette().foreground().color().darker());
+        lg.setColorAt(1, palette().background().color().darker());
     }
 
     return QPen(QBrush(lg), ccs.r * 1.3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -314,8 +305,12 @@ QPen Overlay::makeLinePen(const QPoint& from, const QPoint& to)
         lg.setColorAt(1,Qt::gray);
 
     } else {
-        lg.setColorAt(0,color_out_connected.lighter());
-        lg.setColorAt(1,color_in_connected.lighter());
+        QColor a = palette().foreground().color();
+        QColor b = palette().background().color();
+        a.setAlpha(128);
+        b.setAlpha(128);
+        lg.setColorAt(0, a);
+        lg.setColorAt(1, b);
     }
 
     return QPen(QBrush(lg), ccs.r * 0.75, from.x() > to.x() ? Qt::DotLine : Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -325,33 +320,10 @@ void Overlay::drawConnector(Connector *c)
 {
     bool output = c->isOutput();
 
-    QColor color;
-
-    if(c->isError()) {
-        color= Qt::red;
-    } else if(!c->isEnabled()) {
-        color= Qt::gray;
-    } else {
-        if(c->isConnected()){
-            color = output ? color_out_connected : color_in_connected;
-        } else {
-            color = output ? color_out_disconnected : color_in_disconnected;
-        }
-    }
-
-    painter->setBrush(QBrush(color, Qt::SolidPattern));
-    painter->setPen(QPen(color.darker(), 2));
-
-    int font_size = 10;
-    int lines = 3;
-    if(c->isForwarding()) {
-        painter->setPen(QPen(QBrush(color.darker()), 2, Qt::DotLine));
-    }
-    int r = c->isMinimizedSize() ? 4 : connector_radius_;
-//    painter->drawEllipse(c->centerPoint(), r, r);
-
-
     if(!c->isMinimizedSize()) {
+        int font_size = 10;
+        int lines = 3;
+
         QFont font;
         font.setPixelSize(font_size);
         painter->setFont(font);
@@ -371,6 +343,10 @@ void Overlay::drawConnector(Connector *c)
         QRectF rect(c->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
 
         QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
+        QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
+        QPen p = painter->pen();
+        p.setColor(color.dark());
+        painter->setPen(p);
         painter->drawText(rect, text, opt);
     }
 }
@@ -381,17 +357,15 @@ void Overlay::drawActivity(int life, Connector* c)
         int r = std::min(Connection::activity_marker_max_lifetime_, life);
         double f = r / static_cast<double> (Connection::activity_marker_max_lifetime_);
 
-        bool mini = c->isMinimizedSize();
-
-        int min = mini ? 4 : activity_marker_min_width_;
-        int max = mini ? 8 : activity_marker_max_width_;
+        int min = c->width() / 2 - 2;
+        int max = min * 1.2;
         double w = min + f * (max - min);
 
-        QColor color = c->isOutput() ? color_out_connected : color_in_connected;
+        QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
         painter->setPen(QPen(color, w));
-//        painter->drawEllipse(QPointF(c->centerPoint()), w, w);
+        painter->drawEllipse(QPointF(c->centerPoint()), w, w);
     }
 }
 

@@ -141,7 +141,6 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
 {
     ensureLoaded();
 
-    tree->setHeaderLabel("Available Nodes");
     tree->setDragEnabled(true);
 
     foreach(const Tag& tag, tags) {

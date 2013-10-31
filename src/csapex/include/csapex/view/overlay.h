@@ -102,18 +102,6 @@ protected:
     int activity_marker_min_opacity_;
     int activity_marker_max_opacity_;
 
-    QColor color_connection;
-
-    QColor color_connected;
-    QColor color_disconnected;
-
-    QColor color_in_connected;
-    QColor color_in_disconnected;
-
-    QColor color_out_connected;
-    QColor color_out_disconnected;
-
-
     int highlight_connection_id_;
     bool schema_dirty_;
 

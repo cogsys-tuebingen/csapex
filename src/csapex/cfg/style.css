@@ -71,8 +71,8 @@ QWidget#DesignBoard[grid="true"] {
         background: url(:/background.png) rgb(255, 255, 255);
 }
 
-csapex--Connector {
 /* connectors */
+csapex--Connector {
         border: 2px solid rgb(0, 0, 0);
         background: rgb(255,255,255);
         border-radius: 8px;
@@ -85,4 +85,10 @@ csapex--Connector[disabled="true"]  {
 csapex--Connector[error="true"]  {
         border: 2px solid rgb(165,30,55);
         background: rgb(255,200,200);
+}
+
+/* connection */
+csapex--Overlay  {
+        color: rgb(165,30,55); /* output */
+        background: rgb(180,160,105); /* input */ 
 }
