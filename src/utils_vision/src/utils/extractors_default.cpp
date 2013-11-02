@@ -10,7 +10,7 @@
 #include <boost/bind.hpp>
 
 using namespace csapex;
-using namespace vision;
+using namespace param;
 
 /// COMBINATIONS
 
@@ -37,7 +37,7 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et          = params().read<int>   (param, "extractor_threshold");
         double scale    = params().read<double>(param, "scale");
         int levels      = params().read<int>   (param, "levels");
@@ -57,7 +57,7 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
         }
     }
 
-    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+    static void descriptor(Extractor* e, const param::ParameterProvider& param) {
         e->is_binary = true;
         e->descriptor = "orb";
         e->descriptor_extractor = new cv::ORB();
@@ -85,7 +85,7 @@ struct Brisk : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et       = params().read<int>   (param, "extractor_threshold");
         int octaves  = params().read<int>   (param, "octaves");
         double scale = params().read<double>(param, "pattern_scale");
@@ -101,7 +101,7 @@ struct Brisk : public ExtractorManager::ExtractorInitializer {
         }
     }
 
-    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+    static void descriptor(Extractor* e, const param::ParameterProvider& param) {
         int et      = params().read<int> (param, "extractor_threshold");
         int octaves = params().read<int> (param, "octaves");
 
@@ -135,7 +135,7 @@ struct Sift : public ExtractorManager::ExtractorInitializer {
     static std::vector<Parameter> usedParameters() {
         return params().params;
     }
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et                   = params().read<int> (param, "extractor_threshold");
         int nOctaveLayers        = params().read<int> (param, "nOctaveLayers");
         double contrastThreshold = params().read<double> (param, "contrastThreshold");
@@ -152,7 +152,7 @@ struct Sift : public ExtractorManager::ExtractorInitializer {
         }
     }
 
-    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+    static void descriptor(Extractor* e, const param::ParameterProvider& param) {
         e->is_binary = false;
         e->descriptor = "sift";
         e->descriptor_extractor = new cv::SiftDescriptorExtractor();
@@ -185,7 +185,7 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et            = params().read<int>  (param, "extractor_threshold");
         int nOctaves      = params().read<int>  (param, "nOctaves");
         int nOctaveLayers = params().read<int>  (param, "nOctaveLayers");
@@ -203,7 +203,7 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
         }
     }
 
-    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+    static void descriptor(Extractor* e, const param::ParameterProvider& param) {
         e->is_binary = false;
         e->descriptor = "surf";
         e->descriptor_extractor = new cv::SurfDescriptorExtractor();
@@ -237,7 +237,7 @@ struct Fast : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et                 = params().read<int>  (param, "extractor_threshold");
         bool nonmaxSuppression = params().read<bool> (param, "nonmaxSuppression");
         e->keypoint = "fast";
@@ -275,7 +275,7 @@ struct Mser : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int delta            = params().read<int>    (param, "delta");
         int minArea          = params().read<int>    (param, "minArea");
         int maxArea          = params().read<int>    (param, "maxArea");
@@ -313,7 +313,7 @@ struct Star : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et          = params().read<int>   (param, "extractor_threshold");
 
         e->keypoint = "star";
@@ -342,7 +342,7 @@ struct Gftt : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et          = params().read<int>   (param, "extractor_threshold");
 
         e->keypoint = "gftt";
@@ -371,7 +371,7 @@ struct GfttHarris : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void keypoint(Extractor* e, const vision::ParameterProvider& param, bool complete) {
+    static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
         int et          = params().read<int>   (param, "extractor_threshold");
 
         e->keypoint = "gftt_harris";
@@ -402,7 +402,7 @@ struct Brief : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+    static void descriptor(Extractor* e, const param::ParameterProvider& param) {
         e->is_binary = true;
         e->descriptor = "brief";
         e->descriptor_extractor = new cv::BriefDescriptorExtractor(64);
@@ -428,7 +428,7 @@ struct Freak : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
 
-    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+    static void descriptor(Extractor* e, const param::ParameterProvider& param) {
         e->is_binary = true;
         e->descriptor = "freak";
         e->descriptor_extractor = new cv::FREAK();
@@ -454,7 +454,7 @@ struct Grusig : public ExtractorManager::ExtractorInitializer {
     static std::vector<Parameter> usedParameters() {
         return params().params;
     }
-    static void descriptor(Extractor* e, const vision::ParameterProvider& param) {
+    static void descriptor(Extractor* e, const param::ParameterProvider& param) {
         int dim = params().read<int>   (param, "dimension");
 
         e->is_binary = true;

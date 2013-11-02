@@ -1,10 +1,10 @@
 /// HEADER
-#include "parameter_provider.h"
+#include <utils_param/parameter_provider.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
 
-using namespace vision;
+using namespace param;
 
 ParameterProvider::ParameterProvider()
 {

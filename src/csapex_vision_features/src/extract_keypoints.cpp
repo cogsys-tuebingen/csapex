@@ -102,7 +102,7 @@ void ExtractKeypoints::updateDynamicGui(QBoxLayout *layout)
 template <typename T>
 void ExtractKeypoints::updateParam(const std::string& name, T value)
 {
-    BOOST_FOREACH(vision::Parameter& para, state.params[state.key]) {
+    BOOST_FOREACH(param::Parameter& para, state.params[state.key]) {
         if(para.name() == name) {
             para.set<T>(value);
 
@@ -127,7 +127,7 @@ void ExtractKeypoints::update(int slot)
     }
     callbacks.clear();
 
-    foreach(const vision::Parameter& para, state.params[state.key]) {
+    foreach(const param::Parameter& para, state.params[state.key]) {
         std::string name = para.name();
 
         if(para.is<int>()) {
@@ -181,7 +181,7 @@ void ExtractKeypoints::updateModel()
 
 void ExtractKeypoints::update()
 {
-    Extractor::Ptr next = ExtractorFactory::create(state.key, "", vision::StaticParameterProvider(state.params[state.key]));
+    Extractor::Ptr next = ExtractorFactory::create(state.key, "", param::StaticParameterProvider(state.params[state.key]));
 
     QMutexLocker lock(&extractor_mutex);
     extractor = next;
@@ -200,11 +200,11 @@ void ExtractKeypoints::setState(Memento::Ptr memento)
     //    state = *m;
     state.key = m->key;
 
-    typedef std::pair<std::string, std::vector<vision::Parameter> > Pair;
+    typedef std::pair<std::string, std::vector<param::Parameter> > Pair;
     foreach(Pair pair, m->params) {
-        foreach(const vision::Parameter& para, pair.second) {
-            std::vector<vision::Parameter>& target = state.params[pair.first];
-            BOOST_FOREACH(vision::Parameter& existing_param, target) {
+        foreach(const param::Parameter& para, pair.second) {
+            std::vector<param::Parameter>& target = state.params[pair.first];
+            BOOST_FOREACH(param::Parameter& existing_param, target) {
                 if(existing_param.name() == para.name()) {
                     existing_param.setFrom(para);
                 }

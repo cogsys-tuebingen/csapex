@@ -3,8 +3,8 @@
 
 /// COMPONENT
 #include "types.h"
-#include "parameter_provider.h"
-#include "parameter_map.h"
+#include <utils_param/parameter_provider.h>
+#include <utils_param/parameter_map.h>
 
 /// PROJECT
 #include <common/global.hpp>
@@ -21,7 +21,7 @@ struct ConfigHolder;
  * @brief The Config class extends the automatically generated ROS config
  *        and contains settings for every part of the program
  */
-class Config : public vision::ParameterProvider
+class Config : public param::ParameterProvider
 {
     friend class boost::serialization::access;
     friend class Reconfigurable;
@@ -61,8 +61,8 @@ public:
      * @param name
      * @return Parameter
      */
-    vision::Parameter& getParameter(const std::string &name);
-    const vision::Parameter& getConstParameter(const std::string &name) const;
+    param::Parameter& getParameter(const std::string &name);
+    const param::Parameter& getConstParameter(const std::string &name) const;
 
 protected:
     static impl::ConfigHolder& latest_config();
@@ -79,7 +79,7 @@ protected:
     void init();
 
 private:
-    vision::ParameterMap parameters;
+    param::ParameterMap parameters;
 
 protected:
     template<class Archive>

@@ -1,11 +1,11 @@
 /// HEADER
-#include "parameter.h"
+#include <utils_param/parameter.h>
 
 ///// SYSTEM
 //#include <boost/archive/text_iarchive.hpp>
 //#include <boost/archive/text_oarchive.hpp>
 
-using namespace vision;
+using namespace param;
 
 Parameter::Parameter()
 {

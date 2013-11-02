@@ -10,7 +10,7 @@ ExtractorFactory::ExtractorFactory()
 }
 
 Extractor::Ptr ExtractorFactory::create(const std::string& keypoint, const std::string& descriptor,
-                                        const vision::ParameterProvider& param)
+                                        const param::ParameterProvider& param)
 {
     Extractor::Ptr e(new Extractor(0));
 

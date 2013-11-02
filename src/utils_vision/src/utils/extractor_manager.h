@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include "extractor.h"
-#include "config/parameter_provider.h"
+#include <utils_param/parameter_provider.h>
 
 /// PROJECT
 #include <utils_plugin/singleton.hpp>
@@ -87,13 +87,13 @@ public:
      * @brief The ExtractorInitializer
      */
     struct ExtractorInitializer : public Constructor {
-        typedef boost::function<void(Extractor*, const vision::ParameterProvider&, bool)> Call;
+        typedef boost::function<void(Extractor*, const param::ParameterProvider&, bool)> Call;
 
-        void operator()(Extractor* r, const vision::ParameterProvider& param, bool complete = false) const {
+        void operator()(Extractor* r, const param::ParameterProvider& param, bool complete = false) const {
             return construct(r, param, complete);
         }
 
-        void construct(Extractor* r, const vision::ParameterProvider& param, bool complete = false) const {
+        void construct(Extractor* r, const param::ParameterProvider& param, bool complete = false) const {
             if(!constructor.empty()) {
                 constructor(r, param, complete);
             }
@@ -109,11 +109,11 @@ public:
 
     struct Params {
         template <typename T>
-        T read(const vision::ParameterProvider& param, const std::string& name) {
+        T read(const param::ParameterProvider& param, const std::string& name) {
             try {
                 return param(name);
             } catch (const std::exception& e) {
-                BOOST_FOREACH(const vision::Parameter& p, params) {
+                BOOST_FOREACH(const param::Parameter& p, params) {
                     if(p.name() == name) {
                         return p.as<T>();
                     }
@@ -123,7 +123,7 @@ public:
             }
         }
 
-        std::vector<vision::Parameter> params;
+        std::vector<param::Parameter> params;
     };
 
     class KeypointInitializer : public ExtractorInitializer {};
@@ -132,7 +132,7 @@ public:
     typedef typename KeypointInitializer::Call KeypointInit;
     typedef typename DescriptorInitializer::Call DescriptorInit;
 
-    typedef boost::function<std::vector<vision::Parameter>() > ParameterFunction;
+    typedef boost::function<std::vector<param::Parameter>() > ParameterFunction;
 
 private:
     /**
@@ -182,8 +182,8 @@ public:
         return available_keypoints;
     }
 
-    std::vector<vision::Parameter> featureDetectorParameters(const std::string& keypoint);
-    std::vector<vision::Parameter> featureDescriptorParameters(const std::string& keypoint);
+    std::vector<param::Parameter> featureDetectorParameters(const std::string& keypoint);
+    std::vector<param::Parameter> featureDescriptorParameters(const std::string& keypoint);
 
     /**
      * @brief descriptorExtractors get a container of all extractors
@@ -199,7 +199,7 @@ protected:
             : kc_(kc), dc_(dc), complete_(complete)
         {}
 
-        virtual void init(Extractor* e, const vision::ParameterProvider& param) {
+        virtual void init(Extractor* e, const param::ParameterProvider& param) {
             if(complete_) {
                 kc_(e, param, true);
                 // dc_ == kc_

@@ -2,7 +2,7 @@
 #define EXTRACTOR_H
 
 /// PROJECT
-#include <config/parameter_provider.h>
+#include <utils_param/parameter_provider.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -26,7 +26,7 @@ public:
     struct Initializer {
         typedef boost::shared_ptr<Initializer> Ptr;
 
-        virtual void init(Extractor*, const vision::ParameterProvider&) = 0;
+        virtual void init(Extractor*, const param::ParameterProvider&) = 0;
     };
 
     /**

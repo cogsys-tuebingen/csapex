@@ -10,7 +10,7 @@
 #include <boost/type_traits.hpp>
 #include <yaml-cpp/yaml.h>
 
-namespace vision {
+namespace param {
 
 typedef boost::mpl::vector<
 std::string,
@@ -32,7 +32,7 @@ public:
         return e;
     }
 
-    friend void operator >> (const YAML::Node& node, vision::Parameter& value) {
+    friend void operator >> (const YAML::Node& node, param::Parameter& value) {
         value.read(node);
     }
 

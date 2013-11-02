@@ -9,7 +9,7 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/utility.hpp>
 
-namespace vision
+namespace param
 {
 
 class ParameterMap

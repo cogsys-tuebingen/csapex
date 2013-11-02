@@ -61,7 +61,7 @@ private:
 
     struct State : public Memento {
         std::string key;
-        std::map<std::string, std::vector<vision::Parameter> > params;
+        std::map<std::string, std::vector<param::Parameter> > params;
 
         virtual void writeYaml(YAML::Emitter& out) const;
         virtual void readYaml(const YAML::Node& node);

@@ -9,7 +9,7 @@
 #include <vector>
 #include <map>
 
-namespace vision {
+namespace param {
 
 class ParameterProvider
 {
