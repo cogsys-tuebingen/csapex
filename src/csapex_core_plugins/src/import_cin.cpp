@@ -12,7 +12,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <yaml-cpp/eventhandler.h>
 
-CSAPEX_REGISTER_CLASS(csapex::ImportCin, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ImportCin, csapex::Node)
 
 using namespace csapex;
 

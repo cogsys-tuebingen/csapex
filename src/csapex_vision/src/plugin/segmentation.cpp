@@ -11,7 +11,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <boost/foreach.hpp>
 
-CSAPEX_REGISTER_CLASS(csapex::Segmentation, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::Segmentation, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;

@@ -10,7 +10,7 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::ExportCout, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ExportCout, csapex::Node)
 
 using namespace csapex;
 

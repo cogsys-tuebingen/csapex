@@ -12,7 +12,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <QFileDialog>
 
-CSAPEX_REGISTER_CLASS(csapex::ExportFile, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ExportFile, csapex::Node)
 
 using namespace csapex;
 

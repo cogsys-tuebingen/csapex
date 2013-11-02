@@ -14,7 +14,7 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/voxel_grid.h>
 
-CSAPEX_REGISTER_CLASS(csapex::VoxelGrid, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::VoxelGrid, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;

@@ -8,7 +8,7 @@
 using namespace csapex;
 
 TemplateConstructor::TemplateConstructor(bool temporary, const std::string &type, const std::string &description)
-    : BoxedObjectConstructor(type, description)
+    : NodeConstructor(type, description)
 {
     std::string name = type.substr(std::string("::template::").size());
 
@@ -26,14 +26,14 @@ TemplateConstructor::TemplateConstructor(bool temporary, const std::string &type
     cat.insert(cat.end(), t->tags.begin(), t->tags.end());
 }
 
-BoxedObjectPtr TemplateConstructor::makeContent(const std::string&) const
+NodePtr TemplateConstructor::makeContent(const std::string&) const
 {
-    return BoxedObjectPtr(new NullBoxedObject("void"));
+    return NodePtr(new Node(""));
 }
 
-BoxedObjectPtr TemplateConstructor::makePrototypeContent() const
+NodePtr TemplateConstructor::makePrototypeContent() const
 {
-    return BoxedObjectPtr(new NullBoxedObject("void"));
+    return NodePtr(new Node(""));
 }
 
 void TemplateConstructor::load() const

@@ -22,7 +22,7 @@ class Node : public QObject, public ErrorState
     friend class Box;
     friend class GraphIO;
     friend class Graph;
-    friend class BoxedObjectConstructor;
+    friend class NodeConstructor;
 
     friend class command::AddConnector;
 

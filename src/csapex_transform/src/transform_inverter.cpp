@@ -12,7 +12,7 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::TransformInverter, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::TransformInverter, csapex::Node)
 
 using namespace csapex;
 

@@ -12,7 +12,7 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::DisplayKeypoints, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::DisplayKeypoints, csapex::Node)
 
 using namespace csapex;
 using namespace connection_types;

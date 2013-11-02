@@ -13,7 +13,7 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::TimeOffset, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::TimeOffset, csapex::Node)
 
 using namespace csapex;
 

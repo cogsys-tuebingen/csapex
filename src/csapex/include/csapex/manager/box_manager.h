@@ -2,7 +2,7 @@
 #define BOX_MANAGER_H
 
 /// COMPONENT
-#include <csapex/model/boxed_object_constructor.h>
+#include <csapex/model/node_constructor.h>
 #include <csapex/csapex_fwd.h>
 
 /// PROJECT
@@ -34,11 +34,11 @@ public:
     ~BoxManager();
 
 public:
-    void register_box_type(BoxedObjectConstructor::Ptr provider, bool suppress_signals = false);
+    void register_box_type(NodeConstructor::Ptr provider, bool suppress_signals = false);
 
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
     NodePtr makeNode(const std::string& type, const std::string& uuid);
-    BoxedObjectConstructor::Ptr getSelector(const std::string& type);
+    NodeConstructor::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
     QWidget* container();
@@ -62,18 +62,18 @@ protected:
     void rebuildPrototypes();
     void rebuildMap();
 
-    NodePtr makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string& uuid);
+    NodePtr makeSingleNode(NodeConstructor::Ptr content, const std::string& uuid);
     NodePtr makeTemplateNode(const std::string& uuid, const std::string& type);
 
 protected:
-    std::vector<BoxedObjectConstructor::Ptr> available_elements_prototypes;
+    std::vector<NodeConstructor::Ptr> available_elements_prototypes;
 
     QWidget* container_;
 
-    std::map<Tag, std::vector<BoxedObjectConstructor::Ptr> > map;
+    std::map<Tag, std::vector<NodeConstructor::Ptr> > map;
     std::set<Tag> tags;
 
-    PluginManager<BoxedObject>* manager_;
+    PluginManager<Node>* manager_;
 
     bool dirty_;
 };

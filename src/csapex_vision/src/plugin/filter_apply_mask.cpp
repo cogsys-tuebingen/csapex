@@ -5,7 +5,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 
 
-CSAPEX_REGISTER_CLASS(csapex::FilterApplyMask, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::FilterApplyMask, csapex::Node)
 
 using namespace csapex;
 

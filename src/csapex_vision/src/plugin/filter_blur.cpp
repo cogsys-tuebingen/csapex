@@ -8,7 +8,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 
 
-CSAPEX_REGISTER_CLASS(csapex::FilterBlur, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::FilterBlur, csapex::Node)
 
 using namespace csapex;
 

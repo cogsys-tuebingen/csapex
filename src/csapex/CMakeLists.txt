@@ -80,7 +80,7 @@ add_library(csapex SHARED
 
     src/model/group.cpp
     src/model/boxed_object.cpp
-    src/model/boxed_object_constructor.cpp
+    src/model/node_constructor.cpp
     src/model/error_state.cpp
     src/model/graph.cpp
     src/model/connection.cpp

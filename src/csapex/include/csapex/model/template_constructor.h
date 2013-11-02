@@ -2,18 +2,18 @@
 #define TEMPLATE_CONSTRUCTOR_H
 
 /// COMPONENT
-#include <csapex/model/boxed_object_constructor.h>
+#include <csapex/model/node_constructor.h>
 
 namespace csapex
 {
 
-class TemplateConstructor : public BoxedObjectConstructor
+class TemplateConstructor : public NodeConstructor
 {
 public:
     TemplateConstructor(bool temporary, const std::string& type, const std::string& description);
 
-    virtual BoxedObjectPtr makePrototypeContent() const;
-    virtual BoxedObjectPtr makeContent(const std::string& uuid) const;
+    virtual NodePtr makePrototypeContent() const;
+    virtual NodePtr makeContent(const std::string& uuid) const;
 
 protected:
     virtual void load() const;

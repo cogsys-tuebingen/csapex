@@ -9,7 +9,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <boost/mpl/for_each.hpp>
 
-CSAPEX_REGISTER_CLASS(csapex::PointCount, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::PointCount, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;

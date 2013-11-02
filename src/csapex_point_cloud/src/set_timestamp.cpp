@@ -11,7 +11,7 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::SetTimeStamp, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::SetTimeStamp, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;

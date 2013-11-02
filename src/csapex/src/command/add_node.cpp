@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/boxed_object_constructor.h>
+#include <csapex/model/node_constructor.h>
 #include <csapex/model/node_state.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
