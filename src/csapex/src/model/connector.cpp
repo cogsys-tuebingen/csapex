@@ -155,7 +155,7 @@ bool Connector::canConnectTo(Connector* other_side, bool move) const
     }
 
     bool in_out = (canOutput() && other_side->canInput()) || (canInput() && other_side->canOutput());
-    bool compability = getType()->canConnectTo(other_side->getType(), move);
+    bool compability = getType()->canConnectTo(other_side->getType().get());
 
     return in_out && compability;
 }

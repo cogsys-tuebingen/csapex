@@ -22,9 +22,9 @@ ConnectionType::Ptr ConnectionType::getDefaultConnectionType()
     return default_->clone();
 }
 
-bool ConnectionType::canConnectTo(ConnectionType::ConstPtr /*other_side*/, bool /*move*/) const
+bool ConnectionType::canConnectTo(const ConnectionType *other_side) const
 {
-    return true;//other_side->acceptsConnectionFrom(this);
+    return other_side->acceptsConnectionFrom(this);
 }
 
 bool ConnectionType::acceptsConnectionFrom(const ConnectionType *other_side) const

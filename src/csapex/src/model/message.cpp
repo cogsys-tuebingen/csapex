@@ -46,7 +46,7 @@ ConnectionType::Ptr AnyMessage::make()
     return new_msg;
 }
 
-bool AnyMessage::canConnectTo(ConstPtr) const
+bool AnyMessage::canConnectTo(const ConnectionType*) const
 {
     return true;
 }
