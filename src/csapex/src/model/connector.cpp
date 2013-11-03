@@ -148,7 +148,7 @@ void Connector::refreshStylesheet()
     refresh_style_sheet_ = true;
 }
 
-bool Connector::canConnectTo(Connector* other_side, bool move) const
+bool Connector::canConnectTo(Connector* other_side, bool) const
 {
     if(other_side == this) {
         return false;

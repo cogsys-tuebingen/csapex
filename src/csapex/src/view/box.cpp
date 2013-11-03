@@ -37,6 +37,8 @@ Box::Box(Node* node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), profiling_(false), is_placed_(false)
 {
+    adapter_->setNode(node_);
+
     construct(node);
 
     ++g_instances;
@@ -110,6 +112,13 @@ void Box::construct(Node* node)
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+
+    for(int i = 0; i < node_->countInputs(); ++i) {
+        registerInputEvent(node_->getInput(i));
+    }
+    for(int i = 0; i < node_->countOutputs(); ++i) {
+        registerOutputEvent(node_->getOutput(i));
+    }
 
     setupUi();
 }

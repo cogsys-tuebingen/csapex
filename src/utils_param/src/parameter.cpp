@@ -8,11 +8,30 @@
 using namespace param;
 
 Parameter::Parameter()
+    : parameter_changed(new boost::signals2::signal<void(Parameter*)>)
 {
 }
 
+Parameter::Parameter(const Parameter& rhs)
+    : parameter_changed(rhs.parameter_changed),
+      name_(rhs.name_),
+      value_(rhs.value_),
+      min_(rhs.min_),
+      max_(rhs.max_),
+      def_(rhs.def_),
+      step_(rhs.step_)
+{
+}
+
+Parameter& Parameter::operator =(const Parameter& rhs)
+{
+    assert(name_ == rhs.name());
+    value_ = rhs.value_;
+    return *this;
+}
+
 Parameter::Parameter(const std::string &name)
-    : name_(name)
+    : parameter_changed(new boost::signals2::signal<void(Parameter*)>), name_(name)
 {
 }
 

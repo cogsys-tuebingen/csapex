@@ -29,6 +29,7 @@ FWD(ConnectorOut);
 FWD(Connection);
 
 FWD(Graph);
+FWD(GenericState);
 
 FWD(ConnectionType);
 

@@ -85,6 +85,31 @@ std::vector<Tag> Node::getTags() const
     return tags_;
 }
 
+void Node::addParameter(const param::Parameter &param)
+{
+    param::Parameter::Ptr p(new param::Parameter(param));
+    state.params[param.name()] = p;
+}
+
+void Node::addParameter(const param::Parameter::Ptr &param)
+{
+    state.params[param->name()] = param;
+}
+
+std::vector<param::Parameter::Ptr> Node::getParameters() const
+{
+    std::vector<param::Parameter::Ptr> r;
+    for( std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+        r.push_back( it->second );
+    }
+    return r;
+}
+
+param::Parameter::Ptr Node::getParameter(const std::string &name) const
+{
+    return state.params.at(name);
+}
+
 void Node::setIcon(QIcon icon)
 {
     icon_ = icon;
@@ -191,18 +216,30 @@ void Node::setNodeState(NodeState::Ptr memento)
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
-    //    setNodeState(s);
+    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->boxed_state);
+    if(m) {
+        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
+            param::Parameter* param = it->second.get();
+//            *state.params[param->name()] = param->as<double>();
+            *state.params[param->name()] = *param;
+        }
+    }
     loaded_state_available_ = true;
 }
 
 Memento::Ptr Node::getState() const
 {
-    return Memento::Ptr((Memento*) NULL);
+    return GenericState::Ptr(new GenericState(state));
 }
 
-void Node::setState(Memento::Ptr)
+void Node::setState(Memento::Ptr memento)
 {
+    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
+    assert(m.get());
 
+    state = *m;
+
+    Q_EMIT modelChanged();
 }
 
 void Node::enable(bool e)

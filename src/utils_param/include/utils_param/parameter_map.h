@@ -23,7 +23,7 @@ public:
 
     template<class Archive>
     void serialize(Archive& ar, const unsigned int /*file_version*/) {
-        ar & map_;
+        ar & BOOST_SERIALIZATION_NVP(map_);
     }
 
 private:
