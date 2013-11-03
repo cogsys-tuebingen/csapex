@@ -28,7 +28,7 @@ StaticParameterProvider::StaticParameterProvider(const Map& params)
 StaticParameterProvider::StaticParameterProvider(const Vec& params)
 {
     BOOST_FOREACH(const Parameter& param, params) {
-        params_[param.name()] = param;
+        params_.insert(std::make_pair(param.name(), param));
     }
 }
 
