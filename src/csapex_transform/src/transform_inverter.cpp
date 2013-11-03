@@ -29,7 +29,7 @@ void TransformInverter::allConnectorsArrived()
 }
 
 
-void TransformInverter::fill(QBoxLayout* layout)
+void TransformInverter::setup()
 {
     setSynchronizedInputs(true);
 

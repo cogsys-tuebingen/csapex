@@ -2,12 +2,11 @@
 #define TRANSFORM_COMBINER_H
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
-#include <csapex/utility/qdouble_slider.h>
+#include <csapex/model/node.h>
 
 namespace csapex {
 
-class TransformCombiner : public csapex::BoxedObject
+class TransformCombiner : public csapex::Node
 {
     Q_OBJECT
 
@@ -15,7 +14,7 @@ public:
     TransformCombiner();
 
     virtual void allConnectorsArrived();
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
 
 private:
     ConnectorOut* output_;

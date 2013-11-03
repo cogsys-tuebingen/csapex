@@ -31,7 +31,7 @@ void TransformCombiner::allConnectorsArrived()
 }
 
 
-void TransformCombiner::fill(QBoxLayout* layout)
+void TransformCombiner::setup()
 {
     setSynchronizedInputs(true);
 

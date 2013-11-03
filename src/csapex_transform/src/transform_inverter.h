@@ -2,12 +2,11 @@
 #define TRANSFORM_INVERTER_H
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
-#include <csapex/utility/qdouble_slider.h>
+#include <csapex/model/node.h>
 
 namespace csapex {
 
-class TransformInverter : public csapex::BoxedObject
+class TransformInverter : public csapex::Node
 {
     Q_OBJECT
 
@@ -15,7 +14,7 @@ public:
     TransformInverter();
 
     virtual void allConnectorsArrived();
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
 
 private:
     ConnectorIn* input_;
