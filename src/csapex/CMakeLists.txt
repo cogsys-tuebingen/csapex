@@ -9,7 +9,7 @@ add_definitions(-W -Wall)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS utils_plugin)
+find_package(catkin REQUIRED COMPONENTS utils_plugin utils_param)
 
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
@@ -43,7 +43,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex
-   CATKIN_DEPENDS utils_plugin
+   CATKIN_DEPENDS utils_plugin utils_param
    DEPENDS Qt4
 )
 
@@ -80,7 +80,7 @@ add_library(csapex SHARED
 
     src/model/group.cpp
     src/model/boxed_object.cpp
-    src/model/boxed_object_constructor.cpp
+    src/model/node_constructor.cpp
     src/model/error_state.cpp
     src/model/graph.cpp
     src/model/connection.cpp
@@ -89,6 +89,7 @@ add_library(csapex SHARED
     src/model/connector_out.cpp
     src/model/connector_forward.cpp
     src/model/connection_type.cpp
+    src/model/generic_state.cpp
     src/model/memento.cpp
     src/model/message.cpp
     src/model/message_provider.cpp

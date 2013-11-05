@@ -38,7 +38,7 @@ public:
 
     static ConnectionType::Ptr make();
 
-    bool canConnectTo(const ConnectionType::ConstPtr other_side) const;
+    bool canConnectTo(const ConnectionType* other_side) const;
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
 };
 

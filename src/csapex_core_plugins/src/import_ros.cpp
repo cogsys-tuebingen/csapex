@@ -22,7 +22,7 @@
 #include <QPushButton>
 #include <QLabel>
 
-CSAPEX_REGISTER_CLASS(csapex::ImportRos, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ImportRos, csapex::Node)
 
 using namespace csapex;
 

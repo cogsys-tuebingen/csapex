@@ -12,7 +12,7 @@
 #include <boost/mpl/for_each.hpp>
 #include <pcl_ros/transforms.h>
 
-CSAPEX_REGISTER_CLASS(csapex::TransformCloud, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::TransformCloud, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;

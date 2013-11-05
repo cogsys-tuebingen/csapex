@@ -14,7 +14,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 
 
-CSAPEX_REGISTER_CLASS(csapex::Camera, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::Camera, csapex::Node)
 
 using namespace csapex;
 

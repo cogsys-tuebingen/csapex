@@ -6,6 +6,10 @@
 #include <csapex/model/tag.h>
 #include <csapex/model/memento.h>
 #include <csapex/model/error_state.h>
+#include <csapex/model/generic_state.h>
+
+/// PROJECT
+#include <utils_param/parameter.h>
 
 /// SYSTEM
 #include <QObject>
@@ -22,7 +26,7 @@ class Node : public QObject, public ErrorState
     friend class Box;
     friend class GraphIO;
     friend class Graph;
-    friend class BoxedObjectConstructor;
+    friend class NodeConstructor;
 
     friend class command::AddConnector;
 
@@ -30,7 +34,7 @@ public:
     typedef boost::shared_ptr<Node> Ptr;
 
 public:
-    Node(const std::string& uuid);
+    Node(const std::string& uuid = "");
     virtual ~Node();
     virtual void setup();
 
@@ -41,6 +45,18 @@ public:
 
     void addTag(const Tag& tag);
     std::vector<Tag> getTags() const;
+
+    void addParameter(const param::Parameter& param);
+    void addParameter(const param::Parameter::Ptr& param);
+
+    std::vector<param::Parameter::Ptr> getParameters() const;
+
+    template <typename T>
+    T param(const std::string& name) const
+    {
+        return getParameter(name)->as<T>();
+    }
+    param::Parameter::Ptr getParameter(const std::string& name) const;
 
     void setIcon(QIcon icon);
     QIcon getIcon() const;
@@ -192,12 +208,13 @@ private:
     NodeStatePtr node_state_;
 
     std::vector<ConnectorIn*> input;
-
     std::vector<ConnectorOut*> output;
 
     CommandDispatcher* dispatcher_;
 
     bool loaded_state_available_;
+
+    GenericState state;
 };
 
 }

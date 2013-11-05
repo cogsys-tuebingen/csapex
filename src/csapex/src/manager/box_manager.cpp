@@ -2,7 +2,7 @@
 #include <csapex/manager/box_manager.h>
 
 /// COMPONENT
-#include <csapex/model/boxed_object_constructor.h>
+#include <csapex/model/node_constructor.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/view/box.h>
@@ -21,13 +21,13 @@
 using namespace csapex;
 
 BoxManager::BoxManager()
-    : manager_(new PluginManager<BoxedObject> ("csapex::BoxedObject")), dirty_(false)
+    : manager_(new PluginManager<Node> ("csapex::Node")), dirty_(false)
 {
     manager_->loaded.connect(loaded);
 }
 
 namespace {
-bool compare (BoxedObjectConstructor::Ptr a, BoxedObjectConstructor::Ptr b) {
+bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
     const std::string& as = BoxManager::stripNamespace(a->getType());
     const std::string& bs = BoxManager::stripNamespace(b->getType());
     return as.compare(bs) < 0;
@@ -59,9 +59,9 @@ void BoxManager::rebuildPrototypes()
 {
     available_elements_prototypes.clear();
 
-    typedef std::pair<std::string, DefaultConstructor<BoxedObject> > PAIR;
+    typedef std::pair<std::string, DefaultConstructor<Node> > PAIR;
     foreach(const PAIR& p, manager_->availableClasses()) {
-        csapex::BoxedObjectConstructor::Ptr constructor(new csapex::BoxedObjectConstructor(
+        csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
                                                             p.second.getType(), p.second.getDescription(),
                                                             p.second));
         register_box_type(constructor, true);
@@ -78,7 +78,7 @@ void BoxManager::rebuildMap()
 
     tags.insert(general);
 
-    foreach(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
+    foreach(NodeConstructor::Ptr p, available_elements_prototypes) {
         bool has_tag = false;
         foreach(const Tag& tag, p->getTags()) {
             map[tag].push_back(p);
@@ -120,7 +120,7 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
         QMenu* submenu = new QMenu(tag.getName().c_str());
         menu->addMenu(submenu);
 
-        foreach(const BoxedObjectConstructor::Ptr& proxy, map[tag]) {
+        foreach(const NodeConstructor::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
             QAction* action = new QAction(stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
@@ -149,7 +149,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
         submenu->setText(0, tag.getName().c_str());
         tree->addTopLevelItem(submenu);
 
-        foreach(const BoxedObjectConstructor::Ptr& proxy, map[tag]) {
+        foreach(const NodeConstructor::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
             std::string name = stripNamespace(proxy->getType());
 
@@ -165,7 +165,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
     }
 }
 
-void BoxManager::register_box_type(BoxedObjectConstructor::Ptr provider, bool suppress_signals)
+void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_signals)
 {
     available_elements_prototypes.push_back(provider);
     dirty_ = true;
@@ -176,14 +176,19 @@ void BoxManager::register_box_type(BoxedObjectConstructor::Ptr provider, bool su
 }
 
 namespace {
-QPixmap createPixmap(const std::string& label, const BoxedObjectPtr& content)
+QPixmap createPixmap(const std::string& label, const NodePtr& content)
 {
     csapex::Box::Ptr object;
 
     if(BoxManager::typeIsTemplate(content->getType())) {
         object.reset(new csapex::Group(""));
     } else {
-        object.reset(new csapex::Box(content.get(), content));
+        BoxedObjectPtr bo = boost::dynamic_pointer_cast<BoxedObject> (content);
+        if(bo) {
+            object.reset(new csapex::Box(bo.get()));
+        } else {
+            object.reset(new csapex::Box(content.get(), NodeAdapter::Ptr(new NodeAdapter)));
+        }
     }
 
     object->setObjectName(content->getType().c_str());
@@ -208,11 +213,11 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
 {
     bool is_template = BoxManager::typeIsTemplate(type);
 
-    BoxedObject::Ptr content;
+    Node::Ptr content;
     if(is_template) {
-        content.reset(new NullBoxedObject(type));
+        content.reset(new Node(""));
     } else {
-        foreach(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
+        foreach(NodeConstructor::Ptr p, available_elements_prototypes) {
             if(p->getType() == type) {
                 content = p->makePrototypeContent();
             }
@@ -244,11 +249,11 @@ std::string BoxManager::stripNamespace(const std::string &name)
     return name.substr(from != name.npos ? from + 2 : 0);
 }
 
-Node::Ptr BoxManager::makeSingleNode(BoxedObjectConstructor::Ptr content, const std::string& uuid)
+Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const std::string& uuid)
 {
     assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
 
-    BoxedObject::Ptr bo = content->makeContent(uuid);
+    Node::Ptr bo = content->makeContent(uuid);
 
     return bo;
 }
@@ -284,7 +289,7 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const std::string
     }
 
 
-    BOOST_FOREACH(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
+    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
             return makeSingleNode(p, uuid);
         }
@@ -294,7 +299,7 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const std::string
 
     std::string type_wo_ns = stripNamespace(type);
 
-    BOOST_FOREACH(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
+    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         std::string p_type_wo_ns = stripNamespace(p->getType());
 
         if(p_type_wo_ns == type_wo_ns) {
@@ -304,22 +309,22 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const std::string
     }
 
     std::cerr << "error: cannot make box, type '" << type << "' is unknown\navailable:\n";
-    BOOST_FOREACH(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
+    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         std::cerr << p->getType() << '\n';
     }
     std::cerr << std::endl;
     return NodeNullPtr;
 }
 
-BoxedObjectConstructor::Ptr BoxManager::getSelector(const std::string &type)
+NodeConstructor::Ptr BoxManager::getSelector(const std::string &type)
 {
-    BOOST_FOREACH(BoxedObjectConstructor::Ptr p, available_elements_prototypes) {
+    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
             return p;
         }
     }
 
-    return BoxedObjectConstructorNullPtr;
+    return NodeConstructorNullPtr;
 }
 
 

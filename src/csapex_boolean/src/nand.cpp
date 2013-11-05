@@ -12,7 +12,7 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::boolean::NAND, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::boolean::NAND, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::boolean;

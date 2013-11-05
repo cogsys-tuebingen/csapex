@@ -19,7 +19,7 @@
 #include <QFrame>
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::ExtractDescriptors, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::ExtractDescriptors, csapex::Node)
 
 using namespace csapex;
 using namespace connection_types;
@@ -95,7 +95,7 @@ void ExtractDescriptors::updateDynamicGui(QBoxLayout *layout)
 template <typename T>
 void ExtractDescriptors::updateParam(const std::string& name, T value)
 {
-    BOOST_FOREACH(vision::Parameter& para, state.params[state.des]) {
+    BOOST_FOREACH(param::Parameter& para, state.params[state.des]) {
         if(para.name() == name) {
             para.set<T>(value);
 
@@ -120,7 +120,7 @@ void ExtractDescriptors::update(int slot)
     }
     callbacks.clear();
 
-    foreach(const vision::Parameter& para, state.params[state.des]) {
+    foreach(const param::Parameter& para, state.params[state.des]) {
         std::string name = para.name();
 
         if(para.is<int>()) {
@@ -174,7 +174,7 @@ void ExtractDescriptors::updateModel()
 
 void ExtractDescriptors::update()
 {
-    Extractor::Ptr next = ExtractorFactory::create("", state.des, vision::StaticParameterProvider(state.params[state.des]));
+    Extractor::Ptr next = ExtractorFactory::create("", state.des, param::StaticParameterProvider(state.params[state.des]));
 
     QMutexLocker lock(&extractor_mutex);
     extractor = next;
@@ -193,11 +193,11 @@ void ExtractDescriptors::setState(Memento::Ptr memento)
     //    state = *m;
     state.des = m->des;
 
-    typedef std::pair<std::string, std::vector<vision::Parameter> > Pair;
+    typedef std::pair<std::string, std::vector<param::Parameter> > Pair;
     foreach(Pair pair, m->params) {
-        foreach(const vision::Parameter& para, pair.second) {
-            std::vector<vision::Parameter>& target = state.params[pair.first];
-            BOOST_FOREACH(vision::Parameter& existing_param, target) {
+        foreach(const param::Parameter& para, pair.second) {
+            std::vector<param::Parameter>& target = state.params[pair.first];
+            BOOST_FOREACH(param::Parameter& existing_param, target) {
                 if(existing_param.name() == para.name()) {
                     existing_param.setFrom(para);
                 }

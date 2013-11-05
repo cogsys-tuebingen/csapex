@@ -4,7 +4,7 @@
 /// SYSTEM
 #include <sstream>
 
-using namespace vision;
+using namespace param;
 
 boost::signals2::signal<void(const Config&)> Config::replace;
 

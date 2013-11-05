@@ -13,7 +13,7 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/crop_box.h>
 
-CSAPEX_REGISTER_CLASS(csapex::CropBox, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::CropBox, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;

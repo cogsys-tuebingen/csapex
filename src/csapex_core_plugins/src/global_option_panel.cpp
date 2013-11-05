@@ -8,7 +8,7 @@
 #include <boost/foreach.hpp>
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::GlobalOptionPanel, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::GlobalOptionPanel, csapex::Node)
 
 using namespace csapex;
 

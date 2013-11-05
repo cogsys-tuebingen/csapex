@@ -17,7 +17,7 @@
 #include <csapex/command/add_fulcrum.h>
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/move_fulcrum.h>
-#include <csapex/model/boxed_object_constructor.h>
+#include <csapex/model/node_constructor.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/view/box.h>

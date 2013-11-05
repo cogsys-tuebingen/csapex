@@ -1,10 +1,10 @@
 /// HEADER
-#include "parameter_provider.h"
+#include <utils_param/parameter_provider.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
 
-using namespace vision;
+using namespace param;
 
 ParameterProvider::ParameterProvider()
 {
@@ -28,7 +28,7 @@ StaticParameterProvider::StaticParameterProvider(const Map& params)
 StaticParameterProvider::StaticParameterProvider(const Vec& params)
 {
     BOOST_FOREACH(const Parameter& param, params) {
-        params_[param.name()] = param;
+        params_.insert(std::make_pair(param.name(), param));
     }
 }
 

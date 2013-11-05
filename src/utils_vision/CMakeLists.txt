@@ -3,7 +3,7 @@ project(utils_vision)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-find_package(catkin REQUIRED COMPONENTS cv_bridge utils utils_plugin)
+find_package(catkin REQUIRED COMPONENTS cv_bridge utils utils_plugin utils_param)
 
 find_package(OpenCV REQUIRED)
 
@@ -16,7 +16,7 @@ find_package(Boost COMPONENTS program_options serialization REQUIRED)
 catkin_package(
     INCLUDE_DIRS src
     LIBRARIES utils_vision logger
-    CATKIN_DEPENDS utils_plugin
+    CATKIN_DEPENDS utils_plugin utils_param
 )
 
 include_directories(
@@ -39,9 +39,6 @@ add_library(utils_vision
 
     src/config/config.cpp
     src/config/configurated_tools.cpp
-    src/config/parameter.cpp
-    src/config/parameter_map.cpp
-    src/config/parameter_provider.cpp
     src/config/reconfigurable.cpp
     src/config/types.cpp
     src/data/angle.cpp

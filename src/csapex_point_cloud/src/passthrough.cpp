@@ -14,7 +14,7 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/passthrough.h>
 
-CSAPEX_REGISTER_CLASS(csapex::PassThrough, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::PassThrough, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;

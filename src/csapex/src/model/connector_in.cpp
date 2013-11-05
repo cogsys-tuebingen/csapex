@@ -106,7 +106,7 @@ void ConnectorIn::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
-        if(!target->getType()->canConnectTo(getType(), true)) {
+        if(!target->getType()->canConnectTo(getType().get())) {
             e = true;
         }
     }

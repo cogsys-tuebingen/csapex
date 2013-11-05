@@ -9,8 +9,10 @@
 #include <boost/serialization/variant.hpp>
 #include <boost/type_traits.hpp>
 #include <yaml-cpp/yaml.h>
+#include <boost/shared_ptr.hpp>
+#include <boost/signals2.hpp>
 
-namespace vision {
+namespace param {
 
 typedef boost::mpl::vector<
 std::string,
@@ -27,17 +29,32 @@ class Parameter
     typedef boost::make_variant_over<ParameterTypes>::type variant;
 
 public:
+    typedef boost::shared_ptr<Parameter> Ptr;
+
+public:
     friend YAML::Emitter& operator << (YAML::Emitter& e, const Parameter& p) {
         p.write(e);
         return e;
     }
+    friend YAML::Emitter& operator << (YAML::Emitter& e, const Parameter::Ptr& p) {
+        p->write(e);
+        return e;
+    }
 
-    friend void operator >> (const YAML::Node& node, vision::Parameter& value) {
+    friend void operator >> (const YAML::Node& node, param::Parameter& value) {
         value.read(node);
+    }
+
+    friend void operator >> (const YAML::Node& node, param::Parameter::Ptr& value) {
+        if(!value) {
+            value.reset(new Parameter("loading"));
+        }
+        value->read(node);
     }
 
 public:
     Parameter();
+    Parameter(const Parameter& rhs);
     explicit Parameter(const std::string& name);
 
     void setFrom(const Parameter& other);
@@ -86,6 +103,7 @@ public:
     Parameter& operator = (const T& value)
     {
         value_ = value;
+        (*parameter_changed)(this);
         return *this;
     }
 
@@ -93,6 +111,8 @@ public:
     {
         return operator = (std::string(value));
     }
+
+    Parameter& operator = (const Parameter& param);
 
     template <typename T>
     static Parameter declare(const std::string& name, T min, T max, T def, T step)
@@ -120,6 +140,9 @@ public:
     void serialize(Archive& ar, const unsigned int /*file_version*/) {
         ar & value_;
     }
+
+public:
+    boost::shared_ptr<boost::signals2::signal<void(Parameter*)> > parameter_changed;
 
 private:
     template <typename T>

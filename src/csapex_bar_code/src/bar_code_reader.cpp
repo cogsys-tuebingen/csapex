@@ -14,7 +14,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <zbar.h>
 
-PLUGINLIB_EXPORT_CLASS(csapex::BarCodeReader, csapex::BoxedObject)
+PLUGINLIB_EXPORT_CLASS(csapex::BarCodeReader, csapex::Node)
 
 using namespace csapex;
 using namespace connection_types;

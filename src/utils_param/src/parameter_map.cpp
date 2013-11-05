@@ -1,7 +1,7 @@
 /// HEADER
-#include "parameter_map.h"
+#include <utils_param/parameter_map.h>
 
-using namespace vision;
+using namespace param;
 
 ParameterMap::ParameterMap()
 {
@@ -13,7 +13,7 @@ Parameter& ParameterMap::operator [] (const std::string &name)
     if(it != map_.end()) {
         return it->second;
     } else {
-        map_[name] = Parameter(name);
+        map_.insert(std::make_pair(name, Parameter(name)));
         return operator [](name);
     }
 

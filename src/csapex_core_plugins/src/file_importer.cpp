@@ -20,7 +20,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <QUrl>
 
-CSAPEX_REGISTER_CLASS(csapex::FileImporter, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::FileImporter, csapex::Node)
 
 using namespace csapex;
 using namespace connection_types;

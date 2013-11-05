@@ -12,7 +12,7 @@
 #include <QPushButton>
 #include <QBoxLayout>
 
-CSAPEX_REGISTER_CLASS(csapex::TextInput, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::TextInput, csapex::Node)
 
 using namespace csapex;
 

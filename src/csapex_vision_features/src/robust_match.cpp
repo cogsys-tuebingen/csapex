@@ -22,7 +22,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <opencv2/opencv.hpp>
 
-CSAPEX_REGISTER_CLASS(csapex::RobustMatch, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::RobustMatch, csapex::Node)
 
 using namespace csapex;
 using namespace connection_types;

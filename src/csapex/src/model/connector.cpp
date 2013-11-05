@@ -148,14 +148,14 @@ void Connector::refreshStylesheet()
     refresh_style_sheet_ = true;
 }
 
-bool Connector::canConnectTo(Connector* other_side, bool move) const
+bool Connector::canConnectTo(Connector* other_side, bool) const
 {
     if(other_side == this) {
         return false;
     }
 
     bool in_out = (canOutput() && other_side->canInput()) || (canInput() && other_side->canOutput());
-    bool compability = getType()->canConnectTo(other_side->getType(), move);
+    bool compability = getType()->canConnectTo(other_side->getType().get());
 
     return in_out && compability;
 }

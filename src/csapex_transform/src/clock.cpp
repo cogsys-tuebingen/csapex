@@ -13,7 +13,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <boost/date_time.hpp>
 
-CSAPEX_REGISTER_CLASS(csapex::Clock, csapex::BoxedObject)
+CSAPEX_REGISTER_CLASS(csapex::Clock, csapex::Node)
 
 using namespace csapex;
 

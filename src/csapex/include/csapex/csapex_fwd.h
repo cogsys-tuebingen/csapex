@@ -21,7 +21,7 @@ class CorePlugin;
 FWD(Box);
 FWD(Group);
 FWD(BoxedObject);
-FWD(BoxedObjectConstructor);
+FWD(NodeConstructor);
 
 FWD(Connector);
 FWD(ConnectorIn);
@@ -29,6 +29,7 @@ FWD(ConnectorOut);
 FWD(Connection);
 
 FWD(Graph);
+FWD(GenericState);
 
 FWD(ConnectionType);
 
