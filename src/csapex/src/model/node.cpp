@@ -237,7 +237,18 @@ void Node::setState(Memento::Ptr memento)
     boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
     assert(m.get());
 
-    state = *m;
+    if(state.params.size() != m->params.size()) {
+        std::map<std::string, param::Parameter::Ptr> old_params = state.params;
+        state = *m;
+        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = old_params.begin(); it != old_params.end(); ++it) {
+            param::Parameter::Ptr p = it->second;
+            if(state.params.find(p->name()) == state.params.end()) {
+                state.params[p->name()] = p;
+            }
+        }
+    } else {
+        state = *m;
+    }
 
     Q_EMIT modelChanged();
 }

@@ -5,7 +5,6 @@
 #include <csapex_transform/transform_message.h>
 
 /// PROJECT
-
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 
