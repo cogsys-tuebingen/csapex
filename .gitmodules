@@ -10,3 +10,6 @@
 [submodule "plugins/cip104"]
 	path = plugins/cip104
 	url = gitlab@gitlab.cs.uni-tuebingen.de:csapex/cip104.git
+[submodule "plugins/patsy"]
+	path = plugins/patsy
+	url = gitlab@gitlab.cs.uni-tuebingen.de:csapex/patsy.git
