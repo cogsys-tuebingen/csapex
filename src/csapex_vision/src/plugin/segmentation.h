@@ -6,7 +6,7 @@
 #include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
-#include <qxtspanslider.h>
+#include <utils_qt/qxtspanslider.h>
 
 namespace csapex
 {

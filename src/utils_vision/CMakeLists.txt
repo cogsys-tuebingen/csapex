@@ -3,7 +3,7 @@ project(utils_vision)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-find_package(catkin REQUIRED COMPONENTS cv_bridge utils utils_plugin utils_param)
+find_package(catkin REQUIRED COMPONENTS cv_bridge utils_plugin utils_param)
 
 find_package(OpenCV REQUIRED)
 

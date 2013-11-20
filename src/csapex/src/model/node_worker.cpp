@@ -60,6 +60,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     has_msg_[source] = true;
 
     typedef std::pair<ConnectorIn*, bool> PAIR;
+
     foreach(const PAIR& pair, has_msg_) {
         ConnectorIn* c = pair.first;
         if(!pair.second) {
@@ -69,7 +70,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
                     // c is optional and connected, so we have to wait for a message
                     return;
                 } else {
-                    // c is optinal and not connected, so we can proceed
+                    // c is optional and not connected, so we can proceed
                     /* do nothing */
                 }
             } else {

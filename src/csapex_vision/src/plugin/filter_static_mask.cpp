@@ -7,7 +7,7 @@
 /// SYSTEM
 #include <QPixmap>
 #include <QGraphicsSceneEvent>
-#include <utils/LibUtil/QtCvImageConverter.h>
+#include <utils_qt/QtCvImageConverter.h>
 #include <QKeyEvent>
 #include <QPushButton>
 #include <csapex/utility/register_apex_plugin.h>

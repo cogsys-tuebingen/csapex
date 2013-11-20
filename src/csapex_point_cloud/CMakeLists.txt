@@ -32,9 +32,9 @@ QT4_WRAP_CPP(QT_MOC ${QT_MOC})
 set(QT ${QT_SOURCES} ${QT_MOC})
 
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES csapex_point_cloud
-#  CATKIN_DEPENDS csapex csapex_core_plugins
+  CATKIN_DEPENDS csapex pcl_ros
 #  DEPENDS system_lib
 )
 

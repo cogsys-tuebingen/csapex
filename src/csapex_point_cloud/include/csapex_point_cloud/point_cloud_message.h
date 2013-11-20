@@ -17,7 +17,8 @@ namespace connection_types {
 typedef boost::mpl::vector<
 pcl::PointXYZ,
 pcl::PointXYZI,
-pcl::PointXYZRGB
+pcl::PointXYZRGB,
+pcl::PointNormal
 > PointCloudPointTypes;
 
 namespace traits {
@@ -26,6 +27,7 @@ template <typename T> inline std::string name() { return ""; }
 template <> inline std::string name<pcl::PointXYZ>() { return "PointXYZ"; }
 template <> inline std::string name<pcl::PointXYZI>() { return "PointXYZI"; }
 template <> inline std::string name<pcl::PointXYZRGB>() { return "PointXYZRGB"; }
+template <> inline std::string name<pcl::PointNormal>() { return "PointNormal"; }
 }
 
 template<class T>
@@ -95,9 +97,12 @@ struct PointCloudMessage : public Message
         }
     }
 
-
     bool acceptsConnectionFrom(const ConnectionType* other_side) const {
-        return name() == other_side->name();
+        return rawName() == other_side->rawName();
+//        if(type.empty()) {
+//        } else {
+//            return name() == other_side->name();
+//        }
     }
 
     void writeYaml(YAML::Emitter& yaml) {

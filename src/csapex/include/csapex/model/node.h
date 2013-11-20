@@ -54,7 +54,11 @@ public:
     template <typename T>
     T param(const std::string& name) const
     {
-        return getParameter(name)->as<T>();
+        try {
+            return getParameter(name)->as<T>();
+        } catch(const std::out_of_range& e) {
+            throw std::runtime_error(std::string("unknown parameter '") + name + "'");
+        }
     }
     param::Parameter::Ptr getParameter(const std::string& name) const;
 

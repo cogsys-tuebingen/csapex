@@ -33,12 +33,15 @@ public:
     virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 
     virtual std::string name() const;
+    std::string rawName() const;
 
     virtual void write(std::ostream& out);
     virtual void writeRaw(const std::string& file, const std::string &suffix);
 
     virtual void writeYaml(YAML::Emitter& yaml) = 0;
     virtual void readYaml(YAML::Node& node) = 0;
+
+
 private:
     std::string name_;
 

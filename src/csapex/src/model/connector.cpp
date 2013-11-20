@@ -314,9 +314,12 @@ void Connector::setLabel(const std::string &label)
 
 void Connector::setType(ConnectionType::ConstPtr type)
 {
+    bool validate = type_ != type;
     type_ = type;
 
-    validateConnections();
+    if(validate) {
+        validateConnections();
+    }
 }
 
 ConnectionType::ConstPtr Connector::getType() const

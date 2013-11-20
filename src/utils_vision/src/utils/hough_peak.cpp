@@ -8,9 +8,6 @@
 /// HEADER
 #include "hough_peak.h"
 
-/// SYSTEM
-#include <utils/LibUtil/Stopwatch.h>
-
 template <bool debug_enabled, bool use_theta>
 HoughPeak<debug_enabled, use_theta>::HoughPeak(int cluster_count, int scaling, int octaves, const Matchable& a, const Matchable& b)
     : max_clusters(cluster_count), scaling(scaling), octaves(octaves), a_keypoints(a.keypoints), b_keypoints(b.keypoints)
@@ -66,41 +63,19 @@ int HoughPeak<debug_enabled, use_theta>::filter(std::vector<std::vector<cv::DMat
 
     HoughDebugFields<debug_enabled>::initDebug(scaling, dim_tx, dim_ty);
 
-    Stopwatch stopwatch;
-
     // go through all matches and populate the histogram
     populateHistogram(matches);
-    if(debug_enabled) {
-        log << "populate: " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
-    }
 
     // find maximum value and compute average
     calculateThreshold();
-    if(debug_enabled) {
-        log << "threshold: " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
-    }
 
     // find all possible peaks();
     findPeaks();
-    if(debug_enabled) {
-        log << "peaks: " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
-    }
 
     drawDebugProjection();
-    if(debug_enabled) {
-        log << "draw: " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
-    }
 
     // match peaks and matches that belong together
     assignMatchesToPeaks(matches, clusters);
-    if(debug_enabled) {
-        log << "assign (clusters=" << clusters.size() << "): " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
-    }
 
     HoughDebugFields<debug_enabled>::finishDebug();
 
@@ -218,17 +193,10 @@ void HoughPeak<debug_enabled, use_theta>::calculateThreshold()
 template <bool debug_enabled, bool use_theta>
 void HoughPeak<debug_enabled, use_theta>::findPeaks()
 {
-    Stopwatch stopwatch;
-
     std::deque<HoughData::Peak> peaks_candidates;
     findPeakCandidates(peaks_candidates);
 
     peaks.clear();
-
-    if(debug_enabled) {
-        log << "peak (fill): " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
-    }
 
     // abort, if no peak candidates are found
     if(peaks_candidates.empty()) {
@@ -237,12 +205,6 @@ void HoughPeak<debug_enabled, use_theta>::findPeaks()
 
     // sort the peaks by their histogram counts
     std::sort(peaks_candidates.begin(), peaks_candidates.end(), HoughData::Peak::compare);
-
-    if(debug_enabled) {
-        assert(peaks_candidates.front().magnitude >= peaks_candidates.back().magnitude);
-        log << "peak (sort): " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
-    }
 
     // init by using the best candidate first
     peaks.push_back(peaks_candidates.front());
@@ -286,8 +248,6 @@ void HoughPeak<debug_enabled, use_theta>::findPeaks()
 
     if(debug_enabled) {
         log << "peak (peaks=" << peaks.size() << ")\n";
-        log << "peak (rest): " << stopwatch.usElapsed() * 1e-3 << "ms\n";
-        stopwatch.reset();
     }
 }
 

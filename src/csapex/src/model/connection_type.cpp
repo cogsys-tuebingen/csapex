@@ -37,6 +37,11 @@ std::string ConnectionType::name() const
     return name_;
 }
 
+std::string ConnectionType::rawName() const
+{
+    return name_;
+}
+
 ConnectionType::Ptr ConnectionType::makeDefault()
 {
     if(!default_) {

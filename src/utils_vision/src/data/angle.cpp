@@ -3,7 +3,17 @@
 
 /// SYSTEM
 #include <cmath>
-#include <utils/LibUtil/MathHelper.h>
+
+namespace MathHelper {
+double NormalizeAngle(const double angle) {
+  double ret = angle;
+  while (ret > M_PI)
+    ret -= 2.0 * M_PI;
+  while (ret < -M_PI)
+    ret += 2.0 * M_PI;
+  return ret;
+}
+}
 
 Angle::Angle(double radians)
     : value_(MathHelper::NormalizeAngle(radians))

@@ -4,7 +4,7 @@
 /// PROJECT
 
 #include <csapex/model/connector_in.h>
-#include <utils/LibUtil/QtCvImageConverter.h>
+#include <utils_qt/QtCvImageConverter.h>
 #include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM

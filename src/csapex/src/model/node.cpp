@@ -220,8 +220,11 @@ void Node::setNodeStateLater(NodeStatePtr s)
     if(m) {
         for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
             param::Parameter* param = it->second.get();
-//            *state.params[param->name()] = param->as<double>();
-            *state.params[param->name()] = *param;
+            if(state.params.find(param->name()) != state.params.end()) {
+                *state.params[param->name()] = *param;
+            } else {
+                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
+            }
         }
     }
     loaded_state_available_ = true;
@@ -237,17 +240,17 @@ void Node::setState(Memento::Ptr memento)
     boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
     assert(m.get());
 
-    if(state.params.size() != m->params.size()) {
-        std::map<std::string, param::Parameter::Ptr> old_params = state.params;
-        state = *m;
-        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = old_params.begin(); it != old_params.end(); ++it) {
-            param::Parameter::Ptr p = it->second;
-            if(state.params.find(p->name()) == state.params.end()) {
-                state.params[p->name()] = p;
-            }
+    std::map<std::string, param::Parameter::Ptr> old_params = state.params;
+    state = *m;
+    state.params = old_params;
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it) {
+        param::Parameter::Ptr p = it->second;
+        if(state.params.find(p->name()) == state.params.end()) {
+            std::cout << "warning: parameter " << p->name() << " is not set!" << std::endl;
+        } else {
+            state.params[p->name()] = p;
+            std::cout << "warning: set parameter " << p->name() << std::endl;
         }
-    } else {
-        state = *m;
     }
 
     Q_EMIT modelChanged();
