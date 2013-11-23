@@ -21,7 +21,7 @@ using namespace csapex;
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
-CsApexCore::CsApexCore()
+CsApexCore::CsApexCore(const std::string& config)
     : cmd_dispatch(new CommandDispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin"))
 {
     destruct = true;
@@ -34,7 +34,7 @@ CsApexCore::CsApexCore()
     Tag::createIfNotExists("Template");
     Tag::createIfNotExists("Temporary");
 
-    setCurrentConfig(GraphIO::default_config);
+    setCurrentConfig(config);
 }
 
 CsApexCore::CsApexCore(CommandDispatcher* dispatcher)

@@ -7,6 +7,7 @@
 #include <csapex/view/box.h>
 #include <csapex/model/boxed_object.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/core/graphio.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -79,9 +80,9 @@ int Main::run()
     return result;
 }
 
-int Main::main(bool headless)
+int Main::main(bool headless, const std::string& config)
 {
-    CsApexCore core;
+    CsApexCore core(config);
 
     if(!headless) {
         /*
@@ -128,14 +129,18 @@ int main(int argc, char** argv)
     desc.add_options()
             ("help", "show help message")
             ("headless", "run without gui")
+            ("input", "config file to load")
             ;
+
+    po::positional_options_description p;
+    p.add("input", -1);
 
     // filters all qt parameters from argv
     CsApexApp app(argc, argv);
 
     po::variables_map vm;
     try {
-        po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
+        po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
 
     } catch(po::unknown_option& e) {
         std::cerr << "Error parsing parameters: " << e.what() << "\n";
@@ -150,8 +155,14 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    std::string input;
+    if (vm.count("input")) {
+        input = vm["input"].as<std::string>();
+    } else {
+        input = GraphIO::default_config;
+    }
 
     Main m(app);
-    return m.main(vm.count("headless"));
+    return m.main(vm.count("headless"), input);
 }
 

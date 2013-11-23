@@ -23,7 +23,7 @@ public:
     Main(CsApexApp& app);
 
     int run();
-    int main(bool headless);
+    int main(bool headless, const std::string &config);
 
 public Q_SLOTS:
     void showMessage(const QString& msg);

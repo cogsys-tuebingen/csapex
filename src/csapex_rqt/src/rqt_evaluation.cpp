@@ -5,6 +5,7 @@
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/view/designer.h>
 #include <csapex/model/graph.h>
+#include <csapex/core/graphio.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -18,6 +19,7 @@ using namespace csapex_rqt;
 using namespace csapex;
 
 CsApex::CsApex()
+    : core_(GraphIO::default_config)
 {
 }
 

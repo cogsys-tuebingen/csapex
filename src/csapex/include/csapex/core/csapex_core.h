@@ -22,7 +22,7 @@ public:
     };
 
 public:
-    CsApexCore();
+    CsApexCore(const std::string &config);
     CsApexCore(CommandDispatcher* dispatcher);
     virtual ~CsApexCore();
 
