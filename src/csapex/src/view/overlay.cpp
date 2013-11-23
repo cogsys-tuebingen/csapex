@@ -233,17 +233,27 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
 
         if(current == from) {
             cp1 = current + delta + offset;
+
         } else {
-            cp1 = current + tangent;
+            const Connection::Fulcrum& last = targets[sub_section-1];
+            if(last.type == Connection::Fulcrum::LINEAR) {
+                cp1 = current;
+            } else {
+                cp1 = current + tangent;
+            }
         }
 
         if(fulcrum == to) {
             cp2 = fulcrum - delta + offset;
         } else {
-            const QPoint& next = targets[sub_section+1].pos;
-            tangent = (next - current);
+            const Connection::Fulcrum& next = targets[sub_section+1];
+            tangent = (next.pos - current);
             tangent*= 50.0 / hypot(diff.x(), diff.y());
             cp2 = fulcrum - tangent;
+        }
+
+        if(fulcrum_.type == Connection::Fulcrum::LINEAR) {
+            cp2 = fulcrum;
         }
         path.cubicTo(cp1, cp2, fulcrum);
 
@@ -404,6 +414,10 @@ bool Overlay::mousePressEventHandler(QMouseEvent *)
 bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
 {
     if(splicing) {
+        if(drag_connection_ == -1) {
+            return false;
+        }
+
         QPoint from = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_).pos;
         dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(drag_connection_, drag_sub_section_, from, current_splicing_handle_)));
 
