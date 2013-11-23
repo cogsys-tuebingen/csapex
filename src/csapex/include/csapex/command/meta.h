@@ -26,6 +26,11 @@ protected:
     bool doUndo();
     bool doRedo();
 
+    virtual QTreeWidgetItem* createDebugInformation() const;
+
+    virtual std::string getType() const;
+    virtual std::string getDescription() const;
+
 protected:
     std::vector<Command::Ptr> nested;
     bool locked;

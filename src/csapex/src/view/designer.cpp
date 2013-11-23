@@ -15,7 +15,7 @@
 using namespace csapex;
 
 Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), dispatcher_(dispatcher), menu(NULL)
+    : QWidget(parent), ui(new Ui::Designer), dispatcher_(dispatcher), box_selection_menu(NULL)
 {
     ui->setupUi(this);
 
@@ -24,6 +24,8 @@ Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
 
     designer_board = new DesignBoard(dispatcher);
     ui->scrollArea->setWidget(designer_board);
+
+    QObject::connect(dispatcher, SIGNAL(stateChanged()), this, SLOT(updateUndoInfo()));
 }
 
 Designer::~Designer()
@@ -47,7 +49,7 @@ void Designer::keyReleaseEvent(QKeyEvent* e)
 
 void Designer::resizeEvent(QResizeEvent*)
 {
-    if(menu == NULL) {
+    if(box_selection_menu == NULL) {
         reloadBoxMenues();
     }
 }
@@ -80,16 +82,26 @@ void Designer::updateDebugInfo()
     boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
     graph->foreachBox(append, boost::bind(&Box::isSelected, _1));
 
-    debug->clear();
+    box_info->clear();
 
     foreach (Box* box, selected) {
         Node* node = box->getNode();
         QObject::connect(node, SIGNAL(stateChanged()), this, SLOT(updateDebugInfo()));
-        debug->addTopLevelItem(node->createDebugInformation());
+        box_info->addTopLevelItem(node->createDebugInformation());
     }
 
-    debug->expandAll();
+    box_info->expandAll();
+}
 
+void Designer::updateUndoInfo()
+{
+    undo_stack->clear();
+    redo_stack->clear();
+
+    dispatcher_->populateDebugInfo(undo_stack, redo_stack);
+
+    undo_stack->expandAll();
+    redo_stack->expandAll();
 }
 
 void Designer::reloadBoxMenues()
@@ -102,20 +114,44 @@ void Designer::reloadBoxMenues()
         ui->debug->setLayout(new QVBoxLayout);
     }
 
-    menu = new QTreeWidget;
-    menu->setHeaderLabel("Type");
-    menu->setColumnCount(1);
-    BoxManager::instance().insertAvailableBoxedObjects(menu);
-    ui->boxes->layout()->addWidget(menu);
+    box_selection_menu = new QTreeWidget;
+    box_selection_menu->setHeaderLabel("Type");
+    box_selection_menu->setColumnCount(1);
+    BoxManager::instance().insertAvailableBoxedObjects(box_selection_menu);
+    ui->boxes->layout()->addWidget(box_selection_menu);
 
+    box_info = new QTreeWidget;
+    QStringList box_info_labels;
+    box_info_labels.append("Property");
+    box_info_labels.append("Value");
+    box_info->setHeaderLabels(box_info_labels);
+    box_info->setColumnCount(2);
 
-    debug = new QTreeWidget();
-    QStringList labels;
-    labels.append("Property");
-    labels.append("Value");
-    debug->setHeaderLabels(labels);
-    debug->setColumnCount(2);
-    ui->debug->layout()->addWidget(debug);
+    undo_stack = new QTreeWidget;
+    QStringList undo_labels;
+    undo_labels.append("Command");
+    undo_labels.append("Type");
+    undo_stack->setHeaderLabels(undo_labels);
+    undo_stack->setColumnCount(2);
+
+    redo_stack = new QTreeWidget;
+    QStringList redo_labels;
+    redo_labels.append("Command");
+    redo_labels.append("Type");
+    redo_stack->setHeaderLabels(redo_labels);
+    redo_stack->setColumnCount(2);
+
+    QWidget* undo_redo = new QWidget;
+    undo_redo->setLayout(new QVBoxLayout);
+    undo_redo->layout()->addWidget(new QLabel("Undo stack"));
+    undo_redo->layout()->addWidget(undo_stack);
+    undo_redo->layout()->addWidget(new QLabel("Redo stack"));
+    undo_redo->layout()->addWidget(redo_stack);
+
+    debug_tabs = new QTabWidget;
+    debug_tabs->addTab(box_info, "Box Information");
+    debug_tabs->addTab(undo_redo, "Undo/Redo Stack");
+    ui->debug->layout()->addWidget(debug_tabs);
 
     Graph::Ptr graph = dispatcher_->getGraph();
     QObject::connect(graph.get(), SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));

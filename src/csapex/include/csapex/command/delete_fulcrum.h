@@ -22,6 +22,9 @@ protected:
     bool doUndo();
     bool doRedo();
 
+    virtual std::string getType() const;
+    virtual std::string getDescription() const;
+
 private:
     int connection_id;
     int fulcrum_id;

@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <QTreeWidgetItem>
 
 namespace csapex
 {
@@ -40,6 +41,11 @@ public:
 
     void setBeforeSavepoint(bool save);
     bool isBeforeSavepoint();
+
+    virtual QTreeWidgetItem* createDebugInformation() const;
+
+    virtual std::string getType() const = 0;
+    virtual std::string getDescription() const = 0;
 
 protected:
     static bool executeCommand(GraphPtr graph, CommandPtr cmd);

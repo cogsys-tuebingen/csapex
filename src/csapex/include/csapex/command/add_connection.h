@@ -23,6 +23,9 @@ protected:
 
     void refresh();
 
+    virtual std::string getType() const;
+    virtual std::string getDescription() const;
+
 private:
     ConnectorOut* from;
     ConnectorIn* to;

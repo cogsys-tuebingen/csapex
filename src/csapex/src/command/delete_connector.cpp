@@ -20,6 +20,17 @@ DeleteConnector::DeleteConnector(Connector *_c) :
     c_uuid = c->UUID();
 }
 
+std::string DeleteConnector::getType() const
+{
+    return "DeleteConnector";
+}
+
+std::string DeleteConnector::getDescription() const
+{
+    return std::string("deleted connector with UUID ") + c_uuid;
+}
+
+
 bool DeleteConnector::doExecute()
 {
     Node* node = graph_->findNodeForConnector(c_uuid);

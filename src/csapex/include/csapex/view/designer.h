@@ -41,6 +41,7 @@ public Q_SLOTS:
     void stateChangedEvent();
     void reloadBoxMenues();
     void updateDebugInfo();
+    void updateUndoInfo();
 
     void enableGrid(bool);
     void reset();
@@ -55,8 +56,12 @@ private:
     bool drag_;
     QPoint drag_start_pos_;
 
-    QTreeWidget* menu;
-    QTreeWidget* debug;
+    QTreeWidget* box_selection_menu;
+
+    QTabWidget* debug_tabs;
+    QTreeWidget* box_info;
+    QTreeWidget* undo_stack;
+    QTreeWidget* redo_stack;
 };
 
 }

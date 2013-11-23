@@ -5,6 +5,9 @@
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
 
+/// SYSTEM
+#include <sstream>
+
 using namespace csapex::command;
 
 AddFulcrum::AddFulcrum(int connection_id, int sub_section_to_split, const QPoint &pos)
@@ -12,6 +15,19 @@ AddFulcrum::AddFulcrum(int connection_id, int sub_section_to_split, const QPoint
 {
 
 }
+
+std::string AddFulcrum::getType() const
+{
+    return "AddFulcrum";
+}
+
+std::string AddFulcrum::getDescription() const
+{
+    std::stringstream ss;
+    ss << "added a fulcrum to connection " << connection_id;
+    return ss.str();
+}
+
 
 bool AddFulcrum::doExecute()
 {

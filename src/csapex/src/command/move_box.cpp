@@ -14,6 +14,20 @@ MoveBox::MoveBox(Box* box, QPoint to)
     uuid = box->getNode()->UUID();
 }
 
+std::string MoveBox::getType() const
+{
+    return "MoveBox";
+}
+
+std::string MoveBox::getDescription() const
+{
+    std::stringstream ss;
+    ss << "moved box " << uuid << " from (" << from.x() << ", " << from.y() << ") to";
+    ss << "(" << to.x() << ", " << to.y() << ")";
+    return ss.str();
+}
+
+
 bool MoveBox::doExecute()
 {
     Box* box = graph_->findNode(uuid)->getBox();

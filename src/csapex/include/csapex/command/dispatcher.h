@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <deque>
 #include <QObject>
+#include <QTreeWidget>
 
 namespace csapex
 {
@@ -39,6 +40,8 @@ public:
     GraphPtr getGraph();
 
     void executeNotUndoable(Command::Ptr command);
+
+    void populateDebugInfo(QTreeWidget* undo, QTreeWidget *redo);
 
 public Q_SLOTS:
     void setDirty();

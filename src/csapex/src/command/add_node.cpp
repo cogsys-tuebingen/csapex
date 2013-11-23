@@ -22,6 +22,17 @@ AddNode::AddNode(const std::string &type, QPoint pos, const std::string &parent_
     }
 }
 
+std::string AddNode::getType() const
+{
+    return "AddNode";
+}
+
+std::string AddNode::getDescription() const
+{
+    return std::string("added a node of type ") + type_ + " and UUID " + uuid_;
+}
+
+
 bool AddNode::doExecute()
 {
     if(uuid_.empty()) {

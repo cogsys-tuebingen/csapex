@@ -23,6 +23,9 @@ protected:
     bool doUndo();
     bool doRedo();
 
+    virtual std::string getType() const;
+    virtual std::string getDescription() const;
+
 protected:
     QPoint from;
     QPoint to;

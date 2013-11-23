@@ -16,6 +16,17 @@ DeleteNode::DeleteNode(const std::string &uuid)
 {
 }
 
+std::string DeleteNode::getType() const
+{
+    return "DeleteNode";
+}
+
+std::string DeleteNode::getDescription() const
+{
+    return std::string("deleted node ") + uuid;
+}
+
+
 bool DeleteNode::doExecute()
 {
     Node* node = graph_->findNode(uuid);

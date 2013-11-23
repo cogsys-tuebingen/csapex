@@ -21,6 +21,16 @@ AddConnection::AddConnection(const std::string &from_uuid, const std::string &to
 {
 }
 
+std::string AddConnection::getType() const
+{
+    return "AddConnection";
+}
+
+std::string AddConnection::getDescription() const
+{
+    return std::string("added a connection between ") + from_uuid + " and " + to_uuid;
+}
+
 bool AddConnection::doExecute()
 {
     if(from == NULL) {

@@ -82,3 +82,11 @@ bool Command::isBeforeSavepoint()
 {
     return before_save_point_;
 }
+
+QTreeWidgetItem* Command::createDebugInformation() const
+{
+    QTreeWidgetItem* tl = new QTreeWidgetItem;
+    tl->setText(0, getType().c_str());
+    tl->setText(1, getDescription().c_str());
+    return tl;
+}

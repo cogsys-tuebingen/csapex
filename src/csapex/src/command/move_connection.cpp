@@ -45,3 +45,9 @@ MoveConnection::MoveConnection(Connector *from, Connector *to)
         add(Command::Ptr(new AddConnection(target->UUID(), to_uuid)));
     }
 }
+
+
+std::string MoveConnection::getType() const
+{
+    return "MoveConnection";
+}

@@ -11,6 +11,29 @@ Meta::Meta()
 {
 }
 
+QTreeWidgetItem* Meta::createDebugInformation() const
+{
+    QTreeWidgetItem* tl = new QTreeWidgetItem;
+    tl->setText(0, getType().c_str());
+    tl->setText(1, getDescription().c_str());
+
+    BOOST_FOREACH(Command::Ptr cmd, nested) {
+        tl->addChild(cmd->createDebugInformation());
+    }
+    return tl;
+}
+
+std::string Meta::getType() const
+{
+    return "Group of Commands";
+}
+
+std::string Meta::getDescription() const
+{
+    return "";
+}
+
+
 void Meta::add(Command::Ptr cmd)
 {
     assert(!locked);

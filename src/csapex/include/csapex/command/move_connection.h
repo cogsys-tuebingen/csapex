@@ -14,6 +14,8 @@ struct MoveConnection : public Meta
 {
     MoveConnection(Connector* a, Connector* b);
 
+    virtual std::string getType() const;
+
 private:
     bool output;
 

@@ -189,3 +189,13 @@ Graph::Ptr CommandDispatcher::getGraph()
 {
     return graph_;
 }
+
+void CommandDispatcher::populateDebugInfo(QTreeWidget *undo, QTreeWidget *redo)
+{
+    foreach(const Command::Ptr& c, done) {
+        undo->addTopLevelItem(c->createDebugInformation());
+    }
+    foreach(const Command::Ptr& c, undone) {
+        redo->addTopLevelItem(c->createDebugInformation());
+    }
+}

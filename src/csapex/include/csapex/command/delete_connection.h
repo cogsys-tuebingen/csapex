@@ -20,6 +20,9 @@ protected:
 
     bool refresh();
 
+    virtual std::string getType() const;
+    virtual std::string getDescription() const;
+
 private:
     Command::Ptr remove_fulcrums;
 

@@ -21,6 +21,17 @@ AddConnector::AddConnector(const std::string &box_uuid, const std::string& label
 
 }
 
+std::string AddConnector::getType() const
+{
+    return "AddConnector";
+}
+
+std::string AddConnector::getDescription() const
+{
+    return std::string("added a connector with UUID ") + c_uuid + " to " + b_uuid;
+}
+
+
 bool AddConnector::doExecute()
 {
     Node* node = graph_->findNode(b_uuid);

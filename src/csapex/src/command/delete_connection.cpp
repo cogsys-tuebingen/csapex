@@ -31,6 +31,17 @@ DeleteConnection::DeleteConnection(Connector* a, Connector* b)
     to_uuid = to->UUID();
 }
 
+std::string DeleteConnection::getType() const
+{
+    return "DeleteConnection";
+}
+
+std::string DeleteConnection::getDescription() const
+{
+    return std::string("deleted connection between ") + from_uuid + " and " + to_uuid;
+}
+
+
 bool DeleteConnection::doExecute()
 {
     Connection::Ptr connection(new Connection(from, to));
