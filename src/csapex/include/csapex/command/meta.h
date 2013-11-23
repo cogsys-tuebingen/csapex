@@ -16,7 +16,7 @@ namespace command
 struct Meta : public Command {
     typedef boost::shared_ptr<Meta> Ptr;
 
-    Meta();
+    Meta(const std::string& type);
     void add(Command::Ptr cmd);
 
     int commands() const;
@@ -34,6 +34,7 @@ protected:
 protected:
     std::vector<Command::Ptr> nested;
     bool locked;
+    std::string type;
 };
 }
 }

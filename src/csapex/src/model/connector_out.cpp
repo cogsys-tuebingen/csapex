@@ -67,7 +67,7 @@ Command::Ptr ConnectorOut::removeConnectionCmd(ConnectorIn* other_side) {
 
 Command::Ptr ConnectorOut::removeAllConnectionsCmd()
 {
-    command::Meta::Ptr removeAll(new command::Meta);
+    command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
     BOOST_FOREACH(ConnectorIn* target, targets_) {
         Command::Ptr removeThis(new command::DeleteConnection(this, target));

@@ -15,7 +15,7 @@ namespace command
 
 struct AddFulcrum : public Command
 {
-    AddFulcrum(int connection_id, int sub_section_to_split, const QPoint& pos);
+    AddFulcrum(int connection_id, int sub_section_to_split, const QPoint& pos, int type);
 
 protected:
     bool doExecute();
@@ -29,6 +29,7 @@ private:
     int connection_id;
     int sub_section_to_split;
     const QPoint pos;
+    int type;
 };
 
 }

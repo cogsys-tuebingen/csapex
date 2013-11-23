@@ -15,6 +15,7 @@
 using namespace csapex::command;
 
 MoveConnection::MoveConnection(Connector *from, Connector *to)
+    : Meta("MoveConnection")
 {
     assert(from);
     assert(to);
@@ -44,10 +45,4 @@ MoveConnection::MoveConnection(Connector *from, Connector *to)
         add(Command::Ptr(new DeleteConnection(target, from)));
         add(Command::Ptr(new AddConnection(target->UUID(), to_uuid)));
     }
-}
-
-
-std::string MoveConnection::getType() const
-{
-    return "MoveConnection";
 }

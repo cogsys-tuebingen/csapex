@@ -6,8 +6,8 @@
 
 using namespace csapex::command;
 
-Meta::Meta()
-    : locked(false)
+Meta::Meta(const std::string &type)
+    : locked(false), type(type)
 {
 }
 
@@ -25,7 +25,7 @@ QTreeWidgetItem* Meta::createDebugInformation() const
 
 std::string Meta::getType() const
 {
-    return "Group of Commands";
+    return type;
 }
 
 std::string Meta::getDescription() const

@@ -153,8 +153,8 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
         yaml << YAML::Key << "to" << YAML::Value << connection->to()->UUID();
 
         yaml << YAML::Key << "pts" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-        foreach(const QPoint& pt, connection->getFulcrums()) {
-            yaml << YAML::Flow << YAML::BeginSeq << pt.x() << pt.y() << YAML::EndSeq;
+        foreach(const Connection::Fulcrum& f, connection->getFulcrums()) {
+            yaml << YAML::Flow << YAML::BeginSeq << f.pos.x() << f.pos.y() << YAML::EndSeq;
         }
 
         yaml << YAML::EndSeq;
@@ -251,9 +251,15 @@ void GraphIO::loadConnections(YAML::Node &doc)
             std::vector< std::vector<int> > pts;
             fulcrum["pts"] >> pts;
 
+            std::vector<int> types;
+            if(fulcrum.FindValue("type")) {
+                fulcrum["type"] >> types;
+            }
+
             int n = pts.size();
             for(int i = 0; i < n; ++i) {
-                connection->addFulcrum(i, QPoint(pts[i][0], pts[i][1]));
+                int type = (!types.empty()) ? types[i] : Connection::Fulcrum::CURVE;
+                connection->addFulcrum(i, QPoint(pts[i][0], pts[i][1]), type);
             }
         }
     }

@@ -339,7 +339,7 @@ void Graph::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box
 
 Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
 {
-    command::Meta::Ptr meta(new command::Meta);
+    command::Meta::Ptr meta(new command::Meta("Move Selected Boxes"));
 
     foreach(Node::Ptr b, nodes_) {
         if(b->getBox()->isSelected()) {
@@ -351,8 +351,8 @@ Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
         if(connection->from()->getNode()->getBox()->isSelected() && connection->to()->getNode()->getBox()->isSelected()) {
             int n = connection->getFulcrumCount();
             for(int i = 0; i < n; ++i) {
-                QPoint pos = connection->getFulcrum(i);
-                meta->add(Command::Ptr(new command::MoveFulcrum(connection->id(), i, pos - delta, pos)));
+                const Connection::Fulcrum& f = connection->getFulcrum(i);
+                meta->add(Command::Ptr(new command::MoveFulcrum(connection->id(), i, f.pos - delta, f.pos)));
             }
         }
     }
@@ -412,7 +412,7 @@ void Graph::stop()
 
 Command::Ptr Graph::clear()
 {
-    command::Meta::Ptr clear(new command::Meta);
+    command::Meta::Ptr clear(new command::Meta("Clear Graph"));
 
     foreach(Node::Ptr node, nodes_) {
         Command::Ptr cmd(new command::DeleteNode(node->UUID()));
@@ -656,7 +656,7 @@ Command::Ptr Graph::deleteConnectionFulcrumCommand(int connection, int fulcrum)
 
 Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(int connection)
 {
-    command::Meta::Ptr meta(new command::Meta);
+    command::Meta::Ptr meta(new command::Meta("Delete All Connection Fulcrums"));
     int n = getConnectionWithId(connection)->getFulcrumCount();
     for(int i = n - 1; i >= 0; --i) {
         meta->add(deleteConnectionFulcrumCommand(connection, i));
@@ -680,7 +680,7 @@ Command::Ptr Graph::deleteConnectionById(int id)
 
 Command::Ptr Graph::deleteSelectedConnectionsCmd()
 {
-    command::Meta::Ptr meta(new command::Meta);
+    command::Meta::Ptr meta(new command::Meta("Delete Selected Connections"));
 
     foreach(const Connection::Ptr& connection, visible_connections) {
         if(isConnectionWithIdSelected(connection->id())) {
@@ -735,7 +735,7 @@ bool Graph::isConnectionWithIdSelected(int id)
 
 Command::Ptr Graph::deleteSelectedNodesCmd()
 {
-    command::Meta::Ptr meta(new command::Meta);
+    command::Meta::Ptr meta(new command::Meta("Delete Selected Nodes"));
 
     foreach(Node::Ptr n, nodes_) {
         if(n->getBox()->isSelected()) {
@@ -771,7 +771,7 @@ Command::Ptr Graph::groupSelectedNodesCmd()
 
     std::string group_uuid = makeUUID(type);
 
-    command::Meta::Ptr meta(new command::Meta);
+    command::Meta::Ptr meta(new command::Meta("Group Selected Nodes"));
 
     foreach(Node::Ptr n, nodes_) {
         if(n->getBox()->isSelected()) {
@@ -828,7 +828,7 @@ void Graph::boxMoved(Box *box, int dx, int dy)
             if(connection->from()->getNode()->getBox()->isSelected() && connection->to()->getNode()->getBox()->isSelected()) {
                 int n = connection->getFulcrumCount();
                 for(int i = 0; i < n; ++i) {
-                    connection->moveFulcrum(i, connection->getFulcrum(i) + QPoint(dx,dy));
+                    connection->moveFulcrum(i, connection->getFulcrum(i).pos + QPoint(dx,dy));
                 }
             }
         }

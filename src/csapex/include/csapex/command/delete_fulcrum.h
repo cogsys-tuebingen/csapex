@@ -29,6 +29,7 @@ private:
     int connection_id;
     int fulcrum_id;
     QPoint pos;
+    int type;
 };
 
 }

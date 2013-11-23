@@ -173,13 +173,13 @@ void Overlay::drawConnection(Connection& connection)
     drawActivity(f, to);
 
     int sub_section = 0;
-    foreach(const QPoint& pt, connection.getFulcrums()) {
+    foreach(const Connection::Fulcrum& f, connection.getFulcrums()) {
         int r = 4;
         painter->setPen(QPen(Qt::black, 3));
         if(splicing && drag_connection_ == connection.id() && sub_section == drag_sub_section_) {
             painter->drawEllipse(current_splicing_handle_, r, r);
         } else {
-            painter->drawEllipse(pt, r, r);
+            painter->drawEllipse(f.pos, r, r);
         }
 
         ++sub_section;
@@ -202,19 +202,19 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
     QPoint current = from;
     QPoint last;
 
-    std::vector<QPoint> targets;
+    std::vector<Connection::Fulcrum> targets;
     if(id >= 0) {
         targets = graph_->getConnectionWithId(id)->getFulcrums();
     }
-    targets.push_back(to);
+    targets.push_back(Connection::Fulcrum(to, Connection::Fulcrum::CURVE));
 
     int sub_section = 0;
 
     QPoint cp1, cp2;
     QPoint tangent;
 
-    foreach(const QPoint& fulcrum_, targets) {
-        QPoint fulcrum = fulcrum_;
+    foreach(const Connection::Fulcrum& fulcrum_, targets) {
+        QPoint fulcrum = fulcrum_.pos;
 
         if(splicing && drag_connection_ == id && sub_section == drag_sub_section_) {
             fulcrum = current_splicing_handle_;
@@ -240,7 +240,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
         if(fulcrum == to) {
             cp2 = fulcrum - delta + offset;
         } else {
-            const QPoint& next = targets[sub_section+1];
+            const QPoint& next = targets[sub_section+1].pos;
             tangent = (next - current);
             tangent*= 50.0 / hypot(diff.x(), diff.y());
             cp2 = fulcrum - tangent;
@@ -404,7 +404,7 @@ bool Overlay::mousePressEventHandler(QMouseEvent *)
 bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
 {
     if(splicing) {
-        QPoint from = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
+        QPoint from = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_).pos;
         dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(drag_connection_, drag_sub_section_, from, current_splicing_handle_)));
 
         splicing = false;
@@ -456,7 +456,8 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
                 splicing = true;
 
             } else {
-                Command::Ptr make_fulcrum(new command::AddFulcrum(highlight_connection_id_, drag_sub_section_, drag_connection_handle_));
+                int type = Connection::Fulcrum::CURVE;
+                Command::Ptr make_fulcrum(new command::AddFulcrum(highlight_connection_id_, drag_sub_section_, drag_connection_handle_, type));
                 dispatcher_->execute(make_fulcrum);
             }
             return false;
@@ -489,11 +490,11 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
             foreach(const Connection::Ptr& connection, graph_->visible_connections) {
                 int sub_section = 0;
 
-                foreach(const QPoint& fulcrum, connection->getFulcrums()) {
-                    double dist = hypot(fulcrum.x() - x, fulcrum.y() - y);
+                foreach(const Connection::Fulcrum& fulcrum, connection->getFulcrums()) {
+                    double dist = hypot(fulcrum.pos.x() - x, fulcrum.pos.y() - y);
                     if(dist < closest_dist) {
                         closest_dist = dist;
-                        drag_connection_handle_ = fulcrum;
+                        drag_connection_handle_ = fulcrum.pos;
                         fulcrum_is_hovered_ = true;
                         drag_sub_section_ = sub_section;
                         drag_connection_ = connection->id();
@@ -555,14 +556,54 @@ bool Overlay::showConnectionContextMenu(const QPoint& global_pos)
 
 bool Overlay::showFulcrumContextMenu(const QPoint& global_pos)
 {
+    Connection::Fulcrum fulc = dispatcher_->getGraph()->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
+
     QMenu menu;
     QAction* del = new QAction("delete fulcrum", &menu);
     menu.addAction(del);
+
+    QMenu type("change type");
+
+    QAction* curve = new QAction("curve", &menu);
+    curve->setCheckable(true);
+    if(fulc.type == Connection::Fulcrum::CURVE) {
+        curve->setDisabled(true);
+        curve->setChecked(true);
+    }
+    type.addAction(curve);
+
+    QAction* linear = new QAction("linear", &menu);
+    linear->setCheckable(true);
+    if(fulc.type == Connection::Fulcrum::LINEAR) {
+        linear->setDisabled(true);
+        linear->setChecked(true);
+    }
+    type.addAction(linear);
+
+    menu.addMenu(&type);
 
     QAction* selectedItem = menu.exec(global_pos);
 
     if(selectedItem == del) {
         dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
+
+    } else if(selectedItem == curve || selectedItem == linear) {
+        int type = 0;
+        if(selectedItem == curve) {
+            type = Connection::Fulcrum::CURVE;
+
+        } else if(selectedItem == linear) {
+            type = Connection::Fulcrum::LINEAR;
+
+        } else {
+            return true;
+        }
+
+        command::Meta::Ptr cmd(new command::Meta("Change Fulcrum Type"));
+        cmd->add(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
+        cmd->add(Command::Ptr(new command::AddFulcrum(drag_connection_, drag_sub_section_, fulc.pos, type)));
+        dispatcher_->execute(cmd);
+
     } else {
         fulcrum_is_hovered_ = false;
         drag_connection_handle_ = QPoint();

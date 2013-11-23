@@ -27,6 +27,19 @@ class Connection : public QObject, public Selectable {
 public:
     typedef boost::shared_ptr<Connection> Ptr;
 
+    struct Fulcrum {
+        enum Type {
+            CURVE = 0,
+            LINEAR = 1
+        };
+        Fulcrum(const QPoint& p, int t)
+            : type(t), pos(p)
+        {}
+
+        int type;
+        QPoint pos;
+    };
+
 public:
     static const int activity_marker_max_lifetime_;
 
@@ -59,16 +72,16 @@ Q_SIGNALS:
 public:
     bool operator == (const Connection& c) const;
 
-    std::vector<QPoint> getFulcrums() const;
+    std::vector<Fulcrum> getFulcrums() const;
     int getFulcrumCount() const;
-    QPoint getFulcrum(int fulcrum_id);
+    Fulcrum getFulcrum(int fulcrum_id);
 
 protected:
     Connection(Connector* from, Connector* to);
 
 private:
     /// COMMANDS
-    void addFulcrum(int subsection, const QPoint& pos);
+    void addFulcrum(int subsection, const QPoint& pos, int type);
     void moveFulcrum(int fulcrum_id, const QPoint& pos);
     void deleteFulcrum(int fulcrum_id);
 
@@ -76,7 +89,7 @@ protected:
     Connector* from_;
     Connector* to_;
 
-    std::vector<QPoint> fulcrums_;
+    std::vector<Fulcrum> fulcrums_;
 
     int id_;
 

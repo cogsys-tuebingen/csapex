@@ -73,7 +73,7 @@ void Connection::tick()
     message_count = std::max(0.0, message_count - 0.1);
 }
 
-std::vector<QPoint> Connection::getFulcrums() const
+std::vector<Connection::Fulcrum> Connection::getFulcrums() const
 {
     return fulcrums_;
 }
@@ -83,22 +83,22 @@ int Connection::getFulcrumCount() const
     return fulcrums_.size();
 }
 
-QPoint Connection::getFulcrum(int fulcrum_id)
+Connection::Fulcrum Connection::getFulcrum(int fulcrum_id)
 {
     return fulcrums_[fulcrum_id];
 }
 
-void Connection::addFulcrum(int subsection, const QPoint &pos)
+void Connection::addFulcrum(int subsection, const QPoint &pos, int type)
 {
     std::size_t before = fulcrums_.size();
-    fulcrums_.insert(fulcrums_.begin() + subsection, pos);
+    fulcrums_.insert(fulcrums_.begin() + subsection, Connection::Fulcrum(pos, type));
     assert(before == fulcrums_.size() - 1);
     Q_EMIT fulcrum_added(this);
 }
 
 void Connection::moveFulcrum(int fulcrum_id, const QPoint &pos)
 {
-    fulcrums_[fulcrum_id] = pos;
+    fulcrums_[fulcrum_id].pos = pos;
     Q_EMIT fulcrum_moved(this);
 }
 

@@ -29,14 +29,16 @@ std::string DeleteFulcrum::getDescription() const
 
 bool DeleteFulcrum::doExecute()
 {
-    pos = graph_->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
+    Connection::Fulcrum f = graph_->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
+    pos = f.pos;
+    type = f.type;
     graph_->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
     return true;
 }
 
 bool DeleteFulcrum::doUndo()
 {
-    graph_->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos);
+    graph_->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos, type);
     return true;
 }
 
