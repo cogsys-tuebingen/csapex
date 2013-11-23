@@ -13,15 +13,16 @@ Command::Command()
 {
 }
 
-
 bool Command::Access::executeCommand(GraphPtr graph, Command::Ptr cmd)
 {
     return Command::executeCommand(graph, cmd);
 }
+
 bool Command::Access::undoCommand(GraphPtr graph, Command::Ptr cmd)
 {
     return Command::undoCommand(graph, cmd);
 }
+
 bool Command::Access::redoCommand(GraphPtr graph, Command::Ptr cmd)
 {
     return Command::redoCommand(graph, cmd);
@@ -31,6 +32,7 @@ void Command::setGraph(Graph::Ptr graph)
 {
     graph_ = graph;
 }
+
 Graph::Ptr Command::getGraph()
 {
     return graph_;
@@ -42,6 +44,7 @@ bool Command::executeCommand(GraphPtr graph, Command::Ptr cmd)
     assert(cmd->graph_);
     return cmd->doExecute();
 }
+
 bool Command::undoCommand(GraphPtr graph, Command::Ptr cmd)
 {
     cmd->graph_ = graph;
@@ -53,6 +56,7 @@ bool Command::undoCommand(GraphPtr graph, Command::Ptr cmd)
 
     return true;
 }
+
 bool Command::redoCommand(GraphPtr graph, Command::Ptr cmd)
 {
     if(graph) {
