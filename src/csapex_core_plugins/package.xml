@@ -9,11 +9,9 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
-  <build_depend>utils_plugin</build_depend>
   <build_depend>csapex</build_depend>
 
   <run_depend>roscpp</run_depend>
-  <run_depend>utils_plugin</run_depend>
   <run_depend>csapex</run_depend>
 
   <export>

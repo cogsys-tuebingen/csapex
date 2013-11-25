@@ -20,7 +20,6 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>utils_qt</build_depend>
   <build_depend>utils_vision</build_depend>
-  <build_depend>utils_plugin</build_depend>
   <build_depend>utils_vision</build_depend>
   <build_depend>csapex</build_depend>
   <build_depend>csapex_core_plugins</build_depend>
@@ -34,7 +33,6 @@
   <run_depend>cv_bridge</run_depend>
   <run_depend>utils_qt</run_depend>
   <run_depend>utils_vision</run_depend>
-  <run_depend>utils_plugin</run_depend>
   <run_depend>utils_vision</run_depend>
   <run_depend>csapex</run_depend>
   <run_depend>csapex_core_plugins</run_depend>

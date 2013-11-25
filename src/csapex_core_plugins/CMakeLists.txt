@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(csapex_core_plugins)
 
-find_package(catkin REQUIRED COMPONENTS roscpp utils_plugin csapex)
+find_package(catkin REQUIRED COMPONENTS roscpp csapex)
 
 find_package(Boost REQUIRED)
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
