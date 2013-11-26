@@ -17,12 +17,10 @@ find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
-
 file(GLOB   QT_FORMS    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}  ui/*.ui)
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
 
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_resources.qrc)
-
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
