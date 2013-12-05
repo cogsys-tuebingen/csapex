@@ -16,24 +16,24 @@ class ParameterProvider
 public:
     ParameterProvider();
 
-    const Parameter operator() (const std::string& name) const;
+    const Parameter::Ptr operator() (const std::string& name) const;
     Parameter& operator[] (const std::string& name);
 
-    virtual Parameter& getParameter(const std::string& name) = 0;
-    virtual const Parameter& getConstParameter(const std::string& name) const = 0;
+    virtual Parameter::Ptr getParameter(const std::string& name) = 0;
+    virtual const Parameter::Ptr getConstParameter(const std::string& name) const = 0;
 };
 
 class StaticParameterProvider : public ParameterProvider
 {
-    typedef std::vector<Parameter> Vec;
-    typedef std::map<std::string, Parameter> Map;
+    typedef std::vector<Parameter::Ptr> Vec;
+    typedef std::map<std::string, Parameter::Ptr> Map;
 
 public:
     StaticParameterProvider(const Vec& params);
     StaticParameterProvider(const Map& params);
 
-    virtual Parameter& getParameter(const std::string& name);
-    virtual const Parameter& getConstParameter(const std::string& name) const;
+    virtual Parameter::Ptr getParameter(const std::string& name);
+    virtual const Parameter::Ptr getConstParameter(const std::string& name) const;
 private:
     Map params_;
 };

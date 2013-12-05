@@ -18,8 +18,8 @@ public:
     ParameterMap();
 
     Parameter& operator[] (const std::string& name);
-    const Parameter& at(const std::string& name) const;
-    Parameter& at(const std::string& name);
+    const Parameter::Ptr at(const std::string& name) const;
+    Parameter::Ptr at(const std::string& name);
 
     template<class Archive>
     void serialize(Archive& ar, const unsigned int /*file_version*/) {
@@ -27,7 +27,7 @@ public:
     }
 
 private:
-    std::map<std::string, Parameter> map_;
+    std::map<std::string, Parameter::Ptr> map_;
 };
 
 }

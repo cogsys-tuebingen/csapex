@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/parameter_map.h>
 
+/// COMPONENT
+#include <utils_param/range_parameter.h>
+
 using namespace param;
 
 ParameterMap::ParameterMap()
@@ -9,20 +12,21 @@ ParameterMap::ParameterMap()
 
 Parameter& ParameterMap::operator [] (const std::string &name)
 {
-    std::map<std::string, Parameter>::iterator it = map_.find(name);
+    std::map<std::string, Parameter::Ptr>::iterator it = map_.find(name);
     if(it != map_.end()) {
-        return it->second;
+        assert(it->second->name() == name);
+        return *it->second;
     } else {
-        map_.insert(std::make_pair(name, Parameter(name)));
+        map_.insert(std::make_pair(name, Parameter::Ptr(new RangeParameter(name))));
         return operator [](name);
     }
 
     throw std::logic_error("programming error, this line should not be reached");
 }
 
-Parameter& ParameterMap::at(const std::string &name)
+Parameter::Ptr ParameterMap::at(const std::string &name)
 {
-    std::map<std::string, Parameter>::iterator it = map_.find(name);
+    std::map<std::string, Parameter::Ptr>::iterator it = map_.find(name);
     if(it != map_.end()) {
         return it->second;
     }
@@ -30,9 +34,9 @@ Parameter& ParameterMap::at(const std::string &name)
     throw std::out_of_range(std::string("parameter ") + name + " not found");
 }
 
-const Parameter& ParameterMap::at(const std::string &name) const
+const Parameter::Ptr ParameterMap::at(const std::string &name) const
 {
-    std::map<std::string, Parameter>::const_iterator it = map_.find(name);
+    std::map<std::string, Parameter::Ptr>::const_iterator it = map_.find(name);
     if(it != map_.end()) {
         return it->second;
     }

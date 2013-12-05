@@ -2,169 +2,93 @@
 #define PARAMETER_H
 
 /// SYSTEM
-#include <boost/variant.hpp>
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/contains.hpp>
 #include <stdexcept>
-#include <boost/serialization/variant.hpp>
-#include <boost/type_traits.hpp>
 #include <yaml-cpp/yaml.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/any.hpp>
 #include <boost/signals2.hpp>
+#include <cxxabi.h>
 
 namespace param {
 
-typedef boost::mpl::vector<
-std::string,
-double,
-int,
-bool
-> ParameterTypes;
-
-
 class Parameter
 {
-    friend class boost::serialization::access;
-
-    typedef boost::make_variant_over<ParameterTypes>::type variant;
-
 public:
     typedef boost::shared_ptr<Parameter> Ptr;
 
 public:
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const Parameter& p) {
-        p.write(e);
-        return e;
-    }
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const Parameter::Ptr& p) {
-        p->write(e);
-        return e;
-    }
+    virtual ~Parameter();
 
-    friend void operator >> (const YAML::Node& node, param::Parameter& value) {
-        value.read(node);
-    }
-
-    friend void operator >> (const YAML::Node& node, param::Parameter::Ptr& value) {
-        if(!value) {
-            value.reset(new Parameter("loading"));
-        }
-        value->read(node);
-    }
-
-public:
-    Parameter();
-    Parameter(const Parameter& rhs);
-    explicit Parameter(const std::string& name);
-
-    void setFrom(const Parameter& other);
-
-    void write(YAML::Emitter& e) const;
-    void read(const YAML::Node& n);
+    virtual void write(YAML::Emitter& e) const;
+    virtual void read(const YAML::Node& n);
 
     std::string name() const;
 
-    template <typename T>
-    operator T() const
-    {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<ParameterTypes, T>::value));
-        return as<T> ();
-    }
 
     template <typename T>
     bool is() const
     {
-        return value_.type() == typeid(T);
+        return type() == typeid(T);
     }
 
     template <typename T>
-    T as() const { return read<T>(value_); }
-
-    template <typename T>
-    void set(T value)
+    T as() const
     {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<ParameterTypes, T>::value));
-        value_ = value;
+        if(!is<T>() || is<void>()) {
+            throwTypeError(type(), typeid(T), "get failed: ");
+        }
+        const boost::any& v = get_unsafe();
+        return boost::any_cast<T> (v);
     }
 
     template <typename T>
-    T min() const { return read<T>(min_); }
+    void set(const T& v)
+    {
+        if(!is<T>() && !is<void>()) {
+            throwTypeError(type(), typeid(T), "set failed: ");
+        }
 
-    template <typename T>
-    T max() const { return read<T>(max_); }
-
-    template <typename T>
-    T def() const { return read<T>(def_); }
-
-    template <typename T>
-    T step() const { return read<T>(step_); }
+        set_unsafe(v);
+        (*parameter_changed)(this);
+    }
 
     template <typename T>
     Parameter& operator = (const T& value)
     {
-        value_ = value;
+        boost::any v = value;
+        set_unsafe(v);
         (*parameter_changed)(this);
         return *this;
     }
 
-    Parameter& operator = (const char* value)
+    Parameter& operator = (const char* cstr)
     {
-        return operator = (std::string(value));
+        return operator = (std::string(cstr));
     }
 
-    Parameter& operator = (const Parameter& param);
+    static Parameter::Ptr empty();
 
-    template <typename T>
-    static Parameter declare(const std::string& name, T min, T max, T def, T step)
-    {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<ParameterTypes, T>::value));
+    virtual const std::type_info &type() const;
+    std::string toString() const;
 
-        Parameter result(name);
-        result.def_ = def;
-        result.min_ = min;
-        result.max_ = max;
-        result.value_ = def;
-        result.step_ = step;
-        return result;
-    }
+    virtual void setFrom(const Parameter& other);
 
-    static Parameter declare(const std::string& name, bool def)
-    {
-        Parameter result(name);
-        result.def_ = def;
-        result.value_ = def;
-        return result;
-    }
+protected:
+    virtual std::string toStringImpl() const;
+    std::string type2string(const std::type_info& type) const;
+    void throwTypeError(const std::type_info& a, const std::type_info& b, const std::string& prefix) const;
 
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int /*file_version*/) {
-        ar & value_;
-    }
+protected:
+    explicit Parameter(const std::string& name);
+
+    virtual boost::any get_unsafe() const;
+    virtual void set_unsafe(const boost::any& v);
 
 public:
     boost::shared_ptr<boost::signals2::signal<void(Parameter*)> > parameter_changed;
 
-private:
-    template <typename T>
-    T read(const variant& var) const
-    {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<ParameterTypes, T>::value));
-        try {
-            return boost::get<T>(var);
-
-        } catch(const boost::bad_get& e) {
-            throw std::logic_error(std::string("typeof parameter is not ") + typeid(T).name() + ": " + e.what());
-        }
-    }
-
-private:
+protected:
     std::string name_;
-
-    variant value_;
-    variant min_;
-    variant max_;
-    variant def_;
-    variant step_;
 };
 
 }

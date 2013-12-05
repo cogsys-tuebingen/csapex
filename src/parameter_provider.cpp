@@ -10,14 +10,14 @@ ParameterProvider::ParameterProvider()
 {
 }
 
-const Parameter ParameterProvider::operator () (const std::string& name) const
+const Parameter::Ptr ParameterProvider::operator () (const std::string& name) const
 {
-    return Parameter(getConstParameter(name));
+    return Parameter::Ptr(getConstParameter(name));
 }
 
 Parameter& ParameterProvider::operator [] (const std::string& name)
 {
-    return getParameter(name);
+    return *getParameter(name);
 }
 
 StaticParameterProvider::StaticParameterProvider(const Map& params)
@@ -27,18 +27,18 @@ StaticParameterProvider::StaticParameterProvider(const Map& params)
 }
 StaticParameterProvider::StaticParameterProvider(const Vec& params)
 {
-    BOOST_FOREACH(const Parameter& param, params) {
-        params_.insert(std::make_pair(param.name(), param));
+    BOOST_FOREACH(const Parameter::Ptr param, params) {
+        params_.insert(std::make_pair(param->name(), param));
     }
 }
 
 
-Parameter& StaticParameterProvider::getParameter(const std::string& name)
+Parameter::Ptr StaticParameterProvider::getParameter(const std::string& name)
 {
     return params_.at(name);
 }
 
-const Parameter& StaticParameterProvider::getConstParameter(const std::string& name) const
+const Parameter::Ptr StaticParameterProvider::getConstParameter(const std::string& name) const
 {
     return params_.at(name);
 }

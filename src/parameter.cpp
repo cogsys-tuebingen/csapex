@@ -1,43 +1,16 @@
 /// HEADER
 #include <utils_param/parameter.h>
 
-///// SYSTEM
-//#include <boost/archive/text_iarchive.hpp>
-//#include <boost/archive/text_oarchive.hpp>
-
 using namespace param;
-
-Parameter::Parameter()
-    : parameter_changed(new boost::signals2::signal<void(Parameter*)>)
-{
-}
-
-Parameter::Parameter(const Parameter& rhs)
-    : parameter_changed(rhs.parameter_changed),
-      name_(rhs.name_),
-      value_(rhs.value_),
-      min_(rhs.min_),
-      max_(rhs.max_),
-      def_(rhs.def_),
-      step_(rhs.step_)
-{
-}
-
-Parameter& Parameter::operator =(const Parameter& rhs)
-{
-    assert(name_ == rhs.name());
-    value_ = rhs.value_;
-    return *this;
-}
 
 Parameter::Parameter(const std::string &name)
     : parameter_changed(new boost::signals2::signal<void(Parameter*)>), name_(name)
 {
 }
 
-void Parameter::setFrom(const Parameter &other)
+Parameter::~Parameter()
 {
-    value_ = other.value_;
+
 }
 
 std::string Parameter::name() const
@@ -45,101 +18,59 @@ std::string Parameter::name() const
     return name_;
 }
 
-namespace {
-class serialization_visitor : public boost::static_visitor<void>
+const std::type_info& Parameter::type() const
 {
-public:
-    serialization_visitor(YAML::Emitter& e)
-        : e(e)
-    {}
-
-    void operator () (int i) const
-    {
-        e << YAML::Key << "int" << YAML::Value << i;
-    }
-    void operator () (double d) const
-    {
-        e << YAML::Key << "double" << YAML::Value << d;
-    }
-    void operator () (bool b) const
-    {
-        e << YAML::Key << "bool" << YAML::Value << b;
-    }
-    void operator () (const std::string& s) const
-    {
-        e << YAML::Key << "string" << YAML::Value << s;
-    }
-private:
-    YAML::Emitter& e;
-};
+    return typeid(void);
 }
 
-
-void Parameter::write(YAML::Emitter& e) const
+std::string Parameter::toString() const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
-
-    serialization_visitor sv(e);
-    boost::apply_visitor(sv, value_);
-
-    e << YAML::EndMap;
+    return std::string("[") + name() + ": " + toStringImpl() + "]";
 }
 
-namespace {
-template <typename T>
-T __read(const YAML::Node& n) {
-    T v;
-    n >> v;
-    return v;
-}
-}
-
-void Parameter::read(const YAML::Node& n)
+std::string Parameter::toStringImpl() const
 {
-    if(!n.FindValue("name")) {
-        return;
-    }
-
-    n["name"] >> name_;
-
-    if(n.FindValue("int")) {
-        value_ = __read<int>(n["int"]);
-
-    } else if(n.FindValue("double")) {
-        value_ = __read<double>(n["double"]);
-
-    } else if(n.FindValue("bool")) {
-        value_ = __read<bool>(n["bool"]);
-
-    } else if(n.FindValue("string")) {
-        value_ = __read<std::string>(n["string"]);
-    }
+    throw std::logic_error("not implemented");
 }
 
-//void Parameter::write(YAML::Emitter& e) const
-//{
-//    std::stringstream ss;
-//    boost::archive::text_oarchive oa(ss);
+void Parameter::write(YAML::Emitter &e) const
+{
+    throw std::logic_error("not implemented");
+}
 
-//    oa & value_;
+void Parameter::read(const YAML::Node &n)
+{
+    throw std::logic_error("not implemented");
+}
 
-//    e << YAML::BeginMap;
-//    e << YAML::Key << "data" << YAML::Value << ss.str();
-//    e << YAML::EndMap;
-//}
+void Parameter::setFrom(const Parameter &other)
+{
+    throw std::logic_error("not implemented");
+}
 
-//void Parameter::read(const YAML::Node& n)
-//{
-//    if(!n.FindValue("data")) {
-//        return;
-//    }
+Parameter::Ptr Parameter::empty()
+{
+    return Parameter::Ptr(new Parameter("loading"));
+}
 
-//    std::string data;
-//    n["data"] >> data;
+boost::any Parameter::get_unsafe() const
+{
+    throw std::logic_error("not implemented");
+}
 
-//    std::stringstream ss(data);
-//    boost::archive::text_iarchive ia(ss);
 
-//    ia & value_;
-//}
+void Parameter::set_unsafe(const boost::any &v)
+{
+    throw std::logic_error("not implemented");
+}
+
+std::string Parameter::type2string(const std::type_info &type) const
+{
+    int status;
+    return abi::__cxa_demangle(type.name(), 0, 0, &status);
+}
+
+void Parameter::throwTypeError(const std::type_info &a, const std::type_info &b, const std::string& prefix) const
+{
+    throw std::runtime_error(prefix + std::string("this is not of type '") + type2string(a) + "' but '" + type2string(b) + "'");
+}
