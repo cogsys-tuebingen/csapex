@@ -30,7 +30,7 @@ DynamicTransform::DynamicTransform()
 void DynamicTransform::allConnectorsArrived()
 {
     bool update = false;
-    if(frame_in_from_->isConnected()) {
+    if(frame_in_from_->isConnected() && frame_in_from_->hasMessage()) {
         std::string from = frame_in_from_->getMessage<connection_types::StringMessage>()->value;
 
         if(state.from_ != from) {
@@ -42,7 +42,7 @@ void DynamicTransform::allConnectorsArrived()
         from_box_->setEnabled(true);
     }
 
-    if(frame_in_to_->isConnected()) {
+    if(frame_in_to_->isConnected() && frame_in_to_->hasMessage()) {
         std::string to = frame_in_to_->getMessage<connection_types::StringMessage>()->value;
 
         if(state.to_ != to) {
@@ -99,8 +99,8 @@ void DynamicTransform::fill(QBoxLayout* layout)
     setSynchronizedInputs(true);
 
     time_in_ = addInput<connection_types::TimeStampMessage>("Time", true);
-    frame_in_from_ = addInput<connection_types::StringMessage>("Origin Frame", true);
-    frame_in_to_ = addInput<connection_types::StringMessage>("Target Frame", true);
+    frame_in_from_ = addInput<connection_types::StringMessage>("Origin Frame", true, true);
+    frame_in_to_ = addInput<connection_types::StringMessage>("Target Frame", true, true);
 
     output_ = addOutput<connection_types::TransformMessage>("Transform");
     output_frame_ = addOutput<connection_types::StringMessage>("Target Frame");

@@ -149,6 +149,16 @@ public:
         return internal_layout;
     }
 
+    static QHBoxLayout* wrap(const std::string& label, QLayout* layout) {
+
+        QHBoxLayout* internal_layout = new QHBoxLayout;
+
+        internal_layout->addWidget(new QLabel(label.c_str()));
+        internal_layout->addLayout(layout);
+
+        return internal_layout;
+    }
+
     static void clearLayout(QLayout* layout) {
         QLayoutItem* item;
         while((item = layout->takeAt(0)) != NULL) {

@@ -40,6 +40,7 @@ public:
     void wait();
     void inputMessage(ConnectionType::Ptr message);
 
+    bool hasMessage() const;
     template <typename R>
     typename R::Ptr getMessage() {
         QMutexLocker lock(&io_mutex);
@@ -61,6 +62,10 @@ public:
     bool isOptional() const;
     void setOptional(bool optional);
 
+    bool isAsync() const;
+    void setAsync(bool asynch);
+
+
 protected:
     virtual bool tryConnect(Connector* other_side);
     virtual bool acknowledgeConnection(Connector* other_side);
@@ -81,6 +86,7 @@ protected:
     QWaitCondition can_process_cond;
 
     bool optional_;
+    bool async_;
 };
 
 }

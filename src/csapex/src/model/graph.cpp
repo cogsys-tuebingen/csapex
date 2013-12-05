@@ -62,7 +62,7 @@ Graph::Graph()
     : dispatcher_(NULL)
 {
     timer_ = new QTimer();
-    timer_->setInterval(100);
+    timer_->setInterval(1000. / 30.);
     timer_->start();
 
     QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(tick()));

@@ -8,7 +8,8 @@
 #include <utils/extractor.h>
 #include <utils/extractor_factory.h>
 #include <utils/extractor_manager.h>
-
+#include <utils_param/range_parameter.h>
+#include <utils_param/io.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex_vision/cv_mat_message.h>
@@ -102,9 +103,9 @@ void ExtractKeypoints::updateDynamicGui(QBoxLayout *layout)
 template <typename T>
 void ExtractKeypoints::updateParam(const std::string& name, T value)
 {
-    BOOST_FOREACH(param::Parameter& para, state.params[state.key]) {
-        if(para.name() == name) {
-            para.set<T>(value);
+    BOOST_FOREACH(param::Parameter::Ptr& para, state.params[state.key]) {
+        if(para->name() == name) {
+            para->set<T>(value);
 
             change = true;
             Q_EMIT guiChanged();
@@ -127,12 +128,14 @@ void ExtractKeypoints::update(int slot)
     }
     callbacks.clear();
 
-    foreach(const param::Parameter& para, state.params[state.key]) {
-        std::string name = para.name();
+    foreach(const param::Parameter::Ptr& p, state.params[state.key]) {
+        std::string name = p->name();
 
-        if(para.is<int>()) {
-            QSlider* slider = QtHelper::makeSlider(layout, name , para.as<int>(), para.min<int>(), para.max<int>());
-            slider->setValue(para.as<int>());
+        param::RangeParameter::Ptr range = boost::dynamic_pointer_cast<param::RangeParameter> (p);
+
+        if(range->is<int>()) {
+            QSlider* slider = QtHelper::makeSlider(layout, name , range->as<int>(), range->min<int>(), range->max<int>());
+            slider->setValue(range->as<int>());
 
             boost::function<void()> cb = boost::bind(&ExtractKeypoints::updateParam<int>, this, name, boost::bind(&QSlider::value, slider));
             qt_helper::Call* call = new qt_helper::Call(cb);
@@ -140,9 +143,9 @@ void ExtractKeypoints::update(int slot)
 
             QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
-        } else if(para.is<double>()) {
-            QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , para.as<double>(), para.min<double>(), para.max<double>(), para.step<double>());
-            slider->setDoubleValue(para.as<double>());
+        } else if(range->is<double>()) {
+            QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , range->as<double>(), range->min<double>(), range->max<double>(), range->step<double>());
+            slider->setDoubleValue(range->as<double>());
 
             boost::function<void()> cb = boost::bind(&ExtractKeypoints::updateParam<double>, this, name, boost::bind(&QDoubleSlider::doubleValue, slider));
             qt_helper::Call* call = new qt_helper::Call(cb);
@@ -150,9 +153,9 @@ void ExtractKeypoints::update(int slot)
 
             QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
-        } else if(para.is<bool>()) {
+        } else if(range->is<bool>()) {
             QCheckBox* box = new QCheckBox;
-            box->setChecked(para.as<bool>());
+            box->setChecked(range->as<bool>());
 
             layout->addLayout(QtHelper::wrap(name, box));
 
@@ -200,13 +203,13 @@ void ExtractKeypoints::setState(Memento::Ptr memento)
     //    state = *m;
     state.key = m->key;
 
-    typedef std::pair<std::string, std::vector<param::Parameter> > Pair;
+    typedef std::pair<std::string, std::vector<param::Parameter::Ptr> > Pair;
     foreach(Pair pair, m->params) {
-        foreach(const param::Parameter& para, pair.second) {
-            std::vector<param::Parameter>& target = state.params[pair.first];
-            BOOST_FOREACH(param::Parameter& existing_param, target) {
-                if(existing_param.name() == para.name()) {
-                    existing_param.setFrom(para);
+        foreach(const param::Parameter::Ptr& para, pair.second) {
+            std::vector<param::Parameter::Ptr>& target = state.params[pair.first];
+            BOOST_FOREACH(param::Parameter::Ptr& existing_param, target) {
+                if(existing_param->name() == para->name()) {
+                    existing_param->setFrom(*para);
                 }
             }
         }

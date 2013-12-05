@@ -70,6 +70,16 @@ bool ConnectorIn::isOptional() const
     return optional_;
 }
 
+void ConnectorIn::setAsync(bool asynch)
+{
+    async_ = asynch;
+}
+
+bool ConnectorIn::isAsync() const
+{
+    return async_;
+}
+
 void ConnectorIn::removeAllConnectionsNotUndoable()
 {
     if(target != NULL) {
@@ -156,6 +166,11 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
     count_++;
 
     Q_EMIT messageArrived(this);
+}
+
+bool ConnectorIn::hasMessage() const
+{
+    return message_;
 }
 
 ConnectionType::Ptr ConnectorIn::getMessage()

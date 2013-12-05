@@ -5,9 +5,15 @@
 #include <csapex/model/node.h>
 #include <csapex/utility/qt_helper.hpp>
 
+/// PROJECT
+#include <utils_param/range_parameter.h>
+#include <utils_param/value_parameter.h>
+
 /// SYSTEM
 #include <boost/bind.hpp>
 #include <QCheckBox>
+#include <QLineEdit>
+#include <QPushButton>
 
 using namespace csapex;
 
@@ -47,58 +53,97 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
 void NodeAdapter::setupUi(QBoxLayout * layout)
 {
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
-    foreach(param::Parameter::Ptr p, params) {
-        std::string name = p->name();
+    foreach(param::Parameter::Ptr parameter, params) {
+        std::string name = parameter->name();
 
-        if(p->is<int>()) {
-            QSlider* slider = QtHelper::makeSlider(layout, name , p->as<int>(), p->min<int>(), p->max<int>());
-            slider->setValue(p->as<int>());
+        param::ValueParameter::Ptr value = boost::dynamic_pointer_cast<param::ValueParameter> (parameter);
+        if(value) {
+            if(value->is<std::string>()) {
+                QLineEdit* txt_ = new QLineEdit;
+                QPushButton* send = new QPushButton("set");
 
-            // ui change -> model
-            boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<int>, this, name, boost::bind(&QSlider::value, slider));
-            qt_helper::Call* call = new qt_helper::Call(cb);
-            callbacks.push_back(call);
+                QHBoxLayout* sub = new QHBoxLayout;
 
-            // model change -> ui
-            boost::function<void(int)> set = boost::bind(&QSlider::setValue, slider, _1);
-            p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<int>, this, _1, set));
+                sub->addWidget(txt_);
+                sub->addWidget(send);
 
-            QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
+                layout->addLayout(QtHelper::wrap(name, sub));
 
-        } else if(p->is<double>()) {
-            QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , p->as<double>(), p->min<double>(), p->max<double>(), p->step<double>());
-            slider->setDoubleValue(p->as<double>());
+                // ui change -> model
+                boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<std::string>, this, name, boost::bind(qstring2stdstring, boost::bind(&QLineEdit::text, txt_)));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
 
-            // ui change -> model
-            boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<double>, this, name, boost::bind(&QDoubleSlider::doubleValue, slider));
-            qt_helper::Call* call = new qt_helper::Call(cb);
-            callbacks.push_back(call);
+                // model change -> ui
+                boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
+                boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, txt_, boost::bind(stdstring2qstring, _1));
+                value->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
 
-            // model change -> ui
-            boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, _1);
-            p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<double>, this, _1, set));
+                QObject::connect(txt_, SIGNAL(returnPressed()), call, SLOT(call()));
+                QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
 
-            QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
+            } else {
+                layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
+            }
+        }
 
-        } else if(p->is<bool>()) {
-            QCheckBox* box = new QCheckBox;
-            box->setChecked(p->as<bool>());
+        param::RangeParameter::Ptr range = boost::dynamic_pointer_cast<param::RangeParameter> (parameter);
 
-            layout->addLayout(QtHelper::wrap(name, box));
+        if(range) {
+            if(range->is<int>()) {
+                QSlider* slider = QtHelper::makeSlider(layout, name , range->as<int>(), range->min<int>(), range->max<int>());
+                slider->setValue(range->as<int>());
 
-            // ui change -> model
-            boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<bool>, this, name, boost::bind(&QCheckBox::isChecked, box));
-            qt_helper::Call* call = new qt_helper::Call(cb);
-            callbacks.push_back(call);
+                // ui change -> model
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<int>, this, name, boost::bind(&QSlider::value, slider));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
 
-            // model change -> ui
-            boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
-            p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set));
+                // model change -> ui
+                boost::function<void(int)> set = boost::bind(&QSlider::setValue, slider, _1);
+                range->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<int>, this, _1, set));
 
-            QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
+                QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
-        } else {
-            layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
+            } else if(range->is<double>()) {
+                if(range->name() == "resolution") {
+                    std::cout << "res: " << range->as<double>() << std::endl;
+                }
+                QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , range->as<double>(), range->min<double>(), range->max<double>(), range->step<double>());
+                slider->setDoubleValue(range->as<double>());
+
+                // ui change -> model
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<double>, this, name, boost::bind(&QDoubleSlider::doubleValue, slider));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
+
+                // model change -> ui
+                boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, _1);
+                range->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<double>, this, _1, set));
+
+                QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
+
+            } else if(range->is<bool>()) {
+                QCheckBox* box = new QCheckBox;
+                box->setChecked(range->as<bool>());
+
+                layout->addLayout(QtHelper::wrap(name, box));
+
+                // ui change -> model
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<bool>, this, name, boost::bind(&QCheckBox::isChecked, box));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
+
+                // model change -> ui
+                boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
+                range->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set));
+
+                QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
+
+            } else {
+                layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
+            }
         }
     }
 }
@@ -123,10 +168,10 @@ void NodeAdapter::updateDynamicGui(QBoxLayout *)
 
 void NodeAdapter::modelChangedEvent()
 {
-//    std::vector<param::Parameter::Ptr> params = node_->getParameters();
-//    foreach(param::Parameter::Ptr p, params) {
-//        p->name()
-//    }
+    //    std::vector<param::Parameter::Ptr> params = node_->getParameters();
+    //    foreach(param::Parameter::Ptr p, params) {
+    //        p->name()
+    //    }
 }
 
 void NodeAdapter::guiChanged()

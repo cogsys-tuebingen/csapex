@@ -46,7 +46,6 @@ public:
     void addTag(const Tag& tag);
     std::vector<Tag> getTags() const;
 
-    void addParameter(const param::Parameter& param);
     void addParameter(const param::Parameter::Ptr& param);
 
     std::vector<param::Parameter::Ptr> getParameters() const;
@@ -92,8 +91,8 @@ public:
     NodeWorker* getNodeWorker() const;
 
     template <typename T>
-    ConnectorIn* addInput(const std::string& label, bool optional = false) {
-        return addInput(T::make(), label, optional);
+    ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false) {
+        return addInput(T::make(), label, optional, async);
     }
 
     template <typename T>
@@ -101,7 +100,7 @@ public:
         return addOutput(T::make(), label);
     }
 
-    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
+    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
 
     void addInput(ConnectorIn* in) __attribute__ ((deprecated));

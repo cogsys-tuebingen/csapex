@@ -29,7 +29,7 @@ void Listener::cb(const tf::tfMessage::ConstPtr &msg)
         for(unsigned i = 0, n = msg->transforms.size(); i < n; ++i) {
             if(msg->transforms[i].child_frame_id == reference_frame) {
                 now = msg->transforms[i].header.stamp;
-                if(last_ > now) {
+                if(last_ > now + ros::Duration(3.0)) {
                     std::cout << "warning: reset tf listener, negative time change (" << last_ << " vs. " << now << ")" << std::endl;
                     reset();
                 }

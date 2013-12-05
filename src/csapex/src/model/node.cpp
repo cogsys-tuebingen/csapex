@@ -85,12 +85,6 @@ std::vector<Tag> Node::getTags() const
     return tags_;
 }
 
-void Node::addParameter(const param::Parameter &param)
-{
-    param::Parameter::Ptr p(new param::Parameter(param));
-    state.params[param.name()] = p;
-}
-
 void Node::addParameter(const param::Parameter::Ptr &param)
 {
     state.params[param->name()] = param;
@@ -248,8 +242,8 @@ void Node::setState(Memento::Ptr memento)
         if(state.params.find(p->name()) == state.params.end()) {
             std::cout << "warning: parameter " << p->name() << " is not set!" << std::endl;
         } else {
-            state.params[p->name()] = p;
-            std::cout << "warning: set parameter " << p->name() << std::endl;
+            std::cout << "warning: setting parameter " << p->name() << " from " << state.params[p->name()]->toString() << " to " << p->toString() << std::endl;
+            state.params[p->name()]->setFrom(*p);
         }
     }
 
@@ -386,7 +380,7 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 
 
 
-ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
+ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
     int id = input.size();
     ConnectorIn* c = new ConnectorIn(this, id);

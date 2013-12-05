@@ -40,12 +40,8 @@ void DoubleBuffer::messageArrived(ConnectorIn *source)
     swapBuffers();
 
     if(output_->getType()->name() != msg->name()) {
-        std::cout << "changing type to " << msg->name() << std::endl;
         output_->setType(msg->toType());
     }
-
-    msg->write(std::cout);
-    std::cout << std::endl;
 }
 
 void DoubleBuffer::swapBuffers()

@@ -65,7 +65,9 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         ConnectorIn* c = pair.first;
         if(!pair.second) {
             // connector doesn't have a message
-            if(c->isOptional()) {
+            if(c->isAsync()) {
+                // do not wait for this input
+            } else if(c->isOptional()) {
                 if(c->isConnected()) {
                     // c is optional and connected, so we have to wait for a message
                     return;

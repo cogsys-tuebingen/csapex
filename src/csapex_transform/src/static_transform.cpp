@@ -7,6 +7,7 @@
 /// PROJECT
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/qt_helper.hpp>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <tf/transform_datatypes.h>
@@ -23,12 +24,12 @@ StaticTransform::StaticTransform()
     double p = 3.1415;
     double d = 5.0;
 
-    addParameter(param::Parameter::declare("roll", -p, p, 0.0, 0.001));
-    addParameter(param::Parameter::declare("pitch", -p, p, 0.0, 0.001));
-    addParameter(param::Parameter::declare("yaw", -p, p, 0.0, 0.001));
-    addParameter(param::Parameter::declare("dx", -d, d, 0.0, 0.01));
-    addParameter(param::Parameter::declare("dy", -d, d, 0.0, 0.01));
-    addParameter(param::Parameter::declare("dz", -d, d, 0.0, 0.01));
+    addParameter(param::ParameterFactory::declare("roll", -p, p, 0.0, 0.001));
+    addParameter(param::ParameterFactory::declare("pitch", -p, p, 0.0, 0.001));
+    addParameter(param::ParameterFactory::declare("yaw", -p, p, 0.0, 0.001));
+    addParameter(param::ParameterFactory::declare("dx", -d, d, 0.0, 0.01));
+    addParameter(param::ParameterFactory::declare("dy", -d, d, 0.0, 0.01));
+    addParameter(param::ParameterFactory::declare("dz", -d, d, 0.0, 0.01));
 }
 
 void StaticTransform::tick()
