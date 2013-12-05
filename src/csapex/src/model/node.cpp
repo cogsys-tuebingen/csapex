@@ -386,6 +386,7 @@ ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bo
     ConnectorIn* c = new ConnectorIn(this, id);
     c->setLabel(label);
     c->setOptional(optional);
+    c->setAsync(async);
     c->setType(type);
 
     registerInput(c);

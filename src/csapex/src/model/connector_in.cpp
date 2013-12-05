@@ -13,12 +13,12 @@
 using namespace csapex;
 
 ConnectorIn::ConnectorIn(Node* parent, const std::string &uuid)
-    : Connector(parent, uuid), target(NULL), can_process(true), optional_(false)
+    : Connector(parent, uuid), target(NULL), can_process(true), optional_(false), async_(false)
 {
 }
 
 ConnectorIn::ConnectorIn(Node* parent, int sub_id)
-    : Connector(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false)
+    : Connector(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false), async_(false)
 {
 }
 
