@@ -5,6 +5,7 @@
 #include <utils_param/parameter.h>
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
+#include <utils_param/set_parameter.h>
 
 namespace param
 {
@@ -48,6 +49,17 @@ public:
     static Parameter::Ptr declare(const std::string& name, const char* def)
     {
         return declare(name, std::string(def));
+    }
+
+    template <typename T>
+    static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
+    {
+        SetParameter::Ptr result(new SetParameter(name));
+        result->setSet(set);
+        result->def_ = set.begin()->second;
+        result->set<T>(set.begin()->second);
+
+        return result;
     }
 
     static Parameter::Ptr makeEmpty(const std::string& type);
