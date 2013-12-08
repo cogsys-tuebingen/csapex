@@ -8,12 +8,14 @@
 /// PROJECT
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
+#include <utils_param/set_parameter.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QComboBox>
 
 using namespace csapex;
 
@@ -56,9 +58,9 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
     foreach(param::Parameter::Ptr parameter, params) {
         std::string name = parameter->name();
 
-        param::ValueParameter::Ptr value = boost::dynamic_pointer_cast<param::ValueParameter> (parameter);
-        if(value) {
-            if(value->is<std::string>()) {
+        param::ValueParameter::Ptr value_p = boost::dynamic_pointer_cast<param::ValueParameter> (parameter);
+        if(value_p) {
+            if(value_p->is<std::string>()) {
                 QLineEdit* txt_ = new QLineEdit;
                 QPushButton* send = new QPushButton("set");
 
@@ -78,7 +80,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 // model change -> ui
                 boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
                 boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, txt_, boost::bind(stdstring2qstring, _1));
-                value->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+                value_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
 
                 QObject::connect(txt_, SIGNAL(returnPressed()), call, SLOT(call()));
                 QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
@@ -88,12 +90,11 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             }
         }
 
-        param::RangeParameter::Ptr range = boost::dynamic_pointer_cast<param::RangeParameter> (parameter);
-
-        if(range) {
-            if(range->is<int>()) {
-                QSlider* slider = QtHelper::makeSlider(layout, name , range->as<int>(), range->min<int>(), range->max<int>());
-                slider->setValue(range->as<int>());
+        param::RangeParameter::Ptr range_p = boost::dynamic_pointer_cast<param::RangeParameter> (parameter);
+        if(range_p) {
+            if(range_p->is<int>()) {
+                QSlider* slider = QtHelper::makeSlider(layout, name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>());
+                slider->setValue(range_p->as<int>());
 
                 // ui change -> model
                 boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<int>, this, name, boost::bind(&QSlider::value, slider));
@@ -102,16 +103,16 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(int)> set = boost::bind(&QSlider::setValue, slider, _1);
-                range->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<int>, this, _1, set));
+                range_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<int>, this, _1, set));
 
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
-            } else if(range->is<double>()) {
-                if(range->name() == "resolution") {
-                    std::cout << "res: " << range->as<double>() << std::endl;
+            } else if(range_p->is<double>()) {
+                if(range_p->name() == "resolution") {
+                    std::cout << "res: " << range_p->as<double>() << std::endl;
                 }
-                QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , range->as<double>(), range->min<double>(), range->max<double>(), range->step<double>());
-                slider->setDoubleValue(range->as<double>());
+                QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , range_p->as<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
+                slider->setDoubleValue(range_p->as<double>());
 
                 // ui change -> model
                 boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<double>, this, name, boost::bind(&QDoubleSlider::doubleValue, slider));
@@ -120,13 +121,13 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, _1);
-                range->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<double>, this, _1, set));
+                range_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<double>, this, _1, set));
 
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
-            } else if(range->is<bool>()) {
+            } else if(range_p->is<bool>()) {
                 QCheckBox* box = new QCheckBox;
-                box->setChecked(range->as<bool>());
+                box->setChecked(range_p->as<bool>());
 
                 layout->addLayout(QtHelper::wrap(name, box));
 
@@ -137,13 +138,39 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
-                range->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set));
+                range_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set));
 
                 QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
 
             } else {
                 layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
             }
+        }
+
+        param::SetParameter::Ptr set_p = boost::dynamic_pointer_cast<param::SetParameter> (parameter);
+        if(set_p) {
+            QComboBox* combo = new QComboBox;
+            for(int i = 0; i < set_p->noParameters(); ++i) {
+                std::string str = set_p->getName(i);
+                combo->addItem(QString::fromStdString(str));
+            }
+            combo->setCurrentIndex(0);
+            layout->addLayout(QtHelper::wrap(name, combo));
+
+            // ui change -> model
+            boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
+            boost::function<void()> cb = boost::bind(&NodeAdapter::updateParamSet, this, name, boost::bind(qstring2stdstring, boost::bind(&QComboBox::currentText, combo)));
+            qt_helper::Call* call = new qt_helper::Call(cb);
+            callbacks.push_back(call);
+
+            // model change -> ui
+            boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
+            boost::function<int(const QString&)> txt2idx = boost::bind(&QComboBox::findData, combo, _1, Qt::UserRole, static_cast<Qt::MatchFlags>(Qt::MatchExactly|Qt::MatchCaseSensitive));
+            boost::function<void(const QString&)> select = boost::bind(&QComboBox::setCurrentIndex, combo, boost::bind(txt2idx, _1));
+            boost::function<void(const std::string&)> set = boost::bind(select, boost::bind(stdstring2qstring, _1));
+            //set_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+
+            QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
         }
     }
 }
@@ -153,6 +180,16 @@ void NodeAdapter::updateParam(const std::string& name, T value)
 {
     node_->getParameter(name)->set<T>(value);
     guiChanged();
+}
+
+void NodeAdapter::updateParamSet(const std::string& name, const std::string& value)
+{
+    param::Parameter::Ptr parameter = node_->getParameter(name);
+    param::SetParameter::Ptr set_p = boost::dynamic_pointer_cast<param::SetParameter> (parameter);
+    if(set_p) {
+        set_p->setByName(value);
+        guiChanged();
+    }
 }
 
 template <typename T>

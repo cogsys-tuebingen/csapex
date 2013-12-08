@@ -58,6 +58,8 @@ protected:
     template <typename T>
     void updateParam(const std::string& name, T value);
 
+    void updateParamSet(const std::string& name, const std::string& value);
+
     template <typename T>
     void updateUi(const param::Parameter* p, boost::function<void(T)> setter);
 
