@@ -96,9 +96,9 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
 void NodeWorker::tick()
 {
-    if(node_->isEnabled()) {
-        node_->tick();
-    }
+//    if(node_->isEnabled()) {
+//        node_->tick();
+//    }
 
     while(timer_history_.size() > timer_history_length_) {
         timer_history_.pop_front();

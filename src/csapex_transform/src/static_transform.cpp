@@ -21,7 +21,7 @@ StaticTransform::StaticTransform()
 {
     addTag(Tag::get("Transform"));
 
-    double p = 3.1415;
+    double p = 3.2;
     double d = 5.0;
 
     addParameter(param::ParameterFactory::declare("roll", -p, p, 0.0, 0.001));

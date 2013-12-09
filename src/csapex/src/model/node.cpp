@@ -332,7 +332,7 @@ void Node::connectorChanged()
 
 void Node::tick()
 {
-
+    worker_->tick();
 }
 
 void Node::updateModel()
