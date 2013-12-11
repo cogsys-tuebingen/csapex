@@ -15,7 +15,7 @@ void TimeStampMessage::writeYaml(YAML::Emitter& yaml) {
     yaml << YAML::Key << "time" << YAML::Value << boost::posix_time::to_simple_string(value.toBoost()) << YAML::EndSeq;;
 }
 
-void TimeStampMessage::readYaml(YAML::Node& node) {
+void TimeStampMessage::readYaml(const YAML::Node& node) {
     if(node.FindValue("time")) {
         std::string str;
         node["time"] >> str;

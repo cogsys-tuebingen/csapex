@@ -18,7 +18,7 @@ void Message::writeYaml(YAML::Emitter&)
 {
 
 }
-void Message::readYaml(YAML::Node&)
+void Message::readYaml(const YAML::Node&)
 {
 
 }

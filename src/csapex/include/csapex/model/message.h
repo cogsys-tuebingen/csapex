@@ -18,7 +18,7 @@ protected:
 
 public:
     void writeYaml(YAML::Emitter& yaml);
-    void readYaml(YAML::Node& node);
+    void readYaml(const YAML::Node& node);
 
 public:
     std::string frame_id;

@@ -17,6 +17,11 @@ ConnectionType::~ConnectionType()
 {
 }
 
+void ConnectionType::setName(const std::string &name)
+{
+    name_ = name;
+}
+
 ConnectionType::Ptr ConnectionType::getDefaultConnectionType()
 {
     return default_->clone();

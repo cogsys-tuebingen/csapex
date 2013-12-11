@@ -16,6 +16,6 @@ ConnectionType::Ptr StringMessage::make(){
 void StringMessage::writeYaml(YAML::Emitter& yaml) {
     yaml << YAML::Key << "value" << YAML::Value << value;
 }
-void StringMessage::readYaml(YAML::Node& node) {
+void StringMessage::readYaml(const YAML::Node& node) {
     node["value"] >> value;
 }

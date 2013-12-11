@@ -108,7 +108,7 @@ struct PointCloudMessage : public Message
     void writeYaml(YAML::Emitter& yaml) {
         yaml << YAML::Key << "value" << YAML::Value << "not implemented";
     }
-    void readYaml(YAML::Node&) {
+    void readYaml(const YAML::Node&) {
     }
 
     variant value;

@@ -4,6 +4,7 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <yaml-cpp/yaml.h>
+#include <boost/signals2.hpp>
 
 namespace csapex {
 
@@ -39,8 +40,10 @@ public:
     virtual void writeRaw(const std::string& file, const std::string &suffix);
 
     virtual void writeYaml(YAML::Emitter& yaml) = 0;
-    virtual void readYaml(YAML::Node& node) = 0;
+    virtual void readYaml(const YAML::Node& node) = 0;
 
+protected:
+    void setName(const std::string& name);
 
 private:
     std::string name_;

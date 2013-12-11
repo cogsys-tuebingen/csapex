@@ -19,7 +19,7 @@ void TransformMessage::writeYaml(YAML::Emitter& yaml) {
     yaml << YAML::Key << "translation" << YAML::Value << YAML::Flow << YAML::BeginSeq << t.x() << t.y() << t.z() << YAML::EndSeq;;
 }
 
-void TransformMessage::readYaml(YAML::Node& node) {
+void TransformMessage::readYaml(const YAML::Node& node) {
     double qx,qy,qz,qw,x,y,z;
     if(node.FindValue("orientation")) {
         const YAML::Node& doc = node["orientation"];

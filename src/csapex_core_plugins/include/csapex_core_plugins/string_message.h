@@ -17,7 +17,7 @@ struct StringMessage : public MessageTemplate<std::string, StringMessage>
     static ConnectionType::Ptr make();
 
     void writeYaml(YAML::Emitter& yaml);
-    void readYaml(YAML::Node& node);
+    void readYaml(const YAML::Node& node);
 };
 
 }

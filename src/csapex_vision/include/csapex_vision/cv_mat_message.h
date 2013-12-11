@@ -1,5 +1,5 @@
-#ifndef MESSAGES_DEFAULT_HPP
-#define MESSAGES_DEFAULT_HPP
+#ifndef CV_MAT_MESSAGE_H
+#define CV_MAT_MESSAGE_H
 
 /// COMPONENT
 #include <csapex_vision/encoding.h>
@@ -27,4 +27,4 @@ struct CvMatMessage : public MessageTemplate<cv::Mat, CvMatMessage>
 }
 }
 
-#endif // MESSAGES_DEFAULT_HPP
+#endif // CV_MAT_MESSAGE_H
