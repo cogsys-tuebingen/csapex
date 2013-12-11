@@ -9,6 +9,7 @@
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
+#include <utils_param/path_parameter.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
@@ -16,6 +17,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QComboBox>
+#include <QFileDialog>
 
 using namespace csapex;
 
@@ -58,6 +60,42 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
     foreach(param::Parameter::Ptr parameter, params) {
         std::string name = parameter->name();
 
+        param::PathParameter::Ptr path_p = boost::dynamic_pointer_cast<param::PathParameter> (parameter);
+        if(path_p) {
+            QLineEdit* path = new QLineEdit;
+            QPushButton* open = new QPushButton("open");
+
+            QHBoxLayout* sub = new QHBoxLayout;
+
+            sub->addWidget(path);
+            sub->addWidget(open);
+
+            layout->addLayout(QtHelper::wrap(name, sub));
+
+            // ui change -> model
+            boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
+            boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<std::string>, this, name, boost::bind(qstring2stdstring, boost::bind(&QLineEdit::text, path)));
+            qt_helper::Call* call_set_path = new qt_helper::Call(cb);
+            callbacks.push_back(call_set_path);
+
+
+            boost::function<void()> cb_open = boost::bind(&NodeAdapter::updateParam<std::string>, this, name,
+                                                          boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getOpenFileName,
+                                                                                                     (QWidget*) 0, "Input", "", "All files (*.*)", (QString*) 0, (QFlags<QFileDialog::Option>) 0)));
+            qt_helper::Call* call_open = new qt_helper::Call(cb_open);
+            callbacks.push_back(call_open);
+
+            // model change -> ui
+            boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
+            boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, path, boost::bind(stdstring2qstring, _1));
+            path_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+
+            QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
+            QObject::connect(open, SIGNAL(clicked()), call_open, SLOT(call()));
+
+            continue;
+        }
+
         param::ValueParameter::Ptr value_p = boost::dynamic_pointer_cast<param::ValueParameter> (parameter);
         if(value_p) {
             if(value_p->is<std::string>()) {
@@ -88,6 +126,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             } else {
                 layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
             }
+            continue;
         }
 
         param::RangeParameter::Ptr range_p = boost::dynamic_pointer_cast<param::RangeParameter> (parameter);
@@ -145,6 +184,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             } else {
                 layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
             }
+            continue;
         }
 
         param::SetParameter::Ptr set_p = boost::dynamic_pointer_cast<param::SetParameter> (parameter);
@@ -171,6 +211,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             //set_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
 
             QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
+            continue;
         }
     }
 }
