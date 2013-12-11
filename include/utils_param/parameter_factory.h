@@ -6,6 +6,7 @@
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
+#include <utils_param/path_parameter.h>
 
 namespace param
 {
@@ -58,6 +59,14 @@ public:
         result->setSet(set);
         result->def_ = set.begin()->second;
         result->set<T>(set.begin()->second);
+
+        return result;
+    }
+
+    static Parameter::Ptr declarePath(const std::string& name, const std::string& def)
+    {
+        PathParameter::Ptr result(new PathParameter(name));
+        result->set(def);
 
         return result;
     }

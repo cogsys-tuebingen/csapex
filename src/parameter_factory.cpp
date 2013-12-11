@@ -11,6 +11,8 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
         return Parameter::Ptr(new ValueParameter);
     } else if(type == "set") {
         return Parameter::Ptr(new SetParameter);
+    } else if(type == "path") {
+        return Parameter::Ptr(new PathParameter);
     } else {
         throw std::runtime_error(std::string("illegal parameter type: ") + type);
     }
