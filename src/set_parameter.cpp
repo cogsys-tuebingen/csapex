@@ -66,7 +66,9 @@ std::string SetParameter::convertToString(const variant &v) const
     } else if(v.type() == typeid(bool)) {
         ss << boost::any_cast<bool> (v);
 
-    } else
+    } else {
+        throw std::runtime_error("unsupported type");
+    }
 
     return ss.str();
 }
