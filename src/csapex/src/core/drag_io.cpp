@@ -155,7 +155,7 @@ void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 
 
         std::string uuid = graph_->makeUUID(type);
-        dispatcher_->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
+        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
 
     } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
         e->ignore();

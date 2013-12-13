@@ -239,10 +239,7 @@ void Node::setState(Memento::Ptr memento)
     state.params = old_params;
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it) {
         param::Parameter::Ptr p = it->second;
-        if(state.params.find(p->name()) == state.params.end()) {
-            std::cout << "warning: parameter " << p->name() << " is not set!" << std::endl;
-        } else {
-            std::cout << "warning: setting parameter " << p->name() << " from " << state.params[p->name()]->toString() << " to " << p->toString() << std::endl;
+        if(state.params.find(p->name()) != state.params.end()) {
             state.params[p->name()]->setFrom(*p);
         }
     }

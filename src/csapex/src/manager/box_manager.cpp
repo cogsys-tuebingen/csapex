@@ -42,6 +42,11 @@ void BoxManager::stop()
     }
 }
 
+void BoxManager::setStyleSheet(const QString &str)
+{
+    style_sheet_ = str;
+}
+
 BoxManager::~BoxManager()
 {
     stop();
@@ -176,7 +181,7 @@ void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_
 }
 
 namespace {
-QPixmap createPixmap(const std::string& label, const NodePtr& content)
+QPixmap createPixmap(const std::string& label, const NodePtr& content, const QString& stylesheet)
 {
     csapex::Box::Ptr object;
 
@@ -191,6 +196,7 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content)
         }
     }
 
+    object->setStyleSheet(stylesheet);
     object->setObjectName(content->getType().c_str());
     object->setLabel(label);
 
@@ -236,7 +242,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         mimeData->setProperty("oy", offset.y());
         drag->setMimeData(mimeData);
 
-        drag->setPixmap(createPixmap(type, content));
+        drag->setPixmap(createPixmap(type, content, style_sheet_));
         drag->setHotSpot(-offset);
         drag->exec();
         return;

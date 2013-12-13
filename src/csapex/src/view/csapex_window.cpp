@@ -14,6 +14,7 @@
 #include <csapex/core/drag_io.h>
 #include <csapex/view/box.h>
 #include <csapex/model/group.h>
+#include <csapex/manager/box_manager.h>
 
 /// SYSTEM
 #include <iostream>
@@ -105,6 +106,7 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     file.open(QFile::ReadOnly);
     style_sheet_ = QString(file.readAll());
     QWidget::setStyleSheet(style_sheet_);
+    BoxManager::instance().setStyleSheet(style_sheet_);
 
     if(style_sheet_watcher_) {
         delete style_sheet_watcher_;

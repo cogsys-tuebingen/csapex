@@ -62,6 +62,8 @@ private:
     QTreeWidget* box_info;
     QTreeWidget* undo_stack;
     QTreeWidget* redo_stack;
+
+    bool is_init_;
 };
 
 }

@@ -15,7 +15,7 @@
 using namespace csapex;
 
 Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), dispatcher_(dispatcher), box_selection_menu(NULL)
+    : QWidget(parent), ui(new Ui::Designer), dispatcher_(dispatcher), box_selection_menu(NULL), is_init_(false)
 {
     ui->setupUi(this);
 
@@ -51,6 +51,18 @@ void Designer::resizeEvent(QResizeEvent*)
 {
     if(box_selection_menu == NULL) {
         reloadBoxMenues();
+    }
+
+    if(!is_init_) {
+        QList<int> sizes = ui->splitter->sizes();
+
+        if(sizes[0] > 0 && sizes[1] > 0) {
+            is_init_ = true;
+            int w = 250;
+            sizes[1] = sizes[1] + (sizes[0] - w);
+            sizes[0] = w;
+            ui->splitter->setSizes(sizes);
+        }
     }
 }
 

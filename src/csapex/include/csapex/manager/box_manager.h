@@ -48,6 +48,8 @@ public:
 
     void stop();
 
+    void setStyleSheet(const QString& str);
+
 public:
     boost::signals2::signal<void(const std::string&)> loaded;
     boost::signals2::signal<void()> new_box_type;
@@ -76,6 +78,7 @@ protected:
     PluginManager<Node>* manager_;
 
     bool dirty_;
+    QString style_sheet_;
 };
 
 }
