@@ -15,6 +15,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/overlay.h>
 #include <csapex/model/graph.h>
+#include <csapex/view/box_dialog.h>
 
 /// SYSTEM
 #include <QResizeEvent>
@@ -24,7 +25,6 @@
 #include <QDragEnterEvent>
 #include <QScrollArea>
 #include <QScrollBar>
-
 
 using namespace csapex;
 
@@ -39,6 +39,9 @@ DesignBoard::DesignBoard(CommandDispatcher* dispatcher, QWidget* parent)
 
     setMouseTracking(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
+
+    setFocusPolicy(Qt::StrongFocus);
+    setFocus(Qt::OtherFocusReason);
 
     BoxManager::instance().setContainer(this);
 
@@ -154,7 +157,19 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
     }
 
     if(e->key() == Qt::Key_Space) {
-        space_ = true;
+        if(Qt::ControlModifier == QApplication::keyboardModifiers()) {
+            e->accept();
+
+            BoxDialog diag;
+            int r = diag.exec();
+
+            if(r) {
+                std::cout << r << std::endl;
+            }
+
+        } else {
+            space_ = true;
+        }
     }
 }
 
@@ -304,6 +319,19 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
         overlay->setSelectionRectangle(overlay->mapFromGlobal(drag_start_pos_), overlay->mapFromGlobal(e->globalPos()));
         overlay->repaint();
     }
+}
+
+void DesignBoard::focusInEvent(QFocusEvent *)
+{
+    setProperty("focused", true);
+    setStyleSheet(styleSheet());
+}
+
+
+void DesignBoard::focusOutEvent(QFocusEvent *)
+{
+    setProperty("focused", false);
+    setStyleSheet(styleSheet());
 }
 
 bool DesignBoard::eventFilter(QObject*, QEvent*)

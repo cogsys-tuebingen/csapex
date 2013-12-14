@@ -36,6 +36,9 @@ public:
     void mouseReleaseEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
 
+    void focusInEvent(QFocusEvent* e);
+    void focusOutEvent(QFocusEvent* e);
+
     virtual bool eventFilter(QObject* o, QEvent* e);
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);

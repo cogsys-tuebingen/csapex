@@ -39,7 +39,8 @@ catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex_pluginbase
    CATKIN_DEPENDS utils_plugin utils_param
-   DEPENDS Qt4
+   DEPENDS Qt4 Boost
+   CFG_EXTRAS csapex-extras.cmake
 )
 
 ###########
@@ -118,6 +119,7 @@ set(SRC_APP
     src/model/template_constructor.cpp
 
     src/view/box.cpp
+    src/view/box_dialog.cpp
     src/view/csapex_window.cpp
     src/view/design_board.cpp
     src/view/designer.cpp

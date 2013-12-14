@@ -45,6 +45,7 @@ public:
 
     void insertAvailableBoxedObjects(QMenu* menu);
     void insertAvailableBoxedObjects(QTreeWidget *tree);
+    QAbstractItemModel *listAvailableBoxedObjects();
 
     void stop();
 

@@ -23,9 +23,6 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 
 find_package(OpenCV REQUIRED)
 
-find_package(Boost REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
-
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
@@ -80,7 +77,7 @@ add_library(csapex_vision
     ${QT_RESOURCES}
 )
 target_link_libraries(csapex_vision
-    yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(csapex_vision_plugin
     src/plugin/register_plugin.cpp
@@ -101,7 +98,7 @@ add_library(csapex_vision_plugin
     ${QT_RESOURCES}
 )
 target_link_libraries(csapex_vision_plugin csapex_vision
-    yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
 
 
 add_executable(vision_evaluator src/deprecated.cpp)

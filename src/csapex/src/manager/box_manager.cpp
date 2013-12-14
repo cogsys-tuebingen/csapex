@@ -17,6 +17,7 @@
 #include <stack>
 #include <QDrag>
 #include <qmime.h>
+#include <QStandardItemModel>
 
 using namespace csapex;
 
@@ -170,6 +171,32 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
     }
 }
 
+
+QAbstractItemModel* BoxManager::listAvailableBoxedObjects()
+{
+
+    ensureLoaded();
+
+    int types = 0;
+    foreach(const Tag& tag, tags) {
+        types += map[tag].size();
+    }
+
+    QStandardItemModel* model = new QStandardItemModel(types, 1);
+
+    int row = 0;
+    foreach(const Tag& tag, tags) {
+
+        foreach(const NodeConstructor::Ptr& proxy, map[tag]) {
+            QString name = QString::fromStdString(tag.getName() + "::" + stripNamespace(proxy->getType()));
+            QStandardItem* item = new QStandardItem(proxy->getIcon(), name);
+            model->setItem(row, 0, item);
+            ++row;
+        }
+    }
+
+    return model;
+}
 void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_signals)
 {
     available_elements_prototypes.push_back(provider);

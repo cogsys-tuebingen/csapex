@@ -24,9 +24,6 @@ if(${ZBAR_FOUND})
 
     find_package(OpenCV REQUIRED)
 
-    find_package(Boost REQUIRED)
-    find_package(Boost COMPONENTS program_options REQUIRED)
-
     find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
     include(${QT_USE_FILE})
 
@@ -71,6 +68,6 @@ if(${ZBAR_FOUND})
         ${QT}
     )
     target_link_libraries(csapex_bar_code_plugin
-        yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${ZBAR_LIBRARIES})
+        yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} ${ZBAR_LIBRARIES})
 
 endif(${ZBAR_FOUND})

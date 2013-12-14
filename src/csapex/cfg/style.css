@@ -19,7 +19,7 @@ QFrame#boxframe {
 }
 QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{
         color: white;
-} 
+}
 
 QCheckBox::indicator:unchecked {
      image: url(:/checkbox_unchecked.png);
@@ -66,6 +66,9 @@ QFrame#boxframe[focused="true"] QLabel {
 QWidget#DesignBoard {
         background: rgb(255, 255, 255);
 }
+QWidget#DesignBoard:focus {
+        border: 1px solid rgb(255, 0, 0)!important;
+}
 
 QWidget#DesignBoard[grid="true"] {
         background: url(:/background.png) rgb(255, 255, 255);
@@ -90,5 +93,5 @@ csapex--Connector[error="true"]  {
 /* connection */
 csapex--Overlay  {
         color: rgb(165,30,55); /* output */
-        background: rgb(180,160,105); /* input */ 
+        background: rgb(180,160,105); /* input */
 }

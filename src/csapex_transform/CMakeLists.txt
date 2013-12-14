@@ -20,8 +20,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins tf)
 
-find_package(Boost REQUIRED)
-
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
@@ -54,7 +52,7 @@ add_library(csapex_transform
     ${QT_CORE}
 )
 target_link_libraries(csapex_transform
-    yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(csapex_transform_plugin
     src/register_plugin.cpp
@@ -69,5 +67,5 @@ add_library(csapex_transform_plugin
     ${QT_PLUG}
 )
 target_link_libraries(csapex_transform_plugin csapex_transform
-    yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${catkin_LIBRARIES})
 

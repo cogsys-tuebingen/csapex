@@ -19,8 +19,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins csapex_transform pcl_ros)
 
-find_package(Boost REQUIRED)
-
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
@@ -49,7 +47,7 @@ add_library(csapex_point_cloud
     ${QT}
 )
 target_link_libraries(csapex_point_cloud
-    yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(csapex_point_cloud_plugin
     src/register_plugin.cpp
@@ -63,5 +61,5 @@ add_library(csapex_point_cloud_plugin
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
-    yaml-cpp ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${catkin_LIBRARIES})
 
