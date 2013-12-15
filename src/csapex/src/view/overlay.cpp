@@ -53,7 +53,8 @@ std::pair<int,int> rgb2id(QRgb rgb)
 }
 
 Overlay::Overlay(CommandDispatcher *dispatcher, QWidget* parent)
-    : QWidget(parent), dispatcher_(dispatcher), graph_(dispatcher->getGraph()), highlight_connection_id_(-1), schema_dirty_(true), drag_connection_(-1), fulcrum_is_hovered_(false), splicing_requested(false), splicing(false)
+    : QWidget(parent), dispatcher_(dispatcher), graph_(dispatcher->getGraph()), highlight_connection_id_(-1), schema_dirty_(true),
+      drag_connection_(-1), fulcrum_is_hovered_(false), splicing_requested(false), splicing(false)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -488,7 +489,7 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
             return false;
         }
 
-    } else {
+    } else if(!schema_dirty_) {
         std::pair<int, int> data = rgb2id(schematics.pixel(x,y));
         int id = data.first;
         int subsection = data.second;
