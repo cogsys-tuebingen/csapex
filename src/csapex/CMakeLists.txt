@@ -117,6 +117,7 @@ set(SRC_APP
     src/model/node_worker.cpp
     src/model/template.cpp
     src/model/template_constructor.cpp
+    src/model/node_filter_proxy_model.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp

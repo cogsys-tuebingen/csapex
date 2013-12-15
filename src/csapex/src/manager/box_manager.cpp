@@ -68,8 +68,8 @@ void BoxManager::rebuildPrototypes()
     typedef std::pair<std::string, DefaultConstructor<Node> > PAIR;
     foreach(const PAIR& p, manager_->availableClasses()) {
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
-                                                            p.second.getType(), p.second.getDescription(),
-                                                            p.second));
+                                                     p.second.getType(), p.second.getDescription(),
+                                                     p.second));
         register_box_type(constructor, true);
     }
 }
@@ -177,22 +177,25 @@ QAbstractItemModel* BoxManager::listAvailableBoxedObjects()
 
     ensureLoaded();
 
-    int types = 0;
-    foreach(const Tag& tag, tags) {
-        types += map[tag].size();
-    }
+    QStandardItemModel* model = new QStandardItemModel;//(types, 1);
 
-    QStandardItemModel* model = new QStandardItemModel(types, 1);
+    foreach(const NodeConstructor::Ptr& proxy, available_elements_prototypes) {
+        QString name = QString::fromStdString(stripNamespace(proxy->getType()));
+        QString descr(proxy->getDescription().c_str());
+        QString type(proxy->getType().c_str());
 
-    int row = 0;
-    foreach(const Tag& tag, tags) {
-
-        foreach(const NodeConstructor::Ptr& proxy, map[tag]) {
-            QString name = QString::fromStdString(tag.getName() + "::" + stripNamespace(proxy->getType()));
-            QStandardItem* item = new QStandardItem(proxy->getIcon(), name);
-            model->setItem(row, 0, item);
-            ++row;
+        QStringList tags;
+        foreach(const Tag& tag, proxy->getTags()) {
+            tags << tag.getName().c_str();
         }
+
+        QStandardItem* item = new QStandardItem(proxy->getIcon(), type);
+        item->setData(type, Qt::UserRole);
+        item->setData(descr, Qt::UserRole + 1);
+        item->setData(name, Qt::UserRole + 2);
+        item->setData(tags, Qt::UserRole + 3);
+
+        model->appendRow(item);
     }
 
     return model;
@@ -272,7 +275,9 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         drag->setPixmap(createPixmap(type, content, style_sheet_));
         drag->setHotSpot(-offset);
         drag->exec();
-        return;
+
+    } else {
+        std::cerr << "unknown box type '" << type << "'!" << std::endl;
     }
 }
 
@@ -295,11 +300,11 @@ Node::Ptr BoxManager::makeTemplateNode(const std::string& /*uuid*/, const std::s
 {
     assert(BoxManager::typeIsTemplate(type) || type == "::group");
 
-//    csapex::Group::Ptr group(new csapex::Group(type, uuid));
+    //    csapex::Group::Ptr group(new csapex::Group(type, uuid));
 
-//    group->setObjectName(uuid.c_str());
+    //    group->setObjectName(uuid.c_str());
 
-//    return group;
+    //    return group;
     std::cerr << "WARNING: reimplement!" << std::endl;
     return Node::Ptr(new Node(""));
 }

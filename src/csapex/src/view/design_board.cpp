@@ -164,7 +164,12 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
             int r = diag.exec();
 
             if(r) {
-                std::cout << r << std::endl;
+                //BoxManager::instance().startPlacingBox(this, diag.getName());
+
+                std::string type = diag.getName();
+                std::string uuid = dispatcher_->getGraph()->makeUUID(type);
+                QPoint pos = mapFromGlobal(QCursor::pos());
+                dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
             }
 
         } else {
