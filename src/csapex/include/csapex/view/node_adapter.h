@@ -63,6 +63,8 @@ protected:
     template <typename T>
     void updateUi(const param::Parameter* p, boost::function<void(T)> setter);
 
+    void updateUiSet(const param::Parameter* p, boost::function<void(const std::string&)> setter);
+
 protected:
     void guiChanged();
 

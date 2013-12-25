@@ -206,10 +206,10 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
             // model change -> ui
             boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
-            boost::function<int(const QString&)> txt2idx = boost::bind(&QComboBox::findData, combo, _1, Qt::UserRole, static_cast<Qt::MatchFlags>(Qt::MatchExactly|Qt::MatchCaseSensitive));
+            boost::function<int(const QString&)> txt2idx = boost::bind(&QComboBox::findData, combo, _1, Qt::DisplayRole, static_cast<Qt::MatchFlags>(Qt::MatchExactly|Qt::MatchCaseSensitive));
             boost::function<void(const QString&)> select = boost::bind(&QComboBox::setCurrentIndex, combo, boost::bind(txt2idx, _1));
             boost::function<void(const std::string&)> set = boost::bind(select, boost::bind(stdstring2qstring, _1));
-          // node_->getNodeWorker()->addParameterCallback(set_p, boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+            node_->getNodeWorker()->addParameterCallback(set_p, boost::bind(&NodeAdapter::updateUiSet, this, _1, set));
 
             QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
             continue;
@@ -239,6 +239,15 @@ template <typename T>
 void NodeAdapter::updateUi(const param::Parameter* p, boost::function<void(T)> setter)
 {
     setter(node_->param<T>(p->name()));
+}
+
+
+void NodeAdapter::updateUiSet(const param::Parameter *p, boost::function<void (const std::string &)> setter)
+{
+    const param::SetParameter* set_p = dynamic_cast<const param::SetParameter*> (p);
+    if(set_p) {
+        setter(set_p->getName());
+    }
 }
 
 void NodeAdapter::updateDynamicGui(QBoxLayout *)
