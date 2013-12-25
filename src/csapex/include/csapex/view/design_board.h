@@ -52,6 +52,7 @@ public:
 
 public Q_SLOTS:
     void updateCursor();
+    void showBoxDialog();
     void showContextMenuGlobal(const QPoint& pos);
     void showContextMenu(const QPoint& pos);
     void showContextMenuEditBox(Box* box, const QPoint& pos);

@@ -119,6 +119,8 @@ Q_SIGNALS:
     void nodeAdded(Node*);
     void nodeRemoved(NodePtr);
 
+    void sig_tick();
+
 private:
     void deselectConnections();
     void deselectConnectionById(int id);

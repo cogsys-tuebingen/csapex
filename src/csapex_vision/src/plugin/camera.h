@@ -2,26 +2,28 @@
 #define CAMERA_H_
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
 
+/// HEADER
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+
 namespace csapex
 {
 
-class Camera : public BoxedObject
+class Camera : public Node
 {
-    Q_OBJECT
-
 public:
     Camera();
 
     virtual void tick();
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
 
-private Q_SLOTS:
-    void update(int slot);
+protected:
+    void update(param::Parameter *p);
 
 private:
     ConnectorOut* output_;

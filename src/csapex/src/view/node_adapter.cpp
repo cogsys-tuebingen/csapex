@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node.h>
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/model/node_worker.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -88,7 +89,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             // model change -> ui
             boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
             boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, path, boost::bind(stdstring2qstring, _1));
-            path_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+            node_->getNodeWorker()->addParameterCallback(path_p, boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
 
             QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
             QObject::connect(open, SIGNAL(clicked()), call_open, SLOT(call()));
@@ -118,7 +119,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 // model change -> ui
                 boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
                 boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, txt_, boost::bind(stdstring2qstring, _1));
-                value_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+                node_->getNodeWorker()->addParameterCallback(value_p, boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
 
                 QObject::connect(txt_, SIGNAL(returnPressed()), call, SLOT(call()));
                 QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
@@ -142,7 +143,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(int)> set = boost::bind(&QSlider::setValue, slider, _1);
-                range_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<int>, this, _1, set));
+                node_->getNodeWorker()->addParameterCallback(range_p, boost::bind(&NodeAdapter::updateUi<int>, this, _1, set));
 
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
@@ -160,7 +161,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, _1);
-                range_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<double>, this, _1, set));
+                node_->getNodeWorker()->addParameterCallback(range_p, boost::bind(&NodeAdapter::updateUi<double>, this, _1, set));
 
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
@@ -177,7 +178,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
-                range_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set));
+                node_->getNodeWorker()->addParameterCallback(range_p, boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set));
 
                 QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
 
@@ -208,7 +209,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             boost::function<int(const QString&)> txt2idx = boost::bind(&QComboBox::findData, combo, _1, Qt::UserRole, static_cast<Qt::MatchFlags>(Qt::MatchExactly|Qt::MatchCaseSensitive));
             boost::function<void(const QString&)> select = boost::bind(&QComboBox::setCurrentIndex, combo, boost::bind(txt2idx, _1));
             boost::function<void(const std::string&)> set = boost::bind(select, boost::bind(stdstring2qstring, _1));
-            //set_p->parameter_changed->connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+          // node_->getNodeWorker()->addParameterCallback(set_p, boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
 
             QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
             continue;
@@ -219,7 +220,8 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 template <typename T>
 void NodeAdapter::updateParam(const std::string& name, T value)
 {
-    node_->getParameter(name)->set<T>(value);
+    param::Parameter* p = node_->getParameter(name).get();
+    p->set<T>(value);
     guiChanged();
 }
 

@@ -4,14 +4,19 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 
+/// PROJECT
+#include <utils_param/parameter.h>
+
 /// SYSTEM
 #include <QObject>
+#include <QMutex>
 #include <map>
 #include <deque>
+#include <boost/function.hpp>
 
 namespace csapex {
 
-struct NodeWorker : public QObject
+struct NodeWorker : public QObject, public param::Parameter::access
 {
     Q_OBJECT
 
@@ -38,8 +43,13 @@ public Q_SLOTS:
 
     void setSynchronizedInputs(bool s);
 
+    void addParameterCallback(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
+
 Q_SIGNALS:
     void messageProcessed();
+
+private:
+    void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
 
 public:
     static const unsigned timer_history_length_;
@@ -49,6 +59,9 @@ private:
 
     bool synchronized_inputs_;
     std::map<ConnectorIn*, bool> has_msg_;
+
+    QMutex changed_params_mutex_;
+    std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
 
     std::deque<int> timer_history_;
 };

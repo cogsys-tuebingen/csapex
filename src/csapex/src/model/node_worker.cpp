@@ -17,6 +17,18 @@ NodeWorker::NodeWorker(Node* node)
     assert(node_);
 }
 
+void NodeWorker::addParameterCallback(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb)
+{
+    //parameter_changed(*param).connect(cb);
+    parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1, cb));
+}
+
+void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
+{
+    QMutexLocker lock(&changed_params_mutex_);
+    changed_params_.push_back(std::make_pair(param, cb));
+}
+
 void NodeWorker::setSynchronizedInputs(bool s)
 {
     synchronized_inputs_ = s;
@@ -96,9 +108,19 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
 void NodeWorker::tick()
 {
-//    if(node_->isEnabled()) {
-//        node_->tick();
-//    }
+    if(node_->isEnabled()) {
+        node_->tick();
+    }
+
+    {
+        QMutexLocker lock(&changed_params_mutex_);
+        typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
+        for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end(); ++it) {
+            it->second(it->first);
+        }
+
+        changed_params_.clear();
+    }
 
     while(timer_history_.size() > timer_history_length_) {
         timer_history_.pop_front();

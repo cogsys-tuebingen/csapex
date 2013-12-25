@@ -18,6 +18,7 @@
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/model/node_constructor.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/view/box.h>
@@ -100,6 +101,8 @@ void Graph::addNode(Node::Ptr node)
     node->setCommandDispatcher(dispatcher_);
     node->setup();
 
+    QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(tick()));
+
     Q_EMIT nodeAdded(node.get());
 }
 
@@ -108,6 +111,8 @@ void Graph::deleteNode(const std::string& uuid)
     Node* node = findNode(uuid);
 
     node->stop();
+
+    QObject::disconnect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(tick()));
 
     for(std::vector<Node::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
         if((*it).get() == node) {
@@ -861,11 +866,13 @@ void Graph::selectNode(Node *node, bool add)
 
 void Graph::tick()
 {
-    foreach(Node::Ptr n, nodes_) {
-        if(n->isEnabled()) {
-            n->tick();
-        }
-    }
+//    foreach(Node::Ptr n, nodes_) {
+//        if(n->isEnabled()) {
+//            n->tick();
+//        }
+//    }
+    Q_EMIT sig_tick();
+
     foreach(const Connection::Ptr& connection, visible_connections) {
         connection->tick();
     }

@@ -62,6 +62,7 @@ void RegisterPlugin::init()
     Tag::createIfNotExists("Vision");
     Tag::createIfNotExists("Filter");
     Tag::createIfNotExists("Image Combiner");
+    Tag::createIfNotExists("Pattern Recognition");
 
     qRegisterMetaType<cv::Mat>("cv::Mat");
 

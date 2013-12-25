@@ -93,6 +93,7 @@ add_library(csapex_vision_plugin
     src/plugin/image_provider_img.cpp
     src/plugin/image_provider_mov.cpp
     src/plugin/image_provider_set.cpp
+    src/plugin/hough_circle.cpp
 
     ${QT_MOC_PLUG}
     ${QT_RESOURCES}

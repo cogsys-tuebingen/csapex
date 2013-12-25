@@ -90,6 +90,12 @@ void Node::addParameter(const param::Parameter::Ptr &param)
     state.params[param->name()] = param;
 }
 
+void Node::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
+{
+    addParameter(param);
+    worker_->addParameterCallback(param, cb);
+}
+
 std::vector<param::Parameter::Ptr> Node::getParameters() const
 {
     std::vector<param::Parameter::Ptr> r;
@@ -215,7 +221,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
         for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
             param::Parameter* param = it->second.get();
             if(state.params.find(param->name()) != state.params.end()) {
-                *state.params[param->name()] = *param;
+                state.params[param->name()]->setFrom(*param);
             } else {
                 std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
             }
@@ -329,7 +335,6 @@ void Node::connectorChanged()
 
 void Node::tick()
 {
-    worker_->tick();
 }
 
 void Node::updateModel()

@@ -25,6 +25,7 @@
 #include <QDragEnterEvent>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QShortcut>
 
 using namespace csapex;
 
@@ -32,6 +33,9 @@ DesignBoard::DesignBoard(CommandDispatcher* dispatcher, QWidget* parent)
     : QWidget(parent), ui(new Ui::DesignBoard), dispatcher_(dispatcher), drag_io(dispatcher), space_(false), drag_(false)
 {
     ui->setupUi(this);
+
+    QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
+    QObject::connect(shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
 
     overlay = new Overlay(dispatcher, this);
 
@@ -156,25 +160,23 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
         return;
     }
 
-    if(e->key() == Qt::Key_Space) {
-        if(Qt::ControlModifier == QApplication::keyboardModifiers()) {
-            e->accept();
+    if(e->key() == Qt::Key_Space && Qt::ControlModifier != QApplication::keyboardModifiers()) {
+        space_ = true;
+    }
+}
 
-            BoxDialog diag;
-            int r = diag.exec();
+void DesignBoard::showBoxDialog()
+{
+    BoxDialog diag;
+    int r = diag.exec();
 
-            if(r) {
-                //BoxManager::instance().startPlacingBox(this, diag.getName());
+    if(r) {
+        //BoxManager::instance().startPlacingBox(this, diag.getName());
 
-                std::string type = diag.getName();
-                std::string uuid = dispatcher_->getGraph()->makeUUID(type);
-                QPoint pos = mapFromGlobal(QCursor::pos());
-                dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
-            }
-
-        } else {
-            space_ = true;
-        }
+        std::string type = diag.getName();
+        std::string uuid = dispatcher_->getGraph()->makeUUID(type);
+        QPoint pos = mapFromGlobal(QCursor::pos());
+        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
     }
 }
 

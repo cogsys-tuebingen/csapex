@@ -40,6 +40,10 @@ void HTMLDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & opti
     QString name = index.data(Qt::UserRole + 2).toString();
     QStringList tags = index.data(Qt::UserRole + 3).toStringList();
 
+    if(tags.empty()) {
+        return;
+    }
+
     QString tag = tags.at(0);
     foreach(const QString& t, tags) {
         foreach(const QString& s, key_words) {
@@ -102,7 +106,7 @@ CompleteLineEdit::CompleteLineEdit(QWidget *parent)
 }
 
 
-void CompleteLineEdit::focusOutEvent(QFocusEvent *e) {
+void CompleteLineEdit::focusOutEvent(QFocusEvent */*e*/) {
     Q_EMIT editingFinished();
 }
 

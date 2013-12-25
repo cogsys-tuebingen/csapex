@@ -23,6 +23,7 @@ class Node : public QObject, public ErrorState
     Q_OBJECT
 
     friend class NodeState;
+    friend class NodeAdapter;
     friend class Box;
     friend class GraphIO;
     friend class Graph;
@@ -47,6 +48,7 @@ public:
     std::vector<Tag> getTags() const;
 
     void addParameter(const param::Parameter::Ptr& param);
+    void addParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
 
     std::vector<param::Parameter::Ptr> getParameters() const;
 
