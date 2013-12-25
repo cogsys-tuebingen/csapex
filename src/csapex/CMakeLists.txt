@@ -77,7 +77,7 @@ set(SRC_PLUGIN
     src/utility/qwrapper.cpp
     src/utility/stream_interceptor.cpp
     src/utility/timer.cpp
-    include/csapex/utility/qt_helper.hpp
+    src/utility/qt_helper.cpp
 
     src/deprecated/global_option.cpp
     src/deprecated/global_option_manager.cpp
