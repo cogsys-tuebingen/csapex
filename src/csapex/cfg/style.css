@@ -75,17 +75,17 @@ QWidget#DesignBoard[grid="true"] {
 }
 
 /* connectors */
-csapex--Connector {
+csapex--Port {
         border: 2px solid rgb(0, 0, 0);
         background: rgb(255,255,255);
         border-radius: 8px;
 }
 
-csapex--Connector[disabled="true"]  {
+csapex--Port[disabled="true"]  {
         border: 2px solid rgb(128, 128, 128);
         background: rgb(200,200,200);
 }
-csapex--Connector[error="true"]  {
+csapex--Port[error="true"]  {
         border: 2px solid rgb(165,30,55);
         background: rgb(255,200,200);
 }

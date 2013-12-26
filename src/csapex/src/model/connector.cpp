@@ -32,13 +32,13 @@ std::string Connector::makeUUID(const std::string& box_uuid, int type, int sub_i
 }
 
 Connector::Connector(Node* parent, const std::string& uuid)
-    : node_(parent), buttons_down_(0), uuid_(uuid), minimized_(false), refresh_style_sheet_(false)
+    : node_(parent), buttons_down_(0), uuid_(uuid), minimized_(false)
 {
     init();
 }
 
 Connector::Connector(Node* parent, int sub_id, int type)
-    : node_(parent), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false), refresh_style_sheet_(false)
+    : node_(parent), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false)
 {
     init();
 }
@@ -76,16 +76,6 @@ void Connector::errorChanged(bool error)
 {
     setProperty("error", error);
     refreshStylesheet();
-}
-
-void Connector::paintEvent(QPaintEvent *e)
-{
-    if(refresh_style_sheet_) {
-        refresh_style_sheet_ = false;
-        setStyleSheet(styleSheet());
-    }
-
-    QFrame::paintEvent(e);
 }
 
 bool Connector::isForwarding() const
@@ -141,11 +131,6 @@ void Connector::enable()
     Q_EMIT enabled(this);
     setProperty("disabled", false);
     refreshStylesheet();
-}
-
-void Connector::refreshStylesheet()
-{
-    refresh_style_sheet_ = true;
 }
 
 bool Connector::canConnectTo(Connector* other_side, bool) const

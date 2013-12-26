@@ -2,7 +2,7 @@
 #include <csapex/utility/qt_helper.hpp>
 
 /// COMPONENT
-#include <csapex/model/connector_in.h>
+#include <csapex/view/port.h>
 
 using namespace csapex;
 
@@ -25,7 +25,7 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     /// TODO: Make connector independent of node
-    ConnectorIn* cin = new ConnectorIn(NULL, 0);
+    Port* cin = new Port;
 
     QSlider* slider = new QSlider(Qt::Horizontal);
     slider->setMinimum(min);

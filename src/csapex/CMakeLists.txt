@@ -129,6 +129,7 @@ set(SRC_APP
     src/view/selectable.cpp
     src/view/template_dialog.cpp
     src/view/profiling_widget.cpp
+    src/view/port.cpp
 )
 
 #

@@ -6,6 +6,7 @@
 #include <csapex/command/command.h>
 #include <csapex/model/error_state.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/view/port.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -14,11 +15,9 @@
 namespace csapex
 {
 
-class Connector : public QFrame, public ErrorState
+class Connector : public Port, public ErrorState
 {
     Q_OBJECT
-
-    Q_PROPERTY(QString class READ cssClass)
 
 public:
     static const QString MIME_CREATE;
@@ -72,10 +71,6 @@ public:
 
     virtual QPoint centerPoint();
 
-    QString cssClass() {
-        return QString("Connector");
-    }
-
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
@@ -121,15 +116,12 @@ protected:
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
     void errorChanged(bool error);
-    void paintEvent(QPaintEvent *);
 
 protected:
     virtual QPoint topLeft();
 
     virtual bool shouldMove(bool left, bool right);
     virtual bool shouldCreate(bool left, bool right);
-
-    void refreshStylesheet();
 
 protected:
     Node* node_;
@@ -145,8 +137,6 @@ protected:
 
     bool minimized_;
     int count_;
-
-    bool refresh_style_sheet_;
 };
 
 }
