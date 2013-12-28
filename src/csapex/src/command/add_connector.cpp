@@ -41,9 +41,9 @@ bool AddConnector::doExecute()
         std::string uuid = c_uuid.empty() ? Connectable::makeUUID(node->UUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_IN, node->nextInputId()) : c_uuid;
         ConnectorIn* in;
         if(forward) {
-            in = new ConnectorForward(node, true, uuid);
+            in = new ConnectorForward(true, uuid);
         } else {
-            in = new ConnectorIn(node, uuid);
+            in = new ConnectorIn(uuid);
         }
         c = in;
         node->registerInput(in);
@@ -51,9 +51,9 @@ bool AddConnector::doExecute()
         std::string uuid = c_uuid.empty() ? Connectable::makeUUID(node->UUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_OUT, node->nextOutputId()) : c_uuid;
         ConnectorOut* out;
         if(forward) {
-            out = new ConnectorForward(node, false, uuid);
+            out = new ConnectorForward(false, uuid);
         } else {
-            out = new ConnectorOut(node, uuid);
+            out = new ConnectorOut(uuid);
         }
         c = out;
         node->registerOutput(out);

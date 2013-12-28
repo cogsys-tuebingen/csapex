@@ -84,7 +84,7 @@ void Box::construct(Node* node)
 
     setFocusPolicy(Qt::ClickFocus);
 
-    const std::string& uuid = node_->uuid_;
+    const std::string& uuid = node_->UUID();
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -408,12 +408,24 @@ void Box::triggerPlaced()
 
 void Box::selectEvent()
 {
+    BOOST_FOREACH(ConnectorIn* i, node_->input){
+        i->getPort()->setSelected(true);
+    }
+    BOOST_FOREACH(ConnectorOut* i, node_->output) {
+        i->getPort()->setSelected(true);
+    }
     ui->boxframe->setProperty("focused",true);
     refreshStylesheet();
 }
 
 void Box::deselectEvent()
 {
+    BOOST_FOREACH(ConnectorIn* i, node_->input){
+        i->getPort()->setSelected(false);
+    }
+    BOOST_FOREACH(ConnectorOut* i, node_->output) {
+        i->getPort()->setSelected(false);
+    }
     ui->boxframe->setProperty("focused",false);
     refreshStylesheet();
 }

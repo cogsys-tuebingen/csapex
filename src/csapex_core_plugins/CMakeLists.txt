@@ -41,6 +41,8 @@ add_library(csapex_core_lib
     src/ros_handler.cpp
     src/ros_message_conversion.cpp
     src/string_message.cpp
+    src/int_message.cpp
+    src/double_message.cpp
     src/vector_message.cpp
     ${QT_RESOURCES}
     ${MOC_CORE}
@@ -60,6 +62,8 @@ add_library(csapex_core_plugins
     src/import_cin.cpp
     src/import_ros.cpp
     src/global_option_panel.cpp
+    src/int_input.cpp
+    src/double_input.cpp
     src/text_input.cpp
     src/text_display.cpp
     src/say_text.cpp

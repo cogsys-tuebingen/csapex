@@ -65,6 +65,7 @@ set(SRC_PLUGIN
     src/model/memento.cpp
     src/model/message.cpp
     src/model/tag.cpp
+    src/model/unique.cpp
 
     src/manager/box_manager.cpp
     src/manager/connection_type_manager.cpp

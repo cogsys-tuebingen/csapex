@@ -368,7 +368,6 @@ void CsApexWindow::nodeAdded(Node *node)
     if(bo) {
         box = new Box(bo);
     } else {
-        // TODO: spawn default node adapter
         box = new Box(node, NodeAdapter::Ptr(new NodeAdapter));
     }
 

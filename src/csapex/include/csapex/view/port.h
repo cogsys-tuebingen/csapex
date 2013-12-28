@@ -3,6 +3,8 @@
 
 /// PROJECT
 #include <csapex/model/connectable.h>
+#include <csapex/model/error_state.h>
+#include <csapex/view/selectable.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -10,7 +12,7 @@
 namespace csapex
 {
 
-class Port : public QFrame
+class Port : public QFrame, public Selectable, public ErrorState
 {
     Q_OBJECT
 
@@ -47,6 +49,9 @@ public:
 protected:
     void paintEvent(QPaintEvent *);
     void refreshStylesheet();
+
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+    void errorChanged(bool error);
 
 protected:
     Connectable * adaptee_;

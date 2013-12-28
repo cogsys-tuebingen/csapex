@@ -42,7 +42,7 @@ public:
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
 };
 
-template <class Type, class Instance>
+template <typename Type, class Instance>
 struct MessageTemplate : public Message {
     typedef boost::shared_ptr<Instance> Ptr;
 

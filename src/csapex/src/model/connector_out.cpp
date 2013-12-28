@@ -15,8 +15,8 @@
 
 using namespace csapex;
 
-ConnectorOut::ConnectorOut(Node* parent, const std::string& uuid)
-    : Connectable(parent, uuid), force_send_message_(false)
+ConnectorOut::ConnectorOut(const std::string& uuid)
+    : Connectable(uuid), force_send_message_(false)
 {
 }
 

@@ -5,7 +5,6 @@
 #include <csapex/view/box.h>
 #include <csapex/view/design_board.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/model/node.h>
 #include <csapex/model/boxed_object.h>
 #include <csapex/view/port.h>
 
@@ -29,14 +28,14 @@ std::string Connectable::makeUUID(const std::string& box_uuid, int type, int sub
     return ss.str();
 }
 
-Connectable::Connectable(Node* parent, const std::string& uuid)
-    : node_(parent), buttons_down_(0), uuid_(uuid), minimized_(false)
+Connectable::Connectable(const std::string& uuid)
+    : Unique(uuid), buttons_down_(0), minimized_(false)
 {
     init();
 }
 
-Connectable::Connectable(Node* parent, int sub_id, int type)
-    : node_(parent), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false)
+Connectable::Connectable(Unique* parent, int sub_id, int type)
+    : Unique(makeUUID(parent->UUID(), type, sub_id)), buttons_down_(0), minimized_(false)
 {
     init();
 }
@@ -53,11 +52,19 @@ Port* Connectable::getPort() const
     return port_;
 }
 
+CommandDispatcher* Connectable::getCommandDispatcher() const
+{
+    return dispatcher_;
+}
+
+void Connectable::setCommandDispatcher(CommandDispatcher *d)
+{
+    dispatcher_ = d;
+}
+
 void Connectable::init()
 {
     port_ = NULL;
-
-    setParent(node_->getBox());
 
     setType(ConnectionType::makeDefault());
 
@@ -73,23 +80,12 @@ Connectable::~Connectable()
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    node_->setError(error, msg, level);
-}
-
-void Connectable::errorChanged(bool error)
-{
-    setProperty("error", error);
-    //refreshStylesheet();
+    port_->setError(error, msg, level);
 }
 
 bool Connectable::isForwarding() const
 {
     return false;
-}
-
-std::string Connectable::UUID() const
-{
-    return uuid_;
 }
 
 bool Connectable::tryConnect(QObject* other_side)
@@ -117,7 +113,7 @@ void Connectable::validateConnections()
 void Connectable::removeAllConnectionsUndoable()
 {
     if(isConnected()) {
-        getNode()->getCommandDispatcher()->execute(removeAllConnectionsCmd());
+        getCommandDispatcher()->execute(removeAllConnectionsCmd());
     }
 }
 
@@ -199,12 +195,6 @@ void Connectable::setMinimizedSize(bool mini)
 bool Connectable::isMinimizedSize() const
 {
     return minimized_;
-}
-
-Node* Connectable::getNode() const
-{
-    QMutexLocker lock(&mutex);
-    return node_;
 }
 
 int Connectable::getCount() const

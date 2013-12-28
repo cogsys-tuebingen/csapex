@@ -66,7 +66,7 @@ void NodeState::writeYaml(YAML::Emitter &out) const
         out << YAML::Key << "type";
         out << YAML::Value << parent->getType();
         out << YAML::Key << "uuid";
-        out << YAML::Value << parent->uuid_;
+        out << YAML::Value << parent->UUID();
     }
     out << YAML::Key << "label";
     out << YAML::Value << label_;

@@ -24,7 +24,7 @@ public:
     typedef TargetList::const_iterator TargetIterator;
 
 public:
-    ConnectorOut(Node* parent, const std::string& uuid);
+    ConnectorOut(const std::string& uuid);
     ConnectorOut(Node* parent, int sub_id);
     ~ConnectorOut();
 

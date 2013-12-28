@@ -7,8 +7,8 @@
 
 using namespace csapex;
 
-ConnectorForward::ConnectorForward(Node* parent, bool primary_function_is_input, const std::string &uuid)
-    : Connectable(parent, uuid), ConnectorIn(parent, uuid), ConnectorOut(parent, uuid), primary_function_is_input(primary_function_is_input)
+ConnectorForward::ConnectorForward(bool primary_function_is_input, const std::string &uuid)
+    : Connectable(uuid), ConnectorIn(uuid), ConnectorOut(uuid), primary_function_is_input(primary_function_is_input)
 {
 
 }
@@ -45,67 +45,68 @@ void ConnectorForward::inputMessage(ConnectionType::Ptr message)
 
 bool ConnectorForward::tryConnect(Connectable* other_side)
 {
-    bool use_in = false;
+    // TODO: reimplement
+//    bool use_in = false;
 
-    if(other_side->isForwarding()) {
-        ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
+//    if(other_side->isForwarding()) {
+//        ConnectorForward* other = dynamic_cast<ConnectorForward*> (other_side);
 
-        if(isOutput() == other->isOutput()) {
+//        if(isOutput() == other->isOutput()) {
 
-            // only if one is in a subgraph of the other
-            Group* this_meta_box = dynamic_cast<Group*> (getNode()->getBox());
-            Group* other_meta_box = dynamic_cast<Group*> (other->getNode()->getBox());
+//            // only if one is in a subgraph of the other
+//            Group* this_meta_box = dynamic_cast<Group*> (getNode()->getBox());
+//            Group* other_meta_box = dynamic_cast<Group*> (other->getNode()->getBox());
 
-            assert(this_meta_box);
-            assert(other_meta_box);
+//            assert(this_meta_box);
+//            assert(other_meta_box);
 
-            Graph::Ptr this_sub_graph = this_meta_box->getSubGraph();
-            Graph::Ptr other_sub_graph = other_meta_box->getSubGraph();
+//            Graph::Ptr this_sub_graph = this_meta_box->getSubGraph();
+//            Graph::Ptr other_sub_graph = other_meta_box->getSubGraph();
 
-            Graph::Ptr this_graph = this_meta_box->getCommandDispatcher()->getGraph();
-            Graph::Ptr other_graph = other_meta_box->getCommandDispatcher()->getGraph();
+//            Graph::Ptr this_graph = this_meta_box->getCommandDispatcher()->getGraph();
+//            Graph::Ptr other_graph = other_meta_box->getCommandDispatcher()->getGraph();
 
-            bool i_am_father = this_sub_graph == other_graph;
-            bool i_am_child = other_sub_graph == this_graph;
+//            bool i_am_father = this_sub_graph == other_graph;
+//            bool i_am_child = other_sub_graph == this_graph;
 
-            bool one_is_child_of_the_other = i_am_child || i_am_father;
+//            bool one_is_child_of_the_other = i_am_child || i_am_father;
 
-            if(!one_is_child_of_the_other) {
-                std::cerr << "cannot connect, connectors are not siblings" << std::endl;
-                return false;
-            }
+//            if(!one_is_child_of_the_other) {
+//                std::cerr << "cannot connect, connectors are not siblings" << std::endl;
+//                return false;
+//            }
 
-            if(isInput()) {
-                // both are input -> connect parent to nested
-                if(i_am_father) {
-                    connect(other);
-                } else {
-                    return other->connect(this);
-                }
-            } else {
-                // both are output -> connect nested to parent
-                if(i_am_child) {
-                    connect(other);
-                } else {
-                    return other->connect(this);
-                }
-            }
-        }
+//            if(isInput()) {
+//                // both are input -> connect parent to nested
+//                if(i_am_father) {
+//                    connect(other);
+//                } else {
+//                    return other->connect(this);
+//                }
+//            } else {
+//                // both are output -> connect nested to parent
+//                if(i_am_child) {
+//                    connect(other);
+//                } else {
+//                    return other->connect(this);
+//                }
+//            }
+//        }
 
-        use_in = other_side->isOutput();
+//        use_in = other_side->isOutput();
 
-    } else {
-        // other side is normal connector
-        use_in = other_side->canOutput();
-    }
+//    } else {
+//        // other side is normal connector
+//        use_in = other_side->canOutput();
+//    }
 
-    if(use_in) {
-        // connection from "left"
-        return ConnectorIn::tryConnect(other_side);
-    } else {
-        // connection from "right"
-        return ConnectorOut::tryConnect(other_side);
-    }
+//    if(use_in) {
+//        // connection from "left"
+//        return ConnectorIn::tryConnect(other_side);
+//    } else {
+//        // connection from "right"
+//        return ConnectorOut::tryConnect(other_side);
+//    }
 }
 
 bool ConnectorForward::acknowledgeConnection(Connectable* other_side)

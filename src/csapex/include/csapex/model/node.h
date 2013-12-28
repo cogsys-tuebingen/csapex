@@ -7,6 +7,7 @@
 #include <csapex/model/memento.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/generic_state.h>
+#include <csapex/model/unique.h>
 
 /// PROJECT
 #include <utils_param/parameter.h>
@@ -18,7 +19,7 @@
 
 namespace csapex {
 
-class Node : public QObject, public ErrorState
+class Node : public QObject, public ErrorState, public Unique
 {
     Q_OBJECT
 
@@ -69,14 +70,10 @@ public:
     void stop();
 
 private:
-    void setUUID(const std::string& uuid);
-
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);
 
 public:
-    std::string UUID() const;
-
     virtual bool canBeDisabled() const;
     bool isEnabled();
 
@@ -89,7 +86,8 @@ public:
 
     /// TODO: get rid of this
     virtual void setBox(Box* box);
-    Box* getBox() const;
+    Box* getBox() const  __attribute__ ((deprecated));
+
     NodeWorker* getNodeWorker() const;
 
     template <typename T>
@@ -208,7 +206,6 @@ private:
     QMutex worker_mutex_;
 
     NodeWorker* worker_;
-    std::string uuid_;
 
     NodeStatePtr node_state_;
 

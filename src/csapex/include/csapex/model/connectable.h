@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection_type.h>
+#include <csapex/model/unique.h>
 #include <csapex/command/command.h>
 #include <csapex/model/error_state.h>
 #include <csapex/csapex_fwd.h>
@@ -14,12 +15,11 @@
 namespace csapex
 {
 
-class Connectable : public QObject, public ErrorState
+class Connectable : public QObject, public ErrorState, public Unique
 {
     Q_OBJECT
 
     friend class Port;
-
 
 public:
     static const QString MIME_CREATE_CONNECTION;
@@ -39,15 +39,12 @@ public:
     void setPort(Port* port);
     Port* getPort() const;
 
+    CommandDispatcher* getCommandDispatcher() const;
+    void setCommandDispatcher(CommandDispatcher* d);
+
+    int getCount() const;
+
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
-
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
-    virtual bool isConnected() const = 0;
-    virtual bool tryConnect(Connectable* other_side) = 0;
-    virtual void removeConnection(Connectable* other_side) = 0;
-    virtual void validateConnections();
-
-    virtual void connectionMovePreview(Connectable* other_side) = 0;
 
     virtual bool canOutput() const {
         return false;
@@ -64,8 +61,6 @@ public:
 
     virtual bool isForwarding() const;
 
-    std::string UUID() const;
-
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
@@ -75,10 +70,18 @@ public:
     void setMinimizedSize(bool mini);
     bool isMinimizedSize() const;
 
+    /**
+     * INTERFACE
+     */
+    virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
+    virtual bool isConnected() const = 0;
+    virtual bool tryConnect(Connectable* other_side) = 0;
+    virtual void removeConnection(Connectable* other_side) = 0;
+    virtual void validateConnections();
+    virtual void connectionMovePreview(Connectable* other_side) = 0;
     virtual Command::Ptr removeAllConnectionsCmd() = 0;
-
-    Node* getNode() const;
-    int getCount() const;
+protected:
+    virtual void removeAllConnectionsNotUndoable() = 0;
 
 public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
@@ -103,29 +106,25 @@ Q_SIGNALS:
     void messageArrived(Connectable* source);
 
 protected:
-    Connectable(Node* parent, const std::string &uuid);
-    Connectable(Node* parent, int sub_id, int type);
+    Connectable(const std::string &uuid);
+    Connectable(Unique *parent, int sub_id, int type);
     virtual ~Connectable();
     void init();
 
-    virtual void removeAllConnectionsNotUndoable() = 0;
-
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
-    void errorChanged(bool error);
 
 protected:
     virtual bool shouldMove(bool left, bool right);
     virtual bool shouldCreate(bool left, bool right);
 
 protected:
-    Node* node_;
+    CommandDispatcher* dispatcher_;
     Port* port_;
 
     csapex::DesignBoard* designer;
 
     Qt::MouseButtons buttons_down_;
 
-    std::string uuid_;
     std::string label_;
 
     ConnectionType::ConstPtr type_;

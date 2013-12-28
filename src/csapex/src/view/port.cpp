@@ -76,6 +76,18 @@ void Port::refreshStylesheet()
     refresh_style_sheet_ = true;
 }
 
+void Port::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+{
+    // TODO: relay to parent (box if applicable)
+    //setError(error, msg, level);
+}
+
+void Port::errorChanged(bool error)
+{
+    setProperty("error", error);
+    refreshStylesheet();
+}
+
 void Port::setMinimizedSize(bool mini)
 {
     minimized_ = mini;
@@ -194,14 +206,14 @@ void Port::dropEvent(QDropEvent* e)
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
 
         if(from && from != adaptee_) {
-            adaptee_->getNode()->getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(adaptee_->UUID(), from->UUID())));
+            adaptee_->getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(adaptee_->UUID(), from->UUID())));
         }
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
 
         if(from) {
             Command::Ptr cmd(new command::MoveConnection(from, adaptee_));
-            adaptee_->getNode()->getCommandDispatcher()->execute(cmd);
+            adaptee_->getCommandDispatcher()->execute(cmd);
             e->setDropAction(Qt::MoveAction);
         }
     }
@@ -220,7 +232,7 @@ QPoint Port::topLeft()
         parent = parent->parentWidget();
     };
 
-    return mapTo(parent, parent->pos());
+    return mapTo(parent,  QPoint(0,0));
 }
 
 QPoint Port::centerPoint()

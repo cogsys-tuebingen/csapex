@@ -154,10 +154,6 @@ void Overlay::drawConnection(Connection& connection)
     ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
     ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
 
-    if(from->getNode()->getBox()->isHidden() || to->getNode()->getBox()->isHidden()) {
-        return;
-    }
-
     QPoint p1 = from->getPort()->centerPoint();
     QPoint p2 = to->getPort()->centerPoint();
 

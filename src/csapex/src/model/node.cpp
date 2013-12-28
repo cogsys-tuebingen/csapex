@@ -15,8 +15,8 @@
 using namespace csapex;
 
 Node::Node(const std::string &uuid)
-    : icon_(":/plugin.png"), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
-      uuid_(uuid), node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
+    : Unique(uuid), icon_(":/plugin.png"), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+      node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
 }
@@ -39,15 +39,6 @@ void Node::makeThread()
     }
 }
 
-void Node::setUUID(const std::string &uuid)
-{
-    uuid_ = uuid;
-}
-
-std::string Node::UUID() const
-{
-    return uuid_;
-}
 
 void Node::setup()
 {
@@ -201,8 +192,8 @@ void Node::setNodeState(NodeState::Ptr memento)
     if(node_state_->label_.empty()) {
         node_state_->label_ = old_label;
     }
-    if(uuid_.empty()) {
-        uuid_ = old_uuid;
+    if(UUID().empty()) {
+        setUUID(old_uuid);
     }
 
     node_state_->parent = this;
@@ -559,8 +550,9 @@ QTreeWidgetItem* Node::createDebugInformation() const
             if(connector->isConnected()) {
                 Connectable* target = connector->getSource();
                 target_widget->setText(0, target->UUID().c_str());
-                target_widget->setIcon(1, target->getNode()->getIcon());
-                target_widget->setText(1, target->getNode()->getType().c_str());
+                //target_widget->setIcon(1, target->getNode()->getIcon());
+                //target_widget->setText(1, target->getNode()->getType().c_str());
+                target_widget->setIcon(1, QIcon(":/connector.png"));
             } else {
                 target_widget->setText(0, "not connected");
                 target_widget->setIcon(1, QIcon(":/disconnected.png"));
@@ -587,8 +579,9 @@ QTreeWidgetItem* Node::createDebugInformation() const
                 ConnectorIn* target = *it;
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
                 target_widget->setText(0, target->UUID().c_str());
-                target_widget->setIcon(1, target->getNode()->getIcon());
-                target_widget->setText(1, target->getNode()->getType().c_str());
+                //target_widget->setIcon(1, target->getNode()->getIcon());
+                //target_widget->setText(1, target->getNode()->getType().c_str());
+                target_widget->setIcon(1, QIcon(":/connector.png"));
                 targets->addChild(target_widget);
             }
             connector_widget->addChild(targets);
@@ -605,6 +598,8 @@ void Node::registerInput(ConnectorIn* in)
 {
     input.push_back(in);
 
+    in->setCommandDispatcher(dispatcher_);
+
     worker_->addInput(in);
     connectConnector(in);
     QObject::connect(in, SIGNAL(messageArrived(Connectable*)), worker_, SLOT(forwardMessage(Connectable*)));
@@ -615,6 +610,8 @@ void Node::registerInput(ConnectorIn* in)
 void Node::registerOutput(ConnectorOut* out)
 {
     output.push_back(out);
+
+    out->setCommandDispatcher(dispatcher_);
 
     connectConnector(out);
 
