@@ -37,18 +37,18 @@ public:
     virtual void validateConnections();
 
 
-    virtual bool targetsCanBeMovedTo(Connector* other_side) const;
+    virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
 
-    virtual void connectionMovePreview(Connector* other_side);
+    virtual void connectionMovePreview(Connectable* other_side);
 
     virtual Command::Ptr removeAllConnectionsCmd();
 
     void setPrimaryFunction(bool input);
 
 protected:
-    virtual bool tryConnect(Connector* other_side);
-    virtual bool acknowledgeConnection(Connector* other_side);
-    virtual void removeConnection(Connector* other_side);
+    virtual bool tryConnect(Connectable* other_side);
+    virtual bool acknowledgeConnection(Connectable* other_side);
+    virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
 private:

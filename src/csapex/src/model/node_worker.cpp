@@ -34,7 +34,7 @@ void NodeWorker::setSynchronizedInputs(bool s)
     synchronized_inputs_ = s;
 }
 
-void NodeWorker::forwardMessage(Connector *s)
+void NodeWorker::forwardMessage(Connectable *s)
 {
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
     assert(source);

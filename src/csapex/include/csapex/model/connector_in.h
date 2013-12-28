@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class ConnectorIn : public virtual Connector
+class ConnectorIn : public virtual Connectable
 {
     Q_OBJECT
 
@@ -34,7 +34,7 @@ public:
         return true;
     }
 
-    virtual bool canConnectTo(Connector* other_side, bool move) const;
+    virtual bool canConnectTo(Connectable* other_side, bool move) const;
 
     void notify();
     void wait();
@@ -49,13 +49,13 @@ public:
 
     virtual ConnectionType::Ptr getMessage()  __attribute__ ((deprecated));
 
-    virtual bool targetsCanBeMovedTo(Connector* other_side) const;
+    virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
     virtual bool isConnected() const;
 
-    virtual void connectionMovePreview(Connector* other_side);
+    virtual void connectionMovePreview(Connectable* other_side);
     virtual void validateConnections();
 
-    Connector* getSource() const;
+    Connectable* getSource() const;
 
     virtual Command::Ptr removeAllConnectionsCmd();
 
@@ -67,16 +67,16 @@ public:
 
 
 protected:
-    virtual bool tryConnect(Connector* other_side);
-    virtual bool acknowledgeConnection(Connector* other_side);
-    virtual void removeConnection(Connector* other_side);
+    virtual bool tryConnect(Connectable* other_side);
+    virtual bool acknowledgeConnection(Connectable* other_side);
+    virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
 //public Q_SLOTS:
 //    void relayMessage(ConnectorIn* source);
 
 protected:
-    Connector* target;
+    Connectable* target;
 
     ConnectionType::Ptr message_;
 

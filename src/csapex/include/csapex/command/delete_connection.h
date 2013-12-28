@@ -11,7 +11,7 @@ namespace command
 {
 
 struct DeleteConnection : public Command {
-    DeleteConnection(Connector* a, Connector* b);
+    DeleteConnection(Connectable* a, Connectable* b);
 
 protected:
     bool doExecute();

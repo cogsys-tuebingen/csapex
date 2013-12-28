@@ -12,7 +12,7 @@ namespace command
 
 struct DeleteConnector : public Command
 {
-    DeleteConnector(Connector *_c);
+    DeleteConnector(Connectable *_c);
 
 protected:
     bool doExecute();
@@ -26,7 +26,7 @@ protected:
 
 private:
     bool       in;
-    Connector* c;
+    Connectable* c;
 
     Command::Ptr    delete_connections;
 

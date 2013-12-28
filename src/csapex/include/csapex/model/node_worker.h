@@ -29,7 +29,7 @@ public:
     NodeWorker(Node* node);
 
 public Q_SLOTS:
-    void forwardMessage(Connector* source);
+    void forwardMessage(Connectable* source);
 
     void forwardMessageDirectly(ConnectorIn* source);
     void forwardMessageSynchronized(ConnectorIn* source);

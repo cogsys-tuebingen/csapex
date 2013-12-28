@@ -15,7 +15,7 @@
 using namespace csapex;
 using namespace csapex::command;
 
-DeleteConnection::DeleteConnection(Connector* a, Connector* b)
+DeleteConnection::DeleteConnection(Connectable* a, Connectable* b)
 {
     from = dynamic_cast<ConnectorOut*>(a);
     if(from) {

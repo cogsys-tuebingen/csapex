@@ -15,6 +15,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/profiling_widget.h>
 #include <csapex/view/node_adapter.h>
+#include <csapex/view/port.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -105,8 +106,8 @@ void Box::construct(Node* node)
 
     QObject::connect(node_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
     QObject::connect(node_, SIGNAL(modelChanged()), this, SLOT(eventModelChanged()));
-    QObject::connect(node_, SIGNAL(connectorCreated(Connector*)), this, SLOT(registerEvent(Connector*)));
-    QObject::connect(node_, SIGNAL(connectorRemoved(Connector*)), this, SLOT(unregisterEvent(Connector*)));
+    QObject::connect(node_, SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
+    QObject::connect(node_, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(node_, SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
 
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -222,7 +223,7 @@ std::string Box::getLabel() const
     return ui->label->text().toStdString();
 }
 
-void Box::registerEvent(Connector* c)
+void Box::registerEvent(Connectable* c)
 {
     if(c->isOutput()) {
         registerOutputEvent(dynamic_cast<ConnectorOut*>(c));
@@ -231,14 +232,14 @@ void Box::registerEvent(Connector* c)
     }
 }
 
-void Box::unregisterEvent(Connector*)
+void Box::unregisterEvent(Connectable*)
 {
 }
 
 void Box::registerInputEvent(ConnectorIn* in)
 {
     in->setParent(NULL);
-    ui->input_layout->addWidget(in);
+    ui->input_layout->addWidget(new Port(in));
 
     Q_EMIT changed(this);
 }
@@ -250,7 +251,7 @@ void Box::registerOutputEvent(ConnectorOut* out)
     out->setParent(NULL);
     assert(ui);
     assert(ui->output_layout);
-    ui->output_layout->addWidget(out);
+    ui->output_layout->addWidget(new Port(out));
 
     Q_EMIT changed(this);
 }

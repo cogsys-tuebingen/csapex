@@ -14,7 +14,7 @@
 
 using namespace csapex::command;
 
-MoveConnection::MoveConnection(Connector *from, Connector *to)
+MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     : Meta("MoveConnection")
 {
     assert(from);
@@ -41,7 +41,7 @@ MoveConnection::MoveConnection(Connector *from, Connector *to)
     } else {
         ConnectorIn* in = dynamic_cast<ConnectorIn*>(from);
 
-        Connector* target = in->getSource();
+        Connectable* target = in->getSource();
         add(Command::Ptr(new DeleteConnection(target, from)));
         add(Command::Ptr(new AddConnection(target->UUID(), to_uuid)));
     }

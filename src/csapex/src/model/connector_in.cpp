@@ -13,12 +13,12 @@
 using namespace csapex;
 
 ConnectorIn::ConnectorIn(Node* parent, const std::string &uuid)
-    : Connector(parent, uuid), target(NULL), can_process(true), optional_(false), async_(false)
+    : Connectable(parent, uuid), target(NULL), can_process(true), optional_(false), async_(false)
 {
 }
 
 ConnectorIn::ConnectorIn(Node* parent, int sub_id)
-    : Connector(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false), async_(false)
+    : Connectable(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false), async_(false)
 {
 }
 
@@ -29,7 +29,7 @@ ConnectorIn::~ConnectorIn()
     }
 }
 
-bool ConnectorIn::tryConnect(Connector* other_side)
+bool ConnectorIn::tryConnect(Connectable* other_side)
 {
     if(!other_side->canOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
@@ -39,14 +39,14 @@ bool ConnectorIn::tryConnect(Connector* other_side)
     return other_side->tryConnect(this);
 }
 
-bool ConnectorIn::acknowledgeConnection(Connector* other_side)
+bool ConnectorIn::acknowledgeConnection(Connectable* other_side)
 {
     target = dynamic_cast<ConnectorOut*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
     return true;
 }
 
-void ConnectorIn::removeConnection(Connector* other_side)
+void ConnectorIn::removeConnection(Connectable* other_side)
 {
     if(target != NULL) {
         assert(other_side == target);
@@ -91,12 +91,12 @@ void ConnectorIn::removeAllConnectionsNotUndoable()
 }
 
 
-bool ConnectorIn::canConnectTo(Connector* other_side, bool move) const
+bool ConnectorIn::canConnectTo(Connectable* other_side, bool move) const
 {
-    return Connector::canConnectTo(other_side, move) && (move || !isConnected());
+    return Connectable::canConnectTo(other_side, move) && (move || !isConnected());
 }
 
-bool ConnectorIn::targetsCanBeMovedTo(Connector* other_side) const
+bool ConnectorIn::targetsCanBeMovedTo(Connectable* other_side) const
 {
     return target->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
@@ -106,7 +106,7 @@ bool ConnectorIn::isConnected() const
     return target != NULL;
 }
 
-void ConnectorIn::connectionMovePreview(Connector *other_side)
+void ConnectorIn::connectionMovePreview(Connectable *other_side)
 {
     Q_EMIT(connectionInProgress(getSource(), other_side));
 }
@@ -124,7 +124,7 @@ void ConnectorIn::validateConnections()
     setError(e);
 }
 
-Connector *ConnectorIn::getSource() const
+Connectable *ConnectorIn::getSource() const
 {
     return target;
 }

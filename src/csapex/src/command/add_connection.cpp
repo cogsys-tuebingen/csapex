@@ -57,8 +57,8 @@ bool AddConnection::doRedo()
 
 void AddConnection::refresh()
 {
-    Connector* f = graph_->findConnector(from_uuid);
-    Connector* t = graph_->findConnector(to_uuid);
+    Connectable* f = graph_->findConnector(from_uuid);
+    Connectable* t = graph_->findConnector(to_uuid);
 
     bool f_in = f->isInput();
     bool f_out = f->isOutput();

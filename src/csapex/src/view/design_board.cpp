@@ -116,7 +116,7 @@ void DesignBoard::addBoxEvent(Box *box)
     QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
     QObject::connect(box, SIGNAL(clicked(Box*)), dispatcher_->getGraph().get(), SLOT(toggleBoxSelection(Box*)));
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
-    QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connector*,Connector*)), overlay, SLOT(addTemporaryConnection(Connector*,Connector*)));
+    QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
     QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(Box*, QPoint)), this, SLOT(showContextMenuEditBox(Box*, QPoint)));

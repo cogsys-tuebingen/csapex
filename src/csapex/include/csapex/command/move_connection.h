@@ -12,7 +12,7 @@ namespace command
 
 struct MoveConnection : public Meta
 {
-    MoveConnection(Connector* a, Connector* b);
+    MoveConnection(Connectable* a, Connectable* b);
 
 private:
     bool output;

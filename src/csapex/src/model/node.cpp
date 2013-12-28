@@ -513,7 +513,7 @@ Command::Ptr Node::removeAllConnectionsCmd()
     return cmd;
 }
 
-QTreeWidgetItem * Node::createDebugInformationConnector(Connector* connector) const
+QTreeWidgetItem * Node::createDebugInformationConnector(Connectable* connector) const
 {
     QTreeWidgetItem* connector_widget = new QTreeWidgetItem;
     connector_widget->setText(0, "Connector");
@@ -557,7 +557,7 @@ QTreeWidgetItem* Node::createDebugInformation() const
 
             QTreeWidgetItem* target_widget = new QTreeWidgetItem;
             if(connector->isConnected()) {
-                Connector* target = connector->getSource();
+                Connectable* target = connector->getSource();
                 target_widget->setText(0, target->UUID().c_str());
                 target_widget->setIcon(1, target->getNode()->getIcon());
                 target_widget->setText(1, target->getNode()->getType().c_str());
@@ -607,7 +607,7 @@ void Node::registerInput(ConnectorIn* in)
 
     worker_->addInput(in);
     connectConnector(in);
-    QObject::connect(in, SIGNAL(messageArrived(Connector*)), worker_, SLOT(forwardMessage(Connector*)));
+    QObject::connect(in, SIGNAL(messageArrived(Connectable*)), worker_, SLOT(forwardMessage(Connectable*)));
 
     Q_EMIT connectorCreated(in);
 }
@@ -674,17 +674,17 @@ void Node::stop()
     }
 }
 
-void Node::connectConnector(Connector *c)
+void Node::connectConnector(Connectable *c)
 {
-    QObject::connect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }
 
 
-void Node::disconnectConnector(Connector *c)
+void Node::disconnectConnector(Connectable *c)
 {
-    QObject::disconnect(c, SIGNAL(connectionInProgress(Connector*,Connector*)), this, SIGNAL(connectionInProgress(Connector*,Connector*)));
+    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
     QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }

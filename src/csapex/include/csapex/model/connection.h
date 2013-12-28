@@ -52,11 +52,11 @@ public:
     Connection(ConnectorOut* from, ConnectorIn* to);
     Connection(ConnectorOut* from, ConnectorIn* to, int id);
 
-    Connector* from() const;
-    Connector* to() const;
+    Connectable* from() const;
+    Connectable* to() const;
     int id() const;
 
-    bool contains(Connector* c) const;
+    bool contains(Connectable* c) const;
 
     int activity() const;
     void tick();
@@ -77,7 +77,7 @@ public:
     Fulcrum getFulcrum(int fulcrum_id);
 
 protected:
-    Connection(Connector* from, Connector* to);
+    Connection(Connectable* from, Connectable* to);
 
 private:
     /// COMMANDS
@@ -86,8 +86,8 @@ private:
     void deleteFulcrum(int fulcrum_id);
 
 protected:
-    Connector* from_;
-    Connector* to_;
+    Connectable* from_;
+    Connectable* to_;
 
     std::vector<Fulcrum> fulcrums_;
 

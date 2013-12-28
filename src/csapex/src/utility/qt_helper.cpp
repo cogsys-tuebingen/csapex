@@ -25,7 +25,7 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     /// TODO: Make connector independent of node
-    Port* cin = new Port;
+    Port* cin = new Port(NULL);
 
     QSlider* slider = new QSlider(Qt::Horizontal);
     slider->setMinimum(min);

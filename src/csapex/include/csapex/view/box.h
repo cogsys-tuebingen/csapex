@@ -114,8 +114,8 @@ public Q_SLOTS:
 
     void showContextMenu(const QPoint& pos);
 
-    void registerEvent(Connector*);
-    void unregisterEvent(Connector*);
+    void registerEvent(Connectable*);
+    void unregisterEvent(Connectable*);
 
     void nodeStateChanged();
 

@@ -28,7 +28,7 @@ private:
     bool input;
 
 
-    Connector* c;
+    Connectable* c;
 
     std::string b_uuid;
     std::string c_uuid;

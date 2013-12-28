@@ -55,7 +55,7 @@ public:
     Node* findNodeForConnector(const std::string &uuid);
 
 
-    Connector* findConnector(const std::string &uuid);
+    Connectable* findConnector(const std::string &uuid);
 
 
     bool handleConnectionSelection(int id, bool add);
@@ -140,7 +140,7 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
 
 protected:
     std::vector<NodePtr> nodes_;
-    std::vector<Connector*> connectors_;
+    std::vector<Connectable*> connectors_;
     std::vector<Connection::Ptr> visible_connections;
 
     CommandDispatcher* dispatcher_;

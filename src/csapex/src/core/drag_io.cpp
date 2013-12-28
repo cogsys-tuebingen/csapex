@@ -35,16 +35,17 @@ DragIO::Handler::Handler(CommandDispatcher* dispatcher)
 
 void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 {
+    std::cout << "enter: " << e->format() << std::endl;
     if(e->mimeData()->hasFormat(Box::MIME)) {
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
+    } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
+    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         e->acceptProposedAction();
 
     } else {
@@ -98,14 +99,14 @@ void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterE
 
 void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 {
-    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
-        Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
+    if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+        Connectable* c = dynamic_cast<Connectable*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
         overlay->addTemporaryConnection(c, e->pos());
         overlay->repaint();
 
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        Connector* c = dynamic_cast<Connector*>(e->mimeData()->parent());
+    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
+        Connectable* c = dynamic_cast<Connectable*>(e->mimeData()->parent());
         overlay->deleteTemporaryConnections();
 
         if(c->isOutput()) {
@@ -157,9 +158,9 @@ void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         std::string uuid = graph_->makeUUID(type);
         dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
 
-    } else if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
+    } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         e->ignore();
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
+    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         e->ignore();
     } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
         e->acceptProposedAction();

@@ -4,11 +4,10 @@
 /// COMPONENT
 #include <csapex/view/box.h>
 #include <csapex/view/design_board.h>
+#include <csapex/command/dispatcher.h>
 #include <csapex/model/node.h>
 #include <csapex/model/boxed_object.h>
-#include <csapex/command/dispatcher.h>
-#include <csapex/command/add_connection.h>
-#include <csapex/command/move_connection.h>
+#include <csapex/view/port.h>
 
 /// SYSTEM
 #include <iostream>
@@ -19,121 +18,124 @@
 
 using namespace csapex;
 
-const QString Connector::MIME_CREATE = "csapex/connector/create";
-const QString Connector::MIME_MOVE = "csapex/connector/move";
+const std::string Connectable::namespace_separator = ":|:";
 
-const std::string Connector::namespace_separator = ":|:";
+const QString Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
+const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
-
-std::string Connector::makeUUID(const std::string& box_uuid, int type, int sub_id) {
+std::string Connectable::makeUUID(const std::string& box_uuid, int type, int sub_id) {
     std::stringstream ss;
     ss << box_uuid << namespace_separator << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
     return ss.str();
 }
 
-Connector::Connector(Node* parent, const std::string& uuid)
+Connectable::Connectable(Node* parent, const std::string& uuid)
     : node_(parent), buttons_down_(0), uuid_(uuid), minimized_(false)
 {
     init();
 }
 
-Connector::Connector(Node* parent, int sub_id, int type)
+Connectable::Connectable(Node* parent, int sub_id, int type)
     : node_(parent), buttons_down_(0), uuid_(makeUUID(parent->UUID(), type, sub_id)), minimized_(false)
 {
     init();
 }
 
-void Connector::init()
+void Connectable::setPort(Port *port)
 {
+    port_ = port;
+}
+
+Port* Connectable::getPort() const
+{
+    return port_;
+}
+
+void Connectable::init()
+{
+    port_ = NULL;
+
     setParent(node_->getBox());
 
-    setFocusPolicy(Qt::NoFocus);
-    setAcceptDrops(true);
-
-    setContextMenuPolicy(Qt::PreventContextMenu);
     setType(ConnectionType::makeDefault());
 
     setMinimizedSize(minimized_);
-
-    setMouseTracking(true);
-
-    setToolTip(uuid_.c_str());
 
     count_ = 0;
 }
 
 
-Connector::~Connector()
+Connectable::~Connectable()
 {
 }
 
-void Connector::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
     node_->setError(error, msg, level);
 }
 
-void Connector::errorChanged(bool error)
+void Connectable::errorChanged(bool error)
 {
     setProperty("error", error);
-    refreshStylesheet();
+    //refreshStylesheet();
 }
 
-bool Connector::isForwarding() const
+bool Connectable::isForwarding() const
 {
     return false;
 }
 
-std::string Connector::UUID() const
+std::string Connectable::UUID() const
 {
     return uuid_;
 }
 
-bool Connector::tryConnect(QObject* other_side)
+bool Connectable::tryConnect(QObject* other_side)
 {
-    Connector* c = dynamic_cast<Connector*>(other_side);
+    Connectable* c = dynamic_cast<Connectable*>(other_side);
     if(c) {
         return tryConnect(c);
     }
     return false;
 }
 
-void Connector::removeConnection(QObject* other_side)
+void Connectable::removeConnection(QObject* other_side)
 {
-    Connector* c = dynamic_cast<Connector*>(other_side);
+    Connectable* c = dynamic_cast<Connectable*>(other_side);
     if(c) {
         removeConnection(c);
     }
 }
 
-void Connector::validateConnections()
+void Connectable::validateConnections()
 {
 
 }
 
-void Connector::removeAllConnectionsUndoable()
+void Connectable::removeAllConnectionsUndoable()
 {
     if(isConnected()) {
         getNode()->getCommandDispatcher()->execute(removeAllConnectionsCmd());
     }
 }
 
-void Connector::disable()
+void Connectable::disable()
 {
-    setEnabled(false);
+    port_->setEnabled(false);
     Q_EMIT disabled(this);
-    setProperty("disabled", true);
-    refreshStylesheet();
+    port_->setProperty("disabled", true);
+    //refreshStylesheet();
 }
 
-void Connector::enable()
+void Connectable::enable()
 {
-    setEnabled(true);
+    port_->setEnabled(true);
     Q_EMIT enabled(this);
-    setProperty("disabled", false);
-    refreshStylesheet();
+    port_->setProperty("disabled", false);
+    //refreshStylesheet();
 }
 
-bool Connector::canConnectTo(Connector* other_side, bool) const
+bool Connectable::canConnectTo(Connectable* other_side, bool) const
 {
     if(other_side == this) {
         return false;
@@ -145,159 +147,30 @@ bool Connector::canConnectTo(Connector* other_side, bool) const
     return in_out && compability;
 }
 
-void Connector::dragEnterEvent(QDragEnterEvent* e)
-{
-    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
-        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        if(from == this) {
-            return;
-        }
 
-        if(from->canConnectTo(this, false)) {
-            if(canConnectTo(from, false)) {
-                e->acceptProposedAction();
-            }
-        }
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        Connector* original_connector = dynamic_cast<Connector*>(e->mimeData()->parent());
-
-        if(original_connector->targetsCanBeMovedTo(this)) {
-            e->acceptProposedAction();
-        }
-    }
-}
-
-void Connector::dragMoveEvent(QDragMoveEvent* e)
-{
-    Q_EMIT(connectionStart());
-    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
-        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-        Q_EMIT(connectionInProgress(this, from));
-
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-
-        from->connectionMovePreview(this);
-    }
-}
-
-void Connector::dropEvent(QDropEvent* e)
-{
-    if(e->mimeData()->hasFormat(Connector::MIME_CREATE)) {
-        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-
-        if(from && from != this) {
-            getNode()->getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(UUID(), from->UUID())));
-        }
-    } else if(e->mimeData()->hasFormat(Connector::MIME_MOVE)) {
-        Connector* from = dynamic_cast<Connector*>(e->mimeData()->parent());
-
-        if(from) {
-            Command::Ptr cmd(new command::MoveConnection(from, this));
-            getNode()->getCommandDispatcher()->execute(cmd);
-            e->setDropAction(Qt::MoveAction);
-        }
-    }
-}
-
-void Connector::mousePressEvent(QMouseEvent* e)
-{
-    buttons_down_ = e->buttons();
-}
-
-bool Connector::shouldCreate(bool left, bool)
+bool Connectable::shouldCreate(bool left, bool)
 {
     bool full_input = isInput() && isConnected();
     return left && !full_input;
 }
 
-bool Connector::shouldMove(bool left, bool right)
+bool Connectable::shouldMove(bool left, bool right)
 {
     bool full_input = isInput() && isConnected();
     return (right && isConnected()) || (left && full_input);
 }
 
-void Connector::mouseMoveEvent(QMouseEvent* e)
-{
-    std::stringstream tt;
-    tt << uuid_ << " " << count_;
-    setToolTip(tt.str().c_str());
-
-    if(buttons_down_ == Qt::NoButton) {
-        return;
-    }
-
-    bool left = (buttons_down_ & Qt::LeftButton) != 0;
-    bool right = (buttons_down_ & Qt::RightButton) != 0;
-
-    bool create = shouldCreate(left, right);
-    bool move = shouldMove(left, right);
-
-    if(create || move) {
-        QDrag* drag = new QDrag(this);
-        QMimeData* mimeData = new QMimeData;
-
-        if(move) {
-            mimeData->setData(Connector::MIME_MOVE, QByteArray());
-            mimeData->setParent(this);
-            drag->setMimeData(mimeData);
-
-            disable();
-
-            drag->exec();
-
-            enable();
-
-        } else {
-            mimeData->setData(Connector::MIME_CREATE, QByteArray());
-            mimeData->setParent(this);
-            drag->setMimeData(mimeData);
-
-            drag->exec();
-        }
-
-        e->accept();
-
-        Q_EMIT connectionDone();
-        buttons_down_ = Qt::NoButton;
-    }
-    e->accept();
-}
-
-void Connector::mouseReleaseEvent(QMouseEvent* e)
-{
-    buttons_down_ = e->buttons();
-
-    if(e->button() == Qt::MiddleButton) {
-        removeAllConnectionsUndoable();
-    } else if(e->button() == Qt::RightButton) {
-        removeAllConnectionsUndoable();
-    }
-
-    e->accept();
-}
-
-QPoint Connector::topLeft()
-{
-    return node_->getBox()->geometry().topLeft() + pos();
-}
-
-QPoint Connector::centerPoint()
-{
-    return topLeft() + 0.5 * (geometry().bottomRight() - geometry().topLeft());
-}
-
-std::string Connector::getLabel() const
+std::string Connectable::getLabel() const
 {
     return label_;
 }
 
-void Connector::setLabel(const std::string &label)
+void Connectable::setLabel(const std::string &label)
 {
     label_ = label;
 }
 
-void Connector::setType(ConnectionType::ConstPtr type)
+void Connectable::setType(ConnectionType::ConstPtr type)
 {
     bool validate = type_ != type;
     type_ = type;
@@ -307,30 +180,35 @@ void Connector::setType(ConnectionType::ConstPtr type)
     }
 }
 
-ConnectionType::ConstPtr Connector::getType() const
+ConnectionType::ConstPtr Connectable::getType() const
 {
     return type_;
 }
 
-void Connector::setMinimizedSize(bool mini)
+void Connectable::setMinimizedSize(bool mini)
 {
     minimized_ = mini;
 
-    if(mini) {
-        setFixedSize(8,8);
-    } else {
-        setFixedSize(16,16);
-    }
+//    if(mini) {
+//        setFixedSize(8,8);
+//    } else {
+//        setFixedSize(16,16);
+//    }
 }
 
-bool Connector::isMinimizedSize() const
+bool Connectable::isMinimizedSize() const
 {
     return minimized_;
 }
 
-Node* Connector::getNode() const
+Node* Connectable::getNode() const
 {
     QMutexLocker lock(&mutex);
     return node_;
+}
+
+int Connectable::getCount() const
+{
+    return count_;
 }
 

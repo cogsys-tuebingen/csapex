@@ -23,7 +23,8 @@ FWD(Group);
 FWD(BoxedObject);
 FWD(NodeConstructor);
 
-FWD(Connector);
+FWD(Port);
+FWD(Connectable);
 FWD(ConnectorIn);
 FWD(ConnectorOut);
 FWD(Connection);

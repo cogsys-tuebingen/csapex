@@ -20,8 +20,8 @@ public:
     Overlay(CommandDispatcher* dispatcher, QWidget* parent = 0);
 
 public Q_SLOTS:
-    void addTemporaryConnection(Connector* from, Connector* to);
-    void addTemporaryConnection(Connector *from, const QPoint& end);
+    void addTemporaryConnection(Connectable* from, Connectable* to);
+    void addTemporaryConnection(Connectable *from, const QPoint& end);
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
 
@@ -54,8 +54,8 @@ protected:
     bool showConnectionContextMenu(const QPoint& pos);
     bool showFulcrumContextMenu(const QPoint& pos);
 
-    void drawActivity(int life, Connector* c);
-    void drawConnector(Connector* c);
+    void drawActivity(int life, Connectable* c);
+    void drawConnector(Connectable* c);
     void drawConnection(Connection& connection);
 
     void drawConnection(const QPoint& from, const QPoint& to, int id);
@@ -71,7 +71,7 @@ protected:
     GraphPtr graph_;
 
     struct TempConnection {
-        Connector* from;
+        Connectable* from;
         QPoint to;
     };
 

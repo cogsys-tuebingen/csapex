@@ -16,29 +16,29 @@ const int Connection::activity_marker_max_lifetime_ = 10;
 Connection::Connection(ConnectorOut *from, ConnectorIn *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {
-    QObject::connect(from_, SIGNAL(messageSent(Connector*)), this, SLOT(messageSentEvent()));
+    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
-Connection::Connection(Connector *from, Connector *to)
+Connection::Connection(Connectable *from, Connectable *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {
     assert(from->isOutput());
     assert(to->isInput());
-    QObject::connect(from_, SIGNAL(messageSent(Connector*)), this, SLOT(messageSentEvent()));
+    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(ConnectorOut *from, ConnectorIn *to, int id)
     : from_(from), to_(to), id_(id), message_count(0)
 {
-    QObject::connect(from_, SIGNAL(messageSent(Connector*)), this, SLOT(messageSentEvent()));
+    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
-Connector* Connection::from() const
+Connectable* Connection::from() const
 {
     return from_;
 }
 
-Connector* Connection::to() const
+Connectable* Connection::to() const
 {
     return to_;
 }
@@ -48,7 +48,7 @@ int Connection::id() const
     return id_;
 }
 
-bool Connection::contains(Connector *c) const
+bool Connection::contains(Connectable *c) const
 {
     return from_ == c || to_ == c;
 }

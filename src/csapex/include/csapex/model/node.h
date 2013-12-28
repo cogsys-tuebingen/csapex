@@ -71,8 +71,8 @@ public:
 private:
     void setUUID(const std::string& uuid);
 
-    void connectConnector(Connector* c);
-    void disconnectConnector(Connector* c);
+    void connectConnector(Connectable* c);
+    void disconnectConnector(Connectable* c);
 
 public:
     std::string UUID() const;
@@ -154,7 +154,7 @@ private:
     void registerInput(ConnectorIn* in);
     void registerOutput(ConnectorOut* out);
 
-    QTreeWidgetItem * createDebugInformationConnector(Connector *connector) const;
+    QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
@@ -186,15 +186,15 @@ Q_SIGNALS:
     void toggled(bool);
     void started();
 
-    void connectionInProgress(Connector*, Connector*);
+    void connectionInProgress(Connectable*, Connectable*);
     void connectionDone();
     void connectionStart();
 
-    void connectorCreated(Connector*);
-    void connectorRemoved(Connector*);
+    void connectorCreated(Connectable*);
+    void connectorRemoved(Connectable*);
 
-    void connectorEnabled(Connector*);
-    void connectorDisabled(Connector*);
+    void connectorEnabled(Connectable*);
+    void connectorDisabled(Connectable*);
 
 protected:
     std::string type_;

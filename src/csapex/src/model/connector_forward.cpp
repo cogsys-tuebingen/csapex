@@ -8,13 +8,13 @@
 using namespace csapex;
 
 ConnectorForward::ConnectorForward(Node* parent, bool primary_function_is_input, const std::string &uuid)
-    : Connector(parent, uuid), ConnectorIn(parent, uuid), ConnectorOut(parent, uuid), primary_function_is_input(primary_function_is_input)
+    : Connectable(parent, uuid), ConnectorIn(parent, uuid), ConnectorOut(parent, uuid), primary_function_is_input(primary_function_is_input)
 {
 
 }
 
 ConnectorForward::ConnectorForward(Node *parent, bool primary_function_is_input, int sub_id)
-    : Connector(parent, sub_id, TYPE_MISC), ConnectorIn(parent, sub_id), ConnectorOut(parent, sub_id), primary_function_is_input(primary_function_is_input)
+    : Connectable(parent, sub_id, TYPE_MISC), ConnectorIn(parent, sub_id), ConnectorOut(parent, sub_id), primary_function_is_input(primary_function_is_input)
 {
 
 }
@@ -43,7 +43,7 @@ void ConnectorForward::inputMessage(ConnectionType::Ptr message)
     publish(message);
 }
 
-bool ConnectorForward::tryConnect(Connector* other_side)
+bool ConnectorForward::tryConnect(Connectable* other_side)
 {
     bool use_in = false;
 
@@ -108,12 +108,12 @@ bool ConnectorForward::tryConnect(Connector* other_side)
     }
 }
 
-bool ConnectorForward::acknowledgeConnection(Connector* other_side)
+bool ConnectorForward::acknowledgeConnection(Connectable* other_side)
 {
     return ConnectorIn::acknowledgeConnection(other_side);
 }
 
-void ConnectorForward::removeConnection(Connector* other_side)
+void ConnectorForward::removeConnection(Connectable* other_side)
 {    bool use_in = false;
 
      if(other_side->isForwarding()) {
@@ -162,7 +162,7 @@ void ConnectorForward::validateConnections()
     }
 }
 
-bool ConnectorForward::targetsCanBeMovedTo(Connector *other_side) const
+bool ConnectorForward::targetsCanBeMovedTo(Connectable *other_side) const
 {
     if(primary_function_is_input) {
         return ConnectorIn::targetsCanBeMovedTo(other_side);
@@ -171,7 +171,7 @@ bool ConnectorForward::targetsCanBeMovedTo(Connector *other_side) const
     }
 }
 
-void ConnectorForward::connectionMovePreview(Connector *other_side)
+void ConnectorForward::connectionMovePreview(Connectable *other_side)
 {
     if(primary_function_is_input) {
         return ConnectorIn::connectionMovePreview(other_side);

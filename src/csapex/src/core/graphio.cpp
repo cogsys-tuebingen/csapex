@@ -182,9 +182,9 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
             std::string from_uuid;
             connection["uuid"] >> from_uuid;
-            if(from_uuid.find(Connector::namespace_separator) == from_uuid.npos) {
+            if(from_uuid.find(Connectable::namespace_separator) == from_uuid.npos) {
                 // legacy import
-                from_uuid.replace(from_uuid.find("_out_"), 1, Connector::namespace_separator);
+                from_uuid.replace(from_uuid.find("_out_"), 1, Connectable::namespace_separator);
             }
             Node* parent = graph_->findNodeForConnector(from_uuid);
 
@@ -200,9 +200,9 @@ void GraphIO::loadConnections(YAML::Node &doc)
                 std::string to_uuid;
                 targets[j] >> to_uuid;
 
-                if(to_uuid.find(Connector::namespace_separator) == to_uuid.npos) {
+                if(to_uuid.find(Connectable::namespace_separator) == to_uuid.npos) {
                     // legacy import
-                    to_uuid.replace(to_uuid.find("_in_"), 1, Connector::namespace_separator);
+                    to_uuid.replace(to_uuid.find("_in_"), 1, Connectable::namespace_separator);
                 }
 
                 ConnectorOut* from = parent->getOutput(from_uuid);

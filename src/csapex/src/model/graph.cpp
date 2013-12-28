@@ -185,7 +185,7 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
         if(n->getBox()->isSelected() || !only_selected) {
             foreach(ConnectorIn* in, n->input) {
                 if(in->isConnected()) {
-                    Connector* target = in->getSource();
+                    Connectable* target = in->getSource();
                     Node* owner = target->getNode();
 
                     bool owner_is_selected = false;
@@ -202,8 +202,8 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
                         std::string new_connector_uuid = templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
 
                         std::string in_box, in_connector;
-                        split_first(in->UUID(), Connector::namespace_separator, in_box, in_connector);
-                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + Connector::namespace_separator + in_connector);
+                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
+                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + in_connector);
 
                         connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
                     }
@@ -231,8 +231,8 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
                         }
 
                         std::string out_box, out_connector;
-                        split_first(out->UUID(), Connector::namespace_separator, out_box, out_connector);
-                        templ->addConnection(old_box_to_new_box[n->UUID()] + Connector::namespace_separator + out_connector, new_connector_uuid);
+                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
+                        templ->addConnection(old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + out_connector, new_connector_uuid);
 
                         connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
 
@@ -241,13 +241,13 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
                         std::cerr << "  > keep internal connection between " << in->UUID() << " and " << out->UUID() << std::endl;
 
                         std::string in_box, in_connector;
-                        split_first(in->UUID(), Connector::namespace_separator, in_box, in_connector);
+                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
 
                         std::string out_box, out_connector;
-                        split_first(out->UUID(), Connector::namespace_separator, out_box, out_connector);
+                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
 
-                        std::string in = old_box_to_new_box[in_box] + Connector::namespace_separator + in_connector;
-                        std::string out = old_box_to_new_box[out_box] + Connector::namespace_separator + out_connector;
+                        std::string in = old_box_to_new_box[in_box] + Connectable::namespace_separator + in_connector;
+                        std::string out = old_box_to_new_box[out_box] + Connectable::namespace_separator + out_connector;
 
                         templ->addConnection(out, in);
                     }
@@ -368,8 +368,8 @@ Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
 bool Graph::addConnection(Connection::Ptr connection)
 {
     if(connection->from()->tryConnect(connection->to())) {
-        Connector* from = findConnector(connection->from()->UUID());
-        Connector* to = findConnector(connection->to()->UUID());
+        Connectable* from = findConnector(connection->from()->UUID());
+        Connectable* to = findConnector(connection->to()->UUID());
 
         Graph::Ptr graph_from = from->getNode()->getBox()->getCommandDispatcher()->getGraph();
         Graph::Ptr graph_to = to->getNode()->getBox()->getCommandDispatcher()->getGraph();
@@ -486,7 +486,7 @@ Node* Graph::findNodeNoThrow(const std::string &uuid)
 Node* Graph::findNodeForConnector(const std::string &uuid)
 {
     std::string l, r;
-    split_first(uuid, Connector::namespace_separator, l, r);
+    split_first(uuid, Connectable::namespace_separator, l, r);
 
     try {
         return findNode(l);
@@ -512,15 +512,15 @@ Node* Graph::findNodeForConnector(const std::string &uuid)
     }
 }
 
-Connector* Graph::findConnector(const std::string &uuid)
+Connectable* Graph::findConnector(const std::string &uuid)
 {
     std::string l, r;
-    split_first(uuid, Connector::namespace_separator, l, r);
+    split_first(uuid, Connectable::namespace_separator, l, r);
 
     Box* owner = findNode(l)->getBox();
     assert(owner);
 
-    Connector* result = NULL;
+    Connectable* result = NULL;
     result = owner->getNode()->getInput(uuid);
 
     if(result == NULL) {

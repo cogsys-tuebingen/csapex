@@ -14,6 +14,7 @@
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/box.h>
+#include <csapex/view/port.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -110,8 +111,10 @@ void Overlay::fulcrumMoved(Connection *)
 
 }
 
-void Overlay::addTemporaryConnection(Connector *from, const QPoint& end)
+void Overlay::addTemporaryConnection(Connectable *from, const QPoint& end)
 {
+    assert(from);
+
     TempConnection temp;
     temp.from = from;
     temp.to = end;
@@ -119,11 +122,14 @@ void Overlay::addTemporaryConnection(Connector *from, const QPoint& end)
     temp_.push_back(temp);
 }
 
-void Overlay::addTemporaryConnection(Connector *from, Connector *to)
+void Overlay::addTemporaryConnection(Connectable *from, Connectable *to)
 {
+    assert(from);
+    assert(to);
+
     TempConnection temp;
     temp.from = from;
-    temp.to = to->centerPoint();
+    temp.to = to->getPort()->centerPoint();
 
     temp_.push_back(temp);
 }
@@ -152,8 +158,8 @@ void Overlay::drawConnection(Connection& connection)
         return;
     }
 
-    QPoint p1 = from->centerPoint();
-    QPoint p2 = to->centerPoint();
+    QPoint p1 = from->getPort()->centerPoint();
+    QPoint p2 = to->getPort()->centerPoint();
 
     int id = connection.id();
 
@@ -162,7 +168,7 @@ void Overlay::drawConnection(Connection& connection)
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.selected = connection.isSelected();
-    ccs.disabled = (!from->isEnabled() || !to->isEnabled());
+    ccs.disabled = (!from->getPort()->isEnabled() || !to->getPort()->isEnabled());
     ccs.minimized_from = from->isMinimizedSize();
     ccs.minimized_to = to->isMinimizedSize();
 
@@ -327,7 +333,7 @@ QPen Overlay::makeLinePen(const QPoint& from, const QPoint& to)
     return QPen(QBrush(lg), ccs.r * 0.75, from.x() > to.x() ? Qt::DotLine : Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 }
 
-void Overlay::drawConnector(Connector *c)
+void Overlay::drawConnector(Connectable *c)
 {
     bool output = c->isOutput();
 
@@ -351,7 +357,7 @@ void Overlay::drawConnector(Connector *c)
         int dx = 160;
         int dy = lines * metrics.height();
 
-        QRectF rect(c->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
+        QRectF rect(c->getPort()->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
 
         QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
         QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
@@ -362,13 +368,13 @@ void Overlay::drawConnector(Connector *c)
     }
 }
 
-void Overlay::drawActivity(int life, Connector* c)
+void Overlay::drawActivity(int life, Connectable* c)
 {
-    if(c->isEnabled() && life > 0) {
+    if(c->getPort()->isEnabled() && life > 0) {
         int r = std::min(Connection::activity_marker_max_lifetime_, life);
         double f = r / static_cast<double> (Connection::activity_marker_max_lifetime_);
 
-        int min = c->width() / 2 - 2;
+        int min = c->getPort()->width() / 2 - 2;
         int max = min * 1.2;
         double w = min + f * (max - min);
 
@@ -376,7 +382,7 @@ void Overlay::drawActivity(int life, Connector* c)
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
         painter->setPen(QPen(color, w));
-        painter->drawEllipse(QPointF(c->centerPoint()), w, w);
+        painter->drawEllipse(QPointF(c->getPort()->centerPoint()), w, w);
     }
 }
 
@@ -661,9 +667,9 @@ void Overlay::paintEvent(QPaintEvent*)
             ccs.selected = true;
 
             if(temp.from->isInput()) {
-                drawConnection(temp.to, temp.from->centerPoint(), -1);
+                drawConnection(temp.to, temp.from->getPort()->centerPoint(), -1);
             } else {
-                drawConnection(temp.from->centerPoint(), temp.to, -1);
+                drawConnection(temp.from->getPort()->centerPoint(), temp.to, -1);
             }
         }
     }

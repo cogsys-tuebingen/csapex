@@ -16,12 +16,12 @@
 using namespace csapex;
 
 ConnectorOut::ConnectorOut(Node* parent, const std::string& uuid)
-    : Connector(parent, uuid), force_send_message_(false)
+    : Connectable(parent, uuid), force_send_message_(false)
 {
 }
 
 ConnectorOut::ConnectorOut(Node* parent, int sub_id)
-    : Connector(parent, sub_id, TYPE_OUT), force_send_message_(false)
+    : Connectable(parent, sub_id, TYPE_OUT), force_send_message_(false)
 {
 }
 
@@ -46,7 +46,7 @@ ConnectorOut::TargetIterator ConnectorOut::endTargets() const
     return targets_.end();
 }
 
-void ConnectorOut::removeConnection(Connector* other_side)
+void ConnectorOut::removeConnection(Connectable* other_side)
 {
     for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
@@ -92,12 +92,12 @@ void ConnectorOut::connectForcedWithoutCommand(ConnectorIn *other_side)
     tryConnect(other_side);
 }
 
-bool ConnectorOut::tryConnect(Connector *other_side)
+bool ConnectorOut::tryConnect(Connectable *other_side)
 {
     return connect(other_side);
 }
 
-bool ConnectorOut::connect(Connector *other_side)
+bool ConnectorOut::connect(Connectable *other_side)
 {
     if(!other_side->canInput()) {
         std::cerr << "cannot connect, other side can't input" << std::endl;
@@ -124,7 +124,7 @@ bool ConnectorOut::connect(Connector *other_side)
     return true;
 }
 
-bool ConnectorOut::targetsCanBeMovedTo(Connector* other_side) const
+bool ConnectorOut::targetsCanBeMovedTo(Connectable* other_side) const
 {
     for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
         if(!(*it)->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
@@ -139,7 +139,7 @@ bool ConnectorOut::isConnected() const
     return targets_.size() > 0;
 }
 
-void ConnectorOut::connectionMovePreview(Connector *other_side)
+void ConnectorOut::connectionMovePreview(Connectable *other_side)
 {
     for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
         Q_EMIT(connectionInProgress(*it, other_side));
@@ -155,9 +155,9 @@ void ConnectorOut::validateConnections()
 
 void ConnectorOut::publish(ConnectionType::Ptr message)
 {
-    if(!isEnabled()){
-        return;
-    }
+//    if(!isEnabled()){
+//        return;
+//    }
 
     message_ = message;
 

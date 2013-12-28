@@ -8,7 +8,7 @@
 namespace csapex
 {
 
-class ConnectorOut : public virtual Connector
+class ConnectorOut : public virtual Connectable
 {
     friend class ConnectorIn;
     friend class ConnectorForward;
@@ -37,10 +37,10 @@ public:
 
     void publish(ConnectionType::Ptr message);
 
-    virtual bool targetsCanBeMovedTo(Connector *other_side) const;
+    virtual bool targetsCanBeMovedTo(Connectable *other_side) const;
     virtual bool isConnected() const;
 
-    virtual void connectionMovePreview(Connector* other_side);
+    virtual void connectionMovePreview(Connectable* other_side);
     virtual void validateConnections();
 
     int noTargets();
@@ -58,11 +58,11 @@ public:
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
-    virtual bool tryConnect(Connector* other_side);
-    virtual void removeConnection(Connector* other_side);
+    virtual bool tryConnect(Connectable* other_side);
+    virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
-    bool connect(Connector* other_side);
+    bool connect(Connectable* other_side);
 
 protected:
     std::vector<ConnectorIn*> targets_;
