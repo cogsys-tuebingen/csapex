@@ -2,7 +2,7 @@
 #define PORT_H
 
 /// PROJECT
-#include <csapex/model/connector.h>
+#include <csapex/model/connectable.h>
 
 /// SYSTEM
 #include <QFrame>

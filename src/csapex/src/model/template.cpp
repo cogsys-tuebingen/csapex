@@ -2,7 +2,7 @@
 #include <csapex/model/template.h>
 
 /// COMPONENT
-#include <csapex/model/connector.h>
+#include <csapex/model/connectable.h>
 #include <csapex/command/add_node.h>
 #include <csapex/command/add_connector.h>
 #include <csapex/command/add_connection.h>

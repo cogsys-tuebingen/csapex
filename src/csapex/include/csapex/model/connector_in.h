@@ -2,7 +2,7 @@
 #define CONNECTOR_IN_H
 
 /// COMPONENT
-#include "connector.h"
+#include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM

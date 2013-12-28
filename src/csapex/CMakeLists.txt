@@ -59,7 +59,7 @@ set(SRC_PLUGIN
 
     src/model/boxed_object.cpp
     src/model/node.cpp
-    src/model/connector.cpp
+    src/model/connectable.cpp
     src/model/connector_in.cpp
     src/model/connector_out.cpp
     src/model/memento.cpp

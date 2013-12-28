@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include "ui_design_board.h"
-#include <csapex/model/connector.h>
+#include <csapex/model/connectable.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/view/box.h>
 #include <csapex/model/group.h>

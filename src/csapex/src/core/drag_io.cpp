@@ -2,9 +2,8 @@
 #include <csapex/core/drag_io.h>
 
 /// PROJECT
-
 #include <csapex/model/group.h>
-#include <csapex/model/connector.h>
+#include <csapex/model/connectable.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/manager/box_manager.h>

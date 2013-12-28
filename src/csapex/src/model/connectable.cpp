@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/connector.h>
+#include <csapex/model/connectable.h>
 
 /// COMPONENT
 #include <csapex/view/box.h>

@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include "ui_designer.h"
-#include <csapex/model/connector.h>
+#include <csapex/model/connectable.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/command/meta.h>
