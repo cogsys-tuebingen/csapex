@@ -44,6 +44,8 @@ Connectable::Connectable(Node* parent, int sub_id, int type)
 void Connectable::setPort(Port *port)
 {
     port_ = port;
+
+    port_->setMinimizedSize(minimized_);
 }
 
 Port* Connectable::getPort() const
@@ -189,11 +191,9 @@ void Connectable::setMinimizedSize(bool mini)
 {
     minimized_ = mini;
 
-//    if(mini) {
-//        setFixedSize(8,8);
-//    } else {
-//        setFixedSize(16,16);
-//    }
+    if(port_) {
+        port_->setMinimizedSize(mini);
+    }
 }
 
 bool Connectable::isMinimizedSize() const
