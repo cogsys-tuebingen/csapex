@@ -66,7 +66,7 @@ void BoxManager::rebuildPrototypes()
     available_elements_prototypes.clear();
 
     typedef std::pair<std::string, DefaultConstructor<Node> > PAIR;
-    foreach(const PAIR& p, manager_->availableClasses()) {
+    Q_FOREACH(const PAIR& p, manager_->availableClasses()) {
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second));
@@ -84,9 +84,9 @@ void BoxManager::rebuildMap()
 
     tags.insert(general);
 
-    foreach(NodeConstructor::Ptr p, available_elements_prototypes) {
+    Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         bool has_tag = false;
-        foreach(const Tag& tag, p->getTags()) {
+        Q_FOREACH(const Tag& tag, p->getTags()) {
             map[tag].push_back(p);
             tags.insert(tag);
             has_tag = true;
@@ -97,7 +97,7 @@ void BoxManager::rebuildMap()
         }
     }
 
-    foreach(const Tag& cat, tags) {
+    Q_FOREACH(const Tag& cat, tags) {
         std::sort(map[cat].begin(), map[cat].end(), compare);
     }
 
@@ -122,11 +122,11 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 {
     ensureLoaded();
 
-    foreach(const Tag& tag, tags) {
+    Q_FOREACH(const Tag& tag, tags) {
         QMenu* submenu = new QMenu(tag.getName().c_str());
         menu->addMenu(submenu);
 
-        foreach(const NodeConstructor::Ptr& proxy, map[tag]) {
+        Q_FOREACH(const NodeConstructor::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
             QAction* action = new QAction(stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
@@ -149,13 +149,13 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
 
     tree->setDragEnabled(true);
 
-    foreach(const Tag& tag, tags) {
+    Q_FOREACH(const Tag& tag, tags) {
 
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
         submenu->setText(0, tag.getName().c_str());
         tree->addTopLevelItem(submenu);
 
-        foreach(const NodeConstructor::Ptr& proxy, map[tag]) {
+        Q_FOREACH(const NodeConstructor::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
             std::string name = stripNamespace(proxy->getType());
 
@@ -179,13 +179,13 @@ QAbstractItemModel* BoxManager::listAvailableBoxedObjects()
 
     QStandardItemModel* model = new QStandardItemModel;//(types, 1);
 
-    foreach(const NodeConstructor::Ptr& proxy, available_elements_prototypes) {
+    Q_FOREACH(const NodeConstructor::Ptr& proxy, available_elements_prototypes) {
         QString name = QString::fromStdString(stripNamespace(proxy->getType()));
         QString descr(proxy->getDescription().c_str());
         QString type(proxy->getType().c_str());
 
         QStringList tags;
-        foreach(const Tag& tag, proxy->getTags()) {
+        Q_FOREACH(const Tag& tag, proxy->getTags()) {
             tags << tag.getName().c_str();
         }
 
@@ -253,7 +253,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
     if(is_template) {
         content.reset(new Node(""));
     } else {
-        foreach(NodeConstructor::Ptr p, available_elements_prototypes) {
+        Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
             if(p->getType() == type) {
                 content = p->makePrototypeContent();
             }

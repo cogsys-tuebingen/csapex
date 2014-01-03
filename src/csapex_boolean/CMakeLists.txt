@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(csapex_boolean)
 
-add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function)
-
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
 #  Debug          : w/ debug symbols, w/o optimization
@@ -10,13 +8,7 @@ add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
-set(CMAKE_BUILD_TYPE Debug)
-
 find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins)
-
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
-include(${QT_USE_FILE})
-
 
 file(GLOB_RECURSE QT_MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex_boolean/*.h)
 file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)

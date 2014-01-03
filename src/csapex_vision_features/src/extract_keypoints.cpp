@@ -77,7 +77,7 @@ void ExtractKeypoints::fill(QBoxLayout* layout)
 
         selection_key = new QComboBox;
         typedef std::pair<std::string, ExtractorManager::ExtractorInitializer> Pair;
-        foreach(Pair fc, manager.featureDetectors()) {
+        Q_FOREACH(Pair fc, manager.featureDetectors()) {
             std::string key = fc.second.getType();
             selection_key->addItem(key.c_str());
 
@@ -123,12 +123,12 @@ void ExtractKeypoints::update(int slot)
     QBoxLayout* layout = dynamic_cast<QBoxLayout*> (opt->layout());
     assert(layout);
 
-    foreach(QObject* cb, callbacks) {
+    Q_FOREACH(QObject* cb, callbacks) {
         delete cb;
     }
     callbacks.clear();
 
-    foreach(const param::Parameter::Ptr& p, state.params[state.key]) {
+    Q_FOREACH(const param::Parameter::Ptr& p, state.params[state.key]) {
         std::string name = p->name();
 
         param::RangeParameter::Ptr range = boost::dynamic_pointer_cast<param::RangeParameter> (p);
@@ -204,8 +204,8 @@ void ExtractKeypoints::setState(Memento::Ptr memento)
     state.key = m->key;
 
     typedef std::pair<std::string, std::vector<param::Parameter::Ptr> > Pair;
-    foreach(Pair pair, m->params) {
-        foreach(const param::Parameter::Ptr& para, pair.second) {
+    Q_FOREACH(Pair pair, m->params) {
+        Q_FOREACH(const param::Parameter::Ptr& para, pair.second) {
             std::vector<param::Parameter::Ptr>& target = state.params[pair.first];
             BOOST_FOREACH(param::Parameter::Ptr& existing_param, target) {
                 if(existing_param->name() == para->name()) {

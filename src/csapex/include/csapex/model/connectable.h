@@ -42,6 +42,8 @@ public:
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);
 
+    GraphPtr getGraph() const;
+
     int getCount() const;
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;

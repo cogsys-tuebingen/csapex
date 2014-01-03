@@ -241,7 +241,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
             dispatcher_->getGraph()->deselectNodes();
 
-            foreach(csapex::Box* box, findChildren<csapex::Box*>()) {
+            Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
                     dispatcher_->getGraph()->selectNode(box->getNode(), true);
                 }

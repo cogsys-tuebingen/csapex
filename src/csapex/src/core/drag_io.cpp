@@ -68,7 +68,7 @@ void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterE
     }
 
 
-    foreach(HandlerEnter::Ptr h, DragIO::instance().handler_enter) {
+    Q_FOREACH(HandlerEnter::Ptr h, DragIO::instance().handler_enter) {
         if(h->handle(dispatcher_, src, overlay, e)) {
             return;
         }
@@ -87,7 +87,7 @@ void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterE
         if(cmd != Box::MIME.toStdString()) {
             std::cout << "warning: data is ";
             typedef const std::pair<int, QVariant> PAIR;
-            foreach(PAIR& pair, v.toStdMap()) {
+            Q_FOREACH(PAIR& pair, v.toStdMap()) {
                 std::cout << pair.first << ":\t" << pair.second.toString().toStdString() << '\n';
             }
             std::cout << std::endl;
@@ -129,7 +129,7 @@ void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEve
         overlay->repaint();
 
     } else {
-        foreach(HandlerMove::Ptr h, DragIO::instance().handler_move) {
+        Q_FOREACH(HandlerMove::Ptr h, DragIO::instance().handler_move) {
             if(h->handle(dispatcher_, src, overlay, e)) {
                 return;
             }
@@ -165,7 +165,7 @@ void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         e->acceptProposedAction();
         e->setDropAction(Qt::MoveAction);
     } else {
-        foreach(HandlerDrop::Ptr h, DragIO::instance().handler_drop) {
+        Q_FOREACH(HandlerDrop::Ptr h, DragIO::instance().handler_drop) {
             if(h->handle(dispatcher_, src, overlay, e)) {
                 return;
             }

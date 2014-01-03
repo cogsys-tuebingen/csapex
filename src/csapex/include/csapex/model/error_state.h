@@ -6,7 +6,6 @@
 
 /// SYSTEM
 #include <string>
-#include <QWidget>
 #include <QMutex>
 
 namespace csapex

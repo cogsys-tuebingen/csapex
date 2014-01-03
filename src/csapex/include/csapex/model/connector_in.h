@@ -24,7 +24,7 @@ class ConnectorIn : public virtual Connectable
 
 public:
     ConnectorIn(const std::string& uuid);
-    ConnectorIn(Node* parent, int sub_id);
+    ConnectorIn(Unique *parent, int sub_id);
     virtual ~ConnectorIn();
 
     virtual bool canInput() const {

@@ -20,9 +20,9 @@ bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) 
     QStringList qrys = filterRegExp().pattern().split(" ", QString::SkipEmptyParts);
 
     bool contains_all = true;
-    foreach(const QString& qry, qrys) {
+    Q_FOREACH(const QString& qry, qrys) {
         bool tagged = false;
-        foreach(const QString& t, tags) {
+        Q_FOREACH(const QString& t, tags) {
             if(t.contains(qry, Qt::CaseInsensitive)) {
                 tagged = true;
             }

@@ -3,11 +3,6 @@ project(csapex_core_plugins)
 
 find_package(catkin REQUIRED COMPONENTS roscpp csapex)
 
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
-include(${QT_USE_FILE})
-
-set(CMAKE_BUILD_TYPE Debug)
-
 file(GLOB_RECURSE MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/*.h)
 file(GLOB_RECURSE MOC_PLUG RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_core_resources.qrc)

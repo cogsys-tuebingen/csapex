@@ -29,10 +29,10 @@ void MessageProviderManager::fullReload()
     supported_types_ = "";
 
     typedef std::pair<std::string, PluginManager<csapex::MessageProvider>::Constructor> PAIR;
-    foreach(PAIR pair, manager_->availableClasses()) {
+    Q_FOREACH(PAIR pair, manager_->availableClasses()) {
         try {
             MessageProvider::Ptr prov(pair.second());
-            foreach(const std::string& extension, prov->getExtensions()) {
+            Q_FOREACH(const std::string& extension, prov->getExtensions()) {
                 std::string ext = extension;
                 std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
                 registerMessageProvider(ext, pair.second);

@@ -58,7 +58,7 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
 void NodeAdapter::setupUi(QBoxLayout * layout)
 {
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
-    foreach(param::Parameter::Ptr parameter, params) {
+    Q_FOREACH(param::Parameter::Ptr parameter, params) {
         std::string name = parameter->name();
 
         param::PathParameter::Ptr path_p = boost::dynamic_pointer_cast<param::PathParameter> (parameter);
@@ -258,7 +258,7 @@ void NodeAdapter::updateDynamicGui(QBoxLayout *)
 void NodeAdapter::modelChangedEvent()
 {
     //    std::vector<param::Parameter::Ptr> params = node_->getParameters();
-    //    foreach(param::Parameter::Ptr p, params) {
+    //    Q_FOREACH(param::Parameter::Ptr p, params) {
     //        p->name()
     //    }
 }

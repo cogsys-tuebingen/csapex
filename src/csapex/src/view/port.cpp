@@ -14,10 +14,11 @@
 
 using namespace csapex;
 
-Port::Port(Connectable *adaptee)
-    : adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), buttons_down_(0)
+Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
+    : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), buttons_down_(0)
 {
     if(adaptee_) {
+        adaptee_->setCommandDispatcher(dispatcher);
         adaptee_->setPort(this);
         setToolTip(adaptee_->UUID().c_str());
     }
@@ -58,6 +59,11 @@ bool Port::isInput() const
 Connectable* Port::getAdaptee() const
 {
     return adaptee_;
+}
+
+CommandDispatcher* Port::getCommandDispatcher() const
+{
+    return dispatcher_;
 }
 
 
@@ -206,14 +212,14 @@ void Port::dropEvent(QDropEvent* e)
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
 
         if(from && from != adaptee_) {
-            adaptee_->getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(adaptee_->UUID(), from->UUID())));
+            getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(adaptee_->UUID(), from->UUID())));
         }
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
 
         if(from) {
             Command::Ptr cmd(new command::MoveConnection(from, adaptee_));
-            adaptee_->getCommandDispatcher()->execute(cmd);
+            getCommandDispatcher()->execute(cmd);
             e->setDropAction(Qt::MoveAction);
         }
     }

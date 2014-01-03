@@ -6,9 +6,6 @@ project(csapex_rqt)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp rqt_gui rqt_gui_cpp csapex)
 
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-include(${QT_USE_FILE})
-
 file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 QT4_WRAP_CPP(QT_MOC ${QT_MOC})
 

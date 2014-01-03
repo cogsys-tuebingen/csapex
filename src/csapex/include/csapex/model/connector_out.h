@@ -25,7 +25,7 @@ public:
 
 public:
     ConnectorOut(const std::string& uuid);
-    ConnectorOut(Node* parent, int sub_id);
+    ConnectorOut(Unique *parent, int sub_id);
     ~ConnectorOut();
 
     virtual bool canOutput() const {

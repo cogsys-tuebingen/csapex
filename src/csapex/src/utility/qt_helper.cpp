@@ -2,56 +2,20 @@
 #include <csapex/utility/qt_helper.hpp>
 
 /// COMPONENT
+#include <csapex/model/connector_in.h>
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/view/port.h>
 #include <csapex/command/meta.h>
 
 using namespace csapex;
 
-class QtConnectable : public Connectable
+class QtConnectable : public ConnectorIn
 {
 public:
-    QtConnectable(const std::string& type)
-        : Connectable("none")
+    QtConnectable(const std::string& uuid, const std::string& type)
+        : Connectable(uuid), ConnectorIn(uuid)
     {
         setType(ConnectionTypeManager::createMessage(type));
-    }
-
-    bool canInput() const {
-        return true;
-    }
-    virtual bool isInput() const {
-        return true;
-    }
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const
-    {
-        return false;
-    }
-    virtual bool isConnected() const
-    {
-        return false;
-    }
-    virtual bool tryConnect(Connectable* other_side)
-    {
-        return false;
-    }
-    virtual void removeConnection(Connectable* other_side)
-    {
-    }
-    virtual void validateConnections()
-    {
-    }
-    virtual void connectionMovePreview(Connectable* other_side)
-    {
-    }
-    virtual Command::Ptr removeAllConnectionsCmd()
-    {
-        command::Meta::Ptr res(new command::Meta("noop"));
-        return res;
-    }
-protected:
-    virtual void removeAllConnectionsNotUndoable()
-    {
     }
 };
 
@@ -74,7 +38,7 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     /// TODO: Make connector independent of node
-    Port* cin = new Port(new QtConnectable("int"));
+    //Port* cin = new Port(new QtConnectable("foo", "int"));
 
     QSlider* slider = new QSlider(Qt::Horizontal);
     slider->setMinimum(min);
@@ -87,7 +51,7 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     display->setMaximum(max);
     display->setValue(def);
 
-    internal_layout->addWidget(cin);
+    //internal_layout->addWidget(cin);
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);

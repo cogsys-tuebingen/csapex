@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <QtConcurrentRun>
+#include <boost/foreach.hpp>
 
 using namespace csapex;
 
@@ -53,7 +54,7 @@ void ROSHandler::initHandle(bool try_only)
         spinner_.reset(new ros::AsyncSpinner(2));
         spinner_->start();
 
-        foreach (const boost::function<void()>& f, callbacks_) {
+        BOOST_FOREACH (const boost::function<void()>& f, callbacks_) {
             f();
         }
     }

@@ -153,13 +153,13 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
         yaml << YAML::Key << "to" << YAML::Value << connection->to()->UUID();
 
         yaml << YAML::Key << "pts" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-        foreach(const Connection::Fulcrum& f, connection->getFulcrums()) {
+        Q_FOREACH(const Connection::Fulcrum& f, connection->getFulcrums()) {
             yaml << YAML::Flow << YAML::BeginSeq << f.pos.x() << f.pos.y() << YAML::EndSeq;
         }
         yaml << YAML::EndSeq;
 
         yaml << YAML::Key << "types" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-        foreach(const Connection::Fulcrum& f, connection->getFulcrums()) {
+        Q_FOREACH(const Connection::Fulcrum& f, connection->getFulcrums()) {
             yaml << f.type;
         }
         yaml << YAML::EndSeq;

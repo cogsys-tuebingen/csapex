@@ -14,7 +14,7 @@ class ConnectorForward : public ConnectorIn, public ConnectorOut
 
 public:
     ConnectorForward(bool primary_function_is_input, const std::string& uuid);
-    ConnectorForward(Node* parent, bool primary_function_is_input, int sub_id);
+    ConnectorForward(Unique* parent, bool primary_function_is_input, int sub_id);
     virtual ~ConnectorForward();
 
     virtual bool canInput() const {

@@ -2,7 +2,6 @@
 #include <csapex/model/connector_in.h>
 
 /// COMPONENT
-#include <csapex/model/node.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/command/delete_connection.h>
 
@@ -17,7 +16,7 @@ ConnectorIn::ConnectorIn(const std::string &uuid)
 {
 }
 
-ConnectorIn::ConnectorIn(Node* parent, int sub_id)
+ConnectorIn::ConnectorIn(Unique* parent, int sub_id)
     : Connectable(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false), async_(false)
 {
 }

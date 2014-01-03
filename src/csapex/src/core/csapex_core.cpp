@@ -47,7 +47,7 @@ CsApexCore::CsApexCore(CommandDispatcher* dispatcher)
 CsApexCore::~CsApexCore()
 {
     typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-    foreach(PAIR cp, core_plugin_manager->availableClasses()) {
+    Q_FOREACH(PAIR cp, core_plugin_manager->availableClasses()) {
         CorePlugin::Ptr plugin = cp.second();
 
         plugin->shutdown();
@@ -71,7 +71,7 @@ void CsApexCore::init()
         showStatusMessage("loading core plugins");
         core_plugin_manager->reload();
         typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-        foreach(PAIR cp, core_plugin_manager->availableClasses()) {
+        Q_FOREACH(PAIR cp, core_plugin_manager->availableClasses()) {
             CorePlugin::Ptr plugin = cp.second();
 
             plugin->init();
@@ -135,7 +135,7 @@ void CsApexCore::reset()
 
     TemplateManager::instance().reset();
 
-    foreach(Listener* l, listener_) {
+    Q_FOREACH(Listener* l, listener_) {
         l->resetSignal();
     }
 }

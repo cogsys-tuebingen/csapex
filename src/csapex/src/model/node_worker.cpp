@@ -73,7 +73,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     typedef std::pair<ConnectorIn*, bool> PAIR;
 
-    foreach(const PAIR& pair, has_msg_) {
+    Q_FOREACH(const PAIR& pair, has_msg_) {
         ConnectorIn* c = pair.first;
         if(!pair.second) {
             // connector doesn't have a message
@@ -101,7 +101,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     Q_EMIT messageProcessed();
 
 
-    foreach(const PAIR& pair, has_msg_) {
+    Q_FOREACH(const PAIR& pair, has_msg_) {
         has_msg_[pair.first] = false;
     }
 }

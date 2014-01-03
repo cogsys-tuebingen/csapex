@@ -28,7 +28,7 @@ void TemplateManager::reset()
 
 Template::Ptr TemplateManager::get(const std::string &name)
 {
-    foreach(const Template::Ptr& templ, temporary_templates) {
+    Q_FOREACH(const Template::Ptr& templ, temporary_templates) {
         if(templ->name_ == name) {
             return templ;
         }
@@ -72,7 +72,7 @@ Template::Ptr TemplateManager::createNewNamedTemplate(const std::string &name)
 
 bool TemplateManager::templateExists(const std::string &name)
 {
-    foreach(const Template::Ptr& templ, temporary_templates) {
+    Q_FOREACH(const Template::Ptr& templ, temporary_templates) {
         if(templ->name_ == name) {
             return true;
         }

@@ -45,8 +45,8 @@ void HTMLDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & opti
     }
 
     QString tag = tags.at(0);
-    foreach(const QString& t, tags) {
-        foreach(const QString& s, key_words) {
+    Q_FOREACH(const QString& t, tags) {
+        Q_FOREACH(const QString& s, key_words) {
             if(s.length() > 0) {
                 if(t.contains(s, Qt::CaseInsensitive)) {
                     tag = t;
@@ -55,7 +55,7 @@ void HTMLDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & opti
         }
     }
 
-    foreach(const QString& s, key_words) {
+    Q_FOREACH(const QString& s, key_words) {
         if(s.length() > 0) {
             descr.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");
             name.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");

@@ -19,7 +19,7 @@ class Port : public QFrame, public Selectable, public ErrorState
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(Connectable* adaptee);
+    Port(CommandDispatcher* dispatcher, Connectable* adaptee);
 
     QString cssClass() {
         return QString("Port");
@@ -45,6 +45,7 @@ public:
     virtual bool isInput() const;
 
     Connectable* getAdaptee() const;
+    CommandDispatcher* getCommandDispatcher() const;
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -54,6 +55,7 @@ protected:
     void errorChanged(bool error);
 
 protected:
+    CommandDispatcher* dispatcher_;
     Connectable * adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;

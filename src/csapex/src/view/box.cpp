@@ -239,7 +239,7 @@ void Box::unregisterEvent(Connectable*)
 void Box::registerInputEvent(ConnectorIn* in)
 {
     in->setParent(NULL);
-    ui->input_layout->addWidget(new Port(in));
+    ui->input_layout->addWidget(new Port(getCommandDispatcher(), in));
 
     Q_EMIT changed(this);
 }
@@ -251,7 +251,7 @@ void Box::registerOutputEvent(ConnectorOut* out)
     out->setParent(NULL);
     assert(ui);
     assert(ui->output_layout);
-    ui->output_layout->addWidget(new Port(out));
+    ui->output_layout->addWidget(new Port(getCommandDispatcher(), out));
 
     Q_EMIT changed(this);
 }

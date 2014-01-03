@@ -58,7 +58,7 @@ void Designer::resizeEvent(QResizeEvent*)
 
         if(sizes[0] > 0 && sizes[1] > 0) {
             is_init_ = true;
-            int w = 250;
+            int w = 0;
             sizes[1] = sizes[1] + (sizes[0] - w);
             sizes[0] = w;
             ui->splitter->setSizes(sizes);

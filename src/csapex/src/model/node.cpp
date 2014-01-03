@@ -131,7 +131,7 @@ void Node::allConnectorsArrived()
 
 void Node::messageProcessed()
 {
-    foreach(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, input) {
         i->notify();
     }
 }
@@ -282,14 +282,14 @@ void Node::disable()
 
 void Node::enableIO(bool enable)
 {
-    foreach(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, input) {
         if(enable) {
             i->enable();
         } else {
             i->disable();
         }
     }
-    foreach(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, output) {
         if(enable) {
             i->enable();
         } else {
@@ -300,10 +300,10 @@ void Node::enableIO(bool enable)
 
 void Node::setIOError(bool error)
 {
-    foreach(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, input) {
         i->setErrorSilent(error);
     }
-    foreach(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, output) {
         i->setErrorSilent(error);
     }
     enableIO(!error);
@@ -650,10 +650,10 @@ void Node::setCommandDispatcher(CommandDispatcher *d)
 
 void Node::stop()
 {
-    foreach(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, input) {
         disconnectConnector(i);
     }
-    foreach(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, output) {
         disconnectConnector(i);
     }
 

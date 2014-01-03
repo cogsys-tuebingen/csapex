@@ -36,7 +36,7 @@ void CommandDispatcher::executeLater(Command::Ptr command)
 
 void CommandDispatcher::executeLater()
 {
-    foreach(Command::Ptr cmd, later) {
+    Q_FOREACH(Command::Ptr cmd, later) {
         doExecute(cmd);
     }
     later.clear();
@@ -94,11 +94,11 @@ void CommandDispatcher::resetDirtyPoint()
 
 void CommandDispatcher::clearSavepoints()
 {
-    foreach(Command::Ptr cmd, done) {
+    Q_FOREACH(Command::Ptr cmd, done) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
-    foreach(Command::Ptr cmd, undone) {
+    Q_FOREACH(Command::Ptr cmd, undone) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
@@ -192,10 +192,10 @@ Graph::Ptr CommandDispatcher::getGraph()
 
 void CommandDispatcher::populateDebugInfo(QTreeWidget *undo, QTreeWidget *redo)
 {
-    foreach(const Command::Ptr& c, done) {
+    Q_FOREACH(const Command::Ptr& c, done) {
         undo->addTopLevelItem(c->createDebugInformation());
     }
-    foreach(const Command::Ptr& c, undone) {
+    Q_FOREACH(const Command::Ptr& c, undone) {
         redo->addTopLevelItem(c->createDebugInformation());
     }
 }

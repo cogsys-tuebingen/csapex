@@ -13,7 +13,7 @@ ConnectorForward::ConnectorForward(bool primary_function_is_input, const std::st
 
 }
 
-ConnectorForward::ConnectorForward(Node *parent, bool primary_function_is_input, int sub_id)
+ConnectorForward::ConnectorForward(Unique *parent, bool primary_function_is_input, int sub_id)
     : Connectable(parent, sub_id, TYPE_MISC), ConnectorIn(parent, sub_id), ConnectorOut(parent, sub_id), primary_function_is_input(primary_function_is_input)
 {
 

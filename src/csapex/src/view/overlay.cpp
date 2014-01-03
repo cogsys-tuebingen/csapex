@@ -176,7 +176,7 @@ void Overlay::drawConnection(Connection& connection)
     drawActivity(f, to);
 
     int sub_section = 0;
-    foreach(const Connection::Fulcrum& f, connection.getFulcrums()) {
+    Q_FOREACH(const Connection::Fulcrum& f, connection.getFulcrums()) {
         int r = 4;
         painter->setPen(QPen(Qt::black, 3));
         if(splicing && drag_connection_ == connection.id() && sub_section == drag_sub_section_) {
@@ -216,7 +216,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
     QPoint cp1, cp2;
     QPoint tangent;
 
-    foreach(const Connection::Fulcrum& fulcrum_, targets) {
+    Q_FOREACH(const Connection::Fulcrum& fulcrum_, targets) {
         QPoint fulcrum = fulcrum_.pos;
 
         if(splicing && drag_connection_ == id && sub_section == drag_sub_section_) {
@@ -504,10 +504,10 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
             drag_connection_ = id;
 
             double closest_dist = 15;
-            foreach(const Connection::Ptr& connection, graph_->visible_connections) {
+            Q_FOREACH(const Connection::Ptr& connection, graph_->visible_connections) {
                 int sub_section = 0;
 
-                foreach(const Connection::Fulcrum& fulcrum, connection->getFulcrums()) {
+                Q_FOREACH(const Connection::Fulcrum& fulcrum, connection->getFulcrums()) {
                     double dist = hypot(fulcrum.pos.x() - x, fulcrum.pos.y() - y);
                     if(dist < closest_dist) {
                         closest_dist = dist;
@@ -670,7 +670,7 @@ void Overlay::paintEvent(QPaintEvent*)
         }
     }
 
-    foreach(Connection::Ptr connection, graph_->visible_connections) {
+    Q_FOREACH(Connection::Ptr connection, graph_->visible_connections) {
         drawConnection(*connection);
     }
 

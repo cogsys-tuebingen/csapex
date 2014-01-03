@@ -62,6 +62,11 @@ void Connectable::setCommandDispatcher(CommandDispatcher *d)
     dispatcher_ = d;
 }
 
+Graph::Ptr Connectable::getGraph() const
+{
+    return dispatcher_->getGraph();
+}
+
 void Connectable::init()
 {
     port_ = NULL;
