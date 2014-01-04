@@ -58,6 +58,11 @@ ConnectionType::Ptr ConnectionType::makeDefault()
     return res;
 }
 
+bool ConnectionType::isValid() const
+{
+    return true;
+}
+
 void ConnectionType::write(std::ostream &out)
 {
     YAML::Emitter yaml;

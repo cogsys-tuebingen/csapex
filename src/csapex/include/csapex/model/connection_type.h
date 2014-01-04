@@ -30,6 +30,8 @@ public:
     virtual ConnectionType::Ptr toType() = 0;
     static ConnectionType::Ptr makeDefault();
 
+    virtual bool isValid() const;
+
     virtual bool canConnectTo(const ConnectionType* other_side) const;
     virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 
