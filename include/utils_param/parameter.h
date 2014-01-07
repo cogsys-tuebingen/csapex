@@ -11,10 +11,16 @@
 
 namespace param {
 
-class Parameter
+class Parameter : boost::noncopyable
 {
 public:
     typedef boost::shared_ptr<Parameter> Ptr;
+
+    struct access {
+        boost::signals2::signal<void(Parameter*)>& parameter_changed(Parameter& p) {
+            return p.parameter_changed;
+        }
+    };
 
 public:
     virtual ~Parameter();
@@ -49,7 +55,7 @@ public:
         }
 
         set_unsafe(v);
-        (*parameter_changed)(this);
+        parameter_changed(this);
     }
 
     template <typename T>
@@ -57,7 +63,7 @@ public:
     {
         boost::any v = value;
         set_unsafe(v);
-        (*parameter_changed)(this);
+        parameter_changed(this);
         return *this;
     }
 
@@ -84,8 +90,8 @@ protected:
     virtual boost::any get_unsafe() const;
     virtual void set_unsafe(const boost::any& v);
 
-public:
-    boost::shared_ptr<boost::signals2::signal<void(Parameter*)> > parameter_changed;
+protected:
+    boost::signals2::signal<void(Parameter*)> parameter_changed;
 
 protected:
     std::string name_;

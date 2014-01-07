@@ -42,7 +42,6 @@ public:
 
 public:
     SetParameter();
-    SetParameter(const SetParameter& rhs);
     explicit SetParameter(const std::string& name);
     virtual ~SetParameter();
 
@@ -68,10 +67,9 @@ public:
 
     void setByName(const std::string& name);
 
-    SetParameter& operator = (const SetParameter& param);
-
     int noParameters() const;
     std::string getName(int idx) const;
+    std::string getName() const;
 
 protected:
     virtual boost::any get_unsafe() const;

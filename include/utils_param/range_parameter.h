@@ -54,7 +54,6 @@ public:
 
 public:
     RangeParameter();
-    RangeParameter(const RangeParameter& rhs);
     explicit RangeParameter(const std::string& name);
     virtual ~RangeParameter();
 
@@ -77,8 +76,6 @@ public:
 
     template <typename T>
     T step() const { return read<T>(step_); }
-
-    RangeParameter& operator = (const RangeParameter& param);
 
     template<class Archive>
     void serialize(Archive& ar, const unsigned int /*file_version*/) {

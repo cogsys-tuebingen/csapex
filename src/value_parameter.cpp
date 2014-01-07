@@ -8,20 +8,6 @@ ValueParameter::ValueParameter()
 {
 }
 
-ValueParameter::ValueParameter(const ValueParameter& rhs)
-    : Parameter(rhs),
-      value_(rhs.value_),
-      def_(rhs.def_)
-{
-}
-
-ValueParameter& ValueParameter::operator =(const ValueParameter& rhs)
-{
-    assert(name_ == rhs.name());
-    value_ = rhs.value_;
-    return *this;
-}
-
 ValueParameter::ValueParameter(const std::string &name)
     : Parameter(name)
 {
@@ -75,7 +61,7 @@ void ValueParameter::setFrom(const Parameter &other)
     const ValueParameter* range = dynamic_cast<const ValueParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        (*parameter_changed)(this);
+        parameter_changed(this);
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

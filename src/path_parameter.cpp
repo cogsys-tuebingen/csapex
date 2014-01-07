@@ -8,20 +8,6 @@ PathParameter::PathParameter()
 {
 }
 
-PathParameter::PathParameter(const PathParameter& rhs)
-    : Parameter(rhs),
-      value_(rhs.value_),
-      def_(rhs.def_)
-{
-}
-
-PathParameter& PathParameter::operator =(const PathParameter& rhs)
-{
-    assert(name_ == rhs.name());
-    value_ = rhs.value_;
-    return *this;
-}
-
 PathParameter::PathParameter(const std::string &name)
     : Parameter(name)
 {
@@ -60,7 +46,7 @@ void PathParameter::setFrom(const Parameter &other)
     const PathParameter* range = dynamic_cast<const PathParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        (*parameter_changed)(this);
+        parameter_changed(this);
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

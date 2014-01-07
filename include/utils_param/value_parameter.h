@@ -48,7 +48,6 @@ public:
 
 public:
     ValueParameter();
-    ValueParameter(const ValueParameter& rhs);
     explicit ValueParameter(const std::string& name);
     virtual ~ValueParameter();
 
@@ -62,8 +61,6 @@ public:
 
     template <typename T>
     T def() const { return read<T>(def_); }
-
-    ValueParameter& operator = (const ValueParameter& param);
 
     template<class Archive>
     void serialize(Archive& ar, const unsigned int /*file_version*/) {

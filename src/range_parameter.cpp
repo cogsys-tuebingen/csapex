@@ -8,23 +8,6 @@ RangeParameter::RangeParameter()
 {
 }
 
-RangeParameter::RangeParameter(const RangeParameter& rhs)
-    : Parameter(rhs),
-      value_(rhs.value_),
-      min_(rhs.min_),
-      max_(rhs.max_),
-      def_(rhs.def_),
-      step_(rhs.step_)
-{
-}
-
-RangeParameter& RangeParameter::operator =(const RangeParameter& rhs)
-{
-    assert(name_ == rhs.name());
-    value_ = rhs.value_;
-    return *this;
-}
-
 RangeParameter::RangeParameter(const std::string &name)
     : Parameter(name)
 {
@@ -78,7 +61,7 @@ void RangeParameter::setFrom(const Parameter &other)
     const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        (*parameter_changed)(this);
+        parameter_changed(this);
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

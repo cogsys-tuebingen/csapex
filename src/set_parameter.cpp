@@ -8,20 +8,6 @@ SetParameter::SetParameter()
 {
 }
 
-SetParameter::SetParameter(const SetParameter& rhs)
-    : Parameter(rhs),
-      value_(rhs.value_),
-      set_(rhs.set_),
-      def_(rhs.def_)
-{
-}
-
-SetParameter& SetParameter::operator =(const SetParameter& rhs)
-{
-    assert(name_ == rhs.name());
-    value_ = rhs.value_;
-    return *this;
-}
 
 SetParameter::SetParameter(const std::string &name)
     : Parameter(name)
@@ -78,6 +64,18 @@ std::string SetParameter::getName(int idx) const
     return set_[idx].first;
 }
 
+std::string SetParameter::getName() const
+{
+    std::string str =  convertToString(value_);
+    for(std::vector< std::pair<std::string, variant> >::const_iterator it = set_.begin(); it != set_.end(); ++it) {
+        if(convertToString(it->second) == str) {
+            return it->first;
+        }
+    }
+
+    throw std::runtime_error("cannot get the name for parameter '" + name() + "'");
+}
+
 
 const std::type_info& SetParameter::type() const
 {
@@ -106,7 +104,7 @@ void SetParameter::setFrom(const Parameter &other)
     const SetParameter* range = dynamic_cast<const SetParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        (*parameter_changed)(this);
+        parameter_changed(this);
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

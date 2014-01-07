@@ -4,9 +4,10 @@
 using namespace param;
 
 Parameter::Parameter(const std::string &name)
-    : parameter_changed(new boost::signals2::signal<void(Parameter*)>), name_(name)
+    : name_(name)
 {
 }
+
 
 Parameter::~Parameter()
 {

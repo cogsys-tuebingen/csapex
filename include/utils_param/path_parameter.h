@@ -48,7 +48,6 @@ public:
 
 public:
     PathParameter();
-    PathParameter(const PathParameter& rhs);
     explicit PathParameter(const std::string& name);
     virtual ~PathParameter();
 
@@ -62,8 +61,6 @@ public:
 
     template <typename T>
     T def() const { return read<T>(def_); }
-
-    PathParameter& operator = (const PathParameter& param);
 
 
 protected:
