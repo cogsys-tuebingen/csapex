@@ -167,6 +167,8 @@ void Designer::reloadBoxMenues()
 
     Graph::Ptr graph = dispatcher_->getGraph();
     QObject::connect(graph.get(), SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
+
+    designer_board->setFocus();
 }
 
 void Designer::enableGrid(bool grid)

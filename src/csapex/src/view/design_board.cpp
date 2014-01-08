@@ -209,6 +209,12 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
     }
 }
 
+void DesignBoard::wheelEvent(QWheelEvent *e)
+{
+    e->accept();
+    setFocus();
+}
+
 void DesignBoard::mousePressEvent(QMouseEvent* e)
 {
     if(!drag_ || !space_) {
@@ -326,6 +332,10 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
         overlay->setSelectionRectangle(overlay->mapFromGlobal(drag_start_pos_), overlay->mapFromGlobal(e->globalPos()));
         overlay->repaint();
     }
+
+    if(!drag_) {
+        setFocus();
+    }
 }
 
 void DesignBoard::focusInEvent(QFocusEvent *)
@@ -424,4 +434,9 @@ void DesignBoard::dropEvent(QDropEvent* e)
 
 void DesignBoard::dragLeaveEvent(QDragLeaveEvent*)
 {
+}
+
+void DesignBoard::enterEvent(QEvent *)
+{
+    setFocus();
 }
