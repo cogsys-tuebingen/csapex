@@ -89,7 +89,9 @@ void Box::construct(Node* node)
 
     setObjectName(uuid.c_str());
 
-    setLabel(uuid);
+    if(getLabel().empty()) {
+        setLabel(uuid);
+    }
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);

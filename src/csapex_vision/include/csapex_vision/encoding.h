@@ -35,12 +35,12 @@ static const Encoding rgb = boost::assign::list_of
         (Channel("b",0,255));
 
 static const Encoding hsv = boost::assign::list_of
-        (Channel("h",0,128))
+        (Channel("h",0,255))
         (Channel("s",0,255))
         (Channel("v",0,255));
 
 static const Encoding hsl = boost::assign::list_of
-        (Channel("h",0,128))
+        (Channel("h",0,255))
         (Channel("s",0,255))
         (Channel("l",0,255));
 

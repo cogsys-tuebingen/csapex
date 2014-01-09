@@ -43,5 +43,7 @@ void Camera::setup()
 void Camera::update(param::Parameter *p)
 {
     int dev = param<int>("device");
-    cap_.open(dev);
+    if(!cap_.open(dev)) {
+        throw std::runtime_error("cannot open camera with the given id");
+    }
 }
