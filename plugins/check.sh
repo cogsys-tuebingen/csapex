@@ -9,6 +9,7 @@ for f in *; do
     echo
     echo "${bld}${blu}checking $f${rst}"
     git status
+    git branch
     cd -
   fi
 done

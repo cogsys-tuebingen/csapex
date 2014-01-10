@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/model/message.h>
 
 namespace csapex
 {
@@ -33,6 +34,14 @@ public:
     }
     virtual bool isOutput() const {
         return true;
+    }
+
+    template <typename T>
+    void publish(typename T::Ptr message,
+                 typename boost::disable_if<boost::is_base_and_derived<connection_types::Message, T> >::type* dummy = 0) {
+        typename connection_types::GenericMessage<typename T::Ptr>::Ptr msg(new connection_types::GenericMessage<typename T::Ptr>("generic"));
+        msg->value = message;
+        publish(msg);
     }
 
     void publish(ConnectionType::Ptr message);

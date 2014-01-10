@@ -8,6 +8,7 @@
 #include <csapex/model/error_state.h>
 #include <csapex/model/generic_state.h>
 #include <csapex/model/unique.h>
+#include <csapex/model/message.h>
 
 /// PROJECT
 #include <utils_param/parameter.h>
@@ -16,6 +17,7 @@
 #include <QObject>
 #include <QIcon>
 #include <QTreeWidgetItem>
+#include <boost/utility.hpp>
 
 namespace csapex {
 
@@ -91,13 +93,27 @@ public:
     NodeWorker* getNodeWorker() const;
 
     template <typename T>
-    ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false) {
+    ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
+                          typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         return addInput(T::make(), label, optional, async);
     }
 
     template <typename T>
-    ConnectorOut* addOutput(const std::string& label) {
+    ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
+                          typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        return addInput(connection_types::GenericMessage<T>::make(), label, optional, async);
+    }
+
+    template <typename T>
+    ConnectorOut* addOutput(const std::string& label,
+                            typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         return addOutput(T::make(), label);
+    }
+
+    template <typename T>
+    ConnectorOut* addOutput(const std::string& label,
+                            typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        return addOutput(connection_types::GenericMessage<T>::make(), label);
     }
 
     ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);

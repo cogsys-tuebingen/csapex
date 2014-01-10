@@ -42,6 +42,43 @@ public:
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
 };
 
+template <typename Type>
+struct GenericMessage : public Message {
+    typedef boost::shared_ptr<GenericMessage<Type> > Ptr;
+
+    GenericMessage(const std::string& name)
+        : Message(name)
+    {}
+
+    virtual ConnectionType::Ptr clone() {
+        Ptr new_msg(new GenericMessage<Type>(""));
+        new_msg->value = value;
+        return new_msg;
+    }
+
+    virtual ConnectionType::Ptr toType() {
+        Ptr new_msg(new GenericMessage<Type>(""));
+        return new_msg;
+    }
+
+    static ConnectionType::Ptr make(){
+        Ptr new_msg(new GenericMessage<Type>(""));
+        return new_msg;
+    }
+
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const {
+        return name() == other_side->name();
+    }
+
+    void writeYaml(YAML::Emitter& yaml) {
+        yaml << YAML::Key << "value" << YAML::Value << "not implemented";
+    }
+    void readYaml(YAML::Node& node) {
+    }
+
+    Type value;
+};
+
 template <typename Type, class Instance>
 struct MessageTemplate : public Message {
     typedef boost::shared_ptr<Instance> Ptr;

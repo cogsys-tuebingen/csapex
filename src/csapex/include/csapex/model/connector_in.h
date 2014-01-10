@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/model/message.h>
 
 /// SYSTEM
 #include <QMutex>
@@ -41,10 +42,21 @@ public:
     void inputMessage(ConnectionType::Ptr message);
 
     bool hasMessage() const;
+
+
     template <typename R>
-    typename R::Ptr getMessage() {
+    typename R::Ptr getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {
         QMutexLocker lock(&io_mutex);
-        return boost::dynamic_pointer_cast<R> (message_);
+        typename R::Ptr result = boost::dynamic_pointer_cast<R> (message_);
+        assert(result);
+        return result;
+    }
+    template <typename R>
+    typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {
+        QMutexLocker lock(&io_mutex);
+        typename connection_types::GenericMessage<typename R::Ptr>::Ptr tmp =
+        boost::dynamic_pointer_cast<typename connection_types::GenericMessage<typename R::Ptr> > (message_);
+        return tmp->value;
     }
 
     virtual ConnectionType::Ptr getMessage()  __attribute__ ((deprecated));
