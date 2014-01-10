@@ -35,7 +35,7 @@ Connectable::Connectable(const std::string& uuid)
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->UUID(), type, sub_id)), buttons_down_(0), minimized_(false)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false)
 {
     init();
 }
@@ -124,16 +124,16 @@ void Connectable::removeAllConnectionsUndoable()
 
 void Connectable::disable()
 {
-    port_->setEnabled(false);
-    Q_EMIT disabled(this);
+    //port_->setEnabled(false);
+    Q_EMIT enabled(false);
     port_->setProperty("disabled", true);
     //refreshStylesheet();
 }
 
 void Connectable::enable()
 {
-    port_->setEnabled(true);
-    Q_EMIT enabled(this);
+    //port_->setEnabled(true);
+    Q_EMIT enabled(true);
     port_->setProperty("disabled", false);
     //refreshStylesheet();
 }

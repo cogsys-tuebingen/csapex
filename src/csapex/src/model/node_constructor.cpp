@@ -80,5 +80,6 @@ Node::Ptr NodeConstructor::makeContent(const std::string& uuid) const
     Node::Ptr res = c();
     res->setType(type_);
     res->setUUID(uuid);
+    res->setLabel(uuid);
     return res;
 }

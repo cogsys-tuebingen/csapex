@@ -26,7 +26,6 @@ class BoxManager : public Singleton<BoxManager>
     friend class GraphIO;
 
 public:
-    static std::string stripNamespace(const std::string& name);
     static bool typeIsTemplate(const std::string& type);
     static std::string getTemplateName(const std::string& type);
 

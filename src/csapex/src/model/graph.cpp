@@ -94,7 +94,7 @@ std::string Graph::makeUUID(const std::string& name)
 
 void Graph::addNode(Node::Ptr node)
 {
-    assert(!node->UUID().empty());
+    assert(!node->getUUID().empty());
     assert(!node->getType().empty());
     assert(dispatcher_);
 
@@ -161,7 +161,7 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
 }
 
 
-Template::Ptr Graph::generateTemplate(Template::Ptr /*templ*/, std::vector<std::pair<std::string, std::string> >& /*connections*/, bool /*only_selected*/) const
+Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<std::string, std::string> >& /*connections*/, bool /*only_selected*/) const
 {
     // TODO: reimplement
 //    std::vector<Node*> selected;
@@ -259,7 +259,7 @@ Template::Ptr Graph::generateTemplate(Template::Ptr /*templ*/, std::vector<std::
 //        }
 //    }
 
-//    return templ;
+    return templ;
 }
 
 void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::function<void ()> > &handler)
@@ -370,8 +370,8 @@ Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
 bool Graph::addConnection(Connection::Ptr connection)
 {
     if(connection->from()->tryConnect(connection->to())) {
-        Connectable* from = findConnector(connection->from()->UUID());
-        Connectable* to = findConnector(connection->to()->UUID());
+        Connectable* from = findConnector(connection->from()->getUUID());
+        Connectable* to = findConnector(connection->to()->getUUID());
 
         Graph::Ptr graph_from = from->getGraph();
         Graph::Ptr graph_to = to->getGraph();
@@ -385,7 +385,7 @@ bool Graph::addConnection(Connection::Ptr connection)
         return true;
     }
 
-    std::cerr << "cannot connect " << connection->from()->UUID() << " (" <<( connection->from()->isInput() ? "i": "o" )<< ") to " << connection->to()->UUID() << " (" <<( connection->to()->isInput() ? "i": "o" )<< ")"  << std::endl;
+    std::cerr << "cannot connect " << connection->from()->getUUID() << " (" <<( connection->from()->isInput() ? "i": "o" )<< ") to " << connection->to()->getUUID() << " (" <<( connection->to()->isInput() ? "i": "o" )<< ")"  << std::endl;
     return false;
 }
 
@@ -422,7 +422,7 @@ Command::Ptr Graph::clear()
     command::Meta::Ptr clear(new command::Meta("Clear Graph"));
 
     Q_FOREACH(Node::Ptr node, nodes_) {
-        Command::Ptr cmd(new command::DeleteNode(node->UUID()));
+        Command::Ptr cmd(new command::DeleteNode(node->getUUID()));
         clear->add(cmd);
     }
 
@@ -458,7 +458,7 @@ Node* Graph::findNode(const std::string &uuid)
     std::cerr << "cannot find box \"" << uuid << "\n";
     std::cerr << "available nodes:\n";
     Q_FOREACH(Node::Ptr n, nodes_) {
-        std::cerr << n->UUID() << '\n';
+        std::cerr << n->getUUID() << '\n';
     }
     std::cerr << std::endl;
     throw std::runtime_error("cannot find box");
@@ -467,7 +467,7 @@ Node* Graph::findNode(const std::string &uuid)
 Node* Graph::findNodeNoThrow(const std::string &uuid)
 {
     Q_FOREACH(Node::Ptr b, nodes_) {
-        if(b->UUID() == uuid) {
+        if(b->getUUID() == uuid) {
             return b.get();
         }
     }
@@ -497,14 +497,14 @@ Node* Graph::findNodeForConnector(const std::string &uuid)
         std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
 
         Q_FOREACH(Node::Ptr n, nodes_) {
-            std::cerr << "node: " << n->UUID() << "\n";
+            std::cerr << "node: " << n->getUUID() << "\n";
             std::cerr << "inputs: " << "\n";
             Q_FOREACH(ConnectorIn* in, n->input) {
-                std::cerr << "\t" << in->UUID() << "\n";
+                std::cerr << "\t" << in->getUUID() << "\n";
             }
             std::cerr << "outputs: " << "\n";
             Q_FOREACH(ConnectorOut* out, n->output) {
-                std::cerr << "\t" << out->UUID() << "\n";
+                std::cerr << "\t" << out->getUUID() << "\n";
             }
         }
 
@@ -746,7 +746,7 @@ Command::Ptr Graph::deleteSelectedNodesCmd()
 
     Q_FOREACH(Node::Ptr n, nodes_) {
         if(n->getBox()->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteNode(n->UUID())));
+            meta->add(Command::Ptr(new command::DeleteNode(n->getUUID())));
         }
     }
 
@@ -782,7 +782,7 @@ Command::Ptr Graph::groupSelectedNodesCmd()
 
     Q_FOREACH(Node::Ptr n, nodes_) {
         if(n->getBox()->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteNode(n->UUID())));
+            meta->add(Command::Ptr(new command::DeleteNode(n->getUUID())));
         }
     }
 

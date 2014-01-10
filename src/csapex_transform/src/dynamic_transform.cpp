@@ -73,17 +73,19 @@ void DynamicTransform::tick()
 
 void DynamicTransform::publishTransform(const ros::Time& time)
 {
-    setError(false);
-
     tf::StampedTransform t;
 
-    Listener* l = Listener::instance();
+    {
+        LockedListener l = Listener::getLocked();
 
-    if(l) {
-        l->tfl->lookupTransform(state.to_, state.from_, time, t);
-    } else {
-        return;
+        if(l.l) {
+            l.l->tfl->lookupTransform(state.to_, state.from_, time, t);
+        } else {
+            return;
+        }
     }
+
+    setError(false);
 
     connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
     msg->value = t;
@@ -128,14 +130,16 @@ void DynamicTransform::fill(QBoxLayout* layout)
 
     QObject::connect(this, SIGNAL(started()), this, SLOT(updateFrames()));
 
+    ROSHandler::instance().registerConnectionCallback(boost::bind(&DynamicTransform::updateFrames, this));
+
     updateFrames();
 }
 
 void DynamicTransform::resetTf()
 {
-    Listener* l = Listener::instance();
-    if(l) {
-        l->reset();
+    LockedListener l = Listener::getLocked();
+    if(l.l) {
+        l.l->reset();
     }
 }
 
@@ -143,9 +147,9 @@ void DynamicTransform::updateFrames()
 {
     std::vector<std::string> frames;
 
-    Listener* l = Listener::instance();
-    if(l) {
-        l->tfl->getFrameStrings(frames);
+    LockedListener l = Listener::getLocked();
+    if(l.l) {
+        l.l->tfl->getFrameStrings(frames);
     } else {
         return;
     }

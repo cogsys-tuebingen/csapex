@@ -6,13 +6,14 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/timer.h>
+#include <csapex/utility/thread.h>
 
 using namespace csapex;
 
 const unsigned NodeWorker::timer_history_length_ = 30;
 
 NodeWorker::NodeWorker(Node* node)
-    : node_(node), synchronized_inputs_(false)
+    : node_(node), synchronized_inputs_(false), thread_initialized_(false)
 {
     assert(node_);
 }
@@ -108,6 +109,11 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
 void NodeWorker::tick()
 {
+    if(!thread_initialized_) {
+        thread::set_name(node_->getUUID().getShortName().c_str());
+        thread_initialized_ = true;
+    }
+
     if(node_->isEnabled()) {
         node_->tick();
     }

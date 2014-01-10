@@ -17,7 +17,7 @@ DeleteConnector::DeleteConnector(Connectable *_c) :
     c(_c)
 {
     assert(c);
-    c_uuid = c->UUID();
+    c_uuid = c->getUUID();
 }
 
 std::string DeleteConnector::getType() const

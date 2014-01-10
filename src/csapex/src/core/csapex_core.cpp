@@ -22,7 +22,7 @@ using namespace csapex;
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
 CsApexCore::CsApexCore(const std::string& config)
-    : cmd_dispatch(new CommandDispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin"))
+    : cmd_dispatch(new CommandDispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 

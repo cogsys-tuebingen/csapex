@@ -27,8 +27,8 @@ DeleteConnection::DeleteConnection(Connectable* a, Connectable* b)
     assert(from);
     assert(to);
 
-    from_uuid = from->UUID();
-    to_uuid = to->UUID();
+    from_uuid = from->getUUID();
+    to_uuid = to->getUUID();
 }
 
 std::string DeleteConnection::getType() const

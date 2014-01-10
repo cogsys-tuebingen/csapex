@@ -122,12 +122,12 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
                 }
                 yaml << YAML::BeginMap; // output map
                 yaml << YAML::Key << "uuid";
-                yaml << YAML::Value << o->UUID();
+                yaml << YAML::Value << o->getUUID();
                 yaml << YAML::Key << "targets";
                 yaml << YAML::Value << YAML::BeginSeq; // output list
                 for(ConnectorOut::TargetIterator it = o->beginTargets(); it != o->endTargets(); ++it) {
                     ConnectorIn* i = *it;
-                    yaml << i->UUID();
+                    yaml << i->getUUID();
                 }
                 yaml << YAML::EndSeq; // output list
 
@@ -149,8 +149,8 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
 
         yaml << YAML::BeginMap;
 
-        yaml << YAML::Key << "from" << YAML::Value << connection->from()->UUID();
-        yaml << YAML::Key << "to" << YAML::Value << connection->to()->UUID();
+        yaml << YAML::Key << "from" << YAML::Value << connection->from()->getUUID();
+        yaml << YAML::Key << "to" << YAML::Value << connection->to()->getUUID();
 
         yaml << YAML::Key << "pts" << YAML::Value << YAML::Flow << YAML::BeginSeq;
         Q_FOREACH(const Connection::Fulcrum& f, connection->getFulcrums()) {
@@ -211,16 +211,19 @@ void GraphIO::loadConnections(YAML::Node &doc)
                     continue;
                 }
 
-                Node* target_box = graph_->findNodeForConnector(to_uuid);
-                if(target_box == NULL) {
-                    std::cerr << "cannot load connection, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
+                try {
+                    Node* target_box = graph_->findNodeForConnector(to_uuid);
+
+                    ConnectorIn* to = target_box->getInput(to_uuid);
+                    assert(to); // if parent box has been found, this should never happen
+
+                    graph_->addConnection(Connection::Ptr(new Connection(from, to)));
+
+                } catch(const std::exception& e) {
+                    std::cerr << "cannot load connection: " << e.what() << std::endl;
                     continue;
                 }
 
-                ConnectorIn* to = target_box->getInput(to_uuid);
-                assert(to); // if parent box has been found, this should never happen
-
-                graph_->addConnection(Connection::Ptr(new Connection(from, to)));
             }
         }
     }

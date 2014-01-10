@@ -8,6 +8,16 @@ Listener::Listener()
     init = false;
 }
 
+LockedListener Listener::getLocked()
+{
+    Listener* l = raw_instance();
+    if(l->tfl) {
+        return LockedListener(l);
+    } else {
+        return LockedListener(NULL);
+    }
+}
+
 void Listener::start()
 {
     Listener* i = Listener::raw_instance();

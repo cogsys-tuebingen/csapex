@@ -43,7 +43,7 @@ void ConnectorForward::inputMessage(ConnectionType::Ptr message)
     publish(message);
 }
 
-bool ConnectorForward::tryConnect(Connectable* other_side)
+bool ConnectorForward::tryConnect(Connectable* /*other_side*/)
 {
     // TODO: reimplement
 //    bool use_in = false;
@@ -107,6 +107,7 @@ bool ConnectorForward::tryConnect(Connectable* other_side)
 //        // connection from "right"
 //        return ConnectorOut::tryConnect(other_side);
 //    }
+    return false;
 }
 
 bool ConnectorForward::acknowledgeConnection(Connectable* other_side)

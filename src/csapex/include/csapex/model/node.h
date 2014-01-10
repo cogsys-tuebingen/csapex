@@ -88,7 +88,7 @@ public:
 
     /// TODO: get rid of this
     virtual void setBox(Box* box);
-    Box* getBox() const  __attribute__ ((deprecated));
+    Box* getBox() const;//  __attribute__ ((deprecated));
 
     NodeWorker* getNodeWorker() const;
 

@@ -177,12 +177,11 @@ void CompleteLineEdit::update() {
         list_view->hide();
 
     } else {
-        if(hits == 1) {
-            list_view->setCurrentIndex(list_view->model()->index(0,0));
-        }
+        list_view->setCurrentIndex(list_view->model()->index(0,0));
 
         list_view->move(x, y);
         list_view->setFixedHeight(h);
+
         list_view->show();
     }
 }

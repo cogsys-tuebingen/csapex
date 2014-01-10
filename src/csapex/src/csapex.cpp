@@ -8,21 +8,19 @@
 #include <csapex/model/boxed_object.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/core/graphio.h>
+#include <csapex/utility/thread.h>
+#include <csapex/utility/error_handling.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
 #include <QtGui>
-#include <signal.h>
+#include <execinfo.h>
+#include <stdlib.h>
 
 namespace po = boost::program_options;
 
 using namespace csapex;
 
-void siginthandler(int)
-{
-    printf("User pressed Ctrl+C\n");
-    exit(1);
-}
 
 CsApexApp::CsApexApp(int& argc, char** argv)
     : QApplication(argc, argv)
@@ -68,13 +66,15 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
 Main::Main(CsApexApp& a)
     : app(a), splash(NULL)
 {
-
+    csapex::thread::set_name("cs::APEX main");
 }
 
 int Main::run()
 {
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-    signal(SIGINT, siginthandler);
+
+    csapex::error_handling::init();
+
     int result = app.exec();
 
     return result;

@@ -20,8 +20,10 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
     if(adaptee_) {
         adaptee_->setCommandDispatcher(dispatcher);
         adaptee_->setPort(this);
-        setToolTip(adaptee_->UUID().c_str());
+        setToolTip(adaptee_->getUUID().c_str());
     }
+
+    connect(adaptee, SIGNAL(enabled(bool)), this, SLOT(setEnabled(bool)));
 
     setFixedSize(16, 16);
 
@@ -82,7 +84,7 @@ void Port::refreshStylesheet()
     refresh_style_sheet_ = true;
 }
 
-void Port::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+void Port::errorEvent(bool /*error*/, const std::string& /*msg*/, ErrorLevel /*level*/)
 {
     // TODO: relay to parent (box if applicable)
     //setError(error, msg, level);
@@ -113,7 +115,7 @@ bool Port::isMinimizedSize() const
 void Port::mouseMoveEvent(QMouseEvent* e)
 {
     std::stringstream tt;
-    tt << adaptee_->UUID() << " (" << adaptee_->getCount() << ")";
+    tt << adaptee_->getUUID() << " (" << adaptee_->getCount() << ")";
     setToolTip(tt.str().c_str());
 
     if(buttons_down_ == Qt::NoButton) {
@@ -212,7 +214,7 @@ void Port::dropEvent(QDropEvent* e)
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
 
         if(from && from != adaptee_) {
-            getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(adaptee_->UUID(), from->UUID())));
+            getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(adaptee_->getUUID(), from->getUUID())));
         }
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());

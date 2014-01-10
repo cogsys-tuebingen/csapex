@@ -4,6 +4,17 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 
+namespace ros
+{
+namespace message_traits
+{
+template <class ContainerAllocator>
+struct IsMessage
+{
+};
+}
+}
+
 namespace csapex {
 namespace connection_types {
 
@@ -49,6 +60,10 @@ struct GenericMessage : public Message {
     GenericMessage(const std::string& name)
         : Message(name)
     {}
+
+    bool isRosMessage(typename boost::enable_if<ros::message_traits::IsMessage<Type> >::type* dummy = 0) {
+       return true;
+    }
 
     virtual ConnectionType::Ptr clone() {
         Ptr new_msg(new GenericMessage<Type>(""));

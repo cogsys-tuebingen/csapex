@@ -84,7 +84,7 @@ void Box::construct(Node* node)
 
     setFocusPolicy(Qt::ClickFocus);
 
-    const std::string& uuid = node_->UUID();
+    const std::string& uuid = node_->getUUID();
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -365,7 +365,7 @@ void Box::paintEvent(QPaintEvent*)
             ui->label->setToolTip(node_->errorMessage().c_str());
         } else {
             setLabel(objectName());
-            ui->label->setToolTip(node_->UUID().c_str());
+            ui->label->setToolTip(node_->getUUID().c_str());
         }
 
         refreshStylesheet();
@@ -441,7 +441,7 @@ void Box::startDrag(QPoint offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
-    mimeData->setText(node_->UUID().c_str());
+    mimeData->setText(node_->getUUID().c_str());
 
     QByteArray ox;
     QByteArray oy;
@@ -477,7 +477,7 @@ void Box::startDrag(QPoint offset)
 
 void Box::deleteBox()
 {
-    node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(node_->UUID())));
+    node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
 }
 
 void Box::refreshStylesheet()
@@ -568,7 +568,7 @@ void Box::nodeStateChanged()
     ui->enablebtn->setChecked(node_->getNodeState()->enabled);
 
     setLabel(node_->getNodeState()->label_);
-    ui->label->setToolTip(node_->UUID().c_str());
+    ui->label->setToolTip(node_->getUUID().c_str());
 
     move(node_->getPosition());
 }

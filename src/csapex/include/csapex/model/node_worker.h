@@ -64,6 +64,8 @@ private:
     std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
 
     std::deque<int> timer_history_;
+
+    bool thread_initialized_;
 };
 
 }

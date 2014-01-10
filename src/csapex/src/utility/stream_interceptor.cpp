@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/utility/thread.h>
 
 /// SYSTEM
 #include <iostream>
@@ -59,6 +60,8 @@ StreamInterceptorWorker::~StreamInterceptorWorker()
 }
 
 void StreamInterceptorWorker::run() {
+    csapex::thread::set_name("stream_interceptor");
+
     if (isatty(fileno(stdin))) {
         std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
         return;

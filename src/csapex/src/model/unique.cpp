@@ -16,10 +16,10 @@ Unique::~Unique()
 
 void Unique::setUUID(const std::string &uuid)
 {
-    uuid_ = uuid;
+    uuid_ = UUID(uuid);
 }
 
-std::string Unique::UUID() const
+UUID Unique::getUUID() const
 {
     return uuid_;
 }

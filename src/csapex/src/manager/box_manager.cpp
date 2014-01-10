@@ -9,6 +9,7 @@
 #include <csapex/model/group.h>
 #include <csapex/model/graph.h>
 #include <utils_plugin/plugin_manager.hpp>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -29,8 +30,8 @@ BoxManager::BoxManager()
 
 namespace {
 bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
-    const std::string& as = BoxManager::stripNamespace(a->getType());
-    const std::string& bs = BoxManager::stripNamespace(b->getType());
+    const std::string& as = UUID::stripNamespace(a->getType());
+    const std::string& bs = UUID::stripNamespace(b->getType());
     return as.compare(bs) < 0;
 }
 }
@@ -128,7 +129,7 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 
         Q_FOREACH(const NodeConstructor::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
-            QAction* action = new QAction(stripNamespace(proxy->getType()).c_str(), submenu);
+            QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
             if(!icon.isNull()) {
                 action->setIcon(icon);
@@ -157,7 +158,7 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
 
         Q_FOREACH(const NodeConstructor::Ptr& proxy, map[tag]) {
             QIcon icon = proxy->getIcon();
-            std::string name = stripNamespace(proxy->getType());
+            std::string name = UUID::stripNamespace(proxy->getType());
 
             QTreeWidgetItem* child = new QTreeWidgetItem;
             child->setToolTip(0, (proxy->getType() + ": " + proxy->getDescription()).c_str());
@@ -180,7 +181,7 @@ QAbstractItemModel* BoxManager::listAvailableBoxedObjects()
     QStandardItemModel* model = new QStandardItemModel;//(types, 1);
 
     Q_FOREACH(const NodeConstructor::Ptr& proxy, available_elements_prototypes) {
-        QString name = QString::fromStdString(stripNamespace(proxy->getType()));
+        QString name = QString::fromStdString(UUID::stripNamespace(proxy->getType()));
         QString descr(proxy->getDescription().c_str());
         QString type(proxy->getType().c_str());
 
@@ -281,12 +282,6 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
     }
 }
 
-std::string BoxManager::stripNamespace(const std::string &name)
-{
-    size_t from = name.rfind("::");
-    return name.substr(from != name.npos ? from + 2 : 0);
-}
-
 Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const std::string& uuid)
 {
     assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
@@ -335,10 +330,10 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const std::string
 
     std::cout << "warning: cannot make box, type '" << type << "' is unknown, trying different namespace" << std::endl;
 
-    std::string type_wo_ns = stripNamespace(type);
+    std::string type_wo_ns = UUID::stripNamespace(type);
 
     BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
-        std::string p_type_wo_ns = stripNamespace(p->getType());
+        std::string p_type_wo_ns = UUID::stripNamespace(p->getType());
 
         if(p_type_wo_ns == type_wo_ns) {
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;

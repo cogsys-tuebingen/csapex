@@ -97,8 +97,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void disconnected(QObject*);
-    void disabled(Connectable* source);
-    void enabled(Connectable* source);
+    void enabled(bool e);
     void connectionStart();
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone();

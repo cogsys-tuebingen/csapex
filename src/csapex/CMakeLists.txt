@@ -79,6 +79,9 @@ set(SRC_PLUGIN
     src/utility/stream_interceptor.cpp
     src/utility/timer.cpp
     src/utility/qt_helper.cpp
+    src/utility/thread.cpp
+    src/utility/uuid.cpp
+    src/utility/error_handling.cpp
 
     src/deprecated/global_option.cpp
     src/deprecated/global_option_manager.cpp

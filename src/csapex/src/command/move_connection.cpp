@@ -24,8 +24,8 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
 
     output = from->isOutput();
 
-    from_uuid = from->UUID();
-    to_uuid = to->UUID();
+    from_uuid = from->getUUID();
+    to_uuid = to->getUUID();
 
     nested.clear();
     locked = false;
@@ -35,7 +35,7 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
 
         for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
             add(Command::Ptr(new DeleteConnection(from, *it)));
-            add(Command::Ptr(new AddConnection(to_uuid, (*it)->UUID())));
+            add(Command::Ptr(new AddConnection(to_uuid, (*it)->getUUID())));
         }
 
     } else {
@@ -43,6 +43,6 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
 
         Connectable* target = in->getSource();
         add(Command::Ptr(new DeleteConnection(target, from)));
-        add(Command::Ptr(new AddConnection(target->UUID(), to_uuid)));
+        add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
     }
 }

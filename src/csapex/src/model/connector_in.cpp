@@ -142,13 +142,13 @@ void ConnectorIn::wait()
     QMutexLocker lock(&reserve_mutex);
 
     while(!can_process) {
-        std::cout << "warning: " << UUID() << "can't process" << std::endl;
+        std::cout << "warning: " << getUUID() << "can't process" << std::endl;
         can_process_cond.wait(&reserve_mutex);
 
         if(!can_process) {
             std::cout << "warning: called wait on a busy input connector" << std::endl;
         } else {
-            std::cout << "warning: done waiting  " << UUID() << std::endl;
+            std::cout << "warning: done waiting  " << getUUID() << std::endl;
         }
     }
 }

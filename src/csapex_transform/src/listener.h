@@ -10,17 +10,15 @@
 namespace csapex
 {
 
+struct LockedListener;
+
 struct Listener {
+    friend class LockedListener;
+
+public:
     boost::shared_ptr<tf::TransformListener> tfl;
 
-    static Listener* instance() {
-        Listener* l = raw_instance();
-        if(l->ok()) {
-            return l;
-        } else {
-            return NULL;
-        }
-    }
+    static LockedListener getLocked();
 
     static void start();
 
@@ -28,9 +26,9 @@ struct Listener {
         //tfl.clear();
         tfl.reset(new tf::TransformListener);
     }
+    bool ok();
 
 private:
-
     static Listener* raw_instance() {
         static Listener l;
         assert(&l);
@@ -39,7 +37,6 @@ private:
 
     Listener();
 
-    bool ok();
     void cb(const tf::tfMessage::ConstPtr& msg);
 
     int retries;
@@ -47,6 +44,29 @@ private:
     bool init;
     ros::Time last_;
     ros::Subscriber tf_sub;
+
+    QMutex m;
+};
+
+struct LockedListener {
+public:
+    Listener* l;
+
+    LockedListener(Listener* ll)
+        : l(NULL)
+    {
+        if(ll) {
+            ll->m.lock();
+            l = ll;
+        }
+    }
+
+    ~LockedListener()
+    {
+        if(l) {
+            l->m.unlock();
+        }
+    }
 };
 
 }

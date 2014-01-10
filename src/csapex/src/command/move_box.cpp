@@ -11,7 +11,7 @@ using namespace csapex::command;
 MoveBox::MoveBox(Box* box, QPoint to)
     : from(box->key_point), to(to)
 {
-    uuid = box->getNode()->UUID();
+    uuid = box->getNode()->getUUID();
 }
 
 std::string MoveBox::getType() const

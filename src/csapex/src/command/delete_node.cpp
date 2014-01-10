@@ -38,7 +38,7 @@ bool DeleteNode::doExecute()
     if(Command::executeCommand(graph_, remove_connections)) {
         saved_state = node->getNodeState();
 
-        graph_->deleteNode(node->UUID());
+        graph_->deleteNode(node->getUUID());
         return true;
     }
 
@@ -62,7 +62,7 @@ bool DeleteNode::doRedo()
         Node* node = graph_->findNode(uuid);
         saved_state = node->getNodeState();
 
-        graph_->deleteNode(node->UUID());
+        graph_->deleteNode(node->getUUID());
         return true;
     }
 
