@@ -57,22 +57,40 @@ void ExportRos::allConnectorsArrived()
     }
 
     ConnectionType::Ptr msg = connector_->getMessage<ConnectionType>();
+//    connection_types::PossibleRosMessage::Ptr prm = boost::dynamic_pointer_cast<connection_types::PossibleRosMessage>(msg);
+//    if(prm && prm->isRosMessage()) {
+////        throw std::runtime_error("ros message support not implemented");
+//        if(create_pub) {
+//            ros::AdvertiseOptions ops;
 
-    if(create_pub) {
-        pub = RosMessageConversion::instance().advertise(msg->toType(), state.topic, 1, true);
-        create_pub = false;
-        has_pub = true;
+//            prm->info(ops.md5sum, ops.datatype, ops.message_definition, ops.has_header);
 
-        connector_->setLabel(pub.getTopic());
-        connector_->setType(msg);
-    }
+//            ops.latch = true;
 
-    if(!has_pub) {
-        setError(true, "Publisher is not valid", EL_WARNING);
-        return;
-    }
+//            pub = ROSHandler::instance().nh()->advertise(ops);
+//            create_pub = false;
+//            has_pub = true;
+//        }
 
-    RosMessageConversion::instance().publish(pub, msg);
+//        prm->publish(pub);
+
+//    } else {
+        if(create_pub) {
+            pub = RosMessageConversion::instance().advertise(msg->toType(), state.topic, 1, true);
+            create_pub = false;
+            has_pub = true;
+
+            connector_->setLabel(pub.getTopic());
+            connector_->setType(msg);
+        }
+
+        if(!has_pub) {
+            setError(true, "Publisher is not valid", EL_WARNING);
+            return;
+        }
+
+        RosMessageConversion::instance().publish(pub, msg);
+//    }
 }
 
 void ExportRos::updateTopic()

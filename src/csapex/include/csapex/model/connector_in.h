@@ -54,8 +54,8 @@ public:
     template <typename R>
     typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {
         QMutexLocker lock(&io_mutex);
-        typename connection_types::GenericMessage<typename R::Ptr>::Ptr tmp =
-        boost::dynamic_pointer_cast<typename connection_types::GenericMessage<typename R::Ptr> > (message_);
+        typename connection_types::GenericMessage<R>::Ptr tmp =
+        boost::dynamic_pointer_cast<typename connection_types::GenericMessage<R> > (message_);
         return tmp->value;
     }
 

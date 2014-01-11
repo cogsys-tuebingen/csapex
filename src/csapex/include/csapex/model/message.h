@@ -4,16 +4,35 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 
+///
+/// FOR OPTIONAL ROS SUPPORT
+///
 namespace ros
 {
 namespace message_traits
 {
-template <class ContainerAllocator>
-struct IsMessage
-{
-};
+
+template<typename M>
+struct IsMessage;
+
+template<typename M>
+const char* md5sum();
+
+template<typename M>
+const char* datatype();
+
+template<typename M>
+const char* definition();
+
+template<typename M>
+bool hasHeader();
+
 }
 }
+
+///
+///
+///
 
 namespace csapex {
 namespace connection_types {
@@ -53,31 +72,74 @@ public:
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
 };
 
+struct PossibleRosMessage : public Message
+{
+public:
+    typedef boost::shared_ptr<PossibleRosMessage> Ptr;
+
+protected:
+    PossibleRosMessage(const std::string& name)
+        : Message(name)
+    {
+    }
+
+public:
+    virtual bool isRosMessage() const
+    {
+        return false;
+    }
+
+    virtual void info(std::string& /*md5*/, std::string& /*datatype*/, std::string& /*def*/, bool& /*header*/) {
+
+    }
+
+};
+
 template <typename Type>
-struct GenericMessage : public Message {
+struct GenericMessage : public PossibleRosMessage {
     typedef boost::shared_ptr<GenericMessage<Type> > Ptr;
 
-    GenericMessage(const std::string& name)
-        : Message(name)
+    GenericMessage()
+        : PossibleRosMessage(ros::message_traits::datatype<Type>())
     {}
 
-    bool isRosMessage(typename boost::enable_if<ros::message_traits::IsMessage<Type> >::type* dummy = 0) {
+    virtual bool isRosMessage() const
+    {
+        return isRosMessageImpl<Type>();
+    }
+
+    template <typename T>
+    bool isRosMessageImpl(typename boost::enable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) const
+    {
        return true;
     }
 
+    template <typename T>
+    bool isRosMessageImpl(typename boost::disable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) const
+    {
+       return false;
+    }
+
+    virtual void info(std::string& md5, std::string& datatype, std::string& def, bool& header) {
+        md5 = ros::message_traits::md5sum<Type>();
+        datatype = ros::message_traits::datatype<Type>();
+        def = ros::message_traits::definition<Type>();
+        header = ros::message_traits::hasHeader<Type>();
+    }
+
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new GenericMessage<Type>(""));
+        Ptr new_msg(new GenericMessage<Type>);
         new_msg->value = value;
         return new_msg;
     }
 
     virtual ConnectionType::Ptr toType() {
-        Ptr new_msg(new GenericMessage<Type>(""));
+        Ptr new_msg(new GenericMessage<Type>);
         return new_msg;
     }
 
     static ConnectionType::Ptr make(){
-        Ptr new_msg(new GenericMessage<Type>(""));
+        Ptr new_msg(new GenericMessage<Type>);
         return new_msg;
     }
 
@@ -91,7 +153,7 @@ struct GenericMessage : public Message {
     void readYaml(YAML::Node& node) {
     }
 
-    Type value;
+    typename Type::Ptr value;
 };
 
 template <typename Type, class Instance>

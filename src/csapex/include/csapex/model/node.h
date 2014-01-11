@@ -21,6 +21,10 @@
 
 namespace csapex {
 
+/// FORWARD
+template <typename T>
+class RosMessageConversionT;
+
 class Node : public QObject, public ErrorState, public Unique
 {
     Q_OBJECT
@@ -92,27 +96,33 @@ public:
 
     NodeWorker* getNodeWorker() const;
 
+    /// "real" messages
     template <typename T>
     ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
                           typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         return addInput(T::make(), label, optional, async);
     }
 
+    /// "direct" messages
     template <typename T>
     ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
                           typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        RosMessageConversionT<T>::registerConversion();
         return addInput(connection_types::GenericMessage<T>::make(), label, optional, async);
     }
 
+    /// "real" messages
     template <typename T>
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         return addOutput(T::make(), label);
     }
 
+    /// "direct" messages
     template <typename T>
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        RosMessageConversionT<T>::registerConversion();
         return addOutput(connection_types::GenericMessage<T>::make(), label);
     }
 

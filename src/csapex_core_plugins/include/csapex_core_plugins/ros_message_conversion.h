@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex_core_plugins/ros_handler.h>
-#include <csapex/model/connection_type.h>
+#include <csapex/model/message.h>
 
 /// PROJECT
 #include <utils_plugin/singleton.hpp>
@@ -19,9 +19,16 @@ namespace csapex
 
 class ConnectorOut;
 
+
+template <typename T>
+class RosMessageConversionT;
+
 class RosMessageConversion : public Singleton<RosMessageConversion>
 {
     friend class Singleton<RosMessageConversion>;
+
+    template <typename T>
+    friend class RosMessageConversionT;
 
 private:
     RosMessageConversion();
@@ -55,6 +62,54 @@ private:
 
     protected:
         void publish_apex(ConnectorOut* output, csapex::ConnectionType::Ptr msg);
+    };
+
+
+    template <typename T>
+    class IdentityConvertor : public RosMessageConversion::Convertor
+    {
+        typedef IdentityConvertor<T> Self;
+    public:
+        std::string rosType() {
+            return ros::message_traits::DataType<T>::value();
+        }
+        std::string apexType() {
+            return ros::message_traits::DataType<T>::value();
+        }
+
+        ros::Subscriber subscribe(const ros::master::TopicInfo &topic, int queue, ConnectorOut* output) {
+            boost::shared_ptr<ros::NodeHandle> nh = ROSHandler::instance().nh();
+            if(!nh) {
+                throw std::runtime_error("no ros connection");
+            }
+
+            return nh->subscribe<T>(topic.name, queue, boost::bind(&Self::callback, this, output, _1));
+        }
+        ros::Publisher advertise(const std::string& topic, int queue, bool latch = false) {
+            boost::shared_ptr<ros::NodeHandle> nh = ROSHandler::instance().nh();
+            if(!nh) {
+                throw std::runtime_error("no ros connection");
+            }
+
+            return nh->advertise<T>(topic, queue, latch);
+        }
+        void publish(ros::Publisher& pub, ConnectionType::Ptr apex_msg_raw) {
+            typename connection_types::GenericMessage<T>::Ptr msg =
+                    boost::dynamic_pointer_cast<connection_types::GenericMessage<T> > (apex_msg_raw);
+            if(!msg) {
+                throw std::runtime_error("trying to publish an empty message");
+            }
+            return pub.publish(msg->value);
+        }
+
+        void callback(ConnectorOut* output, const typename T::ConstPtr& ros_msg) {
+            if(!ros_msg) {
+                throw std::runtime_error("received an empty ros message");
+            }
+            typename connection_types::GenericMessage<T>::Ptr apex_msg(new connection_types::GenericMessage<T>);
+            apex_msg->value.reset(new T(*ros_msg));
+            publish_apex(output, apex_msg);
+        }
     };
 
     template <typename ROS, typename APEX, typename Converter>
@@ -109,20 +164,32 @@ private:
 private:
     void doRegisterConversion(Convertor::Ptr c);
 
-//    template <typename R>
-//    R findHandler(const std::string& type, boost::function<R(Convertor::Ptr)> cb) {
-//        try {
-//            return cb(converters_.at(type));
-
-//        } catch(const std::exception& e) {
-//            throw std::logic_error(std::string("cannot convert message of type ") + type + "(" + e.what() + ")");
-//        }
-//    }
+    template <typename T>
+    bool doCanConvert() {
+        return converters_inv_.find(ros::message_traits::DataType<T>::value()) != converters_inv_.end();
+    }
 
 private:
     std::map<std::string, Convertor::Ptr> converters_;
     std::map<std::string, Convertor::Ptr> converters_inv_;
 };
+
+
+template <typename T>
+class RosMessageConversionT
+{
+public:
+    static void registerConversion() {
+        if(!canConvert()) {
+            RosMessageConversion::instance().doRegisterConversion(RosMessageConversion::Convertor::Ptr(new RosMessageConversion::IdentityConvertor<T>));
+        }
+    }
+
+    static bool canConvert() {
+        return RosMessageConversion::instance().doCanConvert<T>();
+    }
+};
+
 
 }
 
