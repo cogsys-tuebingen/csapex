@@ -30,7 +30,8 @@
 using namespace csapex;
 
 DesignBoard::DesignBoard(CommandDispatcher* dispatcher, QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), dispatcher_(dispatcher), drag_io(dispatcher), space_(false), drag_(false)
+    : QWidget(parent), ui(new Ui::DesignBoard), dispatcher_(dispatcher), drag_io(dispatcher),
+      space_(false), drag_(false), parent_scroll(NULL), initial_pos_x_(0), initial_pos_y_(0)
 {
     ui->setupUi(this);
 
@@ -78,6 +79,32 @@ void DesignBoard::updateCursor()
 
 void DesignBoard::paintEvent(QPaintEvent*)
 {
+    if(initial_pos_x_ != 0 || initial_pos_y_ != 0) {
+        if(!parent_scroll) {
+            findParentScroll();
+        }
+
+        if(parent_scroll) {
+            QSize minimum = minimumSize();
+
+            minimum.setWidth(minimum.width() + std::abs(initial_pos_x_));
+            minimum.setHeight(minimum.height() + std::abs(initial_pos_y_));
+
+            setMinimumSize(minimum);
+
+            parent_scroll->horizontalScrollBar()->setValue(initial_pos_x_);
+            parent_scroll->verticalScrollBar()->setValue(initial_pos_y_);
+
+            int vx = parent_scroll->horizontalScrollBar()->value();
+            int vy = parent_scroll->verticalScrollBar()->value();
+
+            if(initial_pos_x_ == vx && initial_pos_y_ == vy) {
+                initial_pos_x_ = 0;
+                initial_pos_y_ = 0;
+            }
+        }
+    }
+
     QStyleOption opt;
     opt.init(this);
     QPainter p(this);
@@ -262,7 +289,6 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     if(!shift) {
         dispatcher_->getGraph()->deselectNodes();
     }
-
     updateCursor();
 }
 
@@ -284,44 +310,7 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
             QPoint delta = e->globalPos() - drag_start_pos_;
             drag_start_pos_ = e->globalPos();
 
-            QScrollArea* parent_scroll = NULL;
-            QWidget* tmp = parentWidget();
-            while(tmp != NULL) {
-                parent_scroll = dynamic_cast<QScrollArea*>(tmp);
-                if(parent_scroll) {
-                    break;
-                }
-                tmp = tmp->parentWidget();
-            }
-
-            if(parent_scroll) {
-                int sbh = parent_scroll->horizontalScrollBar()->value();
-                int sbv = parent_scroll->verticalScrollBar()->value();
-
-                parent_scroll->horizontalScrollBar()->setValue(sbh - delta.x());
-                parent_scroll->verticalScrollBar()->setValue(sbv - delta.y());
-
-                int sbh_after = parent_scroll->horizontalScrollBar()->value();
-                int sbv_after = parent_scroll->verticalScrollBar()->value();
-
-                if(delta.x() > 0) {
-                    delta.setX(0);
-                }
-                if(delta.y() > 0) {
-                    delta.setY(0);
-                }
-                int dx = sbh - delta.x() - sbh_after;
-                int dy = sbv - delta.y() - sbv_after;
-
-                if(dx != 0 || dy != 0) {
-                    QSize minimum = minimumSize();
-
-                    minimum.setWidth(minimum.width() + std::abs(dx));
-                    minimum.setHeight(minimum.height() + std::abs(dy));
-
-                    setMinimumSize(minimum);
-                }
-            }
+            scrollBy(delta.x(), delta.y());
         }
     }
 
@@ -335,6 +324,62 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
 
     if(!drag_) {
         setFocus();
+    }
+}
+
+void DesignBoard::setView(int sx, int sy)
+{
+    initial_pos_x_ = sx;
+    initial_pos_y_ = sy;
+}
+
+void DesignBoard::findParentScroll()
+{
+    QWidget* tmp = parentWidget();
+    while(tmp != NULL) {
+        parent_scroll = dynamic_cast<QScrollArea*>(tmp);
+        if(parent_scroll) {
+            break;
+        }
+        tmp = tmp->parentWidget();
+    }
+}
+
+void DesignBoard::scrollBy(int x, int y)
+{
+    QPoint delta(x, y);
+
+    if(!parent_scroll) {
+        findParentScroll();
+    }
+
+    if(parent_scroll) {
+        int sbh = parent_scroll->horizontalScrollBar()->value();
+        int sbv = parent_scroll->verticalScrollBar()->value();
+
+        parent_scroll->horizontalScrollBar()->setValue(sbh - delta.x());
+        parent_scroll->verticalScrollBar()->setValue(sbv - delta.y());
+
+        int sbh_after = parent_scroll->horizontalScrollBar()->value();
+        int sbv_after = parent_scroll->verticalScrollBar()->value();
+
+        if(delta.x() > 0) {
+            delta.setX(0);
+        }
+        if(delta.y() > 0) {
+            delta.setY(0);
+        }
+        int dx = sbh - delta.x() - sbh_after;
+        int dy = sbv - delta.y() - sbv_after;
+
+        if(dx != 0 || dy != 0) {
+            QSize minimum = minimumSize();
+
+            minimum.setWidth(minimum.width() + std::abs(dx));
+            minimum.setHeight(minimum.height() + std::abs(dy));
+
+            setMinimumSize(minimum);
+        }
     }
 }
 

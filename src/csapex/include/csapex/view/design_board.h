@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <QWidget>
+#include <QScrollArea>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -53,6 +54,9 @@ public:
     }
     void enableGrid(bool);
 
+    void scrollBy(int dx, int dy);
+    void setView(int sx, int sy);
+
 public Q_SLOTS:
     void updateCursor();
     void showBoxDialog();
@@ -68,6 +72,9 @@ public Q_SLOTS:
     void reset();
 
 private:
+    void findParentScroll();
+
+private:
     Ui::DesignBoard* ui;
 
     CommandDispatcher* dispatcher_;
@@ -77,6 +84,11 @@ private:
     bool space_;
     bool drag_;
     QPoint drag_start_pos_;
+
+    QScrollArea* parent_scroll;
+
+    int initial_pos_x_;
+    int initial_pos_y_;
 };
 
 }

@@ -34,6 +34,12 @@ void DesignerIO::saveSettings(YAML::Emitter& yaml)
 
     yaml << YAML::Key << "window_pos";
     yaml << YAML::Value << YAML::BeginSeq << window_pos.x() << window_pos.y() << YAML::EndSeq;
+
+    yaml << YAML::Key << "view_pos";
+    yaml << YAML::Value << YAML::BeginSeq
+         << designer_.ui->scrollArea->horizontalScrollBar()->value()
+         << designer_.ui->scrollArea->verticalScrollBar()->value()
+         << YAML::EndSeq;
 }
 
 void DesignerIO::loadSettings(YAML::Node &doc)
@@ -55,4 +61,12 @@ void DesignerIO::loadSettings(YAML::Node &doc)
         doc["window_pos"][1] >> y;
     }
     window->setGeometry(x,y,w,h);
+
+    if(doc.FindValue("view_pos")) {
+        int sx, sy;
+        doc["view_pos"][0] >> sx;
+        doc["view_pos"][1] >> sy;
+
+        designer_.setView(sx, sy);
+    }
 }

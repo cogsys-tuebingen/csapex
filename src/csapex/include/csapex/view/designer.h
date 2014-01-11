@@ -35,6 +35,8 @@ public:
 
     void updateCursor();
 
+    void setView(int x, int y);
+
 public Q_SLOTS:
     void addBox(Box* box);
     void removeBox(Box* box);

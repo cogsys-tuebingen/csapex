@@ -12,6 +12,9 @@
 #include "ui_designer.h"
 #include <csapex/utility/qt_helper.hpp>
 
+/// SYSTEM
+#include <QScrollBar>
+
 using namespace csapex;
 
 Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
@@ -64,6 +67,11 @@ void Designer::resizeEvent(QResizeEvent*)
             ui->splitter->setSizes(sizes);
         }
     }
+}
+
+void Designer::setView(int sx, int sy)
+{
+    designer_board->setView(sx, sy);
 }
 
 void Designer::reset()
