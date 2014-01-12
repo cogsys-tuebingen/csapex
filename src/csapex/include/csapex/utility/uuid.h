@@ -4,6 +4,7 @@
 /// SYSTEM
 #include <string>
 #include <ostream>
+#include <map>
 
 namespace csapex {
 
@@ -53,6 +54,8 @@ private:
 
 private:
     std::string representation_;
+
+    static std::map<std::string, int> hash_;
 };
 
 }

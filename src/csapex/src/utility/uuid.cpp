@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/utility/uuid.h>
 
+/// SYSTEM
+#include <stdexcept>
+
 using namespace csapex;
 
 UUID UUID::NONE("");
@@ -21,6 +24,8 @@ void split_first(const std::string& haystack, const std::string& needle,
 
 }
 
+std::map<std::string, int> UUID::hash_;
+
 std::string UUID::stripNamespace(const std::string &name)
 {
     size_t from = name.rfind("::");
@@ -29,14 +34,23 @@ std::string UUID::stripNamespace(const std::string &name)
 
 UUID UUID::make(const std::string &prefix)
 {
-    // TODO: ensure uniqueness
-    return UUID(prefix);
+    // ensure uniqueness
+    std::string rep = prefix;
+    if(hash_.find(rep) != hash_.end()) {
+        throw std::runtime_error("the UUID " + prefix + " is already taken");
+    }
+
+    UUID r(rep);
+    hash_[r.representation_]++;
+    return r;
 }
 
 UUID UUID::make_forced(const std::string &representation)
 {
-    // DON'T ensure uniqueness
-    return UUID(representation);
+    // DON'T ensure uniqueness but remember that the id exists
+    UUID r(representation);
+    hash_[r.representation_]++;
+    return r;
 }
 
 UUID::UUID(const std::string &representation)
