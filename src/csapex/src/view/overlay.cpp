@@ -55,7 +55,7 @@ std::pair<int,int> rgb2id(QRgb rgb)
 
 Overlay::Overlay(CommandDispatcher *dispatcher, QWidget* parent)
     : QWidget(parent), dispatcher_(dispatcher), graph_(dispatcher->getGraph()), highlight_connection_id_(-1), schema_dirty_(true),
-      drag_connection_(-1), fulcrum_is_hovered_(false), splicing_requested(false), splicing(false)
+      drag_connection_(-1), fulcrum_is_hovered_(false), mouse_blocked(false), splicing_requested(false), splicing(false)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -109,6 +109,13 @@ void Overlay::fulcrumDeleted(Connection *)
 void Overlay::fulcrumMoved(Connection *)
 {
 
+}
+
+void Overlay::blockMouse(bool b)
+{
+    mouse_blocked = b;
+
+    setAttribute(Qt::WA_TransparentForMouseEvents, !mouse_blocked);
 }
 
 void Overlay::addTemporaryConnection(Connectable *from, const QPoint& end)
@@ -460,6 +467,10 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
     int y = e->y();
 
     if(x < 0 || x >= schematics.width() || y < 0 || y >= schematics.height()) {
+        return true;
+    }
+
+    if(mouse_blocked) {
         return true;
     }
 

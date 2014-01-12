@@ -37,6 +37,8 @@ public Q_SLOTS:
     void invalidateSchema();
     void refresh();
 
+    void blockMouse(bool);
+
 public:
     bool mouseMoveEventHandler(bool drag, QMouseEvent * e);
     bool mousePressEventHandler(QMouseEvent * e);
@@ -116,6 +118,7 @@ protected:
     int drag_connection_;
     bool fulcrum_is_hovered_;
 
+    bool mouse_blocked;
     bool splicing_requested;
     bool splicing;
 };

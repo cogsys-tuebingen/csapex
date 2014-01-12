@@ -70,6 +70,7 @@ public Q_SLOTS:
     void removeBoxEvent(Box* box);
     void refresh();
     void reset();
+    void setSpace(bool);
 
 private:
     void findParentScroll();

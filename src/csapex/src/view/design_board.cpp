@@ -181,6 +181,17 @@ void DesignBoard::reset()
     }
 }
 
+void DesignBoard::setSpace(bool s)
+{
+    space_ = s;
+
+    overlay->blockMouse(space_);
+
+//    Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
+//        box->setEnabled(!space_);
+//    }
+}
+
 void DesignBoard::keyPressEvent(QKeyEvent* e)
 {
     if(!overlay->keyPressEventHandler(e)) {
@@ -188,7 +199,7 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
     }
 
     if(e->key() == Qt::Key_Space && Qt::ControlModifier != QApplication::keyboardModifiers()) {
-        space_ = true;
+        setSpace(true);
     }
 }
 
@@ -231,7 +242,7 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
     }
 
     if(!e->isAutoRepeat() && e->key() == Qt::Key_Space) {
-        space_ = false;
+        setSpace(false);
         drag_ = false;
     }
 }
