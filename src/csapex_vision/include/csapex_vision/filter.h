@@ -38,7 +38,7 @@ private Q_SLOTS:
     void allConnectorsArrived();
 
 protected:
-    Filter();
+    Filter(const UUID &uuid = UUID::NONE);
     virtual bool usesMask();
 
 protected:

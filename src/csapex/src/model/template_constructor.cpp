@@ -28,12 +28,12 @@ TemplateConstructor::TemplateConstructor(bool temporary, const std::string &type
 
 NodePtr TemplateConstructor::makeContent(const std::string&) const
 {
-    return NodePtr(new Node(""));
+    return NodePtr(new Node);
 }
 
 NodePtr TemplateConstructor::makePrototypeContent() const
 {
-    return NodePtr(new Node(""));
+    return NodePtr(new Node);
 }
 
 void TemplateConstructor::load() const

@@ -24,7 +24,7 @@ class ConnectorIn : public virtual Connectable
     friend class command::DeleteConnection;
 
 public:
-    ConnectorIn(const std::string& uuid);
+    ConnectorIn(const UUID &uuid);
     ConnectorIn(Unique *parent, int sub_id);
     virtual ~ConnectorIn();
 

@@ -16,7 +16,7 @@ using namespace csapex;
 using namespace csapex::command;
 
 
-AddConnection::AddConnection(const std::string &from_uuid, const std::string &to_uuid)
+AddConnection::AddConnection(const UUID& from_uuid, const UUID& to_uuid)
     : from(NULL), to(NULL), from_uuid(from_uuid), to_uuid(to_uuid)
 {
 }
@@ -28,7 +28,7 @@ std::string AddConnection::getType() const
 
 std::string AddConnection::getDescription() const
 {
-    return std::string("added a connection between ") + from_uuid + " and " + to_uuid;
+    return std::string("added a connection between ") + from_uuid.getFullName() + " and " + to_uuid.getFullName();
 }
 
 bool AddConnection::doExecute()
@@ -78,9 +78,9 @@ void AddConnection::refresh()
 
     } else {
         throw std::runtime_error(std::string("cannot connect ") +
-                                 from_uuid + "(" + (f->isOutput() ? "o" : "") + (f->isInput() ? "i" : "") + "/" + (f->canOutput() ? "o" : "") + (f->canInput() ? "i" : "")  +
+                                 from_uuid.getFullName() + "(" + (f->isOutput() ? "o" : "") + (f->isInput() ? "i" : "") + "/" + (f->canOutput() ? "o" : "") + (f->canInput() ? "i" : "")  +
                                  ") to " +
-                                 to_uuid + "(" + (t->isOutput() ? "o" : "") + (t->isInput() ? "i" : "") + "/" + (t->canOutput() ? "o" : "") + (t->canInput() ? "i" : "")  + ")");
+                                 to_uuid.getFullName() + "(" + (t->isOutput() ? "o" : "") + (t->isInput() ? "i" : "") + "/" + (t->canOutput() ? "o" : "") + (t->canInput() ? "i" : "")  + ")");
     }
 
     assert(from);

@@ -12,13 +12,13 @@ namespace csapex
 class Unique
 {
 public:
-    Unique(const std::string& uuid);
+    Unique(const UUID &uuid);
     virtual ~Unique();
 
     UUID getUUID() const;
 
 protected:
-    void setUUID(const std::string& uuid);
+    void setUUID(const UUID &uuid);
 
 private:
     UUID uuid_;

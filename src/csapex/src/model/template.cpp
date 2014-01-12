@@ -28,7 +28,8 @@ std::string Template::addBox(const std::string &type, const QPoint &pos, NodeSta
     assert(!locked);
     assert(!type.empty());
 
-    std::string uuid = PARENT_PREFIX_PATTERN + Graph::namespace_separator + tmp_graph.makeUUID(type);
+    std::string uuid_tmp = PARENT_PREFIX_PATTERN + Graph::namespace_separator + tmp_graph.makeUUIDPrefix(type);
+    UUID uuid = UUID::make(uuid_tmp);
 
     std::cerr << "adding box to template: " << uuid << " (" << type << ")" << std::endl;
 
@@ -48,7 +49,8 @@ std::string Template::addConnector(const std::string &label, const std::string &
 {
     assert(!locked);
 
-    std::string uuid = Connectable::makeUUID(PARENT_PREFIX_PATTERN, Connectable::TYPE_MISC, next_connector_sub_id);
+    std::string uuid_tmp = Connectable::makeUUIDPrefix(UUID::make_forced(PARENT_PREFIX_PATTERN), Connectable::TYPE_MISC, next_connector_sub_id);
+    UUID uuid = UUID::make(uuid_tmp);
 
     std::cerr << "adding connector to template: " << uuid << std::endl;
 
@@ -66,7 +68,7 @@ std::string Template::addConnector(const std::string &label, const std::string &
     return uuid;
 }
 
-std::string Template::addConnection(const std::string &from_uuid, const std::string &to_uuid)
+std::string Template::addConnection(const UUID &from_uuid, const UUID &to_uuid)
 {
     assert(!locked);
 
@@ -81,33 +83,31 @@ std::string Template::addConnection(const std::string &from_uuid, const std::str
     return "";
 }
 
-std::string Template::fillInTemplate(const std::string& uuid, const std::string& parent) {
-    size_t pos = uuid.find(Template::PARENT_PREFIX_PATTERN);
-    if(pos == uuid.npos) {
+UUID Template::fillInTemplate(const UUID& uuid, const UUID& parent) {
+    if(!uuid.contains(Template::PARENT_PREFIX_PATTERN)) {
         return uuid;
     } else {
-        std::string result = uuid;
-        return result.replace(pos, Template::PARENT_PREFIX_PATTERN.length(), parent);
+        return uuid.replace(Template::PARENT_PREFIX_PATTERN, parent);
     }
 }
 
-void Template::createCommands(command::Meta* meta, const std::string& parent) const
+void Template::createCommands(command::Meta* meta, const UUID& parent) const
 {
     foreach (const Template::BoxTemplate& box, boxes) {
-        std::string uuid = fillInTemplate(box.uuid, parent);
+        UUID uuid = fillInTemplate(box.uuid, parent);
         NodeState::Ptr state(new NodeState(box.state));
 
         meta->add(Command::Ptr(new command::AddNode(box.type, box.pos, parent, uuid, state)));
     }
 
     foreach (const Template::ConnectorTemplate& c, connectors) {
-        std::string uuid = fillInTemplate(c.uuid, parent);
+        UUID uuid = fillInTemplate(c.uuid, parent);
         meta->add(Command::Ptr(new command::AddConnector(parent, c.label, c.type, c.input, uuid, c.forward)));
     }
 
     foreach (const Template::ConnectionTemplate& c, connections) {
-        std::string f_uuid = fillInTemplate(c.from_uuid, parent);
-        std::string t_uuid = fillInTemplate(c.to_uuid, parent);
+        UUID f_uuid = fillInTemplate(c.from_uuid, parent);
+        UUID t_uuid = fillInTemplate(c.to_uuid, parent);
 
         meta->add(Command::Ptr(new command::AddConnection(f_uuid, t_uuid)));
     }

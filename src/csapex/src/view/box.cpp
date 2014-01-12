@@ -84,7 +84,7 @@ void Box::construct(Node* node)
 
     setFocusPolicy(Qt::ClickFocus);
 
-    const std::string& uuid = node_->getUUID();
+    const UUID& uuid = node_->getUUID();
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());

@@ -15,7 +15,7 @@
 using namespace csapex::command;
 
 MoveConnection::MoveConnection(Connectable *from, Connectable *to)
-    : Meta("MoveConnection")
+    : Meta("MoveConnection"), from_uuid(from->getUUID()), to_uuid(to->getUUID())
 {
     assert(from);
     assert(to);
@@ -23,9 +23,6 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
            (from->isInput() && to->isInput()));
 
     output = from->isOutput();
-
-    from_uuid = from->getUUID();
-    to_uuid = to->getUUID();
 
     nested.clear();
     locked = false;

@@ -45,20 +45,6 @@ using namespace csapex;
 
 const std::string Graph::namespace_separator = ":/:";
 
-namespace {
-void split_first(const std::string& haystack, const std::string& needle,
-                 /* OUTPUTS: */ std::string& lhs, std::string& rhs)
-{
-    size_t pos = haystack.find(needle);
-    if(pos == haystack.npos) {
-        return;
-    }
-
-    lhs = haystack.substr(0, pos);
-    rhs = haystack.substr(pos + needle.length());
-}
-
-}
 
 Graph::Graph()
     : dispatcher_(NULL)
@@ -81,7 +67,7 @@ void Graph::init(CommandDispatcher *dispatcher)
     assert(dispatcher_);
 }
 
-std::string Graph::makeUUID(const std::string& name)
+std::string Graph::makeUUIDPrefix(const std::string& name)
 {
     int& last_id = uuids[name];
     ++last_id;
@@ -107,7 +93,7 @@ void Graph::addNode(Node::Ptr node)
     Q_EMIT nodeAdded(node.get());
 }
 
-void Graph::deleteNode(const std::string& uuid)
+void Graph::deleteNode(const UUID& uuid)
 {
     Node* node = findNode(uuid);
 
@@ -128,7 +114,7 @@ void Graph::deleteNode(const std::string& uuid)
 Template::Ptr Graph::toTemplate(const std::string& name) const
 {
     Template::Ptr sub_graph_templ = TemplateManager::instance().createNewNamedTemplate(name);
-    std::vector<std::pair<std::string, std::string> > connections;
+    std::vector<std::pair<UUID, UUID> > connections;
     generateTemplate(sub_graph_templ, connections, false);
 
     return sub_graph_templ;
@@ -152,7 +138,7 @@ int Graph::countSelectedNodes()
     return c;
 }
 
-Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> >& connections) const
+Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<UUID, UUID> >& connections) const
 {
     Template::Ptr sub_graph_templ = TemplateManager::instance().createNewTemporaryTemplate();
     generateTemplate(sub_graph_templ, connections, true);
@@ -161,7 +147,7 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<std::strin
 }
 
 
-Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<std::string, std::string> >& /*connections*/, bool /*only_selected*/) const
+Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<UUID, UUID> >& /*connections*/, bool /*only_selected*/) const
 {
     // TODO: reimplement
 //    std::vector<Node*> selected;
@@ -438,7 +424,7 @@ void Graph::reset()
     visible_connections.clear();
 }
 
-Graph::Ptr Graph::findSubGraph(const std::string& uuid)
+Graph::Ptr Graph::findSubGraph(const UUID& uuid)
 {
     Box* bg = findNode(uuid)->getBox();
     assert(bg);
@@ -447,7 +433,7 @@ Graph::Ptr Graph::findSubGraph(const std::string& uuid)
     return bg->getSubGraph();
 }
 
-Node* Graph::findNode(const std::string &uuid)
+Node* Graph::findNode(const UUID& uuid)
 {
     Node* node = findNodeNoThrow(uuid);
 
@@ -464,7 +450,7 @@ Node* Graph::findNode(const std::string &uuid)
     throw std::runtime_error("cannot find box");
 }
 
-Node* Graph::findNodeNoThrow(const std::string &uuid)
+Node* Graph::findNodeNoThrow(const UUID& uuid)
 {
     Q_FOREACH(Node::Ptr b, nodes_) {
         if(b->getUUID() == uuid) {
@@ -485,10 +471,11 @@ Node* Graph::findNodeNoThrow(const std::string &uuid)
     return NULL;
 }
 
-Node* Graph::findNodeForConnector(const std::string &uuid)
+Node* Graph::findNodeForConnector(const UUID &uuid)
 {
-    std::string l, r;
-    split_first(uuid, Connectable::namespace_separator, l, r);
+    UUID l = UUID::NONE;
+    UUID r = UUID::NONE;
+    uuid.split(Connectable::namespace_separator, l, r);
 
     try {
         return findNode(l);
@@ -510,14 +497,15 @@ Node* Graph::findNodeForConnector(const std::string &uuid)
 
         std::cerr << std::flush;
 
-        throw std::runtime_error(std::string("cannot find owner of connector \"") + uuid);
+        throw std::runtime_error(std::string("cannot find owner of connector \"") + uuid.getFullName());
     }
 }
 
-Connectable* Graph::findConnector(const std::string &uuid)
+Connectable* Graph::findConnector(const UUID &uuid)
 {
-    std::string l, r;
-    split_first(uuid, Connectable::namespace_separator, l, r);
+    UUID l = UUID::NONE;
+    UUID r = UUID::NONE;
+    uuid.split(Connectable::namespace_separator, l, r);
 
     Box* owner = findNode(l)->getBox();
     assert(owner);
@@ -771,12 +759,12 @@ Command::Ptr Graph::groupSelectedNodesCmd()
     }
 
 
-    std::vector<std::pair<std::string, std::string> > connections;
+    std::vector<std::pair<UUID, UUID> > connections;
     Template::Ptr templ = convertSelectionToTemplate(connections);
 
     std::string type = std::string("::template::") + templ->getName();
 
-    std::string group_uuid = makeUUID(type);
+    UUID group_uuid = UUID::make(makeUUIDPrefix(type));
 
     command::Meta::Ptr meta(new command::Meta("Group Selected Nodes"));
 
@@ -786,12 +774,12 @@ Command::Ptr Graph::groupSelectedNodesCmd()
         }
     }
 
-    meta->add(command::AddNode::Ptr(new command::AddNode(type, tl, "", group_uuid, NodeStateNullPtr)));
+    meta->add(command::AddNode::Ptr(new command::AddNode(type, tl, UUID::NONE, group_uuid, NodeStateNullPtr)));
 
-    typedef std::pair<std::string, std::string> PAIR;
+    typedef std::pair<UUID, UUID> PAIR;
     Q_FOREACH(const PAIR& c, connections) {
-        std::string from = Template::fillInTemplate(c.first, group_uuid);
-        std::string to = Template::fillInTemplate(c.second, group_uuid);
+        UUID from = Template::fillInTemplate(c.first, group_uuid);
+        UUID to = Template::fillInTemplate(c.second, group_uuid);
         meta->add(Command::Ptr(new command::AddConnection(from, to)));
     }
 

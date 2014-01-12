@@ -28,25 +28,12 @@ protected:
     virtual void setupUi(QBoxLayout* layout);
 
 protected:
-    BoxedObject(const std::string& uuid = "");
+    BoxedObject(const UUID &uuid = UUID::NONE);
     virtual void fill(QBoxLayout* layout);
 
 public:
     virtual ~BoxedObject();
 };
-
-
-
-class NullBoxedObject : public BoxedObject {
-    Q_OBJECT
-
-public:
-    NullBoxedObject(const std::string& type)
-    {
-        type_ = type;
-    }
-};
-
 }
 
 #endif // BOXED_OBJECT_H

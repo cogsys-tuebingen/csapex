@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "command.h"
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 namespace csapex
 {
@@ -14,7 +15,7 @@ namespace command
 
 struct AddConnection : public Command
 {
-    AddConnection(const std::string& from_uuid, const std::string& to_uuid);
+    AddConnection(const UUID &from_uuid, const UUID &to_uuid);
 
 protected:
     bool doExecute();
@@ -30,8 +31,8 @@ private:
     ConnectorOut* from;
     ConnectorIn* to;
 
-    std::string from_uuid;
-    std::string to_uuid;
+    UUID from_uuid;
+    UUID to_uuid;
 };
 }
 }

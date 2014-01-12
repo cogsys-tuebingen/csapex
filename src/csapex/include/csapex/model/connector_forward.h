@@ -13,7 +13,7 @@ class ConnectorForward : public ConnectorIn, public ConnectorOut
     Q_OBJECT
 
 public:
-    ConnectorForward(bool primary_function_is_input, const std::string& uuid);
+    ConnectorForward(bool primary_function_is_input, const UUID& uuid);
     ConnectorForward(Unique* parent, bool primary_function_is_input, int sub_id);
     virtual ~ConnectorForward();
 

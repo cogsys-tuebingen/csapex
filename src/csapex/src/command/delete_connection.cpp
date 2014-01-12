@@ -16,6 +16,7 @@ using namespace csapex;
 using namespace csapex::command;
 
 DeleteConnection::DeleteConnection(Connectable* a, Connectable* b)
+    : from_uuid(UUID::NONE), to_uuid(UUID::NONE)
 {
     from = dynamic_cast<ConnectorOut*>(a);
     if(from) {
@@ -38,7 +39,7 @@ std::string DeleteConnection::getType() const
 
 std::string DeleteConnection::getDescription() const
 {
-    return std::string("deleted connection between ") + from_uuid + " and " + to_uuid;
+    return std::string("deleted connection between ") + from_uuid.getFullName() + " and " + to_uuid.getFullName();
 }
 
 

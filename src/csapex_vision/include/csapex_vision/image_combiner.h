@@ -25,7 +25,7 @@ public:
     typedef boost::shared_ptr<ImageCombiner> Ptr;
 
 public:
-    ImageCombiner();
+    ImageCombiner(const UUID& uuid = UUID::NONE);
     virtual ~ImageCombiner();
 
     virtual cv::Mat combine(const cv::Mat img1, const cv::Mat mask1, const cv::Mat img2, const cv::Mat mask2) = 0;

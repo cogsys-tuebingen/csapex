@@ -14,7 +14,7 @@
 
 using namespace csapex;
 
-Node::Node(const std::string &uuid)
+Node::Node(const UUID &uuid)
     : Unique(uuid), icon_(":/plugin.png"), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
@@ -184,7 +184,7 @@ void Node::setNodeState(NodeState::Ptr memento)
     boost::shared_ptr<NodeState> m = boost::dynamic_pointer_cast<NodeState> (memento);
     assert(m.get());
 
-    std::string old_uuid = getUUID();
+    UUID old_uuid = getUUID();
     std::string old_label = node_state_->label_;
 
     *node_state_ = *m;
@@ -436,7 +436,7 @@ ConnectorOut* Node::getOutput(const unsigned int index) const
     return output[index];
 }
 
-ConnectorIn* Node::getInput(const std::string& uuid) const
+ConnectorIn* Node::getInput(const UUID& uuid) const
 {
     BOOST_FOREACH(ConnectorIn* in, input) {
         if(in->getUUID() == uuid) {
@@ -447,7 +447,7 @@ ConnectorIn* Node::getInput(const std::string& uuid) const
     return NULL;
 }
 
-ConnectorOut* Node::getOutput(const std::string& uuid) const
+ConnectorOut* Node::getOutput(const UUID& uuid) const
 {
     BOOST_FOREACH(ConnectorOut* out, output) {
         if(out->getUUID() == uuid) {

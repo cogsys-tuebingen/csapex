@@ -5,6 +5,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/command/meta.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QObject>
@@ -48,14 +49,14 @@ public:
     void init(CommandDispatcher* dispatcher);
     void stop();
 
-    Graph::Ptr findSubGraph(const std::string& uuid);
+    Graph::Ptr findSubGraph(const UUID& uuid);
 
-    Node* findNode(const std::string& uuid);
-    Node* findNodeNoThrow(const std::string& uuid);
-    Node* findNodeForConnector(const std::string &uuid);
+    Node* findNode(const UUID& uuid);
+    Node* findNodeNoThrow(const UUID& uuid);
+    Node* findNodeForConnector(const UUID &uuid);
 
 
-    Connectable* findConnector(const std::string &uuid);
+    Connectable* findConnector(const UUID &uuid);
 
 
     bool handleConnectionSelection(int id, bool add);
@@ -75,7 +76,7 @@ public:
     Connection::Ptr getConnection(Connection::Ptr);
     int getConnectionId(Connection::Ptr);
 
-    std::string makeUUID(const std::string& name);
+    std::string makeUUIDPrefix(const std::string& name);
 
     Command::Ptr clear();
 
@@ -127,13 +128,13 @@ private:
     void selectConnectionById(int id, bool add = false);
     bool isConnectionWithIdSelected(int id);
 
-    TemplatePtr convertSelectionToTemplate(std::vector<std::pair<std::string, std::string> > &connections) const;
-    TemplatePtr generateTemplate(TemplatePtr templ, std::vector<std::pair<std::string, std::string> > &connections, bool only_selected) const;
+    TemplatePtr convertSelectionToTemplate(std::vector<std::pair<UUID, UUID> > &connections) const;
+    TemplatePtr generateTemplate(TemplatePtr templ, std::vector<std::pair<UUID, UUID> > &connections, bool only_selected) const;
 
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addNode(NodePtr node);
-    void deleteNode(const std::string &uuid);
+    void deleteNode(const UUID &uuid);
 
     bool addConnection(Connection::Ptr connection);
     void deleteConnection(Connection::Ptr connection);

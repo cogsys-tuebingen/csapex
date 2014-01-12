@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "command.h"
+#include <csapex/utility/uuid.h>
 
 namespace csapex
 {
@@ -30,7 +31,7 @@ private:
 
     Command::Ptr    delete_connections;
 
-    std::string c_uuid;
+    UUID c_uuid;
 
 };
 }

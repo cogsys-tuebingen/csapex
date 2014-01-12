@@ -11,7 +11,7 @@ using namespace csapex;
 
 NodePtr NodeConstructor::makeNull()
 {
-    return Node::Ptr (new Node(""));
+    return Node::Ptr (new Node);
 }
 
 NodeConstructor::NodeConstructor(const std::string &type, const std::string &description, Make c)
@@ -75,7 +75,7 @@ Node::Ptr NodeConstructor::makePrototypeContent() const
     return res;
 }
 
-Node::Ptr NodeConstructor::makeContent(const std::string& uuid) const
+Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
 {
     Node::Ptr res = c();
     res->setType(type_);

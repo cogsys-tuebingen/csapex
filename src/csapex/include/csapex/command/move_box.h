@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "command.h"
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QPoint>
@@ -30,7 +31,7 @@ protected:
     QPoint from;
     QPoint to;
 
-    std::string uuid;
+    UUID uuid;
 };
 
 }

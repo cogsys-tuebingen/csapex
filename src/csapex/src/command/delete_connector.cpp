@@ -12,12 +12,9 @@
 using namespace csapex;
 using namespace command;
 
-DeleteConnector::DeleteConnector(Connectable *_c) :
-    in(_c->canInput()),
-    c(_c)
+DeleteConnector::DeleteConnector(Connectable *_c)
+    : in(_c->canInput()), c(_c), c_uuid(c->getUUID())
 {
-    assert(c);
-    c_uuid = c->getUUID();
 }
 
 std::string DeleteConnector::getType() const
@@ -27,7 +24,7 @@ std::string DeleteConnector::getType() const
 
 std::string DeleteConnector::getDescription() const
 {
-    return std::string("deleted connector with UUID ") + c_uuid;
+    return std::string("deleted connector with UUID ") + c_uuid.getFullName();
 }
 
 

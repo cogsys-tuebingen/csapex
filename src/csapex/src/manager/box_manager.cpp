@@ -252,7 +252,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
 
     Node::Ptr content;
     if(is_template) {
-        content.reset(new Node(""));
+//        content.reset(new Node(""));
     } else {
         Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
             if(p->getType() == type) {
@@ -282,7 +282,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
     }
 }
 
-Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const std::string& uuid)
+Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
     assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
 
@@ -291,7 +291,7 @@ Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const std::st
     return bo;
 }
 
-Node::Ptr BoxManager::makeTemplateNode(const std::string& /*uuid*/, const std::string& type)
+Node::Ptr BoxManager::makeTemplateNode(const UUID& /*uuid*/, const std::string& type)
 {
     assert(BoxManager::typeIsTemplate(type) || type == "::group");
 
@@ -300,11 +300,10 @@ Node::Ptr BoxManager::makeTemplateNode(const std::string& /*uuid*/, const std::s
     //    group->setObjectName(uuid.c_str());
 
     //    return group;
-    std::cerr << "WARNING: reimplement!" << std::endl;
-    return Node::Ptr(new Node(""));
+    return Node::Ptr((Node*) NULL);
 }
 
-Node::Ptr BoxManager::makeNode(const std::string& target_type, const std::string& uuid)
+Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 {
     assert(!uuid.empty());
 

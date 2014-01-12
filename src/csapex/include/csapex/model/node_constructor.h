@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <utils_plugin/constructor.hpp>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <typeinfo>
@@ -36,7 +37,7 @@ public:
     std::string getDescription() const;
 
     virtual NodePtr makePrototypeContent() const;
-    virtual NodePtr makeContent(const std::string& uuid) const;
+    virtual NodePtr makeContent(const UUID& uuid) const;
 
 protected:
     NodeConstructor(const std::string& type, const std::string& description);

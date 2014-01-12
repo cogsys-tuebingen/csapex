@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/meta.h>
+#include <csapex/utility/uuid.h>
 
 namespace csapex
 {
@@ -17,8 +18,8 @@ struct MoveConnection : public Meta
 private:
     bool output;
 
-    std::string from_uuid;
-    std::string to_uuid;
+    UUID from_uuid;
+    UUID to_uuid;
 };
 }
 }

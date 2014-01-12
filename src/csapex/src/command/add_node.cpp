@@ -11,7 +11,7 @@
 
 using namespace csapex::command;
 
-AddNode::AddNode(const std::string &type, QPoint pos, const std::string &parent_uuid, const std::string& uuid, NodeState::Ptr state)
+AddNode::AddNode(const std::string &type, QPoint pos, const UUID &parent_uuid, const UUID& uuid, NodeState::Ptr state)
     : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
     assert(!uuid.empty());
@@ -29,14 +29,14 @@ std::string AddNode::getType() const
 
 std::string AddNode::getDescription() const
 {
-    return std::string("added a node of type ") + type_ + " and UUID " + uuid_;
+    return std::string("added a node of type ") + type_ + " and UUID " + uuid_.getFullName();
 }
 
 
 bool AddNode::doExecute()
 {
     if(uuid_.empty()) {
-        uuid_ = graph_->makeUUID(type_);
+        uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
     }
 
     Node::Ptr node = BoxManager::instance().makeNode(type_, uuid_);

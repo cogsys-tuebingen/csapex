@@ -3,7 +3,7 @@
 
 using namespace csapex;
 
-Unique::Unique(const std::string &uuid)
+Unique::Unique(const UUID &uuid)
     : uuid_(uuid)
 {
 
@@ -14,9 +14,9 @@ Unique::~Unique()
 
 }
 
-void Unique::setUUID(const std::string &uuid)
+void Unique::setUUID(const UUID &uuid)
 {
-    uuid_ = UUID(uuid);
+    uuid_ = uuid;
 }
 
 UUID Unique::getUUID() const

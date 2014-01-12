@@ -11,7 +11,7 @@
 
 using namespace csapex;
 
-ConnectorIn::ConnectorIn(const std::string &uuid)
+ConnectorIn::ConnectorIn(const UUID &uuid)
     : Connectable(uuid), target(NULL), can_process(true), optional_(false), async_(false)
 {
 }

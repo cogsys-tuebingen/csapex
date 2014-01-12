@@ -9,11 +9,14 @@ namespace csapex {
 
 class UUID
 {
-    friend class Unique;
-
 public:
     static std::string stripNamespace(const std::string& name);
+    static UUID make(const std::string& prefix);
+    static UUID make_forced(const std::string& representation);
 
+    static UUID NONE;
+
+public:
     friend std::ostream& operator << (std::ostream& out, const UUID& uuid_) {
         out << uuid_.representation_;
         return out;
@@ -22,14 +25,21 @@ public:
     friend bool operator == (const std::string& str, const UUID& uuid_) {
         return str == uuid_.representation_;
     }
-
     friend bool operator == (const UUID& uuid_, const std::string& str) {
         return str == uuid_.representation_;
+    }
+    friend bool operator == (const UUID& a, const UUID& b) {
+        return a.representation_ == b.representation_;
     }
 
 public:
     std::string getFullName() const;
     std::string getShortName() const;
+
+    bool contains(const std::string& sub) const;
+    UUID replace(const std::string& needle, const UUID& replacement) const;
+
+    void split(const std::string& separator, UUID& l, UUID& r) const;
 
     operator std::string() const;
     const char* c_str() const;
@@ -39,7 +49,7 @@ public:
     }
 
 private:
-    UUID(const std::string& representation);
+    explicit UUID(const std::string& representation);
 
 private:
     std::string representation_;

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "command.h"
+#include <csapex/utility/uuid.h>
 
 namespace csapex
 {
@@ -31,8 +32,8 @@ private:
     ConnectorOut* from;
     ConnectorIn* to;
 
-    std::string from_uuid;
-    std::string to_uuid;
+    UUID from_uuid;
+    UUID to_uuid;
 };
 }
 }

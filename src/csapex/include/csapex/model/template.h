@@ -34,14 +34,14 @@ private:
 public:
     std::string addBox(const std::string& type, const QPoint& pos, NodeStatePtr state);
     std::string addConnector(const std::string& label, const std::string& type, bool input, bool forward = false);
-    std::string addConnection(const std::string& from_uuid, const std::string& to_uuid);
+    std::string addConnection(const UUID &from_uuid, const UUID &to_uuid);
 
-    void createCommands(command::Meta *meta, const std::string &parent) const;
+    void createCommands(command::Meta *meta, const UUID &parent) const;
 
     void setName(const std::string& name);
     std::string getName();
 
-    static std::string fillInTemplate(const std::string& uuid, const std::string& parent);
+    static UUID fillInTemplate(const UUID& uuid, const UUID &parent);
 
     void write(YAML::Emitter& emitter) const;
     void read(const YAML::Node& doc);
@@ -71,11 +71,11 @@ private:
     struct BoxTemplate {
         std::string type;
         QPoint pos;
-        std::string uuid;
+        UUID uuid;
         NodeState state;
 
         BoxTemplate()
-            : state(NULL)
+            : uuid(UUID::NONE), state(NULL)
         {
         }
 
@@ -92,7 +92,10 @@ private:
             assert(node.Type() == YAML::NodeType::Map);
 
             node["type"] >> box.type;
-            node["uuid"] >> box.uuid;
+
+            std::string uuid_tmp;
+            node["uuid"] >> uuid_tmp;
+            box.uuid = UUID::make_forced(uuid_tmp);
 
             std::vector<int> pos;
             node["pos"] >> pos;
@@ -108,10 +111,15 @@ private:
 
     struct ConnectorTemplate {
         std::string type;
-        std::string uuid;
+        UUID uuid;
         std::string label;
         bool input;
         bool forward;
+
+        ConnectorTemplate()
+            : uuid(UUID::NONE)
+        {
+        }
 
         friend void operator << (YAML::Emitter& e, const ConnectorTemplate& connector) {
             e << YAML::Flow << YAML::BeginMap;
@@ -126,16 +134,24 @@ private:
             assert(node.Type() == YAML::NodeType::Map);
 
             node["type"] >> connector.type;
-            node["uuid"] >> connector.uuid;
             node["label"] >> connector.label;
             node["input"] >> connector.input;
             node["forward"] >> connector.forward;
+
+            std::string uuid_tmp;
+            node["uuid"] >> uuid_tmp;
+            connector.uuid = UUID::make_forced(uuid_tmp);
         }
     };
 
     struct ConnectionTemplate {
-        std::string from_uuid;
-        std::string to_uuid;
+        UUID from_uuid;
+        UUID to_uuid;
+
+        ConnectionTemplate()
+            : from_uuid(UUID::NONE), to_uuid(UUID::NONE)
+        {
+        }
 
         friend void operator << (YAML::Emitter& e, const ConnectionTemplate& connection) {
             e << YAML::Flow << YAML::BeginMap;
@@ -146,8 +162,13 @@ private:
         friend void operator >> (const YAML::Node& node, ConnectionTemplate& connection) {
             assert(node.Type() == YAML::NodeType::Map);
 
-            node["from_uuid"] >> connection.from_uuid;
-            node["to_uuid"] >> connection.to_uuid;
+            std::string from, to;
+
+            node["from_uuid"] >> from;
+            node["to_uuid"] >> to;
+
+            connection.from_uuid = UUID::make_forced(from);
+            connection.to_uuid = UUID::make_forced(to);
         }
     };
 

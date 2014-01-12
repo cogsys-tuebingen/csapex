@@ -7,7 +7,7 @@
 
 using namespace csapex;
 
-ConnectorForward::ConnectorForward(bool primary_function_is_input, const std::string &uuid)
+ConnectorForward::ConnectorForward(bool primary_function_is_input, const UUID &uuid)
     : Connectable(uuid), ConnectorIn(uuid), ConnectorOut(uuid), primary_function_is_input(primary_function_is_input)
 {
 

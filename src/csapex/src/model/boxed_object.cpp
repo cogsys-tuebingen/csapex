@@ -9,7 +9,7 @@
 
 using namespace csapex;
 
-BoxedObject::BoxedObject(const std::string &uuid)
+BoxedObject::BoxedObject(const UUID &uuid)
     : Node(uuid)
 {
 }

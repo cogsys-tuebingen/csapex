@@ -120,7 +120,9 @@ void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEve
         overlay->repaint();
 
     } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
-        std::string uuid = e->mimeData()->text().toStdString();
+        std::string uuid_tmp = e->mimeData()->text().toStdString();
+        UUID uuid = UUID::make_forced(uuid_tmp);
+
         Box* box = dispatcher_->getGraph()->findNode(uuid)->getBox();
         QPoint offset_value(e->mimeData()->data(Box::MIME_MOVE + "/x").toInt(),
                             e->mimeData()->data(Box::MIME_MOVE + "/y").toInt());
@@ -154,8 +156,8 @@ void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         QPoint pos = e->pos() + offset;
 
 
-        std::string uuid = graph_->makeUUID(type);
-        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, "", uuid, NodeStateNullPtr)));
+        UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
+        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, NodeStateNullPtr)));
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         e->ignore();

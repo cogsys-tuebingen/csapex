@@ -76,7 +76,7 @@ class RosHandler
                 if(ROSHandler::instance().topicExists(cmd)) {
                     QPoint pos = e->pos();
 
-                    std::string uuid = dispatcher->getGraph()->makeUUID("csapex::ImportRos");
+                    UUID uuid = UUID::make(dispatcher->getGraph()->makeUUIDPrefix("csapex::ImportRos"));
 
                     ImportRos::State::Ptr sub_state(new ImportRos::State());
                     sub_state->topic_ = cmd;
@@ -85,7 +85,7 @@ class RosHandler
                     state->boxed_state = sub_state;
 
                     std::string type("csapex::ImportRos");
-                    dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid, state)));
+                    dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, state)));
 
                     return true;
                 }
@@ -149,7 +149,7 @@ class FileHandler
             if(file.exists()) {
                 QPoint pos = e->pos();
 
-                std::string uuid = dispatcher->getGraph()->makeUUID("csapex::FileImporter");
+                UUID uuid = UUID::make(dispatcher->getGraph()->makeUUIDPrefix("csapex::FileImporter"));
 
                 FileImporter::State::Ptr sub_state(new FileImporter::State);
                 sub_state->last_path_ = files.first().toString();
@@ -158,7 +158,7 @@ class FileHandler
                 state->boxed_state = sub_state;
 
                 std::string type("csapex::FileImporter");
-                dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, "", uuid, state)));
+                dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, state)));
 
                 e->accept();
                 return true;

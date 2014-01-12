@@ -36,7 +36,7 @@ public:
     void register_box_type(NodeConstructor::Ptr provider, bool suppress_signals = false);
 
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
-    NodePtr makeNode(const std::string& type, const std::string& uuid);
+    NodePtr makeNode(const std::string& type, const UUID& uuid);
     NodeConstructor::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
@@ -64,8 +64,8 @@ protected:
     void rebuildPrototypes();
     void rebuildMap();
 
-    NodePtr makeSingleNode(NodeConstructor::Ptr content, const std::string& uuid);
-    NodePtr makeTemplateNode(const std::string& uuid, const std::string& type);
+    NodePtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
+    NodePtr makeTemplateNode(const UUID& uuid, const std::string& type);
 
 protected:
     std::vector<NodeConstructor::Ptr> available_elements_prototypes;

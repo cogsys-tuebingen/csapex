@@ -42,7 +42,7 @@ public:
     typedef boost::shared_ptr<Node> Ptr;
 
 public:
-    Node(const std::string& uuid = "");
+    Node(const UUID &uuid = UUID::NONE);
     virtual ~Node();
     virtual void setup();
 
@@ -138,8 +138,8 @@ public:
     ConnectorIn* getInput(const unsigned int index) const;
     ConnectorOut* getOutput(const unsigned int index) const;
 
-    ConnectorIn* getInput(const std::string& uuid) const;
-    ConnectorOut* getOutput(const std::string& uuid) const;
+    ConnectorIn* getInput(const UUID& uuid) const;
+    ConnectorOut* getOutput(const UUID& uuid) const;
 
     void removeInput(ConnectorIn *in);
     void removeOutput(ConnectorOut *out);

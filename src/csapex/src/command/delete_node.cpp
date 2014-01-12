@@ -11,7 +11,7 @@
 
 using namespace csapex::command;
 
-DeleteNode::DeleteNode(const std::string &uuid)
+DeleteNode::DeleteNode(const UUID& uuid)
     : uuid(uuid)
 {
 }
@@ -23,7 +23,7 @@ std::string DeleteNode::getType() const
 
 std::string DeleteNode::getDescription() const
 {
-    return std::string("deleted node ") + uuid;
+    return std::string("deleted node ") + uuid.getFullName();
 }
 
 

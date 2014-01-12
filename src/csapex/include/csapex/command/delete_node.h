@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QPoint>
@@ -17,7 +18,7 @@ namespace command
 class DeleteNode : public Command
 {
 public:
-    DeleteNode(const std::string &uuid);
+    DeleteNode(const UUID &uuid);
 
 protected:
     bool doExecute();
@@ -31,7 +32,7 @@ protected:
     QPoint pos;
 
     std::string type;
-    std::string uuid;
+    UUID uuid;
 
     Command::Ptr remove_connections;
 

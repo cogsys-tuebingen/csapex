@@ -33,7 +33,7 @@ public:
         TYPE_MISC = -1
     };
 
-    static std::string makeUUID(const std::string &box_uuid, int type, int sub_id);
+    static std::string makeUUIDPrefix(const UUID &box_uuid, int type, int sub_id);
 
 public:
     void setPort(Port* port);
@@ -107,7 +107,7 @@ Q_SIGNALS:
     void messageArrived(Connectable* source);
 
 protected:
-    Connectable(const std::string &uuid);
+    Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, int type);
     virtual ~Connectable();
     void init();

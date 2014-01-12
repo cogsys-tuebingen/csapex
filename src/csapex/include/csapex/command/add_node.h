@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -16,7 +17,7 @@ namespace command
 
 struct AddNode : public Command
 {
-    AddNode(const std::string& type, QPoint pos_, const std::string& parent_uuid_, const std::string& uuid_, NodeStatePtr state);
+    AddNode(const std::string& type, QPoint pos_, const UUID& parent_uuid_, const UUID& uuid_, NodeStatePtr state);
 
 protected:
     bool doExecute();
@@ -30,8 +31,8 @@ private:
     std::string type_;
     QPoint pos_;
 
-    std::string parent_uuid_;
-    std::string uuid_;
+    UUID parent_uuid_;
+    UUID uuid_;
 
     NodeStatePtr saved_state_;
 };

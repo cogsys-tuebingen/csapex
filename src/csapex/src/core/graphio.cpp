@@ -85,9 +85,11 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
     YAML::Node doc;
 
     while(parser.GetNextDocument(doc)) {
-        std::string type, uuid;
+        std::string type, uuid_tmp;
         doc["type"] >> type;
-        doc["uuid"] >> uuid;
+        doc["uuid"] >> uuid_tmp;
+
+        UUID uuid = UUID::make_forced(uuid_tmp);
 
         int x, y;
         doc["pos"][0] >> x;
@@ -180,12 +182,15 @@ void GraphIO::loadConnections(YAML::Node &doc)
             const YAML::Node& connection = connections[i];
             assert(connection.Type() == YAML::NodeType::Map);
 
-            std::string from_uuid;
-            connection["uuid"] >> from_uuid;
-            if(from_uuid.find(Connectable::namespace_separator) == from_uuid.npos) {
+            std::string from_uuid_tmp;
+            connection["uuid"] >> from_uuid_tmp;
+            if(from_uuid_tmp.find(Connectable::namespace_separator) == from_uuid_tmp.npos) {
                 // legacy import
-                from_uuid.replace(from_uuid.find("_out_"), 1, Connectable::namespace_separator);
+                from_uuid_tmp.replace(from_uuid_tmp.find("_out_"), 1, Connectable::namespace_separator);
             }
+
+            UUID from_uuid = UUID::make_forced(from_uuid_tmp);
+
             Node* parent = graph_->findNodeForConnector(from_uuid);
 
             if(!parent) {
@@ -197,13 +202,15 @@ void GraphIO::loadConnections(YAML::Node &doc)
             assert(targets.Type() == YAML::NodeType::Sequence);
 
             for(unsigned j=0; j<targets.size(); ++j) {
-                std::string to_uuid;
-                targets[j] >> to_uuid;
+                std::string to_uuid_tmp;
+                targets[j] >> to_uuid_tmp;
 
-                if(to_uuid.find(Connectable::namespace_separator) == to_uuid.npos) {
+                if(to_uuid_tmp.find(Connectable::namespace_separator) == to_uuid_tmp.npos) {
                     // legacy import
-                    to_uuid.replace(to_uuid.find("_in_"), 1, Connectable::namespace_separator);
+                    to_uuid_tmp.replace(to_uuid_tmp.find("_in_"), 1, Connectable::namespace_separator);
                 }
+
+                UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
                 ConnectorOut* from = parent->getOutput(from_uuid);
                 if(from == NULL) {
@@ -237,10 +244,13 @@ void GraphIO::loadConnections(YAML::Node &doc)
             const YAML::Node& fulcrum = fulcrums[i];
             assert(fulcrum.Type() == YAML::NodeType::Map);
 
-            std::string from_uuid;
-            fulcrum["from"] >> from_uuid;
-            std::string to_uuid;
-            fulcrum["to"] >> to_uuid;
+            std::string from_uuid_tmp;
+            fulcrum["from"] >> from_uuid_tmp;
+            std::string to_uuid_tmp;
+            fulcrum["to"] >> to_uuid_tmp;
+
+            UUID from_uuid = UUID::make_forced(from_uuid_tmp);
+            UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
             ConnectorOut* from = dynamic_cast<ConnectorOut*>(graph_->findConnector(from_uuid));
             if(from == NULL) {

@@ -12,7 +12,7 @@ using namespace csapex;
 class QtConnectable : public ConnectorIn
 {
 public:
-    QtConnectable(const std::string& uuid, const std::string& type)
+    QtConnectable(const UUID& uuid, const std::string& type)
         : Connectable(uuid), ConnectorIn(uuid)
     {
         setType(ConnectionTypeManager::createMessage(type));
