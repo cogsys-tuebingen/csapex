@@ -1,17 +1,17 @@
 #ifndef ROI_MESSAGE_H
 #define ROI_MESSAGE_H
 
+/// COMPONENT
+#include <csapex_vision/roi.h>
+
 /// PROJECT
 #include <csapex/model/message.h>
-
-/// SYSTEM
-#include <opencv2/opencv.hpp>
 
 namespace csapex {
 namespace connection_types {
 
 
-struct RoiMessage : public MessageTemplate<cv::Rect, RoiMessage>
+struct RoiMessage : public MessageTemplate<Roi, RoiMessage>
 {
     RoiMessage();
 

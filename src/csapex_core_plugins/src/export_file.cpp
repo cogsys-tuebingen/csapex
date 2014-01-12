@@ -80,6 +80,11 @@ void ExportFile::allConnectorsArrived()
 
     ConnectionType::Ptr msg = connector_->getMessage<ConnectionType>();
 
+    QDir dir(state.path_.c_str());
+    if(!dir.exists()) {
+        QDir().mkdir(state.path_.c_str());
+    }
+
     std::stringstream ss;
     ss << "_" << suffix_;
     msg->writeRaw(state.path_, ss.str());
