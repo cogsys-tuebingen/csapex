@@ -20,9 +20,7 @@ find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
-file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h include/csapex_vision_features/*.h)
-
-QT4_WRAP_CPP(QT_MOC ${QT_MOC})
+csapex_moc_all(QT_MOC src/*.h include/csapex_vision_features/*.h)
 
 set(QT ${QT_SOURCES} ${QT_MOC})
 

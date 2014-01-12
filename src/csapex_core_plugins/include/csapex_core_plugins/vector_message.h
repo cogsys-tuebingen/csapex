@@ -32,7 +32,7 @@ struct VectorMessage : public MessageTemplate<std::vector<typename M::Ptr>, Vect
     void writeYaml(YAML::Emitter& yaml) {
         yaml << YAML::Key << "value" << YAML::Value << YAML::Flow;
         yaml << YAML::BeginSeq;
-        for(int i = 0; i < Parent::value.size(); ++i) {
+        for(unsigned i = 0; i < Parent::value.size(); ++i) {
             yaml << YAML::BeginMap;
             typename M::Ptr mptr = Parent::value[i];
             mptr->writeYaml(yaml);

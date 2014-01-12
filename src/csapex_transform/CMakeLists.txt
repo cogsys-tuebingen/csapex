@@ -17,11 +17,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins tf)
 
-file(GLOB_RECURSE QT_MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex_transform/*.h)
-file(GLOB_RECURSE QT_MOC_PLUG RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
+csapex_moc_all(QT_MOC_CORE include/csapex_transform/*.h)
+csapex_moc_all(QT_MOC_PLUG src/*.h)
 
-QT4_WRAP_CPP(QT_MOC_CORE ${QT_MOC_CORE})
-QT4_WRAP_CPP(QT_MOC_PLUG ${QT_MOC_PLUG})
 
 set(QT_CORE ${QT_SOURCES}  ${QT_MOC_CORE})
 set(QT_PLUG ${QT_SOURCES} ${QT_MOC_PLUG})

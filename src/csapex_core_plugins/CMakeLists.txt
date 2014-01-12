@@ -3,11 +3,10 @@ project(csapex_core_plugins)
 
 find_package(catkin REQUIRED COMPONENTS roscpp csapex)
 
-file(GLOB_RECURSE MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/*.h)
-file(GLOB_RECURSE MOC_PLUG RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_core_resources.qrc)
-QT4_WRAP_CPP(MOC_CORE ${MOC_CORE})
-QT4_WRAP_CPP(MOC_PLUG ${MOC_PLUG})
+
+csapex_moc_all(MOC_CORE include/*.h)
+csapex_moc_all(MOC_PLUG src/*.h)
 
 ###################################
 ## catkin specific configuration ##

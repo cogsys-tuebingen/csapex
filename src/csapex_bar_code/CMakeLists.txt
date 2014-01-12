@@ -21,9 +21,8 @@ if(${ZBAR_FOUND})
 
     find_package(OpenCV REQUIRED)
 
-    file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
 
-    QT4_WRAP_CPP(QT_MOC ${QT_MOC})
+    csapex_moc_all(QT_MOC src/*.h)
 
     set(QT ${QT_SOURCES} ${QT_MOC})
 

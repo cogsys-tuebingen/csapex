@@ -20,15 +20,10 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 
 find_package(OpenCV REQUIRED)
 
-file(GLOB_RECURSE QT_MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/core/*.h include/csapex_vision/*.h)
-file(GLOB_RECURSE QT_MOC_PLUG RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/plugin/*.h)
+csapex_moc_all(QT_CORE src/core/*.h include/csapex_vision/*.h)
+csapex_moc_all(QT_MOC_PLUG src/plugin/*.h)
 
-QT4_WRAP_CPP(QT_MOC_CORE ${QT_MOC_CORE})
-QT4_WRAP_CPP(QT_MOC_PLUG ${QT_MOC_PLUG})
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_vision_resources.qrc)
-
-set(QT_CORE ${QT_SOURCES}  ${QT_MOC_CORE})
-set(QT_PLUG ${QT_SOURCES} ${QT_MOC_PLUG})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

@@ -10,10 +10,9 @@ project(csapex_boolean)
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins)
 
-file(GLOB_RECURSE QT_MOC_CORE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex_boolean/*.h)
-file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h)
-QT4_WRAP_CPP(QT_MOC_CORE ${QT_MOC_CORE})
-QT4_WRAP_CPP(QT_MOC ${QT_MOC})
+csapex_moc_all(QT_MOC_CORE include/csapex_boolean/*.h)
+csapex_moc_all(QT_MOC src/*.h)
+
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_boolean_resources.qrc)
 
 ###################################
