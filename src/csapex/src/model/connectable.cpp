@@ -22,10 +22,14 @@ const std::string Connectable::namespace_separator = ":|:";
 const QString Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
 const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
-std::string Connectable::makeUUIDPrefix(const UUID &box_uuid, int type, int sub_id) {
+UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
+    if(box_uuid.empty()) {
+        return UUID::NONE;
+    }
+
     std::stringstream ss;
     ss << box_uuid << namespace_separator << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
-    return ss.str();
+    return UUID::make(ss.str());
 }
 
 Connectable::Connectable(const UUID& uuid)
@@ -35,7 +39,7 @@ Connectable::Connectable(const UUID& uuid)
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, int type)
-    : Unique(UUID::make(makeUUIDPrefix(parent->getUUID(), type, sub_id))), buttons_down_(0), minimized_(false)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false)
 {
     init();
 }

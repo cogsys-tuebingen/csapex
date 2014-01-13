@@ -33,7 +33,7 @@ public:
         TYPE_MISC = -1
     };
 
-    static std::string makeUUIDPrefix(const UUID &box_uuid, int type, int sub_id);
+    static UUID makeUUID(const UUID &box_uuid, int type, int sub_id);
 
 public:
     void setPort(Port* port);

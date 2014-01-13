@@ -138,7 +138,6 @@ void Segmentation::State::readYaml(const YAML::Node& node) {
         min_[i] >> min[i];
         max_[i] >> max[i];
     }
-    std::cout << max[0]<<std::endl;
 
     node["channels"] >> channels;
 }
@@ -150,8 +149,8 @@ QxtSpanSlider* Segmentation::makeSpanSlider(QBoxLayout* layout, const std::strin
     QxtSpanSlider* slider = new QxtSpanSlider(Qt::Horizontal);
     slider->setMinimum(min);
     slider->setMaximum(max);
-    slider->setLowerValue(lower);
     slider->setUpperValue(upper);
+    slider->setLowerValue(lower);
     slider->setMinimumWidth(128);
 
     QWrapper::QSpinBoxExt* displayLower = new QWrapper::QSpinBoxExt;

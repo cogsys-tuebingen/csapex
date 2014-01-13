@@ -80,6 +80,7 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
     display->setMinimum(min);
     display->setMaximum(max);
     display->setValue(def);
+    display->setSingleStep(step_size);
 
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(slider);

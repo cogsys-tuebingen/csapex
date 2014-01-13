@@ -49,8 +49,7 @@ std::string Template::addConnector(const std::string &label, const std::string &
 {
     assert(!locked);
 
-    std::string uuid_tmp = Connectable::makeUUIDPrefix(UUID::make_forced(PARENT_PREFIX_PATTERN), Connectable::TYPE_MISC, next_connector_sub_id);
-    UUID uuid = UUID::make(uuid_tmp);
+    UUID uuid = Connectable::makeUUID(UUID::make_forced(PARENT_PREFIX_PATTERN), Connectable::TYPE_MISC, next_connector_sub_id);
 
     std::cerr << "adding connector to template: " << uuid << std::endl;
 
