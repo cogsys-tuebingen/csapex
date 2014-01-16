@@ -20,6 +20,7 @@ class Connectable : public QObject, public ErrorState, public Unique
     Q_OBJECT
 
     friend class Port;
+    friend class Graph;
 
 public:
     static const QString MIME_CREATE_CONNECTION;

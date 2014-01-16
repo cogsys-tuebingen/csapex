@@ -19,13 +19,14 @@ public:
     }
 };
 
-QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max) {
+QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size) {
     QHBoxLayout *internal_layout = new QHBoxLayout;
 
     QSpinBox* spinner = new QSpinBox;
     spinner->setMinimum(min);
     spinner->setMaximum(max);
     spinner->setValue(def);
+    spinner->setSingleStep(step_size);
 
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(spinner);
@@ -34,11 +35,8 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
     return spinner;
 }
 
-QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max) {
+QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step) {
     QHBoxLayout* internal_layout = new QHBoxLayout;
-
-    /// TODO: Make connector independent of node
-    //Port* cin = new Port(new QtConnectable("foo", "int"));
 
     QSlider* slider = new QSlider(Qt::Horizontal);
     slider->setMinimum(min);
@@ -50,8 +48,8 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     display->setMinimum(min);
     display->setMaximum(max);
     display->setValue(def);
+    display->setSingleStep(step);
 
-    //internal_layout->addWidget(cin);
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);

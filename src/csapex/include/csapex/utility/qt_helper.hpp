@@ -61,9 +61,9 @@ struct QSleepThread : public QThread {
 class QtHelper
 {
 public:
-    static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max) ;
+    static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size = 1) ;
 
-    static QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max);
+    static QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step_size = 1);
 
     static QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size);
 

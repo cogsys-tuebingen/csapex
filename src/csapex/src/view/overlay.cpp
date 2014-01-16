@@ -174,6 +174,7 @@ void Overlay::drawConnection(Connection& connection)
     ccs.disabled = (!from->getPort()->isEnabled() || !to->getPort()->isEnabled());
     ccs.minimized_from = from->isMinimizedSize();
     ccs.minimized_to = to->isMinimizedSize();
+    ccs.is_highway = from->isMultiDimensional();
 
     drawConnection(p1, p2, id);
 
@@ -200,6 +201,10 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
 {
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? 2 : 4;
+
+    if(ccs.is_highway) {
+        ccs.r *= 5.0;
+    }
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;
@@ -268,14 +273,14 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
         path.cubicTo(cp1, cp2, fulcrum);
 
         if(ccs.highlighted) {
-            painter->setPen(QPen(Qt::black, ccs.r * 1.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->setPen(QPen(Qt::black, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(path);
 
-            painter->setPen(QPen(Qt::white, ccs.r * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->setPen(QPen(Qt::white, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(path);
 
         } else if(ccs.selected) {
-            painter->setPen(QPen(Qt::black, ccs.r * 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->setPen(QPen(Qt::black, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(path);
 
             painter->setPen(makeSelectedLinePen(from, to));
@@ -287,7 +292,7 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
         painter->drawPath(path);
 
         if(id >= 0 && schema_dirty_) {
-            QPen schema_pen = QPen(QColor(id2rgb(id, sub_section)), connector_radius_ * 2, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
+            QPen schema_pen = QPen(QColor(id2rgb(id, sub_section)), ccs.r * 1.75, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
             schematics_painter->setPen(schema_pen);
             schematics_painter->drawPath(path);
         }

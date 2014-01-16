@@ -387,12 +387,13 @@ ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bo
     return c;
 }
 
-ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
+ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label, bool multi_dimensional)
 {
     int id = output.size();
     ConnectorOut* c = new ConnectorOut(this, id);
     c->setLabel(label);
     c->setType(type);
+    c->setMultiDimensional(multi_dimensional);
 
     registerOutput(c);
 
@@ -603,8 +604,23 @@ void Node::registerInput(ConnectorIn* in)
     worker_->addInput(in);
     connectConnector(in);
     QObject::connect(in, SIGNAL(messageArrived(Connectable*)), worker_, SLOT(forwardMessage(Connectable*)));
+    QObject::connect(in, SIGNAL(connectionDone()), this, SLOT(check()));
 
     Q_EMIT connectorCreated(in);
+}
+
+void Node::check()
+{
+    bool is_multidim = false;
+    Q_FOREACH(ConnectorIn* i, input) {
+        ConnectorOut* out = dynamic_cast<ConnectorOut*> (i->getSource());
+        if(out) {
+            is_multidim |= out->isMultiDimensional();
+        }
+    }
+    Q_FOREACH(ConnectorOut* o, output) {
+        o->setCurrentlyMultiDimensional(is_multidim);
+    }
 }
 
 void Node::registerOutput(ConnectorOut* out)

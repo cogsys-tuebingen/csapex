@@ -52,6 +52,10 @@ public:
     virtual void connectionMovePreview(Connectable* other_side);
     virtual void validateConnections();
 
+    bool isMultiDimensional() const;
+    void setMultiDimensional(bool m);
+    void setCurrentlyMultiDimensional(bool m);
+
     int noTargets();
     TargetIterator beginTargets() const;
     TargetIterator endTargets() const;
@@ -76,6 +80,8 @@ protected:
 protected:
     std::vector<ConnectorIn*> targets_;
     bool force_send_message_;
+    bool multi_dimensional_;
+    bool currently_multi_dimensional_;
 
     ConnectionType::Ptr message_;
 };

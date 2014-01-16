@@ -38,5 +38,5 @@ void Foreach::setup()
 
     input_ = addInput<VectorMessage>("Vector");
 
-    output_ = addOutput<AnyMessage>("Content");
+    output_ = addMultidimensionalOutput<AnyMessage>("Content");
 }

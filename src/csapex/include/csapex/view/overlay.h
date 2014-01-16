@@ -85,6 +85,7 @@ protected:
         bool minimized_from;
         bool minimized_to;
         bool minimized;
+        bool is_highway;
 
         double r;
     };
