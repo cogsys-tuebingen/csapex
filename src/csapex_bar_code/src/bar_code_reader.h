@@ -23,6 +23,7 @@ public Q_SLOTS:
 private:
     ConnectorIn* in_img;
     ConnectorOut* out_str;
+    ConnectorOut* out_roi;
 
     std::string data_;
     bool lost;

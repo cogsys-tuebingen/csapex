@@ -15,6 +15,8 @@ public:
     static UUID make(const std::string& prefix);
     static UUID make_forced(const std::string& representation);
 
+    static void reset();
+
     static UUID NONE;
 
 public:

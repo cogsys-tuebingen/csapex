@@ -26,6 +26,11 @@ void split_first(const std::string& haystack, const std::string& needle,
 
 std::map<std::string, int> UUID::hash_;
 
+void UUID::reset()
+{
+    hash_.clear();
+}
+
 std::string UUID::stripNamespace(const std::string &name)
 {
     size_t from = name.rfind("::");

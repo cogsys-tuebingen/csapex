@@ -133,6 +133,8 @@ void CsApexCore::reset()
 
     cmd_dispatch->reset();
 
+    UUID::reset();
+
     TemplateManager::instance().reset();
 
     Q_FOREACH(Listener* l, listener_) {

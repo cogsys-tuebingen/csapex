@@ -3,6 +3,8 @@
 
 /// COMPONENT
 #include <csapex_core_plugins/string_message.h>
+#include <csapex_core_plugins/vector_message.h>
+#include <csapex_vision/roi_message.h>
 
 /// PROJECT
 #include <csapex/model/node.h>
@@ -62,12 +64,35 @@ void BarCodeReader::allConnectorsArrived()
         }
     }
 
+    VectorMessage::Ptr out(new VectorMessage(RoiMessage::make()));
+
     // extract results
     for(zbar::Image::SymbolIterator symbol = image.symbol_begin();
         symbol != image.symbol_end();
         ++symbol) {
 
-        std::string data = symbol->get_data();
+        const zbar::Symbol& sym = *symbol;
+        std::string data = sym.get_data();
+
+        {
+            int x = std::numeric_limits<int>::max();
+            int y = std::numeric_limits<int>::max();
+            int X = std::numeric_limits<int>::min();
+            int Y = std::numeric_limits<int>::min();
+
+            for(int i = 0; i < sym.get_location_size(); ++i) {
+                int px = sym.get_location_x(i);
+                int py = sym.get_location_y(i);
+                x = std::min(x, px);
+                X = std::max(X, px);
+                y = std::min(y, py);
+                Y = std::max(Y, py);
+            }
+
+            RoiMessage::Ptr msg(new RoiMessage);
+            msg->value = Roi(cv::Rect(x,y, X-x, Y-y), cv::Scalar(0,0,0));
+            out->value.push_back(msg);
+        }
 
         if(data == data_) {
             if(lost) {
@@ -81,11 +106,15 @@ void BarCodeReader::allConnectorsArrived()
         out_str->publish(msg);
 
         data_ = data;
-        break;
+    }
+
+    if(!out->value.empty()) {
+        out_roi->publish(out);
     }
 
     // clean up
     image.set_data(NULL, 0);
+
 }
 
 
@@ -96,4 +125,6 @@ void BarCodeReader::fill(QBoxLayout* layout)
     in_img = addInput<CvMatMessage>("Image");
 
     out_str = addOutput<StringMessage>("String");
+    out_roi = addOutput<VectorMessage>("ROIs");
+    out_roi->setType(VectorMessage::Ptr(new VectorMessage(RoiMessage::make())));
 }

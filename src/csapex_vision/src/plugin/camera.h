@@ -28,6 +28,8 @@ protected:
 private:
     ConnectorOut* output_;
     cv::VideoCapture cap_;
+
+    int idx;
 };
 
 } /// NAMESPACE

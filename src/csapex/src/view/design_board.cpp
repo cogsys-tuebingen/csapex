@@ -85,8 +85,7 @@ void DesignBoard::paintEvent(QPaintEvent*)
         }
 
         if(parent_scroll) {
-            QSize minimum = minimumSize();
-
+            QSize minimum = size();
             minimum.setWidth(minimum.width() + std::abs(initial_pos_x_));
             minimum.setHeight(minimum.height() + std::abs(initial_pos_y_));
 
@@ -187,9 +186,9 @@ void DesignBoard::setSpace(bool s)
 
     overlay->blockMouse(space_);
 
-//    Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
-//        box->setEnabled(!space_);
-//    }
+    //    Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
+    //        box->setEnabled(!space_);
+    //    }
 }
 
 void DesignBoard::keyPressEvent(QKeyEvent* e)

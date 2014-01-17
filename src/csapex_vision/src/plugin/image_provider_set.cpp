@@ -46,13 +46,15 @@ void ImageProviderSet::update_gui(QFrame* additional_holder)
 
 void ImageProviderSet::next(cv::Mat& img, cv::Mat& mask)
 {
+    cv::Mat i;
     if(state.playing_ || next_frame != -1) {
-        reallyNext(img, mask);
+        reallyNext(i, mask);
         next_frame = -1;
 
     } else {
-        img = last_frame_;
+        i = last_frame_;
     }
+    i.copyTo(img);
 }
 
 void ImageProviderSet::setPlaying(bool playing)

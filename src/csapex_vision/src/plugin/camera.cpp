@@ -17,11 +17,15 @@ CSAPEX_REGISTER_CLASS(csapex::Camera, csapex::Node)
 using namespace csapex;
 
 Camera::Camera()
+    : idx(-1)
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("Vision"));
 
     addParameter(param::ParameterFactory::declare<int>("device", 0, 5, 0, 1), boost::bind(&Camera::update, this, _1));
+
+    addParameter(param::ParameterFactory::declare<int>("w", 640, 1280, 640, 1), boost::bind(&Camera::update, this, _1));
+    addParameter(param::ParameterFactory::declare<int>("h", 480, 800, 480, 1), boost::bind(&Camera::update, this, _1));
 }
 
 void Camera::tick()
@@ -42,8 +46,20 @@ void Camera::setup()
 
 void Camera::update(param::Parameter *p)
 {
+    setError(false);
     int dev = param<int>("device");
+
+    if(cap_.isOpened()) {
+        cap_.release();
+    }
+
     if(!cap_.open(dev)) {
         throw std::runtime_error("cannot open camera with the given id");
     }
+
+    std::cout << "camera settings" << std::endl;
+    std::cout << cap_.get(CV_CAP_PROP_FRAME_WIDTH) << " x " << cap_.get(CV_CAP_PROP_FRAME_HEIGHT) << std::endl;
+    cap_.set(CV_CAP_PROP_FRAME_WIDTH, param<int>("w"));
+    cap_.set(CV_CAP_PROP_FRAME_HEIGHT, param<int>("h"));
+    std::cout << cap_.get(CV_CAP_PROP_FRAME_WIDTH) << " x " << cap_.get(CV_CAP_PROP_FRAME_HEIGHT) << std::endl;
 }
