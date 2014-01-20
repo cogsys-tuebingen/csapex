@@ -53,9 +53,6 @@ UUID UUID::make(const std::string &prefix)
 
 void UUID::free(const UUID &uuid)
 {
-    if(!uuid.empty()) {
-        std::cerr << "freeing UUID " << uuid.getFullName() << std::endl;
-    }
     std::map<std::string, int>::iterator it = hash_.find(uuid.representation_);
     if(it != hash_.end()) {
         hash_.erase(it);

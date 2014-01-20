@@ -73,9 +73,6 @@ public:
     bool isOptional() const;
     void setOptional(bool optional);
 
-    bool isAsync() const;
-    void setAsync(bool asynch);
-
     bool isLegacy() const;
     void setLegacy(bool legacy);
 
@@ -102,7 +99,6 @@ protected:
     QWaitCondition has_msg_cond;
 
     bool optional_;
-    bool async_;
     bool legacy_;
 };
 

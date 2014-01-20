@@ -75,6 +75,12 @@ public:
     void setMinimizedSize(bool mini);
     bool isMinimizedSize() const;
 
+    bool isAsync() const;
+    void setAsync(bool asynch);
+    void setTempAsync(bool asynch);
+
+    bool isBlocked() const;
+
     /**
      * INTERFACE
      */
@@ -104,8 +110,12 @@ public Q_SLOTS:
     virtual void waitForProcessing(const UUID &who_is_waiting);
     virtual void updateIsProcessing();
 
+    void stop();
+
 protected:
     virtual void notifyMessageProcessed();
+
+    void setBlocked(bool b);
 
 
 Q_SIGNALS:
@@ -156,6 +166,9 @@ protected:
 private:
     bool processing;
     bool enabled_;
+    bool async_;
+    bool async_temp_;
+    bool blocked_;
 
 public:
     std::vector<UUID> waiting_list_;

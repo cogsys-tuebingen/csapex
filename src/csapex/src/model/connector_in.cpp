@@ -12,12 +12,12 @@
 using namespace csapex;
 
 ConnectorIn::ConnectorIn(const UUID &uuid)
-    : Connectable(uuid), target(NULL), optional_(false), async_(false), legacy_(true)
+    : Connectable(uuid), target(NULL), optional_(false), legacy_(true)
 {
 }
 
 ConnectorIn::ConnectorIn(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, TYPE_IN), target(NULL), optional_(false), async_(false), legacy_(true)
+    : Connectable(parent, sub_id, TYPE_IN), target(NULL), optional_(false), legacy_(true)
 {
 }
 
@@ -69,16 +69,6 @@ void ConnectorIn::setOptional(bool optional)
 bool ConnectorIn::isOptional() const
 {
     return optional_;
-}
-
-void ConnectorIn::setAsync(bool asynch)
-{
-    async_ = asynch;
-}
-
-bool ConnectorIn::isAsync() const
-{
-    return async_;
 }
 
 void ConnectorIn::setLegacy(bool legacy)
@@ -157,7 +147,7 @@ void ConnectorIn::waitForProcessing(const UUID& who_is_waiting)
 
 void ConnectorIn::setProcessing(bool processing)
 {
-    Connectable::setProcessing(processing);
+        Connectable::setProcessing(processing);
     // call parents
     if(isConnected()) {
         Connectable* parent = getSource();

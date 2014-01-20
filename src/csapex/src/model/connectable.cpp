@@ -32,13 +32,13 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 }
 
 Connectable::Connectable(const UUID& uuid)
-    : Unique(uuid), buttons_down_(0), minimized_(false), processing(false), enabled_(false)
+    : Unique(uuid), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false), blocked_(false)
 {
     init();
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false), processing(false), enabled_(false)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false), blocked_(false)
 {
     init();
 }
@@ -58,9 +58,15 @@ void Connectable::updateIsProcessing()
 
 }
 
+void Connectable::stop()
+{
+    processing = false;
+//    can_process_cond.wakeAll();
+}
+
 void Connectable::setProcessing(bool p)
 {
-    port_->setPortProperty("processing", p);
+    //port_->setPortProperty("processing", p);
 
     processing = p;
 
@@ -86,6 +92,7 @@ void Connectable::waitForProcessing(const UUID& who_is_waiting)
     if(processing) {
         waiting_list_.push_back(who_is_waiting);
         while(processing) {
+            blocked_ = true;
             port_->setPortProperty("blocked", true);
 
             can_process_cond.wait(&io_mutex);
@@ -94,6 +101,7 @@ void Connectable::waitForProcessing(const UUID& who_is_waiting)
         std::remove(waiting_list_.begin(), waiting_list_.end(), who_is_waiting);
     }
 
+    blocked_ = false;
     port_->setPortProperty("blocked", false);
 }
 
@@ -276,8 +284,34 @@ bool Connectable::isMinimizedSize() const
     return minimized_;
 }
 
+void Connectable::setAsync(bool asynch)
+{
+    async_ = asynch;
+    async_temp_ = asynch;
+}
+
+bool Connectable::isAsync() const
+{
+    return async_ || async_temp_;
+}
+
+void Connectable::setTempAsync(bool asynch)
+{
+    async_temp_ = asynch;
+}
+
 int Connectable::getCount() const
 {
     return count_;
 }
+
+bool Connectable::isBlocked() const
+{
+    return blocked_;
+}
+void Connectable::setBlocked(bool b)
+{
+    blocked_ = b;
+}
+
 

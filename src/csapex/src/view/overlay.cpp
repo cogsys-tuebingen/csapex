@@ -172,6 +172,7 @@ void Overlay::drawConnection(Connection& connection)
     ccs.error = (to->isError() || from->isError());
     ccs.selected = connection.isSelected();
     ccs.disabled = (!from->getPort()->isEnabled() || !to->getPort()->isEnabled());
+    ccs.async = from->isAsync() || to->isAsync();
     ccs.minimized_from = from->isMinimizedSize();
     ccs.minimized_to = to->isMinimizedSize();
     ccs.is_highway = from->isMultiDimensional();
@@ -328,7 +329,9 @@ QPen Overlay::makeLinePen(const QPoint& from, const QPoint& to)
     } else if(ccs.disabled) {
         lg.setColorAt(0,Qt::darkGray);
         lg.setColorAt(1,Qt::gray);
-
+    } else if(ccs.async) {
+        lg.setColorAt(0, QColor(0xFF, 0xCC, 0x00));
+        lg.setColorAt(1, QColor(0xFF, 0xCC, 0x00));
     } else {
         QColor a = palette().foreground().color();
         QColor b = palette().background().color();

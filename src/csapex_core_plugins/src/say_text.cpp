@@ -21,13 +21,11 @@ SayText::SayText()
     setIcon(QIcon(":/pencil.png"));
 }
 
-void SayText::fill(QBoxLayout *layout)
+void SayText::setup()
 {
-    if(connector_ == NULL) {
-        setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-        connector_ = addInput<connection_types::StringMessage>("Text");
-    }
+    connector_ = addInput<connection_types::StringMessage>("Text", false, true);
 }
 
 void SayText::allConnectorsArrived()

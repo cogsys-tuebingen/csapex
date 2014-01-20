@@ -9,15 +9,13 @@
 
 namespace csapex {
 
-class SayText : public BoxedObject
+class SayText : public Node
 {
-    Q_OBJECT
-
 public:
     SayText();
 
     virtual void allConnectorsArrived();
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
 
 private:
     ConnectorIn* connector_;

@@ -71,11 +71,13 @@ CommandDispatcher* Port::getCommandDispatcher() const
 
 void Port::paintEvent(QPaintEvent *e)
 {
-    if(adaptee_->isInput()) {
-        ConnectorIn* i = dynamic_cast<ConnectorIn*>(adaptee_);
-        setProperty("legacy", i->isLegacy());
-        refreshStylesheet();
-    }
+    setProperty("async", adaptee_->isAsync());
+
+//    if(adaptee_->isInput()) {
+//        ConnectorIn* i = dynamic_cast<ConnectorIn*>(adaptee_);
+//        setProperty("legacy", i->isLegacy());
+//        refreshStylesheet();
+//    }
 
     if(refresh_style_sheet_) {
         refresh_style_sheet_ = false;

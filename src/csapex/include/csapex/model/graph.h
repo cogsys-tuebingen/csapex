@@ -109,6 +109,8 @@ public Q_SLOTS:
 
     Command::Ptr moveSelectedBoxes(const QPoint& delta);
 
+    void verify();
+
 Q_SIGNALS:
     void stateChanged();
     void dirtyChanged(bool);

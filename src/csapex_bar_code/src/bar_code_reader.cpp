@@ -90,8 +90,11 @@ void BarCodeReader::allConnectorsArrived()
             }
 
             RoiMessage::Ptr msg(new RoiMessage);
-            msg->value = Roi(cv::Rect(x,y, X-x, Y-y), cv::Scalar(0,0,0));
-            out->value.push_back(msg);
+            cv::Rect rect(x,y, X-x, Y-y);
+            if(rect.x >= 0 && rect.y >= 0) {
+                msg->value = Roi(rect, cv::Scalar(0,0,0));
+                out->value.push_back(msg);
+            }
         }
 
         if(data == data_) {
@@ -122,7 +125,7 @@ void BarCodeReader::fill(QBoxLayout* layout)
 {
     setSynchronizedInputs(true);
 
-    in_img = addInput<CvMatMessage>("Image");
+    in_img = addInput<CvMatMessage>("Image", false, true);
 
     out_str = addOutput<StringMessage>("String");
     out_roi = addOutput<VectorMessage>("ROIs");

@@ -367,6 +367,8 @@ bool Graph::addConnection(Connection::Ptr connection)
             visible_connections.push_back(connection);
         }
 
+        verify();
+
         Q_EMIT connectionAdded(connection.get());
         Q_EMIT from->connectionDone();
         Q_EMIT to->connectionDone();
@@ -375,6 +377,87 @@ bool Graph::addConnection(Connection::Ptr connection)
 
     std::cerr << "cannot connect " << connection->from()->getUUID() << " (" <<( connection->from()->isInput() ? "i": "o" )<< ") to " << connection->to()->getUUID() << " (" <<( connection->to()->isInput() ? "i": "o" )<< ")"  << std::endl;
     return false;
+}
+
+void Graph::verify()
+{
+    std::cerr << "verify" << std::endl;
+
+    /* Foreach node look for paths to every other node.
+     * If there are two or more paths from one node to another
+     *   and on of them contains an async edge, make all others
+     *   temporary async
+     */
+
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        for(int i = 0; i < node->countInputs(); ++i) {
+            node->getInput(i)->setTempAsync(false);
+        }
+    }
+
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        bool blocked = false;
+        for(int i = 0; i < node->countInputs(); ++i) {
+            blocked |= node->getInput(i)->isBlocked();
+        }
+
+        if(blocked) {
+            node->finishProcessing();
+        }
+    }
+
+    Q_FOREACH(Node::Ptr node, nodes_) {
+//        std::cerr << "searching from " << node->getUUID() << std::endl;
+
+        std::deque<Node*> Q;
+        std::map<Node*,bool> has_async_input;
+
+        Node* current = node.get();
+
+        Q.push_back(current);
+
+        while(!Q.empty()) {
+            Node* front = Q.front();
+            Q.pop_front();
+
+            bool visited = has_async_input.find(front) != has_async_input.end();
+            if(!visited) {
+                has_async_input[front] = false;
+            }
+
+            for(int i = 0; i < front->countOutputs(); ++i) {
+                ConnectorOut* output = front->getOutput(i);
+                for(ConnectorOut::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
+                    ConnectorIn* input = *in;
+
+                    Node* next_node = findNodeForConnector(input->getUUID());
+
+                    if(input->isAsync() || has_async_input[front]) {
+                        has_async_input[next_node] = true;
+//                        std::cerr << "detected async edge between " << node->getUUID().getFullName() << " and " << next_node->getUUID().getFullName() << std::endl;
+                    }
+
+                    Q.push_back(next_node);
+                }
+            }
+        }
+
+
+        for(int i = 0; i < current->countOutputs(); ++i) {
+            ConnectorOut* output = current->getOutput(i);
+
+            for(ConnectorOut::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
+                ConnectorIn* input = *in;
+
+                Node* next_node = findNodeForConnector(input->getUUID());
+
+                if(!input->isAsync()) {
+                    bool a = has_async_input[next_node];
+                    input->setTempAsync(a);
+                }
+            }
+        }
+    }
 }
 
 void Graph::deleteConnection(Connection::Ptr connection)
@@ -386,6 +469,7 @@ void Graph::deleteConnection(Connection::Ptr connection)
             visible_connections.erase(c);
             connection->to()->setError(false);
 
+            verify();
             Q_EMIT connectionDeleted(connection.get());
         } else {
             ++c;

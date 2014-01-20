@@ -25,10 +25,10 @@ Node::~Node()
 {
     delete worker_;
     BOOST_FOREACH(ConnectorIn* in, input) {
-        delete in;//in->deleteLater();
+        in->deleteLater();
     }
     BOOST_FOREACH(ConnectorOut* out, output) {
-        delete out;//out->deleteLater();
+        out->deleteLater();
     }
 }
 
@@ -143,7 +143,9 @@ void Node::checkInputs()
 void Node::finishProcessing()
 {
     Q_FOREACH(ConnectorIn* i, input) {
-        i->setProcessing(false);
+        if(i->isProcessing()) {
+            i->setProcessing(false);
+        }
     }
 }
 
@@ -751,6 +753,13 @@ void Node::setCommandDispatcher(CommandDispatcher *d)
 
 void Node::stop()
 {
+    Q_FOREACH(ConnectorIn* i, input) {
+        i->stop();
+    }
+    Q_FOREACH(ConnectorOut* i, output) {
+        i->stop();
+    }
+
     Q_FOREACH(ConnectorIn* i, input) {
         disconnectConnector(i);
     }
