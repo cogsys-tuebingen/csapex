@@ -9,6 +9,8 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
+#include <QMutex>
+#include <QWaitCondition>
 #include <QObject>
 
 /// FORWARDS DECLARATION
@@ -95,6 +97,16 @@ public Q_SLOTS:
     virtual void disable();
     virtual void enable();
 
+    bool isEnabled() const;
+
+    virtual void setProcessing(bool processing);
+    bool isProcessing() const;
+    virtual void waitForProcessing(const UUID &who_is_waiting);
+    virtual void updateIsProcessing();
+
+protected:
+    virtual void notifyMessageProcessed();
+
 
 Q_SIGNALS:
     void disconnected(QObject*);
@@ -102,6 +114,8 @@ Q_SIGNALS:
     void connectionStart();
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone();
+    void connectionRemoved();
+    void messageProcessed();
 
 Q_SIGNALS:
     void messageSent(Connectable* source);
@@ -115,6 +129,7 @@ protected:
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
+
 protected:
     virtual bool shouldMove(bool left, bool right);
     virtual bool shouldCreate(bool left, bool right);
@@ -122,6 +137,10 @@ protected:
 protected:
     CommandDispatcher* dispatcher_;
     Port* port_;
+
+    mutable QMutex io_mutex;
+
+    QWaitCondition can_process_cond;
 
     csapex::DesignBoard* designer;
 
@@ -133,6 +152,13 @@ protected:
 
     bool minimized_;
     int count_;
+
+private:
+    bool processing;
+    bool enabled_;
+
+public:
+    std::vector<UUID> waiting_list_;
 };
 
 }

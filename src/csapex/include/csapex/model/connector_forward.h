@@ -44,6 +44,7 @@ public:
     virtual Command::Ptr removeAllConnectionsCmd();
 
     void setPrimaryFunction(bool input);
+    virtual void updateIsProcessing();
 
 protected:
     virtual bool tryConnect(Connectable* other_side);

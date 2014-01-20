@@ -24,6 +24,9 @@ public:
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);
 
+protected:
+    void checkIfDone();
+
 private:
     void swapBuffers();
 

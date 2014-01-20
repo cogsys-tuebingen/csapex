@@ -90,7 +90,7 @@ void Graph::addNode(Node::Ptr node)
 
     QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(tick()));
 
-    Q_EMIT nodeAdded(node.get());
+    Q_EMIT nodeAdded(node);
 }
 
 void Graph::deleteNode(const UUID& uuid)

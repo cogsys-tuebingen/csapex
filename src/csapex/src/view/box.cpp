@@ -34,19 +34,19 @@ const QString Box::MIME_MOVE = "csapex/model/box/move";
 
 int Box::g_instances = 0;
 
-Box::Box(Node* node, NodeAdapter::Ptr adapter, QWidget* parent)
+Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), profiling_(false), is_placed_(false)
 {
-    adapter_->setNode(node_);
+    adapter_->setNode(node_.get());
 
     construct(node);
 
     ++g_instances;
 }
 
-Box::Box(BoxedObject* node, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_shared_(node),
+Box::Box(BoxedObjectPtr node, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_shared_(node.get()),
       down_(false), profiling_(false), is_placed_(false)
 {
     construct(node);
@@ -63,15 +63,15 @@ Box::~Box()
 void Box::setupUi()
 {
     if(adapter_) {
-        QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+        QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
         adapter_->doSetupUi(ui->content);
     } else {
-        QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_, SLOT(eventGuiChanged()), Qt::QueuedConnection);
+        QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
         adapter_shared_->doSetupUi(ui->content);
     }
 }
 
-void Box::construct(Node* node)
+void Box::construct(NodePtr node)
 {
     ui->setupUi(this);
 
@@ -100,17 +100,17 @@ void Box::construct(Node* node)
 
     node_->setMinimized(false);
 
-    QObject::connect(this, SIGNAL(toggled(bool)), node_, SIGNAL(toggled(bool)));
-    QObject::connect(this, SIGNAL(placed()), node_, SIGNAL(started()));
+    QObject::connect(this, SIGNAL(toggled(bool)), node_.get(), SIGNAL(toggled(bool)));
+    QObject::connect(this, SIGNAL(placed()), node_.get(), SIGNAL(started()));
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    QObject::connect(node_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    QObject::connect(node_, SIGNAL(modelChanged()), this, SLOT(eventModelChanged()));
-    QObject::connect(node_, SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
-    QObject::connect(node_, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
-    QObject::connect(node_, SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
+    QObject::connect(node_.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    QObject::connect(node_.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()));
+    QObject::connect(node_.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
+    QObject::connect(node_.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
+    QObject::connect(node_.get(), SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -128,7 +128,7 @@ void Box::construct(Node* node)
 
 Node* Box::getNode()
 {
-    return node_;
+    return node_.get();
 }
 
 void Box::enableContent(bool enable)

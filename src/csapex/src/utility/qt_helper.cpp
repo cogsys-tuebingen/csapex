@@ -7,6 +7,7 @@
 #include <csapex/view/port.h>
 #include <csapex/command/meta.h>
 
+using namespace qt_helper;
 using namespace csapex;
 
 class QtConnectable : public ConnectorIn
@@ -18,6 +19,17 @@ public:
         setType(ConnectionTypeManager::createMessage(type));
     }
 };
+
+
+void QSleepThread::sleep(unsigned long t) {
+    currentThread()->sleep(t);
+}
+void QSleepThread::msleep(unsigned long t) {
+    currentThread()->msleep(t);
+}
+void QSleepThread::usleep(unsigned long t) {
+    currentThread()->usleep(t);
+}
 
 QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size) {
     QHBoxLayout *internal_layout = new QHBoxLayout;

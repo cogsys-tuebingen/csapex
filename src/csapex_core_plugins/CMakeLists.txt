@@ -49,6 +49,7 @@ target_link_libraries(csapex_core_lib
 add_library(csapex_core_plugins
     src/double_buffer.cpp
     src/relay.cpp
+    src/delay.cpp
     src/export_cout.cpp
     src/export_ros.cpp
     src/export_file.cpp

@@ -26,9 +26,14 @@ DoubleBuffer::DoubleBuffer()
 void DoubleBuffer::fill(QBoxLayout *layout)
 {
     if(input_ == NULL) {
-        input_ = addInput<connection_types::AnyMessage>("Anything");
+        input_ = addInput<connection_types::AnyMessage>("Anything", false, true);
         output_ = addOutput<connection_types::AnyMessage>("Same as input");
     }
+}
+
+void DoubleBuffer::checkIfDone()
+{
+    input_->setProcessing(false);
 }
 
 void DoubleBuffer::messageArrived(ConnectorIn *source)

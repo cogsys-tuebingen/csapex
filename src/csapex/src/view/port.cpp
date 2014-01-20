@@ -6,6 +6,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/move_connection.h>
+#include <csapex/model/connector_in.h>
 
 /// SYSTEM
 #include <sstream>
@@ -22,8 +23,6 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
         adaptee_->setPort(this);
         setToolTip(adaptee_->getUUID().c_str());
     }
-
-    connect(adaptee, SIGNAL(enabled(bool)), this, SLOT(setEnabled(bool)));
 
     setFixedSize(16, 16);
 
@@ -72,6 +71,12 @@ CommandDispatcher* Port::getCommandDispatcher() const
 
 void Port::paintEvent(QPaintEvent *e)
 {
+    if(adaptee_->isInput()) {
+        ConnectorIn* i = dynamic_cast<ConnectorIn*>(adaptee_);
+        setProperty("legacy", i->isLegacy());
+        refreshStylesheet();
+    }
+
     if(refresh_style_sheet_) {
         refresh_style_sheet_ = false;
         setStyleSheet(styleSheet());
@@ -110,6 +115,12 @@ void Port::setMinimizedSize(bool mini)
 bool Port::isMinimizedSize() const
 {
     return minimized_;
+}
+
+void Port::setPortProperty(const std::string& name, bool b)
+{
+    setProperty(name.c_str(), b);
+    refreshStylesheet();
 }
 
 void Port::mouseMoveEvent(QMouseEvent* e)
@@ -174,6 +185,7 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
 
 void Port::dragEnterEvent(QDragEnterEvent* e)
 {
+    std::cout << "port enter: " << e->format() << std::endl;
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
         if(from == adaptee_) {

@@ -222,7 +222,9 @@ void GraphIO::loadConnections(YAML::Node &doc)
                     Node* target_box = graph_->findNodeForConnector(to_uuid);
 
                     ConnectorIn* to = target_box->getInput(to_uuid);
-                    assert(to); // if parent box has been found, this should never happen
+                    if(!to) {
+                        continue;
+                    }
 
                     graph_->addConnection(Connection::Ptr(new Connection(from, to)));
 

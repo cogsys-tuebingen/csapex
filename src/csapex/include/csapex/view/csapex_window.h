@@ -65,7 +65,7 @@ public Q_SLOTS:
     void saveSettings(YAML::Emitter& e);
     void loadSettings(YAML::Node& doc);
 
-    void nodeAdded(Node* node);
+    void nodeAdded(NodePtr node);
     void nodeRemoved(NodePtr node);
 
     void openSubGraph(Group* grp);

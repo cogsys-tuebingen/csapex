@@ -51,10 +51,10 @@ public:
 
 public:
     /// CONSTRUCTION
-    Box(BoxedObject *content, QWidget* parent = 0);
-    Box(Node* content, NodeAdapterPtr adapter, QWidget* parent = 0);
+    Box(BoxedObjectPtr content, QWidget* parent = 0);
+    Box(NodePtr content, NodeAdapterPtr adapter, QWidget* parent = 0);
     virtual ~Box();
-    void construct(Node* node);
+    void construct(NodePtr node);
     void init();
 
     /// CONTROL
@@ -141,7 +141,7 @@ protected:
 protected:
     Ui::Box* ui;
 
-    Node* node_;
+    NodePtr node_;
     NodeAdapterPtr adapter_;
     NodeAdapter* adapter_shared_;
 

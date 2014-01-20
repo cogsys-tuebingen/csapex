@@ -28,6 +28,8 @@ public:
 public:
     NodeWorker(Node* node);
 
+    bool isProcessing();
+
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
 
@@ -42,6 +44,7 @@ public Q_SLOTS:
     void triggerError(bool e, const std::string& what);
 
     void setSynchronizedInputs(bool s);
+    bool isSynchronizedInputs() const;
 
     void addParameterCallback(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
 
@@ -66,6 +69,7 @@ private:
     std::deque<int> timer_history_;
 
     bool thread_initialized_;
+    volatile bool is_processing_;
 };
 
 }

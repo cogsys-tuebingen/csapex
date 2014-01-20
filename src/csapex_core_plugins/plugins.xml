@@ -42,6 +42,9 @@
 <class type="csapex::Relay" base_class_type="csapex::Node">
   <description>none yet</description>
 </class>
+<class type="csapex::Delay" base_class_type="csapex::Node">
+  <description>none yet</description>
+</class>
 
 <class type="csapex::FileImporter" base_class_type="csapex::Node">
   <description>none yet</description>

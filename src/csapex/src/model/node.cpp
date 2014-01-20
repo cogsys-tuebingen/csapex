@@ -18,12 +18,18 @@ Node::Node(const UUID &uuid)
     : Unique(uuid), icon_(":/plugin.png"), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
-    QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(messageProcessed()));
+    QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
 }
 
 Node::~Node()
 {
     delete worker_;
+    BOOST_FOREACH(ConnectorIn* in, input) {
+        delete in;//in->deleteLater();
+    }
+    BOOST_FOREACH(ConnectorOut* out, output) {
+        delete out;//out->deleteLater();
+    }
 }
 
 void Node::makeThread()
@@ -129,11 +135,39 @@ void Node::allConnectorsArrived()
 
 }
 
-void Node::messageProcessed()
+void Node::checkInputs()
+{
+    enableInput(canReceive());
+}
+
+void Node::finishProcessing()
 {
     Q_FOREACH(ConnectorIn* i, input) {
-        i->notify();
+        i->setProcessing(false);
     }
+}
+
+void Node::checkIfDone()
+{
+    int no_targets = 0;
+    Q_FOREACH(ConnectorOut* o, output) {
+        no_targets += o->noTargets();
+    }
+
+    if(worker_->isProcessing()/* && no_targets != 0*/) {
+        return;
+    }
+
+    // check if all children are done processing
+    Q_FOREACH(ConnectorOut* o, output) {
+        // o->waitForProcessing();
+        if(o->isProcessing()) {
+            return;
+        }
+    }
+
+    // notify that all children are done
+    finishProcessing();
 }
 
 void Node::killContent()
@@ -247,7 +281,6 @@ void Node::setState(Memento::Ptr memento)
 void Node::enable(bool e)
 {
     node_state_->enabled = e;
-    enableIO(e);
     if(e) {
         enable();
     } else {
@@ -258,6 +291,7 @@ void Node::enable(bool e)
 void Node::enable()
 {
     node_state_->enabled = true;
+    enableIO(true);
 
     if(box_) {
         box_->enabledChange(node_state_->enabled);
@@ -274,13 +308,32 @@ void Node::disable()
 {
     node_state_->enabled = false;
     setError(false);
+    enableIO(false);
 
     if(box_) {
         box_->enabledChange(node_state_->enabled);
     }
 }
 
+bool Node::canReceive()
+{
+    bool can_receive = true;
+    Q_FOREACH(ConnectorIn* i, input) {
+        if(!i->isConnected() && !i->isOptional()) {
+            can_receive = false;
+        }
+    }
+
+    return can_receive;
+}
+
 void Node::enableIO(bool enable)
+{
+    enableInput(canReceive() && enable);
+    enableOutput(enable);
+}
+
+void Node::enableInput (bool enable)
 {
     Q_FOREACH(ConnectorIn* i, input) {
         if(enable) {
@@ -289,6 +342,11 @@ void Node::enableIO(bool enable)
             i->disable();
         }
     }
+}
+
+
+void Node::enableOutput (bool enable)
+{
     Q_FOREACH(ConnectorOut* i, output) {
         if(enable) {
             i->enable();
@@ -363,6 +421,10 @@ NodeWorker* Node::getNodeWorker() const
 
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
+    if(error) {
+        finishProcessing();
+    }
+
     box_->setError(error, msg, level);
     if(node_state_->enabled && error && level == EL_ERROR) {
         setIOError(true);
@@ -403,6 +465,7 @@ ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label, 
 void Node::addInput(ConnectorIn* in)
 {
     registerInput(in);
+    //    in->setLegacy(worker_->isSynchronizedInputs());
 }
 
 void Node::addOutput(ConnectorOut* out)
@@ -413,6 +476,9 @@ void Node::addOutput(ConnectorOut* out)
 void Node::setSynchronizedInputs(bool sync)
 {
     worker_->setSynchronizedInputs(sync);
+    //    BOOST_FOREACH(ConnectorIn* in, input) {
+    //        in->setLegacy(!sync);
+    //    }
 }
 
 int Node::countInputs() const
@@ -470,6 +536,8 @@ void Node::removeInput(ConnectorIn *in)
 
     disconnectConnector(in);
     Q_EMIT connectorRemoved(in);
+
+    checkIfDone();
 }
 
 void Node::removeOutput(ConnectorOut *out)
@@ -484,6 +552,8 @@ void Node::removeOutput(ConnectorOut *out)
 
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
+
+    checkIfDone();
 }
 
 
@@ -547,6 +617,17 @@ QTreeWidgetItem* Node::createDebugInformation() const
             QTreeWidgetItem* input = new QTreeWidgetItem;
             input->setText(0, "Input");
 
+            QTreeWidgetItem* waiting = new QTreeWidgetItem;
+            waiting->setText(0, "Waiting Inputs");
+            for(std::vector<UUID>::const_iterator it = connector->waiting_list_.begin();
+                it != connector->waiting_list_.end(); ++it) {
+
+                QTreeWidgetItem* w = new QTreeWidgetItem;
+                w->setText(0, it->getFullName().c_str());
+
+                waiting->addChild(w);
+            }
+
             QTreeWidgetItem* target_widget = new QTreeWidgetItem;
             if(connector->isConnected()) {
                 Connectable* target = connector->getSource();
@@ -558,9 +639,11 @@ QTreeWidgetItem* Node::createDebugInformation() const
                 target_widget->setText(0, "not connected");
                 target_widget->setIcon(1, QIcon(":/disconnected.png"));
             }
+
             input->addChild(target_widget);
 
             connector_widget->addChild(input);
+            connector_widget->addChild(waiting);
 
             connectors->addChild(connector_widget);
         }
@@ -629,6 +712,8 @@ void Node::registerOutput(ConnectorOut* out)
 
     out->setCommandDispatcher(dispatcher_);
 
+    QObject::connect(out, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
+
     connectConnector(out);
 
     Q_EMIT connectorCreated(out);
@@ -692,6 +777,9 @@ void Node::connectConnector(Connectable *c)
     QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+    QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkInputs()));
+    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkIfDone()));
+    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkInputs()));
 }
 
 

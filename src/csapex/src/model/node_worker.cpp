@@ -7,15 +7,21 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
+#include <csapex/view/port.h>
 
 using namespace csapex;
 
 const unsigned NodeWorker::timer_history_length_ = 30;
 
 NodeWorker::NodeWorker(Node* node)
-    : node_(node), synchronized_inputs_(false), thread_initialized_(false)
+    : node_(node), synchronized_inputs_(false), thread_initialized_(false), is_processing_(false)
 {
     assert(node_);
+}
+
+bool NodeWorker::isProcessing()
+{
+    return is_processing_;
 }
 
 void NodeWorker::addParameterCallback(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb)
@@ -33,12 +39,26 @@ void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(
 void NodeWorker::setSynchronizedInputs(bool s)
 {
     synchronized_inputs_ = s;
+
+    typedef std::pair<ConnectorIn*, bool> PAIR;
+    Q_FOREACH(const PAIR& pair, has_msg_) {
+        pair.first->setLegacy(!synchronized_inputs_);
+    }
+}
+
+bool NodeWorker::isSynchronizedInputs() const
+{
+    return synchronized_inputs_;
 }
 
 void NodeWorker::forwardMessage(Connectable *s)
 {
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
     assert(source);
+
+    if(node_->isError()) {
+        return;
+    }
 
     if(node_->isEnabled()) {
         if(synchronized_inputs_) {
@@ -56,20 +76,28 @@ void NodeWorker::forwardMessage(Connectable *s)
 
 void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
 {
+    assert(!is_processing_);
+
     Timer t;
+    is_processing_ = true;
+
     node_->messageArrived(source);
     timer_history_.push_back(t.elapsedMs());
 
+    is_processing_ = false;
     Q_EMIT messageProcessed();
 }
 
 void NodeWorker::addInput(ConnectorIn *source)
 {
     has_msg_[source] = false;
+    source->setLegacy(!synchronized_inputs_);
 }
 
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
+    assert(!is_processing_);
+
     has_msg_[source] = true;
 
     typedef std::pair<ConnectorIn*, bool> PAIR;
@@ -95,16 +123,18 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         }
     }
 
+    is_processing_ = true;
+
     Timer t;
     node_->allConnectorsArrived();
     timer_history_.push_back(t.elapsedMs());
 
-    Q_EMIT messageProcessed();
-
-
     Q_FOREACH(const PAIR& pair, has_msg_) {
         has_msg_[pair.first] = false;
     }
+
+    is_processing_ = false;
+    Q_EMIT messageProcessed();
 }
 
 void NodeWorker::tick()

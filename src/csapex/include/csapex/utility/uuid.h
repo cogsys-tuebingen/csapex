@@ -13,6 +13,7 @@ class UUID
 public:
     static std::string stripNamespace(const std::string& name);
     static UUID make(const std::string& prefix);
+    static void free(const UUID& uuid);
     static UUID make_forced(const std::string& representation);
 
     static void reset();

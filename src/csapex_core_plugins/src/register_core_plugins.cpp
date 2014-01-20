@@ -184,6 +184,7 @@ void RegisterCorePlugins::init()
     Tag::createIfNotExists("Output");
     Tag::createIfNotExists("RosIO");
     Tag::createIfNotExists("ConsoleIO");
+    Tag::createIfNotExists("Debug");
 
     DragIO::registerHandler<RosHandler>();
     DragIO::registerHandler<FileHandler>();

@@ -221,9 +221,9 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
     } else {
         BoxedObjectPtr bo = boost::dynamic_pointer_cast<BoxedObject> (content);
         if(bo) {
-            object.reset(new csapex::Box(bo.get()));
+            object.reset(new csapex::Box(bo));
         } else {
-            object.reset(new csapex::Box(content.get(), NodeAdapter::Ptr(new NodeAdapter)));
+            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new NodeAdapter)));
         }
     }
 

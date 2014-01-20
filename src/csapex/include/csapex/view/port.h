@@ -28,6 +28,8 @@ public:
     void setMinimizedSize(bool mini);
     bool isMinimizedSize() const;
 
+    void setPortProperty(const std::string& name, bool b);
+
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent * e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
@@ -47,9 +49,10 @@ public:
     Connectable* getAdaptee() const;
     CommandDispatcher* getCommandDispatcher() const;
 
+    void refreshStylesheet();
+
 protected:
     void paintEvent(QPaintEvent *);
-    void refreshStylesheet();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
     void errorChanged(bool error);

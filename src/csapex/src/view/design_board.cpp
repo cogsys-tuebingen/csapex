@@ -159,6 +159,7 @@ void DesignBoard::addBoxEvent(Box *box)
 
 void DesignBoard::removeBoxEvent(Box *box)
 {
+    box->setVisible(false);
     box->deleteLater();
 }
 

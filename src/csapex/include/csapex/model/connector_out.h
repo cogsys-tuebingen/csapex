@@ -68,6 +68,7 @@ public:
     void forceSendMessage(bool force = true);
     ConnectionType::Ptr getMessage();
 
+    virtual void updateIsProcessing();
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)

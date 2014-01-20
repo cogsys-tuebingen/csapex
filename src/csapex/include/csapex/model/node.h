@@ -182,11 +182,14 @@ public:
     YAML::Emitter& save(YAML::Emitter& out) const;
     void read(const YAML::Node &doc);
 
+    bool canReceive();
+
 protected:
     virtual void setState(Memento::Ptr memento);
     virtual Memento::Ptr getState() const;
 
     void makeThread();
+    void finishProcessing();
 
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
@@ -211,11 +214,15 @@ public Q_SLOTS:
     virtual void updateModel();
     void eventGuiChanged();
 
-    void messageProcessed();
+    virtual void checkIfDone();
+    virtual void checkInputs();
 
     void killContent();
 
     void enableIO(bool enable);
+    void enableInput(bool enable);
+    void enableOutput(bool enable);
+
     void setIOError(bool error);
     void setLabel(const std::string& label);
     void setMinimized(bool min);

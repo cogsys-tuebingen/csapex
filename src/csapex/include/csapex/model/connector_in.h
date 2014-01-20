@@ -37,15 +37,12 @@ public:
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
 
-    void notify();
-    void wait();
     void inputMessage(ConnectionType::Ptr message);
-
-    bool hasMessage() const;
-
 
     template <typename R>
     typename R::Ptr getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {
+        waitForMessage();
+
         QMutexLocker lock(&io_mutex);
         typename R::Ptr result = boost::dynamic_pointer_cast<R> (message_);
         assert(result || !message_);
@@ -53,6 +50,8 @@ public:
     }
     template <typename R>
     typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {
+        waitForMessage();
+
         QMutexLocker lock(&io_mutex);
         typename connection_types::GenericMessage<R>::Ptr tmp =
         boost::dynamic_pointer_cast<typename connection_types::GenericMessage<R> > (message_);
@@ -77,6 +76,14 @@ public:
     bool isAsync() const;
     void setAsync(bool asynch);
 
+    bool isLegacy() const;
+    void setLegacy(bool legacy);
+
+    bool hasMessage() const;
+
+    virtual void waitForProcessing(const UUID& who_is_waiting);
+    virtual void setProcessing(bool processing);
+    virtual void updateIsProcessing();
 
 protected:
     virtual bool tryConnect(Connectable* other_side);
@@ -84,21 +91,19 @@ protected:
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
-//public Q_SLOTS:
-//    void relayMessage(ConnectorIn* source);
+private:
+    void waitForMessage();
 
 protected:
     Connectable* target;
 
     ConnectionType::Ptr message_;
 
-    QMutex io_mutex;
-    QMutex reserve_mutex;
-    bool can_process;
-    QWaitCondition can_process_cond;
+    QWaitCondition has_msg_cond;
 
     bool optional_;
     bool async_;
+    bool legacy_;
 };
 
 }

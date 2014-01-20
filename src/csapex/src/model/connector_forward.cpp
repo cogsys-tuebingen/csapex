@@ -195,3 +195,12 @@ void ConnectorForward::setPrimaryFunction(bool input)
 {
     primary_function_is_input = input;
 }
+
+void ConnectorForward::updateIsProcessing()
+{
+    if(primary_function_is_input) {
+        return  ConnectorIn::updateIsProcessing();
+    } else {
+        return ConnectorOut::updateIsProcessing();
+    }
+}

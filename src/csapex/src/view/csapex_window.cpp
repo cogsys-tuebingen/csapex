@@ -74,7 +74,7 @@ void CsApexWindow::construct()
     QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
     QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
-    QObject::connect(graph_.get(), SIGNAL(nodeAdded(Node*)), this, SLOT(nodeAdded(Node*)));
+    QObject::connect(graph_.get(), SIGNAL(nodeAdded(NodePtr)), this, SLOT(nodeAdded(NodePtr)));
     QObject::connect(graph_.get(), SIGNAL(nodeRemoved(NodePtr)), this, SLOT(nodeRemoved(NodePtr)));
 
     QObject::connect(graph_.get(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
@@ -361,10 +361,10 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
     designerio.loadSettings(doc);
 }
 
-void CsApexWindow::nodeAdded(Node *node)
+void CsApexWindow::nodeAdded(Node::Ptr node)
 {
     Box* box;
-    BoxedObject* bo = dynamic_cast<BoxedObject*>(node);
+    BoxedObject::Ptr bo = boost::dynamic_pointer_cast<BoxedObject>(node);
     if(bo) {
         box = new Box(bo);
     } else {

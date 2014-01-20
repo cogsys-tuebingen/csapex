@@ -18,7 +18,6 @@
 using namespace csapex;
 
 const std::string Connectable::namespace_separator = ":|:";
-
 const QString Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
 const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
@@ -33,20 +32,80 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 }
 
 Connectable::Connectable(const UUID& uuid)
-    : Unique(uuid), buttons_down_(0), minimized_(false)
+    : Unique(uuid), buttons_down_(0), minimized_(false), processing(false), enabled_(false)
 {
     init();
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false), processing(false), enabled_(false)
 {
     init();
+}
+
+void Connectable::notifyMessageProcessed()
+{
+    {
+        QMutexLocker lock(&io_mutex);
+        can_process_cond.wakeAll();
+    }
+
+    Q_EMIT messageProcessed();
+}
+
+void Connectable::updateIsProcessing()
+{
+
+}
+
+void Connectable::setProcessing(bool p)
+{
+    port_->setPortProperty("processing", p);
+
+    processing = p;
+
+    if(!processing) {
+        notifyMessageProcessed();
+    }
+}
+
+bool Connectable::isProcessing() const
+{
+    QMutexLocker lock(&io_mutex);
+    return processing;
+}
+
+void Connectable::waitForProcessing(const UUID& who_is_waiting)
+{
+    if(isError()) {
+        return;
+    }
+
+    QMutexLocker lock(&io_mutex);
+
+    if(processing) {
+        waiting_list_.push_back(who_is_waiting);
+        while(processing) {
+            port_->setPortProperty("blocked", true);
+
+            can_process_cond.wait(&io_mutex);
+        }
+
+        std::remove(waiting_list_.begin(), waiting_list_.end(), who_is_waiting);
+    }
+
+    port_->setPortProperty("blocked", false);
 }
 
 void Connectable::setPort(Port *port)
 {
     port_ = port;
+
+    if(isEnabled()) {
+        enable();
+    } else {
+        disable();
+    }
 
     port_->setMinimizedSize(minimized_);
 }
@@ -79,7 +138,11 @@ void Connectable::init()
 
     setMinimizedSize(minimized_);
 
+    QObject::connect(this, SIGNAL(connectionRemoved()), this, SLOT(updateIsProcessing()));
+
     count_ = 0;
+
+    disable();
 }
 
 
@@ -128,18 +191,25 @@ void Connectable::removeAllConnectionsUndoable()
 
 void Connectable::disable()
 {
-    //port_->setEnabled(false);
-    Q_EMIT enabled(false);
-    port_->setProperty("disabled", true);
-    //refreshStylesheet();
+    enabled_ = false;
+    Q_EMIT enabled(enabled_);
+    if(port_) {
+        port_->setProperty("disabled", !enabled_);
+    }
 }
 
 void Connectable::enable()
 {
-    //port_->setEnabled(true);
-    Q_EMIT enabled(true);
-    port_->setProperty("disabled", false);
-    //refreshStylesheet();
+    enabled_ = true;
+    Q_EMIT enabled(enabled_);
+    if(port_) {
+        port_->setProperty("disabled", !enabled_);
+    }
+}
+
+bool Connectable::isEnabled() const
+{
+    return enabled_;
 }
 
 bool Connectable::canConnectTo(Connectable* other_side, bool) const

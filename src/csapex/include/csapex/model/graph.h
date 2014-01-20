@@ -117,7 +117,7 @@ Q_SIGNALS:
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
 
-    void nodeAdded(Node*);
+    void nodeAdded(NodePtr);
     void nodeRemoved(NodePtr);
 
     void sig_tick();

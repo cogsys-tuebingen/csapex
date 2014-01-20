@@ -12,12 +12,12 @@
 using namespace csapex;
 
 ConnectorIn::ConnectorIn(const UUID &uuid)
-    : Connectable(uuid), target(NULL), can_process(true), optional_(false), async_(false)
+    : Connectable(uuid), target(NULL), optional_(false), async_(false), legacy_(true)
 {
 }
 
 ConnectorIn::ConnectorIn(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, TYPE_IN), target(NULL), can_process(true), optional_(false), async_(false)
+    : Connectable(parent, sub_id, TYPE_IN), target(NULL), optional_(false), async_(false), legacy_(true)
 {
 }
 
@@ -50,6 +50,8 @@ void ConnectorIn::removeConnection(Connectable* other_side)
     if(target != NULL) {
         assert(other_side == target);
         target = NULL;
+
+        Q_EMIT connectionRemoved();
     }
 }
 
@@ -77,6 +79,22 @@ void ConnectorIn::setAsync(bool asynch)
 bool ConnectorIn::isAsync() const
 {
     return async_;
+}
+
+void ConnectorIn::setLegacy(bool legacy)
+{
+    legacy_ = legacy;
+}
+
+bool ConnectorIn::isLegacy() const
+{
+    return legacy_;
+}
+
+
+bool ConnectorIn::hasMessage() const
+{
+    return message_;
 }
 
 void ConnectorIn::removeAllConnectionsNotUndoable()
@@ -128,48 +146,52 @@ Connectable *ConnectorIn::getSource() const
     return target;
 }
 
-void ConnectorIn::notify()
+void ConnectorIn::waitForProcessing(const UUID& who_is_waiting)
 {
-    {
-        QMutexLocker lock(&reserve_mutex);
-        can_process = true;
+    if(isAsync() || !isEnabled()) {
+        return;
     }
-    can_process_cond.wakeAll();
+
+    Connectable::waitForProcessing(who_is_waiting);
 }
 
-void ConnectorIn::wait()
+void ConnectorIn::setProcessing(bool processing)
 {
-    QMutexLocker lock(&reserve_mutex);
+    Connectable::setProcessing(processing);
+    // call parents
+    if(isConnected()) {
+        Connectable* parent = getSource();
+        parent->setProcessing(processing);
+    }
+}
 
-    while(!can_process) {
-        std::cout << "warning: " << getUUID() << "can't process" << std::endl;
-        can_process_cond.wait(&reserve_mutex);
+void ConnectorIn::waitForMessage()
+{
+    QMutexLocker lock(&io_mutex);
 
-        if(!can_process) {
-            std::cout << "warning: called wait on a busy input connector" << std::endl;
-        } else {
-            std::cout << "warning: done waiting  " << getUUID() << std::endl;
-        }
+//    while(!has_msg) {
+//        has_msg_cond.wait(&io_mutex);
+//    }
+}
+
+void ConnectorIn::updateIsProcessing()
+{
+    if(!isConnected()) {
+        setProcessing(false);
     }
 }
 
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
-    wait();
-
     {
         QMutexLocker lock(&io_mutex);
         message_ = message;
+        setProcessing(true);
     }
 
     count_++;
 
     Q_EMIT messageArrived(this);
-}
-
-bool ConnectorIn::hasMessage() const
-{
-    return message_;
 }
 
 ConnectionType::Ptr ConnectorIn::getMessage()

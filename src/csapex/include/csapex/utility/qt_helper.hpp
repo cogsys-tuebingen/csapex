@@ -45,15 +45,9 @@ private:
 };
 
 struct QSleepThread : public QThread {
-    static void sleep(unsigned long t) {
-        QThread::sleep(t);
-    }
-    static void msleep(unsigned long t) {
-        QThread::msleep(t);
-    }
-    static void usleep(unsigned long t) {
-        QThread::usleep(t);
-    }
+    static void sleep(unsigned long t);
+    static void msleep(unsigned long t);
+    static void usleep(unsigned long t);
 };
 
 }

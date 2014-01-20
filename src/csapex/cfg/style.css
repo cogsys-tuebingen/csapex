@@ -67,7 +67,7 @@ QWidget#DesignBoard {
         background: rgb(255, 255, 255);
 }
 QWidget#DesignBoard:focus {
-        border: 1px solid rgb(255, 0, 0)!important;
+        /*border: 1px solid rgb(255, 0, 0)!important;*/
 }
 
 QWidget#DesignBoard[grid="true"] {
@@ -88,6 +88,13 @@ csapex--Port[disabled="true"]  {
 csapex--Port[error="true"]  {
         border: 2px solid rgb(165,30,55);
         background: rgb(255,200,200);
+}
+csapex--Port[legacy="true"]  {
+        border: 2px solid rgb(255,255,255);
+        background: rgb(0,0,0);
+}
+csapex--Port[blocked="true"]  {
+        border: 2px solid rgb(255,255,0)!important;
 }
 
 /* connection */

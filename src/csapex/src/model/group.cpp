@@ -18,7 +18,7 @@ using namespace csapex;
 const QString Group::MIME = "csapex/model/boxmeta";
 
 Group::Group(const std::string &/*type*/, const UUID& /*uuid*/, QWidget *parent)
-    : Box(NULL, BoxedObject::Ptr((BoxedObject*) NULL), parent)
+    : Box(BoxedObject::Ptr((BoxedObject*) NULL), BoxedObject::Ptr((BoxedObject*) NULL), parent)
 {
     icon_ = new QLabel();
     QIcon img(":/group.png");

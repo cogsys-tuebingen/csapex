@@ -6,6 +6,7 @@
 #include <csapex/view/design_board.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
+#include <csapex/view/port.h>
 
 /// SYSTEM
 #include <assert.h>
@@ -68,9 +69,20 @@ void ConnectorOut::removeConnection(Connectable* other_side)
             other_side->removeConnection(this);
 
             i = targets_.erase(i);
+
+            Q_EMIT connectionRemoved();
+            return;
+
         } else {
             ++i;
         }
+    }
+}
+
+void ConnectorOut::updateIsProcessing()
+{
+    if(!isConnected()) {
+        setProcessing(false);
     }
 }
 
@@ -170,21 +182,42 @@ void ConnectorOut::validateConnections()
 
 void ConnectorOut::publish(ConnectionType::Ptr message)
 {
-//    if(!isEnabled()){
-//        return;
-//    }
-
+    // update buffer
     message_ = message;
 
-    if(targets_.size() == 1) {
-        targets_[0]->inputMessage(message_);
-    } else if(targets_.size() > 1) {
-        BOOST_FOREACH(ConnectorIn* i, targets_) {
-            i->inputMessage(message_->clone());
+
+    setProcessing(true);
+
+    // wait for all connected inputs to be able to receive
+    //  * inputs can only be connected to this output since they are 1:1
+    std::vector<ConnectorIn*> targets;
+    BOOST_FOREACH(ConnectorIn* i, targets_) {
+        if(i->isEnabled()) {
+            if(i->isProcessing()) {
+                port_->setPortProperty("blocked", true);
+                i->waitForProcessing(getUUID());
+            }
+            targets.push_back(i);
         }
-    } else if(!force_send_message_){
+    }
+
+    port_->setPortProperty("blocked", false);
+
+    if(targets.empty()) {
+        setProcessing(false);
         return;
     }
+
+    // all connected inputs are ready to receive, send them the message
+    if(targets.size() == 1) {
+        targets[0]->inputMessage(message_);
+    } else if(targets.size() > 1) {
+        BOOST_FOREACH(ConnectorIn* i, targets) {
+            i->inputMessage(message_->clone());
+        }
+    }/* else if(!force_send_message_){
+        return;
+    }*/
 
     count_++;
     Q_EMIT messageSent(this);
