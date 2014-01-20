@@ -175,7 +175,6 @@ void Overlay::drawConnection(Connection& connection)
     ccs.async = from->isAsync() || to->isAsync();
     ccs.minimized_from = from->isMinimizedSize();
     ccs.minimized_to = to->isMinimizedSize();
-    ccs.is_highway = from->isMultiDimensional();
 
     drawConnection(p1, p2, id);
 
@@ -202,10 +201,6 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
 {
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? 2 : 4;
-
-    if(ccs.is_highway) {
-        ccs.r *= 5.0;
-    }
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;

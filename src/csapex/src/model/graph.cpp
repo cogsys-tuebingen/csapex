@@ -150,100 +150,100 @@ Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<UUID, UUID
 Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<UUID, UUID> >& /*connections*/, bool /*only_selected*/) const
 {
     // TODO: reimplement
-//    std::vector<Node*> selected;
+    //    std::vector<Node*> selected;
 
-//    std::map<std::string, std::string> old_box_to_new_box;
+    //    std::map<std::string, std::string> old_box_to_new_box;
 
-//    Q_FOREACH(Node::Ptr n, nodes_) {
-//        // iterate selected boxes
-//        if(n->getBox()->isSelected() || !only_selected) {
-//            selected.push_back(n.get());
+    //    Q_FOREACH(Node::Ptr n, nodes_) {
+    //        // iterate selected boxes
+    //        if(n->getBox()->isSelected() || !only_selected) {
+    //            selected.push_back(n.get());
 
-//            NodeState::Ptr state = boost::dynamic_pointer_cast<NodeState>(n->getState());
-//            std::string new_uuid = templ->addBox(n->getType(), n->getBox()->pos(), state);
+    //            NodeState::Ptr state = boost::dynamic_pointer_cast<NodeState>(n->getState());
+    //            std::string new_uuid = templ->addBox(n->getType(), n->getBox()->pos(), state);
 
-//            size_t start_pos = new_uuid.find(Template::PARENT_PREFIX_PATTERN);
-//            assert(start_pos != std::string::npos);
+    //            size_t start_pos = new_uuid.find(Template::PARENT_PREFIX_PATTERN);
+    //            assert(start_pos != std::string::npos);
 
-//            old_box_to_new_box[n->UUID()] = new_uuid;
-//        }
-//    }
+    //            old_box_to_new_box[n->UUID()] = new_uuid;
+    //        }
+    //    }
 
-//    Q_FOREACH(Node::Ptr n, nodes_) {
-//        if(n->getBox()->isSelected() || !only_selected) {
-//            Q_FOREACH(ConnectorIn* in, n->input) {
-//                if(in->isConnected()) {
-//                    Connectable* target = in->getSource();
-//                    Node* owner = target->getNode();
+    //    Q_FOREACH(Node::Ptr n, nodes_) {
+    //        if(n->getBox()->isSelected() || !only_selected) {
+    //            Q_FOREACH(ConnectorIn* in, n->input) {
+    //                if(in->isConnected()) {
+    //                    Connectable* target = in->getSource();
+    //                    Node* owner = target->getNode();
 
-//                    bool owner_is_selected = false;
-//                    Q_FOREACH(Node* b, selected) {
-//                        owner_is_selected |= (b == owner);
-//                    }
+    //                    bool owner_is_selected = false;
+    //                    Q_FOREACH(Node* b, selected) {
+    //                        owner_is_selected |= (b == owner);
+    //                    }
 
-//                    bool is_external = !owner_is_selected;
-//                    // internal connections are done by the next loop
-//                    // external connections should be split
-//                    if(is_external) {
-//                        std::cerr << "  > split incoming connection between " << in->UUID() << " and " << target->UUID() << std::endl;
+    //                    bool is_external = !owner_is_selected;
+    //                    // internal connections are done by the next loop
+    //                    // external connections should be split
+    //                    if(is_external) {
+    //                        std::cerr << "  > split incoming connection between " << in->UUID() << " and " << target->UUID() << std::endl;
 
-//                        std::string new_connector_uuid = templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
+    //                        std::string new_connector_uuid = templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
 
-//                        std::string in_box, in_connector;
-//                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
-//                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + in_connector);
+    //                        std::string in_box, in_connector;
+    //                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
+    //                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + in_connector);
 
-//                        connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
-//                    }
-//                }
-//            }
-//            Q_FOREACH(ConnectorOut* out, n->output) {
-//                std::string new_connector_uuid;
+    //                        connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
+    //                    }
+    //                }
+    //            }
+    //            Q_FOREACH(ConnectorOut* out, n->output) {
+    //                std::string new_connector_uuid;
 
-//                for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-//                    ConnectorIn* in = *it;
-//                    Node* owner = in->getNode();
+    //                for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+    //                    ConnectorIn* in = *it;
+    //                    Node* owner = in->getNode();
 
-//                    bool is_selected = false;
-//                    Q_FOREACH(Node* b, selected) {
-//                        is_selected |= (b == owner);
-//                    }
+    //                    bool is_selected = false;
+    //                    Q_FOREACH(Node* b, selected) {
+    //                        is_selected |= (b == owner);
+    //                    }
 
-//                    bool is_external = !is_selected;
-//                    if(is_external) {
-//                        // external connections are split
-//                        std::cerr << "  > split outgoing connection between " << in->UUID() << " and " << out->UUID() << std::endl;
+    //                    bool is_external = !is_selected;
+    //                    if(is_external) {
+    //                        // external connections are split
+    //                        std::cerr << "  > split outgoing connection between " << in->UUID() << " and " << out->UUID() << std::endl;
 
-//                        if(new_connector_uuid.empty()) {
-//                            new_connector_uuid = templ->addConnector(out->getLabel(), out->getType()->name(), false, true);
-//                        }
+    //                        if(new_connector_uuid.empty()) {
+    //                            new_connector_uuid = templ->addConnector(out->getLabel(), out->getType()->name(), false, true);
+    //                        }
 
-//                        std::string out_box, out_connector;
-//                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
-//                        templ->addConnection(old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + out_connector, new_connector_uuid);
+    //                        std::string out_box, out_connector;
+    //                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
+    //                        templ->addConnection(old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + out_connector, new_connector_uuid);
 
-//                        connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
+    //                        connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
 
-//                    } else {
-//                        // internal connections are kept
-//                        std::cerr << "  > keep internal connection between " << in->UUID() << " and " << out->UUID() << std::endl;
+    //                    } else {
+    //                        // internal connections are kept
+    //                        std::cerr << "  > keep internal connection between " << in->UUID() << " and " << out->UUID() << std::endl;
 
-//                        std::string in_box, in_connector;
-//                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
+    //                        std::string in_box, in_connector;
+    //                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
 
-//                        std::string out_box, out_connector;
-//                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
+    //                        std::string out_box, out_connector;
+    //                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
 
-//                        std::string in = old_box_to_new_box[in_box] + Connectable::namespace_separator + in_connector;
-//                        std::string out = old_box_to_new_box[out_box] + Connectable::namespace_separator + out_connector;
+    //                        std::string in = old_box_to_new_box[in_box] + Connectable::namespace_separator + in_connector;
+    //                        std::string out = old_box_to_new_box[out_box] + Connectable::namespace_separator + out_connector;
 
-//                        templ->addConnection(out, in);
-//                    }
-//                }
-//            }
+    //                        templ->addConnection(out, in);
+    //                    }
+    //                }
+    //            }
 
-//        }
-//    }
+    //        }
+    //    }
 
     return templ;
 }
@@ -379,10 +379,44 @@ bool Graph::addConnection(Connection::Ptr connection)
     return false;
 }
 
+void Graph::deleteConnection(Connection::Ptr connection)
+{
+    connection->from()->removeConnection(connection->to());
+
+    for(std::vector<Connection::Ptr>::iterator c = visible_connections.begin(); c != visible_connections.end();) {
+        if(*connection == **c) {
+            visible_connections.erase(c);
+            connection->to()->setError(false);
+
+            verify();
+            Q_EMIT connectionDeleted(connection.get());
+        } else {
+            ++c;
+        }
+    }
+
+    Q_EMIT stateChanged();
+}
+
+
 void Graph::verify()
 {
-    std::cerr << "verify" << std::endl;
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        bool blocked = false;
+        for(int i = 0; i < node->countInputs(); ++i) {
+            blocked |= node->getInput(i)->isBlocked();
+        }
 
+        if(blocked) {
+            node->finishProcessing();
+        }
+    }
+
+    verifyAsync();
+}
+
+void Graph::verifyAsync()
+{
     /* Foreach node look for paths to every other node.
      * If there are two or more paths from one node to another
      *   and on of them contains an async edge, make all others
@@ -396,19 +430,6 @@ void Graph::verify()
     }
 
     Q_FOREACH(Node::Ptr node, nodes_) {
-        bool blocked = false;
-        for(int i = 0; i < node->countInputs(); ++i) {
-            blocked |= node->getInput(i)->isBlocked();
-        }
-
-        if(blocked) {
-            node->finishProcessing();
-        }
-    }
-
-    Q_FOREACH(Node::Ptr node, nodes_) {
-//        std::cerr << "searching from " << node->getUUID() << std::endl;
-
         std::deque<Node*> Q;
         std::map<Node*,bool> has_async_input;
 
@@ -434,7 +455,6 @@ void Graph::verify()
 
                     if(input->isAsync() || has_async_input[front]) {
                         has_async_input[next_node] = true;
-//                        std::cerr << "detected async edge between " << node->getUUID().getFullName() << " and " << next_node->getUUID().getFullName() << std::endl;
                     }
 
                     Q.push_back(next_node);
@@ -458,25 +478,6 @@ void Graph::verify()
             }
         }
     }
-}
-
-void Graph::deleteConnection(Connection::Ptr connection)
-{
-    connection->from()->removeConnection(connection->to());
-
-    for(std::vector<Connection::Ptr>::iterator c = visible_connections.begin(); c != visible_connections.end();) {
-        if(*connection == **c) {
-            visible_connections.erase(c);
-            connection->to()->setError(false);
-
-            verify();
-            Q_EMIT connectionDeleted(connection.get());
-        } else {
-            ++c;
-        }
-    }
-
-    Q_EMIT stateChanged();
 }
 
 void Graph::stop()
@@ -942,11 +943,11 @@ void Graph::selectNode(Node *node, bool add)
 
 void Graph::tick()
 {
-//    Q_FOREACH(Node::Ptr n, nodes_) {
-//        if(n->isEnabled()) {
-//            n->tick();
-//        }
-//    }
+    //    Q_FOREACH(Node::Ptr n, nodes_) {
+    //        if(n->isEnabled()) {
+    //            n->tick();
+    //        }
+    //    }
     Q_EMIT sig_tick();
 
     Q_FOREACH(const Connection::Ptr& connection, visible_connections) {

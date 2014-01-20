@@ -32,13 +32,15 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 }
 
 Connectable::Connectable(const UUID& uuid)
-    : Unique(uuid), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false), blocked_(false)
+    : Unique(uuid), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+      blocked_(false)
 {
     init();
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false), blocked_(false)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+      blocked_(false)
 {
     init();
 }
@@ -258,10 +260,11 @@ void Connectable::setLabel(const std::string &label)
 void Connectable::setType(ConnectionType::ConstPtr type)
 {
     bool validate = type_ != type;
-    type_ = type;
 
     if(validate) {
+        type_ = type;
         validateConnections();
+        Q_EMIT typeChanged();
     }
 }
 
@@ -313,5 +316,3 @@ void Connectable::setBlocked(bool b)
 {
     blocked_ = b;
 }
-
-

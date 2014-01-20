@@ -16,12 +16,12 @@
 using namespace csapex;
 
 ConnectorOut::ConnectorOut(const UUID& uuid)
-    : Connectable(uuid), force_send_message_(false), multi_dimensional_(false), currently_multi_dimensional_(multi_dimensional_)
+    : Connectable(uuid), force_send_message_(false)
 {
 }
 
 ConnectorOut::ConnectorOut(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, TYPE_OUT), force_send_message_(false), multi_dimensional_(false), currently_multi_dimensional_(multi_dimensional_)
+    : Connectable(parent, sub_id, TYPE_OUT), force_send_message_(false)
 {
 }
 
@@ -30,22 +30,6 @@ ConnectorOut::~ConnectorOut()
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         i->removeConnection(this);
     }
-}
-
-bool ConnectorOut::isMultiDimensional() const
-{
-    return currently_multi_dimensional_;
-}
-
-void ConnectorOut::setMultiDimensional(bool m)
-{
-    multi_dimensional_ = m;
-    currently_multi_dimensional_ = multi_dimensional_;
-}
-
-void ConnectorOut::setCurrentlyMultiDimensional(bool m)
-{
-    currently_multi_dimensional_ = m || multi_dimensional_;
 }
 
 int ConnectorOut::noTargets()

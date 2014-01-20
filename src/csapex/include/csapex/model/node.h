@@ -115,7 +115,7 @@ public:
     template <typename T>
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
-        return addOutput(T::make(), label, false);
+        return addOutput(T::make(), label);
     }
 
     /// "direct" messages
@@ -123,27 +123,12 @@ public:
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         RosMessageConversionT<T>::registerConversion();
-        return addOutput(connection_types::GenericMessage<T>::make(), label, false);
+        return addOutput(connection_types::GenericMessage<T>::make(), label);
     }
 
-
-    /// "real" messages
-    template <typename T>
-    ConnectorOut* addMultidimensionalOutput(const std::string& label,
-                            typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
-        return addOutput(T::make(), label, true);
-    }
-
-    /// "direct" messages
-    template <typename T>
-    ConnectorOut* addMultidimensionalOutput(const std::string& label,
-                            typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
-        RosMessageConversionT<T>::registerConversion();
-        return addOutput(connection_types::GenericMessage<T>::make(), label, true);
-    }
 
     ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
-    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label, bool multi_dimensional = false);
+    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
 
     void addInput(ConnectorIn* in) __attribute__ ((deprecated));
     void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
@@ -226,8 +211,6 @@ public Q_SLOTS:
     void setIOError(bool error);
     void setLabel(const std::string& label);
     void setMinimized(bool min);
-
-    void check();
 
 Q_SIGNALS:
     void stateChanged();

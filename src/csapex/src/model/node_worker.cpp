@@ -129,6 +129,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     node_->allConnectorsArrived();
     timer_history_.push_back(t.elapsedMs());
 
+    // reset all edges
     Q_FOREACH(const PAIR& pair, has_msg_) {
         has_msg_[pair.first] = false;
     }

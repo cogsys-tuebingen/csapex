@@ -130,6 +130,7 @@ Q_SIGNALS:
 Q_SIGNALS:
     void messageSent(Connectable* source);
     void messageArrived(Connectable* source);
+    void typeChanged();
 
 protected:
     Connectable(const UUID &uuid);

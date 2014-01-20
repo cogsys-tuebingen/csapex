@@ -141,6 +141,8 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
     bool addConnection(Connection::Ptr connection);
     void deleteConnection(Connection::Ptr connection);
 
+    void verifyAsync();
+
 protected:
     std::vector<NodePtr> nodes_;
     std::vector<Connectable*> connectors_;

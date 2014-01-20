@@ -27,8 +27,10 @@ void Foreach::allConnectorsArrived()
 
     output_->setType(vec->getSubType());
 
+    /// TODO: support!
     for(int i = 0, n = vec->value.size(); i < n; ++i) {
         output_->publish(vec->value[i]);
+        break;
     }
 }
 
@@ -38,5 +40,5 @@ void Foreach::setup()
 
     input_ = addInput<VectorMessage>("Vector");
 
-    output_ = addMultidimensionalOutput<AnyMessage>("Content");
+    output_ = addOutput<AnyMessage>("Content");
 }
