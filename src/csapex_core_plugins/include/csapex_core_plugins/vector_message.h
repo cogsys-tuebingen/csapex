@@ -15,10 +15,16 @@ struct VectorMessage : public Message
     typedef boost::shared_ptr<VectorMessage> Ptr;
 
     VectorMessage();
-    VectorMessage(ConnectionType::Ptr type);
+
     ConnectionType::Ptr getSubType() const;
 
-    static ConnectionType::Ptr make();
+    template <typename T>
+    static VectorMessage::Ptr make()
+    {
+        return VectorMessage::Ptr (new VectorMessage(T::make()));
+    }
+
+    static VectorMessage::Ptr make();
 
     virtual ConnectionType::Ptr clone();
     virtual ConnectionType::Ptr toType();
@@ -28,6 +34,9 @@ struct VectorMessage : public Message
 
     void writeYaml(YAML::Emitter& yaml);
     void readYaml(const YAML::Node& node);
+
+private:
+    VectorMessage(ConnectionType::Ptr type);
 
 public:
     std::vector<ConnectionType::Ptr> value;

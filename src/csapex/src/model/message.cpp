@@ -1,8 +1,26 @@
 /// HEADAER
 #include <csapex/model/message.h>
 
+/// SYSTEM
+#include <cxxabi.h>
+
 using namespace csapex;
 using namespace connection_types;
+
+std::string csapex::connection_types::type2name(const std::type_info& info)
+{
+    int status;
+    std::string full_name(abi::__cxa_demangle(info.name(), 0, 0, &status));
+
+    std::string replace = "csapex::";
+
+    std::size_t ptr_pos = full_name.find(replace);
+    if(ptr_pos != std::string::npos) {
+        full_name.replace(ptr_pos, replace.size(), "");
+    }
+
+    return full_name;
+}
 
 Message::Message(const std::string& name)
     : ConnectionType(name)

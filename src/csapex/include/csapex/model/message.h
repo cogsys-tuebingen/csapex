@@ -34,8 +34,12 @@ bool hasHeader();
 ///
 ///
 
+
+
 namespace csapex {
 namespace connection_types {
+
+std::string type2name(const std::type_info& info);
 
 struct Message : public ConnectionType
 {
@@ -100,8 +104,20 @@ struct GenericMessage : public PossibleRosMessage {
     typedef boost::shared_ptr<GenericMessage<Type> > Ptr;
 
     GenericMessage()
-        : PossibleRosMessage(ros::message_traits::datatype<Type>())
+        : PossibleRosMessage(GenericMessage::template getTypeName<Type>())
     {}
+
+    template <typename T>
+    static std::string getTypeName(typename boost::enable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0)
+    {
+        return ros::message_traits::datatype<T>();
+    }
+
+    template <typename T>
+    static std::string getTypeName(typename boost::disable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0)
+    {
+        return type2name(typeid(T));
+    }
 
     virtual bool isRosMessage() const
     {
@@ -111,20 +127,31 @@ struct GenericMessage : public PossibleRosMessage {
     template <typename T>
     bool isRosMessageImpl(typename boost::enable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) const
     {
-       return true;
+        return true;
     }
 
     template <typename T>
     bool isRosMessageImpl(typename boost::disable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) const
     {
-       return false;
+        return false;
     }
 
     virtual void info(std::string& md5, std::string& datatype, std::string& def, bool& header) {
+        infoImpl<Type>(md5, datatype, def, header);
+    }
+
+    template <typename T>
+    void infoImpl(std::string& md5, std::string& datatype, std::string& def, bool& header,
+                  typename boost::enable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) {
         md5 = ros::message_traits::md5sum<Type>();
         datatype = ros::message_traits::datatype<Type>();
         def = ros::message_traits::definition<Type>();
         header = ros::message_traits::hasHeader<Type>();
+    }
+
+    template <typename T>
+    void infoImpl(std::string& md5, std::string& datatype, std::string& def, bool& header,
+                  typename boost::disable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) {
     }
 
     virtual ConnectionType::Ptr clone() {
@@ -153,7 +180,7 @@ struct GenericMessage : public PossibleRosMessage {
     void readYaml(YAML::Node& node) {
     }
 
-    typename Type::Ptr value;
+    typename boost::shared_ptr<Type> value;
 };
 
 template <typename Type, class Instance>

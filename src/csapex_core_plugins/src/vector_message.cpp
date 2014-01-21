@@ -20,7 +20,7 @@ ConnectionType::Ptr VectorMessage::getSubType() const
     return type_;
 }
 
-ConnectionType::Ptr VectorMessage::make(){
+VectorMessage::Ptr VectorMessage::make(){
     Ptr new_msg(new VectorMessage);
     return new_msg;
 }

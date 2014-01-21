@@ -64,7 +64,7 @@ void BarCodeReader::allConnectorsArrived()
         }
     }
 
-    VectorMessage::Ptr out(new VectorMessage(RoiMessage::make()));
+    VectorMessage::Ptr out(VectorMessage::make<RoiMessage>());
 
     // extract results
     for(zbar::Image::SymbolIterator symbol = image.symbol_begin();
@@ -128,6 +128,5 @@ void BarCodeReader::fill(QBoxLayout* layout)
     in_img = addInput<CvMatMessage>("Image", false, true);
 
     out_str = addOutput<StringMessage>("String");
-    out_roi = addOutput<VectorMessage>("ROIs");
-    out_roi->setType(VectorMessage::Ptr(new VectorMessage(RoiMessage::make())));
+    out_roi = addOutput<VectorMessage, RoiMessage>("ROIs");
 }

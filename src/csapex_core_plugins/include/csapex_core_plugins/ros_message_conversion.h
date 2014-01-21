@@ -165,8 +165,12 @@ private:
     void doRegisterConversion(Convertor::Ptr c);
 
     template <typename T>
-    bool doCanConvert() {
+    bool doCanConvert(typename boost::enable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) {
         return converters_inv_.find(ros::message_traits::DataType<T>::value()) != converters_inv_.end();
+    }
+    template <typename T>
+    bool doCanConvert(typename boost::disable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0) {
+        return false;
     }
 
 private:
@@ -179,10 +183,18 @@ template <typename T>
 class RosMessageConversionT
 {
 public:
-    static void registerConversion() {
+    template <typename U>
+    static void registerConversionImpl(typename boost::enable_if<ros::message_traits::IsMessage<U> >::type* dummy = 0) {
         if(!canConvert()) {
             RosMessageConversion::instance().doRegisterConversion(RosMessageConversion::Convertor::Ptr(new RosMessageConversion::IdentityConvertor<T>));
         }
+    }
+    template <typename U>
+    static void registerConversionImpl(typename boost::disable_if<ros::message_traits::IsMessage<U> >::type* dummy = 0) {
+    }
+
+    static void registerConversion() {
+        registerConversionImpl<T>();
     }
 
     static bool canConvert() {

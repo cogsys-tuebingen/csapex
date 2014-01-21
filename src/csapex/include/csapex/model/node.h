@@ -102,6 +102,11 @@ public:
                           typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         return addInput(T::make(), label, optional, async);
     }
+    template <typename Container, typename T>
+    ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
+                          typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        return addInput(Container::template make<T>(), label, optional, async);
+    }
 
     /// "direct" messages
     template <typename T>
@@ -110,12 +115,23 @@ public:
         RosMessageConversionT<T>::registerConversion();
         return addInput(connection_types::GenericMessage<T>::make(), label, optional, async);
     }
+    template <typename Container, typename T>
+    ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
+                          typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        RosMessageConversionT<T>::registerConversion();
+        return addInput(Container::template make<connection_types::GenericMessage<T> >(), label, optional, async);
+    }
 
     /// "real" messages
     template <typename T>
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         return addOutput(T::make(), label);
+    }
+    template <typename Container, typename T>
+    ConnectorOut* addOutput(const std::string& label,
+                            typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        return addOutput(Container::template make<T>(), label);
     }
 
     /// "direct" messages
@@ -124,6 +140,12 @@ public:
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         RosMessageConversionT<T>::registerConversion();
         return addOutput(connection_types::GenericMessage<T>::make(), label);
+    }
+    template <typename Container, typename T>
+    ConnectorOut* addOutput(const std::string& label,
+                            typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
+        RosMessageConversionT<T>::registerConversion();
+        return addOutput(Container::template make<connection_types::GenericMessage<T> >(), label);
     }
 
 
