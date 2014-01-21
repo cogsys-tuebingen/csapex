@@ -7,6 +7,7 @@
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
 #include <utils_param/path_parameter.h>
+#include <utils_param/trigger_parameter.h>
 
 namespace param
 {
@@ -68,6 +69,12 @@ public:
         PathParameter::Ptr result(new PathParameter(name));
         result->set(def);
 
+        return result;
+    }
+
+    static Parameter::Ptr declareTrigger(const std::string& name)
+    {
+        TriggerParameter::Ptr result(new TriggerParameter(name));
         return result;
     }
 

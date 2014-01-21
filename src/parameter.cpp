@@ -59,7 +59,6 @@ boost::any Parameter::get_unsafe() const
     throw std::logic_error("not implemented");
 }
 
-
 void Parameter::set_unsafe(const boost::any &v)
 {
     throw std::logic_error("not implemented");

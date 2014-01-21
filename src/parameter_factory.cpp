@@ -13,6 +13,8 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
         return Parameter::Ptr(new SetParameter);
     } else if(type == "path") {
         return Parameter::Ptr(new PathParameter);
+    } else if(type == "trigger") {
+        return Parameter::Ptr(new TriggerParameter);
     } else {
         throw std::runtime_error(std::string("illegal parameter type: ") + type);
     }
