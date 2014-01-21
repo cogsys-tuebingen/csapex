@@ -11,6 +11,7 @@
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
 #include <utils_param/path_parameter.h>
+#include <utils_param/trigger_parameter.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
@@ -30,7 +31,9 @@ NodeAdapter::NodeAdapter()
 
 NodeAdapter::~NodeAdapter()
 {
-
+    Q_FOREACH(QObject* cb, callbacks) {
+        delete cb;
+    }
 }
 
 void NodeAdapter::setNode(Node *node)
@@ -60,6 +63,23 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
     Q_FOREACH(param::Parameter::Ptr parameter, params) {
         std::string name = parameter->name();
+
+        param::TriggerParameter::Ptr trigger_p = boost::dynamic_pointer_cast<param::TriggerParameter> (parameter);
+        if(trigger_p) {
+            QPushButton* btn = new QPushButton(trigger_p->name().c_str());
+
+            QHBoxLayout* sub = new QHBoxLayout;
+            sub->addWidget(btn);
+            layout->addLayout(QtHelper::wrap(name, sub));
+
+            boost::function<void()> cb = boost::bind(&param::TriggerParameter::trigger, trigger_p.get());
+            qt_helper::Call* call_trigger = new qt_helper::Call(cb);
+            callbacks.push_back(call_trigger);
+
+            QObject::connect(btn, SIGNAL(clicked()), call_trigger, SLOT(call()));
+
+            continue;
+        }
 
         param::PathParameter::Ptr path_p = boost::dynamic_pointer_cast<param::PathParameter> (parameter);
         if(path_p) {

@@ -42,20 +42,21 @@ void Segmentation::allConnectorsArrived()
         }
     }
 
-
+    CvMatMessage::Ptr out_mask(new CvMatMessage);
 
     if(recompute) {
         state.channels = img->value.channels();
         state.encoding = img->encoding;
 
         Q_EMIT modelChanged();
+
+        output_mask_->publish(out_mask);
         return;
     }
 
     cv::Mat bw;
     cv::inRange(img->value, state.min, state.max, bw);
 
-    CvMatMessage::Ptr out_mask(new CvMatMessage);
 
     if(input_mask_->isConnected()) {
         CvMatMessage::Ptr mask = input_mask_->getMessage<CvMatMessage>();

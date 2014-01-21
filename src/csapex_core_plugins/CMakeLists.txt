@@ -19,7 +19,7 @@ csapex_moc_all(MOC_PLUG src/*.h)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES csapex_core_lib
-  CATKIN_DEPENDS csapex
+  CATKIN_DEPENDS csapex roscpp
 #  DEPENDS
 )
 

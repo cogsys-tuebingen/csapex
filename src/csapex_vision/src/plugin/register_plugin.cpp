@@ -34,7 +34,7 @@ struct Image2CvMat
             cv_bridge::toCvShare(ros_msg, sensor_msgs::image_encodings::BGR8)->image.copyTo(out->value);
             out->frame_id = ros_msg->header.frame_id;
         } catch (cv_bridge::Exception& e) {
-            ROS_ERROR("cv_bridge exception: %s", e.what());
+            std::cerr << "cv_bridge exception: " << e.what() << std::endl;
         }
     }
     static void apex2ros(const connection_types::CvMatMessage::Ptr& apex_msg, sensor_msgs::Image::Ptr &out) {
