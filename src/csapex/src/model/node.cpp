@@ -107,6 +107,16 @@ param::Parameter::Ptr Node::getParameter(const std::string &name) const
     return state.params.at(name);
 }
 
+bool Node::isParameterEnabled(const std::string &name) const
+{
+    return getParameter(name)->isEnabled();
+}
+
+void Node::setParameterEnabled(const std::string &name, bool enabled)
+{
+    getParameter(name)->setEnabled(enabled);
+}
+
 void Node::setIcon(QIcon icon)
 {
     icon_ = icon;

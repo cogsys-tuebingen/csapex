@@ -24,16 +24,31 @@
 using namespace csapex;
 
 NodeAdapter::NodeAdapter()
-    : bridge(this), is_gui_setup_(false)
+    : bridge(this), layout_(NULL), is_gui_setup_(false)
 {
-
+    QObject::connect(&bridge, SIGNAL(rebuild()), &bridge, SLOT(rebuildEvent()));
 }
 
 NodeAdapter::~NodeAdapter()
 {
-    Q_FOREACH(QObject* cb, callbacks) {
-        delete cb;
+    clear();
+}
+
+void NodeAdapter::clear()
+{
+    Q_FOREACH(const boost::signals2::connection& c, connections) {
+        c.disconnect();
     }
+    connections.clear();
+
+    Q_FOREACH(QObject* cb, callbacks) {
+        qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
+        if(call) {
+            call->disconnect();
+        }
+        cb->deleteLater();
+    }
+    callbacks.clear();
 }
 
 void NodeAdapter::setNode(Node *node)
@@ -48,11 +63,17 @@ Node* NodeAdapter::getNode()
     return node_;
 }
 
+void NodeAdapter::setupUiAgain()
+{
+    bridge.triggerRebuild();
+}
+
 void NodeAdapter::doSetupUi(QBoxLayout *layout)
 {
+    layout_ = layout;
     if(!is_gui_setup_) {
         is_gui_setup_ = true;
-        setupUi(layout);
+        setupUi(layout_);
 
         guiChanged();
     }
@@ -60,8 +81,21 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
 
 void NodeAdapter::setupUi(QBoxLayout * layout)
 {
+    bool is_update = layout->count() > 0;
+    std::cout << (is_update ? "rebuild" : "init") << std::endl;
+
+    QtHelper::clearLayout(layout_);
+    clear();
+
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
     Q_FOREACH(param::Parameter::Ptr parameter, params) {
+        parameter_enabled(*parameter).disconnect_all_slots();
+        parameter_enabled(*parameter).connect(boost::bind(&NodeAdapter::setupUiAgain, this));
+
+        if(!parameter->isEnabled()) {
+            continue;
+        }
+
         std::string name = parameter->name();
 
         param::TriggerParameter::Ptr trigger_p = boost::dynamic_pointer_cast<param::TriggerParameter> (parameter);
@@ -109,7 +143,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             // model change -> ui
             boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
             boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, path, boost::bind(stdstring2qstring, _1));
-            node_->getNodeWorker()->addParameterCallback(path_p, boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+            connections.push_back(parameter_changed(*path_p).connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set)));
 
             QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
             QObject::connect(open, SIGNAL(clicked()), call_open, SLOT(call()));
@@ -139,7 +173,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 // model change -> ui
                 boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
                 boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, txt_, boost::bind(stdstring2qstring, _1));
-                node_->getNodeWorker()->addParameterCallback(value_p, boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set));
+                connections.push_back(parameter_changed(*value_p).connect(boost::bind(&NodeAdapter::updateUi<std::string>, this, _1, set)));
 
                 QObject::connect(txt_, SIGNAL(returnPressed()), call, SLOT(call()));
                 QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
@@ -163,7 +197,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(int)> set = boost::bind(&QSlider::setValue, slider, _1);
-                node_->getNodeWorker()->addParameterCallback(range_p, boost::bind(&NodeAdapter::updateUi<int>, this, _1, set));
+                connections.push_back(parameter_changed(*range_p).connect(boost::bind(&NodeAdapter::updateUi<int>, this, _1, set)));
 
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
@@ -181,7 +215,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, _1);
-                node_->getNodeWorker()->addParameterCallback(range_p, boost::bind(&NodeAdapter::updateUi<double>, this, _1, set));
+                connections.push_back(parameter_changed(*range_p).connect(boost::bind(&NodeAdapter::updateUi<double>, this, _1, set)));
 
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
@@ -198,7 +232,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
                 // model change -> ui
                 boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
-                node_->getNodeWorker()->addParameterCallback(range_p, boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set));
+                connections.push_back(parameter_changed(*range_p).connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set)));
 
                 QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
 
@@ -229,7 +263,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             boost::function<int(const QString&)> txt2idx = boost::bind(&QComboBox::findData, combo, _1, Qt::DisplayRole, static_cast<Qt::MatchFlags>(Qt::MatchExactly|Qt::MatchCaseSensitive));
             boost::function<void(const QString&)> select = boost::bind(&QComboBox::setCurrentIndex, combo, boost::bind(txt2idx, _1));
             boost::function<void(const std::string&)> set = boost::bind(select, boost::bind(stdstring2qstring, _1));
-            node_->getNodeWorker()->addParameterCallback(set_p, boost::bind(&NodeAdapter::updateUiSet, this, _1, set));
+            connections.push_back(parameter_changed(*set_p).connect(boost::bind(&NodeAdapter::updateUiSet, this, _1, set)));
 
             QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
             continue;
@@ -277,10 +311,7 @@ void NodeAdapter::updateDynamicGui(QBoxLayout *)
 
 void NodeAdapter::modelChangedEvent()
 {
-    //    std::vector<param::Parameter::Ptr> params = node_->getParameters();
-    //    Q_FOREACH(param::Parameter::Ptr p, params) {
-    //        p->name()
-    //    }
+
 }
 
 void NodeAdapter::guiChanged()
@@ -299,7 +330,18 @@ void NodeAdapterBridge::modelChangedEvent()
     parent_->modelChangedEvent();
 }
 
+void NodeAdapterBridge::rebuildEvent()
+{
+    parent_->setupUi(parent_->layout_);
+}
+
 void NodeAdapterBridge::triggerGuiChanged()
 {
     Q_EMIT guiChanged();
+}
+
+void NodeAdapterBridge::triggerRebuild()
+{
+    std::cout << "trigger" << std::endl;
+    Q_EMIT rebuild();
 }

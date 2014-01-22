@@ -69,6 +69,8 @@ public:
         }
     }
     param::Parameter::Ptr getParameter(const std::string& name) const;
+    bool isParameterEnabled(const std::string& name) const;
+    void setParameterEnabled(const std::string& name, bool enabled);
 
     void setIcon(QIcon icon);
     QIcon getIcon() const;
