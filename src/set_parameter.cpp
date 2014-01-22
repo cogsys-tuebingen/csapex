@@ -24,6 +24,7 @@ void SetParameter::setByName(const std::string &name)
     for(std::vector< std::pair<std::string, variant> >::iterator it = set_.begin(); it != set_.end(); ++it) {
         if(it->first == name) {
             value_ = it->second;
+            parameter_changed(this);
             return;
         }
     }
