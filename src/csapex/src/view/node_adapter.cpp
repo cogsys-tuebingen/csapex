@@ -245,11 +245,17 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
         param::SetParameter::Ptr set_p = boost::dynamic_pointer_cast<param::SetParameter> (parameter);
         if(set_p) {
             QComboBox* combo = new QComboBox;
+            int current = 0;
+            std::string selected = set_p->getName();
             for(int i = 0; i < set_p->noParameters(); ++i) {
                 std::string str = set_p->getName(i);
                 combo->addItem(QString::fromStdString(str));
+
+                if(str == selected) {
+                    current = i;
+                }
             }
-            combo->setCurrentIndex(0);
+            combo->setCurrentIndex(current);
             layout->addLayout(QtHelper::wrap(name, combo));
 
             // ui change -> model
