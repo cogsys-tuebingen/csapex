@@ -4,7 +4,7 @@
 using namespace param;
 
 Parameter::Parameter(const std::string &name)
-    : name_(name)
+    : name_(name), enabled_(true)
 {
 }
 
@@ -12,6 +12,20 @@ Parameter::Parameter(const std::string &name)
 Parameter::~Parameter()
 {
 
+}
+
+void Parameter::setEnabled(bool enabled)
+{
+    if(enabled != enabled_) {
+        enabled_ = enabled;
+
+        parameter_enabled(this, enabled);
+    }
+}
+
+bool Parameter::isEnabled() const
+{
+    return enabled_;
 }
 
 std::string Parameter::name() const

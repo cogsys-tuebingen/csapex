@@ -20,6 +20,9 @@ public:
         boost::signals2::signal<void(Parameter*)>& parameter_changed(Parameter& p) {
             return p.parameter_changed;
         }
+        boost::signals2::signal<void(Parameter*,bool)>& parameter_enabled(Parameter& p) {
+            return p.parameter_enabled;
+        }
     };
 
 public:
@@ -79,6 +82,9 @@ public:
 
     virtual void setFrom(const Parameter& other);
 
+    bool isEnabled() const;
+    void setEnabled(bool enabled);
+
 protected:
     virtual std::string toStringImpl() const;
     std::string type2string(const std::type_info& type) const;
@@ -92,9 +98,11 @@ protected:
 
 protected:
     boost::signals2::signal<void(Parameter*)> parameter_changed;
+    boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
 
 protected:
     std::string name_;
+    bool enabled_;
 };
 
 }
