@@ -482,6 +482,8 @@ void Graph::verifyAsync()
 
 void Graph::stop()
 {
+    Connectable::allow_processing = false;
+
     Q_FOREACH(Node::Ptr node, nodes_) {
         node->stop();
     }

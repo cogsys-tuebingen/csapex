@@ -57,6 +57,18 @@ public:
         boost::dynamic_pointer_cast<typename connection_types::GenericMessage<R> > (message_);
         return tmp->value;
     }
+    template <typename Container, typename R>
+    boost::shared_ptr<typename Container::template TypeMap<R>::type const>
+    getMessage() {
+        waitForMessage();
+
+        QMutexLocker lock(&io_mutex);
+        typename Container::Ptr tmp = boost::dynamic_pointer_cast<Container>(message_);
+        if(!tmp) {
+            throw std::runtime_error(std::string("cannot get message, not of type ") + connection_types::type2name(typeid(Container)));
+        }
+        return tmp->template makeShared<R>();
+    }
 
     virtual ConnectionType::Ptr getMessage()  __attribute__ ((deprecated));
 

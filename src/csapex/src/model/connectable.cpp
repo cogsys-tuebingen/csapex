@@ -21,6 +21,8 @@ const std::string Connectable::namespace_separator = ":|:";
 const QString Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
 const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
+bool Connectable::allow_processing = true;
+
 UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
     if(box_uuid.empty()) {
         return UUID::NONE;
@@ -93,7 +95,7 @@ void Connectable::waitForProcessing(const UUID& who_is_waiting)
 
     if(processing) {
         waiting_list_.push_back(who_is_waiting);
-        while(processing) {
+        while(processing && allow_processing) {
             blocked_ = true;
             port_->setPortProperty("blocked", true);
 

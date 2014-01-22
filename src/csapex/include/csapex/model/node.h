@@ -119,7 +119,7 @@ public:
     ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
                           typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         RosMessageConversionT<T>::registerConversion();
-        return addInput(Container::template make<connection_types::GenericMessage<T> >(), label, optional, async);
+        return addInput(Container::template make<T>(), label, optional, async);
     }
 
     /// "real" messages
@@ -145,9 +145,8 @@ public:
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
         RosMessageConversionT<T>::registerConversion();
-        return addOutput(Container::template make<connection_types::GenericMessage<T> >(), label);
+        return addOutput(Container::template make<T>(), label);
     }
-
 
     ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
