@@ -22,11 +22,14 @@ include_directories(
 add_library(utils_param
     src/io.cpp
     src/parameter.cpp
+
     src/range_parameter.cpp
     src/set_parameter.cpp
     src/value_parameter.cpp
     src/path_parameter.cpp
     src/trigger_parameter.cpp
+    src/color_parameter.cpp
+
     src/parameter_factory.cpp
     src/parameter_map.cpp
     src/parameter_provider.cpp)

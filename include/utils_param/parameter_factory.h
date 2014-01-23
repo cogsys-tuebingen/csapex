@@ -6,7 +6,6 @@
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
-#include <utils_param/path_parameter.h>
 #include <utils_param/trigger_parameter.h>
 
 namespace param
@@ -30,14 +29,7 @@ public:
         return result;
     }
 
-    static Parameter::Ptr declare(const std::string& name, bool def)
-    {
-        RangeParameter::Ptr result(new RangeParameter(name));
-        result->def_ = def;
-        result->set<bool>(def);
-
-        return result;
-    }
+    static Parameter::Ptr declare(const std::string& name, bool def);
 
     template <typename T>
     static Parameter::Ptr declare(const std::string& name, const T& def)
@@ -48,10 +40,8 @@ public:
 
         return result;
     }
-    static Parameter::Ptr declare(const std::string& name, const char* def)
-    {
-        return declare(name, std::string(def));
-    }
+
+    static Parameter::Ptr declare(const std::string& name, const char* def);
 
     template <typename T>
     static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
@@ -64,19 +54,11 @@ public:
         return result;
     }
 
-    static Parameter::Ptr declarePath(const std::string& name, const std::string& def)
-    {
-        PathParameter::Ptr result(new PathParameter(name));
-        result->set(def);
+    static Parameter::Ptr declarePath(const std::string& name, const std::string& def);
 
-        return result;
-    }
+    static Parameter::Ptr declareTrigger(const std::string& name);
 
-    static Parameter::Ptr declareTrigger(const std::string& name)
-    {
-        TriggerParameter::Ptr result(new TriggerParameter(name));
-        return result;
-    }
+    static Parameter::Ptr declareColorParameter(const std::string& name, int r, int g, int b);
 
     static Parameter::Ptr makeEmpty(const std::string& type);
 };
