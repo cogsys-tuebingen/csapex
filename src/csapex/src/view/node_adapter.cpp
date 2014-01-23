@@ -12,6 +12,7 @@
 #include <utils_param/set_parameter.h>
 #include <utils_param/path_parameter.h>
 #include <utils_param/trigger_parameter.h>
+#include <utils_param/color_parameter.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
@@ -20,6 +21,8 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QFileDialog>
+#include <QColorDialog>
+#include <iomanip>
 
 using namespace csapex;
 
@@ -79,6 +82,36 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
     }
 }
 
+namespace {
+void updateColor(param::ColorParameter *p)
+{
+    std::vector<int> c = p->value();
+    QColor init(c[0], c[1], c[2]);
+    QColor color = QColorDialog::getColor(init);
+    if (color.isValid()) {
+        std::vector<int> v(3);
+        v[0] = color.red();
+        v[1] = color.green();
+        v[2] = color.blue();
+        p->set(v);
+    }
+}
+
+QString toColorSS(const std::vector<int>& v) {
+    std::stringstream ss;
+    ss << "QPushButton {";
+    ss << "background-color: #" << std::hex << std::setfill('0');
+    ss << std::setw(2) << v[0];
+    ss << std::setw(2) << v[1];
+    ss << std::setw(2) << v[2];
+    ss << std::dec << ";";
+    ss << "}";
+
+    return QString::fromStdString(ss.str());
+}
+}
+
+
 void NodeAdapter::setupUi(QBoxLayout * layout)
 {
     bool is_update = layout->count() > 0;
@@ -112,6 +145,31 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
             QObject::connect(btn, SIGNAL(clicked()), call_trigger, SLOT(call()));
 
+            continue;
+        }
+
+        param::ColorParameter::Ptr color_p = boost::dynamic_pointer_cast<param::ColorParameter> (parameter);
+        if(color_p) {
+            QPushButton* btn = new QPushButton;
+
+            btn->setStyleSheet(toColorSS(color_p->value()));
+
+            QHBoxLayout* sub = new QHBoxLayout;
+            sub->addWidget(btn);
+            layout->addLayout(QtHelper::wrap(name, sub));
+
+            // ui callback
+            boost::function<void()> cb = boost::bind(&updateColor, color_p.get());
+            qt_helper::Call* call = new qt_helper::Call(cb);
+            callbacks.push_back(call);
+            QObject::connect(btn, SIGNAL(clicked()), call, SLOT(call()));
+
+            // model change -> ui
+            boost::function<std::vector<int>()> readColor = boost::bind(&param::ColorParameter::value, color_p.get());
+            boost::function<QString()> readSS = boost::bind(&toColorSS, boost::bind(readColor));
+            boost::function<void(param::Parameter*)> up = boost::bind(&QPushButton::setStyleSheet, btn, boost::bind(readSS));
+
+            connections.push_back(parameter_changed(*color_p).connect(up));
             continue;
         }
 
@@ -309,7 +367,6 @@ void NodeAdapter::updateUiSet(const param::Parameter *p, boost::function<void (c
         setter(set_p->getName());
     }
 }
-
 void NodeAdapter::updateDynamicGui(QBoxLayout *)
 {
 
