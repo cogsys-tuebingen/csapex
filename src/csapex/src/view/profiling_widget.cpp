@@ -5,6 +5,7 @@
 #include <csapex/view/box.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/utility/timer.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -14,8 +15,8 @@ using namespace csapex;
 ProfilingWidget::ProfilingWidget(QWidget *parent, Box *box)
     : QWidget(parent), box_(box), node_worker_(box->getNode()->getNodeWorker())
 {
-    w_ = 200;
-    h_ = 75;
+    w_ = 300;
+    h_ = 80;
 
     setFixedSize(w_, h_);
 
@@ -45,14 +46,14 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     int padding = 5;
 
-    int left = padding + 50;
-    int right = w_ - padding;
-    int up = padding;
-    int bottom = h_ - padding;
+    left = padding + 50;
+    right = w_ - padding;
+    up = padding;
+    bottom = h_ - padding;
 
-    double content_width = right - left - 2 * padding;
-    double indiv_width = content_width / node_worker_->timer_history_length_;
-    int content_height = bottom - up - 2 * padding;
+    content_width_ = right - left - 2 * padding;
+    indiv_width_ = content_width_ / node_worker_->timer_history_length_;
+    content_height_ = bottom - up - 2 * padding;
 
     p.setPen(QPen(Qt::black));
 
@@ -66,10 +67,17 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     int n = std::min(max, node_worker_->timer_history_.size());
 
     if(n > 0) {
-        int maxt = *std::max_element(node_worker_->timer_history_.begin(), node_worker_->timer_history_.end());
+        int max_time_ms = 10;
+
+        /// TODO paint all intervals
+        const std::deque<Timer::Ptr>& h = node_worker_->timer_history_;
+        for(std::deque<Timer::Ptr>::const_iterator timer = h.begin(); timer != h.end(); ++timer) {
+            const Timer::Ptr& t = *timer;
+            max_time_ms = std::max(max_time_ms, t->intervals.lengthMs());
+        }
 
         std::stringstream txt;
-        txt << maxt << " ms";
+        txt << max_time_ms << " ms";
 
 
         QFont font;
@@ -86,24 +94,53 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         p.drawText(QRect(0, up, left -padding, dy), txt.str().c_str(), opt);
         p.drawText(QRect(0, bottom - dy, left - padding, dy), "0 ms", opt);
 
-        double maxt_f = std::max(1, maxt);
+        max_time_ms_ = std::max(1, max_time_ms);
 
-        double x = left + padding + (max - n) * indiv_width;
-        for(int i = 0; i < n; ++i) {
-            int time = node_worker_->timer_history_[i];
+        current_draw_x = left + padding + (max - n) * indiv_width_;
+        for(int time = 0; time < n; ++time) {
+            const Timer::Ptr& timer = node_worker_->timer_history_[time];
 
-            double f = time / maxt_f;
-            assert(0.0 <= f);
-            assert(f <= 1.0);
-            int height = f * content_height;
-
-            int r = 255 * f;
-            int g = 255 * (1-f);
-            int b = 128;
-            p.setBrush(QBrush(QColor(r, g, b)));
-            p.drawRect(x, bottom - height, indiv_width, height);
-
-            x += indiv_width;
+            paintTimer(p, timer.get());
         }
+    }
+}
+
+void ProfilingWidget::paintTimer(QPainter& p, const Timer * timer)
+{
+    paintInterval(p, timer->intervals, 0, 0);
+
+    current_draw_x += indiv_width_;
+}
+
+void ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval& interval, int height_offset, int depth)
+{
+    int interval_time = interval.lengthMs();
+
+    double f = interval_time / max_time_ms_;
+    assert(0.0 <= f);
+    assert(f <= 1.0);
+    int height = f * content_height_;
+
+    int r,g,b;
+
+    if(interval.name == "io") {
+        r = 0;
+        g = 0;
+        b = 0;
+    } else {
+        r = 255 * ((1 + depth) / 3.0);
+        g = 128;
+        b = 64;
+    }
+
+    p.setBrush(QBrush(QColor(r, g, b)));
+
+    int w = indiv_width_ / (depth+1);
+
+    p.drawRect(current_draw_x + indiv_width_ - w, bottom - height, w, height);
+
+    for(std::vector<Timer::Interval>::const_iterator sub = interval.sub.begin(); sub != interval.sub.end(); ++sub) {
+        const Timer::Interval& sub_interval = *sub;
+        paintInterval(p, sub_interval, height_offset + height, depth + 1);
     }
 }

@@ -82,6 +82,7 @@ set(SRC_PLUGIN
     src/utility/thread.cpp
     src/utility/uuid.cpp
     src/utility/error_handling.cpp
+    src/utility/timable.cpp
 
     src/deprecated/global_option.cpp
     src/deprecated/global_option_manager.cpp

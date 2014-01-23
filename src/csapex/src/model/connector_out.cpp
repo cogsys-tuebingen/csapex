@@ -7,6 +7,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/view/port.h>
+#include <csapex/utility/timer.h>
 
 /// SYSTEM
 #include <assert.h>
@@ -169,6 +170,10 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     // update buffer
     message_ = message;
 
+    Timer::Interlude::Ptr i;
+    if(publish_timer_) {
+        i = publish_timer_->step("io");
+    }
 
     setProcessing(true);
 

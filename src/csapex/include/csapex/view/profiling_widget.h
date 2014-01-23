@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/timer.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -22,6 +23,8 @@ public Q_SLOTS:
 
 protected:
     void paintEvent(QPaintEvent *);
+    void paintTimer(QPainter &p, const Timer*);
+    void paintInterval(QPainter &p, const csapex::Timer::Interval &interval, int height_offset, int depth);
 
 private:
     Box* box_;
@@ -29,6 +32,19 @@ private:
 
     int w_;
     int h_;
+    int content_height_ ;
+
+    int left;
+    int right;
+    int up;
+    int bottom;
+
+    double max_time_ms_;
+
+    double current_draw_x;
+
+    double content_width_;
+    double indiv_width_;
 };
 
 }

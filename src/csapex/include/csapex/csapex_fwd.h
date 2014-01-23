@@ -53,6 +53,8 @@ class Overlay;
 
 class Tag;
 
+FWD(Timer);
+
 FWD(Command);
 
 FWD(CommandDispatcher);

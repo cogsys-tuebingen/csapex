@@ -745,6 +745,13 @@ void Node::setCommandDispatcher(CommandDispatcher *d)
     dispatcher_ = d;
 }
 
+void Node::useTimer(Timer *timer)
+{
+    Q_FOREACH(ConnectorOut* i, output) {
+        i->useTimer(timer);
+    }
+}
+
 void Node::stop()
 {
     Q_FOREACH(ConnectorIn* i, input) {

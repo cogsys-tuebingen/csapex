@@ -11,7 +11,7 @@
 
 using namespace csapex;
 
-const unsigned NodeWorker::timer_history_length_ = 30;
+const unsigned NodeWorker::timer_history_length_ = 15;
 
 NodeWorker::NodeWorker(Node* node)
     : node_(node), synchronized_inputs_(false), thread_initialized_(false), is_processing_(false)
@@ -78,11 +78,15 @@ void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
 {
     assert(!is_processing_);
 
-    Timer t;
+    Timer::Ptr t(new Timer(node_->getUUID()));
     is_processing_ = true;
 
+    node_->useTimer(t.get());
     node_->messageArrived(source);
-    timer_history_.push_back(t.elapsedMs());
+
+    t->finish();
+
+    timer_history_.push_back(t);
 
     is_processing_ = false;
     Q_EMIT messageProcessed();
@@ -125,9 +129,11 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     is_processing_ = true;
 
-    Timer t;
+    Timer::Ptr t(new Timer(node_->getUUID()));
+    node_->useTimer(t.get());
     node_->allConnectorsArrived();
-    timer_history_.push_back(t.elapsedMs());
+    t->finish();
+    timer_history_.push_back(t);
 
     // reset all edges
     Q_FOREACH(const PAIR& pair, has_msg_) {

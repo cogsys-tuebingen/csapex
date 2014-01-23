@@ -5,11 +5,12 @@
 #include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/message.h>
+#include <csapex/utility/timable.h>
 
 namespace csapex
 {
 
-class ConnectorOut : public virtual Connectable
+class ConnectorOut : public virtual Connectable, public Timable
 {
     friend class ConnectorIn;
     friend class ConnectorForward;

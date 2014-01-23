@@ -66,7 +66,7 @@ private:
     QMutex changed_params_mutex_;
     std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
 
-    std::deque<int> timer_history_;
+    std::deque<TimerPtr> timer_history_;
 
     bool thread_initialized_;
     volatile bool is_processing_;

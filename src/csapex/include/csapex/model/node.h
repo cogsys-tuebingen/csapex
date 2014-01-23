@@ -9,6 +9,7 @@
 #include <csapex/model/generic_state.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/message.h>
+#include <csapex/utility/timable.h>
 
 /// PROJECT
 #include <utils_param/parameter.h>
@@ -25,7 +26,7 @@ namespace csapex {
 template <typename T>
 class RosMessageConversionT;
 
-class Node : public QObject, public ErrorState, public Unique
+class Node : public QObject, public ErrorState, public Unique, public Timable
 {
     Q_OBJECT
 
@@ -76,6 +77,8 @@ public:
     QIcon getIcon() const;
 
     void stop();
+
+    virtual void useTimer(Timer* timer);
 
 private:
     void connectConnector(Connectable* c);
