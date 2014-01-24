@@ -10,6 +10,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
+#include <utils_param/parameter_factory.h>
 #include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
@@ -26,6 +27,8 @@ BarCodeReader::BarCodeReader()
 {
     Tag::createIfNotExists("Bar Code");
     addTag(Tag::get("Bar Code"));
+
+    addParameter(param::ParameterFactory::declare("republish", false));
 }
 
 void BarCodeReader::allConnectorsArrived()
@@ -35,6 +38,8 @@ void BarCodeReader::allConnectorsArrived()
     if(msg->value.channels() != 1) {
         throw std::runtime_error("Input must be 1-channel image!");
     }
+
+    bool republish = param<bool>("republish");
 
     zbar::ImageScanner scanner;
     // configure the reader
@@ -101,7 +106,10 @@ void BarCodeReader::allConnectorsArrived()
             if(lost) {
                 lost = false;
             }
-            continue;
+
+            if(!republish) {
+                continue;
+            }
         }
 
         StringMessage::Ptr msg(new StringMessage);
@@ -121,7 +129,7 @@ void BarCodeReader::allConnectorsArrived()
 }
 
 
-void BarCodeReader::fill(QBoxLayout* layout)
+void BarCodeReader::setup()
 {
     setSynchronizedInputs(true);
 

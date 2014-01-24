@@ -33,6 +33,6 @@ void SayText::allConnectorsArrived()
     connection_types::StringMessage::Ptr msg = connector_->getMessage<connection_types::StringMessage>();
 
     std::stringstream cmd;
-    cmd << "espeak \"" << msg->value << "\" 2> /dev/null 1> /dev/null ";
+    cmd << "espeak \"" << msg->value << "\" 2> /dev/null 1> /dev/null &";
     system(cmd.str().c_str());
 }

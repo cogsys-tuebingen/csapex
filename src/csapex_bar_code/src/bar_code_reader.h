@@ -7,17 +7,14 @@
 namespace csapex
 {
 
-class BarCodeReader : public csapex::BoxedObject
+class BarCodeReader : public csapex::Node
 {
-    Q_OBJECT
-
 public:
     BarCodeReader();
 
 public:
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
 
-public Q_SLOTS:
     virtual void allConnectorsArrived();
 
 private:
