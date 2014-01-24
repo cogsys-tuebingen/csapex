@@ -5,9 +5,6 @@
 #include <csapex/model/boxed_object.h>
 #include <csapex_point_cloud/point_cloud_message.h>
 
-/// SYSTEM
-#include <QLCDNumber>
-
 namespace csapex {
 
 class ExtractTimeStamp : public BoxedObject
