@@ -51,6 +51,7 @@ add_library(csapex_point_cloud_plugin
     src/crop_box.cpp
     src/passthrough.cpp
     src/pointcloud_to_depthimage.cpp
+    src/pointcloud_to_intensityimage.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
