@@ -32,6 +32,7 @@ public:
 public Q_SLOTS:
     void allConnectorsArrived();
     void display(QSharedPointer<QImage> img);
+    void setAsync(int a);
 
 Q_SIGNALS:
     void displayRequest(QSharedPointer<QImage> img);

@@ -12,6 +12,7 @@
 #include <QGraphicsSceneEvent>
 #include <QGraphicsPixmapItem>
 #include <csapex/utility/register_apex_plugin.h>
+#include <QCheckBox>
 
 CSAPEX_REGISTER_CLASS(csapex::OutputDisplay, csapex::Node)
 
@@ -74,7 +75,7 @@ bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
 void OutputDisplay::fill(QBoxLayout* layout)
 {
     if(input_ == NULL) {
-        input_ = addInput<CvMatMessage>("Image");
+        input_ = addInput<CvMatMessage>("Image", false, true);
 
         setSynchronizedInputs(true);
 
@@ -90,10 +91,22 @@ void OutputDisplay::fill(QBoxLayout* layout)
 
         layout->addWidget(view_);
 
+        QCheckBox* cb = new QCheckBox("async");
+        cb->setChecked(input_->isAsync());
+
+        layout->addWidget(cb);
+
+        QObject::connect(cb, SIGNAL(stateChanged(int)), this, SLOT(setAsync(int)));
+
         disable();
 
         connect(this, SIGNAL(displayRequest(QSharedPointer<QImage>)), this, SLOT(display(QSharedPointer<QImage>)));
     }
+}
+
+void OutputDisplay::setAsync(int a)
+{
+    input_->setAsync(a);
 }
 
 Memento::Ptr OutputDisplay::getState() const
