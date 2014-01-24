@@ -753,6 +753,11 @@ void Node::useTimer(Timer *timer)
     }
 }
 
+std::string Node::getLabel() const
+{
+    return node_state_->label_;
+}
+
 void Node::stop()
 {
     Q_FOREACH(ConnectorIn* i, input) {

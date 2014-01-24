@@ -6,12 +6,13 @@
 
 using namespace csapex;
 
-//NodeState::NodeState()
-//    : parent(NULL), minimized(false), enabled(true)
-//{}
 NodeState::NodeState(Node* parent)
     : parent(parent), minimized(false), enabled(true)
-{}
+{
+    if(parent) {
+        label_ = parent->getUUID().getFullName();
+    }
+}
 
 void NodeState::copyFrom(const NodeState::Ptr& rhs)
 {

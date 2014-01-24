@@ -14,7 +14,6 @@ namespace csapex
 struct NodeState : public Memento {
     typedef boost::shared_ptr<NodeState> Ptr;
 
-//    NodeState();
     NodeState(Node* parent);
 
     void copyFrom (const Ptr &rhs);

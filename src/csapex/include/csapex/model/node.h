@@ -78,6 +78,8 @@ public:
 
     void stop();
 
+    std::string getLabel() const;
+
     virtual void useTimer(Timer* timer);
 
 private:

@@ -112,8 +112,6 @@ void Connectable::waitForProcessing(const UUID& who_is_waiting)
 
     blocked_ = false;
     port_->setPortProperty("blocked", false);
-
-    assert(!processing);
 }
 
 void Connectable::setPort(Port *port)

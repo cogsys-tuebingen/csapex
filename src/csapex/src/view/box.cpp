@@ -89,9 +89,9 @@ void Box::construct(NodePtr node)
 
     setObjectName(uuid.c_str());
 
-    if(getLabel().empty()) {
-        setLabel(uuid);
-    }
+//    if(node_->getLabel().empty()) {
+//        setLabel(uuid);
+//    }
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
@@ -222,7 +222,7 @@ void Box::setLabel(const QString &label)
 
 std::string Box::getLabel() const
 {
-    return ui->label->text().toStdString();
+    return node_->getLabel();
 }
 
 void Box::registerEvent(Connectable* c)
