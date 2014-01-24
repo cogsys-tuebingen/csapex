@@ -508,6 +508,8 @@ void Graph::reset()
 {
     stop();
 
+    Connectable::allow_processing = true;
+
     uuids.clear();
     connectors_.clear();
     visible_connections.clear();

@@ -27,9 +27,16 @@ void TimeOffset::allConnectorsArrived()
 {
     connection_types::TimeStampMessage::Ptr in = input_->getMessage<connection_types::TimeStampMessage>();
     connection_types::TimeStampMessage::Ptr time(new connection_types::TimeStampMessage);
-    time->value = time->value.fromNSec((in->value.toNSec() + state.offset_ms_ * 1e6));
 
-//    std::cout << "before: \t" << in->value.toNSec() << "\nafter: \t" << time->value.toNSec() << "\noffset: \t" << 1e6 * state.offset_ms_ << std::endl;
+    if(in->value.toNSec() != 0) {
+        std::cerr << in->value.toNSec() << " + " << state.offset_ms_ << " * " << 1e6 << " = " << (in->value.toNSec() + state.offset_ms_ * 1e6) << std::endl,
+                time->value = time->value.fromNSec((in->value.toNSec() + state.offset_ms_ * 1000000));
+        setError(false);
+    } else {
+        setError(true, "Time is 0, using current time as base", EL_WARNING);
+        ros::Time now = ros::Time::now();
+        time->value = now - ros::Duration(0, state.offset_ms_ * 1000000);
+    }
     output_->publish(time);
 }
 

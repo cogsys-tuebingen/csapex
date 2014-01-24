@@ -56,9 +56,9 @@ void NodeWorker::forwardMessage(Connectable *s)
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
     assert(source);
 
-    if(node_->isError()) {
-        return;
-    }
+//    if(node_->isError()) {
+//        return;
+//    }
 
     if(node_->isEnabled()) {
         if(synchronized_inputs_) {
@@ -69,9 +69,9 @@ void NodeWorker::forwardMessage(Connectable *s)
     }
 
 
-    if(!node_->isError() || node_->errorLevel() != ErrorState::EL_ERROR) {
-        node_->setError(false);
-    }
+//    if(!node_->isError() || node_->errorLevel() != ErrorState::EL_ERROR) {
+//        node_->setError(false);
+//    }
 }
 
 void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
@@ -90,6 +90,16 @@ void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
 
     is_processing_ = false;
     Q_EMIT messageProcessed();
+}
+
+void NodeWorker::setProcessing(bool p)
+{
+    is_processing_ = p;
+}
+
+bool NodeWorker::isProcessing() const
+{
+    return is_processing_;
 }
 
 void NodeWorker::addInput(ConnectorIn *source)

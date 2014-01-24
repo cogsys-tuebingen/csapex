@@ -2,56 +2,29 @@
 #define DisplayFeatures_H
 
 /// COMPONENT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
-#include <QComboBox>
-#include <QCheckBox>
 
 namespace csapex
 {
 
-class DisplayKeypoints : public csapex::BoxedObject
+class DisplayKeypoints : public csapex::Node
 {
-    Q_OBJECT
-
 public:
     DisplayKeypoints();
 
 public:
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
 
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
-
-public Q_SLOTS:
     virtual void allConnectorsArrived();
 
-private Q_SLOTS:
-    void update(int slot);
-    void update();
-
-    // TODO: state
 private:
     ConnectorIn* in_img;
     ConnectorIn* in_key;
 
     ConnectorOut* out_img;
-
-    QComboBox* colorbox;
-    QCheckBox* richbox;
-
-    struct State : public Memento {
-        cv::Scalar color;
-        int flags;
-
-        virtual void writeYaml(YAML::Emitter& out) const;
-        virtual void readYaml(const YAML::Node& node);
-    };
-
-    State state;
-
 };
 
 }

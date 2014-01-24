@@ -65,14 +65,19 @@ void Connectable::updateIsProcessing()
 void Connectable::stop()
 {
     processing = false;
-//    can_process_cond.wakeAll();
+    //    can_process_cond.wakeAll();
 }
 
 void Connectable::setProcessing(bool p)
 {
-    //port_->setPortProperty("processing", p);
+    {
+        QMutexLocker lock(&io_mutex);
+        //port_->setPortProperty("processing", p);
 
-    processing = p;
+        assert(processing != p || isAsync());
+        processing = p;
+    }
+
 
     if(!processing) {
         notifyMessageProcessed();
@@ -107,6 +112,8 @@ void Connectable::waitForProcessing(const UUID& who_is_waiting)
 
     blocked_ = false;
     port_->setPortProperty("blocked", false);
+
+    assert(!processing);
 }
 
 void Connectable::setPort(Port *port)
@@ -204,6 +211,9 @@ void Connectable::removeAllConnectionsUndoable()
 void Connectable::disable()
 {
     enabled_ = false;
+    if(isProcessing()) {
+        setProcessing(false);
+    }
     Q_EMIT enabled(enabled_);
     if(port_) {
         port_->setProperty("disabled", !enabled_);

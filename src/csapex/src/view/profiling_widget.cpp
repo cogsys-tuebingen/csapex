@@ -69,7 +69,6 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     if(n > 0) {
         int max_time_ms = 10;
 
-        /// TODO paint all intervals
         const std::deque<Timer::Ptr>& h = node_worker_->timer_history_;
         for(std::deque<Timer::Ptr>::const_iterator timer = h.begin(); timer != h.end(); ++timer) {
             const Timer::Ptr& t = *timer;

@@ -66,7 +66,7 @@ void ConnectorOut::removeConnection(Connectable* other_side)
 
 void ConnectorOut::updateIsProcessing()
 {
-    if(!isConnected()) {
+    if(!isConnected() && isProcessing()) {
         setProcessing(false);
     }
 }
@@ -175,7 +175,6 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         i = publish_timer_->step("io");
     }
 
-    setProcessing(true);
 
     bool one_is_async = false;
     BOOST_FOREACH(ConnectorIn* i, targets_) {
@@ -190,9 +189,10 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     std::vector<ConnectorIn*> targets;
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         if(i->isEnabled()) {
-            if(i->isProcessing() && !one_is_async) {
+            if(i->isProcessing() && !i->isAsync()/*one_is_async*/) {
                 setBlocked(true);
                 i->waitForProcessing(getUUID());
+                assert(!i->isProcessing());
             }
             targets.push_back(i);
         }
@@ -203,7 +203,6 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     }
 
     if(targets.empty()) {
-        setProcessing(false);
         return;
     }
 

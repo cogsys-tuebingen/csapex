@@ -48,6 +48,9 @@ public Q_SLOTS:
 
     void addParameterCallback(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
 
+    void setProcessing(bool p);
+    bool isProcessing() const;
+
 Q_SIGNALS:
     void messageProcessed();
 

@@ -147,12 +147,14 @@ void ConnectorIn::waitForProcessing(const UUID& who_is_waiting)
 
 void ConnectorIn::setProcessing(bool processing)
 {
-        Connectable::setProcessing(processing);
-    // call parents
-    if(isConnected()) {
-        Connectable* parent = getSource();
-        parent->setProcessing(processing);
-    }
+//    // call parents
+//    if(isConnected()) {
+//        if(!isAsync() || isProcessing() != processing) {
+//            Connectable* parent = getSource();
+//            //parent->setProcessing(processing);
+//        }
+//    }
+    Connectable::setProcessing(processing);
 }
 
 void ConnectorIn::waitForMessage()
@@ -166,7 +168,7 @@ void ConnectorIn::waitForMessage()
 
 void ConnectorIn::updateIsProcessing()
 {
-    if(!isConnected()) {
+    if(!isConnected() && isProcessing()) {
         setProcessing(false);
     }
 }
@@ -176,6 +178,9 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
     {
         QMutexLocker lock(&io_mutex);
         message_ = message;
+    }
+
+    if(!isAsync() || (isAsync() && !isProcessing())) {
         setProcessing(true);
     }
 

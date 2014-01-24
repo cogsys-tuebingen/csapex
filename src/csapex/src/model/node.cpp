@@ -347,6 +347,7 @@ void Node::enableIO(bool enable)
 
 void Node::enableInput (bool enable)
 {
+    worker_->setProcessing(false);
     Q_FOREACH(ConnectorIn* i, input) {
         if(enable) {
             i->enable();
@@ -433,7 +434,7 @@ NodeWorker* Node::getNodeWorker() const
 
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    if(error) {
+    if(error && level == EL_ERROR) {
         finishProcessing();
     }
 

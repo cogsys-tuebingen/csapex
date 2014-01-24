@@ -8,6 +8,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex_vision/cv_mat_message.h>
 #include <csapex_vision_features/keypoint_message.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -20,8 +21,11 @@ using namespace connection_types;
 DisplayKeypoints::DisplayKeypoints()
     : in_key(NULL)
 {
-    state.color = cv::Scalar::all(-1);
     addTag(Tag::get("Features"));
+
+    addParameter(param::ParameterFactory::declare("rich keypoints", true));
+    addParameter(param::ParameterFactory::declareColorParameter("color", 255,0,0));
+    addParameter(param::ParameterFactory::declare("random color", true));
 }
 
 void DisplayKeypoints::allConnectorsArrived()
@@ -30,97 +34,30 @@ void DisplayKeypoints::allConnectorsArrived()
     KeypointMessage::Ptr key_msg = in_key->getMessage<KeypointMessage>();
 
     CvMatMessage::Ptr out(new CvMatMessage);
-    cv::drawKeypoints(img_msg->value, key_msg->value, out->value, state.color, state.flags);
+
+
+    cv::Scalar color(-1,-1,-1,-1);
+    if(!param<bool>("random color")) {
+        const std::vector<int>& c = param<std::vector<int> >("color");
+        color = cv::Scalar(c[2], c[1], c[0]);
+    }
+
+    int flags = 0;
+    if(param<bool>("rich keypoints")) {
+        flags |= cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS;
+    }
+
+    cv::drawKeypoints(img_msg->value, key_msg->value, out->value, color, flags);
 
     out_img->publish(out);
 }
 
-void DisplayKeypoints::fill(QBoxLayout* layout)
+void DisplayKeypoints::setup()
 {
-    if(in_key == NULL) {
-        setSynchronizedInputs(true);
+    setSynchronizedInputs(true);
 
-        in_img = addInput<CvMatMessage>("Image");
-        in_key = addInput<KeypointMessage> ("Keypoints");
+    in_img = addInput<CvMatMessage>("Image");
+    in_key = addInput<KeypointMessage> ("Keypoints");
 
-        out_img = addOutput<CvMatMessage>("Image");
-
-        colorbox = new QComboBox;
-        colorbox->addItem("Random Color");
-        colorbox->addItem("Black");
-        colorbox->addItem("White");
-        colorbox->addItem("Red");
-        layout->addWidget(colorbox);
-        QObject::connect(colorbox, SIGNAL(currentIndexChanged(int)), this, SLOT(update(int)));
-
-        richbox = new QCheckBox("Rich Keypoints");
-        layout->addWidget(richbox);
-        QObject::connect(richbox, SIGNAL(clicked()), this, SLOT(update()));
-    }
-}
-
-
-void DisplayKeypoints::update()
-{
-    state.flags = 0;
-    if(richbox->isChecked()) state.flags += cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS;
-}
-
-void DisplayKeypoints::update(int slot)
-{
-    // TODO: cannot be deserialized in this form...
-    switch(slot) {
-    case 0:
-        state.color = cv::Scalar::all(-1);
-        break;
-    case 1:
-        state.color = cv::Scalar::all(0);
-        break;
-    case 2:
-        state.color = cv::Scalar::all(255);
-        break;
-    case 3:
-        state.color = cv::Scalar(0, 0, 255);
-        break;
-    }
-}
-
-Memento::Ptr DisplayKeypoints::getState() const
-{
-    return boost::shared_ptr<State>(new State(state));
-}
-
-void DisplayKeypoints::setState(Memento::Ptr memento)
-{
-    boost::shared_ptr<DisplayKeypoints::State> m = boost::dynamic_pointer_cast<DisplayKeypoints::State> (memento);
-    assert(m.get());
-
-    state = *m;
-
-    richbox->setChecked((state.flags & cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS) != 0);
-}
-
-void DisplayKeypoints::State::writeYaml(YAML::Emitter& out) const {
-    out << YAML::Key << "flags" << YAML::Value << flags;
-    out << YAML::Key << "color" << YAML::Value << YAML::BeginSeq;
-    out << color[0] << color[1] << color[2] << color[3];
-    out << YAML::EndSeq;
-}
-
-void DisplayKeypoints::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("flags")) {
-        node["flags"] >> flags;
-    }
-    if(node.FindValue("color")) {
-        const YAML::Node& seq = node["color"];
-        assert(seq.Type() == YAML::NodeType::Sequence);
-
-        int data[4];
-
-        for(int i = 0; i < 4; ++i)  {
-            seq[i] >> data[i];
-        }
-
-        color = cv::Scalar(data[0],data[1],data[2],data[3]);
-    }
+    out_img = addOutput<CvMatMessage>("Image");
 }
