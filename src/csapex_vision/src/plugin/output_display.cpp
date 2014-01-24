@@ -13,6 +13,7 @@
 #include <QGraphicsPixmapItem>
 #include <csapex/utility/register_apex_plugin.h>
 #include <QCheckBox>
+#include <QPushButton>
 
 CSAPEX_REGISTER_CLASS(csapex::OutputDisplay, csapex::Node)
 
@@ -91,17 +92,36 @@ void OutputDisplay::fill(QBoxLayout* layout)
 
         layout->addWidget(view_);
 
+        QHBoxLayout* sub = new QHBoxLayout;
+
         QCheckBox* cb = new QCheckBox("async");
         cb->setChecked(input_->isAsync());
-
-        layout->addWidget(cb);
-
+        sub->addWidget(cb, 0,  Qt::AlignLeft);
         QObject::connect(cb, SIGNAL(stateChanged(int)), this, SLOT(setAsync(int)));
+
+        QPushButton* fit = new QPushButton("fit size");
+        sub->addWidget(fit, 0,  Qt::AlignLeft);
+        QObject::connect(fit, SIGNAL(clicked()), this, SLOT(fitInView()));
+
+        sub->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+        layout->addLayout(sub);
 
         disable();
 
         connect(this, SIGNAL(displayRequest(QSharedPointer<QImage>)), this, SLOT(display(QSharedPointer<QImage>)));
     }
+}
+
+void OutputDisplay::fitInView()
+{
+    if(last_size_.isNull()) {
+        return;
+    }
+
+    state.width = last_size_.width();
+    state.height = last_size_.height();
+    view_->setFixedSize(QSize(state.width, state.height));
 }
 
 void OutputDisplay::setAsync(int a)
@@ -161,6 +181,7 @@ void OutputDisplay::display(QSharedPointer<QImage> img)
         pixmap_->setPixmap(QPixmap::fromImage(*img));
     }
 
+    last_size_ = img->size();
 
     view_->scene()->setSceneRect(img->rect());
     view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);

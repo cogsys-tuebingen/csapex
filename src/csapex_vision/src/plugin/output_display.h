@@ -33,6 +33,7 @@ public Q_SLOTS:
     void allConnectorsArrived();
     void display(QSharedPointer<QImage> img);
     void setAsync(int a);
+    void fitInView();
 
 Q_SIGNALS:
     void displayRequest(QSharedPointer<QImage> img);
@@ -60,6 +61,7 @@ private:
         }
     };
 
+    QSize last_size_;
     State state;
     ConnectorIn* input_;
     QGraphicsPixmapItem* pixmap_;
