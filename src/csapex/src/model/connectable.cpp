@@ -17,7 +17,6 @@
 
 using namespace csapex;
 
-const std::string Connectable::namespace_separator = ":|:";
 const QString Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
 const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
@@ -29,7 +28,7 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
     }
 
     std::stringstream ss;
-    ss << box_uuid << namespace_separator << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
+    ss << box_uuid << UUID::namespace_separator << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
     return UUID::make(ss.str());
 }
 
@@ -50,7 +49,7 @@ Connectable::Connectable(Unique* parent, int sub_id, int type)
 void Connectable::notifyMessageProcessed()
 {
     {
-        QMutexLocker lock(&io_mutex);
+        // QMutexLocker lock(&io_mutex);
         can_process_cond.wakeAll();
     }
 
@@ -64,8 +63,11 @@ void Connectable::updateIsProcessing()
 
 void Connectable::stop()
 {
-    processing = false;
-    //    can_process_cond.wakeAll();
+    {
+        QMutexLocker lock(&io_mutex);
+        processing = false;
+    }
+    notifyMessageProcessed();
 }
 
 void Connectable::setProcessing(bool p)
@@ -90,27 +92,28 @@ bool Connectable::isProcessing() const
     return processing;
 }
 
-void Connectable::waitForProcessing(const UUID& who_is_waiting)
+void Connectable::waitForProcessing()
 {
     if(isError()) {
         return;
     }
 
-    QMutexLocker lock(&io_mutex);
+    {
+        QMutexLocker lock(&io_mutex);
 
-    if(processing) {
-        waiting_list_.push_back(who_is_waiting);
-        while(processing && allow_processing) {
-            blocked_ = true;
-            port_->setPortProperty("blocked", true);
+        if(processing) {
+            while(processing && allow_processing) {
+                blocked_ = true;
+                port_->setPortProperty("blocked", true);
 
-            can_process_cond.wait(&io_mutex);
+                can_process_cond.wait(&io_mutex);
+            }
         }
 
-        std::remove(waiting_list_.begin(), waiting_list_.end(), who_is_waiting);
+
+        blocked_ = false;
     }
 
-    blocked_ = false;
     port_->setPortProperty("blocked", false);
 }
 

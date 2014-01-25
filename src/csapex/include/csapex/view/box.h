@@ -57,9 +57,6 @@ public:
     void construct(NodePtr node);
     void init();
 
-    /// CONTROL
-    void stop();
-
     /// ACCESSORS
     Node* getNode();
 

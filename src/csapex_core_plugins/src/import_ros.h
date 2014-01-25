@@ -22,6 +22,9 @@ public:
     virtual void messageArrived(ConnectorIn* source);
     virtual void tick();
 
+Q_SIGNALS:
+    void newTopic(const ros::master::TopicInfo& topic);
+
 public Q_SLOTS:
     void refresh();
     void changeTopic(const QString &topic);
@@ -42,7 +45,7 @@ private:
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);
 
-private:
+private Q_SLOTS:
     void setTopic(const ros::master::TopicInfo& topic);
 
 private:

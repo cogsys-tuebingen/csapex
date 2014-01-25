@@ -116,8 +116,7 @@ void ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval& interval
     int interval_time = interval.lengthMs();
 
     double f = interval_time / max_time_ms_;
-    assert(0.0 <= f);
-    assert(f <= 1.0);
+    f = std::max(0.0, std::min(1.0, f));
     int height = f * content_height_;
 
     int r,g,b;

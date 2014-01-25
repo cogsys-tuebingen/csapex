@@ -90,7 +90,7 @@ public:
 
     bool hasMessage() const;
 
-    virtual void waitForProcessing(const UUID& who_is_waiting);
+    virtual void waitForProcessing();
     virtual void setProcessing(bool processing);
     virtual void updateIsProcessing();
 
@@ -107,8 +107,6 @@ protected:
     Connectable* target;
 
     ConnectionType::Ptr message_;
-
-    QWaitCondition has_msg_cond;
 
     bool optional_;
     bool legacy_;

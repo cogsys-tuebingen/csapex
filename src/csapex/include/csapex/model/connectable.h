@@ -28,8 +28,6 @@ public:
     static const QString MIME_CREATE_CONNECTION;
     static const QString MIME_MOVE_CONNECTIONS;
 
-    static const std::string namespace_separator;
-
     enum {
         TYPE_IN = 1,
         TYPE_OUT = 0,
@@ -107,7 +105,7 @@ public Q_SLOTS:
 
     virtual void setProcessing(bool processing);
     bool isProcessing() const;
-    virtual void waitForProcessing(const UUID &who_is_waiting);
+    virtual void waitForProcessing();
     virtual void updateIsProcessing();
 
     void stop();
@@ -173,9 +171,6 @@ private:
     bool async_;
     bool async_temp_;
     bool blocked_;
-
-public:
-    std::vector<UUID> waiting_list_;
 };
 
 }

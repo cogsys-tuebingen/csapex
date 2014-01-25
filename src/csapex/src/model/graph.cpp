@@ -190,8 +190,8 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
     //                        std::string new_connector_uuid = templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
 
     //                        std::string in_box, in_connector;
-    //                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
-    //                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + in_connector);
+    //                        split_first(in->UUID(), UUID::namespace_separator, in_box, in_connector);
+    //                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + UUID::namespace_separator + in_connector);
 
     //                        connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
     //                    }
@@ -219,8 +219,8 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
     //                        }
 
     //                        std::string out_box, out_connector;
-    //                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
-    //                        templ->addConnection(old_box_to_new_box[n->UUID()] + Connectable::namespace_separator + out_connector, new_connector_uuid);
+    //                        split_first(out->UUID(), UUID::namespace_separator, out_box, out_connector);
+    //                        templ->addConnection(old_box_to_new_box[n->UUID()] + UUID::namespace_separator + out_connector, new_connector_uuid);
 
     //                        connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
 
@@ -229,13 +229,13 @@ Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair
     //                        std::cerr << "  > keep internal connection between " << in->UUID() << " and " << out->UUID() << std::endl;
 
     //                        std::string in_box, in_connector;
-    //                        split_first(in->UUID(), Connectable::namespace_separator, in_box, in_connector);
+    //                        split_first(in->UUID(), UUID::namespace_separator, in_box, in_connector);
 
     //                        std::string out_box, out_connector;
-    //                        split_first(out->UUID(), Connectable::namespace_separator, out_box, out_connector);
+    //                        split_first(out->UUID(), UUID::namespace_separator, out_box, out_connector);
 
-    //                        std::string in = old_box_to_new_box[in_box] + Connectable::namespace_separator + in_connector;
-    //                        std::string out = old_box_to_new_box[out_box] + Connectable::namespace_separator + out_connector;
+    //                        std::string in = old_box_to_new_box[in_box] + UUID::namespace_separator + in_connector;
+    //                        std::string out = old_box_to_new_box[out_box] + UUID::namespace_separator + out_connector;
 
     //                        templ->addConnection(out, in);
     //                    }
@@ -485,6 +485,9 @@ void Graph::stop()
     Connectable::allow_processing = false;
 
     Q_FOREACH(Node::Ptr node, nodes_) {
+        node->disable();
+    }
+    Q_FOREACH(Node::Ptr node, nodes_) {
         node->stop();
     }
 
@@ -566,7 +569,7 @@ Node* Graph::findNodeForConnector(const UUID &uuid)
 {
     UUID l = UUID::NONE;
     UUID r = UUID::NONE;
-    uuid.split(Connectable::namespace_separator, l, r);
+    uuid.split(UUID::namespace_separator, l, r);
 
     try {
         return findNode(l);
@@ -596,17 +599,12 @@ Connectable* Graph::findConnector(const UUID &uuid)
 {
     UUID l = UUID::NONE;
     UUID r = UUID::NONE;
-    uuid.split(Connectable::namespace_separator, l, r);
+    uuid.split(UUID::namespace_separator, l, r);
 
-    Box* owner = findNode(l)->getBox();
+    Node* owner = findNode(l);
     assert(owner);
 
-    Connectable* result = NULL;
-    result = owner->getNode()->getInput(uuid);
-
-    if(result == NULL) {
-        result = owner->getNode()->getOutput(uuid);
-    }
+    Connectable* result = owner->getConnector(uuid);;
 
     assert(result);
 

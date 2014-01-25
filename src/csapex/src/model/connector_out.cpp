@@ -175,24 +175,18 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         i = publish_timer_->step("io");
     }
 
-
-    bool one_is_async = false;
-    BOOST_FOREACH(ConnectorIn* i, targets_) {
-        if(i->isAsync()) {
-            one_is_async = true;
-        }
-    }
-
-
     // wait for all connected inputs to be able to receive, if none is async
     //  * inputs can only be connected to this output since they are 1:1
     std::vector<ConnectorIn*> targets;
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         if(i->isEnabled()) {
-            if(i->isProcessing() && !i->isAsync()/*one_is_async*/) {
+            if(i->isProcessing() && !i->isAsync()) {
                 setBlocked(true);
-                i->waitForProcessing(getUUID());
-                assert(!i->isProcessing());
+                i->waitForProcessing();
+
+                if(i->isProcessing()) {
+                    return;
+                }
             }
             targets.push_back(i);
         }

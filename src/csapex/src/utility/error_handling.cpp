@@ -28,6 +28,7 @@ void csapex::error_handling::init()
     signal(SIGINT, csapex::error_handling::siginthandler);
 
     struct sigaction sigact;
+    memset (&sigact, '\0', sizeof(sigact));
 
     sigact.sa_sigaction = sigsegvhandler;
     sigact.sa_flags = SA_RESTART | SA_SIGINFO;

@@ -30,6 +30,8 @@ Node::~Node()
     BOOST_FOREACH(ConnectorOut* out, output) {
         out->deleteLater();
     }
+
+    std::cerr << "deleted node " << getUUID() << std::endl;
 }
 
 void Node::makeThread()
@@ -536,6 +538,28 @@ ConnectorOut* Node::getOutput(const UUID& uuid) const
 
     return NULL;
 }
+
+Connectable* Node::getConnector(const UUID &uuid) const
+{
+    Connectable* result = getInput(uuid);
+
+    if(result == NULL) {
+        result = getOutput(uuid);
+    }
+
+    return result;
+}
+
+std::vector<ConnectorIn*> Node::getInputs() const
+{
+    return input;
+}
+
+std::vector<ConnectorOut*> Node::getOutputs() const
+{
+    return output;
+}
+
 void Node::removeInput(ConnectorIn *in)
 {
     std::vector<ConnectorIn*>::iterator it;
@@ -573,12 +597,12 @@ Command::Ptr Node::removeAllConnectionsCmd()
 {
     command::Meta::Ptr cmd(new command::Meta("Remove All Connectors"));
 
-    BOOST_FOREACH(ConnectorIn* i, input) {
+    BOOST_FOREACH(ConnectorIn* i, getInputs()) {
         if(i->isConnected()) {
             cmd->add(i->removeAllConnectionsCmd());
         }
     }
-    BOOST_FOREACH(ConnectorOut* i, output) {
+    BOOST_FOREACH(ConnectorOut* i, getOutputs()) {
         if(i->isConnected()) {
             cmd->add(i->removeAllConnectionsCmd());
         }
@@ -629,17 +653,6 @@ QTreeWidgetItem* Node::createDebugInformation() const
             QTreeWidgetItem* input = new QTreeWidgetItem;
             input->setText(0, "Input");
 
-            QTreeWidgetItem* waiting = new QTreeWidgetItem;
-            waiting->setText(0, "Waiting Inputs");
-            for(std::vector<UUID>::const_iterator it = connector->waiting_list_.begin();
-                it != connector->waiting_list_.end(); ++it) {
-
-                QTreeWidgetItem* w = new QTreeWidgetItem;
-                w->setText(0, it->getFullName().c_str());
-
-                waiting->addChild(w);
-            }
-
             QTreeWidgetItem* target_widget = new QTreeWidgetItem;
             if(connector->isConnected()) {
                 Connectable* target = connector->getSource();
@@ -655,7 +668,6 @@ QTreeWidgetItem* Node::createDebugInformation() const
             input->addChild(target_widget);
 
             connector_widget->addChild(input);
-            connector_widget->addChild(waiting);
 
             connectors->addChild(connector_widget);
         }
@@ -760,10 +772,10 @@ std::string Node::getLabel() const
 
 void Node::stop()
 {
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorOut* i, output) {
         i->stop();
     }
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorIn* i, input) {
         i->stop();
     }
 

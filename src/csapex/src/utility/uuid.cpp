@@ -8,6 +8,7 @@
 using namespace csapex;
 
 UUID UUID::NONE("");
+const std::string UUID::namespace_separator = ":|:";
 
 
 namespace {
@@ -49,6 +50,11 @@ UUID UUID::make(const std::string &prefix)
     UUID r(rep);
     hash_[r.representation_]++;
     return r;
+}
+
+UUID UUID::make_sub(const UUID &parent, const std::string &prefix)
+{
+    return make(parent.getFullName() + UUID::namespace_separator + prefix);
 }
 
 void UUID::free(const UUID &uuid)

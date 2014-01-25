@@ -138,11 +138,6 @@ void Box::enableContent(bool enable)
     ui->label->setEnabled(enable);
 }
 
-void Box::stop()
-{
-    node_->stop();
-}
-
 void Box::showContextMenu(const QPoint& pos)
 {
     Q_EMIT showContextMenuForBox(this, mapToGlobal(pos));

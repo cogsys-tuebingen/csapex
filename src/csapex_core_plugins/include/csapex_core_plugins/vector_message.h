@@ -25,6 +25,11 @@ struct VectorMessage : public Message
         return VectorMessage::Ptr (new VectorMessage(T::make()));
     }
 
+    static VectorMessage::Ptr make(ConnectionType::Ptr type)
+    {
+        return VectorMessage::Ptr (new VectorMessage(type->toType()));
+    }
+
     static VectorMessage::Ptr make();
 
     virtual ConnectionType::Ptr clone();

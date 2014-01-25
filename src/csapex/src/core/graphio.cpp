@@ -118,7 +118,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
 
     BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
         if(!node->output.empty()) {
-            BOOST_FOREACH(ConnectorOut* o, node->output) {
+            BOOST_FOREACH(ConnectorOut* o, node->getOutputs()) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
                 }
@@ -184,9 +184,9 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
             std::string from_uuid_tmp;
             connection["uuid"] >> from_uuid_tmp;
-            if(from_uuid_tmp.find(Connectable::namespace_separator) == from_uuid_tmp.npos) {
+            if(from_uuid_tmp.find(UUID::namespace_separator) == from_uuid_tmp.npos) {
                 // legacy import
-                from_uuid_tmp.replace(from_uuid_tmp.find("_out_"), 1, Connectable::namespace_separator);
+                from_uuid_tmp.replace(from_uuid_tmp.find("_out_"), 1, UUID::namespace_separator);
             }
 
             UUID from_uuid = UUID::make_forced(from_uuid_tmp);
@@ -205,9 +205,9 @@ void GraphIO::loadConnections(YAML::Node &doc)
                 std::string to_uuid_tmp;
                 targets[j] >> to_uuid_tmp;
 
-                if(to_uuid_tmp.find(Connectable::namespace_separator) == to_uuid_tmp.npos) {
+                if(to_uuid_tmp.find(UUID::namespace_separator) == to_uuid_tmp.npos) {
                     // legacy import
-                    to_uuid_tmp.replace(to_uuid_tmp.find("_in_"), 1, Connectable::namespace_separator);
+                    to_uuid_tmp.replace(to_uuid_tmp.find("_in_"), 1, UUID::namespace_separator);
                 }
 
                 UUID to_uuid = UUID::make_forced(to_uuid_tmp);

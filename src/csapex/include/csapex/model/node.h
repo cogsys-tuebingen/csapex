@@ -76,13 +76,13 @@ public:
     void setIcon(QIcon icon);
     QIcon getIcon() const;
 
-    void stop();
+    virtual void stop();
 
     std::string getLabel() const;
 
     virtual void useTimer(Timer* timer);
 
-private:
+protected:
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);
 
@@ -167,8 +167,12 @@ public:
     ConnectorIn* getInput(const unsigned int index) const;
     ConnectorOut* getOutput(const unsigned int index) const;
 
-    ConnectorIn* getInput(const UUID& uuid) const;
-    ConnectorOut* getOutput(const UUID& uuid) const;
+    virtual ConnectorIn* getInput(const UUID& uuid) const;
+    virtual ConnectorOut* getOutput(const UUID& uuid) const;
+
+    virtual Connectable* getConnector(const UUID& uuid) const;
+    virtual std::vector<ConnectorIn*> getInputs() const;
+    virtual std::vector<ConnectorOut*> getOutputs() const;
 
     void removeInput(ConnectorIn *in);
     void removeOutput(ConnectorOut *out);

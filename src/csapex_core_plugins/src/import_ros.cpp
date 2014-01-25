@@ -33,6 +33,8 @@ ImportRos::ImportRos()
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));
     setIcon(QIcon(":/terminal.png"));
+
+    QObject::connect(this, SIGNAL(newTopic(ros::master::TopicInfo)), this, SLOT(setTopic(ros::master::TopicInfo)));
 }
 
 void ImportRos::fill(QBoxLayout *layout)
@@ -52,6 +54,7 @@ void ImportRos::fill(QBoxLayout *layout)
 void ImportRos::updateDynamicGui(QBoxLayout *layout)
 {
     QtHelper::clearLayout(dynamic_layout);
+    void setTopic(const ros::master::TopicInfo& topic);
 
     if(!state.topic_.empty()) {
         ROSHandler::instance().refresh();
@@ -118,7 +121,7 @@ void ImportRos::changeTopic(const QString& topic)
 
     for(ros::master::V_TopicInfo::iterator it = topics.begin(); it != topics.end(); ++it) {
         if(it->name == topic.toStdString()) {
-            setTopic(*it);
+            Q_EMIT newTopic(*it);
             return;
         }
     }
@@ -129,6 +132,7 @@ void ImportRos::changeTopic(const QString& topic)
 
 void ImportRos::setTopic(const ros::master::TopicInfo &topic)
 {
+    std::cout << "warning: set topic " << topic.name << std::endl;
     current_subscriber.shutdown();
 
     if(RosMessageConversion::instance().canHandle(topic)) {

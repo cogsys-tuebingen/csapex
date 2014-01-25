@@ -136,13 +136,13 @@ Connectable *ConnectorIn::getSource() const
     return target;
 }
 
-void ConnectorIn::waitForProcessing(const UUID& who_is_waiting)
+void ConnectorIn::waitForProcessing()
 {
     if(isAsync() || !isEnabled()) {
         return;
     }
 
-    Connectable::waitForProcessing(who_is_waiting);
+    Connectable::waitForProcessing();
 }
 
 void ConnectorIn::setProcessing(bool processing)

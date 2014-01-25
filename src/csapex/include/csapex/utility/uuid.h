@@ -15,10 +15,12 @@ public:
     static UUID make(const std::string& prefix);
     static void free(const UUID& uuid);
     static UUID make_forced(const std::string& representation);
+    static UUID make_sub(const UUID& parent, const std::string& prefix);
 
     static void reset();
 
     static UUID NONE;
+    static const std::string namespace_separator;
 
 public:
     friend std::ostream& operator << (std::ostream& out, const UUID& uuid_) {
