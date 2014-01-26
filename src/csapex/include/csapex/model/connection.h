@@ -30,7 +30,10 @@ public:
     struct Fulcrum {
         enum Type {
             CURVE = 0,
-            LINEAR = 1
+            LINEAR = 1,
+            HANDLE = LINEAR,
+            OUT = 10,
+            IN = 11
         };
         Fulcrum(const QPoint& p, int t)
             : type(t), pos(p)

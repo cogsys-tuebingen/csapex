@@ -7,7 +7,7 @@
 using namespace csapex;
 
 NodeState::NodeState(Node* parent)
-    : parent(parent), minimized(false), enabled(true)
+    : parent(parent), minimized(false), enabled(true), flipped(false)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
@@ -31,6 +31,10 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(node.FindValue("enabled")) {
         node["enabled"] >> enabled;
+    }
+
+    if(node.FindValue("flipped")) {
+        node["flipped"] >> flipped;
     }
 
     if(node.FindValue("label")) {
@@ -77,6 +81,8 @@ void NodeState::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << minimized;
     out << YAML::Key << "enabled";
     out << YAML::Value << enabled;
+    out << YAML::Key << "flipped";
+    out << YAML::Value << flipped;
 
     if(parent) {
         boxed_state = parent->getState();

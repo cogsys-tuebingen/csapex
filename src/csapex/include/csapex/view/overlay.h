@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/model/connection.h>
 
 /// SYSTEM
 #include <map>
@@ -57,10 +58,10 @@ protected:
     bool showFulcrumContextMenu(const QPoint& pos);
 
     void drawActivity(int life, Connectable* c);
-    void drawConnector(Connectable* c);
+    void drawPort(Port* p);
     void drawConnection(Connection& connection);
 
-    void drawConnection(const QPoint& from, const QPoint& to, int id);
+    void drawConnection(const QPoint& from, const QPoint& to, int id, Connection::Fulcrum::Type from_type, Connection::Fulcrum::Type to_type);
 
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent * event);

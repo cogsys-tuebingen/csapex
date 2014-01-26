@@ -120,7 +120,9 @@ void Foreach::stop()
 std::vector<ConnectorOut*> Foreach::getOutputs() const
 {
     std::vector<ConnectorOut*> output = Node::getOutputs();
-    output.push_back(out_sub);
+    if(out_sub) {
+        output.push_back(out_sub);
+    }
 
     return output;
 }
@@ -128,7 +130,9 @@ std::vector<ConnectorOut*> Foreach::getOutputs() const
 std::vector<ConnectorIn*> Foreach::getInputs() const
 {
     std::vector<ConnectorIn*> input = Node::getInputs();
-    input.push_back(in_sub);
+    if(in_sub) {
+        input.push_back(in_sub);
+    }
 
     return input;
 }

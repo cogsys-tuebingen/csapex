@@ -32,8 +32,6 @@ using namespace csapex;
 const QString Box::MIME = "csapex/model/box";
 const QString Box::MIME_MOVE = "csapex/model/box/move";
 
-int Box::g_instances = 0;
-
 Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), profiling_(false), is_placed_(false)
@@ -41,8 +39,6 @@ Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     adapter_->setNode(node_.get());
 
     construct(node);
-
-    ++g_instances;
 }
 
 Box::Box(BoxedObjectPtr node, QWidget* parent)
@@ -50,13 +46,10 @@ Box::Box(BoxedObjectPtr node, QWidget* parent)
       down_(false), profiling_(false), is_placed_(false)
 {
     construct(node);
-
-    ++g_instances;
 }
 
 Box::~Box()
 {
-    --g_instances;
 }
 
 
@@ -69,6 +62,7 @@ void Box::setupUi()
         QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
         adapter_shared_->doSetupUi(ui->content);
     }
+    updateFlippedSides();
 }
 
 void Box::construct(NodePtr node)
@@ -88,10 +82,6 @@ void Box::construct(NodePtr node)
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
-
-//    if(node_->getLabel().empty()) {
-//        setLabel(uuid);
-//    }
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
@@ -159,6 +149,12 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
         handler[min] = boost::bind(&Box::minimizeBox, this, true);
         menu->addAction(min);
     }
+
+    QAction* flip = new QAction("flip sides", menu);
+    flip->setIcon(QIcon(":/flip.png"));
+    flip->setIconVisibleInMenu(true);
+    handler[flip] = boost::bind(&Box::flipSides, this);
+    menu->addAction(flip);
 
     menu->addSeparator();
 
@@ -405,10 +401,10 @@ void Box::triggerPlaced()
 
 void Box::selectEvent()
 {
-    BOOST_FOREACH(ConnectorIn* i, node_->input){
+    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
         i->getPort()->setSelected(true);
     }
-    BOOST_FOREACH(ConnectorOut* i, node_->output) {
+    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
         i->getPort()->setSelected(true);
     }
     ui->boxframe->setProperty("focused",true);
@@ -417,10 +413,10 @@ void Box::selectEvent()
 
 void Box::deselectEvent()
 {
-    BOOST_FOREACH(ConnectorIn* i, node_->input){
+    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
         i->getPort()->setSelected(false);
     }
-    BOOST_FOREACH(ConnectorOut* i, node_->output) {
+    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
         i->getPort()->setSelected(false);
     }
     ui->boxframe->setProperty("focused",false);
@@ -513,6 +509,28 @@ void Box::killContent()
     node_->killContent();
 }
 
+void Box::flipSides()
+{
+    bool& flipped = node_->node_state_->flipped;
+    flipped = !flipped;
+    updateFlippedSides();
+}
+
+void Box::updateFlippedSides()
+{
+    const bool& flipped = node_->node_state_->flipped;
+
+    ui->boxframe->setLayoutDirection(flipped ? Qt::RightToLeft : Qt::LeftToRight);
+    ui->frame->setLayoutDirection(Qt::LeftToRight);
+
+    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
+        i->getPort()->setFlipped(flipped);
+    }
+    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
+        i->getPort()->setFlipped(flipped);
+    }
+}
+
 bool Box::isMinimizedSize() const
 {
     return node_->getNodeState()->minimized;
@@ -522,10 +540,10 @@ void Box::minimizeBox(bool minimize)
 {    
     node_->setMinimized(minimize);
 
-    BOOST_FOREACH(ConnectorIn* i, node_->input){
+    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
         i->setMinimizedSize(minimize);
     }
-    BOOST_FOREACH(ConnectorOut* i, node_->output) {
+    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
         i->setMinimizedSize(minimize);
     }
 

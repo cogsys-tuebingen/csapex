@@ -15,5 +15,6 @@
         <file>checkbox_checked.png</file>
         <file>checkbox_unchecked.png</file>
         <file>add_node.png</file>
+        <file>flip.png</file>
     </qresource>
 </RCC>

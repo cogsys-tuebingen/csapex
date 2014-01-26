@@ -28,6 +28,9 @@ public:
     void setMinimizedSize(bool mini);
     bool isMinimizedSize() const;
 
+    bool isFlipped() const;
+    void setFlipped(bool flipped);
+
     void setPortProperty(const std::string& name, bool b);
 
     virtual void mousePressEvent(QMouseEvent* e);
@@ -62,6 +65,7 @@ protected:
     Connectable * adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;
+    bool flipped_;
 
     Qt::MouseButtons buttons_down_;
 };

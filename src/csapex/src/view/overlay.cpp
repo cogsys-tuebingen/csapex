@@ -176,7 +176,9 @@ void Overlay::drawConnection(Connection& connection)
     ccs.minimized_from = from->isMinimizedSize();
     ccs.minimized_to = to->isMinimizedSize();
 
-    drawConnection(p1, p2, id);
+    drawConnection(p1, p2, id,
+                   from->getPort()->isFlipped() ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
+                   to->getPort()->isFlipped() ? Connection::Fulcrum::OUT : Connection::Fulcrum::IN);
 
     int f = connection.activity();
 
@@ -197,7 +199,7 @@ void Overlay::drawConnection(Connection& connection)
     }
 }
 
-void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
+void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, Connection::Fulcrum::Type from_type, Connection::Fulcrum::Type to_type)
 {
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? 2 : 4;
@@ -210,25 +212,23 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
 
     double direct_length = hypot(diff.x(), diff.y());
 
-    QPoint current = from;
-    QPoint last;
+    Connection::Fulcrum current(from, from_type);
+    Connection::Fulcrum last = current;
 
     std::vector<Connection::Fulcrum> targets;
     if(id >= 0) {
         targets = graph_->getConnectionWithId(id)->getFulcrums();
     }
-    targets.push_back(Connection::Fulcrum(to, Connection::Fulcrum::CURVE));
+    targets.push_back(Connection::Fulcrum(to, to_type));
 
     int sub_section = 0;
 
     QPoint cp1, cp2;
     QPoint tangent;
 
-    Q_FOREACH(const Connection::Fulcrum& fulcrum_, targets) {
-        QPoint fulcrum = fulcrum_.pos;
-
+    Q_FOREACH(Connection::Fulcrum fulcrum, targets) {
         if(splicing && drag_connection_ == id && sub_section == drag_sub_section_) {
-            fulcrum = current_splicing_handle_;
+            fulcrum = Connection::Fulcrum(current_splicing_handle_, Connection::Fulcrum::HANDLE);
         }
 
         QPoint offset;
@@ -240,33 +240,38 @@ void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id)
             offset = QPoint(0, offset_factor * max_slack_height);
         }
 
-        QPainterPath path(current);
+        QPainterPath path(current.pos);
 
-        if(current == from) {
-            cp1 = current + delta + offset;
+        if(current.type == Connection::Fulcrum::OUT) {
+            cp1 = current.pos + delta + offset;
+
+        } else if(current.type == Connection::Fulcrum::IN) {
+            cp1 = current.pos - delta + offset;
 
         } else {
             const Connection::Fulcrum& last = targets[sub_section-1];
             if(last.type == Connection::Fulcrum::LINEAR) {
-                cp1 = current;
+                cp1 = current.pos;
             } else {
-                cp1 = current + tangent;
+                cp1 = current.pos + tangent;
             }
         }
 
-        if(fulcrum == to) {
-            cp2 = fulcrum - delta + offset;
+        if(fulcrum.type == Connection::Fulcrum::IN) {
+            cp2 = fulcrum.pos - delta + offset;
+        } else if(fulcrum.type == Connection::Fulcrum::OUT) {
+            cp2 = fulcrum.pos + delta + offset;
         } else {
             const Connection::Fulcrum& next = targets[sub_section+1];
-            tangent = (next.pos - current);
+            tangent = (next.pos - current.pos);
             tangent*= 50.0 / hypot(diff.x(), diff.y());
-            cp2 = fulcrum - tangent;
+            cp2 = fulcrum.pos - tangent;
         }
 
-        if(fulcrum_.type == Connection::Fulcrum::LINEAR) {
-            cp2 = fulcrum;
+        if(fulcrum.type == Connection::Fulcrum::LINEAR) {
+            cp2 = fulcrum.pos;
         }
-        path.cubicTo(cp1, cp2, fulcrum);
+        path.cubicTo(cp1, cp2, fulcrum.pos);
 
         if(ccs.highlighted) {
             painter->setPen(QPen(Qt::black, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -339,9 +344,10 @@ QPen Overlay::makeLinePen(const QPoint& from, const QPoint& to)
     return QPen(QBrush(lg), ccs.r * 0.75, from.x() > to.x() ? Qt::DotLine : Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 }
 
-void Overlay::drawConnector(Connectable *c)
+void Overlay::drawPort(Port *p)
 {
-    bool output = c->isOutput();
+    Connectable* c = p->getAdaptee();
+    bool right = c->isOutput() ^ c->getPort()->isFlipped();
 
     if(!c->isMinimizedSize()) {
         int font_size = 10;
@@ -363,9 +369,9 @@ void Overlay::drawConnector(Connectable *c)
         int dx = 160;
         int dy = lines * metrics.height();
 
-        QRectF rect(c->getPort()->centerPoint() + QPointF(output ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
+        QRectF rect(c->getPort()->centerPoint() + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
 
-        QTextOption opt(Qt::AlignVCenter | (output ? Qt::AlignLeft : Qt::AlignRight));
+        QTextOption opt(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
         QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
         QPen p = painter->pen();
         p.setColor(color.dark());
@@ -676,10 +682,16 @@ void Overlay::paintEvent(QPaintEvent*)
             ccs = CurrentConnectionState();
             ccs.selected = true;
 
+            bool flipped = temp.from->getPort()->isFlipped();
+
             if(temp.from->isInput()) {
-                drawConnection(temp.to, temp.from->getPort()->centerPoint(), -1);
+                drawConnection(temp.to, temp.from->getPort()->centerPoint(), -1,
+                               flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
+                               Connection::Fulcrum::HANDLE);
             } else {
-                drawConnection(temp.from->getPort()->centerPoint(), temp.to, -1);
+                drawConnection(temp.from->getPort()->centerPoint(), temp.to, -1,
+                               flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
+                               Connection::Fulcrum::HANDLE);
             }
         }
     }
@@ -702,10 +714,10 @@ void Overlay::paintEvent(QPaintEvent*)
         }
 
         for(int id = 0; id < node->countInputs(); ++id) {
-            drawConnector(node->getInput(id));
+            drawPort(node->getInput(id)->getPort());
         }
         for(int id = 0; id < node->countOutputs(); ++id) {
-            drawConnector(node->getOutput(id));
+            drawPort(node->getOutput(id)->getPort());
         }
     }
 

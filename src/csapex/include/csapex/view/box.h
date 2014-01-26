@@ -47,8 +47,6 @@ public:
     static const QString MIME;
     static const QString MIME_MOVE;
 
-    static int g_instances;
-
 public:
     /// CONSTRUCTION
     Box(BoxedObjectPtr content, QWidget* parent = 0);
@@ -99,6 +97,7 @@ protected:
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
     void enabledChange(bool val);
+    void updateFlippedSides();
 
 public Q_SLOTS:
     void deleteBox();
@@ -107,6 +106,7 @@ public Q_SLOTS:
     void refreshStylesheet();
     void eventModelChanged();
     void killContent();
+    void flipSides();
     void showProfiling();
 
     void showContextMenu(const QPoint& pos);

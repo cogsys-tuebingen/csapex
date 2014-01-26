@@ -30,6 +30,7 @@ struct NodeState : public Memento {
 
     bool minimized;
     bool enabled;
+    bool flipped;
 };
 
 }
