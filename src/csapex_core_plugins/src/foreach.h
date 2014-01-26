@@ -39,6 +39,9 @@ private:
     ConnectorOut* out_sub;
 
     connection_types::VectorMessage::Ptr current_result_;
+
+    int messages_;
+    int message_;
 };
 
 }

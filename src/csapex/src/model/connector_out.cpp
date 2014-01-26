@@ -127,6 +127,7 @@ bool ConnectorOut::connect(Connectable *other_side)
         return false;
     }
 
+    assert(input);
     targets_.push_back(input);
 
     QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));

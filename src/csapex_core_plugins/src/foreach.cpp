@@ -18,7 +18,7 @@ using namespace csapex;
 using namespace connection_types;
 
 Foreach::Foreach()
-    : in_sub(NULL), out_sub(NULL)
+    : in_sub(NULL), out_sub(NULL), messages_(0), message_(0)
 {
     addTag(Tag::get("General"));
 }
@@ -36,25 +36,21 @@ Foreach::~Foreach()
 void Foreach::allConnectorsArrived()
 {
     VectorMessage::Ptr vec = input_->getMessage<VectorMessage>();
-    //if(!current_result_) {
-        current_result_.reset(new VectorMessage);
-    //}
+    current_result_.reset(new VectorMessage);
 
     out_sub->setType(vec->getSubType());
 
-    for(int i = 0, n = vec->value.size(); i < n; ++i) {
+    messages_ = vec->value.size();
+
+    for(int i = 0; i < messages_; ++i) {
         out_sub->publish(vec->value[i]);
     }
-//    out_sub->publish(vec->value[rand() % vec->value.size()]);
-
-    std::cerr << "publishing vector of size " << current_result_->value.size() << std::endl;
-    output_->setType(current_result_);
-    output_->publish(current_result_);
 }
 
 
 void Foreach::appendMessageFrom(Connectable *)
 {
+
     ConnectorOut* out = dynamic_cast<ConnectorOut*>(in_sub->getSource());
     if(!out) {
         return;
@@ -62,6 +58,14 @@ void Foreach::appendMessageFrom(Connectable *)
     ConnectionType::Ptr msg = out->getMessage();
 
     current_result_->value.push_back(msg);
+
+    ++message_;
+    if(message_ == messages_) {
+        message_ = 0;
+
+        output_->setType(current_result_);
+        output_->publish(current_result_);
+    }
 
     in_sub->setProcessing(false);
 }

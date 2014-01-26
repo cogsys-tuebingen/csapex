@@ -30,8 +30,6 @@ Node::~Node()
     BOOST_FOREACH(ConnectorOut* out, output) {
         out->deleteLater();
     }
-
-    std::cerr << "deleted node " << getUUID() << std::endl;
 }
 
 void Node::makeThread()
