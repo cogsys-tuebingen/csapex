@@ -186,46 +186,46 @@ void CsApexWindow::tick()
     std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
     std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
 
-    if(!latest_cout.empty()) {
-        scrollDownLog();
+//    if(!latest_cout.empty()) {
+//        scrollDownLog();
 
-        std::stringstream latest;
-        latest << latest_cout;
+//        std::stringstream latest;
+//        latest << latest_cout;
 
 
-        std::string line;
-        while (std::getline(latest, line, '\n')) {
-            if(line.substr(0, 8) == "warning:") {
-                line = std::string("<span style='color: #ffcc00;'><b>") + line + "</b></span>";
-            }
+//        std::string line;
+//        while (std::getline(latest, line, '\n')) {
+//            if(line.substr(0, 8) == "warning:") {
+//                line = std::string("<span style='color: #ffcc00;'><b>") + line + "</b></span>";
+//            }
 
-            line = BashParser::toHtml(line);
+//            line = BashParser::toHtml(line);
 
-            line += "<br />";
-            ui->logOutput->insertHtml(line.c_str());
-        }
+//            line += "<br />";
+//            ui->logOutput->insertHtml(line.c_str());
+//        }
 
-    }
-    if(!latest_cerr.empty()) {
-        size_t i = 0;
-        while((i = latest_cerr.find('\n', i)) != std::string::npos) {
-            latest_cerr.replace(i, 1, "<br />");
-            i += 6;
-        }
+//    }
+//    if(!latest_cerr.empty()) {
+//        size_t i = 0;
+//        while((i = latest_cerr.find('\n', i)) != std::string::npos) {
+//            latest_cerr.replace(i, 1, "<br />");
+//            i += 6;
+//        }
 
-        latest_cerr = std::string("<span style='color: red'><b>") + latest_cerr + "</b></span>";
+//        latest_cerr = std::string("<span style='color: red'><b>") + latest_cerr + "</b></span>";
 
-        scrollDownLog();
+//        scrollDownLog();
 
-        ui->logOutput->insertHtml(latest_cerr.c_str());
+//        ui->logOutput->insertHtml(latest_cerr.c_str());
 
-        int height = 50;
+//        int height = 50;
 
-        QList<int> sizes = ui->splitter->sizes();
-        sizes[0] -= height;
-        sizes[1] = height;
-        ui->splitter->setSizes(sizes);
-    }
+//        QList<int> sizes = ui->splitter->sizes();
+//        sizes[0] -= height;
+//        sizes[1] = height;
+//        ui->splitter->setSizes(sizes);
+//    }
 }
 
 void CsApexWindow::hideLog()

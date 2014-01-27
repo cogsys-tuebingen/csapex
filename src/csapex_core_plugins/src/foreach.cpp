@@ -8,6 +8,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/view/port.h>
+#include <csapex/utility/timer.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -21,6 +22,8 @@ Foreach::Foreach()
     : in_sub(NULL), out_sub(NULL), messages_(0), message_(0)
 {
     addTag(Tag::get("General"));
+
+    current_result_.reset(new VectorMessage);
 }
 
 Foreach::~Foreach()
@@ -36,13 +39,16 @@ Foreach::~Foreach()
 void Foreach::allConnectorsArrived()
 {
     VectorMessage::Ptr vec = input_->getMessage<VectorMessage>();
-    current_result_.reset(new VectorMessage);
+
+    in_sub->waitForProcessing();
 
     out_sub->setType(vec->getSubType());
 
     messages_ = vec->value.size();
 
     for(int i = 0; i < messages_; ++i) {
+        std::stringstream step; step << "step " << i;
+        Timer::Interlude::Ptr interlude = publish_timer_->step(step.str());
         out_sub->publish(vec->value[i]);
     }
 }
@@ -60,11 +66,13 @@ void Foreach::appendMessageFrom(Connectable *)
     current_result_->value.push_back(msg);
 
     ++message_;
-    if(message_ == messages_) {
+    if(message_ >= messages_) {
         message_ = 0;
 
         output_->setType(current_result_);
         output_->publish(current_result_);
+
+        current_result_.reset(new VectorMessage);
     }
 
     in_sub->setProcessing(false);
@@ -161,5 +169,5 @@ void Foreach::fill(QBoxLayout *layout)
 
     layout->addLayout(sub);
 
-    QObject::connect(in_sub, SIGNAL(messageArrived(Connectable*)), this, SLOT(appendMessageFrom(Connectable*)));
+    QObject::connect(in_sub, SIGNAL(messageArrived(Connectable*)), this, SLOT(appendMessageFrom(Connectable*)), Qt::DirectConnection);
 }

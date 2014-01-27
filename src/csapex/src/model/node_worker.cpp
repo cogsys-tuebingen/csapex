@@ -147,7 +147,12 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     // reset all edges
     Q_FOREACH(const PAIR& pair, has_msg_) {
-        has_msg_[pair.first] = false;
+        ConnectorIn* cin = pair.first;
+        if(cin->isConnected() && cin->getSource()->isAsync()) {
+            continue;
+        }
+
+        has_msg_[cin] = false;
     }
 
     is_processing_ = false;

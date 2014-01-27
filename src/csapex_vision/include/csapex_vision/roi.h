@@ -23,6 +23,9 @@ public:
     int w() const;
     int h() const;
 
+    void setLabel(const std::string& label);
+    std::string label() const;
+
     cv::Rect rect() const;
     cv::Scalar color() const;
 
@@ -32,6 +35,7 @@ private:
 private:
     cv::Rect rect_;
     cv::Scalar color_;
+    std::string label_;
 };
 
 }

@@ -758,6 +758,8 @@ void Node::setCommandDispatcher(CommandDispatcher *d)
 
 void Node::useTimer(Timer *timer)
 {
+    Timable::useTimer(timer);
+
     Q_FOREACH(ConnectorOut* i, output) {
         i->useTimer(timer);
     }

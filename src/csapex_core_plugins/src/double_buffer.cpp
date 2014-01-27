@@ -16,7 +16,7 @@ CSAPEX_REGISTER_CLASS(csapex::DoubleBuffer, csapex::Node)
 using namespace csapex;
 
 DoubleBuffer::DoubleBuffer()
-    : input_(NULL), output_(NULL)
+    : input_(NULL), output_(NULL), dirty_(false)
 {
     addTag(Tag::get("Buffer"));
     addTag(Tag::get("General"));
@@ -26,14 +26,16 @@ DoubleBuffer::DoubleBuffer()
 void DoubleBuffer::fill(QBoxLayout *layout)
 {
     if(input_ == NULL) {
-        input_ = addInput<connection_types::AnyMessage>("Anything", false, true);
+        input_ = addInput<connection_types::AnyMessage>("Anything");
         output_ = addOutput<connection_types::AnyMessage>("Same as input");
+        output_->setAsync(true);
     }
 }
 
 void DoubleBuffer::checkIfDone()
 {
-    input_->setProcessing(false);
+    Node::checkIfDone();
+    //input_->setProcessing(false);
 }
 
 void DoubleBuffer::messageArrived(ConnectorIn *source)
@@ -47,6 +49,8 @@ void DoubleBuffer::messageArrived(ConnectorIn *source)
     if(output_->getType()->name() != msg->name()) {
         output_->setType(msg->toType());
     }
+
+    dirty_ = true;
 }
 
 void DoubleBuffer::swapBuffers()
@@ -59,6 +63,10 @@ void DoubleBuffer::swapBuffers()
 
 void DoubleBuffer::tick()
 {
+    if(!dirty_) {
+        return;
+    }
+
     if(!state.buffer_front_) {
         return;
     }
@@ -70,6 +78,7 @@ void DoubleBuffer::tick()
     }
 
     output_->publish(msg);
+    dirty_ = false;
 }
 
 

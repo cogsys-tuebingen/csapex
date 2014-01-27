@@ -36,6 +36,8 @@ private:
 
     QMutex mutex_;
 
+    bool dirty_;
+
     struct State : public Memento {
         ConnectionType::Ptr buffer_back_;
         ConnectionType::Ptr buffer_front_;

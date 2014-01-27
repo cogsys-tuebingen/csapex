@@ -20,6 +20,16 @@ Roi::Roi(int x, int y, int width, int height, cv::Scalar color)
     check();
 }
 
+void Roi::setLabel(const std::string &label)
+{
+    label_ = label;
+}
+
+std::string Roi::label() const
+{
+    return label_;
+}
+
 void Roi::check()
 {
     assert(rect_.x >= 0);
