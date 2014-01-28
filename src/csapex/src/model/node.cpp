@@ -235,11 +235,15 @@ void Node::setNodeState(NodeState::Ptr memento)
 
     *node_state_ = *m;
 
-    if(node_state_->label_.empty()) {
-        node_state_->label_ = old_label;
-    }
     if(getUUID().empty()) {
         setUUID(old_uuid);
+    }
+    if(getLabel().empty()) {
+        if(old_label.empty()) {
+            setLabel(getUUID().getShortName());
+        } else {
+            setLabel(old_label);
+        }
     }
 
     node_state_->parent = this;

@@ -246,6 +246,17 @@ std::string BoxManager::getTemplateName(const std::string &type)
     return type.substr(12);
 }
 
+bool BoxManager::isValidType(const std::string &type) const
+{
+    Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
+        if(p->getType() == type) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset)
 {
     bool is_template = BoxManager::typeIsTemplate(type);

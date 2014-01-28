@@ -86,6 +86,8 @@ void Box::construct(NodePtr node)
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
+    setLabel(node_->getLabel());
+
     ui->enablebtn->setIcon(node->getIcon());
 
     node_->setMinimized(false);
@@ -276,7 +278,7 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             bool ok;
             QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, getLabel().c_str(), &ok);
 
-            if(ok) {
+            if(ok && !text.isEmpty()) {
                 setLabel(text);
             }
 
@@ -580,7 +582,7 @@ void Box::nodeStateChanged()
     enableContent(node_->getNodeState()->enabled);
     ui->enablebtn->setChecked(node_->getNodeState()->enabled);
 
-    setLabel(node_->getNodeState()->label_);
+    setLabel(node_->getLabel());
     ui->label->setToolTip(node_->getUUID().c_str());
 
     move(node_->getPosition());

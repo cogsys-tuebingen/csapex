@@ -35,6 +35,8 @@ public:
 public:
     void register_box_type(NodeConstructor::Ptr provider, bool suppress_signals = false);
 
+    bool isValidType(const std::string& type) const;
+
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
     NodePtr makeNode(const std::string& type, const UUID& uuid);
     NodeConstructor::Ptr getSelector(const std::string& type);
@@ -49,6 +51,7 @@ public:
     void stop();
 
     void setStyleSheet(const QString& str);
+
 
 public:
     boost::signals2::signal<void(const std::string&)> loaded;

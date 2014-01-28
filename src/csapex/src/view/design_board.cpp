@@ -212,9 +212,12 @@ void DesignBoard::showBoxDialog()
         //BoxManager::instance().startPlacingBox(this, diag.getName());
 
         std::string type = diag.getName();
-        UUID uuid = UUID::make(dispatcher_->getGraph()->makeUUIDPrefix(type));
-        QPoint pos = mapFromGlobal(QCursor::pos());
-        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, NodeStateNullPtr)));
+
+        if(!type.empty() && BoxManager::instance().isValidType(type)) {
+            UUID uuid = UUID::make(dispatcher_->getGraph()->makeUUIDPrefix(type));
+            QPoint pos = mapFromGlobal(QCursor::pos());
+            dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, NodeStateNullPtr)));
+        }
     }
 }
 
