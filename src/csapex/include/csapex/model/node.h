@@ -69,6 +69,12 @@ public:
             throw std::runtime_error(std::string("unknown parameter '") + name + "'");
         }
     }
+    template <typename T>
+    typename T::Ptr getParameter(const std::string& name) const
+    {
+        return boost::dynamic_pointer_cast<T> (getParameter(name));
+    }
+
     param::Parameter::Ptr getParameter(const std::string& name) const;
     bool isParameterEnabled(const std::string& name) const;
     void setParameterEnabled(const std::string& name, bool enabled);

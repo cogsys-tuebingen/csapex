@@ -97,7 +97,7 @@ void Segmentation::updateDynamicGui(QBoxLayout *layout)
     sliders.clear();
     QtHelper::clearLayout(layout);
     for(int i = 0; i < state.channels; ++i) {
-        QxtSpanSlider * slider = Segmentation::makeSpanSlider(layout, state.encoding[i].name,
+        QxtSpanSlider * slider = QtHelper::makeSpanSlider(layout, state.encoding[i].name,
                                                               state.min[i], state.max[i],
                                                               state.encoding[i].min, state.encoding[i].max);
         connect(slider, SIGNAL(lowerValueChanged(int)), this, SLOT(update()));
@@ -141,41 +141,4 @@ void Segmentation::State::readYaml(const YAML::Node& node) {
     }
 
     node["channels"] >> channels;
-}
-
-
-QxtSpanSlider* Segmentation::makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max) {
-    QHBoxLayout* internal_layout = new QHBoxLayout;
-
-    QxtSpanSlider* slider = new QxtSpanSlider(Qt::Horizontal);
-    slider->setMinimum(min);
-    slider->setMaximum(max);
-    slider->setUpperValue(upper);
-    slider->setLowerValue(lower);
-    slider->setMinimumWidth(128);
-
-    QWrapper::QSpinBoxExt* displayLower = new QWrapper::QSpinBoxExt;
-    displayLower->setMinimum(min);
-    displayLower->setMaximum(max);
-    displayLower->setValue(lower);
-
-    QWrapper::QSpinBoxExt* displayUpper = new QWrapper::QSpinBoxExt;
-    displayUpper->setMinimum(min);
-    displayUpper->setMaximum(max);
-    displayUpper->setValue(upper);
-
-    internal_layout->addWidget(new QLabel(name.c_str()));
-    internal_layout->addWidget(displayLower);
-    internal_layout->addWidget(slider);
-    internal_layout->addWidget(displayUpper);
-
-    layout->addLayout(internal_layout);
-
-    QObject::connect(slider,        SIGNAL(rangeChanged(int,int)),  displayUpper,   SLOT(setRange(int,int)));
-    QObject::connect(slider,        SIGNAL(lowerValueChanged(int)), displayLower,   SLOT(setValue(int)));
-    QObject::connect(slider,        SIGNAL(upperValueChanged(int)), displayUpper,   SLOT(setValue(int)));
-    QObject::connect(displayLower,  SIGNAL(valueChanged(int)),      slider,         SLOT(setLowerValue(int)));
-    QObject::connect(displayUpper,  SIGNAL(valueChanged(int)),      slider,         SLOT(setUpperValue(int)));
-
-    return slider;
 }

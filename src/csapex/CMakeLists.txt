@@ -9,7 +9,7 @@ add_definitions(-W -Wall)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS utils_plugin utils_param)
+find_package(catkin REQUIRED COMPONENTS utils_plugin utils_param utils_qt)
 
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
@@ -38,7 +38,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex_pluginbase
-   CATKIN_DEPENDS utils_plugin utils_param
+   CATKIN_DEPENDS utils_plugin utils_param utils_qt
    DEPENDS Qt4 Boost
    CFG_EXTRAS csapex-extras.cmake
 )

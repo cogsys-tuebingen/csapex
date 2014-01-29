@@ -12,6 +12,10 @@
 #include <csapex/utility/qdouble_slider.h>
 #include <csapex/utility/qwrapper.h>
 
+/// PROJECT
+#include <utils_qt/qxtspanslider.h>
+#include <utils_qt/qxtdoublespanslider.h>
+
 /// SYSTEM
 #include <QSlider>
 #include <QBoxLayout>
@@ -60,6 +64,10 @@ public:
     static QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step_size = 1);
 
     static QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size);
+
+    static QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max);
+
+    static QxtDoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout* layout, const std::string& name, double lower, double upper, double min, double max, double step_size);
 
     static QWidget* wrapLayout(QBoxLayout *l, QWidget *parent = 0);
 

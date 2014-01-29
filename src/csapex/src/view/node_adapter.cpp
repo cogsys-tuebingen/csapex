@@ -8,6 +8,7 @@
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
+#include <utils_param/interval_parameter.h>
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
 #include <utils_param/path_parameter.h>
@@ -300,6 +301,64 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
+        param::IntervalParameter::Ptr interval_p = boost::dynamic_pointer_cast<param::IntervalParameter> (parameter);
+        if(interval_p) {
+            std::cerr << "Type is " << param::Parameter::type2string(interval_p->type()) << std::endl;
+            if(interval_p->is<std::pair<int, int> >()) {
+                const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
+                QxtSpanSlider* slider = QtHelper::makeSpanSlider(layout, name, v.first, v.second, interval_p->min<int>(), interval_p->max<int>());
+
+                // ui change -> model
+                boost::function<int()> low = boost::bind(&QxtSpanSlider::lowerValue, slider);
+                boost::function<int()> high = boost::bind(&QxtSpanSlider::upperValue, slider);
+                boost::function<std::pair<int,int>()> mkpair(boost::bind(&std::make_pair<int,int>, boost::bind(low), boost::bind(high)));
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<std::pair<int,int> >, this, name, boost::bind(mkpair));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
+
+                // model change -> ui
+                boost::function<void(int)> setLow = boost::bind(&QxtSpanSlider::setLowerValue, slider, _1);
+                boost::function<void(int)> setHigh = boost::bind(&QxtSpanSlider::setUpperValue, slider, _1);
+                boost::function<void(std::pair<int,int>)> setLowFromPair = boost::bind(setLow, boost::bind(&std::pair<int,int>::first, _1));
+                boost::function<void(std::pair<int,int>)> setHighFromPair = boost::bind(setHigh, boost::bind(&std::pair<int,int>::second, _1));
+
+                connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&NodeAdapter::updateUi<std::pair<int,int> >, this, _1, setLowFromPair)));
+                connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&NodeAdapter::updateUi<std::pair<int,int> >, this, _1, setHighFromPair)));
+
+                QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
+                QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
+
+            } else if(interval_p->is<std::pair<double, double> >()) {
+                const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
+                QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(layout, name, v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>());
+
+                // ui change -> model
+                boost::function<double()> low = boost::bind(&QxtDoubleSpanSlider::lowerDoubleValue, slider);
+                boost::function<double()> high = boost::bind(&QxtDoubleSpanSlider::upperDoubleValue, slider);
+                boost::function<std::pair<double,double>()> mkpair(boost::bind(&std::make_pair<double,double>, boost::bind(low), boost::bind(high)));
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<std::pair<double,double> >, this, name, boost::bind(mkpair));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
+
+                // model change -> ui
+                boost::function<void(double)> setLow = boost::bind(&QxtDoubleSpanSlider::setLowerDoubleValue, slider, _1);
+                boost::function<void(double)> setHigh = boost::bind(&QxtDoubleSpanSlider::setUpperDoubleValue, slider, _1);
+                boost::function<void(std::pair<double,double>)> setLowFromPair = boost::bind(setLow, boost::bind(&std::pair<double,double>::first, _1));
+                boost::function<void(std::pair<double,double>)> setHighFromPair = boost::bind(setHigh, boost::bind(&std::pair<double,double>::second, _1));
+
+                connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&NodeAdapter::updateUi<std::pair<double,double> >, this, _1, setLowFromPair)));
+                connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&NodeAdapter::updateUi<std::pair<double,double> >, this, _1, setHighFromPair)));
+
+                QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
+                QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
+
+
+            } else {
+                layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
+            }
+            continue;
+        }
+
         param::SetParameter::Ptr set_p = boost::dynamic_pointer_cast<param::SetParameter> (parameter);
         if(set_p) {
             QComboBox* combo = new QComboBox;
@@ -345,8 +404,7 @@ void NodeAdapter::updateParam(const std::string& name, T value)
 
 void NodeAdapter::updateParamSet(const std::string& name, const std::string& value)
 {
-    param::Parameter::Ptr parameter = node_->getParameter(name);
-    param::SetParameter::Ptr set_p = boost::dynamic_pointer_cast<param::SetParameter> (parameter);
+    param::SetParameter::Ptr set_p = node_->getParameter<param::SetParameter>(name);
     if(set_p) {
         set_p->setByName(value);
         guiChanged();

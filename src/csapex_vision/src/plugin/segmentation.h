@@ -4,9 +4,7 @@
 /// COMPONENT
 #include <csapex_vision/filter.h>
 #include <csapex_vision/cv_mat_message.h>
-
-/// SYSTEM
-#include <utils_qt/qxtspanslider.h>
+#include <csapex/utility/qt_helper.hpp>
 
 namespace csapex
 {
@@ -31,8 +29,6 @@ public Q_SLOTS:
 
 private:
     std::vector<QxtSpanSlider*> sliders;
-
-    static QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max);
 
     ConnectorIn* input_img_;
     ConnectorIn* input_mask_;

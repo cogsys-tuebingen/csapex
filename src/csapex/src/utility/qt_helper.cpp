@@ -105,6 +105,77 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
     return slider;
 }
 
+
+
+QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max) {
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QxtSpanSlider* slider = new QxtSpanSlider(Qt::Horizontal);
+    slider->setMinimum(min);
+    slider->setMaximum(max);
+    slider->setUpperValue(upper);
+    slider->setLowerValue(lower);
+
+    QWrapper::QSpinBoxExt* displayLower = new QWrapper::QSpinBoxExt;
+    displayLower->setMinimum(min);
+    displayLower->setMaximum(max);
+    displayLower->setValue(lower);
+
+    QWrapper::QSpinBoxExt* displayUpper = new QWrapper::QSpinBoxExt;
+    displayUpper->setMinimum(min);
+    displayUpper->setMaximum(max);
+    displayUpper->setValue(upper);
+
+    internal_layout->addWidget(new QLabel(name.c_str()));
+    internal_layout->addWidget(displayLower);
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(displayUpper);
+
+    layout->addLayout(internal_layout);
+
+    QObject::connect(slider,        SIGNAL(rangeChanged(int,int)),  displayUpper,   SLOT(setRange(int,int)));
+    QObject::connect(slider,        SIGNAL(lowerValueChanged(int)), displayLower,   SLOT(setValue(int)));
+    QObject::connect(slider,        SIGNAL(upperValueChanged(int)), displayUpper,   SLOT(setValue(int)));
+    QObject::connect(displayLower,  SIGNAL(valueChanged(int)),      slider,         SLOT(setLowerValue(int)));
+    QObject::connect(displayUpper,  SIGNAL(valueChanged(int)),      slider,         SLOT(setUpperValue(int)));
+
+    return slider;
+}
+
+
+QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size)
+{
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QxtDoubleSpanSlider* slider = new QxtDoubleSpanSlider(Qt::Horizontal, step_size);
+    slider->setDoubleMinimum(min);
+    slider->setDoubleMaximum(max);
+    slider->setUpperDoubleValue(upper);
+    slider->setLowerDoubleValue(lower);
+
+    QWrapper::QDoubleSpinBoxExt* displayLower = new QWrapper::QDoubleSpinBoxExt;
+    displayLower->setRange(min, max);
+    displayLower->setValue(lower);
+
+    QWrapper::QDoubleSpinBoxExt* displayUpper = new QWrapper::QDoubleSpinBoxExt;
+    displayUpper->setRange(min, max);
+    displayUpper->setValue(upper);
+
+    internal_layout->addWidget(new QLabel(name.c_str()));
+    internal_layout->addWidget(displayLower);
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(displayUpper);
+
+    layout->addLayout(internal_layout);
+
+    QObject::connect(slider,        SIGNAL(rangeChanged(double,double)),  displayUpper,   SLOT(setRange(double,double)));
+    QObject::connect(slider,        SIGNAL(lowerValueChanged(double)), displayLower,   SLOT(setValue(double)));
+    QObject::connect(slider,        SIGNAL(upperValueChanged(double)), displayUpper,   SLOT(setValue(double)));
+    QObject::connect(displayLower,  SIGNAL(valueChanged(double)),      slider,         SLOT(setLowerDoubleValue(double)));
+    QObject::connect(displayUpper,  SIGNAL(valueChanged(double)),      slider,         SLOT(setUpperDoubleValue(double)));
+
+    return slider;
+}
 QWidget* QtHelper::wrapLayout(QBoxLayout *l, QWidget *parent)
 {
     QWidget *container = new QWidget(parent);
