@@ -78,7 +78,7 @@ void Parameter::set_unsafe(const boost::any &v)
     throw std::logic_error("not implemented");
 }
 
-std::string Parameter::type2string(const std::type_info &type) const
+std::string Parameter::type2string(const std::type_info &type)
 {
     int status;
     return abi::__cxa_demangle(type.name(), 0, 0, &status);

@@ -6,7 +6,7 @@
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
-#include <utils_param/trigger_parameter.h>
+#include <utils_param/interval_parameter.h>
 
 namespace param
 {
@@ -14,8 +14,10 @@ namespace param
 class ParameterFactory
 {
 public:
+    static Parameter::Ptr declareBool(const std::string& name, bool def);
+
     template <typename T>
-    static Parameter::Ptr declare(const std::string& name, T min, T max, T def, T step)
+    static Parameter::Ptr declareRange(const std::string& name, T min, T max, T def, T step)
     {
         BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
 
@@ -29,19 +31,30 @@ public:
         return result;
     }
 
-    static Parameter::Ptr declare(const std::string& name, bool def);
-
     template <typename T>
-    static Parameter::Ptr declare(const std::string& name, const T& def)
+    static Parameter::Ptr declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
     {
-        ValueParameter::Ptr result(new ValueParameter(name));
-        result->def_ = def;
-        result->set<T>(def);
+        BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
+
+        IntervalParameter::Ptr result(new IntervalParameter(name));
+        result->def_ = std::make_pair(def_min, def_max);
+        result->min_ = min;
+        result->max_ = max;
+        result->step_ = step;
+        result->values_ = std::make_pair(def_min, def_max);
+
+        result->set<std::pair<T,T> >(std::make_pair(def_min, def_max));
 
         return result;
     }
 
-    static Parameter::Ptr declare(const std::string& name, const char* def);
+    static Parameter::Ptr declarePath(const std::string& name, const std::string& def);
+
+    static Parameter::Ptr declareTrigger(const std::string& name);
+
+    static Parameter::Ptr declareColorParameter(const std::string& name, int r, int g, int b);
+
+    static Parameter::Ptr makeEmpty(const std::string& type);
 
     template <typename T>
     static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
@@ -54,13 +67,34 @@ public:
         return result;
     }
 
-    static Parameter::Ptr declarePath(const std::string& name, const std::string& def);
+    template <typename T>
+    static Parameter::Ptr declareValue(const std::string& name, const T& def)
+    {
+        ValueParameter::Ptr result(new ValueParameter(name));
+        result->def_ = def;
+        result->set<T>(def);
 
-    static Parameter::Ptr declareTrigger(const std::string& name);
+        return result;
+    }
 
-    static Parameter::Ptr declareColorParameter(const std::string& name, int r, int g, int b);
+    /** LEGACY **/
+    template <typename T>
+    static Parameter::Ptr declare(const std::string& name, T min, T max, T def, T step)
+    {
+        return declareRange(name, min, max, def, step);
+    }
 
-    static Parameter::Ptr makeEmpty(const std::string& type);
+    static Parameter::Ptr declare(const std::string& name, bool def);
+
+    template <typename T>
+    static Parameter::Ptr declare(const std::string& name, const T& def)
+    {
+        return declareValue(name, def);
+    }
+
+    static Parameter::Ptr declare(const std::string& name, const char* def);
+
+    /** / LEGACY **/
 };
 
 }

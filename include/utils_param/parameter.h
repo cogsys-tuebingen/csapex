@@ -85,9 +85,12 @@ public:
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
+
+public:
+    static std::string type2string(const std::type_info& type);
+
 protected:
     virtual std::string toStringImpl() const;
-    std::string type2string(const std::type_info& type) const;
     void throwTypeError(const std::type_info& a, const std::type_info& b, const std::string& prefix) const;
 
 protected:

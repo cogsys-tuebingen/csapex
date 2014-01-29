@@ -4,6 +4,8 @@
 /// COMPONENT
 #include <utils_param/color_parameter.h>
 #include <utils_param/path_parameter.h>
+#include <utils_param/interval_parameter.h>
+#include <utils_param/trigger_parameter.h>
 
 using namespace param;
 
@@ -11,6 +13,8 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
 {
     if(type == "range") {
         return Parameter::Ptr(new RangeParameter);
+    } else if(type == "interval") {
+        return Parameter::Ptr(new IntervalParameter);
     } else if(type == "value") {
         return Parameter::Ptr(new ValueParameter);
     } else if(type == "set") {
@@ -32,6 +36,12 @@ Parameter::Ptr ParameterFactory::declare(const std::string& name, const char* de
 }
 
 Parameter::Ptr ParameterFactory::declare(const std::string& name, bool def)
+{
+    return declareBool(name, def);
+}
+
+
+Parameter::Ptr ParameterFactory::declareBool(const std::string& name, bool def)
 {
     RangeParameter::Ptr result(new RangeParameter(name));
     result->def_ = def;
