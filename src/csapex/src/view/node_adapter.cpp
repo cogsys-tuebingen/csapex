@@ -246,7 +246,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
         param::RangeParameter::Ptr range_p = boost::dynamic_pointer_cast<param::RangeParameter> (parameter);
         if(range_p) {
             if(range_p->is<int>()) {
-                QSlider* slider = QtHelper::makeSlider(layout, name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>());
+                QSlider* slider = QtHelper::makeSlider(layout, name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>());
                 slider->setValue(range_p->as<int>());
 
                 // ui change -> model
@@ -261,9 +261,6 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
             } else if(range_p->is<double>()) {
-                if(range_p->name() == "resolution") {
-                    std::cout << "res: " << range_p->as<double>() << std::endl;
-                }
                 QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , range_p->as<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
                 slider->setDoubleValue(range_p->as<double>());
 

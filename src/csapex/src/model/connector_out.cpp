@@ -188,6 +188,9 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
                 if(i->isProcessing()) {
                     return;
                 }
+                if(!isProcessing()) {
+                    return;
+                }
             }
             targets.push_back(i);
         }

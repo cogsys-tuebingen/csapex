@@ -29,7 +29,7 @@ void PointCloudToIntensityImage::setup()
 
     input_ = addInput<PointCloudMessage>("PointCloud");
 
-    output_ = addOutput<CvMatMessage>("DepthImage");
+    output_ = addOutput<CvMatMessage>("Intensity Image");
 }
 
 void PointCloudToIntensityImage::allConnectorsArrived()

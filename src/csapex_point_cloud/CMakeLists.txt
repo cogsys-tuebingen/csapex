@@ -52,6 +52,7 @@ add_library(csapex_point_cloud_plugin
     src/passthrough.cpp
     src/pointcloud_to_depthimage.cpp
     src/pointcloud_to_intensityimage.cpp
+    src/image_to_point_cloud.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
