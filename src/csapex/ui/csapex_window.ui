@@ -61,13 +61,15 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionSaveAsCopy"/>
-    <addaction name="actionLoad"/>
     <addaction name="actionReload"/>
     <addaction name="separator"/>
     <addaction name="actionReset"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -115,10 +117,10 @@
   </action>
   <action name="actionLoad">
    <property name="text">
-    <string>Load</string>
+    <string>Open</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+L</string>
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionUndo">
@@ -208,9 +210,37 @@
     <string>About CS::APEX</string>
    </property>
   </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../res/csapex_resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>EvaluationWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>450</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
