@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/view/port.h>
 #include <csapex/command/meta.h>
@@ -47,7 +48,7 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
     return spinner;
 }
 
-QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step) {
+QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step, CommandDispatcher* dispatcher) {
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     QSlider* slider = new QSlider(Qt::Horizontal);
@@ -62,9 +63,11 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     display->setValue(def);
     display->setSingleStep(step);
 
+    internal_layout->addWidget(new Port(dispatcher, new ConnectorIn(UUID::NONE)));
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
+    internal_layout->addWidget(new Port(dispatcher, new ConnectorOut(UUID::NONE)));
 
     layout->addLayout(internal_layout);
 

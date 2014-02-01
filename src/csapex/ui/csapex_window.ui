@@ -91,10 +91,19 @@
     </property>
     <addaction name="actionGrid"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp_Center"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout_CS_APEX"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSelection"/>
    <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionSave">
    <property name="text">
@@ -187,6 +196,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+G</string>
+   </property>
+  </action>
+  <action name="actionHelp_Center">
+   <property name="text">
+    <string>Help Center</string>
+   </property>
+  </action>
+  <action name="actionAbout_CS_APEX">
+   <property name="text">
+    <string>About CS::APEX</string>
    </property>
   </action>
  </widget>

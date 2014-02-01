@@ -246,7 +246,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
         param::RangeParameter::Ptr range_p = boost::dynamic_pointer_cast<param::RangeParameter> (parameter);
         if(range_p) {
             if(range_p->is<int>()) {
-                QSlider* slider = QtHelper::makeSlider(layout, name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>());
+                QSlider* slider = QtHelper::makeSlider(layout, name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>(), 1, node_->getCommandDispatcher());
                 slider->setValue(range_p->as<int>());
 
                 // ui change -> model

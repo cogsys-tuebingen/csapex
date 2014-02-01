@@ -1,5 +1,5 @@
-#ifndef EVALUATION_WINDOW_H
-#define EVALUATION_WINDOW_H
+#ifndef CSAPEX_WINDOW_H
+#define CSAPEX_WINDOW_H
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
@@ -97,4 +97,4 @@ private:
 
 } /// NAMESPACE
 
-#endif // EVALUATION_WINDOW_H
+#endif // CSAPEX_WINDOW_H

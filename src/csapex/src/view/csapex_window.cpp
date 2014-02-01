@@ -2,7 +2,7 @@
 #include <csapex/view/csapex_window.h>
 
 /// COMPONENT
-#include "ui_evaluation_window.h"
+#include "ui_csapex_window.h"
 #include <csapex/utility/bash_parser.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/designer.h>
