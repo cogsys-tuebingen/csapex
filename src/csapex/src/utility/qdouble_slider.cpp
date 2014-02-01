@@ -46,14 +46,22 @@ void QDoubleSlider::scaleValue(int value)
 
 void QDoubleSlider::setDoubleMinimum(double min)
 {
+    bool change = min != min_;
     min_ = min;
-    update();
+
+    if(change) {
+        update();
+    }
 }
 
 void QDoubleSlider::setDoubleMaximum(double max)
 {
+    bool change = max != max_;
     max_ = max;
-    update();
+
+    if(change) {
+        update();
+    }
 }
 
 void QDoubleSlider::setDoubleValue(double val)

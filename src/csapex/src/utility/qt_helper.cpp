@@ -32,7 +32,10 @@ void QSleepThread::usleep(unsigned long t) {
     currentThread()->usleep(t);
 }
 
-QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size) {
+QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size)
+{
+    assert(min<=max);
+
     QHBoxLayout *internal_layout = new QHBoxLayout;
 
     QSpinBox* spinner = new QSpinBox;
@@ -49,6 +52,8 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
 }
 
 QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step, CommandDispatcher* dispatcher) {
+    assert(min<=max);
+
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     QSlider* slider = new QSlider(Qt::Horizontal);
@@ -56,6 +61,7 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     slider->setMaximum(max);
     slider->setValue(def);
     slider->setMinimumWidth(100);
+    slider->setSingleStep(step);
 
     QWrapper::QSpinBoxExt* display = new QWrapper::QSpinBoxExt;
     display->setMinimum(min);
@@ -79,12 +85,15 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     return slider;
 }
 
-QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size) {
+QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size)
+{
+    assert(min<=max);
+
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     QDoubleSlider* slider = new QDoubleSlider(Qt::Horizontal, step_size);
-    slider->setDoubleMinimum(min);
     slider->setDoubleMaximum(max);
+    slider->setDoubleMinimum(min);
     slider->setDoubleValue(def);
     slider->setMinimumWidth(100);
 
@@ -110,7 +119,10 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
 
 
 
-QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max) {
+QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max)
+{
+    assert(min<=max);
+
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     QxtSpanSlider* slider = new QxtSpanSlider(Qt::Horizontal);
@@ -148,6 +160,8 @@ QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& n
 
 QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size)
 {
+    assert(min<=max);
+
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     QxtDoubleSpanSlider* slider = new QxtDoubleSpanSlider(Qt::Horizontal, step_size);
