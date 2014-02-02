@@ -48,6 +48,7 @@ public:
 
     void init(CommandDispatcher* dispatcher);
     void stop();
+    void setPause(bool pause);
 
     Graph::Ptr findSubGraph(const UUID& uuid);
 

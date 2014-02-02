@@ -16,5 +16,12 @@
         <file>checkbox_unchecked.png</file>
         <file>add_node.png</file>
         <file>flip.png</file>
+        <file>pause.png</file>
+        <file>play.png</file>
+        <file>grid.png</file>
+        <file>arrow_redo.png</file>
+        <file>arrow_undo.png</file>
+        <file>open.png</file>
+        <file>save.png</file>
     </qresource>
 </RCC>

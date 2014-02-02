@@ -63,6 +63,11 @@ CsApexCore::~CsApexCore()
     }
 }
 
+void CsApexCore::setPause(bool pause)
+{
+    cmd_dispatch->getGraph()->setPause(pause);
+}
+
 void CsApexCore::init()
 {
     if(!init_) {

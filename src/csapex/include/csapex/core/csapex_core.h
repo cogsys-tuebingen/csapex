@@ -42,6 +42,9 @@ public:
     GraphPtr getTopLevelGraph();
     CommandDispatcher* getCommandDispatcher();
 
+public Q_SLOTS:
+    void setPause(bool pause);
+
 Q_SIGNALS:
     void configChanged();
     void showStatusMessage(const std::string& msg);
