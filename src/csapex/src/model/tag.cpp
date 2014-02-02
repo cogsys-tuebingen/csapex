@@ -38,13 +38,14 @@ std::string Tag::getName() const
     return name_;
 }
 
-const Tag Tag::Manager::get(const std::string &name) const
+const Tag Tag::Manager::get(const std::string &name)
 {
     try {
         return tags_.at(name);
     } catch(const std::exception& e) {
         std::cerr << "tag doesn't exist: " << name << std::endl;
-        throw e;
+        create(name);
+        return get(name);
     }
 }
 
