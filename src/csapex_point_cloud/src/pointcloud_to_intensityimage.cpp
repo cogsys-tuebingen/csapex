@@ -87,5 +87,6 @@ void PointCloudToIntensityImage::inputCloudImpl(typename pcl::PointCloud<pcl::Po
         ++pt;
     }
 
+    output->encoding = enc::mono;
     output_->publish(output);
 }
