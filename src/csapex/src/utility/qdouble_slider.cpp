@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <limits>
 
 QDoubleSlider::QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget *parent) :
     QSlider(orientation, parent),
@@ -41,7 +42,7 @@ void QDoubleSlider::scaleValue(int value)
         setDoubleValue(val);
     }
 
-    Q_EMIT valueChanged(int2double(value));
+    Q_EMIT valueChanged(val);
 }
 
 void QDoubleSlider::setDoubleMinimum(double min)
@@ -66,7 +67,20 @@ void QDoubleSlider::setDoubleMaximum(double max)
 
 void QDoubleSlider::setDoubleValue(double val)
 {
-    setValue(double2int(val));
+    int intval= double2int(val);
+    if(value() != intval) {
+        setValue(intval);
+    }
+}
+
+void QDoubleSlider::setNearestDoubleValue(double val)
+{
+    int intval= double2int(val);
+    if(value() != intval) {
+        blockSignals(true);
+        setValue(intval);
+        blockSignals(false);
+    }
 }
 
 void QDoubleSlider::limitMin(double limit)

@@ -95,8 +95,22 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
     slider->setDoubleValue(def);
     slider->setMinimumWidth(100);
 
+    // iterate until decimal value < e
+    double e = 0.0001;
+    int decimals = 0;
+    double f = step_size;
+    while (true) {
+        double decimal_val = f - (floor(f));
+        if(decimal_val < e) {
+            break;
+        }
+        f *= 10.0;
+        ++decimals;
+    }
+
     QWrapper::QDoubleSpinBoxExt* display = new  QWrapper::QDoubleSpinBoxExt;
-    display->setDecimals(std::log10(1.0 / step_size));
+    display->setDecimals(decimals);
+//    display->setDecimals(std::log10(1.0 / step_size) + 1);
     display->setMinimum(min);
     display->setMaximum(max);
     display->setValue(def);
@@ -110,7 +124,8 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
 
     QObject::connect(slider, SIGNAL(valueChanged(double)), display, SLOT(setValue(double)));
     QObject::connect(slider, SIGNAL(rangeChanged(double,double)), display, SLOT(setRange(double, double)));
-    QObject::connect(display, SIGNAL(valueChanged(double)), slider, SLOT(setDoubleValue(double)));
+    //problem: rueckkopplung -> slider ändert sich -> box update -> box ändert sich -> slider update
+    QObject::connect(display, SIGNAL(valueChanged(double)), slider, SLOT(setNearestDoubleValue(double)));
 
     return slider;
 }

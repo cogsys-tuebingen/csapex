@@ -351,13 +351,10 @@ void Box::paintEvent(QPaintEvent*)
 
     if(error_change || warning_change) {
         if(is_error) {
-            setLabel(QString("ERROR: ") + objectName());
             ui->label->setToolTip(node_->errorMessage().c_str());
         } else if(is_warn) {
-            setLabel(QString("WARNING: ") + objectName());
             ui->label->setToolTip(node_->errorMessage().c_str());
         } else {
-            setLabel(objectName());
             ui->label->setToolTip(node_->getUUID().c_str());
         }
 
