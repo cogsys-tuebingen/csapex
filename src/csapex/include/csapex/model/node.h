@@ -58,7 +58,7 @@ public:
     void addParameter(const param::Parameter::Ptr& param);
     void addParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
 
-    std::vector<param::Parameter::Ptr> getParameters() const;
+    std::vector<param::Parameter *> getParameters() const;
 
     template <typename T>
     T param(const std::string& name) const

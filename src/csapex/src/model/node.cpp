@@ -85,6 +85,7 @@ std::vector<Tag> Node::getTags() const
 void Node::addParameter(const param::Parameter::Ptr &param)
 {
     state.params[param->name()] = param;
+    state.param_list.push_back(param.get());
 }
 
 void Node::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
@@ -93,13 +94,10 @@ void Node::addParameter(const param::Parameter::Ptr &param, boost::function<void
     worker_->addParameterCallback(param, cb);
 }
 
-std::vector<param::Parameter::Ptr> Node::getParameters() const
+
+std::vector<param::Parameter*> Node::getParameters() const
 {
-    std::vector<param::Parameter::Ptr> r;
-    for( std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
-        r.push_back( it->second );
-    }
-    return r;
+    return state.param_list;
 }
 
 param::Parameter::Ptr Node::getParameter(const std::string &name) const
