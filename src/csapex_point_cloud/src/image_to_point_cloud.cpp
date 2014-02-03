@@ -32,9 +32,6 @@ ImageToPointCloud::ImageToPointCloud()
 
     addParameter(param::ParameterFactory::declareRange("correct/start", 0, 255, 255, 1));
     addParameter(param::ParameterFactory::declareRange("correct/f", -0.2, 0.2, 0.0, 0.01));
-
-
-    addParameter(param::ParameterFactory::declareRange("test", -2.0, 2.0, 0.0, 0.5));
 }
 
 void ImageToPointCloud::setup()
