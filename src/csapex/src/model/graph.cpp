@@ -494,6 +494,18 @@ void Graph::stop()
     nodes_.clear();
 }
 
+void Graph::setPause(bool pause)
+{
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        node->enableIO(!pause);
+    }
+    if(pause) {
+        timer_->stop();
+    } else {
+        timer_->start();
+    }
+}
+
 
 Command::Ptr Graph::clear()
 {

@@ -14,6 +14,7 @@ struct GenericState : public Memento {
     typedef boost::shared_ptr<GenericState> Ptr;
 
     std::map<std::string, param::Parameter::Ptr> params;
+    std::vector<param::Parameter*> param_list;
 
     virtual void writeYaml(YAML::Emitter& out) const;
     virtual void readYaml(const YAML::Node& node);

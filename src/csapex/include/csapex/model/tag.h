@@ -18,7 +18,7 @@ private:
         friend class Singleton<Manager>;
 
     public:
-        const Tag get(const std::string& name) const;
+        const Tag get(const std::string& name);
         bool exists(const std::string& name) const;
         void create(const std::string &name);
 

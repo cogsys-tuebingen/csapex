@@ -24,6 +24,8 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <iomanip>
+#include <QGroupBox>
+#include <QScrollArea>
 
 using namespace csapex;
 
@@ -113,16 +115,55 @@ QString toColorSS(const std::vector<int>& v) {
 }
 
 
-void NodeAdapter::setupUi(QBoxLayout * layout)
+void NodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
-    bool is_update = layout->count() > 0;
+    bool is_update = outer_layout->count() > 0;
     std::cout << (is_update ? "rebuild" : "init") << std::endl;
 
     QtHelper::clearLayout(layout_);
     clear();
 
-    std::vector<param::Parameter::Ptr> params = node_->getParameters();
-    Q_FOREACH(param::Parameter::Ptr parameter, params) {
+    std::vector<param::Parameter*> params = node_->getParameters();
+
+    std::map<std::string, QBoxLayout*> groups;
+
+    Q_FOREACH(param::Parameter* parameter, params) {
+        const std::string& name = parameter->name();
+
+        QBoxLayout* layout = outer_layout;
+
+        std::string display_name = name;
+        std::size_t separator_pos = name.find_first_of('/');
+        if(separator_pos != std::string::npos) {
+            std::string group = name.substr(0, separator_pos);
+            display_name = name.substr(separator_pos+1);
+
+            if(groups.find(group) != groups.end()) {
+                layout = groups[group];
+            } else {
+                QGroupBox* gb = new QGroupBox(group.c_str());
+                gb->setContentsMargins(0,0,0,0);
+
+                QVBoxLayout* gb_layout = new QVBoxLayout;
+                gb->setLayout(gb_layout);
+                gb->setCheckable(true);
+                gb_layout->setContentsMargins(10,0,10,4);
+
+                layout = new QVBoxLayout;
+                groups.insert(std::make_pair(group, layout));
+                layout->setContentsMargins(0,0,0,0);
+
+                QFrame* hider = new QFrame;
+                hider->setLayout(layout);
+                hider->setContentsMargins(0,0,0,0);
+                gb_layout->addWidget(hider);
+
+                outer_layout->addWidget(gb);
+
+                QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
+            }
+        }
+
         parameter_enabled(*parameter).disconnect_all_slots();
         parameter_enabled(*parameter).connect(boost::bind(&NodeAdapter::setupUiAgain, this));
 
@@ -130,17 +171,15 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
-        std::string name = parameter->name();
-
-        param::TriggerParameter::Ptr trigger_p = boost::dynamic_pointer_cast<param::TriggerParameter> (parameter);
+        param::TriggerParameter* trigger_p = dynamic_cast<param::TriggerParameter*> (parameter);
         if(trigger_p) {
             QPushButton* btn = new QPushButton(trigger_p->name().c_str());
 
             QHBoxLayout* sub = new QHBoxLayout;
             sub->addWidget(btn);
-            layout->addLayout(QtHelper::wrap(name, sub));
+            layout->addLayout(QtHelper::wrap(display_name, sub));
 
-            boost::function<void()> cb = boost::bind(&param::TriggerParameter::trigger, trigger_p.get());
+            boost::function<void()> cb = boost::bind(&param::TriggerParameter::trigger, trigger_p);
             qt_helper::Call* call_trigger = new qt_helper::Call(cb);
             callbacks.push_back(call_trigger);
 
@@ -149,7 +188,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
-        param::ColorParameter::Ptr color_p = boost::dynamic_pointer_cast<param::ColorParameter> (parameter);
+        param::ColorParameter* color_p = dynamic_cast<param::ColorParameter*> (parameter);
         if(color_p) {
             QPushButton* btn = new QPushButton;
 
@@ -157,16 +196,16 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
             QHBoxLayout* sub = new QHBoxLayout;
             sub->addWidget(btn);
-            layout->addLayout(QtHelper::wrap(name, sub));
+            layout->addLayout(QtHelper::wrap(display_name, sub));
 
             // ui callback
-            boost::function<void()> cb = boost::bind(&updateColor, color_p.get());
+            boost::function<void()> cb = boost::bind(&updateColor, color_p);
             qt_helper::Call* call = new qt_helper::Call(cb);
             callbacks.push_back(call);
             QObject::connect(btn, SIGNAL(clicked()), call, SLOT(call()));
 
             // model change -> ui
-            boost::function<std::vector<int>()> readColor = boost::bind(&param::ColorParameter::value, color_p.get());
+            boost::function<std::vector<int>()> readColor = boost::bind(&param::ColorParameter::value, color_p);
             boost::function<QString()> readSS = boost::bind(&toColorSS, boost::bind(readColor));
             boost::function<void(param::Parameter*)> up = boost::bind(&QPushButton::setStyleSheet, btn, boost::bind(readSS));
 
@@ -174,7 +213,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
-        param::PathParameter::Ptr path_p = boost::dynamic_pointer_cast<param::PathParameter> (parameter);
+        param::PathParameter* path_p = dynamic_cast<param::PathParameter*> (parameter);
         if(path_p) {
             QLineEdit* path = new QLineEdit;
             QPushButton* open = new QPushButton("open");
@@ -184,7 +223,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             sub->addWidget(path);
             sub->addWidget(open);
 
-            layout->addLayout(QtHelper::wrap(name, sub));
+            layout->addLayout(QtHelper::wrap(display_name, sub));
 
             // ui change -> model
             boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
@@ -210,7 +249,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
-        param::ValueParameter::Ptr value_p = boost::dynamic_pointer_cast<param::ValueParameter> (parameter);
+        param::ValueParameter* value_p = dynamic_cast<param::ValueParameter*> (parameter);
         if(value_p) {
             if(value_p->is<std::string>()) {
                 QLineEdit* txt_ = new QLineEdit;
@@ -221,7 +260,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 sub->addWidget(txt_);
                 sub->addWidget(send);
 
-                layout->addLayout(QtHelper::wrap(name, sub));
+                layout->addLayout(QtHelper::wrap(display_name, sub));
 
                 // ui change -> model
                 boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
@@ -243,10 +282,10 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
-        param::RangeParameter::Ptr range_p = boost::dynamic_pointer_cast<param::RangeParameter> (parameter);
+        param::RangeParameter* range_p = dynamic_cast<param::RangeParameter*> (parameter);
         if(range_p) {
             if(range_p->is<int>()) {
-                QSlider* slider = QtHelper::makeSlider(layout, name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>());
+                QSlider* slider = QtHelper::makeSlider(layout, display_name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(), node_->getCommandDispatcher());
                 slider->setValue(range_p->as<int>());
 
                 // ui change -> model
@@ -261,7 +300,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
             } else if(range_p->is<double>()) {
-                QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, name , range_p->as<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
+                QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, display_name , range_p->as<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
                 slider->setDoubleValue(range_p->as<double>());
 
                 // ui change -> model
@@ -279,7 +318,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 QCheckBox* box = new QCheckBox;
                 box->setChecked(range_p->as<bool>());
 
-                layout->addLayout(QtHelper::wrap(name, box));
+                layout->addLayout(QtHelper::wrap(display_name, box));
 
                 // ui change -> model
                 boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<bool>, this, name, boost::bind(&QCheckBox::isChecked, box));
@@ -298,12 +337,12 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
-        param::IntervalParameter::Ptr interval_p = boost::dynamic_pointer_cast<param::IntervalParameter> (parameter);
+        param::IntervalParameter* interval_p = dynamic_cast<param::IntervalParameter*> (parameter);
         if(interval_p) {
             std::cerr << "Type is " << param::Parameter::type2string(interval_p->type()) << std::endl;
             if(interval_p->is<std::pair<int, int> >()) {
                 const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
-                QxtSpanSlider* slider = QtHelper::makeSpanSlider(layout, name, v.first, v.second, interval_p->min<int>(), interval_p->max<int>());
+                QxtSpanSlider* slider = QtHelper::makeSpanSlider(layout, display_name, v.first, v.second, interval_p->min<int>(), interval_p->max<int>());
 
                 // ui change -> model
                 boost::function<int()> low = boost::bind(&QxtSpanSlider::lowerValue, slider);
@@ -327,7 +366,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
 
             } else if(interval_p->is<std::pair<double, double> >()) {
                 const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
-                QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(layout, name, v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>());
+                QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(layout, display_name, v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>());
 
                 // ui change -> model
                 boost::function<double()> low = boost::bind(&QxtDoubleSpanSlider::lowerDoubleValue, slider);
@@ -356,7 +395,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
             continue;
         }
 
-        param::SetParameter::Ptr set_p = boost::dynamic_pointer_cast<param::SetParameter> (parameter);
+        param::SetParameter* set_p = dynamic_cast<param::SetParameter*> (parameter);
         if(set_p) {
             QComboBox* combo = new QComboBox;
             int current = 0;
@@ -370,7 +409,7 @@ void NodeAdapter::setupUi(QBoxLayout * layout)
                 }
             }
             combo->setCurrentIndex(current);
-            layout->addLayout(QtHelper::wrap(name, combo));
+            layout->addLayout(QtHelper::wrap(display_name, combo));
 
             // ui change -> model
             boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);

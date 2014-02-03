@@ -2,7 +2,7 @@
 #include <csapex/view/csapex_window.h>
 
 /// COMPONENT
-#include "ui_evaluation_window.h"
+#include "ui_csapex_window.h"
 #include <csapex/utility/bash_parser.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/designer.h>
@@ -60,6 +60,7 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionClear, SIGNAL(triggered()), this,  SLOT(clear()));
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this,  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this,  SLOT(redo()));
+    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
 
