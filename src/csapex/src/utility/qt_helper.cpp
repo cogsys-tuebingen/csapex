@@ -69,11 +69,11 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     display->setValue(def);
     display->setSingleStep(step);
 
-    internal_layout->addWidget(new Port(dispatcher, new ConnectorIn(UUID::NONE)));
+    //internal_layout->addWidget(new Port(dispatcher, new ConnectorIn(UUID::NONE)));
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
-    internal_layout->addWidget(new Port(dispatcher, new ConnectorOut(UUID::NONE)));
+   // internal_layout->addWidget(new Port(dispatcher, new ConnectorOut(UUID::NONE)));
 
     layout->addLayout(internal_layout);
 

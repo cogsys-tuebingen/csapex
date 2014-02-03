@@ -20,6 +20,11 @@ QFrame#boxframe {
 QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{
         color: white;
 }
+QFrame#boxframe QGroupBox {
+        color: white;
+        font-weight: bold;
+        background: qlineargradient(x1:0 y1:0, x2:1 y2:0, stop:0 rgba(175,175,175,255), stop:1 rgba(255,255,255,50));
+}
 
 QCheckBox::indicator:unchecked {
      image: url(:/checkbox_unchecked.png);

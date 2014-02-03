@@ -147,7 +147,7 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
                 QVBoxLayout* gb_layout = new QVBoxLayout;
                 gb->setLayout(gb_layout);
                 gb->setCheckable(true);
-                gb_layout->setContentsMargins(10,0,10,4);
+                gb_layout->setContentsMargins(0,0,0,0);
 
                 layout = new QVBoxLayout;
                 groups.insert(std::make_pair(group, layout));
