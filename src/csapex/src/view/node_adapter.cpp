@@ -312,7 +312,7 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
                 boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, _1);
                 connections.push_back(parameter_changed(*range_p).connect(boost::bind(&NodeAdapter::updateUi<double>, this, _1, set)));
 
-                QObject::connect(slider, SIGNAL(rangeChanged(double,double)), call, SLOT(call()));
+                QObject::connect(slider, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
             } else if(range_p->is<bool>()) {
                 QCheckBox* box = new QCheckBox;
