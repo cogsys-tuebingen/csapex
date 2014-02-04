@@ -6,6 +6,7 @@
 #include <utils_param/path_parameter.h>
 #include <utils_param/interval_parameter.h>
 #include <utils_param/trigger_parameter.h>
+#include <utils_param/bitset_parameter.h>
 
 using namespace param;
 
@@ -19,6 +20,8 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
         return Parameter::Ptr(new ValueParameter);
     } else if(type == "set") {
         return Parameter::Ptr(new SetParameter);
+    } else if(type == "bitset") {
+        return Parameter::Ptr(new BitSetParameter);
     } else if(type == "path") {
         return Parameter::Ptr(new PathParameter);
     } else if(type == "trigger") {
@@ -28,6 +31,16 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
     } else {
         throw std::runtime_error(std::string("illegal parameter type: ") + type);
     }
+}
+
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::vector<std::pair<std::string, int> > &set)
+{
+    BitSetParameter::Ptr result(new BitSetParameter(name));
+    result->setBitSet(set);
+    result->def_ = set.begin()->second;
+    result->set<int>(set.begin()->second);
+
+    return result;
 }
 
 Parameter::Ptr ParameterFactory::declare(const std::string& name, const char* def)

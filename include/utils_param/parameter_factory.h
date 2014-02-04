@@ -67,6 +67,8 @@ public:
         return result;
     }
 
+    static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::vector< std::pair<std::string, int> >& set);
+
     template <typename T>
     static Parameter::Ptr declareValue(const std::string& name, const T& def)
     {

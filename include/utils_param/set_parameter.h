@@ -67,9 +67,10 @@ public:
 
     void setByName(const std::string& name);
 
-    int noParameters() const;
     std::string getName(int idx) const;
     std::string getName() const;
+
+    int noParameters() const;
 
 protected:
     virtual boost::any get_unsafe() const;

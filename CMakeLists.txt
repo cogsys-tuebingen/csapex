@@ -26,6 +26,7 @@ add_library(utils_param
     src/range_parameter.cpp
     src/interval_parameter.cpp
     src/set_parameter.cpp
+    src/bitset_parameter.cpp
     src/value_parameter.cpp
     src/path_parameter.cpp
     src/trigger_parameter.cpp
