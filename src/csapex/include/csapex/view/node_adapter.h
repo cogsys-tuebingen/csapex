@@ -13,6 +13,8 @@
 #include <boost/signals2.hpp>
 #include <vector>
 
+class QListView;
+
 namespace csapex
 {
 
@@ -66,11 +68,14 @@ protected:
     void updateParam(const std::string& name, T value);
 
     void updateParamSet(const std::string& name, const std::string& value);
+    void updateParamBitSet(const std::string& name, const QListView *list);
 
     template <typename T>
     void updateUi(const param::Parameter* p, boost::function<void(T)> setter);
 
     void updateUiSet(const param::Parameter* p, boost::function<void(const std::string&)> setter);
+    void updateUiBitSet(const param::Parameter* p, const QListView *list);
+
 protected:
     void guiChanged();
     void clear();

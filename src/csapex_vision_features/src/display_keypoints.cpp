@@ -9,6 +9,7 @@
 #include <csapex_vision/cv_mat_message.h>
 #include <csapex_vision_features/keypoint_message.h>
 #include <utils_param/parameter_factory.h>
+#include <utils_param/bitset_parameter.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -23,9 +24,15 @@ DisplayKeypoints::DisplayKeypoints()
 {
     addTag(Tag::get("Features"));
 
-    addParameter(param::ParameterFactory::declare("rich keypoints", true));
     addParameter(param::ParameterFactory::declareColorParameter("color", 255,0,0));
     addParameter(param::ParameterFactory::declare("random color", true));
+
+
+    std::vector< std::pair<std::string, int> > flags;
+    //    flags.push_back(std::make_pair("DRAW_OVER_OUTIMG", (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG));
+    flags.push_back(std::make_pair("NOT_DRAW_SINGLE_POINTS", (int) cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS));
+    flags.push_back(std::make_pair("DRAW_RICH_KEYPOINTS", (int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS));
+    addParameter(param::ParameterFactory::declareParameterBitSet("flags", flags));
 }
 
 void DisplayKeypoints::allConnectorsArrived()
@@ -42,10 +49,7 @@ void DisplayKeypoints::allConnectorsArrived()
         color = cv::Scalar(c[2], c[1], c[0]);
     }
 
-    int flags = 0;
-    if(param<bool>("rich keypoints")) {
-        flags |= cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS;
-    }
+    int flags = param<int>("flags");
 
     cv::drawKeypoints(img_msg->value, key_msg->value, out->value, color, flags);
 

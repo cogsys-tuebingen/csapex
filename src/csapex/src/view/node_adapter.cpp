@@ -11,6 +11,7 @@
 #include <utils_param/interval_parameter.h>
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
+#include <utils_param/bitset_parameter.h>
 #include <utils_param/path_parameter.h>
 #include <utils_param/trigger_parameter.h>
 #include <utils_param/color_parameter.h>
@@ -26,6 +27,7 @@
 #include <iomanip>
 #include <QGroupBox>
 #include <QScrollArea>
+#include <QListWidget>
 
 using namespace csapex;
 
@@ -427,6 +429,35 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
             QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
             continue;
         }
+
+        param::BitSetParameter* bitset_p = dynamic_cast<param::BitSetParameter*> (parameter);
+        if(bitset_p) {
+            QGroupBox* group = new QGroupBox(name.c_str());
+            QVBoxLayout* l = new QVBoxLayout;
+            group->setLayout(l);
+            for(int i = 0; i < bitset_p->noParameters(); ++i) {
+                std::string str = bitset_p->getName(i);
+                QCheckBox* item = new QCheckBox(QString::fromStdString(str));
+                l->addWidget(item);
+                if(bitset_p->isSet(str)) {
+                    item->setChecked(true);
+                }
+
+                // ui change -> model
+                boost::function<bool()> isChecked = boost::bind(&QCheckBox::isChecked, item);
+                boost::function<void()> cb = boost::bind(&param::BitSetParameter::setBitTo, bitset_p, str, boost::bind(isChecked), false);
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
+                QObject::connect(item, SIGNAL(toggled(bool)), call, SLOT(call()));
+
+                // model change -> ui
+                boost::function<bool()> isSet = boost::bind(&param::BitSetParameter::isSet, bitset_p, str);
+                connections.push_back(parameter_changed(*bitset_p).connect(boost::bind(&QCheckBox::setChecked, item, boost::bind(isSet))));
+            }
+            layout->addWidget(group);
+
+            continue;
+        }
     }
 }
 
@@ -447,6 +478,19 @@ void NodeAdapter::updateParamSet(const std::string& name, const std::string& val
     }
 }
 
+void NodeAdapter::updateParamBitSet(const std::string& name, const QListView* list)
+{
+    param::BitSetParameter::Ptr bitset_p = node_->getParameter<param::BitSetParameter>(name);
+    if(bitset_p) {
+        std::vector<std::string> selected;
+        Q_FOREACH(const QModelIndex& idx, list->selectionModel()->selectedIndexes()) {
+            selected.push_back(idx.data().toString().toStdString());
+        }
+        bitset_p->setBits(selected, true);
+        guiChanged();
+    }
+}
+
 template <typename T>
 void NodeAdapter::updateUi(const param::Parameter* p, boost::function<void(T)> setter)
 {
@@ -459,6 +503,17 @@ void NodeAdapter::updateUiSet(const param::Parameter *p, boost::function<void (c
     const param::SetParameter* set_p = dynamic_cast<const param::SetParameter*> (p);
     if(set_p) {
         setter(set_p->getName());
+    }
+}
+void NodeAdapter::updateUiBitSet(const param::Parameter *p, const QListView *list)
+{
+    const param::BitSetParameter* bitset_p = dynamic_cast<const param::BitSetParameter*> (p);
+    if(bitset_p) {
+        for(int i = 0; i < bitset_p->noParameters(); ++i) {
+            QModelIndex idx = list->model()->index(i,0);
+            std::string str = bitset_p->getName(i);
+            list->selectionModel()->select(idx, bitset_p->isSet(str) ? QItemSelectionModel::Select : QItemSelectionModel::Deselect);
+        }
     }
 }
 void NodeAdapter::updateDynamicGui(QBoxLayout *)
