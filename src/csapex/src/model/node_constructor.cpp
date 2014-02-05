@@ -44,9 +44,10 @@ void NodeConstructor::load() const
         cat = prototype->getTags();
 
         is_loaded = true;
+
     } catch(const std::exception& e) {
-        std::cerr << "cannot load object of type '" << type_ << "': " << e.what() << std::endl;
         is_loaded = false;
+        throw NodeConstructionException("cannot load object of type '" + type_ + "': " + e.what() );
     }
 }
 

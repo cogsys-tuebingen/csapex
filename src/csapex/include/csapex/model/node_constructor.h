@@ -20,6 +20,15 @@ class NodeConstructor
     friend class BoxManager;
 
 public:
+    struct NodeConstructionException : public std::runtime_error
+    {
+        NodeConstructionException(const std::string& what)
+            : std::runtime_error(what)
+        {
+        }
+    };
+
+public:
     typedef boost::function<NodePtr()> Make;
 
     typedef boost::shared_ptr<NodeConstructor> Ptr;

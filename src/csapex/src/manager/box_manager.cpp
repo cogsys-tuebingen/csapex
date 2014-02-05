@@ -85,16 +85,29 @@ void BoxManager::rebuildMap()
 
     tags.insert(general);
 
-    Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
-        bool has_tag = false;
-        Q_FOREACH(const Tag& tag, p->getTags()) {
-            map[tag].push_back(p);
-            tags.insert(tag);
-            has_tag = true;
-        }
+    for(std::vector<NodeConstructor::Ptr>::iterator
+        it = available_elements_prototypes.begin();
+        it != available_elements_prototypes.end();) {
 
-        if(!has_tag) {
-            map[general].push_back(p);
+        const NodeConstructor::Ptr& p = *it;
+
+        try {
+            bool has_tag = false;
+            Q_FOREACH(const Tag& tag, p->getTags()) {
+                map[tag].push_back(p);
+                tags.insert(tag);
+                has_tag = true;
+            }
+
+            if(!has_tag) {
+                map[general].push_back(p);
+            }
+
+            ++it;
+
+        } catch(const NodeConstructor::NodeConstructionException& e) {
+            std::cerr << "warning: cannot load node: " << e.what() << std::endl;
+            it = available_elements_prototypes.erase(it);
         }
     }
 
@@ -175,7 +188,6 @@ void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
 
 QAbstractItemModel* BoxManager::listAvailableBoxedObjects()
 {
-
     ensureLoaded();
 
     QStandardItemModel* model = new QStandardItemModel;//(types, 1);
