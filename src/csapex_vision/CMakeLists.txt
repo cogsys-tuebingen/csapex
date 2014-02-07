@@ -56,6 +56,7 @@ include_directories(include
 
 add_library(csapex_vision
     src/core/filter.cpp
+    src/core/encoding.cpp
     src/core/cv_mat_message.cpp
     src/core/roi.cpp
     src/core/roi_message.cpp

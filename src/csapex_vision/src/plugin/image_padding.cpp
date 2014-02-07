@@ -58,7 +58,7 @@ void ImagePadding::messageArrived(ConnectorIn *source)
     int cols = img_msg->value.cols;
 
     if(output_->isConnected()) {
-        CvMatMessage::Ptr result(new CvMatMessage);
+        CvMatMessage::Ptr result(new CvMatMessage(img_msg->getEncoding()));
         result->value = cv::Mat(rows + 2 * state.border, cols + 2 * state.border, img_msg->value.type(), cv::Scalar::all(0));
         cv::Mat roi(result->value, cv::Rect(state.border, state.border, cols, rows));
 
@@ -68,7 +68,7 @@ void ImagePadding::messageArrived(ConnectorIn *source)
     }
 
     if(output_mask_->isConnected()) {
-        CvMatMessage::Ptr result(new CvMatMessage);
+        CvMatMessage::Ptr result(new CvMatMessage(enc::mono));
 
         result->value = cv::Mat(rows + 2 * state.border, cols + 2 * state.border, CV_8UC1, cv::Scalar::all(0));
 

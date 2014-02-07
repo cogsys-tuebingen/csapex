@@ -215,14 +215,16 @@ void ExtractKeypoints::setState(Memento::Ptr memento)
         }
     }
 
-    int slot = 0;
-    for(int i = 0, n = selection_key->count(); i < n; ++i) {
-        if(selection_key->itemText(i).toStdString() == state.key) {
-            slot = i;
-            break;
+    if(selection_key) {
+        int slot = 0;
+        for(int i = 0, n = selection_key->count(); i < n; ++i) {
+            if(selection_key->itemText(i).toStdString() == state.key) {
+                slot = i;
+                break;
+            }
         }
+        selection_key->setCurrentIndex(slot);
     }
-    selection_key->setCurrentIndex(slot);
 }
 
 

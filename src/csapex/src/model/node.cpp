@@ -266,6 +266,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
             }
         }
     }
+    setState(s->boxed_state);
     loaded_state_available_ = true;
 }
 

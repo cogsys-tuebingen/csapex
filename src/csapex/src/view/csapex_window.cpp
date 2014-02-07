@@ -51,6 +51,8 @@ void CsApexWindow::construct()
     ui->splitter->addWidget(designer_);
     ui->splitter->addWidget(ui->logOutput);
 
+    Graph* graph = graph_.get();
+
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
     QObject::connect(ui->actionSaveAsCopy, SIGNAL(triggered()), this,  SLOT(saveAsCopy()));
@@ -64,21 +66,21 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
 
-    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph_.get(),  SLOT(clearSelection()));
-    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph_.get(),  SLOT(selectAll()));
+    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph,  SLOT(clearSelection()));
+    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph,  SLOT(selectAll()));
 
-    QObject::connect(graph_.get(), SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
-    QObject::connect(graph_.get(), SIGNAL(stateChanged()), this, SLOT(updateMenu()));
+    QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
+    QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
     QObject::connect(&core_, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
     QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
     QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
-    QObject::connect(graph_.get(), SIGNAL(nodeAdded(NodePtr)), this, SLOT(nodeAdded(NodePtr)));
-    QObject::connect(graph_.get(), SIGNAL(nodeRemoved(NodePtr)), this, SLOT(nodeRemoved(NodePtr)));
+    QObject::connect(graph, SIGNAL(nodeAdded(NodePtr)), this, SLOT(nodeAdded(NodePtr)));
+    QObject::connect(graph, SIGNAL(nodeRemoved(NodePtr)), this, SLOT(nodeRemoved(NodePtr)));
 
-    QObject::connect(graph_.get(), SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
+    QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
     QObject::connect(this, SIGNAL(initialize()), this, SLOT(init()), Qt::QueuedConnection);
 

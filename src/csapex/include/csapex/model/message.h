@@ -198,7 +198,7 @@ struct MessageTemplate : public Message {
     }
 
     virtual ConnectionType::Ptr toType() {
-        Ptr new_msg(new Instance);
+            Ptr new_msg(new Instance);
         return new_msg;
     }
 

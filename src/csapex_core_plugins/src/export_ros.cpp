@@ -20,7 +20,7 @@ CSAPEX_REGISTER_CLASS(csapex::ExportRos, csapex::Node)
 using namespace csapex;
 
 ExportRos::ExportRos()
-    : connector_(NULL), has_pub(false), create_pub(false)
+    : connector_(NULL), has_pub(false), create_pub(false), topic_(NULL)
 {
     addTag(Tag::get("RosIO"));
     addTag(Tag::get("General"));
@@ -123,5 +123,7 @@ void ExportRos::setState(Memento::Ptr memento)
 
     create_pub = true;
 
-    topic_->setText(state.topic.c_str());
+    if(topic_) {
+        topic_->setText(state.topic.c_str());
+    }
 }

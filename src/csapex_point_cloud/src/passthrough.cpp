@@ -20,6 +20,7 @@ using namespace csapex;
 using namespace csapex::connection_types;
 
 PassThrough::PassThrough()
+    : min_(0)
 {
     addTag(Tag::get("PointCloud"));
 }
@@ -167,14 +168,14 @@ void PassThrough::setState(Memento::Ptr memento)
 
     state = *m;
 
-    blockSignals(true);
 
-    min_->setDoubleValue(state.min_);
-    max_->setDoubleValue(state.max_);
-
-    updateFields();
-
-    blockSignals(false);
+    if(min_) {
+        blockSignals(true);
+        min_->setDoubleValue(state.min_);
+        max_->setDoubleValue(state.max_);
+        updateFields();
+        blockSignals(false);
+    }
 }
 
 void PassThrough::State::writeYaml(YAML::Emitter& out) const {

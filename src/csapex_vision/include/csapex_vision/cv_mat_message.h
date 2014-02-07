@@ -11,17 +11,31 @@
 #include <opencv2/opencv.hpp>
 
 namespace csapex {
-namespace connection_types {
 
+template <typename,typename,typename> class ConverterTemplate;
+
+namespace connection_types {
 
 struct CvMatMessage : public MessageTemplate<cv::Mat, CvMatMessage>
 {
-    CvMatMessage();
+    friend class MessageTemplate<cv::Mat, CvMatMessage>;
+
+    template <typename,typename,typename> friend class csapex::ConverterTemplate;
+
+public:
+    CvMatMessage(const Encoding& encoding);
     virtual ConnectionType::Ptr clone();
 
     virtual void writeRaw(const std::string &file, const std::string &suffix);
 
+    const Encoding &getEncoding() const;
+    void setEncoding(const Encoding& e);
+
+private:
     Encoding encoding;
+
+private:
+    CvMatMessage();
 };
 
 }

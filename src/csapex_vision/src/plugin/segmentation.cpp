@@ -31,22 +31,22 @@ void Segmentation::allConnectorsArrived()
     CvMatMessage::Ptr img = input_img_->getMessage<CvMatMessage>();
 
     bool recompute = false;
-    if(static_cast<unsigned>(img->encoding.size()) != sliders.size()) {
+    if(static_cast<unsigned>(img->getEncoding().size()) != sliders.size()) {
         recompute = true;
     } else {
-        for(int i = 0, n = img->encoding.size(); i < n; ++i) {
-            if(img->encoding[i].name != state.encoding[i].name) {
+        for(int i = 0, n = img->getEncoding().size(); i < n; ++i) {
+            if(img->getEncoding()[i].name != state.encoding[i].name) {
                 recompute = true;
                 break;
             }
         }
     }
 
-    CvMatMessage::Ptr out_mask(new CvMatMessage);
+    CvMatMessage::Ptr out_mask(new CvMatMessage(enc::mono));
 
     if(recompute) {
         state.channels = img->value.channels();
-        state.encoding = img->encoding;
+        state.encoding = img->getEncoding();
 
         Q_EMIT modelChanged();
 
@@ -64,8 +64,6 @@ void Segmentation::allConnectorsArrived()
     } else {
         out_mask->value = bw;
     }
-
-    out_mask->encoding = enc::mono;
 
     output_mask_->publish(out_mask);
 }

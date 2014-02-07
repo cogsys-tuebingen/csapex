@@ -56,12 +56,10 @@ void Filter::allConnectorsArrived()
 
     if(img_msg.get() && !img_msg->value.empty()) {
         if(!mask_msg.get()) {
-            mask_msg.reset(new CvMatMessage);
+            mask_msg.reset(new CvMatMessage(enc::mono));
         }
 
         filter(img_msg->value, mask_msg->value);
-
-        mask_msg->encoding = enc::mono;
 
         output_img_->publish(img_msg);
         if(usesMask() && mask_msg.get()) {

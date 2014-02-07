@@ -293,7 +293,7 @@ void RobustMatch::allConnectorsArrived()
     RobustMatcher m(matcher);
     m.match(img1->value, img2->value, matches, key1->value, key2->value, des1->value, des2->value);
 
-    CvMatMessage::Ptr out(new CvMatMessage);
+    CvMatMessage::Ptr out(new CvMatMessage(img1->getEncoding()));
     cv::drawMatches(img1->value, key1->value, img2->value, key2->value, matches, out->value, cv::Scalar(0,0,255), cv::Scalar::all(0), cv::vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
     out_img->publish(out);

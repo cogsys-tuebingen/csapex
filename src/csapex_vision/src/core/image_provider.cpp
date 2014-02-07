@@ -80,11 +80,11 @@ connection_types::Message::Ptr ImageProvider::next()
 {
     cv::Mat mask;
 
-    connection_types::CvMatMessage::Ptr msg(new connection_types::CvMatMessage);
+    connection_types::CvMatMessage::Ptr msg(new connection_types::CvMatMessage(enc::unknown));
 
     next(msg->value, mask);
 
-    msg->encoding = (msg->value.channels() == 1) ? enc::mono : enc::bgr;
+    msg->setEncoding((msg->value.channels() == 1) ? enc::mono : enc::bgr);
 
     return msg;
 }

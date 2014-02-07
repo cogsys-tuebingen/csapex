@@ -67,9 +67,7 @@ void UUID::free(const UUID &uuid)
 
 UUID UUID::make_forced(const std::string &representation)
 {
-    // DON'T ensure uniqueness but remember that the id exists
     UUID r(representation);
-    hash_[r.representation_]++;
     return r;
 }
 

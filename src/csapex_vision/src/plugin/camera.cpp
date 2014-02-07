@@ -31,7 +31,7 @@ Camera::Camera()
 void Camera::tick()
 {
     if(cap_.isOpened()) {
-        connection_types::CvMatMessage::Ptr msg(new connection_types::CvMatMessage);
+        connection_types::CvMatMessage::Ptr msg(new connection_types::CvMatMessage(enc::bgr));
         cap_ >> msg->value;
         output_->publish(msg);
     }

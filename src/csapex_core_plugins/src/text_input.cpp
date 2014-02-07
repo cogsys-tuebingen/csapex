@@ -17,7 +17,7 @@ CSAPEX_REGISTER_CLASS(csapex::TextInput, csapex::Node)
 using namespace csapex;
 
 TextInput::TextInput()
-    : connector_(NULL)
+    : connector_(NULL), txt_(NULL)
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("General"));
@@ -29,7 +29,7 @@ void TextInput::fill(QBoxLayout *layout)
     if(connector_ == NULL) {
         connector_ = addOutput<connection_types::StringMessage>("Text");
 
-        txt_ = new QLineEdit;
+        txt_ = new QLineEdit(state.message.c_str());
         QPushButton* send = new QPushButton("ok");
 
         QHBoxLayout* sub = new QHBoxLayout;
@@ -76,6 +76,8 @@ void TextInput::setState(Memento::Ptr memento)
 
     state = *m;
 
-    txt_->setText(state.message.c_str());
+    if(txt_) {
+        txt_->setText(state.message.c_str());
+    }
 }
 

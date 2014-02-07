@@ -76,13 +76,13 @@ void ImageCombiner::messageArrived(ConnectorIn* source)
 
     if(img_msg_a.get() && !img_msg_a->value.empty() && img_msg_b.get() && !img_msg_b->value.empty()) {
         if(!mask_msg_a.get()) {
-            mask_msg_a.reset(new CvMatMessage);
+            mask_msg_a.reset(new CvMatMessage(enc::mono));
         }
         if(!mask_msg_b.get()) {
-            mask_msg_b.reset(new CvMatMessage);
+            mask_msg_b.reset(new CvMatMessage(enc::mono));
         }
 
-        CvMatMessage::Ptr img_msg_result(new CvMatMessage);
+        CvMatMessage::Ptr img_msg_result(new CvMatMessage(img_msg_a->getEncoding()));
         img_msg_result->value = combine(img_msg_a->value, mask_msg_a->value, img_msg_b->value, mask_msg_b->value);
         output_img_->publish(img_msg_result);
     }

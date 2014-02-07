@@ -9,10 +9,13 @@ CvMatMessage::CvMatMessage()
     : MessageTemplate<cv::Mat, CvMatMessage> ("cv::Mat"), encoding(enc::bgr)
 {}
 
+CvMatMessage::CvMatMessage(const Encoding& encoding)
+    : MessageTemplate<cv::Mat, CvMatMessage> ("cv::Mat"), encoding(encoding)
+{}
+
 ConnectionType::Ptr CvMatMessage::clone() {
-    Ptr new_msg(new CvMatMessage);
+    Ptr new_msg(new CvMatMessage(encoding));
     value.copyTo(new_msg->value);
-    new_msg->encoding = encoding;
     return new_msg;
 }
 
@@ -20,4 +23,14 @@ void CvMatMessage::writeRaw(const std::string &path, const std::string &suffix)
 {
     std::string file = path + "/img" + suffix + ".jpg";
     cv::imwrite(file, value);
+}
+
+const Encoding& CvMatMessage::getEncoding() const
+{
+    return encoding;
+}
+
+void CvMatMessage::setEncoding(const Encoding &e)
+{
+    encoding = e;
 }

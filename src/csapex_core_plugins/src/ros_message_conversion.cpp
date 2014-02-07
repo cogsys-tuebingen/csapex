@@ -38,7 +38,7 @@ void RosMessageConversion::publish(ros::Publisher &pub, ConnectionType::Ptr msg)
 
 
 
-void RosMessageConversion::Convertor::publish_apex(ConnectorOut *output, ConnectionType::Ptr msg)
+void Convertor::publish_apex(ConnectorOut *output, ConnectionType::Ptr msg)
 {
     output->setType(msg);
     output->publish(msg);
