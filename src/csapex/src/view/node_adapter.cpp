@@ -119,9 +119,6 @@ QString toColorSS(const std::vector<int>& v) {
 
 void NodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
-    bool is_update = outer_layout->count() > 0;
-    std::cout << (is_update ? "rebuild" : "init") << std::endl;
-
     QtHelper::clearLayout(layout_);
     clear();
 
@@ -341,7 +338,6 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         param::IntervalParameter* interval_p = dynamic_cast<param::IntervalParameter*> (parameter);
         if(interval_p) {
-            std::cerr << "Type is " << param::Parameter::type2string(interval_p->type()) << std::endl;
             if(interval_p->is<std::pair<int, int> >()) {
                 const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
                 QxtSpanSlider* slider = QtHelper::makeSpanSlider(layout, display_name, v.first, v.second, interval_p->min<int>(), interval_p->max<int>());

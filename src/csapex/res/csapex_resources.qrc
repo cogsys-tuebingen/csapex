@@ -23,5 +23,6 @@
         <file>arrow_undo.png</file>
         <file>open.png</file>
         <file>save.png</file>
+        <file>save_as.png</file>
     </qresource>
 </RCC>
