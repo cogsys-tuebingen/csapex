@@ -45,6 +45,10 @@ public:
 
     private:
         CommandDispatcher* dispatcher_;
+
+    public:
+        static bool lock;
+        static int grid_size;
     };
 public:
 

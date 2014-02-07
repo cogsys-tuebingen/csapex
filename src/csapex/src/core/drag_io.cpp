@@ -13,6 +13,9 @@
 
 using namespace csapex;
 
+bool DragIO::Handler::lock = false;
+int DragIO::Handler::grid_size = 10;
+
 void DragIO::registerEnterHandler(HandlerEnter::Ptr h)
 {
     handler_enter.push_back(h);
@@ -126,7 +129,15 @@ void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEve
         Box* box = dispatcher_->getGraph()->findNode(uuid)->getBox();
         QPoint offset_value(e->mimeData()->data(Box::MIME_MOVE + "/x").toInt(),
                             e->mimeData()->data(Box::MIME_MOVE + "/y").toInt());
-        box->move(e->pos() + offset_value);
+        QPoint pos = e->pos() + offset_value;
+
+        if(lock) {
+            double s = grid_size;
+            pos.setX(round(pos.x() / s) * grid_size);
+            pos.setY(round(pos.y() / s) * grid_size);
+        }
+
+        box->move(pos);
 
         overlay->repaint();
 

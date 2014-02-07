@@ -46,6 +46,7 @@ public Q_SLOTS:
     void updateUndoInfo();
 
     void enableGrid(bool);
+    void lockToGrid(bool);
     void reset();
 
 private:

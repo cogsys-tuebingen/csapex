@@ -232,12 +232,12 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
                 dispatcher_->execute(graph->deleteSelectedNodesCmd());
                 return;
             }
-        } else  if(e->key() == Qt::Key_G) {
+        } /*else  if(e->key() == Qt::Key_G) {
             if(graph->countSelectedNodes() != 0) {
                 dispatcher_->execute(graph->groupSelectedNodesCmd());
                 return;
             }
-        }
+        }*/
     }
 
     if(!overlay->keyReleaseEventHandler(e)) {

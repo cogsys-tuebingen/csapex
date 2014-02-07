@@ -183,3 +183,8 @@ void Designer::enableGrid(bool grid)
 {
     designer_board->enableGrid(grid);
 }
+
+void Designer::lockToGrid(bool lock)
+{
+    DragIO::Handler::lock = lock;
+}
