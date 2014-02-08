@@ -252,6 +252,7 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
         if(value_p) {
             if(value_p->is<std::string>()) {
                 QLineEdit* txt_ = new QLineEdit;
+                txt_->setText(value_p->as<std::string>().c_str());
                 QPushButton* send = new QPushButton("set");
 
                 QHBoxLayout* sub = new QHBoxLayout;

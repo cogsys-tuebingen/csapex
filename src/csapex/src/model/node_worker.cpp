@@ -196,8 +196,16 @@ void NodeWorker::tick()
     {
         QMutexLocker lock(&changed_params_mutex_);
         typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
-        for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end(); ++it) {
-            it->second(it->first);
+        for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end();) {
+            try {
+                it->second(it->first);
+
+            } catch(const std::exception& e) {
+                it = changed_params_.erase(it);
+                throw;
+            }
+
+            it = changed_params_.erase(it);
         }
 
         changed_params_.clear();
