@@ -46,7 +46,9 @@ public Q_SLOTS:
     void setSynchronizedInputs(bool s);
     bool isSynchronizedInputs() const;
 
-    void addParameterCallback(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
+    void addParameter(param::Parameter* param);
+    void addParameterCallback(param::Parameter *param, boost::function<void(param::Parameter *)> cb);
+    void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
 
     void setProcessing(bool p);
     bool isProcessing() const;
@@ -55,6 +57,7 @@ Q_SIGNALS:
     void messageProcessed();
 
 private:
+    void parameterChanged(param::Parameter* param);
     void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
 
 public:
@@ -68,6 +71,7 @@ private:
 
     QMutex changed_params_mutex_;
     std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
+    std::map<param::Parameter*, boost::function<bool()> > conditions_;
 
     std::deque<TimerPtr> timer_history_;
 

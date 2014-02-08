@@ -28,7 +28,7 @@ BarCodeReader::BarCodeReader()
     Tag::createIfNotExists("Bar Code");
     addTag(Tag::get("Bar Code"));
 
-    addParameter(param::ParameterFactory::declare("republish", false));
+    addParameter(param::ParameterFactory::declareBool("republish", false));
 }
 
 void BarCodeReader::allConnectorsArrived()

@@ -57,6 +57,8 @@ public:
 
     void addParameter(const param::Parameter::Ptr& param);
     void addParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
+    void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition);
+    void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
 
     std::vector<param::Parameter *> getParameters() const;
 

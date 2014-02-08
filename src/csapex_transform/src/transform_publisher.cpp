@@ -24,8 +24,8 @@ TransformPublisher::TransformPublisher()
 {
     addTag(Tag::get("Transform"));
 
-    addParameter(param::ParameterFactory::declare("from", "/"));
-    addParameter(param::ParameterFactory::declare("to", "/"));
+    addParameter(param::ParameterFactory::declareText("from", "/"));
+    addParameter(param::ParameterFactory::declareText("to", "/"));
 }
 
 TransformPublisher::~TransformPublisher()

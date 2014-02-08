@@ -24,10 +24,33 @@ bool NodeWorker::isProcessing()
     return is_processing_;
 }
 
-void NodeWorker::addParameterCallback(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb)
+void NodeWorker::addParameter(param::Parameter* param)
 {
-    //parameter_changed(*param).connect(cb);
+    parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1));
+}
+
+void NodeWorker::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
+{
     parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1, cb));
+}
+
+void NodeWorker::addParameterCondition(param::Parameter* param, boost::function<bool ()> enable_condition)
+{
+    conditions_[param] = enable_condition;
+}
+
+void NodeWorker::parameterChanged(param::Parameter *)
+{
+    if(!conditions_.empty()) {
+        for(std::map<param::Parameter*, boost::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
+            bool should_be_enabled = it->second();
+            bool is_enabled = it->first->isEnabled();
+
+            if(should_be_enabled != is_enabled) {
+                it->first->setEnabled(should_be_enabled);
+            }
+        }
+    }
 }
 
 void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)

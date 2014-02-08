@@ -242,7 +242,7 @@ void QtHelper::clearLayout(QLayout* layout) {
             clearLayout(item->layout());
         }
         if(item->widget()) {
-            delete item->widget();
+            item->widget()->deleteLater();
         }
         delete item;
     }

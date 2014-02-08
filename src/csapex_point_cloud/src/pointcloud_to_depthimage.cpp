@@ -22,8 +22,8 @@ PointCloudToDepthImage::PointCloudToDepthImage()
     addTag(Tag::get("PointCloud"));
     addTag(Tag::get("Time"));
 
-    addParameter(param::ParameterFactory::declare("scale", 1.0, 1000.0, 1.0, 0.5));
-    addParameter(param::ParameterFactory::declare("fit", false));
+    addParameter(param::ParameterFactory::declareRange("scale", 1.0, 1000.0, 1.0, 0.5));
+    addParameter(param::ParameterFactory::declareBool("fit", false));
 }
 
 void PointCloudToDepthImage::setup()

@@ -25,13 +25,13 @@ DisplayKeypoints::DisplayKeypoints()
     addTag(Tag::get("Features"));
 
     addParameter(param::ParameterFactory::declareColorParameter("color", 255,0,0));
-    addParameter(param::ParameterFactory::declare("random color", true));
+    addParameter(param::ParameterFactory::declareBool("random color", true));
 
 
-    std::vector< std::pair<std::string, int> > flags;
-    //    flags.push_back(std::make_pair("DRAW_OVER_OUTIMG", (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG));
-    flags.push_back(std::make_pair("NOT_DRAW_SINGLE_POINTS", (int) cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS));
-    flags.push_back(std::make_pair("DRAW_RICH_KEYPOINTS", (int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS));
+    std::map<std::string, int> flags;
+    //    flags["DRAW_OVER_OUTIMG"] = (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG;
+    flags["NOT_DRAW_SINGLE_POINTS"] = (int) cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS;
+    flags["DRAW_RICH_KEYPOINTS"] = (int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS;
     addParameter(param::ParameterFactory::declareParameterBitSet("flags", flags));
 }
 

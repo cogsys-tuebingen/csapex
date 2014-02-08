@@ -550,6 +550,5 @@ void NodeAdapterBridge::triggerGuiChanged()
 
 void NodeAdapterBridge::triggerRebuild()
 {
-    std::cout << "trigger" << std::endl;
     Q_EMIT rebuild();
 }

@@ -86,12 +86,29 @@ void Node::addParameter(const param::Parameter::Ptr &param)
 {
     state.params[param->name()] = param;
     state.param_list.push_back(param.get());
+
+    worker_->addParameter(param.get());
 }
 
 void Node::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
 {
     addParameter(param);
-    worker_->addParameterCallback(param, cb);
+    worker_->addParameterCallback(param.get(), cb);
+}
+
+
+void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition)
+{
+    addParameter(param);
+    worker_->addParameterCondition(param.get(), enable_condition);
+}
+
+
+void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition, boost::function<void (param::Parameter *)> cb)
+{
+    addParameter(param);
+    worker_->addParameterCallback(param.get(), cb);
+    worker_->addParameterCondition(param.get(), enable_condition);
 }
 
 
