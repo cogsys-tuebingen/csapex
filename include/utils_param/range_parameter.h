@@ -15,8 +15,7 @@ namespace param {
 
 typedef boost::mpl::vector<
 double,
-int,
-bool
+int
 > RangeParameterTypes;
 
 

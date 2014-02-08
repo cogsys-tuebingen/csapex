@@ -21,7 +21,7 @@ BitSetParameter::~BitSetParameter()
 
 void BitSetParameter::setByName(const std::string &name)
 {
-    for(std::vector< std::pair<std::string, int> >::iterator it = set_.begin(); it != set_.end(); ++it) {
+    for(std::map<std::string, int>::iterator it = set_.begin(); it != set_.end(); ++it) {
         if(it->first == name) {
             value_ = it->second;
             parameter_changed(this);
@@ -32,7 +32,7 @@ void BitSetParameter::setByName(const std::string &name)
     throw std::runtime_error(std::string("no such parameter: ") + name);
 }
 
-void BitSetParameter::setBitSet(const std::vector< std::pair<std::string, int> >& set) {
+void BitSetParameter::setBitSet(const std::map<std::string, int> &set) {
     set_ = set;
 }
 
@@ -46,7 +46,7 @@ void BitSetParameter::setBits(const std::vector<std::string> &elements, bool sil
 {
     bool change = false;
 
-    for(std::vector< std::pair<std::string, int> >::iterator set_it = set_.begin(); set_it != set_.end(); ++set_it) {
+    for(std::map<std::string, int>::iterator set_it = set_.begin(); set_it != set_.end(); ++set_it) {
         bool found = false;
         const std::string& e = set_it->first;
         for(std::vector<std::string>::const_iterator e_it = elements.begin(); e_it != elements.end(); ++e_it) {
@@ -75,7 +75,7 @@ void BitSetParameter::setBits(const std::vector<std::string> &elements, bool sil
 
 void BitSetParameter::setBitTo(const std::string &element, bool set, bool silent)
 {
-    for(std::vector< std::pair<std::string, int> >::iterator it = set_.begin(); it != set_.end(); ++it) {
+    for(std::map<std::string, int>::iterator it = set_.begin(); it != set_.end(); ++it) {
         if(it->first == element) {
             if(set) {
                 value_ |= it->second;
@@ -103,7 +103,7 @@ void BitSetParameter::clearBit(const std::string &element, bool silent)
 
 bool BitSetParameter::isSet(const std::string &element) const
 {
-    for(std::vector< std::pair<std::string, int> >::const_iterator it = set_.begin(); it != set_.end(); ++it) {
+    for(std::map<std::string, int>::const_iterator it = set_.begin(); it != set_.end(); ++it) {
         if(it->first == element) {
             int target = it->second;
 
@@ -120,7 +120,9 @@ int BitSetParameter::noParameters() const
 
 std::string BitSetParameter::getName(int idx) const
 {
-    return set_[idx].first;
+    std::map<std::string, int>::const_iterator i = set_.begin();
+    std::advance(i, idx);
+    return i->first;
 }
 
 std::string BitSetParameter::getName() const

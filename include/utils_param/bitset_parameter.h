@@ -52,7 +52,7 @@ public:
 
     int def() const { return def_; }
 
-    void setBitSet(const std::vector< std::pair<std::string, int> >& set);
+    void setBitSet(const std::map<std::string, int>& set);
 
     void clear();
     void setBits(const std::vector<std::string> &elements, bool silent = false);
@@ -80,7 +80,7 @@ protected:
 
 private:
     int value_;
-    std::vector< std::pair<std::string, int> > set_;
+    std::map<std::string, int> set_;
     int def_;
 };
 

@@ -33,7 +33,7 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
     }
 }
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::vector<std::pair<std::string, int> > &set)
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set)
 {
     BitSetParameter::Ptr result(new BitSetParameter(name));
     result->setBitSet(set);
@@ -78,6 +78,15 @@ Parameter::Ptr ParameterFactory::declareTrigger(const std::string& name)
 Parameter::Ptr ParameterFactory::declarePath(const std::string& name, const std::string& def)
 {
     PathParameter::Ptr result(new PathParameter(name));
+    result->set(def);
+
+    return result;
+}
+
+
+Parameter::Ptr ParameterFactory::declareText(const std::string& name, const std::string& def)
+{
+    ValueParameter::Ptr result(new ValueParameter(name));
     result->set(def);
 
     return result;

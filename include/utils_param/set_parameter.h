@@ -60,8 +60,15 @@ public:
     void setSet(const std::vector< std::pair<std::string, T> >& set) {
         set_.clear();
         for(typename std::vector< std::pair<std::string, T> >::const_iterator it = set.begin(); it != set.end(); ++it) {
-            variant p = it->second;
-            set_.push_back(std::make_pair(it->first, p));
+            set_[it->first] = it->second;
+        }
+    }
+
+    template <typename T>
+    void setSet(const std::map<std::string, T>& set) {
+        set_.clear();
+        for(typename std::map<std::string, T>::const_iterator it = set.begin(); it != set.end(); ++it) {
+            set_[it->first] = it->second;
         }
     }
 
@@ -92,7 +99,7 @@ private:
 
 private:
     variant value_;
-    std::vector< std::pair<std::string, variant> > set_;
+    std::map<std::string, variant> set_;
     variant def_;
 };
 

@@ -48,6 +48,8 @@ public:
         return result;
     }
 
+    static Parameter::Ptr declareText(const std::string& name, const std::string& def);
+
     static Parameter::Ptr declarePath(const std::string& name, const std::string& def);
 
     static Parameter::Ptr declareTrigger(const std::string& name);
@@ -57,7 +59,7 @@ public:
     static Parameter::Ptr makeEmpty(const std::string& type);
 
     template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
+    static Parameter::Ptr declareParameterSet(const std::string& name, const std::map<std::string, T> & set)
     {
         SetParameter::Ptr result(new SetParameter(name));
         result->setSet(set);
@@ -67,7 +69,7 @@ public:
         return result;
     }
 
-    static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::vector< std::pair<std::string, int> >& set);
+    static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::map<std::string, int> &set);
 
     template <typename T>
     static Parameter::Ptr declareValue(const std::string& name, const T& def)
@@ -81,12 +83,23 @@ public:
 
     /** LEGACY **/
     template <typename T>
+    static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
+    {
+        SetParameter::Ptr result(new SetParameter(name));
+        result->setSet(set);
+        result->def_ = set.begin()->second;
+        result->set<T>(set.begin()->second);
+
+        return result;
+    }
+
+    template <typename T>
     static Parameter::Ptr declare(const std::string& name, T min, T max, T def, T step)
     {
         return declareRange(name, min, max, def, step);
     }
 
-    static Parameter::Ptr declare(const std::string& name, bool def);
+    static Parameter::Ptr declare(const std::string& name, bool def) __attribute__ ((deprecated));
 
     template <typename T>
     static Parameter::Ptr declare(const std::string& name, const T& def)
@@ -94,7 +107,7 @@ public:
         return declareValue(name, def);
     }
 
-    static Parameter::Ptr declare(const std::string& name, const char* def);
+    static Parameter::Ptr declare(const std::string& name, const char* def)  __attribute__ ((deprecated));
 
     /** / LEGACY **/
 };

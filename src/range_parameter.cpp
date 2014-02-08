@@ -34,11 +34,6 @@ std::string RangeParameter::toStringImpl() const
     } else if(value_.type() == typeid(double)) {
         v << boost::any_cast<double> (value_);
 
-    } else if(value_.type() == typeid(bool)) {
-        v << boost::any_cast<bool> (value_);
-
-    } else if(value_.type() == typeid(std::string)) {
-        v << boost::any_cast<std::string> (value_);
     }
 
     return std::string("[ranged: ") + v.str()  + "]";
@@ -79,11 +74,6 @@ void RangeParameter::write(YAML::Emitter& e) const
     } else if(value_.type() == typeid(double)) {
         e << YAML::Key << "double" << YAML::Value << boost::any_cast<double> (value_);
 
-    } else if(value_.type() == typeid(bool)) {
-        e << YAML::Key << "bool" << YAML::Value << boost::any_cast<bool> (value_);
-
-    } else if(value_.type() == typeid(std::string)) {
-        e << YAML::Key << "string" << YAML::Value << boost::any_cast<std::string> (value_);
     }
 
     e << YAML::EndMap;
@@ -111,11 +101,5 @@ void RangeParameter::read(const YAML::Node& n)
 
     } else if(n.FindValue("double")) {
         value_ = __read<double>(n["double"]);
-
-    } else if(n.FindValue("bool")) {
-        value_ = __read<bool>(n["bool"]);
-
-    } else if(n.FindValue("string")) {
-        value_ = __read<std::string>(n["string"]);
     }
 }

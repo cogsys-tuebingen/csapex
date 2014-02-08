@@ -21,15 +21,13 @@ SetParameter::~SetParameter()
 
 void SetParameter::setByName(const std::string &name)
 {
-    for(std::vector< std::pair<std::string, variant> >::iterator it = set_.begin(); it != set_.end(); ++it) {
-        if(it->first == name) {
-            value_ = it->second;
-            parameter_changed(this);
-            return;
-        }
+    std::map<std::string, variant>::iterator pos = set_.find(name);
+    if(pos == set_.end()) {
+        throw std::runtime_error(std::string("no such parameter: ") + name);
     }
 
-    throw std::runtime_error(std::string("no such parameter: ") + name);
+    value_ = pos->second;
+    parameter_changed(this);
 }
 
 int SetParameter::noParameters() const
@@ -62,13 +60,15 @@ std::string SetParameter::convertToString(const variant &v) const
 
 std::string SetParameter::getName(int idx) const
 {
-    return set_[idx].first;
+    std::map<std::string, variant>::const_iterator i = set_.begin();
+    std::advance(i, idx);
+    return i->first;
 }
 
 std::string SetParameter::getName() const
 {
     std::string str =  convertToString(value_);
-    for(std::vector< std::pair<std::string, variant> >::const_iterator it = set_.begin(); it != set_.end(); ++it) {
+    for(std::map<std::string, variant>::const_iterator it = set_.begin(); it != set_.end(); ++it) {
         if(convertToString(it->second) == str) {
             return it->first;
         }
