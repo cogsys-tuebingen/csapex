@@ -80,6 +80,8 @@ void QDoubleSlider::setNearestDoubleValue(double val)
         blockSignals(true);
         setValue(intval);
         blockSignals(false);
+
+        Q_EMIT valueChanged(val);
     }
 }
 

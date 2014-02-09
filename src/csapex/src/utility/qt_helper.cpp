@@ -126,7 +126,6 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
 
     QObject::connect(slider, SIGNAL(valueChanged(double)), display, SLOT(setValue(double)));
     QObject::connect(slider, SIGNAL(rangeChanged(double,double)), display, SLOT(setRange(double, double)));
-    //problem: rueckkopplung -> slider ändert sich -> box update -> box ändert sich -> slider update
     QObject::connect(display, SIGNAL(valueChanged(double)), slider, SLOT(setNearestDoubleValue(double)));
 
     return slider;
