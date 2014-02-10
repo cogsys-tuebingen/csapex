@@ -63,7 +63,13 @@ void ValueParameter::setFrom(const Parameter &other)
         value_ = range->value_;
         parameter_changed(this);
     } else {
-        throw std::runtime_error("bad setFrom, invalid types");
+        try {
+            value_ = access_unsafe(other);
+            parameter_changed(this);
+
+        } catch(const std::exception& e) {
+            throw std::runtime_error("bad setFrom, invalid types");
+        }
     }
 }
 

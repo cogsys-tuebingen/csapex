@@ -56,7 +56,7 @@ Parameter::Ptr ParameterFactory::declare(const std::string& name, bool def)
 
 Parameter::Ptr ParameterFactory::declareBool(const std::string& name, bool def)
 {
-    RangeParameter::Ptr result(new RangeParameter(name));
+    ValueParameter::Ptr result(new ValueParameter(name));
     result->def_ = def;
     result->set<bool>(def);
 

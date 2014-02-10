@@ -99,6 +99,8 @@ protected:
     virtual boost::any get_unsafe() const;
     virtual void set_unsafe(const boost::any& v);
 
+    boost::any access_unsafe(const Parameter &p) const;
+
 protected:
     boost::signals2::signal<void(Parameter*)> parameter_changed;
     boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
