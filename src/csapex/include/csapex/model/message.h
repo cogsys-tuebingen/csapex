@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection_type.h>
+#include <csapex/utility/type.h>
 
 ///
 /// FOR OPTIONAL ROS SUPPORT
@@ -38,8 +39,6 @@ bool hasHeader();
 
 namespace csapex {
 namespace connection_types {
-
-std::string type2name(const std::type_info& info);
 
 struct Message : public ConnectionType
 {

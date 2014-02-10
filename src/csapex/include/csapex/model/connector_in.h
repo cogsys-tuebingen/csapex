@@ -65,7 +65,7 @@ public:
         QMutexLocker lock(&io_mutex);
         typename Container::Ptr tmp = boost::dynamic_pointer_cast<Container>(message_);
         if(!tmp) {
-            throw std::runtime_error(std::string("cannot get message, not of type ") + connection_types::type2name(typeid(Container)));
+            throw std::runtime_error(std::string("cannot get message, not of type ") + type2name(typeid(Container)));
         }
         return tmp->template makeShared<R>();
     }

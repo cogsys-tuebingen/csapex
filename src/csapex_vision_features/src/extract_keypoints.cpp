@@ -9,6 +9,7 @@
 #include <utils/extractor_factory.h>
 #include <utils/extractor_manager.h>
 #include <utils_param/range_parameter.h>
+#include <utils_param/value_parameter.h>
 #include <utils_param/io.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
@@ -131,8 +132,25 @@ void ExtractKeypoints::update(int slot)
     Q_FOREACH(const param::Parameter::Ptr& p, state.params[state.key]) {
         std::string name = p->name();
 
-        param::RangeParameter::Ptr range = boost::dynamic_pointer_cast<param::RangeParameter> (p);
+        param::ValueParameter::Ptr value = boost::dynamic_pointer_cast<param::ValueParameter> (p);
+        if(value) {
+            if(value->is<bool>()) {
+                QCheckBox* box = new QCheckBox;
+                box->setChecked(value->as<bool>());
 
+                layout->addLayout(QtHelper::wrap(name, box));
+
+                boost::function<void()> cb = boost::bind(&ExtractKeypoints::updateParam<bool>, this, name, boost::bind(&QCheckBox::isChecked, box));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
+
+                QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
+
+            }
+            continue;
+        }
+
+        param::RangeParameter::Ptr range = boost::dynamic_pointer_cast<param::RangeParameter> (p);
         if(range->is<int>()) {
             QSlider* slider = QtHelper::makeSlider(layout, name , range->as<int>(), range->min<int>(), range->max<int>());
             slider->setValue(range->as<int>());
@@ -153,21 +171,10 @@ void ExtractKeypoints::update(int slot)
 
             QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
-        } else if(range->is<bool>()) {
-            QCheckBox* box = new QCheckBox;
-            box->setChecked(range->as<bool>());
-
-            layout->addLayout(QtHelper::wrap(name, box));
-
-            boost::function<void()> cb = boost::bind(&ExtractKeypoints::updateParam<bool>, this, name, boost::bind(&QCheckBox::isChecked, box));
-            qt_helper::Call* call = new qt_helper::Call(cb);
-            callbacks.push_back(call);
-
-            QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
-
         } else {
             opt->layout()->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
         }
+
     }
 
 

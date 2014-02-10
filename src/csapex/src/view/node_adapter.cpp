@@ -276,8 +276,25 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
                 QObject::connect(txt_, SIGNAL(returnPressed()), call, SLOT(call()));
                 QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
 
+            } else if(value_p->is<bool>()) {
+                QCheckBox* box = new QCheckBox;
+                box->setChecked(value_p->as<bool>());
+
+                layout->addLayout(QtHelper::wrap(display_name, box));
+
+                // ui change -> model
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<bool>, this, name, boost::bind(&QCheckBox::isChecked, box));
+                qt_helper::Call* call = new qt_helper::Call(cb);
+                callbacks.push_back(call);
+
+                // model change -> ui
+                boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
+                connections.push_back(parameter_changed(*value_p).connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set)));
+
+                QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
+
             } else {
-                layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
+                layout->addWidget(new QLabel((name + "'s type is not yet implemented (value: " + type2name(value_p->type()) + ")").c_str()));
             }
             continue;
         }
@@ -314,25 +331,8 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
 
                 QObject::connect(slider, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
-            } else if(range_p->is<bool>()) {
-                QCheckBox* box = new QCheckBox;
-                box->setChecked(range_p->as<bool>());
-
-                layout->addLayout(QtHelper::wrap(display_name, box));
-
-                // ui change -> model
-                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<bool>, this, name, boost::bind(&QCheckBox::isChecked, box));
-                qt_helper::Call* call = new qt_helper::Call(cb);
-                callbacks.push_back(call);
-
-                // model change -> ui
-                boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
-                connections.push_back(parameter_changed(*range_p).connect(boost::bind(&NodeAdapter::updateUi<bool>, this, _1, set)));
-
-                QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
-
             } else {
-                layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
+                layout->addWidget(new QLabel((name + "'s type is not yet implemented (range: " + type2name(range_p->type()) + ")").c_str()));
             }
             continue;
         }
@@ -389,7 +389,7 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
 
 
             } else {
-                layout->addWidget(new QLabel((name + "'s type is not yet implemented").c_str()));
+                layout->addWidget(new QLabel((name + "'s type is not yet implemented (inverval: " + type2name(interval_p->type()) + ")").c_str()));
             }
             continue;
         }
