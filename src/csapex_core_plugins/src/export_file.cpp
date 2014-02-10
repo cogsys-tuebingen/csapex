@@ -17,7 +17,7 @@ CSAPEX_REGISTER_CLASS(csapex::ExportFile, csapex::Node)
 using namespace csapex;
 
 ExportFile::ExportFile()
-    : connector_(NULL)
+    : connector_(NULL), file_dialog_(NULL)
 {
     addTag(Tag::get("Output"));
     addTag(Tag::get("General"));
@@ -104,8 +104,10 @@ void ExportFile::setState(Memento::Ptr memento)
 
     state = *m;
 
-    if(!state.path_.empty()) {
-        setExportPath(state.path_.c_str());
+    if(file_dialog_) {
+        if(!state.path_.empty()) {
+            setExportPath(state.path_.c_str());
+        }
     }
 }
 
