@@ -12,6 +12,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/approximate_voxel_grid.h>
 
 CSAPEX_REGISTER_CLASS(csapex::StatisticalOutlierRemoval, csapex::Node)
 

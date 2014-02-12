@@ -39,4 +39,15 @@
     on each point’s neighborhood, and trimming those which do not meet a certain criteria.
   </description>
 </class>
+<class type="csapex::RadiusOutlierRemoval" base_class_type="csapex::Node">
+  <description>
+    Filter outliers by performing a radius search
+    on each point’s neighborhood, and trimming those which do not meet a certain criteria.
+  </description>
+</class>
+<class type="csapex::ConditionalOutlierRemoval" base_class_type="csapex::Node">
+  <description>
+    Filter outliers by condition. Currently the Filter only works with ranges in 3D.
+  </description>
+</class>
 </library>
