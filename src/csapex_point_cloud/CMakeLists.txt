@@ -53,6 +53,7 @@ add_library(csapex_point_cloud_plugin
     src/pointcloud_to_depthimage.cpp
     src/pointcloud_to_intensityimage.cpp
     src/image_to_point_cloud.cpp
+    src/statistical_outlier_removal.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
