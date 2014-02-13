@@ -53,6 +53,8 @@ add_library(csapex_point_cloud_plugin
     src/pointcloud_to_depthimage.cpp
     src/pointcloud_to_intensityimage.cpp
     src/pointcloud_to_pointmatrix.cpp
+    src/pointmatrix_to_pointcloud.cpp
+    src/pointcloud_generator.cpp
     src/image_to_point_cloud.cpp
     src/statistical_outlier_removal.cpp
     src/radius_outlier_removal.cpp
