@@ -6,10 +6,10 @@
 #include <csapex_point_cloud/point_cloud_message.h>
 
 namespace csapex {
-class PointCloutToPointMatrix : public csapex::Node
+class PointCloudToPointMatrix : public csapex::Node
 {
 public:
-    PointCloutToPointMatrix();
+    PointCloudToPointMatrix();
 
     virtual void allConnectorsArrived();
     virtual void setup();

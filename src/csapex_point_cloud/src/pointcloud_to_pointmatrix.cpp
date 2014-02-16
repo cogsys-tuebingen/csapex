@@ -4,8 +4,6 @@
 /// PROJECT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex_transform/time_stamp_message.h>
-#include <csapex_core_plugins/string_message.h>
 #include <utils_param/parameter_factory.h>
 #include <csapex_vision/cv_mat_message.h>
 
@@ -14,23 +12,23 @@
 #include <pcl/point_types.h>
 #include <pcl/conversions.h>
 
-CSAPEX_REGISTER_CLASS(csapex::PointCloutToPointMatrix, csapex::Node)
+CSAPEX_REGISTER_CLASS(csapex::PointCloudToPointMatrix, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;
 
-PointCloutToPointMatrix::PointCloutToPointMatrix()
+PointCloudToPointMatrix::PointCloudToPointMatrix()
 {
 }
 
-void PointCloutToPointMatrix::allConnectorsArrived()
+void PointCloudToPointMatrix::allConnectorsArrived()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 
-    boost::apply_visitor (PointCloudMessage::Dispatch<PointCloutToPointMatrix>(this), msg->value);
+    boost::apply_visitor (PointCloudMessage::Dispatch<PointCloudToPointMatrix>(this), msg->value);
 }
 
-void PointCloutToPointMatrix::setup()
+void PointCloudToPointMatrix::setup()
 {
     setSynchronizedInputs(true);
     input_  = addInput<PointCloudMessage>("PointCloud");
@@ -40,7 +38,7 @@ void PointCloutToPointMatrix::setup()
 namespace implementation {
 template<class PointT>
 struct Impl {
-    static void convert(cv::Mat &matrix, typename pcl::PointCloud<PointT>::Ptr cloud)
+    static void convert(const typename pcl::PointCloud<PointT>::Ptr cloud, cv::Mat &matrix)
     {
         int height = cloud->height;
         int width  = cloud->width;
@@ -67,9 +65,10 @@ struct Impl<pcl::PointXY> {
 
 
 template <class PointT>
-void PointCloutToPointMatrix::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
+void PointCloudToPointMatrix::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
     CvMatMessage::Ptr out(new CvMatMessage(enc::unknown));
-    implementation::Impl<PointT>::convert(out->value, cloud);
+    implementation::Impl<PointT>::convert(cloud, out->value);
+    /// TODO : ENCODING NOT YET IMPLEMENTED FOR MULTICHANNEL FLOAT MATRICES
     output_->publish(out);
 }
