@@ -2,22 +2,21 @@
 #include <csapex/view/csapex_window.h>
 
 /// COMPONENT
-#include "ui_csapex_window.h"
-#include <csapex/utility/bash_parser.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/view/designer.h>
-#include <csapex/model/graph.h>
-#include <csapex/utility/stream_interceptor.h>
-#include <csapex/utility/qt_helper.hpp>
 #include <csapex/core/designerio.h>
-#include <csapex/core/graphio.h>
 #include <csapex/core/drag_io.h>
-#include <csapex/view/box.h>
-#include <csapex/model/group.h>
+#include <csapex/core/graphio.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/view/design_board.h>
-#include <csapex/model/node.h>
 #include <csapex/model/boxed_object.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node.h>
+#include <csapex/utility/bash_parser.h>
+#include <csapex/utility/qt_helper.hpp>
+#include <csapex/utility/stream_interceptor.h>
+#include <csapex/view/box.h>
+#include <csapex/view/design_board.h>
+#include <csapex/view/designer.h>
+#include "ui_csapex_window.h"
 
 /// SYSTEM
 #include <iostream>

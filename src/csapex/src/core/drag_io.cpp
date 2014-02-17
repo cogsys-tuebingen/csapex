@@ -2,16 +2,15 @@
 #include <csapex/core/drag_io.h>
 
 /// PROJECT
-#include <csapex/model/group.h>
-#include <csapex/model/connectable.h>
-#include <csapex/model/connector_out.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/manager/box_manager.h>
-#include <csapex/view/overlay.h>
 #include <csapex/command/add_node.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/view/box.h>
+#include <csapex/manager/box_manager.h>
+#include <csapex/model/connectable.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
 #include <csapex/model/node.h>
+#include <csapex/view/box.h>
+#include <csapex/view/overlay.h>
 
 
 using namespace csapex;

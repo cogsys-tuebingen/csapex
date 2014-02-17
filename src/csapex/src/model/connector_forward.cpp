@@ -2,7 +2,6 @@
 #include <csapex/model/connector_forward.h>
 
 /// COMPONENT
-#include <csapex/model/group.h>
 #include <csapex/command/dispatcher.h>
 
 using namespace csapex;

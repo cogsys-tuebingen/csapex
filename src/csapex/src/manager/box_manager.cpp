@@ -2,18 +2,18 @@
 #include <csapex/manager/box_manager.h>
 
 /// COMPONENT
-#include <csapex/model/node_constructor.h>
-#include <csapex/command/meta.h>
 #include <csapex/command/delete_node.h>
-#include <csapex/view/box.h>
-#include <csapex/model/group.h>
-#include <csapex/model/graph.h>
-#include <utils_plugin/plugin_manager.hpp>
-#include <csapex/utility/uuid.h>
-#include <csapex/model/tag.h>
-#include <csapex/model/node.h>
-#include <csapex/view/node_adapter.h>
+#include <csapex/command/meta.h>
 #include <csapex/model/boxed_object.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node_constructor.h>
+#include <csapex/model/node.h>
+#include <csapex/model/tag.h>
+#include <csapex/utility/uuid.h>
+#include <csapex/view/box.h>
+#include <csapex/view/node_adapter.h>
+#include <utils_plugin/plugin_manager.hpp>
+
 
 /// SYSTEM
 #include <boost/foreach.hpp>

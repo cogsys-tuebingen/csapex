@@ -110,7 +110,6 @@ set(SRC_APP
     src/command/move_fulcrum.cpp
     src/command/delete_fulcrum.cpp
 
-    src/model/group.cpp
     src/model/node_constructor.cpp
     src/model/error_state.cpp
     src/model/graph.cpp
