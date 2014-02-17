@@ -11,7 +11,7 @@ class RegisterTransformPlugin : public CorePlugin
 public:
     RegisterTransformPlugin();
 
-    void init();
+    void init(CsApexCore& core);
 };
 
 }

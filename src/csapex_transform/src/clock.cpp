@@ -18,6 +18,7 @@ CSAPEX_REGISTER_CLASS(csapex::Clock, csapex::Node)
 using namespace csapex;
 
 Clock::Clock()
+    : time_type_(NULL)
 {
     addTag(Tag::get("Time"));
 }
@@ -59,12 +60,14 @@ void Clock::fill(QBoxLayout* layout)
 
 void Clock::update()
 {
-    state.use_ros_time = time_type_->isChecked();
+    if(time_type_) {
+        state.use_ros_time = time_type_->isChecked();
 
-    if(state.use_ros_time) {
-        time_type_->setText("ros::Time::now()");
-    } else {
-        time_type_->setText("ros::Time(0)");
+        if(state.use_ros_time) {
+            time_type_->setText("ros::Time::now()");
+        } else {
+            time_type_->setText("ros::Time(0)");
+        }
     }
 }
 

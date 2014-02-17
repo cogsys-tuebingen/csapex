@@ -20,7 +20,7 @@ RegisterVisionFeaturePlugin::RegisterVisionFeaturePlugin()
 {
 }
 
-void RegisterVisionFeaturePlugin::init()
+void RegisterVisionFeaturePlugin::init(CsApexCore& core)
 {
     Tag::createIfNotExists("Features");
 

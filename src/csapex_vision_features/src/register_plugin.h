@@ -11,7 +11,7 @@ class RegisterVisionFeaturePlugin : public CorePlugin
 public:
     RegisterVisionFeaturePlugin();
 
-    void init();
+    void init(CsApexCore& core);
 };
 
 }

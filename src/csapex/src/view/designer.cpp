@@ -11,13 +11,14 @@
 #include <csapex/manager/box_manager.h>
 #include "ui_designer.h"
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/core/drag_io.h>
 
 /// SYSTEM
 #include <QScrollBar>
 
 using namespace csapex;
 
-Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
+Designer::Designer(CommandDispatcher *dispatcher, DesignBoard* board, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer), dispatcher_(dispatcher), box_selection_menu(NULL), is_init_(false)
 {
     ui->setupUi(this);
@@ -25,7 +26,7 @@ Designer::Designer(CommandDispatcher *dispatcher, QWidget* parent)
     ui->splitter->setStretchFactor(0, 0);
     ui->splitter->setStretchFactor(1, 1);
 
-    designer_board = new DesignBoard(dispatcher);
+    designer_board = board;
     ui->scrollArea->setWidget(designer_board);
 
     QObject::connect(dispatcher, SIGNAL(stateChanged()), this, SLOT(updateUndoInfo()));
@@ -186,5 +187,5 @@ void Designer::enableGrid(bool grid)
 
 void Designer::lockToGrid(bool lock)
 {
-    DragIO::Handler::lock = lock;
+    DragIO::lock = lock;
 }

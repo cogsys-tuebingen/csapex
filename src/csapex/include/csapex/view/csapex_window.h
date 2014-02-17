@@ -30,7 +30,7 @@ public:
      * @brief EvaluationWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexCore &core, QWidget* parent = 0);
+    explicit CsApexWindow(CsApexCore &core, Designer *designer, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void showMenu();
@@ -71,7 +71,6 @@ public Q_SLOTS:
     void openSubGraph(Group* grp);
 
 Q_SIGNALS:
-    void initialize();
     void statusChanged(const QString& status);
 
 private:

@@ -11,7 +11,8 @@ class RegisterCorePlugins : public CorePlugin
 public:
     RegisterCorePlugins();
 
-    void init();
+    void init(CsApexCore& core);
+    void initUI(DragIO &dragio);
     void shutdown();
 };
 

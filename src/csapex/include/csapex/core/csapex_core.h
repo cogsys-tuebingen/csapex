@@ -26,7 +26,7 @@ public:
     CsApexCore(CommandDispatcher* dispatcher);
     virtual ~CsApexCore();
 
-    void init();
+    void init(DragIO *dragio);
 
     std::string getConfig() const;
     void setCurrentConfig(const std::string& filename);

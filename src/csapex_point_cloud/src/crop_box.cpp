@@ -19,6 +19,7 @@ using namespace csapex;
 using namespace csapex::connection_types;
 
 CropBox::CropBox()
+    : x_(NULL), y_(NULL), z_(NULL)
 {
     addTag(Tag::get("PointCloud"));
 }
@@ -119,16 +120,18 @@ void CropBox::setState(Memento::Ptr memento)
 
     state = *m;
 
-    blockSignals(true);
+    if(x_) {
+        blockSignals(true);
 
-    x_->setDoubleValue(state.x_);
-    y_->setDoubleValue(state.y_);
-    z_->setDoubleValue(state.z_);
-    dx_->setDoubleValue(state.dx_);
-    dy_->setDoubleValue(state.dy_);
-    dz_->setDoubleValue(state.dz_);
+        x_->setDoubleValue(state.x_);
+        y_->setDoubleValue(state.y_);
+        z_->setDoubleValue(state.z_);
+        dx_->setDoubleValue(state.dx_);
+        dy_->setDoubleValue(state.dy_);
+        dz_->setDoubleValue(state.dz_);
 
-    blockSignals(false);
+        blockSignals(false);
+    }
 }
 
 void CropBox::State::writeYaml(YAML::Emitter& out) const {

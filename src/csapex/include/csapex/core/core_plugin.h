@@ -1,6 +1,9 @@
 #ifndef CORE_PLUGIN_H
 #define CORE_PLUGIN_H
 
+/// PROJECT
+#include <csapex/core/csapex_core.h>
+
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 
@@ -11,7 +14,8 @@ public:
 
 public:
     virtual ~CorePlugin();
-    virtual void init() = 0;
+    virtual void init(CsApexCore& core) = 0;
+    virtual void initUI(DragIO& dragio);
     virtual void shutdown();
 
     void setName(const std::string& name);

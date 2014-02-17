@@ -4,9 +4,6 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 
-/// PROJECT
-#include <utils_plugin/singleton.hpp>
-
 /// SYSTEM
 #include <QDragEnterEvent>
 #include <vector>
@@ -14,10 +11,8 @@
 
 namespace csapex{
 
-class DragIO : public Singleton<DragIO>
+class DragIO
 {
-    friend class Singleton<DragIO>;
-
 public:
     struct HandlerEnter {
         typedef boost::shared_ptr<HandlerEnter> Ptr;
@@ -35,32 +30,27 @@ public:
         virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDropEvent* e) = 0;
     };
 
-    class Handler {
-    public:
-        Handler(CommandDispatcher* dispatcher);
-
-        void dragEnterEvent(QWidget *src, Overlay* overlay, QDragEnterEvent* e);
-        void dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e);
-        void dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e);
-
-    private:
-        CommandDispatcher* dispatcher_;
-
-    public:
-        static bool lock;
-        static int grid_size;
-    };
 public:
+    DragIO(CommandDispatcher* dispatcher);
 
+    void dragEnterEvent(QWidget *src, Overlay* overlay, QDragEnterEvent* e);
+    void dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e);
+    void dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e);
+
+public:
+    static bool lock;
+    static int grid_size;
+
+public:
     template <typename H>
-    static void registerHandler() {
+    void registerHandler() {
         boost::shared_ptr<H> handler(new H);
         if(boost::is_base_of<HandlerEnter,H>::value)
-            instance().registerEnterHandler(boost::static_pointer_cast<HandlerEnter>(handler));
+            registerEnterHandler(boost::static_pointer_cast<HandlerEnter>(handler));
         if(boost::is_base_of<HandlerMove,H>::value)
-            instance().registerMoveHandler(boost::static_pointer_cast<HandlerMove>(handler));
+            registerMoveHandler(boost::static_pointer_cast<HandlerMove>(handler));
         if(boost::is_base_of<HandlerDrop,H>::value)
-            instance().registerDropHandler(boost::static_pointer_cast<HandlerDrop>(handler));
+            registerDropHandler(boost::static_pointer_cast<HandlerDrop>(handler));
     }
 
 private:
@@ -71,6 +61,8 @@ private:
     std::vector<HandlerEnter::Ptr> handler_enter;
     std::vector<HandlerMove::Ptr> handler_move;
     std::vector<HandlerDrop::Ptr> handler_drop;
+
+    CommandDispatcher* dispatcher_;
 };
 
 }

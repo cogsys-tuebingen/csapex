@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/view/csapex_window.h>
+#include <csapex/core/drag_io.h>
 
 /// SYSTEM
 #include <rqt_gui_cpp/plugin.h>
@@ -25,6 +26,10 @@ private:
 
     csapex::CsApexCore core_;
     csapex::CsApexWindow* eva_;
+
+    csapex::DragIO drag_io_;
+    csapex::DesignBoard* board_;
+    csapex::Designer* designer_;
 };
 
 }

@@ -68,7 +68,7 @@ void CsApexCore::setPause(bool pause)
     cmd_dispatch->getGraph()->setPause(pause);
 }
 
-void CsApexCore::init()
+void CsApexCore::init(DragIO* dragio)
 {
     if(!init_) {
         init_ = true;
@@ -79,7 +79,11 @@ void CsApexCore::init()
         Q_FOREACH(PAIR cp, core_plugin_manager->availableClasses()) {
             CorePlugin::Ptr plugin = cp.second();
 
-            plugin->init();
+            plugin->init(*this);
+
+            if(dragio) {
+                plugin->initUI(*dragio);
+            }
         }
 
         showStatusMessage("loading boxedobject plugins");

@@ -57,7 +57,7 @@ struct Image2CvMat
     }
 };
 
-void RegisterPlugin::init()
+void RegisterPlugin::init(CsApexCore& core)
 {
     Tag::createIfNotExists("Vision");
     Tag::createIfNotExists("Filter");

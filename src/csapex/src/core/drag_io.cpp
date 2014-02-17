@@ -13,8 +13,8 @@
 
 using namespace csapex;
 
-bool DragIO::Handler::lock = false;
-int DragIO::Handler::grid_size = 10;
+bool DragIO::lock = false;
+int DragIO::grid_size = 10;
 
 void DragIO::registerEnterHandler(HandlerEnter::Ptr h)
 {
@@ -29,13 +29,13 @@ void DragIO::registerDropHandler(HandlerDrop::Ptr h)
     handler_drop.push_back(h);
 }
 
-DragIO::Handler::Handler(CommandDispatcher* dispatcher)
+DragIO::DragIO(CommandDispatcher* dispatcher)
     : dispatcher_(dispatcher)
 {
 
 }
 
-void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
+void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 {
     std::cout << "enter: " << e->format() << std::endl;
     if(e->mimeData()->hasFormat(Box::MIME)) {
@@ -71,7 +71,7 @@ void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterE
     }
 
 
-    Q_FOREACH(HandlerEnter::Ptr h, DragIO::instance().handler_enter) {
+    Q_FOREACH(HandlerEnter::Ptr h, handler_enter) {
         if(h->handle(dispatcher_, src, overlay, e)) {
             return;
         }
@@ -99,7 +99,7 @@ void DragIO::Handler::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterE
 
 }
 
-void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
+void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 {
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         Connectable* c = dynamic_cast<Connectable*>(e->mimeData()->parent());
@@ -142,7 +142,7 @@ void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEve
         overlay->repaint();
 
     } else {
-        Q_FOREACH(HandlerMove::Ptr h, DragIO::instance().handler_move) {
+        Q_FOREACH(HandlerMove::Ptr h, handler_move) {
             if(h->handle(dispatcher_, src, overlay, e)) {
                 return;
             }
@@ -150,7 +150,7 @@ void DragIO::Handler::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEve
     }
 }
 
-void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
+void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 {
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
@@ -178,7 +178,7 @@ void DragIO::Handler::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
         e->acceptProposedAction();
         e->setDropAction(Qt::MoveAction);
     } else {
-        Q_FOREACH(HandlerDrop::Ptr h, DragIO::instance().handler_drop) {
+        Q_FOREACH(HandlerDrop::Ptr h, handler_drop) {
             if(h->handle(dispatcher_, src, overlay, e)) {
                 return;
             }

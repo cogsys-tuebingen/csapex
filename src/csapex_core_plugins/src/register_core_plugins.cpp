@@ -176,7 +176,7 @@ RegisterCorePlugins::RegisterCorePlugins()
 {
 }
 
-void RegisterCorePlugins::init()
+void RegisterCorePlugins::initUI(DragIO &dragio)
 {
     Tag::createIfNotExists("Buffer");
     Tag::createIfNotExists("General");
@@ -186,9 +186,12 @@ void RegisterCorePlugins::init()
     Tag::createIfNotExists("ConsoleIO");
     Tag::createIfNotExists("Debug");
 
-    DragIO::registerHandler<RosHandler>();
-    DragIO::registerHandler<FileHandler>();
+    dragio.registerHandler<RosHandler>();
+    dragio.registerHandler<FileHandler>();
+}
 
+void RegisterCorePlugins::init(CsApexCore& core)
+{
     ConnectionTypeManager::registerMessage<connection_types::StringMessage>();
     ConnectionTypeManager::registerMessage<connection_types::DoubleMessage>();
     ConnectionTypeManager::registerMessage<connection_types::IntMessage>();

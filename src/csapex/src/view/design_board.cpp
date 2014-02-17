@@ -29,8 +29,8 @@
 
 using namespace csapex;
 
-DesignBoard::DesignBoard(CommandDispatcher* dispatcher, QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), dispatcher_(dispatcher), drag_io(dispatcher),
+DesignBoard::DesignBoard(CommandDispatcher* dispatcher, DragIO& dragio, QWidget* parent)
+    : QWidget(parent), ui(new Ui::DesignBoard), dispatcher_(dispatcher), drag_io_(dragio),
       space_(false), drag_(false), parent_scroll(NULL), initial_pos_x_(0), initial_pos_y_(0)
 {
     ui->setupUi(this);
@@ -478,17 +478,17 @@ void DesignBoard::resizeEvent(QResizeEvent* e)
 
 void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
 {
-    drag_io.dragEnterEvent(this, overlay, e);
+    drag_io_.dragEnterEvent(this, overlay, e);
 }
 
 void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
-    drag_io.dragMoveEvent(this, overlay, e);
+    drag_io_.dragMoveEvent(this, overlay, e);
 }
 
 void DesignBoard::dropEvent(QDropEvent* e)
 {
-    drag_io.dropEvent(this, overlay, e);
+    drag_io_.dropEvent(this, overlay, e);
 }
 
 void DesignBoard::dragLeaveEvent(QDragLeaveEvent*)

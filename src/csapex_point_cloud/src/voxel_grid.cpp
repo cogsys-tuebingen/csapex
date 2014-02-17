@@ -20,6 +20,7 @@ using namespace csapex;
 using namespace csapex::connection_types;
 
 VoxelGrid::VoxelGrid()
+    : res_(NULL)
 {
     addTag(Tag::get("PointCloud"));
 }
@@ -80,7 +81,9 @@ void VoxelGrid::setState(Memento::Ptr memento)
 
     state = *m;
 
-    res_->setDoubleValue(state.resolution_);
+    if(res_) {
+        res_->setDoubleValue(state.resolution_);
+    }
 }
 
 void VoxelGrid::State::writeYaml(YAML::Emitter& out) const {

@@ -6,6 +6,8 @@
 #include <csapex/view/designer.h>
 #include <csapex/model/graph.h>
 #include <csapex/core/graphio.h>
+#include <csapex/view/design_board.h>
+#include <csapex/view/designer.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -19,7 +21,7 @@ using namespace csapex_rqt;
 using namespace csapex;
 
 CsApex::CsApex()
-    : core_(GraphIO::default_config)
+    : core_(GraphIO::default_config), drag_io_(core_.getCommandDispatcher())
 {
 }
 
@@ -33,7 +35,10 @@ void CsApex::initPlugin(qt_gui_cpp::PluginContext& context)
 {
     context_ = &context;
 
-    eva_ = new CsApexWindow(core_);
+    board_ = new DesignBoard(core_.getCommandDispatcher(), drag_io_);
+    designer_ = new Designer(core_.getCommandDispatcher(), board_);
+
+    eva_ = new CsApexWindow(core_, designer_);
     eva_->showMenu();
 
     context_->addWidget(eva_);

@@ -11,7 +11,7 @@ class RegisterPlugin : public CorePlugin
 public:
     RegisterPlugin();
 
-    void init();
+    void init(CsApexCore& core);
 };
 
 }

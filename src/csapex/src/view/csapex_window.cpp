@@ -15,6 +15,7 @@
 #include <csapex/view/box.h>
 #include <csapex/model/group.h>
 #include <csapex/manager/box_manager.h>
+#include <csapex/view/design_board.h>
 
 /// SYSTEM
 #include <iostream>
@@ -29,8 +30,8 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, QWidget *parent)
-    : QMainWindow(parent), core_(core), graph_(core_.getTopLevelGraph()), ui(new Ui::EvaluationWindow), init_(false), style_sheet_watcher_(NULL)
+CsApexWindow::CsApexWindow(CsApexCore& core, Designer* designer, QWidget *parent)
+    : QMainWindow(parent), core_(core), graph_(core_.getTopLevelGraph()), ui(new Ui::EvaluationWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
 {
     core_.addListener(this);
 }
@@ -46,7 +47,6 @@ void CsApexWindow::construct()
 
     ui->setupUi(this);
 
-    designer_ = new Designer(core_.getCommandDispatcher());
     designer_->hide();
     ui->splitter->addWidget(designer_);
     ui->splitter->addWidget(ui->logOutput);
@@ -82,8 +82,6 @@ void CsApexWindow::construct()
     QObject::connect(graph, SIGNAL(nodeRemoved(NodePtr)), this, SLOT(nodeRemoved(NodePtr)));
 
     QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
-
-    QObject::connect(this, SIGNAL(initialize()), this, SLOT(init()), Qt::QueuedConnection);
 
     updateMenu();
     updateTitle();
@@ -282,10 +280,7 @@ void CsApexWindow::init()
 {
     init_ = true;
 
-    core_.init();
-
     designer_->show();
-    show();
     hideLog();
 }
 

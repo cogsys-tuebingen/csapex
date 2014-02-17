@@ -10,6 +10,9 @@
 #include <csapex/core/graphio.h>
 #include <csapex/utility/thread.h>
 #include <csapex/utility/error_handling.h>
+#include <csapex/core/drag_io.h>
+#include <csapex/view/designer.h>
+#include <csapex/view/design_board.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -83,6 +86,7 @@ int Main::run()
 int Main::main(bool headless, const std::string& config)
 {
     CsApexCore core(config);
+    DragIO drag_io(core.getCommandDispatcher());
 
     if(!headless) {
         /*
@@ -96,11 +100,17 @@ int Main::main(bool headless, const std::string& config)
 
         app.processEvents();
 
-        CsApexWindow w(core);
+        DesignBoard* board = new DesignBoard(core.getCommandDispatcher(), drag_io);
+        Designer* designer = new Designer(core.getCommandDispatcher(), board);
+
+        CsApexWindow w(core, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
         w.start();
 
+        core.init(&drag_io);
+
         splash->finish(&w);
+        w.setVisible(true);
 
         int res = run();
 
@@ -109,7 +119,7 @@ int Main::main(bool headless, const std::string& config)
         return res;
 
     } else {
-        core.init();
+        core.init(NULL);
         return run();
     }
 }
