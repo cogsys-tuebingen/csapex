@@ -17,14 +17,12 @@
 #include <csapex/command/move_box.h>
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/manager/template_manager.h>
 #include <csapex/model/connectable.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/template.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/view/box.h>
@@ -112,15 +110,6 @@ void Graph::deleteNode(const UUID& uuid)
     }
 }
 
-Template::Ptr Graph::toTemplate(const std::string& name) const
-{
-    Template::Ptr sub_graph_templ = TemplateManager::instance().createNewNamedTemplate(name);
-    std::vector<std::pair<UUID, UUID> > connections;
-    generateTemplate(sub_graph_templ, connections, false);
-
-    return sub_graph_templ;
-}
-
 int Graph::countNodes()
 {
     return nodes_.size();
@@ -137,116 +126,6 @@ int Graph::countSelectedNodes()
     }
 
     return c;
-}
-
-Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<UUID, UUID> >& connections) const
-{
-    Template::Ptr sub_graph_templ = TemplateManager::instance().createNewTemporaryTemplate();
-    generateTemplate(sub_graph_templ, connections, true);
-
-    return sub_graph_templ;
-}
-
-
-Template::Ptr Graph::generateTemplate(Template::Ptr templ, std::vector<std::pair<UUID, UUID> >& /*connections*/, bool /*only_selected*/) const
-{
-    // TODO: reimplement
-    //    std::vector<Node*> selected;
-
-    //    std::map<std::string, std::string> old_box_to_new_box;
-
-    //    Q_FOREACH(Node::Ptr n, nodes_) {
-    //        // iterate selected boxes
-    //        if(n->getBox()->isSelected() || !only_selected) {
-    //            selected.push_back(n.get());
-
-    //            NodeState::Ptr state = boost::dynamic_pointer_cast<NodeState>(n->getState());
-    //            std::string new_uuid = templ->addBox(n->getType(), n->getBox()->pos(), state);
-
-    //            size_t start_pos = new_uuid.find(Template::PARENT_PREFIX_PATTERN);
-    //            assert(start_pos != std::string::npos);
-
-    //            old_box_to_new_box[n->UUID()] = new_uuid;
-    //        }
-    //    }
-
-    //    Q_FOREACH(Node::Ptr n, nodes_) {
-    //        if(n->getBox()->isSelected() || !only_selected) {
-    //            Q_FOREACH(ConnectorIn* in, n->input) {
-    //                if(in->isConnected()) {
-    //                    Connectable* target = in->getSource();
-    //                    Node* owner = target->getNode();
-
-    //                    bool owner_is_selected = false;
-    //                    Q_FOREACH(Node* b, selected) {
-    //                        owner_is_selected |= (b == owner);
-    //                    }
-
-    //                    bool is_external = !owner_is_selected;
-    //                    // internal connections are done by the next loop
-    //                    // external connections should be split
-    //                    if(is_external) {
-    //                        std::cerr << "  > split incoming connection between " << in->UUID() << " and " << target->UUID() << std::endl;
-
-    //                        std::string new_connector_uuid = templ->addConnector(in->getLabel(), in->getType()->name(), true, true);
-
-    //                        std::string in_box, in_connector;
-    //                        split_first(in->UUID(), UUID::namespace_separator, in_box, in_connector);
-    //                        templ->addConnection(new_connector_uuid, old_box_to_new_box[n->UUID()] + UUID::namespace_separator + in_connector);
-
-    //                        connections.push_back(std::make_pair(target->UUID(), new_connector_uuid));
-    //                    }
-    //                }
-    //            }
-    //            Q_FOREACH(ConnectorOut* out, n->output) {
-    //                std::string new_connector_uuid;
-
-    //                for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-    //                    ConnectorIn* in = *it;
-    //                    Node* owner = in->getNode();
-
-    //                    bool is_selected = false;
-    //                    Q_FOREACH(Node* b, selected) {
-    //                        is_selected |= (b == owner);
-    //                    }
-
-    //                    bool is_external = !is_selected;
-    //                    if(is_external) {
-    //                        // external connections are split
-    //                        std::cerr << "  > split outgoing connection between " << in->UUID() << " and " << out->UUID() << std::endl;
-
-    //                        if(new_connector_uuid.empty()) {
-    //                            new_connector_uuid = templ->addConnector(out->getLabel(), out->getType()->name(), false, true);
-    //                        }
-
-    //                        std::string out_box, out_connector;
-    //                        split_first(out->UUID(), UUID::namespace_separator, out_box, out_connector);
-    //                        templ->addConnection(old_box_to_new_box[n->UUID()] + UUID::namespace_separator + out_connector, new_connector_uuid);
-
-    //                        connections.push_back(std::make_pair(new_connector_uuid, in->UUID()));
-
-    //                    } else {
-    //                        // internal connections are kept
-    //                        std::cerr << "  > keep internal connection between " << in->UUID() << " and " << out->UUID() << std::endl;
-
-    //                        std::string in_box, in_connector;
-    //                        split_first(in->UUID(), UUID::namespace_separator, in_box, in_connector);
-
-    //                        std::string out_box, out_connector;
-    //                        split_first(out->UUID(), UUID::namespace_separator, out_box, out_connector);
-
-    //                        std::string in = old_box_to_new_box[in_box] + UUID::namespace_separator + in_connector;
-    //                        std::string out = old_box_to_new_box[out_box] + UUID::namespace_separator + out_connector;
-
-    //                        templ->addConnection(out, in);
-    //                    }
-    //                }
-    //            }
-
-    //        }
-    //    }
-
-    return templ;
 }
 
 void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::function<void ()> > &handler)
@@ -281,14 +160,6 @@ void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::
         handler[max] = boost::bind(&Graph::foreachBox, this, boost::protect(boost::bind(&Box::minimizeBox, _1, true)), pred_selected);
         menu->addAction(max);
     }
-
-    menu->addSeparator();
-
-    QAction* group = new QAction("group", menu);
-    group->setIcon(QIcon(":/group.png"));
-    group->setIconVisibleInMenu(true);
-    handler[group] = boost::bind(&CommandDispatcher::execute, dispatcher_, boost::bind(boost::bind(&Graph::groupSelectedNodesCmd, this)));
-    menu->addAction(group);
 
     menu->addSeparator();
 
@@ -844,50 +715,6 @@ Command::Ptr Graph::deleteSelectedNodesCmd()
 
     return meta;
 }
-
-Command::Ptr Graph::groupSelectedNodesCmd()
-{
-    QPoint tl(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-    Q_FOREACH(Node::Ptr n, nodes_) {
-        if(n->getBox()->isSelected()) {
-            QPoint pos = n->getBox()->pos();
-            if(pos.x() < tl.x()) {
-                tl.setX(pos.x());
-            }
-            if(pos.y() < tl.y()) {
-                tl.setY(pos.y());
-            }
-        }
-    }
-
-
-    std::vector<std::pair<UUID, UUID> > connections;
-    Template::Ptr templ = convertSelectionToTemplate(connections);
-
-    std::string type = std::string("::template::") + templ->getName();
-
-    UUID group_uuid = UUID::make(makeUUIDPrefix(type));
-
-    command::Meta::Ptr meta(new command::Meta("Group Selected Nodes"));
-
-    Q_FOREACH(Node::Ptr n, nodes_) {
-        if(n->getBox()->isSelected()) {
-            meta->add(Command::Ptr(new command::DeleteNode(n->getUUID())));
-        }
-    }
-
-    meta->add(command::AddNode::Ptr(new command::AddNode(type, tl, UUID::NONE, group_uuid, NodeStateNullPtr)));
-
-    typedef std::pair<UUID, UUID> PAIR;
-    Q_FOREACH(const PAIR& c, connections) {
-        UUID from = Template::fillInTemplate(c.first, group_uuid);
-        UUID to = Template::fillInTemplate(c.second, group_uuid);
-        meta->add(Command::Ptr(new command::AddConnection(from, to)));
-    }
-
-    return meta;
-}
-
 
 void Graph::selectAll()
 {

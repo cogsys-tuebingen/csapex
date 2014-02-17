@@ -6,7 +6,6 @@
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/manager/template_manager.h>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -58,18 +57,13 @@ GraphIO::GraphIO(Graph::Ptr graph)
 void GraphIO::saveSettings(YAML::Emitter& yaml)
 {
     yaml << YAML::Key << "uuid_map";
-    yaml << YAML::Value << graph_->uuids;
-    yaml << YAML::Key << "next_template_id";
-    yaml << YAML::Value << TemplateManager::instance().next_id;
+    yaml << YAML::Value << graph_->uuids;    
 }
 
 void GraphIO::loadSettings(YAML::Node &doc)
 {
     if(doc.FindValue("uuid_map")) {
         doc["uuid_map"] >> graph_->uuids;
-    }
-    if(doc.FindValue("next_template_id")) {
-        doc["next_template_id"] >> TemplateManager::instance().next_id;
     }
 }
 
@@ -282,25 +276,5 @@ void GraphIO::loadConnections(YAML::Node &doc)
                 connection->addFulcrum(i, QPoint(pts[i][0], pts[i][1]), type);
             }
         }
-    }
-}
-
-
-void GraphIO::saveTemplates(YAML::Emitter &yaml)
-{
-    TemplateManager& manager = TemplateManager::instance();
-
-    if(manager.temporary_templates.empty()) {
-        return;
-    }
-    yaml << YAML::Key << "temporary_templates";
-    yaml << YAML::Value << manager.temporary_templates;
-}
-
-void GraphIO::loadTemplates(YAML::Node &doc)
-{
-    TemplateManager& manager = TemplateManager::instance();
-    if(doc.FindValue("temporary_templates")) {
-        doc["temporary_templates"] >> manager.temporary_templates;
     }
 }

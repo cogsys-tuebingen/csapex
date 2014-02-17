@@ -80,8 +80,6 @@ public:
 
     Command::Ptr clear();
 
-    TemplatePtr toTemplate(const std::string& name) const;
-
     void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 
@@ -91,7 +89,6 @@ public:
     void deselectNodes();
 
     Command::Ptr deleteSelectedNodesCmd();
-    Command::Ptr groupSelectedNodesCmd();
 
     void handleNodeSelection(Node* node, bool add);
 
@@ -129,10 +126,6 @@ private:
     void deselectConnectionById(int id);
     void selectConnectionById(int id, bool add = false);
     bool isConnectionWithIdSelected(int id);
-
-    TemplatePtr convertSelectionToTemplate(std::vector<std::pair<UUID, UUID> > &connections) const;
-    TemplatePtr generateTemplate(TemplatePtr templ, std::vector<std::pair<UUID, UUID> > &connections, bool only_selected) const;
-
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addNode(NodePtr node);

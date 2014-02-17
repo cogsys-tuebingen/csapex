@@ -2,7 +2,7 @@
 #include <csapex/view/box_dialog.h>
 
 /// COMPONENT
-#include <csapex/manager/template_manager.h>
+#include <csapex/manager/box_manager.h>
 #include <csapex/model/node_filter_proxy_model.h>
 
 /// SYSTEM

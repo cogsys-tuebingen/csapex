@@ -70,7 +70,6 @@ set(SRC_PLUGIN
     src/manager/box_manager.cpp
     src/manager/connection_type_manager.cpp
     src/manager/message_provider_manager.cpp
-    src/manager/template_manager.cpp
 
     src/utility/bash_parser.cpp
     src/utility/qdouble_slider.cpp
@@ -120,8 +119,6 @@ set(SRC_APP
     src/model/message_provider.cpp
     src/model/node_state.cpp
     src/model/node_worker.cpp
-    src/model/template.cpp
-    src/model/template_constructor.cpp
     src/model/node_filter_proxy_model.cpp
 
     src/view/box.cpp
@@ -132,7 +129,6 @@ set(SRC_APP
     src/view/node_adapter.cpp
     src/view/overlay.cpp
     src/view/selectable.cpp
-    src/view/template_dialog.cpp
     src/view/profiling_widget.cpp
     src/view/port.cpp
 )

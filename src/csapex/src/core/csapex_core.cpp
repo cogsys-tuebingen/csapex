@@ -9,7 +9,6 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/model/message.h>
 #include <csapex/manager/connection_type_manager.h>
-#include <csapex/manager/template_manager.h>
 #include <utils_plugin/plugin_manager.hpp>
 #include <csapex/model/tag.h>
 
@@ -91,16 +90,6 @@ void CsApexCore::init(DragIO* dragio)
         bm.new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
         bm.reload();
 
-        showStatusMessage("loading templates");
-        // default template path is where custom templates are kept
-        TemplateManager::instance().load(TemplateManager::defaultTemplatePath());
-        // import plugin templates
-        std::vector<std::string> template_paths;
-        ros::package::getPlugins("csapex", "template_paths", template_paths);
-        BOOST_FOREACH(const std::string& path, template_paths) {
-            TemplateManager::instance().load(path);
-        }
-
         showStatusMessage("loading config");
         try {
             load(getConfig());
@@ -130,8 +119,6 @@ void CsApexCore::reset()
     cmd_dispatch->reset();
 
     UUID::reset();
-
-    TemplateManager::instance().reset();
 
     Q_FOREACH(Listener* l, listener_) {
         l->resetSignal();
@@ -167,7 +154,6 @@ void CsApexCore::saveAs(const std::string &file)
 
     graphio.saveSettings(yaml);
     graphio.saveConnections(yaml);
-    graphio.saveTemplates(yaml);
 
     yaml << YAML::EndMap; // settings map
 
@@ -206,7 +192,6 @@ void CsApexCore::load(const std::string &file)
 
         Q_EMIT loadSettingsRequest(doc);
         graphio.loadSettings(doc);
-        graphio.loadTemplates(doc);
 
         graphio.loadBoxes(parser);
     }

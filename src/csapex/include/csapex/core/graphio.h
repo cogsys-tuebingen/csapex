@@ -44,9 +44,6 @@ public:
     void saveConnections(YAML::Emitter& yaml);
     void loadConnections(YAML::Node& doc);
 
-    void saveTemplates(YAML::Emitter& yaml);
-    void loadTemplates(YAML::Node& doc);
-
 private:
     Graph::Ptr graph_;
 };
