@@ -10,6 +10,10 @@
 #include <csapex/model/graph.h>
 #include <utils_plugin/plugin_manager.hpp>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/tag.h>
+#include <csapex/model/node.h>
+#include <csapex/view/node_adapter.h>
+#include <csapex/model/boxed_object.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -229,7 +233,8 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
     csapex::Box::Ptr object;
 
     if(BoxManager::typeIsTemplate(content->getType())) {
-        object.reset(new csapex::Group(""));
+        throw std::runtime_error("Groups are not implemented");
+//        object.reset(new csapex::Group(""));
     } else {
         BoxedObjectPtr bo = boost::dynamic_pointer_cast<BoxedObject> (content);
         if(bo) {
@@ -289,7 +294,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         QMimeData* mimeData = new QMimeData;
 
         if(is_template) {
-            mimeData->setData(Template::MIME, "");
+//            mimeData->setData(Template::MIME, "");
         }
         mimeData->setData(Box::MIME, type.c_str());
         mimeData->setProperty("ox", offset.x());

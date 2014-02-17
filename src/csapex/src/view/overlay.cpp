@@ -53,8 +53,8 @@ std::pair<int,int> rgb2id(QRgb rgb)
 }
 }
 
-Overlay::Overlay(CommandDispatcher *dispatcher, QWidget* parent)
-    : QWidget(parent), dispatcher_(dispatcher), graph_(dispatcher->getGraph()), highlight_connection_id_(-1), schema_dirty_(true),
+Overlay::Overlay(Graph::Ptr graph, CommandDispatcher *dispatcher, QWidget* parent)
+    : QWidget(parent), dispatcher_(dispatcher), graph_(graph), highlight_connection_id_(-1), schema_dirty_(true),
       drag_connection_(-1), fulcrum_is_hovered_(false), mouse_blocked(false), splicing_requested(false), splicing(false)
 {
     setPalette(Qt::transparent);
@@ -593,7 +593,7 @@ bool Overlay::showConnectionContextMenu(const QPoint& global_pos)
 
 bool Overlay::showFulcrumContextMenu(const QPoint& global_pos)
 {
-    Connection::Fulcrum fulc = dispatcher_->getGraph()->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
+    Connection::Fulcrum fulc = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
 
     QMenu menu;
     QAction* del = new QAction("delete fulcrum", &menu);

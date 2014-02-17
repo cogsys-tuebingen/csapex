@@ -63,12 +63,6 @@ Connectable* Port::getAdaptee() const
     return adaptee_;
 }
 
-CommandDispatcher* Port::getCommandDispatcher() const
-{
-    return dispatcher_;
-}
-
-
 
 void Port::paintEvent(QPaintEvent *e)
 {
@@ -239,14 +233,14 @@ void Port::dropEvent(QDropEvent* e)
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
 
         if(from && from != adaptee_) {
-            getCommandDispatcher()->execute(Command::Ptr(new command::AddConnection(adaptee_->getUUID(), from->getUUID())));
+            dispatcher_->execute(Command::Ptr(new command::AddConnection(adaptee_->getUUID(), from->getUUID())));
         }
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
 
         if(from) {
             Command::Ptr cmd(new command::MoveConnection(from, adaptee_));
-            getCommandDispatcher()->execute(cmd);
+            dispatcher_->execute(cmd);
             e->setDropAction(Qt::MoveAction);
         }
     }

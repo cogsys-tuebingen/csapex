@@ -85,8 +85,10 @@ int Main::run()
 
 int Main::main(bool headless, const std::string& config)
 {
-    CsApexCore core(config);
-    DragIO drag_io(core.getCommandDispatcher());
+    Graph::Ptr graph(new Graph);
+    CommandDispatcher dispatcher(graph);
+    CsApexCore core(config, graph, &dispatcher);
+    DragIO drag_io(graph.get(), &dispatcher);
 
     if(!headless) {
         /*
@@ -100,10 +102,10 @@ int Main::main(bool headless, const std::string& config)
 
         app.processEvents();
 
-        DesignBoard* board = new DesignBoard(core.getCommandDispatcher(), drag_io);
-        Designer* designer = new Designer(core.getCommandDispatcher(), board);
+        DesignBoard* board = new DesignBoard(graph, &dispatcher, drag_io);
+        Designer* designer = new Designer(graph, &dispatcher, board);
 
-        CsApexWindow w(core, designer);
+        CsApexWindow w(core, &dispatcher, graph, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
         w.start();
 

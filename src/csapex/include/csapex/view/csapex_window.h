@@ -30,7 +30,7 @@ public:
      * @brief EvaluationWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexCore &core, Designer *designer, QWidget* parent = 0);
+    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, GraphPtr graph, Designer *designer, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void showMenu();
@@ -79,6 +79,7 @@ private:
 
 private:
     CsApexCore& core_;
+    CommandDispatcher* cmd_dispatcher_;
 
     GraphPtr graph_;
 

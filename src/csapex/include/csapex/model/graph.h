@@ -40,10 +40,9 @@ public:
 
     typedef boost::shared_ptr<Graph> Ptr;
 
-private:
+public:
     Graph();
 
-public:
     virtual ~Graph();
 
     void init(CommandDispatcher* dispatcher);

@@ -10,6 +10,9 @@
 #include <csapex/view/overlay.h>
 #include <csapex/command/add_node.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/view/box.h>
+#include <csapex/model/node.h>
+
 
 using namespace csapex;
 
@@ -29,8 +32,8 @@ void DragIO::registerDropHandler(HandlerDrop::Ptr h)
     handler_drop.push_back(h);
 }
 
-DragIO::DragIO(CommandDispatcher* dispatcher)
-    : dispatcher_(dispatcher)
+DragIO::DragIO(Graph *graph, CommandDispatcher* dispatcher)
+    : graph_(graph), dispatcher_(dispatcher)
 {
 
 }
@@ -126,7 +129,7 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
         std::string uuid_tmp = e->mimeData()->text().toStdString();
         UUID uuid = UUID::make_forced(uuid_tmp);
 
-        Box* box = dispatcher_->getGraph()->findNode(uuid)->getBox();
+        Box* box = graph_->findNode(uuid)->getBox();
         QPoint offset_value(e->mimeData()->data(Box::MIME_MOVE + "/x").toInt(),
                             e->mimeData()->data(Box::MIME_MOVE + "/y").toInt());
         QPoint pos = e->pos() + offset_value;
@@ -153,8 +156,6 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
 {
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
-
-    Graph::Ptr graph_ = dispatcher_->getGraph();
 
     if(e->mimeData()->hasFormat(Box::MIME)) {
         QByteArray b = e->mimeData()->data(Box::MIME);

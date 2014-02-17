@@ -462,6 +462,7 @@ void Box::startDrag(QPoint offset)
     QPoint end_pos = pos();
 
     QPoint delta = end_pos - start_pos;
+    // TODO: ugly
     node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
 }
 

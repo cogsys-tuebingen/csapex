@@ -30,6 +30,7 @@
 #include <csapex/model/template.h>
 #include <csapex/manager/template_manager.h>
 #include <csapex/view/port.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <boost/bind/protect.hpp>
@@ -359,13 +360,13 @@ bool Graph::addConnection(Connection::Ptr connection)
         Connectable* from = findConnector(connection->from()->getUUID());
         Connectable* to = findConnector(connection->to()->getUUID());
 
-        Graph::Ptr graph_from = from->getGraph();
-        Graph::Ptr graph_to = to->getGraph();
+        //Graph::Ptr graph_from = from->getGraph();
+       // Graph::Ptr graph_to = to->getGraph();
 
         //        if(!graph_from->isHidden() && !graph_to->isHidden()) {
-        if(graph_from.get() == this && graph_to.get() == this) {
+        //if(graph_from.get() == this && graph_to.get() == this) {
             visible_connections.push_back(connection);
-        }
+        //}
 
         verify();
 
@@ -565,13 +566,13 @@ Node* Graph::findNodeNoThrow(const UUID& uuid)
     }
 
     Q_FOREACH(Node::Ptr b, nodes_) {
-        Group::Ptr grp = boost::dynamic_pointer_cast<Group> (b);
-        if(grp) {
-            Node* tmp = grp->getSubGraph()->findNodeNoThrow(uuid);
-            if(tmp) {
-                return tmp;
-            }
-        }
+//        Group::Ptr grp = boost::dynamic_pointer_cast<Group> (b);
+//        if(grp) {
+//            Node* tmp = grp->getSubGraph()->findNodeNoThrow(uuid);
+//            if(tmp) {
+//                return tmp;
+//            }
+//        }
     }
 
     return NULL;

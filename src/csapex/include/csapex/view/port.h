@@ -50,7 +50,6 @@ public:
     virtual bool isInput() const;
 
     Connectable* getAdaptee() const;
-    CommandDispatcher* getCommandDispatcher() const;
 
     void refreshStylesheet();
 

@@ -21,7 +21,7 @@ using namespace csapex_rqt;
 using namespace csapex;
 
 CsApex::CsApex()
-    : core_(GraphIO::default_config), drag_io_(core_.getCommandDispatcher())
+    : graph_(new Graph), dispatcher_(new CommandDispatcher(graph_)), core_(GraphIO::default_config, graph_, dispatcher_), drag_io_(graph_.get(), dispatcher_)
 {
 }
 
@@ -35,10 +35,10 @@ void CsApex::initPlugin(qt_gui_cpp::PluginContext& context)
 {
     context_ = &context;
 
-    board_ = new DesignBoard(core_.getCommandDispatcher(), drag_io_);
-    designer_ = new Designer(core_.getCommandDispatcher(), board_);
+    board_ = new DesignBoard(graph_, dispatcher_, drag_io_);
+    designer_ = new Designer(graph_, dispatcher_, board_);
 
-    eva_ = new CsApexWindow(core_, designer_);
+    eva_ = new CsApexWindow(core_, dispatcher_, graph_, designer_);
     eva_->showMenu();
 
     context_->addWidget(eva_);

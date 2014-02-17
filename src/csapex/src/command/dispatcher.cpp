@@ -6,8 +6,8 @@
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher()
-    : graph_(new Graph), dirty_(false)
+CommandDispatcher::CommandDispatcher(Graph::Ptr graph)
+    : graph_(graph), dirty_(false)
 {
     graph_->init(this);
 
@@ -17,6 +17,7 @@ CommandDispatcher::CommandDispatcher()
 
 void CommandDispatcher::reset()
 {
+    graph_->reset();
     later.clear();
     done.clear();
     undone.clear();

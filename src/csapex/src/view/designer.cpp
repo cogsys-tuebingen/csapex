@@ -18,8 +18,8 @@
 
 using namespace csapex;
 
-Designer::Designer(CommandDispatcher *dispatcher, DesignBoard* board, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), dispatcher_(dispatcher), box_selection_menu(NULL), is_init_(false)
+Designer::Designer(Graph::Ptr graph, CommandDispatcher *dispatcher, DesignBoard* board, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Designer), graph_(graph), dispatcher_(dispatcher), box_selection_menu(NULL), is_init_(false)
 {
     ui->setupUi(this);
 
@@ -98,10 +98,9 @@ void Designer::stateChangedEvent()
 
 void Designer::updateDebugInfo()
 {
-    Graph::Ptr graph = dispatcher_->getGraph();
     std::vector<Box*> selected;
     boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
-    graph->foreachBox(append, boost::bind(&Box::isSelected, _1));
+    graph_->foreachBox(append, boost::bind(&Box::isSelected, _1));
 
     box_info->clear();
 
@@ -174,8 +173,7 @@ void Designer::reloadBoxMenues()
     debug_tabs->addTab(undo_redo, "Undo/Redo Stack");
     ui->debug->layout()->addWidget(debug_tabs);
 
-    Graph::Ptr graph = dispatcher_->getGraph();
-    QObject::connect(graph.get(), SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
+    QObject::connect(graph_.get(), SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
 
     designer_board->setFocus();
 }

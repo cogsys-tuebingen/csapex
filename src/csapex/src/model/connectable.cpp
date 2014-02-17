@@ -145,11 +145,6 @@ void Connectable::setCommandDispatcher(CommandDispatcher *d)
     dispatcher_ = d;
 }
 
-Graph::Ptr Connectable::getGraph() const
-{
-    return dispatcher_->getGraph();
-}
-
 void Connectable::init()
 {
     port_ = NULL;
@@ -205,7 +200,7 @@ void Connectable::validateConnections()
 void Connectable::removeAllConnectionsUndoable()
 {
     if(isConnected()) {
-        getCommandDispatcher()->execute(removeAllConnectionsCmd());
+        dispatcher_->execute(removeAllConnectionsCmd());
     }
 }
 

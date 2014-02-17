@@ -51,7 +51,7 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
     return spinner;
 }
 
-QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step, CommandDispatcher* dispatcher) {
+QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step, CommandDispatcher*) {
     assert(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;

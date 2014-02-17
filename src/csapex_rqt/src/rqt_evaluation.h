@@ -24,6 +24,8 @@ public:
 private:
     qt_gui_cpp::PluginContext* context_;
 
+    csapex::GraphPtr graph_;
+    csapex::CommandDispatcher* dispatcher_;
     csapex::CsApexCore core_;
     csapex::CsApexWindow* eva_;
 

@@ -18,7 +18,7 @@ class Overlay : public QWidget
     Q_OBJECT
 
 public:
-    Overlay(CommandDispatcher* dispatcher, QWidget* parent = 0);
+    Overlay(GraphPtr graph, CommandDispatcher* dispatcher, QWidget* parent = 0);
 
 public Q_SLOTS:
     void addTemporaryConnection(Connectable* from, Connectable* to);

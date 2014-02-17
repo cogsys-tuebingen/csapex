@@ -22,8 +22,8 @@ public:
     };
 
 public:
-    CsApexCore(const std::string &config);
-    CsApexCore(CommandDispatcher* dispatcher);
+    CsApexCore(const std::string &config, GraphPtr graph, CommandDispatcher *cmd_dispatcher);
+    CsApexCore(GraphPtr graph, CommandDispatcher* dispatcher);
     virtual ~CsApexCore();
 
     void init(DragIO *dragio);
@@ -39,9 +39,6 @@ public:
     void addListener(Listener* l);
     void removeListener(Listener* l);
 
-    GraphPtr getTopLevelGraph();
-    CommandDispatcher* getCommandDispatcher();
-
 public Q_SLOTS:
     void setPause(bool pause);
 
@@ -54,6 +51,8 @@ Q_SIGNALS:
     void loadSettingsRequest(YAML::Node& n);
 
 private:
+    GraphPtr graph_;
+
     bool destruct;
     CommandDispatcher* cmd_dispatch;
 

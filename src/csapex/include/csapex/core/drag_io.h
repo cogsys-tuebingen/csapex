@@ -31,7 +31,7 @@ public:
     };
 
 public:
-    DragIO(CommandDispatcher* dispatcher);
+    DragIO(Graph* graph, CommandDispatcher* dispatcher);
 
     void dragEnterEvent(QWidget *src, Overlay* overlay, QDragEnterEvent* e);
     void dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e);
@@ -62,6 +62,7 @@ private:
     std::vector<HandlerMove::Ptr> handler_move;
     std::vector<HandlerDrop::Ptr> handler_drop;
 
+    Graph* graph_;
     CommandDispatcher* dispatcher_;
 };
 

@@ -23,7 +23,7 @@ public:
     typedef boost::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    CommandDispatcher();
+    CommandDispatcher(GraphPtr graph);
 
     void execute(Command::Ptr command);
     void executeLater(Command::Ptr command);

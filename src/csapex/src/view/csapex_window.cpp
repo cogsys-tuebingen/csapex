@@ -16,6 +16,8 @@
 #include <csapex/model/group.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/view/design_board.h>
+#include <csapex/model/node.h>
+#include <csapex/model/boxed_object.h>
 
 /// SYSTEM
 #include <iostream>
@@ -30,8 +32,8 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, Designer* designer, QWidget *parent)
-    : QMainWindow(parent), core_(core), graph_(core_.getTopLevelGraph()), ui(new Ui::EvaluationWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, GraphPtr graph, Designer* designer, QWidget *parent)
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), graph_(graph), ui(new Ui::EvaluationWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
 {
     core_.addListener(this);
 }
@@ -158,8 +160,8 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    ui->actionUndo->setDisabled(!core_.getCommandDispatcher()->canUndo());
-    ui->actionRedo->setDisabled(!core_.getCommandDispatcher()->canRedo());
+    ui->actionUndo->setDisabled(!cmd_dispatcher_->canUndo());
+    ui->actionRedo->setDisabled(!cmd_dispatcher_->canRedo());
 }
 
 void CsApexWindow::updateTitle()
@@ -167,7 +169,7 @@ void CsApexWindow::updateTitle()
     std::stringstream window;
     window << "CS::APEX (" << core_.getConfig() << ")";
 
-    if(core_.getCommandDispatcher()->isDirty()) {
+    if(cmd_dispatcher_->isDirty()) {
         window << " *";
     }
 
@@ -183,7 +185,7 @@ void CsApexWindow::scrollDownLog()
 
 void CsApexWindow::tick()
 {
-    core_.getCommandDispatcher()->executeLater();
+    cmd_dispatcher_->executeLater();
 
     std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
     std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
@@ -240,7 +242,7 @@ void CsApexWindow::hideLog()
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    if(core_.getCommandDispatcher()->isDirty()) {
+    if(cmd_dispatcher_->isDirty()) {
         int r = QMessageBox::warning(this, tr("cs::APEX"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -258,7 +260,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     }
 
     try {
-        core_.getCommandDispatcher()->getGraph()->stop();
+        graph_->stop();
     } catch(...) {
         std::abort();
     }
@@ -326,17 +328,17 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    core_.getCommandDispatcher()->execute(core_.getCommandDispatcher()->getGraph()->clear());
+    cmd_dispatcher_->execute(graph_->clear());
 }
 
 void CsApexWindow::undo()
 {
-    core_.getCommandDispatcher()->undo();
+    cmd_dispatcher_->undo();
 }
 
 void CsApexWindow::redo()
 {
-    core_.getCommandDispatcher()->redo();
+    cmd_dispatcher_->redo();
 }
 
 void CsApexWindow::load()
@@ -372,11 +374,11 @@ void CsApexWindow::nodeAdded(Node::Ptr node)
 
     designer_->addBox(box);
 
-    Group* grp = dynamic_cast<Group*> (box);
+//    Group* grp = dynamic_cast<Group*> (box);
 
-    if(grp) {
-        QObject::connect(grp, SIGNAL(open_sub_graph(Group*)), this, SLOT(openSubGraph(Group*)));
-    }
+//    if(grp) {
+//        QObject::connect(grp, SIGNAL(open_sub_graph(Group*)), this, SLOT(openSubGraph(Group*)));
+//    }
 }
 
 void CsApexWindow::nodeRemoved(NodePtr node)
@@ -386,9 +388,4 @@ void CsApexWindow::nodeRemoved(NodePtr node)
 
 void CsApexWindow::openSubGraph(Group */*grp*/)
 {
-// TODO: create "graph editor" window to use in csapexwindow AND here for editing templates!!
-
-//    CsApexCore* sub_core = new CsApexCore(grp->getCommandDispatcher());
-//    CsApexWindow* sub = new CsApexWindow(*sub_core);
-//    sub->show();
 }

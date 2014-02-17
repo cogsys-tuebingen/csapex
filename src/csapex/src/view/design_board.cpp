@@ -16,6 +16,7 @@
 #include <csapex/view/overlay.h>
 #include <csapex/model/graph.h>
 #include <csapex/view/box_dialog.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <QResizeEvent>
@@ -29,8 +30,8 @@
 
 using namespace csapex;
 
-DesignBoard::DesignBoard(CommandDispatcher* dispatcher, DragIO& dragio, QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), dispatcher_(dispatcher), drag_io_(dragio),
+DesignBoard::DesignBoard(Graph::Ptr graph, CommandDispatcher* dispatcher, DragIO& dragio, QWidget* parent)
+    : QWidget(parent), ui(new Ui::DesignBoard), graph_(graph), dispatcher_(dispatcher), drag_io_(dragio),
       space_(false), drag_(false), parent_scroll(NULL), initial_pos_x_(0), initial_pos_y_(0)
 {
     ui->setupUi(this);
@@ -38,7 +39,7 @@ DesignBoard::DesignBoard(CommandDispatcher* dispatcher, DragIO& dragio, QWidget*
     QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
     QObject::connect(shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
 
-    overlay = new Overlay(dispatcher, this);
+    overlay = new Overlay(graph, dispatcher, this);
 
     installEventFilter(this);
 
@@ -138,9 +139,9 @@ void DesignBoard::addBoxEvent(Box *box)
 {
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), dispatcher_->getGraph().get(), SLOT(boxMoved(Box*, int, int)));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), graph_.get(), SLOT(boxMoved(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(clicked(Box*)), dispatcher_->getGraph().get(), SLOT(toggleBoxSelection(Box*)));
+    QObject::connect(box, SIGNAL(clicked(Box*)), graph_.get(), SLOT(toggleBoxSelection(Box*)));
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
     QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
     QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
@@ -214,7 +215,7 @@ void DesignBoard::showBoxDialog()
         std::string type = diag.getName();
 
         if(!type.empty() && BoxManager::instance().isValidType(type)) {
-            UUID uuid = UUID::make(dispatcher_->getGraph()->makeUUIDPrefix(type));
+            UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
             QPoint pos = mapFromGlobal(QCursor::pos());
             dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, NodeStateNullPtr)));
         }
@@ -223,7 +224,7 @@ void DesignBoard::showBoxDialog()
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
-    Graph::Ptr graph = dispatcher_->getGraph();
+    Graph::Ptr graph = graph_;
 
     // BOXES
     if(Qt::ControlModifier == QApplication::keyboardModifiers()) {
@@ -286,11 +287,11 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     if(e->button() == Qt::LeftButton) {
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            dispatcher_->getGraph()->deselectNodes();
+            graph_->deselectNodes();
 
             Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    dispatcher_->getGraph()->selectNode(box->getNode(), true);
+                    graph_->selectNode(box->getNode(), true);
                 }
             }
 
@@ -301,7 +302,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     // BOXES
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
     if(!shift) {
-        dispatcher_->getGraph()->deselectNodes();
+        graph_->deselectNodes();
     }
     updateCursor();
 }
@@ -423,7 +424,7 @@ void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
     }
 
     /// BOXES
-    dispatcher_->getGraph()->deselectNodes();
+    graph_->deselectNodes();
     showContextMenuAddNode(global_pos);
 }
 
@@ -432,7 +433,7 @@ void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
     QMenu menu;
     std::map<QAction*, boost::function<void()> > handler;
 
-    Graph::Ptr graph = dispatcher_->getGraph();
+    Graph::Ptr graph = graph_;
 
     if(box != NULL && !box->isSelected()) {
         graph->deselectNodes();

@@ -21,8 +21,8 @@ using namespace csapex;
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
-CsApexCore::CsApexCore(const std::string& config)
-    : cmd_dispatch(new CommandDispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
+CsApexCore::CsApexCore(const std::string& config, GraphPtr graph, CommandDispatcher* cmd_dispatcher)
+    : graph_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 
@@ -37,8 +37,8 @@ CsApexCore::CsApexCore(const std::string& config)
     setCurrentConfig(config);
 }
 
-CsApexCore::CsApexCore(CommandDispatcher* dispatcher)
-    : cmd_dispatch(dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
+CsApexCore::CsApexCore(GraphPtr graph, CommandDispatcher* dispatcher)
+    : graph_(graph), cmd_dispatch(dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = false;
 }
@@ -58,14 +58,13 @@ CsApexCore::~CsApexCore()
     PluginLoader::instance().stop();
 
     if(destruct) {
-        delete cmd_dispatch;
         delete core_plugin_manager;
     }
 }
 
 void CsApexCore::setPause(bool pause)
 {
-    cmd_dispatch->getGraph()->setPause(pause);
+    graph_->setPause(pause);
 }
 
 void CsApexCore::init(DragIO* dragio)
@@ -126,20 +125,8 @@ std::string CsApexCore::getConfig() const
     return current_config_;
 }
 
-Graph::Ptr CsApexCore::getTopLevelGraph()
-{
-    return cmd_dispatch->getGraph();
-}
-
-CommandDispatcher* CsApexCore::getCommandDispatcher()
-{
-    return cmd_dispatch;
-}
-
 void CsApexCore::reset()
 {
-    getTopLevelGraph()->reset();
-
     cmd_dispatch->reset();
 
     UUID::reset();
@@ -174,7 +161,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     yaml << YAML::BeginMap; // settings map
 
-    GraphIO graphio(getTopLevelGraph());
+    GraphIO graphio(graph_);
 
     Q_EMIT saveSettingsRequest(yaml);
 
@@ -202,9 +189,9 @@ void CsApexCore::load(const std::string &file)
 
     reset();
 
-    assert(cmd_dispatch->getGraph()->countNodes() == 0);
+    assert(graph_->countNodes() == 0);
 
-    GraphIO graphio(getTopLevelGraph());
+    GraphIO graphio(graph_);
 
     {
         std::ifstream ifs(file.c_str());
