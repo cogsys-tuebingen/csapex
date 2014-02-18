@@ -12,6 +12,13 @@ const std::string Settings::template_extension = ".apext";
 const std::string Settings::default_config = Settings::defaultConfigFile();
 const std::string Settings::config_selector = "Configs(*" + Settings::config_extension + ");;LegacyConfigs(*.vecfg)";
 
+const std::string Settings::namespace_separator = ":/:";
+
+const int Settings::activity_marker_max_lifetime_ = 10;
+
+const unsigned Settings::timer_history_length_ = 15;
+
+
 std::string Settings::defaultConfigPath()
 {
     struct passwd *pw = getpwuid(getuid());

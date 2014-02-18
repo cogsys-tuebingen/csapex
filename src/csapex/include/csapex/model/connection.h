@@ -44,8 +44,6 @@ public:
     };
 
 public:
-    static const int activity_marker_max_lifetime_;
-
     friend std::ostream& operator << (std::ostream& out, const Connection& c) {
         out << "Connection: [" << c.from() << " / " << c.to() << "]";
         return out;

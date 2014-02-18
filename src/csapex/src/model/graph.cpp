@@ -43,9 +43,6 @@
 
 using namespace csapex;
 
-const std::string Graph::namespace_separator = ":/:";
-
-
 Graph::Graph(Settings& settings)
     : settings_(settings), dispatcher_(NULL)
 {

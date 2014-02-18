@@ -19,6 +19,12 @@ public:
     static const std::string default_config;
     static const std::string config_selector;
 
+    static const std::string namespace_separator;
+
+    static const int activity_marker_max_lifetime_;
+
+    static const unsigned timer_history_length_;
+
     static std::string defaultConfigFile();
     static std::string defaultConfigPath();
 

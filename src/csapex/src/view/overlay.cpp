@@ -15,6 +15,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/box.h>
 #include <csapex/view/port.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -383,8 +384,8 @@ void Overlay::drawPort(Port *p)
 void Overlay::drawActivity(int life, Connectable* c)
 {
     if(c->getPort()->isEnabled() && life > 0) {
-        int r = std::min(Connection::activity_marker_max_lifetime_, life);
-        double f = r / static_cast<double> (Connection::activity_marker_max_lifetime_);
+        int r = std::min(Settings::activity_marker_max_lifetime_, life);
+        double f = r / static_cast<double> (Settings::activity_marker_max_lifetime_);
 
         int min = c->getPort()->width() / 2 - 2;
         int max = min * 1.2;

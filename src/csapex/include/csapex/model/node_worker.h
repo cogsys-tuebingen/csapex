@@ -60,9 +60,6 @@ private:
     void parameterChanged(param::Parameter* param);
     void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
 
-public:
-    static const unsigned timer_history_length_;
-
 private:
     Node* node_;
 

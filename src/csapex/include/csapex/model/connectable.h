@@ -161,11 +161,7 @@ protected:
     bool minimized_;
     int count_;
 
-public:
-//    static bool allow_processing;
-
 private:
-
     bool processing;
     bool enabled_;
     bool async_;

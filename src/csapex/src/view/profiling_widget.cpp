@@ -6,6 +6,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/timer.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -52,7 +53,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     bottom = h_ - padding;
 
     content_width_ = right - left - 2 * padding;
-    indiv_width_ = content_width_ / node_worker_->timer_history_length_;
+    indiv_width_ = content_width_ / Settings::timer_history_length_;
     content_height_ = bottom - up - 2 * padding;
 
     p.setPen(QPen(Qt::black));
@@ -63,7 +64,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     // y-axis
     p.drawLine(left, bottom, left, up);
 
-    size_t max = node_worker_->timer_history_length_;
+    size_t max = Settings::timer_history_length_;
     int n = std::min(max, node_worker_->timer_history_.size());
 
     if(n > 0) {

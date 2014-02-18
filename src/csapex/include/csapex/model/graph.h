@@ -36,8 +36,6 @@ class Graph : public QObject
     friend class CommandDispatcher;
 
 public:
-    static const std::string namespace_separator;
-
     typedef boost::shared_ptr<Graph> Ptr;
 
 public:

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <cmath>
@@ -11,7 +12,6 @@
 using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
-const int Connection::activity_marker_max_lifetime_ = 10;
 
 Connection::Connection(ConnectorOut *from, ConnectorIn *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
@@ -65,7 +65,7 @@ int Connection::activity() const
 
 void Connection::messageSentEvent()
 {
-    message_count = std::min(static_cast<double> (Connection::activity_marker_max_lifetime_), message_count + 1);
+    message_count = std::min(static_cast<double> (Settings::activity_marker_max_lifetime_), message_count + 1);
 }
 
 void Connection::tick()

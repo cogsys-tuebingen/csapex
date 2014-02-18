@@ -8,10 +8,9 @@
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/view/port.h>
+#include <csapex/core/settings.h>
 
 using namespace csapex;
-
-const unsigned NodeWorker::timer_history_length_ = 15;
 
 NodeWorker::NodeWorker(Node* node)
     : node_(node), synchronized_inputs_(false), thread_initialized_(false), is_processing_(false)
@@ -211,7 +210,7 @@ void NodeWorker::tick()
         changed_params_.clear();
     }
 
-    while(timer_history_.size() > timer_history_length_) {
+    while(timer_history_.size() > Settings::timer_history_length_) {
         timer_history_.pop_front();
     }
 }
