@@ -35,7 +35,7 @@ void PointCloudToDepthImage::setup()
     output_ = addOutput<CvMatMessage>("DepthImage");
 }
 
-void PointCloudToDepthImage::allConnectorsArrived()
+void PointCloudToDepthImage::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 

@@ -11,13 +11,13 @@
 
 using namespace csapex;
 
-ConnectorIn::ConnectorIn(const UUID &uuid)
-    : Connectable(uuid), target(NULL), optional_(false), legacy_(true)
+ConnectorIn::ConnectorIn(Settings& settings, const UUID &uuid)
+    : Connectable(settings, uuid), target(NULL), optional_(false), legacy_(true)
 {
 }
 
-ConnectorIn::ConnectorIn(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, TYPE_IN), target(NULL), optional_(false), legacy_(true)
+ConnectorIn::ConnectorIn(Settings &settings, Unique* parent, int sub_id)
+    : Connectable(settings, parent, sub_id, TYPE_IN), target(NULL), optional_(false), legacy_(true)
 {
 }
 

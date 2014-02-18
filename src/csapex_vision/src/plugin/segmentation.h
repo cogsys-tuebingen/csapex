@@ -17,7 +17,7 @@ public:
     Segmentation();
 
 public:
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void fill(QBoxLayout *layout);
     virtual void updateDynamicGui(QBoxLayout *layout);
 

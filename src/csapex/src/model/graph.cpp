@@ -2,6 +2,7 @@
 #include <csapex/model/graph.h>
 
 /// PROJECT
+#include <csapex/core/settings.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/add_connector.h>
 #include <csapex/command/add_fulcrum.h>
@@ -45,8 +46,8 @@ using namespace csapex;
 const std::string Graph::namespace_separator = ":/:";
 
 
-Graph::Graph()
-    : dispatcher_(NULL)
+Graph::Graph(Settings& settings)
+    : settings_(settings), dispatcher_(NULL)
 {
     timer_ = new QTimer();
     timer_->setInterval(1000. / 30.);
@@ -58,6 +59,11 @@ Graph::Graph()
 Graph::~Graph()
 {
 
+}
+
+Settings& Graph::getSettings() const
+{
+    return settings_;
 }
 
 void Graph::init(CommandDispatcher *dispatcher)
@@ -127,6 +133,20 @@ int Graph::countSelectedNodes()
 
     return c;
 }
+
+int Graph::countSelectedConnections()
+{
+    int c = 0;
+
+    Q_FOREACH(Connection::Ptr n, visible_connections) {
+        if(n->isSelected()) {
+            ++c;
+        }
+    }
+
+    return c;
+}
+
 
 void Graph::fillContextMenuForSelection(QMenu *menu, std::map<QAction *, boost::function<void ()> > &handler)
 {
@@ -231,13 +251,7 @@ bool Graph::addConnection(Connection::Ptr connection)
         Connectable* from = findConnector(connection->from()->getUUID());
         Connectable* to = findConnector(connection->to()->getUUID());
 
-        //Graph::Ptr graph_from = from->getGraph();
-       // Graph::Ptr graph_to = to->getGraph();
-
-        //        if(!graph_from->isHidden() && !graph_to->isHidden()) {
-        //if(graph_from.get() == this && graph_to.get() == this) {
-            visible_connections.push_back(connection);
-        //}
+        visible_connections.push_back(connection);
 
         verify();
 
@@ -257,9 +271,12 @@ void Graph::deleteConnection(Connection::Ptr connection)
 
     for(std::vector<Connection::Ptr>::iterator c = visible_connections.begin(); c != visible_connections.end();) {
         if(*connection == **c) {
+            Connectable* to = connection->to();
+            to->setError(false);
+            if(to->isProcessing()) {
+                to->setProcessing(false);
+            }
             visible_connections.erase(c);
-            connection->to()->setError(false);
-
             verify();
             Q_EMIT connectionDeleted(connection.get());
         } else {
@@ -273,16 +290,16 @@ void Graph::deleteConnection(Connection::Ptr connection)
 
 void Graph::verify()
 {
-    Q_FOREACH(Node::Ptr node, nodes_) {
-        bool blocked = false;
-        for(int i = 0; i < node->countInputs(); ++i) {
-            blocked |= node->getInput(i)->isBlocked();
-        }
+//    Q_FOREACH(Node::Ptr node, nodes_) {
+//        bool blocked = false;
+//        for(int i = 0; i < node->countInputs(); ++i) {
+//            blocked |= node->getInput(i)->isBlocked();
+//        }
 
-        if(blocked) {
-            node->finishProcessing();
-        }
-    }
+//        if(blocked) {
+//            node->finishProcessing();
+//        }
+//    }
 
     verifyAsync();
 }
@@ -354,7 +371,7 @@ void Graph::verifyAsync()
 
 void Graph::stop()
 {
-    Connectable::allow_processing = false;
+    settings_.setProcessingAllowed(false);
 
     Q_FOREACH(Node::Ptr node, nodes_) {
         node->disable();
@@ -395,7 +412,7 @@ void Graph::reset()
 {
     stop();
 
-    Connectable::allow_processing = true;
+    settings_.setProcessingAllowed(true);
 
     uuids.clear();
     connectors_.clear();
@@ -506,7 +523,7 @@ bool Graph::handleConnectionSelection(int id, bool add)
             }
         } else {
             if(isConnectionWithIdSelected(id)) {
-                if(noSelectedConnections() == 1) {
+                if(countSelectedConnections() == 1) {
                     deselectConnectionById(id);
                 } else {
                     selectConnectionById(id);
@@ -587,23 +604,12 @@ int Graph::getConnectionId(Connection::Ptr c)
     return -1;
 }
 
-int Graph::noSelectedConnections()
-{
-    int c = 0;
-    Q_FOREACH(const Connection::Ptr& connection, visible_connections) {
-        if(connection->isSelected()) {
-            ++c;
-        }
-    }
-
-    return c;
-}
-
 void Graph::deselectConnections()
 {
     BOOST_FOREACH(Connection::Ptr& connection, visible_connections) {
         connection->setSelected(false);
     }
+    Q_EMIT selectionChanged();
 }
 
 Command::Ptr Graph::deleteConnectionByIdCommand(int id)
@@ -672,6 +678,7 @@ void Graph::selectConnectionById(int id, bool add)
     if(c != ConnectionNullPtr) {
         c->setSelected(true);
     }
+    Q_EMIT selectionChanged();
 }
 
 
@@ -682,6 +689,7 @@ void Graph::deselectConnectionById(int id)
             connection->setSelected(false);
         }
     }
+    Q_EMIT selectionChanged();
 }
 
 

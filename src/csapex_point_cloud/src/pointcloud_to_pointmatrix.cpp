@@ -21,7 +21,7 @@ PointCloudToPointMatrix::PointCloudToPointMatrix()
 {
 }
 
-void PointCloudToPointMatrix::allConnectorsArrived()
+void PointCloudToPointMatrix::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 

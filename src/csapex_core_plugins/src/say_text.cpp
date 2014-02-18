@@ -28,7 +28,7 @@ void SayText::setup()
     connector_ = addInput<connection_types::StringMessage>("Text", false, true);
 }
 
-void SayText::allConnectorsArrived()
+void SayText::process()
 {
     connection_types::StringMessage::Ptr msg = connector_->getMessage<connection_types::StringMessage>();
 

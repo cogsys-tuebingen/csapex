@@ -25,7 +25,7 @@ public:
 
 
 public Q_SLOTS:
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void tick();
     void update();
     void updateFrames();

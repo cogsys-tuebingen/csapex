@@ -13,7 +13,7 @@ public:
     HoughCircle();
 
     virtual void setup();
-    virtual void allConnectorsArrived();
+    virtual void process();
 
 private:
     ConnectorIn* input_;

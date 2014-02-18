@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
+#include <csapex/core/settings.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/box.h>
 #include <csapex/model/boxed_object.h>
@@ -13,6 +14,7 @@
 #include <csapex/core/drag_io.h>
 #include <csapex/view/designer.h>
 #include <csapex/view/design_board.h>
+#include <csapex/manager/box_manager.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -85,10 +87,14 @@ int Main::run()
 
 int Main::main(bool headless, const std::string& config)
 {
-    Graph::Ptr graph(new Graph);
+    Settings settings;
+    settings.setCurrentConfig(config);
+
+    BoxManager::instance().settings_ = &settings;
+
+    Graph::Ptr graph(new Graph(settings));
     CommandDispatcher dispatcher(graph);
-    CsApexCore core(config, graph, &dispatcher);
-    DragIO drag_io(graph.get(), &dispatcher);
+    CsApexCore core(settings, graph, &dispatcher);
 
     if(!headless) {
         /*
@@ -102,6 +108,7 @@ int Main::main(bool headless, const std::string& config)
 
         app.processEvents();
 
+        DragIO drag_io(graph.get(), &dispatcher);
         DesignBoard* board = new DesignBoard(graph, &dispatcher, drag_io);
         Designer* designer = new Designer(graph, &dispatcher, board);
 
@@ -171,7 +178,7 @@ int main(int argc, char** argv)
     if (vm.count("input")) {
         input = vm["input"].as<std::string>();
     } else {
-        input = GraphIO::default_config;
+        input = Settings::default_config;
     }
 
     Main m(app);

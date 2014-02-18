@@ -20,8 +20,8 @@ using namespace csapex;
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 
-CsApexCore::CsApexCore(const std::string& config, GraphPtr graph, CommandDispatcher* cmd_dispatcher)
-    : graph_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
+CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cmd_dispatcher)
+    : settings_(settings), graph_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 
@@ -33,15 +33,8 @@ CsApexCore::CsApexCore(const std::string& config, GraphPtr graph, CommandDispatc
     Tag::createIfNotExists("Template");
     Tag::createIfNotExists("Temporary");
 
-    setCurrentConfig(config);
+    settings.settingsChanged.connect(boost::bind(&CsApexCore::settingsChanged, this));
 }
-
-CsApexCore::CsApexCore(GraphPtr graph, CommandDispatcher* dispatcher)
-    : graph_(graph), cmd_dispatch(dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
-{
-    destruct = false;
-}
-
 
 CsApexCore::~CsApexCore()
 {
@@ -92,26 +85,11 @@ void CsApexCore::init(DragIO* dragio)
 
         showStatusMessage("loading config");
         try {
-            load(getConfig());
+            load(settings_.getConfig());
         } catch(const std::exception& e) {
             std::cerr << "error loading the config: " << e.what() << std::endl;
         }
     }
-}
-
-void CsApexCore::setCurrentConfig(const std::string& filename)
-{
-    current_config_ = filename;
-
-    std::string dir = current_config_.substr(0, current_config_.find_last_of('/')+1);
-    chdir(dir.c_str());
-
-    Q_EMIT configChanged();
-}
-
-std::string CsApexCore::getConfig() const
-{
-    return current_config_;
 }
 
 void CsApexCore::reset()
@@ -138,6 +116,16 @@ void CsApexCore::removeListener(Listener *l)
     }
 }
 
+
+Settings &CsApexCore::getSettings() const
+{
+    return settings_;
+}
+
+void CsApexCore::settingsChanged()
+{
+    Q_EMIT configChanged();
+}
 
 void CsApexCore::saveAs(const std::string &file)
 {
@@ -171,7 +159,7 @@ void CsApexCore::saveAs(const std::string &file)
 
 void CsApexCore::load(const std::string &file)
 {
-    setCurrentConfig(file);
+    settings_.setCurrentConfig(file);
 
     reset();
 

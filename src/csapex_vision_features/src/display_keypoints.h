@@ -18,7 +18,7 @@ public:
 public:
     virtual void setup();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
 
 private:
     ConnectorIn* in_img;

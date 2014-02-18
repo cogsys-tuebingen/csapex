@@ -6,6 +6,7 @@
 #include <csapex/core/designerio.h>
 #include <csapex/core/drag_io.h>
 #include <csapex/core/graphio.h>
+#include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/boxed_object.h>
 #include <csapex/model/graph.h>
@@ -68,6 +69,9 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), designer_,  SLOT(lockToGrid(bool)));
 
+    QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
+    QObject::connect(graph, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
+
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph,  SLOT(selectAll()));
 
@@ -94,6 +98,12 @@ void CsApexWindow::construct()
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+}
+
+void CsApexWindow::updateDeleteAction()
+{
+    bool has_selection = graph_->countSelectedConnections() + graph_->countSelectedNodes() > 0;
+    ui->actionDelete_Selected->setEnabled(has_selection);
 }
 
 void CsApexWindow::resetSignal()
@@ -124,7 +134,7 @@ void CsApexWindow::loadStyleSheet(const QString& path)
 
 void CsApexWindow::loadStyleSheet()
 {
-    std::string cfg = GraphIO::defaultConfigPath() + "cfg/style.css";
+    std::string cfg = Settings::defaultConfigPath() + "cfg/style.css";
 
     loadStyleSheet(cfg.c_str());
 }
@@ -166,7 +176,7 @@ void CsApexWindow::updateMenu()
 void CsApexWindow::updateTitle()
 {
     std::stringstream window;
-    window << "CS::APEX (" << core_.getConfig() << ")";
+    window << "CS::APEX (" << core_.getSettings().getConfig() << ")";
 
     if(cmd_dispatcher_->isDirty()) {
         window << " *";
@@ -287,23 +297,23 @@ void CsApexWindow::init()
 
 void CsApexWindow::save()
 {
-    core_.saveAs(core_.getConfig());
+    core_.saveAs(core_.getSettings().getConfig());
 }
 
 void CsApexWindow::saveAs()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getConfig().c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getSettings().getConfig().c_str(), Settings::config_selector.c_str());
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
-        core_.setCurrentConfig(filename.toStdString());
+        core_.getSettings().setCurrentConfig(filename.toStdString());
     }
 }
 
 
 void CsApexWindow::saveAsCopy()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getConfig().c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getSettings().getConfig().c_str(), Settings::config_selector.c_str());
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
@@ -312,7 +322,7 @@ void CsApexWindow::saveAsCopy()
 
 void CsApexWindow::reload()
 {
-    core_.load(core_.getConfig());
+    core_.load(core_.getSettings().getConfig());
 }
 
 void CsApexWindow::reset()
@@ -342,7 +352,7 @@ void CsApexWindow::redo()
 
 void CsApexWindow::load()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Load config", core_.getConfig().c_str(), GraphIO::config_selector.c_str());
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", core_.getSettings().getConfig().c_str(), Settings::config_selector.c_str());
 
     if(QFile(filename).exists()) {
         core_.load(filename.toStdString());

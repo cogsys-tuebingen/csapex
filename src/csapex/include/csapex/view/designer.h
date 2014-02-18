@@ -49,6 +49,8 @@ public Q_SLOTS:
     void lockToGrid(bool);
     void reset();
 
+    void deleteSelected();
+
 private:
     Ui::Designer* ui;
     DesignBoard* designer_board;

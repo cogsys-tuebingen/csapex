@@ -10,6 +10,7 @@
 
 /// COMPONENT
 #include <csapex/utility/qdouble_slider.h>
+#include <csapex/utility/qint_slider.h>
 #include <csapex/utility/qwrapper.h>
 #include <csapex/csapex_fwd.h>
 
@@ -63,7 +64,12 @@ public:
     static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size = 1) ;
 
     static QSlider* makeSlider(QBoxLayout* layout, const std::string& name,
-                               int def, int min, int max, int step_size = 1,
+                               int def, int min, int max,
+                               csapex::CommandDispatcher* dispatcher = NULL);
+
+
+    static QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name,
+                               int def, int min, int max, int step = 1,
                                csapex::CommandDispatcher* dispatcher = NULL);
 
     static QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size);

@@ -25,7 +25,16 @@
     <property name="spacing">
      <number>0</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
      <number>5</number>
     </property>
     <item>
@@ -54,12 +63,12 @@
      <x>0</x>
      <y>0</y>
      <width>902</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
@@ -73,30 +82,33 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="actionClear"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete_Selected"/>
    </widget>
    <widget class="QMenu" name="menuSelection">
     <property name="title">
-     <string>Selection</string>
+     <string>&amp;Selection</string>
     </property>
     <addaction name="actionSelect_all"/>
     <addaction name="actionClear_selection"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <addaction name="actionGrid"/>
     <addaction name="actionLock_to_Grid"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionHelp_Center"/>
     <addaction name="separator"/>
@@ -104,7 +116,7 @@
    </widget>
    <widget class="QMenu" name="menuProcessing">
     <property name="title">
-     <string>Processing</string>
+     <string>&amp;Processing</string>
     </property>
     <addaction name="actionPause"/>
    </widget>
@@ -142,7 +154,7 @@
      <normaloff>:/save.png</normaloff>:/save.png</iconset>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>&amp;Save</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -154,7 +166,7 @@
      <normaloff>:/open.png</normaloff>:/open.png</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>&amp;Open</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -166,7 +178,7 @@
      <normaloff>:/arrow_undo.png</normaloff>:/arrow_undo.png</iconset>
    </property>
    <property name="text">
-    <string>Undo</string>
+    <string>&amp;Undo</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
@@ -178,7 +190,7 @@
      <normaloff>:/arrow_redo.png</normaloff>:/arrow_redo.png</iconset>
    </property>
    <property name="text">
-    <string>Redo</string>
+    <string>&amp;Redo</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
@@ -186,7 +198,7 @@
   </action>
   <action name="actionClear">
    <property name="text">
-    <string>Clear</string>
+    <string>&amp;Clear</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
@@ -198,7 +210,7 @@
      <normaloff>:/save_as.png</normaloff>:/save_as.png</iconset>
    </property>
    <property name="text">
-    <string>Save As</string>
+    <string>Save &amp;As</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
@@ -206,7 +218,7 @@
   </action>
   <action name="actionReload">
    <property name="text">
-    <string>Reload</string>
+    <string>Re&amp;load</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+L</string>
@@ -214,7 +226,7 @@
   </action>
   <action name="actionSelect_all">
    <property name="text">
-    <string>Select all</string>
+    <string>Select &amp;all</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
@@ -222,7 +234,7 @@
   </action>
   <action name="actionClear_selection">
    <property name="text">
-    <string>Clear selection</string>
+    <string>&amp;Clear selection</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
@@ -230,12 +242,12 @@
   </action>
   <action name="actionSaveAsCopy">
    <property name="text">
-    <string>Save As Copy</string>
+    <string>Save As &amp;Copy</string>
    </property>
   </action>
   <action name="actionReset">
    <property name="text">
-    <string>Reset</string>
+    <string>&amp;Reset</string>
    </property>
   </action>
   <action name="actionGrid">
@@ -247,7 +259,7 @@
      <normaloff>:/grid.png</normaloff>:/grid.png</iconset>
    </property>
    <property name="text">
-    <string>Display Grid</string>
+    <string>Display &amp;Grid</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+G</string>
@@ -255,17 +267,17 @@
   </action>
   <action name="actionHelp_Center">
    <property name="text">
-    <string>Help Center</string>
+    <string>Help &amp;Center</string>
    </property>
   </action>
   <action name="actionAbout_CS_APEX">
    <property name="text">
-    <string>About CS::APEX</string>
+    <string>&amp;About CS::APEX</string>
    </property>
   </action>
   <action name="actionExit">
    <property name="text">
-    <string>Quit</string>
+    <string>&amp;Quit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -284,7 +296,7 @@
      <normalon>:/play.png</normalon>:/pause.png</iconset>
    </property>
    <property name="text">
-    <string>Pause</string>
+    <string>&amp;Pause</string>
    </property>
    <property name="shortcut">
     <string>Alt+P</string>
@@ -298,7 +310,22 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Lock to Grid</string>
+    <string>&amp;Lock to Grid</string>
+   </property>
+  </action>
+  <action name="actionDelete_Selected">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/close.png</normaloff>:/close.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Del</string>
    </property>
   </action>
  </widget>

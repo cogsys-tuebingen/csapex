@@ -66,7 +66,7 @@ void ConditionalOutlierRemoval::setup()
     update();
 }
 
-void ConditionalOutlierRemoval::allConnectorsArrived()
+void ConditionalOutlierRemoval::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
     boost::apply_visitor (PointCloudMessage::Dispatch<ConditionalOutlierRemoval>(this), msg->value);

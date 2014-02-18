@@ -31,7 +31,7 @@ BarCodeReader::BarCodeReader()
     addParameter(param::ParameterFactory::declareBool("republish", false));
 }
 
-void BarCodeReader::allConnectorsArrived()
+void BarCodeReader::process()
 {
     CvMatMessage::Ptr msg = in_img->getMessage<CvMatMessage>();
 

@@ -6,14 +6,14 @@
 
 using namespace csapex;
 
-ConnectorForward::ConnectorForward(bool primary_function_is_input, const UUID &uuid)
-    : Connectable(uuid), ConnectorIn(uuid), ConnectorOut(uuid), primary_function_is_input(primary_function_is_input)
+ConnectorForward::ConnectorForward(Settings& settings, bool primary_function_is_input, const UUID &uuid)
+    : Connectable(settings, uuid), ConnectorIn(settings, uuid), ConnectorOut(settings, uuid), primary_function_is_input(primary_function_is_input)
 {
 
 }
 
-ConnectorForward::ConnectorForward(Unique *parent, bool primary_function_is_input, int sub_id)
-    : Connectable(parent, sub_id, TYPE_MISC), ConnectorIn(parent, sub_id), ConnectorOut(parent, sub_id), primary_function_is_input(primary_function_is_input)
+ConnectorForward::ConnectorForward(Settings& settings, Unique *parent, bool primary_function_is_input, int sub_id)
+    : Connectable(settings, parent, sub_id, TYPE_MISC), ConnectorIn(settings, parent, sub_id), ConnectorOut(settings, parent, sub_id), primary_function_is_input(primary_function_is_input)
 {
 
 }

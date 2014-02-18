@@ -10,7 +10,7 @@ class PointmatrixToPointcloud : public csapex::Node
 public:
     PointmatrixToPointcloud();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void setup();
 
 private:

@@ -41,7 +41,9 @@ public:
     typedef boost::shared_ptr<Graph> Ptr;
 
 public:
-    Graph();
+    Graph(Settings &settings);
+
+    Settings& getSettings() const;
 
     virtual ~Graph();
 
@@ -69,8 +71,6 @@ public:
 
     Command::Ptr deleteConnectionById(int id);
     Command::Ptr deleteSelectedConnectionsCmd();
-    int noSelectedConnections();
-
 
     Connection::Ptr getConnectionWithId(int id);
     Connection::Ptr getConnection(Connection::Ptr);
@@ -89,6 +89,8 @@ public:
     void deselectNodes();
 
     Command::Ptr deleteSelectedNodesCmd();
+
+    int countSelectedConnections();
 
     void handleNodeSelection(Node* node, bool add);
 
@@ -137,6 +139,8 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
     void verifyAsync();
 
 protected:
+    Settings& settings_;
+
     std::vector<NodePtr> nodes_;
     std::vector<Connectable*> connectors_;
     std::vector<Connection::Ptr> visible_connections;

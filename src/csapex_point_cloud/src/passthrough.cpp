@@ -106,7 +106,7 @@ void PassThrough::update()
     }
 }
 
-void PassThrough::allConnectorsArrived()
+void PassThrough::process()
 {
     PointCloudMessage::Ptr msg(input_cloud_->getMessage<PointCloudMessage>());
 

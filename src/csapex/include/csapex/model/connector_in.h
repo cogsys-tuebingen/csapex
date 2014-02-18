@@ -24,8 +24,8 @@ class ConnectorIn : public virtual Connectable
     friend class command::DeleteConnection;
 
 public:
-    ConnectorIn(const UUID &uuid);
-    ConnectorIn(Unique *parent, int sub_id);
+    ConnectorIn(Settings &settings, const UUID &uuid);
+    ConnectorIn(Settings& settings, Unique *parent, int sub_id);
     virtual ~ConnectorIn();
 
     virtual bool canInput() const {

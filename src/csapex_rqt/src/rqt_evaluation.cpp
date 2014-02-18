@@ -8,6 +8,8 @@
 #include <csapex/core/graphio.h>
 #include <csapex/view/design_board.h>
 #include <csapex/view/designer.h>
+#include <csapex/core/settings.h>
+#include <csapex/manager/box_manager.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -21,8 +23,9 @@ using namespace csapex_rqt;
 using namespace csapex;
 
 CsApex::CsApex()
-    : graph_(new Graph), dispatcher_(new CommandDispatcher(graph_)), core_(GraphIO::default_config, graph_, dispatcher_), drag_io_(graph_.get(), dispatcher_)
+    : graph_(new Graph(settings_)), dispatcher_(new CommandDispatcher(graph_)), core_(settings_, graph_, dispatcher_), drag_io_(graph_.get(), dispatcher_)
 {
+    BoxManager::instance().settings_ = &settings_;
 }
 
 CsApex::~CsApex()
@@ -50,14 +53,14 @@ void CsApex::shutdownPlugin()
 
 void CsApex::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
 {
-    instance_settings.setValue("file", core_.getConfig().c_str());
+    instance_settings.setValue("file", core_.getSettings().getConfig().c_str());
 }
 
 void CsApex::restoreSettings(const qt_gui_cpp::Settings& plugin_settings, const qt_gui_cpp::Settings& instance_settings)
 {
     QString file = instance_settings.value("file").toString();
     if(!file.isEmpty()) {
-        core_.setCurrentConfig(file.toStdString());
+        core_.getSettings().setCurrentConfig(file.toStdString());
         eva_->reload();
     }
 }

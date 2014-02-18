@@ -44,7 +44,7 @@ void VoxelGrid::update()
     state.resolution_ = res_->doubleValue();
 }
 
-void VoxelGrid::allConnectorsArrived()
+void VoxelGrid::process()
 {
     PointCloudMessage::Ptr msg(input_cloud_->getMessage<PointCloudMessage>());
 

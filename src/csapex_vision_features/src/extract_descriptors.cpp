@@ -31,7 +31,7 @@ ExtractDescriptors::ExtractDescriptors()
     addTag(Tag::get("Features"));
 }
 
-void ExtractDescriptors::allConnectorsArrived()
+void ExtractDescriptors::process()
 {
     if(!extractor) {
         setError(true, "no extractor set");

@@ -36,7 +36,7 @@ Foreach::~Foreach()
     }
 }
 
-void Foreach::allConnectorsArrived()
+void Foreach::process()
 {
     VectorMessage::Ptr vec = input_->getMessage<VectorMessage>();
 
@@ -155,8 +155,8 @@ void Foreach::fill(QBoxLayout *layout)
 
     QHBoxLayout* sub = new QHBoxLayout;
 
-    out_sub = new ConnectorOut(UUID::make_sub(getUUID(), "out_sub"));
-    in_sub = new ConnectorIn(UUID::make_sub(getUUID(), "in_sub"));
+    out_sub = new ConnectorOut(getSettings(), UUID::make_sub(getUUID(), "out_sub"));
+    in_sub = new ConnectorIn(getSettings(), UUID::make_sub(getUUID(), "in_sub"));
 
     out_sub->setType(AnyMessage::make());
     in_sub->setType(AnyMessage::make());

@@ -13,7 +13,7 @@ class TransformInverter : public csapex::Node
 public:
     TransformInverter();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void setup();
 
 private:

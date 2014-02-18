@@ -11,7 +11,7 @@ class PointCloudToPointMatrix : public csapex::Node
 public:
     PointCloudToPointMatrix();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void setup();
 
     template <class PointT>

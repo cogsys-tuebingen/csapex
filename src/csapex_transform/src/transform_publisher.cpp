@@ -35,7 +35,7 @@ TransformPublisher::~TransformPublisher()
     }
 }
 
-void TransformPublisher::allConnectorsArrived()
+void TransformPublisher::process()
 {
     if(!ROSHandler::instance().isConnected()) {
         return;

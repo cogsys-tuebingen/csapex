@@ -129,8 +129,8 @@ Q_SIGNALS:
     void typeChanged();
 
 protected:
-    Connectable(const UUID &uuid);
-    Connectable(Unique *parent, int sub_id, int type);
+    Connectable(Settings& settings, const UUID &uuid);
+    Connectable(Settings& settings, Unique *parent, int sub_id, int type);
     virtual ~Connectable();
     void init();
 
@@ -142,6 +142,7 @@ protected:
     virtual bool shouldCreate(bool left, bool right);
 
 protected:
+    Settings& settings_;
     CommandDispatcher* dispatcher_;
     Port* port_;
 
@@ -161,9 +162,10 @@ protected:
     int count_;
 
 public:
-    static bool allow_processing;
+//    static bool allow_processing;
 
 private:
+
     bool processing;
     bool enabled_;
     bool async_;

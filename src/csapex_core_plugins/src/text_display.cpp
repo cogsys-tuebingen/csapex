@@ -32,7 +32,7 @@ void TextDisplay::fill(QBoxLayout *layout)
     }
 }
 
-void TextDisplay::allConnectorsArrived()
+void TextDisplay::process()
 {
     connection_types::StringMessage::Ptr msg = connector_->getMessage<connection_types::StringMessage>();
 

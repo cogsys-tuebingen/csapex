@@ -31,7 +31,7 @@ void PointCount::fill(QBoxLayout *layout)
 
 }
 
-void PointCount::allConnectorsArrived()
+void PointCount::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 

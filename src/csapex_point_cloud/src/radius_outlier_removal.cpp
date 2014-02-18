@@ -45,7 +45,7 @@ void RadiusOutlierRemoval::setup()
     output_ = addOutput<PointCloudMessage>("Pointcloud");
 }
 
-void RadiusOutlierRemoval::allConnectorsArrived()
+void RadiusOutlierRemoval::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
     boost::apply_visitor (PointCloudMessage::Dispatch<RadiusOutlierRemoval>(this), msg->value);

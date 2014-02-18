@@ -31,7 +31,7 @@ void ExtractTimeStamp::fill(QBoxLayout *layout)
     output_frame_ = addOutput<StringMessage>("Target Frame");
 }
 
-void ExtractTimeStamp::allConnectorsArrived()
+void ExtractTimeStamp::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 

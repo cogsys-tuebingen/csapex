@@ -72,7 +72,7 @@ void ExportFile::exportDialog()
 }
 
 
-void ExportFile::allConnectorsArrived()
+void ExportFile::process()
 {
     if(state.path_.empty()) {
         return;

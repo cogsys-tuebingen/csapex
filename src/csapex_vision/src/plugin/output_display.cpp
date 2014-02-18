@@ -188,7 +188,7 @@ void OutputDisplay::display(QSharedPointer<QImage> img)
     view_->scene()->update();
 }
 
-void OutputDisplay::allConnectorsArrived()
+void OutputDisplay::process()
 {
     CvMatMessage::Ptr mat_msg = input_->getMessage<CvMatMessage>();
 

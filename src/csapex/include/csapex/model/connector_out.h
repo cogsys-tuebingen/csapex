@@ -26,8 +26,8 @@ public:
     typedef TargetList::const_iterator TargetIterator;
 
 public:
-    ConnectorOut(const UUID &uuid);
-    ConnectorOut(Unique *parent, int sub_id);
+    ConnectorOut(Settings& settings, const UUID &uuid);
+    ConnectorOut(Settings& settings, Unique *parent, int sub_id);
     ~ConnectorOut();
 
     virtual bool canOutput() const {

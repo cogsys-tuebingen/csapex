@@ -45,7 +45,7 @@ PointmatrixToPointcloud::PointmatrixToPointcloud()
 {
 }
 
-void PointmatrixToPointcloud::allConnectorsArrived()
+void PointmatrixToPointcloud::process()
 {
     CvMatMessage::Ptr in = input_->getMessage<connection_types::CvMatMessage>();
     PointCloudMessage::Ptr out(new PointCloudMessage);

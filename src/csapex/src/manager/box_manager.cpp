@@ -73,6 +73,7 @@ void BoxManager::rebuildPrototypes()
     typedef std::pair<std::string, DefaultConstructor<Node> > PAIR;
     Q_FOREACH(const PAIR& p, manager_->availableClasses()) {
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
+                                                     *settings_,
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second));
         register_box_type(constructor, true);

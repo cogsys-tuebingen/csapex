@@ -46,7 +46,7 @@ void Filter::fill(QBoxLayout* parent)
     }
 }
 
-void Filter::allConnectorsArrived()
+void Filter::process()
 {
     CvMatMessage::Ptr img_msg = input_img_->getMessage<CvMatMessage>();
     CvMatMessage::Ptr mask_msg;

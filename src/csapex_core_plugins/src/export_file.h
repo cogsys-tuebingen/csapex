@@ -19,7 +19,7 @@ public:
     ExportFile();
 
     virtual void fill(QBoxLayout* layout);
-    virtual void allConnectorsArrived();
+    virtual void process();
 
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);

@@ -36,7 +36,7 @@ public:
     static NodePtr makeNull();
 
 public:
-    NodeConstructor(const std::string& type, const std::string& description, Make c);
+    NodeConstructor(Settings& settings, const std::string& type, const std::string& description, Make c);
 
     virtual ~NodeConstructor();
 
@@ -49,11 +49,12 @@ public:
     virtual NodePtr makeContent(const UUID& uuid) const;
 
 protected:
-    NodeConstructor(const std::string& type, const std::string& description);
+    NodeConstructor(Settings &settings, const std::string& type, const std::string& description);
 
     virtual void load() const;
 
 protected:
+    Settings& settings_;
     std::string type_;
     std::string descr_;
 

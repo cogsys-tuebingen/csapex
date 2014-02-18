@@ -19,7 +19,7 @@ public:
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:
-    virtual void allConnectorsArrived();
+    virtual void process();
 
 private:
     ConnectorIn* in_a;

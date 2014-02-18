@@ -72,6 +72,7 @@ set(SRC_PLUGIN
     src/manager/message_provider_manager.cpp
 
     src/utility/bash_parser.cpp
+    src/utility/qint_slider.cpp
     src/utility/qdouble_slider.cpp
     src/utility/qsignal_bridges.cpp
     src/utility/qwrapper.cpp
@@ -93,6 +94,7 @@ set(SRC_APP
     src/core/graphio.cpp
     src/core/designerio.cpp
     src/core/drag_io.cpp
+    src/core/settings.cpp
 
     src/command/command.cpp
     src/command/dispatcher.cpp

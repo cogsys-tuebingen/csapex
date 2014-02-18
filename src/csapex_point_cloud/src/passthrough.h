@@ -19,7 +19,7 @@ public:
     PassThrough();
 
     virtual void fill(QBoxLayout* layout);
-    virtual void allConnectorsArrived();
+    virtual void process();
 
     template <class PointT>
     void inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud);

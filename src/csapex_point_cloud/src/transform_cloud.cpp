@@ -33,7 +33,7 @@ void TransformCloud::fill(QBoxLayout *layout)
     output_ = addOutput<PointCloudMessage>("PointCloud");
 }
 
-void TransformCloud::allConnectorsArrived()
+void TransformCloud::process()
 {
     PointCloudMessage::Ptr msg(input_cloud_->getMessage<PointCloudMessage>());
 

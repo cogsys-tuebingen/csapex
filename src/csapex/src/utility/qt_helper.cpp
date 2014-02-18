@@ -11,17 +11,6 @@
 using namespace qt_helper;
 using namespace csapex;
 
-class QtConnectable : public ConnectorIn
-{
-public:
-    QtConnectable(const UUID& uuid, const std::string& type)
-        : Connectable(uuid), ConnectorIn(uuid)
-    {
-        setType(ConnectionTypeManager::createMessage(type));
-    }
-};
-
-
 void QSleepThread::sleep(unsigned long t) {
     currentThread()->sleep(t);
 }
@@ -51,7 +40,7 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
     return spinner;
 }
 
-QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step, CommandDispatcher*) {
+QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, CommandDispatcher*) {
     assert(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
@@ -60,6 +49,51 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     slider->setMinimum(min);
     slider->setMaximum(max);
     slider->setValue(def);
+    slider->setMinimumWidth(100);
+
+    QWrapper::QSpinBoxExt* display = new QWrapper::QSpinBoxExt;
+    display->setMinimum(min);
+    display->setMaximum(max);
+    display->setValue(def);
+
+    //internal_layout->addWidget(new Port(dispatcher, new ConnectorIn(UUID::NONE)));
+    internal_layout->addWidget(new QLabel(name.c_str()));
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(display);
+   // internal_layout->addWidget(new Port(dispatcher, new ConnectorOut(UUID::NONE)));
+
+    layout->addLayout(internal_layout);
+
+    QObject::connect(slider, SIGNAL(valueChanged(int)),     display, SLOT(setValue(int)));
+    QObject::connect(slider, SIGNAL(rangeChanged(int,int)), display, SLOT(setRange(int,int)));
+    QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
+
+
+    return slider;
+}
+
+QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step, CommandDispatcher*) {
+    assert(min<=max);
+
+    if(((def - min) / step) * step != (def - min)) {
+        std::cerr << "default " << def << " is not a multiple of minimum " << min << " with a step size of " << step << std::endl;
+        def = min;
+        std::cerr << "set default to " << def << std::endl;
+    }
+
+    if(((max - min) / step) * step != (max - min)) {
+        std::cerr << "maximum " << max << " is not a multiple of minimum " << min << " with a step size of " << step << std::endl;
+        max = ((max - min) / step) * step + min;
+        std::cerr << "set maximum to " << max << std::endl;
+    }
+
+
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QIntSlider* slider = new QIntSlider(Qt::Horizontal, step);
+    slider->setIntMinimum(min);
+    slider->setIntMaximum(max);
+    slider->setIntValue(def);
     slider->setMinimumWidth(100);
     slider->setSingleStep(step);
 
@@ -77,13 +111,14 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
 
     layout->addLayout(internal_layout);
 
-    QObject::connect(slider, SIGNAL(valueChanged(int)),     display, SLOT(setValue(int)));
-    QObject::connect(slider, SIGNAL(rangeChanged(int,int)), display, SLOT(setRange(int,int)));
-    QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
+    QObject::connect(slider, SIGNAL(intValueChanged(int)),  display, SLOT(setValue(int)));
+    QObject::connect(slider, SIGNAL(intRangeChanged(int,int)), display, SLOT(setRange(int,int)));
+    QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setIntValue(int)));
 
 
     return slider;
 }
+
 
 QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size)
 {

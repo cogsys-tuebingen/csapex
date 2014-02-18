@@ -302,22 +302,22 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
         param::RangeParameter* range_p = dynamic_cast<param::RangeParameter*> (parameter);
         if(range_p) {
             if(range_p->is<int>()) {
-                QSlider* slider = QtHelper::makeSlider(layout, display_name , range_p->as<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(), node_->getCommandDispatcher());
-                slider->setValue(range_p->as<int>());
+                QIntSlider* slider = QtHelper::makeIntSlider(layout, display_name , range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(), node_->getCommandDispatcher());
+                slider->setIntValue(range_p->as<int>());
 
                 // ui change -> model
-                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<int>, this, name, boost::bind(&QSlider::value, slider));
+                boost::function<void()> cb = boost::bind(&NodeAdapter::updateParam<int>, this, name, boost::bind(&QIntSlider::intValue, slider));
                 qt_helper::Call* call = new qt_helper::Call(cb);
                 callbacks.push_back(call);
 
                 // model change -> ui
-                boost::function<void(int)> set = boost::bind(&QSlider::setValue, slider, _1);
+                boost::function<void(int)> set = boost::bind(&QIntSlider::setIntValue, slider, _1);
                 connections.push_back(parameter_changed(*range_p).connect(boost::bind(&NodeAdapter::updateUi<int>, this, _1, set)));
 
-                QObject::connect(slider, SIGNAL(valueChanged(int)), call, SLOT(call()));
+                QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
             } else if(range_p->is<double>()) {
-                QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, display_name , range_p->as<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
+                QDoubleSlider* slider = QtHelper::makeDoubleSlider(layout, display_name , range_p->def<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
                 slider->setDoubleValue(range_p->as<double>());
 
                 // ui change -> model

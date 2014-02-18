@@ -16,13 +16,13 @@
 
 using namespace csapex;
 
-ConnectorOut::ConnectorOut(const UUID& uuid)
-    : Connectable(uuid), force_send_message_(false)
+ConnectorOut::ConnectorOut(Settings &settings, const UUID& uuid)
+    : Connectable(settings, uuid), force_send_message_(false)
 {
 }
 
-ConnectorOut::ConnectorOut(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, TYPE_OUT), force_send_message_(false)
+ConnectorOut::ConnectorOut(Settings& settings, Unique* parent, int sub_id)
+    : Connectable(settings, parent, sub_id, TYPE_OUT), force_send_message_(false)
 {
 }
 
@@ -181,18 +181,21 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     std::vector<ConnectorIn*> targets;
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         if(i->isEnabled()) {
-            if(i->isProcessing() && !i->isAsync()) {
-                setBlocked(true);
-                i->waitForProcessing();
-
-                if(i->isProcessing()) {
-                    return;
-                }
-                if(!isProcessing()) {
-                    return;
-                }
-            }
             targets.push_back(i);
+        }
+    }
+
+    BOOST_FOREACH(ConnectorIn* i, targets) {
+        if(i->isProcessing() && !i->isAsync()) {
+            setBlocked(true);
+            i->waitForProcessing();
+
+            if(i->isProcessing()) {
+                return;
+            }
+            if(!isProcessing()) {
+                return;
+            }
         }
     }
 

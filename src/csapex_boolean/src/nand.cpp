@@ -33,7 +33,7 @@ void NAND::fill(QBoxLayout *layout)
     out = addOutput<BooleanMessage>("A nand B");
 }
 
-void NAND::allConnectorsArrived()
+void NAND::process()
 {
     BooleanMessage::Ptr a = in_a->getMessage<BooleanMessage>();
     assert(a);

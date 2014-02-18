@@ -35,7 +35,7 @@ public Q_SLOTS:
     virtual void insert(QBoxLayout* parent) = 0;
 
 private Q_SLOTS:
-    void allConnectorsArrived();
+    void process();
 
 protected:
     Filter(const UUID &uuid = UUID::NONE);

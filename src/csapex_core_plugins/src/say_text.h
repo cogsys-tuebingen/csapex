@@ -14,7 +14,7 @@ class SayText : public Node
 public:
     SayText();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void setup();
 
 private:

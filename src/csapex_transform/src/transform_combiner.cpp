@@ -19,7 +19,7 @@ TransformCombiner::TransformCombiner()
 {
     addTag(Tag::get("Transform"));
 }
-void TransformCombiner::allConnectorsArrived()
+void TransformCombiner::process()
 {
     connection_types::TransformMessage::Ptr a = input_a_->getMessage<connection_types::TransformMessage>();
     connection_types::TransformMessage::Ptr b = input_b_->getMessage<connection_types::TransformMessage>();

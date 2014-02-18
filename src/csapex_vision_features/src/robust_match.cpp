@@ -271,7 +271,7 @@ RobustMatch::RobustMatch()
 }
 
 
-void RobustMatch::allConnectorsArrived()
+void RobustMatch::process()
 {
     CvMatMessage::Ptr img1 = in_img_1->getMessage<CvMatMessage>();
     CvMatMessage::Ptr img2 = in_img_2->getMessage<CvMatMessage>();

@@ -164,7 +164,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
-    node_->allConnectorsArrived();
+    node_->process();
     t->finish();
     timer_history_.push_back(t);
 

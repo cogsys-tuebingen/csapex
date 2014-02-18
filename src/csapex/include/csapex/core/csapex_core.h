@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <QObject>
@@ -22,14 +23,10 @@ public:
     };
 
 public:
-    CsApexCore(const std::string &config, GraphPtr graph, CommandDispatcher *cmd_dispatcher);
-    CsApexCore(GraphPtr graph, CommandDispatcher* dispatcher);
+    CsApexCore(Settings& settings_, GraphPtr graph, CommandDispatcher *cmd_dispatcher);
     virtual ~CsApexCore();
 
     void init(DragIO *dragio);
-
-    std::string getConfig() const;
-    void setCurrentConfig(const std::string& filename);
 
     void load(const std::string& file);
     void saveAs(const std::string& file);
@@ -39,8 +36,11 @@ public:
     void addListener(Listener* l);
     void removeListener(Listener* l);
 
+    Settings& getSettings() const;
+
 public Q_SLOTS:
     void setPause(bool pause);
+    void settingsChanged();
 
 Q_SIGNALS:
     void configChanged();
@@ -51,6 +51,7 @@ Q_SIGNALS:
     void loadSettingsRequest(YAML::Node& n);
 
 private:
+    Settings& settings_;
     GraphPtr graph_;
 
     bool destruct;
@@ -58,8 +59,6 @@ private:
 
     PluginManager<CorePlugin>* core_plugin_manager;
     std::vector<Listener*> listener_;
-
-    std::string current_config_;
 
     bool init_;
 };

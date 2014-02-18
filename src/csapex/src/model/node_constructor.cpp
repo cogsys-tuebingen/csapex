@@ -14,14 +14,14 @@ NodePtr NodeConstructor::makeNull()
     return Node::Ptr (new Node);
 }
 
-NodeConstructor::NodeConstructor(const std::string &type, const std::string &description, Make c)
-    : type_(type), descr_(description), is_loaded(false), c(c)
+NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, Make c)
+    : settings_(settings), type_(type), descr_(description), is_loaded(false), c(c)
 {
     assert(!c.empty());
 }
 
-NodeConstructor::NodeConstructor(const std::string &type, const std::string &description)
-    : type_(type), descr_(description), is_loaded(false)
+NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description)
+    : settings_(settings), type_(type), descr_(description), is_loaded(false)
 {
 }
 
@@ -72,6 +72,7 @@ std::string NodeConstructor::getDescription() const
 Node::Ptr NodeConstructor::makePrototypeContent() const
 {
     Node::Ptr res = c();
+    res->setSettings(&settings_);
     res->setType(type_);
     return res;
 }
@@ -79,6 +80,7 @@ Node::Ptr NodeConstructor::makePrototypeContent() const
 Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
 {
     Node::Ptr res = c();
+    res->setSettings(&settings_);
     res->setType(type_);
     res->setUUID(uuid);
     res->setLabel(uuid);

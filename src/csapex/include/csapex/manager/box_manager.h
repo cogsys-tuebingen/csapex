@@ -57,6 +57,8 @@ public:
     boost::signals2::signal<void(const std::string&)> loaded;
     boost::signals2::signal<void()> new_box_type;
 
+    // TODO: make private and constructor parameter one no longer singleton
+    Settings* settings_;
 
 protected:
     BoxManager();

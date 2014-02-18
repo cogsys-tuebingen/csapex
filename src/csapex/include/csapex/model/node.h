@@ -109,6 +109,8 @@ public:
     virtual void setBox(Box* box);
     Box* getBox() const;//  __attribute__ ((deprecated));
 
+    void setSettings(Settings* settings);
+
     NodeWorker* getNodeWorker() const;
 
     /// "real" messages
@@ -216,6 +218,8 @@ protected:
     void makeThread();
     void finishProcessing();
 
+    Settings& getSettings();
+
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
@@ -224,9 +228,12 @@ private:
 
     QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
 
+protected:
+    virtual void allConnectorsArrived() __attribute__ ((deprecated));
+
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
-    virtual void allConnectorsArrived();
+    virtual void process();
 
     virtual void enable(bool e);
     virtual void enable();
@@ -274,6 +281,7 @@ protected:
     QIcon icon_;
 
 private:
+    Settings* settings_;
     Box* box_;
 
     QThread* private_thread_;

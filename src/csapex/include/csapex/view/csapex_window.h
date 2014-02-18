@@ -46,6 +46,7 @@ private Q_SLOTS:
     void scrollDownLog();
     void init();
     void loadStyleSheet(const QString& path);
+    void updateDeleteAction();
 
 public Q_SLOTS:
     void save();

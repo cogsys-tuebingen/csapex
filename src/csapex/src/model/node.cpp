@@ -15,7 +15,7 @@
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
-    : Unique(uuid), icon_(":/plugin.png"), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+    : Unique(uuid), icon_(":/plugin.png"), settings_(NULL), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
@@ -157,12 +157,20 @@ void Node::messageArrived(ConnectorIn *)
 }
 void Node::allConnectorsArrived()
 {
+}
 
+void Node::process()
+{
+    allConnectorsArrived();
 }
 
 void Node::checkInputs()
 {
-    enableInput(canReceive());
+    if(isEnabled()) {
+        enableInput(canReceive());
+    } else {
+        enableInput(false);
+    }
 }
 
 void Node::finishProcessing()
@@ -172,6 +180,11 @@ void Node::finishProcessing()
             i->setProcessing(false);
         }
     }
+}
+
+Settings& Node::getSettings()
+{
+    return *settings_;
 }
 
 void Node::checkIfDone()
@@ -312,7 +325,6 @@ void Node::setState(Memento::Ptr memento)
 
 void Node::enable(bool e)
 {
-    node_state_->enabled = e;
     if(e) {
         enable();
     } else {
@@ -446,6 +458,11 @@ Box* Node::getBox() const
     return box_;
 }
 
+void Node::setSettings(Settings *settings)
+{
+    settings_ = settings;
+}
+
 NodeWorker* Node::getNodeWorker() const
 {
     return worker_;
@@ -471,7 +488,7 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
     int id = input.size();
-    ConnectorIn* c = new ConnectorIn(this, id);
+    ConnectorIn* c = new ConnectorIn(*settings_, this, id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setAsync(async);
@@ -485,7 +502,7 @@ ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bo
 ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 {
     int id = output.size();
-    ConnectorOut* c = new ConnectorOut(this, id);
+    ConnectorOut* c = new ConnectorOut(*settings_, this, id);
     c->setLabel(label);
     c->setType(type);
 

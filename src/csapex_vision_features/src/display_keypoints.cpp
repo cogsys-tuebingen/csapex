@@ -28,14 +28,14 @@ DisplayKeypoints::DisplayKeypoints()
     addParameter(param::ParameterFactory::declareBool("random color", true));
 
 
-    std::map<std::string, int> flags;
+    std::map<std::string, std::pair<int, bool> > flags;
     //    flags["DRAW_OVER_OUTIMG"] = (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG;
-    flags["NOT_DRAW_SINGLE_POINTS"] = (int) cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS;
-    flags["DRAW_RICH_KEYPOINTS"] = (int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS;
+    flags["NOT_DRAW_SINGLE_POINTS"] = std::make_pair((int) cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS, false);
+    flags["DRAW_RICH_KEYPOINTS"] = std::make_pair((int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS, true);
     addParameter(param::ParameterFactory::declareParameterBitSet("flags", flags));
 }
 
-void DisplayKeypoints::allConnectorsArrived()
+void DisplayKeypoints::process()
 {
     CvMatMessage::Ptr img_msg = in_img->getMessage<CvMatMessage>();
     KeypointMessage::Ptr key_msg = in_key->getMessage<KeypointMessage>();

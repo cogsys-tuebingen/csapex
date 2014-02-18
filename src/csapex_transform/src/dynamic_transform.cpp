@@ -27,7 +27,7 @@ DynamicTransform::DynamicTransform()
     addTag(Tag::get("Transform"));
 }
 
-void DynamicTransform::allConnectorsArrived()
+void DynamicTransform::process()
 {
     bool update = false;
     if(frame_in_from_->isConnected() && frame_in_from_->hasMessage()) {

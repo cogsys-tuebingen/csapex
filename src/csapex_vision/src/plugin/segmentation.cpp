@@ -26,7 +26,7 @@ Segmentation::Segmentation()
     addTag(Tag::get("Segmentation"));
 }
 
-void Segmentation::allConnectorsArrived()
+void Segmentation::process()
 {
     CvMatMessage::Ptr img = input_img_->getMessage<CvMatMessage>();
 

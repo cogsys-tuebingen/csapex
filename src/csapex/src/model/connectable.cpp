@@ -7,6 +7,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/model/boxed_object.h>
 #include <csapex/view/port.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <iostream>
@@ -20,7 +21,7 @@ using namespace csapex;
 const QString Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
 const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
-bool Connectable::allow_processing = true;
+//bool Connectable::allow_processing = true;
 
 UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
     if(box_uuid.empty()) {
@@ -32,15 +33,15 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
     return UUID::make(ss.str());
 }
 
-Connectable::Connectable(const UUID& uuid)
-    : Unique(uuid), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+Connectable::Connectable(Settings& settings, const UUID& uuid)
+    : Unique(uuid), settings_(settings), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
       blocked_(false)
 {
     init();
 }
 
-Connectable::Connectable(Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int type)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
       blocked_(false)
 {
     init();
@@ -102,7 +103,7 @@ void Connectable::waitForProcessing()
         QMutexLocker lock(&io_mutex);
 
         if(processing) {
-            while(processing && allow_processing) {
+            while(processing && settings_.isProcessingAllowed()) {
                 blocked_ = true;
                 port_->setPortProperty("blocked", true);
 

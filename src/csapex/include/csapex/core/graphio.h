@@ -26,15 +26,6 @@ public:
     GraphIO(Graph::Ptr graph);
 
 public:
-    static const std::string config_extension;
-    static const std::string template_extension;
-    static const std::string default_config;
-    static const std::string config_selector;
-
-    static std::string defaultConfigFile();
-    static std::string defaultConfigPath();
-
-public:
     void saveSettings(YAML::Emitter &yaml);
     void loadSettings(YAML::Node& doc);
 

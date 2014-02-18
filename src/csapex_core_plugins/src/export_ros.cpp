@@ -50,7 +50,7 @@ void ExportRos::fill(QBoxLayout *layout)
     }
 }
 
-void ExportRos::allConnectorsArrived()
+void ExportRos::process()
 {
     if(state.topic.empty()) {
         return;
