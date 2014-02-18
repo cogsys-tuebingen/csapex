@@ -12,7 +12,7 @@ public:
     ConditionalOutlierRemoval();
 
     virtual void setup();
-    virtual void allConnectorsArrived();
+    virtual void process();
 
     template <class PointT>
     void inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud);

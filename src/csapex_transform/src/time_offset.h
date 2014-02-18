@@ -13,7 +13,7 @@ class TimeOffset : public csapex::Node
 public:
     TimeOffset();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void setup();
 
 private:

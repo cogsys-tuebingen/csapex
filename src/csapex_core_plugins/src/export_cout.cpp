@@ -32,7 +32,7 @@ void ExportCout::fill(QBoxLayout *layout)
     }
 }
 
-void ExportCout::allConnectorsArrived()
+void ExportCout::process()
 {
     ConnectionType::Ptr msg = connector_->getMessage<ConnectionType>();
 

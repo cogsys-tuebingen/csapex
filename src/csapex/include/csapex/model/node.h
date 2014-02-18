@@ -224,9 +224,12 @@ private:
 
     QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
 
+protected:
+    virtual void allConnectorsArrived() __attribute__ ((deprecated));
+
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
-    virtual void allConnectorsArrived();
+    virtual void process();
 
     virtual void enable(bool e);
     virtual void enable();

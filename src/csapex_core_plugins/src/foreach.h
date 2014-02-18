@@ -15,7 +15,7 @@ public:
     Foreach();
     ~Foreach();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void fill(QBoxLayout* layout);
 
     virtual Connectable* getConnector(const UUID &uuid) const;

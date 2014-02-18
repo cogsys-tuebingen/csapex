@@ -33,7 +33,7 @@ void SetTimeStamp::fill(QBoxLayout *layout)
     output_ = addOutput<connection_types::PointCloudMessage>("PointCloud");
 }
 
-void SetTimeStamp::allConnectorsArrived()
+void SetTimeStamp::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 

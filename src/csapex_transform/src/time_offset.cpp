@@ -25,7 +25,7 @@ TimeOffset::TimeOffset()
 }
 
 
-void TimeOffset::allConnectorsArrived()
+void TimeOffset::process()
 {
     connection_types::TimeStampMessage::Ptr in = input_->getMessage<connection_types::TimeStampMessage>();
     connection_types::TimeStampMessage::Ptr time(new connection_types::TimeStampMessage);

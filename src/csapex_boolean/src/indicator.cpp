@@ -39,7 +39,7 @@ void Indicator::fill(QBoxLayout *layout)
     layout->addWidget(indicator_);
 }
 
-void Indicator::allConnectorsArrived()
+void Indicator::process()
 {
     BooleanMessage::Ptr a = in->getMessage<BooleanMessage>();
     assert(a);

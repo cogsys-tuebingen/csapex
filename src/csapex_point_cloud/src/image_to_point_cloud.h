@@ -19,7 +19,7 @@ public:
     ImageToPointCloud();
 
     virtual void setup();
-    virtual void allConnectorsArrived();
+    virtual void process();
 
 private:
     template <typename PointT>

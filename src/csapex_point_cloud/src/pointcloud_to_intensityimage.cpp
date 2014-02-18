@@ -32,7 +32,7 @@ void PointCloudToIntensityImage::setup()
     output_ = addOutput<CvMatMessage>("Intensity Image");
 }
 
-void PointCloudToIntensityImage::allConnectorsArrived()
+void PointCloudToIntensityImage::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 

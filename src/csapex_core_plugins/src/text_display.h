@@ -16,7 +16,7 @@ class TextDisplay : public BoxedObject
 public:
     TextDisplay();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void fill(QBoxLayout* layout);
 
 private:

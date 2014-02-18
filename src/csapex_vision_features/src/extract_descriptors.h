@@ -29,7 +29,7 @@ public:
     virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
-    virtual void allConnectorsArrived();
+    virtual void process();
     void updateDynamicGui(QBoxLayout *layout);
 
 private Q_SLOTS:

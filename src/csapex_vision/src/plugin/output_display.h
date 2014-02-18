@@ -30,7 +30,7 @@ public:
     virtual void setState(Memento::Ptr memento);
 
 public Q_SLOTS:
-    void allConnectorsArrived();
+    void process();
     void display(QSharedPointer<QImage> img);
     void setAsync(int a);
     void fitInView();

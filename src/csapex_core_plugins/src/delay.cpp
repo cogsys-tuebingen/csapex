@@ -31,7 +31,7 @@ void Delay::setup()
     output_ = addOutput<connection_types::AnyMessage>("Delayed Input");
 }
 
-void Delay::allConnectorsArrived()
+void Delay::process()
 {
     ConnectionType::Ptr msg = input_->getMessage<ConnectionType>();
 

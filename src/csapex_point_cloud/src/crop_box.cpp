@@ -63,7 +63,7 @@ void CropBox::update()
     }
 }
 
-void CropBox::allConnectorsArrived()
+void CropBox::process()
 {
     PointCloudMessage::Ptr msg(input_cloud_->getMessage<PointCloudMessage>());
 

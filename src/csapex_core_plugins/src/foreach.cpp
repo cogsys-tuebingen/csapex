@@ -36,7 +36,7 @@ Foreach::~Foreach()
     }
 }
 
-void Foreach::allConnectorsArrived()
+void Foreach::process()
 {
     VectorMessage::Ptr vec = input_->getMessage<VectorMessage>();
 

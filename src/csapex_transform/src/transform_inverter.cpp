@@ -20,7 +20,7 @@ TransformInverter::TransformInverter()
 {
     addTag(Tag::get("Transform"));
 }
-void TransformInverter::allConnectorsArrived()
+void TransformInverter::process()
 {
     connection_types::TransformMessage::Ptr trafo = input_->getMessage<connection_types::TransformMessage>();
     connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);

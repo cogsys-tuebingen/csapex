@@ -17,7 +17,7 @@ public:
     TransformPublisher();
     ~TransformPublisher();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void setup();
 
 private:

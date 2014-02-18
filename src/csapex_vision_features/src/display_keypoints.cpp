@@ -35,7 +35,7 @@ DisplayKeypoints::DisplayKeypoints()
     addParameter(param::ParameterFactory::declareParameterBitSet("flags", flags));
 }
 
-void DisplayKeypoints::allConnectorsArrived()
+void DisplayKeypoints::process()
 {
     CvMatMessage::Ptr img_msg = in_img->getMessage<CvMatMessage>();
     KeypointMessage::Ptr key_msg = in_key->getMessage<KeypointMessage>();

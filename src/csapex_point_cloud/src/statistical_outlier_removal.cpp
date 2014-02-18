@@ -46,7 +46,7 @@ void StatisticalOutlierRemoval::setup()
     output_ = addOutput<PointCloudMessage>("Pointcloud");
 }
 
-void StatisticalOutlierRemoval::allConnectorsArrived()
+void StatisticalOutlierRemoval::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
     boost::apply_visitor (PointCloudMessage::Dispatch<StatisticalOutlierRemoval>(this), msg->value);

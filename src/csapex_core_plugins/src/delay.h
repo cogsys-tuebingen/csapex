@@ -15,7 +15,7 @@ class Delay : public Node
 public:
     Delay();
 
-    virtual void allConnectorsArrived();
+    virtual void process();
     virtual void setup();
 
 private:

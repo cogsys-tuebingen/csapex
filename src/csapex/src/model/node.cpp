@@ -157,7 +157,11 @@ void Node::messageArrived(ConnectorIn *)
 }
 void Node::allConnectorsArrived()
 {
+}
 
+void Node::process()
+{
+    allConnectorsArrived();
 }
 
 void Node::checkInputs()

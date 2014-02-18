@@ -133,7 +133,7 @@ PointCloudMessage::Ptr ImageToPointCloud::transform(const cv::Mat& depth, const 
     return result;
 }
 
-void ImageToPointCloud::allConnectorsArrived()
+void ImageToPointCloud::process()
 {
     CvMatMessage::Ptr depth_msg(input_depth_->getMessage<CvMatMessage>());
 

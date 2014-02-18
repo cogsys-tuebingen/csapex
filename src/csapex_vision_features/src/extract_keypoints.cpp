@@ -31,7 +31,7 @@ ExtractKeypoints::ExtractKeypoints()
     addTag(Tag::get("Features"));
 }
 
-void ExtractKeypoints::allConnectorsArrived()
+void ExtractKeypoints::process()
 {
     if(!extractor) {
         setError(true, "no extractor set");

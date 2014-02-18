@@ -45,7 +45,7 @@ void HoughCircle::setup()
     output_ = addOutput<CvMatMessage>("Debug Image");
 }
 
-void HoughCircle::allConnectorsArrived()
+void HoughCircle::process()
 {
     CvMatMessage::Ptr msg = input_->getMessage<CvMatMessage>();
 
