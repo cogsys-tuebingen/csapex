@@ -68,6 +68,9 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), designer_,  SLOT(lockToGrid(bool)));
 
+    QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
+    QObject::connect(graph, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
+
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph,  SLOT(selectAll()));
 
@@ -94,6 +97,12 @@ void CsApexWindow::construct()
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+}
+
+void CsApexWindow::updateDeleteAction()
+{
+    bool has_selection = graph_->countSelectedConnections() + graph_->countSelectedNodes() > 0;
+    ui->actionDelete_Selected->setEnabled(has_selection);
 }
 
 void CsApexWindow::resetSignal()

@@ -139,6 +139,19 @@ int Graph::countSelectedNodes()
     return c;
 }
 
+int Graph::countSelectedConnections()
+{
+    int c = 0;
+
+    Q_FOREACH(Connection::Ptr n, visible_connections) {
+        if(n->isSelected()) {
+            ++c;
+        }
+    }
+
+    return c;
+}
+
 Template::Ptr Graph::convertSelectionToTemplate(std::vector<std::pair<UUID, UUID> >& connections) const
 {
     Template::Ptr sub_graph_templ = TemplateManager::instance().createNewTemporaryTemplate();
@@ -632,7 +645,7 @@ bool Graph::handleConnectionSelection(int id, bool add)
             }
         } else {
             if(isConnectionWithIdSelected(id)) {
-                if(noSelectedConnections() == 1) {
+                if(countSelectedConnections() == 1) {
                     deselectConnectionById(id);
                 } else {
                     selectConnectionById(id);
@@ -713,23 +726,12 @@ int Graph::getConnectionId(Connection::Ptr c)
     return -1;
 }
 
-int Graph::noSelectedConnections()
-{
-    int c = 0;
-    Q_FOREACH(const Connection::Ptr& connection, visible_connections) {
-        if(connection->isSelected()) {
-            ++c;
-        }
-    }
-
-    return c;
-}
-
 void Graph::deselectConnections()
 {
     BOOST_FOREACH(Connection::Ptr& connection, visible_connections) {
         connection->setSelected(false);
     }
+    Q_EMIT selectionChanged();
 }
 
 Command::Ptr Graph::deleteConnectionByIdCommand(int id)
@@ -798,6 +800,7 @@ void Graph::selectConnectionById(int id, bool add)
     if(c != ConnectionNullPtr) {
         c->setSelected(true);
     }
+    Q_EMIT selectionChanged();
 }
 
 
@@ -808,6 +811,7 @@ void Graph::deselectConnectionById(int id)
             connection->setSelected(false);
         }
     }
+    Q_EMIT selectionChanged();
 }
 
 

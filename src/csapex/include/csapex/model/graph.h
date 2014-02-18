@@ -69,8 +69,6 @@ public:
 
     Command::Ptr deleteConnectionById(int id);
     Command::Ptr deleteSelectedConnectionsCmd();
-    int noSelectedConnections();
-
 
     Connection::Ptr getConnectionWithId(int id);
     Connection::Ptr getConnection(Connection::Ptr);
@@ -92,6 +90,8 @@ public:
 
     Command::Ptr deleteSelectedNodesCmd();
     Command::Ptr groupSelectedNodesCmd();
+
+    int countSelectedConnections();
 
     void handleNodeSelection(Node* node, bool add);
 

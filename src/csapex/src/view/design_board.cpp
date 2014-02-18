@@ -223,23 +223,6 @@ void DesignBoard::showBoxDialog()
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
-    Graph::Ptr graph = graph_;
-
-    // BOXES
-    if(Qt::ControlModifier == QApplication::keyboardModifiers()) {
-        if(e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
-            if(graph->countSelectedNodes() != 0) {
-                dispatcher_->execute(graph->deleteSelectedNodesCmd());
-                return;
-            }
-        } /*else  if(e->key() == Qt::Key_G) {
-            if(graph->countSelectedNodes() != 0) {
-                dispatcher_->execute(graph->groupSelectedNodesCmd());
-                return;
-            }
-        }*/
-    }
-
     if(!overlay->keyReleaseEventHandler(e)) {
         return;
     }

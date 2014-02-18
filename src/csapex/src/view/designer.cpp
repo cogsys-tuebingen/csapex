@@ -36,6 +36,22 @@ Designer::~Designer()
 {
 }
 
+void Designer::deleteSelected()
+{
+    command::Meta::Ptr del(new command::Meta("delete selected"));
+
+    if(graph_->countSelectedNodes() != 0) {
+        del->add(graph_->deleteSelectedNodesCmd());
+    }
+    if(graph_->countSelectedConnections() != 0) {
+        del->add(graph_->deleteSelectedConnectionsCmd());
+    }
+
+    if(del->commands() != 0) {
+        dispatcher_->execute(del);
+    }
+}
+
 bool Designer::eventFilter(QObject*, QEvent*)
 {
     return false;
