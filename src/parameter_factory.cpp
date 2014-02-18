@@ -33,14 +33,32 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
     }
 }
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set)
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set, int def)
 {
     BitSetParameter::Ptr result(new BitSetParameter(name));
     result->setBitSet(set);
-    result->def_ = set.begin()->second;
-    result->set<int>(set.begin()->second);
+    result->def_ = def;
+    result->set<int>(def);
 
     return result;
+}
+
+
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, std::pair<int, bool> > &set)
+{
+    std::map<std::string, int> raw_set;
+    int def = 0;
+
+    for(std::map<std::string, std::pair<int, bool> >::const_iterator it = set.begin();
+        it != set.end();
+        ++it)
+    {
+        raw_set[it->first] = it->second.first;
+        if(it->second.second) {
+            def += it->second.first;
+        }
+    }
+    return declareParameterBitSet(name, raw_set, def);
 }
 
 Parameter::Ptr ParameterFactory::declare(const std::string& name, const char* def)
