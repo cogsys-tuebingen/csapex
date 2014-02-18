@@ -360,13 +360,7 @@ bool Graph::addConnection(Connection::Ptr connection)
         Connectable* from = findConnector(connection->from()->getUUID());
         Connectable* to = findConnector(connection->to()->getUUID());
 
-        //Graph::Ptr graph_from = from->getGraph();
-       // Graph::Ptr graph_to = to->getGraph();
-
-        //        if(!graph_from->isHidden() && !graph_to->isHidden()) {
-        //if(graph_from.get() == this && graph_to.get() == this) {
-            visible_connections.push_back(connection);
-        //}
+        visible_connections.push_back(connection);
 
         verify();
 
@@ -386,9 +380,12 @@ void Graph::deleteConnection(Connection::Ptr connection)
 
     for(std::vector<Connection::Ptr>::iterator c = visible_connections.begin(); c != visible_connections.end();) {
         if(*connection == **c) {
+            Connectable* to = connection->to();
+            to->setError(false);
+            if(to->isProcessing()) {
+                to->setProcessing(false);
+            }
             visible_connections.erase(c);
-            connection->to()->setError(false);
-
             verify();
             Q_EMIT connectionDeleted(connection.get());
         } else {
@@ -402,16 +399,16 @@ void Graph::deleteConnection(Connection::Ptr connection)
 
 void Graph::verify()
 {
-    Q_FOREACH(Node::Ptr node, nodes_) {
-        bool blocked = false;
-        for(int i = 0; i < node->countInputs(); ++i) {
-            blocked |= node->getInput(i)->isBlocked();
-        }
+//    Q_FOREACH(Node::Ptr node, nodes_) {
+//        bool blocked = false;
+//        for(int i = 0; i < node->countInputs(); ++i) {
+//            blocked |= node->getInput(i)->isBlocked();
+//        }
 
-        if(blocked) {
-            node->finishProcessing();
-        }
-    }
+//        if(blocked) {
+//            node->finishProcessing();
+//        }
+//    }
 
     verifyAsync();
 }

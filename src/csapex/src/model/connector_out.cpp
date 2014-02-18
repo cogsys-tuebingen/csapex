@@ -181,18 +181,21 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     std::vector<ConnectorIn*> targets;
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         if(i->isEnabled()) {
-            if(i->isProcessing() && !i->isAsync()) {
-                setBlocked(true);
-                i->waitForProcessing();
-
-                if(i->isProcessing()) {
-                    return;
-                }
-                if(!isProcessing()) {
-                    return;
-                }
-            }
             targets.push_back(i);
+        }
+    }
+
+    BOOST_FOREACH(ConnectorIn* i, targets) {
+        if(i->isProcessing() && !i->isAsync()) {
+            setBlocked(true);
+            i->waitForProcessing();
+
+            if(i->isProcessing()) {
+                return;
+            }
+            if(!isProcessing()) {
+                return;
+            }
         }
     }
 

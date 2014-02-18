@@ -162,7 +162,11 @@ void Node::allConnectorsArrived()
 
 void Node::checkInputs()
 {
-    enableInput(canReceive());
+    if(isEnabled()) {
+        enableInput(canReceive());
+    } else {
+        enableInput(false);
+    }
 }
 
 void Node::finishProcessing()
@@ -312,7 +316,6 @@ void Node::setState(Memento::Ptr memento)
 
 void Node::enable(bool e)
 {
-    node_state_->enabled = e;
     if(e) {
         enable();
     } else {

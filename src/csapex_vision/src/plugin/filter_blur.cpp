@@ -13,6 +13,7 @@ CSAPEX_REGISTER_CLASS(csapex::FilterBlur, csapex::Node)
 using namespace csapex;
 
 FilterBlur::FilterBlur()
+    : slider(NULL)
 {
     state.blur = 0;
 }
@@ -51,7 +52,9 @@ void FilterBlur::setState(Memento::Ptr memento)
 
     state = *m;
 
-    slider->setValue(state.blur);
+    if(slider) {
+        slider->setValue(state.blur);
+    }
 
     Q_EMIT filter_changed();
 }
