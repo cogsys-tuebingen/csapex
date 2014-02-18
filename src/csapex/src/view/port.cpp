@@ -152,7 +152,7 @@ void Port::mouseMoveEvent(QMouseEvent* e)
 
         if(move) {
             mimeData->setData(Connectable::MIME_MOVE_CONNECTIONS, QByteArray());
-            mimeData->setParent(adaptee_);
+            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee_)));
             drag->setMimeData(mimeData);
 
             adaptee_->disable();
@@ -163,7 +163,8 @@ void Port::mouseMoveEvent(QMouseEvent* e)
 
         } else {
             mimeData->setData(Connectable::MIME_CREATE_CONNECTION, QByteArray());
-            mimeData->setParent(adaptee_);
+            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee_)));
+
             drag->setMimeData(mimeData);
 
             drag->exec();
@@ -194,8 +195,8 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 {
     std::cout << "port enter: " << e->format() << std::endl;
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
-        Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
-        if(from == adaptee_) {
+        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+         if(from == adaptee_) {
             return;
         }
 
@@ -205,7 +206,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
             }
         }
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
-        Connectable* original = dynamic_cast<Connectable*>(e->mimeData()->parent());
+        Connectable* original = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(original->targetsCanBeMovedTo(adaptee_)) {
             e->acceptProposedAction();
@@ -217,11 +218,11 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
 {
     Q_EMIT(adaptee_->connectionStart());
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
-        Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
+        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         Q_EMIT(adaptee_->connectionInProgress(adaptee_, from));
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
-        Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
+        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         from->connectionMovePreview(adaptee_);
     }
@@ -230,13 +231,13 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
 void Port::dropEvent(QDropEvent* e)
 {
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
-        Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
+        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(from && from != adaptee_) {
             dispatcher_->execute(Command::Ptr(new command::AddConnection(adaptee_->getUUID(), from->getUUID())));
         }
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
-        Connectable* from = dynamic_cast<Connectable*>(e->mimeData()->parent());
+        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(from) {
             Command::Ptr cmd(new command::MoveConnection(from, adaptee_));

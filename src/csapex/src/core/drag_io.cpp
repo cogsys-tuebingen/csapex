@@ -104,13 +104,13 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 {
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
-        Connectable* c = dynamic_cast<Connectable*>(e->mimeData()->parent());
+        Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         overlay->deleteTemporaryConnections();
         overlay->addTemporaryConnection(c, e->pos());
         overlay->repaint();
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
-        Connectable* c = dynamic_cast<Connectable*>(e->mimeData()->parent());
+        Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         overlay->deleteTemporaryConnections();
 
         if(c->isOutput()) {
