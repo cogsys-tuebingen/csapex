@@ -73,6 +73,7 @@ set(SRC_PLUGIN
     src/manager/template_manager.cpp
 
     src/utility/bash_parser.cpp
+    src/utility/qint_slider.cpp
     src/utility/qdouble_slider.cpp
     src/utility/qsignal_bridges.cpp
     src/utility/qwrapper.cpp
