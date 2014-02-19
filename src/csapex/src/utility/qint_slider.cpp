@@ -21,7 +21,10 @@ QIntSlider::~QIntSlider()
 
 void QIntSlider::update()
 {
-    setMaximum(integer2int(max_));
+    int m = integer2int(max_);
+    if(m != maximum()) {
+        setMaximum(m);
+    }
 }
 
 int QIntSlider::int2integer(int val)
@@ -49,6 +52,10 @@ void QIntSlider::setIntMinimum(int min)
 {
     bool change = min != min_;
     min_ = min;
+
+    if(min_ > max_) {
+        max_ = min_;
+    }
 
     if(change) {
         update();

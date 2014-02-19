@@ -50,6 +50,10 @@ void QDoubleSlider::setDoubleMinimum(double min)
     bool change = min != min_;
     min_ = min;
 
+    if(min_ > max_) {
+        max_ = min_;
+    }
+
     if(change) {
         update();
     }
