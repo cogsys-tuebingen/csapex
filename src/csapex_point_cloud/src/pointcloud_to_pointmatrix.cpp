@@ -47,9 +47,9 @@ struct Impl {
         for(int i = 0 ; i < height ; ++i) {
             for(int j = 0 ; j < width ; ++j) {
                 PointT pos = cloud->at(i * width + j);
-                matrix.at<float>(i, (j * 3 + 0)) = pos.data[0];
-                matrix.at<float>(i, (j * 3 + 1)) = pos.data[1];
-                matrix.at<float>(i, (j * 3 + 2)) = pos.data[2];
+                matrix.at<float>(i, (j * 3 + 0)) = pos.x;
+                matrix.at<float>(i, (j * 3 + 1)) = pos.y;
+                matrix.at<float>(i, (j * 3 + 2)) = pos.z;
             }
         }
     }
