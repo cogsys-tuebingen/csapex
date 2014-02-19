@@ -20,9 +20,11 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
     : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0)
 {
     if(adaptee_) {
-        adaptee_->setCommandDispatcher(dispatcher);
         adaptee_->setPort(this);
+        adaptee_->setCommandDispatcher(dispatcher);
         setToolTip(adaptee_->getUUID().c_str());
+    } else {
+        std::cerr << "creating empty port!" << std::endl;
     }
 
     setFixedSize(16, 16);

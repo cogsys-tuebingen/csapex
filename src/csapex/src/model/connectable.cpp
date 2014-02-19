@@ -164,11 +164,14 @@ void Connectable::init()
 
 Connectable::~Connectable()
 {
+//    UUID::free(getUUID());
 }
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    port_->setError(error, msg, level);
+    if(port_) {
+        port_->setError(error, msg, level);
+    }
 }
 
 bool Connectable::isForwarding() const

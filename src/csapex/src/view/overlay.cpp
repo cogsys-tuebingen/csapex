@@ -162,6 +162,10 @@ void Overlay::drawConnection(Connection& connection)
     ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
     ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
 
+    if(!from->getPort() || !to->getPort()) {
+        return;
+    }
+
     QPoint p1 = from->getPort()->centerPoint();
     QPoint p2 = to->getPort()->centerPoint();
 
@@ -702,23 +706,32 @@ void Overlay::paintEvent(QPaintEvent*)
     }
 
     foreach (Node::Ptr node, graph_->nodes_) {
+        if(!node->getBox()) {
+            continue;
+        }
         if(node->isError()) {
             QRectF rect(node->getBox()->pos() + QPoint(0, node->getBox()->height() + 8), QSize(node->getBox()->width(), 64));
 
             QFont font;
             font.setPixelSize(8);
             painter->setFont(font);
-            painter->setPen(Qt::red);
+            painter->setPen(node->errorLevel() == Node::EL_ERROR ? Qt::red : QColor(0xCC,0x99,0x00));
 
             QTextOption opt(Qt::AlignTop | Qt::AlignHCenter);
             painter->drawText(rect, node->errorMessage().c_str(), opt);
         }
 
         for(int id = 0; id < node->countInputs(); ++id) {
-            drawPort(node->getInput(id)->getPort());
+            Port* p = node->getInput(id)->getPort();
+            if(p) {
+                drawPort(p);
+            }
         }
         for(int id = 0; id < node->countOutputs(); ++id) {
-            drawPort(node->getOutput(id)->getPort());
+            Port* p = node->getOutput(id)->getPort();
+            if(p) {
+                drawPort(p);
+            }
         }
     }
 

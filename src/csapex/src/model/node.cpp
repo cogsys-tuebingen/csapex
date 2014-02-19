@@ -475,7 +475,9 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
         finishProcessing();
     }
 
-    box_->setError(error, msg, level);
+    if(box_) {
+        box_->setError(error, msg, level);
+    }
     if(node_state_->enabled && error && level == EL_ERROR) {
         setIOError(true);
     } else {
@@ -739,6 +741,8 @@ QTreeWidgetItem* Node::createDebugInformation() const
 
 void Node::registerInput(ConnectorIn* in)
 {
+    in->moveToThread(thread());
+
     input.push_back(in);
 
     in->setCommandDispatcher(dispatcher_);
@@ -752,6 +756,8 @@ void Node::registerInput(ConnectorIn* in)
 
 void Node::registerOutput(ConnectorOut* out)
 {
+    out->moveToThread(thread());
+
     output.push_back(out);
 
     out->setCommandDispatcher(dispatcher_);
