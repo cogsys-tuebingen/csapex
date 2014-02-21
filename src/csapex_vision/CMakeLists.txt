@@ -74,7 +74,6 @@ add_library(csapex_vision_plugin
     src/plugin/camera.cpp
     src/plugin/image_padding.cpp
     src/plugin/segmentation.cpp
-    src/plugin/filter_blur.cpp
     src/plugin/filter_apply_mask.cpp
     src/plugin/filter_static_mask.cpp
     src/plugin/output_display.cpp
@@ -87,6 +86,10 @@ add_library(csapex_vision_plugin
 
     ${QT_MOC_PLUG}
     ${QT_RESOURCES}
+
+    src/plugin/blur.cpp
+    src/plugin/gaussian_blur.cpp
+    src/plugin/bilateral.cpp
 )
 target_link_libraries(csapex_vision_plugin csapex_vision
     yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${catkin_LIBRARIES})
