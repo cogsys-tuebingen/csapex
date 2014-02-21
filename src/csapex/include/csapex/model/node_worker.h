@@ -37,6 +37,7 @@ public Q_SLOTS:
     void forwardMessageSynchronized(ConnectorIn* source);
 
     void addInput(ConnectorIn* source);
+    void removeInput(ConnectorIn* source);
 
     void eventGuiChanged();
     void tick();

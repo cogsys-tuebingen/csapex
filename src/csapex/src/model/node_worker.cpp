@@ -130,6 +130,15 @@ void NodeWorker::addInput(ConnectorIn *source)
     source->setLegacy(!synchronized_inputs_);
 }
 
+void NodeWorker::removeInput(ConnectorIn *source)
+{
+    std::map<ConnectorIn*, bool>::iterator it = has_msg_.find(source);
+
+    if(it != has_msg_.end()) {
+        has_msg_.erase(it);
+    }
+}
+
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
     assert(!is_processing_);

@@ -302,7 +302,9 @@ void Node::setNodeStateLater(NodeStatePtr s)
 
 Memento::Ptr Node::getState() const
 {
-    return GenericState::Ptr(new GenericState(state));
+    GenericState::Ptr r(new GenericState(state));
+    r->param_list.clear();
+    return r;
 }
 
 void Node::setState(Memento::Ptr memento)
@@ -313,10 +315,12 @@ void Node::setState(Memento::Ptr memento)
     std::map<std::string, param::Parameter::Ptr> old_params = state.params;
     state = *m;
     state.params = old_params;
+    state.param_list.clear();
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it) {
         param::Parameter::Ptr p = it->second;
         if(state.params.find(p->name()) != state.params.end()) {
             state.params[p->name()]->setFrom(*p);
+            state.param_list.push_back(state.params[p->name()].get());
         }
     }
 
@@ -599,6 +603,8 @@ std::vector<ConnectorOut*> Node::getOutputs() const
 
 void Node::removeInput(ConnectorIn *in)
 {
+    worker_->removeInput(in);
+
     std::vector<ConnectorIn*>::iterator it;
     it = std::find(input.begin(), input.end(), in);
 
@@ -606,6 +612,7 @@ void Node::removeInput(ConnectorIn *in)
 
     in->deleteLater();
     input.erase(it);
+
 
     disconnectConnector(in);
     Q_EMIT connectorRemoved(in);

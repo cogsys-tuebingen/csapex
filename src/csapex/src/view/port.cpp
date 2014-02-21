@@ -23,6 +23,8 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
         adaptee_->setPort(this);
         adaptee_->setCommandDispatcher(dispatcher);
         setToolTip(adaptee_->getUUID().c_str());
+
+        QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
     } else {
         std::cerr << "creating empty port!" << std::endl;
     }
