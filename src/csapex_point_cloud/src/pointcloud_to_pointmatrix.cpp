@@ -67,8 +67,8 @@ struct Impl<pcl::PointXY> {
 template <class PointT>
 void PointCloudToPointMatrix::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
+    #warning "Fix unsupported type encoding!"
     CvMatMessage::Ptr out(new CvMatMessage(enc::unknown));
     implementation::Impl<PointT>::convert(cloud, out->value);
-    /// TODO : ENCODING NOT YET IMPLEMENTED FOR MULTICHANNEL FLOAT MATRICES
     output_->publish(out);
 }
