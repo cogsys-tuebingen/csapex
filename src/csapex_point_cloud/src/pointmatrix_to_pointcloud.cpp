@@ -19,7 +19,7 @@ using namespace csapex;
 using namespace csapex::connection_types;
 
 namespace implementation {
-inline void convert(const cv::Mat &matrix, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+inline void convert(const cv::Mat &matrix, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
 {
     if(matrix.type() != CV_32FC3) {
         throw std::runtime_error("3Channel float matrix required!");
