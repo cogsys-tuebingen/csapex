@@ -18,8 +18,9 @@ public:
     void inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud);
 
 private:
-    ConnectorIn* input_;
+    ConnectorIn*  input_;
     ConnectorOut* output_;
+    ConnectorOut* mask_;
 };
 }
 #endif // TO_POINT_MATRIX_H

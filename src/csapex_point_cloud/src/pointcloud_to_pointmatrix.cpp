@@ -33,16 +33,18 @@ void PointCloudToPointMatrix::setup()
     setSynchronizedInputs(true);
     input_  = addInput<PointCloudMessage>("PointCloud");
     output_ = addOutput<CvMatMessage>("Point Matrix");
+    mask_   = addOutput<CvMatMessage>("Vadility");
 }
 
 namespace implementation {
 template<class PointT>
 struct Impl {
-    static void convert(const typename pcl::PointCloud<PointT>::Ptr cloud, cv::Mat &matrix)
+    static void convert(const typename pcl::PointCloud<PointT>::Ptr cloud, cv::Mat &matrix, cv::Mat &mask)
     {
         int height = cloud->height;
         int width  = cloud->width;
         matrix = cv::Mat(height, width, CV_32FC3);
+        mask   = cv::Mat(height, width, CV_8UC1, 255);
 
         for(int i = 0 ; i < height ; ++i) {
             for(int j = 0 ; j < width ; ++j) {
@@ -50,13 +52,16 @@ struct Impl {
                 matrix.at<float>(i, (j * 3 + 0)) = pos.x;
                 matrix.at<float>(i, (j * 3 + 1)) = pos.y;
                 matrix.at<float>(i, (j * 3 + 2)) = pos.z;
+                if(pos.x == 0.f && pos.y == 0.f && pos.z == 0.f) {
+                    mask.at<uchar>(i,j) = 0;
+                }
             }
         }
     }
 };
 template <>
 struct Impl<pcl::PointXY> {
-    static void convert(cv::Mat &matrix, typename pcl::PointCloud<pcl::PointXY>::Ptr cloud)
+    static void convert(const typename pcl::PointCloud<pcl::PointXY>::Ptr cloud, cv::Mat &matrix, cv::Mat &mask)
     {
         std::runtime_error("Conversion is not supported for pcl::PointXY!");
     }
@@ -69,6 +74,8 @@ void PointCloudToPointMatrix::inputCloud(typename pcl::PointCloud<PointT>::Ptr c
 {
     #warning "Fix unsupported type encoding!"
     CvMatMessage::Ptr out(new CvMatMessage(enc::unknown));
-    implementation::Impl<PointT>::convert(cloud, out->value);
+    CvMatMessage::Ptr mask(new CvMatMessage(enc::mono));
+    implementation::Impl<PointT>::convert(cloud, out->value, mask->value);
     output_->publish(out);
+    mask_->publish(mask);
 }
