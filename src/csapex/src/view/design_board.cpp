@@ -318,10 +318,6 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
         overlay->setSelectionRectangle(overlay->mapFromGlobal(drag_start_pos_), overlay->mapFromGlobal(e->globalPos()));
         overlay->repaint();
     }
-
-    if(!drag_) {
-        setFocus();
-    }
 }
 
 void DesignBoard::setView(int sx, int sy)
