@@ -148,6 +148,7 @@ void CsApexCore::saveAs(const std::string &file)
     graphio.saveBoxes(yaml);
 
     std::ofstream ofs(file.c_str());
+    ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';
     ofs << yaml.c_str();
 
     std::cout << "save: " << yaml.c_str() << std::endl;

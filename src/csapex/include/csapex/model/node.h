@@ -63,7 +63,7 @@ public:
     std::vector<param::Parameter *> getParameters() const;
 
     template <typename T>
-    T param(const std::string& name) const
+    const T param(const std::string& name) const
     {
         try {
             return getParameter(name)->as<T>();
@@ -211,9 +211,10 @@ public:
 
     bool canReceive();
 
+public:
+    virtual Memento::Ptr getState() const;
 protected:
     virtual void setState(Memento::Ptr memento);
-    virtual Memento::Ptr getState() const;
 
     void makeThread();
     void finishProcessing();

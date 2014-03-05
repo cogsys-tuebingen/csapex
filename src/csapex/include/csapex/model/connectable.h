@@ -167,6 +167,9 @@ private:
     bool async_;
     bool async_temp_;
     bool blocked_;
+
+public:
+    mutable long guard_;
 };
 
 }

@@ -6,12 +6,13 @@
 #include <csapex_core_plugins/ros_message_conversion.h>
 
 /// PROJECT
-
 #include <csapex/model/connector_out.h>
 #include <csapex/manager/connection_type_manager.h>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/model/message.h>
 #include <csapex/utility/qt_helper.hpp>
+#include <utils_param/parameter_factory.h>
+#include <utils_param/set_parameter.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -27,106 +28,78 @@ CSAPEX_REGISTER_CLASS(csapex::ImportRos, csapex::Node)
 using namespace csapex;
 
 ImportRos::ImportRos()
-    : connector_(NULL), topic_list(NULL)
+    : connector_(NULL)
 {
     addTag(Tag::get("RosIO"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));
     setIcon(QIcon(":/terminal.png"));
 
-    QObject::connect(this, SIGNAL(newTopic(ros::master::TopicInfo)), this, SLOT(setTopic(ros::master::TopicInfo)));
+    std::vector<std::string> set;
+    set.push_back("/");
+    addParameter(param::ParameterFactory::declareParameterStringSet("topic", set),
+                 boost::bind(&ImportRos::update, this));
+
+    addParameter(param::ParameterFactory::declareTrigger("refresh"),
+                 boost::bind(&ImportRos::refresh, this));
+
+    refresh();
 }
 
-void ImportRos::fill(QBoxLayout *layout)
+void ImportRos::setup()
 {
-    if(connector_ == NULL) {
-        connector_ = addOutput<connection_types::AnyMessage>("Something");
-
-        dynamic_layout = new QVBoxLayout;
-        layout->addLayout(dynamic_layout);
-
-        QPushButton* refresh = new QPushButton("refresh");
-        layout->addWidget(refresh);
-        connect(refresh, SIGNAL(clicked()), this, SLOT(refresh()));
-    }
-}
-
-void ImportRos::updateDynamicGui(QBoxLayout *layout)
-{
-    QtHelper::clearLayout(dynamic_layout);
-    void setTopic(const ros::master::TopicInfo& topic);
-
-    if(!state.topic_.empty()) {
-        ROSHandler::instance().refresh();
-    }
-
-    if(ROSHandler::instance().nh()) {
-        ros::master::V_TopicInfo topics;
-        ros::master::getTopics(topics);
-
-        int topic_count = 0;
-        topic_list = new QComboBox;
-
-        topic_list->addItem("");
-
-        for(ros::master::V_TopicInfo::iterator it = topics.begin(); it != topics.end(); ++it) {
-            topic_list->addItem(it->name.c_str());
-
-            if(it->name == state.topic_) {
-                topic_list->setCurrentIndex(topic_count + 1);
-                changeTopic(QString(it->name.c_str()));
-            }
-
-            ++topic_count;
-        }
-
-        QObject::connect(topic_list, SIGNAL(currentIndexChanged(QString)), this, SLOT(changeTopic(QString)));
-
-        if(topic_count == 0) {
-            QLabel* label = new QLabel("no topics found");
-            label->setStyleSheet("QLabel { font-style: italic; }");
-            dynamic_layout->addWidget(label);
-
-        } else {
-            dynamic_layout->addWidget(topic_list);
-        }
-
-    } else {
-        QLabel* label = new QLabel("no connection to master");
-        label->setStyleSheet("QLabel { color : red; }");
-        dynamic_layout->addWidget(label);
-    }
-}
-
-void ImportRos::tick()
-{
+    setSynchronizedInputs(true);
+    connector_ = addOutput<connection_types::AnyMessage>("Something");
 }
 
 void ImportRos::refresh()
 {
     ROSHandler::instance().refresh();
 
-    Q_EMIT modelChanged();
-}
+    if(ROSHandler::instance().nh()) {
+        std::string old_topic = param<std::string>("topic");
 
-void ImportRos::messageArrived(ConnectorIn *source)
-{
-    // NO INPUT
-}
+        ros::master::V_TopicInfo topics;
+        ros::master::getTopics(topics);
 
-void ImportRos::changeTopic(const QString& topic)
-{
-    ros::master::V_TopicInfo topics;
-    ros::master::getTopics(topics);
-
-    for(ros::master::V_TopicInfo::iterator it = topics.begin(); it != topics.end(); ++it) {
-        if(it->name == topic.toStdString()) {
-            Q_EMIT newTopic(*it);
+        param::SetParameter::Ptr setp = boost::dynamic_pointer_cast<param::SetParameter>(getParameter("topic"));
+        if(setp) {
+            setError(false);
+            std::vector<std::string> topics_str;
+            for(ros::master::V_TopicInfo::const_iterator it = topics.begin(); it != topics.end(); ++it) {
+                topics_str.push_back(it->name);
+            }
+            setp->setSet(topics_str);
+            setp->set(old_topic);
             return;
         }
     }
 
-    setError(true, std::string("cannot set topic, ") + topic.toStdString() + " doesn't exist.");
+    setError(true, "no ROS connection", EL_WARNING);
+}
+
+void ImportRos::update()
+{
+    ROSHandler::instance().refresh();
+
+    ros::master::V_TopicInfo topics;
+    ros::master::getTopics(topics);
+
+    std::string topic = param<std::string>("topic");
+
+    for(ros::master::V_TopicInfo::iterator it = topics.begin(); it != topics.end(); ++it) {
+        if(it->name == topic) {
+            setTopic(*it);
+            return;
+        }
+    }
+
+    setError(true, std::string("cannot set topic, ") + topic + " doesn't exist.");
+}
+
+void ImportRos::process()
+{
+    // NO INPUT
 }
 
 
@@ -137,40 +110,13 @@ void ImportRos::setTopic(const ros::master::TopicInfo &topic)
 
     if(RosMessageConversion::instance().canHandle(topic)) {
         setError(false);
-        state.topic_ = topic.name;
 
         std::cout << "warning: topic is " << topic.name << std::endl;
         current_subscriber = RosMessageConversion::instance().subscribe(topic, 1, connector_);
 
     } else {
-        state.topic_ = "";
         setError(true, std::string("cannot import topic of type ") + topic.datatype);
         return;
     }
 
 }
-
-
-void ImportRos::State::writeYaml(YAML::Emitter& out) const {
-    out << YAML::Key << "topic" << YAML::Value << topic_;
-}
-
-void ImportRos::State::readYaml(const YAML::Node& node) {
-    node["topic"] >> topic_;
-}
-
-Memento::Ptr ImportRos::getState() const
-{
-    return boost::shared_ptr<State>(new State(state));
-}
-
-void ImportRos::setState(Memento::Ptr memento)
-{
-    boost::shared_ptr<ImportRos::State> m = boost::dynamic_pointer_cast<ImportRos::State> (memento);
-    assert(m.get());
-
-    state = *m;
-
-    Q_EMIT modelChanged();
-}
-

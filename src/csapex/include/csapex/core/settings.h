@@ -48,6 +48,7 @@ public:
         }
     }
 
+    void add(param::Parameter::Ptr p);
 
     template <typename T>
     void set(const std::string& name, const T& val) const

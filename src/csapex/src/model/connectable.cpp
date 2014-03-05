@@ -34,15 +34,15 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 }
 
 Connectable::Connectable(Settings& settings, const UUID& uuid)
-    : Unique(uuid), settings_(settings), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
-      blocked_(false)
+    : Unique(uuid), settings_(settings), port_(NULL), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+      blocked_(false), guard_(0xDEADBEEF)
 {
     init();
 }
 
 Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
-      blocked_(false)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), port_(NULL), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+      blocked_(false), guard_(0xDEADBEEF)
 {
     init();
 }
@@ -105,7 +105,9 @@ void Connectable::waitForProcessing()
         if(processing) {
             while(processing && settings_.isProcessingAllowed()) {
                 blocked_ = true;
-                port_->setPortProperty("blocked", true);
+                if(port_) {
+                    port_->setPortProperty("blocked", true);
+                }
 
                 can_process_cond.wait(&io_mutex);
             }
@@ -115,11 +117,14 @@ void Connectable::waitForProcessing()
         blocked_ = false;
     }
 
-    port_->setPortProperty("blocked", false);
+    if(port_) {
+        port_->setPortProperty("blocked", false);
+    }
 }
 
 void Connectable::setPort(Port *port)
 {
+    assert(port->guard_ == 0xDEADBEEF);
     port_ = port;
 
     if(isEnabled()) {
@@ -133,6 +138,7 @@ void Connectable::setPort(Port *port)
 
 Port* Connectable::getPort() const
 {
+    assert(port_ == NULL || port_->guard_ == 0xDEADBEEF);
     return port_;
 }
 
@@ -148,8 +154,6 @@ void Connectable::setCommandDispatcher(CommandDispatcher *d)
 
 void Connectable::init()
 {
-    port_ = NULL;
-
     setType(ConnectionType::makeDefault());
 
     setMinimizedSize(minimized_);

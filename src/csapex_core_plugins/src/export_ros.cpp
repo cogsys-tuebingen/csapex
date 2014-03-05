@@ -6,10 +6,10 @@
 #include <csapex_core_plugins/ros_handler.h>
 
 /// PROJECT
-
 #include <csapex/model/connector_in.h>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/model/message.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <QPushButton>
@@ -20,110 +20,50 @@ CSAPEX_REGISTER_CLASS(csapex::ExportRos, csapex::Node)
 using namespace csapex;
 
 ExportRos::ExportRos()
-    : connector_(NULL), has_pub(false), create_pub(false), topic_(NULL)
+    : connector_(NULL), create_pub(false)
 {
     addTag(Tag::get("RosIO"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Output"));
     setIcon(QIcon(":/terminal.png"));
+
+    addParameter(param::ParameterFactory::declareText("topic", "export"),
+                 boost::bind(&ExportRos::updateTopic, this));
 }
 
-void ExportRos::fill(QBoxLayout *layout)
+void ExportRos::setup()
 {
-    if(connector_ == NULL) {
-        connector_ = addInput<connection_types::AnyMessage>("Anything");
-
-        setSynchronizedInputs(true);
-
-        topic_ = new QLineEdit;
-        QPushButton* send = new QPushButton("set");
-
-        QHBoxLayout* sub = new QHBoxLayout;
-
-        sub->addWidget(topic_);
-        sub->addWidget(send);
-
-        layout->addLayout(sub);
-
-        connect(send, SIGNAL(clicked()), this, SLOT(updateTopic()));
-
-    }
+    setSynchronizedInputs(true);
+    connector_ = addInput<connection_types::AnyMessage>("Anything");
 }
 
 void ExportRos::process()
 {
-    if(state.topic.empty()) {
+    if(topic_.empty()) {
         return;
     }
 
     ConnectionType::Ptr msg = connector_->getMessage<ConnectionType>();
-//    connection_types::PossibleRosMessage::Ptr prm = boost::dynamic_pointer_cast<connection_types::PossibleRosMessage>(msg);
-//    if(prm && prm->isRosMessage()) {
-////        throw std::runtime_error("ros message support not implemented");
-//        if(create_pub) {
-//            ros::AdvertiseOptions ops;
 
-//            prm->info(ops.md5sum, ops.datatype, ops.message_definition, ops.has_header);
+    if(create_pub) {
+        pub = RosMessageConversion::instance().advertise(msg->toType(), topic_, 1, true);
+        create_pub = false;
 
-//            ops.latch = true;
+        connector_->setLabel(pub.getTopic());
+        connector_->setType(msg);
+    }
 
-//            pub = ROSHandler::instance().nh()->advertise(ops);
-//            create_pub = false;
-//            has_pub = true;
-//        }
+    if(create_pub) {
+        setError(true, "Publisher is not valid", EL_WARNING);
+        return;
+    }
 
-//        prm->publish(pub);
-
-//    } else {
-        if(create_pub) {
-            pub = RosMessageConversion::instance().advertise(msg->toType(), state.topic, 1, true);
-            create_pub = false;
-            has_pub = true;
-
-            connector_->setLabel(pub.getTopic());
-            connector_->setType(msg);
-        }
-
-        if(!has_pub) {
-            setError(true, "Publisher is not valid", EL_WARNING);
-            return;
-        }
-
-        RosMessageConversion::instance().publish(pub, msg);
-//    }
+    RosMessageConversion::instance().publish(pub, msg);
 }
 
 void ExportRos::updateTopic()
 {
-    state.topic = topic_->text().toStdString();
-    std::cout << "trying to publish @" << state.topic << std::endl;
+    topic_ = param<std::string>("topic");
+    std::cout << "trying to publish @" << topic_ << std::endl;
     create_pub = true;
-}
-
-void ExportRos::State::writeYaml(YAML::Emitter& out) const {
-    out << YAML::Key << "topic" << YAML::Value << topic;
-}
-
-void ExportRos::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("topic"))
-        node["topic"] >> topic;
-}
-
-Memento::Ptr ExportRos::getState() const
-{
-    return boost::shared_ptr<State>(new State(state));
-}
-
-void ExportRos::setState(Memento::Ptr memento)
-{
-    boost::shared_ptr<ExportRos::State> m = boost::dynamic_pointer_cast<ExportRos::State> (memento);
-    assert(m.get());
-
-    state = *m;
-
-    create_pub = true;
-
-    if(topic_) {
-        topic_->setText(state.topic.c_str());
-    }
 }

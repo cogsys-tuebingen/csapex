@@ -397,17 +397,8 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
         param::SetParameter* set_p = dynamic_cast<param::SetParameter*> (parameter);
         if(set_p) {
             QComboBox* combo = new QComboBox;
-            int current = 0;
-            std::string selected = set_p->getName();
-            for(int i = 0; i < set_p->noParameters(); ++i) {
-                std::string str = set_p->getName(i);
-                combo->addItem(QString::fromStdString(str));
 
-                if(str == selected) {
-                    current = i;
-                }
-            }
-            combo->setCurrentIndex(current);
+            updateUiSetScope(set_p, combo);
             layout->addLayout(QtHelper::wrap(display_name, combo));
 
             // ui change -> model
@@ -422,6 +413,8 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
             boost::function<void(const QString&)> select = boost::bind(&QComboBox::setCurrentIndex, combo, boost::bind(txt2idx, _1));
             boost::function<void(const std::string&)> set = boost::bind(select, boost::bind(stdstring2qstring, _1));
             connections.push_back(parameter_changed(*set_p).connect(boost::bind(&NodeAdapter::updateUiSet, this, _1, set)));
+
+            connections.push_back(scope_changed(*set_p).connect(boost::bind(&NodeAdapter::updateUiSetScope, this, set_p, combo)));
 
             QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
             continue;
@@ -502,6 +495,29 @@ void NodeAdapter::updateUiSet(const param::Parameter *p, boost::function<void (c
         setter(set_p->getName());
     }
 }
+
+void NodeAdapter::updateUiSetScope(const param::SetParameter *set_p, QComboBox *combo)
+{
+    int current = 0;
+    combo->clear();
+    std::string selected;
+    try {
+        selected = set_p->getName();
+    } catch(const std::exception& e) {
+        selected = "";
+    }
+
+    for(int i = 0; i < set_p->noParameters(); ++i) {
+        std::string str = set_p->getName(i);
+        combo->addItem(QString::fromStdString(str));
+
+        if(str == selected) {
+            current = i;
+        }
+    }
+    combo->setCurrentIndex(current);
+}
+
 void NodeAdapter::updateUiBitSet(const param::Parameter *p, const QListView *list)
 {
     const param::BitSetParameter* bitset_p = dynamic_cast<const param::BitSetParameter*> (p);

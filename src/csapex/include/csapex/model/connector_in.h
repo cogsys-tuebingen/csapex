@@ -45,8 +45,11 @@ public:
 
         QMutexLocker lock(&io_mutex);
         typename R::Ptr result = boost::dynamic_pointer_cast<R> (message_);
-        assert(result || !message_);
-        return result;
+        if(result) {
+            return result;
+        } else {
+            throw std::runtime_error("cannot cast message");
+        }
     }
     template <typename R>
     typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {

@@ -15,6 +15,7 @@
 #include <csapex/view/designer.h>
 #include <csapex/view/design_board.h>
 #include <csapex/manager/box_manager.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -85,10 +86,13 @@ int Main::run()
     return result;
 }
 
-int Main::main(bool headless, const std::string& config)
+int Main::main(bool headless, const std::string& config, const std::string& path_to_bin)
 {
     Settings settings;
     settings.setCurrentConfig(config);
+
+    param::Parameter::Ptr path = param::ParameterFactory::declarePath("path_to_bin", path_to_bin);
+    settings.add(path);
 
     BoxManager::instance().settings_ = &settings;
 
@@ -144,6 +148,8 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
+    std::string path_to_bin(argv[0]);
+
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "show help message")
@@ -182,6 +188,6 @@ int main(int argc, char** argv)
     }
 
     Main m(app);
-    return m.main(vm.count("headless"), input);
+    return m.main(vm.count("headless"), input, path_to_bin);
 }
 

@@ -20,6 +20,7 @@ public:
     OutputDisplay();
     virtual ~OutputDisplay();
 
+    void setup();
     virtual void fill(QBoxLayout* layout);
 
     virtual void enable();

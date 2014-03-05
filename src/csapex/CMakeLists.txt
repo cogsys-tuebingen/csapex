@@ -138,7 +138,7 @@ set(SRC_APP
 #
 # DETERMINE ALL FILES THAT NEED TO BE MOC'D AND DIVIDE INTO PLUGINBASE / APP
 #
-file(GLOB_RECURSE QT_SOURCES  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.h include/*.hpp include/*.h)
+file(GLOB_RECURSE QT_SOURCES  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*/*.h include/*/*.hpp include/*/*.h)
 set(QT_PLUGIN_MOC)
 set(QT_APP_MOC)
 foreach(header ${QT_SOURCES})
@@ -162,6 +162,7 @@ endforeach()
 
 QT4_WRAP_CPP(QT_PLUGIN_MOC ${QT_PLUGIN_MOC})
 QT4_WRAP_CPP(QT_APP_MOC ${QT_APP_MOC})
+QT4_WRAP_CPP(QT_APP_MOC_EXE src/csapex.h)
 
 set(QT_PLUGIN
 ${QT_PLUGIN_MOC}
@@ -204,6 +205,7 @@ target_link_libraries(csapex_app csapex_pluginbase
 #
 
 add_executable(csapex_node
+    ${QT_APP_MOC_EXE}
     src/csapex.cpp)
 target_link_libraries(csapex_node csapex_app)
 

@@ -74,3 +74,8 @@ std::string Settings::getConfig() const
 {
     return current_config_;
 }
+
+void Settings::add(param::Parameter::Ptr p)
+{
+    settings_[p->name()] = p;
+}

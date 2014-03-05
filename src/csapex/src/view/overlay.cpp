@@ -374,7 +374,8 @@ void Overlay::drawPort(Port *p)
         int dx = 160;
         int dy = lines * metrics.height();
 
-        QRectF rect(c->getPort()->centerPoint() + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
+        Port* port = c->getPort();
+        QRectF rect(port->centerPoint() + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
 
         QTextOption opt(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
         QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
@@ -728,7 +729,10 @@ void Overlay::paintEvent(QPaintEvent*)
             }
         }
         for(int id = 0; id < node->countOutputs(); ++id) {
-            Port* p = node->getOutput(id)->getPort();
+            ConnectorOut* o = node->getOutput(id);
+            assert(o->guard_ == 0xDEADBEEF);
+            Port* p = o->getPort();
+            assert(p->guard_ == 0xDEADBEEF);
             if(p) {
                 drawPort(p);
             }

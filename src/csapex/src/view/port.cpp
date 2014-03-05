@@ -17,7 +17,7 @@
 using namespace csapex;
 
 Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
-    : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0)
+    : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
     if(adaptee_) {
         adaptee_->setPort(this);
@@ -39,6 +39,11 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
     setMinimizedSize(minimized_);
 
     setMouseTracking(true);
+}
+
+Port::~Port()
+{
+    guard_ = 0x1;
 }
 
 

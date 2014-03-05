@@ -266,8 +266,6 @@ void Box::init()
 
     key_point = node_->getNodeState()->pos;
     move(key_point);
-
-    node_->makeThread();
 }
 bool Box::eventFilter(QObject* o, QEvent* e)
 {

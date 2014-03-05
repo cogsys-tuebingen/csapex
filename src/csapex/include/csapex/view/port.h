@@ -20,6 +20,7 @@ class Port : public QFrame, public Selectable, public ErrorState
 
 public:
     Port(CommandDispatcher* dispatcher, Connectable* adaptee);
+    virtual ~Port();
 
     QString cssClass() {
         return QString("Port");
@@ -67,6 +68,9 @@ protected:
     bool flipped_;
 
     Qt::MouseButtons buttons_down_;
+
+public:
+    mutable long guard_;
 };
 
 }

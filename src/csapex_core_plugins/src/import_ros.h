@@ -2,57 +2,28 @@
 #define IMPORT_ROS_H
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <ros/ros.h>
-#include <QComboBox>
 
 namespace csapex {
 
-class ImportRos : public BoxedObject
+class ImportRos : public Node
 {
-    Q_OBJECT
-
 public:
     ImportRos();
 
-    virtual void fill(QBoxLayout* layout);
-    virtual void updateDynamicGui(QBoxLayout *layout);
-    virtual void messageArrived(ConnectorIn* source);
-    virtual void tick();
+    virtual void setup();
+    virtual void process();
 
-Q_SIGNALS:
-    void newTopic(const ros::master::TopicInfo& topic);
-
-public Q_SLOTS:
+protected:
     void refresh();
-    void changeTopic(const QString &topic);
-
-public:
-    struct State : public Memento {
-        typedef boost::shared_ptr<State> Ptr;
-
-        std::string topic_;
-
-        virtual void writeYaml(YAML::Emitter& out) const;
-        virtual void readYaml(const YAML::Node& node);
-    };
-
-private:
-    State state;
-
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
-
-private Q_SLOTS:
+    void update();
     void setTopic(const ros::master::TopicInfo& topic);
 
 private:
     ConnectorOut* connector_;
-
-    QVBoxLayout* dynamic_layout;
-    QComboBox* topic_list;
 
     ros::Subscriber current_subscriber;
 };

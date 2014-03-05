@@ -78,11 +78,10 @@ class RosHandler
 
                     UUID uuid = UUID::make(dispatcher->getGraph()->makeUUIDPrefix("csapex::ImportRos"));
 
-                    ImportRos::State::Ptr sub_state(new ImportRos::State());
-                    sub_state->topic_ = cmd;
-
                     NodeState::Ptr state(new NodeState(NULL));
-                    state->boxed_state = sub_state;
+                    ImportRos dummy;
+                    dummy.getParameter("topic")->set(cmd);
+                    state->boxed_state = dummy.getState();
 
                     std::string type("csapex::ImportRos");
                     dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, state)));

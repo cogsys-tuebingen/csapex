@@ -54,7 +54,7 @@ void NodeWorker::parameterChanged(param::Parameter *)
 
 void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
 {
-    QMutexLocker lock(&changed_params_mutex_);
+   // QMutexLocker lock(&changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
 }
 

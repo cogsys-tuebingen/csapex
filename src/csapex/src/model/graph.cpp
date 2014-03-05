@@ -88,7 +88,8 @@ void Graph::addNode(Node::Ptr node)
 
     nodes_.push_back(node);
     node->setCommandDispatcher(dispatcher_);
-    node->setup();
+    node->makeThread();
+    node->setup();    
 
     QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(tick()));
 

@@ -73,44 +73,44 @@ bool OutputDisplay::eventFilter(QObject *o, QEvent *e)
     return false;
 }
 
+void OutputDisplay::setup()
+{
+    setSynchronizedInputs(true);
+    input_ = addInput<CvMatMessage>("Image", false, true);
+}
+
 void OutputDisplay::fill(QBoxLayout* layout)
 {
-    if(input_ == NULL) {
-        input_ = addInput<CvMatMessage>("Image", false, true);
-
-        setSynchronizedInputs(true);
-
-        view_->setFixedSize(QSize(state.width, state.height));
-        view_->setMouseTracking(true);
-        view_->setAcceptDrops(false);
-        QGraphicsScene* scene = view_->scene();
-        if(scene == NULL) {
-            scene = new QGraphicsScene();
-            view_->setScene(scene);
-            scene->installEventFilter(this);
-        }
-
-        layout->addWidget(view_);
-
-        QHBoxLayout* sub = new QHBoxLayout;
-
-        QCheckBox* cb = new QCheckBox("async");
-        cb->setChecked(input_->isAsync());
-        sub->addWidget(cb, 0,  Qt::AlignLeft);
-        QObject::connect(cb, SIGNAL(stateChanged(int)), this, SLOT(setAsync(int)));
-
-        QPushButton* fit = new QPushButton("fit size");
-        sub->addWidget(fit, 0,  Qt::AlignLeft);
-        QObject::connect(fit, SIGNAL(clicked()), this, SLOT(fitInView()));
-
-        sub->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
-        layout->addLayout(sub);
-
-        disable();
-
-        connect(this, SIGNAL(displayRequest(QSharedPointer<QImage>)), this, SLOT(display(QSharedPointer<QImage>)));
+    view_->setFixedSize(QSize(state.width, state.height));
+    view_->setMouseTracking(true);
+    view_->setAcceptDrops(false);
+    QGraphicsScene* scene = view_->scene();
+    if(scene == NULL) {
+        scene = new QGraphicsScene();
+        view_->setScene(scene);
+        scene->installEventFilter(this);
     }
+
+    layout->addWidget(view_);
+
+    QHBoxLayout* sub = new QHBoxLayout;
+
+    QCheckBox* cb = new QCheckBox("async");
+    cb->setChecked(input_->isAsync());
+    sub->addWidget(cb, 0,  Qt::AlignLeft);
+    QObject::connect(cb, SIGNAL(stateChanged(int)), this, SLOT(setAsync(int)));
+
+    QPushButton* fit = new QPushButton("fit size");
+    sub->addWidget(fit, 0,  Qt::AlignLeft);
+    QObject::connect(fit, SIGNAL(clicked()), this, SLOT(fitInView()));
+
+    sub->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+    layout->addLayout(sub);
+
+    disable();
+
+    connect(this, SIGNAL(displayRequest(QSharedPointer<QImage>)), this, SLOT(display(QSharedPointer<QImage>)));
 }
 
 void OutputDisplay::fitInView()

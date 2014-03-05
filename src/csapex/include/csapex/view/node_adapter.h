@@ -12,8 +12,14 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/signals2.hpp>
 #include <vector>
+#include <QComboBox>
 
 class QListView;
+
+namespace param
+{
+class SetParameter;
+}
 
 namespace csapex
 {
@@ -75,6 +81,8 @@ protected:
 
     void updateUiSet(const param::Parameter* p, boost::function<void(const std::string&)> setter);
     void updateUiBitSet(const param::Parameter* p, const QListView *list);
+
+    void updateUiSetScope(const param::SetParameter* set_p, QComboBox* combo);
 
 protected:
     void guiChanged();
