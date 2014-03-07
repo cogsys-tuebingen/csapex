@@ -18,6 +18,7 @@ class DynamicTransform : public csapex::BoxedObject
 public:
     DynamicTransform();
 
+    virtual void setup();
     virtual void fill(QBoxLayout* layout);
 
     virtual Memento::Ptr getState() const;

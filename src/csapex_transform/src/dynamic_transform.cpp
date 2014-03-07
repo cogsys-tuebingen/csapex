@@ -23,6 +23,7 @@ CSAPEX_REGISTER_CLASS(csapex::DynamicTransform, csapex::Node)
 using namespace csapex;
 
 DynamicTransform::DynamicTransform()
+    : from_box_(NULL), to_box_(NULL)
 {
     addTag(Tag::get("Transform"));
 }
@@ -96,7 +97,7 @@ void DynamicTransform::publishTransform(const ros::Time& time)
     output_frame_->publish(frame);
 }
 
-void DynamicTransform::fill(QBoxLayout* layout)
+void DynamicTransform::setup()
 {
     setSynchronizedInputs(true);
 
@@ -106,7 +107,10 @@ void DynamicTransform::fill(QBoxLayout* layout)
 
     output_ = addOutput<connection_types::TransformMessage>("Transform");
     output_frame_ = addOutput<connection_types::StringMessage>("Target Frame");
+}
 
+void DynamicTransform::fill(QBoxLayout* layout)
+{
     from_box_ = new QComboBox;
     from_box_->setEditable(true);
     layout->addWidget(from_box_);
@@ -154,41 +158,43 @@ void DynamicTransform::updateFrames()
         return;
     }
 
-    blockSignals(true);
+    if(from_box_) {
+        blockSignals(true);
 
-    from_box_->clear();
-    to_box_->clear();
-    int i = 0;
-    bool has_from = false;
-    bool has_to = false;
+        from_box_->clear();
+        to_box_->clear();
+        int i = 0;
+        bool has_from = false;
+        bool has_to = false;
 
-    BOOST_FOREACH(const std::string& frame, frames) {
-        from_box_->addItem(frame.c_str());
-        to_box_->addItem(frame.c_str());
+        BOOST_FOREACH(const std::string& frame, frames) {
+            from_box_->addItem(frame.c_str());
+            to_box_->addItem(frame.c_str());
 
-        if(frame == state.from_) {
+            if(frame == state.from_) {
+                from_box_->setCurrentIndex(i);
+                has_from = true;
+            }
+            if(frame == state.to_) {
+                to_box_->setCurrentIndex(i);
+                has_to = true;
+            }
+
+            ++i;
+        }
+
+        if(!has_from) {
+            from_box_->addItem(state.from_.c_str());
             from_box_->setCurrentIndex(i);
-            has_from = true;
         }
-        if(frame == state.to_) {
+
+        if(!has_to) {
+            to_box_->addItem(state.to_.c_str());
             to_box_->setCurrentIndex(i);
-            has_to = true;
         }
 
-        ++i;
+        blockSignals(false);
     }
-
-    if(!has_from) {
-        from_box_->addItem(state.from_.c_str());
-        from_box_->setCurrentIndex(i);
-    }
-
-    if(!has_to) {
-        to_box_->addItem(state.to_.c_str());
-        to_box_->setCurrentIndex(i);
-    }
-
-    blockSignals(false);
 }
 
 void DynamicTransform::update()
