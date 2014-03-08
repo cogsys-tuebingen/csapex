@@ -69,6 +69,16 @@ public:
         return result;
     }
 
+    static Parameter::Ptr declareParameterStringSet(const std::string& name, const std::vector<std::string> & set)
+    {
+        SetParameter::Ptr result(new SetParameter(name));
+        result->setSet(set);
+        result->def_ = set.begin();
+        result->set<std::string>(*set.begin());
+
+        return result;
+    }
+
     static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::map<std::string, int> &set, int def = 0);
     static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> > &set);
 

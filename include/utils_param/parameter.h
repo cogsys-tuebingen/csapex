@@ -20,6 +20,9 @@ public:
         boost::signals2::signal<void(Parameter*)>& parameter_changed(Parameter& p) {
             return p.parameter_changed;
         }
+        boost::signals2::signal<void(Parameter*)>& scope_changed(Parameter& p) {
+            return p.scope_changed;
+        }
         boost::signals2::signal<void(Parameter*,bool)>& parameter_enabled(Parameter& p) {
             return p.parameter_enabled;
         }
@@ -103,6 +106,7 @@ protected:
 
 protected:
     boost::signals2::signal<void(Parameter*)> parameter_changed;
+    boost::signals2::signal<void(Parameter*)> scope_changed;
     boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
 
 protected:
