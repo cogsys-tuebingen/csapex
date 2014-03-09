@@ -303,7 +303,6 @@ void Node::setNodeStateLater(NodeStatePtr s)
 Memento::Ptr Node::getState() const
 {
     GenericState::Ptr r(new GenericState(state));
-    r->param_list.clear();
     return r;
 }
 
@@ -315,16 +314,11 @@ void Node::setState(Memento::Ptr memento)
     std::map<std::string, param::Parameter::Ptr> old_params = state.params;
     state = *m;
     state.params = old_params;
-    state.param_list.clear();
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it) {
         param::Parameter::Ptr p = it->second;
         if(state.params.find(p->name()) != state.params.end()) {
             state.params[p->name()]->setFrom(*p);
         }
-    }
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it) {
-        param::Parameter::Ptr p = it->second;
-        state.param_list.push_back(state.params[p->name()].get());
     }
 
     Q_EMIT modelChanged();
@@ -457,6 +451,7 @@ void Node::setBox(Box* box)
 {
     QMutexLocker lock(&mutex);
     box_ = box;
+    worker_->checkConditions();
 }
 
 Box* Node::getBox() const

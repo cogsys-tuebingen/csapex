@@ -41,13 +41,18 @@ void NodeWorker::addParameterCondition(param::Parameter* param, boost::function<
 void NodeWorker::parameterChanged(param::Parameter *)
 {
     if(!conditions_.empty()) {
-        for(std::map<param::Parameter*, boost::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
-            bool should_be_enabled = it->second();
-            bool is_enabled = it->first->isEnabled();
+        checkConditions();
+    }
+}
 
-            if(should_be_enabled != is_enabled) {
-                it->first->setEnabled(should_be_enabled);
-            }
+void NodeWorker::checkConditions()
+{
+    for(std::map<param::Parameter*, boost::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
+        bool should_be_enabled = it->second();
+        bool is_enabled = it->first->isEnabled();
+
+        if(should_be_enabled != is_enabled) {
+            it->first->setEnabled(should_be_enabled);
         }
     }
 }

@@ -54,6 +54,8 @@ public Q_SLOTS:
     void setProcessing(bool p);
     bool isProcessing() const;
 
+    void checkConditions();
+
 Q_SIGNALS:
     void messageProcessed();
 
