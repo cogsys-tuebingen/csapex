@@ -2,7 +2,7 @@
 #define DOUBLE_BUFFER_H
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex/model/connection_type.h>
 
 /// SYSTEM
@@ -10,19 +10,14 @@
 
 namespace csapex {
 
-class DoubleBuffer : public BoxedObject
+class DoubleBuffer : public Node
 {
-    Q_OBJECT
-
 public:
     DoubleBuffer();
 
-    virtual void fill(QBoxLayout* layout);
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void setup();
+    virtual void process();
     virtual void tick();
-
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
 
 protected:
     void checkIfDone();
@@ -38,12 +33,8 @@ private:
 
     bool dirty_;
 
-    struct State : public Memento {
-        ConnectionType::Ptr buffer_back_;
-        ConnectionType::Ptr buffer_front_;
-    };
-
-    State state;
+    ConnectionType::Ptr buffer_back_;
+    ConnectionType::Ptr buffer_front_;
 };
 
 }

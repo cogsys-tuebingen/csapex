@@ -23,13 +23,13 @@ DoubleBuffer::DoubleBuffer()
     setIcon(QIcon(":/buffer.png"));
 }
 
-void DoubleBuffer::fill(QBoxLayout *layout)
+void DoubleBuffer::setup()
 {
-    if(input_ == NULL) {
-        input_ = addInput<connection_types::AnyMessage>("Anything");
-        output_ = addOutput<connection_types::AnyMessage>("Same as input");
-        output_->setAsync(true);
-    }
+    setSynchronizedInputs(true);
+
+    input_ = addInput<connection_types::AnyMessage>("Anything");
+    output_ = addOutput<connection_types::AnyMessage>("Same as input");
+    output_->setAsync(true);
 }
 
 void DoubleBuffer::checkIfDone()
@@ -38,11 +38,11 @@ void DoubleBuffer::checkIfDone()
     //input_->setProcessing(false);
 }
 
-void DoubleBuffer::messageArrived(ConnectorIn *source)
+void DoubleBuffer::process()
 {
-    ConnectionType::Ptr msg = source->getMessage<ConnectionType>();
+    ConnectionType::Ptr msg = input_->getMessage<ConnectionType>();
 
-    state.buffer_back_ = msg->clone();
+    buffer_back_ = msg->clone();
 
     swapBuffers();
 
@@ -57,8 +57,8 @@ void DoubleBuffer::swapBuffers()
 {
     QMutexLocker lock(&mutex_);
 
-    state.buffer_front_ = state.buffer_back_;
-    state.buffer_back_.reset();
+    buffer_front_ = buffer_back_;
+    buffer_back_.reset();
 }
 
 void DoubleBuffer::tick()
@@ -67,30 +67,16 @@ void DoubleBuffer::tick()
         return;
     }
 
-    if(!state.buffer_front_) {
+    if(!buffer_front_) {
         return;
     }
 
     ConnectionType::Ptr msg;
     {
         QMutexLocker lock(&mutex_);
-        msg = state.buffer_front_;
+        msg = buffer_front_;
     }
 
     output_->publish(msg);
     dirty_ = false;
-}
-
-
-Memento::Ptr DoubleBuffer::getState() const
-{
-    return boost::shared_ptr<State>(new State(state));
-}
-
-void DoubleBuffer::setState(Memento::Ptr memento)
-{
-    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
-    assert(m.get());
-
-    state = *m;
 }
