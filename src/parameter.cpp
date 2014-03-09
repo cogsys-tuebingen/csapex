@@ -91,5 +91,5 @@ std::string Parameter::type2string(const std::type_info &type)
 
 void Parameter::throwTypeError(const std::type_info &a, const std::type_info &b, const std::string& prefix) const
 {
-    throw std::runtime_error(prefix + std::string("this is not of type '") + type2string(a) + "' but '" + type2string(b) + "'");
+    throw std::runtime_error(prefix + std::string("'") + name() + "' is not of type '" + type2string(a) + "' but '" + type2string(b) + "'");
 }

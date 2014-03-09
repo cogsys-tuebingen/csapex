@@ -47,7 +47,7 @@ public:
     T as() const
     {
         if(!is<T>() || is<void>()) {
-            throwTypeError(type(), typeid(T), "get failed: ");
+            throwTypeError(typeid(T), type(), "get failed: ");
         }
         const boost::any& v = get_unsafe();
         return boost::any_cast<T> (v);
@@ -57,7 +57,7 @@ public:
     void set(const T& v)
     {
         if(!is<T>() && !is<void>()) {
-            throwTypeError(type(), typeid(T), "set failed: ");
+            throwTypeError(typeid(T), type(),"set failed: ");
         }
 
         set_unsafe(v);
