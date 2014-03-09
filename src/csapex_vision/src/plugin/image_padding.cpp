@@ -2,11 +2,10 @@
 #include "image_padding.h"
 
 /// PROJECT
-#include <csapex/utility/qt_helper.hpp>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-
 #include <csapex_vision/cv_mat_message.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -18,35 +17,27 @@ using namespace csapex;
 using namespace connection_types;
 
 ImagePadding::ImagePadding()
-    : slider(NULL)
 {
-    state.border = 0;
-
     addTag(Tag::get("General"));
     addTag(Tag::get("Vision"));
 
     setIcon(QIcon(":/border.png"));
+
+    addParameter(param::ParameterFactory::declareRange("border", 0, 1000, 0, 1));
+    addParameter(param::ParameterFactory::declareRange("mask offset", 0, 100, 0, 1));
 }
 
-void ImagePadding::fill(QBoxLayout *layout)
+void ImagePadding::setup()
 {
-    if(slider == NULL) {
-        slider = QtHelper::makeSlider(layout, "border width", 0, 0, 500);
-        connect(slider, SIGNAL(valueChanged(int)), this, SLOT(update()));
+    setSynchronizedInputs(true);
 
-        input_ = addInput<CvMatMessage>("Image");
+    input_ = addInput<CvMatMessage>("Image");
 
-        output_ = addOutput<CvMatMessage>("Expanded Image");
-        output_mask_ = addOutput<CvMatMessage>("Expanded Mask");
-    }
+    output_ = addOutput<CvMatMessage>("Expanded Image");
+    output_mask_ = addOutput<CvMatMessage>("Expanded Mask");
 }
 
-void ImagePadding::update()
-{
-    state.border = slider->value();
-}
-
-void ImagePadding::messageArrived(ConnectorIn *source)
+void ImagePadding::process()
 {
     if(!output_->isConnected() && !output_mask_->isConnected()) {
         return;
@@ -57,10 +48,12 @@ void ImagePadding::messageArrived(ConnectorIn *source)
     int rows = img_msg->value.rows;
     int cols = img_msg->value.cols;
 
+    int border = param<int>("border");
+
     if(output_->isConnected()) {
         CvMatMessage::Ptr result(new CvMatMessage(img_msg->getEncoding()));
-        result->value = cv::Mat(rows + 2 * state.border, cols + 2 * state.border, img_msg->value.type(), cv::Scalar::all(0));
-        cv::Mat roi(result->value, cv::Rect(state.border, state.border, cols, rows));
+        result->value = cv::Mat(rows + 2 * border, cols + 2 * border, img_msg->value.type(), cv::Scalar::all(0));
+        cv::Mat roi(result->value, cv::Rect(border, border, cols, rows));
 
         img_msg->value.copyTo(roi);
 
@@ -70,42 +63,13 @@ void ImagePadding::messageArrived(ConnectorIn *source)
     if(output_mask_->isConnected()) {
         CvMatMessage::Ptr result(new CvMatMessage(enc::mono));
 
-        result->value = cv::Mat(rows + 2 * state.border, cols + 2 * state.border, CV_8UC1, cv::Scalar::all(0));
+        result->value = cv::Mat(rows + 2 * border, cols + 2 * border, CV_8UC1, cv::Scalar::all(0));
 
-        // TODO: make this a parameter
-        int mask_offset = 0;
-        cv::Rect roi_rect(state.border+mask_offset, state.border+mask_offset, cols-2*mask_offset, rows-2*mask_offset);
+        int mask_offset = param<int>("mask offset");
+        cv::Rect roi_rect(border+mask_offset, border+mask_offset, cols-2*mask_offset, rows-2*mask_offset);
         cv::rectangle(result->value, roi_rect, cv::Scalar::all(255), CV_FILLED);
 
         output_mask_->publish(result);
     }
 
-}
-
-Memento::Ptr ImagePadding::getState() const
-{
-    return boost::shared_ptr<State>(new State(state));
-}
-
-void ImagePadding::setState(Memento::Ptr memento)
-{
-    boost::shared_ptr<State> m = boost::dynamic_pointer_cast<State> (memento);
-    assert(m.get());
-
-    state = *m;
-
-    slider->setValue(state.border);
-}
-
-
-void ImagePadding::State::writeYaml(YAML::Emitter& out) const
-{
-    out << YAML::Key << "border" << YAML::Value << border;
-}
-
-void ImagePadding::State::readYaml(const YAML::Node& node)
-{
-    if(node.FindValue("border")) {
-        node["border"] >> border;
-    }
 }

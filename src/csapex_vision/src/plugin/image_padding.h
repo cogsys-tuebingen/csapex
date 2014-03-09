@@ -2,7 +2,7 @@
 #define IMAGE_PADDING_H
 
 /// PROJECT
-#include <csapex_vision/filter.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <QSlider>
@@ -10,38 +10,18 @@
 namespace csapex
 {
 
-class ImagePadding : public BoxedObject
+class ImagePadding : public Node
 {
-    Q_OBJECT
-
 public:
     ImagePadding();
 
-    void fill(QBoxLayout *layout);
-
-    virtual Memento::Ptr getState() const;
-    virtual void setState(Memento::Ptr memento);
-
-public Q_SLOTS:
-    void messageArrived(ConnectorIn* source);
-    void update();
+    void setup();
+    void process();
 
 private:
-    QSlider* slider;
-
     ConnectorIn* input_;
     ConnectorOut* output_;
     ConnectorOut* output_mask_;
-
-    struct State : public Memento {
-        int border;
-
-        virtual void writeYaml(YAML::Emitter& out) const;
-        virtual void readYaml(const YAML::Node& node);
-    };
-
-    State state;
-
 };
 
 } /// NAMESPACE
