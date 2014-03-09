@@ -2,19 +2,19 @@
 #define POINT_COUNT_H
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex_point_cloud/point_cloud_message.h>
 
 namespace csapex {
 
-class TransformCloud : public BoxedObject
+class TransformCloud : public Node
 {
     Q_OBJECT
 
 public:
     TransformCloud();
 
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
     virtual void process();
 
     template <class PointT>

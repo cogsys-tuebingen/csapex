@@ -38,9 +38,13 @@ void DynamicTransform::process()
             state.from_ = from;
             update = true;
         }
-        from_box_->setEnabled(false);
+        if(from_box_) {
+            from_box_->setEnabled(false);
+        }
     } else {
-        from_box_->setEnabled(true);
+        if(from_box_) {
+            from_box_->setEnabled(true);
+        }
     }
 
     if(frame_in_to_->isConnected() && frame_in_to_->hasMessage()) {
@@ -50,14 +54,19 @@ void DynamicTransform::process()
             state.to_ = to;
             update = true;
         }
-        to_box_->setEnabled(false);
+        if(to_box_){
+            to_box_->setEnabled(false);
+        }
     } else {
-        to_box_->setEnabled(true);
+        if(to_box_){
+            to_box_->setEnabled(true);
+        }
     }
 
     if(update) {
         updateFrames();
     }
+
 
     connection_types::TimeStampMessage::Ptr time_msg = time_in_->getMessage<connection_types::TimeStampMessage>();
     publishTransform(time_msg->value);

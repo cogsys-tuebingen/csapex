@@ -22,12 +22,11 @@ TransformCloud::TransformCloud()
     addTag(Tag::get("PointCloud"));
 }
 
-void TransformCloud::fill(QBoxLayout *layout)
+void TransformCloud::setup()
 {
     setSynchronizedInputs(true);
 
     input_cloud_ = addInput<PointCloudMessage>("PointCloud");
-
     input_transform_ = addInput<TransformMessage>("Transformation");
 
     output_ = addOutput<PointCloudMessage>("PointCloud");

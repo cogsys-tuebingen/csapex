@@ -320,8 +320,11 @@ void Node::setState(Memento::Ptr memento)
         param::Parameter::Ptr p = it->second;
         if(state.params.find(p->name()) != state.params.end()) {
             state.params[p->name()]->setFrom(*p);
-            state.param_list.push_back(state.params[p->name()].get());
         }
+    }
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it) {
+        param::Parameter::Ptr p = it->second;
+        state.param_list.push_back(state.params[p->name()].get());
     }
 
     Q_EMIT modelChanged();

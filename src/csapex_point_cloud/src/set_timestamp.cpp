@@ -22,7 +22,7 @@ SetTimeStamp::SetTimeStamp()
     addTag(Tag::get("Time"));
 }
 
-void SetTimeStamp::fill(QBoxLayout *layout)
+void SetTimeStamp::setup()
 {
     setSynchronizedInputs(true);
 

@@ -2,19 +2,19 @@
 #define EXTRACT_TIMESTAMP_H_
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex_point_cloud/point_cloud_message.h>
 
 namespace csapex {
 
-class ExtractTimeStamp : public BoxedObject
+class ExtractTimeStamp : public Node
 {
     Q_OBJECT
 
 public:
     ExtractTimeStamp();
 
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
     virtual void process();
 
     template <class PointT>

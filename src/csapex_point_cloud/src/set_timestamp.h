@@ -2,7 +2,7 @@
 #define SET_TIMESTAMP_H_
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex_point_cloud/point_cloud_message.h>
 
 /// SYSTEM
@@ -10,14 +10,14 @@
 
 namespace csapex {
 
-class SetTimeStamp : public BoxedObject
+class SetTimeStamp : public Node
 {
     Q_OBJECT
 
 public:
     SetTimeStamp();
 
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
     virtual void process();
 
     template <class PointT>

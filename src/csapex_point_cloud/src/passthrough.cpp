@@ -20,12 +20,12 @@ using namespace csapex;
 using namespace csapex::connection_types;
 
 PassThrough::PassThrough()
-    : min_(0)
+    : min_(0), field(NULL)
 {
     addTag(Tag::get("PointCloud"));
 }
 
-void PassThrough::fill(QBoxLayout *layout)
+void PassThrough::setup()
 {
     setSynchronizedInputs(true);
 
@@ -33,9 +33,12 @@ void PassThrough::fill(QBoxLayout *layout)
 
     output_pos_ = addOutput<PointCloudMessage>("cropped PointCloud (+)");
     output_neg_ = addOutput<PointCloudMessage>("cropped PointCloud (-)");
+}
 
-    min_ = QtHelper::makeDoubleSlider(layout, "min", 0.0, -5.0, 5.0, 0.01);
-    max_ = QtHelper::makeDoubleSlider(layout, "max", 0.0, -5.0, 5.0, 0.01);
+void PassThrough::fill(QBoxLayout *layout)
+{
+    min_ = QtHelper::makeDoubleSlider(layout, "min", 0.0, -15.0, 15.0, 0.01);
+    max_ = QtHelper::makeDoubleSlider(layout, "max", 0.0, -15.0, 15.0, 0.01);
 
     QObject::connect(min_, SIGNAL(valueChanged(double)), this, SLOT(update()));
     QObject::connect(max_, SIGNAL(valueChanged(double)), this, SLOT(update()));
@@ -51,6 +54,9 @@ void PassThrough::fill(QBoxLayout *layout)
 
 void PassThrough::updateFields(const std::vector<std::string>& fields)
 {
+    if(!field) {
+        return;
+    }
     bool rebuild = false;
     for(int i = 0, n = field->count(); i < n; ++i) {
         std::string f = field->itemData(i, Qt::DisplayRole).toString().toStdString();
@@ -75,6 +81,9 @@ void PassThrough::updateFields(const std::vector<std::string>& fields)
 
 void PassThrough::updateFields()
 {
+    if(!field) {
+        return;
+    }
     if(field->count() == 0) {
         field->addItem("");
     }
@@ -100,6 +109,9 @@ void PassThrough::updateFields()
 
 void PassThrough::update()
 {
+    if(!field) {
+        return;
+    }
     if(!signalsBlocked()) {
         state.min_ = min_->doubleValue();
         state.max_ = max_->doubleValue();

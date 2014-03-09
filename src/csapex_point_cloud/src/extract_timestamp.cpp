@@ -21,7 +21,7 @@ ExtractTimeStamp::ExtractTimeStamp()
     addTag(Tag::get("Time"));
 }
 
-void ExtractTimeStamp::fill(QBoxLayout *layout)
+void ExtractTimeStamp::setup()
 {
     setSynchronizedInputs(true);
 

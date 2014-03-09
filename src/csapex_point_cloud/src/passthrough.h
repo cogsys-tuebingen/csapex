@@ -18,6 +18,7 @@ class PassThrough : public BoxedObject
 public:
     PassThrough();
 
+    virtual void setup();
     virtual void fill(QBoxLayout* layout);
     virtual void process();
 
