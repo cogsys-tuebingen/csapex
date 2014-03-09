@@ -2,7 +2,6 @@
 #include "relay.h"
 
 /// PROJECT
-
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connection_type.h>
@@ -23,20 +22,19 @@ Relay::Relay()
     setIcon(QIcon(":/buffer.png"));
 }
 
-void Relay::fill(QBoxLayout *layout)
+void Relay::setup()
 {
-    if(input_ == NULL) {
-        input_ = addInput<connection_types::AnyMessage>("Anything");
-        output_ = addOutput<connection_types::AnyMessage>("Same as input");
-    }
+    setSynchronizedInputs(true);
+
+    input_ = addInput<connection_types::AnyMessage>("Anything");
+    output_ = addOutput<connection_types::AnyMessage>("Same as input");
 }
 
-void Relay::messageArrived(ConnectorIn *source)
+void Relay::process()
 {
-    ConnectionType::Ptr msg = source->getMessage<ConnectionType>();
+    ConnectionType::Ptr msg = input_->getMessage<ConnectionType>();
 
     output_->setType(input_->getType());
-
     output_->publish(msg);
 }
 
