@@ -39,6 +39,7 @@ public:
 
 private Q_SLOTS:
     void messageArrived(ConnectorIn* source);
+    void process();
 
 protected:
     virtual void fill(QBoxLayout* layout);

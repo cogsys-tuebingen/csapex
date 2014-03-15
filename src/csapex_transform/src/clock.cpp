@@ -40,6 +40,11 @@ void Clock::tick()
     output_->publish(time);
 }
 
+void Clock::process()
+{
+
+}
+
 void Clock::fill(QBoxLayout* layout)
 {
     setSynchronizedInputs(true);

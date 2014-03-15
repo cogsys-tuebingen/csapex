@@ -27,6 +27,7 @@ public:
 
 public:
     NodeWorker(Node* node);
+    ~NodeWorker();
 
     bool isProcessing();
 
@@ -77,6 +78,8 @@ private:
 
     bool thread_initialized_;
     volatile bool is_processing_;
+
+    std::vector<boost::signals2::connection> connections_;
 };
 
 }

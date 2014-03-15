@@ -21,6 +21,7 @@ public:
     FileImporter();
     ~FileImporter();
 
+    void setup();
     virtual void fill(QBoxLayout* layout);
 
     virtual Memento::Ptr getState() const;
@@ -28,8 +29,8 @@ public:
 
     void import(const QString& filename);
 
-public Q_SLOTS:
-    void messageArrived(ConnectorIn* source);
+    void process();
+
     void tick();
 
     void importDialog();

@@ -19,6 +19,7 @@ public:
     Toggle();
 
 public:
+    void process();
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:

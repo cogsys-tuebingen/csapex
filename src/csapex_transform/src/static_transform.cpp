@@ -32,6 +32,11 @@ StaticTransform::StaticTransform()
     addParameter(param::ParameterFactory::declare("dz", -d, d, 0.0, 0.01));
 }
 
+void StaticTransform::process()
+{
+
+}
+
 void StaticTransform::tick()
 {
     double roll = param<double>("roll");

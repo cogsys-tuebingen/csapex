@@ -382,12 +382,6 @@ void CsApexWindow::nodeAdded(Node::Ptr node)
     }
 
     designer_->addBox(box);
-
-//    Group* grp = dynamic_cast<Group*> (box);
-
-//    if(grp) {
-//        QObject::connect(grp, SIGNAL(open_sub_graph(Group*)), this, SLOT(openSubGraph(Group*)));
-//    }
 }
 
 void CsApexWindow::nodeRemoved(NodePtr node)

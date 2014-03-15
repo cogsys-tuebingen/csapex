@@ -16,6 +16,7 @@ class DoubleInput : public BoxedObject
 public:
     DoubleInput();
 
+    void process();
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:

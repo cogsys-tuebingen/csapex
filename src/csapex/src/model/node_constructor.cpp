@@ -11,7 +11,7 @@ using namespace csapex;
 
 NodePtr NodeConstructor::makeNull()
 {
-    return Node::Ptr (new Node);
+    return Node::Ptr (static_cast<Node*>(NULL));
 }
 
 NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, Make c)

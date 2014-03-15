@@ -19,6 +19,11 @@ PointCloudGenerator::PointCloudGenerator()
 {
 }
 
+void PointCloudGenerator::process()
+{
+
+}
+
 void PointCloudGenerator::setup()
 {
 }

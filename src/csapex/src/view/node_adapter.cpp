@@ -122,11 +122,12 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
     QtHelper::clearLayout(layout_);
     clear();
 
-    std::vector<param::Parameter*> params = node_->getParameters();
+    std::vector<param::Parameter::Ptr> params = node_->getParameters();
 
     std::map<std::string, QBoxLayout*> groups;
 
-    Q_FOREACH(param::Parameter* parameter, params) {
+    Q_FOREACH(param::Parameter::Ptr p, params) {
+        param::Parameter* parameter = p.get();
         const std::string& name = parameter->name();
 
         QBoxLayout* layout = outer_layout;

@@ -112,6 +112,15 @@ FileImporter::~FileImporter()
 {
 }
 
+void FileImporter::setup()
+{
+    setSynchronizedInputs(true);
+
+    optional_input_filename_ = addInput<connection_types::StringMessage>("File", true);
+
+    output_ = addOutput<connection_types::AnyMessage>("Unknown");
+}
+
 void FileImporter::fill(QBoxLayout* layout)
 {
     if(file_dialog_ == NULL) {
@@ -127,9 +136,6 @@ void FileImporter::fill(QBoxLayout* layout)
 
         connect(file_dialog_, SIGNAL(pressed()), this, SLOT(importDialog()));
 
-        optional_input_filename_ = addInput<connection_types::StringMessage>("File", true);
-
-        output_ = addOutput<connection_types::AnyMessage>("Unknown");
 
         QObject::connect(this, SIGNAL(toggled(bool)), this, SLOT(toggle(bool)));
 
@@ -144,9 +150,10 @@ void FileImporter::toggle(bool on)
 
 }
 
-void FileImporter::messageArrived(ConnectorIn *source)
+void FileImporter::process()
 {
-    StringMessage::Ptr msg = source->getMessage<StringMessage>();
+    // TODO: remove once parameters are connectable
+    StringMessage::Ptr msg = optional_input_filename_->getMessage<StringMessage>();
 
     if(msg) {
         std::cout << "got message: " << msg->value << std::endl;

@@ -43,7 +43,7 @@ GlobalOptionPanel::GlobalOptionPanel()
     addTag(Tag::get("General"));
 }
 
-void GlobalOptionPanel::messageArrived(ConnectorIn *source)
+void GlobalOptionPanel::process()
 {
     // NO INPUTS
 }

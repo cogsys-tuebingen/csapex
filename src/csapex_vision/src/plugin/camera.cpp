@@ -28,6 +28,11 @@ Camera::Camera()
     addParameter(param::ParameterFactory::declare<int>("h", 480, 800, 480, 1), boost::bind(&Camera::update, this, _1));
 }
 
+void Camera::process()
+{
+
+}
+
 void Camera::tick()
 {
     if(cap_.isOpened()) {

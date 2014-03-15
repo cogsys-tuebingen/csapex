@@ -22,6 +22,11 @@ Toggle::Toggle()
     addTag(Tag::get("Boolean"));
 }
 
+void Toggle::process()
+{
+
+}
+
 void Toggle::fill(QBoxLayout *layout)
 {
     out = addOutput<connection_types::BooleanMessage>("Signal");
