@@ -1,8 +1,8 @@
 #ifndef TOGGLE_H
 #define TOGGLE_H
 
-/// HEADER
-#include <csapex/model/boxed_object.h>
+/// COMPONENT
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <QPushButton>
@@ -11,27 +11,23 @@ namespace csapex {
 
 namespace boolean {
 
-class Toggle : public BoxedObject
+class Toggle : public Node
 {
-    Q_OBJECT
-
 public:
     Toggle();
 
 public:
+    virtual void setup();
     void process();
-    virtual void fill(QBoxLayout* layout);
-
-public Q_SLOTS:
-    void setSignal(bool signal);
 
     void tick();
 
 private:
-    ConnectorOut* out;
+    void setSignal();
 
+private:
+    ConnectorOut* out;
     bool signal_;
-    QPushButton* btn;
 };
 
 }

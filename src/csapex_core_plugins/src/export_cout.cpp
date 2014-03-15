@@ -2,7 +2,6 @@
 #include "export_cout.h"
 
 /// PROJECT
-
 #include <csapex/model/connector_in.h>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/model/message.h>
@@ -23,13 +22,11 @@ ExportCout::ExportCout()
     setIcon(QIcon(":/terminal.png"));
 }
 
-void ExportCout::fill(QBoxLayout *layout)
+void ExportCout::setup()
 {
-    if(connector_ == NULL) {
-        connector_ = addInput<connection_types::AnyMessage>("Anything");
+    setSynchronizedInputs(true);
 
-        setSynchronizedInputs(true);
-    }
+    connector_ = addInput<connection_types::AnyMessage>("Anything");
 }
 
 void ExportCout::process()

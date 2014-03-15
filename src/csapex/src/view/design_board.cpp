@@ -440,7 +440,7 @@ void DesignBoard::showContextMenu(const QPoint& pos)
 void DesignBoard::showContextMenuAddNode(const QPoint &global_pos)
 {
     QMenu menu;
-    BoxManager::instance().insertAvailableBoxedObjects(&menu);
+    BoxManager::instance().insertAvailableNodeTypes(&menu);
 
     QAction* selectedItem = menu.exec(global_pos);
 

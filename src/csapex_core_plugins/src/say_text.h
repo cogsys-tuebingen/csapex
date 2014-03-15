@@ -2,7 +2,7 @@
 #define TEXT_DISPLAY_H_
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <QLabel>

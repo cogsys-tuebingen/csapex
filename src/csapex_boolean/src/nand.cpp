@@ -5,7 +5,6 @@
 #include <csapex_boolean/boolean_message.h>
 
 /// PROJECT
-
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 
@@ -23,7 +22,7 @@ NAND::NAND()
     addTag(Tag::get("Boolean"));
 }
 
-void NAND::fill(QBoxLayout *layout)
+void NAND::setup()
 {
     setSynchronizedInputs(true);
 
@@ -36,10 +35,7 @@ void NAND::fill(QBoxLayout *layout)
 void NAND::process()
 {
     BooleanMessage::Ptr a = in_a->getMessage<BooleanMessage>();
-    assert(a);
-
     BooleanMessage::Ptr b = in_b->getMessage<BooleanMessage>();
-    assert(b);
 
     BooleanMessage::Ptr msg(new BooleanMessage);
     msg->value = !(a->value && b->value);
