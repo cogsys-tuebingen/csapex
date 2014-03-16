@@ -43,6 +43,9 @@ public:
     ColorParameter();
     explicit ColorParameter(const std::string& name, int r, int g, int b); virtual const std::type_info &type() const;
 
+    virtual int ID() const { return 0x002; }
+    virtual std::string TYPE() const { return "Color"; }
+
     virtual std::string toStringImpl() const;
 
     void setFrom(const Parameter& other);

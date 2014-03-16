@@ -63,11 +63,6 @@ void Parameter::setFrom(const Parameter &other)
     throw std::logic_error("not implemented");
 }
 
-Parameter::Ptr Parameter::empty()
-{
-    return Parameter::Ptr(new Parameter("loading"));
-}
-
 boost::any Parameter::access_unsafe(const Parameter &p) const
 {
     return p.get_unsafe();

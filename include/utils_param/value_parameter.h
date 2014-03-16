@@ -51,6 +51,9 @@ public:
     explicit ValueParameter(const std::string& name);
     virtual ~ValueParameter();
 
+    virtual int ID() const { return 0x008; }
+    virtual std::string TYPE() const { return "Value"; }
+
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 

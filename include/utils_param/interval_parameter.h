@@ -56,6 +56,9 @@ public:
     explicit IntervalParameter(const std::string& name);
     virtual ~IntervalParameter();
 
+    virtual int ID() const { return 0x003; }
+    virtual std::string TYPE() const { return "Interval"; }
+
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 

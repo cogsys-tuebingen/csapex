@@ -51,6 +51,9 @@ public:
     explicit PathParameter(const std::string& name);
     virtual ~PathParameter();
 
+    virtual int ID() const { return 0x004; }
+    virtual std::string TYPE() const { return "Path"; }
+
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 

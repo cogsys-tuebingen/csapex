@@ -45,6 +45,9 @@ public:
     explicit SetParameter(const std::string& name);
     virtual ~SetParameter();
 
+    virtual int ID() const { return 0x006; }
+    virtual std::string TYPE() const { return "Set"; }
+
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 

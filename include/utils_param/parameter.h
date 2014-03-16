@@ -36,6 +36,9 @@ public:
 
     std::string name() const;
 
+    virtual int ID() const = 0;
+    virtual std::string TYPE() const = 0;
+
 
     template <typename T>
     bool is() const
@@ -77,8 +80,6 @@ public:
     {
         return operator = (std::string(cstr));
     }
-
-    static Parameter::Ptr empty();
 
     virtual const std::type_info &type() const;
     std::string toString() const;

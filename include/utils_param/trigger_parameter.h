@@ -30,6 +30,9 @@ public:
     explicit TriggerParameter(const std::string& name);
     virtual ~TriggerParameter();
 
+    virtual int ID() const { return 0x007; }
+    virtual std::string TYPE() const { return "Trigger"; }
+
     void trigger();
 
     virtual const std::type_info &type() const;

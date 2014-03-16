@@ -31,6 +31,7 @@ add_library(utils_param
     src/path_parameter.cpp
     src/trigger_parameter.cpp
     src/color_parameter.cpp
+    src/null_parameter.cpp
 
     src/parameter_factory.cpp
     src/parameter_map.cpp

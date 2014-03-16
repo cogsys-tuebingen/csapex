@@ -42,6 +42,9 @@ public:
     explicit BitSetParameter(const std::string& name);
     virtual ~BitSetParameter();
 
+    virtual int ID() const { return 0x001; }
+    virtual std::string TYPE() const { return "BitSet"; }
+
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 

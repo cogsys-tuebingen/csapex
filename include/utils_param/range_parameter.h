@@ -56,6 +56,9 @@ public:
     explicit RangeParameter(const std::string& name);
     virtual ~RangeParameter();
 
+    virtual int ID() const { return 0x005; }
+    virtual std::string TYPE() const { return "Range"; }
+
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 
