@@ -137,7 +137,7 @@ void BoxManager::ensureLoaded()
     }
 }
 
-void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
+void BoxManager::insertAvailableNodeTypes(QMenu* menu)
 {
     ensureLoaded();
 
@@ -162,7 +162,7 @@ void BoxManager::insertAvailableBoxedObjects(QMenu* menu)
 
 }
 
-void BoxManager::insertAvailableBoxedObjects(QTreeWidget* tree)
+void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
 {
     ensureLoaded();
 

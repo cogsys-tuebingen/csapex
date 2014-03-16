@@ -25,6 +25,11 @@ ImportCin::ImportCin()
     setIcon(QIcon(":/terminal.png"));
 }
 
+void ImportCin::process()
+{
+
+}
+
 void ImportCin::fill(QBoxLayout *)
 {
     if(connector_ == NULL) {

@@ -2,7 +2,7 @@
 #define DELAY_H
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex/model/connection_type.h>
 
 /// SYSTEM

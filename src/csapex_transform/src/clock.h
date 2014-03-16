@@ -18,6 +18,7 @@ class Clock : public csapex::BoxedObject
 public:
     Clock();
 
+    void process();
     virtual void fill(QBoxLayout* layout);
 
     virtual Memento::Ptr getState() const;

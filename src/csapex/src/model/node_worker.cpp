@@ -18,6 +18,13 @@ NodeWorker::NodeWorker(Node* node)
     assert(node_);
 }
 
+NodeWorker::~NodeWorker()
+{
+    for(unsigned i = 0; i < connections_.size(); ++i) {
+        connections_[i].disconnect();
+    }
+}
+
 bool NodeWorker::isProcessing()
 {
     return is_processing_;
@@ -25,12 +32,12 @@ bool NodeWorker::isProcessing()
 
 void NodeWorker::addParameter(param::Parameter* param)
 {
-    parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1));
+    connections_.push_back(parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1)));
 }
 
 void NodeWorker::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
 {
-    parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1, cb));
+    connections_.push_back(parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1, cb)));
 }
 
 void NodeWorker::addParameterCondition(param::Parameter* param, boost::function<bool ()> enable_condition)

@@ -11,6 +11,7 @@ class PointCloudGenerator : public csapex::Node
 public:
     PointCloudGenerator();
 
+    void process();
     virtual void setup();
 
 private:

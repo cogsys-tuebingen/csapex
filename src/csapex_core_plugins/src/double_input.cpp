@@ -23,6 +23,11 @@ DoubleInput::DoubleInput()
     setIcon(QIcon(":/pencil.png"));
 }
 
+void DoubleInput::process()
+{
+
+}
+
 void DoubleInput::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {

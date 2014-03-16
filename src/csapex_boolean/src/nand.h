@@ -1,24 +1,20 @@
 #ifndef NAND_H
 #define NAND_H
 
-/// HEADER
-#include <csapex/model/boxed_object.h>
+/// COMPONENT
+#include <csapex/model/node.h>
 
 namespace csapex {
 
 namespace boolean {
 
-class NAND : public BoxedObject
+class NAND : public Node
 {
-    Q_OBJECT
-
 public:
     NAND();
 
 public:
-    virtual void fill(QBoxLayout* layout);
-
-public Q_SLOTS:
+    virtual void setup();
     virtual void process();
 
 private:

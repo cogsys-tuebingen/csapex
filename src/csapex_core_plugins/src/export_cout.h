@@ -2,18 +2,16 @@
 #define EXPORT_COUT_H
 
 /// PROJECT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 
 namespace csapex {
 
-class ExportCout : public BoxedObject
+class ExportCout : public Node
 {
-    Q_OBJECT
-
 public:
     ExportCout();
 
-    virtual void fill(QBoxLayout* layout);
+    virtual void setup();
     virtual void process();
 
 private:

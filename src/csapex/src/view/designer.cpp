@@ -153,7 +153,7 @@ void Designer::reloadBoxMenues()
     box_selection_menu = new QTreeWidget;
     box_selection_menu->setHeaderLabel("Type");
     box_selection_menu->setColumnCount(1);
-    BoxManager::instance().insertAvailableBoxedObjects(box_selection_menu);
+    BoxManager::instance().insertAvailableNodeTypes(box_selection_menu);
     ui->boxes->layout()->addWidget(box_selection_menu);
 
     box_info = new QTreeWidget;

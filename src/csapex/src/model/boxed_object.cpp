@@ -1,9 +1,6 @@
 /// HEADER
 #include <csapex/model/boxed_object.h>
 
-/// COMPONENT
-
-
 /// SYSTEM
 #include <QLabel>
 

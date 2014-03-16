@@ -6,7 +6,6 @@
 #include <csapex/core/settings.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/box.h>
-#include <csapex/model/boxed_object.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/core/graphio.h>
 #include <csapex/utility/thread.h>

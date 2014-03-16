@@ -24,6 +24,11 @@ TextInput::TextInput()
     setIcon(QIcon(":/pencil.png"));
 }
 
+void TextInput::process()
+{
+
+}
+
 void TextInput::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {

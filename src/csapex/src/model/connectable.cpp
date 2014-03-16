@@ -5,7 +5,6 @@
 #include <csapex/view/box.h>
 #include <csapex/view/design_board.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/model/boxed_object.h>
 #include <csapex/view/port.h>
 #include <csapex/core/settings.h>
 
