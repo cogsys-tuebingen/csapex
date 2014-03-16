@@ -20,7 +20,6 @@ NodeWorker::NodeWorker(Node* node)
 
 NodeWorker::~NodeWorker()
 {
-    std::cerr << "deleting worker with " << connections_.size() << " connections" << std::endl;
     for(unsigned i = 0; i < connections_.size(); ++i) {
         connections_[i].disconnect();
     }
