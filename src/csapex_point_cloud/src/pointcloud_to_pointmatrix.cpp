@@ -88,6 +88,17 @@ struct Impl<pcl::PointXYZI> {
                 }
             }
         }
+
+//        cv::FileStorage fs("/tmp/mat.yml", cv::FileStorage::WRITE);
+//        std::vector<cv::Mat> channels;
+//        cv::split(matrix, channels);
+//        for(int i = 0 ; i < channels.size() ; ++i) {
+//            std::stringstream ss;
+//            ss << "ch" << i;
+//            fs << ss.str() << channels.at(i);
+//        }
+//        fs.release();
+//        exit(0);
     }
 };
 
