@@ -1,15 +1,15 @@
-#ifndef TO_POINT_MATRIX_H
-#define TO_POINT_MATRIX_H
+#ifndef LABEL_POINTCLOUD_H
+#define LABEL_POINTCLOUD_H
 
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex_point_cloud/point_cloud_message.h>
 
 namespace csapex {
-class PointCloudToPointMatrix : public csapex::Node
+class ColorPointCloud : public csapex::Node
 {
 public:
-    PointCloudToPointMatrix();
+    ColorPointCloud();
 
     virtual void process();
     virtual void setup();
@@ -20,7 +20,6 @@ public:
 protected:
     ConnectorIn*  input_;
     ConnectorOut* output_;
-    ConnectorOut* mask_;
 };
 }
-#endif // TO_POINT_MATRIX_H
+#endif // LABEL_POINTCLOUD_H

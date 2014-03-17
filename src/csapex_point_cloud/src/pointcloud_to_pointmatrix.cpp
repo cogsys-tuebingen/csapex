@@ -88,17 +88,6 @@ struct Impl<pcl::PointXYZI> {
                 }
             }
         }
-
-//        cv::FileStorage fs("/tmp/mat.yml", cv::FileStorage::WRITE);
-//        std::vector<cv::Mat> channels;
-//        cv::split(matrix, channels);
-//        for(int i = 0 ; i < channels.size() ; ++i) {
-//            std::stringstream ss;
-//            ss << "ch" << i;
-//            fs << ss.str() << channels.at(i);
-//        }
-//        fs.release();
-//        exit(0);
     }
 };
 
@@ -108,7 +97,7 @@ struct Impl<pcl::PointXYZI> {
 template <class PointT>
 void PointCloudToPointMatrix::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
-    #warning "Fix unsupported type encoding!"
+    #warning "FIX ENCODING"
     CvMatMessage::Ptr out(new CvMatMessage(enc::unknown));
     CvMatMessage::Ptr mask(new CvMatMessage(enc::mono));
     implementation::Impl<PointT>::convert(cloud, out->value, mask->value);
