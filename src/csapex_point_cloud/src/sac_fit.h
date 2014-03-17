@@ -1,5 +1,5 @@
-#ifndef FIT_CONE_H
-#define FIT_CONE_H
+#ifndef SAC_FIT_H
+#define SAC_FIT_H
 
 /// PROJECT
 #include <csapex/model/node.h>
@@ -14,10 +14,10 @@
 #include <pcl/features/normal_3d.h>
 
 namespace csapex {
-class FitCone : public csapex::Node
+class SacFit : public csapex::Node
 {
 public:
-    FitCone();
+    SacFit();
 
     virtual void process();
     virtual void setup();
@@ -33,15 +33,26 @@ private:
 
     int shape_inliers_;
 
+    // PCL parameter
+    int ransac_;
+    int iterations_;
+    double normal_distance_weight_;
+    double distance_threshold_;
+    double sphere_r_min_;
+    double sphere_r_max_;
+    pcl::SacModel model_;
+    bool publish_inverse_;
+
     template <class PointT>
-    void findCone(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape);
+    void findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape);
     template <class PointT>
     void estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals);
     template <class PointT>
-    void initializeSegmentater(pcl::SACSegmentationFromNormals<PointT, pcl::Normal>  &segmenter);
+    void initializeSegmenter(pcl::SACSegmentationFromNormals<PointT, pcl::Normal>  &segmenter);
+    void setParameters();
 };
 
 } // namespace csapex
 
-#endif // FIT_CONE_H
+#endif // SAC_FIT_H
 

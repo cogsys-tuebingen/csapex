@@ -1,15 +1,17 @@
-#include "fit_cone.h"
+#include "sac_fit.h"
 
 /// PROJECT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/ros_message_conversion.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 #include <boost/mpl/for_each.hpp>
+#include <boost/assign.hpp>
 
-CSAPEX_REGISTER_CLASS(csapex::FitCone, csapex::Node)
+CSAPEX_REGISTER_CLASS(csapex::SacFit, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;
@@ -19,20 +21,40 @@ struct NamedMap {
     std::map<std::string, double> value;
 };
 
-FitCone::FitCone()
+SacFit::SacFit()
 {
     addTag(Tag::get("PointCloud"));
+
+    addParameter(param::ParameterFactory::declare("iterations", 1, 20000, 5000, 200));
+    addParameter(param::ParameterFactory::declare("normal distance weight", 0.0, 2.0, 0.085, 0.001));
+    addParameter(param::ParameterFactory::declare("distance threshold", 0.0, 2.0, 0.009, 0.001));
+    addParameter(param::ParameterFactory::declare("sphere min radius", 0.0, 2.0, 0.02, 0.005));
+    addParameter(param::ParameterFactory::declare("sphere max radius", 0.0, 2.0, 0.8, 0.005));
+    addParameter(param::ParameterFactory::declare("publish inverse", false));
+
+    std::map<std::string, int> models = boost::assign::map_list_of
+            ("fit sphere", (int) pcl::SACMODEL_SPHERE)
+            ("fit plane", (int) pcl::SACMODEL_PLANE)
+            //("fit cylinder", (int) pcl::SACMODEL_CYLINDER)
+            ("fit cone", (int) pcl::SACMODEL_CONE);
+
+
+    addParameter(param::ParameterFactory::declareParameterSet<int>("models", models),
+                 boost::bind(&SacFit::setParameters, this));
+
 }
 
 
-void FitCone::process()
+void SacFit::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
 
-    boost::apply_visitor (PointCloudMessage::Dispatch<FitCone>(this), msg->value);
+    boost::apply_visitor (PointCloudMessage::Dispatch<SacFit>(this), msg->value);
+
+    setParameters();
 }
 
-void FitCone::setup()
+void SacFit::setup()
 {
     setSynchronizedInputs(true);
     input_ = addInput<PointCloudMessage>("PointCloud");
@@ -44,7 +66,7 @@ void FitCone::setup()
 
 
 template <class PointT>
-void FitCone::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
+void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
     std::stringstream stringstream;
 
@@ -53,9 +75,9 @@ void FitCone::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         //cloud_extracted.reset(new pcl::PointCloud<PointT>);
         typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
         pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
-        printf("Try to find cone !!! ");
-        findCone<PointT>(cloud, cloud_extracted, coefficients_shape);
-        //cloud_extracted = cloud; // this works
+
+        findModel<PointT>(cloud, cloud_extracted, coefficients_shape);
+
         PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
         cloud_msg->value = cloud_extracted;
         out_cloud_->publish(cloud_msg);
@@ -88,12 +110,12 @@ void FitCone::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 }
 
 template <class PointT>
-void FitCone::findCone(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape)
+void SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape)
 {
     //pcl::ExtractIndices<pcl::Normal> extract_normals_;
     pcl::ExtractIndices<PointT> extract_points;
     pcl::SACSegmentationFromNormals<PointT, pcl::Normal> segmenter;
-    initializeSegmentater<PointT>(segmenter);
+    initializeSegmenter<PointT>(segmenter);
 
     pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
     estimateNormals<PointT>(cloud_in, normals);
@@ -108,12 +130,12 @@ void FitCone::findCone(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename
 
     extract_points.setInputCloud(cloud_in);
     extract_points.setIndices(inliers);
-    extract_points.setNegative(false);
+    extract_points.setNegative(publish_inverse_);
     extract_points.filter(*cloud_extracted);
 }
 
 template <class PointT>
-void FitCone::estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)
+void SacFit::estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)
 {
     typename pcl::NormalEstimation<PointT, pcl::Normal> normal_estimation;
     typename pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
@@ -124,25 +146,31 @@ void FitCone::estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::
     normal_estimation.compute (*normals);
 }
 
-template <class PointT>
-void FitCone::initializeSegmentater(pcl::SACSegmentationFromNormals<PointT, pcl::Normal>  &segmenter)
+void SacFit::setParameters()
 {
-    int ransac = pcl::SAC_RANSAC;
-    int iterations = 7000;
+    //Set Parameters
+    iterations_ = param<int>("iterations");
+    ransac_ = pcl::SAC_RANSAC;
 
-    double normal_distance_weight = 0.085;
-    double distance_threshold = 0.00998;
+    normal_distance_weight_ = param<double>("normal distance weight");
+    distance_threshold_ = param<double>("distance threshold");
+    sphere_r_min_ = param<double>("sphere min radius");
+    sphere_r_max_ = param<double>("sphere max radius");
 
-    double sphere_r_min_ = 0.01;
-    double sphere_r_max_ = 0.8;
+    publish_inverse_ = param<bool>("publish inverse");
+    model_ = (pcl::SacModel) param<int>("models");
+}
 
+template <class PointT>
+void SacFit::initializeSegmenter(pcl::SACSegmentationFromNormals<PointT, pcl::Normal>  &segmenter)
+{
     segmenter.setOptimizeCoefficients (true);
-    segmenter.setModelType (pcl::SACMODEL_SPHERE);
-    segmenter.setMethodType (ransac);
-    segmenter.setMaxIterations (iterations);
-    segmenter.setDistanceThreshold (distance_threshold);
+    segmenter.setModelType (model_);
+    segmenter.setMethodType (ransac_);
+    segmenter.setMaxIterations (iterations_);
+    segmenter.setDistanceThreshold (distance_threshold_);
     segmenter.setRadiusLimits (sphere_r_min_, sphere_r_max_);
-    segmenter.setNormalDistanceWeight (normal_distance_weight);
+    segmenter.setNormalDistanceWeight (normal_distance_weight_);
 }
 
 //
