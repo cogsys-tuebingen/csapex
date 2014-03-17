@@ -16,6 +16,7 @@ class TextInput : public BoxedObject
 public:
     TextInput();
 
+    void process();
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:

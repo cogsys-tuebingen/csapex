@@ -44,8 +44,8 @@ public:
     void setContainer(QWidget* c);
     QWidget* container();
 
-    void insertAvailableBoxedObjects(QMenu* menu);
-    void insertAvailableBoxedObjects(QTreeWidget *tree);
+    void insertAvailableNodeTypes(QMenu* menu);
+    void insertAvailableNodeTypes(QTreeWidget *tree);
     QAbstractItemModel *listAvailableBoxedObjects();
 
     void stop();

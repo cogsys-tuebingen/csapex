@@ -15,6 +15,8 @@
 namespace csapex
 {
 
+#warning "BoxedObject should not be used any more!"
+
 class BoxedObject : public Node, public NodeAdapter
 {
     Q_OBJECT

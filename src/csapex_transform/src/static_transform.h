@@ -13,6 +13,7 @@ class StaticTransform : public csapex::Node
 public:
     StaticTransform();
 
+    void process();
     virtual void setup();
 
 public Q_SLOTS:

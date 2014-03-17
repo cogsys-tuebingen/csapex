@@ -60,7 +60,7 @@ public:
     void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition);
     void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
 
-    std::vector<param::Parameter *> getParameters() const;
+    std::vector<param::Parameter::Ptr> getParameters() const;
 
     template <typename T>
     const T param(const std::string& name) const
@@ -234,7 +234,7 @@ protected:
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
-    virtual void process();
+    virtual void process() = 0;
 
     virtual void enable(bool e);
     virtual void enable();

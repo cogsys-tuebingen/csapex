@@ -40,6 +40,11 @@ void ImageCombiner::fill(QBoxLayout* layout)
     }
 }
 
+void ImageCombiner::process()
+{
+
+}
+
 void ImageCombiner::messageArrived(ConnectorIn* source)
 {
     if(source == input_img_a_) {

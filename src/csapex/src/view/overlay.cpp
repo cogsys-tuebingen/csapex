@@ -2,7 +2,7 @@
 #include <csapex/view/overlay.h>
 
 /// COMPONENT
-#include <csapex/model/boxed_object.h>
+#include <csapex/model/node.h>
 #include <csapex/model/connection.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/connector_out.h>

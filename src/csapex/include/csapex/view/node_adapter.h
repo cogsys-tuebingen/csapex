@@ -5,6 +5,7 @@
 #include <csapex/csapex_fwd.h>
 
 /// PROJECT
+#include <utils_param/param_fwd.h>
 #include <utils_param/parameter.h>
 
 /// SYSTEM
@@ -15,11 +16,6 @@
 #include <QComboBox>
 
 class QListView;
-
-namespace param
-{
-class SetParameter;
-}
 
 namespace csapex
 {
@@ -88,12 +84,25 @@ protected:
     void guiChanged();
     void clear();
 
+    void setupParameter(param::TriggerParameter* trigger_p);
+    void setupParameter(param::ColorParameter* color_p);
+    void setupParameter(param::PathParameter* path_p);
+    void setupParameter(param::ValueParameter* value_p);
+    void setupParameter(param::RangeParameter* range_p);
+    void setupParameter(param::IntervalParameter* interval_p);
+    void setupParameter(param::SetParameter* set_p);
+    void setupParameter(param::BitSetParameter* bitset_p);
+
 public:
     NodeAdapterBridge bridge;
 
 private:
     QBoxLayout *layout_;
     bool is_gui_setup_;
+
+    std::string current_name_;
+    std::string current_display_name_;
+    QBoxLayout* current_layout_;
 
     Node* node_;
 

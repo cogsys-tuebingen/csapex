@@ -23,6 +23,11 @@ IntInput::IntInput()
     setIcon(QIcon(":/pencil.png"));
 }
 
+void IntInput::process()
+{
+
+}
+
 void IntInput::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {

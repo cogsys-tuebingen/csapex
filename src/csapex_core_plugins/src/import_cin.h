@@ -12,6 +12,7 @@ class ImportCin : public BoxedObject
 public:
     ImportCin();
 
+    void process();
     virtual void fill(QBoxLayout* layout);
     virtual void tick();
 

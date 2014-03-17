@@ -16,6 +16,7 @@ class IntInput : public BoxedObject
 public:
     IntInput();
 
+    void process();
     virtual void fill(QBoxLayout* layout);
 
 public Q_SLOTS:
