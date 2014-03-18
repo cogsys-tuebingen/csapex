@@ -59,6 +59,9 @@ add_library(csapex_point_cloud_plugin
     src/statistical_outlier_removal.cpp
     src/radius_outlier_removal.cpp
     src/conditional_outlier_removal.cpp
+    src/sac_fit.cpp
+    src/color_pointcloud.cpp
+    src/label_pointcloud.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins

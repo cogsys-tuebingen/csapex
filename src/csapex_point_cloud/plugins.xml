@@ -60,4 +60,7 @@
     Convert a multidimensional matrix structure to a point cloud.
   </description>
 </class>
+<class type="csapex::SacFit" base_class_type="csapex::Node">
+  <description>Fits a model RANSAC from PCL</description>
+</class>
 </library>

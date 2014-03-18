@@ -66,13 +66,38 @@ struct Impl<pcl::PointXY> {
         std::runtime_error("Conversion is not supported for pcl::PointXY!");
     }
 };
+
+template<>
+struct Impl<pcl::PointXYZI> {
+    static void convert(const typename pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, cv::Mat &matrix, cv::Mat &mask)
+    {
+        int height = cloud->height;
+        int width  = cloud->width;
+        matrix = cv::Mat(height, width, CV_32FC4);
+        mask   = cv::Mat(height, width, CV_8UC1, 255);
+
+        for(int i = 0 ; i < height ; ++i) {
+            for(int j = 0 ; j < width ; ++j) {
+                pcl::PointXYZI pos = cloud->at(i * width + j);
+                matrix.at<float>(i, (j * 4 + 0)) = pos.x;
+                matrix.at<float>(i, (j * 4 + 1)) = pos.y;
+                matrix.at<float>(i, (j * 4 + 2)) = pos.z;
+                matrix.at<float>(i, (j * 4 + 3)) = pos.intensity;
+                if(pos.x == 0.f && pos.y == 0.f && pos.z == 0.f) {
+                    mask.at<uchar>(i,j) = 0;
+                }
+            }
+        }
+    }
+};
+
 }
 
 
 template <class PointT>
 void PointCloudToPointMatrix::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
-    #warning "Fix unsupported type encoding!"
+    #warning "FIX ENCODING"
     CvMatMessage::Ptr out(new CvMatMessage(enc::unknown));
     CvMatMessage::Ptr mask(new CvMatMessage(enc::mono));
     implementation::Impl<PointT>::convert(cloud, out->value, mask->value);
