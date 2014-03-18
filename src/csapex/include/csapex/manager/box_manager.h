@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node_constructor.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/view/node_adapter_builder.h>
 
 /// PROJECT
 #include <utils_plugin/singleton.hpp>
@@ -19,6 +20,8 @@
 namespace csapex
 {
 
+/// TODO: Split into NodeFactory, BoxFactory
+/// TODO: Eliminate Singleton
 class BoxManager : public Singleton<BoxManager>
 {
     friend class Singleton<BoxManager>;
@@ -38,7 +41,10 @@ public:
     bool isValidType(const std::string& type) const;
 
     void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
+
     NodePtr makeNode(const std::string& type, const UUID& uuid);
+    Box* makeBox(NodePtr node);
+
     NodeConstructor::Ptr getSelector(const std::string& type);
 
     void setContainer(QWidget* c);
@@ -74,13 +80,15 @@ protected:
 
 protected:
     std::vector<NodeConstructor::Ptr> available_elements_prototypes;
+    std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
 
     QWidget* container_;
 
-    std::map<Tag, std::vector<NodeConstructor::Ptr> > map;
-    std::set<Tag> tags;
+    std::map<Tag, std::vector<NodeConstructor::Ptr> > tag_map_;
+    std::set<Tag> tags_;
 
-    PluginManager<Node>* manager_;
+    PluginManager<Node>* node_manager_;
+    PluginManager<NodeAdapterBuilder>* node_adapter_manager_;
 
     bool dirty_;
     QString style_sheet_;

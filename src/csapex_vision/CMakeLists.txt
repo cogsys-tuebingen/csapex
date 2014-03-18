@@ -76,7 +76,10 @@ add_library(csapex_vision_plugin
     src/plugin/segmentation.cpp
     src/plugin/filter_apply_mask.cpp
     src/plugin/filter_static_mask.cpp
+
     src/plugin/output_display.cpp
+    src/plugin/output_display_adapter.cpp
+
     src/plugin/image_provider_bag.cpp
     src/plugin/image_provider_dir.cpp
     src/plugin/image_provider_img.cpp

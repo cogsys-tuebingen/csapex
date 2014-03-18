@@ -20,6 +20,7 @@ class QListView;
 namespace csapex
 {
 
+/// TODO: move to default node adapter!!!
 class NodeAdapterBridge : public QObject
 {
     Q_OBJECT
@@ -51,10 +52,10 @@ public:
     typedef boost::shared_ptr<NodeAdapter> Ptr;
 
 public:
-    NodeAdapter();
+    NodeAdapter(Node* adaptee);
     virtual ~NodeAdapter();
 
-    void setNode(Node* node);
+//    void setNode(Node* node);
     Node* getNode();
 
     void setupUiAgain();
