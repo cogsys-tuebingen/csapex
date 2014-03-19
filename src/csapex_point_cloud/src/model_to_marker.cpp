@@ -13,6 +13,7 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 #include <visualization_msgs/Marker.h>
+#include <geometry_msgs/Point.h>
 
 
 
@@ -55,22 +56,7 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
     marker->header.stamp        = ros::Time::now();
     marker->ns                  = "model";
     marker->id                  = 1;
-
     marker->action              = visualization_msgs::Marker::ADD;
-//    marker->pose.position.x     = 1;
-//    marker->pose.position.y     = 1; // see below
-//    marker->pose.position.z     = 1;
-//    marker->pose.orientation.x  = 0.0;
-//    marker->pose.orientation.y  = 0.0;
-//    marker->pose.orientation.z  = 0.0;
-//    marker->pose.orientation.w  = 1.0;
-//    marker->scale.x = 1.0;
-//    marker->scale.y = 1.0;
-//    marker->scale.z = 1.0;
-    marker->color.a = 1.0;
-    marker->color.r = 0.0;
-    marker->color.g = 1.0;
-    marker->color.b = 0.0;
 
     if (model_message.model_type == pcl::SACMODEL_SPHERE ) {
         marker->type                = visualization_msgs::Marker::SPHERE;
@@ -89,9 +75,50 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
         marker->scale.x = scale;
         marker->scale.y = scale;
         marker->scale.z = scale;
+
+        marker->color.a = 0.8;
+        marker->color.r = 0.0;
+        marker->color.g = 1.0;
+        marker->color.b = 0.0;
+
+    } else if (model_message.model_type == pcl::SACMODEL_CONE ) {
+        marker->type                = visualization_msgs::Marker::ARROW;
+
+        geometry_msgs::Point apex;
+        apex.x = model_message.coefficients->values.at(0);
+        apex.y = model_message.coefficients->values.at(1);
+        apex.z = model_message.coefficients->values.at(2);
+
+        geometry_msgs::Point base;
+        base.x = apex.x - model_message.coefficients->values.at(3);
+        base.y = apex.y - model_message.coefficients->values.at(4);
+        base.z = apex.z - model_message.coefficients->values.at(5);
+
+        marker->points.push_back(base);
+        marker->points.push_back(apex);
+//        marker->pose.orientation.x  = 0.0;
+//        marker->pose.orientation.y  = 0.0;
+//        marker->pose.orientation.z  = 0.0;
+//        marker->pose.orientation.w  = 1.0;
+
+        double scale = 1.0;
+        marker->scale.x = scale;
+        marker->scale.y = scale;
+        marker->scale.z = scale;
+
+        marker->color.a = 0.8;
+        marker->color.r = 1.0;
+        marker->color.g = 1.0;
+        marker->color.b = 0.0;
+
     } else {
         printf("unknown Model!!");
     }
+
+    // Todo:
+    // Add plane and cylinder
+    // Add circle
+    // Change to marker array so that a nicer cone can be displayed by a vector and a circle
 
    output_->publish<visualization_msgs::Marker>(marker);
 
