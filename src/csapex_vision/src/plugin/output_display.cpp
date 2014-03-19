@@ -33,29 +33,6 @@ void OutputDisplay::setup()
     input_ = addInput<CvMatMessage>("Image", false, true);
 }
 
-
-//void OutputDisplay::enable()
-//{
-//}
-
-//void OutputDisplay::disable()
-//{
-//    if(pixmap_ != NULL) {
-//        pixmap_->setPixmap(QPixmap::fromImage(empty));
-//        view_->fitInView(view_->scene()->sceneRect(), Qt::KeepAspectRatio);
-//        view_->scene()->update();
-//    }
-//}
-
-void OutputDisplay::connectorChanged()
-{
-//    if(input_->isConnected()) {
-//        enable();
-//    } else {
-//        disable();
-//    }
-}
-
 void OutputDisplay::process()
 {
     CvMatMessage::Ptr mat_msg = input_->getMessage<CvMatMessage>();
@@ -63,8 +40,5 @@ void OutputDisplay::process()
     if(mat_msg.get() && !mat_msg->value.empty()) {
         QSharedPointer<QImage> img = QtCvImageConverter::Converter<QImage, QSharedPointer>::mat2QImage(mat_msg->value);
         display_request(img);
-        //enable();
-
-        //Q_EMIT displayRequest(img);
     }
 }
