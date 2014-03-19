@@ -5,5 +5,5 @@ using namespace csapex;
 
 ModelMessage::ModelMessage()
 {
-    printf("\n Constructed a ModelMessage");
+
 }

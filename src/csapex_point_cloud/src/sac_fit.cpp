@@ -60,7 +60,7 @@ void SacFit::setup()
     input_ = addInput<PointCloudMessage>("PointCloud");
     out_text_= addOutput<StringMessage>("String");
 
-    out_params_ = addOutput<GenericMessage<NamedMap> >("Parameters");
+    out_params_ = addOutput<GenericMessage<ModelMessage> >("Parameters");
     out_cloud_ = addOutput<PointCloudMessage>("PointCloud");
 }
 
@@ -82,17 +82,19 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         cloud_msg->value = cloud_extracted;
         out_cloud_->publish(cloud_msg);
 
-        stringstream << "found [" << shape_inliers_ <<  "] inliers";
+        stringstream << "found [" << shape_inliers_ <<  "] inliers coeffs:" << coefficients_shape->values.at(0) << ", "<< coefficients_shape->values.at(1) << ", "<< coefficients_shape->values.at(2) << ", "<< coefficients_shape->values.at(3) ;
         //stringstream << "Cone apex: "<< coefficients_shape->values[0] << ", " << coefficients_shape->values[1] << ", "<< coefficients_shape->values[2] << ", opening angle: " << coefficients_shape->values[6];
 
-        // Publish the model coefficients of the object
-        GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
-        param_msg->value.reset(new ModelMessage);
+        if (shape_inliers_ > 0) {
+            // Publish the model coefficients of the object
+            GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
+            param_msg->value.reset(new ModelMessage);
 
-        param_msg->value->model_type = pcl::SACMODEL_CONE;
-        param_msg->value->coefficients = coefficients_shape;
-        param_msg->value->frame_id = cloud->header.frame_id;
-        out_params_->publish(param_msg);
+            param_msg->value->model_type = model_;
+            param_msg->value->coefficients = coefficients_shape;
+            param_msg->value->frame_id = cloud->header.frame_id;
+            out_params_->publish(param_msg);
+        }
     } else
     {
         stringstream << "No output cloud connected";
