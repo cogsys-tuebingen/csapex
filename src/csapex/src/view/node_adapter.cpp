@@ -31,10 +31,11 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter()
-    : bridge(this), layout_(NULL), is_gui_setup_(false)
+NodeAdapter::NodeAdapter(Node *adaptee)
+    : bridge(this), layout_(NULL), is_gui_setup_(false), node_(adaptee)
 {
     QObject::connect(&bridge, SIGNAL(rebuild()), &bridge, SLOT(rebuildEvent()));
+    QObject::connect(adaptee, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));
 }
 
 NodeAdapter::~NodeAdapter()
@@ -59,12 +60,12 @@ void NodeAdapter::clear()
     callbacks.clear();
 }
 
-void NodeAdapter::setNode(Node *node)
-{
-    node_ = node;
+//void NodeAdapter::setNode(Node *node)
+//{
+//    node_ = node;
 
-    QObject::connect(node, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));
-}
+//    QObject::connect(node, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));
+//}
 
 Node* NodeAdapter::getNode()
 {
@@ -122,7 +123,6 @@ void NodeAdapter::setupUi(QBoxLayout * outer_layout)
     static std::map<int, boost::function<void(NodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
-        std::cout << "registering ##_TYPE_ with id " <<  &typeid(_TYPE_) << "(" << typeid(_TYPE_).name() << ")" << std::endl;\
         mapping_[_TYPE_().ID()] = boost::bind(static_cast<void (NodeAdapter::*)( _TYPE_* )> (&NodeAdapter::setupParameter), _1, \
 boost::bind(&boost::shared_ptr<_TYPE_>::get, boost::bind(&boost::dynamic_pointer_cast<_TYPE_, param::Parameter>, _2)))
 

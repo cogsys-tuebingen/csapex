@@ -85,23 +85,18 @@ struct Color {
     uchar b;
 };
 
-template<class PointT, class PointY>
+template<class PointT>
 struct Impl {
-    static void convert(const typename pcl::PointCloud<PointT>::Ptr src,
-                        typename pcl::PointCloud<PointY>::Ptr dst)
+    inline static void convert(const typename pcl::PointCloud<PointT>::Ptr src,
+                               typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr dst)
     {
-        throw std::runtime_error("Pointcloud must be labeled type!");
-    }
-};
+        dst->height = src->height;
+        dst->header = src->header;
+        dst->width  = src->width;
 
-template<>
-struct Impl<pcl::PointXYZL, pcl::PointXYZRGB> {
-    static void convert(const typename pcl::PointCloud<pcl::PointXYZL>::Ptr src,
-                        typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr dst)
-    {
         std::map<unsigned int, Color> colors;
         colors.insert(std::make_pair(0, Color()));
-        for(pcl::PointCloud<pcl::PointXYZL>::const_iterator it = src->begin() ; it != src->end() ; ++it) {
+        for(typename pcl::PointCloud<PointT>::const_iterator it = src->begin() ; it != src->end() ; ++it) {
             if(colors.find(it->label) == colors.end()) {
                 double r,g,b;
                 _HSV2RGB_((double) ((colors.size() * 77) % 360), 1.0, 1.0, r, g, b);
@@ -117,26 +112,31 @@ struct Impl<pcl::PointXYZL, pcl::PointXYZRGB> {
     }
 };
 
+template<class PointT>
+struct Conversion {
+    static void apply(const typename pcl::PointCloud<PointT>::Ptr src,
+                      typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr dst)
+    {
+        throw std::runtime_error("Type of pointcloud must be labeled!");
+    }
+};
+
 template<>
-struct Impl<pcl::PointXYZRGBL, pcl::PointXYZRGB> {
-    static void convert(const typename pcl::PointCloud<pcl::PointXYZRGBL>::Ptr src,
+struct Conversion<pcl::PointXYZL>{
+    static void apply(const typename pcl::PointCloud<pcl::PointXYZL>::Ptr src,
+                      typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr dst)
+    {
+      Impl<pcl::PointXYZL>::convert(src, dst);
+    }
+
+};
+
+template<>
+struct Conversion<pcl::PointXYZRGBL>{
+    static void apply(const typename pcl::PointCloud<pcl::PointXYZRGBL>::Ptr src,
                         typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr dst)
     {
-        std::map<unsigned int, Color> colors;
-        colors.insert(std::make_pair(0, Color()));
-        for(pcl::PointCloud<pcl::PointXYZRGBL>::const_iterator it = src->begin() ; it != src->end() ; ++it) {
-            if(colors.find(it->label) == colors.end()) {
-                double r,g,b;
-                _HSV2RGB_((double) ((colors.size() * 77) % 360), 1.0, 1.0, r, g, b);
-                colors.insert(std::make_pair(it->label,Color(r,g,b)));
-            }
-            Color c = colors.at(it->label);
-            pcl::PointXYZRGB p(c.r, c.g, c.b);
-            p.x = it->x;
-            p.y = it->y;
-            p.z = it->z;
-            dst->push_back(p);
-        }
+        Impl<pcl::PointXYZRGBL>::convert(src, dst);
     }
 };
 }
@@ -147,11 +147,8 @@ void ColorPointCloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     PointCloudMessage::Ptr out(new PointCloudMessage);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-    out_cloud->height = cloud->height;
-    out_cloud->width  = cloud->width;
-    out_cloud->header = cloud->header;
+    implementation::Conversion<PointT>::apply(cloud, out_cloud);
 
-    implementation::Impl<PointT, pcl::PointXYZRGB>::convert(cloud, out_cloud);
     out->value = out_cloud;
     output_->publish(out);
 }

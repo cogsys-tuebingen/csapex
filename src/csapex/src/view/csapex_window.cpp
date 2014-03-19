@@ -8,7 +8,6 @@
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/model/boxed_object.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/bash_parser.h>
@@ -373,15 +372,7 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
 
 void CsApexWindow::nodeAdded(Node::Ptr node)
 {
-    Box* box;
-    BoxedObject::Ptr bo = boost::dynamic_pointer_cast<BoxedObject>(node);
-    if(bo) {
-        box = new Box(bo);
-    } else {
-        box = new Box(node, NodeAdapter::Ptr(new NodeAdapter));
-    }
-
-    designer_->addBox(box);
+    designer_->addBox(BoxManager::instance().makeBox(node));
 }
 
 void CsApexWindow::nodeRemoved(NodePtr node)

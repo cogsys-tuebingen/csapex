@@ -36,7 +36,7 @@ Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), profiling_(false), is_placed_(false)
 {
-    adapter_->setNode(node_.get());
+    //adapter_->setNode(node_.get());
 
     construct(node);
 }

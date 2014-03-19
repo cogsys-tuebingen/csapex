@@ -27,9 +27,12 @@
 using namespace csapex;
 
 BoxManager::BoxManager()
-    : manager_(new PluginManager<Node> ("csapex::Node")), dirty_(false)
+    : node_manager_(new PluginManager<Node> ("csapex::Node")),
+      node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder")),
+      dirty_(false)
 {
-    manager_->loaded.connect(loaded);
+    node_manager_->loaded.connect(loaded);
+    node_adapter_manager_->loaded.connect(loaded);
 }
 
 namespace {
@@ -42,9 +45,15 @@ bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
 
 void BoxManager::stop()
 {
-    if(manager_) {
-        delete manager_;
-        manager_ = NULL;
+    if(node_manager_) {
+        delete node_manager_;
+        node_manager_ = NULL;
+    }
+
+    node_adapter_builders_.clear();
+    if(node_adapter_manager_) {
+        delete node_adapter_manager_;
+        node_adapter_manager_ = NULL;
     }
 }
 
@@ -60,7 +69,8 @@ BoxManager::~BoxManager()
 
 void BoxManager::reload()
 {
-    manager_->reload();
+    node_manager_->reload();
+    node_adapter_manager_->reload();
     rebuildPrototypes();
 
     rebuildMap();
@@ -69,14 +79,22 @@ void BoxManager::reload()
 void BoxManager::rebuildPrototypes()
 {
     available_elements_prototypes.clear();
+    node_adapter_builders_.clear();
 
-    typedef std::pair<std::string, DefaultConstructor<Node> > PAIR;
-    Q_FOREACH(const PAIR& p, manager_->availableClasses()) {
+    typedef std::pair<std::string, DefaultConstructor<Node> > NODE_PAIR;
+    Q_FOREACH(const NODE_PAIR& p, node_manager_->availableClasses()) {
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
                                                      *settings_,
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second));
         register_box_type(constructor, true);
+    }
+
+
+    typedef std::pair<std::string, DefaultConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
+    Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
+        NodeAdapterBuilder::Ptr builder = p.second.construct();
+        node_adapter_builders_[builder->getWrappedType()] = builder;
     }
 }
 
@@ -85,10 +103,10 @@ void BoxManager::rebuildMap()
     Tag::createIfNotExists("General");
     Tag general = Tag::get("General");
 
-    map.clear();
-    tags.clear();
+    tag_map_.clear();
+    tags_.clear();
 
-    tags.insert(general);
+    tags_.insert(general);
 
     for(std::vector<NodeConstructor::Ptr>::iterator
         it = available_elements_prototypes.begin();
@@ -99,13 +117,13 @@ void BoxManager::rebuildMap()
         try {
             bool has_tag = false;
             Q_FOREACH(const Tag& tag, p->getTags()) {
-                map[tag].push_back(p);
-                tags.insert(tag);
+                tag_map_[tag].push_back(p);
+                tags_.insert(tag);
                 has_tag = true;
             }
 
             if(!has_tag) {
-                map[general].push_back(p);
+                tag_map_[general].push_back(p);
             }
 
             ++it;
@@ -116,8 +134,8 @@ void BoxManager::rebuildMap()
         }
     }
 
-    Q_FOREACH(const Tag& cat, tags) {
-        std::sort(map[cat].begin(), map[cat].end(), compare);
+    Q_FOREACH(const Tag& cat, tags_) {
+        std::sort(tag_map_[cat].begin(), tag_map_[cat].end(), compare);
     }
 
     dirty_ = false;
@@ -125,8 +143,10 @@ void BoxManager::rebuildMap()
 
 void BoxManager::ensureLoaded()
 {
-    if(!manager_->pluginsLoaded()) {
-        manager_->reload();
+    if(!node_manager_->pluginsLoaded()) {
+        node_manager_->reload();
+        node_adapter_manager_->reload();
+
         rebuildPrototypes();
 
         dirty_ = true;
@@ -141,11 +161,11 @@ void BoxManager::insertAvailableNodeTypes(QMenu* menu)
 {
     ensureLoaded();
 
-    Q_FOREACH(const Tag& tag, tags) {
+    Q_FOREACH(const Tag& tag, tags_) {
         QMenu* submenu = new QMenu(tag.getName().c_str());
         menu->addMenu(submenu);
 
-        Q_FOREACH(const NodeConstructor::Ptr& proxy, map[tag]) {
+        Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
             QIcon icon = proxy->getIcon();
             QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
@@ -168,13 +188,13 @@ void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
 
     tree->setDragEnabled(true);
 
-    Q_FOREACH(const Tag& tag, tags) {
+    Q_FOREACH(const Tag& tag, tags_) {
 
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
         submenu->setText(0, tag.getName().c_str());
         tree->addTopLevelItem(submenu);
 
-        Q_FOREACH(const NodeConstructor::Ptr& proxy, map[tag]) {
+        Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
             QIcon icon = proxy->getIcon();
             std::string name = UUID::stripNamespace(proxy->getType());
 
@@ -241,7 +261,7 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
         if(bo) {
             object.reset(new csapex::Box(bo));
         } else {
-            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new NodeAdapter)));
+            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new NodeAdapter(content.get()))));
         }
     }
 
@@ -375,6 +395,22 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
     }
     std::cerr << std::endl;
     return NodeNullPtr;
+}
+
+Box* BoxManager::makeBox(NodePtr node)
+{
+    BoxedObject::Ptr bo = boost::dynamic_pointer_cast<BoxedObject>(node);
+    if(bo) {
+        return new Box(bo);
+    } else {
+        std::string type = node->getType();
+
+        if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
+            return new Box(node, node_adapter_builders_[type]->build(node));
+        } else {
+            return new Box(node, NodeAdapter::Ptr(new NodeAdapter(node.get())));
+        }
+    }
 }
 
 NodeConstructor::Ptr BoxManager::getSelector(const std::string &type)

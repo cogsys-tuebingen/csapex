@@ -7,7 +7,7 @@
 using namespace csapex;
 
 BoxedObject::BoxedObject(const UUID &uuid)
-    : Node(uuid)
+    : Node(uuid), NodeAdapter(this)
 {
 }
 

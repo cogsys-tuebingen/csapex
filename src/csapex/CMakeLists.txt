@@ -87,6 +87,9 @@ set(SRC_PLUGIN
 
     src/deprecated/global_option.cpp
     src/deprecated/global_option_manager.cpp
+
+    src/view/node_adapter.cpp
+    src/view/node_adapter_builder.cpp
 )
 
 set(SRC_APP
@@ -128,11 +131,11 @@ set(SRC_APP
     src/view/csapex_window.cpp
     src/view/design_board.cpp
     src/view/designer.cpp
-    src/view/node_adapter.cpp
     src/view/overlay.cpp
     src/view/selectable.cpp
     src/view/profiling_widget.cpp
     src/view/port.cpp
+    src/view/default_node_adapter.cpp
 )
 
 #
