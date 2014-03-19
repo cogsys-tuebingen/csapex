@@ -36,6 +36,7 @@ include_directories(
 
 add_library(csapex_point_cloud
     src/point_cloud_message.cpp
+    src/model_message.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud
@@ -65,5 +66,6 @@ add_library(csapex_point_cloud_plugin
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
-    yaml-cpp ${QT_LIBRARIES} ${catkin_LIBRARIES})
+    yaml-cpp ${QT_LIBRARIES} ${catkin_LIBRARIES}
+    csapex_point_cloud)
 

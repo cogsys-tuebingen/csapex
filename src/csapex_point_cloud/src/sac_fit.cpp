@@ -5,6 +5,8 @@
 #include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/ros_message_conversion.h>
 #include <utils_param/parameter_factory.h>
+#include <csapex_point_cloud/model_message.h>
+
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -17,9 +19,7 @@ using namespace csapex;
 using namespace csapex::connection_types;
 using namespace std;
 
-struct NamedMap {
-    std::map<std::string, double> value;
-};
+
 
 SacFit::SacFit()
 {
@@ -84,14 +84,19 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 
         stringstream << "found [" << shape_inliers_ <<  "] inliers";
         //stringstream << "Cone apex: "<< coefficients_shape->values[0] << ", " << coefficients_shape->values[1] << ", "<< coefficients_shape->values[2] << ", opening angle: " << coefficients_shape->values[6];
+
+        // Publish the model coefficients of the object
+        GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
+        param_msg->value.reset(new ModelMessage);
+
+        param_msg->value->model_type = pcl::SACMODEL_CONE;
+        param_msg->value->coefficients = coefficients_shape;
+        param_msg->value->frame_id = cloud->header.frame_id;
+        out_params_->publish(param_msg);
     } else
     {
         stringstream << "No output cloud connected";
     }
-
-    GenericMessage<NamedMap>::Ptr param_msg(new GenericMessage<NamedMap>);
-    out_params_->publish(param_msg);
-
 
     StringMessage::Ptr text_msg(new StringMessage);
     text_msg->value = stringstream.str();
@@ -171,6 +176,7 @@ void SacFit::initializeSegmenter(pcl::SACSegmentationFromNormals<PointT, pcl::No
     segmenter.setDistanceThreshold (distance_threshold_);
     segmenter.setRadiusLimits (sphere_r_min_, sphere_r_max_);
     segmenter.setNormalDistanceWeight (normal_distance_weight_);
+    segmenter.setOptimizeCoefficients(true); // optimize the coefficients
 }
 
 //
