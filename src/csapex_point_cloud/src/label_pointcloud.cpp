@@ -5,13 +5,13 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <utils_param/parameter_factory.h>
-#include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
 #include <csapex_point_cloud/point_cloud_message.h>
 #include <csapex/utility/register_apex_plugin.h>
 #include <pcl/point_types.h>
 #include <pcl/conversions.h>
+#include <opencv2/opencv.hpp>
 
 CSAPEX_REGISTER_CLASS(csapex::LabelPointCloud, csapex::Node)
 
@@ -25,10 +25,9 @@ LabelPointCloud::LabelPointCloud()
 void LabelPointCloud::process()
 {
     PointCloudMessage::Ptr cloud(input_->getMessage<PointCloudMessage>());
-    CvMatMessage::Ptr      labels(labels_->getMessage<CvMatMessage>());
-    label_mat_ = labels->value;
+    label_msg_ = labels_->getMessage<CvMatMessage>();
 
-    if((label_mat_.type() & 7) != CV_16U) {
+    if((label_msg_->value.type() & 7) != CV_16U) {
         throw std::runtime_error("Label matrix must be of type CV_16UC1");
     }
 
@@ -138,6 +137,6 @@ void LabelPointCloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
     PointCloudMessage::Ptr out(new PointCloudMessage);
 
-    implementation::Label<PointT>::apply(cloud, out, label_mat_);
+    implementation::Label<PointT>::apply(cloud, out, label_msg_->value);
     output_->publish(out);
 }

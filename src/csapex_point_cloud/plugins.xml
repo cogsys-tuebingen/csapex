@@ -55,12 +55,20 @@
     Convert a point cloud to a multidimensional matrix structure.
   </description>
 </class>
-<class type="csapex::PointmatrixToPointcloud" base_class_type="csapex::Node">
+<class type="csapex::LabelPointCloud" base_class_type="csapex::Node">
   <description>
-    Convert a multidimensional matrix structure to a point cloud.
+    Produce a labeled pointcloud given an corresponding matrix holding the label values.
+    Label matrix and pointcloud have to be of the same size and organization.
+  </description>
+</class>
+<class type="csapex::ColorPointCloud" base_class_type="csapex::Node">
+  <description>
+    Color a labeled pointlcoud to make the labeling visible.
   </description>
 </class>
 <class type="csapex::SacFit" base_class_type="csapex::Node">
-  <description>Fits a model RANSAC from PCL</description>
+  <description>
+    Apply RANSAC on pointclouds to fit certain models.
+  </description>
 </class>
 </library>
