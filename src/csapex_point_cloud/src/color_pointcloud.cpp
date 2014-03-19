@@ -4,8 +4,8 @@
 /// PROJECT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <utils_param/parameter_factory.h>
 #include <csapex_vision/cv_mat_message.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <csapex_point_cloud/point_cloud_message.h>
@@ -13,10 +13,13 @@
 #include <pcl/point_types.h>
 #include <pcl/conversions.h>
 
+
 CSAPEX_REGISTER_CLASS(csapex::ColorPointCloud, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;
+
+#define FLOOD_DEFAULT_LABEL 0
 
 ColorPointCloud::ColorPointCloud()
 {
@@ -95,7 +98,7 @@ struct Impl {
         dst->width  = src->width;
 
         std::map<unsigned int, Color> colors;
-        colors.insert(std::make_pair(0, Color()));
+        colors.insert(std::make_pair(FLOOD_DEFAULT_LABEL, Color()));
         for(typename pcl::PointCloud<PointT>::const_iterator it = src->begin() ; it != src->end() ; ++it) {
             if(colors.find(it->label) == colors.end()) {
                 double r,g,b;
@@ -134,7 +137,7 @@ struct Conversion<pcl::PointXYZL>{
 template<>
 struct Conversion<pcl::PointXYZRGBL>{
     static void apply(const typename pcl::PointCloud<pcl::PointXYZRGBL>::Ptr src,
-                        typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr dst)
+                      typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr dst)
     {
         Impl<pcl::PointXYZRGBL>::convert(src, dst);
     }
