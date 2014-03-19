@@ -18,6 +18,8 @@ typedef boost::mpl::vector<
 pcl::PointXYZ,
 pcl::PointXYZI,
 pcl::PointXYZRGB,
+pcl::PointXYZRGBL,
+pcl::PointXYZL,
 pcl::PointNormal
 > PointCloudPointTypes;
 
@@ -27,6 +29,8 @@ template <typename T> inline std::string name() { return ""; }
 template <> inline std::string name<pcl::PointXYZ>() { return "PointXYZ"; }
 template <> inline std::string name<pcl::PointXYZI>() { return "PointXYZI"; }
 template <> inline std::string name<pcl::PointXYZRGB>() { return "PointXYZRGB"; }
+template <> inline std::string name<pcl::PointXYZRGBL>() { return "PointXYZRGBL"; }
+template <> inline std::string name<pcl::PointXYZL>() { return "PointXYZL"; }
 template <> inline std::string name<pcl::PointNormal>() { return "PointNormal"; }
 }
 
