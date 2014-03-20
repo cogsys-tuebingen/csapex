@@ -285,6 +285,22 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 
         QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
 
+    } else if(value_p->is<double>()) {
+        QDoubleSpinBox* box = new QDoubleSpinBox;
+        box->setValue(value_p->as<double>());
+
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box));
+
+        // ui change -> model
+        boost::function<void()> cb = boost::bind(&param::ValueParameter::set<double>, value_p, boost::bind(&QDoubleSpinBox::value, box));
+        qt_helper::Call* call = new qt_helper::Call(cb);
+        callbacks.push_back(call);
+
+        // model change -> ui
+        connections.push_back(parameter_changed(*value_p).connect(boost::bind(&QDoubleSpinBox::setValue, box, boost::bind(&param::ValueParameter::as<double>, value_p))));
+
+        QObject::connect(box, SIGNAL(valueChanged(double)), call, SLOT(call()));
+
     } else {
         current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (value: " + type2name(value_p->type()) + ")").c_str()));
     }
