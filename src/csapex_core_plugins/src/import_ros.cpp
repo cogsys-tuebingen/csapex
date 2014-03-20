@@ -42,14 +42,14 @@ ImportRos::ImportRos()
 
     addParameter(param::ParameterFactory::declareTrigger("refresh"),
                  boost::bind(&ImportRos::refresh, this));
-
-    refresh();
 }
 
 void ImportRos::setup()
 {
     setSynchronizedInputs(true);
     connector_ = addOutput<connection_types::AnyMessage>("Something");
+
+    refresh();
 }
 
 void ImportRos::refresh()
@@ -105,6 +105,10 @@ void ImportRos::process()
 
 void ImportRos::setTopic(const ros::master::TopicInfo &topic)
 {
+    if(topic.name == current_topic_) {
+        return;
+    }
+
     std::cout << "warning: set topic " << topic.name << std::endl;
     current_subscriber.shutdown();
 
@@ -112,6 +116,7 @@ void ImportRos::setTopic(const ros::master::TopicInfo &topic)
         setError(false);
 
         std::cout << "warning: topic is " << topic.name << std::endl;
+        current_topic_ = topic.name;
         current_subscriber = RosMessageConversion::instance().subscribe(topic, 1, connector_);
 
     } else {

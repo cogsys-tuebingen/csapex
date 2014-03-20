@@ -17,15 +17,18 @@ CSAPEX_REGISTER_CLASS(csapex::Camera, csapex::Node)
 using namespace csapex;
 
 Camera::Camera()
-    : idx(-1)
+    : current_dev_(-1)
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("Vision"));
 
-    addParameter(param::ParameterFactory::declare<int>("device", 0, 5, 0, 1), boost::bind(&Camera::update, this, _1));
+    addParameter(param::ParameterFactory::declare<int>("device", 0, 5, 0, 1), boost::bind(&Camera::update, this));
 
-    addParameter(param::ParameterFactory::declare<int>("w", 640, 1280, 640, 1), boost::bind(&Camera::update, this, _1));
-    addParameter(param::ParameterFactory::declare<int>("h", 480, 800, 480, 1), boost::bind(&Camera::update, this, _1));
+    w_ = 640;
+    h_ = 480;
+
+    addParameter(param::ParameterFactory::declare<int>("w", 640, 1280, w_, 1), boost::bind(&Camera::update, this));
+    addParameter(param::ParameterFactory::declare<int>("h", 480, 800, h_, 1), boost::bind(&Camera::update, this));
 }
 
 void Camera::process()
@@ -46,13 +49,27 @@ void Camera::setup()
 {
     Node::setup();
     output_ = addOutput<connection_types::CvMatMessage>("Image");
+
+    update();
 }
 
 
-void Camera::update(param::Parameter *p)
+void Camera::update()
 {
     setError(false);
+
     int dev = param<int>("device");
+    int w = param<int>("w");
+    int h = param<int>("h");
+
+    if(dev == current_dev_ && w == w_ && h == h_) {
+        // no change, no update
+        return;
+    }
+
+    current_dev_= dev;
+    w_ = w;
+    h_ = h;
 
     if(cap_.isOpened()) {
         cap_.release();
@@ -64,7 +81,7 @@ void Camera::update(param::Parameter *p)
 
     std::cout << "camera settings" << std::endl;
     std::cout << cap_.get(CV_CAP_PROP_FRAME_WIDTH) << " x " << cap_.get(CV_CAP_PROP_FRAME_HEIGHT) << std::endl;
-    cap_.set(CV_CAP_PROP_FRAME_WIDTH, param<int>("w"));
-    cap_.set(CV_CAP_PROP_FRAME_HEIGHT, param<int>("h"));
+    cap_.set(CV_CAP_PROP_FRAME_WIDTH, w);
+    cap_.set(CV_CAP_PROP_FRAME_HEIGHT, h);
     std::cout << cap_.get(CV_CAP_PROP_FRAME_WIDTH) << " x " << cap_.get(CV_CAP_PROP_FRAME_HEIGHT) << std::endl;
 }

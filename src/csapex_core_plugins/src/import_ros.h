@@ -26,6 +26,8 @@ private:
     ConnectorOut* connector_;
 
     ros::Subscriber current_subscriber;
+
+    std::string current_topic_;
 };
 
 }
