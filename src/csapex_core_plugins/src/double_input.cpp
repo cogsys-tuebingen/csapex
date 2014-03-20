@@ -3,13 +3,11 @@
 
 /// PROJECT
 #include <csapex/model/connector_out.h>
-#include <csapex_core_plugins/double_message.h>
 #include <utils_param/parameter_factory.h>
+#include <csapex_core_plugins/ros_message_conversion.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
-#include <QPushButton>
-#include <QBoxLayout>
 
 CSAPEX_REGISTER_CLASS(csapex::DoubleInput, csapex::Node)
 
@@ -37,13 +35,11 @@ void DoubleInput::setup()
 {
     setSynchronizedInputs(true);
 
-    out_ = addOutput<connection_types::DoubleMessage>("Double");
+    out_ = addOutput<double>("Double");
 }
 
 void DoubleInput::process()
 {
-    connection_types::DoubleMessage::Ptr msg(new connection_types::DoubleMessage);
-    msg->value = param<double>("value");
-
-    out_->publish(msg);
+    double val = param<double>("value");
+    out_->publishIntegral(val);
 }

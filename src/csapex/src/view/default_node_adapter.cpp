@@ -287,6 +287,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 
     } else if(value_p->is<double>()) {
         QDoubleSpinBox* box = new QDoubleSpinBox;
+        box->setDecimals(10);
         box->setValue(value_p->as<double>());
 
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box));
