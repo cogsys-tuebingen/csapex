@@ -101,10 +101,18 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
 //        marker->pose.orientation.z  = 0.0;
 //        marker->pose.orientation.w  = 1.0;
 
+        // Normal vector of the cone
+        double nx = model_message.coefficients->values.at(3);
+        double ny = base.y = apex.y + model_message.coefficients->values.at(4);
+        double nz = base.z = apex.z + model_message.coefficients->values.at(5);
+        double len = sqrt( nx*nx + ny*ny + nz*nz);
+        double opening_angle = model_message.coefficients->values.at(5);
+
+
         double scale = 1.0;
         marker->scale.x = scale;
-        marker->scale.y = scale;
-        marker->scale.z = scale;
+        marker->scale.y = len * tan(opening_angle);
+        marker->scale.z = 100;
 
         marker->color.a = 0.8;
         marker->color.r = 1.0;
