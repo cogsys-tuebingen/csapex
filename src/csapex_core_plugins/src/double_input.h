@@ -9,10 +9,11 @@
 
 namespace csapex {
 
-class DoubleInput : public Node
+template <typename T>
+class NumberInput : public Node
 {
 public:
-    DoubleInput();
+    NumberInput();
 
     void tick();
     void setup();
