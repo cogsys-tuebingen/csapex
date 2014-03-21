@@ -35,7 +35,6 @@ add_library(csapex_core_lib
     src/ros_handler.cpp
     src/ros_message_conversion.cpp
     src/string_message.cpp
-    src/int_message.cpp
     src/vector_message.cpp
     ${QT_RESOURCES}
     ${MOC_CORE}
