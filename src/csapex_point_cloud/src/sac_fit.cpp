@@ -30,7 +30,6 @@ SacFit::SacFit()
     addParameter(param::ParameterFactory::declare("distance threshold", 0.0, 2.0, 0.009, 0.001));
     addParameter(param::ParameterFactory::declare("sphere min radius", 0.0, 2.0, 0.02, 0.005));
     addParameter(param::ParameterFactory::declare("sphere max radius", 0.0, 2.0, 0.8, 0.005));
-    addParameter(param::ParameterFactory::declare("publish inverse", false));
 
     std::map<std::string, int> models = boost::assign::map_list_of
             ("fit sphere", (int) pcl::SACMODEL_SPHERE)
@@ -61,7 +60,8 @@ void SacFit::setup()
     out_text_= addOutput<StringMessage>("String");
 
     out_model_ = addOutput<GenericMessage<ModelMessage> >("Model");
-    out_cloud_ = addOutput<PointCloudMessage>("PointCloud");
+    out_cloud_ = addOutput<PointCloudMessage>("PointCloud Model");
+    out_cloud_residue_ = addOutput<PointCloudMessage>("PointCloud Residue");
 }
 
 
@@ -71,37 +71,45 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     std::stringstream stringstream;
     int inliers_size = 0;
 
-    if (out_cloud_->isConnected()) {
-        //typename pcl::PointCloud<PointT>::Ptr cloud_extracted;
-        //cloud_extracted.reset(new pcl::PointCloud<PointT>);
-        typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
-        pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
 
-        inliers_size = findModel<PointT>(cloud, cloud_extracted, coefficients_shape);
+    //typename pcl::PointCloud<PointT>::Ptr cloud_extracted;
+    //cloud_extracted.reset(new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr cloud_residue(new pcl::PointCloud<PointT>);
+    pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
+
+    inliers_size = findModel<PointT>(cloud, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
 
 
 
-        stringstream << "found [" << shape_inliers_ <<  "] inliers coeffs:" << coefficients_shape->values.at(0) << ", "<< coefficients_shape->values.at(1) << ", "<< coefficients_shape->values.at(2) << ", "<< coefficients_shape->values.at(3) ;
-        //stringstream << "Cone apex: "<< coefficients_shape->values[0] << ", " << coefficients_shape->values[1] << ", "<< coefficients_shape->values[2] << ", opening angle: " << coefficients_shape->values[6];
+    stringstream << "found [" << shape_inliers_ <<  "] inliers coeffs:" << coefficients_shape->values.at(0) << ", "<< coefficients_shape->values.at(1) << ", "<< coefficients_shape->values.at(2) << ", "<< coefficients_shape->values.at(3) ;
+    //stringstream << "Cone apex: "<< coefficients_shape->values[0] << ", " << coefficients_shape->values[1] << ", "<< coefficients_shape->values[2] << ", opening angle: " << coefficients_shape->values[6];
 
-        if (inliers_size > 0) {
-            PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
-            cloud_msg->value = cloud_extracted;
-            out_cloud_->publish(cloud_msg);
+    if (inliers_size > 0) {
+        // Publish the model coefficients of the object
+        GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
+        param_msg->value.reset(new ModelMessage);
 
-            // Publish the model coefficients of the object
-            GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
-            param_msg->value.reset(new ModelMessage);
+        param_msg->value->model_type = model_;
+        param_msg->value->coefficients = coefficients_shape;
+        param_msg->value->frame_id = cloud->header.frame_id;
+        param_msg->value->probability = ransac_probability_;
+        out_model_->publish(param_msg);
+    }
 
-            param_msg->value->model_type = model_;
-            param_msg->value->coefficients = coefficients_shape;
-            param_msg->value->frame_id = cloud->header.frame_id;
-            param_msg->value->probability = ransac_probability_;
-            out_model_->publish(param_msg);
-        }
-    } else
-    {
-        stringstream << "No output cloud connected";
+
+   if (out_cloud_->isConnected()) {
+       if (inliers_size > 0 ) {
+           PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
+           cloud_msg->value = cloud_extracted;
+           out_cloud_->publish(cloud_msg);
+       }
+    }
+
+   if (out_cloud_residue_->isConnected()) {
+       PointCloudMessage::Ptr cloud_msg_residue(new PointCloudMessage);
+       cloud_msg_residue->value = cloud_residue;
+       out_cloud_->publish(cloud_msg_residue);
     }
 
     StringMessage::Ptr text_msg(new StringMessage);
@@ -121,7 +129,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 }
 
 template <class PointT>
-int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape)
+int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue)
 {
     //pcl::ExtractIndices<pcl::Normal> extract_normals_;
     pcl::ExtractIndices<PointT> extract_points;
@@ -143,8 +151,15 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
     if (inliers->indices.size() > 0) {
         extract_points.setInputCloud(cloud_in);
         extract_points.setIndices(inliers);
-        extract_points.setNegative(publish_inverse_);
+        extract_points.setNegative(false);
         extract_points.filter(*cloud_extracted);
+    }
+
+    if (get_resisdue) {
+        extract_points.setInputCloud(cloud_in);
+        extract_points.setIndices(inliers);
+        extract_points.setNegative(true);
+        extract_points.filter(*cloud_resisdue);
     }
 
     return inliers->indices.size();
@@ -172,8 +187,6 @@ void SacFit::setParameters()
     distance_threshold_ = param<double>("distance threshold");
     sphere_r_min_ = param<double>("sphere min radius");
     sphere_r_max_ = param<double>("sphere max radius");
-
-    publish_inverse_ = param<bool>("publish inverse");
     model_ = (pcl::SacModel) param<int>("models");
 }
 

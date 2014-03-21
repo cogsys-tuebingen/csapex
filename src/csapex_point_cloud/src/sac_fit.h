@@ -30,6 +30,7 @@ private:
     ConnectorOut* out_text_;
     ConnectorOut* out_model_;
     ConnectorOut* out_cloud_;
+    ConnectorOut* out_cloud_residue_;
 
     int shape_inliers_;
     double ransac_probability_;
@@ -42,10 +43,9 @@ private:
     double sphere_r_min_;
     double sphere_r_max_;
     pcl::SacModel model_;
-    bool publish_inverse_;
 
     template <class PointT>
-    int findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape);
+    int findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape, typename pcl::PointCloud<PointT>::Ptr cloud_rest, bool get_rest);
     template <class PointT>
     void estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals);
     template <class PointT>
