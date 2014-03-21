@@ -90,9 +90,9 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
         apex.z = model_message.coefficients->values.at(2);
 
         geometry_msgs::Point base;
-        base.x = apex.x - model_message.coefficients->values.at(3);
-        base.y = apex.y - model_message.coefficients->values.at(4);
-        base.z = apex.z - model_message.coefficients->values.at(5);
+        base.x = apex.x + model_message.coefficients->values.at(3);
+        base.y = apex.y + model_message.coefficients->values.at(4);
+        base.z = apex.z + model_message.coefficients->values.at(5);
 
         marker->points.push_back(base);
         marker->points.push_back(apex);

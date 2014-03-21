@@ -69,6 +69,7 @@ template <class PointT>
 void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
     std::stringstream stringstream;
+    int inliers_size = 0;
 
     if (out_cloud_->isConnected()) {
         //typename pcl::PointCloud<PointT>::Ptr cloud_extracted;
@@ -76,16 +77,18 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
         pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
 
-        findModel<PointT>(cloud, cloud_extracted, coefficients_shape);
+        inliers_size = findModel<PointT>(cloud, cloud_extracted, coefficients_shape);
 
-        PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
-        cloud_msg->value = cloud_extracted;
-        out_cloud_->publish(cloud_msg);
+
 
         stringstream << "found [" << shape_inliers_ <<  "] inliers coeffs:" << coefficients_shape->values.at(0) << ", "<< coefficients_shape->values.at(1) << ", "<< coefficients_shape->values.at(2) << ", "<< coefficients_shape->values.at(3) ;
         //stringstream << "Cone apex: "<< coefficients_shape->values[0] << ", " << coefficients_shape->values[1] << ", "<< coefficients_shape->values[2] << ", opening angle: " << coefficients_shape->values[6];
 
-        if (shape_inliers_ > 0) {
+        if (inliers_size > 0) {
+            PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
+            cloud_msg->value = cloud_extracted;
+            out_cloud_->publish(cloud_msg);
+
             // Publish the model coefficients of the object
             GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
             param_msg->value.reset(new ModelMessage);
@@ -117,7 +120,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 }
 
 template <class PointT>
-void SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape)
+int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape)
 {
     //pcl::ExtractIndices<pcl::Normal> extract_normals_;
     pcl::ExtractIndices<PointT> extract_points;
@@ -133,12 +136,16 @@ void SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename
 
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     segmenter.segment(*inliers, *coefficients_shape);
-    shape_inliers_ = inliers->indices.size();
 
-    extract_points.setInputCloud(cloud_in);
-    extract_points.setIndices(inliers);
-    extract_points.setNegative(publish_inverse_);
-    extract_points.filter(*cloud_extracted);
+
+    if (inliers->indices.size() > 0) {
+        extract_points.setInputCloud(cloud_in);
+        extract_points.setIndices(inliers);
+        extract_points.setNegative(publish_inverse_);
+        extract_points.filter(*cloud_extracted);
+    }
+
+    return inliers->indices.size();
 }
 
 template <class PointT>
@@ -177,6 +184,7 @@ void SacFit::initializeSegmenter(pcl::SACSegmentationFromNormals<PointT, pcl::No
     segmenter.setMaxIterations (iterations_);
     segmenter.setDistanceThreshold (distance_threshold_);
     segmenter.setRadiusLimits (sphere_r_min_, sphere_r_max_);
+    segmenter.setMinMaxOpeningAngle(sphere_r_min_, sphere_r_max_);
     segmenter.setNormalDistanceWeight (normal_distance_weight_);
     segmenter.setOptimizeCoefficients(true); // optimize the coefficients
 }
