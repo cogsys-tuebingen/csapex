@@ -119,6 +119,27 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
         marker->color.g = 1.0;
         marker->color.b = 0.0;
 
+    // 2D Circle
+    } else if (model_message.model_type == pcl::SACMODEL_CIRCLE2D ) {
+        marker->type                = visualization_msgs::Marker::CYLINDER;
+
+        marker->pose.position.x = model_message.coefficients->values.at(0);
+        marker->pose.position.y = model_message.coefficients->values.at(1);
+        marker->pose.position.z = 0;
+
+        marker->pose.orientation.x  = 0.0;
+        marker->pose.orientation.y  = 0.0;
+        marker->pose.orientation.z  = 0.0;
+        marker->pose.orientation.w  = 1.0;
+
+        marker->scale.x = model_message.coefficients->values.at(2);
+        marker->scale.y = model_message.coefficients->values.at(2);
+        marker->scale.z = model_message.probability;
+
+        marker->color.a = 0.8;
+        marker->color.r = 0.0;
+        marker->color.g = 1.0;
+        marker->color.b = 0.0;
     } else {
         printf("unknown Model!!");
     }

@@ -15,6 +15,7 @@ public:
     pcl::SacModel model_type;
     pcl::ModelCoefficients::Ptr coefficients;
     std::string                  frame_id;
+    double probability;
 };
 
 }

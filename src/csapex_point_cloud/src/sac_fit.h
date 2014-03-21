@@ -28,10 +28,11 @@ public:
 private:
     ConnectorIn* input_;
     ConnectorOut* out_text_;
-    ConnectorOut* out_params_;
+    ConnectorOut* out_model_;
     ConnectorOut* out_cloud_;
 
     int shape_inliers_;
+    double ransac_probability_;
 
     // PCL parameter
     int ransac_;

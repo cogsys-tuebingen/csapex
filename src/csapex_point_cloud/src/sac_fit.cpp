@@ -60,7 +60,7 @@ void SacFit::setup()
     input_ = addInput<PointCloudMessage>("PointCloud");
     out_text_= addOutput<StringMessage>("String");
 
-    out_params_ = addOutput<GenericMessage<ModelMessage> >("Parameters");
+    out_model_ = addOutput<GenericMessage<ModelMessage> >("Model");
     out_cloud_ = addOutput<PointCloudMessage>("PointCloud");
 }
 
@@ -96,7 +96,8 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
             param_msg->value->model_type = model_;
             param_msg->value->coefficients = coefficients_shape;
             param_msg->value->frame_id = cloud->header.frame_id;
-            out_params_->publish(param_msg);
+            param_msg->value->probability = ransac_probability_;
+            out_model_->publish(param_msg);
         }
     } else
     {
@@ -136,6 +137,7 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
 
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     segmenter.segment(*inliers, *coefficients_shape);
+    ransac_probability_ = segmenter.getProbability();
 
 
     if (inliers->indices.size() > 0) {
