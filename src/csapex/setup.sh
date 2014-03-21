@@ -13,4 +13,4 @@ if [[ ${XDG_CURRENT_DESKTOP} == "Unity" ]]; then
         cp res/apex_logo.png $DIR/.local/share/icons/apex_logo.png
 fi
 
-cp -r cfg ~/.csapex
+cp -r cfg ~/.csapex/cfg

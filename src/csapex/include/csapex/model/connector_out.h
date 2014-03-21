@@ -38,6 +38,12 @@ public:
     }
 
     template <typename T>
+    void publishIntegral(T message) {
+        typename connection_types::DirectMessage<T>::Ptr msg(new connection_types::DirectMessage<T>);
+        msg->value = message;
+        publish(msg);
+    }
+    template <typename T>
     void publish(typename T::Ptr message,
                  typename boost::disable_if<boost::is_base_and_derived<connection_types::Message, T> >::type* dummy = 0) {
         typename connection_types::GenericMessage<T>::Ptr msg(new connection_types::GenericMessage<T>);

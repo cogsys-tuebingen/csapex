@@ -20,10 +20,6 @@ public:
     void setup();
     void process();
 
-//    virtual void enable();
-//    virtual void disable();
-    virtual void connectorChanged();
-
 protected:
     ConnectorIn* input_;
 

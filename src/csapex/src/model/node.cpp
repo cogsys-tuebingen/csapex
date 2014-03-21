@@ -85,8 +85,9 @@ std::vector<Tag> Node::getTags() const
 void Node::addParameter(const param::Parameter::Ptr &param)
 {
     state.params[param->name()] = param;
+    state.order.push_back(param->name());
 
-    state.parameters.push_back(param);
+    //state.parameters.push_back(param);
 
     worker_->addParameter(param.get());
 }
@@ -115,7 +116,11 @@ void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::fu
 
 std::vector<param::Parameter::Ptr> Node::getParameters() const
 {
-    return state.parameters;
+    std::vector<param::Parameter::Ptr> result;
+    for(std::vector<std::string>::const_iterator n = state.order.begin(); n != state.order.end(); ++n) {
+        result.push_back(state.params.at(*n));
+    }
+    return result;
 }
 
 param::Parameter::Ptr Node::getParameter(const std::string &name) const

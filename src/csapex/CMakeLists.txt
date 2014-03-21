@@ -90,6 +90,7 @@ set(SRC_PLUGIN
 
     src/view/node_adapter.cpp
     src/view/node_adapter_builder.cpp
+    src/view/default_node_adapter.cpp
 )
 
 set(SRC_APP
@@ -135,7 +136,6 @@ set(SRC_APP
     src/view/selectable.cpp
     src/view/profiling_widget.cpp
     src/view/port.cpp
-    src/view/default_node_adapter.cpp
 )
 
 #

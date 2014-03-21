@@ -5,30 +5,32 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <utils_param/parameter_factory.h>
-#include <csapex_vision/cv_mat_message.h>
 
 /// SYSTEM
 #include <csapex_point_cloud/point_cloud_message.h>
 #include <csapex/utility/register_apex_plugin.h>
 #include <pcl/point_types.h>
 #include <pcl/conversions.h>
+#include <opencv2/opencv.hpp>
 
 CSAPEX_REGISTER_CLASS(csapex::LabelPointCloud, csapex::Node)
 
 using namespace csapex;
 using namespace csapex::connection_types;
 
+#define FLOOD_DEFAULT_LABEL 0
+
 LabelPointCloud::LabelPointCloud()
 {
+    addParameter(param::ParameterFactory::declareBool("exclude default label", false));
 }
 
 void LabelPointCloud::process()
 {
     PointCloudMessage::Ptr cloud(input_->getMessage<PointCloudMessage>());
-    CvMatMessage::Ptr      labels(labels_->getMessage<CvMatMessage>());
-    label_mat_ = labels->value;
+    label_msg_ = labels_->getMessage<CvMatMessage>();
 
-    if((label_mat_.type() & 7) != CV_16U) {
+    if((label_msg_->value.type() & 7) != CV_16U) {
         throw std::runtime_error("Label matrix must be of type CV_16UC1");
     }
 
@@ -76,7 +78,8 @@ template<class PointT, class PointS>
 struct Impl {
     inline static void label(const typename pcl::PointCloud<PointT>::Ptr src,
                              typename pcl::PointCloud<PointS>::Ptr dst,
-                             const cv::Mat &labels)
+                             const cv::Mat &labels,
+                             const bool exclude_default_label)
     {
         if(src->height != (uint) labels.rows)
             throw std::runtime_error("PointCloud height != labels matrix height");
@@ -90,8 +93,9 @@ struct Impl {
         typename pcl::PointCloud<PointT>::const_iterator it = src->begin();
         for(int y = 0 ; y < labels.rows ; ++y) {
             for(int x = 0 ; x < labels.cols ; ++x) {
-                dst->push_back(Copy<PointT, PointS>::apply(*it));
-                dst->back().label = labels.at<ushort>(y,x);
+                ushort label = labels.at<ushort>(y,x);
+                dst->push_back(exclude_default_label && label == FLOOD_DEFAULT_LABEL ?  PointS() : Copy<PointT, PointS>::apply(*it));
+                dst->back().label = label;
                 ++it;
             }
         }
@@ -102,10 +106,11 @@ template<class PointT>
 struct Label {
     static void apply(const typename pcl::PointCloud<PointT>::Ptr src,
                       PointCloudMessage::Ptr &dst_msg,
-                      const cv::Mat &labels)
+                      const cv::Mat &labels,
+                      const bool exclude_default_label)
     {
         pcl::PointCloud<pcl::PointXYZL>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZL>);
-        Impl<PointT, pcl::PointXYZL>::label(src, cloud, labels);
+        Impl<PointT, pcl::PointXYZL>::label(src, cloud, labels, exclude_default_label);
         dst_msg->value = cloud;
     }
 };
@@ -114,10 +119,11 @@ template<>
 struct Label<pcl::PointXYZRGB> {
     static void apply(const typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr src,
                       PointCloudMessage::Ptr &dst_msg,
-                      const cv::Mat &labels)
+                      const cv::Mat &labels,
+                      const bool exclude_default_label)
     {
         pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBL>);
-        Impl<pcl::PointXYZRGB, pcl::PointXYZRGBL>::label(src, cloud, labels);
+        Impl<pcl::PointXYZRGB, pcl::PointXYZRGBL>::label(src, cloud, labels, exclude_default_label);
         dst_msg->value = cloud;
     }
 };
@@ -126,7 +132,8 @@ template<>
 struct Label<pcl::PointXY> {
     static void apply(const typename pcl::PointCloud<pcl::PointXY>::Ptr src,
                       PointCloudMessage::Ptr &dst_msg,
-                      const cv::Mat &labels)
+                      const cv::Mat &labels,
+                      const bool exclude_default_label)
     {
         throw std::runtime_error("Pointcloud must be of type XYZ!");
     }
@@ -138,6 +145,7 @@ void LabelPointCloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
     PointCloudMessage::Ptr out(new PointCloudMessage);
 
-    implementation::Label<PointT>::apply(cloud, out, label_mat_);
+    bool exclude_default_label = param<bool>("exclude default label");
+    implementation::Label<PointT>::apply(cloud, out, label_msg_->value, exclude_default_label);
     output_->publish(out);
 }

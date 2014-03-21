@@ -11,7 +11,7 @@
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/view/box.h>
-#include <csapex/view/node_adapter.h>
+#include <csapex/view/default_node_adapter.h>
 #include <utils_plugin/plugin_manager.hpp>
 
 
@@ -261,7 +261,7 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
         if(bo) {
             object.reset(new csapex::Box(bo));
         } else {
-            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new NodeAdapter(content.get()))));
+            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get()))));
         }
     }
 
@@ -408,7 +408,7 @@ Box* BoxManager::makeBox(NodePtr node)
         if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
             return new Box(node, node_adapter_builders_[type]->build(node));
         } else {
-            return new Box(node, NodeAdapter::Ptr(new NodeAdapter(node.get())));
+            return new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get())));
         }
     }
 }

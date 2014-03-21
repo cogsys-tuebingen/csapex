@@ -24,13 +24,15 @@ public:
     virtual void setup();
 
 protected:
-    void update(param::Parameter *p);
+    void update();
 
 private:
     ConnectorOut* output_;
     cv::VideoCapture cap_;
 
-    int idx;
+    int current_dev_;
+    int w_;
+    int h_;
 };
 
 } /// NAMESPACE

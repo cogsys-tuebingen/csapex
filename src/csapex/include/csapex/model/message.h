@@ -182,6 +182,48 @@ struct GenericMessage : public PossibleRosMessage {
     typename boost::shared_ptr<Type> value;
 };
 
+template <typename Type>
+struct DirectMessage : public Message {
+    typedef boost::shared_ptr<DirectMessage<Type> > Ptr;
+
+    DirectMessage()
+        : Message(type2name(typeid(Type)))
+    {}
+
+    virtual bool isRosMessage() const
+    {
+        return false;
+    }
+
+    virtual ConnectionType::Ptr clone() {
+        Ptr new_msg(new DirectMessage<Type>);
+        new_msg->value = value;
+        return new_msg;
+    }
+
+    virtual ConnectionType::Ptr toType() {
+        Ptr new_msg(new DirectMessage<Type>);
+        return new_msg;
+    }
+
+    static ConnectionType::Ptr make(){
+        Ptr new_msg(new DirectMessage<Type>);
+        return new_msg;
+    }
+
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const {
+        return name() == other_side->name();
+    }
+
+    void writeYaml(YAML::Emitter& yaml) {
+        yaml << YAML::Key << "value" << YAML::Value << value;
+    }
+    void readYaml(YAML::Node& node) {
+    }
+
+    Type value;
+};
+
 template <typename Type, class Instance>
 struct MessageTemplate : public Message {
     typedef boost::shared_ptr<Instance> Ptr;
