@@ -375,12 +375,10 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
 
             node_->manageOutput(cout);
         }
-        Port* port_out = new Port(node_->getCommandDispatcher(), cout);
-        Port* port_in = new Port(node_->getCommandDispatcher(), cin);
 
-        combined->addWidget(port_in);
+        combined->addWidget(new Port(node_->getCommandDispatcher(), cin));
         combined->addLayout(sub);
-        combined->addWidget(port_out);
+        combined->addWidget(new Port(node_->getCommandDispatcher(), cout));
 
         current_layout_->addLayout(combined);
 
