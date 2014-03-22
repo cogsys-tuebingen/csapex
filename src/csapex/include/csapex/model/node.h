@@ -171,6 +171,9 @@ public:
     void addInput(ConnectorIn* in) __attribute__ ((deprecated));
     void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
 
+    void manageInput(ConnectorIn* in);
+    void manageOutput(ConnectorOut* out);
+
     int countInputs() const;
     int countOutputs() const;
 
@@ -219,6 +222,8 @@ protected:
     void makeThread();
     void finishProcessing();
 
+    /// TODO: make private
+public:
     Settings& getSettings();
 
 private:
@@ -281,6 +286,7 @@ protected:
     mutable std::vector<Tag> tags_;
     QIcon icon_;
 
+
 private:
     Settings* settings_;
     Box* box_;
@@ -292,8 +298,11 @@ private:
 
     NodeStatePtr node_state_;
 
-    std::vector<ConnectorIn*> input;
-    std::vector<ConnectorOut*> output;
+    std::vector<ConnectorIn*> inputs_;
+    std::vector<ConnectorOut*> outputs_;
+
+    std::vector<ConnectorIn*> managed_inputs_;
+    std::vector<ConnectorOut*> managed_outputs_;
 
     CommandDispatcher* dispatcher_;
 

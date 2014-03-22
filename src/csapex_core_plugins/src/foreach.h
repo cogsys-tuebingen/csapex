@@ -16,15 +16,8 @@ public:
     ~Foreach();
 
     virtual void process();
+    virtual void setup();
     virtual void fill(QBoxLayout* layout);
-
-    virtual Connectable* getConnector(const UUID &uuid) const;
-
-    virtual std::vector<ConnectorIn*> getInputs() const;
-    virtual std::vector<ConnectorOut*> getOutputs() const;
-
-    virtual ConnectorIn* getInput(const UUID& uuid) const;
-    virtual ConnectorOut* getOutput(const UUID& uuid) const;
 
     virtual void stop();
 

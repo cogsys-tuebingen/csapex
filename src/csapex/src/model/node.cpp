@@ -24,10 +24,16 @@ Node::Node(const UUID &uuid)
 Node::~Node()
 {
     delete worker_;
-    BOOST_FOREACH(ConnectorIn* in, input) {
+    BOOST_FOREACH(ConnectorIn* in, inputs_) {
         in->deleteLater();
     }
-    BOOST_FOREACH(ConnectorOut* out, output) {
+    BOOST_FOREACH(ConnectorOut* out, outputs_) {
+        out->deleteLater();
+    }
+    BOOST_FOREACH(ConnectorIn* in, managed_inputs_) {
+        in->deleteLater();
+    }
+    BOOST_FOREACH(ConnectorOut* out, managed_outputs_) {
         out->deleteLater();
     }
 }
@@ -181,7 +187,7 @@ void Node::checkInputs()
 
 void Node::finishProcessing()
 {
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         if(i->isProcessing()) {
             i->setProcessing(false);
         }
@@ -196,7 +202,7 @@ Settings& Node::getSettings()
 void Node::checkIfDone()
 {
     int no_targets = 0;
-    Q_FOREACH(ConnectorOut* o, output) {
+    Q_FOREACH(ConnectorOut* o, outputs_) {
         no_targets += o->noTargets();
     }
 
@@ -205,7 +211,7 @@ void Node::checkIfDone()
     }
 
     // check if all children are done processing
-    Q_FOREACH(ConnectorOut* o, output) {
+    Q_FOREACH(ConnectorOut* o, outputs_) {
         // o->waitForProcessing();
         if(o->isProcessing()) {
             return;
@@ -239,7 +245,7 @@ void Node::killContent()
         private_thread_ = NULL;
         worker_ = new NodeWorker(this);
 
-        BOOST_FOREACH(ConnectorIn* in, input) {
+        BOOST_FOREACH(ConnectorIn* in, inputs_) {
             QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
         }
 
@@ -369,7 +375,7 @@ void Node::disable()
 bool Node::canReceive()
 {
     bool can_receive = true;
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
             can_receive = false;
         }
@@ -387,7 +393,7 @@ void Node::enableIO(bool enable)
 void Node::enableInput (bool enable)
 {
     worker_->setProcessing(false);
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         if(enable) {
             i->enable();
         } else {
@@ -399,7 +405,7 @@ void Node::enableInput (bool enable)
 
 void Node::enableOutput (bool enable)
 {
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         if(enable) {
             i->enable();
         } else {
@@ -410,10 +416,10 @@ void Node::enableOutput (bool enable)
 
 void Node::setIOError(bool error)
 {
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         i->setErrorSilent(error);
     }
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         i->setErrorSilent(error);
     }
     enableIO(!error);
@@ -497,7 +503,7 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 
 ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
-    int id = input.size();
+    int id = inputs_.size();
     ConnectorIn* c = new ConnectorIn(*settings_, this, id);
     c->setLabel(label);
     c->setOptional(optional);
@@ -511,7 +517,7 @@ ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bo
 
 ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 {
-    int id = output.size();
+    int id = outputs_.size();
     ConnectorOut* c = new ConnectorOut(*settings_, this, id);
     c->setLabel(label);
     c->setType(type);
@@ -532,6 +538,19 @@ void Node::addOutput(ConnectorOut* out)
     registerOutput(out);
 }
 
+
+void Node::manageInput(ConnectorIn* in)
+{
+    managed_inputs_.push_back(in);
+    in->moveToThread(thread());
+}
+
+void Node::manageOutput(ConnectorOut* out)
+{
+    managed_outputs_.push_back(out);
+    out->moveToThread(thread());
+}
+
 void Node::setSynchronizedInputs(bool sync)
 {
     worker_->setSynchronizedInputs(sync);
@@ -542,29 +561,34 @@ void Node::setSynchronizedInputs(bool sync)
 
 int Node::countInputs() const
 {
-    return input.size();
+    return inputs_.size();
 }
 
 int Node::countOutputs() const
 {
-    return output.size();
+    return outputs_.size();
 }
 
 ConnectorIn* Node::getInput(const unsigned int index) const
 {
-    assert(index < input.size());
-    return input[index];
+    assert(index < inputs_.size());
+    return inputs_[index];
 }
 
 ConnectorOut* Node::getOutput(const unsigned int index) const
 {
-    assert(index < output.size());
-    return output[index];
+    assert(index < outputs_.size());
+    return outputs_[index];
 }
 
 ConnectorIn* Node::getInput(const UUID& uuid) const
 {
-    BOOST_FOREACH(ConnectorIn* in, input) {
+    BOOST_FOREACH(ConnectorIn* in, inputs_) {
+        if(in->getUUID() == uuid) {
+            return in;
+        }
+    }
+    BOOST_FOREACH(ConnectorIn* in, managed_inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
@@ -575,7 +599,12 @@ ConnectorIn* Node::getInput(const UUID& uuid) const
 
 ConnectorOut* Node::getOutput(const UUID& uuid) const
 {
-    BOOST_FOREACH(ConnectorOut* out, output) {
+    BOOST_FOREACH(ConnectorOut* out, outputs_) {
+        if(out->getUUID() == uuid) {
+            return out;
+        }
+    }
+    BOOST_FOREACH(ConnectorOut* out, managed_outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
@@ -597,12 +626,18 @@ Connectable* Node::getConnector(const UUID &uuid) const
 
 std::vector<ConnectorIn*> Node::getInputs() const
 {
-    return input;
+    std::vector<ConnectorIn*> result;
+    result = inputs_;
+    result.insert(result.end(), managed_inputs_.begin(), managed_inputs_.end());
+    return result;
 }
 
 std::vector<ConnectorOut*> Node::getOutputs() const
 {
-    return output;
+    std::vector<ConnectorOut*> result;
+    result = outputs_;
+    result.insert(result.end(), managed_outputs_.begin(), managed_outputs_.end());
+    return result;
 }
 
 void Node::removeInput(ConnectorIn *in)
@@ -610,12 +645,12 @@ void Node::removeInput(ConnectorIn *in)
     worker_->removeInput(in);
 
     std::vector<ConnectorIn*>::iterator it;
-    it = std::find(input.begin(), input.end(), in);
+    it = std::find(inputs_.begin(), inputs_.end(), in);
 
     assert(*it == in);
 
     in->deleteLater();
-    input.erase(it);
+    inputs_.erase(it);
 
 
     disconnectConnector(in);
@@ -627,12 +662,12 @@ void Node::removeInput(ConnectorIn *in)
 void Node::removeOutput(ConnectorOut *out)
 {
     std::vector<ConnectorOut*>::iterator it;
-    it = std::find(output.begin(), output.end(), out);
+    it = std::find(outputs_.begin(), outputs_.end(), out);
 
     assert(*it == out);
 
     out->deleteLater();
-    output.erase(it);
+    outputs_.erase(it);
 
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
@@ -754,7 +789,7 @@ void Node::registerInput(ConnectorIn* in)
 {
     in->moveToThread(thread());
 
-    input.push_back(in);
+    inputs_.push_back(in);
 
     in->setCommandDispatcher(dispatcher_);
 
@@ -769,7 +804,7 @@ void Node::registerOutput(ConnectorOut* out)
 {
     out->moveToThread(thread());
 
-    output.push_back(out);
+    outputs_.push_back(out);
 
     out->setCommandDispatcher(dispatcher_);
 
@@ -782,12 +817,12 @@ void Node::registerOutput(ConnectorOut* out)
 
 int Node::nextInputId()
 {
-    return input.size();
+    return inputs_.size();
 }
 
 int Node::nextOutputId()
 {
-    return output.size();
+    return outputs_.size();
 }
 
 void Node::setPosition(const QPoint &pos)
@@ -814,7 +849,7 @@ void Node::useTimer(Timer *timer)
 {
     Timable::useTimer(timer);
 
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         i->useTimer(timer);
     }
 }
@@ -826,17 +861,17 @@ std::string Node::getLabel() const
 
 void Node::stop()
 {
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         i->stop();
     }
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         i->stop();
     }
 
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         disconnectConnector(i);
     }
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         disconnectConnector(i);
     }
 

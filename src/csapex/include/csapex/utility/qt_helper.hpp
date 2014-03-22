@@ -64,13 +64,11 @@ public:
     static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size = 1) ;
 
     static QSlider* makeSlider(QBoxLayout* layout, const std::string& name,
-                               int def, int min, int max,
-                               csapex::CommandDispatcher* dispatcher = NULL);
+                               int def, int min, int max);
 
 
     static QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name,
-                               int def, int min, int max, int step = 1,
-                               csapex::CommandDispatcher* dispatcher = NULL);
+                               int def, int min, int max, int step = 1);
 
     static QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size);
 

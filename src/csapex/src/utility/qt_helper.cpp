@@ -40,7 +40,7 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
     return spinner;
 }
 
-QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, CommandDispatcher*) {
+QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max) {
     assert(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
@@ -56,11 +56,9 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     display->setMaximum(max);
     display->setValue(def);
 
-    //internal_layout->addWidget(new Port(dispatcher, new ConnectorIn(UUID::NONE)));
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
-   // internal_layout->addWidget(new Port(dispatcher, new ConnectorOut(UUID::NONE)));
 
     layout->addLayout(internal_layout);
 
@@ -72,7 +70,7 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     return slider;
 }
 
-QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step, CommandDispatcher*) {
+QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step) {
     assert(min<=max);
 
     if(((def - min) / step) * step != (def - min)) {
@@ -103,11 +101,9 @@ QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name,
     display->setValue(def);
     display->setSingleStep(step);
 
-    //internal_layout->addWidget(new Port(dispatcher, new ConnectorIn(UUID::NONE)));
     internal_layout->addWidget(new QLabel(name.c_str()));
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
-   // internal_layout->addWidget(new Port(dispatcher, new ConnectorOut(UUID::NONE)));
 
     layout->addLayout(internal_layout);
 

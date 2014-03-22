@@ -478,11 +478,11 @@ Node* Graph::findNodeForConnector(const UUID &uuid)
         Q_FOREACH(Node::Ptr n, nodes_) {
             std::cerr << "node: " << n->getUUID() << "\n";
             std::cerr << "inputs: " << "\n";
-            Q_FOREACH(ConnectorIn* in, n->input) {
+            Q_FOREACH(ConnectorIn* in, n->getInputs()) {
                 std::cerr << "\t" << in->getUUID() << "\n";
             }
             std::cerr << "outputs: " << "\n";
-            Q_FOREACH(ConnectorOut* out, n->output) {
+            Q_FOREACH(ConnectorOut* out, n->getOutputs()) {
                 std::cerr << "\t" << out->getUUID() << "\n";
             }
         }
