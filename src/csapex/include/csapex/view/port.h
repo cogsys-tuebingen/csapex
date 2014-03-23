@@ -55,6 +55,7 @@ public:
     void refreshStylesheet();
 
 protected:
+    void createToolTip();
     void paintEvent(QPaintEvent *);
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);

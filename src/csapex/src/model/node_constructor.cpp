@@ -75,7 +75,7 @@ Node::Ptr NodeConstructor::makePrototypeContent() const
     res->setSettings(&settings_);
     res->setType(type_);
 
-    res->setup();
+    res->doSetup();
     return res;
 }
 
@@ -87,6 +87,6 @@ Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
     res->setUUID(uuid);
     res->setLabel(uuid);
 
-    res->setup();
+    res->doSetup();
     return res;
 }

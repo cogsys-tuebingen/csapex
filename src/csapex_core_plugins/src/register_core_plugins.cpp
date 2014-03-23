@@ -2,7 +2,6 @@
 #include "register_core_plugins.h"
 
 /// COMPONENT
-#include <csapex_core_plugins/string_message.h>
 #include <csapex_core_plugins/ros_handler.h>
 #include "import_ros.h"
 #include "file_importer.h"
@@ -189,7 +188,6 @@ void RegisterCorePlugins::initUI(DragIO &dragio)
 
 void RegisterCorePlugins::init(CsApexCore& core)
 {
-    ConnectionTypeManager::registerMessage<connection_types::StringMessage>();
 }
 
 void RegisterCorePlugins::shutdown()

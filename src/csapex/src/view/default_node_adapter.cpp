@@ -168,12 +168,25 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
             continue;
         }
 
+        current_layout_ = new QHBoxLayout;
+
+        ConnectorIn* param_in = node_->getParameterInput(current_name_);
+        if(param_in) {
+            current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_in));
+        }
+
         if(mapping_.find(p->ID()) != mapping_.end()) {
             mapping_[p->ID()](this, p);
 
         } else {
             current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet registered (value: " + type2name(p->type()) + ")").c_str()));
         }
+
+        ConnectorOut* param_out = node_->getParameterOutput(current_name_);
+        if(param_out) {
+            current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_out));
+        }
+        outer_layout->addLayout(current_layout_);
     }
 }
 
@@ -336,51 +349,8 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
 {
     if(range_p->is<int>()) {
-        QHBoxLayout* sub = new QHBoxLayout;
-        QIntSlider* slider = QtHelper::makeIntSlider(sub, current_display_name_ , range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>());
+        QIntSlider* slider = QtHelper::makeIntSlider(current_layout_, current_display_name_ , range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>());
         slider->setIntValue(range_p->as<int>());
-
-        QHBoxLayout* combined = new QHBoxLayout;
-
-        /// TODO: cin into parameter, so that it doesn't depend on gui!
-        ConnectorIn* cin;
-        /// TODO: cout into parameter, so that it doesn't depend on gui!
-        ConnectorOut* cout;
-        /// TODO: make synchronized!!!!!
-        {
-            cin = new ConnectorIn(node_->getSettings(), UUID::make_sub(node_->getUUID(), range_p->name()));
-            cin->setType(connection_types::DirectMessage<int>::make());
-            cin->enable();
-            cin->setAsync(true);
-
-            boost::function<connection_types::DirectMessage<int>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<int> >, cin, (void*) 0);
-            boost::function<connection_types::DirectMessage<int>*()> getmsg = boost::bind(&connection_types::DirectMessage<int>::Ptr::get, boost::bind(getmsgptr));
-            boost::function<int()> read = boost::bind(&connection_types::DirectMessage<int>::getValue, boost::bind(getmsg));
-            boost::function<void()> set_param_fn = boost::bind(&param::RangeParameter::set<int>, range_p, boost::bind(read));
-            qt_helper::Call* set_param = new qt_helper::Call(set_param_fn);
-            callbacks.push_back(set_param);
-            QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
-
-            node_->manageInput(cin);
-        }
-        {
-            cout = new ConnectorOut(node_->getSettings(), UUID::make_sub(node_->getUUID(), range_p->name() + "_out"));
-            cout->setType(connection_types::DirectMessage<int>::make());
-            cout->enable();
-            cout->setAsync(true);
-
-            boost::function<void(int)> publish = boost::bind(&ConnectorOut::publishIntegral<int>, cout, __1);
-            boost::function<int()> read = boost::bind(&param::Parameter::as<int>, range_p);
-            connections.push_back(parameter_changed(*range_p).connect(boost::bind(publish, boost::bind(read))));
-
-            node_->manageOutput(cout);
-        }
-
-        combined->addWidget(new Port(node_->getCommandDispatcher(), cin));
-        combined->addLayout(sub);
-        combined->addWidget(new Port(node_->getCommandDispatcher(), cout));
-
-        current_layout_->addLayout(combined);
 
         // ui change -> model
         boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParam<int>, this, current_name_, boost::bind(&QIntSlider::intValue, slider));

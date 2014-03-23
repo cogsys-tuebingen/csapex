@@ -52,7 +52,7 @@ public:
     Box(BoxedObjectPtr content, QWidget* parent = 0);
     Box(NodePtr content, NodeAdapterPtr adapter, QWidget* parent = 0);
     virtual ~Box();
-    void construct(NodePtr node);
+    void construct();
     void init();
 
     /// ACCESSORS

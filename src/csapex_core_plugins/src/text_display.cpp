@@ -2,9 +2,7 @@
 #include "text_display.h"
 
 /// PROJECT
-
 #include <csapex/model/connector_in.h>
-#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -26,7 +24,7 @@ void TextDisplay::fill(QBoxLayout *layout)
     if(connector_ == NULL) {
         setSynchronizedInputs(true);
 
-        //connector_ = addInput<connection_types::StringMessage>("Text");
+        //connector_ = addInput<connection_types::DirectMessage<std::string> >("Text");
         connector_ = addInput<connection_types::AnyMessage>("Anything", false, true);
         txt_ = new QLabel("<i>no input yet</i>");
         layout->addWidget(txt_);

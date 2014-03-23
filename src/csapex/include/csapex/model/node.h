@@ -45,7 +45,6 @@ public:
 public:
     Node(const UUID &uuid = UUID::NONE);
     virtual ~Node();
-    virtual void setup();
 
     void setType(const std::string& type);
     std::string getType() const;
@@ -78,8 +77,12 @@ public:
     }
 
     param::Parameter::Ptr getParameter(const std::string& name) const;
+
     bool isParameterEnabled(const std::string& name) const;
     void setParameterEnabled(const std::string& name, bool enabled);
+
+    ConnectorIn* getParameterInput(const std::string& name) const;
+    ConnectorOut* getParameterOutput(const std::string& name) const;
 
     void setIcon(QIcon icon);
     QIcon getIcon() const;
@@ -112,6 +115,8 @@ public:
     void setSettings(Settings* settings);
 
     NodeWorker* getNodeWorker() const;
+
+    void doSetup();
 
     /// "real" messages
     template <typename T>
@@ -222,9 +227,9 @@ protected:
     void makeThread();
     void finishProcessing();
 
-    /// TODO: make private
-public:
     Settings& getSettings();
+
+    void updateParameters();
 
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
@@ -240,6 +245,7 @@ protected:
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
     virtual void process() = 0;
+    virtual void setup() = 0;
 
     virtual void enable(bool e);
     virtual void enable();
@@ -297,6 +303,8 @@ private:
     NodeWorker* worker_;
 
     NodeStatePtr node_state_;
+    std::map<std::string, ConnectorIn*> param_2_input_;
+    std::map<std::string, ConnectorOut*> param_2_output_;
 
     std::vector<ConnectorIn*> inputs_;
     std::vector<ConnectorOut*> outputs_;

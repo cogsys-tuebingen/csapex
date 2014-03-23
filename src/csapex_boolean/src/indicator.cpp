@@ -1,11 +1,7 @@
 /// HEADER
 #include "indicator.h"
 
-/// COMPONENT
-#include <csapex_boolean/boolean_message.h>
-
 /// PROJECT
-
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 
@@ -27,7 +23,7 @@ void Indicator::fill(QBoxLayout *layout)
 {
     setSynchronizedInputs(true);
 
-    in = addInput<BooleanMessage>("Signal");
+    in = addInput<DirectMessage<bool> >("Signal");
 
     indicator_ = new QCheckBox("signal");
 
@@ -41,7 +37,7 @@ void Indicator::fill(QBoxLayout *layout)
 
 void Indicator::process()
 {
-    BooleanMessage::Ptr a = in->getMessage<BooleanMessage>();
+    DirectMessage<bool>::Ptr a = in->getMessage<DirectMessage<bool> >();
     assert(a);
 
     indicator_->setChecked(a->value);

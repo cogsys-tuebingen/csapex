@@ -36,16 +36,12 @@ Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), profiling_(false), is_placed_(false)
 {
-    //adapter_->setNode(node_.get());
-
-    construct(node);
 }
 
 Box::Box(BoxedObjectPtr node, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_shared_(node.get()),
       down_(false), profiling_(false), is_placed_(false)
 {
-    construct(node);
 }
 
 Box::~Box()
@@ -65,7 +61,7 @@ void Box::setupUi()
     updateFlippedSides();
 }
 
-void Box::construct(NodePtr node)
+void Box::construct()
 {
     ui->setupUi(this);
 
@@ -88,7 +84,7 @@ void Box::construct(NodePtr node)
 
     setLabel(node_->getLabel());
 
-    ui->enablebtn->setIcon(node->getIcon());
+    ui->enablebtn->setIcon(node_->getIcon());
 
     node_->setMinimized(false);
 
@@ -338,6 +334,10 @@ void Box::enabledChange(bool val)
 
 void Box::paintEvent(QPaintEvent*)
 {
+    if(!node_ || !adapter_) {
+        return;
+    }
+
     bool is_error = node_->isError() && node_->errorLevel() == ErrorState::EL_ERROR;
     bool is_warn = node_->isError() && node_->errorLevel() == ErrorState::EL_WARNING;
 

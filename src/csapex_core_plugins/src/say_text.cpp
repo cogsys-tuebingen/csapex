@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <csapex/model/connector_in.h>
-#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -24,12 +23,12 @@ void SayText::setup()
 {
     setSynchronizedInputs(true);
 
-    connector_ = addInput<connection_types::StringMessage>("Text", false, true);
+    connector_ = addInput<connection_types::DirectMessage<std::string> >("Text", false, true);
 }
 
 void SayText::process()
 {
-    connection_types::StringMessage::Ptr msg = connector_->getMessage<connection_types::StringMessage>();
+    connection_types::DirectMessage<std::string>::Ptr msg = connector_->getMessage<connection_types::DirectMessage<std::string> >();
 
     std::stringstream cmd;
     cmd << "espeak \"" << msg->value << "\" 2> /dev/null 1> /dev/null &";

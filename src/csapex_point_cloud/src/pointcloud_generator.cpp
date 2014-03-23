@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <csapex/model/connector_out.h>
-#include <csapex_core_plugins/string_message.h>
 #include <utils_param/parameter_factory.h>
 
 /// SYSTEM

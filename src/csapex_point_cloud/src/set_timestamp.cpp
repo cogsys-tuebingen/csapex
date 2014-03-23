@@ -2,11 +2,9 @@
 #include "set_timestamp.h"
 
 /// PROJECT
-
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex_transform/time_stamp_message.h>
-#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -27,7 +25,7 @@ void SetTimeStamp::setup()
     setSynchronizedInputs(true);
 
     input_ = addInput<connection_types::PointCloudMessage>("PointCloud");
-    input_frame_ = addInput<connection_types::StringMessage>("Frame", true, true);
+    input_frame_ = addInput<connection_types::DirectMessage<std::string> >("Frame", true, true);
     input_time_ = addInput<connection_types::TimeStampMessage>("Time");
 
     output_ = addOutput<connection_types::PointCloudMessage>("PointCloud");
@@ -49,7 +47,7 @@ void SetTimeStamp::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     connection_types::PointCloudMessage::Ptr msg(new connection_types::PointCloudMessage);
 
     if(input_frame_->isConnected() && input_frame_->hasMessage()) {
-        cloud->header.frame_id = input_frame_->getMessage<connection_types::StringMessage>()->value;
+        cloud->header.frame_id = input_frame_->getMessage<connection_types::DirectMessage<std::string> >()->value;
     }
 
     msg->value = cloud;

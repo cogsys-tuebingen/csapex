@@ -2,9 +2,7 @@
 #include "text_input.h"
 
 /// PROJECT
-
 #include <csapex/model/connector_out.h>
-#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -32,7 +30,7 @@ void TextInput::process()
 void TextInput::fill(QBoxLayout *layout)
 {
     if(connector_ == NULL) {
-        connector_ = addOutput<connection_types::StringMessage>("Text");
+        connector_ = addOutput<connection_types::DirectMessage<std::string> >("Text");
 
         txt_ = new QLineEdit(state.message.c_str());
         QPushButton* send = new QPushButton("ok");
@@ -56,7 +54,7 @@ void TextInput::setText(QString text)
 
 void TextInput::publish()
 {
-    connection_types::StringMessage::Ptr msg(new connection_types::StringMessage);
+    connection_types::DirectMessage<std::string>::Ptr msg(new connection_types::DirectMessage<std::string>);
     msg->value = state.message;
     connector_->publish(msg);
 }

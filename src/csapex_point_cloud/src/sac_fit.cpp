@@ -58,7 +58,7 @@ void SacFit::setup()
 {
     setSynchronizedInputs(true);
     input_ = addInput<PointCloudMessage>("PointCloud");
-    out_text_= addOutput<StringMessage>("String");
+    out_text_= addOutput<DirectMessage<std::string> >("String");
 
     out_model_ = addOutput<GenericMessage<ModelMessage> >("Model");
     out_cloud_ = addOutput<PointCloudMessage>("PointCloud");
@@ -104,7 +104,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         stringstream << "No output cloud connected";
     }
 
-    StringMessage::Ptr text_msg(new StringMessage);
+    DirectMessage<std::string>::Ptr text_msg(new DirectMessage<std::string>);
     text_msg->value = stringstream.str();
     out_text_->publish(text_msg);
 

@@ -400,17 +400,20 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 Box* BoxManager::makeBox(NodePtr node)
 {
     BoxedObject::Ptr bo = boost::dynamic_pointer_cast<BoxedObject>(node);
+    Box* box;
     if(bo) {
-        return new Box(bo);
+        box = new Box(bo);
     } else {
         std::string type = node->getType();
 
         if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-            return new Box(node, node_adapter_builders_[type]->build(node));
+            box = new Box(node, node_adapter_builders_[type]->build(node));
         } else {
-            return new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get())));
+            box = new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get())));
         }
     }
+    box->construct();
+    return box;
 }
 
 NodeConstructor::Ptr BoxManager::getSelector(const std::string &type)

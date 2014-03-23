@@ -6,7 +6,6 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex_transform/time_stamp_message.h>
-#include <csapex_core_plugins/string_message.h>
 #include <utils_param/parameter_factory.h>
 
 /// SYSTEM

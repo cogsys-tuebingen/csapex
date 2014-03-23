@@ -52,9 +52,10 @@ void Node::makeThread()
 }
 
 
-void Node::setup()
+void Node::doSetup()
 {
-
+    updateParameters();
+    setup();
 }
 
 void Node::setType(const std::string &type)
@@ -92,9 +93,6 @@ void Node::addParameter(const param::Parameter::Ptr &param)
 {
     state.params[param->name()] = param;
     state.order.push_back(param->name());
-
-    //state.parameters.push_back(param);
-
     worker_->addParameter(param.get());
 }
 
@@ -142,6 +140,26 @@ bool Node::isParameterEnabled(const std::string &name) const
 void Node::setParameterEnabled(const std::string &name, bool enabled)
 {
     getParameter(name)->setEnabled(enabled);
+}
+
+ConnectorIn* Node::getParameterInput(const std::string &name) const
+{
+    std::map<std::string, ConnectorIn*>::const_iterator it = param_2_input_.find(name);
+    if(it == param_2_input_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
+}
+
+ConnectorOut* Node::getParameterOutput(const std::string &name) const
+{
+    std::map<std::string, ConnectorOut*>::const_iterator it = param_2_output_.find(name);
+    if(it == param_2_output_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
 }
 
 void Node::setIcon(QIcon icon)
@@ -294,6 +312,76 @@ void Node::setNodeState(NodeState::Ptr memento)
     Q_EMIT stateChanged();
 }
 
+void Node::updateParameters()
+{
+    assert(!getUUID().empty());
+
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+        param::Parameter* p = it->second.get();
+
+        bool is_int = p->is<int>();
+        bool is_double = p->is<double>();
+        bool is_str = p->is<std::string>();
+        bool is_bool = p->is<bool>();
+
+        if(!is_int && !is_double && !is_str && !is_bool) {
+            continue;
+        }
+
+        /// TODO: make synchronized!!!!!
+        {
+            ConnectorIn* cin;
+            cin = new ConnectorIn(*settings_, UUID::make_sub(getUUID(), p->name() + "_in"));
+
+            if(is_int) {
+                cin->setType(connection_types::DirectMessage<int>::make());
+            } else if(is_double) {
+                cin->setType(connection_types::DirectMessage<double>::make());
+            } else if(is_str) {
+                cin->setType(connection_types::DirectMessage<std::string>::make());
+            } else if(is_bool) {
+                cin->setType(connection_types::DirectMessage<bool>::make());
+            }
+            cin->enable();
+            cin->setAsync(true);
+
+            //        boost::function<connection_types::DirectMessage<int>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<int> >, cin, (void*) 0);
+            //        boost::function<connection_types::DirectMessage<int>*()> getmsg = boost::bind(&connection_types::DirectMessage<int>::Ptr::get, boost::bind(getmsgptr));
+            //        boost::function<int()> read = boost::bind(&connection_types::DirectMessage<int>::getValue, boost::bind(getmsg));
+            //        boost::function<void()> set_param_fn = boost::bind(&param::RangeParameter::set<int>, range_p, boost::bind(read));
+            //        qt_helper::Call* set_param = new qt_helper::Call(set_param_fn);
+            //        callbacks.push_back(set_param);
+            //        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
+
+            manageInput(cin);
+            param_2_input_[p->name()] = cin;
+        }
+        {
+            ConnectorOut* cout;
+            cout = new ConnectorOut(*settings_, UUID::make_sub(getUUID(), p->name() + "_out"));
+
+            if(is_int) {
+                cout->setType(connection_types::DirectMessage<int>::make());
+            } else if(is_double) {
+                cout->setType(connection_types::DirectMessage<double>::make());
+            } else if(is_str) {
+                cout->setType(connection_types::DirectMessage<std::string>::make());
+            } else if(is_bool) {
+                cout->setType(connection_types::DirectMessage<bool>::make());
+            }
+            cout->enable();
+            cout->setAsync(true);
+
+            //        boost::function<void(int)> publish = boost::bind(&ConnectorOut::publishIntegral<int>, cout, __1);
+            //        boost::function<int()> read = boost::bind(&param::Parameter::as<int>, range_p);
+            //        connections.push_back(parameter_changed(*range_p).connect(boost::bind(publish, boost::bind(read))));
+
+            manageOutput(cout);
+            param_2_output_[p->name()] = cout;
+        }
+    }
+}
+
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
@@ -308,6 +396,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
             }
         }
     }
+
     setState(s->boxed_state);
     loaded_state_available_ = true;
 }
@@ -330,6 +419,10 @@ void Node::setState(Memento::Ptr memento)
         param::Parameter::Ptr p = it->second;
         if(state.params.find(p->name()) != state.params.end()) {
             state.params[p->name()]->setFrom(*p);
+        }
+
+        if(getUUID().empty()) {
+            return;
         }
     }
 

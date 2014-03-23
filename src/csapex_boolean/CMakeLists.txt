@@ -10,7 +10,6 @@ project(csapex_boolean)
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 find_package(catkin REQUIRED COMPONENTS csapex csapex_core_plugins)
 
-csapex_moc_all(QT_MOC_CORE include/csapex_boolean/*.h)
 csapex_moc_all(QT_MOC src/*.h)
 
 QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_boolean_resources.qrc)
@@ -25,25 +24,11 @@ QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_boolean_resources.qrc)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
-   LIBRARIES csapex_boolean_core
-#  CATKIN_DEPENDS csapex csapex_core_plugins
-#  DEPENDS system_lib
 )
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
-
-
-add_library(csapex_boolean_core
-    src/boolean_message.cpp
-
-    ${QT_MOC_CORE}
-)
-target_link_libraries(csapex_boolean_core
-    yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
-
 
 add_library(csapex_boolean_plugin
     src/register_plugin.cpp
@@ -54,5 +39,5 @@ add_library(csapex_boolean_plugin
     ${QT_MOC}
     ${QT_RESOURCES}
 )
-target_link_libraries(csapex_boolean_plugin csapex_boolean_core
+target_link_libraries(csapex_boolean_plugin
     yaml-cpp ${QT_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
