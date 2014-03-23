@@ -637,13 +637,16 @@ void Node::addOutput(ConnectorOut* out)
 void Node::manageInput(ConnectorIn* in)
 {
     managed_inputs_.push_back(in);
+    connectConnector(in);
     in->moveToThread(thread());
 }
 
 void Node::manageOutput(ConnectorOut* out)
 {
     managed_outputs_.push_back(out);
+    connectConnector(out);
     out->moveToThread(thread());
+    QObject::connect(out, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
 }
 
 void Node::setSynchronizedInputs(bool sync)
