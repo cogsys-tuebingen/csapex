@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/utility/q_signal_relay.h>
 #include <csapex/model/node.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
@@ -170,11 +171,13 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         current_layout_ = new QHBoxLayout;
 
+        // connect parameter input, if available
         ConnectorIn* param_in = node_->getParameterInput(current_name_);
         if(param_in) {
             current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_in));
         }
 
+        // generate UI element
         if(mapping_.find(p->ID()) != mapping_.end()) {
             mapping_[p->ID()](this, p);
 
@@ -182,6 +185,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
             current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet registered (value: " + type2name(p->type()) + ")").c_str()));
         }
 
+        // connect parameter output, if available
         ConnectorOut* param_out = node_->getParameterOutput(current_name_);
         if(param_out) {
             current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_out));

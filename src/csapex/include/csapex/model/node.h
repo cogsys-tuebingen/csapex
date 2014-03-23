@@ -26,7 +26,7 @@ namespace csapex {
 template <typename T>
 class RosMessageConversionT;
 
-class Node : public QObject, public ErrorState, public Unique, public Timable
+class Node : public QObject, public ErrorState, public Unique, public Timable, public param::Parameter::access
 {
     Q_OBJECT
 
@@ -229,6 +229,8 @@ protected:
 
     Settings& getSettings();
 
+    template <typename T>
+    void updateParameter(param::Parameter*);
     void updateParameters();
 
 private:
@@ -317,6 +319,8 @@ private:
     bool loaded_state_available_;
 
     GenericState state;
+    std::vector<boost::signals2::connection> connections;
+    std::vector<QObject*> callbacks;
 };
 
 }

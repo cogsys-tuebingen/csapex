@@ -15,6 +15,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex_vision/cv_mat_message.h>
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/utility/q_signal_relay.h>
 
 /// SYSTEM
 #include <QFrame>

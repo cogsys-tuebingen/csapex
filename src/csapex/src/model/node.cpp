@@ -7,6 +7,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/utility/q_signal_relay.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -36,6 +37,15 @@ Node::~Node()
     BOOST_FOREACH(ConnectorOut* out, managed_outputs_) {
         out->deleteLater();
     }
+
+    Q_FOREACH(QObject* cb, callbacks) {
+        qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
+        if(call) {
+            call->disconnect();
+        }
+        cb->deleteLater();
+    }
+    callbacks.clear();
 }
 
 void Node::makeThread()
@@ -312,6 +322,48 @@ void Node::setNodeState(NodeState::Ptr memento)
     Q_EMIT stateChanged();
 }
 
+template <typename T>
+void Node::updateParameter(param::Parameter *p)
+{
+    /// TODO: make synchronized!!!!!
+    {
+        ConnectorIn* cin;
+        cin = new ConnectorIn(*settings_, UUID::make_sub(getUUID(), p->name() + "_in"));
+
+        cin->setType(connection_types::DirectMessage<T>::make());
+
+        cin->enable();
+        cin->setAsync(true);
+
+        boost::function<typename connection_types::DirectMessage<T>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<T> >, cin, (void*) 0);
+        boost::function<connection_types::DirectMessage<T>*()> getmsg = boost::bind(&connection_types::DirectMessage<T>::Ptr::get, boost::bind(getmsgptr));
+        boost::function<T()> read = boost::bind(&connection_types::DirectMessage<T>::getValue, boost::bind(getmsg));
+        boost::function<void()> set_param_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
+        qt_helper::Call* set_param = new qt_helper::Call(set_param_fn);
+        callbacks.push_back(set_param);
+        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
+
+        manageInput(cin);
+        param_2_input_[p->name()] = cin;
+    }
+    {
+        ConnectorOut* cout;
+        cout = new ConnectorOut(*settings_, UUID::make_sub(getUUID(), p->name() + "_out"));
+
+        cout->setType(connection_types::DirectMessage<T>::make());
+
+        cout->enable();
+        cout->setAsync(true);
+
+        boost::function<void(T)> publish = boost::bind(&ConnectorOut::publishIntegral<T>, cout, _1);
+        boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
+        connections.push_back(parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
+
+        manageOutput(cout);
+        param_2_output_[p->name()] = cout;
+    }
+}
+
 void Node::updateParameters()
 {
     assert(!getUUID().empty());
@@ -319,66 +371,16 @@ void Node::updateParameters()
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
         param::Parameter* p = it->second.get();
 
-        bool is_int = p->is<int>();
-        bool is_double = p->is<double>();
-        bool is_str = p->is<std::string>();
-        bool is_bool = p->is<bool>();
-
-        if(!is_int && !is_double && !is_str && !is_bool) {
-            continue;
+        if(p->is<int>()) {
+            updateParameter<int>(p);
+        } else if(p->is<double>()) {
+            updateParameter<double>(p);
+        } else if(p->is<std::string>()) {
+            updateParameter<std::string>(p);
+        } else if(p->is<bool>()) {
+            updateParameter<bool>(p);
         }
-
-        /// TODO: make synchronized!!!!!
-        {
-            ConnectorIn* cin;
-            cin = new ConnectorIn(*settings_, UUID::make_sub(getUUID(), p->name() + "_in"));
-
-            if(is_int) {
-                cin->setType(connection_types::DirectMessage<int>::make());
-            } else if(is_double) {
-                cin->setType(connection_types::DirectMessage<double>::make());
-            } else if(is_str) {
-                cin->setType(connection_types::DirectMessage<std::string>::make());
-            } else if(is_bool) {
-                cin->setType(connection_types::DirectMessage<bool>::make());
-            }
-            cin->enable();
-            cin->setAsync(true);
-
-            //        boost::function<connection_types::DirectMessage<int>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<int> >, cin, (void*) 0);
-            //        boost::function<connection_types::DirectMessage<int>*()> getmsg = boost::bind(&connection_types::DirectMessage<int>::Ptr::get, boost::bind(getmsgptr));
-            //        boost::function<int()> read = boost::bind(&connection_types::DirectMessage<int>::getValue, boost::bind(getmsg));
-            //        boost::function<void()> set_param_fn = boost::bind(&param::RangeParameter::set<int>, range_p, boost::bind(read));
-            //        qt_helper::Call* set_param = new qt_helper::Call(set_param_fn);
-            //        callbacks.push_back(set_param);
-            //        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
-
-            manageInput(cin);
-            param_2_input_[p->name()] = cin;
-        }
-        {
-            ConnectorOut* cout;
-            cout = new ConnectorOut(*settings_, UUID::make_sub(getUUID(), p->name() + "_out"));
-
-            if(is_int) {
-                cout->setType(connection_types::DirectMessage<int>::make());
-            } else if(is_double) {
-                cout->setType(connection_types::DirectMessage<double>::make());
-            } else if(is_str) {
-                cout->setType(connection_types::DirectMessage<std::string>::make());
-            } else if(is_bool) {
-                cout->setType(connection_types::DirectMessage<bool>::make());
-            }
-            cout->enable();
-            cout->setAsync(true);
-
-            //        boost::function<void(int)> publish = boost::bind(&ConnectorOut::publishIntegral<int>, cout, __1);
-            //        boost::function<int()> read = boost::bind(&param::Parameter::as<int>, range_p);
-            //        connections.push_back(parameter_changed(*range_p).connect(boost::bind(publish, boost::bind(read))));
-
-            manageOutput(cout);
-            param_2_output_[p->name()] = cout;
-        }
+        // else: do nothing and ignore the parameter
     }
 }
 

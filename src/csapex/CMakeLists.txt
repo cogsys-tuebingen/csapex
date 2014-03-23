@@ -84,6 +84,7 @@ set(SRC_PLUGIN
     src/utility/error_handling.cpp
     src/utility/timable.cpp
     src/utility/type.cpp
+    src/utility/q_signal_relay.cpp
 
     src/deprecated/global_option.cpp
     src/deprecated/global_option_manager.cpp
