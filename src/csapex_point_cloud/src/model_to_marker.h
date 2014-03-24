@@ -18,6 +18,7 @@ public:
 private:
     ConnectorIn* input_;
     ConnectorOut* output_;
+    ConnectorOut* output_text_;
 
     void publishMarkers(const ModelMessage model_message);
 };

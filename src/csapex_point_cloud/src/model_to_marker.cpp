@@ -34,6 +34,7 @@ void ModelToMarker::process()
         publishMarkers(*(message->value));
     }
 
+
 }
 
 void ModelToMarker::setup()
@@ -41,6 +42,7 @@ void ModelToMarker::setup()
     setSynchronizedInputs(true);
     input_ = addInput<GenericMessage<ModelMessage> >("ModelMessage");
     output_ = addOutput<visualization_msgs::Marker>("Marker");
+    output_text_ = addOutput<StringMessage>("String");
 
     addParameter(param::ParameterFactory::declareBool("publish marker", true));
 }
@@ -150,5 +152,17 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
     // Change to marker array so that a nicer cone can be displayed by a vector and a circle
 
    output_->publish<visualization_msgs::Marker>(marker);
+
+   // Publish the model as Text
+   std::stringstream stringstream;
+   stringstream << "Model Type: " << model_message.model_type;
+   stringstream << " Frame: " << model_message.frame_id;
+   for (int i1=0; i1 < model_message.coefficients->values.size(); i1++) {
+       stringstream << " [" << i1 << "]=" << model_message.coefficients->values.at(i1);
+   }
+
+   StringMessage::Ptr text_msg(new StringMessage);
+   text_msg->value = stringstream.str();
+   output_text_->publish(text_msg);
 
 }
