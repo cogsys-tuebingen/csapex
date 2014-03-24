@@ -57,11 +57,11 @@ void SacFit::setup()
 {
     setSynchronizedInputs(true);
     input_ = addInput<PointCloudMessage>("PointCloud");
-    out_text_= addOutput<StringMessage>("String");
+    out_text_= addOutput<StringMessage>("Debug Info");
 
     out_model_ = addOutput<GenericMessage<ModelMessage> >("Model");
-    out_cloud_ = addOutput<PointCloudMessage>("PointCloud Model");
-    out_cloud_residue_ = addOutput<PointCloudMessage>("PointCloud Residue");
+    out_cloud_ = addOutput<PointCloudMessage>("Points of Model");
+    out_cloud_residue_ = addOutput<PointCloudMessage>("Residue");
 }
 
 
@@ -109,7 +109,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
    if (out_cloud_residue_->isConnected()) {
        PointCloudMessage::Ptr cloud_msg_residue(new PointCloudMessage);
        cloud_msg_residue->value = cloud_residue;
-       out_cloud_->publish(cloud_msg_residue);
+       out_cloud_residue_->publish(cloud_msg_residue);
     }
 
     StringMessage::Ptr text_msg(new StringMessage);
