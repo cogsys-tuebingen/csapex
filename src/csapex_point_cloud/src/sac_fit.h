@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex_point_cloud/point_cloud_message.h>
 #include <csapex_core_plugins/string_message.h>
+#include <csapex_point_cloud/model_message.h>
 
 /// POINT CLOUD
 #include <pcl/sample_consensus/method_types.h>
@@ -45,7 +46,7 @@ private:
     pcl::SacModel model_;
 
     template <class PointT>
-    int findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape, typename pcl::PointCloud<PointT>::Ptr cloud_rest, bool get_rest);
+    int findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue);
     template <class PointT>
     void estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals);
     template <class PointT>

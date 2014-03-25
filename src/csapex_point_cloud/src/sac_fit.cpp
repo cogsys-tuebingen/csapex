@@ -5,8 +5,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/ros_message_conversion.h>
 #include <utils_param/parameter_factory.h>
-#include <csapex_point_cloud/model_message.h>
-
+#include <tf/tf.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -18,7 +17,6 @@ CSAPEX_REGISTER_CLASS(csapex::SacFit, csapex::Node)
 using namespace csapex;
 using namespace csapex::connection_types;
 using namespace std;
-
 
 
 SacFit::SacFit()
@@ -78,14 +76,19 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     typename pcl::PointCloud<PointT>::Ptr cloud_residue(new pcl::PointCloud<PointT>);
     pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
 
-    inliers_size = findModel<PointT>(cloud, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
+    std::vector<ModelMessage> models;
+    inliers_size = findModel<PointT>(cloud, cloud_extracted, models, cloud_residue, out_cloud_residue_->isConnected());
 
 
+    stringstream << "found " << models.size() << " models and " << cloud_extracted->size() <<  "points total";
+//    for (int j = 0; j < coefficients_shape->values.size(); j++) {
+//        stringstream << " [" <<  j << "]: " << coefficients_shape->values.at(j);
+//    }
 
-    stringstream << "found [" << shape_inliers_ <<  "] inliers coeffs:" << coefficients_shape->values.at(0) << ", "<< coefficients_shape->values.at(1) << ", "<< coefficients_shape->values.at(2) << ", "<< coefficients_shape->values.at(3) ;
     //stringstream << "Cone apex: "<< coefficients_shape->values[0] << ", " << coefficients_shape->values[1] << ", "<< coefficients_shape->values[2] << ", opening angle: " << coefficients_shape->values[6];
 
     if (inliers_size > 0) {
+
         // Publish the model coefficients of the object
         GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
         param_msg->value.reset(new ModelMessage);
@@ -129,39 +132,67 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 }
 
 template <class PointT>
-int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue)
+int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue)
 {
-    //pcl::ExtractIndices<pcl::Normal> extract_normals_;
-    pcl::ExtractIndices<PointT> extract_points;
     pcl::SACSegmentationFromNormals<PointT, pcl::Normal> segmenter;
     initializeSegmenter<PointT>(segmenter);
+    pcl::ExtractIndices<PointT> extract_points;
+    pcl::ExtractIndices<pcl::Normal> extract_normals;
 
     pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
-    estimateNormals<PointT>(cloud_in, normals);
-
-    // Segment and extract the found points
-    segmenter.setInputCloud(cloud_in);
-    segmenter.setInputNormals(normals);
+    typename pcl::PointCloud<PointT>::Ptr cloud;
+     cloud = cloud_in;
+    typename pcl::PointCloud<PointT>::Ptr cloud_inliers (new pcl::PointCloud<PointT>);
 
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-    segmenter.segment(*inliers, *coefficients_shape);
-    ransac_probability_ = segmenter.getProbability();
+    pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
+
+    estimateNormals<PointT>(cloud, normals);
+
+    cloud_extracted->header = cloud_in->header;
+    while (cloud->size() > 10) { // TODO: add parameter for min inliers
+        std::cout << "!! SIZE CLOUD: " << cloud->size() << std::endl;
 
 
-    if (inliers->indices.size() > 0) {
-        extract_points.setInputCloud(cloud_in);
-        extract_points.setIndices(inliers);
-        extract_points.setNegative(false);
-        extract_points.filter(*cloud_extracted);
+
+        // Segment and extract the found points
+        segmenter.setInputCloud(cloud);
+        segmenter.setInputNormals(normals);
+
+        segmenter.segment(*inliers, *coefficients_shape);
+        ransac_probability_ = segmenter.getProbability();
+
+         std::cout << "!! SIZE INLIER: " << inliers->indices.size() << std::endl;
+        if (inliers->indices.size() > 0) {
+            extract_points.setInputCloud(cloud);
+            extract_points.setIndices(inliers);
+            extract_points.setNegative(false);
+            extract_points.filter(*cloud_inliers);
+            // append new found inlier cloud points
+            *cloud_extracted += *cloud_inliers;
+
+            extract_points.setInputCloud(cloud);
+            extract_points.setIndices(inliers);
+            extract_points.setNegative(true);
+            extract_points.filter(*cloud);
+
+            // Extract the normals from the residue
+            extract_normals.setInputCloud(normals);
+            extract_normals.setIndices(inliers);
+            extract_normals.setNegative(true);
+            extract_normals.filter(*normals);
+
+            // Save Model
+            ModelMessage model;
+            model.coefficients = coefficients_shape;
+            model.probability = ransac_probability_;
+            model.frame_id = cloud->header.frame_id;
+            model.model_type = model_;
+            models.push_back(model);
+        }
     }
 
-    if (get_resisdue) {
-        extract_points.setInputCloud(cloud_in);
-        extract_points.setIndices(inliers);
-        extract_points.setNegative(true);
-        extract_points.filter(*cloud_resisdue);
-    }
-
+    cloud_resisdue = cloud;
     return inliers->indices.size();
 }
 
@@ -201,7 +232,6 @@ void SacFit::initializeSegmenter(pcl::SACSegmentationFromNormals<PointT, pcl::No
     segmenter.setRadiusLimits (sphere_r_min_, sphere_r_max_);
     segmenter.setMinMaxOpeningAngle(sphere_r_min_, sphere_r_max_);
     segmenter.setNormalDistanceWeight (normal_distance_weight_);
-    segmenter.setOptimizeCoefficients(true); // optimize the coefficients
 }
 
 //
