@@ -28,6 +28,7 @@ public:
 
 private:
     ConnectorIn* input_;
+    ConnectorIn* in_indices_;
     ConnectorOut* out_text_;
     ConnectorOut* out_model_;
     ConnectorOut* out_cloud_;
@@ -47,7 +48,9 @@ private:
     pcl::SacModel model_;
 
     template <class PointT>
-    int findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue);
+    int findModels(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue);
+    template <class PointT> // Was "findModel in commit 51178f0ca   fixed bug that it publishes the resiues
+    int findSingleModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue);
     template <class PointT>
     void estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals);
     template <class PointT>

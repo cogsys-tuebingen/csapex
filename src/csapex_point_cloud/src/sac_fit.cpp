@@ -57,6 +57,7 @@ void SacFit::setup()
 {
     setSynchronizedInputs(true);
     input_ = addInput<PointCloudMessage>("PointCloud");
+    in_indices_ = addInput <GenericVectorMessage, pcl::PointIndices>("Clusters");
     out_text_= addOutput<StringMessage>("Debug Info");
 
     out_model_ = addOutput<GenericVectorMessage, ModelMessage >("Models");
@@ -73,14 +74,61 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 
 
     typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr point_cloud_out(new pcl::PointCloud<PointT>);
     typename pcl::PointCloud<PointT>::Ptr cloud_residue(new pcl::PointCloud<PointT>);
 
     boost::shared_ptr<std::vector<ModelMessage> >  models(new std::vector<ModelMessage>);
-    inliers_size = findModel<PointT>(cloud, cloud_extracted, *models, cloud_residue, out_cloud_residue_->isConnected());
+    //inliers_size = findModels<PointT>(cloud, cloud_extracted, *models, cloud_residue, out_cloud_residue_->isConnected());
+
+    pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
+
+    // Get indices from in_indices_
+    boost::shared_ptr<std::vector<pcl::PointIndices> const> cluster_indices = input_->getMessage<GenericVectorMessage, pcl::PointIndices>();
+
+    point_cloud_out->header = cloud->header;
+    // search for clusters
+    int j = 0;
+    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices->begin(); it != cluster_indices->end (); ++it)
+        //    for (j=0; j < cluster_indices->size(); j++)
+    {
+        // for every cluster
+        // extract the points of the cluster
+        //        typename pcl::ExtractIndices<PointT> extract_points;
+        //        extract_points.setInputCloud(cloud);
+        //        pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+        //        inliers = &(cluster_indices->at(j));
+        //        extract_points.setIndices(inliers);
+        //        extract_points.setNegative(false);
+        //        extract_points.filter(*cloud_cluster);
+        typename pcl::PointCloud<PointT>::Ptr cloud_cluster (new pcl::PointCloud<PointT>);
+        for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
+            cloud_cluster->points.push_back (cloud->points[*pit]); //*
+        cloud_cluster->width = cloud_cluster->points.size ();
+        cloud_cluster->height = 1;
+        cloud_cluster->is_dense = true;
+
+        //            std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size () << " data points." << std::endl;
+        //            std::stringstream ss;
+        //            ss << "cloud_cluster_" << j << ".pcd";
+
+        // find a model for the points
+        inliers_size = findSingleModel<PointT>(cloud_cluster, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
+
+        if (inliers_size > min_inliers_) {
+            // Save Model
+            ModelMessage model;
+            model.coefficients = coefficients_shape;
+            model.probability = ransac_probability_;
+            model.frame_id = cloud->header.frame_id;
+            model.model_type = model_;
+            models->push_back(model);
+            *point_cloud_out += *cloud_extracted;
+        }
+    }
 
 
     // Publish the found modelcoefficients as a vector
-    if (inliers_size > 0) {
+    if (models->size() > 0) {
         out_model_->publish<GenericVectorMessage, ModelMessage>(models);
         stringstream << "found " << models->size() << " models and " << cloud_extracted->size() <<  "points total";
     } else {
@@ -88,19 +136,19 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     }
 
     // Publish all points that belong to some models
-   if (out_cloud_->isConnected()) {
-       if (inliers_size > 0 ) {
-           PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
-           cloud_msg->value = cloud_extracted;
-           out_cloud_->publish(cloud_msg);
-       }
+    if (out_cloud_->isConnected()) {
+        if (inliers_size > 0 ) {
+            PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
+            cloud_msg->value = cloud_extracted;
+            out_cloud_->publish(cloud_msg);
+        }
     }
 
     // Publish everything that doesent belong to a model
-   if (out_cloud_residue_->isConnected()) {
-       PointCloudMessage::Ptr cloud_msg_residue(new PointCloudMessage);
-       cloud_msg_residue->value = cloud_residue;
-       out_cloud_residue_->publish(cloud_msg_residue);
+    if (out_cloud_residue_->isConnected()) {
+        PointCloudMessage::Ptr cloud_msg_residue(new PointCloudMessage);
+        cloud_msg_residue->value = cloud_residue;
+        out_cloud_residue_->publish(cloud_msg_residue);
     }
 
     StringMessage::Ptr text_msg(new StringMessage);
@@ -108,19 +156,21 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     out_text_->publish(text_msg);
 
 
-// Description of Cone parameters: http://docs.pointclouds.org/1.6.0/classpcl_1_1_sample_consensus_model_cone.html
-//    apex.x : the X coordinate of cone's apex
-//    apex.y : the Y coordinate of cone's apex
-//    apex.z : the Z coordinate of cone's apex
-//    axis_direction.x : the X coordinate of the cone's axis direction
-//    axis_direction.y : the Y coordinate of the cone's axis direction
-//    axis_direction.z : the Z coordinate of the cone's axis direction
-//    opening_angle : the cone's opening angle
+    // Description of Cone parameters: http://docs.pointclouds.org/1.6.0/classpcl_1_1_sample_consensus_model_cone.html
+    //    apex.x : the X coordinate of cone's apex
+    //    apex.y : the Y coordinate of cone's apex
+    //    apex.z : the Z coordinate of cone's apex
+    //    axis_direction.x : the X coordinate of the cone's axis direction
+    //    axis_direction.y : the Y coordinate of the cone's axis direction
+    //    axis_direction.z : the Z coordinate of the cone's axis direction
+    //    opening_angle : the cone's opening angle
 
 }
 
+
+
 template <class PointT>
-int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue)
+int SacFit::findModels(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue)
 {
     // Create functional objects
     pcl::SACSegmentationFromNormals<PointT, pcl::Normal> segmenter;
@@ -188,6 +238,45 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
     cloud_resisdue = cloud;
     return inliers->indices.size();
 }
+
+
+template <class PointT>
+int SacFit::findSingleModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, pcl::ModelCoefficients::Ptr coefficients_shape, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue)
+{
+    //pcl::ExtractIndices<pcl::Normal> extract_normals_;
+    pcl::ExtractIndices<PointT> extract_points;
+    pcl::SACSegmentationFromNormals<PointT, pcl::Normal> segmenter;
+    initializeSegmenter<PointT>(segmenter);
+
+    pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+    estimateNormals<PointT>(cloud_in, normals);
+
+    // Segment and extract the found points
+    segmenter.setInputCloud(cloud_in);
+    segmenter.setInputNormals(normals);
+
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    segmenter.segment(*inliers, *coefficients_shape);
+    ransac_probability_ = segmenter.getProbability();
+
+
+    if (inliers->indices.size() > 0) {
+        extract_points.setInputCloud(cloud_in);
+        extract_points.setIndices(inliers);
+        extract_points.setNegative(false);
+        extract_points.filter(*cloud_extracted);
+    }
+
+    if (get_resisdue) {
+        extract_points.setInputCloud(cloud_in);
+        extract_points.setIndices(inliers);
+        extract_points.setNegative(true);
+        extract_points.filter(*cloud_resisdue);
+    }
+
+    return inliers->indices.size();
+}
+
 
 template <class PointT>
 void SacFit::estimateNormals(typename pcl::PointCloud<PointT>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)

@@ -57,7 +57,7 @@ void ClusterPointcloud::setup()
 {
     setSynchronizedInputs(true);
     in_cloud_ = addInput<PointCloudMessage>("PointCloud");
-    out_ = addOutput<GenericVectorMessage, pcl::PointIndices >("Clusters Indices");
+    out_ = addOutput<GenericVectorMessage, pcl::PointIndices >("Clusters");
 }
 
 template <class PointT>
@@ -77,8 +77,8 @@ void ClusterPointcloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
       ec.setInputCloud (cloud);
       ec.extract (*cluster_indices);
 
-      boost::shared_ptr<std::vector<pcl::PointIndices> >  clusters(new std::vector<pcl::PointIndices>);
+      //boost::shared_ptr<std::vector<pcl::PointIndices> >  clusters(new std::vector<pcl::PointIndices>);
 
-      out_->publish<GenericVectorMessage, pcl::PointIndices >(clusters);
+      out_->publish<GenericVectorMessage, pcl::PointIndices >(cluster_indices);
 
 }
