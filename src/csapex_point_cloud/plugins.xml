@@ -74,4 +74,7 @@
 <class type="csapex::ModelToMarker" base_class_type="csapex::Node">
   <description>Takes a model message and creates a marker for rviz</description>
 </class>
+<class type="csapex::ClusterPointcloud" base_class_type="csapex::Node">
+  <description>cluster implementation from pcl</description>
+</class>
 </library>

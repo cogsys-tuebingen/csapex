@@ -64,6 +64,7 @@ add_library(csapex_point_cloud_plugin
     src/model_to_marker.cpp
     src/color_pointcloud.cpp
     src/label_pointcloud.cpp
+    src/cluster_pointcloud.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
