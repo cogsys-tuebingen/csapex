@@ -4,6 +4,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/ros_message_conversion.h>
+#include <csapex_core_plugins/vector_message.h>
 #include <utils_param/parameter_factory.h>
 #include <tf/tf.h>
 
@@ -57,7 +58,7 @@ void SacFit::setup()
     input_ = addInput<PointCloudMessage>("PointCloud");
     out_text_= addOutput<StringMessage>("Debug Info");
 
-    out_model_ = addOutput<GenericMessage<ModelMessage> >("Model");
+    out_model_ = addOutput<GenericVectorMessage, ModelMessage >("Models");
     out_cloud_ = addOutput<PointCloudMessage>("Points of Model");
     out_cloud_residue_ = addOutput<PointCloudMessage>("Residue");
 }
@@ -70,37 +71,20 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     int inliers_size = 0;
 
 
-    //typename pcl::PointCloud<PointT>::Ptr cloud_extracted;
-    //cloud_extracted.reset(new pcl::PointCloud<PointT>);
     typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
     typename pcl::PointCloud<PointT>::Ptr cloud_residue(new pcl::PointCloud<PointT>);
-    pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
 
-    std::vector<ModelMessage> models;
-    inliers_size = findModel<PointT>(cloud, cloud_extracted, models, cloud_residue, out_cloud_residue_->isConnected());
+    boost::shared_ptr<std::vector<ModelMessage> >  models(new std::vector<ModelMessage>);
+    inliers_size = findModel<PointT>(cloud, cloud_extracted, *models, cloud_residue, out_cloud_residue_->isConnected());
 
+    stringstream << "found " << models->size() << " models and " << cloud_extracted->size() <<  "points total";
 
-    stringstream << "found " << models.size() << " models and " << cloud_extracted->size() <<  "points total";
-//    for (int j = 0; j < coefficients_shape->values.size(); j++) {
-//        stringstream << " [" <<  j << "]: " << coefficients_shape->values.at(j);
-//    }
-
-    //stringstream << "Cone apex: "<< coefficients_shape->values[0] << ", " << coefficients_shape->values[1] << ", "<< coefficients_shape->values[2] << ", opening angle: " << coefficients_shape->values[6];
-
+    // Publish the found modelcoefficients as a vector
     if (inliers_size > 0) {
-
-        // Publish the model coefficients of the object
-        GenericMessage<ModelMessage>::Ptr param_msg(new GenericMessage<ModelMessage>);
-        param_msg->value.reset(new ModelMessage);
-
-        param_msg->value->model_type = model_;
-        param_msg->value->coefficients = coefficients_shape;
-        param_msg->value->frame_id = cloud->header.frame_id;
-        param_msg->value->probability = ransac_probability_;
-        out_model_->publish(param_msg);
+        out_model_->publish<GenericVectorMessage, ModelMessage>(models);
     }
 
-
+    // Publish all points that belong to some models
    if (out_cloud_->isConnected()) {
        if (inliers_size > 0 ) {
            PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
@@ -109,6 +93,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
        }
     }
 
+    // Publish everything that doesent belong to a model
    if (out_cloud_residue_->isConnected()) {
        PointCloudMessage::Ptr cloud_msg_residue(new PointCloudMessage);
        cloud_msg_residue->value = cloud_residue;
@@ -134,11 +119,13 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 template <class PointT>
 int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue)
 {
+    // Create functional objects
     pcl::SACSegmentationFromNormals<PointT, pcl::Normal> segmenter;
     initializeSegmenter<PointT>(segmenter);
     pcl::ExtractIndices<PointT> extract_points;
     pcl::ExtractIndices<pcl::Normal> extract_normals;
 
+    // Create data objects
     pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
     typename pcl::PointCloud<PointT>::Ptr cloud;
      cloud = cloud_in;
@@ -151,9 +138,7 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
 
     cloud_extracted->header = cloud_in->header;
     while (cloud->size() > 10) { // TODO: add parameter for min inliers
-        std::cout << "!! SIZE CLOUD: " << cloud->size() << std::endl;
-
-
+        //std::cout << "!! SIZE CLOUD: " << cloud->size() << std::endl;
 
         // Segment and extract the found points
         segmenter.setInputCloud(cloud);
@@ -162,15 +147,17 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
         segmenter.segment(*inliers, *coefficients_shape);
         ransac_probability_ = segmenter.getProbability();
 
-         std::cout << "!! SIZE INLIER: " << inliers->indices.size() << std::endl;
+        // std::cout << "!! SIZE INLIER: " << inliers->indices.size() << std::endl;
         if (inliers->indices.size() > 0) {
+            // extract the points that belong to a model
             extract_points.setInputCloud(cloud);
             extract_points.setIndices(inliers);
             extract_points.setNegative(false);
             extract_points.filter(*cloud_inliers);
-            // append new found inlier cloud points
+            // append new found inlier cloud points // TODO: index the points with different colors for different models
             *cloud_extracted += *cloud_inliers;
 
+            // Extract the residue
             extract_points.setInputCloud(cloud);
             extract_points.setIndices(inliers);
             extract_points.setNegative(true);
