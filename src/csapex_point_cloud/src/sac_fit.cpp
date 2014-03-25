@@ -25,6 +25,7 @@ SacFit::SacFit()
     addTag(Tag::get("PointCloud"));
 
     addParameter(param::ParameterFactory::declare("iterations", 1, 20000, 5000, 200));
+    addParameter(param::ParameterFactory::declare("min inliers", 5, 20000, 100, 100));
     addParameter(param::ParameterFactory::declare("normal distance weight", 0.0, 2.0, 0.085, 0.001));
     addParameter(param::ParameterFactory::declare("distance threshold", 0.0, 2.0, 0.009, 0.001));
     addParameter(param::ParameterFactory::declare("sphere min radius", 0.0, 2.0, 0.02, 0.005));
@@ -77,11 +78,13 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     boost::shared_ptr<std::vector<ModelMessage> >  models(new std::vector<ModelMessage>);
     inliers_size = findModel<PointT>(cloud, cloud_extracted, *models, cloud_residue, out_cloud_residue_->isConnected());
 
-    stringstream << "found " << models->size() << " models and " << cloud_extracted->size() <<  "points total";
 
     // Publish the found modelcoefficients as a vector
     if (inliers_size > 0) {
         out_model_->publish<GenericVectorMessage, ModelMessage>(models);
+        stringstream << "found " << models->size() << " models and " << cloud_extracted->size() <<  "points total";
+    } else {
+        stringstream << "Zero inliers found";
     }
 
     // Publish all points that belong to some models
@@ -138,7 +141,7 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
 
     cloud_extracted->header = cloud_in->header;
     while (cloud->size() > 10) { // TODO: add parameter for min inliers
-        //std::cout << "!! SIZE CLOUD: " << cloud->size() << std::endl;
+        std::cout << "!! SIZE CLOUD: " << cloud->size() << std::endl;
 
         // Segment and extract the found points
         segmenter.setInputCloud(cloud);
@@ -147,8 +150,8 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
         segmenter.segment(*inliers, *coefficients_shape);
         ransac_probability_ = segmenter.getProbability();
 
-        // std::cout << "!! SIZE INLIER: " << inliers->indices.size() << std::endl;
-        if (inliers->indices.size() > 0) {
+        std::cout << "!! SIZE INLIER: " << inliers->indices.size() << std::endl;
+        if (inliers->indices.size() > min_inliers_) {
             // extract the points that belong to a model
             extract_points.setInputCloud(cloud);
             extract_points.setIndices(inliers);
@@ -176,7 +179,10 @@ int SacFit::findModel(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename 
             model.frame_id = cloud->header.frame_id;
             model.model_type = model_;
             models.push_back(model);
+        } else {
+            break;
         }
+
     }
 
     cloud_resisdue = cloud;
@@ -199,6 +205,7 @@ void SacFit::setParameters()
 {
     //Set Parameters
     iterations_ = param<int>("iterations");
+    min_inliers_ = param<int>("min inliers");
     ransac_ = pcl::SAC_RANSAC;
 
     normal_distance_weight_ = param<double>("normal distance weight");

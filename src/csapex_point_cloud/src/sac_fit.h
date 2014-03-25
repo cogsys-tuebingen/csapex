@@ -39,6 +39,7 @@ private:
     // PCL parameter
     int ransac_;
     int iterations_;
+    int min_inliers_;
     double normal_distance_weight_;
     double distance_threshold_;
     double sphere_r_min_;

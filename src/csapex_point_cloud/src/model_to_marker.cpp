@@ -5,7 +5,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex_core_plugins/ros_message_conversion.h>
-//#include <csapex/model/message.h>
+#include <csapex_core_plugins/vector_message.h>
 #include <utils_param/parameter_factory.h>
 
 
@@ -29,9 +29,12 @@ ModelToMarker::ModelToMarker()
 
 void ModelToMarker::process()
 {
-    boost::shared_ptr<GenericMessage<ModelMessage> > message = input_->getMessage<GenericMessage<ModelMessage> >();
+    boost::shared_ptr<std::vector<ModelMessage> const> models = input_->getMessage<GenericVectorMessage, ModelMessage>();
     if(param<bool>("publish marker")) {
-        publishMarkers(*(message->value));
+        for (std::vector<ModelMessage>::const_iterator it = models->begin(); it != models->end(); it++) {
+
+            publishMarkers(*(it));
+        }
     }
 
 
@@ -40,7 +43,7 @@ void ModelToMarker::process()
 void ModelToMarker::setup()
 {
     setSynchronizedInputs(true);
-    input_ = addInput<GenericMessage<ModelMessage> >("ModelMessage");
+    input_ = addInput<GenericVectorMessage, ModelMessage >("ModelMessages");
     output_ = addOutput<visualization_msgs::Marker>("Marker");
     output_text_ = addOutput<StringMessage>("String");
 
@@ -160,7 +163,7 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
    for (int i1=0; i1 < model_message.coefficients->values.size(); i1++) {
        stringstream << " [" << i1 << "]=" << model_message.coefficients->values.at(i1);
    }
-
+   stringstream << " Prob: " << model_message.probability;
    StringMessage::Ptr text_msg(new StringMessage);
    text_msg->value = stringstream.str();
    output_text_->publish(text_msg);
