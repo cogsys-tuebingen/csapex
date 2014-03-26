@@ -12,7 +12,6 @@
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
-#include <visualization_msgs/Marker.h>
 #include <geometry_msgs/Point.h>
 
 
@@ -31,10 +30,19 @@ void ModelToMarker::process()
 {
     boost::shared_ptr<std::vector<ModelMessage> const> models = input_->getMessage<GenericVectorMessage, ModelMessage>();
     if(param<bool>("publish marker")) {
+        visualization_msgs::MarkerArray::Ptr marker_array(new visualization_msgs::MarkerArray);
+        int marker_id = 0;
         for (std::vector<ModelMessage>::const_iterator it = models->begin(); it != models->end(); it++) {
 
-            publishMarkers(*(it));
+            visualization_msgs::Marker::Ptr marker(new visualization_msgs::Marker);
+            generateMarker(*(it), marker);
+            marker->id = marker_id;
+            marker_id ++;
+            marker_array->markers.push_back(*marker);
+
+            publishText(*(it)); // publish the model as text for debuging
         }
+        output_->publish<visualization_msgs::MarkerArray>(marker_array);
     }
 
 
@@ -44,18 +52,18 @@ void ModelToMarker::setup()
 {
     setSynchronizedInputs(true);
     input_ = addInput<GenericVectorMessage, ModelMessage >("ModelMessages");
-    output_ = addOutput<visualization_msgs::Marker>("Marker");
+    output_ = addOutput<visualization_msgs::MarkerArray>("Marker");
     output_text_ = addOutput<StringMessage>("String");
 
     addParameter(param::ParameterFactory::declareBool("publish marker", true));
 }
 
 
-void ModelToMarker::publishMarkers(const ModelMessage model_message)
+void ModelToMarker::generateMarker(const ModelMessage model_message, const visualization_msgs::Marker::Ptr marker)
 {
     //visualization_msgs::MarkerArray::Ptr marker_array(new visualization_msgs::MarkerArray);
     //visualization_msgs::Marker           marker;
-    visualization_msgs::Marker::Ptr      marker(new visualization_msgs::Marker);
+
 
     marker->header.frame_id     = model_message.frame_id;
     marker->header.stamp        = ros::Time::now();
@@ -154,18 +162,20 @@ void ModelToMarker::publishMarkers(const ModelMessage model_message)
     // Add circle
     // Change to marker array so that a nicer cone can be displayed by a vector and a circle
 
-   output_->publish<visualization_msgs::Marker>(marker);
-
-   // Publish the model as Text
-   std::stringstream stringstream;
-   stringstream << "Model Type: " << model_message.model_type;
-   stringstream << " Frame: " << model_message.frame_id;
-   for (int i1=0; i1 < model_message.coefficients->values.size(); i1++) {
-       stringstream << " [" << i1 << "]=" << model_message.coefficients->values.at(i1);
-   }
-   stringstream << " Prob: " << model_message.probability;
-   StringMessage::Ptr text_msg(new StringMessage);
-   text_msg->value = stringstream.str();
-   output_text_->publish(text_msg);
-
 }
+
+void ModelToMarker::publishText(const ModelMessage model_message)
+{
+    // Publish the model as Text
+    std::stringstream stringstream;
+    stringstream << "Model Type: " << model_message.model_type;
+    stringstream << " Frame: " << model_message.frame_id;
+    for (int i1=0; i1 < model_message.coefficients->values.size(); i1++) {
+        stringstream << " [" << i1 << "]=" << model_message.coefficients->values.at(i1);
+    }
+    stringstream << " Prob: " << model_message.probability;
+    StringMessage::Ptr text_msg(new StringMessage);
+    text_msg->value = stringstream.str();
+    output_text_->publish(text_msg);
+}
+
