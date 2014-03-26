@@ -159,7 +159,6 @@ void ModelToMarker::generateMarker(const ModelMessage model_message, const visua
 
     // Todo:
     // Add plane and cylinder
-    // Add circle
     // Change to marker array so that a nicer cone can be displayed by a vector and a circle
 
 }

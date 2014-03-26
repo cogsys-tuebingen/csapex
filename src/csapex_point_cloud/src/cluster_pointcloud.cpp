@@ -65,10 +65,15 @@ void ClusterPointcloud::setup()
 template <class PointT>
 void ClusterPointcloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 {
+    // check for nans in cloud
+    typename pcl::PointCloud<PointT>::Ptr cloud_clean (new pcl::PointCloud<PointT>);
+    std::vector<int> nan_indices;
+    pcl::removeNaNFromPointCloud<PointT>(*cloud, *cloud_clean, nan_indices);
+
     // from http://www.pointclouds.org/documentation/tutorials/cluster_extraction.php
 
       typename pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
-      tree->setInputCloud (cloud);
+      tree->setInputCloud (cloud_clean);
 
       boost::shared_ptr<std::vector<pcl::PointIndices> > cluster_indices(new std::vector<pcl::PointIndices>);
       typename pcl::EuclideanClusterExtraction<PointT> ec;
@@ -76,7 +81,7 @@ void ClusterPointcloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
       ec.setMinClusterSize (param_clusterMinSize_);
       ec.setMaxClusterSize (param_clusterMaxSize_);
       ec.setSearchMethod (tree);
-      ec.setInputCloud (cloud);
+      ec.setInputCloud (cloud_clean);
       ec.extract (*cluster_indices);
 
       std::stringstream stringstream;

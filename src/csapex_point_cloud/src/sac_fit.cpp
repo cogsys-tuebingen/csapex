@@ -88,22 +88,40 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
 
     point_cloud_out->header = cloud->header;
-    // search for clusters
-    int j = 0;
-    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_->begin(); it != cluster_indices_->end (); ++it)
-    {
-        // for every cluster
-        // extract the points of the cluster
-        typename pcl::PointCloud<PointT>::Ptr cloud_cluster (new pcl::PointCloud<PointT>);
-        for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
-            cloud_cluster->points.push_back (cloud->points[*pit]); //*
-        cloud_cluster->width = cloud_cluster->points.size ();
-        cloud_cluster->height = 1;
-        cloud_cluster->is_dense = true;
 
+    if (in_indices_->isConnected()) {
+        // search for clusters
+        int j = 0;
+        for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_->begin(); it != cluster_indices_->end (); ++it)
+        {
+            // for every cluster
+            // extract the points of the cluster
+            typename pcl::PointCloud<PointT>::Ptr cloud_cluster (new pcl::PointCloud<PointT>);
+            for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
+                cloud_cluster->points.push_back (cloud->points[*pit]); //*
+            cloud_cluster->width = cloud_cluster->points.size ();
+            cloud_cluster->height = 1;
+            cloud_cluster->is_dense = true;
+
+
+            // find a model for the points
+            inliers_size = findSingleModel<PointT>(cloud_cluster, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
+
+            if (inliers_size > min_inliers_) {
+                // Save Model
+                ModelMessage model;
+                model.coefficients = coefficients_shape;
+                model.probability = ransac_probability_;
+                model.frame_id = cloud->header.frame_id;
+                model.model_type = model_;
+                models->push_back(model);
+                *point_cloud_out += *cloud_extracted;
+            }
+        }
+    } else { // No Clustering indices are connected
 
         // find a model for the points
-        inliers_size = findSingleModel<PointT>(cloud_cluster, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
+        inliers_size = findSingleModel<PointT>(cloud, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
 
         if (inliers_size > min_inliers_) {
             // Save Model
@@ -117,7 +135,6 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         }
     }
 
-
     // Publish the found modelcoefficients as a vector
     if (models->size() > 0) {
         out_model_->publish<GenericVectorMessage, ModelMessage>(models);
@@ -130,7 +147,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     if (out_cloud_->isConnected()) {
         if (inliers_size > 0 ) {
             PointCloudMessage::Ptr cloud_msg(new PointCloudMessage);
-            cloud_msg->value = cloud_extracted;
+            cloud_msg->value = point_cloud_out;
             out_cloud_->publish(cloud_msg);
         }
     }
