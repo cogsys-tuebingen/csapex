@@ -41,12 +41,17 @@ SacFit::SacFit()
     addParameter(param::ParameterFactory::declareParameterSet<int>("models", models),
                  boost::bind(&SacFit::setParameters, this));
 
+    cluster_indices_.reset(new std::vector<pcl::PointIndices>);
+
 }
 
 
 void SacFit::process()
 {
     PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
+
+    // Get indices from in_indices_
+    cluster_indices_ = in_indices_->getMessage<GenericVectorMessage, pcl::PointIndices>();
 
     boost::apply_visitor (PointCloudMessage::Dispatch<SacFit>(this), msg->value);
 
@@ -82,24 +87,13 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 
     pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
 
-    // Get indices from in_indices_
-    boost::shared_ptr<std::vector<pcl::PointIndices> const> cluster_indices = input_->getMessage<GenericVectorMessage, pcl::PointIndices>();
-
     point_cloud_out->header = cloud->header;
     // search for clusters
     int j = 0;
-    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices->begin(); it != cluster_indices->end (); ++it)
-        //    for (j=0; j < cluster_indices->size(); j++)
+    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_->begin(); it != cluster_indices_->end (); ++it)
     {
         // for every cluster
         // extract the points of the cluster
-        //        typename pcl::ExtractIndices<PointT> extract_points;
-        //        extract_points.setInputCloud(cloud);
-        //        pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-        //        inliers = &(cluster_indices->at(j));
-        //        extract_points.setIndices(inliers);
-        //        extract_points.setNegative(false);
-        //        extract_points.filter(*cloud_cluster);
         typename pcl::PointCloud<PointT>::Ptr cloud_cluster (new pcl::PointCloud<PointT>);
         for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
             cloud_cluster->points.push_back (cloud->points[*pit]); //*
@@ -107,9 +101,6 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         cloud_cluster->height = 1;
         cloud_cluster->is_dense = true;
 
-        //            std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size () << " data points." << std::endl;
-        //            std::stringstream ss;
-        //            ss << "cloud_cluster_" << j << ".pcd";
 
         // find a model for the points
         inliers_size = findSingleModel<PointT>(cloud_cluster, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());

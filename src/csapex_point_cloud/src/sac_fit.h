@@ -47,6 +47,8 @@ private:
     double sphere_r_max_;
     pcl::SacModel model_;
 
+    boost::shared_ptr<std::vector<pcl::PointIndices> const> cluster_indices_;
+
     template <class PointT>
     int findModels(typename pcl::PointCloud<PointT>::Ptr  cloud_in, typename pcl::PointCloud<PointT>::Ptr cloud_extracted, std::vector<ModelMessage> &models, typename pcl::PointCloud<PointT>::Ptr cloud_resisdue, bool get_resisdue);
     template <class PointT> // Was "findModel in commit 51178f0ca   fixed bug that it publishes the resiues

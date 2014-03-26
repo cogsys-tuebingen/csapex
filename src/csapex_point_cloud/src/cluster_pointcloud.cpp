@@ -5,6 +5,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/ros_message_conversion.h>
 #include <csapex_core_plugins/vector_message.h>
+#include <csapex_core_plugins/string_message.h>
 #include <utils_param/parameter_factory.h>
 #include <tf/tf.h>
 
@@ -58,6 +59,7 @@ void ClusterPointcloud::setup()
     setSynchronizedInputs(true);
     in_cloud_ = addInput<PointCloudMessage>("PointCloud");
     out_ = addOutput<GenericVectorMessage, pcl::PointIndices >("Clusters");
+    out_debug_ = addOutput<StringMessage>("Debug Info");
 }
 
 template <class PointT>
@@ -70,15 +72,18 @@ void ClusterPointcloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 
       boost::shared_ptr<std::vector<pcl::PointIndices> > cluster_indices(new std::vector<pcl::PointIndices>);
       typename pcl::EuclideanClusterExtraction<PointT> ec;
-      ec.setClusterTolerance (0.02); // 2cm
-      ec.setMinClusterSize (100);
-      ec.setMaxClusterSize (25000);
+      ec.setClusterTolerance (param_clusterTolerance_); // 2cm
+      ec.setMinClusterSize (param_clusterMinSize_);
+      ec.setMaxClusterSize (param_clusterMaxSize_);
       ec.setSearchMethod (tree);
       ec.setInputCloud (cloud);
       ec.extract (*cluster_indices);
 
-      //boost::shared_ptr<std::vector<pcl::PointIndices> >  clusters(new std::vector<pcl::PointIndices>);
-
+      std::stringstream stringstream;
+      stringstream << "Found clusters: " << cluster_indices->size();
+      StringMessage::Ptr text_msg(new StringMessage);
+      text_msg->value = stringstream.str();
+      out_debug_->publish(text_msg);
       out_->publish<GenericVectorMessage, pcl::PointIndices >(cluster_indices);
 
 }

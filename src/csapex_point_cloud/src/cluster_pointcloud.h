@@ -20,6 +20,7 @@ public:
 private:
     ConnectorIn* in_cloud_;
     ConnectorOut* out_;
+    ConnectorOut* out_debug_;
 
     double param_clusterTolerance_;
     int param_clusterMinSize_;
