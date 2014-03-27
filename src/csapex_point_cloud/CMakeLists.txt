@@ -66,6 +66,7 @@ add_library(csapex_point_cloud_plugin
     src/label_pointcloud.cpp
     src/cluster_pointcloud.cpp
     src/labeled_cloud_to_indices.cpp
+    src/split_clustered_cloud.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
