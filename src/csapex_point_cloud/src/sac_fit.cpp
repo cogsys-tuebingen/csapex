@@ -83,14 +83,14 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     int inliers_size = 0;
 
 
-    typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
+
     typename pcl::PointCloud<PointT>::Ptr point_cloud_out(new pcl::PointCloud<PointT>);
     typename pcl::PointCloud<PointT>::Ptr cloud_residue(new pcl::PointCloud<PointT>);
 
     boost::shared_ptr<std::vector<ModelMessage> >  models(new std::vector<ModelMessage>);
     //inliers_size = findModels<PointT>(cloud, cloud_extracted, *models, cloud_residue, out_cloud_residue_->isConnected());
 
-    pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
+
 
     point_cloud_out->header = cloud->header;
 
@@ -108,9 +108,12 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
             cloud_cluster->width = cloud_cluster->points.size ();
             cloud_cluster->height = 1;
             cloud_cluster->is_dense = true;
+            cloud_cluster->header = cloud->header;
 
 
             // find a model for the points
+            typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
+            pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
             inliers_size = findSingleModel<PointT>(cloud_cluster, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
 
             if (inliers_size > min_inliers_) {
@@ -127,6 +130,8 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     } else { // No Clustering indices are connected
 
         // find a model in the whole cloud
+        typename pcl::PointCloud<PointT>::Ptr cloud_extracted(new pcl::PointCloud<PointT>);
+        pcl::ModelCoefficients::Ptr coefficients_shape (new pcl::ModelCoefficients);
         inliers_size = findSingleModel<PointT>(cloud, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
 
         if (inliers_size > min_inliers_) {
@@ -144,7 +149,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     // Publish the found modelcoefficients as a vector
     if (models->size() > 0) {
         out_model_->publish<GenericVectorMessage, ModelMessage>(models);
-        stringstream << "found " << models->size() << " models and " << cloud_extracted->size() <<  "points total";
+        stringstream << "found " << models->size() << " models and " << point_cloud_out->size() <<  "points total";
     } else {
         stringstream << "Zero inliers found";
     }
