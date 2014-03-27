@@ -48,12 +48,17 @@ SacFit::SacFit()
 
 void SacFit::process()
 {
-    PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
-
+//    if (in_indices_->isConnected()) {
+//        setSynchronizedInputs(true);
+//    } else {
+//        setSynchronizedInputs(false);
+//    }
     // Get indices from in_indices_
     cluster_indices_ = in_indices_->getMessage<GenericVectorMessage, pcl::PointIndices>();
 
+    PointCloudMessage::Ptr msg(input_->getMessage<PointCloudMessage>());
     boost::apply_visitor (PointCloudMessage::Dispatch<SacFit>(this), msg->value);
+
 
     setParameters();
 }
@@ -89,6 +94,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 
     point_cloud_out->header = cloud->header;
 
+    // If inlices are connected search for models in the clusters
     if (in_indices_->isConnected()) {
         // search for clusters
         int j = 0;
@@ -120,7 +126,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         }
     } else { // No Clustering indices are connected
 
-        // find a model for the points
+        // find a model in the whole cloud
         inliers_size = findSingleModel<PointT>(cloud, cloud_extracted, coefficients_shape, cloud_residue, out_cloud_residue_->isConnected());
 
         if (inliers_size > min_inliers_) {

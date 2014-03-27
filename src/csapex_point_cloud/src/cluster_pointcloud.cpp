@@ -69,6 +69,7 @@ void ClusterPointcloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     typename pcl::PointCloud<PointT>::Ptr cloud_clean (new pcl::PointCloud<PointT>);
     std::vector<int> nan_indices;
     pcl::removeNaNFromPointCloud<PointT>(*cloud, *cloud_clean, nan_indices);
+    cloud_clean->is_dense = false;
 
     // from http://www.pointclouds.org/documentation/tutorials/cluster_extraction.php
 
