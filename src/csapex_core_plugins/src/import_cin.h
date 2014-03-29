@@ -16,6 +16,8 @@ public:
     virtual void fill(QBoxLayout* layout);
     virtual void tick();
 
+    virtual QIcon getIcon() const;
+
 private:
     ConnectorOut* connector_;
 

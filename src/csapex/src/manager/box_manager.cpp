@@ -90,7 +90,6 @@ void BoxManager::rebuildPrototypes()
         register_box_type(constructor, true);
     }
 
-
     typedef std::pair<std::string, DefaultConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
     Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
         NodeAdapterBuilder::Ptr builder = p.second.construct();
@@ -368,7 +367,6 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
             type.replace(type.find(" "), 1, "");
         }
     }
-
 
     BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {

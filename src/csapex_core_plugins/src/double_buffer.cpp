@@ -21,9 +21,13 @@ DoubleBuffer::DoubleBuffer()
     addTag(Tag::get("Buffer"));
     addTag(Tag::get("General"));
 
-    setIcon(QIcon(":/buffer.png"));
 
     addParameter(param::ParameterFactory::declareBool("synchronized", true));
+}
+
+QIcon DoubleBuffer::getIcon() const
+{
+    return QIcon(":/buffer.png");
 }
 
 void DoubleBuffer::setup()

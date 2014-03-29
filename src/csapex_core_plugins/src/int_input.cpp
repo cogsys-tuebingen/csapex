@@ -20,12 +20,16 @@ IntInput::IntInput()
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/pencil.png"));
 }
 
 void IntInput::process()
 {
 
+}
+
+QIcon IntInput::getIcon() const
+{
+    return QIcon(":/pencil.png");
 }
 
 void IntInput::fill(QBoxLayout *layout)

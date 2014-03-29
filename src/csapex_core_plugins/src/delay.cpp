@@ -18,9 +18,13 @@ Delay::Delay()
     : input_(NULL), output_(NULL)
 {
     addTag(Tag::get("Debug"));
-    setIcon(QIcon(":/buffer.png"));
 
     addParameter(param::ParameterFactory::declare<double>("delay", 0.0, 10.0, 1.0, 0.1));
+}
+
+QIcon Delay::getIcon() const
+{
+    return QIcon(":/buffer.png");
 }
 
 void Delay::setup()

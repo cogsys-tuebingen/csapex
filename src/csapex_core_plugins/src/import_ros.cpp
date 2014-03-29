@@ -33,7 +33,6 @@ ImportRos::ImportRos()
     addTag(Tag::get("RosIO"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));
-    setIcon(QIcon(":/terminal.png"));
 
     std::vector<std::string> set;
     set.push_back("/");
@@ -42,6 +41,11 @@ ImportRos::ImportRos()
 
     addParameter(param::ParameterFactory::declareTrigger("refresh"),
                  boost::bind(&ImportRos::refresh, this));
+}
+
+QIcon ImportRos::getIcon() const
+{
+    return QIcon(":/terminal.png");
 }
 
 void ImportRos::setup()
