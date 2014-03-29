@@ -48,21 +48,15 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
             bw->triggerError(true, e.what());
         } else {
             std::cerr << "Uncatched exception:" << e.what() << std::endl;
-#if DEBUG
-            throw;
-#endif
         }
 
         return false;
 
     } catch(const std::string& s) {
         std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-#if DEBUG
-        throw;
-#endif
     } catch(...) {
         std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-        throw;
+        std::abort();
     }
 
     return true;
@@ -120,6 +114,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         CsApexWindow w(core, &dispatcher, graph, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
+        csapex::error_handling::stop_request.connect(boost::bind(&CsApexWindow::close, &w));
         w.start();
 
         core.init(&drag_io);
@@ -135,6 +130,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
     } else {
         core.init(NULL);
+        csapex::error_handling::stop_request.connect(boost::bind(&csapex::error_handling::kill));
         return run();
     }
 }

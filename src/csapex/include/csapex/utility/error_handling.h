@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <csignal>
+#include <boost/signals2.hpp>
 
 namespace csapex
 {
@@ -13,6 +14,10 @@ void init();
 
 void siginthandler(int);
 void sigsegvhandler(int sig_num, siginfo_t * info, void * ucontext);
+void stop();
+void kill();
+
+boost::signals2::signal<void()> stop_request;
 
 }
 }
