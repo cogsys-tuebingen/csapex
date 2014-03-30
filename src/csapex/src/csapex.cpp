@@ -114,7 +114,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         CsApexWindow w(core, &dispatcher, graph, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
-        csapex::error_handling::stop_request.connect(boost::bind(&CsApexWindow::close, &w));
+        csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
         w.start();
 
         core.init(&drag_io);
@@ -130,7 +130,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
     } else {
         core.init(NULL);
-        csapex::error_handling::stop_request.connect(boost::bind(&csapex::error_handling::kill));
+        csapex::error_handling::stop_request().connect(boost::bind(&csapex::error_handling::kill));
         return run();
     }
 }
@@ -153,10 +153,14 @@ int main(int argc, char** argv)
             ("help", "show help message")
             ("headless", "run without gui")
             ("input", "config file to load")
+            ("ros-name", "(ros parameter (provided by launch files))")
+            ("ros-log", "(ros parameter (provided by launch files))")
             ;
 
     po::positional_options_description p;
-    p.add("input", -1);
+    p.add("input", 1);
+    p.add("ros-name", 1);
+    p.add("ros-log", 1);
 
     // first check for --headless parameter
     // this has to be done before the qapp can be created, which
@@ -183,15 +187,18 @@ int main(int argc, char** argv)
 
     // no check for remaining parameters
     po::variables_map vm;
-    try {
-        po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
 
-    } catch(po::unknown_option& e) {
-        std::cerr << "Error parsing parameters: " << e.what() << "\n";
-        std::cerr << desc << std::endl;
-        return 2;
+    try {
+        po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).positional(p).run();
+
+        po::store(parsed, vm);
+
+        po::notify(vm);
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot parse parameters: " << e.what() << std::endl;
+        return 4;
     }
-    po::notify(vm);
 
     // display help?
     if(vm.count("help")) {

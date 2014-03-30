@@ -17,7 +17,11 @@ void sigsegvhandler(int sig_num, siginfo_t * info, void * ucontext);
 void stop();
 void kill();
 
-boost::signals2::signal<void()> stop_request;
+boost::signals2::signal<void()>& stop_request()
+{
+    static boost::signals2::signal<void()> s;
+    return s;
+}
 
 }
 }
