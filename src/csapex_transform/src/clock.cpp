@@ -18,7 +18,7 @@ CSAPEX_REGISTER_CLASS(csapex::Clock, csapex::Node)
 using namespace csapex;
 
 Clock::Clock()
-    : time_type_(NULL)
+    : time_type_(NULL), time_label_(NULL)
 {
     addTag(Tag::get("Time"));
 }
@@ -65,7 +65,6 @@ void Clock::fill(QBoxLayout* layout)
 
     update();
 }
-
 
 void Clock::update()
 {
