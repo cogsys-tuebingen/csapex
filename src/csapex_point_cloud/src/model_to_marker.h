@@ -23,7 +23,6 @@ private:
     ConnectorIn* input_;
     ConnectorOut* output_;
     ConnectorOut* output_text_;
-
     void generateMarker(const ModelMessage model_message, const visualization_msgs::Marker::Ptr marker);
     void publishText(const ModelMessage model_message);
 };
