@@ -38,6 +38,8 @@ public:
 
     Settings& getSettings() const;
 
+    bool isPaused() const;
+
 public Q_SLOTS:
     void setPause(bool pause);
     void settingsChanged();
@@ -50,6 +52,8 @@ Q_SIGNALS:
     void saveSettingsRequest(YAML::Emitter& e);
     void loadSettingsRequest(YAML::Node& n);
 
+    void paused(bool);
+
 private:
     Settings& settings_;
     GraphPtr graph_;
@@ -58,6 +62,7 @@ private:
     CommandDispatcher* cmd_dispatch;
 
     PluginManager<CorePlugin>* core_plugin_manager;
+    std::vector<boost::shared_ptr<CorePlugin> > core_plugins_;
     std::vector<Listener*> listener_;
 
     bool init_;
