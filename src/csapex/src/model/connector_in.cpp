@@ -178,6 +178,9 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
     {
         QMutexLocker lock(&io_mutex);
         message_ = message;
+        if(!message_) {
+            throw std::runtime_error("message is empty");
+        }
     }
 
     if(!isAsync() || (isAsync() && !isProcessing())) {
@@ -185,6 +188,7 @@ void ConnectorIn::inputMessage(ConnectionType::Ptr message)
     }
 
     count_++;
+    assert(message_);
 
     Q_EMIT messageArrived(this);
 }

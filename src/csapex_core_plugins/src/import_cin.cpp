@@ -22,12 +22,16 @@ ImportCin::ImportCin()
     addTag(Tag::get("ConsoleIO"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));
-    setIcon(QIcon(":/terminal.png"));
 }
 
 void ImportCin::process()
 {
 
+}
+
+QIcon ImportCin::getIcon() const
+{
+    return QIcon(":/terminal.png");
 }
 
 void ImportCin::fill(QBoxLayout *)

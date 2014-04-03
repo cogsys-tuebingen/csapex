@@ -17,11 +17,15 @@ DoubleInput::DoubleInput()
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/pencil.png"));
 
     addParameter(param::ParameterFactory::declareValue<double>("value", 0.0));
     addParameter(param::ParameterFactory::declareTrigger("publish"), boost::bind(&DoubleInput::process, this));
     addParameter(param::ParameterFactory::declareBool("tick", false));
+}
+
+QIcon DoubleInput::getIcon() const
+{
+    return QIcon(":/pencil.png");
 }
 
 void DoubleInput::tick()

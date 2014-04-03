@@ -15,7 +15,7 @@
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
-    : Unique(uuid), icon_(":/plugin.png"), settings_(NULL), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+    : Unique(uuid), settings_(NULL), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
@@ -138,14 +138,9 @@ void Node::setParameterEnabled(const std::string &name, bool enabled)
     getParameter(name)->setEnabled(enabled);
 }
 
-void Node::setIcon(QIcon icon)
-{
-    icon_ = icon;
-}
-
 QIcon Node::getIcon() const
 {
-    return icon_;
+    return QIcon(":/plugin.png");
 }
 
 bool Node::canBeDisabled() const

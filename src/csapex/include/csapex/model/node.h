@@ -81,8 +81,7 @@ public:
     bool isParameterEnabled(const std::string& name) const;
     void setParameterEnabled(const std::string& name, bool enabled);
 
-    void setIcon(QIcon icon);
-    QIcon getIcon() const;
+    virtual QIcon getIcon() const;
 
     virtual void stop();
 
@@ -279,7 +278,6 @@ Q_SIGNALS:
 protected:
     std::string type_;
     mutable std::vector<Tag> tags_;
-    QIcon icon_;
 
 private:
     Settings* settings_;

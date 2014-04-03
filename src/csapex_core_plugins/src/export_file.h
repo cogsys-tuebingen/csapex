@@ -21,6 +21,8 @@ public:
     virtual void fill(QBoxLayout* layout);
     virtual void process();
 
+    virtual QIcon getIcon() const;
+
     virtual Memento::Ptr getState() const;
     virtual void setState(Memento::Ptr memento);
 

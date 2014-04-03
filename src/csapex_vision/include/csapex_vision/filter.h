@@ -26,6 +26,8 @@ public:
 public:
     virtual ~Filter();
 
+    virtual QIcon getIcon() const;
+
 Q_SIGNALS:
     void filter_changed();
 

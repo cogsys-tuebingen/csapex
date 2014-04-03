@@ -11,7 +11,7 @@ namespace csapex
 {
 
 struct CsApexApp : public QApplication {
-    CsApexApp(int& argc, char** argv);
+    CsApexApp(int& argc, char** argv, bool headless);
 
     virtual bool notify(QObject* receiver, QEvent* event);
 };
@@ -20,7 +20,7 @@ struct Main : public QObject {
     Q_OBJECT
 
 public:
-    Main(CsApexApp& app);
+    Main(CsApexApp &app);
 
     int run();
     int main(bool headless, const std::string &config, const std::string& path_to_bin);

@@ -27,8 +27,8 @@ namespace po = boost::program_options;
 using namespace csapex;
 
 
-CsApexApp::CsApexApp(int& argc, char** argv)
-    : QApplication(argc, argv)
+CsApexApp::CsApexApp(int& argc, char** argv, bool headless)
+    : QApplication(argc, argv, !headless)
 {}
 
 bool CsApexApp::notify(QObject* receiver, QEvent* event) {
@@ -48,21 +48,15 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
             bw->triggerError(true, e.what());
         } else {
             std::cerr << "Uncatched exception:" << e.what() << std::endl;
-#if DEBUG
-            throw;
-#endif
         }
 
         return false;
 
     } catch(const std::string& s) {
         std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-#if DEBUG
-        throw;
-#endif
     } catch(...) {
         std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-        throw;
+        std::abort();
     }
 
     return true;
@@ -76,8 +70,6 @@ Main::Main(CsApexApp& a)
 
 int Main::run()
 {
-    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-
     csapex::error_handling::init();
 
     int result = app.exec();
@@ -90,6 +82,9 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     Settings settings;
     settings.setCurrentConfig(config);
 
+    param::Parameter::Ptr headless_p = param::ParameterFactory::declareBool("headless", headless);
+    settings.add(headless_p);
+
     param::Parameter::Ptr path = param::ParameterFactory::declarePath("path_to_bin", path_to_bin);
     settings.add(path);
 
@@ -100,6 +95,8 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     CsApexCore core(settings, graph, &dispatcher);
 
     if(!headless) {
+        app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+
         /*
              * There seems to be a bug in Qt4:
              *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
@@ -117,6 +114,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         CsApexWindow w(core, &dispatcher, graph, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
+        csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
         w.start();
 
         core.init(&drag_io);
@@ -132,6 +130,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
     } else {
         core.init(NULL);
+        csapex::error_handling::stop_request().connect(boost::bind(&csapex::error_handling::kill));
         return run();
     }
 }
@@ -154,31 +153,60 @@ int main(int argc, char** argv)
             ("help", "show help message")
             ("headless", "run without gui")
             ("input", "config file to load")
+            ("ros-name", "(ros parameter (provided by launch files))")
+            ("ros-log", "(ros parameter (provided by launch files))")
             ;
 
     po::positional_options_description p;
-    p.add("input", -1);
+    p.add("input", 1);
+    p.add("ros-name", 1);
+    p.add("ros-log", 1);
 
-    // filters all qt parameters from argv
-    CsApexApp app(argc, argv);
-
-    po::variables_map vm;
-    try {
-        po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-
-    } catch(po::unknown_option& e) {
-        std::cerr << "Error parsing parameters: " << e.what() << "\n";
-        std::cerr << desc << std::endl;
-        return 2;
+    // first check for --headless parameter
+    // this has to be done before the qapp can be created, which
+    // has to be done before parameters can be read.
+    bool headless = false;
+    for(int i = 1; i < argc; ++i) {
+        if(std::string(argv[i]) == "--headless") {
+            headless = true;
+            break;
+        }
     }
 
-    po::notify(vm);
+    if(!headless) {
+        // if headless not requested, check if there is a display
+        // if not, we enforce headless mode
+        if(!getenv("DISPLAY")) {
+            headless = true;
+            std::cout << "warning: enforcing headless mode because there is no display detected" << std::endl;
+        }
+    }
 
+    // filters all qt parameters from argv
+    CsApexApp app(argc, argv, headless);
+
+    // no check for remaining parameters
+    po::variables_map vm;
+
+    try {
+        po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).positional(p).run();
+
+        po::store(parsed, vm);
+
+        po::notify(vm);
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot parse parameters: " << e.what() << std::endl;
+        return 4;
+    }
+
+    // display help?
     if(vm.count("help")) {
         std::cerr << desc << std::endl;
         return 1;
     }
 
+    // which file to use?
     std::string input;
     if (vm.count("input")) {
         input = vm["input"].as<std::string>();
@@ -186,7 +214,8 @@ int main(int argc, char** argv)
         input = Settings::default_config;
     }
 
+    // start the app
     Main m(app);
-    return m.main(vm.count("headless"), input, path_to_bin);
+    return m.main(headless, input, path_to_bin);
 }
 

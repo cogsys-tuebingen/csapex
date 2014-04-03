@@ -103,13 +103,17 @@ FileImporter::FileImporter()
 {
     state.parent = this;
 
-    setIcon(QIcon(":/folder_picture.png"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));
 }
 
 FileImporter::~FileImporter()
 {
+}
+
+QIcon FileImporter::getIcon() const
+{
+    return QIcon(":/folder_picture.png");
 }
 
 void FileImporter::setup()

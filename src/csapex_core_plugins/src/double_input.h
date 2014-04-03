@@ -18,6 +18,8 @@ public:
     void setup();
     void process();
 
+    virtual QIcon getIcon() const;
+
 private:
     ConnectorOut* out_;
 };

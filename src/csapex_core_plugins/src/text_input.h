@@ -19,6 +19,8 @@ public:
     void process();
     virtual void fill(QBoxLayout* layout);
 
+    virtual QIcon getIcon() const;
+
 public Q_SLOTS:
     void setText(QString text);
     void publish();

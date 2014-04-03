@@ -21,9 +21,13 @@ ExportFile::ExportFile()
 {
     addTag(Tag::get("Output"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/terminal.png"));
 
     suffix_ = 0;
+}
+
+QIcon ExportFile::getIcon() const
+{
+    return QIcon(":/terminal.png");
 }
 
 void ExportFile::fill(QBoxLayout *layout)

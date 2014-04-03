@@ -142,7 +142,11 @@ void Port::setPortProperty(const std::string& name, bool b)
 void Port::mouseMoveEvent(QMouseEvent* e)
 {
     std::stringstream tt;
-    tt << adaptee_->getUUID() << " (" << adaptee_->getCount() << ")";
+    tt << adaptee_->getUUID() << " (count: " << adaptee_->getCount() <<
+          ", enabled: " << adaptee_->isEnabled() <<
+          ", blocked: " << adaptee_->isBlocked() <<
+          ", processing: " << adaptee_->isProcessing() <<
+          ", error: " << adaptee_->isError() << ")";
     setToolTip(tt.str().c_str());
 
     if(buttons_down_ == Qt::NoButton) {

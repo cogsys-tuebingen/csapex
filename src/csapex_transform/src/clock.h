@@ -19,6 +19,7 @@ public:
     Clock();
 
     void process();
+    void setup();
     virtual void fill(QBoxLayout* layout);
 
     virtual Memento::Ptr getState() const;

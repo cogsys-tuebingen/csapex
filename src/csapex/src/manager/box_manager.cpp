@@ -45,17 +45,15 @@ bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
 
 void BoxManager::stop()
 {
-    if(node_manager_) {
-        delete node_manager_;
-        node_manager_ = NULL;
-    }
+    delete node_manager_;
+    node_manager_ = NULL;
 
     node_adapter_builders_.clear();
-    if(node_adapter_manager_) {
-        delete node_adapter_manager_;
-        node_adapter_manager_ = NULL;
-    }
+
+    delete node_adapter_manager_;
+    node_adapter_manager_ = NULL;
 }
+
 
 void BoxManager::setStyleSheet(const QString &str)
 {
@@ -89,7 +87,6 @@ void BoxManager::rebuildPrototypes()
                                                      p.second));
         register_box_type(constructor, true);
     }
-
 
     typedef std::pair<std::string, DefaultConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
     Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
@@ -255,7 +252,7 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
 
     if(BoxManager::typeIsTemplate(content->getType())) {
         throw std::runtime_error("Groups are not implemented");
-//        object.reset(new csapex::Group(""));
+        //        object.reset(new csapex::Group(""));
     } else {
         BoxedObjectPtr bo = boost::dynamic_pointer_cast<BoxedObject> (content);
         if(bo) {
@@ -301,7 +298,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
 
     Node::Ptr content;
     if(is_template) {
-//        content.reset(new Node(""));
+        //        content.reset(new Node(""));
     } else {
         Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
             if(p->getType() == type) {
@@ -315,7 +312,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         QMimeData* mimeData = new QMimeData;
 
         if(is_template) {
-//            mimeData->setData(Template::MIME, "");
+            //            mimeData->setData(Template::MIME, "");
         }
         mimeData->setData(Box::MIME, type.c_str());
         mimeData->setProperty("ox", offset.x());
@@ -368,7 +365,6 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
             type.replace(type.find(" "), 1, "");
         }
     }
-
 
     BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {

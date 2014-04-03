@@ -2,11 +2,11 @@
 #include "double_buffer.h"
 
 /// PROJECT
-
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connection_type.h>
 #include <csapex/model/message.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -20,7 +20,14 @@ DoubleBuffer::DoubleBuffer()
 {
     addTag(Tag::get("Buffer"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/buffer.png"));
+
+
+    addParameter(param::ParameterFactory::declareBool("synchronized", true));
+}
+
+QIcon DoubleBuffer::getIcon() const
+{
+    return QIcon(":/buffer.png");
 }
 
 void DoubleBuffer::setup()
@@ -63,7 +70,7 @@ void DoubleBuffer::swapBuffers()
 
 void DoubleBuffer::tick()
 {
-    if(!dirty_) {
+    if(!dirty_ && param<bool>("synchronized")) {
         return;
     }
 

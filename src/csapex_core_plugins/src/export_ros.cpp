@@ -25,10 +25,14 @@ ExportRos::ExportRos()
     addTag(Tag::get("RosIO"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Output"));
-    setIcon(QIcon(":/terminal.png"));
 
     addParameter(param::ParameterFactory::declareText("topic", "export"),
                  boost::bind(&ExportRos::updateTopic, this));
+}
+
+QIcon ExportRos::getIcon() const
+{
+    return QIcon(":/terminal.png");
 }
 
 void ExportRos::setup()

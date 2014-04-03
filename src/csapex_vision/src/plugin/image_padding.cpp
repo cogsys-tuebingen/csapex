@@ -21,10 +21,14 @@ ImagePadding::ImagePadding()
     addTag(Tag::get("General"));
     addTag(Tag::get("Vision"));
 
-    setIcon(QIcon(":/border.png"));
 
     addParameter(param::ParameterFactory::declareRange("border", 0, 1000, 0, 1));
     addParameter(param::ParameterFactory::declareRange("mask offset", 0, 100, 0, 1));
+}
+
+QIcon ImagePadding::getIcon() const
+{
+    return QIcon(":/border.png");
 }
 
 void ImagePadding::setup()
