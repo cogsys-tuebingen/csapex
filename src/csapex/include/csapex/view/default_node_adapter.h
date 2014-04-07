@@ -24,6 +24,8 @@ protected:
 
     template <typename T>
     void updateUi(const param::Parameter* p, boost::function<void(T)> setter);
+    template <typename T>
+    void updateUiPtr(const param::Parameter* p, boost::function<void(const T*)> setter);
 
     void updateUiSet(const param::Parameter* p, boost::function<void(const std::string&)> setter);
     void updateUiBitSet(const param::Parameter* p, const QListView *list);

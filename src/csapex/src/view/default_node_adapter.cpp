@@ -410,6 +410,15 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
         connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<int,int> >, this, __1, setLowFromPair)));
         connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<int,int> >, this, __1, setHighFromPair)));
 
+
+        boost::function<void(int)> setMin = boost::bind(&QxtSpanSlider::setMinimum, slider, __1);
+        boost::function<void(int)> setMax = boost::bind(&QxtSpanSlider::setMaximum, slider, __1);
+        boost::function<void(const param::IntervalParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::IntervalParameter::min<int>, __1));
+        boost::function<void(const param::IntervalParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::IntervalParameter::max<int>, __1));
+
+        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMinFromParam)));
+        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMaxFromParam)));
+
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
@@ -433,6 +442,15 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
 
         connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<double,double> >, this, __1, setLowFromPair)));
         connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<double,double> >, this, __1, setHighFromPair)));
+
+
+        boost::function<void(double)> setMin = boost::bind(&QxtDoubleSpanSlider::setDoubleMinimum, slider, __1);
+        boost::function<void(double)> setMax = boost::bind(&QxtDoubleSpanSlider::setDoubleMaximum, slider, __1);
+        boost::function<void(const param::IntervalParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::IntervalParameter::min<double>, __1));
+        boost::function<void(const param::IntervalParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::IntervalParameter::max<double>, __1));
+
+        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMinFromParam)));
+        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMaxFromParam)));
 
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
@@ -531,6 +549,11 @@ void DefaultNodeAdapter::updateUi(const param::Parameter* p, boost::function<voi
     setter(node_->param<T>(p->name()));
 }
 
+template <typename T>
+void DefaultNodeAdapter::updateUiPtr(const param::Parameter* p, boost::function<void(const T*)> setter)
+{
+    setter(dynamic_cast<const T*>(p));
+}
 
 void DefaultNodeAdapter::updateUiSet(const param::Parameter *p, boost::function<void (const std::string &)> setter)
 {

@@ -325,7 +325,6 @@ void Node::setNodeState(NodeState::Ptr memento)
 template <typename T>
 void Node::updateParameter(param::Parameter *p)
 {
-    /// TODO: make synchronized!!!!!
     {
         ConnectorIn* cin;
         cin = new ConnectorIn(*settings_, UUID::make_sub(getUUID(), p->name() + "_in"));
@@ -333,6 +332,7 @@ void Node::updateParameter(param::Parameter *p)
         cin->setType(connection_types::DirectMessage<T>::make());
 
         cin->enable();
+        /// TODO: make synchronized!!!!!
         cin->setAsync(true);
 
         boost::function<typename connection_types::DirectMessage<T>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<T> >, cin, (void*) 0);
@@ -353,6 +353,7 @@ void Node::updateParameter(param::Parameter *p)
         cout->setType(connection_types::DirectMessage<T>::make());
 
         cout->enable();
+        /// TODO: make synchronized!!!!!
         cout->setAsync(true);
 
         boost::function<void(T)> publish = boost::bind(&ConnectorOut::publishIntegral<T>, cout, _1);

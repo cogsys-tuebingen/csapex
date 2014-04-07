@@ -266,6 +266,7 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
     }
 
     object->setStyleSheet(stylesheet);
+    object->construct();
     object->setObjectName(content->getType().c_str());
     object->setLabel(label);
 
