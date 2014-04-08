@@ -4,7 +4,7 @@
 using namespace param;
 
 Parameter::Parameter(const std::string &name)
-    : name_(name), enabled_(true)
+    : name_(name), enabled_(true), interactive_(false)
 {
 }
 
@@ -26,6 +26,20 @@ void Parameter::setEnabled(bool enabled)
 bool Parameter::isEnabled() const
 {
     return enabled_;
+}
+
+void Parameter::setInteractive(bool interactive)
+{
+    if(interactive != interactive_) {
+        interactive_ = interactive;
+
+        interactive_changed(this);
+    }
+}
+
+bool Parameter::isInteractive() const
+{
+    return interactive_;
 }
 
 std::string Parameter::name() const

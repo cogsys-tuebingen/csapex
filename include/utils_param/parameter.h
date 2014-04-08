@@ -23,6 +23,9 @@ public:
         boost::signals2::signal<void(Parameter*)>& scope_changed(Parameter& p) {
             return p.scope_changed;
         }
+        boost::signals2::signal<void(Parameter*)>& interactive_changed(Parameter& p) {
+            return p.interactive_changed;
+        }
         boost::signals2::signal<void(Parameter*,bool)>& parameter_enabled(Parameter& p) {
             return p.parameter_enabled;
         }
@@ -89,6 +92,9 @@ public:
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
+    bool isInteractive() const;
+    void setInteractive(bool enabled);
+
 
 public:
     static std::string type2string(const std::type_info& type);
@@ -108,11 +114,13 @@ protected:
 protected:
     boost::signals2::signal<void(Parameter*)> parameter_changed;
     boost::signals2::signal<void(Parameter*)> scope_changed;
+    boost::signals2::signal<void(Parameter*)> interactive_changed;
     boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
 
 protected:
     std::string name_;
     bool enabled_;
+    bool interactive_;
 };
 
 }
