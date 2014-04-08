@@ -16,6 +16,7 @@
 #include <csapex/view/profiling_widget.h>
 #include <csapex/view/node_adapter.h>
 #include <csapex/view/port.h>
+#include <csapex/utility/context_menu_handler.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -133,6 +134,8 @@ void Box::showContextMenu(const QPoint& pos)
 
 void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
 {
+    ContextMenuHandler::addHeader(*menu, std::string("Node: ") + node_->getUUID().getShortName());
+
     if(isMinimizedSize()) {
         QAction* max = new QAction("maximize", menu);
         max->setIcon(QIcon(":/maximize.png"));
@@ -399,10 +402,16 @@ void Box::triggerPlaced()
 void Box::selectEvent()
 {
     BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        i->getPort()->setSelected(true);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(true);
+        }
     }
     BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        i->getPort()->setSelected(true);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(true);
+        }
     }
     ui->boxframe->setProperty("focused",true);
     refreshStylesheet();
@@ -411,10 +420,16 @@ void Box::selectEvent()
 void Box::deselectEvent()
 {
     BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        i->getPort()->setSelected(false);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(false);
+        }
     }
     BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        i->getPort()->setSelected(false);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(false);
+        }
     }
     ui->boxframe->setProperty("focused",false);
     refreshStylesheet();
@@ -522,10 +537,16 @@ void Box::updateFlippedSides()
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
     BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        i->getPort()->setFlipped(flipped);
+        Port* p = i->getPort();
+        if(p) {
+            p->setFlipped(flipped);
+        }
     }
     BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        i->getPort()->setFlipped(flipped);
+        Port* p = i->getPort();
+        if(p) {
+            p->setFlipped(flipped);
+        }
     }
 }
 

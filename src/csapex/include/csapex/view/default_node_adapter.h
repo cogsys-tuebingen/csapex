@@ -1,8 +1,9 @@
 #ifndef DEFAULT_NODE_ADAPTER_H
 #define DEFAULT_NODE_ADAPTER_H
 
-/// SYSTEM
+/// COMPONENT
 #include <csapex/view/node_adapter.h>
+#include <csapex/utility/context_menu_handler.h>
 
 namespace csapex
 {

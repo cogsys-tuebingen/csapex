@@ -230,7 +230,12 @@ Command::Ptr Graph::moveSelectedBoxes(const QPoint& delta)
     }
 
     Q_FOREACH(const Connection::Ptr& connection, visible_connections) {
-        if(connection->from()->getPort()->isSelected() && connection->to()->getPort()->isSelected()) {
+        Port* fromp = connection->from()->getPort();
+        Port* top = connection->to()->getPort();
+        if(!fromp || !top) {
+            continue;
+        }
+        if(fromp->isSelected() && top->isSelected()) {
             int n = connection->getFulcrumCount();
             for(int i = 0; i < n; ++i) {
                 const Connection::Fulcrum& f = connection->getFulcrum(i);
@@ -754,7 +759,12 @@ void Graph::boxMoved(Box *box, int dx, int dy)
             }
         }
         Q_FOREACH(const Connection::Ptr& connection, visible_connections) {
-            if(connection->from()->getPort()->isSelected() && connection->to()->getPort()->isSelected()) {
+            Port* fromp = connection->from()->getPort();
+            Port* top = connection->to()->getPort();
+            if(!fromp || !top) {
+                continue;
+            }
+            if(fromp->isSelected() && top->isSelected()) {
                 int n = connection->getFulcrumCount();
                 for(int i = 0; i < n; ++i) {
                     connection->moveFulcrum(i, connection->getFulcrum(i).pos + QPoint(dx,dy));

@@ -245,21 +245,33 @@ QWidget* QtHelper::wrapLayout(QBoxLayout *l, QWidget *parent)
     return container;
 }
 
-QHBoxLayout* QtHelper::wrap(const std::string& label, QWidget* widget) {
+QHBoxLayout* QtHelper::wrap(const std::string& txt, QWidget* widget, csapex::ContextMenuHandler *context_handler) {
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
-    internal_layout->addWidget(new QLabel(label.c_str()));
+    QLabel* label = new QLabel(txt.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+    internal_layout->addWidget(new QLabel(txt.c_str()));
     internal_layout->addWidget(widget);
 
     return internal_layout;
 }
 
-QHBoxLayout* QtHelper::wrap(const std::string& label, QLayout* layout) {
+QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout, csapex::ContextMenuHandler *context_handler ) {
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
-    internal_layout->addWidget(new QLabel(label.c_str()));
+    QLabel* label = new QLabel(txt.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+    internal_layout->addWidget(label);
     internal_layout->addLayout(layout);
 
     return internal_layout;

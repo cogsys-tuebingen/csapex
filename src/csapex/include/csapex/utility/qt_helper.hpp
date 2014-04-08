@@ -13,6 +13,7 @@
 #include <csapex/utility/qint_slider.h>
 #include <csapex/utility/qwrapper.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/context_menu_handler.h>
 
 /// PROJECT
 #include <utils_qt/qxtspanslider.h>
@@ -57,9 +58,9 @@ public:
 
     static QWidget* wrapLayout(QBoxLayout *l, QWidget *parent = 0);
 
-    static QHBoxLayout* wrap(const std::string& label, QWidget* widget);
+    static QHBoxLayout* wrap(const std::string& label, QWidget* widget, csapex::ContextMenuHandler *context_handler = 0);
 
-    static QHBoxLayout* wrap(const std::string& label, QLayout* layout);
+    static QHBoxLayout* wrap(const std::string& label, QLayout* layout, csapex::ContextMenuHandler *context_handler = 0);
 
     static void clearLayout(QLayout* layout);
 };

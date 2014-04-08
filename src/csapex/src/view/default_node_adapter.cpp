@@ -32,6 +32,9 @@
 #include <QGroupBox>
 #include <QScrollArea>
 #include <QListWidget>
+#include <QMouseEvent>
+#include <QMenu>
+#include <QAction>
 
 using namespace csapex;
 using namespace boost::lambda;
@@ -96,6 +99,49 @@ QString toColorSS(const std::vector<int>& v) {
     return QString::fromStdString(ss.str());
 }
 }
+
+
+class ParameterContextMenu : public ContextMenuHandler
+{
+public:
+    ParameterContextMenu(param::Parameter *p)
+        : param_(p)
+    {
+
+    }
+
+    void doShowContextMenu(const QPoint& pt)
+    {
+        QWidget* w = dynamic_cast<QWidget*>(parent());
+        if(!w) {
+            return;
+        }
+
+        QPoint gpt = w->mapToGlobal(pt);
+
+        QMenu menu;
+        ContextMenuHandler::addHeader(menu, std::string("Parameter: ") + param_->name());
+
+        QAction* connectable = new QAction("connectable", &menu);
+        connectable->setCheckable(true);
+        connectable->setChecked(param_->isInteractive());
+        connectable->setIcon(QIcon(":/connector.png"));
+
+        connectable->setIconVisibleInMenu(true);
+        menu.addAction(connectable);
+
+        QAction* selectedItem = menu.exec(gpt);
+        if (selectedItem) {
+            if(selectedItem == connectable) {
+                param_->setInteractive(!param_->isInteractive());
+            }
+        }
+    }
+
+private:
+    param::Parameter* param_;
+};
+
 
 
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
@@ -173,7 +219,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         // connect parameter input, if available
         ConnectorIn* param_in = node_->getParameterInput(current_name_);
-        if(param_in) {
+        if(param_in && p->isInteractive()) {
             current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_in));
         }
 
@@ -187,7 +233,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         // connect parameter output, if available
         ConnectorOut* param_out = node_->getParameterOutput(current_name_);
-        if(param_out) {
+        if(param_out && p->isInteractive()) {
             current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_out));
         }
         outer_layout->addLayout(current_layout_);
@@ -200,7 +246,7 @@ void DefaultNodeAdapter::setupParameter(param::TriggerParameter * trigger_p)
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(trigger_p)));
 
     boost::function<void()> cb = boost::bind(&param::TriggerParameter::trigger, trigger_p);
     qt_helper::Call* call_trigger = new qt_helper::Call(cb);
@@ -217,7 +263,7 @@ void DefaultNodeAdapter::setupParameter(param::ColorParameter *color_p)
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(color_p)));
 
     // ui callback
     boost::function<void()> cb = boost::bind(&updateColor, color_p);
@@ -243,7 +289,7 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     sub->addWidget(path);
     sub->addWidget(open);
 
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(path_p)));
 
     // ui change -> model
     boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, __1);
@@ -279,7 +325,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         sub->addWidget(txt_);
         sub->addWidget(send);
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(value_p)));
 
         // ui change -> model
         boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, __1);
@@ -299,7 +345,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         QCheckBox* box = new QCheckBox;
         box->setChecked(value_p->as<bool>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
         boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParam<bool>, this, current_name_, boost::bind(&QCheckBox::isChecked, box));
@@ -317,7 +363,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         box->setDecimals(10);
         box->setValue(value_p->as<double>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
         boost::function<void()> cb = boost::bind(&param::ValueParameter::set<double>, value_p, boost::bind(&QDoubleSpinBox::value, box));
@@ -333,7 +379,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         QSpinBox* box = new QSpinBox;
         box->setValue(value_p->as<int>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
         boost::function<void()> cb = boost::bind(&param::ValueParameter::set<int>, value_p, boost::bind(&QSpinBox::value, box));
@@ -466,7 +512,7 @@ void DefaultNodeAdapter::setupParameter(param::SetParameter *set_p)
     QComboBox* combo = new QComboBox;
 
     updateUiSetScope(set_p, combo);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, combo));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, combo, new ParameterContextMenu(set_p)));
 
     // ui change -> model
     boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, __1);
