@@ -32,23 +32,23 @@ public:
 
 public:
     friend YAML::Emitter& operator << (YAML::Emitter& e, const IntervalParameter& p) {
-        p.write(e);
+        p.doWrite(e);
         return e;
     }
     friend YAML::Emitter& operator << (YAML::Emitter& e, const IntervalParameter::Ptr& p) {
-        p->write(e);
+        p->doWrite(e);
         return e;
     }
 
     friend void operator >> (const YAML::Node& node, param::IntervalParameter& value) {
-        value.read(node);
+        value.doRead(node);
     }
 
     friend void operator >> (const YAML::Node& node, param::IntervalParameter::Ptr& value) {
         if(!value) {
             value.reset(new IntervalParameter("loading"));
         }
-        value->read(node);
+        value->doRead(node);
     }
 
 public:
@@ -62,10 +62,10 @@ public:
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 
-    void setFrom(const Parameter& other);
+    void doSetFrom(const Parameter& other);
 
-    void write(YAML::Emitter& e) const;
-    void read(const YAML::Node& n);
+    void doWrite(YAML::Emitter& e) const;
+    void doRead(const YAML::Node& n);
 
     template <typename T>
     void setLower(T v) {

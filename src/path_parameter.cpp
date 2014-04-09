@@ -41,24 +41,21 @@ void PathParameter::set_unsafe(const boost::any &v)
 }
 
 
-void PathParameter::setFrom(const Parameter &other)
+void PathParameter::doSetFrom(const Parameter &other)
 {
     const PathParameter* range = dynamic_cast<const PathParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        parameter_changed(this);
+        triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
 }
 
-void PathParameter::write(YAML::Emitter& e) const
+void PathParameter::doWrite(YAML::Emitter& e) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
     e << YAML::Key << "type" << YAML::Value << "path";
     e << YAML::Key << "value" << YAML::Value <<value_;
-    e << YAML::EndMap;
 }
 
 namespace {
@@ -70,7 +67,7 @@ T __read(const YAML::Node& n) {
 }
 }
 
-void PathParameter::read(const YAML::Node& n)
+void PathParameter::doRead(const YAML::Node& n)
 {
     if(!n.FindValue("name")) {
         return;

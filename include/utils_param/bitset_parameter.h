@@ -18,23 +18,23 @@ public:
 
 public:
     friend YAML::Emitter& operator << (YAML::Emitter& e, const BitSetParameter& p) {
-        p.write(e);
+        p.doWrite(e);
         return e;
     }
     friend YAML::Emitter& operator << (YAML::Emitter& e, const BitSetParameter::Ptr& p) {
-        p->write(e);
+        p->doWrite(e);
         return e;
     }
 
     friend void operator >> (const YAML::Node& node, param::BitSetParameter& value) {
-        value.read(node);
+        value.doRead(node);
     }    template<class Archive>
 
     friend void operator >> (const YAML::Node& node, param::BitSetParameter::Ptr& value) {
         if(!value) {
             value.reset(new BitSetParameter("loading"));
         }
-        value->read(node);
+        value->doRead(node);
     }
 
 public:
@@ -48,10 +48,10 @@ public:
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 
-    void setFrom(const Parameter& other);
+    void doSetFrom(const Parameter& other);
 
-    void write(YAML::Emitter& e) const;
-    void read(const YAML::Node& n);
+    void doWrite(YAML::Emitter& e) const;
+    void doRead(const YAML::Node& n);
 
     int def() const { return def_; }
 

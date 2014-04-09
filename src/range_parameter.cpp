@@ -51,21 +51,19 @@ void RangeParameter::set_unsafe(const boost::any &v)
 }
 
 
-void RangeParameter::setFrom(const Parameter &other)
+void RangeParameter::doSetFrom(const Parameter &other)
 {
     const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        parameter_changed(this);
+        triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
 }
 
-void RangeParameter::write(YAML::Emitter& e) const
+void RangeParameter::doWrite(YAML::Emitter& e) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
     e << YAML::Key << "type" << YAML::Value << "range";
 
     if(value_.type() == typeid(int)) {
@@ -75,8 +73,6 @@ void RangeParameter::write(YAML::Emitter& e) const
         e << YAML::Key << "double" << YAML::Value << boost::any_cast<double> (value_);
 
     }
-
-    e << YAML::EndMap;
 }
 
 namespace {
@@ -88,7 +84,7 @@ T __read(const YAML::Node& n) {
 }
 }
 
-void RangeParameter::read(const YAML::Node& n)
+void RangeParameter::doRead(const YAML::Node& n)
 {
     if(!n.FindValue("name")) {
         return;

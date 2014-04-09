@@ -24,7 +24,7 @@ void BitSetParameter::setByName(const std::string &name)
     for(std::map<std::string, int>::iterator it = set_.begin(); it != set_.end(); ++it) {
         if(it->first == name) {
             value_ = it->second;
-            parameter_changed(this);
+            triggerChange();
             return;
         }
     }
@@ -39,7 +39,7 @@ void BitSetParameter::setBitSet(const std::map<std::string, int> &set) {
 void BitSetParameter::clear()
 {
     value_ = 0;
-    parameter_changed(this);
+    triggerChange();
 }
 
 void BitSetParameter::setBits(const std::vector<std::string> &elements, bool silent)
@@ -69,7 +69,7 @@ void BitSetParameter::setBits(const std::vector<std::string> &elements, bool sil
     }
 
     if(change && !silent) {
-        parameter_changed(this);
+        triggerChange();
     }
 }
 
@@ -84,7 +84,7 @@ void BitSetParameter::setBitTo(const std::string &element, bool set, bool silent
             }
 
             if(!silent) {
-                parameter_changed(this);
+                triggerChange();
             }
             return;
         }
@@ -153,27 +153,24 @@ void BitSetParameter::set_unsafe(const boost::any &v)
 }
 
 
-void BitSetParameter::setFrom(const Parameter &other)
+void BitSetParameter::doSetFrom(const Parameter &other)
 {
     const BitSetParameter* range = dynamic_cast<const BitSetParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        parameter_changed(this);
+        triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
 }
 
-void BitSetParameter::write(YAML::Emitter& e) const
+void BitSetParameter::doWrite(YAML::Emitter& e) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
     e << YAML::Key << "type" << YAML::Value << "bitset";
     e << YAML::Key << "int" << YAML::Value << boost::any_cast<int> (value_);
-    e << YAML::EndMap;
 }
 
-void BitSetParameter::read(const YAML::Node& n)
+void BitSetParameter::doRead(const YAML::Node& n)
 {
     if(!n.FindValue("name")) {
         return;

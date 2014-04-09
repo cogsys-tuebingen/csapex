@@ -56,16 +56,16 @@ void ValueParameter::set_unsafe(const boost::any &v)
 }
 
 
-void ValueParameter::setFrom(const Parameter &other)
+void ValueParameter::doSetFrom(const Parameter &other)
 {
     const ValueParameter* range = dynamic_cast<const ValueParameter*>(&other);
     if(range) {
         value_ = range->value_;
-        parameter_changed(this);
+        triggerChange();
     } else {
         try {
             value_ = access_unsafe(other);
-            parameter_changed(this);
+            triggerChange();
 
         } catch(const std::exception& e) {
             throw std::runtime_error("bad setFrom, invalid types");
@@ -73,10 +73,8 @@ void ValueParameter::setFrom(const Parameter &other)
     }
 }
 
-void ValueParameter::write(YAML::Emitter& e) const
+void ValueParameter::doWrite(YAML::Emitter& e) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
     e << YAML::Key << "type" << YAML::Value << "value";
 
     if(value_.type() == typeid(int)) {
@@ -91,8 +89,6 @@ void ValueParameter::write(YAML::Emitter& e) const
     } else if(value_.type() == typeid(std::string)) {
         e << YAML::Key << "string" << YAML::Value << boost::any_cast<std::string> (value_);
     }
-
-    e << YAML::EndMap;
 }
 
 namespace {
@@ -104,7 +100,7 @@ T __read(const YAML::Node& n) {
 }
 }
 
-void ValueParameter::read(const YAML::Node& n)
+void ValueParameter::doRead(const YAML::Node& n)
 {
     if(!n.FindValue("name")) {
         return;

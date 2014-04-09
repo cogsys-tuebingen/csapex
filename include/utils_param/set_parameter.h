@@ -21,23 +21,23 @@ public:
 
 public:
     friend YAML::Emitter& operator << (YAML::Emitter& e, const SetParameter& p) {
-        p.write(e);
+        p.doWrite(e);
         return e;
     }
     friend YAML::Emitter& operator << (YAML::Emitter& e, const SetParameter::Ptr& p) {
-        p->write(e);
+        p->doWrite(e);
         return e;
     }
 
     friend void operator >> (const YAML::Node& node, param::SetParameter& value) {
-        value.read(node);
+        value.doRead(node);
     }    template<class Archive>
 
     friend void operator >> (const YAML::Node& node, param::SetParameter::Ptr& value) {
         if(!value) {
             value.reset(new SetParameter("loading"));
         }
-        value->read(node);
+        value->doRead(node);
     }
 
 public:
@@ -51,10 +51,10 @@ public:
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 
-    void setFrom(const Parameter& other);
+    void doSetFrom(const Parameter& other);
 
-    void write(YAML::Emitter& e) const;
-    void read(const YAML::Node& n);
+    void doWrite(YAML::Emitter& e) const;
+    void doRead(const YAML::Node& n);
 
     template <typename T>
     T def() const { return read<T>(def_); }

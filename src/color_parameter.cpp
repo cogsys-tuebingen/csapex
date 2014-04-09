@@ -24,7 +24,7 @@ ColorParameter::ColorParameter(const std::string &name, int r, int g, int b)
 void ColorParameter::set(const std::vector<int> &v)
 {
     colors_ = v;
-    parameter_changed(this);
+    triggerChange();
 }
 
 const std::type_info& ColorParameter::type() const
@@ -64,25 +64,21 @@ std::vector<int> ColorParameter::value() const
 }
 
 
-void ColorParameter::setFrom(const Parameter &other)
+void ColorParameter::doSetFrom(const Parameter &other)
 {
     const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other);
     if(color) {
         colors_ = color->colors_;
-        parameter_changed(this);
+        triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
 }
 
-void ColorParameter::write(YAML::Emitter& e) const
+void ColorParameter::doWrite(YAML::Emitter& e) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
     e << YAML::Key << "type" << YAML::Value << "color";
     e << YAML::Key << "values" << YAML::Value << colors_;
-
-    e << YAML::EndMap;
 }
 
 namespace {
@@ -94,7 +90,7 @@ T __read(const YAML::Node& n) {
 }
 }
 
-void ColorParameter::read(const YAML::Node& n)
+void ColorParameter::doRead(const YAML::Node& n)
 {
     if(!n.FindValue("name")) {
         return;

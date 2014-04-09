@@ -20,23 +20,23 @@ public:
 
 public:
     friend YAML::Emitter& operator << (YAML::Emitter& e, const ColorParameter& p) {
-        p.write(e);
+        p.doWrite(e);
         return e;
     }
     friend YAML::Emitter& operator << (YAML::Emitter& e, const ColorParameter::Ptr& p) {
-        p->write(e);
+        p->doWrite(e);
         return e;
     }
 
     friend void operator >> (const YAML::Node& node, param::ColorParameter& value) {
-        value.read(node);
+        value.doRead(node);
     }
 
     friend void operator >> (const YAML::Node& node, param::ColorParameter::Ptr& value) {
         if(!value) {
             value.reset(new ColorParameter);
         }
-        value->read(node);
+        value->doRead(node);
     }
 
 public:
@@ -48,11 +48,11 @@ public:
 
     virtual std::string toStringImpl() const;
 
-    void setFrom(const Parameter& other);
+    void doSetFrom(const Parameter& other);
     void set(const std::vector<int> &v);
 
-    void write(YAML::Emitter& e) const;
-    void read(const YAML::Node& n);
+    void doWrite(YAML::Emitter& e) const;
+    void doRead(const YAML::Node& n);
 
     std::vector<int> def() const;
     std::vector<int> value() const;

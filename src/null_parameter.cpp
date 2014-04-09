@@ -41,16 +41,16 @@ void NullParameter::set_unsafe(const boost::any &v)
 }
 
 
-void NullParameter::setFrom(const Parameter &other)
+void NullParameter::doSetFrom(const Parameter &other)
 {
     throw std::runtime_error("cannot use null parameters");
 }
 
-void NullParameter::write(YAML::Emitter& e) const
+void NullParameter::doWrite(YAML::Emitter& e) const
 {
 }
 
-void NullParameter::read(const YAML::Node& n)
+void NullParameter::doRead(const YAML::Node& n)
 {
 }
 

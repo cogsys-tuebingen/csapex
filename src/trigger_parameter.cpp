@@ -42,19 +42,16 @@ void TriggerParameter::set_unsafe(const boost::any &v)
 }
 
 
-void TriggerParameter::setFrom(const Parameter &other)
+void TriggerParameter::doSetFrom(const Parameter &other)
 {
 }
 
-void TriggerParameter::write(YAML::Emitter& e) const
+void TriggerParameter::doWrite(YAML::Emitter& e) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
     e << YAML::Key << "type" << YAML::Value << "value";
-    e << YAML::EndMap;
 }
 
-void TriggerParameter::read(const YAML::Node& n)
+void TriggerParameter::doRead(const YAML::Node& n)
 {
     if(!n.FindValue("name")) {
         return;
@@ -66,5 +63,5 @@ void TriggerParameter::read(const YAML::Node& n)
 
 void TriggerParameter::trigger()
 {
-    parameter_changed(this);
+    triggerChange();
 }

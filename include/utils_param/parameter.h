@@ -23,7 +23,7 @@ public:
         boost::signals2::signal<void(Parameter*)>& scope_changed(Parameter& p) {
             return p.scope_changed;
         }
-        boost::signals2::signal<void(Parameter*)>& interactive_changed(Parameter& p) {
+        boost::signals2::signal<void(Parameter*,bool)>& interactive_changed(Parameter& p) {
             return p.interactive_changed;
         }
         boost::signals2::signal<void(Parameter*,bool)>& parameter_enabled(Parameter& p) {
@@ -34,9 +34,17 @@ public:
 public:
     virtual ~Parameter();
 
-    virtual void write(YAML::Emitter& e) const;
-    virtual void read(const YAML::Node& n);
+    void write(YAML::Emitter& e) const;
+    void read(const YAML::Node& n);
 
+    void setFrom(const Parameter& other);
+
+protected:
+    virtual void doWrite(YAML::Emitter& e) const = 0;
+    virtual void doRead(const YAML::Node& n) = 0;
+    virtual void doSetFrom(const Parameter& other) = 0;
+
+public:
     std::string name() const;
 
     virtual int ID() const = 0;
@@ -67,7 +75,7 @@ public:
         }
 
         set_unsafe(v);
-        parameter_changed(this);
+        triggerChange();
     }
 
     template <typename T>
@@ -75,7 +83,7 @@ public:
     {
         boost::any v = value;
         set_unsafe(v);
-        parameter_changed(this);
+        triggerChange();
         return *this;
     }
 
@@ -87,14 +95,13 @@ public:
     virtual const std::type_info &type() const;
     std::string toString() const;
 
-    virtual void setFrom(const Parameter& other);
-
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
     bool isInteractive() const;
     void setInteractive(bool enabled);
 
+    void triggerChange();
 
 public:
     static std::string type2string(const std::type_info& type);
@@ -114,7 +121,7 @@ protected:
 protected:
     boost::signals2::signal<void(Parameter*)> parameter_changed;
     boost::signals2::signal<void(Parameter*)> scope_changed;
-    boost::signals2::signal<void(Parameter*)> interactive_changed;
+    boost::signals2::signal<void(Parameter*, bool)> interactive_changed;
     boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
 
 protected:

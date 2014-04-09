@@ -68,21 +68,19 @@ void IntervalParameter::set_unsafe(const boost::any &v)
 }
 
 
-void IntervalParameter::setFrom(const Parameter &other)
+void IntervalParameter::doSetFrom(const Parameter &other)
 {
     const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
     if(interval) {
         values_ = interval->values_;
-        parameter_changed(this);
+        triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
 }
 
-void IntervalParameter::write(YAML::Emitter& e) const
+void IntervalParameter::doWrite(YAML::Emitter& e) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
     e << YAML::Key << "type" << YAML::Value << "interval";
 
     if(values_.first.type() == typeid(int)) {
@@ -95,8 +93,6 @@ void IntervalParameter::write(YAML::Emitter& e) const
         e << boost::any_cast<double> (values_.first) << boost::any_cast<double> (values_.second);
         e << YAML::EndSeq;
     }
-
-    e << YAML::EndMap;
 }
 
 namespace {
@@ -110,7 +106,7 @@ std::pair<T,T> __read(const YAML::Node& n) {
 }
 }
 
-void IntervalParameter::read(const YAML::Node& n)
+void IntervalParameter::doRead(const YAML::Node& n)
 {
     if(!n.FindValue("name")) {
         return;

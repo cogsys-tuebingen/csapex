@@ -33,13 +33,18 @@ void Parameter::setInteractive(bool interactive)
     if(interactive != interactive_) {
         interactive_ = interactive;
 
-        interactive_changed(this);
+        interactive_changed(this, interactive_);
     }
 }
 
 bool Parameter::isInteractive() const
 {
     return interactive_;
+}
+
+void Parameter::triggerChange()
+{
+    parameter_changed(this);
 }
 
 std::string Parameter::name() const
@@ -64,17 +69,31 @@ std::string Parameter::toStringImpl() const
 
 void Parameter::write(YAML::Emitter &e) const
 {
-    throw std::logic_error("not implemented");
+    e << YAML::BeginMap;
+    e << YAML::Key << "name" << YAML::Value << name();
+
+    if(interactive_) {
+        e << YAML::Key << "interactive" << YAML::Value << interactive_;
+    }
+    doWrite(e);
+
+    e << YAML::EndMap;
 }
 
 void Parameter::read(const YAML::Node &n)
 {
-    throw std::logic_error("not implemented");
+    if(n.FindValue("interactive")) {
+        n["interactive"] >> interactive_;
+    }
+
+    doRead(n);
 }
 
 void Parameter::setFrom(const Parameter &other)
 {
-    throw std::logic_error("not implemented");
+    interactive_ = other.interactive_;
+    enabled_ = other.enabled_;
+    doSetFrom(other);
 }
 
 boost::any Parameter::access_unsafe(const Parameter &p) const

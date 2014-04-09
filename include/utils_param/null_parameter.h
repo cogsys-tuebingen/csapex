@@ -32,10 +32,10 @@ public:
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 
-    void setFrom(const Parameter& other);
+    void doSetFrom(const Parameter& other);
 
-    void write(YAML::Emitter& e) const;
-    void read(const YAML::Node& n);
+    void doWrite(YAML::Emitter& e) const;
+    void doRead(const YAML::Node& n);
 
 protected:
     virtual boost::any get_unsafe() const;
