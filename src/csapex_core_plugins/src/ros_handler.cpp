@@ -97,11 +97,11 @@ void ROSHandler::checkMasterConnection()
         int c = 0;
         ros::init(c, (char**) NULL, "csapex");
     }
+    //initialized_ = true;
 
     if(!has_connection.isRunning()) {
         has_connection = QtConcurrent::run(ros::master::check);
     }
-    initialized_ = true;
 }
 
 bool ROSHandler::waitForConnection()
