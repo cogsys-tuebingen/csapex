@@ -97,6 +97,7 @@ boost::any SetParameter::get_unsafe() const
 void SetParameter::set_unsafe(const boost::any &v)
 {
     value_ = v;
+    txt_ = getName();
 }
 
 
@@ -104,6 +105,10 @@ void SetParameter::doSetFrom(const Parameter &other)
 {
     const SetParameter* range = dynamic_cast<const SetParameter*>(&other);
     if(range) {
+        std::string name = range->txt_;
+        if(set_.find(name) == set_.end()) {
+            set_[name] = range->value_;
+        }
         value_ = range->value_;
         triggerChange();
     } else {
@@ -114,6 +119,7 @@ void SetParameter::doSetFrom(const Parameter &other)
 void SetParameter::doWrite(YAML::Emitter& e) const
 {
     e << YAML::Key << "type" << YAML::Value << "set";
+    e << YAML::Key << "txt" << YAML::Value << getName();
 
     if(value_.type() == typeid(int)) {
         e << YAML::Key << "int" << YAML::Value << boost::any_cast<int> (value_);
@@ -146,6 +152,13 @@ void SetParameter::doRead(const YAML::Node& n)
 
     n["name"] >> name_;
 
+    if(n.FindValue("txt")) {
+        n["txt"] >> txt_;
+    } else {
+        // backward compability
+        txt_ = "unknown";
+    }
+
     if(n.FindValue("int")) {
         value_ = __read<int>(n["int"]);
 
@@ -158,4 +171,5 @@ void SetParameter::doRead(const YAML::Node& n)
     } else if(n.FindValue("string")) {
         value_ = __read<std::string>(n["string"]);
     }
+    set_[name_] = value_;
 }

@@ -111,6 +111,7 @@ private:
 
 private:
     variant value_;
+    std::string txt_;
     std::map<std::string, variant> set_;
     variant def_;
 };

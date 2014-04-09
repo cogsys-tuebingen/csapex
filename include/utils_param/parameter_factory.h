@@ -63,8 +63,10 @@ public:
     {
         SetParameter::Ptr result(new SetParameter(name));
         result->setSet(set);
-        result->def_ = set.begin()->second;
-        result->set<T>(set.begin()->second);
+        if(!set.empty()) {
+            result->def_ = set.begin()->second;
+            result->set<T>(set.begin()->second);
+        }
 
         return result;
     }
@@ -73,8 +75,11 @@ public:
     {
         SetParameter::Ptr result(new SetParameter(name));
         result->setSet(set);
-        result->def_ = set.begin();
-        result->set<std::string>(*set.begin());
+
+        if(!set.empty()) {
+            result->def_ = set.begin();
+            result->set<std::string>(*set.begin());
+        }
 
         return result;
     }
