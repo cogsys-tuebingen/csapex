@@ -21,7 +21,8 @@ void QSleepThread::usleep(unsigned long t) {
     currentThread()->usleep(t);
 }
 
-QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size)
+QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size,
+                                csapex::ContextMenuHandler *context_handler)
 {
     assert(min<=max);
 
@@ -33,14 +34,22 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
     spinner->setValue(def);
     spinner->setSingleStep(step_size);
 
-    internal_layout->addWidget(new QLabel(name.c_str()));
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
     internal_layout->addWidget(spinner);
     layout->addLayout(internal_layout);
 
     return spinner;
 }
 
-QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max) {
+QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max,
+                              csapex::ContextMenuHandler *context_handler) {
     assert(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
@@ -56,7 +65,14 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     display->setMaximum(max);
     display->setValue(def);
 
-    internal_layout->addWidget(new QLabel(name.c_str()));
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
 
@@ -70,7 +86,8 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
     return slider;
 }
 
-QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step) {
+QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step,
+                                    csapex::ContextMenuHandler *context_handler) {
     assert(min<=max);
 
     if(((def - min) / step) * step != (def - min)) {
@@ -101,7 +118,14 @@ QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name,
     display->setValue(def);
     display->setSingleStep(step);
 
-    internal_layout->addWidget(new QLabel(name.c_str()));
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
 
@@ -116,7 +140,8 @@ QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name,
 }
 
 
-QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size)
+QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size,
+                                          csapex::ContextMenuHandler *context_handler)
 {
     assert(min<=max);
 
@@ -149,7 +174,14 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
     display->setValue(def);
     display->setSingleStep(step_size);
 
-    internal_layout->addWidget(new QLabel(name.c_str()));
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
 
@@ -164,7 +196,8 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
 
 
 
-QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max)
+QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max,
+                                        csapex::ContextMenuHandler *context_handler)
 {
     assert(min<=max);
 
@@ -186,7 +219,14 @@ QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& n
     displayUpper->setMaximum(max);
     displayUpper->setValue(upper);
 
-    internal_layout->addWidget(new QLabel(name.c_str()));
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
     internal_layout->addWidget(displayLower);
     internal_layout->addWidget(slider);
     internal_layout->addWidget(displayUpper);
@@ -203,7 +243,8 @@ QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& n
 }
 
 
-QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size)
+QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size,
+                                                    csapex::ContextMenuHandler *context_handler)
 {
     assert(min<=max);
 
@@ -223,7 +264,14 @@ QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const st
     displayUpper->setRange(min, max);
     displayUpper->setValue(upper);
 
-    internal_layout->addWidget(new QLabel(name.c_str()));
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
     internal_layout->addWidget(displayLower);
     internal_layout->addWidget(slider);
     internal_layout->addWidget(displayUpper);
@@ -245,7 +293,8 @@ QWidget* QtHelper::wrapLayout(QBoxLayout *l, QWidget *parent)
     return container;
 }
 
-QHBoxLayout* QtHelper::wrap(const std::string& txt, QWidget* widget, csapex::ContextMenuHandler *context_handler) {
+QHBoxLayout* QtHelper::wrap(const std::string& txt, QWidget* widget,
+                            csapex::ContextMenuHandler *context_handler) {
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
@@ -255,13 +304,14 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QWidget* widget, csapex::Con
         context_handler->setParent(label);
         QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
     }
-    internal_layout->addWidget(new QLabel(txt.c_str()));
+    internal_layout->addWidget(label);
     internal_layout->addWidget(widget);
 
     return internal_layout;
 }
 
-QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout, csapex::ContextMenuHandler *context_handler ) {
+QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
+                            csapex::ContextMenuHandler *context_handler ) {
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 

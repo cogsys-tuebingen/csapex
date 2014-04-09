@@ -178,12 +178,15 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
         current_name_= parameter->name();
         current_display_name_ = current_name_;
         std::size_t separator_pos = current_name_.find_first_of('/');
+
+        QBoxLayout* group_layout = NULL;
+
         if(separator_pos != std::string::npos) {
             std::string group = current_name_.substr(0, separator_pos);
             current_display_name_ = current_name_.substr(separator_pos+1);
 
             if(groups.find(group) != groups.end()) {
-                current_layout_ = groups[group];
+                group_layout = groups[group];
             } else {
                 QGroupBox* gb = new QGroupBox(group.c_str());
                 gb->setContentsMargins(0,0,0,0);
@@ -193,12 +196,12 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
                 gb->setCheckable(true);
                 gb_layout->setContentsMargins(0,0,0,0);
 
-                current_layout_ = new QVBoxLayout;
-                groups.insert(std::make_pair(group, current_layout_));
-                current_layout_->setContentsMargins(0,0,0,0);
+                group_layout = new QVBoxLayout;
+                groups.insert(std::make_pair(group, group_layout));
+                group_layout->setContentsMargins(0,0,0,0);
 
                 QFrame* hider = new QFrame;
-                hider->setLayout(current_layout_);
+                hider->setLayout(group_layout);
                 hider->setContentsMargins(0,0,0,0);
                 gb_layout->addWidget(hider);
 
@@ -219,8 +222,11 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         // connect parameter input, if available
         ConnectorIn* param_in = node_->getParameterInput(current_name_);
-        if(param_in && p->isInteractive()) {
-            current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_in));
+        if(param_in) {
+            Port* port = new Port(node_->getCommandDispatcher(), param_in);
+            port->setVisible(p->isInteractive());
+            interactive_changed(*p).connect(boost::bind(&Port::setVisible, port, __2));
+            current_layout_->addWidget(port);
         }
 
         // generate UI element
@@ -233,10 +239,24 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         // connect parameter output, if available
         ConnectorOut* param_out = node_->getParameterOutput(current_name_);
-        if(param_out && p->isInteractive()) {
-            current_layout_->addWidget(new Port(node_->getCommandDispatcher(), param_out));
+        if(param_out) {
+            Port* port = new Port(node_->getCommandDispatcher(), param_out);
+            port->setVisible(p->isInteractive());
+            interactive_changed(*p).connect(boost::bind(&Port::setVisible, port, __2));
+
+            qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&param::Parameter::triggerChange, p.get()));
+            callbacks.push_back(call_trigger);
+            QObject::connect(param_out, SIGNAL(connectionDone()), call_trigger, SLOT(call()));
+            current_layout_->addWidget(port);
         }
-        outer_layout->addLayout(current_layout_);
+
+        // put into layout
+        if(group_layout) {
+            group_layout->addLayout(current_layout_);
+        } else {
+            outer_layout->addLayout(current_layout_);
+        }
+
     }
 }
 
@@ -399,7 +419,9 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
 {
     if(range_p->is<int>()) {
-        QIntSlider* slider = QtHelper::makeIntSlider(current_layout_, current_display_name_ , range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>());
+        QIntSlider* slider = QtHelper::makeIntSlider(current_layout_, current_display_name_ ,
+                                                     range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(),
+                                                     new ParameterContextMenu(range_p));
         slider->setIntValue(range_p->as<int>());
 
         // ui change -> model
@@ -414,7 +436,9 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
     } else if(range_p->is<double>()) {
-        QDoubleSlider* slider = QtHelper::makeDoubleSlider(current_layout_, current_display_name_ , range_p->def<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
+        QDoubleSlider* slider = QtHelper::makeDoubleSlider(current_layout_, current_display_name_ ,
+                                                           range_p->def<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>(),
+                                                           new ParameterContextMenu(range_p));
         slider->setDoubleValue(range_p->as<double>());
 
         // ui change -> model
@@ -437,7 +461,9 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
 {
     if(interval_p->is<std::pair<int, int> >()) {
         const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
-        QxtSpanSlider* slider = QtHelper::makeSpanSlider(current_layout_, current_display_name_, v.first, v.second, interval_p->min<int>(), interval_p->max<int>());
+        QxtSpanSlider* slider = QtHelper::makeSpanSlider(current_layout_, current_display_name_,
+                                                         v.first, v.second, interval_p->min<int>(), interval_p->max<int>(),
+                                                         new ParameterContextMenu(interval_p));
 
         // ui change -> model
         boost::function<int()> low = boost::bind(&QxtSpanSlider::lowerValue, slider);
@@ -470,7 +496,9 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
 
     } else if(interval_p->is<std::pair<double, double> >()) {
         const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
-        QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(current_layout_, current_display_name_, v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>());
+        QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(current_layout_, current_display_name_,
+                                                                     v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>(),
+                                                                     new ParameterContextMenu(interval_p));
 
         // ui change -> model
         boost::function<double()> low = boost::bind(&QxtDoubleSpanSlider::lowerDoubleValue, slider);
