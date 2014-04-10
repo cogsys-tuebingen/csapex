@@ -139,9 +139,9 @@ void DesignBoard::addBoxEvent(Box *box)
 {
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay_, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), &widget_ctrl_->box_selection_, SLOT(boxMoved(Box*, int, int)));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), &widget_ctrl_->box_selection_, SLOT(mimicBoxMovement(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(Box*)), overlay_, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(clicked(Box*)), &widget_ctrl_->box_selection_, SLOT(toggleBoxSelection(Box*)));
+    QObject::connect(box, SIGNAL(clicked(Box*)), &widget_ctrl_->box_selection_, SLOT(toggleSelection(Box*)));
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay_, SLOT(deleteTemporaryConnections()));
     QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
     QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay_, SLOT(deleteTemporaryConnectionsAndRepaint()));
@@ -270,11 +270,11 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     if(e->button() == Qt::LeftButton) {
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            widget_ctrl_->box_selection_.deselectNodes();
+            widget_ctrl_->box_selection_.clearSelection();
 
             Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    widget_ctrl_->box_selection_.selectNode(box->getNode(), true);
+                    widget_ctrl_->box_selection_.select(box->getNode(), true);
                 }
             }
 
@@ -285,7 +285,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     // BOXES
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
     if(!shift) {
-        widget_ctrl_->box_selection_.deselectNodes();
+        widget_ctrl_->box_selection_.clearSelection();
     }
     updateCursor();
 }
@@ -403,7 +403,7 @@ void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
     }
 
     /// BOXES
-    widget_ctrl_->box_selection_.deselectNodes();
+    widget_ctrl_->box_selection_.clearSelection();
     showContextMenuAddNode(global_pos);
 }
 
@@ -415,11 +415,11 @@ void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
     Graph::Ptr graph = graph_;
 
     if(box != NULL && !box->isSelected()) {
-        widget_ctrl_->box_selection_.deselectNodes();
+        widget_ctrl_->box_selection_.clearSelection();
         box->setSelected(true);
     }
 
-    if(widget_ctrl_->box_selection_.countSelectedNodes() == 1) {
+    if(widget_ctrl_->box_selection_.countSelected() == 1) {
         box->fillContextMenu(&menu, handler);
 
     } else {

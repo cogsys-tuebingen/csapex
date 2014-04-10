@@ -4,94 +4,18 @@
 /// PROJECT
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/box_selection_model.h>
+#include <csapex/model/connection_selection_model.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <QObject>
 #include <QPoint>
-#include <QMenu>
 #include <boost/function.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace csapex
 {
-
-class SelectionManager  : public QObject
-{
-    Q_OBJECT
-
-public:
-    SelectionManager(GraphPtr graph, WidgetController* widget_ctrl)
-        : graph_(graph), widget_ctrl_(widget_ctrl)
-    {
-    }
-
-    virtual ~SelectionManager()
-    {
-    }
-
-    void setCommandDispatcher(CommandDispatcher *dispatcher)
-    {
-        dispatcher_ = dispatcher;
-    }
-
-Q_SIGNALS:
-    void selectionChanged();
-
-protected:
-    GraphPtr graph_;
-    WidgetController* widget_ctrl_;
-    CommandDispatcher *dispatcher_;
-};
-
-class BoxSelectionManager : public SelectionManager
-{
-    Q_OBJECT
-
-public:
-    BoxSelectionManager(GraphPtr graph, WidgetController* widget_ctrl);
-
-    void handleNodeSelection(Node* node, bool add);
-    CommandPtr deleteSelectedNodesCmd();
-
-    void selectNode(Node* node, bool add = false);
-    void deselectNodes();
-
-    int countSelectedNodes();
-
-    void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
-
-
-public Q_SLOTS:
-    void clearSelection();
-    void selectAll();
-
-    void toggleBoxSelection(Box* box);
-    void boxMoved(Box* box, int dx, int dy);
-
-    void moveSelectedBoxes(Box* origin, const QPoint& delta);
-};
-
-class ConnectionSelectionManager : public SelectionManager
-{
-    Q_OBJECT
-
-public:
-    ConnectionSelectionManager(GraphPtr graph, WidgetController* widget_ctrl);
-
-    CommandPtr deleteSelectedConnectionsCmd();
-
-public:
-    bool handleConnectionSelection(int id, bool add);
-    int countSelectedConnections();
-
-private:
-    void deselectConnections();
-    void deselectConnectionById(int id);
-
-    void selectConnectionById(int id, bool add = false);
-    bool isConnectionWithIdSelected(int id);
-};
-
 
 class WidgetController : public QObject
 {
@@ -121,11 +45,12 @@ private:
     CommandDispatcher* dispatcher_;
 
 public:
-    BoxSelectionManager box_selection_;
-    ConnectionSelectionManager connection_selection_;
+    BoxSelectionModel box_selection_;
+    ConnectionSelectionModel connection_selection_;
 
 private:
     Designer* designer_;
+    boost::unordered_map<UUID, Box*, UUID::Hasher> box_map_;
 };
 
 }

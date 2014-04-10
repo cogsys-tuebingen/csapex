@@ -41,11 +41,11 @@ void Designer::deleteSelected()
 {
     command::Meta::Ptr del(new command::Meta("delete selected"));
 
-    if(widget_ctrl_->box_selection_.countSelectedNodes() != 0) {
-        del->add(widget_ctrl_->box_selection_.deleteSelectedNodesCmd());
+    if(widget_ctrl_->box_selection_.countSelected() != 0) {
+        del->add(widget_ctrl_->box_selection_.deleteSelectedCommand());
     }
-    if(widget_ctrl_->connection_selection_.countSelectedConnections() != 0) {
-        del->add(widget_ctrl_->connection_selection_.deleteSelectedConnectionsCmd());
+    if(widget_ctrl_->connection_selection_.countSelected() != 0) {
+        del->add(widget_ctrl_->connection_selection_.deleteSelectedCommand());
     }
 
     if(del->commands() != 0) {

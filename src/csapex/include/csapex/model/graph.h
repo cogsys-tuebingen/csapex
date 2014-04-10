@@ -29,8 +29,8 @@ class Graph : public QObject
     friend class CommandDispatcher;
 
     friend class WidgetController;
-    friend class BoxSelectionManager;
-    friend class ConnectionSelectionManager;
+    friend class BoxSelectionModel;
+    friend class ConnectionSelectionModel;
 
 public:
     typedef boost::shared_ptr<Graph> Ptr;

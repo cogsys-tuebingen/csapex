@@ -469,7 +469,7 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
         }
 
         bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
-        widget_ctrl_->connection_selection_.handleConnectionSelection(highlight_connection_id_, shift);
+        widget_ctrl_->connection_selection_.handleSelection(highlight_connection_id_, shift);
 
         repaint();
 

@@ -106,7 +106,7 @@ void CsApexWindow::construct()
 
 void CsApexWindow::updateDeleteAction()
 {
-    bool has_selection = widget_ctrl_->connection_selection_.countSelectedConnections() + widget_ctrl_->box_selection_.countSelectedNodes() > 0;
+    bool has_selection = widget_ctrl_->connection_selection_.countSelected() + widget_ctrl_->box_selection_.countSelected() > 0;
     ui->actionDelete_Selected->setEnabled(has_selection);
 }
 
