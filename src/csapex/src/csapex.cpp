@@ -101,6 +101,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     WidgetControllerPtr widget_control (new WidgetController(graph));
 
     CommandDispatcher dispatcher(graph, widget_control);
+
     CsApexCore core(settings, graph, &dispatcher);
 
     if(!headless) {

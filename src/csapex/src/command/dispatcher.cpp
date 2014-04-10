@@ -11,6 +11,7 @@ CommandDispatcher::CommandDispatcher(Graph::Ptr graph, WidgetController::Ptr wid
     : graph_(graph), widget_ctrl_(widget_control), dirty_(false)
 {
     graph_->init(this);
+    widget_ctrl_->setCommandDispatcher(this);
 
     QObject::connect(this, SIGNAL(stateChanged()), graph_.get(), SIGNAL(stateChanged()));
     QObject::connect(this, SIGNAL(dirtyChanged(bool)), graph_.get(), SIGNAL(dirtyChanged(bool)));

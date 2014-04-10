@@ -28,13 +28,13 @@ GraphIO::GraphIO(Graph::Ptr graph)
 void GraphIO::saveSettings(YAML::Emitter& yaml)
 {
     yaml << YAML::Key << "uuid_map";
-    yaml << YAML::Value << graph_->uuids;    
+    yaml << YAML::Value << graph_->uuids_;    
 }
 
 void GraphIO::loadSettings(YAML::Node &doc)
 {
     if(doc.FindValue("uuid_map")) {
-        doc["uuid_map"] >> graph_->uuids;
+        doc["uuid_map"] >> graph_->uuids_;
     }
 }
 
@@ -109,7 +109,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Key << "fulcrums";
     yaml << YAML::Value << YAML::BeginSeq; // fulcrums seq
 
-    BOOST_FOREACH(const Connection::Ptr& connection, graph_->visible_connections) {
+    BOOST_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }

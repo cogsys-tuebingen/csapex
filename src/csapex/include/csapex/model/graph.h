@@ -31,7 +31,7 @@ class Graph : public QObject
     friend class command::DeleteConnection;
     friend class command::DeleteNode;
     friend class Overlay;
-
+    friend class WidgetController;
     friend class Template;
     friend class CommandDispatcher;
 
@@ -59,7 +59,6 @@ public:
     Connectable* findConnector(const UUID &uuid);
 
 
-    bool handleConnectionSelection(int id, bool add);
     Command::Ptr deleteConnectionByIdCommand(int id);
 
     Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
@@ -68,7 +67,6 @@ public:
     Command::Ptr deleteAllConnectionFulcrumsCommand(Connection::Ptr connection);
 
     Command::Ptr deleteConnectionById(int id);
-    Command::Ptr deleteSelectedConnectionsCmd();
 
     Connection::Ptr getConnectionWithId(int id);
     Connection::Ptr getConnection(Connection::Ptr);
@@ -78,19 +76,9 @@ public:
 
     Command::Ptr clear();
 
-    void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
 
     int countNodes();
-    int countSelectedNodes();
-    void selectNode(Node* node, bool add = false);
-    void deselectNodes();
-
-    Command::Ptr deleteSelectedNodesCmd();
-
-    int countSelectedConnections();
-
-    void handleNodeSelection(Node* node, bool add);
 
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
     void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
@@ -98,13 +86,6 @@ public:
 public Q_SLOTS:
     void reset();
     void tick();
-    void clearSelection();
-    void selectAll();
-
-    void toggleBoxSelection(Box* box);
-    void boxMoved(Box* box, int dx, int dy);
-
-    Command::Ptr moveSelectedBoxes(const QPoint& delta);
 
     void verify();
 
@@ -124,8 +105,6 @@ Q_SIGNALS:
 private:
     void deselectConnections();
     void deselectConnectionById(int id);
-    void selectConnectionById(int id, bool add = false);
-    bool isConnectionWithIdSelected(int id);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addNode(NodePtr node);
@@ -136,16 +115,44 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
 
     void verifyAsync();
 
+    ///
+    /// VIEW DEPENDENT STUFF
+    ///
+public:
+    /*view*/ bool handleConnectionSelection(int id, bool add);
+    /*view*/ Command::Ptr deleteSelectedConnectionsCmd();
+    /*view*/ void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
+    /*view*/ int countSelectedNodes();
+    /*view*/ void selectNode(Node* node, bool add = false);
+    /*view*/ void deselectNodes();
+
+    /*view*/ Command::Ptr deleteSelectedNodesCmd();
+
+    /*view*/ int countSelectedConnections();
+
+    /*view*/ void handleNodeSelection(Node* node, bool add);
+
+public Q_SLOTS:
+    /*view*/ void clearSelection();
+    /*view*/ void selectAll();
+
+    /*view*/ void toggleBoxSelection(Box* box);
+    /*view*/ void boxMoved(Box* box, int dx, int dy);
+
+private:
+    /*view*/ void selectConnectionById(int id, bool add = false);
+    /*view*/ bool isConnectionWithIdSelected(int id);
+
 protected:
     Settings& settings_;
 
     std::vector<NodePtr> nodes_;
     std::vector<Connectable*> connectors_;
-    std::vector<Connection::Ptr> visible_connections;
+    std::vector<Connection::Ptr> connections_;
 
     CommandDispatcher* dispatcher_;
 
-    std::map<std::string, int> uuids;
+    std::map<std::string, int> uuids_;
 
     QTimer* timer_;
 };

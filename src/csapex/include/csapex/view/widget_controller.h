@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <QObject>
+#include <QPoint>
 
 namespace csapex
 {
@@ -27,13 +28,17 @@ public:
     GraphPtr getGraph();
 
     void setDesigner(Designer* designer);
+    void setCommandDispatcher(CommandDispatcher *dispatcher);
 
 public Q_SLOTS:
     void nodeAdded(NodePtr node);
     void nodeRemoved(NodePtr node);
 
+    void moveSelectedBoxes(Box* origin, const QPoint& delta);
+
 private:
     GraphPtr graph_;
+    CommandDispatcher* dispatcher_;
 
     Designer* designer_;
 };

@@ -476,7 +476,9 @@ void Box::startDrag(QPoint offset)
 
     QPoint delta = end_pos - start_pos;
     // TODO: ugly
-    node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
+
+    Q_EMIT moveRequest(this,delta);
+    //node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
 }
 
 void Box::deleteBox()

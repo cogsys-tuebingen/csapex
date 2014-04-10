@@ -120,7 +120,10 @@ public Q_SLOTS:
 Q_SIGNALS:
     void placed();
     void toggled(bool);
+
+    void moveRequest(Box*, QPoint);
     void moved(Box*, int dx, int dy);
+
     void changed(Box*);
     void clicked(Box*);
     void moveSelectionToBox(Box*);
