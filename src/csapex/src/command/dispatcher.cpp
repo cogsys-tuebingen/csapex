@@ -3,11 +3,12 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
+#include <csapex/view/widget_controller.h>
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Graph::Ptr graph)
-    : graph_(graph), dirty_(false)
+CommandDispatcher::CommandDispatcher(Graph::Ptr graph, WidgetController::Ptr widget_control)
+    : graph_(graph), widget_ctrl_(widget_control), dirty_(false)
 {
     graph_->init(this);
 
@@ -32,6 +33,7 @@ void CommandDispatcher::execute(Command::Ptr command)
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
     command->setGraph(graph_);
+    command->setWidgetController(widget_ctrl_);
     later.push_back(command);
 }
 
@@ -45,7 +47,7 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::executeNotUndoable(Command::Ptr command)
 {
-    Command::Access::executeCommand(graph_, command);
+    Command::Access::executeCommand(graph_, widget_ctrl_, command);
 }
 
 
@@ -59,7 +61,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = Command::Access::executeCommand(graph_, command);
+    bool success = Command::Access::executeCommand(graph_, widget_ctrl_, command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -147,7 +149,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = Command::Access::undoCommand(graph_, last);
+    bool ret = Command::Access::undoCommand(graph_, widget_ctrl_, last);
     assert(ret);
 
 //    while(!Command::undo_later.empty()) {
@@ -177,7 +179,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    Command::Access::redoCommand(graph_, last);
+    Command::Access::redoCommand(graph_, widget_ctrl_, last);
 
     done.push_back(last);
 

@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/view/box.h>
 #include <csapex/model/graph.h>
+#include <csapex/view/widget_controller.h>
 
 using namespace csapex::command;
 
@@ -29,7 +30,7 @@ std::string MoveBox::getDescription() const
 
 bool MoveBox::doExecute()
 {
-    Box* box = graph_->findNode(uuid)->getBox();
+    Box* box = widget_ctrl_->getBox(uuid);
     box->clearFocus();
     box->move(to);
     box->key_point = to;
@@ -39,7 +40,7 @@ bool MoveBox::doExecute()
 
 bool MoveBox::doUndo()
 {
-    Box* box = graph_->findNode(uuid)->getBox();
+    Box* box = widget_ctrl_->getBox(uuid);
     box->clearFocus();
     box->move(from);
     box->key_point = from;

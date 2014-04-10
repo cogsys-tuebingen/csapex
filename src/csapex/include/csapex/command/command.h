@@ -22,9 +22,9 @@ public:
         friend class command::Meta;
 
     private:
-        static bool executeCommand(GraphPtr graph, CommandPtr cmd);
-        static bool undoCommand(GraphPtr graph, CommandPtr cmd);
-        static bool redoCommand(GraphPtr graph, CommandPtr cmd);
+        static bool executeCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
+        static bool undoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
+        static bool redoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
     };
 
 public:
@@ -34,7 +34,11 @@ public:
     Command();
 
     void setGraph(GraphPtr graph);
+
+    // TODO: remove!
     GraphPtr getGraph();
+
+    void setWidgetController(WidgetControllerPtr widget_ctrl);
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -48,9 +52,9 @@ public:
     virtual std::string getDescription() const = 0;
 
 protected:
-    static bool executeCommand(GraphPtr graph, CommandPtr cmd);
-    static bool undoCommand(GraphPtr graph, CommandPtr cmd);
-    static bool redoCommand(GraphPtr graph, CommandPtr cmd);
+    static bool executeCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
+    static bool undoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
+    static bool redoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
 
     virtual bool doExecute() = 0;
     virtual bool doUndo() = 0;
@@ -58,6 +62,7 @@ protected:
 
 protected:
     GraphPtr graph_;
+    WidgetControllerPtr widget_ctrl_;
 
     static std::vector<Command::Ptr> undo_later;
 

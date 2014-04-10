@@ -11,7 +11,7 @@
 #include <csapex/model/node.h>
 #include <csapex/view/box.h>
 #include <csapex/view/overlay.h>
-
+#include <csapex/view/widget_controller.h>
 
 using namespace csapex;
 
@@ -31,8 +31,8 @@ void DragIO::registerDropHandler(HandlerDrop::Ptr h)
     handler_drop.push_back(h);
 }
 
-DragIO::DragIO(Graph *graph, CommandDispatcher* dispatcher)
-    : graph_(graph), dispatcher_(dispatcher)
+DragIO::DragIO(Graph *graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl)
+    : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl)
 {
 
 }
@@ -128,7 +128,7 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
         std::string uuid_tmp = e->mimeData()->text().toStdString();
         UUID uuid = UUID::make_forced(uuid_tmp);
 
-        Box* box = graph_->findNode(uuid)->getBox();
+        Box* box = widget_ctrl_->getBox(uuid);
         QPoint offset_value(e->mimeData()->data(Box::MIME_MOVE + "/x").toInt(),
                             e->mimeData()->data(Box::MIME_MOVE + "/y").toInt());
         QPoint pos = e->pos() + offset_value;

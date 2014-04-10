@@ -10,6 +10,8 @@
 #include <csapex/view/designer.h>
 #include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
+#include <csapex/view/widget_controller.h>
+#include <csapex/view/overlay.h>
 
 /// SYSTEM
 #include <pluginlib/class_list_macros.h>
@@ -23,9 +25,18 @@ using namespace csapex_rqt;
 using namespace csapex;
 
 CsApex::CsApex()
-    : graph_(new Graph(settings_)), dispatcher_(new CommandDispatcher(graph_)), core_(settings_, graph_, dispatcher_), drag_io_(graph_.get(), dispatcher_)
+    : graph_(new Graph(settings_)),
+      widget_controller_(new csapex::WidgetController(graph_)),
+      dispatcher_(new CommandDispatcher(graph_, widget_controller_)),
+      core_(settings_, graph_, dispatcher_.get()),
+      drag_io_(graph_.get(), dispatcher_.get(), widget_controller_),
+      overlay_(new Overlay(graph_, dispatcher_.get(), widget_controller_)),
+      board_ (new DesignBoard(graph_, dispatcher_.get(), drag_io_, overlay_)),
+      designer_(new Designer(graph_, dispatcher_.get(), board_))
 {
     BoxManager::instance().settings_ = &settings_;
+
+    widget_controller_->setDesigner(designer_);
 }
 
 CsApex::~CsApex()
@@ -38,10 +49,7 @@ void CsApex::initPlugin(qt_gui_cpp::PluginContext& context)
 {
     context_ = &context;
 
-    board_ = new DesignBoard(graph_, dispatcher_, drag_io_);
-    designer_ = new Designer(graph_, dispatcher_, board_);
-
-    eva_ = new CsApexWindow(core_, dispatcher_, graph_, designer_);
+    eva_ = new CsApexWindow(core_, dispatcher_.get(), widget_controller_, graph_, designer_);
     eva_->showMenu();
 
     context_->addWidget(eva_);
