@@ -117,7 +117,7 @@ void Designer::updateDebugInfo()
 {
     std::vector<Box*> selected;
     boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
-    graph_->foreachBox(append, boost::bind(&Box::isSelected, _1));
+    widget_ctrl_->foreachBox(append, boost::bind(&Box::isSelected, _1));
 
     box_info->clear();
 

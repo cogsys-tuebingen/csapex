@@ -10,16 +10,10 @@
 /// SYSTEM
 #include <QObject>
 #include <QTimer>
-#include <QMenu>
 #include <map>
-#include <deque>
 #include <boost/function.hpp>
 
 namespace csapex {
-
-namespace command {
-}
-
 
 class Graph : public QObject
 {
@@ -34,6 +28,7 @@ class Graph : public QObject
     friend class Template;
     friend class CommandDispatcher;
 
+    friend class WidgetController;
     friend class BoxSelectionManager;
     friend class ConnectionSelectionManager;
 
@@ -43,6 +38,7 @@ public:
 public:
     Graph(Settings &settings);
 
+    // TODO: remove
     Settings& getSettings() const;
 
     virtual ~Graph();
@@ -50,8 +46,6 @@ public:
     void init(CommandDispatcher* dispatcher);
     void stop();
     void setPause(bool pause);
-
-    Graph::Ptr findSubGraph(const UUID& uuid);
 
     Node* findNode(const UUID& uuid);
     Node* findNodeNoThrow(const UUID& uuid);
@@ -80,7 +74,6 @@ public:
     int countNodes();
 
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
-    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
 
 public Q_SLOTS:
     void reset();
@@ -113,13 +106,13 @@ protected:
     Settings& settings_;
 
     std::vector<NodePtr> nodes_;
-    std::vector<Connectable*> connectors_;
     std::vector<Connection::Ptr> connections_;
 
     CommandDispatcher* dispatcher_;
 
     std::map<std::string, int> uuids_;
 
+    // TODO: extract
     QTimer* timer_;
 };
 

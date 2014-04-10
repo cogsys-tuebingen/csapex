@@ -110,6 +110,8 @@ public:
     void setDesigner(Designer* designer);
     void setCommandDispatcher(CommandDispatcher *dispatcher);
 
+    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
+
 public Q_SLOTS:
     void nodeAdded(NodePtr node);
     void nodeRemoved(NodePtr node);

@@ -67,6 +67,27 @@ void WidgetController::nodeRemoved(NodePtr node)
     }
 }
 
+void WidgetController::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred)
+{
+    Q_FOREACH(Node::Ptr n, graph_->nodes_) {
+        Box* b = getBox(n->getUUID());
+        if(pred(b)) {
+            f(b);
+        }
+    }
+}
+
+
+
+/**
+  * BOX SELECTION
+  **/
+
+BoxSelectionManager::BoxSelectionManager(GraphPtr graph, WidgetController *widget_ctrl)
+    : SelectionManager(graph, widget_ctrl)
+{
+
+}
 
 void BoxSelectionManager::moveSelectedBoxes(Box*, const QPoint& delta)
 {
@@ -95,16 +116,6 @@ void BoxSelectionManager::moveSelectedBoxes(Box*, const QPoint& delta)
     }
 
     dispatcher_->execute(meta);
-}
-
-/**
-  * BOX SELECTION
-  **/
-
-BoxSelectionManager::BoxSelectionManager(GraphPtr graph, WidgetController *widget_ctrl)
-    : SelectionManager(graph, widget_ctrl)
-{
-
 }
 
 void BoxSelectionManager::clearSelection()
@@ -229,7 +240,7 @@ void BoxSelectionManager::fillContextMenuForSelection(QMenu *menu, std::map<QAct
         QAction* max = new QAction("maximize all", menu);
         max->setIcon(QIcon(":/maximize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&Graph::foreachBox, graph_.get(), boost::protect(boost::bind(&Box::minimizeBox, _1, false)), pred_selected);
+        handler[max] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::minimizeBox, _1, false)), pred_selected);
         menu->addAction(max);
     }
 
@@ -237,7 +248,7 @@ void BoxSelectionManager::fillContextMenuForSelection(QMenu *menu, std::map<QAct
         QAction* max = new QAction("minimize all", menu);
         max->setIcon(QIcon(":/minimize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&Graph::foreachBox, graph_.get(), boost::protect(boost::bind(&Box::minimizeBox, _1, true)), pred_selected);
+        handler[max] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::minimizeBox, _1, true)), pred_selected);
         menu->addAction(max);
     }
 
@@ -246,13 +257,13 @@ void BoxSelectionManager::fillContextMenuForSelection(QMenu *menu, std::map<QAct
     QAction* term = new QAction("terminate thread", menu);
     term->setIcon(QIcon(":/stop.png"));
     term->setIconVisibleInMenu(true);
-    handler[term] = boost::bind(&Graph::foreachBox, graph_.get(), boost::protect(boost::bind(&Box::killContent, _1)), pred_selected);
+    handler[term] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::killContent, _1)), pred_selected);
     menu->addAction(term);
 
     QAction* prof = new QAction("profiling", menu);
     prof->setIcon(QIcon(":/profiling.png"));
     prof->setIconVisibleInMenu(true);
-    handler[prof] = boost::bind(&Graph::foreachBox, graph_.get(), boost::protect(boost::bind(&Box::showProfiling, _1)), pred_selected);
+    handler[prof] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::showProfiling, _1)), pred_selected);
     menu->addAction(prof);
 
     menu->addSeparator();

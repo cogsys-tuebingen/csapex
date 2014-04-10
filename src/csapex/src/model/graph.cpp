@@ -2,19 +2,16 @@
 #include <csapex/model/graph.h>
 
 /// PROJECT
-#include <csapex/core/settings.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/add_connector.h>
-#include <csapex/command/add_fulcrum.h>
 #include <csapex/command/add_node.h>
 #include <csapex/command/delete_connection.h>
-#include <csapex/command/delete_connector.h>
 #include <csapex/command/delete_fulcrum.h>
-#include <csapex/command/delete_node.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/meta.h>
+#include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connectable.h>
 #include <csapex/model/connector_in.h>
@@ -24,19 +21,9 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/utility/stream_interceptor.h>
-#include <csapex/view/box.h>
-#include <csapex/view/port.h>
-#include "ui_designer.h"
-
 
 /// SYSTEM
 #include <boost/foreach.hpp>
-#include <QResizeEvent>
-#include <QMenu>
-#include <QScrollBar>
-#include <QFileDialog>
-#include <boost/algorithm/string.hpp>
-
 
 using namespace csapex;
 
@@ -122,15 +109,6 @@ void Graph::foreachNode(boost::function<void (Node*)> f, boost::function<bool (N
     Q_FOREACH(Node::Ptr b, nodes_) {
         if(pred(b.get())) {
             f(b.get());
-        }
-    }
-}
-
-void Graph::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred)
-{
-    Q_FOREACH(Node::Ptr b, nodes_) {
-        if(pred(b->getBox())) {
-            f(b->getBox());
         }
     }
 }
@@ -305,17 +283,7 @@ void Graph::reset()
     settings_.setProcessingAllowed(true);
 
     uuids_.clear();
-    connectors_.clear();
     connections_.clear();
-}
-
-Graph::Ptr Graph::findSubGraph(const UUID& uuid)
-{
-    Box* bg = findNode(uuid)->getBox();
-    assert(bg);
-    assert(bg->hasSubGraph());
-
-    return bg->getSubGraph();
 }
 
 Node* Graph::findNode(const UUID& uuid)
