@@ -118,8 +118,8 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
         Overlay* overlay   = new Overlay(graph, &dispatcher, widget_control);
-        DesignBoard* board = new DesignBoard(graph, &dispatcher, drag_io, overlay);
-        Designer* designer = new Designer(graph, &dispatcher, board);
+        DesignBoard* board = new DesignBoard(graph, &dispatcher, widget_control, drag_io, overlay);
+        Designer* designer = new Designer(graph, &dispatcher, widget_control, board);
 
         widget_control->setDesigner(designer);
 

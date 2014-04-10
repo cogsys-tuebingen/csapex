@@ -39,6 +39,7 @@ class Box : public QWidget, public Selectable
     friend class Node;
     friend class command::MoveBox;
     friend class command::AddConnector;
+    friend class BoxSelectionmanager;
 
 public:
     typedef boost::shared_ptr<Box> Ptr;

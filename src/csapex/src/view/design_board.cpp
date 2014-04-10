@@ -15,6 +15,7 @@
 #include <csapex/view/box_dialog.h>
 #include <csapex/view/box.h>
 #include <csapex/view/overlay.h>
+#include <csapex/view/widget_controller.h>
 #include "ui_design_board.h"
 
 /// SYSTEM
@@ -29,8 +30,8 @@
 
 using namespace csapex;
 
-DesignBoard::DesignBoard(Graph::Ptr graph, CommandDispatcher* dispatcher, DragIO& dragio, Overlay* overlay, QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), graph_(graph), dispatcher_(dispatcher), overlay_(overlay), drag_io_(dragio),
+DesignBoard::DesignBoard(Graph::Ptr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, Overlay* overlay, QWidget* parent)
+    : QWidget(parent), ui(new Ui::DesignBoard), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), overlay_(overlay), drag_io_(dragio),
       space_(false), drag_(false), parent_scroll(NULL), initial_pos_x_(0), initial_pos_y_(0)
 {
     ui->setupUi(this);
@@ -138,9 +139,9 @@ void DesignBoard::addBoxEvent(Box *box)
 {
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay_, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), graph_.get(), SLOT(boxMoved(Box*, int, int)));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), &widget_ctrl_->box_selection_, SLOT(boxMoved(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(Box*)), overlay_, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(clicked(Box*)), graph_.get(), SLOT(toggleBoxSelection(Box*)));
+    QObject::connect(box, SIGNAL(clicked(Box*)), &widget_ctrl_->box_selection_, SLOT(toggleBoxSelection(Box*)));
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay_, SLOT(deleteTemporaryConnections()));
     QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
     QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay_, SLOT(deleteTemporaryConnectionsAndRepaint()));
@@ -269,11 +270,11 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     if(e->button() == Qt::LeftButton) {
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            graph_->deselectNodes();
+            widget_ctrl_->box_selection_.deselectNodes();
 
             Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    graph_->selectNode(box->getNode(), true);
+                    widget_ctrl_->box_selection_.selectNode(box->getNode(), true);
                 }
             }
 
@@ -284,7 +285,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     // BOXES
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
     if(!shift) {
-        graph_->deselectNodes();
+        widget_ctrl_->box_selection_.deselectNodes();
     }
     updateCursor();
 }
@@ -402,7 +403,7 @@ void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
     }
 
     /// BOXES
-    graph_->deselectNodes();
+    widget_ctrl_->box_selection_.deselectNodes();
     showContextMenuAddNode(global_pos);
 }
 
@@ -414,15 +415,15 @@ void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
     Graph::Ptr graph = graph_;
 
     if(box != NULL && !box->isSelected()) {
-        graph->deselectNodes();
+        widget_ctrl_->box_selection_.deselectNodes();
         box->setSelected(true);
     }
 
-    if(graph->countSelectedNodes() == 1) {
+    if(widget_ctrl_->box_selection_.countSelectedNodes() == 1) {
         box->fillContextMenu(&menu, handler);
 
     } else {
-        graph->fillContextMenuForSelection(&menu, handler);
+        widget_ctrl_->box_selection_.fillContextMenuForSelection(&menu, handler);
     }
 
     QAction* selectedItem = menu.exec(global_pos);

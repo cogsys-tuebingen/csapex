@@ -31,9 +31,11 @@ class Graph : public QObject
     friend class command::DeleteConnection;
     friend class command::DeleteNode;
     friend class Overlay;
-    friend class WidgetController;
     friend class Template;
     friend class CommandDispatcher;
+
+    friend class BoxSelectionManager;
+    friend class ConnectionSelectionManager;
 
 public:
     typedef boost::shared_ptr<Graph> Ptr;
@@ -58,7 +60,6 @@ public:
 
     Connectable* findConnector(const UUID &uuid);
 
-
     Command::Ptr deleteConnectionByIdCommand(int id);
 
     Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
@@ -76,8 +77,6 @@ public:
 
     Command::Ptr clear();
 
-
-
     int countNodes();
 
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
@@ -92,7 +91,6 @@ public Q_SLOTS:
 Q_SIGNALS:
     void stateChanged();
     void dirtyChanged(bool);
-    void selectionChanged();
 
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
@@ -102,10 +100,6 @@ Q_SIGNALS:
 
     void sig_tick();
 
-private:
-    void deselectConnections();
-    void deselectConnectionById(int id);
-
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addNode(NodePtr node);
     void deleteNode(const UUID &uuid);
@@ -114,34 +108,6 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
     void deleteConnection(Connection::Ptr connection);
 
     void verifyAsync();
-
-    ///
-    /// VIEW DEPENDENT STUFF
-    ///
-public:
-    /*view*/ bool handleConnectionSelection(int id, bool add);
-    /*view*/ Command::Ptr deleteSelectedConnectionsCmd();
-    /*view*/ void fillContextMenuForSelection(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
-    /*view*/ int countSelectedNodes();
-    /*view*/ void selectNode(Node* node, bool add = false);
-    /*view*/ void deselectNodes();
-
-    /*view*/ Command::Ptr deleteSelectedNodesCmd();
-
-    /*view*/ int countSelectedConnections();
-
-    /*view*/ void handleNodeSelection(Node* node, bool add);
-
-public Q_SLOTS:
-    /*view*/ void clearSelection();
-    /*view*/ void selectAll();
-
-    /*view*/ void toggleBoxSelection(Box* box);
-    /*view*/ void boxMoved(Box* box, int dx, int dy);
-
-private:
-    /*view*/ void selectConnectionById(int id, bool add = false);
-    /*view*/ bool isConnectionWithIdSelected(int id);
 
 protected:
     Settings& settings_;

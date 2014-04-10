@@ -24,7 +24,7 @@ class Designer : public QWidget
     friend class DesignerIO;
 
 public:
-    Designer(GraphPtr graph, CommandDispatcher* dispatcher, DesignBoard *designer_board, QWidget* parent = 0);
+    Designer(GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, DesignBoard *designer_board, QWidget* parent = 0);
     virtual ~Designer();
 
     bool eventFilter(QObject* o, QEvent* e);
@@ -57,6 +57,7 @@ private:
 
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;
+    WidgetControllerPtr widget_ctrl_;
 
     bool space_;
     bool drag_;
