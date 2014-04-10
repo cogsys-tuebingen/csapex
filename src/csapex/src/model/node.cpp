@@ -562,12 +562,6 @@ void Node::setBox(Box* box)
     worker_->checkConditions();
 }
 
-Box* Node::getBox() const
-{
-    QMutexLocker lock(&mutex);
-    return box_;
-}
-
 void Node::setSettings(Settings *settings)
 {
     settings_ = settings;

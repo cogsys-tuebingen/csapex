@@ -24,7 +24,7 @@ WidgetController::WidgetController(Graph::Ptr graph)
 
 Box* WidgetController::getBox(const UUID &node_id)
 {
-    return graph_->findNode(node_id)->getBox();
+    return box_map_.at(node_id);
 }
 
 Graph::Ptr WidgetController::getGraph()
