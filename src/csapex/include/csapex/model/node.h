@@ -20,6 +20,8 @@
 #include <QTreeWidgetItem>
 #include <boost/utility.hpp>
 
+Q_DECLARE_METATYPE (std::string)
+
 namespace csapex {
 
 /// FORWARD
@@ -276,6 +278,7 @@ Q_SIGNALS:
     void stateChanged();
     void modelChanged();
     void toggled(bool);
+    void enabled(bool);
     void started();
 
     void connectionInProgress(Connectable*, Connectable*);
@@ -286,7 +289,9 @@ Q_SIGNALS:
     void connectorRemoved(Connectable*);
 
     void connectorEnabled(Connectable*);
-    void connectorDisabled(Connectable*);
+    void connectorDisabled(Connectable*);    
+
+    void nodeError(bool error, const std::string &msg, int level);
 
 protected:
     std::string type_;

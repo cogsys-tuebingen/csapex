@@ -14,9 +14,10 @@ namespace csapex
 class ErrorState
 {
 public:
-    enum ErrorLevel {
-        EL_ERROR, EL_WARNING
-    };
+    typedef int ErrorLevel;
+
+    static const int EL_ERROR = 0;
+    static const int EL_WARNING = 1;
 
 public:
     virtual void setError(bool e, const std::string& msg = "", ErrorLevel level = EL_ERROR);

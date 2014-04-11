@@ -74,7 +74,6 @@ public:
     bool isError() const;
     ErrorState::ErrorLevel errorLevel() const;
     std::string errorMessage() const;
-    void setError(bool e, const std::string& msg, ErrorState::ErrorLevel level = ErrorState::EL_ERROR);
 
     /// UI
     virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
@@ -97,7 +96,6 @@ protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
-    void enabledChange(bool val);
     void updateFlippedSides();
 
 public Q_SLOTS:
@@ -116,7 +114,10 @@ public Q_SLOTS:
     void unregisterEvent(Connectable*);
 
     void nodeStateChanged();
+    void enabledChange(bool val);
 
+    void setError(bool e, const std::string& msg);
+    void setError(bool e, const std::string& msg, int level);
 
 Q_SIGNALS:
     void placed();

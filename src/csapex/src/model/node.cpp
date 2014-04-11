@@ -446,9 +446,7 @@ void Node::enable()
     node_state_->enabled = true;
     enableIO(true);
 
-    if(box_) {
-        box_->enabledChange(node_state_->enabled);
-    }
+    Q_EMIT enabled(true);
 }
 
 void Node::disable(bool d)
@@ -463,9 +461,7 @@ void Node::disable()
     setError(false);
     enableIO(false);
 
-    if(box_) {
-        box_->enabledChange(node_state_->enabled);
-    }
+    Q_EMIT enabled(false);
 }
 
 bool Node::canReceive()
@@ -579,9 +575,8 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
         finishProcessing();
     }
 
-    if(box_) {
-        box_->setError(error, msg, level);
-    }
+    Q_EMIT nodeError(error,msg,level);
+
     if(node_state_->enabled && error && level == EL_ERROR) {
         setIOError(true);
     } else {
