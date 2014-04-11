@@ -69,7 +69,7 @@ void Box::construct()
     ui->input_layout->addSpacerItem(new QSpacerItem(16, 0));
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
-    node_->setBox(this);
+    node_->getNodeWorker()->checkConditions();
 
     ui->enablebtn->setCheckable(node_->canBeDisabled());
 

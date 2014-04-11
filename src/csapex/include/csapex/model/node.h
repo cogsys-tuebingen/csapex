@@ -110,9 +110,6 @@ public:
     void setNodeStateLater(NodeStatePtr state);
     NodeStatePtr getNodeState();
 
-    /// TODO: get rid of this
-    virtual void setBox(Box* box);
-
     void setSettings(Settings* settings);
 
     NodeWorker* getNodeWorker() const;
@@ -301,7 +298,6 @@ protected:
 
 private:
     Settings* settings_;
-    Box* box_;
 
     QThread* private_thread_;
     QMutex worker_mutex_;

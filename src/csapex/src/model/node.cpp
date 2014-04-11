@@ -2,7 +2,7 @@
 #include <csapex/model/node.h>
 
 /// COMPONENT
-#include <csapex/view/box.h>
+#include <csapex/command/meta.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_state.h>
@@ -16,7 +16,7 @@
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
-    : Unique(uuid), icon_(":/plugin.png"), settings_(NULL), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+    : Unique(uuid), icon_(":/plugin.png"), settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
@@ -548,14 +548,6 @@ void Node::eventGuiChanged()
         loaded_state_available_ = false;
         setNodeState(node_state_);
     }
-}
-
-
-void Node::setBox(Box* box)
-{
-    QMutexLocker lock(&mutex);
-    box_ = box;
-    worker_->checkConditions();
 }
 
 void Node::setSettings(Settings *settings)
