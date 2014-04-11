@@ -20,8 +20,6 @@
 #include <QTreeWidgetItem>
 #include <boost/utility.hpp>
 
-Q_DECLARE_METATYPE (std::string)
-
 namespace csapex {
 
 /// FORWARD

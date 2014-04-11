@@ -17,9 +17,9 @@ NodeState::NodeState(Node* parent)
 void NodeState::copyFrom(const NodeState::Ptr& rhs)
 {
     operator =(*rhs);
-    boxed_state = parent->getState();
-    if(rhs->boxed_state) {
-        *boxed_state = *rhs->boxed_state;
+    child_state = parent->getState();
+    if(rhs->child_state) {
+        *child_state = *rhs->child_state;
     }
 }
 
@@ -54,10 +54,10 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(node.FindValue("state")) {
         const YAML::Node& state_map = node["state"];
-        boxed_state = parent->getState();
+        child_state = parent->getState();
 
-        if(boxed_state) {
-            boxed_state->readYaml(state_map);
+        if(child_state) {
+            child_state->readYaml(state_map);
         }
     }
 }
@@ -85,13 +85,13 @@ void NodeState::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << flipped;
 
     if(parent) {
-        boxed_state = parent->getState();
+        child_state = parent->getState();
     }
 
-    if(boxed_state.get()) {
+    if(child_state.get()) {
         out << YAML::Key << "state";
         out << YAML::Value << YAML::BeginMap;
-        boxed_state->writeYaml(out);
+        child_state->writeYaml(out);
         out << YAML::EndMap;
     }
 

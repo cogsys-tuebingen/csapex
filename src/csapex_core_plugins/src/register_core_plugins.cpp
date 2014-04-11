@@ -78,7 +78,7 @@ class RosHandler
                     NodeState::Ptr state(new NodeState(NULL));
                     ImportRos dummy;
                     dummy.getParameter("topic")->set(cmd);
-                    state->boxed_state = dummy.getState();
+                    state->child_state = dummy.getState();
 
                     std::string type("csapex::ImportRos");
                     dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, state)));
@@ -151,7 +151,7 @@ class FileHandler
                 sub_state->last_path_ = files.first().toString();
 
                 NodeState::Ptr state(new NodeState(NULL));
-                state->boxed_state = sub_state;
+                state->child_state = sub_state;
 
                 std::string type("csapex::FileImporter");
                 dispatcher->execute(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, state)));

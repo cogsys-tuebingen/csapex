@@ -288,7 +288,7 @@ NodeState::Ptr Node::getNodeState()
     NodeState::Ptr memento(new NodeState(this));
     *memento = *node_state_;
 
-    memento->boxed_state = getState();
+    memento->child_state = getState();
 
     return memento;
 }
@@ -315,8 +315,8 @@ void Node::setNodeState(NodeState::Ptr memento)
     }
 
     node_state_->parent = this;
-    if(m->boxed_state != NULL) {
-        setState(m->boxed_state);
+    if(m->child_state != NULL) {
+        setState(m->child_state);
     }
 
     Q_EMIT stateChanged();
@@ -388,7 +388,7 @@ void Node::updateParameters()
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
-    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->boxed_state);
+    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
     if(m) {
         for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
             param::Parameter* param = it->second.get();
@@ -400,7 +400,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
         }
     }
 
-    setState(s->boxed_state);
+    setState(s->child_state);
     loaded_state_available_ = true;
 }
 
