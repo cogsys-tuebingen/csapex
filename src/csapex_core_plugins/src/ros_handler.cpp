@@ -44,6 +44,7 @@ void ROSHandler::initHandle(bool try_only)
         checkMasterConnection();
     }
 
+    QMutexLocker lock(&has_connection_mutex);
     if(try_only && has_connection.isRunning()) {
         std::cout << "init handle: still probing master" << std::endl;
         return;
@@ -54,6 +55,8 @@ void ROSHandler::initHandle(bool try_only)
         spinner_.reset(new ros::AsyncSpinner(2));
         spinner_->start();
 
+        lock.unlock();
+
         BOOST_FOREACH (const boost::function<void()>& f, callbacks_) {
             f();
         }
@@ -62,6 +65,7 @@ void ROSHandler::initHandle(bool try_only)
 
 bool ROSHandler::isConnected()
 {
+    QMutexLocker lock(&has_connection_mutex);
     if(has_connection.isRunning()) {
         return false;
     } else {
@@ -93,6 +97,8 @@ void ROSHandler::registerConnectionCallback(boost::function<void ()> f)
 
 void ROSHandler::checkMasterConnection()
 {
+    QMutexLocker lock(&has_connection_mutex);
+
     if(!ros::isInitialized()) {
         int c = 0;
         ros::init(c, (char**) NULL, "csapex");
@@ -110,6 +116,7 @@ bool ROSHandler::waitForConnection()
         checkMasterConnection();
     }
 
+    QMutexLocker lock(&has_connection_mutex);
     has_connection.waitForFinished();
     return has_connection.result();
 }
@@ -119,6 +126,7 @@ void ROSHandler::refresh()
     waitForConnection();
 
     if(nh_) {
+        QMutexLocker lock(&has_connection_mutex);
         // connection was there
         has_connection.waitForFinished();
         if(!has_connection.result()) {
