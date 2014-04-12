@@ -16,6 +16,7 @@
 #include <csapex/view/box.h>
 #include <csapex/view/port.h>
 #include <csapex/core/settings.h>
+#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -54,8 +55,8 @@ std::pair<int,int> rgb2id(QRgb rgb)
 }
 }
 
-Overlay::Overlay(Graph::Ptr graph, CommandDispatcher *dispatcher, QWidget* parent)
-    : QWidget(parent), dispatcher_(dispatcher), graph_(graph), highlight_connection_id_(-1), schema_dirty_(true),
+Overlay::Overlay(Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, QWidget* parent)
+    : QWidget(parent), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), graph_(graph), highlight_connection_id_(-1), schema_dirty_(true),
       drag_connection_(-1), fulcrum_is_hovered_(false), mouse_blocked(false), splicing_requested(false), splicing(false)
 {
     setPalette(Qt::transparent);
@@ -468,7 +469,7 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
         }
 
         bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
-        graph_->handleConnectionSelection(highlight_connection_id_, shift);
+        widget_ctrl_->connection_selection_.handleSelection(highlight_connection_id_, shift);
 
         repaint();
 
@@ -530,7 +531,7 @@ bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
             drag_connection_ = id;
 
             double closest_dist = 15;
-            Q_FOREACH(const Connection::Ptr& connection, graph_->visible_connections) {
+            Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
                 int sub_section = 0;
 
                 Q_FOREACH(const Connection::Fulcrum& fulcrum, connection->getFulcrums()) {
@@ -702,16 +703,19 @@ void Overlay::paintEvent(QPaintEvent*)
         }
     }
 
-    Q_FOREACH(Connection::Ptr connection, graph_->visible_connections) {
+    Q_FOREACH(Connection::Ptr connection, graph_->connections_) {
         drawConnection(*connection);
     }
 
     foreach (Node::Ptr node, graph_->nodes_) {
-        if(!node->getBox()) {
+
+        Box* box = widget_ctrl_->getBox(node->getUUID());
+        if(!box) {
             continue;
         }
+
         if(node->isError()) {
-            QRectF rect(node->getBox()->pos() + QPoint(0, node->getBox()->height() + 8), QSize(node->getBox()->width(), 64));
+            QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
 
             QFont font;
             font.setPixelSize(8);

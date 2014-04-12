@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
+#include <csapex/view/widget_controller.h>
 
 using namespace csapex;
 
@@ -13,19 +14,19 @@ Command::Command()
 {
 }
 
-bool Command::Access::executeCommand(GraphPtr graph, Command::Ptr cmd)
+bool Command::Access::executeCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
 {
-    return Command::executeCommand(graph, cmd);
+    return Command::executeCommand(graph, widget_ctrl, cmd);
 }
 
-bool Command::Access::undoCommand(GraphPtr graph, Command::Ptr cmd)
+bool Command::Access::undoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
 {
-    return Command::undoCommand(graph, cmd);
+    return Command::undoCommand(graph, widget_ctrl, cmd);
 }
 
-bool Command::Access::redoCommand(GraphPtr graph, Command::Ptr cmd)
+bool Command::Access::redoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
 {
-    return Command::redoCommand(graph, cmd);
+    return Command::redoCommand(graph, widget_ctrl, cmd);
 }
 
 void Command::setGraph(Graph::Ptr graph)
@@ -38,17 +39,26 @@ Graph::Ptr Command::getGraph()
     return graph_;
 }
 
-bool Command::executeCommand(GraphPtr graph, Command::Ptr cmd)
+void Command::setWidgetController(WidgetControllerPtr widget_ctrl)
+{
+    widget_ctrl_ = widget_ctrl;
+}
+
+bool Command::executeCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
 {
     cmd->graph_ = graph;
+    cmd->widget_ctrl_ = widget_ctrl;
     assert(cmd->graph_);
+    assert(cmd->widget_ctrl_);
     return cmd->doExecute();
 }
 
-bool Command::undoCommand(GraphPtr graph, Command::Ptr cmd)
+bool Command::undoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
 {
     cmd->graph_ = graph;
+    cmd->widget_ctrl_ = widget_ctrl;
     assert(cmd->graph_);
+    assert(cmd->widget_ctrl_);
     if(!cmd->doUndo()) {
         undo_later.push_back(cmd);
         return false;
@@ -57,13 +67,12 @@ bool Command::undoCommand(GraphPtr graph, Command::Ptr cmd)
     return true;
 }
 
-bool Command::redoCommand(GraphPtr graph, Command::Ptr cmd)
+bool Command::redoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
 {
-    if(graph) {
-        cmd->graph_ = graph;
-    }
-
+    cmd->graph_ = graph;
+    cmd->widget_ctrl_ = widget_ctrl;
     assert(cmd->graph_);
+    assert(cmd->widget_ctrl_);
     return cmd->doRedo();
 }
 

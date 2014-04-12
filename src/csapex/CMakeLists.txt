@@ -128,6 +128,9 @@ set(SRC_APP
     src/model/node_state.cpp
     src/model/node_worker.cpp
     src/model/node_filter_proxy_model.cpp
+    src/model/selection_model.cpp
+    src/model/box_selection_model.cpp
+    src/model/connection_selection_model.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp
@@ -138,6 +141,7 @@ set(SRC_APP
     src/view/selectable.cpp
     src/view/profiling_widget.cpp
     src/view/port.cpp
+    src/view/widget_controller.cpp
 )
 
 #

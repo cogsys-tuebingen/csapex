@@ -108,10 +108,6 @@ public:
     void setNodeStateLater(NodeStatePtr state);
     NodeStatePtr getNodeState();
 
-    /// TODO: get rid of this
-    virtual void setBox(Box* box);
-    Box* getBox() const;//  __attribute__ ((deprecated));
-
     void setSettings(Settings* settings);
 
     NodeWorker* getNodeWorker() const;
@@ -277,6 +273,7 @@ Q_SIGNALS:
     void stateChanged();
     void modelChanged();
     void toggled(bool);
+    void enabled(bool);
     void started();
 
     void connectionInProgress(Connectable*, Connectable*);
@@ -287,7 +284,9 @@ Q_SIGNALS:
     void connectorRemoved(Connectable*);
 
     void connectorEnabled(Connectable*);
-    void connectorDisabled(Connectable*);
+    void connectorDisabled(Connectable*);    
+
+    void nodeError(bool error, const std::string &msg, int level);
 
 protected:
     std::string type_;
@@ -297,7 +296,6 @@ protected:
 
 private:
     Settings* settings_;
-    Box* box_;
 
     QThread* private_thread_;
     QMutex worker_mutex_;

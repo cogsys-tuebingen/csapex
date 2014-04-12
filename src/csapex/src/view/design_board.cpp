@@ -15,6 +15,7 @@
 #include <csapex/view/box_dialog.h>
 #include <csapex/view/box.h>
 #include <csapex/view/overlay.h>
+#include <csapex/view/widget_controller.h>
 #include "ui_design_board.h"
 
 /// SYSTEM
@@ -29,16 +30,16 @@
 
 using namespace csapex;
 
-DesignBoard::DesignBoard(Graph::Ptr graph, CommandDispatcher* dispatcher, DragIO& dragio, QWidget* parent)
-    : QWidget(parent), ui(new Ui::DesignBoard), graph_(graph), dispatcher_(dispatcher), drag_io_(dragio),
+DesignBoard::DesignBoard(Graph::Ptr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, Overlay* overlay, QWidget* parent)
+    : QWidget(parent), ui(new Ui::DesignBoard), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), overlay_(overlay), drag_io_(dragio),
       space_(false), drag_(false), parent_scroll(NULL), initial_pos_x_(0), initial_pos_y_(0)
 {
     ui->setupUi(this);
 
+    overlay_->setParent(this);
+
     QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
     QObject::connect(shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
-
-    overlay = new Overlay(graph, dispatcher, this);
 
     installEventFilter(this);
 
@@ -137,13 +138,13 @@ void DesignBoard::findMinSize(Box* box)
 void DesignBoard::addBoxEvent(Box *box)
 {
     QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), graph_.get(), SLOT(boxMoved(Box*, int, int)));
-    QObject::connect(box, SIGNAL(changed(Box*)), overlay, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(clicked(Box*)), graph_.get(), SLOT(toggleBoxSelection(Box*)));
-    QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay, SLOT(deleteTemporaryConnections()));
-    QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
-    QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay, SLOT(deleteTemporaryConnectionsAndRepaint()));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay_, SLOT(invalidateSchema()));
+    QObject::connect(box, SIGNAL(moved(Box*, int, int)), &widget_ctrl_->box_selection_, SLOT(mimicBoxMovement(Box*, int, int)));
+    QObject::connect(box, SIGNAL(changed(Box*)), overlay_, SLOT(invalidateSchema()));
+    QObject::connect(box, SIGNAL(clicked(Box*)), &widget_ctrl_->box_selection_, SLOT(toggleSelection(Box*)));
+    QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay_, SLOT(deleteTemporaryConnections()));
+    QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
+    QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay_, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(Box*, QPoint)), this, SLOT(showContextMenuEditBox(Box*, QPoint)));
 
@@ -153,7 +154,7 @@ void DesignBoard::addBoxEvent(Box *box)
     box->setCommandDispatcher(dispatcher_);
     box->show();
 
-    overlay->raise();
+    overlay_->raise();
     repaint();
 }
 
@@ -165,8 +166,8 @@ void DesignBoard::removeBoxEvent(Box *box)
 
 void DesignBoard::refresh()
 {
-    overlay->refresh();
-    overlay->raise();
+    overlay_->refresh();
+    overlay_->raise();
 }
 
 void DesignBoard::reset()
@@ -185,7 +186,7 @@ void DesignBoard::setSpace(bool s)
 {
     space_ = s;
 
-    overlay->blockMouse(space_);
+    overlay_->blockMouse(space_);
 
     //    Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
     //        box->setEnabled(!space_);
@@ -194,7 +195,7 @@ void DesignBoard::setSpace(bool s)
 
 void DesignBoard::keyPressEvent(QKeyEvent* e)
 {
-    if(!overlay->keyPressEventHandler(e)) {
+    if(!overlay_->keyPressEventHandler(e)) {
         return;
     }
 
@@ -223,7 +224,7 @@ void DesignBoard::showBoxDialog()
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
-    if(!overlay->keyReleaseEventHandler(e)) {
+    if(!overlay_->keyReleaseEventHandler(e)) {
         return;
     }
 
@@ -242,7 +243,7 @@ void DesignBoard::wheelEvent(QWheelEvent *e)
 void DesignBoard::mousePressEvent(QMouseEvent* e)
 {
     if(!drag_ || !space_) {
-        if(!overlay->mousePressEventHandler(e)) {
+        if(!overlay_->mousePressEventHandler(e)) {
             return;
         }
     }
@@ -259,21 +260,21 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 
     if(e->button() == Qt::LeftButton) {
         drag_ = false;
-        overlay->setSelectionRectangle(QPoint(),QPoint());
+        overlay_->setSelectionRectangle(QPoint(),QPoint());
     }
 
-    if(!overlay->mouseReleaseEventHandler(e)) {
+    if(!overlay_->mouseReleaseEventHandler(e)) {
         return;
     }
 
     if(e->button() == Qt::LeftButton) {
         QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            graph_->deselectNodes();
+            widget_ctrl_->box_selection_.clearSelection();
 
             Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
                 if(selection.contains(box->geometry())) {
-                    graph_->selectNode(box->getNode(), true);
+                    widget_ctrl_->box_selection_.select(box->getNode(), true);
                 }
             }
 
@@ -284,7 +285,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
     // BOXES
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
     if(!shift) {
-        graph_->deselectNodes();
+        widget_ctrl_->box_selection_.clearSelection();
     }
     updateCursor();
 }
@@ -311,12 +312,12 @@ void DesignBoard::mouseMoveEvent(QMouseEvent* e)
         }
     }
 
-    if(!overlay->mouseMoveEventHandler(drag_, e)) {
+    if(!overlay_->mouseMoveEventHandler(drag_, e)) {
         return;
     }
     if(drag_ && !space_) {
-        overlay->setSelectionRectangle(overlay->mapFromGlobal(drag_start_pos_), overlay->mapFromGlobal(e->globalPos()));
-        overlay->repaint();
+        overlay_->setSelectionRectangle(overlay_->mapFromGlobal(drag_start_pos_), overlay_->mapFromGlobal(e->globalPos()));
+        overlay_->repaint();
     }
 }
 
@@ -397,12 +398,12 @@ bool DesignBoard::eventFilter(QObject*, QEvent*)
 
 void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
 {
-    if(overlay->showContextMenu(global_pos)) {
+    if(overlay_->showContextMenu(global_pos)) {
         return;
     }
 
     /// BOXES
-    graph_->deselectNodes();
+    widget_ctrl_->box_selection_.clearSelection();
     showContextMenuAddNode(global_pos);
 }
 
@@ -414,15 +415,15 @@ void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
     Graph::Ptr graph = graph_;
 
     if(box != NULL && !box->isSelected()) {
-        graph->deselectNodes();
+        widget_ctrl_->box_selection_.clearSelection();
         box->setSelected(true);
     }
 
-    if(graph->countSelectedNodes() == 1) {
+    if(widget_ctrl_->box_selection_.countSelected() == 1) {
         box->fillContextMenu(&menu, handler);
 
     } else {
-        graph->fillContextMenuForSelection(&menu, handler);
+        widget_ctrl_->box_selection_.fillContextMenuForSelection(&menu, handler);
     }
 
     QAction* selectedItem = menu.exec(global_pos);
@@ -452,22 +453,22 @@ void DesignBoard::showContextMenuAddNode(const QPoint &global_pos)
 
 void DesignBoard::resizeEvent(QResizeEvent* e)
 {
-    overlay->resize(e->size());
+    overlay_->resize(e->size());
 }
 
 void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
 {
-    drag_io_.dragEnterEvent(this, overlay, e);
+    drag_io_.dragEnterEvent(this, overlay_, e);
 }
 
 void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
 {
-    drag_io_.dragMoveEvent(this, overlay, e);
+    drag_io_.dragMoveEvent(this, overlay_, e);
 }
 
 void DesignBoard::dropEvent(QDropEvent* e)
 {
-    drag_io_.dropEvent(this, overlay, e);
+    drag_io_.dropEvent(this, overlay_, e);
 }
 
 void DesignBoard::dragLeaveEvent(QDragLeaveEvent*)

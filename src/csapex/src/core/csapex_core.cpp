@@ -19,13 +19,16 @@
 using namespace csapex;
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
+Q_DECLARE_METATYPE(std::string)
 
 CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cmd_dispatcher)
     : settings_(settings), graph_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 
-    qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
+    qRegisterMetaType < QSharedPointer<QImage> > ("QSharedPointer<QImage>");
+    qRegisterMetaType < std::string > ("std::string");
+
     ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ();
     StreamInterceptor::instance().start();
 

@@ -39,7 +39,7 @@ bool DeleteConnector::doExecute()
         } else {
             delete_connections = dynamic_cast<ConnectorOut*>(c)->removeAllConnectionsCmd();
         }
-        Command::executeCommand(graph_, delete_connections);
+        Command::executeCommand(graph_, widget_ctrl_, delete_connections);
     }
 
     if(in) {

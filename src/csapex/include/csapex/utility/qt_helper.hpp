@@ -41,26 +41,37 @@ struct QSleepThread : public QThread {
 class QtHelper
 {
 public:
-    static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size = 1) ;
+    static QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size = 1,
+                                 csapex::ContextMenuHandler *context_handler = 0) ;
 
     static QSlider* makeSlider(QBoxLayout* layout, const std::string& name,
-                               int def, int min, int max);
+                               int def, int min, int max,
+                               csapex::ContextMenuHandler *context_handler = 0);
 
 
     static QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name,
-                               int def, int min, int max, int step = 1);
+                                     int def, int min, int max, int step = 1,
+                                     csapex::ContextMenuHandler *context_handler = 0);
 
-    static QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size);
+    static QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string& name,
+                                           double def, double min, double max, double step_size,
+                                           csapex::ContextMenuHandler *context_handler = 0);
 
-    static QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max);
+    static QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name,
+                                         int lower, int upper, int min, int max,
+                                         csapex::ContextMenuHandler *context_handler = 0);
 
-    static QxtDoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout* layout, const std::string& name, double lower, double upper, double min, double max, double step_size);
+    static QxtDoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout* layout, const std::string& name,
+                                                     double lower, double upper, double min, double max, double step_size,
+                                                     csapex::ContextMenuHandler *context_handler = 0);
 
     static QWidget* wrapLayout(QBoxLayout *l, QWidget *parent = 0);
 
-    static QHBoxLayout* wrap(const std::string& label, QWidget* widget, csapex::ContextMenuHandler *context_handler = 0);
+    static QHBoxLayout* wrap(const std::string& label, QWidget* widget,
+                             csapex::ContextMenuHandler *context_handler = 0);
 
-    static QHBoxLayout* wrap(const std::string& label, QLayout* layout, csapex::ContextMenuHandler *context_handler = 0);
+    static QHBoxLayout* wrap(const std::string& label, QLayout* layout,
+                             csapex::ContextMenuHandler *context_handler = 0);
 
     static void clearLayout(QLayout* layout);
 };

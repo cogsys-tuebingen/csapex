@@ -4,6 +4,8 @@
 /// SYSTEM
 #include <stdexcept>
 #include <iostream>
+#include <boost/functional/hash.hpp>
+
 
 using namespace csapex;
 
@@ -92,6 +94,11 @@ const char* UUID::c_str() const
 std::string UUID::getFullName() const
 {
     return representation_;
+}
+
+std::size_t UUID::hash() const
+{
+    return boost::hash<std::string>()(representation_);
 }
 
 std::string UUID::getShortName() const

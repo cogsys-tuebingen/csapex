@@ -39,6 +39,7 @@ class Box : public QWidget, public Selectable
     friend class Node;
     friend class command::MoveBox;
     friend class command::AddConnector;
+    friend class BoxSelectionmanager;
 
 public:
     typedef boost::shared_ptr<Box> Ptr;
@@ -73,7 +74,6 @@ public:
     bool isError() const;
     ErrorState::ErrorLevel errorLevel() const;
     std::string errorMessage() const;
-    void setError(bool e, const std::string& msg, ErrorState::ErrorLevel level = ErrorState::EL_ERROR);
 
     /// UI
     virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
@@ -96,7 +96,6 @@ protected:
     void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
-    void enabledChange(bool val);
     void updateFlippedSides();
 
 public Q_SLOTS:
@@ -115,12 +114,18 @@ public Q_SLOTS:
     void unregisterEvent(Connectable*);
 
     void nodeStateChanged();
+    void enabledChange(bool val);
 
+    void setError(bool e, const std::string& msg);
+    void setError(bool e, const std::string& msg, int level);
 
 Q_SIGNALS:
     void placed();
     void toggled(bool);
+
+    void moveRequest(Box*, QPoint);
     void moved(Box*, int dx, int dy);
+
     void changed(Box*);
     void clicked(Box*);
     void moveSelectionToBox(Box*);

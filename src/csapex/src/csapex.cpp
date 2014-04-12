@@ -15,6 +15,8 @@
 #include <csapex/view/design_board.h>
 #include <csapex/manager/box_manager.h>
 #include <utils_param/parameter_factory.h>
+#include <csapex/view/widget_controller.h>
+#include <csapex/view/overlay.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -96,7 +98,10 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     BoxManager::instance().settings_ = &settings;
 
     Graph::Ptr graph(new Graph(settings));
-    CommandDispatcher dispatcher(graph);
+    WidgetControllerPtr widget_control (new WidgetController(graph));
+
+    CommandDispatcher dispatcher(graph, widget_control);
+
     CsApexCore core(settings, graph, &dispatcher);
 
     if(!headless) {
@@ -111,11 +116,14 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         app.processEvents();
 
-        DragIO drag_io(graph.get(), &dispatcher);
-        DesignBoard* board = new DesignBoard(graph, &dispatcher, drag_io);
-        Designer* designer = new Designer(graph, &dispatcher, board);
+        DragIO drag_io(graph.get(), &dispatcher, widget_control);
+        Overlay* overlay   = new Overlay(graph, &dispatcher, widget_control);
+        DesignBoard* board = new DesignBoard(graph, &dispatcher, widget_control, drag_io, overlay);
+        Designer* designer = new Designer(graph, &dispatcher, widget_control, board);
 
-        CsApexWindow w(core, &dispatcher, graph, designer);
+        widget_control->setDesigner(designer);
+
+        CsApexWindow w(core, &dispatcher, widget_control, graph, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
         w.start();
 

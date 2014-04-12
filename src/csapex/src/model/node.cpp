@@ -2,7 +2,7 @@
 #include <csapex/model/node.h>
 
 /// COMPONENT
-#include <csapex/view/box.h>
+#include <csapex/command/meta.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_state.h>
@@ -16,7 +16,7 @@
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
-    : Unique(uuid), icon_(":/plugin.png"), settings_(NULL), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+    : Unique(uuid), icon_(":/plugin.png"), settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
@@ -288,7 +288,7 @@ NodeState::Ptr Node::getNodeState()
     NodeState::Ptr memento(new NodeState(this));
     *memento = *node_state_;
 
-    memento->boxed_state = getState();
+    memento->child_state = getState();
 
     return memento;
 }
@@ -315,8 +315,8 @@ void Node::setNodeState(NodeState::Ptr memento)
     }
 
     node_state_->parent = this;
-    if(m->boxed_state != NULL) {
-        setState(m->boxed_state);
+    if(m->child_state != NULL) {
+        setState(m->child_state);
     }
 
     Q_EMIT stateChanged();
@@ -388,7 +388,7 @@ void Node::updateParameters()
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
-    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->boxed_state);
+    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
     if(m) {
         for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
             param::Parameter* param = it->second.get();
@@ -400,7 +400,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
         }
     }
 
-    setState(s->boxed_state);
+    setState(s->child_state);
     loaded_state_available_ = true;
 }
 
@@ -446,9 +446,7 @@ void Node::enable()
     node_state_->enabled = true;
     enableIO(true);
 
-    if(box_) {
-        box_->enabledChange(node_state_->enabled);
-    }
+    Q_EMIT enabled(true);
 }
 
 void Node::disable(bool d)
@@ -463,9 +461,7 @@ void Node::disable()
     setError(false);
     enableIO(false);
 
-    if(box_) {
-        box_->enabledChange(node_state_->enabled);
-    }
+    Q_EMIT enabled(false);
 }
 
 bool Node::canReceive()
@@ -554,20 +550,6 @@ void Node::eventGuiChanged()
     }
 }
 
-
-void Node::setBox(Box* box)
-{
-    QMutexLocker lock(&mutex);
-    box_ = box;
-    worker_->checkConditions();
-}
-
-Box* Node::getBox() const
-{
-    QMutexLocker lock(&mutex);
-    return box_;
-}
-
 void Node::setSettings(Settings *settings)
 {
     settings_ = settings;
@@ -585,9 +567,8 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
         finishProcessing();
     }
 
-    if(box_) {
-        box_->setError(error, msg, level);
-    }
+    Q_EMIT nodeError(error,msg,level);
+
     if(node_state_->enabled && error && level == EL_ERROR) {
         setIOError(true);
     } else {

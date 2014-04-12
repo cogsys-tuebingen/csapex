@@ -12,14 +12,15 @@
 #include "ui_designer.h"
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/core/drag_io.h>
+#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <QScrollBar>
 
 using namespace csapex;
 
-Designer::Designer(Graph::Ptr graph, CommandDispatcher *dispatcher, DesignBoard* board, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), graph_(graph), dispatcher_(dispatcher), box_selection_menu(NULL), is_init_(false)
+Designer::Designer(Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignBoard* board, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Designer), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), box_selection_menu(NULL), is_init_(false)
 {
     ui->setupUi(this);
 
@@ -40,11 +41,11 @@ void Designer::deleteSelected()
 {
     command::Meta::Ptr del(new command::Meta("delete selected"));
 
-    if(graph_->countSelectedNodes() != 0) {
-        del->add(graph_->deleteSelectedNodesCmd());
+    if(widget_ctrl_->box_selection_.countSelected() != 0) {
+        del->add(widget_ctrl_->box_selection_.deleteSelectedCommand());
     }
-    if(graph_->countSelectedConnections() != 0) {
-        del->add(graph_->deleteSelectedConnectionsCmd());
+    if(widget_ctrl_->connection_selection_.countSelected() != 0) {
+        del->add(widget_ctrl_->connection_selection_.deleteSelectedCommand());
     }
 
     if(del->commands() != 0) {
@@ -116,7 +117,7 @@ void Designer::updateDebugInfo()
 {
     std::vector<Box*> selected;
     boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
-    graph_->foreachBox(append, boost::bind(&Box::isSelected, _1));
+    widget_ctrl_->foreachBox(append, boost::bind(&Box::isSelected, _1));
 
     box_info->clear();
 
@@ -188,8 +189,6 @@ void Designer::reloadBoxMenues()
     debug_tabs->addTab(box_info, "Box Information");
     debug_tabs->addTab(undo_redo, "Undo/Redo Stack");
     ui->debug->layout()->addWidget(debug_tabs);
-
-    QObject::connect(graph_.get(), SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
 
     designer_board->setFocus();
 }

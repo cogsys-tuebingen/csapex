@@ -69,7 +69,7 @@ void Box::construct()
     ui->input_layout->addSpacerItem(new QSpacerItem(16, 0));
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
-    node_->setBox(this);
+    node_->getNodeWorker()->checkConditions();
 
     ui->enablebtn->setCheckable(node_->canBeDisabled());
 
@@ -100,6 +100,8 @@ void Box::construct()
     QObject::connect(node_.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
     QObject::connect(node_.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(node_.get(), SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
+    QObject::connect(node_.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+    QObject::connect(node_.get(), SIGNAL(nodeError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -192,7 +194,13 @@ std::string Box::errorMessage() const
 {
     return node_->errorMessage();
 }
-void Box::setError(bool e, const std::string &msg, ErrorState::ErrorLevel level)
+
+void Box::setError(bool e, const std::string &msg)
+{
+    setError(e, msg, ErrorState::EL_ERROR);
+}
+
+void Box::setError(bool e, const std::string &msg, int level)
 {
     setToolTip(msg.c_str());
     node_->setErrorSilent(e, msg, level);
@@ -476,7 +484,9 @@ void Box::startDrag(QPoint offset)
 
     QPoint delta = end_pos - start_pos;
     // TODO: ugly
-    node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
+
+    Q_EMIT moveRequest(this,delta);
+    //node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
 }
 
 void Box::deleteBox()
