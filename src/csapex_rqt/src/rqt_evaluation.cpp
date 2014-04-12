@@ -32,7 +32,7 @@ CsApex::CsApex()
       drag_io_(graph_.get(), dispatcher_.get(), widget_controller_),
       overlay_(new Overlay(graph_, dispatcher_.get(), widget_controller_)),
       board_ (new DesignBoard(graph_, dispatcher_.get(), widget_controller_, drag_io_, overlay_)),
-      designer_(new Designer(graph_, dispatcher_.get(), widget_controller_, board_))
+      designer_(new Designer(settings_, graph_, dispatcher_.get(), widget_controller_, board_))
 {
     BoxManager::instance().settings_ = &settings_;
 

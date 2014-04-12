@@ -127,6 +127,7 @@ Settings &CsApexCore::getSettings() const
 
 void CsApexCore::settingsChanged()
 {
+    settings_.save();
     Q_EMIT configChanged();
 }
 

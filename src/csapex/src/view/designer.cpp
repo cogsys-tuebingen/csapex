@@ -2,25 +2,27 @@
 #include <csapex/view/designer.h>
 
 /// COMPONENT
-#include <csapex/model/node.h>
+#include <csapex/command/dispatcher.h>
+#include <csapex/core/drag_io.h>
+#include <csapex/core/settings.h>
+#include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/view/box.h>
-#include <csapex/command/dispatcher.h>
-#include <csapex/view/design_board.h>
-#include <csapex/manager/box_manager.h>
-#include "ui_designer.h"
+#include <csapex/model/node.h>
 #include <csapex/utility/qt_helper.hpp>
-#include <csapex/core/drag_io.h>
+#include <csapex/view/box.h>
+#include <csapex/view/design_board.h>
 #include <csapex/view/widget_controller.h>
+#include "ui_designer.h"
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <QScrollBar>
 
 using namespace csapex;
 
-Designer::Designer(Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignBoard* board, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), box_selection_menu(NULL), is_init_(false)
+Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignBoard* board, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Designer), settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), box_selection_menu(NULL), is_init_(false)
 {
     ui->setupUi(this);
 
@@ -29,6 +31,14 @@ Designer::Designer(Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetContro
 
     designer_board = board;
     ui->scrollArea->setWidget(designer_board);
+
+    if(settings_.knows("grid")) {
+        enableGrid(settings_.get<bool>("grid"));
+    }
+
+    if(settings_.knows("grid-lock")) {
+        lockToGrid(settings_.get<bool>("grid-lock"));
+    }
 
     QObject::connect(dispatcher, SIGNAL(stateChanged()), this, SLOT(updateUndoInfo()));
 }
@@ -193,12 +203,37 @@ void Designer::reloadBoxMenues()
     designer_board->setFocus();
 }
 
+bool Designer::isGridEnabled() const
+{
+    return settings_.get<bool>("grid", false);
+}
+
+bool Designer::isGridLockEnabled() const
+{
+    return settings_.get<bool>("grid-lock", false);
+}
+
 void Designer::enableGrid(bool grid)
 {
+    if(!settings_.knows("grid")) {
+        settings_.add(param::ParameterFactory::declareBool("grid", grid));
+    }
+
+    settings_.set("grid", grid);
+
     designer_board->enableGrid(grid);
+    Q_EMIT gridEnabled(grid);
+
 }
 
 void Designer::lockToGrid(bool lock)
 {
+    if(!settings_.knows("grid-lock")) {
+        settings_.add(param::ParameterFactory::declareBool("grid-lock", lock));
+    }
+
+    settings_.set("grid-lock", lock);
+
     DragIO::lock = lock;
+    Q_EMIT gridLockEnabled(lock);
 }

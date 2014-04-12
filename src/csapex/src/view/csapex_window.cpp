@@ -55,6 +55,9 @@ void CsApexWindow::construct()
 
     Graph* graph = graph_.get();
 
+    ui->actionGrid->setChecked(designer_->isGridEnabled());
+    ui->actionLock_to_Grid->setChecked(designer_->isGridLockEnabled());
+
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
     QObject::connect(ui->actionSaveAsCopy, SIGNAL(triggered()), this,  SLOT(saveAsCopy()));
@@ -67,7 +70,9 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
+    QObject::connect(designer_, SIGNAL(gridEnabled(bool)), ui->actionGrid, SLOT(setChecked(bool)));
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), designer_,  SLOT(lockToGrid(bool)));
+    QObject::connect(designer_, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
     QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
     QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));

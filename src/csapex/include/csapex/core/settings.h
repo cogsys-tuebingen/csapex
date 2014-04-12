@@ -14,6 +14,7 @@ namespace csapex
 class Settings
 {
 public:
+    static const std::string settings_file;
     static const std::string config_extension;
     static const std::string template_extension;
     static const std::string default_config;
@@ -38,14 +39,28 @@ public:
     bool isProcessingAllowed() const;
     void setProcessingAllowed(bool processing);
 
+    bool knows(const std::string& name) const;
+
     template <typename T>
     T get(const std::string& name) const
     {
-        try {
-            return settings_.at(name)->as<T>();
-        } catch(const std::out_of_range& e) {
+        std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        if(pos == settings_.end()) {
             throw std::runtime_error(std::string("settings.get: unknown parameter '") + name + "'");
         }
+
+        return pos->second->as<T>();
+    }
+
+    template <typename T>
+    T get(const std::string& name, T def) const
+    {
+        std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        if(pos == settings_.end()) {
+            return def;
+        }
+
+        return pos->second->as<T>();
     }
 
     void add(param::Parameter::Ptr p);
@@ -53,16 +68,17 @@ public:
     template <typename T>
     void set(const std::string& name, const T& val) const
     {
-        try {
-            settings_.at(name)->set<T>(val);
-            settingsChanged();
-
-        } catch(const std::out_of_range& e) {
+        std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        if(pos == settings_.end()) {
             throw std::runtime_error(std::string("settings.set: unknown parameter '") + name + "'");
         }
+
+        pos->second->set<T>(val);
+        settingsChanged();
     }
 
-
+    void save();
+    void load();
 
 public:
     boost::signals2::signal<void()> settingsChanged;

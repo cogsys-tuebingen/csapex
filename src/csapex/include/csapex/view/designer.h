@@ -24,7 +24,7 @@ class Designer : public QWidget
     friend class DesignerIO;
 
 public:
-    Designer(GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, DesignBoard *designer_board, QWidget* parent = 0);
+    Designer(Settings& settings, GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, DesignBoard *designer_board, QWidget* parent = 0);
     virtual ~Designer();
 
     bool eventFilter(QObject* o, QEvent* e);
@@ -36,6 +36,13 @@ public:
     void updateCursor();
 
     void setView(int x, int y);
+
+    bool isGridEnabled() const;
+    bool isGridLockEnabled() const;
+
+Q_SIGNALS:
+    void gridEnabled(bool);
+    void gridLockEnabled(bool);
 
 public Q_SLOTS:
     void addBox(Box* box);
@@ -55,6 +62,7 @@ private:
     Ui::Designer* ui;
     DesignBoard* designer_board;
 
+    Settings& settings_;
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;
