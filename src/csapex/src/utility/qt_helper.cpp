@@ -210,10 +210,8 @@ QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const st
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     QxtDoubleSpanSlider* slider = new QxtDoubleSpanSlider(Qt::Horizontal, step_size);
-    slider->setDoubleMinimum(min);
-    slider->setDoubleMaximum(max);
-    slider->setUpperDoubleValue(upper);
-    slider->setLowerDoubleValue(lower);
+    slider->setDoubleRange(min, max);
+    slider->setSpan(lower, upper);
 
     QWrapper::QDoubleSpinBoxExt* displayLower = new QWrapper::QDoubleSpinBoxExt;
     displayLower->setRange(min, max);
@@ -231,6 +229,7 @@ QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const st
     layout->addLayout(internal_layout);
 
     QObject::connect(slider,        SIGNAL(rangeChanged(double,double)),  displayUpper,   SLOT(setRange(double,double)));
+    QObject::connect(slider,        SIGNAL(rangeChanged(double,double)),  displayLower,   SLOT(setRange(double,double)));
     QObject::connect(slider,        SIGNAL(lowerValueChanged(double)), displayLower,   SLOT(setValue(double)));
     QObject::connect(slider,        SIGNAL(upperValueChanged(double)), displayUpper,   SLOT(setValue(double)));
     QObject::connect(displayLower,  SIGNAL(valueChanged(double)),      slider,         SLOT(setLowerDoubleValue(double)));

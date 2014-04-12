@@ -47,11 +47,9 @@ void PassThrough::updateBorders()
     param::IntervalParameter::Ptr interv = getParameter<param::IntervalParameter>("interval");
 
     if(field == "x" || field == "y" || field == "z") {
-        interv->setMin(-10.0);
-        interv->setMax(10.0);
+        interv->setInterval(-10.0, 10.0);
     } else {
-        interv->setMin(0.0);
-        interv->setMax(255.0);
+        interv->setInterval(0.0, 255.0);
     }
 }
 
