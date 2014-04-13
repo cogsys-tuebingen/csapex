@@ -38,7 +38,6 @@ public:
 
 public:
     void setPort(Port* port);
-    Port* getPort() const;
 
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);

@@ -40,8 +40,8 @@ void BoxSelectionModel::moveSelectedBoxes(Box*, const QPoint& delta)
     }
 
     Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
-        Port* fromp = connection->from()->getPort();
-        Port* top = connection->to()->getPort();
+        Port* fromp = widget_ctrl_->getPort(connection->from());
+        Port* top = widget_ctrl_->getPort(connection->to());
         if(!fromp || !top) {
             continue;
         }
@@ -215,8 +215,8 @@ void BoxSelectionModel::mimicBoxMovement(Box *box, int dx, int dy)
             }
         }
         Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
-            Port* fromp = connection->from()->getPort();
-            Port* top = connection->to()->getPort();
+            Port* fromp = widget_ctrl_->getPort(connection->from());
+            Port* top = widget_ctrl_->getPort(connection->to());
             if(!fromp || !top) {
                 continue;
             }

@@ -182,6 +182,16 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
     menu->addAction(del);
 }
 
+QBoxLayout* Box::getInputLayout()
+{
+    return ui->input_layout;
+}
+
+QBoxLayout* Box::getOutputLayout()
+{
+    return ui->output_layout;
+}
+
 bool Box::isError() const
 {
     return node_->isError();
@@ -241,7 +251,7 @@ void Box::unregisterEvent(Connectable*)
 void Box::registerInputEvent(ConnectorIn* in)
 {
     in->setParent(NULL);
-    ui->input_layout->addWidget(new Port(getCommandDispatcher(), in));
+    //ui->input_layout->addWidget(new Port(getCommandDispatcher(), in));
 
     Q_EMIT changed(this);
 }
@@ -251,9 +261,9 @@ void Box::registerOutputEvent(ConnectorOut* out)
     assert(out);
 
     out->setParent(NULL);
-    assert(ui);
-    assert(ui->output_layout);
-    ui->output_layout->addWidget(new Port(getCommandDispatcher(), out));
+    //assert(ui);
+    //assert(ui->output_layout);
+    //ui->output_layout->addWidget(new Port(getCommandDispatcher(), out));
 
     Q_EMIT changed(this);
 }
@@ -409,36 +419,38 @@ void Box::triggerPlaced()
 
 void Box::selectEvent()
 {
-    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        Port* p = i->getPort();
-        if(p) {
-            p->setSelected(true);
-        }
-    }
-    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        Port* p = i->getPort();
-        if(p) {
-            p->setSelected(true);
-        }
-    }
+//#error TODO: make this into a signal, connect port via signal!
+//    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
+//        Port* p = i->getPort();
+//        if(p) {
+//            p->setSelected(true);
+//        }
+//    }
+//    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
+//        Port* p = i->getPort();
+//        if(p) {
+//            p->setSelected(true);
+//        }
+//    }
+
     ui->boxframe->setProperty("focused",true);
     refreshStylesheet();
 }
 
 void Box::deselectEvent()
 {
-    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        Port* p = i->getPort();
-        if(p) {
-            p->setSelected(false);
-        }
-    }
-    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        Port* p = i->getPort();
-        if(p) {
-            p->setSelected(false);
-        }
-    }
+//    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
+//        Port* p = i->getPort();
+//        if(p) {
+//            p->setSelected(false);
+//        }
+//    }
+//    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
+//        Port* p = i->getPort();
+//        if(p) {
+//            p->setSelected(false);
+//        }
+//    }
     ui->boxframe->setProperty("focused",false);
     refreshStylesheet();
 }
@@ -541,23 +553,24 @@ void Box::flipSides()
 
 void Box::updateFlippedSides()
 {
-    const bool& flipped = node_->node_state_->flipped;
+    const bool& flip = node_->node_state_->flipped;
 
-    ui->boxframe->setLayoutDirection(flipped ? Qt::RightToLeft : Qt::LeftToRight);
+    ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
-    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        Port* p = i->getPort();
-        if(p) {
-            p->setFlipped(flipped);
-        }
-    }
-    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        Port* p = i->getPort();
-        if(p) {
-            p->setFlipped(flipped);
-        }
-    }
+    Q_EMIT flipped(flip);
+//    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
+//        Port* p = i->getPort();
+//        if(p) {
+//            p->setFlipped(flip);
+//        }
+//    }
+//    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
+//        Port* p = i->getPort();
+//        if(p) {
+//            p->setFlipped(flip);
+//        }
+//    }
 }
 
 bool Box::isMinimizedSize() const

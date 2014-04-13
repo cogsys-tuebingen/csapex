@@ -16,7 +16,7 @@
 #include <QMenu>
 #include <QMutex>
 #include <QWidget>
-#include <yaml-cpp/yaml.h>
+#include <QBoxLayout>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -78,6 +78,9 @@ public:
     /// UI
     virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
 
+    QBoxLayout* getInputLayout();
+    QBoxLayout* getOutputLayout();
+
     /// UI CALLBACKS
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
@@ -122,6 +125,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void placed();
     void toggled(bool);
+    void flipped(bool);
 
     void moveRequest(Box*, QPoint);
     void moved(Box*, int dx, int dy);

@@ -138,7 +138,7 @@ void Overlay::addTemporaryConnection(Connectable *from, Connectable *to)
 
     TempConnection temp;
     temp.from = from;
-    temp.to = to->getPort()->centerPoint();
+    temp.to = widget_ctrl_->getPort(to)->centerPoint();
 
     temp_.push_back(temp);
 }
@@ -163,12 +163,15 @@ void Overlay::drawConnection(Connection& connection)
     ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
     ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
 
-    if(!from->getPort() || !to->getPort()) {
+    Port* fromp = widget_ctrl_->getPort(from);
+    Port* top = widget_ctrl_->getPort(to);
+
+    if(!fromp || !top) {
         return;
     }
 
-    QPoint p1 = from->getPort()->centerPoint();
-    QPoint p2 = to->getPort()->centerPoint();
+    QPoint p1 = fromp->centerPoint();
+    QPoint p2 = top->centerPoint();
 
     int id = connection.id();
 
@@ -177,14 +180,14 @@ void Overlay::drawConnection(Connection& connection)
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.selected = connection.isSelected();
-    ccs.disabled = (!from->getPort()->isEnabled() || !to->getPort()->isEnabled());
+    ccs.disabled = (!fromp->isEnabled() || !top->isEnabled());
     ccs.async = from->isAsync() || to->isAsync();
     ccs.minimized_from = from->isMinimizedSize();
     ccs.minimized_to = to->isMinimizedSize();
 
     drawConnection(p1, p2, id,
-                   from->getPort()->isFlipped() ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
-                   to->getPort()->isFlipped() ? Connection::Fulcrum::OUT : Connection::Fulcrum::IN);
+                   fromp->isFlipped() ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
+                   top->isFlipped() ? Connection::Fulcrum::OUT : Connection::Fulcrum::IN);
 
     int f = connection.activity();
 
@@ -353,7 +356,7 @@ QPen Overlay::makeLinePen(const QPoint& from, const QPoint& to)
 void Overlay::drawPort(Port *p)
 {
     Connectable* c = p->getAdaptee();
-    bool right = c->isOutput() ^ c->getPort()->isFlipped();
+    bool right = c->isOutput() ^ p->isFlipped();
 
     if(!c->isMinimizedSize()) {
         int font_size = 10;
@@ -375,8 +378,7 @@ void Overlay::drawPort(Port *p)
         int dx = 160;
         int dy = lines * metrics.height();
 
-        Port* port = c->getPort();
-        QRectF rect(port->centerPoint() + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
+        QRectF rect(p->centerPoint() + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
 
         QTextOption opt(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
         QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
@@ -389,11 +391,12 @@ void Overlay::drawPort(Port *p)
 
 void Overlay::drawActivity(int life, Connectable* c)
 {
-    if(c->getPort()->isEnabled() && life > 0) {
+    Port* port = widget_ctrl_->getPort(c);
+    if(port && life > 0) {
         int r = std::min(Settings::activity_marker_max_lifetime_, life);
         double f = r / static_cast<double> (Settings::activity_marker_max_lifetime_);
 
-        int min = c->getPort()->width() / 2 - 2;
+        int min = port->width() / 2 - 2;
         int max = min * 1.2;
         double w = min + f * (max - min);
 
@@ -401,7 +404,7 @@ void Overlay::drawActivity(int life, Connectable* c)
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
         painter->setPen(QPen(color, w));
-        painter->drawEllipse(QPointF(c->getPort()->centerPoint()), w, w);
+        painter->drawEllipse(QPointF(port->centerPoint()), w, w);
     }
 }
 
@@ -689,14 +692,15 @@ void Overlay::paintEvent(QPaintEvent*)
             ccs = CurrentConnectionState();
             ccs.selected = true;
 
-            bool flipped = temp.from->getPort()->isFlipped();
+            Port* fromp = widget_ctrl_->getPort(temp.from);
+            bool flipped = fromp->isFlipped();
 
             if(temp.from->isInput()) {
-                drawConnection(temp.to, temp.from->getPort()->centerPoint(), -1,
+                drawConnection(temp.to, fromp->centerPoint(), -1,
                                flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
                                Connection::Fulcrum::HANDLE);
             } else {
-                drawConnection(temp.from->getPort()->centerPoint(), temp.to, -1,
+                drawConnection(fromp->centerPoint(), temp.to, -1,
                                flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
                                Connection::Fulcrum::HANDLE);
             }
@@ -727,7 +731,7 @@ void Overlay::paintEvent(QPaintEvent*)
         }
 
         for(int id = 0; id < node->countInputs(); ++id) {
-            Port* p = node->getInput(id)->getPort();
+            Port* p = widget_ctrl_->getPort(node->getInput(id));
             if(p) {
                 drawPort(p);
             }
@@ -735,9 +739,9 @@ void Overlay::paintEvent(QPaintEvent*)
         for(int id = 0; id < node->countOutputs(); ++id) {
             ConnectorOut* o = node->getOutput(id);
             assert(o->guard_ == 0xDEADBEEF);
-            Port* p = o->getPort();
-            assert(p->guard_ == 0xDEADBEEF);
+            Port* p = widget_ctrl_->getPort(o);
             if(p) {
+                assert(p->guard_ == 0xDEADBEEF);
                 drawPort(p);
             }
         }

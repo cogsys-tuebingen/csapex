@@ -54,6 +54,8 @@ public:
     bool contains(const std::string& sub) const;
     UUID replace(const std::string& needle, const UUID& replacement) const;
 
+    UUID parentUUID() const;
+
     void split(const std::string& separator, UUID& l, UUID& r) const;
 
     operator std::string() const;

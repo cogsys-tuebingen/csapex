@@ -135,12 +135,6 @@ void Connectable::setPort(Port *port)
     port_->setMinimizedSize(minimized_);
 }
 
-Port* Connectable::getPort() const
-{
-    assert(port_ == NULL || port_->guard_ == 0xDEADBEEF);
-    return port_;
-}
-
 CommandDispatcher* Connectable::getCommandDispatcher() const
 {
     return dispatcher_;

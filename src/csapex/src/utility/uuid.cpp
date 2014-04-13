@@ -120,6 +120,15 @@ UUID UUID::replace(const std::string &needle, const UUID &replacement) const
     return UUID::make(tmp);
 }
 
+UUID UUID::parentUUID() const
+{
+    UUID l = UUID::NONE;
+    UUID r = UUID::NONE;
+    split(UUID::namespace_separator, l, r);
+
+    return l;
+}
+
 void UUID::split(const std::string &separator, UUID &l, UUID &r) const
 {
     split_first(representation_, separator, l.representation_, r.representation_);

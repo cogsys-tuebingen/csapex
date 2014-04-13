@@ -22,6 +22,8 @@ void Selectable::setSelected(bool selected)
     } else {
         deselectEvent();
     }
+
+    selection(selected_);
 }
 
 void Selectable::selectEvent()

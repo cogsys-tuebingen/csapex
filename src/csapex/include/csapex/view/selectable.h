@@ -1,10 +1,14 @@
 #ifndef SELECTABLE_H
 #define SELECTABLE_H
 
+/// SYSTEM
+#include <boost/signals2.hpp>
+
 namespace csapex
 {
 
 class Selectable {
+
 
 protected:
     Selectable();
@@ -16,6 +20,10 @@ public:
     virtual void selectEvent();
     virtual void deselectEvent();
 
+public:
+    boost::signals2::signal<void(bool)> selection;
+
+private:
     bool selected_;
 };
 

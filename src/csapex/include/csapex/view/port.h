@@ -26,11 +26,8 @@ public:
         return QString("Port");
     }
 
-    void setMinimizedSize(bool mini);
     bool isMinimizedSize() const;
-
     bool isFlipped() const;
-    void setFlipped(bool flipped);
 
     void setPortProperty(const std::string& name, bool b);
 
@@ -53,6 +50,10 @@ public:
     Connectable* getAdaptee() const;
 
     void refreshStylesheet();
+
+public Q_SLOTS:
+    void setMinimizedSize(bool mini);
+    void setFlipped(bool flipped);
 
 protected:
     void createToolTip();

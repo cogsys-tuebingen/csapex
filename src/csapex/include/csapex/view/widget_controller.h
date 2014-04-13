@@ -29,6 +29,9 @@ public:
 
     Box* getBox(const UUID& node_id);
 
+    Port* getPort(const UUID& connector_id);
+    Port* getPort(const Connectable* connector_id);
+
     GraphPtr getGraph();
 
     void setDesigner(Designer* designer);
@@ -39,6 +42,9 @@ public:
 public Q_SLOTS:
     void nodeAdded(NodePtr node);
     void nodeRemoved(NodePtr node);
+
+    void connectorAdded(Connectable *connector);
+    void connectorRemoved(Connectable *connector);
 
 private:
     GraphPtr graph_;
@@ -51,6 +57,7 @@ public:
 private:
     Designer* designer_;
     boost::unordered_map<UUID, Box*, UUID::Hasher> box_map_;
+    boost::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 };
 
 }
