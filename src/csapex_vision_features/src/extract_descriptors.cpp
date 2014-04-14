@@ -224,10 +224,10 @@ void ExtractDescriptors::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "params" << YAML::Value << params;
 }
 void ExtractDescriptors::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("params")) {
+    if(exists(node, "params")) {
         node["params"] >> params;
     }
-    if(node.FindValue("des")) {
+    if(exists(node, "des")) {
         node["des"] >> des;
     }
 }

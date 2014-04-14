@@ -179,12 +179,12 @@ void CsApexCore::load(const std::string &file)
     GraphIO graphio(graph_);
 
     {
+        YAML::Node doc;
+
         std::ifstream ifs(file.c_str());
         YAML::Parser parser(ifs);
 
-        YAML::Node doc;
-
-        if(!parser.GetNextDocument(doc)) {
+        if(!getNextDocument(parser, doc)) {
             std::cerr << "cannot read the config" << std::endl;
             return;
         }
@@ -200,7 +200,7 @@ void CsApexCore::load(const std::string &file)
 
         YAML::Node doc;
 
-        if(!parser.GetNextDocument(doc)) {
+        if(!getNextDocument(parser, doc)) {
             std::cerr << "cannot read the config" << std::endl;
             return;
         }

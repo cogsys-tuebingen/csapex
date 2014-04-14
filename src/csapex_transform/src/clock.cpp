@@ -98,7 +98,7 @@ void Clock::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "use_ros_time" << YAML::Value << use_ros_time;
 }
 void Clock::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("use_ros_time")) {
+    if(exists(node, "use_ros_time")) {
         node["use_ros_time"] >> use_ros_time;
     }
 }

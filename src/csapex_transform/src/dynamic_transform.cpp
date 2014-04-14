@@ -248,10 +248,10 @@ void DynamicTransform::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "to" << YAML::Value << to_;
 }
 void DynamicTransform::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("from")) {
+    if(exists(node, "from")) {
         node["from"] >> from_;
     }
-    if(node.FindValue("to")) {
+    if(exists(node, "to")) {
         node["to"] >> to_;
     }
 }

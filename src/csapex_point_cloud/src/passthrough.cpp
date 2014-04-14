@@ -195,13 +195,13 @@ void PassThrough::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "field" << YAML::Value << field;
 }
 void PassThrough::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("dim")) {
+    if(exists(node, "dim")) {
         const YAML::Node& seq = node["dim"];
         assert(seq.Type() == YAML::NodeType::Sequence);
         seq[0] >> min_;
         seq[1] >> max_;
     }
-    if(node.FindValue("field")) {
+    if(exists(node, "field")) {
         node["field"] >> field;
     }
 }

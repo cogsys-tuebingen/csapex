@@ -240,10 +240,10 @@ void ExtractKeypoints::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "params" << YAML::Value << params;
 }
 void ExtractKeypoints::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("params")) {
+    if(exists(node, "params")) {
         node["params"] >> params;
     }
-    if(node.FindValue("key")) {
+    if(exists(node, "key")) {
         node["key"] >> key;
     }
 }

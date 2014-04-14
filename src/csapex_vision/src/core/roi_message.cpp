@@ -19,7 +19,7 @@ void RoiMessage::writeYaml(YAML::Emitter &yaml)
 
 void RoiMessage::readYaml(const YAML::Node &node)
 {
-    if(node.FindValue("value")) {
+    if(exists(node, "value")) {
         const YAML::Node& n = node["value"];
         assert(n.Type() == YAML::NodeType::Sequence);
 

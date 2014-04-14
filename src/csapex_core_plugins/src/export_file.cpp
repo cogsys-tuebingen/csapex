@@ -120,7 +120,7 @@ void ExportFile::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "path" << YAML::Value << path_;
 }
 void ExportFile::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("path")) {
+    if(exists(node, "path")) {
         node["path"] >> path_;
     }
 }
