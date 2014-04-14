@@ -16,7 +16,11 @@ TextDisplay::TextDisplay()
 {
     addTag(Tag::get("Output"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/pencil.png"));
+}
+
+QIcon TextDisplay::getIcon() const
+{
+    return QIcon(":/pencil.png");
 }
 
 void TextDisplay::fill(QBoxLayout *layout)

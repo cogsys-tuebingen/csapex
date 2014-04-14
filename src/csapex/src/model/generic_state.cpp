@@ -11,7 +11,7 @@ void GenericState::writeYaml(YAML::Emitter& out) const {
 }
 
 void GenericState::readYaml(const YAML::Node& node) {
-    if(node.FindValue("params")) {
+    if(exists(node, "params")) {
         node["params"] >> params;
     }
 }

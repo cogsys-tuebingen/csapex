@@ -39,7 +39,6 @@ void GlobalOptionPanel::State::writeYaml(YAML::Emitter &out) const
 GlobalOptionPanel::GlobalOptionPanel()
     : state(this)
 {
-    setIcon(QIcon(":/wrench.png"));
     addTag(Tag::get("General"));
 }
 

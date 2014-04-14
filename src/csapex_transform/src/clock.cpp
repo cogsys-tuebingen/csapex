@@ -18,7 +18,7 @@ CSAPEX_REGISTER_CLASS(csapex::Clock, csapex::Node)
 using namespace csapex;
 
 Clock::Clock()
-    : time_type_(NULL)
+    : time_type_(NULL), time_label_(NULL)
 {
     addTag(Tag::get("Time"));
 }
@@ -35,8 +35,9 @@ void Clock::tick()
         time->value = ros::Time(0);
     }
 
-    time_label_->setText(boost::posix_time::to_simple_string(time->value.toBoost()).c_str());
-
+    if(time_label_) {
+        time_label_->setText(boost::posix_time::to_simple_string(time->value.toBoost()).c_str());
+    }
     output_->publish(time);
 }
 
@@ -45,12 +46,15 @@ void Clock::process()
 
 }
 
-void Clock::fill(QBoxLayout* layout)
+void Clock::setup()
 {
     setSynchronizedInputs(true);
 
     output_ = addOutput<connection_types::TimeStampMessage>("Time");
+}
 
+void Clock::fill(QBoxLayout* layout)
+{
     time_type_ = new QPushButton;
     time_type_->setCheckable(true);
     QObject::connect(time_type_, SIGNAL(clicked()), this, SLOT(update()));
@@ -61,7 +65,6 @@ void Clock::fill(QBoxLayout* layout)
 
     update();
 }
-
 
 void Clock::update()
 {
@@ -95,7 +98,7 @@ void Clock::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "use_ros_time" << YAML::Value << use_ros_time;
 }
 void Clock::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("use_ros_time")) {
+    if(exists(node, "use_ros_time")) {
         node["use_ros_time"] >> use_ros_time;
     }
 }

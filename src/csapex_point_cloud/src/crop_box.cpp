@@ -138,7 +138,7 @@ void CropBox::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "dim" << YAML::Value << YAML::Flow << YAML::BeginSeq << x_ << y_ << z_ << dx_ << dy_ << dz_ << YAML::EndSeq;
 }
 void CropBox::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("dim")) {
+    if(exists(node, "dim")) {
         const YAML::Node& seq = node["dim"];
         assert(seq.Type() == YAML::NodeType::Sequence);
         seq[0] >> x_;

@@ -44,11 +44,20 @@ public:
         waitForMessage();
 
         QMutexLocker lock(&io_mutex);
+
+        if(!message_) {
+            std::stringstream e;
+            e << "message in connector " << getUUID().getFullName() << " is empty!";
+            throw std::runtime_error(e.str());
+        }
+
         typename R::Ptr result = boost::dynamic_pointer_cast<R> (message_);
         if(result) {
             return result;
         } else {
-            throw std::runtime_error("cannot cast message");
+            std::stringstream e;
+            e << "cannot cast message from " << message_->toType()->name() << " to " << type2name(typeid(R));
+            throw std::runtime_error(e.str());
         }
     }
     template <typename R>

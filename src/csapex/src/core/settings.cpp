@@ -4,6 +4,13 @@
 /// SYSTEM
 #include <pwd.h>
 #include <boost/filesystem.hpp>
+#include <boost/version.hpp>
+
+#if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
+namespace bf3 = boost::filesystem;
+#else
+namespace bf3 = boost::filesystem3;
+#endif
 
 using namespace csapex;
 
@@ -29,13 +36,13 @@ std::string Settings::defaultConfigFile()
 {
     std::string dir = Settings::defaultConfigPath();
 
-    if(!boost::filesystem3::exists(dir)) {
-        boost::filesystem3::create_directories(dir);
+    if(!bf3::exists(dir)) {
+        bf3::create_directories(dir);
     }
 
     std::string file = dir + "default" + Settings::config_extension;
 
-    if(!boost::filesystem3::exists(file)) {
+    if(!bf3::exists(file)) {
         //        createDefaultConfig(file);
     }
 

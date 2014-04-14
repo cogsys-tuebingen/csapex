@@ -22,12 +22,16 @@ ImportCin::ImportCin()
     addTag(Tag::get("ConsoleIO"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));
-    setIcon(QIcon(":/terminal.png"));
 }
 
 void ImportCin::process()
 {
 
+}
+
+QIcon ImportCin::getIcon() const
+{
+    return QIcon(":/terminal.png");
 }
 
 void ImportCin::fill(QBoxLayout *)
@@ -80,7 +84,7 @@ void ImportCin::tick()
         YAML::Node doc;
 
         YAML::Parser parser(docstream);
-        while(parser.GetNextDocument(doc)) {
+        while(getNextDocument(parser, doc)) {
             std::string type;
             doc["type"] >> type;
 

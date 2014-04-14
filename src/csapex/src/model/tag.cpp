@@ -43,7 +43,6 @@ const Tag Tag::Manager::get(const std::string &name)
     try {
         return tags_.at(name);
     } catch(const std::exception& e) {
-        std::cerr << "tag doesn't exist: " << name << std::endl;
         create(name);
         return get(name);
     }

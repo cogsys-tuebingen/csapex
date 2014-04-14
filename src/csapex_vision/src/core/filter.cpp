@@ -21,11 +21,15 @@ Filter::Filter(const UUID& uuid)
 {
     addTag(Tag::get("Filter"));
     addTag(Tag::get("Vision"));
-    setIcon(QIcon(":/filter.png"));
 }
 
 Filter::~Filter()
 {
+}
+
+QIcon Filter::getIcon() const
+{
+    return QIcon(":/filter.png");
 }
 
 void Filter::fill(QBoxLayout* parent)

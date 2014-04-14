@@ -19,6 +19,8 @@ public:
     virtual void process();
     virtual void fill(QBoxLayout* layout);
 
+    virtual QIcon getIcon() const;
+
 private:
     ConnectorIn* connector_;
 

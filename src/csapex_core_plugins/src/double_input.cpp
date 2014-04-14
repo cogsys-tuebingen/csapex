@@ -16,7 +16,6 @@ NumberInput<T>::NumberInput()
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/pencil.png"));
 
     addParameter(param::ParameterFactory::declareValue<T>("value", (T) 0.0));
     addParameter(param::ParameterFactory::declareTrigger("publish"), boost::bind(&NumberInput::process, this));
@@ -29,6 +28,12 @@ void NumberInput<T>::tick()
     if(param<bool>("tick")) {
         process();
     }
+}
+
+template <typename T>
+QIcon NumberInput<T>::getIcon() const
+{
+    return QIcon(":/pencil.png");
 }
 
 template <typename T>

@@ -49,7 +49,7 @@ void FileImporter::State::readYaml(const YAML::Node& node) {
     assert(parent);
     parent->import(last_path_);
 
-    if(node.FindValue("sub_state") && parent->provider_) {
+    if(exists(node, "sub_state") && parent->provider_) {
         const YAML::Node& sub_state_node = node["sub_state"];
         sub_state = parent->provider_->getState();
         sub_state->readYaml(sub_state_node);
@@ -102,13 +102,17 @@ FileImporter::FileImporter()
 {
     state.parent = this;
 
-    setIcon(QIcon(":/folder_picture.png"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Input"));
 }
 
 FileImporter::~FileImporter()
 {
+}
+
+QIcon FileImporter::getIcon() const
+{
+    return QIcon(":/folder_picture.png");
 }
 
 void FileImporter::setup()

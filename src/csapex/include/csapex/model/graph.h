@@ -45,6 +45,8 @@ public:
 
     void init(CommandDispatcher* dispatcher);
     void stop();
+
+    bool isPaused() const;
     void setPause(bool pause);
 
     Node* findNode(const UUID& uuid);

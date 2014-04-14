@@ -84,8 +84,7 @@ public:
     ConnectorIn* getParameterInput(const std::string& name) const;
     ConnectorOut* getParameterOutput(const std::string& name) const;
 
-    void setIcon(QIcon icon);
-    QIcon getIcon() const;
+    virtual QIcon getIcon() const;
 
     virtual void stop();
 
@@ -291,8 +290,6 @@ Q_SIGNALS:
 protected:
     std::string type_;
     mutable std::vector<Tag> tags_;
-    QIcon icon_;
-
 
 private:
     Settings* settings_;

@@ -20,11 +20,15 @@ OutputDisplay::OutputDisplay()
     addTag(Tag::get("General"));
     addTag(Tag::get("Vision"));
 
-    setIcon(QIcon(":/picture.png"));
 }
 
 OutputDisplay::~OutputDisplay()
 {
+}
+
+QIcon OutputDisplay::getIcon() const
+{
+    return QIcon(":/picture.png");
 }
 
 void OutputDisplay::setup()

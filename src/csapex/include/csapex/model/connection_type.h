@@ -3,7 +3,7 @@
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
-#include <yaml-cpp/yaml.h>
+#include <utils_yaml/yamlplus.h>
 #include <boost/signals2.hpp>
 
 namespace csapex {
