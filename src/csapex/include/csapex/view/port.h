@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class Port : public QFrame, public Selectable, public ErrorState
+class Port : public QFrame, public Selectable/*, public ErrorState*/
 {
     Q_OBJECT
 
@@ -54,13 +54,15 @@ public:
 public Q_SLOTS:
     void setMinimizedSize(bool mini);
     void setFlipped(bool flipped);
+    void setBlocked(bool blocked);
+    void setEnabledFlag(bool disabled);
+
+    void setError(bool e, const std::string& msg);
+    void setError(bool e, const std::string& msg, int level);
 
 protected:
     void createToolTip();
     void paintEvent(QPaintEvent *);
-
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
-    void errorChanged(bool error);
 
 protected:
     CommandDispatcher* dispatcher_;

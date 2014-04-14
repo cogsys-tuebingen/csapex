@@ -126,6 +126,7 @@ Q_SIGNALS:
     void placed();
     void toggled(bool);
     void flipped(bool);
+    void minimized(bool);
 
     void moveRequest(Box*, QPoint);
     void moved(Box*, int dx, int dy);

@@ -20,12 +20,15 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
     : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
     if(adaptee_) {
-        adaptee_->setPort(this);
         adaptee_->setCommandDispatcher(dispatcher);
 
         createToolTip();
 
+        QObject::connect(adaptee, SIGNAL(blocked(bool)), this, SLOT(setBlocked(bool)));
         QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
+        QObject::connect(adaptee, SIGNAL(connectableError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
+        QObject::connect(adaptee, SIGNAL(enabled(bool)), this, SLOT(setEnabledFlag(bool)));
+
     } else {
         std::cerr << "creating empty port!" << std::endl;
     }
@@ -96,13 +99,12 @@ void Port::refreshStylesheet()
     refresh_style_sheet_ = true;
 }
 
-void Port::errorEvent(bool /*error*/, const std::string& /*msg*/, ErrorLevel /*level*/)
+void Port::setError(bool error, const std::string& msg)
 {
-    // TODO: relay to parent (box if applicable)
-    //setError(error, msg, level);
+    setError(error, msg, ErrorState::EL_ERROR);
 }
 
-void Port::errorChanged(bool error)
+void Port::setError(bool error, const std::string& /*msg*/, int /*level*/)
 {
     setProperty("error", error);
     refreshStylesheet();
@@ -132,6 +134,17 @@ void Port::setFlipped(bool flipped)
 bool Port::isFlipped() const
 {
     return flipped_;
+}
+
+void Port::setBlocked(bool blocked)
+{
+    setPortProperty("blocked", blocked);
+}
+
+void Port::setEnabledFlag(bool enabled)
+{
+    setPortProperty("enabled", enabled);
+    setPortProperty("disabled", !enabled);
 }
 
 void Port::setPortProperty(const std::string& name, bool b)

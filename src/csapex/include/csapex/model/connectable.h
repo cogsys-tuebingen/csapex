@@ -37,8 +37,6 @@ public:
     static UUID makeUUID(const UUID &box_uuid, int type, int sub_id);
 
 public:
-    void setPort(Port* port);
-
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);
 
@@ -66,9 +64,6 @@ public:
 
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
-
-    void setMinimizedSize(bool mini);
-    bool isMinimizedSize() const;
 
     bool isAsync() const;
     void setAsync(bool asynch);
@@ -107,9 +102,9 @@ public Q_SLOTS:
 
     void stop();
 
+
 protected:
     virtual void notifyMessageProcessed();
-
     void setBlocked(bool b);
 
 
@@ -121,8 +116,9 @@ Q_SIGNALS:
     void connectionDone();
     void connectionRemoved();
     void messageProcessed();
+    void blocked(bool);
+    void connectableError(bool error, const std::string &msg, int level);
 
-Q_SIGNALS:
     void messageSent(Connectable* source);
     void messageArrived(Connectable* source);
     void typeChanged();
@@ -143,7 +139,6 @@ protected:
 protected:
     Settings& settings_;
     CommandDispatcher* dispatcher_;
-    Port* port_;
 
     mutable QMutex io_mutex;
 
@@ -157,7 +152,6 @@ protected:
 
     ConnectionType::ConstPtr type_;
 
-    bool minimized_;
     int count_;
 
 private:

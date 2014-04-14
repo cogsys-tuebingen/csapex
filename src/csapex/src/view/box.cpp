@@ -582,12 +582,7 @@ void Box::minimizeBox(bool minimize)
 {    
     node_->setMinimized(minimize);
 
-    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        i->setMinimizedSize(minimize);
-    }
-    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        i->setMinimizedSize(minimize);
-    }
+    Q_EMIT minimized(minimize);
 
     if(minimize) {
         ui->frame->hide();

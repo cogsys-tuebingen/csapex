@@ -33,14 +33,14 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 }
 
 Connectable::Connectable(Settings& settings, const UUID& uuid)
-    : Unique(uuid), settings_(settings), port_(NULL), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+    : Unique(uuid), settings_(settings), buttons_down_(0), processing(false), enabled_(false), async_(false), async_temp_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
 }
 
 Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), port_(NULL), buttons_down_(0), minimized_(false), processing(false), enabled_(false), async_(false), async_temp_(false),
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), buttons_down_(0), processing(false), enabled_(false), async_(false), async_temp_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
@@ -104,9 +104,7 @@ void Connectable::waitForProcessing()
         if(processing) {
             while(processing && settings_.isProcessingAllowed()) {
                 blocked_ = true;
-                if(port_) {
-                    port_->setPortProperty("blocked", true);
-                }
+                Q_EMIT blocked(blocked_);
 
                 can_process_cond.wait(&io_mutex);
             }
@@ -114,25 +112,8 @@ void Connectable::waitForProcessing()
 
 
         blocked_ = false;
+        Q_EMIT blocked(blocked_);
     }
-
-    if(port_) {
-        port_->setPortProperty("blocked", false);
-    }
-}
-
-void Connectable::setPort(Port *port)
-{
-    assert(port->guard_ == 0xDEADBEEF);
-    port_ = port;
-
-    if(isEnabled()) {
-        enable();
-    } else {
-        disable();
-    }
-
-    port_->setMinimizedSize(minimized_);
 }
 
 CommandDispatcher* Connectable::getCommandDispatcher() const
@@ -149,8 +130,6 @@ void Connectable::init()
 {
     setType(ConnectionType::makeDefault());
 
-    setMinimizedSize(minimized_);
-
     QObject::connect(this, SIGNAL(connectionRemoved()), this, SLOT(updateIsProcessing()));
 
     count_ = 0;
@@ -166,9 +145,7 @@ Connectable::~Connectable()
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    if(port_) {
-        port_->setError(error, msg, level);
-    }
+    Q_EMIT connectableError(error,msg,level);
 }
 
 bool Connectable::isForwarding() const
@@ -212,18 +189,12 @@ void Connectable::disable()
         setProcessing(false);
     }
     Q_EMIT enabled(enabled_);
-    if(port_) {
-        port_->setProperty("disabled", !enabled_);
-    }
 }
 
 void Connectable::enable()
 {
     enabled_ = true;
     Q_EMIT enabled(enabled_);
-    if(port_) {
-        port_->setProperty("disabled", !enabled_);
-    }
 }
 
 bool Connectable::isEnabled() const
@@ -280,20 +251,6 @@ void Connectable::setType(ConnectionType::ConstPtr type)
 ConnectionType::ConstPtr Connectable::getType() const
 {
     return type_;
-}
-
-void Connectable::setMinimizedSize(bool mini)
-{
-    minimized_ = mini;
-
-    if(port_) {
-        port_->setMinimizedSize(mini);
-    }
-}
-
-bool Connectable::isMinimizedSize() const
-{
-    return minimized_;
 }
 
 void Connectable::setAsync(bool asynch)

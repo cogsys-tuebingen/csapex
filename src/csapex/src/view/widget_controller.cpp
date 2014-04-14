@@ -113,6 +113,7 @@ void WidgetController::connectorAdded(Connectable* connector)
         Box* box = getBox(parent_uuid);
         Port* port = new Port(dispatcher_, connector);
 
+        QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
         QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
         box->selection.connect(boost::bind(&Port::setSelected, port, _1));
 
@@ -127,9 +128,10 @@ void WidgetController::connectorAdded(Connectable* connector)
 void WidgetController::connectorRemoved(Connectable *connector)
 {
     if(designer_) {
-        Port* port = getPort(connector->getUUID());
-
-        port_map_.erase(port_map_.find(connector->getUUID()));
+        boost::unordered_map<UUID, Port*, UUID::Hasher>::iterator it = port_map_.find(connector->getUUID());
+        if(it != port_map_.end()) {
+            port_map_.erase(it);
+        }
     }
 }
 

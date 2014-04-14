@@ -24,18 +24,17 @@ Node::Node(const UUID &uuid)
 
 Node::~Node()
 {
-    delete worker_;
     BOOST_FOREACH(ConnectorIn* in, inputs_) {
-        in->deleteLater();
+        removeInput(in);
     }
     BOOST_FOREACH(ConnectorOut* out, outputs_) {
-        out->deleteLater();
+        removeOutput(out);
     }
     BOOST_FOREACH(ConnectorIn* in, managed_inputs_) {
-        in->deleteLater();
+        removeInput(in);
     }
     BOOST_FOREACH(ConnectorOut* out, managed_outputs_) {
-        out->deleteLater();
+        removeOutput(out);
     }
 
     Q_FOREACH(QObject* cb, callbacks) {
@@ -46,6 +45,7 @@ Node::~Node()
         cb->deleteLater();
     }
     callbacks.clear();
+    delete worker_;
 }
 
 void Node::makeThread()
@@ -727,6 +727,10 @@ void Node::removeInput(ConnectorIn *in)
     std::vector<ConnectorIn*>::iterator it;
     it = std::find(inputs_.begin(), inputs_.end(), in);
 
+    if(it == inputs_.end()) {
+        it = std::find(managed_inputs_.begin(), managed_inputs_.end(), in);
+    }
+
     assert(*it == in);
 
     in->deleteLater();
@@ -736,13 +740,17 @@ void Node::removeInput(ConnectorIn *in)
     disconnectConnector(in);
     Q_EMIT connectorRemoved(in);
 
-    checkIfDone();
+    //checkIfDone();
 }
 
 void Node::removeOutput(ConnectorOut *out)
 {
     std::vector<ConnectorOut*>::iterator it;
     it = std::find(outputs_.begin(), outputs_.end(), out);
+
+    if(it == outputs_.end()) {
+        it = std::find(managed_outputs_.begin(), managed_outputs_.end(), out);
+    }
 
     assert(*it == out);
 
@@ -752,7 +760,7 @@ void Node::removeOutput(ConnectorOut *out)
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
 
-    checkIfDone();
+   // checkIfDone();
 }
 
 
@@ -982,9 +990,9 @@ void Node::connectConnector(Connectable *c)
 
 void Node::disconnectConnector(Connectable *c)
 {
-    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
-    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
-    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+//    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
+//    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
+//    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }
 
 

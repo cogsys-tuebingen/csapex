@@ -182,8 +182,8 @@ void Overlay::drawConnection(Connection& connection)
     ccs.selected = connection.isSelected();
     ccs.disabled = (!fromp->isEnabled() || !top->isEnabled());
     ccs.async = from->isAsync() || to->isAsync();
-    ccs.minimized_from = from->isMinimizedSize();
-    ccs.minimized_to = to->isMinimizedSize();
+    ccs.minimized_from = fromp->isMinimizedSize();
+    ccs.minimized_to = top->isMinimizedSize();
 
     drawConnection(p1, p2, id,
                    fromp->isFlipped() ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
@@ -358,7 +358,7 @@ void Overlay::drawPort(Port *p)
     Connectable* c = p->getAdaptee();
     bool right = c->isOutput() ^ p->isFlipped();
 
-    if(!c->isMinimizedSize()) {
+    if(!p->isMinimizedSize()) {
         int font_size = 10;
         int lines = 3;
 
