@@ -53,7 +53,7 @@ void TriggerParameter::doWrite(YAML::Emitter& e) const
 
 void TriggerParameter::doRead(const YAML::Node& n)
 {
-    if(!n.FindValue("name")) {
+    if(!exists(n, "name")) {
         return;
     }
 

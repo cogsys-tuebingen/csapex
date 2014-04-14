@@ -10,4 +10,7 @@
   <author email="sebastian.buck@uni-tuebingen.de">buck</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>utils_yaml</build_depend>
+  <run_depend>utils_yaml</run_depend>
 </package>

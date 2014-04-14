@@ -69,7 +69,7 @@ T __read(const YAML::Node& n) {
 
 void PathParameter::doRead(const YAML::Node& n)
 {
-    if(!n.FindValue("name")) {
+    if(!exists(n, "name")) {
         return;
     }
 

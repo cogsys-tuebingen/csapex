@@ -86,16 +86,16 @@ T __read(const YAML::Node& n) {
 
 void RangeParameter::doRead(const YAML::Node& n)
 {
-    if(!n.FindValue("name")) {
+    if(!exists(n, "name")) {
         return;
     }
 
     n["name"] >> name_;
 
-    if(n.FindValue("int")) {
+    if(exists(n, "int")) {
         value_ = __read<int>(n["int"]);
 
-    } else if(n.FindValue("double")) {
+    } else if(exists(n, "double")) {
         value_ = __read<double>(n["double"]);
     }
 }

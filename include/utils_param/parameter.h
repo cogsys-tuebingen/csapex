@@ -3,7 +3,7 @@
 
 /// SYSTEM
 #include <stdexcept>
-#include <yaml-cpp/yaml.h>
+#include <utils_yaml/yamlplus.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
 #include <boost/signals2.hpp>

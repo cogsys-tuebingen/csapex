@@ -92,13 +92,13 @@ T __read(const YAML::Node& n) {
 
 void ColorParameter::doRead(const YAML::Node& n)
 {
-    if(!n.FindValue("name")) {
+    if(!exists(n, "name")) {
         return;
     }
 
     n["name"] >> name_;
 
-    if(n.FindValue("values")) {
+    if(exists(n, "values")) {
         n["values"] >> colors_;
     }
 }

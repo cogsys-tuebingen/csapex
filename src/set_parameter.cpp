@@ -146,29 +146,29 @@ T __read(const YAML::Node& n) {
 
 void SetParameter::doRead(const YAML::Node& n)
 {
-    if(!n.FindValue("name")) {
+    if(!exists(n, "name")) {
         return;
     }
 
     n["name"] >> name_;
 
-    if(n.FindValue("txt")) {
+    if(exists(n, "txt")) {
         n["txt"] >> txt_;
     } else {
         // backward compability
         txt_ = "unknown";
     }
 
-    if(n.FindValue("int")) {
+    if(exists(n, "int")) {
         value_ = __read<int>(n["int"]);
 
-    } else if(n.FindValue("double")) {
+    } else if(exists(n, "double")) {
         value_ = __read<double>(n["double"]);
 
-    } else if(n.FindValue("bool")) {
+    } else if(exists(n, "bool")) {
         value_ = __read<bool>(n["bool"]);
 
-    } else if(n.FindValue("string")) {
+    } else if(exists(n, "string")) {
         value_ = __read<std::string>(n["string"]);
     }
     set_[name_] = value_;

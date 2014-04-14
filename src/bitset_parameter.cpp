@@ -172,12 +172,12 @@ void BitSetParameter::doWrite(YAML::Emitter& e) const
 
 void BitSetParameter::doRead(const YAML::Node& n)
 {
-    if(!n.FindValue("name")) {
+    if(!exists(n, "name")) {
         return;
     }
 
     n["name"] >> name_;
-    if(n.FindValue("int")) {
+    if(exists(n, "int")) {
         n["int"] >> value_;
     }
 }

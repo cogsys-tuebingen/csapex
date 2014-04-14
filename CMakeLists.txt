@@ -3,13 +3,14 @@ project(utils_param)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS utils_yaml)
 
 find_package(Boost REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES utils_param
+    CATKIN_DEPENDS utils_yaml
 )
 
 include_directories(

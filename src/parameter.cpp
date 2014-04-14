@@ -82,8 +82,8 @@ void Parameter::write(YAML::Emitter &e) const
 
 void Parameter::read(const YAML::Node &n)
 {
-    if(n.FindValue("interactive")) {
-        n["interactive"] >> interactive_;
+    if(n["interactive"].IsDefined()) {
+        interactive_ = n["interactive"].as<bool>();
     }
 
     doRead(n);
