@@ -12,6 +12,7 @@
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
+#include <tf/tf.h>
 
 
 
@@ -53,22 +54,62 @@ void TransformFromModels::process()
 
     std::cout << "points_ref.size() = " << points_ref.size() << " points_new.size() = " << points_new.size() << std::endl;
 
+    int offset = matchSidesOfTriangles(points_ref, points_new);
+
+    Eigen::Matrix4d r_T_n(4,4);
+    r_T_n = calculateTransformation(points_ref, points_new, offset);
+
+    double x = r_T_n(3,0);
+    double y = r_T_n(3,1);
+    double z = r_T_n(3,2);
 
 
-//    // Copied from static_transform.cpp remove agian
-//    double roll = param<double>("roll");
-//    double pitch = param<double>("pitch");
-//    double yaw = param<double>("yaw");
-//    double x = param<double>("dx");
-//    double y = param<double>("dy");
-//    double z = param<double>("dz");
+    // Convert Homogenious Coordinates to a Quaternion
+    Eigen::Matrix3d r_test;
+    r_test <<       0.5,    -0.1464,  0.8536,
+                    0.5,     0.8536, -0.1464,
+                    -0.707,   0.5,     0.5;
+
+    double roll, pitch, yaw;
+    //eulerAnglesFromRotationMatrix(r_test, roll, pitch, yaw);
+    eulerAnglesFromRotationMatrix(r_T_n.block<3,3>(0,0), roll, pitch, yaw);
 
     // Publish Output
-//    connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
-//    msg->value = tf::Transform(tf::createQuaternionFromRPY(roll, pitch, yaw), tf::Vector3(x, y, z));
-//    output_->publish(msg);
+    connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
+    msg->value = tf::Transform(tf::createQuaternionFromRPY(roll, pitch, yaw), tf::Vector3(x, y, z));
+    output_->publish(msg);
 }
 
+void TransformFromModels::eulerAnglesFromRotationMatrix( Eigen::Matrix3d R, double &psi, double &theta, double &phi)
+{
+    /* Note: this function is based on the paper http://www.soi.city.ac.uk/~sbbh653/publications/euler.pdf
+     * but the second solution is ignored
+     * Test the function with
+     * R =
+     *[[ 0.5    -0.1464  0.8536]
+     * [ 0.5     0.8536 -0.1464]
+     * [-0.707   0.5     0.5   ]]
+     * It shuould return psi = 0.78539816, theta = 0.78524716, phi = 0.78539816
+     **/
+    if ((R(2,0) != 1) && (R(2,0) != -1))
+    {
+        theta = asin(R(2,0));
+        double c = cos(theta);
+        psi = atan2(R(2,1)/c, R(2,2)/c);
+        phi = atan2(R(1,0)/c, R(0,0)/c);
+    } else
+        phi = 0; // infinit solution for phi, just pick zero
+    {
+        if (R(0,2) == -1){
+            theta = M_PI / 2.0;
+            psi = phi + atan2(R(0,1), R(0,2));
+        } else {
+            theta = - M_PI / 2.0;
+            psi = - phi + atan2(R(0,1), R(0,2));
+        }
+    }
+
+}
 
 std::vector<Eigen::Vector3d> TransformFromModels::getInterestingPointsFromModels(boost::shared_ptr<std::vector<ModelMessage> const> models)
 {
@@ -155,4 +196,40 @@ int TransformFromModels::matchSidesOfTriangles(const std::vector<Eigen::Vector3d
         std::cerr << "There is an triangle with less than 3 points (error)" << std::endl;
     }
     return min_offset;
+}
+
+Eigen::Matrix4d TransformFromModels::calculateTransformation(const std::vector<Eigen::Vector3d> &points_ref, const std::vector<Eigen::Vector3d> &points_new, int offset)
+{
+    Eigen::Matrix4d r_T_0;
+    r_T_0 = threePointsToTransformation(points_ref);
+
+    Eigen::Matrix4d n_T_0;
+    n_T_0 = threePointsToTransformation(points_new);
+
+    return r_T_0 * n_T_0.inverse();
+}
+
+using namespace std;
+
+Eigen::Matrix4d TransformFromModels::threePointsToTransformation(const std::vector<Eigen::Vector3d> &points)
+{
+    assert (points.size() == 3);
+
+    Eigen::Vector3d v1(points.at(0) - points.at(1));
+    Eigen::Vector3d v2(points.at(2) - points.at(0));
+
+    Eigen::Matrix4d transformation;
+    // example for block http://eigen.tuxfamily.org/dox/group__TutorialBlockOperations.html
+    transformation.block<3,1>(0,0) = v1;          // x vector of the coordinate system
+    transformation.block<3,1>(0,1) = v2;          // y vector of the coordinate system
+    transformation.block<3,1>(0,2) = v1.cross(v2);          // z vector of the coordinate system
+    transformation(3,3) = 1;
+
+//    Eigen::Matrix4d transformation();
+//    transformation.col(0) = Eigen::Vector4d(v1,0);          // x vector of the coordinate system
+//    transformation.col(1) = Eigen::Vector4d(v2,0);          // y vector of the coordinate system
+//    transformation.col(2) = Eigen::Vector4d(v1.cross(v2), 0);// z vector of the coordinate system
+//    transformation.col(3) = Eigen::Vector4d(points.at(0), 1); // origin of the coordinate sysetm
+
+    return transformation;
 }
