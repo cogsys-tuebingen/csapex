@@ -2,18 +2,13 @@
 #include <csapex/model/connectable.h>
 
 /// COMPONENT
-#include <csapex/view/box.h>
-#include <csapex/view/design_board.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/view/port.h>
 #include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <iostream>
 #include <sstream>
 #include <typeinfo>
-#include <QDragEnterEvent>
-#include <QPainter>
 
 using namespace csapex;
 

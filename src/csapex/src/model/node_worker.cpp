@@ -7,7 +7,6 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
-#include <csapex/view/port.h>
 #include <csapex/core/settings.h>
 
 using namespace csapex;

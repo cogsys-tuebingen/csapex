@@ -3,10 +3,8 @@
 
 /// COMPONENT
 #include <csapex/model/connector_in.h>
-#include <csapex/view/design_board.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
-#include <csapex/view/port.h>
 #include <csapex/utility/timer.h>
 
 /// SYSTEM

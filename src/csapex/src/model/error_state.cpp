@@ -2,7 +2,7 @@
 #include <csapex/model/error_state.h>
 
 /// COMPONENT
-#include <csapex/view/box.h>
+#include <QString>
 
 using namespace csapex;
 
