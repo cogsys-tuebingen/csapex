@@ -5,7 +5,6 @@
 #include <csapex/model/connector_out.h>
 #include <csapex_core_plugins/ros_message_conversion.h>
 #include <csapex_core_plugins/vector_message.h>
-#include <csapex_core_plugins/string_message.h>
 #include <utils_param/parameter_factory.h>
 #include <tf/tf.h>
 
@@ -59,7 +58,7 @@ void ClusterPointcloud::setup()
     setSynchronizedInputs(true);
     in_cloud_ = addInput<PointCloudMessage>("PointCloud");
     out_ = addOutput<GenericVectorMessage, pcl::PointIndices >("Clusters");
-    out_debug_ = addOutput<StringMessage>("Debug Info");
+    out_debug_ = addOutput<std::string>("Debug Info");
 }
 
 template <class PointT>
@@ -87,9 +86,8 @@ void ClusterPointcloud::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
 
       std::stringstream stringstream;
       stringstream << "Found clusters: " << cluster_indices->size();
-      StringMessage::Ptr text_msg(new StringMessage);
-      text_msg->value = stringstream.str();
-      out_debug_->publish(text_msg);
+      std::string text_msg = stringstream.str();
+      out_debug_->publishIntegral(text_msg);
       out_->publish<GenericVectorMessage, pcl::PointIndices >(cluster_indices);
 
 }

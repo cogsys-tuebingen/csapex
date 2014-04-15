@@ -84,7 +84,7 @@ void ImportCin::tick()
         YAML::Node doc;
 
         YAML::Parser parser(docstream);
-        while(parser.GetNextDocument(doc)) {
+        while(getNextDocument(parser, doc)) {
             std::string type;
             doc["type"] >> type;
 

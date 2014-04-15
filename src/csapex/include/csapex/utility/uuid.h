@@ -38,9 +38,18 @@ public:
         return a.representation_ == b.representation_;
     }
 
+    struct Hasher {
+      std::size_t operator()(const UUID& k) const {
+        return k.hash();
+      }
+    };
+
+
 public:
     std::string getFullName() const;
     std::string getShortName() const;
+
+    std::size_t hash() const;
 
     bool contains(const std::string& sub) const;
     UUID replace(const std::string& needle, const UUID& replacement) const;

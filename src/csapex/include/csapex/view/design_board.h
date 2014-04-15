@@ -23,7 +23,7 @@ class DesignBoard : public QWidget
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    DesignBoard(csapex::GraphPtr graph, CommandDispatcher *dispatcher, DragIO& dragio_, QWidget* parent = 0);
+    DesignBoard(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio_, Overlay* overlay, QWidget* parent = 0);
     virtual ~DesignBoard();
 
     void paintEvent(QPaintEvent*);
@@ -79,7 +79,8 @@ private:
 
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;
-    Overlay* overlay;
+    WidgetControllerPtr widget_ctrl_;
+    Overlay* overlay_;
     DragIO& drag_io_;
 
     bool space_;

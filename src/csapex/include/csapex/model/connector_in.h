@@ -40,7 +40,7 @@ public:
     void inputMessage(ConnectionType::Ptr message);
 
     template <typename R>
-    typename R::Ptr getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {
+    typename R::Ptr getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
         waitForMessage();
 
         QMutexLocker lock(&io_mutex);
@@ -61,7 +61,7 @@ public:
         }
     }
     template <typename R>
-    typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* dummy = 0) {
+    typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
         waitForMessage();
 
         QMutexLocker lock(&io_mutex);

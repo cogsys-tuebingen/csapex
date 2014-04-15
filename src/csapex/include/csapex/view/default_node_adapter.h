@@ -1,8 +1,9 @@
 #ifndef DEFAULT_NODE_ADAPTER_H
 #define DEFAULT_NODE_ADAPTER_H
 
-/// SYSTEM
+/// COMPONENT
 #include <csapex/view/node_adapter.h>
+#include <csapex/utility/context_menu_handler.h>
 
 namespace csapex
 {
@@ -24,6 +25,8 @@ protected:
 
     template <typename T>
     void updateUi(const param::Parameter* p, boost::function<void(T)> setter);
+    template <typename T>
+    void updateUiPtr(const param::Parameter* p, boost::function<void(const T*)> setter);
 
     void updateUiSet(const param::Parameter* p, boost::function<void(const std::string&)> setter);
     void updateUiBitSet(const param::Parameter* p, const QListView *list);

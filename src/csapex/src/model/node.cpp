@@ -2,11 +2,12 @@
 #include <csapex/model/node.h>
 
 /// COMPONENT
-#include <csapex/view/box.h>
+#include <csapex/command/meta.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/utility/q_signal_relay.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -15,7 +16,7 @@
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
-    : Unique(uuid), settings_(NULL), box_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+    : Unique(uuid), settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
@@ -24,12 +25,27 @@ Node::Node(const UUID &uuid)
 Node::~Node()
 {
     delete worker_;
-    BOOST_FOREACH(ConnectorIn* in, input) {
+    BOOST_FOREACH(ConnectorIn* in, inputs_) {
         in->deleteLater();
     }
-    BOOST_FOREACH(ConnectorOut* out, output) {
+    BOOST_FOREACH(ConnectorOut* out, outputs_) {
         out->deleteLater();
     }
+    BOOST_FOREACH(ConnectorIn* in, managed_inputs_) {
+        in->deleteLater();
+    }
+    BOOST_FOREACH(ConnectorOut* out, managed_outputs_) {
+        out->deleteLater();
+    }
+
+    Q_FOREACH(QObject* cb, callbacks) {
+        qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
+        if(call) {
+            call->disconnect();
+        }
+        cb->deleteLater();
+    }
+    callbacks.clear();
 }
 
 void Node::makeThread()
@@ -46,9 +62,10 @@ void Node::makeThread()
 }
 
 
-void Node::setup()
+void Node::doSetup()
 {
-
+    updateParameters();
+    setup();
 }
 
 void Node::setType(const std::string &type)
@@ -86,9 +103,6 @@ void Node::addParameter(const param::Parameter::Ptr &param)
 {
     state.params[param->name()] = param;
     state.order.push_back(param->name());
-
-    //state.parameters.push_back(param);
-
     worker_->addParameter(param.get());
 }
 
@@ -138,6 +152,26 @@ void Node::setParameterEnabled(const std::string &name, bool enabled)
     getParameter(name)->setEnabled(enabled);
 }
 
+ConnectorIn* Node::getParameterInput(const std::string &name) const
+{
+    std::map<std::string, ConnectorIn*>::const_iterator it = param_2_input_.find(name);
+    if(it == param_2_input_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
+}
+
+ConnectorOut* Node::getParameterOutput(const std::string &name) const
+{
+    std::map<std::string, ConnectorOut*>::const_iterator it = param_2_output_.find(name);
+    if(it == param_2_output_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
+}
+
 QIcon Node::getIcon() const
 {
     return QIcon(":/plugin.png");
@@ -176,7 +210,7 @@ void Node::checkInputs()
 
 void Node::finishProcessing()
 {
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         if(i->isProcessing()) {
             i->setProcessing(false);
         }
@@ -191,7 +225,7 @@ Settings& Node::getSettings()
 void Node::checkIfDone()
 {
     int no_targets = 0;
-    Q_FOREACH(ConnectorOut* o, output) {
+    Q_FOREACH(ConnectorOut* o, outputs_) {
         no_targets += o->noTargets();
     }
 
@@ -200,7 +234,7 @@ void Node::checkIfDone()
     }
 
     // check if all children are done processing
-    Q_FOREACH(ConnectorOut* o, output) {
+    Q_FOREACH(ConnectorOut* o, outputs_) {
         // o->waitForProcessing();
         if(o->isProcessing()) {
             return;
@@ -234,7 +268,7 @@ void Node::killContent()
         private_thread_ = NULL;
         worker_ = new NodeWorker(this);
 
-        BOOST_FOREACH(ConnectorIn* in, input) {
+        BOOST_FOREACH(ConnectorIn* in, inputs_) {
             QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
         }
 
@@ -249,7 +283,7 @@ NodeState::Ptr Node::getNodeState()
     NodeState::Ptr memento(new NodeState(this));
     *memento = *node_state_;
 
-    memento->boxed_state = getState();
+    memento->child_state = getState();
 
     return memento;
 }
@@ -276,17 +310,80 @@ void Node::setNodeState(NodeState::Ptr memento)
     }
 
     node_state_->parent = this;
-    if(m->boxed_state != NULL) {
-        setState(m->boxed_state);
+    if(m->child_state != NULL) {
+        setState(m->child_state);
     }
 
     Q_EMIT stateChanged();
 }
 
+template <typename T>
+void Node::updateParameter(param::Parameter *p)
+{
+    {
+        ConnectorIn* cin;
+        cin = new ConnectorIn(*settings_, UUID::make_sub(getUUID(), p->name() + "_in"));
+
+        cin->setType(connection_types::DirectMessage<T>::make());
+
+        cin->enable();
+        /// TODO: make synchronized!!!!!
+        cin->setAsync(true);
+
+        boost::function<typename connection_types::DirectMessage<T>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<T> >, cin, (void*) 0);
+        boost::function<connection_types::DirectMessage<T>*()> getmsg = boost::bind(&connection_types::DirectMessage<T>::Ptr::get, boost::bind(getmsgptr));
+        boost::function<T()> read = boost::bind(&connection_types::DirectMessage<T>::getValue, boost::bind(getmsg));
+        boost::function<void()> set_param_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
+        qt_helper::Call* set_param = new qt_helper::Call(set_param_fn);
+        callbacks.push_back(set_param);
+        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
+
+        manageInput(cin);
+        param_2_input_[p->name()] = cin;
+    }
+    {
+        ConnectorOut* cout;
+        cout = new ConnectorOut(*settings_, UUID::make_sub(getUUID(), p->name() + "_out"));
+
+        cout->setType(connection_types::DirectMessage<T>::make());
+
+        cout->enable();
+        /// TODO: make synchronized!!!!!
+        cout->setAsync(true);
+
+        boost::function<void(T)> publish = boost::bind(&ConnectorOut::publishIntegral<T>, cout, _1);
+        boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
+        connections.push_back(parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
+
+        manageOutput(cout);
+        param_2_output_[p->name()] = cout;
+    }
+}
+
+void Node::updateParameters()
+{
+    assert(!getUUID().empty());
+
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+        param::Parameter* p = it->second.get();
+
+        if(p->is<int>()) {
+            updateParameter<int>(p);
+        } else if(p->is<double>()) {
+            updateParameter<double>(p);
+        } else if(p->is<std::string>()) {
+            updateParameter<std::string>(p);
+        } else if(p->is<bool>()) {
+            updateParameter<bool>(p);
+        }
+        // else: do nothing and ignore the parameter
+    }
+}
+
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
-    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->boxed_state);
+    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
     if(m) {
         for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
             param::Parameter* param = it->second.get();
@@ -297,7 +394,8 @@ void Node::setNodeStateLater(NodeStatePtr s)
             }
         }
     }
-    setState(s->boxed_state);
+
+    setState(s->child_state);
     loaded_state_available_ = true;
 }
 
@@ -320,6 +418,10 @@ void Node::setState(Memento::Ptr memento)
         if(state.params.find(p->name()) != state.params.end()) {
             state.params[p->name()]->setFrom(*p);
         }
+
+        if(getUUID().empty()) {
+            return;
+        }
     }
 
     Q_EMIT modelChanged();
@@ -339,9 +441,7 @@ void Node::enable()
     node_state_->enabled = true;
     enableIO(true);
 
-    if(box_) {
-        box_->enabledChange(node_state_->enabled);
-    }
+    Q_EMIT enabled(true);
 }
 
 void Node::disable(bool d)
@@ -356,15 +456,13 @@ void Node::disable()
     setError(false);
     enableIO(false);
 
-    if(box_) {
-        box_->enabledChange(node_state_->enabled);
-    }
+    Q_EMIT enabled(false);
 }
 
 bool Node::canReceive()
 {
     bool can_receive = true;
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
             can_receive = false;
         }
@@ -382,7 +480,7 @@ void Node::enableIO(bool enable)
 void Node::enableInput (bool enable)
 {
     worker_->setProcessing(false);
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         if(enable) {
             i->enable();
         } else {
@@ -394,7 +492,7 @@ void Node::enableInput (bool enable)
 
 void Node::enableOutput (bool enable)
 {
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         if(enable) {
             i->enable();
         } else {
@@ -405,10 +503,10 @@ void Node::enableOutput (bool enable)
 
 void Node::setIOError(bool error)
 {
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         i->setErrorSilent(error);
     }
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         i->setErrorSilent(error);
     }
     enableIO(!error);
@@ -447,20 +545,6 @@ void Node::eventGuiChanged()
     }
 }
 
-
-void Node::setBox(Box* box)
-{
-    QMutexLocker lock(&mutex);
-    box_ = box;
-    worker_->checkConditions();
-}
-
-Box* Node::getBox() const
-{
-    QMutexLocker lock(&mutex);
-    return box_;
-}
-
 void Node::setSettings(Settings *settings)
 {
     settings_ = settings;
@@ -478,9 +562,8 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
         finishProcessing();
     }
 
-    if(box_) {
-        box_->setError(error, msg, level);
-    }
+    Q_EMIT nodeError(error,msg,level);
+
     if(node_state_->enabled && error && level == EL_ERROR) {
         setIOError(true);
     } else {
@@ -492,7 +575,7 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 
 ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
-    int id = input.size();
+    int id = inputs_.size();
     ConnectorIn* c = new ConnectorIn(*settings_, this, id);
     c->setLabel(label);
     c->setOptional(optional);
@@ -506,7 +589,7 @@ ConnectorIn* Node::addInput(ConnectionTypePtr type, const std::string& label, bo
 
 ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 {
-    int id = output.size();
+    int id = outputs_.size();
     ConnectorOut* c = new ConnectorOut(*settings_, this, id);
     c->setLabel(label);
     c->setType(type);
@@ -527,6 +610,22 @@ void Node::addOutput(ConnectorOut* out)
     registerOutput(out);
 }
 
+
+void Node::manageInput(ConnectorIn* in)
+{
+    managed_inputs_.push_back(in);
+    connectConnector(in);
+    in->moveToThread(thread());
+}
+
+void Node::manageOutput(ConnectorOut* out)
+{
+    managed_outputs_.push_back(out);
+    connectConnector(out);
+    out->moveToThread(thread());
+    QObject::connect(out, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
+}
+
 void Node::setSynchronizedInputs(bool sync)
 {
     worker_->setSynchronizedInputs(sync);
@@ -537,29 +636,34 @@ void Node::setSynchronizedInputs(bool sync)
 
 int Node::countInputs() const
 {
-    return input.size();
+    return inputs_.size();
 }
 
 int Node::countOutputs() const
 {
-    return output.size();
+    return outputs_.size();
 }
 
 ConnectorIn* Node::getInput(const unsigned int index) const
 {
-    assert(index < input.size());
-    return input[index];
+    assert(index < inputs_.size());
+    return inputs_[index];
 }
 
 ConnectorOut* Node::getOutput(const unsigned int index) const
 {
-    assert(index < output.size());
-    return output[index];
+    assert(index < outputs_.size());
+    return outputs_[index];
 }
 
 ConnectorIn* Node::getInput(const UUID& uuid) const
 {
-    BOOST_FOREACH(ConnectorIn* in, input) {
+    BOOST_FOREACH(ConnectorIn* in, inputs_) {
+        if(in->getUUID() == uuid) {
+            return in;
+        }
+    }
+    BOOST_FOREACH(ConnectorIn* in, managed_inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
@@ -570,7 +674,12 @@ ConnectorIn* Node::getInput(const UUID& uuid) const
 
 ConnectorOut* Node::getOutput(const UUID& uuid) const
 {
-    BOOST_FOREACH(ConnectorOut* out, output) {
+    BOOST_FOREACH(ConnectorOut* out, outputs_) {
+        if(out->getUUID() == uuid) {
+            return out;
+        }
+    }
+    BOOST_FOREACH(ConnectorOut* out, managed_outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
@@ -592,12 +701,18 @@ Connectable* Node::getConnector(const UUID &uuid) const
 
 std::vector<ConnectorIn*> Node::getInputs() const
 {
-    return input;
+    std::vector<ConnectorIn*> result;
+    result = inputs_;
+    result.insert(result.end(), managed_inputs_.begin(), managed_inputs_.end());
+    return result;
 }
 
 std::vector<ConnectorOut*> Node::getOutputs() const
 {
-    return output;
+    std::vector<ConnectorOut*> result;
+    result = outputs_;
+    result.insert(result.end(), managed_outputs_.begin(), managed_outputs_.end());
+    return result;
 }
 
 void Node::removeInput(ConnectorIn *in)
@@ -605,12 +720,12 @@ void Node::removeInput(ConnectorIn *in)
     worker_->removeInput(in);
 
     std::vector<ConnectorIn*>::iterator it;
-    it = std::find(input.begin(), input.end(), in);
+    it = std::find(inputs_.begin(), inputs_.end(), in);
 
     assert(*it == in);
 
     in->deleteLater();
-    input.erase(it);
+    inputs_.erase(it);
 
 
     disconnectConnector(in);
@@ -622,12 +737,12 @@ void Node::removeInput(ConnectorIn *in)
 void Node::removeOutput(ConnectorOut *out)
 {
     std::vector<ConnectorOut*>::iterator it;
-    it = std::find(output.begin(), output.end(), out);
+    it = std::find(outputs_.begin(), outputs_.end(), out);
 
     assert(*it == out);
 
     out->deleteLater();
-    output.erase(it);
+    outputs_.erase(it);
 
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
@@ -749,7 +864,7 @@ void Node::registerInput(ConnectorIn* in)
 {
     in->moveToThread(thread());
 
-    input.push_back(in);
+    inputs_.push_back(in);
 
     in->setCommandDispatcher(dispatcher_);
 
@@ -764,7 +879,7 @@ void Node::registerOutput(ConnectorOut* out)
 {
     out->moveToThread(thread());
 
-    output.push_back(out);
+    outputs_.push_back(out);
 
     out->setCommandDispatcher(dispatcher_);
 
@@ -777,12 +892,12 @@ void Node::registerOutput(ConnectorOut* out)
 
 int Node::nextInputId()
 {
-    return input.size();
+    return inputs_.size();
 }
 
 int Node::nextOutputId()
 {
-    return output.size();
+    return outputs_.size();
 }
 
 void Node::setPosition(const QPoint &pos)
@@ -809,7 +924,7 @@ void Node::useTimer(Timer *timer)
 {
     Timable::useTimer(timer);
 
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         i->useTimer(timer);
     }
 }
@@ -821,17 +936,17 @@ std::string Node::getLabel() const
 
 void Node::stop()
 {
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         i->stop();
     }
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         i->stop();
     }
 
-    Q_FOREACH(ConnectorIn* i, input) {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
         disconnectConnector(i);
     }
-    Q_FOREACH(ConnectorOut* i, output) {
+    Q_FOREACH(ConnectorOut* i, outputs_) {
         disconnectConnector(i);
     }
 

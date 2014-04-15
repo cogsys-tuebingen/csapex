@@ -6,7 +6,6 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/utility/qt_helper.hpp>
-#include <csapex_core_plugins/string_message.h>
 #include <csapex/manager/message_provider_manager.h>
 
 /// SYSTEM
@@ -50,7 +49,7 @@ void FileImporter::State::readYaml(const YAML::Node& node) {
     assert(parent);
     parent->import(last_path_);
 
-    if(node.FindValue("sub_state") && parent->provider_) {
+    if(exists(node, "sub_state") && parent->provider_) {
         const YAML::Node& sub_state_node = node["sub_state"];
         sub_state = parent->provider_->getState();
         sub_state->readYaml(sub_state_node);
@@ -120,7 +119,7 @@ void FileImporter::setup()
 {
     setSynchronizedInputs(true);
 
-    optional_input_filename_ = addInput<connection_types::StringMessage>("File", true);
+    optional_input_filename_ = addInput<connection_types::DirectMessage<std::string> >("File", true);
 
     output_ = addOutput<connection_types::AnyMessage>("Unknown");
 }
@@ -157,7 +156,7 @@ void FileImporter::toggle(bool on)
 void FileImporter::process()
 {
     // TODO: remove once parameters are connectable
-    StringMessage::Ptr msg = optional_input_filename_->getMessage<StringMessage>();
+    DirectMessage<std::string>::Ptr msg = optional_input_filename_->getMessage<DirectMessage<std::string> >();
 
     if(msg) {
         std::cout << "got message: " << msg->value << std::endl;

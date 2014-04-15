@@ -21,10 +21,16 @@ csapex_moc_all(QT_MOC src/*.h include/csapex_point_cloud/*.h)
 
 set(QT ${QT_SOURCES} ${QT_MOC})
 
+find_package(PCL 1.2 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 catkin_package(
   INCLUDE_DIRS include
 # LIBRARIES csapex_point_cloud
-  CATKIN_DEPENDS csapex pcl_ros
+#  LIBRARIES csapex_point_cloud
+  CATKIN_DEPENDS csapex 
 #  DEPENDS system_lib
 )
 

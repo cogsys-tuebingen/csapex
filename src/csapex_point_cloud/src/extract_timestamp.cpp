@@ -5,7 +5,6 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex_transform/time_stamp_message.h>
-#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
@@ -28,7 +27,7 @@ void ExtractTimeStamp::setup()
     input_ = addInput<PointCloudMessage>("PointCloud");
 
     output_ = addOutput<TimeStampMessage>("Time");
-    output_frame_ = addOutput<StringMessage>("Target Frame");
+    output_frame_ = addOutput<DirectMessage<std::string> >("Target Frame");
 }
 
 void ExtractTimeStamp::process()
@@ -45,7 +44,7 @@ void ExtractTimeStamp::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
     time->value = time->value.fromNSec(cloud->header.stamp * 1000);
     output_->publish(time);
 
-    connection_types::StringMessage::Ptr frame(new connection_types::StringMessage);
+    connection_types::DirectMessage<std::string>::Ptr frame(new connection_types::DirectMessage<std::string>);
     frame->value = cloud->header.frame_id;
     output_frame_->publish(frame);
 }

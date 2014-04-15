@@ -1,9 +1,6 @@
 /// HEADER
 #include "toggle.h"
 
-/// COMPONENT
-#include <csapex_boolean/boolean_message.h>
-
 /// PROJECT
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
@@ -31,12 +28,12 @@ void Toggle::process()
 
 void Toggle::setup()
 {
-    out = addOutput<connection_types::BooleanMessage>("Signal");
+    out = addOutput<connection_types::DirectMessage<bool> >("Signal");
 }
 
 void Toggle::tick()
 {
-    csapex::connection_types::BooleanMessage::Ptr msg(new csapex::connection_types::BooleanMessage);
+    csapex::connection_types::DirectMessage<bool>::Ptr msg(new csapex::connection_types::DirectMessage<bool>);
     msg->value = signal_;
     out->publish(msg);
 }

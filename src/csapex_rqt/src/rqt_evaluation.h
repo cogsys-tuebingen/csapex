@@ -26,11 +26,13 @@ private:
 
     csapex::Settings settings_;
     csapex::GraphPtr graph_;
-    csapex::CommandDispatcher* dispatcher_;
+    csapex::WidgetControllerPtr widget_controller_;
+    csapex::CommandDispatcher::Ptr dispatcher_;
     csapex::CsApexCore core_;
     csapex::CsApexWindow* eva_;
 
     csapex::DragIO drag_io_;
+    csapex::Overlay* overlay_;
     csapex::DesignBoard* board_;
     csapex::Designer* designer_;
 };

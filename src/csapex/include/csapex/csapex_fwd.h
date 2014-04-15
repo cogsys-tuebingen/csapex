@@ -44,6 +44,8 @@ FWD(NodeState);
 FWD(NodeWorker);
 FWD(NodeAdapter);
 
+FWD(WidgetController);
+
 class Designer;
 class DesignBoard;
 

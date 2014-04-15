@@ -23,6 +23,8 @@ class Connection : public QObject, public Selectable {
     friend class command::DeleteFulcrum;
     friend class GraphIO;
     friend class Graph;
+    friend class ConnectionSelectionModel;
+    friend class BoxSelectionModel;
 
 public:
     typedef boost::shared_ptr<Connection> Ptr;

@@ -17,6 +17,7 @@
 #include <csapex/view/design_board.h>
 #include <csapex/view/designer.h>
 #include "ui_csapex_window.h"
+#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <iostream>
@@ -31,8 +32,8 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, GraphPtr graph, Designer* designer, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), graph_(graph), ui(new Ui::EvaluationWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphPtr graph, Designer* designer, QWidget *parent)
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_(graph), ui(new Ui::EvaluationWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
 {
     core_.addListener(this);
 }
@@ -71,10 +72,14 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), designer_,  SLOT(lockToGrid(bool)));
 
     QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
-    QObject::connect(graph, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
+    QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
+    QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
 
-    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), graph,  SLOT(clearSelection()));
-    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), graph,  SLOT(selectAll()));
+    QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), designer_, SLOT(updateDebugInfo()));
+    QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), designer_, SLOT(updateDebugInfo()));
+
+    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), &widget_ctrl_->box_selection_,  SLOT(clearSelection()));
+    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), &widget_ctrl_->box_selection_,  SLOT(selectAll()));
 
     QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
     QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
@@ -84,8 +89,8 @@ void CsApexWindow::construct()
     QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
     QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
-    QObject::connect(graph, SIGNAL(nodeAdded(NodePtr)), this, SLOT(nodeAdded(NodePtr)));
-    QObject::connect(graph, SIGNAL(nodeRemoved(NodePtr)), this, SLOT(nodeRemoved(NodePtr)));
+    QObject::connect(graph, SIGNAL(nodeAdded(NodePtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodePtr)));
+    QObject::connect(graph, SIGNAL(nodeRemoved(NodePtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodePtr)));
 
     QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
@@ -103,7 +108,7 @@ void CsApexWindow::construct()
 
 void CsApexWindow::updateDeleteAction()
 {
-    bool has_selection = graph_->countSelectedConnections() + graph_->countSelectedNodes() > 0;
+    bool has_selection = widget_ctrl_->connection_selection_.countSelected() + widget_ctrl_->box_selection_.countSelected() > 0;
     ui->actionDelete_Selected->setEnabled(has_selection);
 }
 
@@ -372,15 +377,6 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
     designerio.loadSettings(doc);
 }
 
-void CsApexWindow::nodeAdded(Node::Ptr node)
-{
-    designer_->addBox(BoxManager::instance().makeBox(node));
-}
-
-void CsApexWindow::nodeRemoved(NodePtr node)
-{
-    designer_->removeBox(node->getBox());
-}
 
 void CsApexWindow::openSubGraph(Group */*grp*/)
 {

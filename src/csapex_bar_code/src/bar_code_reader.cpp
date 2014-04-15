@@ -2,7 +2,6 @@
 #include "bar_code_reader.h"
 
 /// COMPONENT
-#include <csapex_core_plugins/string_message.h>
 #include <csapex_core_plugins/vector_message.h>
 #include <csapex_vision/roi_message.h>
 
@@ -112,9 +111,7 @@ void BarCodeReader::process()
             }
         }
 
-        StringMessage::Ptr msg(new StringMessage);
-        msg->value = data;
-        out_str->publish(msg);
+        out_str->publishIntegral(data);
 
         data_ = data;
     }
@@ -135,6 +132,6 @@ void BarCodeReader::setup()
 
     in_img = addInput<CvMatMessage>("Image", false, true);
 
-    out_str = addOutput<StringMessage>("String");
+    out_str = addOutput<DirectMessage<std::string> >("String");
     out_roi = addOutput<VectorMessage, RoiMessage>("ROIs");
 }

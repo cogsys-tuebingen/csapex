@@ -3,7 +3,11 @@
 
 /// COMPONENT
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/utility/q_signal_relay.h>
 #include <csapex/model/node.h>
+#include <csapex/model/connector_in.h>
+#include <csapex/model/connector_out.h>
+#include <csapex/view/port.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -16,18 +20,28 @@
 #include <utils_param/color_parameter.h>
 
 /// SYSTEM
+#include <boost/lambda/lambda.hpp>
+#include <boost/lambda/bind.hpp>
+#include <iomanip>
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QComboBox>
 #include <QFileDialog>
 #include <QColorDialog>
-#include <iomanip>
 #include <QGroupBox>
 #include <QScrollArea>
 #include <QListWidget>
+#include <QMouseEvent>
+#include <QMenu>
+#include <QAction>
 
 using namespace csapex;
+using namespace boost::lambda;
+namespace bll = boost::lambda;
+
+boost::arg<1> __1;
+boost::arg<2> __2;
 
 DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee)
     : NodeAdapter(adaptee)
@@ -87,13 +101,56 @@ QString toColorSS(const std::vector<int>& v) {
 }
 
 
+class ParameterContextMenu : public ContextMenuHandler
+{
+public:
+    ParameterContextMenu(param::Parameter *p)
+        : param_(p)
+    {
+
+    }
+
+    void doShowContextMenu(const QPoint& pt)
+    {
+        QWidget* w = dynamic_cast<QWidget*>(parent());
+        if(!w) {
+            return;
+        }
+
+        QPoint gpt = w->mapToGlobal(pt);
+
+        QMenu menu;
+        ContextMenuHandler::addHeader(menu, std::string("Parameter: ") + param_->name());
+
+        QAction* connectable = new QAction("connectable", &menu);
+        connectable->setCheckable(true);
+        connectable->setChecked(param_->isInteractive());
+        connectable->setIcon(QIcon(":/connector.png"));
+
+        connectable->setIconVisibleInMenu(true);
+        menu.addAction(connectable);
+
+        QAction* selectedItem = menu.exec(gpt);
+        if (selectedItem) {
+            if(selectedItem == connectable) {
+                param_->setInteractive(!param_->isInteractive());
+            }
+        }
+    }
+
+private:
+    param::Parameter* param_;
+};
+
+
+
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
     static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
-        mapping_[_TYPE_().ID()] = boost::bind(static_cast<void (DefaultNodeAdapter::*)( _TYPE_* )> (&DefaultNodeAdapter::setupParameter), _1, \
-boost::bind(&boost::shared_ptr<_TYPE_>::get, boost::bind(&boost::dynamic_pointer_cast<_TYPE_, param::Parameter>, _2)))
+    mapping_[_TYPE_().ID()] = boost::bind(static_cast<void (DefaultNodeAdapter::*)( _TYPE_* )> (&DefaultNodeAdapter::setupParameter), __1, \
+    boost::bind(&boost::shared_ptr<_TYPE_>::get, boost::bind(&boost::dynamic_pointer_cast<_TYPE_, param::Parameter>, __2)))
 
         INSTALL(param::TriggerParameter);
         INSTALL(param::ColorParameter);
@@ -121,12 +178,15 @@ boost::bind(&boost::shared_ptr<_TYPE_>::get, boost::bind(&boost::dynamic_pointer
         current_name_= parameter->name();
         current_display_name_ = current_name_;
         std::size_t separator_pos = current_name_.find_first_of('/');
+
+        QBoxLayout* group_layout = NULL;
+
         if(separator_pos != std::string::npos) {
             std::string group = current_name_.substr(0, separator_pos);
             current_display_name_ = current_name_.substr(separator_pos+1);
 
             if(groups.find(group) != groups.end()) {
-                current_layout_ = groups[group];
+                group_layout = groups[group];
             } else {
                 QGroupBox* gb = new QGroupBox(group.c_str());
                 gb->setContentsMargins(0,0,0,0);
@@ -136,12 +196,12 @@ boost::bind(&boost::shared_ptr<_TYPE_>::get, boost::bind(&boost::dynamic_pointer
                 gb->setCheckable(true);
                 gb_layout->setContentsMargins(0,0,0,0);
 
-                current_layout_ = new QVBoxLayout;
-                groups.insert(std::make_pair(group, current_layout_));
-                current_layout_->setContentsMargins(0,0,0,0);
+                group_layout = new QVBoxLayout;
+                groups.insert(std::make_pair(group, group_layout));
+                group_layout->setContentsMargins(0,0,0,0);
 
                 QFrame* hider = new QFrame;
-                hider->setLayout(current_layout_);
+                hider->setLayout(group_layout);
                 hider->setContentsMargins(0,0,0,0);
                 gb_layout->addWidget(hider);
 
@@ -158,12 +218,45 @@ boost::bind(&boost::shared_ptr<_TYPE_>::get, boost::bind(&boost::dynamic_pointer
             continue;
         }
 
+        current_layout_ = new QHBoxLayout;
+
+        // connect parameter input, if available
+        ConnectorIn* param_in = node_->getParameterInput(current_name_);
+        if(param_in) {
+            Port* port = new Port(node_->getCommandDispatcher(), param_in);
+            port->setVisible(p->isInteractive());
+            interactive_changed(*p).connect(boost::bind(&Port::setVisible, port, __2));
+            current_layout_->addWidget(port);
+        }
+
+        // generate UI element
         if(mapping_.find(p->ID()) != mapping_.end()) {
             mapping_[p->ID()](this, p);
 
         } else {
             current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet registered (value: " + type2name(p->type()) + ")").c_str()));
         }
+
+        // connect parameter output, if available
+        ConnectorOut* param_out = node_->getParameterOutput(current_name_);
+        if(param_out) {
+            Port* port = new Port(node_->getCommandDispatcher(), param_out);
+            port->setVisible(p->isInteractive());
+            interactive_changed(*p).connect(boost::bind(&Port::setVisible, port, __2));
+
+            qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&param::Parameter::triggerChange, p.get()));
+            callbacks.push_back(call_trigger);
+            QObject::connect(param_out, SIGNAL(connectionDone()), call_trigger, SLOT(call()));
+            current_layout_->addWidget(port);
+        }
+
+        // put into layout
+        if(group_layout) {
+            group_layout->addLayout(current_layout_);
+        } else {
+            outer_layout->addLayout(current_layout_);
+        }
+
     }
 }
 
@@ -173,7 +266,7 @@ void DefaultNodeAdapter::setupParameter(param::TriggerParameter * trigger_p)
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(trigger_p)));
 
     boost::function<void()> cb = boost::bind(&param::TriggerParameter::trigger, trigger_p);
     qt_helper::Call* call_trigger = new qt_helper::Call(cb);
@@ -190,7 +283,7 @@ void DefaultNodeAdapter::setupParameter(param::ColorParameter *color_p)
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(color_p)));
 
     // ui callback
     boost::function<void()> cb = boost::bind(&updateColor, color_p);
@@ -216,10 +309,10 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     sub->addWidget(path);
     sub->addWidget(open);
 
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(path_p)));
 
     // ui change -> model
-    boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
+    boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, __1);
     boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_, boost::bind(qstring2stdstring, boost::bind(&QLineEdit::text, path)));
     qt_helper::Call* call_set_path = new qt_helper::Call(cb);
     callbacks.push_back(call_set_path);
@@ -232,9 +325,9 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     callbacks.push_back(call_open);
 
     // model change -> ui
-    boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
-    boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, path, boost::bind(stdstring2qstring, _1));
-    connections.push_back(parameter_changed(*path_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::string>, this, _1, set)));
+    boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, __1);
+    boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, path, boost::bind(stdstring2qstring, __1));
+    connections.push_back(parameter_changed(*path_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::string>, this, __1, set)));
 
     QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
     QObject::connect(open, SIGNAL(clicked()), call_open, SLOT(call()));
@@ -252,18 +345,18 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         sub->addWidget(txt_);
         sub->addWidget(send);
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
+        boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, __1);
         boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_, boost::bind(qstring2stdstring, boost::bind(&QLineEdit::text, txt_)));
         qt_helper::Call* call = new qt_helper::Call(cb);
         callbacks.push_back(call);
 
         // model change -> ui
-        boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
-        boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, txt_, boost::bind(stdstring2qstring, _1));
-        connections.push_back(parameter_changed(*value_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::string>, this, _1, set)));
+        boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, __1);
+        boost::function<void(const std::string&)> set = boost::bind(&QLineEdit::setText, txt_, boost::bind(stdstring2qstring, __1));
+        connections.push_back(parameter_changed(*value_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::string>, this, __1, set)));
 
         QObject::connect(txt_, SIGNAL(returnPressed()), call, SLOT(call()));
         QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
@@ -272,7 +365,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         QCheckBox* box = new QCheckBox;
         box->setChecked(value_p->as<bool>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
         boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParam<bool>, this, current_name_, boost::bind(&QCheckBox::isChecked, box));
@@ -280,8 +373,8 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         callbacks.push_back(call);
 
         // model change -> ui
-        boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, _1);
-        connections.push_back(parameter_changed(*value_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<bool>, this, _1, set)));
+        boost::function<void(bool)> set = boost::bind(&QCheckBox::setChecked, box, __1);
+        connections.push_back(parameter_changed(*value_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<bool>, this, __1, set)));
 
         QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
 
@@ -290,7 +383,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         box->setDecimals(10);
         box->setValue(value_p->as<double>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
         boost::function<void()> cb = boost::bind(&param::ValueParameter::set<double>, value_p, boost::bind(&QDoubleSpinBox::value, box));
@@ -302,6 +395,22 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 
         QObject::connect(box, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
+    }  else if(value_p->is<int>()) {
+        QSpinBox* box = new QSpinBox;
+        box->setValue(value_p->as<int>());
+
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
+
+        // ui change -> model
+        boost::function<void()> cb = boost::bind(&param::ValueParameter::set<int>, value_p, boost::bind(&QSpinBox::value, box));
+        qt_helper::Call* call = new qt_helper::Call(cb);
+        callbacks.push_back(call);
+
+        // model change -> ui
+        connections.push_back(parameter_changed(*value_p).connect(boost::bind(&QSpinBox::setValue, box, boost::bind(&param::ValueParameter::as<int>, value_p))));
+
+        QObject::connect(box, SIGNAL(valueChanged(int)), call, SLOT(call()));
+
     } else {
         current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (value: " + type2name(value_p->type()) + ")").c_str()));
     }
@@ -310,7 +419,9 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
 {
     if(range_p->is<int>()) {
-        QIntSlider* slider = QtHelper::makeIntSlider(current_layout_, current_display_name_ , range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(), node_->getCommandDispatcher());
+        QIntSlider* slider = QtHelper::makeIntSlider(current_layout_, current_display_name_ ,
+                                                     range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(),
+                                                     new ParameterContextMenu(range_p));
         slider->setIntValue(range_p->as<int>());
 
         // ui change -> model
@@ -319,13 +430,15 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         callbacks.push_back(call);
 
         // model change -> ui
-        boost::function<void(int)> set = boost::bind(&QIntSlider::setIntValue, slider, _1);
-        connections.push_back(parameter_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<int>, this, _1, set)));
+        boost::function<void(int)> set = boost::bind(&QIntSlider::setIntValue, slider, __1);
+        connections.push_back(parameter_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<int>, this, __1, set)));
 
         QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
     } else if(range_p->is<double>()) {
-        QDoubleSlider* slider = QtHelper::makeDoubleSlider(current_layout_, current_display_name_ , range_p->def<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>());
+        QDoubleSlider* slider = QtHelper::makeDoubleSlider(current_layout_, current_display_name_ ,
+                                                           range_p->def<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>(),
+                                                           new ParameterContextMenu(range_p));
         slider->setDoubleValue(range_p->as<double>());
 
         // ui change -> model
@@ -334,8 +447,8 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         callbacks.push_back(call);
 
         // model change -> ui
-        boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, _1);
-        connections.push_back(parameter_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<double>, this, _1, set)));
+        boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, __1);
+        connections.push_back(parameter_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<double>, this, __1, set)));
 
         QObject::connect(slider, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
@@ -348,7 +461,9 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
 {
     if(interval_p->is<std::pair<int, int> >()) {
         const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
-        QxtSpanSlider* slider = QtHelper::makeSpanSlider(current_layout_, current_display_name_, v.first, v.second, interval_p->min<int>(), interval_p->max<int>());
+        QxtSpanSlider* slider = QtHelper::makeSpanSlider(current_layout_, current_display_name_,
+                                                         v.first, v.second, interval_p->min<int>(), interval_p->max<int>(),
+                                                         new ParameterContextMenu(interval_p));
 
         // ui change -> model
         boost::function<int()> low = boost::bind(&QxtSpanSlider::lowerValue, slider);
@@ -359,20 +474,31 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
         callbacks.push_back(call);
 
         // model change -> ui
-        boost::function<void(int)> setLow = boost::bind(&QxtSpanSlider::setLowerValue, slider, _1);
-        boost::function<void(int)> setHigh = boost::bind(&QxtSpanSlider::setUpperValue, slider, _1);
-        boost::function<void(std::pair<int,int>)> setLowFromPair = boost::bind(setLow, boost::bind(&std::pair<int,int>::first, _1));
-        boost::function<void(std::pair<int,int>)> setHighFromPair = boost::bind(setHigh, boost::bind(&std::pair<int,int>::second, _1));
+        boost::function<void(int)> setLow = boost::bind(&QxtSpanSlider::setLowerValue, slider, __1);
+        boost::function<void(int)> setHigh = boost::bind(&QxtSpanSlider::setUpperValue, slider, __1);
+        boost::function<void(std::pair<int,int>)> setLowFromPair = boost::bind(setLow, boost::bind(&std::pair<int,int>::first, __1));
+        boost::function<void(std::pair<int,int>)> setHighFromPair = boost::bind(setHigh, boost::bind(&std::pair<int,int>::second, __1));
 
-        connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<int,int> >, this, _1, setLowFromPair)));
-        connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<int,int> >, this, _1, setHighFromPair)));
+        connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<int,int> >, this, __1, setLowFromPair)));
+        connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<int,int> >, this, __1, setHighFromPair)));
+
+
+        boost::function<void(int)> setMin = boost::bind(&QxtSpanSlider::setMinimum, slider, __1);
+        boost::function<void(int)> setMax = boost::bind(&QxtSpanSlider::setMaximum, slider, __1);
+        boost::function<void(const param::IntervalParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::IntervalParameter::min<int>, __1));
+        boost::function<void(const param::IntervalParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::IntervalParameter::max<int>, __1));
+
+        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMinFromParam)));
+        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMaxFromParam)));
 
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
     } else if(interval_p->is<std::pair<double, double> >()) {
         const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
-        QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(current_layout_, current_display_name_, v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>());
+        QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(current_layout_, current_display_name_,
+                                                                     v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>(),
+                                                                     new ParameterContextMenu(interval_p));
 
         // ui change -> model
         boost::function<double()> low = boost::bind(&QxtDoubleSpanSlider::lowerDoubleValue, slider);
@@ -383,13 +509,27 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
         callbacks.push_back(call);
 
         // model change -> ui
-        boost::function<void(double)> setLow = boost::bind(&QxtDoubleSpanSlider::setLowerDoubleValue, slider, _1);
-        boost::function<void(double)> setHigh = boost::bind(&QxtDoubleSpanSlider::setUpperDoubleValue, slider, _1);
-        boost::function<void(std::pair<double,double>)> setLowFromPair = boost::bind(setLow, boost::bind(&std::pair<double,double>::first, _1));
-        boost::function<void(std::pair<double,double>)> setHighFromPair = boost::bind(setHigh, boost::bind(&std::pair<double,double>::second, _1));
+        boost::function<void(double, double)> setSpan = boost::bind(&QxtDoubleSpanSlider::setSpan, slider, __1, __2);
+        boost::function<void(std::pair<double,double>)> setSpanFromPair = boost::bind(setSpan,
+                                                                                      boost::bind(&std::pair<double,double>::first, __1),
+                                                                                      boost::bind(&std::pair<double,double>::second, __1));
+        connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<double,double> >,
+                                                                                 this, __1, setSpanFromPair)));
 
-        connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<double,double> >, this, _1, setLowFromPair)));
-        connections.push_back(parameter_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<std::pair<double,double> >, this, _1, setHighFromPair)));
+
+        boost::function<void(double,double)> setInterval = boost::bind(&QxtDoubleSpanSlider::setDoubleRange, slider, __1, __2);
+        boost::function<void(const param::IntervalParameter*)> setFromParam = boost::bind(setInterval,
+                                                                                          boost::bind(&param::IntervalParameter::min<double>, __1),
+                                                                                          boost::bind(&param::IntervalParameter::max<double>, __1));
+        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setFromParam)));
+
+//        boost::function<void(double)> setMin = boost::bind(&QxtDoubleSpanSlider::setDoubleMinimum, slider, __1);
+//        boost::function<void(double)> setMax = boost::bind(&QxtDoubleSpanSlider::setDoubleMaximum, slider, __1);
+//        boost::function<void(const param::IntervalParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::IntervalParameter::min<double>, __1));
+//        boost::function<void(const param::IntervalParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::IntervalParameter::max<double>, __1));
+
+//        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMinFromParam)));
+//        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMaxFromParam)));
 
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
@@ -405,20 +545,20 @@ void DefaultNodeAdapter::setupParameter(param::SetParameter *set_p)
     QComboBox* combo = new QComboBox;
 
     updateUiSetScope(set_p, combo);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, combo));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, combo, new ParameterContextMenu(set_p)));
 
     // ui change -> model
-    boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, _1);
+    boost::function<std::string(const QString&)> qstring2stdstring = boost::bind(&QString::toStdString, __1);
     boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParamSet, this, current_name_, boost::bind(qstring2stdstring, boost::bind(&QComboBox::currentText, combo)));
     qt_helper::Call* call = new qt_helper::Call(cb);
     callbacks.push_back(call);
 
     // model change -> ui
-    boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, _1);
-    boost::function<int(const QString&)> txt2idx = boost::bind(&QComboBox::findData, combo, _1, Qt::DisplayRole, static_cast<Qt::MatchFlags>(Qt::MatchExactly|Qt::MatchCaseSensitive));
-    boost::function<void(const QString&)> select = boost::bind(&QComboBox::setCurrentIndex, combo, boost::bind(txt2idx, _1));
-    boost::function<void(const std::string&)> set = boost::bind(select, boost::bind(stdstring2qstring, _1));
-    connections.push_back(parameter_changed(*set_p).connect(boost::bind(&DefaultNodeAdapter::updateUiSet, this, _1, set)));
+    boost::function<QString(const std::string&)> stdstring2qstring = boost::bind(&QString::fromStdString, __1);
+    boost::function<int(const QString&)> txt2idx = boost::bind(&QComboBox::findData, combo, __1, Qt::DisplayRole, static_cast<Qt::MatchFlags>(Qt::MatchExactly|Qt::MatchCaseSensitive));
+    boost::function<void(const QString&)> select = boost::bind(&QComboBox::setCurrentIndex, combo, boost::bind(txt2idx, __1));
+    boost::function<void(const std::string&)> set = boost::bind(select, boost::bind(stdstring2qstring, __1));
+    connections.push_back(parameter_changed(*set_p).connect(boost::bind(&DefaultNodeAdapter::updateUiSet, this, __1, set)));
 
     connections.push_back(scope_changed(*set_p).connect(boost::bind(&DefaultNodeAdapter::updateUiSetScope, this, set_p, combo)));
 
@@ -488,6 +628,11 @@ void DefaultNodeAdapter::updateUi(const param::Parameter* p, boost::function<voi
     setter(node_->param<T>(p->name()));
 }
 
+template <typename T>
+void DefaultNodeAdapter::updateUiPtr(const param::Parameter* p, boost::function<void(const T*)> setter)
+{
+    setter(dynamic_cast<const T*>(p));
+}
 
 void DefaultNodeAdapter::updateUiSet(const param::Parameter *p, boost::function<void (const std::string &)> setter)
 {

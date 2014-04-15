@@ -182,7 +182,7 @@ void FilterStaticMask::State::writeYaml(YAML::Emitter& out) const {
  }
 
 void FilterStaticMask::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("rawdata")){
+    if(exists(node, "rawdata")){
         int rows, cols;
         node["rows"] >> rows;
         node["cols"] >> cols;
@@ -193,7 +193,7 @@ void FilterStaticMask::State::readYaml(const YAML::Node& node) {
 
         cv::Mat(rows, cols, CV_8UC1, raw.data()).copyTo(mask_);
 
-    } else  if(node.FindValue("mask")) {
+    } else  if(exists(node, "mask")) {
         std::string file;
         node["mask"] >> file;
         mask_ = cv::imread(file, 0);

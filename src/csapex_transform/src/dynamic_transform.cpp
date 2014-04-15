@@ -7,11 +7,9 @@
 #include "listener.h"
 
 /// PROJECT
-
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/utility/qt_helper.hpp>
-#include <csapex_core_plugins/string_message.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -33,7 +31,7 @@ void DynamicTransform::process()
     setError(false);
     bool update = false;
     if(frame_in_from_->isConnected() && frame_in_from_->hasMessage()) {
-        std::string from = frame_in_from_->getMessage<connection_types::StringMessage>()->value;
+        std::string from = frame_in_from_->getMessage<connection_types::DirectMessage<std::string> >()->value;
 
         if(state.from_ != from) {
             state.from_ = from;
@@ -49,7 +47,7 @@ void DynamicTransform::process()
     }
 
     if(frame_in_to_->isConnected() && frame_in_to_->hasMessage()) {
-        std::string to = frame_in_to_->getMessage<connection_types::StringMessage>()->value;
+        std::string to = frame_in_to_->getMessage<connection_types::DirectMessage<std::string> >()->value;
 
         if(state.to_ != to) {
             state.to_ = to;
@@ -105,7 +103,7 @@ void DynamicTransform::publishTransform(const ros::Time& time)
     msg->value = t;
     output_->publish(msg);
 
-    connection_types::StringMessage::Ptr frame(new connection_types::StringMessage);
+    connection_types::DirectMessage<std::string>::Ptr frame(new connection_types::DirectMessage<std::string>);
     frame->value = state.to_;
     output_frame_->publish(frame);
 }
@@ -115,11 +113,11 @@ void DynamicTransform::setup()
     setSynchronizedInputs(true);
 
     time_in_ = addInput<connection_types::TimeStampMessage>("Time", true);
-    frame_in_from_ = addInput<connection_types::StringMessage>("Origin Frame", true, true);
-    frame_in_to_ = addInput<connection_types::StringMessage>("Target Frame", true, true);
+    frame_in_from_ = addInput<connection_types::DirectMessage<std::string> >("Origin Frame", true, true);
+    frame_in_to_ = addInput<connection_types::DirectMessage<std::string> >("Target Frame", true, true);
 
     output_ = addOutput<connection_types::TransformMessage>("Transform");
-    output_frame_ = addOutput<connection_types::StringMessage>("Target Frame");
+    output_frame_ = addOutput<connection_types::DirectMessage<std::string> >("Target Frame");
 }
 
 void DynamicTransform::fill(QBoxLayout* layout)
@@ -248,10 +246,10 @@ void DynamicTransform::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "to" << YAML::Value << to_;
 }
 void DynamicTransform::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("from")) {
+    if(exists(node, "from")) {
         node["from"] >> from_;
     }
-    if(node.FindValue("to")) {
+    if(exists(node, "to")) {
         node["to"] >> to_;
     }
 }

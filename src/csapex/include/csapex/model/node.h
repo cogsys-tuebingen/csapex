@@ -26,7 +26,7 @@ namespace csapex {
 template <typename T>
 class RosMessageConversionT;
 
-class Node : public QObject, public ErrorState, public Unique, public Timable
+class Node : public QObject, public ErrorState, public Unique, public Timable, public param::Parameter::access
 {
     Q_OBJECT
 
@@ -45,7 +45,6 @@ public:
 public:
     Node(const UUID &uuid = UUID::NONE);
     virtual ~Node();
-    virtual void setup();
 
     void setType(const std::string& type);
     std::string getType() const;
@@ -78,8 +77,12 @@ public:
     }
 
     param::Parameter::Ptr getParameter(const std::string& name) const;
+
     bool isParameterEnabled(const std::string& name) const;
     void setParameterEnabled(const std::string& name, bool enabled);
+
+    ConnectorIn* getParameterInput(const std::string& name) const;
+    ConnectorOut* getParameterOutput(const std::string& name) const;
 
     virtual QIcon getIcon() const;
 
@@ -104,13 +107,11 @@ public:
     void setNodeStateLater(NodeStatePtr state);
     NodeStatePtr getNodeState();
 
-    /// TODO: get rid of this
-    virtual void setBox(Box* box);
-    Box* getBox() const;//  __attribute__ ((deprecated));
-
     void setSettings(Settings* settings);
 
     NodeWorker* getNodeWorker() const;
+
+    void doSetup();
 
     /// "real" messages
     template <typename T>
@@ -170,6 +171,9 @@ public:
     void addInput(ConnectorIn* in) __attribute__ ((deprecated));
     void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
 
+    void manageInput(ConnectorIn* in);
+    void manageOutput(ConnectorOut* out);
+
     int countInputs() const;
     int countOutputs() const;
 
@@ -220,6 +224,10 @@ protected:
 
     Settings& getSettings();
 
+    template <typename T>
+    void updateParameter(param::Parameter*);
+    void updateParameters();
+
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
@@ -234,6 +242,7 @@ protected:
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);
     virtual void process() = 0;
+    virtual void setup() = 0;
 
     virtual void enable(bool e);
     virtual void enable();
@@ -263,6 +272,7 @@ Q_SIGNALS:
     void stateChanged();
     void modelChanged();
     void toggled(bool);
+    void enabled(bool);
     void started();
 
     void connectionInProgress(Connectable*, Connectable*);
@@ -273,7 +283,9 @@ Q_SIGNALS:
     void connectorRemoved(Connectable*);
 
     void connectorEnabled(Connectable*);
-    void connectorDisabled(Connectable*);
+    void connectorDisabled(Connectable*);    
+
+    void nodeError(bool error, const std::string &msg, int level);
 
 protected:
     std::string type_;
@@ -281,7 +293,6 @@ protected:
 
 private:
     Settings* settings_;
-    Box* box_;
 
     QThread* private_thread_;
     QMutex worker_mutex_;
@@ -289,15 +300,22 @@ private:
     NodeWorker* worker_;
 
     NodeStatePtr node_state_;
+    std::map<std::string, ConnectorIn*> param_2_input_;
+    std::map<std::string, ConnectorOut*> param_2_output_;
 
-    std::vector<ConnectorIn*> input;
-    std::vector<ConnectorOut*> output;
+    std::vector<ConnectorIn*> inputs_;
+    std::vector<ConnectorOut*> outputs_;
+
+    std::vector<ConnectorIn*> managed_inputs_;
+    std::vector<ConnectorOut*> managed_outputs_;
 
     CommandDispatcher* dispatcher_;
 
     bool loaded_state_available_;
 
     GenericState state;
+    std::vector<boost::signals2::connection> connections;
+    std::vector<QObject*> callbacks;
 };
 
 }

@@ -90,7 +90,7 @@ void VoxelGrid::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "resolution" << YAML::Value << resolution_;
 }
 void VoxelGrid::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("resolution")) {
+    if(exists(node, "resolution")) {
         node["resolution"] >> resolution_;
     }
 }

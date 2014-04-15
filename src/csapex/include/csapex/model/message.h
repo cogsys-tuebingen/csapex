@@ -221,6 +221,10 @@ struct DirectMessage : public Message {
     void readYaml(YAML::Node& node) {
     }
 
+    Type getValue() {
+        return value;
+    }
+
     Type value;
 };
 

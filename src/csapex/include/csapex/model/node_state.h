@@ -23,7 +23,7 @@ struct NodeState : public Memento {
 
     Node* parent;
 
-    mutable Memento::Ptr boxed_state;
+    mutable Memento::Ptr child_state;
 
     std::string label_;
     QPoint pos;

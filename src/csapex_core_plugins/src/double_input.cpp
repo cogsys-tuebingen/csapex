@@ -9,41 +9,52 @@
 /// SYSTEM
 #include <csapex/utility/register_apex_plugin.h>
 
-CSAPEX_REGISTER_CLASS(csapex::DoubleInput, csapex::Node)
-
 using namespace csapex;
 
-DoubleInput::DoubleInput()
+template <typename T>
+NumberInput<T>::NumberInput()
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("General"));
 
-    addParameter(param::ParameterFactory::declareValue<double>("value", 0.0));
-    addParameter(param::ParameterFactory::declareTrigger("publish"), boost::bind(&DoubleInput::process, this));
+    addParameter(param::ParameterFactory::declareValue<T>("value", (T) 0.0));
+    addParameter(param::ParameterFactory::declareTrigger("publish"), boost::bind(&NumberInput::process, this));
     addParameter(param::ParameterFactory::declareBool("tick", false));
 }
 
-QIcon DoubleInput::getIcon() const
-{
-    return QIcon(":/pencil.png");
-}
-
-void DoubleInput::tick()
+template <typename T>
+void NumberInput<T>::tick()
 {
     if(param<bool>("tick")) {
         process();
     }
 }
 
-void DoubleInput::setup()
+template <typename T>
+QIcon NumberInput<T>::getIcon() const
+{
+    return QIcon(":/pencil.png");
+}
+
+template <typename T>
+void NumberInput<T>::setup()
 {
     setSynchronizedInputs(true);
 
-    out_ = addOutput<double>("Double");
+    out_ = addOutput<T>(type2name(typeid(T)));
 }
 
-void DoubleInput::process()
+template <typename T>
+void NumberInput<T>::process()
 {
-    double val = param<double>("value");
+    T val = param<T>("value");
     out_->publishIntegral(val);
 }
+
+namespace csapex {
+typedef NumberInput<int> IntInput;
+typedef NumberInput<double> DoubleInput;
+}
+
+CSAPEX_REGISTER_CLASS(csapex::IntInput, csapex::Node)
+CSAPEX_REGISTER_CLASS(csapex::DoubleInput, csapex::Node)

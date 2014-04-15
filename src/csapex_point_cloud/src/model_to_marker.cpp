@@ -53,7 +53,7 @@ void ModelToMarker::setup()
     setSynchronizedInputs(true);
     input_ = addInput<GenericVectorMessage, ModelMessage >("ModelMessages");
     output_ = addOutput<visualization_msgs::MarkerArray>("Marker");
-    output_text_ = addOutput<StringMessage>("String");
+    output_text_ = addOutput<std::string>("String");
 
     addParameter(param::ParameterFactory::declareBool("publish marker", true));
 }
@@ -173,8 +173,7 @@ void ModelToMarker::publishText(const ModelMessage model_message)
         stringstream << " [" << i1 << "]=" << model_message.coefficients->values.at(i1);
     }
     stringstream << " Prob: " << model_message.probability;
-    StringMessage::Ptr text_msg(new StringMessage);
-    text_msg->value = stringstream.str();
-    output_text_->publish(text_msg);
+    std::string text_msg = stringstream.str();
+    output_text_->publishIntegral(text_msg);
 }
 

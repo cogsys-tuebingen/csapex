@@ -35,7 +35,7 @@ ImportRos::ImportRos()
     addTag(Tag::get("Input"));
 
     std::vector<std::string> set;
-    set.push_back("/");
+    set.push_back("no topic");
     addParameter(param::ParameterFactory::declareParameterStringSet("topic", set),
                  boost::bind(&ImportRos::update, this));
 
@@ -58,8 +58,6 @@ void ImportRos::setup()
 
 void ImportRos::refresh()
 {
-    ROSHandler::instance().refresh();
-
     if(ROSHandler::instance().nh()) {
         std::string old_topic = param<std::string>("topic");
 
@@ -74,7 +72,10 @@ void ImportRos::refresh()
                 topics_str.push_back(it->name);
             }
             setp->setSet(topics_str);
-            setp->set(old_topic);
+
+            if(old_topic != "no topic") {
+                setp->set(old_topic);
+            }
             return;
         }
     }
@@ -85,6 +86,10 @@ void ImportRos::refresh()
 void ImportRos::update()
 {
     ROSHandler::instance().refresh();
+
+    if(!ROSHandler::instance().isConnected()) {
+        return;
+    }
 
     ros::master::V_TopicInfo topics;
     ros::master::getTopics(topics);

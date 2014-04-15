@@ -4,7 +4,6 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex_point_cloud/point_cloud_message.h>
-#include <csapex_core_plugins/string_message.h>
 #include <csapex_point_cloud/model_message.h>
 
 /// POINT CLOUD

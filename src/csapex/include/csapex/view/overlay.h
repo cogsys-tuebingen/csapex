@@ -18,7 +18,7 @@ class Overlay : public QWidget
     Q_OBJECT
 
 public:
-    Overlay(GraphPtr graph, CommandDispatcher* dispatcher, QWidget* parent = 0);
+    Overlay(GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, QWidget* parent = 0);
 
 public Q_SLOTS:
     void addTemporaryConnection(Connectable* from, Connectable* to);
@@ -71,6 +71,7 @@ protected:
 
 protected:
     CommandDispatcher* dispatcher_;
+    WidgetControllerPtr widget_ctrl_;
     GraphPtr graph_;
 
     struct TempConnection {

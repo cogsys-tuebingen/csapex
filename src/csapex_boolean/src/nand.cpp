@@ -1,9 +1,6 @@
 /// HEADER
 #include "nand.h"
 
-/// COMPONENT
-#include <csapex_boolean/boolean_message.h>
-
 /// PROJECT
 #include <csapex/model/connector_out.h>
 #include <csapex/model/connector_in.h>
@@ -26,18 +23,18 @@ void NAND::setup()
 {
     setSynchronizedInputs(true);
 
-    in_a = addInput<BooleanMessage>("A");
-    in_b = addInput<BooleanMessage>("B");
+    in_a = addInput<DirectMessage<bool> >("A");
+    in_b = addInput<DirectMessage<bool> >("B");
 
-    out = addOutput<BooleanMessage>("A nand B");
+    out = addOutput<DirectMessage<bool> >("A nand B");
 }
 
 void NAND::process()
 {
-    BooleanMessage::Ptr a = in_a->getMessage<BooleanMessage>();
-    BooleanMessage::Ptr b = in_b->getMessage<BooleanMessage>();
+    DirectMessage<bool>::Ptr a = in_a->getMessage<DirectMessage<bool> >();
+    DirectMessage<bool>::Ptr b = in_b->getMessage<DirectMessage<bool> >();
 
-    BooleanMessage::Ptr msg(new BooleanMessage);
+    DirectMessage<bool>::Ptr msg(new DirectMessage<bool>);
     msg->value = !(a->value && b->value);
     out->publish(msg);
 }

@@ -22,7 +22,8 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
     if(adaptee_) {
         adaptee_->setPort(this);
         adaptee_->setCommandDispatcher(dispatcher);
-        setToolTip(adaptee_->getUUID().c_str());
+
+        createToolTip();
 
         QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
     } else {
@@ -139,15 +140,16 @@ void Port::setPortProperty(const std::string& name, bool b)
     refreshStylesheet();
 }
 
+void Port::createToolTip()
+{
+    std::stringstream tooltip;
+    tooltip << "UUID: " << adaptee_->getUUID().c_str() << ", Type: " << adaptee_->getType()->name() << ", Messages: " << adaptee_->getCount();
+    setToolTip(tooltip.str().c_str());
+}
+
 void Port::mouseMoveEvent(QMouseEvent* e)
 {
-    std::stringstream tt;
-    tt << adaptee_->getUUID() << " (count: " << adaptee_->getCount() <<
-          ", enabled: " << adaptee_->isEnabled() <<
-          ", blocked: " << adaptee_->isBlocked() <<
-          ", processing: " << adaptee_->isProcessing() <<
-          ", error: " << adaptee_->isError() << ")";
-    setToolTip(tt.str().c_str());
+    createToolTip();
 
     if(buttons_down_ == Qt::NoButton) {
         return;

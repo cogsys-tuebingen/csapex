@@ -28,13 +28,13 @@ GraphIO::GraphIO(Graph::Ptr graph)
 void GraphIO::saveSettings(YAML::Emitter& yaml)
 {
     yaml << YAML::Key << "uuid_map";
-    yaml << YAML::Value << graph_->uuids;    
+    yaml << YAML::Value << graph_->uuids_;    
 }
 
 void GraphIO::loadSettings(YAML::Node &doc)
 {
-    if(doc.FindValue("uuid_map")) {
-        doc["uuid_map"] >> graph_->uuids;
+    if(exists(doc, "uuid_map")) {
+        doc["uuid_map"] >> graph_->uuids_;
     }
 }
 
@@ -49,7 +49,7 @@ void GraphIO::loadBoxes(YAML::Parser& parser)
 {
     YAML::Node doc;
 
-    while(parser.GetNextDocument(doc)) {
+    while(getNextDocument(parser, doc)) {
         std::string type, uuid_tmp;
         doc["type"] >> type;
         doc["uuid"] >> uuid_tmp;
@@ -82,7 +82,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Value << YAML::BeginSeq; // connections seq
 
     BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
-        if(!node->output.empty()) {
+        if(!node->getOutputs().empty()) {
             BOOST_FOREACH(ConnectorOut* o, node->getOutputs()) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
@@ -109,7 +109,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Key << "fulcrums";
     yaml << YAML::Value << YAML::BeginSeq; // fulcrums seq
 
-    BOOST_FOREACH(const Connection::Ptr& connection, graph_->visible_connections) {
+    BOOST_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }
@@ -139,7 +139,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
 
 void GraphIO::loadConnections(YAML::Node &doc)
 {
-    if(doc.FindValue("connections")) {
+    if(exists(doc, "connections")) {
         const YAML::Node& connections = doc["connections"];
         assert(connections.Type() == YAML::NodeType::Sequence);
 
@@ -202,7 +202,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
         }
     }
 
-    if(doc.FindValue("fulcrums")) {
+    if(exists(doc, "fulcrums")) {
         const YAML::Node& fulcrums = doc["fulcrums"];
         assert(fulcrums.Type() == YAML::NodeType::Sequence);
 
@@ -237,7 +237,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
             fulcrum["pts"] >> pts;
 
             std::vector<int> types;
-            if(fulcrum.FindValue("types")) {
+            if(exists(fulcrum, "types")) {
                 fulcrum["types"] >> types;
             }
 

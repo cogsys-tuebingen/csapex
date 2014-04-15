@@ -13,7 +13,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/point_cloud.h>
+//#include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/common/impl/io.hpp>
 #include <boost/mpl/for_each.hpp>

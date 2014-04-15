@@ -67,8 +67,8 @@ void SacFit::setup()
 {
     setSynchronizedInputs(true);
     input_ = addInput<PointCloudMessage>("PointCloud");
+    out_text_= addOutput<DirectMessage<std::string> >("String");
     in_indices_ = addInput <GenericVectorMessage, pcl::PointIndices>("Clusters");
-    out_text_= addOutput<StringMessage>("Debug Info");
 
     out_model_ = addOutput<GenericVectorMessage, ModelMessage >("Models");
     out_cloud_ = addOutput<PointCloudMessage>("Points of Model");
@@ -170,7 +170,7 @@ void SacFit::inputCloud(typename pcl::PointCloud<PointT>::Ptr cloud)
         out_cloud_residue_->publish(cloud_msg_residue);
     }
 
-    StringMessage::Ptr text_msg(new StringMessage);
+    DirectMessage<std::string>::Ptr text_msg(new DirectMessage<std::string>);
     text_msg->value = stringstream.str();
     out_text_->publish(text_msg);
 

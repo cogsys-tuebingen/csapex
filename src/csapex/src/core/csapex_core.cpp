@@ -19,13 +19,16 @@
 using namespace csapex;
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
+Q_DECLARE_METATYPE(std::string)
 
 CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cmd_dispatcher)
     : settings_(settings), graph_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 
-    qRegisterMetaType<QSharedPointer<QImage> >("QSharedPointer<QImage>");
+    qRegisterMetaType < QSharedPointer<QImage> > ("QSharedPointer<QImage>");
+    qRegisterMetaType < std::string > ("std::string");
+
     ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ();
     StreamInterceptor::instance().start();
 
@@ -179,12 +182,12 @@ void CsApexCore::load(const std::string &file)
     GraphIO graphio(graph_);
 
     {
+        YAML::Node doc;
+
         std::ifstream ifs(file.c_str());
         YAML::Parser parser(ifs);
 
-        YAML::Node doc;
-
-        if(!parser.GetNextDocument(doc)) {
+        if(!getNextDocument(parser, doc)) {
             std::cerr << "cannot read the config" << std::endl;
             return;
         }
@@ -200,7 +203,7 @@ void CsApexCore::load(const std::string &file)
 
         YAML::Node doc;
 
-        if(!parser.GetNextDocument(doc)) {
+        if(!getNextDocument(parser, doc)) {
             std::cerr << "cannot read the config" << std::endl;
             return;
         }

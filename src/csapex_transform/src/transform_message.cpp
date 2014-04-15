@@ -21,7 +21,7 @@ void TransformMessage::writeYaml(YAML::Emitter& yaml) {
 
 void TransformMessage::readYaml(const YAML::Node& node) {
     double qx,qy,qz,qw,x,y,z;
-    if(node.FindValue("orientation")) {
+    if(exists(node, "orientation")) {
         const YAML::Node& doc = node["orientation"];
         assert(doc.Type() == YAML::NodeType::Sequence);
         doc[0] >> qx;
@@ -29,7 +29,7 @@ void TransformMessage::readYaml(const YAML::Node& node) {
         doc[2] >> qz;
         doc[3] >> qw;
     }
-    if(node.FindValue("translation")) {
+    if(exists(node, "translation")) {
         const YAML::Node& doc = node["translation"];
         assert(doc.Type() == YAML::NodeType::Sequence);
         doc[0] >> x;

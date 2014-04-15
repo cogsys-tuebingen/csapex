@@ -30,7 +30,7 @@ public:
      * @brief EvaluationWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, GraphPtr graph, Designer *designer, QWidget* parent = 0);
+    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphPtr graph, Designer *designer, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void showMenu();
@@ -66,9 +66,6 @@ public Q_SLOTS:
     void saveSettings(YAML::Emitter& e);
     void loadSettings(YAML::Node& doc);
 
-    void nodeAdded(NodePtr node);
-    void nodeRemoved(NodePtr node);
-
     void openSubGraph(Group* grp);
 
 Q_SIGNALS:
@@ -81,7 +78,7 @@ private:
 private:
     CsApexCore& core_;
     CommandDispatcher* cmd_dispatcher_;
-
+    WidgetControllerPtr widget_ctrl_;
     GraphPtr graph_;
 
     Ui::EvaluationWindow* ui;

@@ -1,9 +1,6 @@
 /// HEADER
 #include "register_plugin.h"
 
-/// COMPONENT
-#include <csapex_boolean/boolean_message.h>
-
 /// PROJECT
 #include <csapex/model/tag.h>
 #include <csapex/manager/connection_type_manager.h>
@@ -24,6 +21,4 @@ RegisterPlugin::RegisterPlugin()
 void RegisterPlugin::init(CsApexCore& core)
 {
     Tag::createIfNotExists("Boolean");
-
-    ConnectionTypeManager::registerMessage<connection_types::BooleanMessage>();
 }

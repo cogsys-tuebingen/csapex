@@ -50,7 +50,7 @@ bool DeleteConnection::doExecute()
     connection_id = graph_->getConnectionId(connection);
     remove_fulcrums = graph_->deleteAllConnectionFulcrumsCommand(connection);
 
-    if(Command::executeCommand(graph_, remove_fulcrums)) {
+    if(Command::executeCommand(graph_, widget_ctrl_, remove_fulcrums)) {
         graph_->deleteConnection(connection);
     }
 
@@ -64,7 +64,7 @@ bool DeleteConnection::doUndo()
     }
     graph_->addConnection(Connection::Ptr(new Connection(from, to, connection_id)));
 
-    return Command::undoCommand(graph_, remove_fulcrums);
+    return Command::undoCommand(graph_, widget_ctrl_, remove_fulcrums);
 }
 
 bool DeleteConnection::doRedo()

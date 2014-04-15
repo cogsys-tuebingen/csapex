@@ -16,6 +16,7 @@
 #include <csapex/view/profiling_widget.h>
 #include <csapex/view/node_adapter.h>
 #include <csapex/view/port.h>
+#include <csapex/utility/context_menu_handler.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -36,16 +37,12 @@ Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), profiling_(false), is_placed_(false)
 {
-    //adapter_->setNode(node_.get());
-
-    construct(node);
 }
 
 Box::Box(BoxedObjectPtr node, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_shared_(node.get()),
       down_(false), profiling_(false), is_placed_(false)
 {
-    construct(node);
 }
 
 Box::~Box()
@@ -65,14 +62,14 @@ void Box::setupUi()
     updateFlippedSides();
 }
 
-void Box::construct(NodePtr node)
+void Box::construct()
 {
     ui->setupUi(this);
 
     ui->input_layout->addSpacerItem(new QSpacerItem(16, 0));
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
-    node_->setBox(this);
+    node_->getNodeWorker()->checkConditions();
 
     ui->enablebtn->setCheckable(node_->canBeDisabled());
 
@@ -88,7 +85,7 @@ void Box::construct(NodePtr node)
 
     setLabel(node_->getLabel());
 
-    ui->enablebtn->setIcon(node->getIcon());
+    ui->enablebtn->setIcon(node_->getIcon());
 
     node_->setMinimized(false);
 
@@ -103,6 +100,8 @@ void Box::construct(NodePtr node)
     QObject::connect(node_.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
     QObject::connect(node_.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(node_.get(), SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
+    QObject::connect(node_.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+    QObject::connect(node_.get(), SIGNAL(nodeError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -137,6 +136,8 @@ void Box::showContextMenu(const QPoint& pos)
 
 void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
 {
+    ContextMenuHandler::addHeader(*menu, std::string("Node: ") + node_->getUUID().getShortName());
+
     if(isMinimizedSize()) {
         QAction* max = new QAction("maximize", menu);
         max->setIcon(QIcon(":/maximize.png"));
@@ -193,7 +194,13 @@ std::string Box::errorMessage() const
 {
     return node_->errorMessage();
 }
-void Box::setError(bool e, const std::string &msg, ErrorState::ErrorLevel level)
+
+void Box::setError(bool e, const std::string &msg)
+{
+    setError(e, msg, ErrorState::EL_ERROR);
+}
+
+void Box::setError(bool e, const std::string &msg, int level)
 {
     setToolTip(msg.c_str());
     node_->setErrorSilent(e, msg, level);
@@ -338,6 +345,10 @@ void Box::enabledChange(bool val)
 
 void Box::paintEvent(QPaintEvent*)
 {
+    if(!node_ || !adapter_) {
+        return;
+    }
+
     bool is_error = node_->isError() && node_->errorLevel() == ErrorState::EL_ERROR;
     bool is_warn = node_->isError() && node_->errorLevel() == ErrorState::EL_WARNING;
 
@@ -399,10 +410,16 @@ void Box::triggerPlaced()
 void Box::selectEvent()
 {
     BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        i->getPort()->setSelected(true);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(true);
+        }
     }
     BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        i->getPort()->setSelected(true);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(true);
+        }
     }
     ui->boxframe->setProperty("focused",true);
     refreshStylesheet();
@@ -411,10 +428,16 @@ void Box::selectEvent()
 void Box::deselectEvent()
 {
     BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        i->getPort()->setSelected(false);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(false);
+        }
     }
     BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        i->getPort()->setSelected(false);
+        Port* p = i->getPort();
+        if(p) {
+            p->setSelected(false);
+        }
     }
     ui->boxframe->setProperty("focused",false);
     refreshStylesheet();
@@ -461,7 +484,9 @@ void Box::startDrag(QPoint offset)
 
     QPoint delta = end_pos - start_pos;
     // TODO: ugly
-    node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
+
+    Q_EMIT moveRequest(this,delta);
+    //node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
 }
 
 void Box::deleteBox()
@@ -522,10 +547,16 @@ void Box::updateFlippedSides()
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
     BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-        i->getPort()->setFlipped(flipped);
+        Port* p = i->getPort();
+        if(p) {
+            p->setFlipped(flipped);
+        }
     }
     BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-        i->getPort()->setFlipped(flipped);
+        Port* p = i->getPort();
+        if(p) {
+            p->setFlipped(flipped);
+        }
     }
 }
 
