@@ -28,7 +28,7 @@ add_definitions(${PCL_DEFINITIONS})
 
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES csapex_point_cloud
+# LIBRARIES csapex_point_cloud
   CATKIN_DEPENDS csapex 
 #  DEPENDS system_lib
 )
@@ -72,6 +72,7 @@ add_library(csapex_point_cloud_plugin
     src/cluster_pointcloud.cpp
     src/labeled_cloud_to_indices.cpp
     src/split_clustered_cloud.cpp
+    src/transform_from_models.cpp
     ${QT}
 )
 target_link_libraries(csapex_point_cloud_plugin csapex_core_plugins
