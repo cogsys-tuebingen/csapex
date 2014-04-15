@@ -28,6 +28,7 @@ DynamicTransform::DynamicTransform()
 
 void DynamicTransform::process()
 {
+    setError(false);
     bool update = false;
     if(frame_in_from_->isConnected() && frame_in_from_->hasMessage()) {
         std::string from = frame_in_from_->getMessage<connection_types::DirectMessage<std::string> >()->value;
@@ -83,17 +84,20 @@ void DynamicTransform::publishTransform(const ros::Time& time)
 {
     tf::StampedTransform t;
 
-    {
+    try {
         LockedListener l = Listener::getLocked();
 
         if(l.l) {
             l.l->tfl->lookupTransform(state.to_, state.from_, time, t);
+            setError(false);
         } else {
             return;
         }
+    } catch(const tf2::TransformException& e) {
+        setError(true, e.what(), EL_WARNING);
+        return;
     }
 
-    setError(false);
 
     connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
     msg->value = t;
@@ -242,10 +246,10 @@ void DynamicTransform::State::writeYaml(YAML::Emitter& out) const {
     out << YAML::Key << "to" << YAML::Value << to_;
 }
 void DynamicTransform::State::readYaml(const YAML::Node& node) {
-    if(node.FindValue("from")) {
+    if(exists(node, "from")) {
         node["from"] >> from_;
     }
-    if(node.FindValue("to")) {
+    if(exists(node, "to")) {
         node["to"] >> to_;
     }
 }

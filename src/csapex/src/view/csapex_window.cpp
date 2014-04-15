@@ -67,7 +67,9 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionClear, SIGNAL(triggered()), this,  SLOT(clear()));
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this,  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this,  SLOT(redo()));
+
     QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
+    QObject::connect(&core_, SIGNAL(paused(bool)), ui->actionPause, SLOT(setChecked(bool)));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
     QObject::connect(designer_, SIGNAL(gridEnabled(bool)), ui->actionGrid, SLOT(setChecked(bool)));

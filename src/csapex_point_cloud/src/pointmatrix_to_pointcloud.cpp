@@ -26,8 +26,6 @@ inline void convert(const cv::Mat &matrix, pcl::PointCloud<pcl::PointXYZ>::Ptr &
     }
 
     cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
-    cloud->height = matrix.rows;
-    cloud->width  = matrix.cols;
 
     for(int i = 0 ; i < matrix.rows ; ++i) {
         for(int j = 0 ; j < matrix.cols ; ++j) {
@@ -38,6 +36,11 @@ inline void convert(const cv::Mat &matrix, pcl::PointCloud<pcl::PointXYZ>::Ptr &
             cloud->push_back(pt);
         }
     }
+
+    cloud->height = matrix.rows;
+    cloud->width  = matrix.cols;
+    cloud->is_dense = false;
+
 }
 }
 

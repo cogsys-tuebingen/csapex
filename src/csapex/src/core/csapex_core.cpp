@@ -41,12 +41,11 @@ CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cm
 
 CsApexCore::~CsApexCore()
 {
-    typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-    Q_FOREACH(PAIR cp, core_plugin_manager->availableClasses()) {
-        CorePlugin::Ptr plugin = cp.second();
 
-        plugin->shutdown();
+    for(std::vector<CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
+        (*it)->shutdown();
     }
+    core_plugins_.clear();
 
     StreamInterceptor::instance().stop();
     BoxManager::instance().stop();
@@ -59,7 +58,16 @@ CsApexCore::~CsApexCore()
 
 void CsApexCore::setPause(bool pause)
 {
-    graph_->setPause(pause);
+    if(pause != graph_->isPaused()) {
+        std::cout << (pause ? "pause" : "unpause") << std::endl;
+        graph_->setPause(pause);
+        paused(pause);
+    }
+}
+
+bool CsApexCore::isPaused() const
+{
+    return graph_->isPaused();
 }
 
 void CsApexCore::init(DragIO* dragio)
@@ -78,6 +86,8 @@ void CsApexCore::init(DragIO* dragio)
             if(dragio) {
                 plugin->initUI(*dragio);
             }
+
+            core_plugins_.push_back(plugin);
         }
 
         showStatusMessage("loading boxedobject plugins");
@@ -173,12 +183,12 @@ void CsApexCore::load(const std::string &file)
     GraphIO graphio(graph_);
 
     {
+        YAML::Node doc;
+
         std::ifstream ifs(file.c_str());
         YAML::Parser parser(ifs);
 
-        YAML::Node doc;
-
-        if(!parser.GetNextDocument(doc)) {
+        if(!getNextDocument(parser, doc)) {
             std::cerr << "cannot read the config" << std::endl;
             return;
         }
@@ -194,7 +204,7 @@ void CsApexCore::load(const std::string &file)
 
         YAML::Node doc;
 
-        if(!parser.GetNextDocument(doc)) {
+        if(!getNextDocument(parser, doc)) {
             std::cerr << "cannot read the config" << std::endl;
             return;
         }

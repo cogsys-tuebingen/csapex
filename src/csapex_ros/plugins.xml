@@ -1,0 +1,7 @@
+<library path="libcsapex_ros">
+
+<class type="csapex::APEXRosInterface" base_class_type="csapex::CorePlugin">
+  <description>none yet</description>
+</class>
+
+</library>

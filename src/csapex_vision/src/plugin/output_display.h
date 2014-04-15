@@ -17,6 +17,8 @@ public:
     OutputDisplay();
     virtual ~OutputDisplay();
 
+    virtual QIcon getIcon() const;
+
     void setup();
     void process();
 

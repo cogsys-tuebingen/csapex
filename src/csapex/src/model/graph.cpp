@@ -251,6 +251,11 @@ void Graph::stop()
     nodes_.clear();
 }
 
+bool Graph::isPaused() const
+{
+    return !timer_->isActive();
+}
+
 void Graph::setPause(bool pause)
 {
     Q_FOREACH(Node::Ptr node, nodes_) {

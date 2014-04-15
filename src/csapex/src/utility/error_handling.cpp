@@ -44,15 +44,27 @@ void csapex::error_handling::init()
             fprintf(stderr, "error setting signal handler for %d (%s)\n",
                     signal_vec[i], strsignal(signal_vec[i]));
 
-            exit(EXIT_FAILURE);
+            stop();
         }
     }
+}
+
+void csapex::error_handling::kill()
+{
+    raise(SIGKILL);
+}
+
+void csapex::error_handling::stop()
+{
+//    exit(EXIT_FAILURE);
+    stop_request()();
+    // TODO: kill on timeout!
 }
 
 void csapex::error_handling::siginthandler(int)
 {
     printf("User pressed Ctrl+C\n");
-    exit(EXIT_FAILURE);
+    stop_request()();
 }
 
 void csapex::error_handling::sigsegvhandler(int sig_num, siginfo_t * info, void * ucontext)

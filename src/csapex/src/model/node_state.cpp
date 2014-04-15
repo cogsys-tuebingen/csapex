@@ -25,26 +25,26 @@ void NodeState::copyFrom(const NodeState::Ptr& rhs)
 
 void NodeState::readYaml(const YAML::Node &node)
 {
-    if(node.FindValue("minimized")) {
+    if(exists(node, "minimized")) {
         node["minimized"] >> minimized;
     }
 
-    if(node.FindValue("enabled")) {
+    if(exists(node, "enabled")) {
         node["enabled"] >> enabled;
     }
 
-    if(node.FindValue("flipped")) {
+    if(exists(node, "flipped")) {
         node["flipped"] >> flipped;
     }
 
-    if(node.FindValue("label")) {
+    if(exists(node, "label")) {
         node["label"] >> label_;
         if(label_.empty()) {
             label_ = parent->getUUID();
         }
     }
 
-    if(node.FindValue("pos")) {
+    if(exists(node, "pos")) {
         double x, y;
         node["pos"][0] >> x;
         node["pos"][1] >> y;
@@ -52,7 +52,7 @@ void NodeState::readYaml(const YAML::Node &node)
         pos.setY(y);
     }
 
-    if(node.FindValue("state")) {
+    if(exists(node, "state")) {
         const YAML::Node& state_map = node["state"];
         child_state = parent->getState();
 

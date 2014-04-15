@@ -19,7 +19,11 @@ Relay::Relay()
 {
     addTag(Tag::get("Buffer"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/buffer.png"));
+}
+
+QIcon Relay::getIcon() const
+{
+    return QIcon(":/buffer.png");
 }
 
 void Relay::setup()

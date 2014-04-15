@@ -12,7 +12,7 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
-#include <yaml-cpp/yaml.h>
+#include <utils_yaml/yamlplus.h>
 #include <QScrollBar>
 #include <sys/types.h>
 #include <pwd.h>
@@ -51,18 +51,18 @@ void DesignerIO::loadSettings(YAML::Node &doc)
     int x = window->pos().x();
     int y = window->pos().y();
 
-    if(doc.FindValue("window_size")) {
+    if(exists(doc, "window_size")) {
         doc["window_size"][0] >> w;
         doc["window_size"][1] >> h;
     }
 
-    if(doc.FindValue("window_pos")) {
+    if(exists(doc, "window_pos")) {
         doc["window_pos"][0] >> x;
         doc["window_pos"][1] >> y;
     }
     window->setGeometry(x,y,w,h);
 
-    if(doc.FindValue("view_pos")) {
+    if(exists(doc, "view_pos")) {
         int sx, sy;
         doc["view_pos"][0] >> sx;
         doc["view_pos"][1] >> sy;

@@ -55,6 +55,11 @@
     Convert a point cloud to a multidimensional matrix structure.
   </description>
 </class>
+<class type="csapex::PointmatrixToPointcloud" base_class_type="csapex::Node">
+  <description>
+   Create a PointCloud from a Pointmatrix
+  </description>
+</class>
 <class type="csapex::LabelPointCloud" base_class_type="csapex::Node">
   <description>
     Produce a labeled pointcloud given an corresponding matrix holding the label values.
@@ -73,5 +78,14 @@
 </class>
 <class type="csapex::ModelToMarker" base_class_type="csapex::Node">
   <description>Takes a model message and creates a marker for rviz</description>
+</class>
+<class type="csapex::ClusterPointcloud" base_class_type="csapex::Node">
+  <description>cluster implementation from pcl</description>
+</class>
+<class type="csapex::LabeledCloudToIndices" base_class_type="csapex::Node">
+  <description>convert a labled pointcloud to indices</description>
+</class>
+<class type="csapex::SplitClusteredCloud" base_class_type="csapex::Node">
+  <description>Make several small point clouds from on cloud by indices from a clustering</description>
 </class>
 </library>

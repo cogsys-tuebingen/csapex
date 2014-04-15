@@ -19,7 +19,11 @@ ExportCout::ExportCout()
     addTag(Tag::get("ConsoleIO"));
     addTag(Tag::get("General"));
     addTag(Tag::get("Output"));
-    setIcon(QIcon(":/terminal.png"));
+}
+
+QIcon ExportCout::getIcon() const
+{
+    return QIcon(":/terminal.png");
 }
 
 void ExportCout::setup()

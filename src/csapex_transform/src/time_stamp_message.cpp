@@ -16,7 +16,7 @@ void TimeStampMessage::writeYaml(YAML::Emitter& yaml) {
 }
 
 void TimeStampMessage::readYaml(const YAML::Node& node) {
-    if(node.FindValue("time")) {
+    if(exists(node, "time")) {
         std::string str;
         node["time"] >> str;
         value = ros::Time::fromBoost(boost::posix_time::time_from_string(str));

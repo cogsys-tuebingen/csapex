@@ -16,7 +16,11 @@ SayText::SayText()
 {
     addTag(Tag::get("Output"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/pencil.png"));
+}
+
+QIcon SayText::getIcon() const
+{
+    return QIcon(":/pencil.png");
 }
 
 void SayText::setup()

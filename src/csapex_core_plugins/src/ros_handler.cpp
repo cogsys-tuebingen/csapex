@@ -91,6 +91,9 @@ bool ROSHandler::topicExists(const std::string &topic)
 
 void ROSHandler::registerConnectionCallback(boost::function<void ()> f)
 {
+    if(isConnected()) {
+        f();
+    }
     callbacks_.push_back(f);
 }
 

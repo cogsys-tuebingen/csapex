@@ -16,7 +16,7 @@
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
-    : Unique(uuid), icon_(":/plugin.png"), settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+    : Unique(uuid), settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
@@ -24,17 +24,17 @@ Node::Node(const UUID &uuid)
 
 Node::~Node()
 {
-    BOOST_FOREACH(ConnectorIn* in, inputs_) {
-        removeInput(in);
+    while(!inputs_.empty()) {
+        removeInput(*inputs_.begin());
     }
-    BOOST_FOREACH(ConnectorOut* out, outputs_) {
-        removeOutput(out);
+    while(!outputs_.empty()) {
+        removeOutput(*outputs_.begin());
     }
-    BOOST_FOREACH(ConnectorIn* in, managed_inputs_) {
-        removeInput(in);
+    while(!managed_inputs_.empty()) {
+        removeInput(*managed_inputs_.begin());
     }
-    BOOST_FOREACH(ConnectorOut* out, managed_outputs_) {
-        removeOutput(out);
+    while(!managed_outputs_.empty()) {
+        removeOutput(*managed_outputs_.begin());
     }
 
     Q_FOREACH(QObject* cb, callbacks) {
@@ -172,14 +172,9 @@ ConnectorOut* Node::getParameterOutput(const std::string &name) const
     }
 }
 
-void Node::setIcon(QIcon icon)
-{
-    icon_ = icon;
-}
-
 QIcon Node::getIcon() const
 {
-    return icon_;
+    return QIcon(":/plugin.png");
 }
 
 bool Node::canBeDisabled() const
@@ -727,15 +722,18 @@ void Node::removeInput(ConnectorIn *in)
     std::vector<ConnectorIn*>::iterator it;
     it = std::find(inputs_.begin(), inputs_.end(), in);
 
-    if(it == inputs_.end()) {
+    if(it != inputs_.end()) {
+        inputs_.erase(it);
+    } else {
         it = std::find(managed_inputs_.begin(), managed_inputs_.end(), in);
+        if(it != managed_inputs_.end()) {
+            managed_inputs_.erase(it);
+        } else {
+            std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
+        }
     }
 
-    assert(*it == in);
-
     in->deleteLater();
-    inputs_.erase(it);
-
 
     disconnectConnector(in);
     Q_EMIT connectorRemoved(in);
@@ -748,14 +746,18 @@ void Node::removeOutput(ConnectorOut *out)
     std::vector<ConnectorOut*>::iterator it;
     it = std::find(outputs_.begin(), outputs_.end(), out);
 
-    if(it == outputs_.end()) {
+    if(it != outputs_.end()) {
+        outputs_.erase(it);
+    } else {
         it = std::find(managed_outputs_.begin(), managed_outputs_.end(), out);
+        if(it != managed_outputs_.end()) {
+            managed_outputs_.erase(it);
+        } else {
+            std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
+        }
     }
 
-    assert(*it == out);
-
     out->deleteLater();
-    outputs_.erase(it);
 
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);

@@ -30,9 +30,7 @@ TransformPublisher::TransformPublisher()
 
 TransformPublisher::~TransformPublisher()
 {
-    if(tfb_) {
-        delete tfb_;
-    }
+    delete tfb_;
 }
 
 void TransformPublisher::process()

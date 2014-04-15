@@ -18,12 +18,16 @@ ImageCombiner::ImageCombiner(const UUID& uuid)
 {
     addTag(Tag::get("Image Combiner"));
     addTag(Tag::get("Vision"));
-    setIcon(QIcon(":/combiner.png"));
 }
 
 ImageCombiner::~ImageCombiner()
 {
 
+}
+
+QIcon ImageCombiner::getIcon() const
+{
+    return QIcon(":/combiner.png");
 }
 
 void ImageCombiner::fill(QBoxLayout* layout)

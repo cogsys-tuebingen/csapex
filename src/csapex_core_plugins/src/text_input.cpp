@@ -19,12 +19,16 @@ TextInput::TextInput()
 {
     addTag(Tag::get("Input"));
     addTag(Tag::get("General"));
-    setIcon(QIcon(":/pencil.png"));
 }
 
 void TextInput::process()
 {
 
+}
+
+QIcon TextInput::getIcon() const
+{
+    return QIcon(":/pencil.png");
 }
 
 void TextInput::fill(QBoxLayout *layout)

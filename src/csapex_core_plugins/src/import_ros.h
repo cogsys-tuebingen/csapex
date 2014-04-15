@@ -17,6 +17,8 @@ public:
     virtual void setup();
     virtual void process();
 
+    virtual QIcon getIcon() const;
+
 protected:
     void refresh();
     void update();

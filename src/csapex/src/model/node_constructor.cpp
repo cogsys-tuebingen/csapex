@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
@@ -40,7 +41,9 @@ void NodeConstructor::load() const
     try {
         Node::Ptr prototype = c();
 
-        icon = prototype->getIcon();
+        if(!settings_.get<bool>("headless")) {
+            icon = prototype->getIcon();
+        }
         cat = prototype->getTags();
 
         is_loaded = true;
