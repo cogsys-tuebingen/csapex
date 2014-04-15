@@ -191,7 +191,6 @@ add_library(csapex_pluginbase SHARED
 )
 
 target_link_libraries(csapex_pluginbase
-    yaml-cpp
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
@@ -203,7 +202,6 @@ add_library(csapex_app SHARED
 )
 
 target_link_libraries(csapex_app csapex_pluginbase
-    yaml-cpp
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
