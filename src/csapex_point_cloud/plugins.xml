@@ -88,4 +88,8 @@
 <class type="csapex::SplitClusteredCloud" base_class_type="csapex::Node">
   <description>Make several small point clouds from on cloud by indices from a clustering</description>
 </class>
+<class type="csapex::TransformFromModels" base_class_type="csapex::Node">
+  <description>Gets model messages with 3 points and trys to find the transformations between the points</description>
+</class>
+
 </library>
