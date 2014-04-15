@@ -71,8 +71,8 @@ void TransformFromModels::process()
                     -0.707,   0.5,     0.5;
 
     double roll, pitch, yaw;
-    //eulerAnglesFromRotationMatrix(r_test, roll, pitch, yaw);
-    eulerAnglesFromRotationMatrix(r_T_n.block<3,3>(0,0), roll, pitch, yaw);
+    eulerAnglesFromRotationMatrix(r_test, roll, pitch, yaw);
+    //eulerAnglesFromRotationMatrix(r_T_n.block<3,3>(0,0), roll, pitch, yaw);
 
     // Publish Output
     connection_types::TransformMessage::Ptr msg(new connection_types::TransformMessage);
@@ -213,23 +213,24 @@ using namespace std;
 
 Eigen::Matrix4d TransformFromModels::threePointsToTransformation(const std::vector<Eigen::Vector3d> &points)
 {
-    assert (points.size() == 3);
-
-    Eigen::Vector3d v1(points.at(0) - points.at(1));
-    Eigen::Vector3d v2(points.at(2) - points.at(0));
-
     Eigen::Matrix4d transformation;
-    // example for block http://eigen.tuxfamily.org/dox/group__TutorialBlockOperations.html
-    transformation.block<3,1>(0,0) = v1;          // x vector of the coordinate system
-    transformation.block<3,1>(0,1) = v2;          // y vector of the coordinate system
-    transformation.block<3,1>(0,2) = v1.cross(v2);          // z vector of the coordinate system
-    transformation(3,3) = 1;
+    transformation.setZero(); // initalize with zeros
 
-//    Eigen::Matrix4d transformation();
-//    transformation.col(0) = Eigen::Vector4d(v1,0);          // x vector of the coordinate system
-//    transformation.col(1) = Eigen::Vector4d(v2,0);          // y vector of the coordinate system
-//    transformation.col(2) = Eigen::Vector4d(v1.cross(v2), 0);// z vector of the coordinate system
-//    transformation.col(3) = Eigen::Vector4d(points.at(0), 1); // origin of the coordinate sysetm
+    // assert (points.size() == 3);
+    if (points.size() >= 2) {
+        Eigen::Vector3d v1(points.at(0) - points.at(1));
+        Eigen::Vector3d v2(points.at(2) - points.at(0));
+
+        // example for block http://eigen.tuxfamily.org/dox/group__TutorialBlockOperations.html
+        transformation.block<3,1>(0,0) = v1;          // x vector of the coordinate system
+        transformation.block<3,1>(0,1) = v2;          // y vector of the coordinate system
+        transformation.block<3,1>(0,2) = v1.cross(v2);          // z vector of the coordinate system
+        transformation.block<3,1>(0,3) = points.at(0); // origin of the coordinate system
+        transformation(3,3) = 1;
+    } else
+    {
+        ROS_ERROR("TransformFromModels: Not Enough points Found");
+    }
 
     return transformation;
 }
