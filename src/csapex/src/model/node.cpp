@@ -101,6 +101,9 @@ std::vector<Tag> Node::getTags() const
 
 void Node::addParameter(const param::Parameter::Ptr &param)
 {
+    assert(param->name() != "noname");
+    assert(std::find(state.order.begin(), state.order.end(), param->name()) == state.order.end());
+
     state.params[param->name()] = param;
     state.order.push_back(param->name());
     worker_->addParameter(param.get());
@@ -388,7 +391,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
         for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
             param::Parameter* param = it->second.get();
             if(state.params.find(param->name()) != state.params.end()) {
-                state.params[param->name()]->setFrom(*param);
+                state.params[param->name()]->setValueFrom(*param);
             } else {
                 std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
             }
@@ -416,7 +419,7 @@ void Node::setState(Memento::Ptr memento)
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it) {
         param::Parameter::Ptr p = it->second;
         if(state.params.find(p->name()) != state.params.end()) {
-            state.params[p->name()]->setFrom(*p);
+            state.params[p->name()]->setValueFrom(*p);
         }
 
         if(getUUID().empty()) {
@@ -871,6 +874,45 @@ QTreeWidgetItem* Node::createDebugInformation() const
         }
         tl->addChild(connectors);
     }
+    {
+        QTreeWidgetItem* parameters = new QTreeWidgetItem;
+        parameters->setText(0, "Parameters");
+        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+            param::Parameter* p = it->second.get();
+
+            QTreeWidgetItem* param = new QTreeWidgetItem;
+            param->setText(0, p->name().c_str());
+
+            QTreeWidgetItem* param_type_widget = new QTreeWidgetItem;
+            param_type_widget->setText(0, "Value type");
+            param_type_widget->setText(1, type2name(p->type()).c_str());
+            param->addChild(param_type_widget);
+
+            YAML::Emitter e;
+            p->write(e);
+            QTreeWidgetItem* param_type_data = new QTreeWidgetItem;
+            param_type_data->setText(0, "Data");
+            param_type_data->setText(1, e.c_str());
+            param->addChild(param_type_data);
+
+            QTreeWidgetItem* enabled = new QTreeWidgetItem;
+            enabled->setText(0, "Enabled?");
+            enabled->setText(1, p->isEnabled() ? "true" : "false");
+            param->addChild(enabled);
+
+            QTreeWidgetItem* interactive = new QTreeWidgetItem;
+            interactive->setText(0, "Interactive?");
+            interactive->setText(1, p->isInteractive() ? "true" : "false");
+            param->addChild(interactive);
+
+            parameters->addChild(param);
+
+            if(!p->isEnabled()) {
+                param->setExpanded(false);
+            }
+        }
+        tl->addChild(parameters);
+    }
 
     return tl;
 }
@@ -990,7 +1032,7 @@ void Node::connectConnector(Connectable *c)
 }
 
 
-void Node::disconnectConnector(Connectable *c)
+void Node::disconnectConnector(Connectable */*c*/)
 {
 //    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
 //    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));

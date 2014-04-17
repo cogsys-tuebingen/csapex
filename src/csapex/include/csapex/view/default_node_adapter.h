@@ -46,7 +46,8 @@ protected:
     void clear();
 
 private:
-    std::vector<QObject*> callbacks;
+    std::vector<QObject*> callbacks;    
+    std::map<std::string, QBoxLayout*> groups;
     std::vector<boost::signals2::connection> connections;
 };
 

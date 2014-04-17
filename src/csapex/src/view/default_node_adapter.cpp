@@ -8,6 +8,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/view/port.h>
+#include <csapex/model/node_worker.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -69,6 +70,7 @@ void DefaultNodeAdapter::clear()
         cb->deleteLater();
     }
     callbacks.clear();
+    groups.clear();
 }
 
 namespace {
@@ -146,6 +148,8 @@ private:
 
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
+    getNode()->getNodeWorker()->checkConditions();
+
     static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
@@ -170,10 +174,12 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
 
-    std::map<std::string, QBoxLayout*> groups;
-
     Q_FOREACH(param::Parameter::Ptr p, params) {
         param::Parameter* parameter = p.get();
+
+        if(!parameter->isEnabled()) {
+            continue;
+        }
 
         current_name_= parameter->name();
         current_display_name_ = current_name_;
@@ -213,10 +219,6 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         parameter_enabled(*parameter).disconnect_all_slots();
         parameter_enabled(*parameter).connect(boost::bind(&DefaultNodeAdapter::setupUiAgain, this));
-
-        if(!parameter->isEnabled()) {
-            continue;
-        }
 
         current_layout_ = new QHBoxLayout;
 
