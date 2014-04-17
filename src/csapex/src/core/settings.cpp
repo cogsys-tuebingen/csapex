@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <utils_param/io.h>
+#include <utils_yaml/yamlplus.h>
 
 /// SYSTEM
 #include <pwd.h>
@@ -86,7 +87,7 @@ void Settings::load()
 
     YAML::Node doc;
 
-    if(!parser.GetNextDocument(doc) || doc.Type() != YAML::NodeType::Sequence) {
+    if(!YAML::getNextDocument(parser,doc) || doc.Type() != YAML::NodeType::Sequence) {
         std::cerr << "cannot read the settings" << std::endl;
         return;
     }
