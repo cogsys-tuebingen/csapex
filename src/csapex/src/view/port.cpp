@@ -42,6 +42,7 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
 
     setMinimizedSize(minimized_);
 
+    setEnabled(true);
     setMouseTracking(true);
 }
 
@@ -145,6 +146,7 @@ void Port::setEnabledFlag(bool enabled)
 {
     setPortProperty("enabled", enabled);
     setPortProperty("disabled", !enabled);
+    setEnabled(true);
 }
 
 void Port::setPortProperty(const std::string& name, bool b)
