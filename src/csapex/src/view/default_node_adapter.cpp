@@ -148,7 +148,7 @@ private:
 
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
-    getNode()->getNodeWorker()->checkConditions();
+//    getNode()->getNodeWorker()->checkConditions();
 
     static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
@@ -176,6 +176,9 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
     Q_FOREACH(param::Parameter::Ptr p, params) {
         param::Parameter* parameter = p.get();
+
+        parameter_enabled(*parameter).disconnect_all_slots();
+        parameter_enabled(*parameter).connect(boost::bind(&DefaultNodeAdapter::setupUiAgain, this));
 
         if(!parameter->isEnabled()) {
             continue;
@@ -216,9 +219,6 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
                 QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
             }
         }
-
-        parameter_enabled(*parameter).disconnect_all_slots();
-        parameter_enabled(*parameter).connect(boost::bind(&DefaultNodeAdapter::setupUiAgain, this));
 
         current_layout_ = new QHBoxLayout;
 
