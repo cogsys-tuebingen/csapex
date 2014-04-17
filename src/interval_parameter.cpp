@@ -68,7 +68,7 @@ void IntervalParameter::set_unsafe(const boost::any &v)
 }
 
 
-void IntervalParameter::doSetFrom(const Parameter &other)
+void IntervalParameter::doSetValueFrom(const Parameter &other)
 {
     const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
     if(interval) {
@@ -76,6 +76,20 @@ void IntervalParameter::doSetFrom(const Parameter &other)
         triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
+    }
+}
+
+void IntervalParameter::doClone(const Parameter &other)
+{
+    const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
+    if(interval) {
+        values_ = interval->values_;
+        min_ = interval->min_;
+        max_ = interval->max_;
+        def_ = interval->def_;
+        step_ = interval->step_;
+    } else {
+        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

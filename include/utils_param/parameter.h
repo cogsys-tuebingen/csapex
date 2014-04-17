@@ -14,6 +14,8 @@ namespace param {
 class Parameter : boost::noncopyable
 {
 public:
+    friend class ParameterFactory;
+
     typedef boost::shared_ptr<Parameter> Ptr;
 
     struct access {
@@ -37,12 +39,14 @@ public:
     void write(YAML::Emitter& e) const;
     void read(const YAML::Node& n);
 
-    void setFrom(const Parameter& other);
+    void setValueFrom(const Parameter& other);
+    void clone(const Parameter& other);
 
 protected:
     virtual void doWrite(YAML::Emitter& e) const = 0;
     virtual void doRead(const YAML::Node& n) = 0;
-    virtual void doSetFrom(const Parameter& other) = 0;
+    virtual void doSetValueFrom(const Parameter& other) = 0;
+    virtual void doClone(const Parameter& other) = 0;
 
 public:
     std::string name() const;

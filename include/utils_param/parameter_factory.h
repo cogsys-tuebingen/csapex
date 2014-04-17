@@ -14,6 +14,11 @@ namespace param
 class ParameterFactory
 {
 public:
+    static Parameter::Ptr makeEmpty(const std::string& type);
+    static Parameter::Ptr clone(const Parameter::Ptr& param);
+
+
+
     static Parameter::Ptr declareBool(const std::string& name, bool def);
 
     template <typename T>
@@ -56,8 +61,6 @@ public:
 
     static Parameter::Ptr declareColorParameter(const std::string& name, int r, int g, int b);
 
-    static Parameter::Ptr makeEmpty(const std::string& type);
-
     template <typename T>
     static Parameter::Ptr declareParameterSet(const std::string& name, const std::map<std::string, T> & set)
     {
@@ -96,6 +99,7 @@ public:
 
         return result;
     }
+
 
     /** LEGACY **/
     template <typename T>

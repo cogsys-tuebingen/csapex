@@ -48,7 +48,8 @@ public:
 
     virtual std::string toStringImpl() const;
 
-    void doSetFrom(const Parameter& other);
+    void doSetValueFrom(const Parameter& other);
+    void doClone(const Parameter& other);
     void set(const std::vector<int> &v);
 
     void doWrite(YAML::Emitter& e) const;

@@ -89,11 +89,20 @@ void Parameter::read(const YAML::Node &n)
     doRead(n);
 }
 
-void Parameter::setFrom(const Parameter &other)
+void Parameter::setValueFrom(const Parameter &other)
 {
+    name_ = other.name_;
     interactive_ = other.interactive_;
     enabled_ = other.enabled_;
-    doSetFrom(other);
+    doSetValueFrom(other);
+}
+
+void Parameter::clone(const Parameter &other)
+{
+    name_ = other.name_;
+    interactive_ = other.interactive_;
+    enabled_ = other.enabled_;
+    doClone(other);
 }
 
 boost::any Parameter::access_unsafe(const Parameter &p) const

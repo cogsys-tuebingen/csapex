@@ -56,11 +56,11 @@ void ValueParameter::set_unsafe(const boost::any &v)
 }
 
 
-void ValueParameter::doSetFrom(const Parameter &other)
+void ValueParameter::doSetValueFrom(const Parameter &other)
 {
-    const ValueParameter* range = dynamic_cast<const ValueParameter*>(&other);
-    if(range) {
-        value_ = range->value_;
+    const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other);
+    if(value) {
+        value_ = value->value_;
         triggerChange();
     } else {
         try {
@@ -70,6 +70,17 @@ void ValueParameter::doSetFrom(const Parameter &other)
         } catch(const std::exception& e) {
             throw std::runtime_error("bad setFrom, invalid types");
         }
+    }
+}
+
+void ValueParameter::doClone(const Parameter &other)
+{
+    const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other);
+    if(value) {
+        value_ = value->value_;
+        def_ = value->def_;
+    } else {
+        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

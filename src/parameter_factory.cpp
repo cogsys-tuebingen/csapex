@@ -12,25 +12,35 @@ using namespace param;
 
 Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
 {
-    if(type == "range") {
+    std::string t = type;
+    std::transform(t.begin(), t.end(), t.begin(), tolower);
+    if(t == "range") {
         return Parameter::Ptr(new RangeParameter);
-    } else if(type == "interval") {
+    } else if(t == "interval") {
         return Parameter::Ptr(new IntervalParameter);
-    } else if(type == "value") {
+    } else if(t == "value") {
         return Parameter::Ptr(new ValueParameter);
-    } else if(type == "set") {
+    } else if(t == "set") {
         return Parameter::Ptr(new SetParameter);
-    } else if(type == "bitset") {
+    } else if(t == "bitset") {
         return Parameter::Ptr(new BitSetParameter);
-    } else if(type == "path") {
+    } else if(t == "path") {
         return Parameter::Ptr(new PathParameter);
-    } else if(type == "trigger") {
+    } else if(t == "trigger") {
         return Parameter::Ptr(new TriggerParameter);
-    } else if(type == "color") {
+    } else if(t == "color") {
         return Parameter::Ptr(new ColorParameter);
     } else {
-        throw std::runtime_error(std::string("illegal parameter type: ") + type);
+        throw std::runtime_error(std::string("illegal parameter type: ") + t);
     }
+}
+
+Parameter::Ptr ParameterFactory::clone(const Parameter::Ptr& param)
+{
+    std::string type = param->TYPE();
+    Parameter::Ptr r = makeEmpty(type);
+    r->clone(*param);
+    return r;
 }
 
 Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set, int def)

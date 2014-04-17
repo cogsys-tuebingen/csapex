@@ -41,7 +41,12 @@ void NullParameter::set_unsafe(const boost::any &v)
 }
 
 
-void NullParameter::doSetFrom(const Parameter &other)
+void NullParameter::doSetValueFrom(const Parameter &other)
+{
+    throw std::runtime_error("cannot use null parameters");
+}
+
+void NullParameter::doClone(const Parameter &other)
 {
     throw std::runtime_error("cannot use null parameters");
 }

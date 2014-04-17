@@ -41,14 +41,25 @@ void PathParameter::set_unsafe(const boost::any &v)
 }
 
 
-void PathParameter::doSetFrom(const Parameter &other)
+void PathParameter::doSetValueFrom(const Parameter &other)
 {
-    const PathParameter* range = dynamic_cast<const PathParameter*>(&other);
-    if(range) {
-        value_ = range->value_;
+    const PathParameter* path = dynamic_cast<const PathParameter*>(&other);
+    if(path) {
+        value_ = path->value_;
         triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
+    }
+}
+
+void PathParameter::doClone(const Parameter &other)
+{
+    const PathParameter* path = dynamic_cast<const PathParameter*>(&other);
+    if(path) {
+        value_ = path->value_;
+        def_ = path->def_;
+    } else {
+        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

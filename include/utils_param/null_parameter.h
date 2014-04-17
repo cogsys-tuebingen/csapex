@@ -32,7 +32,8 @@ public:
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
 
-    void doSetFrom(const Parameter& other);
+    void doSetValueFrom(const Parameter& other);
+    void doClone(const Parameter& other);
 
     void doWrite(YAML::Emitter& e) const;
     void doRead(const YAML::Node& n);

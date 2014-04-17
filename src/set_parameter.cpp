@@ -27,6 +27,7 @@ void SetParameter::setByName(const std::string &name)
     }
 
     value_ = pos->second;
+    txt_ = getName();
     triggerChange();
 }
 
@@ -101,18 +102,32 @@ void SetParameter::set_unsafe(const boost::any &v)
 }
 
 
-void SetParameter::doSetFrom(const Parameter &other)
+void SetParameter::doSetValueFrom(const Parameter &other)
 {
-    const SetParameter* range = dynamic_cast<const SetParameter*>(&other);
-    if(range) {
-        std::string name = range->txt_;
+    const SetParameter* set = dynamic_cast<const SetParameter*>(&other);
+    if(set) {
+        std::string name = set->txt_;
         if(set_.find(name) == set_.end()) {
-            set_[name] = range->value_;
+            set_[name] = set->value_;
         }
-        value_ = range->value_;
+        value_ = set->value_;
         triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
+    }
+}
+
+
+void SetParameter::doClone(const Parameter &other)
+{
+    const SetParameter* set = dynamic_cast<const SetParameter*>(&other);
+    if(set) {
+        value_ = set->value_;
+        txt_ = set->txt_;
+        set_ = set->set_;
+        def_ = set->def_;
+    } else {
+        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

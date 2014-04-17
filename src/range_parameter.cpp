@@ -51,7 +51,7 @@ void RangeParameter::set_unsafe(const boost::any &v)
 }
 
 
-void RangeParameter::doSetFrom(const Parameter &other)
+void RangeParameter::doSetValueFrom(const Parameter &other)
 {
     const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
     if(range) {
@@ -59,6 +59,21 @@ void RangeParameter::doSetFrom(const Parameter &other)
         triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
+    }
+}
+
+
+void RangeParameter::doClone(const Parameter &other)
+{
+    const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
+    if(range) {
+        value_ = range->value_;
+        min_ = range->min_;
+        max_ = range->max_;
+        def_ = range->def_;
+        step_ = range->step_;
+    } else {
+        throw std::runtime_error("bad clone, invalid types");
     }
 }
 
