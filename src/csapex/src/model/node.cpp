@@ -525,6 +525,11 @@ void Node::setMinimized(bool min)
     node_state_->minimized = min;
 }
 
+void Node::triggerModelChanged()
+{
+    Q_EMIT modelChanged();
+}
+
 void Node::connectorChanged()
 {
 
@@ -790,12 +795,12 @@ Command::Ptr Node::removeAllConnectionsCmd()
 QTreeWidgetItem * Node::createDebugInformationConnector(Connectable* connector) const
 {
     QTreeWidgetItem* connector_widget = new QTreeWidgetItem;
-    connector_widget->setText(0, "Connector");
+    connector_widget->setText(0, connector->getUUID().getShortName().c_str());
     connector_widget->setIcon(0, QIcon(":/connector.png"));
 
     QTreeWidgetItem* uuid = new QTreeWidgetItem;
     uuid->setText(0, "UUID");
-    uuid->setText(1, connector->getUUID().c_str());
+    uuid->setText(1, connector->getUUID().getFullName().c_str());
     connector_widget->addChild(uuid);
 
     QTreeWidgetItem* label = new QTreeWidgetItem;
@@ -907,9 +912,7 @@ QTreeWidgetItem* Node::createDebugInformation() const
 
             parameters->addChild(param);
 
-            if(!p->isEnabled()) {
-                param->setExpanded(false);
-            }
+            param->setData(0, Qt::UserRole, p->isEnabled());
         }
         tl->addChild(parameters);
     }

@@ -49,6 +49,7 @@ void NodeWorker::parameterChanged(param::Parameter *)
     if(!conditions_.empty()) {
         checkConditions();
     }
+    node_->triggerModelChanged();
 }
 
 void NodeWorker::checkConditions()

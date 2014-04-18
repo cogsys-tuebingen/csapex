@@ -268,6 +268,8 @@ public Q_SLOTS:
     void setLabel(const std::string& label);
     void setMinimized(bool min);
 
+    void triggerModelChanged();
+
 Q_SIGNALS:
     void stateChanged();
     void modelChanged();

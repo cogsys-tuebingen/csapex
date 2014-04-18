@@ -123,6 +123,7 @@ void Designer::stateChangedEvent()
     designer_board->refresh();
 }
 
+
 void Designer::updateDebugInfo()
 {
     std::vector<Box*> selected;
@@ -134,10 +135,34 @@ void Designer::updateDebugInfo()
     foreach (Box* box, selected) {
         Node* node = box->getNode();
         QObject::connect(node, SIGNAL(stateChanged()), this, SLOT(updateDebugInfo()));
+        QObject::connect(node, SIGNAL(modelChanged()), this, SLOT(updateDebugInfo()));
         box_info->addTopLevelItem(node->createDebugInformation());
     }
 
-    box_info->expandAll();
+    QTreeWidgetItemIterator it(box_info);
+    while (*it) {
+        QTreeWidgetItem* item = *it;
+        bool expand = item->data(0, Qt::UserRole).toBool();
+
+        int depth = 0;
+        while(item->parent()) {
+            item = item->parent();
+            ++depth;
+        }
+
+        if(depth <= 1 || expand) {
+            QTreeWidgetItem* item = *it;
+            do {
+                box_info->expandItem(item);
+                item = item->parent();
+            }  while(item);
+        }
+        ++it;
+    }
+
+    for(int i = 0; i < box_info->depth(); ++i) {
+        box_info->resizeColumnToContents(i);
+    }
 }
 
 void Designer::updateUndoInfo()
