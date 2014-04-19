@@ -296,7 +296,8 @@ protected:
     std::string type_;
     mutable std::vector<Tag> tags_;
 
-    StreamRelay aout;
+    StreamRelay ainfo;
+    StreamRelay awarn;
     StreamRelay aerr;
     StreamRelay alog;
 

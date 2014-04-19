@@ -17,7 +17,7 @@ using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
-      aout(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
+      ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
       settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
@@ -55,7 +55,8 @@ void Node::setUUID(const UUID &uuid)
     Unique::setUUID(uuid);
 
     std::string p = uuid.getFullName();
-    aout.setPrefix(p);
+    ainfo.setPrefix(p);
+    awarn.setPrefix(p);
     aerr.setPrefix(p);
     alog.setPrefix(p);
 }
@@ -927,6 +928,33 @@ QTreeWidgetItem* Node::createDebugInformation() const
             param->setData(0, Qt::UserRole, p->isEnabled());
         }
         tl->addChild(parameters);
+    }
+    {
+        QTreeWidgetItem* streams = new QTreeWidgetItem;
+        streams->setText(0, "Output");
+
+        QTreeWidgetItem* aout_w = new QTreeWidgetItem;
+        aout_w->setText(0, "output");
+        QTreeWidgetItem* aout_w_txt = new QTreeWidgetItem;
+        aout_w_txt->setText(0, ainfo.history().str().c_str());
+        aout_w->addChild(aout_w_txt);
+        streams->addChild(aout_w);
+
+        QTreeWidgetItem* awarn_w = new QTreeWidgetItem;
+        awarn_w->setText(0, "warning");
+        QTreeWidgetItem* awarn_w_txt = new QTreeWidgetItem;
+        awarn_w_txt->setText(0, awarn.history().str().c_str());
+        awarn_w->addChild(awarn_w_txt);
+        streams->addChild(awarn_w);
+
+        QTreeWidgetItem* aerr_w = new QTreeWidgetItem;
+        aerr_w->setText(0, "error");
+        QTreeWidgetItem* aerr_w_txt = new QTreeWidgetItem;
+        aerr_w_txt->setText(0, aerr.history().str().c_str());
+        aerr_w->addChild(aerr_w_txt);
+        streams->addChild(aerr_w);
+
+        tl->addChild(streams);
     }
 
     return tl;

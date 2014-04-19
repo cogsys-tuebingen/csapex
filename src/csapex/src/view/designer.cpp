@@ -126,6 +126,10 @@ void Designer::stateChangedEvent()
 
 void Designer::updateDebugInfo()
 {
+    if(!debug_tabs->isVisible()) {
+        return;
+    }
+
     std::vector<Box*> selected;
     boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
     widget_ctrl_->foreachBox(append, boost::bind(&Box::isSelected, _1));
