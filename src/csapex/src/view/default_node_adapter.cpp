@@ -148,8 +148,6 @@ private:
 
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
-//    getNode()->getNodeWorker()->checkConditions();
-
     static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
@@ -319,10 +317,36 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     qt_helper::Call* call_set_path = new qt_helper::Call(cb);
     callbacks.push_back(call_set_path);
 
+    QString filter = QString::fromStdString(path_p->filter());
+    if(filter.isEmpty()) {
+        filter = "All files (*.*)";
+    }
 
-    boost::function<void()> cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
-                                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getOpenFileName,
-                                                                                             (QWidget*) 0, "Input", "", "All files (*.*)", (QString*) 0, (QFlags<QFileDialog::Option>) 0)));
+    int flags = 0;
+    bool is_file = path_p->isFile();
+    boost::function<void()> cb_open;
+
+    if(path_p->isOutput()) {
+        if(is_file) {
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getSaveFileName,
+                                                                             (QWidget*) 0, path_p->name().c_str(), "", filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
+        } else {
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getExistingDirectory,
+                                                                             (QWidget*) 0, path_p->name().c_str(), "", (QFlags<QFileDialog::Option>) flags)));
+        }
+    } else {
+        if(is_file) {
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getOpenFileName,
+                                                                             (QWidget*) 0, path_p->name().c_str(), "", filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
+        } else {
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getExistingDirectory,
+                                                                             (QWidget*) 0, path_p->name().c_str(), "", (QFlags<QFileDialog::Option>) flags)));
+        }
+    }
     qt_helper::Call* call_open = new qt_helper::Call(cb_open);
     callbacks.push_back(call_open);
 
@@ -525,13 +549,13 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                                                           boost::bind(&param::IntervalParameter::max<double>, __1));
         connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setFromParam)));
 
-//        boost::function<void(double)> setMin = boost::bind(&QxtDoubleSpanSlider::setDoubleMinimum, slider, __1);
-//        boost::function<void(double)> setMax = boost::bind(&QxtDoubleSpanSlider::setDoubleMaximum, slider, __1);
-//        boost::function<void(const param::IntervalParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::IntervalParameter::min<double>, __1));
-//        boost::function<void(const param::IntervalParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::IntervalParameter::max<double>, __1));
+        //        boost::function<void(double)> setMin = boost::bind(&QxtDoubleSpanSlider::setDoubleMinimum, slider, __1);
+        //        boost::function<void(double)> setMax = boost::bind(&QxtDoubleSpanSlider::setDoubleMaximum, slider, __1);
+        //        boost::function<void(const param::IntervalParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::IntervalParameter::min<double>, __1));
+        //        boost::function<void(const param::IntervalParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::IntervalParameter::max<double>, __1));
 
-//        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMinFromParam)));
-//        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMaxFromParam)));
+        //        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMinFromParam)));
+        //        connections.push_back(scope_changed(*interval_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::IntervalParameter>, this, __1, setMaxFromParam)));
 
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));

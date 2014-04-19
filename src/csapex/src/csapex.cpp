@@ -85,7 +85,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     settings.setCurrentConfig(config);
 
     if(!settings.knows("path_to_bin")) {
-        settings.add(param::ParameterFactory::declarePath("path_to_bin", path_to_bin));
+        settings.add(param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
     } else {
         settings.set("path_to_bin", path_to_bin);
     }
