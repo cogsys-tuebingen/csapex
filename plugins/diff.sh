@@ -6,9 +6,8 @@ rst=$(tput sgr0)       # Text reset
 for f in *; do
   if [[ -d $f ]]; then
     cd $f
-    echo
     echo "${bld}${blu}diffing $f${rst}"
     git diff
-    cd -
+    cd - 1> /dev/null
   fi
 done
