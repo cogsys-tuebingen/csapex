@@ -246,7 +246,7 @@ void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_
 }
 
 namespace {
-QPixmap createPixmap(const std::string& label, const NodePtr& content, const QString& stylesheet)
+QPixmap createPixmap(const std::string& label, const NodePtr& content, const QString& stylesheet, WidgetController* widget_ctrl)
 {
     csapex::Box::Ptr object;
 
@@ -258,7 +258,7 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
         if(bo) {
             object.reset(new csapex::Box(bo));
         } else {
-            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get()))));
+            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
         }
     }
 
@@ -293,7 +293,7 @@ bool BoxManager::isValidType(const std::string &type) const
     return false;
 }
 
-void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const QPoint& offset)
+void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, const QPoint& offset)
 {
     bool is_template = BoxManager::typeIsTemplate(type);
 
@@ -320,7 +320,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, const
         mimeData->setProperty("oy", offset.y());
         drag->setMimeData(mimeData);
 
-        drag->setPixmap(createPixmap(type, content, style_sheet_));
+        drag->setPixmap(createPixmap(type, content, style_sheet_, widget_ctrl));
         drag->setHotSpot(-offset);
         drag->exec();
 
@@ -394,7 +394,7 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
     return NodeNullPtr;
 }
 
-Box* BoxManager::makeBox(NodePtr node)
+Box* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
 {
     BoxedObject::Ptr bo = boost::dynamic_pointer_cast<BoxedObject>(node);
     Box* box;
@@ -404,9 +404,9 @@ Box* BoxManager::makeBox(NodePtr node)
         std::string type = node->getType();
 
         if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-            box = new Box(node, node_adapter_builders_[type]->build(node));
+            box = new Box(node, node_adapter_builders_[type]->build(node, widget_ctrl));
         } else {
-            box = new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get())));
+            box = new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)));
         }
     }
     box->construct();

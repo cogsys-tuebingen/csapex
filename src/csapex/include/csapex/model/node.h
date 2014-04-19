@@ -179,9 +179,14 @@ public:
 
     int countInputs() const;
     int countOutputs() const;
+    int countManagedInputs() const;
+    int countManagedOutputs() const;
 
     ConnectorIn* getInput(const unsigned int index) const;
     ConnectorOut* getOutput(const unsigned int index) const;
+
+    ConnectorIn* getManagedInput(const unsigned int index) const;
+    ConnectorOut* getManagedOutput(const unsigned int index) const;
 
     virtual ConnectorIn* getInput(const UUID& uuid) const;
     virtual ConnectorOut* getOutput(const UUID& uuid) const;

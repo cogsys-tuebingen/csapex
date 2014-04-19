@@ -24,7 +24,7 @@ public:
 
     virtual std::string getWrappedType() const = 0;
 
-    virtual NodeAdapterPtr build(NodePtr node) const = 0;
+    virtual NodeAdapterPtr build(NodePtr node, WidgetController* widget_ctrl) const = 0;
 
 private:
     std::string type_;

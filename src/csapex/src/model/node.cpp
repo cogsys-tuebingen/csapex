@@ -391,6 +391,10 @@ void Node::updateParameters()
             updateParameter<std::string>(p);
         } else if(p->is<bool>()) {
             updateParameter<bool>(p);
+        } else if(p->is<std::pair<int, int> >()) {
+            updateParameter<std::pair<int, int> >(p);
+        } else if(p->is<std::pair<double, double> >()) {
+            updateParameter<std::pair<double, double> >(p);
         }
         // else: do nothing and ignore the parameter
     }
@@ -665,6 +669,16 @@ int Node::countOutputs() const
     return outputs_.size();
 }
 
+int Node::countManagedInputs() const
+{
+    return managed_inputs_.size();
+}
+
+int Node::countManagedOutputs() const
+{
+    return managed_outputs_.size();
+}
+
 ConnectorIn* Node::getInput(const unsigned int index) const
 {
     assert(index < inputs_.size());
@@ -675,6 +689,19 @@ ConnectorOut* Node::getOutput(const unsigned int index) const
 {
     assert(index < outputs_.size());
     return outputs_[index];
+}
+
+
+ConnectorIn* Node::getManagedInput(const unsigned int index) const
+{
+    assert(index < managed_inputs_.size());
+    return managed_inputs_[index];
+}
+
+ConnectorOut* Node::getManagedOutput(const unsigned int index) const
+{
+    assert(index < managed_outputs_.size());
+    return managed_outputs_[index];
 }
 
 ConnectorIn* Node::getInput(const UUID& uuid) const

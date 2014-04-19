@@ -8,6 +8,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/view/port.h>
+#include <csapex/view/widget_controller.h>
 #include <csapex/model/node_worker.h>
 
 /// PROJECT
@@ -44,8 +45,8 @@ namespace bll = boost::lambda;
 boost::arg<1> __1;
 boost::arg<2> __2;
 
-DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee)
-    : NodeAdapter(adaptee)
+DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee, WidgetController *widget_ctrl)
+    : NodeAdapter(adaptee, widget_ctrl)
 {
 
 }
@@ -220,13 +221,16 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
         current_layout_ = new QHBoxLayout;
 
+
+
         // connect parameter input, if available
         ConnectorIn* param_in = node_->getParameterInput(current_name_);
         if(param_in) {
             Port* port = new Port(node_->getCommandDispatcher(), param_in);
             port->setVisible(p->isInteractive());
             interactive_changed(*p).connect(boost::bind(&Port::setVisible, port, __2));
-            current_layout_->addWidget(port);
+
+            widget_ctrl_->insertPort(current_layout_, port);
         }
 
         // generate UI element
@@ -247,7 +251,8 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
             qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&param::Parameter::triggerChange, p.get()));
             callbacks.push_back(call_trigger);
             QObject::connect(param_out, SIGNAL(connectionDone()), call_trigger, SLOT(call()));
-            current_layout_->addWidget(port);
+
+            widget_ctrl_->insertPort(current_layout_, port);
         }
 
         // put into layout

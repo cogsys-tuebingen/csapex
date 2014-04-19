@@ -46,6 +46,8 @@ public Q_SLOTS:
     void connectorAdded(Connectable *connector);
     void connectorRemoved(Connectable *connector);
 
+    void insertPort(QLayout* layout, Port* port);
+
 private:
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;

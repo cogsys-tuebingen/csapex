@@ -52,7 +52,7 @@ public:
     typedef boost::shared_ptr<NodeAdapter> Ptr;
 
 protected:
-    NodeAdapter(Node* adaptee);
+    NodeAdapter(Node* adaptee, WidgetController *widget_ctrl);
 
 public:
     virtual ~NodeAdapter();
@@ -83,6 +83,7 @@ protected:
     QBoxLayout* current_layout_;
 
     Node* node_;
+    WidgetController* widget_ctrl_;
 };
 
 }

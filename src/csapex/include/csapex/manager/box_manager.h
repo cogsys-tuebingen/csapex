@@ -40,10 +40,10 @@ public:
 
     bool isValidType(const std::string& type) const;
 
-    void startPlacingBox(QWidget *parent, const std::string& type, const QPoint &offset = QPoint(0,0));
+    void startPlacingBox(QWidget *parent, const std::string& type, WidgetController *widget_ctrl, const QPoint &offset = QPoint(0,0));
 
     NodePtr makeNode(const std::string& type, const UUID& uuid);
-    Box* makeBox(NodePtr node);
+    Box* makeBox(NodePtr node, WidgetController *widget_ctrl);
 
     NodeConstructor::Ptr getSelector(const std::string& type);
 

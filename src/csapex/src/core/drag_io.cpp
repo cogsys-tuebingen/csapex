@@ -67,7 +67,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
                 e->accept();
 
                 std::string type = v[Qt::UserRole+1].toString().toStdString();
-                BoxManager::instance().startPlacingBox(src, type, QPoint(0,0));
+                BoxManager::instance().startPlacingBox(src, type, widget_ctrl_.get(), QPoint(0,0));
             }
         }
     }

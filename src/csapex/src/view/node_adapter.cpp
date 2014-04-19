@@ -10,8 +10,8 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(Node *adaptee)
-    : bridge(this), layout_(NULL), is_gui_setup_(false), node_(adaptee)
+NodeAdapter::NodeAdapter(Node *adaptee, WidgetController* widget_ctrl)
+    : bridge(this), layout_(NULL), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
 {
     QObject::connect(&bridge, SIGNAL(rebuild()), &bridge, SLOT(rebuildEvent()));
     QObject::connect(adaptee, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));

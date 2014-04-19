@@ -74,7 +74,7 @@ void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
 void WidgetController::nodeAdded(Node::Ptr node)
 {
     if(designer_) {
-        Box* box = BoxManager::instance().makeBox(node);
+        Box* box = BoxManager::instance().makeBox(node, this);
         QObject::connect(box, SIGNAL(moveRequest(Box*,QPoint)), &box_selection_, SLOT(moveSelectedBoxes(Box*, QPoint)));
 
         box_map_[node->getUUID()] = box;
@@ -113,17 +113,24 @@ void WidgetController::connectorAdded(Connectable* connector)
         Box* box = getBox(parent_uuid);
         Port* port = new Port(dispatcher_, connector);
 
+
         QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
         QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
+
         box->selection.connect(boost::bind(&Port::setSelected, port, _1));
 
         QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
-
-        layout->addWidget(port);
-
-        port_map_[connector->getUUID()] = port;
+        insertPort(layout, port);
     }
 }
+
+void WidgetController::insertPort(QLayout* layout, Port* port)
+{
+    port_map_[port->getAdaptee()->getUUID()] = port;
+
+    layout->addWidget(port);
+}
+
 
 void WidgetController::connectorRemoved(Connectable *connector)
 {

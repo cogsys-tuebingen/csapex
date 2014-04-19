@@ -317,7 +317,7 @@ bool Box::eventFilter(QObject* o, QEvent* e)
             if(down_) {
                 if(shift_drag) {
                     if(hypot(delta.x(), delta.y()) > 15) {
-                        BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), -start_drag_);
+                        //BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), -start_drag_);
                         down_ = false;
                     }
                 } else {
@@ -475,7 +475,7 @@ void Box::startDrag(QPoint offset)
     lower();
 
     if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
-        BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), offset);
+        //BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), offset);
         return;
     }
 

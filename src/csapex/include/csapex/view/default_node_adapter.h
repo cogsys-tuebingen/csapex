@@ -11,7 +11,7 @@ namespace csapex
 class DefaultNodeAdapter : public NodeAdapter
 {
 public:
-    DefaultNodeAdapter(Node* adaptee);
+    DefaultNodeAdapter(Node* adaptee, WidgetController* widget_ctrl);
     virtual ~DefaultNodeAdapter();
 
 protected:
