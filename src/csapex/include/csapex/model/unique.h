@@ -18,7 +18,7 @@ public:
     UUID getUUID() const;
 
 protected:
-    void setUUID(const UUID &uuid);
+    virtual void setUUID(const UUID &uuid);
 
 private:
     UUID uuid_;

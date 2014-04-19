@@ -46,6 +46,8 @@ FWD(NodeAdapter);
 
 FWD(WidgetController);
 
+class StreamRelay;
+
 class Designer;
 class DesignBoard;
 

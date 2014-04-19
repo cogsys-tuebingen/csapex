@@ -211,7 +211,7 @@ void Box::setError(bool e, const std::string &msg)
 void Box::setError(bool e, const std::string &msg, int level)
 {
     setToolTip(msg.c_str());
-    node_->setErrorSilent(e, msg, level);
+    //node_->setErrorSilent(e, msg, level);
 }
 
 void Box::setLabel(const std::string& label)

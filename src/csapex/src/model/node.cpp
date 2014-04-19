@@ -16,7 +16,9 @@
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
-    : Unique(uuid), settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+    : Unique(uuid),
+      aout(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
+      settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
     QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
@@ -46,6 +48,16 @@ Node::~Node()
     }
     callbacks.clear();
     delete worker_;
+}
+
+void Node::setUUID(const UUID &uuid)
+{
+    Unique::setUUID(uuid);
+
+    std::string p = uuid.getFullName();
+    aout.setPrefix(p);
+    aerr.setPrefix(p);
+    alog.setPrefix(p);
 }
 
 void Node::makeThread()

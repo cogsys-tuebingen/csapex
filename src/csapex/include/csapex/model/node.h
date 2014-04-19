@@ -10,6 +10,7 @@
 #include <csapex/model/unique.h>
 #include <csapex/model/message.h>
 #include <csapex/utility/timable.h>
+#include <csapex/utility/stream_relay.h>
 
 /// PROJECT
 #include <utils_param/parameter.h>
@@ -95,6 +96,8 @@ public:
 protected:
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);
+
+    void setUUID(const UUID& uuid);
 
 public:
     virtual bool canBeDisabled() const;
@@ -292,6 +295,10 @@ Q_SIGNALS:
 protected:
     std::string type_;
     mutable std::vector<Tag> tags_;
+
+    StreamRelay aout;
+    StreamRelay aerr;
+    StreamRelay alog;
 
 private:
     Settings* settings_;

@@ -77,6 +77,7 @@ set(SRC_PLUGIN
     src/utility/qsignal_bridges.cpp
     src/utility/qwrapper.cpp
     src/utility/stream_interceptor.cpp
+    src/utility/stream_relay.cpp
     src/utility/timer.cpp
     src/utility/qt_helper.cpp
     src/utility/thread.cpp
