@@ -88,9 +88,6 @@ set(SRC_PLUGIN
     src/utility/q_signal_relay.cpp
     src/utility/context_menu_handler.cpp
 
-    src/deprecated/global_option.cpp
-    src/deprecated/global_option_manager.cpp
-
     src/view/node_adapter.cpp
     src/view/node_adapter_builder.cpp
     src/view/default_node_adapter.cpp
