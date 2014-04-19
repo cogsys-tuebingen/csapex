@@ -10,6 +10,7 @@
 #include <boost/mpl/contains.hpp>
 #include <boost/serialization/variant.hpp>
 #include <boost/type_traits.hpp>
+#include <utils_yaml/yamlplus.h>
 
 namespace param {
 
