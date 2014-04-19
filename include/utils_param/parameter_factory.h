@@ -55,7 +55,15 @@ public:
 
     static Parameter::Ptr declareText(const std::string& name, const std::string& def);
 
-    static Parameter::Ptr declarePath(const std::string& name, const std::string& def);
+    static Parameter::Ptr declarePath(const std::string& name, bool is_file, const std::string& def, const std::string& filter = "", bool input = false, bool output = false);
+
+    static Parameter::Ptr declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static Parameter::Ptr declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static Parameter::Ptr declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+
+    static Parameter::Ptr declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static Parameter::Ptr declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static Parameter::Ptr declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     static Parameter::Ptr declareTrigger(const std::string& name);
 

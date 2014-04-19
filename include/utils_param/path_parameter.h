@@ -25,6 +25,7 @@ public:
 public:
     typedef boost::shared_ptr<PathParameter> Ptr;
 
+
 public:
     friend YAML::Emitter& operator << (YAML::Emitter& e, const PathParameter& p) {
         p.doWrite(e);
@@ -41,14 +42,14 @@ public:
 
     friend void operator >> (const YAML::Node& node, param::PathParameter::Ptr& value) {
         if(!value) {
-            value.reset(new PathParameter("loading"));
+            value.reset(new PathParameter("loading", "", 0, false, false));
         }
         value->doRead(node);
     }
 
 public:
     PathParameter();
-    explicit PathParameter(const std::string& name);
+    explicit PathParameter(const std::string& name, const std::string& filter, bool is_file, bool input, bool output);
     virtual ~PathParameter();
 
     virtual int ID() const { return 0x004; }
@@ -66,6 +67,10 @@ public:
     template <typename T>
     T def() const { return read<T>(def_); }
 
+    std::string filter() const;
+    bool isFile() const;
+    bool isInput() const;
+    bool isOutput() const;
 
 protected:
     virtual boost::any get_unsafe() const;
@@ -86,6 +91,11 @@ private:
 private:
     std::string value_;
     std::string def_;
+
+    std::string filter_;
+    bool is_file_;
+    bool input_;
+    bool output_;
 };
 
 }

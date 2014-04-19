@@ -8,8 +8,8 @@ PathParameter::PathParameter()
 {
 }
 
-PathParameter::PathParameter(const std::string &name)
-    : Parameter(name)
+PathParameter::PathParameter(const std::string &name, const std::string &filter, bool is_file, bool input, bool output)
+    : Parameter(name), filter_(filter), is_file_(is_file), input_(input), output_(output)
 {
 }
 
@@ -86,4 +86,24 @@ void PathParameter::doRead(const YAML::Node& n)
 
     n["name"] >> name_;
     n["value"] >> value_;
+}
+
+std::string PathParameter::filter() const
+{
+    return filter_;
+}
+
+bool PathParameter::isFile() const
+{
+    return is_file_;
+}
+
+bool PathParameter::isInput() const
+{
+    return input_;
+}
+
+bool PathParameter::isOutput() const
+{
+    return output_;
 }

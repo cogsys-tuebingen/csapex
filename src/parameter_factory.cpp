@@ -103,12 +103,43 @@ Parameter::Ptr ParameterFactory::declareTrigger(const std::string& name)
     return result;
 }
 
-Parameter::Ptr ParameterFactory::declarePath(const std::string& name, const std::string& def)
+Parameter::Ptr ParameterFactory::declarePath(const std::string& name, bool is_file, const std::string& def, const std::string& filter, bool input, bool output)
 {
-    PathParameter::Ptr result(new PathParameter(name));
+    PathParameter::Ptr result(new PathParameter(name, filter, is_file, input, output));
     result->set(def);
 
     return result;
+}
+
+Parameter::Ptr ParameterFactory::declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, true, def, filter, true, false);
+}
+
+Parameter::Ptr ParameterFactory::declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, true, def, filter, false, true);
+}
+
+Parameter::Ptr ParameterFactory::declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, true, def, filter, true, true);
+}
+
+
+Parameter::Ptr ParameterFactory::declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, false, def, filter, true, false);
+}
+
+Parameter::Ptr ParameterFactory::declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, false, def, filter, false, true);
+}
+
+Parameter::Ptr ParameterFactory::declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, false, def, filter, true, true);
 }
 
 
