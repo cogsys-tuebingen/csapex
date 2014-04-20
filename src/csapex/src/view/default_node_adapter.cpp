@@ -311,7 +311,7 @@ void DefaultNodeAdapter::setupParameter(param::ColorParameter *color_p)
 
 void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
 {
-    QLineEdit* path = new QLineEdit;
+    QLineEdit* path = new QLineEdit(path_p->as<std::string>().c_str());
     QPushButton* open = new QPushButton("open");
 
     QHBoxLayout* sub = new QHBoxLayout;
@@ -336,25 +336,30 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     bool is_file = path_p->isFile();
     boost::function<void()> cb_open;
 
+    QString dir(path_p->as<std::string>().c_str());
+    if(dir.startsWith("file://", Qt::CaseInsensitive)) {
+        dir = dir.replace("file://", "", Qt::CaseInsensitive);
+    }
+
     if(path_p->isOutput()) {
         if(is_file) {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
                                   boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getSaveFileName,
-                                                                             (QWidget*) 0, path_p->name().c_str(), "", filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
+                                                                             (QWidget*) 0, path_p->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
         } else {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
                                   boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getExistingDirectory,
-                                                                             (QWidget*) 0, path_p->name().c_str(), "", (QFlags<QFileDialog::Option>) flags)));
+                                                                             (QWidget*) 0, path_p->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags)));
         }
     } else {
         if(is_file) {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
                                   boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getOpenFileName,
-                                                                             (QWidget*) 0, path_p->name().c_str(), "", filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
+                                                                             (QWidget*) 0, path_p->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
         } else {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParam<std::string>, this, current_name_,
+            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
                                   boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getExistingDirectory,
-                                                                             (QWidget*) 0, path_p->name().c_str(), "", (QFlags<QFileDialog::Option>) flags)));
+                                                                             (QWidget*) 0, path_p->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags)));
         }
     }
     qt_helper::Call* call_open = new qt_helper::Call(cb_open);
@@ -635,6 +640,16 @@ void DefaultNodeAdapter::updateParam(const std::string& name, T value)
     p->set<T>(value);
     guiChanged();
 }
+
+void DefaultNodeAdapter::updateParamIfNotEmpty(const std::string& name, const std::string& value)
+{
+    if(value.empty()) {
+        return;
+    }
+
+    updateParam(name, value);
+}
+
 
 void DefaultNodeAdapter::updateParamSet(const std::string& name, const std::string& value)
 {
