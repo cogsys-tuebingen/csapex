@@ -85,6 +85,29 @@ public:
         ar & value_;
     }
 
+    template <typename T>
+    void setInterval(T min, T max) {
+        if(min != read<T>(min_) || max != read<T>(max_)) {
+            min_ = min;
+            max_ = max;
+            scope_changed(this);
+        }
+    }
+
+    template <typename T>
+    void setMin(T min) {
+        if(min != read<T>(min_)) {
+            min_ = min; scope_changed(this);
+        }
+    }
+
+    template <typename T>
+    void setMax(T max) {
+        if(read<T>(max_) != max) {
+            max_ = max;
+            scope_changed(this);
+        }
+    }
 protected:
     virtual boost::any get_unsafe() const;
     virtual void set_unsafe(const boost::any& v);

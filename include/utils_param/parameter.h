@@ -85,9 +85,7 @@ public:
     template <typename T>
     Parameter& operator = (const T& value)
     {
-        boost::any v = value;
-        set_unsafe(v);
-        triggerChange();
+        set(value);
         return *this;
     }
 
