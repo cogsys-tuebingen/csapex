@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/memento.h>
 #include <csapex/model/message.h>
+#include <csapex/model/generic_state.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -37,13 +38,19 @@ public:
     virtual Memento::Ptr getState() const = 0;
     virtual void setState(Memento::Ptr memento) = 0;
 
+    std::vector<param::Parameter::Ptr> getParameters() const;
+
 protected:
     void setType(ConnectionType::Ptr type);
+
+protected:
+    GenericState state;
 
 private:
     ConnectionType::Ptr type_;
 
     std::string name_;
+
 };
 
 }

@@ -112,13 +112,19 @@ std::vector<Tag> Node::getTags() const
     return tags_;
 }
 
+void Node::removeTemporaryParameters()
+{
+    state.removeTemporaryParameters();
+}
+
+void Node::addTemporaryParameter(const param::Parameter::Ptr &param)
+{
+    state.addTemporaryParameter(param);
+}
+
 void Node::addParameter(const param::Parameter::Ptr &param)
 {
-    assert(param->name() != "noname");
-    assert(std::find(state.order.begin(), state.order.end(), param->name()) == state.order.end());
-
-    state.params[param->name()] = param;
-    state.order.push_back(param->name());
+    state.addParameter(param);
     worker_->addParameter(param.get());
 }
 
@@ -146,16 +152,12 @@ void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::fu
 
 std::vector<param::Parameter::Ptr> Node::getParameters() const
 {
-    std::vector<param::Parameter::Ptr> result;
-    for(std::vector<std::string>::const_iterator n = state.order.begin(); n != state.order.end(); ++n) {
-        result.push_back(state.params.at(*n));
-    }
-    return result;
+    return state.getParameters();
 }
 
 param::Parameter::Ptr Node::getParameter(const std::string &name) const
 {
-    return state.params.at(name);
+    return state.getParameter(name);
 }
 
 bool Node::isParameterEnabled(const std::string &name) const
@@ -403,17 +405,17 @@ void Node::updateParameters()
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
-    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
-    if(m) {
-        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
-            param::Parameter* param = it->second.get();
-            if(state.params.find(param->name()) != state.params.end()) {
-                state.params[param->name()]->setValueFrom(*param);
-            } else {
-                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
-            }
-        }
-    }
+//    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
+//    if(m) {
+//        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
+//            param::Parameter* param = it->second.get();
+//            if(state.params.find(param->name()) != state.params.end()) {
+//                state.params[param->name()]->setValueFrom(*param);
+//            } else {
+//                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
+//            }
+//        }
+//    }
 
     setState(s->child_state);
     loaded_state_available_ = true;
@@ -421,8 +423,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
 
 Memento::Ptr Node::getState() const
 {
-    GenericState::Ptr r(new GenericState(state));
-    return r;
+    return state.clone();
 }
 
 void Node::setState(Memento::Ptr memento)
@@ -430,19 +431,7 @@ void Node::setState(Memento::Ptr memento)
     boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
     assert(m.get());
 
-    std::map<std::string, param::Parameter::Ptr> old_params = state.params;
-    state = *m;
-    state.params = old_params;
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it) {
-        param::Parameter::Ptr p = it->second;
-        if(state.params.find(p->name()) != state.params.end()) {
-            state.params[p->name()]->setValueFrom(*p);
-        }
-
-        if(getUUID().empty()) {
-            return;
-        }
-    }
+    state.setFrom(*m);
 
     Q_EMIT modelChanged();
 }

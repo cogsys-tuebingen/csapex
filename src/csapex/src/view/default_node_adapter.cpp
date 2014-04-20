@@ -173,6 +173,11 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
 
+    GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getState());
+    if(state) {
+        state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapter::setupUiAgain, this));
+    }
+
     Q_FOREACH(param::Parameter::Ptr p, params) {
         param::Parameter* parameter = p.get();
 

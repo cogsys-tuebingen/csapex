@@ -60,16 +60,15 @@ public:
     void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition);
     void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
 
+    void addTemporaryParameter(const param::Parameter::Ptr& param);
+    void removeTemporaryParameters();
+
     std::vector<param::Parameter::Ptr> getParameters() const;
 
     template <typename T>
     const T param(const std::string& name) const
     {
-        try {
-            return getParameter(name)->as<T>();
-        } catch(const std::out_of_range& e) {
-            throw std::runtime_error(std::string("unknown parameter '") + name + "'");
-        }
+        return state.param<T>(name);
     }
     template <typename T>
     typename T::Ptr getParameter(const std::string& name) const
@@ -224,6 +223,7 @@ public:
 
 public:
     virtual Memento::Ptr getState() const;
+
 protected:
     virtual void setState(Memento::Ptr memento);
 
