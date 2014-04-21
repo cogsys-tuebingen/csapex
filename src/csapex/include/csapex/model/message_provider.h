@@ -14,10 +14,8 @@
 namespace csapex
 {
 
-class MessageProvider : public QObject
+class MessageProvider
 {
-    Q_OBJECT
-
 public:
     typedef boost::shared_ptr<MessageProvider> Ptr;
 
@@ -25,7 +23,6 @@ public:
     ConnectionType::ConstPtr getType() const;
 
     virtual void load(const std::string& file) = 0;
-    virtual void insert(QBoxLayout*) {}
 
     void setName(const std::string& name);
     std::string getName() const;
