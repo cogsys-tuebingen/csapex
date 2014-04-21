@@ -676,17 +676,20 @@ void DefaultNodeAdapter::updateParamBitSet(const std::string& name, const QListV
 template <typename T>
 void DefaultNodeAdapter::updateUi(const param::Parameter* p, boost::function<void(T)> setter)
 {
+    /// TODO: execute ONLY in UI thread
     setter(node_->param<T>(p->name()));
 }
 
 template <typename T>
 void DefaultNodeAdapter::updateUiPtr(const param::Parameter* p, boost::function<void(const T*)> setter)
 {
+    /// TODO: execute ONLY in UI thread
     setter(dynamic_cast<const T*>(p));
 }
 
 void DefaultNodeAdapter::updateUiSet(const param::Parameter *p, boost::function<void (const std::string &)> setter)
 {
+    /// TODO: execute ONLY in UI thread
     const param::SetParameter* set_p = dynamic_cast<const param::SetParameter*> (p);
     if(set_p) {
         setter(set_p->getName());
@@ -695,6 +698,7 @@ void DefaultNodeAdapter::updateUiSet(const param::Parameter *p, boost::function<
 
 void DefaultNodeAdapter::updateUiSetScope(const param::SetParameter *set_p, QComboBox *combo)
 {
+    /// TODO: execute ONLY in UI thread
     int current = 0;
     combo->clear();
     std::string selected;
@@ -717,6 +721,7 @@ void DefaultNodeAdapter::updateUiSetScope(const param::SetParameter *set_p, QCom
 
 void DefaultNodeAdapter::updateUiBitSet(const param::Parameter *p, const QListView *list)
 {
+    /// TODO: execute ONLY in UI thread
     const param::BitSetParameter* bitset_p = dynamic_cast<const param::BitSetParameter*> (p);
     if(bitset_p) {
         for(int i = 0; i < bitset_p->noParameters(); ++i) {

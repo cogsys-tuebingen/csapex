@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <QObject>
 #include <QMutex>
+#include <QTimer>
 #include <map>
 #include <deque>
 #include <boost/function.hpp>
@@ -41,6 +42,10 @@ public Q_SLOTS:
     void removeInput(ConnectorIn* source);
 
     void eventGuiChanged();
+
+    void checkParameters();
+
+    void setTickFrequency(double f);
     void tick();
 
     void triggerError(bool e, const std::string& what);
@@ -65,7 +70,11 @@ private:
     void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
 
 private:
+    static const double DEFAULT_FREQUENCY = 30.0;
+
+private:
     Node* node_;
+    QTimer* timer_;
 
     bool synchronized_inputs_;
     std::map<ConnectorIn*, bool> has_msg_;

@@ -74,7 +74,7 @@ void Graph::addNode(Node::Ptr node)
     node->setCommandDispatcher(dispatcher_);
     node->makeThread();
 
-    QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(tick()));
+    QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
 
     Q_EMIT nodeAdded(node);
 }
@@ -85,7 +85,7 @@ void Graph::deleteNode(const UUID& uuid)
 
     node->stop();
 
-    QObject::disconnect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(tick()));
+    QObject::disconnect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
 
     for(std::vector<Node::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
         if((*it).get() == node) {

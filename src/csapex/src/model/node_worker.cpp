@@ -15,6 +15,11 @@ NodeWorker::NodeWorker(Node* node)
     : node_(node), synchronized_inputs_(false), thread_initialized_(false), is_processing_(false)
 {
     assert(node_);
+
+    timer_ = new QTimer();
+    setTickFrequency(DEFAULT_FREQUENCY);
+
+    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 NodeWorker::~NodeWorker()
@@ -60,7 +65,7 @@ void NodeWorker::checkConditions()
 
 void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
 {
-   // QMutexLocker lock(&changed_params_mutex_);
+    // QMutexLocker lock(&changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
 }
 
@@ -84,9 +89,9 @@ void NodeWorker::forwardMessage(Connectable *s)
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
     assert(source);
 
-//    if(node_->isError()) {
-//        return;
-//    }
+    //    if(node_->isError()) {
+    //        return;
+    //    }
 
     if(node_->isEnabled()) {
         if(synchronized_inputs_) {
@@ -97,9 +102,9 @@ void NodeWorker::forwardMessage(Connectable *s)
     }
 
 
-//    if(!node_->isError() || node_->errorLevel() != ErrorState::EL_ERROR) {
-//        node_->setError(false);
-//    }
+    //    if(!node_->isError() || node_->errorLevel() != ErrorState::EL_ERROR) {
+    //        node_->setError(false);
+    //    }
 }
 
 void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
@@ -110,7 +115,10 @@ void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
     is_processing_ = true;
 
     node_->useTimer(t.get());
-    node_->messageArrived(source);
+    {
+        QMutexLocker lock(&changed_params_mutex_);
+        node_->messageArrived(source);
+    }
 
     t->finish();
 
@@ -178,7 +186,10 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
-    node_->process();
+    {
+        QMutexLocker lock(&changed_params_mutex_);
+        node_->process();
+    }
     t->finish();
     timer_history_.push_back(t);
 
@@ -196,6 +207,19 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     Q_EMIT messageProcessed();
 }
 
+void NodeWorker::setTickFrequency(double f)
+{
+    if(timer_->isActive()) {
+        timer_->stop();
+    }
+    if(f == 0.0) {
+        return;
+    }
+    timer_->setInterval(1000. / f);
+    timer_->setSingleShot(false);
+    timer_->start();
+}
+
 void NodeWorker::tick()
 {
     if(!thread_initialized_) {
@@ -204,31 +228,33 @@ void NodeWorker::tick()
     }
 
     if(node_->isEnabled()) {
+        QMutexLocker lock(&changed_params_mutex_);
         node_->tick();
     }
-
-    {
-        QMutexLocker lock(&changed_params_mutex_);
-        typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
-        for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end();) {
-            try {
-                it->second(it->first);
-
-            } catch(const std::exception& e) {
-                it = changed_params_.erase(it);
-                throw;
-            }
-
-            it = changed_params_.erase(it);
-        }
-
-        changed_params_.clear();
-    }
-
     while(timer_history_.size() > Settings::timer_history_length_) {
         timer_history_.pop_front();
     }
 }
+
+void NodeWorker::checkParameters()
+{
+    QMutexLocker lock(&changed_params_mutex_);
+    typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
+    for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end();) {
+        try {
+            it->second(it->first);
+
+        } catch(const std::exception& e) {
+            it = changed_params_.erase(it);
+            throw;
+        }
+
+        it = changed_params_.erase(it);
+    }
+
+    changed_params_.clear();
+}
+
 void NodeWorker::eventGuiChanged()
 {
     if(node_->isEnabled()) {
