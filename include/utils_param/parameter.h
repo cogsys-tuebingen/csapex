@@ -9,6 +9,7 @@
 #include <boost/signals2.hpp>
 #include <cxxabi.h>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 namespace param {
 
@@ -18,6 +19,7 @@ public:
     friend class ParameterFactory;
 
     typedef boost::shared_ptr<Parameter> Ptr;
+
     typedef boost::shared_ptr<boost::lock_guard<boost::mutex> > Lock;
 
     struct access {
