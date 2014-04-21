@@ -332,9 +332,11 @@ private:
 
     bool loaded_state_available_;
 
-    GenericState state;
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;
+
+protected:
+    GenericState state;
 };
 
 }
