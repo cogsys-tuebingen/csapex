@@ -8,6 +8,7 @@
 #include <boost/any.hpp>
 #include <boost/signals2.hpp>
 #include <cxxabi.h>
+#include <boost/thread/mutex.hpp>
 
 namespace param {
 
@@ -17,6 +18,7 @@ public:
     friend class ParameterFactory;
 
     typedef boost::shared_ptr<Parameter> Ptr;
+    typedef boost::shared_ptr<boost::lock_guard<boost::mutex> > Lock;
 
     struct access {
         boost::signals2::signal<void(Parameter*)>& parameter_changed(Parameter& p) {
@@ -61,14 +63,20 @@ public:
         return type() == typeid(T);
     }
 
+    Lock lock() const;
+
     template <typename T>
     T as() const
     {
         if(!is<T>() || is<void>()) {
             throwTypeError(typeid(T), type(), "get failed: ");
         }
-        const boost::any& v = get_unsafe();
-        return boost::any_cast<T> (v);
+
+        {
+            Lock l = lock();
+            const boost::any& v = get_unsafe();
+            return boost::any_cast<T> (v);
+        }
     }
 
     template <typename T>
@@ -77,8 +85,10 @@ public:
         if(!is<T>() && !is<void>()) {
             throwTypeError(typeid(T), type(),"set failed: ");
         }
-
-        set_unsafe(v);
+        {
+            Lock l = lock();
+            set_unsafe(v);
+        }
         triggerChange();
     }
 
@@ -130,6 +140,8 @@ protected:
     std::string name_;
     bool enabled_;
     bool interactive_;
+
+    mutable boost::mutex mutex_;
 };
 
 }

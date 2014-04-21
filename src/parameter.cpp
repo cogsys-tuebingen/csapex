@@ -42,6 +42,11 @@ bool Parameter::isInteractive() const
     return interactive_;
 }
 
+Parameter::Lock Parameter::lock() const
+{
+    return Lock(new boost::lock_guard<boost::mutex>(mutex_));
+}
+
 void Parameter::triggerChange()
 {
     parameter_changed(this);
