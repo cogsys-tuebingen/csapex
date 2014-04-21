@@ -61,7 +61,11 @@ public:
     void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
 
     void addTemporaryParameter(const param::Parameter::Ptr& param);
+    void addTemporaryParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
+
+    void setParameterSetSilence(bool silent);
     void removeTemporaryParameters();
+    void triggerParameterSetChanged();
 
     std::vector<param::Parameter::Ptr> getParameters() const;
 

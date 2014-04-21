@@ -112,14 +112,31 @@ std::vector<Tag> Node::getTags() const
     return tags_;
 }
 
+void Node::setParameterSetSilence(bool silent)
+{
+    state.setParameterSetSilence(silent);
+}
+
 void Node::removeTemporaryParameters()
 {
+    // TODO: handle callbacks!
     state.removeTemporaryParameters();
+}
+
+void Node::triggerParameterSetChanged()
+{
+    state.triggerParameterSetChanged();
 }
 
 void Node::addTemporaryParameter(const param::Parameter::Ptr &param)
 {
     state.addTemporaryParameter(param);
+}
+
+void Node::addTemporaryParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
+{
+    state.addTemporaryParameter(param);
+    worker_->addParameterCallback(param.get(), cb);
 }
 
 void Node::addParameter(const param::Parameter::Ptr &param)

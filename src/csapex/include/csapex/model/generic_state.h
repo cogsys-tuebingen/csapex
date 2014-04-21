@@ -27,6 +27,9 @@ public:
     void addTemporaryParameter(const param::Parameter::Ptr& param);
     void removeTemporaryParameters();
 
+    void setParameterSetSilence(bool silent);
+    void triggerParameterSetChanged();
+
     param::Parameter& operator [] (const std::string& name) const;
     param::Parameter::Ptr getParameter(const std::string& name) const;
     std::vector<param::Parameter::Ptr> getParameters() const;
@@ -49,6 +52,8 @@ public:
     std::map<std::string, param::Parameter::Ptr> params;
     std::map<std::string, bool> temporary;
     std::vector<std::string> order;
+
+    bool silent_;
 
     boost::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
 };

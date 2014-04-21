@@ -7,7 +7,7 @@
 using namespace csapex;
 
 GenericState::GenericState()
-    : parameter_set_changed(new boost::signals2::signal<void()>)
+    : silent_(false), parameter_set_changed(new boost::signals2::signal<void()>)
 {
 
 }
@@ -36,7 +36,12 @@ void GenericState::addParameter(param::Parameter::Ptr param)
     params[param->name()] = param;
     order.push_back(param->name());
 
-    (*parameter_set_changed)();
+    triggerParameterSetChanged();
+}
+
+void GenericState::setParameterSetSilence(bool silent)
+{
+    silent_ = silent;
 }
 
 void GenericState::removeTemporaryParameters()
@@ -51,7 +56,14 @@ void GenericState::removeTemporaryParameters()
 
     temporary.clear();
 
-    (*parameter_set_changed)();
+    triggerParameterSetChanged();
+}
+
+void GenericState::triggerParameterSetChanged()
+{
+    if(!silent_) {
+        (*parameter_set_changed)();
+    }
 }
 
 void GenericState::addTemporaryParameter(const param::Parameter::Ptr &param)
@@ -62,9 +74,15 @@ void GenericState::addTemporaryParameter(const param::Parameter::Ptr &param)
 
 void GenericState::setFrom(const GenericState &rhs)
 {
-    std::map<std::string, param::Parameter::Ptr> old_params = params;
-    *this = rhs;
-    params = old_params;
+//    std::map<std::string, param::Parameter::Ptr> old_params = params;
+//    std::vector<std::string> old_order = order;
+
+//    *this = rhs;
+
+//    params = old_params;
+//    order = old_order;
+//    order = old_order;
+
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = rhs.params.begin(); it != rhs.params.end(); ++it) {
         param::Parameter::Ptr p = it->second;
         if(params.find(p->name()) != params.end()) {

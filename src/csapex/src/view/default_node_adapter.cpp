@@ -175,6 +175,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
     GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getState());
     if(state) {
+        state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapter::setupUiAgain, this));
     }
 
