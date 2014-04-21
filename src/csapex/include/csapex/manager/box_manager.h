@@ -52,7 +52,7 @@ public:
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
-    QAbstractItemModel *listAvailableBoxedObjects();
+    QAbstractItemModel *listAvailableNodeTypes();
 
     void stop();
 

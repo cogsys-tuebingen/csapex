@@ -4,7 +4,6 @@
 /// COMPONENT
 #include "ui_box.h"
 #include <csapex/model/node.h>
-#include <csapex/model/boxed_object.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
@@ -39,12 +38,6 @@ Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
 {
 }
 
-Box::Box(BoxedObjectPtr node, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_shared_(node.get()),
-      down_(false), profiling_(false), is_placed_(false)
-{
-}
-
 Box::~Box()
 {
 }
@@ -52,13 +45,9 @@ Box::~Box()
 
 void Box::setupUi()
 {
-    if(adapter_) {
-        QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
-        adapter_->doSetupUi(ui->content);
-    } else {
-        QObject::connect(&adapter_shared_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
-        adapter_shared_->doSetupUi(ui->content);
-    }
+    QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
+    adapter_->doSetupUi(ui->content);
+
     updateFlippedSides();
 }
 
@@ -208,7 +197,7 @@ void Box::setError(bool e, const std::string &msg)
     setError(e, msg, ErrorState::EL_ERROR);
 }
 
-void Box::setError(bool e, const std::string &msg, int level)
+void Box::setError(bool, const std::string &msg, int)
 {
     setToolTip(msg.c_str());
     //node_->setErrorSilent(e, msg, level);
@@ -413,19 +402,19 @@ void Box::triggerPlaced()
 
 void Box::selectEvent()
 {
-//#error TODO: make this into a signal, connect port via signal!
-//    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
-//        Port* p = i->getPort();
-//        if(p) {
-//            p->setSelected(true);
-//        }
-//    }
-//    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-//        Port* p = i->getPort();
-//        if(p) {
-//            p->setSelected(true);
-//        }
-//    }
+    //#error TODO: make this into a signal, connect port via signal!
+    //    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
+    //        Port* p = i->getPort();
+    //        if(p) {
+    //            p->setSelected(true);
+    //        }
+    //    }
+    //    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
+    //        Port* p = i->getPort();
+    //        if(p) {
+    //            p->setSelected(true);
+    //        }
+    //    }
 
     ui->boxframe->setProperty("focused",true);
     refreshStylesheet();
@@ -433,18 +422,18 @@ void Box::selectEvent()
 
 void Box::deselectEvent()
 {
-//    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
-//        Port* p = i->getPort();
-//        if(p) {
-//            p->setSelected(false);
-//        }
-//    }
-//    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-//        Port* p = i->getPort();
-//        if(p) {
-//            p->setSelected(false);
-//        }
-//    }
+    //    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
+    //        Port* p = i->getPort();
+    //        if(p) {
+    //            p->setSelected(false);
+    //        }
+    //    }
+    //    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
+    //        Port* p = i->getPort();
+    //        if(p) {
+    //            p->setSelected(false);
+    //        }
+    //    }
     ui->boxframe->setProperty("focused",false);
     refreshStylesheet();
 }
@@ -507,17 +496,9 @@ void Box::refreshStylesheet()
 
 void Box::eventModelChanged()
 {
-    //    if(is_updating_gui_) {
-    //        return;
-    //    }
-
     setupUi();
 
-    if(adapter_) {
-        adapter_->updateDynamicGui(ui->content);
-    } else {
-        adapter_shared_->updateDynamicGui(ui->content);
-    }
+    adapter_->updateDynamicGui(ui->content);
 }
 
 void Box::showProfiling()
@@ -553,18 +534,18 @@ void Box::updateFlippedSides()
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
     Q_EMIT flipped(flip);
-//    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-//        Port* p = i->getPort();
-//        if(p) {
-//            p->setFlipped(flip);
-//        }
-//    }
-//    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-//        Port* p = i->getPort();
-//        if(p) {
-//            p->setFlipped(flip);
-//        }
-//    }
+    //    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
+    //        Port* p = i->getPort();
+    //        if(p) {
+    //            p->setFlipped(flip);
+    //        }
+    //    }
+    //    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
+    //        Port* p = i->getPort();
+    //        if(p) {
+    //            p->setFlipped(flip);
+    //        }
+    //    }
 }
 
 bool Box::isMinimizedSize() const

@@ -90,7 +90,7 @@ void CsApexCore::init(DragIO* dragio)
             core_plugins_.push_back(plugin);
         }
 
-        showStatusMessage("loading boxedobject plugins");
+        showStatusMessage("loading node plugins");
         BoxManager& bm = BoxManager::instance();
         bm.loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
         bm.new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
@@ -99,6 +99,7 @@ void CsApexCore::init(DragIO* dragio)
         showStatusMessage("loading config");
         try {
             load(settings_.getConfig());
+            showStatusMessage("painting user interface");
         } catch(const std::exception& e) {
             std::cerr << "error loading the config: " << e.what() << std::endl;
         }

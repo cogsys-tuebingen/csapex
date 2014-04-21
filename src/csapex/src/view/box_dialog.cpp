@@ -216,7 +216,7 @@ void BoxDialog::makeUI()
 
     NodeFilterProxyModel* filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    filter->setSourceModel(BoxManager::instance().listAvailableBoxedObjects());
+    filter->setSourceModel(BoxManager::instance().listAvailableNodeTypes());
 
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));

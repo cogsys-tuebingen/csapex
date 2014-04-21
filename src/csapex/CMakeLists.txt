@@ -57,7 +57,6 @@ include_directories(include
 set(SRC_PLUGIN
     src/core/core_plugin.cpp
 
-    src/model/boxed_object.cpp
     src/model/node.cpp
     src/model/connectable.cpp
     src/model/connector_in.cpp

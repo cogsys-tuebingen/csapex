@@ -20,7 +20,6 @@ class CorePlugin;
 
 FWD(Box);
 FWD(Group);
-FWD(BoxedObject);
 FWD(NodeConstructor);
 
 FWD(Port);

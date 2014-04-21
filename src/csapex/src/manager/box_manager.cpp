@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
-#include <csapex/model/boxed_object.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
@@ -208,7 +207,7 @@ void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
 }
 
 
-QAbstractItemModel* BoxManager::listAvailableBoxedObjects()
+QAbstractItemModel* BoxManager::listAvailableNodeTypes()
 {
     ensureLoaded();
 
@@ -254,12 +253,7 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
         throw std::runtime_error("Groups are not implemented");
         //        object.reset(new csapex::Group(""));
     } else {
-        BoxedObjectPtr bo = boost::dynamic_pointer_cast<BoxedObject> (content);
-        if(bo) {
-            object.reset(new csapex::Box(bo));
-        } else {
-            object.reset(new csapex::Box(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
-        }
+        object.reset(new csapex::Box(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
     }
 
     object->setStyleSheet(stylesheet);
@@ -396,18 +390,13 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 
 Box* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
 {
-    BoxedObject::Ptr bo = boost::dynamic_pointer_cast<BoxedObject>(node);
-    Box* box;
-    if(bo) {
-        box = new Box(bo);
-    } else {
-        std::string type = node->getType();
+    std::string type = node->getType();
 
-        if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-            box = new Box(node, node_adapter_builders_[type]->build(node, widget_ctrl));
-        } else {
-            box = new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)));
-        }
+    Box* box;
+    if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
+        box = new Box(node, node_adapter_builders_[type]->build(node, widget_ctrl));
+    } else {
+        box = new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)));
     }
     box->construct();
     return box;

@@ -50,7 +50,6 @@ public:
 
 public:
     /// CONSTRUCTION
-    Box(BoxedObjectPtr content, QWidget* parent = 0);
     Box(NodePtr content, NodeAdapterPtr adapter, QWidget* parent = 0);
     virtual ~Box();
     void construct();
@@ -150,7 +149,6 @@ protected:
 
     NodePtr node_;
     NodeAdapterPtr adapter_;
-    NodeAdapter* adapter_shared_;
 
     bool down_;
     QPoint start_drag_;
