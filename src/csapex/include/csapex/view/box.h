@@ -101,6 +101,8 @@ protected:
     void updateFlippedSides();
 
 public Q_SLOTS:
+    void setupUiAgain();
+
     void deleteBox();
     void minimizeBox(bool minimize);
     void enableContent(bool enable);

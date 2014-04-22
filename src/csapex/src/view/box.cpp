@@ -45,9 +45,18 @@ Box::~Box()
 
 void Box::setupUi()
 {
+    node_->getNodeWorker()->checkConditions(true);
+
     QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
+    QObject::connect(node_->getNodeWorker(), SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
     adapter_->doSetupUi(ui->content);
 
+    updateFlippedSides();
+}
+
+void Box::setupUiAgain()
+{
+    adapter_->doSetupUi(ui->content);
     updateFlippedSides();
 }
 

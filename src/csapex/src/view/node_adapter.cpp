@@ -35,6 +35,7 @@ Node* NodeAdapter::getNode()
 
 void NodeAdapter::setupUiAgain()
 {
+    //is_gui_setup_ = false;
     bridge.triggerRebuild();
 }
 
@@ -42,10 +43,10 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
 {
     layout_ = layout;
     if(!is_gui_setup_) {
-        is_gui_setup_ = true;
 
         try {
             setupUi(layout_);
+            is_gui_setup_ = true;
             guiChanged();
         } catch(const std::exception& e) {
             std::cerr << "setting up ui for node " << node_->getUUID().getFullName() << " failed: " << e.what() << std::endl;

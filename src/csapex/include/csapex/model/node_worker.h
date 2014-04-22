@@ -60,14 +60,16 @@ public Q_SLOTS:
     void setProcessing(bool p);
     bool isProcessing() const;
 
-    void checkConditions();
+    void checkConditions(bool silent);
 
 Q_SIGNALS:
+    void messagesReceived();
     void messageProcessed();
 
 private:
     void parameterChanged(param::Parameter* param);
     void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
+    void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
     static const double DEFAULT_FREQUENCY = 30.0;

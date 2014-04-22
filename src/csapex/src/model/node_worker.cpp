@@ -37,6 +37,7 @@ bool NodeWorker::isProcessing()
 void NodeWorker::addParameter(param::Parameter* param)
 {
     connections_.push_back(parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1)));
+    connections_.push_back(parameter_enabled(*param).connect(boost::bind(&NodeWorker::parameterEnabled, this, _1, _2)));
 }
 
 void NodeWorker::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
@@ -52,14 +53,26 @@ void NodeWorker::addParameterCondition(param::Parameter* param, boost::function<
 void NodeWorker::parameterChanged(param::Parameter *)
 {
     if(!conditions_.empty()) {
-        checkConditions();
+        checkConditions(false);
     }
 }
 
-void NodeWorker::checkConditions()
+void NodeWorker::checkConditions(bool silent)
 {
+    bool change = false;
+    node_->setParameterSetSilence(true);
     for(std::map<param::Parameter*, boost::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
-        it->first->setEnabled(it->second());
+        param::Parameter* p = it->first;
+        bool should_be_enabled = it->second();
+        if(should_be_enabled != p->isEnabled()) {
+            it->first->setEnabled(should_be_enabled);
+            change = true;
+        }
+    }
+    node_->setParameterSetSilence(false);
+
+    if(change && !silent) {
+        node_->triggerParameterSetChanged();
     }
 }
 
@@ -67,6 +80,11 @@ void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(
 {
     // QMutexLocker lock(&changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
+}
+
+void NodeWorker::parameterEnabled(param::Parameter *param, bool enabled)
+{
+    node_->triggerParameterSetChanged();
 }
 
 void NodeWorker::setSynchronizedInputs(bool s)
@@ -94,6 +112,8 @@ void NodeWorker::forwardMessage(Connectable *s)
     //    }
 
     if(node_->isEnabled()) {
+        Q_EMIT messagesReceived();
+
         if(synchronized_inputs_) {
             forwardMessageSynchronized(source);
         } else {
@@ -239,20 +259,23 @@ void NodeWorker::tick()
 void NodeWorker::checkParameters()
 {
     QMutexLocker lock(&changed_params_mutex_);
-    typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
-    for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end();) {
-        try {
-            it->second(it->first);
 
-        } catch(const std::exception& e) {
+    if(!changed_params_.empty()) {
+        typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
+        for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end();) {
+            try {
+                it->second(it->first);
+
+            } catch(const std::exception& e) {
+                it = changed_params_.erase(it);
+                throw;
+            }
+
             it = changed_params_.erase(it);
-            throw;
         }
 
-        it = changed_params_.erase(it);
+        changed_params_.clear();
     }
-
-    changed_params_.clear();
 }
 
 void NodeWorker::eventGuiChanged()

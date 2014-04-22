@@ -33,6 +33,7 @@ class Node : public QObject, public ErrorState, public Unique, public Timable, p
 
     friend class NodeState;
     friend class NodeAdapter;
+    friend class DefaultNodeAdapter;
     friend class Box;
     friend class GraphIO;
     friend class Graph;
@@ -247,9 +248,6 @@ private:
     void registerOutput(ConnectorOut* out);
 
     QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
-
-protected:
-    virtual void allConnectorsArrived() __attribute__ ((deprecated));
 
 public Q_SLOTS:
     virtual void messageArrived(ConnectorIn* source);

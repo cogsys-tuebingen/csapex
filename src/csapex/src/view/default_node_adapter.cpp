@@ -61,6 +61,8 @@ void DefaultNodeAdapter::clear()
     Q_FOREACH(const boost::signals2::connection& c, connections) {
         c.disconnect();
     }
+
+    QtHelper::clearLayout(current_layout_);
     connections.clear();
 
     Q_FOREACH(QObject* cb, callbacks) {
@@ -168,7 +170,6 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
     current_layout_ = outer_layout;
 
-    QtHelper::clearLayout(layout_);
     clear();
 
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
@@ -181,9 +182,6 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
     Q_FOREACH(param::Parameter::Ptr p, params) {
         param::Parameter* parameter = p.get();
-
-        parameter_enabled(*parameter).disconnect_all_slots();
-        parameter_enabled(*parameter).connect(boost::bind(&DefaultNodeAdapter::setupUiAgain, this));
 
         if(!parameter->isEnabled()) {
             continue;
@@ -220,6 +218,8 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
                 gb_layout->addWidget(hider);
 
                 outer_layout->addWidget(gb);
+
+                node_->awarn << "add group " << group << std::endl;
 
                 QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
             }
@@ -267,7 +267,6 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
         } else {
             outer_layout->addLayout(current_layout_);
         }
-
     }
 }
 
