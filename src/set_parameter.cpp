@@ -110,8 +110,20 @@ void SetParameter::doSetValueFrom(const Parameter &other)
         if(set_.find(name) == set_.end()) {
             set_[name] = set->value_;
         }
-        value_ = set->value_;
-        triggerChange();
+        bool change = false;
+        if(value_.type() == typeid(int)) {
+            change = boost::any_cast<int>(value_) != boost::any_cast<int>(set->value_);
+        } else if(value_.type() == typeid(double)) {
+            change = boost::any_cast<double>(value_) != boost::any_cast<double>(set->value_);
+        } else if(value_.type() == typeid(bool)) {
+            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(set->value_);
+        } else if(value_.type() == typeid(std::string)) {
+            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(set->value_);
+        }
+        if(change) {
+            value_ = set->value_;
+            triggerChange();
+        }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

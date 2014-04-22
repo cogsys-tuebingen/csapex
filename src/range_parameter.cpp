@@ -55,8 +55,16 @@ void RangeParameter::doSetValueFrom(const Parameter &other)
 {
     const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
     if(range) {
-        value_ = range->value_;
-        triggerChange();
+        bool change = false;
+        if(value_.type() == typeid(int)) {
+            change = boost::any_cast<int>(value_) != boost::any_cast<int>(range->value_);
+        } else if(value_.type() == typeid(double)) {
+            change = boost::any_cast<double>(value_) != boost::any_cast<double>(range->value_);
+        }
+        if(change) {
+            value_ = range->value_;
+            triggerChange();
+        }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

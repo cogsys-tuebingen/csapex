@@ -72,8 +72,18 @@ void IntervalParameter::doSetValueFrom(const Parameter &other)
 {
     const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
     if(interval) {
-        values_ = interval->values_;
-        triggerChange();
+        bool change = false;
+        if(type() == typeid(std::pair<int, int>)) {
+            change = boost::any_cast<int>(values_.first) != boost::any_cast<int>(interval->values_.first) &&
+                    boost::any_cast<int>(values_.second) != boost::any_cast<int>(interval->values_.second);
+        } else if(type() == typeid(std::pair<double, double>)) {
+            change = boost::any_cast<double>(values_.first) != boost::any_cast<double>(interval->values_.first) &&
+                    boost::any_cast<double>(values_.second) != boost::any_cast<double>(interval->values_.second);
+        }
+        if(change) {
+            values_ = interval->values_;
+            triggerChange();
+        }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

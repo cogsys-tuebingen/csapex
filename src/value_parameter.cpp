@@ -60,8 +60,20 @@ void ValueParameter::doSetValueFrom(const Parameter &other)
 {
     const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other);
     if(value) {
-        value_ = value->value_;
-        triggerChange();
+        bool change = false;
+        if(value_.type() == typeid(int)) {
+            change = boost::any_cast<int>(value_) != boost::any_cast<int>(value->value_);
+        } else if(value_.type() == typeid(double)) {
+            change = boost::any_cast<double>(value_) != boost::any_cast<double>(value->value_);
+        } else if(value_.type() == typeid(bool)) {
+            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
+        } else if(value_.type() == typeid(std::string)) {
+            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
+        }
+        if(change) {
+            value_ = value->value_;
+            triggerChange();
+        }
     } else {
         try {
             value_ = access_unsafe(other);

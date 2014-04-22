@@ -157,8 +157,10 @@ void BitSetParameter::doSetValueFrom(const Parameter &other)
 {
     const BitSetParameter* range = dynamic_cast<const BitSetParameter*>(&other);
     if(range) {
-        value_ = range->value_;
-        triggerChange();
+        if(value_ != range->value_) {
+            value_ = range->value_;
+            triggerChange();
+        }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }

@@ -9,7 +9,7 @@
 #include <boost/signals2.hpp>
 #include <cxxabi.h>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/locks.hpp>
 
 namespace param {
 

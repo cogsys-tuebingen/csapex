@@ -68,8 +68,10 @@ void ColorParameter::doSetValueFrom(const Parameter &other)
 {
     const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other);
     if(color) {
-        colors_ = color->colors_;
-        triggerChange();
+        if(colors_ != color->colors_) {
+            colors_ = color->colors_;
+            triggerChange();
+        }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
