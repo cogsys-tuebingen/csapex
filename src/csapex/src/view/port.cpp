@@ -82,12 +82,6 @@ void Port::paintEvent(QPaintEvent *e)
 {
     setProperty("async", adaptee_->isAsync());
 
-//    if(adaptee_->isInput()) {
-//        ConnectorIn* i = dynamic_cast<ConnectorIn*>(adaptee_);
-//        setProperty("legacy", i->isLegacy());
-//        refreshStylesheet();
-//    }
-
     if(refresh_style_sheet_) {
         refresh_style_sheet_ = false;
         setStyleSheet(styleSheet());
@@ -159,6 +153,7 @@ void Port::createToolTip()
 {
     std::stringstream tooltip;
     tooltip << "UUID: " << adaptee_->getUUID().c_str() << ", Type: " << adaptee_->getType()->name() << ", Messages: " << adaptee_->getCount();
+    tooltip << ", Blocked: " << adaptee_->isBlocked();
     setToolTip(tooltip.str().c_str());
 }
 

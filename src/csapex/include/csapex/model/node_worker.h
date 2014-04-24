@@ -14,6 +14,7 @@
 #include <map>
 #include <deque>
 #include <boost/function.hpp>
+#include <QWaitCondition>
 
 namespace csapex {
 
@@ -30,12 +31,9 @@ public:
     NodeWorker(Node* node);
     ~NodeWorker();
 
-    bool isProcessing();
-
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
 
-    void forwardMessageDirectly(ConnectorIn* source);
     void forwardMessageSynchronized(ConnectorIn* source);
 
     void addInput(ConnectorIn* source);
@@ -50,17 +48,13 @@ public Q_SLOTS:
 
     void triggerError(bool e, const std::string& what);
 
-    void setSynchronizedInputs(bool s);
-    bool isSynchronizedInputs() const;
-
     void addParameter(param::Parameter* param);
     void addParameterCallback(param::Parameter *param, boost::function<void(param::Parameter *)> cb);
     void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
 
-    void setProcessing(bool p);
-    bool isProcessing() const;
-
     void checkConditions(bool silent);
+
+    void pause(bool pause);
 
 Q_SIGNALS:
     void messagesReceived();
@@ -78,7 +72,7 @@ private:
     Node* node_;
     QTimer* timer_;
 
-    bool synchronized_inputs_;
+
     std::map<ConnectorIn*, bool> has_msg_;
 
     QMutex changed_params_mutex_;
@@ -88,7 +82,9 @@ private:
     std::deque<TimerPtr> timer_history_;
 
     bool thread_initialized_;
-    volatile bool is_processing_;
+    bool paused_;
+    QMutex pause_mutex_;
+    QWaitCondition continue_;
 
     std::vector<boost::signals2::connection> connections_;
 };

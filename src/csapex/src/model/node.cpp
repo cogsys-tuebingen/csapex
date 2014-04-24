@@ -21,7 +21,6 @@ Node::Node(const UUID &uuid)
       settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
-    QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
 }
 
 Node::~Node()
@@ -238,41 +237,9 @@ void Node::checkInputs()
     }
 }
 
-void Node::finishProcessing()
-{
-    Q_FOREACH(ConnectorIn* i, inputs_) {
-        if(i->isProcessing()) {
-            i->setProcessing(false);
-        }
-    }
-}
-
 Settings& Node::getSettings()
 {
     return *settings_;
-}
-
-void Node::checkIfDone()
-{
-    int no_targets = 0;
-    Q_FOREACH(ConnectorOut* o, outputs_) {
-        no_targets += o->noTargets();
-    }
-
-    if(worker_->isProcessing()/* && no_targets != 0*/) {
-        return;
-    }
-
-    // check if all children are done processing
-    Q_FOREACH(ConnectorOut* o, outputs_) {
-        // o->waitForProcessing();
-        if(o->isProcessing()) {
-            return;
-        }
-    }
-
-    // notify that all children are done
-    finishProcessing();
 }
 
 void Node::killContent()
@@ -500,7 +467,6 @@ void Node::enableIO(bool enable)
 
 void Node::enableInput (bool enable)
 {
-    worker_->setProcessing(false);
     Q_FOREACH(ConnectorIn* i, inputs_) {
         if(enable) {
             i->enable();
@@ -584,10 +550,6 @@ NodeWorker* Node::getNodeWorker() const
 
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    if(error && level == EL_ERROR) {
-        finishProcessing();
-    }
-
     Q_EMIT nodeError(error,msg,level);
 
     if(node_state_->enabled && error && level == EL_ERROR) {
@@ -628,7 +590,6 @@ ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 void Node::addInput(ConnectorIn* in)
 {
     registerInput(in);
-    //    in->setLegacy(worker_->isSynchronizedInputs());
 }
 
 void Node::addOutput(ConnectorOut* out)
@@ -649,15 +610,12 @@ void Node::manageOutput(ConnectorOut* out)
     managed_outputs_.push_back(out);
     connectConnector(out);
     out->moveToThread(thread());
-    QObject::connect(out, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
 }
 
 void Node::setSynchronizedInputs(bool sync)
 {
-    worker_->setSynchronizedInputs(sync);
-    //    BOOST_FOREACH(ConnectorIn* in, input) {
-    //        in->setLegacy(!sync);
-    //    }
+    // not used anymore
+    // TODO: remove!
 }
 
 int Node::countInputs() const
@@ -786,8 +744,6 @@ void Node::removeInput(ConnectorIn *in)
 
     disconnectConnector(in);
     Q_EMIT connectorRemoved(in);
-
-    //checkIfDone();
 }
 
 void Node::removeOutput(ConnectorOut *out)
@@ -810,8 +766,6 @@ void Node::removeOutput(ConnectorOut *out)
 
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
-
-   // checkIfDone();
 }
 
 
@@ -1011,8 +965,6 @@ void Node::registerOutput(ConnectorOut* out)
 
     out->setCommandDispatcher(dispatcher_);
 
-    QObject::connect(out, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
-
     connectConnector(out);
 
     Q_EMIT connectorCreated(out);
@@ -1062,8 +1014,16 @@ std::string Node::getLabel() const
     return node_state_->label_;
 }
 
+void Node::pause(bool pause)
+{
+    worker_->pause(pause);
+}
+
 void Node::stop()
 {
+    Q_FOREACH(ConnectorIn* i, inputs_) {
+        i->free();
+    }
     Q_FOREACH(ConnectorOut* i, outputs_) {
         i->stop();
     }
@@ -1084,11 +1044,11 @@ void Node::stop()
 
     if(private_thread_) {
         private_thread_->quit();
-        private_thread_->wait(1000);
-        if(private_thread_->isRunning()) {
-            std::cout << "terminate thread" << std::endl;
-            private_thread_->terminate();
-        }
+//        private_thread_->wait(1000);
+//        if(private_thread_->isRunning()) {
+//            std::cout << "terminate thread" << std::endl;
+//            private_thread_->terminate();
+//        }
     }
 }
 
@@ -1098,7 +1058,6 @@ void Node::connectConnector(Connectable *c)
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkInputs()));
-    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkIfDone()));
     QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkInputs()));
 }
 

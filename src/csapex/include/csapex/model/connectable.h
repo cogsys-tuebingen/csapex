@@ -95,11 +95,6 @@ public Q_SLOTS:
 
     bool isEnabled() const;
 
-    virtual void setProcessing(bool processing);
-    bool isProcessing() const;
-    virtual void waitForProcessing();
-    virtual void updateIsProcessing();
-
     void stop();
 
 
@@ -155,7 +150,6 @@ protected:
     int count_;
 
 private:
-    bool processing;
     bool enabled_;
     bool async_;
     bool async_temp_;

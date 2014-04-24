@@ -129,6 +129,8 @@ set(SRC_APP
     src/model/box_selection_model.cpp
     src/model/connection_selection_model.cpp
 
+    src/utility/buffer.cpp
+
     src/view/box.cpp
     src/view/box_dialog.cpp
     src/view/csapex_window.cpp

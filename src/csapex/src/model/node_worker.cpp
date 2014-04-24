@@ -12,7 +12,7 @@
 using namespace csapex;
 
 NodeWorker::NodeWorker(Node* node)
-    : node_(node), synchronized_inputs_(false), thread_initialized_(false), is_processing_(false)
+    : node_(node), thread_initialized_(false), paused_(false)
 {
     assert(node_);
 
@@ -27,11 +27,6 @@ NodeWorker::~NodeWorker()
     for(unsigned i = 0; i < connections_.size(); ++i) {
         connections_[i].disconnect();
     }
-}
-
-bool NodeWorker::isProcessing()
-{
-    return is_processing_;
 }
 
 void NodeWorker::addParameter(param::Parameter* param)
@@ -76,92 +71,48 @@ void NodeWorker::checkConditions(bool silent)
     }
 }
 
+void NodeWorker::pause(bool pause)
+{
+    QMutexLocker lock(&pause_mutex_);
+    paused_ = pause;
+    continue_.wakeAll();
+}
+
 void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
 {
     // QMutexLocker lock(&changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
 }
 
-void NodeWorker::parameterEnabled(param::Parameter *param, bool enabled)
+void NodeWorker::parameterEnabled(param::Parameter */*param*/, bool /*enabled*/)
 {
     node_->triggerParameterSetChanged();
 }
 
-void NodeWorker::setSynchronizedInputs(bool s)
-{
-    synchronized_inputs_ = s;
-
-    typedef std::pair<ConnectorIn*, bool> PAIR;
-    Q_FOREACH(const PAIR& pair, has_msg_) {
-        pair.first->setLegacy(!synchronized_inputs_);
-    }
-}
-
-bool NodeWorker::isSynchronizedInputs() const
-{
-    return synchronized_inputs_;
-}
 
 void NodeWorker::forwardMessage(Connectable *s)
 {
+    {
+        pause_mutex_.lock();
+        while(paused_) {
+            continue_.wait(&pause_mutex_);
+        }
+        pause_mutex_.unlock();
+    }
+
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
     assert(source);
-
-    //    if(node_->isError()) {
-    //        return;
-    //    }
 
     if(node_->isEnabled()) {
         Q_EMIT messagesReceived();
 
-        if(synchronized_inputs_) {
-            forwardMessageSynchronized(source);
-        } else {
-            forwardMessageDirectly(source);
-        }
+        forwardMessageSynchronized(source);
     }
-
-
-    //    if(!node_->isError() || node_->errorLevel() != ErrorState::EL_ERROR) {
-    //        node_->setError(false);
-    //    }
-}
-
-void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
-{
-    assert(!is_processing_);
-
-    Timer::Ptr t(new Timer(node_->getUUID()));
-    is_processing_ = true;
-
-    node_->useTimer(t.get());
-    {
-        QMutexLocker lock(&changed_params_mutex_);
-        node_->messageArrived(source);
-    }
-
-    t->finish();
-
-    timer_history_.push_back(t);
-
-    is_processing_ = false;
-    Q_EMIT messageProcessed();
-}
-
-void NodeWorker::setProcessing(bool p)
-{
-    is_processing_ = p;
-}
-
-bool NodeWorker::isProcessing() const
-{
-    return is_processing_;
 }
 
 void NodeWorker::addInput(ConnectorIn *source)
 {
     has_msg_[source] = false;
-    source->setLegacy(!synchronized_inputs_);
 }
 
 void NodeWorker::removeInput(ConnectorIn *source)
@@ -175,8 +126,6 @@ void NodeWorker::removeInput(ConnectorIn *source)
 
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
-    assert(!is_processing_);
-
     has_msg_[source] = true;
 
     typedef std::pair<ConnectorIn*, bool> PAIR;
@@ -202,8 +151,6 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         }
     }
 
-    is_processing_ = true;
-
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
     {
@@ -223,7 +170,12 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         has_msg_[cin] = false;
     }
 
-    is_processing_ = false;
+
+    Q_FOREACH(const PAIR& pair, has_msg_) {
+        ConnectorIn* cin = pair.first;
+        cin->free();
+    }
+
     Q_EMIT messageProcessed();
 }
 

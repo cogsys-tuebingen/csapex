@@ -85,8 +85,6 @@ void Graph::deleteNode(const UUID& uuid)
 
     node->stop();
 
-    QObject::disconnect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
-
     for(std::vector<Node::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
         if((*it).get() == node) {
             Q_EMIT nodeRemoved(*it);
@@ -141,9 +139,6 @@ void Graph::deleteConnection(Connection::Ptr connection)
         if(*connection == **c) {
             Connectable* to = connection->to();
             to->setError(false);
-            if(to->isProcessing()) {
-                to->setProcessing(false);
-            }
             connections_.erase(c);
             verify();
             Q_EMIT connectionDeleted(connection.get());
@@ -158,17 +153,6 @@ void Graph::deleteConnection(Connection::Ptr connection)
 
 void Graph::verify()
 {
-    //    Q_FOREACH(Node::Ptr node, nodes_) {
-    //        bool blocked = false;
-    //        for(int i = 0; i < node->countInputs(); ++i) {
-    //            blocked |= node->getInput(i)->isBlocked();
-    //        }
-
-    //        if(blocked) {
-    //            node->finishProcessing();
-    //        }
-    //    }
-
     verifyAsync();
 }
 
@@ -239,8 +223,6 @@ void Graph::verifyAsync()
 
 void Graph::stop()
 {
-    settings_.setProcessingAllowed(false);
-
     Q_FOREACH(Node::Ptr node, nodes_) {
         node->disable();
     }
@@ -259,7 +241,7 @@ bool Graph::isPaused() const
 void Graph::setPause(bool pause)
 {
     Q_FOREACH(Node::Ptr node, nodes_) {
-        node->enableIO(!pause);
+        node->pause(pause);
     }
     if(pause) {
         timer_->stop();

@@ -62,13 +62,6 @@ void ConnectorOut::removeConnection(Connectable* other_side)
     }
 }
 
-void ConnectorOut::updateIsProcessing()
-{
-    if(!isConnected() && isProcessing()) {
-        setProcessing(false);
-    }
-}
-
 Command::Ptr ConnectorOut::removeConnectionCmd(ConnectorIn* other_side) {
     Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
 
@@ -180,20 +173,6 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
     BOOST_FOREACH(ConnectorIn* i, targets_) {
         if(i->isEnabled()) {
             targets.push_back(i);
-        }
-    }
-
-    BOOST_FOREACH(ConnectorIn* i, targets) {
-        if(i->isProcessing() && !i->isAsync()) {
-            setBlocked(true);
-            i->waitForProcessing();
-
-            if(i->isProcessing()) {
-                return;
-            }
-            if(!isProcessing()) {
-                return;
-            }
         }
     }
 

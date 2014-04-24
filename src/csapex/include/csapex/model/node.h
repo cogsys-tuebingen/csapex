@@ -91,6 +91,7 @@ public:
 
     virtual QIcon getIcon() const;
 
+    virtual void pause(bool pause);
     virtual void stop();
 
     std::string getLabel() const;
@@ -233,7 +234,6 @@ protected:
     virtual void setState(Memento::Ptr memento);
 
     void makeThread();
-    void finishProcessing();
 
     Settings& getSettings();
 
@@ -265,7 +265,6 @@ public Q_SLOTS:
     virtual void updateModel();
     void eventGuiChanged();
 
-    virtual void checkIfDone();
     virtual void checkInputs();
 
     void killContent();
