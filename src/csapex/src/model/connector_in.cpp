@@ -87,7 +87,7 @@ void ConnectorIn::free()
 
 void ConnectorIn::disable()
 {
-    free();
+    //free();
     Connectable::disable();
 }
 
@@ -142,9 +142,9 @@ Connectable *ConnectorIn::getSource() const
 
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
-    buffer_->write(message);
-
     setBlocked(true);
+
+    buffer_->write(message);
 
     count_++;
 

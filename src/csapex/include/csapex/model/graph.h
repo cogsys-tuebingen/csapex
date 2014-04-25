@@ -102,12 +102,19 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
     bool addConnection(Connection::Ptr connection);
     void deleteConnection(Connection::Ptr connection);
 
+    void buildConnectedComponents();
     void verifyAsync();
 
 protected:
     Settings& settings_;
 
     std::vector<NodePtr> nodes_;
+    std::map<Node*, int> node_component_;
+
+    std::map<Node*, std::vector<Node*> > node_parents_;
+    std::map<Node*, std::vector<Node*> > node_children_;
+
+    /// TODO: remove!
     std::vector<Connection::Ptr> connections_;
 
     CommandDispatcher* dispatcher_;

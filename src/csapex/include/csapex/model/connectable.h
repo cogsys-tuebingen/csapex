@@ -71,6 +71,9 @@ public:
 
     bool isBlocked() const;
 
+    int sequenceNumber() const;
+    void setSequenceNumber(int seq_no_);
+
     /**
      * INTERFACE
      */
@@ -148,6 +151,7 @@ protected:
     ConnectionType::ConstPtr type_;
 
     int count_;
+    int seq_no_;
 
 private:
     bool enabled_;
