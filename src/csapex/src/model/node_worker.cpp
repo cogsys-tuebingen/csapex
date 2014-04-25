@@ -80,7 +80,7 @@ void NodeWorker::pause(bool pause)
 
 void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
 {
-    // QMutexLocker lock(&changed_params_mutex_);
+    QMutexLocker lock(&changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
 }
 
@@ -126,6 +126,7 @@ void NodeWorker::removeInput(ConnectorIn *source)
 
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
+    assert(!has_msg_[source]);
     has_msg_[source] = true;
 
     typedef std::pair<ConnectorIn*, bool> PAIR;
@@ -210,23 +211,26 @@ void NodeWorker::tick()
 
 void NodeWorker::checkParameters()
 {
-    QMutexLocker lock(&changed_params_mutex_);
+    std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params;
+    {
+        QMutexLocker lock(&changed_params_mutex_);
+        changed_params = changed_params_;
+        changed_params_.clear();
+    }
 
-    if(!changed_params_.empty()) {
+    if(!changed_params.empty()) {
         typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
-        for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end();) {
+        for(cbs::iterator it = changed_params.begin(); it != changed_params.end();) {
             try {
                 it->second(it->first);
 
             } catch(const std::exception& e) {
-                it = changed_params_.erase(it);
+                it = changed_params.erase(it);
                 throw;
             }
 
-            it = changed_params_.erase(it);
+            it = changed_params.erase(it);
         }
-
-        changed_params_.clear();
     }
 }
 
