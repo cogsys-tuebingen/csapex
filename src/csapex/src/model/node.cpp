@@ -90,14 +90,6 @@ std::string Node::getType() const
     return type_;
 }
 
-void Node::setCategory(const std::string &category)
-{
-    if(!Tag::exists(category)) {
-        Tag::create(category);
-    }
-    addTag(Tag::get(category));
-}
-
 void Node::addTag(const Tag &tag)
 {
     tags_.push_back(tag);

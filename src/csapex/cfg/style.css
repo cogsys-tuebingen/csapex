@@ -25,6 +25,11 @@ QFrame#boxframe QGroupBox {
         font-weight: bold;
         background: qlineargradient(x1:0 y1:0, x2:1 y2:0, stop:0 rgba(175,175,175,255), stop:1 rgba(255,255,255,50));
 }
+QFrame#boxframe QLabel[component="true"] {
+        border: 1px solid black;
+        border-radius: 5px;
+        color: black;
+}
 
 QCheckBox::indicator:unchecked {
      image: url(:/checkbox_unchecked.png);

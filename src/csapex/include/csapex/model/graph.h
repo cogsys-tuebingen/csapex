@@ -49,10 +49,11 @@ public:
     bool isPaused() const;
     void setPause(bool pause);
 
-    Node* findNode(const UUID& uuid);
-    Node* findNodeNoThrow(const UUID& uuid);
-    Node* findNodeForConnector(const UUID &uuid);
+    Node* findNode(const UUID& uuid) const;
+    Node* findNodeNoThrow(const UUID& uuid) const;
+    Node* findNodeForConnector(const UUID &uuid) const;
 
+    int getComponent(const UUID& node_uuid) const;
 
     Connectable* findConnector(const UUID &uuid);
 
@@ -85,6 +86,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void stateChanged();
+    void structureChanged(Graph*);
     void dirtyChanged(bool);
 
     void connectionAdded(Connection*);

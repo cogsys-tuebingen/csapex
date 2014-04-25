@@ -51,8 +51,6 @@ public:
     void setType(const std::string& type);
     std::string getType() const;
 
-    void setCategory(const std::string& category) __attribute__ ((deprecated));
-
     void addTag(const Tag& tag);
     std::vector<Tag> getTags() const;
 

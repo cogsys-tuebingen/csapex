@@ -222,7 +222,6 @@ void Graph::buildConnectedComponents()
                 neighbors.push_back(child);
             }
 
-            std::vector<Node*> unmarked_neighbors;
             Q_FOREACH(Node* neighbor, neighbors) {
                 if(node_component_[neighbor] == -1) {
                     node_component_[neighbor] = component;
@@ -234,11 +233,7 @@ void Graph::buildConnectedComponents()
         ++component;
     }
 
-    std::cerr << "components: \n";
-    Q_FOREACH(Node::Ptr node, nodes_) {
-        std::cerr << node->getUUID().getFullName() << "\t: " << node_component_[node.get()] << "\n";
-    }
-    std::cerr << "_________" << std::endl;
+    Q_EMIT structureChanged(this);
 }
 
 void Graph::verify()
@@ -363,7 +358,12 @@ void Graph::reset()
     connections_.clear();
 }
 
-Node* Graph::findNode(const UUID& uuid)
+int Graph::getComponent(const UUID &node_uuid) const
+{
+    return node_component_.at(findNode(node_uuid));
+}
+
+Node* Graph::findNode(const UUID& uuid) const
 {
     Node* node = findNodeNoThrow(uuid);
 
@@ -380,7 +380,7 @@ Node* Graph::findNode(const UUID& uuid)
     throw std::runtime_error("cannot find box");
 }
 
-Node* Graph::findNodeNoThrow(const UUID& uuid)
+Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
     Q_FOREACH(Node::Ptr b, nodes_) {
         if(b->getUUID() == uuid) {
@@ -401,7 +401,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid)
     return NULL;
 }
 
-Node* Graph::findNodeForConnector(const UUID &uuid)
+Node* Graph::findNodeForConnector(const UUID &uuid) const
 {
     UUID l = UUID::NONE;
     UUID r = UUID::NONE;

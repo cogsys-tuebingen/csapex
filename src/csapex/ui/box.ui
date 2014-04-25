@@ -104,6 +104,9 @@
            </spacer>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="infos"/>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="additional_layout">
             <property name="spacing">
              <number>0</number>
