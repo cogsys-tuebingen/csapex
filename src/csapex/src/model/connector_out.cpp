@@ -161,6 +161,7 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
 {
     // update buffer
     message_ = message;
+    message_->setSequenceNumber(seq_no_);
 
     Timer::Interlude::Ptr i;
     if(publish_timer_) {

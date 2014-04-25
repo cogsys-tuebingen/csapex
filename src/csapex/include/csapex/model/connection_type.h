@@ -38,6 +38,9 @@ public:
     virtual std::string name() const;
     std::string rawName() const;
 
+    int sequenceNumber() const;
+    void setSequenceNumber(int seq_no_);
+
     virtual void write(std::ostream& out);
     virtual void writeRaw(const std::string& file, const std::string &suffix);
 
@@ -49,6 +52,7 @@ protected:
 
 private:
     std::string name_;
+    int seq_no_;
 
 private:
     static ConnectionType::Ptr default_;

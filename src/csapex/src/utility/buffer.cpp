@@ -21,16 +21,6 @@ void Buffer::write(ConnectionType::Ptr message)
     used_.release();
 }
 
-void Buffer::waitForMessage()
-{
-    used_.acquire();
-}
-
-void Buffer::waitForEmpty()
-{
-    free_.acquire();
-}
-
 void Buffer::free()
 {
     free_.release();

@@ -28,14 +28,14 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 }
 
 Connectable::Connectable(Settings& settings, const UUID& uuid)
-    : Unique(uuid), settings_(settings), buttons_down_(0), enabled_(false), async_(false), async_temp_(false),
+    : Unique(uuid), settings_(settings), buttons_down_(0), count_(0), seq_no_(0), enabled_(false), async_(false), async_temp_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
 }
 
 Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), buttons_down_(0), enabled_(false), async_(false), async_temp_(false),
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), buttons_down_(0), count_(0), seq_no_(0), enabled_(false), async_(false), async_temp_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
@@ -70,15 +70,13 @@ void Connectable::init()
 {
     setType(ConnectionType::makeDefault());
 
-    count_ = 0;
-
     disable();
 }
 
 
 Connectable::~Connectable()
 {
-//    UUID::free(getUUID());
+    //    UUID::free(getUUID());
 }
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
@@ -216,4 +214,15 @@ bool Connectable::isBlocked() const
 void Connectable::setBlocked(bool b)
 {
     blocked_ = b;
+    Q_EMIT blocked(b);
+}
+
+int Connectable::sequenceNumber() const
+{
+    return seq_no_;
+}
+
+void Connectable::setSequenceNumber(int seq_no)
+{
+    seq_no_ = seq_no;
 }

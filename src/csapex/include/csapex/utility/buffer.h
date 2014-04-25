@@ -14,9 +14,6 @@ class Buffer
 public:
     Buffer(std::size_t size);
 
-    void waitForMessage();
-    void waitForEmpty();
-
     void free();
 
     template <typename R>
@@ -25,8 +22,6 @@ public:
         used_.acquire();
 
         typename R::Ptr result = boost::dynamic_pointer_cast<R> (message_);
-
-        used_.release();
 
         if(result) {
             return result;

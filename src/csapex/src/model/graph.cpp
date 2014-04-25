@@ -71,10 +71,15 @@ void Graph::addNode(Node::Ptr node)
     assert(dispatcher_);
 
     nodes_.push_back(node);
+    node_parents_[node.get()] = std::vector<Node*>();
+    node_children_[node.get()] = std::vector<Node*>();
+
     node->setCommandDispatcher(dispatcher_);
     node->makeThread();
 
     QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
+
+    buildConnectedComponents();
 
     Q_EMIT nodeAdded(node);
 }
@@ -83,12 +88,22 @@ void Graph::deleteNode(const UUID& uuid)
 {
     Node* node = findNode(uuid);
 
+    /// assert that all connections have already been deleted
+    assert(node_parents_[node].empty());
+    assert(node_children_[node].empty());
+
+    node_parents_.erase(node);
+    node_children_.erase(node);
+
     node->stop();
 
     for(std::vector<Node::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
         if((*it).get() == node) {
-            Q_EMIT nodeRemoved(*it);
             it = nodes_.erase(it);
+
+            buildConnectedComponents();
+
+            Q_EMIT nodeRemoved(*it);
         } else {
             ++it;
         }
@@ -119,6 +134,14 @@ bool Graph::addConnection(Connection::Ptr connection)
 
         connections_.push_back(connection);
 
+        Node* n_from = findNodeForConnector(connection->from()->getUUID());
+        Node* n_to = findNodeForConnector(connection->to()->getUUID());
+
+        node_parents_[n_to].push_back(n_from);
+        node_children_[n_from].push_back(n_to);
+
+
+        buildConnectedComponents();
         verify();
 
         Q_EMIT connectionAdded(connection.get());
@@ -139,7 +162,20 @@ void Graph::deleteConnection(Connection::Ptr connection)
         if(*connection == **c) {
             Connectable* to = connection->to();
             to->setError(false);
+
+            Node* n_from = findNodeForConnector(connection->from()->getUUID());
+            Node* n_to = findNodeForConnector(connection->to()->getUUID());
+
+            // erase pointer from TO to FROM
+            // if there are multiple edges, this only erases one entry
+            node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
+
+            // erase pointer from FROM to TO
+            node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+
             connections_.erase(c);
+
+            buildConnectedComponents();
             verify();
             Q_EMIT connectionDeleted(connection.get());
         } else {
@@ -150,6 +186,60 @@ void Graph::deleteConnection(Connection::Ptr connection)
     Q_EMIT stateChanged();
 }
 
+
+void Graph::buildConnectedComponents()
+{
+    /* Find all connected sub components of this graph */
+    node_component_.clear();
+
+    std::deque<Node*> unmarked;
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        unmarked.push_back(node.get());
+        node_component_[node.get()] = -1;
+    }
+
+    std::deque<Node*> Q;
+    int component = 0;
+    while(!unmarked.empty()) {
+        // take a random unmarked node to start bfs from
+        Node* start = unmarked.front();
+        Q.push_back(start);
+
+        node_component_[start] = component;
+
+        while(!Q.empty()) {
+            Node* front = Q.front();
+            Q.pop_front();
+
+            unmarked.erase(std::find(unmarked.begin(), unmarked.end(), front));
+
+            // iterate all neighbors
+            std::vector<Node*> neighbors;
+            Q_FOREACH(Node* parent, node_parents_[front]) {
+                neighbors.push_back(parent);
+            }
+            Q_FOREACH(Node* child, node_children_[front]) {
+                neighbors.push_back(child);
+            }
+
+            std::vector<Node*> unmarked_neighbors;
+            Q_FOREACH(Node* neighbor, neighbors) {
+                if(node_component_[neighbor] == -1) {
+                    node_component_[neighbor] = component;
+                    Q.push_back(neighbor);
+                }
+            }
+        }
+
+        ++component;
+    }
+
+    std::cerr << "components: \n";
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        std::cerr << node->getUUID().getFullName() << "\t: " << node_component_[node.get()] << "\n";
+    }
+    std::cerr << "_________" << std::endl;
+}
 
 void Graph::verify()
 {
