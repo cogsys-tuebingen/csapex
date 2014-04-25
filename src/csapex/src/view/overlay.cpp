@@ -707,7 +707,7 @@ void Overlay::paintEvent(QPaintEvent*)
         }
     }
 
-#error dont use connections_ field!!!
+//#error dont use connections_ field!!!
     Q_FOREACH(Connection::Ptr connection, graph_->connections_) {
         drawConnection(*connection);
     }

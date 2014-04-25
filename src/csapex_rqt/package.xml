@@ -15,11 +15,13 @@
   <build_depend>rqt_gui</build_depend>
   <build_depend>rqt_gui_cpp</build_depend>
   <build_depend>csapex</build_depend>
+  <build_depend>class_loader</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>rqt_gui</run_depend>
   <run_depend>rqt_gui_cpp</run_depend>
   <run_depend>csapex</run_depend>
+  <run_depend>class_loader</run_depend>
 
   <export>
     <rqt_gui plugin="${prefix}/rqt_plugin.xml"/>

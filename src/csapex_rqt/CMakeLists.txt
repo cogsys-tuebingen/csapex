@@ -4,7 +4,7 @@ project(csapex_rqt)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rqt_gui rqt_gui_cpp csapex)
+find_package(catkin REQUIRED COMPONENTS class_loader roscpp rqt_gui rqt_gui_cpp csapex)
 
 csapex_moc_all(QT_MOC src/*.h)
 
@@ -42,5 +42,18 @@ add_library(csapex_rqt
 )
 target_link_libraries(csapex_rqt ${catkin_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
 
-find_package(class_loader)
 class_loader_hide_library_symbols(csapex_rqt)
+
+
+
+#
+# INSTALL
+#
+
+install(FILES rqt_plugin.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+install(TARGETS csapex_rqt
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})

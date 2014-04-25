@@ -11,7 +11,6 @@ add_definitions(-W -Wall)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS utils_plugin utils_param utils_qt)
 
-find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
@@ -216,3 +215,24 @@ add_executable(csapex_node
 target_link_libraries(csapex_node csapex_app)
 
 execute_process(COMMAND ./setup.sh ${CATKIN_DEVEL_PREFIX} ${CATKIN_PACKAGE_BIN_DESTINATION} csapex_node WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
+
+#
+# INSTALL
+#
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+install(TARGETS csapex_pluginbase
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_app
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_node
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
