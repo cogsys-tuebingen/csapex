@@ -38,3 +38,14 @@ add_library(utils_param
     src/parameter_map.cpp
     src/parameter_provider.cpp)
 target_link_libraries(utils_param yaml-cpp ${Boost_LIBRARIES} )
+
+
+
+install(TARGETS utils_param
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
