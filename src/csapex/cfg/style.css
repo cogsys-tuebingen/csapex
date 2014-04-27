@@ -29,6 +29,8 @@ QFrame#boxframe QLabel[component="true"] {
         border: 1px solid black;
         border-radius: 5px;
         color: black;
+        padding: 4px;
+        font-weight: bold;
 }
 
 QCheckBox::indicator:unchecked {

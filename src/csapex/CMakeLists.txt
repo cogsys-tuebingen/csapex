@@ -214,8 +214,12 @@ add_executable(csapex_node
     src/csapex.cpp)
 target_link_libraries(csapex_node csapex_app)
 
-execute_process(COMMAND ./setup.sh ${CATKIN_DEVEL_PREFIX} ${CATKIN_PACKAGE_BIN_DESTINATION} csapex_node WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
+add_custom_target(cfg ALL DEPENDS cfg/style.css)
+add_custom_command(TARGET cfg POST_BUILD
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
 
 #
 # INSTALL

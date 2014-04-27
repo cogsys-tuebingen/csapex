@@ -173,12 +173,16 @@ void Box::updateInformation(Graph* graph)
     info_compo->setText(info.str().c_str());
 
     // set color using HSV rotation
+    double hue =  (compo * 77) % 360;
     double r, g, b;
-    _HSV2RGB_((double)((compo *77)%360), .5, 1., r, g, b);
+    _HSV2RGB_(hue, 1., 1., r, g, b);
+    double fr = 0, fb = 0, fg = 0;
+    if(b > 100 && r < 100 && g < 100) {
+        fr = fb = fg = 255;
+    }
     std::stringstream ss;
-    ss << "QLabel { background-color : " << r << " " << g << " " << b << ";}";
+    ss << "QLabel { background-color : rgb(" << r << "," << g << "," << b << "); color: rgb(" << fr << "," << fg << "," << fb << ");}";
     info_compo->setStyleSheet(ss.str().c_str());
-#error continue here
 }
 
 void Box::showContextMenu(const QPoint& pos)

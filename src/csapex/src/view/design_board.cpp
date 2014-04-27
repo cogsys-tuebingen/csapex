@@ -156,6 +156,8 @@ void DesignBoard::addBoxEvent(Box *box)
     box->setCommandDispatcher(dispatcher_);
     box->show();
 
+    box->updateInformation(graph_.get());
+
     overlay_->raise();
     repaint();
 }
