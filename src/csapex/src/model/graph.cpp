@@ -97,16 +97,21 @@ void Graph::deleteNode(const UUID& uuid)
 
     node->stop();
 
+    Node::Ptr removed;
+
     for(std::vector<Node::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
-        if((*it).get() == node) {
+        if((*it)->getUUID() == node->getUUID()) {
+            removed = *it;
             it = nodes_.erase(it);
 
-            buildConnectedComponents();
-
-            Q_EMIT nodeRemoved(*it);
         } else {
             ++it;
         }
+    }
+
+    if(removed) {
+        Q_EMIT nodeRemoved(removed);
+        buildConnectedComponents();
     }
 }
 
@@ -360,7 +365,12 @@ void Graph::reset()
 
 int Graph::getComponent(const UUID &node_uuid) const
 {
-    return node_component_.at(findNode(node_uuid));
+    try {
+        return node_component_.at(findNode(node_uuid));
+
+    } catch(const std::exception& e) {
+        return -1;
+    }
 }
 
 Node* Graph::findNode(const UUID& uuid) const

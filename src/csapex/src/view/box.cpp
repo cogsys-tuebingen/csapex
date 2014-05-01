@@ -168,6 +168,10 @@ void Box::enableContent(bool enable)
 void Box::updateInformation(Graph* graph)
 {
     int compo = graph->getComponent(node_->getUUID());
+    if(compo < 0) {
+        return;
+    }
+
     std::stringstream info;
     info << compo;
     info_compo->setText(info.str().c_str());
