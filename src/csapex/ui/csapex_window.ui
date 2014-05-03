@@ -63,7 +63,7 @@
      <x>0</x>
      <y>0</y>
      <width>902</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -119,6 +119,7 @@
      <string>&amp;Processing</string>
     </property>
     <addaction name="actionPause"/>
+    <addaction name="actionClearBlock"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -145,6 +146,7 @@
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
    <addaction name="actionPause"/>
+   <addaction name="actionClearBlock"/>
    <addaction name="separator"/>
    <addaction name="actionGrid"/>
   </widget>
@@ -326,6 +328,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Del</string>
+   </property>
+  </action>
+  <action name="actionClearBlock">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/stop.png</normaloff>:/stop.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Blocking Connectors</string>
    </property>
   </action>
  </widget>

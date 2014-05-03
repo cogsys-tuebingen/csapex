@@ -49,6 +49,8 @@ public:
     bool isPaused() const;
     void setPause(bool pause);
 
+    void clearBlock();
+
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
     Node* findNodeForConnector(const UUID &uuid) const;

@@ -895,6 +895,14 @@ void Node::pause(bool pause)
     worker_->pause(pause);
 }
 
+void Node::clearBlock()
+{
+    Q_FOREACH(ConnectorIn* i, inputs_) {
+        i->free();
+        worker_->clearInput(i);
+    }
+}
+
 void Node::stop()
 {
     worker_->stop();

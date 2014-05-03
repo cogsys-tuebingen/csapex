@@ -189,12 +189,14 @@ void Graph::deleteConnection(Connection::Ptr connection)
     }
 
     Q_EMIT stateChanged();
+
 }
 
 
 void Graph::buildConnectedComponents()
 {
     /* Find all connected sub components of this graph */
+//    std::map<Node*, int> old_node_component = node_component_;
     node_component_.clear();
 
     std::deque<Node*> unmarked;
@@ -340,6 +342,14 @@ void Graph::setPause(bool pause)
     }
 }
 
+void Graph::clearBlock()
+{
+    setPause(true);
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        node->clearBlock();
+    }
+    setPause(false);
+}
 
 Command::Ptr Graph::clear()
 {

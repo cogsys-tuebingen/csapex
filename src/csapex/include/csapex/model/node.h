@@ -61,6 +61,7 @@ public:
     virtual QIcon getIcon() const;
 
     virtual void pause(bool pause);
+    virtual void clearBlock();
     virtual void stop();
 
     std::string getLabel() const;

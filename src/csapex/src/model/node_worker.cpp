@@ -93,6 +93,12 @@ void NodeWorker::forwardMessage(Connectable *s)
 
 void NodeWorker::addInput(ConnectorIn *source)
 {
+    clearInput(source);
+}
+
+
+void NodeWorker::clearInput(ConnectorIn *source)
+{
     has_msg_[source] = false;
 }
 
@@ -107,7 +113,6 @@ void NodeWorker::removeInput(ConnectorIn *source)
 
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
-
     assert(!has_msg_[source]);
     has_msg_[source] = true;
 

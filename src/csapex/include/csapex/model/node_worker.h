@@ -42,6 +42,7 @@ public Q_SLOTS:
     void forwardMessageSynchronized(ConnectorIn* source);
 
     void addInput(ConnectorIn* source);
+    void clearInput(ConnectorIn* source);
     void removeInput(ConnectorIn* source);
 
     void eventGuiChanged();
@@ -52,7 +53,6 @@ public Q_SLOTS:
     void tick();
 
     void triggerError(bool e, const std::string& what);
-
 
     void pause(bool pause);
 

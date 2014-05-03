@@ -70,6 +70,11 @@ bool CsApexCore::isPaused() const
     return graph_->isPaused();
 }
 
+void CsApexCore::clearBlock()
+{
+    graph_->clearBlock();
+}
+
 void CsApexCore::init(DragIO* dragio)
 {
     if(!init_) {
