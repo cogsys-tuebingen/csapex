@@ -88,14 +88,14 @@ void Graph::deleteNode(const UUID& uuid)
 {
     Node* node = findNode(uuid);
 
+    node->stop();
+
     /// assert that all connections have already been deleted
     assert(node_parents_[node].empty());
     assert(node_children_[node].empty());
 
     node_parents_.erase(node);
     node_children_.erase(node);
-
-    node->stop();
 
     Node::Ptr removed;
 
@@ -365,12 +365,12 @@ void Graph::reset()
 
 int Graph::getComponent(const UUID &node_uuid) const
 {
-    try {
-        return node_component_.at(findNode(node_uuid));
-
-    } catch(const std::exception& e) {
+    Node* node = findNodeNoThrow(node_uuid);
+    if(!node) {
         return -1;
     }
+
+    return node_component_.at(node);
 }
 
 Node* Graph::findNode(const UUID& uuid) const

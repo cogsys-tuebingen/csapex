@@ -31,6 +31,8 @@ public:
     NodeWorker(Node* node);
     ~NodeWorker();
 
+    void stop();
+
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
 
@@ -68,6 +70,8 @@ private:
 
     bool thread_initialized_;
     bool paused_;
+    bool stop_;
+    QMutex stop_mutex_;
     QMutex pause_mutex_;
     QWaitCondition continue_;
 };

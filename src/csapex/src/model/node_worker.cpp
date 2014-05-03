@@ -12,7 +12,7 @@
 using namespace csapex;
 
 NodeWorker::NodeWorker(Node* node)
-    : node_(node), thread_initialized_(false), paused_(false)
+    : node_(node), thread_initialized_(false), paused_(false), stop_(false)
 {
     assert(node_);
 
@@ -26,6 +26,12 @@ NodeWorker::~NodeWorker()
 {
 }
 
+void NodeWorker::stop()
+{
+    QMutexLocker lock(&stop_mutex_);
+    stop_ = true;
+}
+
 void NodeWorker::pause(bool pause)
 {
     QMutexLocker lock(&pause_mutex_);
@@ -35,6 +41,11 @@ void NodeWorker::pause(bool pause)
 
 void NodeWorker::forwardMessage(Connectable *s)
 {
+    QMutexLocker lock(&stop_mutex_);
+    if(stop_) {
+        return;
+    }
+
     {
         pause_mutex_.lock();
         while(paused_) {
@@ -69,6 +80,7 @@ void NodeWorker::removeInput(ConnectorIn *source)
 
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
+
     assert(!has_msg_[source]);
     has_msg_[source] = true;
 

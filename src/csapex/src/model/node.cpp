@@ -46,6 +46,7 @@ Node::~Node()
         cb->deleteLater();
     }
     callbacks.clear();
+
     delete worker_;
 }
 
@@ -943,6 +944,8 @@ void Node::pause(bool pause)
 
 void Node::stop()
 {
+    worker_->stop();
+
     Q_FOREACH(ConnectorIn* i, inputs_) {
         i->free();
     }
