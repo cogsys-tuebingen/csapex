@@ -24,51 +24,6 @@ NodeWorker::NodeWorker(Node* node)
 
 NodeWorker::~NodeWorker()
 {
-    for(unsigned i = 0; i < connections_.size(); ++i) {
-        connections_[i].disconnect();
-    }
-}
-
-void NodeWorker::addParameter(param::Parameter* param)
-{
-    connections_.push_back(parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1)));
-    connections_.push_back(parameter_enabled(*param).connect(boost::bind(&NodeWorker::parameterEnabled, this, _1, _2)));
-}
-
-void NodeWorker::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
-{
-    connections_.push_back(parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1, cb)));
-}
-
-void NodeWorker::addParameterCondition(param::Parameter* param, boost::function<bool ()> enable_condition)
-{
-    conditions_[param] = enable_condition;
-}
-
-void NodeWorker::parameterChanged(param::Parameter *)
-{
-    if(!conditions_.empty()) {
-        checkConditions(false);
-    }
-}
-
-void NodeWorker::checkConditions(bool silent)
-{
-    bool change = false;
-    node_->setParameterSetSilence(true);
-    for(std::map<param::Parameter*, boost::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
-        param::Parameter* p = it->first;
-        bool should_be_enabled = it->second();
-        if(should_be_enabled != p->isEnabled()) {
-            it->first->setEnabled(should_be_enabled);
-            change = true;
-        }
-    }
-    node_->setParameterSetSilence(false);
-
-    if(change && !silent) {
-        node_->triggerParameterSetChanged();
-    }
 }
 
 void NodeWorker::pause(bool pause)
@@ -77,18 +32,6 @@ void NodeWorker::pause(bool pause)
     paused_ = pause;
     continue_.wakeAll();
 }
-
-void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
-{
-    QMutexLocker lock(&changed_params_mutex_);
-    changed_params_.push_back(std::make_pair(param, cb));
-}
-
-void NodeWorker::parameterEnabled(param::Parameter */*param*/, bool /*enabled*/)
-{
-    node_->triggerParameterSetChanged();
-}
-
 
 void NodeWorker::forwardMessage(Connectable *s)
 {
@@ -155,7 +98,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
     {
-        QMutexLocker lock(&changed_params_mutex_);
+        boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->process();
     }
     t->finish();
@@ -201,7 +144,7 @@ void NodeWorker::tick()
     }
 
     if(node_->isEnabled()) {
-        QMutexLocker lock(&changed_params_mutex_);
+        boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->tick();
     }
     while(timer_history_.size() > Settings::timer_history_length_) {
@@ -211,16 +154,10 @@ void NodeWorker::tick()
 
 void NodeWorker::checkParameters()
 {
-    std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params;
-    {
-        QMutexLocker lock(&changed_params_mutex_);
-        changed_params = changed_params_;
-        changed_params_.clear();
-    }
+    Parameterizable::ChangedParameterList changed_params = node_->getChangedParameters();
 
     if(!changed_params.empty()) {
-        typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
-        for(cbs::iterator it = changed_params.begin(); it != changed_params.end();) {
+        for(Parameterizable::ChangedParameterList::iterator it = changed_params.begin(); it != changed_params.end();) {
             try {
                 it->second(it->first);
 

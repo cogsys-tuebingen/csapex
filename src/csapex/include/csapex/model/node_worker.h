@@ -9,8 +9,8 @@
 
 /// SYSTEM
 #include <QObject>
-#include <QMutex>
 #include <QTimer>
+#include <QMutex>
 #include <map>
 #include <deque>
 #include <boost/function.hpp>
@@ -18,7 +18,7 @@
 
 namespace csapex {
 
-struct NodeWorker : public QObject, public param::Parameter::access
+struct NodeWorker : public QObject
 {
     Q_OBJECT
 
@@ -48,11 +48,6 @@ public Q_SLOTS:
 
     void triggerError(bool e, const std::string& what);
 
-    void addParameter(param::Parameter* param);
-    void addParameterCallback(param::Parameter *param, boost::function<void(param::Parameter *)> cb);
-    void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
-
-    void checkConditions(bool silent);
 
     void pause(bool pause);
 
@@ -61,23 +56,13 @@ Q_SIGNALS:
     void messageProcessed();
 
 private:
-    void parameterChanged(param::Parameter* param);
-    void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
-    void parameterEnabled(param::Parameter* param, bool enabled);
-
-private:
     static const double DEFAULT_FREQUENCY = 30.0;
 
 private:
     Node* node_;
     QTimer* timer_;
 
-
     std::map<ConnectorIn*, bool> has_msg_;
-
-    QMutex changed_params_mutex_;
-    std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
-    std::map<param::Parameter*, boost::function<bool()> > conditions_;
 
     std::deque<TimerPtr> timer_history_;
 
@@ -85,8 +70,6 @@ private:
     bool paused_;
     QMutex pause_mutex_;
     QWaitCondition continue_;
-
-    std::vector<boost::signals2::connection> connections_;
 };
 
 }

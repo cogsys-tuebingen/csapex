@@ -18,7 +18,7 @@ using namespace csapex;
 Node::Node(const UUID &uuid)
     : Unique(uuid),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
-      settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+      settings_(NULL), private_thread_(NULL), worker_(NULL),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
 }
@@ -101,81 +101,6 @@ std::vector<Tag> Node::getTags() const
         tags_.push_back(Tag::get("General"));
     }
     return tags_;
-}
-
-void Node::setParameterSetSilence(bool silent)
-{
-    state.setParameterSetSilence(silent);
-}
-
-void Node::removeTemporaryParameters()
-{
-    // TODO: handle callbacks!
-    state.removeTemporaryParameters();
-}
-
-void Node::triggerParameterSetChanged()
-{
-    state.triggerParameterSetChanged();
-}
-
-void Node::addTemporaryParameter(const param::Parameter::Ptr &param)
-{
-    state.addTemporaryParameter(param);
-}
-
-void Node::addTemporaryParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
-{
-    state.addTemporaryParameter(param);
-    worker_->addParameterCallback(param.get(), cb);
-}
-
-void Node::addParameter(const param::Parameter::Ptr &param)
-{
-    state.addParameter(param);
-    worker_->addParameter(param.get());
-}
-
-void Node::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
-{
-    addParameter(param);
-    worker_->addParameterCallback(param.get(), cb);
-}
-
-
-void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition)
-{
-    addParameter(param);
-    worker_->addParameterCondition(param.get(), enable_condition);
-}
-
-
-void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition, boost::function<void (param::Parameter *)> cb)
-{
-    addParameter(param);
-    worker_->addParameterCallback(param.get(), cb);
-    worker_->addParameterCondition(param.get(), enable_condition);
-}
-
-
-std::vector<param::Parameter::Ptr> Node::getParameters() const
-{
-    return state.getParameters();
-}
-
-param::Parameter::Ptr Node::getParameter(const std::string &name) const
-{
-    return state.getParameter(name);
-}
-
-bool Node::isParameterEnabled(const std::string &name) const
-{
-    return getParameter(name)->isEnabled();
-}
-
-void Node::setParameterEnabled(const std::string &name, bool enabled)
-{
-    getParameter(name)->setEnabled(enabled);
 }
 
 ConnectorIn* Node::getParameterInput(const std::string &name) const
@@ -322,8 +247,8 @@ void Node::updateParameter(param::Parameter *p)
         boost::function<typename connection_types::DirectMessage<T>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<T> >, cin, (void*) 0);
         boost::function<connection_types::DirectMessage<T>*()> getmsg = boost::bind(&connection_types::DirectMessage<T>::Ptr::get, boost::bind(getmsgptr));
         boost::function<T()> read = boost::bind(&connection_types::DirectMessage<T>::getValue, boost::bind(getmsg));
-        boost::function<void()> set_param_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
-        qt_helper::Call* set_param = new qt_helper::Call(set_param_fn);
+        boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
+        qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
         callbacks.push_back(set_param);
         QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
 
@@ -353,7 +278,7 @@ void Node::updateParameters()
 {
     assert(!getUUID().empty());
 
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = parameter_state_.params.begin(); it != parameter_state_.params.end(); ++it ) {
         param::Parameter* p = it->second.get();
 
         if(p->is<int>()) {
@@ -394,7 +319,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
 
 Memento::Ptr Node::getState() const
 {
-    return state.clone();
+    return parameter_state_.clone();
 }
 
 void Node::setState(Memento::Ptr memento)
@@ -402,7 +327,7 @@ void Node::setState(Memento::Ptr memento)
     boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
     assert(m.get());
 
-    state.setFrom(*m);
+    parameter_state_.setFrom(*m);
 
     Q_EMIT modelChanged();
 }
@@ -532,6 +457,11 @@ void Node::eventGuiChanged()
 void Node::setSettings(Settings *settings)
 {
     settings_ = settings;
+}
+
+void Node::setNodeWorker(NodeWorker *nw)
+{
+    worker_ = nw;
 }
 
 NodeWorker* Node::getNodeWorker() const
@@ -869,23 +799,23 @@ QTreeWidgetItem* Node::createDebugInformation() const
     {
         QTreeWidgetItem* parameters = new QTreeWidgetItem;
         parameters->setText(0, "Parameters");
-        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = parameter_state_.params.begin(); it != parameter_state_.params.end(); ++it ) {
             param::Parameter* p = it->second.get();
 
             QTreeWidgetItem* param = new QTreeWidgetItem;
             param->setText(0, p->name().c_str());
 
-            QTreeWidgetItem* param_type_widget = new QTreeWidgetItem;
-            param_type_widget->setText(0, "Value type");
-            param_type_widget->setText(1, type2name(p->type()).c_str());
-            param->addChild(param_type_widget);
+            QTreeWidgetItem* params_type_widget = new QTreeWidgetItem;
+            params_type_widget->setText(0, "Value type");
+            params_type_widget->setText(1, type2name(p->type()).c_str());
+            param->addChild(params_type_widget);
 
             YAML::Emitter e;
             p->write(e);
-            QTreeWidgetItem* param_type_data = new QTreeWidgetItem;
-            param_type_data->setText(0, "Data");
-            param_type_data->setText(1, e.c_str());
-            param->addChild(param_type_data);
+            QTreeWidgetItem* params_type_data = new QTreeWidgetItem;
+            params_type_data->setText(0, "Data");
+            params_type_data->setText(1, e.c_str());
+            param->addChild(params_type_data);
 
             QTreeWidgetItem* enabled = new QTreeWidgetItem;
             enabled->setText(0, "Enabled?");

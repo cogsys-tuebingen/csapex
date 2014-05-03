@@ -45,7 +45,7 @@ Box::~Box()
 
 void Box::setupUi()
 {
-    node_->getNodeWorker()->checkConditions(true);
+    node_->checkConditions(true);
 
     if(!info_compo) {
         info_compo = new QLabel;

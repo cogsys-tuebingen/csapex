@@ -123,6 +123,7 @@ set(SRC_APP
     src/model/message_provider.cpp
     src/model/node_state.cpp
     src/model/node_worker.cpp
+    src/model/parameterizable.cpp
     src/model/node_filter_proxy_model.cpp
     src/model/selection_model.cpp
     src/model/box_selection_model.cpp

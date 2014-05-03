@@ -6,11 +6,11 @@
 #include <csapex/model/tag.h>
 #include <csapex/model/memento.h>
 #include <csapex/model/error_state.h>
-#include <csapex/model/generic_state.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/message.h>
 #include <csapex/utility/timable.h>
 #include <csapex/utility/stream_relay.h>
+#include <csapex/model/parameterizable.h>
 
 /// PROJECT
 #include <utils_param/parameter.h>
@@ -27,12 +27,13 @@ namespace csapex {
 template <typename T>
 class RosMessageConversionT;
 
-class Node : public QObject, public ErrorState, public Unique, public Timable, public param::Parameter::access
+class Node : public QObject, public ErrorState, public Unique, public Parameterizable, public Timable
 {
     Q_OBJECT
 
     friend class NodeState;
     friend class NodeAdapter;
+    friend class NodeWorker;
     friend class DefaultNodeAdapter;
     friend class Box;
     friend class GraphIO;
@@ -53,36 +54,6 @@ public:
 
     void addTag(const Tag& tag);
     std::vector<Tag> getTags() const;
-
-    void addParameter(const param::Parameter::Ptr& param);
-    void addParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
-    void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition);
-    void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
-
-    void addTemporaryParameter(const param::Parameter::Ptr& param);
-    void addTemporaryParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
-
-    void setParameterSetSilence(bool silent);
-    void removeTemporaryParameters();
-    void triggerParameterSetChanged();
-
-    std::vector<param::Parameter::Ptr> getParameters() const;
-
-    template <typename T>
-    const T param(const std::string& name) const
-    {
-        return state.param<T>(name);
-    }
-    template <typename T>
-    typename T::Ptr getParameter(const std::string& name) const
-    {
-        return boost::dynamic_pointer_cast<T> (getParameter(name));
-    }
-
-    param::Parameter::Ptr getParameter(const std::string& name) const;
-
-    bool isParameterEnabled(const std::string& name) const;
-    void setParameterEnabled(const std::string& name, bool enabled);
 
     ConnectorIn* getParameterInput(const std::string& name) const;
     ConnectorOut* getParameterOutput(const std::string& name) const;
@@ -115,6 +86,7 @@ public:
 
     void setSettings(Settings* settings);
 
+    void setNodeWorker(NodeWorker* nw);
     NodeWorker* getNodeWorker() const;
 
     void doSetup();
@@ -329,9 +301,6 @@ private:
 
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;
-
-protected:
-    GenericState state;
 };
 
 }
