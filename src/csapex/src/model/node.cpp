@@ -11,14 +11,13 @@
 
 /// SYSTEM
 #include <boost/foreach.hpp>
-#include <QThread>
 
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
-      settings_(NULL), private_thread_(NULL), worker_(NULL),
+      settings_(NULL), worker_(NULL),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
 }
@@ -60,20 +59,6 @@ void Node::setUUID(const UUID &uuid)
     aerr.setPrefix(p);
     alog.setPrefix(p);
 }
-
-void Node::makeThread()
-{
-    if(!private_thread_) {
-        private_thread_ = new QThread;
-        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
-
-        assert(worker_);
-        worker_->moveToThread(private_thread_);
-
-        private_thread_->start();
-    }
-}
-
 
 void Node::doSetup()
 {
@@ -162,33 +147,7 @@ Settings& Node::getSettings()
 
 void Node::killContent()
 {
-    if(private_thread_ && private_thread_->isRunning()) {
-
-        QMutexLocker lock(&worker_mutex_);
-
-        QObject::disconnect(private_thread_);
-        QObject::disconnect(worker_);
-
-        QObject::connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
-        QObject::connect(private_thread_, SIGNAL(terminated()), private_thread_, SLOT(deleteLater()));
-
-        QObject::connect(private_thread_, SIGNAL(finished()), worker_, SLOT(deleteLater()));
-        QObject::connect(private_thread_, SIGNAL(terminated()), worker_, SLOT(deleteLater()));
-
-        private_thread_->quit();
-        if(!private_thread_->wait(100)) {
-            private_thread_->terminate();
-        }
-
-        private_thread_ = NULL;
-        worker_ = new NodeWorker(this);
-
-        BOOST_FOREACH(ConnectorIn* in, inputs_) {
-            QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
-        }
-
-        makeThread();
-    }
+    // TODO: implement
 }
 
 NodeState::Ptr Node::getNodeState()
@@ -533,12 +492,6 @@ void Node::manageOutput(ConnectorOut* out)
     managed_outputs_.push_back(out);
     connectConnector(out);
     out->moveToThread(thread());
-}
-
-void Node::setSynchronizedInputs(bool sync)
-{
-    // not used anymore
-    // TODO: remove!
 }
 
 int Node::countInputs() const
@@ -963,18 +916,8 @@ void Node::stop()
         disconnectConnector(i);
     }
 
-    QObject::disconnect(private_thread_);
     QObject::disconnect(worker_);
     QObject::disconnect(this);
-
-    if(private_thread_) {
-        private_thread_->quit();
-//        private_thread_->wait(1000);
-//        if(private_thread_->isRunning()) {
-//            std::cout << "terminate thread" << std::endl;
-//            private_thread_->terminate();
-//        }
-    }
 }
 
 void Node::connectConnector(Connectable *c)

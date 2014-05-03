@@ -33,6 +33,9 @@ public:
 
     void stop();
 
+    void makeThread();
+
+
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
 
@@ -63,6 +66,8 @@ private:
 private:
     Node* node_;
     QTimer* timer_;
+
+    QThread* private_thread_;
 
     std::map<ConnectorIn*, bool> has_msg_;
 

@@ -75,7 +75,7 @@ void Graph::addNode(Node::Ptr node)
     node_children_[node.get()] = std::vector<Node*>();
 
     node->setCommandDispatcher(dispatcher_);
-    node->makeThread();
+    node->getNodeWorker()->makeThread();
 
     QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
 

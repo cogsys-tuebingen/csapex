@@ -9,10 +9,13 @@
 #include <csapex/utility/thread.h>
 #include <csapex/core/settings.h>
 
+/// SYSTEM
+#include <QThread>
+
 using namespace csapex;
 
 NodeWorker::NodeWorker(Node* node)
-    : node_(node), thread_initialized_(false), paused_(false), stop_(false)
+    : node_(node), private_thread_(NULL), thread_initialized_(false), paused_(false), stop_(false)
 {
     assert(node_);
 
@@ -26,10 +29,34 @@ NodeWorker::~NodeWorker()
 {
 }
 
+void NodeWorker::makeThread()
+{
+    if(!private_thread_) {
+        private_thread_ = new QThread;
+        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+
+        moveToThread(private_thread_);
+
+        private_thread_->start();
+    }
+}
+
 void NodeWorker::stop()
 {
     QMutexLocker lock(&stop_mutex_);
+
+    QObject::disconnect(private_thread_);
     stop_ = true;
+
+
+    if(private_thread_) {
+        private_thread_->quit();
+//        private_thread_->wait(1000);
+//        if(private_thread_->isRunning()) {
+//            std::cout << "terminate thread" << std::endl;
+//            private_thread_->terminate();
+//        }
+    }
 }
 
 void NodeWorker::pause(bool pause)

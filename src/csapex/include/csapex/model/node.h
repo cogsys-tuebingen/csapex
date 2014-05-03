@@ -173,7 +173,7 @@ public:
     void removeInput(ConnectorIn *in);
     void removeOutput(ConnectorOut *out);
 
-    void setSynchronizedInputs(bool sync);
+    void setSynchronizedInputs(bool) __attribute__ ((deprecated))__attribute__ ((warning("not needed anymore, everything is synchronized now"))) {}
 
     int nextInputId();
     int nextOutputId();
@@ -202,8 +202,6 @@ public:
 
 protected:
     virtual void setState(Memento::Ptr memento);
-
-    void makeThread();
 
     Settings& getSettings();
 
@@ -280,7 +278,6 @@ protected:
 private:
     Settings* settings_;
 
-    QThread* private_thread_;
     QMutex worker_mutex_;
 
     NodeWorker* worker_;
