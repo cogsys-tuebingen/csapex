@@ -129,9 +129,6 @@ void Connectable::disable()
 void Connectable::enable()
 {
     if(!enabled_) {
-        if("csapex::Foreach_1:|:out_0" == getUUID().getFullName()) {
-        std::cerr << "enable " << getUUID().getFullName() << std::endl;
-        }
         enabled_ = true;
         Q_EMIT enabled(enabled_);
     }
