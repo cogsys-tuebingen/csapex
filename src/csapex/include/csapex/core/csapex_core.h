@@ -43,6 +43,7 @@ public:
 public Q_SLOTS:
     void setPause(bool pause);
     void settingsChanged();
+    void clearBlock();
 
 Q_SIGNALS:
     void configChanged();

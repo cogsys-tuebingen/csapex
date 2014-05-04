@@ -219,8 +219,6 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
                 outer_layout->addWidget(gb);
 
-                node_->awarn << "add group " << group << std::endl;
-
                 QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
             }
         }

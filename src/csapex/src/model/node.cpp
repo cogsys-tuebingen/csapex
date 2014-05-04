@@ -11,17 +11,15 @@
 
 /// SYSTEM
 #include <boost/foreach.hpp>
-#include <QThread>
 
 using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
-      settings_(NULL), private_thread_(NULL), worker_(new NodeWorker(this)),
+      settings_(NULL), worker_(NULL),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
 {
-    QObject::connect(worker_, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
 }
 
 Node::~Node()
@@ -47,6 +45,7 @@ Node::~Node()
         cb->deleteLater();
     }
     callbacks.clear();
+
     delete worker_;
 }
 
@@ -60,20 +59,6 @@ void Node::setUUID(const UUID &uuid)
     aerr.setPrefix(p);
     alog.setPrefix(p);
 }
-
-void Node::makeThread()
-{
-    if(!private_thread_) {
-        private_thread_ = new QThread;
-        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
-
-        assert(worker_);
-        worker_->moveToThread(private_thread_);
-
-        private_thread_->start();
-    }
-}
-
 
 void Node::doSetup()
 {
@@ -91,14 +76,6 @@ std::string Node::getType() const
     return type_;
 }
 
-void Node::setCategory(const std::string &category)
-{
-    if(!Tag::exists(category)) {
-        Tag::create(category);
-    }
-    addTag(Tag::get(category));
-}
-
 void Node::addTag(const Tag &tag)
 {
     tags_.push_back(tag);
@@ -110,81 +87,6 @@ std::vector<Tag> Node::getTags() const
         tags_.push_back(Tag::get("General"));
     }
     return tags_;
-}
-
-void Node::setParameterSetSilence(bool silent)
-{
-    state.setParameterSetSilence(silent);
-}
-
-void Node::removeTemporaryParameters()
-{
-    // TODO: handle callbacks!
-    state.removeTemporaryParameters();
-}
-
-void Node::triggerParameterSetChanged()
-{
-    state.triggerParameterSetChanged();
-}
-
-void Node::addTemporaryParameter(const param::Parameter::Ptr &param)
-{
-    state.addTemporaryParameter(param);
-}
-
-void Node::addTemporaryParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
-{
-    state.addTemporaryParameter(param);
-    worker_->addParameterCallback(param.get(), cb);
-}
-
-void Node::addParameter(const param::Parameter::Ptr &param)
-{
-    state.addParameter(param);
-    worker_->addParameter(param.get());
-}
-
-void Node::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
-{
-    addParameter(param);
-    worker_->addParameterCallback(param.get(), cb);
-}
-
-
-void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition)
-{
-    addParameter(param);
-    worker_->addParameterCondition(param.get(), enable_condition);
-}
-
-
-void Node::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition, boost::function<void (param::Parameter *)> cb)
-{
-    addParameter(param);
-    worker_->addParameterCallback(param.get(), cb);
-    worker_->addParameterCondition(param.get(), enable_condition);
-}
-
-
-std::vector<param::Parameter::Ptr> Node::getParameters() const
-{
-    return state.getParameters();
-}
-
-param::Parameter::Ptr Node::getParameter(const std::string &name) const
-{
-    return state.getParameter(name);
-}
-
-bool Node::isParameterEnabled(const std::string &name) const
-{
-    return getParameter(name)->isEnabled();
-}
-
-void Node::setParameterEnabled(const std::string &name, bool enabled)
-{
-    getParameter(name)->setEnabled(enabled);
 }
 
 ConnectorIn* Node::getParameterInput(const std::string &name) const
@@ -229,21 +131,14 @@ void Node::process()
 {
 }
 
-void Node::checkInputs()
+void Node::checkIO()
 {
     if(isEnabled()) {
         enableInput(canReceive());
+        enableOutput(canReceive());
     } else {
         enableInput(false);
-    }
-}
-
-void Node::finishProcessing()
-{
-    Q_FOREACH(ConnectorIn* i, inputs_) {
-        if(i->isProcessing()) {
-            i->setProcessing(false);
-        }
+        enableOutput(false);
     }
 }
 
@@ -252,58 +147,9 @@ Settings& Node::getSettings()
     return *settings_;
 }
 
-void Node::checkIfDone()
-{
-    int no_targets = 0;
-    Q_FOREACH(ConnectorOut* o, outputs_) {
-        no_targets += o->noTargets();
-    }
-
-    if(worker_->isProcessing()/* && no_targets != 0*/) {
-        return;
-    }
-
-    // check if all children are done processing
-    Q_FOREACH(ConnectorOut* o, outputs_) {
-        // o->waitForProcessing();
-        if(o->isProcessing()) {
-            return;
-        }
-    }
-
-    // notify that all children are done
-    finishProcessing();
-}
-
 void Node::killContent()
 {
-    if(private_thread_ && private_thread_->isRunning()) {
-
-        QMutexLocker lock(&worker_mutex_);
-
-        QObject::disconnect(private_thread_);
-        QObject::disconnect(worker_);
-
-        QObject::connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
-        QObject::connect(private_thread_, SIGNAL(terminated()), private_thread_, SLOT(deleteLater()));
-
-        QObject::connect(private_thread_, SIGNAL(finished()), worker_, SLOT(deleteLater()));
-        QObject::connect(private_thread_, SIGNAL(terminated()), worker_, SLOT(deleteLater()));
-
-        private_thread_->quit();
-        if(!private_thread_->wait(100)) {
-            private_thread_->terminate();
-        }
-
-        private_thread_ = NULL;
-        worker_ = new NodeWorker(this);
-
-        BOOST_FOREACH(ConnectorIn* in, inputs_) {
-            QObject::connect(in, SIGNAL(messageArrived(ConnectorIn*)), worker_, SLOT(forwardMessage(ConnectorIn*)));
-        }
-
-        makeThread();
-    }
+    // TODO: implement
 }
 
 NodeState::Ptr Node::getNodeState()
@@ -363,8 +209,8 @@ void Node::updateParameter(param::Parameter *p)
         boost::function<typename connection_types::DirectMessage<T>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<T> >, cin, (void*) 0);
         boost::function<connection_types::DirectMessage<T>*()> getmsg = boost::bind(&connection_types::DirectMessage<T>::Ptr::get, boost::bind(getmsgptr));
         boost::function<T()> read = boost::bind(&connection_types::DirectMessage<T>::getValue, boost::bind(getmsg));
-        boost::function<void()> set_param_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
-        qt_helper::Call* set_param = new qt_helper::Call(set_param_fn);
+        boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
+        qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
         callbacks.push_back(set_param);
         QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
 
@@ -394,7 +240,7 @@ void Node::updateParameters()
 {
     assert(!getUUID().empty());
 
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = parameter_state_.params.begin(); it != parameter_state_.params.end(); ++it ) {
         param::Parameter* p = it->second.get();
 
         if(p->is<int>()) {
@@ -417,17 +263,17 @@ void Node::updateParameters()
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
-//    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
-//    if(m) {
-//        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
-//            param::Parameter* param = it->second.get();
-//            if(state.params.find(param->name()) != state.params.end()) {
-//                state.params[param->name()]->setValueFrom(*param);
-//            } else {
-//                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
-//            }
-//        }
-//    }
+    //    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
+    //    if(m) {
+    //        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
+    //            param::Parameter* param = it->second.get();
+    //            if(state.params.find(param->name()) != state.params.end()) {
+    //                state.params[param->name()]->setValueFrom(*param);
+    //            } else {
+    //                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
+    //            }
+    //        }
+    //    }
 
     setState(s->child_state);
     loaded_state_available_ = true;
@@ -435,7 +281,7 @@ void Node::setNodeStateLater(NodeStatePtr s)
 
 Memento::Ptr Node::getState() const
 {
-    return state.clone();
+    return parameter_state_.clone();
 }
 
 void Node::setState(Memento::Ptr memento)
@@ -443,7 +289,7 @@ void Node::setState(Memento::Ptr memento)
     boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
     assert(m.get());
 
-    state.setFrom(*m);
+    parameter_state_.setFrom(*m);
 
     Q_EMIT modelChanged();
 }
@@ -460,7 +306,7 @@ void Node::enable(bool e)
 void Node::enable()
 {
     node_state_->enabled = true;
-    enableIO(true);
+    checkIO();
 
     Q_EMIT enabled(true);
 }
@@ -475,7 +321,7 @@ void Node::disable()
 {
     node_state_->enabled = false;
     setError(false);
-    enableIO(false);
+    checkIO();
 
     Q_EMIT enabled(false);
 }
@@ -485,6 +331,8 @@ bool Node::canReceive()
     bool can_receive = true;
     Q_FOREACH(ConnectorIn* i, inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
+            can_receive = false;
+        } else if(i->isConnected() && !i->getSource()->isEnabled()) {
             can_receive = false;
         }
     }
@@ -500,7 +348,6 @@ void Node::enableIO(bool enable)
 
 void Node::enableInput (bool enable)
 {
-    worker_->setProcessing(false);
     Q_FOREACH(ConnectorIn* i, inputs_) {
         if(enable) {
             i->enable();
@@ -513,11 +360,11 @@ void Node::enableInput (bool enable)
 
 void Node::enableOutput (bool enable)
 {
-    Q_FOREACH(ConnectorOut* i, outputs_) {
+    Q_FOREACH(ConnectorOut* o, outputs_) {
         if(enable) {
-            i->enable();
+            o->enable();
         } else {
-            i->disable();
+            o->disable();
         }
     }
 }
@@ -576,6 +423,11 @@ void Node::setSettings(Settings *settings)
     settings_ = settings;
 }
 
+void Node::setNodeWorker(NodeWorker *nw)
+{
+    worker_ = nw;
+}
+
 NodeWorker* Node::getNodeWorker() const
 {
     return worker_;
@@ -584,10 +436,6 @@ NodeWorker* Node::getNodeWorker() const
 
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    if(error && level == EL_ERROR) {
-        finishProcessing();
-    }
-
     Q_EMIT nodeError(error,msg,level);
 
     if(node_state_->enabled && error && level == EL_ERROR) {
@@ -628,7 +476,6 @@ ConnectorOut* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 void Node::addInput(ConnectorIn* in)
 {
     registerInput(in);
-    //    in->setLegacy(worker_->isSynchronizedInputs());
 }
 
 void Node::addOutput(ConnectorOut* out)
@@ -649,15 +496,6 @@ void Node::manageOutput(ConnectorOut* out)
     managed_outputs_.push_back(out);
     connectConnector(out);
     out->moveToThread(thread());
-    QObject::connect(out, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
-}
-
-void Node::setSynchronizedInputs(bool sync)
-{
-    worker_->setSynchronizedInputs(sync);
-    //    BOOST_FOREACH(ConnectorIn* in, input) {
-    //        in->setLegacy(!sync);
-    //    }
 }
 
 int Node::countInputs() const
@@ -786,8 +624,6 @@ void Node::removeInput(ConnectorIn *in)
 
     disconnectConnector(in);
     Q_EMIT connectorRemoved(in);
-
-    //checkIfDone();
 }
 
 void Node::removeOutput(ConnectorOut *out)
@@ -810,8 +646,6 @@ void Node::removeOutput(ConnectorOut *out)
 
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
-
-   // checkIfDone();
 }
 
 
@@ -923,23 +757,23 @@ QTreeWidgetItem* Node::createDebugInformation() const
     {
         QTreeWidgetItem* parameters = new QTreeWidgetItem;
         parameters->setText(0, "Parameters");
-        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state.params.begin(); it != state.params.end(); ++it ) {
+        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = parameter_state_.params.begin(); it != parameter_state_.params.end(); ++it ) {
             param::Parameter* p = it->second.get();
 
             QTreeWidgetItem* param = new QTreeWidgetItem;
             param->setText(0, p->name().c_str());
 
-            QTreeWidgetItem* param_type_widget = new QTreeWidgetItem;
-            param_type_widget->setText(0, "Value type");
-            param_type_widget->setText(1, type2name(p->type()).c_str());
-            param->addChild(param_type_widget);
+            QTreeWidgetItem* params_type_widget = new QTreeWidgetItem;
+            params_type_widget->setText(0, "Value type");
+            params_type_widget->setText(1, type2name(p->type()).c_str());
+            param->addChild(params_type_widget);
 
             YAML::Emitter e;
             p->write(e);
-            QTreeWidgetItem* param_type_data = new QTreeWidgetItem;
-            param_type_data->setText(0, "Data");
-            param_type_data->setText(1, e.c_str());
-            param->addChild(param_type_data);
+            QTreeWidgetItem* params_type_data = new QTreeWidgetItem;
+            params_type_data->setText(0, "Data");
+            params_type_data->setText(1, e.c_str());
+            param->addChild(params_type_data);
 
             QTreeWidgetItem* enabled = new QTreeWidgetItem;
             enabled->setText(0, "Enabled?");
@@ -1011,8 +845,6 @@ void Node::registerOutput(ConnectorOut* out)
 
     out->setCommandDispatcher(dispatcher_);
 
-    QObject::connect(out, SIGNAL(messageProcessed()), this, SLOT(checkIfDone()));
-
     connectConnector(out);
 
     Q_EMIT connectorCreated(out);
@@ -1062,34 +894,50 @@ std::string Node::getLabel() const
     return node_state_->label_;
 }
 
-void Node::stop()
+void Node::pause(bool pause)
 {
-    Q_FOREACH(ConnectorOut* i, outputs_) {
-        i->stop();
-    }
+    worker_->pause(pause);
+}
+
+void Node::clearBlock()
+{
     Q_FOREACH(ConnectorIn* i, inputs_) {
-        i->stop();
-    }
-
-    Q_FOREACH(ConnectorIn* i, inputs_) {
-        disconnectConnector(i);
-    }
-    Q_FOREACH(ConnectorOut* i, outputs_) {
-        disconnectConnector(i);
-    }
-
-    QObject::disconnect(private_thread_);
-    QObject::disconnect(worker_);
-    QObject::disconnect(this);
-
-    if(private_thread_) {
-        private_thread_->quit();
-        private_thread_->wait(1000);
-        if(private_thread_->isRunning()) {
-            std::cout << "terminate thread" << std::endl;
-            private_thread_->terminate();
+        if(i->isBlocked()) {
+            i->free();
+            worker_->clearInput(i);
         }
     }
+    Q_FOREACH(ConnectorIn* i, inputs_) {
+        i->setSequenceNumber(0);
+    }
+    Q_FOREACH(ConnectorOut* o, outputs_) {
+        o->setSequenceNumber(0);
+    }
+}
+
+void Node::stop()
+{
+    worker_->stop();
+
+    Q_FOREACH(ConnectorIn* i, inputs_) {
+        i->free();
+    }
+    Q_FOREACH(ConnectorOut* i, outputs_) {
+        i->stop();
+    }
+    Q_FOREACH(ConnectorIn* i, inputs_) {
+        i->stop();
+    }
+
+    Q_FOREACH(ConnectorIn* i, inputs_) {
+        disconnectConnector(i);
+    }
+    Q_FOREACH(ConnectorOut* i, outputs_) {
+        disconnectConnector(i);
+    }
+
+    QObject::disconnect(worker_);
+    QObject::disconnect(this);
 }
 
 void Node::connectConnector(Connectable *c)
@@ -1097,17 +945,17 @@ void Node::connectConnector(Connectable *c)
     QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
-    QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkInputs()));
-    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkIfDone()));
-    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkInputs()));
+    QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionEnabled(bool)), this, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkIO()));
 }
 
 
 void Node::disconnectConnector(Connectable */*c*/)
 {
-//    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
-//    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
-//    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+    //    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
+    //    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
+    //    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }
 
 

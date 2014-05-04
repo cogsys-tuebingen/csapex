@@ -82,12 +82,6 @@ void Port::paintEvent(QPaintEvent *e)
 {
     setProperty("async", adaptee_->isAsync());
 
-//    if(adaptee_->isInput()) {
-//        ConnectorIn* i = dynamic_cast<ConnectorIn*>(adaptee_);
-//        setProperty("legacy", i->isLegacy());
-//        refreshStylesheet();
-//    }
-
     if(refresh_style_sheet_) {
         refresh_style_sheet_ = false;
         setStyleSheet(styleSheet());
@@ -159,6 +153,7 @@ void Port::createToolTip()
 {
     std::stringstream tooltip;
     tooltip << "UUID: " << adaptee_->getUUID().c_str() << ", Type: " << adaptee_->getType()->name() << ", Messages: " << adaptee_->getCount();
+    tooltip << ", Enabled: " << adaptee_->isEnabled() << ", Blocked: " << adaptee_->isBlocked() << ", #: " << adaptee_->sequenceNumber();
     setToolTip(tooltip.str().c_str());
 }
 
@@ -223,7 +218,6 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
 
 void Port::dragEnterEvent(QDragEnterEvent* e)
 {
-    std::cout << "port enter: " << e->format() << std::endl;
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
          if(from == adaptee_) {

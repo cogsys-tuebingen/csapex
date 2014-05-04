@@ -146,6 +146,8 @@ void DesignBoard::addBoxEvent(Box *box)
     QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
     QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay_, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
+    QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateInformation(Graph*)));
+
     QObject::connect(box, SIGNAL(showContextMenuForBox(Box*, QPoint)), this, SLOT(showContextMenuEditBox(Box*, QPoint)));
 
     box->setParent(this);
@@ -153,6 +155,8 @@ void DesignBoard::addBoxEvent(Box *box)
     box->triggerPlaced();
     box->setCommandDispatcher(dispatcher_);
     box->show();
+
+    box->updateInformation(graph_.get());
 
     overlay_->raise();
     repaint();

@@ -9,7 +9,7 @@ using namespace csapex;
 ConnectionType::Ptr ConnectionType::default_;
 
 ConnectionType::ConnectionType(const std::string& name)
-    : name_(name)
+    : name_(name), seq_no_(-1)
 {
 }
 
@@ -45,6 +45,16 @@ std::string ConnectionType::name() const
 std::string ConnectionType::rawName() const
 {
     return name_;
+}
+
+int ConnectionType::sequenceNumber() const
+{
+    return seq_no_;
+}
+
+void ConnectionType::setSequenceNumber(int seq_no)
+{
+    seq_no_ = seq_no;
 }
 
 ConnectionType::Ptr ConnectionType::makeDefault()

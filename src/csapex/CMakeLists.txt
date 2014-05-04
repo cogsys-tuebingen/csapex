@@ -11,7 +11,6 @@ add_definitions(-W -Wall)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS utils_plugin utils_param utils_qt)
 
-find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
@@ -118,16 +117,18 @@ set(SRC_APP
     src/model/error_state.cpp
     src/model/graph.cpp
     src/model/connection.cpp
-    src/model/connector_forward.cpp
     src/model/connection_type.cpp
     src/model/generic_state.cpp
     src/model/message_provider.cpp
     src/model/node_state.cpp
     src/model/node_worker.cpp
+    src/model/parameterizable.cpp
     src/model/node_filter_proxy_model.cpp
     src/model/selection_model.cpp
     src/model/box_selection_model.cpp
     src/model/connection_selection_model.cpp
+
+    src/utility/buffer.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp
@@ -213,4 +214,29 @@ add_executable(csapex_node
     src/csapex.cpp)
 target_link_libraries(csapex_node csapex_app)
 
-execute_process(COMMAND ./setup.sh ${CATKIN_DEVEL_PREFIX} ${CATKIN_PACKAGE_BIN_DESTINATION} csapex_node WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
+add_custom_target(cfg ALL DEPENDS cfg/style.css)
+add_custom_command(TARGET cfg POST_BUILD
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
+#
+# INSTALL
+#
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+install(TARGETS csapex_pluginbase
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_app
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_node
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

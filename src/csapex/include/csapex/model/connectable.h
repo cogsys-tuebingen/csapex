@@ -71,6 +71,9 @@ public:
 
     bool isBlocked() const;
 
+    int sequenceNumber() const;
+    void setSequenceNumber(int seq_no_);
+
     /**
      * INTERFACE
      */
@@ -92,13 +95,9 @@ public Q_SLOTS:
 
     virtual void disable();
     virtual void enable();
+    void setEnabled(bool enabled);
 
     bool isEnabled() const;
-
-    virtual void setProcessing(bool processing);
-    bool isProcessing() const;
-    virtual void waitForProcessing();
-    virtual void updateIsProcessing();
 
     void stop();
 
@@ -115,6 +114,7 @@ Q_SIGNALS:
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone();
     void connectionRemoved();
+    void connectionEnabled(bool);
     void messageProcessed();
     void blocked(bool);
     void connectableError(bool error, const std::string &msg, int level);
@@ -153,9 +153,9 @@ protected:
     ConnectionType::ConstPtr type_;
 
     int count_;
+    int seq_no_;
 
 private:
-    bool processing;
     bool enabled_;
     bool async_;
     bool async_temp_;

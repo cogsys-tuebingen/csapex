@@ -62,13 +62,6 @@ void ConnectorOut::removeConnection(Connectable* other_side)
     }
 }
 
-void ConnectorOut::updateIsProcessing()
-{
-    if(!isConnected() && isProcessing()) {
-        setProcessing(false);
-    }
-}
-
 Command::Ptr ConnectorOut::removeConnectionCmd(ConnectorIn* other_side) {
     Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
 
@@ -168,6 +161,7 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
 {
     // update buffer
     message_ = message;
+    message_->setSequenceNumber(seq_no_);
 
     Timer::Interlude::Ptr i;
     if(publish_timer_) {
@@ -183,40 +177,25 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         }
     }
 
-    BOOST_FOREACH(ConnectorIn* i, targets) {
-        if(i->isProcessing() && !i->isAsync()) {
-            setBlocked(true);
-            i->waitForProcessing();
-
-            if(i->isProcessing()) {
-                return;
-            }
-            if(!isProcessing()) {
-                return;
-            }
-        }
-    }
-
     if(isBlocked()) {
         setBlocked(false);
     }
 
-    if(targets.empty()) {
-        return;
+    if(!targets.empty()) {
+        // all connected inputs are ready to receive, send them the message
+        if(targets.size() == 1) {
+            targets[0]->inputMessage(message_);
+        } else if(targets.size() > 1) {
+            BOOST_FOREACH(ConnectorIn* i, targets) {
+                ConnectionType::Ptr msg = message_->clone();
+                msg->setSequenceNumber(seq_no_);
+                i->inputMessage(msg);
+            }
+        }
+        ++count_;
     }
 
-    // all connected inputs are ready to receive, send them the message
-    if(targets.size() == 1) {
-        targets[0]->inputMessage(message_);
-    } else if(targets.size() > 1) {
-        BOOST_FOREACH(ConnectorIn* i, targets) {
-            i->inputMessage(message_->clone());
-        }
-    }/* else if(!force_send_message_){
-        return;
-    }*/
-
-    count_++;
+    ++seq_no_;
     Q_EMIT messageSent(this);
 }
 

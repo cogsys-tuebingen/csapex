@@ -123,7 +123,6 @@ void Designer::stateChangedEvent()
     designer_board->refresh();
 }
 
-
 void Designer::updateDebugInfo()
 {
     if(!debug_tabs->isVisible()) {

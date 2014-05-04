@@ -28,14 +28,14 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 }
 
 Connectable::Connectable(Settings& settings, const UUID& uuid)
-    : Unique(uuid), settings_(settings), buttons_down_(0), processing(false), enabled_(false), async_(false), async_temp_(false),
+    : Unique(uuid), settings_(settings), buttons_down_(0), count_(0), seq_no_(0), enabled_(false), async_(false), async_temp_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
 }
 
 Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), buttons_down_(0), processing(false), enabled_(false), async_(false), async_temp_(false),
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings), buttons_down_(0), count_(0), seq_no_(0), enabled_(false), async_(false), async_temp_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
@@ -51,64 +51,9 @@ void Connectable::notifyMessageProcessed()
     Q_EMIT messageProcessed();
 }
 
-void Connectable::updateIsProcessing()
-{
-
-}
-
 void Connectable::stop()
 {
-    {
-        QMutexLocker lock(&io_mutex);
-        processing = false;
-    }
     notifyMessageProcessed();
-}
-
-void Connectable::setProcessing(bool p)
-{
-    {
-        QMutexLocker lock(&io_mutex);
-        //port_->setPortProperty("processing", p);
-
-        assert(processing != p || isAsync());
-        processing = p;
-    }
-
-
-    if(!processing) {
-        notifyMessageProcessed();
-    }
-}
-
-bool Connectable::isProcessing() const
-{
-    QMutexLocker lock(&io_mutex);
-    return processing;
-}
-
-void Connectable::waitForProcessing()
-{
-    if(isError()) {
-        return;
-    }
-
-    {
-        QMutexLocker lock(&io_mutex);
-
-        if(processing) {
-            while(processing && settings_.isProcessingAllowed()) {
-                blocked_ = true;
-                Q_EMIT blocked(blocked_);
-
-                can_process_cond.wait(&io_mutex);
-            }
-        }
-
-
-        blocked_ = false;
-        Q_EMIT blocked(blocked_);
-    }
 }
 
 CommandDispatcher* Connectable::getCommandDispatcher() const
@@ -125,17 +70,13 @@ void Connectable::init()
 {
     setType(ConnectionType::makeDefault());
 
-    QObject::connect(this, SIGNAL(connectionRemoved()), this, SLOT(updateIsProcessing()));
-
-    count_ = 0;
-
     disable();
 }
 
 
 Connectable::~Connectable()
 {
-//    UUID::free(getUUID());
+    //    UUID::free(getUUID());
 }
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
@@ -179,17 +120,27 @@ void Connectable::removeAllConnectionsUndoable()
 
 void Connectable::disable()
 {
-    enabled_ = false;
-    if(isProcessing()) {
-        setProcessing(false);
+    if(enabled_) {
+        enabled_ = false;
+        Q_EMIT enabled(enabled_);
     }
-    Q_EMIT enabled(enabled_);
 }
 
 void Connectable::enable()
 {
-    enabled_ = true;
-    Q_EMIT enabled(enabled_);
+    if(!enabled_) {
+        enabled_ = true;
+        Q_EMIT enabled(enabled_);
+    }
+}
+
+void Connectable::setEnabled(bool enabled)
+{
+    if(enabled) {
+        enable();
+    } else {
+        disable();
+    }
 }
 
 bool Connectable::isEnabled() const
@@ -276,4 +227,15 @@ bool Connectable::isBlocked() const
 void Connectable::setBlocked(bool b)
 {
     blocked_ = b;
+    Q_EMIT blocked(b);
+}
+
+int Connectable::sequenceNumber() const
+{
+    return seq_no_;
+}
+
+void Connectable::setSequenceNumber(int seq_no)
+{
+    seq_no_ = seq_no;
 }

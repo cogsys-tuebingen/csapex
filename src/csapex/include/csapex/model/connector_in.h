@@ -5,6 +5,7 @@
 #include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/message.h>
+#include <csapex/utility/buffer.h>
 
 /// SYSTEM
 #include <QMutex>
@@ -41,48 +42,19 @@ public:
 
     template <typename R>
     typename R::Ptr getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
-        waitForMessage();
-
-        QMutexLocker lock(&io_mutex);
-
-        if(!message_) {
-            std::stringstream e;
-            e << "message in connector " << getUUID().getFullName() << " is empty!";
-            throw std::runtime_error(e.str());
-        }
-
-        typename R::Ptr result = boost::dynamic_pointer_cast<R> (message_);
-        if(result) {
-            return result;
-        } else {
-            std::stringstream e;
-            e << "cannot cast message from " << message_->toType()->name() << " to " << type2name(typeid(R));
-            throw std::runtime_error(e.str());
-        }
+        return buffer_->read<R>();
     }
+
     template <typename R>
     typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
-        waitForMessage();
-
-        QMutexLocker lock(&io_mutex);
-        typename connection_types::GenericMessage<R>::Ptr tmp =
-        boost::dynamic_pointer_cast<typename connection_types::GenericMessage<R> > (message_);
-        return tmp->value;
+        return buffer_->read< connection_types::GenericMessage<R> >() -> value;
     }
+
     template <typename Container, typename R>
     boost::shared_ptr<typename Container::template TypeMap<R>::type const>
     getMessage() {
-        waitForMessage();
-
-        QMutexLocker lock(&io_mutex);
-        typename Container::Ptr tmp = boost::dynamic_pointer_cast<Container>(message_);
-        if(!tmp) {
-            throw std::runtime_error(std::string("cannot get message, not of type ") + type2name(typeid(Container)));
-        }
-        return tmp->template makeShared<R>();
+        return buffer_->read<Container>() -> template makeShared<R>();
     }
-
-    virtual ConnectionType::Ptr getMessage()  __attribute__ ((deprecated));
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
     virtual bool isConnected() const;
@@ -97,14 +69,11 @@ public:
     bool isOptional() const;
     void setOptional(bool optional);
 
-    bool isLegacy() const;
-    void setLegacy(bool legacy);
-
     bool hasMessage() const;
+    void free();
 
-    virtual void waitForProcessing();
-    virtual void setProcessing(bool processing);
-    virtual void updateIsProcessing();
+    virtual void enable();
+    virtual void disable();
 
 protected:
     virtual bool tryConnect(Connectable* other_side);
@@ -112,16 +81,12 @@ protected:
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
-private:
-    void waitForMessage();
-
 protected:
     Connectable* target;
 
-    ConnectionType::Ptr message_;
+    BufferPtr buffer_;
 
     bool optional_;
-    bool legacy_;
 };
 
 }

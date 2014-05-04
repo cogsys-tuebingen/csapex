@@ -9,15 +9,16 @@
 
 /// SYSTEM
 #include <QObject>
-#include <QMutex>
 #include <QTimer>
+#include <QMutex>
 #include <map>
 #include <deque>
 #include <boost/function.hpp>
+#include <QWaitCondition>
 
 namespace csapex {
 
-struct NodeWorker : public QObject, public param::Parameter::access
+struct NodeWorker : public QObject
 {
     Q_OBJECT
 
@@ -30,15 +31,19 @@ public:
     NodeWorker(Node* node);
     ~NodeWorker();
 
-    bool isProcessing();
+    void stop();
+
+    void makeThread();
+
 
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
 
-    void forwardMessageDirectly(ConnectorIn* source);
     void forwardMessageSynchronized(ConnectorIn* source);
 
     void addInput(ConnectorIn* source);
+    void checkInputs();
+    void clearInput(ConnectorIn* source);
     void removeInput(ConnectorIn* source);
 
     void eventGuiChanged();
@@ -50,26 +55,11 @@ public Q_SLOTS:
 
     void triggerError(bool e, const std::string& what);
 
-    void setSynchronizedInputs(bool s);
-    bool isSynchronizedInputs() const;
-
-    void addParameter(param::Parameter* param);
-    void addParameterCallback(param::Parameter *param, boost::function<void(param::Parameter *)> cb);
-    void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
-
-    void setProcessing(bool p);
-    bool isProcessing() const;
-
-    void checkConditions(bool silent);
+    void pause(bool pause);
 
 Q_SIGNALS:
     void messagesReceived();
     void messageProcessed();
-
-private:
-    void parameterChanged(param::Parameter* param);
-    void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
-    void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
     static const double DEFAULT_FREQUENCY = 30.0;
@@ -78,19 +68,19 @@ private:
     Node* node_;
     QTimer* timer_;
 
-    bool synchronized_inputs_;
-    std::map<ConnectorIn*, bool> has_msg_;
+    QThread* private_thread_;
 
-    QMutex changed_params_mutex_;
-    std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
-    std::map<param::Parameter*, boost::function<bool()> > conditions_;
+    std::map<ConnectorIn*, bool> has_msg_;
 
     std::deque<TimerPtr> timer_history_;
 
     bool thread_initialized_;
-    volatile bool is_processing_;
-
-    std::vector<boost::signals2::connection> connections_;
+    bool paused_;
+    bool stop_;
+    QMutex stop_mutex_;
+    QMutex pause_mutex_;
+    QMutex message_mutex_;
+    QWaitCondition continue_;
 };
 
 }

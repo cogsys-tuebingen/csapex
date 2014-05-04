@@ -71,10 +71,15 @@ void Graph::addNode(Node::Ptr node)
     assert(dispatcher_);
 
     nodes_.push_back(node);
+    node_parents_[node.get()] = std::vector<Node*>();
+    node_children_[node.get()] = std::vector<Node*>();
+
     node->setCommandDispatcher(dispatcher_);
-    node->makeThread();
+    node->getNodeWorker()->makeThread();
 
     QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
+
+    buildConnectedComponents();
 
     Q_EMIT nodeAdded(node);
 }
@@ -85,15 +90,28 @@ void Graph::deleteNode(const UUID& uuid)
 
     node->stop();
 
-    QObject::disconnect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
+    /// assert that all connections have already been deleted
+    assert(node_parents_[node].empty());
+    assert(node_children_[node].empty());
+
+    node_parents_.erase(node);
+    node_children_.erase(node);
+
+    Node::Ptr removed;
 
     for(std::vector<Node::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
-        if((*it).get() == node) {
-            Q_EMIT nodeRemoved(*it);
+        if((*it)->getUUID() == node->getUUID()) {
+            removed = *it;
             it = nodes_.erase(it);
+
         } else {
             ++it;
         }
+    }
+
+    if(removed) {
+        Q_EMIT nodeRemoved(removed);
+        buildConnectedComponents();
     }
 }
 
@@ -121,7 +139,69 @@ bool Graph::addConnection(Connection::Ptr connection)
 
         connections_.push_back(connection);
 
+        Node* n_from = findNodeForConnector(connection->from()->getUUID());
+        Node* n_to = findNodeForConnector(connection->to()->getUUID());
+
+        node_parents_[n_to].push_back(n_from);
+        node_children_[n_from].push_back(n_to);
+
+        if(node_component_[n_from] == node_component_[n_to]) {
+            // if both nodes are already in the same component
+            // we need to have the same seq no
+
+            int highest_seq_no = -1;
+            // search all parents of the target for the highest seq no
+            for(int i = 0; i < n_to->countInputs(); ++i) {
+                ConnectorIn* input = n_to->getInput(i);
+                if(!input->isConnected()) {
+                    continue;
+                }
+                Node* ni = findNodeForConnector(input->getSource()->getUUID());
+
+                for(int j = 0; j < ni->countOutputs(); ++j) {
+                    ConnectorOut* output = ni->getOutput(j);
+                    if(output->sequenceNumber() > highest_seq_no) {
+                        highest_seq_no = output->sequenceNumber();
+                    }
+                }
+            }
+            if(highest_seq_no != -1) {
+//                std::cerr << "setting the sequence numbers:\n";
+                for(int i = 0; i < n_to->countInputs(); ++i) {
+                    ConnectorIn* input = n_to->getInput(i);
+//                    std::cerr << " - " << input->getUUID().getFullName() << " from #" << input->sequenceNumber() << " to #" << highest_seq_no << std::endl;
+                    input->setSequenceNumber(highest_seq_no);
+                }
+            }
+
+        } else {
+            // if both nodes are in different components we need to synchronize the two components
+            // this connection is the only connection between the two components.
+            // set the sequence no of the child component to the one given by this connector
+            int seq_no = from->sequenceNumber();
+
+            setPause(true);
+//            std::cerr << "synchronize components" << std::endl;
+            Q_FOREACH(Node::Ptr n, nodes_) {
+                if(node_component_[n.get()] == node_component_[n_to]) {
+                    for(int i = 0; i < n->countOutputs(); ++i) {
+                        ConnectorOut* output = n->getOutput(i);
+                        output->setSequenceNumber(seq_no);
+                    }
+                    for(int i = 0; i < n->countInputs(); ++i) {
+                        ConnectorIn* input = n->getInput(i);
+                        input->setSequenceNumber(seq_no);
+                    }
+                }
+            }
+
+            setPause(false);
+        }
+
+        buildConnectedComponents();
         verify();
+
+
 
         Q_EMIT connectionAdded(connection.get());
         Q_EMIT from->connectionDone();
@@ -141,10 +221,20 @@ void Graph::deleteConnection(Connection::Ptr connection)
         if(*connection == **c) {
             Connectable* to = connection->to();
             to->setError(false);
-            if(to->isProcessing()) {
-                to->setProcessing(false);
-            }
+
+            Node* n_from = findNodeForConnector(connection->from()->getUUID());
+            Node* n_to = findNodeForConnector(connection->to()->getUUID());
+
+            // erase pointer from TO to FROM
+            // if there are multiple edges, this only erases one entry
+            node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
+
+            // erase pointer from FROM to TO
+            node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+
             connections_.erase(c);
+
+            buildConnectedComponents();
             verify();
             Q_EMIT connectionDeleted(connection.get());
         } else {
@@ -153,22 +243,62 @@ void Graph::deleteConnection(Connection::Ptr connection)
     }
 
     Q_EMIT stateChanged();
+
 }
 
 
+void Graph::buildConnectedComponents()
+{
+    /* Find all connected sub components of this graph */
+    //    std::map<Node*, int> old_node_component = node_component_;
+    node_component_.clear();
+
+    std::deque<Node*> unmarked;
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        unmarked.push_back(node.get());
+        node_component_[node.get()] = -1;
+    }
+
+    std::deque<Node*> Q;
+    int component = 0;
+    while(!unmarked.empty()) {
+        // take a random unmarked node to start bfs from
+        Node* start = unmarked.front();
+        Q.push_back(start);
+
+        node_component_[start] = component;
+
+        while(!Q.empty()) {
+            Node* front = Q.front();
+            Q.pop_front();
+
+            unmarked.erase(std::find(unmarked.begin(), unmarked.end(), front));
+
+            // iterate all neighbors
+            std::vector<Node*> neighbors;
+            Q_FOREACH(Node* parent, node_parents_[front]) {
+                neighbors.push_back(parent);
+            }
+            Q_FOREACH(Node* child, node_children_[front]) {
+                neighbors.push_back(child);
+            }
+
+            Q_FOREACH(Node* neighbor, neighbors) {
+                if(node_component_[neighbor] == -1) {
+                    node_component_[neighbor] = component;
+                    Q.push_back(neighbor);
+                }
+            }
+        }
+
+        ++component;
+    }
+
+    Q_EMIT structureChanged(this);
+}
+
 void Graph::verify()
 {
-    //    Q_FOREACH(Node::Ptr node, nodes_) {
-    //        bool blocked = false;
-    //        for(int i = 0; i < node->countInputs(); ++i) {
-    //            blocked |= node->getInput(i)->isBlocked();
-    //        }
-
-    //        if(blocked) {
-    //            node->finishProcessing();
-    //        }
-    //    }
-
     verifyAsync();
 }
 
@@ -239,8 +369,6 @@ void Graph::verifyAsync()
 
 void Graph::stop()
 {
-    settings_.setProcessingAllowed(false);
-
     Q_FOREACH(Node::Ptr node, nodes_) {
         node->disable();
     }
@@ -259,15 +387,24 @@ bool Graph::isPaused() const
 void Graph::setPause(bool pause)
 {
     Q_FOREACH(Node::Ptr node, nodes_) {
-        node->enableIO(!pause);
+        node->pause(pause);
     }
     if(pause) {
         timer_->stop();
     } else {
         timer_->start();
     }
+
+    paused(pause);
 }
 
+void Graph::clearBlock()
+{
+    setPause(true);
+    Q_FOREACH(Node::Ptr node, nodes_) {
+        node->clearBlock();
+    }
+}
 
 Command::Ptr Graph::clear()
 {
@@ -291,7 +428,17 @@ void Graph::reset()
     connections_.clear();
 }
 
-Node* Graph::findNode(const UUID& uuid)
+int Graph::getComponent(const UUID &node_uuid) const
+{
+    Node* node = findNodeNoThrow(node_uuid);
+    if(!node) {
+        return -1;
+    }
+
+    return node_component_.at(node);
+}
+
+Node* Graph::findNode(const UUID& uuid) const
 {
     Node* node = findNodeNoThrow(uuid);
 
@@ -308,7 +455,7 @@ Node* Graph::findNode(const UUID& uuid)
     throw std::runtime_error("cannot find box");
 }
 
-Node* Graph::findNodeNoThrow(const UUID& uuid)
+Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
     Q_FOREACH(Node::Ptr b, nodes_) {
         if(b->getUUID() == uuid) {
@@ -329,7 +476,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid)
     return NULL;
 }
 
-Node* Graph::findNodeForConnector(const UUID &uuid)
+Node* Graph::findNodeForConnector(const UUID &uuid) const
 {
     UUID l = UUID::NONE;
     UUID r = UUID::NONE;

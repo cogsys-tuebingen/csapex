@@ -2,10 +2,8 @@
 #include <csapex/command/add_connector.h>
 
 /// COMPONENT
-
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/model/connector_forward.h>
 #include <csapex/model/connection_type.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
@@ -39,22 +37,12 @@ bool AddConnector::doExecute()
 
     if(input) {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_IN, node->nextInputId()) : c_uuid;
-        ConnectorIn* in;
-        if(forward) {
-            in = new ConnectorForward(graph_->getSettings(), true, uuid);
-        } else {
-            in = new ConnectorIn(graph_->getSettings(), uuid);
-        }
+        ConnectorIn* in = new ConnectorIn(graph_->getSettings(), uuid);
         c = in;
         node->registerInput(in);
     } else {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_OUT, node->nextOutputId()) : c_uuid;
-        ConnectorOut* out;
-        if(forward) {
-            out = new ConnectorForward(graph_->getSettings(), false, uuid);
-        } else {
-            out = new ConnectorOut(graph_->getSettings(), uuid);
-        }
+        ConnectorOut* out = new ConnectorOut(graph_->getSettings(), uuid);
         c = out;
         node->registerOutput(out);
     }

@@ -17,6 +17,7 @@
 #include <QMutex>
 #include <QWidget>
 #include <QBoxLayout>
+#include <QLabel>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -112,6 +113,7 @@ public Q_SLOTS:
     void flipSides();
     void showProfiling();
 
+    void updateInformation(Graph* graph);
     void showContextMenu(const QPoint& pos);
 
     void registerEvent(Connectable*);
@@ -160,6 +162,8 @@ protected:
     QIcon maximize_icon_;
 
     QPoint key_point;
+
+    QLabel* info_compo;
 
     bool profiling_;
     ProfilingWidget* prof;

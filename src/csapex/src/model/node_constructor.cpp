@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/core/settings.h>
 
 /// SYSTEM
@@ -86,6 +87,7 @@ Node::Ptr NodeConstructor::makePrototypeContent() const
 Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
 {
     Node::Ptr res = c();
+    res->setNodeWorker(new NodeWorker(res.get()));
     res->setSettings(&settings_);
     res->setType(type_);
     res->setUUID(uuid);

@@ -49,10 +49,13 @@ public:
     bool isPaused() const;
     void setPause(bool pause);
 
-    Node* findNode(const UUID& uuid);
-    Node* findNodeNoThrow(const UUID& uuid);
-    Node* findNodeForConnector(const UUID &uuid);
+    void clearBlock();
 
+    Node* findNode(const UUID& uuid) const;
+    Node* findNodeNoThrow(const UUID& uuid) const;
+    Node* findNodeForConnector(const UUID &uuid) const;
+
+    int getComponent(const UUID& node_uuid) const;
 
     Connectable* findConnector(const UUID &uuid);
 
@@ -85,6 +88,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void stateChanged();
+    void structureChanged(Graph*);
     void dirtyChanged(bool);
 
     void connectionAdded(Connection*);
@@ -94,6 +98,7 @@ Q_SIGNALS:
     void nodeRemoved(NodePtr);
 
     void sig_tick();
+    void paused(bool);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addNode(NodePtr node);
@@ -102,12 +107,19 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
     bool addConnection(Connection::Ptr connection);
     void deleteConnection(Connection::Ptr connection);
 
+    void buildConnectedComponents();
     void verifyAsync();
 
 protected:
     Settings& settings_;
 
     std::vector<NodePtr> nodes_;
+    std::map<Node*, int> node_component_;
+
+    std::map<Node*, std::vector<Node*> > node_parents_;
+    std::map<Node*, std::vector<Node*> > node_children_;
+
+    /// TODO: remove!
     std::vector<Connection::Ptr> connections_;
 
     CommandDispatcher* dispatcher_;

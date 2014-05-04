@@ -12,12 +12,12 @@
 using namespace csapex;
 
 ConnectorIn::ConnectorIn(Settings& settings, const UUID &uuid)
-    : Connectable(settings, uuid), target(NULL), optional_(false), legacy_(true)
+    : Connectable(settings, uuid), target(NULL), buffer_(new Buffer(1)), optional_(false)
 {
 }
 
 ConnectorIn::ConnectorIn(Settings &settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, TYPE_IN), target(NULL), optional_(false), legacy_(true)
+    : Connectable(settings, parent, sub_id, TYPE_IN), target(NULL), buffer_(new Buffer(1)), optional_(false)
 {
 }
 
@@ -26,6 +26,8 @@ ConnectorIn::~ConnectorIn()
     if(target != NULL) {
         target->removeConnection(this);
     }
+
+    free();
 }
 
 bool ConnectorIn::tryConnect(Connectable* other_side)
@@ -42,6 +44,7 @@ bool ConnectorIn::acknowledgeConnection(Connectable* other_side)
 {
     target = dynamic_cast<ConnectorOut*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
+    connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
     return true;
 }
 
@@ -71,20 +74,32 @@ bool ConnectorIn::isOptional() const
     return optional_;
 }
 
-void ConnectorIn::setLegacy(bool legacy)
-{
-    legacy_ = legacy;
-}
-
-bool ConnectorIn::isLegacy() const
-{
-    return legacy_;
-}
-
-
 bool ConnectorIn::hasMessage() const
 {
-    return message_;
+    return buffer_->isFilled();
+}
+
+void ConnectorIn::free()
+{
+    buffer_->free();
+
+    setBlocked(false);
+}
+
+void ConnectorIn::enable()
+{
+    Connectable::enable();
+//    if(isConnected() && !getSource()->isEnabled()) {
+//        getSource()->enable();
+//    }
+}
+
+void ConnectorIn::disable()
+{
+    Connectable::disable();
+//    if(isConnected() && getSource()->isEnabled()) {
+//        getSource()->disable();
+//    }
 }
 
 void ConnectorIn::removeAllConnectionsNotUndoable()
@@ -136,65 +151,22 @@ Connectable *ConnectorIn::getSource() const
     return target;
 }
 
-void ConnectorIn::waitForProcessing()
+void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
-    if(isAsync() || !isEnabled()) {
+    int s = message->sequenceNumber();
+    if(s < sequenceNumber() && !isAsync()) {
+        std::cerr << "connector @" << getUUID().getFullName() <<
+                     ": dropping old message @ with #" << s <<
+                     " < #" << sequenceNumber() << std::endl;
         return;
     }
 
-    Connectable::waitForProcessing();
-}
+    setBlocked(true);
 
-void ConnectorIn::setProcessing(bool processing)
-{
-//    // call parents
-//    if(isConnected()) {
-//        if(!isAsync() || isProcessing() != processing) {
-//            Connectable* parent = getSource();
-//            //parent->setProcessing(processing);
-//        }
-//    }
-    Connectable::setProcessing(processing);
-}
-
-void ConnectorIn::waitForMessage()
-{
-    QMutexLocker lock(&io_mutex);
-
-//    while(!has_msg) {
-//        has_msg_cond.wait(&io_mutex);
-//    }
-}
-
-void ConnectorIn::updateIsProcessing()
-{
-    if(!isConnected() && isProcessing()) {
-        setProcessing(false);
-    }
-}
-
-void ConnectorIn::inputMessage(ConnectionType::Ptr message)
-{
-    {
-        QMutexLocker lock(&io_mutex);
-        message_ = message;
-        if(!message_) {
-            throw std::runtime_error("message is empty");
-        }
-    }
-
-    if(!isAsync() || (isAsync() && !isProcessing())) {
-        setProcessing(true);
-    }
+    buffer_->write(message);
+    setSequenceNumber(s);
 
     count_++;
-    assert(message_);
 
     Q_EMIT messageArrived(this);
-}
-
-ConnectionType::Ptr ConnectorIn::getMessage()
-{
-    QMutexLocker lock(&io_mutex);
-    return message_;
 }

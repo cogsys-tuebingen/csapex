@@ -58,6 +58,8 @@ class Tag;
 
 class Settings;
 
+FWD(Buffer);
+
 FWD(Timer);
 
 FWD(Command);

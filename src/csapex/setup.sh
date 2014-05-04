@@ -12,5 +12,6 @@ if [[ ${XDG_CURRENT_DESKTOP} == "Unity" ]]; then
 	chmod +x $DIR/.local/share/applications/csapex.desktop
         cp res/apex_logo.png $DIR/.local/share/icons/apex_logo.png
 fi
+
 mkdir -p ~/.csapex/
 cp -r cfg/ ~/.csapex/cfg/

@@ -9,10 +9,13 @@
 #include <csapex/utility/thread.h>
 #include <csapex/core/settings.h>
 
+/// SYSTEM
+#include <QThread>
+
 using namespace csapex;
 
 NodeWorker::NodeWorker(Node* node)
-    : node_(node), synchronized_inputs_(false), thread_initialized_(false), is_processing_(false)
+    : node_(node), private_thread_(NULL), thread_initialized_(false), paused_(false), stop_(false)
 {
     assert(node_);
 
@@ -24,148 +27,97 @@ NodeWorker::NodeWorker(Node* node)
 
 NodeWorker::~NodeWorker()
 {
-    for(unsigned i = 0; i < connections_.size(); ++i) {
-        connections_[i].disconnect();
+}
+
+void NodeWorker::makeThread()
+{
+    if(!private_thread_) {
+        private_thread_ = new QThread;
+        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+
+        moveToThread(private_thread_);
+
+        private_thread_->start();
     }
 }
 
-bool NodeWorker::isProcessing()
+void NodeWorker::stop()
 {
-    return is_processing_;
-}
+    QMutexLocker lock(&stop_mutex_);
 
-void NodeWorker::addParameter(param::Parameter* param)
-{
-    connections_.push_back(parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1)));
-    connections_.push_back(parameter_enabled(*param).connect(boost::bind(&NodeWorker::parameterEnabled, this, _1, _2)));
-}
+    QObject::disconnect(private_thread_);
+    stop_ = true;
 
-void NodeWorker::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
-{
-    connections_.push_back(parameter_changed(*param).connect(boost::bind(&NodeWorker::parameterChanged, this, _1, cb)));
-}
 
-void NodeWorker::addParameterCondition(param::Parameter* param, boost::function<bool ()> enable_condition)
-{
-    conditions_[param] = enable_condition;
-}
-
-void NodeWorker::parameterChanged(param::Parameter *)
-{
-    if(!conditions_.empty()) {
-        checkConditions(false);
+    if(private_thread_) {
+        private_thread_->quit();
+        //        private_thread_->wait(1000);
+        //        if(private_thread_->isRunning()) {
+        //            std::cout << "terminate thread" << std::endl;
+        //            private_thread_->terminate();
+        //        }
     }
 }
 
-void NodeWorker::checkConditions(bool silent)
+void NodeWorker::pause(bool pause)
 {
-    bool change = false;
-    node_->setParameterSetSilence(true);
-    for(std::map<param::Parameter*, boost::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
-        param::Parameter* p = it->first;
-        bool should_be_enabled = it->second();
-        if(should_be_enabled != p->isEnabled()) {
-            it->first->setEnabled(should_be_enabled);
-            change = true;
-        }
-    }
-    node_->setParameterSetSilence(false);
-
-    if(change && !silent) {
-        node_->triggerParameterSetChanged();
-    }
-}
-
-void NodeWorker::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
-{
-    // QMutexLocker lock(&changed_params_mutex_);
-    changed_params_.push_back(std::make_pair(param, cb));
-}
-
-void NodeWorker::parameterEnabled(param::Parameter *param, bool enabled)
-{
-    node_->triggerParameterSetChanged();
-}
-
-void NodeWorker::setSynchronizedInputs(bool s)
-{
-    synchronized_inputs_ = s;
-
-    typedef std::pair<ConnectorIn*, bool> PAIR;
-    Q_FOREACH(const PAIR& pair, has_msg_) {
-        pair.first->setLegacy(!synchronized_inputs_);
-    }
-}
-
-bool NodeWorker::isSynchronizedInputs() const
-{
-    return synchronized_inputs_;
+    QMutexLocker lock(&pause_mutex_);
+    paused_ = pause;
+    continue_.wakeAll();
 }
 
 void NodeWorker::forwardMessage(Connectable *s)
 {
+    QMutexLocker lock(&stop_mutex_);
+    if(stop_) {
+        return;
+    }
+
+    {
+        pause_mutex_.lock();
+        while(paused_) {
+            continue_.wait(&pause_mutex_);
+        }
+        pause_mutex_.unlock();
+    }
+
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
     assert(source);
-
-    //    if(node_->isError()) {
-    //        return;
-    //    }
 
     if(node_->isEnabled()) {
         Q_EMIT messagesReceived();
 
-        if(synchronized_inputs_) {
-            forwardMessageSynchronized(source);
-        } else {
-            forwardMessageDirectly(source);
-        }
+        forwardMessageSynchronized(source);
     }
-
-
-    //    if(!node_->isError() || node_->errorLevel() != ErrorState::EL_ERROR) {
-    //        node_->setError(false);
-    //    }
-}
-
-void NodeWorker::forwardMessageDirectly(ConnectorIn *source)
-{
-    assert(!is_processing_);
-
-    Timer::Ptr t(new Timer(node_->getUUID()));
-    is_processing_ = true;
-
-    node_->useTimer(t.get());
-    {
-        QMutexLocker lock(&changed_params_mutex_);
-        node_->messageArrived(source);
-    }
-
-    t->finish();
-
-    timer_history_.push_back(t);
-
-    is_processing_ = false;
-    Q_EMIT messageProcessed();
-}
-
-void NodeWorker::setProcessing(bool p)
-{
-    is_processing_ = p;
-}
-
-bool NodeWorker::isProcessing() const
-{
-    return is_processing_;
 }
 
 void NodeWorker::addInput(ConnectorIn *source)
 {
+    clearInput(source);
+
+    connect(source, SIGNAL(enabled(bool)), this, SLOT(checkInputs()));
+}
+
+void NodeWorker::checkInputs()
+{
+    for(int i = 0; i < node_->countInputs(); ++i) {
+        ConnectorIn* source = node_->getInput(i);
+        if(!source->isEnabled() && source->isBlocked()) {
+            source->free();
+            clearInput(source);
+        }
+    }
+}
+
+void NodeWorker::clearInput(ConnectorIn *source)
+{
+    QMutexLocker lock(&message_mutex_);
     has_msg_[source] = false;
-    source->setLegacy(!synchronized_inputs_);
 }
 
 void NodeWorker::removeInput(ConnectorIn *source)
 {
+    QMutexLocker lock(&message_mutex_);
     std::map<ConnectorIn*, bool>::iterator it = has_msg_.find(source);
 
     if(it != has_msg_.end()) {
@@ -175,39 +127,102 @@ void NodeWorker::removeInput(ConnectorIn *source)
 
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
-    assert(!is_processing_);
-
-    has_msg_[source] = true;
-
     typedef std::pair<ConnectorIn*, bool> PAIR;
 
-    Q_FOREACH(const PAIR& pair, has_msg_) {
-        ConnectorIn* c = pair.first;
-        if(!pair.second) {
-            // connector doesn't have a message
-            if(c->isAsync()) {
-                // do not wait for this input
-            } else if(c->isOptional()) {
-                if(c->isConnected()) {
-                    // c is optional and connected, so we have to wait for a message
-                    return;
-                } else {
-                    // c is optional and not connected, so we can proceed
-                    /* do nothing */
+    {
+        QMutexLocker lock(&message_mutex_);
+
+        //assert(!has_msg_[source]);
+        if(has_msg_[source] && !source->isAsync()) {
+            std::cerr << "input @" << source->getUUID().getFullName() <<
+                         ": assertion failed: !has_msg_[" << source->getUUID().getFullName() << "]" << std::endl;
+            assert(false);
+        }
+        has_msg_[source] = true;
+
+        // check for old messages
+        bool had_old_message = false;
+        int highest_seq_no = -1;
+        UUID highest = UUID::NONE;
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* cin = pair.first;
+
+            if(has_msg_[cin] && !cin->isAsync()) {
+                int s = cin->sequenceNumber();
+                if(s > highest_seq_no) {
+                    highest_seq_no = s;
+                    highest = cin->getUUID();
                 }
-            } else {
-                // c is mandatory, so we have to wait for a message
-                return;
             }
         }
-    }
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* cin = pair.first;
 
-    is_processing_ = true;
+            if(has_msg_[cin] && !cin->isAsync() && cin->sequenceNumber() != highest_seq_no) {
+                std::cerr << "input @" << source->getUUID().getFullName() <<
+                             ": dropping old message @" << cin->getUUID().getFullName() << " with #" << cin->sequenceNumber() <<
+                             " < #" << highest_seq_no << " @" << highest.getFullName() << std::endl;
+                has_msg_[cin] = false;
+                had_old_message = true;
+                cin->free();
+            }
+        }
+
+        // if a message was dropped we can already return
+        if(had_old_message) {
+            return;
+        }
+
+        // check if all inputs have messages
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* c = pair.first;
+            if(!pair.second) {
+                // connector doesn't have a message
+                if(c->isAsync()) {
+                    // do not wait for this input
+                } else if(c->isOptional()) {
+                    if(c->isConnected()) {
+                        // c is optional and connected, so we have to wait for a message
+                        return;
+                    } else {
+                        // c is optional and not connected, so we can proceed
+                        /* do nothing */
+                    }
+                } else {
+                    // c is mandatory, so we have to wait for a message
+                    return;
+                }
+            }
+        }
+
+        // now all sequence numbers must be equal!
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* cin = pair.first;
+
+            if(has_msg_[cin] && !cin->isAsync()) {
+                assert(highest_seq_no == cin->sequenceNumber());
+            }
+        }
+
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* cin = pair.first;
+
+            if(has_msg_[cin] && !cin->isAsync()) {
+                has_msg_[cin] = false;
+            }
+        }
+
+        // set output sequence numbers
+        for(int i = 0; i < node_->countOutputs(); ++i) {
+            ConnectorOut* out = node_->getOutput(i);
+            out->setSequenceNumber(highest_seq_no);
+        }
+    }
 
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
     {
-        QMutexLocker lock(&changed_params_mutex_);
+        boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->process();
     }
     t->finish();
@@ -216,14 +231,9 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     // reset all edges
     Q_FOREACH(const PAIR& pair, has_msg_) {
         ConnectorIn* cin = pair.first;
-        if(cin->isConnected() && cin->getSource()->isAsync()) {
-            continue;
-        }
-
-        has_msg_[cin] = false;
+        cin->free();
     }
 
-    is_processing_ = false;
     Q_EMIT messageProcessed();
 }
 
@@ -248,7 +258,7 @@ void NodeWorker::tick()
     }
 
     if(node_->isEnabled()) {
-        QMutexLocker lock(&changed_params_mutex_);
+        boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->tick();
     }
     while(timer_history_.size() > Settings::timer_history_length_) {
@@ -258,23 +268,20 @@ void NodeWorker::tick()
 
 void NodeWorker::checkParameters()
 {
-    QMutexLocker lock(&changed_params_mutex_);
+    Parameterizable::ChangedParameterList changed_params = node_->getChangedParameters();
 
-    if(!changed_params_.empty()) {
-        typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > cbs;
-        for(cbs::iterator it = changed_params_.begin(); it != changed_params_.end();) {
+    if(!changed_params.empty()) {
+        for(Parameterizable::ChangedParameterList::iterator it = changed_params.begin(); it != changed_params.end();) {
             try {
                 it->second(it->first);
 
             } catch(const std::exception& e) {
-                it = changed_params_.erase(it);
+                it = changed_params.erase(it);
                 throw;
             }
 
-            it = changed_params_.erase(it);
+            it = changed_params.erase(it);
         }
-
-        changed_params_.clear();
     }
 }
 

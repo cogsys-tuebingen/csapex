@@ -34,7 +34,7 @@ const QString Box::MIME_MOVE = "csapex/model/box/move";
 
 Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
-      down_(false), profiling_(false), is_placed_(false)
+      down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
 }
 
@@ -45,7 +45,13 @@ Box::~Box()
 
 void Box::setupUi()
 {
-    node_->getNodeWorker()->checkConditions(true);
+    node_->checkConditions(true);
+
+    if(!info_compo) {
+        info_compo = new QLabel;
+        info_compo->setProperty("component", true);
+        ui->infos->addWidget(info_compo);
+    }
 
     QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
     QObject::connect(node_->getNodeWorker(), SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
@@ -123,6 +129,64 @@ void Box::enableContent(bool enable)
     node_->enable(enable);
 
     ui->label->setEnabled(enable);
+}
+
+#define _HSV2RGB_(H, S, V, R, G, B) \
+{ \
+  double _h = H/60.; \
+  int _hf = (int)floor(_h); \
+  int _hi = ((int)_h)%6; \
+  double _f = _h - _hf; \
+  \
+  double _p = V * (1. - S); \
+  double _q = V * (1. - _f * S); \
+  double _t = V * (1. - (1. - _f) * S); \
+  \
+  switch (_hi) \
+  { \
+    case 0: \
+        R = 255.*V; G = 255.*_t; B = 255.*_p; \
+    break; \
+    case 1: \
+        R = 255.*_q; G = 255.*V; B = 255.*_p; \
+    break; \
+    case 2: \
+        R = 255.*_p; G = 255.*V; B = 255.*_t; \
+    break; \
+    case 3: \
+        R = 255.*_p; G = 255.*_q; B = 255.*V; \
+    break; \
+    case 4: \
+        R = 255.*_t; G = 255.*_p; B = 255.*V; \
+    break; \
+    case 5: \
+        R = 255.*V; G = 255.*_p; B = 255.*_q; \
+    break; \
+  } \
+}
+
+void Box::updateInformation(Graph* graph)
+{
+    int compo = graph->getComponent(node_->getUUID());
+    if(compo < 0) {
+        return;
+    }
+
+    std::stringstream info;
+    info << compo;
+    info_compo->setText(info.str().c_str());
+
+    // set color using HSV rotation
+    double hue =  (compo * 77) % 360;
+    double r, g, b;
+    _HSV2RGB_(hue, 1., 1., r, g, b);
+    double fr = 0, fb = 0, fg = 0;
+    if(b > 100 && r < 100 && g < 100) {
+        fr = fb = fg = 255;
+    }
+    std::stringstream ss;
+    ss << "QLabel { background-color : rgb(" << r << "," << g << "," << b << "); color: rgb(" << fr << "," << fg << "," << fb << ");}";
+    info_compo->setStyleSheet(ss.str().c_str());
 }
 
 void Box::showContextMenu(const QPoint& pos)
