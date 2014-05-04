@@ -3,6 +3,11 @@
 
 using namespace csapex;
 
+MessageProvider::~MessageProvider()
+{
+
+}
+
 ConnectionType::ConstPtr MessageProvider::getType() const
 {
     return type_;
