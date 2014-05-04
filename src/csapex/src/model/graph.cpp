@@ -145,9 +145,37 @@ bool Graph::addConnection(Connection::Ptr connection)
         node_parents_[n_to].push_back(n_from);
         node_children_[n_from].push_back(n_to);
 
+        if(node_component_[n_from] == node_component_[n_to]) {
+            // if both parents are already in the same component
+            // we need to have the same seq no
+
+            int highest_seq_no = -1;
+            // search all parents of the target for the highest seq no
+            for(int i = 0; i < n_to->countInputs(); ++i) {
+                ConnectorIn* input = n_to->getInput(i);
+                Node* ni = findNodeForConnector(input->getSource()->getUUID());
+
+                for(int j = 0; j < ni->countOutputs(); ++j) {
+                    ConnectorOut* output = ni->getOutput(j);
+                    if(output->sequenceNumber() > highest_seq_no) {
+                        highest_seq_no = output->sequenceNumber();
+                    }
+                }
+            }
+            if(highest_seq_no != -1) {
+                std::cerr << "setting the sequence numbers:\n";
+                for(int i = 0; i < n_to->countInputs(); ++i) {
+                    ConnectorIn* input = n_to->getInput(i);
+                    std::cerr << " - " << input->getUUID().getFullName() << " from #" << input->sequenceNumber() << " to #" << highest_seq_no << std::endl;
+                    input->setSequenceNumber(highest_seq_no);
+                }
+            }
+        }
 
         buildConnectedComponents();
         verify();
+
+
 
         Q_EMIT connectionAdded(connection.get());
         Q_EMIT from->connectionDone();
@@ -196,7 +224,7 @@ void Graph::deleteConnection(Connection::Ptr connection)
 void Graph::buildConnectedComponents()
 {
     /* Find all connected sub components of this graph */
-//    std::map<Node*, int> old_node_component = node_component_;
+    //    std::map<Node*, int> old_node_component = node_component_;
     node_component_.clear();
 
     std::deque<Node*> unmarked;

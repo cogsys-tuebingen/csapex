@@ -78,6 +78,7 @@ private:
     bool stop_;
     QMutex stop_mutex_;
     QMutex pause_mutex_;
+    QMutex message_mutex_;
     QWaitCondition continue_;
 };
 

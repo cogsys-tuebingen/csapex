@@ -142,9 +142,12 @@ Connectable *ConnectorIn::getSource() const
 
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
+    int s = message->sequenceNumber();
+
     setBlocked(true);
 
     buffer_->write(message);
+    setSequenceNumber(s);
 
     count_++;
 

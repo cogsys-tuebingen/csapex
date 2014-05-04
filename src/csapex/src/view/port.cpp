@@ -153,7 +153,7 @@ void Port::createToolTip()
 {
     std::stringstream tooltip;
     tooltip << "UUID: " << adaptee_->getUUID().c_str() << ", Type: " << adaptee_->getType()->name() << ", Messages: " << adaptee_->getCount();
-    tooltip << ", Blocked: " << adaptee_->isBlocked();
+    tooltip << ", Blocked: " << adaptee_->isBlocked() << ", #: " << adaptee_->sequenceNumber();
     setToolTip(tooltip.str().c_str());
 }
 
