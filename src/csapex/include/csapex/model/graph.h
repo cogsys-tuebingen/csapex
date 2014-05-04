@@ -98,6 +98,7 @@ Q_SIGNALS:
     void nodeRemoved(NodePtr);
 
     void sig_tick();
+    void paused(bool);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addNode(NodePtr node);

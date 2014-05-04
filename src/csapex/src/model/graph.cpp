@@ -394,6 +394,8 @@ void Graph::setPause(bool pause)
     } else {
         timer_->start();
     }
+
+    paused(pause);
 }
 
 void Graph::clearBlock()
@@ -402,7 +404,6 @@ void Graph::clearBlock()
     Q_FOREACH(Node::Ptr node, nodes_) {
         node->clearBlock();
     }
-    setPause(false);
 }
 
 Command::Ptr Graph::clear()

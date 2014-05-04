@@ -37,6 +37,8 @@ CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cm
     Tag::createIfNotExists("Temporary");
 
     settings.settingsChanged.connect(boost::bind(&CsApexCore::settingsChanged, this));
+
+    QObject::connect(graph.get(), SIGNAL(paused(bool)), this, SIGNAL(paused(bool)));
 }
 
 CsApexCore::~CsApexCore()
@@ -61,7 +63,6 @@ void CsApexCore::setPause(bool pause)
     if(pause != graph_->isPaused()) {
         std::cout << (pause ? "pause" : "unpause") << std::endl;
         graph_->setPause(pause);
-        paused(pause);
     }
 }
 

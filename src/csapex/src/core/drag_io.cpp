@@ -39,7 +39,6 @@ DragIO::DragIO(Graph *graph, CommandDispatcher* dispatcher, WidgetControllerPtr 
 
 void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 {
-    std::cout << "enter: " << e->format() << std::endl;
     if(e->mimeData()->hasFormat(Box::MIME)) {
         e->acceptProposedAction();
 
@@ -53,6 +52,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
         e->acceptProposedAction();
 
     } else {
+        std::cout << "enter event: " << e->format() << std::endl;
         if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
             QDataStream stream(&itemData, QIODevice::ReadOnly);

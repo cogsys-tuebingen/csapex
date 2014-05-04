@@ -234,7 +234,7 @@ public Q_SLOTS:
     virtual void updateModel();
     void eventGuiChanged();
 
-    virtual void checkInputs();
+    virtual void checkIO();
 
     void killContent();
 

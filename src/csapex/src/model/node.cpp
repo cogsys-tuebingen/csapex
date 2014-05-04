@@ -131,12 +131,14 @@ void Node::process()
 {
 }
 
-void Node::checkInputs()
+void Node::checkIO()
 {
     if(isEnabled()) {
         enableInput(canReceive());
+        enableOutput(canReceive());
     } else {
         enableInput(false);
+        enableOutput(false);
     }
 }
 
@@ -261,17 +263,17 @@ void Node::updateParameters()
 void Node::setNodeStateLater(NodeStatePtr s)
 {
     *node_state_ = *s;
-//    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
-//    if(m) {
-//        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
-//            param::Parameter* param = it->second.get();
-//            if(state.params.find(param->name()) != state.params.end()) {
-//                state.params[param->name()]->setValueFrom(*param);
-//            } else {
-//                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
-//            }
-//        }
-//    }
+    //    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
+    //    if(m) {
+    //        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
+    //            param::Parameter* param = it->second.get();
+    //            if(state.params.find(param->name()) != state.params.end()) {
+    //                state.params[param->name()]->setValueFrom(*param);
+    //            } else {
+    //                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
+    //            }
+    //        }
+    //    }
 
     setState(s->child_state);
     loaded_state_available_ = true;
@@ -330,6 +332,8 @@ bool Node::canReceive()
     Q_FOREACH(ConnectorIn* i, inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
             can_receive = false;
+        } else if(i->isConnected() && !i->getSource()->isEnabled()) {
+            can_receive = false;
         }
     }
 
@@ -356,11 +360,11 @@ void Node::enableInput (bool enable)
 
 void Node::enableOutput (bool enable)
 {
-    Q_FOREACH(ConnectorOut* i, outputs_) {
+    Q_FOREACH(ConnectorOut* o, outputs_) {
         if(enable) {
-            i->enable();
+            o->enable();
         } else {
-            i->disable();
+            o->disable();
         }
     }
 }
@@ -898,8 +902,16 @@ void Node::pause(bool pause)
 void Node::clearBlock()
 {
     Q_FOREACH(ConnectorIn* i, inputs_) {
-        i->free();
-        worker_->clearInput(i);
+        if(i->isBlocked()) {
+            i->free();
+            worker_->clearInput(i);
+        }
+    }
+    Q_FOREACH(ConnectorIn* i, inputs_) {
+        i->setSequenceNumber(0);
+    }
+    Q_FOREACH(ConnectorOut* o, outputs_) {
+        o->setSequenceNumber(0);
     }
 }
 
@@ -933,16 +945,17 @@ void Node::connectConnector(Connectable *c)
     QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
-    QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkInputs()));
-    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkInputs()));
+    QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionEnabled(bool)), this, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkIO()));
 }
 
 
 void Node::disconnectConnector(Connectable */*c*/)
 {
-//    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
-//    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
-//    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+    //    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
+    //    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
+    //    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }
 
 

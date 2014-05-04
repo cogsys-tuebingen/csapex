@@ -44,6 +44,7 @@ bool ConnectorIn::acknowledgeConnection(Connectable* other_side)
 {
     target = dynamic_cast<ConnectorOut*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
+    connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
     return true;
 }
 
@@ -85,10 +86,20 @@ void ConnectorIn::free()
     setBlocked(false);
 }
 
+void ConnectorIn::enable()
+{
+    Connectable::enable();
+//    if(isConnected() && !getSource()->isEnabled()) {
+//        getSource()->enable();
+//    }
+}
+
 void ConnectorIn::disable()
 {
-    //free();
     Connectable::disable();
+//    if(isConnected() && getSource()->isEnabled()) {
+//        getSource()->disable();
+//    }
 }
 
 void ConnectorIn::removeAllConnectionsNotUndoable()

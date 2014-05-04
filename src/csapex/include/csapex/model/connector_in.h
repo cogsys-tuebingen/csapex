@@ -72,6 +72,7 @@ public:
     bool hasMessage() const;
     void free();
 
+    virtual void enable();
     virtual void disable();
 
 protected:

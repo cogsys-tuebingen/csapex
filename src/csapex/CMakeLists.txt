@@ -117,7 +117,6 @@ set(SRC_APP
     src/model/error_state.cpp
     src/model/graph.cpp
     src/model/connection.cpp
-    src/model/connector_forward.cpp
     src/model/connection_type.cpp
     src/model/generic_state.cpp
     src/model/message_provider.cpp

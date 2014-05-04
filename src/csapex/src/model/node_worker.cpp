@@ -94,8 +94,20 @@ void NodeWorker::forwardMessage(Connectable *s)
 void NodeWorker::addInput(ConnectorIn *source)
 {
     clearInput(source);
+
+    connect(source, SIGNAL(enabled(bool)), this, SLOT(checkInputs()));
 }
 
+void NodeWorker::checkInputs()
+{
+    for(int i = 0; i < node_->countInputs(); ++i) {
+        ConnectorIn* source = node_->getInput(i);
+        if(!source->isEnabled() && source->isBlocked()) {
+            source->free();
+            clearInput(source);
+        }
+    }
+}
 
 void NodeWorker::clearInput(ConnectorIn *source)
 {
@@ -196,6 +208,12 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
             ConnectorIn* cin = pair.first;
 
             has_msg_[cin] = false;
+        }
+
+        // set output sequence numbers
+        for(int i = 0; i < node_->countOutputs(); ++i) {
+            ConnectorOut* out = node_->getOutput(i);
+            out->setSequenceNumber(highest_seq_no);
         }
     }
 

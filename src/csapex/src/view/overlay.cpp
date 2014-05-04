@@ -180,7 +180,7 @@ void Overlay::drawConnection(Connection& connection)
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.selected = connection.isSelected();
-    ccs.disabled = (!fromp->isEnabled() || !top->isEnabled());
+    ccs.disabled = (!from->isEnabled() || !to->isEnabled());
     ccs.async = from->isAsync() || to->isAsync();
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();

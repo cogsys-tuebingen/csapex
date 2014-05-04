@@ -113,6 +113,7 @@ Q_SIGNALS:
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone();
     void connectionRemoved();
+    void connectionEnabled(bool);
     void messageProcessed();
     void blocked(bool);
     void connectableError(bool error, const std::string &msg, int level);
