@@ -146,13 +146,16 @@ bool Graph::addConnection(Connection::Ptr connection)
         node_children_[n_from].push_back(n_to);
 
         if(node_component_[n_from] == node_component_[n_to]) {
-            // if both parents are already in the same component
+            // if both nodes are already in the same component
             // we need to have the same seq no
 
             int highest_seq_no = -1;
             // search all parents of the target for the highest seq no
             for(int i = 0; i < n_to->countInputs(); ++i) {
                 ConnectorIn* input = n_to->getInput(i);
+                if(!input->isConnected()) {
+                    continue;
+                }
                 Node* ni = findNodeForConnector(input->getSource()->getUUID());
 
                 for(int j = 0; j < ni->countOutputs(); ++j) {
@@ -163,13 +166,36 @@ bool Graph::addConnection(Connection::Ptr connection)
                 }
             }
             if(highest_seq_no != -1) {
-                std::cerr << "setting the sequence numbers:\n";
+//                std::cerr << "setting the sequence numbers:\n";
                 for(int i = 0; i < n_to->countInputs(); ++i) {
                     ConnectorIn* input = n_to->getInput(i);
-                    std::cerr << " - " << input->getUUID().getFullName() << " from #" << input->sequenceNumber() << " to #" << highest_seq_no << std::endl;
+//                    std::cerr << " - " << input->getUUID().getFullName() << " from #" << input->sequenceNumber() << " to #" << highest_seq_no << std::endl;
                     input->setSequenceNumber(highest_seq_no);
                 }
             }
+
+        } else {
+            // if both nodes are in different components we need to synchronize the two components
+            // this connection is the only connection between the two components.
+            // set the sequence no of the child component to the one given by this connector
+            int seq_no = from->sequenceNumber();
+
+            setPause(true);
+//            std::cerr << "synchronize components" << std::endl;
+            Q_FOREACH(Node::Ptr n, nodes_) {
+                if(node_component_[n.get()] == node_component_[n_to]) {
+                    for(int i = 0; i < n->countOutputs(); ++i) {
+                        ConnectorOut* output = n->getOutput(i);
+                        output->setSequenceNumber(seq_no);
+                    }
+                    for(int i = 0; i < n->countInputs(); ++i) {
+                        ConnectorIn* input = n->getInput(i);
+                        input->setSequenceNumber(seq_no);
+                    }
+                }
+            }
+
+            setPause(false);
         }
 
         buildConnectedComponents();

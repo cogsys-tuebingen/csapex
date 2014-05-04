@@ -159,12 +159,6 @@ void ConnectorOut::validateConnections()
 
 void ConnectorOut::publish(ConnectionType::Ptr message)
 {
-    if(seq_no_ == -1) {
-        seq_no_ = 0;
-    } else {
-        ++seq_no_;
-    }
-
     // update buffer
     message_ = message;
     message_->setSequenceNumber(seq_no_);
@@ -187,24 +181,21 @@ void ConnectorOut::publish(ConnectionType::Ptr message)
         setBlocked(false);
     }
 
-    if(targets.empty()) {
-        return;
+    if(!targets.empty()) {
+        // all connected inputs are ready to receive, send them the message
+        if(targets.size() == 1) {
+            targets[0]->inputMessage(message_);
+        } else if(targets.size() > 1) {
+            BOOST_FOREACH(ConnectorIn* i, targets) {
+                ConnectionType::Ptr msg = message_->clone();
+                msg->setSequenceNumber(seq_no_);
+                i->inputMessage(msg);
+            }
+        }
+        ++count_;
     }
 
-    // all connected inputs are ready to receive, send them the message
-    if(targets.size() == 1) {
-        targets[0]->inputMessage(message_);
-    } else if(targets.size() > 1) {
-        BOOST_FOREACH(ConnectorIn* i, targets) {
-            ConnectionType::Ptr msg = message_->clone();
-            msg->setSequenceNumber(seq_no_);
-            i->inputMessage(msg);
-        }
-    }/* else if(!force_send_message_){
-        return;
-    }*/
-
-    ++count_;
+    ++seq_no_;
     Q_EMIT messageSent(this);
 }
 

@@ -29,7 +29,7 @@ QFrame#boxframe QLabel[component="true"] {
         border: 1px solid black;
         border-radius: 5px;
         color: black;
-        padding: 4px;
+        padding: 1px;
         font-weight: bold;
 }
 
