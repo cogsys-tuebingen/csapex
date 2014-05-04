@@ -95,6 +95,7 @@ public Q_SLOTS:
 
     virtual void disable();
     virtual void enable();
+    void setEnabled(bool enabled);
 
     bool isEnabled() const;
 

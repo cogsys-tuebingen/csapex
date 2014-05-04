@@ -133,7 +133,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         QMutexLocker lock(&message_mutex_);
 
         //assert(!has_msg_[source]);
-        if(has_msg_[source]) {
+        if(has_msg_[source] && !source->isAsync()) {
             std::cerr << "input @" << source->getUUID().getFullName() <<
                          ": assertion failed: !has_msg_[" << source->getUUID().getFullName() << "]" << std::endl;
             assert(false);
@@ -147,7 +147,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
 
-            if(has_msg_[cin]) {
+            if(has_msg_[cin] && !cin->isAsync()) {
                 int s = cin->sequenceNumber();
                 if(s > highest_seq_no) {
                     highest_seq_no = s;
@@ -158,7 +158,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
 
-            if(has_msg_[cin] && cin->sequenceNumber() != highest_seq_no) {
+            if(has_msg_[cin] && !cin->isAsync() && cin->sequenceNumber() != highest_seq_no) {
                 std::cerr << "input @" << source->getUUID().getFullName() <<
                              ": dropping old message @" << cin->getUUID().getFullName() << " with #" << cin->sequenceNumber() <<
                              " < #" << highest_seq_no << " @" << highest.getFullName() << std::endl;
@@ -199,7 +199,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
 
-            if(has_msg_[cin]) {
+            if(has_msg_[cin] && !cin->isAsync()) {
                 assert(highest_seq_no == cin->sequenceNumber());
             }
         }
@@ -207,7 +207,9 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
 
-            has_msg_[cin] = false;
+            if(has_msg_[cin] && !cin->isAsync()) {
+                has_msg_[cin] = false;
+            }
         }
 
         // set output sequence numbers

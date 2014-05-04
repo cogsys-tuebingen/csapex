@@ -306,7 +306,7 @@ void Node::enable(bool e)
 void Node::enable()
 {
     node_state_->enabled = true;
-    enableIO(true);
+    checkIO();
 
     Q_EMIT enabled(true);
 }
@@ -321,7 +321,7 @@ void Node::disable()
 {
     node_state_->enabled = false;
     setError(false);
-    enableIO(false);
+    checkIO();
 
     Q_EMIT enabled(false);
 }

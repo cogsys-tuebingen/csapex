@@ -120,14 +120,30 @@ void Connectable::removeAllConnectionsUndoable()
 
 void Connectable::disable()
 {
-    enabled_ = false;
-    Q_EMIT enabled(enabled_);
+    if(enabled_) {
+        enabled_ = false;
+        Q_EMIT enabled(enabled_);
+    }
 }
 
 void Connectable::enable()
 {
-    enabled_ = true;
-    Q_EMIT enabled(enabled_);
+    if(!enabled_) {
+        if("csapex::Foreach_1:|:out_0" == getUUID().getFullName()) {
+        std::cerr << "enable " << getUUID().getFullName() << std::endl;
+        }
+        enabled_ = true;
+        Q_EMIT enabled(enabled_);
+    }
+}
+
+void Connectable::setEnabled(bool enabled)
+{
+    if(enabled) {
+        enable();
+    } else {
+        disable();
+    }
 }
 
 bool Connectable::isEnabled() const
