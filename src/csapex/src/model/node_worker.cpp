@@ -195,9 +195,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
 
-            if(has_msg_[cin]) {
-                has_msg_[cin] = false;
-            }
+            has_msg_[cin] = false;
         }
     }
 

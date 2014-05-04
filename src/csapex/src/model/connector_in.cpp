@@ -143,6 +143,12 @@ Connectable *ConnectorIn::getSource() const
 void ConnectorIn::inputMessage(ConnectionType::Ptr message)
 {
     int s = message->sequenceNumber();
+    if(s < sequenceNumber()) {
+        std::cerr << "connector @" << getUUID().getFullName() <<
+                     ": dropping old message @ with #" << s <<
+                     " < #" << sequenceNumber() << std::endl;
+        return;
+    }
 
     setBlocked(true);
 
