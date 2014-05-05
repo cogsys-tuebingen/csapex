@@ -28,7 +28,6 @@ public:
     virtual ~Designer();
 
     bool eventFilter(QObject* o, QEvent* e);
-    void resizeEvent(QResizeEvent* e);
 
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
@@ -48,9 +47,6 @@ public Q_SLOTS:
     void addBox(Box* box);
     void removeBox(Box* box);
     void stateChangedEvent();
-    void reloadBoxMenues();
-    void updateDebugInfo();
-    void updateUndoInfo();
 
     void enableGrid(bool);
     void lockToGrid(bool);
@@ -70,13 +66,6 @@ private:
     bool space_;
     bool drag_;
     QPoint drag_start_pos_;
-
-    QTreeWidget* box_selection_menu;
-
-    QTabWidget* debug_tabs;
-    QTreeWidget* box_info;
-    QTreeWidget* undo_stack;
-    QTreeWidget* redo_stack;
 
     bool is_init_;
 };

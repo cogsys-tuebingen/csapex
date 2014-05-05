@@ -9,6 +9,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QFileSystemWatcher>
+#include <QBoxLayout>
 
 namespace Ui
 {
@@ -66,7 +67,8 @@ public Q_SLOTS:
     void saveSettings(YAML::Emitter& e);
     void loadSettings(YAML::Node& doc);
 
-    void openSubGraph(Group* grp);
+    void updateDebugInfo();
+    void updateUndoInfo();
 
 Q_SIGNALS:
     void statusChanged(const QString& status);

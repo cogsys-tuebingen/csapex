@@ -410,7 +410,9 @@ void Node::updateModel()
 
 void Node::eventGuiChanged()
 {
-    worker_->eventGuiChanged();
+    if(worker_) {
+        worker_->eventGuiChanged();
+    }
 
     if(loaded_state_available_) {
         loaded_state_available_ = false;
@@ -604,8 +606,10 @@ std::vector<ConnectorOut*> Node::getOutputs() const
 
 void Node::removeInput(ConnectorIn *in)
 {
-    worker_->removeInput(in);
 
+    if(worker_) {
+        worker_->removeInput(in);
+    }
     std::vector<ConnectorIn*>::iterator it;
     it = std::find(inputs_.begin(), inputs_.end(), in);
 
@@ -824,11 +828,15 @@ QTreeWidgetItem* Node::createDebugInformation() const
 
 void Node::registerInput(ConnectorIn* in)
 {
+    inputs_.push_back(in);
+    in->setCommandDispatcher(dispatcher_);
+
+    if(!worker_) {
+        return;
+    }
     in->moveToThread(thread());
 
-    inputs_.push_back(in);
 
-    in->setCommandDispatcher(dispatcher_);
 
     worker_->addInput(in);
     connectConnector(in);
@@ -917,7 +925,9 @@ void Node::clearBlock()
 
 void Node::stop()
 {
-    worker_->stop();
+    if(worker_) {
+        worker_->stop();
+    }
 
     Q_FOREACH(ConnectorIn* i, inputs_) {
         i->free();

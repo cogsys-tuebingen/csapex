@@ -81,8 +81,8 @@ void CsApexWindow::construct()
     QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
     QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
 
-    QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), designer_, SLOT(updateDebugInfo()));
-    QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), designer_, SLOT(updateDebugInfo()));
+    QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
+    QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
 
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), &widget_ctrl_->box_selection_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), &widget_ctrl_->box_selection_,  SLOT(selectAll()));
@@ -101,6 +101,8 @@ void CsApexWindow::construct()
 
     QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
+    QObject::connect(cmd_dispatcher_, SIGNAL(stateChanged()), this, SLOT(updateUndoInfo()));
+
     updateMenu();
     updateTitle();
 
@@ -118,6 +120,76 @@ void CsApexWindow::updateDeleteAction()
     bool has_selection = widget_ctrl_->connection_selection_.countSelected() + widget_ctrl_->box_selection_.countSelected() > 0;
     ui->actionDelete_Selected->setEnabled(has_selection);
 }
+
+
+void CsApexWindow::updateDebugInfo()
+{
+    if(!ui->Debug->isVisible()) {
+        return;
+    }
+
+    std::vector<Box*> selected;
+    boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
+    widget_ctrl_->foreachBox(append, boost::bind(&Box::isSelected, _1));
+
+    ui->box_info->clear();
+
+    foreach (Box* box, selected) {
+        Node* node = box->getNode();
+        QObject::connect(node, SIGNAL(stateChanged()), this, SLOT(updateDebugInfo()));
+        QObject::connect(node, SIGNAL(modelChanged()), this, SLOT(updateDebugInfo()));
+        ui->box_info->addTopLevelItem(node->createDebugInformation());
+    }
+
+    QTreeWidgetItemIterator it(ui->box_info);
+    while (*it) {
+        QTreeWidgetItem* item = *it;
+        bool expand = item->data(0, Qt::UserRole).toBool();
+
+        int depth = 0;
+        while(item->parent()) {
+            item = item->parent();
+            ++depth;
+        }
+
+        if(depth <= 1 || expand) {
+            QTreeWidgetItem* item = *it;
+            do {
+                ui->box_info->expandItem(item);
+                item = item->parent();
+            }  while(item);
+        }
+        ++it;
+    }
+
+    for(int i = 0; i < ui->box_info->depth(); ++i) {
+        ui->box_info->resizeColumnToContents(i);
+    }
+}
+
+
+void CsApexWindow::updateUndoInfo()
+{
+    ui->undo->clear();
+    ui->redo->clear();
+
+    cmd_dispatcher_->populateDebugInfo(ui->undo, ui->redo);
+
+    ui->undo->expandAll();
+    ui->redo->expandAll();
+}
+
+void CsApexWindow::reloadBoxMenues()
+{
+    if(ui->boxes->layout()) {
+        QtHelper::clearLayout(ui->boxes->layout());
+    } else {
+        ui->boxes->setLayout(new QVBoxLayout);
+    }
+
+    BoxManager::instance().insertAvailableNodeTypes(ui->boxes);
+}
+
 
 void CsApexWindow::resetSignal()
 {
@@ -212,46 +284,46 @@ void CsApexWindow::tick()
     std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
     std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
 
-//    if(!latest_cout.empty()) {
-//        scrollDownLog();
+    if(!latest_cout.empty()) {
+        scrollDownLog();
 
-//        std::stringstream latest;
-//        latest << latest_cout;
+        std::stringstream latest;
+        latest << latest_cout;
 
 
-//        std::string line;
-//        while (std::getline(latest, line, '\n')) {
-//            if(line.substr(0, 8) == "warning:") {
-//                line = std::string("<span style='color: #ffcc00;'><b>") + line + "</b></span>";
-//            }
+        std::string line;
+        while (std::getline(latest, line, '\n')) {
+            if(line.substr(0, 8) == "warning:") {
+                line = std::string("<span style='color: #ffcc00;'><b>") + line + "</b></span>";
+            }
 
-//            line = BashParser::toHtml(line);
+            line = BashParser::toHtml(line);
 
-//            line += "<br />";
-//            ui->logOutput->insertHtml(line.c_str());
-//        }
+            line += "<br />";
+            ui->logOutput->insertHtml(line.c_str());
+        }
 
-//    }
-//    if(!latest_cerr.empty()) {
-//        size_t i = 0;
-//        while((i = latest_cerr.find('\n', i)) != std::string::npos) {
-//            latest_cerr.replace(i, 1, "<br />");
-//            i += 6;
-//        }
+    }
+    if(!latest_cerr.empty()) {
+        size_t i = 0;
+        while((i = latest_cerr.find('\n', i)) != std::string::npos) {
+            latest_cerr.replace(i, 1, "<br />");
+            i += 6;
+        }
 
-//        latest_cerr = std::string("<span style='color: red'><b>") + latest_cerr + "</b></span>";
+        latest_cerr = std::string("<span style='color: red'><b>") + latest_cerr + "</b></span>";
 
-//        scrollDownLog();
+        scrollDownLog();
 
-//        ui->logOutput->insertHtml(latest_cerr.c_str());
+        ui->logOutput->insertHtml(latest_cerr.c_str());
 
-//        int height = 50;
+        int height = 50;
 
-//        QList<int> sizes = ui->splitter->sizes();
-//        sizes[0] -= height;
-//        sizes[1] = height;
-//        ui->splitter->setSizes(sizes);
-//    }
+        QList<int> sizes = ui->splitter->sizes();
+        sizes[0] -= height;
+        sizes[1] = height;
+        ui->splitter->setSizes(sizes);
+    }
 }
 
 void CsApexWindow::hideLog()
@@ -295,15 +367,11 @@ void CsApexWindow::showStatusMessage(const std::string &msg)
     Q_EMIT statusChanged(QString(msg.c_str()));
 }
 
-void CsApexWindow::reloadBoxMenues()
-{
-    designer_->reloadBoxMenues();
-}
-
 void CsApexWindow::init()
 {
     init_ = true;
 
+    reloadBoxMenues();
     designer_->show();
     hideLog();
 }
@@ -384,7 +452,3 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
     designerio.loadSettings(doc);
 }
 
-
-void CsApexWindow::openSubGraph(Group */*grp*/)
-{
-}
