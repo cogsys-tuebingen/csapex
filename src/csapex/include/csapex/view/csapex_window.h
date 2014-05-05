@@ -13,14 +13,14 @@
 
 namespace Ui
 {
-class EvaluationWindow;
+class CsApexWindow;
 }
 
 namespace csapex
 {
 
 /**
- * @brief The EvaluationWindow class provides the window for the evaluator program
+ * @brief The CsApexWindow class provides the window for the evaluator program
  */
 class CsApexWindow : public QMainWindow, public CsApexCore::Listener
 {
@@ -28,7 +28,7 @@ class CsApexWindow : public QMainWindow, public CsApexCore::Listener
 
 public:
     /**
-     * @brief EvaluationWindow
+     * @brief CsApexWindow
      * @param parent
      */
     explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphPtr graph, Designer *designer, QWidget* parent = 0);
@@ -83,7 +83,7 @@ private:
     WidgetControllerPtr widget_ctrl_;
     GraphPtr graph_;
 
-    Ui::EvaluationWindow* ui;
+    Ui::CsApexWindow* ui;
 
     Designer* designer_;
 

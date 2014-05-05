@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>EvaluationWindow</class>
- <widget class="QMainWindow" name="EvaluationWindow">
+ <class>CsApexWindow</class>
+ <widget class="QMainWindow" name="CsApexWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>902</width>
-    <height>368</height>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -229,7 +229,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
+   <widget class="QWidget" name="NodesContents">
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
       <widget class="QTreeWidget" name="boxes">
@@ -440,7 +440,7 @@
   <connection>
    <sender>actionExit</sender>
    <signal>triggered()</signal>
-   <receiver>EvaluationWindow</receiver>
+   <receiver>CsApexWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">

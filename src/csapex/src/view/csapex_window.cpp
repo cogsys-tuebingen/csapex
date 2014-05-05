@@ -18,6 +18,7 @@
 #include <csapex/view/designer.h>
 #include "ui_csapex_window.h"
 #include <csapex/view/widget_controller.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <iostream>
@@ -33,7 +34,7 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphPtr graph, Designer* designer, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_(graph), ui(new Ui::EvaluationWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_(graph), ui(new Ui::CsApexWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
 {
     core_.addListener(this);
 }
@@ -353,6 +354,21 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
         }
     }
 
+    QString geometry(saveGeometry().toBase64());
+    QString uistate(saveState().toBase64());
+
+    Settings& settings = core_.getSettings();
+    if(!settings.knows("uistate")) {
+        settings.add(param::ParameterFactory::declareText("uistate", ""));
+    }
+    if(!settings.knows("geometry")) {
+        settings.add(param::ParameterFactory::declareText("geometry", "geometry.toStdString()"));
+    }
+
+    settings.set("uistate", uistate.toStdString());
+    settings.set("geometry", geometry.toStdString());
+    core_.settingsChanged();
+
     try {
         graph_->stop();
     } catch(...) {
@@ -374,6 +390,16 @@ void CsApexWindow::init()
     reloadBoxMenues();
     designer_->show();
     hideLog();
+
+    Settings& settings = core_.getSettings();
+    if(settings.knows("uistate")) {
+        std::string uistate = settings.get<std::string>("uistate");
+        restoreState(QByteArray::fromBase64(uistate.data()));
+    }
+    if(settings.knows("geometry")) {
+        std::string geometry = settings.get<std::string>("geometry");
+        restoreGeometry(QByteArray::fromBase64(geometry.data()));
+    }
 }
 
 void CsApexWindow::save()
