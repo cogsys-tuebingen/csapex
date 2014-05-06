@@ -32,6 +32,13 @@ public:
         }
     }
 
+    template <typename T>
+    bool isType()
+    {
+        boost::shared_ptr<T> tmp = boost::dynamic_pointer_cast<T>(message_);
+        return tmp;
+    }
+
     void write(ConnectionType::Ptr message);
 
     bool isFilled() const;

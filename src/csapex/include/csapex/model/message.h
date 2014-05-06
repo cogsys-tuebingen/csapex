@@ -57,6 +57,24 @@ public:
     std::string frame_id;
 };
 
+struct NoMessage : public Message
+{
+public:
+    typedef boost::shared_ptr<NoMessage> Ptr;
+
+protected:
+    NoMessage();
+
+public:
+    virtual ConnectionType::Ptr clone() ;
+    virtual ConnectionType::Ptr toType();
+
+    static ConnectionType::Ptr make();
+
+    bool canConnectTo(const ConnectionType* other_side) const;
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const;
+};
+
 struct AnyMessage : public Message
 {
 public:

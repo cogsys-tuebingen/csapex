@@ -57,6 +57,8 @@ public Q_SLOTS:
 
     void pause(bool pause);
 
+    void sendMessages();
+
 Q_SIGNALS:
     void messagesReceived();
     void messageProcessed();

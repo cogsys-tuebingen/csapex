@@ -69,6 +69,11 @@ public:
     bool isOptional() const;
     void setOptional(bool optional);
 
+    template <typename T>
+    bool isMessage() {
+        return buffer_->isType<T>();
+    }
+
     bool hasMessage() const;
     void free();
 

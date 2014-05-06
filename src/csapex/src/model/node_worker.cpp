@@ -128,6 +128,7 @@ void NodeWorker::removeInput(ConnectorIn *source)
 void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 {
     typedef std::pair<ConnectorIn*, bool> PAIR;
+    bool can_process = true;
 
     {
         QMutexLocker lock(&message_mutex_);
@@ -204,11 +205,14 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
             }
         }
 
+        // check if one is "NoMessage"
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
 
             if(has_msg_[cin] && !cin->isAsync()) {
-                has_msg_[cin] = false;
+                if(cin->isMessage<connection_types::NoMessage>()) {
+                    can_process = false;
+                }
             }
         }
 
@@ -217,15 +221,28 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
             ConnectorOut* out = node_->getOutput(i);
             out->setSequenceNumber(highest_seq_no);
         }
+
+        // reset states
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* cin = pair.first;
+
+            if(has_msg_[cin] && !cin->isAsync()) {
+                has_msg_[cin] = false;
+            }
+        }
     }
 
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
-    {
+    if(can_process){
         boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->process();
     }
     t->finish();
+
+    // send the messages
+    sendMessages();
+
     timer_history_.push_back(t);
 
     // reset all edges
@@ -235,6 +252,14 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     }
 
     Q_EMIT messageProcessed();
+}
+
+void NodeWorker::sendMessages()
+{
+    for(int i = 0; i < node_->countOutputs(); ++i) {
+        ConnectorOut* out = node_->getOutput(i);
+        out->sendMessages();
+    }
 }
 
 void NodeWorker::setTickFrequency(double f)
@@ -260,6 +285,18 @@ void NodeWorker::tick()
     if(node_->isEnabled()) {
         boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->tick();
+
+        // if there is a message: send!
+        bool has_msg = false;
+        for(int i = 0; i < node_->countOutputs(); ++i) {
+            ConnectorOut* out = node_->getOutput(i);
+            if(out->hasMessage()) {
+                has_msg = true;
+            }
+        }
+        if(has_msg) {
+            sendMessages();
+        }
     }
     while(timer_history_.size() > Settings::timer_history_length_) {
         timer_history_.pop_front();

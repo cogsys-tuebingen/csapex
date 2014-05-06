@@ -76,7 +76,11 @@ public:
     virtual Command::Ptr removeConnectionCmd(ConnectorIn *other_side);
 
     void forceSendMessage(bool force = true);
+
+    bool hasMessage();
     ConnectionType::Ptr getMessage();
+
+    void sendMessages();
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
@@ -91,6 +95,7 @@ protected:
     bool force_send_message_;
 
     ConnectionType::Ptr message_;
+    ConnectionType::Ptr message_to_send_;
 };
 
 }

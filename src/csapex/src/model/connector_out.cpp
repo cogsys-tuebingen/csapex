@@ -160,7 +160,23 @@ void ConnectorOut::validateConnections()
 void ConnectorOut::publish(ConnectionType::Ptr message)
 {
     // update buffer
-    message_ = message;
+    message_to_send_ = message;
+}
+
+bool ConnectorOut::hasMessage()
+{
+    return message_to_send_;
+}
+
+void ConnectorOut::sendMessages()
+{
+    if(message_to_send_) {
+        message_ = message_to_send_;
+        message_to_send_.reset();
+    } else {
+        message_ = connection_types::NoMessage::make();
+    }
+
     message_->setSequenceNumber(seq_no_);
 
     Timer::Interlude::Ptr i;
