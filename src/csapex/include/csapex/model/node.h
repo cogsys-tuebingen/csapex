@@ -34,11 +34,12 @@ class Node : public QObject, public ErrorState, public Unique, public Parameteri
     friend class NodeState;
     friend class NodeAdapter;
     friend class NodeWorker;
+    friend class NodeConstructor;
+    friend class NodeModifier;
     friend class DefaultNodeAdapter;
     friend class Box;
     friend class GraphIO;
     friend class Graph;
-    friend class NodeConstructor;
 
     friend class command::AddConnector;
 
@@ -270,6 +271,8 @@ Q_SIGNALS:
 protected:
     std::string type_;
     mutable std::vector<Tag> tags_;
+
+    NodeModifier* modifier_;
 
     StreamRelay ainfo;
     StreamRelay awarn;

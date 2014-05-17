@@ -57,6 +57,7 @@ set(SRC_PLUGIN
     src/core/core_plugin.cpp
 
     src/model/node.cpp
+    src/model/node_modifier.cpp
     src/model/connectable.cpp
     src/model/connector_in.cpp
     src/model/connector_out.cpp
@@ -118,6 +119,7 @@ set(SRC_APP
     src/model/graph.cpp
     src/model/connection.cpp
     src/model/connection_type.cpp
+    src/model/multi_connection_type.cpp
     src/model/generic_state.cpp
     src/model/message_provider.cpp
     src/model/node_state.cpp

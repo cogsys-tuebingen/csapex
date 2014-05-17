@@ -42,6 +42,7 @@ FWD(Node);
 FWD(NodeState);
 FWD(NodeWorker);
 FWD(NodeAdapter);
+FWD(NodeModifier);
 
 FWD(WidgetController);
 

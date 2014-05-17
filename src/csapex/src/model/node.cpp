@@ -8,6 +8,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/q_signal_relay.h>
+#include <csapex/model/node_modifier.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -16,6 +17,7 @@ using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
+      modifier_(new NodeModifier(this)),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
       settings_(NULL), worker_(NULL),
       node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
@@ -47,6 +49,7 @@ Node::~Node()
     callbacks.clear();
 
     delete worker_;
+    delete modifier_;
 }
 
 void Node::setUUID(const UUID &uuid)
