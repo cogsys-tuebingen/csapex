@@ -282,8 +282,6 @@ protected:
 private:
     Settings* settings_;
 
-    QMutex worker_mutex_;
-
     NodeWorker* worker_;
 
     NodeStatePtr node_state_;

@@ -516,6 +516,12 @@ void Box::keyPressEvent(QKeyEvent *)
 
 }
 
+void Box::stop()
+{
+    QObject::disconnect(this);
+    adapter_->stop();
+}
+
 void Box::startDrag(QPoint offset)
 {
     QDrag* drag = new QDrag(this);

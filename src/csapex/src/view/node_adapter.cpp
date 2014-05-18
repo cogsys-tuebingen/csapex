@@ -65,6 +65,11 @@ void NodeAdapter::updateDynamicGui(QBoxLayout* /*layout*/)
 
 }
 
+void NodeAdapter::stop()
+{
+    bridge.disconnect();
+}
+
 void NodeAdapter::guiChanged()
 {
     bridge.triggerGuiChanged();

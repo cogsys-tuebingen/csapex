@@ -66,6 +66,9 @@ public:
     virtual void modelChangedEvent();
     virtual void updateDynamicGui(QBoxLayout* layout);
 
+    virtual void stop();
+
+
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;
 

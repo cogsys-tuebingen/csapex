@@ -46,7 +46,7 @@ boost::arg<1> __1;
 boost::arg<2> __2;
 
 DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee, WidgetController *widget_ctrl)
-    : NodeAdapter(adaptee, widget_ctrl)
+    : NodeAdapter(adaptee, widget_ctrl), wrapper_layout_(NULL)
 {
 
 }
@@ -62,7 +62,7 @@ void DefaultNodeAdapter::clear()
         c.disconnect();
     }
 
-    QtHelper::clearLayout(current_layout_);
+    QtHelper::clearLayout(wrapper_layout_);
     connections.clear();
 
     Q_FOREACH(QObject* cb, callbacks) {
@@ -151,6 +151,11 @@ private:
 
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
+    if(!wrapper_layout_) {
+        wrapper_layout_ = new QVBoxLayout;
+        outer_layout->addLayout(wrapper_layout_);
+    }
+
     static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
@@ -168,9 +173,8 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 #undef INSTALL
     }
 
-    current_layout_ = outer_layout;
-
     clear();
+    current_layout_ = wrapper_layout_;
 
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
 
@@ -217,7 +221,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
                 hider->setContentsMargins(0,0,0,0);
                 gb_layout->addWidget(hider);
 
-                outer_layout->addWidget(gb);
+                wrapper_layout_->addWidget(gb);
 
                 QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
             }

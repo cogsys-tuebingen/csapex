@@ -51,6 +51,8 @@ private:
     std::vector<QObject*> callbacks;    
     std::map<std::string, QBoxLayout*> groups;
     std::vector<boost::signals2::connection> connections;
+
+    QBoxLayout* wrapper_layout_;
 };
 
 }

@@ -99,8 +99,7 @@ void WidgetController::nodeRemoved(NodePtr node)
 {
     if(designer_) {
         Box* box = getBox(node->getUUID());
-
-        QObject::disconnect(box);
+        box->stop();
 
         box_map_.erase(box_map_.find(node->getUUID()));
 

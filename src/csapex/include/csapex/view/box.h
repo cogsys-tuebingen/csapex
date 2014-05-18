@@ -94,6 +94,8 @@ public:
 
     void keyPressEvent(QKeyEvent * e);
 
+    void stop();
+
 protected:
     void setupUi();
     void startDrag(QPoint offset);
