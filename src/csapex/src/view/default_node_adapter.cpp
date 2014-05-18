@@ -204,12 +204,22 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
             if(groups.find(group) != groups.end()) {
                 group_layout = groups[group];
             } else {
-                QGroupBox* gb = new QGroupBox(group.c_str());
+                bool hidden = group.size() > 0 && group.at(0) == '~';
+
+                QGroupBox* gb;
+                if(hidden) {
+                    gb = new QGroupBox(QString::fromStdString(group.substr(1)));
+                } else {
+                    gb = new QGroupBox(QString::fromStdString(group));
+                }
+
+
                 gb->setContentsMargins(0,0,0,0);
 
                 QVBoxLayout* gb_layout = new QVBoxLayout;
                 gb->setLayout(gb_layout);
                 gb->setCheckable(true);
+                gb->setChecked(!hidden);
                 gb_layout->setContentsMargins(0,0,0,0);
 
                 group_layout = new QVBoxLayout;
@@ -223,6 +233,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 
                 wrapper_layout_->addWidget(gb);
 
+                hider->setShown(!hidden);
                 QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
             }
         }
