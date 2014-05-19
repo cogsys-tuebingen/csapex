@@ -233,7 +233,6 @@ public Q_SLOTS:
     virtual void tick();
 
     virtual void updateModel();
-    void eventGuiChanged();
 
     virtual void checkIO();
 

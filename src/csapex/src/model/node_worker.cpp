@@ -322,13 +322,6 @@ void NodeWorker::checkParameters()
     }
 }
 
-void NodeWorker::eventGuiChanged()
-{
-    if(node_->isEnabled()) {
-        node_->updateModel();
-    }
-}
-
 void NodeWorker::triggerError(bool e, const std::string &what)
 {
     node_->setError(e, what);

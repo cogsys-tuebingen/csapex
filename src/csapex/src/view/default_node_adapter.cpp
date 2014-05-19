@@ -45,10 +45,44 @@ namespace bll = boost::lambda;
 boost::arg<1> __1;
 boost::arg<2> __2;
 
-DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee, WidgetController *widget_ctrl)
-    : NodeAdapter(adaptee, widget_ctrl), wrapper_layout_(NULL)
+/// BRIDGE
+DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter *parent)
+    : parent_(parent)
 {
+    QObject::connect(this, SIGNAL(setupAdaptiveUiRequest()), this, SLOT(setupAdaptiveUi()), Qt::QueuedConnection);
+}
 
+void DefaultNodeAdapterBridge::modelChangedEvent()
+{
+    parent_->modelChangedEvent();
+}
+
+void DefaultNodeAdapterBridge::triggerGuiChanged()
+{
+    Q_EMIT guiChanged();
+}
+
+void DefaultNodeAdapterBridge::setupAdaptiveUi()
+{
+    parent_->setupAdaptiveUi();
+}
+
+void DefaultNodeAdapterBridge::enableGroup(bool enable, const std::string &group)
+{
+    parent_->groups_enabled[group] = enable;
+}
+
+void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
+{
+    Q_EMIT setupAdaptiveUiRequest();
+}
+
+
+/// ADAPTER
+DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee, WidgetController *widget_ctrl)
+    : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(NULL)
+{
+    QObject::connect(adaptee, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));
 }
 
 DefaultNodeAdapter::~DefaultNodeAdapter()
@@ -63,6 +97,7 @@ void DefaultNodeAdapter::clear()
     }
 
     QtHelper::clearLayout(wrapper_layout_);
+
     connections.clear();
 
     Q_FOREACH(QObject* cb, callbacks) {
@@ -149,6 +184,7 @@ private:
 
 
 
+
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
     if(!wrapper_layout_) {
@@ -156,6 +192,11 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
         outer_layout->addLayout(wrapper_layout_);
     }
 
+    setupAdaptiveUi();
+}
+
+void DefaultNodeAdapter::setupAdaptiveUi()
+{
     static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
@@ -174,6 +215,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
     }
 
     clear();
+
     current_layout_ = wrapper_layout_;
 
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
@@ -181,7 +223,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
     GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
-        state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapter::setupUiAgain, this));
+        state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
     }
 
     Q_FOREACH(param::Parameter::Ptr p, params) {
@@ -213,6 +255,9 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
                     gb = new QGroupBox(QString::fromStdString(group));
                 }
 
+                if(groups_enabled.find(group) != groups_enabled.end()) {
+                    hidden = !groups_enabled[group];
+                }
 
                 gb->setContentsMargins(0,0,0,0);
 
@@ -234,6 +279,12 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
                 wrapper_layout_->addWidget(gb);
 
                 hider->setShown(!hidden);
+
+
+                qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&DefaultNodeAdapterBridge::enableGroup, &bridge, boost::bind(&QGroupBox::isChecked, gb), group));
+                callbacks.push_back(call_trigger);
+                QObject::connect(gb, SIGNAL(toggled(bool)), call_trigger, SLOT(call()));
+
                 QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
             }
         }
@@ -278,7 +329,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
         if(group_layout) {
             group_layout->addLayout(current_layout_);
         } else {
-            outer_layout->addLayout(current_layout_);
+            wrapper_layout_->addLayout(current_layout_);
         }
     }
 }
@@ -743,4 +794,16 @@ void DefaultNodeAdapter::updateUiBitSet(const param::Parameter *p, const QListVi
             list->selectionModel()->select(idx, bitset_p->isSet(str) ? QItemSelectionModel::Select : QItemSelectionModel::Deselect);
         }
     }
+}
+
+void DefaultNodeAdapter::stop()
+{
+    NodeAdapter::stop();
+    bridge.disconnect();
+}
+
+void DefaultNodeAdapter::guiChanged()
+{
+    NodeAdapter::guiChanged();
+    bridge.triggerGuiChanged();
 }

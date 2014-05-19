@@ -53,7 +53,6 @@ void Box::setupUi()
         ui->infos->addWidget(info_compo);
     }
 
-    QObject::connect(&adapter_->bridge, SIGNAL(guiChanged()), node_.get(), SLOT(eventGuiChanged()), Qt::QueuedConnection);
     QObject::connect(node_->getNodeWorker(), SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
     adapter_->doSetupUi(ui->content);
 

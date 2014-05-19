@@ -411,18 +411,6 @@ void Node::updateModel()
 {
 }
 
-void Node::eventGuiChanged()
-{
-    if(worker_) {
-        worker_->eventGuiChanged();
-    }
-
-    if(loaded_state_available_) {
-        loaded_state_available_ = false;
-        setNodeState(node_state_);
-    }
-}
-
 void Node::setSettings(Settings *settings)
 {
     settings_ = settings;

@@ -11,10 +11,8 @@
 using namespace csapex;
 
 NodeAdapter::NodeAdapter(Node *adaptee, WidgetController* widget_ctrl)
-    : bridge(this), layout_(NULL), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
+    : layout_(NULL), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
 {
-    QObject::connect(&bridge, SIGNAL(rebuild()), &bridge, SLOT(rebuildEvent()));
-    QObject::connect(adaptee, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));
 }
 
 NodeAdapter::~NodeAdapter()
@@ -33,12 +31,6 @@ Node* NodeAdapter::getNode()
     return node_;
 }
 
-void NodeAdapter::setupUiAgain()
-{
-    //is_gui_setup_ = false;
-    bridge.triggerRebuild();
-}
-
 void NodeAdapter::doSetupUi(QBoxLayout *layout)
 {
     layout_ = layout;
@@ -54,7 +46,6 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
     }
 }
 
-
 void NodeAdapter::modelChangedEvent()
 {
 
@@ -67,36 +58,8 @@ void NodeAdapter::updateDynamicGui(QBoxLayout* /*layout*/)
 
 void NodeAdapter::stop()
 {
-    bridge.disconnect();
 }
 
 void NodeAdapter::guiChanged()
 {
-    bridge.triggerGuiChanged();
-}
-
-NodeAdapterBridge::NodeAdapterBridge(NodeAdapter *parent)
-    : parent_(parent)
-{
-
-}
-
-void NodeAdapterBridge::modelChangedEvent()
-{
-    parent_->modelChangedEvent();
-}
-
-void NodeAdapterBridge::rebuildEvent()
-{
-    parent_->setupUi(parent_->layout_);
-}
-
-void NodeAdapterBridge::triggerGuiChanged()
-{
-    Q_EMIT guiChanged();
-}
-
-void NodeAdapterBridge::triggerRebuild()
-{
-    Q_EMIT rebuild();
 }

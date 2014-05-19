@@ -46,8 +46,6 @@ public Q_SLOTS:
     void clearInput(ConnectorIn* source);
     void removeInput(ConnectorIn* source);
 
-    void eventGuiChanged();
-
     void checkParameters();
 
     void setTickFrequency(double f);
