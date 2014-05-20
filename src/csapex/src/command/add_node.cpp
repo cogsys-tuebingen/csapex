@@ -44,7 +44,7 @@ bool AddNode::doExecute()
     assert(node->getType() == type_);
 
     if(saved_state_) {
-        node->setNodeStateLater(saved_state_);
+        node->setNodeState(saved_state_);
     }
 
     node->setPosition(pos_);
@@ -77,7 +77,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        graph_->findNode(uuid_)->setNodeStateLater(saved_state_);
+        graph_->findNode(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

@@ -79,12 +79,9 @@ public:
     virtual bool canBeDisabled() const;
     bool isEnabled();
 
-private:
-    void setNodeState(NodeStatePtr memento);
-
 public:
-    void setNodeStateLater(NodeStatePtr state);
     NodeStatePtr getNodeState();
+    void setNodeState(NodeStatePtr memento);
 
     void setSettings(Settings* settings);
 
@@ -294,8 +291,6 @@ private:
     std::vector<ConnectorOut*> managed_outputs_;
 
     CommandDispatcher* dispatcher_;
-
-    bool loaded_state_available_;
 
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;

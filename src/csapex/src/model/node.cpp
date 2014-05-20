@@ -20,7 +20,7 @@ Node::Node(const UUID &uuid)
       modifier_(new NodeModifier(this)),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
       settings_(NULL), worker_(NULL),
-      node_state_(new NodeState(this)), dispatcher_(NULL), loaded_state_available_(false)
+      node_state_(new NodeState(this)), dispatcher_(NULL)
 {
 }
 
@@ -261,25 +261,6 @@ void Node::updateParameters()
         }
         // else: do nothing and ignore the parameter
     }
-}
-
-void Node::setNodeStateLater(NodeStatePtr s)
-{
-    *node_state_ = *s;
-    //    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (s->child_state);
-    //    if(m) {
-    //        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = m->params.begin(); it != m->params.end(); ++it ) {
-    //            param::Parameter* param = it->second.get();
-    //            if(state.params.find(param->name()) != state.params.end()) {
-    //                state.params[param->name()]->setValueFrom(*param);
-    //            } else {
-    //                std::cout << "warning: parameter " << param->name() << " is ignored!" << std::endl;
-    //            }
-    //        }
-    //    }
-
-    setState(s->child_state);
-    loaded_state_available_ = true;
 }
 
 Memento::Ptr Node::getState() const
@@ -972,5 +953,5 @@ void Node::read(const YAML::Node &doc)
     NodeState::Ptr s = getNodeState();
     s->readYaml(doc);
 
-    setNodeStateLater(s);
+    setNodeState(s);
 }

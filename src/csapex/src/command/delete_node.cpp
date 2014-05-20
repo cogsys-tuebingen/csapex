@@ -49,7 +49,7 @@ bool DeleteNode::doUndo()
 {
     Node::Ptr node = BoxManager::instance().makeNode(type, uuid);
 
-    node->setNodeStateLater(saved_state);
+    node->setNodeState(saved_state);
 
     graph_->addNode(node);
 
