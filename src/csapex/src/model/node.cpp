@@ -65,6 +65,7 @@ void Node::setUUID(const UUID &uuid)
 
 void Node::doSetup()
 {
+    setupParameters();
     updateParameters();
     setup();
 }
@@ -130,6 +131,11 @@ void Node::messageArrived(ConnectorIn *)
 {
 
 }
+void Node::setupParameters()
+{
+
+}
+
 void Node::process()
 {
 }

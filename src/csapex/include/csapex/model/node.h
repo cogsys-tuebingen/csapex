@@ -217,17 +217,18 @@ private:
     QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
 
 public Q_SLOTS:
+    virtual void setup() = 0;
+    virtual void setupParameters();
     virtual void messageArrived(ConnectorIn* source);
     virtual void process() = 0;
-    virtual void setup() = 0;
+
+    virtual void tick();
 
     virtual void enable(bool e);
     virtual void enable();
     virtual void disable(bool e);
     virtual void disable();
     virtual void connectorChanged();
-
-    virtual void tick();
 
     virtual void updateModel();
 
