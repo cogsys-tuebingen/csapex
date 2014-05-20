@@ -122,6 +122,13 @@ int Graph::countNodes()
 
 
 
+void Graph::foreachNode(boost::function<void (Node*)> f)
+{
+    Q_FOREACH(Node::Ptr b, nodes_) {
+        f(b.get());
+    }
+}
+
 void Graph::foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred)
 {
     Q_FOREACH(Node::Ptr b, nodes_) {

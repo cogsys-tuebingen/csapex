@@ -78,6 +78,7 @@ public:
 
     int countNodes();
 
+    void foreachNode(boost::function<void (Node*)> f);
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
 
 public Q_SLOTS:

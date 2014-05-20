@@ -29,8 +29,8 @@ public:
     void saveSettings(YAML::Emitter &yaml);
     void loadSettings(YAML::Node& doc);
 
-    void saveBoxes(YAML::Emitter &yaml);
-    void loadBoxes(YAML::Parser &doc);
+    void saveNodes(YAML::Emitter &yaml);
+    void loadNodes(YAML::Parser &doc);
 
     void saveConnections(YAML::Emitter& yaml);
     void loadConnections(YAML::Node& doc);

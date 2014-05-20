@@ -3,7 +3,11 @@
 
 /// PROJECT
 #include <csapex/view/designer.h>
-
+#include <csapex/model/graph.h>
+#include <csapex/model/node.h>
+#include <csapex/view/widget_controller.h>
+#include <csapex/view/box.h>
+#include <csapex/view/node_adapter.h>
 #include "ui_designer.h"
 
 /// SYSTEM
@@ -19,8 +23,8 @@
 
 using namespace csapex;
 
-DesignerIO::DesignerIO(Designer &designer)
-    : designer_(designer)
+DesignerIO::DesignerIO(Designer &designer, Graph::Ptr graph, WidgetController* widget_ctrl)
+    : designer_(designer), graph_(graph), widget_ctrl_(widget_ctrl)
 {
 }
 
@@ -43,5 +47,38 @@ void DesignerIO::loadSettings(YAML::Node &doc)
         doc["view_pos"][1] >> sy;
 
         designer_.setView(sx, sy);
+    }
+}
+
+void DesignerIO::saveBoxes(YAML::Emitter& yaml)
+{
+    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, boost::ref(yaml));
+    graph_->foreachNode(cb);
+}
+
+void DesignerIO::saveBox(Node *node, YAML::Emitter &yaml)
+{
+    Box* box = widget_ctrl_->getBox(node->getUUID());
+    NodeAdapter::Ptr na = box->getNodeAdapter();
+    Memento::Ptr m = na->getState();
+    if(m) {
+        m->writeYaml(yaml);
+    }
+}
+
+void DesignerIO::loadBoxes(YAML::Node &doc)
+{
+    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::loadBox, this, _1, boost::ref(doc));
+    graph_->foreachNode(cb);
+}
+
+void DesignerIO::loadBox(Node* node, YAML::Node& doc)
+{
+    Box* box = widget_ctrl_->getBox(node->getUUID());
+    NodeAdapter::Ptr na = box->getNodeAdapter();
+    Memento::Ptr m = na->getState();
+    if(m) {
+        m->readYaml(doc);
+        box->getNodeAdapter()->setState(m);
     }
 }

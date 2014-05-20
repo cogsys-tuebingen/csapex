@@ -123,6 +123,11 @@ Node* Box::getNode()
     return node_.get();
 }
 
+NodeAdapter::Ptr Box::getNodeAdapter()
+{
+    return adapter_;
+}
+
 void Box::enableContent(bool enable)
 {
     node_->enable(enable);

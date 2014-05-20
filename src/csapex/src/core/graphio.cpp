@@ -38,14 +38,14 @@ void GraphIO::loadSettings(YAML::Node &doc)
     }
 }
 
-void GraphIO::saveBoxes(YAML::Emitter &yaml)
+void GraphIO::saveNodes(YAML::Emitter &yaml)
 {
     BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
         node->save(yaml);
     }
 }
 
-void GraphIO::loadBoxes(YAML::Parser& parser)
+void GraphIO::loadNodes(YAML::Parser& parser)
 {
     YAML::Node doc;
 

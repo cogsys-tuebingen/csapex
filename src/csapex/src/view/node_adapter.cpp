@@ -63,3 +63,14 @@ void NodeAdapter::stop()
 void NodeAdapter::guiChanged()
 {
 }
+
+Memento::Ptr NodeAdapter::getState() const
+{
+    Memento::Ptr state;
+    return state;
+}
+
+void NodeAdapter::setState(Memento::Ptr)
+{
+
+}

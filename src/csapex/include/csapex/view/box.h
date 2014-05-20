@@ -58,6 +58,7 @@ public:
 
     /// ACCESSORS
     Node* getNode();
+    NodeAdapterPtr getNodeAdapter();
 
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);

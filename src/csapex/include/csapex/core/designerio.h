@@ -20,13 +20,22 @@ namespace csapex
 class DesignerIO
 {
 public:
-    DesignerIO(Designer& designer);
+    DesignerIO(Designer& designer, GraphPtr graph, WidgetController *widget_ctrl);
 
     void saveSettings(YAML::Emitter &yaml);
     void loadSettings(YAML::Node& doc);
 
+    void saveBoxes(YAML::Emitter &yaml);
+    void loadBoxes(YAML::Node& doc);
+
+private:
+    void saveBox(Node* node, YAML::Emitter &yaml);
+    void loadBox(Node* node, YAML::Node &doc);
+
 private:
     Designer& designer_;
+    GraphPtr graph_;
+    WidgetController *widget_ctrl_;
 };
 
 }

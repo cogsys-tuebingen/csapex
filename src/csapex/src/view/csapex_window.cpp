@@ -468,13 +468,15 @@ void CsApexWindow::load()
 
 void CsApexWindow::saveSettings(YAML::Emitter &e)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio(*designer_, graph_, widget_ctrl_.get());
     designerio.saveSettings(e);
+    designerio.saveBoxes(e);
 }
 
 void CsApexWindow::loadSettings(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio(*designer_, graph_, widget_ctrl_.get());
     designerio.loadSettings(doc);
+    designerio.loadBoxes(doc);
 }
 
