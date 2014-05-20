@@ -67,6 +67,9 @@ public Q_SLOTS:
     void saveSettings(YAML::Emitter& e);
     void loadSettings(YAML::Node& doc);
 
+    void saveView(YAML::Emitter& e);
+    void loadView(YAML::Node& doc);
+
     void updateDebugInfo();
     void updateUndoInfo();
 

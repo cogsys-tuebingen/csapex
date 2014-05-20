@@ -94,8 +94,11 @@ void CsApexWindow::construct()
     QObject::connect(&core_, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
     QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
+
     QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
+    QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Emitter&)), this, SLOT(saveView(YAML::Emitter&)));
+    QObject::connect(&core_, SIGNAL(loadViewRequest(YAML::Node&)), this, SLOT(loadView(YAML::Node&)));
 
     QObject::connect(graph, SIGNAL(nodeAdded(NodePtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodePtr)));
     QObject::connect(graph, SIGNAL(nodeRemoved(NodePtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodePtr)));
@@ -468,15 +471,26 @@ void CsApexWindow::load()
 
 void CsApexWindow::saveSettings(YAML::Emitter &e)
 {
-    DesignerIO designerio(*designer_, graph_, widget_ctrl_.get());
+    DesignerIO designerio(*designer_);
     designerio.saveSettings(e);
-    designerio.saveBoxes(e);
 }
 
 void CsApexWindow::loadSettings(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_, graph_, widget_ctrl_.get());
+    DesignerIO designerio(*designer_);
     designerio.loadSettings(doc);
-    designerio.loadBoxes(doc);
+}
+
+
+void CsApexWindow::saveView(YAML::Emitter &e)
+{
+    DesignerIO designerio(*designer_);
+    designerio.saveBoxes(e, graph_, widget_ctrl_.get());
+}
+
+void CsApexWindow::loadView(YAML::Node &doc)
+{
+    DesignerIO designerio(*designer_);
+    designerio.loadBoxes(doc, graph_, widget_ctrl_.get());
 }
 

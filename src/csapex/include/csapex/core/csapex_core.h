@@ -54,6 +54,9 @@ Q_SIGNALS:
     void saveSettingsRequest(YAML::Emitter& e);
     void loadSettingsRequest(YAML::Node& n);
 
+    void saveViewRequest(YAML::Emitter& e);
+    void loadViewRequest(YAML::Node& n);
+
     void paused(bool);
 
 private:

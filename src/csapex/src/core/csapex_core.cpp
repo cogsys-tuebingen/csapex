@@ -169,6 +169,8 @@ void CsApexCore::saveAs(const std::string &file)
     graphio.saveSettings(yaml);
     graphio.saveConnections(yaml);
 
+    Q_EMIT saveViewRequest(yaml);
+
     yaml << YAML::EndMap; // settings map
 
     graphio.saveNodes(yaml);
@@ -205,11 +207,10 @@ void CsApexCore::load(const std::string &file)
             return;
         }
 
+        Q_EMIT loadSettingsRequest(doc);
         graphio.loadSettings(doc);
 
         graphio.loadNodes(parser);
-
-        Q_EMIT loadSettingsRequest(doc);
     }
     {
         std::ifstream ifs(file.c_str());
@@ -222,6 +223,8 @@ void CsApexCore::load(const std::string &file)
             return;
         }
         graphio.loadConnections(doc);
+
+        Q_EMIT loadViewRequest(doc);
     }
 
 

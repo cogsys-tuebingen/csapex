@@ -23,8 +23,8 @@
 
 using namespace csapex;
 
-DesignerIO::DesignerIO(Designer &designer, Graph::Ptr graph, WidgetController* widget_ctrl)
-    : designer_(designer), graph_(graph), widget_ctrl_(widget_ctrl)
+DesignerIO::DesignerIO(Designer &designer)
+    : designer_(designer)
 {
 }
 
@@ -50,35 +50,57 @@ void DesignerIO::loadSettings(YAML::Node &doc)
     }
 }
 
-void DesignerIO::saveBoxes(YAML::Emitter& yaml)
+void DesignerIO::saveBoxes(YAML::Emitter& yaml, Graph::Ptr graph, WidgetController* widget_ctrl)
 {
-    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, boost::ref(yaml));
-    graph_->foreachNode(cb);
+    yaml << YAML::Key << "adapters";
+    yaml << YAML::Value << YAML::BeginSeq; // adapters seq
+
+
+    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, boost::ref(yaml));
+    graph->foreachNode(cb);
+
+    yaml << YAML::EndSeq; // adapters seq
 }
 
-void DesignerIO::saveBox(Node *node, YAML::Emitter &yaml)
+void DesignerIO::saveBox(Node *node, WidgetController* widget_ctrl, YAML::Emitter &yaml)
 {
-    Box* box = widget_ctrl_->getBox(node->getUUID());
+    Box* box = widget_ctrl->getBox(node->getUUID());
     NodeAdapter::Ptr na = box->getNodeAdapter();
     Memento::Ptr m = na->getState();
     if(m) {
+        yaml << YAML::BeginMap;
+        yaml << YAML::Key << "uuid" << YAML::Value << na->getNode()->getUUID();
+        yaml << YAML::Key << "state" << YAML::Value;
+
+        yaml << YAML::BeginMap;
         m->writeYaml(yaml);
+        yaml << YAML::EndMap;
+
+        yaml << YAML::EndMap;
     }
 }
 
-void DesignerIO::loadBoxes(YAML::Node &doc)
+void DesignerIO::loadBoxes(YAML::Node &doc, Graph::Ptr graph, WidgetController* widget_ctrl)
 {
-    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::loadBox, this, _1, boost::ref(doc));
-    graph_->foreachNode(cb);
-}
+    if(exists(doc, "adapters")) {
+        const YAML::Node& adapters = doc["adapters"];
+        assert(adapters.Type() == YAML::NodeType::Sequence);
 
-void DesignerIO::loadBox(Node* node, YAML::Node& doc)
-{
-    Box* box = widget_ctrl_->getBox(node->getUUID());
-    NodeAdapter::Ptr na = box->getNodeAdapter();
-    Memento::Ptr m = na->getState();
-    if(m) {
-        m->readYaml(doc);
-        box->getNodeAdapter()->setState(m);
+        for(std::size_t i = 0; i < adapters.size(); ++i) {
+            const YAML::Node& e = adapters[i];
+
+            std::string uuid;
+            e["uuid"] >> uuid;
+
+            Box* box = widget_ctrl->getBox(UUID::make_forced(uuid));
+            if(box) {
+                NodeAdapter::Ptr na = box->getNodeAdapter();
+                Memento::Ptr m = na->getState();
+                if(m) {
+                    m->readYaml(e["state"]);
+                    box->getNodeAdapter()->setState(m);
+                }
+            }
+        }
     }
 }

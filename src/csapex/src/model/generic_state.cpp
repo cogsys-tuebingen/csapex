@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <utils_param/io.h>
+#include <utils_param/parameter_factory.h>
 
 using namespace csapex;
 
@@ -30,6 +31,11 @@ void GenericState::readYaml(const YAML::Node& node) {
 
 void GenericState::addParameter(param::Parameter::Ptr param)
 {
+    param::Parameter::Ptr old_value;
+    if(params.find(param->name()) != params.end()) {
+        // already here, keep value!
+        param->setValueFrom(*params[param->name()]);
+    }
     assert(param->name() != "noname");
     assert(std::find(order.begin(), order.end(), param->name()) == order.end());
 
@@ -87,6 +93,8 @@ void GenericState::setFrom(const GenericState &rhs)
         param::Parameter::Ptr p = it->second;
         if(params.find(p->name()) != params.end()) {
             params[p->name()]->setValueFrom(*p);
+        } else {
+            params[p->name()] = param::ParameterFactory::clone(p);
         }
     }
 }
