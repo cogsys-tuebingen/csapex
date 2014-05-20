@@ -76,6 +76,11 @@ void CsApexCore::clearBlock()
     graph_->clearBlock();
 }
 
+void CsApexCore::setStatusMessage(const std::string &msg)
+{
+    Q_EMIT showStatusMessage(msg);
+}
+
 void CsApexCore::init(DragIO* dragio)
 {
     if(!init_) {
@@ -105,10 +110,10 @@ void CsApexCore::init(DragIO* dragio)
         showStatusMessage("loading config");
         try {
             load(settings_.getConfig());
-            showStatusMessage("painting user interface");
         } catch(const std::exception& e) {
             std::cerr << "error loading the config: " << e.what() << std::endl;
         }
+        showStatusMessage("painting user interface");
     }
 }
 

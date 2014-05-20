@@ -134,8 +134,8 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         core.init(&drag_io);
 
-        splash->finish(&w);
         w.setVisible(true);
+        splash->finish(&w);
 
         int res = run();
 
