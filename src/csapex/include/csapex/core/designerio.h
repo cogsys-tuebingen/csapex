@@ -26,7 +26,7 @@ public:
     void loadSettings(YAML::Node& doc);
 
     void saveBoxes(YAML::Emitter &yaml, GraphPtr graph, WidgetController* widget_ctrl);
-    void loadBoxes(YAML::Node& doc, GraphPtr graph, WidgetController* widget_ctrl);
+    void loadBoxes(YAML::Node& doc, WidgetController* widget_ctrl);
 
 private:
     void saveBox(Node* node, WidgetController* widget_ctrl, YAML::Emitter &yaml);

@@ -80,7 +80,7 @@ void DesignerIO::saveBox(Node *node, WidgetController* widget_ctrl, YAML::Emitte
     }
 }
 
-void DesignerIO::loadBoxes(YAML::Node &doc, Graph::Ptr graph, WidgetController* widget_ctrl)
+void DesignerIO::loadBoxes(YAML::Node &doc, WidgetController* widget_ctrl)
 {
     if(exists(doc, "adapters")) {
         const YAML::Node& adapters = doc["adapters"];

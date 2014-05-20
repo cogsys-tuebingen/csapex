@@ -491,6 +491,6 @@ void CsApexWindow::saveView(YAML::Emitter &e)
 void CsApexWindow::loadView(YAML::Node &doc)
 {
     DesignerIO designerio(*designer_);
-    designerio.loadBoxes(doc, graph_, widget_ctrl_.get());
+    designerio.loadBoxes(doc, widget_ctrl_.get());
 }
 
