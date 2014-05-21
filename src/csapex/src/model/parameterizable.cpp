@@ -13,7 +13,9 @@ Parameterizable::Parameterizable()
 void Parameterizable::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
 {
     connections_.push_back(parameter_changed(*param).connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
-    parameterChanged(param, cb);
+    if(param->hasState()) {
+        parameterChanged(param, cb);
+    }
 }
 
 void Parameterizable::addParameterCondition(param::Parameter* param, boost::function<bool ()> enable_condition)

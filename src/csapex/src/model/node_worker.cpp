@@ -254,7 +254,17 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     node_->useTimer(t.get());
     if(can_process){
         //boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
-        node_->process();
+        try {
+            node_->process();
+
+        }  catch(const std::exception& e) {
+            node_->setError(true, e.what());
+        } catch(const std::string& s) {
+            node_->setError(true, "Uncatched exception (string) exception: " + s);
+        } catch(...) {
+            throw;
+        }
+
     }
     t->finish();
 
