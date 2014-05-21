@@ -132,6 +132,13 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     {
         QMutexLocker lock(&message_mutex_);
+        std::vector< boost::shared_ptr<QMutexLocker> > locks;
+
+        // forbid async to change
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* cin = pair.first;
+            locks.push_back(cin->lockAsync());
+        }
 
         //assert(!has_msg_[source]);
         if(has_msg_[source] && !source->isAsync()) {
@@ -139,7 +146,33 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
                          ": assertion failed: !has_msg_[" << source->getUUID().getFullName() << "]" << std::endl;
             assert(false);
         }
-        has_msg_[source] = true;
+        if(!source->isAsync()) {
+            has_msg_[source] = true;
+        }
+
+        // check if all inputs have messages
+        Q_FOREACH(const PAIR& pair, has_msg_) {
+            ConnectorIn* cin = pair.first;
+            if(!has_msg_[cin]) {
+                // connector doesn't have a message
+                if(cin->isAsync()) {
+                    // do not wait for this input
+                } else if(cin->isOptional()) {
+                    if(cin->isConnected()) {
+                        // c is optional and connected, so we have to wait for a message
+                        return;
+                    } else {
+                        // c is optional and not connected, so we can proceed
+                        /* do nothing */
+                    }
+                } else {
+                    // c is mandatory, so we have to wait for a message
+                    return;
+                }
+            }
+        }
+
+        // everything has a message here
 
         // check for old messages
         bool had_old_message = false;
@@ -158,6 +191,9 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         }
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
+            if(cin == source) {
+                continue;
+            }
 
             if(has_msg_[cin] && !cin->isAsync() && cin->sequenceNumber() != highest_seq_no) {
                 std::cerr << "input @" << source->getUUID().getFullName() <<
@@ -174,34 +210,16 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
             return;
         }
 
-        // check if all inputs have messages
-        Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* c = pair.first;
-            if(!pair.second) {
-                // connector doesn't have a message
-                if(c->isAsync()) {
-                    // do not wait for this input
-                } else if(c->isOptional()) {
-                    if(c->isConnected()) {
-                        // c is optional and connected, so we have to wait for a message
-                        return;
-                    } else {
-                        // c is optional and not connected, so we can proceed
-                        /* do nothing */
-                    }
-                } else {
-                    // c is mandatory, so we have to wait for a message
-                    return;
-                }
-            }
-        }
-
         // now all sequence numbers must be equal!
         Q_FOREACH(const PAIR& pair, has_msg_) {
             ConnectorIn* cin = pair.first;
 
             if(has_msg_[cin] && !cin->isAsync()) {
-                assert(highest_seq_no == cin->sequenceNumber());
+                if(highest_seq_no != cin->sequenceNumber()) {
+                    std::cerr << "input @" << cin->getUUID().getFullName() <<
+                                 ": assertion failed: highest_seq_no (" << highest_seq_no << ") == cin->seq_no (" << cin->sequenceNumber() << ")" << std::endl;
+                    assert(false);
+                }
             }
         }
 

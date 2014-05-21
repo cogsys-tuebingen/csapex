@@ -65,9 +65,10 @@ public:
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
 
+    boost::shared_ptr<QMutexLocker> lockAsync();
     bool isAsync() const;
-    void setAsync(bool asynch);
-    void setTempAsync(bool asynch);
+    virtual void setAsync(bool asynch);
+    virtual void setTempAsync(bool asynch);
 
     bool isBlocked() const;
 
@@ -141,6 +142,7 @@ protected:
     CommandDispatcher* dispatcher_;
 
     mutable QMutex io_mutex;
+    mutable QMutex sync_mutex;
 
     QWaitCondition can_process_cond;
 

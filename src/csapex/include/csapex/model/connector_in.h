@@ -69,6 +69,8 @@ public:
     bool isOptional() const;
     void setOptional(bool optional);
 
+    virtual void setAsync(bool asynch);
+
     template <typename T>
     bool isMessage() {
         return buffer_->isType<T>();

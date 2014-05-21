@@ -74,6 +74,18 @@ bool ConnectorIn::isOptional() const
     return optional_;
 }
 
+void ConnectorIn::setAsync(bool asynch)
+{
+    QMutexLocker lock(&sync_mutex);
+
+    Connectable::setAsync(asynch);
+
+    if(!asynch && isConnected()) {
+        free();
+        setSequenceNumber(getSource()->sequenceNumber());
+    }
+}
+
 bool ConnectorIn::hasMessage() const
 {
     return buffer_->isFilled();
