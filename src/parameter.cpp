@@ -42,6 +42,11 @@ bool Parameter::isInteractive() const
     return interactive_;
 }
 
+bool Parameter::hasState() const
+{
+    return true;
+}
+
 Parameter::Lock Parameter::lock() const
 {
     return Lock(new boost::lock_guard<boost::mutex>(mutex_));

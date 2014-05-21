@@ -69,3 +69,8 @@ void TriggerParameter::trigger()
 {
     triggerChange();
 }
+
+bool TriggerParameter::hasState() const
+{
+    return false;
+}

@@ -115,6 +115,8 @@ public:
     bool isInteractive() const;
     void setInteractive(bool enabled);
 
+    virtual bool hasState() const;
+
     void triggerChange();
 
 public:

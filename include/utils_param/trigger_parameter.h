@@ -34,6 +34,7 @@ public:
     virtual std::string TYPE() const { return "Trigger"; }
 
     void trigger();
+    virtual bool hasState() const;
 
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
