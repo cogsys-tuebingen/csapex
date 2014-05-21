@@ -120,7 +120,6 @@ protected:
     std::map<Node*, std::vector<Node*> > node_parents_;
     std::map<Node*, std::vector<Node*> > node_children_;
 
-    /// TODO: remove!
     std::vector<Connection::Ptr> connections_;
 
     CommandDispatcher* dispatcher_;
