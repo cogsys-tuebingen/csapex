@@ -194,6 +194,8 @@ void CsApexCore::load(const std::string &file)
 
     assert(graph_->countNodes() == 0);
 
+    graph_->setPause(true);
+
     GraphIO graphio(graph_);
 
     {
@@ -227,7 +229,8 @@ void CsApexCore::load(const std::string &file)
         Q_EMIT loadViewRequest(doc);
     }
 
-
     cmd_dispatch->setClean();
     cmd_dispatch->resetDirtyPoint();
+
+    graph_->setPause(false);
 }

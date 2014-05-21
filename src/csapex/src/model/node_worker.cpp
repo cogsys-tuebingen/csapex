@@ -45,9 +45,11 @@ void NodeWorker::stop()
 {
     QMutexLocker lock(&stop_mutex_);
 
+
     QObject::disconnect(private_thread_);
     stop_ = true;
 
+    pause(false);
 
     if(private_thread_) {
         private_thread_->quit();
@@ -68,17 +70,17 @@ void NodeWorker::pause(bool pause)
 
 void NodeWorker::forwardMessage(Connectable *s)
 {
-    QMutexLocker lock(&stop_mutex_);
-    if(stop_) {
-        return;
-    }
-
     {
         pause_mutex_.lock();
         while(paused_) {
             continue_.wait(&pause_mutex_);
         }
         pause_mutex_.unlock();
+    }
+
+    QMutexLocker lock(&stop_mutex_);
+    if(stop_) {
+        return;
     }
 
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
@@ -305,6 +307,20 @@ void NodeWorker::setTickFrequency(double f)
 
 void NodeWorker::tick()
 {
+    {
+        pause_mutex_.lock();
+        while(paused_) {
+            continue_.wait(&pause_mutex_);
+        }
+        pause_mutex_.unlock();
+
+        QMutexLocker lock(&stop_mutex_);
+        if(stop_) {
+            return;
+        }
+    }
+
+
     if(!thread_initialized_) {
         thread::set_name(node_->getUUID().getShortName().c_str());
         thread_initialized_ = true;

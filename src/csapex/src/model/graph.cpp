@@ -187,7 +187,10 @@ bool Graph::addConnection(Connection::Ptr connection)
             // set the sequence no of the child component to the one given by this connector
             int seq_no = from->sequenceNumber();
 
-            setPause(true);
+            bool already_paused = isPaused();
+            if(!already_paused) {
+                setPause(true);
+            }
 //            std::cerr << "synchronize components" << std::endl;
             Q_FOREACH(Node::Ptr n, nodes_) {
                 if(node_component_[n.get()] == node_component_[n_to]) {
@@ -202,7 +205,9 @@ bool Graph::addConnection(Connection::Ptr connection)
                 }
             }
 
-            setPause(false);
+            if(!already_paused) {
+                setPause(false);
+            }
         }
 
         buildConnectedComponents();
@@ -393,6 +398,10 @@ bool Graph::isPaused() const
 
 void Graph::setPause(bool pause)
 {
+    if(pause == isPaused()) {
+        return;
+    }
+
     Q_FOREACH(Node::Ptr node, nodes_) {
         node->pause(pause);
     }
