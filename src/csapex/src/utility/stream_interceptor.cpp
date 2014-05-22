@@ -104,7 +104,7 @@ StreamInterceptor::StreamInterceptor()
 
     fake_cout_.str(std::string());
 
-    std::cout.rdbuf(fake_cout_.rdbuf());
+ //   std::cout.rdbuf(fake_cout_.rdbuf());
 //    std::cerr.rdbuf(fake_cerr_.rdbuf());
 }
 

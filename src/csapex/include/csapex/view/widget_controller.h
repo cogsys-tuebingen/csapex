@@ -27,7 +27,7 @@ public:
 public:
     WidgetController(GraphPtr graph);
 
-    Box* getBox(const UUID& node_id);
+    NodeBox* getBox(const UUID& node_id);
 
     Port* getPort(const UUID& connector_id);
     Port* getPort(const Connectable* connector_id);
@@ -37,7 +37,7 @@ public:
     void setDesigner(Designer* designer);
     void setCommandDispatcher(CommandDispatcher *dispatcher);
 
-    void foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred);
+    void foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred);
 
 public Q_SLOTS:
     void nodeAdded(NodePtr node);
@@ -58,7 +58,7 @@ public:
 
 private:
     Designer* designer_;
-    boost::unordered_map<UUID, Box*, UUID::Hasher> box_map_;
+    boost::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
     boost::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 };
 

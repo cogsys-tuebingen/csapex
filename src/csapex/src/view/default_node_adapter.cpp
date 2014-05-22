@@ -10,6 +10,7 @@
 #include <csapex/view/port.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/view/designer_view.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -37,6 +38,7 @@
 #include <QMouseEvent>
 #include <QMenu>
 #include <QAction>
+#include <QApplication>
 
 using namespace csapex;
 using namespace boost::lambda;
@@ -157,7 +159,11 @@ public:
             return;
         }
 
-        QPoint gpt = w->mapToGlobal(pt);
+        DesignerView* view = QApplication::activeWindow()->findChild<DesignerView*>();
+
+
+
+        QPoint gpt = view->mapToGlobal(view->mapFromScene(w->mapToGlobal(pt)));
 
         QMenu menu;
         ContextMenuHandler::addHeader(menu, std::string("Parameter: ") + param_->name());

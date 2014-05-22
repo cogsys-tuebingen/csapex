@@ -13,8 +13,10 @@ find_package(catkin REQUIRED COMPONENTS utils_plugin utils_param utils_qt)
 
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
+find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGl)
 include(${QT_USE_FILE})
+
+FIND_PACKAGE(OpenGL REQUIRED)
 
 file(GLOB   QT_FORMS    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}  ui/*.ui)
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
@@ -48,6 +50,7 @@ catkin_package(
 
 include_directories(include
     ${catkin_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
 )
 
 #
@@ -131,11 +134,14 @@ set(SRC_APP
     src/model/connection_selection_model.cpp
 
     src/utility/buffer.cpp
+    src/utility/movable_graphics_proxy_widget.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp
     src/view/csapex_window.cpp
     src/view/design_board.cpp
+    src/view/designer_scene.cpp
+    src/view/designer_view.cpp
     src/view/designer.cpp
     src/view/overlay.cpp
     src/view/selectable.cpp
@@ -205,6 +211,7 @@ target_link_libraries(csapex_app csapex_pluginbase
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
+    ${OPENGL_LIBRARIES}
 )
 
 #

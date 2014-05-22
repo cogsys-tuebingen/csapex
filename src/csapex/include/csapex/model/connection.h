@@ -37,12 +37,12 @@ public:
             OUT = 10,
             IN = 11
         };
-        Fulcrum(const QPoint& p, int t)
+        Fulcrum(const QPointF& p, int t)
             : type(t), pos(p)
         {}
 
         int type;
-        QPoint pos;
+        QPointF pos;
     };
 
 public:
@@ -84,8 +84,8 @@ protected:
 
 private:
     /// COMMANDS
-    void addFulcrum(int subsection, const QPoint& pos, int type);
-    void moveFulcrum(int fulcrum_id, const QPoint& pos);
+    void addFulcrum(int subsection, const QPointF& pos, int type);
+    void moveFulcrum(int fulcrum_id, const QPointF &pos);
     void deleteFulcrum(int fulcrum_id);
 
 protected:

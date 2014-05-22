@@ -13,7 +13,7 @@
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(QWidget *parent, Box *box)
+ProfilingWidget::ProfilingWidget(QWidget *parent, NodeBox *box)
     : QWidget(parent), box_(box), node_worker_(box->getNode()->getNodeWorker())
 {
     w_ = 300;
@@ -25,10 +25,10 @@ ProfilingWidget::ProfilingWidget(QWidget *parent, Box *box)
 
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    connect(box_, SIGNAL(moved(Box*,int,int)), this, SLOT(reposition(Box*)));
+    connect(box_, SIGNAL(moved(NodeBox*,int,int)), this, SLOT(reposition(NodeBox*)));
 }
 
-void ProfilingWidget::reposition(Box *box)
+void ProfilingWidget::reposition(NodeBox *box)
 {
     move(box->pos() + QPoint(0, box->height()));
 }

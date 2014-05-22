@@ -28,7 +28,7 @@ protected:
 private:
     int connection_id;
     int fulcrum_id;
-    QPoint pos;
+    QPointF pos;
     int type;
 };
 

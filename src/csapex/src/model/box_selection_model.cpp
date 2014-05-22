@@ -28,12 +28,12 @@ BoxSelectionModel::BoxSelectionModel(GraphPtr graph, WidgetController *widget_ct
 
 }
 
-void BoxSelectionModel::moveSelectedBoxes(Box*, const QPoint& delta)
+void BoxSelectionModel::moveSelectedBoxes(NodeBox*, const QPoint& delta)
 {
     command::Meta::Ptr meta(new command::Meta("Move Selected Boxes"));
 
     Q_FOREACH(Node::Ptr node, graph_->nodes_) {
-        Box* b = widget_ctrl_->getBox(node->getUUID());
+        NodeBox* b = widget_ctrl_->getBox(node->getUUID());
         if(b->isSelected()) {
             meta->add(Command::Ptr(new command::MoveBox(b, b->pos())));
         }
@@ -73,7 +73,7 @@ void BoxSelectionModel::selectAll()
     Q_EMIT selectionChanged();
 }
 
-void BoxSelectionModel::toggleSelection(Box *box)
+void BoxSelectionModel::toggleSelection(NodeBox *box)
 {
     bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
 
@@ -153,7 +153,7 @@ void BoxSelectionModel::fillContextMenuForSelection(QMenu *menu, std::map<QActio
     bool has_maximized = false;
 
     Q_FOREACH(Node::Ptr n, graph_->nodes_) {
-        Box* b = widget_ctrl_->getBox(n->getUUID());
+        NodeBox* b = widget_ctrl_->getBox(n->getUUID());
         if(b->isSelected()) {
             if(b->isMinimizedSize()) {
                 has_minimized = true;
@@ -163,13 +163,13 @@ void BoxSelectionModel::fillContextMenuForSelection(QMenu *menu, std::map<QActio
         }
     }
 
-    boost::function<bool(Box*)> pred_selected = boost::bind(&Box::isSelected, _1);
+    boost::function<bool(NodeBox*)> pred_selected = boost::bind(&NodeBox::isSelected, _1);
 
     if(has_minimized) {
         QAction* max = new QAction("maximize all", menu);
         max->setIcon(QIcon(":/maximize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::minimizeBox, _1, false)), pred_selected);
+        handler[max] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&NodeBox::minimizeBox, _1, false)), pred_selected);
         menu->addAction(max);
     }
 
@@ -177,7 +177,7 @@ void BoxSelectionModel::fillContextMenuForSelection(QMenu *menu, std::map<QActio
         QAction* max = new QAction("minimize all", menu);
         max->setIcon(QIcon(":/minimize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::minimizeBox, _1, true)), pred_selected);
+        handler[max] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&NodeBox::minimizeBox, _1, true)), pred_selected);
         menu->addAction(max);
     }
 
@@ -186,13 +186,13 @@ void BoxSelectionModel::fillContextMenuForSelection(QMenu *menu, std::map<QActio
     QAction* term = new QAction("terminate thread", menu);
     term->setIcon(QIcon(":/stop.png"));
     term->setIconVisibleInMenu(true);
-    handler[term] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::killContent, _1)), pred_selected);
+    handler[term] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&NodeBox::killContent, _1)), pred_selected);
     menu->addAction(term);
 
     QAction* prof = new QAction("profiling", menu);
     prof->setIcon(QIcon(":/profiling.png"));
     prof->setIconVisibleInMenu(true);
-    handler[prof] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&Box::showProfiling, _1)), pred_selected);
+    handler[prof] = boost::bind(&WidgetController::foreachBox, widget_ctrl_, boost::protect(boost::bind(&NodeBox::showProfiling, _1)), pred_selected);
     menu->addAction(prof);
 
     menu->addSeparator();
@@ -205,11 +205,11 @@ void BoxSelectionModel::fillContextMenuForSelection(QMenu *menu, std::map<QActio
 }
 
 
-void BoxSelectionModel::mimicBoxMovement(Box *box, int dx, int dy)
+void BoxSelectionModel::mimicBoxMovement(NodeBox *box, int dx, int dy)
 {
     if(box->isSelected() && box->hasFocus()) {
         Q_FOREACH(Node::Ptr n, graph_->nodes_) {
-            Box* b = widget_ctrl_->getBox(n->getUUID());
+            NodeBox* b = widget_ctrl_->getBox(n->getUUID());
             if(b != box && b->isSelected()) {
                 b->move(b->x() + dx, b->y() + dy);
             }

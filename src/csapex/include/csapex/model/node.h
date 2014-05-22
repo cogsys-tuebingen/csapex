@@ -37,7 +37,7 @@ class Node : public QObject, public ErrorState, public Unique, public Parameteri
     friend class NodeConstructor;
     friend class NodeModifier;
     friend class DefaultNodeAdapter;
-    friend class Box;
+    friend class NodeBox;
     friend class GraphIO;
     friend class Graph;
 

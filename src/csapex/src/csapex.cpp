@@ -12,7 +12,7 @@
 #include <csapex/utility/error_handling.h>
 #include <csapex/core/drag_io.h>
 #include <csapex/view/designer.h>
-#include <csapex/view/design_board.h>
+#include <csapex/view/designer_view.h>
 #include <csapex/manager/box_manager.h>
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/widget_controller.h>
@@ -39,7 +39,7 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
 
     } catch(const std::exception& e) {
         ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-        Box* box = dynamic_cast<Box*> (receiver);
+        NodeBox* box = dynamic_cast<NodeBox*> (receiver);
         NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
 
         if(er) {
@@ -121,21 +121,23 @@ int Main::main(bool headless, const std::string& config, const std::string& path
         app.processEvents();
 
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
-        Overlay* overlay   = new Overlay(graph, &dispatcher, widget_control);
-        DesignBoard* board = new DesignBoard(graph, &dispatcher, widget_control, drag_io, overlay);
-        Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, board);
+        //Overlay* overlay   = new Overlay(graph, &dispatcher, widget_control);
+        //DesignBoard* board = new DesignBoard(graph, &dispatcher, widget_control, drag_io, overlay);
+        DesignerView* view = new DesignerView(graph, &dispatcher, widget_control, drag_io);
+        Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view);
 
         widget_control->setDesigner(designer);
 
         CsApexWindow w(core, &dispatcher, widget_control, graph, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
+
         csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
         w.start();
 
         core.init(&drag_io);
 
-        w.setVisible(true);
         splash->finish(&w);
+        w.setVisible(true);
 
         int res = run();
 

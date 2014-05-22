@@ -24,9 +24,9 @@ WidgetController::WidgetController(Graph::Ptr graph)
 
 }
 
-Box* WidgetController::getBox(const UUID &node_id)
+NodeBox* WidgetController::getBox(const UUID &node_id)
 {
-    boost::unordered_map<UUID, Box*, UUID::Hasher>::const_iterator pos = box_map_.find(node_id);
+    boost::unordered_map<UUID, NodeBox*, UUID::Hasher>::const_iterator pos = box_map_.find(node_id);
     if(pos == box_map_.end()) {
         return NULL;
     }
@@ -74,8 +74,8 @@ void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
 void WidgetController::nodeAdded(Node::Ptr node)
 {
     if(designer_) {
-        Box* box = BoxManager::instance().makeBox(node, this);
-        QObject::connect(box, SIGNAL(moveRequest(Box*,QPoint)), &box_selection_, SLOT(moveSelectedBoxes(Box*, QPoint)));
+        NodeBox* box = BoxManager::instance().makeBox(node, this);
+        QObject::connect(box, SIGNAL(moveRequest(NodeBox*,QPoint)), &box_selection_, SLOT(moveSelectedBoxes(NodeBox*, QPoint)));
 
         box_map_[node->getUUID()] = box;
 
@@ -98,7 +98,7 @@ void WidgetController::nodeAdded(Node::Ptr node)
 void WidgetController::nodeRemoved(NodePtr node)
 {
     if(designer_) {
-        Box* box = getBox(node->getUUID());
+        NodeBox* box = getBox(node->getUUID());
         box->stop();
 
         box_map_.erase(box_map_.find(node->getUUID()));
@@ -111,7 +111,7 @@ void WidgetController::connectorAdded(Connectable* connector)
 {
     if(designer_) {
         UUID parent_uuid = connector->getUUID().parentUUID();
-        Box* box = getBox(parent_uuid);
+        NodeBox* box = getBox(parent_uuid);
         Port* port = new Port(dispatcher_, connector);
 
 
@@ -143,10 +143,10 @@ void WidgetController::connectorRemoved(Connectable *connector)
     }
 }
 
-void WidgetController::foreachBox(boost::function<void (Box*)> f, boost::function<bool (Box*)> pred)
+void WidgetController::foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred)
 {
     Q_FOREACH(Node::Ptr n, graph_->nodes_) {
-        Box* b = getBox(n->getUUID());
+        NodeBox* b = getBox(n->getUUID());
         if(pred(b)) {
             f(b);
         }

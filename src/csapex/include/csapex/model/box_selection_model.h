@@ -30,10 +30,10 @@ public Q_SLOTS:
     void clearSelection();
     void selectAll();
 
-    void toggleSelection(Box* box);
-    void mimicBoxMovement(Box* box, int dx, int dy);
+    void toggleSelection(NodeBox* box);
+    void mimicBoxMovement(NodeBox* box, int dx, int dy);
 
-    void moveSelectedBoxes(Box* origin, const QPoint& delta);
+    void moveSelectedBoxes(NodeBox* origin, const QPoint& delta);
 };
 }
 

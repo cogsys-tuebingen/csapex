@@ -29,21 +29,21 @@
 
 using namespace csapex;
 
-const QString Box::MIME = "csapex/model/box";
-const QString Box::MIME_MOVE = "csapex/model/box/move";
+const QString NodeBox::MIME = "csapex/model/box";
+const QString NodeBox::MIME_MOVE = "csapex/model/box/move";
 
-Box::Box(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
+NodeBox::NodeBox(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
       down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
 }
 
-Box::~Box()
+NodeBox::~NodeBox()
 {
 }
 
 
-void Box::setupUi()
+void NodeBox::setupUi()
 {
     node_->checkConditions(true);
 
@@ -59,13 +59,13 @@ void Box::setupUi()
     updateFlippedSides();
 }
 
-void Box::setupUiAgain()
+void NodeBox::setupUiAgain()
 {
     adapter_->doSetupUi(ui->content);
     updateFlippedSides();
 }
 
-void Box::construct()
+void NodeBox::construct()
 {
     ui->setupUi(this);
 
@@ -104,10 +104,6 @@ void Box::construct()
     QObject::connect(node_.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
     QObject::connect(node_.get(), SIGNAL(nodeError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
 
-    setContextMenuPolicy(Qt::CustomContextMenu);
-
-    QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-
     for(int i = 0; i < node_->countInputs(); ++i) {
         registerInputEvent(node_->getInput(i));
     }
@@ -118,17 +114,17 @@ void Box::construct()
     setupUi();
 }
 
-Node* Box::getNode()
+Node* NodeBox::getNode()
 {
     return node_.get();
 }
 
-NodeAdapter::Ptr Box::getNodeAdapter()
+NodeAdapter::Ptr NodeBox::getNodeAdapter()
 {
     return adapter_;
 }
 
-void Box::enableContent(bool enable)
+void NodeBox::enableContent(bool enable)
 {
     node_->enable(enable);
 
@@ -169,7 +165,7 @@ void Box::enableContent(bool enable)
   } \
 }
 
-void Box::updateInformation(Graph* graph)
+void NodeBox::updateInformation(Graph* graph)
 {
     int compo = graph->getComponent(node_->getUUID());
     if(compo < 0) {
@@ -193,12 +189,12 @@ void Box::updateInformation(Graph* graph)
     info_compo->setStyleSheet(ss.str().c_str());
 }
 
-void Box::showContextMenu(const QPoint& pos)
+void NodeBox::contextMenuEvent(QContextMenuEvent* e)
 {
-    Q_EMIT showContextMenuForBox(this, mapToGlobal(pos));
+    Q_EMIT showContextMenuForBox(this, e->globalPos());
 }
 
-void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
+void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
 {
     ContextMenuHandler::addHeader(*menu, std::string("Node: ") + node_->getUUID().getShortName());
 
@@ -206,21 +202,21 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
         QAction* max = new QAction("maximize", menu);
         max->setIcon(QIcon(":/maximize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&Box::minimizeBox, this, false);
+        handler[max] = boost::bind(&NodeBox::minimizeBox, this, false);
         menu->addAction(max);
 
     } else {
         QAction* min = new QAction("minimize", menu);
         min->setIcon(QIcon(":/minimize.png"));
         min->setIconVisibleInMenu(true);
-        handler[min] = boost::bind(&Box::minimizeBox, this, true);
+        handler[min] = boost::bind(&NodeBox::minimizeBox, this, true);
         menu->addAction(min);
     }
 
     QAction* flip = new QAction("flip sides", menu);
     flip->setIcon(QIcon(":/flip.png"));
     flip->setIconVisibleInMenu(true);
-    handler[flip] = boost::bind(&Box::flipSides, this);
+    handler[flip] = boost::bind(&NodeBox::flipSides, this);
     menu->addAction(flip);
 
     menu->addSeparator();
@@ -228,13 +224,13 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
     QAction* term = new QAction("terminate thread", menu);
     term->setIcon(QIcon(":/stop.png"));
     term->setIconVisibleInMenu(true);
-    handler[term] = boost::bind(&Box::killContent, this);
+    handler[term] = boost::bind(&NodeBox::killContent, this);
     menu->addAction(term);
 
     QAction* prof = new QAction("profiling", menu);
     prof->setIcon(QIcon(":/profiling.png"));
     prof->setIconVisibleInMenu(true);
-    handler[prof] = boost::bind(&Box::showProfiling, this);
+    handler[prof] = boost::bind(&NodeBox::showProfiling, this);
     menu->addAction(prof);
 
     menu->addSeparator();
@@ -242,45 +238,45 @@ void Box::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()
     QAction* del = new QAction("delete", menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = boost::bind(&Box::deleteBox, this);
+    handler[del] = boost::bind(&NodeBox::deleteBox, this);
     menu->addAction(del);
 }
 
-QBoxLayout* Box::getInputLayout()
+QBoxLayout* NodeBox::getInputLayout()
 {
     return ui->input_layout;
 }
 
-QBoxLayout* Box::getOutputLayout()
+QBoxLayout* NodeBox::getOutputLayout()
 {
     return ui->output_layout;
 }
 
-bool Box::isError() const
+bool NodeBox::isError() const
 {
     return node_->isError();
 }
-ErrorState::ErrorLevel Box::errorLevel() const
+ErrorState::ErrorLevel NodeBox::errorLevel() const
 {
     return node_->errorLevel();
 }
-std::string Box::errorMessage() const
+std::string NodeBox::errorMessage() const
 {
     return node_->errorMessage();
 }
 
-void Box::setError(bool e, const std::string &msg)
+void NodeBox::setError(bool e, const std::string &msg)
 {
     setError(e, msg, ErrorState::EL_ERROR);
 }
 
-void Box::setError(bool, const std::string &msg, int)
+void NodeBox::setError(bool, const std::string &msg, int)
 {
     setToolTip(msg.c_str());
     //node_->setErrorSilent(e, msg, level);
 }
 
-void Box::setLabel(const std::string& label)
+void NodeBox::setLabel(const std::string& label)
 {
     assert(node_->getNodeState());
     node_->setLabel(label);
@@ -288,18 +284,18 @@ void Box::setLabel(const std::string& label)
     ui->label->setToolTip(label.c_str());
 }
 
-void Box::setLabel(const QString &label)
+void NodeBox::setLabel(const QString &label)
 {
     node_->setLabel(label.toStdString());
     ui->label->setText(label);
 }
 
-std::string Box::getLabel() const
+std::string NodeBox::getLabel() const
 {
     return node_->getLabel();
 }
 
-void Box::registerEvent(Connectable* c)
+void NodeBox::registerEvent(Connectable* c)
 {
     if(c->isOutput()) {
         registerOutputEvent(dynamic_cast<ConnectorOut*>(c));
@@ -308,18 +304,18 @@ void Box::registerEvent(Connectable* c)
     }
 }
 
-void Box::unregisterEvent(Connectable*)
+void NodeBox::unregisterEvent(Connectable*)
 {
 }
 
-void Box::registerInputEvent(ConnectorIn* in)
+void NodeBox::registerInputEvent(ConnectorIn* in)
 {
     in->setParent(NULL);
 
     Q_EMIT changed(this);
 }
 
-void Box::registerOutputEvent(ConnectorOut* out)
+void NodeBox::registerOutputEvent(ConnectorOut* out)
 {
     assert(out);
 
@@ -328,12 +324,12 @@ void Box::registerOutputEvent(ConnectorOut* out)
     Q_EMIT changed(this);
 }
 
-void Box::resizeEvent(QResizeEvent *)
+void NodeBox::resizeEvent(QResizeEvent *)
 {
     Q_EMIT changed(this);
 }
 
-void Box::init()
+void NodeBox::init()
 {
     if(parent()) {
         setVisible(true);
@@ -344,59 +340,59 @@ void Box::init()
     key_point = node_->getNodeState()->pos;
     move(key_point);
 }
-bool Box::eventFilter(QObject* o, QEvent* e)
+bool NodeBox::eventFilter(QObject* o, QEvent* e)
 {
     QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
 
-    if(o == ui->label) {
-        if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
-            bool ok;
-            QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, getLabel().c_str(), &ok);
+//    if(o == ui->label) {
+//        if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
+//            bool ok;
+//            QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, getLabel().c_str(), &ok);
 
-            if(ok && !text.isEmpty()) {
-                setLabel(text);
-            }
+//            if(ok && !text.isEmpty()) {
+//                setLabel(text);
+//            }
 
-            e->accept();
+//            e->accept();
 
-            return true;
-        }
-    }
+//            return true;
+//        }
+//    }
 
-    if(o == ui->content || o == ui->label || o == this) {
-        if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
-            down_ = true;
-            start_drag_global_ = em->globalPos();
-            start_drag_ = em->pos();
+//    if(o == ui->content || o == ui->label || o == this) {
+//        if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
+//            down_ = true;
+//            start_drag_global_ = em->globalPos();
+//            start_drag_ = em->pos();
 
-        } else if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::LeftButton) {
-            down_ = false;
-            Q_EMIT clicked(this);
-            e->accept();
-            return true;
+//        } else if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::LeftButton) {
+//            down_ = false;
+//            Q_EMIT clicked(this);
+//            e->accept();
+//            return true;
 
-        } else if(e->type() == QEvent::MouseMove) {
-            QPoint delta = em->globalPos() - start_drag_global_;
+//        } else if(e->type() == QEvent::MouseMove) {
+//            QPoint delta = em->globalPos() - start_drag_global_;
 
-            bool shift_drag = Qt::ShiftModifier == QApplication::keyboardModifiers();
+//            bool shift_drag = Qt::ShiftModifier == QApplication::keyboardModifiers();
 
-            if(down_) {
-                if(shift_drag) {
-                    if(hypot(delta.x(), delta.y()) > 15) {
-                        //BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), -start_drag_);
-                        down_ = false;
-                    }
-                } else {
-                    e->ignore();
+//            if(down_) {
+//                if(shift_drag) {
+//                    if(hypot(delta.x(), delta.y()) > 15) {
+//                        //BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), -start_drag_);
+//                        down_ = false;
+//                    }
+//                } else {
+//                    e->ignore();
 
-                    startDrag(-start_drag_);
+//                    startDrag(-start_drag_);
 
-                    down_ = false;
-                    return true;
-                }
-            }
-        }
-    }
+//                    down_ = false;
+//                    return true;
+//                }
+//            }
+//        }
+//    }
 
     //    if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::RightButton && !isSelected()) {
     //        Q_EMIT clicked(this);
@@ -406,14 +402,14 @@ bool Box::eventFilter(QObject* o, QEvent* e)
     return false;
 }
 
-void Box::enabledChange(bool val)
+void NodeBox::enabledChange(bool val)
 {
     ui->boxframe->setProperty("disabled", !val);
 
     refreshStylesheet();
 }
 
-void Box::paintEvent(QPaintEvent*)
+void NodeBox::paintEvent(QPaintEvent*)
 {
     if(!node_ || !adapter_) {
         return;
@@ -443,20 +439,20 @@ void Box::paintEvent(QPaintEvent*)
     resize(sizeHint());
 }
 
-void Box::mousePressEvent(QMouseEvent* e)
-{
-    eventFilter(this, e);
-}
-void Box::mouseReleaseEvent(QMouseEvent* e)
-{
-    eventFilter(this, e);
-}
-void Box::mouseMoveEvent(QMouseEvent* e)
-{
-    eventFilter(this, e);
-}
+//void Box::mousePressEvent(QMouseEvent* e)
+//{
+//    eventFilter(this, e);
+//}
+//void Box::mouseReleaseEvent(QMouseEvent* e)
+//{
+//    eventFilter(this, e);
+//}
+//void Box::mouseMoveEvent(QMouseEvent* e)
+//{
+//    eventFilter(this, e);
+//}
 
-void Box::moveEvent(QMoveEvent* e)
+void NodeBox::moveEvent(QMoveEvent* e)
 {
     if(!is_placed_) {
         is_placed_ = true;
@@ -472,12 +468,12 @@ void Box::moveEvent(QMoveEvent* e)
     Q_EMIT moved(this, delta.x(), delta.y());
 }
 
-void Box::triggerPlaced()
+void NodeBox::triggerPlaced()
 {
     Q_EMIT placed();
 }
 
-void Box::selectEvent()
+void NodeBox::selectEvent()
 {
     //#error TODO: make this into a signal, connect port via signal!
     //    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
@@ -497,7 +493,7 @@ void Box::selectEvent()
     refreshStylesheet();
 }
 
-void Box::deselectEvent()
+void NodeBox::deselectEvent()
 {
     //    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
     //        Port* p = i->getPort();
@@ -515,18 +511,18 @@ void Box::deselectEvent()
     refreshStylesheet();
 }
 
-void Box::keyPressEvent(QKeyEvent *)
+void NodeBox::keyPressEvent(QKeyEvent *)
 {
 
 }
 
-void Box::stop()
+void NodeBox::stop()
 {
     QObject::disconnect(this);
     adapter_->stop();
 }
 
-void Box::startDrag(QPoint offset)
+void NodeBox::startDrag(QPoint offset)
 {
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
@@ -538,9 +534,9 @@ void Box::startDrag(QPoint offset)
     ox.setNum(offset.x());
     oy.setNum(offset.y());
 
-    mimeData->setData(Box::MIME_MOVE, QByteArray());
-    mimeData->setData(Box::MIME_MOVE + "/x", ox);
-    mimeData->setData(Box::MIME_MOVE + "/y", oy);
+    mimeData->setData(NodeBox::MIME_MOVE, QByteArray());
+    mimeData->setData(NodeBox::MIME_MOVE + "/x", ox);
+    mimeData->setData(NodeBox::MIME_MOVE + "/y", oy);
 
     drag->setMimeData(mimeData);
 
@@ -567,24 +563,24 @@ void Box::startDrag(QPoint offset)
     //node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
 }
 
-void Box::deleteBox()
+void NodeBox::deleteBox()
 {
     node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
 }
 
-void Box::refreshStylesheet()
+void NodeBox::refreshStylesheet()
 {
     setStyleSheet(styleSheet());
 }
 
-void Box::eventModelChanged()
+void NodeBox::eventModelChanged()
 {
     setupUi();
 
     adapter_->updateDynamicGui(ui->content);
 }
 
-void Box::showProfiling()
+void NodeBox::showProfiling()
 {
     profiling_ = !profiling_;
 
@@ -597,19 +593,19 @@ void Box::showProfiling()
 
 }
 
-void Box::killContent()
+void NodeBox::killContent()
 {
     node_->killContent();
 }
 
-void Box::flipSides()
+void NodeBox::flipSides()
 {
     bool& flipped = node_->node_state_->flipped;
     flipped = !flipped;
     updateFlippedSides();
 }
 
-void Box::updateFlippedSides()
+void NodeBox::updateFlippedSides()
 {
     const bool& flip = node_->node_state_->flipped;
 
@@ -631,12 +627,12 @@ void Box::updateFlippedSides()
     //    }
 }
 
-bool Box::isMinimizedSize() const
+bool NodeBox::isMinimizedSize() const
 {
     return node_->getNodeState()->minimized;
 }
 
-void Box::minimizeBox(bool minimize)
+void NodeBox::minimizeBox(bool minimize)
 {    
     node_->setMinimized(minimize);
 
@@ -658,17 +654,17 @@ void Box::minimizeBox(bool minimize)
     resize(sizeHint());
 }
 
-bool Box::hasSubGraph()
+bool NodeBox::hasSubGraph()
 {
     return false;
 }
 
-Graph::Ptr Box::getSubGraph()
+Graph::Ptr NodeBox::getSubGraph()
 {
     throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
 }
 
-void Box::nodeStateChanged()
+void NodeBox::nodeStateChanged()
 {
     minimizeBox(node_->getNodeState()->minimized);
 
@@ -681,12 +677,12 @@ void Box::nodeStateChanged()
     move(node_->getPosition());
 }
 
-CommandDispatcher* Box::getCommandDispatcher() const
+CommandDispatcher* NodeBox::getCommandDispatcher() const
 {
     return node_->getCommandDispatcher();
 }
 
-void Box::setCommandDispatcher(CommandDispatcher *d)
+void NodeBox::setCommandDispatcher(CommandDispatcher *d)
 {
     node_->setCommandDispatcher(d);
 }

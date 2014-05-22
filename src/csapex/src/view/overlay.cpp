@@ -56,8 +56,8 @@ std::pair<int,int> rgb2id(QRgb rgb)
 }
 
 Overlay::Overlay(Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, QWidget* parent)
-    : QWidget(parent), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), graph_(graph), highlight_connection_id_(-1), schema_dirty_(true),
-      drag_connection_(-1), fulcrum_is_hovered_(false), mouse_blocked(false), splicing_requested(false), splicing(false)
+    : QWidget(parent), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), graph_(graph), highlight_connection_id_(-1),
+      drag_connection_(-1), fulcrum_is_hovered_(false), mouse_blocked(false)
 {
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -84,34 +84,6 @@ Overlay::Overlay(Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControll
 }
 
 
-void Overlay::connectionAdded(Connection* c)
-{
-    QObject::connect(c, SIGNAL(fulcrum_added(Connection*)), this, SLOT(fulcrumAdded(Connection*)));
-    QObject::connect(c, SIGNAL(fulcrum_deleted(Connection*)), this, SLOT(fulcrumDeleted(Connection*)));
-    QObject::connect(c, SIGNAL(fulcrum_moved(Connection*)), this, SLOT(fulcrumMoved(Connection*)));
-}
-
-void Overlay::connectionDeleted(Connection*)
-{
-
-}
-
-void Overlay::fulcrumAdded(Connection *)
-{
-    if(splicing_requested) {
-        splicing = true;
-    }
-}
-
-void Overlay::fulcrumDeleted(Connection *)
-{
-
-}
-
-void Overlay::fulcrumMoved(Connection *)
-{
-
-}
 
 void Overlay::blockMouse(bool b)
 {
@@ -120,198 +92,6 @@ void Overlay::blockMouse(bool b)
     setAttribute(Qt::WA_TransparentForMouseEvents, !mouse_blocked);
 }
 
-void Overlay::addTemporaryConnection(Connectable *from, const QPoint& end)
-{
-    assert(from);
-
-    TempConnection temp;
-    temp.from = from;
-    temp.to = end;
-
-    temp_.push_back(temp);
-}
-
-void Overlay::addTemporaryConnection(Connectable *from, Connectable *to)
-{
-    assert(from);
-    assert(to);
-
-    TempConnection temp;
-    temp.from = from;
-    temp.to = widget_ctrl_->getPort(to)->centerPoint();
-
-    temp_.push_back(temp);
-}
-
-void Overlay::deleteTemporaryConnections()
-{
-    temp_.clear();
-}
-
-void Overlay::deleteTemporaryConnectionsAndRepaint()
-{
-    deleteTemporaryConnections();
-    repaint();
-}
-
-void Overlay::drawConnection(Connection& connection)
-{
-    if(!connection.from()->isOutput() || !connection.to()->isInput()) {
-        return;
-    }
-
-    ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
-    ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
-
-    Port* fromp = widget_ctrl_->getPort(from);
-    Port* top = widget_ctrl_->getPort(to);
-
-    if(!fromp || !top) {
-        return;
-    }
-
-    QPoint p1 = fromp->centerPoint();
-    QPoint p2 = top->centerPoint();
-
-    int id = connection.id();
-
-    ccs = CurrentConnectionState();
-
-    ccs.highlighted = (highlight_connection_id_ == id);
-    ccs.error = (to->isError() || from->isError());
-    ccs.selected = connection.isSelected();
-    ccs.disabled = (!from->isEnabled() || !to->isEnabled());
-    ccs.async = from->isAsync() || to->isAsync();
-    ccs.minimized_from = fromp->isMinimizedSize();
-    ccs.minimized_to = top->isMinimizedSize();
-
-    drawConnection(p1, p2, id,
-                   fromp->isFlipped() ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
-                   top->isFlipped() ? Connection::Fulcrum::OUT : Connection::Fulcrum::IN);
-
-    int f = connection.activity();
-
-    drawActivity(f, from);
-    drawActivity(f, to);
-
-    int sub_section = 0;
-    Q_FOREACH(const Connection::Fulcrum& f, connection.getFulcrums()) {
-        int r = 4;
-        painter->setPen(QPen(Qt::black, 3));
-        if(splicing && drag_connection_ == connection.id() && sub_section == drag_sub_section_) {
-            painter->drawEllipse(current_splicing_handle_, r, r);
-        } else {
-            painter->drawEllipse(f.pos, r, r);
-        }
-
-        ++sub_section;
-    }
-}
-
-void Overlay::drawConnection(const QPoint& from, const QPoint& to, int id, Connection::Fulcrum::Type from_type, Connection::Fulcrum::Type to_type)
-{
-    ccs.minimized = ccs.minimized_from || ccs.minimized_to;
-    ccs.r = ccs.minimized ? 2 : 4;
-
-    double max_slack_height = 40.0;
-    double mindist_for_slack = 60.0;
-    double slack_smooth_distance = 300.0;
-
-    QPoint diff = (to - from);
-
-    double direct_length = hypot(diff.x(), diff.y());
-
-    Connection::Fulcrum current(from, from_type);
-    Connection::Fulcrum last = current;
-
-    std::vector<Connection::Fulcrum> targets;
-    if(id >= 0) {
-        targets = graph_->getConnectionWithId(id)->getFulcrums();
-    }
-    targets.push_back(Connection::Fulcrum(to, to_type));
-
-    int sub_section = 0;
-
-    QPoint cp1, cp2;
-    QPoint tangent;
-
-    Q_FOREACH(Connection::Fulcrum fulcrum, targets) {
-        if(splicing && drag_connection_ == id && sub_section == drag_sub_section_) {
-            fulcrum = Connection::Fulcrum(current_splicing_handle_, Connection::Fulcrum::HANDLE);
-        }
-
-        QPoint offset;
-        QPoint delta;
-        if(direct_length > mindist_for_slack) {
-            double offset_factor = std::min(1.0, (direct_length - mindist_for_slack) / slack_smooth_distance);
-
-            delta = QPoint(std::max(offset_factor * mindist_for_slack, std::abs(0.45 * (diff).x())), 0);
-            offset = QPoint(0, offset_factor * max_slack_height);
-        }
-
-        QPainterPath path(current.pos);
-
-        if(current.type == Connection::Fulcrum::OUT) {
-            cp1 = current.pos + delta + offset;
-
-        } else if(current.type == Connection::Fulcrum::IN) {
-            cp1 = current.pos - delta + offset;
-
-        } else {
-            const Connection::Fulcrum& last = targets[sub_section-1];
-            if(last.type == Connection::Fulcrum::LINEAR) {
-                cp1 = current.pos;
-            } else {
-                cp1 = current.pos + tangent;
-            }
-        }
-
-        if(fulcrum.type == Connection::Fulcrum::IN) {
-            cp2 = fulcrum.pos - delta + offset;
-        } else if(fulcrum.type == Connection::Fulcrum::OUT) {
-            cp2 = fulcrum.pos + delta + offset;
-        } else {
-            const Connection::Fulcrum& next = targets[sub_section+1];
-            tangent = (next.pos - current.pos);
-            tangent*= 50.0 / hypot(diff.x(), diff.y());
-            cp2 = fulcrum.pos - tangent;
-        }
-
-        if(fulcrum.type == Connection::Fulcrum::LINEAR) {
-            cp2 = fulcrum.pos;
-        }
-        path.cubicTo(cp1, cp2, fulcrum.pos);
-
-        if(ccs.highlighted) {
-            painter->setPen(QPen(Qt::black, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(path);
-
-            painter->setPen(QPen(Qt::white, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(path);
-
-        } else if(ccs.selected) {
-            painter->setPen(QPen(Qt::black, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(path);
-
-            painter->setPen(makeSelectedLinePen(from, to));
-            painter->drawPath(path);
-        }
-
-        painter->setPen(makeLinePen(from, to));
-
-        painter->drawPath(path);
-
-        if(id >= 0 && schema_dirty_) {
-            QPen schema_pen = QPen(QColor(id2rgb(id, sub_section)), ccs.r * 1.75, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
-            schematics_painter->setPen(schema_pen);
-            schematics_painter->drawPath(path);
-        }
-
-        last = current;
-        current = fulcrum;
-        ++sub_section;
-    }
-}
 
 
 QPen Overlay::makeSelectedLinePen(const QPoint& from, const QPoint& to)
@@ -353,60 +133,7 @@ QPen Overlay::makeLinePen(const QPoint& from, const QPoint& to)
     return QPen(QBrush(lg), ccs.r * 0.75, from.x() > to.x() ? Qt::DotLine : Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 }
 
-void Overlay::drawPort(Port *p)
-{
-    Connectable* c = p->getAdaptee();
-    bool right = c->isOutput() ^ p->isFlipped();
 
-    if(!p->isMinimizedSize()) {
-        int font_size = 10;
-        int lines = 3;
-
-        QFont font;
-        font.setPixelSize(font_size);
-        painter->setFont(font);
-
-        QString text = c->getLabel().c_str();
-
-        if(text.length() != 0) {
-            text += "\n";
-        }
-        text += c->getType()->name().c_str();
-
-        QFontMetrics metrics(font);
-
-        int dx = 160;
-        int dy = lines * metrics.height();
-
-        QRectF rect(p->centerPoint() + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
-
-        QTextOption opt(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
-        QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
-        QPen p = painter->pen();
-        p.setColor(color.dark());
-        painter->setPen(p);
-        painter->drawText(rect, text, opt);
-    }
-}
-
-void Overlay::drawActivity(int life, Connectable* c)
-{
-    Port* port = widget_ctrl_->getPort(c);
-    if(port && life > 0) {
-        int r = std::min(Settings::activity_marker_max_lifetime_, life);
-        double f = r / static_cast<double> (Settings::activity_marker_max_lifetime_);
-
-        int min = port->width() / 2 - 2;
-        int max = min * 1.2;
-        double w = min + f * (max - min);
-
-        QColor color = c->isOutput() ? palette().foreground().color() : palette().background().color();
-        color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
-
-        painter->setPen(QPen(color, w));
-        painter->drawEllipse(QPointF(port->centerPoint()), w, w);
-    }
-}
 
 void Overlay::tick()
 {
@@ -447,7 +174,7 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
             return false;
         }
 
-        QPoint from = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_).pos;
+        QPointF from = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_).pos;
         dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(drag_connection_, drag_sub_section_, from, current_splicing_handle_)));
 
         splicing = false;
@@ -482,183 +209,88 @@ bool Overlay::mouseReleaseEventHandler(QMouseEvent *e)
 
 bool Overlay::mouseMoveEventHandler(bool drag, QMouseEvent *e)
 {
-    int x = e->x();
-    int y = e->y();
+//    int x = e->x();
+//    int y = e->y();
 
-    if(x < 0 || x >= schematics.width() || y < 0 || y >= schematics.height()) {
-        return true;
-    }
+//    if(x < 0 || x >= schematics.width() || y < 0 || y >= schematics.height()) {
+//        return true;
+//    }
 
-    if(mouse_blocked) {
-        return true;
-    }
+//    if(mouse_blocked) {
+//        return true;
+//    }
 
 
-    if(drag) {
-        if(hasTempConnectionHandle() && !splicing_requested) {
-            splicing_requested = true;
-            current_splicing_handle_ = drag_connection_handle_;
+//    if(drag) {
+//        if(hasTempConnectionHandle() && !splicing_requested) {
+//            splicing_requested = true;
+//            current_splicing_handle_ = drag_connection_handle_;
 
-            if(fulcrum_is_hovered_) {
-                splicing = true;
+//            if(fulcrum_is_hovered_) {
+//                splicing = true;
 
-            } else {
-                int type = Connection::Fulcrum::CURVE;
-                Command::Ptr make_fulcrum(new command::AddFulcrum(highlight_connection_id_, drag_sub_section_, drag_connection_handle_, type));
-                dispatcher_->execute(make_fulcrum);
-            }
-            return false;
+//            } else {
+//                int type = Connection::Fulcrum::CURVE;
+//                Command::Ptr make_fulcrum(new command::AddFulcrum(highlight_connection_id_, drag_sub_section_, drag_connection_handle_, type));
+//                dispatcher_->execute(make_fulcrum);
+//            }
+//            return false;
 
-        } else if(splicing) {
-            if(current_splicing_handle_.x() != x || current_splicing_handle_.y() != y) {
-                current_splicing_handle_.setX(x);
-                current_splicing_handle_.setY(y);
-                drag_connection_handle_ = e->pos();
+//        } else if(splicing) {
+//            if(current_splicing_handle_.x() != x || current_splicing_handle_.y() != y) {
+//                current_splicing_handle_.setX(x);
+//                current_splicing_handle_.setY(y);
+//                drag_connection_handle_ = e->pos();
 
-                invalidateSchema();
-                repaint();
-            }
-            return false;
-        }
+//                invalidateSchema();
+//                repaint();
+//            }
+//            return false;
+//        }
 
-    } else if(!schema_dirty_) {
-        std::pair<int, int> data = rgb2id(schematics.pixel(x,y));
-        int id = data.first;
-        int subsection = data.second;
+//    } else if(!schema_dirty_) {
+//        std::pair<int, int> data = rgb2id(schematics.pixel(x,y));
+//        int id = data.first;
+//        int subsection = data.second;
 
-        if(id != -1) {
-            highlight_connection_id_ = id;
-            drag_connection_handle_ = e->pos();
-            fulcrum_is_hovered_ = false;
-            drag_sub_section_ = subsection;
-            drag_connection_ = id;
+//        if(id != -1) {
+//            highlight_connection_id_ = id;
+//            drag_connection_handle_ = e->pos();
+//            fulcrum_is_hovered_ = false;
+//            drag_sub_section_ = subsection;
+//            drag_connection_ = id;
 
-            double closest_dist = 15;
-            Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
-                int sub_section = 0;
+//            double closest_dist = 15;
+//            Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
+//                int sub_section = 0;
 
-                Q_FOREACH(const Connection::Fulcrum& fulcrum, connection->getFulcrums()) {
-                    double dist = hypot(fulcrum.pos.x() - x, fulcrum.pos.y() - y);
-                    if(dist < closest_dist) {
-                        closest_dist = dist;
-                        drag_connection_handle_ = fulcrum.pos;
-                        fulcrum_is_hovered_ = true;
-                        drag_sub_section_ = sub_section;
-                        drag_connection_ = connection->id();
+//                Q_FOREACH(const Connection::Fulcrum& fulcrum, connection->getFulcrums()) {
+//                    double dist = hypot(fulcrum.pos.x() - x, fulcrum.pos.y() - y);
+//                    if(dist < closest_dist) {
+//                        closest_dist = dist;
+//                        drag_connection_handle_ = fulcrum.pos;
+//                        fulcrum_is_hovered_ = true;
+//                        drag_sub_section_ = sub_section;
+//                        drag_connection_ = connection->id();
 
-                        highlight_connection_id_ = drag_connection_;
-                    }
+//                        highlight_connection_id_ = drag_connection_;
+//                    }
 
-                    ++sub_section;
-                }
-            }
+//                    ++sub_section;
+//                }
+//            }
 
-            repaint();
-        } else {
-            highlight_connection_id_ = -1;
-            splicing = false;
-            drag_connection_handle_ = QPoint(0,0);
-        }
-    }
+//            repaint();
+//        } else {
+//            highlight_connection_id_ = -1;
+//            splicing = false;
+//            drag_connection_handle_ = QPoint(0,0);
+//        }
+//    }
 
-    return true;
+//    return true;
 }
 
-bool Overlay::showContextMenu(const QPoint &global_pos)
-{
-    if(fulcrum_is_hovered_) {
-        return showFulcrumContextMenu(global_pos);
-    } else {
-        return showConnectionContextMenu(global_pos);
-    }
-}
-
-bool Overlay::showConnectionContextMenu(const QPoint& global_pos)
-{
-    QPoint pos = mapFromGlobal(global_pos);
-    std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
-    int id = data.first;
-
-    if(id != -1) {
-        QMenu menu;
-        QAction* reset = new QAction("reset connection", &menu);
-        menu.addAction(reset);
-        QAction* del = new QAction("delete connection", &menu);
-        menu.addAction(del);
-
-        QAction* selectedItem = menu.exec(global_pos);
-
-        if(selectedItem == del) {
-            dispatcher_->execute(graph_->deleteConnectionById(id));
-
-        } else if(selectedItem == reset) {
-            dispatcher_->execute(graph_->deleteAllConnectionFulcrumsCommand(id));
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-bool Overlay::showFulcrumContextMenu(const QPoint& global_pos)
-{
-    Connection::Fulcrum fulc = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
-
-    QMenu menu;
-    QAction* del = new QAction("delete fulcrum", &menu);
-    menu.addAction(del);
-
-    QMenu type("change type");
-
-    QAction* curve = new QAction("curve", &menu);
-    curve->setCheckable(true);
-    if(fulc.type == Connection::Fulcrum::CURVE) {
-        curve->setDisabled(true);
-        curve->setChecked(true);
-    }
-    type.addAction(curve);
-
-    QAction* linear = new QAction("linear", &menu);
-    linear->setCheckable(true);
-    if(fulc.type == Connection::Fulcrum::LINEAR) {
-        linear->setDisabled(true);
-        linear->setChecked(true);
-    }
-    type.addAction(linear);
-
-    menu.addMenu(&type);
-
-    QAction* selectedItem = menu.exec(global_pos);
-
-    if(selectedItem == del) {
-        dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
-
-    } else if(selectedItem == curve || selectedItem == linear) {
-        int type = 0;
-        if(selectedItem == curve) {
-            type = Connection::Fulcrum::CURVE;
-
-        } else if(selectedItem == linear) {
-            type = Connection::Fulcrum::LINEAR;
-
-        } else {
-            return true;
-        }
-
-        command::Meta::Ptr cmd(new command::Meta("Change Fulcrum Type"));
-        cmd->add(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
-        cmd->add(Command::Ptr(new command::AddFulcrum(drag_connection_, drag_sub_section_, fulc.pos, type)));
-        dispatcher_->execute(cmd);
-
-    } else {
-        fulcrum_is_hovered_ = false;
-        drag_connection_handle_ = QPoint();
-        highlight_connection_id_ = -1;
-    }
-
-    return true;
-}
 
 void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
 {
@@ -673,114 +305,6 @@ void Overlay::setSelectionRectangle(const QPoint &a, const QPoint &b)
 
 void Overlay::paintEvent(QPaintEvent*)
 {
-    QPainter p(this);
-    QPainter ps(&schematics);
 
-    painter = &p;
-    schematics_painter = &ps;
-
-    if(schema_dirty_) {
-        schematics_painter->fillRect(0, 0, schematics.width(), schematics.height(), Qt::white);
-    }
-
-    painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(Qt::black, 3));
-
-    if(!temp_.empty()) {
-        BOOST_FOREACH(TempConnection& temp, temp_) {
-
-            ccs = CurrentConnectionState();
-            ccs.selected = true;
-
-            Port* fromp = widget_ctrl_->getPort(temp.from);
-            bool flipped = fromp->isFlipped();
-
-            if(temp.from->isInput()) {
-                drawConnection(temp.to, fromp->centerPoint(), -1,
-                               flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
-                               Connection::Fulcrum::HANDLE);
-            } else {
-                drawConnection(fromp->centerPoint(), temp.to, -1,
-                               flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
-                               Connection::Fulcrum::HANDLE);
-            }
-        }
-    }
-
-    Q_FOREACH(Connection::Ptr connection, graph_->connections_) {
-        drawConnection(*connection);
-    }
-
-    foreach (Node::Ptr node, graph_->nodes_) {
-
-        Box* box = widget_ctrl_->getBox(node->getUUID());
-        if(!box) {
-            continue;
-        }
-
-        if(node->isError()) {
-            QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
-
-            QFont font;
-            font.setPixelSize(8);
-            painter->setFont(font);
-            painter->setPen(node->errorLevel() == Node::EL_ERROR ? Qt::red : QColor(0xCC,0x99,0x00));
-
-            QTextOption opt(Qt::AlignTop | Qt::AlignHCenter);
-            painter->drawText(rect, node->errorMessage().c_str(), opt);
-        }
-
-        for(int id = 0; id < node->countInputs(); ++id) {
-            Port* p = widget_ctrl_->getPort(node->getInput(id));
-            if(p) {
-                drawPort(p);
-            }
-        }
-        for(int id = 0; id < node->countOutputs(); ++id) {
-            ConnectorOut* o = node->getOutput(id);
-            assert(o->guard_ == 0xDEADBEEF);
-            Port* p = widget_ctrl_->getPort(o);
-            if(p) {
-                assert(p->guard_ == 0xDEADBEEF);
-                drawPort(p);
-            }
-        }
-    }
-
-    if(!drag_connection_handle_.isNull()) {
-        int r = 4;
-        painter->setPen(QPen(Qt::black, 1));
-        painter->drawEllipse(drag_connection_handle_, r, r);
-    }
-
-    painter->setOpacity(0.35);
-
-    if(!selection_a.isNull() && !selection_b.isNull()) {
-        painter->setPen(QPen(Qt::black, 1));
-        painter->setBrush(QBrush(Qt::white));
-        painter->drawRect(QRect(selection_a, selection_b));
-    }
-
-    //    painter->drawImage(QPoint(0,0), schematics);
-
-    schema_dirty_ = false;
-
-    painter = NULL;
-    schematics_painter = NULL;
 }
 
-void Overlay::invalidateSchema()
-{
-    schema_dirty_ = true;
-}
-
-void Overlay::refresh()
-{
-    invalidateSchema();
-}
-
-void Overlay::resizeEvent(QResizeEvent *event)
-{
-    schematics = QImage(event->size(), QImage::Format_RGB888);
-    invalidateSchema();
-}

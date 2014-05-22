@@ -34,7 +34,6 @@ public:
     explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphPtr graph, Designer *designer, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
-    void showMenu();
     void closeEvent(QCloseEvent* event);
 
     void resetSignal();
@@ -43,8 +42,6 @@ private Q_SLOTS:
     void updateMenu();
     void updateTitle();
     void tick();
-    void hideLog();
-    void scrollDownLog();
     void init();
     void loadStyleSheet(const QString& path);
     void updateDeleteAction();

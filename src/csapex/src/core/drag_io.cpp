@@ -10,8 +10,9 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/model/node.h>
 #include <csapex/view/box.h>
-#include <csapex/view/overlay.h>
 #include <csapex/view/widget_controller.h>
+#include <csapex/view/designer_scene.h>
+#include <csapex/view/designer_view.h>
 
 using namespace csapex;
 
@@ -37,12 +38,12 @@ DragIO::DragIO(Graph *graph, CommandDispatcher* dispatcher, WidgetControllerPtr 
 
 }
 
-void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
+void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
 {
-    if(e->mimeData()->hasFormat(Box::MIME)) {
+    if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
+    } else if(e->mimeData()->hasFormat(NodeBox::MIME_MOVE)) {
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
@@ -63,7 +64,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
             std::string cmd = v[Qt::UserRole].toString().toStdString();
 
-            if(cmd == Box::MIME.toStdString()) {
+            if(cmd == NodeBox::MIME.toStdString()) {
                 e->accept();
 
                 std::string type = v[Qt::UserRole+1].toString().toStdString();
@@ -74,7 +75,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
 
     Q_FOREACH(HandlerEnter::Ptr h, handler_enter) {
-        if(h->handle(dispatcher_, src, overlay, e)) {
+        if(h->handle(dispatcher_, src, e)) {
             return;
         }
     }
@@ -89,7 +90,7 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
         std::string cmd = v[Qt::UserRole].toString().toStdString();
 
-        if(cmd != Box::MIME.toStdString()) {
+        if(cmd != NodeBox::MIME.toStdString()) {
             std::cout << "warning: data is ";
             typedef const std::pair<int, QVariant> PAIR;
             Q_FOREACH(PAIR& pair, v.toStdMap()) {
@@ -101,36 +102,44 @@ void DragIO::dragEnterEvent(QWidget* src, Overlay *overlay, QDragEnterEvent* e)
 
 }
 
-void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
+void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
 {
-    if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+    if(e->mimeData()->hasFormat(NodeBox::MIME)) {
+        e->acceptProposedAction();
+
+    } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        overlay->deleteTemporaryConnections();
-        overlay->addTemporaryConnection(c, e->pos());
-        overlay->repaint();
+        e->acceptProposedAction();
+
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnections();
+        scene->addTemporaryConnection(c, src->mapToScene(e->pos()));
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        overlay->deleteTemporaryConnections();
+        e->acceptProposedAction();
+
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnections();
 
         if(c->isOutput()) {
             ConnectorOut* out = dynamic_cast<ConnectorOut*> (c);
             for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-                overlay->addTemporaryConnection(*it, e->pos());
+                scene->addTemporaryConnection(*it, src->mapToScene(e->pos()));
             }
         } else {
             ConnectorIn* in = dynamic_cast<ConnectorIn*> (c);
-            overlay->addTemporaryConnection(in->getSource(), e->pos());
+            scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
         }
-        overlay->repaint();
+        scene->update();
 
-    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
+    } else if(e->mimeData()->hasFormat(NodeBox::MIME_MOVE)) {
         std::string uuid_tmp = e->mimeData()->text().toStdString();
         UUID uuid = UUID::make_forced(uuid_tmp);
 
-        Box* box = widget_ctrl_->getBox(uuid);
-        QPoint offset_value(e->mimeData()->data(Box::MIME_MOVE + "/x").toInt(),
-                            e->mimeData()->data(Box::MIME_MOVE + "/y").toInt());
+        NodeBox* box = widget_ctrl_->getBox(uuid);
+        QPoint offset_value(e->mimeData()->data(NodeBox::MIME_MOVE + "/x").toInt(),
+                            e->mimeData()->data(NodeBox::MIME_MOVE + "/y").toInt());
         QPoint pos = e->pos() + offset_value;
 
         if(lock) {
@@ -141,45 +150,45 @@ void DragIO::dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e)
 
         box->move(pos);
 
-        overlay->repaint();
+//        overlay->repaint();
 
     } else {
         Q_FOREACH(HandlerMove::Ptr h, handler_move) {
-            if(h->handle(dispatcher_, src, overlay, e)) {
+            if(h->handle(dispatcher_, src, e)) {
                 return;
             }
         }
     }
 }
 
-void DragIO::dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e)
+void DragIO::dropEvent(DesignerView *src, QDropEvent* e)
 {
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
-    if(e->mimeData()->hasFormat(Box::MIME)) {
-        QByteArray b = e->mimeData()->data(Box::MIME);
+    if(e->mimeData()->hasFormat(NodeBox::MIME)) {
+        QByteArray b = e->mimeData()->data(NodeBox::MIME);
         std::string type = (QString(b)).toStdString();
 
         e->setDropAction(Qt::CopyAction);
         e->accept();
 
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
-        QPoint pos = e->pos() + offset;
+        QPointF pos = src->mapToScene(e->pos()) + offset;
 
 
         UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
-        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, NodeStateNullPtr)));
+        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, NodeStateNullPtr)));
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         e->ignore();
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         e->ignore();
-    } else if(e->mimeData()->hasFormat(Box::MIME_MOVE)) {
+    } else if(e->mimeData()->hasFormat(NodeBox::MIME_MOVE)) {
         e->acceptProposedAction();
         e->setDropAction(Qt::MoveAction);
     } else {
         Q_FOREACH(HandlerDrop::Ptr h, handler_drop) {
-            if(h->handle(dispatcher_, src, overlay, e)) {
+            if(h->handle(dispatcher_, src, e)) {
                 return;
             }
         }

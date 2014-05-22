@@ -12,22 +12,44 @@
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/view/box.h>
 #include <csapex/view/design_board.h>
+#include <csapex/view/designer_view.h>
 #include <csapex/view/widget_controller.h>
 #include "ui_designer.h"
 #include <utils_param/parameter_factory.h>
+#include <csapex/view/designer_scene.h>
 
 /// SYSTEM
 #include <QScrollBar>
+#include <QGLWidget>
+#include <QGraphicsView>
+#include <QGraphicsSceneWheelEvent>
 
 using namespace csapex;
 
-Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignBoard* board, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
+Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerView* view, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Designer), designer_view_(view), settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
+{
+}
+
+Designer::~Designer()
+{
+}
+
+void Designer::setup()
 {
     ui->setupUi(this);
 
-    designer_board = board;
-    ui->scrollArea->setWidget(designer_board);
+    ui->horizontalLayout->addWidget(designer_view_);
+    designer_view_->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+    designer_view_->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
+
+    designer_view_->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+
+//    designer_view_->setSceneRect(0, 0, 1000, 1000);
+
+    //    designer_board = board;
+    //    ui->scrollArea->setWidget(designer_board);
 
     if(settings_.knows("grid")) {
         enableGrid(settings_.get<bool>("grid"));
@@ -36,10 +58,8 @@ Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *disp
     if(settings_.knows("grid-lock")) {
         lockToGrid(settings_.get<bool>("grid-lock"));
     }
-}
 
-Designer::~Designer()
-{
+    setFocusPolicy(Qt::NoFocus);
 }
 
 void Designer::deleteSelected()
@@ -58,45 +78,35 @@ void Designer::deleteSelected()
     }
 }
 
-bool Designer::eventFilter(QObject*, QEvent*)
+void Designer::overwriteStyleSheet(QString &stylesheet)
 {
-    return false;
-}
-
-void Designer::keyPressEvent(QKeyEvent* e)
-{
-    designer_board->keyPressEvent(e);
-}
-
-void Designer::keyReleaseEvent(QKeyEvent* e)
-{
-    designer_board->keyReleaseEvent(e);
+    designer_view_->overwriteStyleSheet(stylesheet);
 }
 
 void Designer::setView(int sx, int sy)
 {
-    designer_board->setView(sx, sy);
+    //designer_board->setView(sx, sy);
 }
 
 void Designer::reset()
 {
-    designer_board->reset();
+    //designer_board->reset();
 }
 
-void Designer::addBox(Box *box)
+void Designer::addBox(NodeBox *box)
 {
-    designer_board->addBoxEvent(box);
+    designer_view_->addBoxEvent(box);
 }
 
-void Designer::removeBox(Box *box)
+void Designer::removeBox(NodeBox *box)
 {
-    designer_board->removeBoxEvent(box);
+    designer_view_->removeBoxEvent(box);
 }
 
 
 void Designer::stateChangedEvent()
 {
-    designer_board->refresh();
+    //designer_board->refresh();
 }
 
 
@@ -118,7 +128,7 @@ void Designer::enableGrid(bool grid)
 
     settings_.set("grid", grid);
 
-    designer_board->enableGrid(grid);
+    //designer_board->enableGrid(grid);
     Q_EMIT gridEnabled(grid);
 
 }

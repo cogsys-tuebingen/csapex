@@ -88,7 +88,7 @@ Connection::Fulcrum Connection::getFulcrum(int fulcrum_id)
     return fulcrums_[fulcrum_id];
 }
 
-void Connection::addFulcrum(int subsection, const QPoint &pos, int type)
+void Connection::addFulcrum(int subsection, const QPointF &pos, int type)
 {
     std::size_t before = fulcrums_.size();
     fulcrums_.insert(fulcrums_.begin() + subsection, Connection::Fulcrum(pos, type));
@@ -96,7 +96,7 @@ void Connection::addFulcrum(int subsection, const QPoint &pos, int type)
     Q_EMIT fulcrum_added(this);
 }
 
-void Connection::moveFulcrum(int fulcrum_id, const QPoint &pos)
+void Connection::moveFulcrum(int fulcrum_id, const QPointF &pos)
 {
     fulcrums_[fulcrum_id].pos = pos;
     Q_EMIT fulcrum_moved(this);

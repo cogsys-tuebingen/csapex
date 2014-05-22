@@ -50,11 +50,10 @@ void CsApexWindow::construct()
 
     ui->setupUi(this);
 
-    designer_->hide();
-    ui->splitter->addWidget(designer_);
-    ui->splitter->addWidget(ui->logOutput);
-
     Graph* graph = graph_.get();
+
+    designer_->setup();
+    setCentralWidget(designer_);
 
     ui->actionGrid->setChecked(designer_->isGridEnabled());
     ui->actionLock_to_Grid->setChecked(designer_->isGridLockEnabled());
@@ -110,8 +109,6 @@ void CsApexWindow::construct()
     updateMenu();
     updateTitle();
 
-    hideLog();
-
     timer.setInterval(100);
     timer.setSingleShot(false);
     timer.start();
@@ -132,13 +129,13 @@ void CsApexWindow::updateDebugInfo()
         return;
     }
 
-    std::vector<Box*> selected;
-    boost::function<void(Box*)> append = boost::bind(&std::vector<Box*>::push_back, &selected, _1);
-    widget_ctrl_->foreachBox(append, boost::bind(&Box::isSelected, _1));
+    std::vector<NodeBox*> selected;
+    boost::function<void(NodeBox*)> append = boost::bind(&std::vector<NodeBox*>::push_back, &selected, _1);
+    widget_ctrl_->foreachBox(append, boost::bind(&NodeBox::isSelected, _1));
 
     ui->box_info->clear();
 
-    foreach (Box* box, selected) {
+    foreach (NodeBox* box, selected) {
         Node* node = box->getNode();
         QObject::connect(node, SIGNAL(stateChanged()), this, SLOT(updateDebugInfo()));
         QObject::connect(node, SIGNAL(modelChanged()), this, SLOT(updateDebugInfo()));
@@ -210,6 +207,8 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     QWidget::setStyleSheet(style_sheet_);
     BoxManager::instance().setStyleSheet(style_sheet_);
 
+    designer_->overwriteStyleSheet(style_sheet_);
+
     if(style_sheet_watcher_) {
         delete style_sheet_watcher_;
     }
@@ -228,25 +227,6 @@ void CsApexWindow::loadStyleSheet()
     loadStyleSheet(cfg.c_str());
 }
 
-void CsApexWindow::showMenu()
-{
-    QVBoxLayout* new_layout = new QVBoxLayout;
-
-    QToolBar* tb = new QToolBar;
-    QMenuBar* mb = menuBar();
-    tb->addActions(mb->actions());
-
-    new_layout->addWidget(tb);
-
-    QLayout* layout = ui->centralwidget->layout();
-    QLayoutItem* item;
-    while((item = layout->takeAt(0)) != NULL) {
-        new_layout->addItem(item);
-    }
-
-    delete layout;
-    ui->centralwidget->setLayout(new_layout);
-}
 
 void CsApexWindow::start()
 {
@@ -274,68 +254,9 @@ void CsApexWindow::updateTitle()
     setWindowTitle(window.str().c_str());
 }
 
-void CsApexWindow::scrollDownLog()
-{
-    QTextCursor cursor = ui->logOutput->textCursor();
-    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-    ui->logOutput->setTextCursor(cursor);
-}
-
 void CsApexWindow::tick()
 {
     cmd_dispatcher_->executeLater();
-
-    std::string latest_cout = StreamInterceptor::instance().getCout().c_str();
-    std::string latest_cerr = StreamInterceptor::instance().getCerr().c_str();
-
-    if(!latest_cout.empty()) {
-        scrollDownLog();
-
-        std::stringstream latest;
-        latest << latest_cout;
-
-
-        std::string line;
-        while (std::getline(latest, line, '\n')) {
-            if(line.substr(0, 8) == "warning:") {
-                line = std::string("<span style='color: #ffcc00;'><b>") + line + "</b></span>";
-            }
-
-            line = BashParser::toHtml(line);
-
-            line += "<br />";
-            ui->logOutput->insertHtml(line.c_str());
-        }
-
-    }
-    if(!latest_cerr.empty()) {
-        size_t i = 0;
-        while((i = latest_cerr.find('\n', i)) != std::string::npos) {
-            latest_cerr.replace(i, 1, "<br />");
-            i += 6;
-        }
-
-        latest_cerr = std::string("<span style='color: red'><b>") + latest_cerr + "</b></span>";
-
-        scrollDownLog();
-
-        ui->logOutput->insertHtml(latest_cerr.c_str());
-
-        int height = 50;
-
-        QList<int> sizes = ui->splitter->sizes();
-        sizes[0] -= height;
-        sizes[1] = height;
-        ui->splitter->setSizes(sizes);
-    }
-}
-
-void CsApexWindow::hideLog()
-{
-    QList<int> sizes = ui->splitter->sizes();
-    sizes[0] += sizes[1];
-    sizes[1] = 0;
-    ui->splitter->setSizes(sizes);
 }
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
@@ -391,8 +312,7 @@ void CsApexWindow::init()
     init_ = true;
 
     reloadBoxMenues();
-    designer_->show();
-    hideLog();
+//    designer_->show();
 
     Settings& settings = core_.getSettings();
     if(settings.knows("uistate")) {

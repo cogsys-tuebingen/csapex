@@ -43,12 +43,9 @@ public:
     void startPlacingBox(QWidget *parent, const std::string& type, WidgetController *widget_ctrl, const QPoint &offset = QPoint(0,0));
 
     NodePtr makeNode(const std::string& type, const UUID& uuid);
-    Box* makeBox(NodePtr node, WidgetController *widget_ctrl);
+    NodeBox* makeBox(NodePtr node, WidgetController *widget_ctrl);
 
     NodeConstructor::Ptr getSelector(const std::string& type);
-
-    void setContainer(QWidget* c);
-    QWidget* container();
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
@@ -81,8 +78,6 @@ protected:
 protected:
     std::vector<NodeConstructor::Ptr> available_elements_prototypes;
     std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
-
-    QWidget* container_;
 
     std::map<Tag, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::set<Tag> tags_;

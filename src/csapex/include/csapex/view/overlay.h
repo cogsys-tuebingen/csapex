@@ -21,22 +21,8 @@ public:
     Overlay(GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, QWidget* parent = 0);
 
 public Q_SLOTS:
-    void addTemporaryConnection(Connectable* from, Connectable* to);
-    void addTemporaryConnection(Connectable *from, const QPoint& end);
-    void deleteTemporaryConnections();
-    void deleteTemporaryConnectionsAndRepaint();
-
-    void connectionAdded(Connection*);
-    void connectionDeleted(Connection*);
-
-    void fulcrumAdded(Connection*);
-    void fulcrumMoved(Connection*);
-    void fulcrumDeleted(Connection*);
 
     void tick();
-
-    void invalidateSchema();
-    void refresh();
 
     void blockMouse(bool);
 
@@ -54,17 +40,8 @@ public:
     bool showContextMenu(const QPoint& pos);
 
 protected:
-    bool showConnectionContextMenu(const QPoint& pos);
-    bool showFulcrumContextMenu(const QPoint& pos);
-
-    void drawActivity(int life, Connectable* c);
-    void drawPort(Port* p);
-    void drawConnection(Connection& connection);
-
-    void drawConnection(const QPoint& from, const QPoint& to, int id, Connection::Fulcrum::Type from_type, Connection::Fulcrum::Type to_type);
 
     void paintEvent(QPaintEvent* event);
-    void resizeEvent(QResizeEvent * event);
 
     QPen makeLinePen(const QPoint &from, const QPoint &to);
     QPen makeSelectedLinePen(const QPoint &from, const QPoint &to);
@@ -97,8 +74,6 @@ protected:
     std::vector<TempConnection> temp_;
 
     QPainter* painter;
-    QPainter* schematics_painter;
-    QImage schematics;
 
     QTimer* repainter;
 
@@ -108,7 +83,6 @@ protected:
     int activity_marker_max_opacity_;
 
     int highlight_connection_id_;
-    bool schema_dirty_;
 
     int connector_radius_;
 

@@ -29,7 +29,7 @@ namespace csapex
 {
 
 
-class Box : public QWidget, public Selectable
+class NodeBox : public QWidget, public Selectable
 {
     Q_OBJECT
 
@@ -43,7 +43,7 @@ class Box : public QWidget, public Selectable
     friend class BoxSelectionmanager;
 
 public:
-    typedef boost::shared_ptr<Box> Ptr;
+    typedef boost::shared_ptr<NodeBox> Ptr;
 
 public:
     static const QString MIME;
@@ -51,8 +51,8 @@ public:
 
 public:
     /// CONSTRUCTION
-    Box(NodePtr content, NodeAdapterPtr adapter, QWidget* parent = 0);
-    virtual ~Box();
+    NodeBox(NodePtr content, NodeAdapterPtr adapter, QWidget* parent = 0);
+    virtual ~NodeBox();
     void construct();
     void init();
 
@@ -83,9 +83,9 @@ public:
     QBoxLayout* getOutputLayout();
 
     /// UI CALLBACKS
-    virtual void mousePressEvent(QMouseEvent* e);
-    virtual void mouseReleaseEvent(QMouseEvent* e);
-    virtual void mouseMoveEvent(QMouseEvent* e);
+//    virtual void mousePressEvent(QMouseEvent* e);
+//    virtual void mouseReleaseEvent(QMouseEvent* e);
+//    virtual void mouseMoveEvent(QMouseEvent* e);
 
     void moveEvent(QMoveEvent*);
     void triggerPlaced();
@@ -117,7 +117,7 @@ public Q_SLOTS:
     void showProfiling();
 
     void updateInformation(Graph* graph);
-    void showContextMenu(const QPoint& pos);
+    void contextMenuEvent(QContextMenuEvent* e);
 
     void registerEvent(Connectable*);
     void unregisterEvent(Connectable*);
@@ -134,14 +134,14 @@ Q_SIGNALS:
     void flipped(bool);
     void minimized(bool);
 
-    void moveRequest(Box*, QPoint);
-    void moved(Box*, int dx, int dy);
+    void moveRequest(NodeBox*, QPoint);
+    void moved(NodeBox*, int dx, int dy);
 
-    void changed(Box*);
-    void clicked(Box*);
-    void moveSelectionToBox(Box*);
+    void changed(NodeBox*);
+    void clicked(NodeBox*);
+    void moveSelectionToBox(NodeBox*);
 
-    void showContextMenuForBox(Box* box, const QPoint& pos);
+    void showContextMenuForBox(NodeBox* box, const QPoint& pos);
 
 
 protected:

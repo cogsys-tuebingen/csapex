@@ -198,7 +198,7 @@ void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
             child->setToolTip(0, (proxy->getType() + ": " + proxy->getDescription()).c_str());
             child->setIcon(0, icon);
             child->setText(0, name.c_str());
-            child->setData(0, Qt::UserRole, Box::MIME);
+            child->setData(0, Qt::UserRole, NodeBox::MIME);
             child->setData(0, Qt::UserRole + 1, proxy->getType().c_str());
 
             submenu->addChild(child);
@@ -247,13 +247,13 @@ void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_
 namespace {
 QPixmap createPixmap(const std::string& label, const NodePtr& content, const QString& stylesheet, WidgetController* widget_ctrl)
 {
-    csapex::Box::Ptr object;
+    NodeBox::Ptr object;
 
     if(BoxManager::typeIsTemplate(content->getType())) {
         throw std::runtime_error("Groups are not implemented");
         //        object.reset(new csapex::Group(""));
     } else {
-        object.reset(new csapex::Box(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
+        object.reset(new NodeBox(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
     }
 
     object->setStyleSheet(stylesheet);
@@ -309,7 +309,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, Widge
         if(is_template) {
             //            mimeData->setData(Template::MIME, "");
         }
-        mimeData->setData(Box::MIME, type.c_str());
+        mimeData->setData(NodeBox::MIME, type.c_str());
         mimeData->setProperty("ox", offset.x());
         mimeData->setProperty("oy", offset.y());
         drag->setMimeData(mimeData);
@@ -388,15 +388,15 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
     return NodeNullPtr;
 }
 
-Box* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
+NodeBox* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
 {
     std::string type = node->getType();
 
-    Box* box;
+    NodeBox* box;
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        box = new Box(node, node_adapter_builders_[type]->build(node, widget_ctrl));
+        box = new NodeBox(node, node_adapter_builders_[type]->build(node, widget_ctrl));
     } else {
-        box = new Box(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)));
+        box = new NodeBox(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)));
     }
     box->construct();
     return box;
@@ -411,15 +411,4 @@ NodeConstructor::Ptr BoxManager::getSelector(const std::string &type)
     }
 
     return NodeConstructorNullPtr;
-}
-
-
-void BoxManager::setContainer(QWidget *c)
-{
-    container_ = c;
-}
-
-QWidget* BoxManager::container()
-{
-    return container_;
 }

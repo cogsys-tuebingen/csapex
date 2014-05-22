@@ -9,7 +9,7 @@
 
 using namespace csapex::command;
 
-MoveBox::MoveBox(Box* box, QPoint to)
+MoveBox::MoveBox(NodeBox* box, QPoint to)
     : from(box->key_point), to(to), uuid(box->getNode()->getUUID())
 {
 }
@@ -30,7 +30,7 @@ std::string MoveBox::getDescription() const
 
 bool MoveBox::doExecute()
 {
-    Box* box = widget_ctrl_->getBox(uuid);
+    NodeBox* box = widget_ctrl_->getBox(uuid);
     box->clearFocus();
     box->move(to);
     box->key_point = to;
@@ -40,7 +40,7 @@ bool MoveBox::doExecute()
 
 bool MoveBox::doUndo()
 {
-    Box* box = widget_ctrl_->getBox(uuid);
+    NodeBox* box = widget_ctrl_->getBox(uuid);
     box->clearFocus();
     box->move(from);
     box->key_point = from;

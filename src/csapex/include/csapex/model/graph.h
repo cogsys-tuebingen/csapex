@@ -24,7 +24,8 @@ class Graph : public QObject
     friend class command::AddConnection;
     friend class command::DeleteConnection;
     friend class command::DeleteNode;
-    friend class Overlay;
+    friend class DesignerView;
+    friend class DesignerScene;
     friend class Template;
     friend class CommandDispatcher;
 

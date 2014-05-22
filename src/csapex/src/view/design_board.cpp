@@ -12,7 +12,6 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
-#include <csapex/view/box_dialog.h>
 #include <csapex/view/box.h>
 #include <csapex/view/overlay.h>
 #include <csapex/view/widget_controller.h>
@@ -38,20 +37,9 @@ DesignBoard::DesignBoard(Graph::Ptr graph, CommandDispatcher* dispatcher, Widget
 
     overlay_->setParent(this);
 
-    QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
-    QObject::connect(shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
-
     installEventFilter(this);
 
     setMouseTracking(true);
-    setContextMenuPolicy(Qt::CustomContextMenu);
-
-    setFocusPolicy(Qt::StrongFocus);
-    setFocus(Qt::OtherFocusReason);
-
-    BoxManager::instance().setContainer(this);
-
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
 void DesignBoard::enableGrid(bool grid)
@@ -113,7 +101,7 @@ void DesignBoard::paintEvent(QPaintEvent*)
     updateCursor();
 }
 
-void DesignBoard::findMinSize(Box* box)
+void DesignBoard::findMinSize(NodeBox* box)
 {
     QSize minimum = minimumSize();
 
@@ -135,50 +123,15 @@ void DesignBoard::findMinSize(Box* box)
     setMinimumSize(minimum);
 }
 
-void DesignBoard::addBoxEvent(Box *box)
-{
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), this, SLOT(findMinSize(Box*)));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay_, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(moved(Box*, int, int)), &widget_ctrl_->box_selection_, SLOT(mimicBoxMovement(Box*, int, int)));
-    QObject::connect(box, SIGNAL(changed(Box*)), overlay_, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(clicked(Box*)), &widget_ctrl_->box_selection_, SLOT(toggleSelection(Box*)));
-    QObject::connect(box->getNode(), SIGNAL(connectionStart()), overlay_, SLOT(deleteTemporaryConnections()));
-    QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), overlay_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
-    QObject::connect(box->getNode(), SIGNAL(connectionDone()), overlay_, SLOT(deleteTemporaryConnectionsAndRepaint()));
-
-    QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateInformation(Graph*)));
-
-    QObject::connect(box, SIGNAL(showContextMenuForBox(Box*, QPoint)), this, SLOT(showContextMenuEditBox(Box*, QPoint)));
-
-    box->setParent(this);
-    box->init();
-    box->triggerPlaced();
-    box->setCommandDispatcher(dispatcher_);
-    box->show();
-
-    box->updateInformation(graph_.get());
-
-    overlay_->raise();
-    repaint();
-}
-
-void DesignBoard::removeBoxEvent(Box *box)
-{
-    box->setVisible(false);
-    box->deleteLater();
-}
-
 void DesignBoard::refresh()
 {
-    overlay_->refresh();
-    overlay_->raise();
 }
 
 void DesignBoard::reset()
 {
     bool has_child = true;
     while(has_child) {
-        Box* b = findChild<Box*>();
+        NodeBox* b = findChild<NodeBox*>();
         has_child = b != NULL;
         if(has_child) {
             delete b;
@@ -208,23 +161,6 @@ void DesignBoard::keyPressEvent(QKeyEvent* e)
     }
 }
 
-void DesignBoard::showBoxDialog()
-{
-    BoxDialog diag;
-    int r = diag.exec();
-
-    if(r) {
-        //BoxManager::instance().startPlacingBox(this, diag.getName());
-
-        std::string type = diag.getName();
-
-        if(!type.empty() && BoxManager::instance().isValidType(type)) {
-            UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
-            QPoint pos = mapFromGlobal(QCursor::pos());
-            dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos, UUID::NONE, uuid, NodeStateNullPtr)));
-        }
-    }
-}
 
 void DesignBoard::keyReleaseEvent(QKeyEvent* e)
 {
@@ -236,12 +172,6 @@ void DesignBoard::keyReleaseEvent(QKeyEvent* e)
         setSpace(false);
         drag_ = false;
     }
-}
-
-void DesignBoard::wheelEvent(QWheelEvent *e)
-{
-    e->accept();
-    setFocus();
 }
 
 void DesignBoard::mousePressEvent(QMouseEvent* e)
@@ -276,7 +206,7 @@ void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
         if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
             widget_ctrl_->box_selection_.clearSelection();
 
-            Q_FOREACH(csapex::Box* box, findChildren<csapex::Box*>()) {
+            Q_FOREACH(NodeBox* box, findChildren<NodeBox*>()) {
                 if(selection.contains(box->geometry())) {
                     widget_ctrl_->box_selection_.select(box->getNode(), true);
                 }
@@ -400,86 +330,12 @@ bool DesignBoard::eventFilter(QObject*, QEvent*)
 }
 
 
-void DesignBoard::showContextMenuGlobal(const QPoint& global_pos)
-{
-    if(overlay_->showContextMenu(global_pos)) {
-        return;
-    }
-
-    /// BOXES
-    widget_ctrl_->box_selection_.clearSelection();
-    showContextMenuAddNode(global_pos);
-}
-
-void DesignBoard::showContextMenuEditBox(Box* box, const QPoint &global_pos)
-{
-    QMenu menu;
-    std::map<QAction*, boost::function<void()> > handler;
-
-    Graph::Ptr graph = graph_;
-
-    if(box != NULL && !box->isSelected()) {
-        widget_ctrl_->box_selection_.clearSelection();
-        box->setSelected(true);
-    }
-
-    if(widget_ctrl_->box_selection_.countSelected() == 1) {
-        box->fillContextMenu(&menu, handler);
-
-    } else {
-        widget_ctrl_->box_selection_.fillContextMenuForSelection(&menu, handler);
-    }
-
-    QAction* selectedItem = menu.exec(global_pos);
-
-    if(selectedItem) {
-        handler[selectedItem]();
-    }
-}
-
-void DesignBoard::showContextMenu(const QPoint& pos)
-{
-    showContextMenuGlobal(mapToGlobal(pos));
-}
-
-void DesignBoard::showContextMenuAddNode(const QPoint &global_pos)
-{
-    QMenu menu;
-    BoxManager::instance().insertAvailableNodeTypes(&menu);
-
-    QAction* selectedItem = menu.exec(global_pos);
-
-    if(selectedItem) {
-        std::string selected = selectedItem->data().toString().toStdString();
-        BoxManager::instance().startPlacingBox(this, selected, widget_ctrl_.get());
-    }
-}
 
 void DesignBoard::resizeEvent(QResizeEvent* e)
 {
     overlay_->resize(e->size());
 }
 
-void DesignBoard::dragEnterEvent(QDragEnterEvent* e)
-{
-    drag_io_.dragEnterEvent(this, overlay_, e);
-}
-
-void DesignBoard::dragMoveEvent(QDragMoveEvent* e)
-{
-    drag_io_.dragMoveEvent(this, overlay_, e);
-}
-
-void DesignBoard::dropEvent(QDropEvent* e)
-{
-    drag_io_.dropEvent(this, overlay_, e);
-}
-
-void DesignBoard::dragLeaveEvent(QDragLeaveEvent*)
-{
-}
-
 void DesignBoard::enterEvent(QEvent *)
 {
-    setFocus();
 }

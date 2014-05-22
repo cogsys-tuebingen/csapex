@@ -4,6 +4,9 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 
+/// PROJECT
+#include <csapex/view/designer_view.h>
+
 /// SYSTEM
 #include <QDragEnterEvent>
 #include <vector>
@@ -17,25 +20,25 @@ public:
     struct HandlerEnter {
         typedef boost::shared_ptr<HandlerEnter> Ptr;
         virtual ~HandlerEnter() {}
-        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragEnterEvent* e) = 0;
+        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDragEnterEvent* e) = 0;
     };
     struct HandlerMove {
         typedef boost::shared_ptr<HandlerMove> Ptr;
         virtual ~HandlerMove() {}
-        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDragMoveEvent* e) = 0;
+        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDragMoveEvent* e) = 0;
     };
     struct HandlerDrop {
         typedef boost::shared_ptr<HandlerDrop> Ptr;
         virtual ~HandlerDrop() {}
-        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, Overlay* overlay, QDropEvent* e) = 0;
+        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e) = 0;
     };
 
 public:
     DragIO(Graph* graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl);
 
-    void dragEnterEvent(QWidget *src, Overlay* overlay, QDragEnterEvent* e);
-    void dragMoveEvent(QWidget *src, Overlay* overlay, QDragMoveEvent* e);
-    void dropEvent(QWidget *src, Overlay* overlay, QDropEvent* e);
+    void dragEnterEvent(DesignerView *src, QDragEnterEvent* e);
+    void dragMoveEvent(DesignerView *src, QDragMoveEvent* e);
+    void dropEvent(DesignerView *src, QDropEvent* e);
 
 public:
     static bool lock;

@@ -32,8 +32,8 @@ void DesignerIO::saveSettings(YAML::Emitter& yaml)
 {
     yaml << YAML::Key << "view_pos";
     yaml << YAML::Value << YAML::BeginSeq
-         << designer_.ui->scrollArea->horizontalScrollBar()->value()
-         << designer_.ui->scrollArea->verticalScrollBar()->value()
+//         << designer_.ui->scrollArea->horizontalScrollBar()->value()
+//         << designer_.ui->scrollArea->verticalScrollBar()->value()
          << YAML::EndSeq;
 }
 
@@ -43,10 +43,10 @@ void DesignerIO::loadSettings(YAML::Node &doc)
 
     if(exists(doc, "view_pos")) {
         int sx, sy;
-        doc["view_pos"][0] >> sx;
-        doc["view_pos"][1] >> sy;
+//        doc["view_pos"][0] >> sx;
+//        doc["view_pos"][1] >> sy;
 
-        designer_.setView(sx, sy);
+//        designer_.setView(sx, sy);
     }
 }
 
@@ -64,7 +64,7 @@ void DesignerIO::saveBoxes(YAML::Emitter& yaml, Graph::Ptr graph, WidgetControll
 
 void DesignerIO::saveBox(Node *node, WidgetController* widget_ctrl, YAML::Emitter &yaml)
 {
-    Box* box = widget_ctrl->getBox(node->getUUID());
+    NodeBox* box = widget_ctrl->getBox(node->getUUID());
     NodeAdapter::Ptr na = box->getNodeAdapter();
     Memento::Ptr m = na->getState();
     if(m) {
@@ -92,7 +92,7 @@ void DesignerIO::loadBoxes(YAML::Node &doc, WidgetController* widget_ctrl)
             std::string uuid;
             e["uuid"] >> uuid;
 
-            Box* box = widget_ctrl->getBox(UUID::make_forced(uuid));
+            NodeBox* box = widget_ctrl->getBox(UUID::make_forced(uuid));
             if(box) {
                 NodeAdapter::Ptr na = box->getNodeAdapter();
                 Memento::Ptr m = na->getState();

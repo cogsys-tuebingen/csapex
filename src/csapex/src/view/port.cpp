@@ -244,11 +244,14 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         Q_EMIT(adaptee_->connectionInProgress(adaptee_, from));
+        e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         from->connectionMovePreview(adaptee_);
+
+        e->acceptProposedAction();
     }
 }
 
@@ -280,9 +283,9 @@ void Port::mousePressEvent(QMouseEvent* e)
 QPoint Port::topLeft()
 {
     QWidget* parent = parentWidget();
-    while(parent->objectName() != "DesignBoard") {
-        parent = parent->parentWidget();
-    };
+//    while(strcmp(parent->metaObject()->className(), "DesignerScene")) {
+//        parent = parent->parentWidget();
+//    };
 
     return mapTo(parent,  QPoint(0,0));
 }

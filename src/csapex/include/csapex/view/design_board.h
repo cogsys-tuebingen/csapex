@@ -32,7 +32,6 @@ public:
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
 
-    void wheelEvent(QWheelEvent * e);
     void mousePressEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
@@ -41,10 +40,6 @@ public:
     void focusOutEvent(QFocusEvent* e);
 
     virtual bool eventFilter(QObject* o, QEvent* e);
-    void dragEnterEvent(QDragEnterEvent* e);
-    void dragMoveEvent(QDragMoveEvent* e);
-    void dropEvent(QDropEvent* e);
-    void dragLeaveEvent(QDragLeaveEvent * e);
 
     void enterEvent(QEvent * e);
 
@@ -58,15 +53,8 @@ public:
 
 public Q_SLOTS:
     void updateCursor();
-    void showBoxDialog();
-    void showContextMenuGlobal(const QPoint& pos);
-    void showContextMenu(const QPoint& pos);
-    void showContextMenuEditBox(Box* box, const QPoint& pos);
-    void showContextMenuAddNode(const QPoint& global_pos);
-    void findMinSize(Box* box);
+    void findMinSize(NodeBox* box);
 
-    void addBoxEvent(Box* box);
-    void removeBoxEvent(Box* box);
     void refresh();
     void reset();
     void setSpace(bool);

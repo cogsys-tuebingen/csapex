@@ -15,7 +15,7 @@ namespace command
 
 struct MoveFulcrum : public Command
 {
-    MoveFulcrum(int connection_id, int fulcrum_id, const QPoint& from, const QPoint& to);
+    MoveFulcrum(int connection_id, int fulcrum_id, const QPointF& from, const QPointF& to);
 
     virtual std::string getType() const;
     virtual std::string getDescription() const;
@@ -28,8 +28,8 @@ protected:
 private:
     int connection_id;
     int fulcrum_id;
-    QPoint from;
-    QPoint to;
+    QPointF from;
+    QPointF to;
 };
 
 }

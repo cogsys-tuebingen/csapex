@@ -10,7 +10,7 @@
 
 using namespace csapex::command;
 
-MoveFulcrum::MoveFulcrum(int connection_id, int fulcrum_id, const QPoint &from, const QPoint &to)
+MoveFulcrum::MoveFulcrum(int connection_id, int fulcrum_id, const QPointF &from, const QPointF &to)
     : connection_id(connection_id), fulcrum_id(fulcrum_id), from(from), to(to)
 {
 }

@@ -18,7 +18,7 @@ namespace csapex
 {
 class CorePlugin;
 
-FWD(Box);
+FWD(NodeBox);
 FWD(Group);
 FWD(NodeConstructor);
 
@@ -50,6 +50,8 @@ class StreamRelay;
 
 class Designer;
 class DesignBoard;
+class DesignerScene;
+class DesignerView;
 
 class DragIO;
 
