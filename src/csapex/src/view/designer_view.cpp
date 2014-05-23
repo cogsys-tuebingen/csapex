@@ -51,6 +51,11 @@ DesignerView::DesignerView(csapex::GraphPtr graph, CommandDispatcher *dispatcher
     setContextMenuPolicy(Qt::DefaultContextMenu);
 }
 
+DesignerView::~DesignerView()
+{
+    delete scene_;
+}
+
 DesignerScene* DesignerView::designerScene()
 {
     return scene_;

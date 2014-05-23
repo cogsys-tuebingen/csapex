@@ -20,6 +20,7 @@ class DesignerScene : public QGraphicsScene
 
 public:
     DesignerScene(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl);
+    ~DesignerScene();
 
     void drawBackground(QPainter *painter, const QRectF &rect);
     void drawForeground(QPainter *painter, const QRectF &rect);

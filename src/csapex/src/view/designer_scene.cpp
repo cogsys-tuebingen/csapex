@@ -78,6 +78,11 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
     QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)));
 }
 
+DesignerScene::~DesignerScene()
+{
+
+}
+
 void DesignerScene::enableGrid(bool draw)
 {
     if(draw != draw_grid_) {

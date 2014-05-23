@@ -19,6 +19,7 @@ class DesignerView : public QGraphicsView
 
 public:
     DesignerView(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget* parent = 0);
+    ~DesignerView();
 
     DesignerScene* designerScene();
 
