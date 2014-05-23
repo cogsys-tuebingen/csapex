@@ -192,36 +192,7 @@ void DesignBoard::mousePressEvent(QMouseEvent* e)
 void DesignBoard::mouseReleaseEvent(QMouseEvent* e)
 {
 
-    if(e->button() == Qt::LeftButton) {
-        drag_ = false;
-        overlay_->setSelectionRectangle(QPoint(),QPoint());
-    }
 
-    if(!overlay_->mouseReleaseEventHandler(e)) {
-        return;
-    }
-
-    if(e->button() == Qt::LeftButton) {
-        QRect selection(mapFromGlobal(drag_start_pos_), mapFromGlobal(e->globalPos()));
-        if(std::abs(selection.width()) > 5 && std::abs(selection.height()) > 5) {
-            widget_ctrl_->box_selection_.clearSelection();
-
-            Q_FOREACH(NodeBox* box, findChildren<NodeBox*>()) {
-                if(selection.contains(box->geometry())) {
-                    widget_ctrl_->box_selection_.select(box->getNode(), true);
-                }
-            }
-
-            return;
-        }
-    }
-
-    // BOXES
-    bool shift = Qt::ShiftModifier == QApplication::keyboardModifiers();
-    if(!shift) {
-        widget_ctrl_->box_selection_.clearSelection();
-    }
-    updateCursor();
 }
 
 void DesignBoard::mouseMoveEvent(QMouseEvent* e)

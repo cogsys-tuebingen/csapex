@@ -59,6 +59,7 @@ QWidget* topLevelParentWidget (QWidget* widget)
 
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl)
     : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
+      draw_grid_(false),
       schema_dirty_(false), splicing_requested(false), splicing(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
@@ -77,12 +78,22 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
     QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)));
 }
 
+void DesignerScene::enableGrid(bool draw)
+{
+    if(draw != draw_grid_) {
+        draw_grid_ = draw;
+
+        update();
+    }
+}
+
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsScene::drawBackground(painter, rect);
 
-    painter->drawTiledPixmap(sceneRect(), background_);
-
+    if(draw_grid_) {
+        painter->drawTiledPixmap(sceneRect(), background_);
+    }
 //    int t = painter->paintEngine()->type();
 //    if (t != QPaintEngine::OpenGL && t != QPaintEngine::OpenGL2) {
 //        qWarning("DesignerScene: drawBackground needs a QGLWidget to be set as viewport on the graphics view");
@@ -208,7 +219,7 @@ void DesignerScene::drawItems(QPainter *painter, int numItems,
                        const QStyleOptionGraphicsItem options[],
                        QWidget *widget)
 {
-    QGraphicsScene::drawItems(painter, numItems, items, options);
+    QGraphicsScene::drawItems(painter, numItems, items, options, widget);
 }
 
 QPen DesignerScene::makeSelectedLinePen(const QPointF& from, const QPointF& to)

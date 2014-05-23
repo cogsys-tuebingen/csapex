@@ -53,6 +53,8 @@ class DesignBoard;
 class DesignerScene;
 class DesignerView;
 
+class MovableGraphicsProxyWidget;
+
 class DragIO;
 
 class Overlay;

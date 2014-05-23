@@ -13,6 +13,7 @@
 #include <QPoint>
 #include <boost/function.hpp>
 #include <boost/unordered_map.hpp>
+#include <QLayout>
 
 namespace csapex
 {
@@ -28,6 +29,8 @@ public:
     WidgetController(GraphPtr graph);
 
     NodeBox* getBox(const UUID& node_id);
+
+    MovableGraphicsProxyWidget* getProxy(const UUID& node_id);
 
     Port* getPort(const UUID& connector_id);
     Port* getPort(const Connectable* connector_id);
@@ -53,12 +56,13 @@ private:
     CommandDispatcher* dispatcher_;
 
 public:
-    BoxSelectionModel box_selection_;
+//    BoxSelectionModel box_selection_;
     ConnectionSelectionModel connection_selection_;
 
 private:
     Designer* designer_;
     boost::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
+    boost::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
     boost::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 };
 

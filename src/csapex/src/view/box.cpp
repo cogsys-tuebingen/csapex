@@ -337,8 +337,7 @@ void NodeBox::init()
         setVisible(false);
     }
 
-    key_point = node_->getNodeState()->pos;
-    move(key_point);
+    move(node_->getNodeState()->pos);
 }
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
 {

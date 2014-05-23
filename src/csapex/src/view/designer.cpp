@@ -46,6 +46,8 @@ void Designer::setup()
 
     designer_view_->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
+    QObject::connect(designer_view_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
+
 //    designer_view_->setSceneRect(0, 0, 1000, 1000);
 
     //    designer_board = board;
@@ -62,13 +64,24 @@ void Designer::setup()
     setFocusPolicy(Qt::NoFocus);
 }
 
+void Designer::clearSelection()
+{
+    widget_ctrl_->connection_selection_.clearSelection();
+
+    designer_view_->scene()->clearSelection();
+}
+
+void Designer::selectAll()
+{
+    designer_view_->selectAll();
+}
+
 void Designer::deleteSelected()
 {
     command::Meta::Ptr del(new command::Meta("delete selected"));
 
-    if(widget_ctrl_->box_selection_.countSelected() != 0) {
-        del->add(widget_ctrl_->box_selection_.deleteSelectedCommand());
-    }
+#warning IMPLEMENT AGAIN FOR BOXES
+
     if(widget_ctrl_->connection_selection_.countSelected() != 0) {
         del->add(widget_ctrl_->connection_selection_.deleteSelectedCommand());
     }
@@ -128,7 +141,8 @@ void Designer::enableGrid(bool grid)
 
     settings_.set("grid", grid);
 
-    //designer_board->enableGrid(grid);
+    designer_view_->enableGrid(grid);
+
     Q_EMIT gridEnabled(grid);
 
 }

@@ -15,11 +15,12 @@
 #include <csapex/view/box.h>
 #include <csapex/view/designer.h>
 #include <csapex/view/port.h>
+#include <csapex/utility/movable_graphics_proxy_widget.h>
 
 using namespace csapex;
 
 WidgetController::WidgetController(Graph::Ptr graph)
-    : graph_(graph), box_selection_(graph, this), connection_selection_(graph, this), designer_(NULL)
+    : graph_(graph), connection_selection_(graph, this), designer_(NULL)
 {
 
 }
@@ -28,6 +29,16 @@ NodeBox* WidgetController::getBox(const UUID &node_id)
 {
     boost::unordered_map<UUID, NodeBox*, UUID::Hasher>::const_iterator pos = box_map_.find(node_id);
     if(pos == box_map_.end()) {
+        return NULL;
+    }
+
+    return pos->second;
+}
+
+MovableGraphicsProxyWidget* WidgetController::getProxy(const UUID &node_id)
+{
+    boost::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher>::const_iterator pos = proxy_map_.find(node_id);
+    if(pos == proxy_map_.end()) {
         return NULL;
     }
 
@@ -67,7 +78,6 @@ void WidgetController::setDesigner(Designer *designer)
 void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
 {
     dispatcher_ = dispatcher;
-    box_selection_.setCommandDispatcher(dispatcher);
     connection_selection_.setCommandDispatcher(dispatcher);
 }
 
@@ -75,9 +85,9 @@ void WidgetController::nodeAdded(Node::Ptr node)
 {
     if(designer_) {
         NodeBox* box = BoxManager::instance().makeBox(node, this);
-        QObject::connect(box, SIGNAL(moveRequest(NodeBox*,QPoint)), &box_selection_, SLOT(moveSelectedBoxes(NodeBox*, QPoint)));
 
         box_map_[node->getUUID()] = box;
+        proxy_map_[node->getUUID()] = new MovableGraphicsProxyWidget(box);
 
         designer_->addBox(box);
 

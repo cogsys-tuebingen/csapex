@@ -2,6 +2,8 @@
 #include <csapex/view/designer_view.h>
 
 /// COMPONENT
+#include <csapex/command/meta.h>
+#include <csapex/command/move_box.h>
 #include <csapex/view/box_dialog.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/node.h>
@@ -12,6 +14,7 @@
 #include <csapex/view/box.h>
 #include <csapex/utility/movable_graphics_proxy_widget.h>
 #include <csapex/core/drag_io.h>
+#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <iostream>
@@ -42,7 +45,8 @@ DesignerView::DesignerView(csapex::GraphPtr graph, CommandDispatcher *dispatcher
     QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
     QObject::connect(shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
 
-    QObject::connect(scene_, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
+    QObject::connect(scene_, SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
+    QObject::connect(scene_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
     setContextMenuPolicy(Qt::DefaultContextMenu);
 }
@@ -52,7 +56,7 @@ DesignerScene* DesignerView::designerScene()
     return scene_;
 }
 
-void DesignerView::selectionChanged()
+void DesignerView::updateSelection()
 {
     QList<QGraphicsItem *> selected = scene_->items();
     foreach(QGraphicsItem* item, selected) {
@@ -158,8 +162,10 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*, QPoint)), this, SLOT(showContextMenuEditBox(NodeBox*, QPoint)));
 
-    MovableGraphicsProxyWidget* proxy = new MovableGraphicsProxyWidget(box);
+    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
     scene_->addItem(proxy);
+
+    QObject::connect(proxy, SIGNAL(moved(double,double)), this, SLOT(movedBoxes(double,double)));
 
     boxes_.push_back(box);
 
@@ -187,6 +193,24 @@ void DesignerView::removeBoxEvent(NodeBox *box)
 {
     box->setVisible(false);
     box->deleteLater();
+}
+
+void DesignerView::movedBoxes(double dx, double dy)
+{
+    QPointF delta(dx, dy);
+
+    command::Meta::Ptr meta(new command::Meta("move boxes"));
+    foreach(QGraphicsItem* item, scene_->selectedItems()) {
+        MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
+        if(proxy) {
+            NodeBox* b = proxy->getBox();
+            QPointF to = proxy->pos();
+            QPointF from = to - delta;
+            meta->add(Command::Ptr(new command::MoveBox(b->getNode()->getUUID(), from, to)));
+        }
+    }
+
+    dispatcher_->execute(meta);
 }
 
 void DesignerView::overwriteStyleSheet(QString &stylesheet)
@@ -241,4 +265,16 @@ void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
         std::string selected = selectedItem->data().toString().toStdString();
         BoxManager::instance().startPlacingBox(this, selected, widget_ctrl_.get());
     }
+}
+
+void DesignerView::selectAll()
+{
+    foreach(QGraphicsItem* item, scene_->items()) {
+        item->setSelected(true);
+    }
+}
+
+void DesignerView::enableGrid(bool draw)
+{
+    scene_->enableGrid(draw);
 }

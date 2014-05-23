@@ -35,6 +35,7 @@ public:
     bool isGridLockEnabled() const;
 
 Q_SIGNALS:
+    void selectionChanged();
     void gridEnabled(bool);
     void gridLockEnabled(bool);
 
@@ -49,6 +50,8 @@ public Q_SLOTS:
     void lockToGrid(bool);
     void reset();
 
+    void selectAll();
+    void clearSelection();
     void deleteSelected();
 
 private:

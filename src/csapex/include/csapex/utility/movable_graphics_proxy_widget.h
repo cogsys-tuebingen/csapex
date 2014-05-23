@@ -30,7 +30,11 @@ public:
 
     NodeBox* getBox();
 
+Q_SIGNALS:
+    void moved(double dx, double dy);
+
 private:
+    QPointF before_;
     NodeBox* box_;
 };
 

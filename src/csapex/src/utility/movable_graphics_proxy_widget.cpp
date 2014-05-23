@@ -31,6 +31,8 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         QGraphicsProxyWidget::mousePressEvent(event);
     }
 
+    before_ = pos();
+
     if(!event->isAccepted()) {
         QGraphicsItem::mousePressEvent(event);
     }
@@ -46,6 +48,12 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
     }
     if(!event->isAccepted()) {
         QGraphicsItem::mouseReleaseEvent(event);
+    }
+
+    QPointF after = pos();
+    if(before_ != after) {
+        QPointF delta = after - before_;
+        moved(delta.x(), delta.y());
     }
 }
 

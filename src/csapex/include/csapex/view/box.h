@@ -164,8 +164,6 @@ protected:
     QIcon minimize_icon_;
     QIcon maximize_icon_;
 
-    QPoint key_point;
-
     QLabel* info_compo;
 
     bool profiling_;

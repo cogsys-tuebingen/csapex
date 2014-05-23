@@ -78,14 +78,14 @@ void CsApexWindow::construct()
     QObject::connect(designer_, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
     QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
-    QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
+    QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
     QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
 
-    QObject::connect(&widget_ctrl_->box_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
+    QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
     QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
 
-    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), &widget_ctrl_->box_selection_,  SLOT(clearSelection()));
-    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), &widget_ctrl_->box_selection_,  SLOT(selectAll()));
+    QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
+    QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
 
     QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
     QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
@@ -118,7 +118,9 @@ void CsApexWindow::construct()
 
 void CsApexWindow::updateDeleteAction()
 {
-    bool has_selection = widget_ctrl_->connection_selection_.countSelected() + widget_ctrl_->box_selection_.countSelected() > 0;
+
+#warning IMPLEMENT AGAIN FOR BOXES
+    bool has_selection = widget_ctrl_->connection_selection_.countSelected() > 0 || false;
     ui->actionDelete_Selected->setEnabled(has_selection);
 }
 

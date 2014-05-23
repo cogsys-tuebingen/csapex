@@ -6,11 +6,12 @@
 #include <csapex/view/box.h>
 #include <csapex/model/graph.h>
 #include <csapex/view/widget_controller.h>
+#include <csapex/utility/movable_graphics_proxy_widget.h>
 
 using namespace csapex::command;
 
-MoveBox::MoveBox(NodeBox* box, QPoint to)
-    : from(box->key_point), to(to), uuid(box->getNode()->getUUID())
+MoveBox::MoveBox(const UUID& node_uuid, QPointF from, QPointF to)
+    : from(from), to(to), uuid(node_uuid)
 {
 }
 
@@ -30,25 +31,21 @@ std::string MoveBox::getDescription() const
 
 bool MoveBox::doExecute()
 {
-    NodeBox* box = widget_ctrl_->getBox(uuid);
-    box->clearFocus();
-    box->move(to);
-    box->key_point = to;
-
     return true;
 }
 
 bool MoveBox::doUndo()
 {
-    NodeBox* box = widget_ctrl_->getBox(uuid);
-    box->clearFocus();
-    box->move(from);
-    box->key_point = from;
+    MovableGraphicsProxyWidget* box = widget_ctrl_->getProxy(uuid);
+    box->setPos(from);
 
     return true;
 }
 
 bool MoveBox::doRedo()
 {
-    return doExecute();
+    MovableGraphicsProxyWidget* box = widget_ctrl_->getProxy(uuid);
+    box->setPos(to);
+
+    return true;
 }

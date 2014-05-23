@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <QPoint>
+#include <QPointF>
 
 namespace csapex
 {
@@ -17,7 +17,7 @@ namespace command
 class MoveBox : public Command
 {
 public:
-    MoveBox(NodeBox* box, QPoint to);
+    MoveBox(const UUID& node_uuid, QPointF from, QPointF to);
 
 protected:
     bool doExecute();
@@ -28,8 +28,8 @@ protected:
     virtual std::string getDescription() const;
 
 protected:
-    QPoint from;
-    QPoint to;
+    QPointF from;
+    QPointF to;
 
     UUID uuid;
 };

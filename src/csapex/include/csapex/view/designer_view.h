@@ -50,12 +50,17 @@ public:
         output_color_ = c;
     }
 
+Q_SIGNALS:
+    void selectionChanged();
+
 public Q_SLOTS:
     void showBoxDialog();
     void addBoxEvent(NodeBox* box);
     void removeBoxEvent(NodeBox* box);
 
-    void selectionChanged();
+    void movedBoxes(double dx, double dy);
+
+    void updateSelection();
 
     void overwriteStyleSheet(QString& stylesheet);
 
@@ -63,6 +68,10 @@ public Q_SLOTS:
     void showContextMenuGlobal(const QPoint& pos);
     void showContextMenuEditBox(NodeBox* box, const QPoint& pos);
     void showContextMenuAddNode(const QPoint& global_pos);
+
+    void enableGrid(bool draw);
+
+    void selectAll();
 
 private:
     GraphPtr graph_;
