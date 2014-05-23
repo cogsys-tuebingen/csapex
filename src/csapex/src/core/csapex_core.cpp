@@ -119,6 +119,8 @@ void CsApexCore::init(DragIO* dragio)
 
 void CsApexCore::reset()
 {
+    Q_EMIT resetRequest();
+
     cmd_dispatch->reset();
 
     UUID::reset();

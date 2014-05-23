@@ -23,6 +23,9 @@ public:
 
     DesignerScene* designerScene();
 
+    bool hasSelection() const;
+    CommandPtr deleteSelected();
+
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
 
@@ -71,6 +74,8 @@ public Q_SLOTS:
     void showContextMenuAddNode(const QPoint& global_pos);
 
     void enableGrid(bool draw);
+
+    void reset();
 
     void selectAll();
 

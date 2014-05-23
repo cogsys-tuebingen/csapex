@@ -94,6 +94,8 @@ void CsApexWindow::construct()
     QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
     QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
 
+    QObject::connect(&core_, SIGNAL(resetRequest()), designer_, SLOT(reset()));
+
     QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
     QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
     QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Emitter&)), this, SLOT(saveView(YAML::Emitter&)));
@@ -118,9 +120,7 @@ void CsApexWindow::construct()
 
 void CsApexWindow::updateDeleteAction()
 {
-
-#warning IMPLEMENT AGAIN FOR BOXES
-    bool has_selection = widget_ctrl_->connection_selection_.countSelected() > 0 || false;
+    bool has_selection = widget_ctrl_->connection_selection_.countSelected() > 0 || designer_->hasSelection();
     ui->actionDelete_Selected->setEnabled(has_selection);
 }
 

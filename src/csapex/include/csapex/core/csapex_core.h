@@ -51,6 +51,8 @@ Q_SIGNALS:
     void showStatusMessage(const std::string& msg);
     void reloadBoxMenues();
 
+    void resetRequest();
+
     void saveSettingsRequest(YAML::Emitter& e);
     void loadSettingsRequest(YAML::Node& n);
 

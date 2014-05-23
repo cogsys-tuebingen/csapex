@@ -34,6 +34,8 @@ public:
     bool isGridEnabled() const;
     bool isGridLockEnabled() const;
 
+    bool hasSelection() const;
+
 Q_SIGNALS:
     void selectionChanged();
     void gridEnabled(bool);

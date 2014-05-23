@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/meta.h>
 #include <csapex/command/move_box.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/view/box_dialog.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/node.h>
@@ -56,9 +57,31 @@ DesignerView::~DesignerView()
     delete scene_;
 }
 
+void DesignerView::reset()
+{
+    scene_->clear();
+}
+
 DesignerScene* DesignerView::designerScene()
 {
     return scene_;
+}
+
+bool DesignerView::hasSelection() const
+{
+    return scene_->selectedItems().size() > 0;
+}
+
+Command::Ptr DesignerView::deleteSelected()
+{
+    command::Meta::Ptr meta(new command::Meta("delete selected boxes"));
+    foreach(QGraphicsItem* item, scene_->selectedItems()) {
+        MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
+        if(proxy) {
+            meta->add(Command::Ptr(new command::DeleteNode(proxy->getBox()->getNode()->getUUID())));
+        }
+    }
+    return meta;
 }
 
 void DesignerView::updateSelection()

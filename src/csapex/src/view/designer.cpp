@@ -80,7 +80,7 @@ void Designer::deleteSelected()
 {
     command::Meta::Ptr del(new command::Meta("delete selected"));
 
-#warning IMPLEMENT AGAIN FOR BOXES
+    del->add(designer_view_->deleteSelected());
 
     if(widget_ctrl_->connection_selection_.countSelected() != 0) {
         del->add(widget_ctrl_->connection_selection_.deleteSelectedCommand());
@@ -103,7 +103,7 @@ void Designer::setView(int sx, int sy)
 
 void Designer::reset()
 {
-    //designer_board->reset();
+    designer_view_->reset();
 }
 
 void Designer::addBox(NodeBox *box)
@@ -131,6 +131,11 @@ bool Designer::isGridEnabled() const
 bool Designer::isGridLockEnabled() const
 {
     return settings_.get<bool>("grid-lock", false);
+}
+
+bool Designer::hasSelection() const
+{
+    return designer_view_->hasSelection();
 }
 
 void Designer::enableGrid(bool grid)
