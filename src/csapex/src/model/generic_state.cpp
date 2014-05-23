@@ -101,12 +101,20 @@ void GenericState::setFrom(const GenericState &rhs)
 
 param::Parameter &GenericState::operator [](const std::string& name) const
 {
-    return *params.at(name);
+    try {
+        return *params.at(name);
+    } catch(const std::exception& e) {
+        throw std::runtime_error("cannot get parameter '" + name + "', doesn't exist: " + e.what());
+    }
 }
 
 param::Parameter::Ptr GenericState::getParameter(const std::string &name) const
 {
-    return params.at(name);
+    try {
+        return params.at(name);
+    } catch(const std::exception& e) {
+        throw std::runtime_error("cannot get parameter '" + name + "', doesn't exist: " + e.what());
+    }
 }
 
 std::vector<param::Parameter::Ptr> GenericState::getParameters() const

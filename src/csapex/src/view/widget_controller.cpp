@@ -20,7 +20,7 @@
 using namespace csapex;
 
 WidgetController::WidgetController(Graph::Ptr graph)
-    : graph_(graph), connection_selection_(graph, this), designer_(NULL)
+    : graph_(graph), designer_(NULL)
 {
 
 }
@@ -78,7 +78,6 @@ void WidgetController::setDesigner(Designer *designer)
 void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
 {
     dispatcher_ = dispatcher;
-    connection_selection_.setCommandDispatcher(dispatcher);
 }
 
 void WidgetController::nodeAdded(Node::Ptr node)

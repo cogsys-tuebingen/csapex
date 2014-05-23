@@ -4,8 +4,6 @@
 /// PROJECT
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/model/box_selection_model.h>
-#include <csapex/model/connection_selection_model.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -54,10 +52,6 @@ public Q_SLOTS:
 private:
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;
-
-public:
-//    BoxSelectionModel box_selection_;
-    ConnectionSelectionModel connection_selection_;
 
 private:
     Designer* designer_;

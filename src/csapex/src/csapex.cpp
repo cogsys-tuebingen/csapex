@@ -16,7 +16,6 @@
 #include <csapex/manager/box_manager.h>
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/widget_controller.h>
-#include <csapex/view/overlay.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>

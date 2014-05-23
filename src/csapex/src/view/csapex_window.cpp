@@ -14,7 +14,6 @@
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/view/box.h>
-#include <csapex/view/design_board.h>
 #include <csapex/view/designer.h>
 #include "ui_csapex_window.h"
 #include <csapex/view/widget_controller.h>
@@ -79,10 +78,7 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
-    QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
-
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
-    QObject::connect(&widget_ctrl_->connection_selection_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
 
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
@@ -120,8 +116,7 @@ void CsApexWindow::construct()
 
 void CsApexWindow::updateDeleteAction()
 {
-    bool has_selection = widget_ctrl_->connection_selection_.countSelected() > 0 || designer_->hasSelection();
-    ui->actionDelete_Selected->setEnabled(has_selection);
+    ui->actionDelete_Selected->setEnabled(designer_->hasSelection());
 }
 
 
@@ -236,6 +231,8 @@ void CsApexWindow::start()
     construct();
     showStatusMessage("initializing");
     init();
+
+    designer_->setFocus(Qt::OtherFocusReason);
 }
 
 void CsApexWindow::updateMenu()

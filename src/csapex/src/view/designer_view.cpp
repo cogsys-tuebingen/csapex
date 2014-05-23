@@ -43,8 +43,11 @@ DesignerView::DesignerView(csapex::GraphPtr graph, CommandDispatcher *dispatcher
     setDragMode(QGraphicsView::RubberBandDrag);
     setInteractive(true);
 
-    QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
-    QObject::connect(shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
+    QShortcut *box_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
+    QObject::connect(box_shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
+
+    QShortcut *box_reset_view = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_0), this);
+    QObject::connect(box_reset_view, SIGNAL(activated()), this, SLOT(resetZoom()));
 
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
@@ -60,6 +63,11 @@ DesignerView::~DesignerView()
 void DesignerView::reset()
 {
     scene_->clear();
+}
+
+void DesignerView::resetZoom()
+{
+    resetTransform();
 }
 
 DesignerScene* DesignerView::designerScene()
@@ -121,15 +129,30 @@ void DesignerView::keyReleaseEvent(QKeyEvent* e)
 
 void DesignerView::wheelEvent(QWheelEvent *we)
 {
-    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
+    bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
+    bool alt = Qt::AltModifier & QApplication::keyboardModifiers();
 
-    double scaleFactor = 1.15;
-    if(we->delta() > 0) {
-        // Zoom in
-        scale(scaleFactor, scaleFactor);
+    if(shift || ctrl || alt) {
+        we->accept();
+
+        if(ctrl) {
+            setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+        } else if(shift) {
+            setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+        }
+
+        double scaleFactor = alt ? 1.05 : 1.25;
+        if(we->delta() > 0) {
+            // Zoom in
+            scale(scaleFactor, scaleFactor);
+        } else {
+            // Zooming out
+            scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+        }
+
     } else {
-        // Zooming out
-        scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+        QGraphicsView::wheelEvent(we);
     }
 }
 

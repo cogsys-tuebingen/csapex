@@ -61,34 +61,23 @@ set(SRC_PLUGIN
 
     src/model/node.cpp
     src/model/node_modifier.cpp
-    src/model/connectable.cpp
     src/model/connector_in.cpp
     src/model/connector_out.cpp
-    src/model/memento.cpp
     src/model/message.cpp
     src/model/tag.cpp
-    src/model/unique.cpp
 
-    src/manager/box_manager.cpp
     src/manager/connection_type_manager.cpp
     src/manager/message_provider_manager.cpp
 
-    src/utility/bash_parser.cpp
     src/utility/qint_slider.cpp
     src/utility/qdouble_slider.cpp
     src/utility/qsignal_bridges.cpp
     src/utility/qwrapper.cpp
-    src/utility/stream_interceptor.cpp
-    src/utility/stream_relay.cpp
+
     src/utility/timer.cpp
     src/utility/qt_helper.cpp
     src/utility/thread.cpp
     src/utility/uuid.cpp
-    src/utility/error_handling.cpp
-    src/utility/timable.cpp
-    src/utility/type.cpp
-    src/utility/q_signal_relay.cpp
-    src/utility/context_menu_handler.cpp
 
     src/view/node_adapter.cpp
     src/view/node_adapter_builder.cpp
@@ -119,6 +108,7 @@ set(SRC_APP
 
     src/model/node_constructor.cpp
     src/model/error_state.cpp
+    src/model/connectable.cpp
     src/model/graph.cpp
     src/model/connection.cpp
     src/model/connection_type.cpp
@@ -129,21 +119,28 @@ set(SRC_APP
     src/model/node_worker.cpp
     src/model/parameterizable.cpp
     src/model/node_filter_proxy_model.cpp
-    src/model/selection_model.cpp
-    src/model/box_selection_model.cpp
-    src/model/connection_selection_model.cpp
+    src/model/unique.cpp
+    src/model/memento.cpp
 
+    src/manager/box_manager.cpp
+
+    src/utility/error_handling.cpp
+    src/utility/timable.cpp
+    src/utility/type.cpp
+    src/utility/q_signal_relay.cpp
+    src/utility/context_menu_handler.cpp
+    src/utility/stream_interceptor.cpp
+    src/utility/stream_relay.cpp
+    src/utility/bash_parser.cpp
     src/utility/buffer.cpp
     src/utility/movable_graphics_proxy_widget.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp
     src/view/csapex_window.cpp
-    src/view/design_board.cpp
     src/view/designer_scene.cpp
     src/view/designer_view.cpp
     src/view/designer.cpp
-    src/view/overlay.cpp
     src/view/selectable.cpp
     src/view/profiling_widget.cpp
     src/view/port.cpp

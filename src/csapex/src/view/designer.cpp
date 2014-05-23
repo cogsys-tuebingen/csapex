@@ -11,7 +11,6 @@
 #include <csapex/model/node.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/view/box.h>
-#include <csapex/view/design_board.h>
 #include <csapex/view/designer_view.h>
 #include <csapex/view/widget_controller.h>
 #include "ui_designer.h"
@@ -66,8 +65,6 @@ void Designer::setup()
 
 void Designer::clearSelection()
 {
-    widget_ctrl_->connection_selection_.clearSelection();
-
     designer_view_->scene()->clearSelection();
 }
 
@@ -81,10 +78,6 @@ void Designer::deleteSelected()
     command::Meta::Ptr del(new command::Meta("delete selected"));
 
     del->add(designer_view_->deleteSelected());
-
-    if(widget_ctrl_->connection_selection_.countSelected() != 0) {
-        del->add(widget_ctrl_->connection_selection_.deleteSelectedCommand());
-    }
 
     if(del->commands() != 0) {
         dispatcher_->execute(del);

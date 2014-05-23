@@ -76,6 +76,7 @@ public Q_SLOTS:
     void enableGrid(bool draw);
 
     void reset();
+    void resetZoom();
 
     void selectAll();
 
