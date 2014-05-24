@@ -132,18 +132,13 @@ void DesignerView::wheelEvent(QWheelEvent *we)
 {
     bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
     bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
-    bool alt = Qt::AltModifier & QApplication::keyboardModifiers();
 
-    if(shift || ctrl || alt) {
+    if(shift || ctrl) {
         we->accept();
 
-        if(ctrl) {
-            setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-        } else if(shift) {
-            setTransformationAnchor(QGraphicsView::AnchorViewCenter);
-        }
+        setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-        double scaleFactor = alt ? 1.05 : 1.25;
+        double scaleFactor = ctrl ? 1.05 : 1.25;
         if(we->delta() > 0) {
             // Zoom in
             scale(scaleFactor, scaleFactor);
