@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connector_out.h>
 #include <csapex/command/delete_connection.h>
+#include <csapex/command/command.h>
 
 /// SYSTEM
 #include <assert.h>

@@ -7,7 +7,9 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <vector>
-#include <QTreeWidgetItem>
+
+/// FORWARD DECLARATION
+class QTreeWidgetItem;
 
 namespace csapex
 {

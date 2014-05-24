@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 #include <csapex/model/unique.h>
-#include <csapex/command/command.h>
 #include <csapex/model/error_state.h>
 #include <csapex/csapex_fwd.h>
 
@@ -84,7 +83,7 @@ public:
     virtual void removeConnection(Connectable* other_side) = 0;
     virtual void validateConnections();
     virtual void connectionMovePreview(Connectable* other_side) = 0;
-    virtual Command::Ptr removeAllConnectionsCmd() = 0;
+    virtual CommandPtr removeAllConnectionsCmd() = 0;
 protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
 

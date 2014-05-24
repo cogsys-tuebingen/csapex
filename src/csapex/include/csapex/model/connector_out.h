@@ -72,8 +72,8 @@ public:
 
     void connectForcedWithoutCommand(ConnectorIn* other_side);
 
-    virtual Command::Ptr removeAllConnectionsCmd();
-    virtual Command::Ptr removeConnectionCmd(ConnectorIn *other_side);
+    virtual CommandPtr removeAllConnectionsCmd();
+    virtual CommandPtr removeConnectionCmd(ConnectorIn *other_side);
 
     void forceSendMessage(bool force = true);
 

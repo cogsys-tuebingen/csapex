@@ -5,6 +5,9 @@
 #include <csapex/model/graph.h>
 #include <csapex/view/widget_controller.h>
 
+/// SYSTEM
+#include <QTreeWidgetItem>
+
 using namespace csapex;
 
 std::vector<Command::Ptr> Command::undo_later;

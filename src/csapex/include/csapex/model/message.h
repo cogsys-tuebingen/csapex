@@ -133,7 +133,7 @@ struct GenericMessage : public PossibleRosMessage {
     template <typename T>
     static std::string getTypeName(typename boost::disable_if<ros::message_traits::IsMessage<T> >::type* dummy = 0)
     {
-        return type2name(typeid(T));
+        return type2nameWithoutNamespace(typeid(T));
     }
 
     virtual bool isRosMessage() const

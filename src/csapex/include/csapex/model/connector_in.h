@@ -64,7 +64,7 @@ public:
 
     Connectable* getSource() const;
 
-    virtual Command::Ptr removeAllConnectionsCmd();
+    virtual CommandPtr removeAllConnectionsCmd();
 
     bool isOptional() const;
     void setOptional(bool optional);

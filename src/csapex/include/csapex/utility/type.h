@@ -7,6 +7,7 @@
 namespace csapex
 {
 std::string type2name(const std::type_info& info);
+std::string type2nameWithoutNamespace(const std::type_info& info);
 }
 
 #endif // TYPE_H
