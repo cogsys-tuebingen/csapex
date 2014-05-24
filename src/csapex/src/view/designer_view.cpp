@@ -68,6 +68,7 @@ void DesignerView::reset()
 void DesignerView::resetZoom()
 {
     resetTransform();
+    scene_->setScale(1.0);
 }
 
 DesignerScene* DesignerView::designerScene()
@@ -150,6 +151,8 @@ void DesignerView::wheelEvent(QWheelEvent *we)
             // Zooming out
             scale(1.0 / scaleFactor, 1.0 / scaleFactor);
         }
+
+        scene_->setScale(transform().m11());
 
     } else {
         QGraphicsView::wheelEvent(we);

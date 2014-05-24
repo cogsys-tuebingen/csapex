@@ -49,17 +49,17 @@ std::pair<int,int> rgb2id(QRgb rgb)
 }
 
 QWidget* topLevelParentWidget (QWidget* widget)
-  {
-  while (widget -> parentWidget()) widget = widget -> parentWidget() ;
-  return widget ;
-  }
+{
+    while (widget -> parentWidget()) widget = widget -> parentWidget() ;
+    return widget ;
+}
 }
 
 
 
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl)
     : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
-      draw_grid_(false),
+      draw_grid_(false), scale_(1.0),
       schema_dirty_(false), splicing_requested(false), splicing(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
@@ -92,35 +92,32 @@ void DesignerScene::enableGrid(bool draw)
     }
 }
 
+void DesignerScene::setScale(double scale)
+{
+    scale_ = scale;
+}
+
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsScene::drawBackground(painter, rect);
 
     if(draw_grid_) {
+        bool spt = painter->renderHints() & QPainter::SmoothPixmapTransform;
+        painter->setRenderHint(QPainter::SmoothPixmapTransform, scale_ < 1.0);
+
+        qreal o = painter->opacity();
+        static const double max_distance = 0.4;
+        if(scale_ < 1.0) {
+            qreal op = (scale_ - max_distance) / max_distance;
+            painter->setOpacity(op);
+        }
+
         painter->drawTiledPixmap(sceneRect(), background_);
+
+        painter->setOpacity(o);
+
+        painter->setRenderHint(QPainter::SmoothPixmapTransform, spt);
     }
-//    int t = painter->paintEngine()->type();
-//    if (t != QPaintEngine::OpenGL && t != QPaintEngine::OpenGL2) {
-//        qWarning("DesignerScene: drawBackground needs a QGLWidget to be set as viewport on the graphics view");
-//        return;
-//    }
-
-//    //glClearColor(m_backgroundColor.redF(), m_backgroundColor.greenF(), m_backgroundColor.blueF(), 1.0f);
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//    glMatrixMode(GL_PROJECTION);
-//    glPushMatrix();
-//    glLoadIdentity();
-//    gluPerspective(70, width() / height(), 0.01, 1000);
-
-//    glMatrixMode(GL_MODELVIEW);
-//    glPushMatrix();
-//    glLoadIdentity();
-
-//    glPopMatrix();
-
-//    glMatrixMode(GL_PROJECTION);
-//    glPopMatrix();
 }
 
 void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
@@ -210,9 +207,9 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         painter->drawEllipse(drag_connection_handle_, r, r);
     }
 
-  // painter->setOpacity(0.35);
+    // painter->setOpacity(0.35);
 
-  //  painter->drawImage(QPoint(0,0), schematics);
+    //  painter->drawImage(QPoint(0,0), schematics);
 
     schema_dirty_ = false;
 
@@ -220,9 +217,9 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 }
 
 void DesignerScene::drawItems(QPainter *painter, int numItems,
-                       QGraphicsItem *items[],
-                       const QStyleOptionGraphicsItem options[],
-                       QWidget *widget)
+                              QGraphicsItem *items[],
+                              const QStyleOptionGraphicsItem options[],
+                              QWidget *widget)
 {
     QGraphicsScene::drawItems(painter, numItems, items, options, widget);
 }

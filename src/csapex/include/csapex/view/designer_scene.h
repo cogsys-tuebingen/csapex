@@ -49,6 +49,7 @@ public Q_SLOTS:
     void invalidateSchema();
 
     void enableGrid(bool draw);
+    void setScale(double scale);
 
     void setInputColor(const QColor& c)
     {
@@ -106,6 +107,7 @@ private:
     std::vector<TempConnection> temp_;
 
     bool draw_grid_;
+    double scale_;
 
 
     int activity_marker_min_width_;
