@@ -55,12 +55,12 @@ ConnectionType::Ptr MultiConnectionType::toType()
     return new_msg;
 }
 
-void MultiConnectionType::writeYaml(YAML::Emitter &yaml)
+void MultiConnectionType::writeYaml(YAML::Emitter &/*yaml*/)
 {
 
 }
 
-void MultiConnectionType::readYaml(const YAML::Node &node)
+void MultiConnectionType::readYaml(const YAML::Node &/*node*/)
 {
 
 }

@@ -37,17 +37,17 @@ void DesignerIO::saveSettings(YAML::Emitter& yaml)
          << YAML::EndSeq;
 }
 
-void DesignerIO::loadSettings(YAML::Node &doc)
+void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 {
-    QWidget* window = designer_.window();
+//    QWidget* window = designer_.window();
 
-    if(exists(doc, "view_pos")) {
-        int sx, sy;
+//    if(exists(doc, "view_pos")) {
+//        int sx, sy;
 //        doc["view_pos"][0] >> sx;
 //        doc["view_pos"][1] >> sy;
 
 //        designer_.setView(sx, sy);
-    }
+//    }
 }
 
 void DesignerIO::saveBoxes(YAML::Emitter& yaml, Graph::Ptr graph, WidgetController* widget_ctrl)

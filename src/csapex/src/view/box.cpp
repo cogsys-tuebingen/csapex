@@ -339,9 +339,9 @@ void NodeBox::init()
 
     move(node_->getNodeState()->pos);
 }
-bool NodeBox::eventFilter(QObject* o, QEvent* e)
+bool NodeBox::eventFilter(QObject* /*o*/, QEvent* /*e*/)
 {
-    QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
+//    QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
 
 //    if(o == ui->label) {
 //        if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {

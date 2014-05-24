@@ -89,7 +89,7 @@ void Designer::overwriteStyleSheet(QString &stylesheet)
     designer_view_->overwriteStyleSheet(stylesheet);
 }
 
-void Designer::setView(int sx, int sy)
+void Designer::setView(int /*sx*/, int /*sy*/)
 {
     //designer_board->setView(sx, sy);
 }
