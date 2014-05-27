@@ -99,7 +99,6 @@ public:
 
 protected:
     void setupUi();
-    void startDrag(QPoint offset);
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
     void updateFlippedSides();

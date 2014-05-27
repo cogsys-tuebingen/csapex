@@ -156,7 +156,14 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
             UUID from_uuid = UUID::make_forced(from_uuid_tmp);
 
-            Node* parent = graph_->findNodeForConnector(from_uuid);
+            Node* parent = NULL;
+            try {
+                parent = graph_->findNodeForConnector(from_uuid);
+
+            } catch(const std::exception& e) {
+                std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
+                continue;
+            }
 
             if(!parent) {
                 std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;

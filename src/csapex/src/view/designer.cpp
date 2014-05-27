@@ -94,6 +94,11 @@ void Designer::setView(int /*sx*/, int /*sy*/)
     //designer_board->setView(sx, sy);
 }
 
+DesignerView* Designer::getDesignerView()
+{
+    return designer_view_;
+}
+
 void Designer::reset()
 {
     designer_view_->reset();

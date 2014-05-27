@@ -73,6 +73,30 @@ void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param, 
     addParameterCallback(param.get(), cb);
 }
 
+void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter::Ptr> &params)
+{
+    setParameterSetSilence(true);
+    removeTemporaryParameters();
+    Q_FOREACH(param::Parameter::Ptr param, params) {
+        addTemporaryParameter(param);
+    }
+    setParameterSetSilence(false);
+    triggerParameterSetChanged();
+}
+
+void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter::Ptr> &params, boost::function<void (param::Parameter *)> cb)
+{
+    setParameterSetSilence(true);
+    removeTemporaryParameters();
+    Q_FOREACH(param::Parameter::Ptr param, params) {
+        addTemporaryParameter(param, cb);
+    }
+    setParameterSetSilence(false);
+    triggerParameterSetChanged();
+}
+
+
+
 void Parameterizable::addParameter(const param::Parameter::Ptr &param)
 {
     parameter_state_.addParameter(param);

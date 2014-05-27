@@ -31,6 +31,8 @@ public:
 
     void setView(int x, int y);
 
+    DesignerView* getDesignerView();
+
     bool isGridEnabled() const;
     bool isGridLockEnabled() const;
 

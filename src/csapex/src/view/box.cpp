@@ -16,6 +16,7 @@
 #include <csapex/view/node_adapter.h>
 #include <csapex/view/port.h>
 #include <csapex/utility/context_menu_handler.h>
+#include <csapex/utility/color.hpp>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -131,40 +132,6 @@ void NodeBox::enableContent(bool enable)
     ui->label->setEnabled(enable);
 }
 
-#define _HSV2RGB_(H, S, V, R, G, B) \
-{ \
-  double _h = H/60.; \
-  int _hf = (int)floor(_h); \
-  int _hi = ((int)_h)%6; \
-  double _f = _h - _hf; \
-  \
-  double _p = V * (1. - S); \
-  double _q = V * (1. - _f * S); \
-  double _t = V * (1. - (1. - _f) * S); \
-  \
-  switch (_hi) \
-  { \
-    case 0: \
-        R = 255.*V; G = 255.*_t; B = 255.*_p; \
-    break; \
-    case 1: \
-        R = 255.*_q; G = 255.*V; B = 255.*_p; \
-    break; \
-    case 2: \
-        R = 255.*_p; G = 255.*V; B = 255.*_t; \
-    break; \
-    case 3: \
-        R = 255.*_p; G = 255.*_q; B = 255.*V; \
-    break; \
-    case 4: \
-        R = 255.*_t; G = 255.*_p; B = 255.*V; \
-    break; \
-    case 5: \
-        R = 255.*V; G = 255.*_p; B = 255.*_q; \
-    break; \
-  } \
-}
-
 void NodeBox::updateInformation(Graph* graph)
 {
     int compo = graph->getComponent(node_->getUUID());
@@ -179,7 +146,7 @@ void NodeBox::updateInformation(Graph* graph)
     // set color using HSV rotation
     double hue =  (compo * 77) % 360;
     double r, g, b;
-    _HSV2RGB_(hue, 1., 1., r, g, b);
+    __HSV2RGB__(hue, 1., 1., r, g, b);
     double fr = 0, fb = 0, fg = 0;
     if(b > 100 && r < 100 && g < 100) {
         fr = fb = fg = 255;
@@ -519,47 +486,6 @@ void NodeBox::stop()
 {
     QObject::disconnect(this);
     adapter_->stop();
-}
-
-void NodeBox::startDrag(QPoint offset)
-{
-    QDrag* drag = new QDrag(this);
-    QMimeData* mimeData = new QMimeData;
-    mimeData->setText(node_->getUUID().c_str());
-
-    QByteArray ox;
-    QByteArray oy;
-
-    ox.setNum(offset.x());
-    oy.setNum(offset.y());
-
-    mimeData->setData(NodeBox::MIME_MOVE, QByteArray());
-    mimeData->setData(NodeBox::MIME_MOVE + "/x", ox);
-    mimeData->setData(NodeBox::MIME_MOVE + "/y", oy);
-
-    drag->setMimeData(mimeData);
-
-    lower();
-
-    if(Qt::ShiftModifier == QApplication::keyboardModifiers()) {
-        //BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), offset);
-        return;
-    }
-
-    if(!isSelected()) {
-        Q_EMIT clicked(this);
-    }
-
-    QPoint start_pos = pos();
-    /*Qt::DropAction action = */drag->exec();
-
-    QPoint end_pos = pos();
-
-    QPoint delta = end_pos - start_pos;
-    // TODO: ugly
-
-    Q_EMIT moveRequest(this,delta);
-    //node_->getCommandDispatcher()->execute(node_->getCommandDispatcher()->getGraph()->moveSelectedBoxes(delta));
 }
 
 void NodeBox::deleteBox()

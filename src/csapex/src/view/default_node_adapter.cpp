@@ -762,7 +762,7 @@ void DefaultNodeAdapter::updateUiSet(const param::Parameter *p, boost::function<
     /// TODO: execute ONLY in UI thread
     const param::SetParameter* set_p = dynamic_cast<const param::SetParameter*> (p);
     if(set_p) {
-        setter(set_p->getName());
+        setter(set_p->getText());
     }
 }
 
@@ -773,13 +773,13 @@ void DefaultNodeAdapter::updateUiSetScope(const param::SetParameter *set_p, QCom
     combo->clear();
     std::string selected;
     try {
-        selected = set_p->getName();
+        selected = set_p->getText();
     } catch(const std::exception& e) {
         selected = "";
     }
 
     for(int i = 0; i < set_p->noParameters(); ++i) {
-        std::string str = set_p->getName(i);
+        std::string str = set_p->getText(i);
         combo->addItem(QString::fromStdString(str));
 
         if(str == selected) {

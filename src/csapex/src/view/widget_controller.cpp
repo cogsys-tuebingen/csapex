@@ -86,7 +86,7 @@ void WidgetController::nodeAdded(Node::Ptr node)
         NodeBox* box = BoxManager::instance().makeBox(node, this);
 
         box_map_[node->getUUID()] = box;
-        proxy_map_[node->getUUID()] = new MovableGraphicsProxyWidget(box);
+        proxy_map_[node->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
 
         designer_->addBox(box);
 

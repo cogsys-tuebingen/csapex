@@ -85,7 +85,7 @@ public:
 
     void setSettings(Settings* settings);
 
-    void setNodeWorker(NodeWorker* nw);
+    virtual void setNodeWorker(NodeWorker* nw);
     NodeWorker* getNodeWorker() const;
 
     void doSetup();

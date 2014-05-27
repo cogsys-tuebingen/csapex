@@ -7,7 +7,8 @@ for f in *; do
   if [[ -d $f ]]; then
     cd $f
     echo "${bld}${blu}diffing $f${rst}"
-    git diff
+    #git diff
+    meld .
     cd - 1> /dev/null
   fi
 done

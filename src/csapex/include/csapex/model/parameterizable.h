@@ -33,6 +33,9 @@ public:
     void addTemporaryParameter(const param::Parameter::Ptr& param);
     void addTemporaryParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
 
+    void setTemporaryParameters(const std::vector<param::Parameter::Ptr>& param);
+    void setTemporaryParameters(const std::vector<param::Parameter::Ptr>& param, boost::function<void(param::Parameter *)> cb);
+
     /***
      *  GETTING PARAMETERS
      */

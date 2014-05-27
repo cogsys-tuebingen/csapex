@@ -15,7 +15,7 @@ class MovableGraphicsProxyWidget : public QGraphicsProxyWidget
     Q_OBJECT
 
 public:
-    MovableGraphicsProxyWidget(NodeBox* box, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    MovableGraphicsProxyWidget(NodeBox* box, DesignerView* view, WidgetController *widget_ctrl, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
@@ -36,6 +36,10 @@ Q_SIGNALS:
 private:
     QPointF before_;
     NodeBox* box_;
+    DesignerView* view_;
+    WidgetController* widget_ctrl_;
+
+    bool relay_;
 };
 
 }

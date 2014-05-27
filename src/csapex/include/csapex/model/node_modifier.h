@@ -6,6 +6,9 @@
 #include <csapex/model/message.h>
 #include <csapex/csapex_fwd.h>
 
+/// SYSTEM
+#include <boost/mpl/vector.hpp>
+
 namespace csapex
 {
 
@@ -72,12 +75,32 @@ public:
 
 
     /// multiple input types allowed
+
+    /// vector
     template <typename Types>
     ConnectorIn* addMultiInput(const std::string& label, bool optional = false, bool async = false) {
         return addInput(multi_type::make<Types>(), label, optional, async);
     }
 
-    // TODO: default for 2, 3, 4, 5; other -> boost mpl vector
+    /// specializations
+    template <typename A, typename B>
+    ConnectorIn* addMultiInput(const std::string& label, bool optional = false, bool async = false) {
+        return addInput(multi_type::make< boost::mpl::vector<A,B> >(), label, optional, async);
+    }
+    template <typename A, typename B, typename C>
+    ConnectorIn* addMultiInput(const std::string& label, bool optional = false, bool async = false) {
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C> >(), label, optional, async);
+    }
+    template <typename A, typename B, typename C, typename D>
+    ConnectorIn* addMultiInput(const std::string& label, bool optional = false, bool async = false) {
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D> >(), label, optional, async);
+    }
+    template <typename A, typename B, typename C, typename D, typename E>
+    ConnectorIn* addMultiInput(const std::string& label, bool optional = false, bool async = false) {
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D,E> >(), label, optional, async);
+    }
+
+
 
 
 private:
