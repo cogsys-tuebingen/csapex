@@ -27,7 +27,7 @@ void SetParameter::setByName(const std::string &name)
     }
 
     value_ = pos->second;
-    txt_ = getName();
+    txt_ = getText();
     triggerChange();
 }
 
@@ -59,14 +59,14 @@ std::string SetParameter::convertToString(const variant &v) const
     return ss.str();
 }
 
-std::string SetParameter::getName(int idx) const
+std::string SetParameter::getText(int idx) const
 {
     std::map<std::string, variant>::const_iterator i = set_.begin();
     std::advance(i, idx);
     return i->first;
 }
 
-std::string SetParameter::getName() const
+std::string SetParameter::getText() const
 {
     std::string str =  convertToString(value_);
     for(std::map<std::string, variant>::const_iterator it = set_.begin(); it != set_.end(); ++it) {
@@ -75,7 +75,12 @@ std::string SetParameter::getName() const
         }
     }
 
-    throw std::runtime_error("cannot get the name for parameter '" + name() + "'");
+    if(is<std::string>()) {
+        return as<std::string>();
+    }
+
+    std::abort();
+    throw std::runtime_error("cannot get the text for parameter '" + name() + "'");
 }
 
 
@@ -98,7 +103,7 @@ boost::any SetParameter::get_unsafe() const
 void SetParameter::set_unsafe(const boost::any &v)
 {
     value_ = v;
-    txt_ = getName();
+    txt_ = getText();
 }
 
 
@@ -146,7 +151,7 @@ void SetParameter::doClone(const Parameter &other)
 void SetParameter::doWrite(YAML::Emitter& e) const
 {
     e << YAML::Key << "type" << YAML::Value << "set";
-    e << YAML::Key << "txt" << YAML::Value << getName();
+    e << YAML::Key << "txt" << YAML::Value << getText();
 
     if(value_.type() == typeid(int)) {
         e << YAML::Key << "int" << YAML::Value << boost::any_cast<int> (value_);

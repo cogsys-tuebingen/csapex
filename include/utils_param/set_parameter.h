@@ -87,8 +87,8 @@ public:
 
     void setByName(const std::string& name);
 
-    std::string getName(int idx) const;
-    std::string getName() const;
+    std::string getText(int idx) const;
+    std::string getText() const;
 
     int noParameters() const;
 
