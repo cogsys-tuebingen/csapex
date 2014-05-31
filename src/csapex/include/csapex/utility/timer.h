@@ -29,6 +29,8 @@ public:
 
         int lengthMs() const;
         int lengthSubMs() const;
+
+        void entries(std::vector<std::pair<std::string, int> > &out) const;
     };
 
     class Interlude : public boost::noncopyable {
@@ -47,6 +49,7 @@ public:
     ~Timer();
 
     void finish();
+    std::vector<std::pair<std::string, int> > entries() const;
 
     Interlude::Ptr step(const std::string& name);
 

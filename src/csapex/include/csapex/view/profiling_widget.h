@@ -7,6 +7,9 @@
 
 /// SYSTEM
 #include <QWidget>
+#include <map>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
 
 namespace csapex
 {
@@ -24,21 +27,25 @@ public Q_SLOTS:
 protected:
     void paintEvent(QPaintEvent *);
     void paintTimer(QPainter &p, const Timer*);
-    void paintInterval(QPainter &p, const csapex::Timer::Interval &interval, int height_offset, int depth);
+    float paintInterval(QPainter &p, const csapex::Timer::Interval &interval, float height_offset, int depth);
 
 private:
     DesignerView* view_;
     NodeBox* box_;
     NodeWorker* node_worker_;
 
-    int w_;
-    int h_;
-    int content_height_ ;
+    float w_;
+    float h_;
+    float content_height_ ;
 
-    int left;
-    int right;
-    int up;
-    int bottom;
+    float left_space;
+    float padding;
+    float line_height;
+
+    float left;
+    float right;
+    float up;
+    float bottom;
 
     double max_time_ms_;
 
@@ -46,6 +53,13 @@ private:
 
     double content_width_;
     double indiv_width_;
+
+    std::map<std::string, QColor> steps_;
+
+    typedef boost::accumulators::stats<boost::accumulators::tag::variance> stats;
+    typedef boost::accumulators::accumulator_set<double, stats > accumulator;
+    std::map<std::string, accumulator> steps_acc_;
+    unsigned int count_;
 };
 
 }

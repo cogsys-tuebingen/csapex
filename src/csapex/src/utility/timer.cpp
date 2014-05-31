@@ -14,6 +14,13 @@ Timer::~Timer()
     finish();
 }
 
+std::vector<std::pair<std::string, int> > Timer::entries() const
+{
+    std::vector<std::pair<std::string, int> > result;
+    intervals.entries(result);
+    return result;
+}
+
 void Timer::finish()
 {
     intervals.end = QDateTime::currentDateTime();
@@ -41,6 +48,14 @@ Timer::Interlude::~Interlude()
     // stop interval
     parent_->current_sub_interval->end = QDateTime::currentDateTime();
     parent_->current_sub_interval = parent_->current_sub_interval->parent;
+}
+
+void Timer::Interval::entries(std::vector<std::pair<std::string, int> > &out) const
+{
+    out.push_back(std::make_pair(name, lengthMs()));
+    for(std::vector<Interval>::const_iterator it = sub.begin(); it != sub.end(); ++it) {
+        it->entries(out);
+    }
 }
 
 int Timer::Interval::lengthMs() const

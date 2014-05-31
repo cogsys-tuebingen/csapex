@@ -72,7 +72,7 @@ private:
 
     std::map<ConnectorIn*, bool> has_msg_;
 
-    std::size_t timer_history_pos_;
+    int timer_history_pos_;
     std::vector<TimerPtr> timer_history_;
 
     bool thread_initialized_;

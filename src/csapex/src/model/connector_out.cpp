@@ -181,7 +181,7 @@ void ConnectorOut::sendMessages()
 
     Timer::Interlude::Ptr i;
     if(publish_timer_) {
-        i = publish_timer_->step("io");
+//        i = publish_timer_->step("io");
     }
 
     // wait for all connected inputs to be able to receive, if none is async
