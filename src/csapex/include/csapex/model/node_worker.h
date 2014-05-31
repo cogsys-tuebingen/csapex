@@ -12,9 +12,9 @@
 #include <QTimer>
 #include <QMutex>
 #include <map>
-#include <deque>
 #include <boost/function.hpp>
 #include <QWaitCondition>
+#include <vector>
 
 namespace csapex {
 
@@ -72,7 +72,8 @@ private:
 
     std::map<ConnectorIn*, bool> has_msg_;
 
-    std::deque<TimerPtr> timer_history_;
+    std::size_t timer_history_pos_;
+    std::vector<TimerPtr> timer_history_;
 
     bool thread_initialized_;
     bool paused_;

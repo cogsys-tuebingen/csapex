@@ -73,8 +73,8 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     if(n > 0) {
         int max_time_ms = 10;
 
-        const std::deque<Timer::Ptr>& h = node_worker_->timer_history_;
-        for(std::deque<Timer::Ptr>::const_iterator timer = h.begin(); timer != h.end(); ++timer) {
+        const std::vector<Timer::Ptr>& h = node_worker_->timer_history_;
+        for(std::vector<Timer::Ptr>::const_iterator timer = h.begin(); timer != h.end(); ++timer) {
             const Timer::Ptr& t = *timer;
             max_time_ms = std::max(max_time_ms, t->intervals.lengthMs());
         }
@@ -106,6 +106,14 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
             paintTimer(p, timer.get());
         }
     }
+
+    // time line
+    int pos = left + padding + node_worker_->timer_history_pos_ * indiv_width_;
+    QPen pen(QColor(255, 20, 20));
+    pen.setWidth(3);
+    p.setPen(pen);
+    p.drawLine(pos, bottom, pos, up);
+
 }
 
 void ProfilingWidget::paintTimer(QPainter& p, const Timer * timer)
