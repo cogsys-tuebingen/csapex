@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <QGraphicsView>
+#include <map>
 
 namespace csapex
 {
@@ -75,6 +76,9 @@ public Q_SLOTS:
 
     void enableGrid(bool draw);
 
+    void profile(NodeBox* box);
+    void stopProfiling(NodeBox* box);
+
     void reset();
     void resetZoom();
 
@@ -92,6 +96,7 @@ private:
     QColor output_color_;
 
     std::vector<NodeBox*> boxes_;
+    std::map<NodeBox*, ProfilingWidget*> profiling_;
 };
 }
 

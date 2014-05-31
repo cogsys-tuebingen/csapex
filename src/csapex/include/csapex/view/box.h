@@ -141,6 +141,8 @@ Q_SIGNALS:
     void moveSelectionToBox(NodeBox*);
 
     void showContextMenuForBox(NodeBox* box, const QPoint& pos);
+    void profile(NodeBox* box);
+    void stopProfiling(NodeBox* box);
 
 
 protected:
@@ -166,7 +168,6 @@ protected:
     QLabel* info_compo;
 
     bool profiling_;
-    ProfilingWidget* prof;
 
     bool is_placed_;
 };

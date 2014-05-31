@@ -31,6 +31,7 @@ public:
     NodeBox* getBox();
 
 Q_SIGNALS:
+    void moving(double dx, double dy);
     void moved(double dx, double dy);
 
 private:

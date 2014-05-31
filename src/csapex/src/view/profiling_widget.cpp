@@ -7,30 +7,33 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/timer.h>
 #include <csapex/core/settings.h>
+#include <csapex/view/designer_view.h>
 
 /// SYSTEM
 #include <QPainter>
+#include <QGraphicsProxyWidget>
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(QWidget *parent, NodeBox *box)
-    : QWidget(parent), box_(box), node_worker_(box->getNode()->getNodeWorker())
+ProfilingWidget::ProfilingWidget(DesignerView *view, NodeBox *box, QWidget *parent)
+    : QWidget(parent), view_(view), box_(box), node_worker_(box->getNode()->getNodeWorker())
 {
     w_ = 300;
     h_ = 80;
 
     setFixedSize(w_, h_);
 
-    reposition(box_);
-
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    connect(box_, SIGNAL(moved(NodeBox*,int,int)), this, SLOT(reposition(NodeBox*)));
 }
 
-void ProfilingWidget::reposition(NodeBox *box)
+void ProfilingWidget::reposition(double x, double y)
 {
-    move(box->pos() + QPoint(0, box->height()));
+    QPointF pos = box_->graphicsProxyWidget()->pos() + QPointF(0,box_->height());
+    graphicsProxyWidget()->setPos(pos);
+
+    //QPointF pos = view_->mapToParent(view_->mapFromScene(x, y));
+    //move(pos.x(), pos.y());
 }
 
 void ProfilingWidget::paintEvent(QPaintEvent *)

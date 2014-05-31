@@ -83,6 +83,8 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
     if(!event->isAccepted()) {
         QGraphicsItem::mouseMoveEvent(event);
+        QPointF delta = pos() - before_;
+        moving(delta.x(), delta.y());
     }
 }
 

@@ -16,6 +16,8 @@
 #include <csapex/utility/movable_graphics_proxy_widget.h>
 #include <csapex/core/drag_io.h>
 #include <csapex/view/widget_controller.h>
+#include <csapex/view/profiling_widget.h>
+#include <csapex/model/node_worker.h>
 
 /// SYSTEM
 #include <iostream>
@@ -210,6 +212,8 @@ void DesignerView::addBoxEvent(NodeBox *box)
     QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateInformation(Graph*)));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*, QPoint)), this, SLOT(showContextMenuEditBox(NodeBox*, QPoint)));
+    QObject::connect(box, SIGNAL(profile(NodeBox*)), this, SLOT(profile(NodeBox*)));
+    QObject::connect(box, SIGNAL(stopProfiling(NodeBox*)), this, SLOT(stopProfiling(NodeBox*)));
 
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
     scene_->addItem(proxy);
@@ -233,15 +237,46 @@ void DesignerView::addBoxEvent(NodeBox *box)
     box->show();
 
     box->updateInformation(graph_.get());
-
-    //overlay_->raise();
-    //repaint();
 }
 
 void DesignerView::removeBoxEvent(NodeBox *box)
 {
     box->setVisible(false);
     box->deleteLater();
+}
+
+void DesignerView::profile(NodeBox *box)
+{
+    assert(profiling_.find(box) == profiling_.end());
+
+    ProfilingWidget* prof = new ProfilingWidget(this, box);
+    profiling_[box] = prof;
+
+    QGraphicsProxyWidget* prof_proxy = scene_->addWidget(prof);
+    prof->reposition(prof_proxy->pos().x(), prof_proxy->pos().y());
+    prof->show();
+
+
+    foreach (QGraphicsItem *item, items()) {
+        item->setFlag(QGraphicsItem::ItemIsMovable);
+        item->setFlag(QGraphicsItem::ItemIsSelectable);
+        item->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+        item->setScale(1.0);
+    }
+
+    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
+    QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
+    QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(repaint()));
+}
+
+void DesignerView::stopProfiling(NodeBox *box)
+{
+    std::map<NodeBox*, ProfilingWidget*>::iterator pos = profiling_.find(box);
+    assert(pos != profiling_.end());
+
+    pos->second->deleteLater();
+//    delete pos->second;
+    profiling_.erase(pos);
 }
 
 void DesignerView::movedBoxes(double dx, double dy)

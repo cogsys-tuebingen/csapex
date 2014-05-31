@@ -24,5 +24,6 @@
         <file>open.png</file>
         <file>save.png</file>
         <file>save_as.png</file>
+        <file>stop_profiling.png</file>
     </qresource>
 </RCC>

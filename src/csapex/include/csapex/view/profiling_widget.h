@@ -16,10 +16,10 @@ class ProfilingWidget : public QWidget
     Q_OBJECT
 
 public:
-    ProfilingWidget(QWidget* parent, NodeBox* box);
+    ProfilingWidget(DesignerView *view, NodeBox* box, QWidget* parent=0);
 
 public Q_SLOTS:
-    void reposition(NodeBox* box);
+    void reposition(double x, double y);
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -27,6 +27,7 @@ protected:
     void paintInterval(QPainter &p, const csapex::Timer::Interval &interval, int height_offset, int depth);
 
 private:
+    DesignerView* view_;
     NodeBox* box_;
     NodeWorker* node_worker_;
 

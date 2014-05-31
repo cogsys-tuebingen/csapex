@@ -12,7 +12,6 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/view/profiling_widget.h>
 #include <csapex/view/node_adapter.h>
 #include <csapex/view/port.h>
 #include <csapex/utility/context_menu_handler.h>
@@ -194,8 +193,14 @@ void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<vo
     handler[term] = boost::bind(&NodeBox::killContent, this);
     menu->addAction(term);
 
-    QAction* prof = new QAction("profiling", menu);
-    prof->setIcon(QIcon(":/profiling.png"));
+    QAction* prof;
+    if(profiling_) {
+        prof = new QAction("stop profiling", menu);
+        prof->setIcon(QIcon(":/stop_profiling.png"));
+    } else {
+        prof = new QAction("profiling", menu);
+        prof->setIcon(QIcon(":/profiling.png"));
+    }
     prof->setIconVisibleInMenu(true);
     handler[prof] = boost::bind(&NodeBox::showProfiling, this);
     menu->addAction(prof);
@@ -510,12 +515,10 @@ void NodeBox::showProfiling()
     profiling_ = !profiling_;
 
     if(profiling_) {
-        prof = new ProfilingWidget(parentWidget(), this);
-        prof->show();
+        Q_EMIT profile(this);
     } else {
-        delete prof;
+        Q_EMIT stopProfiling(this);
     }
-
 }
 
 void NodeBox::killContent()
