@@ -140,7 +140,7 @@ void DesignerView::wheelEvent(QWheelEvent *we)
 
         setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-        double scaleFactor = ctrl ? 1.05 : 1.25;
+        double scaleFactor = shift ? 1.05 : 1.25;
         if(we->delta() > 0) {
             // Zoom in
             scale(scaleFactor, scaleFactor);

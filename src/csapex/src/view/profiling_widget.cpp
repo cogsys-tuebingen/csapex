@@ -51,14 +51,6 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     indiv_width_ = content_width_ / Settings::timer_history_length_;
     content_height_ = bottom - up - 2 * padding;
 
-    p.setPen(QPen(Qt::black));
-
-    // x-axis
-    p.drawLine(left, bottom, right, bottom);
-
-    // y-axis
-    p.drawLine(left, bottom, left, up);
-
     size_t max = Settings::timer_history_length_;
     int n = std::min(max, node_worker_->timer_history_.size());
 
@@ -66,6 +58,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     const std::vector<Timer::Ptr>& h = node_worker_->timer_history_;
     for(std::vector<Timer::Ptr>::const_iterator timer = h.begin(); timer != h.end(); ++timer) {
         const Timer::Ptr& t = *timer;
+        if(!t) {
+            continue;
+        }
+
         max_time_ms = std::max(max_time_ms, t->intervals.lengthMs());
 
         std::vector<std::pair<std::string, int> > names = t->entries();
@@ -79,17 +75,6 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         }
     }
 
-    // update stats
-    {
-        const Timer::Ptr& t = node_worker_->timer_history_[node_worker_->timer_history_pos_];
-        std::vector<std::pair<std::string, int> > names = t->entries();
-        for(std::vector<std::pair<std::string, int> >::const_iterator it = names.begin(); it != names.end(); ++it) {
-            const std::string& name = it->first;
-            steps_acc_[name](it->second);
-        }
-        ++count_;
-    }
-
     // background
     QRect rect = contentsRect().adjusted(0,0,-1,-1);
 
@@ -99,12 +84,42 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     p.drawRect(rect);
 
+    // x-axis
     p.setOpacity(1.0);
+    p.setPen(QPen(Qt::black));
+    p.drawLine(left, bottom, right, bottom);
 
+    // y-axis
+    p.drawLine(left, bottom, left, up);
+
+
+    if(node_worker_->timer_history_pos_ < 0) {
+        // no entries
+        QFont font = p.font();
+        font.setPixelSize(line_height * 2);
+        p.setFont(font);
+        p.setPen(QColor(0, 0, 0));
+        p.drawText(rect.adjusted(left, 0, 0, 0), Qt::AlignCenter, "no data");
+        return;
+    }
+
+    // update stats
+    {
+        const Timer::Ptr& t = node_worker_->timer_history_[node_worker_->timer_history_pos_];
+        if(t) {
+            std::vector<std::pair<std::string, int> > names = t->entries();
+            for(std::vector<std::pair<std::string, int> >::const_iterator it = names.begin(); it != names.end(); ++it) {
+                const std::string& name = it->first;
+                steps_acc_[name](it->second);
+            }
+            ++count_;
+        }
+    }
+
+    // bars
     if(n > 0) {
         std::stringstream txt;
         txt << max_time_ms << " ms";
-
 
         QFont font;
         font.setPixelSize(12);
@@ -124,6 +139,12 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
         current_draw_x = left + padding + (max - n) * indiv_width_;
         for(int time = 0; time < n; ++time) {
+
+            static const float min_opacity = 0.25f;
+
+            float op = ((time - node_worker_->timer_history_pos_ + n - 1) % n) / (float) n;
+            p.setOpacity(min_opacity + op * (1.0f - min_opacity));
+
             const Timer::Ptr& timer = node_worker_->timer_history_[time];
 
             paintTimer(p, timer.get());
@@ -132,7 +153,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // time line
     p.setOpacity(0.8);
-    float pos = left + padding + node_worker_->timer_history_pos_ * indiv_width_;
+    float pos = left + padding + (node_worker_->timer_history_pos_+1) * indiv_width_;
     QPen pen(QColor(255, 20, 20));
     pen.setWidth(3);
     p.setPen(pen);
@@ -160,6 +181,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     p.drawText(QRectF(info_x, y, info_w, line_height), QString::fromStdString(ss.str()));
     y += line_height;
 
+    // stats
     for(std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
         const std::string& name = it->first;
         QBrush brush(it->second);

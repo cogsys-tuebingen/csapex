@@ -16,9 +16,11 @@ using namespace csapex;
 
 NodeWorker::NodeWorker(Node* node)
     : node_(node), private_thread_(NULL),
-      timer_history_pos_(-1), timer_history_(Settings::timer_history_length_),
+      timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false)
 {
+    timer_history_.resize(Settings::timer_history_length_);
+    assert(timer_history_.size() == Settings::timer_history_length_);
     assert(timer_history_.capacity() == Settings::timer_history_length_);
 
     assert(node_);
@@ -277,7 +279,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
     // send the messages
     sendMessages();
 
-    if(++timer_history_pos_ >= Settings::timer_history_length_) {
+    if(++timer_history_pos_ >= (int) Settings::timer_history_length_) {
         timer_history_pos_ = 0;
     }
     timer_history_[timer_history_pos_] = t;
