@@ -143,7 +143,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     schematics_painter = &ps;
 
     if(schema_dirty_) {
-        schematics_painter->fillRect(sceneRect(), Qt::red);
+        schematics_painter->fillRect(sceneRect(), -1);
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
@@ -232,6 +232,23 @@ void DesignerScene::drawItems(QPainter *painter, int numItems,
                               QWidget *widget)
 {
     QGraphicsScene::drawItems(painter, numItems, items, options, widget);
+}
+
+void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
+{
+    QPoint pos = (e->scenePos() - sceneRect().topLeft()).toPoint();
+    if(!schematics.rect().contains(pos)) {
+        return;
+    }
+
+    std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
+
+    int id = data.first;
+
+    if(id != highlight_connection_id_) {
+        highlight_connection_id_ = id;
+        update();
+    }
 }
 
 QPen DesignerScene::makeSelectedLinePen(const QPointF& from, const QPointF& to)
@@ -469,14 +486,14 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         path.cubicTo(cp1, cp2, fulcrum.pos);
 
         if(ccs.highlighted) {
-            painter->setPen(QPen(Qt::black, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->setPen(QPen(Qt::black, ccs.r + 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(path);
 
-            painter->setPen(QPen(Qt::white, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->setPen(QPen(Qt::white, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(path);
 
         } else if(ccs.selected) {
-            painter->setPen(QPen(Qt::black, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->setPen(QPen(Qt::black, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(path);
 
             painter->setPen(makeSelectedLinePen(from, to));

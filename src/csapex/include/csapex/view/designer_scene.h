@@ -29,6 +29,8 @@ public:
                            const QStyleOptionGraphicsItem options[],
                            QWidget *widget = 0);
 
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+
 public Q_SLOTS:
     void addTemporaryConnection(Connectable* from, Connectable* to);
     void addTemporaryConnection(Connectable *from, const QPointF &end);
