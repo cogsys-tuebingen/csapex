@@ -59,7 +59,7 @@ QWidget* topLevelParentWidget (QWidget* widget)
 
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl)
     : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
-      draw_grid_(false), scale_(1.0),
+      draw_grid_(false), draw_schema_(false), scale_(1.0),
       schema_dirty_(false), splicing_requested(false), splicing(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
@@ -88,6 +88,14 @@ void DesignerScene::enableGrid(bool draw)
     if(draw != draw_grid_) {
         draw_grid_ = draw;
 
+        update();
+    }
+}
+
+void DesignerScene::enableSchema(bool draw)
+{
+    if(draw != draw_schema_) {
+        draw_schema_ = draw;
         update();
     }
 }
@@ -124,17 +132,18 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    if(schematics.isNull()) {
-        schematics = QImage(QSize(rect.width(), rect.height()), QImage::Format_RGB888);
+    QSize scene_size(sceneRect().width(), sceneRect().height());
+    if(schematics.isNull() || schematics.size() != scene_size ) {
+        schematics = QImage(scene_size, QImage::Format_RGB888);
+        schema_dirty_ = true;
     }
 
     QPainter ps(&schematics);
-
-
+    ps.setWindow(sceneRect().toRect());
     schematics_painter = &ps;
 
     if(schema_dirty_) {
-        schematics_painter->fillRect(0, 0, schematics.width(), schematics.height(), Qt::white);
+        schematics_painter->fillRect(sceneRect(), Qt::red);
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
@@ -207,9 +216,10 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         painter->drawEllipse(drag_connection_handle_, r, r);
     }
 
-    // painter->setOpacity(0.35);
-
-    //  painter->drawImage(QPoint(0,0), schematics);
+    if(draw_schema_){
+        painter->setOpacity(0.35);
+        painter->drawImage(sceneRect().topLeft(), schematics);
+    }
 
     schema_dirty_ = false;
 
@@ -269,11 +279,13 @@ void DesignerScene::connectionAdded(Connection* c)
     QObject::connect(c, SIGNAL(fulcrum_added(Connection*)), this, SLOT(fulcrumAdded(Connection*)));
     QObject::connect(c, SIGNAL(fulcrum_deleted(Connection*)), this, SLOT(fulcrumDeleted(Connection*)));
     QObject::connect(c, SIGNAL(fulcrum_moved(Connection*)), this, SLOT(fulcrumMoved(Connection*)));
+
+    invalidateSchema();
 }
 
 void DesignerScene::connectionDeleted(Connection*)
 {
-
+    invalidateSchema();
 }
 
 void DesignerScene::fulcrumAdded(Connection *)

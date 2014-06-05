@@ -24,7 +24,8 @@ class Designer : public QWidget
     friend class DesignerIO;
 
 public:
-    Designer(Settings& settings, GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl, DesignerView *view, QWidget* parent = 0);
+    Designer(Settings& settings, GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl,
+             DesignerView *view, DesignerScene* scene,  QWidget* parent = 0);
     virtual ~Designer();
 
     void setup();
@@ -41,6 +42,7 @@ public:
 Q_SIGNALS:
     void selectionChanged();
     void gridEnabled(bool);
+    void schematicsEnabled(bool);
     void gridLockEnabled(bool);
 
 public Q_SLOTS:
@@ -51,6 +53,7 @@ public Q_SLOTS:
     void overwriteStyleSheet(QString& stylesheet);
 
     void enableGrid(bool);
+    void enableSchematics(bool);
     void lockToGrid(bool);
     void reset();
 
@@ -61,6 +64,7 @@ public Q_SLOTS:
 private:
     Ui::Designer* ui;
     DesignerView* designer_view_;
+    DesignerScene* designer_scene_;
 
     Settings& settings_;
     GraphPtr graph_;

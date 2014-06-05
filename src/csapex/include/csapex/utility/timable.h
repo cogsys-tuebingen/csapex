@@ -7,6 +7,9 @@
 namespace csapex
 {
 
+#define INTERLUDE(name) \
+    csapex::Timer::Interlude::Ptr __interlude__ = publish_timer_->step(name)
+
 class Timable
 {
 public:

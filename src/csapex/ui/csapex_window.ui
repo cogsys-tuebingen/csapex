@@ -87,6 +87,8 @@
     </property>
     <addaction name="actionGrid"/>
     <addaction name="actionLock_to_Grid"/>
+    <addaction name="separator"/>
+    <addaction name="actionSchematics"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -131,6 +133,7 @@
    <addaction name="actionClearBlock"/>
    <addaction name="separator"/>
    <addaction name="actionGrid"/>
+   <addaction name="actionSchematics"/>
   </widget>
   <widget class="QDockWidget" name="Debug">
    <property name="features">
@@ -412,6 +415,18 @@
    </property>
    <property name="text">
     <string>Clear Blocking Connectors</string>
+   </property>
+  </action>
+  <action name="actionSchematics">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/schema.png</normaloff>:/schema.png</iconset>
+   </property>
+   <property name="text">
+    <string>Display Schematics</string>
    </property>
   </action>
  </widget>

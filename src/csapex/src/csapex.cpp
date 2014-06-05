@@ -16,6 +16,7 @@
 #include <csapex/manager/box_manager.h>
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/widget_controller.h>
+#include <csapex/view/designer_scene.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -120,8 +121,9 @@ int Main::main(bool headless, const std::string& config, const std::string& path
         app.processEvents();
 
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
-        DesignerView* view = new DesignerView(graph, &dispatcher, widget_control, drag_io);
-        Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view);
+        DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control);
+        DesignerView* view = new DesignerView(scene, graph, &dispatcher, widget_control, drag_io);
+        Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene);
 
         widget_control->setDesigner(designer);
 

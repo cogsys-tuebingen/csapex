@@ -19,12 +19,11 @@ class DesignerView : public QGraphicsView
     Q_PROPERTY(QColor outputColor READ outputColor WRITE setOutputColor)
 
 public:
-    DesignerView(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget* parent = 0);
+    DesignerView(DesignerScene* scene, csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget* parent = 0);
     ~DesignerView();
 
     DesignerScene* designerScene();
 
-    bool hasSelection() const;
     CommandPtr deleteSelected();
 
     void keyPressEvent(QKeyEvent* e);
@@ -74,8 +73,6 @@ public Q_SLOTS:
     void showContextMenuEditBox(NodeBox* box, const QPoint& pos);
     void showContextMenuAddNode(const QPoint& global_pos);
 
-    void enableGrid(bool draw);
-
     void profile(NodeBox* box);
     void stopProfiling(NodeBox* box);
 
@@ -85,12 +82,12 @@ public Q_SLOTS:
     void selectAll();
 
 private:
+    DesignerScene* scene_;
+
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;
     DragIO& drag_io_;
-
-    DesignerScene* scene_;
 
     QColor input_color_;
     QColor output_color_;

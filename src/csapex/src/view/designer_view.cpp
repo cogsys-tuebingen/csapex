@@ -29,11 +29,10 @@
 
 using namespace csapex;
 
-DesignerView::DesignerView(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget *parent)
-    : QGraphicsView(parent), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio)
+DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget *parent)
+    : QGraphicsView(parent), scene_(scene), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio)
 
 {
-    scene_ = new DesignerScene(graph_, dispatcher_, widget_ctrl_);
     setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     setScene(scene_);
@@ -76,11 +75,6 @@ void DesignerView::resetZoom()
 DesignerScene* DesignerView::designerScene()
 {
     return scene_;
-}
-
-bool DesignerView::hasSelection() const
-{
-    return scene_->selectedItems().size() > 0;
 }
 
 Command::Ptr DesignerView::deleteSelected()
@@ -201,9 +195,9 @@ void DesignerView::showBoxDialog()
 void DesignerView::addBoxEvent(NodeBox *box)
 {
     //QObject::connect(box, SIGNAL(moved(csapex::Box*, int, int)), this, SLOT(findMinSize(csapex::Box*)));
-    //QObject::connect(box, SIGNAL(moved(Box*, int, int)), overlay_, SLOT(invalidateSchema()));
+    QObject::connect(box, SIGNAL(moved(NodeBox*, int, int)), scene_, SLOT(invalidateSchema()));
     //QObject::connect(box, SIGNAL(moved(Box*, int, int)), &widget_ctrl_->box_selection_, SLOT(mimicBoxMovement(Box*, int, int)));
-    //QObject::connect(box, SIGNAL(changed(Box*)), overlay_, SLOT(invalidateSchema()));
+    QObject::connect(box, SIGNAL(changed(NodeBox*)), scene_, SLOT(invalidateSchema()));
     //QObject::connect(box, SIGNAL(clicked(Box*)), &widget_ctrl_->box_selection_, SLOT(toggleSelection(Box*)));
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
     QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
@@ -356,9 +350,4 @@ void DesignerView::selectAll()
     foreach(QGraphicsItem* item, scene_->items()) {
         item->setSelected(true);
     }
-}
-
-void DesignerView::enableGrid(bool draw)
-{
-    scene_->enableGrid(draw);
 }

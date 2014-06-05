@@ -25,8 +25,8 @@
 
 using namespace csapex;
 
-Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerView* view, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), designer_view_(view), settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
+Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerView* view, DesignerScene* scene, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Designer), designer_view_(view), designer_scene_(scene), settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
 {
 }
 
@@ -54,6 +54,10 @@ void Designer::setup()
 
     if(settings_.knows("grid")) {
         enableGrid(settings_.get<bool>("grid"));
+    }
+
+    if(settings_.knows("schematics")) {
+        enableSchematics(settings_.get<bool>("schematics"));
     }
 
     if(settings_.knows("grid-lock")) {
@@ -133,7 +137,7 @@ bool Designer::isGridLockEnabled() const
 
 bool Designer::hasSelection() const
 {
-    return designer_view_->hasSelection();
+    return designer_scene_->selectedItems().size() > 0;
 }
 
 void Designer::enableGrid(bool grid)
@@ -144,9 +148,23 @@ void Designer::enableGrid(bool grid)
 
     settings_.set("grid", grid);
 
-    designer_view_->enableGrid(grid);
+    designer_scene_->enableGrid(grid);
 
     Q_EMIT gridEnabled(grid);
+
+}
+
+void Designer::enableSchematics(bool schema)
+{
+    if(!settings_.knows("schematics")) {
+        settings_.add(param::ParameterFactory::declareBool("schematics", schema));
+    }
+
+    settings_.set("schematics", schema);
+
+    designer_scene_->enableSchema(schema);
+
+    Q_EMIT schematicsEnabled(schema);
 
 }
 
