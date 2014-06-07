@@ -17,8 +17,9 @@ class FulcrumWidget : public QObject, public QGraphicsEllipseItem
     Q_OBJECT
 
 public:
-    FulcrumWidget(Fulcrum* fulcrum, QGraphicsItem *parent = 0);
+    FulcrumWidget(Fulcrum* fulcrum, CommandDispatcher *dispatcher, QGraphicsItem *parent = 0);
 
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* e);
     bool sceneEvent(QEvent *event);
 
 public Q_SLOTS:
@@ -34,6 +35,7 @@ private:
 
 private:
     Fulcrum* fulcrum_;
+    CommandDispatcher* cmd_dispatcher_;
 
     QPointF half_size_;
 

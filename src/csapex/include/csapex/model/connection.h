@@ -55,6 +55,7 @@ Q_SIGNALS:
     void fulcrum_added(Fulcrum*);
     void fulcrum_moved(Fulcrum*,bool dropped);
     void fulcrum_moved_handle(Fulcrum*,bool dropped, int which);
+    void fulcrum_type_changed(Fulcrum*,int type);
     void fulcrum_deleted(Fulcrum*);
 
 public:

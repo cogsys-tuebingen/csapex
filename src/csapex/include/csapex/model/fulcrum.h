@@ -49,6 +49,8 @@ public:
     int id() const;
     void setId(int id);
 
+    int connectionId() const;
+
     int type() const;
     void setType(int type);
 

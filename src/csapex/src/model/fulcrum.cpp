@@ -63,6 +63,11 @@ int Fulcrum::id() const
     return id_;
 }
 
+int Fulcrum::connectionId() const
+{
+    return parent_->id();
+}
+
 void Fulcrum::setId(int id)
 {
     id_ = id;

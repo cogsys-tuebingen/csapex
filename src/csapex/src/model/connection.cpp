@@ -92,7 +92,9 @@ Fulcrum::Ptr Connection::getFulcrum(int fulcrum_id)
 void Connection::addFulcrum(int fulcrum_id, const QPointF &pos, int type, const QPointF &handle_in, const QPointF &handle_out)
 {
     // create the new fulcrum
-    Fulcrum::Ptr f(new Fulcrum(this, pos, type, handle_in, handle_out));
+    Fulcrum::Ptr fulcrum(new Fulcrum(this, pos, type, handle_in, handle_out));
+    Fulcrum* f = fulcrum.get();
+
     f->setId(fulcrum_id);
 
     // update the ids of the later fulcrums
@@ -101,12 +103,13 @@ void Connection::addFulcrum(int fulcrum_id, const QPointF &pos, int type, const 
         (*it)->setId((*it)->id() + 1);
     }
 
-    fulcrums_.insert(index, f);
+    fulcrums_.insert(index, fulcrum);
 
-    QObject::connect(f.get(), SIGNAL(moved(Fulcrum*,bool)), this, SIGNAL(fulcrum_moved(Fulcrum*,bool)));
-    QObject::connect(f.get(), SIGNAL(movedHandle(Fulcrum*,bool,int)), this, SIGNAL(fulcrum_moved_handle(Fulcrum*,bool,int)));
+    QObject::connect(f, SIGNAL(moved(Fulcrum*,bool)), this, SIGNAL(fulcrum_moved(Fulcrum*,bool)));
+    QObject::connect(f, SIGNAL(movedHandle(Fulcrum*,bool,int)), this, SIGNAL(fulcrum_moved_handle(Fulcrum*,bool,int)));
+    QObject::connect(f, SIGNAL(typeChanged(Fulcrum*,int)), this, SIGNAL(fulcrum_type_changed(Fulcrum*,int)));
 
-    Q_EMIT fulcrum_added(f.get());
+    Q_EMIT fulcrum_added(f);
 }
 
 void Connection::modifyFulcrum(int fulcrum_id, int type, const QPointF &handle_in, const QPointF &handle_out)

@@ -16,7 +16,6 @@ FulcrumHandle::FulcrumHandle(const QPointF& pos, QGraphicsItem *parent)
     QPointF half_size_(5, 5);
 
     setFlag(QGraphicsItem::ItemIsMovable);
-//    setFlag(QGraphicsItem::ItemIsSelectable);
 
     setPos(pos);
     setRect(QRectF(-half_size_, half_size_));

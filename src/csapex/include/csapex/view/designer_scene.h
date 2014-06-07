@@ -48,6 +48,7 @@ public Q_SLOTS:
 
     void fulcrumAdded(Fulcrum *f);
     void fulcrumMoved(Fulcrum *f, bool dropped);
+    void fulcrumTypeChanged(Fulcrum *f, int type);
     void fulcrumHandleMoved(Fulcrum *f, bool dropped, int which);
     void fulcrumDeleted(Fulcrum *);
 

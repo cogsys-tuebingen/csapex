@@ -319,6 +319,7 @@ void DesignerScene::connectionAdded(Connection* c)
     QObject::connect(c, SIGNAL(fulcrum_deleted(Fulcrum*)), this, SLOT(fulcrumDeleted(Fulcrum*)), Qt::DirectConnection);
     QObject::connect(c, SIGNAL(fulcrum_moved(Fulcrum*,bool)), this, SLOT(fulcrumMoved(Fulcrum *, bool)));
     QObject::connect(c, SIGNAL(fulcrum_moved_handle(Fulcrum*,bool,int)), this, SLOT(fulcrumHandleMoved(Fulcrum *, bool, int)));
+    QObject::connect(c, SIGNAL(fulcrum_type_changed(Fulcrum*,int)), this, SLOT(fulcrumTypeChanged(Fulcrum*,int)));
 
     invalidateSchema();
 }
@@ -330,7 +331,7 @@ void DesignerScene::connectionDeleted(Connection*)
 
 void DesignerScene::fulcrumAdded(Fulcrum * f)
 {
-    FulcrumWidget* w = new FulcrumWidget(f);
+    FulcrumWidget* w = new FulcrumWidget(f, dispatcher_);
     addItem(w);
     fulcrum_2_widget_[f] = w;
     fulcrum_last_pos_[f] = f->pos();
@@ -359,7 +360,7 @@ void DesignerScene::fulcrumDeleted(Fulcrum* f)
 void DesignerScene::fulcrumMoved(Fulcrum * f, bool dropped)
 {
     if(dropped) {
-        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(f->connection()->id(), f->id(), fulcrum_last_pos_[f], f->pos())));
+        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(f->connectionId(), f->id(), fulcrum_last_pos_[f], f->pos())));
         fulcrum_last_pos_[f] = f->pos();
     }
     invalidateSchema();
@@ -368,7 +369,7 @@ void DesignerScene::fulcrumMoved(Fulcrum * f, bool dropped)
 void DesignerScene::fulcrumHandleMoved(Fulcrum * f, bool dropped, int /*which*/)
 {
     if(dropped) {
-        dispatcher_->execute(Command::Ptr(new command::ModifyFulcrum(f->connection()->id(), f->id(),
+        dispatcher_->execute(Command::Ptr(new command::ModifyFulcrum(f->connectionId(), f->id(),
                                                                      fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
                                                                      f->type(), f->handleIn(), f->handleOut())));
         fulcrum_last_type_[f] = f->type();
@@ -376,6 +377,11 @@ void DesignerScene::fulcrumHandleMoved(Fulcrum * f, bool dropped, int /*which*/)
         fulcrum_last_hout_[f] = f->handleOut();
 
     }
+    invalidateSchema();
+}
+
+void DesignerScene::fulcrumTypeChanged(Fulcrum *f, int type)
+{
     invalidateSchema();
 }
 

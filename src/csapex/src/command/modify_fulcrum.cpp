@@ -35,6 +35,7 @@ std::string ModifyFulcrum::getDescription() const
 
 bool ModifyFulcrum::doExecute()
 {
+    graph_->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, t_type, t_in, t_out);
     return true;
 }
 
@@ -46,7 +47,6 @@ bool ModifyFulcrum::doUndo()
 
 bool ModifyFulcrum::doRedo()
 {
-    graph_->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, t_type, t_in, t_out);
-    return true;
+    return doExecute();
 }
 
