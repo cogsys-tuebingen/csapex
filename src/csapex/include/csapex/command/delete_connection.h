@@ -2,7 +2,7 @@
 #define COMMAND_DELETE_CONNECTION_H
 
 /// COMPONENT
-#include "command.h"
+#include "meta.h"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -11,7 +11,7 @@ namespace csapex
 namespace command
 {
 
-struct DeleteConnection : public Command {
+struct DeleteConnection : public Meta {
     DeleteConnection(Connectable* a, Connectable* b);
 
 protected:
@@ -25,8 +25,6 @@ protected:
     virtual std::string getDescription() const;
 
 private:
-    Command::Ptr remove_fulcrums;
-
     int connection_id;
 
     ConnectorOut* from;

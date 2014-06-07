@@ -29,6 +29,8 @@ private:
     int connection_id;
     int fulcrum_id;
     QPointF pos;
+    QPointF in;
+    QPointF out;
     int type;
 };
 

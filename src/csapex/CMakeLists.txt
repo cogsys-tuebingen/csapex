@@ -104,6 +104,7 @@ set(SRC_APP
     src/command/move_box.cpp
     src/command/add_fulcrum.cpp
     src/command/move_fulcrum.cpp
+    src/command/modify_fulcrum.cpp
     src/command/delete_fulcrum.cpp
 
     src/model/node_constructor.cpp
@@ -147,6 +148,7 @@ set(SRC_APP
     src/view/port.cpp
     src/view/widget_controller.cpp
     src/view/fulcrum_widget.cpp
+    src/view/fulcrum_handle.cpp
 )
 
 #

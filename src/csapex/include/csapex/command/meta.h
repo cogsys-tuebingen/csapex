@@ -17,6 +17,7 @@ struct Meta : public Command {
     typedef boost::shared_ptr<Meta> Ptr;
 
     Meta(const std::string& type);
+    void clear();
     void add(Command::Ptr cmd);
 
     int commands() const;

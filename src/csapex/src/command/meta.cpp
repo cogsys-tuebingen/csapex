@@ -34,6 +34,11 @@ std::string Meta::getDescription() const
     return "";
 }
 
+void Meta::clear()
+{
+    assert(!locked);
+    nested.clear();
+}
 
 void Meta::add(Command::Ptr cmd)
 {

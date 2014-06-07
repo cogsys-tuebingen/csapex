@@ -12,7 +12,7 @@
 using namespace csapex::command;
 
 DeleteNode::DeleteNode(const UUID& uuid)
-    : uuid(uuid)
+    : Meta("delete node and connections"), uuid(uuid)
 {
 }
 
@@ -33,9 +33,12 @@ bool DeleteNode::doExecute()
 
     type = node->getType();
 
-    remove_connections = node->removeAllConnectionsCmd();
+    locked = false;
+    clear();
+    add(node->removeAllConnectionsCmd());
+    locked = true;
 
-    if(Command::executeCommand(graph_, widget_ctrl_, remove_connections)) {
+    if(Meta::doExecute()) {
         saved_state = node->getNodeState();
 
         graph_->deleteNode(node->getUUID());
@@ -53,12 +56,12 @@ bool DeleteNode::doUndo()
 
     graph_->addNode(node);
 
-    return Command::undoCommand(graph_, widget_ctrl_, remove_connections);
+    return Meta::doUndo();
 }
 
 bool DeleteNode::doRedo()
 {
-    if(Command::redoCommand(graph_, widget_ctrl_, remove_connections)) {
+    if(Meta::doRedo()) {
         Node* node = graph_->findNode(uuid);
         saved_state = node->getNodeState();
 

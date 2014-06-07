@@ -194,11 +194,9 @@ void DesignerView::showBoxDialog()
 
 void DesignerView::addBoxEvent(NodeBox *box)
 {
-    //QObject::connect(box, SIGNAL(moved(csapex::Box*, int, int)), this, SLOT(findMinSize(csapex::Box*)));
     QObject::connect(box, SIGNAL(moved(NodeBox*, int, int)), scene_, SLOT(invalidateSchema()));
-    //QObject::connect(box, SIGNAL(moved(Box*, int, int)), &widget_ctrl_->box_selection_, SLOT(mimicBoxMovement(Box*, int, int)));
     QObject::connect(box, SIGNAL(changed(NodeBox*)), scene_, SLOT(invalidateSchema()));
-    //QObject::connect(box, SIGNAL(clicked(Box*)), &widget_ctrl_->box_selection_, SLOT(toggleSelection(Box*)));
+
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
     QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
     QObject::connect(box->getNode(), SIGNAL(connectionDone()), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()));

@@ -633,7 +633,7 @@ void Node::removeOutput(ConnectorOut *out)
 
 Command::Ptr Node::removeAllConnectionsCmd()
 {
-    command::Meta::Ptr cmd(new command::Meta("Remove All Connectors"));
+    command::Meta::Ptr cmd(new command::Meta("Remove All Connections"));
 
     BOOST_FOREACH(ConnectorIn* i, getInputs()) {
         if(i->isConnected()) {

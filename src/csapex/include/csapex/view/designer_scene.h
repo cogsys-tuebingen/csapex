@@ -48,6 +48,7 @@ public Q_SLOTS:
 
     void fulcrumAdded(Fulcrum *f);
     void fulcrumMoved(Fulcrum *f, bool dropped);
+    void fulcrumHandleMoved(Fulcrum *f, bool dropped, int which);
     void fulcrumDeleted(Fulcrum *);
 
 //    bool showConnectionContextMenu(const QPoint& pos);
@@ -117,7 +118,10 @@ private:
     std::vector<TempConnection> temp_;
 
     std::map<Fulcrum*,FulcrumWidget*> fulcrum_2_widget_;
-    std::map<Fulcrum*,QPointF> last_pos_;
+    std::map<Fulcrum*,QPointF> fulcrum_last_pos_;
+    std::map<Fulcrum*,int> fulcrum_last_type_;
+    std::map<Fulcrum*,QPointF> fulcrum_last_hin_;
+    std::map<Fulcrum*,QPointF> fulcrum_last_hout_;
 
     bool draw_grid_;
     bool draw_schema_;

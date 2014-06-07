@@ -2,7 +2,7 @@
 #define COMMAND_DELETE_NODE_H
 
 /// COMPONENT
-#include <csapex/command/command.h>
+#include <csapex/command/meta.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 
@@ -15,7 +15,7 @@ namespace csapex
 
 namespace command
 {
-class DeleteNode : public Command
+class DeleteNode : public Meta
 {
 public:
     DeleteNode(const UUID &uuid);
@@ -34,7 +34,7 @@ protected:
     std::string type;
     UUID uuid;
 
-    Command::Ptr remove_connections;
+//    Command::Ptr remove_connections;
 
     NodeStatePtr saved_state;
 };

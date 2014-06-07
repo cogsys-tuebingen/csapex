@@ -103,6 +103,11 @@ DesignerView* Designer::getDesignerView()
     return designer_view_;
 }
 
+void Designer::refresh()
+{
+    designer_scene_->invalidateSchema();
+}
+
 void Designer::reset()
 {
     designer_view_->reset();

@@ -14,6 +14,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_fulcrum.h>
 #include <csapex/command/move_fulcrum.h>
+#include <csapex/command/modify_fulcrum.h>
 #include <csapex/view/fulcrum_widget.h>
 
 /// SYSTEM
@@ -315,8 +316,9 @@ QPen DesignerScene::makeLinePen(const QPointF& from, const QPointF& to)
 void DesignerScene::connectionAdded(Connection* c)
 {
     QObject::connect(c, SIGNAL(fulcrum_added(Fulcrum *)), this, SLOT(fulcrumAdded(Fulcrum *)));
-    QObject::connect(c, SIGNAL(fulcrum_deleted(Fulcrum*)), this, SLOT(fulcrumDeleted(Fulcrum*)));
+    QObject::connect(c, SIGNAL(fulcrum_deleted(Fulcrum*)), this, SLOT(fulcrumDeleted(Fulcrum*)), Qt::DirectConnection);
     QObject::connect(c, SIGNAL(fulcrum_moved(Fulcrum*,bool)), this, SLOT(fulcrumMoved(Fulcrum *, bool)));
+    QObject::connect(c, SIGNAL(fulcrum_moved_handle(Fulcrum*,bool,int)), this, SLOT(fulcrumHandleMoved(Fulcrum *, bool, int)));
 
     invalidateSchema();
 }
@@ -331,7 +333,10 @@ void DesignerScene::fulcrumAdded(Fulcrum * f)
     FulcrumWidget* w = new FulcrumWidget(f);
     addItem(w);
     fulcrum_2_widget_[f] = w;
-    last_pos_[f] = f->pos();
+    fulcrum_last_pos_[f] = f->pos();
+    fulcrum_last_type_[f] = f->type();
+    fulcrum_last_hin_[f] = f->handleIn();
+    fulcrum_last_hout_[f] = f->handleOut();
 
     clearSelection();
     w->setSelected(true);
@@ -354,8 +359,22 @@ void DesignerScene::fulcrumDeleted(Fulcrum* f)
 void DesignerScene::fulcrumMoved(Fulcrum * f, bool dropped)
 {
     if(dropped) {
-        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(f->connection()->id(), f->id(), last_pos_[f], f->pos())));
-        last_pos_[f] = f->pos();
+        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(f->connection()->id(), f->id(), fulcrum_last_pos_[f], f->pos())));
+        fulcrum_last_pos_[f] = f->pos();
+    }
+    invalidateSchema();
+}
+
+void DesignerScene::fulcrumHandleMoved(Fulcrum * f, bool dropped, int /*which*/)
+{
+    if(dropped) {
+        dispatcher_->execute(Command::Ptr(new command::ModifyFulcrum(f->connection()->id(), f->id(),
+                                                                     fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
+                                                                     f->type(), f->handleIn(), f->handleOut())));
+        fulcrum_last_type_[f] = f->type();
+        fulcrum_last_hin_[f] = f->handleIn();
+        fulcrum_last_hout_[f] = f->handleOut();
+
     }
     invalidateSchema();
 }
@@ -452,19 +471,18 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     Connection::Ptr connection = graph_->getConnectionWithId(id);
 
-    Fulcrum::Ptr current(new Fulcrum(connection.get(), from, from_type));
+    Fulcrum::Ptr current(new Fulcrum(connection.get(), from, from_type, from, from));
     Fulcrum::Ptr last = current;
 
     std::vector<Fulcrum::Ptr> targets;
     if(id >= 0) {
         targets = connection->getFulcrums();
     }
-    targets.push_back(Fulcrum::Ptr(new Fulcrum(connection.get(), to, to_type)));
+    targets.push_back(Fulcrum::Ptr(new Fulcrum(connection.get(), to, to_type, to, to)));
 
     int sub_section = 0;
 
     QPointF cp1, cp2;
-    QPointF tangent;
 
     Q_FOREACH(Fulcrum::Ptr fulcrum, targets) {
         QPoint offset;
@@ -489,7 +507,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
             if(last->type() == Fulcrum::LINEAR) {
                 cp1 = current->pos();
             } else {
-                cp1 = current->pos() + tangent;
+                cp1 = current->pos() + current->handleOut();
             }
         }
 
@@ -499,14 +517,13 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
             cp2 = fulcrum->pos() + delta + offset;
         } else {
             const Fulcrum::Ptr& next = targets[sub_section+1];
-            tangent = (next->pos() - current->pos());
-            tangent*= 50.0 / hypot(diff.x(), diff.y());
-            cp2 = fulcrum->pos() - tangent;
+            if(fulcrum->type() == Fulcrum::LINEAR) {
+                cp2 = fulcrum->pos();
+            } else {
+                cp2 = fulcrum->pos() + fulcrum->handleIn();
+            }
         }
 
-        if(fulcrum->type() == Fulcrum::LINEAR) {
-            cp2 = fulcrum->pos();
-        }
         path.cubicTo(cp1, cp2, fulcrum->pos());
 
         if(ccs.highlighted) {
@@ -697,6 +714,7 @@ void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
 void DesignerScene::invalidateSchema()
 {
     schema_dirty_ = true;
+    update();
 }
 
 void DesignerScene::refresh()

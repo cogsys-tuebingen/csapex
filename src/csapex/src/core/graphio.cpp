@@ -29,7 +29,7 @@ GraphIO::GraphIO(Graph::Ptr graph)
 void GraphIO::saveSettings(YAML::Emitter& yaml)
 {
     yaml << YAML::Key << "uuid_map";
-    yaml << YAML::Value << graph_->uuids_;    
+    yaml << YAML::Value << graph_->uuids_;
 }
 
 void GraphIO::loadSettings(YAML::Node &doc)
@@ -123,6 +123,12 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
         yaml << YAML::Key << "pts" << YAML::Value << YAML::Flow << YAML::BeginSeq;
         Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
             yaml << YAML::Flow << YAML::BeginSeq << f->pos().x() << f->pos().y() << YAML::EndSeq;
+        }
+        yaml << YAML::EndSeq;
+
+        yaml << YAML::Key << "handles" << YAML::Value << YAML::Flow << YAML::BeginSeq;
+        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+            yaml << YAML::Flow << YAML::BeginSeq << f->handleIn().x() << f->handleIn().y() << f->handleOut().x() << f->handleOut().y() << YAML::EndSeq;
         }
         yaml << YAML::EndSeq;
 
@@ -241,8 +247,14 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
             Connection::Ptr connection = graph_->getConnection(Connection::Ptr(new Connection(from, to)));
 
-            std::vector< std::vector<int> > pts;
+            std::vector< std::vector<double> > pts;
             fulcrum["pts"] >> pts;
+
+            std::vector< std::vector<double> > handles;
+            bool has_handle = YAML::exists(fulcrum, "handles");
+            if(has_handle) {
+                fulcrum["handles"] >> handles;
+            }
 
             std::vector<int> types;
             if(exists(fulcrum, "types")) {
@@ -252,7 +264,13 @@ void GraphIO::loadConnections(YAML::Node &doc)
             int n = pts.size();
             for(int i = 0; i < n; ++i) {
                 int type = (!types.empty()) ? types[i] : Fulcrum::CURVE;
-                connection->addFulcrum(i, QPoint(pts[i][0], pts[i][1]), type);
+                if(has_handle) {
+                    QPointF in(handles[i][0], handles[i][1]);
+                    QPointF out(handles[i][2], handles[i][3]);
+                    connection->addFulcrum(i, QPointF(pts[i][0], pts[i][1]), type, in, out);
+                } else {
+                    connection->addFulcrum(i, QPointF(pts[i][0], pts[i][1]), type);
+                }
             }
         }
     }

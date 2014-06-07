@@ -20,6 +20,7 @@ class Connection : public QObject, public Selectable {
 
     friend class command::AddFulcrum;
     friend class command::MoveFulcrum;
+    friend class command::ModifyFulcrum;
     friend class command::DeleteFulcrum;
     friend class GraphIO;
     friend class Graph;
@@ -53,6 +54,7 @@ private Q_SLOTS:
 Q_SIGNALS:
     void fulcrum_added(Fulcrum*);
     void fulcrum_moved(Fulcrum*,bool dropped);
+    void fulcrum_moved_handle(Fulcrum*,bool dropped, int which);
     void fulcrum_deleted(Fulcrum*);
 
 public:
@@ -67,7 +69,8 @@ protected:
 
 private:
     /// COMMANDS
-    void addFulcrum(int subsection, const QPointF& pos, int type);
+    void addFulcrum(int fulcrum_id, const QPointF& pos, int type, const QPointF& handle_in=QPointF(-10.0, 0.0), const QPointF& handle_out=QPointF(10.0, 0.0));
+    void modifyFulcrum(int fulcrum_id, int type, const QPointF& handle_in=QPointF(-10.0, 0.0), const QPointF& handle_out=QPointF(10.0, 0.0));
     void moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped);
     void deleteFulcrum(int fulcrum_id);
 

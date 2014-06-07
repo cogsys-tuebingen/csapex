@@ -153,17 +153,6 @@ void CommandDispatcher::undo()
     bool ret = Command::Access::undoCommand(graph_, widget_ctrl_, last);
     assert(ret);
 
-//    while(!Command::undo_later.empty()) {
-//        for(std::vector<Command::Ptr>::iterator it = Command::undo_later.begin(); it != Command::undo_later.end();) {
-//            if((*it)->undo(*graph_)) {
-//                it = Command::undo_later.erase(it);
-
-//            } else {
-//                ++it;
-//            }
-//        }
-//    }
-
     setDirty(!last->isAfterSavepoint());
 
     undone.push_back(last);

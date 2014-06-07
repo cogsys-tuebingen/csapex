@@ -151,7 +151,6 @@ protected:
     void registerInputEvent(ConnectorIn* in);
     void registerOutputEvent(ConnectorOut* out);
 
-
 protected:
     Ui::Box* ui;
 

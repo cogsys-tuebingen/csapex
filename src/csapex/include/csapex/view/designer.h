@@ -55,6 +55,8 @@ public Q_SLOTS:
     void enableGrid(bool);
     void enableSchematics(bool);
     void lockToGrid(bool);
+
+    void refresh();
     void reset();
 
     void selectAll();

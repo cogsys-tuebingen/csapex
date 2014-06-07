@@ -57,6 +57,8 @@ void NodeBox::setupUi()
     adapter_->doSetupUi(ui->content);
 
     updateFlippedSides();
+
+    Q_EMIT changed(this);
 }
 
 void NodeBox::setupUiAgain()

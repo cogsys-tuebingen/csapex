@@ -16,7 +16,7 @@ using namespace csapex;
 using namespace csapex::command;
 
 DeleteConnection::DeleteConnection(Connectable* a, Connectable* b)
-    : from_uuid(UUID::NONE), to_uuid(UUID::NONE)
+    : Meta("delete connection and fulcrums"), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
 {
     from = dynamic_cast<ConnectorOut*>(a);
     if(from) {
@@ -48,9 +48,13 @@ bool DeleteConnection::doExecute()
     Connection::Ptr connection(new Connection(from, to));
 
     connection_id = graph_->getConnectionId(connection);
-    remove_fulcrums = graph_->deleteAllConnectionFulcrumsCommand(connection);
 
-    if(Command::executeCommand(graph_, widget_ctrl_, remove_fulcrums)) {
+    locked = false;
+    clear();
+    add(graph_->deleteAllConnectionFulcrumsCommand(connection));
+    locked = true;
+
+    if(Meta::doExecute()) {
         graph_->deleteConnection(connection);
     }
 
@@ -64,7 +68,7 @@ bool DeleteConnection::doUndo()
     }
     graph_->addConnection(Connection::Ptr(new Connection(from, to, connection_id)));
 
-    return Command::undoCommand(graph_, widget_ctrl_, remove_fulcrums);
+    return Meta::doUndo();
 }
 
 bool DeleteConnection::doRedo()

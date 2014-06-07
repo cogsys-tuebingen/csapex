@@ -89,6 +89,7 @@ class DeleteConnection;
 class AddFulcrum;
 class MoveFulcrum;
 class DeleteFulcrum;
+class ModifyFulcrum;
 
 class AddConnector;
 }

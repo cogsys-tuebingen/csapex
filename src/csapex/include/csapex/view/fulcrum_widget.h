@@ -10,6 +10,8 @@
 namespace csapex
 {
 
+class FulcrumHandle;
+
 class FulcrumWidget : public QObject, public QGraphicsEllipseItem
 {
     Q_OBJECT
@@ -22,10 +24,21 @@ public:
 public Q_SLOTS:
     void moved();
 
+    void updateHandles(Fulcrum* f, bool dropped, int which);
+    void updateHandleIn(bool dropped);
+    void updateHandleOut(bool dropped);
+
+
+private:
+    void updateHandlesHelper(FulcrumHandle& a, QGraphicsLineItem *linea, FulcrumHandle& b, QGraphicsLineItem *lineb, bool dropped);
+
 private:
     Fulcrum* fulcrum_;
 
     QPointF half_size_;
+
+    FulcrumHandle *handle_in_, *handle_out_;
+    QGraphicsLineItem *line_in, *line_out;
 };
 
 }

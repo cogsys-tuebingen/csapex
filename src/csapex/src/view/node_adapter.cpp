@@ -43,6 +43,8 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
         } catch(const std::exception& e) {
             std::cerr << "setting up ui for node " << node_->getUUID().getFullName() << " failed: " << e.what() << std::endl;
         }
+
+        node_->stateChanged();
     }
 }
 
