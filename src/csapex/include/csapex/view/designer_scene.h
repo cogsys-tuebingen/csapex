@@ -46,6 +46,8 @@ public Q_SLOTS:
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
 
+    void boxMoved(NodeBox* box);
+
     void fulcrumAdded(Fulcrum *f);
     void fulcrumMoved(Fulcrum *f, bool dropped);
     void fulcrumTypeChanged(Fulcrum *f, int type);

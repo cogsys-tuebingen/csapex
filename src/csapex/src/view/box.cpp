@@ -16,6 +16,7 @@
 #include <csapex/view/port.h>
 #include <csapex/utility/context_menu_handler.h>
 #include <csapex/utility/color.hpp>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -433,9 +434,17 @@ void NodeBox::moveEvent(QMoveEvent* e)
 
     eventFilter(this, e);
 
-    QPoint delta = e->pos() - e->oldPos();
 
-    node_->setPosition(e->pos());
+    QPoint pos = e->pos();
+    if(node_->getSettings().get("grid-lock", false)) {
+        pos.setX(round(pos.x() / 10.0) * 10.0);
+        pos.setY(round(pos.y() / 10.0) * 10.0);
+        move(pos);
+    }
+
+    QPoint delta = pos - e->oldPos();
+
+    node_->setPosition(pos);
 
     Q_EMIT moved(this, delta.x(), delta.y());
 }

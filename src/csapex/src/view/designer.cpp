@@ -181,6 +181,5 @@ void Designer::lockToGrid(bool lock)
 
     settings_.set("grid-lock", lock);
 
-    DragIO::lock = lock;
     Q_EMIT gridLockEnabled(lock);
 }

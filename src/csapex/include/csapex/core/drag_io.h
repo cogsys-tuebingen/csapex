@@ -41,10 +41,6 @@ public:
     void dropEvent(DesignerView *src, QDropEvent* e);
 
 public:
-    static bool lock;
-    static int grid_size;
-
-public:
     template <typename H>
     void registerHandler() {
         boost::shared_ptr<H> handler(new H);

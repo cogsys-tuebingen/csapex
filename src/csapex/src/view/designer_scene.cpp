@@ -16,6 +16,7 @@
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/command/modify_fulcrum.h>
 #include <csapex/view/fulcrum_widget.h>
+#include <csapex/utility/movable_graphics_proxy_widget.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -331,6 +332,13 @@ void DesignerScene::connectionAdded(Connection* c)
 
 void DesignerScene::connectionDeleted(Connection*)
 {
+    invalidateSchema();
+}
+
+void DesignerScene::boxMoved(NodeBox *box)
+{
+    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
+    proxy->setPos(box->pos());
     invalidateSchema();
 }
 

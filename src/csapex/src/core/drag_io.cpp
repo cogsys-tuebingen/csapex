@@ -16,9 +16,6 @@
 
 using namespace csapex;
 
-bool DragIO::lock = false;
-int DragIO::grid_size = 10;
-
 void DragIO::registerEnterHandler(HandlerEnter::Ptr h)
 {
     handler_enter.push_back(h);

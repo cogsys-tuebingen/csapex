@@ -194,8 +194,7 @@ void DesignerView::showBoxDialog()
 
 void DesignerView::addBoxEvent(NodeBox *box)
 {
-    QObject::connect(box, SIGNAL(moved(NodeBox*, int, int)), scene_, SLOT(invalidateSchema()));
-    QObject::connect(box, SIGNAL(changed(NodeBox*)), scene_, SLOT(invalidateSchema()));
+    QObject::connect(box, SIGNAL(moved(NodeBox*, int, int)), scene_, SLOT(boxMoved(NodeBox*)));
 
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
     QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
