@@ -4,6 +4,8 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/connection.h>
+#include <csapex/model/fulcrum.h>
+#include <csapex/view/fulcrum_widget.h>
 
 /// SYSTEM
 #include <QGraphicsScene>
@@ -29,7 +31,11 @@ public:
                            const QStyleOptionGraphicsItem options[],
                            QWidget *widget = 0);
 
+    void mousePressEvent(QGraphicsSceneMouseEvent* e);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
+
+
 
 public Q_SLOTS:
     void addTemporaryConnection(Connectable* from, Connectable* to);
@@ -40,9 +46,9 @@ public Q_SLOTS:
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
 
-    void fulcrumAdded(Connection*);
-    void fulcrumMoved(Connection*);
-    void fulcrumDeleted(Connection*);
+    void fulcrumAdded(Fulcrum *f);
+    void fulcrumMoved(Fulcrum *f, bool dropped);
+    void fulcrumDeleted(Fulcrum *);
 
 //    bool showConnectionContextMenu(const QPoint& pos);
 //    bool showFulcrumContextMenu(const QPoint& pos);
@@ -66,7 +72,7 @@ public Q_SLOTS:
 
 private:
     void drawConnection(QPainter *painter, Connection& connection);
-    void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id, Connection::Fulcrum::Type from_type, Connection::Fulcrum::Type to_type);
+    void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id, Fulcrum::Type from_type, Fulcrum::Type to_type);
 
     void drawActivity(QPainter *painter, int life, Connectable* c);
     void drawPort(QPainter *painter, NodeBox *box, Port* p);
@@ -110,6 +116,9 @@ private:
 
     std::vector<TempConnection> temp_;
 
+    std::map<Fulcrum*,FulcrumWidget*> fulcrum_2_widget_;
+    std::map<Fulcrum*,QPointF> last_pos_;
+
     bool draw_grid_;
     bool draw_schema_;
     double scale_;
@@ -121,18 +130,11 @@ private:
     int activity_marker_max_opacity_;
 
     int highlight_connection_id_;
+    int highlight_connection_sub_id_;
 
     int connector_radius_;
 
-    QPoint drag_connection_handle_;
-    QPoint current_splicing_handle_;
-    int drag_sub_section_;
-    int drag_connection_;
-    bool fulcrum_is_hovered_;
-
     bool schema_dirty_;
-    bool splicing_requested;
-    bool splicing;
 };
 
 }

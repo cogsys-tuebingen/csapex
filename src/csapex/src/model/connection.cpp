@@ -5,6 +5,7 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/fulcrum.h>
 
 /// SYSTEM
 #include <cmath>
@@ -73,7 +74,7 @@ void Connection::tick()
     message_count = std::max(0.0, message_count - 0.1);
 }
 
-std::vector<Connection::Fulcrum> Connection::getFulcrums() const
+std::vector<Fulcrum::Ptr> Connection::getFulcrums() const
 {
     return fulcrums_;
 }
@@ -83,29 +84,44 @@ int Connection::getFulcrumCount() const
     return fulcrums_.size();
 }
 
-Connection::Fulcrum Connection::getFulcrum(int fulcrum_id)
+Fulcrum::Ptr Connection::getFulcrum(int fulcrum_id)
 {
     return fulcrums_[fulcrum_id];
 }
 
 void Connection::addFulcrum(int subsection, const QPointF &pos, int type)
 {
-    std::size_t before = fulcrums_.size();
-    fulcrums_.insert(fulcrums_.begin() + subsection, Connection::Fulcrum(pos, type));
-    assert(before == fulcrums_.size() - 1);
-    Q_EMIT fulcrum_added(this);
+    // create the new fulcrum
+    Fulcrum::Ptr f(new Fulcrum(this, pos, type));
+    f->setId(subsection);
+
+    // update the ids of the later fulcrums
+    std::vector<Fulcrum::Ptr>::iterator index = fulcrums_.begin() + subsection;
+    for(std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
+        (*it)->setId((*it)->id() + 1);
+    }
+
+    fulcrums_.insert(index, f);
+
+    QObject::connect(f.get(), SIGNAL(moved(Fulcrum*,bool)), this, SIGNAL(fulcrum_moved(Fulcrum*,bool)));
+
+    Q_EMIT fulcrum_added(f.get());
 }
 
-void Connection::moveFulcrum(int fulcrum_id, const QPointF &pos)
+void Connection::moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped)
 {
-    fulcrums_[fulcrum_id].pos = pos;
-    Q_EMIT fulcrum_moved(this);
+    fulcrums_[fulcrum_id]->move(pos, dropped);
 }
 
 void Connection::deleteFulcrum(int fulcrum_id)
 {
-    std::size_t before = fulcrums_.size();
-    fulcrums_.erase(fulcrums_.begin() + fulcrum_id);
-    assert(before == fulcrums_.size() + 1);
-    Q_EMIT fulcrum_deleted(this);
+    Q_EMIT fulcrum_deleted((fulcrums_[fulcrum_id]).get());
+
+    // update the ids of the later fulcrums
+    std::vector<Fulcrum::Ptr>::iterator index = fulcrums_.begin() + fulcrum_id;
+    for(std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
+        (*it)->setId((*it)->id() - 1);
+    }
+
+    fulcrums_.erase(index);
 }

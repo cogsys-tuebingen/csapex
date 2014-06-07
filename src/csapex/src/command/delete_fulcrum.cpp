@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/fulcrum.h>
 
 /// SYSTEM
 #include <sstream>
@@ -29,9 +30,9 @@ std::string DeleteFulcrum::getDescription() const
 
 bool DeleteFulcrum::doExecute()
 {
-    Connection::Fulcrum f = graph_->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
-    pos = f.pos;
-    type = f.type;
+    Fulcrum::Ptr f = graph_->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
+    pos = f->pos();
+    type = f->type();
     graph_->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
     return true;
 }

@@ -6,6 +6,7 @@
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
+#include <csapex/model/fulcrum.h>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -120,14 +121,14 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
         yaml << YAML::Key << "to" << YAML::Value << connection->to()->getUUID();
 
         yaml << YAML::Key << "pts" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-        Q_FOREACH(const Connection::Fulcrum& f, connection->getFulcrums()) {
-            yaml << YAML::Flow << YAML::BeginSeq << f.pos.x() << f.pos.y() << YAML::EndSeq;
+        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+            yaml << YAML::Flow << YAML::BeginSeq << f->pos().x() << f->pos().y() << YAML::EndSeq;
         }
         yaml << YAML::EndSeq;
 
         yaml << YAML::Key << "types" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-        Q_FOREACH(const Connection::Fulcrum& f, connection->getFulcrums()) {
-            yaml << f.type;
+        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+            yaml << f->type();
         }
         yaml << YAML::EndSeq;
 
@@ -250,7 +251,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
             int n = pts.size();
             for(int i = 0; i < n; ++i) {
-                int type = (!types.empty()) ? types[i] : Connection::Fulcrum::CURVE;
+                int type = (!types.empty()) ? types[i] : Fulcrum::CURVE;
                 connection->addFulcrum(i, QPoint(pts[i][0], pts[i][1]), type);
             }
         }

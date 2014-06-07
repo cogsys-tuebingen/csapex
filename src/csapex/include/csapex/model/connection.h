@@ -23,27 +23,10 @@ class Connection : public QObject, public Selectable {
     friend class command::DeleteFulcrum;
     friend class GraphIO;
     friend class Graph;
-    friend class ConnectionSelectionModel;
-    friend class BoxSelectionModel;
+    friend class Fulcrum;
 
 public:
     typedef boost::shared_ptr<Connection> Ptr;
-
-    struct Fulcrum {
-        enum Type {
-            CURVE = 0,
-            LINEAR = 1,
-            HANDLE = LINEAR,
-            OUT = 10,
-            IN = 11
-        };
-        Fulcrum(const QPointF& p, int t)
-            : type(t), pos(p)
-        {}
-
-        int type;
-        QPointF pos;
-    };
 
 public:
     friend std::ostream& operator << (std::ostream& out, const Connection& c) {
@@ -68,16 +51,16 @@ private Q_SLOTS:
     void messageSentEvent();
 
 Q_SIGNALS:
-    void fulcrum_added(Connection*);
-    void fulcrum_moved(Connection*);
-    void fulcrum_deleted(Connection*);
+    void fulcrum_added(Fulcrum*);
+    void fulcrum_moved(Fulcrum*,bool dropped);
+    void fulcrum_deleted(Fulcrum*);
 
 public:
     bool operator == (const Connection& c) const;
 
-    std::vector<Fulcrum> getFulcrums() const;
+    std::vector<FulcrumPtr> getFulcrums() const;
     int getFulcrumCount() const;
-    Fulcrum getFulcrum(int fulcrum_id);
+    FulcrumPtr getFulcrum(int fulcrum_id);
 
 protected:
     Connection(Connectable* from, Connectable* to);
@@ -85,14 +68,14 @@ protected:
 private:
     /// COMMANDS
     void addFulcrum(int subsection, const QPointF& pos, int type);
-    void moveFulcrum(int fulcrum_id, const QPointF &pos);
+    void moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped);
     void deleteFulcrum(int fulcrum_id);
 
 protected:
     Connectable* from_;
     Connectable* to_;
 
-    std::vector<Fulcrum> fulcrums_;
+    std::vector<FulcrumPtr> fulcrums_;
 
     int id_;
 

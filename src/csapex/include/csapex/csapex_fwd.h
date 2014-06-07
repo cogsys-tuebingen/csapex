@@ -27,6 +27,7 @@ FWD(Connectable);
 FWD(ConnectorIn);
 FWD(ConnectorOut);
 FWD(Connection);
+FWD(Fulcrum);
 
 FWD(Graph);
 FWD(GenericState);

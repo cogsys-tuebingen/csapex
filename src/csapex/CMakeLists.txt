@@ -111,6 +111,7 @@ set(SRC_APP
     src/model/connectable.cpp
     src/model/graph.cpp
     src/model/connection.cpp
+    src/model/fulcrum.cpp
     src/model/connection_type.cpp
     src/model/multi_connection_type.cpp
     src/model/generic_state.cpp
@@ -145,6 +146,7 @@ set(SRC_APP
     src/view/profiling_widget.cpp
     src/view/port.cpp
     src/view/widget_controller.cpp
+    src/view/fulcrum_widget.cpp
 )
 
 #

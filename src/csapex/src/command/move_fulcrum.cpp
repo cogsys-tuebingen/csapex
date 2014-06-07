@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/fulcrum.h>
 
 /// SYSTEM
 #include <sstream>
@@ -29,17 +30,17 @@ std::string MoveFulcrum::getDescription() const
 
 bool MoveFulcrum::doExecute()
 {
-    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to);
     return true;
 }
 
 bool MoveFulcrum::doUndo()
 {
-    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from);
+    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from, false);
     return true;
 }
 
 bool MoveFulcrum::doRedo()
 {
+    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
     return doExecute();
 }

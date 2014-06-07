@@ -11,6 +11,10 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/core/settings.h>
+#include <csapex/command/dispatcher.h>
+#include <csapex/command/add_fulcrum.h>
+#include <csapex/command/move_fulcrum.h>
+#include <csapex/view/fulcrum_widget.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -60,7 +64,7 @@ QWidget* topLevelParentWidget (QWidget* widget)
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl)
     : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
       draw_grid_(false), draw_schema_(false), scale_(1.0),
-      schema_dirty_(false), splicing_requested(false), splicing(false)
+      schema_dirty_(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
 
@@ -160,12 +164,12 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
             if(temp.from->isInput()) {
                 drawConnection(painter, temp.to, topLevelParentWidget(fromp)->pos() + fromp->centerPoint(), -1,
-                               flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
-                               Connection::Fulcrum::HANDLE);
+                               flipped ? Fulcrum::IN : Fulcrum::OUT,
+                               Fulcrum::HANDLE);
             } else {
                 drawConnection(painter, topLevelParentWidget(fromp)->pos() + fromp->centerPoint(), temp.to, -1,
-                               flipped ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
-                               Connection::Fulcrum::HANDLE);
+                               flipped ? Fulcrum::IN : Fulcrum::OUT,
+                               Fulcrum::HANDLE);
             }
         }
     }
@@ -210,12 +214,6 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
     }
 
-    if(!drag_connection_handle_.isNull()) {
-        int r = 4;
-        painter->setPen(QPen(Qt::black, 1));
-        painter->drawEllipse(drag_connection_handle_, r, r);
-    }
-
     if(draw_schema_){
         painter->setOpacity(0.35);
         painter->drawImage(sceneRect().topLeft(), schematics);
@@ -234,8 +232,31 @@ void DesignerScene::drawItems(QPainter *painter, int numItems,
     QGraphicsScene::drawItems(painter, numItems, items, options, widget);
 }
 
+void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
+{
+    QGraphicsScene::mousePressEvent(e);
+
+    if(!e->isAccepted()) {
+        if(highlight_connection_id_ != -1) {
+            std::cerr << "press with id " << highlight_connection_id_ << std::endl;
+            QPoint pos = e->scenePos().toPoint();
+            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, highlight_connection_sub_id_, pos, 0)));
+            e->accept();
+        }
+    }
+}
+
+void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
+{
+    QGraphicsScene::mouseReleaseEvent(e);
+    //    QPoint pos = e->scenePos().toPoint();// (e->scenePos() - sceneRect().topLeft()).toPoint();
+    //    dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, 0, pos, 0)));
+}
+
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 {
+    QGraphicsScene::mouseMoveEvent(e);
+
     QPoint pos = (e->scenePos() - sceneRect().topLeft()).toPoint();
     if(!schematics.rect().contains(pos)) {
         return;
@@ -243,10 +264,9 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
     std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
 
-    int id = data.first;
-
-    if(id != highlight_connection_id_) {
-        highlight_connection_id_ = id;
+    if(data.first != highlight_connection_id_) {
+        highlight_connection_id_ = data.first;
+        highlight_connection_sub_id_ = data.second;
         update();
     }
 }
@@ -293,9 +313,9 @@ QPen DesignerScene::makeLinePen(const QPointF& from, const QPointF& to)
 
 void DesignerScene::connectionAdded(Connection* c)
 {
-    QObject::connect(c, SIGNAL(fulcrum_added(Connection*)), this, SLOT(fulcrumAdded(Connection*)));
-    QObject::connect(c, SIGNAL(fulcrum_deleted(Connection*)), this, SLOT(fulcrumDeleted(Connection*)));
-    QObject::connect(c, SIGNAL(fulcrum_moved(Connection*)), this, SLOT(fulcrumMoved(Connection*)));
+    QObject::connect(c, SIGNAL(fulcrum_added(Fulcrum *)), this, SLOT(fulcrumAdded(Fulcrum *)));
+    QObject::connect(c, SIGNAL(fulcrum_deleted(Fulcrum*)), this, SLOT(fulcrumDeleted(Fulcrum*)));
+    QObject::connect(c, SIGNAL(fulcrum_moved(Fulcrum*,bool)), this, SLOT(fulcrumMoved(Fulcrum *, bool)));
 
     invalidateSchema();
 }
@@ -305,22 +325,36 @@ void DesignerScene::connectionDeleted(Connection*)
     invalidateSchema();
 }
 
-void DesignerScene::fulcrumAdded(Connection *)
+void DesignerScene::fulcrumAdded(Fulcrum * f)
 {
-    if(splicing_requested) {
-        splicing = true;
+    FulcrumWidget* w = new FulcrumWidget(f);
+    addItem(w);
+    fulcrum_2_widget_[f] = w;
+    last_pos_[f] = f->pos();
+
+    invalidateSchema();
+}
+
+void DesignerScene::fulcrumDeleted(Fulcrum* f)
+{
+    std::map<Fulcrum*, FulcrumWidget*>::iterator pos = fulcrum_2_widget_.find(f);
+    assert(pos != fulcrum_2_widget_.end());
+
+    delete pos->second;
+    fulcrum_2_widget_.erase(pos);
+
+    invalidateSchema();
+}
+
+void DesignerScene::fulcrumMoved(Fulcrum * f, bool dropped)
+{
+    if(dropped) {
+        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(f->connection()->id(), f->id(), last_pos_[f], f->pos())));
+        last_pos_[f] = f->pos();
     }
+    invalidateSchema();
 }
 
-void DesignerScene::fulcrumDeleted(Connection *)
-{
-
-}
-
-void DesignerScene::fulcrumMoved(Connection *)
-{
-
-}
 void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end)
 {
     assert(from);
@@ -389,29 +423,16 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
     ccs.minimized_to = top->isMinimizedSize();
 
     drawConnection(painter, p1, p2, id,
-                   fromp->isFlipped() ? Connection::Fulcrum::IN : Connection::Fulcrum::OUT,
-                   top->isFlipped() ? Connection::Fulcrum::OUT : Connection::Fulcrum::IN);
+                   fromp->isFlipped() ? Fulcrum::IN : Fulcrum::OUT,
+                   top->isFlipped() ? Fulcrum::OUT : Fulcrum::IN);
 
     int f = connection.activity();
 
     drawActivity(painter, f, from);
     drawActivity(painter, f, to);
-
-    int sub_section = 0;
-    Q_FOREACH(const Connection::Fulcrum& f, connection.getFulcrums()) {
-        int r = 4;
-        painter->setPen(QPen(Qt::black, 3));
-        if(splicing && drag_connection_ == connection.id() && sub_section == drag_sub_section_) {
-            painter->drawEllipse(current_splicing_handle_, r, r);
-        } else {
-            painter->drawEllipse(f.pos, r, r);
-        }
-
-        ++sub_section;
-    }
 }
 
-void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& to, int id, Connection::Fulcrum::Type from_type, Connection::Fulcrum::Type to_type)
+void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& to, int id, Fulcrum::Type from_type, Fulcrum::Type to_type)
 {
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? 2 : 4;
@@ -424,25 +445,23 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     double direct_length = hypot(diff.x(), diff.y());
 
-    Connection::Fulcrum current(from, from_type);
-    Connection::Fulcrum last = current;
+    Connection::Ptr connection = graph_->getConnectionWithId(id);
 
-    std::vector<Connection::Fulcrum> targets;
+    Fulcrum::Ptr current(new Fulcrum(connection.get(), from, from_type));
+    Fulcrum::Ptr last = current;
+
+    std::vector<Fulcrum::Ptr> targets;
     if(id >= 0) {
-        targets = graph_->getConnectionWithId(id)->getFulcrums();
+        targets = connection->getFulcrums();
     }
-    targets.push_back(Connection::Fulcrum(to, to_type));
+    targets.push_back(Fulcrum::Ptr(new Fulcrum(connection.get(), to, to_type)));
 
     int sub_section = 0;
 
     QPointF cp1, cp2;
     QPointF tangent;
 
-    Q_FOREACH(Connection::Fulcrum fulcrum, targets) {
-        if(splicing && drag_connection_ == id && sub_section == drag_sub_section_) {
-            fulcrum = Connection::Fulcrum(current_splicing_handle_, Connection::Fulcrum::HANDLE);
-        }
-
+    Q_FOREACH(Fulcrum::Ptr fulcrum, targets) {
         QPoint offset;
         QPoint delta;
         if(direct_length > mindist_for_slack) {
@@ -452,38 +471,38 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
             offset = QPoint(0, offset_factor * max_slack_height);
         }
 
-        QPainterPath path(current.pos);
+        QPainterPath path(current->pos());
 
-        if(current.type == Connection::Fulcrum::OUT) {
-            cp1 = current.pos + delta + offset;
+        if(current->type() == Fulcrum::OUT) {
+            cp1 = current->pos() + delta + offset;
 
-        } else if(current.type == Connection::Fulcrum::IN) {
-            cp1 = current.pos - delta + offset;
+        } else if(current->type() == Fulcrum::IN) {
+            cp1 = current->pos() - delta + offset;
 
         } else {
-            const Connection::Fulcrum& last = targets[sub_section-1];
-            if(last.type == Connection::Fulcrum::LINEAR) {
-                cp1 = current.pos;
+            const Fulcrum::Ptr& last = targets[sub_section-1];
+            if(last->type() == Fulcrum::LINEAR) {
+                cp1 = current->pos();
             } else {
-                cp1 = current.pos + tangent;
+                cp1 = current->pos() + tangent;
             }
         }
 
-        if(fulcrum.type == Connection::Fulcrum::IN) {
-            cp2 = fulcrum.pos - delta + offset;
-        } else if(fulcrum.type == Connection::Fulcrum::OUT) {
-            cp2 = fulcrum.pos + delta + offset;
+        if(fulcrum->type() == Fulcrum::IN) {
+            cp2 = fulcrum->pos() - delta + offset;
+        } else if(fulcrum->type() == Fulcrum::OUT) {
+            cp2 = fulcrum->pos() + delta + offset;
         } else {
-            const Connection::Fulcrum& next = targets[sub_section+1];
-            tangent = (next.pos - current.pos);
+            const Fulcrum::Ptr& next = targets[sub_section+1];
+            tangent = (next->pos() - current->pos());
             tangent*= 50.0 / hypot(diff.x(), diff.y());
-            cp2 = fulcrum.pos - tangent;
+            cp2 = fulcrum->pos() - tangent;
         }
 
-        if(fulcrum.type == Connection::Fulcrum::LINEAR) {
-            cp2 = fulcrum.pos;
+        if(fulcrum->type() == Fulcrum::LINEAR) {
+            cp2 = fulcrum->pos();
         }
-        path.cubicTo(cp1, cp2, fulcrum.pos);
+        path.cubicTo(cp1, cp2, fulcrum->pos());
 
         if(ccs.highlighted) {
             painter->setPen(QPen(Qt::black, ccs.r + 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -613,7 +632,7 @@ void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
 
 //bool DesignerScene::showFulcrumContextMenu(const QPoint& global_pos)
 //{
-//    Connection::Fulcrum fulc = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
+//    Fulcrum fulc = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
 
 //    QMenu menu;
 //    QAction* del = new QAction("delete fulcrum", &menu);
@@ -623,7 +642,7 @@ void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
 
 //    QAction* curve = new QAction("curve", &menu);
 //    curve->setCheckable(true);
-//    if(fulc.type == Connection::Fulcrum::CURVE) {
+//    if(fulc.type == Fulcrum::CURVE) {
 //        curve->setDisabled(true);
 //        curve->setChecked(true);
 //    }
@@ -631,7 +650,7 @@ void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
 
 //    QAction* linear = new QAction("linear", &menu);
 //    linear->setCheckable(true);
-//    if(fulc.type == Connection::Fulcrum::LINEAR) {
+//    if(fulc.type == Fulcrum::LINEAR) {
 //        linear->setDisabled(true);
 //        linear->setChecked(true);
 //    }
@@ -647,10 +666,10 @@ void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
 //    } else if(selectedItem == curve || selectedItem == linear) {
 //        int type = 0;
 //        if(selectedItem == curve) {
-//            type = Connection::Fulcrum::CURVE;
+//            type = Fulcrum::CURVE;
 
 //        } else if(selectedItem == linear) {
-//            type = Connection::Fulcrum::LINEAR;
+//            type = Fulcrum::LINEAR;
 
 //        } else {
 //            return true;
