@@ -4,12 +4,18 @@
 using namespace csapex;
 
 Timable::Timable()
-    : publish_timer_(NULL)
+    : profiling_timer_(NULL)
+{
+
+}
+
+Timable::Timable(Timer* timer)
+    : profiling_timer_(timer)
 {
 
 }
 
 void Timable::useTimer(Timer *timer)
 {
-    publish_timer_ = timer;
+    profiling_timer_ = timer;
 }

@@ -180,7 +180,7 @@ void ConnectorOut::sendMessages()
     message_->setSequenceNumber(seq_no_);
 
     Timer::Interlude::Ptr i;
-    if(publish_timer_) {
+    if(profiling_timer_) {
 //        i = publish_timer_->step("io");
     }
 
