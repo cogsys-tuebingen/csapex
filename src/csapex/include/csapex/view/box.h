@@ -132,6 +132,8 @@ Q_SIGNALS:
     void flipped(bool);
     void minimized(bool);
 
+    void renameRequest(NodeBox*);
+
     void moveRequest(NodeBox*, QPoint);
     void moved(NodeBox*, int dx, int dy);
 

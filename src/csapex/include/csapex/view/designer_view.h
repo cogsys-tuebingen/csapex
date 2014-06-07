@@ -61,6 +61,7 @@ public Q_SLOTS:
     void showBoxDialog();
     void addBoxEvent(NodeBox* box);
     void removeBoxEvent(NodeBox* box);
+    void renameBox(NodeBox* box);
 
     void movedBoxes(double dx, double dy);
 

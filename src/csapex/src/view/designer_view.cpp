@@ -26,6 +26,7 @@
 #include <QShortcut>
 #include <QGraphicsItem>
 #include <QGLWidget>
+#include <QInputDialog>
 
 using namespace csapex;
 
@@ -194,6 +195,8 @@ void DesignerView::showBoxDialog()
 
 void DesignerView::addBoxEvent(NodeBox *box)
 {
+    QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
+
     QObject::connect(box, SIGNAL(moved(NodeBox*, int, int)), scene_, SLOT(boxMoved(NodeBox*)));
 
     QObject::connect(box->getNode(), SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
@@ -228,6 +231,16 @@ void DesignerView::addBoxEvent(NodeBox *box)
     box->show();
 
     box->updateInformation(graph_.get());
+}
+
+void DesignerView::renameBox(NodeBox *box)
+{
+    bool ok;
+    QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, box->getLabel().c_str(), &ok);
+
+    if(ok && !text.isEmpty()) {
+        box->setLabel(text);
+    }
 }
 
 void DesignerView::removeBoxEvent(NodeBox *box)

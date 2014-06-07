@@ -55,8 +55,8 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
 
 void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    QPoint pt = event->pos().toPoint();
-    QWidget* child = widget()->childAt(pt);
+//    QPoint pt = event->pos().toPoint();
+//    QWidget* child = widget()->childAt(pt);
 
     if(relay_) { // child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel")) {
         QGraphicsProxyWidget::mouseReleaseEvent(event);
@@ -75,8 +75,8 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
 
 void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    QPoint pt = event->pos().toPoint();
-    QWidget* child = widget()->childAt(pt);
+//    QPoint pt = event->pos().toPoint();
+//    QWidget* child = widget()->childAt(pt);
 
     if(relay_) { //child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel")) {
         QGraphicsProxyWidget::mouseMoveEvent(event);

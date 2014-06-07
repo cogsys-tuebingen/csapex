@@ -21,7 +21,6 @@
 /// SYSTEM
 #include <QDragMoveEvent>
 #include <QGraphicsSceneDragDropEvent>
-#include <QInputDialog>
 #include <QMenu>
 #include <QTimer>
 #include <iostream>
@@ -313,64 +312,19 @@ void NodeBox::init()
 
     move(node_->getNodeState()->pos);
 }
-bool NodeBox::eventFilter(QObject* /*o*/, QEvent* /*e*/)
+
+bool NodeBox::eventFilter(QObject* o, QEvent* e)
 {
-//    QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
+    QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
 
-//    if(o == ui->label) {
-//        if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
-//            bool ok;
-//            QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, getLabel().c_str(), &ok);
+    if(o == ui->label) {
+        if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
+            Q_EMIT renameRequest(this);
+            e->accept();
 
-//            if(ok && !text.isEmpty()) {
-//                setLabel(text);
-//            }
-
-//            e->accept();
-
-//            return true;
-//        }
-//    }
-
-//    if(o == ui->content || o == ui->label || o == this) {
-//        if(e->type() == QEvent::MouseButtonPress && em->button() == Qt::LeftButton) {
-//            down_ = true;
-//            start_drag_global_ = em->globalPos();
-//            start_drag_ = em->pos();
-
-//        } else if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::LeftButton) {
-//            down_ = false;
-//            Q_EMIT clicked(this);
-//            e->accept();
-//            return true;
-
-//        } else if(e->type() == QEvent::MouseMove) {
-//            QPoint delta = em->globalPos() - start_drag_global_;
-
-//            bool shift_drag = Qt::ShiftModifier == QApplication::keyboardModifiers();
-
-//            if(down_) {
-//                if(shift_drag) {
-//                    if(hypot(delta.x(), delta.y()) > 15) {
-//                        //BoxManager::instance().startPlacingBox(parentWidget(), node_->getType(), -start_drag_);
-//                        down_ = false;
-//                    }
-//                } else {
-//                    e->ignore();
-
-//                    startDrag(-start_drag_);
-
-//                    down_ = false;
-//                    return true;
-//                }
-//            }
-//        }
-//    }
-
-    //    if(e->type() == QEvent::MouseButtonRelease && em->button() == Qt::RightButton && !isSelected()) {
-    //        Q_EMIT clicked(this);
-    //        Q_EMIT showContextMenuForBox(this, em->globalPos());
-    //    }
+            return true;
+        }
+    }
 
     return false;
 }
@@ -412,19 +366,6 @@ void NodeBox::paintEvent(QPaintEvent*)
     resize(sizeHint());
 }
 
-//void Box::mousePressEvent(QMouseEvent* e)
-//{
-//    eventFilter(this, e);
-//}
-//void Box::mouseReleaseEvent(QMouseEvent* e)
-//{
-//    eventFilter(this, e);
-//}
-//void Box::mouseMoveEvent(QMouseEvent* e)
-//{
-//    eventFilter(this, e);
-//}
-
 void NodeBox::moveEvent(QMoveEvent* e)
 {
     if(!is_placed_) {
@@ -456,38 +397,12 @@ void NodeBox::triggerPlaced()
 
 void NodeBox::selectEvent()
 {
-    //#error TODO: make this into a signal, connect port via signal!
-    //    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
-    //        Port* p = i->getPort();
-    //        if(p) {
-    //            p->setSelected(true);
-    //        }
-    //    }
-    //    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-    //        Port* p = i->getPort();
-    //        if(p) {
-    //            p->setSelected(true);
-    //        }
-    //    }
-
     ui->boxframe->setProperty("focused",true);
     refreshStylesheet();
 }
 
 void NodeBox::deselectEvent()
 {
-    //    Q_FOREACH(ConnectorIn* i, node_->getInputs()){
-    //        Port* p = i->getPort();
-    //        if(p) {
-    //            p->setSelected(false);
-    //        }
-    //    }
-    //    Q_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-    //        Port* p = i->getPort();
-    //        if(p) {
-    //            p->setSelected(false);
-    //        }
-    //    }
     ui->boxframe->setProperty("focused",false);
     refreshStylesheet();
 }
@@ -551,18 +466,6 @@ void NodeBox::updateFlippedSides()
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
     Q_EMIT flipped(flip);
-    //    BOOST_FOREACH(ConnectorIn* i, node_->getInputs()){
-    //        Port* p = i->getPort();
-    //        if(p) {
-    //            p->setFlipped(flip);
-    //        }
-    //    }
-    //    BOOST_FOREACH(ConnectorOut* i, node_->getOutputs()) {
-    //        Port* p = i->getPort();
-    //        if(p) {
-    //            p->setFlipped(flip);
-    //        }
-    //    }
 }
 
 bool NodeBox::isMinimizedSize() const
