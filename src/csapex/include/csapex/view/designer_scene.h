@@ -52,8 +52,7 @@ public Q_SLOTS:
     void fulcrumHandleMoved(Fulcrum *f, bool dropped, int which);
     void fulcrumDeleted(Fulcrum *);
 
-//    bool showConnectionContextMenu(const QPoint& pos);
-//    bool showFulcrumContextMenu(const QPoint& pos);
+    bool showConnectionContextMenu();
 
     void refresh();
     void invalidateSchema();

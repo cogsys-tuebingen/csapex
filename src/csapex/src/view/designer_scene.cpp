@@ -235,11 +235,16 @@ void DesignerScene::drawItems(QPainter *painter, int numItems,
 
 void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
+    if(e->button() == Qt::RightButton && highlight_connection_id_ != -1) {
+        e->accept();
+        showConnectionContextMenu();
+        return;
+    }
+
     QGraphicsScene::mousePressEvent(e);
 
-    if(!e->isAccepted()) {
+    if(!e->isAccepted() && e->button() == Qt::LeftButton) {
         if(highlight_connection_id_ != -1) {
-            std::cerr << "press with id " << highlight_connection_id_ << std::endl;
             QPoint pos = e->scenePos().toPoint();
             dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, highlight_connection_sub_id_, pos, 0)));
             e->accept();
@@ -621,101 +626,25 @@ void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
     }
 }
 
-//bool DesignerScene::showContextMenu(const QPoint &global_pos)
-//{
-//    if(fulcrum_is_hovered_) {
-//        return showFulcrumContextMenu(global_pos);
-//    } else {
-//        return showConnectionContextMenu(global_pos);
-//    }
-//}
+bool DesignerScene::showConnectionContextMenu()
+{
+    QMenu menu;
+    QAction* reset = new QAction("reset connection", &menu);
+    menu.addAction(reset);
+    QAction* del = new QAction("delete connection", &menu);
+    menu.addAction(del);
 
-//bool DesignerScene::showConnectionContextMenu(const QPoint& global_pos)
-//{
-//    QPoint pos = mapFromGlobal(global_pos);
-//    std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
-//    int id = data.first;
+    QAction* selectedItem = menu.exec(QCursor::pos());
 
-//    if(id != -1) {
-//        QMenu menu;
-//        QAction* reset = new QAction("reset connection", &menu);
-//        menu.addAction(reset);
-//        QAction* del = new QAction("delete connection", &menu);
-//        menu.addAction(del);
+    if(selectedItem == del) {
+        dispatcher_->execute(graph_->deleteConnectionById(highlight_connection_id_));
 
-//        QAction* selectedItem = menu.exec(global_pos);
+    } else if(selectedItem == reset) {
+        dispatcher_->execute(graph_->deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
+    }
 
-//        if(selectedItem == del) {
-//            dispatcher_->execute(graph_->deleteConnectionById(id));
-
-//        } else if(selectedItem == reset) {
-//            dispatcher_->execute(graph_->deleteAllConnectionFulcrumsCommand(id));
-//        }
-
-//        return true;
-//    }
-
-//    return false;
-//}
-
-//bool DesignerScene::showFulcrumContextMenu(const QPoint& global_pos)
-//{
-//    Fulcrum fulc = graph_->getConnectionWithId(drag_connection_)->getFulcrum(drag_sub_section_);
-
-//    QMenu menu;
-//    QAction* del = new QAction("delete fulcrum", &menu);
-//    menu.addAction(del);
-
-//    QMenu type("change type");
-
-//    QAction* curve = new QAction("curve", &menu);
-//    curve->setCheckable(true);
-//    if(fulc.type == Fulcrum::CURVE) {
-//        curve->setDisabled(true);
-//        curve->setChecked(true);
-//    }
-//    type.addAction(curve);
-
-//    QAction* linear = new QAction("linear", &menu);
-//    linear->setCheckable(true);
-//    if(fulc.type == Fulcrum::LINEAR) {
-//        linear->setDisabled(true);
-//        linear->setChecked(true);
-//    }
-//    type.addAction(linear);
-
-//    menu.addMenu(&type);
-
-//    QAction* selectedItem = menu.exec(global_pos);
-
-//    if(selectedItem == del) {
-//        dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
-
-//    } else if(selectedItem == curve || selectedItem == linear) {
-//        int type = 0;
-//        if(selectedItem == curve) {
-//            type = Fulcrum::CURVE;
-
-//        } else if(selectedItem == linear) {
-//            type = Fulcrum::LINEAR;
-
-//        } else {
-//            return true;
-//        }
-
-//        command::Meta::Ptr cmd(new command::Meta("Change Fulcrum Type"));
-//        cmd->add(Command::Ptr(new command::DeleteFulcrum(drag_connection_, drag_sub_section_)));
-//        cmd->add(Command::Ptr(new command::AddFulcrum(drag_connection_, drag_sub_section_, fulc.pos, type)));
-//        dispatcher_->execute(cmd);
-
-//    } else {
-//        fulcrum_is_hovered_ = false;
-//        drag_connection_handle_ = QPoint();
-//        highlight_connection_id_ = -1;
-//    }
-
-//    return true;
-//}
+    return true;
+}
 
 void DesignerScene::invalidateSchema()
 {
