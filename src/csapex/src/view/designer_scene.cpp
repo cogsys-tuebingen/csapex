@@ -242,6 +242,9 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
             QPoint pos = e->scenePos().toPoint();
             dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, highlight_connection_sub_id_, pos, 0)));
             e->accept();
+
+            // allow moving the fulcrum directly
+            QGraphicsScene::mousePressEvent(e);
         }
     }
 }
@@ -249,8 +252,6 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsScene::mouseReleaseEvent(e);
-    //    QPoint pos = e->scenePos().toPoint();// (e->scenePos() - sceneRect().topLeft()).toPoint();
-    //    dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, 0, pos, 0)));
 }
 
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
@@ -331,6 +332,10 @@ void DesignerScene::fulcrumAdded(Fulcrum * f)
     addItem(w);
     fulcrum_2_widget_[f] = w;
     last_pos_[f] = f->pos();
+
+    clearSelection();
+    w->setSelected(true);
+    setFocusItem(w, Qt::MouseFocusReason);
 
     invalidateSchema();
 }
