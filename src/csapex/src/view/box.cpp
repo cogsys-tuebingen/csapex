@@ -30,7 +30,6 @@
 using namespace csapex;
 
 const QString NodeBox::MIME = "csapex/model/box";
-const QString NodeBox::MIME_MOVE = "csapex/model/box/move";
 
 NodeBox::NodeBox(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),

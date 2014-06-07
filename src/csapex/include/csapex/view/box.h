@@ -47,7 +47,6 @@ public:
 
 public:
     static const QString MIME;
-    static const QString MIME_MOVE;
 
 public:
     /// CONSTRUCTION

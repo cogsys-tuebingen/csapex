@@ -43,9 +43,6 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
     if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(NodeBox::MIME_MOVE)) {
-        e->acceptProposedAction();
-
     } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         e->acceptProposedAction();
 
@@ -133,25 +130,6 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         }
         scene->update();
 
-    } else if(e->mimeData()->hasFormat(NodeBox::MIME_MOVE)) {
-        std::string uuid_tmp = e->mimeData()->text().toStdString();
-        UUID uuid = UUID::make_forced(uuid_tmp);
-
-        NodeBox* box = widget_ctrl_->getBox(uuid);
-        QPoint offset_value(e->mimeData()->data(NodeBox::MIME_MOVE + "/x").toInt(),
-                            e->mimeData()->data(NodeBox::MIME_MOVE + "/y").toInt());
-        QPoint pos = e->pos() + offset_value;
-
-        if(lock) {
-            double s = grid_size;
-            pos.setX(round(pos.x() / s) * grid_size);
-            pos.setY(round(pos.y() / s) * grid_size);
-        }
-
-        box->move(pos);
-
-//        overlay->repaint();
-
     } else {
         Q_FOREACH(HandlerMove::Ptr h, handler_move) {
             if(h->handle(dispatcher_, src, e)) {
@@ -183,9 +161,6 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e)
         e->ignore();
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         e->ignore();
-    } else if(e->mimeData()->hasFormat(NodeBox::MIME_MOVE)) {
-        e->acceptProposedAction();
-        e->setDropAction(Qt::MoveAction);
     } else {
         Q_FOREACH(HandlerDrop::Ptr h, handler_drop) {
             if(h->handle(dispatcher_, src, e)) {

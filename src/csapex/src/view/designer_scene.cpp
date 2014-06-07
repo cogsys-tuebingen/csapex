@@ -385,7 +385,7 @@ void DesignerScene::fulcrumHandleMoved(Fulcrum * f, bool dropped, int /*which*/)
     invalidateSchema();
 }
 
-void DesignerScene::fulcrumTypeChanged(Fulcrum *f, int type)
+void DesignerScene::fulcrumTypeChanged(Fulcrum */*f*/, int /*type*/)
 {
     invalidateSchema();
 }
@@ -527,7 +527,6 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         } else if(fulcrum->type() == Fulcrum::OUT) {
             cp2 = fulcrum->pos() + delta + offset;
         } else {
-            const Fulcrum::Ptr& next = targets[sub_section+1];
             if(fulcrum->type() == Fulcrum::LINEAR) {
                 cp2 = fulcrum->pos();
             } else {
