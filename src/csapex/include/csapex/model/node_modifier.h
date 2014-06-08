@@ -11,11 +11,6 @@
 
 namespace csapex
 {
-
-/// FORWARD
-template <typename T>
-class RosMessageConversionT;
-
 class NodeModifier
 {
 public:
@@ -37,13 +32,13 @@ public:
     template <typename T>
     ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
                           typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
-        RosMessageConversionT<T>::registerConversion();
+        //RosMessageConversionT<T>::registerConversion();
         return addInput(connection_types::GenericMessage<T>::make(), label, optional, async);
     }
     template <typename Container, typename T>
     ConnectorIn* addInput(const std::string& label, bool optional = false, bool async = false,
                           typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
-        RosMessageConversionT<T>::registerConversion();
+        //RosMessageConversionT<T>::registerConversion();
         return addInput(Container::template make<T>(), label, optional, async);
     }
 
@@ -63,13 +58,13 @@ public:
     template <typename T>
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
-        RosMessageConversionT<T>::registerConversion();
+        //RosMessageConversionT<T>::registerConversion();
         return addOutput(connection_types::GenericMessage<T>::make(), label);
     }
     template <typename Container, typename T>
     ConnectorOut* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* dummy = 0) {
-        RosMessageConversionT<T>::registerConversion();
+        //RosMessageConversionT<T>::registerConversion();
         return addOutput(Container::template make<T>(), label);
     }
 
