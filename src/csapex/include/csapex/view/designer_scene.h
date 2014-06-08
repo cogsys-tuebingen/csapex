@@ -129,6 +129,7 @@ private:
     bool draw_grid_;
     bool draw_schema_;
     double scale_;
+    double overlay_threshold_;
 
 
     int activity_marker_min_width_;

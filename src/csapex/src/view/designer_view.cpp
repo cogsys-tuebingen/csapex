@@ -36,9 +36,12 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph, Command
 {
     setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
     setScene(scene_);
     setFocusPolicy(Qt::StrongFocus);
     setFocus(Qt::OtherFocusReason);
+
+
 
     setAcceptDrops(true);
 

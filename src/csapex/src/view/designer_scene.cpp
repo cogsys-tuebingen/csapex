@@ -66,7 +66,7 @@ QWidget* topLevelParentWidget (QWidget* widget)
 
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl)
     : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
-      draw_grid_(false), draw_schema_(false), scale_(1.0),
+      draw_grid_(false), draw_schema_(false), scale_(1.0), overlay_threshold_(0.45),
       schema_dirty_(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
@@ -139,12 +139,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
+    // check if we need to update the schematics
     QSize scene_size(sceneRect().width(), sceneRect().height());
     if(schematics.isNull() || schematics.size() != scene_size ) {
         schematics = QImage(scene_size, QImage::Format_RGB888);
         schema_dirty_ = true;
     }
 
+    // make schematics renderer
     QPainter ps(&schematics);
     ps.setWindow(sceneRect().toRect());
     schematics_painter = &ps;
@@ -153,9 +155,11 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         schematics_painter->fillRect(sceneRect(), -1);
     }
 
+    // set drawing params
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(Qt::black, 3));
 
+    // check if we have temporary connections
     if(!temp_.empty()) {
         foreach(const TempConnection& temp, temp_) {
 
@@ -175,17 +179,19 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
     }
 
+    // draw all connections
     Q_FOREACH(Connection::Ptr connection, graph_->connections_) {
         drawConnection(painter, *connection);
     }
 
+    // augment nodes
     foreach (Node::Ptr node, graph_->nodes_) {
-
         NodeBox* box = widget_ctrl_->getBox(node->getUUID());
         if(!box) {
             continue;
         }
 
+        // draw error message
         if(node->isError()) {
             QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
 
@@ -198,18 +204,46 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             painter->drawText(rect, node->errorMessage().c_str(), opt);
         }
 
+        // draw box overlay
+        if(scale_ < overlay_threshold_) {
+            double o = 1.0;
+            double thresh = overlay_threshold_ * 0.75;
+            if(scale_ > thresh) {
+                o = (overlay_threshold_ - scale_) / (overlay_threshold_ - thresh);
+            }
+            painter->setOpacity(o * 0.75);
+
+            QBrush brush(QColor(0xCC, 0xCC, 0xCC));
+            QPen pen(brush, 1.0);
+            painter->setPen(pen);
+            painter->setBrush(brush);
+            painter->drawRect(box->geometry());
+
+            painter->setRenderHint(QPainter::Antialiasing);
+            painter->setPen(QPen(QColor(0,0,0)));
+            QFont font = painter->font();
+            font.setPixelSize(10 / scale_);
+            font.setBold(true);
+            painter->setFont(font);
+            QTextOption opt(Qt::AlignCenter);
+            opt.setWrapMode(QTextOption::WrapAnywhere);
+
+            std::string s = box->getLabel();
+            int grow = 10 / scale_;
+            painter->drawText(box->geometry().adjusted(-grow, -grow, grow, grow), s.c_str(), opt);
+        }
+
+        // draw port information (in)
         for(int id = 0; id < node->countInputs(); ++id) {
             Port* p = widget_ctrl_->getPort(node->getInput(id));
             if(p) {
                 drawPort(painter, box, p);
             }
         }
+        // draw port information (out)
         for(int id = 0; id < node->countOutputs(); ++id) {
-            ConnectorOut* o = node->getOutput(id);
-            assert(o->guard_ == 0xDEADBEEF);
-            Port* p = widget_ctrl_->getPort(o);
+            Port* p = widget_ctrl_->getPort(node->getOutput(id));
             if(p) {
-                assert(p->guard_ == 0xDEADBEEF);
                 drawPort(painter, box, p);
             }
         }
@@ -484,6 +518,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? 2 : 4;
+    ccs.r /= scale_;
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;
@@ -564,10 +599,11 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     // arrow
     QPolygonF arrow;
-    arrow.append(QPointF(to.x()+ ARROW_LENGTH, to.y()));
-    arrow.append(QPointF(to.x(), to.y() -ARROW_LENGTH/2.0));
-    arrow.append(QPointF(to.x(), to.y() + ARROW_LENGTH/2.0));
-    arrow.append(QPointF(to.x()+ ARROW_LENGTH, to.y()));
+    double a = ARROW_LENGTH/scale_;
+    arrow.append(QPointF(to.x()+ a, to.y()));
+    arrow.append(QPointF(to.x(), to.y() -a/2.0));
+    arrow.append(QPointF(to.x(), to.y() + a/2.0));
+    arrow.append(QPointF(to.x()+ a, to.y()));
 
     QPainterPath arrow_path;
     arrow_path.addPolygon(arrow);
@@ -577,13 +613,13 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     // draw
     if(ccs.highlighted) {
-        painter->setPen(QPen(Qt::black, ccs.r + 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(Qt::black, ccs.r + 6/scale_, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         foreach(const Path& path, paths) {
             painter->drawPath(path.first);
         }
         painter->drawPath(arrow_path);
 
-        painter->setPen(QPen(Qt::white, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(Qt::white, ccs.r + 3/scale_, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         foreach(const Path& path, paths) {
             painter->drawPath(path.first);
         }
