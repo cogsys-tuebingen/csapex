@@ -20,6 +20,8 @@ class DesignerScene : public QGraphicsScene
 {
     Q_OBJECT
 
+    static const float ARROW_LENGTH;
+
 public:
     DesignerScene(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl);
     ~DesignerScene();

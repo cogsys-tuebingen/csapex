@@ -21,9 +21,9 @@ public:
     enum Type {
         CURVE = 0,
         LINEAR = 1,
-        HANDLE = LINEAR,
         OUT = 10,
-        IN = 11
+        IN = 11,
+        HANDLE = IN
     };
 
 public:

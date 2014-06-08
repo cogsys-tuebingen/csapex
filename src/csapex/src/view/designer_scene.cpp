@@ -30,6 +30,7 @@
 
 using namespace csapex;
 
+const float DesignerScene::ARROW_LENGTH = 10.f;
 
 namespace {
 QRgb id2rgb(int id, int subsection)
@@ -238,6 +239,10 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
         e->accept();
         showConnectionContextMenu();
         return;
+
+    } else if(e->button() == Qt::MiddleButton && highlight_connection_id_ != -1) {
+        dispatcher_->execute(graph_->deleteConnectionById(highlight_connection_id_));
+        return;
     }
 
     QGraphicsScene::mousePressEvent(e);
@@ -307,13 +312,11 @@ QPen DesignerScene::makeLinePen(const QPointF& from, const QPointF& to)
     } else {
         QColor a = output_color_;
         QColor b = input_color_;
-        a.setAlpha(128);
-        b.setAlpha(128);
         lg.setColorAt(0, a);
         lg.setColorAt(1, b);
     }
 
-    return QPen(QBrush(lg), ccs.r * 0.75, from.x() > to.x() ? Qt::DotLine : Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    return QPen(QBrush(lg), ccs.r * 0.75, /*from.x() > to.x() ? Qt::DotLine : Qt::SolidLine*/ Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 }
 
 
@@ -472,8 +475,13 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
     drawActivity(painter, f, to);
 }
 
-void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& to, int id, Fulcrum::Type from_type, Fulcrum::Type to_type)
+void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id, Fulcrum::Type from_type, Fulcrum::Type to_type)
 {
+    QPointF to = real_to;
+    to.setX(to.x() - ARROW_LENGTH);
+
+    painter->setRenderHint(QPainter::Antialiasing);
+
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? 2 : 4;
 
@@ -500,6 +508,11 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     QPointF cp1, cp2;
 
+    // paths
+    typedef std::pair<QPainterPath, int> Path;
+    std::vector<Path> paths;
+
+    // generate lines
     Q_FOREACH(Fulcrum::Ptr fulcrum, targets) {
         QPoint offset;
         QPoint delta;
@@ -529,6 +542,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
         if(fulcrum->type() == Fulcrum::IN) {
             cp2 = fulcrum->pos() - delta + offset;
+
         } else if(fulcrum->type() == Fulcrum::OUT) {
             cp2 = fulcrum->pos() + delta + offset;
         } else {
@@ -541,32 +555,61 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
         path.cubicTo(cp1, cp2, fulcrum->pos());
 
-        if(ccs.highlighted) {
-            painter->setPen(QPen(Qt::black, ccs.r + 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(path);
-
-            painter->setPen(QPen(Qt::white, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(path);
-        }
-
-        painter->setPen(makeLinePen(from, to));
-
-        painter->drawPath(path);
-
-        if(id >= 0 && schema_dirty_) {
-            QPen schema_pen = QPen(QColor(id2rgb(id, sub_section)), ccs.r * 1.75, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
-            schematics_painter->setPen(schema_pen);
-            schematics_painter->drawPath(path);
-        }
+        paths.push_back(std::make_pair(path, sub_section));
 
         last = current;
         current = fulcrum;
         ++sub_section;
     }
+
+    // arrow
+    QPolygonF arrow;
+    arrow.append(QPointF(to.x()+ ARROW_LENGTH, to.y()));
+    arrow.append(QPointF(to.x(), to.y() -ARROW_LENGTH/2.0));
+    arrow.append(QPointF(to.x(), to.y() + ARROW_LENGTH/2.0));
+    arrow.append(QPointF(to.x()+ ARROW_LENGTH, to.y()));
+
+    QPainterPath arrow_path;
+    arrow_path.addPolygon(arrow);
+
+    // reset brush if it is set
+    painter->setBrush(QBrush());
+
+    // draw
+    if(ccs.highlighted) {
+        painter->setPen(QPen(Qt::black, ccs.r + 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        foreach(const Path& path, paths) {
+            painter->drawPath(path.first);
+        }
+        painter->drawPath(arrow_path);
+
+        painter->setPen(QPen(Qt::white, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        foreach(const Path& path, paths) {
+            painter->drawPath(path.first);
+        }
+        painter->drawPath(arrow_path);
+    }
+
+    painter->setPen(makeLinePen(from, to));
+    foreach(const Path& path, paths) {
+        painter->drawPath(path.first);
+
+        if(id >= 0 && schema_dirty_) {
+            QPen schema_pen = QPen(QColor(id2rgb(id, path.second)), ccs.r * 1.75, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
+            schematics_painter->setPen(schema_pen);
+            schematics_painter->drawPath(path.first);
+        }
+    }
+    painter->setBrush(input_color_);
+    painter->setPen(QPen(painter->brush(), 1.0));
+    painter->drawPath(arrow_path);
 }
 
 void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 {
+    // reset brush if it is set
+    painter->setBrush(QBrush());
+
     Connectable* c = p->getAdaptee();
     bool right = c->isOutput() ^ p->isFlipped();
 
@@ -604,6 +647,9 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 
 void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
 {
+    // reset brush if it is set
+    painter->setBrush(QBrush());
+
     Port* port = widget_ctrl_->getPort(c);
     if(port && life > 0) {
         int r = std::min(Settings::activity_marker_max_lifetime_, life);
