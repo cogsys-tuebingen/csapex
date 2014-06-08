@@ -74,18 +74,6 @@ QFrame#boxframe[focused="true"] QLabel {
         color: black!important;
 }
 
-/* board */
-QWidget#DesignBoard {
-        background: rgb(255, 255, 255);
-}
-QWidget#DesignBoard:focus {
-        /*border: 1px solid rgb(255, 0, 0)!important;*/
-}
-
-QWidget#DesignBoard[grid="true"] {
-        background: url(:/background.png) rgb(255, 255, 255);
-}
-
 /* connectors */
 csapex--Port {
         border: 2px solid rgb(0, 0, 0);
@@ -114,7 +102,7 @@ csapex--Port[blocked="true"]  {
 }
 
 /* connection */
-csapex--Overlay  {
-        color: rgb(165,30,55); /* output */
-        background: rgb(180,160,105); /* input */
+csapex--DesignerView  {
+        qproperty-outputColor: rgb(165,30,55); /* output */
+        qproperty-inputColor: rgb(180,160,105); /* input */
 }
