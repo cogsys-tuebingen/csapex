@@ -65,8 +65,6 @@ public Q_SLOTS:
 
     void movedBoxes(double dx, double dy);
 
-    void updateSelection();
-
     void overwriteStyleSheet(QString& stylesheet);
 
     void contextMenuEvent(QContextMenuEvent* e);
@@ -80,6 +78,7 @@ public Q_SLOTS:
     void reset();
     void resetZoom();
 
+    void updateSelection();
     void selectAll();
 
 private:

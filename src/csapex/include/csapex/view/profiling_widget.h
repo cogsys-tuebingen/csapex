@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <QWidget>
 #include <map>
+#define BOOST_PARAMETER_MAX_ARITY 7
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
 

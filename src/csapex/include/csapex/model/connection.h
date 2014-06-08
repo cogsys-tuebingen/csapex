@@ -2,7 +2,6 @@
 #define CONNECTION_H
 
 /// COMPONENT
-#include <csapex/view/selectable.h>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
@@ -14,7 +13,7 @@
 namespace csapex
 {
 
-class Connection : public QObject, public Selectable {
+class Connection : public QObject {
 
     Q_OBJECT
 

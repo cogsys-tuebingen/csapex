@@ -18,6 +18,7 @@
 #include "ui_csapex_window.h"
 #include <csapex/view/widget_controller.h>
 #include <utils_param/parameter_factory.h>
+#include <csapex/view/designer.h>
 
 /// SYSTEM
 #include <iostream>
@@ -128,11 +129,9 @@ void CsApexWindow::updateDebugInfo()
         return;
     }
 
-    std::vector<NodeBox*> selected;
-    boost::function<void(NodeBox*)> append = boost::bind(&std::vector<NodeBox*>::push_back, &selected, _1);
-    widget_ctrl_->foreachBox(append, boost::bind(&NodeBox::isSelected, _1));
-
     ui->box_info->clear();
+
+    std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
 
     foreach (NodeBox* box, selected) {
         Node* node = box->getNode();

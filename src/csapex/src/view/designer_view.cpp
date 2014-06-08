@@ -78,6 +78,17 @@ DesignerScene* DesignerView::designerScene()
     return scene_;
 }
 
+void DesignerView::updateSelection()
+{
+    QList<QGraphicsItem *> selected = scene_->items();
+    foreach(QGraphicsItem* item, selected) {
+        MovableGraphicsProxyWidget* m = dynamic_cast<MovableGraphicsProxyWidget*>(item);
+        if(m) {
+            m->getBox()->setSelected(m->isSelected());
+        }
+    }
+}
+
 Command::Ptr DesignerView::deleteSelected()
 {
     command::Meta::Ptr meta(new command::Meta("delete selected boxes"));
@@ -88,17 +99,6 @@ Command::Ptr DesignerView::deleteSelected()
         }
     }
     return meta;
-}
-
-void DesignerView::updateSelection()
-{
-    QList<QGraphicsItem *> selected = scene_->items();
-    foreach(QGraphicsItem* item, selected) {
-        MovableGraphicsProxyWidget* m = dynamic_cast<MovableGraphicsProxyWidget*>(item);
-        if(m) {
-            m->getBox()->setSelected(m->isSelected());
-        }
-    }
 }
 
 void DesignerView::keyPressEvent(QKeyEvent* e)

@@ -395,15 +395,9 @@ void NodeBox::triggerPlaced()
     Q_EMIT placed();
 }
 
-void NodeBox::selectEvent()
+void NodeBox::setSelected(bool selected)
 {
-    ui->boxframe->setProperty("focused",true);
-    refreshStylesheet();
-}
-
-void NodeBox::deselectEvent()
-{
-    ui->boxframe->setProperty("focused",false);
+    ui->boxframe->setProperty("focused",selected);
     refreshStylesheet();
 }
 

@@ -59,6 +59,7 @@ public Q_SLOTS:
     void refresh();
     void reset();
 
+    std::vector<NodeBox*> getSelectedBoxes() const;
     void selectAll();
     void clearSelection();
     void deleteSelected();

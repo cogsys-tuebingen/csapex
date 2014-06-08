@@ -127,8 +127,6 @@ void WidgetController::connectorAdded(Connectable* connector)
         QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
         QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
 
-        box->selection.connect(boost::bind(&Port::setSelected, port, _1));
-
         QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
         insertPort(layout, port);
     }

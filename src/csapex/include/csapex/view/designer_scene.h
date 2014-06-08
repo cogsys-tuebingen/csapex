@@ -90,7 +90,6 @@ private:
     };
 
     struct CurrentConnectionState {
-        bool selected;
         bool highlighted;
         bool error;
         bool disabled;

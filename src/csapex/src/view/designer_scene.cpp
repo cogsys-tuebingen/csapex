@@ -159,8 +159,6 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         foreach(const TempConnection& temp, temp_) {
 
             ccs = CurrentConnectionState();
-            ccs.selected = true;
-
             Port* fromp = widget_ctrl_->getPort(temp.from);
             bool flipped = fromp->isFlipped();
 
@@ -459,7 +457,6 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
 
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
-    ccs.selected = connection.isSelected();
     ccs.disabled = (!from->isEnabled() || !to->isEnabled());
     ccs.async = from->isAsync() || to->isAsync();
     ccs.minimized_from = fromp->isMinimizedSize();
@@ -549,13 +546,6 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
             painter->drawPath(path);
 
             painter->setPen(QPen(Qt::white, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(path);
-
-        } else if(ccs.selected) {
-            painter->setPen(QPen(Qt::black, ccs.r + 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(path);
-
-            painter->setPen(makeSelectedLinePen(from, to));
             painter->drawPath(path);
         }
 

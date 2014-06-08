@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/memento.h>
 #include <csapex/command/command.h>
-#include <csapex/view/selectable.h>
 #include <csapex/model/graph.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/error_state.h>
@@ -29,7 +28,7 @@ namespace csapex
 {
 
 
-class NodeBox : public QWidget, public Selectable
+class NodeBox : public QWidget
 {
     Q_OBJECT
 
@@ -89,8 +88,7 @@ public:
     void moveEvent(QMoveEvent*);
     void triggerPlaced();
 
-    void selectEvent();
-    void deselectEvent();
+    void setSelected(bool selected);
 
     void keyPressEvent(QKeyEvent * e);
 

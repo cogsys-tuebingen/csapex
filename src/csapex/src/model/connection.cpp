@@ -126,7 +126,7 @@ void Connection::moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped)
 
 void Connection::deleteFulcrum(int fulcrum_id)
 {
-    assert(fulcrum_id > 0 && fulcrum_id < (int) fulcrums_.size());
+    assert(fulcrum_id >= 0 && fulcrum_id < (int) fulcrums_.size());
     Q_EMIT fulcrum_deleted((fulcrums_[fulcrum_id]).get());
 
     // update the ids of the later fulcrums

@@ -16,6 +16,7 @@
 #include "ui_designer.h"
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/designer_scene.h>
+#include <csapex/utility/movable_graphics_proxy_widget.h>
 
 /// SYSTEM
 #include <QScrollBar>
@@ -65,6 +66,18 @@ void Designer::setup()
     }
 
     setFocusPolicy(Qt::NoFocus);
+}
+
+std::vector<NodeBox*> Designer::getSelectedBoxes() const
+{
+    std::vector<NodeBox*> r;
+    foreach(QGraphicsItem* item, designer_scene_->selectedItems()) {
+        MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
+        if(proxy) {
+            r.push_back(proxy->getBox());
+        }
+    }
+    return r;
 }
 
 void Designer::clearSelection()

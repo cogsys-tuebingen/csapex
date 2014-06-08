@@ -143,7 +143,6 @@ set(SRC_APP
     src/view/designer_scene.cpp
     src/view/designer_view.cpp
     src/view/designer.cpp
-    src/view/selectable.cpp
     src/view/profiling_widget.cpp
     src/view/port.cpp
     src/view/widget_controller.cpp
