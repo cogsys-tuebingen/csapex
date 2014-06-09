@@ -316,44 +316,6 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
     }
 }
 
-QPen DesignerScene::makeSelectedLinePen(const QPointF& from, const QPointF& to)
-{
-    QLinearGradient lg(from, to);
-    if(ccs.error) {
-        lg.setColorAt(0, Qt::darkRed);
-        lg.setColorAt(1, Qt::red);
-    } else {
-        lg.setColorAt(0, output_color_.darker());
-        lg.setColorAt(1, input_color_.darker());
-    }
-
-    return QPen(QBrush(lg), ccs.r * 1.3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-}
-
-QPen DesignerScene::makeLinePen(const QPointF& from, const QPointF& to)
-{
-    QLinearGradient lg(from, to);
-    if(ccs.error) {
-        lg.setColorAt(0,Qt::darkRed);
-        lg.setColorAt(1,Qt::red);
-
-    } else if(ccs.disabled) {
-        lg.setColorAt(0,Qt::darkGray);
-        lg.setColorAt(1,Qt::gray);
-    } else if(ccs.async) {
-        lg.setColorAt(0, QColor(0xFF, 0xCC, 0x00));
-        lg.setColorAt(1, QColor(0xFF, 0xCC, 0x00));
-    } else {
-        QColor a = output_color_;
-        QColor b = input_color_;
-        lg.setColorAt(0, a);
-        lg.setColorAt(1, b);
-    }
-
-    return QPen(QBrush(lg), ccs.r * 0.75, /*from.x() > to.x() ? Qt::DotLine : Qt::SolidLine*/ Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-}
-
-
 void DesignerScene::connectionAdded(Connection* c)
 {
     QObject::connect(c, SIGNAL(fulcrum_added(Fulcrum *)), this, SLOT(fulcrumAdded(Fulcrum *)));
@@ -516,9 +478,14 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     painter->setRenderHint(QPainter::Antialiasing);
 
+    double scale_factor = 1.0 / scale_;
+    if(scale_factor < 1.0) {
+        scale_factor = 1.0;
+    }
+
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? 2 : 4;
-    ccs.r /= scale_;
+    ccs.r *= scale_factor;
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;
@@ -599,7 +566,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     // arrow
     QPolygonF arrow;
-    double a = ARROW_LENGTH/scale_;
+    double a = ARROW_LENGTH * scale_factor;
     arrow.append(QPointF(to.x()+ a, to.y()));
     arrow.append(QPointF(to.x(), to.y() -a/2.0));
     arrow.append(QPointF(to.x(), to.y() + a/2.0));
@@ -613,20 +580,39 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     // draw
     if(ccs.highlighted) {
-        painter->setPen(QPen(Qt::black, ccs.r + 6/scale_, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(Qt::black, ccs.r + 6*scale_factor, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         foreach(const Path& path, paths) {
             painter->drawPath(path.first);
         }
         painter->drawPath(arrow_path);
 
-        painter->setPen(QPen(Qt::white, ccs.r + 3/scale_, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(Qt::white, ccs.r + 3*scale_factor, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         foreach(const Path& path, paths) {
             painter->drawPath(path.first);
         }
         painter->drawPath(arrow_path);
     }
 
-    painter->setPen(makeLinePen(from, to));
+    QColor color_start = output_color_;
+    QColor color_end = input_color_;
+
+    if(ccs.error) {
+        color_start = Qt::darkRed;
+        color_end = Qt::red;
+
+    } else if(ccs.disabled) {
+        color_start = Qt::darkGray;
+        color_end = Qt::gray;
+    } else if(ccs.async) {
+        color_start = QColor(0xFF, 0xCC, 0x00);
+        color_end = QColor(0xFF, 0xCC, 0x00);
+    }
+    QLinearGradient lg(from, to);
+    lg.setColorAt(0, color_start);
+    lg.setColorAt(1, color_end);
+
+    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, /*from.x() > to.x() ? Qt::DotLine : Qt::SolidLine*/ Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+
     foreach(const Path& path, paths) {
         painter->drawPath(path.first);
 
@@ -636,9 +622,13 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
             schematics_painter->drawPath(path.first);
         }
     }
-    painter->setBrush(input_color_);
+    painter->setBrush(color_end);
     painter->setPen(QPen(painter->brush(), 1.0));
     painter->drawPath(arrow_path);
+
+    if(id >= 0 && schema_dirty_) {
+        schematics_painter->drawPath(arrow_path);
+    }
 }
 
 void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)

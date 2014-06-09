@@ -148,6 +148,7 @@ void DesignerView::wheelEvent(QWheelEvent *we)
         }
 
         scene_->setScale(transform().m11());
+        scene_->invalidateSchema();
 
     } else {
         QGraphicsView::wheelEvent(we);

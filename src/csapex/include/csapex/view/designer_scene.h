@@ -82,9 +82,6 @@ private:
     void drawActivity(QPainter *painter, int life, Connectable* c);
     void drawPort(QPainter *painter, NodeBox *box, Port* p);
 
-    QPen makeLinePen(const QPointF &from, const QPointF &to);
-    QPen makeSelectedLinePen(const QPointF &from, const QPointF &to);
-
 private:
     struct TempConnection {
         Connectable* from;
