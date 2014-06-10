@@ -39,17 +39,14 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         return;
     }
 
+    QGraphicsItem::mousePressEvent(event);
+
     bool do_relay = !ctrl && child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel");
 
     if(do_relay) {
         QGraphicsProxyWidget::mousePressEvent(event);
         relay_ = true;
-    }
-
-    before_ = pos();
-
-    if(!event->isAccepted()) {
-        QGraphicsItem::mousePressEvent(event);
+        before_ = pos();
     }
 }
 
@@ -58,18 +55,17 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
 //    QPoint pt = event->pos().toPoint();
 //    QWidget* child = widget()->childAt(pt);
 
+    QGraphicsItem::mouseReleaseEvent(event);
+
     if(relay_) { // child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel")) {
         QGraphicsProxyWidget::mouseReleaseEvent(event);
-        relay_ = false;
-    }
-    if(!event->isAccepted()) {
-        QGraphicsItem::mouseReleaseEvent(event);
-    }
+        relay_ = false;        
 
-    QPointF after = pos();
-    if(before_ != after) {
-        QPointF delta = after - before_;
-        moved(delta.x(), delta.y());
+        QPointF after = pos();
+        if(before_ != after) {
+            QPointF delta = after - before_;
+            moved(delta.x(), delta.y());
+        }
     }
 }
 
