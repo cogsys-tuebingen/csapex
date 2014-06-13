@@ -4,12 +4,12 @@
 using namespace param;
 
 ValueParameter::ValueParameter()
-    : Parameter("noname")
+    : Parameter("noname", ParameterDescription())
 {
 }
 
-ValueParameter::ValueParameter(const std::string &name)
-    : Parameter(name)
+ValueParameter::ValueParameter(const std::string &name, const ParameterDescription &description)
+    : Parameter(name, description)
 {
 }
 

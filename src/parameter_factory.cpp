@@ -43,9 +43,9 @@ Parameter::Ptr ParameterFactory::clone(const Parameter::Ptr& param)
     return r;
 }
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set, int def)
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, int> &set, int def)
 {
-    BitSetParameter::Ptr result(new BitSetParameter(name));
+    BitSetParameter::Ptr result(new BitSetParameter(name, description));
     result->setBitSet(set);
     result->def_ = def;
     result->set<int>(def);
@@ -53,8 +53,12 @@ Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name,
     return result;
 }
 
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set, int def)
+{
+    return declareParameterBitSet(name, ParameterDescription(), set, def);
+}
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, std::pair<int, bool> > &set)
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> > &set)
 {
     std::map<std::string, int> raw_set;
     int def = 0;
@@ -68,7 +72,12 @@ Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name,
             def += it->second.first;
         }
     }
-    return declareParameterBitSet(name, raw_set, def);
+    return declareParameterBitSet(name, description, raw_set, def);
+}
+
+Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, std::pair<int, bool> > &set)
+{
+    return ParameterFactory::declareParameterBitSet(name, ParameterDescription(), set);
 }
 
 Parameter::Ptr ParameterFactory::declare(const std::string& name, const char* def)
@@ -82,71 +91,136 @@ Parameter::Ptr ParameterFactory::declare(const std::string& name, bool def)
 }
 
 
-Parameter::Ptr ParameterFactory::declareBool(const std::string& name, bool def)
+Parameter::Ptr ParameterFactory::declareBool(const std::string& name, const ParameterDescription& description, bool def)
 {
-    ValueParameter::Ptr result(new ValueParameter(name));
+    ValueParameter::Ptr result(new ValueParameter(name, description));
     result->def_ = def;
     result->set<bool>(def);
 
     return result;
 }
 
+Parameter::Ptr ParameterFactory::declareBool(const std::string &name, bool def)
+{
+    return declareBool(name, ParameterDescription(), def);
+}
+
+Parameter::Ptr ParameterFactory::declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b)
+{
+    ColorParameter::Ptr result(new ColorParameter(name, description, r, g, b));
+    return result;
+}
+
 Parameter::Ptr ParameterFactory::declareColorParameter(const std::string& name, int r, int g, int b)
 {
-    ColorParameter::Ptr result(new ColorParameter(name, r, g, b));
+    return declareColorParameter(name, ParameterDescription(), r,g,b);
+}
+
+Parameter::Ptr ParameterFactory::declareTrigger(const std::string& name, const ParameterDescription& description)
+{
+    TriggerParameter::Ptr result(new TriggerParameter(name, description));
     return result;
 }
 
-Parameter::Ptr ParameterFactory::declareTrigger(const std::string& name)
+Parameter::Ptr ParameterFactory::declareTrigger(const std::string &name)
 {
-    TriggerParameter::Ptr result(new TriggerParameter(name));
-    return result;
+    return declareTrigger(name, ParameterDescription());
 }
 
-Parameter::Ptr ParameterFactory::declarePath(const std::string& name, bool is_file, const std::string& def, const std::string& filter, bool input, bool output)
+Parameter::Ptr ParameterFactory::declarePath(const std::string& name, const ParameterDescription& description,
+                                             bool is_file, const std::string& def, const std::string& filter, bool input, bool output)
 {
-    PathParameter::Ptr result(new PathParameter(name, filter, is_file, input, output));
+    PathParameter::Ptr result(new PathParameter(name, description, filter, is_file, input, output));
     result->set(def);
 
     return result;
 }
 
+Parameter::Ptr ParameterFactory::declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, description, true, def, filter, true, false);
+}
 Parameter::Ptr ParameterFactory::declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
-    return declarePath(name, true, def, filter, true, false);
+    return declareFileInputPath(name, ParameterDescription(), def, filter);
+}
+
+Parameter::Ptr ParameterFactory::declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, description, true, def, filter, false, true);
 }
 
 Parameter::Ptr ParameterFactory::declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
-    return declarePath(name, true, def, filter, false, true);
+    return declareFileOutputPath(name, ParameterDescription(), def, filter);
 }
 
+Parameter::Ptr ParameterFactory::declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, description, true, def, filter, true, true);
+}
 Parameter::Ptr ParameterFactory::declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
-    return declarePath(name, true, def, filter, true, true);
+    return declareFileInputOutputPath(name, ParameterDescription(), def, filter);
 }
 
+
+Parameter::Ptr ParameterFactory::declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, description, false, def, filter, true, false);
+}
 
 Parameter::Ptr ParameterFactory::declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
-    return declarePath(name, false, def, filter, true, false);
+    return declareDirectoryInputPath(name, ParameterDescription(), def, filter);
 }
 
+Parameter::Ptr ParameterFactory::declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, description, false, def, filter, false, true);
+}
 Parameter::Ptr ParameterFactory::declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
-    return declarePath(name, false, def, filter, false, true);
+    return declareDirectoryOutputPath(name, ParameterDescription(), def, filter);
 }
 
+Parameter::Ptr ParameterFactory::declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+{
+    return declarePath(name, description, false, def, filter, true, true);
+}
 Parameter::Ptr ParameterFactory::declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
-    return declarePath(name, false, def, filter, true, true);
+    return declareDirectoryInputOutputPath(name, ParameterDescription(), def, filter);
 }
 
 
-Parameter::Ptr ParameterFactory::declareText(const std::string& name, const std::string& def)
+Parameter::Ptr ParameterFactory::declareText(const std::string& name, const ParameterDescription& description, const std::string& def)
 {
-    ValueParameter::Ptr result(new ValueParameter(name));
+    ValueParameter::Ptr result(new ValueParameter(name, description));
     result->set(def);
 
     return result;
+}
+
+Parameter::Ptr ParameterFactory::declareText(const std::string &name, const std::string &def)
+{
+    return declareText(name, ParameterDescription(""), def);
+}
+
+Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const ParameterDescription& description, const std::vector<std::string> & set)
+{
+    SetParameter::Ptr result(new SetParameter(name, description));
+    result->setSet(set);
+
+    if(!set.empty()) {
+        result->def_ = set.begin();
+        result->set<std::string>(*set.begin());
+    }
+
+    return result;
+}
+
+Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const std::vector<std::string> & set)
+{
+    return declareParameterStringSet(name, ParameterDescription(), set);
 }

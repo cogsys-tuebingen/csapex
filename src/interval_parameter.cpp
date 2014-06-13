@@ -4,12 +4,12 @@
 using namespace param;
 
 IntervalParameter::IntervalParameter()
-    : Parameter("noname")
+    : Parameter("noname", ParameterDescription())
 {
 }
 
-IntervalParameter::IntervalParameter(const std::string &name)
-    : Parameter(name)
+IntervalParameter::IntervalParameter(const std::string &name, const ParameterDescription& description)
+    : Parameter(name, description)
 {
 }
 

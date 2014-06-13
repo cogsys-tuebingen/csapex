@@ -4,12 +4,12 @@
 using namespace param;
 
 PathParameter::PathParameter()
-    : Parameter("noname")
+    : Parameter("noname", ParameterDescription())
 {
 }
 
-PathParameter::PathParameter(const std::string &name, const std::string &filter, bool is_file, bool input, bool output)
-    : Parameter(name), filter_(filter), is_file_(is_file), input_(input), output_(output)
+PathParameter::PathParameter(const std::string &name, const ParameterDescription& description, const std::string &filter, bool is_file, bool input, bool output)
+    : Parameter(name, description), filter_(filter), is_file_(is_file), input_(input), output_(output)
 {
 }
 

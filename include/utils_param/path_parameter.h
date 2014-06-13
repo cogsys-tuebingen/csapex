@@ -42,14 +42,14 @@ public:
 
     friend void operator >> (const YAML::Node& node, param::PathParameter::Ptr& value) {
         if(!value) {
-            value.reset(new PathParameter("loading", "", 0, false, false));
+            value.reset(new PathParameter("loading", ParameterDescription(""), "", 0, false, false));
         }
         value->doRead(node);
     }
 
 public:
     PathParameter();
-    explicit PathParameter(const std::string& name, const std::string& filter, bool is_file, bool input, bool output);
+    explicit PathParameter(const std::string& name, const ParameterDescription& description, const std::string& filter, bool is_file, bool input, bool output);
     virtual ~PathParameter();
 
     virtual int ID() const { return 0x004; }

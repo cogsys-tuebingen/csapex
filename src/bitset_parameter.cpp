@@ -4,13 +4,13 @@
 using namespace param;
 
 BitSetParameter::BitSetParameter()
-    : Parameter("noname")
+    : Parameter("noname", ParameterDescription())
 {
 }
 
 
-BitSetParameter::BitSetParameter(const std::string &name)
-    : Parameter(name)
+BitSetParameter::BitSetParameter(const std::string &name, const ParameterDescription& description)
+    : Parameter(name, description)
 {
 }
 

@@ -7,6 +7,7 @@
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
 #include <utils_param/interval_parameter.h>
+#include <utils_param/parameter_description.h>
 
 namespace param
 {
@@ -14,19 +15,46 @@ namespace param
 class ParameterFactory
 {
 public:
+    /**
+     * @brief makeEmpty creates an empty parameter pointer
+     * @param type
+     * @return
+     */
     static Parameter::Ptr makeEmpty(const std::string& type);
+
+
+
+
+    /**
+     * @brief clone duplicates a parameter deeply
+     * @param param
+     * @return
+     */
     static Parameter::Ptr clone(const Parameter::Ptr& param);
 
 
 
-    static Parameter::Ptr declareBool(const std::string& name, bool def);
 
+
+
+    /**
+     * @brief declareRange
+     * @param name
+     * @param description
+     * @param min
+     * @param max
+     * @param def
+     * @param step
+     * @return
+     */
     template <typename T>
-    static Parameter::Ptr declareRange(const std::string& name, T min, T max, T def, T step)
+    static Parameter::Ptr declareRange(const std::string& name,
+                                       const ParameterDescription& description,
+                                       T min, T max, T def, T step)
     {
         BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
 
-        RangeParameter::Ptr result(new RangeParameter(name));
+        RangeParameter::Ptr result(new RangeParameter(name, description));
         result->def_ = def;
         result->min_ = min;
         result->max_ = max;
@@ -35,13 +63,34 @@ public:
 
         return result;
     }
-
     template <typename T>
-    static Parameter::Ptr declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
+    static Parameter::Ptr declareRange(const std::string& name, T min, T max, T def, T step)
+    {
+        return declareRange(name, ParameterDescription(), min, max, def, step);
+    }
+
+
+
+
+    /**
+     * @brief declareInterval
+     * @param name
+     * @param description
+     * @param min
+     * @param max
+     * @param def_min
+     * @param def_max
+     * @param step
+     * @return
+     */
+    template <typename T>
+    static Parameter::Ptr declareInterval(const std::string& name,
+                                          const ParameterDescription& description,
+                                          T min, T max, T def_min, T def_max, T step)
     {
         BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
 
-        IntervalParameter::Ptr result(new IntervalParameter(name));
+        IntervalParameter::Ptr result(new IntervalParameter(name, description));
         result->def_ = std::make_pair(def_min, def_max);
         result->min_ = min;
         result->max_ = max;
@@ -52,27 +101,171 @@ public:
 
         return result;
     }
+    template <typename T>
+    static Parameter::Ptr declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
+    {
+        return declareInterval(name, ParameterDescription(), min, max, def_min, def_max, step);
+    }
 
+
+
+
+    /**
+     * @brief declareBool
+     * @param name
+     * @param def
+     * @return
+     */
+    static Parameter::Ptr declareBool(const std::string& name, bool def);
+    static Parameter::Ptr declareBool(const std::string& name, const ParameterDescription& description, bool def);
+
+
+
+
+
+    /**
+     * @brief declareText
+     * @param name
+     * @param description
+     * @param def
+     * @return
+     */
+    static Parameter::Ptr declareText(const std::string& name, const ParameterDescription& description, const std::string& def);
     static Parameter::Ptr declareText(const std::string& name, const std::string& def);
 
-    static Parameter::Ptr declarePath(const std::string& name, bool is_file, const std::string& def, const std::string& filter = "", bool input = false, bool output = false);
 
+
+
+    /**
+     * @brief declarePath
+     * @param name
+     * @param description
+     * @param is_file
+     * @param def
+     * @param filter
+     * @param input
+     * @param output
+     * @return
+     */
+    static Parameter::Ptr declarePath(const std::string& name, const ParameterDescription& description,
+                                      bool is_file, const std::string& def, const std::string& filter = "", bool input = false, bool output = false);
+
+
+
+
+    /**
+     * @brief declareFileInputPath
+     * @param name
+     * @param description
+     * @param def
+     * @param filter
+     * @return
+     */
+    static Parameter::Ptr declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
     static Parameter::Ptr declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+
+    /**
+     * @brief declareFileOutputPath
+     * @param name
+     * @param description
+     * @param def
+     * @param filter
+     * @return
+     */
+    static Parameter::Ptr declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
     static Parameter::Ptr declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+
+    /**
+     * @brief declareFileInputOutputPath
+     * @param name
+     * @param description
+     * @param def
+     * @param filter
+     * @return
+     */
+    static Parameter::Ptr declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
     static Parameter::Ptr declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
+
+
+    /**
+     * @brief declareDirectoryInputPath
+     * @param name
+     * @param description
+     * @param def
+     * @param filter
+     * @return
+     */
+    static Parameter::Ptr declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
     static Parameter::Ptr declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+
+
+    /**
+     * @brief declareDirectoryOutputPath
+     * @param name
+     * @param description
+     * @param def
+     * @param filter
+     * @return
+     */
+    static Parameter::Ptr declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
     static Parameter::Ptr declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+
+
+    /**
+     * @brief declareDirectoryInputOutputPath
+     * @param name
+     * @param description
+     * @param def
+     * @param filter
+     * @return
+     */
+    static Parameter::Ptr declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
     static Parameter::Ptr declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
+
+
+
+
+    /**
+     * @brief declareTrigger
+     * @param name
+     * @param description
+     * @return
+     */
+    static Parameter::Ptr declareTrigger(const std::string& name, const ParameterDescription& description);
     static Parameter::Ptr declareTrigger(const std::string& name);
 
+
+
+    /**
+     * @brief declareColorParameter
+     * @param name
+     * @param description
+     * @param r
+     * @param g
+     * @param b
+     * @return
+     */
+    static Parameter::Ptr declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b);
     static Parameter::Ptr declareColorParameter(const std::string& name, int r, int g, int b);
 
+
+
+
+
+
+    /**
+     * @brief declareParameterSet
+     * @param name
+     * @param description
+     * @param set
+     * @return
+     */
     template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const std::map<std::string, T> & set)
+    static Parameter::Ptr declareParameterSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, T> & set)
     {
-        SetParameter::Ptr result(new SetParameter(name));
+        SetParameter::Ptr result(new SetParameter(name, description));
         result->setSet(set);
         if(!set.empty()) {
             result->def_ = set.begin()->second;
@@ -81,50 +274,100 @@ public:
 
         return result;
     }
-
-    static Parameter::Ptr declareParameterStringSet(const std::string& name, const std::vector<std::string> & set)
+    template <typename T>
+    static Parameter::Ptr declareParameterSet(const std::string& name, const std::map<std::string, T> & set)
     {
-        SetParameter::Ptr result(new SetParameter(name));
-        result->setSet(set);
-
-        if(!set.empty()) {
-            result->def_ = set.begin();
-            result->set<std::string>(*set.begin());
-        }
-
-        return result;
+        return declareParameterSet(name, ParameterDescription(), set);
     }
 
+
+
+    /**
+     * @brief declareParameterStringSet
+     * @param name
+     * @param description
+     * @param set
+     * @return
+     */
+    static Parameter::Ptr declareParameterStringSet(const std::string& name,
+                                                    const ParameterDescription& description,
+                                                    const std::vector<std::string> & set);
+    static Parameter::Ptr declareParameterStringSet(const std::string& name, const std::vector<std::string> & set);
+
+
+
+
+    /**
+     * @brief declareParameterBitSet
+     * @param name
+     * @param description
+     * @param set
+     * @param def
+     * @return
+     */
+    static Parameter::Ptr declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, int> &set, int def = 0);
     static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::map<std::string, int> &set, int def = 0);
+
+
+    /**
+     * @brief declareParameterBitSet
+     * @param name
+     * @param description
+     * @param set
+     * @return
+     */
+    static Parameter::Ptr declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> > &set);
     static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> > &set);
 
+
+
+
+
+    /**
+     * @brief declareValue
+     * @param name
+     * @param description
+     * @param def
+     * @return
+     */
     template <typename T>
-    static Parameter::Ptr declareValue(const std::string& name, const T& def)
+    static Parameter::Ptr declareValue(const std::string& name, const ParameterDescription& description, const T& def)
     {
-        ValueParameter::Ptr result(new ValueParameter(name));
+        ValueParameter::Ptr result(new ValueParameter(name, description));
         result->def_ = def;
         result->set<T>(def);
 
         return result;
     }
+    template <typename T>
+    static Parameter::Ptr declareValue(const std::string& name, const T& def)
+    {
+        return declareValue(name, ParameterDescription(), def);
+    }
 
 
     /** LEGACY **/
     template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
+    static Parameter::Ptr declareParameterSet(const std::string& name, const ParameterDescription& description, const std::vector< std::pair<std::string, T> >& set)
     {
-        SetParameter::Ptr result(new SetParameter(name));
+        SetParameter::Ptr result(new SetParameter(name, description));
         result->setSet(set);
         result->def_ = set.begin()->second;
         result->set<T>(set.begin()->second);
 
         return result;
     }
+    template <typename T>
+    static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
+    {
+        return declareParameterSet(name, ParameterDescription(), set);
+    }
+
 
     template <typename T>
     static Parameter::Ptr declare(const std::string& name, T min, T max, T def, T step)
     {
-        return declareRange(name, min, max, def, step);
+        return declareRange(name, ParameterDescription(), min, max, def, step);
     }
 
     static Parameter::Ptr declare(const std::string& name, bool def) __attribute__ ((deprecated));
@@ -132,7 +375,7 @@ public:
     template <typename T>
     static Parameter::Ptr declare(const std::string& name, const T& def)
     {
-        return declareValue(name, def);
+        return declareValue(name, ParameterDescription(), def);
     }
 
     static Parameter::Ptr declare(const std::string& name, const char* def)  __attribute__ ((deprecated));

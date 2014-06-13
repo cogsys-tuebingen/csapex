@@ -27,7 +27,7 @@ public:
 
 public:
     TriggerParameter();
-    explicit TriggerParameter(const std::string& name);
+    explicit TriggerParameter(const std::string& name, const ParameterDescription& description);
     virtual ~TriggerParameter();
 
     virtual int ID() const { return 0x007; }

@@ -4,12 +4,12 @@
 using namespace param;
 
 TriggerParameter::TriggerParameter()
-    : Parameter("noname")
+    : Parameter("noname", ParameterDescription())
 {
 }
 
-TriggerParameter::TriggerParameter(const std::string &name)
-    : Parameter(name)
+TriggerParameter::TriggerParameter(const std::string &name, const ParameterDescription& description)
+    : Parameter(name, description)
 {
 }
 

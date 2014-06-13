@@ -3,11 +3,10 @@
 
 using namespace param;
 
-Parameter::Parameter(const std::string &name)
-    : name_(name), enabled_(true), interactive_(false)
+Parameter::Parameter(const std::string &name, const ParameterDescription &description)
+    : name_(name), description_(description), enabled_(true), interactive_(false)
 {
 }
-
 
 Parameter::~Parameter()
 {
@@ -72,6 +71,11 @@ std::string Parameter::toString() const
     return std::string("[") + name() + ": " + toStringImpl() + "]";
 }
 
+const ParameterDescription& Parameter::description() const
+{
+    return description_;
+}
+
 std::string Parameter::toStringImpl() const
 {
     throw std::logic_error("not implemented");
@@ -110,6 +114,7 @@ void Parameter::setValueFrom(const Parameter &other)
 void Parameter::clone(const Parameter &other)
 {
     name_ = other.name_;
+    description_ = other.description_;
     interactive_ = other.interactive_;
     enabled_ = other.enabled_;
     doClone(other);

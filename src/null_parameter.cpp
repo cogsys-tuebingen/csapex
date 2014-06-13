@@ -4,13 +4,13 @@
 using namespace param;
 
 NullParameter::NullParameter()
-    : Parameter("null")
+    : Parameter("null", ParameterDescription())
 {
 }
 
 
-NullParameter::NullParameter(const std::string &name)
-    : Parameter(name)
+NullParameter::NullParameter(const std::string &name, const ParameterDescription& description)
+    : Parameter(name, description)
 {
 }
 

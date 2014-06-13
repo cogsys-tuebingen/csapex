@@ -23,7 +23,7 @@ public:
 
 public:
     NullParameter();
-    explicit NullParameter(const std::string& name);
+    explicit NullParameter(const std::string& name, const ParameterDescription &description);
     virtual ~NullParameter();
 
     virtual int ID() const { return 0x000; }

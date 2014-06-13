@@ -17,7 +17,7 @@ Parameter& ParameterMap::operator [] (const std::string &name)
         assert(it->second->name() == name);
         return *it->second;
     } else {
-        map_.insert(std::make_pair(name, Parameter::Ptr(new RangeParameter(name))));
+        map_.insert(std::make_pair(name, Parameter::Ptr(new RangeParameter(name, ParameterDescription()))));
         return operator [](name);
     }
 

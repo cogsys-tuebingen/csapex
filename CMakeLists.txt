@@ -23,6 +23,7 @@ include_directories(
 add_library(utils_param
     src/io.cpp
     src/parameter.cpp
+    src/parameter_description.cpp
 
     src/range_parameter.cpp
     src/interval_parameter.cpp

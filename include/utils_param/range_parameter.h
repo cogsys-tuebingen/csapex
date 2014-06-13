@@ -46,14 +46,14 @@ public:
 
     friend void operator >> (const YAML::Node& node, param::RangeParameter::Ptr& value) {
         if(!value) {
-            value.reset(new RangeParameter("loading"));
+            value.reset(new RangeParameter("loading", ParameterDescription("")));
         }
         value->doRead(node);
     }
 
 public:
     RangeParameter();
-    explicit RangeParameter(const std::string& name);
+    explicit RangeParameter(const std::string& name, const ParameterDescription &description);
     virtual ~RangeParameter();
 
     virtual int ID() const { return 0x005; }

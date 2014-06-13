@@ -32,14 +32,14 @@ public:
 
     friend void operator >> (const YAML::Node& node, param::BitSetParameter::Ptr& value) {
         if(!value) {
-            value.reset(new BitSetParameter("loading"));
+            value.reset(new BitSetParameter("loading", ParameterDescription("")));
         }
         value->doRead(node);
     }
 
 public:
     BitSetParameter();
-    explicit BitSetParameter(const std::string& name);
+    explicit BitSetParameter(const std::string& name, const ParameterDescription& description);
     virtual ~BitSetParameter();
 
     virtual int ID() const { return 0x001; }

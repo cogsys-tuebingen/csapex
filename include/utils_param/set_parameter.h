@@ -35,14 +35,14 @@ public:
 
     friend void operator >> (const YAML::Node& node, param::SetParameter::Ptr& value) {
         if(!value) {
-            value.reset(new SetParameter("loading"));
+            value.reset(new SetParameter("loading", ParameterDescription("")));
         }
         value->doRead(node);
     }
 
 public:
     SetParameter();
-    explicit SetParameter(const std::string& name);
+    explicit SetParameter(const std::string& name, const ParameterDescription &description);
     virtual ~SetParameter();
 
     virtual int ID() const { return 0x006; }

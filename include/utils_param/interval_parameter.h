@@ -47,14 +47,14 @@ public:
 
     friend void operator >> (const YAML::Node& node, param::IntervalParameter::Ptr& value) {
         if(!value) {
-            value.reset(new IntervalParameter("loading"));
+            value.reset(new IntervalParameter("loading", ParameterDescription("")));
         }
         value->doRead(node);
     }
 
 public:
     IntervalParameter();
-    explicit IntervalParameter(const std::string& name);
+    explicit IntervalParameter(const std::string& name, const ParameterDescription &description);
     virtual ~IntervalParameter();
 
     virtual int ID() const { return 0x003; }

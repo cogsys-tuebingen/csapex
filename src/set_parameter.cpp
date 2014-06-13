@@ -4,13 +4,13 @@
 using namespace param;
 
 SetParameter::SetParameter()
-    : Parameter("noname")
+    : Parameter("noname", ParameterDescription())
 {
 }
 
 
-SetParameter::SetParameter(const std::string &name)
-    : Parameter(name)
+SetParameter::SetParameter(const std::string &name, const ParameterDescription &description)
+    : Parameter(name, description)
 {
 }
 

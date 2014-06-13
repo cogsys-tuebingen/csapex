@@ -1,6 +1,9 @@
 #ifndef PARAMETER_H
 #define PARAMETER_H
 
+/// COMPONENT
+#include <utils_param/parameter_description.h>
+
 /// SYSTEM
 #include <stdexcept>
 #include <utils_yaml/yamlplus.h>
@@ -109,6 +112,8 @@ public:
     virtual const std::type_info &type() const;
     std::string toString() const;
 
+    const ParameterDescription& description() const;
+
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
@@ -127,7 +132,7 @@ protected:
     void throwTypeError(const std::type_info& a, const std::type_info& b, const std::string& prefix) const;
 
 protected:
-    explicit Parameter(const std::string& name);
+    explicit Parameter(const std::string& name, const ParameterDescription& description);
 
     virtual boost::any get_unsafe() const;
     virtual void set_unsafe(const boost::any& v);
@@ -142,6 +147,7 @@ protected:
 
 protected:
     std::string name_;
+    ParameterDescription description_;
     bool enabled_;
     bool interactive_;
 
