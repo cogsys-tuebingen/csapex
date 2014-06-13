@@ -4,21 +4,18 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/tag.h>
-#include <csapex/model/memento.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/unique.h>
-#include <csapex/model/message.h>
 #include <csapex/utility/timable.h>
 #include <csapex/utility/stream_relay.h>
 #include <csapex/model/parameterizable.h>
 
 /// PROJECT
-#include <utils_param/parameter.h>
+#include <utils_param/param_fwd.h>
 
 /// SYSTEM
 #include <QObject>
 #include <QIcon>
-#include <QTreeWidgetItem>
 #include <boost/utility.hpp>
 
 namespace csapex {
@@ -32,6 +29,7 @@ class Node : public QObject, public ErrorState, public Unique, public Parameteri
     friend class NodeWorker;
     friend class NodeConstructor;
     friend class NodeModifier;
+    friend class NodeStatistics;
     friend class DefaultNodeAdapter;
     friend class NodeBox;
     friend class GraphIO;
@@ -129,7 +127,6 @@ public:
 
     CommandPtr removeAllConnectionsCmd();
 
-    QTreeWidgetItem* createDebugInformation() const;
 
     ///
     /// IO
@@ -141,7 +138,7 @@ public:
     bool canReceive();
 
 public:
-    virtual Memento::Ptr getState() const;
+    virtual MementoPtr getState() const;
 
 protected:
     virtual void setState(Memento::Ptr memento);
@@ -157,8 +154,6 @@ private:
 
     void registerInput(ConnectorIn* in);
     void registerOutput(ConnectorOut* out);
-
-    QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
 
 public Q_SLOTS:
     virtual void setup() = 0;

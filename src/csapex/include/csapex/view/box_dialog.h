@@ -4,7 +4,6 @@
 /// SYSTEM
 #include <QDialog>
 #include <QLineEdit>
-#include <QStyledItemDelegate>
 
 class QAbstractItemModel;
 class QListView;
@@ -13,26 +12,6 @@ class QModelIndex;
 
 namespace csapex
 {
-class HTMLDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
-
-public:
-    HTMLDelegate(int line_height);
-
-public Q_SLOTS:
-    void setKeyWords (const QString& words);
-
-protected:
-    void paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
-
-    QSize sizeHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const;
-
-    int line_height;
-    QStringList key_words;
-};
-
-
 class CompleteLineEdit : public QLineEdit {
 
     Q_OBJECT

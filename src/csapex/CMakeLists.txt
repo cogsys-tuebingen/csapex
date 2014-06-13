@@ -119,6 +119,7 @@ set(SRC_APP
     src/model/message_provider.cpp
     src/model/node_state.cpp
     src/model/node_worker.cpp
+    src/model/node_statistics.cpp
     src/model/parameterizable.cpp
     src/model/node_filter_proxy_model.cpp
     src/model/unique.cpp
@@ -136,6 +137,7 @@ set(SRC_APP
     src/utility/bash_parser.cpp
     src/utility/buffer.cpp
     src/utility/movable_graphics_proxy_widget.cpp
+    src/utility/html_delegate.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp

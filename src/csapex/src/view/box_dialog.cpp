@@ -4,90 +4,15 @@
 /// COMPONENT
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/node_filter_proxy_model.h>
+#include <csapex/utility/html_delegate.h>
 
 /// SYSTEM
-#include <QIcon>
-#include <QVBoxLayout>
-#include <QFormLayout>
-#include <QDialogButtonBox>
 #include <QLabel>
-#include <QAbstractItemModel>
 #include <QKeyEvent>
 #include <QtGui/QListView>
-#include <QtGui/QStringListModel>
-#include <QDebug>
-#include <QPainter>
-#include <QTextDocument>
 
 using namespace csapex;
 
-HTMLDelegate::HTMLDelegate(int line_height)
-    : line_height(line_height)
-{
-}
-
-void HTMLDelegate::setKeyWords (const QString& words) {
-    key_words = words.split(QRegExp("(\\s+|::)"));
-}
-
-void HTMLDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const {
-    QStyleOptionViewItemV4 options = option;
-    initStyleOption(&options, index);
-
-    painter->save();
-
-    QString descr = index.data(Qt::UserRole + 1).toString();
-    QString name = index.data(Qt::UserRole + 2).toString();
-    QStringList tags = index.data(Qt::UserRole + 3).toStringList();
-
-    if(tags.empty()) {
-        return;
-    }
-
-    QString tag = tags.at(0);
-    Q_FOREACH(const QString& t, tags) {
-        Q_FOREACH(const QString& s, key_words) {
-            if(s.length() > 0) {
-                if(t.contains(s, Qt::CaseInsensitive)) {
-                    tag = t;
-                }
-            }
-        }
-    }
-
-    Q_FOREACH(const QString& s, key_words) {
-        if(s.length() > 0) {
-            descr.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");
-            name.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");
-            tag.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");
-        }
-    }
-
-    QTextDocument doc;
-    QString html = QString("<small>") + tag + " :: </small>" + name + "<br /><small><i>" + descr + "</i></small>";
-
-    doc.setHtml(html);
-
-    options.text = "";
-    options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
-
-    painter->translate(options.rect.left() + 18, options.rect.top());
-    QRect clip(0, 0, options.rect.width(), options.rect.height());
-    doc.drawContents(painter, clip);
-
-    painter->restore();
-}
-
-
-QSize HTMLDelegate::sizeHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const {
-    QStyleOptionViewItemV4 options = option;
-    initStyleOption(&options, index);
-
-    QTextDocument doc;
-    doc.setHtml(options.text);
-    doc.setTextWidth(options.rect.width());
-    return QSize(doc.idealWidth(), 2 * line_height);
-}
 
 CompleteLineEdit::CompleteLineEdit(QWidget *parent)
     : QLineEdit(parent)
@@ -97,7 +22,7 @@ CompleteLineEdit::CompleteLineEdit(QWidget *parent)
     list_view = new QListView(this);
     list_view->setWindowFlags(Qt::ToolTip);
 
-    HTMLDelegate* delegate = new HTMLDelegate(line_height);
+    HTMLBoxDelegate* delegate = new HTMLBoxDelegate(line_height);
     list_view->setItemDelegate(delegate);
 
     connect(list_view, SIGNAL(clicked(const QModelIndex&)), this, SLOT(completeText(const QModelIndex&)));

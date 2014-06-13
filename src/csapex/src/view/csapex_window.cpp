@@ -19,6 +19,7 @@
 #include <csapex/view/widget_controller.h>
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/designer.h>
+#include <csapex/model/node_statistics.h>
 
 /// SYSTEM
 #include <iostream>
@@ -137,7 +138,7 @@ void CsApexWindow::updateDebugInfo()
         Node* node = box->getNode();
         QObject::connect(node, SIGNAL(stateChanged()), this, SLOT(updateDebugInfo()));
         QObject::connect(node, SIGNAL(modelChanged()), this, SLOT(updateDebugInfo()));
-        ui->box_info->addTopLevelItem(node->createDebugInformation());
+        ui->box_info->addTopLevelItem(NodeStatistics(node).createDebugInformation());
     }
 
     QTreeWidgetItemIterator it(ui->box_info);

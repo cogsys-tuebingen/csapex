@@ -21,6 +21,7 @@ class CorePlugin;
 FWD(NodeBox);
 FWD(Group);
 FWD(NodeConstructor);
+FWD(NodeStatistics);
 
 FWD(Port);
 FWD(Connectable);
