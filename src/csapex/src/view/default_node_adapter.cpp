@@ -201,6 +201,24 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
     setupAdaptiveUi();
 }
 
+namespace {
+void setTooltip(QLayout* l, const QString& tooltip)
+{
+    for(std::size_t i = 0; i < l->count(); ++i) {
+        QLayoutItem* o = l->itemAt(i);
+        QWidgetItem* w = dynamic_cast<QWidgetItem*>(o);
+        if(w) {
+            w->widget()->setToolTip(tooltip);
+        } else {
+            QLayout* l = dynamic_cast<QLayout*>(o);
+            if(l) {
+                setTooltip(l, tooltip);
+            }
+        }
+    }
+}
+}
+
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
     static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
@@ -329,6 +347,11 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             QObject::connect(param_out, SIGNAL(connectionDone()), call_trigger, SLOT(call()));
 
             widget_ctrl_->insertPort(current_layout_, port);
+        }
+
+        QString tooltip = QString::fromStdString(p->description().toString());
+        if(!tooltip.isEmpty()){
+            setTooltip(current_layout_, tooltip);
         }
 
         // put into layout
