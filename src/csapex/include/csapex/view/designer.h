@@ -44,6 +44,7 @@ Q_SIGNALS:
     void gridEnabled(bool);
     void schematicsEnabled(bool);
     void gridLockEnabled(bool);
+    void helpRequest(NodeBox*);
 
 public Q_SLOTS:
     void addBox(NodeBox* box);

@@ -128,6 +128,8 @@ void Designer::reset()
 
 void Designer::addBox(NodeBox *box)
 {
+    QObject::connect(box, SIGNAL(helpRequest(NodeBox*)), this, SIGNAL(helpRequest(NodeBox*)));
+
     designer_view_->addBoxEvent(box);
 }
 

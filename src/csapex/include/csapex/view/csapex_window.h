@@ -45,6 +45,7 @@ private Q_SLOTS:
     void init();
     void loadStyleSheet(const QString& path);
     void updateDeleteAction();
+    void showHelp(NodeBox* box);
 
 public Q_SLOTS:
     void save();
@@ -69,6 +70,7 @@ public Q_SLOTS:
 
     void updateDebugInfo();
     void updateUndoInfo();
+    void updateNodeInfo();
 
     void about();
 

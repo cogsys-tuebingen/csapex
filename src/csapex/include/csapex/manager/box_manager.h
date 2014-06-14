@@ -42,6 +42,7 @@ public:
 
     void startPlacingBox(QWidget *parent, const std::string& type, WidgetController *widget_ctrl, const QPoint &offset = QPoint(0,0));
 
+    NodeConstructorPtr getConstructor(const std::string& type);
     NodePtr makeNode(const std::string& type, const UUID& uuid);
     NodeBox* makeBox(NodePtr node, WidgetController *widget_ctrl);
 

@@ -83,11 +83,14 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
+    QObject::connect(designer_, SIGNAL(helpRequest(NodeBox*)), this, SLOT(showHelp(NodeBox*)));
 
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
 
     QObject::connect(ui->actionAbout_CS_APEX, SIGNAL(triggered()), this, SLOT(about()));
+
+    QObject::connect(ui->node_info_tree, SIGNAL(itemSelectionChanged()), this, SLOT(updateNodeInfo()));
 
     QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
     QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
@@ -125,6 +128,35 @@ void CsApexWindow::updateDeleteAction()
     ui->actionDelete_Selected->setEnabled(designer_->hasSelection());
 }
 
+void CsApexWindow::showHelp(NodeBox *box)
+{
+    if(ui->HelpCenter->isHidden()) {
+        ui->HelpCenter->show();
+    }
+
+
+    std::string node_type = box->getNode()->getType();
+
+    QTreeWidgetItemIterator it(ui->node_info_tree);
+    while (*it) {
+        QTreeWidgetItem* item = *it;
+
+        std::string type = item->data(0, Qt::UserRole + 1).toString().toStdString();
+
+        if(type == node_type) {
+            ui->node_info_tree->clearSelection();
+            ui->node_group->setChecked(false);
+            QTreeWidgetItem* tmp = *it;
+            tmp->setSelected(true);
+            do {
+                ui->node_info_tree->expandItem(tmp);
+                tmp = tmp->parent();
+            }  while(tmp);
+            return;
+        }
+        ++it;
+    }
+}
 
 void CsApexWindow::updateDebugInfo()
 {
@@ -169,6 +201,45 @@ void CsApexWindow::updateDebugInfo()
     }
 }
 
+void CsApexWindow::updateNodeInfo()
+{
+    std::stringstream ss;
+
+    Q_FOREACH(QTreeWidgetItem* item, ui->node_info_tree->selectedItems()) {
+        QString type = item->data(0, Qt::UserRole + 1).toString();
+        if(!type.isEmpty()) {
+            NodeConstructor::Ptr n = BoxManager::instance().getConstructor(type.toStdString());
+
+            QImage image = n->getIcon().pixmap(QSize(16,16)).toImage();
+            QUrl uri ( QString::fromStdString(n->getType()));
+            ui->node_info_text->document()->addResource( QTextDocument::ImageResource, uri, QVariant ( image ) );
+
+            ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << n->getType() << "</h1>";
+            ss << "<p>Tags: <i>";
+            int i = 0;
+            Q_FOREACH(const Tag& tag,  n->getTags()) {
+                if(i++ > 0) {
+                    ss << ", ";
+                }
+                ss << tag.getName();
+            }
+            ss << "</p>";
+            ss << "<h3>" << n->getDescription() << "</h3>";
+
+            ss << "<hr />";
+            ss << "<h1>Parameters:</h1>";
+
+            Q_FOREACH(const param::Parameter::Ptr& p, n->getParameters()) {
+                ss << "<h2>" << p->name() << "</h2>";
+                ss << "<p>" << p->description().toString() << "</p>";
+                ss << "<p>" << p->toString() << "</p>";
+            }
+        }
+    }
+
+
+    ui->node_info_text->setHtml(QString::fromStdString(ss.str()));
+}
 
 void CsApexWindow::updateUndoInfo()
 {
@@ -208,8 +279,14 @@ void CsApexWindow::reloadBoxMenues()
     } else {
         ui->boxes->setLayout(new QVBoxLayout);
     }
+    if(ui->node_info_tree->layout()) {
+        QtHelper::clearLayout(ui->node_info_tree->layout());
+    } else {
+        ui->node_info_tree->setLayout(new QVBoxLayout);
+    }
 
     BoxManager::instance().insertAvailableNodeTypes(ui->boxes);
+    BoxManager::instance().insertAvailableNodeTypes(ui->node_info_tree);
 }
 
 
@@ -238,7 +315,7 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     style_sheet_watcher_->addPath(path);
 
     QObject::connect(style_sheet_watcher_, SIGNAL(fileChanged(const QString&)),
-             this, SLOT(loadStyleSheet(const QString&)));
+                     this, SLOT(loadStyleSheet(const QString&)));
 }
 
 void CsApexWindow::loadStyleSheet()
@@ -335,7 +412,7 @@ void CsApexWindow::init()
     init_ = true;
 
     reloadBoxMenues();
-//    designer_->show();
+    //    designer_->show();
 
     Settings& settings = core_.getSettings();
     if(settings.knows("uistate")) {

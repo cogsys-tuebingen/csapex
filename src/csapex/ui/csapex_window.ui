@@ -246,7 +246,7 @@
      <item>
       <widget class="QToolBox" name="help_toolbox">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="ui">
         <property name="geometry">
@@ -254,7 +254,7 @@
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>250</height>
+          <height>302</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -326,6 +326,70 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="node_page">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>274</width>
+          <height>302</height>
+         </rect>
+        </property>
+        <attribute name="icon">
+         <iconset resource="../res/csapex_resources.qrc">
+          <normaloff>:/plugin.png</normaloff>:/plugin.png</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>Node Information</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <widget class="QGroupBox" name="node_group">
+           <property name="title">
+            <string>List of all the node types</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>9</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QTreeWidget" name="node_info_tree">
+              <property name="headerHidden">
+               <bool>true</bool>
+              </property>
+              <column>
+               <property name="text">
+                <string>Node</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextBrowser" name="node_info_text"/>
          </item>
         </layout>
        </widget>
@@ -580,6 +644,22 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>900</x>
      <y>638</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>node_group</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>node_info_tree</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>432</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>149</x>
+     <y>444</y>
     </hint>
    </hints>
   </connection>

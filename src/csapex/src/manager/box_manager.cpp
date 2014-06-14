@@ -46,9 +46,9 @@ void BoxManager::stop()
 {
     delete node_manager_;
     node_manager_ = NULL;
-
+    
     node_adapter_builders_.clear();
-
+    
     delete node_adapter_manager_;
     node_adapter_manager_ = NULL;
 }
@@ -69,7 +69,7 @@ void BoxManager::reload()
     node_manager_->reload();
     node_adapter_manager_->reload();
     rebuildPrototypes();
-
+    
     rebuildMap();
 }
 
@@ -77,7 +77,7 @@ void BoxManager::rebuildPrototypes()
 {
     available_elements_prototypes.clear();
     node_adapter_builders_.clear();
-
+    
     typedef std::pair<std::string, DefaultConstructor<Node> > NODE_PAIR;
     Q_FOREACH(const NODE_PAIR& p, node_manager_->availableClasses()) {
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
@@ -86,7 +86,7 @@ void BoxManager::rebuildPrototypes()
                                                      p.second));
         register_box_type(constructor, true);
     }
-
+    
     typedef std::pair<std::string, DefaultConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
     Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
         NodeAdapterBuilder::Ptr builder = p.second.construct();
@@ -98,18 +98,18 @@ void BoxManager::rebuildMap()
 {
     Tag::createIfNotExists("General");
     Tag general = Tag::get("General");
-
+    
     tag_map_.clear();
     tags_.clear();
-
+    
     tags_.insert(general);
-
+    
     for(std::vector<NodeConstructor::Ptr>::iterator
         it = available_elements_prototypes.begin();
         it != available_elements_prototypes.end();) {
-
+        
         const NodeConstructor::Ptr& p = *it;
-
+        
         try {
             bool has_tag = false;
             Q_FOREACH(const Tag& tag, p->getTags()) {
@@ -117,23 +117,23 @@ void BoxManager::rebuildMap()
                 tags_.insert(tag);
                 has_tag = true;
             }
-
+            
             if(!has_tag) {
                 tag_map_[general].push_back(p);
             }
-
+            
             ++it;
-
+            
         } catch(const NodeConstructor::NodeConstructionException& e) {
             std::cerr << "warning: cannot load node: " << e.what() << std::endl;
             it = available_elements_prototypes.erase(it);
         }
     }
-
+    
     Q_FOREACH(const Tag& cat, tags_) {
         std::sort(tag_map_[cat].begin(), tag_map_[cat].end(), compare);
     }
-
+    
     dirty_ = false;
 }
 
@@ -142,12 +142,12 @@ void BoxManager::ensureLoaded()
     if(!node_manager_->pluginsLoaded()) {
         node_manager_->reload();
         node_adapter_manager_->reload();
-
+        
         rebuildPrototypes();
-
+        
         dirty_ = true;
     }
-
+    
     if(dirty_) {
         rebuildMap();
     }
@@ -156,11 +156,11 @@ void BoxManager::ensureLoaded()
 void BoxManager::insertAvailableNodeTypes(QMenu* menu)
 {
     ensureLoaded();
-
+    
     Q_FOREACH(const Tag& tag, tags_) {
         QMenu* submenu = new QMenu(tag.getName().c_str());
         menu->addMenu(submenu);
-
+        
         Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
             QIcon icon = proxy->getIcon();
             QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
@@ -173,34 +173,34 @@ void BoxManager::insertAvailableNodeTypes(QMenu* menu)
             submenu->addAction(action);
         }
     }
-
+    
     menu->menuAction()->setIconVisibleInMenu(true);
-
+    
 }
 
 void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
 {
     ensureLoaded();
-
+    
     tree->setDragEnabled(true);
-
+    
     Q_FOREACH(const Tag& tag, tags_) {
-
+        
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
         submenu->setText(0, tag.getName().c_str());
         tree->addTopLevelItem(submenu);
-
+        
         Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
             QIcon icon = proxy->getIcon();
             std::string name = UUID::stripNamespace(proxy->getType());
-
+            
             QTreeWidgetItem* child = new QTreeWidgetItem;
             child->setToolTip(0, (proxy->getType() + ": " + proxy->getDescription()).c_str());
             child->setIcon(0, icon);
             child->setText(0, name.c_str());
             child->setData(0, Qt::UserRole, NodeBox::MIME);
             child->setData(0, Qt::UserRole + 1, proxy->getType().c_str());
-
+            
             submenu->addChild(child);
         }
     }
@@ -210,35 +210,35 @@ void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
 QAbstractItemModel* BoxManager::listAvailableNodeTypes()
 {
     ensureLoaded();
-
+    
     QStandardItemModel* model = new QStandardItemModel;//(types, 1);
-
+    
     Q_FOREACH(const NodeConstructor::Ptr& proxy, available_elements_prototypes) {
         QString name = QString::fromStdString(UUID::stripNamespace(proxy->getType()));
         QString descr(proxy->getDescription().c_str());
         QString type(proxy->getType().c_str());
-
+        
         QStringList tags;
         Q_FOREACH(const Tag& tag, proxy->getTags()) {
             tags << tag.getName().c_str();
         }
-
+        
         QStandardItem* item = new QStandardItem(proxy->getIcon(), type);
         item->setData(type, Qt::UserRole);
         item->setData(descr, Qt::UserRole + 1);
         item->setData(name, Qt::UserRole + 2);
         item->setData(tags, Qt::UserRole + 3);
-
+        
         model->appendRow(item);
     }
-
+    
     return model;
 }
 void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_signals)
 {
     available_elements_prototypes.push_back(provider);
     dirty_ = true;
-
+    
     if(!suppress_signals) {
         new_box_type();
     }
@@ -248,19 +248,19 @@ namespace {
 QPixmap createPixmap(const std::string& label, const NodePtr& content, const QString& stylesheet, WidgetController* widget_ctrl)
 {
     NodeBox::Ptr object;
-
+    
     if(BoxManager::typeIsTemplate(content->getType())) {
         throw std::runtime_error("Groups are not implemented");
         //        object.reset(new csapex::Group(""));
     } else {
         object.reset(new NodeBox(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
     }
-
+    
     object->setStyleSheet(stylesheet);
     object->construct();
     object->setObjectName(content->getType().c_str());
     object->setLabel(label);
-
+    
     return QPixmap::grabWidget(object.get());
 }
 }
@@ -283,14 +283,14 @@ bool BoxManager::isValidType(const std::string &type) const
             return true;
         }
     }
-
+    
     return false;
 }
 
 void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, const QPoint& offset)
 {
     bool is_template = BoxManager::typeIsTemplate(type);
-
+    
     Node::Ptr content;
     if(is_template) {
         //        content.reset(new Node(""));
@@ -301,11 +301,11 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, Widge
             }
         }
     }
-
+    
     if(content) {
         QDrag* drag = new QDrag(parent);
         QMimeData* mimeData = new QMimeData;
-
+        
         if(is_template) {
             //            mimeData->setData(Template::MIME, "");
         }
@@ -313,11 +313,11 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, Widge
         mimeData->setProperty("ox", offset.x());
         mimeData->setProperty("oy", offset.y());
         drag->setMimeData(mimeData);
-
+        
         drag->setPixmap(createPixmap(type, content, style_sheet_, widget_ctrl));
         drag->setHotSpot(-offset);
         drag->exec();
-
+        
     } else {
         std::cerr << "unknown box type '" << type << "'!" << std::endl;
     }
@@ -326,33 +326,26 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, Widge
 Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
     assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
-
+    
     Node::Ptr bo = content->makeContent(uuid);
-
+    
     return bo;
 }
 
 Node::Ptr BoxManager::makeTemplateNode(const UUID& /*uuid*/, const std::string& type)
 {
     assert(BoxManager::typeIsTemplate(type) || type == "::group");
-
+    
     //    csapex::Group::Ptr group(new csapex::Group(type, uuid));
-
+    
     //    group->setObjectName(uuid.c_str());
-
+    
     //    return group;
     return Node::Ptr((Node*) NULL);
 }
 
-Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
+NodeConstructor::Ptr BoxManager::getConstructor(const std::string &target_type)
 {
-    assert(!uuid.empty());
-
-
-    if(BoxManager::typeIsTemplate(target_type) || target_type == "::group") {
-        return makeTemplateNode(uuid, target_type);
-    }
-
     std::string type = target_type;
     if(type.find_first_of(" ") != type.npos) {
         std::cout << "warning: type '" << type << "' contains spaces, stripping them!" << std::endl;
@@ -363,7 +356,7 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 
     BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
-            return makeSingleNode(p, uuid);
+            return p;
         }
     }
 
@@ -376,22 +369,41 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 
         if(p_type_wo_ns == type_wo_ns) {
             std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
-            return makeSingleNode(p, uuid);
+            return p;
         }
     }
 
-    std::cerr << "error: cannot make box, type '" << type << "' is unknown\navailable:\n";
-    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
-        std::cerr << p->getType() << '\n';
+    return NodeConstructorNullPtr;
+}
+
+Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
+{
+    assert(!uuid.empty());
+
+    
+    if(BoxManager::typeIsTemplate(target_type) || target_type == "::group") {
+        return makeTemplateNode(uuid, target_type);
     }
-    std::cerr << std::endl;
-    return NodeNullPtr;
+
+
+    NodeConstructorPtr p = getConstructor(target_type);
+    if(p) {
+        return makeSingleNode(p, uuid);
+
+    } else {
+        std::cerr << "error: cannot make box, type '" << target_type << "' is unknown\navailable:\n";
+        BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
+            std::cerr << p->getType() << '\n';
+        }
+        std::cerr << std::endl;
+        return NodeNullPtr;
+    }
 }
 
 NodeBox* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
 {
     std::string type = node->getType();
-
+    
     NodeBox* box;
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
         box = new NodeBox(node, node_adapter_builders_[type]->build(node, widget_ctrl));
@@ -409,6 +421,6 @@ NodeConstructor::Ptr BoxManager::getSelector(const std::string &type)
             return p;
         }
     }
-
+    
     return NodeConstructorNullPtr;
 }

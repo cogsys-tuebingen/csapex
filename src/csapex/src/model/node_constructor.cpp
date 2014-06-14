@@ -45,7 +45,9 @@ void NodeConstructor::load() const
         if(!settings_.get<bool>("headless")) {
             icon = prototype->getIcon();
         }
-        cat = prototype->getTags();
+        tags_ = prototype->getTags();
+        prototype->setupParameters();
+        params_ = prototype->getParameters();
 
         is_loaded = true;
 
@@ -60,7 +62,7 @@ std::vector<Tag> NodeConstructor::getTags() const
     if(!is_loaded) {
         load();
     }
-    return cat;
+    return tags_;
 }
 
 QIcon NodeConstructor::getIcon() const
@@ -71,6 +73,11 @@ QIcon NodeConstructor::getIcon() const
 std::string NodeConstructor::getDescription() const
 {
     return descr_;
+}
+
+std::vector<param::ParameterPtr> NodeConstructor::getParameters() const
+{
+    return params_;
 }
 
 Node::Ptr NodeConstructor::makePrototypeContent() const

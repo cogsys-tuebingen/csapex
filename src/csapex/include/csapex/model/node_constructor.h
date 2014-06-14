@@ -5,6 +5,7 @@
 #include <utils_plugin/constructor.hpp>
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <utils_param/param_fwd.h>
 
 /// SYSTEM
 #include <typeinfo>
@@ -44,6 +45,7 @@ public:
     std::vector<Tag> getTags() const;
     QIcon getIcon() const;
     std::string getDescription() const;
+    std::vector<param::ParameterPtr> getParameters() const;
 
     virtual NodePtr makePrototypeContent() const;
     virtual NodePtr makeContent(const UUID& uuid) const;
@@ -60,7 +62,8 @@ protected:
 
     mutable bool is_loaded;
     mutable QIcon icon;
-    mutable std::vector<Tag> cat;
+    mutable std::vector<Tag> tags_;
+    mutable std::vector<param::ParameterPtr> params_;
 
     Make c;
 };

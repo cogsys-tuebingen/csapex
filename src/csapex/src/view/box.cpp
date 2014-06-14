@@ -206,6 +206,12 @@ void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<vo
     handler[prof] = boost::bind(&NodeBox::showProfiling, this);
     menu->addAction(prof);
 
+    QAction* info = new QAction("get information", menu);
+    info->setIcon(QIcon(":/help.png"));
+    info->setIconVisibleInMenu(true);
+    handler[info] = boost::bind(&NodeBox::getInformation, this);
+    menu->addAction(info);
+
     menu->addSeparator();
 
     QAction* del = new QAction("delete", menu);
@@ -415,6 +421,11 @@ void NodeBox::stop()
 void NodeBox::deleteBox()
 {
     node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
+}
+
+void NodeBox::getInformation()
+{
+    Q_EMIT helpRequest(this);
 }
 
 void NodeBox::refreshStylesheet()

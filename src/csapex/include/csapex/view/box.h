@@ -104,6 +104,7 @@ public Q_SLOTS:
     void setupUiAgain();
 
     void deleteBox();
+    void getInformation();
     void minimizeBox(bool minimize);
     void enableContent(bool enable);
     void refreshStylesheet();
@@ -131,6 +132,7 @@ Q_SIGNALS:
     void minimized(bool);
 
     void renameRequest(NodeBox*);
+    void helpRequest(NodeBox*);
 
     void moveRequest(NodeBox*, QPoint);
     void moved(NodeBox*, int dx, int dy);
