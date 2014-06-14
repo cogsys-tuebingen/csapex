@@ -70,6 +70,8 @@ public Q_SLOTS:
     void updateDebugInfo();
     void updateUndoInfo();
 
+    void about();
+
 Q_SIGNALS:
     void statusChanged(const QString& status);
 

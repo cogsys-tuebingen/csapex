@@ -87,6 +87,8 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
 
+    QObject::connect(ui->actionAbout_CS_APEX, SIGNAL(triggered()), this, SLOT(about()));
+
     QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
     QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
@@ -177,6 +179,26 @@ void CsApexWindow::updateUndoInfo()
 
     ui->undo->expandAll();
     ui->redo->expandAll();
+}
+
+void CsApexWindow::about()
+{
+    std::stringstream ss;
+    ss << "<h1>cs::APEX 0.9</h1>";
+    ss << "<p>Based on QT " << QT_VERSION_STR ;
+#ifdef __GNUC__
+    ss << " (GCC " << __VERSION__ << ")";
+#endif
+    ss << "</p>";
+    ss << "<p>Built on " << __DATE__ << " at " << __TIME__ << "</p>";
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+    ss << "<p>From revision " << TOSTRING(GIT_COMMIT_HASH) << " (" << TOSTRING(GIT_BRANCH) << ")</p>";
+    ss << "<p>The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</p>";
+
+    QMessageBox::about(this, "About cs::APEX", ss.str().c_str());
 }
 
 void CsApexWindow::reloadBoxMenues()

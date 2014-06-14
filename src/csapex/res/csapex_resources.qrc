@@ -26,5 +26,7 @@
         <file>save_as.png</file>
         <file>stop_profiling.png</file>
         <file>schema.png</file>
+        <file>help.png</file>
+        <file>keyboard.png</file>
     </qresource>
 </RCC>
