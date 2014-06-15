@@ -62,7 +62,7 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
                 e->accept();
 
                 std::string type = v[Qt::UserRole+1].toString().toStdString();
-                BoxManager::instance().startPlacingBox(src, type, widget_ctrl_.get(), QPoint(0,0));
+                BoxManager::instance().startPlacingBox(src, type, widget_ctrl_.get(), NodeStateNullPtr, QPoint(0,0));
             }
         }
     }
@@ -152,7 +152,15 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e)
 
 
         UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
-        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, NodeStateNullPtr)));
+
+        NodeStatePtr state;
+
+        if(!e->mimeData()->property("state").isNull()) {
+            NodeStatePtr* state_ptr = (NodeStatePtr *) e->mimeData()->property("state").value<void *>();
+            state = *state_ptr;
+        }
+
+        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, state)));
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         e->ignore();

@@ -355,7 +355,7 @@ void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
 
     if(selectedItem) {
         std::string selected = selectedItem->data().toString().toStdString();
-        BoxManager::instance().startPlacingBox(this, selected, widget_ctrl_.get());
+        BoxManager::instance().startPlacingBox(this, selected, widget_ctrl_.get(), NodeStateNullPtr);
     }
 }
 

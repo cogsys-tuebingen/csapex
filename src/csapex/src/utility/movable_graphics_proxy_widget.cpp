@@ -35,7 +35,7 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
     bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
 
     if(shift) {
-        BoxManager::instance().startPlacingBox(view_, box_->getNode()->getType(), widget_ctrl_);
+        BoxManager::instance().startPlacingBox(view_, box_->getNode()->getType(), widget_ctrl_, box_->getNode()->getNodeState());
         return;
     }
 

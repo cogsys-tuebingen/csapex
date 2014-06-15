@@ -249,13 +249,8 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
 {
     NodeBox::Ptr object;
     
-    if(BoxManager::typeIsTemplate(content->getType())) {
-        throw std::runtime_error("Groups are not implemented");
-        //        object.reset(new csapex::Group(""));
-    } else {
-        object.reset(new NodeBox(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
-    }
-    
+    object.reset(new NodeBox(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
+
     object->setStyleSheet(stylesheet);
     object->construct();
     object->setObjectName(content->getType().c_str());
@@ -264,18 +259,6 @@ QPixmap createPixmap(const std::string& label, const NodePtr& content, const QSt
     return QPixmap::grabWidget(object.get());
 }
 }
-
-bool BoxManager::typeIsTemplate(const std::string &type)
-{
-    return type.substr(0,12) == "::template::";
-}
-
-std::string BoxManager::getTemplateName(const std::string &type)
-{
-    assert(typeIsTemplate(type));
-    return type.substr(12);
-}
-
 bool BoxManager::isValidType(const std::string &type) const
 {
     Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
@@ -287,29 +270,25 @@ bool BoxManager::isValidType(const std::string &type) const
     return false;
 }
 
-void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, const QPoint& offset)
+void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, NodeStatePtr state, const QPoint& offset)
 {
-    bool is_template = BoxManager::typeIsTemplate(type);
-    
     Node::Ptr content;
-    if(is_template) {
-        //        content.reset(new Node(""));
-    } else {
-        Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
-            if(p->getType() == type) {
-                content = p->makePrototypeContent();
-            }
+
+    Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
+        if(p->getType() == type) {
+            content = p->makePrototypeContent();
         }
     }
-    
+
     if(content) {
         QDrag* drag = new QDrag(parent);
         QMimeData* mimeData = new QMimeData;
-        
-        if(is_template) {
-            //            mimeData->setData(Template::MIME, "");
-        }
+
         mimeData->setData(NodeBox::MIME, type.c_str());
+        if(state) {
+            QVariant payload = qVariantFromValue((void *) &state);
+            mimeData->setProperty("state", payload);
+        }
         mimeData->setProperty("ox", offset.x());
         mimeData->setProperty("oy", offset.y());
         drag->setMimeData(mimeData);
@@ -325,23 +304,10 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, Widge
 
 Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
-    assert(!BoxManager::typeIsTemplate(content->getType()) && content->getType() != "::group");
     
     Node::Ptr bo = content->makeContent(uuid);
     
     return bo;
-}
-
-Node::Ptr BoxManager::makeTemplateNode(const UUID& /*uuid*/, const std::string& type)
-{
-    assert(BoxManager::typeIsTemplate(type) || type == "::group");
-    
-    //    csapex::Group::Ptr group(new csapex::Group(type, uuid));
-    
-    //    group->setObjectName(uuid.c_str());
-    
-    //    return group;
-    return Node::Ptr((Node*) NULL);
 }
 
 NodeConstructor::Ptr BoxManager::getConstructor(const std::string &target_type)
@@ -379,12 +345,6 @@ NodeConstructor::Ptr BoxManager::getConstructor(const std::string &target_type)
 Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 {
     assert(!uuid.empty());
-
-    
-    if(BoxManager::typeIsTemplate(target_type) || target_type == "::group") {
-        return makeTemplateNode(uuid, target_type);
-    }
-
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {

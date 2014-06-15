@@ -29,9 +29,6 @@ class BoxManager : public Singleton<BoxManager>
     friend class GraphIO;
 
 public:
-    static bool typeIsTemplate(const std::string& type);
-    static std::string getTemplateName(const std::string& type);
-
     virtual void reload();
     ~BoxManager();
 
@@ -40,7 +37,7 @@ public:
 
     bool isValidType(const std::string& type) const;
 
-    void startPlacingBox(QWidget *parent, const std::string& type, WidgetController *widget_ctrl, const QPoint &offset = QPoint(0,0));
+    void startPlacingBox(QWidget *parent, const std::string& type, WidgetController *widget_ctrl, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
 
     NodeConstructorPtr getConstructor(const std::string& type);
     NodePtr makeNode(const std::string& type, const UUID& uuid);
@@ -74,7 +71,6 @@ protected:
     void rebuildMap();
 
     NodePtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
-    NodePtr makeTemplateNode(const UUID& uuid, const std::string& type);
 
 protected:
     std::vector<NodeConstructor::Ptr> available_elements_prototypes;
