@@ -41,8 +41,6 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph, Command
     setFocusPolicy(Qt::StrongFocus);
     setFocus(Qt::OtherFocusReason);
 
-
-
     setAcceptDrops(true);
 
     setDragMode(QGraphicsView::RubberBandDrag);

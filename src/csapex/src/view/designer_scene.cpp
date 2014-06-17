@@ -67,7 +67,7 @@ QWidget* topLevelParentWidget (QWidget* widget)
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl)
     : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
       draw_grid_(false), draw_schema_(false), scale_(1.0), overlay_threshold_(0.45),
-      schema_dirty_(false)
+      highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
 
@@ -80,6 +80,8 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
 
     output_color_ = QColor(0xFF, 0xCC, 0x00);
     input_color_ = QColor(0xFF, 0x00, 0xCC);
+
+    setSceneRect(QRectF(-100, -100, 200, 200));
 
     QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)));
     QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)));
@@ -269,12 +271,12 @@ void DesignerScene::drawItems(QPainter *painter, int numItems,
 
 void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
-    if(e->button() == Qt::RightButton && highlight_connection_id_ != -1) {
+    if(e->button() == Qt::RightButton && highlight_connection_id_ >= 0) {
         e->accept();
         showConnectionContextMenu();
         return;
 
-    } else if(e->button() == Qt::MiddleButton && highlight_connection_id_ != -1) {
+    } else if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
         dispatcher_->execute(graph_->deleteConnectionById(highlight_connection_id_));
         return;
     }
@@ -282,7 +284,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsScene::mousePressEvent(e);
 
     if(!e->isAccepted() && e->button() == Qt::LeftButton) {
-        if(highlight_connection_id_ != -1) {
+        if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
             dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, highlight_connection_sub_id_, pos, 0)));
             e->accept();

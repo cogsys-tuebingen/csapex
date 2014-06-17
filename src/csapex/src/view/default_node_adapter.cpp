@@ -204,7 +204,7 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 namespace {
 void setTooltip(QLayout* l, const QString& tooltip)
 {
-    for(std::size_t i = 0; i < l->count(); ++i) {
+    for(int i = 0; i < l->count(); ++i) {
         QLayoutItem* o = l->itemAt(i);
         QWidgetItem* w = dynamic_cast<QWidgetItem*>(o);
         if(w) {
