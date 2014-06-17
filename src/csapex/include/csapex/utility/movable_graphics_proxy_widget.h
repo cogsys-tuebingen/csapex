@@ -41,6 +41,8 @@ private:
     WidgetController* widget_ctrl_;
 
     bool relay_;
+    QPointF clone_start_;
+    bool clone_p_;
 };
 
 }
