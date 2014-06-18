@@ -81,8 +81,6 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
     output_color_ = QColor(0xFF, 0xCC, 0x00);
     input_color_ = QColor(0xFF, 0x00, 0xCC);
 
-    setSceneRect(QRectF(-100, -100, 200, 200));
-
     QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)));
     QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)));
 }
