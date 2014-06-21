@@ -253,7 +253,7 @@ void DesignerView::removeBoxEvent(NodeBox *box)
 
 void DesignerView::profile(NodeBox *box)
 {
-    assert(profiling_.find(box) == profiling_.end());
+    apex_assert_hard(profiling_.find(box) == profiling_.end());
 
     ProfilingWidget* prof = new ProfilingWidget(this, box);
     profiling_[box] = prof;
@@ -278,7 +278,7 @@ void DesignerView::profile(NodeBox *box)
 void DesignerView::stopProfiling(NodeBox *box)
 {
     std::map<NodeBox*, ProfilingWidget*>::iterator pos = profiling_.find(box);
-    assert(pos != profiling_.end());
+    apex_assert_hard(pos != profiling_.end());
 
     pos->second->deleteLater();
 //    delete pos->second;

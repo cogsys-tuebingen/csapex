@@ -4,6 +4,7 @@
 /// PROJECT
 #include <utils_param/io.h>
 #include <utils_param/parameter_factory.h>
+#include <csapex/utility/assert.h>
 
 using namespace csapex;
 
@@ -36,8 +37,8 @@ void GenericState::addParameter(param::Parameter::Ptr param)
         // already here, keep value!
         param->setValueFrom(*params[param->name()]);
     }
-    assert(param->name() != "noname");
-    assert(std::find(order.begin(), order.end(), param->name()) == order.end());
+    apex_assert_hard(param->name() != "noname");
+    apex_assert_hard(std::find(order.begin(), order.end(), param->name()) == order.end());
 
     params[param->name()] = param;
     order.push_back(param->name());

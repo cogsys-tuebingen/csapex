@@ -85,7 +85,7 @@ void NodeBox::construct()
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
-    setLabel(node_->getLabel());
+    setLabel(node_->getNodeState()->getLabel());
 
     ui->enablebtn->setIcon(node_->getIcon());
 
@@ -257,21 +257,21 @@ void NodeBox::setError(bool, const std::string &msg, int)
 
 void NodeBox::setLabel(const std::string& label)
 {
-    assert(node_->getNodeState());
-    node_->setLabel(label);
+    apex_assert_hard(node_->getNodeState());
+    node_->getNodeState()->setLabel(label);
     ui->label->setText(label.c_str());
     ui->label->setToolTip(label.c_str());
 }
 
 void NodeBox::setLabel(const QString &label)
 {
-    node_->setLabel(label.toStdString());
+    node_->getNodeState()->setLabel(label.toStdString());
     ui->label->setText(label);
 }
 
 std::string NodeBox::getLabel() const
 {
-    return node_->getLabel();
+    return node_->getNodeState()->getLabel();
 }
 
 void NodeBox::registerEvent(Connectable* c)
@@ -296,7 +296,7 @@ void NodeBox::registerInputEvent(ConnectorIn* in)
 
 void NodeBox::registerOutputEvent(ConnectorOut* out)
 {
-    assert(out);
+    apex_assert_hard(out);
 
     out->setParent(NULL);
 
@@ -316,7 +316,7 @@ void NodeBox::init()
         setVisible(false);
     }
 
-    move(node_->getNodeState()->pos);
+    move(node_->getNodeState()->getPos());
 }
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
@@ -391,7 +391,7 @@ void NodeBox::moveEvent(QMoveEvent* e)
 
     QPoint delta = pos - e->oldPos();
 
-    node_->setPosition(pos);
+    node_->getNodeState()->setPos(pos);
 
     Q_EMIT moved(this, delta.x(), delta.y());
 }
@@ -453,19 +453,18 @@ void NodeBox::showProfiling()
 
 void NodeBox::killContent()
 {
-    node_->killContent();
+    node_->getNodeWorker()->killExecution();
 }
 
 void NodeBox::flipSides()
 {
-    bool& flipped = node_->node_state_->flipped;
-    flipped = !flipped;
+    node_->getNodeState()->setFlipped(!node_->getNodeState()->isFlipped());
     updateFlippedSides();
 }
 
 void NodeBox::updateFlippedSides()
 {
-    const bool& flip = node_->node_state_->flipped;
+    bool flip = node_->getNodeState()->isFlipped();
 
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
@@ -475,7 +474,12 @@ void NodeBox::updateFlippedSides()
 
 bool NodeBox::isMinimizedSize() const
 {
-    return node_->getNodeState()->minimized;
+    return node_->getNodeState()->isMinimized();
+}
+
+bool NodeBox::isFlipped() const
+{
+    return node_->getNodeState()->isFlipped();
 }
 
 void NodeBox::minimizeBox(bool minimize)
@@ -512,15 +516,15 @@ Graph::Ptr NodeBox::getSubGraph()
 
 void NodeBox::nodeStateChanged()
 {
-    minimizeBox(node_->getNodeState()->minimized);
+    minimizeBox(node_->getNodeState()->isMinimized());
 
-    enableContent(node_->getNodeState()->enabled);
-    ui->enablebtn->setChecked(node_->getNodeState()->enabled);
+    enableContent(node_->getNodeState()->isEnabled());
+    ui->enablebtn->setChecked(node_->getNodeState()->isEnabled());
 
-    setLabel(node_->getLabel());
+    setLabel(node_->getNodeState()->getLabel());
     ui->label->setToolTip(node_->getUUID().c_str());
 
-    move(node_->getPosition());
+    move(node_->getNodeState()->getPos());
 }
 
 CommandDispatcher* NodeBox::getCommandDispatcher() const

@@ -14,14 +14,37 @@ namespace csapex
 struct NodeState : public Memento {
     typedef boost::shared_ptr<NodeState> Ptr;
 
-    NodeState(Node* parent);
+    NodeState(const Node* parent);
 
     void copyFrom (const Ptr &rhs);
 
     virtual void writeYaml(YAML::Emitter& out) const;
     virtual void readYaml(const YAML::Node& node);
 
-    Node* parent;
+public:
+    QPoint getPos() const;
+    void setPos(const QPoint &value);
+
+    std::string getLabel() const;
+    void setLabel(const std::string &label);
+
+    bool isMinimized() const;
+    void setMinimized(bool value);
+
+    bool isEnabled() const;
+    void setEnabled(bool value);
+
+    bool isFlipped() const;
+    void setFlipped(bool value);
+
+    Memento::Ptr getChildState() const;
+    void setChildState(const Memento::Ptr &value);
+
+    const Node* getParent() const;
+    void setParent(Node *value);
+
+private:
+    const Node* parent;
 
     mutable Memento::Ptr child_state;
 

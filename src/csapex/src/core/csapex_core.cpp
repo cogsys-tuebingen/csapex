@@ -8,9 +8,10 @@
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/model/message.h>
-#include <csapex/manager/connection_type_manager.h>
+#include <csapex/model/message_factory.h>
 #include <utils_plugin/plugin_manager.hpp>
 #include <csapex/model/tag.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <fstream>
@@ -29,7 +30,7 @@ CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cm
     qRegisterMetaType < QSharedPointer<QImage> > ("QSharedPointer<QImage>");
     qRegisterMetaType < std::string > ("std::string");
 
-    ConnectionTypeManager::registerMessage<connection_types::AnyMessage> ();
+    MessageFactory::registerMessage<connection_types::AnyMessage> ();
     StreamInterceptor::instance().start();
 
     Tag::createIfNotExists("General");
@@ -194,7 +195,7 @@ void CsApexCore::load(const std::string &file)
 
     reset();
 
-    assert(graph_->countNodes() == 0);
+    apex_assert_hard(graph_->countNodes() == 0);
 
     graph_->setPause(true);
 

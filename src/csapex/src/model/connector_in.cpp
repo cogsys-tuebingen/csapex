@@ -5,9 +5,9 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/command.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
-#include <assert.h>
 #include <iostream>
 
 using namespace csapex;
@@ -52,7 +52,7 @@ bool ConnectorIn::acknowledgeConnection(Connectable* other_side)
 void ConnectorIn::removeConnection(Connectable* other_side)
 {
     if(target != NULL) {
-        assert(other_side == target);
+        apex_assert_hard(other_side == target);
         target = NULL;
 
         Q_EMIT connectionRemoved();

@@ -6,9 +6,10 @@
 #include <csapex/model/tag.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/unique.h>
+#include <csapex/model/parameterizable.h>
 #include <csapex/utility/timable.h>
 #include <csapex/utility/stream_relay.h>
-#include <csapex/model/parameterizable.h>
+#include <csapex/utility/assert.h>
 
 /// PROJECT
 #include <utils_param/param_fwd.h>
@@ -50,16 +51,11 @@ public:
     void addTag(const Tag& tag);
     std::vector<Tag> getTags() const;
 
-    ConnectorIn* getParameterInput(const std::string& name) const;
-    ConnectorOut* getParameterOutput(const std::string& name) const;
-
     virtual QIcon getIcon() const;
 
     virtual void pause(bool pause);
     virtual void clearBlock();
     virtual void stop();
-
-    std::string getLabel() const;
 
     virtual void useTimer(Timer* timer);
 
@@ -75,6 +71,7 @@ public:
 
 public:
     NodeStatePtr getNodeState();
+    NodeStatePtr getNodeStateCopy() const;
     void setNodeState(NodeStatePtr memento);
 
     void setSettings(Settings* settings);
@@ -104,6 +101,9 @@ public:
     ConnectorIn* getManagedInput(const unsigned int index) const;
     ConnectorOut* getManagedOutput(const unsigned int index) const;
 
+    ConnectorIn* getParameterInput(const std::string& name) const;
+    ConnectorOut* getParameterOutput(const std::string& name) const;
+
     virtual ConnectorIn* getInput(const UUID& uuid) const;
     virtual ConnectorOut* getOutput(const UUID& uuid) const;
 
@@ -119,26 +119,15 @@ public:
     int nextInputId();
     int nextOutputId();
 
-    QPoint getPosition() const;
-    void setPosition(const QPoint& pos);
-
     CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);
 
     CommandPtr removeAllConnectionsCmd();
 
-
-    ///
-    /// IO
-    ///
-
-    YAML::Emitter& save(YAML::Emitter& out) const;
-    void read(const YAML::Node &doc);
-
     bool canReceive();
 
 public:
-    virtual MementoPtr getState() const;
+    virtual MementoPtr getChildState() const;
 
 protected:
     virtual void setState(Memento::Ptr memento);
@@ -173,14 +162,11 @@ public Q_SLOTS:
 
     virtual void checkIO();
 
-    void killContent();
-
     void enableIO(bool enable);
     void enableInput(bool enable);
     void enableOutput(bool enable);
 
     void setIOError(bool error);
-    void setLabel(const std::string& label);
     void setMinimized(bool min);
 
     void triggerModelChanged();

@@ -97,6 +97,9 @@ private:
         bool minimized_to;
         bool minimized;
 
+        bool start_flipped;
+        bool end_flipped;
+
         double r;
     };
 

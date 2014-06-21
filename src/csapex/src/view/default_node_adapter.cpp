@@ -244,7 +244,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     std::vector<param::Parameter::Ptr> params = node_->getParameters();
 
-    GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getState());
+    GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getChildState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
@@ -320,7 +320,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter input, if available
         ConnectorIn* param_in = node_->getParameterInput(current_name_);
         if(param_in) {
-            Port* port = new Port(node_->getCommandDispatcher(), param_in);
+            Port* port = new Port(node_->getCommandDispatcher(), param_in, false);
             port->setVisible(p->isInteractive());
             interactive_changed(*p).connect(boost::bind(&Port::setVisible, port, __2));
 
@@ -338,7 +338,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter output, if available
         ConnectorOut* param_out = node_->getParameterOutput(current_name_);
         if(param_out) {
-            Port* port = new Port(node_->getCommandDispatcher(), param_out);
+            Port* port = new Port(node_->getCommandDispatcher(), param_out, false);
             port->setVisible(p->isInteractive());
             interactive_changed(*p).connect(boost::bind(&Port::setVisible, port, __2));
 

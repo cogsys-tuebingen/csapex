@@ -4,9 +4,10 @@
 /// COMPONENT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/manager/connection_type_manager.h>
+#include <csapex/model/message_factory.h>
 #include <csapex/view/port.h>
 #include <csapex/command/meta.h>
+#include <csapex/utility/assert.h>
 
 using namespace qt_helper;
 using namespace csapex;
@@ -24,7 +25,7 @@ void QSleepThread::usleep(unsigned long t) {
 QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size,
                                 csapex::ContextMenuHandler *context_handler)
 {
-    assert(min<=max);
+    apex_assert_hard(min<=max);
 
     QHBoxLayout *internal_layout = new QHBoxLayout;
 
@@ -50,7 +51,7 @@ QSpinBox* QtHelper::makeSpinBox(QBoxLayout *layout, const std::string &name, int
 
 QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max,
                               csapex::ContextMenuHandler *context_handler) {
-    assert(min<=max);
+    apex_assert_hard(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
@@ -88,7 +89,7 @@ QSlider* QtHelper::makeSlider(QBoxLayout* layout, const std::string& name, int d
 
 QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step,
                                     csapex::ContextMenuHandler *context_handler) {
-    assert(min<=max);
+    apex_assert_hard(min<=max);
 
     if(((def - min) / step) * step != (def - min)) {
         std::cerr << "default " << def << " is not a multiple of minimum " << min << " with a step size of " << step << std::endl;
@@ -143,7 +144,7 @@ QIntSlider* QtHelper::makeIntSlider(QBoxLayout* layout, const std::string& name,
 QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string& name, double def, double min, double max, double step_size,
                                           csapex::ContextMenuHandler *context_handler)
 {
-    assert(min<=max);
+    apex_assert_hard(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
@@ -199,7 +200,7 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
 QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max,
                                         csapex::ContextMenuHandler *context_handler)
 {
-    assert(min<=max);
+    apex_assert_hard(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
@@ -246,7 +247,7 @@ QxtSpanSlider* QtHelper::makeSpanSlider(QBoxLayout* layout, const std::string& n
 QxtDoubleSpanSlider* QtHelper::makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size,
                                                     csapex::ContextMenuHandler *context_handler)
 {
-    assert(min<=max);
+    apex_assert_hard(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 

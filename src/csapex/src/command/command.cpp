@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
+#include <csapex/utility/assert.h>
 #include <csapex/view/widget_controller.h>
 
 /// SYSTEM
@@ -51,8 +52,8 @@ bool Command::executeCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, 
 {
     cmd->graph_ = graph;
     cmd->widget_ctrl_ = widget_ctrl;
-    assert(cmd->graph_);
-    assert(cmd->widget_ctrl_);
+    apex_assert_hard(cmd->graph_);
+    apex_assert_hard(cmd->widget_ctrl_);
     return cmd->doExecute();
 }
 
@@ -60,8 +61,8 @@ bool Command::undoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Com
 {
     cmd->graph_ = graph;
     cmd->widget_ctrl_ = widget_ctrl;
-    assert(cmd->graph_);
-    assert(cmd->widget_ctrl_);
+    apex_assert_hard(cmd->graph_);
+    apex_assert_hard(cmd->widget_ctrl_);
     if(!cmd->doUndo()) {
         undo_later.push_back(cmd);
         return false;
@@ -74,8 +75,8 @@ bool Command::redoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Com
 {
     cmd->graph_ = graph;
     cmd->widget_ctrl_ = widget_ctrl;
-    assert(cmd->graph_);
-    assert(cmd->widget_ctrl_);
+    apex_assert_hard(cmd->graph_);
+    apex_assert_hard(cmd->widget_ctrl_);
     return cmd->doRedo();
 }
 

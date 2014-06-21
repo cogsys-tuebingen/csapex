@@ -6,9 +6,9 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
-#include <assert.h>
 #include <boost/foreach.hpp>
 #include <iostream>
 
@@ -118,7 +118,7 @@ bool ConnectorOut::connect(Connectable *other_side)
         return false;
     }
 
-    assert(input);
+    apex_assert_hard(input);
     targets_.push_back(input);
 
     QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));

@@ -69,6 +69,7 @@ public:
     std::string getLabel() const;
 
     bool isMinimizedSize() const;
+    bool isFlipped() const;
 
     bool isError() const;
     ErrorState::ErrorLevel errorLevel() const;

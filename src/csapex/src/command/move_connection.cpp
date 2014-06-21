@@ -8,6 +8,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/add_connection.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -17,9 +18,9 @@ using namespace csapex::command;
 MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     : Meta("MoveConnection"), from_uuid(from->getUUID()), to_uuid(to->getUUID())
 {
-    assert(from);
-    assert(to);
-    assert((from->isOutput() && to->isOutput()) ||
+    apex_assert_hard(from);
+    apex_assert_hard(to);
+    apex_assert_hard((from->isOutput() && to->isOutput()) ||
            (from->isInput() && to->isInput()));
 
     output = from->isOutput();

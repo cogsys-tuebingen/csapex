@@ -1,8 +1,10 @@
 /// HEADER
 #include <csapex/model/tag.h>
 
+/// COMPONENT
+#include <csapex/utility/assert.h>
+
 /// SYSTEM
-#include <assert.h>
 #include <iostream>
 
 using namespace csapex;
@@ -67,7 +69,7 @@ void Tag::createIfNotExists(const std::string &name)
 
 void Tag::Manager::create(const std::string &name)
 {
-    assert(!exists(name));
+    apex_assert_hard(!exists(name));
     tags_.insert(std::make_pair(name, Tag(name)));
 }
 

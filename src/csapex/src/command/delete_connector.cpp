@@ -79,7 +79,7 @@ bool DeleteConnector::refresh()
         c = node->getOutput(c_uuid);
     }
 
-    assert(c);
+    apex_assert_hard(c);
 
     return true;
 }

@@ -8,7 +8,8 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/manager/connection_type_manager.h>
+#include <csapex/model/message_factory.h>
+#include <csapex/utility/assert.h>
 
 using namespace csapex;
 using namespace command;
@@ -33,7 +34,7 @@ std::string AddConnector::getDescription() const
 bool AddConnector::doExecute()
 {
     Node* node = graph_->findNode(b_uuid);
-    assert(node);
+    apex_assert_hard(node);
 
     if(input) {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_IN, node->nextInputId()) : c_uuid;
@@ -47,7 +48,7 @@ bool AddConnector::doExecute()
         node->registerOutput(out);
     }
 
-    c->setType(ConnectionTypeManager::createMessage(type));
+    c->setType(MessageFactory::createMessage(type));
     c->setLabel(label);
     c_uuid = c->getUUID();
 
@@ -57,7 +58,7 @@ bool AddConnector::doExecute()
 bool AddConnector::doUndo()
 {
     Node* node = graph_->findNode(b_uuid);
-    assert(node);
+    apex_assert_hard(node);
 
     if(input) {
         node->removeInput(node->getInput(c_uuid));

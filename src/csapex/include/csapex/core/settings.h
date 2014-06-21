@@ -17,6 +17,7 @@ public:
     static const std::string settings_file;
     static const std::string config_extension;
     static const std::string template_extension;
+    static const std::string message_extension;
     static const std::string default_config;
     static const std::string config_selector;
 

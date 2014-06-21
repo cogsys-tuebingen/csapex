@@ -16,7 +16,7 @@
 
 using namespace csapex;
 
-Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
+Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee, bool flipped)
     : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
     if(adaptee_) {
@@ -32,6 +32,8 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee)
     } else {
         std::cerr << "creating empty port!" << std::endl;
     }
+
+    setFlipped(flipped);
 
     setFixedSize(16, 16);
 

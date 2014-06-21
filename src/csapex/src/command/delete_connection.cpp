@@ -25,8 +25,8 @@ DeleteConnection::DeleteConnection(Connectable* a, Connectable* b)
         from = dynamic_cast<ConnectorOut*>(b);
         to = dynamic_cast<ConnectorIn*>(a);
     }
-    assert(from);
-    assert(to);
+    apex_assert_hard(from);
+    apex_assert_hard(to);
 
     from_uuid = from->getUUID();
     to_uuid = to->getUUID();
@@ -94,8 +94,8 @@ bool DeleteConnection::refresh()
     from = from_node->getOutput(from_uuid);
     to = to_node->getInput(to_uuid);
 
-    assert(from);
-    assert(to);
+    apex_assert_hard(from);
+    apex_assert_hard(to);
 
     return true;
 }

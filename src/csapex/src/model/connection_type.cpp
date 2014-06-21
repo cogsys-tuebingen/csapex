@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/message.h>
+#include <csapex/utility/assert.h>
 
 using namespace csapex;
 
@@ -64,7 +65,7 @@ ConnectionType::Ptr ConnectionType::makeDefault()
     }
 
     ConnectionType::Ptr res = default_->clone();
-    assert(res);
+    apex_assert_hard(res);
     return res;
 }
 

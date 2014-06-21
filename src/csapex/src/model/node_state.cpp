@@ -6,7 +6,7 @@
 
 using namespace csapex;
 
-NodeState::NodeState(Node* parent)
+NodeState::NodeState(const Node *parent)
     : parent(parent), minimized(false), enabled(true), flipped(false)
 {
     if(parent) {
@@ -17,7 +17,7 @@ NodeState::NodeState(Node* parent)
 void NodeState::copyFrom(const NodeState::Ptr& rhs)
 {
     operator =(*rhs);
-    child_state = parent->getState();
+    child_state = parent->getChildState();
     if(rhs->child_state) {
         *child_state = *rhs->child_state;
     }
@@ -54,12 +54,79 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(exists(node, "state")) {
         const YAML::Node& state_map = node["state"];
-        child_state = parent->getState();
+        child_state = parent->getChildState();
 
         if(child_state) {
             child_state->readYaml(state_map);
         }
     }
+}
+QPoint NodeState::getPos() const
+{
+    return pos;
+}
+
+void NodeState::setPos(const QPoint &value)
+{
+    pos = value;
+}
+
+std::string NodeState::getLabel() const
+{
+    return label_;
+}
+
+void NodeState::setLabel(const std::string &label)
+{
+    label_ = label;
+}
+
+bool NodeState::isMinimized() const
+{
+    return minimized;
+}
+
+void NodeState::setMinimized(bool value)
+{
+    minimized = value;
+}
+bool NodeState::isEnabled() const
+{
+    return enabled;
+}
+
+void NodeState::setEnabled(bool value)
+{
+    enabled = value;
+}
+
+bool NodeState::isFlipped() const
+{
+    return flipped;
+}
+
+void NodeState::setFlipped(bool value)
+{
+    flipped = value;
+}
+Memento::Ptr NodeState::getChildState() const
+{
+    return child_state;
+}
+
+void NodeState::setChildState(const Memento::Ptr &value)
+{
+    child_state = value;
+}
+
+const Node *NodeState::getParent() const
+{
+    return parent;
+}
+
+void NodeState::setParent(Node *value)
+{
+    parent = value;
 }
 
 
@@ -85,7 +152,7 @@ void NodeState::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << flipped;
 
     if(parent) {
-        child_state = parent->getState();
+        child_state = parent->getChildState();
     }
 
     if(child_state.get()) {
@@ -97,4 +164,3 @@ void NodeState::writeYaml(YAML::Emitter &out) const
 
     out << YAML::EndMap;
 }
-

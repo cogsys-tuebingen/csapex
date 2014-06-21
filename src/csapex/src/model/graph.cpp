@@ -50,7 +50,7 @@ Settings& Graph::getSettings() const
 void Graph::init(CommandDispatcher *dispatcher)
 {
     dispatcher_ = dispatcher;
-    assert(dispatcher_);
+    apex_assert_hard(dispatcher_);
 }
 
 std::string Graph::makeUUIDPrefix(const std::string& name)
@@ -66,9 +66,9 @@ std::string Graph::makeUUIDPrefix(const std::string& name)
 
 void Graph::addNode(Node::Ptr node)
 {
-    assert(!node->getUUID().empty());
-    assert(!node->getType().empty());
-    assert(dispatcher_);
+    apex_assert_hard(!node->getUUID().empty());
+    apex_assert_hard(!node->getType().empty());
+    apex_assert_hard(dispatcher_);
 
     nodes_.push_back(node);
     node_parents_[node.get()] = std::vector<Node*>();
@@ -91,8 +91,8 @@ void Graph::deleteNode(const UUID& uuid)
     node->stop();
 
     /// assert that all connections have already been deleted
-    assert(node_parents_[node].empty());
-    assert(node_children_[node].empty());
+    apex_assert_hard(node_parents_[node].empty());
+    apex_assert_hard(node_children_[node].empty());
 
     node_parents_.erase(node);
     node_children_.erase(node);
@@ -529,11 +529,11 @@ Connectable* Graph::findConnector(const UUID &uuid)
     uuid.split(UUID::namespace_separator, l, r);
 
     Node* owner = findNode(l);
-    assert(owner);
+    apex_assert_hard(owner);
 
     Connectable* result = owner->getConnector(uuid);;
 
-    assert(result);
+    apex_assert_hard(result);
 
     return result;
 }

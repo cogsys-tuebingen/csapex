@@ -7,6 +7,8 @@
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
 #include <csapex/model/fulcrum.h>
+#include <csapex/utility/assert.h>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -42,7 +44,7 @@ void GraphIO::loadSettings(YAML::Node &doc)
 void GraphIO::saveNodes(YAML::Emitter &yaml)
 {
     BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
-        node->save(yaml);
+        node->getNodeState()->writeYaml(yaml);
     }
 }
 
@@ -66,12 +68,15 @@ void GraphIO::loadNodes(YAML::Parser& parser)
             continue;
         }
         try {
-            node->read(doc);
+            NodeState::Ptr s = node->getNodeState();
+            s->readYaml(doc);
+            node->setNodeState(s);
+
         } catch(const std::exception& e) {
             std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
         }
         if(x != 0 || y != 0) {
-            node->setPosition(QPoint(x,y));
+            node->getNodeState()->setPos(QPoint(x,y));
         }
         graph_->addNode(node);
     }
@@ -148,11 +153,11 @@ void GraphIO::loadConnections(YAML::Node &doc)
 {
     if(exists(doc, "connections")) {
         const YAML::Node& connections = doc["connections"];
-        assert(connections.Type() == YAML::NodeType::Sequence);
+        apex_assert_hard(connections.Type() == YAML::NodeType::Sequence);
 
         for(unsigned i = 0; i < connections.size(); ++i) {
             const YAML::Node& connection = connections[i];
-            assert(connection.Type() == YAML::NodeType::Map);
+            apex_assert_hard(connection.Type() == YAML::NodeType::Map);
 
             std::string from_uuid_tmp;
             connection["uuid"] >> from_uuid_tmp;
@@ -178,7 +183,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
             }
 
             const YAML::Node& targets = connection["targets"];
-            assert(targets.Type() == YAML::NodeType::Sequence);
+            apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
 
             for(unsigned j=0; j<targets.size(); ++j) {
                 std::string to_uuid_tmp;
@@ -218,12 +223,12 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
     if(exists(doc, "fulcrums")) {
         const YAML::Node& fulcrums = doc["fulcrums"];
-        assert(fulcrums.Type() == YAML::NodeType::Sequence);
+        apex_assert_hard(fulcrums.Type() == YAML::NodeType::Sequence);
 
 
         for(unsigned i = 0; i < fulcrums.size(); ++i) {
             const YAML::Node& fulcrum = fulcrums[i];
-            assert(fulcrum.Type() == YAML::NodeType::Map);
+            apex_assert_hard(fulcrum.Type() == YAML::NodeType::Map);
 
             std::string from_uuid_tmp;
             fulcrum["from"] >> from_uuid_tmp;

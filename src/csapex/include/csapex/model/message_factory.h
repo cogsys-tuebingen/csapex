@@ -1,5 +1,5 @@
-#ifndef CONNECTION_TYPE_MANAGER_H
-#define CONNECTION_TYPE_MANAGER_H
+#ifndef MESSAGE_FACTORY_H
+#define MESSAGE_FACTORY_H
 
 /// COMPONENT
 #include <csapex/model/connection_type.h>
@@ -12,15 +12,18 @@
 #include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <utils_yaml/yamlplus.h>
 
 namespace csapex {
 
-class ConnectionTypeManager : public Singleton<ConnectionTypeManager>
+class MessageFactory : public Singleton<MessageFactory>
 {
-    friend class Singleton<ConnectionTypeManager>;
+    friend class Singleton<MessageFactory>;
 
 public:
     typedef boost::function<ConnectionType::Ptr()>  Constructor;
+
+    typedef std::runtime_error DeserializationError;
 
 public:
     template <typename M>
@@ -30,8 +33,13 @@ public:
 
     static ConnectionType::Ptr createMessage(const std::string& type);
 
+    static ConnectionType::Ptr readMessage(const std::string& path);
+    static void writeMessage(const std::string& path, const ConnectionType::Ptr msg);
+
+    static ConnectionType::Ptr readYaml(const YAML::Node& node);
+
 private:
-    ConnectionTypeManager();
+    MessageFactory();
 
     static void registerMessage(Constructor constructor);
 
@@ -41,4 +49,4 @@ private:
 
 }
 
-#endif // CONNECTION_TYPE_MANAGER_H
+#endif // MESSAGE_FACTORY_H

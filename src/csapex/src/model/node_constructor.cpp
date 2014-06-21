@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_state.h>
 #include <csapex/core/settings.h>
 
 /// SYSTEM
@@ -19,7 +20,7 @@ NodePtr NodeConstructor::makeNull()
 NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, Make c)
     : settings_(settings), type_(type), descr_(description), is_loaded(false), c(c)
 {
-    assert(!c.empty());
+    apex_assert_hard(!c.empty());
 }
 
 NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description)
@@ -98,7 +99,7 @@ Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
     res->setSettings(&settings_);
     res->setType(type_);
     res->setUUID(uuid);
-    res->setLabel(uuid);
+    res->getNodeState()->setLabel(uuid);
 
     res->doSetup();
     return res;

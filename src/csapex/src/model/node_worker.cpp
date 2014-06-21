@@ -20,10 +20,10 @@ NodeWorker::NodeWorker(Node* node)
       thread_initialized_(false), paused_(false), stop_(false)
 {
     timer_history_.resize(Settings::timer_history_length_);
-    assert(timer_history_.size() == Settings::timer_history_length_);
-    assert(timer_history_.capacity() == Settings::timer_history_length_);
+    apex_assert_hard(timer_history_.size() == Settings::timer_history_length_);
+    apex_assert_hard(timer_history_.capacity() == Settings::timer_history_length_);
 
-    assert(node_);
+    apex_assert_hard(node_);
 
     timer_ = new QTimer();
     setTickFrequency(DEFAULT_FREQUENCY);
@@ -74,6 +74,11 @@ void NodeWorker::pause(bool pause)
     continue_.wakeAll();
 }
 
+void NodeWorker::killExecution()
+{
+    // TODO: implement
+}
+
 void NodeWorker::forwardMessage(Connectable *s)
 {
     {
@@ -90,7 +95,7 @@ void NodeWorker::forwardMessage(Connectable *s)
     }
 
     ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
-    assert(source);
+    apex_assert_hard(source);
 
     if(node_->isEnabled()) {
         Q_EMIT messagesReceived();
@@ -148,11 +153,11 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
             locks.push_back(cin->lockAsync());
         }
 
-        //assert(!has_msg_[source]);
+        //apex_assert_hard(!has_msg_[source]);
         if(has_msg_[source] && !source->isAsync()) {
             std::cerr << "input @" << source->getUUID().getFullName() <<
                          ": assertion failed: !has_msg_[" << source->getUUID().getFullName() << "]" << std::endl;
-            assert(false);
+            apex_assert_hard(false);
         }
         if(!source->isAsync()) {
             has_msg_[source] = true;
@@ -226,7 +231,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
                 if(highest_seq_no != cin->sequenceNumber()) {
                     std::cerr << "input @" << cin->getUUID().getFullName() <<
                                  ": assertion failed: highest_seq_no (" << highest_seq_no << ") == cin->seq_no (" << cin->sequenceNumber() << ")" << std::endl;
-                    assert(false);
+                    apex_assert_hard(false);
                 }
             }
         }

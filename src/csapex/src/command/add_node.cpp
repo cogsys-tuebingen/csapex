@@ -8,13 +8,14 @@
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
+#include <csapex/utility/assert.h>
 
 using namespace csapex::command;
 
 AddNode::AddNode(const std::string &type, QPoint pos, const UUID &parent_uuid, const UUID& uuid, NodeState::Ptr state)
     : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
-    assert(!uuid.empty());
+    apex_assert_hard(!uuid.empty());
 
     if(state != MementoNullPtr) {
         NodeState::Ptr bs = boost::dynamic_pointer_cast<NodeState> (state);
@@ -41,13 +42,13 @@ bool AddNode::doExecute()
 
     Node::Ptr node = BoxManager::instance().makeNode(type_, uuid_);
 
-    assert(node->getType() == type_);
+    apex_assert_hard(node->getType() == type_);
 
     if(saved_state_) {
         node->setNodeState(saved_state_);
     }
 
-    node->setPosition(pos_);
+    node->getNodeState()->setPos(pos_);
 
 //    if(parent_uuid_.empty()) {
         graph_->addNode(node);
@@ -62,7 +63,7 @@ bool AddNode::doUndo()
 {
     Node* node_ = graph_->findNode(uuid_);
 
-    saved_state_ = node_->getNodeState();
+    saved_state_ = node_->getNodeStateCopy();
 
 
     if(parent_uuid_.empty()) {

@@ -39,7 +39,7 @@ bool DeleteNode::doExecute()
     locked = true;
 
     if(Meta::doExecute()) {
-        saved_state = node->getNodeState();
+        saved_state = node->getNodeStateCopy();
 
         graph_->deleteNode(node->getUUID());
         return true;
@@ -63,7 +63,7 @@ bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
         Node* node = graph_->findNode(uuid);
-        saved_state = node->getNodeState();
+        saved_state = node->getNodeStateCopy();
 
         graph_->deleteNode(node->getUUID());
         return true;

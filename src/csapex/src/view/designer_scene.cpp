@@ -17,12 +17,12 @@
 #include <csapex/command/modify_fulcrum.h>
 #include <csapex/view/fulcrum_widget.h>
 #include <csapex/utility/movable_graphics_proxy_widget.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <QtGui>
 #include <QtOpenGL>
 #include <GL/glu.h>
-#include <assert.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -35,8 +35,8 @@ const float DesignerScene::ARROW_LENGTH = 10.f;
 namespace {
 QRgb id2rgb(int id, int subsection)
 {
-    assert(id < 0xFFFF);
-    assert(subsection < 0xFF);
+    apex_assert_hard(id < 0xFFFF);
+    apex_assert_hard(subsection < 0xFF);
     int raw = (id & 0xFFFF) | ((subsection & 0xFF) << 16);
 
     return qRgb(qRed(raw), qGreen(raw), qBlue(raw));
@@ -359,7 +359,7 @@ void DesignerScene::fulcrumAdded(Fulcrum * f)
 void DesignerScene::fulcrumDeleted(Fulcrum* f)
 {
     std::map<Fulcrum*, FulcrumWidget*>::iterator pos = fulcrum_2_widget_.find(f);
-    assert(pos != fulcrum_2_widget_.end());
+    apex_assert_hard(pos != fulcrum_2_widget_.end());
 
     delete pos->second;
     fulcrum_2_widget_.erase(pos);
@@ -397,7 +397,7 @@ void DesignerScene::fulcrumTypeChanged(Fulcrum */*f*/, int /*type*/)
 
 void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end)
 {
-    assert(from);
+    apex_assert_hard(from);
 
     TempConnection temp;
     temp.from = from;
@@ -410,8 +410,8 @@ void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end
 
 void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
 {
-    assert(from);
-    assert(to);
+    apex_assert_hard(from);
+    apex_assert_hard(to);
 
     TempConnection temp;
     temp.from = from;
@@ -461,6 +461,9 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
 
+    ccs.start_flipped = fromp->isFlipped();
+    ccs.end_flipped = top->isFlipped();
+
     drawConnection(painter, p1, p2, id,
                    fromp->isFlipped() ? Fulcrum::IN : Fulcrum::OUT,
                    top->isFlipped() ? Fulcrum::OUT : Fulcrum::IN);
@@ -474,7 +477,7 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
 void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id, Fulcrum::Type from_type, Fulcrum::Type to_type)
 {
     QPointF to = real_to;
-    to.setX(to.x() - ARROW_LENGTH);
+    to.setX(to.x() + (ccs.end_flipped ? ARROW_LENGTH : -ARROW_LENGTH));
 
     painter->setRenderHint(QPainter::Antialiasing);
 
@@ -515,23 +518,23 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     std::vector<Path> paths;
 
     // generate lines
-    Q_FOREACH(Fulcrum::Ptr fulcrum, targets) {
-        QPoint offset;
-        QPoint delta;
+    Q_FOREACH(Fulcrum::Ptr next, targets) {
+        QPoint y_offset;
+        QPoint x_offset;
         if(direct_length > mindist_for_slack) {
             double offset_factor = std::min(1.0, (direct_length - mindist_for_slack) / slack_smooth_distance);
 
-            delta = QPoint(std::max(offset_factor * mindist_for_slack, std::abs(0.45 * (diff).x())), 0);
-            offset = QPoint(0, offset_factor * max_slack_height);
+            x_offset = QPoint(std::max(offset_factor * mindist_for_slack, std::abs(0.45 * (diff).x())), 0);
+            y_offset = QPoint(0, offset_factor * max_slack_height);
         }
 
         QPainterPath path(current->pos());
 
         if(current->type() == Fulcrum::OUT) {
-            cp1 = current->pos() + delta + offset;
+            cp1 = current->pos() + (ccs.start_flipped ? -x_offset : x_offset) + y_offset;
 
         } else if(current->type() == Fulcrum::IN) {
-            cp1 = current->pos() - delta + offset;
+            cp1 = current->pos() - (ccs.end_flipped ? -x_offset : x_offset) + y_offset;
 
         } else {
             const Fulcrum::Ptr& last = targets[sub_section-1];
@@ -542,31 +545,32 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
             }
         }
 
-        if(fulcrum->type() == Fulcrum::IN) {
-            cp2 = fulcrum->pos() - delta + offset;
+        if(next->type() == Fulcrum::OUT) {
+            cp2 = next->pos() + (ccs.start_flipped ? -x_offset : x_offset) + y_offset;
 
-        } else if(fulcrum->type() == Fulcrum::OUT) {
-            cp2 = fulcrum->pos() + delta + offset;
+        } else if(next->type() == Fulcrum::IN) {
+            cp2 = next->pos() - (ccs.end_flipped ? -x_offset : x_offset) + y_offset;
+
         } else {
-            if(fulcrum->type() == Fulcrum::LINEAR) {
-                cp2 = fulcrum->pos();
+            if(next->type() == Fulcrum::LINEAR) {
+                cp2 = next->pos();
             } else {
-                cp2 = fulcrum->pos() + fulcrum->handleIn();
+                cp2 = next->pos() + next->handleIn();
             }
         }
 
-        path.cubicTo(cp1, cp2, fulcrum->pos());
+        path.cubicTo(cp1, cp2, next->pos());
 
         paths.push_back(std::make_pair(path, sub_section));
 
         last = current;
-        current = fulcrum;
+        current = next;
         ++sub_section;
     }
 
     // arrow
     QPolygonF arrow;
-    double a = ARROW_LENGTH * scale_factor;
+    double a = (ccs.end_flipped ? -ARROW_LENGTH : ARROW_LENGTH) * scale_factor;
     arrow.append(QPointF(to.x()+ a, to.y()));
     arrow.append(QPointF(to.x(), to.y() -a/2.0));
     arrow.append(QPointF(to.x(), to.y() + a/2.0));
@@ -587,6 +591,13 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         painter->drawPath(arrow_path);
 
         painter->setPen(QPen(Qt::white, ccs.r + 3*scale_factor, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        foreach(const Path& path, paths) {
+            painter->drawPath(path.first);
+        }
+        painter->drawPath(arrow_path);
+
+    } else {
+        painter->setPen(QPen(Qt::black, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         foreach(const Path& path, paths) {
             painter->drawPath(path.first);
         }

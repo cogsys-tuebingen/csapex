@@ -344,7 +344,7 @@ NodeConstructor::Ptr BoxManager::getConstructor(const std::string &target_type)
 
 Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 {
-    assert(!uuid.empty());
+    apex_assert_hard(!uuid.empty());
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {

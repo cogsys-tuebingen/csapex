@@ -22,6 +22,7 @@ using namespace csapex;
 const std::string Settings::settings_file = defaultConfigPath() + "cfg/persistent_settings";
 const std::string Settings::config_extension = ".apex";
 const std::string Settings::template_extension = ".apext";
+const std::string Settings::message_extension = ".apexm";
 const std::string Settings::default_config = Settings::defaultConfigFile();
 const std::string Settings::config_selector = "Configs(*" + Settings::config_extension + ");;LegacyConfigs(*.vecfg)";
 

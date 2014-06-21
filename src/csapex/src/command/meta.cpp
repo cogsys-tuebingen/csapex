@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/command/meta.h>
 
+/// PROJECT
+#include <csapex/utility/assert.h>
+
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <QTreeWidgetItem>
@@ -36,14 +39,14 @@ std::string Meta::getDescription() const
 
 void Meta::clear()
 {
-    assert(!locked);
+    apex_assert_hard(!locked);
     nested.clear();
 }
 
 void Meta::add(Command::Ptr cmd)
 {
-    assert(!locked);
-    assert(cmd);
+    apex_assert_hard(!locked);
+    apex_assert_hard(cmd);
     nested.push_back(cmd);
 }
 

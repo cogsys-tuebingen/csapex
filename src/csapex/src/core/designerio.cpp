@@ -9,6 +9,7 @@
 #include <csapex/view/box.h>
 #include <csapex/view/node_adapter.h>
 #include "ui_designer.h"
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -84,7 +85,7 @@ void DesignerIO::loadBoxes(YAML::Node &doc, WidgetController* widget_ctrl)
 {
     if(exists(doc, "adapters")) {
         const YAML::Node& adapters = doc["adapters"];
-        assert(adapters.Type() == YAML::NodeType::Sequence);
+        apex_assert_hard(adapters.Type() == YAML::NodeType::Sequence);
 
         for(std::size_t i = 0; i < adapters.size(); ++i) {
             const YAML::Node& e = adapters[i];

@@ -6,6 +6,7 @@
 #include <csapex/model/connector_out.h>
 #include <csapex/core/settings.h>
 #include <csapex/model/fulcrum.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <cmath>
@@ -23,8 +24,8 @@ Connection::Connection(ConnectorOut *from, ConnectorIn *to)
 Connection::Connection(Connectable *from, Connectable *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {
-    assert(from->isOutput());
-    assert(to->isInput());
+    apex_assert_hard(from->isOutput());
+    apex_assert_hard(to->isInput());
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
@@ -126,7 +127,7 @@ void Connection::moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped)
 
 void Connection::deleteFulcrum(int fulcrum_id)
 {
-    assert(fulcrum_id >= 0 && fulcrum_id < (int) fulcrums_.size());
+    apex_assert_hard(fulcrum_id >= 0 && fulcrum_id < (int) fulcrums_.size());
     Q_EMIT fulcrum_deleted((fulcrums_[fulcrum_id]).get());
 
     // update the ids of the later fulcrums

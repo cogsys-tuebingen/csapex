@@ -9,6 +9,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/q_signal_relay.h>
 #include <csapex/model/node_modifier.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -67,7 +68,12 @@ void Node::doSetup()
 {
     setupParameters();
     updateParameters();
-    setup();
+
+    try {
+        setup();
+    } catch(std::runtime_error& e) {
+        aerr << "setup failed: " << e.what() << std::endl;
+    }
 }
 
 void Node::setType(const std::string &type)
@@ -125,7 +131,7 @@ bool Node::canBeDisabled() const
 
 bool Node::isEnabled()
 {
-    return node_state_->enabled;
+    return node_state_->isEnabled();
 }
 void Node::messageArrived(ConnectorIn *)
 {
@@ -156,47 +162,49 @@ Settings& Node::getSettings()
     return *settings_;
 }
 
-void Node::killContent()
+NodeState::Ptr Node::getNodeStateCopy() const
 {
-    // TODO: implement
-}
-
-NodeState::Ptr Node::getNodeState()
-{
-    assert(node_state_);
+    apex_assert_hard(node_state_);
 
     NodeState::Ptr memento(new NodeState(this));
     *memento = *node_state_;
 
-    memento->child_state = getState();
+    memento->setChildState(getChildState());
 
     return memento;
+}
+
+NodeState::Ptr Node::getNodeState()
+{
+    apex_assert_hard(node_state_);
+
+    return node_state_;
 }
 
 void Node::setNodeState(NodeState::Ptr memento)
 {
     boost::shared_ptr<NodeState> m = boost::dynamic_pointer_cast<NodeState> (memento);
-    assert(m.get());
+    apex_assert_hard(m.get());
 
     UUID old_uuid = getUUID();
-    std::string old_label = node_state_->label_;
+    std::string old_label = node_state_->getLabel();
 
     *node_state_ = *m;
 
     if(getUUID().empty()) {
         setUUID(old_uuid);
     }
-    if(getLabel().empty()) {
+    if(node_state_->getLabel().empty()) {
         if(old_label.empty()) {
-            setLabel(getUUID().getShortName());
+            node_state_->setLabel(getUUID().getShortName());
         } else {
-            setLabel(old_label);
+            node_state_->setLabel(old_label);
         }
     }
 
-    node_state_->parent = this;
-    if(m->child_state != NULL) {
-        setState(m->child_state);
+    node_state_->setParent(this);
+    if(m->getChildState()) {
+        setState(m->getChildState());
     }
 
     Q_EMIT stateChanged();
@@ -247,7 +255,7 @@ void Node::updateParameter(param::Parameter *p)
 
 void Node::updateParameters()
 {
-    assert(!getUUID().empty());
+    apex_assert_hard(!getUUID().empty());
 
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = parameter_state_.params.begin(); it != parameter_state_.params.end(); ++it ) {
         param::Parameter* p = it->second.get();
@@ -269,7 +277,7 @@ void Node::updateParameters()
     }
 }
 
-Memento::Ptr Node::getState() const
+Memento::Ptr Node::getChildState() const
 {
     return parameter_state_.clone();
 }
@@ -277,7 +285,7 @@ Memento::Ptr Node::getState() const
 void Node::setState(Memento::Ptr memento)
 {
     boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
-    assert(m.get());
+    apex_assert_hard(m.get());
 
     parameter_state_.setFrom(*m);
 
@@ -295,7 +303,7 @@ void Node::enable(bool e)
 
 void Node::enable()
 {
-    node_state_->enabled = true;
+    node_state_->setEnabled(true);
     checkIO();
 
     Q_EMIT enabled(true);
@@ -309,7 +317,7 @@ void Node::disable(bool d)
 
 void Node::disable()
 {
-    node_state_->enabled = false;
+    node_state_->setEnabled(false);
     setError(false);
     checkIO();
 
@@ -370,14 +378,9 @@ void Node::setIOError(bool error)
     enableIO(!error);
 }
 
-void Node::setLabel(const std::string &label)
-{
-    node_state_->label_ = label;
-}
-
 void Node::setMinimized(bool min)
 {
-    node_state_->minimized = min;
+    node_state_->setMinimized(min);
 }
 
 void Node::triggerModelChanged()
@@ -418,7 +421,7 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
     Q_EMIT nodeError(error,msg,level);
 
-    if(node_state_->enabled && error && level == EL_ERROR) {
+    if(node_state_->isEnabled() && error && level == EL_ERROR) {
         setIOError(true);
     } else {
         setIOError(false);
@@ -500,26 +503,26 @@ int Node::countManagedOutputs() const
 
 ConnectorIn* Node::getInput(const unsigned int index) const
 {
-    assert(index < inputs_.size());
+    apex_assert_hard(index < inputs_.size());
     return inputs_[index];
 }
 
 ConnectorOut* Node::getOutput(const unsigned int index) const
 {
-    assert(index < outputs_.size());
+    apex_assert_hard(index < outputs_.size());
     return outputs_[index];
 }
 
 
 ConnectorIn* Node::getManagedInput(const unsigned int index) const
 {
-    assert(index < managed_inputs_.size());
+    apex_assert_hard(index < managed_inputs_.size());
     return managed_inputs_[index];
 }
 
 ConnectorOut* Node::getManagedOutput(const unsigned int index) const
 {
-    assert(index < managed_outputs_.size());
+    apex_assert_hard(index < managed_outputs_.size());
     return managed_outputs_[index];
 }
 
@@ -691,16 +694,6 @@ int Node::nextOutputId()
     return outputs_.size();
 }
 
-void Node::setPosition(const QPoint &pos)
-{
-    node_state_->pos = pos;
-}
-
-QPoint Node::getPosition() const
-{
-    return node_state_->pos;
-}
-
 CommandDispatcher* Node::getCommandDispatcher() const
 {
     return dispatcher_;
@@ -718,11 +711,6 @@ void Node::useTimer(Timer *timer)
     Q_FOREACH(ConnectorOut* i, outputs_) {
         i->useTimer(timer);
     }
-}
-
-std::string Node::getLabel() const
-{
-    return node_state_->label_;
 }
 
 void Node::pause(bool pause)
@@ -789,20 +777,4 @@ void Node::disconnectConnector(Connectable */*c*/)
     //    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
     //    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     //    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
-}
-
-
-YAML::Emitter& Node::save(YAML::Emitter& out) const
-{
-    node_state_->writeYaml(out);
-
-    return out;
-}
-
-void Node::read(const YAML::Node &doc)
-{
-    NodeState::Ptr s = getNodeState();
-    s->readYaml(doc);
-
-    setNodeState(s);
 }

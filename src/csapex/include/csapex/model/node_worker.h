@@ -54,6 +54,7 @@ public Q_SLOTS:
     void triggerError(bool e, const std::string& what);
 
     void pause(bool pause);
+    void killExecution();
 
     void sendMessages();
 

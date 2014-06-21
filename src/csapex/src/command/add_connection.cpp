@@ -6,8 +6,8 @@
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-
 #include <csapex/model/graph.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -83,6 +83,6 @@ void AddConnection::refresh()
                                  to_uuid.getFullName() + "(" + (t->isOutput() ? "o" : "") + (t->isInput() ? "i" : "") + "/" + (t->canOutput() ? "o" : "") + (t->canInput() ? "i" : "")  + ")");
     }
 
-    assert(from);
-    assert(to);
+    apex_assert_hard(from);
+    apex_assert_hard(to);
 }

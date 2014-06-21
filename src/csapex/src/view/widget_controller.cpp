@@ -121,7 +121,7 @@ void WidgetController::connectorAdded(Connectable* connector)
     if(designer_) {
         UUID parent_uuid = connector->getUUID().parentUUID();
         NodeBox* box = getBox(parent_uuid);
-        Port* port = new Port(dispatcher_, connector);
+        Port* port = new Port(dispatcher_, connector, box->isFlipped());
 
 
         QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));

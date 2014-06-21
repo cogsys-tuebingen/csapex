@@ -86,9 +86,9 @@ set(SRC_PLUGIN
     src/model/connector_in.cpp
     src/model/connector_out.cpp
     src/model/message.cpp
+    src/model/message_factory.cpp
     src/model/tag.cpp
 
-    src/manager/connection_type_manager.cpp
     src/manager/message_provider_manager.cpp
 
     src/utility/qint_slider.cpp
@@ -100,6 +100,7 @@ set(SRC_PLUGIN
     src/utility/qt_helper.cpp
     src/utility/thread.cpp
     src/utility/uuid.cpp
+    src/utility/assert.cpp
 
     src/view/node_adapter.cpp
     src/view/node_adapter_builder.cpp

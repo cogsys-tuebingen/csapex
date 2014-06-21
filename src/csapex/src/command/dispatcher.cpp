@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/graph.h>
 #include <csapex/view/widget_controller.h>
+#include <csapex/utility/assert.h>
 
 using namespace csapex;
 
@@ -151,7 +152,7 @@ void CommandDispatcher::undo()
     done.pop_back();
 
     bool ret = Command::Access::undoCommand(graph_, widget_ctrl_, last);
-    assert(ret);
+    apex_assert_hard(ret);
 
     setDirty(!last->isAfterSavepoint());
 
