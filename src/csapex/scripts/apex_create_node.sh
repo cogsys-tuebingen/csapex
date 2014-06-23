@@ -18,6 +18,7 @@ fi
 FILE_NAME=$(sed -e 's/\([A-Z]\)/_\L\1/g' -e 's/^_//' <<< $NODE_NAME)
 FILE_NAME=$(tr '[:upper:]' '[:lower:]' <<< $FILE_NAME)
 
+
 DESCRIPTION=$2
 
 if [[ ! NODE_NAME || ! $DESCRIPTION ]]; then
@@ -25,7 +26,7 @@ if [[ ! NODE_NAME || ! $DESCRIPTION ]]; then
     exit
 fi
 
-WORKING_DIR=.
+WORKING_DIR=`pwd`
 
 ###
 ### FIND PREFIX
@@ -33,7 +34,7 @@ WORKING_DIR=.
 PREFIX="NOT-FOUND"
 while [[ `pwd` != "/" ]]; do    
     if [[ -f 'CMakeLists.txt' ]]; then
-        PREFIX=`pwd`
+        PREFIX=`pwd`/
         break
     fi
     
@@ -45,6 +46,8 @@ if [[ $PREFIX == "NOT-FOUND" ]]; then
 fi
 
 cd $PREFIX
+
+DIR=${WORKING_DIR:${#PREFIX}}/
 
 ###
 ### CMAKELISTS EXISTS, BEGIN PARSING
@@ -150,7 +153,7 @@ $NAMESPACE_END
 
 }
 
-#endif // $GUARD" > src/$NEW_FILE_H
+#endif // $GUARD" > $DIR/$NEW_FILE_H
 
 
 ###
@@ -201,7 +204,7 @@ void $NODE_NAME::setup()
 void $NODE_NAME::process()
 {
 }
-"> src/$NEW_FILE
+"> $DIR/$NEW_FILE
 
 
 
@@ -209,7 +212,7 @@ void $NODE_NAME::process()
 ###
 ### MODIFY CMAKELISTS
 ###
-ENTRY="    src/$NEW_FILE"
+ENTRY="    $DIR/$NEW_FILE"
 sed -i -e "/add_library.*$LIBRARY.*/{
         $!{ N ; s|\(add_library.*$LIBRARY.*\)\n\(.*\)|\\1\n$ENTRY\n\\2|
           }
