@@ -41,10 +41,10 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
-    virtual void write(std::ostream& out);
-    virtual void writeRaw(const std::string& file, const std::string &suffix);
+    virtual void write(std::ostream& out) const;
+    virtual void writeRaw(const std::string& file, const std::string &suffix) const;
 
-    virtual void writeYaml(YAML::Emitter& yaml) = 0;
+    virtual void writeYaml(YAML::Emitter& yaml) const = 0;
     virtual void readYaml(const YAML::Node& node) = 0;
 
 protected:

@@ -50,7 +50,7 @@ protected:
     virtual ~Message();
 
 public:
-    void writeYaml(YAML::Emitter& yaml);
+    void writeYaml(YAML::Emitter& yaml) const;
     void readYaml(const YAML::Node& node);
 
 public:
@@ -122,7 +122,7 @@ struct GenericMessage : public Message {
         return name() == other_side->name();
     }
 
-    void writeYaml(YAML::Emitter& yaml) {
+    void writeYaml(YAML::Emitter& yaml) const {
         yaml << YAML::Key << "value" << YAML::Value << "not implemented";
     }
     void readYaml(YAML::Node& node) {
@@ -164,7 +164,7 @@ struct DirectMessage : public Message {
         return name() == other_side->name();
     }
 
-    void writeYaml(YAML::Emitter& yaml) {
+    void writeYaml(YAML::Emitter& yaml) const {
         yaml << YAML::Key << "value" << YAML::Value << value;
     }
     void readYaml(YAML::Node& node) {
@@ -205,7 +205,7 @@ struct MessageTemplate : public Message {
         return name() == other_side->name();
     }
 
-    void writeYaml(YAML::Emitter& yaml) {
+    void writeYaml(YAML::Emitter& yaml) const {
         yaml << YAML::Key << "value" << YAML::Value << "not implemented";
     }
     void readYaml(YAML::Node& node) {

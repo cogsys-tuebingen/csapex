@@ -17,7 +17,7 @@ Message::~Message()
 
 }
 
-void Message::writeYaml(YAML::Emitter&)
+void Message::writeYaml(YAML::Emitter&) const
 {
 
 }

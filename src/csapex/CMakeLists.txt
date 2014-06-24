@@ -86,6 +86,7 @@ set(SRC_PLUGIN
     src/model/connector_in.cpp
     src/model/connector_out.cpp
     src/model/message.cpp
+    src/model/connection_type.cpp
     src/model/message_factory.cpp
     src/model/tag.cpp
 
@@ -136,7 +137,6 @@ set(SRC_APP
     src/model/graph.cpp
     src/model/connection.cpp
     src/model/fulcrum.cpp
-    src/model/connection_type.cpp
     src/model/multi_connection_type.cpp
     src/model/generic_state.cpp
     src/model/message_provider.cpp

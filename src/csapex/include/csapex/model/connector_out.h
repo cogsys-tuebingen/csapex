@@ -51,8 +51,8 @@ public:
         publish(msg);
     }
     template <class Container, typename T>
-    void publish(const typename Container::template TypeMap<T>::Ptr& message,
-                 typename boost::disable_if<boost::is_base_and_derived<connection_types::Message, T> >::type* dummy = 0) {
+    void publish(const typename Container::template TypeMap<T>::Ptr& message/*,
+                 typename boost::disable_if<boost::is_base_and_derived<connection_types::Message, T> >::type* dummy = 0*/) {
         typename Container::Ptr msg(Container::template make<T>());
         msg->template set<T>(message);
         publish(msg);
