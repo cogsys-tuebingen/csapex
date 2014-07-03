@@ -159,7 +159,8 @@ void CsApexCore::settingsChanged()
 void CsApexCore::saveAs(const std::string &file)
 {
     std::string dir = file.substr(0, file.find_last_of('/')+1);
-    chdir(dir.c_str());
+    int chdir_result = chdir(dir.c_str());
+
 
     YAML::Emitter yaml;
 

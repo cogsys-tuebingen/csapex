@@ -58,7 +58,7 @@ void NodeConstructor::load() const
     }
 }
 
-std::vector<Tag> NodeConstructor::getTags() const
+std::vector<Tag::Ptr> NodeConstructor::getTags() const
 {
     if(!is_loaded) {
         load();

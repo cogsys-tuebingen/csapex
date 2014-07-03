@@ -42,7 +42,7 @@ public:
     virtual ~NodeConstructor();
 
     std::string getType() const;
-    std::vector<Tag> getTags() const;
+    std::vector<TagPtr> getTags() const;
     QIcon getIcon() const;
     std::string getDescription() const;
     std::vector<param::ParameterPtr> getParameters() const;
@@ -62,7 +62,7 @@ protected:
 
     mutable bool is_loaded;
     mutable QIcon icon;
-    mutable std::vector<Tag> tags_;
+    mutable std::vector<TagPtr> tags_;
     mutable std::vector<param::ParameterPtr> params_;
 
     Make c;

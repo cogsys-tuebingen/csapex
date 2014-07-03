@@ -25,7 +25,7 @@ Tag::~Tag()
 
 }
 
-const Tag Tag::get(const std::string &name)
+const Tag::Ptr Tag::get(const std::string &name)
 {
     return Manager::instance().get(name);
 }
@@ -40,7 +40,7 @@ std::string Tag::getName() const
     return name_;
 }
 
-const Tag Tag::Manager::get(const std::string &name)
+const Tag::Ptr Tag::Manager::get(const std::string &name)
 {
     try {
         return tags_.at(name);
@@ -70,7 +70,7 @@ void Tag::createIfNotExists(const std::string &name)
 void Tag::Manager::create(const std::string &name)
 {
     apex_assert_hard(!exists(name));
-    tags_.insert(std::make_pair(name, Tag(name)));
+    tags_.insert(std::make_pair(name, Tag::Ptr(new Tag(name))));
 }
 
 int Tag::compare(const Tag &tag) const

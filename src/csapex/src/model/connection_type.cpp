@@ -5,6 +5,9 @@
 #include <csapex/model/message.h>
 #include <csapex/utility/assert.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 ConnectionType::Ptr ConnectionType::default_;

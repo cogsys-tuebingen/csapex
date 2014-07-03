@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <vector>
+#include <string>
 
 namespace csapex
 {

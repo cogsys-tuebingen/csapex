@@ -97,7 +97,7 @@ void BoxManager::rebuildPrototypes()
 void BoxManager::rebuildMap()
 {
     Tag::createIfNotExists("General");
-    Tag general = Tag::get("General");
+    Tag::Ptr general = Tag::get("General");
     
     tag_map_.clear();
     tags_.clear();
@@ -112,7 +112,7 @@ void BoxManager::rebuildMap()
         
         try {
             bool has_tag = false;
-            Q_FOREACH(const Tag& tag, p->getTags()) {
+            Q_FOREACH(const Tag::Ptr& tag, p->getTags()) {
                 tag_map_[tag].push_back(p);
                 tags_.insert(tag);
                 has_tag = true;
@@ -130,7 +130,7 @@ void BoxManager::rebuildMap()
         }
     }
     
-    Q_FOREACH(const Tag& cat, tags_) {
+    Q_FOREACH(const Tag::Ptr& cat, tags_) {
         std::sort(tag_map_[cat].begin(), tag_map_[cat].end(), compare);
     }
     
@@ -157,8 +157,8 @@ void BoxManager::insertAvailableNodeTypes(QMenu* menu)
 {
     ensureLoaded();
     
-    Q_FOREACH(const Tag& tag, tags_) {
-        QMenu* submenu = new QMenu(tag.getName().c_str());
+    Q_FOREACH(const Tag::Ptr& tag, tags_) {
+        QMenu* submenu = new QMenu(tag->getName().c_str());
         menu->addMenu(submenu);
         
         Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
@@ -184,10 +184,10 @@ void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
     
     tree->setDragEnabled(true);
     
-    Q_FOREACH(const Tag& tag, tags_) {
+    Q_FOREACH(const Tag::Ptr& tag, tags_) {
         
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
-        submenu->setText(0, tag.getName().c_str());
+        submenu->setText(0, tag->getName().c_str());
         tree->addTopLevelItem(submenu);
         
         Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
@@ -219,8 +219,8 @@ QAbstractItemModel* BoxManager::listAvailableNodeTypes()
         QString type(proxy->getType().c_str());
         
         QStringList tags;
-        Q_FOREACH(const Tag& tag, proxy->getTags()) {
-            tags << tag.getName().c_str();
+        Q_FOREACH(const Tag::Ptr& tag, proxy->getTags()) {
+            tags << tag->getName().c_str();
         }
         
         QStandardItem* item = new QStandardItem(proxy->getIcon(), type);

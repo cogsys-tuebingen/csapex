@@ -1,38 +1,42 @@
 #ifndef TAG_H
 #define TAG_H
 
-/// PROJECT
-#include <utils_plugin/singleton.hpp>
-
 /// SYSTEM
 #include <string>
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 namespace csapex
 {
 
 class Tag
 {
+public:
+    typedef boost::shared_ptr<Tag> Ptr;
+
 private:
-    class Manager : public Singleton<Manager> {
-        friend class Singleton<Manager>;
+    class Manager {
+    public:
+        static Manager& instance() {
+            static Manager inst;
+            return inst;
+        }
 
     public:
-        const Tag get(const std::string& name);
+        const Tag::Ptr get(const std::string& name);
         bool exists(const std::string& name) const;
         void create(const std::string &name);
 
     private:
         Manager();
 
-        std::map<std::string, Tag> tags_;
+        std::map<std::string, Tag::Ptr> tags_;
     };
-
 
 public:
     ~Tag();
 
-    static const Tag get(const std::string& name);
+    static const Tag::Ptr get(const std::string& name);
     static bool exists(const std::string& name);
     static void create(const std::string& name);
     static void createIfNotExists(const std::string& name);

@@ -86,12 +86,12 @@ std::string Node::getType() const
     return type_;
 }
 
-void Node::addTag(const Tag &tag)
+void Node::addTag(const Tag::Ptr &tag)
 {
     tags_.push_back(tag);
 }
 
-std::vector<Tag> Node::getTags() const
+std::vector<Tag::Ptr> Node::getTags() const
 {
     if(tags_.empty()) {
         tags_.push_back(Tag::get("General"));
