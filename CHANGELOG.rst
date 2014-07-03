@@ -2,8 +2,8 @@
 Changelog for package utils_param
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.2 (2014-07-03)
+------------------
 
 * formated default string
 * added parameter description
