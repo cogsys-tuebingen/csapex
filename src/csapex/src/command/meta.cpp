@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <QTreeWidgetItem>
+#include <iostream>
 
 using namespace csapex::command;
 

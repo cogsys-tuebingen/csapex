@@ -217,11 +217,11 @@ void CsApexWindow::updateNodeInfo()
             ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << n->getType() << "</h1>";
             ss << "<p>Tags: <i>";
             int i = 0;
-            Q_FOREACH(const Tag& tag,  n->getTags()) {
+            Q_FOREACH(const Tag::Ptr& tag, n->getTags()) {
                 if(i++ > 0) {
                     ss << ", ";
                 }
-                ss << tag.getName();
+                ss << tag->getName();
             }
             ss << "</p>";
             ss << "<h3>" << n->getDescription() << "</h3>";

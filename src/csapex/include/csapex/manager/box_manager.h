@@ -76,8 +76,8 @@ protected:
     std::vector<NodeConstructor::Ptr> available_elements_prototypes;
     std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
 
-    std::map<Tag, std::vector<NodeConstructor::Ptr> > tag_map_;
-    std::set<Tag> tags_;
+    std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tag_map_;
+    std::set<TagPtr> tags_;
 
     PluginManager<Node>* node_manager_;
     PluginManager<NodeAdapterBuilder>* node_adapter_manager_;

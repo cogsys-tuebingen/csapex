@@ -48,8 +48,8 @@ public:
     void setType(const std::string& type);
     std::string getType() const;
 
-    void addTag(const Tag& tag);
-    std::vector<Tag> getTags() const;
+    void addTag(const Tag::Ptr &tag);
+    std::vector<Tag::Ptr> getTags() const;
 
     virtual QIcon getIcon() const;
 
@@ -192,7 +192,7 @@ Q_SIGNALS:
 
 protected:
     std::string type_;
-    mutable std::vector<Tag> tags_;
+    mutable std::vector<Tag::Ptr> tags_;
 
     NodeModifier* modifier_;
 

@@ -9,6 +9,9 @@
 #include <csapex/command/meta.h>
 #include <csapex/utility/assert.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace qt_helper;
 using namespace csapex;
 
