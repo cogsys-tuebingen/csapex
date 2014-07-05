@@ -567,6 +567,16 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         boost::function<void(int)> set = boost::bind(&QIntSlider::setIntValue, slider, __1);
         connections.push_back(parameter_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<int>, this, __1, set)));
 
+        // paramter scope changed -> update slider interval
+        boost::function<void(int)> setMin = boost::bind(&QIntSlider::setMinimum, slider, __1);
+        boost::function<void(int)> setMax = boost::bind(&QIntSlider::setMaximum, slider, __1);
+        boost::function<void(const param::RangeParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::RangeParameter::min<int>, __1));
+        boost::function<void(const param::RangeParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::RangeParameter::max<int>, __1));
+
+        connections.push_back(scope_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::RangeParameter>, this, __1, setMinFromParam)));
+        connections.push_back(scope_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::RangeParameter>, this, __1, setMaxFromParam)));
+
+
         QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
     } else if(range_p->is<double>()) {
@@ -583,6 +593,15 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         // model change -> ui
         boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, __1);
         connections.push_back(parameter_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<double>, this, __1, set)));
+
+        // paramter scope changed -> update slider interval
+        boost::function<void(double)> setMin = boost::bind(&QDoubleSlider::setMinimum, slider, __1);
+        boost::function<void(double)> setMax = boost::bind(&QDoubleSlider::setMaximum, slider, __1);
+        boost::function<void(const param::RangeParameter*)> setMinFromParam = boost::bind(setMin, boost::bind(&param::RangeParameter::min<double>, __1));
+        boost::function<void(const param::RangeParameter*)> setMaxFromParam = boost::bind(setMax, boost::bind(&param::RangeParameter::max<double>, __1));
+
+        connections.push_back(scope_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::RangeParameter>, this, __1, setMinFromParam)));
+        connections.push_back(scope_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::RangeParameter>, this, __1, setMaxFromParam)));
 
         QObject::connect(slider, SIGNAL(valueChanged(double)), call, SLOT(call()));
 

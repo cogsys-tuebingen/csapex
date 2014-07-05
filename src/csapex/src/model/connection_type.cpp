@@ -80,7 +80,7 @@ bool ConnectionType::isValid() const
 void ConnectionType::write(std::ostream &out) const
 {
     YAML::Emitter yaml;
-    yaml << YAML::Flow << YAML::BeginMap;
+    yaml << /*YAML::Flow << */YAML::BeginMap;
     yaml << YAML::Key << "type" << YAML::Value << name();
 
     writeYaml(yaml);

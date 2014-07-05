@@ -244,7 +244,7 @@ void Node::updateParameter(param::Parameter *p)
         /// TODO: make synchronized!!!!!
         cout->setAsync(true);
 
-        boost::function<void(T)> publish = boost::bind(&ConnectorOut::publishIntegral<T>, cout, _1);
+        boost::function<void(T)> publish = boost::bind(&ConnectorOut::publishIntegral<T>, cout, _1, "/");
         boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
         connections.push_back(parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
 
