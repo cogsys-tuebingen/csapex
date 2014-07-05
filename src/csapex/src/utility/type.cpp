@@ -30,7 +30,7 @@ std::string csapex::type2nameWithoutNamespace(const std::type_info& info)
     std::string full_name(abi::__cxa_demangle(info.name(), 0, 0, &status));
 
     //    return replace(replace(full_name, "connection_types::", ""), "csapex::", "");
-    std::size_t split_point = full_name.rfind("::");
+    std::size_t split_point = full_name.find("::");
 
     if(split_point == full_name.npos) {
         return full_name;

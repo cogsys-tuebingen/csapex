@@ -47,7 +47,7 @@ public:
 
     template <typename R>
     typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
-        return buffer_->read< connection_types::GenericMessage<R> >() -> value;
+        return buffer_->read< connection_types::GenericPointerMessage<R> >() -> value;
     }
 
     template <typename Container, typename R>

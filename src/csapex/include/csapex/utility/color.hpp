@@ -41,7 +41,7 @@ namespace color {
 
 inline QColor fromCount(std::size_t count)
 {
-    double r,g,b;
+    double r = 0, g = 0, b = 0;
     __HSV2RGB__((double) ((count * 77) % 360), 1.0, 1.0, r, g, b);
     return QColor(r,g,b);
 }

@@ -145,7 +145,7 @@ void NodeBox::updateInformation(Graph* graph)
 
     // set color using HSV rotation
     double hue =  (compo * 77) % 360;
-    double r, g, b;
+    double r = 0, g = 0, b = 0;
     __HSV2RGB__(hue, 1., 1., r, g, b);
     double fr = 0, fb = 0, fg = 0;
     if(b > 100 && r < 100 && g < 100) {

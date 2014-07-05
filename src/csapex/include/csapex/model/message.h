@@ -95,26 +95,26 @@ public:
 
 
 template <typename Type>
-struct GenericMessage : public Message {
-    typedef boost::shared_ptr<GenericMessage<Type> > Ptr;
+struct GenericPointerMessage : public Message {
+    typedef boost::shared_ptr<GenericPointerMessage<Type> > Ptr;
 
-    GenericMessage()
-        : Message(type2nameWithoutNamespace(typeid(Type)))
+    GenericPointerMessage()
+        : Message(type2name(typeid(Type)))
     {}
 
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new GenericMessage<Type>);
+        Ptr new_msg(new GenericPointerMessage<Type>);
         new_msg->value = value;
         return new_msg;
     }
 
     virtual ConnectionType::Ptr toType() {
-        Ptr new_msg(new GenericMessage<Type>);
+        Ptr new_msg(new GenericPointerMessage<Type>);
         return new_msg;
     }
 
     static ConnectionType::Ptr make(){
-        Ptr new_msg(new GenericMessage<Type>);
+        Ptr new_msg(new GenericPointerMessage<Type>);
         return new_msg;
     }
 
@@ -132,31 +132,26 @@ struct GenericMessage : public Message {
 };
 
 template <typename Type>
-struct DirectMessage : public Message {
-    typedef boost::shared_ptr<DirectMessage<Type> > Ptr;
+struct GenericValueMessage : public Message {
+    typedef boost::shared_ptr<GenericValueMessage<Type> > Ptr;
 
-    DirectMessage()
+    GenericValueMessage()
         : Message(type2name(typeid(Type)))
     {}
 
-    virtual bool isRosMessage() const
-    {
-        return false;
-    }
-
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new DirectMessage<Type>);
+        Ptr new_msg(new GenericValueMessage<Type>);
         new_msg->value = value;
         return new_msg;
     }
 
     virtual ConnectionType::Ptr toType() {
-        Ptr new_msg(new DirectMessage<Type>);
+        Ptr new_msg(new GenericValueMessage<Type>);
         return new_msg;
     }
 
     static ConnectionType::Ptr make(){
-        Ptr new_msg(new DirectMessage<Type>);
+        Ptr new_msg(new GenericValueMessage<Type>);
         return new_msg;
     }
 

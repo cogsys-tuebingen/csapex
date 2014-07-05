@@ -217,15 +217,15 @@ void Node::updateParameter(param::Parameter *p)
         ConnectorIn* cin;
         cin = new ConnectorIn(*settings_, UUID::make_sub(getUUID(), p->name() + "_in"));
 
-        cin->setType(connection_types::DirectMessage<T>::make());
+        cin->setType(connection_types::GenericValueMessage<T>::make());
 
         cin->enable();
         /// TODO: make synchronized!!!!!
         cin->setAsync(true);
 
-        boost::function<typename connection_types::DirectMessage<T>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::DirectMessage<T> >, cin, (void*) 0);
-        boost::function<connection_types::DirectMessage<T>*()> getmsg = boost::bind(&connection_types::DirectMessage<T>::Ptr::get, boost::bind(getmsgptr));
-        boost::function<T()> read = boost::bind(&connection_types::DirectMessage<T>::getValue, boost::bind(getmsg));
+        boost::function<typename connection_types::GenericValueMessage<T>::Ptr()> getmsgptr = boost::bind(&ConnectorIn::getMessage<connection_types::GenericValueMessage<T> >, cin, (void*) 0);
+        boost::function<connection_types::GenericValueMessage<T>*()> getmsg = boost::bind(&connection_types::GenericValueMessage<T>::Ptr::get, boost::bind(getmsgptr));
+        boost::function<T()> read = boost::bind(&connection_types::GenericValueMessage<T>::getValue, boost::bind(getmsg));
         boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
         qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
         callbacks.push_back(set_param);
@@ -238,7 +238,7 @@ void Node::updateParameter(param::Parameter *p)
         ConnectorOut* cout;
         cout = new ConnectorOut(*settings_, UUID::make_sub(getUUID(), p->name() + "_out"));
 
-        cout->setType(connection_types::DirectMessage<T>::make());
+        cout->setType(connection_types::GenericValueMessage<T>::make());
 
         cout->enable();
         /// TODO: make synchronized!!!!!
