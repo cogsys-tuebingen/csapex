@@ -1,15 +1,19 @@
 /// HEADAER
 #include <csapex/model/message.h>
 
+/// PROJECT
+#include <csapex/utility/assert.h>
+
 using namespace csapex;
 using namespace connection_types;
 
 /***
  * MESSAGE
  */
-Message::Message(const std::string& name)
-    : ConnectionType(name)
+Message::Message(const std::string& name, const std::string &frame_id)
+    : ConnectionType(name), frame_id(frame_id)
 {
+    apex_assert(!frame_id.empty());
 }
 
 Message::~Message()
@@ -30,7 +34,7 @@ void Message::readYaml(const YAML::Node&)
  * ANYMESSAGE
  */
 AnyMessage::AnyMessage()
-    : Message("anything")
+    : Message("anything", "/")
 {}
 
 ConnectionType::Ptr AnyMessage::clone()
@@ -65,7 +69,7 @@ bool AnyMessage::acceptsConnectionFrom(const ConnectionType*) const
  * NOMESSAGE
  */
 NoMessage::NoMessage()
-    : Message("nothing")
+    : Message("nothing", "/")
 {}
 
 ConnectionType::Ptr NoMessage::clone()

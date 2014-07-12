@@ -160,7 +160,9 @@ void CsApexCore::saveAs(const std::string &file)
 {
     std::string dir = file.substr(0, file.find_last_of('/')+1);
     int chdir_result = chdir(dir.c_str());
-
+    if(chdir_result != 0) {
+        throw std::runtime_error(std::string("cannot change into directory ") + dir);
+    }
 
     YAML::Emitter yaml;
 

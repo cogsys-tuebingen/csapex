@@ -38,8 +38,8 @@ public:
     }
 
     template <typename T>
-    void publishIntegral(T message) {
-        typename connection_types::DirectMessage<T>::Ptr msg(new connection_types::DirectMessage<T>);
+    void publishIntegral(T message, const std::string& frame_id = "/") {
+        typename connection_types::DirectMessage<T>::Ptr msg(new connection_types::DirectMessage<T>(frame_id));
         msg->value = message;
         publish(msg);
     }

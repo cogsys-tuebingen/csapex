@@ -7,23 +7,23 @@
 #include <sstream>
 #include <iostream>
 
-void apex_assert(bool assertion)
+void _apex_assert(bool assertion, const char* code, const char* file, int line)
 {
-    apex_assert_hard(assertion);
+    _apex_assert_hard(assertion, code, file, line);
 }
 
-void apex_assert_hard(bool assertion)
+void _apex_assert_hard(bool assertion, const char* code, const char* file, int line)
 {
     if(!assertion) {
         std::stringstream ss;
-        ss << "assertion failed in " << __FILE__ << ", line " << __LINE__ ;
+        ss << "assertion \"" << code << "\" failed in " << file << ", line " << line ;
         throw std::runtime_error(ss.str());
     }
 }
 
-void apex_assert_soft(bool assertion)
+void _apex_assert_soft(bool assertion, const char* code, const char* file, int line)
 {
     if(!assertion) {
-        std::cerr << "[cs::APEX - SOFT ASSERTION FAILED] file " << __FILE__ << ", line " << __LINE__  << std::endl;
+        std::cerr << "[cs::APEX - SOFT ASSERTION FAILED] \"" << code << "\" [file " << file << ", line " << line << "]" << std::endl;
     }
 }
