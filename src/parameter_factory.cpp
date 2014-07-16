@@ -207,20 +207,26 @@ Parameter::Ptr ParameterFactory::declareText(const std::string &name, const std:
     return declareText(name, ParameterDescription(""), def);
 }
 
-Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const ParameterDescription& description, const std::vector<std::string> & set)
+Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const ParameterDescription& description,
+                                                           const std::vector<std::string> & set,
+                                                           const std::string &def)
 {
     SetParameter::Ptr result(new SetParameter(name, description));
     result->setSet(set);
 
     if(!set.empty()) {
-        result->def_ = set.begin();
-        result->set<std::string>(*set.begin());
+        std::string v = def;
+        if(v.empty()) {
+            v = set[0];
+        }
+        result->def_ = v;
+        result->set<std::string>(v);
     }
 
     return result;
 }
 
-Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const std::vector<std::string> & set)
+Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const std::vector<std::string> & set, const std::string& def)
 {
-    return declareParameterStringSet(name, ParameterDescription(), set);
+    return declareParameterStringSet(name, ParameterDescription(), set, def);
 }

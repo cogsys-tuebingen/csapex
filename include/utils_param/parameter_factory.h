@@ -260,24 +260,29 @@ public:
      * @param name
      * @param description
      * @param set
+     * @param def default value
      * @return
      */
     template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, T> & set)
+    static Parameter::Ptr declareParameterSet(const std::string& name, const ParameterDescription& description,
+                                              const std::map<std::string, T> & set,
+                                              const T& def)
     {
         SetParameter::Ptr result(new SetParameter(name, description));
         result->setSet(set);
         if(!set.empty()) {
-            result->def_ = set.begin()->second;
-            result->set<T>(set.begin()->second);
+            result->def_ = def;//set.begin()->second;
+            result->set<T>(def);
         }
 
         return result;
     }
     template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const std::map<std::string, T> & set)
+    static Parameter::Ptr declareParameterSet(const std::string& name,
+                                              const std::map<std::string, T> & set,
+                                              const T& def)
     {
-        return declareParameterSet(name, ParameterDescription(), set);
+        return declareParameterSet(name, ParameterDescription(), set, def);
     }
 
 
@@ -287,12 +292,16 @@ public:
      * @param name
      * @param description
      * @param set
+     * @param def default value
      * @return
      */
     static Parameter::Ptr declareParameterStringSet(const std::string& name,
                                                     const ParameterDescription& description,
-                                                    const std::vector<std::string> & set);
-    static Parameter::Ptr declareParameterStringSet(const std::string& name, const std::vector<std::string> & set);
+                                                    const std::vector<std::string> & set,
+                                                    const std::string &def = "");
+    static Parameter::Ptr declareParameterStringSet(const std::string& name,
+                                                    const std::vector<std::string> & set,
+                                                    const std::string &def = "");
 
 
 
