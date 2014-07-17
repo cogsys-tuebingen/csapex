@@ -14,7 +14,7 @@ class QSpinBoxExt : public QSpinBox {
 public Q_SLOTS:
     void setRange(int min, int max)
     {
-        QSpinBoxExt::setRange(min, max);
+        QSpinBox::setRange(min, max);
     }
 };
 
