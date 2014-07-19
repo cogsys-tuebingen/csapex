@@ -96,15 +96,26 @@ public:
 
     template <typename T>
     void setMin(T min) {
-        if(min != read<T>(min_)) {
-            min_ = min; scope_changed(this);
+        T _min = read<T>(min_);
+        if(min != _min) {
+            min_ = min;
+            T _max = read<T>(max_);
+            if(_max < _min) {
+                max_ = min;
+            }
+            scope_changed(this);
         }
     }
 
     template <typename T>
     void setMax(T max) {
-        if(read<T>(max_) != max) {
+        T _max = read<T>(max_);
+        if(_max != max) {
             max_ = max;
+            T _min = read<T>(min_);
+            if(_max < _min) {
+                min_ = max;
+            }
             scope_changed(this);
         }
     }
