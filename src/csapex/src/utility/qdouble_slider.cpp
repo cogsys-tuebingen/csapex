@@ -21,7 +21,10 @@ QDoubleSlider::~QDoubleSlider()
 
 void QDoubleSlider::update()
 {
-    setMaximum(double2int(max_));
+    if(min_ > max_) {
+        max_ = min_;
+    }
+    setRange(double2int(min_), double2int(max_));
 }
 
 double QDoubleSlider::int2double(int val)
@@ -48,13 +51,9 @@ void QDoubleSlider::scaleValue(int value)
 void QDoubleSlider::setDoubleMinimum(double min)
 {
     bool change = min != min_;
-    min_ = min;
-
-    if(min_ > max_) {
-        max_ = min_;
-    }
 
     if(change) {
+        min_ = min;
         update();
     }
 }
@@ -62,9 +61,20 @@ void QDoubleSlider::setDoubleMinimum(double min)
 void QDoubleSlider::setDoubleMaximum(double max)
 {
     bool change = max != max_;
-    max_ = max;
 
     if(change) {
+        max_ = max;
+        update();
+    }
+}
+
+void QDoubleSlider::setDoubleRange(double min, double max)
+{
+    bool change = max != max_ || min != min_;
+
+    if(change) {
+        max_ = max;
+        min_ = min;
         update();
     }
 }
