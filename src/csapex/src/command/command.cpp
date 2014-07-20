@@ -14,7 +14,7 @@ using namespace csapex;
 std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command()
-    : before_save_point_(false), after_save_point_(false)
+    : settings_(NULL), before_save_point_(false), after_save_point_(false)
 {
 }
 
@@ -33,18 +33,10 @@ bool Command::Access::redoCommand(GraphPtr graph, WidgetController::Ptr widget_c
     return Command::redoCommand(graph, widget_ctrl, cmd);
 }
 
-void Command::setGraph(Graph::Ptr graph)
+void Command::init(Settings *settings, GraphPtr graph, WidgetControllerPtr widget_ctrl)
 {
+    settings_ = settings;
     graph_ = graph;
-}
-
-Graph::Ptr Command::getGraph()
-{
-    return graph_;
-}
-
-void Command::setWidgetController(WidgetControllerPtr widget_ctrl)
-{
     widget_ctrl_ = widget_ctrl;
 }
 

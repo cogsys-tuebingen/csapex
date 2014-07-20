@@ -42,11 +42,6 @@ Graph::~Graph()
 
 }
 
-Settings& Graph::getSettings() const
-{
-    return settings_;
-}
-
 void Graph::init(CommandDispatcher *dispatcher)
 {
     dispatcher_ = dispatcher;

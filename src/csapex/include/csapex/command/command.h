@@ -35,12 +35,7 @@ public:
 public:
     Command();
 
-    void setGraph(GraphPtr graph);
-
-    // TODO: remove!
-    GraphPtr getGraph();
-
-    void setWidgetController(WidgetControllerPtr widget_ctrl);
+    void init(Settings* settings, GraphPtr graph, WidgetControllerPtr widget_ctrl);
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -63,6 +58,7 @@ protected:
     virtual bool doRedo() = 0;
 
 protected:
+    Settings* settings_;
     GraphPtr graph_;
     WidgetControllerPtr widget_ctrl_;
 

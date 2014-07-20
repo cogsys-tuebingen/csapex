@@ -38,10 +38,6 @@ public:
 
 public:
     Graph(Settings &settings);
-
-    // TODO: remove
-    Settings& getSettings() const;
-
     virtual ~Graph();
 
     void init(CommandDispatcher* dispatcher);

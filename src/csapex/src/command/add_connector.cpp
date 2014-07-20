@@ -39,12 +39,12 @@ bool AddConnector::doExecute()
 
     if(input) {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_IN, node->getMessageInputs().size()) : c_uuid;
-        Input* in = new Input(graph_->getSettings(), uuid);
+        Input* in = new Input(*settings_, uuid);
         c = in;
         node->getNodeWorker()->registerInput(in);
     } else {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_OUT, node->getMessageOutputs().size()) : c_uuid;
-        Output* out = new Output(graph_->getSettings(), uuid);
+        Output* out = new Output(*settings_, uuid);
         c = out;
         node->getNodeWorker()->registerOutput(out);
     }

@@ -8,8 +8,8 @@
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Graph::Ptr graph, WidgetController::Ptr widget_control)
-    : graph_(graph), widget_ctrl_(widget_control), dirty_(false)
+CommandDispatcher::CommandDispatcher(Settings& settings, Graph::Ptr graph, WidgetController::Ptr widget_control)
+    : settings_(settings), graph_(graph), widget_ctrl_(widget_control), dirty_(false)
 {
     graph_->init(this);
     widget_ctrl_->setCommandDispatcher(this);
@@ -34,8 +34,7 @@ void CommandDispatcher::execute(Command::Ptr command)
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
-    command->setGraph(graph_);
-    command->setWidgetController(widget_ctrl_);
+    command->init(&settings_, graph_, widget_ctrl_);
     later.push_back(command);
 }
 
