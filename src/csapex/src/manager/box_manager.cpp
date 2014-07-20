@@ -11,7 +11,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/view/box.h>
 #include <csapex/view/default_node_adapter.h>
-#include <utils_plugin/plugin_manager.hpp>
+#include <csapex/utility/plugin_manager.hpp>
 
 
 /// SYSTEM

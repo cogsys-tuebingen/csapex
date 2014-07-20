@@ -2,7 +2,7 @@
 #define NODE_CONSTRUCTOR_H
 
 /// COMPONENT
-#include <utils_plugin/constructor.hpp>
+#include <csapex/utility/constructor.hpp>
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <utils_param/param_fwd.h>

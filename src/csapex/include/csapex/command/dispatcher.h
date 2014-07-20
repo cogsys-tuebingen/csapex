@@ -4,9 +4,6 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 
-/// PROJECT
-#include <utils_plugin/singleton.hpp>
-
 /// SYSTEM
 #include <deque>
 #include <QObject>

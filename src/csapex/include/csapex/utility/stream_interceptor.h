@@ -2,7 +2,7 @@
 #define STREAM_INTERCEPTOR_H
 
 /// PROJECT
-#include <utils_plugin/singleton.hpp>
+#include <csapex/utility/singleton.hpp>
 
 /// SYSTEM
 #include <QWidget>

@@ -2,7 +2,7 @@
 #include <csapex/manager/message_provider_manager.h>
 
 /// COMPONENT
-#include <utils_plugin/plugin_manager.hpp>
+#include <csapex/utility/plugin_manager.hpp>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>

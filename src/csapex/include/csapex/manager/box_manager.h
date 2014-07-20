@@ -7,7 +7,7 @@
 #include <csapex/view/node_adapter_builder.h>
 
 /// PROJECT
-#include <utils_plugin/singleton.hpp>
+#include <csapex/utility/singleton.hpp>
 
 /// SYSTEM
 #include <QLayout>

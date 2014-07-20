@@ -6,7 +6,7 @@
 #include <csapex/csapex_fwd.h>
 
 /// PROJECT
-#include <utils_plugin/singleton.hpp>
+#include <csapex/utility/singleton.hpp>
 
 /// SYSTEM
 #include <map>
