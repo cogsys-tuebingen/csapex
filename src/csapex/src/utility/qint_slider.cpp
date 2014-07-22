@@ -56,13 +56,13 @@ void QIntSlider::scaleValue(int value)
 void QIntSlider::setIntMinimum(int min)
 {
     bool change = min != min_;
-    min_ = min;
 
     if(min_ > max_) {
         max_ = min_;
     }
 
     if(change) {
+        min_ = min;
         update();
     }
 }
@@ -70,9 +70,24 @@ void QIntSlider::setIntMinimum(int min)
 void QIntSlider::setIntMaximum(int max)
 {
     bool change = max != max_;
-    max_ = max;
+
+    if(min_ > max_) {
+        min_ = max_;
+    }
 
     if(change) {
+        max_ = max;
+        update();
+    }
+}
+
+void QIntSlider::setIntRange(int min, int max)
+{
+    bool change = max != max_ || min != min_;
+
+    if(change) {
+        min_ = min;
+        max_ = max;
         update();
     }
 }

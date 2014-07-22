@@ -30,6 +30,7 @@ public Q_SLOTS:
     void scaleValue(int value);
     void setIntMinimum(int min);
     void setIntMaximum(int max);
+    void setIntRange(int min, int max);
     void setIntValue(int val);
     void limitMin(int limit);
     void limitMax(int limit);
