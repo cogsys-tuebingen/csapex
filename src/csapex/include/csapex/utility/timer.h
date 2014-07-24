@@ -6,6 +6,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <deque>
 
 namespace csapex
 {
@@ -16,21 +17,27 @@ public:
     typedef boost::shared_ptr<Timer> Ptr;
 
     struct Interval {
-        std::string name;
-        QDateTime start;
-        QDateTime end;
+        typedef boost::shared_ptr<Interval> Ptr;
 
-        Interval* parent;
-        std::vector<Interval> sub;
+        Interval(const std::string& name);
 
-        Interval(const std::string& name)
-            : name(name), parent(NULL)
-        {}
+        void start();
+        void stop();
+
+        std::string name() const;
 
         int lengthMs() const;
         int lengthSubMs() const;
 
         void entries(std::vector<std::pair<std::string, int> > &out) const;
+
+    public:
+        std::vector<Interval::Ptr> sub;
+
+    private:
+        std::string name_;
+        QDateTime start_;
+        QDateTime end_;
     };
 
     class Interlude : public boost::noncopyable {
@@ -54,8 +61,10 @@ public:
     Interlude::Ptr step(const std::string& name);
 
 public:
-    Interval intervals;
-    Interval* current_sub_interval;
+    std::string timer_name_;
+
+    Interval::Ptr root;
+    std::deque<Interval::Ptr> active;
 };
 
 }

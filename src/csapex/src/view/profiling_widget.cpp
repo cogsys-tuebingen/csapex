@@ -62,7 +62,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
             continue;
         }
 
-        max_time_ms = std::max(max_time_ms, t->intervals.lengthMs());
+        max_time_ms = std::max(max_time_ms, t->root->lengthMs());
 
         std::vector<std::pair<std::string, int> > names = t->entries();
         for(std::vector<std::pair<std::string, int> >::const_iterator it = names.begin(); it != names.end(); ++it) {
@@ -147,7 +147,9 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
             const Timer::Ptr& timer = node_worker_->timer_history_[time];
 
-            paintTimer(p, timer.get());
+            if(timer) {
+                paintTimer(p, timer.get());
+            }
         }
     }
 
@@ -201,28 +203,28 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
 void ProfilingWidget::paintTimer(QPainter& p, const Timer * timer)
 {
-    paintInterval(p, timer->intervals, 0, 0);
+    paintInterval(p, timer->root, 0, 0);
 
     current_draw_x += indiv_width_;
 }
 
-float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval& interval, float height_offset, int depth)
+float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& interval, float height_offset, int depth)
 {
-    int interval_time = interval.lengthMs();
+    int interval_time = interval->lengthMs();
 
     float f = interval_time / max_time_ms_;
     f = std::max(0.0f, std::min(1.0f, f));
     float height = f * content_height_;
 
 
-    if(interval.name == "io") {
+    if(interval->name() == "io") {
         int r,g,b;
         r = 0;
         g = 0;
         b = 0;
         p.setBrush(QBrush(QColor(r, g, b)));
     } else {
-        p.setBrush(QBrush(steps_[interval.name]));
+        p.setBrush(QBrush(steps_[interval->name()]));
     }
 
 
@@ -230,8 +232,8 @@ float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval& interva
     p.drawRect(QRectF(current_draw_x + indiv_width_ - w, bottom - height - height_offset, w, height));
 
     float h = height_offset;
-    for(std::vector<Timer::Interval>::const_iterator sub = interval.sub.begin(); sub != interval.sub.end(); ++sub) {
-        const Timer::Interval& sub_interval = *sub;
+    for(std::vector<Timer::Interval::Ptr>::const_iterator sub = interval->sub.begin(); sub != interval->sub.end(); ++sub) {
+        const Timer::Interval::Ptr& sub_interval = *sub;
         h += paintInterval(p, sub_interval, h, depth + 1);
     }
 

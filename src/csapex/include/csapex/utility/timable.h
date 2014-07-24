@@ -9,7 +9,7 @@ namespace csapex
 {
 
 #define INTERLUDE(name) \
-    if(profiling_timer_) csapex::Timer::Interlude::Ptr __interlude__ = profiling_timer_->step(name)
+    csapex::Timer::Interlude::Ptr __interlude__ = profiling_timer_ ? profiling_timer_->step(name) : csapex::Timer::Interlude::Ptr(static_cast<csapex::Timer::Interlude*>(NULL))
 
 class Timable
 {

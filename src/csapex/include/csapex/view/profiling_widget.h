@@ -28,7 +28,7 @@ public Q_SLOTS:
 protected:
     void paintEvent(QPaintEvent *);
     void paintTimer(QPainter &p, const Timer*);
-    float paintInterval(QPainter &p, const csapex::Timer::Interval &interval, float height_offset, int depth);
+    float paintInterval(QPainter &p, const Timer::Interval::Ptr &interval, float height_offset, int depth);
 
 private:
     DesignerView* view_;
