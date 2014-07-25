@@ -40,9 +40,9 @@ public:
      *  GETTING PARAMETERS
      */
     template <typename T>
-    const T param(const std::string& name) const
+    const T readParameter(const std::string& name) const
     {
-        return parameter_state_.param<T>(name);
+        return parameter_state_.readParameter<T>(name);
     }
 
     std::vector<param::Parameter::Ptr> getParameters() const;

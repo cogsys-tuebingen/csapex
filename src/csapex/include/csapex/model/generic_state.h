@@ -35,7 +35,7 @@ public:
     std::vector<param::Parameter::Ptr> getParameters() const;
 
     template <typename T>
-    const T param (const std::string& name) const {
+    const T readParameter (const std::string& name) const {
         try {
             return getParameter(name)->as<T>();
         } catch(const std::out_of_range& e) {

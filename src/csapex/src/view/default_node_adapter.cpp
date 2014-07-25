@@ -787,7 +787,7 @@ template <typename T>
 void DefaultNodeAdapter::updateUi(const param::Parameter* p, boost::function<void(T)> setter)
 {
     /// TODO: execute ONLY in UI thread
-    setter(node_->param<T>(p->name()));
+    setter(node_->readParameter<T>(p->name()));
 }
 
 template <typename T>
