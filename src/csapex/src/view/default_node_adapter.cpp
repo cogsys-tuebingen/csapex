@@ -568,7 +568,7 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         connections.push_back(parameter_changed(*range_p).connect(boost::bind(&DefaultNodeAdapter::updateUi<int>, this, __1, set)));
 
         // paramter scope changed -> update slider interval
-        boost::function<void(int, int)> setRange = boost::bind(&QIntSlider::setRange, slider, __1, __2);
+        boost::function<void(int, int)> setRange = boost::bind(&QIntSlider::setIntRange, slider, __1, __2);
         boost::function<void(const param::RangeParameter*)> setter = boost::bind(setRange,
                                                                                  boost::bind(&param::RangeParameter::min<int>, __1),
                                                                                  boost::bind(&param::RangeParameter::max<int>, __1));
