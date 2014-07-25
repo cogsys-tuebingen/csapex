@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
+#include <csapex/manager/box_manager.h>
 
 using namespace csapex;
 
@@ -44,8 +45,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation() const
     QTreeWidgetItem* tl = new QTreeWidgetItem;
     tl->setText(0, node_->getUUID().c_str());
 
-#warning reimplement icon for debug information
-//    tl->setIcon(0, node_->getIcon());
+    NodeConstructor::Ptr constructor = BoxManager::instance().getConstructor(node_->getType());
+
+    tl->setIcon(0, constructor->getIcon());
 
     {
         QTreeWidgetItem* connectors = new QTreeWidgetItem;

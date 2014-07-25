@@ -246,11 +246,11 @@ void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_
 }
 
 namespace {
-QPixmap createPixmap(const std::string& label, const NodePtr& content, const QString& stylesheet, WidgetController* widget_ctrl)
+QPixmap createPixmap(const std::string& label, const NodePtr& content, const QIcon& icon, const QString& stylesheet, WidgetController* widget_ctrl)
 {
     NodeBox::Ptr object;
-    
-    object.reset(new NodeBox(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl))));
+
+    object.reset(new NodeBox(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl)), icon));
 
     object->setStyleSheet(stylesheet);
     object->construct();
@@ -273,34 +273,24 @@ bool BoxManager::isValidType(const std::string &type) const
 
 void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, NodeStatePtr state, const QPoint& offset)
 {
-    Node::Ptr content;
+    NodeConstructor::Ptr c = getConstructor(type);
+    Node::Ptr content = c->makePrototypeContent();
 
-    Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
-        if(p->getType() == type) {
-            content = p->makePrototypeContent();
-        }
+    QDrag* drag = new QDrag(parent);
+    QMimeData* mimeData = new QMimeData;
+
+    mimeData->setData(NodeBox::MIME, type.c_str());
+    if(state) {
+        QVariant payload = qVariantFromValue((void *) &state);
+        mimeData->setProperty("state", payload);
     }
+    mimeData->setProperty("ox", offset.x());
+    mimeData->setProperty("oy", offset.y());
+    drag->setMimeData(mimeData);
 
-    if(content) {
-        QDrag* drag = new QDrag(parent);
-        QMimeData* mimeData = new QMimeData;
-
-        mimeData->setData(NodeBox::MIME, type.c_str());
-        if(state) {
-            QVariant payload = qVariantFromValue((void *) &state);
-            mimeData->setProperty("state", payload);
-        }
-        mimeData->setProperty("ox", offset.x());
-        mimeData->setProperty("oy", offset.y());
-        drag->setMimeData(mimeData);
-        
-        drag->setPixmap(createPixmap(type, content, style_sheet_, widget_ctrl));
-        drag->setHotSpot(-offset);
-        drag->exec();
-        
-    } else {
-        std::cerr << "unknown box type '" << type << "'!" << std::endl;
-    }
+    drag->setPixmap(createPixmap(type, content, c->getIcon(), style_sheet_, widget_ctrl));
+    drag->setHotSpot(-offset);
+    drag->exec();
 }
 
 Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
@@ -366,22 +356,12 @@ NodeBox* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
     std::string type = node->getType();
     
     NodeBox* box;
+    QIcon icon = getConstructor(type)->getIcon();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        box = new NodeBox(node, node_adapter_builders_[type]->build(node, widget_ctrl));
+        box = new NodeBox(node, node_adapter_builders_[type]->build(node, widget_ctrl), icon);
     } else {
-        box = new NodeBox(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)));
+        box = new NodeBox(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)), icon);
     }
     box->construct();
     return box;
-}
-
-NodeConstructor::Ptr BoxManager::getSelector(const std::string &type)
-{
-    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
-        if(p->getType() == type) {
-            return p;
-        }
-    }
-    
-    return NodeConstructorNullPtr;
 }

@@ -31,8 +31,8 @@ using namespace csapex;
 
 const QString NodeBox::MIME = "csapex/model/box";
 
-NodeBox::NodeBox(NodePtr node, NodeAdapter::Ptr adapter, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter),
+NodeBox::NodeBox(NodePtr node, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter), icon_(icon),
       down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
 }
@@ -75,6 +75,8 @@ void NodeBox::construct()
 
     ui->enablebtn->setCheckable(node_->canBeDisabled());
 
+    ui->enablebtn->setIcon(icon_);
+
     setFocusPolicy(Qt::ClickFocus);
 
     const UUID& uuid = node_->getUUID();
@@ -86,9 +88,6 @@ void NodeBox::construct()
     ui->label->installEventFilter(this);
 
     setLabel(node_->getNodeState()->getLabel());
-
-#warning reimplement icon for boxes
-    //ui->enablebtn->setIcon(node_->getIcon());
 
     node_->setMinimized(false);
 

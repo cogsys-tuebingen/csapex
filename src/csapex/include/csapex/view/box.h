@@ -49,7 +49,7 @@ public:
 
 public:
     /// CONSTRUCTION
-    NodeBox(NodePtr content, NodeAdapterPtr adapter, QWidget* parent = 0);
+    NodeBox(NodePtr content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
     virtual ~NodeBox();
     void construct();
     void init();
@@ -158,6 +158,8 @@ protected:
 
     NodePtr node_;
     NodeAdapterPtr adapter_;
+
+    QIcon icon_;
 
     bool down_;
     QPoint start_drag_;

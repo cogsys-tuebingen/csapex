@@ -43,8 +43,6 @@ public:
     NodePtr makeNode(const std::string& type, const UUID& uuid);
     NodeBox* makeBox(NodePtr node, WidgetController *widget_ctrl);
 
-    NodeConstructor::Ptr getSelector(const std::string& type);
-
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
     QAbstractItemModel *listAvailableNodeTypes();
