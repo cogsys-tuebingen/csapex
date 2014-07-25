@@ -70,6 +70,11 @@ Main::Main(CsApexApp& a)
     csapex::thread::set_name("cs::APEX main");
 }
 
+Main::~Main()
+{
+    delete splash;
+}
+
 int Main::run()
 {
     csapex::error_handling::init();
@@ -115,7 +120,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
              *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
              */
         QPixmap pm(":/apex_splash.png");
-        splash = new QSplashScreen(pm);
+        splash = new QSplashScreen (pm);
         splash->show();
 
         app.processEvents();
@@ -131,22 +136,22 @@ int Main::main(bool headless, const std::string& config, const std::string& path
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
-        w.start();
 
         core.init(&drag_io);
+        w.start();
+        core.startup();
 
+        w.show();
         splash->finish(&w);
-        w.setVisible(true);
 
         int res = run();
-
-        delete splash;
 
         return res;
 
     } else {
         core.init(NULL);
         csapex::error_handling::stop_request().connect(boost::bind(&csapex::error_handling::kill));
+        core.startup();
         return run();
     }
 }

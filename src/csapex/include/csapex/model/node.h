@@ -48,10 +48,8 @@ public:
     void setType(const std::string& type);
     std::string getType() const;
 
-    void addTag(const Tag::Ptr &tag);
-    std::vector<Tag::Ptr> getTags() const;
-
-    virtual QIcon getIcon() const;
+    void addTag(const Tag::Ptr &tag) __attribute__ ((deprecated));
+    std::vector<Tag::Ptr> getTags() const  __attribute__ ((deprecated));
 
     virtual void pause(bool pause);
     virtual void clearBlock();

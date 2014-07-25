@@ -119,11 +119,6 @@ ConnectorOut* Node::getParameterOutput(const std::string &name) const
     }
 }
 
-QIcon Node::getIcon() const
-{
-    return QIcon(":/plugin.png");
-}
-
 bool Node::canBeDisabled() const
 {
     return true;

@@ -17,14 +17,14 @@ NodePtr NodeConstructor::makeNull()
     return Node::Ptr (static_cast<Node*>(NULL));
 }
 
-NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, Make c)
-    : settings_(settings), type_(type), descr_(description), is_loaded(false), c(c)
+NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, const std::string &icon, Make c)
+    : settings_(settings), type_(type), descr_(description), icon_(icon), is_loaded(false), c(c)
 {
     apex_assert_hard(!c.empty());
 }
 
-NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description)
-    : settings_(settings), type_(type), descr_(description), is_loaded(false)
+NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, const std::string &icon)
+    : settings_(settings), type_(type), descr_(description), icon_(icon), is_loaded(false)
 {
 }
 
@@ -38,17 +38,14 @@ std::string NodeConstructor::getType() const
     return type_;
 }
 
+// todo: remove this, only read xml files!!!
 void NodeConstructor::load() const
 {
     try {
         Node::Ptr prototype = c();
 
-        if(!settings_.get<bool>("headless")) {
-            icon = prototype->getIcon();
-        }
         tags_ = prototype->getTags();
         prototype->setupParameters();
-        params_ = prototype->getParameters();
 
         is_loaded = true;
 
@@ -68,17 +65,12 @@ std::vector<Tag::Ptr> NodeConstructor::getTags() const
 
 QIcon NodeConstructor::getIcon() const
 {
-    return icon;
+    return QIcon(QString::fromStdString(icon_));
 }
 
 std::string NodeConstructor::getDescription() const
 {
     return descr_;
-}
-
-std::vector<param::ParameterPtr> NodeConstructor::getParameters() const
-{
-    return params_;
 }
 
 Node::Ptr NodeConstructor::makePrototypeContent() const

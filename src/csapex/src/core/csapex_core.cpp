@@ -52,7 +52,6 @@ CsApexCore::~CsApexCore()
 
     StreamInterceptor::instance().stop();
     BoxManager::instance().stop();
-    PluginLoader::instance().stop();
 
     if(destruct) {
         delete core_plugin_manager;
@@ -107,15 +106,18 @@ void CsApexCore::init(DragIO* dragio)
         bm.loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
         bm.new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
         bm.reload();
-
-        showStatusMessage("loading config");
-        try {
-            load(settings_.getConfig());
-        } catch(const std::exception& e) {
-            std::cerr << "error loading the config: " << e.what() << std::endl;
-        }
-        showStatusMessage("painting user interface");
     }
+}
+
+void CsApexCore::startup()
+{
+    showStatusMessage("loading config");
+    try {
+        load(settings_.getConfig());
+    } catch(const std::exception& e) {
+        std::cerr << "error loading the config: " << e.what() << std::endl;
+    }
+    showStatusMessage("painting user interface");
 }
 
 void CsApexCore::reset()

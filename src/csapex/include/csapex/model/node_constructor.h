@@ -37,7 +37,9 @@ public:
     static NodePtr makeNull();
 
 public:
-    NodeConstructor(Settings& settings, const std::string& type, const std::string& description, Make c);
+    NodeConstructor(Settings& settings, const std::string& type,
+                    const std::string& description, const std::string& icon,
+                    Make c);
 
     virtual ~NodeConstructor();
 
@@ -45,13 +47,12 @@ public:
     std::vector<TagPtr> getTags() const;
     QIcon getIcon() const;
     std::string getDescription() const;
-    std::vector<param::ParameterPtr> getParameters() const;
 
     virtual NodePtr makePrototypeContent() const;
     virtual NodePtr makeContent(const UUID& uuid) const;
 
 protected:
-    NodeConstructor(Settings &settings, const std::string& type, const std::string& description);
+    NodeConstructor(Settings &settings, const std::string& type, const std::string& description, const std::string &icon);
 
     virtual void load() const;
 
@@ -59,11 +60,10 @@ protected:
     Settings& settings_;
     std::string type_;
     std::string descr_;
+    std::string icon_;
 
     mutable bool is_loaded;
-    mutable QIcon icon;
     mutable std::vector<TagPtr> tags_;
-    mutable std::vector<param::ParameterPtr> params_;
 
     Make c;
 };

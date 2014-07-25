@@ -83,6 +83,7 @@ void BoxManager::rebuildPrototypes()
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
                                                      *settings_,
                                                      p.second.getType(), p.second.getDescription(),
+                                                     p.second.getIcon(),
                                                      p.second));
         register_box_type(constructor, true);
     }

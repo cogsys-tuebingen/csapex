@@ -21,6 +21,7 @@ struct Main : public QObject {
 
 public:
     Main(CsApexApp &app);
+    ~Main();
 
     int run();
     int main(bool headless, const std::string &config, const std::string& path_to_bin);

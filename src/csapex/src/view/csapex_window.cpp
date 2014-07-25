@@ -229,7 +229,9 @@ void CsApexWindow::updateNodeInfo()
             ss << "<hr />";
             ss << "<h1>Parameters:</h1>";
 
-            Q_FOREACH(const param::Parameter::Ptr& p, n->getParameters()) {
+            std::vector<param::Parameter::Ptr> params = n->makePrototypeContent()->getParameters();
+
+            Q_FOREACH(const param::Parameter::Ptr& p, params) {
                 ss << "<h2>" << p->name() << "</h2>";
                 ss << "<p>" << p->description().toString() << "</p>";
                 ss << "<p>" << p->toString() << "</p>";

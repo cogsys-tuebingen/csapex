@@ -27,6 +27,7 @@ public:
     virtual ~CsApexCore();
 
     void init(DragIO *dragio);
+    void startup();
 
     void load(const std::string& file);
     void saveAs(const std::string& file);

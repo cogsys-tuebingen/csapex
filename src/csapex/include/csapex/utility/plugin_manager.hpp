@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/utility/constructor.hpp>
-#include <csapex/utility/plugin_loader.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
@@ -17,7 +16,7 @@ class PluginManagerImp
     friend class PluginManager;
 
 public:
-    typedef pluginlib::ClassLoader<M> Loader;
+    typedef pluginlib::ClassLoader<M> PluginLibLoader;
 
 protected:
     typedef DefaultConstructor<M> Constructor;
@@ -25,7 +24,7 @@ protected:
 
 protected:
     PluginManagerImp(const std::string& full_name)
-        : loader_("csapex", full_name), plugins_loaded_(false), full_name_(full_name)
+        : plugins_loaded_(false), full_name_(full_name)
     {
     }
 
@@ -41,38 +40,97 @@ protected:
         available_classes[constructor.getType()] = constructor;
     }
     void reload() {
-        std::vector<std::string> classes = loader_.getDeclaredClasses();
-        for(std::vector<std::string>::iterator c = classes.begin(); c != classes.end(); ++c) {
-            // std::cout << "loading " << typeid(M).name() << " class " << *c << std::endl;
-            std::string msg = std::string("loading ") + *c;
-            loaded(msg);
+        // TODO: make this via a plugin! -> csapex_ros
+        PluginLibLoader pluginlib_loader("csapex", full_name_);
+        xml_files_ = pluginlib_loader.getPluginXmlPaths();
 
-            try {
-                if(!loader_.isClassLoaded(*c)) {
-                    loader_.loadLibraryForClass(*c);
+        for(std::vector<std::string>::const_iterator manifest = xml_files_.begin(); manifest != xml_files_.end(); ++manifest) {
+            processManifest(*manifest);
+        }
+
+        plugins_loaded_ = true;
+    }
+
+    bool processManifest(const std::string& xml_file)
+    {
+        TiXmlDocument document;
+        document.LoadFile(xml_file);
+        TiXmlElement * config = document.RootElement();
+        if (config == NULL) {
+            std::cerr << "[Plugin] Cannot load the file " << xml_file << std::endl;
+            return false;
+        }
+        if (config->ValueStr() != "library") {
+            std::cerr << "[Plugin] Manifest root is not <library>" << std::endl;
+            return false;
+        }
+
+        TiXmlElement* library = config;
+        while (library != NULL) {
+            std::string library_name = library->Attribute("path");
+            if (library_name.size() == 0) {
+                std::cerr << "[Plugin] Item in row" << library->Row() << " does not contain a path attribute" << std::endl;
+                continue;
+            }
+
+            std::string library_path = library_name + ".so";
+
+
+            boost::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
+            loaders_[library_path] = loader;
+
+
+            TiXmlElement* class_element = library->FirstChildElement("class");
+            while (class_element) {
+                std::string base_class_type = class_element->Attribute("base_class_type");
+                std::string derived_class = class_element->Attribute("type");
+
+                std::string lookup_name;
+                if(class_element->Attribute("name") != NULL) {
+                    lookup_name = class_element->Attribute("name");
+                } else {
+                    lookup_name = derived_class;
                 }
 
-                Constructor constructor;
-                constructor.setType(*c);
-                constructor.setDescription(loader_.getClassDescription(*c));
-                constructor.setConstructor(boost::bind(&Loader::createInstance, &loader_, *c));
+                if(base_class_type == full_name_){
+                    TiXmlElement* description = class_element->FirstChildElement("description");
+                    std::string description_str;
+                    if(description) {
+                        description_str = description->GetText() ? description->GetText() : "";
+                    }
 
-                registerConstructor(constructor);
-            } catch(const pluginlib::PluginlibException& ex) {
-                std::cerr << "The plugin " << *c << " failed to load for some reason. Error: " << ex.what() << std::endl;
-            } catch(const std::exception& ex) {
-                std::cerr << "The plugin " << *c << " failed to load for some reason. Error: " << ex.what() << std::endl;
+                    TiXmlElement* icon = class_element->FirstChildElement("icon");
+                    std::string icon_str;
+                    if(icon) {
+                        icon_str = icon->GetText() ? icon->GetText() : "";
+                    }
+
+                    Constructor constructor;
+                    constructor.setType(lookup_name);
+                    constructor.setDescription(description_str);
+                    constructor.setIcon(icon_str);
+                    constructor.setConstructor(boost::bind(&class_loader::ClassLoader::createInstance<M>, loader.get(), lookup_name));
+
+                    registerConstructor(constructor);
+                }
+
+
+                class_element = class_element->NextSiblingElement( "class" );
             }
+            library = library->NextSiblingElement( "library" );
         }
-        plugins_loaded_ = true;
+
+        return true;
     }
 
 protected:
     boost::signals2::signal<void(const std::string&)> loaded;
 
 protected:
-    Loader loader_;
     bool plugins_loaded_;
+
+    std::vector<std::string> xml_files_;
+    std::map< std::string, boost::shared_ptr<class_loader::ClassLoader> > loaders_;
 
     std::string full_name_;
     Constructors available_classes;

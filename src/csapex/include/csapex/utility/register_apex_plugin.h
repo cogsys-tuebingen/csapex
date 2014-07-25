@@ -2,9 +2,9 @@
 #define REGISTER_APEX_PLUGIN_H
 
 /// SYSTEM
-#include <pluginlib/class_list_macros.h>
+#include <class_loader/class_loader_register_macro.h>
 
 #define CSAPEX_REGISTER_CLASS(name, parent) \
-    PLUGINLIB_EXPORT_CLASS(name, parent)
+    CLASS_LOADER_REGISTER_CLASS(name, parent)
 
 #endif // REGISTER_PLUGIN_H

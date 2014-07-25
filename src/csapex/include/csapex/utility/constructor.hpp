@@ -28,9 +28,18 @@ struct Constructor {
         descr = n;
     }
 
+    std::string getIcon() const {
+        return icon;
+    }
+
+    void setIcon(const std::string& i) {
+        icon = i;
+    }
+
 protected:
     std::string type;
     std::string descr;
+    std::string icon;
     bool valid_;
     bool has_constructor;
 };

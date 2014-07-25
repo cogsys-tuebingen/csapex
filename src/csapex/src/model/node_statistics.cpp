@@ -43,7 +43,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation() const
 {
     QTreeWidgetItem* tl = new QTreeWidgetItem;
     tl->setText(0, node_->getUUID().c_str());
-    tl->setIcon(0, node_->getIcon());
+
+#warning reimplement icon for debug information
+//    tl->setIcon(0, node_->getIcon());
 
     {
         QTreeWidgetItem* connectors = new QTreeWidgetItem;

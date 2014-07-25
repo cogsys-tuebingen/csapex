@@ -87,7 +87,8 @@ void NodeBox::construct()
 
     setLabel(node_->getNodeState()->getLabel());
 
-    ui->enablebtn->setIcon(node_->getIcon());
+#warning reimplement icon for boxes
+    //ui->enablebtn->setIcon(node_->getIcon());
 
     node_->setMinimized(false);
 
