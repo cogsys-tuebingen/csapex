@@ -16,7 +16,6 @@
 
 /// SYSTEM
 #include <QObject>
-#include <QIcon>
 #include <boost/utility.hpp>
 
 namespace csapex {

@@ -38,7 +38,7 @@ public:
 
 public:
     NodeConstructor(Settings& settings, const std::string& type,
-                    const std::string& description, const std::string& icon,
+                    const std::string& description, const std::string& icon, const std::vector<TagPtr> &tags,
                     Make c);
 
     virtual ~NodeConstructor();
@@ -52,18 +52,14 @@ public:
     virtual NodePtr makeContent(const UUID& uuid) const;
 
 protected:
-    NodeConstructor(Settings &settings, const std::string& type, const std::string& description, const std::string &icon);
-
-    virtual void load() const;
+    NodeConstructor(Settings &settings, const std::string& type, const std::string& description, const std::string &icon, const std::vector<TagPtr> &tags);
 
 protected:
     Settings& settings_;
     std::string type_;
     std::string descr_;
     std::string icon_;
-
-    mutable bool is_loaded;
-    mutable std::vector<TagPtr> tags_;
+    std::vector<TagPtr> tags_;
 
     Make c;
 };

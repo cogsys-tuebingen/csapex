@@ -105,10 +105,17 @@ protected:
                         icon_str = icon->GetText() ? icon->GetText() : "";
                     }
 
+                    TiXmlElement* tags = class_element->FirstChildElement("tags");
+                    std::string tags_str;
+                    if(tags) {
+                        tags_str = tags->GetText() ? tags->GetText() : "";
+                    }
+
                     Constructor constructor;
                     constructor.setType(lookup_name);
                     constructor.setDescription(description_str);
                     constructor.setIcon(icon_str);
+                    constructor.setTags(tags_str);
                     constructor.setConstructor(boost::bind(&class_loader::ClassLoader::createInstance<M>, loader.get(), lookup_name));
 
                     registerConstructor(constructor);

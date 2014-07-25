@@ -13,7 +13,6 @@
 #include <csapex/view/default_node_adapter.h>
 #include <csapex/utility/plugin_manager.hpp>
 
-
 /// SYSTEM
 #include <boost/foreach.hpp>
 #include <QApplication>
@@ -22,6 +21,7 @@
 #include <QDrag>
 #include <qmime.h>
 #include <QStandardItemModel>
+#include <boost/algorithm/string.hpp>
 
 using namespace csapex;
 
@@ -80,10 +80,30 @@ void BoxManager::rebuildPrototypes()
     
     typedef std::pair<std::string, DefaultConstructor<Node> > NODE_PAIR;
     Q_FOREACH(const NODE_PAIR& p, node_manager_->availableClasses()) {
+        // convert tag list into vector
+        std::vector<std::string> tokens;
+        std::vector<Tag::Ptr> tags;
+
+        std::string taglist = p.second.getTags();
+        boost::algorithm::split(tokens, taglist, boost::is_any_of(",;"));
+
+        for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+            std::string str = boost::algorithm::trim_copy(*it);
+            if(!str.empty()) {
+                tags.push_back(Tag::get(str));
+            }
+        }
+
+        if(tags.empty()) {
+            tags.push_back(Tag::get("General"));
+        }
+
+        // make the constructor
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
                                                      *settings_,
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second.getIcon(),
+                                                     tags,
                                                      p.second));
         register_box_type(constructor, true);
     }

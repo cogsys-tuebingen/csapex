@@ -17,14 +17,21 @@ NodePtr NodeConstructor::makeNull()
     return Node::Ptr (static_cast<Node*>(NULL));
 }
 
-NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, const std::string &icon, Make c)
-    : settings_(settings), type_(type), descr_(description), icon_(icon), is_loaded(false), c(c)
+NodeConstructor::NodeConstructor(Settings &settings,
+                                 const std::string &type, const std::string &description,
+                                 const std::string &icon,
+                                 const std::vector<TagPtr>& tags,
+                                 Make c)
+    : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
 {
     apex_assert_hard(!c.empty());
 }
 
-NodeConstructor::NodeConstructor(Settings &settings, const std::string &type, const std::string &description, const std::string &icon)
-    : settings_(settings), type_(type), descr_(description), icon_(icon), is_loaded(false)
+NodeConstructor::NodeConstructor(Settings &settings,
+                                 const std::string &type, const std::string &description,
+                                 const std::string &icon,
+                                 const std::vector<TagPtr>& tags)
+    : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags)
 {
 }
 
@@ -38,28 +45,8 @@ std::string NodeConstructor::getType() const
     return type_;
 }
 
-// todo: remove this, only read xml files!!!
-void NodeConstructor::load() const
-{
-    try {
-        Node::Ptr prototype = c();
-
-        tags_ = prototype->getTags();
-        prototype->setupParameters();
-
-        is_loaded = true;
-
-    } catch(const std::exception& e) {
-        is_loaded = false;
-        throw NodeConstructionException("cannot load object of type '" + type_ + "': " + e.what() );
-    }
-}
-
 std::vector<Tag::Ptr> NodeConstructor::getTags() const
 {
-    if(!is_loaded) {
-        load();
-    }
     return tags_;
 }
 

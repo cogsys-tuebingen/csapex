@@ -28,6 +28,14 @@ struct Constructor {
         descr = n;
     }
 
+    std::string getTags() const {
+        return tags;
+    }
+
+    void setTags(const std::string& t) {
+        tags = t;
+    }
+
     std::string getIcon() const {
         return icon;
     }
@@ -40,6 +48,7 @@ protected:
     std::string type;
     std::string descr;
     std::string icon;
+    std::string tags;
     bool valid_;
     bool has_constructor;
 };
