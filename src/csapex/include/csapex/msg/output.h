@@ -11,9 +11,9 @@
 namespace csapex
 {
 
-class ConnectorOut : public virtual Connectable, public Timable
+class Output : public virtual Connectable, public Timable
 {
-    friend class ConnectorIn;
+    friend class Input;
     friend class ConnectorForward;
     friend class Graph;
     friend class command::AddConnection;
@@ -21,15 +21,15 @@ class ConnectorOut : public virtual Connectable, public Timable
     friend class command::DeleteConnection;
     friend class DesignerIO;
 
-    typedef std::vector<ConnectorIn*> TargetList;
+    typedef std::vector<Input*> TargetList;
 
 public:
     typedef TargetList::const_iterator TargetIterator;
 
 public:
-    ConnectorOut(Settings& settings, const UUID &uuid);
-    ConnectorOut(Settings& settings, Unique *parent, int sub_id);
-    ~ConnectorOut();
+    Output(Settings& settings, const UUID &uuid);
+    Output(Settings& settings, Unique *parent, int sub_id);
+    ~Output();
 
     virtual bool canOutput() const {
         return true;
@@ -71,10 +71,10 @@ public:
     TargetIterator beginTargets() const;
     TargetIterator endTargets() const;
 
-    void connectForcedWithoutCommand(ConnectorIn* other_side);
+    void connectForcedWithoutCommand(Input* other_side);
 
     virtual CommandPtr removeAllConnectionsCmd();
-    virtual CommandPtr removeConnectionCmd(ConnectorIn *other_side);
+    virtual CommandPtr removeConnectionCmd(Input *other_side);
 
     void forceSendMessage(bool force = true);
 
@@ -92,7 +92,7 @@ protected:
     bool connect(Connectable* other_side);
 
 protected:
-    std::vector<ConnectorIn*> targets_;
+    std::vector<Input*> targets_;
     bool force_send_message_;
 
     ConnectionType::Ptr message_;

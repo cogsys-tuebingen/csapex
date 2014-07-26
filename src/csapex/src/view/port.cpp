@@ -6,7 +6,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/move_connection.h>
-#include <csapex/model/connector_in.h>
+#include <csapex/msg/input.h>
 
 /// SYSTEM
 #include <sstream>

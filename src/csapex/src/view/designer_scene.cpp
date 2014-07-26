@@ -8,8 +8,8 @@
 #include <csapex/view/port.h>
 #include <csapex/model/node.h>
 #include <csapex/view/box.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/core/settings.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_fulcrum.h>
@@ -437,8 +437,8 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
         return;
     }
 
-    ConnectorOut* from = dynamic_cast<ConnectorOut*> (connection.from());
-    ConnectorIn* to = dynamic_cast<ConnectorIn*> (connection.to());
+    Output* from = dynamic_cast<Output*> (connection.from());
+    Input* to = dynamic_cast<Input*> (connection.to());
 
     Port* fromp = widget_ctrl_->getPort(from);
     Port* top = widget_ctrl_->getPort(to);

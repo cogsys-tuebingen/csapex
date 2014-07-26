@@ -5,8 +5,8 @@
 #include "ui_box.h"
 #include <csapex/model/node.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/delete_node.h>
@@ -277,9 +277,9 @@ std::string NodeBox::getLabel() const
 void NodeBox::registerEvent(Connectable* c)
 {
     if(c->isOutput()) {
-        registerOutputEvent(dynamic_cast<ConnectorOut*>(c));
+        registerOutputEvent(dynamic_cast<Output*>(c));
     } else {
-        registerInputEvent(dynamic_cast<ConnectorIn*>(c));
+        registerInputEvent(dynamic_cast<Input*>(c));
     }
 }
 
@@ -287,14 +287,14 @@ void NodeBox::unregisterEvent(Connectable*)
 {
 }
 
-void NodeBox::registerInputEvent(ConnectorIn* in)
+void NodeBox::registerInputEvent(Input* in)
 {
     in->setParent(NULL);
 
     Q_EMIT changed(this);
 }
 
-void NodeBox::registerOutputEvent(ConnectorOut* out)
+void NodeBox::registerOutputEvent(Output* out)
 {
     apex_assert_hard(out);
 

@@ -5,8 +5,8 @@
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/utility/q_signal_relay.h>
 #include <csapex/model/node.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/view/port.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/model/node_worker.h>
@@ -318,7 +318,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
 
         // connect parameter input, if available
-        ConnectorIn* param_in = node_->getParameterInput(current_name_);
+        Input* param_in = node_->getParameterInput(current_name_);
         if(param_in) {
             Port* port = new Port(node_->getCommandDispatcher(), param_in, false);
             port->setVisible(p->isInteractive());
@@ -336,7 +336,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        ConnectorOut* param_out = node_->getParameterOutput(current_name_);
+        Output* param_out = node_->getParameterOutput(current_name_);
         if(param_out) {
             Port* port = new Port(node_->getCommandDispatcher(), param_out, false);
             port->setVisible(p->isInteractive());

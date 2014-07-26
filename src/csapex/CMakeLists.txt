@@ -84,12 +84,12 @@ set(SRC_PLUGIN
 
     src/model/node.cpp
     src/model/node_modifier.cpp
-    src/model/connector_in.cpp
-    src/model/connector_out.cpp
     src/model/connection_type.cpp
 
     src/msg/message.cpp
     src/msg/message_factory.cpp
+    src/msg/input.cpp
+    src/msg/output.cpp
 
     src/manager/message_provider_manager.cpp
 

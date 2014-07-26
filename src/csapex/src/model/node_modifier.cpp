@@ -12,12 +12,12 @@ NodeModifier::NodeModifier(Node *node)
 
 }
 
-ConnectorIn* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
+Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
     return node_->addInput(type, label, optional, async);
 }
 
-ConnectorOut* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label)
+Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label)
 {
     return node_->addOutput(type, label);
 }

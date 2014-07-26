@@ -74,38 +74,38 @@ public:
 
     void doSetup();
 
-    ConnectorIn* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
-    ConnectorOut* addOutput(ConnectionTypePtr type, const std::string& label);
+    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
+    Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
-    void addInput(ConnectorIn* in) __attribute__ ((deprecated));
-    void addOutput(ConnectorOut* out) __attribute__ ((deprecated));
+    void addInput(Input* in) __attribute__ ((deprecated));
+    void addOutput(Output* out) __attribute__ ((deprecated));
 
-    void manageInput(ConnectorIn* in);
-    void manageOutput(ConnectorOut* out);
+    void manageInput(Input* in);
+    void manageOutput(Output* out);
 
     int countInputs() const;
     int countOutputs() const;
     int countManagedInputs() const;
     int countManagedOutputs() const;
 
-    ConnectorIn* getInput(const unsigned int index) const;
-    ConnectorOut* getOutput(const unsigned int index) const;
+    Input* getInput(const unsigned int index) const;
+    Output* getOutput(const unsigned int index) const;
 
-    ConnectorIn* getManagedInput(const unsigned int index) const;
-    ConnectorOut* getManagedOutput(const unsigned int index) const;
+    Input* getManagedInput(const unsigned int index) const;
+    Output* getManagedOutput(const unsigned int index) const;
 
-    ConnectorIn* getParameterInput(const std::string& name) const;
-    ConnectorOut* getParameterOutput(const std::string& name) const;
+    Input* getParameterInput(const std::string& name) const;
+    Output* getParameterOutput(const std::string& name) const;
 
-    virtual ConnectorIn* getInput(const UUID& uuid) const;
-    virtual ConnectorOut* getOutput(const UUID& uuid) const;
+    virtual Input* getInput(const UUID& uuid) const;
+    virtual Output* getOutput(const UUID& uuid) const;
 
     virtual Connectable* getConnector(const UUID& uuid) const;
-    virtual std::vector<ConnectorIn*> getInputs() const;
-    virtual std::vector<ConnectorOut*> getOutputs() const;
+    virtual std::vector<Input*> getInputs() const;
+    virtual std::vector<Output*> getOutputs() const;
 
-    void removeInput(ConnectorIn *in);
-    void removeOutput(ConnectorOut *out);
+    void removeInput(Input *in);
+    void removeOutput(Output *out);
 
     void setSynchronizedInputs(bool) __attribute__ ((deprecated))__attribute__ ((warning("not needed anymore, everything is synchronized now"))) {}
 
@@ -134,13 +134,13 @@ protected:
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
-    void registerInput(ConnectorIn* in);
-    void registerOutput(ConnectorOut* out);
+    void registerInput(Input* in);
+    void registerOutput(Output* out);
 
 public Q_SLOTS:
     virtual void setup() = 0;
     virtual void setupParameters();
-    virtual void messageArrived(ConnectorIn* source);
+    virtual void messageArrived(Input* source);
     virtual void process() = 0;
 
     virtual void tick();
@@ -199,14 +199,14 @@ private:
     NodeWorker* worker_;
 
     NodeStatePtr node_state_;
-    std::map<std::string, ConnectorIn*> param_2_input_;
-    std::map<std::string, ConnectorOut*> param_2_output_;
+    std::map<std::string, Input*> param_2_input_;
+    std::map<std::string, Output*> param_2_output_;
 
-    std::vector<ConnectorIn*> inputs_;
-    std::vector<ConnectorOut*> outputs_;
+    std::vector<Input*> inputs_;
+    std::vector<Output*> outputs_;
 
-    std::vector<ConnectorIn*> managed_inputs_;
-    std::vector<ConnectorOut*> managed_outputs_;
+    std::vector<Input*> managed_inputs_;
+    std::vector<Output*> managed_outputs_;
 
     CommandDispatcher* dispatcher_;
 

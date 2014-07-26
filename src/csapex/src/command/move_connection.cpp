@@ -3,8 +3,8 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/add_connection.h>
@@ -29,15 +29,15 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     locked = false;
 
     if(output) {
-        ConnectorOut* out = dynamic_cast<ConnectorOut*>(from);
+        Output* out = dynamic_cast<Output*>(from);
 
-        for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+        for(Output::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
             add(Command::Ptr(new DeleteConnection(from, *it)));
             add(Command::Ptr(new AddConnection(to_uuid, (*it)->getUUID())));
         }
 
     } else {
-        ConnectorIn* in = dynamic_cast<ConnectorIn*>(from);
+        Input* in = dynamic_cast<Input*>(from);
 
         Connectable* target = in->getSource();
         add(Command::Ptr(new DeleteConnection(target, from)));

@@ -39,12 +39,12 @@ public:
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
 
-    void forwardMessageSynchronized(ConnectorIn* source);
+    void forwardMessageSynchronized(Input* source);
 
-    void addInput(ConnectorIn* source);
+    void addInput(Input* source);
     void checkInputs();
-    void clearInput(ConnectorIn* source);
-    void removeInput(ConnectorIn* source);
+    void clearInput(Input* source);
+    void removeInput(Input* source);
 
     void checkParameters();
 
@@ -71,7 +71,7 @@ private:
 
     QThread* private_thread_;
 
-    std::map<ConnectorIn*, bool> has_msg_;
+    std::map<Input*, bool> has_msg_;
 
     int timer_history_pos_;
     std::vector<TimerPtr> timer_history_;

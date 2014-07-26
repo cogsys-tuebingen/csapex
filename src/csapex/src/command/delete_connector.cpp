@@ -3,8 +3,8 @@
 
 /// COMPONENT
 
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
@@ -34,18 +34,18 @@ bool DeleteConnector::doExecute()
 
     if(c->isConnected()) {
         if(in) {
-//            delete_connections = ((ConnectorIn*) c)->removeAllConnectionsCmd();
-            delete_connections = dynamic_cast<ConnectorIn*>(c)->removeAllConnectionsCmd();
+//            delete_connections = ((Input*) c)->removeAllConnectionsCmd();
+            delete_connections = dynamic_cast<Input*>(c)->removeAllConnectionsCmd();
         } else {
-            delete_connections = dynamic_cast<ConnectorOut*>(c)->removeAllConnectionsCmd();
+            delete_connections = dynamic_cast<Output*>(c)->removeAllConnectionsCmd();
         }
         Command::executeCommand(graph_, widget_ctrl_, delete_connections);
     }
 
     if(in) {
-        node->removeInput(dynamic_cast<ConnectorIn*>(c));
+        node->removeInput(dynamic_cast<Input*>(c));
     } else {
-        node->removeOutput(dynamic_cast<ConnectorOut*>(c));
+        node->removeOutput(dynamic_cast<Output*>(c));
     }
 
     return true;

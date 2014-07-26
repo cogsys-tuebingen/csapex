@@ -2,8 +2,8 @@
 #include <csapex/model/connection.h>
 
 /// COMPONENT
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/core/settings.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
@@ -15,7 +15,7 @@ using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
 
-Connection::Connection(ConnectorOut *from, ConnectorIn *to)
+Connection::Connection(Output *from, Input *to)
     : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
 {
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
@@ -29,7 +29,7 @@ Connection::Connection(Connectable *from, Connectable *to)
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
-Connection::Connection(ConnectorOut *from, ConnectorIn *to, int id)
+Connection::Connection(Output *from, Input *to, int id)
     : from_(from), to_(to), id_(id), message_count(0)
 {
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));

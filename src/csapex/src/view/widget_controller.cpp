@@ -8,8 +8,8 @@
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connectable.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/view/box.h>

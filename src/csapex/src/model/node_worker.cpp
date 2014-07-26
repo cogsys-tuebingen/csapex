@@ -3,8 +3,8 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/core/settings.h>
@@ -94,7 +94,7 @@ void NodeWorker::forwardMessage(Connectable *s)
         return;
     }
 
-    ConnectorIn* source = dynamic_cast<ConnectorIn*> (s);
+    Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
     if(node_->isEnabled()) {
@@ -104,7 +104,7 @@ void NodeWorker::forwardMessage(Connectable *s)
     }
 }
 
-void NodeWorker::addInput(ConnectorIn *source)
+void NodeWorker::addInput(Input *source)
 {
     clearInput(source);
 
@@ -114,7 +114,7 @@ void NodeWorker::addInput(ConnectorIn *source)
 void NodeWorker::checkInputs()
 {
     for(int i = 0; i < node_->countInputs(); ++i) {
-        ConnectorIn* source = node_->getInput(i);
+        Input* source = node_->getInput(i);
         if(!source->isEnabled() && source->isBlocked()) {
             source->free();
             clearInput(source);
@@ -122,25 +122,25 @@ void NodeWorker::checkInputs()
     }
 }
 
-void NodeWorker::clearInput(ConnectorIn *source)
+void NodeWorker::clearInput(Input *source)
 {
     QMutexLocker lock(&message_mutex_);
     has_msg_[source] = false;
 }
 
-void NodeWorker::removeInput(ConnectorIn *source)
+void NodeWorker::removeInput(Input *source)
 {
     QMutexLocker lock(&message_mutex_);
-    std::map<ConnectorIn*, bool>::iterator it = has_msg_.find(source);
+    std::map<Input*, bool>::iterator it = has_msg_.find(source);
 
     if(it != has_msg_.end()) {
         has_msg_.erase(it);
     }
 }
 
-void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
+void NodeWorker::forwardMessageSynchronized(Input *source)
 {
-    typedef std::pair<ConnectorIn*, bool> PAIR;
+    typedef std::pair<Input*, bool> PAIR;
     bool can_process = true;
 
     {
@@ -149,7 +149,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
         // forbid async to change
         Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* cin = pair.first;
+            Input* cin = pair.first;
             locks.push_back(cin->lockAsync());
         }
 
@@ -165,7 +165,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
         // check if all inputs have messages
         Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* cin = pair.first;
+            Input* cin = pair.first;
             if(!has_msg_[cin]) {
                 // connector doesn't have a message
                 if(cin->isAsync()) {
@@ -192,7 +192,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
         int highest_seq_no = -1;
         UUID highest = UUID::NONE;
         Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* cin = pair.first;
+            Input* cin = pair.first;
 
             if(has_msg_[cin] && !cin->isAsync()) {
                 int s = cin->sequenceNumber();
@@ -203,7 +203,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
             }
         }
         Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* cin = pair.first;
+            Input* cin = pair.first;
             if(cin == source) {
                 continue;
             }
@@ -225,7 +225,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
         // now all sequence numbers must be equal!
         Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* cin = pair.first;
+            Input* cin = pair.first;
 
             if(has_msg_[cin] && !cin->isAsync()) {
                 if(highest_seq_no != cin->sequenceNumber()) {
@@ -238,7 +238,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
         // check if one is "NoMessage"
         Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* cin = pair.first;
+            Input* cin = pair.first;
 
             if(has_msg_[cin] && !cin->isAsync()) {
                 if(cin->isMessage<connection_types::NoMessage>()) {
@@ -249,13 +249,13 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
         // set output sequence numbers
         for(int i = 0; i < node_->countOutputs(); ++i) {
-            ConnectorOut* out = node_->getOutput(i);
+            Output* out = node_->getOutput(i);
             out->setSequenceNumber(highest_seq_no);
         }
 
         // reset states
         Q_FOREACH(const PAIR& pair, has_msg_) {
-            ConnectorIn* cin = pair.first;
+            Input* cin = pair.first;
 
             if(has_msg_[cin] && !cin->isAsync()) {
                 has_msg_[cin] = false;
@@ -291,7 +291,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 
     // reset all edges
     Q_FOREACH(const PAIR& pair, has_msg_) {
-        ConnectorIn* cin = pair.first;
+        Input* cin = pair.first;
         cin->free();
     }
 
@@ -301,7 +301,7 @@ void NodeWorker::forwardMessageSynchronized(ConnectorIn *source)
 void NodeWorker::sendMessages()
 {
     for(int i = 0; i < node_->countOutputs(); ++i) {
-        ConnectorOut* out = node_->getOutput(i);
+        Output* out = node_->getOutput(i);
         out->sendMessages();
     }
 }
@@ -347,7 +347,7 @@ void NodeWorker::tick()
         // if there is a message: send!
         bool has_msg = false;
         for(int i = 0; i < node_->countOutputs(); ++i) {
-            ConnectorOut* out = node_->getOutput(i);
+            Output* out = node_->getOutput(i);
             if(out->hasMessage()) {
                 has_msg = true;
             }

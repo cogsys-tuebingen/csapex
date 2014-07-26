@@ -4,8 +4,8 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/node_state.h>
@@ -89,7 +89,7 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
 
     BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
         if(!node->getOutputs().empty()) {
-            BOOST_FOREACH(ConnectorOut* o, node->getOutputs()) {
+            BOOST_FOREACH(Output* o, node->getOutputs()) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
                 }
@@ -98,8 +98,8 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
                 yaml << YAML::Value << o->getUUID();
                 yaml << YAML::Key << "targets";
                 yaml << YAML::Value << YAML::BeginSeq; // output list
-                for(ConnectorOut::TargetIterator it = o->beginTargets(); it != o->endTargets(); ++it) {
-                    ConnectorIn* i = *it;
+                for(Output::TargetIterator it = o->beginTargets(); it != o->endTargets(); ++it) {
+                    Input* i = *it;
                     yaml << i->getUUID();
                 }
                 yaml << YAML::EndSeq; // output list
@@ -196,7 +196,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
 
                 UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
-                ConnectorOut* from = parent->getOutput(from_uuid);
+                Output* from = parent->getOutput(from_uuid);
                 if(from == NULL) {
                     std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                     continue;
@@ -205,7 +205,7 @@ void GraphIO::loadConnections(YAML::Node &doc)
                 try {
                     Node* target_box = graph_->findNodeForConnector(to_uuid);
 
-                    ConnectorIn* to = target_box->getInput(to_uuid);
+                    Input* to = target_box->getInput(to_uuid);
                     if(!to) {
                         continue;
                     }
@@ -238,13 +238,13 @@ void GraphIO::loadConnections(YAML::Node &doc)
             UUID from_uuid = UUID::make_forced(from_uuid_tmp);
             UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
-            ConnectorOut* from = dynamic_cast<ConnectorOut*>(graph_->findConnector(from_uuid));
+            Output* from = dynamic_cast<Output*>(graph_->findConnector(from_uuid));
             if(from == NULL) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                 continue;
             }
 
-            ConnectorIn* to = dynamic_cast<ConnectorIn*>(graph_->findConnector(to_uuid));
+            Input* to = dynamic_cast<Input*>(graph_->findConnector(to_uuid));
             if(to == NULL) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
                 continue;

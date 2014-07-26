@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
 #include <csapex/utility/assert.h>
 
@@ -69,12 +69,12 @@ void AddConnection::refresh()
     bool t_for = t->isForwarding();
 
     if((f_out && t_in) || (f_out && t_for && t_out) || (f_in && f_for && t_in)) {
-        from = dynamic_cast<ConnectorOut*> (f);
-        to =  dynamic_cast<ConnectorIn*> (t);
+        from = dynamic_cast<Output*> (f);
+        to =  dynamic_cast<Input*> (t);
 
     } else if(f_in && t_out) {
-        from = dynamic_cast<ConnectorOut*> (t);
-        to =  dynamic_cast<ConnectorIn*> (f);
+        from = dynamic_cast<Output*> (t);
+        to =  dynamic_cast<Input*> (f);
 
     } else {
         throw std::runtime_error(std::string("cannot connect ") +

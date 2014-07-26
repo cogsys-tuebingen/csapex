@@ -15,20 +15,20 @@
 namespace csapex
 {
 
-class ConnectorIn : public virtual Connectable
+class Input : public virtual Connectable
 {
     Q_OBJECT
 
-    friend class ConnectorOut;
-    friend class ConnectorInForward;
+    friend class Output;
+    friend class InputForward;
     friend class command::AddConnection;
     friend class command::MoveConnection;
     friend class command::DeleteConnection;
 
 public:
-    ConnectorIn(Settings &settings, const UUID &uuid);
-    ConnectorIn(Settings& settings, Unique *parent, int sub_id);
-    virtual ~ConnectorIn();
+    Input(Settings &settings, const UUID &uuid);
+    Input(Settings& settings, Unique *parent, int sub_id);
+    virtual ~Input();
 
     virtual bool canInput() const {
         return true;

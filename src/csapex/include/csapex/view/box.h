@@ -150,8 +150,8 @@ Q_SIGNALS:
 protected:
     void resizeEvent(QResizeEvent * e);
 
-    void registerInputEvent(ConnectorIn* in);
-    void registerOutputEvent(ConnectorOut* out);
+    void registerInputEvent(Input* in);
+    void registerOutputEvent(Output* out);
 
 protected:
     Ui::Box* ui;

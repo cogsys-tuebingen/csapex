@@ -25,8 +25,8 @@ FWD(NodeStatistics);
 
 FWD(Port);
 FWD(Connectable);
-FWD(ConnectorIn);
-FWD(ConnectorOut);
+FWD(Input);
+FWD(Output);
 FWD(Connection);
 FWD(Fulcrum);
 

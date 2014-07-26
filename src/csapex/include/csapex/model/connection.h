@@ -35,8 +35,8 @@ public:
     }
 
 public:
-    Connection(ConnectorOut* from, ConnectorIn* to);
-    Connection(ConnectorOut* from, ConnectorIn* to, int id);
+    Connection(Output* from, Input* to);
+    Connection(Output* from, Input* to, int id);
 
     Connectable* from() const;
     Connectable* to() const;

@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 
@@ -18,12 +18,12 @@ using namespace csapex::command;
 DeleteConnection::DeleteConnection(Connectable* a, Connectable* b)
     : Meta("delete connection and fulcrums"), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
 {
-    from = dynamic_cast<ConnectorOut*>(a);
+    from = dynamic_cast<Output*>(a);
     if(from) {
-        to = dynamic_cast<ConnectorIn*>(b);
+        to = dynamic_cast<Input*>(b);
     } else {
-        from = dynamic_cast<ConnectorOut*>(b);
-        to = dynamic_cast<ConnectorIn*>(a);
+        from = dynamic_cast<Output*>(b);
+        to = dynamic_cast<Input*>(a);
     }
     apex_assert_hard(from);
     apex_assert_hard(to);

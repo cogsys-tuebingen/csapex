@@ -14,8 +14,8 @@
 #include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connectable.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
@@ -159,14 +159,14 @@ bool Graph::addConnection(Connection::Ptr connection)
             int highest_seq_no = -1;
             // search all parents of the target for the highest seq no
             for(int i = 0; i < n_to->countInputs(); ++i) {
-                ConnectorIn* input = n_to->getInput(i);
+                Input* input = n_to->getInput(i);
                 if(!input->isConnected()) {
                     continue;
                 }
                 Node* ni = findNodeForConnector(input->getSource()->getUUID());
 
                 for(int j = 0; j < ni->countOutputs(); ++j) {
-                    ConnectorOut* output = ni->getOutput(j);
+                    Output* output = ni->getOutput(j);
                     if(output->sequenceNumber() > highest_seq_no) {
                         highest_seq_no = output->sequenceNumber();
                     }
@@ -175,7 +175,7 @@ bool Graph::addConnection(Connection::Ptr connection)
             if(highest_seq_no != -1) {
 //                std::cerr << "setting the sequence numbers:\n";
                 for(int i = 0; i < n_to->countInputs(); ++i) {
-                    ConnectorIn* input = n_to->getInput(i);
+                    Input* input = n_to->getInput(i);
 //                    std::cerr << " - " << input->getUUID().getFullName() << " from #" << input->sequenceNumber() << " to #" << highest_seq_no << std::endl;
                     input->setSequenceNumber(highest_seq_no);
                 }
@@ -195,11 +195,11 @@ bool Graph::addConnection(Connection::Ptr connection)
             Q_FOREACH(Node::Ptr n, nodes_) {
                 if(node_component_[n.get()] == node_component_[n_to]) {
                     for(int i = 0; i < n->countOutputs(); ++i) {
-                        ConnectorOut* output = n->getOutput(i);
+                        Output* output = n->getOutput(i);
                         output->setSequenceNumber(seq_no);
                     }
                     for(int i = 0; i < n->countInputs(); ++i) {
-                        ConnectorIn* input = n->getInput(i);
+                        Input* input = n->getInput(i);
                         input->setSequenceNumber(seq_no);
                     }
                 }
@@ -346,9 +346,9 @@ void Graph::verifyAsync()
             }
 
             for(int i = 0; i < front->countOutputs(); ++i) {
-                ConnectorOut* output = front->getOutput(i);
-                for(ConnectorOut::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
-                    ConnectorIn* input = *in;
+                Output* output = front->getOutput(i);
+                for(Output::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
+                    Input* input = *in;
 
                     Node* next_node = findNodeForConnector(input->getUUID());
 
@@ -363,10 +363,10 @@ void Graph::verifyAsync()
 
 
         for(int i = 0; i < current->countOutputs(); ++i) {
-            ConnectorOut* output = current->getOutput(i);
+            Output* output = current->getOutput(i);
 
-            for(ConnectorOut::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
-                ConnectorIn* input = *in;
+            for(Output::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
+                Input* input = *in;
 
                 Node* next_node = findNodeForConnector(input->getUUID());
 
@@ -507,11 +507,11 @@ Node* Graph::findNodeForConnector(const UUID &uuid) const
         Q_FOREACH(Node::Ptr n, nodes_) {
             std::cerr << "node: " << n->getUUID() << "\n";
             std::cerr << "inputs: " << "\n";
-            Q_FOREACH(ConnectorIn* in, n->getInputs()) {
+            Q_FOREACH(Input* in, n->getInputs()) {
                 std::cerr << "\t" << in->getUUID() << "\n";
             }
             std::cerr << "outputs: " << "\n";
-            Q_FOREACH(ConnectorOut* out, n->getOutputs()) {
+            Q_FOREACH(Output* out, n->getOutputs()) {
                 std::cerr << "\t" << out->getUUID() << "\n";
             }
         }

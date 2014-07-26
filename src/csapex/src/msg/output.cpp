@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/output.h>
 
 /// COMPONENT
-#include <csapex/model/connector_in.h>
+#include <csapex/msg/input.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
@@ -14,40 +14,40 @@
 
 using namespace csapex;
 
-ConnectorOut::ConnectorOut(Settings &settings, const UUID& uuid)
+Output::Output(Settings &settings, const UUID& uuid)
     : Connectable(settings, uuid), force_send_message_(false)
 {
 }
 
-ConnectorOut::ConnectorOut(Settings& settings, Unique* parent, int sub_id)
+Output::Output(Settings& settings, Unique* parent, int sub_id)
     : Connectable(settings, parent, sub_id, TYPE_OUT), force_send_message_(false)
 {
 }
 
-ConnectorOut::~ConnectorOut()
+Output::~Output()
 {
-    BOOST_FOREACH(ConnectorIn* i, targets_) {
+    BOOST_FOREACH(Input* i, targets_) {
         i->removeConnection(this);
     }
 }
 
-int ConnectorOut::noTargets()
+int Output::noTargets()
 {
     return targets_.size();
 }
 
-ConnectorOut::TargetIterator ConnectorOut::beginTargets() const
+Output::TargetIterator Output::beginTargets() const
 {
     return targets_.begin();
 }
-ConnectorOut::TargetIterator ConnectorOut::endTargets() const
+Output::TargetIterator Output::endTargets() const
 {
     return targets_.end();
 }
 
-void ConnectorOut::removeConnection(Connectable* other_side)
+void Output::removeConnection(Connectable* other_side)
 {
-    for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
+    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
             other_side->removeConnection(this);
 
@@ -62,17 +62,17 @@ void ConnectorOut::removeConnection(Connectable* other_side)
     }
 }
 
-Command::Ptr ConnectorOut::removeConnectionCmd(ConnectorIn* other_side) {
+Command::Ptr Output::removeConnectionCmd(Input* other_side) {
     Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
 
     return removeThis;
 }
 
-Command::Ptr ConnectorOut::removeAllConnectionsCmd()
+Command::Ptr Output::removeAllConnectionsCmd()
 {
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
-    BOOST_FOREACH(ConnectorIn* target, targets_) {
+    BOOST_FOREACH(Input* target, targets_) {
         Command::Ptr removeThis(new command::DeleteConnection(this, target));
         removeAll->add(removeThis);
     }
@@ -80,9 +80,9 @@ Command::Ptr ConnectorOut::removeAllConnectionsCmd()
     return removeAll;
 }
 
-void ConnectorOut::removeAllConnectionsNotUndoable()
+void Output::removeAllConnectionsNotUndoable()
 {
-    for(std::vector<ConnectorIn*>::iterator i = targets_.begin(); i != targets_.end();) {
+    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
         (*i)->removeConnection(this);
         i = targets_.erase(i);
     }
@@ -90,17 +90,17 @@ void ConnectorOut::removeAllConnectionsNotUndoable()
     Q_EMIT disconnected(this);
 }
 
-void ConnectorOut::connectForcedWithoutCommand(ConnectorIn *other_side)
+void Output::connectForcedWithoutCommand(Input *other_side)
 {
     tryConnect(other_side);
 }
 
-bool ConnectorOut::tryConnect(Connectable *other_side)
+bool Output::tryConnect(Connectable *other_side)
 {
     return connect(other_side);
 }
 
-bool ConnectorOut::connect(Connectable *other_side)
+bool Output::connect(Connectable *other_side)
 {
     if(!other_side->canInput()) {
         std::cerr << "cannot connect, other side can't input" << std::endl;
@@ -111,7 +111,7 @@ bool ConnectorOut::connect(Connectable *other_side)
         return false;
     }
 
-    ConnectorIn* input = dynamic_cast<ConnectorIn*>(other_side);
+    Input* input = dynamic_cast<Input*>(other_side);
 
     if(!input->acknowledgeConnection(this)) {
         std::cerr << "cannot connect, other side doesn't acknowledge" << std::endl;
@@ -128,9 +128,9 @@ bool ConnectorOut::connect(Connectable *other_side)
     return true;
 }
 
-bool ConnectorOut::targetsCanBeMovedTo(Connectable* other_side) const
+bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
+    for(Output::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
         if(!(*it)->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
@@ -138,37 +138,37 @@ bool ConnectorOut::targetsCanBeMovedTo(Connectable* other_side) const
     return true;
 }
 
-bool ConnectorOut::isConnected() const
+bool Output::isConnected() const
 {
     return targets_.size() > 0;
 }
 
-void ConnectorOut::connectionMovePreview(Connectable *other_side)
+void Output::connectionMovePreview(Connectable *other_side)
 {
-    for(ConnectorOut::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
+    for(Output::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
         Q_EMIT(connectionInProgress(*it, other_side));
     }
 }
 
-void ConnectorOut::validateConnections()
+void Output::validateConnections()
 {
-    BOOST_FOREACH(ConnectorIn* target, targets_) {
+    BOOST_FOREACH(Input* target, targets_) {
         target->validateConnections();
     }
 }
 
-void ConnectorOut::publish(ConnectionType::Ptr message)
+void Output::publish(ConnectionType::Ptr message)
 {
     // update buffer
     message_to_send_ = message;
 }
 
-bool ConnectorOut::hasMessage()
+bool Output::hasMessage()
 {
     return message_to_send_;
 }
 
-void ConnectorOut::sendMessages()
+void Output::sendMessages()
 {
     if(message_to_send_) {
         message_ = message_to_send_;
@@ -186,8 +186,8 @@ void ConnectorOut::sendMessages()
 
     // wait for all connected inputs to be able to receive, if none is async
     //  * inputs can only be connected to this output since they are 1:1
-    std::vector<ConnectorIn*> targets;
-    BOOST_FOREACH(ConnectorIn* i, targets_) {
+    std::vector<Input*> targets;
+    BOOST_FOREACH(Input* i, targets_) {
         if(i->isEnabled()) {
             targets.push_back(i);
         }
@@ -202,7 +202,7 @@ void ConnectorOut::sendMessages()
         if(targets.size() == 1) {
             targets[0]->inputMessage(message_);
         } else if(targets.size() > 1) {
-            BOOST_FOREACH(ConnectorIn* i, targets) {
+            BOOST_FOREACH(Input* i, targets) {
                 ConnectionType::Ptr msg = message_->clone();
                 msg->setSequenceNumber(seq_no_);
                 i->inputMessage(msg);
@@ -215,12 +215,12 @@ void ConnectorOut::sendMessages()
     Q_EMIT messageSent(this);
 }
 
-void ConnectorOut::forceSendMessage(bool force)
+void Output::forceSendMessage(bool force)
 {
     force_send_message_ = force;
 }
 
-ConnectionType::Ptr ConnectorOut::getMessage()
+ConnectionType::Ptr Output::getMessage()
 {
     return message_;
 }

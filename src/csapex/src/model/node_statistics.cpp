@@ -3,8 +3,8 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/manager/box_manager.h>
 
 using namespace csapex;
@@ -53,7 +53,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation() const
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
         for(int i = 0, n = node_->countInputs(); i < n; ++i) {
-            ConnectorIn* connector = node_->getInput(i);
+            Input* connector = node_->getInput(i);
 
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
 
@@ -84,14 +84,14 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation() const
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
         for(int i = 0, n = node_->countOutputs(); i < n; ++i) {
-            ConnectorOut* connector = node_->getOutput(i);
+            Output* connector = node_->getOutput(i);
 
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             targets->setText(0, "Target");
-            for(ConnectorOut::TargetIterator it = connector->beginTargets(); it != connector->endTargets(); ++it) {
-                ConnectorIn* target = *it;
+            for(Output::TargetIterator it = connector->beginTargets(); it != connector->endTargets(); ++it) {
+                Input* target = *it;
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
                 target_widget->setText(0, target->getUUID().c_str());
                 //target_widget->setIcon(1, target->getNode()->getIcon());

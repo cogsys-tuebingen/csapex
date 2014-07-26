@@ -6,8 +6,8 @@
 #include <csapex/core/drag_io.h>
 #include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/view/box.h>

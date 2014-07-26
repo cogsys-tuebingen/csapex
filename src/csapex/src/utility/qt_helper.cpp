@@ -2,8 +2,8 @@
 #include <csapex/utility/qt_helper.hpp>
 
 /// COMPONENT
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/msg/message_factory.h>
 #include <csapex/view/port.h>
 #include <csapex/command/meta.h>

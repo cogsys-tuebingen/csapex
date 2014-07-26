@@ -6,8 +6,8 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connectable.h>
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/node.h>
 #include <csapex/view/box.h>
 #include <csapex/view/widget_controller.h>
@@ -117,12 +117,12 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         scene->deleteTemporaryConnections();
 
         if(c->isOutput()) {
-            ConnectorOut* out = dynamic_cast<ConnectorOut*> (c);
-            for(ConnectorOut::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
+            Output* out = dynamic_cast<Output*> (c);
+            for(Output::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
                 scene->addTemporaryConnection(*it, src->mapToScene(e->pos()));
             }
         } else {
-            ConnectorIn* in = dynamic_cast<ConnectorIn*> (c);
+            Input* in = dynamic_cast<Input*> (c);
             scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
         }
         scene->update();

@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/model/connector_in.h>
+#include <csapex/msg/input.h>
 
 /// COMPONENT
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/output.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
@@ -12,17 +12,17 @@
 
 using namespace csapex;
 
-ConnectorIn::ConnectorIn(Settings& settings, const UUID &uuid)
+Input::Input(Settings& settings, const UUID &uuid)
     : Connectable(settings, uuid), target(NULL), buffer_(new Buffer(1)), optional_(false)
 {
 }
 
-ConnectorIn::ConnectorIn(Settings &settings, Unique* parent, int sub_id)
+Input::Input(Settings &settings, Unique* parent, int sub_id)
     : Connectable(settings, parent, sub_id, TYPE_IN), target(NULL), buffer_(new Buffer(1)), optional_(false)
 {
 }
 
-ConnectorIn::~ConnectorIn()
+Input::~Input()
 {
     if(target != NULL) {
         target->removeConnection(this);
@@ -31,7 +31,7 @@ ConnectorIn::~ConnectorIn()
     free();
 }
 
-bool ConnectorIn::tryConnect(Connectable* other_side)
+bool Input::tryConnect(Connectable* other_side)
 {
     if(!other_side->canOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
@@ -41,15 +41,15 @@ bool ConnectorIn::tryConnect(Connectable* other_side)
     return other_side->tryConnect(this);
 }
 
-bool ConnectorIn::acknowledgeConnection(Connectable* other_side)
+bool Input::acknowledgeConnection(Connectable* other_side)
 {
-    target = dynamic_cast<ConnectorOut*>(other_side);
+    target = dynamic_cast<Output*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
     connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
     return true;
 }
 
-void ConnectorIn::removeConnection(Connectable* other_side)
+void Input::removeConnection(Connectable* other_side)
 {
     if(target != NULL) {
         apex_assert_hard(other_side == target);
@@ -59,23 +59,23 @@ void ConnectorIn::removeConnection(Connectable* other_side)
     }
 }
 
-Command::Ptr ConnectorIn::removeAllConnectionsCmd()
+Command::Ptr Input::removeAllConnectionsCmd()
 {
     Command::Ptr cmd(new command::DeleteConnection(target, this));
     return cmd;
 }
 
-void ConnectorIn::setOptional(bool optional)
+void Input::setOptional(bool optional)
 {
     optional_ = optional;
 }
 
-bool ConnectorIn::isOptional() const
+bool Input::isOptional() const
 {
     return optional_;
 }
 
-void ConnectorIn::setAsync(bool asynch)
+void Input::setAsync(bool asynch)
 {
     QMutexLocker lock(&sync_mutex);
 
@@ -87,19 +87,19 @@ void ConnectorIn::setAsync(bool asynch)
     }
 }
 
-bool ConnectorIn::hasMessage() const
+bool Input::hasMessage() const
 {
     return buffer_->isFilled();
 }
 
-void ConnectorIn::free()
+void Input::free()
 {
     buffer_->free();
 
     setBlocked(false);
 }
 
-void ConnectorIn::enable()
+void Input::enable()
 {
     Connectable::enable();
 //    if(isConnected() && !getSource()->isEnabled()) {
@@ -107,7 +107,7 @@ void ConnectorIn::enable()
 //    }
 }
 
-void ConnectorIn::disable()
+void Input::disable()
 {
     Connectable::disable();
 //    if(isConnected() && getSource()->isEnabled()) {
@@ -115,7 +115,7 @@ void ConnectorIn::disable()
 //    }
 }
 
-void ConnectorIn::removeAllConnectionsNotUndoable()
+void Input::removeAllConnectionsNotUndoable()
 {
     if(target != NULL) {
         target->removeConnection(this);
@@ -126,28 +126,28 @@ void ConnectorIn::removeAllConnectionsNotUndoable()
 }
 
 
-bool ConnectorIn::canConnectTo(Connectable* other_side, bool move) const
+bool Input::canConnectTo(Connectable* other_side, bool move) const
 {
     return Connectable::canConnectTo(other_side, move) && (move || !isConnected());
 }
 
-bool ConnectorIn::targetsCanBeMovedTo(Connectable* other_side) const
+bool Input::targetsCanBeMovedTo(Connectable* other_side) const
 {
     return target->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
-bool ConnectorIn::isConnected() const
+bool Input::isConnected() const
 {
     return target != NULL;
 }
 
-void ConnectorIn::connectionMovePreview(Connectable *other_side)
+void Input::connectionMovePreview(Connectable *other_side)
 {
     Q_EMIT(connectionInProgress(getSource(), other_side));
 }
 
 
-void ConnectorIn::validateConnections()
+void Input::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
@@ -159,12 +159,12 @@ void ConnectorIn::validateConnections()
     setError(e);
 }
 
-Connectable *ConnectorIn::getSource() const
+Connectable *Input::getSource() const
 {
     return target;
 }
 
-void ConnectorIn::inputMessage(ConnectionType::Ptr message)
+void Input::inputMessage(ConnectionType::Ptr message)
 {
     int s = message->sequenceNumber();
     if(s < sequenceNumber() && !isAsync()) {
