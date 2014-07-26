@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
-#include <csapex/model/tag.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/parameterizable.h>
@@ -46,9 +45,6 @@ public:
 
     void setType(const std::string& type);
     std::string getType() const;
-
-    void addTag(const Tag::Ptr &tag) __attribute__ ((deprecated));
-    std::vector<Tag::Ptr> getTags() const  __attribute__ ((deprecated));
 
     virtual void pause(bool pause);
     virtual void clearBlock();
@@ -189,7 +185,6 @@ Q_SIGNALS:
 
 protected:
     std::string type_;
-    mutable std::vector<Tag::Ptr> tags_;
 
     NodeModifier* modifier_;
 

@@ -86,19 +86,6 @@ std::string Node::getType() const
     return type_;
 }
 
-void Node::addTag(const Tag::Ptr &tag)
-{
-    tags_.push_back(tag);
-}
-
-std::vector<Tag::Ptr> Node::getTags() const
-{
-    if(tags_.empty()) {
-        tags_.push_back(Tag::get("General"));
-    }
-    return tags_;
-}
-
 ConnectorIn* Node::getParameterInput(const std::string &name) const
 {
     std::map<std::string, ConnectorIn*>::const_iterator it = param_2_input_.find(name);

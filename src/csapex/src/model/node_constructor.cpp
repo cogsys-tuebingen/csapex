@@ -45,7 +45,7 @@ std::string NodeConstructor::getType() const
     return type_;
 }
 
-std::vector<Tag::Ptr> NodeConstructor::getTags() const
+std::vector<TagPtr> NodeConstructor::getTags() const
 {
     return tags_;
 }

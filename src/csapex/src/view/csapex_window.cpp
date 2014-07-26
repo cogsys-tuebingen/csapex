@@ -10,16 +10,17 @@
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_statistics.h>
+#include <csapex/model/tag.h>
 #include <csapex/utility/bash_parser.h>
 #include <csapex/utility/qt_helper.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/view/box.h>
 #include <csapex/view/designer.h>
-#include "ui_csapex_window.h"
-#include <csapex/view/widget_controller.h>
-#include <utils_param/parameter_factory.h>
 #include <csapex/view/designer.h>
-#include <csapex/model/node_statistics.h>
+#include <csapex/view/widget_controller.h>
+#include "ui_csapex_window.h"
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <iostream>
