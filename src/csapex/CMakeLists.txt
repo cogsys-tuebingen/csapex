@@ -86,10 +86,10 @@ set(SRC_PLUGIN
     src/model/node_modifier.cpp
     src/model/connector_in.cpp
     src/model/connector_out.cpp
-    src/model/message.cpp
     src/model/connection_type.cpp
-    src/model/message_factory.cpp
-    src/model/tag.cpp
+
+    src/msg/message.cpp
+    src/msg/message_factory.cpp
 
     src/manager/message_provider_manager.cpp
 
@@ -133,6 +133,7 @@ set(SRC_APP
     src/command/modify_fulcrum.cpp
     src/command/delete_fulcrum.cpp
 
+    src/model/tag.cpp
     src/model/node_constructor.cpp
     src/model/error_state.cpp
     src/model/connectable.cpp
@@ -141,7 +142,6 @@ set(SRC_APP
     src/model/fulcrum.cpp
     src/model/multi_connection_type.cpp
     src/model/generic_state.cpp
-    src/model/message_provider.cpp
     src/model/node_state.cpp
     src/model/node_worker.cpp
     src/model/node_statistics.cpp
@@ -149,6 +149,8 @@ set(SRC_APP
     src/model/node_filter_proxy_model.cpp
     src/model/unique.cpp
     src/model/memento.cpp
+
+    src/msg/message_provider.cpp
 
     src/manager/box_manager.cpp
 

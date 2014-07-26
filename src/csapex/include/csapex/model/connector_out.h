@@ -4,7 +4,8 @@
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
-#include <csapex/model/message.h>
+#include <csapex/msg/generic_pointer_message.hpp>
+#include <csapex/msg/generic_value_message.hpp>
 #include <csapex/utility/timable.h>
 
 namespace csapex

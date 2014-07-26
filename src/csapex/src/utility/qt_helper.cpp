@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connector_in.h>
 #include <csapex/model/connector_out.h>
-#include <csapex/model/message_factory.h>
+#include <csapex/msg/message_factory.h>
 #include <csapex/view/port.h>
 #include <csapex/command/meta.h>
 #include <csapex/utility/assert.h>

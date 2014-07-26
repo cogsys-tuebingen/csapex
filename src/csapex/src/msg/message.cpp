@@ -1,5 +1,5 @@
 /// HEADAER
-#include <csapex/model/message.h>
+#include <csapex/msg/message.h>
 
 /// PROJECT
 #include <csapex/utility/assert.h>

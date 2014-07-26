@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/message_factory.h>
+#include <csapex/msg/message_factory.h>
 
 /// COMPONENT
 #include <csapex/utility/assert.h>

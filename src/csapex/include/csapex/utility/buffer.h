@@ -2,7 +2,7 @@
 #define BUFFER_H
 
 /// PROJECT
-#include <csapex/model/message.h>
+#include <csapex/msg/message.h>
 
 /// SYSTEM
 #include <QSemaphore>

@@ -3,7 +3,8 @@
 
 /// COMPONENT
 #include <csapex/model/multi_connection_type.h>
-#include <csapex/model/message.h>
+#include <csapex/msg/message.h>
+#include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM

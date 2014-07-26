@@ -7,8 +7,8 @@
 #include <csapex/core/graphio.h>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/model/message.h>
-#include <csapex/model/message_factory.h>
+#include <csapex/msg/message.h>
+#include <csapex/msg/message_factory.h>
 #include <csapex/utility/plugin_manager.hpp>
 #include <csapex/model/tag.h>
 #include <csapex/utility/assert.h>

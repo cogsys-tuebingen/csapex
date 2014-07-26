@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/memento.h>
-#include <csapex/model/message.h>
+#include <csapex/msg/message.h>
 #include <csapex/model/generic_state.h>
 
 /// SYSTEM

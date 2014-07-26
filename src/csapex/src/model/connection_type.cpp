@@ -2,7 +2,7 @@
 #include <csapex/model/connection_type.h>
 
 /// COMPONENT
-#include <csapex/model/message.h>
+#include <csapex/msg/message.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM

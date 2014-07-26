@@ -2,7 +2,7 @@
 #define MESSAGE_PROVIDER_MANAGER_H
 
 /// COMPONENT
-#include <csapex/model/message_provider.h>
+#include <csapex/msg/message_provider.h>
 #include <csapex/csapex_fwd.h>
 
 /// PROJECT

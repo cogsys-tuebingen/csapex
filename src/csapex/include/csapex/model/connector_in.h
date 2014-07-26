@@ -4,7 +4,8 @@
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
-#include <csapex/model/message.h>
+#include <csapex/msg/message.h>
+#include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/utility/buffer.h>
 
 /// SYSTEM

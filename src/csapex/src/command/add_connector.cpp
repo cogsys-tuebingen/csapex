@@ -8,7 +8,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/model/message_factory.h>
+#include <csapex/msg/message_factory.h>
 #include <csapex/utility/assert.h>
 
 using namespace csapex;
