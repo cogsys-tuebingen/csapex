@@ -47,12 +47,12 @@ public:
     std::string getType() const;
 
     virtual void pause(bool pause);
-    virtual void clearBlock();
+    /* ?? */ virtual void clearBlock();
     virtual void stop();
 
-    virtual void useTimer(Timer* timer);
+    /* ?? */ virtual void useTimer(Timer* timer);
 
-
+    virtual void setEnabled(bool e);
     bool isEnabled();
 
     NodeStatePtr getNodeState();
@@ -103,7 +103,8 @@ public:
 
     void setCommandDispatcher(CommandDispatcher* d);
 
-    bool canReceive();
+    /* ?? */ bool canReceive();
+
 
 public:
     virtual void setup() = 0;
@@ -115,10 +116,6 @@ public:
 
     /*ALL TO BE REMOVED / MADE NON SLOT*/
 public Q_SLOTS:
-    virtual void enable(bool e);
-    virtual void enable();
-    virtual void disable(bool e);
-    virtual void disable();
     virtual void connectorChanged();
 
     virtual void updateModel();
@@ -132,7 +129,6 @@ public Q_SLOTS:
     void setIOError(bool error);
     void setMinimized(bool min);
 
-    void triggerModelChanged();
 
 /*ALL TO BE REMOVED*/
 Q_SIGNALS:
@@ -154,22 +150,24 @@ Q_SIGNALS:
 
 
 protected:
-    void connectConnector(Connectable* c);
-    void disconnectConnector(Connectable* c);
+    /* ?? */ void connectConnector(Connectable* c);
+    /* ?? */ void disconnectConnector(Connectable* c);
 
     void setUUID(const UUID& uuid);
 
     virtual void setState(Memento::Ptr memento);
 
     template <typename T>
-    void updateParameter(param::Parameter*);
-    void updateParameters();
+    /* ?? */ void updateParameter(param::Parameter*);
+    /* ?? */ void updateParameters();
+
+    void triggerModelChanged();
 
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
-    void registerInput(Input* in);
-    void registerOutput(Output* out);
+    /* ?? */ void registerInput(Input* in);
+    /* ?? */ void registerOutput(Output* out);
 
 protected:
     std::string type_;

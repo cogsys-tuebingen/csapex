@@ -124,7 +124,7 @@ NodeAdapter::Ptr NodeBox::getNodeAdapter()
 
 void NodeBox::enableContent(bool enable)
 {
-    node_->enable(enable);
+    node_->setEnabled(enable);
 
     ui->label->setEnabled(enable);
 }

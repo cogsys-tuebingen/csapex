@@ -261,39 +261,19 @@ void Node::setState(Memento::Ptr memento)
 
     parameter_state_.setFrom(*m);
 
-    Q_EMIT modelChanged();
+    triggerModelChanged();
 }
 
-void Node::enable(bool e)
+void Node::setEnabled(bool e)
 {
-    if(e) {
-        enable();
-    } else {
-        disable();
+    node_state_->setEnabled(e);
+
+    if(!e) {
+        setError(false);
     }
-}
 
-void Node::enable()
-{
-    node_state_->setEnabled(true);
     checkIO();
-
-    Q_EMIT enabled(true);
-}
-
-void Node::disable(bool d)
-{
-    enable(!d);
-}
-
-
-void Node::disable()
-{
-    node_state_->setEnabled(false);
-    setError(false);
-    checkIO();
-
-    Q_EMIT enabled(false);
+    Q_EMIT enabled(e);
 }
 
 bool Node::canReceive()

@@ -382,7 +382,7 @@ void Graph::verifyAsync()
 void Graph::stop()
 {
     Q_FOREACH(Node::Ptr node, nodes_) {
-        node->disable();
+        node->setEnabled(false);
     }
     Q_FOREACH(Node::Ptr node, nodes_) {
         node->stop();
