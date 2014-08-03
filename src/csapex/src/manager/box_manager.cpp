@@ -12,6 +12,7 @@
 #include <csapex/view/box.h>
 #include <csapex/view/default_node_adapter.h>
 #include <csapex/utility/plugin_manager.hpp>
+#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -265,21 +266,6 @@ void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_
     }
 }
 
-namespace {
-QPixmap createPixmap(const std::string& label, const NodePtr& content, const QIcon& icon, const QString& stylesheet, WidgetController* widget_ctrl)
-{
-    NodeBox::Ptr object;
-
-    object.reset(new NodeBox(content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl)), icon));
-
-    object->setStyleSheet(stylesheet);
-    object->construct();
-    object->setObjectName(content->getType().c_str());
-    object->setLabel(label);
-    
-    return QPixmap::grabWidget(object.get());
-}
-}
 bool BoxManager::isValidType(const std::string &type) const
 {
     Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
@@ -308,7 +294,16 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, Widge
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    drag->setPixmap(createPixmap(type, content, c->getIcon(), style_sheet_, widget_ctrl));
+
+    NodeBox::Ptr object(new NodeBox(*settings_, widget_ctrl->getCommandDispatcher(), content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl)), c->getIcon()));
+
+    object->setStyleSheet(style_sheet_);
+    object->construct();
+    object->setObjectName(content->getType().c_str());
+    object->setLabel(type);
+
+
+    drag->setPixmap(QPixmap::grabWidget(object.get()));
     drag->setHotSpot(-offset);
     drag->exec();
 }
@@ -378,9 +373,9 @@ NodeBox* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
     NodeBox* box;
     QIcon icon = getConstructor(type)->getIcon();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        box = new NodeBox(node, node_adapter_builders_[type]->build(node, widget_ctrl), icon);
+        box = new NodeBox(*settings_, widget_ctrl->getCommandDispatcher(), node, node_adapter_builders_[type]->build(node, widget_ctrl), icon);
     } else {
-        box = new NodeBox(node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)), icon);
+        box = new NodeBox(*settings_, widget_ctrl->getCommandDispatcher(), node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)), icon);
     }
     box->construct();
     return box;

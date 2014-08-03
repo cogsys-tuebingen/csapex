@@ -36,6 +36,8 @@ public:
     GraphPtr getGraph();
 
     void setDesigner(Designer* designer);
+
+    CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher *dispatcher);
 
     void foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred);

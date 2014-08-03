@@ -8,6 +8,11 @@
 #include <csapex/model/node_state.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
+
+/// SYSTEM
+#include <boost/foreach.hpp>
 
 using namespace csapex::command;
 
@@ -35,7 +40,18 @@ bool DeleteNode::doExecute()
 
     locked = false;
     clear();
-    add(node->removeAllConnectionsCmd());
+
+    BOOST_FOREACH(Input* i, node->getInputs()) {
+        if(i->isConnected()) {
+            add(i->removeAllConnectionsCmd());
+        }
+    }
+    BOOST_FOREACH(Output* i, node->getOutputs()) {
+        if(i->isConnected()) {
+            add(i->removeAllConnectionsCmd());
+        }
+    }
+
     locked = true;
 
     if(Meta::doExecute()) {

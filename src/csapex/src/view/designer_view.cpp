@@ -229,7 +229,6 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     box->init();
     box->triggerPlaced();
-    box->setCommandDispatcher(dispatcher_);
     box->show();
 
     box->updateInformation(graph_.get());

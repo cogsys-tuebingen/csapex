@@ -31,10 +31,11 @@ using namespace csapex;
 
 const QString NodeBox::MIME = "csapex/model/box";
 
-NodeBox::NodeBox(NodePtr node, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), node_(node), adapter_(adapter), icon_(icon),
+NodeBox::NodeBox(Settings& settings, CommandDispatcher* cmd_dispatcher, NodePtr node, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), settings_(settings), cmd_dispatcher_(cmd_dispatcher), node_(node), adapter_(adapter), icon_(icon),
       down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
+    node_->setCommandDispatcher(cmd_dispatcher);
 }
 
 NodeBox::~NodeBox()
@@ -73,7 +74,7 @@ void NodeBox::construct()
     ui->input_layout->addSpacerItem(new QSpacerItem(16, 0));
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
-    ui->enablebtn->setCheckable(node_->canBeDisabled());
+    ui->enablebtn->setCheckable(true);
 
     ui->enablebtn->setIcon(icon_);
 
@@ -91,10 +92,6 @@ void NodeBox::construct()
 
     node_->setMinimized(false);
 
-    QObject::connect(this, SIGNAL(toggled(bool)), node_.get(), SIGNAL(toggled(bool)));
-    QObject::connect(this, SIGNAL(placed()), node_.get(), SIGNAL(started()));
-
-    QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
     QObject::connect(node_.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
@@ -383,7 +380,7 @@ void NodeBox::moveEvent(QMoveEvent* e)
 
 
     QPoint pos = e->pos();
-    if(node_->getSettings().get("grid-lock", false)) {
+    if(settings_.get("grid-lock", false)) {
         pos.setX(round(pos.x() / 10.0) * 10.0);
         pos.setY(round(pos.y() / 10.0) * 10.0);
         move(pos);
@@ -420,7 +417,7 @@ void NodeBox::stop()
 
 void NodeBox::deleteBox()
 {
-    node_->getCommandDispatcher()->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
+    cmd_dispatcher_->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
 }
 
 void NodeBox::getInformation()
@@ -525,14 +522,4 @@ void NodeBox::nodeStateChanged()
     ui->label->setToolTip(node_->getUUID().c_str());
 
     move(node_->getNodeState()->getPos());
-}
-
-CommandDispatcher* NodeBox::getCommandDispatcher() const
-{
-    return node_->getCommandDispatcher();
-}
-
-void NodeBox::setCommandDispatcher(CommandDispatcher *d)
-{
-    node_->setCommandDispatcher(d);
 }

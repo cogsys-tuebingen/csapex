@@ -37,12 +37,12 @@ bool AddConnector::doExecute()
     apex_assert_hard(node);
 
     if(input) {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_IN, node->nextInputId()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_IN, node->countInputs()) : c_uuid;
         Input* in = new Input(graph_->getSettings(), uuid);
         c = in;
         node->registerInput(in);
     } else {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_OUT, node->nextOutputId()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_OUT, node->countOutputs()) : c_uuid;
         Output* out = new Output(graph_->getSettings(), uuid);
         c = out;
         node->registerOutput(out);

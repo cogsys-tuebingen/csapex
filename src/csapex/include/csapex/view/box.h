@@ -49,7 +49,7 @@ public:
 
 public:
     /// CONSTRUCTION
-    NodeBox(NodePtr content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
+    NodeBox(Settings& settings, CommandDispatcher* cmd_dispatcher, NodePtr content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
     virtual ~NodeBox();
     void construct();
     void init();
@@ -57,9 +57,6 @@ public:
     /// ACCESSORS
     Node* getNode();
     NodeAdapterPtr getNodeAdapter();
-
-    CommandDispatcher* getCommandDispatcher() const;
-    void setCommandDispatcher(CommandDispatcher* d);
 
     virtual bool hasSubGraph();
     virtual Graph::Ptr getSubGraph();
@@ -155,6 +152,9 @@ protected:
 
 protected:
     Ui::Box* ui;
+
+    Settings& settings_;
+    CommandDispatcher* cmd_dispatcher_;
 
     NodePtr node_;
     NodeAdapterPtr adapter_;

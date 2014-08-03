@@ -52,20 +52,14 @@ public:
 
     virtual void useTimer(Timer* timer);
 
-protected:
-    void connectConnector(Connectable* c);
-    void disconnectConnector(Connectable* c);
 
-    void setUUID(const UUID& uuid);
-
-public:
-    virtual bool canBeDisabled() const;
     bool isEnabled();
 
-public:
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
     void setNodeState(NodeStatePtr memento);
+
+    virtual MementoPtr getChildState() const;
 
     void setSettings(Settings* settings);
 
@@ -97,47 +91,21 @@ public:
     Input* getParameterInput(const std::string& name) const;
     Output* getParameterOutput(const std::string& name) const;
 
+    virtual Connectable* getConnector(const UUID& uuid) const;
     virtual Input* getInput(const UUID& uuid) const;
     virtual Output* getOutput(const UUID& uuid) const;
 
-    virtual Connectable* getConnector(const UUID& uuid) const;
     virtual std::vector<Input*> getInputs() const;
     virtual std::vector<Output*> getOutputs() const;
 
     void removeInput(Input *in);
     void removeOutput(Output *out);
 
-    void setSynchronizedInputs(bool) __attribute__ ((deprecated))__attribute__ ((warning("not needed anymore, everything is synchronized now"))) {}
-
-    int nextInputId();
-    int nextOutputId();
-
-    CommandDispatcher* getCommandDispatcher() const;
     void setCommandDispatcher(CommandDispatcher* d);
-
-    CommandPtr removeAllConnectionsCmd();
 
     bool canReceive();
 
 public:
-    virtual MementoPtr getChildState() const;
-
-protected:
-    virtual void setState(Memento::Ptr memento);
-
-    Settings& getSettings();
-
-    template <typename T>
-    void updateParameter(param::Parameter*);
-    void updateParameters();
-
-private:
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
-
-    void registerInput(Input* in);
-    void registerOutput(Output* out);
-
-public Q_SLOTS:
     virtual void setup() = 0;
     virtual void setupParameters();
     virtual void messageArrived(Input* source);
@@ -145,6 +113,8 @@ public Q_SLOTS:
 
     virtual void tick();
 
+    /*ALL TO BE REMOVED / MADE NON SLOT*/
+public Q_SLOTS:
     virtual void enable(bool e);
     virtual void enable();
     virtual void disable(bool e);
@@ -164,12 +134,11 @@ public Q_SLOTS:
 
     void triggerModelChanged();
 
+/*ALL TO BE REMOVED*/
 Q_SIGNALS:
     void stateChanged();
     void modelChanged();
-    void toggled(bool);
     void enabled(bool);
-    void started();
 
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone();
@@ -183,10 +152,31 @@ Q_SIGNALS:
 
     void nodeError(bool error, const std::string &msg, int level);
 
+
+protected:
+    void connectConnector(Connectable* c);
+    void disconnectConnector(Connectable* c);
+
+    void setUUID(const UUID& uuid);
+
+    virtual void setState(Memento::Ptr memento);
+
+    template <typename T>
+    void updateParameter(param::Parameter*);
+    void updateParameters();
+
+private:
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+
+    void registerInput(Input* in);
+    void registerOutput(Output* out);
+
 protected:
     std::string type_;
 
     NodeModifier* modifier_;
+    Settings* settings_;
+    CommandDispatcher* dispatcher_;
 
     StreamRelay ainfo;
     StreamRelay awarn;
@@ -194,8 +184,6 @@ protected:
     StreamRelay alog;
 
 private:
-    Settings* settings_;
-
     NodeWorker* worker_;
 
     NodeStatePtr node_state_;
@@ -207,8 +195,6 @@ private:
 
     std::vector<Input*> managed_inputs_;
     std::vector<Output*> managed_outputs_;
-
-    CommandDispatcher* dispatcher_;
 
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;

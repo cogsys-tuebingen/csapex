@@ -18,10 +18,10 @@ using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
-      modifier_(new NodeModifier(this)),
+      modifier_(new NodeModifier(this)), settings_(NULL), dispatcher_(NULL),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
-      settings_(NULL), worker_(NULL),
-      node_state_(new NodeState(this)), dispatcher_(NULL)
+      worker_(NULL),
+      node_state_(new NodeState(this))
 {
 }
 
@@ -106,11 +106,6 @@ Output* Node::getParameterOutput(const std::string &name) const
     }
 }
 
-bool Node::canBeDisabled() const
-{
-    return true;
-}
-
 bool Node::isEnabled()
 {
     return node_state_->isEnabled();
@@ -137,11 +132,6 @@ void Node::checkIO()
         enableInput(false);
         enableOutput(false);
     }
-}
-
-Settings& Node::getSettings()
-{
-    return *settings_;
 }
 
 NodeState::Ptr Node::getNodeStateCopy() const
@@ -615,25 +605,6 @@ void Node::removeOutput(Output *out)
     Q_EMIT connectorRemoved(out);
 }
 
-
-Command::Ptr Node::removeAllConnectionsCmd()
-{
-    command::Meta::Ptr cmd(new command::Meta("Remove All Connections"));
-
-    BOOST_FOREACH(Input* i, getInputs()) {
-        if(i->isConnected()) {
-            cmd->add(i->removeAllConnectionsCmd());
-        }
-    }
-    BOOST_FOREACH(Output* i, getOutputs()) {
-        if(i->isConnected()) {
-            cmd->add(i->removeAllConnectionsCmd());
-        }
-    }
-
-    return cmd;
-}
-
 void Node::registerInput(Input* in)
 {
     inputs_.push_back(in);
@@ -664,21 +635,6 @@ void Node::registerOutput(Output* out)
     connectConnector(out);
 
     Q_EMIT connectorCreated(out);
-}
-
-int Node::nextInputId()
-{
-    return inputs_.size();
-}
-
-int Node::nextOutputId()
-{
-    return outputs_.size();
-}
-
-CommandDispatcher* Node::getCommandDispatcher() const
-{
-    return dispatcher_;
 }
 
 void Node::setCommandDispatcher(CommandDispatcher *d)

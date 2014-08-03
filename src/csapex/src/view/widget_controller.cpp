@@ -75,6 +75,11 @@ void WidgetController::setDesigner(Designer *designer)
     designer_ = designer;
 }
 
+CommandDispatcher* WidgetController::getCommandDispatcher() const
+{
+    return dispatcher_;
+}
+
 void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
 {
     dispatcher_ = dispatcher;
