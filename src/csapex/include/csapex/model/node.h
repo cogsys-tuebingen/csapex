@@ -6,9 +6,9 @@
 #include <csapex/model/error_state.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/parameterizable.h>
-#include <csapex/utility/timable.h>
 #include <csapex/utility/stream_relay.h>
 #include <csapex/utility/assert.h>
+#include <csapex/utility/timable.h>
 
 /// PROJECT
 #include <utils_param/param_fwd.h>
@@ -46,50 +46,45 @@ public:
     void setType(const std::string& type);
     std::string getType() const;
 
-    virtual void pause(bool pause);
+    /* extract */ virtual void pause(bool pause);
     /* ?? */ virtual void clearBlock();
-    virtual void stop();
+    /*poor naming*/ virtual void stop();
 
-    /* ?? */ virtual void useTimer(Timer* timer);
-
-    virtual void setEnabled(bool e);
-    bool isEnabled();
+    /* extract */ virtual void setEnabled(bool e);
+    /* extract */ bool isEnabled();
 
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
     void setNodeState(NodeStatePtr memento);
 
-    virtual MementoPtr getChildState() const;
+    /*poor naming*/ virtual MementoPtr getChildState() const;
 
-    void setSettings(Settings* settings);
+    /* extract */ void setSettings(Settings* settings);
 
     virtual void setNodeWorker(NodeWorker* nw);
     NodeWorker* getNodeWorker() const;
 
-    void doSetup();
+    /*poor naming*/ void doSetup();
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
-    void addInput(Input* in) __attribute__ ((deprecated));
-    void addOutput(Output* out) __attribute__ ((deprecated));
+    /*??*/ void manageInput(Input* in);
+    /*??*/ void manageOutput(Output* out);
 
-    void manageInput(Input* in);
-    void manageOutput(Output* out);
+    /*poor naming*/ int countInputs() const;
+    /*poor naming*/ int countOutputs() const;
+    /*??*/ int countManagedInputs() const;
+    /*??*/ int countManagedOutputs() const;
 
-    int countInputs() const;
-    int countOutputs() const;
-    int countManagedInputs() const;
-    int countManagedOutputs() const;
+    /* ONLY UUID! */ Input* getInput(const unsigned int index) const;
+    /* ONLY UUID! */ Output* getOutput(const unsigned int index) const;
 
-    Input* getInput(const unsigned int index) const;
-    Output* getOutput(const unsigned int index) const;
+    /* ONLY UUID! */ Input* getManagedInput(const unsigned int index) const;
+    /* ONLY UUID! */Output* getManagedOutput(const unsigned int index) const;
 
-    Input* getManagedInput(const unsigned int index) const;
-    Output* getManagedOutput(const unsigned int index) const;
-
-    Input* getParameterInput(const std::string& name) const;
-    Output* getParameterOutput(const std::string& name) const;
+    /* experimental */ Input* getParameterInput(const std::string& name) const;
+    /* experimental */ Output* getParameterOutput(const std::string& name) const;
 
     virtual Connectable* getConnector(const UUID& uuid) const;
     virtual Input* getInput(const UUID& uuid) const;
@@ -98,10 +93,10 @@ public:
     virtual std::vector<Input*> getInputs() const;
     virtual std::vector<Output*> getOutputs() const;
 
-    void removeInput(Input *in);
-    void removeOutput(Output *out);
+    /* ONLY UUID! */ void removeInput(Input *in);
+    /* ONLY UUID! */ void removeOutput(Output *out);
 
-    void setCommandDispatcher(CommandDispatcher* d);
+    /* extract */ void setCommandDispatcher(CommandDispatcher* d);
 
     /* ?? */ bool canReceive();
 
@@ -150,8 +145,6 @@ Q_SIGNALS:
 
 
 protected:
-    /* ?? */ void connectConnector(Connectable* c);
-    /* ?? */ void disconnectConnector(Connectable* c);
 
     void setUUID(const UUID& uuid);
 
@@ -168,6 +161,9 @@ private:
 
     /* ?? */ void registerInput(Input* in);
     /* ?? */ void registerOutput(Output* out);
+
+    void connectConnector(Connectable* c);
+    void disconnectConnector(Connectable* c);
 
 protected:
     std::string type_;

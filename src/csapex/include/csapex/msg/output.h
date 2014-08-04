@@ -6,12 +6,11 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/msg/generic_value_message.hpp>
-#include <csapex/utility/timable.h>
 
 namespace csapex
 {
 
-class Output : public virtual Connectable, public Timable
+class Output : public virtual Connectable
 {
     friend class Input;
     friend class ConnectorForward;

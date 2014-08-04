@@ -13,7 +13,7 @@ namespace command
 
 struct AddConnector : public Command
 {
-    AddConnector(const UUID &box_uuid, const std::string& label, const std::string& type, bool input, const UUID &uuid, bool forward = false);
+    AddConnector(const UUID &box_uuid, const std::string& label, const std::string& type, bool input, const UUID &uuid);
 
 protected:
     bool doExecute();
@@ -33,8 +33,6 @@ private:
 
     UUID b_uuid;
     UUID c_uuid;
-
-    bool forward;
 };
 
 }

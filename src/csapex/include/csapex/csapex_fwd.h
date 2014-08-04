@@ -61,6 +61,8 @@ class DragIO;
 
 class Overlay;
 
+FWD(Timable);
+
 FWD(Tag);
 
 class Settings;

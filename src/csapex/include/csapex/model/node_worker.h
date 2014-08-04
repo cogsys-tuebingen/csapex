@@ -67,7 +67,7 @@ private:
 
 private:
     Node* node_;
-    QTimer* timer_;
+    QTimer* tick_timer_;
 
     QThread* private_thread_;
 

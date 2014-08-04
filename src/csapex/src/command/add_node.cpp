@@ -42,8 +42,6 @@ bool AddNode::doExecute()
 
     Node::Ptr node = BoxManager::instance().makeNode(type_, uuid_);
 
-    apex_assert_hard(node->getType() == type_);
-
     if(saved_state_) {
         node->setNodeState(saved_state_);
     }

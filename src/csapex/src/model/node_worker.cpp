@@ -25,10 +25,10 @@ NodeWorker::NodeWorker(Node* node)
 
     apex_assert_hard(node_);
 
-    timer_ = new QTimer();
+    tick_timer_ = new QTimer();
     setTickFrequency(DEFAULT_FREQUENCY);
 
-    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(tick()));
+    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 NodeWorker::~NodeWorker()
@@ -308,15 +308,15 @@ void NodeWorker::sendMessages()
 
 void NodeWorker::setTickFrequency(double f)
 {
-    if(timer_->isActive()) {
-        timer_->stop();
+    if(tick_timer_->isActive()) {
+        tick_timer_->stop();
     }
     if(f == 0.0) {
         return;
     }
-    timer_->setInterval(1000. / f);
-    timer_->setSingleShot(false);
-    timer_->start();
+    tick_timer_->setInterval(1000. / f);
+    tick_timer_->setSingleShot(false);
+    tick_timer_->start();
 }
 
 void NodeWorker::tick()

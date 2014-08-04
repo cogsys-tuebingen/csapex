@@ -179,11 +179,6 @@ void Output::sendMessages()
 
     message_->setSequenceNumber(seq_no_);
 
-    Timer::Interlude::Ptr i;
-    if(profiling_timer_) {
-//        i = publish_timer_->step("io");
-    }
-
     // wait for all connected inputs to be able to receive, if none is async
     //  * inputs can only be connected to this output since they are 1:1
     std::vector<Input*> targets;

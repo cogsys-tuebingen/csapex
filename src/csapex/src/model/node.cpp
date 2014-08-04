@@ -408,17 +408,6 @@ Output* Node::addOutput(ConnectionTypePtr type, const std::string& label)
     return c;
 }
 
-void Node::addInput(Input* in)
-{
-    registerInput(in);
-}
-
-void Node::addOutput(Output* out)
-{
-    registerOutput(out);
-}
-
-
 void Node::manageInput(Input* in)
 {
     managed_inputs_.push_back(in);
@@ -620,15 +609,6 @@ void Node::registerOutput(Output* out)
 void Node::setCommandDispatcher(CommandDispatcher *d)
 {
     dispatcher_ = d;
-}
-
-void Node::useTimer(Timer *timer)
-{
-    Timable::useTimer(timer);
-
-    Q_FOREACH(Output* i, outputs_) {
-        i->useTimer(timer);
-    }
 }
 
 void Node::pause(bool pause)

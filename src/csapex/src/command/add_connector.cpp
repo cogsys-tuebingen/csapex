@@ -14,8 +14,8 @@
 using namespace csapex;
 using namespace command;
 
-AddConnector::AddConnector(const UUID &box_uuid, const std::string& label, const std::string& type, bool input, const UUID &uuid, bool forward)
-    : type(type), label(label), input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid), forward(forward)
+AddConnector::AddConnector(const UUID &box_uuid, const std::string& label, const std::string& type, bool input, const UUID &uuid)
+    : type(type), label(label), input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid)
 {
 
 }
@@ -37,12 +37,12 @@ bool AddConnector::doExecute()
     apex_assert_hard(node);
 
     if(input) {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_IN, node->countInputs()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_IN, node->countInputs()) : c_uuid;
         Input* in = new Input(graph_->getSettings(), uuid);
         c = in;
         node->registerInput(in);
     } else {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), forward ? Connectable::TYPE_MISC : Connectable::TYPE_OUT, node->countOutputs()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_OUT, node->countOutputs()) : c_uuid;
         Output* out = new Output(graph_->getSettings(), uuid);
         c = out;
         node->registerOutput(out);
