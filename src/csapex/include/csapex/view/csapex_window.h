@@ -73,6 +73,7 @@ public Q_SLOTS:
     void updateNodeInfo();
 
     void about();
+    void clearBlock();
 
 Q_SIGNALS:
     void statusChanged(const QString& status);

@@ -71,11 +71,6 @@ bool CsApexCore::isPaused() const
     return graph_->isPaused();
 }
 
-void CsApexCore::clearBlock()
-{
-    graph_->clearBlock();
-}
-
 void CsApexCore::setStatusMessage(const std::string &msg)
 {
     Q_EMIT showStatusMessage(msg);

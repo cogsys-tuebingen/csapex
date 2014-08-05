@@ -611,27 +611,6 @@ void Node::setCommandDispatcher(CommandDispatcher *d)
     dispatcher_ = d;
 }
 
-void Node::pause(bool pause)
-{
-    worker_->pause(pause);
-}
-
-void Node::clearBlock()
-{
-    Q_FOREACH(Input* i, inputs_) {
-        if(i->isBlocked()) {
-            i->free();
-            worker_->clearInput(i);
-        }
-    }
-    Q_FOREACH(Input* i, inputs_) {
-        i->setSequenceNumber(0);
-    }
-    Q_FOREACH(Output* o, outputs_) {
-        o->setSequenceNumber(0);
-    }
-}
-
 void Node::stop()
 {
     if(worker_) {

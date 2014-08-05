@@ -67,67 +67,75 @@ protected:
 
         TiXmlElement* library = config;
         while (library != NULL) {
+
             std::string library_name = library->Attribute("path");
             if (library_name.size() == 0) {
                 std::cerr << "[Plugin] Item in row" << library->Row() << " does not contain a path attribute" << std::endl;
                 continue;
             }
 
-            std::string library_path = library_name + ".so";
-
-
-            boost::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
-            loaders_[library_path] = loader;
-
-
-            TiXmlElement* class_element = library->FirstChildElement("class");
-            while (class_element) {
-                std::string base_class_type = class_element->Attribute("base_class_type");
-                std::string derived_class = class_element->Attribute("type");
-
-                std::string lookup_name;
-                if(class_element->Attribute("name") != NULL) {
-                    lookup_name = class_element->Attribute("name");
-                } else {
-                    lookup_name = derived_class;
-                }
-
-                if(base_class_type == full_name_){
-                    TiXmlElement* description = class_element->FirstChildElement("description");
-                    std::string description_str;
-                    if(description) {
-                        description_str = description->GetText() ? description->GetText() : "";
-                    }
-
-                    TiXmlElement* icon = class_element->FirstChildElement("icon");
-                    std::string icon_str;
-                    if(icon) {
-                        icon_str = icon->GetText() ? icon->GetText() : "";
-                    }
-
-                    TiXmlElement* tags = class_element->FirstChildElement("tags");
-                    std::string tags_str;
-                    if(tags) {
-                        tags_str = tags->GetText() ? tags->GetText() : "";
-                    }
-
-                    Constructor constructor;
-                    constructor.setType(lookup_name);
-                    constructor.setDescription(description_str);
-                    constructor.setIcon(icon_str);
-                    constructor.setTags(tags_str);
-                    constructor.setConstructor(boost::bind(&class_loader::ClassLoader::createInstance<M>, loader.get(), lookup_name));
-
-                    registerConstructor(constructor);
-                }
-
-
-                class_element = class_element->NextSiblingElement( "class" );
+            try {
+                loadLibrary(library_name, library);
+            } catch(const class_loader::ClassLoaderException& e) {
+                std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
             }
+
             library = library->NextSiblingElement( "library" );
         }
 
         return true;
+    }
+
+    void loadLibrary(const std::string& library_name, TiXmlElement* library)  {
+        std::string library_path = library_name + ".so";
+
+        boost::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
+        loaders_[library_path] = loader;
+
+
+        TiXmlElement* class_element = library->FirstChildElement("class");
+        while (class_element) {
+            loadClass(class_element, loader.get());
+
+            class_element = class_element->NextSiblingElement( "class" );
+        }
+    }
+
+    void loadClass(TiXmlElement* class_element, class_loader::ClassLoader* loader) {
+        std::string base_class_type = class_element->Attribute("base_class_type");
+        std::string derived_class = class_element->Attribute("type");
+
+        std::string lookup_name;
+        if(class_element->Attribute("name") != NULL) {
+            lookup_name = class_element->Attribute("name");
+        } else {
+            lookup_name = derived_class;
+        }
+
+        if(base_class_type == full_name_){
+            std::string description = readString(class_element, "description");
+            std::string icon = readString(class_element, "icon");
+            std::string tags = readString(class_element, "tags");
+
+            Constructor constructor;
+            constructor.setType(lookup_name);
+            constructor.setDescription(description);
+            constructor.setIcon(icon);
+            constructor.setTags(tags);
+            constructor.setConstructor(boost::bind(&class_loader::ClassLoader::createInstance<M>, loader, lookup_name));
+
+            registerConstructor(constructor);
+        }
+    }
+
+    std::string readString(TiXmlElement* class_element, const std::string& name) {
+        TiXmlElement* description = class_element->FirstChildElement(name);
+        std::string description_str;
+        if(description) {
+            description_str = description->GetText() ? description->GetText() : "";
+        }
+
+        return description_str;
     }
 
 protected:

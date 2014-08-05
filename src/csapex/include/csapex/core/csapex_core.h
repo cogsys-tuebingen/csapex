@@ -44,7 +44,6 @@ public:
 public Q_SLOTS:
     void setPause(bool pause);
     void settingsChanged();
-    void clearBlock();
     void setStatusMessage(const std::string& msg);
 
 Q_SIGNALS:

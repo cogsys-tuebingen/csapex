@@ -72,7 +72,7 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
     QObject::connect(&core_, SIGNAL(paused(bool)), ui->actionPause, SLOT(setChecked(bool)));
-    QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), &core_, SLOT(clearBlock()));
+    QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
     QObject::connect(designer_, SIGNAL(gridEnabled(bool)), ui->actionGrid, SLOT(setChecked(bool)));
@@ -273,6 +273,11 @@ void CsApexWindow::about()
     ss << "<p>The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</p>";
 
     QMessageBox::about(this, "About cs::APEX", ss.str().c_str());
+}
+
+void CsApexWindow::clearBlock()
+{
+    QMessageBox::information(this, "Not yet implemented", "Sorry, this feature is not implemented yet.");
 }
 
 void CsApexWindow::reloadBoxMenues()

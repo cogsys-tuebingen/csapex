@@ -46,11 +46,9 @@ public:
     void setType(const std::string& type);
     std::string getType() const;
 
-    /* extract */ virtual void pause(bool pause);
-    /* ?? */ virtual void clearBlock();
     /*poor naming*/ virtual void stop();
 
-    /* extract */ virtual void setEnabled(bool e);
+    /* extract */ void setEnabled(bool e);
     /* extract */ bool isEnabled();
 
     NodeStatePtr getNodeState();

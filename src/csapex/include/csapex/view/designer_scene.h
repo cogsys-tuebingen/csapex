@@ -37,7 +37,7 @@ public:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
-
+    bool isEmpty() const;
 
 public Q_SLOTS:
     void addTemporaryConnection(Connectable* from, Connectable* to);

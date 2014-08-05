@@ -116,7 +116,20 @@ void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsScene::drawBackground(painter, rect);
 
-    if(draw_grid_) {
+    if(isEmpty()) {
+        QFile file(QString::fromStdString(Settings::defaultConfigPath() + "cfg/intro.html"));
+
+        if(file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            painter->resetTransform();
+
+            QTextDocument doc(this);
+            doc.setUndoRedoEnabled(false);
+            doc.setHtml(file.readAll());
+            doc.setUseDesignMetrics(true);
+            doc.drawContents(painter);
+        }
+
+    } else if(draw_grid_) {
         bool spt = painter->renderHints() & QPainter::SmoothPixmapTransform;
         painter->setRenderHint(QPainter::SmoothPixmapTransform, scale_ < 1.0);
 
@@ -138,6 +151,10 @@ void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
+
+    if(isEmpty()) {
+        return;
+    }
 
     // check if we need to update the schematics
     QSize scene_size(sceneRect().width(), sceneRect().height());
@@ -314,6 +331,11 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         highlight_connection_sub_id_ = data.second;
         update();
     }
+}
+
+bool DesignerScene::isEmpty() const
+{
+    return graph_->nodes_.empty();
 }
 
 void DesignerScene::connectionAdded(Connection* c)

@@ -132,6 +132,11 @@ void DesignerView::wheelEvent(QWheelEvent *we)
     bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
 
     if(shift || ctrl) {
+        if(scene_->isEmpty()) {
+            resetZoom();
+            return;
+        }
+
         we->accept();
 
         setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
