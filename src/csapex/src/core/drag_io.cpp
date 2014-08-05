@@ -136,7 +136,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
     }
 }
 
-void DragIO::dropEvent(DesignerView *src, QDropEvent* e)
+void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_pos)
 {
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
@@ -168,7 +168,7 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e)
         e->ignore();
     } else {
         Q_FOREACH(HandlerDrop::Ptr h, handler_drop) {
-            if(h->handle(dispatcher_, src, e)) {
+            if(h->handle(dispatcher_, src, e, scene_pos)) {
                 return;
             }
         }

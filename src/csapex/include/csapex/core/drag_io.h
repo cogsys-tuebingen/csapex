@@ -30,7 +30,7 @@ public:
     struct HandlerDrop {
         typedef boost::shared_ptr<HandlerDrop> Ptr;
         virtual ~HandlerDrop() {}
-        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e) = 0;
+        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e, const QPointF& scene_pos) = 0;
     };
 
 public:
@@ -38,7 +38,7 @@ public:
 
     void dragEnterEvent(DesignerView *src, QDragEnterEvent* e);
     void dragMoveEvent(DesignerView *src, QDragMoveEvent* e);
-    void dropEvent(DesignerView *src, QDropEvent* e);
+    void dropEvent(DesignerView *src, QDropEvent* e, const QPointF &scene_pos);
 
 public:
     template <typename H>

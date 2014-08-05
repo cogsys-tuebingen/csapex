@@ -208,7 +208,7 @@ void DesignerView::dragMoveEvent(QDragMoveEvent* e)
 void DesignerView::dropEvent(QDropEvent* e)
 {
     QGraphicsView::dropEvent(e);
-    drag_io_.dropEvent(this, e);
+    drag_io_.dropEvent(this, e, mapToScene(e->pos()));
 }
 
 void DesignerView::dragLeaveEvent(QDragLeaveEvent* e)
