@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <QGraphicsView>
 #include <map>
+#include <QTimer>
 
 namespace csapex
 {
@@ -31,6 +32,7 @@ public:
 
     void wheelEvent(QWheelEvent* we);
 
+    void mouseMoveEvent(QMouseEvent* me);
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
@@ -77,6 +79,7 @@ public Q_SLOTS:
 
     void reset();
     void resetZoom();
+    void animateZoom();
 
     void updateSelection();
     void selectAll();
@@ -94,6 +97,9 @@ private:
 
     std::vector<NodeBox*> boxes_;
     std::map<NodeBox*, ProfilingWidget*> profiling_;
+
+    int scalings_to_perform_;
+    QTimer scalings_animation_timer_;
 };
 }
 

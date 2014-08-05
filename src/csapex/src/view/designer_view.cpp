@@ -31,7 +31,8 @@
 using namespace csapex;
 
 DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget *parent)
-    : QGraphicsView(parent), scene_(scene), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio)
+    : QGraphicsView(parent), scene_(scene), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
+      scalings_to_perform_(0)
 
 {
     setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
@@ -55,6 +56,8 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph, Command
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
+    QObject::connect(&scalings_animation_timer_, SIGNAL(timeout()), this, SLOT(animateZoom()));
+
     setContextMenuPolicy(Qt::DefaultContextMenu);
 }
 
@@ -72,6 +75,31 @@ void DesignerView::resetZoom()
 {
     resetTransform();
     scene_->setScale(1.0);
+}
+
+void DesignerView::animateZoom()
+{
+    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+    double current_scale = transform().m11();
+    if((current_scale < 0.1 && scalings_to_perform_ < 0) ||
+            (current_scale > 3.0 && scalings_to_perform_ > 0)) {
+        scalings_to_perform_ = 0;
+    }
+
+    qreal factor = 1.0 + scalings_to_perform_ / 500.0;
+    scale(factor, factor);
+
+    scene_->setScale(transform().m11());
+    scene_->invalidateSchema();
+
+    if(scalings_to_perform_ > 0) {
+        --scalings_to_perform_;
+    } else if(scalings_to_perform_ < 0) {
+        ++scalings_to_perform_;
+    } else {
+        scalings_animation_timer_.stop();
+    }
 }
 
 DesignerScene* DesignerView::designerScene()
@@ -139,25 +167,31 @@ void DesignerView::wheelEvent(QWheelEvent *we)
 
         we->accept();
 
-        setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+        int scaleFactor = shift ? 1 : 4;
+        int direction = (we->delta() > 0) ? 1 : -1;
 
-        double scaleFactor = shift ? 1.05 : 1.25;
-        if(we->delta() > 0) {
-            // Zoom in
-            scale(scaleFactor, scaleFactor);
-        } else {
-            // Zooming out
-            scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+        if((direction > 0) != (scalings_to_perform_ > 0)) {
+            scalings_to_perform_ = 0;
         }
 
-        scene_->setScale(transform().m11());
-        scene_->invalidateSchema();
+        scalings_to_perform_ +=  2 * direction * scaleFactor;
+
+        if(!scalings_animation_timer_.isActive()) {
+            scalings_animation_timer_.setInterval(1000.0 / 60.0);
+            scalings_animation_timer_.start();
+        }
 
     } else {
         QGraphicsView::wheelEvent(we);
     }
 }
 
+void DesignerView::mouseMoveEvent(QMouseEvent *me)
+{
+    QGraphicsView::mouseMoveEvent(me);
+
+    setFocus();
+}
 
 void DesignerView::dragEnterEvent(QDragEnterEvent* e)
 {
@@ -188,8 +222,6 @@ void DesignerView::showBoxDialog()
     int r = diag.exec();
 
     if(r) {
-        //BoxManager::instance().startPlacingBox(this, diag.getName());
-
         std::string type = diag.getName();
 
         if(!type.empty() && BoxManager::instance().isValidType(type)) {
