@@ -104,23 +104,6 @@ public:
 
     virtual void tick();
 
-/*ALL TO BE REMOVED*/
-Q_SIGNALS:
-    void stateChanged();
-    void modelChanged();
-
-    void connectionInProgress(Connectable*, Connectable*);
-    void connectionDone();
-    void connectionStart();
-
-    void connectorCreated(Connectable*);
-    void connectorRemoved(Connectable*);
-
-    void connectorEnabled(Connectable*);
-    void connectorDisabled(Connectable*);    
-
-    void nodeError(bool error, const std::string &msg, int level);
-
 
 protected:
 

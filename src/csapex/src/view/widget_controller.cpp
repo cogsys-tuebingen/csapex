@@ -16,6 +16,7 @@
 #include <csapex/view/designer.h>
 #include <csapex/view/port.h>
 #include <csapex/utility/movable_graphics_proxy_widget.h>
+#include <csapex/model/node_worker.h>
 
 using namespace csapex;
 
@@ -104,8 +105,9 @@ void WidgetController::nodeAdded(Node::Ptr node)
         }
 
         // subscribe to coming connectors
-        QObject::connect(node.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorAdded(Connectable*)));
-        QObject::connect(node.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
+        NodeWorker* worker = node->getNodeWorker();
+        QObject::connect(worker, SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorAdded(Connectable*)));
+        QObject::connect(worker, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
     }
 }
 

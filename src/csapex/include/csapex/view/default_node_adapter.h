@@ -24,7 +24,7 @@ public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
 
 public Q_SLOTS:
-    void modelChangedEvent();
+    void nodeModelChangedEvent();
     void setupAdaptiveUi();
 
     void enableGroup(bool enable, const std::string& group);

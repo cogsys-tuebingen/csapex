@@ -238,9 +238,11 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     QObject::connect(box, SIGNAL(moved(NodeBox*, int, int)), scene_, SLOT(boxMoved(NodeBox*)));
 
-    QObject::connect(box->getNode(), SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
-    QObject::connect(box->getNode(), SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
-    QObject::connect(box->getNode(), SIGNAL(connectionDone()), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()));
+    Node* node = box->getNode();
+    NodeWorker* worker = node->getNodeWorker();
+    QObject::connect(worker, SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
+    QObject::connect(worker, SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
+    QObject::connect(worker, SIGNAL(connectionDone()), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
     QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateInformation(Graph*)));
 

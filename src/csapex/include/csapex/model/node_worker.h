@@ -23,6 +23,7 @@ struct NodeWorker : public QObject
     Q_OBJECT
 
     friend class ProfilingWidget;
+    friend class Node;
 
 public:
     typedef boost::shared_ptr<NodeWorker> Ptr;
@@ -74,6 +75,19 @@ Q_SIGNALS:
     void messageProcessed();
 
     void enabled(bool);
+
+    void connectionInProgress(Connectable*, Connectable*);
+    void connectionDone();
+    void connectionStart();
+
+    void connectorCreated(Connectable*);
+    void connectorRemoved(Connectable*);
+
+    void connectorEnabled(Connectable*);
+    void connectorDisabled(Connectable*);
+
+    void nodeStateChanged();
+    void nodeModelChanged();
 
 private:
     static const double DEFAULT_FREQUENCY = 30.0;

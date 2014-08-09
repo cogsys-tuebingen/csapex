@@ -164,7 +164,7 @@ void Node::setNodeState(NodeState::Ptr memento)
         setState(m->getChildState());
     }
 
-    Q_EMIT stateChanged();
+    Q_EMIT worker_->nodeStateChanged();
 }
 
 template <typename T>
@@ -266,7 +266,7 @@ bool Node::canReceive()
 
 void Node::triggerModelChanged()
 {
-    Q_EMIT modelChanged();
+    Q_EMIT worker_->nodeModelChanged();
 }
 
 void Node::tick()
@@ -291,8 +291,6 @@ NodeWorker* Node::getNodeWorker() const
 
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    Q_EMIT nodeError(error,msg,level);
-
     if(node_state_->isEnabled() && error && level == EL_ERROR) {
         worker_->setIOError(true);
     } else {
@@ -469,7 +467,7 @@ void Node::removeInput(Input *in)
     in->deleteLater();
 
     disconnectConnector(in);
-    Q_EMIT connectorRemoved(in);
+    Q_EMIT worker_->connectorRemoved(in);
 }
 
 void Node::removeOutput(Output *out)
@@ -491,7 +489,7 @@ void Node::removeOutput(Output *out)
     out->deleteLater();
 
     disconnectConnector(out);
-    Q_EMIT connectorRemoved(out);
+    Q_EMIT worker_->connectorRemoved(out);
 }
 
 void Node::registerInput(Input* in)
@@ -510,7 +508,7 @@ void Node::registerInput(Input* in)
     connectConnector(in);
     QObject::connect(in, SIGNAL(messageArrived(Connectable*)), worker_, SLOT(forwardMessage(Connectable*)));
 
-    Q_EMIT connectorCreated(in);
+    Q_EMIT worker_->connectorCreated(in);
 }
 
 void Node::registerOutput(Output* out)
@@ -523,7 +521,7 @@ void Node::registerOutput(Output* out)
 
     connectConnector(out);
 
-    Q_EMIT connectorCreated(out);
+    Q_EMIT worker_->connectorCreated(out);
 }
 
 void Node::setCommandDispatcher(CommandDispatcher *d)
@@ -560,9 +558,9 @@ void Node::stop()
 
 void Node::connectConnector(Connectable *c)
 {
-    QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
-    QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
-    QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+    QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), worker_, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
+    QObject::connect(c, SIGNAL(connectionStart()), worker_, SIGNAL(connectionStart()));
+    QObject::connect(c, SIGNAL(connectionDone()), worker_, SIGNAL(connectionDone()));
     QObject::connect(c, SIGNAL(connectionDone()), worker_, SLOT(checkIO()));
     QObject::connect(c, SIGNAL(connectionEnabled(bool)), worker_, SLOT(checkIO()));
     QObject::connect(c, SIGNAL(connectionRemoved()), worker_, SLOT(checkIO()));

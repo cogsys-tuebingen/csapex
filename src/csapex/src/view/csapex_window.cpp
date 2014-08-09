@@ -10,6 +10,7 @@
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/node_statistics.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/bash_parser.h>
@@ -171,8 +172,9 @@ void CsApexWindow::updateDebugInfo()
 
     foreach (NodeBox* box, selected) {
         Node* node = box->getNode();
-        QObject::connect(node, SIGNAL(stateChanged()), this, SLOT(updateDebugInfo()));
-        QObject::connect(node, SIGNAL(modelChanged()), this, SLOT(updateDebugInfo()));
+        NodeWorker* worker = node->getNodeWorker();
+        QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(updateDebugInfo()));
+        QObject::connect(worker, SIGNAL(nodeModelChanged()), this, SLOT(updateDebugInfo()));
         ui->box_info->addTopLevelItem(NodeStatistics(node).createDebugInformation());
     }
 

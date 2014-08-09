@@ -32,7 +32,7 @@ public:
 
     void doSetupUi(QBoxLayout* layout);
 
-    virtual void modelChangedEvent();
+    virtual void nodeModelChangedEvent();
     virtual void updateDynamicGui(QBoxLayout* layout);
 
     virtual void stop();

@@ -54,9 +54,9 @@ DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter *parent)
     QObject::connect(this, SIGNAL(setupAdaptiveUiRequest()), this, SLOT(setupAdaptiveUi()), Qt::QueuedConnection);
 }
 
-void DefaultNodeAdapterBridge::modelChangedEvent()
+void DefaultNodeAdapterBridge::nodeModelChangedEvent()
 {
-    parent_->modelChangedEvent();
+    parent_->nodeModelChangedEvent();
 }
 
 void DefaultNodeAdapterBridge::triggerGuiChanged()
@@ -84,7 +84,7 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee, WidgetController *widget_ctrl)
     : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(NULL)
 {
-    QObject::connect(adaptee, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));
+    QObject::connect(adaptee->getNodeWorker(), SIGNAL(nodeModelChanged()), &bridge, SLOT(nodeModelChangedEvent()));
 }
 
 DefaultNodeAdapter::~DefaultNodeAdapter()

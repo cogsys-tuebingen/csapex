@@ -120,9 +120,6 @@ public Q_SLOTS:
     void nodeStateChanged();
     void enabledChange(bool val);
 
-    void setError(bool e, const std::string& msg);
-    void setError(bool e, const std::string& msg, int level);
-
 Q_SIGNALS:
     void placed();
     void toggled(bool);

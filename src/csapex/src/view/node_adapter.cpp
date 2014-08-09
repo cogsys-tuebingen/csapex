@@ -19,12 +19,6 @@ NodeAdapter::~NodeAdapter()
 {
 }
 
-//void NodeAdapter::setNode(Node *node)
-//{
-//    node_ = node;
-
-//    QObject::connect(node, SIGNAL(modelChanged()), &bridge, SLOT(modelChangedEvent()));
-//}
 
 Node* NodeAdapter::getNode()
 {
@@ -43,12 +37,12 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
         } catch(const std::exception& e) {
             std::cerr << "setting up ui for node " << node_->getUUID().getFullName() << " failed: " << e.what() << std::endl;
         }
-
-        node_->stateChanged();
+#warning is this needed?
+//        node_->getNodeWorker()->nodeStateChanged();
     }
 }
 
-void NodeAdapter::modelChangedEvent()
+void NodeAdapter::nodeModelChangedEvent()
 {
 
 }

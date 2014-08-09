@@ -39,13 +39,10 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
 
     } catch(const std::exception& e) {
         ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-        NodeBox* box = dynamic_cast<NodeBox*> (receiver);
         NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
 
         if(er) {
             er->setError(true, e.what());
-        } else if(box) {
-            box->setError(true, e.what());
         } else if(bw) {
             bw->triggerError(true, e.what());
         } else {

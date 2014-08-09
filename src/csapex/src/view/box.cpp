@@ -90,19 +90,18 @@ void NodeBox::construct()
 
     setLabel(node_->getNodeState()->getLabel());
 
-    node_->getNodeWorker()->setMinimized(false);
+    NodeWorker* worker = node_->getNodeWorker();
+    worker->setMinimized(false);
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
     QObject::connect(node_.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    QObject::connect(node_.get(), SIGNAL(modelChanged()), this, SLOT(eventModelChanged()));
-    QObject::connect(node_.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
-    QObject::connect(node_.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
-    QObject::connect(node_.get(), SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
-    QObject::connect(node_.get(), SIGNAL(nodeError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
+    QObject::connect(worker, SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
+    QObject::connect(worker, SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
+    QObject::connect(worker, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
+    QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
 
-    NodeWorker* worker_ = node_->getNodeWorker();
-    QObject::connect(worker_, SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+    QObject::connect(worker, SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
 
     for(int i = 0; i < node_->countInputs(); ++i) {
         registerInputEvent(node_->getInput(i));
@@ -241,17 +240,6 @@ ErrorState::ErrorLevel NodeBox::errorLevel() const
 std::string NodeBox::errorMessage() const
 {
     return node_->errorMessage();
-}
-
-void NodeBox::setError(bool e, const std::string &msg)
-{
-    setError(e, msg, ErrorState::EL_ERROR);
-}
-
-void NodeBox::setError(bool, const std::string &msg, int)
-{
-    setToolTip(msg.c_str());
-    //node_->setErrorSilent(e, msg, level);
 }
 
 void NodeBox::setLabel(const std::string& label)
