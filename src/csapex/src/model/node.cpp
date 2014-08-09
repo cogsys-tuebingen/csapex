@@ -27,19 +27,6 @@ Node::Node(const UUID &uuid)
 
 Node::~Node()
 {
-    while(!inputs_.empty()) {
-        removeInput(*inputs_.begin());
-    }
-    while(!outputs_.empty()) {
-        removeOutput(*outputs_.begin());
-    }
-    while(!managed_inputs_.empty()) {
-        removeInput(*managed_inputs_.begin());
-    }
-    while(!managed_outputs_.empty()) {
-        removeOutput(*managed_outputs_.begin());
-    }
-
     Q_FOREACH(QObject* cb, callbacks) {
         qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
         if(call) {
@@ -188,7 +175,7 @@ void Node::updateParameter(param::Parameter *p)
         callbacks.push_back(set_param);
         QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
 
-        manageInput(cin);
+        worker_->manageInput(cin);
         param_2_input_[p->name()] = cin;
     }
     {
@@ -205,15 +192,13 @@ void Node::updateParameter(param::Parameter *p)
         boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
         connections.push_back(parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
 
-        manageOutput(cout);
+        worker_->manageOutput(cout);
         param_2_output_[p->name()] = cout;
     }
 }
 
 void Node::updateParameters()
 {
-    apex_assert_hard(!getUUID().empty());
-
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = parameter_state_.params.begin(); it != parameter_state_.params.end(); ++it ) {
         param::Parameter* p = it->second.get();
 
@@ -249,20 +234,6 @@ void Node::setState(Memento::Ptr memento)
     triggerModelChanged();
 }
 
-bool Node::canReceive()
-{
-    bool can_receive = true;
-    Q_FOREACH(Input* i, inputs_) {
-        if(!i->isConnected() && !i->isOptional()) {
-            can_receive = false;
-        } else if(i->isConnected() && !i->getSource()->isEnabled()) {
-            can_receive = false;
-        }
-    }
-
-    return can_receive;
-}
-
 
 void Node::triggerModelChanged()
 {
@@ -289,7 +260,7 @@ NodeWorker* Node::getNodeWorker() const
 }
 
 
-void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+void Node::errorEvent(bool error, const std::string& /*msg*/, ErrorLevel level)
 {
     if(node_state_->isEnabled() && error && level == EL_ERROR) {
         worker_->setIOError(true);
@@ -309,7 +280,11 @@ Input* Node::addInput(ConnectionTypePtr type, const std::string& label, bool opt
     c->setAsync(async);
     c->setType(type);
 
-    registerInput(c);
+    if(worker_) {
+        worker_->registerInput(c);
+    } else {
+        aerr << "trying to add an input in a constructor! Please use setup()" << std::endl;
+    }
 
     return c;
 }
@@ -321,23 +296,13 @@ Output* Node::addOutput(ConnectionTypePtr type, const std::string& label)
     c->setLabel(label);
     c->setType(type);
 
-    registerOutput(c);
+    if(worker_) {
+        worker_->registerOutput(c);
+    } else {
+        aerr << "trying to add an output in a constructor! Please use setup()" << std::endl;
+    }
 
     return c;
-}
-
-void Node::manageInput(Input* in)
-{
-    managed_inputs_.push_back(in);
-    connectConnector(in);
-    in->moveToThread(worker_->thread());
-}
-
-void Node::manageOutput(Output* out)
-{
-    managed_outputs_.push_back(out);
-    connectConnector(out);
-    out->moveToThread(worker_->thread());
 }
 
 int Node::countInputs() const
@@ -466,7 +431,7 @@ void Node::removeInput(Input *in)
 
     in->deleteLater();
 
-    disconnectConnector(in);
+    worker_->disconnectConnector(in);
     Q_EMIT worker_->connectorRemoved(in);
 }
 
@@ -488,40 +453,8 @@ void Node::removeOutput(Output *out)
 
     out->deleteLater();
 
-    disconnectConnector(out);
+    worker_->disconnectConnector(out);
     Q_EMIT worker_->connectorRemoved(out);
-}
-
-void Node::registerInput(Input* in)
-{
-    inputs_.push_back(in);
-    in->setCommandDispatcher(dispatcher_);
-
-    if(!worker_) {
-        return;
-    }
-    in->moveToThread(worker_->thread());
-
-
-
-    worker_->addInput(in);
-    connectConnector(in);
-    QObject::connect(in, SIGNAL(messageArrived(Connectable*)), worker_, SLOT(forwardMessage(Connectable*)));
-
-    Q_EMIT worker_->connectorCreated(in);
-}
-
-void Node::registerOutput(Output* out)
-{
-    out->moveToThread(worker_->thread());
-
-    outputs_.push_back(out);
-
-    out->setCommandDispatcher(dispatcher_);
-
-    connectConnector(out);
-
-    Q_EMIT worker_->connectorCreated(out);
 }
 
 void Node::setCommandDispatcher(CommandDispatcher *d)
@@ -534,36 +467,4 @@ void Node::stop()
     if(worker_) {
         worker_->stop();
     }
-
-    Q_FOREACH(Input* i, inputs_) {
-        i->free();
-    }
-    Q_FOREACH(Output* i, outputs_) {
-        i->stop();
-    }
-    Q_FOREACH(Input* i, inputs_) {
-        i->stop();
-    }
-
-    Q_FOREACH(Input* i, inputs_) {
-        disconnectConnector(i);
-    }
-    Q_FOREACH(Output* i, outputs_) {
-        disconnectConnector(i);
-    }
-}
-
-void Node::connectConnector(Connectable *c)
-{
-    QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), worker_, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
-    QObject::connect(c, SIGNAL(connectionStart()), worker_, SIGNAL(connectionStart()));
-    QObject::connect(c, SIGNAL(connectionDone()), worker_, SIGNAL(connectionDone()));
-    QObject::connect(c, SIGNAL(connectionDone()), worker_, SLOT(checkIO()));
-    QObject::connect(c, SIGNAL(connectionEnabled(bool)), worker_, SLOT(checkIO()));
-    QObject::connect(c, SIGNAL(connectionRemoved()), worker_, SLOT(checkIO()));
-}
-
-
-void Node::disconnectConnector(Connectable */*c*/)
-{
 }

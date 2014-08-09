@@ -53,7 +53,7 @@ public:
 
     /* extract */ void setSettings(Settings* settings);
 
-    virtual void setNodeWorker(NodeWorker* nw);
+    void setNodeWorker(NodeWorker* nw);
     NodeWorker* getNodeWorker() const;
 
     /*poor naming*/ void doSetup();
@@ -61,8 +61,6 @@ public:
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
-    /*??*/ void manageInput(Input* in);
-    /*??*/ void manageOutput(Output* out);
 
     /*poor naming*/ int countInputs() const;
     /*poor naming*/ int countOutputs() const;
@@ -90,8 +88,6 @@ public:
 
     /* extract */ void setCommandDispatcher(CommandDispatcher* d);
 
-    /* -> worker */ bool canReceive();
-
 
 public:
     virtual void setup() = 0;
@@ -116,12 +112,6 @@ protected:
 
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
-
-    /* ?? */ void registerInput(Input* in);
-    /* ?? */ void registerOutput(Output* out);
-
-    void connectConnector(Connectable* c);
-    void disconnectConnector(Connectable* c);
 
 protected:
     std::string type_;

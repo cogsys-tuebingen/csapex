@@ -43,6 +43,17 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
+    void connectConnector(Connectable* c);
+    void disconnectConnector(Connectable* c);
+
+    /*??*/ void manageInput(Input* in);
+    /*??*/ void manageOutput(Output* out);
+
+    /* ?? */ void registerInput(Input* in);
+    /* ?? */ void registerOutput(Output* out);
+
+    bool canReceive();
+
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
 
@@ -94,6 +105,7 @@ private:
 
 private:
     Node* node_;
+
     QTimer* tick_timer_;
 
     QThread* private_thread_;

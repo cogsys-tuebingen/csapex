@@ -62,13 +62,7 @@ std::string NodeConstructor::getDescription() const
 
 Node::Ptr NodeConstructor::makePrototypeContent() const
 {
-    Node::Ptr res = c();
-    res->setSettings(&settings_);
-    res->setType(type_);
-    res->setUUID(UUID::make("prototype"));
-
-    res->doSetup();
-    return res;
+    return makeContent(UUID::make("prototype"));
 }
 
 Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const

@@ -10,6 +10,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/msg/message_factory.h>
 #include <csapex/utility/assert.h>
+#include <csapex/model/node_worker.h>
 
 using namespace csapex;
 using namespace command;
@@ -40,12 +41,12 @@ bool AddConnector::doExecute()
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_IN, node->countInputs()) : c_uuid;
         Input* in = new Input(graph_->getSettings(), uuid);
         c = in;
-        node->registerInput(in);
+        node->getNodeWorker()->registerInput(in);
     } else {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_OUT, node->countOutputs()) : c_uuid;
         Output* out = new Output(graph_->getSettings(), uuid);
         c = out;
-        node->registerOutput(out);
+        node->getNodeWorker()->registerOutput(out);
     }
 
     c->setType(MessageFactory::createMessage(type));

@@ -34,6 +34,18 @@ NodeWorker::NodeWorker(Node* node)
 
 NodeWorker::~NodeWorker()
 {
+    while(!node_->inputs_.empty()) {
+        node_->removeInput(*node_->inputs_.begin());
+    }
+    while(!node_->outputs_.empty()) {
+        node_->removeOutput(*node_->outputs_.begin());
+    }
+    while(!node_->managed_inputs_.empty()) {
+        node_->removeInput(*node_->managed_inputs_.begin());
+    }
+    while(!node_->managed_outputs_.empty()) {
+        node_->removeOutput(*node_->managed_outputs_.begin());
+    }
 }
 
 bool NodeWorker::isEnabled() const
@@ -53,6 +65,21 @@ void NodeWorker::setEnabled(bool e)
     Q_EMIT enabled(e);
 }
 
+bool NodeWorker::canReceive()
+{
+    bool can_receive = true;
+    Q_FOREACH(Input* i, node_->inputs_) {
+        if(!i->isConnected() && !i->isOptional()) {
+            can_receive = false;
+        } else if(i->isConnected() && !i->getSource()->isEnabled()) {
+            can_receive = false;
+        }
+    }
+
+    return can_receive;
+}
+
+
 void NodeWorker::makeThread()
 {
     if(!private_thread_) {
@@ -65,10 +92,43 @@ void NodeWorker::makeThread()
     }
 }
 
+void NodeWorker::connectConnector(Connectable *c)
+{
+    QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
+    QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
+    QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
+    QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionEnabled(bool)), this, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkIO()));
+}
+
+
+void NodeWorker::disconnectConnector(Connectable */*c*/)
+{
+}
+
+
 void NodeWorker::stop()
 {
     QMutexLocker lock(&stop_mutex_);
 
+
+    Q_FOREACH(Input* i, node_->inputs_) {
+        i->free();
+    }
+    Q_FOREACH(Output* i, node_->outputs_) {
+        i->stop();
+    }
+    Q_FOREACH(Input* i, node_->inputs_) {
+        i->stop();
+    }
+
+    Q_FOREACH(Input* i, node_->inputs_) {
+        disconnectConnector(i);
+    }
+    Q_FOREACH(Output* i, node_->outputs_) {
+        disconnectConnector(i);
+    }
 
     QObject::disconnect(private_thread_);
     stop_ = true;
@@ -83,6 +143,7 @@ void NodeWorker::stop()
         //            private_thread_->terminate();
         //        }
     }
+
 }
 
 void NodeWorker::pause(bool pause)
@@ -127,6 +188,48 @@ void NodeWorker::addInput(Input *source)
     clearInput(source);
 
     connect(source, SIGNAL(enabled(bool)), this, SLOT(checkInputs()));
+}
+
+
+void NodeWorker::manageInput(Input* in)
+{
+    node_->managed_inputs_.push_back(in);
+    connectConnector(in);
+    in->moveToThread(thread());
+}
+
+void NodeWorker::manageOutput(Output* out)
+{
+    node_->managed_outputs_.push_back(out);
+    connectConnector(out);
+    out->moveToThread(thread());
+}
+
+
+void NodeWorker::registerInput(Input* in)
+{
+    node_->inputs_.push_back(in);
+    in->setCommandDispatcher(node_->dispatcher_);
+
+    in->moveToThread(thread());
+
+    addInput(in);
+    connectConnector(in);
+    QObject::connect(in, SIGNAL(messageArrived(Connectable*)), this, SLOT(forwardMessage(Connectable*)));
+
+    Q_EMIT connectorCreated(in);
+}
+
+void NodeWorker::registerOutput(Output* out)
+{
+    node_->outputs_.push_back(out);
+    out->setCommandDispatcher(node_->dispatcher_);
+
+    out->moveToThread(thread());
+
+    connectConnector(out);
+
+    Q_EMIT connectorCreated(out);
 }
 
 void NodeWorker::checkInputs()
@@ -398,8 +501,8 @@ void NodeWorker::checkParameters()
 void NodeWorker::checkIO()
 {
     if(isEnabled()) {
-        enableInput(node_->canReceive());
-        enableOutput(node_->canReceive());
+        enableInput(canReceive());
+        enableOutput(canReceive());
     } else {
         enableInput(false);
         enableOutput(false);
@@ -409,7 +512,7 @@ void NodeWorker::checkIO()
 
 void NodeWorker::enableIO(bool enable)
 {
-    enableInput(node_->canReceive() && enable);
+    enableInput(canReceive() && enable);
     enableOutput(enable);
 }
 
