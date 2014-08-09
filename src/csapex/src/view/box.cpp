@@ -90,7 +90,7 @@ void NodeBox::construct()
 
     setLabel(node_->getNodeState()->getLabel());
 
-    node_->setMinimized(false);
+    node_->getNodeWorker()->setMinimized(false);
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
@@ -99,8 +99,10 @@ void NodeBox::construct()
     QObject::connect(node_.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
     QObject::connect(node_.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(node_.get(), SIGNAL(stateChanged()), this, SLOT(nodeStateChanged()));
-    QObject::connect(node_.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
     QObject::connect(node_.get(), SIGNAL(nodeError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
+
+    NodeWorker* worker_ = node_->getNodeWorker();
+    QObject::connect(worker_, SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
 
     for(int i = 0; i < node_->countInputs(); ++i) {
         registerInputEvent(node_->getInput(i));
@@ -124,7 +126,7 @@ NodeAdapter::Ptr NodeBox::getNodeAdapter()
 
 void NodeBox::enableContent(bool enable)
 {
-    node_->setEnabled(enable);
+    node_->getNodeWorker()->setEnabled(enable);
 
     ui->label->setEnabled(enable);
 }
@@ -481,7 +483,7 @@ bool NodeBox::isFlipped() const
 
 void NodeBox::minimizeBox(bool minimize)
 {    
-    node_->setMinimized(minimize);
+    node_->getNodeWorker()->setMinimized(minimize);
 
     Q_EMIT minimized(minimize);
 

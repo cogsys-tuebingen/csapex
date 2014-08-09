@@ -35,6 +35,12 @@ public:
 
     void makeThread();
 
+    bool isEnabled() const;
+    void setEnabled(bool e);
+
+    void setIOError(bool error);
+
+    /* REMOVE => UI*/ void setMinimized(bool min);
 
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
@@ -46,7 +52,12 @@ public Q_SLOTS:
     void clearInput(Input* source);
     void removeInput(Input* source);
 
-    void checkParameters();
+    void checkParameters();    
+    void checkIO();
+
+    void enableIO(bool enable);
+    void enableInput(bool enable);
+    void enableOutput(bool enable);
 
     void setTickFrequency(double f);
     void tick();
@@ -61,6 +72,8 @@ public Q_SLOTS:
 Q_SIGNALS:
     void messagesReceived();
     void messageProcessed();
+
+    void enabled(bool);
 
 private:
     static const double DEFAULT_FREQUENCY = 30.0;

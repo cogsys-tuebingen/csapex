@@ -8,6 +8,7 @@
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <QThread>
@@ -33,6 +34,23 @@ NodeWorker::NodeWorker(Node* node)
 
 NodeWorker::~NodeWorker()
 {
+}
+
+bool NodeWorker::isEnabled() const
+{
+    return node_->node_state_->isEnabled();
+}
+
+void NodeWorker::setEnabled(bool e)
+{
+    node_->node_state_->setEnabled(e);
+
+    if(!e) {
+        node_->setError(false);
+    }
+
+    checkIO();
+    Q_EMIT enabled(e);
 }
 
 void NodeWorker::makeThread()
@@ -97,7 +115,7 @@ void NodeWorker::forwardMessage(Connectable *s)
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
-    if(node_->isEnabled()) {
+    if(isEnabled()) {
         Q_EMIT messagesReceived();
 
         forwardMessageSynchronized(source);
@@ -340,7 +358,7 @@ void NodeWorker::tick()
         thread_initialized_ = true;
     }
 
-    if(node_->isEnabled()) {
+    if(isEnabled()) {
         //boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->tick();
 
@@ -377,8 +395,66 @@ void NodeWorker::checkParameters()
     }
 }
 
+void NodeWorker::checkIO()
+{
+    if(isEnabled()) {
+        enableInput(node_->canReceive());
+        enableOutput(node_->canReceive());
+    } else {
+        enableInput(false);
+        enableOutput(false);
+    }
+}
+
+
+void NodeWorker::enableIO(bool enable)
+{
+    enableInput(node_->canReceive() && enable);
+    enableOutput(enable);
+}
+
+void NodeWorker::enableInput (bool enable)
+{
+    Q_FOREACH(Input* i, node_->inputs_) {
+        if(enable) {
+            i->enable();
+        } else {
+            i->disable();
+        }
+    }
+}
+
+
+void NodeWorker::enableOutput (bool enable)
+{
+    Q_FOREACH(Output* o, node_->outputs_) {
+        if(enable) {
+            o->enable();
+        } else {
+            o->disable();
+        }
+    }
+}
+
 void NodeWorker::triggerError(bool e, const std::string &what)
 {
     node_->setError(e, what);
 }
 
+
+
+void NodeWorker::setIOError(bool error)
+{
+    Q_FOREACH(Input* i, node_->inputs_) {
+        i->setErrorSilent(error);
+    }
+    Q_FOREACH(Output* i, node_->outputs_) {
+        i->setErrorSilent(error);
+    }
+    enableIO(!error);
+}
+
+void NodeWorker::setMinimized(bool min)
+{
+    node_->node_state_->setMinimized(min);
+}

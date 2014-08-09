@@ -106,10 +106,6 @@ Output* Node::getParameterOutput(const std::string &name) const
     }
 }
 
-bool Node::isEnabled()
-{
-    return node_state_->isEnabled();
-}
 void Node::messageArrived(Input *)
 {
 
@@ -121,17 +117,6 @@ void Node::setupParameters()
 
 void Node::process()
 {
-}
-
-void Node::checkIO()
-{
-    if(isEnabled()) {
-        enableInput(canReceive());
-        enableOutput(canReceive());
-    } else {
-        enableInput(false);
-        enableOutput(false);
-    }
 }
 
 NodeState::Ptr Node::getNodeStateCopy() const
@@ -264,18 +249,6 @@ void Node::setState(Memento::Ptr memento)
     triggerModelChanged();
 }
 
-void Node::setEnabled(bool e)
-{
-    node_state_->setEnabled(e);
-
-    if(!e) {
-        setError(false);
-    }
-
-    checkIO();
-    Q_EMIT enabled(e);
-}
-
 bool Node::canReceive()
 {
     bool can_receive = true;
@@ -290,66 +263,13 @@ bool Node::canReceive()
     return can_receive;
 }
 
-void Node::enableIO(bool enable)
-{
-    enableInput(canReceive() && enable);
-    enableOutput(enable);
-}
-
-void Node::enableInput (bool enable)
-{
-    Q_FOREACH(Input* i, inputs_) {
-        if(enable) {
-            i->enable();
-        } else {
-            i->disable();
-        }
-    }
-}
-
-
-void Node::enableOutput (bool enable)
-{
-    Q_FOREACH(Output* o, outputs_) {
-        if(enable) {
-            o->enable();
-        } else {
-            o->disable();
-        }
-    }
-}
-
-void Node::setIOError(bool error)
-{
-    Q_FOREACH(Input* i, inputs_) {
-        i->setErrorSilent(error);
-    }
-    Q_FOREACH(Output* i, outputs_) {
-        i->setErrorSilent(error);
-    }
-    enableIO(!error);
-}
-
-void Node::setMinimized(bool min)
-{
-    node_state_->setMinimized(min);
-}
 
 void Node::triggerModelChanged()
 {
     Q_EMIT modelChanged();
 }
 
-void Node::connectorChanged()
-{
-
-}
-
 void Node::tick()
-{
-}
-
-void Node::updateModel()
 {
 }
 
@@ -374,9 +294,9 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
     Q_EMIT nodeError(error,msg,level);
 
     if(node_state_->isEnabled() && error && level == EL_ERROR) {
-        setIOError(true);
+        worker_->setIOError(true);
     } else {
-        setIOError(false);
+        worker_->setIOError(false);
     }
 }
 
@@ -643,9 +563,9 @@ void Node::connectConnector(Connectable *c)
     QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
     QObject::connect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
     QObject::connect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
-    QObject::connect(c, SIGNAL(connectionDone()), this, SLOT(checkIO()));
-    QObject::connect(c, SIGNAL(connectionEnabled(bool)), this, SLOT(checkIO()));
-    QObject::connect(c, SIGNAL(connectionRemoved()), this, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionDone()), worker_, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionEnabled(bool)), worker_, SLOT(checkIO()));
+    QObject::connect(c, SIGNAL(connectionRemoved()), worker_, SLOT(checkIO()));
 }
 
 

@@ -48,9 +48,6 @@ public:
 
     /*poor naming*/ virtual void stop();
 
-    /* extract */ void setEnabled(bool e);
-    /* extract */ bool isEnabled();
-
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
     void setNodeState(NodeStatePtr memento);
@@ -96,7 +93,7 @@ public:
 
     /* extract */ void setCommandDispatcher(CommandDispatcher* d);
 
-    /* ?? */ bool canReceive();
+    /* -> worker */ bool canReceive();
 
 
 public:
@@ -107,27 +104,10 @@ public:
 
     virtual void tick();
 
-    /*ALL TO BE REMOVED / MADE NON SLOT*/
-public Q_SLOTS:
-    virtual void connectorChanged();
-
-    virtual void updateModel();
-
-    virtual void checkIO();
-
-    void enableIO(bool enable);
-    void enableInput(bool enable);
-    void enableOutput(bool enable);
-
-    void setIOError(bool error);
-    void setMinimized(bool min);
-
-
 /*ALL TO BE REMOVED*/
 Q_SIGNALS:
     void stateChanged();
     void modelChanged();
-    void enabled(bool);
 
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone();
