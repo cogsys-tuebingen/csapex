@@ -202,7 +202,9 @@ void DesignerView::dragEnterEvent(QDragEnterEvent* e)
 void DesignerView::dragMoveEvent(QDragMoveEvent* e)
 {
     QGraphicsView::dragMoveEvent(e);
-    drag_io_.dragMoveEvent(this, e);
+    if(!e->isAccepted()) {
+        drag_io_.dragMoveEvent(this, e);
+    }
 }
 
 void DesignerView::dropEvent(QDropEvent* e)
@@ -241,7 +243,7 @@ void DesignerView::addBoxEvent(NodeBox *box)
     Node* node = box->getNode();
     NodeWorker* worker = node->getNodeWorker();
     QObject::connect(worker, SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
-    QObject::connect(worker, SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(addTemporaryConnection(Connectable*,Connectable*)));
+    QObject::connect(worker, SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(previewConnection(Connectable*,Connectable*)));
     QObject::connect(worker, SIGNAL(connectionDone()), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()));
 
     QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateInformation(Graph*)));

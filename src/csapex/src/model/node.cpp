@@ -330,14 +330,14 @@ void Node::manageInput(Input* in)
 {
     managed_inputs_.push_back(in);
     connectConnector(in);
-    in->moveToThread(thread());
+    in->moveToThread(worker_->thread());
 }
 
 void Node::manageOutput(Output* out)
 {
     managed_outputs_.push_back(out);
     connectConnector(out);
-    out->moveToThread(thread());
+    out->moveToThread(worker_->thread());
 }
 
 int Node::countInputs() const
@@ -500,7 +500,7 @@ void Node::registerInput(Input* in)
     if(!worker_) {
         return;
     }
-    in->moveToThread(thread());
+    in->moveToThread(worker_->thread());
 
 
 
@@ -513,7 +513,7 @@ void Node::registerInput(Input* in)
 
 void Node::registerOutput(Output* out)
 {
-    out->moveToThread(thread());
+    out->moveToThread(worker_->thread());
 
     outputs_.push_back(out);
 
@@ -551,9 +551,6 @@ void Node::stop()
     Q_FOREACH(Output* i, outputs_) {
         disconnectConnector(i);
     }
-
-    QObject::disconnect(worker_);
-    QObject::disconnect(this);
 }
 
 void Node::connectConnector(Connectable *c)
@@ -569,7 +566,4 @@ void Node::connectConnector(Connectable *c)
 
 void Node::disconnectConnector(Connectable */*c*/)
 {
-    //    QObject::disconnect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
-    //    QObject::disconnect(c, SIGNAL(connectionStart()), this, SIGNAL(connectionStart()));
-    //    QObject::disconnect(c, SIGNAL(connectionDone()), this, SIGNAL(connectionDone()));
 }

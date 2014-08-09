@@ -41,6 +41,7 @@ public:
 
 public Q_SLOTS:
     void addTemporaryConnection(Connectable* from, Connectable* to);
+    void previewConnection(Connectable* from, Connectable* to);
     void addTemporaryConnection(Connectable *from, const QPointF &end);
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();

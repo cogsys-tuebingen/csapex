@@ -173,6 +173,8 @@ void Port::mouseMoveEvent(QMouseEvent* e)
     bool create = adaptee_->shouldCreate(left, right);
     bool move = adaptee_->shouldMove(left, right);
 
+    Q_EMIT(adaptee_->connectionStart());
+
     if(create || move) {
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
@@ -229,6 +231,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
         if(from->canConnectTo(adaptee_, false)) {
             if(adaptee_->canConnectTo(from, false)) {
                 e->acceptProposedAction();
+                Q_EMIT(adaptee_->connectionInProgress(adaptee_, from));
             }
         }
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
@@ -242,10 +245,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
 void Port::dragMoveEvent(QDragMoveEvent* e)
 {
-    Q_EMIT(adaptee_->connectionStart());
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
-        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        Q_EMIT(adaptee_->connectionInProgress(adaptee_, from));
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
@@ -285,10 +285,6 @@ void Port::mousePressEvent(QMouseEvent* e)
 QPoint Port::topLeft()
 {
     QWidget* parent = parentWidget();
-//    while(strcmp(parent->metaObject()->className(), "DesignerScene")) {
-//        parent = parent->parentWidget();
-//    };
-
     return mapTo(parent,  QPoint(0,0));
 }
 

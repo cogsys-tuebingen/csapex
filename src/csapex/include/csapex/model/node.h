@@ -14,15 +14,12 @@
 #include <utils_param/param_fwd.h>
 
 /// SYSTEM
-#include <QObject>
 #include <boost/utility.hpp>
 
 namespace csapex {
 
-class Node : public QObject, public ErrorState, public Unique, public Parameterizable, public Timable
+class Node : public ErrorState, public Unique, public Parameterizable, public Timable
 {
-    Q_OBJECT
-
     friend class NodeState;
     friend class NodeAdapter;
     friend class NodeWorker;

@@ -95,7 +95,7 @@ void NodeBox::construct()
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    QObject::connect(node_.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    QObject::connect(worker, SIGNAL(destroyed()), this, SLOT(deleteLater()));
     QObject::connect(worker, SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
     QObject::connect(worker, SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
     QObject::connect(worker, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));

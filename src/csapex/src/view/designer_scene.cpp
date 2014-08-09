@@ -60,6 +60,11 @@ QWidget* topLevelParentWidget (QWidget* widget)
     while (widget -> parentWidget()) widget = widget -> parentWidget() ;
     return widget ;
 }
+
+QPointF centerPoint(Port* port)
+{
+    return topLevelParentWidget(port)->pos() + port->parentWidget()->pos() + port->centerPoint();
+}
 }
 
 
@@ -185,11 +190,11 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             bool flipped = fromp->isFlipped();
 
             if(temp.from->isInput()) {
-                drawConnection(painter, temp.to, topLevelParentWidget(fromp)->pos() + fromp->centerPoint(), -1,
+                drawConnection(painter, temp.to, centerPoint(fromp), -1,
                                flipped ? Fulcrum::IN : Fulcrum::OUT,
                                Fulcrum::HANDLE);
             } else {
-                drawConnection(painter, topLevelParentWidget(fromp)->pos() + fromp->centerPoint(), temp.to, -1,
+                drawConnection(painter, centerPoint(fromp), temp.to, -1,
                                flipped ? Fulcrum::IN : Fulcrum::OUT,
                                Fulcrum::HANDLE);
             }
@@ -430,6 +435,13 @@ void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end
     update();
 }
 
+void DesignerScene::previewConnection(Connectable *from, Connectable *to)
+{
+    deleteTemporaryConnections();
+    addTemporaryConnection(from, to);
+    update();
+}
+
 void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
 {
     apex_assert_hard(from);
@@ -437,7 +449,9 @@ void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
 
     TempConnection temp;
     temp.from = from;
-    temp.to = widget_ctrl_->getPort(to)->centerPoint();
+
+    Port* top = widget_ctrl_->getPort(to);
+    temp.to = centerPoint(top);
 
     temp_.push_back(temp);
 }
@@ -469,8 +483,8 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
         return;
     }
 
-    QPoint p1 = topLevelParentWidget(fromp)->pos() + fromp->centerPoint();
-    QPoint p2 = topLevelParentWidget(top)->pos() + top->centerPoint();
+    QPointF p1 = centerPoint(fromp);
+    QPointF p2 = centerPoint(top);
 
     int id = connection.id();
 
@@ -721,7 +735,7 @@ void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
         QColor color = c->isOutput() ? output_color_ : input_color_;
         color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
 
-        QPointF pos = topLevelParentWidget(port)->pos() + port->centerPoint();
+        QPointF pos = centerPoint(port);
 
         painter->setPen(QPen(color, w));
         painter->drawEllipse(pos, w, w);
