@@ -96,7 +96,7 @@ struct DefaultConstructor : public Constructor {
 
     boost::shared_ptr<M> construct() const {
         boost::shared_ptr<M> res(constructor());
-        impl::setType<M>(res, type);
+//        impl::setType<M>(res, type);
         assert(res.get() != NULL);
         return res;
     }

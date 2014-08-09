@@ -40,7 +40,6 @@ public:
     Node(const UUID &uuid = UUID::NONE);
     virtual ~Node();
 
-    void setType(const std::string& type);
     std::string getType() const;
 
     /*poor naming*/ virtual void stop();
@@ -52,10 +51,10 @@ public:
     /*poor naming*/ virtual MementoPtr getChildState() const;
 
 
-    void setNodeWorker(NodeWorker* nw);
     NodeWorker* getNodeWorker() const;
 
-    /*poor naming*/ void doSetup();
+    /*poor naming*/ void initialize(const std::string &type, const UUID &uuid,
+                                    NodeWorker *node_worker, Settings *settings);
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
@@ -79,18 +78,14 @@ public:
     void removeInput(const UUID& uuid);
     void removeOutput(const UUID& uuid);
 
-
-
-    /* extract these */
-    void setSettings(Settings* settings);
     void setCommandDispatcher(CommandDispatcher* d);
-    void setUUID(const UUID& uuid);
 
 public:
     virtual void setup() = 0;
     virtual void setupParameters();
     virtual void messageArrived(Input* source);
     virtual void process() = 0;
+    virtual void stateChanged();
 
     virtual void tick();
 

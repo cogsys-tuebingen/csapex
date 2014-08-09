@@ -40,8 +40,13 @@ Node::~Node()
     delete modifier_;
 }
 
-void Node::setUUID(const UUID &uuid)
+void Node::initialize(const std::string& type, const UUID& uuid,
+                   NodeWorker* node_worker, Settings* settings)
 {
+    type_ = type;
+    worker_ = node_worker;
+    settings_ = settings;
+
     Unique::setUUID(uuid);
 
     std::string p = uuid.getFullName();
@@ -49,10 +54,8 @@ void Node::setUUID(const UUID &uuid)
     awarn.setPrefix(p);
     aerr.setPrefix(p);
     alog.setPrefix(p);
-}
 
-void Node::doSetup()
-{
+
     setupParameters();
     updateParameters();
 
@@ -61,11 +64,6 @@ void Node::doSetup()
     } catch(std::runtime_error& e) {
         aerr << "setup failed: " << e.what() << std::endl;
     }
-}
-
-void Node::setType(const std::string &type)
-{
-    type_ = type;
 }
 
 std::string Node::getType() const
@@ -98,6 +96,11 @@ void Node::messageArrived(Input *)
 
 }
 void Node::setupParameters()
+{
+
+}
+
+void Node::stateChanged()
 {
 
 }
@@ -152,6 +155,8 @@ void Node::setNodeState(NodeState::Ptr memento)
     }
 
     Q_EMIT worker_->nodeStateChanged();
+
+    stateChanged();
 }
 
 template <typename T>
@@ -242,16 +247,6 @@ void Node::triggerModelChanged()
 
 void Node::tick()
 {
-}
-
-void Node::setSettings(Settings *settings)
-{
-    settings_ = settings;
-}
-
-void Node::setNodeWorker(NodeWorker *nw)
-{
-    worker_ = nw;
 }
 
 NodeWorker* Node::getNodeWorker() const

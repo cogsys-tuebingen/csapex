@@ -68,12 +68,8 @@ Node::Ptr NodeConstructor::makePrototypeContent() const
 Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
 {
     Node::Ptr res = c();
-    res->setNodeWorker(new NodeWorker(res.get()));
-    res->setSettings(&settings_);
-    res->setType(type_);
-    res->setUUID(uuid);
+    res->initialize(type_, uuid, new NodeWorker(res.get()), &settings_);
     res->getNodeState()->setLabel(uuid);
 
-    res->doSetup();
     return res;
 }
