@@ -10,12 +10,6 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/timable.h>
 
-/// PROJECT
-#include <utils_param/param_fwd.h>
-
-/// SYSTEM
-#include <boost/utility.hpp>
-
 namespace csapex {
 
 class Node : public ErrorState, public Unique, public Parameterizable, public Timable
@@ -40,31 +34,26 @@ public:
     Node(const UUID &uuid = UUID::NONE);
     virtual ~Node();
 
-    std::string getType() const;
+    void initialize(const std::string &type, const UUID &uuid,
+                    NodeWorker *node_worker, Settings *settings);
+    void setCommandDispatcher(CommandDispatcher* d);
 
-    /*poor naming*/ virtual void stop();
 
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
     void setNodeState(NodeStatePtr memento);
 
-    /*poor naming*/ virtual MementoPtr getChildState() const;
+    virtual MementoPtr getParameterState() const;
+    virtual void setParameterState(Memento::Ptr memento);
 
-
+    std::string getType() const;
     NodeWorker* getNodeWorker() const;
-
-    /*poor naming*/ void initialize(const std::string &type, const UUID &uuid,
-                                    NodeWorker *node_worker, Settings *settings);
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
-    virtual Connectable* getConnector(const UUID& uuid) const;
     virtual Input* getInput(const UUID& uuid) const;
     virtual Output* getOutput(const UUID& uuid) const;
-
-    /* experimental */ Input* getParameterInput(const std::string& name) const;
-    /* experimental */ Output* getParameterOutput(const std::string& name) const;
 
     std::vector<Input*> getAllInputs() const;
     std::vector<Output*> getAllOutputs() const;
@@ -78,7 +67,6 @@ public:
     void removeInput(const UUID& uuid);
     void removeOutput(const UUID& uuid);
 
-    void setCommandDispatcher(CommandDispatcher* d);
 
 public:
     virtual void setup() = 0;
@@ -86,15 +74,9 @@ public:
     virtual void messageArrived(Input* source);
     virtual void process() = 0;
     virtual void stateChanged();
-
     virtual void tick();
 
 protected:
-    virtual void setState(Memento::Ptr memento);
-
-    template <typename T>
-    /* ?? */ void updateParameter(param::Parameter*);
-    /* ?? */ void updateParameters();
 
     void triggerModelChanged();
 
@@ -117,11 +99,6 @@ private:
     NodeWorker* worker_;
 
     NodeStatePtr node_state_;
-    std::map<std::string, Input*> param_2_input_;
-    std::map<std::string, Output*> param_2_output_;
-
-    std::vector<boost::signals2::connection> connections;
-    std::vector<QObject*> callbacks;
 };
 
 }

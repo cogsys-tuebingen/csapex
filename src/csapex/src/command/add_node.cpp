@@ -40,11 +40,7 @@ bool AddNode::doExecute()
         uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
     }
 
-    Node::Ptr node = BoxManager::instance().makeNode(type_, uuid_);
-
-    if(saved_state_) {
-        node->setNodeState(saved_state_);
-    }
+    Node::Ptr node = BoxManager::instance().makeNode(type_, uuid_, saved_state_);
 
     node->getNodeState()->setPos(pos_);
 

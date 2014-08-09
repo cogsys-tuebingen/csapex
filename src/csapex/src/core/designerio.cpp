@@ -99,7 +99,7 @@ void DesignerIO::loadBoxes(YAML::Node &doc, WidgetController* widget_ctrl)
                 Memento::Ptr m = na->getState();
                 if(m) {
                     m->readYaml(e["state"]);
-                    box->getNodeAdapter()->setState(m);
+                    box->getNodeAdapter()->setParameterState(m);
                 }
             }
         }

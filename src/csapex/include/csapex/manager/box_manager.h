@@ -41,6 +41,7 @@ public:
 
     NodeConstructorPtr getConstructor(const std::string& type);
     NodePtr makeNode(const std::string& type, const UUID& uuid);
+    NodePtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
     NodeBox* makeBox(NodePtr node, WidgetController *widget_ctrl);
 
     void insertAvailableNodeTypes(QMenu* menu);

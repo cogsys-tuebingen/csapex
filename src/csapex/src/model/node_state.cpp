@@ -17,7 +17,7 @@ NodeState::NodeState(const Node *parent)
 void NodeState::copyFrom(const NodeState::Ptr& rhs)
 {
     operator =(*rhs);
-    child_state = parent->getChildState();
+    child_state = parent->getParameterState();
     if(rhs->child_state) {
         *child_state = *rhs->child_state;
     }
@@ -54,7 +54,7 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(exists(node, "state")) {
         const YAML::Node& state_map = node["state"];
-        child_state = parent->getChildState();
+        child_state = parent->getParameterState();
 
         if(child_state) {
             child_state->readYaml(state_map);
@@ -109,12 +109,12 @@ void NodeState::setFlipped(bool value)
 {
     flipped = value;
 }
-Memento::Ptr NodeState::getChildState() const
+Memento::Ptr NodeState::getParameterState() const
 {
     return child_state;
 }
 
-void NodeState::setChildState(const Memento::Ptr &value)
+void NodeState::setParameterState(const Memento::Ptr &value)
 {
     child_state = value;
 }
@@ -152,7 +152,7 @@ void NodeState::writeYaml(YAML::Emitter &out) const
     out << YAML::Value << flipped;
 
     if(parent) {
-        child_state = parent->getChildState();
+        child_state = parent->getParameterState();
     }
 
     if(child_state.get()) {

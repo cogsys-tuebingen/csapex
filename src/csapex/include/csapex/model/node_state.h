@@ -37,8 +37,8 @@ public:
     bool isFlipped() const;
     void setFlipped(bool value);
 
-    Memento::Ptr getChildState() const;
-    void setChildState(const Memento::Ptr &value);
+    Memento::Ptr getParameterState() const;
+    void setParameterState(const Memento::Ptr &value);
 
     const Node* getParent() const;
     void setParent(Node *value);

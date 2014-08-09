@@ -27,15 +27,6 @@ Node::Node(const UUID &uuid)
 
 Node::~Node()
 {
-    Q_FOREACH(QObject* cb, callbacks) {
-        qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
-        if(call) {
-            call->disconnect();
-        }
-        cb->deleteLater();
-    }
-    callbacks.clear();
-
     delete worker_;
     delete modifier_;
 }
@@ -57,7 +48,7 @@ void Node::initialize(const std::string& type, const UUID& uuid,
 
 
     setupParameters();
-    updateParameters();
+    worker_->makeParametersConnectable();
 
     try {
         setup();
@@ -69,26 +60,6 @@ void Node::initialize(const std::string& type, const UUID& uuid,
 std::string Node::getType() const
 {
     return type_;
-}
-
-Input* Node::getParameterInput(const std::string &name) const
-{
-    std::map<std::string, Input*>::const_iterator it = param_2_input_.find(name);
-    if(it == param_2_input_.end()) {
-        return NULL;
-    } else {
-        return it->second;
-    }
-}
-
-Output* Node::getParameterOutput(const std::string &name) const
-{
-    std::map<std::string, Output*>::const_iterator it = param_2_output_.find(name);
-    if(it == param_2_output_.end()) {
-        return NULL;
-    } else {
-        return it->second;
-    }
 }
 
 void Node::messageArrived(Input *)
@@ -116,7 +87,7 @@ NodeState::Ptr Node::getNodeStateCopy() const
     NodeState::Ptr memento(new NodeState(this));
     *memento = *node_state_;
 
-    memento->setChildState(getChildState());
+    memento->setParameterState(getParameterState());
 
     return memento;
 }
@@ -150,8 +121,8 @@ void Node::setNodeState(NodeState::Ptr memento)
     }
 
     node_state_->setParent(this);
-    if(m->getChildState()) {
-        setState(m->getChildState());
+    if(m->getParameterState()) {
+        setParameterState(m->getParameterState());
     }
 
     Q_EMIT worker_->nodeStateChanged();
@@ -159,77 +130,12 @@ void Node::setNodeState(NodeState::Ptr memento)
     stateChanged();
 }
 
-template <typename T>
-void Node::updateParameter(param::Parameter *p)
-{
-    {
-        Input* cin;
-        cin = new Input(*settings_, UUID::make_sub(getUUID(), p->name() + "_in"));
-
-        cin->setType(connection_types::GenericValueMessage<T>::make());
-
-        cin->enable();
-        /// TODO: make synchronized!!!!!
-        cin->setAsync(true);
-
-        boost::function<typename connection_types::GenericValueMessage<T>::Ptr()> getmsgptr = boost::bind(&Input::getMessage<connection_types::GenericValueMessage<T> >, cin, (void*) 0);
-        boost::function<connection_types::GenericValueMessage<T>*()> getmsg = boost::bind(&connection_types::GenericValueMessage<T>::Ptr::get, boost::bind(getmsgptr));
-        boost::function<T()> read = boost::bind(&connection_types::GenericValueMessage<T>::getValue, boost::bind(getmsg));
-        boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
-        qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
-        callbacks.push_back(set_param);
-        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
-
-        worker_->manageInput(cin);
-        param_2_input_[p->name()] = cin;
-    }
-    {
-        Output* cout;
-        cout = new Output(*settings_, UUID::make_sub(getUUID(), p->name() + "_out"));
-
-        cout->setType(connection_types::GenericValueMessage<T>::make());
-
-        cout->enable();
-        /// TODO: make synchronized!!!!!
-        cout->setAsync(true);
-
-        boost::function<void(T)> publish = boost::bind(&Output::publishIntegral<T>, cout, _1, "/");
-        boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
-        connections.push_back(parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
-
-        worker_->manageOutput(cout);
-        param_2_output_[p->name()] = cout;
-    }
-}
-
-void Node::updateParameters()
-{
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = parameter_state_.params.begin(); it != parameter_state_.params.end(); ++it ) {
-        param::Parameter* p = it->second.get();
-
-        if(p->is<int>()) {
-            updateParameter<int>(p);
-        } else if(p->is<double>()) {
-            updateParameter<double>(p);
-        } else if(p->is<std::string>()) {
-            updateParameter<std::string>(p);
-        } else if(p->is<bool>()) {
-            updateParameter<bool>(p);
-        } else if(p->is<std::pair<int, int> >()) {
-            updateParameter<std::pair<int, int> >(p);
-        } else if(p->is<std::pair<double, double> >()) {
-            updateParameter<std::pair<double, double> >(p);
-        }
-        // else: do nothing and ignore the parameter
-    }
-}
-
-Memento::Ptr Node::getChildState() const
+Memento::Ptr Node::getParameterState() const
 {
     return parameter_state_.clone();
 }
 
-void Node::setState(Memento::Ptr memento)
+void Node::setParameterState(Memento::Ptr memento)
 {
     boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
     apex_assert_hard(m.get());
@@ -318,17 +224,6 @@ Output* Node::getOutput(const UUID& uuid) const
     return NULL;
 }
 
-Connectable* Node::getConnector(const UUID &uuid) const
-{
-    Connectable* result = getInput(uuid);
-
-    if(result == NULL) {
-        result = getOutput(uuid);
-    }
-
-    return result;
-}
-
 std::vector<Input*> Node::getAllInputs() const
 {
     std::vector<Input*> result;
@@ -368,11 +263,4 @@ std::vector<Output*> Node::getManagedOutputs() const
 void Node::setCommandDispatcher(CommandDispatcher *d)
 {
     dispatcher_ = d;
-}
-
-void Node::stop()
-{
-    if(worker_) {
-        worker_->stop();
-    }
 }

@@ -350,11 +350,22 @@ NodeConstructor::Ptr BoxManager::getConstructor(const std::string &target_type)
 
 Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
 {
+    return makeNode(target_type, uuid, NodeStateNullPtr);
+}
+
+Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
+{
     apex_assert_hard(!uuid.empty());
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {
-        return makeSingleNode(p, uuid);
+        Node::Ptr result = makeSingleNode(p, uuid);
+
+        if(state) {
+            result->setNodeState(state);
+        }
+
+        return result;
 
     } else {
         std::cerr << "error: cannot make box, type '" << target_type << "' is unknown\navailable:\n";

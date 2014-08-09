@@ -46,6 +46,9 @@ public:
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
+    /* experimental */ Input* getParameterInput(const std::string& name) const;
+    /* experimental */ Output* getParameterOutput(const std::string& name) const;
+
     /* NAMING */ void manageInput(Input* in);
     /* NAMING */ void manageOutput(Output* out);
 
@@ -53,6 +56,8 @@ public:
     /* NAMING */ void registerOutput(Output* out);
 
     bool canReceive();
+
+    void makeParametersConnectable();
 
 public Q_SLOTS:
     void forwardMessage(Connectable* source);
@@ -106,6 +111,9 @@ private:
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);
 
+    template <typename T>
+    void makeParameterConnectable(param::Parameter*);
+
 private:
     Node* node_;
 
@@ -114,6 +122,12 @@ private:
 
     std::vector<Input*> managed_inputs_;
     std::vector<Output*> managed_outputs_;
+
+    std::map<std::string, Input*> param_2_input_;
+    std::map<std::string, Output*> param_2_output_;
+
+    std::vector<boost::signals2::connection> connections;
+    std::vector<QObject*> callbacks;
 
     QTimer* tick_timer_;
 

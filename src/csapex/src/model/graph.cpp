@@ -88,7 +88,7 @@ void Graph::deleteNode(const UUID& uuid)
 {
     Node* node = findNode(uuid);
 
-    node->stop();
+    node->getNodeWorker()->stop();
 
     /// assert that all connections have already been deleted
     apex_assert_hard(node_parents_[node].empty());
@@ -376,7 +376,7 @@ void Graph::stop()
         node->getNodeWorker()->setEnabled(false);
     }
     Q_FOREACH(Node::Ptr node, nodes_) {
-        node->stop();
+        node->getNodeWorker()->stop();
     }
 
     nodes_.clear();
@@ -514,7 +514,10 @@ Connectable* Graph::findConnector(const UUID &uuid)
     Node* owner = findNode(l);
     apex_assert_hard(owner);
 
-    Connectable* result = owner->getConnector(uuid);;
+    Connectable* result = owner->getInput(uuid);
+    if(result == NULL) {
+        result = owner->getOutput(uuid);
+    }
 
     apex_assert_hard(result);
 

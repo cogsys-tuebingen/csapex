@@ -38,7 +38,7 @@ public:
     virtual void stop();
 
     virtual MementoPtr getState() const;
-    virtual void setState(MementoPtr memento);
+    virtual void setParameterState(MementoPtr memento);
 
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;

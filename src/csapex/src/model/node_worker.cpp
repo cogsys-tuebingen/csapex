@@ -9,6 +9,7 @@
 #include <csapex/utility/thread.h>
 #include <csapex/core/settings.h>
 #include <csapex/model/node_state.h>
+#include <csapex/utility/q_signal_relay.h>
 
 /// SYSTEM
 #include <QThread>
@@ -46,6 +47,15 @@ NodeWorker::~NodeWorker()
     while(!managed_outputs_.empty()) {
         removeOutput(*managed_outputs_.begin());
     }
+
+    Q_FOREACH(QObject* cb, callbacks) {
+        qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
+        if(call) {
+            call->disconnect();
+        }
+        cb->deleteLater();
+    }
+    callbacks.clear();
 }
 
 bool NodeWorker::isEnabled() const
@@ -77,6 +87,69 @@ bool NodeWorker::canReceive()
     }
 
     return can_receive;
+}
+
+template <typename T>
+void NodeWorker::makeParameterConnectable(param::Parameter *p)
+{
+    {
+        Input* cin = new Input(*node_->settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
+
+        cin->setType(connection_types::GenericValueMessage<T>::make());
+
+        cin->enable();
+        /// TODO: make synchronized!!!!!
+        cin->setAsync(true);
+
+        boost::function<typename connection_types::GenericValueMessage<T>::Ptr()> getmsgptr = boost::bind(&Input::getMessage<connection_types::GenericValueMessage<T> >, cin, (void*) 0);
+        boost::function<connection_types::GenericValueMessage<T>*()> getmsg = boost::bind(&connection_types::GenericValueMessage<T>::Ptr::get, boost::bind(getmsgptr));
+        boost::function<T()> read = boost::bind(&connection_types::GenericValueMessage<T>::getValue, boost::bind(getmsg));
+        boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
+        qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
+        callbacks.push_back(set_param);
+        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
+
+        manageInput(cin);
+        param_2_input_[p->name()] = cin;
+    }
+    {
+        Output* cout = new Output(*node_->settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
+
+        cout->setType(connection_types::GenericValueMessage<T>::make());
+
+        cout->enable();
+        /// TODO: make synchronized!!!!!
+        cout->setAsync(true);
+
+        boost::function<void(T)> publish = boost::bind(&Output::publishIntegral<T>, cout, _1, "/");
+        boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
+        connections.push_back(node_->parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
+
+        manageOutput(cout);
+        param_2_output_[p->name()] = cout;
+    }
+}
+
+void NodeWorker::makeParametersConnectable()
+{
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = node_->parameter_state_.params.begin(); it != node_->parameter_state_.params.end(); ++it ) {
+        param::Parameter* p = it->second.get();
+
+        if(p->is<int>()) {
+            makeParameterConnectable<int>(p);
+        } else if(p->is<double>()) {
+            makeParameterConnectable<double>(p);
+        } else if(p->is<std::string>()) {
+            makeParameterConnectable<std::string>(p);
+        } else if(p->is<bool>()) {
+            makeParameterConnectable<bool>(p);
+        } else if(p->is<std::pair<int, int> >()) {
+            makeParameterConnectable<std::pair<int, int> >(p);
+        } else if(p->is<std::pair<double, double> >()) {
+            makeParameterConnectable<std::pair<double, double> >(p);
+        }
+        // else: do nothing and ignore the parameter
+    }
 }
 
 
@@ -206,6 +279,26 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 
     registerOutput(c);
     return c;
+}
+
+Input* NodeWorker::getParameterInput(const std::string &name) const
+{
+    std::map<std::string, Input*>::const_iterator it = param_2_input_.find(name);
+    if(it == param_2_input_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
+}
+
+Output* NodeWorker::getParameterOutput(const std::string &name) const
+{
+    std::map<std::string, Output*>::const_iterator it = param_2_output_.find(name);
+    if(it == param_2_output_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
 }
 
 

@@ -35,7 +35,7 @@ public:
     virtual std::vector<std::string> getExtensions() const = 0;
 
     virtual Memento::Ptr getState() const = 0;
-    virtual void setState(Memento::Ptr memento) = 0;
+    virtual void setParameterState(Memento::Ptr memento) = 0;
 
     std::vector<param::Parameter::Ptr> getParameters() const;
 
