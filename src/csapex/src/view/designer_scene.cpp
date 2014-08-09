@@ -256,15 +256,15 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw port information (in)
-        for(int id = 0; id < node->countInputs(); ++id) {
-            Port* p = widget_ctrl_->getPort(node->getInput(id));
+        Q_FOREACH(Input* input, node->getMessageInputs()) {
+            Port* p = widget_ctrl_->getPort(input);
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw port information (out)
-        for(int id = 0; id < node->countOutputs(); ++id) {
-            Port* p = widget_ctrl_->getPort(node->getOutput(id));
+        Q_FOREACH(Output* output, node->getMessageOutputs()) {
+            Port* p = widget_ctrl_->getPort(output);
             if(p) {
                 drawPort(painter, box, p);
             }

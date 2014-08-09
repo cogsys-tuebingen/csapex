@@ -88,8 +88,8 @@ void GraphIO::saveConnections(YAML::Emitter &yaml)
     yaml << YAML::Value << YAML::BeginSeq; // connections seq
 
     BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
-        if(!node->getOutputs().empty()) {
-            BOOST_FOREACH(Output* o, node->getOutputs()) {
+        if(!node->getAllOutputs().empty()) {
+            BOOST_FOREACH(Output* o, node->getAllOutputs()) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
                 }

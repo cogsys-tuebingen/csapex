@@ -52,8 +52,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation() const
     {
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
-        for(int i = 0, n = node_->countInputs(); i < n; ++i) {
-            Input* connector = node_->getInput(i);
+        std::vector<Input*> inputs = node_->getAllInputs();
+        for(std::size_t i = 0, n = inputs.size(); i < n; ++i) {
+            Input* connector = inputs[i];
 
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
 
@@ -83,8 +84,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation() const
     {
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
-        for(int i = 0, n = node_->countOutputs(); i < n; ++i) {
-            Output* connector = node_->getOutput(i);
+        std::vector<Output*> outputs = node_->getAllOutputs();
+        for(std::size_t i = 0, n = outputs.size(); i < n; ++i) {
+            Output* connector = outputs[i];
 
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
 

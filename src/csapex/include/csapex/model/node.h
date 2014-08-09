@@ -51,7 +51,6 @@ public:
 
     /*poor naming*/ virtual MementoPtr getChildState() const;
 
-    /* extract */ void setSettings(Settings* settings);
 
     void setNodeWorker(NodeWorker* nw);
     NodeWorker* getNodeWorker() const;
@@ -61,33 +60,31 @@ public:
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
-
-    /*poor naming*/ int countInputs() const;
-    /*poor naming*/ int countOutputs() const;
-    /*??*/ int countManagedInputs() const;
-    /*??*/ int countManagedOutputs() const;
-
-    /* ONLY UUID! */ Input* getInput(const unsigned int index) const;
-    /* ONLY UUID! */ Output* getOutput(const unsigned int index) const;
-
-    /* ONLY UUID! */ Input* getManagedInput(const unsigned int index) const;
-    /* ONLY UUID! */Output* getManagedOutput(const unsigned int index) const;
-
-    /* experimental */ Input* getParameterInput(const std::string& name) const;
-    /* experimental */ Output* getParameterOutput(const std::string& name) const;
-
     virtual Connectable* getConnector(const UUID& uuid) const;
     virtual Input* getInput(const UUID& uuid) const;
     virtual Output* getOutput(const UUID& uuid) const;
 
-    virtual std::vector<Input*> getInputs() const;
-    virtual std::vector<Output*> getOutputs() const;
+    /* experimental */ Input* getParameterInput(const std::string& name) const;
+    /* experimental */ Output* getParameterOutput(const std::string& name) const;
 
-    /* ONLY UUID! */ void removeInput(Input *in);
-    /* ONLY UUID! */ void removeOutput(Output *out);
+    std::vector<Input*> getAllInputs() const;
+    std::vector<Output*> getAllOutputs() const;
 
-    /* extract */ void setCommandDispatcher(CommandDispatcher* d);
+    std::vector<Input*> getMessageInputs() const;
+    std::vector<Output*> getMessageOutputs() const;
 
+    std::vector<Input*> getManagedInputs() const;
+    std::vector<Output*> getManagedOutputs() const;
+
+    void removeInput(const UUID& uuid);
+    void removeOutput(const UUID& uuid);
+
+
+
+    /* extract these */
+    void setSettings(Settings* settings);
+    void setCommandDispatcher(CommandDispatcher* d);
+    void setUUID(const UUID& uuid);
 
 public:
     virtual void setup() = 0;
@@ -97,11 +94,7 @@ public:
 
     virtual void tick();
 
-
 protected:
-
-    void setUUID(const UUID& uuid);
-
     virtual void setState(Memento::Ptr memento);
 
     template <typename T>
@@ -131,12 +124,6 @@ private:
     NodeStatePtr node_state_;
     std::map<std::string, Input*> param_2_input_;
     std::map<std::string, Output*> param_2_output_;
-
-    std::vector<Input*> inputs_;
-    std::vector<Output*> outputs_;
-
-    std::vector<Input*> managed_inputs_;
-    std::vector<Output*> managed_outputs_;
 
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;

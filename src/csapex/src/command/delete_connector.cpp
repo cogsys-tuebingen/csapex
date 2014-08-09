@@ -43,9 +43,9 @@ bool DeleteConnector::doExecute()
     }
 
     if(in) {
-        node->removeInput(dynamic_cast<Input*>(c));
+        node->removeInput(c->getUUID());
     } else {
-        node->removeOutput(dynamic_cast<Output*>(c));
+        node->removeOutput(c->getUUID());
     }
 
     return true;

@@ -34,17 +34,17 @@ NodeWorker::NodeWorker(Node* node)
 
 NodeWorker::~NodeWorker()
 {
-    while(!node_->inputs_.empty()) {
-        node_->removeInput(*node_->inputs_.begin());
+    while(!inputs_.empty()) {
+        removeInput(*inputs_.begin());
     }
-    while(!node_->outputs_.empty()) {
-        node_->removeOutput(*node_->outputs_.begin());
+    while(!outputs_.empty()) {
+        removeOutput(*outputs_.begin());
     }
-    while(!node_->managed_inputs_.empty()) {
-        node_->removeInput(*node_->managed_inputs_.begin());
+    while(!managed_inputs_.empty()) {
+        removeInput(*managed_inputs_.begin());
     }
-    while(!node_->managed_outputs_.empty()) {
-        node_->removeOutput(*node_->managed_outputs_.begin());
+    while(!managed_outputs_.empty()) {
+        removeOutput(*managed_outputs_.begin());
     }
 }
 
@@ -68,7 +68,7 @@ void NodeWorker::setEnabled(bool e)
 bool NodeWorker::canReceive()
 {
     bool can_receive = true;
-    Q_FOREACH(Input* i, node_->inputs_) {
+    Q_FOREACH(Input* i, inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
             can_receive = false;
         } else if(i->isConnected() && !i->getSource()->isEnabled()) {
@@ -113,20 +113,20 @@ void NodeWorker::stop()
     QMutexLocker lock(&stop_mutex_);
 
 
-    Q_FOREACH(Input* i, node_->inputs_) {
+    Q_FOREACH(Input* i, inputs_) {
         i->free();
     }
-    Q_FOREACH(Output* i, node_->outputs_) {
+    Q_FOREACH(Output* i, outputs_) {
         i->stop();
     }
-    Q_FOREACH(Input* i, node_->inputs_) {
+    Q_FOREACH(Input* i, inputs_) {
         i->stop();
     }
 
-    Q_FOREACH(Input* i, node_->inputs_) {
+    Q_FOREACH(Input* i, inputs_) {
         disconnectConnector(i);
     }
-    Q_FOREACH(Output* i, node_->outputs_) {
+    Q_FOREACH(Output* i, outputs_) {
         disconnectConnector(i);
     }
 
@@ -183,24 +183,96 @@ void NodeWorker::forwardMessage(Connectable *s)
     }
 }
 
-void NodeWorker::addInput(Input *source)
+Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
-    clearInput(source);
+    int id = inputs_.size();
+    Input* c = new Input(*node_->settings_, node_, id);
+    c->setLabel(label);
+    c->setOptional(optional);
+    c->setAsync(async);
+    c->setType(type);
 
-    connect(source, SIGNAL(enabled(bool)), this, SLOT(checkInputs()));
+    registerInput(c);
+
+    return c;
+}
+
+Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
+{
+    int id = outputs_.size();
+    Output* c = new Output(*node_->settings_, node_, id);
+    c->setLabel(label);
+    c->setType(type);
+
+    registerOutput(c);
+    return c;
+}
+
+
+void NodeWorker::removeInput(Input *in)
+{
+    {
+        QMutexLocker lock(&message_mutex_);
+        std::map<Input*, bool>::iterator it = has_msg_.find(in);
+
+        if(it != has_msg_.end()) {
+            has_msg_.erase(it);
+        }
+    }
+
+    std::vector<Input*>::iterator it;
+    it = std::find(inputs_.begin(), inputs_.end(), in);
+
+    if(it != inputs_.end()) {
+        inputs_.erase(it);
+    } else {
+        it = std::find(managed_inputs_.begin(), managed_inputs_.end(), in);
+        if(it != managed_inputs_.end()) {
+            managed_inputs_.erase(it);
+        } else {
+            std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
+        }
+    }
+
+    in->deleteLater();
+
+    disconnectConnector(in);
+    Q_EMIT connectorRemoved(in);
+}
+
+void NodeWorker::removeOutput(Output *out)
+{
+    std::vector<Output*>::iterator it;
+    it = std::find(outputs_.begin(), outputs_.end(), out);
+
+    if(it != outputs_.end()) {
+        outputs_.erase(it);
+    } else {
+        it = std::find(managed_outputs_.begin(), managed_outputs_.end(), out);
+        if(it != managed_outputs_.end()) {
+            managed_outputs_.erase(it);
+        } else {
+            std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
+        }
+    }
+
+    out->deleteLater();
+
+    disconnectConnector(out);
+    Q_EMIT connectorRemoved(out);
 }
 
 
 void NodeWorker::manageInput(Input* in)
 {
-    node_->managed_inputs_.push_back(in);
+    managed_inputs_.push_back(in);
     connectConnector(in);
     in->moveToThread(thread());
 }
 
 void NodeWorker::manageOutput(Output* out)
 {
-    node_->managed_outputs_.push_back(out);
+    managed_outputs_.push_back(out);
     connectConnector(out);
     out->moveToThread(thread());
 }
@@ -208,12 +280,12 @@ void NodeWorker::manageOutput(Output* out)
 
 void NodeWorker::registerInput(Input* in)
 {
-    node_->inputs_.push_back(in);
+    inputs_.push_back(in);
     in->setCommandDispatcher(node_->dispatcher_);
 
     in->moveToThread(thread());
 
-    addInput(in);
+    clearInput(in);
     connectConnector(in);
     QObject::connect(in, SIGNAL(messageArrived(Connectable*)), this, SLOT(forwardMessage(Connectable*)));
 
@@ -222,7 +294,7 @@ void NodeWorker::registerInput(Input* in)
 
 void NodeWorker::registerOutput(Output* out)
 {
-    node_->outputs_.push_back(out);
+    outputs_.push_back(out);
     out->setCommandDispatcher(node_->dispatcher_);
 
     out->moveToThread(thread());
@@ -232,31 +304,11 @@ void NodeWorker::registerOutput(Output* out)
     Q_EMIT connectorCreated(out);
 }
 
-void NodeWorker::checkInputs()
-{
-    for(int i = 0; i < node_->countInputs(); ++i) {
-        Input* source = node_->getInput(i);
-        if(!source->isEnabled() && source->isBlocked()) {
-            source->free();
-            clearInput(source);
-        }
-    }
-}
-
 void NodeWorker::clearInput(Input *source)
 {
     QMutexLocker lock(&message_mutex_);
     has_msg_[source] = false;
-}
 
-void NodeWorker::removeInput(Input *source)
-{
-    QMutexLocker lock(&message_mutex_);
-    std::map<Input*, bool>::iterator it = has_msg_.find(source);
-
-    if(it != has_msg_.end()) {
-        has_msg_.erase(it);
-    }
 }
 
 void NodeWorker::forwardMessageSynchronized(Input *source)
@@ -369,8 +421,8 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
         }
 
         // set output sequence numbers
-        for(int i = 0; i < node_->countOutputs(); ++i) {
-            Output* out = node_->getOutput(i);
+        for(std::size_t i = 0; i < outputs_.size(); ++i) {
+            Output* out = outputs_[i];
             out->setSequenceNumber(highest_seq_no);
         }
 
@@ -421,8 +473,8 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
 
 void NodeWorker::sendMessages()
 {
-    for(int i = 0; i < node_->countOutputs(); ++i) {
-        Output* out = node_->getOutput(i);
+    for(std::size_t i = 0; i < outputs_.size(); ++i) {
+        Output* out = outputs_[i];
         out->sendMessages();
     }
 }
@@ -467,8 +519,8 @@ void NodeWorker::tick()
 
         // if there is a message: send!
         bool has_msg = false;
-        for(int i = 0; i < node_->countOutputs(); ++i) {
-            Output* out = node_->getOutput(i);
+        for(std::size_t i = 0; i < outputs_.size(); ++i) {
+            Output* out = outputs_[i];
             if(out->hasMessage()) {
                 has_msg = true;
             }
@@ -518,7 +570,7 @@ void NodeWorker::enableIO(bool enable)
 
 void NodeWorker::enableInput (bool enable)
 {
-    Q_FOREACH(Input* i, node_->inputs_) {
+    Q_FOREACH(Input* i, inputs_) {
         if(enable) {
             i->enable();
         } else {
@@ -530,7 +582,7 @@ void NodeWorker::enableInput (bool enable)
 
 void NodeWorker::enableOutput (bool enable)
 {
-    Q_FOREACH(Output* o, node_->outputs_) {
+    Q_FOREACH(Output* o, outputs_) {
         if(enable) {
             o->enable();
         } else {
@@ -548,10 +600,10 @@ void NodeWorker::triggerError(bool e, const std::string &what)
 
 void NodeWorker::setIOError(bool error)
 {
-    Q_FOREACH(Input* i, node_->inputs_) {
+    Q_FOREACH(Input* i, inputs_) {
         i->setErrorSilent(error);
     }
-    Q_FOREACH(Output* i, node_->outputs_) {
+    Q_FOREACH(Output* i, outputs_) {
         i->setErrorSilent(error);
     }
     enableIO(!error);

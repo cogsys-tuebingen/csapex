@@ -97,11 +97,11 @@ void WidgetController::nodeAdded(Node::Ptr node)
         designer_->addBox(box);
 
         // add existing connectors
-        for(std::size_t i = 0, n = node->countInputs(); i < n; ++i) {
-            connectorAdded(node->getInput(i));
+        Q_FOREACH(Input* input, node->getMessageInputs()) {
+            connectorAdded(input);
         }
-        for(std::size_t i = 0, n = node->countOutputs(); i < n; ++i) {
-            connectorAdded(node->getOutput(i));
+        Q_FOREACH(Output* output, node->getMessageOutputs()) {
+            connectorAdded(output);
         }
 
         // subscribe to coming connectors

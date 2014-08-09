@@ -34,7 +34,7 @@ public:
 
     void stop();
 
-    void makeThread();
+    /*??*/ void makeThread();
 
     bool isEnabled() const;
     void setEnabled(bool e);
@@ -43,14 +43,14 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    void connectConnector(Connectable* c);
-    void disconnectConnector(Connectable* c);
+    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
+    Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
-    /*??*/ void manageInput(Input* in);
-    /*??*/ void manageOutput(Output* out);
+    /* NAMING */ void manageInput(Input* in);
+    /* NAMING */ void manageOutput(Output* out);
 
-    /* ?? */ void registerInput(Input* in);
-    /* ?? */ void registerOutput(Output* out);
+    /* NAMING */ void registerInput(Input* in);
+    /* NAMING */ void registerOutput(Output* out);
 
     bool canReceive();
 
@@ -59,10 +59,7 @@ public Q_SLOTS:
 
     void forwardMessageSynchronized(Input* source);
 
-    void addInput(Input* source);
-    void checkInputs();
     void clearInput(Input* source);
-    void removeInput(Input* source);
 
     void checkParameters();    
     void checkIO();
@@ -103,8 +100,20 @@ Q_SIGNALS:
 private:
     static const double DEFAULT_FREQUENCY = 30.0;
 
+    void removeInput(Input *in);
+    void removeOutput(Output *out);
+
+    void connectConnector(Connectable* c);
+    void disconnectConnector(Connectable* c);
+
 private:
     Node* node_;
+
+    std::vector<Input*> inputs_;
+    std::vector<Output*> outputs_;
+
+    std::vector<Input*> managed_inputs_;
+    std::vector<Output*> managed_outputs_;
 
     QTimer* tick_timer_;
 

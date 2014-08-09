@@ -103,11 +103,11 @@ void NodeBox::construct()
 
     QObject::connect(worker, SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
 
-    for(int i = 0; i < node_->countInputs(); ++i) {
-        registerInputEvent(node_->getInput(i));
+    Q_FOREACH(Input* input, node_->getMessageInputs()) {
+        registerInputEvent(input);
     }
-    for(int i = 0; i < node_->countOutputs(); ++i) {
-        registerOutputEvent(node_->getOutput(i));
+    Q_FOREACH(Output* output, node_->getMessageOutputs()) {
+        registerOutputEvent(output);
     }
 
     setupUi();

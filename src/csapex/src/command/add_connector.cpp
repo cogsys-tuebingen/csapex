@@ -38,12 +38,12 @@ bool AddConnector::doExecute()
     apex_assert_hard(node);
 
     if(input) {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_IN, node->countInputs()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_IN, node->getMessageInputs().size()) : c_uuid;
         Input* in = new Input(graph_->getSettings(), uuid);
         c = in;
         node->getNodeWorker()->registerInput(in);
     } else {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_OUT, node->countOutputs()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_OUT, node->getMessageOutputs().size()) : c_uuid;
         Output* out = new Output(graph_->getSettings(), uuid);
         c = out;
         node->getNodeWorker()->registerOutput(out);
@@ -62,9 +62,9 @@ bool AddConnector::doUndo()
     apex_assert_hard(node);
 
     if(input) {
-        node->removeInput(node->getInput(c_uuid));
+        node->removeInput(c_uuid);
     } else {
-        node->removeOutput(node->getOutput(c_uuid));
+        node->removeOutput(c_uuid);
     }
     return false;
 }

@@ -273,91 +273,32 @@ void Node::errorEvent(bool error, const std::string& /*msg*/, ErrorLevel level)
 
 Input* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
-    int id = inputs_.size();
-    Input* c = new Input(*settings_, this, id);
-    c->setLabel(label);
-    c->setOptional(optional);
-    c->setAsync(async);
-    c->setType(type);
-
-    if(worker_) {
-        worker_->registerInput(c);
-    } else {
-        aerr << "trying to add an input in a constructor! Please use setup()" << std::endl;
-    }
-
-    return c;
+    return worker_->addInput(type, label, optional, async);
 }
 
 Output* Node::addOutput(ConnectionTypePtr type, const std::string& label)
 {
-    int id = outputs_.size();
-    Output* c = new Output(*settings_, this, id);
-    c->setLabel(label);
-    c->setType(type);
-
-    if(worker_) {
-        worker_->registerOutput(c);
-    } else {
-        aerr << "trying to add an output in a constructor! Please use setup()" << std::endl;
-    }
-
-    return c;
+    return worker_->addOutput(type, label);
 }
 
-int Node::countInputs() const
+void Node::removeInput(const UUID &uuid)
 {
-    return inputs_.size();
+    worker_->removeInput(getInput(uuid));
 }
 
-int Node::countOutputs() const
+void Node::removeOutput(const UUID &uuid)
 {
-    return outputs_.size();
-}
-
-int Node::countManagedInputs() const
-{
-    return managed_inputs_.size();
-}
-
-int Node::countManagedOutputs() const
-{
-    return managed_outputs_.size();
-}
-
-Input* Node::getInput(const unsigned int index) const
-{
-    apex_assert_hard(index < inputs_.size());
-    return inputs_[index];
-}
-
-Output* Node::getOutput(const unsigned int index) const
-{
-    apex_assert_hard(index < outputs_.size());
-    return outputs_[index];
-}
-
-
-Input* Node::getManagedInput(const unsigned int index) const
-{
-    apex_assert_hard(index < managed_inputs_.size());
-    return managed_inputs_[index];
-}
-
-Output* Node::getManagedOutput(const unsigned int index) const
-{
-    apex_assert_hard(index < managed_outputs_.size());
-    return managed_outputs_[index];
+    worker_->removeOutput(getOutput(uuid));
 }
 
 Input* Node::getInput(const UUID& uuid) const
 {
-    BOOST_FOREACH(Input* in, inputs_) {
+    BOOST_FOREACH(Input* in, worker_->inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
     }
-    BOOST_FOREACH(Input* in, managed_inputs_) {
+    BOOST_FOREACH(Input* in, worker_->managed_inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
@@ -368,12 +309,12 @@ Input* Node::getInput(const UUID& uuid) const
 
 Output* Node::getOutput(const UUID& uuid) const
 {
-    BOOST_FOREACH(Output* out, outputs_) {
+    BOOST_FOREACH(Output* out, worker_->outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
     }
-    BOOST_FOREACH(Output* out, managed_outputs_) {
+    BOOST_FOREACH(Output* out, worker_->managed_outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
@@ -393,68 +334,40 @@ Connectable* Node::getConnector(const UUID &uuid) const
     return result;
 }
 
-std::vector<Input*> Node::getInputs() const
+std::vector<Input*> Node::getAllInputs() const
 {
     std::vector<Input*> result;
-    result = inputs_;
-    result.insert(result.end(), managed_inputs_.begin(), managed_inputs_.end());
+    result = worker_->inputs_;
+    result.insert(result.end(), worker_->managed_inputs_.begin(), worker_->managed_inputs_.end());
     return result;
 }
 
-std::vector<Output*> Node::getOutputs() const
+std::vector<Output*> Node::getAllOutputs() const
 {
     std::vector<Output*> result;
-    result = outputs_;
-    result.insert(result.end(), managed_outputs_.begin(), managed_outputs_.end());
+    result = worker_->outputs_;
+    result.insert(result.end(), worker_->managed_outputs_.begin(), worker_->managed_outputs_.end());
     return result;
 }
 
-void Node::removeInput(Input *in)
+std::vector<Input*> Node::getMessageInputs() const
 {
-
-    if(worker_) {
-        worker_->removeInput(in);
-    }
-    std::vector<Input*>::iterator it;
-    it = std::find(inputs_.begin(), inputs_.end(), in);
-
-    if(it != inputs_.end()) {
-        inputs_.erase(it);
-    } else {
-        it = std::find(managed_inputs_.begin(), managed_inputs_.end(), in);
-        if(it != managed_inputs_.end()) {
-            managed_inputs_.erase(it);
-        } else {
-            std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
-        }
-    }
-
-    in->deleteLater();
-
-    worker_->disconnectConnector(in);
-    Q_EMIT worker_->connectorRemoved(in);
+    return worker_->inputs_;
 }
 
-void Node::removeOutput(Output *out)
+std::vector<Output*> Node::getMessageOutputs() const
 {
-    std::vector<Output*>::iterator it;
-    it = std::find(outputs_.begin(), outputs_.end(), out);
+    return worker_->outputs_;
+}
 
-    if(it != outputs_.end()) {
-        outputs_.erase(it);
-    } else {
-        it = std::find(managed_outputs_.begin(), managed_outputs_.end(), out);
-        if(it != managed_outputs_.end()) {
-            managed_outputs_.erase(it);
-        } else {
-            std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
-        }
-    }
+std::vector<Input*> Node::getManagedInputs() const
+{
+    return worker_->managed_inputs_;
+}
 
-    out->deleteLater();
-
-    worker_->disconnectConnector(out);
-    Q_EMIT worker_->connectorRemoved(out);
+std::vector<Output*> Node::getManagedOutputs() const
+{
+    return worker_->managed_outputs_;
 }
 
 void Node::setCommandDispatcher(CommandDispatcher *d)
