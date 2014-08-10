@@ -38,7 +38,7 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     worker_ = node_worker;
     settings_ = settings;
 
-    Unique::setUUID(uuid);
+    setUUID(uuid);
 
     std::string p = uuid.getFullName();
     ainfo.setPrefix(p);

@@ -5,7 +5,7 @@
 #include <csapex/model/memento.h>
 
 /// PROJECT
-#include <utils_param/parameter_map.h>
+#include <utils_param/parameter.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>

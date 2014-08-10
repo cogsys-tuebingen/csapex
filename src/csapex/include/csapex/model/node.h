@@ -12,8 +12,10 @@
 
 namespace csapex {
 
+// TODO: less inheritance!
 class Node : public ErrorState, public Unique, public Parameterizable, public Timable
 {
+    // TODO: less friends!
     friend class NodeState;
     friend class NodeAdapter;
     friend class NodeWorker;
@@ -77,11 +79,10 @@ public:
     virtual void tick();
 
 protected:
-
     void triggerModelChanged();
 
 private:
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+    /*???*/ void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 protected:
     std::string type_;

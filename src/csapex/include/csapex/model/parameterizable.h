@@ -8,7 +8,6 @@
 
 /// SYSTEM
 #include <boost/signals2.hpp>
-#include <QMutex>
 
 namespace csapex
 {
@@ -66,7 +65,6 @@ public:
     void removeTemporaryParameters();
     void triggerParameterSetChanged();
 
-    boost::shared_ptr<QMutexLocker> getParamLock();
     ChangedParameterList getChangedParameters();
 
 protected:
@@ -82,7 +80,7 @@ private:
     std::vector<boost::signals2::connection> connections_;
     std::map<param::Parameter*, boost::function<bool()> > conditions_;
 
-    QMutex changed_params_mutex_;
+    boost::mutex* changed_params_mutex_;
     std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
 
 protected:

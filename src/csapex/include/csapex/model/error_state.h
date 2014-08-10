@@ -6,7 +6,6 @@
 
 /// SYSTEM
 #include <string>
-#include <QMutex>
 
 namespace csapex
 {
@@ -35,7 +34,7 @@ protected:
     virtual void errorChanged(bool error);
 
 protected:
-    mutable QMutex mutex;
+    boost::mutex* error_mutex_;
     bool error_;
     std::string error_msg_;
     ErrorLevel level_;

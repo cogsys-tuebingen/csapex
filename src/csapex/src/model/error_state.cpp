@@ -1,13 +1,14 @@
 /// HEADER
 #include <csapex/model/error_state.h>
 
-/// COMPONENT
-#include <QString>
+/// SYSTEM
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
 
 using namespace csapex;
 
 ErrorState::ErrorState()
-    : error_(false)
+    : error_mutex_(new boost::mutex), error_(false)
 {
 }
 
@@ -32,13 +33,13 @@ void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
 void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
 {
     {
-        QMutexLocker lock(&mutex);
+        boost::lock_guard<boost::mutex> lock (*error_mutex_);
 
         if(!error_ && !e) {
             return;
         }
 
-        QString err;
+        std::string err;
         if(e) {
             unsigned line = 60;
             for(unsigned i = 0; i < msg.size(); ++i) {
@@ -63,19 +64,19 @@ void ErrorState::errorChanged(bool)
 
 bool ErrorState::isError() const
 {
-    QMutexLocker lock(&mutex);
+    boost::lock_guard<boost::mutex> lock (*error_mutex_);
     return error_;
 }
 
 ErrorState::ErrorLevel ErrorState::errorLevel() const
 {
-    QMutexLocker lock(&mutex);
+    boost::lock_guard<boost::mutex> lock (*error_mutex_);
     return level_;
 }
 
 std::string ErrorState::errorMessage() const
 {
-    QMutexLocker lock(&mutex);
+    boost::lock_guard<boost::mutex> lock (*error_mutex_);
     return error_msg_;
 }
 

@@ -4,6 +4,12 @@
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 
+/// FORWARD DELCARATION
+namespace boost {
+class mutex;
+}
+
+
 #define FWD(name) \
     class name;\
     typedef boost::shared_ptr<name> name##Ptr;\

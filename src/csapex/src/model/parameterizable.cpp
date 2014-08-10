@@ -1,11 +1,14 @@
 /// HEADER
 #include <csapex/model/parameterizable.h>
 
+/// SYSTEM
+#include <QtGlobal>
 
 using namespace csapex;
 
 
 Parameterizable::Parameterizable()
+    : changed_params_mutex_(new boost::mutex)
 {
 
 }
@@ -32,7 +35,7 @@ void Parameterizable::parameterChanged(param::Parameter *)
 
 void Parameterizable::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
 {
-    QMutexLocker lock(&changed_params_mutex_);
+    boost::lock_guard<boost::mutex> lock(*changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
 }
 
@@ -165,16 +168,11 @@ void Parameterizable::triggerParameterSetChanged()
     parameter_state_.triggerParameterSetChanged();
 }
 
-boost::shared_ptr<QMutexLocker> Parameterizable::getParamLock()
-{
-    return boost::shared_ptr<QMutexLocker>(new QMutexLocker(&changed_params_mutex_));
-}
-
 Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
 {
     ChangedParameterList changed_params;
 
-    QMutexLocker lock(&changed_params_mutex_);
+    boost::lock_guard<boost::mutex> lock(*changed_params_mutex_);
     changed_params = changed_params_;
     changed_params_.clear();
 

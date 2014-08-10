@@ -532,7 +532,6 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
     if(can_process){
-        //boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         try {
             node_->process();
 
@@ -607,7 +606,6 @@ void NodeWorker::tick()
     }
 
     if(isEnabled()) {
-        //boost::shared_ptr<QMutexLocker> lock = node_->getParamLock();
         node_->tick();
 
         // if there is a message: send!
