@@ -1,6 +1,8 @@
 /// HEADER
 #include <utils_param/parameter.h>
 
+#include <cxxabi.h>
+
 using namespace param;
 
 Parameter::Parameter(const std::string &name, const ParameterDescription &description)

@@ -5,14 +5,12 @@
 #include <utils_param/parameter_description.h>
 
 /// SYSTEM
-#include <stdexcept>
-#include <utils_yaml/yamlplus.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
 #include <boost/signals2.hpp>
-#include <cxxabi.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
+#include <utils_yaml/yamlplus.h>
 
 namespace param {
 
