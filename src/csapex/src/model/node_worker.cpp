@@ -183,8 +183,9 @@ void NodeWorker::disconnectConnector(Connectable */*c*/)
 
 void NodeWorker::stop()
 {
-    QMutexLocker lock(&stop_mutex_);
+    node_->abort();
 
+    QMutexLocker lock(&stop_mutex_);
 
     Q_FOREACH(Input* i, inputs_) {
         i->free();

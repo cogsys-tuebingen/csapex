@@ -77,6 +77,7 @@ public:
     virtual void process() = 0;
     virtual void stateChanged();
     virtual void tick();
+    virtual void abort();
 
 protected:
     void triggerModelChanged();

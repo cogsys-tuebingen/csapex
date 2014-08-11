@@ -155,6 +155,10 @@ void Node::tick()
 {
 }
 
+void Node::abort()
+{
+}
+
 NodeWorker* Node::getNodeWorker() const
 {
     return worker_;
