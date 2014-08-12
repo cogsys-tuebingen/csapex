@@ -213,8 +213,8 @@ void $NODE_NAME::process()
 ### MODIFY CMAKELISTS
 ###
 ENTRY="    $DIR/$NEW_FILE"
-sed -i -e "/add_library.*$LIBRARY.*/{
-        $!{ N ; s|\(add_library.*$LIBRARY.*\)\n\(.*\)|\\1\n$ENTRY\n\\2|
+sed -i -e "/add_library.*$LIBRARY\s*/{
+        $!{ N ; s|\(add_library.*$LIBRARY\s*\)\n\(.*\)|\\1\n$ENTRY\n\\2|
           }
          }" $CMAKELIST
                          
