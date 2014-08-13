@@ -31,8 +31,8 @@ using namespace csapex;
 
 const QString NodeBox::MIME = "csapex/model/box";
 
-NodeBox::NodeBox(Settings& settings, CommandDispatcher* cmd_dispatcher, NodePtr node, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), settings_(settings), cmd_dispatcher_(cmd_dispatcher), node_(node), adapter_(adapter), icon_(icon),
+NodeBox::NodeBox(Settings& settings, NodePtr node, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), settings_(settings), node_(node), adapter_(adapter), icon_(icon),
       down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
 }
@@ -158,7 +158,7 @@ void NodeBox::contextMenuEvent(QContextMenuEvent* e)
     Q_EMIT showContextMenuForBox(this, e->globalPos());
 }
 
-void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler)
+void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler, CommandDispatcher* dispatcher)
 {
     ContextMenuHandler::addHeader(*menu, std::string("Node: ") + node_->getUUID().getShortName());
 
@@ -214,7 +214,7 @@ void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<vo
     QAction* del = new QAction("delete", menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = boost::bind(&NodeBox::deleteBox, this);
+    handler[del] = boost::bind(&NodeBox::deleteBox, this, dispatcher);
     menu->addAction(del);
 }
 
@@ -404,9 +404,9 @@ void NodeBox::stop()
     adapter_->stop();
 }
 
-void NodeBox::deleteBox()
+void NodeBox::deleteBox(CommandDispatcher* dispatcher)
 {
-    cmd_dispatcher_->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
+    dispatcher->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
 }
 
 void NodeBox::getInformation()

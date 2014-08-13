@@ -45,11 +45,7 @@ bool AddNode::doExecute()
 
     node->getNodeState()->setPos(pos_);
 
-//    if(parent_uuid_.empty()) {
-        graph_->addNode(node);
-//    } else {
-//        graph_->findSubGraph(parent_uuid_)->addBox(box);
-//    }
+    graph_->addNode(node);
 
     return true;
 }
@@ -63,8 +59,6 @@ bool AddNode::doUndo()
 
     if(parent_uuid_.empty()) {
         graph_->deleteNode(node_->getUUID());
-    } else {
-//        graph_->findSubGraph(parent_uuid_)->deleteBox(box_->UUID());
     }
 
     return true;

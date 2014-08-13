@@ -49,7 +49,7 @@ public:
 
 public:
     /// CONSTRUCTION
-    NodeBox(Settings& settings, CommandDispatcher* cmd_dispatcher, NodePtr content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
+    NodeBox(Settings& settings, NodePtr content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
     virtual ~NodeBox();
     void construct();
     void init();
@@ -73,16 +73,12 @@ public:
     std::string errorMessage() const;
 
     /// UI
-    virtual void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler);
+    void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler, CommandDispatcher* dispatcher);
 
     QBoxLayout* getInputLayout();
     QBoxLayout* getOutputLayout();
 
     /// UI CALLBACKS
-//    virtual void mousePressEvent(QMouseEvent* e);
-//    virtual void mouseReleaseEvent(QMouseEvent* e);
-//    virtual void mouseMoveEvent(QMouseEvent* e);
-
     void moveEvent(QMoveEvent*);
     void triggerPlaced();
 
@@ -98,11 +94,11 @@ protected:
     bool eventFilter(QObject*, QEvent*);
     void updateFlippedSides();
 
+    void deleteBox(CommandDispatcher *dispatcher);
+
 public Q_SLOTS:
     void setupUiAgain();
 
-    // TODO: extract
-    void deleteBox();
 
     void getInformation();
     void minimizeBox(bool minimize);
@@ -153,9 +149,6 @@ protected:
     Ui::Box* ui;
 
     Settings& settings_;
-
-    // TODO: remove
-    CommandDispatcher* cmd_dispatcher_;
 
     NodePtr node_;
     NodeAdapterPtr adapter_;

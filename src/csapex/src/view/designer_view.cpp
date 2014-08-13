@@ -366,7 +366,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &global_pos
     QMenu menu;
     std::map<QAction*, boost::function<void()> > handler;
 
-    box->fillContextMenu(&menu, handler);
+    box->fillContextMenu(&menu, handler, dispatcher_);
 
     QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(global_pos)));
 

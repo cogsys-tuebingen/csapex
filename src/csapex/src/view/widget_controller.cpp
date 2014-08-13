@@ -115,7 +115,7 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    NodeBox::Ptr object(new NodeBox(settings_, dispatcher_, content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
+    NodeBox::Ptr object(new NodeBox(settings_, content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
 
     object->setStyleSheet(style_sheet_);
     object->construct();
@@ -136,9 +136,9 @@ void WidgetController::nodeAdded(Node::Ptr node)
         QIcon icon = node_factory_->getConstructor(type)->getIcon();
         // TODO: replace with correct iteration!
         if(node_factory_->node_adapter_builders_.find(type) != node_factory_->node_adapter_builders_.end()) {
-            box = new NodeBox(settings_, dispatcher_, node, node_factory_->node_adapter_builders_[type]->build(node, this), icon);
+            box = new NodeBox(settings_, node, node_factory_->node_adapter_builders_[type]->build(node, this), icon);
         } else {
-            box = new NodeBox(settings_, dispatcher_, node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), this)), icon);
+            box = new NodeBox(settings_, node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), this)), icon);
         }
         box->construct();
 
