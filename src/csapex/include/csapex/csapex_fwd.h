@@ -68,6 +68,8 @@ class DragIO;
 
 class Overlay;
 
+class BoxManager;
+
 FWD(Timable);
 
 FWD(Tag);

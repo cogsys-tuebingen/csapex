@@ -220,13 +220,13 @@ void DesignerView::dragLeaveEvent(QDragLeaveEvent* e)
 
 void DesignerView::showBoxDialog()
 {
-    BoxDialog diag;
+    BoxDialog diag(widget_ctrl_->getNodeFactory());
     int r = diag.exec();
 
     if(r) {
         std::string type = diag.getName();
 
-        if(!type.empty() && BoxManager::instance().isValidType(type)) {
+        if(!type.empty() && widget_ctrl_->getNodeFactory()->isValidType(type)) {
             UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
             QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
             dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, NodeStateNullPtr)));
@@ -387,13 +387,13 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
 void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
 {
     QMenu menu;
-    BoxManager::instance().insertAvailableNodeTypes(&menu);
+    widget_ctrl_->getNodeFactory()->insertAvailableNodeTypes(&menu);
 
     QAction* selectedItem = menu.exec(global_pos);
 
     if(selectedItem) {
         std::string selected = selectedItem->data().toString().toStdString();
-        BoxManager::instance().startPlacingBox(this, selected, widget_ctrl_.get(), NodeStateNullPtr);
+        widget_ctrl_->getNodeFactory()->startPlacingBox(this, selected, widget_ctrl_.get(), NodeStateNullPtr);
     }
 }
 

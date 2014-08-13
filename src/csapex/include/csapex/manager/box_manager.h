@@ -20,13 +20,15 @@
 namespace csapex
 {
 
-/// TODO: Split into NodeFactory, BoxFactory
+/// TODO: Rename to NodeFactory
 /// TODO: Eliminate Singleton
 class BoxManager : public Singleton<BoxManager>
 {
+    /// TODO: no friends
     friend class Singleton<BoxManager>;
     friend class DesignerIO;
     friend class GraphIO;
+    friend class WidgetController;
 
 public:
     virtual void reload();
@@ -37,12 +39,12 @@ public:
 
     bool isValidType(const std::string& type) const;
 
+    // TODO: move to widget controller
     void startPlacingBox(QWidget *parent, const std::string& type, WidgetController *widget_ctrl, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
 
     NodeConstructorPtr getConstructor(const std::string& type);
     NodePtr makeNode(const std::string& type, const UUID& uuid);
     NodePtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
-    NodeBox* makeBox(NodePtr node, WidgetController *widget_ctrl);
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);

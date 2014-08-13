@@ -9,6 +9,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
+#include <csapex/view/widget_controller.h>
 
 using namespace csapex::command;
 
@@ -40,7 +41,7 @@ bool AddNode::doExecute()
         uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
     }
 
-    Node::Ptr node = BoxManager::instance().makeNode(type_, uuid_, saved_state_);
+    Node::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type_, uuid_, saved_state_);
 
     node->getNodeState()->setPos(pos_);
 

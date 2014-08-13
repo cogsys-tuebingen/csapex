@@ -1,6 +1,9 @@
 #ifndef BOX_DIALOG_H
 #define BOX_DIALOG_H
 
+/// COMPONENT
+#include <csapex/csapex_fwd.h>
+
 /// SYSTEM
 #include <QDialog>
 #include <QLineEdit>
@@ -39,7 +42,7 @@ class BoxDialog : public QDialog
     Q_OBJECT
 
 public:
-    BoxDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    BoxDialog(BoxManager* node_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     std::string getName();
 
@@ -51,6 +54,7 @@ private:
 
 private:
     CompleteLineEdit * name_edit_;
+    BoxManager* node_factory_;
 };
 
 }

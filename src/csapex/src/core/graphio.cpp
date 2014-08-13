@@ -22,8 +22,8 @@
 
 using namespace csapex;
 
-GraphIO::GraphIO(Graph *graph)
-    : graph_(graph)
+GraphIO::GraphIO(Graph *graph, BoxManager* node_factory)
+    : graph_(graph), node_factory_(node_factory)
 {
 }
 
@@ -63,7 +63,7 @@ void GraphIO::loadNodes(YAML::Parser& parser)
         doc["pos"][0] >> x;
         doc["pos"][1] >> y;
 
-        Node::Ptr node = BoxManager::instance().makeNode(type, uuid);
+        Node::Ptr node = node_factory_->makeNode(type, uuid);
         if(!node) {
             continue;
         }

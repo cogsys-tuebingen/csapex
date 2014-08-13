@@ -176,7 +176,7 @@ void CsApexWindow::updateDebugInfo()
         NodeWorker* worker = node->getNodeWorker();
         QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(updateDebugInfo()));
         QObject::connect(worker, SIGNAL(nodeModelChanged()), this, SLOT(updateDebugInfo()));
-        ui->box_info->addTopLevelItem(NodeStatistics(node).createDebugInformation());
+        ui->box_info->addTopLevelItem(NodeStatistics(node).createDebugInformation(widget_ctrl_->getNodeFactory()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);
@@ -212,7 +212,7 @@ void CsApexWindow::updateNodeInfo()
     Q_FOREACH(QTreeWidgetItem* item, ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
-            NodeConstructor::Ptr n = BoxManager::instance().getConstructor(type.toStdString());
+            NodeConstructor::Ptr n = widget_ctrl_->getNodeFactory()->getConstructor(type.toStdString());
 
             QImage image = n->getIcon().pixmap(QSize(16,16)).toImage();
             QUrl uri ( QString::fromStdString(n->getType()));
@@ -296,8 +296,8 @@ void CsApexWindow::reloadBoxMenues()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    BoxManager::instance().insertAvailableNodeTypes(ui->boxes);
-    BoxManager::instance().insertAvailableNodeTypes(ui->node_info_tree);
+    widget_ctrl_->getNodeFactory()->insertAvailableNodeTypes(ui->boxes);
+    widget_ctrl_->getNodeFactory()->insertAvailableNodeTypes(ui->node_info_tree);
 }
 
 
@@ -314,7 +314,7 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     file.open(QFile::ReadOnly);
     style_sheet_ = QString(file.readAll());
     QWidget::setStyleSheet(style_sheet_);
-    BoxManager::instance().setStyleSheet(style_sheet_);
+    widget_ctrl_->getNodeFactory()->setStyleSheet(style_sheet_);
 
     designer_->overwriteStyleSheet(style_sheet_);
 

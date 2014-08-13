@@ -375,18 +375,3 @@ Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid,
         return NodeNullPtr;
     }
 }
-
-NodeBox* BoxManager::makeBox(NodePtr node, WidgetController* widget_ctrl)
-{
-    std::string type = node->getType();
-    
-    NodeBox* box;
-    QIcon icon = getConstructor(type)->getIcon();
-    if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        box = new NodeBox(*settings_, widget_ctrl->getCommandDispatcher(), node, node_adapter_builders_[type]->build(node, widget_ctrl), icon);
-    } else {
-        box = new NodeBox(*settings_, widget_ctrl->getCommandDispatcher(), node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), widget_ctrl)), icon);
-    }
-    box->construct();
-    return box;
-}

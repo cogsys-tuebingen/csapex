@@ -17,11 +17,12 @@
 #include <csapex/view/port.h>
 #include <csapex/utility/movable_graphics_proxy_widget.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/view/default_node_adapter.h>
 
 using namespace csapex;
 
-WidgetController::WidgetController(Graph::Ptr graph)
-    : graph_(graph), designer_(NULL)
+WidgetController::WidgetController(Graph::Ptr graph, BoxManager* node_factory)
+    : graph_(graph), node_factory_(node_factory), designer_(NULL)
 {
 
 }
@@ -71,6 +72,11 @@ Graph::Ptr WidgetController::getGraph()
     return graph_;
 }
 
+BoxManager* WidgetController::getNodeFactory()
+{
+    return node_factory_;
+}
+
 void WidgetController::setDesigner(Designer *designer)
 {
     designer_ = designer;
@@ -89,7 +95,16 @@ void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
 void WidgetController::nodeAdded(Node::Ptr node)
 {
     if(designer_) {
-        NodeBox* box = BoxManager::instance().makeBox(node, this);
+        std::string type = node->getType();
+
+        NodeBox* box;
+        QIcon icon = node_factory_->getConstructor(type)->getIcon();
+        if(node_factory_->node_adapter_builders_.find(type) != node_factory_->node_adapter_builders_.end()) {
+            box = new NodeBox(*node_factory_->settings_, dispatcher_, node, node_factory_->node_adapter_builders_[type]->build(node, this), icon);
+        } else {
+            box = new NodeBox(*node_factory_->settings_, dispatcher_, node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), this)), icon);
+        }
+        box->construct();
 
         box_map_[node->getUUID()] = box;
         proxy_map_[node->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);

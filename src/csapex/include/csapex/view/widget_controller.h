@@ -24,7 +24,7 @@ public:
     typedef boost::shared_ptr<WidgetController> Ptr;
 
 public:
-    WidgetController(GraphPtr graph);
+    WidgetController(GraphPtr graph, BoxManager* node_factory);
 
     NodeBox* getBox(const UUID& node_id);
 
@@ -34,6 +34,7 @@ public:
     Port* getPort(const Connectable* connector_id);
 
     GraphPtr getGraph();
+    BoxManager* getNodeFactory();
 
     void setDesigner(Designer* designer);
 
@@ -54,9 +55,9 @@ public Q_SLOTS:
 private:
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;
-
-private:
+    BoxManager* node_factory_;
     Designer* designer_;
+
     boost::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
     boost::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
     boost::unordered_map<UUID, Port*, UUID::Hasher> port_map_;

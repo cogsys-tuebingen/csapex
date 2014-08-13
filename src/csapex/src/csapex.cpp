@@ -100,18 +100,19 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     }
 
 
+    BoxManager* node_factory = &BoxManager::instance();
 
     Graph::Ptr graph(new Graph);
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
-    WidgetControllerPtr widget_control (new WidgetController(graph));
+    WidgetControllerPtr widget_control (new WidgetController(graph, node_factory));
 
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
     // TODO: remove
-    BoxManager::instance().settings_ = &settings;
-    BoxManager::instance().dispatcher_ = &dispatcher;
+    node_factory->settings_ = &settings;
+    node_factory->dispatcher_ = &dispatcher;
 
-    CsApexCore core(settings, graph_worker, &dispatcher);
+    CsApexCore core(settings, graph_worker, node_factory, &dispatcher);
 
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));

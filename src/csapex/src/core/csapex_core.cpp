@@ -23,8 +23,8 @@ using namespace csapex;
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 Q_DECLARE_METATYPE(std::string)
 
-CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, CommandDispatcher* cmd_dispatcher)
-    : settings_(settings), graph_worker_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
+CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, BoxManager *node_factory, CommandDispatcher* cmd_dispatcher)
+    : settings_(settings), graph_worker_(graph), node_factory_(node_factory), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 
@@ -52,7 +52,7 @@ CsApexCore::~CsApexCore()
     core_plugins_.clear();
 
     StreamInterceptor::instance().stop();
-    BoxManager::instance().stop();
+    node_factory_->stop();
 
     if(destruct) {
         delete core_plugin_manager;
@@ -98,10 +98,9 @@ void CsApexCore::init(DragIO* dragio)
         }
 
         showStatusMessage("loading node plugins");
-        BoxManager& bm = BoxManager::instance();
-        bm.loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
-        bm.new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
-        bm.reload();
+        node_factory_->loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
+        node_factory_->new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
+        node_factory_->reload();
     }
 }
 
@@ -166,7 +165,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     yaml << YAML::BeginMap; // settings map
 
-    GraphIO graphio(graph_worker_->getGraph());
+    GraphIO graphio(graph_worker_->getGraph(), node_factory_);
 
     Q_EMIT saveSettingsRequest(yaml);
 
@@ -200,7 +199,7 @@ void CsApexCore::load(const std::string &file)
 
     graph_worker_->setPause(true);
 
-    GraphIO graphio(graph_worker_->getGraph());
+    GraphIO graphio(graph_worker_->getGraph(), node_factory_);
 
     {
         YAML::Node doc;

@@ -118,8 +118,8 @@ void CompleteLineEdit::completeText(const QModelIndex &index) {
     Q_EMIT editingFinished();
 }
 
-BoxDialog::BoxDialog(QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+BoxDialog::BoxDialog(BoxManager* node_factory, QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f), node_factory_(node_factory)
 {
     makeUI();
 }
@@ -141,7 +141,7 @@ void BoxDialog::makeUI()
 
     NodeFilterProxyModel* filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    filter->setSourceModel(BoxManager::instance().listAvailableNodeTypes());
+    filter->setSourceModel(node_factory_->listAvailableNodeTypes());
 
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));

@@ -40,12 +40,12 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* c
     return connector_widget;
 }
 
-QTreeWidgetItem* NodeStatistics::createDebugInformation() const
+QTreeWidgetItem* NodeStatistics::createDebugInformation(BoxManager* node_factory) const
 {
     QTreeWidgetItem* tl = new QTreeWidgetItem;
     tl->setText(0, node_->getUUID().c_str());
 
-    NodeConstructor::Ptr constructor = BoxManager::instance().getConstructor(node_->getType());
+    NodeConstructor::Ptr constructor = node_factory->getConstructor(node_->getType());
 
     tl->setIcon(0, constructor->getIcon());
 

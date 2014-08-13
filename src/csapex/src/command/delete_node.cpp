@@ -10,6 +10,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -66,7 +67,7 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    Node::Ptr node = BoxManager::instance().makeNode(type, uuid);
+    Node::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type, uuid);
 
     node->setNodeState(saved_state);
 
