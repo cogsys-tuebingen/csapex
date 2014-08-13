@@ -6,7 +6,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/box.h>
-#include <csapex/manager/box_manager.h>
+#include <csapex/model/node_factory.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/core/graphio.h>
@@ -15,7 +15,7 @@
 #include <csapex/core/drag_io.h>
 #include <csapex/view/designer.h>
 #include <csapex/view/designer_view.h>
-#include <csapex/manager/box_manager.h>
+#include <csapex/model/node_factory.h>
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/designer_scene.h>
@@ -101,16 +101,15 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     }
 
 
-    NodeFactory::Ptr node_factory(new NodeFactory);
+    NodeFactory::Ptr node_factory(new NodeFactory(settings));
 
     Graph::Ptr graph(new Graph);
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
-    WidgetControllerPtr widget_control (new WidgetController(graph, node_factory.get()));
+    WidgetControllerPtr widget_control (new WidgetController(settings, graph, node_factory.get()));
 
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
     // TODO: remove
-    node_factory->settings_ = &settings;
     node_factory->dispatcher_ = &dispatcher;
 
     CsApexCore core(settings, graph_worker, node_factory.get(), &dispatcher);

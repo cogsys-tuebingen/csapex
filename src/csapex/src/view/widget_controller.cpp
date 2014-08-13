@@ -6,7 +6,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/move_fulcrum.h>
-#include <csapex/manager/box_manager.h>
+#include <csapex/model/node_factory.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -21,8 +21,8 @@
 
 using namespace csapex;
 
-WidgetController::WidgetController(Graph::Ptr graph, NodeFactory* node_factory)
-    : graph_(graph), node_factory_(node_factory), designer_(NULL)
+WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFactory* node_factory)
+    : graph_(graph), settings_(settings), node_factory_(node_factory), designer_(NULL)
 {
 
 }
@@ -99,10 +99,11 @@ void WidgetController::nodeAdded(Node::Ptr node)
 
         NodeBox* box;
         QIcon icon = node_factory_->getConstructor(type)->getIcon();
+        // TODO: replace with correct iteration!
         if(node_factory_->node_adapter_builders_.find(type) != node_factory_->node_adapter_builders_.end()) {
-            box = new NodeBox(*node_factory_->settings_, dispatcher_, node, node_factory_->node_adapter_builders_[type]->build(node, this), icon);
+            box = new NodeBox(settings_, dispatcher_, node, node_factory_->node_adapter_builders_[type]->build(node, this), icon);
         } else {
-            box = new NodeBox(*node_factory_->settings_, dispatcher_, node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), this)), icon);
+            box = new NodeBox(settings_, dispatcher_, node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), this)), icon);
         }
         box->construct();
 

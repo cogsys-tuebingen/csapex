@@ -2,7 +2,7 @@
 #include <csapex/core/csapex_core.h>
 
 /// COMPONENT
-#include <csapex/manager/box_manager.h>
+#include <csapex/model/node_factory.h>
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/graphio.h>
 #include <csapex/utility/stream_interceptor.h>

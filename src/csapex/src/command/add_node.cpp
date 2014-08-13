@@ -5,7 +5,7 @@
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_state.h>
-#include <csapex/manager/box_manager.h>
+#include <csapex/model/node_factory.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>

@@ -143,6 +143,7 @@ set(SRC_APP
     src/model/fulcrum.cpp
     src/model/multi_connection_type.cpp
     src/model/generic_state.cpp
+    src/model/node_factory.cpp
     src/model/node_state.cpp
     src/model/node_worker.cpp
     src/model/node_statistics.cpp
@@ -152,8 +153,6 @@ set(SRC_APP
     src/model/memento.cpp
 
     src/msg/message_provider.cpp
-
-    src/manager/box_manager.cpp
 
     src/utility/error_handling.cpp
     src/utility/timable.cpp

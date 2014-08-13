@@ -28,7 +28,7 @@ public:
     typedef boost::shared_ptr<NodeFactory> Ptr;
 
 public:
-    NodeFactory();
+    NodeFactory(Settings& settings);
     ~NodeFactory();
 
     virtual void reload();
@@ -59,7 +59,6 @@ public:
     boost::signals2::signal<void()> new_box_type;
 
     // TODO: make private and constructor parameter one no longer singleton
-    Settings* settings_;
     CommandDispatcher* dispatcher_;
 
 protected:
@@ -70,6 +69,8 @@ protected:
     NodePtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
 
 protected:
+    Settings& settings_;
+
     std::vector<NodeConstructor::Ptr> available_elements_prototypes;
     std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
 

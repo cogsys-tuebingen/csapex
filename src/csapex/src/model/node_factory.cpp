@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/manager/box_manager.h>
+#include <csapex/model/node_factory.h>
 
 /// COMPONENT
 #include <csapex/command/delete_node.h>
@@ -25,8 +25,9 @@
 
 using namespace csapex;
 
-NodeFactory::NodeFactory()
-    : node_manager_(new PluginManager<Node> ("csapex::Node")),
+NodeFactory::NodeFactory(Settings &settings)
+    : settings_(settings),
+      node_manager_(new PluginManager<Node> ("csapex::Node")),
       node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder")),
       dirty_(false)
 {
@@ -100,7 +101,7 @@ void NodeFactory::rebuildPrototypes()
 
         // make the constructor
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
-                                                     *settings_, dispatcher_,
+                                                     settings_, dispatcher_,
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second.getIcon(),
                                                      tags,
@@ -294,7 +295,7 @@ void NodeFactory::startPlacingBox(QWidget* parent, const std::string &type, Widg
     drag->setMimeData(mimeData);
 
 
-    NodeBox::Ptr object(new NodeBox(*settings_, widget_ctrl->getCommandDispatcher(), content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl)), c->getIcon()));
+    NodeBox::Ptr object(new NodeBox(settings_, widget_ctrl->getCommandDispatcher(), content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl)), c->getIcon()));
 
     object->setStyleSheet(style_sheet_);
     object->construct();

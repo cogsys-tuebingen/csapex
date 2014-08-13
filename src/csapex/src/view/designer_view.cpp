@@ -6,7 +6,7 @@
 #include <csapex/command/move_box.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/view/box_dialog.h>
-#include <csapex/manager/box_manager.h>
+#include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/graph.h>
 #include <csapex/command/dispatcher.h>

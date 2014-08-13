@@ -24,7 +24,7 @@ public:
     typedef boost::shared_ptr<WidgetController> Ptr;
 
 public:
-    WidgetController(GraphPtr graph, NodeFactory* node_factory);
+    WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory);
 
     NodeBox* getBox(const UUID& node_id);
 
@@ -55,6 +55,7 @@ public Q_SLOTS:
 private:
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;
+    Settings& settings_;
     NodeFactory* node_factory_;
     Designer* designer_;
 
