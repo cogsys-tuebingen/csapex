@@ -146,8 +146,8 @@ public:
     void process();
 
 private:
-    ConnectorIn* in_;
-    ConnectorOut* out_;
+    Input* in_;
+    Output* out_;
 };
 $NAMESPACE_END
 
@@ -164,8 +164,8 @@ echo "/// HEADER
 #include \"$NEW_FILE_H\"
 
 /// PROJECT
-#include <csapex/model/connector_in.h>
-#include <csapex/model/connector_out.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/utility/register_apex_plugin.h>
 #include <utils_param/parameter_factory.h>
 #include <csapex/model/node_modifier.h>
