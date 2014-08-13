@@ -49,9 +49,6 @@ CsApexCore::~CsApexCore()
 
     StreamInterceptor::instance().stop();
 
-    // TODO: remove!
-    node_factory_->stop();
-
     if(destruct) {
         delete core_plugin_manager;
     }

@@ -46,11 +46,6 @@ bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
 
 NodeFactory::~NodeFactory()
 {
-    stop();
-}
-
-void NodeFactory::stop()
-{
     delete node_manager_;
     node_manager_ = NULL;
     

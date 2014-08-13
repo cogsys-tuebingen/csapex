@@ -47,8 +47,6 @@ public:
     void insertAvailableNodeTypes(QTreeWidget *tree);
     QAbstractItemModel *listAvailableNodeTypes();
 
-    void stop();
-
 public:
     boost::signals2::signal<void(const std::string&)> loaded;
     boost::signals2::signal<void()> new_box_type;
