@@ -97,7 +97,7 @@ void NodeFactory::rebuildPrototypes()
 
         // make the constructor
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
-                                                     settings_, dispatcher_,
+                                                     settings_,
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second.getIcon(),
                                                      tags,

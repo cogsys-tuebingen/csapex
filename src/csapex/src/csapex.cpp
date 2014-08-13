@@ -109,9 +109,6 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
-    // TODO: remove
-    node_factory->dispatcher_ = &dispatcher;
-
     CsApexCore core(settings, graph_worker, node_factory.get(), &dispatcher);
 
     if(!headless) {

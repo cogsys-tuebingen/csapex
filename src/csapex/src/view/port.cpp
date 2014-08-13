@@ -20,8 +20,6 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee, bool flipped)
     : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
     if(adaptee_) {
-        adaptee_->setCommandDispatcher(dispatcher);
-
         createToolTip();
 
         QObject::connect(adaptee, SIGNAL(blocked(bool)), this, SLOT(setBlocked(bool)));
@@ -212,9 +210,9 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
     buttons_down_ = e->buttons();
 
     if(e->button() == Qt::MiddleButton) {
-        adaptee_->removeAllConnectionsUndoable();
+        dispatcher_->execute(adaptee_->removeAllConnectionsCmd());
     } else if(e->button() == Qt::RightButton) {
-        adaptee_->removeAllConnectionsUndoable();
+        dispatcher_->execute(adaptee_->removeAllConnectionsCmd());
     }
 
     e->accept();

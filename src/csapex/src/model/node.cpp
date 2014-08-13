@@ -7,7 +7,6 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/utility/q_signal_relay.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/utility/assert.h>
 
@@ -18,7 +17,7 @@ using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
-      modifier_(new NodeModifier(this)), settings_(NULL), dispatcher_(NULL),
+      modifier_(new NodeModifier(this)), settings_(NULL),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
       worker_(NULL),
       node_state_(new NodeState(this))
@@ -32,12 +31,11 @@ Node::~Node()
 }
 
 void Node::initialize(const std::string& type, const UUID& uuid,
-                   NodeWorker* node_worker, Settings* settings, CommandDispatcher* command_dispatcher)
+                   NodeWorker* node_worker, Settings* settings)
 {
     type_ = type;
     worker_ = node_worker;
     settings_ = settings;
-    dispatcher_ = command_dispatcher;
 
     setUUID(uuid);
 

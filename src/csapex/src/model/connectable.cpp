@@ -2,7 +2,6 @@
 #include <csapex/model/connectable.h>
 
 /// COMPONENT
-#include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
 
 /// SYSTEM
@@ -60,16 +59,6 @@ void Connectable::stop()
     notifyMessageProcessed();
 }
 
-CommandDispatcher* Connectable::getCommandDispatcher() const
-{
-    return dispatcher_;
-}
-
-void Connectable::setCommandDispatcher(CommandDispatcher *d)
-{
-    dispatcher_ = d;
-}
-
 void Connectable::init()
 {
     setType(ConnectionType::makeDefault());
@@ -113,13 +102,6 @@ void Connectable::removeConnection(QObject* other_side)
 void Connectable::validateConnections()
 {
 
-}
-
-void Connectable::removeAllConnectionsUndoable()
-{
-    if(isConnected()) {
-        dispatcher_->execute(removeAllConnectionsCmd());
-    }
 }
 
 void Connectable::disable()

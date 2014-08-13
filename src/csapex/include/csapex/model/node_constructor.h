@@ -37,7 +37,7 @@ public:
     static NodePtr makeNull();
 
 public:
-    NodeConstructor(Settings& settings, CommandDispatcher* command_dispatcher, const std::string& type,
+    NodeConstructor(Settings& settings, const std::string& type,
                     const std::string& description, const std::string& icon, const std::vector<TagPtr> &tags,
                     Make c);
 
@@ -52,12 +52,10 @@ public:
     virtual NodePtr makeContent(const UUID& uuid) const;
 
 protected:
-    NodeConstructor(Settings &settings, CommandDispatcher* command_dispatcher,
-                    const std::string& type, const std::string& description, const std::string &icon, const std::vector<TagPtr> &tags);
+    NodeConstructor(Settings &settings, const std::string& type, const std::string& description, const std::string &icon, const std::vector<TagPtr> &tags);
 
 protected:
     Settings& settings_;
-    CommandDispatcher* command_dispatcher_;
     std::string type_;
     std::string descr_;
     std::string icon_;

@@ -37,7 +37,7 @@ public:
     virtual ~Node();
 
     void initialize(const std::string &type, const UUID &uuid,
-                    NodeWorker *node_worker, Settings *settings, CommandDispatcher* command_dispatcher);
+                    NodeWorker *node_worker, Settings *settings);
 
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
@@ -88,7 +88,6 @@ protected:
 
     NodeModifier* modifier_;
     Settings* settings_;
-    CommandDispatcher* dispatcher_;
 
     StreamRelay ainfo;
     StreamRelay awarn;

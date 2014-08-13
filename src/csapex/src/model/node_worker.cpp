@@ -375,7 +375,6 @@ void NodeWorker::manageOutput(Output* out)
 void NodeWorker::registerInput(Input* in)
 {
     inputs_.push_back(in);
-    in->setCommandDispatcher(node_->dispatcher_);
 
     in->moveToThread(thread());
 
@@ -389,7 +388,6 @@ void NodeWorker::registerInput(Input* in)
 void NodeWorker::registerOutput(Output* out)
 {
     outputs_.push_back(out);
-    out->setCommandDispatcher(node_->dispatcher_);
 
     out->moveToThread(thread());
 

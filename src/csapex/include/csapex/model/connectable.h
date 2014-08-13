@@ -36,9 +36,6 @@ public:
     static UUID makeUUID(const UUID &box_uuid, int type, int sub_id);
 
 public:
-    CommandDispatcher* getCommandDispatcher() const;
-    void setCommandDispatcher(CommandDispatcher* d);
-
     int getCount() const;
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
@@ -91,8 +88,6 @@ public Q_SLOTS:
     virtual bool tryConnect(QObject* other_side);
     virtual void removeConnection(QObject* other_side);
 
-    void removeAllConnectionsUndoable();
-
     virtual void disable();
     virtual void enable();
     void setEnabled(bool enabled);
@@ -138,7 +133,6 @@ protected:
 
 protected:
     Settings& settings_;
-    CommandDispatcher* dispatcher_;
 
     mutable QMutex io_mutex;
     mutable QMutex sync_mutex;
