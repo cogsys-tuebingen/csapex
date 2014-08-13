@@ -34,10 +34,6 @@ CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *no
     MessageFactory::registerMessage<connection_types::AnyMessage> ();
     StreamInterceptor::instance().start();
 
-    Tag::createIfNotExists("General");
-    Tag::createIfNotExists("Template");
-    Tag::createIfNotExists("Temporary");
-
     settings.settingsChanged.connect(boost::bind(&CsApexCore::settingsChanged, this));
 
     QObject::connect(graph_worker_.get(), SIGNAL(paused(bool)), this, SIGNAL(paused(bool)));
@@ -52,6 +48,8 @@ CsApexCore::~CsApexCore()
     core_plugins_.clear();
 
     StreamInterceptor::instance().stop();
+
+    // TODO: remove!
     node_factory_->stop();
 
     if(destruct) {

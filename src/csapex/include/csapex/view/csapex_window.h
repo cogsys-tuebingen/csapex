@@ -96,7 +96,6 @@ private:
 
     bool init_;
 
-    QString style_sheet_;
     QFileSystemWatcher* style_sheet_watcher_;
 };
 

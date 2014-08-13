@@ -92,6 +92,41 @@ void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
     dispatcher_ = dispatcher;
 }
 
+void WidgetController::setStyleSheet(const QString &str)
+{
+    style_sheet_ = str;
+    designer_->overwriteStyleSheet(style_sheet_);
+}
+
+void WidgetController::startPlacingBox(QWidget *parent, const std::string &type, NodeStatePtr state, const QPoint &offset)
+{
+    NodeConstructor::Ptr c = node_factory_->getConstructor(type);
+    Node::Ptr content = c->makePrototypeContent();
+
+    QDrag* drag = new QDrag(parent);
+    QMimeData* mimeData = new QMimeData;
+
+    mimeData->setData(NodeBox::MIME, type.c_str());
+    if(state) {
+        QVariant payload = qVariantFromValue((void *) &state);
+        mimeData->setProperty("state", payload);
+    }
+    mimeData->setProperty("ox", offset.x());
+    mimeData->setProperty("oy", offset.y());
+    drag->setMimeData(mimeData);
+
+    NodeBox::Ptr object(new NodeBox(settings_, dispatcher_, content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
+
+    object->setStyleSheet(style_sheet_);
+    object->construct();
+    object->setObjectName(content->getType().c_str());
+    object->setLabel(type);
+
+    drag->setPixmap(QPixmap::grabWidget(object.get()));
+    drag->setHotSpot(-offset);
+    drag->exec();
+}
+
 void WidgetController::nodeAdded(Node::Ptr node)
 {
     if(designer_) {

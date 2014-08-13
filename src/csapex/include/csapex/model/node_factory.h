@@ -38,21 +38,16 @@ public:
 
     bool isValidType(const std::string& type) const;
 
-    // TODO: move to widget controller
-    void startPlacingBox(QWidget *parent, const std::string& type, WidgetController *widget_ctrl, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
-
     NodeConstructorPtr getConstructor(const std::string& type);
     NodePtr makeNode(const std::string& type, const UUID& uuid);
     NodePtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
 
+    // TODO: extract
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
     QAbstractItemModel *listAvailableNodeTypes();
 
     void stop();
-
-    void setStyleSheet(const QString& str);
-
 
 public:
     boost::signals2::signal<void(const std::string&)> loaded;
@@ -71,17 +66,17 @@ protected:
 protected:
     Settings& settings_;
 
-    std::vector<NodeConstructor::Ptr> available_elements_prototypes;
-    std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
-
     std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::set<TagPtr> tags_;
 
     PluginManager<Node>* node_manager_;
+    std::vector<NodeConstructor::Ptr> available_elements_prototypes;
+
+    // TODO: extract to NodeAdapterFactory!
     PluginManager<NodeAdapterBuilder>* node_adapter_manager_;
+    std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
 
     bool dirty_;
-    QString style_sheet_;
 };
 
 }

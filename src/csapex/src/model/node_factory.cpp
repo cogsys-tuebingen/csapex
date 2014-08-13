@@ -61,10 +61,6 @@ void NodeFactory::stop()
 }
 
 
-void NodeFactory::setStyleSheet(const QString &str)
-{
-    style_sheet_ = str;
-}
 void NodeFactory::reload()
 {
     node_manager_->reload();
@@ -277,43 +273,9 @@ bool NodeFactory::isValidType(const std::string &type) const
     return false;
 }
 
-void NodeFactory::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, NodeStatePtr state, const QPoint& offset)
-{
-    NodeConstructor::Ptr c = getConstructor(type);
-    Node::Ptr content = c->makePrototypeContent();
-
-    QDrag* drag = new QDrag(parent);
-    QMimeData* mimeData = new QMimeData;
-
-    mimeData->setData(NodeBox::MIME, type.c_str());
-    if(state) {
-        QVariant payload = qVariantFromValue((void *) &state);
-        mimeData->setProperty("state", payload);
-    }
-    mimeData->setProperty("ox", offset.x());
-    mimeData->setProperty("oy", offset.y());
-    drag->setMimeData(mimeData);
-
-
-    NodeBox::Ptr object(new NodeBox(settings_, widget_ctrl->getCommandDispatcher(), content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), widget_ctrl)), c->getIcon()));
-
-    object->setStyleSheet(style_sheet_);
-    object->construct();
-    object->setObjectName(content->getType().c_str());
-    object->setLabel(type);
-
-
-    drag->setPixmap(QPixmap::grabWidget(object.get()));
-    drag->setHotSpot(-offset);
-    drag->exec();
-}
-
 Node::Ptr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
-    
-    Node::Ptr bo = content->makeContent(uuid);
-    
-    return bo;
+    return content->makeContent(uuid);
 }
 
 NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)

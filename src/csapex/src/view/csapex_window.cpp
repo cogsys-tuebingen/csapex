@@ -308,15 +308,11 @@ void CsApexWindow::resetSignal()
 
 void CsApexWindow::loadStyleSheet(const QString& path)
 {
-    std::cout << "loading stylesheet " << path.toStdString() << std::endl;
-
     QFile file(path);
     file.open(QFile::ReadOnly);
-    style_sheet_ = QString(file.readAll());
-    QWidget::setStyleSheet(style_sheet_);
-    widget_ctrl_->getNodeFactory()->setStyleSheet(style_sheet_);
-
-    designer_->overwriteStyleSheet(style_sheet_);
+    QString style_sheet(file.readAll());
+    QWidget::setStyleSheet(style_sheet);
+    widget_ctrl_->setStyleSheet(style_sheet);
 
     if(style_sheet_watcher_) {
         delete style_sheet_watcher_;

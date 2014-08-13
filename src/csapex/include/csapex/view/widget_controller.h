@@ -26,6 +26,8 @@ public:
 public:
     WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory);
 
+    void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
+
     NodeBox* getBox(const UUID& node_id);
 
     MovableGraphicsProxyWidget* getProxy(const UUID& node_id);
@@ -42,6 +44,8 @@ public:
     void setCommandDispatcher(CommandDispatcher *dispatcher);
 
     void foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred);
+
+    void setStyleSheet(const QString &str);
 
 public Q_SLOTS:
     void nodeAdded(NodePtr node);
@@ -62,6 +66,8 @@ private:
     boost::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
     boost::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
     boost::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
+
+    QString style_sheet_;
 };
 
 }
