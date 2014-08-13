@@ -12,7 +12,6 @@ using namespace csapex;
 CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, WidgetController::Ptr widget_control)
     : settings_(settings), graph_worker_(graph), widget_ctrl_(widget_control), dirty_(false)
 {
-    graph_worker_->getGraph()->init(this);
     widget_ctrl_->setCommandDispatcher(this);
 
     QObject::connect(this, SIGNAL(stateChanged()), graph_worker_->getGraph(), SIGNAL(stateChanged()));

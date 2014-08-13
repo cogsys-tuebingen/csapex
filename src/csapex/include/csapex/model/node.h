@@ -37,9 +37,7 @@ public:
     virtual ~Node();
 
     void initialize(const std::string &type, const UUID &uuid,
-                    NodeWorker *node_worker, Settings *settings);
-    void setCommandDispatcher(CommandDispatcher* d);
-
+                    NodeWorker *node_worker, Settings *settings, CommandDispatcher* command_dispatcher);
 
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;

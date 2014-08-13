@@ -17,21 +17,21 @@ NodePtr NodeConstructor::makeNull()
     return Node::Ptr (static_cast<Node*>(NULL));
 }
 
-NodeConstructor::NodeConstructor(Settings &settings,
+NodeConstructor::NodeConstructor(Settings &settings, CommandDispatcher* command_dispatcher,
                                  const std::string &type, const std::string &description,
                                  const std::string &icon,
                                  const std::vector<TagPtr>& tags,
                                  Make c)
-    : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
+    : settings_(settings), command_dispatcher_(command_dispatcher), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
 {
     apex_assert_hard(!c.empty());
 }
 
-NodeConstructor::NodeConstructor(Settings &settings,
+NodeConstructor::NodeConstructor(Settings &settings, CommandDispatcher *command_dispatcher,
                                  const std::string &type, const std::string &description,
                                  const std::string &icon,
                                  const std::vector<TagPtr>& tags)
-    : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags)
+    : settings_(settings), command_dispatcher_(command_dispatcher), type_(type), descr_(description), icon_(icon), tags_(tags)
 {
 }
 
@@ -68,7 +68,7 @@ Node::Ptr NodeConstructor::makePrototypeContent() const
 Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
 {
     Node::Ptr res = c();
-    res->initialize(type_, uuid, new NodeWorker(res.get()), &settings_);
+    res->initialize(type_, uuid, new NodeWorker(res.get()), &settings_, command_dispatcher_);
     res->getNodeState()->setLabel(uuid);
 
     return res;

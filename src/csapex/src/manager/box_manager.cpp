@@ -101,7 +101,7 @@ void BoxManager::rebuildPrototypes()
 
         // make the constructor
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
-                                                     *settings_,
+                                                     *settings_, dispatcher_,
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second.getIcon(),
                                                      tags,

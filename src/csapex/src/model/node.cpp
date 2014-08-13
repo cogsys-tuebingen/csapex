@@ -32,11 +32,12 @@ Node::~Node()
 }
 
 void Node::initialize(const std::string& type, const UUID& uuid,
-                   NodeWorker* node_worker, Settings* settings)
+                   NodeWorker* node_worker, Settings* settings, CommandDispatcher* command_dispatcher)
 {
     type_ = type;
     worker_ = node_worker;
     settings_ = settings;
+    dispatcher_ = command_dispatcher;
 
     setUUID(uuid);
 
@@ -262,9 +263,4 @@ std::vector<Input*> Node::getManagedInputs() const
 std::vector<Output*> Node::getManagedOutputs() const
 {
     return worker_->managed_outputs_;
-}
-
-void Node::setCommandDispatcher(CommandDispatcher *d)
-{
-    dispatcher_ = d;
 }

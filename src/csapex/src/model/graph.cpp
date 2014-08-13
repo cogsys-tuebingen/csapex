@@ -8,7 +8,6 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/delete_node.h>
-#include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/meta.h>
 #include <csapex/manager/box_manager.h>
@@ -27,19 +26,12 @@
 using namespace csapex;
 
 Graph::Graph()
-    : dispatcher_(NULL)
 {
 }
 
 Graph::~Graph()
 {
 
-}
-
-void Graph::init(CommandDispatcher *dispatcher)
-{
-    dispatcher_ = dispatcher;
-    apex_assert_hard(dispatcher_);
 }
 
 std::string Graph::makeUUIDPrefix(const std::string& name)
@@ -57,13 +49,11 @@ void Graph::addNode(Node::Ptr node)
 {
     apex_assert_hard(!node->getUUID().empty());
     apex_assert_hard(!node->getType().empty());
-    apex_assert_hard(dispatcher_);
 
     nodes_.push_back(node);
     node_parents_[node.get()] = std::vector<Node*>();
     node_children_[node.get()] = std::vector<Node*>();
 
-    node->setCommandDispatcher(dispatcher_);
     node->getNodeWorker()->makeThread();
 
     buildConnectedComponents();

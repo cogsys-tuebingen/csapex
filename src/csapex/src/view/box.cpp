@@ -35,7 +35,6 @@ NodeBox::NodeBox(Settings& settings, CommandDispatcher* cmd_dispatcher, NodePtr 
     : QWidget(parent), ui(new Ui::Box), settings_(settings), cmd_dispatcher_(cmd_dispatcher), node_(node), adapter_(adapter), icon_(icon),
       down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
-    node_->setCommandDispatcher(cmd_dispatcher);
 }
 
 NodeBox::~NodeBox()

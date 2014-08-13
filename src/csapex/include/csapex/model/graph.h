@@ -40,8 +40,6 @@ public:
     Graph();
     virtual ~Graph();
 
-    /*extract dispatcher*/ void init(CommandDispatcher* dispatcher);
-
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
     Node* findNodeForConnector(const UUID &uuid) const;
@@ -104,8 +102,6 @@ protected:
     std::map<Node*, std::vector<Node*> > node_children_;
 
     std::vector<Connection::Ptr> connections_;
-
-    /*extract*/ CommandDispatcher* dispatcher_;
 
     std::map<std::string, int> uuids_;
 };

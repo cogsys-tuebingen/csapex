@@ -101,7 +101,9 @@ protected:
 public Q_SLOTS:
     void setupUiAgain();
 
+    // TODO: extract
     void deleteBox();
+
     void getInformation();
     void minimizeBox(bool minimize);
     void enableContent(bool enable);
@@ -151,6 +153,8 @@ protected:
     Ui::Box* ui;
 
     Settings& settings_;
+
+    // TODO: remove
     CommandDispatcher* cmd_dispatcher_;
 
     NodePtr node_;

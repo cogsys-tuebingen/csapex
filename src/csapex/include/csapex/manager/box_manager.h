@@ -59,6 +59,7 @@ public:
 
     // TODO: make private and constructor parameter one no longer singleton
     Settings* settings_;
+    CommandDispatcher* dispatcher_;
 
 protected:
     BoxManager();
