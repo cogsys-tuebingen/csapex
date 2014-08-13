@@ -7,6 +7,7 @@
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/box.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/core/graphio.h>
 #include <csapex/utility/thread.h>
 #include <csapex/utility/error_handling.h>
@@ -102,6 +103,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     BoxManager::instance().settings_ = &settings;
 
     Graph::Ptr graph(new Graph(settings));
+    GraphWorker::Ptr graph_worker(new GraphWorker(graph));
     WidgetControllerPtr widget_control (new WidgetController(graph));
 
     CommandDispatcher dispatcher(settings, graph, widget_control);
@@ -112,10 +114,10 @@ int Main::main(bool headless, const std::string& config, const std::string& path
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
         /*
-             * There seems to be a bug in Qt4:
-             *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
-             *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
-             */
+         * There seems to be a bug in Qt4:
+         *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
+         *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
+         */
         QPixmap pm(":/apex_splash.png");
         splash = new QSplashScreen (pm);
         splash->show();

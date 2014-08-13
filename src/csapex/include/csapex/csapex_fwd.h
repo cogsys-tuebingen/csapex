@@ -37,6 +37,7 @@ FWD(Connection);
 FWD(Fulcrum);
 
 FWD(Graph);
+FWD(GraphWorker);
 FWD(GenericState);
 
 FWD(ConnectionType);

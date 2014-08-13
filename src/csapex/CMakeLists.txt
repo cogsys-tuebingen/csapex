@@ -138,6 +138,7 @@ set(SRC_APP
     src/model/error_state.cpp
     src/model/connectable.cpp
     src/model/graph.cpp
+    src/model/graph_worker.cpp
     src/model/connection.cpp
     src/model/fulcrum.cpp
     src/model/multi_connection_type.cpp
