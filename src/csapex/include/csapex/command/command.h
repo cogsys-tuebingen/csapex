@@ -24,9 +24,9 @@ public:
         friend class command::Meta;
 
     private:
-        static bool executeCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
-        static bool undoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
-        static bool redoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
+        static bool executeCommand(Graph* graph, WidgetController* widget_ctrl, CommandPtr cmd);
+        static bool undoCommand(Graph* graph, WidgetController* widget_ctrl, CommandPtr cmd);
+        static bool redoCommand(Graph* graph, WidgetController* widget_ctrl, CommandPtr cmd);
     };
 
 public:
@@ -35,7 +35,7 @@ public:
 public:
     Command();
 
-    void init(Settings* settings, GraphPtr graph, WidgetControllerPtr widget_ctrl);
+    void init(Settings* settings, Graph *graph, WidgetController* widget_ctrl);
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -49,9 +49,9 @@ public:
     virtual std::string getDescription() const = 0;
 
 protected:
-    static bool executeCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
-    static bool undoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
-    static bool redoCommand(GraphPtr graph, WidgetControllerPtr widget_ctrl, CommandPtr cmd);
+    static bool executeCommand(Graph* graph, WidgetController* widget_ctrl, CommandPtr cmd);
+    static bool undoCommand(Graph* graph, WidgetController* widget_ctrl, CommandPtr cmd);
+    static bool redoCommand(Graph* graph, WidgetController* widget_ctrl, CommandPtr cmd);
 
     virtual bool doExecute() = 0;
     virtual bool doUndo() = 0;
@@ -59,8 +59,8 @@ protected:
 
 protected:
     Settings* settings_;
-    GraphPtr graph_;
-    WidgetControllerPtr widget_ctrl_;
+    Graph* graph_;
+    WidgetController* widget_ctrl_;
 
     static std::vector<Command::Ptr> undo_later;
 

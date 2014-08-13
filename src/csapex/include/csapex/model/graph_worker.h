@@ -7,6 +7,8 @@
 /// SYSTEM
 #include <QObject>
 
+class QTimer;
+
 namespace csapex
 {
 
@@ -18,10 +20,26 @@ public:
     typedef boost::shared_ptr<GraphWorker> Ptr;
 
 public:
-    GraphWorker(GraphPtr graph);
+    GraphWorker(Graph* graph);
+
+    Graph* getGraph();
+
+    void stop();
+
+    bool isPaused() const;
+    void setPause(bool pause);
+
+public Q_SLOTS:
+    void tick();
+    void reset();
+
+Q_SIGNALS:
+    void paused(bool);
 
 private:
-    GraphPtr graph_;
+    Graph* graph_;
+
+    QTimer* timer_;
 };
 
 }

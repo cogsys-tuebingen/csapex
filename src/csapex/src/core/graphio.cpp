@@ -22,7 +22,7 @@
 
 using namespace csapex;
 
-GraphIO::GraphIO(Graph::Ptr graph)
+GraphIO::GraphIO(Graph *graph)
     : graph_(graph)
 {
 }

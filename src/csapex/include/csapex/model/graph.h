@@ -9,7 +9,6 @@
 
 /// SYSTEM
 #include <QObject>
-#include <QTimer>
 #include <map>
 #include <boost/function.hpp>
 
@@ -20,6 +19,7 @@ class Graph : public QObject
     Q_OBJECT
 
     friend class GraphIO;
+    friend class GraphWorker;
     friend class command::AddNode;
     friend class command::AddConnection;
     friend class command::DeleteConnection;
@@ -41,10 +41,6 @@ public:
     virtual ~Graph();
 
     void init(CommandDispatcher* dispatcher);
-    void stop();
-
-    bool isPaused() const;
-    void setPause(bool pause);
 
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
@@ -77,9 +73,6 @@ public:
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
 
 public Q_SLOTS:
-    void reset();
-    void tick();
-
     void verify();
 
 Q_SIGNALS:
@@ -92,9 +85,6 @@ Q_SIGNALS:
 
     void nodeAdded(NodePtr);
     void nodeRemoved(NodePtr);
-
-    void sig_tick();
-    void paused(bool);
 
 private: /// ONLY COMMANDS / NOT UNDOABLE
     void addNode(NodePtr node);
@@ -120,9 +110,6 @@ protected:
     CommandDispatcher* dispatcher_;
 
     std::map<std::string, int> uuids_;
-
-    // TODO: extract
-    QTimer* timer_;
 };
 
 }

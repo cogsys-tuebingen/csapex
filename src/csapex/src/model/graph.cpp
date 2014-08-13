@@ -30,11 +30,6 @@ using namespace csapex;
 Graph::Graph(Settings& settings)
     : settings_(settings), dispatcher_(NULL)
 {
-    timer_ = new QTimer();
-    timer_->setInterval(1000. / 30.);
-    timer_->start();
-
-    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 Graph::~Graph()
@@ -71,8 +66,6 @@ void Graph::addNode(Node::Ptr node)
 
     node->setCommandDispatcher(dispatcher_);
     node->getNodeWorker()->makeThread();
-
-    QObject::connect(this, SIGNAL(sig_tick()), node->getNodeWorker(), SLOT(checkParameters()));
 
     buildConnectedComponents();
 
@@ -178,10 +171,6 @@ bool Graph::addConnection(Connection::Ptr connection)
             // set the sequence no of the child component to the one given by this connector
             int seq_no = from->sequenceNumber();
 
-            bool already_paused = isPaused();
-            if(!already_paused) {
-                setPause(true);
-            }
 //            std::cerr << "synchronize components" << std::endl;
             Q_FOREACH(Node::Ptr n, nodes_) {
                 if(node_component_[n.get()] == node_component_[n_to]) {
@@ -192,10 +181,6 @@ bool Graph::addConnection(Connection::Ptr connection)
                         input->setSequenceNumber(seq_no);
                     }
                 }
-            }
-
-            if(!already_paused) {
-                setPause(false);
             }
         }
 
@@ -365,41 +350,6 @@ void Graph::verifyAsync()
     }
 }
 
-void Graph::stop()
-{
-    Q_FOREACH(Node::Ptr node, nodes_) {
-        node->getNodeWorker()->setEnabled(false);
-    }
-    Q_FOREACH(Node::Ptr node, nodes_) {
-        node->getNodeWorker()->stop();
-    }
-
-    nodes_.clear();
-}
-
-bool Graph::isPaused() const
-{
-    return !timer_->isActive();
-}
-
-void Graph::setPause(bool pause)
-{
-    if(pause == isPaused()) {
-        return;
-    }
-
-    Q_FOREACH(Node::Ptr node, nodes_) {
-        node->getNodeWorker()->pause(pause);
-    }
-    if(pause) {
-        timer_->stop();
-    } else {
-        timer_->start();
-    }
-
-    paused(pause);
-}
-
 Command::Ptr Graph::clear()
 {
     command::Meta::Ptr clear(new command::Meta("Clear Graph"));
@@ -410,16 +360,6 @@ Command::Ptr Graph::clear()
     }
 
     return clear;
-}
-
-void Graph::reset()
-{
-    stop();
-
-    settings_.setProcessingAllowed(true);
-
-    uuids_.clear();
-    connections_.clear();
 }
 
 int Graph::getComponent(const UUID &node_uuid) const
@@ -594,19 +534,4 @@ Command::Ptr Graph::deleteConnectionById(int id)
     Command::Ptr cmd(deleteConnectionByIdCommand(id));
 
     return cmd;
-}
-
-
-void Graph::tick()
-{
-    //    Q_FOREACH(Node::Ptr n, nodes_) {
-    //        if(n->isEnabled()) {
-    //            n->tick();
-    //        }
-    //    }
-    Q_EMIT sig_tick();
-
-    Q_FOREACH(const Connection::Ptr& connection, connections_) {
-        connection->tick();
-    }
 }

@@ -23,7 +23,7 @@ class GraphIO : public QObject
     Q_OBJECT
 
 public:
-    GraphIO(Graph::Ptr graph);
+    GraphIO(Graph* graph);
 
 public:
     void saveSettings(YAML::Emitter &yaml);
@@ -36,7 +36,7 @@ public:
     void loadConnections(YAML::Node& doc);
 
 private:
-    Graph::Ptr graph_;
+    Graph* graph_;
 };
 
 }

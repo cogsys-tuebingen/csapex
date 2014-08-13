@@ -9,6 +9,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_statistics.h>
@@ -36,8 +37,8 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphPtr graph, Designer* designer, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_(graph), ui(new Ui::CsApexWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphWorkerPtr graph, Designer* designer, QWidget *parent)
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph), ui(new Ui::CsApexWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
 {
     core_.addListener(this);
 }
@@ -53,7 +54,7 @@ void CsApexWindow::construct()
 
     ui->setupUi(this);
 
-    Graph* graph = graph_.get();
+    Graph* graph = graph_worker_->getGraph();
 
     designer_->setup();
     setCentralWidget(designer_);
@@ -404,7 +405,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     core_.settingsChanged();
 
     try {
-        graph_->stop();
+        graph_worker_->stop();
     } catch(...) {
         std::abort();
     }
@@ -477,7 +478,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    cmd_dispatcher_->execute(graph_->clear());
+    cmd_dispatcher_->execute(graph_worker_->getGraph()->clear());
 }
 
 void CsApexWindow::undo()
@@ -515,7 +516,7 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
 void CsApexWindow::saveView(YAML::Emitter &e)
 {
     DesignerIO designerio(*designer_);
-    designerio.saveBoxes(e, graph_, widget_ctrl_.get());
+    designerio.saveBoxes(e, graph_worker_->getGraph(), widget_ctrl_.get());
 }
 
 void CsApexWindow::loadView(YAML::Node &doc)

@@ -18,43 +18,43 @@ Command::Command()
 {
 }
 
-bool Command::Access::executeCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
+bool Command::Access::executeCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
 {
     return Command::executeCommand(graph, widget_ctrl, cmd);
 }
 
-bool Command::Access::undoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
+bool Command::Access::undoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
 {
     return Command::undoCommand(graph, widget_ctrl, cmd);
 }
 
-bool Command::Access::redoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
+bool Command::Access::redoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
 {
     return Command::redoCommand(graph, widget_ctrl, cmd);
 }
 
-void Command::init(Settings *settings, GraphPtr graph, WidgetControllerPtr widget_ctrl)
+void Command::init(Settings *settings, Graph* graph, WidgetController* widget_ctrl)
 {
     settings_ = settings;
     graph_ = graph;
     widget_ctrl_ = widget_ctrl;
 }
 
-bool Command::executeCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
+bool Command::executeCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
 {
+    apex_assert_hard(graph);
+    apex_assert_hard(widget_ctrl);
     cmd->graph_ = graph;
     cmd->widget_ctrl_ = widget_ctrl;
-    apex_assert_hard(cmd->graph_);
-    apex_assert_hard(cmd->widget_ctrl_);
     return cmd->doExecute();
 }
 
-bool Command::undoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
+bool Command::undoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
 {
+    apex_assert_hard(graph);
+    apex_assert_hard(widget_ctrl);
     cmd->graph_ = graph;
     cmd->widget_ctrl_ = widget_ctrl;
-    apex_assert_hard(cmd->graph_);
-    apex_assert_hard(cmd->widget_ctrl_);
     if(!cmd->doUndo()) {
         undo_later.push_back(cmd);
         return false;
@@ -63,7 +63,7 @@ bool Command::undoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Com
     return true;
 }
 
-bool Command::redoCommand(GraphPtr graph, WidgetController::Ptr widget_ctrl, Command::Ptr cmd)
+bool Command::redoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
 {
     cmd->graph_ = graph;
     cmd->widget_ctrl_ = widget_ctrl;

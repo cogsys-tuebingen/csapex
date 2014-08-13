@@ -103,12 +103,12 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     BoxManager::instance().settings_ = &settings;
 
     Graph::Ptr graph(new Graph(settings));
-    GraphWorker::Ptr graph_worker(new GraphWorker(graph));
+    GraphWorker::Ptr graph_worker(new GraphWorker(graph.get()));
     WidgetControllerPtr widget_control (new WidgetController(graph));
 
-    CommandDispatcher dispatcher(settings, graph, widget_control);
+    CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
-    CsApexCore core(settings, graph, &dispatcher);
+    CsApexCore core(settings, graph_worker, &dispatcher);
 
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
@@ -131,7 +131,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(core, &dispatcher, widget_control, graph, designer);
+        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));

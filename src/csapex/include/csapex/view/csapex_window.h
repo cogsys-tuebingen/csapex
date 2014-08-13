@@ -31,7 +31,7 @@ public:
      * @brief CsApexWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphPtr graph, Designer *designer, QWidget* parent = 0);
+    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphWorkerPtr graph, Designer *designer, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void closeEvent(QCloseEvent* event);
@@ -86,7 +86,7 @@ private:
     CsApexCore& core_;
     CommandDispatcher* cmd_dispatcher_;
     WidgetControllerPtr widget_ctrl_;
-    GraphPtr graph_;
+    GraphWorkerPtr graph_worker_;
 
     Ui::CsApexWindow* ui;
 

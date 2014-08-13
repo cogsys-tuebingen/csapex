@@ -51,7 +51,7 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 //    }
 }
 
-void DesignerIO::saveBoxes(YAML::Emitter& yaml, Graph::Ptr graph, WidgetController* widget_ctrl)
+void DesignerIO::saveBoxes(YAML::Emitter& yaml, Graph* graph, WidgetController* widget_ctrl)
 {
     yaml << YAML::Key << "adapters";
     yaml << YAML::Value << YAML::BeginSeq; // adapters seq

@@ -3,24 +3,25 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/utility/assert.h>
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Settings& settings, Graph::Ptr graph, WidgetController::Ptr widget_control)
-    : settings_(settings), graph_(graph), widget_ctrl_(widget_control), dirty_(false)
+CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, WidgetController::Ptr widget_control)
+    : settings_(settings), graph_worker_(graph), widget_ctrl_(widget_control), dirty_(false)
 {
-    graph_->init(this);
+    graph_worker_->getGraph()->init(this);
     widget_ctrl_->setCommandDispatcher(this);
 
-    QObject::connect(this, SIGNAL(stateChanged()), graph_.get(), SIGNAL(stateChanged()));
-    QObject::connect(this, SIGNAL(dirtyChanged(bool)), graph_.get(), SIGNAL(dirtyChanged(bool)));
+    QObject::connect(this, SIGNAL(stateChanged()), graph_worker_->getGraph(), SIGNAL(stateChanged()));
+    QObject::connect(this, SIGNAL(dirtyChanged(bool)), graph_worker_->getGraph(), SIGNAL(dirtyChanged(bool)));
 }
 
 void CommandDispatcher::reset()
 {
-    graph_->reset();
+    graph_worker_->reset();
     later.clear();
     done.clear();
     undone.clear();
@@ -34,7 +35,7 @@ void CommandDispatcher::execute(Command::Ptr command)
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
-    command->init(&settings_, graph_, widget_ctrl_);
+    command->init(&settings_, graph_worker_->getGraph(), widget_ctrl_.get());
     later.push_back(command);
 }
 
@@ -48,7 +49,7 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::executeNotUndoable(Command::Ptr command)
 {
-    Command::Access::executeCommand(graph_, widget_ctrl_, command);
+    Command::Access::executeCommand(graph_worker_->getGraph(), widget_ctrl_.get(), command);
 }
 
 
@@ -62,7 +63,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = Command::Access::executeCommand(graph_, widget_ctrl_, command);
+    bool success = Command::Access::executeCommand(graph_worker_->getGraph(), widget_ctrl_.get(), command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -150,7 +151,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = Command::Access::undoCommand(graph_, widget_ctrl_, last);
+    bool ret = Command::Access::undoCommand(graph_worker_->getGraph(), widget_ctrl_.get(), last);
     apex_assert_hard(ret);
 
     setDirty(!last->isAfterSavepoint());
@@ -169,7 +170,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    Command::Access::redoCommand(graph_, widget_ctrl_, last);
+    Command::Access::redoCommand(graph_worker_->getGraph(), widget_ctrl_.get(), last);
 
     done.push_back(last);
 
@@ -178,9 +179,9 @@ void CommandDispatcher::redo()
     Q_EMIT stateChanged();
 }
 
-Graph::Ptr CommandDispatcher::getGraph()
+Graph* CommandDispatcher::getGraph()
 {
-    return graph_;
+    return graph_worker_->getGraph();
 }
 
 void CommandDispatcher::populateDebugInfo(QTreeWidget *undo, QTreeWidget *redo)

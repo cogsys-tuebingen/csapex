@@ -20,7 +20,7 @@ public:
     typedef boost::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    CommandDispatcher(Settings& settings, GraphPtr graph, WidgetControllerPtr widget_ctrl);
+    CommandDispatcher(Settings& settings, GraphWorkerPtr graph, WidgetControllerPtr widget_ctrl);
 
     void execute(Command::Ptr command);
     void executeLater(Command::Ptr command);
@@ -34,7 +34,7 @@ public:
     void undo();
     void redo();
 
-    GraphPtr getGraph();
+    Graph* getGraph();
 
     void executeNotUndoable(Command::Ptr command);
 
@@ -62,7 +62,7 @@ protected:
 
 private:
     Settings& settings_;
-    GraphPtr graph_;
+    GraphWorkerPtr graph_worker_;
     WidgetControllerPtr widget_ctrl_;
 
     std::vector<Command::Ptr> later;

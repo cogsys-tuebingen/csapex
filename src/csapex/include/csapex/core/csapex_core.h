@@ -23,7 +23,7 @@ public:
     };
 
 public:
-    CsApexCore(Settings& settings_, GraphPtr graph, CommandDispatcher *cmd_dispatcher);
+    CsApexCore(Settings& settings_, GraphWorkerPtr graph, CommandDispatcher *cmd_dispatcher);
     virtual ~CsApexCore();
 
     void init(DragIO *dragio);
@@ -63,7 +63,7 @@ Q_SIGNALS:
 
 private:
     Settings& settings_;
-    GraphPtr graph_;
+    GraphWorkerPtr graph_worker_;
 
     bool destruct;
     CommandDispatcher* cmd_dispatch;

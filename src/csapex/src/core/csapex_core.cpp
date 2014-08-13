@@ -12,6 +12,7 @@
 #include <csapex/utility/plugin_manager.hpp>
 #include <csapex/model/tag.h>
 #include <csapex/utility/assert.h>
+#include <csapex/model/graph_worker.h>
 
 /// SYSTEM
 #include <fstream>
@@ -22,8 +23,8 @@ using namespace csapex;
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 Q_DECLARE_METATYPE(std::string)
 
-CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cmd_dispatcher)
-    : settings_(settings), graph_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
+CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, CommandDispatcher* cmd_dispatcher)
+    : settings_(settings), graph_worker_(graph), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 
@@ -39,7 +40,7 @@ CsApexCore::CsApexCore(Settings &settings, GraphPtr graph, CommandDispatcher* cm
 
     settings.settingsChanged.connect(boost::bind(&CsApexCore::settingsChanged, this));
 
-    QObject::connect(graph.get(), SIGNAL(paused(bool)), this, SIGNAL(paused(bool)));
+    QObject::connect(graph_worker_.get(), SIGNAL(paused(bool)), this, SIGNAL(paused(bool)));
 }
 
 CsApexCore::~CsApexCore()
@@ -60,15 +61,15 @@ CsApexCore::~CsApexCore()
 
 void CsApexCore::setPause(bool pause)
 {
-    if(pause != graph_->isPaused()) {
+    if(pause != graph_worker_->isPaused()) {
         std::cout << (pause ? "pause" : "unpause") << std::endl;
-        graph_->setPause(pause);
+        graph_worker_->setPause(pause);
     }
 }
 
 bool CsApexCore::isPaused() const
 {
-    return graph_->isPaused();
+    return graph_worker_->isPaused();
 }
 
 void CsApexCore::setStatusMessage(const std::string &msg)
@@ -165,7 +166,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     yaml << YAML::BeginMap; // settings map
 
-    GraphIO graphio(graph_);
+    GraphIO graphio(graph_worker_->getGraph());
 
     Q_EMIT saveSettingsRequest(yaml);
 
@@ -195,11 +196,11 @@ void CsApexCore::load(const std::string &file)
 
     reset();
 
-    apex_assert_hard(graph_->countNodes() == 0);
+    apex_assert_hard(graph_worker_->getGraph()->countNodes() == 0);
 
-    graph_->setPause(true);
+    graph_worker_->setPause(true);
 
-    GraphIO graphio(graph_);
+    GraphIO graphio(graph_worker_->getGraph());
 
     {
         YAML::Node doc;
@@ -235,5 +236,5 @@ void CsApexCore::load(const std::string &file)
     cmd_dispatch->setClean();
     cmd_dispatch->resetDirtyPoint();
 
-    graph_->setPause(false);
+    graph_worker_->setPause(false);
 }
