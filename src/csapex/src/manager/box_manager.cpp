@@ -25,7 +25,7 @@
 
 using namespace csapex;
 
-BoxManager::BoxManager()
+NodeFactory::NodeFactory()
     : node_manager_(new PluginManager<Node> ("csapex::Node")),
       node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder")),
       dirty_(false)
@@ -42,7 +42,13 @@ bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
 }
 }
 
-void BoxManager::stop()
+
+NodeFactory::~NodeFactory()
+{
+    stop();
+}
+
+void NodeFactory::stop()
 {
     delete node_manager_;
     node_manager_ = NULL;
@@ -54,17 +60,11 @@ void BoxManager::stop()
 }
 
 
-void BoxManager::setStyleSheet(const QString &str)
+void NodeFactory::setStyleSheet(const QString &str)
 {
     style_sheet_ = str;
 }
-
-BoxManager::~BoxManager()
-{
-    stop();
-}
-
-void BoxManager::reload()
+void NodeFactory::reload()
 {
     node_manager_->reload();
     node_adapter_manager_->reload();
@@ -73,7 +73,7 @@ void BoxManager::reload()
     rebuildMap();
 }
 
-void BoxManager::rebuildPrototypes()
+void NodeFactory::rebuildPrototypes()
 {
     available_elements_prototypes.clear();
     node_adapter_builders_.clear();
@@ -115,7 +115,7 @@ void BoxManager::rebuildPrototypes()
     }
 }
 
-void BoxManager::rebuildMap()
+void NodeFactory::rebuildMap()
 {
     Tag::createIfNotExists("General");
     Tag::Ptr general = Tag::get("General");
@@ -158,7 +158,7 @@ void BoxManager::rebuildMap()
     dirty_ = false;
 }
 
-void BoxManager::ensureLoaded()
+void NodeFactory::ensureLoaded()
 {
     if(!node_manager_->pluginsLoaded()) {
         node_manager_->reload();
@@ -174,7 +174,7 @@ void BoxManager::ensureLoaded()
     }
 }
 
-void BoxManager::insertAvailableNodeTypes(QMenu* menu)
+void NodeFactory::insertAvailableNodeTypes(QMenu* menu)
 {
     ensureLoaded();
     
@@ -199,7 +199,7 @@ void BoxManager::insertAvailableNodeTypes(QMenu* menu)
     
 }
 
-void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
+void NodeFactory::insertAvailableNodeTypes(QTreeWidget* tree)
 {
     ensureLoaded();
     
@@ -228,7 +228,7 @@ void BoxManager::insertAvailableNodeTypes(QTreeWidget* tree)
 }
 
 
-QAbstractItemModel* BoxManager::listAvailableNodeTypes()
+QAbstractItemModel* NodeFactory::listAvailableNodeTypes()
 {
     ensureLoaded();
     
@@ -255,7 +255,7 @@ QAbstractItemModel* BoxManager::listAvailableNodeTypes()
     
     return model;
 }
-void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_signals)
+void NodeFactory::register_box_type(NodeConstructor::Ptr provider, bool suppress_signals)
 {
     available_elements_prototypes.push_back(provider);
     dirty_ = true;
@@ -265,7 +265,7 @@ void BoxManager::register_box_type(NodeConstructor::Ptr provider, bool suppress_
     }
 }
 
-bool BoxManager::isValidType(const std::string &type) const
+bool NodeFactory::isValidType(const std::string &type) const
 {
     Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         if(p->getType() == type) {
@@ -276,7 +276,7 @@ bool BoxManager::isValidType(const std::string &type) const
     return false;
 }
 
-void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, NodeStatePtr state, const QPoint& offset)
+void NodeFactory::startPlacingBox(QWidget* parent, const std::string &type, WidgetController* widget_ctrl, NodeStatePtr state, const QPoint& offset)
 {
     NodeConstructor::Ptr c = getConstructor(type);
     Node::Ptr content = c->makePrototypeContent();
@@ -307,7 +307,7 @@ void BoxManager::startPlacingBox(QWidget* parent, const std::string &type, Widge
     drag->exec();
 }
 
-Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
+Node::Ptr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
     
     Node::Ptr bo = content->makeContent(uuid);
@@ -315,7 +315,7 @@ Node::Ptr BoxManager::makeSingleNode(NodeConstructor::Ptr content, const UUID& u
     return bo;
 }
 
-NodeConstructor::Ptr BoxManager::getConstructor(const std::string &target_type)
+NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
 {
     std::string type = target_type;
     if(type.find_first_of(" ") != type.npos) {
@@ -347,12 +347,12 @@ NodeConstructor::Ptr BoxManager::getConstructor(const std::string &target_type)
     return NodeConstructorNullPtr;
 }
 
-Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid)
+Node::Ptr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid)
 {
     return makeNode(target_type, uuid, NodeStateNullPtr);
 }
 
-Node::Ptr BoxManager::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
+Node::Ptr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
 {
     apex_assert_hard(!uuid.empty());
 

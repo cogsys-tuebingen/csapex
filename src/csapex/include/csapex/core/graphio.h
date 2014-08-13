@@ -23,7 +23,7 @@ class GraphIO : public QObject
     Q_OBJECT
 
 public:
-    GraphIO(Graph* graph, BoxManager* node_factory);
+    GraphIO(Graph* graph, NodeFactory* node_factory);
 
 public:
     void saveSettings(YAML::Emitter &yaml);
@@ -37,7 +37,7 @@ public:
 
 private:
     Graph* graph_;
-    BoxManager* node_factory_;
+    NodeFactory* node_factory_;
 };
 
 }

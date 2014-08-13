@@ -22,7 +22,7 @@
 
 using namespace csapex;
 
-GraphIO::GraphIO(Graph *graph, BoxManager* node_factory)
+GraphIO::GraphIO(Graph *graph, NodeFactory* node_factory)
     : graph_(graph), node_factory_(node_factory)
 {
 }

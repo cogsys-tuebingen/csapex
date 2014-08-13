@@ -21,7 +21,7 @@
 
 using namespace csapex;
 
-WidgetController::WidgetController(Graph::Ptr graph, BoxManager* node_factory)
+WidgetController::WidgetController(Graph::Ptr graph, NodeFactory* node_factory)
     : graph_(graph), node_factory_(node_factory), designer_(NULL)
 {
 
@@ -72,7 +72,7 @@ Graph::Ptr WidgetController::getGraph()
     return graph_;
 }
 
-BoxManager* WidgetController::getNodeFactory()
+NodeFactory* WidgetController::getNodeFactory()
 {
     return node_factory_;
 }

@@ -68,7 +68,7 @@ class DragIO;
 
 class Overlay;
 
-class BoxManager;
+FWD(NodeFactory);
 
 FWD(Timable);
 

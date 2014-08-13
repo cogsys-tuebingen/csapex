@@ -18,7 +18,7 @@ namespace csapex
 class NodeConstructor
 {
     friend class command::AddNode;
-    friend class BoxManager;
+    friend class NodeFactory;
 
 public:
     struct NodeConstructionException : public std::runtime_error

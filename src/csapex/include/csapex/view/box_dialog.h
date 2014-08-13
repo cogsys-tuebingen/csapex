@@ -42,7 +42,7 @@ class BoxDialog : public QDialog
     Q_OBJECT
 
 public:
-    BoxDialog(BoxManager* node_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    BoxDialog(NodeFactory* node_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     std::string getName();
 
@@ -54,7 +54,7 @@ private:
 
 private:
     CompleteLineEdit * name_edit_;
-    BoxManager* node_factory_;
+    NodeFactory* node_factory_;
 };
 
 }

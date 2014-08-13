@@ -118,7 +118,7 @@ void CompleteLineEdit::completeText(const QModelIndex &index) {
     Q_EMIT editingFinished();
 }
 
-BoxDialog::BoxDialog(BoxManager* node_factory, QWidget *parent, Qt::WindowFlags f)
+BoxDialog::BoxDialog(NodeFactory* node_factory, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f), node_factory_(node_factory)
 {
     makeUI();

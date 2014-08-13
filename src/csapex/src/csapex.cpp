@@ -6,6 +6,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/box.h>
+#include <csapex/manager/box_manager.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/core/graphio.h>
@@ -100,11 +101,11 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     }
 
 
-    BoxManager* node_factory = &BoxManager::instance();
+    NodeFactory::Ptr node_factory(new NodeFactory);
 
     Graph::Ptr graph(new Graph);
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
-    WidgetControllerPtr widget_control (new WidgetController(graph, node_factory));
+    WidgetControllerPtr widget_control (new WidgetController(graph, node_factory.get()));
 
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
@@ -112,7 +113,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     node_factory->settings_ = &settings;
     node_factory->dispatcher_ = &dispatcher;
 
-    CsApexCore core(settings, graph_worker, node_factory, &dispatcher);
+    CsApexCore core(settings, graph_worker, node_factory.get(), &dispatcher);
 
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));

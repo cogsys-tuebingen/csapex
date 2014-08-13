@@ -1,13 +1,10 @@
-#ifndef BOX_MANAGER_H
-#define BOX_MANAGER_H
+#ifndef NODE_FACTORY_H
+#define NODE_FACTORY_H
 
 /// COMPONENT
 #include <csapex/model/node_constructor.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/view/node_adapter_builder.h>
-
-/// PROJECT
-#include <csapex/utility/singleton.hpp>
 
 /// SYSTEM
 #include <QLayout>
@@ -20,19 +17,21 @@
 namespace csapex
 {
 
-/// TODO: Rename to NodeFactory
-/// TODO: Eliminate Singleton
-class BoxManager : public Singleton<BoxManager>
+class NodeFactory
 {
     /// TODO: no friends
-    friend class Singleton<BoxManager>;
     friend class DesignerIO;
     friend class GraphIO;
     friend class WidgetController;
 
 public:
+    typedef boost::shared_ptr<NodeFactory> Ptr;
+
+public:
+    NodeFactory();
+    ~NodeFactory();
+
     virtual void reload();
-    ~BoxManager();
 
 public:
     void register_box_type(NodeConstructor::Ptr provider, bool suppress_signals = false);
@@ -64,10 +63,6 @@ public:
     CommandDispatcher* dispatcher_;
 
 protected:
-    BoxManager();
-    BoxManager(const BoxManager& copy);
-    BoxManager& operator = (const BoxManager& assign);
-
     void ensureLoaded();
     void rebuildPrototypes();
     void rebuildMap();
@@ -90,4 +85,4 @@ protected:
 
 }
 
-#endif // BOX_MANAGER_H
+#endif // NODE_FACTORY_H

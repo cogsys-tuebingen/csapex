@@ -13,7 +13,7 @@ class NodeStatistics
 {
 public:
     NodeStatistics(Node* node);
-    QTreeWidgetItem* createDebugInformation(BoxManager *node_factory) const;
+    QTreeWidgetItem* createDebugInformation(NodeFactory *node_factory) const;
 
 private:
     QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;

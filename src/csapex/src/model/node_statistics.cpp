@@ -40,7 +40,7 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* c
     return connector_widget;
 }
 
-QTreeWidgetItem* NodeStatistics::createDebugInformation(BoxManager* node_factory) const
+QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factory) const
 {
     QTreeWidgetItem* tl = new QTreeWidgetItem;
     tl->setText(0, node_->getUUID().c_str());

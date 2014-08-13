@@ -23,7 +23,7 @@ using namespace csapex;
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 Q_DECLARE_METATYPE(std::string)
 
-CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, BoxManager *node_factory, CommandDispatcher* cmd_dispatcher)
+CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *node_factory, CommandDispatcher* cmd_dispatcher)
     : settings_(settings), graph_worker_(graph), node_factory_(node_factory), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
