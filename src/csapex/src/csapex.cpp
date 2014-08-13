@@ -102,8 +102,8 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
     BoxManager::instance().settings_ = &settings;
 
-    Graph::Ptr graph(new Graph(settings));
-    GraphWorker::Ptr graph_worker(new GraphWorker(graph.get()));
+    Graph::Ptr graph(new Graph);
+    GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
     WidgetControllerPtr widget_control (new WidgetController(graph));
 
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);

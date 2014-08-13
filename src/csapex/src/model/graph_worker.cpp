@@ -13,8 +13,8 @@
 
 using namespace csapex;
 
-GraphWorker::GraphWorker(Graph* graph)
-    : graph_(graph), timer_(new QTimer)
+GraphWorker::GraphWorker(Settings* settings, Graph* graph)
+    : settings_(settings), graph_(graph), timer_(new QTimer)
 {
     timer_->setInterval(1000. / 30.);
     timer_->start();
@@ -48,7 +48,7 @@ void GraphWorker::reset()
 {
     stop();
 
-    graph_->settings_.setProcessingAllowed(true);
+    settings_->setProcessingAllowed(true);
 
     graph_->uuids_.clear();
     graph_->connections_.clear();

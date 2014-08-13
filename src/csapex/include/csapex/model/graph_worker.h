@@ -20,7 +20,7 @@ public:
     typedef boost::shared_ptr<GraphWorker> Ptr;
 
 public:
-    GraphWorker(Graph* graph);
+    GraphWorker(Settings *settings, Graph* graph);
 
     Graph* getGraph();
 
@@ -37,6 +37,7 @@ Q_SIGNALS:
     void paused(bool);
 
 private:
+    Settings *settings_;
     Graph* graph_;
 
     QTimer* timer_;

@@ -37,10 +37,10 @@ public:
     typedef boost::shared_ptr<Graph> Ptr;
 
 public:
-    Graph(Settings &settings);
+    Graph();
     virtual ~Graph();
 
-    void init(CommandDispatcher* dispatcher);
+    /*extract dispatcher*/ void init(CommandDispatcher* dispatcher);
 
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
@@ -72,13 +72,13 @@ public:
     void foreachNode(boost::function<void (Node*)> f);
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
 
-public Q_SLOTS:
-    void verify();
+private:
+   /*rename*/ void verify();
 
 Q_SIGNALS:
     void stateChanged();
     void structureChanged(Graph*);
-    void dirtyChanged(bool);
+    /*extract?*/ void dirtyChanged(bool);
 
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
@@ -97,8 +97,6 @@ private: /// ONLY COMMANDS / NOT UNDOABLE
     void verifyAsync();
 
 protected:
-    Settings& settings_;
-
     std::vector<NodePtr> nodes_;
     std::map<Node*, int> node_component_;
 
@@ -107,7 +105,7 @@ protected:
 
     std::vector<Connection::Ptr> connections_;
 
-    CommandDispatcher* dispatcher_;
+    /*extract*/ CommandDispatcher* dispatcher_;
 
     std::map<std::string, int> uuids_;
 };

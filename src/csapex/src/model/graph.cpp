@@ -11,7 +11,6 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/meta.h>
-#include <csapex/core/settings.h>
 #include <csapex/manager/box_manager.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
@@ -27,8 +26,8 @@
 
 using namespace csapex;
 
-Graph::Graph(Settings& settings)
-    : settings_(settings), dispatcher_(NULL)
+Graph::Graph()
+    : dispatcher_(NULL)
 {
 }
 
