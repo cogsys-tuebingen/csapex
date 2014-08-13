@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection.h>
-#include <csapex/command/meta.h>
+#include <csapex/command/command.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 
@@ -24,14 +24,9 @@ class Graph : public QObject
     friend class command::AddConnection;
     friend class command::DeleteConnection;
     friend class command::DeleteNode;
-    friend class DesignerView;
-    friend class DesignerScene;
-    friend class Template;
-    friend class CommandDispatcher;
 
-    friend class WidgetController;
-    friend class BoxSelectionModel;
-    friend class ConnectionSelectionModel;
+    /*remove*/ friend class DesignerScene;
+    /*remove*/ friend class WidgetController;
 
 public:
     typedef boost::shared_ptr<Graph> Ptr;
@@ -48,14 +43,13 @@ public:
 
     Connectable* findConnector(const UUID &uuid);
 
+    // TODO: extract commands from here!!
     Command::Ptr deleteConnectionByIdCommand(int id);
-
     Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
-
     Command::Ptr deleteAllConnectionFulcrumsCommand(int connection);
     Command::Ptr deleteAllConnectionFulcrumsCommand(Connection::Ptr connection);
-
     Command::Ptr deleteConnectionById(int id);
+    Command::Ptr clear();
 
     Connection::Ptr getConnectionWithId(int id);
     Connection::Ptr getConnection(Connection::Ptr);
@@ -63,10 +57,10 @@ public:
 
     std::string makeUUIDPrefix(const std::string& name);
 
-    Command::Ptr clear();
 
     int countNodes();
 
+    // TODO: do this correctly.. -> iterators
     void foreachNode(boost::function<void (Node*)> f);
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
 

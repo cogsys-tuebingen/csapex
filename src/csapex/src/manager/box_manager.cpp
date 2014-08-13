@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
-#include <csapex/model/graph.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/tag.h>

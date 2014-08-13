@@ -9,16 +9,11 @@
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
-#include <csapex/command/meta.h>
-#include <csapex/manager/box_manager.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/utility/qt_helper.hpp>
-#include <csapex/utility/stream_interceptor.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
