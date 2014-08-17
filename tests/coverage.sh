@@ -7,7 +7,7 @@ DIR=$THISDIR/traces
 
 # build
 cd $ROOT/build
-make
+make -j4
 
 # clean
 cd $THISDIR

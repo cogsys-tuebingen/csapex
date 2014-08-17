@@ -266,12 +266,20 @@ set(CSAPEX_TESTING 0 CACHE BOOL "build tests?")
 if(${CSAPEX_TESTING})
     enable_testing()
 
+    set(TESTS
+        tests/tests.cpp
+
+        tests/graph_test.cpp
+        tests/node_creation_test.cpp
+    )
+
     # UNIT TEST
-    add_executable(csapex_run_unit_tests tests/graph_test.cpp)
+    add_executable(csapex_run_unit_tests ${TESTS})
     target_link_libraries(csapex_run_unit_tests gtest gtest_main csapex_app)
 
     # PROFILING
-    add_executable(csapex_profile_unit_tests tests/graph_test.cpp
+    add_executable(csapex_profile_unit_tests
+        ${TESTS}
         ${SRC_PLUGIN}
         ${QT_PLUGIN}
         ${SRC_APP}
