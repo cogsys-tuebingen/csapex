@@ -260,6 +260,33 @@ add_custom_command(TARGET cfg POST_BUILD
 )
 
 #
+# TESTS
+#
+set(CSAPEX_TESTING 0 CACHE BOOL "build tests?")
+if(${CSAPEX_TESTING})
+    enable_testing()
+
+    # UNIT TEST
+    add_executable(csapex_run_unit_tests tests/graph_test.cpp)
+    target_link_libraries(csapex_run_unit_tests gtest gtest_main csapex_app)
+
+    # PROFILING
+    add_executable(csapex_profile_unit_tests tests/graph_test.cpp
+        ${SRC_PLUGIN}
+        ${QT_PLUGIN}
+        ${SRC_APP}
+        ${QT_APP})
+    set_target_properties(csapex_profile_unit_tests PROPERTIES COMPILE_FLAGS "--coverage")
+    target_link_libraries(csapex_profile_unit_tests gtest gtest_main gcov
+        ${QT_LIBRARIES}
+        ${Boost_LIBRARIES}
+        ${catkin_LIBRARIES}
+        ${OPENGL_LIBRARIES})
+    add_test(csapex_profile_unit_tests ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION}/csapex/csapex_profile_unit_tests)
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+                      DEPENDS csapex_profile_unit_tests)
+endif()
+#
 # INSTALL
 #
 

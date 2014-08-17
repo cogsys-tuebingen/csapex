@@ -31,6 +31,13 @@ class Graph : public QObject
 public:
     typedef boost::shared_ptr<Graph> Ptr;
 
+    struct NodeNotFoundException : public std::logic_error
+    {
+        NodeNotFoundException(const std::string& name)
+            : std::logic_error("node " + name + " cannot be found")
+        {}
+    };
+
 public:
     Graph();
     virtual ~Graph();
@@ -60,12 +67,20 @@ public:
 
     int countNodes();
 
+    void addNode(NodePtr node);
+    void deleteNode(const UUID &uuid);
+
+    bool addConnection(Connection::Ptr connection);
+    void deleteConnection(Connection::Ptr connection);
+
     // TODO: do this correctly.. -> iterators
     void foreachNode(boost::function<void (Node*)> f);
     void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
 
 private:
    /*rename*/ void verify();
+    void buildConnectedComponents();
+    void verifyAsync();
 
 Q_SIGNALS:
     void stateChanged();
@@ -77,16 +92,6 @@ Q_SIGNALS:
 
     void nodeAdded(NodePtr);
     void nodeRemoved(NodePtr);
-
-private: /// ONLY COMMANDS / NOT UNDOABLE
-    void addNode(NodePtr node);
-    void deleteNode(const UUID &uuid);
-
-    bool addConnection(Connection::Ptr connection);
-    void deleteConnection(Connection::Ptr connection);
-
-    void buildConnectedComponents();
-    void verifyAsync();
 
 protected:
     std::vector<NodePtr> nodes_;

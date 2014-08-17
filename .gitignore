@@ -1,3 +1,9 @@
+# TESTS #
+#########
+tests/coverage
+tests/traces
+tests/*.info
+
 # Compiled source #
 ###################
 *.com

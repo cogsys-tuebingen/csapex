@@ -359,18 +359,10 @@ int Graph::getComponent(const UUID &node_uuid) const
 Node* Graph::findNode(const UUID& uuid) const
 {
     Node* node = findNodeNoThrow(uuid);
-
     if(node) {
         return node;
     }
-
-    std::cerr << "cannot find box \"" << uuid << "\n";
-    std::cerr << "available nodes:\n";
-    Q_FOREACH(Node::Ptr n, nodes_) {
-        std::cerr << n->getUUID() << '\n';
-    }
-    std::cerr << std::endl;
-    throw std::runtime_error("cannot find box");
+    throw NodeNotFoundException(uuid.getFullName());
 }
 
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
@@ -379,16 +371,6 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
         if(b->getUUID() == uuid) {
             return b.get();
         }
-    }
-
-    Q_FOREACH(Node::Ptr b, nodes_) {
-        //        Group::Ptr grp = boost::dynamic_pointer_cast<Group> (b);
-        //        if(grp) {
-        //            Node* tmp = grp->getSubGraph()->findNodeNoThrow(uuid);
-        //            if(tmp) {
-        //                return tmp;
-        //            }
-        //        }
     }
 
     return NULL;
