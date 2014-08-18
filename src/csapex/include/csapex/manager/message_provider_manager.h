@@ -33,7 +33,7 @@ private:
     ~MessageProviderManager();
     MessageProvider::Ptr createMessageProviderHelper(const std::string& path);
 
-    void fullReload();
+    void loadPlugins();
 
 private:
     std::map<std::string, Constructor> classes;

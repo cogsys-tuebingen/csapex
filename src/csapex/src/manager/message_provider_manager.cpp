@@ -20,9 +20,9 @@ MessageProviderManager::~MessageProviderManager()
     delete manager_;
 }
 
-void MessageProviderManager::fullReload()
+void MessageProviderManager::loadPlugins()
 {
-    instance().manager_->reload();
+    instance().manager_->load();
 
     classes.clear();
 
@@ -55,7 +55,7 @@ MessageProvider::Ptr MessageProviderManager::createMessageProvider(const std::st
 MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const std::string& path)
 {
     if(!manager_->pluginsLoaded()) {
-        fullReload();
+        loadPlugins();
     }
 
     bfs::path file(path);
@@ -86,7 +86,7 @@ void MessageProviderManager::registerMessageProvider(const std::string &type, Co
 std::string MessageProviderManager::supportedTypes()
 {
     if(!manager_->pluginsLoaded()) {
-        fullReload();
+        loadPlugins();
     }
 
     return supported_types_;

@@ -6,6 +6,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/tag.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
@@ -25,6 +26,10 @@ NodeConstructor::NodeConstructor(Settings &settings,
     : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
 {
     apex_assert_hard(!c.empty());
+
+    if(tags_.empty()) {
+        tags_.push_back(Tag::get("General"));
+    }
 }
 
 NodeConstructor::NodeConstructor(Settings &settings,
@@ -33,6 +38,9 @@ NodeConstructor::NodeConstructor(Settings &settings,
                                  const std::vector<TagPtr>& tags)
     : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags)
 {
+    if(tags_.empty()) {
+        tags_.push_back(Tag::get("General"));
+    }
 }
 
 NodeConstructor::~NodeConstructor()

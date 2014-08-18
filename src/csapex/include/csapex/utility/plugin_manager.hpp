@@ -39,7 +39,7 @@ protected:
     void registerConstructor(Constructor constructor) {
         available_classes[constructor.getType()] = constructor;
     }
-    void reload() {
+    void load() {
         // TODO: make this via a plugin! -> csapex_ros
         PluginLibLoader pluginlib_loader("csapex", full_name_);
         xml_files_ = pluginlib_loader.getPluginXmlPaths();
@@ -182,8 +182,8 @@ public:
         return instance->plugins_loaded_;
     }
 
-    virtual void reload() {
-        instance->reload();
+    virtual void load() {
+        instance->load();
     }
 
     const Constructors& availableClasses() const {

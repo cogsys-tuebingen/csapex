@@ -8,13 +8,6 @@
 namespace csapex {
 namespace connection_types {
 
-/// TRAITS
-template <typename T>
-struct type {
-    //std::string name();
-};
-
-
 /// DEFAULT TYPES
 struct Message : public ConnectionType
 {

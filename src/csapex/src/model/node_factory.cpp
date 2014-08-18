@@ -56,10 +56,10 @@ NodeFactory::~NodeFactory()
 }
 
 
-void NodeFactory::reload()
+void NodeFactory::loadPlugins()
 {
-    node_manager_->reload();
-    node_adapter_manager_->reload();
+    node_manager_->load();
+    node_adapter_manager_->load();
     rebuildPrototypes();
     
     rebuildMap();
@@ -67,8 +67,8 @@ void NodeFactory::reload()
 
 void NodeFactory::rebuildPrototypes()
 {
-    available_elements_prototypes.clear();
-    node_adapter_builders_.clear();
+//    available_elements_prototypes.clear();
+//    node_adapter_builders_.clear();
     
     typedef std::pair<std::string, DefaultConstructor<Node> > NODE_PAIR;
     Q_FOREACH(const NODE_PAIR& p, node_manager_->availableClasses()) {
@@ -84,10 +84,6 @@ void NodeFactory::rebuildPrototypes()
             if(!str.empty()) {
                 tags.push_back(Tag::get(str));
             }
-        }
-
-        if(tags.empty()) {
-            tags.push_back(Tag::get("General"));
         }
 
         // make the constructor
@@ -153,8 +149,8 @@ void NodeFactory::rebuildMap()
 void NodeFactory::ensureLoaded()
 {
     if(!node_manager_->pluginsLoaded()) {
-        node_manager_->reload();
-        node_adapter_manager_->reload();
+        node_manager_->load();
+        node_adapter_manager_->load();
         
         rebuildPrototypes();
         

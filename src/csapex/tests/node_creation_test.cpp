@@ -2,6 +2,7 @@
 #include <csapex/model/node_factory.h>
 #include <csapex/msg/message.h>
 #include <csapex/core/settings.h>
+#include <csapex/factory/generic_node_factory.hpp>
 #include "gtest/gtest.h"
 
 
@@ -76,182 +77,6 @@ struct type<MockupMessage> {
         return "Mockup";
     }
 };
-template <>
-struct type<const MockupMessage> {
-    static std::string name() {
-        return "Mockup";
-    }
-};
-}
-
-}
-
-#include <boost/mpl/assert.hpp>
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/equal.hpp>
-#include <boost/mpl/for_each.hpp>
-#include <boost/function_types/parameter_types.hpp>
-#include <boost/function_types/components.hpp>
-#include <boost/function_types/function_pointer.hpp>
-#include <boost/function_types/function_reference.hpp>
-#include <boost/type_traits.hpp>
-
-#include <csapex/model/node_modifier.h>
-#include <utils_param/parameter_factory.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
-
-namespace csapex {
-
-template <typename Message>
-struct CompositeInput
-{
-    typedef Message type;
-};
-template <typename Message>
-struct CompositeOutput
-{
-    typedef Message type;
-};
-template <typename T>
-struct CompositeParameter
-{
-    typedef T type;
-};
-
-template <typename Parameters>
-class CompositeNode : public Node
-{
-    typedef typename boost::mpl::push_front<Parameters, void>::type Sig;
-    typedef typename boost::function_types::function_pointer<Sig>::type Callback;
-
-    template <typename T>
-    friend class CompositeNodeSetup;
-    template <typename T>
-    friend class CompositeNodeParameterSetup;
-
-public:
-    CompositeNode(Callback cb)
-        : cb_(cb)
-    {
-
-    }
-
-    void setup();
-    void setupParameters();
-    void process();
-
-private:
-    Callback cb_;
-    std::vector<Input*> input_;
-    std::vector<Output*> output_;
-    std::vector<std::string> params_;
-};
-
-template <typename Parameters>
-struct CompositeNodeSetup {
-    CompositeNodeSetup(CompositeNode<Parameters>* instance)
-        : instance_(instance)
-    {
-
-    }
-
-    template<typename U>
-    void operator()(CompositeInput<U>) {
-        std::string label = connection_types::type<U>::name();
-        instance_->input_.push_back(instance_->modifier_->template addInput<U>(label));
-    }
-    template<typename U>
-    void operator()(CompositeOutput<U>) {
-        std::string label = connection_types::type<U>::name();
-        instance_->output_.push_back(instance_->modifier_->template addOutput<U>(label));
-
-    }
-    template<typename U>
-    void operator()(CompositeParameter<U>) {}
-
-    CompositeNode<Parameters>* instance_;
-};
-
-template <typename Parameters>
-struct CompositeNodeParameterSetup {
-    CompositeNodeParameterSetup(CompositeNode<Parameters>* instance)
-        : instance_(instance)
-    {}
-
-    template<typename U>
-    void operator()(CompositeInput<U>) {}
-    template<typename U>
-    void operator()(CompositeOutput<U>) {}
-
-    template<typename U>
-    void operator()(CompositeParameter<U>) {
-        std::string name = "param";
-        param::Parameter::Ptr p = param::ParameterFactory::declareValue<U>(name, 0);
-        instance_->addParameter(p);
-        instance_->params_.push_back(name);
-    }
-
-    CompositeNode<Parameters>* instance_;
-};
-
-struct wrap_parameters
-{
-    template <typename I>
-    struct apply
-    {
-        typedef typename boost::remove_reference<I>::type RawType;
-
-        typedef typename boost::mpl::if_< boost::is_reference<I>,
-        typename boost::mpl::if_< boost::is_const<RawType>, CompositeInput<RawType>, CompositeOutput<RawType> >::type,
-        CompositeParameter<RawType> >::type type;
-    };
-};
-
-
-template <typename Parameters>
-void CompositeNode<Parameters>::setup()
-{
-    boost::mpl::for_each<Parameters, wrap_parameters>(CompositeNodeSetup<Parameters>(this));
-}
-
-template <typename Parameters>
-void CompositeNode<Parameters>::setupParameters()
-{
-    boost::mpl::for_each<Parameters, wrap_parameters>(CompositeNodeParameterSetup<Parameters>(this));
-}
-
-template <int count>
-struct Call
-{
-};
-
-template <typename Parameters>
-void CompositeNode<Parameters>::process()
-{
-    // finish!
-    MockupMessage::Ptr in = input_[0]->template getMessage<MockupMessage>();
-    MockupMessage::Ptr in2 = input_[1]->template getMessage<MockupMessage>();
-
-    MockupMessage::Ptr out(new MockupMessage);
-
-    int param = readParameter<int>(params_[0]);
-
-    //boost::bind(cb_, boost::ref(*in), boost::ref(*in2), param, boost::ref(*out))();
-    Call <boost::mpl::size<Parameters>::value > caller;
-
-    output_[0]->publish(out);
-}
-
-
-
-template<typename F>
-Node::Ptr wrapFunction(F f)
-{
-    typedef typename boost::function_types::parameter_types<F>::type params;
-
-    Node::Ptr result(new CompositeNode<params>(f));
-    return result;
 }
 
 void functionToBeWrappedIntoANode(const MockupMessage& input, const MockupMessage& input2, int parameter, MockupMessage& output)
@@ -278,13 +103,10 @@ protected:
                                                             boost::bind(&NodeCreationTest::makeMockup)));
         factory.register_box_type(mockup_constructor);
 
-
-        csapex::NodeConstructor::Ptr wrapped_constructor(new csapex::NodeConstructor(
-                                                             settings,
-                                                             "WrappedFunctionNode", "functionToBeWrappedIntoANode",
-                                                             ":/no_icon.png", tags,
-                                                             boost::bind(&NodeCreationTest::makeWrappedFunctionNode)));
-        factory.register_box_type(wrapped_constructor);
+        factory.register_box_type(GenericNodeFactory::createConstructorFromFunction(functionToBeWrappedIntoANode,
+                                                                                    "WrappedFunctionNode",
+                                                                                    "functionToBeWrappedIntoANode",
+                                                                                    settings));
     }
 
     virtual ~NodeCreationTest() {
@@ -308,12 +130,6 @@ protected:
         return NodePtr(new MockupNode);
     }
 
-    static NodePtr makeWrappedFunctionNode() {
-        //        return NodePtr(new WrapFunction<const MockupMessage, MockupMessage, functionToBeWrappedIntoANode>);
-        //        return NodePtr(new WrappedFunction(&functionToBeWrappedIntoANode));
-        return NodePtr(wrapFunction(functionToBeWrappedIntoANode));
-    }
-
 };
 
 TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
@@ -331,13 +147,24 @@ TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
     ASSERT_TRUE(node != NULL);
 
     std::vector<Input*> inputs = node->getMessageInputs();
-    ASSERT_EQ(inputs.size(), 2);
+    ASSERT_EQ(2, inputs.size());
 
     std::vector<Output*> outputs = node->getMessageOutputs();
-    ASSERT_EQ(outputs.size(), 1);
+    ASSERT_EQ(1, outputs.size());
 
     std::vector<param::Parameter::Ptr> params = node->getParameters();
-    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(1, params.size());
+}
+
+TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
+    UUID node_id = UUID::make_forced("foobarbaz2");
+    NodePtr node = factory.makeNode("WrappedFunctionNode", node_id);
+
+    ASSERT_TRUE(node != NULL);
+
+    std::vector<Input*> inputs = node->getMessageInputs();
+    std::vector<Output*> outputs = node->getMessageOutputs();
+    std::vector<param::Parameter::Ptr> params = node->getParameters();
 
     MockupMessage::Ptr msg(new MockupMessage);
     msg->setSequenceNumber(0);
@@ -369,7 +196,7 @@ TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
 
     ASSERT_TRUE(result != NULL);
 
-    ASSERT_EQ(result->value.value, 42);
+    ASSERT_EQ(42, result->value.value);
 }
 
 }

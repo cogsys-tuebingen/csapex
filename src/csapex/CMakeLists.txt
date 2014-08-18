@@ -152,6 +152,8 @@ set(SRC_APP
     src/model/unique.cpp
     src/model/memento.cpp
 
+    src/factory/generic_node_factory.cpp
+
     src/msg/message_provider.cpp
 
     src/utility/error_handling.cpp
@@ -269,6 +271,7 @@ if(${CSAPEX_TESTING})
     set(TESTS
         tests/tests.cpp
 
+        tests/uuid_test.cpp
         tests/graph_test.cpp
         tests/node_creation_test.cpp
     )

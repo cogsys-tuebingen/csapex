@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/msg/message.h>
+#include <csapex/msg/message_traits.h>
 
 namespace csapex {
 namespace connection_types {

@@ -38,6 +38,7 @@ public:
     void removeListener(Listener* l);
 
     Settings& getSettings() const;
+    NodeFactory& getNodeFactory() const;
 
     bool isPaused() const;
 

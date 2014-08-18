@@ -78,7 +78,7 @@ void CsApexCore::init(DragIO* dragio)
         init_ = true;
 
         showStatusMessage("loading core plugins");
-        core_plugin_manager->reload();
+        core_plugin_manager->load();
         typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
         Q_FOREACH(PAIR cp, core_plugin_manager->availableClasses()) {
             CorePlugin::Ptr plugin = cp.second();
@@ -95,7 +95,7 @@ void CsApexCore::init(DragIO* dragio)
         showStatusMessage("loading node plugins");
         node_factory_->loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
         node_factory_->new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
-        node_factory_->reload();
+        node_factory_->loadPlugins();
     }
 }
 
@@ -140,6 +140,11 @@ void CsApexCore::removeListener(Listener *l)
 Settings &CsApexCore::getSettings() const
 {
     return settings_;
+}
+
+NodeFactory &CsApexCore::getNodeFactory() const
+{
+    return *node_factory_;
 }
 
 void CsApexCore::settingsChanged()

@@ -31,7 +31,7 @@ public:
     NodeFactory(Settings& settings);
     ~NodeFactory();
 
-    virtual void reload();
+    virtual void loadPlugins();
 
 public:
     void register_box_type(NodeConstructor::Ptr provider, bool suppress_signals = false);
