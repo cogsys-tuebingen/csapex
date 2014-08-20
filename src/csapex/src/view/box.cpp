@@ -74,6 +74,7 @@ void NodeBox::construct()
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
     ui->enablebtn->setCheckable(true);
+    ui->enablebtn->setChecked(node_->getNodeState()->isEnabled());
 
     ui->enablebtn->setIcon(icon_);
 
