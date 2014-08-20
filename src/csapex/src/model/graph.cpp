@@ -386,22 +386,6 @@ Node* Graph::findNodeForConnector(const UUID &uuid) const
         return findNode(l);
 
     } catch(const std::exception& e) {
-        std::cerr << "error: cannot find owner of connector '" << uuid << "'\n";
-
-        Q_FOREACH(Node::Ptr n, nodes_) {
-            std::cerr << "node: " << n->getUUID() << "\n";
-            std::cerr << "inputs: " << "\n";
-            Q_FOREACH(Input* in, n->getAllInputs()) {
-                std::cerr << "\t" << in->getUUID() << "\n";
-            }
-            std::cerr << "outputs: " << "\n";
-            Q_FOREACH(Output* out, n->getAllOutputs()) {
-                std::cerr << "\t" << out->getUUID() << "\n";
-            }
-        }
-
-        std::cerr << std::flush;
-
         throw std::runtime_error(std::string("cannot find owner of connector \"") + uuid.getFullName());
     }
 }

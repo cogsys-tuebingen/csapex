@@ -285,15 +285,13 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
         }
     }
 
-    std::cout << "warning: cannot make box, type '" << type << "' is unknown, trying different namespace" << std::endl;
-
+    // cannot make box, type is unknown, trying different namespace
     std::string type_wo_ns = UUID::stripNamespace(type);
 
     BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
         std::string p_type_wo_ns = UUID::stripNamespace(p->getType());
 
         if(p_type_wo_ns == type_wo_ns) {
-            std::cout << "found a match: '" << type << " == " << p->getType() << std::endl;
             return p;
         }
     }
@@ -321,11 +319,7 @@ Node::Ptr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid
         return result;
 
     } else {
-        std::cerr << "error: cannot make box, type '" << target_type << "' is unknown\navailable:\n";
-        BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
-            std::cerr << p->getType() << '\n';
-        }
-        std::cerr << std::endl;
+        std::cerr << "error: cannot make node, type '" << target_type << "' is unknown" << std::endl;
         return NodeNullPtr;
     }
 }

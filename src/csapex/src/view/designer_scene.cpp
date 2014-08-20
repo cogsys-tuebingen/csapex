@@ -184,19 +184,23 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     // check if we have temporary connections
     if(!temp_.empty()) {
         foreach(const TempConnection& temp, temp_) {
+            if(temp.is_connected) {
+                drawConnection(painter, Connection(temp.from_c, temp.to_c, -1));
 
-            ccs = CurrentConnectionState();
-            Port* fromp = widget_ctrl_->getPort(temp.from);
-            bool flipped = fromp->isFlipped();
-
-            if(temp.from->isInput()) {
-                drawConnection(painter, temp.to, centerPoint(fromp), -1,
-                               flipped ? Fulcrum::IN : Fulcrum::OUT,
-                               Fulcrum::HANDLE);
             } else {
-                drawConnection(painter, centerPoint(fromp), temp.to, -1,
-                               flipped ? Fulcrum::IN : Fulcrum::OUT,
-                               Fulcrum::HANDLE);
+                ccs = CurrentConnectionState();
+                Port* fromp = widget_ctrl_->getPort(temp.from_p);
+                bool flipped = fromp->isFlipped();
+
+                ccs.start_points_left = flipped;
+                ccs.end_points_left = !flipped;
+
+
+                if(temp.from_p->isInput()) {
+                    drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
+                } else {
+                    drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
+                }
             }
         }
     }
@@ -426,9 +430,9 @@ void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end
 {
     apex_assert_hard(from);
 
-    TempConnection temp;
-    temp.from = from;
-    temp.to = end;
+    TempConnection temp(false);
+    temp.from_p = from;
+    temp.to_p = end;
 
     temp_.push_back(temp);
 
@@ -447,11 +451,23 @@ void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
     apex_assert_hard(from);
     apex_assert_hard(to);
 
-    TempConnection temp;
-    temp.from = from;
+    Input* input = dynamic_cast<Input*> (from);
+    Output* output;
+    if(input) {
+        output = dynamic_cast<Output*> (to);
 
-    Port* top = widget_ctrl_->getPort(to);
-    temp.to = centerPoint(top);
+    } else {
+        input = dynamic_cast<Input*> (to);
+        output = dynamic_cast<Output*> (from);
+    }
+
+    apex_assert_hard(input);
+    apex_assert_hard(output);
+
+
+    TempConnection temp(true);
+    temp.from_c = output;
+    temp.to_c = input;
 
     temp_.push_back(temp);
 }
@@ -467,7 +483,7 @@ void DesignerScene::deleteTemporaryConnectionsAndRepaint()
     update();
 }
 
-void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
+void DesignerScene::drawConnection(QPainter *painter, const Connection& connection)
 {
     if(!connection.from()->isOutput() || !connection.to()->isInput()) {
         return;
@@ -497,12 +513,10 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
 
-    ccs.start_flipped = fromp->isFlipped();
-    ccs.end_flipped = top->isFlipped();
+    ccs.start_points_left = fromp->isFlipped();
+    ccs.end_points_left = !top->isFlipped();
 
-    drawConnection(painter, p1, p2, id,
-                   fromp->isFlipped() ? Fulcrum::IN : Fulcrum::OUT,
-                   top->isFlipped() ? Fulcrum::OUT : Fulcrum::IN);
+    drawConnection(painter, p1, p2, id);
 
     int f = connection.activity();
 
@@ -510,10 +524,10 @@ void DesignerScene::drawConnection(QPainter *painter, Connection& connection)
     drawActivity(painter, f, to);
 }
 
-void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id, Fulcrum::Type from_type, Fulcrum::Type to_type)
+void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id)
 {
     QPointF to = real_to;
-    to.setX(to.x() + (ccs.end_flipped ? ARROW_LENGTH : -ARROW_LENGTH));
+    to.setX(to.x() + (ccs.end_points_left ? -ARROW_LENGTH : ARROW_LENGTH));
 
     painter->setRenderHint(QPainter::Antialiasing);
 
@@ -534,16 +548,17 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     double direct_length = hypot(diff.x(), diff.y());
 
-    Connection::Ptr connection = graph_->getConnectionWithId(id);
 
-    Fulcrum::Ptr current(new Fulcrum(connection.get(), from, from_type, from, from));
+    Fulcrum::Ptr first(new Fulcrum(NULL, from, Fulcrum::OUT, from, from));
+    Fulcrum::Ptr current = first;
     Fulcrum::Ptr last = current;
 
     std::vector<Fulcrum::Ptr> targets;
     if(id >= 0) {
+        Connection::Ptr connection = graph_->getConnectionWithId(id);
         targets = connection->getFulcrums();
     }
-    targets.push_back(Fulcrum::Ptr(new Fulcrum(connection.get(), to, to_type, to, to)));
+    targets.push_back(Fulcrum::Ptr(new Fulcrum(NULL, to, Fulcrum::IN, to, to)));
 
     int sub_section = 0;
 
@@ -567,10 +582,10 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         QPainterPath path(current->pos());
 
         if(current->type() == Fulcrum::OUT) {
-            cp1 = current->pos() + (ccs.start_flipped ? -x_offset : x_offset) + y_offset;
+            cp1 = current->pos() + (ccs.start_points_left ? -x_offset : x_offset) + y_offset;
 
         } else if(current->type() == Fulcrum::IN) {
-            cp1 = current->pos() - (ccs.end_flipped ? -x_offset : x_offset) + y_offset;
+            cp1 = current->pos() + (ccs.end_points_left ? -x_offset : x_offset) + y_offset;
 
         } else {
             const Fulcrum::Ptr& last = targets[sub_section-1];
@@ -582,10 +597,10 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         }
 
         if(next->type() == Fulcrum::OUT) {
-            cp2 = next->pos() + (ccs.start_flipped ? -x_offset : x_offset) + y_offset;
+            cp2 = next->pos() + (ccs.start_points_left ? -x_offset : x_offset) + y_offset;
 
         } else if(next->type() == Fulcrum::IN) {
-            cp2 = next->pos() - (ccs.end_flipped ? -x_offset : x_offset) + y_offset;
+            cp2 = next->pos() + (ccs.end_points_left ? -x_offset : x_offset) + y_offset;
 
         } else {
             if(next->type() == Fulcrum::LINEAR) {
@@ -606,7 +621,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     // arrow
     QPolygonF arrow;
-    double a = (ccs.end_flipped ? -ARROW_LENGTH : ARROW_LENGTH) * scale_factor;
+    double a = (ccs.end_points_left ? ARROW_LENGTH : -ARROW_LENGTH) * scale_factor;
     arrow.append(QPointF(to.x()+ a, to.y()));
     arrow.append(QPointF(to.x(), to.y() -a/2.0));
     arrow.append(QPointF(to.x(), to.y() + a/2.0));
@@ -658,7 +673,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);
 
-    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, /*from.x() > to.x() ? Qt::DotLine : Qt::SolidLine*/ Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
     foreach(const Path& path, paths) {
         painter->drawPath(path.first);

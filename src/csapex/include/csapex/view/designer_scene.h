@@ -29,9 +29,9 @@ public:
     void drawBackground(QPainter *painter, const QRectF &rect);
     void drawForeground(QPainter *painter, const QRectF &rect);
     void drawItems(QPainter *painter, int numItems,
-                           QGraphicsItem *items[],
-                           const QStyleOptionGraphicsItem options[],
-                           QWidget *widget = 0);
+                   QGraphicsItem *items[],
+                   const QStyleOptionGraphicsItem options[],
+                   QWidget *widget = 0);
 
     void mousePressEvent(QGraphicsSceneMouseEvent* e);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
@@ -77,16 +77,27 @@ public Q_SLOTS:
     }
 
 private:
-    void drawConnection(QPainter *painter, Connection& connection);
-    void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id, Fulcrum::Type from_type, Fulcrum::Type to_type);
+    void drawConnection(QPainter *painter, const Connection &connection);
+    void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
     void drawActivity(QPainter *painter, int life, Connectable* c);
     void drawPort(QPainter *painter, NodeBox *box, Port* p);
 
 private:
     struct TempConnection {
-        Connectable* from;
-        QPointF to;
+        TempConnection(bool is_connected)
+            : is_connected(is_connected)
+        {}
+
+        bool is_connected;
+
+        union {
+            Connectable* from_p;
+            Output* from_c;
+        };
+
+        QPointF to_p;
+        Input* to_c;
     };
 
     struct CurrentConnectionState {
@@ -98,8 +109,8 @@ private:
         bool minimized_to;
         bool minimized;
 
-        bool start_flipped;
-        bool end_flipped;
+        bool start_points_left;
+        bool end_points_left;
 
         double r;
     };
