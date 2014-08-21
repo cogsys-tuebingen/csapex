@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 #include <csapex/utility/type.h>
+#include <csapex/utility/yaml_io.hpp>
 
 namespace csapex {
 namespace connection_types {
