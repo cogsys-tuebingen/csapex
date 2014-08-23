@@ -65,6 +65,20 @@ bool AnyMessage::acceptsConnectionFrom(const ConnectionType*) const
     return true;
 }
 
+
+
+/// YAML
+namespace YAML {
+Node convert<csapex::connection_types::AnyMessage>::encode(const csapex::connection_types::AnyMessage& rhs) {
+    return Node();
+}
+
+bool convert<csapex::connection_types::AnyMessage>::decode(const Node& node, csapex::connection_types::AnyMessage& rhs) {
+    return true;
+}
+}
+
+
 /***
  * NOMESSAGE
  */

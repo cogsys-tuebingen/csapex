@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <deque>
+#include <map>
 
 namespace csapex
 {
@@ -32,12 +33,13 @@ public:
         void entries(std::vector<std::pair<std::string, int> > &out) const;
 
     public:
-        std::vector<Interval::Ptr> sub;
+        std::map<std::string, Interval::Ptr> sub;
 
     private:
         std::string name_;
         QDateTime start_;
         QDateTime end_;
+        int length_;
     };
 
     class Interlude : public boost::noncopyable {
@@ -49,6 +51,7 @@ public:
         ~Interlude();
     private:
         Timer* parent_;
+        Interval::Ptr interval_;
     };
 
 public:

@@ -41,11 +41,7 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
-    virtual void write(std::ostream& out) const;
     virtual void writeRaw(const std::string& file, const std::string &suffix) const;
-
-    virtual void writeYaml(YAML::Emitter& yaml) const = 0;
-    virtual void readYaml(const YAML::Node& node) = 0;
 
 protected:
     void setName(const std::string& name);
@@ -58,12 +54,6 @@ private:
     static ConnectionType::Ptr default_;
 };
 
-}
-
-inline std::ostream& operator << (std::ostream& out, csapex::ConnectionType& obj)
-{
-    obj.write(out);
-    return out;
 }
 
 #endif // CONNECTION_TYPE_H

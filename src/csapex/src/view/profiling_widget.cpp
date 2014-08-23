@@ -232,8 +232,8 @@ float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& in
     p.drawRect(QRectF(current_draw_x + indiv_width_ - w, bottom - height - height_offset, w, height));
 
     float h = height_offset;
-    for(std::vector<Timer::Interval::Ptr>::const_iterator sub = interval->sub.begin(); sub != interval->sub.end(); ++sub) {
-        const Timer::Interval::Ptr& sub_interval = *sub;
+    for(std::map<std::string, Timer::Interval::Ptr>::const_iterator sub = interval->sub.begin(); sub != interval->sub.end(); ++sub) {
+        const Timer::Interval::Ptr& sub_interval = sub->second;
         h += paintInterval(p, sub_interval, h, depth + 1);
     }
 

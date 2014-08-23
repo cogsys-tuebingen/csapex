@@ -77,19 +77,6 @@ bool ConnectionType::isValid() const
     return true;
 }
 
-void ConnectionType::write(std::ostream &out) const
-{
-    YAML::Emitter yaml;
-    yaml << /*YAML::Flow << */YAML::BeginMap;
-    yaml << YAML::Key << "type" << YAML::Value << name();
-
-    writeYaml(yaml);
-
-    yaml << YAML::EndMap;
-
-    out << yaml.c_str();
-}
-
 void ConnectionType::writeRaw(const std::string &/*file*/, const std::string& /*suffix*/) const
 {
     std::cerr << "error: writeRaw not implemented for message type " << name() << std::endl;

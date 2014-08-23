@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection_type.h>
+#include <csapex/msg/message.h>
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>
@@ -22,16 +23,32 @@ class MessageFactory : public Singleton<MessageFactory>
 
 public:
     typedef boost::function<ConnectionType::Ptr()>  Constructor;
+    struct Converter
+    {
+        typedef boost::function<YAML::Node(const csapex::ConnectionType&)> Encoder;
+        typedef boost::function<bool(const YAML::Node&, csapex::ConnectionType&)> Decoder;
+
+        Converter(Encoder encode, Decoder decode)
+            : encoder(encode), decoder(decode)
+        {}
+
+        Encoder encoder;
+        Decoder decoder;
+    };
 
     typedef std::runtime_error DeserializationError;
 
 public:
     template <typename M>
     static void registerMessage() {
-        registerMessage(boost::bind(&M::make));
+        registerMessage(boost::bind(&M::make),
+                        Converter(boost::bind(&MessageFactory::encode<M>, _1),
+                                  boost::bind(&MessageFactory::decode<M>, _1, _2)));
     }
 
     static ConnectionType::Ptr createMessage(const std::string& type);
+    static ConnectionType::Ptr deserializeMessage(const YAML::Node &node);
+    static YAML::Node serializeMessage(const ConnectionType::Ptr& msg);
 
     static ConnectionType::Ptr readMessage(const std::string& path);
     static void writeMessage(const std::string& path, const ConnectionType::Ptr msg);
@@ -39,14 +56,25 @@ public:
     static ConnectionType::Ptr readYaml(const YAML::Node& node);
 
 private:
-    MessageFactory();
+    template <typename Message>
+    static YAML::Node encode(const csapex::ConnectionType& msg) {
+        return YAML::convert<Message>::encode(dynamic_cast<const Message&>(msg));
+    }
 
-    static void registerMessage(Constructor constructor);
+    template <typename Message>
+    static bool decode(const YAML::Node& node, csapex::ConnectionType& msg) {
+        return YAML::convert<Message>::decode(node, dynamic_cast<Message&>(msg));
+    }
 
 private:
-    std::map<std::string, Constructor> classes;
-};
+    MessageFactory();
 
+    static void registerMessage(Constructor constructor, Converter converter);
+
+private:
+    std::map<std::string, Constructor> type_to_constructor;
+    std::map<std::string, Converter> type_to_converter;
+};
 }
 
 #endif // MESSAGE_FACTORY_H

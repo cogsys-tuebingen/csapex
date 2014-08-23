@@ -17,15 +17,49 @@ ConnectionType::Ptr MessageFactory::createMessage(const std::string& type)
 {
     MessageFactory& i = instance();
 
-    if(i.classes.empty()) {
+    if(i.type_to_constructor.empty()) {
         throw std::runtime_error("no connection types registered!");
     }
 
-    if(i.classes.find(type) == i.classes.end()) {
+    if(i.type_to_constructor.find(type) == i.type_to_constructor.end()) {
         throw std::runtime_error(std::string("no such type (") + type + ")");
     }
 
-    return i.classes[type]();
+    return i.type_to_constructor[type]();
+}
+
+ConnectionType::Ptr MessageFactory::deserializeMessage(const YAML::Node &node)
+{
+    MessageFactory& i = instance();
+
+    std::string type;
+    node["type"] >> type;
+
+    if(i.type_to_constructor.empty()) {
+        throw std::runtime_error("no connection types registered!");
+    }
+
+    if(i.type_to_constructor.find(type) == i.type_to_constructor.end()) {
+        throw std::runtime_error(std::string("no such type (") + type + ")");
+    }
+
+    ConnectionType::Ptr msg = i.type_to_constructor[type]();
+    i.type_to_converter.at(type).decoder(node["data"], *msg);
+
+    return msg;
+}
+
+YAML::Node MessageFactory::serializeMessage(const ConnectionType::Ptr &msg)
+{
+    MessageFactory& i = instance();
+
+    std::string type = msg->name();
+
+    YAML::Node node;
+    node["type"] = type;
+    node["data"] = i.type_to_converter.at(type).encoder(*msg);
+
+    return node;
 }
 
 ConnectionType::Ptr MessageFactory::readMessage(const std::string &path)
@@ -45,34 +79,35 @@ ConnectionType::Ptr MessageFactory::readMessage(const std::string &path)
 void MessageFactory::writeMessage(const std::string &path, const ConnectionType::Ptr msg)
 {
     std::ofstream out(path.c_str());
-    msg->write(out);
+
+    YAML::Emitter yaml;
+    yaml << serializeMessage(msg);
+    out << yaml.c_str();
 }
 
 ConnectionType::Ptr MessageFactory::readYaml(const YAML::Node &node)
 {
-    std::string type;
-    node["type"] >> type;
-
-    ConnectionType::Ptr msg = MessageFactory::createMessage(type);
+    ConnectionType::Ptr msg = MessageFactory::deserializeMessage(node);
     if(!msg) {
-        throw DeserializationError("message type unknown");
+        std::string type;
+        node["type"] >> type;
+        throw DeserializationError(std::string("message type '") + type + "' unknown");
     }
-
-    msg->readYaml(node);
 
     return msg;
 }
 
-void MessageFactory::registerMessage(Constructor constructor)
+void MessageFactory::registerMessage(Constructor constructor, Converter converter)
 {
     MessageFactory& i = instance();
 
     std::string type = constructor()->name();
-    std::map<std::string, Constructor>::const_iterator it = i.classes.find(type);
-    apex_assert_hard(it == i.classes.end());
+    std::map<std::string, Constructor>::const_iterator it = i.type_to_constructor.find(type);
+    apex_assert_hard(it == i.type_to_constructor.end());
 //    if(name != type) {
 //        throw std::logic_error(name + " cannot be registered as a connection type, its name is different from the specified type: " + type);
 //    }
 
-    i.classes[type] = constructor;
+    i.type_to_constructor.insert(std::make_pair(type, constructor));
+    i.type_to_converter.insert(std::make_pair(type, converter));
 }

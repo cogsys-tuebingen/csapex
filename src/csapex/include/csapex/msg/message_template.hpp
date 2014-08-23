@@ -37,12 +37,6 @@ struct MessageTemplate : public Message {
         return name() == other_side->name();
     }
 
-    void writeYaml(YAML::Emitter& yaml) const {
-        yaml << YAML::Key << "value" << YAML::Value << "not implemented";
-    }
-    void readYaml(YAML::Node& node) {
-    }
-
     Type value;
 };
 
