@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
+#include <csapex/msg/message_factory.h>
 
 using namespace csapex;
 

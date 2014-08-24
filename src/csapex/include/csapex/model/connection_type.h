@@ -15,9 +15,8 @@ public:
     typedef boost::shared_ptr<const ConnectionType> ConstPtr;
 
 public:
-    template <typename C>
-    static void setDefaultConnectionType() {
-        default_ = C::make();
+    static void setDefaultConnectionType(ConnectionType::Ptr type) {
+        default_ = type;
     }
 
     static ConnectionType::Ptr getDefaultConnectionType();

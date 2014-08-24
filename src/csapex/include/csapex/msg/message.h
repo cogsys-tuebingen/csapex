@@ -5,6 +5,7 @@
 #include <csapex/model/connection_type.h>
 #include <csapex/utility/type.h>
 #include <csapex/utility/yaml_io.hpp>
+#include <csapex/msg/message_traits.h>
 
 namespace csapex {
 namespace connection_types {
@@ -20,10 +21,6 @@ protected:
     virtual ~Message();
 
 public:
-    void writeYaml(YAML::Emitter& yaml) const;
-    void readYaml(const YAML::Node& node);
-
-public:
     std::string frame_id;
 };
 
@@ -32,14 +29,12 @@ struct NoMessage : public Message
 public:
     typedef boost::shared_ptr<NoMessage> Ptr;
 
-protected:
+public:
     NoMessage();
 
 public:
     virtual ConnectionType::Ptr clone() ;
     virtual ConnectionType::Ptr toType();
-
-    static ConnectionType::Ptr make();
 
     bool canConnectTo(const ConnectionType* other_side) const;
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
@@ -50,14 +45,12 @@ struct AnyMessage : public Message
 public:
     typedef boost::shared_ptr<AnyMessage> Ptr;
 
-protected:
+public:
     AnyMessage();
 
 public:
     virtual ConnectionType::Ptr clone() ;
     virtual ConnectionType::Ptr toType();
-
-    static ConnectionType::Ptr make();
 
     bool canConnectTo(const ConnectionType* other_side) const;
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
@@ -71,6 +64,12 @@ template<>
 struct convert<csapex::connection_types::AnyMessage> {
   static Node encode(const csapex::connection_types::AnyMessage& rhs);
   static bool decode(const Node& node, csapex::connection_types::AnyMessage& rhs);
+};
+
+template<>
+struct convert<csapex::connection_types::Message> {
+  static Node encode(const csapex::connection_types::Message& rhs);
+  static bool decode(const Node& node, csapex::connection_types::Message& rhs);
 };
 }
 

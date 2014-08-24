@@ -3,6 +3,10 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
+#include <csapex/utility/register_msg.h>
+
+CSAPEX_REGISTER_MESSAGE(csapex::connection_types::AnyMessage)
+//CSAPEX_REGISTER_MESSAGE(csapex::connection_types::NoMessage)
 
 using namespace csapex;
 using namespace connection_types;
@@ -21,13 +25,22 @@ Message::~Message()
 
 }
 
-void Message::writeYaml(YAML::Emitter&) const
-{
 
+/// YAML
+namespace YAML {
+Node convert<csapex::connection_types::Message>::encode(const csapex::connection_types::Message& rhs) {
+    Node node;
+    node["frame_id"] = rhs.frame_id;
+    return node;
 }
-void Message::readYaml(const YAML::Node&)
-{
 
+bool convert<csapex::connection_types::Message>::decode(const Node& node, csapex::connection_types::Message& rhs) {
+    if(!node.IsMap()) {
+        return false;
+    }
+    rhs.frame_id = node["frame_id"].as<std::string>();
+    return true;
+}
 }
 
 /***
@@ -49,12 +62,6 @@ ConnectionType::Ptr AnyMessage::toType()
     return new_msg;
 }
 
-ConnectionType::Ptr AnyMessage::make()
-{
-    Ptr new_msg(new AnyMessage);
-    return new_msg;
-}
-
 bool AnyMessage::canConnectTo(const ConnectionType*) const
 {
     return true;
@@ -70,10 +77,14 @@ bool AnyMessage::acceptsConnectionFrom(const ConnectionType*) const
 /// YAML
 namespace YAML {
 Node convert<csapex::connection_types::AnyMessage>::encode(const csapex::connection_types::AnyMessage& rhs) {
-    return Node();
+    return convert<csapex::connection_types::Message>::encode(rhs);
 }
 
 bool convert<csapex::connection_types::AnyMessage>::decode(const Node& node, csapex::connection_types::AnyMessage& rhs) {
+    if(!node.IsMap()) {
+        return false;
+    }
+    convert<csapex::connection_types::Message>::decode(node, rhs);
     return true;
 }
 }
@@ -93,12 +104,6 @@ ConnectionType::Ptr NoMessage::clone()
 }
 
 ConnectionType::Ptr NoMessage::toType()
-{
-    Ptr new_msg(new NoMessage);
-    return new_msg;
-}
-
-ConnectionType::Ptr NoMessage::make()
 {
     Ptr new_msg(new NoMessage);
     return new_msg;

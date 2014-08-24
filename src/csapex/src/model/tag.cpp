@@ -42,11 +42,14 @@ std::string Tag::getName() const
 
 const Tag::Ptr Tag::Manager::get(const std::string &name)
 {
-    try {
-        return tags_.at(name);
-    } catch(const std::exception& e) {
+    std::map<std::string, Tag::Ptr>::const_iterator it = tags_.find(name);
+
+    if(it == tags_.end()) {
         create(name);
         return get(name);
+
+    } else {
+        return it->second;
     }
 }
 

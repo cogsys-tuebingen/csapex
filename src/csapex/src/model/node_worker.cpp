@@ -95,7 +95,7 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
     {
         Input* cin = new Input(*node_->settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
 
-        cin->setType(connection_types::GenericValueMessage<T>::make());
+        cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
         cin->enable();
         /// TODO: make synchronized!!!!!
@@ -115,7 +115,7 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
     {
         Output* cout = new Output(*node_->settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
 
-        cout->setType(connection_types::GenericValueMessage<T>::make());
+        cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
         cout->enable();
         /// TODO: make synchronized!!!!!

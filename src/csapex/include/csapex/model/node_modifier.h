@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/multi_connection_type.h>
 #include <csapex/msg/message.h>
+#include <csapex/msg/message_traits.h>
 #include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/csapex_fwd.h>
 
@@ -21,7 +22,7 @@ public:
     template <typename T>
     Input* addInput(const std::string& label, bool optional = false, bool async = false,
                           typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
-        return addInput(T::make(), label, optional, async);
+        return addInput(connection_types::makeEmptyMessage<T>(), label, optional, async);
     }
     template <typename Container, typename T>
     Input* addInput(const std::string& label, bool optional = false, bool async = false,
@@ -33,7 +34,7 @@ public:
     template <typename T>
     Input* addInput(const std::string& label, bool optional = false, bool async = false,
                           typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
-        return addInput(connection_types::GenericPointerMessage<T>::make(), label, optional, async);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, optional, async);
     }
     template <typename Container, typename T>
     Input* addInput(const std::string& label, bool optional = false, bool async = false,
@@ -45,7 +46,7 @@ public:
     template <typename T>
     Output* addOutput(const std::string& label,
                             typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
-        return addOutput(T::make(), label);
+        return addOutput(connection_types::makeEmptyMessage<T>(), label);
     }
     template <typename Container, typename T>
     Output* addOutput(const std::string& label,
@@ -57,13 +58,11 @@ public:
     template <typename T>
     Output* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
-        //RosMessageConversionT<T>::registerConversion();
-        return addOutput(connection_types::GenericPointerMessage<T>::make(), label);
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label);
     }
     template <typename Container, typename T>
     Output* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
-        //RosMessageConversionT<T>::registerConversion();
         return addOutput(Container::template make<T>(), label);
     }
 

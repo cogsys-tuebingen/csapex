@@ -87,7 +87,7 @@ fi
 ###
 ### TEST IF NODE NAME IS FREE IN PACKAGEXML
 ###
-if [[ `cat $PLUGINXML | grep "type=.*$NODE_NAME" | wc -l` != 0 ]]; then
+if [[ `cat $PLUGINXML | grep "type=.*$NODE_NAME\"" | wc -l` != 0 ]]; then
     echo "ERROR: $NODE_NAME already exists in $PLUGINXML"
     exit
 fi

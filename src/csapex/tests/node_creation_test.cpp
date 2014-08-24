@@ -3,8 +3,9 @@
 #include <csapex/msg/message.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/generic_node_factory.hpp>
+#include <csapex/utility/register_msg.h>
+//#include <csapex/msg/message_traits.h>
 #include "gtest/gtest.h"
-
 
 namespace csapex {
 
@@ -78,6 +79,21 @@ struct type<MockupMessage> {
     }
 };
 }
+}
+
+
+/// YAML
+namespace YAML {
+template<>
+struct convert<csapex::MockupMessage> {
+  static Node encode(const csapex::MockupMessage&){return Node();}
+  static bool decode(const Node&, csapex::MockupMessage&){return true;}
+};
+}
+
+CSAPEX_REGISTER_MESSAGE(csapex::MockupMessage)
+
+namespace csapex {
 
 void functionToBeWrappedIntoANode(const MockupMessage& input, const MockupMessage& input2, int parameter, MockupMessage& output)
 {

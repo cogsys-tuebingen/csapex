@@ -26,25 +26,46 @@ struct GenericPointerMessage : public Message {
         return new_msg;
     }
 
-    static ConnectionType::Ptr make(){
-        Ptr new_msg(new GenericPointerMessage<Type>("/"));
-        return new_msg;
-    }
-
     bool acceptsConnectionFrom(const ConnectionType* other_side) const {
         return name() == other_side->name();
-    }
-
-    void writeYaml(YAML::Emitter& yaml) const {
-        yaml << YAML::Key << "value" << YAML::Value << "not implemented";
-    }
-    void readYaml(YAML::Node& node) {
     }
 
     typename boost::shared_ptr<Type> value;
 };
 
+
+/// TRAITS
+template <typename T>
+struct type<GenericPointerMessage<T> > {
+    static std::string name() {
+        return std::string("Pointer<") + type2name(typeid(T)) + ">";
+    }
+};
+
 }
 }
+
+/// YAML
+namespace YAML {
+template<typename T>
+struct convert<csapex::connection_types::GenericPointerMessage<T> > {
+  static Node encode(const csapex::connection_types::GenericPointerMessage<T>& rhs) {
+      Node node;
+      node["value"] = *rhs.value;
+      return node;
+  }
+
+  static bool decode(const Node& node, csapex::connection_types::GenericPointerMessage<T>& rhs) {
+      if(!node.IsMap()) {
+          return false;
+      }
+
+      rhs.value.reset(new T);
+      (*rhs.value) = node["value"].as<T>();
+      return true;
+  }
+};
+}
+
 
 #endif // GENERIC_POINTER_MESSAGE_H

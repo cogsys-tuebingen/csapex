@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/msg/message.h>
+#include <csapex/msg/message_traits.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -64,7 +65,7 @@ void ConnectionType::setSequenceNumber(int seq_no)
 ConnectionType::Ptr ConnectionType::makeDefault()
 {
     if(!default_) {
-        ConnectionType::default_ = connection_types::AnyMessage::make();
+        ConnectionType::default_ = connection_types::makeEmpty<connection_types::AnyMessage>();
     }
 
     ConnectionType::Ptr res = default_->clone();

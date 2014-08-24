@@ -13,15 +13,16 @@
 #include <csapex/model/tag.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/graph_worker.h>
+#include <csapex/utility/register_msg.h>
 
 /// SYSTEM
 #include <fstream>
 #include <boost/foreach.hpp>
 
-using namespace csapex;
-
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)
 Q_DECLARE_METATYPE(std::string)
+
+using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *node_factory, CommandDispatcher* cmd_dispatcher)
     : settings_(settings), graph_worker_(graph), node_factory_(node_factory), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
@@ -31,7 +32,6 @@ CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *no
     qRegisterMetaType < QSharedPointer<QImage> > ("QSharedPointer<QImage>");
     qRegisterMetaType < std::string > ("std::string");
 
-    MessageFactory::registerMessage<connection_types::AnyMessage> ();
     StreamInterceptor::instance().start();
 
     settings.settingsChanged.connect(boost::bind(&CsApexCore::settingsChanged, this));

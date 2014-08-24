@@ -7,6 +7,7 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/assert.h>
+#include <csapex/msg/message_traits.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -174,7 +175,7 @@ void Output::sendMessages()
         message_ = message_to_send_;
         message_to_send_.reset();
     } else {
-        message_ = connection_types::NoMessage::make();
+        message_ = connection_types::makeEmpty<connection_types::NoMessage>();
     }
 
     message_->setSequenceNumber(seq_no_);

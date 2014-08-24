@@ -26,19 +26,8 @@ struct GenericValueMessage : public Message {
         return new_msg;
     }
 
-    static ConnectionType::Ptr make(){
-        Ptr new_msg(new GenericValueMessage<Type>("/"));
-        return new_msg;
-    }
-
     bool acceptsConnectionFrom(const ConnectionType* other_side) const {
         return name() == other_side->name();
-    }
-
-    void writeYaml(YAML::Emitter& yaml) const {
-        yaml << YAML::Key << "value" << YAML::Value << value;
-    }
-    void readYaml(YAML::Node& node) {
     }
 
     Type getValue() {
@@ -48,7 +37,38 @@ struct GenericValueMessage : public Message {
     Type value;
 };
 
+
+/// TRAITS
+template <typename T>
+struct type<GenericValueMessage<T> > {
+    static std::string name() {
+        return std::string("Value<") + type2name(typeid(T)) + ">";
+    }
+};
+
 }
 }
+
+/// YAML
+namespace YAML {
+template<typename T>
+struct convert<csapex::connection_types::GenericValueMessage<T> > {
+  static Node encode(const csapex::connection_types::GenericValueMessage<T>& rhs) {
+      Node node;
+      node["value"] = rhs.value;
+      return node;
+  }
+
+  static bool decode(const Node& node, csapex::connection_types::GenericValueMessage<T>& rhs) {
+      if(!node.IsMap()) {
+          return false;
+      }
+
+      rhs.value = node["value"].as<T>();
+      return true;
+  }
+};
+}
+
 
 #endif // GENERIC_VALUE_MESSAGE_H

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 #include <csapex/msg/message.h>
+#include <csapex/msg/message_traits.h>
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>
@@ -21,6 +22,9 @@ class MessageFactory : public Singleton<MessageFactory>
 {
     friend class Singleton<MessageFactory>;
 
+    template <typename M>
+    friend class csapex::connection_types::MessageRegistered;
+
 public:
     typedef boost::function<ConnectionType::Ptr()>  Constructor;
     struct Converter
@@ -36,17 +40,17 @@ public:
         Decoder decoder;
     };
 
+    typedef std::runtime_error SerializationError;
     typedef std::runtime_error DeserializationError;
 
 public:
     template <typename M>
-    static void registerMessage() {
-        registerMessage(boost::bind(&M::make),
-                        Converter(boost::bind(&MessageFactory::encode<M>, _1),
-                                  boost::bind(&MessageFactory::decode<M>, _1, _2)));
+    static ConnectionType::Ptr createMessage() {
+        return connection_types::makeEmpty<M>();
     }
 
     static ConnectionType::Ptr createMessage(const std::string& type);
+
     static ConnectionType::Ptr deserializeMessage(const YAML::Node &node);
     static YAML::Node serializeMessage(const ConnectionType::Ptr& msg);
 
@@ -56,6 +60,13 @@ public:
     static ConnectionType::Ptr readYaml(const YAML::Node& node);
 
 private:
+    template <typename M>
+    static void registerMessage() {
+        MessageFactory::instance().registerMessage(boost::bind(&MessageFactory::createMessage<M>),
+                                                   Converter(boost::bind(&MessageFactory::encode<M>, _1),
+                                                             boost::bind(&MessageFactory::decode<M>, _1, _2)));
+    }
+
     template <typename Message>
     static YAML::Node encode(const csapex::ConnectionType& msg) {
         return YAML::convert<Message>::encode(dynamic_cast<const Message&>(msg));

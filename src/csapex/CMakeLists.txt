@@ -265,6 +265,7 @@ add_custom_command(TARGET cfg POST_BUILD
 # TESTS
 #
 set(CSAPEX_TESTING 0 CACHE BOOL "build tests?")
+message("BUILD TESTS? " ${CSAPEX_TESTING})
 if(${CSAPEX_TESTING})
     enable_testing()
 

@@ -28,10 +28,6 @@ struct MessageTemplate : public Message {
         return new_msg;
     }
 
-    static ConnectionType::Ptr make(){
-        Ptr new_msg(new Instance);
-        return new_msg;
-    }
 
     bool acceptsConnectionFrom(const ConnectionType* other_side) const {
         return name() == other_side->name();

@@ -36,30 +36,40 @@ ConnectionType::Ptr MessageFactory::deserializeMessage(const YAML::Node &node)
     node["type"] >> type;
 
     if(i.type_to_constructor.empty()) {
-        throw std::runtime_error("no connection types registered!");
+        throw DeserializationError("no connection types registered!");
     }
 
     if(i.type_to_constructor.find(type) == i.type_to_constructor.end()) {
-        throw std::runtime_error(std::string("no such type (") + type + ")");
+        throw DeserializationError(std::string("no such type (") + type + ")");
     }
 
     ConnectionType::Ptr msg = i.type_to_constructor[type]();
-    i.type_to_converter.at(type).decoder(node["data"], *msg);
+    try {
+        i.type_to_converter.at(type).decoder(node["data"], *msg);
+    } catch(const YAML::Exception& e) {
+        throw DeserializationError(std::string("error while deserializing: ") + e.msg);
+    }
 
     return msg;
 }
 
 YAML::Node MessageFactory::serializeMessage(const ConnectionType::Ptr &msg)
 {
-    MessageFactory& i = instance();
+    try {
+        MessageFactory& i = instance();
 
-    std::string type = msg->name();
+        std::string type = msg->name();
 
-    YAML::Node node;
-    node["type"] = type;
-    node["data"] = i.type_to_converter.at(type).encoder(*msg);
+        YAML::Node node;
+        node["type"] = type;
+        node["data"] = i.type_to_converter.at(type).encoder(*msg);
 
-    return node;
+        return node;
+
+    } catch(const std::out_of_range& e) {
+        throw SerializationError(std::string("cannot serialize message of type ")
+                                 + msg->name() + ", no YAML converter registered!");
+    }
 }
 
 ConnectionType::Ptr MessageFactory::readMessage(const std::string &path)
@@ -104,9 +114,9 @@ void MessageFactory::registerMessage(Constructor constructor, Converter converte
     std::string type = constructor()->name();
     std::map<std::string, Constructor>::const_iterator it = i.type_to_constructor.find(type);
     apex_assert_hard(it == i.type_to_constructor.end());
-//    if(name != type) {
-//        throw std::logic_error(name + " cannot be registered as a connection type, its name is different from the specified type: " + type);
-//    }
+    //    if(name != type) {
+    //        throw std::logic_error(name + " cannot be registered as a connection type, its name is different from the specified type: " + type);
+    //    }
 
     i.type_to_constructor.insert(std::make_pair(type, constructor));
     i.type_to_converter.insert(std::make_pair(type, converter));
