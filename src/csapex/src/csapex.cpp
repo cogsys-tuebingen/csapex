@@ -83,7 +83,7 @@ int Main::run()
     return result;
 }
 
-int Main::main(bool headless, const std::string& config, const std::string& path_to_bin)
+int Main::main(bool headless, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
     Settings settings;
     settings.setCurrentConfig(config);
@@ -98,6 +98,12 @@ int Main::main(bool headless, const std::string& config, const std::string& path
         settings.add(param::ParameterFactory::declareBool("headless", headless));
     } else {
         settings.set("headless", headless);
+    }
+
+    if(!settings.knows("additional_args")) {
+        settings.add(param::ParameterFactory::declareValue< std::vector<std::string> >("additional_args", additional_args));
+    } else {
+        settings.set("additional_args", additional_args);
     }
 
 
@@ -172,6 +178,7 @@ int main(int argc, char** argv)
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "show help message")
+            ("dump", "show variables")
             ("headless", "run without gui")
             ("input", "config file to load")
             ("ros-name", "(ros parameter (provided by launch files))")
@@ -206,8 +213,9 @@ int main(int argc, char** argv)
     // filters all qt parameters from argv
     CsApexApp app(argc, argv, headless);
 
-    // no check for remaining parameters
+    // now check for remaining parameters
     po::variables_map vm;
+    std::vector<std::string> additional_args;
 
     try {
         po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).positional(p).run();
@@ -216,15 +224,26 @@ int main(int argc, char** argv)
 
         po::notify(vm);
 
+        additional_args = po::collect_unrecognized(parsed.options, po::include_positional);
+
     } catch(const std::exception& e) {
         std::cerr << "cannot parse parameters: " << e.what() << std::endl;
         return 4;
     }
 
+
     // display help?
     if(vm.count("help")) {
         std::cerr << desc << std::endl;
         return 1;
+    }
+    if(vm.count("dump")) {
+        std::cout << "to be passed on:\n";
+        for(std::size_t i = 0; i < additional_args.size(); ++i) {
+            std::cout << additional_args[i] << "\n";
+        }
+        std::cout << std::flush;
+        return 0;
     }
 
     // which file to use?
@@ -237,6 +256,6 @@ int main(int argc, char** argv)
 
     // start the app
     Main m(app);
-    return m.main(headless, input, path_to_bin);
+    return m.main(headless, input, path_to_bin, additional_args);
 }
 
