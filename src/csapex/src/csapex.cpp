@@ -148,7 +148,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
         core.startup();
 
         w.show();
-        splash->finish(&w);
+        splash->close();
 
         int res = run();
 
