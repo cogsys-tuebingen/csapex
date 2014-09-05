@@ -76,7 +76,7 @@ Node::Ptr NodeConstructor::makePrototypeContent() const
 Node::Ptr NodeConstructor::makeContent(const UUID& uuid) const
 {
     Node::Ptr res = c();
-    res->initialize(type_, uuid, new NodeWorker(res.get()), &settings_);
+    res->initialize(type_, uuid, new NodeWorker(settings_, res.get()), &settings_);
     res->getNodeState()->setLabel(uuid);
 
     return res;

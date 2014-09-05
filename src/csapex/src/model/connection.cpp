@@ -16,13 +16,13 @@ using namespace csapex;
 int Connection::next_connection_id_ = 0;
 
 Connection::Connection(Output *from, Input *to)
-    : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
+    : from_(from), to_(to), id_(next_connection_id_++)
 {
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Connectable *from, Connectable *to)
-    : from_(from), to_(to), id_(next_connection_id_++), message_count(0)
+    : from_(from), to_(to), id_(next_connection_id_++)
 {
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
@@ -30,7 +30,7 @@ Connection::Connection(Connectable *from, Connectable *to)
 }
 
 Connection::Connection(Output *from, Input *to, int id)
-    : from_(from), to_(to), id_(id), message_count(0)
+    : from_(from), to_(to), id_(id)
 {
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
@@ -60,19 +60,12 @@ bool Connection::operator == (const Connection& c) const
     return from_ == c.from() && to_ == c.to();
 }
 
-int Connection::activity() const
-{
-    return std::ceil(message_count);
-}
-
 void Connection::messageSentEvent()
 {
-    message_count = std::min(static_cast<double> (Settings::activity_marker_max_lifetime_), message_count + 1);
 }
 
 void Connection::tick()
 {
-    message_count = std::max(0.0, message_count - 0.1);
 }
 
 std::vector<Fulcrum::Ptr> Connection::getFulcrums() const

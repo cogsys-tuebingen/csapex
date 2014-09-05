@@ -16,14 +16,17 @@
 
 using namespace csapex;
 
-NodeWorker::NodeWorker(Node* node)
-    : node_(node), private_thread_(NULL),
+static const int DEFAULT_HISTORY_LENGTH = 15;
+
+NodeWorker::NodeWorker(Settings& settings, Node* node)
+    : settings_(settings), node_(node), private_thread_(NULL),
       timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false)
 {
-    timer_history_.resize(Settings::timer_history_length_);
-    apex_assert_hard(timer_history_.size() == Settings::timer_history_length_);
-    apex_assert_hard(timer_history_.capacity() == Settings::timer_history_length_);
+    std::size_t timer_history_length = settings_.get<int>("timer_history_length", DEFAULT_HISTORY_LENGTH);
+    timer_history_.resize(timer_history_length);
+    apex_assert_hard(timer_history_.size() == timer_history_length);
+    apex_assert_hard(timer_history_.capacity() == timer_history_length);
 
     apex_assert_hard(node_);
 
@@ -548,7 +551,7 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
     // send the messages
     sendMessages();
 
-    if(++timer_history_pos_ >= (int) Settings::timer_history_length_) {
+    if(++timer_history_pos_ >= (int) timer_history_.size()) {
         timer_history_pos_ = 0;
     }
     timer_history_[timer_history_pos_] = t;

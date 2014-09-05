@@ -47,12 +47,13 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     up = padding;
     bottom = h_ - padding;
 
+    std::size_t history_length = node_worker_->timer_history_.size();
+
     content_width_ = right - left - 2 * padding;
-    indiv_width_ = content_width_ / Settings::timer_history_length_;
+    indiv_width_ = content_width_ / history_length;
     content_height_ = bottom - up - 2 * padding;
 
-    size_t max = Settings::timer_history_length_;
-    int n = std::min(max, node_worker_->timer_history_.size());
+    int n = history_length;
 
     int max_time_ms = 10;
     const std::vector<Timer::Ptr>& h = node_worker_->timer_history_;
@@ -137,7 +138,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
         max_time_ms_ = std::max(1, max_time_ms);
 
-        current_draw_x = left + padding + (max - n) * indiv_width_;
+        current_draw_x = left + padding + (history_length - n) * indiv_width_;
         for(int time = 0; time < n; ++time) {
 
             static const float min_opacity = 0.25f;

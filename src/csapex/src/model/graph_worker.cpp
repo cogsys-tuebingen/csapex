@@ -48,8 +48,6 @@ void GraphWorker::reset()
 {
     stop();
 
-    settings_->setProcessingAllowed(true);
-
     graph_->uuids_.clear();
     graph_->connections_.clear();
 }

@@ -517,11 +517,6 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.end_points_left = !top->isFlipped();
 
     drawConnection(painter, p1, p2, id);
-
-    int f = connection.activity();
-
-    drawActivity(painter, f, from);
-    drawActivity(painter, f, to);
 }
 
 void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id)
@@ -730,30 +725,6 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
         p.setColor(color.dark());
         painter->setPen(p);
         painter->drawText(rect, text, opt);
-    }
-}
-
-void DesignerScene::drawActivity(QPainter *painter, int life, Connectable* c)
-{
-    // reset brush if it is set
-    painter->setBrush(QBrush());
-
-    Port* port = widget_ctrl_->getPort(c);
-    if(port && life > 0) {
-        int r = std::min(Settings::activity_marker_max_lifetime_, life);
-        double f = r / static_cast<double> (Settings::activity_marker_max_lifetime_);
-
-        int min = port->width() / 2 - 2;
-        int max = min * 1.2;
-        double w = min + f * (max - min);
-
-        QColor color = c->isOutput() ? output_color_ : input_color_;
-        color.setAlpha(activity_marker_min_opacity_ + (activity_marker_max_opacity_ - activity_marker_min_opacity_) * f);
-
-        QPointF pos = centerPoint(port);
-
-        painter->setPen(QPen(color, w));
-        painter->drawEllipse(pos, w, w);
     }
 }
 

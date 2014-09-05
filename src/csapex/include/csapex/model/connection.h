@@ -44,7 +44,6 @@ public:
 
     bool contains(Connectable* c) const;
 
-    int activity() const;
     void tick();
 
 private Q_SLOTS:
@@ -81,8 +80,6 @@ protected:
     std::vector<FulcrumPtr> fulcrums_;
 
     int id_;
-
-    double message_count;
 
     static int next_connection_id_;
 };

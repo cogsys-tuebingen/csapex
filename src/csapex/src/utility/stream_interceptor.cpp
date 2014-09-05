@@ -62,13 +62,13 @@ StreamInterceptorWorker::~StreamInterceptorWorker()
 void StreamInterceptorWorker::run() {
     csapex::thread::set_name("stream_interceptor");
 
-    if (isatty(fileno(stdin))) {
-        std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
-        return;
+//    if (isatty(fileno(stdin))) {
+//        std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
+//        return;
 
-    } else {
-        std::cout << "<b>std::cin is a file or pipe -> polling</b>" << std::endl;
-    }
+//    } else {
+//        std::cout << "<b>std::cin is a file or pipe -> polling</b>" << std::endl;
+//    }
 
     while(running) {
         std::string line;

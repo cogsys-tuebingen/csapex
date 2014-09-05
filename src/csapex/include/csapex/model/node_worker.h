@@ -29,7 +29,7 @@ public:
     typedef boost::shared_ptr<NodeWorker> Ptr;
 
 public:
-    NodeWorker(Node* node);
+    NodeWorker(Settings& settings, Node* node);
     ~NodeWorker();
 
     void stop();
@@ -115,6 +115,7 @@ private:
     void makeParameterConnectable(param::Parameter*);
 
 private:
+    Settings& settings_;
     Node* node_;
 
     std::vector<Input*> inputs_;

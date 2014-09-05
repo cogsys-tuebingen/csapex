@@ -28,10 +28,6 @@ const std::string Settings::config_selector = "Configs(*" + Settings::config_ext
 
 const std::string Settings::namespace_separator = ":/:";
 
-const int Settings::activity_marker_max_lifetime_ = 10;
-
-const unsigned Settings::timer_history_length_ = 15;
-
 
 std::string Settings::defaultConfigPath()
 {
@@ -57,7 +53,6 @@ std::string Settings::defaultConfigFile()
 }
 
 Settings::Settings()
-    : processing_allowed_(false)
 {
     current_config_ = defaultConfigFile();
 
@@ -98,20 +93,6 @@ void Settings::load()
         doc[i] >> p;
 
         settings_[p->name()] = p;
-    }
-}
-
-bool Settings::isProcessingAllowed() const
-{
-    return processing_allowed_;
-}
-
-void Settings::setProcessingAllowed(bool processing)
-{
-    if(processing != processing_allowed_) {
-        processing_allowed_ = processing;
-
-        settingsChanged();
     }
 }
 

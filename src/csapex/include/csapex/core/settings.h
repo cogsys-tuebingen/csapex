@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <utils_param/parameter.h>
+#include <utils_param/value_parameter.h>
 
 /// SYSTEM
 #include <string>
@@ -23,10 +24,6 @@ public:
 
     static const std::string namespace_separator;
 
-    static const int activity_marker_max_lifetime_;
-
-    static const unsigned timer_history_length_;
-
     static std::string defaultConfigFile();
     static std::string defaultConfigPath();
 
@@ -36,9 +33,6 @@ public:
 
     std::string getConfig() const;
     void setCurrentConfig(const std::string& filename);
-
-    bool isProcessingAllowed() const;
-    void setProcessingAllowed(bool processing);
 
     bool knows(const std::string& name) const;
 
@@ -54,10 +48,14 @@ public:
     }
 
     template <typename T>
-    T get(const std::string& name, T def) const
+    T get(const std::string& name, T def)
     {
         std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
         if(pos == settings_.end()) {
+            param::ValueParameter::Ptr p(new param::ValueParameter(name, param::ParameterDescription()));
+            p->set(def);
+            add(p);
+            settingsChanged();
             return def;
         }
 
@@ -67,14 +65,17 @@ public:
     void add(param::Parameter::Ptr p);
 
     template <typename T>
-    void set(const std::string& name, const T& val) const
+    void set(const std::string& name, const T& val)
     {
         std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
         if(pos == settings_.end()) {
-            throw std::runtime_error(std::string("settings.set: unknown parameter '") + name + "'");
-        }
+            param::ValueParameter::Ptr p(new param::ValueParameter(name, param::ParameterDescription()));
+            p->set(val);
+            add(p);
 
-        pos->second->set<T>(val);
+        } else {
+            pos->second->set<T>(val);
+        }
         settingsChanged();
     }
 
@@ -86,7 +87,6 @@ public:
 
 private:
     std::string current_config_;
-    bool processing_allowed_;
 
     std::map<std::string, param::Parameter::Ptr> settings_;
 };

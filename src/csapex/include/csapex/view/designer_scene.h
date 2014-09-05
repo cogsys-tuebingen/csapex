@@ -80,7 +80,6 @@ private:
     void drawConnection(QPainter *painter, const Connection &connection);
     void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
-    void drawActivity(QPainter *painter, int life, Connectable* c);
     void drawPort(QPainter *painter, NodeBox *box, Port* p);
 
 private:
