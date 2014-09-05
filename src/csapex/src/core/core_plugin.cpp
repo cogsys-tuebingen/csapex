@@ -23,7 +23,12 @@ std::string CorePlugin::getName()
     return name_;
 }
 
-void CorePlugin::initUI(DragIO &)
+void CorePlugin::prepare(Settings&)
+{
+
+}
+
+void CorePlugin::initUI(DragIO&)
 {
 
 }

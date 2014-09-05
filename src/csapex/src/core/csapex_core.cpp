@@ -82,14 +82,18 @@ void CsApexCore::init(DragIO* dragio)
         typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
         Q_FOREACH(PAIR cp, core_plugin_manager->availableClasses()) {
             CorePlugin::Ptr plugin = cp.second();
-
+            core_plugins_.push_back(plugin);
+        }
+        Q_FOREACH(CorePlugin::Ptr plugin, core_plugins_) {
+            plugin->prepare(getSettings());
+        }
+        Q_FOREACH(CorePlugin::Ptr plugin, core_plugins_) {
             plugin->init(*this);
-
-            if(dragio) {
+        }
+        if(dragio) {
+            Q_FOREACH(CorePlugin::Ptr plugin, core_plugins_) {
                 plugin->initUI(*dragio);
             }
-
-            core_plugins_.push_back(plugin);
         }
 
         showStatusMessage("loading node plugins");
