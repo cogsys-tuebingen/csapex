@@ -89,7 +89,7 @@ void Input::setAsync(bool asynch)
 
 bool Input::hasMessage() const
 {
-    return buffer_->isFilled();
+    return isConnected() && buffer_->isFilled() && !buffer_->isType<connection_types::NoMessage>();
 }
 
 void Input::free()

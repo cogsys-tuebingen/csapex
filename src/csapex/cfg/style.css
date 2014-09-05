@@ -97,6 +97,12 @@ csapex--Port[async="true"]  {
         border: 2px solid rgb(255,200,128);
         background: rgb(255,255,255);
 }
+csapex--Port[unconnected="true"]  {
+        border: 2px solid rgb(128,200,255);
+        background: rgb(255,255,255);
+}
+csapex--Port[optional="true"]  {
+}
 csapex--Port[blocked="true"]  {
         border: 2px solid rgb(255,255,0)!important;
 }

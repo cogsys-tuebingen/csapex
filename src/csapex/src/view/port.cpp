@@ -81,6 +81,9 @@ Connectable* Port::getAdaptee() const
 void Port::paintEvent(QPaintEvent *e)
 {
     setProperty("async", adaptee_->isAsync());
+    bool opt = isInput() && dynamic_cast<Input*>(adaptee_)->isOptional();
+    setProperty("unconnected", isInput() && !opt && !adaptee_->isConnected());
+    setProperty("optional", opt);
 
     if(refresh_style_sheet_) {
         refresh_style_sheet_ = false;
