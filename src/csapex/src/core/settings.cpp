@@ -54,8 +54,6 @@ std::string Settings::defaultConfigFile()
 
 Settings::Settings()
 {
-    current_config_ = defaultConfigFile();
-
     load();
 }
 
@@ -94,25 +92,6 @@ void Settings::load()
 
         settings_[p->name()] = p;
     }
-}
-
-void Settings::setCurrentConfig(const std::string& filename)
-{
-    if(filename != current_config_) {
-        current_config_ = filename;
-
-        std::string dir = current_config_.substr(0, current_config_.find_last_of('/')+1);
-        if(chdir(dir.c_str()) != 0) {
-            std::cerr << "cannot change directory to " << dir << std::endl;
-        }
-
-        settingsChanged();
-    }
-}
-
-std::string Settings::getConfig() const
-{
-    return current_config_;
 }
 
 void Settings::add(param::Parameter::Ptr p)

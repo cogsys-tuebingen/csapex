@@ -107,7 +107,7 @@ void CsApexCore::startup()
 {
     showStatusMessage("loading config");
     try {
-        load(settings_.getConfig());
+        load(settings_.get<std::string>("config", Settings::defaultConfigFile()));
     } catch(const std::exception& e) {
         std::cerr << "error loading the config: " << e.what() << std::endl;
     }
@@ -195,7 +195,7 @@ void CsApexCore::saveAs(const std::string &file)
 
 void CsApexCore::load(const std::string &file)
 {
-    settings_.setCurrentConfig(file);
+    settings_.set("config", file);
 
     reset();
 

@@ -82,6 +82,8 @@ private:
     void construct();
     void loadStyleSheet();
 
+    std::string getConfigFile();
+
 private:
     CsApexCore& core_;
     CommandDispatcher* cmd_dispatcher_;

@@ -31,9 +31,6 @@ public:
 public:
     Settings();
 
-    std::string getConfig() const;
-    void setCurrentConfig(const std::string& filename);
-
     bool knows(const std::string& name) const;
 
     template <typename T>
@@ -86,8 +83,6 @@ public:
     boost::signals2::signal<void()> settingsChanged;
 
 private:
-    std::string current_config_;
-
     std::map<std::string, param::Parameter::Ptr> settings_;
 };
 

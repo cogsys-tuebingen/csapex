@@ -86,7 +86,7 @@ int Main::run()
 int Main::main(bool headless, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
     Settings settings;
-    settings.setCurrentConfig(config);
+    settings.set("config", config);
 
     if(!settings.knows("path_to_bin")) {
         settings.add(param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));

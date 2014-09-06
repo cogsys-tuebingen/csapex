@@ -2,9 +2,7 @@
 #include <csapex/view/csapex_window.h>
 
 /// COMPONENT
-#include <csapex/command/dispatcher.h>
 #include <csapex/core/designerio.h>
-#include <csapex/core/drag_io.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/model/node_factory.h>
@@ -14,26 +12,20 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_statistics.h>
 #include <csapex/model/tag.h>
-#include <csapex/utility/bash_parser.h>
 #include <csapex/utility/qt_helper.hpp>
-#include <csapex/utility/stream_interceptor.h>
 #include <csapex/view/box.h>
-#include <csapex/view/designer.h>
 #include <csapex/view/designer.h>
 #include <csapex/view/widget_controller.h>
 #include "ui_csapex_window.h"
+
+/// PROJECT
 #include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <iostream>
 #include <QCloseEvent>
 #include <QMessageBox>
-#include <QToolBar>
-#include <QTimer>
 #include <QFileDialog>
-#include <QGraphicsScene>
-#include <QGraphicsTextItem>
-#include <QDesktopWidget>
 
 using namespace csapex;
 
@@ -352,7 +344,7 @@ void CsApexWindow::updateMenu()
 void CsApexWindow::updateTitle()
 {
     std::stringstream window;
-    window << "CS::APEX (" << core_.getSettings().getConfig() << ")";
+    window << "CS::APEX (" << getConfigFile() << ")";
 
     if(cmd_dispatcher_->isDirty()) {
         window << " *";
@@ -432,25 +424,30 @@ void CsApexWindow::init()
     }
 }
 
+std::string CsApexWindow::getConfigFile()
+{
+    return core_.getSettings().get<std::string>("config");
+}
+
 void CsApexWindow::save()
 {
-    core_.saveAs(core_.getSettings().getConfig());
+    core_.saveAs(getConfigFile());
 }
 
 void CsApexWindow::saveAs()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getSettings().getConfig().c_str(), Settings::config_selector.c_str());
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
-        core_.getSettings().setCurrentConfig(filename.toStdString());
+        core_.getSettings().set("config", filename.toStdString());
     }
 }
 
 
 void CsApexWindow::saveAsCopy()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", core_.getSettings().getConfig().c_str(), Settings::config_selector.c_str());
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
@@ -459,7 +456,7 @@ void CsApexWindow::saveAsCopy()
 
 void CsApexWindow::reload()
 {
-    core_.load(core_.getSettings().getConfig());
+    core_.load(getConfigFile());
 }
 
 void CsApexWindow::reset()
@@ -489,7 +486,7 @@ void CsApexWindow::redo()
 
 void CsApexWindow::load()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Load config", core_.getSettings().getConfig().c_str(), Settings::config_selector.c_str());
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
 
     if(QFile(filename).exists()) {
         core_.load(filename.toStdString());
