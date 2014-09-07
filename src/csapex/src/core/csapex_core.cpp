@@ -14,6 +14,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/utility/register_msg.h>
+#include <csapex/view/node_adapter_factory.h>
 
 /// SYSTEM
 #include <fstream>
@@ -24,8 +25,10 @@ Q_DECLARE_METATYPE(std::string)
 
 using namespace csapex;
 
-CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *node_factory, CommandDispatcher* cmd_dispatcher)
-    : settings_(settings), graph_worker_(graph), node_factory_(node_factory), cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
+CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
+    : settings_(settings), graph_worker_(graph),
+      node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
+      cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
 
@@ -100,6 +103,8 @@ void CsApexCore::init(DragIO* dragio)
         node_factory_->loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
         node_factory_->new_node_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
         node_factory_->loadPlugins();
+
+        node_adapter_factory_->loadPlugins();
     }
 }
 

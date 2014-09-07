@@ -28,7 +28,7 @@ public:
     typedef boost::shared_ptr<WidgetController> Ptr;
 
 public:
-    WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory);
+    WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);
 
     void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
 
@@ -71,6 +71,7 @@ private:
     CommandDispatcher* dispatcher_;
     Settings& settings_;
     NodeFactory* node_factory_;
+    NodeAdapterFactory* node_adapter_factory_;
     Designer* designer_;
 
     boost::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;

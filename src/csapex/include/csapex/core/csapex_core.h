@@ -23,7 +23,7 @@ public:
     };
 
 public:
-    CsApexCore(Settings& settings_, GraphWorkerPtr graph, NodeFactory* node_factory, CommandDispatcher *cmd_dispatcher);
+    CsApexCore(Settings& settings_, GraphWorkerPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory, CommandDispatcher *cmd_dispatcher);
     virtual ~CsApexCore();
 
     void init(DragIO *dragio);
@@ -66,6 +66,7 @@ private:
     Settings& settings_;
     GraphWorkerPtr graph_worker_;
     NodeFactory* node_factory_;
+    NodeAdapterFactory* node_adapter_factory_;
 
     bool destruct;
     CommandDispatcher* cmd_dispatch;

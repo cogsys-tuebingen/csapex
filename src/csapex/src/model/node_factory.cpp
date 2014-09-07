@@ -2,21 +2,14 @@
 #include <csapex/model/node_factory.h>
 
 /// COMPONENT
-#include <csapex/command/delete_node.h>
-#include <csapex/command/meta.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/view/box.h>
-#include <csapex/view/default_node_adapter.h>
 #include <csapex/utility/plugin_manager.hpp>
-#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
-#include <stack>
-#include <qmime.h>
 #include <boost/algorithm/string.hpp>
 
 using namespace csapex;
@@ -24,11 +17,8 @@ using namespace csapex;
 NodeFactory::NodeFactory(Settings &settings)
     : settings_(settings),
       node_manager_(new PluginManager<Node> ("csapex::Node")),
-      node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder")),
-      dirty_(false)
+      tag_map_has_to_be_rebuilt_(false)
 {
-    node_manager_->loaded.connect(loaded);
-    node_adapter_manager_->loaded.connect(loaded);
 }
 
 namespace {
@@ -44,18 +34,12 @@ NodeFactory::~NodeFactory()
 {
     delete node_manager_;
     node_manager_ = NULL;
-    
-    node_adapter_builders_.clear();
-    
-    delete node_adapter_manager_;
-    node_adapter_manager_ = NULL;
 }
 
 
 void NodeFactory::loadPlugins()
 {
     node_manager_->load();
-    node_adapter_manager_->load();
     rebuildPrototypes();
     
     rebuildMap();
@@ -90,12 +74,6 @@ void NodeFactory::rebuildPrototypes()
                                                      tags,
                                                      p.second));
         registerNodeType(constructor, true);
-    }
-    
-    typedef std::pair<std::string, DefaultConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
-    Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
-        NodeAdapterBuilder::Ptr builder = p.second.construct();
-        node_adapter_builders_[builder->getWrappedType()] = builder;
     }
 }
 
@@ -137,7 +115,7 @@ void NodeFactory::rebuildMap()
         std::sort(it->second.begin(), it->second.end(), compare);
     }
     
-    dirty_ = false;
+    tag_map_has_to_be_rebuilt_ = false;
 }
 
 std::map<TagPtr, std::vector<NodeConstructor::Ptr> > NodeFactory::getTagMap()
@@ -150,14 +128,13 @@ void NodeFactory::ensureLoaded()
 {
     if(!node_manager_->pluginsLoaded()) {
         node_manager_->load();
-        node_adapter_manager_->load();
         
         rebuildPrototypes();
         
-        dirty_ = true;
+        tag_map_has_to_be_rebuilt_ = true;
     }
     
-    if(dirty_) {
+    if(tag_map_has_to_be_rebuilt_) {
         rebuildMap();
     }
 }
@@ -166,7 +143,7 @@ void NodeFactory::ensureLoaded()
 void NodeFactory::registerNodeType(NodeConstructor::Ptr provider, bool suppress_signals)
 {
     constructors_.push_back(provider);
-    dirty_ = true;
+    tag_map_has_to_be_rebuilt_ = true;
     
     if(!suppress_signals) {
         new_node_type();

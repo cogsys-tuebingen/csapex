@@ -4,23 +4,16 @@
 /// COMPONENT
 #include <csapex/model/node_constructor.h>
 #include <csapex/csapex_fwd.h>
-#include <csapex/view/node_adapter_builder.h>
 
 /// SYSTEM
 #include <vector>
 #include <boost/signals2.hpp>
-#include <set>
 
 namespace csapex
 {
 
 class NodeFactory
 {
-    /// TODO: no friends
-//    friend class DesignerIO;
-//    friend class GraphIO;
-    friend class WidgetController;
-
 public:
     typedef boost::shared_ptr<NodeFactory> Ptr;
 
@@ -28,7 +21,7 @@ public:
     NodeFactory(Settings& settings);
     ~NodeFactory();
 
-    virtual void loadPlugins();
+    void loadPlugins();
 
 public:
     void registerNodeType(NodeConstructor::Ptr provider, bool suppress_signals = false);
@@ -62,11 +55,7 @@ protected:
 
     PluginManager<Node>* node_manager_;
 
-    // TODO: extract to NodeAdapterFactory!
-    PluginManager<NodeAdapterBuilder>* node_adapter_manager_;
-    std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
-
-    bool dirty_;
+    bool tag_map_has_to_be_rebuilt_;
 };
 
 }

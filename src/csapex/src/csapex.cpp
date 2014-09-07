@@ -7,6 +7,7 @@
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/box.h>
 #include <csapex/model/node_factory.h>
+#include <csapex/view/node_adapter_factory.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/core/graphio.h>
@@ -108,14 +109,15 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
 
     NodeFactory::Ptr node_factory(new NodeFactory(settings));
+    NodeAdapterFactory::Ptr node_adapter_factory(new NodeAdapterFactory(settings));
 
     Graph::Ptr graph(new Graph);
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
-    WidgetControllerPtr widget_control (new WidgetController(settings, graph, node_factory.get()));
+    WidgetControllerPtr widget_control (new WidgetController(settings, graph, node_factory.get(), node_adapter_factory.get()));
 
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
-    CsApexCore core(settings, graph_worker, node_factory.get(), &dispatcher);
+    CsApexCore core(settings, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
 
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));

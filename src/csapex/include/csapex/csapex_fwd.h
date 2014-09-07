@@ -69,6 +69,7 @@ class DragIO;
 class Overlay;
 
 FWD(NodeFactory);
+FWD(NodeAdapterFactory);
 
 FWD(Timable);
 

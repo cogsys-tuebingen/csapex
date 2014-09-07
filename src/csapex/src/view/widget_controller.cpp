@@ -19,6 +19,7 @@
 #include <csapex/view/default_node_adapter.h>
 #include <csapex/view/designer.h>
 #include <csapex/view/port.h>
+#include <csapex/view/node_adapter_factory.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -28,8 +29,8 @@
 
 using namespace csapex;
 
-WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFactory* node_factory)
-    : graph_(graph), settings_(settings), node_factory_(node_factory), designer_(NULL)
+WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
+    : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(NULL)
 {
 
 }
@@ -139,14 +140,11 @@ void WidgetController::nodeAdded(Node::Ptr node)
     if(designer_) {
         std::string type = node->getType();
 
-        NodeBox* box;
+        NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node, this);
+
         QIcon icon = node_factory_->getConstructor(type)->getIcon();
-        // TODO: replace with correct iteration!
-        if(node_factory_->node_adapter_builders_.find(type) != node_factory_->node_adapter_builders_.end()) {
-            box = new NodeBox(settings_, node, node_factory_->node_adapter_builders_[type]->build(node, this), icon);
-        } else {
-            box = new NodeBox(settings_, node, NodeAdapter::Ptr(new DefaultNodeAdapter(node.get(), this)), icon);
-        }
+
+        NodeBox* box = new NodeBox(settings_, node, adapter, icon);
         box->construct();
 
         box_map_[node->getUUID()] = box;
