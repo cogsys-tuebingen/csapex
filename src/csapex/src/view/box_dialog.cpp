@@ -2,7 +2,7 @@
 #include <csapex/view/box_dialog.h>
 
 /// COMPONENT
-#include <csapex/model/node_factory.h>
+#include <csapex/view/widget_controller.h>
 #include <csapex/model/node_filter_proxy_model.h>
 #include <csapex/utility/html_delegate.h>
 
@@ -118,8 +118,8 @@ void CompleteLineEdit::completeText(const QModelIndex &index) {
     Q_EMIT editingFinished();
 }
 
-BoxDialog::BoxDialog(NodeFactory* node_factory, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), node_factory_(node_factory)
+BoxDialog::BoxDialog(WidgetController* widget_controller, QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f), widget_controller_(widget_controller)
 {
     makeUI();
 }
@@ -141,7 +141,7 @@ void BoxDialog::makeUI()
 
     NodeFilterProxyModel* filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    filter->setSourceModel(node_factory_->listAvailableNodeTypes());
+    filter->setSourceModel(widget_controller_->listAvailableNodeTypes());
 
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));

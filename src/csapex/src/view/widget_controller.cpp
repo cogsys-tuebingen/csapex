@@ -6,18 +6,25 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/move_fulcrum.h>
-#include <csapex/model/node_factory.h>
 #include <csapex/model/connectable.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node_factory.h>
+#include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
+#include <csapex/model/tag.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/graph.h>
-#include <csapex/model/node.h>
+#include <csapex/utility/movable_graphics_proxy_widget.h>
 #include <csapex/view/box.h>
+#include <csapex/view/default_node_adapter.h>
 #include <csapex/view/designer.h>
 #include <csapex/view/port.h>
-#include <csapex/utility/movable_graphics_proxy_widget.h>
-#include <csapex/model/node_worker.h>
-#include <csapex/view/default_node_adapter.h>
+
+/// SYSTEM
+#include <QApplication>
+#include <QTreeWidget>
+#include <QDrag>
+#include <QStandardItemModel>
 
 using namespace csapex;
 
@@ -216,4 +223,93 @@ void WidgetController::foreachBox(boost::function<void (NodeBox*)> f, boost::fun
             f(b);
         }
     }
+}
+
+
+
+
+void WidgetController::insertAvailableNodeTypes(QMenu* menu)
+{
+    std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tags = node_factory_->getTagMap();
+
+    typedef std::pair<TagPtr, std::vector<NodeConstructor::Ptr> > PAIR;
+    Q_FOREACH(const PAIR& pair, tags) {
+        const TagPtr& tag = pair.first;
+        const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
+
+        QMenu* submenu = new QMenu(tag->getName().c_str());
+        menu->addMenu(submenu);
+
+        Q_FOREACH(const NodeConstructor::Ptr& proxy, constructors) {
+            QIcon icon = proxy->getIcon();
+            QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
+            action->setData(QString(proxy->getType().c_str()));
+            if(!icon.isNull()) {
+                action->setIcon(icon);
+                action->setIconVisibleInMenu(true);
+            }
+            action->setToolTip(proxy->getDescription().c_str());
+            submenu->addAction(action);
+        }
+    }
+
+    menu->menuAction()->setIconVisibleInMenu(true);
+
+}
+
+void WidgetController::insertAvailableNodeTypes(QTreeWidget* tree)
+{
+    std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tags = node_factory_->getTagMap();
+
+    tree->setDragEnabled(true);
+
+    typedef std::pair<TagPtr, std::vector<NodeConstructor::Ptr> > PAIR;
+    Q_FOREACH(const PAIR& pair, tags) {
+        const TagPtr& tag = pair.first;
+        const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
+
+        QTreeWidgetItem* submenu = new QTreeWidgetItem;
+        submenu->setText(0, tag->getName().c_str());
+        tree->addTopLevelItem(submenu);
+
+        Q_FOREACH(const NodeConstructor::Ptr& proxy, constructors) {
+            QIcon icon = proxy->getIcon();
+            std::string name = UUID::stripNamespace(proxy->getType());
+
+            QTreeWidgetItem* child = new QTreeWidgetItem;
+            child->setToolTip(0, (proxy->getType() + ": " + proxy->getDescription()).c_str());
+            child->setIcon(0, icon);
+            child->setText(0, name.c_str());
+            child->setData(0, Qt::UserRole, NodeBox::MIME);
+            child->setData(0, Qt::UserRole + 1, proxy->getType().c_str());
+
+            submenu->addChild(child);
+        }
+    }
+}
+
+QAbstractItemModel* WidgetController::listAvailableNodeTypes()
+{
+    QStandardItemModel* model = new QStandardItemModel;
+
+    Q_FOREACH(const NodeConstructor::Ptr& proxy, node_factory_->getConstructors()) {
+        QString name = QString::fromStdString(UUID::stripNamespace(proxy->getType()));
+        QString descr(proxy->getDescription().c_str());
+        QString type(proxy->getType().c_str());
+
+        QStringList tags;
+        Q_FOREACH(const Tag::Ptr& tag, proxy->getTags()) {
+            tags << tag->getName().c_str();
+        }
+
+        QStandardItem* item = new QStandardItem(proxy->getIcon(), type);
+        item->setData(type, Qt::UserRole);
+        item->setData(descr, Qt::UserRole + 1);
+        item->setData(name, Qt::UserRole + 2);
+        item->setData(tags, Qt::UserRole + 3);
+
+        model->appendRow(item);
+    }
+
+    return model;
 }

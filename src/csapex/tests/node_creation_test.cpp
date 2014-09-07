@@ -117,9 +117,9 @@ protected:
                                                             "MockupNode", "A mockup node",
                                                             ":/no_icon.png", tags,
                                                             boost::bind(&NodeCreationTest::makeMockup)));
-        factory.register_box_type(mockup_constructor);
+        factory.registerNodeType(mockup_constructor);
 
-        factory.register_box_type(GenericNodeFactory::createConstructorFromFunction(functionToBeWrappedIntoANode,
+        factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(functionToBeWrappedIntoANode,
                                                                                     "WrappedFunctionNode",
                                                                                     "functionToBeWrappedIntoANode",
                                                                                     settings));

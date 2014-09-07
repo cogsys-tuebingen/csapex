@@ -13,6 +13,10 @@
 #include <boost/unordered_map.hpp>
 #include <QLayout>
 
+class QTreeWidget;
+class QMenu;
+class QAbstractItemModel;
+
 namespace csapex
 {
 
@@ -46,6 +50,12 @@ public:
     void foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred);
 
     void setStyleSheet(const QString &str);
+
+
+    void insertAvailableNodeTypes(QMenu* menu);
+    void insertAvailableNodeTypes(QTreeWidget *tree);
+    QAbstractItemModel *listAvailableNodeTypes();
+
 
 public Q_SLOTS:
     void nodeAdded(NodePtr node);

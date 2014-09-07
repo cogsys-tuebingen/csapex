@@ -220,7 +220,7 @@ void DesignerView::dragLeaveEvent(QDragLeaveEvent* e)
 
 void DesignerView::showBoxDialog()
 {
-    BoxDialog diag(widget_ctrl_->getNodeFactory());
+    BoxDialog diag(widget_ctrl_.get());
     int r = diag.exec();
 
     if(r) {
@@ -387,7 +387,7 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
 void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
 {
     QMenu menu;
-    widget_ctrl_->getNodeFactory()->insertAvailableNodeTypes(&menu);
+    widget_ctrl_->insertAvailableNodeTypes(&menu);
 
     QAction* selectedItem = menu.exec(global_pos);
 

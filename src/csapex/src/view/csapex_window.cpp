@@ -26,6 +26,8 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QApplication>
+#include <QTreeWidget>
 
 using namespace csapex;
 
@@ -288,8 +290,8 @@ void CsApexWindow::reloadBoxMenues()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    widget_ctrl_->getNodeFactory()->insertAvailableNodeTypes(ui->boxes);
-    widget_ctrl_->getNodeFactory()->insertAvailableNodeTypes(ui->node_info_tree);
+    widget_ctrl_->insertAvailableNodeTypes(ui->boxes);
+    widget_ctrl_->insertAvailableNodeTypes(ui->node_info_tree);
 }
 
 

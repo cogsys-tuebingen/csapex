@@ -39,7 +39,7 @@ protected:
                                                      "MockupNode", "A mockup node",
                                                      ":/no_icon.png", tags,
                                                      boost::bind(&GraphTest::makeMockup)));
-        factory.register_box_type(constructor);
+        factory.registerNodeType(constructor);
     }
 
     virtual ~GraphTest() {

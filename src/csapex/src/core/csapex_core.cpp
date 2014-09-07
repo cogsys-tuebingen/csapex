@@ -98,7 +98,7 @@ void CsApexCore::init(DragIO* dragio)
 
         showStatusMessage("loading node plugins");
         node_factory_->loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
-        node_factory_->new_box_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
+        node_factory_->new_node_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
         node_factory_->loadPlugins();
     }
 }

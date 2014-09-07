@@ -15,12 +15,8 @@
 
 /// SYSTEM
 #include <boost/foreach.hpp>
-#include <QApplication>
-#include <QTreeWidget>
 #include <stack>
-#include <QDrag>
 #include <qmime.h>
-#include <QStandardItemModel>
 #include <boost/algorithm/string.hpp>
 
 using namespace csapex;
@@ -93,7 +89,7 @@ void NodeFactory::rebuildPrototypes()
                                                      p.second.getIcon(),
                                                      tags,
                                                      p.second));
-        register_box_type(constructor, true);
+        registerNodeType(constructor, true);
     }
     
     typedef std::pair<std::string, DefaultConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
@@ -109,13 +105,10 @@ void NodeFactory::rebuildMap()
     Tag::Ptr general = Tag::get("General");
     
     tag_map_.clear();
-    tags_.clear();
-    
-    tags_.insert(general);
     
     for(std::vector<NodeConstructor::Ptr>::iterator
-        it = available_elements_prototypes.begin();
-        it != available_elements_prototypes.end();) {
+        it = constructors_.begin();
+        it != constructors_.end();) {
         
         const NodeConstructor::Ptr& p = *it;
         
@@ -123,7 +116,6 @@ void NodeFactory::rebuildMap()
             bool has_tag = false;
             Q_FOREACH(const Tag::Ptr& tag, p->getTags()) {
                 tag_map_[tag].push_back(p);
-                tags_.insert(tag);
                 has_tag = true;
             }
             
@@ -135,15 +127,23 @@ void NodeFactory::rebuildMap()
             
         } catch(const NodeConstructor::NodeConstructionException& e) {
             std::cerr << "warning: cannot load node: " << e.what() << std::endl;
-            it = available_elements_prototypes.erase(it);
+            it = constructors_.erase(it);
         }
     }
     
-    Q_FOREACH(const Tag::Ptr& cat, tags_) {
-        std::sort(tag_map_[cat].begin(), tag_map_[cat].end(), compare);
+
+    typedef std::map<TagPtr, std::vector<NodeConstructor::Ptr> > map;
+    for(map::iterator it = tag_map_.begin(); it != tag_map_.end(); ++it) {
+        std::sort(it->second.begin(), it->second.end(), compare);
     }
     
     dirty_ = false;
+}
+
+std::map<TagPtr, std::vector<NodeConstructor::Ptr> > NodeFactory::getTagMap()
+{
+    ensureLoaded();
+    return tag_map_;
 }
 
 void NodeFactory::ensureLoaded()
@@ -162,100 +162,20 @@ void NodeFactory::ensureLoaded()
     }
 }
 
-void NodeFactory::insertAvailableNodeTypes(QMenu* menu)
-{
-    ensureLoaded();
-    
-    Q_FOREACH(const Tag::Ptr& tag, tags_) {
-        QMenu* submenu = new QMenu(tag->getName().c_str());
-        menu->addMenu(submenu);
-        
-        Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
-            QIcon icon = proxy->getIcon();
-            QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
-            action->setData(QString(proxy->getType().c_str()));
-            if(!icon.isNull()) {
-                action->setIcon(icon);
-                action->setIconVisibleInMenu(true);
-            }
-            action->setToolTip(proxy->getDescription().c_str());
-            submenu->addAction(action);
-        }
-    }
-    
-    menu->menuAction()->setIconVisibleInMenu(true);
-    
-}
 
-void NodeFactory::insertAvailableNodeTypes(QTreeWidget* tree)
+void NodeFactory::registerNodeType(NodeConstructor::Ptr provider, bool suppress_signals)
 {
-    ensureLoaded();
-    
-    tree->setDragEnabled(true);
-    
-    Q_FOREACH(const Tag::Ptr& tag, tags_) {
-        
-        QTreeWidgetItem* submenu = new QTreeWidgetItem;
-        submenu->setText(0, tag->getName().c_str());
-        tree->addTopLevelItem(submenu);
-        
-        Q_FOREACH(const NodeConstructor::Ptr& proxy, tag_map_[tag]) {
-            QIcon icon = proxy->getIcon();
-            std::string name = UUID::stripNamespace(proxy->getType());
-            
-            QTreeWidgetItem* child = new QTreeWidgetItem;
-            child->setToolTip(0, (proxy->getType() + ": " + proxy->getDescription()).c_str());
-            child->setIcon(0, icon);
-            child->setText(0, name.c_str());
-            child->setData(0, Qt::UserRole, NodeBox::MIME);
-            child->setData(0, Qt::UserRole + 1, proxy->getType().c_str());
-            
-            submenu->addChild(child);
-        }
-    }
-}
-
-
-QAbstractItemModel* NodeFactory::listAvailableNodeTypes()
-{
-    ensureLoaded();
-    
-    QStandardItemModel* model = new QStandardItemModel;//(types, 1);
-    
-    Q_FOREACH(const NodeConstructor::Ptr& proxy, available_elements_prototypes) {
-        QString name = QString::fromStdString(UUID::stripNamespace(proxy->getType()));
-        QString descr(proxy->getDescription().c_str());
-        QString type(proxy->getType().c_str());
-        
-        QStringList tags;
-        Q_FOREACH(const Tag::Ptr& tag, proxy->getTags()) {
-            tags << tag->getName().c_str();
-        }
-        
-        QStandardItem* item = new QStandardItem(proxy->getIcon(), type);
-        item->setData(type, Qt::UserRole);
-        item->setData(descr, Qt::UserRole + 1);
-        item->setData(name, Qt::UserRole + 2);
-        item->setData(tags, Qt::UserRole + 3);
-        
-        model->appendRow(item);
-    }
-    
-    return model;
-}
-void NodeFactory::register_box_type(NodeConstructor::Ptr provider, bool suppress_signals)
-{
-    available_elements_prototypes.push_back(provider);
+    constructors_.push_back(provider);
     dirty_ = true;
     
     if(!suppress_signals) {
-        new_box_type();
+        new_node_type();
     }
 }
 
 bool NodeFactory::isValidType(const std::string &type) const
 {
-    Q_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
+    Q_FOREACH(NodeConstructor::Ptr p, constructors_) {
         if(p->getType() == type) {
             return true;
         }
@@ -271,6 +191,8 @@ Node::Ptr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& 
 
 NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
 {
+    ensureLoaded();
+
     std::string type = target_type;
     if(type.find_first_of(" ") != type.npos) {
         std::cout << "warning: type '" << type << "' contains spaces, stripping them!" << std::endl;
@@ -279,7 +201,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
         }
     }
 
-    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
+    BOOST_FOREACH(NodeConstructor::Ptr p, constructors_) {
         if(p->getType() == type) {
             return p;
         }
@@ -288,7 +210,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
     // cannot make box, type is unknown, trying different namespace
     std::string type_wo_ns = UUID::stripNamespace(type);
 
-    BOOST_FOREACH(NodeConstructor::Ptr p, available_elements_prototypes) {
+    BOOST_FOREACH(NodeConstructor::Ptr p, constructors_) {
         std::string p_type_wo_ns = UUID::stripNamespace(p->getType());
 
         if(p_type_wo_ns == type_wo_ns) {
@@ -297,6 +219,13 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
     }
 
     return NodeConstructorNullPtr;
+}
+
+std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
+{
+    ensureLoaded();
+
+    return constructors_;
 }
 
 Node::Ptr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid)
