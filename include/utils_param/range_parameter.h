@@ -100,7 +100,7 @@ public:
         if(min != _min) {
             min_ = min;
             T _max = read<T>(max_);
-            if(_max < _min) {
+            if(_max < min) {
                 max_ = min;
             }
             scope_changed(this);
@@ -113,7 +113,7 @@ public:
         if(_max != max) {
             max_ = max;
             T _min = read<T>(min_);
-            if(_max < _min) {
+            if(max < _min) {
                 min_ = max;
             }
             scope_changed(this);
