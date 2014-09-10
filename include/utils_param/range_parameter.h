@@ -119,6 +119,22 @@ public:
             scope_changed(this);
         }
     }
+
+//    template <typename T>
+//    void setStep(T step) {
+//        T _step = read<T>(step_);
+//        if (_step != step) {
+//            // test, if difference between max and min is bigger than step
+//            T _max = read<T>(max_);
+//            T _min = read<T>(min_);
+//            if(((_min + step) < _max) && ((_min - step) < _max)) {
+//                step_ = step;
+//            } else {
+//                step_ = _max - _min;
+//            }
+//        }
+//    }
+
 protected:
     virtual boost::any get_unsafe() const;
     virtual void set_unsafe(const boost::any& v);
