@@ -132,7 +132,6 @@ void NodeState::setParent(Node *value)
 
 void NodeState::writeYaml(YAML::Emitter &out) const
 {
-    out << YAML::Flow;
     out << YAML::BeginMap;
     if(parent) {
         out << YAML::Key << "type";

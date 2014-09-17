@@ -32,3 +32,8 @@ std::vector<param::Parameter::Ptr> MessageProvider::getParameters() const
 {
     return state.getParameters();
 }
+
+void MessageProvider::parameterChanged()
+{
+
+}

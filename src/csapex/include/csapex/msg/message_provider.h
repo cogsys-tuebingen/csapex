@@ -25,6 +25,7 @@ public:
     ConnectionType::ConstPtr getType() const;
 
     virtual void load(const std::string& file) = 0;
+    virtual void parameterChanged();
 
     void setName(const std::string& name);
     std::string getName() const;
