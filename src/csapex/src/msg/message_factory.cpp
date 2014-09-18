@@ -53,22 +53,22 @@ ConnectionType::Ptr MessageFactory::deserializeMessage(const YAML::Node &node)
     return msg;
 }
 
-YAML::Node MessageFactory::serializeMessage(const ConnectionType::Ptr &msg)
+YAML::Node MessageFactory::serializeMessage(const ConnectionType &msg)
 {
     try {
         MessageFactory& i = instance();
 
-        std::string type = msg->name();
+        std::string type = msg.name();
 
         YAML::Node node;
         node["type"] = type;
-        node["data"] = i.type_to_converter.at(type).encoder(*msg);
+        node["data"] = i.type_to_converter.at(type).encoder(msg);
 
         return node;
 
     } catch(const std::out_of_range& e) {
         throw SerializationError(std::string("cannot serialize message of type ")
-                                 + msg->name() + ", no YAML converter registered!");
+                                 + msg.name() + ", no YAML converter registered!");
     }
 }
 
@@ -86,7 +86,7 @@ ConnectionType::Ptr MessageFactory::readMessage(const std::string &path)
     throw DeserializationError("path '" + path + "' cannot be read.");
 }
 
-void MessageFactory::writeMessage(const std::string &path, const ConnectionType::Ptr msg)
+void MessageFactory::writeMessage(const std::string &path, const ConnectionType& msg)
 {
     std::ofstream out(path.c_str());
 

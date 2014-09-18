@@ -38,14 +38,17 @@ public:
     /// "container" messages
     template <typename Container, typename T>
     Input* addInput(const std::string& label) {
+        Container::template registerType<T>();
         return addInput(Container::template make<T>(), label, false, false);
     }
     template <typename Container, typename T>
     Input* addOptionalInput(const std::string& label) {
+        Container::template registerType<T>();
         return addInput(Container::template make<T>(), label, true, false);
     }
     template <typename Container, typename T>
     Output* addOutput(const std::string& label) {
+        Container::template registerType<T>();
         return addOutput(Container::template make<T>(), label);
     }
 

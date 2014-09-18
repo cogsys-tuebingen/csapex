@@ -52,10 +52,10 @@ public:
     static ConnectionType::Ptr createMessage(const std::string& type);
 
     static ConnectionType::Ptr deserializeMessage(const YAML::Node &node);
-    static YAML::Node serializeMessage(const ConnectionType::Ptr& msg);
+    static YAML::Node serializeMessage(const ConnectionType& msg);
 
     static ConnectionType::Ptr readMessage(const std::string& path);
-    static void writeMessage(const std::string& path, const ConnectionType::Ptr msg);
+    static void writeMessage(const std::string& path, const ConnectionType &msg);
 
     static ConnectionType::Ptr readYaml(const YAML::Node& node);
 
