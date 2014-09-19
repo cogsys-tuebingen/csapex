@@ -77,13 +77,7 @@ public:
         scope_changed(this);
     }
 
-    void setSet(const std::vector<std::string>& set) {
-        set_.clear();
-        for(typename std::vector<std::string>::const_iterator it = set.begin(); it != set.end(); ++it) {
-            set_[*it] = *it;
-        }
-        scope_changed(this);
-    }
+    void setSet(const std::vector<std::string>& set);
 
     void setByName(const std::string& name);
 

@@ -4,19 +4,35 @@
 using namespace param;
 
 SetParameter::SetParameter()
-    : Parameter("noname", ParameterDescription())
+    : Parameter("noname", ParameterDescription()), txt_("")
 {
 }
 
 
 SetParameter::SetParameter(const std::string &name, const ParameterDescription &description)
-    : Parameter(name, description)
+    : Parameter(name, description), txt_("")
 {
 }
 
 SetParameter::~SetParameter()
 {
 
+}
+
+void SetParameter::setSet(const std::vector<std::string> &set)
+{
+    set_.clear();
+    bool found = txt_.empty();
+    for(typename std::vector<std::string>::const_iterator it = set.begin(); it != set.end(); ++it) {
+        set_[*it] = *it;
+        if(!found && txt_ == *it) {
+            found = true;
+        }
+    }
+    if(!found) {
+        set_[txt_] = value_;
+    }
+    scope_changed(this);
 }
 
 void SetParameter::setByName(const std::string &name)
@@ -53,7 +69,7 @@ std::string SetParameter::convertToString(const variant &v) const
         ss << boost::any_cast<bool> (v);
 
     } else {
-        throw std::runtime_error("unsupported type");
+        throw std::runtime_error(std::string("unsupported type: ") + v.type().name());
     }
 
     return ss.str();
@@ -111,11 +127,12 @@ void SetParameter::doSetValueFrom(const Parameter &other)
 {
     const SetParameter* set = dynamic_cast<const SetParameter*>(&other);
     if(set) {
-        std::string name = set->txt_;
-        if(set_.find(name) == set_.end()) {
-            set_[name] = set->value_;
-        }
+        txt_ = set->txt_;
         bool change = false;
+        if(set_.find(txt_) == set_.end()) {
+            set_[txt_] = set->value_;
+            change = true;
+        }
         if(value_.type() == typeid(int)) {
             change = boost::any_cast<int>(value_) != boost::any_cast<int>(set->value_);
         } else if(value_.type() == typeid(double)) {
