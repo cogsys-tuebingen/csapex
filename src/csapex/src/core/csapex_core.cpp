@@ -44,13 +44,12 @@ CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *no
 
 CsApexCore::~CsApexCore()
 {
+    StreamInterceptor::instance().stop();
 
     for(std::vector<CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         (*it)->shutdown();
     }
     core_plugins_.clear();
-
-    StreamInterceptor::instance().stop();
 
     if(destruct) {
         delete core_plugin_manager;

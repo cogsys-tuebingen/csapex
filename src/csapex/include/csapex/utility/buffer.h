@@ -14,6 +14,7 @@ class Buffer
 public:
     Buffer(std::size_t size);
 
+    void disable();
     void free();
 
     template <typename R>
@@ -46,6 +47,8 @@ public:
 private:
     QSemaphore free_;
     QSemaphore used_;
+
+    bool enabled_;
 
     ConnectionType::Ptr message_;
 };

@@ -92,6 +92,12 @@ bool Input::hasMessage() const
     return isConnected() && buffer_->isFilled() && !buffer_->isType<connection_types::NoMessage>();
 }
 
+void Input::stop()
+{
+    buffer_->disable();
+    Connectable::stop();
+}
+
 void Input::free()
 {
     buffer_->free();

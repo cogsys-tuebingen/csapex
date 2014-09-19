@@ -94,7 +94,7 @@ public Q_SLOTS:
 
     bool isEnabled() const;
 
-    void stop();
+    virtual void stop();
 
 
 protected:
