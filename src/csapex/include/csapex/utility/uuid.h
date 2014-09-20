@@ -46,6 +46,8 @@ public:
 
 
 public:
+    UUID();
+
     std::string getFullName() const;
     std::string getShortName() const;
 

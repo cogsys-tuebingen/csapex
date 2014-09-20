@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <utils_param/io.h>
-#include <utils_yaml/yamlplus.h>
+#include <csapex/utility/yaml_node_builder.h>
 
 /// SYSTEM
 #include <pwd.h>
@@ -59,13 +59,14 @@ Settings::Settings()
 
 void Settings::save()
 {
-
     YAML::Emitter yaml;
     yaml << YAML::BeginSeq;
 
     for(std::map<std::string, param::Parameter::Ptr>::iterator it = settings_.begin(); it != settings_.end(); ++it) {
         param::Parameter::Ptr p = it->second;
-        p->write(yaml);
+        YAML::Node n;
+        p->serialize(n);
+        yaml << n;
     }
 
     yaml << YAML::EndSeq;
@@ -79,16 +80,19 @@ void Settings::load()
     std::ifstream ifs(settings_file.c_str());
     YAML::Parser parser(ifs);
 
-    YAML::Node doc;
+    YAML::NodeBuilder builder;
+    if (!parser.HandleNextDocument(builder)) {
+        std::cerr << "cannot read the config" << std::endl;
+    }
+    YAML::Node doc = builder.Root();
 
-    if(!YAML::getNextDocument(parser,doc) || doc.Type() != YAML::NodeType::Sequence) {
+    if(doc.Type() != YAML::NodeType::Sequence) {
         std::cerr << "cannot read the settings" << std::endl;
         return;
     }
 
     for(std::size_t i = 0, n = doc.size(); i < n; ++i) {
-        param::Parameter::Ptr p;
-        doc[i] >> p;
+        param::Parameter::Ptr p = doc[i].as<param::Parameter::Ptr>();
 
         settings_[p->name()] = p;
     }

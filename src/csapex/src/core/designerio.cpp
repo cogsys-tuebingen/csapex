@@ -10,6 +10,7 @@
 #include <csapex/view/node_adapter.h>
 #include "ui_designer.h"
 #include <csapex/utility/assert.h>
+#include <csapex/utility/yaml_io.hpp>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -17,7 +18,7 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
-#include <utils_yaml/yamlplus.h>
+#include <yaml-cpp/yaml.h>
 #include <QScrollBar>
 #include <sys/types.h>
 #include <pwd.h>
@@ -29,71 +30,47 @@ DesignerIO::DesignerIO(Designer &designer)
 {
 }
 
-void DesignerIO::saveSettings(YAML::Emitter& yaml)
+void DesignerIO::saveSettings(YAML::Node& /*yaml*/)
 {
-    yaml << YAML::Key << "view_pos";
-    yaml << YAML::Value << YAML::BeginSeq
-//         << designer_.ui->scrollArea->horizontalScrollBar()->value()
-//         << designer_.ui->scrollArea->verticalScrollBar()->value()
-         << YAML::EndSeq;
 }
 
 void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 {
-//    QWidget* window = designer_.window();
-
-//    if(exists(doc, "view_pos")) {
-//        int sx, sy;
-//        doc["view_pos"][0] >> sx;
-//        doc["view_pos"][1] >> sy;
-
-//        designer_.setView(sx, sy);
-//    }
 }
 
-void DesignerIO::saveBoxes(YAML::Emitter& yaml, Graph* graph, WidgetController* widget_ctrl)
+void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* widget_ctrl)
 {
-    yaml << YAML::Key << "adapters";
-    yaml << YAML::Value << YAML::BeginSeq; // adapters seq
-
-
-    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, boost::ref(yaml));
+    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, yaml["adapters"]);
     graph->foreachNode(cb);
-
-    yaml << YAML::EndSeq; // adapters seq
 }
 
-void DesignerIO::saveBox(Node *node, WidgetController* widget_ctrl, YAML::Emitter &yaml)
+void DesignerIO::saveBox(Node *node, WidgetController* widget_ctrl, YAML::Node &yaml)
 {
     NodeBox* box = widget_ctrl->getBox(node->getUUID());
     NodeAdapter::Ptr na = box->getNodeAdapter();
     Memento::Ptr m = na->getState();
     if(m) {
-        yaml << YAML::BeginMap;
-        yaml << YAML::Key << "uuid" << YAML::Value << na->getNode()->getUUID();
-        yaml << YAML::Key << "state" << YAML::Value;
+        YAML::Node doc;
+        doc["uuid"] = na->getNode()->getUUID();
 
-        yaml << YAML::BeginMap;
-        m->writeYaml(yaml);
-        yaml << YAML::EndMap;
+        YAML::Node state;
+        m->writeYaml(state);
+        doc["state"] = state;
 
-        yaml << YAML::EndMap;
+        yaml.push_back(doc);
     }
 }
 
 void DesignerIO::loadBoxes(YAML::Node &doc, WidgetController* widget_ctrl)
 {
-    if(exists(doc, "adapters")) {
+    if(doc["adapters"].IsDefined()) {
         const YAML::Node& adapters = doc["adapters"];
-        apex_assert_hard(adapters.Type() == YAML::NodeType::Sequence);
-
         for(std::size_t i = 0; i < adapters.size(); ++i) {
             const YAML::Node& e = adapters[i];
 
-            std::string uuid;
-            e["uuid"] >> uuid;
+            UUID uuid = e["uuid"].as<UUID>();
 
-            NodeBox* box = widget_ctrl->getBox(UUID::make_forced(uuid));
+            NodeBox* box = widget_ctrl->getBox(uuid);
             if(box) {
                 NodeAdapter::Ptr na = box->getNodeAdapter();
                 Memento::Ptr m = na->getState();

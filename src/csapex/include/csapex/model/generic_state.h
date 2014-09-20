@@ -45,7 +45,7 @@ public:
 
     void setFrom(const GenericState& rhs);
 
-    virtual void writeYaml(YAML::Emitter& out) const;
+    virtual void writeYaml(YAML::Node& out) const;
     virtual void readYaml(const YAML::Node& node);
 
 public:

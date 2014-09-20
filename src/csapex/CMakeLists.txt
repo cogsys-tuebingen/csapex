@@ -17,6 +17,8 @@ find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGl)
 include(${QT_USE_FILE})
 
+set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
+
 FIND_PACKAGE(OpenGL REQUIRED)
 
 file(GLOB   QT_FORMS    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}  ui/*.ui)
@@ -167,6 +169,7 @@ set(SRC_APP
     src/utility/buffer.cpp
     src/utility/movable_graphics_proxy_widget.cpp
     src/utility/html_delegate.cpp
+    src/utility/yaml_node_builder.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp
@@ -232,6 +235,7 @@ target_link_libraries(csapex_pluginbase
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
+    ${YAML_LIBRARIES}
 )
 
 add_library(csapex_app SHARED
@@ -244,6 +248,7 @@ target_link_libraries(csapex_app csapex_pluginbase
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${YAML_LIBRARIES}
 )
 
 #
@@ -294,7 +299,8 @@ if(${CSAPEX_TESTING})
         ${QT_LIBRARIES}
         ${Boost_LIBRARIES}
         ${catkin_LIBRARIES}
-        ${OPENGL_LIBRARIES})
+        ${OPENGL_LIBRARIES}
+        ${YAML_LIBRARIES})
     add_test(csapex_profile_unit_tests ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION}/csapex/csapex_profile_unit_tests)
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
                       DEPENDS csapex_profile_unit_tests)

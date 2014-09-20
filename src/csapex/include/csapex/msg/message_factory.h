@@ -14,7 +14,7 @@
 #include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <utils_yaml/yamlplus.h>
+#include <yaml-cpp/yaml.h>
 
 namespace csapex {
 

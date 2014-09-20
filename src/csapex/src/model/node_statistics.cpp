@@ -128,7 +128,10 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
             param->addChild(params_type_widget);
 
             YAML::Emitter e;
-            p->write(e);
+            YAML::Node n;
+            p->serialize(n);
+            e << n;
+
             QTreeWidgetItem* params_type_data = new QTreeWidgetItem;
             params_type_data->setText(0, "Data");
             params_type_data->setText(1, e.c_str());

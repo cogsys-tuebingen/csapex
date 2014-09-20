@@ -20,13 +20,13 @@ GenericState::Ptr GenericState::clone() const
     return r;
 }
 
-void GenericState::writeYaml(YAML::Emitter& out) const {
-    out << YAML::Key << "params" << YAML::Value << params;
+void GenericState::writeYaml(YAML::Node& out) const {
+    out["params"] = params;
 }
 
 void GenericState::readYaml(const YAML::Node& node) {
-    if(exists(node, "params")) {
-        node["params"] >> params;
+    if(node["params"].IsDefined()) {
+        params = node["params"].as<std::map<std::string, param::Parameter::Ptr> >();
     }
 }
 

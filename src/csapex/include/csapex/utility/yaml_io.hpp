@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/msg/message_traits.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -30,6 +31,19 @@ struct convert< boost::shared_ptr<T> > {
 //      rhs.reset(new T);
 //  }
 };
+
+template<>
+struct convert<csapex::UUID> {
+    static Node encode(const csapex::UUID& rhs) {
+        return Node (rhs.getFullName());
+    }
+
+    static bool decode(const Node& node, csapex::UUID& rhs) {
+        rhs = csapex::UUID::make_forced(node.as<std::string>());
+        return true;
+    }
+};
+
 }
 
 #endif // CSAPEX_YAML_IO_HPP

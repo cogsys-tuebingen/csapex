@@ -11,7 +11,7 @@ Memento::~Memento()
 {
 }
 
-void Memento::writeYaml(YAML::Emitter&) const
+void Memento::writeYaml(YAML::Node&) const
 {
 }
 

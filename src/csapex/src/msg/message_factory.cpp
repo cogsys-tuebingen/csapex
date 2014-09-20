@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/assert.h>
+#include <csapex/utility/yaml_node_builder.h>
 
 /// SYSTEM
 #include <fstream>
@@ -32,8 +33,7 @@ ConnectionType::Ptr MessageFactory::deserializeMessage(const YAML::Node &node)
 {
     MessageFactory& i = instance();
 
-    std::string type;
-    node["type"] >> type;
+    std::string type = node["type"].as<std::string>();
 
     if(i.type_to_constructor.empty()) {
         throw DeserializationError("no connection types registered!");
@@ -76,11 +76,10 @@ ConnectionType::Ptr MessageFactory::readMessage(const std::string &path)
 {
     std::ifstream f(path.c_str());
 
-    YAML::Node doc;
-
     YAML::Parser parser(f);
-    if(getNextDocument(parser, doc)) {
-        return readYaml(doc);
+    YAML::NodeBuilder builder;
+    if (parser.HandleNextDocument(builder)) {
+        return readYaml(builder.Root());
     }
 
     throw DeserializationError("path '" + path + "' cannot be read.");
@@ -99,8 +98,7 @@ ConnectionType::Ptr MessageFactory::readYaml(const YAML::Node &node)
 {
     ConnectionType::Ptr msg = MessageFactory::deserializeMessage(node);
     if(!msg) {
-        std::string type;
-        node["type"] >> type;
+        std::string type = node["type"].as<std::string>();
         throw DeserializationError(std::string("message type '") + type + "' unknown");
     }
 

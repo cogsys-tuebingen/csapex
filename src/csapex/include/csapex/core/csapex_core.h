@@ -54,10 +54,10 @@ Q_SIGNALS:
 
     void resetRequest();
 
-    void saveSettingsRequest(YAML::Emitter& e);
+    void saveSettingsRequest(YAML::Node& e);
     void loadSettingsRequest(YAML::Node& n);
 
-    void saveViewRequest(YAML::Emitter& e);
+    void saveViewRequest(YAML::Node& e);
     void loadViewRequest(YAML::Node& n);
 
     void paused(bool);

@@ -15,6 +15,7 @@
 #include <csapex/model/graph_worker.h>
 #include <csapex/utility/register_msg.h>
 #include <csapex/view/node_adapter_factory.h>
+#include <csapex/utility/yaml_node_builder.h>
 
 /// SYSTEM
 #include <fstream>
@@ -169,22 +170,22 @@ void CsApexCore::saveAs(const std::string &file)
         throw std::runtime_error(std::string("cannot change into directory ") + dir);
     }
 
-    YAML::Emitter yaml;
 
-    yaml << YAML::BeginMap; // settings map
+    YAML::Node node_map(YAML::NodeType::Map);
 
     GraphIO graphio(graph_worker_->getGraph(), node_factory_);
 
-    Q_EMIT saveSettingsRequest(yaml);
+    Q_EMIT saveSettingsRequest(node_map);
 
-    graphio.saveSettings(yaml);
-    graphio.saveConnections(yaml);
+    graphio.saveSettings(node_map);
+    graphio.saveConnections(node_map);
 
-    Q_EMIT saveViewRequest(yaml);
+    Q_EMIT saveViewRequest(node_map);
 
-    yaml << YAML::EndMap; // settings map
+    graphio.saveNodes(node_map);
 
-    graphio.saveNodes(yaml);
+    YAML::Emitter yaml;
+    yaml << node_map;
 
     std::ofstream ofs(file.c_str());
     ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';
@@ -210,31 +211,41 @@ void CsApexCore::load(const std::string &file)
     GraphIO graphio(graph_worker_->getGraph(), node_factory_);
 
     {
-        YAML::Node doc;
-
         std::ifstream ifs(file.c_str());
         YAML::Parser parser(ifs);
 
-        if(!getNextDocument(parser, doc)) {
+        YAML::NodeBuilder builder;
+        if (!parser.HandleNextDocument(builder)) {
             std::cerr << "cannot read the config" << std::endl;
-            return;
         }
+        YAML::Node doc = builder.Root();
 
         Q_EMIT loadSettingsRequest(doc);
         graphio.loadSettings(doc);
 
-        graphio.loadNodes(parser);
+        YAML::Node nodes = doc["nodes"];
+        if(nodes.IsDefined()) {
+            for(std::size_t i = 0, total = nodes.size(); i < total; ++i) {
+                graphio.loadNode(doc["nodes"][i]);
+            }
+        }
+
+        // legacy nodes
+        while (parser.HandleNextDocument(builder)) {
+            YAML::Node doc = builder.Root();
+            graphio.loadNode(doc);
+        }
     }
     {
         std::ifstream ifs(file.c_str());
         YAML::Parser parser(ifs);
 
-        YAML::Node doc;
-
-        if(!getNextDocument(parser, doc)) {
+        YAML::NodeBuilder builder;
+        if (!parser.HandleNextDocument(builder)) {
             std::cerr << "cannot read the config" << std::endl;
-            return;
         }
+        YAML::Node doc = builder.Root();
+
         graphio.loadConnections(doc);
 
         Q_EMIT loadViewRequest(doc);

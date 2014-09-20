@@ -98,9 +98,9 @@ void CsApexWindow::construct()
 
     QObject::connect(&core_, SIGNAL(resetRequest()), designer_, SLOT(reset()));
 
-    QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Emitter&)), this, SLOT(saveSettings(YAML::Emitter&)));
+    QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Node&)), this, SLOT(saveSettings(YAML::Node&)));
     QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
-    QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Emitter&)), this, SLOT(saveView(YAML::Emitter&)));
+    QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Node&)), this, SLOT(saveView(YAML::Node&)));
     QObject::connect(&core_, SIGNAL(loadViewRequest(YAML::Node&)), this, SLOT(loadView(YAML::Node&)));
 
     QObject::connect(graph, SIGNAL(nodeAdded(NodePtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodePtr)));
@@ -495,10 +495,10 @@ void CsApexWindow::load()
     }
 }
 
-void CsApexWindow::saveSettings(YAML::Emitter &e)
+void CsApexWindow::saveSettings(YAML::Node& doc)
 {
     DesignerIO designerio(*designer_);
-    designerio.saveSettings(e);
+    designerio.saveSettings(doc);
 }
 
 void CsApexWindow::loadSettings(YAML::Node &doc)
@@ -508,10 +508,10 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
 }
 
 
-void CsApexWindow::saveView(YAML::Emitter &e)
+void CsApexWindow::saveView(YAML::Node &doc)
 {
     DesignerIO designerio(*designer_);
-    designerio.saveBoxes(e, graph_worker_->getGraph(), widget_ctrl_.get());
+    designerio.saveBoxes(doc, graph_worker_->getGraph(), widget_ctrl_.get());
 }
 
 void CsApexWindow::loadView(YAML::Node &doc)

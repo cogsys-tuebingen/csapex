@@ -22,14 +22,14 @@ class DesignerIO
 public:
     DesignerIO(Designer& designer);
 
-    void saveSettings(YAML::Emitter &yaml);
+    void saveSettings(YAML::Node& yaml);
     void loadSettings(YAML::Node& doc);
 
-    void saveBoxes(YAML::Emitter &yaml, Graph* graph, WidgetController* widget_ctrl);
+    void saveBoxes(YAML::Node &yaml, Graph* graph, WidgetController* widget_ctrl);
     void loadBoxes(YAML::Node& doc, WidgetController* widget_ctrl);
 
 private:
-    void saveBox(Node* node, WidgetController* widget_ctrl, YAML::Emitter &yaml);
+    void saveBox(Node* node, WidgetController* widget_ctrl, YAML::Node &yaml);
 
 private:
     Designer& designer_;
