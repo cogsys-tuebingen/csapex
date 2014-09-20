@@ -31,7 +31,7 @@ public:
     virtual ~TriggerParameter();
 
     virtual int ID() const { return 0x007; }
-    virtual std::string TYPE() const { return "Trigger"; }
+    virtual std::string TYPE() const { return "trigger"; }
 
     void trigger();
     virtual bool hasState() const;
@@ -42,8 +42,8 @@ public:
     void doSetValueFrom(const Parameter& other);
     void doClone(const Parameter& other);
 
-    void doWrite(YAML::Emitter& e) const;
-    void doRead(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const;
+    void doDeserialize(const YAML::Node& n);
 
 protected:
     virtual boost::any get_unsafe() const;

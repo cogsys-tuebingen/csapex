@@ -83,26 +83,24 @@ std::string Parameter::toStringImpl() const
     throw std::logic_error("not implemented");
 }
 
-void Parameter::write(YAML::Emitter &e) const
+void Parameter::serialize(YAML::Node &n) const
 {
-    e << YAML::BeginMap;
-    e << YAML::Key << "name" << YAML::Value << name();
+    n["type"] = TYPE();
+    n["name"] = name();
 
     if(interactive_) {
-        e << YAML::Key << "interactive" << YAML::Value << interactive_;
+        n["interactive"] = interactive_;
     }
-    doWrite(e);
-
-    e << YAML::EndMap;
+    doSerialize(n);
 }
 
-void Parameter::read(const YAML::Node &n)
+void Parameter::deserialize(const YAML::Node &n)
 {
-    if(exists(n, "interactive")) {
-        n["interactive"] >> interactive_;
+    if(n["interactive"].IsDefined()) {
+        interactive_ = n["interactive"].as<bool>();
     }
 
-    doRead(n);
+    doDeserialize(n);
 }
 
 void Parameter::setValueFrom(const Parameter &other)

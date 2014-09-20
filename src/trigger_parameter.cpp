@@ -50,18 +50,17 @@ void TriggerParameter::doClone(const Parameter &other)
 {
 }
 
-void TriggerParameter::doWrite(YAML::Emitter& e) const
+void TriggerParameter::doSerialize(YAML::Node&) const
 {
-    e << YAML::Key << "type" << YAML::Value << "value";
 }
 
-void TriggerParameter::doRead(const YAML::Node& n)
+void TriggerParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!exists(n, "name")) {
+    if(!n["name"].IsDefined()) {
         return;
     }
 
-    n["name"] >> name_;
+    name_ = n["name"].as<std::string>();
 
 }
 

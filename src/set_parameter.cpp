@@ -165,59 +165,56 @@ void SetParameter::doClone(const Parameter &other)
     }
 }
 
-void SetParameter::doWrite(YAML::Emitter& e) const
+void SetParameter::doSerialize(YAML::Node& n) const
 {
-    e << YAML::Key << "type" << YAML::Value << "set";
-    e << YAML::Key << "txt" << YAML::Value << getText();
+    n["txt"] = getText();
 
     if(value_.type() == typeid(int)) {
-        e << YAML::Key << "int" << YAML::Value << boost::any_cast<int> (value_);
+        n["int"] = boost::any_cast<int> (value_);
 
     } else if(value_.type() == typeid(double)) {
-        e << YAML::Key << "double" << YAML::Value << boost::any_cast<double> (value_);
+        n["double"] = boost::any_cast<double> (value_);
 
     } else if(value_.type() == typeid(bool)) {
-        e << YAML::Key << "bool" << YAML::Value << boost::any_cast<bool> (value_);
+        n["bool"] = boost::any_cast<bool> (value_);
 
     } else if(value_.type() == typeid(std::string)) {
-        e << YAML::Key << "string" << YAML::Value << boost::any_cast<std::string> (value_);
+        n["string"] = boost::any_cast<std::string> (value_);
     }
 }
 
 namespace {
 template <typename T>
 T __read(const YAML::Node& n) {
-    T v;
-    n >> v;
-    return v;
+    return n.as<T>();
 }
 }
 
-void SetParameter::doRead(const YAML::Node& n)
+void SetParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!exists(n, "name")) {
+    if(!n["name"].IsDefined()) {
         return;
     }
 
-    n["name"] >> name_;
+    name_ = n["name"].as<std::string>();
 
-    if(exists(n, "txt")) {
-        n["txt"] >> txt_;
+    if(n["txt"].IsDefined()) {
+        txt_ = n["txt"].as<std::string>();
     } else {
         // backward compability
         txt_ = "unknown";
     }
 
-    if(exists(n, "int")) {
+    if(n["int"].IsDefined()) {
         value_ = __read<int>(n["int"]);
 
-    } else if(exists(n, "double")) {
+    } else if(n["double"].IsDefined()) {
         value_ = __read<double>(n["double"]);
 
-    } else if(exists(n, "bool")) {
+    } else if(n["bool"].IsDefined()) {
         value_ = __read<bool>(n["bool"]);
 
-    } else if(exists(n, "string")) {
+    } else if(n["string"].IsDefined()) {
         value_ = __read<std::string>(n["string"]);
     }
     set_[name_] = value_;

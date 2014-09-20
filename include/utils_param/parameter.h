@@ -10,7 +10,7 @@
 #include <boost/signals2.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
-#include <utils_yaml/yamlplus.h>
+#include <yaml-cpp/yaml.h>
 
 namespace param {
 
@@ -41,15 +41,16 @@ public:
 public:
     virtual ~Parameter();
 
-    void write(YAML::Emitter& e) const;
-    void read(const YAML::Node& n);
+    void serialize(YAML::Node& n) const;
+    void deserialize(const YAML::Node& n);
 
     void setValueFrom(const Parameter& other);
     void clone(const Parameter& other);
 
 protected:
-    virtual void doWrite(YAML::Emitter& e) const = 0;
-    virtual void doRead(const YAML::Node& n) = 0;
+    virtual void doSerialize(YAML::Node& n) const = 0;
+    virtual void doDeserialize(const YAML::Node& n) = 0;
+
     virtual void doSetValueFrom(const Parameter& other) = 0;
     virtual void doClone(const Parameter& other) = 0;
 

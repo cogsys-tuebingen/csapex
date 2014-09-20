@@ -85,15 +85,13 @@ void RangeParameter::doClone(const Parameter &other)
     }
 }
 
-void RangeParameter::doWrite(YAML::Emitter& e) const
+void RangeParameter::doSerialize(YAML::Node& n) const
 {
-    e << YAML::Key << "type" << YAML::Value << "range";
-
     if(value_.type() == typeid(int)) {
-        e << YAML::Key << "int" << YAML::Value << boost::any_cast<int> (value_);
+        n["int"] = boost::any_cast<int> (value_);
 
     } else if(value_.type() == typeid(double)) {
-        e << YAML::Key << "double" << YAML::Value << boost::any_cast<double> (value_);
+        n["double"] = boost::any_cast<double> (value_);
 
     }
 }
@@ -101,24 +99,22 @@ void RangeParameter::doWrite(YAML::Emitter& e) const
 namespace {
 template <typename T>
 T __read(const YAML::Node& n) {
-    T v;
-    n >> v;
-    return v;
+    return n.as<T>();
 }
 }
 
-void RangeParameter::doRead(const YAML::Node& n)
+void RangeParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!exists(n, "name")) {
+    if(!n["name"].IsDefined()) {
         return;
     }
 
-    n["name"] >> name_;
+    name_ = n["name"].as<std::string>();
 
-    if(exists(n, "int")) {
+    if(n["int"].IsDefined()) {
         value_ = __read<int>(n["int"]);
 
-    } else if(exists(n, "double")) {
+    } else if(n["double"].IsDefined()) {
         value_ = __read<double>(n["double"]);
     }
 }

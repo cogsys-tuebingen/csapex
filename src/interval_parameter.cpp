@@ -103,19 +103,15 @@ void IntervalParameter::doClone(const Parameter &other)
     }
 }
 
-void IntervalParameter::doWrite(YAML::Emitter& e) const
+void IntervalParameter::doSerialize(YAML::Node& n) const
 {
-    e << YAML::Key << "type" << YAML::Value << "interval";
-
     if(values_.first.type() == typeid(int)) {
-        e << YAML::Key << "int" << YAML::Value << YAML::BeginSeq;
-        e << boost::any_cast<int> (values_.first) << boost::any_cast<int> (values_.second);
-        e << YAML::EndSeq;
+        n["int"][0] = boost::any_cast<int> (values_.first);
+        n["int"][1] = boost::any_cast<int> (values_.second);
 
     } else if(values_.first.type() == typeid(double)) {
-        e << YAML::Key << "double" << YAML::Value << YAML::BeginSeq;
-        e << boost::any_cast<double> (values_.first) << boost::any_cast<double> (values_.second);
-        e << YAML::EndSeq;
+        n["double"][0] = boost::any_cast<double> (values_.first);
+        n["double"][1] = boost::any_cast<double> (values_.second);
     }
 }
 
@@ -124,24 +120,24 @@ template <typename T>
 std::pair<T,T> __read(const YAML::Node& n) {
     std::pair<T,T> v;
     assert(n.Type() == YAML::NodeType::Sequence);
-    n[0] >> v.first;
-    n[1] >> v.second;
+    v.first = n[0].as<T>();
+    v.second = n[1].as<T>();
     return v;
 }
 }
 
-void IntervalParameter::doRead(const YAML::Node& n)
+void IntervalParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!exists(n, "name")) {
+    if(!n["name"].IsDefined()) {
         return;
     }
 
-    n["name"] >> name_;
+    name_ = n["name"].as<std::string>();
 
-    if(exists(n, "int")) {
+    if(n["int"].IsDefined()) {
         values_ = __read<int>(n["int"]);
 
-    } else if(exists(n, "double")) {
+    } else if(n["double"].IsDefined()) {
         values_ = __read<double>(n["double"]);
 
     } else {

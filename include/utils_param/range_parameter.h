@@ -31,33 +31,12 @@ public:
     typedef boost::shared_ptr<RangeParameter> Ptr;
 
 public:
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const RangeParameter& p) {
-        p.doWrite(e);
-        return e;
-    }
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const RangeParameter::Ptr& p) {
-        p->doWrite(e);
-        return e;
-    }
-
-    friend void operator >> (const YAML::Node& node, param::RangeParameter& value) {
-        value.doRead(node);
-    }
-
-    friend void operator >> (const YAML::Node& node, param::RangeParameter::Ptr& value) {
-        if(!value) {
-            value.reset(new RangeParameter("loading", ParameterDescription("")));
-        }
-        value->doRead(node);
-    }
-
-public:
     RangeParameter();
     explicit RangeParameter(const std::string& name, const ParameterDescription &description);
     virtual ~RangeParameter();
 
     virtual int ID() const { return 0x005; }
-    virtual std::string TYPE() const { return "Range"; }
+    virtual std::string TYPE() const { return "range"; }
 
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
@@ -65,8 +44,8 @@ public:
     void doSetValueFrom(const Parameter& other);
     void doClone(const Parameter& other);
 
-    void doWrite(YAML::Emitter& e) const;
-    void doRead(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const;
+    void doDeserialize(const YAML::Node& n);
 
     template <typename T>
     T min() const { return read<T>(min_); }

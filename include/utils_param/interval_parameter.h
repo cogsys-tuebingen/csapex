@@ -10,7 +10,7 @@
 #include <boost/mpl/contains.hpp>
 #include <boost/serialization/variant.hpp>
 #include <boost/type_traits.hpp>
-#include <utils_yaml/yamlplus.h>
+#include <yaml-cpp/yaml.h>
 
 namespace param {
 
@@ -32,33 +32,12 @@ public:
     typedef boost::shared_ptr<IntervalParameter> Ptr;
 
 public:
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const IntervalParameter& p) {
-        p.doWrite(e);
-        return e;
-    }
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const IntervalParameter::Ptr& p) {
-        p->doWrite(e);
-        return e;
-    }
-
-    friend void operator >> (const YAML::Node& node, param::IntervalParameter& value) {
-        value.doRead(node);
-    }
-
-    friend void operator >> (const YAML::Node& node, param::IntervalParameter::Ptr& value) {
-        if(!value) {
-            value.reset(new IntervalParameter("loading", ParameterDescription("")));
-        }
-        value->doRead(node);
-    }
-
-public:
     IntervalParameter();
     explicit IntervalParameter(const std::string& name, const ParameterDescription &description);
     virtual ~IntervalParameter();
 
     virtual int ID() const { return 0x003; }
-    virtual std::string TYPE() const { return "Interval"; }
+    virtual std::string TYPE() const { return "interval"; }
 
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
@@ -66,8 +45,8 @@ public:
     void doSetValueFrom(const Parameter& other);
     void doClone(const Parameter& other);
 
-    void doWrite(YAML::Emitter& e) const;
-    void doRead(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const;
+    void doDeserialize(const YAML::Node& n);
 
     template <typename T>
     void setLower(T v) {

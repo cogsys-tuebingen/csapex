@@ -7,47 +7,23 @@
 using namespace param;
 using namespace YAML;
 
-#if NEW_YAML_API
 Node YAML::convert<param::Parameter::Ptr>::encode(const param::Parameter::Ptr& rhs) {
-    throw std::runtime_error("YAML::encode not implemented");
+    YAML::Node n;
+    rhs->serialize(n);
+    return n;
 }
 
 bool YAML::convert<param::Parameter::Ptr>::decode(const Node& node, param::Parameter::Ptr& rhs) {
     std::string type;
 
-    if(YAML::exists(node, "type")) {
-        node["type"] >> type;
+    if(node["type"].IsDefined()) {
+        type = node["type"].as<std::string>();
     } else {
         type = "range";
     }
 
     rhs = ParameterFactory::makeEmpty(type);
-    rhs->read(node);
+    rhs->deserialize(node);
     return true;
 }
 
-template<>
-struct convert<param::Parameter::Ptr>;
-#endif
-
-Emitter& YAML::operator << (Emitter& e, const Parameter& p) {
-    p.write(e);
-    return e;
-}
-Emitter& YAML::operator << (Emitter& e, const Parameter::Ptr& p) {
-    p->write(e);
-    return e;
-}
-
-void YAML::operator >> (const Node& node, Parameter::Ptr& value) {
-    std::string type;
-
-    if(YAML::exists(node, "type")) {
-        node["type"] >> type;
-    } else {
-        type = "range";
-    }
-
-    value = ParameterFactory::makeEmpty(type);
-    value->read(node);
-}

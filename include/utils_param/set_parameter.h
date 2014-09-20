@@ -20,33 +20,12 @@ public:
     typedef boost::shared_ptr<SetParameter> Ptr;
 
 public:
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const SetParameter& p) {
-        p.doWrite(e);
-        return e;
-    }
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const SetParameter::Ptr& p) {
-        p->doWrite(e);
-        return e;
-    }
-
-    friend void operator >> (const YAML::Node& node, param::SetParameter& value) {
-        value.doRead(node);
-    }    template<class Archive>
-
-    friend void operator >> (const YAML::Node& node, param::SetParameter::Ptr& value) {
-        if(!value) {
-            value.reset(new SetParameter("loading", ParameterDescription("")));
-        }
-        value->doRead(node);
-    }
-
-public:
     SetParameter();
     explicit SetParameter(const std::string& name, const ParameterDescription &description);
     virtual ~SetParameter();
 
     virtual int ID() const { return 0x006; }
-    virtual std::string TYPE() const { return "Set"; }
+    virtual std::string TYPE() const { return "set"; }
 
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
@@ -54,8 +33,8 @@ public:
     void doSetValueFrom(const Parameter& other);
     void doClone(const Parameter& other);
 
-    void doWrite(YAML::Emitter& e) const;
-    void doRead(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const;
+    void doDeserialize(const YAML::Node& n);
 
     template <typename T>
     T def() const { return read<T>(def_); }

@@ -19,34 +19,13 @@ public:
     typedef boost::shared_ptr<ColorParameter> Ptr;
 
 public:
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const ColorParameter& p) {
-        p.doWrite(e);
-        return e;
-    }
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const ColorParameter::Ptr& p) {
-        p->doWrite(e);
-        return e;
-    }
-
-    friend void operator >> (const YAML::Node& node, param::ColorParameter& value) {
-        value.doRead(node);
-    }
-
-    friend void operator >> (const YAML::Node& node, param::ColorParameter::Ptr& value) {
-        if(!value) {
-            value.reset(new ColorParameter);
-        }
-        value->doRead(node);
-    }
-
-public:
     ColorParameter();
     explicit ColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b);
 
     virtual const std::type_info &type() const;
 
     virtual int ID() const { return 0x002; }
-    virtual std::string TYPE() const { return "Color"; }
+    virtual std::string TYPE() const { return "color"; }
 
     virtual std::string toStringImpl() const;
 
@@ -54,8 +33,8 @@ public:
     void doClone(const Parameter& other);
     void set(const std::vector<int> &v);
 
-    void doWrite(YAML::Emitter& e) const;
-    void doRead(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const;
+    void doDeserialize(const YAML::Node& n);
 
     std::vector<int> def() const;
     std::vector<int> value() const;

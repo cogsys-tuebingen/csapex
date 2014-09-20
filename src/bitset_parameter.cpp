@@ -178,20 +178,19 @@ void BitSetParameter::doClone(const Parameter &other)
     }
 }
 
-void BitSetParameter::doWrite(YAML::Emitter& e) const
+void BitSetParameter::doSerialize(YAML::Node& n) const
 {
-    e << YAML::Key << "type" << YAML::Value << "bitset";
-    e << YAML::Key << "int" << YAML::Value << boost::any_cast<int> (value_);
+    n["int"] = boost::any_cast<int> (value_);
 }
 
-void BitSetParameter::doRead(const YAML::Node& n)
+void BitSetParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!exists(n, "name")) {
+    if(!n["name"].IsDefined()) {
         return;
     }
 
-    n["name"] >> name_;
-    if(exists(n, "int")) {
-        n["int"] >> value_;
+    name_ = n["name"].as<std::string>();
+    if(n["int"].IsDefined()) {
+        value_ = n["int"].as<int>();
     }
 }

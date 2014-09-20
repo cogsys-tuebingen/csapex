@@ -3,14 +3,13 @@ project(utils_param)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-find_package(catkin REQUIRED COMPONENTS utils_yaml)
+find_package(catkin REQUIRED)
 
 find_package(Boost REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES utils_param
-    CATKIN_DEPENDS utils_yaml
 )
 
 include_directories(
@@ -18,6 +17,7 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
+set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 
 ##### CORE
 add_library(utils_param
@@ -38,7 +38,7 @@ add_library(utils_param
     src/parameter_factory.cpp
     src/parameter_map.cpp
     src/parameter_provider.cpp)
-target_link_libraries(utils_param yaml-cpp ${Boost_LIBRARIES} )
+target_link_libraries(utils_param ${YAML_LIBRARIES} ${Boost_LIBRARIES} )
 
 
 

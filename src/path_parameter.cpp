@@ -65,29 +65,24 @@ void PathParameter::doClone(const Parameter &other)
     }
 }
 
-void PathParameter::doWrite(YAML::Emitter& e) const
+void PathParameter::doSerialize(YAML::Node& n) const
 {
-    e << YAML::Key << "type" << YAML::Value << "path";
-    e << YAML::Key << "value" << YAML::Value <<value_;
+    n["value"] = value_;
 }
 
-namespace {
-template <typename T>
-T __read(const YAML::Node& n) {
-    T v;
-    n >> v;
-    return v;
-}
-}
-
-void PathParameter::doRead(const YAML::Node& n)
+void PathParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!exists(n, "name")) {
+    if(!n["name"].IsDefined()) {
         return;
     }
 
-    n["name"] >> name_;
-    n["value"] >> value_;
+    name_ = n["name"].as<std::string>();
+    value_ = n["value"].as<std::string>();
+}
+
+std::string PathParameter::def() const
+{
+    return def_;
 }
 
 std::string PathParameter::filter() const

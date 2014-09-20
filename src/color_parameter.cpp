@@ -88,30 +88,20 @@ void ColorParameter::doClone(const Parameter &other)
     }
 }
 
-void ColorParameter::doWrite(YAML::Emitter& e) const
+void ColorParameter::doSerialize(YAML::Node& n) const
 {
-    e << YAML::Key << "type" << YAML::Value << "color";
-    e << YAML::Key << "values" << YAML::Value << colors_;
+    n["values"] = colors_;
 }
 
-namespace {
-template <typename T>
-T __read(const YAML::Node& n) {
-    T v;
-    n >> v;
-    return v;
-}
-}
-
-void ColorParameter::doRead(const YAML::Node& n)
+void ColorParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!exists(n, "name")) {
+    if(!n["name"].IsDefined()) {
         return;
     }
 
-    n["name"] >> name_;
+    name_ = n["name"].as<std::string>();
 
-    if(exists(n, "values")) {
-        n["values"] >> colors_;
+    if(n["values"].IsDefined()) {
+        colors_ = n["values"].as< std::vector<int> >();
     }
 }

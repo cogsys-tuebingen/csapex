@@ -17,33 +17,12 @@ public:
     typedef boost::shared_ptr<BitSetParameter> Ptr;
 
 public:
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const BitSetParameter& p) {
-        p.doWrite(e);
-        return e;
-    }
-    friend YAML::Emitter& operator << (YAML::Emitter& e, const BitSetParameter::Ptr& p) {
-        p->doWrite(e);
-        return e;
-    }
-
-    friend void operator >> (const YAML::Node& node, param::BitSetParameter& value) {
-        value.doRead(node);
-    }    template<class Archive>
-
-    friend void operator >> (const YAML::Node& node, param::BitSetParameter::Ptr& value) {
-        if(!value) {
-            value.reset(new BitSetParameter("loading", ParameterDescription("")));
-        }
-        value->doRead(node);
-    }
-
-public:
     BitSetParameter();
     explicit BitSetParameter(const std::string& name, const ParameterDescription& description);
     virtual ~BitSetParameter();
 
     virtual int ID() const { return 0x001; }
-    virtual std::string TYPE() const { return "BitSet"; }
+    virtual std::string TYPE() const { return "bitset"; }
 
     virtual const std::type_info &type() const;
     virtual std::string toStringImpl() const;
@@ -51,8 +30,8 @@ public:
     void doSetValueFrom(const Parameter& other);
     void doClone(const Parameter& other);
 
-    void doWrite(YAML::Emitter& e) const;
-    void doRead(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const;
+    void doDeserialize(const YAML::Node& n);
 
     int def() const { return def_; }
 

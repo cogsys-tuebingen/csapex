@@ -51,11 +51,11 @@ void NullParameter::doClone(const Parameter &other)
     throw std::runtime_error("cannot use null parameters");
 }
 
-void NullParameter::doWrite(YAML::Emitter& e) const
+void NullParameter::doSerialize(YAML::Node& n) const
 {
 }
 
-void NullParameter::doRead(const YAML::Node& n)
+void NullParameter::doDeserialize(const YAML::Node& n)
 {
 }
 
