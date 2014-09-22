@@ -57,7 +57,7 @@ struct MockupMessage : public connection_types::Message
     }
 
 
-    void writeYaml(YAML::Emitter &) const
+    void writeYaml(YAML::Node &) const
     {
         throw std::runtime_error ("MOCKUP: not implemented");
     }

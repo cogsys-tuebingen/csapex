@@ -28,6 +28,8 @@ struct NodeWorker : public QObject
 public:
     typedef boost::shared_ptr<NodeWorker> Ptr;
 
+    static const double DEFAULT_FREQUENCY = 30.0;
+
 public:
     NodeWorker(Settings& settings, Node* node);
     ~NodeWorker();
@@ -103,8 +105,6 @@ Q_SIGNALS:
     void nodeModelChanged();
 
 private:
-    static const double DEFAULT_FREQUENCY = 30.0;
-
     void removeInput(Input *in);
     void removeOutput(Output *out);
 

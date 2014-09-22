@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
+#include <csapex/utility/yaml_io.hpp>
 
 using namespace csapex;
 
@@ -25,34 +26,33 @@ void NodeState::copyFrom(const NodeState::Ptr& rhs)
 
 void NodeState::readYaml(const YAML::Node &node)
 {
-    if(exists(node, "minimized")) {
-        node["minimized"] >> minimized;
+    if(node["minimized"].IsDefined()) {
+        minimized = node["minimized"].as<bool>();
     }
 
-    if(exists(node, "enabled")) {
-        node["enabled"] >> enabled;
+    if(node["enabled"].IsDefined()) {
+        enabled = node["enabled"].as<bool>();
     }
 
-    if(exists(node, "flipped")) {
-        node["flipped"] >> flipped;
+    if(node["flipped"].IsDefined()) {
+        flipped = node["flipped"].as<bool>();
     }
 
-    if(exists(node, "label")) {
-        node["label"] >> label_;
+    if(node["label"].IsDefined()) {
+        label_ = node["label"].as<std::string>();
         if(label_.empty()) {
             label_ = parent->getUUID();
         }
     }
 
-    if(exists(node, "pos")) {
-        double x, y;
-        node["pos"][0] >> x;
-        node["pos"][1] >> y;
+    if(node["pos"].IsDefined()) {
+        double x = node["pos"][0].as<double>();
+        double y = node["pos"][1].as<double>();
         pos.setX(x);
         pos.setY(y);
     }
 
-    if(exists(node, "state")) {
+    if(node["state"].IsDefined()) {
         const YAML::Node& state_map = node["state"];
         child_state = parent->getParameterState();
 
@@ -130,37 +130,26 @@ void NodeState::setParent(Node *value)
 }
 
 
-void NodeState::writeYaml(YAML::Emitter &out) const
+void NodeState::writeYaml(YAML::Node &out) const
 {
-    out << YAML::Flow;
-    out << YAML::BeginMap;
     if(parent) {
-        out << YAML::Key << "type";
-        out << YAML::Value << parent->getType();
-        out << YAML::Key << "uuid";
-        out << YAML::Value << parent->getUUID();
+        out["type"] = parent->getType();
+        out["uuid"] = parent->getUUID();
     }
-    out << YAML::Key << "label";
-    out << YAML::Value << label_;
-    out << YAML::Key << "pos";
-    out << YAML::Value << YAML::BeginSeq << pos.x() << pos.y() << YAML::EndSeq;
-    out << YAML::Key << "minimized";
-    out << YAML::Value << minimized;
-    out << YAML::Key << "enabled";
-    out << YAML::Value << enabled;
-    out << YAML::Key << "flipped";
-    out << YAML::Value << flipped;
+    out["label"] = label_;
+    out["pos"][0] = pos.x();
+    out["pos"][1] = pos.y();
+    out["minimized"] = minimized;
+    out["enabled"] = enabled;
+    out["flipped"] = flipped;
 
     if(parent) {
         child_state = parent->getParameterState();
     }
 
     if(child_state.get()) {
-        out << YAML::Key << "state";
-        out << YAML::Value << YAML::BeginMap;
-        child_state->writeYaml(out);
-        out << YAML::EndMap;
+        YAML::Node sub_node;
+        child_state->writeYaml(sub_node);
+        out["state"] = sub_node;
     }
-
-    out << YAML::EndMap;
 }

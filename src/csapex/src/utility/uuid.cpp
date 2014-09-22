@@ -76,6 +76,11 @@ UUID UUID::make_forced(const std::string &representation)
     return r;
 }
 
+UUID::UUID()
+{
+    representation_ = "invalid_uuid";
+}
+
 UUID::UUID(const std::string &representation)
 {
     representation_ = representation;

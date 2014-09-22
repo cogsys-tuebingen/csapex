@@ -62,10 +62,10 @@ public Q_SLOTS:
     void showStatusMessage(const std::string& msg);
     void reloadBoxMenues();
 
-    void saveSettings(YAML::Emitter& e);
+    void saveSettings(YAML::Node& doc);
     void loadSettings(YAML::Node& doc);
 
-    void saveView(YAML::Emitter& e);
+    void saveView(YAML::Node &e);
     void loadView(YAML::Node& doc);
 
     void updateDebugInfo();

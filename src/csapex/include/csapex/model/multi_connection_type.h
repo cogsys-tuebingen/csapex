@@ -27,7 +27,7 @@ public:
     virtual ConnectionType::Ptr clone() ;
     virtual ConnectionType::Ptr toType();
 
-    void writeYaml(YAML::Emitter& yaml) const;
+    void writeYaml(YAML::Node& yaml) const;
     void readYaml(const YAML::Node& node);
 
 private:

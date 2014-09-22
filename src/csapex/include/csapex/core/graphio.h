@@ -26,14 +26,14 @@ public:
     GraphIO(Graph* graph, NodeFactory* node_factory);
 
 public:
-    void saveSettings(YAML::Emitter &yaml);
-    void loadSettings(YAML::Node& doc);
+    void saveSettings(YAML::Node& yaml);
+    void loadSettings(const YAML::Node& doc);
 
-    void saveNodes(YAML::Emitter &yaml);
-    void loadNodes(YAML::Parser &doc);
+    void saveNodes(YAML::Node &yaml);
+    void loadNode(const YAML::Node &doc);
 
-    void saveConnections(YAML::Emitter& yaml);
-    void loadConnections(YAML::Node& doc);
+    void saveConnections(YAML::Node &yaml);
+    void loadConnections(const YAML::Node& doc);
 
 private:
     Graph* graph_;

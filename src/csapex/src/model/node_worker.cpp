@@ -189,10 +189,8 @@ void NodeWorker::stop()
     node_->abort();
 
     QMutexLocker lock(&stop_mutex_);
+    stop_ = true;
 
-    Q_FOREACH(Input* i, inputs_) {
-        i->free();
-    }
     Q_FOREACH(Output* i, outputs_) {
         i->stop();
     }
@@ -208,7 +206,6 @@ void NodeWorker::stop()
     }
 
     QObject::disconnect(private_thread_);
-    stop_ = true;
 
     pause(false);
 
@@ -243,11 +240,6 @@ void NodeWorker::forwardMessage(Connectable *s)
             continue_.wait(&pause_mutex_);
         }
         pause_mutex_.unlock();
-    }
-
-    QMutexLocker lock(&stop_mutex_);
-    if(stop_) {
-        return;
     }
 
     Input* source = dynamic_cast<Input*> (s);
@@ -408,6 +400,12 @@ void NodeWorker::clearInput(Input *source)
 
 void NodeWorker::forwardMessageSynchronized(Input *source)
 {
+
+    QMutexLocker lock(&stop_mutex_);
+    if(stop_) {
+        return;
+    }
+
     typedef std::pair<Input*, bool> PAIR;
     bool can_process = true;
 
@@ -547,6 +545,8 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
 
     }
     t->finish();
+
+    lock.unlock();
 
     // send the messages
     sendMessages();

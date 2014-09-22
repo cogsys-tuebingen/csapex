@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/multi_connection_type.h>
 #include <csapex/msg/message.h>
+#include <csapex/msg/message_factory.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/csapex_fwd.h>
@@ -38,14 +39,17 @@ public:
     /// "container" messages
     template <typename Container, typename T>
     Input* addInput(const std::string& label) {
+        Container::template registerType<T>();
         return addInput(Container::template make<T>(), label, false, false);
     }
     template <typename Container, typename T>
     Input* addOptionalInput(const std::string& label) {
+        Container::template registerType<T>();
         return addInput(Container::template make<T>(), label, true, false);
     }
     template <typename Container, typename T>
     Output* addOutput(const std::string& label) {
+        Container::template registerType<T>();
         return addOutput(Container::template make<T>(), label);
     }
 
@@ -53,16 +57,19 @@ public:
     template <typename T>
     Input* addInput(const std::string& label,
                           typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
                           typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true, false);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
                             typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label);
     }
 
