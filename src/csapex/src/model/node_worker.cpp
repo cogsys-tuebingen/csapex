@@ -581,45 +581,58 @@ void NodeWorker::setTickFrequency(double f)
     if(f == 0.0) {
         return;
     }
-    tick_timer_->setInterval(1000. / f);
-    tick_timer_->setSingleShot(false);
+
+    tick_immediate_ = (f >= 999.9);
+
+    if(tick_immediate_) {
+        tick_timer_->setSingleShot(true);
+    } else {
+        tick_timer_->setInterval(1000. / f);
+        tick_timer_->setSingleShot(false);
+    }
     tick_timer_->start();
 }
 
 void NodeWorker::tick()
 {
-    {
-        pause_mutex_.lock();
-        while(paused_) {
-            continue_.wait(&pause_mutex_);
-        }
-        pause_mutex_.unlock();
+    while(true) {
+        {
+            pause_mutex_.lock();
+            while(paused_) {
+                continue_.wait(&pause_mutex_);
+            }
+            pause_mutex_.unlock();
 
-        QMutexLocker lock(&stop_mutex_);
-        if(stop_) {
-            return;
-        }
-    }
-
-
-    if(!thread_initialized_) {
-        thread::set_name(node_->getUUID().getShortName().c_str());
-        thread_initialized_ = true;
-    }
-
-    if(isEnabled()) {
-        node_->tick();
-
-        // if there is a message: send!
-        bool has_msg = false;
-        for(std::size_t i = 0; i < outputs_.size(); ++i) {
-            Output* out = outputs_[i];
-            if(out->hasMessage()) {
-                has_msg = true;
+            QMutexLocker lock(&stop_mutex_);
+            if(stop_) {
+                return;
             }
         }
-        if(has_msg) {
-            sendMessages();
+
+
+        if(!thread_initialized_) {
+            thread::set_name(node_->getUUID().getShortName().c_str());
+            thread_initialized_ = true;
+        }
+
+        if(isEnabled()) {
+            node_->tick();
+
+            // if there is a message: send!
+            bool has_msg = false;
+            for(std::size_t i = 0; i < outputs_.size(); ++i) {
+                Output* out = outputs_[i];
+                if(out->hasMessage()) {
+                    has_msg = true;
+                }
+            }
+            if(has_msg) {
+                sendMessages();
+            }
+        }
+
+        if(!tick_immediate_) {
+            return;
         }
     }
 }

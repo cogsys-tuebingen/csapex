@@ -131,6 +131,7 @@ private:
     std::vector<QObject*> callbacks;
 
     QTimer* tick_timer_;
+    bool tick_immediate_;
 
     QThread* private_thread_;
 
