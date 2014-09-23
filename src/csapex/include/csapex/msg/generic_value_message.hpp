@@ -12,7 +12,7 @@ struct GenericValueMessage : public Message {
     typedef boost::shared_ptr<GenericValueMessage<Type> > Ptr;
 
     GenericValueMessage(const std::string& frame_id = "/")
-        : Message(type2name(typeid(Type)), frame_id)
+        : Message(type< GenericValueMessage<Type> >::name(), frame_id)
     {}
 
     virtual ConnectionType::Ptr clone() {
