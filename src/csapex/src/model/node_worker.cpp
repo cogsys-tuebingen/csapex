@@ -506,7 +506,7 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             Input* cin = pair.first;
 
-            if(has_msg_[cin] && !cin->isAsync()) {
+            if(has_msg_[cin] && (!cin->isAsync() && !cin->isOptional() )) {
                 if(cin->isMessage<connection_types::NoMessage>()) {
                     can_process = false;
                 }
