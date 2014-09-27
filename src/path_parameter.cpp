@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/path_parameter.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace param;
 
 PathParameter::PathParameter()

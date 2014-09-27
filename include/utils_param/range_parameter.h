@@ -5,11 +5,8 @@
 #include <utils_param/parameter.h>
 
 /// SYSTEM
-#include <boost/variant.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
-#include <boost/serialization/variant.hpp>
-#include <boost/type_traits.hpp>
 
 namespace param {
 
@@ -21,11 +18,7 @@ int
 
 class RangeParameter : public Parameter
 {
-    friend class boost::serialization::access;
     friend class ParameterFactory;
-
-public:
-    typedef boost::any variant;
 
 public:
     typedef boost::shared_ptr<RangeParameter> Ptr;
@@ -120,7 +113,7 @@ protected:
 
 private:
     template <typename T>
-    T read(const variant& var) const
+    T read(const boost::any& var) const
     {
         BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
         try {
@@ -132,11 +125,11 @@ private:
     }
 
 private:
-    variant value_;
-    variant min_;
-    variant max_;
-    variant def_;
-    variant step_;
+    boost::any value_;
+    boost::any min_;
+    boost::any max_;
+    boost::any def_;
+    boost::any step_;
 };
 
 }

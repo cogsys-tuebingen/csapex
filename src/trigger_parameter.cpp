@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/trigger_parameter.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace param;
 
 TriggerParameter::TriggerParameter()

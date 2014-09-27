@@ -4,23 +4,12 @@
 /// COMPONENT
 #include <utils_param/parameter.h>
 
-/// SYSTEM
-#include <boost/variant.hpp>
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/contains.hpp>
-#include <boost/serialization/variant.hpp>
-#include <boost/type_traits.hpp>
-
 namespace param {
 
 
 class TriggerParameter : public Parameter
 {
-    friend class boost::serialization::access;
     friend class ParameterFactory;
-
-public:
-    typedef boost::any variant;
 
 public:
     typedef boost::shared_ptr<TriggerParameter> Ptr;

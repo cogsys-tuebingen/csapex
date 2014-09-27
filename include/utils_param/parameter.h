@@ -2,6 +2,7 @@
 #define PARAMETER_H
 
 /// COMPONENT
+#include <utils_param/param_fwd.h>
 #include <utils_param/parameter_description.h>
 
 /// SYSTEM
@@ -10,7 +11,11 @@
 #include <boost/signals2.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
-#include <yaml-cpp/yaml.h>
+
+/// FORWARD DECLARATIONS
+namespace YAML {
+class Node;
+}
 
 namespace param {
 
@@ -23,20 +28,11 @@ public:
 
     typedef boost::shared_ptr<boost::lock_guard<boost::mutex> > Lock;
 
-    struct access {
-        boost::signals2::signal<void(Parameter*)>& parameter_changed(Parameter& p) {
-            return p.parameter_changed;
-        }
-        boost::signals2::signal<void(Parameter*)>& scope_changed(Parameter& p) {
-            return p.scope_changed;
-        }
-        boost::signals2::signal<void(Parameter*,bool)>& interactive_changed(Parameter& p) {
-            return p.interactive_changed;
-        }
-        boost::signals2::signal<void(Parameter*,bool)>& parameter_enabled(Parameter& p) {
-            return p.parameter_enabled;
-        }
-    };
+public:
+    boost::signals2::signal<void(Parameter*)> parameter_changed;
+    boost::signals2::signal<void(Parameter*)> scope_changed;
+    boost::signals2::signal<void(Parameter*, bool)> interactive_changed;
+    boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
 
 public:
     virtual ~Parameter();
@@ -137,12 +133,6 @@ protected:
     virtual void set_unsafe(const boost::any& v);
 
     boost::any access_unsafe(const Parameter &p) const;
-
-protected:
-    boost::signals2::signal<void(Parameter*)> parameter_changed;
-    boost::signals2::signal<void(Parameter*)> scope_changed;
-    boost::signals2::signal<void(Parameter*, bool)> interactive_changed;
-    boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
 
 protected:
     std::string name_;

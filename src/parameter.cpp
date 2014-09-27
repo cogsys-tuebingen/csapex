@@ -1,6 +1,7 @@
 /// HEADER
 #include <utils_param/parameter.h>
 
+#include <yaml-cpp/yaml.h>
 #include <cxxabi.h>
 
 using namespace param;

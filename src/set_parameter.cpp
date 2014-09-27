@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/set_parameter.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace param;
 
 SetParameter::SetParameter()
@@ -37,7 +40,7 @@ void SetParameter::setSet(const std::vector<std::string> &set)
 
 void SetParameter::setByName(const std::string &name)
 {
-    std::map<std::string, variant>::iterator pos = set_.find(name);
+    std::map<std::string, boost::any>::iterator pos = set_.find(name);
     if(pos == set_.end()) {
         throw std::runtime_error(std::string("no such parameter: ") + name);
     }
@@ -52,7 +55,7 @@ int SetParameter::noParameters() const
     return set_.size();
 }
 
-std::string SetParameter::convertToString(const variant &v) const
+std::string SetParameter::convertToString(const boost::any &v) const
 {
     if(v.type() == typeid(std::string)) {
         return boost::any_cast<std::string> (v);
@@ -77,7 +80,7 @@ std::string SetParameter::convertToString(const variant &v) const
 
 std::string SetParameter::getText(int idx) const
 {
-    std::map<std::string, variant>::const_iterator i = set_.begin();
+    std::map<std::string, boost::any>::const_iterator i = set_.begin();
     std::advance(i, idx);
     return i->first;
 }
@@ -85,7 +88,7 @@ std::string SetParameter::getText(int idx) const
 std::string SetParameter::getText() const
 {
     std::string str =  convertToString(value_);
-    for(std::map<std::string, variant>::const_iterator it = set_.begin(); it != set_.end(); ++it) {
+    for(std::map<std::string, boost::any>::const_iterator it = set_.begin(); it != set_.end(); ++it) {
         if(convertToString(it->second) == str) {
             return it->first;
         }

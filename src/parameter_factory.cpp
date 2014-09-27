@@ -7,6 +7,8 @@
 #include <utils_param/interval_parameter.h>
 #include <utils_param/trigger_parameter.h>
 #include <utils_param/bitset_parameter.h>
+#include <utils_param/range_parameter.h>
+#include <utils_param/value_parameter.h>
 
 using namespace param;
 
@@ -79,17 +81,6 @@ Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name,
 {
     return ParameterFactory::declareParameterBitSet(name, ParameterDescription(), set);
 }
-
-Parameter::Ptr ParameterFactory::declare(const std::string& name, const char* def)
-{
-    return declare(name, std::string(def));
-}
-
-Parameter::Ptr ParameterFactory::declare(const std::string& name, bool def)
-{
-    return declareBool(name, def);
-}
-
 
 Parameter::Ptr ParameterFactory::declareBool(const std::string& name, const ParameterDescription& description, bool def)
 {
@@ -230,3 +221,62 @@ Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& na
 {
     return declareParameterStringSet(name, ParameterDescription(), set, def);
 }
+
+template <typename T>
+Parameter::Ptr ParameterFactory::declareRange(const std::string& name,
+                                   const ParameterDescription& description,
+                                   T min, T max, T def, T step)
+{
+    BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
+
+    RangeParameter::Ptr result(new RangeParameter(name, description));
+    result->def_ = def;
+    result->min_ = min;
+    result->max_ = max;
+    result->step_ = step;
+    result->set<T>(def);
+
+    return result;
+}
+
+
+template
+Parameter::Ptr ParameterFactory::declareRange<double>(const std::string& name,
+                                                      const ParameterDescription& description,
+                                                      double min, double max, double def, double step);
+template
+Parameter::Ptr ParameterFactory::declareRange<int>(const std::string& name,
+                                                   const ParameterDescription& description,
+                                                   int min, int max, int def, int step);
+
+
+
+
+template <typename T>
+Parameter::Ptr ParameterFactory::declareInterval(const std::string& name,
+                                                 const ParameterDescription& description,
+                                                 T min, T max, T def_min, T def_max, T step)
+{
+    BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
+
+    IntervalParameter::Ptr result(new IntervalParameter(name, description));
+    result->def_ = std::make_pair(def_min, def_max);
+    result->min_ = min;
+    result->max_ = max;
+    result->step_ = step;
+    result->values_ = std::make_pair(def_min, def_max);
+
+    result->set<std::pair<T,T> >(std::make_pair(def_min, def_max));
+
+    return result;
+}
+
+
+template
+Parameter::Ptr ParameterFactory::declareInterval<double>(const std::string& name,
+                                                      const ParameterDescription& description,
+                                                      double min, double max, double def_min, double def_max, double step);
+template
+Parameter::Ptr ParameterFactory::declareInterval<int>(const std::string& name,
+                                                   const ParameterDescription& description,
+                                                   int min, int max, int def_min, int def_max, int step);

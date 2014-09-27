@@ -3,10 +3,8 @@
 
 /// COMPONENT
 #include <utils_param/parameter.h>
-#include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
 #include <utils_param/set_parameter.h>
-#include <utils_param/interval_parameter.h>
 #include <utils_param/parameter_description.h>
 
 namespace param
@@ -50,19 +48,8 @@ public:
     template <typename T>
     static Parameter::Ptr declareRange(const std::string& name,
                                        const ParameterDescription& description,
-                                       T min, T max, T def, T step)
-    {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
+                                       T min, T max, T def, T step);
 
-        RangeParameter::Ptr result(new RangeParameter(name, description));
-        result->def_ = def;
-        result->min_ = min;
-        result->max_ = max;
-        result->step_ = step;
-        result->set<T>(def);
-
-        return result;
-    }
     template <typename T>
     static Parameter::Ptr declareRange(const std::string& name, T min, T max, T def, T step)
     {
@@ -86,21 +73,8 @@ public:
     template <typename T>
     static Parameter::Ptr declareInterval(const std::string& name,
                                           const ParameterDescription& description,
-                                          T min, T max, T def_min, T def_max, T step)
-    {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
+                                          T min, T max, T def_min, T def_max, T step);
 
-        IntervalParameter::Ptr result(new IntervalParameter(name, description));
-        result->def_ = std::make_pair(def_min, def_max);
-        result->min_ = min;
-        result->max_ = max;
-        result->step_ = step;
-        result->values_ = std::make_pair(def_min, def_max);
-
-        result->set<std::pair<T,T> >(std::make_pair(def_min, def_max));
-
-        return result;
-    }
     template <typename T>
     static Parameter::Ptr declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
     {
@@ -353,43 +327,6 @@ public:
     {
         return declareValue(name, ParameterDescription(), def);
     }
-
-
-    /** LEGACY **/
-    template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const ParameterDescription& description, const std::vector< std::pair<std::string, T> >& set)
-    {
-        SetParameter::Ptr result(new SetParameter(name, description));
-        result->setSet(set);
-        result->def_ = set.begin()->second;
-        result->set<T>(set.begin()->second);
-
-        return result;
-    }
-    template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const std::vector< std::pair<std::string, T> >& set)
-    {
-        return declareParameterSet(name, ParameterDescription(), set);
-    }
-
-
-    template <typename T>
-    static Parameter::Ptr declare(const std::string& name, T min, T max, T def, T step)
-    {
-        return declareRange(name, ParameterDescription(), min, max, def, step);
-    }
-
-    static Parameter::Ptr declare(const std::string& name, bool def) __attribute__ ((deprecated));
-
-    template <typename T>
-    static Parameter::Ptr declare(const std::string& name, const T& def)
-    {
-        return declareValue(name, ParameterDescription(), def);
-    }
-
-    static Parameter::Ptr declare(const std::string& name, const char* def)  __attribute__ ((deprecated));
-
-    /** / LEGACY **/
 };
 
 }

@@ -5,12 +5,8 @@
 #include <utils_param/parameter.h>
 
 /// SYSTEM
-#include <boost/variant.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
-#include <boost/serialization/variant.hpp>
-#include <boost/type_traits.hpp>
-#include <yaml-cpp/yaml.h>
 
 namespace param {
 
@@ -22,11 +18,7 @@ int
 
 class IntervalParameter : public Parameter
 {
-    friend class boost::serialization::access;
     friend class ParameterFactory;
-
-public:
-    typedef boost::any variant;
 
 public:
     typedef boost::shared_ptr<IntervalParameter> Ptr;
@@ -113,7 +105,7 @@ protected:
 
 private:
     template <typename T>
-    T read(const variant& var) const
+    T read(const boost::any& var) const
     {
         BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
         try {
@@ -125,11 +117,11 @@ private:
     }
 
 private:
-    std::pair<variant, variant> values_;
-    variant min_;
-    variant max_;
-    std::pair<variant, variant> def_;
-    variant step_;
+    std::pair<boost::any, boost::any> values_;
+    boost::any min_;
+    boost::any max_;
+    std::pair<boost::any, boost::any> def_;
+    boost::any step_;
 };
 
 }

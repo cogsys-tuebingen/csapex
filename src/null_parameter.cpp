@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/null_parameter.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace param;
 
 NullParameter::NullParameter()

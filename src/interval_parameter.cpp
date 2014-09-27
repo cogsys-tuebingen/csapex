@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/interval_parameter.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace param;
 
 IntervalParameter::IntervalParameter()

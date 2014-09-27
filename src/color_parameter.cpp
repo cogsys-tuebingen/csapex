@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/color_parameter.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace param;
 
 ColorParameter::ColorParameter()

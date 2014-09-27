@@ -9,11 +9,7 @@ namespace param {
 
 class ColorParameter : public Parameter
 {
-    friend class boost::serialization::access;
     friend class ParameterFactory;
-
-public:
-    typedef boost::any variant;
 
 public:
     typedef boost::shared_ptr<ColorParameter> Ptr;

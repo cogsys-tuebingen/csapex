@@ -1,6 +1,9 @@
 /// HEADER
 #include <utils_param/bitset_parameter.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace param;
 
 BitSetParameter::BitSetParameter()

@@ -14,9 +14,6 @@ class SetParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::any variant;
-
-public:
     typedef boost::shared_ptr<SetParameter> Ptr;
 
 public:
@@ -69,11 +66,11 @@ protected:
     virtual boost::any get_unsafe() const;
     virtual void set_unsafe(const boost::any& v);
 
-    std::string convertToString(const variant& v) const;
+    std::string convertToString(const boost::any& v) const;
 
 private:
     template <typename T>
-    T read(const variant& var) const
+    T read(const boost::any& var) const
     {
         try {
             return boost::any_cast<T> (var);
@@ -84,10 +81,10 @@ private:
     }
 
 private:
-    variant value_;
+    boost::any value_;
     std::string txt_;
-    std::map<std::string, variant> set_;
-    variant def_;
+    std::map<std::string, boost::any> set_;
+    boost::any def_;
 };
 
 }

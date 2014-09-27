@@ -4,23 +4,12 @@
 /// COMPONENT
 #include <utils_param/parameter.h>
 
-/// SYSTEM
-#include <boost/variant.hpp>
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/contains.hpp>
-#include <boost/serialization/variant.hpp>
-#include <boost/type_traits.hpp>
-
 namespace param {
 
 
 class ValueParameter : public Parameter
 {
-    friend class boost::serialization::access;
     friend class ParameterFactory;
-
-public:
-    typedef boost::any variant;
 
 public:
     typedef boost::shared_ptr<ValueParameter> Ptr;
@@ -56,7 +45,7 @@ protected:
 
 private:
     template <typename T>
-    T read(const variant& var) const
+    T read(const boost::any& var) const
     {
         try {
             return boost::any_cast<T> (var);
@@ -67,8 +56,8 @@ private:
     }
 
 private:
-    variant value_;
-    variant def_;
+    boost::any value_;
+    boost::any def_;
 };
 
 }
