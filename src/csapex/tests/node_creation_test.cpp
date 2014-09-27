@@ -1,4 +1,5 @@
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/msg/message.h>
 #include <csapex/core/settings.h>
@@ -162,10 +163,10 @@ TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
 
     ASSERT_TRUE(node != NULL);
 
-    std::vector<Input*> inputs = node->getMessageInputs();
+    std::vector<Input*> inputs = node->getNodeWorker()->getMessageInputs();
     ASSERT_EQ(2, inputs.size());
 
-    std::vector<Output*> outputs = node->getMessageOutputs();
+    std::vector<Output*> outputs = node->getNodeWorker()->getMessageOutputs();
     ASSERT_EQ(1, outputs.size());
 
     std::vector<param::Parameter::Ptr> params = node->getParameters();
@@ -178,8 +179,8 @@ TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
 
     ASSERT_TRUE(node != NULL);
 
-    std::vector<Input*> inputs = node->getMessageInputs();
-    std::vector<Output*> outputs = node->getMessageOutputs();
+    std::vector<Input*> inputs = node->getNodeWorker()->getMessageInputs();
+    std::vector<Output*> outputs = node->getNodeWorker()->getMessageOutputs();
     std::vector<param::Parameter::Ptr> params = node->getParameters();
 
     MockupMessage::Ptr msg(new MockupMessage);

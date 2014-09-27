@@ -23,8 +23,6 @@ void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
         return;
     }
 
-    // TODO: print if headless
-    //std::cerr << msg << std::endl;
     setErrorSilent(e, msg, level);
 
     errorEvent(error_, msg, level_);

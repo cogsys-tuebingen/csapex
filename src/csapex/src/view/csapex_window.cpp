@@ -166,11 +166,10 @@ void CsApexWindow::updateDebugInfo()
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
 
     foreach (NodeBox* box, selected) {
-        Node* node = box->getNode();
-        NodeWorker* worker = node->getNodeWorker();
+        NodeWorker* worker = box->getNodeWorker();
         QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(updateDebugInfo()));
         QObject::connect(worker, SIGNAL(nodeModelChanged()), this, SLOT(updateDebugInfo()));
-        ui->box_info->addTopLevelItem(NodeStatistics(node).createDebugInformation(widget_ctrl_->getNodeFactory()));
+        ui->box_info->addTopLevelItem(NodeStatistics(worker).createDebugInformation(widget_ctrl_->getNodeFactory()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);

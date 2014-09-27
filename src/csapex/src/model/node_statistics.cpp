@@ -6,11 +6,12 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node_factory.h>
+#include <csapex/model/node_worker.h>
 
 using namespace csapex;
 
-NodeStatistics::NodeStatistics(Node *node)
-    : node_(node)
+NodeStatistics::NodeStatistics(NodeWorker *node)
+    : node_worker_(node)
 {
 
 }
@@ -42,17 +43,19 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* c
 
 QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factory) const
 {
-    QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, node_->getUUID().c_str());
+    Node* node = node_worker_->getNode();
 
-    NodeConstructor::Ptr constructor = node_factory->getConstructor(node_->getType());
+    QTreeWidgetItem* tl = new QTreeWidgetItem;
+    tl->setText(0, node_worker_->getNodeUUID().c_str());
+
+    NodeConstructor::Ptr constructor = node_factory->getConstructor(node->getType());
 
     tl->setIcon(0, constructor->getIcon());
 
     {
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
-        std::vector<Input*> inputs = node_->getAllInputs();
+        std::vector<Input*> inputs = node_worker_->getAllInputs();
         for(std::size_t i = 0, n = inputs.size(); i < n; ++i) {
             Input* connector = inputs[i];
 
@@ -84,7 +87,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
     {
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
-        std::vector<Output*> outputs = node_->getAllOutputs();
+        std::vector<Output*> outputs = node_worker_->getAllOutputs();
         for(std::size_t i = 0, n = outputs.size(); i < n; ++i) {
             Output* connector = outputs[i];
 
@@ -110,7 +113,8 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
     {
         QTreeWidgetItem* parameters = new QTreeWidgetItem;
         parameters->setText(0, "Parameters");
-        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = node_->parameter_state_.params.begin(); it != node_->parameter_state_.params.end(); ++it ) {
+        GenericState::Ptr state = node->getParameterState();
+        for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
             param::Parameter* p = it->second.get();
 
             QTreeWidgetItem* param = new QTreeWidgetItem;
@@ -160,21 +164,21 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* aout_w = new QTreeWidgetItem;
         aout_w->setText(0, "output");
         QTreeWidgetItem* aout_w_txt = new QTreeWidgetItem;
-        aout_w_txt->setText(0, node_->ainfo.history().str().c_str());
+        aout_w_txt->setText(0, node->ainfo.history().str().c_str());
         aout_w->addChild(aout_w_txt);
         streams->addChild(aout_w);
 
         QTreeWidgetItem* awarn_w = new QTreeWidgetItem;
         awarn_w->setText(0, "warning");
         QTreeWidgetItem* awarn_w_txt = new QTreeWidgetItem;
-        awarn_w_txt->setText(0, node_->awarn.history().str().c_str());
+        awarn_w_txt->setText(0, node->awarn.history().str().c_str());
         awarn_w->addChild(awarn_w_txt);
         streams->addChild(awarn_w);
 
         QTreeWidgetItem* aerr_w = new QTreeWidgetItem;
         aerr_w->setText(0, "error");
         QTreeWidgetItem* aerr_w_txt = new QTreeWidgetItem;
-        aerr_w_txt->setText(0, node_->aerr.history().str().c_str());
+        aerr_w_txt->setText(0, node->aerr.history().str().c_str());
         aerr_w->addChild(aerr_w_txt);
         streams->addChild(aerr_w);
 

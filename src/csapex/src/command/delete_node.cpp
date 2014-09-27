@@ -5,6 +5,7 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/graph.h>
@@ -35,19 +36,19 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    Node* node = graph_->findNode(uuid);
+    NodeWorker* node_worker = graph_->findNodeWorkerForConnector(uuid);
 
-    type = node->getType();
+    type = node_worker->getNode()->getType();
 
     locked = false;
     clear();
 
-    BOOST_FOREACH(Input* i, node->getAllInputs()) {
+    BOOST_FOREACH(Input* i, node_worker->getAllInputs()) {
         if(i->isConnected()) {
             add(i->removeAllConnectionsCmd());
         }
     }
-    BOOST_FOREACH(Output* i, node->getAllOutputs()) {
+    BOOST_FOREACH(Output* i, node_worker->getAllOutputs()) {
         if(i->isConnected()) {
             add(i->removeAllConnectionsCmd());
         }
@@ -56,9 +57,9 @@ bool DeleteNode::doExecute()
     locked = true;
 
     if(Meta::doExecute()) {
-        saved_state = node->getNodeStateCopy();
+        saved_state = node_worker->getNode()->getNodeStateCopy();
 
-        graph_->deleteNode(node->getUUID());
+        graph_->deleteNode(node_worker->getNodeUUID());
         return true;
     }
 
@@ -79,10 +80,10 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        Node* node = graph_->findNode(uuid);
-        saved_state = node->getNodeStateCopy();
+        NodeWorker* node_worker = graph_->findNodeWorker(uuid);
+        saved_state = node_worker->getNode()->getNodeStateCopy();
 
-        graph_->deleteNode(node->getUUID());
+        graph_->deleteNode(node_worker->getNodeUUID());
         return true;
     }
 

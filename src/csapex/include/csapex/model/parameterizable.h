@@ -41,7 +41,12 @@ public:
     template <typename T>
     const T readParameter(const std::string& name) const
     {
-        return parameter_state_.getParameter(name)->as<T>();
+        return parameter_state_->getParameter(name)->as<T>();
+    }
+    template <typename T>
+    void setParameter(const std::string& name, const T& value)
+    {
+        parameter_state_->getParameter(name)->set<T>(value);
     }
 
     std::vector<param::Parameter::Ptr> getParameters() const;
@@ -67,6 +72,10 @@ public:
 
     ChangedParameterList getChangedParameters();
 
+    virtual GenericStatePtr getParameterState();
+    virtual GenericStatePtr getParameterStateClone() const;
+    virtual void setParameterState(Memento::Ptr memento);
+
 protected:
     void addParameterCallback(param::Parameter *param, boost::function<void(param::Parameter *)> cb);
     void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
@@ -84,7 +93,7 @@ private:
     std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
 
 protected:
-    GenericState parameter_state_;
+    GenericStatePtr parameter_state_;
 };
 
 }

@@ -12,14 +12,14 @@ namespace csapex
 class NodeStatistics
 {
 public:
-    NodeStatistics(Node* node);
+    NodeStatistics(NodeWorker *node);
     QTreeWidgetItem* createDebugInformation(NodeFactory *node_factory) const;
 
 private:
     QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
 
 private:
-    Node* node_;
+    NodeWorker* node_worker_;
 };
 }
 

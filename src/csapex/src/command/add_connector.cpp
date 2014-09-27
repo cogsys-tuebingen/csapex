@@ -34,19 +34,19 @@ std::string AddConnector::getDescription() const
 
 bool AddConnector::doExecute()
 {
-    Node* node = graph_->findNode(b_uuid);
-    apex_assert_hard(node);
+    NodeWorker* node_worker = graph_->findNodeWorker(b_uuid);
+    apex_assert_hard(node_worker);
 
     if(input) {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_IN, node->getMessageInputs().size()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getNodeUUID(), Connectable::TYPE_IN, node_worker->getMessageInputs().size()) : c_uuid;
         Input* in = new Input(*settings_, uuid);
         c = in;
-        node->getNodeWorker()->registerInput(in);
+        node_worker->registerInput(in);
     } else {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node->getUUID(), Connectable::TYPE_OUT, node->getMessageOutputs().size()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getNodeUUID(), Connectable::TYPE_OUT, node_worker->getMessageOutputs().size()) : c_uuid;
         Output* out = new Output(*settings_, uuid);
         c = out;
-        node->getNodeWorker()->registerOutput(out);
+        node_worker->registerOutput(out);
     }
 
     c->setType(MessageFactory::createMessage(type));
@@ -58,13 +58,13 @@ bool AddConnector::doExecute()
 
 bool AddConnector::doUndo()
 {
-    Node* node = graph_->findNode(b_uuid);
-    apex_assert_hard(node);
+    NodeWorker* node_worker = graph_->findNodeWorker(b_uuid);
+    apex_assert_hard(node_worker);
 
     if(input) {
-        node->removeInput(c_uuid);
+        node_worker->removeInput(c_uuid);
     } else {
-        node->removeOutput(c_uuid);
+        node_worker->removeOutput(c_uuid);
     }
     return false;
 }

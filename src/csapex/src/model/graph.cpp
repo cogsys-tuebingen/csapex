@@ -14,6 +14,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/utility/timer.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -130,13 +131,13 @@ bool Graph::addConnection(Connection::Ptr connection)
 
             int highest_seq_no = -1;
             // search all parents of the target for the highest seq no
-            Q_FOREACH(Input* input, n_to->getMessageInputs()) {
+            Q_FOREACH(Input* input, n_to->getNodeWorker()->getMessageInputs()) {
                 if(!input->isConnected()) {
                     continue;
                 }
                 Node* ni = findNodeForConnector(input->getSource()->getUUID());
 
-                Q_FOREACH(Output* output, ni->getMessageOutputs()) {
+                Q_FOREACH(Output* output, ni->getNodeWorker()->getMessageOutputs()) {
                     if(output->sequenceNumber() > highest_seq_no) {
                         highest_seq_no = output->sequenceNumber();
                     }
@@ -144,7 +145,7 @@ bool Graph::addConnection(Connection::Ptr connection)
             }
             if(highest_seq_no != -1) {
 //                std::cerr << "setting the sequence numbers:\n";
-                Q_FOREACH(Input* input, n_to->getMessageInputs()) {
+                Q_FOREACH(Input* input, n_to->getNodeWorker()->getMessageInputs()) {
                     input->setSequenceNumber(highest_seq_no);
                 }
             }
@@ -158,10 +159,10 @@ bool Graph::addConnection(Connection::Ptr connection)
 //            std::cerr << "synchronize components" << std::endl;
             Q_FOREACH(Node::Ptr n, nodes_) {
                 if(node_component_[n.get()] == node_component_[n_to]) {
-                    Q_FOREACH(Output* output, n->getMessageOutputs()) {
+                    Q_FOREACH(Output* output, n->getNodeWorker()->getMessageOutputs()) {
                         output->setSequenceNumber(seq_no);
                     }
-                    Q_FOREACH(Input* input, n->getMessageInputs()) {
+                    Q_FOREACH(Input* input, n->getNodeWorker()->getMessageInputs()) {
                         input->setSequenceNumber(seq_no);
                     }
                 }
@@ -281,7 +282,7 @@ void Graph::verifyAsync()
      */
 
     Q_FOREACH(Node::Ptr node, nodes_) {
-        Q_FOREACH(Input* input, node->getMessageInputs()) {
+        Q_FOREACH(Input* input, node->getNodeWorker()->getMessageInputs()) {
             input->setTempAsync(false);
         }
     }
@@ -303,7 +304,7 @@ void Graph::verifyAsync()
                 has_async_input[front] = false;
             }
 
-            Q_FOREACH(Output* output, front->getMessageOutputs()) {
+            Q_FOREACH(Output* output, front->getNodeWorker()->getMessageOutputs()) {
                 for(typename Output::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
                     Input* input = *in;
 
@@ -319,7 +320,7 @@ void Graph::verifyAsync()
         }
 
 
-        Q_FOREACH(Output* output, node->getMessageOutputs()) {
+        Q_FOREACH(Output* output, node->getNodeWorker()->getMessageOutputs()) {
             for(Output::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
                 Input* input = *in;
 
@@ -365,11 +366,32 @@ Node* Graph::findNode(const UUID& uuid) const
     throw NodeNotFoundException(uuid.getFullName());
 }
 
+NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
+{
+    Node* node = findNodeNoThrow(uuid);
+    if(node) {
+        return node->getNodeWorker();
+    }
+    throw NodeWorkerNotFoundException(uuid.getFullName());
+}
+
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
     Q_FOREACH(Node::Ptr b, nodes_) {
         if(b->getUUID() == uuid) {
             return b.get();
+        }
+    }
+
+    return NULL;
+}
+
+
+NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
+{
+    Q_FOREACH(Node::Ptr b, nodes_) {
+        if(b->getUUID() == uuid) {
+            return b->getNodeWorker();
         }
     }
 
@@ -390,6 +412,30 @@ Node* Graph::findNodeForConnector(const UUID &uuid) const
     }
 }
 
+NodeWorker* Graph::findNodeWorkerForConnector(const UUID &uuid) const
+{
+    UUID l = UUID::NONE;
+    UUID r = UUID::NONE;
+    uuid.split(UUID::namespace_separator, l, r);
+
+    try {
+        return findNodeWorker(l);
+
+    } catch(const std::exception& e) {
+        throw std::runtime_error(std::string("cannot find owner of connector \"") + uuid.getFullName());
+    }
+}
+
+std::vector<NodeWorker*> Graph::getAllNodeWorkers()
+{
+    std::vector<NodeWorker*> node_workers;
+    foreach(const NodePtr& node, nodes_) {
+        node_workers.push_back(node->getNodeWorker());
+    }
+
+    return node_workers;
+}
+
 Connectable* Graph::findConnector(const UUID &uuid)
 {
     UUID l = UUID::NONE;
@@ -399,9 +445,9 @@ Connectable* Graph::findConnector(const UUID &uuid)
     Node* owner = findNode(l);
     apex_assert_hard(owner);
 
-    Connectable* result = owner->getInput(uuid);
+    Connectable* result = owner->getNodeWorker()->getInput(uuid);
     if(result == NULL) {
-        result = owner->getOutput(uuid);
+        result = owner->getNodeWorker()->getOutput(uuid);
     }
 
     apex_assert_hard(result);

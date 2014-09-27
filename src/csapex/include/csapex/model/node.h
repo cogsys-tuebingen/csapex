@@ -12,23 +12,8 @@
 
 namespace csapex {
 
-// TODO: less inheritance!
 class Node : public ErrorState, public Unique, public Parameterizable, public Timable
 {
-    // TODO: less friends!
-    friend class NodeState;
-    friend class NodeAdapter;
-    friend class NodeWorker;
-    friend class NodeConstructor;
-    friend class NodeModifier;
-    friend class NodeStatistics;
-    friend class DefaultNodeAdapter;
-    friend class NodeBox;
-    friend class GraphIO;
-    friend class Graph;
-
-    friend class command::AddConnector;
-
 public:
     typedef boost::shared_ptr<Node> Ptr;
 
@@ -43,29 +28,8 @@ public:
     NodeStatePtr getNodeStateCopy() const;
     void setNodeState(NodeStatePtr memento);
 
-    virtual MementoPtr getParameterState() const;
-    virtual void setParameterState(Memento::Ptr memento);
-
     std::string getType() const;
     NodeWorker* getNodeWorker() const;
-
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
-    Output* addOutput(ConnectionTypePtr type, const std::string& label);
-
-    virtual Input* getInput(const UUID& uuid) const;
-    virtual Output* getOutput(const UUID& uuid) const;
-
-    std::vector<Input*> getAllInputs() const;
-    std::vector<Output*> getAllOutputs() const;
-
-    std::vector<Input*> getMessageInputs() const;
-    std::vector<Output*> getMessageOutputs() const;
-
-    std::vector<Input*> getManagedInputs() const;
-    std::vector<Output*> getManagedOutputs() const;
-
-    void removeInput(const UUID& uuid);
-    void removeOutput(const UUID& uuid);
 
 
 public:
@@ -81,20 +45,22 @@ protected:
     void triggerModelChanged();
 
 private:
-    /*???*/ void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
-protected:
-    std::string type_;
 
-    NodeModifier* modifier_;
-    Settings* settings_;
-
+public:
     StreamRelay ainfo;
     StreamRelay awarn;
     StreamRelay aerr;
     StreamRelay alog;
 
+protected:
+    NodeModifier* modifier_;
+    Settings* settings_;
+
 private:
+    std::string type_;
+
     NodeWorker* worker_;
 
     NodeStatePtr node_state_;

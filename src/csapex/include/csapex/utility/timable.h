@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <csapex/csapex_fwd.h>
-#include <csapex/utility/timer.h>
 
 namespace csapex
 {

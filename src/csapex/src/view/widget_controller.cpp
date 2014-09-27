@@ -123,7 +123,7 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    NodeBox::Ptr object(new NodeBox(settings_, content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
+    NodeBox::Ptr object(new NodeBox(settings_, content->getNodeWorker(), NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
 
     object->setStyleSheet(style_sheet_);
     object->construct();
@@ -144,7 +144,7 @@ void WidgetController::nodeAdded(Node::Ptr node)
 
         QIcon icon = node_factory_->getConstructor(type)->getIcon();
 
-        NodeBox* box = new NodeBox(settings_, node, adapter, icon);
+        NodeBox* box = new NodeBox(settings_, node->getNodeWorker(), adapter, icon);
         box->construct();
 
         box_map_[node->getUUID()] = box;
@@ -153,10 +153,10 @@ void WidgetController::nodeAdded(Node::Ptr node)
         designer_->addBox(box);
 
         // add existing connectors
-        Q_FOREACH(Input* input, node->getMessageInputs()) {
+        Q_FOREACH(Input* input, node->getNodeWorker()->getMessageInputs()) {
             connectorAdded(input);
         }
-        Q_FOREACH(Output* output, node->getMessageOutputs()) {
+        Q_FOREACH(Output* output, node->getNodeWorker()->getMessageOutputs()) {
             connectorAdded(output);
         }
 

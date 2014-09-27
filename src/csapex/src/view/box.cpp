@@ -31,8 +31,8 @@ using namespace csapex;
 
 const QString NodeBox::MIME = "csapex/model/box";
 
-NodeBox::NodeBox(Settings& settings, NodePtr node, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), settings_(settings), node_(node), adapter_(adapter), icon_(icon),
+NodeBox::NodeBox(Settings& settings, NodeWorker* worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
       down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
 }
@@ -44,7 +44,7 @@ NodeBox::~NodeBox()
 
 void NodeBox::setupUi()
 {
-    node_->checkConditions(true);
+    node_worker_->getNode()->checkConditions(true);
 
     if(!info_compo) {
         info_compo = new QLabel;
@@ -52,7 +52,7 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_compo);
     }
 
-    QObject::connect(node_->getNodeWorker(), SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
+    QObject::connect(node_worker_, SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
     adapter_->doSetupUi(ui->content);
 
     updateFlippedSides();
@@ -74,13 +74,13 @@ void NodeBox::construct()
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
     ui->enablebtn->setCheckable(true);
-    ui->enablebtn->setChecked(node_->getNodeState()->isEnabled());
+    ui->enablebtn->setChecked(node_worker_->getNode()->getNodeState()->isEnabled());
 
     ui->enablebtn->setIcon(icon_);
 
     setFocusPolicy(Qt::ClickFocus);
 
-    const UUID& uuid = node_->getUUID();
+    const UUID& uuid = node_worker_->getNodeUUID();
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -88,25 +88,24 @@ void NodeBox::construct()
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
-    setLabel(node_->getNodeState()->getLabel());
+    setLabel(node_worker_->getNode()->getNodeState()->getLabel());
 
-    NodeWorker* worker = node_->getNodeWorker();
-    worker->setMinimized(false);
+    node_worker_->setMinimized(false);
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    QObject::connect(worker, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    QObject::connect(worker, SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
-    QObject::connect(worker, SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
-    QObject::connect(worker, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
-    QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
+    QObject::connect(node_worker_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    QObject::connect(node_worker_, SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
+    QObject::connect(node_worker_, SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
+    QObject::connect(node_worker_, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
+    QObject::connect(node_worker_, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
 
-    QObject::connect(worker, SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+    QObject::connect(node_worker_, SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
 
-    Q_FOREACH(Input* input, node_->getMessageInputs()) {
+    Q_FOREACH(Input* input, node_worker_->getMessageInputs()) {
         registerInputEvent(input);
     }
-    Q_FOREACH(Output* output, node_->getMessageOutputs()) {
+    Q_FOREACH(Output* output, node_worker_->getMessageOutputs()) {
         registerOutputEvent(output);
     }
 
@@ -115,7 +114,12 @@ void NodeBox::construct()
 
 Node* NodeBox::getNode()
 {
-    return node_.get();
+    return node_worker_->getNode();
+}
+
+NodeWorker* NodeBox::getNodeWorker()
+{
+    return node_worker_;
 }
 
 NodeAdapter::Ptr NodeBox::getNodeAdapter()
@@ -125,14 +129,14 @@ NodeAdapter::Ptr NodeBox::getNodeAdapter()
 
 void NodeBox::enableContent(bool enable)
 {
-    node_->getNodeWorker()->setEnabled(enable);
+    node_worker_->setEnabled(enable);
 
     ui->label->setEnabled(enable);
 }
 
 void NodeBox::updateInformation(Graph* graph)
 {
-    int compo = graph->getComponent(node_->getUUID());
+    int compo = graph->getComponent(node_worker_->getNodeUUID());
     if(compo < 0) {
         return;
     }
@@ -161,7 +165,7 @@ void NodeBox::contextMenuEvent(QContextMenuEvent* e)
 
 void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler, CommandDispatcher* dispatcher)
 {
-    ContextMenuHandler::addHeader(*menu, std::string("Node: ") + node_->getUUID().getShortName());
+    ContextMenuHandler::addHeader(*menu, std::string("Node: ") + node_worker_->getNodeUUID().getShortName());
 
     if(isMinimizedSize()) {
         QAction* max = new QAction("maximize", menu);
@@ -231,34 +235,34 @@ QBoxLayout* NodeBox::getOutputLayout()
 
 bool NodeBox::isError() const
 {
-    return node_->isError();
+    return node_worker_->getNode()->isError();
 }
 ErrorState::ErrorLevel NodeBox::errorLevel() const
 {
-    return node_->errorLevel();
+    return node_worker_->getNode()->errorLevel();
 }
 std::string NodeBox::errorMessage() const
 {
-    return node_->errorMessage();
+    return node_worker_->getNode()->errorMessage();
 }
 
 void NodeBox::setLabel(const std::string& label)
 {
-    apex_assert_hard(node_->getNodeState());
-    node_->getNodeState()->setLabel(label);
+    apex_assert_hard(node_worker_->getNode()->getNodeState());
+    node_worker_->getNode()->getNodeState()->setLabel(label);
     ui->label->setText(label.c_str());
     ui->label->setToolTip(label.c_str());
 }
 
 void NodeBox::setLabel(const QString &label)
 {
-    node_->getNodeState()->setLabel(label.toStdString());
+    node_worker_->getNode()->getNodeState()->setLabel(label.toStdString());
     ui->label->setText(label);
 }
 
 std::string NodeBox::getLabel() const
 {
-    return node_->getNodeState()->getLabel();
+    return node_worker_->getNode()->getNodeState()->getLabel();
 }
 
 void NodeBox::registerEvent(Connectable* c)
@@ -303,7 +307,7 @@ void NodeBox::init()
         setVisible(false);
     }
 
-    move(node_->getNodeState()->getPos());
+    move(node_worker_->getNode()->getNodeState()->getPos());
 }
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
@@ -331,12 +335,12 @@ void NodeBox::enabledChange(bool val)
 
 void NodeBox::paintEvent(QPaintEvent*)
 {
-    if(!node_ || !adapter_) {
+    if(!node_worker_ || !adapter_) {
         return;
     }
 
-    bool is_error = node_->isError() && node_->errorLevel() == ErrorState::EL_ERROR;
-    bool is_warn = node_->isError() && node_->errorLevel() == ErrorState::EL_WARNING;
+    bool is_error = node_worker_->getNode()->isError() && node_worker_->getNode()->errorLevel() == ErrorState::EL_ERROR;
+    bool is_warn = node_worker_->getNode()->isError() && node_worker_->getNode()->errorLevel() == ErrorState::EL_WARNING;
 
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
@@ -346,11 +350,11 @@ void NodeBox::paintEvent(QPaintEvent*)
 
     if(error_change || warning_change) {
         if(is_error) {
-            ui->label->setToolTip(node_->errorMessage().c_str());
+            ui->label->setToolTip(node_worker_->getNode()->errorMessage().c_str());
         } else if(is_warn) {
-            ui->label->setToolTip(node_->errorMessage().c_str());
+            ui->label->setToolTip(node_worker_->getNode()->errorMessage().c_str());
         } else {
-            ui->label->setToolTip(node_->getUUID().c_str());
+            ui->label->setToolTip(node_worker_->getNode()->getUUID().c_str());
         }
 
         refreshStylesheet();
@@ -378,7 +382,7 @@ void NodeBox::moveEvent(QMoveEvent* e)
 
     QPoint delta = pos - e->oldPos();
 
-    node_->getNodeState()->setPos(pos);
+    node_worker_->getNode()->getNodeState()->setPos(pos);
 
     Q_EMIT moved(this, delta.x(), delta.y());
 }
@@ -407,7 +411,7 @@ void NodeBox::stop()
 
 void NodeBox::deleteBox(CommandDispatcher* dispatcher)
 {
-    dispatcher->execute(Command::Ptr(new command::DeleteNode(node_->getUUID())));
+    dispatcher->execute(Command::Ptr(new command::DeleteNode(node_worker_->getNode()->getUUID())));
 }
 
 void NodeBox::getInformation()
@@ -440,18 +444,18 @@ void NodeBox::showProfiling()
 
 void NodeBox::killContent()
 {
-    node_->getNodeWorker()->killExecution();
+    node_worker_->killExecution();
 }
 
 void NodeBox::flipSides()
 {
-    node_->getNodeState()->setFlipped(!node_->getNodeState()->isFlipped());
+    node_worker_->getNode()->getNodeState()->setFlipped(!node_worker_->getNode()->getNodeState()->isFlipped());
     updateFlippedSides();
 }
 
 void NodeBox::updateFlippedSides()
 {
-    bool flip = node_->getNodeState()->isFlipped();
+    bool flip = node_worker_->getNode()->getNodeState()->isFlipped();
 
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
@@ -461,17 +465,17 @@ void NodeBox::updateFlippedSides()
 
 bool NodeBox::isMinimizedSize() const
 {
-    return node_->getNodeState()->isMinimized();
+    return node_worker_->getNode()->getNodeState()->isMinimized();
 }
 
 bool NodeBox::isFlipped() const
 {
-    return node_->getNodeState()->isFlipped();
+    return node_worker_->getNode()->getNodeState()->isFlipped();
 }
 
 void NodeBox::minimizeBox(bool minimize)
 {    
-    node_->getNodeWorker()->setMinimized(minimize);
+    node_worker_->setMinimized(minimize);
 
     Q_EMIT minimized(minimize);
 
@@ -503,13 +507,13 @@ Graph::Ptr NodeBox::getSubGraph()
 
 void NodeBox::nodeStateChanged()
 {
-    minimizeBox(node_->getNodeState()->isMinimized());
+    minimizeBox(node_worker_->getNode()->getNodeState()->isMinimized());
 
-    enableContent(node_->getNodeState()->isEnabled());
-    ui->enablebtn->setChecked(node_->getNodeState()->isEnabled());
+    enableContent(node_worker_->getNode()->getNodeState()->isEnabled());
+    ui->enablebtn->setChecked(node_worker_->getNode()->getNodeState()->isEnabled());
 
-    setLabel(node_->getNodeState()->getLabel());
-    ui->label->setToolTip(node_->getUUID().c_str());
+    setLabel(node_worker_->getNode()->getNodeState()->getLabel());
+    ui->label->setToolTip(node_worker_->getNode()->getUUID().c_str());
 
-    move(node_->getNodeState()->getPos());
+    move(node_worker_->getNode()->getNodeState()->getPos());
 }

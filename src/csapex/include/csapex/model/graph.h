@@ -38,6 +38,13 @@ public:
         {}
     };
 
+    struct NodeWorkerNotFoundException : public std::logic_error
+    {
+        NodeWorkerNotFoundException(const std::string& name)
+            : std::logic_error("node worker for node " + name + " cannot be found")
+        {}
+    };
+
 public:
     Graph();
     virtual ~Graph();
@@ -45,6 +52,12 @@ public:
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
     Node* findNodeForConnector(const UUID &uuid) const;
+
+    NodeWorker* findNodeWorker(const UUID& uuid) const;
+    NodeWorker* findNodeWorkerNoThrow(const UUID& uuid) const;
+    NodeWorker* findNodeWorkerForConnector(const UUID &uuid) const;
+
+    std::vector<NodeWorker*> getAllNodeWorkers();
 
     int getComponent(const UUID& node_uuid) const;
 
@@ -63,7 +76,6 @@ public:
     int getConnectionId(Connection::Ptr);
 
     std::string makeUUIDPrefix(const std::string& name);
-
 
     int countNodes();
 

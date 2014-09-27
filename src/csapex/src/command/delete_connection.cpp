@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-
+#include <csapex/model/node_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
@@ -81,18 +81,18 @@ bool DeleteConnection::doRedo()
 
 bool DeleteConnection::refresh()
 {
-    Node* from_node = graph_->findNodeForConnector(from_uuid);
-    Node* to_node = graph_->findNodeForConnector(to_uuid);
+    NodeWorker* from_worker = graph_->findNodeWorkerForConnector(from_uuid);
+    NodeWorker* to_worker = graph_->findNodeWorkerForConnector(to_uuid);
 
     from = NULL;
     to = NULL;
 
-    if(!from_node || !to_node) {
+    if(!from_worker || !to_worker) {
         return false;
     }
 
-    from = from_node->getOutput(from_uuid);
-    to = to_node->getInput(to_uuid);
+    from = from_worker->getOutput(from_uuid);
+    to = to_worker->getInput(to_uuid);
 
     apex_assert_hard(from);
     apex_assert_hard(to);

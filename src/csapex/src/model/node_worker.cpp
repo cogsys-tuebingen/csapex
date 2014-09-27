@@ -61,14 +61,24 @@ NodeWorker::~NodeWorker()
     callbacks.clear();
 }
 
+Node* NodeWorker::getNode()
+{
+    return node_;
+}
+
+UUID NodeWorker::getNodeUUID() const
+{
+    return node_->getUUID();
+}
+
 bool NodeWorker::isEnabled() const
 {
-    return node_->node_state_->isEnabled();
+    return node_->getNodeState()->isEnabled();
 }
 
 void NodeWorker::setEnabled(bool e)
 {
-    node_->node_state_->setEnabled(e);
+    node_->getNodeState()->setEnabled(e);
 
     if(!e) {
         node_->setError(false);
@@ -96,7 +106,7 @@ template <typename T>
 void NodeWorker::makeParameterConnectable(param::Parameter *p)
 {
     {
-        Input* cin = new Input(*node_->settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
+        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
 
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -117,7 +127,7 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
         param_2_input_[p->name()] = cin;
     }
     {
-        Output* cout = new Output(*node_->settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
+        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
 
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -137,7 +147,8 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
 
 void NodeWorker::makeParametersConnectable()
 {
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = node_->parameter_state_.params.begin(); it != node_->parameter_state_.params.end(); ++it ) {
+    GenericState::Ptr state = node_->getParameterState();
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
         param::Parameter* p = it->second.get();
 
         if(p->is<int>()) {
@@ -257,7 +268,7 @@ void NodeWorker::forwardMessage(Connectable *s)
 Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
     int id = inputs_.size();
-    Input* c = new Input(*node_->settings_, node_, id);
+    Input* c = new Input(settings_, node_, id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setAsync(async);
@@ -271,7 +282,7 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
 Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 {
     int id = outputs_.size();
-    Output* c = new Output(*node_->settings_, node_, id);
+    Output* c = new Output(settings_, node_, id);
     c->setLabel(label);
     c->setType(type);
 
@@ -393,12 +404,93 @@ void NodeWorker::registerOutput(Output* out)
     Q_EMIT connectorCreated(out);
 }
 
+
+Input* NodeWorker::getInput(const UUID& uuid) const
+{
+    foreach(Input* in, inputs_) {
+        if(in->getUUID() == uuid) {
+            return in;
+        }
+    }
+    foreach(Input* in, managed_inputs_) {
+        if(in->getUUID() == uuid) {
+            return in;
+        }
+    }
+
+    return NULL;
+}
+
+Output* NodeWorker::getOutput(const UUID& uuid) const
+{
+    foreach(Output* out, outputs_) {
+        if(out->getUUID() == uuid) {
+            return out;
+        }
+    }
+    foreach(Output* out, managed_outputs_) {
+        if(out->getUUID() == uuid) {
+            return out;
+        }
+    }
+
+    return NULL;
+}
+
+void NodeWorker::removeInput(const UUID &uuid)
+{
+    removeInput(getInput(uuid));
+}
+
+void NodeWorker::removeOutput(const UUID &uuid)
+{
+    removeOutput(getOutput(uuid));
+}
+
 void NodeWorker::clearInput(Input *source)
 {
     QMutexLocker lock(&message_mutex_);
     has_msg_[source] = false;
 
 }
+
+
+std::vector<Input*> NodeWorker::getAllInputs() const
+{
+    std::vector<Input*> result;
+    result = inputs_;
+    result.insert(result.end(), managed_inputs_.begin(), managed_inputs_.end());
+    return result;
+}
+
+std::vector<Output*> NodeWorker::getAllOutputs() const
+{
+    std::vector<Output*> result;
+    result = outputs_;
+    result.insert(result.end(), managed_outputs_.begin(), managed_outputs_.end());
+    return result;
+}
+
+std::vector<Input*> NodeWorker::getMessageInputs() const
+{
+    return inputs_;
+}
+
+std::vector<Output*> NodeWorker::getMessageOutputs() const
+{
+    return outputs_;
+}
+
+std::vector<Input*> NodeWorker::getManagedInputs() const
+{
+    return managed_inputs_;
+}
+
+std::vector<Output*> NodeWorker::getManagedOutputs() const
+{
+    return managed_outputs_;
+}
+
 
 void NodeWorker::forwardMessageSynchronized(Input *source)
 {
@@ -719,5 +811,5 @@ void NodeWorker::setIOError(bool error)
 
 void NodeWorker::setMinimized(bool min)
 {
-    node_->node_state_->setMinimized(min);
+    node_->getNodeState()->setMinimized(min);
 }

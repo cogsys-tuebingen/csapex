@@ -7,6 +7,7 @@
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/port.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/view/box.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -211,8 +212,10 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     }
 
     // augment nodes
-    foreach (Node::Ptr node, graph_->nodes_) {
-        NodeBox* box = widget_ctrl_->getBox(node->getUUID());
+    foreach(NodeWorker* node_worker, graph_->getAllNodeWorkers()) {
+        Node* node = node_worker->getNode();
+
+        NodeBox* box = widget_ctrl_->getBox(node_worker->getNodeUUID());
         if(!box) {
             continue;
         }
@@ -260,14 +263,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw port information (in)
-        Q_FOREACH(Input* input, node->getMessageInputs()) {
+        Q_FOREACH(Input* input, node_worker->getMessageInputs()) {
             Port* p = widget_ctrl_->getPort(input);
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw port information (out)
-        Q_FOREACH(Output* output, node->getMessageOutputs()) {
+        Q_FOREACH(Output* output, node_worker->getMessageOutputs()) {
             Port* p = widget_ctrl_->getPort(output);
             if(p) {
                 drawPort(painter, box, p);

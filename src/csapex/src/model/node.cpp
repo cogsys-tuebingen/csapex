@@ -9,6 +9,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/utility/assert.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -17,8 +18,8 @@ using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
-      modifier_(new NodeModifier(this)), settings_(NULL),
       ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
+      modifier_(NULL), settings_(NULL),
       worker_(NULL),
       node_state_(new NodeState(this))
 {
@@ -35,6 +36,7 @@ void Node::initialize(const std::string& type, const UUID& uuid,
 {
     type_ = type;
     worker_ = node_worker;
+    modifier_ = new NodeModifier(node_worker),
     settings_ = settings;
 
     setUUID(uuid);
@@ -86,7 +88,7 @@ NodeState::Ptr Node::getNodeStateCopy() const
     NodeState::Ptr memento(new NodeState(this));
     *memento = *node_state_;
 
-    memento->setParameterState(getParameterState());
+    memento->setParameterState(getParameterStateClone());
 
     return memento;
 }
@@ -129,22 +131,6 @@ void Node::setNodeState(NodeState::Ptr memento)
     stateChanged();
 }
 
-Memento::Ptr Node::getParameterState() const
-{
-    return parameter_state_.clone();
-}
-
-void Node::setParameterState(Memento::Ptr memento)
-{
-    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
-    apex_assert_hard(m.get());
-
-    parameter_state_.setFrom(*m);
-
-    triggerModelChanged();
-}
-
-
 void Node::triggerModelChanged()
 {
     Q_EMIT worker_->nodeModelChanged();
@@ -164,8 +150,11 @@ NodeWorker* Node::getNodeWorker() const
 }
 
 
-void Node::errorEvent(bool error, const std::string& /*msg*/, ErrorLevel level)
+void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
+    if(settings_->get<bool>("headless")){
+        aerr << msg << std::endl;
+    }
     if(node_state_->isEnabled() && error && level == EL_ERROR) {
         worker_->setIOError(true);
     } else {
@@ -175,90 +164,3 @@ void Node::errorEvent(bool error, const std::string& /*msg*/, ErrorLevel level)
 
 
 
-Input* Node::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
-{
-    return worker_->addInput(type, label, optional, async);
-}
-
-Output* Node::addOutput(ConnectionTypePtr type, const std::string& label)
-{
-    return worker_->addOutput(type, label);
-}
-
-void Node::removeInput(const UUID &uuid)
-{
-    worker_->removeInput(getInput(uuid));
-}
-
-void Node::removeOutput(const UUID &uuid)
-{
-    worker_->removeOutput(getOutput(uuid));
-}
-
-Input* Node::getInput(const UUID& uuid) const
-{
-    BOOST_FOREACH(Input* in, worker_->inputs_) {
-        if(in->getUUID() == uuid) {
-            return in;
-        }
-    }
-    BOOST_FOREACH(Input* in, worker_->managed_inputs_) {
-        if(in->getUUID() == uuid) {
-            return in;
-        }
-    }
-
-    return NULL;
-}
-
-Output* Node::getOutput(const UUID& uuid) const
-{
-    BOOST_FOREACH(Output* out, worker_->outputs_) {
-        if(out->getUUID() == uuid) {
-            return out;
-        }
-    }
-    BOOST_FOREACH(Output* out, worker_->managed_outputs_) {
-        if(out->getUUID() == uuid) {
-            return out;
-        }
-    }
-
-    return NULL;
-}
-
-std::vector<Input*> Node::getAllInputs() const
-{
-    std::vector<Input*> result;
-    result = worker_->inputs_;
-    result.insert(result.end(), worker_->managed_inputs_.begin(), worker_->managed_inputs_.end());
-    return result;
-}
-
-std::vector<Output*> Node::getAllOutputs() const
-{
-    std::vector<Output*> result;
-    result = worker_->outputs_;
-    result.insert(result.end(), worker_->managed_outputs_.begin(), worker_->managed_outputs_.end());
-    return result;
-}
-
-std::vector<Input*> Node::getMessageInputs() const
-{
-    return worker_->inputs_;
-}
-
-std::vector<Output*> Node::getMessageOutputs() const
-{
-    return worker_->outputs_;
-}
-
-std::vector<Input*> Node::getManagedInputs() const
-{
-    return worker_->managed_inputs_;
-}
-
-std::vector<Output*> Node::getManagedOutputs() const
-{
-    return worker_->managed_outputs_;
-}

@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <utils_param/parameter.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QObject>
@@ -38,6 +39,9 @@ public:
 
     /*??*/ void makeThread();
 
+    Node* getNode();
+    UUID getNodeUUID() const;
+
     bool isEnabled() const;
     void setEnabled(bool e);
 
@@ -48,6 +52,9 @@ public:
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
+    virtual Input* getInput(const UUID& uuid) const;
+    virtual Output* getOutput(const UUID& uuid) const;
+
     /* experimental */ Input* getParameterInput(const std::string& name) const;
     /* experimental */ Output* getParameterOutput(const std::string& name) const;
 
@@ -57,9 +64,23 @@ public:
     /* NAMING */ void registerInput(Input* in);
     /* NAMING */ void registerOutput(Output* out);
 
+    void removeInput(const UUID& uuid);
+    void removeOutput(const UUID& uuid);
+
+    std::vector<Input*> getAllInputs() const;
+    std::vector<Output*> getAllOutputs() const;
+
+    std::vector<Input*> getMessageInputs() const;
+    std::vector<Output*> getMessageOutputs() const;
+
+    std::vector<Input*> getManagedInputs() const;
+    std::vector<Output*> getManagedOutputs() const;
+
     bool canReceive();
 
     void makeParametersConnectable();
+
+
 
 public Q_SLOTS:
     void forwardMessage(Connectable* source);

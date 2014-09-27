@@ -1,6 +1,10 @@
 /// HEADER
 #include <csapex/model/parameterizable.h>
 
+/// PROJECT
+#include <csapex/model/generic_state.h>
+#include <csapex/utility/assert.h>
+
 /// SYSTEM
 #include <QtGlobal>
 
@@ -8,7 +12,7 @@ using namespace csapex;
 
 
 Parameterizable::Parameterizable()
-    : changed_params_mutex_(new boost::mutex)
+    : changed_params_mutex_(new boost::mutex), parameter_state_(new GenericState)
 {
 
 }
@@ -67,12 +71,12 @@ void Parameterizable::checkConditions(bool silent)
 
 void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param)
 {
-    parameter_state_.addTemporaryParameter(param);
+    parameter_state_->addTemporaryParameter(param);
 }
 
 void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
 {
-    parameter_state_.addTemporaryParameter(param);
+    parameter_state_->addTemporaryParameter(param);
     addParameterCallback(param.get(), cb);
 }
 
@@ -102,7 +106,7 @@ void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter:
 
 void Parameterizable::addParameter(const param::Parameter::Ptr &param)
 {
-    parameter_state_.addParameter(param);
+    parameter_state_->addParameter(param);
 
     connections_.push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1)));
     connections_.push_back(param->parameter_enabled.connect(boost::bind(&Parameterizable::parameterEnabled, this, _1, _2)));
@@ -132,12 +136,12 @@ void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param
 
 std::vector<param::Parameter::Ptr> Parameterizable::getParameters() const
 {
-    return parameter_state_.getParameters();
+    return parameter_state_->getParameters();
 }
 
 param::Parameter::Ptr Parameterizable::getParameter(const std::string &name) const
 {
-    return parameter_state_.getParameter(name);
+    return parameter_state_->getParameter(name);
 }
 
 bool Parameterizable::isParameterEnabled(const std::string &name) const
@@ -154,18 +158,18 @@ void Parameterizable::setParameterEnabled(const std::string &name, bool enabled)
 
 void Parameterizable::setParameterSetSilence(bool silent)
 {
-    parameter_state_.setParameterSetSilence(silent);
+    parameter_state_->setParameterSetSilence(silent);
 }
 
 void Parameterizable::removeTemporaryParameters()
 {
     // TODO: handle callbacks!
-    parameter_state_.removeTemporaryParameters();
+    parameter_state_->removeTemporaryParameters();
 }
 
 void Parameterizable::triggerParameterSetChanged()
 {
-    parameter_state_.triggerParameterSetChanged();
+    parameter_state_->triggerParameterSetChanged();
 }
 
 Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
@@ -177,4 +181,26 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
     changed_params_.clear();
 
     return changed_params;
+}
+
+
+GenericState::Ptr Parameterizable::getParameterStateClone() const
+{
+    return parameter_state_->clone();
+}
+
+GenericState::Ptr Parameterizable::getParameterState()
+{
+    return parameter_state_;
+}
+
+void Parameterizable::setParameterState(Memento::Ptr memento)
+{
+    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
+    apex_assert_hard(m.get());
+
+    parameter_state_->setFrom(*m);
+
+    // TODO: is this necessary?
+//    triggerModelChanged();
 }

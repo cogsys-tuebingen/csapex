@@ -17,7 +17,7 @@ namespace csapex
 class NodeModifier
 {
 public:
-    NodeModifier(Node* node);
+    NodeModifier(NodeWorker* node);
 
     /// "real" messages
     template <typename T>
@@ -123,7 +123,7 @@ private:
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
 private:
-    Node* node_;
+    NodeWorker* node_worker_;
 };
 
 }

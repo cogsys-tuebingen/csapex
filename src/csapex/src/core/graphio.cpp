@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -79,8 +80,8 @@ void GraphIO::loadNode(const YAML::Node& doc)
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
     BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
-        if(!node->getAllOutputs().empty()) {
-            BOOST_FOREACH(Output* o, node->getAllOutputs()) {
+        if(!node->getNodeWorker()->getAllOutputs().empty()) {
+            BOOST_FOREACH(Output* o, node->getNodeWorker()->getAllOutputs()) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
                 }
@@ -149,9 +150,9 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
             UUID from_uuid = UUID::make_forced(from_uuid_tmp);
 
-            Node* parent = NULL;
+            NodeWorker* parent = NULL;
             try {
-                parent = graph_->findNodeForConnector(from_uuid);
+                parent = graph_->findNodeWorkerForConnector(from_uuid);
 
             } catch(const std::exception& e) {
                 std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
@@ -183,9 +184,9 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 }
 
                 try {
-                    Node* target_box = graph_->findNodeForConnector(to_uuid);
+                    NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
 
-                    Input* to = target_box->getInput(to_uuid);
+                    Input* to = target->getInput(to_uuid);
                     if(!to) {
                         continue;
                     }
