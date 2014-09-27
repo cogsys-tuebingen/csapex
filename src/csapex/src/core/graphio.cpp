@@ -44,9 +44,9 @@ void GraphIO::loadSettings(const YAML::Node &doc)
 
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
+    BOOST_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
         YAML::Node yaml_node;
-        node->getNodeState()->writeYaml(yaml_node);
+        node->getNode()->getNodeState()->writeYaml(yaml_node);
         yaml["nodes"].push_back(yaml_node);
     }
 }
@@ -59,7 +59,8 @@ void GraphIO::loadNode(const YAML::Node& doc)
     int x = doc["pos"][0].as<int>();
     int y = doc["pos"][1].as<int>();
 
-    Node::Ptr node = node_factory_->makeNode(type, uuid);
+    NodeWorker::Ptr node_worker = node_factory_->makeNode(type, uuid);
+    Node* node = node_worker->getNode();
     if(!node) {
         return;
     }
@@ -74,14 +75,14 @@ void GraphIO::loadNode(const YAML::Node& doc)
     if(x != 0 || y != 0) {
         node->getNodeState()->setPos(QPoint(x,y));
     }
-    graph_->addNode(node);
+    graph_->addNode(node_worker);
 }
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    BOOST_FOREACH(Node::Ptr node, graph_->nodes_) {
-        if(!node->getNodeWorker()->getAllOutputs().empty()) {
-            BOOST_FOREACH(Output* o, node->getNodeWorker()->getAllOutputs()) {
+    BOOST_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+        if(!node->getAllOutputs().empty()) {
+            BOOST_FOREACH(Output* o, node->getAllOutputs()) {
                 if(o->beginTargets() == o->endTargets()) {
                     continue;
                 }

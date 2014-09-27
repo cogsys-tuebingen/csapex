@@ -42,6 +42,7 @@ public:
     virtual void abort();
 
 protected:
+    /* CAN THIS BIS REMOVED???? */
     void triggerModelChanged();
 
 private:

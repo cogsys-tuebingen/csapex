@@ -27,7 +27,6 @@ Node::Node(const UUID &uuid)
 
 Node::~Node()
 {
-    delete worker_;
     delete modifier_;
 }
 

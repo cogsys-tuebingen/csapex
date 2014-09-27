@@ -6,6 +6,7 @@
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_factory.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
@@ -41,9 +42,9 @@ bool AddNode::doExecute()
         uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
     }
 
-    Node::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type_, uuid_, saved_state_);
+    NodeWorker::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type_, uuid_, saved_state_);
 
-    node->getNodeState()->setPos(pos_);
+    node->getNode()->getNodeState()->setPos(pos_);
 
     graph_->addNode(node);
 

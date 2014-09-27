@@ -31,8 +31,8 @@ public:
     NodeConstructorPtr getConstructor(const std::string& type);
     std::vector<NodeConstructorPtr> getConstructors();
 
-    NodePtr makeNode(const std::string& type, const UUID& uuid);
-    NodePtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
+    NodeWorkerPtr makeNode(const std::string& type, const UUID& uuid);
+    NodeWorkerPtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
 
     std::map<TagPtr, std::vector<NodeConstructor::Ptr> > getTagMap();
 
@@ -45,7 +45,7 @@ protected:
     void rebuildPrototypes();
     void rebuildMap();
 
-    NodePtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
+    NodeWorkerPtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
 
 protected:
     Settings& settings_;

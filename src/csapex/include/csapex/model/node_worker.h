@@ -32,7 +32,7 @@ public:
     static const double DEFAULT_FREQUENCY = 30.0;
 
 public:
-    NodeWorker(Settings& settings, Node* node);
+    NodeWorker(Settings& settings, NodePtr node);
     ~NodeWorker();
 
     void stop();
@@ -137,7 +137,7 @@ private:
 
 private:
     Settings& settings_;
-    Node* node_;
+    NodePtr node_;
 
     std::vector<Input*> inputs_;
     std::vector<Output*> outputs_;

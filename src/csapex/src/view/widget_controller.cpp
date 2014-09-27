@@ -109,7 +109,7 @@ void WidgetController::setStyleSheet(const QString &str)
 void WidgetController::startPlacingBox(QWidget *parent, const std::string &type, NodeStatePtr state, const QPoint &offset)
 {
     NodeConstructor::Ptr c = node_factory_->getConstructor(type);
-    Node::Ptr content = c->makePrototypeContent();
+    NodeWorker::Ptr content = c->makePrototypeContent();
 
     QDrag* drag = new QDrag(parent);
     QMimeData* mimeData = new QMimeData;
@@ -123,11 +123,11 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    NodeBox::Ptr object(new NodeBox(settings_, content->getNodeWorker(), NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
+    NodeBox::Ptr object(new NodeBox(settings_, content, NodeAdapter::Ptr(new DefaultNodeAdapter(content->getNode(), this)), c->getIcon()));
 
     object->setStyleSheet(style_sheet_);
     object->construct();
-    object->setObjectName(content->getType().c_str());
+    object->setObjectName(content->getNode()->getType().c_str());
     object->setLabel(type);
 
     drag->setPixmap(QPixmap::grabWidget(object.get()));
@@ -135,16 +135,17 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     drag->exec();
 }
 
-void WidgetController::nodeAdded(Node::Ptr node)
+void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 {
     if(designer_) {
+        Node* node = node_worker->getNode();
         std::string type = node->getType();
 
         NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node, this);
 
         QIcon icon = node_factory_->getConstructor(type)->getIcon();
 
-        NodeBox* box = new NodeBox(settings_, node->getNodeWorker(), adapter, icon);
+        NodeBox* box = new NodeBox(settings_, node_worker, adapter, icon);
         box->construct();
 
         box_map_[node->getUUID()] = box;
@@ -153,27 +154,27 @@ void WidgetController::nodeAdded(Node::Ptr node)
         designer_->addBox(box);
 
         // add existing connectors
-        Q_FOREACH(Input* input, node->getNodeWorker()->getMessageInputs()) {
+        Q_FOREACH(Input* input, node_worker->getMessageInputs()) {
             connectorAdded(input);
         }
-        Q_FOREACH(Output* output, node->getNodeWorker()->getMessageOutputs()) {
+        Q_FOREACH(Output* output, node_worker->getMessageOutputs()) {
             connectorAdded(output);
         }
 
         // subscribe to coming connectors
-        NodeWorker* worker = node->getNodeWorker();
-        QObject::connect(worker, SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorAdded(Connectable*)));
-        QObject::connect(worker, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
+        QObject::connect(node_worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorAdded(Connectable*)));
+        QObject::connect(node_worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
     }
 }
 
-void WidgetController::nodeRemoved(NodePtr node)
+void WidgetController::nodeRemoved(NodeWorkerPtr node_worker)
 {
     if(designer_) {
-        NodeBox* box = getBox(node->getUUID());
+        UUID node_uuid = node_worker->getNodeUUID();
+        NodeBox* box = getBox(node_uuid);
         box->stop();
 
-        box_map_.erase(box_map_.find(node->getUUID()));
+        box_map_.erase(box_map_.find(node_uuid));
 
         designer_->removeBox(box);
     }
@@ -215,8 +216,8 @@ void WidgetController::connectorRemoved(Connectable *connector)
 
 void WidgetController::foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred)
 {
-    Q_FOREACH(Node::Ptr n, graph_->nodes_) {
-        NodeBox* b = getBox(n->getUUID());
+    Q_FOREACH(NodeWorker::Ptr n, graph_->nodes_) {
+        NodeBox* b = getBox(n->getNodeUUID());
         if(pred(b)) {
             f(b);
         }

@@ -68,9 +68,9 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    Node::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type, uuid);
+    NodeWorker::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type, uuid);
 
-    node->setNodeState(saved_state);
+    node->getNode()->setNodeState(saved_state);
 
     graph_->addNode(node);
 

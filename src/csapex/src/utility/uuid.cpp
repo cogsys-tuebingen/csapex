@@ -19,6 +19,7 @@ void split_first(const std::string& haystack, const std::string& needle,
 {
     size_t pos = haystack.find(needle);
     if(pos == haystack.npos) {
+        lhs = haystack;
         return;
     }
 

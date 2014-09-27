@@ -58,8 +58,8 @@ public:
 
 
 public Q_SLOTS:
-    void nodeAdded(NodePtr node);
-    void nodeRemoved(NodePtr node);
+    void nodeAdded(NodeWorkerPtr node_worker);
+    void nodeRemoved(NodeWorkerPtr node_worker);
 
     void connectorAdded(Connectable *connector);
     void connectorRemoved(Connectable *connector);

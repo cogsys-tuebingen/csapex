@@ -151,37 +151,37 @@ protected:
 
 TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
     UUID node_id = UUID::make_forced("foobarbaz");
-    NodePtr node = factory.makeNode("MockupNode", node_id);
+    NodeWorkerPtr node = factory.makeNode("MockupNode", node_id);
 
     ASSERT_TRUE(node != NULL);
-    EXPECT_EQ(node_id, node->getUUID());
+    EXPECT_EQ(node_id, node->getNodeUUID());
 }
 
 TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
     UUID node_id = UUID::make_forced("foobarbaz");
-    NodePtr node = factory.makeNode("WrappedFunctionNode", node_id);
+    NodeWorkerPtr node = factory.makeNode("WrappedFunctionNode", node_id);
 
     ASSERT_TRUE(node != NULL);
 
-    std::vector<Input*> inputs = node->getNodeWorker()->getMessageInputs();
+    std::vector<Input*> inputs = node->getMessageInputs();
     ASSERT_EQ(2, inputs.size());
 
-    std::vector<Output*> outputs = node->getNodeWorker()->getMessageOutputs();
+    std::vector<Output*> outputs = node->getMessageOutputs();
     ASSERT_EQ(1, outputs.size());
 
-    std::vector<param::Parameter::Ptr> params = node->getParameters();
+    std::vector<param::Parameter::Ptr> params = node->getNode()->getParameters();
     ASSERT_EQ(1, params.size());
 }
 
 TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
     UUID node_id = UUID::make_forced("foobarbaz2");
-    NodePtr node = factory.makeNode("WrappedFunctionNode", node_id);
+    NodeWorkerPtr node = factory.makeNode("WrappedFunctionNode", node_id);
 
     ASSERT_TRUE(node != NULL);
 
-    std::vector<Input*> inputs = node->getNodeWorker()->getMessageInputs();
-    std::vector<Output*> outputs = node->getNodeWorker()->getMessageOutputs();
-    std::vector<param::Parameter::Ptr> params = node->getParameters();
+    std::vector<Input*> inputs = node->getMessageInputs();
+    std::vector<Output*> outputs = node->getMessageOutputs();
+    std::vector<param::Parameter::Ptr> params = node->getNode()->getParameters();
 
     MockupMessage::Ptr msg(new MockupMessage);
     msg->setSequenceNumber(0);

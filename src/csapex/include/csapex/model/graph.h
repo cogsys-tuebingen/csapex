@@ -79,7 +79,7 @@ public:
 
     int countNodes();
 
-    void addNode(NodePtr node);
+    void addNode(NodeWorkerPtr node);
     void deleteNode(const UUID &uuid);
 
     bool addConnection(Connection::Ptr connection);
@@ -102,15 +102,15 @@ Q_SIGNALS:
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
 
-    void nodeAdded(NodePtr);
-    void nodeRemoved(NodePtr);
+    void nodeAdded(NodeWorkerPtr);
+    void nodeRemoved(NodeWorkerPtr);
 
 protected:
-    std::vector<NodePtr> nodes_;
-    std::map<Node*, int> node_component_;
+    std::vector<NodeWorkerPtr> nodes_;
+    std::map<NodeWorker*, int> node_component_;
 
-    std::map<Node*, std::vector<Node*> > node_parents_;
-    std::map<Node*, std::vector<Node*> > node_children_;
+    std::map<NodeWorker*, std::vector<NodeWorker*> > node_parents_;
+    std::map<NodeWorker*, std::vector<NodeWorker*> > node_children_;
 
     std::vector<Connection::Ptr> connections_;
 

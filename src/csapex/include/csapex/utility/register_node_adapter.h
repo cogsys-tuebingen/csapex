@@ -14,9 +14,9 @@ public: \
     { \
         return #Adaptee; \
     } \
-    virtual NodeAdapterPtr build(NodePtr node, WidgetController* widget_ctrl) const \
+    virtual NodeAdapterPtr build(Node* node, WidgetController* widget_ctrl) const \
     { \
-        Adaptee* adaptee = dynamic_cast<Adaptee*> (node.get()); \
+        Adaptee* adaptee = dynamic_cast<Adaptee*> (node); \
         return NodeAdapter::Ptr(new Adapter(adaptee, widget_ctrl)); \
     } \
 }; \

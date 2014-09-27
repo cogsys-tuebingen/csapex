@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/plugin_manager.hpp>
@@ -161,7 +162,7 @@ bool NodeFactory::isValidType(const std::string &type) const
     return false;
 }
 
-Node::Ptr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
+NodeWorkerPtr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
     return content->makeContent(uuid);
 }
@@ -205,27 +206,27 @@ std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
     return constructors_;
 }
 
-Node::Ptr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid)
+NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid)
 {
     return makeNode(target_type, uuid, NodeStateNullPtr);
 }
 
-Node::Ptr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
+NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
 {
     apex_assert_hard(!uuid.empty());
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {
-        Node::Ptr result = makeSingleNode(p, uuid);
+        NodeWorkerPtr result = makeSingleNode(p, uuid);
 
         if(state) {
-            result->setNodeState(state);
+            result->getNode()->setNodeState(state);
         }
 
         return result;
 
     } else {
         std::cerr << "error: cannot make node, type '" << target_type << "' is unknown" << std::endl;
-        return NodeNullPtr;
+        return NodeWorkerNullPtr;
     }
 }

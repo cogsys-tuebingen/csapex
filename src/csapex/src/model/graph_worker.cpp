@@ -35,8 +35,8 @@ void GraphWorker::tick()
     //        }
     //    }
 
-    Q_FOREACH(Node::Ptr node, graph_->nodes_) {
-        node->getNodeWorker()->checkParameters();
+    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+        node->checkParameters();
     }
 
     Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
@@ -63,8 +63,8 @@ void GraphWorker::setPause(bool pause)
         return;
     }
 
-    Q_FOREACH(Node::Ptr node, graph_->nodes_) {
-        node->getNodeWorker()->pause(pause);
+    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+        node->pause(pause);
     }
     if(pause) {
         timer_->stop();
@@ -78,11 +78,11 @@ void GraphWorker::setPause(bool pause)
 
 void GraphWorker::stop()
 {
-    Q_FOREACH(Node::Ptr node, graph_->nodes_) {
-        node->getNodeWorker()->setEnabled(false);
+    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+        node->setEnabled(false);
     }
-    Q_FOREACH(Node::Ptr node, graph_->nodes_) {
-        node->getNodeWorker()->stop();
+    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+        node->stop();
     }
 
     graph_->nodes_.clear();

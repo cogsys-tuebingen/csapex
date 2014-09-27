@@ -103,8 +103,8 @@ void CsApexWindow::construct()
     QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Node&)), this, SLOT(saveView(YAML::Node&)));
     QObject::connect(&core_, SIGNAL(loadViewRequest(YAML::Node&)), this, SLOT(loadView(YAML::Node&)));
 
-    QObject::connect(graph, SIGNAL(nodeAdded(NodePtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodePtr)));
-    QObject::connect(graph, SIGNAL(nodeRemoved(NodePtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodePtr)));
+    QObject::connect(graph, SIGNAL(nodeAdded(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodeWorkerPtr)));
+    QObject::connect(graph, SIGNAL(nodeRemoved(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodeWorkerPtr)));
 
     QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
@@ -226,7 +226,7 @@ void CsApexWindow::updateNodeInfo()
             ss << "<hr />";
             ss << "<h1>Parameters:</h1>";
 
-            std::vector<param::Parameter::Ptr> params = n->makePrototypeContent()->getParameters();
+            std::vector<param::Parameter::Ptr> params = n->makePrototypeContent()->getNode()->getParameters();
 
             Q_FOREACH(const param::Parameter::Ptr& p, params) {
                 ss << "<h2>" << p->name() << "</h2>";

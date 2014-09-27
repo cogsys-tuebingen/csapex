@@ -18,7 +18,7 @@ using namespace csapex;
 
 static const int DEFAULT_HISTORY_LENGTH = 15;
 
-NodeWorker::NodeWorker(Settings& settings, Node* node)
+NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
     : settings_(settings), node_(node), private_thread_(NULL),
       timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false)
@@ -63,7 +63,7 @@ NodeWorker::~NodeWorker()
 
 Node* NodeWorker::getNode()
 {
-    return node_;
+    return node_.get();
 }
 
 UUID NodeWorker::getNodeUUID() const
@@ -268,7 +268,7 @@ void NodeWorker::forwardMessage(Connectable *s)
 Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
 {
     int id = inputs_.size();
-    Input* c = new Input(settings_, node_, id);
+    Input* c = new Input(settings_, node_.get(), id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setAsync(async);
@@ -282,7 +282,7 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
 Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 {
     int id = outputs_.size();
-    Output* c = new Output(settings_, node_, id);
+    Output* c = new Output(settings_, node_.get(), id);
     c->setLabel(label);
     c->setType(type);
 

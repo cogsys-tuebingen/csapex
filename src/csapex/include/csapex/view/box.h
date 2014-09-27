@@ -49,7 +49,7 @@ public:
 
 public:
     /// CONSTRUCTION
-    NodeBox(Settings& settings, NodeWorker* content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
+    NodeBox(Settings& settings, NodeWorkerPtr content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
     virtual ~NodeBox();
     void construct();
     void init();
@@ -151,7 +151,7 @@ protected:
 
     Settings& settings_;
 
-    NodeWorker* node_worker_;
+    NodeWorkerPtr node_worker_;
     NodeAdapterPtr adapter_;
 
     QIcon icon_;

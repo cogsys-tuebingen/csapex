@@ -68,7 +68,7 @@ protected:
 TEST_F(GraphTest, NodeCanBeFound) {
     Graph graph;
     UUID node_id = UUID::make_forced("foobarbaz");
-    NodePtr node = factory.makeNode("MockupNode", node_id);
+    NodeWorkerPtr node = factory.makeNode("MockupNode", node_id);
     graph.addNode(node);
 
     Node* node_found = graph.findNode(node_id);
@@ -80,7 +80,7 @@ TEST_F(GraphTest, NodeCanBeFound) {
 TEST_F(GraphTest, NodeCanBeDeleted) {
     Graph graph;
     UUID node_id = UUID::make_forced("foobarbaz");
-    NodePtr node = factory.makeNode("MockupNode", node_id);
+    NodeWorkerPtr node = factory.makeNode("MockupNode", node_id);
     graph.addNode(node);
 
     graph.deleteNode(node_id);

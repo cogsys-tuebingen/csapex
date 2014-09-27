@@ -31,7 +31,7 @@ using namespace csapex;
 
 const QString NodeBox::MIME = "csapex/model/box";
 
-NodeBox::NodeBox(Settings& settings, NodeWorker* worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
+NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
       down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
 {
@@ -52,7 +52,7 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_compo);
     }
 
-    QObject::connect(node_worker_, SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
+    QObject::connect(node_worker_.get(), SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
     adapter_->doSetupUi(ui->content);
 
     updateFlippedSides();
@@ -94,13 +94,13 @@ void NodeBox::construct()
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
-    QObject::connect(node_worker_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    QObject::connect(node_worker_, SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
-    QObject::connect(node_worker_, SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
-    QObject::connect(node_worker_, SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
-    QObject::connect(node_worker_, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
+    QObject::connect(node_worker_.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    QObject::connect(node_worker_.get(), SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
+    QObject::connect(node_worker_.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
+    QObject::connect(node_worker_.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
+    QObject::connect(node_worker_.get(), SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
 
-    QObject::connect(node_worker_, SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+    QObject::connect(node_worker_.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
 
     Q_FOREACH(Input* input, node_worker_->getMessageInputs()) {
         registerInputEvent(input);
@@ -119,7 +119,7 @@ Node* NodeBox::getNode()
 
 NodeWorker* NodeBox::getNodeWorker()
 {
-    return node_worker_;
+    return node_worker_.get();
 }
 
 NodeAdapter::Ptr NodeBox::getNodeAdapter()

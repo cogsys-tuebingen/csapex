@@ -48,8 +48,8 @@ public:
     QIcon getIcon() const;
     std::string getDescription() const;
 
-    virtual NodePtr makePrototypeContent() const;
-    virtual NodePtr makeContent(const UUID& uuid) const;
+    virtual NodeWorkerPtr makePrototypeContent() const;
+    virtual NodeWorkerPtr makeContent(const UUID& uuid) const;
 
 protected:
     NodeConstructor(Settings &settings, const std::string& type, const std::string& description, const std::string &icon, const std::vector<TagPtr> &tags);
