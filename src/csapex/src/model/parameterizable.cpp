@@ -15,7 +15,7 @@ Parameterizable::Parameterizable()
 
 void Parameterizable::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
 {
-    connections_.push_back(parameter_changed(*param).connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
+    connections_.push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
     if(param->hasState()) {
         parameterChanged(param, cb);
     }
@@ -104,8 +104,8 @@ void Parameterizable::addParameter(const param::Parameter::Ptr &param)
 {
     parameter_state_.addParameter(param);
 
-    connections_.push_back(parameter_changed(*param).connect(boost::bind(&Parameterizable::parameterChanged, this, _1)));
-    connections_.push_back(parameter_enabled(*param).connect(boost::bind(&Parameterizable::parameterEnabled, this, _1, _2)));
+    connections_.push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1)));
+    connections_.push_back(param->parameter_enabled.connect(boost::bind(&Parameterizable::parameterEnabled, this, _1, _2)));
 }
 
 void Parameterizable::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)

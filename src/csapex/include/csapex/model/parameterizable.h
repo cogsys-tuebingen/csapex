@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class Parameterizable : public param::Parameter::access
+class Parameterizable
 {
 public:
     typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > ChangedParameterList;
@@ -41,7 +41,7 @@ public:
     template <typename T>
     const T readParameter(const std::string& name) const
     {
-        return parameter_state_.readParameter<T>(name);
+        return parameter_state_.getParameter(name)->as<T>();
     }
 
     std::vector<param::Parameter::Ptr> getParameters() const;

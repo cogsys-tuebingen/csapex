@@ -100,17 +100,18 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
 
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
-        cin->enable();
-        /// TODO: make synchronized!!!!!
-        cin->setAsync(true);
+        // TODO: reimplement
+//        cin->enable();
+//        /// TODO: make synchronized!!!!!
+//        cin->setAsync(true);
 
-        boost::function<typename connection_types::GenericValueMessage<T>::Ptr()> getmsgptr = boost::bind(&Input::getMessage<connection_types::GenericValueMessage<T> >, cin, (void*) 0);
-        boost::function<connection_types::GenericValueMessage<T>*()> getmsg = boost::bind(&connection_types::GenericValueMessage<T>::Ptr::get, boost::bind(getmsgptr));
-        boost::function<T()> read = boost::bind(&connection_types::GenericValueMessage<T>::getValue, boost::bind(getmsg));
-        boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
-        qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
-        callbacks.push_back(set_param);
-        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
+//        boost::function<typename connection_types::GenericValueMessage<T>::Ptr()> getmsgptr = boost::bind(&Input::getMessage<connection_types::GenericValueMessage<T> >, cin, (void*) 0);
+//        boost::function<connection_types::GenericValueMessage<T>*()> getmsg = boost::bind(&connection_types::GenericValueMessage<T>::Ptr::get, boost::bind(getmsgptr));
+//        boost::function<T()> read = boost::bind(&connection_types::GenericValueMessage<T>::getValue, boost::bind(getmsg));
+//        boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
+//        qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
+//        callbacks.push_back(set_param);
+//        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
 
         manageInput(cin);
         param_2_input_[p->name()] = cin;
@@ -120,13 +121,14 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
 
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
-        cout->enable();
-        /// TODO: make synchronized!!!!!
-        cout->setAsync(true);
+        // TODO: reimplement
+//        cout->enable();
+//        /// TODO: make synchronized!!!!!
+//        cout->setAsync(true);
 
-        boost::function<void(T)> publish = boost::bind(&Output::publishIntegral<T>, cout, _1, "/");
-        boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
-        connections.push_back(node_->parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
+//        boost::function<void(T)> publish = boost::bind(&Output::publishIntegral<T>, cout, _1, "/");
+//        boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
+//        connections.push_back(node_->parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
 
         manageOutput(cout);
         param_2_output_[p->name()] = cout;

@@ -4,9 +4,6 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 
-/// PROJECT
-#include <utils_param/parameter.h>
-
 /// SYSTEM
 #include <QLayout>
 #include <boost/shared_ptr.hpp>
@@ -17,7 +14,7 @@ class QListView;
 
 namespace csapex
 {
-class NodeAdapter : public param::Parameter::access
+class NodeAdapter
 {
 public:
     typedef boost::shared_ptr<NodeAdapter> Ptr;

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
+#include <utils_param/parameter.h>
 
 /// SYSTEM
 #include <boost/bind.hpp>
