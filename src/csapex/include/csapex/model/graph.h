@@ -92,7 +92,6 @@ public:
 private:
    /*rename*/ void verify();
     void buildConnectedComponents();
-    void verifyAsync();
 
 Q_SIGNALS:
     void stateChanged();

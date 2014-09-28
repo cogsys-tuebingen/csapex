@@ -21,6 +21,7 @@ static const int DEFAULT_HISTORY_LENGTH = 15;
 
 NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
     : settings_(settings), node_(node),
+      has_msg_message_mutex_(QMutex::Recursive),
       timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false)
 {
@@ -112,17 +113,6 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
         // TODO: reimplement
-//        cin->enable();
-//        /// TODO: make synchronized!!!!!
-//        cin->setAsync(true);
-
-//        boost::function<typename connection_types::GenericValueMessage<T>::Ptr()> getmsgptr = boost::bind(&Input::getMessage<connection_types::GenericValueMessage<T> >, cin, (void*) 0);
-//        boost::function<connection_types::GenericValueMessage<T>*()> getmsg = boost::bind(&connection_types::GenericValueMessage<T>::Ptr::get, boost::bind(getmsgptr));
-//        boost::function<T()> read = boost::bind(&connection_types::GenericValueMessage<T>::getValue, boost::bind(getmsg));
-//        boost::function<void()> set_params_fn = boost::bind(&param::Parameter::set<T>, p, boost::bind(read));
-//        qt_helper::Call* set_param = new qt_helper::Call(set_params_fn);
-//        callbacks.push_back(set_param);
-//        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), set_param, SLOT(call()));
 
         manageInput(cin);
         param_2_input_[p->name()] = cin;
@@ -133,13 +123,6 @@ void NodeWorker::makeParameterConnectable(param::Parameter *p)
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
         // TODO: reimplement
-//        cout->enable();
-//        /// TODO: make synchronized!!!!!
-//        cout->setAsync(true);
-
-//        boost::function<void(T)> publish = boost::bind(&Output::publishIntegral<T>, cout, _1, "/");
-//        boost::function<T()> read = boost::bind(&param::Parameter::as<T>, p);
-//        connections.push_back(node_->parameter_changed(*p).connect(boost::bind(publish, boost::bind(read))));
 
         manageOutput(cout);
         param_2_output_[p->name()] = cout;
@@ -257,13 +240,20 @@ void NodeWorker::messageArrived(Connectable *s)
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
-    if(isEnabled()) {
-        forwardMessageSynchronized(source);
+    QMutexLocker lock(&has_msg_message_mutex_);
+
+    apex_assert_hard(!has_msg_[source]);
+    has_msg_[source] = true;
+
+    if(isEnabled() && areAllInputsAvailable()) {
+        processMessage(source);
     }
 }
 
-void NodeWorker::forwardMessageSynchronized(Input *source)
+void NodeWorker::processMessage(Input *source)
 {
+    // everything has a message here
+
     assert(this->thread() != QApplication::instance()->thread());
 
     QMutexLocker lock(&stop_mutex_);
@@ -275,48 +265,7 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
     bool can_process = true;
 
     {
-        QMutexLocker lock(&message_mutex_);
-        std::vector< boost::shared_ptr<QMutexLocker> > locks;
-
-        // forbid async to change
-        Q_FOREACH(const PAIR& pair, has_msg_) {
-            Input* cin = pair.first;
-            locks.push_back(cin->lockAsync());
-        }
-
-        //apex_assert_hard(!has_msg_[source]);
-        if(has_msg_[source] && !source->isAsync()) {
-            std::cerr << "input @" << source->getUUID().getFullName() <<
-                         ": assertion failed: !has_msg_[" << source->getUUID().getFullName() << "]" << std::endl;
-            apex_assert_hard(false);
-        }
-        if(!source->isAsync()) {
-            has_msg_[source] = true;
-        }
-
-        // check if all inputs have messages
-        Q_FOREACH(const PAIR& pair, has_msg_) {
-            Input* cin = pair.first;
-            if(!has_msg_[cin]) {
-                // connector doesn't have a message
-                if(cin->isAsync()) {
-                    // do not wait for this input
-                } else if(cin->isOptional()) {
-                    if(cin->isConnected()) {
-                        // c is optional and connected, so we have to wait for a message
-                        return;
-                    } else {
-                        // c is optional and not connected, so we can proceed
-                        /* do nothing */
-                    }
-                } else {
-                    // c is mandatory, so we have to wait for a message
-                    return;
-                }
-            }
-        }
-
-        // everything has a message here
+        QMutexLocker lock(&has_msg_message_mutex_);
 
         // check for old messages
         bool had_old_message = false;
@@ -325,7 +274,7 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             Input* cin = pair.first;
 
-            if(has_msg_[cin] && !cin->isAsync()) {
+            if(has_msg_[cin]) {
                 int s = cin->sequenceNumber();
                 if(s > highest_seq_no) {
                     highest_seq_no = s;
@@ -339,7 +288,7 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
                 continue;
             }
 
-            if(has_msg_[cin] && !cin->isAsync() && cin->sequenceNumber() != highest_seq_no) {
+            if(has_msg_[cin] && cin->sequenceNumber() != highest_seq_no) {
                 std::cerr << "input @" << source->getUUID().getFullName() <<
                              ": dropping old message @" << cin->getUUID().getFullName() << " with #" << cin->sequenceNumber() <<
                              " < #" << highest_seq_no << " @" << highest.getFullName() << std::endl;
@@ -358,7 +307,7 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             Input* cin = pair.first;
 
-            if(has_msg_[cin] && !cin->isAsync()) {
+            if(has_msg_[cin]) {
                 if(highest_seq_no != cin->sequenceNumber()) {
                     std::cerr << "input @" << cin->getUUID().getFullName() <<
                                  ": assertion failed: highest_seq_no (" << highest_seq_no << ") == cin->seq_no (" << cin->sequenceNumber() << ")" << std::endl;
@@ -371,7 +320,7 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             Input* cin = pair.first;
 
-            if(has_msg_[cin] && (!cin->isAsync() && !cin->isOptional() )) {
+            if(has_msg_[cin] && !cin->isOptional()) {
                 if(cin->isMessage<connection_types::NoMessage>()) {
                     can_process = false;
                 }
@@ -388,12 +337,58 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
         Q_FOREACH(const PAIR& pair, has_msg_) {
             Input* cin = pair.first;
 
-            if(has_msg_[cin] && !cin->isAsync()) {
+            if(has_msg_[cin]) {
                 has_msg_[cin] = false;
             }
         }
     }
 
+    processInputs(can_process);
+
+    lock.unlock();
+
+    // reset all edges
+    Q_FOREACH(const PAIR& pair, has_msg_) {
+        Input* cin = pair.first;
+        cin->free();
+    }
+
+    // send the messages
+    sendMessages();
+
+    Q_EMIT messageProcessed();
+}
+
+bool NodeWorker::areAllInputsAvailable()
+{
+    QMutexLocker lock(&has_msg_message_mutex_);
+
+    // check if all inputs have messages
+    typedef std::pair<Input*, bool> PAIR;
+    Q_FOREACH(const PAIR& pair, has_msg_) {
+        Input* cin = pair.first;
+        if(!has_msg_[cin]) {
+            // connector doesn't have a message
+            if(cin->isOptional()) {
+                if(cin->isConnected()) {
+                    // c is optional and connected, so we have to wait for a message
+                    return false;
+                } else {
+                    // c is optional and not connected, so we can proceed
+                    /* do nothing */
+                }
+            } else {
+                // c is mandatory, so we have to wait for a message
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+void NodeWorker::processInputs(bool can_process)
+{
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
     if(can_process){
@@ -411,33 +406,20 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
     }
     t->finish();
 
-    lock.unlock();
-
-    // send the messages
-    sendMessages();
 
     if(++timer_history_pos_ >= (int) timer_history_.size()) {
         timer_history_pos_ = 0;
     }
     timer_history_[timer_history_pos_] = t;
-
-    // reset all edges
-    Q_FOREACH(const PAIR& pair, has_msg_) {
-        Input* cin = pair.first;
-        cin->free();
-    }
-
-    Q_EMIT messageProcessed();
 }
 
 
-Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
+Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
 {
     int id = inputs_.size();
     Input* c = new Input(settings_, node_.get(), id);
     c->setLabel(label);
     c->setOptional(optional);
-    c->setAsync(async);
     c->setType(type);
 
     registerInput(c);
@@ -480,7 +462,7 @@ Output* NodeWorker::getParameterOutput(const std::string &name) const
 void NodeWorker::removeInput(Input *in)
 {
     {
-        QMutexLocker lock(&message_mutex_);
+        QMutexLocker lock(&has_msg_message_mutex_);
         std::map<Input*, bool>::iterator it = has_msg_.find(in);
 
         if(it != has_msg_.end()) {
@@ -552,7 +534,8 @@ void NodeWorker::registerInput(Input* in)
 
     in->moveToThread(thread());
 
-    clearInput(in);
+    has_msg_[in] = false;
+
     connectConnector(in);
     QObject::connect(in, SIGNAL(messageArrived(Connectable*)), this, SLOT(messageArrived(Connectable*)));
 
@@ -612,14 +595,6 @@ void NodeWorker::removeOutput(const UUID &uuid)
 {
     removeOutput(getOutput(uuid));
 }
-
-void NodeWorker::clearInput(Input *source)
-{
-    QMutexLocker lock(&message_mutex_);
-    has_msg_[source] = false;
-
-}
-
 
 std::vector<Input*> NodeWorker::getAllInputs() const
 {

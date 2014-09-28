@@ -29,7 +29,7 @@ UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
 Connectable::Connectable(Settings& settings, const UUID& uuid)
     : Unique(uuid), settings_(settings),
       sync_mutex(QMutex::Recursive),
-      buttons_down_(0), count_(0), seq_no_(0), enabled_(false), async_(false), async_temp_(false),
+      buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
@@ -38,7 +38,7 @@ Connectable::Connectable(Settings& settings, const UUID& uuid)
 Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int type)
     : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings),
       sync_mutex(QMutex::Recursive),
-      buttons_down_(0), count_(0), seq_no_(0), enabled_(false), async_(false), async_temp_(false),
+      buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
       blocked_(false), guard_(0xDEADBEEF)
 {
     init();
@@ -183,31 +183,6 @@ void Connectable::setType(ConnectionType::ConstPtr type)
 ConnectionType::ConstPtr Connectable::getType() const
 {
     return type_;
-}
-
-void Connectable::setAsync(bool asynch)
-{
-    QMutexLocker lock(&sync_mutex);
-
-    async_ = asynch;
-    async_temp_ = asynch;
-}
-
-boost::shared_ptr<QMutexLocker> Connectable::lockAsync()
-{
-    return boost::shared_ptr<QMutexLocker>(new QMutexLocker(&sync_mutex));
-}
-
-bool Connectable::isAsync() const
-{
-    return async_ || async_temp_;
-}
-
-void Connectable::setTempAsync(bool asynch)
-{
-    QMutexLocker lock(&sync_mutex);
-
-    async_temp_ = asynch;
 }
 
 int Connectable::getCount() const

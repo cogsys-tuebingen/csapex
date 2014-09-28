@@ -103,7 +103,6 @@ private:
         bool highlighted;
         bool error;
         bool disabled;
-        bool async;
         bool minimized_from;
         bool minimized_to;
         bool minimized;

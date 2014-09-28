@@ -50,7 +50,7 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
+    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
     virtual Input* getInput(const UUID& uuid) const;
@@ -78,6 +78,7 @@ public:
     std::vector<Output*> getManagedOutputs() const;
 
     bool canReceive();
+    bool areAllInputsAvailable();
 
     void makeParametersConnectable();
 
@@ -86,9 +87,7 @@ public:
 public Q_SLOTS:
     void messageArrived(Connectable* source);
 
-    void forwardMessageSynchronized(Input* source);
-
-    void clearInput(Input* source);
+    void processMessage(Input* source);
 
     void checkParameters();    
     void checkIO();
@@ -141,6 +140,9 @@ private:
     template <typename T>
     void makeParameterConnectable(param::Parameter*);
 
+
+    void processInputs(bool can_process);
+
 private:
     Settings& settings_;
     NodePtr node_;
@@ -160,6 +162,7 @@ private:
     QTimer* tick_timer_;
     bool tick_immediate_;
 
+    QMutex has_msg_message_mutex_;
     std::map<Input*, bool> has_msg_;
 
     int timer_history_pos_;
@@ -170,7 +173,6 @@ private:
     bool stop_;
     QMutex stop_mutex_;
     QMutex pause_mutex_;
-    QMutex message_mutex_;
     QWaitCondition continue_;
 };
 

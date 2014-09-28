@@ -180,7 +180,7 @@ void Output::sendMessages()
 
     message_->setSequenceNumber(seq_no_);
 
-    // wait for all connected inputs to be able to receive, if none is async
+    // wait for all connected inputs to be able to receive
     //  * inputs can only be connected to this output since they are 1:1
     std::vector<Input*> targets;
     BOOST_FOREACH(Input* i, targets_) {

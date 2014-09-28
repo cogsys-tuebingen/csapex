@@ -75,18 +75,6 @@ bool Input::isOptional() const
     return optional_;
 }
 
-void Input::setAsync(bool asynch)
-{
-    QMutexLocker lock(&sync_mutex);
-
-    Connectable::setAsync(asynch);
-
-    if(!asynch && isConnected()) {
-        free();
-        setSequenceNumber(getSource()->sequenceNumber());
-    }
-}
-
 bool Input::hasMessage() const
 {
     return isConnected() && buffer_->isFilled() && !buffer_->isType<connection_types::NoMessage>();
@@ -173,7 +161,7 @@ Connectable *Input::getSource() const
 void Input::inputMessage(ConnectionType::Ptr message)
 {
     int s = message->sequenceNumber();
-    if(s < sequenceNumber() && !isAsync()) {
+    if(s < sequenceNumber()) {
         std::cerr << "connector @" << getUUID().getFullName() <<
                      ": dropping old message @ with #" << s <<
                      " < #" << sequenceNumber() << std::endl;

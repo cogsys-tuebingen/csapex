@@ -515,7 +515,6 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.disabled = (!from->isEnabled() || !to->isEnabled());
-    ccs.async = from->isAsync() || to->isAsync();
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
 
@@ -666,9 +665,6 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     } else if(ccs.disabled) {
         color_start = Qt::darkGray;
         color_end = Qt::gray;
-    } else if(ccs.async) {
-        color_start = QColor(0xFF, 0xCC, 0x00);
-        color_end = QColor(0xFF, 0xCC, 0x00);
     }
     QLinearGradient lg(from, to);
     lg.setColorAt(0, color_start);

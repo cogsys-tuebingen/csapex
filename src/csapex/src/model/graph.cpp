@@ -267,69 +267,6 @@ void Graph::buildConnectedComponents()
 
 void Graph::verify()
 {
-    verifyAsync();
-}
-
-void Graph::verifyAsync()
-{
-    /* Foreach node look for paths to every other node.
-     * If there are two or more paths from one node to another
-     *   and on of them contains an async edge, make all others
-     *   temporary async
-     */
-
-    Q_FOREACH(NodeWorker::Ptr node_worker, nodes_) {
-        Q_FOREACH(Input* input, node_worker->getMessageInputs()) {
-            input->setTempAsync(false);
-        }
-    }
-
-    Q_FOREACH(NodeWorker::Ptr node_worker, nodes_) {
-        std::deque<NodeWorker*> Q;
-        std::map<NodeWorker*,bool> has_async_input;
-
-        NodeWorker* current = node_worker.get();
-
-        Q.push_back(current);
-
-        while(!Q.empty()) {
-            NodeWorker* front = Q.front();
-            Q.pop_front();
-
-            bool visited = has_async_input.find(front) != has_async_input.end();
-            if(!visited) {
-                has_async_input[front] = false;
-            }
-
-            Q_FOREACH(Output* output, front->getMessageOutputs()) {
-                for(typename Output::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
-                    Input* input = *in;
-
-                    NodeWorker* next_node = findNodeWorkerForConnector(input->getUUID());
-
-                    if(input->isAsync() || has_async_input[front]) {
-                        has_async_input[next_node] = true;
-                    }
-
-                    Q.push_back(next_node);
-                }
-            }
-        }
-
-
-        Q_FOREACH(Output* output, node_worker->getMessageOutputs()) {
-            for(Output::TargetIterator in = output->beginTargets(); in != output->endTargets(); ++in) {
-                Input* input = *in;
-
-                NodeWorker* next_node = findNodeWorkerForConnector(input->getUUID());
-
-                if(!input->isAsync()) {
-                    bool a = has_async_input[next_node];
-                    input->setTempAsync(a);
-                }
-            }
-        }
-    }
 }
 
 Command::Ptr Graph::clear()

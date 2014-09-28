@@ -61,11 +61,6 @@ public:
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
 
-    boost::shared_ptr<QMutexLocker> lockAsync();
-    bool isAsync() const;
-    virtual void setAsync(bool asynch);
-    virtual void setTempAsync(bool asynch);
-
     bool isBlocked() const;
 
     int sequenceNumber() const;
@@ -152,8 +147,6 @@ protected:
 
 private:
     bool enabled_;
-    bool async_;
-    bool async_temp_;
     bool blocked_;
 
 public:
