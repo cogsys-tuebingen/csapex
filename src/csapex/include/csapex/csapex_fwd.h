@@ -29,6 +29,8 @@ FWD(Group);
 FWD(NodeConstructor);
 FWD(NodeStatistics);
 
+FWD(ThreadPool);
+
 FWD(Port);
 FWD(Connectable);
 FWD(Input);

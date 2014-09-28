@@ -20,6 +20,7 @@
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/designer_scene.h>
+#include <csapex/core/thread_pool.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -84,7 +85,7 @@ int Main::run()
     return result;
 }
 
-int Main::main(bool headless, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
+int Main::main(bool headless, bool threadless, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
     Settings settings;
     settings.set("config", config);
@@ -99,6 +100,18 @@ int Main::main(bool headless, const std::string& config, const std::string& path
         settings.add(param::ParameterFactory::declareBool("headless", headless));
     } else {
         settings.set("headless", headless);
+    }
+
+    if(!settings.knows("threadless")) {
+        settings.add(param::ParameterFactory::declareBool("threadless", threadless));
+    } else {
+        settings.set("threadless", threadless);
+    }
+
+    if(!settings.knows("thread_grouping")) {
+        settings.add(param::ParameterFactory::declareBool("thread_grouping", thread_grouping));
+    } else {
+        settings.set("thread_grouping", thread_grouping);
     }
 
     if(!settings.knows("additional_args")) {
@@ -118,6 +131,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
     CsApexCore core(settings, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
+    ThreadPool thread_pool(&core, graph.get(), !threadless, thread_grouping);
 
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
@@ -135,7 +149,7 @@ int Main::main(bool headless, const std::string& config, const std::string& path
 
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
         DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control);
-        DesignerView* view = new DesignerView(scene, graph, &dispatcher, widget_control, drag_io);
+        DesignerView* view = new DesignerView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io);
         Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene);
 
         widget_control->setDesigner(designer);
@@ -182,6 +196,8 @@ int main(int argc, char** argv)
             ("help", "show help message")
             ("dump", "show variables")
             ("headless", "run without gui")
+            ("threadless", "run without threading")
+            ("thread_grouping", "create one thread per graph component")
             ("input", "config file to load")
             ("ros-name", "(ros parameter (provided by launch files))")
             ("ros-log", "(ros parameter (provided by launch files))")
@@ -256,8 +272,11 @@ int main(int argc, char** argv)
         input = Settings::default_config;
     }
 
+    bool threadless = vm.count("threadless");
+    bool thread_grouping = vm.count("thread_grouping");
+
     // start the app
     Main m(app);
-    return m.main(headless, input, path_to_bin, additional_args);
+    return m.main(headless, threadless, thread_grouping, input, path_to_bin, additional_args);
 }
 

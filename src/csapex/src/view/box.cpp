@@ -14,7 +14,6 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/node_adapter.h>
 #include <csapex/view/port.h>
-#include <csapex/utility/context_menu_handler.h>
 #include <csapex/utility/color.hpp>
 #include <csapex/core/settings.h>
 
@@ -33,7 +32,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_compo(NULL), profiling_(false), is_placed_(false)
+      down_(false), info_compo(NULL), info_thread(NULL), profiling_(false), is_placed_(false)
 {
 }
 
@@ -52,10 +51,15 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_compo);
     }
 
-    QObject::connect(node_worker_.get(), SIGNAL(messagesReceived()), this, SLOT(setupUiAgain()));
+    if(!info_thread) {
+        info_thread = new QLabel;
+        info_thread->setProperty("threadgroup", true);
+        ui->infos->addWidget(info_thread);
+    }
+
     adapter_->doSetupUi(ui->content);
 
-    updateFlippedSides();
+    updateVisuals();
 
     Q_EMIT changed(this);
 }
@@ -63,7 +67,7 @@ void NodeBox::setupUi()
 void NodeBox::setupUiAgain()
 {
     adapter_->doSetupUi(ui->content);
-    updateFlippedSides();
+    updateVisuals();
 }
 
 void NodeBox::construct()
@@ -90,8 +94,6 @@ void NodeBox::construct()
 
     setLabel(node_worker_->getNode()->getNodeState()->getLabel());
 
-    node_worker_->setMinimized(false);
-
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
     QObject::connect(node_worker_.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
@@ -101,6 +103,7 @@ void NodeBox::construct()
     QObject::connect(node_worker_.get(), SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
 
     QObject::connect(node_worker_.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+    QObject::connect(node_worker_.get(), SIGNAL(threadChanged()), this, SLOT(updateThreadInformation()));
 
     Q_FOREACH(Input* input, node_worker_->getMessageInputs()) {
         registerInputEvent(input);
@@ -134,93 +137,78 @@ void NodeBox::enableContent(bool enable)
     ui->label->setEnabled(enable);
 }
 
-void NodeBox::updateInformation(Graph* graph)
+void NodeBox::updateBoxInformation(Graph* graph)
 {
-    int compo = graph->getComponent(node_worker_->getNodeUUID());
-    if(compo < 0) {
-        return;
-    }
+    updateComponentInformation(graph);
+    updateThreadInformation();
+}
 
-    std::stringstream info;
-    info << compo;
-    info_compo->setText(info.str().c_str());
-
+namespace {
+void setStyleForId(QLabel* label, int id) {
     // set color using HSV rotation
-    double hue =  (compo * 77) % 360;
+    double hue =  (id * 77) % 360;
     double r = 0, g = 0, b = 0;
     __HSV2RGB__(hue, 1., 1., r, g, b);
     double fr = 0, fb = 0, fg = 0;
-    if(b > 100 && r < 100 && g < 100) {
+    double min = std::min(b, std::min(g, r));
+    double max = std::max(b, std::max(g, r));
+    if(min < 100 && max < 100) {
         fr = fb = fg = 255;
     }
     std::stringstream ss;
     ss << "QLabel { background-color : rgb(" << r << "," << g << "," << b << "); color: rgb(" << fr << "," << fg << "," << fb << ");}";
-    info_compo->setStyleSheet(ss.str().c_str());
+    label->setStyleSheet(ss.str().c_str());
+}
+}
+
+void NodeBox::updateComponentInformation(Graph* graph)
+{
+    if(!settings_.get<bool>("display-graph-components", false)) {
+        info_compo->setVisible(false);
+        return;
+    } else {
+        info_compo->setVisible(true);
+    }
+
+    if(info_compo) {
+        int compo = graph->getComponent(node_worker_->getNodeUUID());
+        std::stringstream info;
+        info << "C:" << compo;
+        info_compo->setText(info.str().c_str());
+
+        setStyleForId(info_compo, compo);
+    }
+}
+
+void NodeBox::updateThreadInformation()
+{
+    if(!settings_.get<bool>("display-threads", false)) {
+        info_thread->setVisible(false);
+        return;
+    } else {
+        info_thread->setVisible(true);
+    }
+
+    if(info_thread && node_worker_->thread()) {
+        int id = node_worker_->thread()->property("id").toInt();
+        std::stringstream info;
+        if(id < 0) {
+            info << "T:" << -id;
+        } else if(id == 0) {
+            info << "private";
+        } else {
+            info << node_worker_->thread()->property("name").toString().toStdString();
+        }
+        info_thread->setProperty("custom", node_worker_->thread()->property("custom"));
+        info_thread->setText(info.str().c_str());
+
+        setStyleForId(info_thread, id);
+    }
 }
 
 void NodeBox::contextMenuEvent(QContextMenuEvent* e)
 {
     Q_EMIT showContextMenuForBox(this, e->globalPos());
-}
-
-void NodeBox::fillContextMenu(QMenu *menu, std::map<QAction*, boost::function<void()> >& handler, CommandDispatcher* dispatcher)
-{
-    ContextMenuHandler::addHeader(*menu, std::string("Node: ") + node_worker_->getNodeUUID().getShortName());
-
-    if(isMinimizedSize()) {
-        QAction* max = new QAction("maximize", menu);
-        max->setIcon(QIcon(":/maximize.png"));
-        max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&NodeBox::minimizeBox, this, false);
-        menu->addAction(max);
-
-    } else {
-        QAction* min = new QAction("minimize", menu);
-        min->setIcon(QIcon(":/minimize.png"));
-        min->setIconVisibleInMenu(true);
-        handler[min] = boost::bind(&NodeBox::minimizeBox, this, true);
-        menu->addAction(min);
-    }
-
-    QAction* flip = new QAction("flip sides", menu);
-    flip->setIcon(QIcon(":/flip.png"));
-    flip->setIconVisibleInMenu(true);
-    handler[flip] = boost::bind(&NodeBox::flipSides, this);
-    menu->addAction(flip);
-
-    menu->addSeparator();
-
-    QAction* term = new QAction("terminate thread", menu);
-    term->setIcon(QIcon(":/stop.png"));
-    term->setIconVisibleInMenu(true);
-    handler[term] = boost::bind(&NodeBox::killContent, this);
-    menu->addAction(term);
-
-    QAction* prof;
-    if(profiling_) {
-        prof = new QAction("stop profiling", menu);
-        prof->setIcon(QIcon(":/stop_profiling.png"));
-    } else {
-        prof = new QAction("profiling", menu);
-        prof->setIcon(QIcon(":/profiling.png"));
-    }
-    prof->setIconVisibleInMenu(true);
-    handler[prof] = boost::bind(&NodeBox::showProfiling, this);
-    menu->addAction(prof);
-
-    QAction* info = new QAction("get information", menu);
-    info->setIcon(QIcon(":/help.png"));
-    info->setIconVisibleInMenu(true);
-    handler[info] = boost::bind(&NodeBox::getInformation, this);
-    menu->addAction(info);
-
-    menu->addSeparator();
-
-    QAction* del = new QAction("delete", menu);
-    del->setIcon(QIcon(":/close.png"));
-    del->setIconVisibleInMenu(true);
-    handler[del] = boost::bind(&NodeBox::deleteBox, this, dispatcher);
-    menu->addAction(del);
 }
 
 QBoxLayout* NodeBox::getInputLayout()
@@ -409,11 +397,6 @@ void NodeBox::stop()
     adapter_->stop();
 }
 
-void NodeBox::deleteBox(CommandDispatcher* dispatcher)
-{
-    dispatcher->execute(Command::Ptr(new command::DeleteNode(node_worker_->getNode()->getUUID())));
-}
-
 void NodeBox::getInformation()
 {
     Q_EMIT helpRequest(this);
@@ -449,37 +432,21 @@ void NodeBox::killContent()
 
 void NodeBox::flipSides()
 {
-    node_worker_->getNode()->getNodeState()->setFlipped(!node_worker_->getNode()->getNodeState()->isFlipped());
-    updateFlippedSides();
+    bool flip = !node_worker_->getNode()->getNodeState()->isFlipped();
+    node_worker_->getNode()->getNodeState()->setFlipped(flip);
+    updateVisuals();
+
+    Q_EMIT flipped(flip);
 }
 
-void NodeBox::updateFlippedSides()
+void NodeBox::updateVisuals()
 {
     bool flip = node_worker_->getNode()->getNodeState()->isFlipped();
 
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
-    Q_EMIT flipped(flip);
-}
-
-bool NodeBox::isMinimizedSize() const
-{
-    return node_worker_->getNode()->getNodeState()->isMinimized();
-}
-
-bool NodeBox::isFlipped() const
-{
-    return node_worker_->getNode()->getNodeState()->isFlipped();
-}
-
-void NodeBox::minimizeBox(bool minimize)
-{    
-    node_worker_->setMinimized(minimize);
-
-    Q_EMIT minimized(minimize);
-
-    if(minimize) {
+    if(isMinimizedSize()) {
         ui->frame->hide();
         ui->label->hide();
         ui->boxframe->setProperty("content_minimized", true);
@@ -493,6 +460,30 @@ void NodeBox::minimizeBox(bool minimize)
     refreshStylesheet();
 
     resize(sizeHint());
+}
+
+bool NodeBox::isMinimizedSize() const
+{
+    return node_worker_->getNode()->getNodeState()->isMinimized();
+}
+
+bool NodeBox::isFlipped() const
+{
+    return node_worker_->getNode()->getNodeState()->isFlipped();
+}
+
+bool NodeBox::isProfiling() const
+{
+    return profiling_;
+}
+
+void NodeBox::minimizeBox(bool minimize)
+{    
+    node_worker_->setMinimized(minimize);
+
+    updateVisuals();
+
+    Q_EMIT minimized(minimize);
 }
 
 bool NodeBox::hasSubGraph()

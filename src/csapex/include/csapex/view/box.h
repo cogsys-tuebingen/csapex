@@ -68,13 +68,11 @@ public:
 
     bool isMinimizedSize() const;
     bool isFlipped() const;
+    bool isProfiling() const;
 
     bool isError() const;
     ErrorState::ErrorLevel errorLevel() const;
     std::string errorMessage() const;
-
-    /// UI
-    void fillContextMenu(QMenu* menu, std::map<QAction *, boost::function<void()> > &handler, CommandDispatcher* dispatcher);
 
     QBoxLayout* getInputLayout();
     QBoxLayout* getOutputLayout();
@@ -93,9 +91,6 @@ protected:
     void setupUi();
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
-    void updateFlippedSides();
-
-    void deleteBox(CommandDispatcher *dispatcher);
 
 public Q_SLOTS:
     void setupUiAgain();
@@ -110,7 +105,9 @@ public Q_SLOTS:
     void flipSides();
     void showProfiling();
 
-    void updateInformation(Graph* graph);
+    void updateBoxInformation(Graph* graph);
+    void updateComponentInformation(Graph* graph);
+    void updateThreadInformation();
     void contextMenuEvent(QContextMenuEvent* e);
 
     void registerEvent(Connectable*);
@@ -118,6 +115,8 @@ public Q_SLOTS:
 
     void nodeStateChanged();
     void enabledChange(bool val);
+
+    void updateVisuals();
 
 Q_SIGNALS:
     void placed();
@@ -138,7 +137,6 @@ Q_SIGNALS:
     void showContextMenuForBox(NodeBox* box, const QPoint& pos);
     void profile(NodeBox* box);
     void stopProfiling(NodeBox* box);
-
 
 protected:
     void resizeEvent(QResizeEvent * e);
@@ -164,6 +162,7 @@ protected:
     QIcon maximize_icon_;
 
     QLabel* info_compo;
+    QLabel* info_thread;
 
     bool profiling_;
 

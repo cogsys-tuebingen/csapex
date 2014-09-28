@@ -43,6 +43,9 @@ public:
     const Node* getParent() const;
     void setParent(Node *value);
 
+    int getThread() const;
+    void setThread(int id);
+
 private:
     const Node* parent;
 
@@ -54,6 +57,8 @@ private:
     bool minimized;
     bool enabled;
     bool flipped;
+
+    int thread;
 };
 
 }

@@ -13,13 +13,14 @@
 
 /// SYSTEM
 #include <QThread>
+#include <QApplication>
 
 using namespace csapex;
 
 static const int DEFAULT_HISTORY_LENGTH = 15;
 
 NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
-    : settings_(settings), node_(node), private_thread_(NULL),
+    : settings_(settings), node_(node),
       timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false)
 {
@@ -33,7 +34,7 @@ NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
     tick_timer_ = new QTimer();
     setTickFrequency(DEFAULT_FREQUENCY);
 
-    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
+    QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 }
 
 NodeWorker::~NodeWorker()
@@ -169,16 +170,25 @@ void NodeWorker::makeParametersConnectable()
 }
 
 
-void NodeWorker::makeThread()
+void NodeWorker::triggerSwitchThreadRequest(QThread* thread, int id)
 {
-    if(!private_thread_) {
-        private_thread_ = new QThread;
-        connect(private_thread_, SIGNAL(finished()), private_thread_, SLOT(deleteLater()));
+    Q_EMIT threadSwitchRequested(thread, id);
+}
 
-        moveToThread(private_thread_);
+void NodeWorker::switchThread(QThread *thread, int id)
+{
+    QObject::disconnect(tick_timer_);
 
-        private_thread_->start();
-    }
+    assert(thread);
+    assert(thread != QApplication::instance()->thread());
+
+    moveToThread(thread);
+
+    node_->getNodeState()->setThread(id);
+
+    Q_EMIT threadChanged();
+
+    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()), Qt::QueuedConnection);
 }
 
 void NodeWorker::connectConnector(Connectable *c)
@@ -199,6 +209,7 @@ void NodeWorker::disconnectConnector(Connectable */*c*/)
 
 void NodeWorker::stop()
 {
+    assert(this->thread() != QApplication::instance()->thread());
     node_->abort();
 
     QMutexLocker lock(&stop_mutex_);
@@ -218,19 +229,7 @@ void NodeWorker::stop()
         disconnectConnector(i);
     }
 
-    QObject::disconnect(private_thread_);
-
     pause(false);
-
-    if(private_thread_) {
-        private_thread_->quit();
-        //        private_thread_->wait(1000);
-        //        if(private_thread_->isRunning()) {
-        //            std::cout << "terminate thread" << std::endl;
-        //            private_thread_->terminate();
-        //        }
-    }
-
 }
 
 void NodeWorker::pause(bool pause)
@@ -245,7 +244,7 @@ void NodeWorker::killExecution()
     // TODO: implement
 }
 
-void NodeWorker::forwardMessage(Connectable *s)
+void NodeWorker::messageArrived(Connectable *s)
 {
     {
         pause_mutex_.lock();
@@ -259,241 +258,13 @@ void NodeWorker::forwardMessage(Connectable *s)
     apex_assert_hard(source);
 
     if(isEnabled()) {
-        Q_EMIT messagesReceived();
-
         forwardMessageSynchronized(source);
     }
 }
 
-Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
-{
-    int id = inputs_.size();
-    Input* c = new Input(settings_, node_.get(), id);
-    c->setLabel(label);
-    c->setOptional(optional);
-    c->setAsync(async);
-    c->setType(type);
-
-    registerInput(c);
-
-    return c;
-}
-
-Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
-{
-    int id = outputs_.size();
-    Output* c = new Output(settings_, node_.get(), id);
-    c->setLabel(label);
-    c->setType(type);
-
-    registerOutput(c);
-    return c;
-}
-
-Input* NodeWorker::getParameterInput(const std::string &name) const
-{
-    std::map<std::string, Input*>::const_iterator it = param_2_input_.find(name);
-    if(it == param_2_input_.end()) {
-        return NULL;
-    } else {
-        return it->second;
-    }
-}
-
-Output* NodeWorker::getParameterOutput(const std::string &name) const
-{
-    std::map<std::string, Output*>::const_iterator it = param_2_output_.find(name);
-    if(it == param_2_output_.end()) {
-        return NULL;
-    } else {
-        return it->second;
-    }
-}
-
-
-void NodeWorker::removeInput(Input *in)
-{
-    {
-        QMutexLocker lock(&message_mutex_);
-        std::map<Input*, bool>::iterator it = has_msg_.find(in);
-
-        if(it != has_msg_.end()) {
-            has_msg_.erase(it);
-        }
-    }
-
-    std::vector<Input*>::iterator it;
-    it = std::find(inputs_.begin(), inputs_.end(), in);
-
-    if(it != inputs_.end()) {
-        inputs_.erase(it);
-    } else {
-        it = std::find(managed_inputs_.begin(), managed_inputs_.end(), in);
-        if(it != managed_inputs_.end()) {
-            managed_inputs_.erase(it);
-        } else {
-            std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
-        }
-    }
-
-    in->deleteLater();
-
-    disconnectConnector(in);
-    Q_EMIT connectorRemoved(in);
-}
-
-void NodeWorker::removeOutput(Output *out)
-{
-    std::vector<Output*>::iterator it;
-    it = std::find(outputs_.begin(), outputs_.end(), out);
-
-    if(it != outputs_.end()) {
-        outputs_.erase(it);
-    } else {
-        it = std::find(managed_outputs_.begin(), managed_outputs_.end(), out);
-        if(it != managed_outputs_.end()) {
-            managed_outputs_.erase(it);
-        } else {
-            std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
-        }
-    }
-
-    out->deleteLater();
-
-    disconnectConnector(out);
-    Q_EMIT connectorRemoved(out);
-}
-
-
-void NodeWorker::manageInput(Input* in)
-{
-    managed_inputs_.push_back(in);
-    connectConnector(in);
-    in->moveToThread(thread());
-}
-
-void NodeWorker::manageOutput(Output* out)
-{
-    managed_outputs_.push_back(out);
-    connectConnector(out);
-    out->moveToThread(thread());
-}
-
-
-void NodeWorker::registerInput(Input* in)
-{
-    inputs_.push_back(in);
-
-    in->moveToThread(thread());
-
-    clearInput(in);
-    connectConnector(in);
-    QObject::connect(in, SIGNAL(messageArrived(Connectable*)), this, SLOT(forwardMessage(Connectable*)));
-
-    Q_EMIT connectorCreated(in);
-}
-
-void NodeWorker::registerOutput(Output* out)
-{
-    outputs_.push_back(out);
-
-    out->moveToThread(thread());
-
-    connectConnector(out);
-
-    Q_EMIT connectorCreated(out);
-}
-
-
-Input* NodeWorker::getInput(const UUID& uuid) const
-{
-    foreach(Input* in, inputs_) {
-        if(in->getUUID() == uuid) {
-            return in;
-        }
-    }
-    foreach(Input* in, managed_inputs_) {
-        if(in->getUUID() == uuid) {
-            return in;
-        }
-    }
-
-    return NULL;
-}
-
-Output* NodeWorker::getOutput(const UUID& uuid) const
-{
-    foreach(Output* out, outputs_) {
-        if(out->getUUID() == uuid) {
-            return out;
-        }
-    }
-    foreach(Output* out, managed_outputs_) {
-        if(out->getUUID() == uuid) {
-            return out;
-        }
-    }
-
-    return NULL;
-}
-
-void NodeWorker::removeInput(const UUID &uuid)
-{
-    removeInput(getInput(uuid));
-}
-
-void NodeWorker::removeOutput(const UUID &uuid)
-{
-    removeOutput(getOutput(uuid));
-}
-
-void NodeWorker::clearInput(Input *source)
-{
-    QMutexLocker lock(&message_mutex_);
-    has_msg_[source] = false;
-
-}
-
-
-std::vector<Input*> NodeWorker::getAllInputs() const
-{
-    std::vector<Input*> result;
-    result = inputs_;
-    result.insert(result.end(), managed_inputs_.begin(), managed_inputs_.end());
-    return result;
-}
-
-std::vector<Output*> NodeWorker::getAllOutputs() const
-{
-    std::vector<Output*> result;
-    result = outputs_;
-    result.insert(result.end(), managed_outputs_.begin(), managed_outputs_.end());
-    return result;
-}
-
-std::vector<Input*> NodeWorker::getMessageInputs() const
-{
-    return inputs_;
-}
-
-std::vector<Output*> NodeWorker::getMessageOutputs() const
-{
-    return outputs_;
-}
-
-std::vector<Input*> NodeWorker::getManagedInputs() const
-{
-    return managed_inputs_;
-}
-
-std::vector<Output*> NodeWorker::getManagedOutputs() const
-{
-    return managed_outputs_;
-}
-
-
 void NodeWorker::forwardMessageSynchronized(Input *source)
 {
+    assert(this->thread() != QApplication::instance()->thread());
 
     QMutexLocker lock(&stop_mutex_);
     if(stop_) {
@@ -659,6 +430,233 @@ void NodeWorker::forwardMessageSynchronized(Input *source)
     Q_EMIT messageProcessed();
 }
 
+
+Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async)
+{
+    int id = inputs_.size();
+    Input* c = new Input(settings_, node_.get(), id);
+    c->setLabel(label);
+    c->setOptional(optional);
+    c->setAsync(async);
+    c->setType(type);
+
+    registerInput(c);
+
+    return c;
+}
+
+Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
+{
+    int id = outputs_.size();
+    Output* c = new Output(settings_, node_.get(), id);
+    c->setLabel(label);
+    c->setType(type);
+
+    registerOutput(c);
+    return c;
+}
+
+Input* NodeWorker::getParameterInput(const std::string &name) const
+{
+    std::map<std::string, Input*>::const_iterator it = param_2_input_.find(name);
+    if(it == param_2_input_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
+}
+
+Output* NodeWorker::getParameterOutput(const std::string &name) const
+{
+    std::map<std::string, Output*>::const_iterator it = param_2_output_.find(name);
+    if(it == param_2_output_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
+}
+
+
+void NodeWorker::removeInput(Input *in)
+{
+    {
+        QMutexLocker lock(&message_mutex_);
+        std::map<Input*, bool>::iterator it = has_msg_.find(in);
+
+        if(it != has_msg_.end()) {
+            has_msg_.erase(it);
+        }
+    }
+
+    std::vector<Input*>::iterator it;
+    it = std::find(inputs_.begin(), inputs_.end(), in);
+
+    if(it != inputs_.end()) {
+        inputs_.erase(it);
+    } else {
+        it = std::find(managed_inputs_.begin(), managed_inputs_.end(), in);
+        if(it != managed_inputs_.end()) {
+            managed_inputs_.erase(it);
+        } else {
+            std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
+        }
+    }
+
+    in->deleteLater();
+
+    disconnectConnector(in);
+    Q_EMIT connectorRemoved(in);
+}
+
+void NodeWorker::removeOutput(Output *out)
+{
+    std::vector<Output*>::iterator it;
+    it = std::find(outputs_.begin(), outputs_.end(), out);
+
+    if(it != outputs_.end()) {
+        outputs_.erase(it);
+    } else {
+        it = std::find(managed_outputs_.begin(), managed_outputs_.end(), out);
+        if(it != managed_outputs_.end()) {
+            managed_outputs_.erase(it);
+        } else {
+            std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
+        }
+    }
+
+    out->deleteLater();
+
+    disconnectConnector(out);
+    Q_EMIT connectorRemoved(out);
+}
+
+
+void NodeWorker::manageInput(Input* in)
+{
+    managed_inputs_.push_back(in);
+    connectConnector(in);
+    in->moveToThread(thread());
+}
+
+void NodeWorker::manageOutput(Output* out)
+{
+    managed_outputs_.push_back(out);
+    connectConnector(out);
+    out->moveToThread(thread());
+}
+
+
+void NodeWorker::registerInput(Input* in)
+{
+    inputs_.push_back(in);
+
+    in->moveToThread(thread());
+
+    clearInput(in);
+    connectConnector(in);
+    QObject::connect(in, SIGNAL(messageArrived(Connectable*)), this, SLOT(messageArrived(Connectable*)));
+
+    Q_EMIT connectorCreated(in);
+}
+
+void NodeWorker::registerOutput(Output* out)
+{
+    outputs_.push_back(out);
+
+    out->moveToThread(thread());
+
+    connectConnector(out);
+
+    Q_EMIT connectorCreated(out);
+}
+
+
+Input* NodeWorker::getInput(const UUID& uuid) const
+{
+    foreach(Input* in, inputs_) {
+        if(in->getUUID() == uuid) {
+            return in;
+        }
+    }
+    foreach(Input* in, managed_inputs_) {
+        if(in->getUUID() == uuid) {
+            return in;
+        }
+    }
+
+    return NULL;
+}
+
+Output* NodeWorker::getOutput(const UUID& uuid) const
+{
+    foreach(Output* out, outputs_) {
+        if(out->getUUID() == uuid) {
+            return out;
+        }
+    }
+    foreach(Output* out, managed_outputs_) {
+        if(out->getUUID() == uuid) {
+            return out;
+        }
+    }
+
+    return NULL;
+}
+
+void NodeWorker::removeInput(const UUID &uuid)
+{
+    removeInput(getInput(uuid));
+}
+
+void NodeWorker::removeOutput(const UUID &uuid)
+{
+    removeOutput(getOutput(uuid));
+}
+
+void NodeWorker::clearInput(Input *source)
+{
+    QMutexLocker lock(&message_mutex_);
+    has_msg_[source] = false;
+
+}
+
+
+std::vector<Input*> NodeWorker::getAllInputs() const
+{
+    std::vector<Input*> result;
+    result = inputs_;
+    result.insert(result.end(), managed_inputs_.begin(), managed_inputs_.end());
+    return result;
+}
+
+std::vector<Output*> NodeWorker::getAllOutputs() const
+{
+    std::vector<Output*> result;
+    result = outputs_;
+    result.insert(result.end(), managed_outputs_.begin(), managed_outputs_.end());
+    return result;
+}
+
+std::vector<Input*> NodeWorker::getMessageInputs() const
+{
+    return inputs_;
+}
+
+std::vector<Output*> NodeWorker::getMessageOutputs() const
+{
+    return outputs_;
+}
+
+std::vector<Input*> NodeWorker::getManagedInputs() const
+{
+    return managed_inputs_;
+}
+
+std::vector<Output*> NodeWorker::getManagedOutputs() const
+{
+    return managed_outputs_;
+}
+
 void NodeWorker::sendMessages()
 {
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
@@ -705,11 +703,14 @@ void NodeWorker::tick()
 
 
         if(!thread_initialized_) {
-            thread::set_name(node_->getUUID().getShortName().c_str());
+//            thread::set_name(node_->getUUID().getShortName().c_str());
+            thread::set_name(thread()->objectName().toStdString().c_str());
             thread_initialized_ = true;
         }
 
         if(isEnabled()) {
+            assert(this->thread() != QApplication::instance()->thread());
+
             node_->tick();
 
             // if there is a message: send!

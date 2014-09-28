@@ -24,7 +24,7 @@ public:
     ~Main();
 
     int run();
-    int main(bool headless, const std::string &config, const std::string& path_to_bin, const std::vector<std::string>& additional_args);
+    int main(bool headless, bool threadless, bool thread_grouping, const std::string &config, const std::string& path_to_bin, const std::vector<std::string>& additional_args);
 
 public Q_SLOTS:
     void showMessage(const QString& msg);

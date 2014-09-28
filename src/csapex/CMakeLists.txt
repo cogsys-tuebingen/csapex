@@ -118,6 +118,7 @@ set(SRC_APP
     src/core/designerio.cpp
     src/core/drag_io.cpp
     src/core/settings.cpp
+    src/core/thread_pool.cpp
 
     src/command/command.cpp
     src/command/dispatcher.cpp

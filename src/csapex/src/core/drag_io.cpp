@@ -164,8 +164,14 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_po
 
     } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         e->ignore();
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnectionsAndRepaint();
+
     } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
         e->ignore();
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnectionsAndRepaint();
+
     } else {
         Q_FOREACH(HandlerDrop::Ptr h, handler_drop) {
             if(h->handle(dispatcher_, src, e, scene_pos)) {

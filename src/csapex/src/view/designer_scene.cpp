@@ -87,8 +87,8 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
     output_color_ = QColor(0xFF, 0xCC, 0x00);
     input_color_ = QColor(0xFF, 0x00, 0xCC);
 
-    QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)));
-    QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)));
+    QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
+    QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
 }
 
 DesignerScene::~DesignerScene()
@@ -116,6 +116,7 @@ void DesignerScene::enableSchema(bool draw)
 void DesignerScene::setScale(double scale)
 {
     scale_ = scale;
+    invalidateSchema();
 }
 
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
@@ -371,6 +372,8 @@ void DesignerScene::boxMoved(NodeBox *box)
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
     proxy->setPos(box->pos());
     invalidateSchema();
+
+    QObject::connect(proxy, SIGNAL(geometryChanged()), this, SLOT(invalidateSchema()));
 }
 
 void DesignerScene::fulcrumAdded(Fulcrum * f)

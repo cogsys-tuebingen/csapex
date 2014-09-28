@@ -60,10 +60,11 @@ void GraphIO::loadNode(const YAML::Node& doc)
     int y = doc["pos"][1].as<int>();
 
     NodeWorker::Ptr node_worker = node_factory_->makeNode(type, uuid);
-    Node* node = node_worker->getNode();
-    if(!node) {
+    if(!node_worker) {
         return;
     }
+
+    Node* node = node_worker->getNode();
     try {
         NodeState::Ptr s = node->getNodeState();
         s->readYaml(doc);

@@ -54,7 +54,10 @@ void CsApexWindow::construct()
     setCentralWidget(designer_);
 
     ui->actionGrid->setChecked(designer_->isGridEnabled());
+    ui->actionSchematics->setChecked(designer_->isSchematicsEnabled());
     ui->actionLock_to_Grid->setChecked(designer_->isGridLockEnabled());
+    ui->actionDisplay_Graph_Components->setChecked(designer_->isGraphComponentsEnabled());
+    ui->actionDisplay_Threads->setChecked(designer_->isThreadsEnabled());
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
@@ -76,6 +79,10 @@ void CsApexWindow::construct()
     QObject::connect(designer_, SIGNAL(schematicsEnabled(bool)), ui->actionSchematics, SLOT(setChecked(bool)));
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), designer_,  SLOT(lockToGrid(bool)));
     QObject::connect(designer_, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionDisplay_Graph_Components, SIGNAL(toggled(bool)), designer_,  SLOT(displayGraphComponents(bool)));
+    QObject::connect(designer_, SIGNAL(graphComponentsEnabled(bool)), ui->actionDisplay_Graph_Components, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionDisplay_Threads, SIGNAL(toggled(bool)), designer_,  SLOT(displayThreads(bool)));
+    QObject::connect(designer_, SIGNAL(threadsEnabled(bool)), ui->actionDisplay_Threads, SLOT(setChecked(bool)));
 
     QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));

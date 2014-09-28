@@ -26,7 +26,8 @@ Q_DECLARE_METATYPE(std::string)
 
 using namespace csapex;
 
-CsApexCore::CsApexCore(Settings &settings, GraphWorkerPtr graph, NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
+CsApexCore::CsApexCore(Settings &settings,
+                       GraphWorkerPtr graph, NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
     : settings_(settings), graph_worker_(graph),
       node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
       cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
@@ -220,7 +221,6 @@ void CsApexCore::load(const std::string &file)
         }
         YAML::Node doc = builder.Root();
 
-        Q_EMIT loadSettingsRequest(doc);
         graphio.loadSettings(doc);
 
         YAML::Node nodes = doc["nodes"];
@@ -249,6 +249,8 @@ void CsApexCore::load(const std::string &file)
         graphio.loadConnections(doc);
 
         Q_EMIT loadViewRequest(doc);
+
+        Q_EMIT loadSettingsRequest(doc);
     }
 
     cmd_dispatch->setClean();

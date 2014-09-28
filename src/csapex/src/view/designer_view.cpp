@@ -18,6 +18,9 @@
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/profiling_widget.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/utility/context_menu_handler.h>
+#include <csapex/core/settings.h>
+#include <csapex/core/thread_pool.h>
 
 /// SYSTEM
 #include <iostream>
@@ -30,8 +33,12 @@
 
 using namespace csapex;
 
-DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget *parent)
-    : QGraphicsView(parent), scene_(scene), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
+DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
+                           Settings &settings, ThreadPool &thread_pool,
+                           CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
+                           QWidget *parent)
+    : QGraphicsView(parent), scene_(scene), settings_(settings),
+      thread_pool_(thread_pool), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
       scalings_to_perform_(0)
 
 {
@@ -242,11 +249,11 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     Node* node = box->getNode();
     NodeWorker* worker = node->getNodeWorker();
-    QObject::connect(worker, SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()));
-    QObject::connect(worker, SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(previewConnection(Connectable*,Connectable*)));
-    QObject::connect(worker, SIGNAL(connectionDone()), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()));
+    QObject::connect(worker, SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()), Qt::QueuedConnection);
+    QObject::connect(worker, SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(previewConnection(Connectable*,Connectable*)), Qt::QueuedConnection);
+    QObject::connect(worker, SIGNAL(connectionDone()), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()), Qt::QueuedConnection);
 
-    QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateInformation(Graph*)));
+    QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateBoxInformation(Graph*)));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*, QPoint)), this, SLOT(showContextMenuEditBox(NodeBox*, QPoint)));
     QObject::connect(box, SIGNAL(profile(NodeBox*)), this, SLOT(profile(NodeBox*)));
@@ -272,7 +279,7 @@ void DesignerView::addBoxEvent(NodeBox *box)
     box->triggerPlaced();
     box->show();
 
-    box->updateInformation(graph_.get());
+    box->updateBoxInformation(graph_.get());
 }
 
 void DesignerView::renameBox(NodeBox *box)
@@ -355,6 +362,17 @@ void DesignerView::overwriteStyleSheet(QString &stylesheet)
     }
 }
 
+void DesignerView::updateBoxInformation()
+{
+    foreach(QGraphicsItem* item, scene_->items()) {
+        MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
+        if(proxy) {
+            NodeBox* b = proxy->getBox();
+            b->updateBoxInformation(graph_.get());
+        }
+    }
+}
+
 void DesignerView::showContextMenuGlobal(const QPoint& global_pos)
 {
     /// BOXES
@@ -366,13 +384,128 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &global_pos
     QMenu menu;
     std::map<QAction*, boost::function<void()> > handler;
 
-    box->fillContextMenu(&menu, handler, dispatcher_);
+    ContextMenuHandler::addHeader(menu, std::string("Node: ") + box->getNodeWorker()->getNodeUUID().getShortName());
+
+    if(box->isMinimizedSize()) {
+        QAction* max = new QAction("maximize", &menu);
+        max->setIcon(QIcon(":/maximize.png"));
+        max->setIconVisibleInMenu(true);
+        handler[max] = boost::bind(&NodeBox::minimizeBox, box, false);
+        menu.addAction(max);
+
+    } else {
+        QAction* min = new QAction("minimize", &menu);
+        min->setIcon(QIcon(":/minimize.png"));
+        min->setIconVisibleInMenu(true);
+        handler[min] = boost::bind(&NodeBox::minimizeBox, box, true);
+        menu.addAction(min);
+    }
+
+    QAction* flip = new QAction("flip sides", &menu);
+    flip->setIcon(QIcon(":/flip.png"));
+    flip->setIconVisibleInMenu(true);
+    handler[flip] = boost::bind(&NodeBox::flipSides, box);
+    menu.addAction(flip);
+
+    menu.addSeparator();
+
+    bool threading = !settings_.get("threadless", false);
+    bool grouping = settings_.get("thread_grouping", false);
+    QMenu thread_menu("thread grouping", &menu);
+    thread_menu.setEnabled(threading && !grouping);
+    menu.addMenu(&thread_menu);
+
+    if(thread_menu.isEnabled()) {
+        QAction* private_thread = new QAction("private thread", &menu);
+        private_thread->setIcon(QIcon(":/thread_group_none.png"));
+        private_thread->setIconVisibleInMenu(true);
+        handler[private_thread] = boost::bind(&ThreadPool::usePrivateThreadFor, &thread_pool_,  box->getNodeWorker());
+        thread_menu.addAction(private_thread);
+
+        thread_menu.addSeparator();
+
+        QMenu* choose_group_menu = new QMenu("thread group", &menu);
+
+        std::vector<ThreadPool::Group> thread_groups = thread_pool_.getCustomGroups();
+        for(std::size_t i = 0; i < thread_groups.size(); ++i) {
+            const ThreadPool::Group& group = thread_groups[i];
+
+            std::stringstream ss;
+            ss << "(" << group.id << ") " << group.name;
+            QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
+            switch_thread->setIcon(QIcon(":/thread_group.png"));
+            switch_thread->setIconVisibleInMenu(true);
+            handler[switch_thread] = boost::bind(&ThreadPool::switchToThread, &thread_pool_, box->getNodeWorker(), group.id);
+            choose_group_menu->addAction(switch_thread);
+        }
+
+        choose_group_menu->addSeparator();
+
+        QAction* new_group = new QAction("new thread group", &menu);
+        new_group->setIcon(QIcon(":/thread_group_add.png"));
+        new_group->setIconVisibleInMenu(true);
+        //        handler[new_group] = boost::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
+        handler[new_group] = boost::bind(&DesignerView::createNewThreadGroupFor, this,  box->getNodeWorker());
+
+        choose_group_menu->addAction(new_group);
+
+        thread_menu.addMenu(choose_group_menu);
+    }
+
+    QAction* term = new QAction("terminate thread", &menu);
+    term->setIcon(QIcon(":/stop.png"));
+    term->setIconVisibleInMenu(true);
+    handler[term] = boost::bind(&NodeBox::killContent, box);
+    menu.addAction(term);
+
+    menu.addSeparator();
+
+    QAction* prof;
+    if(box->isProfiling()) {
+        prof = new QAction("stop profiling", &menu);
+        prof->setIcon(QIcon(":/stop_profiling.png"));
+    } else {
+        prof = new QAction("profiling", &menu);
+        prof->setIcon(QIcon(":/profiling.png"));
+    }
+    prof->setIconVisibleInMenu(true);
+    handler[prof] = boost::bind(&NodeBox::showProfiling, box);
+    menu.addAction(prof);
+
+    QAction* info = new QAction("get information", &menu);
+    info->setIcon(QIcon(":/help.png"));
+    info->setIconVisibleInMenu(true);
+    handler[info] = boost::bind(&NodeBox::getInformation, box);
+    menu.addAction(info);
+
+    menu.addSeparator();
+
+    QAction* del = new QAction("delete", &menu);
+    del->setIcon(QIcon(":/close.png"));
+    del->setIconVisibleInMenu(true);
+    handler[del] = boost::bind(&DesignerView::deleteBox, this, box);
+    menu.addAction(del);
 
     QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(global_pos)));
 
     if(selectedItem) {
         handler[selectedItem]();
     }
+}
+
+void DesignerView::createNewThreadGroupFor(NodeWorker* worker)
+{
+    bool ok;
+    QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool_.nextName()), &ok);
+
+    if(ok && !text.isEmpty()) {
+        thread_pool_.createNewThreadGroupFor(worker, text.toStdString());
+    }
+}
+
+void DesignerView::deleteBox(NodeBox* box)
+{
+    dispatcher_->execute(Command::Ptr(new command::DeleteNode(box->getNodeWorker()->getNodeUUID())));
 }
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)

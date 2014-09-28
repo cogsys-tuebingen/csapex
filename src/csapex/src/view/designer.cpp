@@ -150,10 +150,22 @@ bool Designer::isGridEnabled() const
 {
     return settings_.get<bool>("grid", false);
 }
+bool Designer::isSchematicsEnabled() const
+{
+    return settings_.get<bool>("schematics", false);
+}
 
 bool Designer::isGridLockEnabled() const
 {
     return settings_.get<bool>("grid-lock", false);
+}
+bool Designer::isGraphComponentsEnabled() const
+{
+    return settings_.get<bool>("display-graph-components", false);
+}
+bool Designer::isThreadsEnabled() const
+{
+    return settings_.get<bool>("display-threads", false);
 }
 
 bool Designer::hasSelection() const
@@ -198,4 +210,30 @@ void Designer::lockToGrid(bool lock)
     settings_.set("grid-lock", lock);
 
     Q_EMIT gridLockEnabled(lock);
+}
+
+void Designer::displayGraphComponents(bool display)
+{
+    if(!settings_.knows("display-graph-components")) {
+        settings_.add(param::ParameterFactory::declareBool("display-graph-components", display));
+    }
+
+    settings_.set("display-graph-components", display);
+
+    designer_view_->updateBoxInformation();
+
+    Q_EMIT graphComponentsEnabled(display);
+}
+
+void Designer::displayThreads(bool display)
+{
+    if(!settings_.knows("display-threads")) {
+        settings_.add(param::ParameterFactory::declareBool("display-threads", display));
+    }
+
+    settings_.set("display-threads", display);
+
+    designer_view_->updateBoxInformation();
+
+    Q_EMIT threadsEnabled(display);
 }

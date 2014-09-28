@@ -89,6 +89,8 @@
     <addaction name="actionLock_to_Grid"/>
     <addaction name="separator"/>
     <addaction name="actionSchematics"/>
+    <addaction name="actionDisplay_Graph_Components"/>
+    <addaction name="actionDisplay_Threads"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -134,6 +136,8 @@
    <addaction name="separator"/>
    <addaction name="actionGrid"/>
    <addaction name="actionSchematics"/>
+   <addaction name="actionDisplay_Graph_Components"/>
+   <addaction name="actionDisplay_Threads"/>
   </widget>
   <widget class="QDockWidget" name="Debug">
    <property name="features">
@@ -253,8 +257,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>274</width>
-          <height>302</height>
+          <width>98</width>
+          <height>96</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -334,7 +338,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>274</width>
+          <width>282</width>
           <height>302</height>
          </rect>
         </property>
@@ -608,6 +612,22 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Display Schematics</string>
+   </property>
+  </action>
+  <action name="actionDisplay_Graph_Components">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Display Graph Components</string>
+   </property>
+  </action>
+  <action name="actionDisplay_Threads">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Display Threads</string>
    </property>
   </action>
  </widget>

@@ -8,7 +8,7 @@
 using namespace csapex;
 
 NodeState::NodeState(const Node *parent)
-    : parent(parent), minimized(false), enabled(true), flipped(false)
+    : parent(parent), minimized(false), enabled(true), flipped(false), thread(-1)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
@@ -50,6 +50,10 @@ void NodeState::readYaml(const YAML::Node &node)
         double y = node["pos"][1].as<double>();
         pos.setX(x);
         pos.setY(y);
+    }
+
+    if(node["thread"].IsDefined()) {
+        thread = node["thread"].as<int>();
     }
 
     if(node["state"].IsDefined()) {
@@ -129,6 +133,16 @@ void NodeState::setParent(Node *value)
     parent = value;
 }
 
+int NodeState::getThread() const
+{
+    return thread;
+}
+
+void NodeState::setThread(int id)
+{
+    thread = id;
+}
+
 
 void NodeState::writeYaml(YAML::Node &out) const
 {
@@ -142,6 +156,7 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["minimized"] = minimized;
     out["enabled"] = enabled;
     out["flipped"] = flipped;
+    out["thread"] = thread;
 
     if(parent) {
         child_state = parent->getParameterStateClone();

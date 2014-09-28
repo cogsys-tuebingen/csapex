@@ -18,6 +18,7 @@
 
 /// SYSTEM
 #include <boost/foreach.hpp>
+#include <QThread>
 
 using namespace csapex;
 
@@ -46,8 +47,6 @@ void Graph::addNode(NodeWorker::Ptr node_worker)
     nodes_.push_back(node_worker);
     node_parents_[node_worker.get()] = std::vector<NodeWorker*>();
     node_children_[node_worker.get()] = std::vector<NodeWorker*>();
-
-    node_worker->makeThread();
 
     buildConnectedComponents();
 

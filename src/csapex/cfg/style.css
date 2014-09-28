@@ -27,6 +27,22 @@ QFrame#boxframe QGroupBox {
 }
 QFrame#boxframe QLabel[component="true"] {
         border: 1px solid black;
+        font-size: 8pt;
+        border-radius: 5px;
+        color: black;
+        padding: 0px;
+        font-weight: bold;
+}
+QFrame#boxframe QLabel[threadgroup="true"] {
+        border: 1px dotted black;
+        font-size: 8pt;
+        border-radius: 5px;
+        color: black;
+        padding: 0px;
+        font-weight: bold;
+}
+QFrame#boxframe QLabel[custom="true"] {
+        border: 1px solid black;
         border-radius: 5px;
         color: black;
         padding: 1px;

@@ -20,7 +20,8 @@ class DesignerView : public QGraphicsView
     Q_PROPERTY(QColor outputColor READ outputColor WRITE setOutputColor)
 
 public:
-    DesignerView(DesignerScene* scene, csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget* parent = 0);
+    DesignerView(DesignerScene* scene, csapex::GraphPtr graph,
+                 Settings& settings, ThreadPool& thread_pool, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget* parent = 0);
     ~DesignerView();
 
     DesignerScene* designerScene();
@@ -56,6 +57,7 @@ public:
         output_color_ = c;
     }
 
+
 Q_SIGNALS:
     void selectionChanged();
 
@@ -68,6 +70,7 @@ public Q_SLOTS:
     void movedBoxes(double dx, double dy);
 
     void overwriteStyleSheet(QString& stylesheet);
+    void updateBoxInformation();
 
     void contextMenuEvent(QContextMenuEvent* e);
     void showContextMenuGlobal(const QPoint& pos);
@@ -85,7 +88,14 @@ public Q_SLOTS:
     void selectAll();
 
 private:
+    void deleteBox(NodeBox* box);
+    void createNewThreadGroupFor(NodeWorker* worker);
+
+private:
     DesignerScene* scene_;
+
+    Settings& settings_;
+    ThreadPool& thread_pool_;
 
     GraphPtr graph_;
     CommandDispatcher* dispatcher_;

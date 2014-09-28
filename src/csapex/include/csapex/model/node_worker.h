@@ -11,6 +11,7 @@
 /// SYSTEM
 #include <QObject>
 #include <QTimer>
+#include <QThread>
 #include <QMutex>
 #include <map>
 #include <boost/function.hpp>
@@ -37,7 +38,7 @@ public:
 
     void stop();
 
-    /*??*/ void makeThread();
+    void triggerSwitchThreadRequest(QThread* thread, int id);
 
     Node* getNode();
     UUID getNodeUUID() const;
@@ -83,7 +84,7 @@ public:
 
 
 public Q_SLOTS:
-    void forwardMessage(Connectable* source);
+    void messageArrived(Connectable* source);
 
     void forwardMessageSynchronized(Input* source);
 
@@ -107,7 +108,6 @@ public Q_SLOTS:
     void sendMessages();
 
 Q_SIGNALS:
-    void messagesReceived();
     void messageProcessed();
 
     void enabled(bool);
@@ -124,6 +124,12 @@ Q_SIGNALS:
 
     void nodeStateChanged();
     void nodeModelChanged();
+    void threadChanged();
+
+    void threadSwitchRequested(QThread*, int);
+
+private Q_SLOTS:
+    void switchThread(QThread* thread, int id);
 
 private:
     void removeInput(Input *in);
@@ -153,8 +159,6 @@ private:
 
     QTimer* tick_timer_;
     bool tick_immediate_;
-
-    QThread* private_thread_;
 
     std::map<Input*, bool> has_msg_;
 

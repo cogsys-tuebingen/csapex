@@ -28,5 +28,8 @@
         <file>schema.png</file>
         <file>help.png</file>
         <file>keyboard.png</file>
+        <file>thread_group.png</file>
+        <file>thread_group_add.png</file>
+        <file>thread_group_none.png</file>
     </qresource>
 </RCC>
