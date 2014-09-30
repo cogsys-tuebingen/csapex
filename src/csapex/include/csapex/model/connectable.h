@@ -91,9 +91,9 @@ public Q_SLOTS:
 
     virtual void stop();
 
+    virtual void notifyMessageProcessed();
 
 protected:
-    virtual void notifyMessageProcessed();
     void setBlocked(bool b);
 
 
@@ -105,7 +105,7 @@ Q_SIGNALS:
     void connectionDone();
     void connectionRemoved();
     void connectionEnabled(bool);
-    void messageProcessed();
+    void messageProcessed(Connectable*);
     void blocked(bool);
     void connectableError(bool error, const std::string &msg, int level);
 

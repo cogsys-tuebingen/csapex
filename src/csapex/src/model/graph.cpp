@@ -50,6 +50,8 @@ void Graph::addNode(NodeWorker::Ptr node_worker)
 
     buildConnectedComponents();
 
+    node_worker->checkParameters();
+
     Q_EMIT nodeAdded(node_worker);
 }
 

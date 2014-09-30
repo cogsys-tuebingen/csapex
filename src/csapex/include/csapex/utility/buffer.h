@@ -3,16 +3,14 @@
 
 /// PROJECT
 #include <csapex/msg/message.h>
-
-/// SYSTEM
-#include <QSemaphore>
+#include <csapex/utility/assert.h>
 
 namespace csapex
 {
 class Buffer
 {
 public:
-    Buffer(std::size_t size);
+    Buffer();
 
     void disable();
     void free();
@@ -20,7 +18,7 @@ public:
     template <typename R>
     typename boost::shared_ptr<R> read()
     {
-        used_.acquire();
+        apex_assert_hard(message_);
 
         typename R::Ptr result = boost::dynamic_pointer_cast<R> (message_);
 
@@ -45,9 +43,6 @@ public:
     bool isFilled() const;
 
 private:
-    QSemaphore free_;
-    QSemaphore used_;
-
     bool enabled_;
 
     ConnectionType::Ptr message_;

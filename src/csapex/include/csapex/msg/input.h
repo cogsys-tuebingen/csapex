@@ -82,6 +82,8 @@ public:
     virtual void enable();
     virtual void disable();
 
+    virtual void notifyMessageProcessed();
+
 protected:
     virtual bool tryConnect(Connectable* other_side);
     virtual bool acknowledgeConnection(Connectable* other_side);

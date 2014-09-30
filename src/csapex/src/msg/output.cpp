@@ -175,6 +175,7 @@ void Output::sendMessages()
         message_ = message_to_send_;
         message_to_send_.reset();
     } else {
+        std::cout << getUUID() << " sends empty message" << std::endl;
         message_ = connection_types::makeEmpty<connection_types::NoMessage>();
     }
 
@@ -187,10 +188,6 @@ void Output::sendMessages()
         if(i->isEnabled()) {
             targets.push_back(i);
         }
-    }
-
-    if(isBlocked()) {
-        setBlocked(false);
     }
 
     if(!targets.empty()) {

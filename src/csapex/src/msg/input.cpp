@@ -13,12 +13,12 @@
 using namespace csapex;
 
 Input::Input(Settings& settings, const UUID &uuid)
-    : Connectable(settings, uuid), target(NULL), buffer_(new Buffer(1)), optional_(false)
+    : Connectable(settings, uuid), target(NULL), buffer_(new Buffer), optional_(false)
 {
 }
 
 Input::Input(Settings &settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, TYPE_IN), target(NULL), buffer_(new Buffer(1)), optional_(false)
+    : Connectable(settings, parent, sub_id, TYPE_IN), target(NULL), buffer_(new Buffer), optional_(false)
 {
 }
 
@@ -167,13 +167,22 @@ void Input::inputMessage(ConnectionType::Ptr message)
                      " < #" << sequenceNumber() << std::endl;
         return;
     }
+    setSequenceNumber(s);
 
     setBlocked(true);
 
     buffer_->write(message);
-    setSequenceNumber(s);
 
     count_++;
 
     Q_EMIT messageArrived(this);
+}
+
+void Input::notifyMessageProcessed()
+{
+    Connectable::notifyMessageProcessed();
+
+    if(target) {
+        target->notifyMessageProcessed();
+    }
 }

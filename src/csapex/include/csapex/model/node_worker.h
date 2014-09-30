@@ -82,12 +82,10 @@ public:
 
     void makeParametersConnectable();
 
-
-
 public Q_SLOTS:
     void messageArrived(Connectable* source);
-
-    void processMessage(Input* source);
+    void processMessages();
+    void outgoingConnectionRemoved();
 
     void checkParameters();    
     void checkIO();
@@ -104,7 +102,9 @@ public Q_SLOTS:
     void pause(bool pause);
     void killExecution();
 
-    void sendMessages();
+    bool canSendMessages();
+    void trySendMessages();
+    void resetInputs();
 
 Q_SIGNALS:
     void messageProcessed();
@@ -129,6 +129,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
+    void messageProcessed(Connectable*);
 
 private:
     void removeInput(Input *in);
@@ -162,8 +163,11 @@ private:
     QTimer* tick_timer_;
     bool tick_immediate_;
 
-    QMutex has_msg_message_mutex_;
+    QMutex sync;
     std::map<Input*, bool> has_msg_;
+    bool messages_processed_;
+    bool messages_sent_;
+    std::map<Output*, bool> is_ready_;
 
     int timer_history_pos_;
     std::vector<TimerPtr> timer_history_;

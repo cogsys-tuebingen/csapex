@@ -21,7 +21,8 @@ static const int DEFAULT_HISTORY_LENGTH = 15;
 
 NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
     : settings_(settings), node_(node),
-      has_msg_message_mutex_(QMutex::Recursive),
+      sync(QMutex::Recursive),
+      messages_processed_(false), messages_sent_(false),
       timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false)
 {
@@ -240,23 +241,56 @@ void NodeWorker::messageArrived(Connectable *s)
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
-    QMutexLocker lock(&has_msg_message_mutex_);
+    QMutexLocker lock(&sync);
 
     apex_assert_hard(!has_msg_[source]);
     has_msg_[source] = true;
 
     if(isEnabled() && areAllInputsAvailable()) {
-        processMessage(source);
+        processMessages();
     }
 }
 
-void NodeWorker::processMessage(Input *source)
+void NodeWorker::messageProcessed(Connectable* c)
+{
+    Output* output = dynamic_cast<Output*>(c);
+    assert(output);
+
+    QMutexLocker lock(&sync);
+    bool every_input_ready = true;
+    for(Output::TargetIterator it = output->beginTargets(); it != output->endTargets(); ++it) {
+        Input* input = *it;
+        every_input_ready &= !input->isBlocked();
+    }
+
+    is_ready_[output] = every_input_ready;
+
+    trySendMessages();
+}
+
+void NodeWorker::outgoingConnectionRemoved()
+{
+    trySendMessages();
+//    if(messages_must_be_sent_ && !messages_sent_ && canSendMessages()) {
+//        send
+//        QMutexLocker lock(&sync);
+//        bool all_inputs_are_waiting = true;
+//        Q_FOREACH(Input* cin, inputs_) {
+//            all_inputs_are_waiting &= cin->isBlocked();
+//        }
+//        if(all_inputs_are_waiting) {
+//            resetInputs();
+//        }
+//    }
+}
+
+void NodeWorker::processMessages()
 {
     // everything has a message here
 
     assert(this->thread() != QApplication::instance()->thread());
 
-    QMutexLocker lock(&stop_mutex_);
+    QMutexLocker stop_lock(&stop_mutex_);
     if(stop_) {
         return;
     }
@@ -265,7 +299,7 @@ void NodeWorker::processMessage(Input *source)
     bool can_process = true;
 
     {
-        QMutexLocker lock(&has_msg_message_mutex_);
+        QMutexLocker lock(&sync);
 
         // check for old messages
         bool had_old_message = false;
@@ -280,21 +314,6 @@ void NodeWorker::processMessage(Input *source)
                     highest_seq_no = s;
                     highest = cin->getUUID();
                 }
-            }
-        }
-        Q_FOREACH(const PAIR& pair, has_msg_) {
-            Input* cin = pair.first;
-            if(cin == source) {
-                continue;
-            }
-
-            if(has_msg_[cin] && cin->sequenceNumber() != highest_seq_no) {
-                std::cerr << "input @" << source->getUUID().getFullName() <<
-                             ": dropping old message @" << cin->getUUID().getFullName() << " with #" << cin->sequenceNumber() <<
-                             " < #" << highest_seq_no << " @" << highest.getFullName() << std::endl;
-                has_msg_[cin] = false;
-                had_old_message = true;
-                cin->free();
             }
         }
 
@@ -316,14 +335,10 @@ void NodeWorker::processMessage(Input *source)
             }
         }
 
-        // check if one is "NoMessage"
-        Q_FOREACH(const PAIR& pair, has_msg_) {
-            Input* cin = pair.first;
-
-            if(has_msg_[cin] && !cin->isOptional()) {
-                if(cin->isMessage<connection_types::NoMessage>()) {
-                    can_process = false;
-                }
+        // check if one is "NoMessage";
+        Q_FOREACH(Input* cin, inputs_) {
+            if(!cin->isOptional() && cin->isMessage<connection_types::NoMessage>()) {
+                can_process = false;
             }
         }
 
@@ -332,36 +347,21 @@ void NodeWorker::processMessage(Input *source)
             Output* out = outputs_[i];
             out->setSequenceNumber(highest_seq_no);
         }
-
-        // reset states
-        Q_FOREACH(const PAIR& pair, has_msg_) {
-            Input* cin = pair.first;
-
-            if(has_msg_[cin]) {
-                has_msg_[cin] = false;
-            }
-        }
     }
 
     processInputs(can_process);
 
-    lock.unlock();
-
-    // reset all edges
-    Q_FOREACH(const PAIR& pair, has_msg_) {
-        Input* cin = pair.first;
-        cin->free();
-    }
+    stop_lock.unlock();
 
     // send the messages
-    sendMessages();
+    trySendMessages();
 
     Q_EMIT messageProcessed();
 }
 
 bool NodeWorker::areAllInputsAvailable()
 {
-    QMutexLocker lock(&has_msg_message_mutex_);
+    QMutexLocker lock(&sync);
 
     // check if all inputs have messages
     typedef std::pair<Input*, bool> PAIR;
@@ -389,6 +389,10 @@ bool NodeWorker::areAllInputsAvailable()
 
 void NodeWorker::processInputs(bool can_process)
 {
+    QMutexLocker lock_in(&sync);
+
+    messages_sent_ = false;
+
     Timer::Ptr t(new Timer(node_->getUUID()));
     node_->useTimer(t.get());
     if(can_process){
@@ -402,10 +406,12 @@ void NodeWorker::processInputs(bool can_process)
         } catch(...) {
             throw;
         }
-
+    } else {
+        std::cout << "cannot process messages for " << node_->getUUID() << std::endl;
     }
     t->finish();
 
+    messages_processed_ = true;
 
     if(++timer_history_pos_ >= (int) timer_history_.size()) {
         timer_history_pos_ = 0;
@@ -462,7 +468,7 @@ Output* NodeWorker::getParameterOutput(const std::string &name) const
 void NodeWorker::removeInput(Input *in)
 {
     {
-        QMutexLocker lock(&has_msg_message_mutex_);
+        QMutexLocker lock(&sync);
         std::map<Input*, bool>::iterator it = has_msg_.find(in);
 
         if(it != has_msg_.end()) {
@@ -492,6 +498,15 @@ void NodeWorker::removeInput(Input *in)
 
 void NodeWorker::removeOutput(Output *out)
 {
+    {
+        QMutexLocker lock(&sync);
+        std::map<Output*, bool>::iterator it = is_ready_.find(out);
+
+        if(it != is_ready_.end()) {
+            is_ready_.erase(it);
+        }
+    }
+
     std::vector<Output*>::iterator it;
     it = std::find(outputs_.begin(), outputs_.end(), out);
 
@@ -548,11 +563,14 @@ void NodeWorker::registerOutput(Output* out)
 
     out->moveToThread(thread());
 
+    is_ready_[out] = true;
+
     connectConnector(out);
+    QObject::connect(out, SIGNAL(messageProcessed(Connectable*)), this, SLOT(messageProcessed(Connectable*)));
+    QObject::connect(out, SIGNAL(connectionRemoved()), this, SLOT(outgoingConnectionRemoved()));
 
     Q_EMIT connectorCreated(out);
 }
-
 
 Input* NodeWorker::getInput(const UUID& uuid) const
 {
@@ -632,12 +650,62 @@ std::vector<Output*> NodeWorker::getManagedOutputs() const
     return managed_outputs_;
 }
 
-void NodeWorker::sendMessages()
+bool NodeWorker::canSendMessages()
 {
+    QMutexLocker lock(&sync);
+
+    for(std::size_t i = 0; i < outputs_.size(); ++i) {
+        Output* out = outputs_[i];
+        if(!is_ready_[out]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void NodeWorker::resetInputs()
+{
+    QMutexLocker lock(&sync);
+    Q_FOREACH(Input* cin, inputs_) {
+        has_msg_[cin] = false;
+        cin->free();
+    }
+    Q_FOREACH(Input* cin, inputs_) {
+        cin->notifyMessageProcessed();
+    }
+}
+
+void NodeWorker::trySendMessages()
+{
+    QMutexLocker lock(&sync);
+
+    if(!messages_processed_) {
+        return;
+    }
+
+    if(messages_sent_) {
+        return;
+    }
+
+    if(!canSendMessages()) {
+        return;
+    }
+
+    messages_sent_ = true;
+    messages_processed_ = false;
+
+    for(std::size_t i = 0; i < outputs_.size(); ++i) {
+        Output* out = outputs_[i];
+        is_ready_[out] = false;
+    }
+
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
         out->sendMessages();
     }
+
+    resetInputs();
 }
 
 void NodeWorker::setTickFrequency(double f)
@@ -678,27 +746,35 @@ void NodeWorker::tick()
 
 
         if(!thread_initialized_) {
-//            thread::set_name(node_->getUUID().getShortName().c_str());
             thread::set_name(thread()->objectName().toStdString().c_str());
             thread_initialized_ = true;
         }
 
-        if(isEnabled()) {
+        if(isEnabled() && inputs_.empty()) {
             assert(this->thread() != QApplication::instance()->thread());
 
-            node_->tick();
+            if(!canSendMessages()) {
+                return;
+            }
+
+            processInputs(true);
+            trySendMessages();
+
+            //            node_->tick();
 
             // if there is a message: send!
-            bool has_msg = false;
-            for(std::size_t i = 0; i < outputs_.size(); ++i) {
-                Output* out = outputs_[i];
-                if(out->hasMessage()) {
-                    has_msg = true;
-                }
-            }
-            if(has_msg) {
-                sendMessages();
-            }
+            //            bool has_msg = false;
+            //            for(std::size_t i = 0; i < outputs_.size(); ++i) {
+            //                Output* out = outputs_[i];
+            //                if(out->hasMessage()) {
+            //                    has_msg = true;
+            //                }
+            //            }
+            //            if(has_msg) {
+            //                trySendMessages();
+            //            } else {
+            //                node_->ainfo << "no message output" << std::endl;
+            //            }
         }
 
         if(!tick_immediate_) {

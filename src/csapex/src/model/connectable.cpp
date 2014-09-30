@@ -51,7 +51,7 @@ void Connectable::notifyMessageProcessed()
         can_process_cond.wakeAll();
     }
 
-    Q_EMIT messageProcessed();
+    Q_EMIT messageProcessed(this);
 }
 
 void Connectable::stop()
