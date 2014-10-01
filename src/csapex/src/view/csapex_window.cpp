@@ -280,7 +280,13 @@ void CsApexWindow::about()
 
 void CsApexWindow::clearBlock()
 {
-    QMessageBox::information(this, "Not yet implemented", "Sorry, this feature is not implemented yet.");
+    core_.setPause(true);
+    Graph* graph = graph_worker_->getGraph();
+    foreach(NodeWorker* nw, graph->getAllNodeWorkers()) {
+        nw->reset();
+    }
+
+    core_.setPause(false);
 }
 
 void CsApexWindow::reloadBoxMenues()

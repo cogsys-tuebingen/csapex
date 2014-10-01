@@ -11,12 +11,12 @@ template <typename Type>
 struct GenericValueMessage : public Message {
     typedef boost::shared_ptr<GenericValueMessage<Type> > Ptr;
 
-    GenericValueMessage(const std::string& frame_id = "/")
-        : Message(type< GenericValueMessage<Type> >::name(), frame_id)
+    GenericValueMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
+        : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp)
     {}
 
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new GenericValueMessage<Type>(frame_id));
+        Ptr new_msg(new GenericValueMessage<Type>(frame_id, stamp));
         new_msg->value = value;
         return new_msg;
     }

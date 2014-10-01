@@ -7,13 +7,24 @@
 using namespace csapex;
 
 Buffer::Buffer()
-    : enabled_(true)
+    : enabled_(true), mutex_(new QMutex)
 {
 
 }
 
+ConnectionType::Ptr Buffer::readImpl() const
+{
+    QMutexLocker lock(mutex_);
+
+    apex_assert_hard(message_);
+
+    return message_;
+}
+
 void Buffer::write(ConnectionType::Ptr message)
 {
+    QMutexLocker lock(mutex_);
+
     if(!enabled_) {
         return;
     }
@@ -27,15 +38,21 @@ void Buffer::write(ConnectionType::Ptr message)
 
 void Buffer::disable()
 {
+    QMutexLocker lock(mutex_);
+
     enabled_ = false;
 }
 
 void Buffer::free()
 {
+    QMutexLocker lock(mutex_);
+
     message_.reset();
 }
 
 bool Buffer::isFilled() const
 {
+    QMutexLocker lock(mutex_);
+
     return message_;
 }

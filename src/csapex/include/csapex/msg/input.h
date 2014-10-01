@@ -15,7 +15,7 @@
 namespace csapex
 {
 
-class Input : public virtual Connectable
+class Input : public Connectable
 {
     Q_OBJECT
 
@@ -84,11 +84,19 @@ public:
 
     virtual void notifyMessageProcessed();
 
+    void reset();
+
 protected:
     virtual bool tryConnect(Connectable* other_side);
     virtual bool acknowledgeConnection(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
+
+Q_SIGNALS:
+    void gotMessage(ConnectionType::Ptr msg);
+
+private Q_SLOTS:
+    void handleMessage(ConnectionType::Ptr msg);
 
 protected:
     Connectable* target;

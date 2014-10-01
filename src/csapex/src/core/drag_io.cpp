@@ -118,8 +118,8 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
 
         if(c->isOutput()) {
             Output* out = dynamic_cast<Output*> (c);
-            for(Output::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-                scene->addTemporaryConnection(*it, src->mapToScene(e->pos()));
+            foreach(Input* input, out->getTargets()) {
+                scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
             }
         } else {
             Input* in = dynamic_cast<Input*> (c);

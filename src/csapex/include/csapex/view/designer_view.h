@@ -82,6 +82,9 @@ public Q_SLOTS:
 
     void reset();
     void resetZoom();
+    void zoomIn();
+    void zoomOut();
+    void zoom(double factor);
     void animateZoom();
 
     void updateSelection();

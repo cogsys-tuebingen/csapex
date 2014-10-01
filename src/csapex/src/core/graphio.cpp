@@ -44,7 +44,7 @@ void GraphIO::loadSettings(const YAML::Node &doc)
 
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    BOOST_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+    foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
         YAML::Node yaml_node;
         node->getNode()->getNodeState()->writeYaml(yaml_node);
         yaml["nodes"].push_back(yaml_node);
@@ -81,16 +81,15 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    BOOST_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+    foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
         if(!node->getAllOutputs().empty()) {
-            BOOST_FOREACH(Output* o, node->getAllOutputs()) {
-                if(o->beginTargets() == o->endTargets()) {
+            foreach(Output* o, node->getAllOutputs()) {
+                if(o->noTargets() == 0) {
                     continue;
                 }
                 YAML::Node connection;
                 connection["uuid"] = o->getUUID();
-                for(Output::TargetIterator it = o->beginTargets(); it != o->endTargets(); ++it) {
-                    Input* i = *it;
+                foreach(Input* i, o->getTargets()) {
                     connection["targets"].push_back(i->getUUID());
                 }
 
@@ -99,7 +98,7 @@ void GraphIO::saveConnections(YAML::Node &yaml)
         }
     }
 
-    BOOST_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
+    foreach(const Connection::Ptr& connection, graph_->connections_) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }

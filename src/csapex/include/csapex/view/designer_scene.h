@@ -103,6 +103,8 @@ private:
         bool highlighted;
         bool error;
         bool disabled;
+        bool blocked_from;
+        bool blocked_to;
         bool minimized_from;
         bool minimized_to;
         bool minimized;

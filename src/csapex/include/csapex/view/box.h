@@ -115,6 +115,7 @@ public Q_SLOTS:
 
     void nodeStateChanged();
     void enabledChange(bool val);
+    void blockedChange(bool val);
 
     void updateVisuals();
 

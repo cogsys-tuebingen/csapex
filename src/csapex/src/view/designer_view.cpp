@@ -60,10 +60,16 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
     QShortcut *box_reset_view = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_0), this);
     QObject::connect(box_reset_view, SIGNAL(activated()), this, SLOT(resetZoom()));
 
+    QShortcut *box_zoom_in = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus), this);
+    QObject::connect(box_zoom_in, SIGNAL(activated()), this, SLOT(zoomIn()));
+
+    QShortcut *box_zoom_out = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
+    QObject::connect(box_zoom_out, SIGNAL(activated()), this, SLOT(zoomOut()));
+
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
-    QObject::connect(&scalings_animation_timer_, SIGNAL(timeout()), this, SLOT(animateZoom()));
+//    QObject::connect(&scalings_animation_timer_, SIGNAL(timeout()), this, SLOT(animateZoom()));
 
     setContextMenuPolicy(Qt::DefaultContextMenu);
 }
@@ -82,6 +88,27 @@ void DesignerView::resetZoom()
 {
     resetTransform();
     scene_->setScale(1.0);
+}
+
+void DesignerView::zoomIn()
+{
+    zoom(5.0);
+}
+
+void DesignerView::zoomOut()
+{
+    zoom(-5.0);
+}
+
+void DesignerView::zoom(double f)
+{
+    qreal factor = 1.0 + f / 25.0;
+
+    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+    scale(factor, factor);
+    scene_->setScale(transform().m11());
+    scene_->invalidateSchema();
 }
 
 void DesignerView::animateZoom()
@@ -177,16 +204,18 @@ void DesignerView::wheelEvent(QWheelEvent *we)
         int scaleFactor = shift ? 1 : 4;
         int direction = (we->delta() > 0) ? 1 : -1;
 
-        if((direction > 0) != (scalings_to_perform_ > 0)) {
-            scalings_to_perform_ = 0;
-        }
+//        if((direction > 0) != (scalings_to_perform_ > 0)) {
+//            scalings_to_perform_ = 0;
+//        }
 
-        scalings_to_perform_ +=  2 * direction * scaleFactor;
+//        scalings_to_perform_ +=  2 * direction * scaleFactor;
 
-        if(!scalings_animation_timer_.isActive()) {
-            scalings_animation_timer_.setInterval(1000.0 / 60.0);
-            scalings_animation_timer_.start();
-        }
+        zoom(direction * scaleFactor);
+
+//        if(!scalings_animation_timer_.isActive()) {
+//            scalings_animation_timer_.setInterval(1000.0 / 60.0);
+//            scalings_animation_timer_.start();
+//        }
 
     } else {
         QGraphicsView::wheelEvent(we);
@@ -249,9 +278,9 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     Node* node = box->getNode();
     NodeWorker* worker = node->getNodeWorker();
-    QObject::connect(worker, SIGNAL(connectionStart()), scene_, SLOT(deleteTemporaryConnections()), Qt::QueuedConnection);
+    QObject::connect(worker, SIGNAL(connectionStart(Connectable*)), scene_, SLOT(deleteTemporaryConnections()), Qt::QueuedConnection);
     QObject::connect(worker, SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(previewConnection(Connectable*,Connectable*)), Qt::QueuedConnection);
-    QObject::connect(worker, SIGNAL(connectionDone()), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()), Qt::QueuedConnection);
+    QObject::connect(worker, SIGNAL(connectionDone(Connectable*)), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()), Qt::QueuedConnection);
 
     QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateBoxInformation(Graph*)));
 

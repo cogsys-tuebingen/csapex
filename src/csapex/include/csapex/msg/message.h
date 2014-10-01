@@ -15,13 +15,15 @@ struct Message : public ConnectionType
 {
 public:
     typedef boost::shared_ptr<Message> Ptr;
+    typedef u_int64_t Stamp;
 
 protected:
-    Message(const std::string& name, const std::string& frame_id);
+    Message(const std::string& name, const std::string& frame_id, Stamp stamp);
     virtual ~Message();
 
 public:
     std::string frame_id;
+    Stamp stamp;
 };
 
 struct NoMessage : public Message

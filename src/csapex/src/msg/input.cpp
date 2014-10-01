@@ -15,11 +15,13 @@ using namespace csapex;
 Input::Input(Settings& settings, const UUID &uuid)
     : Connectable(settings, uuid), target(NULL), buffer_(new Buffer), optional_(false)
 {
+    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
 }
 
 Input::Input(Settings &settings, Unique* parent, int sub_id)
     : Connectable(settings, parent, sub_id, TYPE_IN), target(NULL), buffer_(new Buffer), optional_(false)
 {
+    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
 }
 
 Input::~Input()
@@ -29,6 +31,12 @@ Input::~Input()
     }
 
     free();
+}
+
+void Input::reset()
+{
+    free();
+    setSequenceNumber(0);
 }
 
 bool Input::tryConnect(Connectable* other_side)
@@ -55,7 +63,7 @@ void Input::removeConnection(Connectable* other_side)
         apex_assert_hard(other_side == target);
         target = NULL;
 
-        Q_EMIT connectionRemoved();
+        Q_EMIT connectionRemoved(this);
     }
 }
 
@@ -104,6 +112,11 @@ void Input::enable()
 void Input::disable()
 {
     Connectable::disable();
+
+//    if(isBlocked()) {
+        free();
+        notifyMessageProcessed();
+//    }
 //    if(isConnected() && getSource()->isEnabled()) {
 //        getSource()->disable();
 //    }
@@ -160,6 +173,15 @@ Connectable *Input::getSource() const
 
 void Input::inputMessage(ConnectionType::Ptr message)
 {
+    Q_EMIT gotMessage(message);
+}
+
+void Input::handleMessage(ConnectionType::Ptr message)
+{
+    if(!isEnabled()) {
+        return;
+    }
+
     int s = message->sequenceNumber();
     if(s < sequenceNumber()) {
         std::cerr << "connector @" << getUUID().getFullName() <<

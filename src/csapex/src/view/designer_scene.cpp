@@ -299,7 +299,7 @@ void DesignerScene::drawItems(QPainter *painter, int numItems,
 
 void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
-    if(e->button() == Qt::RightButton && highlight_connection_id_ >= 0) {
+    if(e->button() == Qt::RightButton && highlight_connection_id_ >= 0 && items(e->scenePos(), Qt::ContainsItemShape, Qt::AscendingOrder).empty()) {
         e->accept();
         showConnectionContextMenu();
         return;
@@ -515,6 +515,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.disabled = (!from->isEnabled() || !to->isEnabled());
+    ccs.blocked_from = from->isBlocked();
+    ccs.blocked_to = to->isBlocked();
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
 
@@ -658,7 +660,11 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     QColor color_start = output_color_;
     QColor color_end = input_color_;
 
-    if(ccs.error) {
+    if(ccs.blocked_from || ccs.blocked_to) {
+        color_start = ccs.blocked_from ? Qt::yellow : Qt::black;
+        color_end = ccs.blocked_to ? Qt::yellow : Qt::black;
+
+    } else if(ccs.error) {
         color_start = Qt::darkRed;
         color_end = Qt::red;
 

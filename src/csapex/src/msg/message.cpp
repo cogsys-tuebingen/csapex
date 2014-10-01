@@ -14,8 +14,8 @@ using namespace connection_types;
 /***
  * MESSAGE
  */
-Message::Message(const std::string& name, const std::string &frame_id)
-    : ConnectionType(name), frame_id(frame_id)
+Message::Message(const std::string& name, const std::string &frame_id, Stamp stamp)
+    : ConnectionType(name), frame_id(frame_id), stamp(stamp)
 {
     apex_assert(!frame_id.empty());
 }
@@ -31,6 +31,7 @@ namespace YAML {
 Node convert<csapex::connection_types::Message>::encode(const csapex::connection_types::Message& rhs) {
     Node node;
     node["frame_id"] = rhs.frame_id;
+    node["stamp"] = rhs.stamp;
     return node;
 }
 
@@ -39,6 +40,7 @@ bool convert<csapex::connection_types::Message>::decode(const Node& node, csapex
         return false;
     }
     rhs.frame_id = node["frame_id"].as<std::string>();
+    rhs.stamp = node["stamp"].as<u_int64_t>();
     return true;
 }
 }
@@ -47,7 +49,7 @@ bool convert<csapex::connection_types::Message>::decode(const Node& node, csapex
  * ANYMESSAGE
  */
 AnyMessage::AnyMessage()
-    : Message("anything", "/")
+    : Message("anything", "/", 0)
 {}
 
 ConnectionType::Ptr AnyMessage::clone()
@@ -94,7 +96,7 @@ bool convert<csapex::connection_types::AnyMessage>::decode(const Node& node, csa
  * NOMESSAGE
  */
 NoMessage::NoMessage()
-    : Message("nothing", "/")
+    : Message("nothing", "/", 0)
 {}
 
 ConnectionType::Ptr NoMessage::clone()

@@ -12,13 +12,14 @@ template <typename Type, class Instance>
 struct MessageTemplate : public Message {
     typedef boost::shared_ptr<Instance> Ptr;
 
-    MessageTemplate( const std::string& frame_id = "/")
-        : Message(type<Instance>::name(), frame_id)
+    MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
+        : Message(type<Instance>::name(), frame_id, stamp)
     {}
 
     virtual ConnectionType::Ptr clone() {
         Ptr new_msg(new Instance);
         new_msg->frame_id = frame_id;
+        new_msg->stamp = stamp;
         new_msg->value = value;
         return new_msg;
     }

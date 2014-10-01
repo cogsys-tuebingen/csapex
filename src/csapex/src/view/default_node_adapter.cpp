@@ -346,7 +346,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
             qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&param::Parameter::triggerChange, p.get()));
             callbacks.push_back(call_trigger);
-            QObject::connect(param_out, SIGNAL(connectionDone()), call_trigger, SLOT(call()));
+            QObject::connect(param_out, SIGNAL(connectionDone(Connectable*)), call_trigger, SLOT(call()));
 
             widget_ctrl_->insertPort(current_layout_, port);
         }

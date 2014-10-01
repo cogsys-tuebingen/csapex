@@ -173,7 +173,7 @@ void Port::mouseMoveEvent(QMouseEvent* e)
     bool create = adaptee_->shouldCreate(left, right);
     bool move = adaptee_->shouldMove(left, right);
 
-    Q_EMIT(adaptee_->connectionStart());
+    Q_EMIT(adaptee_->connectionStart(adaptee_));
 
     if(create || move) {
         QDrag* drag = new QDrag(this);
@@ -182,13 +182,10 @@ void Port::mouseMoveEvent(QMouseEvent* e)
         if(move) {
             mimeData->setData(Connectable::MIME_MOVE_CONNECTIONS, QByteArray());
             mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee_)));
+
             drag->setMimeData(mimeData);
 
-            adaptee_->disable();
-
             drag->exec();
-
-            adaptee_->enable();
 
         } else {
             mimeData->setData(Connectable::MIME_CREATE_CONNECTION, QByteArray());
@@ -201,7 +198,7 @@ void Port::mouseMoveEvent(QMouseEvent* e)
 
         e->accept();
 
-        Q_EMIT adaptee_->connectionDone();
+        Q_EMIT adaptee_->connectionDone(adaptee_);
         buttons_down_ = Qt::NoButton;
     }
     e->accept();

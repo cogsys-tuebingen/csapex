@@ -95,8 +95,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             targets->setText(0, "Target");
-            for(Output::TargetIterator it = connector->beginTargets(); it != connector->endTargets(); ++it) {
-                Input* target = *it;
+            foreach(Input* target, connector->getTargets()) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
                 target_widget->setText(0, target->getUUID().c_str());
                 //target_widget->setIcon(1, target->getNode()->getIcon());

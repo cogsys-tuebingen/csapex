@@ -100,10 +100,10 @@ protected:
 Q_SIGNALS:
     void disconnected(QObject*);
     void enabled(bool e);
-    void connectionStart();
+    void connectionStart(Connectable*);
     void connectionInProgress(Connectable*, Connectable*);
-    void connectionDone();
-    void connectionRemoved();
+    void connectionDone(Connectable*);
+    void connectionRemoved(Connectable*);
     void connectionEnabled(bool);
     void messageProcessed(Connectable*);
     void blocked(bool);

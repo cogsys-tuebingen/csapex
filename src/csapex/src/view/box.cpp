@@ -103,7 +103,10 @@ void NodeBox::construct()
     QObject::connect(node_worker_.get(), SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
 
     QObject::connect(node_worker_.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+    QObject::connect(node_worker_.get(), SIGNAL(messagesWaitingToBeSent(bool)), this, SLOT(blockedChange(bool)));
     QObject::connect(node_worker_.get(), SIGNAL(threadChanged()), this, SLOT(updateThreadInformation()));
+
+
 
     Q_FOREACH(Input* input, node_worker_->getMessageInputs()) {
         registerInputEvent(input);
@@ -192,17 +195,21 @@ void NodeBox::updateThreadInformation()
     if(info_thread && node_worker_->thread()) {
         int id = node_worker_->thread()->property("id").toInt();
         std::stringstream info;
-        if(id < 0) {
+        if(settings_.get<bool>("threadless")) {
+            info << "<i><b><small>threadless</small></b></i>";
+            info_thread->setStyleSheet("QLabel { background-color : rgb(0,0,0); color: rgb(255,255,255);}");
+        } else if(id < 0) {
             info << "T:" << -id;
+            setStyleForId(info_thread, id);
         } else if(id == 0) {
-            info << "private";
+            info << "<i><b><small>private</small></b></i>";
+            info_thread->setStyleSheet("QLabel { background-color : rgb(255,255,255); color: rgb(0,0,0);}");
         } else {
             info << node_worker_->thread()->property("name").toString().toStdString();
+            setStyleForId(info_thread, id);
         }
         info_thread->setProperty("custom", node_worker_->thread()->property("custom"));
         info_thread->setText(info.str().c_str());
-
-        setStyleForId(info_thread, id);
     }
 }
 
@@ -319,6 +326,11 @@ void NodeBox::enabledChange(bool val)
     ui->boxframe->setProperty("disabled", !val);
 
     refreshStylesheet();
+}
+
+void NodeBox::blockedChange(bool val)
+{
+    ui->boxframe->setProperty("blocked", val);
 }
 
 void NodeBox::paintEvent(QPaintEvent*)

@@ -37,6 +37,7 @@ public:
     ~NodeWorker();
 
     void stop();
+    void reset();
 
     void triggerSwitchThreadRequest(QThread* thread, int id);
 
@@ -85,7 +86,6 @@ public:
 public Q_SLOTS:
     void messageArrived(Connectable* source);
     void processMessages();
-    void outgoingConnectionRemoved();
 
     void checkParameters();    
     void checkIO();
@@ -110,10 +110,11 @@ Q_SIGNALS:
     void messageProcessed();
 
     void enabled(bool);
+    void messagesWaitingToBeSent(bool);
 
     void connectionInProgress(Connectable*, Connectable*);
-    void connectionDone();
-    void connectionStart();
+    void connectionDone(Connectable*);
+    void connectionStart(Connectable*);
 
     void connectorCreated(Connectable*);
     void connectorRemoved(Connectable*);
@@ -129,7 +130,8 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
-    void messageProcessed(Connectable*);
+    void checkIfOutputIsReady(Connectable*);
+    void checkIfInputsCanBeProcessed();
 
 private:
     void removeInput(Input *in);
@@ -142,7 +144,7 @@ private:
     void makeParameterConnectable(param::Parameter*);
 
 
-    void processInputs(bool can_process);
+    void processInputs(bool all_inputs_are_present);
 
 private:
     Settings& settings_;
@@ -162,11 +164,11 @@ private:
 
     QTimer* tick_timer_;
     bool tick_immediate_;
+    int ticks_;
 
     QMutex sync;
     std::map<Input*, bool> has_msg_;
-    bool messages_processed_;
-    bool messages_sent_;
+    bool messages_waiting_to_be_sent;
     std::map<Output*, bool> is_ready_;
 
     int timer_history_pos_;

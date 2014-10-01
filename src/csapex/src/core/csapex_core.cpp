@@ -35,6 +35,7 @@ CsApexCore::CsApexCore(Settings &settings,
     destruct = true;
 
     qRegisterMetaType < QSharedPointer<QImage> > ("QSharedPointer<QImage>");
+    qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
     qRegisterMetaType < std::string > ("std::string");
 
     StreamInterceptor::instance().start();

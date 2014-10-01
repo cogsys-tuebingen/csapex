@@ -27,9 +27,17 @@ Output::Output(Settings& settings, Unique* parent, int sub_id)
 
 Output::~Output()
 {
-    BOOST_FOREACH(Input* i, targets_) {
+    foreach(Input* i, targets_) {
         i->removeConnection(this);
     }
+}
+
+void Output::reset()
+{
+    setBlocked(false);
+    setSequenceNumber(0);
+    message_.reset();
+    message_to_send_.reset();
 }
 
 int Output::noTargets()
@@ -37,13 +45,9 @@ int Output::noTargets()
     return targets_.size();
 }
 
-Output::TargetIterator Output::beginTargets() const
+std::vector<Input*> Output::getTargets() const
 {
-    return targets_.begin();
-}
-Output::TargetIterator Output::endTargets() const
-{
-    return targets_.end();
+    return targets_;
 }
 
 void Output::removeConnection(Connectable* other_side)
@@ -54,7 +58,7 @@ void Output::removeConnection(Connectable* other_side)
 
             i = targets_.erase(i);
 
-            Q_EMIT connectionRemoved();
+            Q_EMIT connectionRemoved(this);
             return;
 
         } else {
@@ -73,7 +77,7 @@ Command::Ptr Output::removeAllConnectionsCmd()
 {
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
-    BOOST_FOREACH(Input* target, targets_) {
+    foreach(Input* target, targets_) {
         Command::Ptr removeThis(new command::DeleteConnection(this, target));
         removeAll->add(removeThis);
     }
@@ -89,6 +93,16 @@ void Output::removeAllConnectionsNotUndoable()
     }
 
     Q_EMIT disconnected(this);
+}
+
+void Output::disable()
+{
+    Connectable::disable();
+
+//    if(isBlocked()) {
+        message_to_send_.reset();
+        message_.reset();
+//    }
 }
 
 void Output::connectForcedWithoutCommand(Input *other_side)
@@ -131,8 +145,8 @@ bool Output::connect(Connectable *other_side)
 
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    for(Output::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
-        if(!(*it)->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+    foreach(Input* input, targets_) {
+        if(!input->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
@@ -146,22 +160,26 @@ bool Output::isConnected() const
 
 void Output::connectionMovePreview(Connectable *other_side)
 {
-    for(Output::TargetIterator it = beginTargets(); it != endTargets(); ++it) {
-        Q_EMIT(connectionInProgress(*it, other_side));
+    foreach(Input* input, targets_) {
+        Q_EMIT(connectionInProgress(input, other_side));
     }
 }
 
 void Output::validateConnections()
 {
-    BOOST_FOREACH(Input* target, targets_) {
+    foreach(Input* target, targets_) {
         target->validateConnections();
     }
 }
 
 void Output::publish(ConnectionType::Ptr message)
 {
+    setType(message);
+
     // update buffer
     message_to_send_ = message;
+
+    setBlocked(true);
 }
 
 bool Output::hasMessage()
@@ -174,8 +192,11 @@ void Output::sendMessages()
     if(message_to_send_) {
         message_ = message_to_send_;
         message_to_send_.reset();
+
     } else {
-        std::cout << getUUID() << " sends empty message" << std::endl;
+        if(!targets_.empty()) {
+//            std::cout << getUUID() << " sends empty message" << std::endl;
+        }
         message_ = connection_types::makeEmpty<connection_types::NoMessage>();
     }
 
@@ -184,7 +205,7 @@ void Output::sendMessages()
     // wait for all connected inputs to be able to receive
     //  * inputs can only be connected to this output since they are 1:1
     std::vector<Input*> targets;
-    BOOST_FOREACH(Input* i, targets_) {
+    foreach(Input* i, targets_) {
         if(i->isEnabled()) {
             targets.push_back(i);
         }
@@ -195,7 +216,7 @@ void Output::sendMessages()
         if(targets.size() == 1) {
             targets[0]->inputMessage(message_);
         } else if(targets.size() > 1) {
-            BOOST_FOREACH(Input* i, targets) {
+            foreach(Input* i, targets) {
                 ConnectionType::Ptr msg = message_->clone();
                 msg->setSequenceNumber(seq_no_);
                 i->inputMessage(msg);
@@ -203,6 +224,8 @@ void Output::sendMessages()
         }
         ++count_;
     }
+
+    setBlocked(false);
 
     ++seq_no_;
     Q_EMIT messageSent(this);

@@ -31,9 +31,9 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     if(output) {
         Output* out = dynamic_cast<Output*>(from);
 
-        for(Output::TargetIterator it = out->beginTargets(); it != out->endTargets(); ++it) {
-            add(Command::Ptr(new DeleteConnection(from, *it)));
-            add(Command::Ptr(new AddConnection(to_uuid, (*it)->getUUID())));
+        foreach(Input* input, out->getTargets()) {
+            add(Command::Ptr(new DeleteConnection(from, input)));
+            add(Command::Ptr(new AddConnection(to_uuid, input->getUUID())));
         }
 
     } else {

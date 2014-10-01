@@ -174,8 +174,8 @@ bool Graph::addConnection(Connection::Ptr connection)
 
 
         Q_EMIT connectionAdded(connection.get());
-        Q_EMIT from->connectionDone();
-        Q_EMIT to->connectionDone();
+        Q_EMIT from->connectionDone(from);
+        Q_EMIT to->connectionDone(to);
         return true;
     }
 

@@ -11,18 +11,18 @@ template <typename Type>
 struct GenericPointerMessage : public Message {
     typedef boost::shared_ptr<GenericPointerMessage<Type> > Ptr;
 
-    GenericPointerMessage(const std::string& frame_id = "/")
-        : Message(type2name(typeid(Type)), frame_id)
+    GenericPointerMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
+        : Message(type2name(typeid(Type)), frame_id, stamp)
     {}
 
     virtual ConnectionType::Ptr clone() {
-        Ptr new_msg(new GenericPointerMessage<Type>(frame_id));
+        Ptr new_msg(new GenericPointerMessage<Type>(frame_id, stamp));
         new_msg->value = value;
         return new_msg;
     }
 
     virtual ConnectionType::Ptr toType() {
-        Ptr new_msg(new GenericPointerMessage<Type>(frame_id));
+        Ptr new_msg(new GenericPointerMessage<Type>(frame_id, 0));
         return new_msg;
     }
 

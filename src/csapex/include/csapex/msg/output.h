@@ -10,20 +10,14 @@
 namespace csapex
 {
 
-class Output : public virtual Connectable
+class Output : public Connectable
 {
     friend class Input;
-    friend class ConnectorForward;
     friend class Graph;
     friend class command::AddConnection;
     friend class command::MoveConnection;
     friend class command::DeleteConnection;
     friend class DesignerIO;
-
-    typedef std::vector<Input*> TargetList;
-
-public:
-    typedef TargetList::const_iterator TargetIterator;
 
 public:
     Output(Settings& settings, const UUID &uuid);
@@ -36,6 +30,8 @@ public:
     virtual bool isOutput() const {
         return true;
     }
+
+    virtual void disable();
 
     template <typename T>
     void publishIntegral(T message, const std::string& frame_id = "/") {
@@ -67,8 +63,7 @@ public:
     virtual void validateConnections();
 
     int noTargets();
-    TargetIterator beginTargets() const;
-    TargetIterator endTargets() const;
+    std::vector<Input*> getTargets() const;
 
     void connectForcedWithoutCommand(Input* other_side);
 
@@ -81,6 +76,8 @@ public:
     ConnectionType::Ptr getMessage();
 
     void sendMessages();
+
+    void reset();
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
