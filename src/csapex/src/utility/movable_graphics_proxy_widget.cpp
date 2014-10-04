@@ -7,6 +7,7 @@
 #include <csapex/model/node.h>
 #include <csapex/view/designer_view.h>
 #include <csapex/view/widget_controller.h>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <QGraphicsSceneMouseEvent>
@@ -83,7 +84,9 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if(clone_p_) {
         QPointF delta = clone_start_ - event->pos();
         if(hypot(delta.x(), delta.y()) > 10) {
-            widget_ctrl_->startPlacingBox(view_, box_->getNode()->getType(), box_->getNode()->getNodeState());
+            NodeStatePtr state = box_->getNode()->getNodeStateCopy();
+            state->setLabel("");
+            widget_ctrl_->startPlacingBox(view_, box_->getNode()->getType(), state);
         }
         return;
     }
