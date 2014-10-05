@@ -767,6 +767,8 @@ void NodeWorker::tick()
             return;
         }
 
+        checkParameters();
+
         if(!thread_initialized_) {
             thread::set_name(thread()->objectName().toStdString().c_str());
             thread_initialized_ = true;

@@ -35,9 +35,9 @@ void GraphWorker::tick()
     //        }
     //    }
 
-    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
-        node->checkParameters();
-    }
+//    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
+//        node->checkParameters();
+//    }
 
     Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
         connection->tick();

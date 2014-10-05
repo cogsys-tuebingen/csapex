@@ -353,6 +353,10 @@ bool DesignerScene::isEmpty() const
 
 void DesignerScene::connectionAdded(Connection* c)
 {
+    foreach(FulcrumPtr f, c->getFulcrums()) {
+        fulcrumAdded(f.get());
+    }
+
     QObject::connect(c, SIGNAL(fulcrum_added(Fulcrum *)), this, SLOT(fulcrumAdded(Fulcrum *)));
     QObject::connect(c, SIGNAL(fulcrum_deleted(Fulcrum*)), this, SLOT(fulcrumDeleted(Fulcrum*)), Qt::DirectConnection);
     QObject::connect(c, SIGNAL(fulcrum_moved(Fulcrum*,bool)), this, SLOT(fulcrumMoved(Fulcrum *, bool)));
