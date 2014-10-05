@@ -37,6 +37,7 @@ public:
     ~NodeWorker();
 
     void stop();
+    void waitUntilFinished();
     void reset();
 
     void triggerSwitchThreadRequest(QThread* thread, int id);

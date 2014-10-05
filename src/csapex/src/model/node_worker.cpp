@@ -42,6 +42,12 @@ NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
 
 NodeWorker::~NodeWorker()
 {
+    tick_immediate_ = false;
+
+    waitUntilFinished();
+
+    QObject::disconnect(this);
+
     while(!inputs_.empty()) {
         removeInput(*inputs_.begin());
     }
@@ -107,28 +113,26 @@ bool NodeWorker::canReceive()
 }
 
 template <typename T>
-void NodeWorker::makeParameterConnectable(param::Parameter *p)
+void NodeWorker::makeParameterConnectable(param::Parameter */*p*/)
 {
-    {
-        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
+    // TODO: reimplement
+    //    {
+    //        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
 
-        cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
+    //        cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
-        // TODO: reimplement
 
-        manageInput(cin);
-        param_2_input_[p->name()] = cin;
-    }
-    {
-        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
+    //        manageInput(cin);
+    //        param_2_input_[p->name()] = cin;
+    //    }
+    //    {
+    //        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
 
-        cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
+    //        cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
-        // TODO: reimplement
-
-        manageOutput(cout);
-        param_2_output_[p->name()] = cout;
-    }
+    //        manageOutput(cout);
+    //        param_2_output_[p->name()] = cout;
+    //}
 }
 
 void NodeWorker::makeParametersConnectable()
@@ -194,6 +198,8 @@ void NodeWorker::disconnectConnector(Connectable */*c*/)
 
 void NodeWorker::stop()
 {
+    QObject::disconnect(tick_timer_);
+
     assert(this->thread() != QApplication::instance()->thread());
     node_->abort();
 
@@ -214,7 +220,14 @@ void NodeWorker::stop()
         disconnectConnector(i);
     }
 
+    QObject::disconnect(this);
+
     pause(false);
+}
+
+void NodeWorker::waitUntilFinished()
+{
+    QMutexLocker stop_lock(&stop_mutex_);
 }
 
 void NodeWorker::reset()
@@ -747,13 +760,12 @@ void NodeWorker::tick()
                 continue_.wait(&pause_mutex_);
             }
             pause_mutex_.unlock();
-
-            QMutexLocker lock(&stop_mutex_);
-            if(stop_) {
-                return;
-            }
         }
 
+        QMutexLocker lock(&stop_mutex_);
+        if(stop_) {
+            return;
+        }
 
         if(!thread_initialized_) {
             thread::set_name(thread()->objectName().toStdString().c_str());
