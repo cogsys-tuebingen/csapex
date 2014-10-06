@@ -767,6 +767,7 @@ void NodeWorker::tick()
             return;
         }
 
+        node_->checkConditions(false);
         checkParameters();
 
         if(!thread_initialized_) {
