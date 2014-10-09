@@ -81,8 +81,6 @@ public:
     std::vector<Input*> getManagedInputs() const;
     std::vector<Output*> getManagedOutputs() const;
 
-    bool isPaused() const;
-
     bool canReceive();
     bool areAllInputsAvailable();
 

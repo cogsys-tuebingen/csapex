@@ -50,6 +50,8 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
             std::abort();
         }
 
+        std::cerr << "exception: " << e.what() << std::endl;
+
         if(er) {
             er->setError(true, e.what());
         } else if(bw) {

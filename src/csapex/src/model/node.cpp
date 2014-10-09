@@ -151,9 +151,8 @@ NodeWorker* Node::getNodeWorker() const
 
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    if(settings_->get<bool>("headless")){
-        aerr << msg << std::endl;
-    }
+    aerr << msg << std::endl;
+
     if(node_state_->isEnabled() && error && level == EL_ERROR) {
         worker_->setIOError(true);
     } else {
