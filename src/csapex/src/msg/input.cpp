@@ -193,7 +193,12 @@ void Input::handleMessage(ConnectionType::Ptr message)
 
     setBlocked(true);
 
-    buffer_->write(message);
+    try {
+        buffer_->write(message);
+    } catch(const std::exception& e) {
+        std::cerr << getUUID() << ": writing message failed: " << e.what() << std::endl;
+        throw e;
+    }
 
     count_++;
 
