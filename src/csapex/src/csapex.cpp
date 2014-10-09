@@ -33,8 +33,8 @@ namespace po = boost::program_options;
 using namespace csapex;
 
 
-CsApexApp::CsApexApp(int& argc, char** argv, bool headless)
-    : QApplication(argc, argv, !headless)
+CsApexApp::CsApexApp(int& argc, char** argv, bool headless, bool fatal_exceptions)
+    : QApplication(argc, argv, !headless), fatal_exceptions_(fatal_exceptions)
 {}
 
 bool CsApexApp::notify(QObject* receiver, QEvent* event) {
@@ -44,6 +44,11 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
     } catch(const std::exception& e) {
         ErrorState* er = dynamic_cast<ErrorState*> (receiver);
         NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
+
+        if(fatal_exceptions_) {
+            std::cerr << "caught an exception in --fatal-exceptions mode: Abort!" << std::endl;
+            std::abort();
+        }
 
         if(er) {
             er->setError(true, e.what());
@@ -197,6 +202,7 @@ int main(int argc, char** argv)
             ("dump", "show variables")
             ("headless", "run without gui")
             ("threadless", "run without threading")
+            ("fatal_exceptions", "abort execution on exception")
             ("thread_grouping", "create one thread per graph component")
             ("input", "config file to load")
             ("ros-name", "(ros parameter (provided by launch files))")
@@ -208,14 +214,17 @@ int main(int argc, char** argv)
     p.add("ros-name", 1);
     p.add("ros-log", 1);
 
-    // first check for --headless parameter
+    // first check for --headless or --fatal_exceptions parameter
     // this has to be done before the qapp can be created, which
     // has to be done before parameters can be read.
     bool headless = false;
+    bool fatal_exceptions = false;
     for(int i = 1; i < argc; ++i) {
-        if(std::string(argv[i]) == "--headless") {
+        std::string arg(argv[i]);
+        if(arg == "--headless") {
             headless = true;
-            break;
+        } else if(arg == "--fatal_exceptions") {
+            fatal_exceptions = true;
         }
     }
 
@@ -229,7 +238,7 @@ int main(int argc, char** argv)
     }
 
     // filters all qt parameters from argv
-    CsApexApp app(argc, argv, headless);
+    CsApexApp app(argc, argv, headless, fatal_exceptions);
 
     // now check for remaining parameters
     po::variables_map vm;

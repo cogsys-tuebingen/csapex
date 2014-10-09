@@ -11,9 +11,11 @@ namespace csapex
 {
 
 struct CsApexApp : public QApplication {
-    CsApexApp(int& argc, char** argv, bool headless);
+    CsApexApp(int& argc, char** argv, bool headless, bool fatal_exceptions);
 
     virtual bool notify(QObject* receiver, QEvent* event);
+
+    bool fatal_exceptions_;
 };
 
 struct Main : public QObject {
