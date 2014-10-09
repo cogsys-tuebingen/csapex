@@ -245,6 +245,11 @@ void NodeWorker::reset()
     }
 }
 
+bool NodeWorker::isPaused() const
+{
+    return paused_;
+}
+
 void NodeWorker::pause(bool pause)
 {
     QMutexLocker lock(&pause_mutex_);

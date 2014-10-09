@@ -48,6 +48,8 @@ public:
     bool isEnabled() const;
     void setEnabled(bool e);
 
+    bool isPaused() const;
+
     void setIOError(bool error);
 
     /* REMOVE => UI*/ void setMinimized(bool min);
