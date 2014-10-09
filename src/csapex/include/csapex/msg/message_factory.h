@@ -16,6 +16,7 @@
 #include <boost/bind.hpp>
 #include <yaml-cpp/yaml.h>
 #include <boost/type_traits.hpp>
+#include <iostream>
 
 #define HAS_MEM_FUNC(func, name)                                        \
     template<typename T, typename Sign>                                 \
