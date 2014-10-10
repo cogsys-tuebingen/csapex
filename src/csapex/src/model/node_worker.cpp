@@ -164,6 +164,11 @@ void NodeWorker::triggerSwitchThreadRequest(QThread* thread, int id)
     Q_EMIT threadSwitchRequested(thread, id);
 }
 
+void NodeWorker::triggerPanic()
+{
+    Q_EMIT panic();
+}
+
 void NodeWorker::switchThread(QThread *thread, int id)
 {
     QObject::disconnect(tick_timer_);

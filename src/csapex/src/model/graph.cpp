@@ -52,6 +52,8 @@ void Graph::addNode(NodeWorker::Ptr node_worker)
 
     node_worker->checkParameters();
 
+    QObject::connect(node_worker.get(), SIGNAL(panic()), this, SIGNAL(panic()));
+
     Q_EMIT nodeAdded(node_worker);
 }
 

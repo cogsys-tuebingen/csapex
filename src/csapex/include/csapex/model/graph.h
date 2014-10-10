@@ -98,6 +98,8 @@ Q_SIGNALS:
     void structureChanged(Graph*);
     /*extract?*/ void dirtyChanged(bool);
 
+    void panic();
+
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
 

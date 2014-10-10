@@ -112,6 +112,7 @@ void CsApexWindow::construct()
 
     QObject::connect(graph, SIGNAL(nodeAdded(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodeWorkerPtr)));
     QObject::connect(graph, SIGNAL(nodeRemoved(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodeWorkerPtr)));
+    QObject::connect(graph, SIGNAL(panic()), this, SLOT(clearBlock()));
 
     QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
 
@@ -280,6 +281,7 @@ void CsApexWindow::about()
 
 void CsApexWindow::clearBlock()
 {
+    std::cerr << "clearing blocking connections" << std::endl;
     core_.setPause(true);
     Graph* graph = graph_worker_->getGraph();
     foreach(NodeWorker* nw, graph->getAllNodeWorkers()) {

@@ -41,6 +41,7 @@ public:
     void reset();
 
     void triggerSwitchThreadRequest(QThread* thread, int id);
+    void triggerPanic();
 
     Node* getNode();
     UUID getNodeUUID() const;
@@ -130,6 +131,8 @@ Q_SIGNALS:
     void threadChanged();
 
     void threadSwitchRequested(QThread*, int);
+
+    void panic();
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
