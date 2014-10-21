@@ -77,10 +77,10 @@ void IntervalParameter::doSetValueFrom(const Parameter &other)
     if(interval) {
         bool change = false;
         if(type() == typeid(std::pair<int, int>)) {
-            change = boost::any_cast<int>(values_.first) != boost::any_cast<int>(interval->values_.first) &&
+            change = boost::any_cast<int>(values_.first) != boost::any_cast<int>(interval->values_.first) ||
                     boost::any_cast<int>(values_.second) != boost::any_cast<int>(interval->values_.second);
         } else if(type() == typeid(std::pair<double, double>)) {
-            change = boost::any_cast<double>(values_.first) != boost::any_cast<double>(interval->values_.first) &&
+            change = boost::any_cast<double>(values_.first) != boost::any_cast<double>(interval->values_.first) ||
                     boost::any_cast<double>(values_.second) != boost::any_cast<double>(interval->values_.second);
         }
         if(change) {
