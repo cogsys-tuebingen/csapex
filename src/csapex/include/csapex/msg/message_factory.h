@@ -8,6 +8,7 @@
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>
+#include <csapex/utility/tmp.hpp>
 
 /// SYSTEM
 #include <map>
@@ -18,16 +19,6 @@
 #include <boost/type_traits.hpp>
 #include <iostream>
 
-#define HAS_MEM_FUNC(func, name)                                        \
-    template<typename T, typename Sign>                                 \
-    struct name {                                                       \
-        typedef char yes[1];                                            \
-        typedef char no [2];                                            \
-        template <typename U, U> struct type_check;                     \
-        template <typename _1> static yes &chk(type_check<Sign, &_1::func > *); \
-        template <typename   > static no  &chk(...);                    \
-        static bool const value = sizeof(chk<T>(0)) == sizeof(yes);     \
-    }
 HAS_MEM_FUNC(encode, has_yaml_implementation);
 
 namespace csapex {
@@ -35,9 +26,6 @@ namespace csapex {
 class MessageFactory : public Singleton<MessageFactory>
 {
     friend class Singleton<MessageFactory>;
-
-    template <typename M>
-    friend class csapex::connection_types::MessageRegistered;
 
 public:
     typedef boost::function<ConnectionType::Ptr()>  Constructor;
@@ -84,14 +72,15 @@ public:
         registerDirectMessageImpl<Wrapper, M>();
     }
 
-private:
     template <typename M>
     static void registerMessage() {
-        MessageFactory::instance().registerMessage(boost::bind(&MessageFactory::createMessage<M>),
+        MessageFactory::instance().registerMessage(connection_types::name<M>(),
+                                                   boost::bind(&MessageFactory::createMessage<M>),
                                                    Converter(boost::bind(&MessageFactory::encode<M>, _1),
                                                              boost::bind(&MessageFactory::decode<M>, _1, _2)));
     }
 
+private:
     template <template <typename> class Wrapper, typename M>
     struct HasYaml {
         typedef typename boost::type_traits::ice_and<
@@ -108,7 +97,8 @@ private:
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessageImpl(typename boost::enable_if< typename HasYaml<Wrapper,M>::type >::type* = 0)
     {
-        MessageFactory::instance().registerMessage(boost::bind(&MessageFactory::createDirectMessage<Wrapper, M>),
+        MessageFactory::instance().registerMessage(connection_types::name< Wrapper<M> >(),
+                                                   boost::bind(&MessageFactory::createDirectMessage<Wrapper, M>),
                                                    Converter(boost::bind(&MessageFactory::encodeDirectMessage<Wrapper, M>, _1),
                                                              boost::bind(&MessageFactory::decodeDirectMessage<Wrapper, M>, _1, _2)));
     }
@@ -141,12 +131,23 @@ private:
 private:
     MessageFactory();
 
-    static void registerMessage(Constructor constructor, Converter converter);
+    static void registerMessage(std::string type, Constructor constructor, Converter converter);
 
 private:
     std::map<std::string, Constructor> type_to_constructor;
     std::map<std::string, Converter> type_to_converter;
 };
+
+
+
+template <typename T>
+struct MessageRegistered
+{
+    MessageRegistered() {
+        csapex::MessageFactory::registerMessage<T>();
+    }
+};
+
 }
 
 #endif // MESSAGE_FACTORY_H

@@ -7,13 +7,6 @@
 #define CSAPEX_REGISTER_MESSAGE_WITH_NAME(name,instancename)\
 namespace csapex { \
 namespace connection_types { \
-template <> \
-struct MessageRegistered<name> \
-{ \
-    MessageRegistered() { \
-        csapex::MessageFactory::registerMessage<name>(); \
-    } \
-}; \
 static MessageRegistered<name> instancename; \
 } \
 }

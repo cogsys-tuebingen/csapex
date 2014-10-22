@@ -21,7 +21,8 @@ static const int DEFAULT_HISTORY_LENGTH = 15;
 
 NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
     : settings_(settings), node_(node),
-      ticks_(0),
+      tick_enabled_(false), ticks_(0),
+      source_(false), sink_(false),
       sync(QMutex::Recursive),
       messages_waiting_to_be_sent(false),
       timer_history_pos_(-1),
@@ -104,35 +105,34 @@ bool NodeWorker::canReceive()
     Q_FOREACH(Input* i, inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
             can_receive = false;
-        } else if(i->isConnected() && !i->getSource()->isEnabled()) {
+        } /*else if(i->isConnected() && !i->getSource()->isEnabled()) {
             can_receive = false;
-        }
+        }*/
     }
 
     return can_receive;
 }
 
 template <typename T>
-void NodeWorker::makeParameterConnectable(param::Parameter */*p*/)
+void NodeWorker::makeParameterConnectable(param::Parameter *p)
 {
-    // TODO: reimplement
-    //    {
-    //        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
+    {
+        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
 
-    //        cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
+        cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
 
-    //        manageInput(cin);
-    //        param_2_input_[p->name()] = cin;
-    //    }
-    //    {
-    //        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
+        manageInput(cin);
+        param_2_input_[p->name()] = cin;
+    }
+    {
+        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
 
-    //        cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
+        cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
-    //        manageOutput(cout);
-    //        param_2_output_[p->name()] = cout;
-    //}
+        manageOutput(cout);
+        param_2_output_[p->name()] = cout;
+    }
 }
 
 void NodeWorker::makeParametersConnectable()
@@ -342,22 +342,22 @@ void NodeWorker::processMessages()
         }
 
         // if a message was dropped we can already return
-//        if(had_old_message) {
-//            return;
-//        }
+        //        if(had_old_message) {
+        //            return;
+        //        }
 
         // now all sequence numbers must be equal!
-//        Q_FOREACH(const PAIR& pair, has_msg_) {
-//            Input* cin = pair.first;
+        //        Q_FOREACH(const PAIR& pair, has_msg_) {
+        //            Input* cin = pair.first;
 
-//            if(has_msg_[cin]) {
-//                if(highest_seq_no != cin->sequenceNumber()) {
-//                    std::cerr << "input @" << cin->getUUID().getFullName() <<
-//                                 ": assertion failed: highest_seq_no (" << highest_seq_no << ") == cin->seq_no (" << cin->sequenceNumber() << ")" << std::endl;
-//                    apex_assert_hard(false);
-//                }
-//            }
-//        }
+        //            if(has_msg_[cin]) {
+        //                if(highest_seq_no != cin->sequenceNumber()) {
+        //                    std::cerr << "input @" << cin->getUUID().getFullName() <<
+        //                                 ": assertion failed: highest_seq_no (" << highest_seq_no << ") == cin->seq_no (" << cin->sequenceNumber() << ")" << std::endl;
+        //                    apex_assert_hard(false);
+        //                }
+        //            }
+        //        }
 
         // check if one is "NoMessage";
         Q_FOREACH(Input* cin, inputs_) {
@@ -377,8 +377,12 @@ void NodeWorker::processMessages()
 
     stop_lock.unlock();
 
-    // send the messages
-    trySendMessages();
+    if(!isSink()) {
+        // send the messages
+        trySendMessages();
+    } else {
+        resetInputs();
+    }
 
     Q_EMIT messageProcessed();
 }
@@ -678,7 +682,7 @@ bool NodeWorker::canSendMessages()
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
         if(!is_ready_[out]) {
-//            node_->ainfo << "cannot send: " << out->getUUID() << " is not ready" << std::endl;
+            //            node_->ainfo << "cannot send: " << out->getUUID() << " is not ready" << std::endl;
             return false;
         }
     }
@@ -761,6 +765,52 @@ void NodeWorker::setTickFrequency(double f)
     tick_timer_->start();
 }
 
+void NodeWorker::setTickEnabled(bool enabled)
+{
+    tick_enabled_ = enabled;
+}
+
+bool NodeWorker::isTickEnabled() const
+{
+    return tick_enabled_;
+}
+
+
+void NodeWorker::setIsSource(bool source)
+{
+    source_ = source;
+}
+
+bool NodeWorker::isSource() const
+{
+    if(source_) {
+        return true;
+    }
+
+    // check if there are no (mandatory) inputs -> then it's a virtual source
+    // TODO: remove and refactor old plugins
+    if(!inputs_.empty()) {
+        foreach(Input* in, inputs_) {
+            if(!in->isOptional() || in->isConnected()) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+void NodeWorker::setIsSink(bool sink)
+{
+    sink_ = sink;
+}
+
+bool NodeWorker::isSink() const
+{
+    return sink_ || outputs_.empty();
+}
+
 void NodeWorker::tick()
 {
     while(true) {
@@ -785,47 +835,37 @@ void NodeWorker::tick()
             thread_initialized_ = true;
         }
 
-        bool should_be_ticked = true;
-        if(!inputs_.empty()) {
-            foreach(Input* in, inputs_) {
-                if(!in->isOptional() || in->isConnected()) {
-                    should_be_ticked = false;
-                    break;
-                }
-            }
-        }
 
-        if(isEnabled() && should_be_ticked) {
+        if(isEnabled() && (isTickEnabled() || isSource())) {
             assert(this->thread() != QApplication::instance()->thread());
 
             if(!canSendMessages() /*|| ticks_ != 0*/) {
                 return;
             }
 
-            // TODO: deprecate tick
             node_->tick();
             ++ticks_;
 
-            processInputs(true);
+            processInputs(isSource());
             trySendMessages();
         }
 
-            //            node_->tick();
+        //            node_->tick();
 
-            // if there is a message: send!
-            //            bool has_msg = false;
-            //            for(std::size_t i = 0; i < outputs_.size(); ++i) {
-            //                Output* out = outputs_[i];
-            //                if(out->hasMessage()) {
-            //                    has_msg = true;
-            //                }
-            //            }
-            //            if(has_msg) {
-            //                trySendMessages();
-            //            } else {
-            //                node_->ainfo << "no message output" << std::endl;
-            //            }
-//        }
+        // if there is a message: send!
+        //            bool has_msg = false;
+        //            for(std::size_t i = 0; i < outputs_.size(); ++i) {
+        //                Output* out = outputs_[i];
+        //                if(out->hasMessage()) {
+        //                    has_msg = true;
+        //                }
+        //            }
+        //            if(has_msg) {
+        //                trySendMessages();
+        //            } else {
+        //                node_->ainfo << "no message output" << std::endl;
+        //            }
+        //        }
 
         if(!tick_immediate_) {
             return;

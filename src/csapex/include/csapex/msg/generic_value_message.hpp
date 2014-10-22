@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/msg/message.h>
+#include <csapex/utility/register_msg.h>
 
 namespace csapex {
 namespace connection_types {
@@ -13,7 +14,9 @@ struct GenericValueMessage : public Message {
 
     GenericValueMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp)
-    {}
+    {
+        static csapex::MessageRegistered<GenericValueMessage<Type> > reg;
+    }
 
     virtual ConnectionType::Ptr clone() {
         Ptr new_msg(new GenericValueMessage<Type>(frame_id, stamp));

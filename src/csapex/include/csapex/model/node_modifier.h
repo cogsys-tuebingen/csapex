@@ -7,10 +7,12 @@
 #include <csapex/msg/message_factory.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/msg/generic_pointer_message.hpp>
+#include <csapex/msg/generic_value_message.hpp>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <boost/mpl/vector.hpp>
+#include <boost/type_traits.hpp>
 
 namespace csapex
 {
@@ -22,17 +24,17 @@ public:
     /// "real" messages
     template <typename T>
     Input* addInput(const std::string& label,
-                          typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                    typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, false, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
-                          typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                            typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, true, false);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
-                            typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                      typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
         return addOutput(connection_types::makeEmptyMessage<T>(), label);
     }
 
@@ -53,24 +55,43 @@ public:
         return addOutput(Container::template make<T>(), label);
     }
 
+
+
     /// "direct" messages
     template <typename T>
     Input* addInput(const std::string& label,
-                          typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                    typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
-                          typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                            typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true, false);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
-                            typename boost::disable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                      typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label);
+    }
+
+
+    template <typename T>
+    Input* addInput(const std::string& label,
+                    typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false, false);
+    }
+    template <typename T>
+    Input* addOptionalInput(const std::string& label,
+                            typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true, false);
+    }
+    template <typename T>
+    Output* addOutput(const std::string& label,
+                      typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label);
     }
 
 

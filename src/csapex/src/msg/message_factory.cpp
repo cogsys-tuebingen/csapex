@@ -105,11 +105,10 @@ ConnectionType::Ptr MessageFactory::readYaml(const YAML::Node &node)
     return msg;
 }
 
-void MessageFactory::registerMessage(Constructor constructor, Converter converter)
+void MessageFactory::registerMessage(std::string type, Constructor constructor, Converter converter)
 {
     MessageFactory& i = instance();
 
-    std::string type = constructor()->name();
     std::map<std::string, Constructor>::const_iterator it = i.type_to_constructor.find(type);
     apex_assert_hard(it == i.type_to_constructor.end());
     //    if(name != type) {

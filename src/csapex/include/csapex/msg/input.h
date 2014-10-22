@@ -6,6 +6,7 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/msg/message.h>
 #include <csapex/msg/generic_pointer_message.hpp>
+#include <csapex/msg/generic_value_message.hpp>
 #include <csapex/utility/buffer.h>
 
 /// SYSTEM
@@ -55,6 +56,15 @@ public:
     boost::shared_ptr<typename Container::template TypeMap<R>::type const>
     getMessage() {
         return buffer_->read<Container>() -> template makeShared<R>();
+    }
+
+    template <typename R>
+    R getValue() {
+        typename connection_types::GenericValueMessage<R>::Ptr msg = getMessage< connection_types::GenericValueMessage<R> >();
+        if(!msg) {
+            throw std::logic_error("cannot convert message to requested value");
+        }
+        return msg->value;
     }
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;

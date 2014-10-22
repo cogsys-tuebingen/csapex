@@ -87,6 +87,15 @@ public:
 
     void makeParametersConnectable();
 
+    bool isTickEnabled() const;
+    void setTickEnabled(bool enabled);
+
+    bool isSource() const;
+    void setIsSource(bool source);
+
+    bool isSink() const;
+    void setIsSink(bool sink);
+
 public Q_SLOTS:
     void messageArrived(Connectable* source);
     void processMessages();
@@ -169,8 +178,12 @@ private:
     std::vector<QObject*> callbacks;
 
     QTimer* tick_timer_;
+    bool tick_enabled_;
     bool tick_immediate_;
     int ticks_;
+
+    bool source_;
+    bool sink_;
 
     QMutex sync;
     std::map<Input*, bool> has_msg_;

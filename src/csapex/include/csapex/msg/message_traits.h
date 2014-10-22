@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection_type.h>
+#include <csapex/utility/tmp.hpp>
 
 /// SYSTEM
 #include <string>
@@ -14,8 +15,6 @@ namespace connection_types {
 /// TRAITS
 template <typename T>
 struct type;
-template <typename T>
-struct MessageRegistered;
 
 template <typename T>
 std::string name()
@@ -44,6 +43,30 @@ boost::shared_ptr<typename boost::remove_const<T>::type > makeEmptyMessage(
     return makeEmpty<TT>();
 }
 
+
+HAS_MEM_TYPE(Ptr, has_ptr_member);
+HAS_MEM_TYPE(element_type, has_elem_type_member);
+
+template <typename M>
+struct should_use_pointer_message {
+    static const bool value = boost::type_traits::ice_and<
+    boost::is_class<M>::value,
+    has_ptr_member<M>::value,
+    boost::type_traits::ice_not< boost::is_same<std::string, M>::value >::value,
+    boost::type_traits::ice_not< boost::is_base_of<ConnectionType, M>::value >::value
+    >::value;
+};
+
+template <typename M>
+struct should_use_value_message {
+    static const bool value = boost::type_traits::ice_and<
+    boost::type_traits::ice_not<
+            should_use_pointer_message<M>::value
+            >::value,
+    boost::type_traits::ice_not< has_elem_type_member<M>::value >::value, // reject shared_ptr
+    boost::type_traits::ice_not< boost::is_base_of<ConnectionType, M>::value >::value
+    >::value;
+};
 
 }
 }

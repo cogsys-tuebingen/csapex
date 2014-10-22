@@ -41,6 +41,12 @@ public:
     bool canConnectTo(const ConnectionType* other_side) const;
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
 };
+template <>
+struct type<NoMessage> {
+    static std::string name() {
+        return "Nothing";
+    }
+};
 
 struct AnyMessage : public Message
 {
@@ -56,6 +62,12 @@ public:
 
     bool canConnectTo(const ConnectionType* other_side) const;
     bool acceptsConnectionFrom(const ConnectionType* other_side) const;
+};
+template <>
+struct type<AnyMessage> {
+    static std::string name() {
+        return "Anything";
+    }
 };
 }
 }

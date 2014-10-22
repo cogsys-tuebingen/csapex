@@ -49,7 +49,7 @@ bool convert<csapex::connection_types::Message>::decode(const Node& node, csapex
  * ANYMESSAGE
  */
 AnyMessage::AnyMessage()
-    : Message("anything", "/", 0)
+    : Message(type<AnyMessage>::name(), "/", 0)
 {}
 
 ConnectionType::Ptr AnyMessage::clone()
@@ -96,7 +96,7 @@ bool convert<csapex::connection_types::AnyMessage>::decode(const Node& node, csa
  * NOMESSAGE
  */
 NoMessage::NoMessage()
-    : Message("nothing", "/", 0)
+    : Message(type<NoMessage>::name(), "/", 0)
 {}
 
 ConnectionType::Ptr NoMessage::clone()
