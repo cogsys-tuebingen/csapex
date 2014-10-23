@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/view/designer.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/box.h>
 #include <csapex/view/node_adapter.h>
@@ -40,18 +40,18 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* widget_ctrl)
 {
-    boost::function<void(Node*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, yaml["adapters"]);
+    boost::function<void(NodeWorker*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, yaml["adapters"]);
     graph->foreachNode(cb);
 }
 
-void DesignerIO::saveBox(Node *node, WidgetController* widget_ctrl, YAML::Node &yaml)
+void DesignerIO::saveBox(NodeWorker *node, WidgetController* widget_ctrl, YAML::Node &yaml)
 {
-    NodeBox* box = widget_ctrl->getBox(node->getUUID());
+    NodeBox* box = widget_ctrl->getBox(node->getNodeUUID());
     NodeAdapter::Ptr na = box->getNodeAdapter();
     Memento::Ptr m = na->getState();
     if(m) {
         YAML::Node doc;
-        doc["uuid"] = na->getNode()->getUUID();
+        doc["uuid"] = node->getNodeUUID();
 
         YAML::Node state;
         m->writeYaml(state);

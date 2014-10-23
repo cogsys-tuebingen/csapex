@@ -187,6 +187,7 @@ set(SRC_APP
     src/view/widget_controller.cpp
     src/view/fulcrum_widget.cpp
     src/view/fulcrum_handle.cpp
+    src/view/parameter_context_menu.cpp
 )
 
 #

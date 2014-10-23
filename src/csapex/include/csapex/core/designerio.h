@@ -29,7 +29,7 @@ public:
     void loadBoxes(YAML::Node& doc, WidgetController* widget_ctrl);
 
 private:
-    void saveBox(Node* node, WidgetController* widget_ctrl, YAML::Node &yaml);
+    void saveBox(NodeWorker *node, WidgetController* widget_ctrl, YAML::Node &yaml);
 
 private:
     Designer& designer_;

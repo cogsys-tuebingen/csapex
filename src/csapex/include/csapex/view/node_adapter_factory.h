@@ -22,7 +22,7 @@ public:
     NodeAdapterFactory(Settings& settings);
     ~NodeAdapterFactory();
 
-    NodeAdapterPtr makeNodeAdapter(Node* node, WidgetController* widget_controller);
+    NodeAdapterPtr makeNodeAdapter(NodeWorker* node, WidgetController* widget_controller);
 
     void loadPlugins();
 

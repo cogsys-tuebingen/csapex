@@ -86,8 +86,8 @@ public:
     void deleteConnection(Connection::Ptr connection);
 
     // TODO: do this correctly.. -> iterators
-    void foreachNode(boost::function<void (Node*)> f);
-    void foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred);
+    void foreachNode(boost::function<void (NodeWorker*)> f);
+    void foreachNode(boost::function<void (NodeWorker*)> f, boost::function<bool (NodeWorker*)> pred);
 
 private:
    /*rename*/ void verify();

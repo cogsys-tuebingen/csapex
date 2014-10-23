@@ -11,7 +11,7 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(Node *adaptee, WidgetController* widget_ctrl)
+NodeAdapter::NodeAdapter(NodeWorker *adaptee, WidgetController* widget_ctrl)
     : layout_(NULL), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
 {
 }
@@ -21,7 +21,7 @@ NodeAdapter::~NodeAdapter()
 }
 
 
-Node* NodeAdapter::getNode()
+NodeWorker* NodeAdapter::getNodeWorker()
 {
     return node_;
 }
@@ -36,7 +36,7 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
             is_gui_setup_ = true;
             guiChanged();
         } catch(const std::exception& e) {
-            std::cerr << "setting up ui for node " << node_->getUUID().getFullName() << " failed: " << e.what() << std::endl;
+            std::cerr << "setting up ui for node " << node_->getNodeUUID().getFullName() << " failed: " << e.what() << std::endl;
         }
     }
 }

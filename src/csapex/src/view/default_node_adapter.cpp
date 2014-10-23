@@ -10,7 +10,7 @@
 #include <csapex/view/port.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/view/designer_view.h>
+#include <csapex/view/parameter_context_menu.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -33,12 +33,7 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QGroupBox>
-#include <QScrollArea>
 #include <QListWidget>
-#include <QMouseEvent>
-#include <QMenu>
-#include <QAction>
-#include <QApplication>
 
 using namespace csapex;
 using namespace boost::lambda;
@@ -81,10 +76,10 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(Node *adaptee, WidgetController *widget_ctrl)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeWorker *adaptee, WidgetController *widget_ctrl)
     : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(NULL)
 {
-    QObject::connect(adaptee->getNodeWorker(), SIGNAL(nodeModelChanged()), &bridge, SLOT(nodeModelChangedEvent()));
+    QObject::connect(adaptee, SIGNAL(nodeModelChanged()), &bridge, SLOT(nodeModelChangedEvent()));
 }
 
 DefaultNodeAdapter::~DefaultNodeAdapter()
@@ -143,54 +138,6 @@ QString toColorSS(const std::vector<int>& v) {
 }
 
 
-class ParameterContextMenu : public ContextMenuHandler
-{
-public:
-    ParameterContextMenu(param::Parameter *p)
-        : param_(p)
-    {
-
-    }
-
-    void doShowContextMenu(const QPoint& pt)
-    {
-        QWidget* w = dynamic_cast<QWidget*>(parent());
-        if(!w) {
-            return;
-        }
-
-        DesignerView* view = QApplication::activeWindow()->findChild<DesignerView*>();
-
-
-
-        QPoint gpt = view->mapToGlobal(view->mapFromScene(w->mapToGlobal(pt)));
-
-        QMenu menu;
-        ContextMenuHandler::addHeader(menu, std::string("Parameter: ") + param_->name());
-
-        QAction* connectable = new QAction("connectable", &menu);
-        connectable->setCheckable(true);
-        connectable->setChecked(param_->isInteractive());
-        connectable->setIcon(QIcon(":/connector.png"));
-
-        connectable->setIconVisibleInMenu(true);
-        menu.addAction(connectable);
-
-        QAction* selectedItem = menu.exec(gpt);
-        if (selectedItem) {
-            if(selectedItem == connectable) {
-                param_->setInteractive(!param_->isInteractive());
-            }
-        }
-    }
-
-private:
-    param::Parameter* param_;
-};
-
-
-
-
 void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
 {
     if(!wrapper_layout_) {
@@ -242,9 +189,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     current_layout_ = wrapper_layout_;
 
-    std::vector<param::Parameter::Ptr> params = node_->getParameters();
+    std::vector<param::Parameter::Ptr> params = node_->getNode()->getParameters();
 
-    GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getParameterState());
+    GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getNode()->getParameterState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
@@ -320,7 +267,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
 
         // connect parameter input, if available
-        Input* param_in = node_->getNodeWorker()->getParameterInput(current_name_);
+        Input* param_in = node_->getParameterInput(current_name_);
         if(param_in) {
             Port* port = new Port(cmd_dispatcher, param_in, false);
             port->setVisible(p->isInteractive());
@@ -338,7 +285,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        Output* param_out = node_->getNodeWorker()->getParameterOutput(current_name_);
+        Output* param_out = node_->getParameterOutput(current_name_);
         if(param_out) {
             Port* port = new Port(cmd_dispatcher, param_out, false);
             port->setVisible(p->isInteractive());
@@ -748,7 +695,7 @@ void DefaultNodeAdapter::setupParameter(param::BitSetParameter *bitset_p)
 template <typename T>
 void DefaultNodeAdapter::updateParam(const std::string& name, T value)
 {
-    param::Parameter* p = node_->getParameter(name).get();
+    param::Parameter* p = node_->getNode()->getParameter(name).get();
     p->set<T>(value);
     guiChanged();
 }
@@ -765,7 +712,7 @@ void DefaultNodeAdapter::updateParamIfNotEmpty(const std::string& name, const st
 
 void DefaultNodeAdapter::updateParamSet(const std::string& name, const std::string& value)
 {
-    param::SetParameter::Ptr set_p = node_->getParameter<param::SetParameter>(name);
+    param::SetParameter::Ptr set_p = node_->getNode()->getParameter<param::SetParameter>(name);
     if(set_p) {
         set_p->setByName(value);
         guiChanged();
@@ -774,7 +721,7 @@ void DefaultNodeAdapter::updateParamSet(const std::string& name, const std::stri
 
 void DefaultNodeAdapter::updateParamBitSet(const std::string& name, const QListView* list)
 {
-    param::BitSetParameter::Ptr bitset_p = node_->getParameter<param::BitSetParameter>(name);
+    param::BitSetParameter::Ptr bitset_p = node_->getNode()->getParameter<param::BitSetParameter>(name);
     if(bitset_p) {
         std::vector<std::string> selected;
         Q_FOREACH(const QModelIndex& idx, list->selectionModel()->selectedIndexes()) {
@@ -789,7 +736,7 @@ template <typename T>
 void DefaultNodeAdapter::updateUi(const param::Parameter* p, boost::function<void(T)> setter)
 {
     /// TODO: execute ONLY in UI thread
-    setter(node_->readParameter<T>(p->name()));
+    setter(node_->getNode()->readParameter<T>(p->name()));
 }
 
 template <typename T>

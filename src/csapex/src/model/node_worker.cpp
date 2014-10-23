@@ -82,6 +82,11 @@ UUID NodeWorker::getNodeUUID() const
     return node_->getUUID();
 }
 
+std::string NodeWorker::getType() const
+{
+    return node_->getType();
+}
+
 bool NodeWorker::isEnabled() const
 {
     return node_->getNodeState()->isEnabled();

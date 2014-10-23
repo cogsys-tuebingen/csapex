@@ -20,12 +20,12 @@ public:
     typedef boost::shared_ptr<NodeAdapter> Ptr;
 
 protected:
-    NodeAdapter(Node* adaptee, WidgetController *widget_ctrl);
+    NodeAdapter(NodeWorker* adaptee, WidgetController *widget_ctrl);
 
 public:
     virtual ~NodeAdapter();
 
-    Node* getNode();
+    NodeWorker *getNodeWorker();
 
     void doSetupUi(QBoxLayout* layout);
 
@@ -50,7 +50,7 @@ protected:
     std::string current_display_name_;
     QBoxLayout* current_layout_;
 
-    Node* node_;
+    NodeWorker* node_;
     WidgetController* widget_ctrl_;
 };
 

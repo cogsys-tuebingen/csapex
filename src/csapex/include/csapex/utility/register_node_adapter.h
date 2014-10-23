@@ -2,6 +2,7 @@
 #define REGISTER_NODE_ADAPTER_H
 
 /// COMPONENT
+#include <csapex/model/node_worker.h>
 #include <csapex/utility/register_apex_plugin.h>
 #include <csapex/view/node_adapter_builder.h>
 
@@ -14,10 +15,10 @@ public: \
     { \
         return #Adaptee; \
     } \
-    virtual NodeAdapterPtr build(Node* node, WidgetController* widget_ctrl) const \
+    virtual NodeAdapterPtr build(NodeWorker* worker, WidgetController* widget_ctrl) const \
     { \
-        Adaptee* adaptee = dynamic_cast<Adaptee*> (node); \
-        return NodeAdapter::Ptr(new Adapter(adaptee, widget_ctrl)); \
+        Adaptee* adaptee = dynamic_cast<Adaptee*> (worker->getNode()); \
+        return NodeAdapter::Ptr(new Adapter(worker, adaptee, widget_ctrl)); \
     } \
 }; \
 }\

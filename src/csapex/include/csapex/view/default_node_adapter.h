@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/view/node_adapter.h>
-#include <csapex/utility/context_menu_handler.h>
 
 /// PROJECT
 #include <utils_param/param_fwd.h>
@@ -47,7 +46,7 @@ class DefaultNodeAdapter : public NodeAdapter
     friend class DefaultNodeAdapterBridge;
 
 public:
-    DefaultNodeAdapter(Node* adaptee, WidgetController* widget_ctrl);
+    DefaultNodeAdapter(NodeWorker* adaptee, WidgetController* widget_ctrl);
     virtual ~DefaultNodeAdapter();
 
     virtual void stop();

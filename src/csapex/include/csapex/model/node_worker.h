@@ -45,6 +45,7 @@ public:
 
     Node* getNode();
     UUID getNodeUUID() const;
+    std::string getType() const;
 
     bool isEnabled() const;
     void setEnabled(bool e);

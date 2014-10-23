@@ -96,18 +96,18 @@ int Graph::countNodes()
 
 
 
-void Graph::foreachNode(boost::function<void (Node*)> f)
+void Graph::foreachNode(boost::function<void (NodeWorker*)> f)
 {
     Q_FOREACH(NodeWorker::Ptr b, nodes_) {
-        f(b->getNode());
+        f(b.get());
     }
 }
 
-void Graph::foreachNode(boost::function<void (Node*)> f, boost::function<bool (Node*)> pred)
+void Graph::foreachNode(boost::function<void (NodeWorker*)> f, boost::function<bool (NodeWorker*)> pred)
 {
     Q_FOREACH(NodeWorker::Ptr b, nodes_) {
-        if(pred(b->getNode())) {
-            f(b->getNode());
+        if(pred(b.get())) {
+            f(b.get());
         }
     }
 }
