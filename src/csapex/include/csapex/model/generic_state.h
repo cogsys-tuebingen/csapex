@@ -24,6 +24,8 @@ public:
 
     void addParameter(param::ParameterPtr param);
 
+    void addPersistentParameter(const param::ParameterPtr& param);
+
     void addTemporaryParameter(const param::ParameterPtr& param);
     void removeTemporaryParameters();
 
@@ -51,6 +53,7 @@ public:
 public:
     std::map<std::string, param::ParameterPtr> params;
     std::map<std::string, bool> temporary;
+    std::set<std::string> persistent;
     std::vector<std::string> order;
 
     bool silent_;

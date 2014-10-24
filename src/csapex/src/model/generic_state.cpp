@@ -6,6 +6,9 @@
 #include <utils_param/parameter_factory.h>
 #include <csapex/utility/assert.h>
 
+/// SYSTEM
+#include <qglobal.h>
+
 using namespace csapex;
 
 GenericState::GenericState()
@@ -22,11 +25,19 @@ GenericState::Ptr GenericState::clone() const
 
 void GenericState::writeYaml(YAML::Node& out) const {
     out["params"] = params;
+
+    std::vector<std::string> persistent_v(persistent.begin(), persistent.end());
+    out["persistent_params"] = persistent_v;
 }
 
 void GenericState::readYaml(const YAML::Node& node) {
     if(node["params"].IsDefined()) {
         params = node["params"].as<std::map<std::string, param::Parameter::Ptr> >();
+    }
+    if(node["persistent_params"].IsDefined()) {
+         std::vector<std::string> persistent_v = node["persistent_params"].as<std::vector<std::string> >();
+         persistent.clear();
+         persistent.insert(persistent_v.begin(), persistent_v.end());
     }
 }
 
@@ -79,16 +90,16 @@ void GenericState::addTemporaryParameter(const param::Parameter::Ptr &param)
     temporary[param->name()] = true;
 }
 
+void GenericState::addPersistentParameter(const param::Parameter::Ptr &param)
+{
+    params[param->name()] = param;
+    persistent.insert(param->name());
+    triggerParameterSetChanged();
+}
+
 void GenericState::setFrom(const GenericState &rhs)
 {
-//    std::map<std::string, param::Parameter::Ptr> old_params = params;
-//    std::vector<std::string> old_order = order;
-
-//    *this = rhs;
-
-//    params = old_params;
-//    order = old_order;
-//    order = old_order;
+    persistent = rhs.persistent;
 
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = rhs.params.begin(); it != rhs.params.end(); ++it) {
         param::Parameter::Ptr p = it->second;
@@ -124,5 +135,9 @@ std::vector<param::Parameter::Ptr> GenericState::getParameters() const
     for(std::vector<std::string>::const_iterator n = order.begin(); n != order.end(); ++n) {
         result.push_back(params.at(*n));
     }
+    foreach(const std::string& p, persistent) {
+        result.push_back(params.at(p));
+    }
+
     return result;
 }

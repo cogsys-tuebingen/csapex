@@ -69,6 +69,11 @@ void Parameterizable::checkConditions(bool silent)
     }
 }
 
+void Parameterizable::addPersistentParameter(const param::Parameter::Ptr &param)
+{
+    parameter_state_->addPersistentParameter(param);
+}
+
 void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param)
 {
     parameter_state_->addTemporaryParameter(param);

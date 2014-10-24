@@ -29,6 +29,8 @@ public:
     void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition);
     void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
 
+    void addPersistentParameter(const param::Parameter::Ptr& param);
+
     void addTemporaryParameter(const param::Parameter::Ptr& param);
     void addTemporaryParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
 
