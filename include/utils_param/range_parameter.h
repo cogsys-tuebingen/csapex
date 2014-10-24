@@ -47,7 +47,7 @@ public:
     T max() const { return read<T>(max_); }
 
     template <typename T>
-    T def() const { return read<T>(def_); }
+    T def() const { return read<T>(def_value_); }
 
     template <typename T>
     T step() const { return read<T>(step_); }
@@ -128,7 +128,9 @@ private:
     boost::any value_;
     boost::any min_;
     boost::any max_;
-    boost::any def_;
+    boost::any def_value_;
+    boost::any def_min_;
+    boost::any def_max_;
     boost::any step_;
 };
 

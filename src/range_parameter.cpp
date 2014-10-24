@@ -81,7 +81,9 @@ void RangeParameter::doClone(const Parameter &other)
         value_ = range->value_;
         min_ = range->min_;
         max_ = range->max_;
-        def_ = range->def_;
+        def_min_ = range->def_min_;
+        def_max_ = range->def_max_;
+        def_value_ = range->def_value_;
         step_ = range->step_;
     } else {
         throw std::runtime_error("bad clone, invalid types");
@@ -92,18 +94,16 @@ void RangeParameter::doSerialize(YAML::Node& n) const
 {
     if(value_.type() == typeid(int)) {
         n["int"] = boost::any_cast<int> (value_);
+        n["min"] = boost::any_cast<int> (min_);
+        n["max"] = boost::any_cast<int> (max_);
+        n["step"] = boost::any_cast<int> (step_);
 
     } else if(value_.type() == typeid(double)) {
         n["double"] = boost::any_cast<double> (value_);
-
+        n["min"] = boost::any_cast<double> (min_);
+        n["max"] = boost::any_cast<double> (max_);
+        n["step"] = boost::any_cast<double> (step_);
     }
-}
-
-namespace {
-template <typename T>
-T __read(const YAML::Node& n) {
-    return n.as<T>();
-}
 }
 
 void RangeParameter::doDeserialize(const YAML::Node& n)
@@ -115,9 +115,30 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
     name_ = n["name"].as<std::string>();
 
     if(n["int"].IsDefined()) {
-        value_ = __read<int>(n["int"]);
+        value_ = n["int"].as<int>();
+        if(n["min"].IsDefined())
+            min_ = n["min"].as<int>();
+        if(n["max"].IsDefined())
+            max_ = n["max"].as<int>();
+        if(n["step"].IsDefined())
+            step_ = n["step"].as<int>();
 
     } else if(n["double"].IsDefined()) {
-        value_ = __read<double>(n["double"]);
+        value_ = n["double"].as<double>();
+        if(n["min"].IsDefined())
+            min_ = n["min"].as<double>();
+        if(n["max"].IsDefined())
+            max_ = n["max"].as<double>();
+        if(n["step"].IsDefined())
+            step_ = n["step"].as<double>();
     }
+
+    if(def_min_.empty())
+        def_min_ = min_;
+
+    if(def_max_.empty())
+        def_max_ = max_;
+
+    if(def_value_.empty())
+        def_value_ = value_;
 }

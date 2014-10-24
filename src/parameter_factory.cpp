@@ -230,9 +230,11 @@ Parameter::Ptr ParameterFactory::declareRange(const std::string& name,
     BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
 
     RangeParameter::Ptr result(new RangeParameter(name, description));
-    result->def_ = def;
-    result->min_ = min;
-    result->max_ = max;
+    result->def_value_ = def;
+    result->def_min_ = min;
+    result->def_max_ = max;
+    result->min_ = result->def_min_;
+    result->max_ = result->def_max_;
     result->step_ = step;
     result->set<T>(def);
 
