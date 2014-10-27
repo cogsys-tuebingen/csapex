@@ -19,7 +19,7 @@ using namespace csapex;
 
 static const int DEFAULT_HISTORY_LENGTH = 15;
 
-NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
+NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
     : settings_(settings), node_(node),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
@@ -35,10 +35,15 @@ NodeWorker::NodeWorker(Settings& settings, Node::Ptr node)
 
     apex_assert_hard(node_);
 
+
     tick_timer_ = new QTimer();
     setTickFrequency(DEFAULT_FREQUENCY);
 
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
+
+    node->getParameterState()->parameter_added->connect(boost::bind(&NodeWorker::makeParameterConnectable, this, _1));
+
+    node_->initialize(type, uuid, this, &settings_);
 }
 
 NodeWorker::~NodeWorker()
@@ -55,11 +60,11 @@ NodeWorker::~NodeWorker()
     while(!outputs_.empty()) {
         removeOutput(*outputs_.begin());
     }
-    while(!managed_inputs_.empty()) {
-        removeInput(*managed_inputs_.begin());
+    while(!parameter_inputs_.empty()) {
+        removeInput(*parameter_inputs_.begin());
     }
-    while(!managed_outputs_.empty()) {
-        removeOutput(*managed_outputs_.begin());
+    while(!parameter_outputs_.empty()) {
+        removeOutput(*parameter_outputs_.begin());
     }
 
     Q_FOREACH(QObject* cb, callbacks) {
@@ -119,47 +124,59 @@ bool NodeWorker::canReceive()
 }
 
 template <typename T>
-void NodeWorker::makeParameterConnectable(param::Parameter *p)
+void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
 {
     {
         Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
-
+        cin->setEnabled(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
+        parameter_inputs_.push_back(cin);
+        connectConnector(cin);
+        cin->moveToThread(thread());
 
-        manageInput(cin);
+        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), this, SLOT(parameterMessageArrived(Connectable*)));
+
         param_2_input_[p->name()] = cin;
+        input_2_param_[cin] = p;
     }
     {
         Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
-
+        cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
-        manageOutput(cout);
+        parameter_outputs_.push_back(cout);
+        connectConnector(cout);
+        cout->moveToThread(thread());
+
         param_2_output_[p->name()] = cout;
+        output_2_param_[cout] = p;
     }
+}
+
+void NodeWorker::makeParameterConnectable(param::Parameter* p)
+{
+    if(p->is<int>()) {
+        makeParameterConnectableImpl<int>(p);
+    } else if(p->is<double>()) {
+        makeParameterConnectableImpl<double>(p);
+    } else if(p->is<std::string>()) {
+        makeParameterConnectableImpl<std::string>(p);
+    } else if(p->is<bool>()) {
+        makeParameterConnectableImpl<bool>(p);
+    } else if(p->is<std::pair<int, int> >()) {
+        makeParameterConnectableImpl<std::pair<int, int> >(p);
+    } else if(p->is<std::pair<double, double> >()) {
+        makeParameterConnectableImpl<std::pair<double, double> >(p);
+    }
+    // else: do nothing and ignore the parameter
 }
 
 void NodeWorker::makeParametersConnectable()
 {
     GenericState::Ptr state = node_->getParameterState();
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
-        param::Parameter* p = it->second.get();
-
-        if(p->is<int>()) {
-            makeParameterConnectable<int>(p);
-        } else if(p->is<double>()) {
-            makeParameterConnectable<double>(p);
-        } else if(p->is<std::string>()) {
-            makeParameterConnectable<std::string>(p);
-        } else if(p->is<bool>()) {
-            makeParameterConnectable<bool>(p);
-        } else if(p->is<std::pair<int, int> >()) {
-            makeParameterConnectable<std::pair<int, int> >(p);
-        } else if(p->is<std::pair<double, double> >()) {
-            makeParameterConnectable<std::pair<double, double> >(p);
-        }
-        // else: do nothing and ignore the parameter
+        makeParameterConnectable(it->second.get());
     }
 }
 
@@ -293,12 +310,34 @@ void NodeWorker::messageArrived(Connectable *s)
     checkIfInputsCanBeProcessed();
 }
 
+void NodeWorker::parameterMessageArrived(Connectable *s)
+{
+    Input* source = dynamic_cast<Input*> (s);
+    apex_assert_hard(source);
+
+    param::Parameter* p = input_2_param_.at(source);
+
+    if(source->isValue<int>()) {
+        p->set<int>(source->getValue<int>());
+    } else if(source->isValue<double>()) {
+        p->set<double>(source->getValue<double>());
+    } else if(source->isValue<std::string>()) {
+        p->set<std::string>(source->getValue<std::string>());
+    } else {
+        node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
+    }
+
+    source->free();
+    source->notifyMessageProcessed();
+}
+
 void NodeWorker::checkIfInputsCanBeProcessed()
 {
     if(isEnabled() && areAllInputsAvailable()) {
         processMessages();
     }
 }
+
 
 void NodeWorker::checkIfOutputIsReady(Connectable* c)
 {
@@ -510,9 +549,9 @@ void NodeWorker::removeInput(Input *in)
     if(it != inputs_.end()) {
         inputs_.erase(it);
     } else {
-        it = std::find(managed_inputs_.begin(), managed_inputs_.end(), in);
-        if(it != managed_inputs_.end()) {
-            managed_inputs_.erase(it);
+        it = std::find(parameter_inputs_.begin(), parameter_inputs_.end(), in);
+        if(it != parameter_inputs_.end()) {
+            parameter_inputs_.erase(it);
         } else {
             std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
         }
@@ -541,9 +580,9 @@ void NodeWorker::removeOutput(Output *out)
     if(it != outputs_.end()) {
         outputs_.erase(it);
     } else {
-        it = std::find(managed_outputs_.begin(), managed_outputs_.end(), out);
-        if(it != managed_outputs_.end()) {
-            managed_outputs_.erase(it);
+        it = std::find(parameter_outputs_.begin(), parameter_outputs_.end(), out);
+        if(it != parameter_outputs_.end()) {
+            parameter_outputs_.erase(it);
         } else {
             std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
         }
@@ -554,22 +593,6 @@ void NodeWorker::removeOutput(Output *out)
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
 }
-
-
-void NodeWorker::manageInput(Input* in)
-{
-    managed_inputs_.push_back(in);
-    connectConnector(in);
-    in->moveToThread(thread());
-}
-
-void NodeWorker::manageOutput(Output* out)
-{
-    managed_outputs_.push_back(out);
-    connectConnector(out);
-    out->moveToThread(thread());
-}
-
 
 void NodeWorker::registerInput(Input* in)
 {
@@ -609,7 +632,7 @@ Input* NodeWorker::getInput(const UUID& uuid) const
             return in;
         }
     }
-    foreach(Input* in, managed_inputs_) {
+    foreach(Input* in, parameter_inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
@@ -625,7 +648,7 @@ Output* NodeWorker::getOutput(const UUID& uuid) const
             return out;
         }
     }
-    foreach(Output* out, managed_outputs_) {
+    foreach(Output* out, parameter_outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
@@ -648,7 +671,7 @@ std::vector<Input*> NodeWorker::getAllInputs() const
 {
     std::vector<Input*> result;
     result = inputs_;
-    result.insert(result.end(), managed_inputs_.begin(), managed_inputs_.end());
+    result.insert(result.end(), parameter_inputs_.begin(), parameter_inputs_.end());
     return result;
 }
 
@@ -656,7 +679,7 @@ std::vector<Output*> NodeWorker::getAllOutputs() const
 {
     std::vector<Output*> result;
     result = outputs_;
-    result.insert(result.end(), managed_outputs_.begin(), managed_outputs_.end());
+    result.insert(result.end(), parameter_outputs_.begin(), parameter_outputs_.end());
     return result;
 }
 
@@ -670,14 +693,14 @@ std::vector<Output*> NodeWorker::getMessageOutputs() const
     return outputs_;
 }
 
-std::vector<Input*> NodeWorker::getManagedInputs() const
+std::vector<Input*> NodeWorker::getParameterInputs() const
 {
-    return managed_inputs_;
+    return parameter_inputs_;
 }
 
-std::vector<Output*> NodeWorker::getManagedOutputs() const
+std::vector<Output*> NodeWorker::getParameterOutputs() const
 {
-    return managed_outputs_;
+    return parameter_outputs_;
 }
 
 bool NodeWorker::canSendMessages()
@@ -739,6 +762,20 @@ void NodeWorker::trySendMessages()
 
         } else {
             is_ready_[out] = true;
+        }
+    }
+
+    for(std::size_t i = 0; i < parameter_outputs_.size(); ++i) {
+        Output* out = parameter_outputs_[i];
+        if(out->isConnected()) {
+            param::Parameter* p = output_2_param_.at(out);
+            if(p->is<int>())
+                out->publish(p->as<int>());
+            else if(p->is<double>())
+                out->publish(p->as<double>());
+            else if(p->is<std::string>())
+                out->publish(p->as<std::string>());
+            out->sendMessages();
         }
     }
 
@@ -880,8 +917,10 @@ void NodeWorker::tick()
 
 void NodeWorker::checkParameters()
 {
-    Parameterizable::ChangedParameterList changed_params = node_->getChangedParameters();
+    // check if a parameter-connection has a message
 
+    // check if a parameter was changed
+    Parameterizable::ChangedParameterList changed_params = node_->getChangedParameters();
     if(!changed_params.empty()) {
         for(Parameterizable::ChangedParameterList::iterator it = changed_params.begin(); it != changed_params.end();) {
             try {

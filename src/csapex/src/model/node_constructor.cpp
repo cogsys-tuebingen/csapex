@@ -77,9 +77,7 @@ NodeWorker::Ptr NodeConstructor::makeContent(const UUID& uuid) const
 {
     try {
         Node::Ptr node = c();
-        NodeWorker::Ptr result(new NodeWorker(settings_, node));
-        node->initialize(type_, uuid, result.get(), &settings_);
-        node->getNodeState()->setLabel(uuid);
+        NodeWorker::Ptr result(new NodeWorker(type_, uuid, settings_, node));
         return result;
     } catch(const std::exception& e) {
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;

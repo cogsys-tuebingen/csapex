@@ -33,7 +33,7 @@ public:
     static const double DEFAULT_FREQUENCY = 30.0;
 
 public:
-    NodeWorker(Settings& settings, NodePtr node);
+    NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);
     ~NodeWorker();
 
     void stop();
@@ -62,11 +62,9 @@ public:
     virtual Input* getInput(const UUID& uuid) const;
     virtual Output* getOutput(const UUID& uuid) const;
 
+    /* experimental */ void makeParameterConnectable(param::Parameter*);
     /* experimental */ Input* getParameterInput(const std::string& name) const;
     /* experimental */ Output* getParameterOutput(const std::string& name) const;
-
-    /* NAMING */ void manageInput(Input* in);
-    /* NAMING */ void manageOutput(Output* out);
 
     /* NAMING */ void registerInput(Input* in);
     /* NAMING */ void registerOutput(Output* out);
@@ -80,8 +78,8 @@ public:
     std::vector<Input*> getMessageInputs() const;
     std::vector<Output*> getMessageOutputs() const;
 
-    std::vector<Input*> getManagedInputs() const;
-    std::vector<Output*> getManagedOutputs() const;
+    std::vector<Input*> getParameterInputs() const;
+    std::vector<Output*> getParameterOutputs() const;
 
     bool canReceive();
     bool areAllInputsAvailable();
@@ -100,6 +98,9 @@ public:
 public Q_SLOTS:
     void messageArrived(Connectable* source);
     void processMessages();
+
+    void parameterMessageArrived(Connectable* source);
+
 
     void checkParameters();    
     void checkIO();
@@ -157,7 +158,7 @@ private:
     void disconnectConnector(Connectable* c);
 
     template <typename T>
-    void makeParameterConnectable(param::Parameter*);
+    void makeParameterConnectableImpl(param::Parameter*);
 
 
     void processInputs(bool all_inputs_are_present);
@@ -169,11 +170,14 @@ private:
     std::vector<Input*> inputs_;
     std::vector<Output*> outputs_;
 
-    std::vector<Input*> managed_inputs_;
-    std::vector<Output*> managed_outputs_;
+    std::vector<Input*> parameter_inputs_;
+    std::vector<Output*> parameter_outputs_;
 
     std::map<std::string, Input*> param_2_input_;
     std::map<std::string, Output*> param_2_output_;
+
+    std::map<Input*,param::Parameter*> input_2_param_;
+    std::map<Output*,param::Parameter*> output_2_param_;
 
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;

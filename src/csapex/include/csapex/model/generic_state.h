@@ -50,6 +50,11 @@ public:
     virtual void writeYaml(YAML::Node& out) const;
     virtual void readYaml(const YAML::Node& node);
 
+    void initializePersistentParameters();
+
+private:
+    void registerParameter(const param::Parameter::Ptr &param);
+
 public:
     std::map<std::string, param::ParameterPtr> params;
     std::map<std::string, bool> temporary;
@@ -59,6 +64,7 @@ public:
     bool silent_;
 
     boost::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
+    boost::shared_ptr<boost::signals2::signal<void(param::Parameter*)> > parameter_added;
 };
 
 }

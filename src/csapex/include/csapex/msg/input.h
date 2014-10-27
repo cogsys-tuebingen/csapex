@@ -67,6 +67,11 @@ public:
         return msg->value;
     }
 
+    template <typename R>
+    bool isValue() {
+        return isMessage< connection_types::GenericValueMessage<R> >();
+    }
+
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
     virtual bool isConnected() const;
 

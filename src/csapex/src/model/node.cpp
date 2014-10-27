@@ -46,9 +46,8 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     aerr.setPrefix(p);
     alog.setPrefix(p);
 
-
     setupParameters();
-    worker_->makeParametersConnectable();
+    node_state_->setLabel(uuid);
 
     try {
         setup();

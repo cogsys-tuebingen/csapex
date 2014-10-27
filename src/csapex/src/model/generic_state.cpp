@@ -12,10 +12,13 @@
 using namespace csapex;
 
 GenericState::GenericState()
-    : silent_(false), parameter_set_changed(new boost::signals2::signal<void()>)
+    : silent_(false),
+      parameter_set_changed(new boost::signals2::signal<void()>),
+      parameter_added(new boost::signals2::signal<void(param::Parameter*)>)
 {
 
 }
+
 
 GenericState::Ptr GenericState::clone() const
 {
@@ -41,6 +44,13 @@ void GenericState::readYaml(const YAML::Node& node) {
     }
 }
 
+void GenericState::initializePersistentParameters()
+{
+    foreach(const std::string& name, persistent) {
+        (*parameter_added)(params[name].get());
+    }
+}
+
 void GenericState::addParameter(param::Parameter::Ptr param)
 {
     param::Parameter::Ptr old_value;
@@ -51,10 +61,9 @@ void GenericState::addParameter(param::Parameter::Ptr param)
     apex_assert_hard(param->name() != "noname");
     apex_assert_hard(std::find(order.begin(), order.end(), param->name()) == order.end());
 
-    params[param->name()] = param;
     order.push_back(param->name());
 
-    triggerParameterSetChanged();
+    registerParameter(param);
 }
 
 void GenericState::setParameterSetSilence(bool silent)
@@ -90,10 +99,19 @@ void GenericState::addTemporaryParameter(const param::Parameter::Ptr &param)
     temporary[param->name()] = true;
 }
 
+
 void GenericState::addPersistentParameter(const param::Parameter::Ptr &param)
 {
-    params[param->name()] = param;
     persistent.insert(param->name());
+
+    registerParameter(param);
+}
+
+void GenericState::registerParameter(const param::Parameter::Ptr &param)
+{
+    params[param->name()] = param;
+
+    (*parameter_added)(param.get());
     triggerParameterSetChanged();
 }
 
@@ -109,6 +127,8 @@ void GenericState::setFrom(const GenericState &rhs)
             params[p->name()] = param::ParameterFactory::clone(p);
         }
     }
+
+    initializePersistentParameters();
 }
 
 param::Parameter &GenericState::operator [](const std::string& name) const
