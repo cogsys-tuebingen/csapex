@@ -264,7 +264,6 @@ void NodeWorker::reset()
     node_->setError(false);
     Q_FOREACH(Input* i, inputs_) {
         i->reset();
-        has_msg_[i] = false;
     }
     Q_FOREACH(Output* i, outputs_) {
         i->reset();
@@ -304,8 +303,6 @@ void NodeWorker::messageArrived(Connectable *s)
 
     QMutexLocker lock(&sync);
 
-    apex_assert_hard(!has_msg_[source]);
-    has_msg_[source] = true;
 
     checkIfInputsCanBeProcessed();
 }
@@ -376,7 +373,7 @@ void NodeWorker::processMessages()
         int highest_seq_no = -1;
         UUID highest = UUID::NONE;
         foreach(Input* cin, inputs_) {
-            if(has_msg_[cin]) {
+            if(cin->hasReceived()) {
                 int s = cin->sequenceNumber();
                 if(s > highest_seq_no) {
                     highest_seq_no = s;
@@ -437,7 +434,7 @@ bool NodeWorker::areAllInputsAvailable()
 
     // check if all inputs have messages
     foreach(Input* cin, inputs_) {
-        if(!has_msg_[cin]) {
+        if(!cin->hasReceived()) {
             // connector doesn't have a message
             if(cin->isOptional()) {
                 if(cin->isConnected()) {
@@ -534,15 +531,6 @@ Output* NodeWorker::getParameterOutput(const std::string &name) const
 
 void NodeWorker::removeInput(Input *in)
 {
-    {
-        QMutexLocker lock(&sync);
-        std::map<Input*, bool>::iterator it = has_msg_.find(in);
-
-        if(it != has_msg_.end()) {
-            has_msg_.erase(it);
-        }
-    }
-
     std::vector<Input*>::iterator it;
     it = std::find(inputs_.begin(), inputs_.end(), in);
 
@@ -599,8 +587,6 @@ void NodeWorker::registerInput(Input* in)
     inputs_.push_back(in);
 
     in->moveToThread(thread());
-
-    has_msg_[in] = false;
 
     connectConnector(in);
     QObject::connect(in, SIGNAL(messageArrived(Connectable*)), this, SLOT(messageArrived(Connectable*)));
@@ -722,7 +708,6 @@ void NodeWorker::resetInputs()
 {
     QMutexLocker lock(&sync);
     Q_FOREACH(Input* cin, inputs_) {
-        has_msg_[cin] = false;
         cin->free();
     }
     Q_FOREACH(Input* cin, inputs_) {

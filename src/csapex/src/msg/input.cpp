@@ -83,9 +83,13 @@ bool Input::isOptional() const
     return optional_;
 }
 
+bool Input::hasReceived() const
+{
+    return isConnected() && buffer_->isFilled();
+}
 bool Input::hasMessage() const
 {
-    return isConnected() && buffer_->isFilled() && !buffer_->isType<connection_types::NoMessage>();
+    return hasReceived() && !buffer_->isType<connection_types::NoMessage>();
 }
 
 void Input::stop()

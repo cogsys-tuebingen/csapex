@@ -91,6 +91,8 @@ public:
     }
 
     bool hasMessage() const;
+    bool hasReceived() const;
+
     void free();
     void stop();
 
