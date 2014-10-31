@@ -136,7 +136,7 @@ bool Output::connect(Connectable *other_side)
     apex_assert_hard(input);
     targets_.push_back(input);
 
-    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
+    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
 
     validateConnections();
 
@@ -185,6 +185,17 @@ void Output::publish(ConnectionType::Ptr message)
 bool Output::hasMessage()
 {
     return message_to_send_;
+}
+
+bool Output::canSendMessages()
+{
+    foreach(Input* input, targets_) {
+        bool blocked = input->isEnabled() && input->isBlocked();
+        if(blocked) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void Output::sendMessages()

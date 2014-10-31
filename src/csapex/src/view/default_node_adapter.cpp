@@ -511,6 +511,7 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParam<int>, this, current_name_, boost::bind(&QIntSlider::intValue, slider));
         qt_helper::Call* call = new qt_helper::Call(cb);
         callbacks.push_back(call);
+        QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
         boost::function<void(int)> set = boost::bind(&QIntSlider::setIntValue, slider, __1);
@@ -525,8 +526,6 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         connections.push_back(range_p->scope_changed.connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::RangeParameter>, this, __1, setter)));
 
 
-        QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
-
     } else if(range_p->is<double>()) {
         QDoubleSlider* slider = QtHelper::makeDoubleSlider(current_layout_, current_display_name_ ,
                                                            range_p->def<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>(),
@@ -537,6 +536,7 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         boost::function<void()> cb = boost::bind(&DefaultNodeAdapter::updateParam<double>, this, current_name_, boost::bind(&QDoubleSlider::doubleValue, slider));
         qt_helper::Call* call = new qt_helper::Call(cb);
         callbacks.push_back(call);
+        QObject::connect(slider, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
         // model change -> ui
         boost::function<void(double)> set = boost::bind(&QDoubleSlider::setDoubleValue, slider, __1);
@@ -549,8 +549,6 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
                                                                                  boost::bind(&param::RangeParameter::max<double>, __1));
 
         connections.push_back(range_p->scope_changed.connect(boost::bind(&DefaultNodeAdapter::updateUiPtr<param::RangeParameter>, this, __1, setter)));
-
-        QObject::connect(slider, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
     } else {
         current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (range: " + type2name(range_p->type()) + ")").c_str()));

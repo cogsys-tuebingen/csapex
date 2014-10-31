@@ -52,7 +52,7 @@ bool Input::tryConnect(Connectable* other_side)
 bool Input::acknowledgeConnection(Connectable* other_side)
 {
     target = dynamic_cast<Output*>(other_side);
-    connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)));
+    connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
     connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
     return true;
 }

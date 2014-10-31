@@ -196,9 +196,22 @@ void NodeWorker::switchThread(QThread *thread, int id)
     QObject::disconnect(tick_timer_);
 
     assert(thread);
-    assert(thread != QApplication::instance()->thread());
 
+    foreach(Input* input, inputs_){
+        input->moveToThread(thread);
+    }
+    foreach(Input* input, parameter_inputs_){
+        input->moveToThread(thread);
+    }
+    foreach(Output* output, outputs_){
+        output->moveToThread(thread);
+    }
+    foreach(Output* output, parameter_outputs_){
+        output->moveToThread(thread);
+    }
     moveToThread(thread);
+
+    assertNotInGuiThread();
 
     node_->getNodeState()->setThread(id);
 
@@ -227,7 +240,7 @@ void NodeWorker::stop()
 {
     QObject::disconnect(tick_timer_);
 
-    assert(this->thread() != QApplication::instance()->thread());
+    assertNotInGuiThread();
     node_->abort();
 
     QMutexLocker lock(&stop_mutex_);
@@ -259,7 +272,8 @@ void NodeWorker::waitUntilFinished()
 
 void NodeWorker::reset()
 {
-    assert(this->thread() != QApplication::instance()->thread());
+    assertNotInGuiThread();
+
     node_->abort();
     node_->setError(false);
     Q_FOREACH(Input* i, inputs_) {
@@ -267,7 +281,6 @@ void NodeWorker::reset()
     }
     Q_FOREACH(Output* i, outputs_) {
         i->reset();
-        is_ready_[i] = true;
     }
 }
 
@@ -290,6 +303,8 @@ void NodeWorker::killExecution()
 
 void NodeWorker::messageArrived(Connectable *s)
 {
+    assertNotInGuiThread();
+
     {
         pause_mutex_.lock();
         while(paused_) {
@@ -309,6 +324,8 @@ void NodeWorker::messageArrived(Connectable *s)
 
 void NodeWorker::parameterMessageArrived(Connectable *s)
 {
+    assertNotInGuiThread();
+
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
@@ -336,29 +353,16 @@ void NodeWorker::checkIfInputsCanBeProcessed()
 }
 
 
-void NodeWorker::checkIfOutputIsReady(Connectable* c)
+void NodeWorker::checkIfOutputIsReady(Connectable*)
 {
-    Output* output = dynamic_cast<Output*>(c);
-    assert(output);
-
-    QMutexLocker lock(&sync);
-    bool every_input_ready = true;
-    foreach(Input* input, output->getTargets()) {
-        bool blocked = input->isEnabled() && input->isBlocked();
-        every_input_ready &= !blocked;
-    }
-
-    is_ready_[output] = every_input_ready;
-
     trySendMessages();
 }
 
 void NodeWorker::processMessages()
 {
+    assertNotInGuiThread();
+
     // everything has a message here
-
-    assert(this->thread() != QApplication::instance()->thread());
-
     QMutexLocker stop_lock(&stop_mutex_);
     if(stop_) {
         return;
@@ -456,6 +460,7 @@ bool NodeWorker::areAllInputsAvailable()
 
 void NodeWorker::processInputs(bool all_inputs_are_present)
 {
+    assertNotInGuiThread();
     QMutexLocker lock_in(&sync);
 
     Timer::Ptr t(new Timer(node_->getUUID()));
@@ -553,15 +558,6 @@ void NodeWorker::removeInput(Input *in)
 
 void NodeWorker::removeOutput(Output *out)
 {
-    {
-        QMutexLocker lock(&sync);
-        std::map<Output*, bool>::iterator it = is_ready_.find(out);
-
-        if(it != is_ready_.end()) {
-            is_ready_.erase(it);
-        }
-    }
-
     std::vector<Output*>::iterator it;
     it = std::find(outputs_.begin(), outputs_.end(), out);
 
@@ -600,8 +596,6 @@ void NodeWorker::registerOutput(Output* out)
     outputs_.push_back(out);
 
     out->moveToThread(thread());
-
-    is_ready_[out] = true;
 
     connectConnector(out);
     QObject::connect(out, SIGNAL(messageProcessed(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
@@ -695,8 +689,7 @@ bool NodeWorker::canSendMessages()
 
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
-        if(!is_ready_[out]) {
-            //            node_->ainfo << "cannot send: " << out->getUUID() << " is not ready" << std::endl;
+        if(!out->canSendMessages()) {
             return false;
         }
     }
@@ -717,6 +710,7 @@ void NodeWorker::resetInputs()
 
 void NodeWorker::trySendMessages()
 {
+    assertNotInGuiThread();
     QMutexLocker lock(&sync);
 
     if(!messages_waiting_to_be_sent) {
@@ -729,26 +723,6 @@ void NodeWorker::trySendMessages()
 
     messages_waiting_to_be_sent = false;
     Q_EMIT messagesWaitingToBeSent(false);
-
-    for(std::size_t i = 0; i < outputs_.size(); ++i) {
-        Output* out = outputs_[i];
-        if(out->isConnected()) {
-            bool every_connected_input_disabled = false;
-            foreach(Input* input, out->getTargets()) {
-                bool disabled = !input->isEnabled();
-                every_connected_input_disabled |= disabled;
-            }
-
-            if(every_connected_input_disabled) {
-                is_ready_[out] = true;
-            } else {
-                is_ready_[out] = false;
-            }
-
-        } else {
-            is_ready_[out] = true;
-        }
-    }
 
     for(std::size_t i = 0; i < parameter_outputs_.size(); ++i) {
         Output* out = parameter_outputs_[i];
@@ -840,6 +814,8 @@ bool NodeWorker::isSink() const
 
 void NodeWorker::tick()
 {
+    assertNotInGuiThread();
+
     while(true) {
         {
             pause_mutex_.lock();
@@ -864,7 +840,6 @@ void NodeWorker::tick()
 
 
         if(isEnabled() && (isTickEnabled() || isSource())) {
-            assert(this->thread() != QApplication::instance()->thread());
 
             if(!canSendMessages() /*|| ticks_ != 0*/) {
                 return;
@@ -983,4 +958,9 @@ void NodeWorker::setIOError(bool error)
 void NodeWorker::setMinimized(bool min)
 {
     node_->getNodeState()->setMinimized(min);
+}
+
+void NodeWorker::assertNotInGuiThread()
+{
+    assert(this->thread() != QApplication::instance()->thread());
 }

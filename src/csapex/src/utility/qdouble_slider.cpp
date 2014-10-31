@@ -4,6 +4,7 @@
 /// SYSTEM
 #include <iostream>
 #include <limits>
+#include <cmath>
 
 QDoubleSlider::QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget *parent) :
     QSlider(orientation, parent),
@@ -34,7 +35,7 @@ double QDoubleSlider::int2double(int val)
 
 int QDoubleSlider::double2int(double val)
 {
-    return (val - min_) / step_;
+    return round((val - min_) / step_);
 }
 
 

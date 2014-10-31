@@ -56,7 +56,6 @@ void csapex::error_handling::kill()
 
 void csapex::error_handling::stop()
 {
-//    exit(EXIT_FAILURE);
     stop_request()();
     // TODO: kill on timeout!
 }
@@ -64,7 +63,7 @@ void csapex::error_handling::stop()
 void csapex::error_handling::siginthandler(int)
 {
     printf("User pressed Ctrl+C\n");
-    stop_request()();
+    stop();
 }
 
 void csapex::error_handling::sigsegvhandler(int sig_num, siginfo_t * info, void * ucontext)

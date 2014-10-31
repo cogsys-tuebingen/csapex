@@ -81,6 +81,7 @@ public:
     bool hasMessage();
     ConnectionType::Ptr getMessage();
 
+    bool canSendMessages();
     void sendMessages();
 
     void reset();

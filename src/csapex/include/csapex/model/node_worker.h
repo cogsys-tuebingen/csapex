@@ -163,6 +163,8 @@ private:
 
     void processInputs(bool all_inputs_are_present);
 
+    void assertNotInGuiThread();
+
 private:
     Settings& settings_;
     NodePtr node_;
@@ -191,9 +193,7 @@ private:
     bool sink_;
 
     QMutex sync;
-    std::map<Input*, bool> has_msg_;
     bool messages_waiting_to_be_sent;
-    std::map<Output*, bool> is_ready_;
 
     int timer_history_pos_;
     std::vector<TimerPtr> timer_history_;

@@ -98,30 +98,41 @@ set(SRC_PLUGIN
 
     src/manager/message_provider_manager.cpp
 
-    src/utility/qint_slider.cpp
-    src/utility/qdouble_slider.cpp
-    src/utility/qsignal_bridges.cpp
-    src/utility/qwrapper.cpp
-
-    src/utility/timer.cpp
-    src/utility/qt_helper.cpp
-    src/utility/thread.cpp
-    src/utility/uuid.cpp
-    src/utility/assert.cpp
-    src/utility/plugin_loader.cpp
-
     src/view/node_adapter.cpp
     src/view/node_adapter_builder.cpp
     src/view/default_node_adapter.cpp
 )
 
 set(SRC_APP
+    src/model/node_worker.cpp
+    src/model/graph.cpp
+    src/model/graph_worker.cpp
+    src/model/connectable.cpp
+    src/model/generic_state.cpp
+    src/model/connection.cpp
+    src/model/tag.cpp
+    src/model/node_constructor.cpp
+    src/model/error_state.cpp
+    src/model/fulcrum.cpp
+    src/model/multi_connection_type.cpp
+    src/model/node_factory.cpp
+    src/model/node_state.cpp
+    src/model/node_statistics.cpp
+    src/model/parameterizable.cpp
+    src/model/node_filter_proxy_model.cpp
+    src/model/unique.cpp
+    src/model/memento.cpp
+
     src/core/csapex_core.cpp
     src/core/graphio.cpp
     src/core/designerio.cpp
     src/core/drag_io.cpp
     src/core/settings.cpp
     src/core/thread_pool.cpp
+
+    src/msg/message_provider.cpp
+
+    src/factory/generic_node_factory.cpp
 
     src/command/command.cpp
     src/command/dispatcher.cpp
@@ -139,28 +150,6 @@ set(SRC_APP
     src/command/modify_fulcrum.cpp
     src/command/delete_fulcrum.cpp
 
-    src/model/tag.cpp
-    src/model/node_constructor.cpp
-    src/model/error_state.cpp
-    src/model/connectable.cpp
-    src/model/graph.cpp
-    src/model/graph_worker.cpp
-    src/model/connection.cpp
-    src/model/fulcrum.cpp
-    src/model/multi_connection_type.cpp
-    src/model/generic_state.cpp
-    src/model/node_factory.cpp
-    src/model/node_state.cpp
-    src/model/node_worker.cpp
-    src/model/node_statistics.cpp
-    src/model/parameterizable.cpp
-    src/model/node_filter_proxy_model.cpp
-    src/model/unique.cpp
-    src/model/memento.cpp
-
-    src/factory/generic_node_factory.cpp
-
-    src/msg/message_provider.cpp
 
     src/utility/error_handling.cpp
     src/utility/timable.cpp
@@ -174,6 +163,16 @@ set(SRC_APP
     src/utility/movable_graphics_proxy_widget.cpp
     src/utility/html_delegate.cpp
     src/utility/yaml_node_builder.cpp
+    src/utility/qint_slider.cpp
+    src/utility/qdouble_slider.cpp
+    src/utility/qsignal_bridges.cpp
+    src/utility/qwrapper.cpp
+    src/utility/timer.cpp
+    src/utility/qt_helper.cpp
+    src/utility/thread.cpp
+    src/utility/uuid.cpp
+    src/utility/assert.cpp
+    src/utility/plugin_loader.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp
