@@ -6,6 +6,12 @@
 
 using namespace csapex;
 
+MessageProvider::MessageProvider()
+    : slot_count_(1)
+{
+
+}
+
 MessageProvider::~MessageProvider()
 {
 
@@ -39,4 +45,18 @@ std::vector<param::Parameter::Ptr> MessageProvider::getParameters() const
 void MessageProvider::parameterChanged()
 {
 
+}
+
+void MessageProvider::setSlotCount(std::size_t slot_count)
+{
+    if(slot_count != slot_count_) {
+        slot_count_ = slot_count;
+
+        slot_count_changed(slot_count_);
+    }
+}
+
+std::size_t MessageProvider::slotCount() const
+{
+    return slot_count_;
 }

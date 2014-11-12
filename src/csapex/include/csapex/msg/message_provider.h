@@ -30,8 +30,10 @@ public:
     void setName(const std::string& name);
     std::string getName() const;
 
+    std::size_t slotCount() const;
+
     virtual bool hasNext() = 0;
-    virtual connection_types::Message::Ptr next() = 0;
+    virtual connection_types::Message::Ptr next(std::size_t slot) = 0;
 
     virtual std::vector<std::string> getExtensions() const = 0;
 
@@ -40,8 +42,13 @@ public:
 
     std::vector<param::ParameterPtr> getParameters() const;
 
+public:
+    boost::signals2::signal<void(std::size_t)> slot_count_changed;
+
 protected:
+    MessageProvider();
     void setType(ConnectionType::Ptr type);
+    void setSlotCount(std::size_t slot_count);
 
 protected:
     GenericState state;
@@ -50,7 +57,7 @@ private:
     ConnectionType::Ptr type_;
 
     std::string name_;
-
+    std::size_t slot_count_;
 };
 
 }
