@@ -92,7 +92,12 @@ void Parameter::serialize(YAML::Node &n) const
     if(interactive_) {
         n["interactive"] = interactive_;
     }
-    doSerialize(n);
+    try {
+        doSerialize(n);
+    } catch(const std::exception& e) {
+        std::cerr << "cannot serialize parameter " << name() << ": " << e.what() << std::endl;
+        throw e;
+    }
 }
 
 void Parameter::deserialize(const YAML::Node &n)
@@ -101,7 +106,12 @@ void Parameter::deserialize(const YAML::Node &n)
         interactive_ = n["interactive"].as<bool>();
     }
 
-    doDeserialize(n);
+    try {
+        doDeserialize(n);
+    } catch(const std::exception& e) {
+        std::cerr << "cannot deserialize parameter " << name() << ": " << e.what() << std::endl;
+        throw e;
+    }
 }
 
 void Parameter::setValueFrom(const Parameter &other)
