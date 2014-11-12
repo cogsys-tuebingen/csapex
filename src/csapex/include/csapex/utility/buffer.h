@@ -13,6 +13,7 @@ class Buffer
 {
 public:
     Buffer();
+    ~Buffer();
 
     void disable();
     void free();

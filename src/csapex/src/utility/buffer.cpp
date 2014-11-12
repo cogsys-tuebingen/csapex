@@ -12,6 +12,11 @@ Buffer::Buffer()
 
 }
 
+Buffer::~Buffer()
+{
+    delete mutex_;
+}
+
 ConnectionType::Ptr Buffer::readImpl() const
 {
     QMutexLocker lock(mutex_);
