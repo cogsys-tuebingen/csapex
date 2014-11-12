@@ -84,8 +84,8 @@ QFrame#boxframe[warning="true"] {
 
 /* blocked box */
 QFrame#boxframe[blocked="true"] {
-        background: rgb(200, 150, 0);
-        border: 2px solid rgb(255, 200, 0);
+        /*background: rgb(200, 150, 0);
+        border: 2px solid rgb(255, 200, 0);*/
 }
 
 /* selected box */
