@@ -19,7 +19,9 @@ std::string replace(const std::string& s, const std::string& find, const std::st
 std::string csapex::type2name(const std::type_info& info)
 {
     int status;
-    std::string full_name(abi::__cxa_demangle(info.name(), 0, 0, &status));
+    char* demangled = abi::__cxa_demangle(info.name(), 0, 0, &status);
+    std::string full_name(demangled);
+    delete[] demangled;
 
     return full_name;
 }
