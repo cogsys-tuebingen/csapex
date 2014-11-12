@@ -39,7 +39,7 @@ bool ConnectionType::canConnectTo(const ConnectionType *other_side) const
 
 bool ConnectionType::acceptsConnectionFrom(const ConnectionType *other_side) const
 {
-    return name_ == other_side->name();
+    return name_ == other_side->rawName();
 }
 
 std::string ConnectionType::name() const

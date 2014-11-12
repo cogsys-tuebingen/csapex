@@ -369,41 +369,8 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     qt_helper::Call* call_set_path = new qt_helper::Call(cb);
     callbacks.push_back(call_set_path);
 
-    QString filter = QString::fromStdString(path_p->filter());
-    if(filter.isEmpty()) {
-        filter = "All files (*.*)";
-    }
+    boost::function<void()> cb_open = boost::bind(&DefaultNodeAdapter::updatePathParam, this, path_p->name());
 
-    int flags = 0;
-    bool is_file = path_p->isFile();
-    boost::function<void()> cb_open;
-
-    QString dir(path_p->as<std::string>().c_str());
-    if(dir.startsWith("file://", Qt::CaseInsensitive)) {
-        dir = dir.replace("file://", "", Qt::CaseInsensitive);
-    }
-
-    if(path_p->isOutput()) {
-        if(is_file) {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
-                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getSaveFileName,
-                                                                             (QWidget*) 0, path_p->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
-        } else {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
-                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getExistingDirectory,
-                                                                             (QWidget*) 0, path_p->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags)));
-        }
-    } else {
-        if(is_file) {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
-                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getOpenFileName,
-                                                                             (QWidget*) 0, path_p->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags)));
-        } else {
-            cb_open = boost::bind(&DefaultNodeAdapter::updateParamIfNotEmpty, this, current_name_,
-                                  boost::bind(qstring2stdstring, boost::bind(&QFileDialog::getExistingDirectory,
-                                                                             (QWidget*) 0, path_p->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags)));
-        }
-    }
     qt_helper::Call* call_open = new qt_helper::Call(cb_open);
     callbacks.push_back(call_open);
 
@@ -698,13 +665,44 @@ void DefaultNodeAdapter::updateParam(const std::string& name, T value)
     guiChanged();
 }
 
-void DefaultNodeAdapter::updateParamIfNotEmpty(const std::string& name, const std::string& value)
+void DefaultNodeAdapter::updatePathParam(const std::string &name)
 {
-    if(value.empty()) {
+    param::Parameter* p = node_->getNode()->getParameter(name).get();
+    param::PathParameter* path_p = dynamic_cast<param::PathParameter*>(p);
+    if(!path_p) {
         return;
     }
+    QString filter = QString::fromStdString(path_p->filter());
+    if(filter.isEmpty()) {
+        filter = "All files (*.*)";
+    }
 
-    updateParam(name, value);
+    int flags = 0;
+    bool is_file = path_p->isFile();
+
+    QString dir(path_p->as<std::string>().c_str());
+    if(dir.startsWith("file://", Qt::CaseInsensitive)) {
+        dir = dir.replace("file://", "", Qt::CaseInsensitive);
+    }
+
+    QString path;
+    if(path_p->isOutput()) {
+        if(is_file) {
+            path = QFileDialog::getSaveFileName((QWidget*) 0, path_p->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
+        } else {
+            path = QFileDialog::getExistingDirectory((QWidget*) 0, path_p->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags);
+        }
+    } else {
+        if(is_file) {
+            path = QFileDialog::getOpenFileName((QWidget*) 0, path_p->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
+        } else {
+            path = QFileDialog::getExistingDirectory((QWidget*) 0, path_p->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags);
+        }
+    }
+
+    if(!path.isEmpty()) {
+        p->set(path.toStdString());
+    }
 }
 
 

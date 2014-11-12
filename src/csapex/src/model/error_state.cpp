@@ -14,7 +14,7 @@ ErrorState::ErrorState()
 
 ErrorState::~ErrorState()
 {
-
+    delete error_mutex_;
 }
 
 void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)

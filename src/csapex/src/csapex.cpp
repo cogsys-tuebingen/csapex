@@ -175,6 +175,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         int res = run();
 
+        delete designer;
         return res;
 
     } else {

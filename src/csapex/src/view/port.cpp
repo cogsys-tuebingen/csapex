@@ -33,8 +33,6 @@ Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee, bool flipped)
 
     setFlipped(flipped);
 
-    setFixedSize(16, 16);
-
     setFocusPolicy(Qt::NoFocus);
     setAcceptDrops(true);
 

@@ -59,7 +59,7 @@ protected:
     template <typename T>
     void updateParam(const std::string& name, T value);
 
-    void updateParamIfNotEmpty(const std::string& name, const std::string& value);
+    void updatePathParam(const std::string& name);
 
     void updateParamSet(const std::string& name, const std::string& value);
     void updateParamBitSet(const std::string& name, const QListView *list);

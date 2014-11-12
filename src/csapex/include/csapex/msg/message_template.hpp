@@ -31,7 +31,7 @@ struct MessageTemplate : public Message {
 
 
     bool acceptsConnectionFrom(const ConnectionType* other_side) const {
-        return name() == other_side->name();
+        return rawName() == other_side->rawName();
     }
 
     Type value;

@@ -17,6 +17,11 @@ Parameterizable::Parameterizable()
 
 }
 
+Parameterizable::~Parameterizable()
+{
+    delete changed_params_mutex_;
+}
+
 void Parameterizable::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
 {
     connections_.push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
@@ -142,6 +147,11 @@ void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param
 std::vector<param::Parameter::Ptr> Parameterizable::getParameters() const
 {
     return parameter_state_->getParameters();
+}
+
+std::size_t Parameterizable::getParameterCount() const
+{
+    return parameter_state_->getParameterCount();
 }
 
 param::Parameter::Ptr Parameterizable::getParameter(const std::string &name) const

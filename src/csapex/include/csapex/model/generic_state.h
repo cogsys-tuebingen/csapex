@@ -36,6 +36,8 @@ public:
     param::ParameterPtr getParameter(const std::string& name) const;
     std::vector<param::ParameterPtr> getParameters() const;
 
+    std::size_t getParameterCount() const;
+
     template <typename T>
     const T readParameter (const std::string& name) const {
         try {

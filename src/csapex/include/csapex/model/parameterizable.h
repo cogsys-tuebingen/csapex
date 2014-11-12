@@ -19,6 +19,7 @@ public:
 
 public:
     Parameterizable();
+    virtual ~Parameterizable();
 
     /***
      *  ADDING PARAMETERS
@@ -52,6 +53,7 @@ public:
     }
 
     std::vector<param::Parameter::Ptr> getParameters() const;
+    std::size_t getParameterCount() const;
 
     param::Parameter::Ptr getParameter(const std::string& name) const;
     template <typename T>

@@ -58,7 +58,7 @@ YAML::Node MessageFactory::serializeMessage(const ConnectionType &msg)
     try {
         MessageFactory& i = instance();
 
-        std::string type = msg.name();
+        std::string type = msg.rawName();
 
         YAML::Node node;
         node["type"] = type;

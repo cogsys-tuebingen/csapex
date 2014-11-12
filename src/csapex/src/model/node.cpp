@@ -45,15 +45,6 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     awarn.setPrefix(p);
     aerr.setPrefix(p);
     alog.setPrefix(p);
-
-    setupParameters();
-    node_state_->setLabel(uuid);
-
-    try {
-        setup();
-    } catch(std::runtime_error& e) {
-        aerr << "setup failed: " << e.what() << std::endl;
-    }
 }
 
 std::string Node::getType() const

@@ -161,3 +161,8 @@ std::vector<param::Parameter::Ptr> GenericState::getParameters() const
 
     return result;
 }
+
+std::size_t GenericState::getParameterCount() const
+{
+    return params.size();
+}

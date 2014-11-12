@@ -158,13 +158,23 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["flipped"] = flipped;
     out["thread"] = thread;
 
-    if(parent) {
-        child_state = parent->getParameterStateClone();
+    try {
+        if(parent) {
+            child_state = parent->getParameterStateClone();
+        }
+    } catch(const std::exception& e) {
+        std::cerr << "cannot clone child state for node " << parent->getUUID() << ": " << e.what() << std::endl;
+        throw e;
     }
 
     if(child_state.get()) {
-        YAML::Node sub_node;
-        child_state->writeYaml(sub_node);
-        out["state"] = sub_node;
+        try {
+            YAML::Node sub_node;
+            child_state->writeYaml(sub_node);
+            out["state"] = sub_node;
+        } catch(const std::exception& e) {
+            std::cerr << "cannot save child state for node " << parent->getUUID() << ": " << e.what() << std::endl;
+            throw e;
+        }
     }
 }

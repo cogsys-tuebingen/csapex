@@ -41,9 +41,27 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
 
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 
-    node->getParameterState()->parameter_added->connect(boost::bind(&NodeWorker::makeParameterConnectable, this, _1));
-
     node_->initialize(type, uuid, this, &settings_);
+
+    bool params_created_in_constructor = node_->getParameterCount() != 0;
+
+    if(params_created_in_constructor) {
+        makeParametersConnectable();
+    }
+
+    node_->getParameterState()->parameter_added->connect(boost::bind(&NodeWorker::makeParameterConnectable, this, _1));
+
+    node_->setupParameters();
+    node_->getNodeState()->setLabel(node_->getUUID());
+
+    try {
+        node_->setup();
+    } catch(std::runtime_error& e) {
+        node_->aerr << "setup failed: " << e.what() << std::endl;
+    }
+    if(params_created_in_constructor) {
+       node_->awarn << "Node creates parameters in its constructor! Please implement 'setupParameters'" << std::endl;
+    }
 }
 
 NodeWorker::~NodeWorker()
@@ -126,6 +144,10 @@ bool NodeWorker::canReceive()
 template <typename T>
 void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
 {
+    if(param_2_input_.find(p->name()) != param_2_input_.end()) {
+        return;
+    }
+
     {
         Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
         cin->setEnabled(true);

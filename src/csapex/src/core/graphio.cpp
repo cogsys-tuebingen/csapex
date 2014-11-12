@@ -45,9 +45,14 @@ void GraphIO::loadSettings(const YAML::Node &doc)
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
     foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
-        YAML::Node yaml_node;
-        node->getNode()->getNodeState()->writeYaml(yaml_node);
-        yaml["nodes"].push_back(yaml_node);
+        try {
+            YAML::Node yaml_node;
+            node->getNode()->getNodeState()->writeYaml(yaml_node);
+            yaml["nodes"].push_back(yaml_node);
+        } catch(const std::exception& e) {
+            std::cerr << "cannot save state for node " << node->getNodeUUID() << ": " << e.what() << std::endl;
+            throw e;
+        }
     }
 }
 
