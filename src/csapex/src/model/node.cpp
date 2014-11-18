@@ -56,6 +56,7 @@ void Node::doSetup()
 
     try {
         modifier_->addSlot("enable");
+        modifier_->addSlot("disable");
 
         setup();
     } catch(std::runtime_error& e) {

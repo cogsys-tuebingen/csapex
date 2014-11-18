@@ -723,7 +723,6 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
     painter->setBrush(QBrush());
 
     Connectable* c = p->getAdaptee();
-    bool right = c->isOutput() ^ p->isFlipped();
     bool is_message = (dynamic_cast<Slot*>(c) == NULL && dynamic_cast<Trigger*>(c) == NULL);
 
     if(!p->isMinimizedSize()) {
@@ -754,10 +753,12 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
         QRectF rect;
         QTextOption opt;
         if(is_message) {
+            bool right = c->isOutput() ^ p->isFlipped();
             rect = QRectF(pos + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
             opt = QTextOption(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
         } else {
-            rect = QRectF(pos + QPointF(-dx/2.0, -connector_radius_-dy), QSize(dx, dy));
+            bool bottom = c->isOutput();
+            rect = QRectF(pos + QPointF(-dx/2.0, bottom ? connector_radius_ : -connector_radius_-dy), QSize(dx, dy));
             opt = QTextOption(Qt::AlignVCenter | Qt::AlignCenter);
         }
 
