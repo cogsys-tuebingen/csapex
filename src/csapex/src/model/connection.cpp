@@ -4,6 +4,8 @@
 /// COMPONENT
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/slot.h>
+#include <csapex/signal/trigger.h>
 #include <csapex/core/settings.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
@@ -15,11 +17,6 @@ using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
 
-Connection::Connection(Output *from, Input *to)
-    : from_(from), to_(to), id_(next_connection_id_++)
-{
-    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
-}
 
 Connection::Connection(Connectable *from, Connectable *to)
     : from_(from), to_(to), id_(next_connection_id_++)
@@ -29,7 +26,26 @@ Connection::Connection(Connectable *from, Connectable *to)
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
+Connection::Connection(Output *from, Input *to)
+    : from_(from), to_(to), id_(next_connection_id_++)
+{
+    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
+}
+
 Connection::Connection(Output *from, Input *to, int id)
+    : from_(from), to_(to), id_(id)
+{
+    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
+}
+
+
+Connection::Connection(Trigger *from, Slot *to)
+    : from_(from), to_(to), id_(next_connection_id_++)
+{
+    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
+}
+
+Connection::Connection(Trigger *from, Slot *to, int id)
     : from_(from), to_(to), id_(id)
 {
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));

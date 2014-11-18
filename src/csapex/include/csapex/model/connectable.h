@@ -47,8 +47,6 @@ public:
         return false;
     }
 
-    virtual bool isForwarding() const;
-
     void setLabel(const std::string& label);
     std::string getLabel() const;
 

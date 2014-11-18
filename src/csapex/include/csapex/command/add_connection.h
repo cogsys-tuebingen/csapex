@@ -28,8 +28,8 @@ protected:
     virtual std::string getDescription() const;
 
 private:
-    Output* from;
-    Input* to;
+    Connectable* from;
+    Connectable* to;
 
     UUID from_uuid;
     UUID to_uuid;

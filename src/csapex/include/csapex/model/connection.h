@@ -35,8 +35,12 @@ public:
     }
 
 public:
+    Connection(Connectable* from, Connectable* to);
+
     Connection(Output* from, Input* to);
     Connection(Output* from, Input* to, int id);
+    Connection(Trigger* from, Slot* to);
+    Connection(Trigger* from, Slot* to, int id);
 
     Connectable* from() const;
     Connectable* to() const;
@@ -62,9 +66,6 @@ public:
     std::vector<FulcrumPtr> getFulcrums() const;
     int getFulcrumCount() const;
     FulcrumPtr getFulcrum(int fulcrum_id);
-
-protected:
-    Connection(Connectable* from, Connectable* to);
 
 private:
     /// COMMANDS

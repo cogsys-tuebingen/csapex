@@ -2,7 +2,7 @@
 #include <csapex/signal/slot.h>
 
 /// COMPONENT
-#include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
@@ -51,7 +51,7 @@ bool Slot::tryConnect(Connectable* other_side)
 
 bool Slot::acknowledgeConnection(Connectable* other_side)
 {
-    target = dynamic_cast<Output*>(other_side);
+    target = dynamic_cast<Trigger*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
     connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
     return true;
@@ -108,22 +108,22 @@ void Slot::free()
 void Slot::enable()
 {
     Connectable::enable();
-//    if(isConnected() && !getSource()->isEnabled()) {
-//        getSource()->enable();
-//    }
+    //    if(isConnected() && !getSource()->isEnabled()) {
+    //        getSource()->enable();
+    //    }
 }
 
 void Slot::disable()
 {
     Connectable::disable();
 
-//    if(isBlocked()) {
-        free();
-        notifyMessageProcessed();
-//    }
-//    if(isConnected() && getSource()->isEnabled()) {
-//        getSource()->disable();
-//    }
+    //    if(isBlocked()) {
+    free();
+    notifyMessageProcessed();
+    //    }
+    //    if(isConnected() && getSource()->isEnabled()) {
+    //        getSource()->disable();
+    //    }
 }
 
 void Slot::removeAllConnectionsNotUndoable()
@@ -139,7 +139,8 @@ void Slot::removeAllConnectionsNotUndoable()
 
 bool Slot::canConnectTo(Connectable* other_side, bool move) const
 {
-    return Connectable::canConnectTo(other_side, move) && (move || !isConnected());
+    Trigger* trigger = dynamic_cast<Trigger*>(other_side);
+    return trigger;
 }
 
 bool Slot::targetsCanBeMovedTo(Connectable* other_side) const

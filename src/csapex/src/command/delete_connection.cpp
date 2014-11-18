@@ -8,6 +8,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
+#include <csapex/model/connection.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

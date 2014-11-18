@@ -10,8 +10,11 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
 #include <csapex/model/connectable.h>
+#include <csapex/model/connection.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/slot.h>
+#include <csapex/signal/trigger.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/timer.h>
@@ -338,26 +341,18 @@ NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
 
 Node* Graph::findNodeForConnector(const UUID &uuid) const
 {
-    UUID l = UUID::NONE;
-    UUID r = UUID::NONE;
-    uuid.split(UUID::namespace_separator, l, r);
-
     try {
-        return findNode(l);
+        return findNode(uuid.parentUUID());
 
     } catch(const std::exception& e) {
-        throw std::runtime_error(std::string("cannot find node of connector \"") + uuid.getFullName());
+        throw std::runtime_error(std::string("cannot find node of connector \"") + uuid.getFullName() + ": " + e.what());
     }
 }
 
 NodeWorker* Graph::findNodeWorkerForConnector(const UUID &uuid) const
 {
-    UUID l = UUID::NONE;
-    UUID r = UUID::NONE;
-    uuid.split(UUID::namespace_separator, l, r);
-
     try {
-        return findNodeWorker(l);
+        return findNodeWorker(uuid.parentUUID());
 
     } catch(const std::exception& e) {
         throw std::runtime_error(std::string("cannot find worker of connector \"") + uuid.getFullName());
@@ -376,16 +371,22 @@ std::vector<NodeWorker*> Graph::getAllNodeWorkers()
 
 Connectable* Graph::findConnector(const UUID &uuid)
 {
-    UUID l = UUID::NONE;
-    UUID r = UUID::NONE;
-    uuid.split(UUID::namespace_separator, l, r);
-
-    NodeWorker* owner = findNodeWorker(l);
+    NodeWorker* owner = findNodeWorker(uuid.parentUUID());
     apex_assert_hard(owner);
 
-    Connectable* result = owner->getInput(uuid);
-    if(result == NULL) {
+    std::string type = uuid.type();
+
+    Connectable* result = NULL;
+    if(type == "in") {
+        result = owner->getInput(uuid);
+    } else if(type == "out") {
         result = owner->getOutput(uuid);
+    } else if(type == "slot") {
+        result = owner->getSlot(uuid);
+    } else if(type == "trigger") {
+        result = owner->getTrigger(uuid);
+    } else {
+        throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
     }
 
     apex_assert_hard(result);

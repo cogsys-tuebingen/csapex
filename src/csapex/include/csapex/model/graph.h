@@ -2,7 +2,6 @@
 #define GRAPH_H
 
 /// COMPONENT
-#include <csapex/model/connection.h>
 #include <csapex/command/command.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
@@ -67,13 +66,13 @@ public:
     Command::Ptr deleteConnectionByIdCommand(int id);
     Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
     Command::Ptr deleteAllConnectionFulcrumsCommand(int connection);
-    Command::Ptr deleteAllConnectionFulcrumsCommand(Connection::Ptr connection);
+    Command::Ptr deleteAllConnectionFulcrumsCommand(ConnectionPtr connection);
     Command::Ptr deleteConnectionById(int id);
     Command::Ptr clear();
 
-    Connection::Ptr getConnectionWithId(int id);
-    Connection::Ptr getConnection(Connection::Ptr);
-    int getConnectionId(Connection::Ptr);
+    ConnectionPtr getConnectionWithId(int id);
+    ConnectionPtr getConnection(ConnectionPtr);
+    int getConnectionId(ConnectionPtr);
 
     std::string makeUUIDPrefix(const std::string& name);
 
@@ -82,8 +81,8 @@ public:
     void addNode(NodeWorkerPtr node);
     void deleteNode(const UUID &uuid);
 
-    bool addConnection(Connection::Ptr connection);
-    void deleteConnection(Connection::Ptr connection);
+    bool addConnection(ConnectionPtr connection);
+    void deleteConnection(ConnectionPtr connection);
 
     // TODO: do this correctly.. -> iterators
     void foreachNode(boost::function<void (NodeWorker*)> f);
@@ -113,7 +112,7 @@ protected:
     std::map<NodeWorker*, std::vector<NodeWorker*> > node_parents_;
     std::map<NodeWorker*, std::vector<NodeWorker*> > node_children_;
 
-    std::vector<Connection::Ptr> connections_;
+    std::vector<ConnectionPtr> connections_;
 
     std::map<std::string, int> uuids_;
 };

@@ -5,6 +5,7 @@
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/fulcrum.h>
+#include <csapex/model/connection.h>
 
 /// SYSTEM
 #include <sstream>

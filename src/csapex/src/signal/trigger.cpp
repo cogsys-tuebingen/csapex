@@ -117,19 +117,8 @@ bool Trigger::tryConnect(Connectable *other_side)
 
 bool Trigger::connect(Connectable *other_side)
 {
-    if(!other_side->canInput()) {
-        std::cerr << "cannot connect, other side can't input" << std::endl;
-        return false;
-    }
-    if(!other_side->canConnectTo(this, false)) {
-        std::cerr << "cannot connect, other side can't connect" << std::endl;
-        return false;
-    }
-
     Slot* slot = dynamic_cast<Slot*>(other_side);
-
-    if(!slot->acknowledgeConnection(this)) {
-        std::cerr << "cannot connect, other side doesn't acknowledge" << std::endl;
+    if(!slot) {
         return false;
     }
 

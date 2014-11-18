@@ -8,6 +8,7 @@
 #include <csapex/view/port.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/connection.h>
 #include <csapex/view/box.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -516,8 +517,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
         return;
     }
 
-    Output* from = dynamic_cast<Output*> (connection.from());
-    Input* to = dynamic_cast<Input*> (connection.to());
+    Connectable* from = connection.from();
+    Connectable* to = connection.to();
 
     Port* fromp = widget_ctrl_->getPort(from);
     Port* top = widget_ctrl_->getPort(to);

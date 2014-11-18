@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
-#include <csapex/model/connection.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/view/fulcrum_widget.h>
 

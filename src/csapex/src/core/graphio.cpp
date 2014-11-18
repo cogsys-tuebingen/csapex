@@ -7,9 +7,12 @@
 #include <csapex/model/node_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/signal/slot.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/connection.h>
 #include <csapex/utility/yaml_node_builder.h>
 
 /// SYSTEM
@@ -100,6 +103,18 @@ void GraphIO::saveConnections(YAML::Node &yaml)
 
                 yaml["connections"].push_back(connection);
             }
+            foreach(Trigger* o, node->getTriggers()) {
+                if(o->noTargets() == 0) {
+                    continue;
+                }
+                YAML::Node connection;
+                connection["uuid"] = o->getUUID();
+                foreach(Slot* i, o->getTargets()) {
+                    connection["targets"].push_back(i->getUUID());
+                }
+
+                yaml["connections"].push_back(connection);
+            }
         }
     }
 
@@ -183,7 +198,10 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
                 UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
-                Output* from = parent->getOutput(from_uuid);
+                Connectable* from = parent->getOutput(from_uuid);
+                if(from == NULL) {
+                    from = parent->getTrigger(from_uuid);
+                }
                 if(from == NULL) {
                     std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                     continue;
@@ -192,7 +210,10 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 try {
                     NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
 
-                    Input* to = target->getInput(to_uuid);
+                    Connectable* to = target->getInput(to_uuid);
+                    if(to == NULL) {
+                        to = target->getSlot(to_uuid);
+                    }
                     if(!to) {
                         continue;
                     }

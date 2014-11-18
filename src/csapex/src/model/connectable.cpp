@@ -72,11 +72,6 @@ void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel leve
     Q_EMIT connectableError(error,msg,level);
 }
 
-bool Connectable::isForwarding() const
-{
-    return false;
-}
-
 bool Connectable::tryConnect(QObject* other_side)
 {
     Connectable* c = dynamic_cast<Connectable*>(other_side);

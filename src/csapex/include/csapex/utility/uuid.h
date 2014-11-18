@@ -57,8 +57,8 @@ public:
     UUID replace(const std::string& needle, const UUID& replacement) const;
 
     UUID parentUUID() const;
+    std::string type() const;
 
-    void split(const std::string& separator, UUID& l, UUID& r) const;
 
     operator std::string() const;
     const char* c_str() const;
@@ -69,6 +69,8 @@ public:
 
 private:
     explicit UUID(const std::string& representation);
+
+    void split(const std::string& separator, UUID& l, UUID& r) const;
 
 private:
     std::string representation_;

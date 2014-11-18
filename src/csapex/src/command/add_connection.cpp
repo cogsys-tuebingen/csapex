@@ -8,6 +8,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
 #include <csapex/utility/assert.h>
+#include <csapex/model/connection.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>
@@ -60,21 +61,13 @@ void AddConnection::refresh()
     Connectable* f = graph_->findConnector(from_uuid);
     Connectable* t = graph_->findConnector(to_uuid);
 
-    bool f_in = f->isInput();
-    bool f_out = f->isOutput();
-    bool f_for = f->isForwarding();
+    if((f->isOutput() && t->isInput())) {
+        from = f;
+        to =  t;
 
-    bool t_in = t->isInput();
-    bool t_out = t->isOutput();
-    bool t_for = t->isForwarding();
-
-    if((f_out && t_in) || (f_out && t_for && t_out) || (f_in && f_for && t_in)) {
-        from = dynamic_cast<Output*> (f);
-        to =  dynamic_cast<Input*> (t);
-
-    } else if(f_in && t_out) {
-        from = dynamic_cast<Output*> (t);
-        to =  dynamic_cast<Input*> (f);
+    } else if(f->isInput() && t->isOutput()) {
+        from = t;
+        to =  f;
 
     } else {
         throw std::runtime_error(std::string("cannot connect ") +

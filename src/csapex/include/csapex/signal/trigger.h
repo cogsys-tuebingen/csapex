@@ -33,33 +33,6 @@ public:
 
     virtual void disable();
 
-
-    template <typename T>
-    void publish(typename T::Ptr message,
-                 std::string frame_id = "/",
-                 typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
-        typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
-        msg->value = message;
-        publish(boost::dynamic_pointer_cast<ConnectionType>(msg));
-    }
-
-    template <typename T>
-    void publish(T message,
-                 std::string frame_id = "/",
-                 typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
-        typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
-        msg->value = message;
-        publish(boost::dynamic_pointer_cast<ConnectionType>(msg));
-    }
-
-    template <class Container, typename T>
-    void publish(const typename Container::template TypeMap<T>::Ptr& message/*,
-                 typename boost::disable_if<boost::is_base_and_derived<connection_types::Message, T> >::type* = 0*/) {
-        typename Container::Ptr msg(Container::template make<T>());
-        msg->template set<T>(message);
-        publish(msg);
-    }
-
     void publish(ConnectionType::Ptr message);
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const;
