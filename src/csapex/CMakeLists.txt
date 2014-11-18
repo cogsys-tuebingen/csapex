@@ -96,6 +96,10 @@ set(SRC_PLUGIN
     src/msg/input.cpp
     src/msg/output.cpp
 
+    src/signal/signal.cpp
+    src/signal/trigger.cpp
+    src/signal/slot.cpp
+
     src/manager/message_provider_manager.cpp
 
     src/view/node_adapter.cpp
@@ -256,11 +260,19 @@ target_link_libraries(csapex_app csapex_pluginbase
 )
 
 #
+# LIST EVERYTHING IN QT
+#
+file(GLOB_RECURSE ALL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/*.hpp include/*.h)
+
+
+#
 # BUILD THE APPLICATION
 #
 
 add_executable(csapex_node
     ${QT_APP_MOC_EXE}
+    ${ALL_HEADERS}
+
     src/csapex.cpp)
 target_link_libraries(csapex_node csapex_app)
 
@@ -309,6 +321,8 @@ if(${CSAPEX_TESTING})
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
                       DEPENDS csapex_profile_unit_tests)
 endif()
+
+
 #
 # INSTALL
 #

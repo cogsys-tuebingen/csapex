@@ -1,5 +1,5 @@
-#ifndef CONNECTOR_OUT_H
-#define CONNECTOR_OUT_H
+#ifndef TRIGGER_H
+#define TRIGGER_H
 
 /// COMPONENT
 #include <csapex/model/connectable.h>
@@ -10,7 +10,7 @@
 namespace csapex
 {
 
-class Output : public Connectable
+class Trigger : public Connectable
 {
     friend class Input;
     friend class Graph;
@@ -20,9 +20,9 @@ class Output : public Connectable
     friend class DesignerIO;
 
 public:
-    Output(Settings& settings, const UUID &uuid);
-    Output(Settings& settings, Unique *parent, int sub_id);
-    ~Output();
+    Trigger(Settings& settings, const UUID &uuid);
+    Trigger(Settings& settings, Unique *parent, int sub_id);
+    ~Trigger();
 
     virtual bool canOutput() const {
         return true;
@@ -69,12 +69,12 @@ public:
     virtual void validateConnections();
 
     int noTargets();
-    std::vector<Input*> getTargets() const;
+    std::vector<Slot*> getTargets() const;
 
-    void connectForcedWithoutCommand(Input* other_side);
+    void connectForcedWithoutCommand(Slot* other_side);
 
     virtual CommandPtr removeAllConnectionsCmd();
-    virtual CommandPtr removeConnectionCmd(Input *other_side);
+    CommandPtr removeConnectionCmd(Slot *other_side);
 
     void forceSendMessage(bool force = true);
 
@@ -85,7 +85,6 @@ public:
     void sendMessages();
 
     void reset();
-    void clearMessage();
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
@@ -96,7 +95,7 @@ protected:
     bool connect(Connectable* other_side);
 
 protected:
-    std::vector<Input*> targets_;
+    std::vector<Slot*> targets_;
     bool force_send_message_;
 
     ConnectionType::Ptr message_;
@@ -105,4 +104,4 @@ protected:
 
 }
 
-#endif // CONNECTOR_OUT_H
+#endif // TRIGGER_H

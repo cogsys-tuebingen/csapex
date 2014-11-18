@@ -11,6 +11,8 @@
 #include <csapex/view/box.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/slot.h>
+#include <csapex/signal/trigger.h>
 #include <csapex/core/settings.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_fulcrum.h>
@@ -273,6 +275,21 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         // draw port information (out)
         Q_FOREACH(Output* output, node_worker->getMessageOutputs()) {
             Port* p = widget_ctrl_->getPort(output);
+            if(p) {
+                drawPort(painter, box, p);
+            }
+        }
+
+        // draw slots
+        Q_FOREACH(Slot* slot, node_worker->getSlots()) {
+            Port* p = widget_ctrl_->getPort(slot);
+            if(p) {
+                drawPort(painter, box, p);
+            }
+        }
+        // draw triggers
+        Q_FOREACH(Trigger* trigger, node_worker->getTriggers()) {
+            Port* p = widget_ctrl_->getPort(trigger);
             if(p) {
                 drawPort(painter, box, p);
             }
@@ -707,10 +724,11 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 
     Connectable* c = p->getAdaptee();
     bool right = c->isOutput() ^ p->isFlipped();
+    bool is_message = (dynamic_cast<Slot*>(c) == NULL && dynamic_cast<Trigger*>(c) == NULL);
 
     if(!p->isMinimizedSize()) {
         int font_size = 10;
-        int lines = 3;
+        int lines = 2;
 
         QFont font;
         font.setPixelSize(font_size);
@@ -718,10 +736,14 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 
         QString text = c->getLabel().c_str();
 
-        if(text.length() != 0) {
-            text += "\n";
+        if(is_message) {
+            if(text.length() != 0) {
+                text += "\n";
+            }
+            text += c->getType()->name().c_str();
+            ++lines;
         }
-        text += c->getType()->name().c_str();
+
 
         QFontMetrics metrics(font);
 
@@ -729,13 +751,21 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
         int dy = lines * metrics.height();
 
         QPointF pos = box->pos() + p->centerPoint();
-        QRectF rect(pos + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
+        QRectF rect;
+        QTextOption opt;
+        if(is_message) {
+            rect = QRectF(pos + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
+            opt = QTextOption(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
+        } else {
+            rect = QRectF(pos + QPointF(-dx/2.0, -connector_radius_-dy), QSize(dx, dy));
+            opt = QTextOption(Qt::AlignVCenter | Qt::AlignCenter);
+        }
 
-        QTextOption opt(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
         QColor color = c->isOutput() ? output_color_ : input_color_;
         QPen p = painter->pen();
         p.setColor(color.dark());
         painter->setPen(p);
+//        painter->drawRect(rect);
         painter->drawText(rect, text, opt);
     }
 }

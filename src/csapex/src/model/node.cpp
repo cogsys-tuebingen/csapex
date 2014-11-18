@@ -5,6 +5,8 @@
 #include <csapex/command/meta.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/slot.h>
+#include <csapex/signal/trigger.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_modifier.h>
@@ -45,6 +47,20 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     awarn.setPrefix(p);
     aerr.setPrefix(p);
     alog.setPrefix(p);
+}
+
+void Node::doSetup()
+{
+    node_state_->setLabel(getUUID());
+    setupParameters();
+
+    try {
+        modifier_->addSlot("enable");
+
+        setup();
+    } catch(std::runtime_error& e) {
+        aerr << "setup failed: " << e.what() << std::endl;
+    }
 }
 
 std::string Node::getType() const
@@ -123,6 +139,11 @@ void Node::setNodeState(NodeState::Ptr memento)
 void Node::triggerModelChanged()
 {
     Q_EMIT worker_->nodeModelChanged();
+}
+
+bool Node::canTick()
+{
+    return true;
 }
 
 void Node::tick()

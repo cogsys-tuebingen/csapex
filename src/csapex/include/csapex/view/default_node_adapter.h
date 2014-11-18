@@ -10,8 +10,14 @@
 /// FORWARD DECLARTIONS
 class QComboBox;
 
+namespace qt_helper{
+struct Call;
+}
+
 namespace csapex
 {
+
+typedef boost::function<void()> Function;
 
 class DefaultNodeAdapter;
 
@@ -22,24 +28,30 @@ class DefaultNodeAdapterBridge : public QObject
 public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
 
+    void connectInGuiThread(boost::signals2::signal<void(param::Parameter*)>& signal,
+                 boost::function<void()> cb);
+    void disconnect();
+
 public Q_SLOTS:
     void nodeModelChangedEvent();
     void setupAdaptiveUi();
 
     void enableGroup(bool enable, const std::string& group);
 
+    void executeModelCallback(Function);
+
 Q_SIGNALS:
-    void guiChanged();
     void setupAdaptiveUiRequest();
 
+    void modelCallback(Function);
+
 public:
-    void triggerGuiChanged();
     void triggerSetupAdaptiveUiRequest();
 
 private:
     DefaultNodeAdapter* parent_;
+    std::vector<boost::signals2::connection> connections;
 };
-
 
 class DefaultNodeAdapter : public NodeAdapter
 {
@@ -50,29 +62,10 @@ public:
     virtual ~DefaultNodeAdapter();
 
     virtual void stop();
-    virtual void guiChanged();
 
 protected:
     virtual void setupAdaptiveUi();
     virtual void setupUi(QBoxLayout* layout);
-
-    template <typename T>
-    void updateParam(const std::string& name, T value);
-
-    void updatePathParam(const std::string& name);
-
-    void updateParamSet(const std::string& name, const std::string& value);
-    void updateParamBitSet(const std::string& name, const QListView *list);
-
-    template <typename T>
-    void updateUi(const param::Parameter* p, boost::function<void(T)> setter);
-    template <typename T>
-    void updateUiPtr(const param::Parameter* p, boost::function<void(const T*)> setter);
-
-    void updateUiSet(const param::Parameter* p, boost::function<void(const std::string&)> setter);
-    void updateUiBitSet(const param::Parameter* p, const QListView *list);
-
-    void updateUiSetScope(const param::SetParameter* set_p, QComboBox* combo);
 
 protected:
     void setupParameter(param::TriggerParameter* trigger_p);
@@ -86,15 +79,16 @@ protected:
 
     void clear();
 
-
 public:
     DefaultNodeAdapterBridge bridge;
+
+private:
+    qt_helper::Call* makeCall(boost::function<void()> cb);
 
 private:
     std::vector<QObject*> callbacks;
     std::map<std::string, QBoxLayout*> groups;
     std::map<std::string, bool> groups_enabled;
-    std::vector<boost::signals2::connection> connections;
 
     QBoxLayout* wrapper_layout_;
 };

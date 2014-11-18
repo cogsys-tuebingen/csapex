@@ -21,16 +21,20 @@ class NodeModifier
 public:
     NodeModifier(NodeWorker* node);
 
+    /*
+     * MESSAGES
+     */
+
     /// "real" messages
     template <typename T>
     Input* addInput(const std::string& label,
                     typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
-        return addInput(connection_types::makeEmptyMessage<T>(), label, false, false);
+        return addInput(connection_types::makeEmptyMessage<T>(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
                             typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
-        return addInput(connection_types::makeEmptyMessage<T>(), label, true, false);
+        return addInput(connection_types::makeEmptyMessage<T>(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
@@ -42,12 +46,12 @@ public:
     template <typename Container, typename T>
     Input* addInput(const std::string& label) {
         Container::template registerType<T>();
-        return addInput(Container::template make<T>(), label, false, false);
+        return addInput(Container::template make<T>(), label, false);
     }
     template <typename Container, typename T>
     Input* addOptionalInput(const std::string& label) {
         Container::template registerType<T>();
-        return addInput(Container::template make<T>(), label, true, false);
+        return addInput(Container::template make<T>(), label, true);
     }
     template <typename Container, typename T>
     Output* addOutput(const std::string& label) {
@@ -62,13 +66,13 @@ public:
     Input* addInput(const std::string& label,
                     typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, false);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
                             typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true, false);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
@@ -81,12 +85,12 @@ public:
     template <typename T>
     Input* addInput(const std::string& label,
                     typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false, false);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
                             typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true, false);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
@@ -98,49 +102,55 @@ public:
     /// multiple input types allowed
     template <typename Types>
     Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make<Types>(), label, false, false);
+        return addInput(multi_type::make<Types>(), label, false);
     }
     template <typename A, typename B>
     Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B> >(), label, false, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B> >(), label, false);
     }
     template <typename A, typename B, typename C>
     Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C> >(), label, false, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C> >(), label, false);
     }
     template <typename A, typename B, typename C, typename D>
     Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D> >(), label, false, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D> >(), label, false);
     }
     template <typename A, typename B, typename C, typename D, typename E>
     Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D,E> >(), label, false, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D,E> >(), label, false);
     }
 
     template <typename Types>
     Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make<Types>(), label, true, false);
+        return addInput(multi_type::make<Types>(), label, true);
     }
     template <typename A, typename B>
     Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B> >(), label, true, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B> >(), label, true);
     }
     template <typename A, typename B, typename C>
     Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C> >(), label, true, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C> >(), label, true);
     }
     template <typename A, typename B, typename C, typename D>
     Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D> >(), label, true, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D> >(), label, true);
     }
     template <typename A, typename B, typename C, typename D, typename E>
     Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D,E> >(), label, true, false);
+        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D,E> >(), label, true);
     }
 
 
+    /*
+     * SIGNALING
+     */
+    Slot* addSlot(const std::string& label);
+    Trigger* addTrigger(const std::string& label);
+
 private:
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional, bool async);
+    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
 
 private:

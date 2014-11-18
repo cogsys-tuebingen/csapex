@@ -16,13 +16,13 @@ const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_conn
 
 //bool Connectable::allow_processing = true;
 
-UUID Connectable::makeUUID(const UUID &box_uuid, int type, int sub_id) {
+UUID Connectable::makeUUID(const UUID &box_uuid, const std::string& type, int sub_id) {
     if(box_uuid.empty()) {
         return UUID::NONE;
     }
 
     std::stringstream ss;
-    ss << box_uuid << UUID::namespace_separator << (type > 0 ? "in" : (type == 0 ? "out" : "~")) << "_" << sub_id;
+    ss << box_uuid << UUID::namespace_separator << type << "_" << sub_id;
     return UUID::make(ss.str());
 }
 
@@ -35,7 +35,7 @@ Connectable::Connectable(Settings& settings, const UUID& uuid)
     init();
 }
 
-Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int type)
+Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, const std::string& type)
     : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings),
       sync_mutex(QMutex::Recursive),
       buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
@@ -46,11 +46,6 @@ Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, int typ
 
 void Connectable::notifyMessageProcessed()
 {
-    {
-        // QMutexLocker lock(&io_mutex);
-        can_process_cond.wakeAll();
-    }
-
     Q_EMIT messageProcessed(this);
 }
 
@@ -192,10 +187,12 @@ int Connectable::getCount() const
 
 bool Connectable::isBlocked() const
 {
+    QMutexLocker lock(&sync_mutex);
     return blocked_;
 }
 void Connectable::setBlocked(bool b)
 {
+    QMutexLocker lock(&sync_mutex);
     blocked_ = b;
     Q_EMIT blocked(b);
 }

@@ -54,17 +54,25 @@ public:
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
-    QAbstractItemModel *listAvailableNodeTypes();
+    QAbstractItemModel *listAvailableNodeTypes();    
 
+    void insertPort(QLayout* layout, Port* port);
 
 public Q_SLOTS:
     void nodeAdded(NodeWorkerPtr node_worker);
     void nodeRemoved(NodeWorkerPtr node_worker);
 
-    void connectorAdded(Connectable *connector);
+    void connectorCreated(Connectable *connector);
     void connectorRemoved(Connectable *connector);
 
-    void insertPort(QLayout* layout, Port* port);
+private:
+    void createPort(Connectable* connector, NodeBox *box, QBoxLayout *layout);
+
+    void connectorSignalAdded(Connectable *connector);
+    void connectorSignalRemoved(Connectable *connector);
+
+    void connectorMessageAdded(Connectable *connector);
+    void connectorMessageRemoved(Connectable *connector);
 
 private:
     GraphPtr graph_;

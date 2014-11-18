@@ -34,7 +34,6 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
         try {
             setupUi(layout_);
             is_gui_setup_ = true;
-            guiChanged();
         } catch(const std::exception& e) {
             std::cerr << "setting up ui for node " << node_->getNodeUUID().getFullName() << " failed: " << e.what() << std::endl;
         }
@@ -52,10 +51,6 @@ void NodeAdapter::updateDynamicGui(QBoxLayout* /*layout*/)
 }
 
 void NodeAdapter::stop()
-{
-}
-
-void NodeAdapter::guiChanged()
 {
 }
 

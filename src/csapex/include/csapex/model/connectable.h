@@ -27,13 +27,7 @@ public:
     static const QString MIME_CREATE_CONNECTION;
     static const QString MIME_MOVE_CONNECTIONS;
 
-    enum {
-        TYPE_IN = 1,
-        TYPE_OUT = 0,
-        TYPE_MISC = -1
-    };
-
-    static UUID makeUUID(const UUID &box_uuid, int type, int sub_id);
+    static UUID makeUUID(const UUID &box_uuid, const std::string &type, int sub_id);
 
 public:
     int getCount() const;
@@ -115,7 +109,7 @@ Q_SIGNALS:
 
 protected:
     Connectable(Settings& settings, const UUID &uuid);
-    Connectable(Settings& settings, Unique *parent, int sub_id, int type);
+    Connectable(Settings& settings, Unique *parent, int sub_id, const std::string &type);
     virtual ~Connectable();
     void init();
 
@@ -132,8 +126,6 @@ protected:
     mutable QMutex io_mutex;
     mutable QMutex sync_mutex;
 
-    QWaitCondition can_process_cond;
-
     csapex::DesignBoard* designer;
 
     Qt::MouseButtons buttons_down_;
@@ -147,7 +139,7 @@ protected:
 
 private:
     bool enabled_;
-    bool blocked_;
+    volatile bool blocked_;
 
 public:
     mutable long guard_;

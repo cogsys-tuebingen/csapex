@@ -34,6 +34,7 @@ Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *disp
 
 Designer::~Designer()
 {
+    delete ui;
 }
 
 void Designer::setup()

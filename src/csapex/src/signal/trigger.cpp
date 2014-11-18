@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
 
 /// COMPONENT
-#include <csapex/msg/input.h>
+#include <csapex/signal/slot.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
@@ -15,45 +15,44 @@
 
 using namespace csapex;
 
-Output::Output(Settings &settings, const UUID& uuid)
+Trigger::Trigger(Settings &settings, const UUID& uuid)
     : Connectable(settings, uuid), force_send_message_(false)
 {
 }
 
-Output::Output(Settings& settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "out"), force_send_message_(false)
+Trigger::Trigger(Settings& settings, Unique* parent, int sub_id)
+    : Connectable(settings, parent, sub_id, "trigger"), force_send_message_(false)
 {
 }
 
-Output::~Output()
+Trigger::~Trigger()
 {
-    foreach(Input* i, targets_) {
+    foreach(Slot* i, targets_) {
         i->removeConnection(this);
     }
 }
 
-void Output::reset()
+void Trigger::reset()
 {
-    clearMessage();
-
     setBlocked(false);
     setSequenceNumber(0);
     message_.reset();
+    message_to_send_.reset();
 }
 
-int Output::noTargets()
+int Trigger::noTargets()
 {
     return targets_.size();
 }
 
-std::vector<Input*> Output::getTargets() const
+std::vector<Slot*> Trigger::getTargets() const
 {
     return targets_;
 }
 
-void Output::removeConnection(Connectable* other_side)
+void Trigger::removeConnection(Connectable* other_side)
 {
-    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
+    for(std::vector<Slot*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
             other_side->removeConnection(this);
 
@@ -68,17 +67,17 @@ void Output::removeConnection(Connectable* other_side)
     }
 }
 
-Command::Ptr Output::removeConnectionCmd(Input* other_side) {
+Command::Ptr Trigger::removeConnectionCmd(Slot* other_side) {
     Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
 
     return removeThis;
 }
 
-Command::Ptr Output::removeAllConnectionsCmd()
+Command::Ptr Trigger::removeAllConnectionsCmd()
 {
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
-    foreach(Input* target, targets_) {
+    foreach(Slot* target, targets_) {
         Command::Ptr removeThis(new command::DeleteConnection(this, target));
         removeAll->add(removeThis);
     }
@@ -86,9 +85,9 @@ Command::Ptr Output::removeAllConnectionsCmd()
     return removeAll;
 }
 
-void Output::removeAllConnectionsNotUndoable()
+void Trigger::removeAllConnectionsNotUndoable()
 {
-    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
+    for(std::vector<Slot*>::iterator i = targets_.begin(); i != targets_.end();) {
         (*i)->removeConnection(this);
         i = targets_.erase(i);
     }
@@ -96,7 +95,7 @@ void Output::removeAllConnectionsNotUndoable()
     Q_EMIT disconnected(this);
 }
 
-void Output::disable()
+void Trigger::disable()
 {
     Connectable::disable();
 
@@ -106,17 +105,17 @@ void Output::disable()
 //    }
 }
 
-void Output::connectForcedWithoutCommand(Input *other_side)
+void Trigger::connectForcedWithoutCommand(Slot *other_side)
 {
     tryConnect(other_side);
 }
 
-bool Output::tryConnect(Connectable *other_side)
+bool Trigger::tryConnect(Connectable *other_side)
 {
     return connect(other_side);
 }
 
-bool Output::connect(Connectable *other_side)
+bool Trigger::connect(Connectable *other_side)
 {
     if(!other_side->canInput()) {
         std::cerr << "cannot connect, other side can't input" << std::endl;
@@ -127,15 +126,15 @@ bool Output::connect(Connectable *other_side)
         return false;
     }
 
-    Input* input = dynamic_cast<Input*>(other_side);
+    Slot* slot = dynamic_cast<Slot*>(other_side);
 
-    if(!input->acknowledgeConnection(this)) {
+    if(!slot->acknowledgeConnection(this)) {
         std::cerr << "cannot connect, other side doesn't acknowledge" << std::endl;
         return false;
     }
 
-    apex_assert_hard(input);
-    targets_.push_back(input);
+    apex_assert_hard(slot);
+    targets_.push_back(slot);
 
     QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
 
@@ -144,36 +143,36 @@ bool Output::connect(Connectable *other_side)
     return true;
 }
 
-bool Output::targetsCanBeMovedTo(Connectable* other_side) const
+bool Trigger::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    foreach(Input* input, targets_) {
-        if(!input->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+    foreach(Slot* Slot, targets_) {
+        if(!Slot->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
     return true;
 }
 
-bool Output::isConnected() const
+bool Trigger::isConnected() const
 {
     return targets_.size() > 0;
 }
 
-void Output::connectionMovePreview(Connectable *other_side)
+void Trigger::connectionMovePreview(Connectable *other_side)
 {
-    foreach(Input* input, targets_) {
-        Q_EMIT(connectionInProgress(input, other_side));
+    foreach(Slot* Slot, targets_) {
+        Q_EMIT(connectionInProgress(Slot, other_side));
     }
 }
 
-void Output::validateConnections()
+void Trigger::validateConnections()
 {
-    foreach(Input* target, targets_) {
+    foreach(Slot* target, targets_) {
         target->validateConnections();
     }
 }
 
-void Output::publish(ConnectionType::Ptr message)
+void Trigger::publish(ConnectionType::Ptr message)
 {
     setType(message);
 
@@ -183,15 +182,15 @@ void Output::publish(ConnectionType::Ptr message)
     setBlocked(true);
 }
 
-bool Output::hasMessage()
+bool Trigger::hasMessage()
 {
     return message_to_send_;
 }
 
-bool Output::canSendMessages()
+bool Trigger::canSendMessages()
 {
-    foreach(Input* input, targets_) {
-        bool blocked = /*input->isEnabled() && */input->isBlocked();
+    foreach(Slot* Slot, targets_) {
+        bool blocked = Slot->isEnabled() && Slot->isBlocked();
         if(blocked) {
             return false;
         }
@@ -199,17 +198,11 @@ bool Output::canSendMessages()
     return true;
 }
 
-void Output::clearMessage()
+void Trigger::sendMessages()
 {
-    message_to_send_.reset();
-}
-
-void Output::sendMessages()
-{
-    assert(canSendMessages());
     if(message_to_send_) {
         message_ = message_to_send_;
-        clearMessage();
+        message_to_send_.reset();
 
     } else {
         if(!targets_.empty()) {
@@ -220,23 +213,21 @@ void Output::sendMessages()
 
     message_->setSequenceNumber(seq_no_);
 
-    // wait for all connected inputs to be able to receive
-    //  * inputs can only be connected to this output since they are 1:1
-    std::vector<Input*> targets;
-    foreach(Input* i, targets_) {
+    // wait for all connected Slots to be able to receive
+    //  * Slots can only be connected to this Trigger since they are 1:1
+    std::vector<Slot*> targets;
+    foreach(Slot* i, targets_) {
         if(i->isEnabled()) {
             targets.push_back(i);
-            assert(!i->isBlocked());
         }
     }
 
-//    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
     if(!targets.empty()) {
-        // all connected inputs are ready to receive, send them the message
+        // all connected Slots are ready to receive, send them the message
         if(targets.size() == 1) {
             targets[0]->inputMessage(message_);
         } else if(targets.size() > 1) {
-            foreach(Input* i, targets) {
+            foreach(Slot* i, targets) {
                 ConnectionType::Ptr msg = message_->clone();
                 msg->setSequenceNumber(seq_no_);
                 i->inputMessage(msg);
@@ -251,12 +242,12 @@ void Output::sendMessages()
     Q_EMIT messageSent(this);
 }
 
-void Output::forceSendMessage(bool force)
+void Trigger::forceSendMessage(bool force)
 {
     force_send_message_ = force;
 }
 
-ConnectionType::Ptr Output::getMessage()
+ConnectionType::Ptr Trigger::getMessage()
 {
     return message_;
 }

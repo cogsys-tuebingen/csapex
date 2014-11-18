@@ -40,31 +40,37 @@
      <property name="lineWidth">
       <number>2</number>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
-      <property name="spacing">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="leftMargin">
        <number>0</number>
       </property>
-      <property name="leftMargin">
-       <number>1</number>
-      </property>
       <property name="topMargin">
-       <number>3</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>3</number>
+       <number>0</number>
       </property>
-      <item>
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item row="2" column="0">
        <layout class="QVBoxLayout" name="input_layout">
         <property name="leftMargin">
          <number>0</number>
         </property>
        </layout>
       </item>
-      <item>
-       <layout class="QVBoxLayout" name="mainLayout" stretch="0,0,1">
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="signal_layout"/>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="slot_layout"/>
+      </item>
+      <item row="2" column="1">
+       <layout class="QVBoxLayout" name="mainLayout" stretch="0,0,0">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -74,19 +80,35 @@
         <item>
          <layout class="QHBoxLayout" name="header">
           <item>
-           <widget class="QCheckBox" name="enablebtn">
-            <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+           <widget class="QLabel" name="icon">
+            <property name="text">
+             <string/>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="icon_label_spacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>8</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QLabel" name="label">
             <property name="text">
              <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
             </property>
            </widget>
           </item>
@@ -148,7 +170,17 @@
         </item>
        </layout>
       </item>
-      <item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="enablebtn">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
        <layout class="QVBoxLayout" name="output_layout"/>
       </item>
      </layout>
@@ -160,7 +192,7 @@
  <connections>
   <connection>
    <sender>enablebtn</sender>
-   <signal>clicked()</signal>
+   <signal>stateChanged(int)</signal>
    <receiver>Box</receiver>
    <slot>setFocus()</slot>
    <hints>
@@ -176,7 +208,7 @@
   </connection>
   <connection>
    <sender>enablebtn</sender>
-   <signal>stateChanged(int)</signal>
+   <signal>clicked()</signal>
    <receiver>Box</receiver>
    <slot>setFocus()</slot>
    <hints>

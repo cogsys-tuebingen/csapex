@@ -23,6 +23,7 @@ public:
 
     void initialize(const std::string &type, const UUID &uuid,
                     NodeWorker *node_worker, Settings *settings);
+    void doSetup();
 
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
@@ -38,6 +39,7 @@ public:
     virtual void messageArrived(Input* source);
     virtual void process() = 0;
     virtual void stateChanged();
+    virtual bool canTick();
     virtual void tick();
     virtual void abort();
 

@@ -23,8 +23,8 @@ private:
     void update();
 
 Q_SIGNALS:
-    void valueChanged(double value);
-    void rangeChanged(double min, double max);
+    void doubleValueChanged(double value);
+    void doubleRangeChanged(double min, double max);
 
 public Q_SLOTS:
     void scaleValue(int value);

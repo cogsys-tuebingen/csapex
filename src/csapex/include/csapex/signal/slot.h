@@ -1,5 +1,5 @@
-#ifndef CONNECTOR_IN_H
-#define CONNECTOR_IN_H
+#ifndef SLOT_H
+#define SLOT_H
 
 /// COMPONENT
 #include <csapex/model/connectable.h>
@@ -16,19 +16,19 @@
 namespace csapex
 {
 
-class Input : public Connectable
+class Slot : public Connectable
 {
     Q_OBJECT
 
-    friend class Output;
+    friend class Trigger;
     friend class command::AddConnection;
     friend class command::MoveConnection;
     friend class command::DeleteConnection;
 
 public:
-    Input(Settings &settings, const UUID &uuid);
-    Input(Settings& settings, Unique *parent, int sub_id);
-    virtual ~Input();
+    Slot(Settings &settings, const UUID &uuid);
+    Slot(Settings& settings, Unique *parent, int sub_id);
+    virtual ~Slot();
 
     virtual bool canInput() const {
         return true;
@@ -86,7 +86,6 @@ public:
 
     template <typename T>
     bool isMessage() {
-        QMutexLocker lock(&sync_mutex);
         return buffer_->isType<T>();
     }
 
@@ -124,5 +123,4 @@ protected:
 };
 
 }
-
-#endif // CONNECTOR_IN_H
+#endif // SLOT_H

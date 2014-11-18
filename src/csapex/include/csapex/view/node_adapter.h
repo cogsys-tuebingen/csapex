@@ -40,8 +40,6 @@ public:
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;
 
-    virtual void guiChanged();
-
 protected:
     QBoxLayout *layout_;
     bool is_gui_setup_;

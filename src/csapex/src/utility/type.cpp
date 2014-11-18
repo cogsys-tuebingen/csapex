@@ -4,6 +4,7 @@
 /// SYSTEM
 #include <string>
 #include <cxxabi.h>
+#include <cstdlib>
 
 namespace {
 std::string replace(const std::string& s, const std::string& find, const std::string& replace) {
@@ -21,7 +22,7 @@ std::string csapex::type2name(const std::type_info& info)
     int status;
     char* demangled = abi::__cxa_demangle(info.name(), 0, 0, &status);
     std::string full_name(demangled);
-    delete[] demangled;
+    free(demangled);
 
     return full_name;
 }
@@ -29,7 +30,9 @@ std::string csapex::type2name(const std::type_info& info)
 std::string csapex::type2nameWithoutNamespace(const std::type_info& info)
 {
     int status;
-    std::string full_name(abi::__cxa_demangle(info.name(), 0, 0, &status));
+    char* demangled = abi::__cxa_demangle(info.name(), 0, 0, &status);
+    std::string full_name(demangled);
+    free(demangled);
 
     //    return replace(replace(full_name, "connection_types::", ""), "csapex::", "");
     std::size_t split_point = full_name.find("::");

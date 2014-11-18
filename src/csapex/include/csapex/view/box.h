@@ -76,6 +76,8 @@ public:
 
     QBoxLayout* getInputLayout();
     QBoxLayout* getOutputLayout();
+    QBoxLayout* getSlotLayout();
+    QBoxLayout* getTriggerLayout();
 
     /// UI CALLBACKS
     void moveEvent(QMoveEvent*);

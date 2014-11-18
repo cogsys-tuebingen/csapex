@@ -46,7 +46,7 @@ void QDoubleSlider::scaleValue(int value)
         setDoubleValue(val);
     }
 
-    Q_EMIT valueChanged(val);
+    Q_EMIT doubleValueChanged(val);
 }
 
 void QDoubleSlider::setDoubleMinimum(double min)
@@ -96,7 +96,7 @@ void QDoubleSlider::setNearestDoubleValue(double val)
         setValue(intval);
         blockSignals(false);
 
-        Q_EMIT valueChanged(val);
+        Q_EMIT doubleValueChanged(val);
     }
 }
 
@@ -135,5 +135,5 @@ void QDoubleSlider::emitRangeChanged(int min, int max)
     if(int2double(max) != max_)
         setDoubleMaximum(int2double(max));
 
-    Q_EMIT rangeChanged(min_, max_);
+    Q_EMIT doubleRangeChanged(min_, max_);
 }

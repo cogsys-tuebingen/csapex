@@ -10,6 +10,8 @@
 #include <csapex/core/settings.h>
 #include <csapex/model/node_state.h>
 #include <csapex/utility/q_signal_relay.h>
+#include <csapex/signal/slot.h>
+#include <csapex/signal/trigger.h>
 
 /// SYSTEM
 #include <QThread>
@@ -21,6 +23,7 @@ static const int DEFAULT_HISTORY_LENGTH = 15;
 
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
     : settings_(settings), node_(node),
+      is_setup_(false),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
       sync(QMutex::Recursive),
@@ -51,14 +54,14 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
 
     node_->getParameterState()->parameter_added->connect(boost::bind(&NodeWorker::makeParameterConnectable, this, _1));
 
-    node_->setupParameters();
-    node_->getNodeState()->setLabel(node_->getUUID());
+    node_->doSetup();
 
-    try {
-        node_->setup();
-    } catch(std::runtime_error& e) {
-        node_->aerr << "setup failed: " << e.what() << std::endl;
+    if(isSource()) {
+        setTickEnabled(true);
     }
+
+    is_setup_ = true;
+
     if(params_created_in_constructor) {
        node_->awarn << "Node creates parameters in its constructor! Please implement 'setupParameters'" << std::endl;
     }
@@ -67,6 +70,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
 NodeWorker::~NodeWorker()
 {
     tick_immediate_ = false;
+    is_setup_ = false;
 
     waitUntilFinished();
 
@@ -434,10 +438,10 @@ void NodeWorker::processMessages()
         }
 
         // set output sequence numbers
-        for(std::size_t i = 0; i < outputs_.size(); ++i) {
-            Output* out = outputs_[i];
-            out->setSequenceNumber(highest_seq_no);
-        }
+//        for(std::size_t i = 0; i < outputs_.size(); ++i) {
+//            Output* out = outputs_[i];
+//            out->setSequenceNumber(highest_seq_no);
+//        }
     }
 
     processInputs(all_inputs_are_present);
@@ -501,8 +505,12 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
     }
     t->finish();
 
-    messages_waiting_to_be_sent = true;
-    Q_EMIT messagesWaitingToBeSent(true);
+    if(isSink()) {
+        messages_waiting_to_be_sent = false;
+    } else {
+        messages_waiting_to_be_sent = true;
+        Q_EMIT messagesWaitingToBeSent(true);
+    }
 
     if(++timer_history_pos_ >= (int) timer_history_.size()) {
         timer_history_pos_ = 0;
@@ -533,6 +541,28 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 
     registerOutput(c);
     return c;
+}
+
+Slot* NodeWorker::addSlot(const std::string& label)
+{
+    int id = slots_.size();
+    Slot* slot = new Slot(settings_, node_.get(), id);
+    slot->setLabel(label);
+
+    slots_.push_back(slot);
+
+    return slot;
+}
+
+Trigger* NodeWorker::addTrigger(const std::string& label)
+{
+    int id = triggers_.size();
+    Trigger* trigger = new Trigger(settings_, node_.get(), id);
+    trigger->setLabel(label);
+
+    triggers_.push_back(trigger);
+
+    return trigger;
 }
 
 Input* NodeWorker::getParameterInput(const std::string &name) const
@@ -572,10 +602,10 @@ void NodeWorker::removeInput(Input *in)
         }
     }
 
-    in->deleteLater();
-
     disconnectConnector(in);
     Q_EMIT connectorRemoved(in);
+
+    in->deleteLater();
 }
 
 void NodeWorker::removeOutput(Output *out)
@@ -594,10 +624,40 @@ void NodeWorker::removeOutput(Output *out)
         }
     }
 
-    out->deleteLater();
-
     disconnectConnector(out);
     Q_EMIT connectorRemoved(out);
+
+    out->deleteLater();
+}
+
+void NodeWorker::removeSlot(Slot *s)
+{
+    std::vector<Slot*>::iterator it;
+    it = std::find(slots_.begin(), slots_.end(), s);
+
+    if(it != slots_.end()) {
+        slots_.erase(it);
+    }
+
+    s->deleteLater();
+
+    disconnectConnector(s);
+    Q_EMIT connectorRemoved(s);
+}
+
+void NodeWorker::removeTrigger(Trigger *t)
+{
+    std::vector<Trigger*>::iterator it;
+    it = std::find(triggers_.begin(), triggers_.end(), t);
+
+    if(it != triggers_.end()) {
+        triggers_.erase(it);
+    }
+
+    t->deleteLater();
+
+    disconnectConnector(t);
+    Q_EMIT connectorRemoved(t);
 }
 
 void NodeWorker::registerInput(Input* in)
@@ -625,6 +685,33 @@ void NodeWorker::registerOutput(Output* out)
     QObject::connect(out, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
 
     Q_EMIT connectorCreated(out);
+}
+
+void NodeWorker::registerSlot(Slot* s)
+{
+    slots_.push_back(s);
+
+    s->moveToThread(thread());
+
+    connectConnector(s);
+    QObject::connect(s, SIGNAL(messageArrived(Connectable*)), this, SLOT(messageArrived(Connectable*)));
+    QObject::connect(s, SIGNAL(connectionDone(Connectable*)), this, SLOT(trySendMessages()));
+
+    Q_EMIT connectorCreated(s);
+}
+
+void NodeWorker::registerTrigger(Trigger* t)
+{
+    triggers_.push_back(t);
+
+    t->moveToThread(thread());
+
+    connectConnector(t);
+    QObject::connect(t, SIGNAL(messageProcessed(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
+    QObject::connect(t, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
+    QObject::connect(t, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
+
+    Q_EMIT connectorCreated(t);
 }
 
 Input* NodeWorker::getInput(const UUID& uuid) const
@@ -659,6 +746,30 @@ Output* NodeWorker::getOutput(const UUID& uuid) const
     return NULL;
 }
 
+
+Slot* NodeWorker::getSlot(const UUID& uuid) const
+{
+    foreach(Slot* s, slots_) {
+        if(s->getUUID() == uuid) {
+            return s;
+        }
+    }
+
+    return NULL;
+}
+
+
+Trigger* NodeWorker::getTrigger(const UUID& uuid) const
+{
+    foreach(Trigger* t, triggers_) {
+        if(t->getUUID() == uuid) {
+            return t;
+        }
+    }
+
+    return NULL;
+}
+
 void NodeWorker::removeInput(const UUID &uuid)
 {
     removeInput(getInput(uuid));
@@ -667,6 +778,16 @@ void NodeWorker::removeInput(const UUID &uuid)
 void NodeWorker::removeOutput(const UUID &uuid)
 {
     removeOutput(getOutput(uuid));
+}
+
+void NodeWorker::removeSlot(const UUID &uuid)
+{
+    removeSlot(getSlot(uuid));
+}
+
+void NodeWorker::removeTrigger(const UUID &uuid)
+{
+    removeTrigger(getTrigger(uuid));
 }
 
 std::vector<Input*> NodeWorker::getAllInputs() const
@@ -695,6 +816,16 @@ std::vector<Output*> NodeWorker::getMessageOutputs() const
     return outputs_;
 }
 
+std::vector<Slot*> NodeWorker::getSlots() const
+{
+    return slots_;
+}
+
+std::vector<Trigger*> NodeWorker::getTriggers() const
+{
+    return triggers_;
+}
+
 std::vector<Input*> NodeWorker::getParameterInputs() const
 {
     return parameter_inputs_;
@@ -709,8 +840,13 @@ bool NodeWorker::canSendMessages()
 {
     QMutexLocker lock(&sync);
 
-    for(std::size_t i = 0; i < outputs_.size(); ++i) {
-        Output* out = outputs_[i];
+    foreach(Output* out, outputs_) {
+        if(!out->canSendMessages()) {
+            return false;
+        }
+    }
+
+    foreach(Output* out, parameter_outputs_) {
         if(!out->canSendMessages()) {
             return false;
         }
@@ -836,6 +972,10 @@ bool NodeWorker::isSink() const
 
 void NodeWorker::tick()
 {
+    if(!is_setup_) {
+        return;
+    }
+
     assertNotInGuiThread();
 
     while(true) {
@@ -861,35 +1001,34 @@ void NodeWorker::tick()
         }
 
 
-        if(isEnabled() && (isTickEnabled() || isSource())) {
+        if(isEnabled() && (isTickEnabled() && isSource())) {
 
-            if(!canSendMessages() /*|| ticks_ != 0*/) {
+            if(!canSendMessages() || !node_->canTick() /*|| ticks_ != 0*/) {
                 return;
+            }
+            foreach(Output* out, parameter_outputs_) {
+                out->clearMessage();
+            }
+            foreach(Output* out, outputs_) {
+                out->clearMessage();
             }
 
             node_->tick();
             ++ticks_;
 
-            processInputs(isSource());
+            //processInputs(isSource());
+
+            foreach(Output* out, parameter_outputs_) {
+                messages_waiting_to_be_sent |= out->hasMessage();
+            }
+            foreach(Output* out, outputs_) {
+                messages_waiting_to_be_sent |= out->hasMessage();
+            }
+
+            Q_EMIT messagesWaitingToBeSent(messages_waiting_to_be_sent);
+
             trySendMessages();
         }
-
-        //            node_->tick();
-
-        // if there is a message: send!
-        //            bool has_msg = false;
-        //            for(std::size_t i = 0; i < outputs_.size(); ++i) {
-        //                Output* out = outputs_[i];
-        //                if(out->hasMessage()) {
-        //                    has_msg = true;
-        //                }
-        //            }
-        //            if(has_msg) {
-        //                trySendMessages();
-        //            } else {
-        //                node_->ainfo << "no message output" << std::endl;
-        //            }
-        //        }
 
         if(!tick_immediate_) {
             return;

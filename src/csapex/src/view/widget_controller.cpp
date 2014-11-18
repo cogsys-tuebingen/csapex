@@ -14,6 +14,8 @@
 #include <csapex/model/tag.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/slot.h>
+#include <csapex/signal/trigger.h>
 #include <csapex/utility/movable_graphics_proxy_widget.h>
 #include <csapex/view/box.h>
 #include <csapex/view/default_node_adapter.h>
@@ -155,14 +157,20 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 
         // add existing connectors
         Q_FOREACH(Input* input, node_worker->getMessageInputs()) {
-            connectorAdded(input);
+            connectorMessageAdded(input);
         }
         Q_FOREACH(Output* output, node_worker->getMessageOutputs()) {
-            connectorAdded(output);
+            connectorMessageAdded(output);
+        }
+        Q_FOREACH(Slot* slot, node_worker->getSlots()) {
+            connectorSignalAdded(slot);
+        }
+        Q_FOREACH(Trigger* trigger, node_worker->getTriggers()) {
+            connectorSignalAdded(trigger);
         }
 
         // subscribe to coming connectors
-        QObject::connect(node_worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorAdded(Connectable*)));
+        QObject::connect(node_worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorCreated(Connectable*)));
         QObject::connect(node_worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
     }
 }
@@ -180,31 +188,36 @@ void WidgetController::nodeRemoved(NodeWorkerPtr node_worker)
     }
 }
 
-void WidgetController::connectorAdded(Connectable* connector)
+void WidgetController::connectorCreated(Connectable* connector)
 {
-    if(designer_) {
-        UUID parent_uuid = connector->getUUID().parentUUID();
-        NodeBox* box = getBox(parent_uuid);
-        Port* port = new Port(dispatcher_, connector, box->isFlipped());
-
-
-        QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
-        QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
-
-        QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
-        insertPort(layout, port);
+    // TODO: dirty...
+    if(dynamic_cast<Slot*> (connector) || dynamic_cast<Trigger*>(connector)) {
+        connectorSignalAdded(connector);
+    } else {
+        connectorMessageAdded(connector);
     }
 }
 
-void WidgetController::insertPort(QLayout* layout, Port* port)
+void WidgetController::connectorRemoved(Connectable *connector)
 {
-    port_map_[port->getAdaptee()->getUUID()] = port;
-
-    layout->addWidget(port);
+    // TODO: dirty...
+    if(dynamic_cast<Slot*> (connector) || dynamic_cast<Trigger*>(connector)) {
+        connectorSignalRemoved(connector);
+    } else {
+        connectorMessageRemoved(connector);
+    }
 }
 
+void WidgetController::connectorMessageAdded(Connectable* connector)
+{
+    UUID parent_uuid = connector->getUUID().parentUUID();
+    NodeBox* box = getBox(parent_uuid);
+    QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
 
-void WidgetController::connectorRemoved(Connectable *connector)
+    createPort(connector, box, layout);
+}
+
+void WidgetController::connectorMessageRemoved(Connectable *connector)
 {
     if(designer_) {
         boost::unordered_map<UUID, Port*, UUID::Hasher>::iterator it = port_map_.find(connector->getUUID());
@@ -212,6 +225,40 @@ void WidgetController::connectorRemoved(Connectable *connector)
             port_map_.erase(it);
         }
     }
+}
+
+void WidgetController::connectorSignalAdded(Connectable *connector)
+{
+    UUID parent_uuid = connector->getUUID().parentUUID();
+    NodeBox* box = getBox(parent_uuid);
+    QBoxLayout* layout = dynamic_cast<Trigger*>(connector) ? box->getTriggerLayout() : box->getSlotLayout();
+
+    createPort(connector, box, layout);
+}
+
+void WidgetController::connectorSignalRemoved(Connectable *connector)
+{
+    connectorMessageRemoved(connector);
+}
+
+void WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
+{
+    if(designer_) {
+        Port* port = new Port(dispatcher_, connector, box->isFlipped());
+
+        QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
+        QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
+
+        insertPort(layout, port);
+    }
+}
+
+
+void WidgetController::insertPort(QLayout* layout, Port* port)
+{
+    port_map_[port->getAdaptee()->getUUID()] = port;
+
+    layout->addWidget(port);
 }
 
 void WidgetController::foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred)

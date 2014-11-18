@@ -37,6 +37,9 @@ FWD(Input);
 FWD(Output);
 FWD(Connection);
 FWD(Fulcrum);
+FWD(Trigger);
+FWD(Slot);
+FWD(Signal);
 
 FWD(Graph);
 FWD(GraphWorker);
@@ -109,6 +112,10 @@ class ModifyFulcrum;
 class AddConnector;
 }
 
+namespace connection_types
+{
+FWD(Message);
+}
 
 }
 

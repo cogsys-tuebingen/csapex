@@ -13,7 +13,6 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/node_adapter.h>
-#include <csapex/view/port.h>
 #include <csapex/utility/color.hpp>
 #include <csapex/core/settings.h>
 
@@ -80,7 +79,8 @@ void NodeBox::construct()
     ui->enablebtn->setCheckable(true);
     ui->enablebtn->setChecked(node_worker_->getNode()->getNodeState()->isEnabled());
 
-    ui->enablebtn->setIcon(icon_);
+    QSize size(16, 16);
+    ui->icon->setPixmap(icon_.pixmap(size));
 
     setFocusPolicy(Qt::ClickFocus);
 
@@ -226,6 +226,16 @@ QBoxLayout* NodeBox::getInputLayout()
 QBoxLayout* NodeBox::getOutputLayout()
 {
     return ui->output_layout;
+}
+
+QBoxLayout* NodeBox::getSlotLayout()
+{
+    return ui->slot_layout;
+}
+
+QBoxLayout* NodeBox::getTriggerLayout()
+{
+    return ui->signal_layout;
 }
 
 bool NodeBox::isError() const

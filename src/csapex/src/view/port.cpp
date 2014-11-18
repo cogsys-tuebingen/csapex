@@ -78,7 +78,7 @@ Connectable* Port::getAdaptee() const
 
 void Port::paintEvent(QPaintEvent *e)
 {
-    bool opt = isInput() && dynamic_cast<Input*>(adaptee_)->isOptional();
+    bool opt = dynamic_cast<Input*>(adaptee_) && dynamic_cast<Input*>(adaptee_)->isOptional();
     setProperty("unconnected", isInput() && !opt && !adaptee_->isConnected());
     setProperty("optional", opt);
 

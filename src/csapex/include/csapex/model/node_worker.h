@@ -58,9 +58,13 @@ public:
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
+    Slot* addSlot(const std::string& label);
+    Trigger* addTrigger(const std::string& label);
 
-    virtual Input* getInput(const UUID& uuid) const;
-    virtual Output* getOutput(const UUID& uuid) const;
+    Input* getInput(const UUID& uuid) const;
+    Output* getOutput(const UUID& uuid) const;
+    Slot* getSlot(const UUID& uuid) const;
+    Trigger* getTrigger(const UUID& uuid) const;
 
     /* experimental */ void makeParameterConnectable(param::Parameter*);
     /* experimental */ Input* getParameterInput(const std::string& name) const;
@@ -68,15 +72,21 @@ public:
 
     /* NAMING */ void registerInput(Input* in);
     /* NAMING */ void registerOutput(Output* out);
+    /* NAMING */ void registerSlot(Slot* s);
+    /* NAMING */ void registerTrigger(Trigger* t);
 
     void removeInput(const UUID& uuid);
     void removeOutput(const UUID& uuid);
+    void removeSlot(const UUID& uuid);
+    void removeTrigger(const UUID& uuid);
 
     std::vector<Input*> getAllInputs() const;
     std::vector<Output*> getAllOutputs() const;
 
     std::vector<Input*> getMessageInputs() const;
     std::vector<Output*> getMessageOutputs() const;
+    std::vector<Slot*> getSlots() const;
+    std::vector<Trigger*> getTriggers() const;
 
     std::vector<Input*> getParameterInputs() const;
     std::vector<Output*> getParameterOutputs() const;
@@ -153,6 +163,8 @@ private Q_SLOTS:
 private:
     void removeInput(Input *in);
     void removeOutput(Output *out);
+    void removeSlot(Slot *out);
+    void removeTrigger(Trigger *out);
 
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);
@@ -169,8 +181,12 @@ private:
     Settings& settings_;
     NodePtr node_;
 
+    bool is_setup_;
+
     std::vector<Input*> inputs_;
     std::vector<Output*> outputs_;
+    std::vector<Trigger*> triggers_;
+    std::vector<Slot*> slots_;
 
     std::vector<Input*> parameter_inputs_;
     std::vector<Output*> parameter_outputs_;

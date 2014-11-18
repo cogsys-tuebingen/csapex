@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/msg/input.h>
+#include <csapex/signal/slot.h>
 
 /// COMPONENT
 #include <csapex/msg/output.h>
@@ -12,19 +12,19 @@
 
 using namespace csapex;
 
-Input::Input(Settings& settings, const UUID &uuid)
+Slot::Slot(Settings& settings, const UUID &uuid)
     : Connectable(settings, uuid), target(NULL), buffer_(new Buffer), optional_(false)
 {
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
 }
 
-Input::Input(Settings &settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "in"), target(NULL), buffer_(new Buffer), optional_(false)
+Slot::Slot(Settings &settings, Unique* parent, int sub_id)
+    : Connectable(settings, parent, sub_id, "slot"), target(NULL), buffer_(new Buffer), optional_(false)
 {
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
 }
 
-Input::~Input()
+Slot::~Slot()
 {
     if(target != NULL) {
         target->removeConnection(this);
@@ -33,15 +33,13 @@ Input::~Input()
     free();
 }
 
-void Input::reset()
+void Slot::reset()
 {
-
-
     free();
     setSequenceNumber(0);
 }
 
-bool Input::tryConnect(Connectable* other_side)
+bool Slot::tryConnect(Connectable* other_side)
 {
     if(!other_side->canOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
@@ -51,7 +49,7 @@ bool Input::tryConnect(Connectable* other_side)
     return other_side->tryConnect(this);
 }
 
-bool Input::acknowledgeConnection(Connectable* other_side)
+bool Slot::acknowledgeConnection(Connectable* other_side)
 {
     target = dynamic_cast<Output*>(other_side);
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
@@ -59,7 +57,7 @@ bool Input::acknowledgeConnection(Connectable* other_side)
     return true;
 }
 
-void Input::removeConnection(Connectable* other_side)
+void Slot::removeConnection(Connectable* other_side)
 {
     if(target != NULL) {
         apex_assert_hard(other_side == target);
@@ -69,70 +67,66 @@ void Input::removeConnection(Connectable* other_side)
     }
 }
 
-Command::Ptr Input::removeAllConnectionsCmd()
+Command::Ptr Slot::removeAllConnectionsCmd()
 {
     Command::Ptr cmd(new command::DeleteConnection(target, this));
     return cmd;
 }
 
-void Input::setOptional(bool optional)
+void Slot::setOptional(bool optional)
 {
     optional_ = optional;
 }
 
-bool Input::isOptional() const
+bool Slot::isOptional() const
 {
     return optional_;
 }
 
-bool Input::hasReceived() const
+bool Slot::hasReceived() const
 {
-
     return isConnected() && buffer_->isFilled();
 }
-bool Input::hasMessage() const
+bool Slot::hasMessage() const
 {
-
     return hasReceived() && !buffer_->isType<connection_types::NoMessage>();
 }
 
-void Input::stop()
+void Slot::stop()
 {
-
-
     buffer_->disable();
     Connectable::stop();
 }
 
-void Input::free()
+void Slot::free()
 {
     buffer_->free();
 
     setBlocked(false);
 }
 
-void Input::enable()
+void Slot::enable()
 {
     Connectable::enable();
-    //    if(isConnected() && !getSource()->isEnabled()) {
-    //        getSource()->enable();
-    //    }
+//    if(isConnected() && !getSource()->isEnabled()) {
+//        getSource()->enable();
+//    }
 }
 
-void Input::disable()
+void Slot::disable()
 {
     Connectable::disable();
 
-    //    if(isBlocked()) {
-    free();
-    notifyMessageProcessed();
-    //    }
-    //    if(isConnected() && getSource()->isEnabled()) {
-    //        getSource()->disable();
-    //    }
+//    if(isBlocked()) {
+        free();
+        notifyMessageProcessed();
+//    }
+//    if(isConnected() && getSource()->isEnabled()) {
+//        getSource()->disable();
+//    }
 }
 
-void Input::removeAllConnectionsNotUndoable()
+void Slot::removeAllConnectionsNotUndoable()
 {
     if(target != NULL) {
         target->removeConnection(this);
@@ -143,29 +137,28 @@ void Input::removeAllConnectionsNotUndoable()
 }
 
 
-bool Input::canConnectTo(Connectable* other_side, bool move) const
+bool Slot::canConnectTo(Connectable* other_side, bool move) const
 {
     return Connectable::canConnectTo(other_side, move) && (move || !isConnected());
 }
 
-bool Input::targetsCanBeMovedTo(Connectable* other_side) const
+bool Slot::targetsCanBeMovedTo(Connectable* other_side) const
 {
     return target->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
-bool Input::isConnected() const
+bool Slot::isConnected() const
 {
-
     return target != NULL;
 }
 
-void Input::connectionMovePreview(Connectable *other_side)
+void Slot::connectionMovePreview(Connectable *other_side)
 {
     Q_EMIT(connectionInProgress(getSource(), other_side));
 }
 
 
-void Input::validateConnections()
+void Slot::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
@@ -180,26 +173,21 @@ void Input::validateConnections()
     setError(e);
 }
 
-Connectable *Input::getSource() const
+Connectable *Slot::getSource() const
 {
-
     return target;
 }
 
-void Input::inputMessage(ConnectionType::Ptr message)
+void Slot::inputMessage(ConnectionType::Ptr message)
 {
-    assert(!isBlocked());
-    setBlocked(true);
-
     Q_EMIT gotMessage(message);
 }
 
-void Input::handleMessage(ConnectionType::Ptr message)
+void Slot::handleMessage(ConnectionType::Ptr message)
 {
     if(!isEnabled()) {
         return;
     }
-
 
     int s = message->sequenceNumber();
     if(s < sequenceNumber()) {
@@ -208,8 +196,9 @@ void Input::handleMessage(ConnectionType::Ptr message)
                      " < #" << sequenceNumber() << std::endl;
         return;
     }
-
     setSequenceNumber(s);
+
+    setBlocked(true);
 
     try {
         buffer_->write(message);
@@ -223,9 +212,8 @@ void Input::handleMessage(ConnectionType::Ptr message)
     Q_EMIT messageArrived(this);
 }
 
-void Input::notifyMessageProcessed()
+void Slot::notifyMessageProcessed()
 {
-
     Connectable::notifyMessageProcessed();
 
     if(target) {

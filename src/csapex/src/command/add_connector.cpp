@@ -38,12 +38,12 @@ bool AddConnector::doExecute()
     apex_assert_hard(node_worker);
 
     if(input) {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getNodeUUID(), Connectable::TYPE_IN, node_worker->getMessageInputs().size()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getNodeUUID(), "in", node_worker->getMessageInputs().size()) : c_uuid;
         Input* in = new Input(*settings_, uuid);
         c = in;
         node_worker->registerInput(in);
     } else {
-        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getNodeUUID(), Connectable::TYPE_OUT, node_worker->getMessageOutputs().size()) : c_uuid;
+        UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getNodeUUID(), "out", node_worker->getMessageOutputs().size()) : c_uuid;
         Output* out = new Output(*settings_, uuid);
         c = out;
         node_worker->registerOutput(out);
