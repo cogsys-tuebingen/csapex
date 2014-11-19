@@ -543,11 +543,12 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
     return c;
 }
 
-Slot* NodeWorker::addSlot(const std::string& label)
+Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> callback)
 {
     int id = slots_.size();
-    Slot* slot = new Slot(settings_, node_.get(), id);
+    Slot* slot = new Slot(callback, settings_, node_.get(), id);
     slot->setLabel(label);
+    slot->setEnabled(true);
 
     slots_.push_back(slot);
 
@@ -559,6 +560,7 @@ Trigger* NodeWorker::addTrigger(const std::string& label)
     int id = triggers_.size();
     Trigger* trigger = new Trigger(settings_, node_.get(), id);
     trigger->setLabel(label);
+    trigger->setEnabled(true);
 
     triggers_.push_back(trigger);
 

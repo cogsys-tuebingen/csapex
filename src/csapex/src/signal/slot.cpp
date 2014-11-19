@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/signal/trigger.h>
+#include <csapex/signal/signal.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
@@ -13,15 +14,17 @@
 
 using namespace csapex;
 
-Slot::Slot(Settings& settings, const UUID &uuid)
-    : Connectable(settings, uuid), target(NULL), buffer_(new Buffer), optional_(false)
+Slot::Slot(boost::function<void()> callback, Settings& settings, const UUID &uuid)
+    : Connectable(settings, uuid), target(NULL), callback_(callback)
 {
+    setType(connection_types::makeEmpty<connection_types::Signal>());
     QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
-Slot::Slot(Settings &settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "slot"), target(NULL), buffer_(new Buffer), optional_(false)
+Slot::Slot(boost::function<void()> callback, Settings &settings, Unique* parent, int sub_id)
+    : Connectable(settings, parent, sub_id, "slot"), target(NULL), callback_(callback)
 {
+    setType(connection_types::makeEmpty<connection_types::Signal>());
     QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
@@ -30,13 +33,10 @@ Slot::~Slot()
     if(target != NULL) {
         target->removeConnection(this);
     }
-
-    free();
 }
 
 void Slot::reset()
 {
-    free();
     setSequenceNumber(0);
 }
 
@@ -74,37 +74,6 @@ Command::Ptr Slot::removeAllConnectionsCmd()
     return cmd;
 }
 
-void Slot::setOptional(bool optional)
-{
-    optional_ = optional;
-}
-
-bool Slot::isOptional() const
-{
-    return optional_;
-}
-
-bool Slot::hasReceived() const
-{
-    return isConnected() && buffer_->isFilled();
-}
-bool Slot::hasMessage() const
-{
-    return hasReceived() && !buffer_->isType<connection_types::NoMessage>();
-}
-
-void Slot::stop()
-{
-    buffer_->disable();
-    Connectable::stop();
-}
-
-void Slot::free()
-{
-    buffer_->free();
-
-    setBlocked(false);
-}
 
 void Slot::enable()
 {
@@ -119,7 +88,6 @@ void Slot::disable()
     Connectable::disable();
 
     //    if(isBlocked()) {
-    free();
     notifyMessageProcessed();
     //    }
     //    if(isConnected() && getSource()->isEnabled()) {
@@ -186,6 +154,7 @@ void Slot::trigger()
 
     Q_EMIT triggered();
 
+    // wait for the signal to be handled
     exec_finished_.wait(&trigger_exec_mutex_);
     trigger_exec_mutex_.unlock();
 }
@@ -194,7 +163,8 @@ void Slot::handleTrigger()
 {
     QMutexLocker lock(&trigger_exec_mutex_);
 
-    std::cout << "slot " << getUUID() << " was triggered" << std::endl;
+    // do the work
+    callback_();
 
     exec_finished_.wakeAll();
 }

@@ -25,9 +25,9 @@ Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label
 }
 
 
-Slot* NodeModifier::addSlot(const std::string& label)
+Slot* NodeModifier::addSlot(const std::string& label, boost::function<void()> callback)
 {
-    return node_worker_->addSlot(label);
+    return node_worker_->addSlot(label, callback);
 }
 
 

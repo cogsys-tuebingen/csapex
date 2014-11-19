@@ -58,7 +58,7 @@ public:
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
-    Slot* addSlot(const std::string& label);
+    Slot* addSlot(const std::string& label, boost::function<void ()> callback);
     Trigger* addTrigger(const std::string& label);
 
     Input* getInput(const UUID& uuid) const;

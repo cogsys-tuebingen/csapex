@@ -334,6 +334,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
 void NodeBox::enabledChange(bool val)
 {
     ui->boxframe->setProperty("disabled", !val);
+    ui->enablebtn->setChecked(val);
 
     refreshStylesheet();
 }

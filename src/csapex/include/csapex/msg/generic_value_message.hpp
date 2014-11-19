@@ -9,7 +9,8 @@ namespace csapex {
 namespace connection_types {
 
 template <typename Type>
-struct GenericValueMessage : public Message {
+struct GenericValueMessage : public Message
+{
     typedef boost::shared_ptr<GenericValueMessage<Type> > Ptr;
 
     GenericValueMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)

@@ -146,7 +146,7 @@ public:
     /*
      * SIGNALING
      */
-    Slot* addSlot(const std::string& label);
+    Slot* addSlot(const std::string& label, boost::function<void()> callback);
     Trigger* addTrigger(const std::string& label);
 
 private:

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/signal/slot.h>
+#include <csapex/signal/signal.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
@@ -18,11 +19,13 @@ using namespace csapex;
 Trigger::Trigger(Settings &settings, const UUID& uuid)
     : Connectable(settings, uuid)
 {
+    setType(connection_types::makeEmpty<connection_types::Signal>());
 }
 
 Trigger::Trigger(Settings& settings, Unique* parent, int sub_id)
     : Connectable(settings, parent, sub_id, "trigger")
 {
+    setType(connection_types::makeEmpty<connection_types::Signal>());
 }
 
 Trigger::~Trigger()
@@ -95,8 +98,6 @@ void Trigger::removeAllConnectionsNotUndoable()
 
 void Trigger::trigger()
 {
-    // TODO: implement
-    std::cout << "trigger " << getUUID() << std::endl;
     foreach(Slot* s, targets_) {
         s->trigger();
     }
