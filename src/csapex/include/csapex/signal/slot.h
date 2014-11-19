@@ -12,6 +12,7 @@
 /// SYSTEM
 #include <QMutex>
 #include <QWaitCondition>
+#include <QFuture>
 
 namespace csapex
 {
@@ -30,6 +31,8 @@ public:
     Slot(Settings& settings, Unique *parent, int sub_id);
     virtual ~Slot();
 
+    virtual void trigger();
+
     virtual bool canInput() const {
         return true;
     }
@@ -39,37 +42,6 @@ public:
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
 
-    void inputMessage(ConnectionType::Ptr message);
-
-    template <typename R>
-    typename R::Ptr getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
-        return buffer_->read<R>();
-    }
-
-    template <typename R>
-    typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
-        return buffer_->read< connection_types::GenericPointerMessage<R> >() -> value;
-    }
-
-    template <typename Container, typename R>
-    boost::shared_ptr<typename Container::template TypeMap<R>::type const>
-    getMessage() {
-        return buffer_->read<Container>() -> template makeShared<R>();
-    }
-
-    template <typename R>
-    R getValue() {
-        typename connection_types::GenericValueMessage<R>::Ptr msg = getMessage< connection_types::GenericValueMessage<R> >();
-        if(!msg) {
-            throw std::logic_error("cannot convert message to requested value");
-        }
-        return msg->value;
-    }
-
-    template <typename R>
-    bool isValue() {
-        return isMessage< connection_types::GenericValueMessage<R> >();
-    }
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
     virtual bool isConnected() const;
@@ -109,13 +81,16 @@ protected:
     virtual void removeAllConnectionsNotUndoable();
 
 Q_SIGNALS:
-    void gotMessage(ConnectionType::Ptr msg);
+    void triggered();
 
 private Q_SLOTS:
-    void handleMessage(ConnectionType::Ptr msg);
+    void handleTrigger();
 
 protected:
     Connectable* target;
+
+    QMutex trigger_exec_mutex_;
+    QWaitCondition exec_finished_;
 
     BufferPtr buffer_;
 

@@ -31,9 +31,9 @@ public:
         return true;
     }
 
-    virtual void disable();
+    void trigger();
 
-    void publish(ConnectionType::Ptr message);
+    virtual void disable();
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const;
     virtual bool isConnected() const;
@@ -49,13 +49,6 @@ public:
     virtual CommandPtr removeAllConnectionsCmd();
     CommandPtr removeConnectionCmd(Slot *other_side);
 
-    void forceSendMessage(bool force = true);
-
-    bool hasMessage();
-    ConnectionType::Ptr getMessage();
-
-    bool canSendMessages();
-    void sendMessages();
 
     void reset();
 
@@ -69,10 +62,7 @@ protected:
 
 protected:
     std::vector<Slot*> targets_;
-    bool force_send_message_;
 
-    ConnectionType::Ptr message_;
-    ConnectionType::Ptr message_to_send_;
 };
 
 }

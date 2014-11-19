@@ -45,6 +45,10 @@ public:
 public:
     boost::signals2::signal<void(std::size_t)> slot_count_changed;
 
+
+    boost::signals2::signal<void()> begin;
+    boost::signals2::signal<void()> no_more_messages;
+
 protected:
     MessageProvider();
     void setType(ConnectionType::Ptr type);

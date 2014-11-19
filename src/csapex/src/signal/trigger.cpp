@@ -16,12 +16,12 @@
 using namespace csapex;
 
 Trigger::Trigger(Settings &settings, const UUID& uuid)
-    : Connectable(settings, uuid), force_send_message_(false)
+    : Connectable(settings, uuid)
 {
 }
 
 Trigger::Trigger(Settings& settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "trigger"), force_send_message_(false)
+    : Connectable(settings, parent, sub_id, "trigger")
 {
 }
 
@@ -36,8 +36,6 @@ void Trigger::reset()
 {
     setBlocked(false);
     setSequenceNumber(0);
-    message_.reset();
-    message_to_send_.reset();
 }
 
 int Trigger::noTargets()
@@ -95,14 +93,19 @@ void Trigger::removeAllConnectionsNotUndoable()
     Q_EMIT disconnected(this);
 }
 
+void Trigger::trigger()
+{
+    // TODO: implement
+    std::cout << "trigger " << getUUID() << std::endl;
+    foreach(Slot* s, targets_) {
+        s->trigger();
+    }
+    ++count_;
+}
+
 void Trigger::disable()
 {
     Connectable::disable();
-
-//    if(isBlocked()) {
-        message_to_send_.reset();
-        message_.reset();
-//    }
 }
 
 void Trigger::connectForcedWithoutCommand(Slot *other_side)
@@ -159,84 +162,4 @@ void Trigger::validateConnections()
     foreach(Slot* target, targets_) {
         target->validateConnections();
     }
-}
-
-void Trigger::publish(ConnectionType::Ptr message)
-{
-    setType(message);
-
-    // update buffer
-    message_to_send_ = message;
-
-    setBlocked(true);
-}
-
-bool Trigger::hasMessage()
-{
-    return message_to_send_;
-}
-
-bool Trigger::canSendMessages()
-{
-    foreach(Slot* Slot, targets_) {
-        bool blocked = Slot->isEnabled() && Slot->isBlocked();
-        if(blocked) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void Trigger::sendMessages()
-{
-    if(message_to_send_) {
-        message_ = message_to_send_;
-        message_to_send_.reset();
-
-    } else {
-        if(!targets_.empty()) {
-//            std::cout << getUUID() << " sends empty message" << std::endl;
-        }
-        message_ = connection_types::makeEmpty<connection_types::NoMessage>();
-    }
-
-    message_->setSequenceNumber(seq_no_);
-
-    // wait for all connected Slots to be able to receive
-    //  * Slots can only be connected to this Trigger since they are 1:1
-    std::vector<Slot*> targets;
-    foreach(Slot* i, targets_) {
-        if(i->isEnabled()) {
-            targets.push_back(i);
-        }
-    }
-
-    if(!targets.empty()) {
-        // all connected Slots are ready to receive, send them the message
-        if(targets.size() == 1) {
-            targets[0]->inputMessage(message_);
-        } else if(targets.size() > 1) {
-            foreach(Slot* i, targets) {
-                ConnectionType::Ptr msg = message_->clone();
-                msg->setSequenceNumber(seq_no_);
-                i->inputMessage(msg);
-            }
-        }
-        ++count_;
-    }
-
-    setBlocked(false);
-
-    ++seq_no_;
-    Q_EMIT messageSent(this);
-}
-
-void Trigger::forceSendMessage(bool force)
-{
-    force_send_message_ = force;
-}
-
-ConnectionType::Ptr Trigger::getMessage()
-{
-    return message_;
 }

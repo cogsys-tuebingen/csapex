@@ -9,19 +9,20 @@
 
 /// SYSTEM
 #include <iostream>
+#include <QFuture>
 
 using namespace csapex;
 
 Slot::Slot(Settings& settings, const UUID &uuid)
     : Connectable(settings, uuid), target(NULL), buffer_(new Buffer), optional_(false)
 {
-    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
 Slot::Slot(Settings &settings, Unique* parent, int sub_id)
     : Connectable(settings, parent, sub_id, "slot"), target(NULL), buffer_(new Buffer), optional_(false)
 {
-    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
 Slot::~Slot()
@@ -179,38 +180,23 @@ Connectable *Slot::getSource() const
     return target;
 }
 
-void Slot::inputMessage(ConnectionType::Ptr message)
+void Slot::trigger()
 {
-    Q_EMIT gotMessage(message);
+    trigger_exec_mutex_.lock();
+
+    Q_EMIT triggered();
+
+    exec_finished_.wait(&trigger_exec_mutex_);
+    trigger_exec_mutex_.unlock();
 }
 
-void Slot::handleMessage(ConnectionType::Ptr message)
+void Slot::handleTrigger()
 {
-    if(!isEnabled()) {
-        return;
-    }
+    QMutexLocker lock(&trigger_exec_mutex_);
 
-    int s = message->sequenceNumber();
-    if(s < sequenceNumber()) {
-        std::cerr << "connector @" << getUUID().getFullName() <<
-                     ": dropping old message @ with #" << s <<
-                     " < #" << sequenceNumber() << std::endl;
-        return;
-    }
-    setSequenceNumber(s);
+    std::cout << "slot " << getUUID() << " was triggered" << std::endl;
 
-    setBlocked(true);
-
-    try {
-        buffer_->write(message);
-    } catch(const std::exception& e) {
-        std::cerr << getUUID() << ": writing message failed: " << e.what() << std::endl;
-        throw e;
-    }
-
-    count_++;
-
-    Q_EMIT messageArrived(this);
+    exec_finished_.wakeAll();
 }
 
 void Slot::notifyMessageProcessed()
