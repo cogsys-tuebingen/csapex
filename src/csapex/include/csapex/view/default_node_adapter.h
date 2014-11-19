@@ -83,7 +83,8 @@ public:
     DefaultNodeAdapterBridge bridge;
 
 private:
-    qt_helper::Call* makeCall(boost::function<void()> cb);
+    qt_helper::Call* makeModelCall(boost::function<void()> cb);
+    qt_helper::Call* makeUiCall(boost::function<void()> cb);
 
 private:
     std::vector<QObject*> callbacks;

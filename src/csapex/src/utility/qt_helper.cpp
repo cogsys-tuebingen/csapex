@@ -191,8 +191,8 @@ QDoubleSlider* QtHelper::makeDoubleSlider(QBoxLayout* layout, const std::string&
 
     layout->addLayout(internal_layout);
 
-    QObject::connect(slider, SIGNAL(valueChanged(double)), display, SLOT(setValue(double)));
-    QObject::connect(slider, SIGNAL(rangeChanged(double,double)), display, SLOT(setRange(double, double)));
+    QObject::connect(slider, SIGNAL(doubleValueChanged(double)), display, SLOT(setValue(double)));
+    QObject::connect(slider, SIGNAL(doubleRangeChanged(double,double)), display, SLOT(setRange(double, double)));
     QObject::connect(display, SIGNAL(valueChanged(double)), slider, SLOT(setNearestDoubleValue(double)));
 
     return slider;

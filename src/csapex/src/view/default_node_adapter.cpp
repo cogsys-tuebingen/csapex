@@ -193,7 +193,7 @@ void model_updatePathParameter(param::PathParameter* path_p, QLineEdit* path)
     // gui changed
 }
 
-void model_updatePathParameterDialog(param::PathParameter* path_p)
+void ui_updatePathParameterDialog(param::PathParameter* path_p)
 {
     assertGuiThread();
     QString filter = QString::fromStdString(path_p->filter());
@@ -549,11 +549,18 @@ void DefaultNodeAdapter::setupAdaptiveUi()
     }
 }
 
-qt_helper::Call * DefaultNodeAdapter::makeCall(boost::function<void()> cb)
+qt_helper::Call * DefaultNodeAdapter::makeModelCall(boost::function<void()> cb)
 {
     qt_helper::Call* call = new qt_helper::Call(cb);
     callbacks.push_back(call);
     call->moveToThread(node_->thread());
+    return call;
+}
+
+qt_helper::Call * DefaultNodeAdapter::makeUiCall(boost::function<void()> cb)
+{
+    qt_helper::Call* call = new qt_helper::Call(cb);
+    callbacks.push_back(call);
     return call;
 }
 
@@ -565,7 +572,7 @@ void DefaultNodeAdapter::setupParameter(param::TriggerParameter * trigger_p)
     sub->addWidget(btn);
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(trigger_p)));
 
-    qt_helper::Call* call_trigger = makeCall(boost::bind(&param::TriggerParameter::trigger, trigger_p));
+    qt_helper::Call* call_trigger = makeModelCall(boost::bind(&param::TriggerParameter::trigger, trigger_p));
     QObject::connect(btn, SIGNAL(clicked()), call_trigger, SLOT(call()));
 }
 
@@ -580,7 +587,7 @@ void DefaultNodeAdapter::setupParameter(param::ColorParameter *color_p)
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(color_p)));
 
     // ui callback
-    qt_helper::Call* call = makeCall(boost::bind(&model_updateColorParameter, color_p));
+    qt_helper::Call* call = makeModelCall(boost::bind(&model_updateColorParameter, color_p));
     QObject::connect(btn, SIGNAL(clicked()), call, SLOT(call()));
 
     // model change -> ui
@@ -600,10 +607,10 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(path_p)));
 
     // ui change -> model
-    qt_helper::Call* call_set_path = makeCall(boost::bind(&model_updatePathParameter, path_p, path));
+    qt_helper::Call* call_set_path = makeModelCall(boost::bind(&model_updatePathParameter, path_p, path));
     QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
 
-    qt_helper::Call* call_select = makeCall(boost::bind(&model_updatePathParameterDialog, path_p));
+    qt_helper::Call* call_select = makeUiCall(boost::bind(&ui_updatePathParameterDialog, path_p));
     QObject::connect(select, SIGNAL(clicked()), call_select, SLOT(call()));
 
     // model change -> ui
@@ -625,7 +632,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateStringValueParameter, value_p, txt));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateStringValueParameter, value_p, txt));
         QObject::connect(txt, SIGNAL(returnPressed()), call, SLOT(call()));
         QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
 
@@ -639,7 +646,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateBoolValueParameter, value_p, box));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateBoolValueParameter, value_p, box));
         QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
 
         // model change -> ui
@@ -654,7 +661,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
         QObject::connect(box, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
         // model change -> ui
@@ -667,7 +674,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateValueParameter<int, QSpinBox>, value_p, box));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateValueParameter<int, QSpinBox>, value_p, box));
         QObject::connect(box, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
@@ -687,7 +694,7 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         slider->setIntValue(range_p->as<int>());
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateIntRangeParameter, range_p, slider));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateIntRangeParameter, range_p, slider));
         QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
@@ -703,8 +710,8 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         slider->setDoubleValue(range_p->as<double>());
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateDoubleRangeParameter, range_p, slider));
-        QObject::connect(slider, SIGNAL(valueChanged(double)), call, SLOT(call()));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateDoubleRangeParameter, range_p, slider));
+        QObject::connect(slider, SIGNAL(doubleValueChanged(double)), call, SLOT(call()));
 
         // model change -> ui
         bridge.connectInGuiThread(range_p->parameter_changed, boost::bind(&ui_updateDoubleRangeParameter, range_p, slider));
@@ -726,7 +733,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                          new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
@@ -743,7 +750,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                                      new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
@@ -766,7 +773,7 @@ void DefaultNodeAdapter::setupParameter(param::SetParameter *set_p)
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, combo, new ParameterContextMenu(set_p)));
 
     // ui change -> model
-    qt_helper::Call* call = makeCall(boost::bind(&model_updateSetParameter, set_p, combo));
+    qt_helper::Call* call = makeModelCall(boost::bind(&model_updateSetParameter, set_p, combo));
     QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
 
     // model change -> ui
@@ -792,7 +799,7 @@ void DefaultNodeAdapter::setupParameter(param::BitSetParameter *bitset_p)
         }
 
         // ui change -> model
-        qt_helper::Call* call = makeCall(boost::bind(&model_updateBitSetParameter, bitset_p, item, str));
+        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateBitSetParameter, bitset_p, item, str));
         QObject::connect(item, SIGNAL(toggled(bool)), call, SLOT(call()));
 
         // model change -> ui
