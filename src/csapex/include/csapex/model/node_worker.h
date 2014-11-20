@@ -171,7 +171,8 @@ private:
 
     template <typename T>
     void makeParameterConnectableImpl(param::Parameter*);
-
+    void publishParameters();
+    void publishParameter(param::Parameter *p);
 
     void processInputs(bool all_inputs_are_present);
 

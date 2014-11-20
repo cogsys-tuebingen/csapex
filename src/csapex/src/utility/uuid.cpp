@@ -142,7 +142,7 @@ std::string UUID::type() const
     split(UUID::namespace_separator, l, r);
 
     std::string t = r;
-    return t.substr(0, t.find_last_of("_"));
+    return t.substr(0, t.find_first_of("_"));
 }
 
 void UUID::split(const std::string &separator, UUID &l, UUID &r) const

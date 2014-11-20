@@ -153,7 +153,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
     }
 
     {
-        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_in"));
+        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), std::string("in_") + p->name()));
         cin->setEnabled(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -167,13 +167,15 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         input_2_param_[cin] = p;
     }
     {
-        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), p->name() + "_out"));
+        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), std::string("out_") + p->name()));
         cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
         parameter_outputs_.push_back(cout);
         connectConnector(cout);
         cout->moveToThread(thread());
+
+        p->parameter_changed.connect(boost::bind(&NodeWorker::publishParameter, this, p));
 
         param_2_output_[p->name()] = cout;
         output_2_param_[cout] = p;
@@ -369,6 +371,9 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
 
     source->free();
     source->notifyMessageProcessed();
+
+    std::cout << "updated parameter " << p->name() << " -> publish" << std::endl;
+    publishParameter(p);
 }
 
 void NodeWorker::checkIfInputsCanBeProcessed()
@@ -848,11 +853,11 @@ bool NodeWorker::canSendMessages()
         }
     }
 
-    foreach(Output* out, parameter_outputs_) {
-        if(!out->canSendMessages()) {
-            return false;
-        }
-    }
+//    foreach(Output* out, parameter_outputs_) {
+//        if(!out->canSendMessages()) {
+//            return false;
+//        }
+//    }
 
     return true;
 }
@@ -865,6 +870,33 @@ void NodeWorker::resetInputs()
     }
     Q_FOREACH(Input* cin, inputs_) {
         cin->notifyMessageProcessed();
+    }
+}
+
+
+void NodeWorker::publishParameters()
+{
+    for(std::size_t i = 0; i < parameter_outputs_.size(); ++i) {
+        Output* out = parameter_outputs_[i];
+        publishParameter(output_2_param_.at(out));
+    }
+}
+void NodeWorker::publishParameter(param::Parameter* p)
+{
+    Output* out = param_2_output_.at(p->name());
+    if(out->isConnected()) {
+        if(!out->canSendMessages()) {
+            node_->awarn << "dropping parameter change: " << p->name() << ", output " << out->getUUID() << " cannot send!" << std::endl;
+            return;
+        }
+
+        if(p->is<int>())
+            out->publish(p->as<int>());
+        else if(p->is<double>())
+            out->publish(p->as<double>());
+        else if(p->is<std::string>())
+            out->publish(p->as<std::string>());
+        out->sendMessages();
     }
 }
 
@@ -884,19 +916,7 @@ void NodeWorker::trySendMessages()
     messages_waiting_to_be_sent = false;
     Q_EMIT messagesWaitingToBeSent(false);
 
-    for(std::size_t i = 0; i < parameter_outputs_.size(); ++i) {
-        Output* out = parameter_outputs_[i];
-        if(out->isConnected()) {
-            param::Parameter* p = output_2_param_.at(out);
-            if(p->is<int>())
-                out->publish(p->as<int>());
-            else if(p->is<double>())
-                out->publish(p->as<double>());
-            else if(p->is<std::string>())
-                out->publish(p->as<std::string>());
-            out->sendMessages();
-        }
-    }
+//    publishParameters();
 
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
@@ -1008,9 +1028,9 @@ void NodeWorker::tick()
             if(!canSendMessages() || !node_->canTick() /*|| ticks_ != 0*/) {
                 return;
             }
-            foreach(Output* out, parameter_outputs_) {
-                out->clearMessage();
-            }
+//            foreach(Output* out, parameter_outputs_) {
+//                out->clearMessage();
+//            }
             foreach(Output* out, outputs_) {
                 out->clearMessage();
             }
@@ -1020,9 +1040,9 @@ void NodeWorker::tick()
 
             //processInputs(isSource());
 
-            foreach(Output* out, parameter_outputs_) {
-                messages_waiting_to_be_sent |= out->hasMessage();
-            }
+//            foreach(Output* out, parameter_outputs_) {
+//                messages_waiting_to_be_sent |= out->hasMessage();
+//            }
             foreach(Output* out, outputs_) {
                 messages_waiting_to_be_sent |= out->hasMessage();
             }
