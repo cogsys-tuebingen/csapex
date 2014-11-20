@@ -60,3 +60,8 @@ std::size_t MessageProvider::slotCount() const
 {
     return slot_count_;
 }
+
+std::string MessageProvider::getLabel(std::size_t slot) const
+{
+    return getType()->name();
+}

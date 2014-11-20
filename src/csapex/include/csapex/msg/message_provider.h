@@ -31,6 +31,7 @@ public:
     std::string getName() const;
 
     std::size_t slotCount() const;
+    virtual std::string getLabel(std::size_t slot) const;
 
     virtual bool hasNext() = 0;
     virtual connection_types::Message::Ptr next(std::size_t slot) = 0;

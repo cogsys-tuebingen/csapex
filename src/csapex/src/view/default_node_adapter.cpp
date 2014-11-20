@@ -70,7 +70,7 @@ DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter *parent)
 }
 
 void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (param::Parameter *)> &signal,
-                                       boost::function<void ()> cb)
+                                                  boost::function<void ()> cb)
 {
     // cb should be executed in the gui thread
     connections.push_back(signal.connect(boost::bind(&DefaultNodeAdapterBridge::modelCallback, this, cb)));
@@ -226,7 +226,7 @@ void ui_updatePathParameterDialog(param::PathParameter* path_p)
 
     if(!path.isEmpty()) {
         path_p->set(path.toStdString());
-//        cb();
+        //        cb();
     }
 }
 
@@ -327,12 +327,17 @@ void ui_updateSetParameter(param::SetParameter* set_p, QComboBox* combo)
 {
     assertGuiThread();
     int index = combo->findData(QString::fromStdString(set_p->getText()));
-    combo->setCurrentIndex(index);
+    if(index >= 0) {
+        combo->setCurrentIndex(index);
+    }
 }
 void model_updateSetParameter(param::SetParameter* set_p, QComboBox* combo)
 {
-    assertNotGuiThread();
-    set_p->setByName(combo->currentText().toStdString());
+    if(!combo->currentText().isEmpty()) {
+        std::cout << "set set: " << combo->currentText().toStdString() << std::endl;
+        assertNotGuiThread();
+        set_p->setByName(combo->currentText().toStdString());
+    }
 }
 
 void ui_updateSetParameterScope(param::SetParameter* set_p, QComboBox* combo)
