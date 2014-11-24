@@ -170,9 +170,10 @@ void Input::validateConnections()
     bool e = false;
     if(isConnected()) {
         ConnectionType::ConstPtr target_type = target->getType();
+        ConnectionType::ConstPtr type = getType();
         if(!target_type) {
             e = true;
-        } else if(!target_type->canConnectTo(getType().get())) {
+        } else if(!target_type->canConnectTo(type.get())) {
             e = true;
         }
     }
