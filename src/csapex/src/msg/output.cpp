@@ -172,7 +172,7 @@ void Output::validateConnections()
 
 void Output::publish(ConnectionType::Ptr message)
 {
-    setType(message);
+    setType(message->toType());
 
     // update buffer
     message_to_send_ = message;
