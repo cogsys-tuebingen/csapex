@@ -37,12 +37,20 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
     }
 }
 
-Parameter::Ptr ParameterFactory::clone(const Parameter::Ptr& param)
+Parameter::Ptr ParameterFactory::clone(const Parameter* param)
 {
     std::string type = param->TYPE();
     Parameter::Ptr r = makeEmpty(type);
     r->clone(*param);
     return r;
+}
+Parameter::Ptr ParameterFactory::clone(const Parameter& param)
+{
+    return clone(&param);
+}
+Parameter::Ptr ParameterFactory::clone(const Parameter::Ptr& param)
+{
+    return clone(param.get());
 }
 
 Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, int> &set, int def)

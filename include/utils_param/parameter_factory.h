@@ -28,6 +28,8 @@ public:
      * @param param
      * @return
      */
+    static Parameter::Ptr clone(const Parameter *param);
+    static Parameter::Ptr clone(const Parameter& param);
     static Parameter::Ptr clone(const Parameter::Ptr& param);
 
 

@@ -53,6 +53,9 @@ protected:
 public:
     std::string name() const;
 
+    void setUUID(const std::string& uuid);
+    std::string UUID() const;
+
     virtual int ID() const = 0;
     virtual std::string TYPE() const = 0;
 
@@ -136,6 +139,8 @@ protected:
 
 protected:
     std::string name_;
+    std::string uuid_;
+
     ParameterDescription description_;
     bool enabled_;
     bool interactive_;

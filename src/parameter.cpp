@@ -16,6 +16,16 @@ Parameter::~Parameter()
 
 }
 
+void Parameter::setUUID(const std::string& uuid)
+{
+    uuid_ = uuid;
+}
+
+std::string Parameter::UUID() const
+{
+    return uuid_;
+}
+
 void Parameter::setEnabled(bool enabled)
 {
     if(enabled != enabled_) {
