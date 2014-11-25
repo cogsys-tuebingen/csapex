@@ -26,6 +26,14 @@ Connection::Connection(Connectable *from, Connectable *to)
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
+Connection::Connection(Connectable *from, Connectable *to, int id)
+    : from_(from), to_(to), id_(id)
+{
+    apex_assert_hard(from->isOutput());
+    apex_assert_hard(to->isInput());
+    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
+}
+
 Connection::Connection(Output *from, Input *to)
     : from_(from), to_(to), id_(next_connection_id_++)
 {

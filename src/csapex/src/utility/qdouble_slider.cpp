@@ -14,6 +14,8 @@ QDoubleSlider::QDoubleSlider(Qt::Orientation orientation, double step_size, QWid
 {
     connect(this, SIGNAL(valueChanged(int)), this, SLOT(scaleValue(int)));
     connect(this, SIGNAL(rangeChanged(int,int)), this, SLOT(emitRangeChanged(int,int)));
+
+    update();
 }
 
 QDoubleSlider::~QDoubleSlider()

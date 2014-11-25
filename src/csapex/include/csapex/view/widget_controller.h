@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <utils_param/param_fwd.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -31,6 +32,8 @@ public:
     WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);
 
     void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
+
+    DesignerScene* getDesignerScene();
 
     NodeBox* getBox(const UUID& node_id);
 

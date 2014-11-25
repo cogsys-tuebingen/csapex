@@ -27,9 +27,6 @@ Output::Output(Settings& settings, Unique* parent, int sub_id)
 
 Output::~Output()
 {
-    foreach(Input* i, targets_) {
-        i->removeConnection(this);
-    }
 }
 
 void Output::reset()

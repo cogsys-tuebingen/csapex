@@ -88,6 +88,12 @@ NodeWorker::~NodeWorker()
     while(!parameter_outputs_.empty()) {
         removeOutput(*parameter_outputs_.begin());
     }
+    while(!slots_.empty()) {
+        removeSlot(*slots_.begin());
+    }
+    while(!triggers_.empty()) {
+        removeTrigger(*triggers_.begin());
+    }
 
     Q_FOREACH(QObject* cb, callbacks) {
         qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
@@ -259,8 +265,9 @@ void NodeWorker::connectConnector(Connectable *c)
 }
 
 
-void NodeWorker::disconnectConnector(Connectable */*c*/)
+void NodeWorker::disconnectConnector(Connectable* c)
 {
+    disconnect(c);
 }
 
 
@@ -372,7 +379,6 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
     source->free();
     source->notifyMessageProcessed();
 
-    std::cout << "updated parameter " << p->name() << " -> publish" << std::endl;
     publishParameter(p);
 }
 
@@ -721,6 +727,23 @@ void NodeWorker::registerTrigger(Trigger* t)
     Q_EMIT connectorCreated(t);
 }
 
+Connectable* NodeWorker::getConnector(const UUID &uuid) const
+{
+    std::string type = uuid.type();
+
+    if(type == "in") {
+        return getInput(uuid);
+    } else if(type == "out") {
+        return getOutput(uuid);
+    } else if(type == "slot") {
+        return getSlot(uuid);
+    } else if(type == "trigger") {
+        return getTrigger(uuid);
+    } else {
+        throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
+    }
+}
+
 Input* NodeWorker::getInput(const UUID& uuid) const
 {
     foreach(Input* in, inputs_) {
@@ -795,6 +818,18 @@ void NodeWorker::removeSlot(const UUID &uuid)
 void NodeWorker::removeTrigger(const UUID &uuid)
 {
     removeTrigger(getTrigger(uuid));
+}
+
+std::vector<Connectable*> NodeWorker::getAllConnectors() const
+{
+    std::vector<Connectable*> result;
+    result.insert(result.end(), inputs_.begin(), inputs_.end());
+    result.insert(result.end(), outputs_.begin(), outputs_.end());
+    result.insert(result.end(), parameter_inputs_.begin(), parameter_inputs_.end());
+    result.insert(result.end(), parameter_outputs_.begin(), parameter_outputs_.end());
+    result.insert(result.end(), triggers_.begin(), triggers_.end());
+    result.insert(result.end(), slots_.begin(), slots_.end());
+    return result;
 }
 
 std::vector<Input*> NodeWorker::getAllInputs() const

@@ -26,17 +26,11 @@ Input::Input(Settings &settings, Unique* parent, int sub_id)
 
 Input::~Input()
 {
-    if(target != NULL) {
-        target->removeConnection(this);
-    }
-
     free();
 }
 
 void Input::reset()
 {
-
-
     free();
     setSequenceNumber(0);
 }

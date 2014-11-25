@@ -22,6 +22,7 @@
 #include <csapex/view/designer.h>
 #include <csapex/view/port.h>
 #include <csapex/view/node_adapter_factory.h>
+#include <csapex/view/designer_view.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -135,6 +136,11 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     drag->setPixmap(QPixmap::grabWidget(object.get()));
     drag->setHotSpot(-offset);
     drag->exec();
+}
+
+DesignerScene* WidgetController::getDesignerScene()
+{
+    return designer_->getDesignerView()->designerScene();
 }
 
 void WidgetController::nodeAdded(NodeWorkerPtr node_worker)

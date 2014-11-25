@@ -36,6 +36,7 @@ public:
 
 public:
     Connection(Connectable* from, Connectable* to);
+    Connection(Connectable* from, Connectable* to, int id);
 
     Connection(Output* from, Input* to);
     Connection(Output* from, Input* to, int id);

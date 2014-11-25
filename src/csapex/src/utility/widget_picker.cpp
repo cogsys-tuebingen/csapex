@@ -1,0 +1,76 @@
+/// HEADER
+#include <csapex/utility/widget_picker.h>
+
+/// PROJECT
+#include <csapex/view/designer_scene.h>
+
+/// SYSTEM
+#include <QEvent>
+#include <QGraphicsSceneMouseEvent>
+#include <iostream>
+#include <QFuture>
+#include <QtConcurrentRun>
+#include <QWidget>
+#include <QGraphicsProxyWidget>
+#include <QApplication>
+
+using namespace csapex;
+
+WidgetPicker::WidgetPicker()
+    : designer_scene_(NULL), widget_(NULL)
+{
+
+}
+
+void WidgetPicker::startPicking(DesignerScene* designer_scene)
+{
+    assert(designer_scene);
+
+    designer_scene_ = designer_scene;
+    designer_scene_->installEventFilter(this);
+
+    QApplication::setOverrideCursor(Qt::CrossCursor);
+}
+
+QWidget* WidgetPicker::getWidget()
+{
+    designer_scene_->removeEventFilter(this);
+    QApplication::restoreOverrideCursor();
+    designer_scene_ = NULL;
+
+    return widget_;
+}
+
+bool WidgetPicker::eventFilter(QObject*, QEvent * e)
+{
+    QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
+
+    switch(e->type()) {
+    case QEvent::GraphicsSceneMousePress:
+        if(me->button() == Qt::LeftButton) {
+            QGraphicsItem* item = designer_scene_->itemAt(me->scenePos());
+
+            if(item && item->type() == QGraphicsProxyWidget::Type) {
+                QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);
+                QWidget* widget = proxy->widget();
+                QPointF p = proxy->mapFromScene(me->scenePos());
+                QWidget* child = widget->childAt(p.toPoint());
+
+                widget_ = child;
+            } else {
+                widget_ = NULL;
+            }
+
+            Q_EMIT widgetPicked();
+
+            e->accept();
+            return true;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return false;
+}

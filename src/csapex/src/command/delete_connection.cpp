@@ -19,12 +19,13 @@ using namespace csapex::command;
 DeleteConnection::DeleteConnection(Connectable* a, Connectable* b)
     : Meta("delete connection and fulcrums"), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
 {
-    from = dynamic_cast<Output*>(a);
-    if(from) {
-        to = dynamic_cast<Input*>(b);
-    } else {
-        from = dynamic_cast<Output*>(b);
-        to = dynamic_cast<Input*>(a);
+    if((a->isOutput() && b->isInput())) {
+        from = a;
+        to =  b;
+
+    } else if(a->isInput() && b->isOutput()) {
+        from = b;
+        to =  a;
     }
     apex_assert_hard(from);
     apex_assert_hard(to);
@@ -92,8 +93,8 @@ bool DeleteConnection::refresh()
         return false;
     }
 
-    from = from_worker->getOutput(from_uuid);
-    to = to_worker->getInput(to_uuid);
+    from = from_worker->getConnector(from_uuid);
+    to = to_worker->getConnector(to_uuid);
 
     apex_assert_hard(from);
     apex_assert_hard(to);

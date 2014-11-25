@@ -212,13 +212,15 @@ void Graph::deleteConnection(Connection::Ptr connection)
             buildConnectedComponents();
             verify();
             Q_EMIT connectionDeleted(connection.get());
+            Q_EMIT stateChanged();
+            return;
+
         } else {
             ++c;
         }
     }
 
-    Q_EMIT stateChanged();
-
+    throw std::runtime_error("cannot delete connection");
 }
 
 

@@ -45,6 +45,281 @@ boost::arg<2> __2;
 
 namespace {
 
+
+/// UI HANDLES
+QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size,
+                                csapex::ContextMenuHandler *context_handler)
+{
+    apex_assert_hard(min<=max);
+
+    QHBoxLayout *internal_layout = new QHBoxLayout;
+
+    QSpinBox* spinner = new QSpinBox;
+    spinner->setMinimum(min);
+    spinner->setMaximum(max);
+    spinner->setValue(def);
+    spinner->setSingleStep(step_size);
+
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
+    internal_layout->addWidget(spinner);
+    layout->addLayout(internal_layout);
+
+    return spinner;
+}
+
+QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max,
+                              csapex::ContextMenuHandler *context_handler) {
+    apex_assert_hard(min<=max);
+
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QSlider* slider = new QSlider(Qt::Horizontal);
+    slider->setMinimum(min);
+    slider->setMaximum(max);
+    slider->setValue(def);
+    slider->setMinimumWidth(100);
+
+    QWrapper::QSpinBoxExt* display = new QWrapper::QSpinBoxExt;
+    display->setMinimum(min);
+    display->setMaximum(max);
+    display->setValue(def);
+
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(display);
+
+    layout->addLayout(internal_layout);
+
+    QObject::connect(slider, SIGNAL(valueChanged(int)),     display, SLOT(setValue(int)));
+    QObject::connect(slider, SIGNAL(rangeChanged(int,int)), display, SLOT(setRange(int,int)));
+    QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
+
+
+    return slider;
+}
+
+QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step,
+                                    csapex::ContextMenuHandler *context_handler) {
+    apex_assert_hard(min<=max);
+
+    if(((def - min) / step) * step != (def - min)) {
+        std::cerr << "default " << def << " is not a multiple of minimum " << min << " with a step size of " << step << std::endl;
+        def = min;
+        std::cerr << "set default to " << def << std::endl;
+    }
+
+    if(((max - min) / step) * step != (max - min)) {
+        std::cerr << "maximum " << max << " is not a multiple of minimum " << min << " with a step size of " << step << std::endl;
+        max = ((max - min) / step) * step + min;
+        std::cerr << "set maximum to " << max << std::endl;
+    }
+
+
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QIntSlider* slider = new QIntSlider(Qt::Horizontal, step);
+    slider->setIntMinimum(min);
+    slider->setIntMaximum(max);
+    slider->setIntValue(def);
+    slider->setMinimumWidth(100);
+    slider->setSingleStep(step);
+
+    QWrapper::QSpinBoxExt* display = new QWrapper::QSpinBoxExt;
+    display->setMinimum(min);
+    display->setMaximum(max);
+    display->setValue(def);
+    display->setSingleStep(step);
+
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(display);
+
+    layout->addLayout(internal_layout);
+
+    QObject::connect(slider, SIGNAL(intValueChanged(int)),  display, SLOT(setValue(int)));
+    QObject::connect(slider, SIGNAL(intRangeChanged(int,int)), display, SLOT(setRange(int,int)));
+    QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setIntValue(int)));
+
+
+    return slider;
+}
+
+
+QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string display_name, param::RangeParameter* range_param,
+                                          csapex::ContextMenuHandler *context_handler)
+{
+    apex_assert_hard(range_param->min<double>()<=range_param->max<double>());
+
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QDoubleSlider* slider = new QDoubleSlider(Qt::Horizontal, range_param->step<double>());
+    slider->setDoubleMaximum(range_param->max<double>());
+    slider->setDoubleMinimum(range_param->min<double>());
+    slider->setDoubleValue(range_param->def<double>());
+    slider->setMinimumWidth(100);
+
+    // iterate until decimal value < e
+    double e = 0.0001;
+    int decimals = 0;
+    double f = range_param->step<double>();
+    while (true) {
+        double decimal_val = f - (floor(f));
+        if(decimal_val < e) {
+            break;
+        }
+        f *= 10.0;
+        ++decimals;
+    }
+
+    QWrapper::QDoubleSpinBoxExt* display = new  QWrapper::QDoubleSpinBoxExt;
+    display->setDecimals(decimals);
+//    display->setDecimals(std::log10(1.0 / step_size) + 1);
+    display->setMinimum(range_param->min<double>());
+    display->setMaximum(range_param->max<double>());
+    display->setValue(range_param->def<double>());
+    display->setSingleStep(range_param->step<double>());
+
+    QLabel* label = new QLabel(QString::fromStdString(display_name));
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(display);
+
+
+    layout->addLayout(internal_layout);
+
+
+    for(int i = 0; i < internal_layout->count(); ++i) {
+        QWidget* child = internal_layout->itemAt(i)->widget();
+        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<param::Parameter*>(range_param))));
+    }
+
+    QObject::connect(slider, SIGNAL(doubleValueChanged(double)), display, SLOT(setValue(double)));
+    QObject::connect(slider, SIGNAL(doubleRangeChanged(double,double)), display, SLOT(setRange(double, double)));
+    QObject::connect(display, SIGNAL(valueChanged(double)), slider, SLOT(setNearestDoubleValue(double)));
+
+    return slider;
+}
+
+
+
+QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max,
+                                        csapex::ContextMenuHandler *context_handler)
+{
+    apex_assert_hard(min<=max);
+
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QxtSpanSlider* slider = new QxtSpanSlider(Qt::Horizontal);
+    slider->setMinimum(min);
+    slider->setMaximum(max);
+    slider->setUpperValue(upper);
+    slider->setLowerValue(lower);
+
+    QWrapper::QSpinBoxExt* displayLower = new QWrapper::QSpinBoxExt;
+    displayLower->setMinimum(min);
+    displayLower->setMaximum(max);
+    displayLower->setValue(lower);
+
+    QWrapper::QSpinBoxExt* displayUpper = new QWrapper::QSpinBoxExt;
+    displayUpper->setMinimum(min);
+    displayUpper->setMaximum(max);
+    displayUpper->setValue(upper);
+
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
+    internal_layout->addWidget(displayLower);
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(displayUpper);
+
+    layout->addLayout(internal_layout);
+
+    QObject::connect(slider,        SIGNAL(rangeChanged(int,int)),  displayUpper,   SLOT(setRange(int,int)));
+    QObject::connect(slider,        SIGNAL(lowerValueChanged(int)), displayLower,   SLOT(setValue(int)));
+    QObject::connect(slider,        SIGNAL(upperValueChanged(int)), displayUpper,   SLOT(setValue(int)));
+    QObject::connect(displayLower,  SIGNAL(valueChanged(int)),      slider,         SLOT(setLowerValue(int)));
+    QObject::connect(displayUpper,  SIGNAL(valueChanged(int)),      slider,         SLOT(setUpperValue(int)));
+
+    return slider;
+}
+
+
+QxtDoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size,
+                                                    csapex::ContextMenuHandler *context_handler)
+{
+    apex_assert_hard(min<=max);
+
+    QHBoxLayout* internal_layout = new QHBoxLayout;
+
+    QxtDoubleSpanSlider* slider = new QxtDoubleSpanSlider(Qt::Horizontal, step_size);
+    slider->setDoubleRange(min, max);
+    slider->setSpan(lower, upper);
+
+    QWrapper::QDoubleSpinBoxExt* displayLower = new QWrapper::QDoubleSpinBoxExt;
+    displayLower->setRange(min, max);
+    displayLower->setValue(lower);
+
+    QWrapper::QDoubleSpinBoxExt* displayUpper = new QWrapper::QDoubleSpinBoxExt;
+    displayUpper->setRange(min, max);
+    displayUpper->setValue(upper);
+
+    QLabel* label = new QLabel(name.c_str());
+    if(context_handler) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        context_handler->setParent(label);
+        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    }
+
+    internal_layout->addWidget(label);
+    internal_layout->addWidget(displayLower);
+    internal_layout->addWidget(slider);
+    internal_layout->addWidget(displayUpper);
+
+    layout->addLayout(internal_layout);
+
+    QObject::connect(slider,        SIGNAL(rangeChanged(double,double)),  displayUpper,   SLOT(setRange(double,double)));
+    QObject::connect(slider,        SIGNAL(rangeChanged(double,double)),  displayLower,   SLOT(setRange(double,double)));
+    QObject::connect(slider,        SIGNAL(lowerValueChanged(double)), displayLower,   SLOT(setValue(double)));
+    QObject::connect(slider,        SIGNAL(upperValueChanged(double)), displayUpper,   SLOT(setValue(double)));
+    QObject::connect(displayLower,  SIGNAL(valueChanged(double)),      slider,         SLOT(setLowerDoubleValue(double)));
+    QObject::connect(displayUpper,  SIGNAL(valueChanged(double)),      slider,         SLOT(setUpperDoubleValue(double)));
+
+    return slider;
+}
+
+/// THREADING
 void assertGuiThread()
 {
     assert(QThread::currentThread() == QApplication::instance()->thread());
@@ -166,7 +441,7 @@ void ui_updateColorParameter(param::ColorParameter* color_p, QPushButton* btn)
 
 void model_updateColorParameter(param::ColorParameter *p)
 {
-    assertNotGuiThread();
+    assertGuiThread();
     std::vector<int> c = p->value();
     QColor init(c[0], c[1], c[2]);
     QColor color = QColorDialog::getColor(init);
@@ -592,7 +867,7 @@ void DefaultNodeAdapter::setupParameter(param::ColorParameter *color_p)
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(color_p)));
 
     // ui callback
-    qt_helper::Call* call = makeModelCall(boost::bind(&model_updateColorParameter, color_p));
+    qt_helper::Call* call = makeUiCall(boost::bind(&model_updateColorParameter, color_p));
     QObject::connect(btn, SIGNAL(clicked()), call, SLOT(call()));
 
     // model change -> ui
@@ -693,7 +968,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
 {
     if(range_p->is<int>()) {
-        QIntSlider* slider = QtHelper::makeIntSlider(current_layout_, current_display_name_ ,
+        QIntSlider* slider = makeIntSlider(current_layout_, current_display_name_ ,
                                                      range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(),
                                                      new ParameterContextMenu(range_p));
         slider->setIntValue(range_p->as<int>());
@@ -709,9 +984,7 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         bridge.connectInGuiThread(range_p->scope_changed, boost::bind(&ui_updateIntRangeParameterScope, range_p, slider));
 
     } else if(range_p->is<double>()) {
-        QDoubleSlider* slider = QtHelper::makeDoubleSlider(current_layout_, current_display_name_ ,
-                                                           range_p->def<double>(), range_p->min<double>(), range_p->max<double>(), range_p->step<double>(),
-                                                           new ParameterContextMenu(range_p));
+        QDoubleSlider* slider = makeDoubleSlider(current_layout_, current_display_name_ , range_p, new ParameterContextMenu(range_p));
         slider->setDoubleValue(range_p->as<double>());
 
         // ui change -> model
@@ -733,7 +1006,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
 {
     if(interval_p->is<std::pair<int, int> >()) {
         const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
-        QxtSpanSlider* slider = QtHelper::makeSpanSlider(current_layout_, current_display_name_,
+        QxtSpanSlider* slider = makeSpanSlider(current_layout_, current_display_name_,
                                                          v.first, v.second, interval_p->min<int>(), interval_p->max<int>(),
                                                          new ParameterContextMenu(interval_p));
 
@@ -750,7 +1023,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
 
     } else if(interval_p->is<std::pair<double, double> >()) {
         const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
-        QxtDoubleSpanSlider* slider = QtHelper::makeDoubleSpanSlider(current_layout_, current_display_name_,
+        QxtDoubleSpanSlider* slider = makeDoubleSpanSlider(current_layout_, current_display_name_,
                                                                      v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>(),
                                                                      new ParameterContextMenu(interval_p));
 

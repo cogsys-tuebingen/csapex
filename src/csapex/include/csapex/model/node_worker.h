@@ -61,6 +61,7 @@ public:
     Slot* addSlot(const std::string& label, boost::function<void ()> callback);
     Trigger* addTrigger(const std::string& label);
 
+    Connectable* getConnector(const UUID& uuid) const;
     Input* getInput(const UUID& uuid) const;
     Output* getOutput(const UUID& uuid) const;
     Slot* getSlot(const UUID& uuid) const;
@@ -80,6 +81,7 @@ public:
     void removeSlot(const UUID& uuid);
     void removeTrigger(const UUID& uuid);
 
+    std::vector<Connectable*> getAllConnectors() const;
     std::vector<Input*> getAllInputs() const;
     std::vector<Output*> getAllOutputs() const;
 

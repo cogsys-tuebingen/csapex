@@ -43,12 +43,7 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    BOOST_FOREACH(Input* i, node_worker->getAllInputs()) {
-        if(i->isConnected()) {
-            add(i->removeAllConnectionsCmd());
-        }
-    }
-    BOOST_FOREACH(Output* i, node_worker->getAllOutputs()) {
+    foreach(Connectable* i, node_worker->getAllConnectors()) {
         if(i->isConnected()) {
             add(i->removeAllConnectionsCmd());
         }

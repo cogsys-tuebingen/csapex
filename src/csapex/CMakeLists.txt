@@ -177,6 +177,7 @@ set(SRC_APP
     src/utility/uuid.cpp
     src/utility/assert.cpp
     src/utility/plugin_loader.cpp
+    src/utility/widget_picker.cpp
 
     src/view/box.cpp
     src/view/box_dialog.cpp

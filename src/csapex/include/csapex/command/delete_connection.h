@@ -27,8 +27,8 @@ protected:
 private:
     int connection_id;
 
-    Output* from;
-    Input* to;
+    Connectable* from;
+    Connectable* to;
 
     UUID from_uuid;
     UUID to_uuid;
