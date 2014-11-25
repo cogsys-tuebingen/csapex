@@ -8,8 +8,6 @@
 #include <QEvent>
 #include <QGraphicsSceneMouseEvent>
 #include <iostream>
-#include <QFuture>
-#include <QtConcurrentRun>
 #include <QWidget>
 #include <QGraphicsProxyWidget>
 #include <QApplication>
@@ -43,10 +41,23 @@ QWidget* WidgetPicker::getWidget()
 
 bool WidgetPicker::eventFilter(QObject*, QEvent * e)
 {
-    QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
-
     switch(e->type()) {
-    case QEvent::GraphicsSceneMousePress:
+    case QEvent::KeyPress: {
+        QKeyEvent* ke = dynamic_cast<QKeyEvent*>(e);
+        int key = ke->key();
+
+        if(key == Qt::Key_Escape) {
+            e->accept();
+            widget_ = NULL;
+
+            Q_EMIT widgetPicked();
+            return true;
+        }
+    }
+        break;
+
+    case QEvent::GraphicsSceneMousePress: {
+        QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
         if(me->button() == Qt::LeftButton) {
             QGraphicsItem* item = designer_scene_->itemAt(me->scenePos());
 
@@ -66,6 +77,7 @@ bool WidgetPicker::eventFilter(QObject*, QEvent * e)
             e->accept();
             return true;
         }
+    }
         break;
 
     default:

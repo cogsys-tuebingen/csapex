@@ -19,6 +19,14 @@ GenericState::GenericState()
 
 }
 
+void GenericState::setParentUUID(const UUID &parent_uuid)
+{
+    parent_uuid_ = parent_uuid;
+
+    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = params.begin(); it != params.end(); ++it) {
+        it->second->setUUID(parent_uuid_);
+    }
+}
 
 GenericState::Ptr GenericState::clone() const
 {
@@ -110,6 +118,8 @@ void GenericState::addPersistentParameter(const param::Parameter::Ptr &param)
 void GenericState::registerParameter(const param::Parameter::Ptr &param)
 {
     params[param->name()] = param;
+
+    param->setUUID(parent_uuid_.getFullName());
 
     (*parameter_added)(param.get());
     triggerParameterSetChanged();

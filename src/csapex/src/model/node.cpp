@@ -41,6 +41,7 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     settings_ = settings;
 
     setUUID(uuid);
+    parameter_state_->setParentUUID(uuid);
 
     std::string p = uuid.getFullName();
     ainfo.setPrefix(p);

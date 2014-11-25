@@ -60,6 +60,11 @@ UUID UUID::make_sub(const UUID &parent, const std::string &prefix)
     return make(parent.getFullName() + UUID::namespace_separator + prefix);
 }
 
+UUID UUID::make_sub_forced(const UUID &parent, const std::string &prefix)
+{
+    return make_forced( parent.getFullName() + UUID::namespace_separator + prefix);
+}
+
 void UUID::free(const UUID &uuid)
 {
 //    if(!uuid.getFullName().empty()) {

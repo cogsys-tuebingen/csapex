@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/memento.h>
+#include <csapex/utility/uuid.h>
 
 /// PROJECT
 #include <utils_param/parameter.h>
@@ -21,6 +22,8 @@ public:
 public:
     GenericState();
     GenericState::Ptr clone() const;
+
+    void setParentUUID(const UUID& parent_uuid);
 
     void addParameter(param::ParameterPtr param);
 
@@ -58,6 +61,8 @@ private:
     void registerParameter(const param::Parameter::Ptr &param);
 
 public:
+    UUID parent_uuid_;
+
     std::map<std::string, param::ParameterPtr> params;
     std::map<std::string, bool> temporary;
     std::set<std::string> persistent;

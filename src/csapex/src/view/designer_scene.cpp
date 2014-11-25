@@ -67,7 +67,13 @@ QWidget* topLevelParentWidget (QWidget* widget)
 
 QPointF centerPoint(Port* port)
 {
-    return topLevelParentWidget(port)->pos() + port->parentWidget()->pos() + port->centerPoint();
+    QPointF pos = port->centerPoint();
+    QWidget* widget = port;
+    while (widget -> parentWidget()) {
+        widget = widget -> parentWidget();
+        pos += widget->pos();
+    }
+    return pos;
 }
 }
 
