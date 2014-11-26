@@ -154,6 +154,7 @@ Q_SIGNALS:
     void threadChanged();
 
     void threadSwitchRequested(QThread*, int);
+    void tickRequested();
 
     void panic();
 

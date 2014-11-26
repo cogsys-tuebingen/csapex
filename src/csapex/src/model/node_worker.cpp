@@ -63,7 +63,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     is_setup_ = true;
 
     if(params_created_in_constructor) {
-       node_->awarn << "Node creates parameters in its constructor! Please implement 'setupParameters'" << std::endl;
+        node_->awarn << "Node creates parameters in its constructor! Please implement 'setupParameters'" << std::endl;
     }
 }
 
@@ -251,7 +251,8 @@ void NodeWorker::switchThread(QThread *thread, int id)
 
     Q_EMIT threadChanged();
 
-    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()), Qt::QueuedConnection);
+    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
+    QObject::connect(this, SIGNAL(tickRequested()), this, SLOT(tick()), Qt::QueuedConnection);
 }
 
 void NodeWorker::connectConnector(Connectable *c)
@@ -449,10 +450,10 @@ void NodeWorker::processMessages()
         }
 
         // set output sequence numbers
-//        for(std::size_t i = 0; i < outputs_.size(); ++i) {
-//            Output* out = outputs_[i];
-//            out->setSequenceNumber(highest_seq_no);
-//        }
+        //        for(std::size_t i = 0; i < outputs_.size(); ++i) {
+        //            Output* out = outputs_[i];
+        //            out->setSequenceNumber(highest_seq_no);
+        //        }
     }
 
     processInputs(all_inputs_are_present);
@@ -888,11 +889,11 @@ bool NodeWorker::canSendMessages()
         }
     }
 
-//    foreach(Output* out, parameter_outputs_) {
-//        if(!out->canSendMessages()) {
-//            return false;
-//        }
-//    }
+    //    foreach(Output* out, parameter_outputs_) {
+    //        if(!out->canSendMessages()) {
+    //            return false;
+    //        }
+    //    }
 
     return true;
 }
@@ -951,7 +952,7 @@ void NodeWorker::trySendMessages()
     messages_waiting_to_be_sent = false;
     Q_EMIT messagesWaitingToBeSent(false);
 
-//    publishParameters();
+    //    publishParameters();
 
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
@@ -970,7 +971,7 @@ void NodeWorker::setTickFrequency(double f)
         return;
     }
 
-    tick_immediate_ = (f >= 999.9);
+    tick_immediate_ = (f < 0.0);
 
     if(tick_immediate_) {
         tick_timer_->setSingleShot(true);
@@ -1035,49 +1036,38 @@ void NodeWorker::tick()
 
     assertNotInGuiThread();
 
-    while(true) {
-        {
-            pause_mutex_.lock();
-            while(paused_) {
-                continue_.wait(&pause_mutex_);
-            }
-            pause_mutex_.unlock();
+
+    {
+        pause_mutex_.lock();
+        while(paused_) {
+            continue_.wait(&pause_mutex_);
         }
+        pause_mutex_.unlock();
+    }
 
-        QMutexLocker lock(&stop_mutex_);
-        if(stop_) {
-            return;
-        }
+    QMutexLocker lock(&stop_mutex_);
+    if(stop_) {
+        return;
+    }
 
-        node_->checkConditions(false);
-        checkParameters();
+    node_->checkConditions(false);
+    checkParameters();
 
-        if(!thread_initialized_) {
-            thread::set_name(thread()->objectName().toStdString().c_str());
-            thread_initialized_ = true;
-        }
+    if(!thread_initialized_) {
+        thread::set_name(thread()->objectName().toStdString().c_str());
+        thread_initialized_ = true;
+    }
 
 
-        if(isEnabled() && (isTickEnabled() && isSource())) {
+    if(isEnabled() && (isTickEnabled() && isSource())) {
 
-            if(!canSendMessages() || !node_->canTick() /*|| ticks_ != 0*/) {
-                return;
-            }
-//            foreach(Output* out, parameter_outputs_) {
-//                out->clearMessage();
-//            }
+        if(canSendMessages() && node_->canTick() /*|| ticks_ != 0*/) {
             foreach(Output* out, outputs_) {
                 out->clearMessage();
             }
 
             node_->tick();
             ++ticks_;
-
-            //processInputs(isSource());
-
-//            foreach(Output* out, parameter_outputs_) {
-//                messages_waiting_to_be_sent |= out->hasMessage();
-//            }
             foreach(Output* out, outputs_) {
                 messages_waiting_to_be_sent |= out->hasMessage();
             }
@@ -1086,10 +1076,10 @@ void NodeWorker::tick()
 
             trySendMessages();
         }
+    }
 
-        if(!tick_immediate_) {
-            return;
-        }
+    if(tick_immediate_) {
+        Q_EMIT tickRequested();
     }
 }
 
