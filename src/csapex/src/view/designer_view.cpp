@@ -42,7 +42,7 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
       scalings_to_perform_(0)
 
 {
-    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     setScene(scene_);

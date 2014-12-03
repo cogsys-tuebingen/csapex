@@ -410,7 +410,8 @@ void DefaultNodeAdapter::clear()
         if(call) {
             call->disconnect();
         }
-        cb->deleteLater();
+        delete call;
+        //cb->deleteLater();
     }
     callbacks.clear();
     groups.clear();

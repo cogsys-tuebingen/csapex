@@ -40,6 +40,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, 
 CsApexWindow::~CsApexWindow()
 {
     core_.removeListener(this);
+    delete ui;
 }
 
 void CsApexWindow::construct()

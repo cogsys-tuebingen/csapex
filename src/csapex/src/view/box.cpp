@@ -37,6 +37,7 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
 
 NodeBox::~NodeBox()
 {
+    delete ui;
 }
 
 
