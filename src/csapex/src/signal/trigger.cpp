@@ -30,9 +30,6 @@ Trigger::Trigger(Settings& settings, Unique* parent, int sub_id)
 
 Trigger::~Trigger()
 {
-    foreach(Slot* i, targets_) {
-        i->removeConnection(this);
-    }
 }
 
 void Trigger::reset()
