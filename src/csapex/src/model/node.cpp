@@ -20,7 +20,7 @@ using namespace csapex;
 
 Node::Node(const UUID &uuid)
     : Unique(uuid),
-      ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()), alog(std::clog, uuid.getFullName()),
+      adebug(std::cout, uuid.getFullName()), ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()),
       modifier_(NULL), settings_(NULL),
       worker_(NULL),
       node_state_(new NodeState(this))
@@ -44,10 +44,10 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     parameter_state_->setParentUUID(uuid);
 
     std::string p = uuid.getFullName();
+    adebug.setPrefix(p);
     ainfo.setPrefix(p);
     awarn.setPrefix(p);
     aerr.setPrefix(p);
-    alog.setPrefix(p);
 }
 
 void Node::doSetup()
@@ -172,6 +172,3 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
         worker_->setIOError(false);
     }
 }
-
-
-

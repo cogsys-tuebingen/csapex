@@ -52,10 +52,10 @@ private:
 
 
 public:
+    StreamRelay adebug;
     StreamRelay ainfo;
     StreamRelay awarn;
     StreamRelay aerr;
-    StreamRelay alog;
 
 protected:
     NodeModifier* modifier_;
