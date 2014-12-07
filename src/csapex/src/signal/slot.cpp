@@ -18,21 +18,18 @@ Slot::Slot(boost::function<void()> callback, Settings& settings, const UUID &uui
     : Connectable(settings, uuid), target(NULL), callback_(callback)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
-    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
+//    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
 Slot::Slot(boost::function<void()> callback, Settings &settings, Unique* parent, int sub_id)
     : Connectable(settings, parent, sub_id, "slot"), target(NULL), callback_(callback)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
-    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
+//    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
 Slot::~Slot()
 {
-    if(target != NULL) {
-        target->removeConnection(this);
-    }
 }
 
 void Slot::reset()

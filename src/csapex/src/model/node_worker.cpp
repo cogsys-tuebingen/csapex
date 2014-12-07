@@ -243,6 +243,12 @@ void NodeWorker::switchThread(QThread *thread, int id)
     foreach(Output* output, parameter_outputs_){
         output->moveToThread(thread);
     }
+    foreach(Slot* slot, slots_){
+        slot->moveToThread(thread);
+    }
+    foreach(Trigger* trigger, triggers_){
+        trigger->moveToThread(thread);
+    }
     moveToThread(thread);
 
     assertNotInGuiThread();
@@ -562,7 +568,7 @@ Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> call
     slot->setLabel(label);
     slot->setEnabled(true);
 
-    slots_.push_back(slot);
+    registerSlot(slot);
 
     return slot;
 }
@@ -574,7 +580,7 @@ Trigger* NodeWorker::addTrigger(const std::string& label)
     trigger->setLabel(label);
     trigger->setEnabled(true);
 
-    triggers_.push_back(trigger);
+    registerTrigger(trigger);
 
     return trigger;
 }
@@ -710,6 +716,7 @@ void NodeWorker::registerSlot(Slot* s)
     connectConnector(s);
     QObject::connect(s, SIGNAL(messageArrived(Connectable*)), this, SLOT(messageArrived(Connectable*)));
     QObject::connect(s, SIGNAL(connectionDone(Connectable*)), this, SLOT(trySendMessages()));
+    QObject::connect(s, SIGNAL(triggered()), s, SLOT(handleTrigger()), Qt::QueuedConnection);
 
     Q_EMIT connectorCreated(s);
 }
