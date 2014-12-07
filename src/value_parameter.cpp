@@ -24,6 +24,7 @@ ValueParameter::~ValueParameter()
 
 const std::type_info& ValueParameter::type() const
 {
+    Lock l = lock();
     return value_.type();
 }
 

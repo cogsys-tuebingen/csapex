@@ -105,6 +105,7 @@ std::string SetParameter::getText() const
 
 const std::type_info& SetParameter::type() const
 {
+    Lock l = lock();
     return value_.type();
 }
 

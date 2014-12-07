@@ -24,6 +24,7 @@ IntervalParameter::~IntervalParameter()
 
 const std::type_info& IntervalParameter::type() const
 {
+    Lock l = lock();
     if(values_.first.type() == typeid(int)) {
         return typeid(std::pair<int,int>);
     } else if(values_.first.type() == typeid(double)) {

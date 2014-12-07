@@ -32,6 +32,7 @@ void ColorParameter::set(const std::vector<int> &v)
 
 const std::type_info& ColorParameter::type() const
 {
+    Lock l = lock();
     return typeid(colors_);
 }
 
