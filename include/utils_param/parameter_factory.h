@@ -241,13 +241,13 @@ public:
      */
     template <typename T>
     static Parameter::Ptr declareParameterSet(const std::string& name, const ParameterDescription& description,
-                                              const std::map<std::string, T> & set,
+                                              const std::map<std::string, T> & set_values,
                                               const T& def)
     {
         SetParameter::Ptr result(new SetParameter(name, description));
-        result->setSet(set);
-        if(!set.empty()) {
-            result->def_ = def;//set.begin()->second;
+        result->setSet(set_values);
+        if(!set_values.empty()) {
+            result->def_ = def;
             result->set<T>(def);
         }
 
