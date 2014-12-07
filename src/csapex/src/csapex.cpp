@@ -21,6 +21,7 @@
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/designer_scene.h>
 #include <csapex/core/thread_pool.h>
+#include <csapex/utility/plugin_locator.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -127,9 +128,10 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         settings.set("additional_args", additional_args);
     }
 
+    PluginLocatorPtr plugin_locator(new PluginLocator);
 
-    NodeFactory::Ptr node_factory(new NodeFactory(settings));
-    NodeAdapterFactory::Ptr node_adapter_factory(new NodeAdapterFactory(settings));
+    NodeFactory::Ptr node_factory(new NodeFactory(settings, plugin_locator.get()));
+    NodeAdapterFactory::Ptr node_adapter_factory(new NodeAdapterFactory(settings, plugin_locator.get()));
 
     Graph::Ptr graph(new Graph);
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
@@ -137,7 +139,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
     CommandDispatcher dispatcher(settings, graph_worker, widget_control);
 
-    CsApexCore core(settings, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
+    CsApexCore core(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
     ThreadPool thread_pool(&core, graph.get(), !threadless, thread_grouping);
 
     if(!headless) {
@@ -171,7 +173,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         core.startup();
 
         w.show();
-        splash->close();
+        splash->finish(&w);
 
         int res = run();
 

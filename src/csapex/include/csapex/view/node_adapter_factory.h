@@ -19,7 +19,7 @@ public:
     typedef boost::shared_ptr<NodeAdapterFactory> Ptr;
 
 public:
-    NodeAdapterFactory(Settings& settings);
+    NodeAdapterFactory(Settings& settings, csapex::PluginLocator* locator);
     ~NodeAdapterFactory();
 
     NodeAdapterPtr makeNodeAdapter(NodeWorker* node, WidgetController* widget_controller);
@@ -32,6 +32,7 @@ private:
 
 protected:
     Settings& settings_;
+    csapex::PluginLocator* plugin_locator_;
 
     PluginManager<NodeAdapterBuilder>* node_adapter_manager_;
     std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;

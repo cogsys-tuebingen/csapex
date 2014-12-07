@@ -3,20 +3,19 @@
 
 /// COMPONENT
 #include <csapex/utility/constructor.hpp>
+#include <csapex/utility/plugin_locator.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
-#include <pluginlib/class_loader.h>
+#include <class_loader/class_loader.h>
 #include <set>
+#include <tinyxml.h>
 
 template <class M>
 class PluginManagerImp
 {
     template <class>
     friend class PluginManager;
-
-public:
-    typedef pluginlib::ClassLoader<M> PluginLibLoader;
 
 protected:
     typedef DefaultConstructor<M> Constructor;
@@ -39,14 +38,15 @@ protected:
     void registerConstructor(Constructor constructor) {
         available_classes[constructor.getType()] = constructor;
     }
-    void load() {
-        // TODO: make this via a plugin! -> csapex_ros
-        PluginLibLoader pluginlib_loader("csapex", full_name_);
-        xml_files_ = pluginlib_loader.getPluginXmlPaths();
 
-        std::unique(xml_files_.begin(), xml_files_.end());
+    void enumerateXmlFiles()
+    {
+    }
 
-        for(std::vector<std::string>::const_iterator manifest = xml_files_.begin(); manifest != xml_files_.end(); ++manifest) {
+    void load(csapex::PluginLocator* locator) {
+        std::vector<std::string> xml_files = locator->enumerateXmlFiles<M>();
+
+        for(std::vector<std::string>::const_iterator manifest = xml_files.begin(); manifest != xml_files.end(); ++manifest) {
             processManifest(*manifest);
         }
 
@@ -146,7 +146,6 @@ protected:
 protected:
     bool plugins_loaded_;
 
-    std::vector<std::string> xml_files_;
     std::map< std::string, boost::shared_ptr<class_loader::ClassLoader> > loaders_;
 
     std::string full_name_;
@@ -184,8 +183,8 @@ public:
         return instance->plugins_loaded_;
     }
 
-    virtual void load() {
-        instance->load();
+    virtual void load(csapex::PluginLocator* locator) {
+        instance->load(locator);
     }
 
     const Constructors& availableClasses() const {

@@ -12,8 +12,8 @@
 
 using namespace csapex;
 
-NodeAdapterFactory::NodeAdapterFactory(Settings &settings)
-    : settings_(settings),
+NodeAdapterFactory::NodeAdapterFactory(Settings &settings, PluginLocator *locator)
+    : settings_(settings), plugin_locator_(locator),
     node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder"))
 {
 
@@ -57,7 +57,7 @@ void NodeAdapterFactory::rebuildPrototypes()
 void NodeAdapterFactory::ensureLoaded()
 {
     if(!node_adapter_manager_->pluginsLoaded()) {
-        node_adapter_manager_->load();
+        node_adapter_manager_->load(plugin_locator_);
 
         rebuildPrototypes();
     }

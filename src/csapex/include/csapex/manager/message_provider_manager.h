@@ -22,11 +22,14 @@ class MessageProviderManager : public Singleton<MessageProviderManager>
 public:
     typedef boost::function<MessageProvider::Ptr()>  Constructor;
 
-public:
+public:    
     static void registerMessageProvider(const std::string& type, Constructor constructor);
     static MessageProvider::Ptr createMessageProvider(const std::string& path);
 
     std::string supportedTypes();
+
+    // TODO: remove singleton -> put this in constructor
+    void setPluginLocator(PluginLocatorPtr locator);
 
 private:
     MessageProviderManager();
@@ -36,6 +39,8 @@ private:
     void loadPlugins();
 
 private:
+    csapex::PluginLocatorPtr plugin_locator_;
+
     std::map<std::string, Constructor> classes;
 
     std::string supported_types_;

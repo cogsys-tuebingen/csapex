@@ -10,6 +10,10 @@
 #include <QObject>
 #include <yaml-cpp/yaml.h>
 
+namespace class_loader {
+class ClassLoader;
+}
+
 namespace csapex
 {
 
@@ -23,11 +27,14 @@ public:
     };
 
 public:
-    CsApexCore(Settings& settings_, GraphWorkerPtr graph,
+    CsApexCore(Settings& settings_,
+               PluginLocatorPtr plugin_locator,
+               GraphWorkerPtr graph,
                NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory, CommandDispatcher *cmd_dispatcher);
     virtual ~CsApexCore();
 
     void init(DragIO *dragio);
+    void boot();
     void startup();
 
     void load(const std::string& file);
@@ -66,6 +73,8 @@ Q_SIGNALS:
 private:
     Settings& settings_;
 
+    csapex::PluginLocatorPtr plugin_locator_;
+
     GraphWorkerPtr graph_worker_;
     NodeFactory* node_factory_;
     NodeAdapterFactory* node_adapter_factory_;
@@ -76,6 +85,9 @@ private:
     PluginManager<CorePlugin>* core_plugin_manager;
     std::vector<boost::shared_ptr<CorePlugin> > core_plugins_;
     std::vector<Listener*> listener_;
+
+    std::vector<BootstrapPluginPtr> boot_plugins_;
+    std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
 
     bool init_;
 };

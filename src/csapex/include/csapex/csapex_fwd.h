@@ -23,6 +23,8 @@ class PluginManager;
 namespace csapex
 {
 class CorePlugin;
+FWD(BootstrapPlugin);
+FWD(PluginLocator);
 
 FWD(NodeBox);
 FWD(Group);
@@ -57,6 +59,7 @@ FWD(NodeState);
 FWD(NodeWorker);
 FWD(NodeAdapter);
 FWD(NodeModifier);
+FWD(NodeAdapterBuilder);
 
 FWD(WidgetController);
 

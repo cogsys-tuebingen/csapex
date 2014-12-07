@@ -18,7 +18,7 @@ public:
     typedef boost::shared_ptr<NodeFactory> Ptr;
 
 public:
-    NodeFactory(Settings& settings);
+    NodeFactory(Settings& settings, PluginLocator *locator);
     ~NodeFactory();
 
     void loadPlugins();
@@ -49,6 +49,7 @@ protected:
 
 protected:
     Settings& settings_;
+    csapex::PluginLocator* plugin_locator_;
 
     std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::vector<NodeConstructor::Ptr> constructors_;

@@ -13,7 +13,7 @@ add_definitions(-W -Wall)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS utils_param utils_qt pluginlib)
+find_package(catkin REQUIRED COMPONENTS utils_param utils_qt class_loader)
 
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
@@ -21,10 +21,16 @@ include(cmake/csapex-extras.cmake)
 
 set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 
-FIND_PACKAGE(OpenGL REQUIRED)
-
+find_package(OpenGL REQUIRED)
+find_package(TinyXML REQUIRED)
 find_package(Qt5 COMPONENTS OpenGL REQUIRED)
-QT5_ADD_RESOURCES(QT_RESOURCES res/csapex_resources.qrc)
+
+qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
+qt5_wrap_ui(QT_UI
+    ui/box.ui
+    ui/csapex_window.ui
+    ui/design_board.ui
+    ui/designer.ui)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -42,7 +48,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex_pluginbase
-   CATKIN_DEPENDS utils_param utils_qt pluginlib
+   CATKIN_DEPENDS utils_param utils_qt
    DEPENDS Boost
    CFG_EXTRAS csapex-extras.cmake
 )
@@ -70,6 +76,7 @@ add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
 add_definitions("-DGIT_BRANCH=${GIT_BRANCH}")
 add_definitions("-DMAINTAINER=${csapex_MAINTAINER}")
 add_definitions("-DVERSION=${csapex_VERSION}")
+add_definitions("-DCSAPEX_BOOT_PLUGIN_DIR=\"${CSAPEX_BOOT_PLUGIN_DIR}\"")
 
 ###########
 ## Build ##
@@ -83,6 +90,10 @@ include_directories(include
 #
 # SINGLE OUT PLUGIN RELEVANT FILES
 #
+set(SRC_ESSENTIAL
+    src/core/bootstrap_plugin.cpp
+)
+
 set(SRC_PLUGIN
     src/core/core_plugin.cpp
 
@@ -176,6 +187,7 @@ set(SRC_APP
     src/utility/uuid.cpp
     src/utility/assert.cpp
     src/utility/plugin_loader.cpp
+    src/utility/plugin_locator.cpp
     src/utility/widget_picker.cpp
 
     src/view/box.cpp
@@ -194,10 +206,7 @@ set(SRC_APP
 
     ${QT_RESOURCES}
 
-    ui/box.ui
-    ui/csapex_window.ui
-    ui/design_board.ui
-    ui/designer.ui
+    ${QT_UI}
 )
 
 
@@ -205,16 +214,24 @@ set(SRC_APP
 # BUILD THE LIBRARIES
 #
 
+add_library(csapex_core SHARED
+    ${SRC_ESSENTIAL}
+)
+
+
 add_library(csapex_pluginbase SHARED
     ${SRC_PLUGIN}
 )
 
 target_link_libraries(csapex_pluginbase
+    csapex_core
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${YAML_LIBRARIES}
+    ${TinyXML_LIBRARIES}
 )
+
 
 add_library(csapex_app SHARED
     ${SRC_APP}

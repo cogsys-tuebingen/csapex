@@ -15,8 +15,8 @@
 
 using namespace csapex;
 
-NodeFactory::NodeFactory(Settings &settings)
-    : settings_(settings),
+NodeFactory::NodeFactory(Settings &settings, csapex::PluginLocator* locator)
+    : settings_(settings), plugin_locator_(locator),
       node_manager_(new PluginManager<Node> ("csapex::Node")),
       tag_map_has_to_be_rebuilt_(false)
 {
@@ -127,7 +127,7 @@ std::map<TagPtr, std::vector<NodeConstructor::Ptr> > NodeFactory::getTagMap()
 void NodeFactory::ensureLoaded()
 {
     if(!node_manager_->pluginsLoaded()) {
-        node_manager_->load();
+        node_manager_->load(plugin_locator_);
         
         rebuildPrototypes();
         
