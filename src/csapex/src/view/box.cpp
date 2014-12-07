@@ -216,7 +216,7 @@ void NodeBox::updateThreadInformation()
 
 void NodeBox::contextMenuEvent(QContextMenuEvent* e)
 {
-    Q_EMIT showContextMenuForBox(this, e->globalPos());
+    Q_EMIT showContextMenuForBox(this, pos() + e->globalPos());
 }
 
 QBoxLayout* NodeBox::getInputLayout()
@@ -382,15 +382,9 @@ void NodeBox::moveEvent(QMoveEvent* e)
         return;
     }
 
-    eventFilter(this, e);
-
-
     QPoint pos = e->pos();
-    if(settings_.get("grid-lock", false)) {
-        pos.setX(round(pos.x() / 10.0) * 10.0);
-        pos.setY(round(pos.y() / 10.0) * 10.0);
-        move(pos);
-    }
+
+    eventFilter(this, e);
 
     QPoint delta = pos - e->oldPos();
 

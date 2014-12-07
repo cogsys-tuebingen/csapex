@@ -61,12 +61,19 @@ public:
 
     void insertPort(QLayout* layout, Port* port);
 
+    bool isGridLockEnabled() const;
+
+Q_SIGNALS:
+    void gridLockEnabled(bool);
+
 public Q_SLOTS:
     void nodeAdded(NodeWorkerPtr node_worker);
     void nodeRemoved(NodeWorkerPtr node_worker);
 
     void connectorCreated(Connectable *connector);
     void connectorRemoved(Connectable *connector);
+
+    void enableGridLock(bool enabled);
 
 private:
     void createPort(Connectable* connector, NodeBox *box, QBoxLayout *layout);

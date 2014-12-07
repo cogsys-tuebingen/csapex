@@ -59,7 +59,7 @@ bool WidgetPicker::eventFilter(QObject*, QEvent * e)
     case QEvent::GraphicsSceneMousePress: {
         QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
         if(me->button() == Qt::LeftButton) {
-            QGraphicsItem* item = designer_scene_->itemAt(me->scenePos());
+            QGraphicsItem* item = designer_scene_->itemAt(me->scenePos(), QTransform());
 
             if(item && item->type() == QGraphicsProxyWidget::Type) {
                 QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);

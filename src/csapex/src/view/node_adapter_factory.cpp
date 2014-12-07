@@ -40,7 +40,8 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeWorker* node, WidgetCon
 
 void NodeAdapterFactory::loadPlugins()
 {
-    node_adapter_manager_->load();
+    ensureLoaded();
+
     rebuildPrototypes();
 }
 

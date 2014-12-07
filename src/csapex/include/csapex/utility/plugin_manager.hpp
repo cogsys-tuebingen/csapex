@@ -44,6 +44,8 @@ protected:
         PluginLibLoader pluginlib_loader("csapex", full_name_);
         xml_files_ = pluginlib_loader.getPluginXmlPaths();
 
+        std::unique(xml_files_.begin(), xml_files_.end());
+
         for(std::vector<std::string>::const_iterator manifest = xml_files_.begin(); manifest != xml_files_.end(); ++manifest) {
             processManifest(*manifest);
         }

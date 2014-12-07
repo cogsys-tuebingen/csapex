@@ -7,7 +7,6 @@
 
 /// SYSTEM
 #include <iostream>
-#include <QtConcurrentRun>
 #include <unistd.h>
 #include <stdio.h>
 

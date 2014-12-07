@@ -11,8 +11,10 @@
 /// SYSTEM
 #include <sstream>
 #include <stdexcept>
+#include <QDrag>
+#include <QWidget>
 #include <QDragEnterEvent>
-
+#include <QMimeData>
 
 using namespace csapex;
 

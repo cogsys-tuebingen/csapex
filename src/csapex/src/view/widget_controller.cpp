@@ -23,11 +23,14 @@
 #include <csapex/view/port.h>
 #include <csapex/view/node_adapter_factory.h>
 #include <csapex/view/designer_view.h>
+#include <csapex/core/settings.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <QApplication>
 #include <QTreeWidget>
 #include <QDrag>
+#include <QMimeData>
 #include <QStandardItemModel>
 
 using namespace csapex;
@@ -35,7 +38,9 @@ using namespace csapex;
 WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
     : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(NULL)
 {
-
+    if(settings_.knows("grid-lock")) {
+       enableGridLock(settings_.get<bool>("grid-lock"));
+    }
 }
 
 NodeBox* WidgetController::getBox(const UUID &node_id)
@@ -133,7 +138,7 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     object->setObjectName(content->getNode()->getType().c_str());
     object->setLabel(type);
 
-    drag->setPixmap(QPixmap::grabWidget(object.get()));
+    drag->setPixmap(object->grab());
     drag->setHotSpot(-offset);
     drag->exec();
 }
@@ -364,4 +369,20 @@ QAbstractItemModel* WidgetController::listAvailableNodeTypes()
     }
 
     return model;
+}
+
+bool WidgetController::isGridLockEnabled() const
+{
+    return settings_.get<bool>("grid-lock", false);
+}
+
+void WidgetController::enableGridLock(bool enabled)
+{
+    if(!settings_.knows("grid-lock")) {
+        settings_.add(param::ParameterFactory::declareBool("grid-lock", enabled));
+    }
+
+    settings_.set("grid-lock", enabled);
+
+    Q_EMIT gridLockEnabled(enabled);
 }

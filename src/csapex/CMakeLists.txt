@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.11)
 project(csapex)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -17,17 +17,14 @@ find_package(catkin REQUIRED COMPONENTS utils_param utils_qt pluginlib)
 
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGl)
-include(${QT_USE_FILE})
+include(cmake/csapex-extras.cmake)
 
 set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 
 FIND_PACKAGE(OpenGL REQUIRED)
 
-file(GLOB   QT_FORMS    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}  ui/*.ui)
-QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
-
-QT4_ADD_RESOURCES(QT_RESOURCES res/csapex_resources.qrc)
+find_package(Qt5 COMPONENTS OpenGL REQUIRED)
+QT5_ADD_RESOURCES(QT_RESOURCES res/csapex_resources.qrc)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -46,7 +43,7 @@ catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex_pluginbase
    CATKIN_DEPENDS utils_param utils_qt pluginlib
-   DEPENDS Qt4 Boost
+   DEPENDS Boost
    CFG_EXTRAS csapex-extras.cmake
 )
 
@@ -71,6 +68,8 @@ execute_process(
 
 add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
 add_definitions("-DGIT_BRANCH=${GIT_BRANCH}")
+add_definitions("-DMAINTAINER=${csapex_MAINTAINER}")
+add_definitions("-DVERSION=${csapex_VERSION}")
 
 ###########
 ## Build ##
@@ -192,44 +191,15 @@ set(SRC_APP
     src/view/fulcrum_widget.cpp
     src/view/fulcrum_handle.cpp
     src/view/parameter_context_menu.cpp
+
+    ${QT_RESOURCES}
+
+    ui/box.ui
+    ui/csapex_window.ui
+    ui/design_board.ui
+    ui/designer.ui
 )
 
-#
-# DETERMINE ALL FILES THAT NEED TO BE MOC'D AND DIVIDE INTO PLUGINBASE / APP
-#
-file(GLOB_RECURSE QT_SOURCES  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*/*.h include/*/*.hpp include/*/*.h)
-set(QT_PLUGIN_MOC)
-set(QT_APP_MOC)
-foreach(header ${QT_SOURCES})
-    file(STRINGS "${header}" lines REGEX "Q_OBJECT")
-    if(lines)
-        GET_FILENAME_COMPONENT(comp ${header} NAME_WE)
-        set(found)
-        foreach(plug ${SRC_PLUGIN})
-            GET_FILENAME_COMPONENT(comp_plug ${plug} NAME_WE)
-            if(${comp_plug} STREQUAL ${comp})
-                set(found TRUE)
-            endif()
-        endforeach()
-        if(${found})
-            list(APPEND QT_PLUGIN_MOC "${header}")
-        else()
-            list(APPEND QT_APP_MOC "${header}")
-        endif()
-    endif()
-endforeach()
-
-QT4_WRAP_CPP(QT_PLUGIN_MOC ${QT_PLUGIN_MOC})
-QT4_WRAP_CPP(QT_APP_MOC ${QT_APP_MOC})
-QT4_WRAP_CPP(QT_APP_MOC_EXE src/csapex.h)
-
-set(QT_PLUGIN
-${QT_PLUGIN_MOC}
-${QT_FORMS_HPP} ${QT_RESOURCES})
-
-set(QT_APP
-${QT_APP_MOC}
-${QT_FORMS_HPP} ${QT_RESOURCES})
 
 #
 # BUILD THE LIBRARIES
@@ -237,7 +207,6 @@ ${QT_FORMS_HPP} ${QT_RESOURCES})
 
 add_library(csapex_pluginbase SHARED
     ${SRC_PLUGIN}
-    ${QT_PLUGIN}
 )
 
 target_link_libraries(csapex_pluginbase
@@ -249,7 +218,7 @@ target_link_libraries(csapex_pluginbase
 
 add_library(csapex_app SHARED
     ${SRC_APP}
-    ${QT_APP}
+    ${QT_FORMS_HPP}
 )
 
 target_link_libraries(csapex_app csapex_pluginbase
@@ -258,6 +227,7 @@ target_link_libraries(csapex_app csapex_pluginbase
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${YAML_LIBRARIES}
+    Qt5::OpenGL
 )
 
 #
@@ -271,7 +241,6 @@ file(GLOB_RECURSE ALL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLIN
 #
 
 add_executable(csapex_node
-    ${QT_APP_MOC_EXE}
     ${ALL_HEADERS}
 
     src/csapex.cpp)

@@ -767,14 +767,14 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
                 wrapper_layout_->addWidget(gb);
 
-                hider->setShown(!hidden);
+                hider->setHidden(hidden);
 
 
                 qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&DefaultNodeAdapterBridge::enableGroup, &bridge, boost::bind(&QGroupBox::isChecked, gb), group));
                 callbacks.push_back(call_trigger);
                 QObject::connect(gb, SIGNAL(toggled(bool)), call_trigger, SLOT(call()));
 
-                QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setShown(bool)));
+                QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setVisible(bool)));
             }
         }
 

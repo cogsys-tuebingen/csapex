@@ -22,10 +22,27 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, DesignerVie
 {
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
+    setFlag(ItemSendsGeometryChanges);
 
     setWidget(box_);
 
     setAcceptDrops(true);
+}
+
+QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+    if (change == ItemPositionChange) {
+        QPointF newPos = value.toPointF();
+        if(QApplication::mouseButtons() == Qt::LeftButton){
+            if(widget_ctrl_->isGridLockEnabled()) {
+                newPos.setX(round(newPos.x() / 10.0) * 10.0);
+                newPos.setY(round(newPos.y() / 10.0) * 10.0);
+            }
+        }
+        return newPos;
+    }
+    else
+        return QGraphicsProxyWidget::itemChange(change, value);
 }
 
 void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -44,15 +61,30 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
 
     bool do_relay = !ctrl && child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel");
 
+    before_ = pos();
     if(do_relay) {
         QGraphicsProxyWidget::mousePressEvent(event);
         relay_ = true;
-        before_ = pos();
 
     } else if(shift) {
         clone_start_ = event->pos();
         clone_p_ = true;
     }
+}
+
+void MovableGraphicsProxyWidget::signalMoved(const QPointF &delta)
+{
+    moved(delta.x(), delta.y());
+}
+
+
+void MovableGraphicsProxyWidget::signalMoving(const QPointF &delta)
+{
+    if(delta != last_signaled_) {
+        moving(delta.x(), delta.y());
+    }
+
+    last_signaled_ = delta;
 }
 
 void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -70,8 +102,7 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
 
         QPointF after = pos();
         if(before_ != after) {
-            QPointF delta = after - before_;
-            moved(delta.x(), delta.y());
+            signalMoved(after - before_);
         }
     }
 }
@@ -96,8 +127,7 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
     if(!event->isAccepted()) {
         QGraphicsItem::mouseMoveEvent(event);
-        QPointF delta = pos() - before_;
-        moving(delta.x(), delta.y());
+        signalMoving(pos() - before_);
     }
 }
 

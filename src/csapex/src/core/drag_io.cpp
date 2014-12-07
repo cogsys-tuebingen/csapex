@@ -14,6 +14,9 @@
 #include <csapex/view/designer_scene.h>
 #include <csapex/view/designer_view.h>
 
+/// SYSTEM
+#include <QMimeData>
+
 using namespace csapex;
 
 void DragIO::registerEnterHandler(HandlerEnter::Ptr h)
@@ -47,7 +50,6 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
         e->acceptProposedAction();
 
     } else {
-        std::cout << "enter event: " << e->format() << std::endl;
         if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
             QDataStream stream(&itemData, QIODevice::ReadOnly);

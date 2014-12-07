@@ -106,7 +106,7 @@ void Slot::removeAllConnectionsNotUndoable()
 }
 
 
-bool Slot::canConnectTo(Connectable* other_side, bool move) const
+bool Slot::canConnectTo(Connectable* other_side, bool /*move*/) const
 {
     Trigger* trigger = dynamic_cast<Trigger*>(other_side);
     return trigger;

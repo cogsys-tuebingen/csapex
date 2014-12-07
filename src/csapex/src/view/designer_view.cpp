@@ -408,7 +408,7 @@ void DesignerView::showContextMenuGlobal(const QPoint& global_pos)
     showContextMenuAddNode(global_pos);
 }
 
-void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &global_pos)
+void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
 {
     QMenu menu;
     std::map<QAction*, boost::function<void()> > handler;
@@ -515,7 +515,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &global_pos
     handler[del] = boost::bind(&DesignerView::deleteBox, this, box);
     menu.addAction(del);
 
-    QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(global_pos)));
+    QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(scene_pos)));
 
     if(selectedItem) {
         handler[selectedItem]();

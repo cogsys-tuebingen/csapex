@@ -9,7 +9,7 @@
 /// SYSTEM
 #include <QLabel>
 #include <QKeyEvent>
-#include <QtGui/QListView>
+#include <QListView>
 
 using namespace csapex;
 

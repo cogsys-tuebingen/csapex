@@ -17,6 +17,8 @@ class MovableGraphicsProxyWidget : public QGraphicsProxyWidget
 public:
     MovableGraphicsProxyWidget(NodeBox* box, DesignerView* view, WidgetController *widget_ctrl, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
 
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
@@ -35,7 +37,12 @@ Q_SIGNALS:
     void moved(double dx, double dy);
 
 private:
+    void signalMoved(const QPointF& delta);
+    void signalMoving(const QPointF& delta);
+
+private:
     QPointF before_;
+    QPointF last_signaled_;
     NodeBox* box_;
     DesignerView* view_;
     WidgetController* widget_ctrl_;

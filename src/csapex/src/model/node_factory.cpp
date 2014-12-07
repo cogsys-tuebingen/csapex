@@ -40,8 +40,7 @@ NodeFactory::~NodeFactory()
 
 void NodeFactory::loadPlugins()
 {
-    node_manager_->load();
-    rebuildPrototypes();
+    ensureLoaded();
     
     rebuildMap();
 }

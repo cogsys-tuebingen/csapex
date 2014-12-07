@@ -36,7 +36,6 @@ public:
 
     bool isGridEnabled() const;
     bool isSchematicsEnabled() const;
-    bool isGridLockEnabled() const;
     bool isGraphComponentsEnabled() const;
     bool isThreadsEnabled() const;
 
@@ -46,7 +45,6 @@ Q_SIGNALS:
     void selectionChanged();
     void gridEnabled(bool);
     void schematicsEnabled(bool);
-    void gridLockEnabled(bool);
     void graphComponentsEnabled(bool);
     void threadsEnabled(bool);
     void helpRequest(NodeBox*);
@@ -60,7 +58,6 @@ public Q_SLOTS:
 
     void enableGrid(bool);
     void enableSchematics(bool);
-    void lockToGrid(bool);
     void displayGraphComponents(bool);
     void displayThreads(bool);
 

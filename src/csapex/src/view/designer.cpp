@@ -42,7 +42,7 @@ void Designer::setup()
     ui->setupUi(this);
 
     ui->horizontalLayout->addWidget(designer_view_);
-    designer_view_->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+    designer_view_->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::DoubleBuffer)));
     designer_view_->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
 
@@ -61,10 +61,6 @@ void Designer::setup()
 
     if(settings_.knows("schematics")) {
         enableSchematics(settings_.get<bool>("schematics"));
-    }
-
-    if(settings_.knows("grid-lock")) {
-        lockToGrid(settings_.get<bool>("grid-lock"));
     }
 
     setFocusPolicy(Qt::NoFocus);
@@ -156,10 +152,6 @@ bool Designer::isSchematicsEnabled() const
     return settings_.get<bool>("schematics", false);
 }
 
-bool Designer::isGridLockEnabled() const
-{
-    return settings_.get<bool>("grid-lock", false);
-}
 bool Designer::isGraphComponentsEnabled() const
 {
     return settings_.get<bool>("display-graph-components", false);
@@ -200,17 +192,6 @@ void Designer::enableSchematics(bool schema)
 
     Q_EMIT schematicsEnabled(schema);
 
-}
-
-void Designer::lockToGrid(bool lock)
-{
-    if(!settings_.knows("grid-lock")) {
-        settings_.add(param::ParameterFactory::declareBool("grid-lock", lock));
-    }
-
-    settings_.set("grid-lock", lock);
-
-    Q_EMIT gridLockEnabled(lock);
 }
 
 void Designer::displayGraphComponents(bool display)
