@@ -539,6 +539,11 @@ void DesignerView::deleteBox(NodeBox* box)
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)
 {
+    if(scene_->getHighlightedConnectionId() != -1) {
+        scene_->showConnectionContextMenu();
+        return;
+    }
+
     QGraphicsView::contextMenuEvent(event);
 
     if(!event->isAccepted()) {

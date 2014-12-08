@@ -36,6 +36,7 @@ public:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
+    int getHighlightedConnectionId() const;
     bool isEmpty() const;
 
 public Q_SLOTS:

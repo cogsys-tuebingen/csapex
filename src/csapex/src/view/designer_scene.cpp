@@ -323,12 +323,12 @@ void DesignerScene::drawItems(QPainter *painter, int numItems,
 
 void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
-    if(e->button() == Qt::RightButton && highlight_connection_id_ >= 0 && items(e->scenePos(), Qt::ContainsItemShape, Qt::AscendingOrder).empty()) {
+    /*if(e->button() == Qt::RightButton && highlight_connection_id_ >= 0 && items(e->scenePos(), Qt::ContainsItemShape, Qt::AscendingOrder).empty()) {
         e->accept();
         showConnectionContextMenu();
         return;
 
-    } else if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
+    } else*/ if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
         dispatcher_->execute(graph_->deleteConnectionById(highlight_connection_id_));
         return;
     }
@@ -368,6 +368,11 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         highlight_connection_sub_id_ = data.second;
         update();
     }
+}
+
+int DesignerScene::getHighlightedConnectionId() const
+{
+    return highlight_connection_id_;
 }
 
 bool DesignerScene::isEmpty() const

@@ -30,7 +30,9 @@ bool ApexMessageProvider::hasNext()
 
 connection_types::Message::Ptr ApexMessageProvider::next(std::size_t slot)
 {
-    return msg_;
+    connection_types::Message::Ptr r = msg_;
+    msg_.reset();
+    return r;
 }
 
 std::string ApexMessageProvider::getLabel(std::size_t slot) const
