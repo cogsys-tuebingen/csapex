@@ -137,6 +137,8 @@ set(SRC_APP
     src/model/unique.cpp
     src/model/memento.cpp
 
+    src/msg/apex_message_provider.cpp
+
     src/core/csapex_core.cpp
     src/core/graphio.cpp
     src/core/designerio.cpp

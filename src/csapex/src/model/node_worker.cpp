@@ -659,10 +659,10 @@ void NodeWorker::removeSlot(Slot *s)
         slots_.erase(it);
     }
 
-    s->deleteLater();
-
     disconnectConnector(s);
     Q_EMIT connectorRemoved(s);
+
+    s->deleteLater();
 }
 
 void NodeWorker::removeTrigger(Trigger *t)
@@ -1102,8 +1102,7 @@ void NodeWorker::checkParameters()
                 it->second(it->first);
 
             } catch(const std::exception& e) {
-                it = changed_params.erase(it);
-                throw;
+                std::cerr << "parameter callback failed: " << e.what() << std::endl;
             }
 
             it = changed_params.erase(it);
