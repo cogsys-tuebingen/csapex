@@ -52,6 +52,12 @@ public:
         parameter_state_->getParameter(name)->set<T>(value);
     }
 
+    /***
+     *  PARAMETER CONSTRAINTS
+     */
+    void addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
+    void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
+
     std::vector<param::Parameter::Ptr> getParameters() const;
     std::size_t getParameterCount() const;
 
@@ -80,9 +86,6 @@ public:
     virtual GenericStatePtr getParameterStateClone() const;
     virtual void setParameterState(Memento::Ptr memento);
 
-protected:
-    void addParameterCallback(param::Parameter *param, boost::function<void(param::Parameter *)> cb);
-    void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
 
 private:
     void parameterChanged(param::Parameter* param);

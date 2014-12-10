@@ -96,7 +96,11 @@ void Trigger::removeAllConnectionsNotUndoable()
 void Trigger::trigger()
 {
     foreach(Slot* s, targets_) {
-        s->trigger();
+        try {
+            s->trigger();
+        } catch(const std::exception& e) {
+            std::cout << "triggering slot " << s->getLabel()  << " failed: " << e.what();
+        }
     }
     ++count_;
 }
@@ -124,6 +128,12 @@ bool Trigger::connect(Connectable *other_side)
     }
 
     apex_assert_hard(slot);
+
+    if(!slot->acknowledgeConnection(this)) {
+        std::cerr << "cannot connect, slot doesn't acknowledge" << std::endl;
+        return false;
+    }
+
     targets_.push_back(slot);
 
     QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);

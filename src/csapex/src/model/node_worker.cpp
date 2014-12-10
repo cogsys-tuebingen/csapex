@@ -12,6 +12,7 @@
 #include <csapex/utility/q_signal_relay.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
+#include <utils_param/trigger_parameter.h>
 
 /// SYSTEM
 #include <QThread>
@@ -204,6 +205,13 @@ void NodeWorker::makeParameterConnectable(param::Parameter* p)
         makeParameterConnectableImpl<std::pair<double, double> >(p);
     }
     // else: do nothing and ignore the parameter
+
+    param::TriggerParameter* t = dynamic_cast<param::TriggerParameter*>(p);
+    if(t) {
+        Trigger* trigger = addTrigger(t->name());
+        addSlot(t->name(), boost::bind(&param::TriggerParameter::trigger, t));
+        node_->addParameterCallback(t, boost::bind(&Trigger::trigger, trigger));
+    }
 }
 
 void NodeWorker::makeParametersConnectable()
