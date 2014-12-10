@@ -27,7 +27,12 @@ void ParameterContextMenu::doShowContextMenu(const QPoint& pt)
 
     DesignerView* view = QApplication::activeWindow()->findChild<DesignerView*>();
 
-    QPoint gpt = view->mapToGlobal(view->mapFromScene(w->mapToGlobal(pt)));
+    QWidget* real_parent = w;
+    while(real_parent->parentWidget()) {
+        real_parent = real_parent->parentWidget();
+    }
+
+    QPoint gpt = view->mapToGlobal(view->mapFromScene(real_parent->pos() + w->mapToGlobal(pt)));
 
     QMenu menu;
     ContextMenuHandler::addHeader(menu, std::string("Parameter: ") + param_->name());
