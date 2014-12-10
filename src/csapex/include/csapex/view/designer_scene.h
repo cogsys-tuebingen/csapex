@@ -77,12 +77,6 @@ public Q_SLOTS:
     }
 
 private:
-    void drawConnection(QPainter *painter, const Connection &connection);
-    void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
-
-    void drawPort(QPainter *painter, NodeBox *box, Port* p);
-
-private:
     struct TempConnection {
         TempConnection(bool is_connected)
             : is_connected(is_connected)
@@ -92,11 +86,20 @@ private:
 
         union {
             Connectable* from_p;
-            Output* from_c;
+            Connectable* from_c;
         };
 
         QPointF to_p;
-        Input* to_c;
+        Connectable* to_c;
+    };
+
+    enum Position {
+        LEFT = 0,
+        RIGHT = 1,
+        TOP = 2,
+        BOTTOM = 3,
+
+        UNDEFINED = 99
     };
 
     struct CurrentConnectionState {
@@ -109,12 +112,22 @@ private:
         bool minimized_to;
         bool minimized;
 
-        bool start_points_left;
-        bool end_points_left;
+        Position start_pos;
+        Position end_pos;
 
         double r;
     };
 
+private:
+    void drawConnection(QPainter *painter, const Connection &connection);
+    void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
+
+    void drawPort(QPainter *painter, NodeBox *box, Port* p);
+
+
+    QPointF offset(const QPointF& vector, Position position, double offset);
+
+private:
     QColor output_color_;
     QColor input_color_;
 
