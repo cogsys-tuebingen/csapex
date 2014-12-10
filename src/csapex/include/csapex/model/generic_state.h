@@ -38,6 +38,7 @@ public:
     param::Parameter& operator [] (const std::string& name) const;
     param::ParameterPtr getParameter(const std::string& name) const;
     std::vector<param::ParameterPtr> getParameters() const;
+    std::vector<param::ParameterPtr> getTemporaryParameters() const;
 
     std::size_t getParameterCount() const;
 

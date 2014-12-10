@@ -24,9 +24,28 @@ Parameterizable::~Parameterizable()
 
 void Parameterizable::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
 {
-    connections_.push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
+    connections_[param].push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
     if(param->hasState()) {
         parameterChanged(param, cb);
+    }
+}
+
+void Parameterizable::removeParameterCallbacks(param::Parameter *param)
+{
+    boost::lock_guard<boost::mutex> lock(*changed_params_mutex_);
+
+    typedef std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > PAIR;
+    for(std::vector<PAIR>::iterator it = changed_params_.begin(); it != changed_params_.end();) {
+        const PAIR& p = *it;
+        if(p.first == param) {
+            it = changed_params_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    foreach(boost::signals2::connection c, connections_[param]) {
+        c.disconnect();
     }
 }
 
@@ -118,8 +137,8 @@ void Parameterizable::addParameter(const param::Parameter::Ptr &param)
 {
     parameter_state_->addParameter(param);
 
-    connections_.push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1)));
-    connections_.push_back(param->parameter_enabled.connect(boost::bind(&Parameterizable::parameterEnabled, this, _1, _2)));
+    connections_[param.get()].push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1)));
+    connections_[param.get()].push_back(param->parameter_enabled.connect(boost::bind(&Parameterizable::parameterEnabled, this, _1, _2)));
 }
 
 void Parameterizable::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
@@ -179,6 +198,10 @@ void Parameterizable::setParameterSetSilence(bool silent)
 void Parameterizable::removeTemporaryParameters()
 {
     // TODO: handle callbacks!
+    foreach(param::Parameter::Ptr param, parameter_state_->getTemporaryParameters()) {
+        removeParameterCallbacks(param.get());
+    }
+
     parameter_state_->removeTemporaryParameters();
 }
 

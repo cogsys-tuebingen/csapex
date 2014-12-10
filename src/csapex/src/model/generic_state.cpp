@@ -64,7 +64,11 @@ void GenericState::addParameter(param::Parameter::Ptr param)
     param::Parameter::Ptr old_value;
     if(params.find(param->name()) != params.end()) {
         // already here, keep value!
-        param->setValueFrom(*params[param->name()]);
+        try {
+            param->setValueFrom(*params[param->name()]);
+        } catch(const std::exception& e) {
+            std::cerr << "cannot use serialized value for " << param->name() << ": " << e.what() << std::endl;
+        }
     }
     apex_assert_hard(param->name() != "noname");
     apex_assert_hard(std::find(order.begin(), order.end(), param->name()) == order.end());
@@ -167,6 +171,17 @@ std::vector<param::Parameter::Ptr> GenericState::getParameters() const
     }
     foreach(const std::string& p, persistent) {
         result.push_back(params.at(p));
+    }
+
+    return result;
+}
+
+std::vector<param::Parameter::Ptr> GenericState::getTemporaryParameters() const
+{
+    std::vector<param::Parameter::Ptr> result;
+    typedef std::pair<const std::string&,bool> PAIR;
+    foreach(const PAIR& pair, temporary) {
+        result.push_back(params.at(pair.first));
     }
 
     return result;

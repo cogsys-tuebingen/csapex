@@ -58,6 +58,8 @@ public:
     void addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
     void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
 
+    void removeParameterCallbacks(param::Parameter* param);
+
     std::vector<param::Parameter::Ptr> getParameters() const;
     std::size_t getParameterCount() const;
 
@@ -93,7 +95,7 @@ private:
     void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
-    std::vector<boost::signals2::connection> connections_;
+    std::map<param::Parameter*, std::vector<boost::signals2::connection> > connections_;
     std::map<param::Parameter*, boost::function<bool()> > conditions_;
 
     boost::mutex* changed_params_mutex_;
