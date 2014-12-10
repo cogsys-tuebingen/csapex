@@ -16,8 +16,6 @@ struct MoveConnection : public Meta
     MoveConnection(Connectable* a, Connectable* b);
 
 private:
-    bool output;
-
     UUID from_uuid;
     UUID to_uuid;
 };

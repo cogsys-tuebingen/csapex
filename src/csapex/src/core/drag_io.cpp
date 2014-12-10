@@ -8,6 +8,8 @@
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/signal/slot.h>
 #include <csapex/model/node.h>
 #include <csapex/view/box.h>
 #include <csapex/view/widget_controller.h>
@@ -120,12 +122,28 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
 
         if(c->isOutput()) {
             Output* out = dynamic_cast<Output*> (c);
-            foreach(Input* input, out->getTargets()) {
-                scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
+            if(out) {
+                foreach(Input* input, out->getTargets()) {
+                    scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
+                }
+            } else {
+                Trigger* trigger = dynamic_cast<Trigger*> (c);
+                if(trigger) {
+                    foreach(Slot* slot, trigger->getTargets()) {
+                        scene->addTemporaryConnection(slot, src->mapToScene(e->pos()));
+                    }
+                }
             }
         } else {
             Input* in = dynamic_cast<Input*> (c);
-            scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
+            if(in) {
+                scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
+            } else {
+                Slot* slot = dynamic_cast<Slot*> (c);
+                if(slot) {
+                    scene->addTemporaryConnection(slot->getSource(), src->mapToScene(e->pos()));
+                }
+            }
         }
         scene->update();
 

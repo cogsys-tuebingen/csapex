@@ -196,17 +196,17 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     if(!temp_.empty()) {
         foreach(const TempConnection& temp, temp_) {
             if(temp.is_connected) {
-                drawConnection(painter, Connection(temp.from_c, temp.to_c, -1));
+                drawConnection(painter, Connection(temp.from, temp.to_c, -1));
 
             } else {
                 ccs = CurrentConnectionState();
-                Port* fromp = widget_ctrl_->getPort(temp.from_p);
+                Port* fromp = widget_ctrl_->getPort(temp.from);
 
                 ccs.start_pos = UNDEFINED;
                 ccs.end_pos = UNDEFINED;
 
 
-                if(temp.from_p->isInput()) {
+                if(temp.from->isInput()) {
                     drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
                 } else {
                     drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
@@ -469,7 +469,7 @@ void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end
     apex_assert_hard(from);
 
     TempConnection temp(false);
-    temp.from_p = from;
+    temp.from = from;
     temp.to_p = end;
 
     temp_.push_back(temp);
@@ -505,7 +505,7 @@ void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
 
 
     TempConnection temp(true);
-    temp.from_c = output;
+    temp.from = output;
     temp.to_c = input;
 
     temp_.push_back(temp);

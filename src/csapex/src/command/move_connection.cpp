@@ -5,6 +5,8 @@
 #include <csapex/command/command.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/signal/slot.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/add_connection.h>
@@ -21,26 +23,45 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     apex_assert_hard(from);
     apex_assert_hard(to);
     apex_assert_hard((from->isOutput() && to->isOutput()) ||
-           (from->isInput() && to->isInput()));
+                     (from->isInput() && to->isInput()));
 
-    output = from->isOutput();
+    bool is_output = from->isOutput();
 
     nested.clear();
     locked = false;
 
-    if(output) {
+    if(is_output) {
         Output* out = dynamic_cast<Output*>(from);
-
-        foreach(Input* input, out->getTargets()) {
-            add(Command::Ptr(new DeleteConnection(from, input)));
-            add(Command::Ptr(new AddConnection(to_uuid, input->getUUID())));
+        if(out) {
+            foreach(Input* input, out->getTargets()) {
+                add(Command::Ptr(new DeleteConnection(from, input)));
+                add(Command::Ptr(new AddConnection(to_uuid, input->getUUID())));
+            }
+        } else {
+            Trigger* trigger = dynamic_cast<Trigger*>(from);
+            if(trigger) {
+                foreach(Slot* slot, trigger->getTargets()) {
+                    add(Command::Ptr(new DeleteConnection(from, slot)));
+                    add(Command::Ptr(new AddConnection(to_uuid, slot->getUUID())));
+                }
+            }
         }
 
     } else {
         Input* in = dynamic_cast<Input*>(from);
 
-        Connectable* target = in->getSource();
-        add(Command::Ptr(new DeleteConnection(target, from)));
-        add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
+        if(in) {
+            Connectable* target = in->getSource();
+            add(Command::Ptr(new DeleteConnection(target, from)));
+            add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
+        } else {
+            Slot* in = dynamic_cast<Slot*>(from);
+
+            if(in) {
+                Connectable* target = in->getSource();
+                add(Command::Ptr(new DeleteConnection(target, from)));
+                add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
+            }
+        }
     }
 }

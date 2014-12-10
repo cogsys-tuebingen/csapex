@@ -84,10 +84,7 @@ private:
 
         bool is_connected;
 
-        union {
-            Connectable* from_p;
-            Connectable* from_c;
-        };
+        Connectable* from;
 
         QPointF to_p;
         Connectable* to_c;
