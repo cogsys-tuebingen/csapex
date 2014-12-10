@@ -11,6 +11,7 @@
 #include <boost/signals2.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 /// FORWARD DECLARATIONS
 namespace YAML {
@@ -26,7 +27,7 @@ public:
 
     typedef boost::shared_ptr<Parameter> Ptr;
 
-    typedef boost::shared_ptr<boost::lock_guard<boost::mutex> > Lock;
+    typedef boost::shared_ptr<boost::recursive_mutex::scoped_lock> Lock;
 
 public:
     boost::signals2::signal<void(Parameter*)> parameter_changed;
@@ -145,7 +146,7 @@ protected:
     bool enabled_;
     bool interactive_;
 
-    mutable boost::mutex mutex_;
+    mutable boost::recursive_mutex mutex_;
 };
 
 }

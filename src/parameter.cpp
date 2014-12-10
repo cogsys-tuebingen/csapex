@@ -61,7 +61,7 @@ bool Parameter::hasState() const
 
 Parameter::Lock Parameter::lock() const
 {
-    return Lock(new boost::lock_guard<boost::mutex>(mutex_));
+    return Lock(new boost::recursive_mutex::scoped_lock(mutex_));
 }
 
 void Parameter::triggerChange()
