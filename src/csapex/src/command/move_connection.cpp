@@ -58,9 +58,10 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
             Slot* in = dynamic_cast<Slot*>(from);
 
             if(in) {
-                Connectable* target = in->getSource();
-                add(Command::Ptr(new DeleteConnection(target, from)));
-                add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
+                foreach(Trigger* target, in->getSources()) {
+                    add(Command::Ptr(new DeleteConnection(target, from)));
+                    add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
+                }
             }
         }
     }

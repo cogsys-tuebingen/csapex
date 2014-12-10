@@ -44,7 +44,7 @@ public:
     virtual void connectionMovePreview(Connectable* other_side);
     virtual void validateConnections();
 
-    Connectable* getSource() const;
+    std::vector<Trigger*> getSources() const;
 
     virtual CommandPtr removeAllConnectionsCmd();
 
@@ -68,7 +68,7 @@ private Q_SLOTS:
     void handleTrigger();
 
 protected:
-    Connectable* target;
+    std::vector<Trigger*> sources_;
 
     QMutex trigger_exec_mutex_;
     QWaitCondition exec_finished_;

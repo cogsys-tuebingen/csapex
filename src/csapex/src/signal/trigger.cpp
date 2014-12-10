@@ -143,10 +143,25 @@ bool Trigger::connect(Connectable *other_side)
     return true;
 }
 
+bool Trigger::canConnectTo(Connectable* other_side, bool move) const
+{
+    if(!Connectable::canConnectTo(other_side, move)) {
+        return false;
+    } else {
+        foreach (Slot* target, targets_) {
+            if(target == other_side) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
 bool Trigger::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    foreach(Slot* Slot, targets_) {
-        if(!Slot->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+    foreach(Slot* slot, targets_) {
+        if(!slot->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
@@ -160,8 +175,8 @@ bool Trigger::isConnected() const
 
 void Trigger::connectionMovePreview(Connectable *other_side)
 {
-    foreach(Slot* Slot, targets_) {
-        Q_EMIT(connectionInProgress(Slot, other_side));
+    foreach(Slot* slot, targets_) {
+        Q_EMIT(connectionInProgress(slot, other_side));
     }
 }
 

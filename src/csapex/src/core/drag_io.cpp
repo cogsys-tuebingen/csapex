@@ -141,7 +141,9 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
             } else {
                 Slot* slot = dynamic_cast<Slot*> (c);
                 if(slot) {
-                    scene->addTemporaryConnection(slot->getSource(), src->mapToScene(e->pos()));
+                    foreach(Trigger* trigger, slot->getSources()) {
+                        scene->addTemporaryConnection(trigger, src->mapToScene(e->pos()));
+                    }
                 }
             }
         }

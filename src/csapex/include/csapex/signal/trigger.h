@@ -35,6 +35,8 @@ public:
 
     virtual void disable();
 
+    virtual bool canConnectTo(Connectable* other_side, bool move) const;
+
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const;
     virtual bool isConnected() const;
 

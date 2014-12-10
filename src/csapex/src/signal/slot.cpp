@@ -7,6 +7,7 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
+#include <csapex/command/meta.h>
 
 /// SYSTEM
 #include <iostream>
@@ -15,14 +16,14 @@
 using namespace csapex;
 
 Slot::Slot(boost::function<void()> callback, Settings& settings, const UUID &uuid)
-    : Connectable(settings, uuid), target(NULL), callback_(callback)
+    : Connectable(settings, uuid), callback_(callback)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 //    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
 Slot::Slot(boost::function<void()> callback, Settings &settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "slot"), target(NULL), callback_(callback)
+    : Connectable(settings, parent, sub_id, "slot"), callback_(callback)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 //    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
@@ -49,7 +50,10 @@ bool Slot::tryConnect(Connectable* other_side)
 
 bool Slot::acknowledgeConnection(Connectable* other_side)
 {
-    target = dynamic_cast<Trigger*>(other_side);
+    Trigger* target = dynamic_cast<Trigger*>(other_side);
+
+    sources_.push_back(target);
+
     connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
     connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
     return true;
@@ -57,9 +61,9 @@ bool Slot::acknowledgeConnection(Connectable* other_side)
 
 void Slot::removeConnection(Connectable* other_side)
 {
-    if(target != NULL) {
-        apex_assert_hard(other_side == target);
-        target = NULL;
+    std::vector<Trigger*>::iterator pos = std::find(sources_.begin(), sources_.end(), other_side);
+    if(pos != sources_.end()) {
+        sources_.erase(pos);
 
         Q_EMIT connectionRemoved(this);
     }
@@ -67,7 +71,10 @@ void Slot::removeConnection(Connectable* other_side)
 
 Command::Ptr Slot::removeAllConnectionsCmd()
 {
-    Command::Ptr cmd(new command::DeleteConnection(target, this));
+    command::Meta::Ptr cmd(new command::Meta("Delete sources"));
+    foreach(Trigger* source, sources_) {
+        cmd->add(Command::Ptr(new command::DeleteConnection(source, this)));
+    }
     return cmd;
 }
 
@@ -94,12 +101,13 @@ void Slot::disable()
 
 void Slot::removeAllConnectionsNotUndoable()
 {
-    if(target != NULL) {
+    for(std::vector<Trigger*>::iterator i = sources_.begin(); i != sources_.end();) {
+        Connectable* target = *i;
         target->removeConnection(this);
-        target = NULL;
-        setError(false);
-        Q_EMIT disconnected(this);
+        i = sources_.erase(i);
     }
+
+    Q_EMIT disconnected(this);
 }
 
 
@@ -111,38 +119,34 @@ bool Slot::canConnectTo(Connectable* other_side, bool /*move*/) const
 
 bool Slot::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    return target->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
+    foreach(Trigger* trigger, sources_) {
+        if(!trigger->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Slot::isConnected() const
 {
-    return target != NULL;
+    return !sources_.empty();
 }
 
 void Slot::connectionMovePreview(Connectable *other_side)
 {
-    Q_EMIT(connectionInProgress(getSource(), other_side));
+    foreach(Trigger* trigger, sources_) {
+        Q_EMIT(connectionInProgress(trigger, other_side));
+    }
 }
 
 
 void Slot::validateConnections()
 {
-    bool e = false;
-    if(isConnected()) {
-        ConnectionType::ConstPtr target_type = target->getType();
-        if(!target_type) {
-            e = true;
-        } else if(!target_type->canConnectTo(getType().get())) {
-            e = true;
-        }
-    }
-
-    setError(e);
 }
 
-Connectable *Slot::getSource() const
+std::vector<Trigger*> Slot::getSources() const
 {
-    return target;
+    return sources_;
 }
 
 void Slot::trigger()
@@ -170,7 +174,7 @@ void Slot::notifyMessageProcessed()
 {
     Connectable::notifyMessageProcessed();
 
-    if(target) {
-        target->notifyMessageProcessed();
+    foreach(Trigger* trigger, sources_) {
+        trigger->notifyMessageProcessed();
     }
 }
