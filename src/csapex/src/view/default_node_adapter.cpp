@@ -937,6 +937,8 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
     } else if(value_p->is<double>()) {
         QDoubleSpinBox* box = new QDoubleSpinBox;
         box->setDecimals(10);
+        box->setMaximum(1e12);
+        box->setMinimum(-1e12);
         box->setValue(value_p->as<double>());
 
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
@@ -950,6 +952,8 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
 
     }  else if(value_p->is<int>()) {
         QSpinBox* box = new QSpinBox;
+        box->setMaximum(std::numeric_limits<int>::max());
+        box->setMinimum(std::numeric_limits<int>::min());
         box->setValue(value_p->as<int>());
 
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
