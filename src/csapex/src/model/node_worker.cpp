@@ -510,6 +510,15 @@ bool NodeWorker::areAllInputsAvailable()
     return true;
 }
 
+void NodeWorker::finishTimer(Timer::Ptr t)
+{
+    t->finish();
+    if(++timer_history_pos_ >= (int) timer_history_.size()) {
+        timer_history_pos_ = 0;
+    }
+    timer_history_[timer_history_pos_] = t;
+}
+
 void NodeWorker::processInputs(bool all_inputs_are_present)
 {
     assertNotInGuiThread();
@@ -529,19 +538,14 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
             throw;
         }
     }
-    t->finish();
+    finishTimer(t);
 
     if(isSink()) {
         messages_waiting_to_be_sent = false;
     } else {
         messages_waiting_to_be_sent = true;
         Q_EMIT messagesWaitingToBeSent(true);
-    }
-
-    if(++timer_history_pos_ >= (int) timer_history_.size()) {
-        timer_history_pos_ = 0;
-    }
-    timer_history_[timer_history_pos_] = t;
+    }    
 }
 
 
@@ -1081,7 +1085,16 @@ void NodeWorker::tick()
                 out->clearMessage();
             }
 
+
+            Timer::Ptr t(new Timer(node_->getUUID()));
+            node_->useTimer(t.get());
+
             node_->tick();
+
+            finishTimer(t);
+
+            Q_EMIT ticked();
+
             ++ticks_;
             foreach(Output* out, outputs_) {
                 messages_waiting_to_be_sent |= out->hasMessage();

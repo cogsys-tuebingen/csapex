@@ -135,6 +135,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void messageProcessed();
+    void ticked();
 
     void enabled(bool);
     void messagesWaitingToBeSent(bool);
@@ -180,6 +181,8 @@ private:
     void processInputs(bool all_inputs_are_present);
 
     void assertNotInGuiThread();
+
+    void finishTimer(TimerPtr t);
 
 private:
     Settings& settings_;
