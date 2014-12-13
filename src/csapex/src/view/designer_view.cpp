@@ -349,6 +349,7 @@ void DesignerView::profile(NodeBox *box)
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
     QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
     QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(repaint()));
+    QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(repaint()));
 }
 
 void DesignerView::stopProfiling(NodeBox *box)
