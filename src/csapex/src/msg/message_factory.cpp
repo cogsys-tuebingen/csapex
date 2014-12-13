@@ -60,9 +60,12 @@ YAML::Node MessageFactory::serializeMessage(const ConnectionType &msg)
 
         std::string type = msg.rawName();
 
+        Converter& converter = i.type_to_converter.at(type);
+        Converter::Encoder& encoder = converter.encoder;
+
         YAML::Node node;
         node["type"] = type;
-        node["data"] = i.type_to_converter.at(type).encoder(msg);
+        node["data"] = encoder(msg);
 
         return node;
 
@@ -74,15 +77,8 @@ YAML::Node MessageFactory::serializeMessage(const ConnectionType &msg)
 
 ConnectionType::Ptr MessageFactory::readMessage(const std::string &path)
 {
-    std::ifstream f(path.c_str());
-
-    YAML::Parser parser(f);
-    YAML::NodeBuilder builder;
-    if (parser.HandleNextDocument(builder)) {
-        return readYaml(builder.Root());
-    }
-
-    throw DeserializationError("path '" + path + "' cannot be read.");
+    YAML::Node node = YAML::LoadFile(path);
+    return readYaml(node);
 }
 
 void MessageFactory::writeMessage(const std::string &path, const ConnectionType& msg)
@@ -90,6 +86,7 @@ void MessageFactory::writeMessage(const std::string &path, const ConnectionType&
     std::ofstream out(path.c_str());
 
     YAML::Emitter yaml;
+    yaml.SetSeqFormat(YAML::Flow);
     yaml << serializeMessage(msg);
     out << yaml.c_str();
 }
@@ -110,10 +107,8 @@ void MessageFactory::registerMessage(std::string type, Constructor constructor, 
     MessageFactory& i = instance();
 
     std::map<std::string, Constructor>::const_iterator it = i.type_to_constructor.find(type);
+
     apex_assert_hard(it == i.type_to_constructor.end());
-    //    if(name != type) {
-    //        throw std::logic_error(name + " cannot be registered as a connection type, its name is different from the specified type: " + type);
-    //    }
 
     i.type_to_constructor.insert(std::make_pair(type, constructor));
     i.type_to_converter.insert(std::make_pair(type, converter));
