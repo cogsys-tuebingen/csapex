@@ -100,10 +100,11 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
         QGraphicsProxyWidget::mouseReleaseEvent(event);
         relay_ = false;        
 
-        QPointF after = pos();
-        if(before_ != after) {
-            signalMoved(after - before_);
-        }
+    }
+
+    QPointF after = pos();
+    if(before_ != after) {
+        signalMoved(after - before_);
     }
 }
 
