@@ -1069,6 +1069,10 @@ void NodeWorker::tick()
         return;
     }
 
+
+    Timer::Ptr t(new Timer(node_->getUUID()));
+    node_->useTimer(t.get());
+
     node_->checkConditions(false);
     checkParameters();
 
@@ -1085,13 +1089,7 @@ void NodeWorker::tick()
                 out->clearMessage();
             }
 
-
-            Timer::Ptr t(new Timer(node_->getUUID()));
-            node_->useTimer(t.get());
-
             node_->tick();
-
-            finishTimer(t);
 
             Q_EMIT ticked();
 
@@ -1105,6 +1103,8 @@ void NodeWorker::tick()
             trySendMessages();
         }
     }
+
+    finishTimer(t);
 
     if(tick_immediate_) {
         Q_EMIT tickRequested();
