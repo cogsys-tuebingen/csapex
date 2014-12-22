@@ -103,6 +103,7 @@ set(SRC_PLUGIN
 
     src/msg/message.cpp
     src/msg/message_factory.cpp
+    src/msg/message_renderer.cpp
     src/msg/input.cpp
     src/msg/output.cpp
 
@@ -111,6 +112,7 @@ set(SRC_PLUGIN
     src/signal/slot.cpp
 
     src/manager/message_provider_manager.cpp
+    src/manager/message_renderer_manager.cpp
 
     src/view/node_adapter.cpp
     src/view/node_adapter_builder.cpp

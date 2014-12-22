@@ -52,7 +52,9 @@ FWD(ConnectionType);
 FWD(Template);
 
 FWD(Memento);
+
 FWD(MessageProvider);
+FWD(MessageRenderer);
 
 FWD(Node);
 FWD(NodeState);

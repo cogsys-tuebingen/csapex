@@ -30,6 +30,7 @@ public:
 
     // TODO: remove singleton -> put this in constructor
     void setPluginLocator(PluginLocatorPtr locator);
+    void shutdown();
 
 private:
     MessageProviderManager();

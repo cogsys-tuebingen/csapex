@@ -27,7 +27,6 @@ CompleteLineEdit::CompleteLineEdit(QWidget *parent)
 
     connect(list_view, SIGNAL(clicked(const QModelIndex&)), this, SLOT(completeText(const QModelIndex&)));
     connect(this, SIGNAL(textChanged(QString)), delegate, SLOT(setKeyWords(const QString&)));
-    connect(this, SIGNAL(lostFocus()), list_view, SLOT(hide()));
 }
 
 

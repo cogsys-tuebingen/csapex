@@ -18,6 +18,7 @@
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/core/bootstrap_plugin.h>
 #include <csapex/manager/message_provider_manager.h>
+#include <csapex/manager/message_renderer_manager.h>
 
 /// SYSTEM
 #include <fstream>
@@ -51,6 +52,9 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
 CsApexCore::~CsApexCore()
 {
     StreamInterceptor::instance().stop();
+
+    MessageProviderManager::instance().shutdown();
+    MessageRendererManager::instance().shutdown();
 
     for(std::vector<CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         (*it)->shutdown();
@@ -152,6 +156,7 @@ void CsApexCore::boot()
     }
 
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
+    MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 }
 
 void CsApexCore::startup()
