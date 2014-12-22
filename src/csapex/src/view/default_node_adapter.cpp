@@ -787,7 +787,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter input, if available
         Input* param_in = node_->getParameterInput(current_name_);
         if(param_in) {
-            Port* port = new Port(cmd_dispatcher, param_in, false);
+            Port* port = new Port(cmd_dispatcher, widget_ctrl_, param_in, false);
             port->setVisible(p->isInteractive());
             p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
 
@@ -805,7 +805,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter output, if available
         Output* param_out = node_->getParameterOutput(current_name_);
         if(param_out) {
-            Port* port = new Port(cmd_dispatcher, param_out, false);
+            Port* port = new Port(cmd_dispatcher, widget_ctrl_, param_out, false);
             port->setVisible(p->isInteractive());
             p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
 

@@ -17,8 +17,10 @@ class Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(CommandDispatcher* dispatcher, Connectable* adaptee, bool flipped);
+    Port(CommandDispatcher* dispatcher, WidgetController *widget_controller, Connectable* adaptee, bool flipped);
     virtual ~Port();
+
+    bool event(QEvent *e);
 
     QString cssClass() {
         return QString("Port");
@@ -32,6 +34,9 @@ public:
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent * e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
+
+    virtual void enterEvent(QEvent* e);
+    virtual void leaveEvent(QEvent* e);
 
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
@@ -58,12 +63,15 @@ public Q_SLOTS:
     void setError(bool e, const std::string& msg);
     void setError(bool e, const std::string& msg, int level);
 
+    void updateTooltip();
+
 protected:
     void createToolTip();
     void paintEvent(QPaintEvent *);
 
 protected:
     CommandDispatcher* dispatcher_;
+    WidgetController *widget_controller_;
     Connectable * adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;

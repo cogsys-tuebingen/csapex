@@ -59,5 +59,9 @@ MessageRendererPtr MessageRendererManager::createMessageRenderer(const Connectio
         throw std::runtime_error("no message renderers registered!");
     }
 
-    return renderers.at(&typeid(*message));
+    try {
+        return renderers.at(&typeid(*message));
+    } catch(const std::exception& e) {
+        throw std::runtime_error(std::string("cannot create message renderer for ") + type2name(typeid(*message)));
+    }
 }

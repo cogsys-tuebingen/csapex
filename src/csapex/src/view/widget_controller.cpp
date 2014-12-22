@@ -25,6 +25,7 @@
 #include <csapex/view/designer_view.h>
 #include <csapex/core/settings.h>
 #include <utils_param/parameter_factory.h>
+#include <csapex/view/designer_scene.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -36,11 +37,16 @@
 using namespace csapex;
 
 WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
-    : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(NULL)
+    : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(NULL), tooltip_view_(NULL)
 {
     if(settings_.knows("grid-lock")) {
        enableGridLock(settings_.get<bool>("grid-lock"));
     }
+}
+
+WidgetController::~WidgetController()
+{
+    delete tooltip_view_;
 }
 
 NodeBox* WidgetController::getBox(const UUID &node_id)
@@ -93,6 +99,28 @@ NodeFactory* WidgetController::getNodeFactory()
     return node_factory_;
 }
 
+void WidgetController::hideTooltipView()
+{
+    if(tooltip_view_) {
+        tooltip_view_->hide();
+        tooltip_view_->deleteLater();
+        tooltip_view_ = NULL;
+    }
+}
+
+QGraphicsView* WidgetController::getTooltipView(const std::string& title)
+{
+    if(!tooltip_view_) {
+        tooltip_view_ = new QGraphicsView;
+        designer_->getDesignerView()->designerScene()->addWidget(tooltip_view_);
+        tooltip_view_->setWindowTitle(QString::fromStdString(title));
+        tooltip_view_->setScene(new QGraphicsScene);
+        tooltip_view_->setHidden(true);
+    }
+
+    return tooltip_view_;
+}
+
 void WidgetController::setDesigner(Designer *designer)
 {
     designer_ = designer;
@@ -141,6 +169,11 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     drag->setPixmap(object->grab());
     drag->setHotSpot(-offset);
     drag->exec();
+}
+
+DesignerView* WidgetController::getDesignerView()
+{
+    return designer_->getDesignerView();
 }
 
 DesignerScene* WidgetController::getDesignerScene()
@@ -255,7 +288,7 @@ void WidgetController::connectorSignalRemoved(Connectable *connector)
 void WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
 {
     if(designer_) {
-        Port* port = new Port(dispatcher_, connector, box->isFlipped());
+        Port* port = new Port(dispatcher_, this, connector, box->isFlipped());
 
         QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
         QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));

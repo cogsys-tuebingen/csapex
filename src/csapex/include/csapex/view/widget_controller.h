@@ -13,6 +13,7 @@
 #include <boost/function.hpp>
 #include <boost/unordered_map.hpp>
 #include <QLayout>
+#include <QGraphicsView>
 
 class QTreeWidget;
 class QMenu;
@@ -30,9 +31,11 @@ public:
 
 public:
     WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);
+    ~WidgetController();
 
     void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
 
+    DesignerView* getDesignerView();
     DesignerScene* getDesignerScene();
 
     NodeBox* getBox(const UUID& node_id);
@@ -44,6 +47,9 @@ public:
 
     GraphPtr getGraph();
     NodeFactory* getNodeFactory();
+
+    void hideTooltipView();
+    QGraphicsView* getTooltipView(const std::string& title);
 
     void setDesigner(Designer* designer);
 
@@ -97,6 +103,8 @@ private:
     boost::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 
     QString style_sheet_;
+
+    QGraphicsView* tooltip_view_;
 };
 
 }

@@ -7,6 +7,10 @@
 #include <csapex/command/add_connection.h>
 #include <csapex/command/move_connection.h>
 #include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
+#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/view/widget_controller.h>
+#include <csapex/view/designer_view.h>
 
 /// SYSTEM
 #include <sstream>
@@ -15,11 +19,13 @@
 #include <QWidget>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QHelpEvent>
+#include <QEvent>
 
 using namespace csapex;
 
-Port::Port(CommandDispatcher *dispatcher, Connectable *adaptee, bool flipped)
-    : dispatcher_(dispatcher), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
+Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, Connectable *adaptee, bool flipped)
+    : dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
     if(adaptee_) {
         createToolTip();
@@ -51,6 +57,60 @@ Port::~Port()
     guard_ = 0x1;
 }
 
+bool Port::event(QEvent *e)
+{
+    if (e->type() == QEvent::ToolTip) {
+        createToolTip();
+
+        if(adaptee_->isOutput()) {
+            Output* output = dynamic_cast<Output*>(adaptee_);
+            if(output) {
+                QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
+                QPoint global_pos = helpEvent->globalPos();
+                DesignerView* dview = widget_controller_->getDesignerView();
+                QPointF pos = dview->mapToScene(dview->mapFromGlobal(global_pos));
+                pos.setY(pos.y() + 50);
+
+                QGraphicsView* view = widget_controller_->getTooltipView("Output");
+                view->move(pos.toPoint());
+
+                updateTooltip();
+                QObject::connect(output, SIGNAL(messageSent(Connectable*)), this, SLOT(updateTooltip()));
+            }
+        }
+    }
+
+    return QWidget::event(e);
+}
+
+void Port::updateTooltip()
+{
+    Output* output = dynamic_cast<Output*>(adaptee_);
+
+    if(output) {
+        QGraphicsView* view = widget_controller_->getTooltipView("Output");
+
+        ConnectionType::Ptr msg = output->getMessage();
+
+        if(msg) {
+            view->scene()->clear();
+
+            try {
+                MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
+                QSharedPointer<QImage> img = renderer->render(msg);
+
+                view->scene()->addPixmap(QPixmap::fromImage(*img));
+                view->setMaximumSize(256, 256);
+                view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
+                view->show();
+
+            } catch(const std::exception& e) {
+                view->hide();
+            }
+
+        }
+    }
+}
 
 bool Port::canOutput() const
 {
@@ -161,8 +221,6 @@ void Port::createToolTip()
 
 void Port::mouseMoveEvent(QMouseEvent* e)
 {
-    createToolTip();
-
     if(buttons_down_ == Qt::NoButton) {
         return;
     }
@@ -221,7 +279,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 {
     if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-         if(from == adaptee_) {
+        if(from == adaptee_) {
             return;
         }
 
@@ -269,6 +327,25 @@ void Port::dropEvent(QDropEvent* e)
             Command::Ptr cmd(new command::MoveConnection(from, adaptee_));
             dispatcher_->execute(cmd);
             e->setDropAction(Qt::MoveAction);
+        }
+    }
+}
+
+void Port::enterEvent(QEvent *e)
+{
+
+}
+
+void Port::leaveEvent(QEvent *e)
+{
+    //    QObject::disconnect(this, SLOT(updateTooltip()));
+
+    if(adaptee_->isOutput()) {
+        Output* output = dynamic_cast<Output*>(adaptee_);
+        if(output) {
+            QObject::disconnect(output, SIGNAL(messageSent(Connectable*)), this, SLOT(updateTooltip()));
+
+            widget_controller_->hideTooltipView();
         }
     }
 }
