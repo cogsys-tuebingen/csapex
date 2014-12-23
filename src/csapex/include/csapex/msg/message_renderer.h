@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/csapex_fwd.h>
+#include <utils_param/param_fwd.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -18,11 +19,16 @@ class MessageRenderer
 public:
     typedef boost::shared_ptr<MessageRenderer> Ptr;
 
-    virtual QSharedPointer<QImage> render(const ConnectionTypePtr& msg) = 0;
-    virtual const std::type_info* messageType() = 0;
-
 public:
     virtual ~MessageRenderer();
+
+    virtual QSharedPointer<QImage> render(const ConnectionTypePtr& msg) = 0;
+    virtual const std::type_info* messageType() const = 0;
+
+    virtual std::vector<param::ParameterPtr> getParameters() const
+    {
+        return std::vector<param::ParameterPtr>();
+    }
 };
 
 template <class Message>
@@ -39,7 +45,7 @@ public:
         }
     }
 
-    virtual const std::type_info* messageType()
+    virtual const std::type_info* messageType() const
     {
         return &typeid(Message);
     }
