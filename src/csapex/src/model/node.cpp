@@ -36,10 +36,8 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     worker_ = node_worker;
     modifier_ = new NodeModifier(node_worker),
     settings_ = settings;
-    node_state_.reset(new NodeState(node_worker));
 
     parameter_state_->setParentUUID(uuid);
-    node_state_->setLabel(uuid);
 
     std::string p = uuid.getFullName();
     adebug.setPrefix(p);
@@ -80,41 +78,7 @@ void Node::process()
 {
 }
 
-NodeState::Ptr Node::getNodeStateCopy() const
-{
-    apex_assert_hard(node_state_);
 
-    NodeState::Ptr memento(new NodeState(getNodeWorker()));
-    *memento = *node_state_;
-
-    memento->setParameterState(getParameterStateClone());
-
-    return memento;
-}
-
-NodeState::Ptr Node::getNodeState()
-{
-    apex_assert_hard(node_state_);
-
-    return node_state_;
-}
-
-void Node::setNodeState(NodeState::Ptr memento)
-{
-    boost::shared_ptr<NodeState> m = boost::dynamic_pointer_cast<NodeState> (memento);
-    apex_assert_hard(m.get());
-
-    *node_state_ = *m;
-
-    node_state_->setParent(getNodeWorker());
-    if(m->getParameterState()) {
-        setParameterState(m->getParameterState());
-    }
-
-    Q_EMIT worker_->nodeStateChanged();
-
-    stateChanged();
-}
 
 void Node::triggerModelChanged()
 {
@@ -144,7 +108,7 @@ void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
     aerr << msg << std::endl;
 
-    if(node_state_->isEnabled() && error && level == EL_ERROR) {
+    if(error && level == EL_ERROR) {
         worker_->setIOError(true);
     } else {
         worker_->setIOError(false);

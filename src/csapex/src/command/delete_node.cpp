@@ -52,7 +52,7 @@ bool DeleteNode::doExecute()
     locked = true;
 
     if(Meta::doExecute()) {
-        saved_state = node_worker->getNode()->getNodeStateCopy();
+        saved_state = node_worker->getNodeStateCopy();
 
         graph_->deleteNode(node_worker->getUUID());
         return true;
@@ -65,7 +65,7 @@ bool DeleteNode::doUndo()
 {
     NodeWorker::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type, uuid);
 
-    node->getNode()->setNodeState(saved_state);
+    node->setNodeState(saved_state);
 
     graph_->addNode(node);
 
@@ -76,7 +76,7 @@ bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
         NodeWorker* node_worker = graph_->findNodeWorker(uuid);
-        saved_state = node_worker->getNode()->getNodeStateCopy();
+        saved_state = node_worker->getNodeStateCopy();
 
         graph_->deleteNode(node_worker->getUUID());
         return true;

@@ -78,7 +78,7 @@ void NodeBox::construct()
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
     ui->enablebtn->setCheckable(true);
-    ui->enablebtn->setChecked(node_worker_->getNode()->getNodeState()->isEnabled());
+    ui->enablebtn->setChecked(node_worker_->getNodeState()->isEnabled());
 
     QSize size(16, 16);
     ui->icon->setPixmap(icon_.pixmap(size));
@@ -93,7 +93,7 @@ void NodeBox::construct()
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
-    setLabel(node_worker_->getNode()->getNodeState()->getLabel());
+    setLabel(node_worker_->getNodeState()->getLabel());
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
@@ -254,21 +254,21 @@ std::string NodeBox::errorMessage() const
 
 void NodeBox::setLabel(const std::string& label)
 {
-    apex_assert_hard(node_worker_->getNode()->getNodeState());
-    node_worker_->getNode()->getNodeState()->setLabel(label);
+    apex_assert_hard(node_worker_->getNodeState());
+    node_worker_->getNodeState()->setLabel(label);
     ui->label->setText(label.c_str());
     ui->label->setToolTip(label.c_str());
 }
 
 void NodeBox::setLabel(const QString &label)
 {
-    node_worker_->getNode()->getNodeState()->setLabel(label.toStdString());
+    node_worker_->getNodeState()->setLabel(label.toStdString());
     ui->label->setText(label);
 }
 
 std::string NodeBox::getLabel() const
 {
-    return node_worker_->getNode()->getNodeState()->getLabel();
+    return node_worker_->getNodeState()->getLabel();
 }
 
 void NodeBox::registerEvent(Connectable* c)
@@ -313,7 +313,7 @@ void NodeBox::init()
         setVisible(false);
     }
 
-    move(node_worker_->getNode()->getNodeState()->getPos());
+    move(node_worker_->getNodeState()->getPos());
 }
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
@@ -388,7 +388,7 @@ void NodeBox::moveEvent(QMoveEvent* e)
 
     QPoint delta = pos - e->oldPos();
 
-    node_worker_->getNode()->getNodeState()->setPos(pos);
+    node_worker_->getNodeState()->setPos(pos);
 
     Q_EMIT moved(this, delta.x(), delta.y());
 }
@@ -450,8 +450,8 @@ void NodeBox::killContent()
 
 void NodeBox::flipSides()
 {
-    bool flip = !node_worker_->getNode()->getNodeState()->isFlipped();
-    node_worker_->getNode()->getNodeState()->setFlipped(flip);
+    bool flip = !node_worker_->getNodeState()->isFlipped();
+    node_worker_->getNodeState()->setFlipped(flip);
     updateVisuals();
 
     Q_EMIT flipped(flip);
@@ -459,7 +459,7 @@ void NodeBox::flipSides()
 
 void NodeBox::updateVisuals()
 {
-    bool flip = node_worker_->getNode()->getNodeState()->isFlipped();
+    bool flip = node_worker_->getNodeState()->isFlipped();
 
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
@@ -482,12 +482,12 @@ void NodeBox::updateVisuals()
 
 bool NodeBox::isMinimizedSize() const
 {
-    return node_worker_->getNode()->getNodeState()->isMinimized();
+    return node_worker_->getNodeState()->isMinimized();
 }
 
 bool NodeBox::isFlipped() const
 {
-    return node_worker_->getNode()->getNodeState()->isFlipped();
+    return node_worker_->getNodeState()->isFlipped();
 }
 
 bool NodeBox::isProfiling() const
@@ -516,13 +516,13 @@ Graph::Ptr NodeBox::getSubGraph()
 
 void NodeBox::nodeStateChanged()
 {
-    minimizeBox(node_worker_->getNode()->getNodeState()->isMinimized());
+    minimizeBox(node_worker_->getNodeState()->isMinimized());
 
-    enableContent(node_worker_->getNode()->getNodeState()->isEnabled());
-    ui->enablebtn->setChecked(node_worker_->getNode()->getNodeState()->isEnabled());
+    enableContent(node_worker_->getNodeState()->isEnabled());
+    ui->enablebtn->setChecked(node_worker_->getNodeState()->isEnabled());
 
-    setLabel(node_worker_->getNode()->getNodeState()->getLabel());
+    setLabel(node_worker_->getNodeState()->getLabel());
     ui->label->setToolTip(node_worker_->getUUID().c_str());
 
-    move(node_worker_->getNode()->getNodeState()->getPos());
+    move(node_worker_->getNodeState()->getPos());
 }

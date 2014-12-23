@@ -117,7 +117,7 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if(clone_p_) {
         QPointF delta = clone_start_ - event->pos();
         if(hypot(delta.x(), delta.y()) > 10) {
-            NodeStatePtr state = box_->getNode()->getNodeStateCopy();
+            NodeStatePtr state = box_->getNodeWorker()->getNodeStateCopy();
             state->setLabel("");
             widget_ctrl_->startPlacingBox(view_, box_->getNodeWorker()->getType(), state);
         }

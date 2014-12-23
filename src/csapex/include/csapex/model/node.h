@@ -24,10 +24,6 @@ public:
                     NodeWorker *node_worker, Settings *settings);
     void doSetup();
 
-    NodeStatePtr getNodeState();
-    NodeStatePtr getNodeStateCopy() const;
-    void setNodeState(NodeStatePtr memento);
-
     NodeWorker* getNodeWorker() const;
 
 
@@ -60,11 +56,7 @@ protected:
     Settings* settings_;
 
 private:
-    std::string type_;
-
     NodeWorker* worker_;
-
-    NodeStatePtr node_state_;
 };
 
 }

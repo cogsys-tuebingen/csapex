@@ -25,7 +25,7 @@ static const int DEFAULT_HISTORY_LENGTH = 15;
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
     : Unique(uuid),
       settings_(settings),
-      node_type_(type), node_(node),
+      node_type_(type), node_(node), node_state_(new NodeState(this)),
       is_setup_(false),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
@@ -47,6 +47,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
 
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 
+    node_state_->setLabel(uuid);
     node_->initialize(type, uuid, this, &settings_);
 
     bool params_created_in_constructor = node_->getParameterCount() != 0;
@@ -111,23 +112,49 @@ NodeWorker::~NodeWorker()
 void NodeWorker::setNodeState(NodeStatePtr memento)
 {
     UUID old_uuid = getUUID();
-    std::string old_label = node_->getNodeState()->getLabel();
+    std::string old_label = node_state_->getLabel();
 
-    node_->setNodeState(memento);
+    *node_state_ = *memento;
+
+    node_state_->setParent(this);
+    if(memento->getParameterState()) {
+        node_->setParameterState(memento->getParameterState());
+    }
+
+    Q_EMIT nodeStateChanged();
+
+    node_->stateChanged();
+
 
     if(getUUID().empty()) {
         setUUID(old_uuid);
     }
 
-    NodeStatePtr state = node_->getNodeState();
-
-    if(state->getLabel().empty()) {
+    if(node_state_->getLabel().empty()) {
         if(old_label.empty()) {
-            state->setLabel(getUUID().getShortName());
+            node_state_->setLabel(getUUID().getShortName());
         } else {
-            state->setLabel(old_label);
+            node_state_->setLabel(old_label);
         }
     }
+}
+NodeState::Ptr NodeWorker::getNodeStateCopy() const
+{
+    apex_assert_hard(node_state_);
+
+    NodeState::Ptr memento(new NodeState(this));
+    *memento = *node_state_;
+
+    memento->setParameterState(node_->getParameterStateClone());
+
+    return memento;
+}
+
+NodeState::Ptr NodeWorker::getNodeState()
+{
+    apex_assert_hard(node_state_);
+
+    return node_state_;
 }
 
 Node* NodeWorker::getNode() const
@@ -142,12 +169,12 @@ std::string NodeWorker::getType() const
 
 bool NodeWorker::isEnabled() const
 {
-    return node_->getNodeState()->isEnabled();
+    return node_state_->isEnabled();
 }
 
 void NodeWorker::setEnabled(bool e)
 {
-    node_->getNodeState()->setEnabled(e);
+    node_state_->setEnabled(e);
 
     if(!e) {
         node_->setError(false);
@@ -280,7 +307,7 @@ void NodeWorker::switchThread(QThread *thread, int id)
 
     assertNotInGuiThread();
 
-    node_->getNodeState()->setThread(id);
+    node_state_->setThread(id);
 
     Q_EMIT threadChanged();
 
@@ -1211,7 +1238,7 @@ void NodeWorker::setIOError(bool error)
 
 void NodeWorker::setMinimized(bool min)
 {
-    node_->getNodeState()->setMinimized(min);
+    node_state_->setMinimized(min);
 }
 
 void NodeWorker::assertNotInGuiThread()

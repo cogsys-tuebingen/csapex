@@ -63,7 +63,6 @@ void Graph::addNode(NodeWorker::Ptr node_worker)
 void Graph::deleteNode(const UUID& uuid)
 {
     NodeWorker* node_worker = findNodeWorker(uuid);
-    Node* node = node_worker->getNode();
 
     node_worker->stop();
 

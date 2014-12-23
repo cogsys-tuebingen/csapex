@@ -44,7 +44,7 @@ bool AddNode::doExecute()
 
     NodeWorker::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type_, uuid_, saved_state_);
 
-    node->getNode()->getNodeState()->setPos(pos_);
+    node->getNodeState()->setPos(pos_);
 
     graph_->addNode(node);
 
@@ -55,7 +55,7 @@ bool AddNode::doUndo()
 {
     NodeWorker* node_ = graph_->findNodeWorker(uuid_);
 
-    saved_state_ = node_->getNode()->getNodeStateCopy();
+    saved_state_ = node_->getNodeStateCopy();
 
 
     if(parent_uuid_.empty()) {
@@ -68,7 +68,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        graph_->findNode(uuid_)->setNodeState(saved_state_);
+        graph_->findNodeWorker(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

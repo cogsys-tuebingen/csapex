@@ -38,6 +38,9 @@ public:
     ~NodeWorker();
 
     void setNodeState(NodeStatePtr memento);
+    NodeStatePtr getNodeState();
+    NodeStatePtr getNodeStateCopy() const;
+
 
     void stop();
     void waitUntilFinished();
@@ -190,7 +193,9 @@ private:
     Settings& settings_;
 
     std::string node_type_;
-    NodePtr node_;
+    NodePtr node_;    
+    NodeStatePtr node_state_;
+
 
     bool is_setup_;
 
