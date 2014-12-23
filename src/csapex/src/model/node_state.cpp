@@ -9,43 +9,63 @@
 using namespace csapex;
 
 NodeState::NodeState(const NodeWorker *parent)
-    : parent(parent), minimized(false), enabled(true), flipped(false), thread(-1)
+    : pos_changed(new SignalImpl),
+      label_changed(new SignalImpl),
+      minimized_changed(new SignalImpl),
+      enabled_changed(new SignalImpl),
+      flipped_changed(new SignalImpl),
+      thread_changed(new SignalImpl),
+      parent_changed(new SignalImpl),
+      parent(parent), minimized(false), enabled(true), flipped(false), thread(-1)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
     }
 }
 
+NodeState& NodeState::operator = (const NodeState& rhs)
+{
+    setPos(rhs.pos);
+    setEnabled(rhs.enabled);
+    setMinimized(rhs.minimized);
+    setFlipped(rhs.flipped);
+    setParent(rhs.parent);
+    setLabel(rhs.label_);
+    setThread(rhs.thread);
+
+    return *this;
+}
+
 void NodeState::readYaml(const YAML::Node &node)
 {
     if(node["minimized"].IsDefined()) {
-        minimized = node["minimized"].as<bool>();
+        setMinimized(node["minimized"].as<bool>());
     }
 
     if(node["enabled"].IsDefined()) {
-        enabled = node["enabled"].as<bool>();
+        setEnabled(node["enabled"].as<bool>());
     }
 
     if(node["flipped"].IsDefined()) {
-        flipped = node["flipped"].as<bool>();
+        setFlipped(node["flipped"].as<bool>());
     }
 
     if(node["label"].IsDefined()) {
-        label_ = node["label"].as<std::string>();
+        setLabel(node["label"].as<std::string>());
         if(label_.empty()) {
-            label_ = parent->getUUID();
+            setLabel(parent->getUUID());
         }
     }
 
     if(node["pos"].IsDefined()) {
         double x = node["pos"][0].as<double>();
         double y = node["pos"][1].as<double>();
-        pos.setX(x);
-        pos.setY(y);
+        QPoint p(x,y);
+        setPos(p);
     }
 
     if(node["thread"].IsDefined()) {
-        thread = node["thread"].as<int>();
+        setThread(node["thread"].as<int>());
     }
 
     if(node["state"].IsDefined()) {
@@ -64,7 +84,10 @@ QPoint NodeState::getPos() const
 
 void NodeState::setPos(const QPoint &value)
 {
-    pos = value;
+    if(pos != value) {
+        pos = value;
+        (*pos_changed)();
+    }
 }
 
 std::string NodeState::getLabel() const
@@ -74,7 +97,10 @@ std::string NodeState::getLabel() const
 
 void NodeState::setLabel(const std::string &label)
 {
-    label_ = label;
+    if(label_ != label) {
+        label_ = label;
+        (*label_changed)();
+    }
 }
 
 bool NodeState::isMinimized() const
@@ -84,7 +110,10 @@ bool NodeState::isMinimized() const
 
 void NodeState::setMinimized(bool value)
 {
-    minimized = value;
+    if(minimized != value) {
+        minimized = value;
+        (*minimized_changed)();
+    }
 }
 bool NodeState::isEnabled() const
 {
@@ -93,7 +122,10 @@ bool NodeState::isEnabled() const
 
 void NodeState::setEnabled(bool value)
 {
-    enabled = value;
+    if(enabled != value) {
+        enabled = value;
+        (*enabled_changed)();
+    }
 }
 
 bool NodeState::isFlipped() const
@@ -103,7 +135,10 @@ bool NodeState::isFlipped() const
 
 void NodeState::setFlipped(bool value)
 {
-    flipped = value;
+    if(flipped != value) {
+        flipped = value;
+        (*flipped_changed)();
+    }
 }
 Memento::Ptr NodeState::getParameterState() const
 {
@@ -120,9 +155,12 @@ const NodeWorker *NodeState::getParent() const
     return parent;
 }
 
-void NodeState::setParent(NodeWorker *value)
+void NodeState::setParent(const NodeWorker *value)
 {
-    parent = value;
+    if(parent != value) {
+        parent = value;
+        (*parent_changed)();
+    }
 }
 
 int NodeState::getThread() const
@@ -132,7 +170,10 @@ int NodeState::getThread() const
 
 void NodeState::setThread(int id)
 {
-    thread = id;
+    if(thread != id) {
+        thread = id;
+        (*thread_changed)();
+    }
 }
 
 

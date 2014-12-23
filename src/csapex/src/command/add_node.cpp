@@ -44,6 +44,10 @@ bool AddNode::doExecute()
 
     NodeWorker::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type_, uuid_, saved_state_);
 
+    if(!node) {
+        return false;
+    }
+
     node->getNodeState()->setPos(pos_);
 
     graph_->addNode(node);

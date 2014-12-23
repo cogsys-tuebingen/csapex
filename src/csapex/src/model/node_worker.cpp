@@ -120,7 +120,15 @@ void NodeWorker::setNodeState(NodeStatePtr memento)
         node_->setParameterState(memento->getParameterState());
     }
 
-    Q_EMIT nodeStateChanged();
+    node_state_->enabled_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->flipped_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->label_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->minimized_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->parent_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->pos_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->thread_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+
+    triggerNodeStateChanged();
 
     node_->stateChanged();
 
@@ -132,6 +140,12 @@ void NodeWorker::setNodeState(NodeStatePtr memento)
         }
     }
 }
+
+void NodeWorker::triggerNodeStateChanged()
+{
+    Q_EMIT nodeStateChanged();
+}
+
 NodeState::Ptr NodeWorker::getNodeStateCopy() const
 {
     apex_assert_hard(node_state_);

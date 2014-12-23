@@ -7,14 +7,19 @@
 
 /// SYSTEM
 #include <QPoint>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex
 {
 
 struct NodeState : public Memento {
     typedef boost::shared_ptr<NodeState> Ptr;
+    typedef boost::signals2::signal<void()> SignalImpl;
+    typedef boost::shared_ptr< SignalImpl > Signal;
 
     NodeState(const NodeWorker *parent);
+
+    NodeState& operator = (const NodeState& rhs);
 
     virtual void writeYaml(YAML::Node& out) const;
     virtual void readYaml(const YAML::Node& node);
@@ -22,27 +27,34 @@ struct NodeState : public Memento {
 public:
     QPoint getPos() const;
     void setPos(const QPoint &value);
+    Signal pos_changed;
 
     std::string getLabel() const;
     void setLabel(const std::string &label);
+    Signal label_changed;
 
     bool isMinimized() const;
     void setMinimized(bool value);
+    Signal minimized_changed;
 
     bool isEnabled() const;
     void setEnabled(bool value);
+    Signal enabled_changed;
 
     bool isFlipped() const;
     void setFlipped(bool value);
-
-    Memento::Ptr getParameterState() const;
-    void setParameterState(const Memento::Ptr &value);
-
-    const NodeWorker* getParent() const;
-    void setParent(NodeWorker *value);
+    Signal flipped_changed;
 
     int getThread() const;
     void setThread(int id);
+    Signal thread_changed;
+
+    const NodeWorker* getParent() const;
+    void setParent(const NodeWorker *value);
+    Signal parent_changed;
+
+    Memento::Ptr getParameterState() const;
+    void setParameterState(const Memento::Ptr &value);
 
 private:
     const NodeWorker* parent;

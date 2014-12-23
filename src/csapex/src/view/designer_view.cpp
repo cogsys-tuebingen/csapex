@@ -5,6 +5,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/delete_node.h>
+#include <csapex/command/flip_sides.h>
 #include <csapex/view/box_dialog.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
@@ -434,7 +435,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
     QAction* flip = new QAction("flip sides", &menu);
     flip->setIcon(QIcon(":/flip.png"));
     flip->setIconVisibleInMenu(true);
-    handler[flip] = boost::bind(&NodeBox::flipSides, box);
+    handler[flip] = boost::bind(&DesignerView::flipBox, this, box);
     menu.addAction(flip);
 
     menu.addSeparator();
@@ -531,6 +532,11 @@ void DesignerView::createNewThreadGroupFor(NodeWorker* worker)
     if(ok && !text.isEmpty()) {
         thread_pool_.createNewThreadGroupFor(worker, text.toStdString());
     }
+}
+
+void DesignerView::flipBox(NodeBox *box)
+{
+    dispatcher_->execute(Command::Ptr(new command::FlipSides(box->getNodeWorker()->getUUID())));
 }
 
 void DesignerView::deleteBox(NodeBox* box)

@@ -9,7 +9,6 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
-#include <csapex/command/delete_node.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/node_adapter.h>
@@ -450,10 +449,9 @@ void NodeBox::killContent()
 
 void NodeBox::flipSides()
 {
-    bool flip = !node_worker_->getNodeState()->isFlipped();
-    node_worker_->getNodeState()->setFlipped(flip);
     updateVisuals();
 
+    bool flip = node_worker_->getNodeState()->isFlipped();
     Q_EMIT flipped(flip);
 }
 

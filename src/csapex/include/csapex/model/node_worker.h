@@ -187,6 +187,8 @@ private:
 
     void assertNotInGuiThread();
 
+    void triggerNodeStateChanged();
+
     void finishTimer(TimerPtr t);
 
 private:
