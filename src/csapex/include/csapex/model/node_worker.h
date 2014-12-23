@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <utils_param/parameter.h>
+#include <csapex/model/unique.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
@@ -20,7 +21,7 @@
 
 namespace csapex {
 
-struct NodeWorker : public QObject
+struct NodeWorker : public QObject, public Unique
 {
     Q_OBJECT
 
@@ -36,6 +37,8 @@ public:
     NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);
     ~NodeWorker();
 
+    void setNodeState(NodeStatePtr memento);
+
     void stop();
     void waitUntilFinished();
     void reset();
@@ -43,8 +46,7 @@ public:
     void triggerSwitchThreadRequest(QThread* thread, int id);
     void triggerPanic();
 
-    Node* getNode();
-    UUID getNodeUUID() const;
+    Node* getNode() const;
     std::string getType() const;
 
     bool isEnabled() const;

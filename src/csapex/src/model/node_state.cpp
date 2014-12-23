@@ -3,24 +3,16 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/utility/yaml_io.hpp>
 
 using namespace csapex;
 
-NodeState::NodeState(const Node *parent)
+NodeState::NodeState(const NodeWorker *parent)
     : parent(parent), minimized(false), enabled(true), flipped(false), thread(-1)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
-    }
-}
-
-void NodeState::copyFrom(const NodeState::Ptr& rhs)
-{
-    operator =(*rhs);
-    child_state = parent->getParameterStateClone();
-    if(rhs->child_state) {
-        *child_state = *rhs->child_state;
     }
 }
 
@@ -58,7 +50,7 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(node["state"].IsDefined()) {
         const YAML::Node& state_map = node["state"];
-        child_state = parent->getParameterStateClone();
+        child_state = parent->getNode()->getParameterStateClone();
 
         if(child_state) {
             child_state->readYaml(state_map);
@@ -123,12 +115,12 @@ void NodeState::setParameterState(const Memento::Ptr &value)
     child_state = value;
 }
 
-const Node *NodeState::getParent() const
+const NodeWorker *NodeState::getParent() const
 {
     return parent;
 }
 
-void NodeState::setParent(Node *value)
+void NodeState::setParent(NodeWorker *value)
 {
     parent = value;
 }
@@ -160,7 +152,7 @@ void NodeState::writeYaml(YAML::Node &out) const
 
     try {
         if(parent) {
-            child_state = parent->getParameterStateClone();
+            child_state = parent->getNode()->getParameterStateClone();
         }
     } catch(const std::exception& e) {
         std::cerr << "cannot clone child state for node " << parent->getUUID() << ": " << e.what() << std::endl;

@@ -14,9 +14,7 @@ namespace csapex
 struct NodeState : public Memento {
     typedef boost::shared_ptr<NodeState> Ptr;
 
-    NodeState(const Node* parent);
-
-    void copyFrom (const Ptr &rhs);
+    NodeState(const NodeWorker *parent);
 
     virtual void writeYaml(YAML::Node& out) const;
     virtual void readYaml(const YAML::Node& node);
@@ -40,14 +38,14 @@ public:
     Memento::Ptr getParameterState() const;
     void setParameterState(const Memento::Ptr &value);
 
-    const Node* getParent() const;
-    void setParent(Node *value);
+    const NodeWorker* getParent() const;
+    void setParent(NodeWorker *value);
 
     int getThread() const;
     void setThread(int id);
 
 private:
-    const Node* parent;
+    const NodeWorker* parent;
 
     mutable Memento::Ptr child_state;
 

@@ -46,12 +46,12 @@ void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* wid
 
 void DesignerIO::saveBox(NodeWorker *node, WidgetController* widget_ctrl, YAML::Node &yaml)
 {
-    NodeBox* box = widget_ctrl->getBox(node->getNodeUUID());
+    NodeBox* box = widget_ctrl->getBox(node->getUUID());
     NodeAdapter::Ptr na = box->getNodeAdapter();
     Memento::Ptr m = na->getState();
     if(m) {
         YAML::Node doc;
-        doc["uuid"] = node->getNodeUUID();
+        doc["uuid"] = node->getUUID();
 
         YAML::Node state;
         m->writeYaml(state);

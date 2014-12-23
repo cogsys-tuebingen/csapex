@@ -219,7 +219,7 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
         NodeWorkerPtr result = makeSingleNode(p, uuid);
 
         if(state) {
-            result->getNode()->setNodeState(state);
+            result->setNodeState(state);
         }
 
         return result;

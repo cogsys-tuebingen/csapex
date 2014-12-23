@@ -194,8 +194,8 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         NodeBox* box = new NodeBox(settings_, node_worker, adapter, icon);
         box->construct();
 
-        box_map_[node->getUUID()] = box;
-        proxy_map_[node->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
+        box_map_[node_worker->getUUID()] = box;
+        proxy_map_[node_worker->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
 
         designer_->addBox(box);
 
@@ -222,7 +222,7 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 void WidgetController::nodeRemoved(NodeWorkerPtr node_worker)
 {
     if(designer_) {
-        UUID node_uuid = node_worker->getNodeUUID();
+        UUID node_uuid = node_worker->getUUID();
         NodeBox* box = getBox(node_uuid);
         box->stop();
 
@@ -308,7 +308,7 @@ void WidgetController::insertPort(QLayout* layout, Port* port)
 void WidgetController::foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred)
 {
     Q_FOREACH(NodeWorker::Ptr n, graph_->nodes_) {
-        NodeBox* b = getBox(n->getNodeUUID());
+        NodeBox* b = getBox(n->getUUID());
         if(pred(b)) {
             f(b);
         }

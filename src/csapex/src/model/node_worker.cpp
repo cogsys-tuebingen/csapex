@@ -23,7 +23,8 @@ using namespace csapex;
 static const int DEFAULT_HISTORY_LENGTH = 15;
 
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
-    : settings_(settings), node_(node),
+    : Unique(uuid),
+      settings_(settings), node_(node),
       is_setup_(false),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
@@ -106,14 +107,31 @@ NodeWorker::~NodeWorker()
     callbacks.clear();
 }
 
-Node* NodeWorker::getNode()
+void NodeWorker::setNodeState(NodeStatePtr memento)
 {
-    return node_.get();
+    UUID old_uuid = getUUID();
+    std::string old_label = node_->getNodeState()->getLabel();
+
+    node_->setNodeState(memento);
+
+    if(getUUID().empty()) {
+        setUUID(old_uuid);
+    }
+
+    NodeStatePtr state = node_->getNodeState();
+
+    if(state->getLabel().empty()) {
+        if(old_label.empty()) {
+            state->setLabel(getUUID().getShortName());
+        } else {
+            state->setLabel(old_label);
+        }
+    }
 }
 
-UUID NodeWorker::getNodeUUID() const
+Node* NodeWorker::getNode() const
 {
-    return node_->getUUID();
+    return node_.get();
 }
 
 std::string NodeWorker::getType() const
@@ -160,7 +178,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
     }
 
     {
-        Input* cin = new Input(settings_, UUID::make_sub(node_->getUUID(), std::string("in_") + p->name()));
+        Input* cin = new Input(settings_, UUID::make_sub(getUUID(), std::string("in_") + p->name()));
         cin->setEnabled(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -174,7 +192,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         input_2_param_[cin] = p;
     }
     {
-        Output* cout = new Output(settings_, UUID::make_sub(node_->getUUID(), std::string("out_") + p->name()));
+        Output* cout = new Output(settings_, UUID::make_sub(getUUID(), std::string("out_") + p->name()));
         cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -524,7 +542,7 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
     assertNotInGuiThread();
     QMutexLocker lock_in(&sync);
 
-    Timer::Ptr t(new Timer(node_->getUUID()));
+    Timer::Ptr t(new Timer(getUUID()));
     node_->useTimer(t.get());
     if(all_inputs_are_present){
         try {
@@ -552,7 +570,7 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
 Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
 {
     int id = inputs_.size();
-    Input* c = new Input(settings_, node_.get(), id);
+    Input* c = new Input(settings_, this, id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
@@ -565,7 +583,7 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
 Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 {
     int id = outputs_.size();
-    Output* c = new Output(settings_, node_.get(), id);
+    Output* c = new Output(settings_, this, id);
     c->setLabel(label);
     c->setType(type);
 
@@ -576,7 +594,7 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> callback)
 {
     int id = slots_.size();
-    Slot* slot = new Slot(callback, settings_, node_.get(), id);
+    Slot* slot = new Slot(callback, settings_, this, id);
     slot->setLabel(label);
     slot->setEnabled(true);
 
@@ -588,7 +606,7 @@ Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> call
 Trigger* NodeWorker::addTrigger(const std::string& label)
 {
     int id = triggers_.size();
-    Trigger* trigger = new Trigger(settings_, node_.get(), id);
+    Trigger* trigger = new Trigger(settings_, this, id);
     trigger->setLabel(label);
     trigger->setEnabled(true);
 
@@ -1070,7 +1088,7 @@ void NodeWorker::tick()
     }
 
 
-    Timer::Ptr t(new Timer(node_->getUUID()));
+    Timer::Ptr t(new Timer(getUUID()));
     node_->useTimer(t.get());
 
     node_->checkConditions(false);

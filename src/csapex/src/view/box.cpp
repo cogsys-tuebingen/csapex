@@ -85,7 +85,7 @@ void NodeBox::construct()
 
     setFocusPolicy(Qt::ClickFocus);
 
-    const UUID& uuid = node_worker_->getNodeUUID();
+    const UUID& uuid = node_worker_->getUUID();
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -175,7 +175,7 @@ void NodeBox::updateComponentInformation(Graph* graph)
     }
 
     if(info_compo) {
-        int compo = graph->getComponent(node_worker_->getNodeUUID());
+        int compo = graph->getComponent(node_worker_->getUUID());
         std::stringstream info;
         info << "C:" << compo;
         info_compo->setText(info.str().c_str());
@@ -366,7 +366,7 @@ void NodeBox::paintEvent(QPaintEvent*)
         } else if(is_warn) {
             ui->label->setToolTip(node_worker_->getNode()->errorMessage().c_str());
         } else {
-            ui->label->setToolTip(node_worker_->getNode()->getUUID().c_str());
+            ui->label->setToolTip(node_worker_->getUUID().c_str());
         }
 
         refreshStylesheet();
@@ -522,7 +522,7 @@ void NodeBox::nodeStateChanged()
     ui->enablebtn->setChecked(node_worker_->getNode()->getNodeState()->isEnabled());
 
     setLabel(node_worker_->getNode()->getNodeState()->getLabel());
-    ui->label->setToolTip(node_worker_->getNode()->getUUID().c_str());
+    ui->label->setToolTip(node_worker_->getUUID().c_str());
 
     move(node_worker_->getNode()->getNodeState()->getPos());
 }

@@ -224,7 +224,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     foreach(NodeWorker* node_worker, graph_->getAllNodeWorkers()) {
         Node* node = node_worker->getNode();
 
-        NodeBox* box = widget_ctrl_->getBox(node_worker->getNodeUUID());
+        NodeBox* box = widget_ctrl_->getBox(node_worker->getUUID());
         if(!box) {
             continue;
         }
@@ -401,7 +401,7 @@ void DesignerScene::connectionDeleted(Connection*)
 
 void DesignerScene::boxMoved(NodeBox *box)
 {
-    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
+    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     proxy->setPos(box->pos());
     invalidateSchema();
 

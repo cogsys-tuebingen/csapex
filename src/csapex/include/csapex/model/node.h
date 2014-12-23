@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/error_state.h>
-#include <csapex/model/unique.h>
 #include <csapex/model/parameterizable.h>
 #include <csapex/utility/stream_relay.h>
 #include <csapex/utility/assert.h>
@@ -12,13 +11,13 @@
 
 namespace csapex {
 
-class Node : public ErrorState, public Unique, public Parameterizable, public Timable
+class Node : public ErrorState, public Parameterizable, public Timable
 {
 public:
     typedef boost::shared_ptr<Node> Ptr;
 
 public:
-    Node(const UUID &uuid = UUID::NONE);
+    Node();
     virtual ~Node();
 
     void initialize(const std::string &type, const UUID &uuid,

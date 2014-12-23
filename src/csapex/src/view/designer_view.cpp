@@ -158,7 +158,7 @@ Command::Ptr DesignerView::deleteSelected()
     foreach(QGraphicsItem* item, scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
-            meta->add(Command::Ptr(new command::DeleteNode(proxy->getBox()->getNode()->getUUID())));
+            meta->add(Command::Ptr(new command::DeleteNode(proxy->getBox()->getNodeWorker()->getUUID())));
         }
     }
     return meta;
@@ -288,7 +288,7 @@ void DesignerView::addBoxEvent(NodeBox *box)
     QObject::connect(box, SIGNAL(profile(NodeBox*)), this, SLOT(profile(NodeBox*)));
     QObject::connect(box, SIGNAL(stopProfiling(NodeBox*)), this, SLOT(stopProfiling(NodeBox*)));
 
-    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
+    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     scene_->addItem(proxy);
 
     QObject::connect(proxy, SIGNAL(moved(double,double)), this, SLOT(movedBoxes(double,double)));
@@ -346,7 +346,7 @@ void DesignerView::profile(NodeBox *box)
         item->setScale(1.0);
     }
 
-    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNode()->getUUID());
+    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
     QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(repaint()));
     QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(repaint()));
@@ -373,7 +373,7 @@ void DesignerView::movedBoxes(double dx, double dy)
             NodeBox* b = proxy->getBox();
             QPointF to = proxy->pos();
             QPointF from = to - delta;
-            meta->add(Command::Ptr(new command::MoveBox(b->getNode()->getUUID(), from, to)));
+            meta->add(Command::Ptr(new command::MoveBox(b->getNodeWorker()->getUUID(), from, to)));
         }
     }
 
@@ -414,7 +414,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
     QMenu menu;
     std::map<QAction*, boost::function<void()> > handler;
 
-    ContextMenuHandler::addHeader(menu, std::string("Node: ") + box->getNodeWorker()->getNodeUUID().getShortName());
+    ContextMenuHandler::addHeader(menu, std::string("Node: ") + box->getNodeWorker()->getUUID().getShortName());
 
     if(box->isMinimizedSize()) {
         QAction* max = new QAction("maximize", &menu);
@@ -535,7 +535,7 @@ void DesignerView::createNewThreadGroupFor(NodeWorker* worker)
 
 void DesignerView::deleteBox(NodeBox* box)
 {
-    dispatcher_->execute(Command::Ptr(new command::DeleteNode(box->getNodeWorker()->getNodeUUID())));
+    dispatcher_->execute(Command::Ptr(new command::DeleteNode(box->getNodeWorker()->getUUID())));
 }
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)

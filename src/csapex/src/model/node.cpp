@@ -18,12 +18,10 @@
 
 using namespace csapex;
 
-Node::Node(const UUID &uuid)
-    : Unique(uuid),
-      adebug(std::cout, uuid.getFullName()), ainfo(std::cout, uuid.getFullName()), awarn(std::cout, uuid.getFullName()), aerr(std::cerr, uuid.getFullName()),
+Node::Node()
+    : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
       modifier_(NULL), settings_(NULL),
-      worker_(NULL),
-      node_state_(new NodeState(this))
+      worker_(NULL)
 {
 }
 
@@ -39,9 +37,10 @@ void Node::initialize(const std::string& type, const UUID& uuid,
     worker_ = node_worker;
     modifier_ = new NodeModifier(node_worker),
     settings_ = settings;
+    node_state_.reset(new NodeState(node_worker));
 
-    setUUID(uuid);
     parameter_state_->setParentUUID(uuid);
+    node_state_->setLabel(uuid);
 
     std::string p = uuid.getFullName();
     adebug.setPrefix(p);
@@ -52,7 +51,6 @@ void Node::initialize(const std::string& type, const UUID& uuid,
 
 void Node::doSetup()
 {
-    node_state_->setLabel(getUUID());
     setupParameters();
 
     try {
@@ -92,7 +90,7 @@ NodeState::Ptr Node::getNodeStateCopy() const
 {
     apex_assert_hard(node_state_);
 
-    NodeState::Ptr memento(new NodeState(this));
+    NodeState::Ptr memento(new NodeState(getNodeWorker()));
     *memento = *node_state_;
 
     memento->setParameterState(getParameterStateClone());
@@ -112,23 +110,9 @@ void Node::setNodeState(NodeState::Ptr memento)
     boost::shared_ptr<NodeState> m = boost::dynamic_pointer_cast<NodeState> (memento);
     apex_assert_hard(m.get());
 
-    UUID old_uuid = getUUID();
-    std::string old_label = node_state_->getLabel();
-
     *node_state_ = *m;
 
-    if(getUUID().empty()) {
-        setUUID(old_uuid);
-    }
-    if(node_state_->getLabel().empty()) {
-        if(old_label.empty()) {
-            node_state_->setLabel(getUUID().getShortName());
-        } else {
-            node_state_->setLabel(old_label);
-        }
-    }
-
-    node_state_->setParent(this);
+    node_state_->setParent(getNodeWorker());
     if(m->getParameterState()) {
         setParameterState(m->getParameterState());
     }

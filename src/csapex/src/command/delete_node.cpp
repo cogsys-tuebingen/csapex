@@ -54,7 +54,7 @@ bool DeleteNode::doExecute()
     if(Meta::doExecute()) {
         saved_state = node_worker->getNode()->getNodeStateCopy();
 
-        graph_->deleteNode(node_worker->getNodeUUID());
+        graph_->deleteNode(node_worker->getUUID());
         return true;
     }
 
@@ -78,7 +78,7 @@ bool DeleteNode::doRedo()
         NodeWorker* node_worker = graph_->findNodeWorker(uuid);
         saved_state = node_worker->getNode()->getNodeStateCopy();
 
-        graph_->deleteNode(node_worker->getNodeUUID());
+        graph_->deleteNode(node_worker->getUUID());
         return true;
     }
 

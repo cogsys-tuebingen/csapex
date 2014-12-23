@@ -47,7 +47,7 @@ void ThreadPool::saveSettings(YAML::Node& node)
         it != custom_group_assignment_.end(); ++it)
     {
         YAML::Node assignment;
-        assignment["uuid"] = it->first->getNodeUUID();
+        assignment["uuid"] = it->first->getUUID();
         assignment["id"] = it->second->id;
         assignments.push_back(assignment);
     }
@@ -99,7 +99,7 @@ void ThreadPool::usePrivateThreadFor(NodeWorker *worker)
 
     custom_group_assignment_.erase(worker);
 
-    QThread* thread = setupThread(PRIVATE_THREAD, false, worker->getNodeUUID().getShortName());
+    QThread* thread = setupThread(PRIVATE_THREAD, false, worker->getUUID().getShortName());
     worker->triggerSwitchThreadRequest(thread, PRIVATE_THREAD);
 }
 
@@ -206,7 +206,7 @@ std::set<int> ThreadPool::assignGroupThreads()
             continue;
         }
 
-        int component = graph_->getComponent(node_worker->getNodeUUID()) + 1;
+        int component = graph_->getComponent(node_worker->getUUID()) + 1;
         if(!component_group_threads_[component]) {
             std::stringstream name;
             name << "Component " << component;

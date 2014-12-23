@@ -77,7 +77,7 @@ void Graph::deleteNode(const UUID& uuid)
     NodeWorker::Ptr removed;
 
     for(std::vector<NodeWorker::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
-        if((*it)->getNodeUUID() == node->getUUID()) {
+        if((*it)->getUUID() == uuid) {
             removed = *it;
             it = nodes_.erase(it);
 
@@ -283,7 +283,7 @@ Command::Ptr Graph::clear()
     command::Meta::Ptr clear(new command::Meta("Clear Graph"));
 
     Q_FOREACH(NodeWorker::Ptr node, nodes_) {
-        Command::Ptr cmd(new command::DeleteNode(node->getNodeUUID()));
+        Command::Ptr cmd(new command::DeleteNode(node->getUUID()));
         clear->add(cmd);
     }
 
@@ -321,7 +321,7 @@ NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
     Q_FOREACH(NodeWorker::Ptr b, nodes_) {
-        if(b->getNodeUUID() == uuid) {
+        if(b->getUUID() == uuid) {
             return b->getNode();
         }
     }
@@ -333,7 +333,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
 NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
 {
     Q_FOREACH(const NodeWorker::Ptr b, nodes_) {
-        if(b->getNodeUUID() == uuid) {
+        if(b->getUUID() == uuid) {
             return b.get();
         }
     }

@@ -53,7 +53,7 @@ void GraphIO::saveNodes(YAML::Node &yaml)
             node->getNode()->getNodeState()->writeYaml(yaml_node);
             yaml["nodes"].push_back(yaml_node);
         } catch(const std::exception& e) {
-            std::cerr << "cannot save state for node " << node->getNodeUUID() << ": " << e.what() << std::endl;
+            std::cerr << "cannot save state for node " << node->getUUID() << ": " << e.what() << std::endl;
             throw e;
         }
     }

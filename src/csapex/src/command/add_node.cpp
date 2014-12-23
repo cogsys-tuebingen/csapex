@@ -53,9 +53,9 @@ bool AddNode::doExecute()
 
 bool AddNode::doUndo()
 {
-    Node* node_ = graph_->findNode(uuid_);
+    NodeWorker* node_ = graph_->findNodeWorker(uuid_);
 
-    saved_state_ = node_->getNodeStateCopy();
+    saved_state_ = node_->getNode()->getNodeStateCopy();
 
 
     if(parent_uuid_.empty()) {
