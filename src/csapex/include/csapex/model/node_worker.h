@@ -188,6 +188,8 @@ private:
 
 private:
     Settings& settings_;
+
+    std::string node_type_;
     NodePtr node_;
 
     bool is_setup_;

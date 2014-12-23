@@ -24,7 +24,8 @@ static const int DEFAULT_HISTORY_LENGTH = 15;
 
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
     : Unique(uuid),
-      settings_(settings), node_(node),
+      settings_(settings),
+      node_type_(type), node_(node),
       is_setup_(false),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
@@ -136,7 +137,7 @@ Node* NodeWorker::getNode() const
 
 std::string NodeWorker::getType() const
 {
-    return node_->getType();
+    return node_type_;
 }
 
 bool NodeWorker::isEnabled() const

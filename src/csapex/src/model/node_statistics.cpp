@@ -48,7 +48,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
     QTreeWidgetItem* tl = new QTreeWidgetItem;
     tl->setText(0, node_worker_->getUUID().c_str());
 
-    NodeConstructor::Ptr constructor = node_factory->getConstructor(node->getType());
+    NodeConstructor::Ptr constructor = node_factory->getConstructor(node_worker_->getType());
 
     tl->setIcon(0, constructor->getIcon());
 

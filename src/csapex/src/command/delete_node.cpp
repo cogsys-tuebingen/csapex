@@ -38,7 +38,7 @@ bool DeleteNode::doExecute()
 {
     NodeWorker* node_worker = graph_->findNodeWorkerForConnector(uuid);
 
-    type = node_worker->getNode()->getType();
+    type = node_worker->getType();
 
     locked = false;
     clear();

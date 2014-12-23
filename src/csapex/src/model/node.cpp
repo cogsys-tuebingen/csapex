@@ -33,7 +33,6 @@ Node::~Node()
 void Node::initialize(const std::string& type, const UUID& uuid,
                    NodeWorker* node_worker, Settings* settings)
 {
-    type_ = type;
     worker_ = node_worker;
     modifier_ = new NodeModifier(node_worker),
     settings_ = settings;
@@ -61,11 +60,6 @@ void Node::doSetup()
     } catch(std::runtime_error& e) {
         aerr << "setup failed: " << e.what() << std::endl;
     }
-}
-
-std::string Node::getType() const
-{
-    return type_;
 }
 
 void Node::messageArrived(Input *)

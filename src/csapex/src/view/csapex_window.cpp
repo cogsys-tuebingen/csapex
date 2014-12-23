@@ -142,7 +142,7 @@ void CsApexWindow::showHelp(NodeBox *box)
     }
 
 
-    std::string node_type = box->getNode()->getType();
+    std::string node_type = box->getNodeWorker()->getType();
 
     QTreeWidgetItemIterator it(ui->node_info_tree);
     while (*it) {

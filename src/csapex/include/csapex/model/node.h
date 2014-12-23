@@ -28,7 +28,6 @@ public:
     NodeStatePtr getNodeStateCopy() const;
     void setNodeState(NodeStatePtr memento);
 
-    std::string getType() const;
     NodeWorker* getNodeWorker() const;
 
 

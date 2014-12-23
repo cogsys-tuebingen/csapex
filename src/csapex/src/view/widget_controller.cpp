@@ -163,7 +163,7 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
 
     object->setStyleSheet(style_sheet_);
     object->construct();
-    object->setObjectName(content->getNode()->getType().c_str());
+    object->setObjectName(content->getType().c_str());
     object->setLabel(type);
 
     drag->setPixmap(object->grab());
@@ -184,8 +184,7 @@ DesignerScene* WidgetController::getDesignerScene()
 void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 {
     if(designer_) {
-        Node* node = node_worker->getNode();
-        std::string type = node->getType();
+        std::string type = node_worker->getType();
 
         NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node_worker.get(), this);
 
