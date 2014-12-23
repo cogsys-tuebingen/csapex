@@ -65,6 +65,10 @@ bool Port::event(QEvent *e)
         if(adaptee_->isOutput()) {
             Output* output = dynamic_cast<Output*>(adaptee_);
             if(output) {
+                if(!output->isConnected()) {
+                    output->forceSendMessage(true);
+                }
+
                 QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
                 QPoint global_pos = helpEvent->globalPos();
                 DesignerView* dview = widget_controller_->getDesignerView();
@@ -73,6 +77,7 @@ bool Port::event(QEvent *e)
 
                 QGraphicsView* view = widget_controller_->getTooltipView("Output");
                 view->move(pos.toPoint());
+                view->show();
 
                 updateTooltip();
                 QObject::connect(output, SIGNAL(messageSent(Connectable*)), this, SLOT(updateTooltip()));
@@ -90,6 +95,10 @@ void Port::updateTooltip()
     if(output) {
         QGraphicsView* view = widget_controller_->getTooltipView("Output");
 
+        if(view->isHidden()) {
+            return;
+        }
+
         ConnectionType::Ptr msg = output->getMessage();
 
         if(msg) {
@@ -102,7 +111,6 @@ void Port::updateTooltip()
                 view->scene()->addPixmap(QPixmap::fromImage(*img));
                 view->setMaximumSize(256, 256);
                 view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
-                view->show();
 
             } catch(const std::exception& e) {
                 view->hide();
@@ -343,6 +351,8 @@ void Port::leaveEvent(QEvent *e)
     if(adaptee_->isOutput()) {
         Output* output = dynamic_cast<Output*>(adaptee_);
         if(output) {
+            output->forceSendMessage(false);
+
             QObject::disconnect(output, SIGNAL(messageSent(Connectable*)), this, SLOT(updateTooltip()));
 
             widget_controller_->hideTooltipView();

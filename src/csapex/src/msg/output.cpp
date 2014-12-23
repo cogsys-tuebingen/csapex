@@ -153,7 +153,7 @@ bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 
 bool Output::isConnected() const
 {
-    return targets_.size() > 0;
+    return targets_.size() > 0 || force_send_message_;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
