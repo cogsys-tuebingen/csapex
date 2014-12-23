@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/generic_state.h>
 #include <csapex/utility/assert.h>
+#include <utils_param/parameter.h>
 
 /// SYSTEM
 #include <QtGlobal>
@@ -21,6 +22,37 @@ Parameterizable::~Parameterizable()
 {
     delete changed_params_mutex_;
 }
+
+template <typename T>
+T Parameterizable::readParameter(const std::string& name) const
+{
+    return parameter_state_->getParameter(name)->as<T>();
+}
+
+template <typename T>
+void Parameterizable::setParameter(const std::string& name, const T& value)
+{
+    parameter_state_->getParameter(name)->set<T>(value);
+}
+
+
+
+template bool Parameterizable::readParameter<bool>(const std::string& name) const;
+template double Parameterizable::readParameter<double>(const std::string& name) const;
+template int Parameterizable::readParameter<int>(const std::string& name) const;
+template std::string Parameterizable::readParameter<std::string>(const std::string& name) const;
+template std::pair<int,int> Parameterizable::readParameter<std::pair<int,int> >(const std::string& name) const;
+template std::pair<double,double> Parameterizable::readParameter<std::pair<double,double> >(const std::string& name) const;
+
+
+template void Parameterizable::setParameter<bool>(const std::string& name, const bool& value);
+template void Parameterizable::setParameter<double>(const std::string& name, const double& value);
+template void Parameterizable::setParameter<int>(const std::string& name, const int& value);
+template void Parameterizable::setParameter<std::string>(const std::string& name, const std::string& value);
+template void Parameterizable::setParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
+template void Parameterizable::setParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
+
+
 
 void Parameterizable::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
 {

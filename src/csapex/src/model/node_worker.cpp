@@ -111,7 +111,6 @@ NodeWorker::~NodeWorker()
 
 void NodeWorker::setNodeState(NodeStatePtr memento)
 {
-    UUID old_uuid = getUUID();
     std::string old_label = node_state_->getLabel();
 
     *node_state_ = *memento;
@@ -124,11 +123,6 @@ void NodeWorker::setNodeState(NodeStatePtr memento)
     Q_EMIT nodeStateChanged();
 
     node_->stateChanged();
-
-
-    if(getUUID().empty()) {
-        setUUID(old_uuid);
-    }
 
     if(node_state_->getLabel().empty()) {
         if(old_label.empty()) {

@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/csapex_fwd.h>
-#include <utils_param/parameter.h>
+#include <utils_param/param_fwd.h>
 #include <csapex/model/generic_state.h>
 
 /// SYSTEM
@@ -24,33 +24,28 @@ public:
     /***
      *  ADDING PARAMETERS
      */
-    void addParameter(const param::Parameter::Ptr& param);
-    void addParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
+    void addParameter(const param::ParameterPtr& param);
+    void addParameter(const param::ParameterPtr& param, boost::function<void(param::Parameter *)> cb);
 
-    void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition);
-    void addConditionalParameter(const param::Parameter::Ptr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
+    void addConditionalParameter(const param::ParameterPtr& param, boost::function<bool()> enable_condition);
+    void addConditionalParameter(const param::ParameterPtr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
 
-    void addPersistentParameter(const param::Parameter::Ptr& param);
+    void addPersistentParameter(const param::ParameterPtr& param);
 
-    void addTemporaryParameter(const param::Parameter::Ptr& param);
-    void addTemporaryParameter(const param::Parameter::Ptr& param, boost::function<void(param::Parameter *)> cb);
+    void addTemporaryParameter(const param::ParameterPtr& param);
+    void addTemporaryParameter(const param::ParameterPtr& param, boost::function<void(param::Parameter *)> cb);
 
-    void setTemporaryParameters(const std::vector<param::Parameter::Ptr>& param);
-    void setTemporaryParameters(const std::vector<param::Parameter::Ptr>& param, boost::function<void(param::Parameter *)> cb);
+    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param);
+    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param, boost::function<void(param::Parameter *)> cb);
 
     /***
      *  GETTING PARAMETERS
      */
     template <typename T>
-    const T readParameter(const std::string& name) const
-    {
-        return parameter_state_->getParameter(name)->as<T>();
-    }
+    T readParameter(const std::string& name) const;
+
     template <typename T>
-    void setParameter(const std::string& name, const T& value)
-    {
-        parameter_state_->getParameter(name)->set<T>(value);
-    }
+    void setParameter(const std::string& name, const T& value);
 
     /***
      *  PARAMETER CONSTRAINTS
@@ -60,10 +55,10 @@ public:
 
     void removeParameterCallbacks(param::Parameter* param);
 
-    std::vector<param::Parameter::Ptr> getParameters() const;
+    std::vector<param::ParameterPtr> getParameters() const;
     std::size_t getParameterCount() const;
 
-    param::Parameter::Ptr getParameter(const std::string& name) const;
+    param::ParameterPtr getParameter(const std::string& name) const;
     template <typename T>
     typename T::Ptr getParameter(const std::string& name) const
     {

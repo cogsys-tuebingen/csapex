@@ -6,7 +6,7 @@
 #include <csapex/utility/uuid.h>
 
 /// PROJECT
-#include <utils_param/parameter.h>
+#include <utils_param/param_fwd.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
@@ -43,13 +43,7 @@ public:
     std::size_t getParameterCount() const;
 
     template <typename T>
-    const T readParameter (const std::string& name) const {
-        try {
-            return getParameter(name)->as<T>();
-        } catch(const std::out_of_range& e) {
-            throw std::runtime_error(std::string("unknown parameter '") + name + "'");
-        }
-    }
+    T readParameter (const std::string& name) const;
 
     void setFrom(const GenericState& rhs);
 
@@ -59,7 +53,7 @@ public:
     void initializePersistentParameters();
 
 private:
-    void registerParameter(const param::Parameter::Ptr &param);
+    void registerParameter(const param::ParameterPtr &param);
 
 public:
     UUID parent_uuid_;

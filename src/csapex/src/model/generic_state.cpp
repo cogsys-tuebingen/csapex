@@ -46,9 +46,9 @@ void GenericState::readYaml(const YAML::Node& node) {
         params = node["params"].as<std::map<std::string, param::Parameter::Ptr> >();
     }
     if(node["persistent_params"].IsDefined()) {
-         std::vector<std::string> persistent_v = node["persistent_params"].as<std::vector<std::string> >();
-         persistent.clear();
-         persistent.insert(persistent_v.begin(), persistent_v.end());
+        std::vector<std::string> persistent_v = node["persistent_params"].as<std::vector<std::string> >();
+        persistent.clear();
+        persistent.insert(persistent_v.begin(), persistent_v.end());
     }
 }
 
@@ -191,3 +191,20 @@ std::size_t GenericState::getParameterCount() const
 {
     return params.size();
 }
+
+template <typename T>
+T GenericState::readParameter(const std::string& name) const
+{
+    try {
+        return getParameter(name)->as<T>();
+    } catch(const std::out_of_range& e) {
+        throw std::runtime_error(std::string("unknown parameter '") + name + "'");
+    }
+}
+
+template bool GenericState::readParameter<bool>(const std::string& name) const;
+template double GenericState::readParameter<double>(const std::string& name) const;
+template int GenericState::readParameter<int>(const std::string& name) const;
+template std::string GenericState::readParameter<std::string>(const std::string& name) const;
+template std::pair<int,int> GenericState::readParameter<std::pair<int,int> >(const std::string& name) const;
+template std::pair<double,double> GenericState::readParameter<std::pair<double,double> >(const std::string& name) const;
