@@ -20,7 +20,7 @@ public:
     typedef boost::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    CommandDispatcher(Settings& settings, GraphWorkerPtr graph, WidgetControllerPtr widget_ctrl);
+    CommandDispatcher(Settings& settings, GraphWorkerPtr graph, ThreadPool* thread_pool, WidgetControllerPtr widget_ctrl);
 
     void execute(Command::Ptr command);
     void executeLater(Command::Ptr command);
@@ -63,6 +63,7 @@ protected:
 private:
     Settings& settings_;
     GraphWorkerPtr graph_worker_;
+    ThreadPool* thread_pool_;
     WidgetControllerPtr widget_ctrl_;
 
     std::vector<Command::Ptr> later;

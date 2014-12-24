@@ -33,10 +33,11 @@ bool Command::Access::redoCommand(Graph* graph, WidgetController* widget_ctrl, C
     return Command::redoCommand(graph, widget_ctrl, cmd);
 }
 
-void Command::init(Settings *settings, Graph* graph, WidgetController* widget_ctrl)
+void Command::init(Settings *settings, Graph* graph, ThreadPool *thread_pool, WidgetController* widget_ctrl)
 {
     settings_ = settings;
     graph_ = graph;
+    thread_pool_ = thread_pool;
     widget_ctrl_ = widget_ctrl;
 }
 

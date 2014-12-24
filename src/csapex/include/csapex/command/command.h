@@ -35,7 +35,7 @@ public:
 public:
     Command();
 
-    void init(Settings* settings, Graph *graph, WidgetController* widget_ctrl);
+    void init(Settings* settings, Graph *graph, ThreadPool* thread_pool, WidgetController* widget_ctrl);
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -60,6 +60,7 @@ protected:
 protected:
     Settings* settings_;
     Graph* graph_;
+    ThreadPool* thread_pool_;
     WidgetController* widget_ctrl_;
 
     static std::vector<Command::Ptr> undo_later;

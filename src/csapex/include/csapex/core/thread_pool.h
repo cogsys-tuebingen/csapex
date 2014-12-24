@@ -38,9 +38,10 @@ public:
     };
 
 public:
-    ThreadPool(CsApexCore *core, Graph* graph, bool enable_threading, bool grouping);
+    ThreadPool(Graph* graph, bool enable_threading, bool grouping);
 
     std::vector<Group> getCustomGroups();
+    Group getCustomGroup(int id);
 
     std::string nextName();
 
@@ -50,7 +51,10 @@ public Q_SLOTS:
 
     void usePrivateThreadFor(NodeWorker* worker);
     void switchToThread(NodeWorker* worker, int group_id);
-    void createNewThreadGroupFor(NodeWorker* worker, const std::string &name);
+
+    int createNewThreadGroupFor(NodeWorker* worker, const std::string &name);
+    void deleteThreadGroup(int group_id);
+
     void useDefaultThreadFor(NodeWorker *node_worker);
 
     void saveSettings(YAML::Node&);

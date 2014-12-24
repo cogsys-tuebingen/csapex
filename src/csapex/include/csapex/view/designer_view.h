@@ -94,6 +94,10 @@ private:
     void flipBox(NodeBox* box);
     void minimizeBox(NodeBox* box);
     void deleteBox(NodeBox* box);
+
+
+    void usePrivateThreadFor(NodeWorker* worker);
+    void switchToThread(NodeWorker* worker, int group_id);
     void createNewThreadGroupFor(NodeWorker* worker);
 
 private:

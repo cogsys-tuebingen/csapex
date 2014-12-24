@@ -169,6 +169,8 @@ set(SRC_APP
     src/command/delete_fulcrum.cpp
     src/command/flip_sides.cpp
     src/command/minimize.cpp
+    src/command/create_thread.cpp
+    src/command/switch_thread.cpp
 
 
     src/utility/error_handling.cpp

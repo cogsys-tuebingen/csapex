@@ -137,10 +137,13 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
     WidgetControllerPtr widget_control (new WidgetController(settings, graph, node_factory.get(), node_adapter_factory.get()));
 
-    CommandDispatcher dispatcher(settings, graph_worker, widget_control);
+    ThreadPool thread_pool(graph.get(), !threadless, thread_grouping);
+    CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, widget_control);
 
     CsApexCore core(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
-    ThreadPool thread_pool(&core, graph.get(), !threadless, thread_grouping);
+
+    QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Node&)), &thread_pool, SLOT(saveSettings(YAML::Node&)));
+    QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), &thread_pool, SLOT(loadSettings(YAML::Node&)));
 
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));

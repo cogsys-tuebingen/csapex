@@ -9,8 +9,8 @@
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, WidgetController::Ptr widget_control)
-    : settings_(settings), graph_worker_(graph), widget_ctrl_(widget_control), dirty_(false)
+CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, ThreadPool* thread_pool, WidgetController::Ptr widget_control)
+    : settings_(settings), graph_worker_(graph), thread_pool_(thread_pool), widget_ctrl_(widget_control), dirty_(false)
 {
     widget_ctrl_->setCommandDispatcher(this);
 
@@ -29,12 +29,13 @@ void CommandDispatcher::reset()
 
 void CommandDispatcher::execute(Command::Ptr command)
 {
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
     doExecute(command);
 }
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), widget_ctrl_.get());
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
     later.push_back(command);
 }
 

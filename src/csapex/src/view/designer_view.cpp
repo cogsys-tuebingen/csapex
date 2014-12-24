@@ -7,6 +7,8 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/command/flip_sides.h>
 #include <csapex/command/minimize.h>
+#include <csapex/command/create_thread.h>
+#include <csapex/command/switch_thread.h>
 #include <csapex/view/box_dialog.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
@@ -451,7 +453,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
         QAction* private_thread = new QAction("private thread", &menu);
         private_thread->setIcon(QIcon(":/thread_group_none.png"));
         private_thread->setIconVisibleInMenu(true);
-        handler[private_thread] = boost::bind(&ThreadPool::usePrivateThreadFor, &thread_pool_,  box->getNodeWorker());
+        handler[private_thread] = boost::bind(&DesignerView::usePrivateThreadFor, this,  box->getNodeWorker());
         thread_menu.addAction(private_thread);
 
         thread_menu.addSeparator();
@@ -467,7 +469,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
             QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
             switch_thread->setIcon(QIcon(":/thread_group.png"));
             switch_thread->setIconVisibleInMenu(true);
-            handler[switch_thread] = boost::bind(&ThreadPool::switchToThread, &thread_pool_, box->getNodeWorker(), group.id);
+            handler[switch_thread] = boost::bind(&DesignerView::switchToThread, this, box->getNodeWorker(), group.id);
             choose_group_menu->addAction(switch_thread);
         }
 
@@ -525,13 +527,24 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
     }
 }
 
+
+void DesignerView::usePrivateThreadFor(NodeWorker* worker)
+{
+    dispatcher_->execute(Command::Ptr(new command::SwitchThread(worker->getUUID(), 0)));
+}
+
+void DesignerView::switchToThread(NodeWorker* worker, int group_id)
+{
+    dispatcher_->execute(Command::Ptr(new command::SwitchThread(worker->getUUID(), group_id)));
+}
+
 void DesignerView::createNewThreadGroupFor(NodeWorker* worker)
 {
     bool ok;
     QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool_.nextName()), &ok);
 
     if(ok && !text.isEmpty()) {
-        thread_pool_.createNewThreadGroupFor(worker, text.toStdString());
+        dispatcher_->execute(Command::Ptr(new command::CreateThread(worker->getUUID(), text.toStdString())));
     }
 }
 
