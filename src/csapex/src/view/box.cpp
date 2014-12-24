@@ -32,6 +32,7 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
       down_(false), info_compo(NULL), info_thread(NULL), profiling_(false), is_placed_(false)
 {
+    worker->getNodeState()->flipped_changed->connect(boost::bind(&NodeBox::flipSides, this));
 }
 
 NodeBox::~NodeBox()

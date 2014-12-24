@@ -191,10 +191,11 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         QIcon icon = node_factory_->getConstructor(type)->getIcon();
 
         NodeBox* box = new NodeBox(settings_, node_worker, adapter, icon);
-        box->construct();
 
         box_map_[node_worker->getUUID()] = box;
         proxy_map_[node_worker->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
+
+        box->construct();
 
         designer_->addBox(box);
 
@@ -284,7 +285,7 @@ void WidgetController::connectorSignalRemoved(Connectable *connector)
     connectorMessageRemoved(connector);
 }
 
-void WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
+Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
 {
     if(designer_) {
         Port* port = new Port(dispatcher_, this, connector, box->isFlipped());
@@ -293,7 +294,11 @@ void WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayo
         QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
 
         insertPort(layout, port);
+
+        return port;
     }
+
+    return NULL;
 }
 
 

@@ -11,6 +11,7 @@
 #include <csapex/view/widget_controller.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/view/parameter_context_menu.h>
+#include <csapex/model/node_state.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -682,6 +683,11 @@ void setTooltip(QLayout* l, const QString& tooltip)
         }
     }
 }
+
+void setDirection(QBoxLayout* layout, NodeWorker* node)
+{
+    layout->setDirection(node->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
+}
 }
 
 void DefaultNodeAdapter::setupAdaptiveUi()
@@ -779,19 +785,17 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         current_layout_ = new QHBoxLayout;
-
-
-        CommandDispatcher* cmd_dispatcher = widget_ctrl_->getCommandDispatcher();
-
+        setDirection(current_layout_, node_);
+        node_->getNodeState()->flipped_changed->connect(boost::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
         Input* param_in = node_->getParameterInput(current_name_);
         if(param_in) {
-            Port* port = new Port(cmd_dispatcher, widget_ctrl_, param_in, false);
+            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_->getUUID()), current_layout_);
+
             port->setVisible(p->isInteractive());
             p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
 
-            widget_ctrl_->insertPort(current_layout_, port);
         }
 
         // generate UI element
@@ -805,15 +809,14 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter output, if available
         Output* param_out = node_->getParameterOutput(current_name_);
         if(param_out) {
-            Port* port = new Port(cmd_dispatcher, widget_ctrl_, param_out, false);
+            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_->getUUID()), current_layout_);
+
             port->setVisible(p->isInteractive());
             p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
 
             qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&param::Parameter::triggerChange, p.get()));
             callbacks.push_back(call_trigger);
             QObject::connect(param_out, SIGNAL(connectionDone(Connectable*)), call_trigger, SLOT(call()));
-
-            widget_ctrl_->insertPort(current_layout_, port);
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());

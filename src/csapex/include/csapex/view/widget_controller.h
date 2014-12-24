@@ -42,6 +42,10 @@ public:
 
     MovableGraphicsProxyWidget* getProxy(const UUID& node_id);
 
+
+    //** FACTORY ??? **//
+    Port *createPort(Connectable* connector, NodeBox *box, QBoxLayout *layout);
+
     Port* getPort(const UUID& connector_id);
     Port* getPort(const Connectable* connector_id);
 
@@ -63,9 +67,7 @@ public:
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
-    QAbstractItemModel *listAvailableNodeTypes();    
-
-    void insertPort(QLayout* layout, Port* port);
+    QAbstractItemModel *listAvailableNodeTypes();
 
     bool isGridLockEnabled() const;
 
@@ -82,7 +84,7 @@ public Q_SLOTS:
     void enableGridLock(bool enabled);
 
 private:
-    void createPort(Connectable* connector, NodeBox *box, QBoxLayout *layout);
+    void insertPort(QLayout* layout, Port* port);
 
     void connectorSignalAdded(Connectable *connector);
     void connectorSignalRemoved(Connectable *connector);
