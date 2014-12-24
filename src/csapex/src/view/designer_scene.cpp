@@ -67,13 +67,20 @@ QWidget* topLevelParentWidget (QWidget* widget)
 
 QPointF centerPoint(Port* port)
 {
-    QPointF pos = port->centerPoint();
+
+    QPointF pos;
     QWidget* widget = port;
     while (widget -> parentWidget()) {
         widget = widget -> parentWidget();
         pos += widget->pos();
     }
-    return pos;
+
+    if(!port->isVisible()) {
+        QSizeF s = widget->geometry().size() * 0.5;
+        return widget->pos() + QPointF(s.width(), s.height());
+    } else {
+        return pos + port->centerPoint();
+    }
 }
 }
 
@@ -552,6 +559,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.blocked_to = to->isBlocked();
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
+    ccs.hidden_from = !fromp->isVisible();
+    ccs.hidden_to = !top->isVisible();
 
     bool is_msg = dynamic_cast<Input*>(from) || dynamic_cast<Output*>(from);
 
@@ -683,10 +692,6 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     // arrow
     QPolygonF arrow;
     QPointF a = offset(QPointF(0,0), ccs.end_pos, ARROW_LENGTH) * scale_factor;
-//    arrow.append(QPointF(to.x()+ a, to.y()));
-//    arrow.append(QPointF(to.x(), to.y() -a/2.0));
-//    arrow.append(QPointF(to.x(), to.y() + a/2.0));
-//    arrow.append(QPointF(to.x()+ a, to.y()));
 
     QPointF side(a.y()/2.0, a.x()/2.0);
     arrow.append(to - a);
@@ -715,7 +720,11 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         painter->drawPath(arrow_path);
 
     } else {
-        painter->setPen(QPen(Qt::black, ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        QLinearGradient bg_gradient(from, to);
+        bg_gradient.setColorAt(0, QColor(0,0,0, ccs.minimized_from ? 0 : 255));
+        bg_gradient.setColorAt(1, QColor(0,0,0, ccs.minimized_to ? 0 : 255));
+
+        painter->setPen(QPen(QBrush(bg_gradient), ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         foreach(const Path& path, paths) {
             painter->drawPath(path.first);
         }
@@ -737,6 +746,14 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         color_start = Qt::darkGray;
         color_end = Qt::gray;
     }
+
+    if(ccs.hidden_from) {
+        color_start.setAlpha(60);
+    }
+    if(ccs.hidden_to) {
+        color_end.setAlpha(60);
+    }
+
     QLinearGradient lg(from, to);
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);

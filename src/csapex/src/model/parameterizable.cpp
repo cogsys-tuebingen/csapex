@@ -24,33 +24,32 @@ Parameterizable::~Parameterizable()
 }
 
 template <typename T>
-T Parameterizable::readParameter(const std::string& name) const
+T Parameterizable::doReadParameter(const std::string& name) const
 {
     return parameter_state_->getParameter(name)->as<T>();
 }
 
 template <typename T>
-void Parameterizable::setParameter(const std::string& name, const T& value)
+void Parameterizable::doSetParameter(const std::string& name, const T& value)
 {
     parameter_state_->getParameter(name)->set<T>(value);
 }
 
 
+template bool Parameterizable::doReadParameter<bool>(const std::string& name) const;
+template double Parameterizable::doReadParameter<double>(const std::string& name) const;
+template int Parameterizable::doReadParameter<int>(const std::string& name) const;
+template std::string Parameterizable::doReadParameter<std::string>(const std::string& name) const;
+template std::pair<int,int> Parameterizable::doReadParameter<std::pair<int,int> >(const std::string& name) const;
+template std::pair<double,double> Parameterizable::doReadParameter<std::pair<double,double> >(const std::string& name) const;
 
-template bool Parameterizable::readParameter<bool>(const std::string& name) const;
-template double Parameterizable::readParameter<double>(const std::string& name) const;
-template int Parameterizable::readParameter<int>(const std::string& name) const;
-template std::string Parameterizable::readParameter<std::string>(const std::string& name) const;
-template std::pair<int,int> Parameterizable::readParameter<std::pair<int,int> >(const std::string& name) const;
-template std::pair<double,double> Parameterizable::readParameter<std::pair<double,double> >(const std::string& name) const;
 
-
-template void Parameterizable::setParameter<bool>(const std::string& name, const bool& value);
-template void Parameterizable::setParameter<double>(const std::string& name, const double& value);
-template void Parameterizable::setParameter<int>(const std::string& name, const int& value);
-template void Parameterizable::setParameter<std::string>(const std::string& name, const std::string& value);
-template void Parameterizable::setParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
-template void Parameterizable::setParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
+template void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value);
+template void Parameterizable::doSetParameter<double>(const std::string& name, const double& value);
+template void Parameterizable::doSetParameter<int>(const std::string& name, const int& value);
+template void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value);
+template void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
+template void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
 
 
 

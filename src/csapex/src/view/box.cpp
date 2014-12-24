@@ -33,6 +33,7 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
       down_(false), info_compo(NULL), info_thread(NULL), profiling_(false), is_placed_(false)
 {
     worker->getNodeState()->flipped_changed->connect(boost::bind(&NodeBox::flipSides, this));
+    worker->getNodeState()->minimized_changed->connect(boost::bind(&NodeBox::minimizeBox, this));
 }
 
 NodeBox::~NodeBox()
@@ -456,6 +457,14 @@ void NodeBox::flipSides()
     Q_EMIT flipped(flip);
 }
 
+void NodeBox::minimizeBox()
+{
+    updateVisuals();
+
+    bool minimize = node_worker_->getNodeState()->isMinimized();
+    Q_EMIT minimized(minimize);
+}
+
 void NodeBox::updateVisuals()
 {
     bool flip = node_worker_->getNodeState()->isFlipped();
@@ -494,15 +503,6 @@ bool NodeBox::isProfiling() const
     return profiling_;
 }
 
-void NodeBox::minimizeBox(bool minimize)
-{    
-    node_worker_->setMinimized(minimize);
-
-    updateVisuals();
-
-    Q_EMIT minimized(minimize);
-}
-
 bool NodeBox::hasSubGraph()
 {
     return false;
@@ -515,7 +515,7 @@ Graph::Ptr NodeBox::getSubGraph()
 
 void NodeBox::nodeStateChanged()
 {
-    minimizeBox(node_worker_->getNodeState()->isMinimized());
+    minimizeBox();
 
     enableContent(node_worker_->getNodeState()->isEnabled());
     ui->enablebtn->setChecked(node_worker_->getNodeState()->isEnabled());

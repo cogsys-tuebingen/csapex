@@ -168,6 +168,7 @@ set(SRC_APP
     src/command/modify_fulcrum.cpp
     src/command/delete_fulcrum.cpp
     src/command/flip_sides.cpp
+    src/command/minimize.cpp
 
 
     src/utility/error_handling.cpp

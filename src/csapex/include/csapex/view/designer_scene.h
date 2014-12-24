@@ -108,6 +108,8 @@ private:
         bool minimized_from;
         bool minimized_to;
         bool minimized;
+        bool hidden_from;
+        bool hidden_to;
 
         Position start_pos;
         Position end_pos;

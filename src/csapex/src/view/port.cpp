@@ -24,7 +24,7 @@
 
 using namespace csapex;
 
-Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, Connectable *adaptee, bool flipped)
+Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, Connectable *adaptee)
     : dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
     if(adaptee_) {
@@ -39,7 +39,7 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
         std::cerr << "creating empty port!" << std::endl;
     }
 
-    setFlipped(flipped);
+    setFlipped(flipped_);
 
     setFocusPolicy(Qt::NoFocus);
     setAcceptDrops(true);

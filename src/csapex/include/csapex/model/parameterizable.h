@@ -8,6 +8,8 @@
 
 /// SYSTEM
 #include <boost/signals2.hpp>
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/contains.hpp>
 
 namespace csapex
 {
@@ -16,6 +18,15 @@ class Parameterizable
 {
 public:
     typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > ChangedParameterList;
+
+    typedef boost::mpl::vector<bool, int, double,
+                                std::string,
+                                std::pair<int,int>,
+                                std::pair<double,double>,
+                                std::vector<int>,
+                                std::vector<double>
+                              >
+    SupportedTemplateParameters;
 
 public:
     Parameterizable();
@@ -42,10 +53,30 @@ public:
      *  GETTING PARAMETERS
      */
     template <typename T>
-    T readParameter(const std::string& name) const;
+    typename boost::enable_if<boost::mpl::contains< SupportedTemplateParameters, T >, T>::type
+    readParameter(const std::string& name) const
+    {
+        return doReadParameter<T>(name);
+    }
+    template <typename T>
+    typename boost::disable_if<boost::mpl::contains< SupportedTemplateParameters, T >, T>::type
+    readParameter(const std::string& name) const
+    {
+        throw std::runtime_error(std::string("cannot read parameter ") + name);
+    }
 
     template <typename T>
-    void setParameter(const std::string& name, const T& value);
+    typename boost::enable_if<boost::mpl::contains< SupportedTemplateParameters, T >, void>::type
+    setParameter(const std::string& name, const T& value)
+    {
+        doSetParameter<T>(name, value);
+    }
+    template <typename T>
+    typename boost::disable_if<boost::mpl::contains< SupportedTemplateParameters, T >, void>::type
+    setParameter(const std::string& name, const T& /*value*/)
+    {
+        throw std::runtime_error(std::string("cannot set parameter ") + name);
+    }
 
     /***
      *  PARAMETER CONSTRAINTS
@@ -83,6 +114,11 @@ public:
     virtual GenericStatePtr getParameterStateClone() const;
     virtual void setParameterState(Memento::Ptr memento);
 
+
+    template <typename T>
+    T doReadParameter(const std::string& name) const;
+    template <typename T>
+    void doSetParameter(const std::string& name, const T& value);
 
 private:
     void parameterChanged(param::Parameter* param);

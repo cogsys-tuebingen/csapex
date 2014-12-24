@@ -288,7 +288,10 @@ void WidgetController::connectorSignalRemoved(Connectable *connector)
 Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
 {
     if(designer_) {
-        Port* port = new Port(dispatcher_, this, connector, box->isFlipped());
+        Port* port = new Port(dispatcher_, this, connector);
+
+        port->setFlipped(box->isFlipped());
+        port->setMinimizedSize(box->isMinimizedSize());
 
         QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
         QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));

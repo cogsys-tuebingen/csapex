@@ -92,6 +92,7 @@ public Q_SLOTS:
 
 private:
     void flipBox(NodeBox* box);
+    void minimizeBox(NodeBox* box);
     void deleteBox(NodeBox* box);
     void createNewThreadGroupFor(NodeWorker* worker);
 

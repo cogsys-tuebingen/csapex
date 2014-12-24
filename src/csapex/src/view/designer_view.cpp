@@ -6,6 +6,7 @@
 #include <csapex/command/move_box.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/command/flip_sides.h>
+#include <csapex/command/minimize.h>
 #include <csapex/view/box_dialog.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
@@ -421,14 +422,14 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
         QAction* max = new QAction("maximize", &menu);
         max->setIcon(QIcon(":/maximize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&NodeBox::minimizeBox, box, false);
+        handler[max] = boost::bind(&DesignerView::minimizeBox, this, box);
         menu.addAction(max);
 
     } else {
         QAction* min = new QAction("minimize", &menu);
         min->setIcon(QIcon(":/minimize.png"));
         min->setIconVisibleInMenu(true);
-        handler[min] = boost::bind(&NodeBox::minimizeBox, box, true);
+        handler[min] = boost::bind(&DesignerView::minimizeBox, this, box);
         menu.addAction(min);
     }
 
@@ -537,6 +538,11 @@ void DesignerView::createNewThreadGroupFor(NodeWorker* worker)
 void DesignerView::flipBox(NodeBox *box)
 {
     dispatcher_->execute(Command::Ptr(new command::FlipSides(box->getNodeWorker()->getUUID())));
+}
+
+void DesignerView::minimizeBox(NodeBox *box)
+{
+    dispatcher_->execute(Command::Ptr(new command::Minimize(box->getNodeWorker()->getUUID())));
 }
 
 void DesignerView::deleteBox(NodeBox* box)

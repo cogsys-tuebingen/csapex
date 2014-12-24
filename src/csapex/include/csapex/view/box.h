@@ -99,7 +99,7 @@ public Q_SLOTS:
 
 
     void getInformation();
-    void minimizeBox(bool minimize);
+    void minimizeBox();
     void enableContent(bool enable);
     void refreshStylesheet();
     void eventModelChanged();
