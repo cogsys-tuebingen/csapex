@@ -9,6 +9,7 @@
 #include <utils_param/bitset_parameter.h>
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
+#include <utils_param/output_progress_parameter.h>
 
 using namespace param;
 
@@ -31,7 +32,9 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
     } else if(t == "trigger") {
         return Parameter::Ptr(new TriggerParameter);
     } else if(t == "color") {
-        return Parameter::Ptr(new ColorParameter);
+        return Parameter::Ptr(new ColorParameter);        
+    } else if(t == "progress") {
+        return Parameter::Ptr(new OutputProgressParameter);
     } else {
         throw std::runtime_error(std::string("illegal parameter type: ") + t);
     }
@@ -290,3 +293,9 @@ template
 Parameter::Ptr ParameterFactory::declareInterval<int>(const std::string& name,
                                                    const ParameterDescription& description,
                                                    int min, int max, int def_min, int def_max, int step);
+
+
+Parameter::Ptr ParameterFactory::declareOutputProgress(const std::string &name, const ParameterDescription &description)
+{
+    return Parameter::Ptr(new OutputProgressParameter(name, description));
+}

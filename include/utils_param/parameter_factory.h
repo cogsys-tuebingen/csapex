@@ -329,6 +329,16 @@ public:
     {
         return declareValue(name, ParameterDescription(), def);
     }
+
+
+
+    /**
+     * @brief declareOutputProgress
+     * @param name
+     * @param description
+     * @return
+     */
+    static Parameter::Ptr declareOutputProgress(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
 };
 
 }

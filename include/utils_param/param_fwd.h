@@ -23,6 +23,8 @@ FWD(ValueParameter);
 FWD(IntervalParameter);
 FWD(ColorParameter);
 
+FWD(OutputProgressParameter);
+
 }
 
 #undef FWD

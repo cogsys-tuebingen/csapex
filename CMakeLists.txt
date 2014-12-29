@@ -35,6 +35,8 @@ add_library(utils_param
     src/color_parameter.cpp
     src/null_parameter.cpp
 
+    src/output_progress_parameter.cpp
+
     src/parameter_factory.cpp
     src/parameter_map.cpp
     src/parameter_provider.cpp)
