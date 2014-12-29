@@ -22,6 +22,7 @@
 #include <utils_param/path_parameter.h>
 #include <utils_param/trigger_parameter.h>
 #include <utils_param/color_parameter.h>
+#include <utils_param/output_progress_parameter.h>
 
 /// SYSTEM
 #include <boost/lambda/lambda.hpp>
@@ -36,6 +37,7 @@
 #include <QGroupBox>
 #include <QListWidget>
 #include <QApplication>
+#include <QProgressBar>
 
 using namespace csapex;
 using namespace boost::lambda;
@@ -653,6 +655,17 @@ void model_updateBitSetParameter(param::BitSetParameter* bitset_p, QCheckBox* it
     bitset_p->setBitTo(str, item->isChecked());
 }
 
+// PROGRESS ////////////////////
+void ui_updateProgressParameter(param::OutputProgressParameter* progress_p, QProgressBar* bar)
+{
+    assertGuiThread();
+    bar->setValue(progress_p->getProgress());
+}
+void ui_updateProgressScope(param::OutputProgressParameter* progress_p, QProgressBar* bar)
+{
+    assertGuiThread();
+    bar->setMaximum(progress_p->getProgressMaximum());
+}
 
 }
 
@@ -706,6 +719,8 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         INSTALL(param::IntervalParameter);
         INSTALL(param::SetParameter);
         INSTALL(param::BitSetParameter);
+
+        INSTALL(param::OutputProgressParameter);
 #undef INSTALL
     }
 
@@ -1093,6 +1108,21 @@ void DefaultNodeAdapter::setupParameter(param::BitSetParameter *bitset_p)
     }
 
     current_layout_->addWidget(group);
+}
+
+void DefaultNodeAdapter::setupParameter(param::OutputProgressParameter* progress)
+{
+    QProgressBar* bar = new QProgressBar;
+    bar->setValue(progress->getProgress());
+    bar->setMaximum(progress->getProgressMaximum());
+    bar->setFormat(QString::fromStdString(progress->name()) + ": %p%");
+    current_layout_->addWidget(bar);
+
+    // model change -> ui
+    bridge.connectInGuiThread(progress->parameter_changed, boost::bind(&ui_updateProgressParameter, progress, bar));
+
+    // parameter scope changed -> update slider interval
+    bridge.connectInGuiThread(progress->scope_changed, boost::bind(&ui_updateProgressScope, progress, bar));
 }
 
 

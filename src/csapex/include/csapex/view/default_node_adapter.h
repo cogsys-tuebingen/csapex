@@ -77,6 +77,8 @@ protected:
     void setupParameter(param::SetParameter* set_p);
     void setupParameter(param::BitSetParameter* bitset_p);
 
+    void setupParameter(param::OutputProgressParameter* bitset_p);
+
     void clear();
 
 public:
