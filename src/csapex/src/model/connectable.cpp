@@ -1,9 +1,6 @@
 /// HEADER
 #include <csapex/model/connectable.h>
 
-/// COMPONENT
-#include <csapex/core/settings.h>
-
 /// SYSTEM
 #include <iostream>
 #include <sstream>
@@ -26,8 +23,8 @@ UUID Connectable::makeUUID(const UUID &box_uuid, const std::string& type, int su
     return UUID::make(ss.str());
 }
 
-Connectable::Connectable(Settings& settings, const UUID& uuid)
-    : Unique(uuid), settings_(settings),
+Connectable::Connectable(const UUID& uuid)
+    : Unique(uuid),
       sync_mutex(QMutex::Recursive),
       buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
       blocked_(false), guard_(0xDEADBEEF)
@@ -35,8 +32,8 @@ Connectable::Connectable(Settings& settings, const UUID& uuid)
     init();
 }
 
-Connectable::Connectable(Settings& settings, Unique* parent, int sub_id, const std::string& type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)), settings_(settings),
+Connectable::Connectable(Unique* parent, int sub_id, const std::string& type)
+    : Unique(makeUUID(parent->getUUID(), type, sub_id)),
       sync_mutex(QMutex::Recursive),
       buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
       blocked_(false), guard_(0xDEADBEEF)

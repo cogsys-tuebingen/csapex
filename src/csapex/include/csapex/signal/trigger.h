@@ -20,8 +20,8 @@ class Trigger : public Connectable
     friend class DesignerIO;
 
 public:
-    Trigger(Settings& settings, const UUID &uuid);
-    Trigger(Settings& settings, Unique *parent, int sub_id);
+    Trigger(const UUID &uuid);
+    Trigger(Unique *parent, int sub_id);
     ~Trigger();
 
     virtual bool canOutput() const {

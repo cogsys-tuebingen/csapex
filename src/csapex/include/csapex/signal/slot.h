@@ -22,8 +22,8 @@ class Slot : public Connectable
     friend class command::DeleteConnection;
 
 public:
-    Slot(boost::function<void()> callback, Settings &settings, const UUID &uuid);
-    Slot(boost::function<void()> callback, Settings& settings, Unique *parent, int sub_id);
+    Slot(boost::function<void()> callback, const UUID &uuid);
+    Slot(boost::function<void()> callback, Unique *parent, int sub_id);
     virtual ~Slot();
 
     virtual void trigger();

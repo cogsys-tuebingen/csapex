@@ -149,6 +149,33 @@ public:
     Slot* addSlot(const std::string& label, boost::function<void()> callback);
     Trigger* addTrigger(const std::string& label);
 
+
+
+
+    std::vector<Input*> getMessageInputs() const;
+    std::vector<Output*> getMessageOutputs() const;
+    std::vector<Slot*> getSlots() const;
+    std::vector<Trigger*> getTriggers() const;
+
+    void removeInput(const UUID& uuid);
+    void removeOutput(const UUID& uuid);
+    void removeTrigger(const UUID& uuid);
+    void removeSlot(const UUID& uuid);
+
+
+    /*
+     * MISCELLANEOUS
+     */
+
+    void setTickEnabled(bool tick);
+    void setTickFrequency(double f);
+
+    bool isSource() const;
+    void setIsSource(bool source);
+
+    bool isSink() const;
+    void setIsSink(bool sink);
+
 private:
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);

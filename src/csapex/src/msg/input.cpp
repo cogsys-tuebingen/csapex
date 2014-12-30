@@ -12,14 +12,14 @@
 
 using namespace csapex;
 
-Input::Input(Settings& settings, const UUID &uuid)
-    : Connectable(settings, uuid), target(NULL), buffer_(new Buffer), optional_(false)
+Input::Input(const UUID &uuid)
+    : Connectable(uuid), target(NULL), buffer_(new Buffer), optional_(false)
 {
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
 }
 
-Input::Input(Settings &settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "in"), target(NULL), buffer_(new Buffer), optional_(false)
+Input::Input(Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "in"), target(NULL), buffer_(new Buffer), optional_(false)
 {
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
 }

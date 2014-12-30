@@ -20,8 +20,7 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      modifier_(NULL), settings_(NULL),
-      worker_(NULL)
+      modifier_(NULL), worker_(NULL)
 {
 }
 
@@ -31,11 +30,10 @@ Node::~Node()
 }
 
 void Node::initialize(const std::string& type, const UUID& uuid,
-                   NodeWorker* node_worker, Settings* settings)
+                   NodeWorker* node_worker)
 {
     worker_ = node_worker;
-    modifier_ = new NodeModifier(node_worker),
-    settings_ = settings;
+    modifier_ = new NodeModifier(node_worker);
 
     parameter_state_->setParentUUID(uuid);
 

@@ -106,8 +106,8 @@ Q_SIGNALS:
     void typeChanged();
 
 protected:
-    Connectable(Settings& settings, const UUID &uuid);
-    Connectable(Settings& settings, Unique *parent, int sub_id, const std::string &type);
+    Connectable(const UUID &uuid);
+    Connectable(Unique *parent, int sub_id, const std::string &type);
     virtual ~Connectable();
     void init();
 
@@ -119,8 +119,6 @@ protected:
     virtual bool shouldCreate(bool left, bool right);
 
 protected:
-    Settings& settings_;
-
     mutable QMutex io_mutex;
     mutable QMutex sync_mutex;
 

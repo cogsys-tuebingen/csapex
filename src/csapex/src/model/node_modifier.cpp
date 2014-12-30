@@ -35,3 +35,73 @@ Trigger* NodeModifier::addTrigger(const std::string& label)
 {
     return node_worker_->addTrigger(label);
 }
+
+
+
+
+std::vector<Input*> NodeModifier::getMessageInputs() const
+{
+    return node_worker_->getMessageInputs();
+}
+std::vector<Output*> NodeModifier::getMessageOutputs() const
+{
+    return node_worker_->getMessageOutputs();
+}
+std::vector<Slot*> NodeModifier::getSlots() const
+{
+    return node_worker_->getSlots();
+}
+std::vector<Trigger*> NodeModifier::getTriggers() const
+{
+    return node_worker_->getTriggers();
+}
+
+
+void NodeModifier::removeInput(const UUID &uuid)
+{
+    node_worker_->removeInput(uuid);
+}
+
+void NodeModifier::removeOutput(const UUID &uuid)
+{
+    node_worker_->removeOutput(uuid);
+}
+
+void NodeModifier::removeSlot(const UUID &uuid)
+{
+    node_worker_->removeSlot(uuid);
+}
+
+void NodeModifier::removeTrigger(const UUID &uuid)
+{
+    node_worker_->removeTrigger(uuid);
+}
+
+
+void NodeModifier::setTickEnabled(bool tick)
+{
+    node_worker_->setTickEnabled(tick);
+}
+
+void NodeModifier::setTickFrequency(double f)
+{
+    node_worker_->setTickFrequency(f);
+}
+
+bool NodeModifier::isSource() const
+{
+    return node_worker_->isSource();
+}
+void NodeModifier::setIsSource(bool source)
+{
+    node_worker_->setIsSource(source);
+}
+
+bool NodeModifier::isSink() const
+{
+    return node_worker_->isSink();
+}
+void NodeModifier::setIsSink(bool sink)
+{
+    node_worker_->setIsSink(sink);
+}

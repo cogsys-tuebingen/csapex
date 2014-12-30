@@ -16,14 +16,14 @@
 
 using namespace csapex;
 
-Trigger::Trigger(Settings &settings, const UUID& uuid)
-    : Connectable(settings, uuid)
+Trigger::Trigger(const UUID& uuid)
+    : Connectable(uuid)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 }
 
-Trigger::Trigger(Settings& settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "trigger")
+Trigger::Trigger(Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "trigger")
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 }

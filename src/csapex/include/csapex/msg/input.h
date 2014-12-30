@@ -26,8 +26,8 @@ class Input : public Connectable
     friend class command::DeleteConnection;
 
 public:
-    Input(Settings &settings, const UUID &uuid);
-    Input(Settings& settings, Unique *parent, int sub_id);
+    Input(const UUID &uuid);
+    Input(Unique *parent, int sub_id);
     virtual ~Input();
 
     virtual bool canInput() const {

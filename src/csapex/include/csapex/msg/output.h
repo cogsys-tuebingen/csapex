@@ -20,8 +20,8 @@ class Output : public Connectable
     friend class DesignerIO;
 
 public:
-    Output(Settings& settings, const UUID &uuid);
-    Output(Settings& settings, Unique *parent, int sub_id);
+    Output(const UUID &uuid);
+    Output(Unique *parent, int sub_id);
     ~Output();
 
     virtual bool canOutput() const {

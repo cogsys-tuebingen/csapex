@@ -20,8 +20,7 @@ public:
     Node();
     virtual ~Node();
 
-    void initialize(const std::string &type, const UUID &uuid,
-                    NodeWorker *node_worker, Settings *settings);
+    void initialize(const std::string &type, const UUID &uuid, NodeWorker *node_worker);
     void doSetup();
 
     NodeWorker* getNodeWorker() const;
@@ -53,7 +52,6 @@ public:
 
 protected:
     NodeModifier* modifier_;
-    Settings* settings_;
 
 private:
     NodeWorker* worker_;

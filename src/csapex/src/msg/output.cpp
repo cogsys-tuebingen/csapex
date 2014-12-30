@@ -15,13 +15,13 @@
 
 using namespace csapex;
 
-Output::Output(Settings &settings, const UUID& uuid)
-    : Connectable(settings, uuid), force_send_message_(false)
+Output::Output(const UUID& uuid)
+    : Connectable(uuid), force_send_message_(false)
 {
 }
 
-Output::Output(Settings& settings, Unique* parent, int sub_id)
-    : Connectable(settings, parent, sub_id, "out"), force_send_message_(false)
+Output::Output(Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "out"), force_send_message_(false)
 {
 }
 

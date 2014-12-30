@@ -48,7 +48,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 
     node_state_->setLabel(uuid);
-    node_->initialize(type, uuid, this, &settings_);
+    node_->initialize(type, uuid, this);
 
     bool params_created_in_constructor = node_->getParameterCount() != 0;
 
@@ -214,7 +214,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
     }
 
     {
-        Input* cin = new Input(settings_, UUID::make_sub(getUUID(), std::string("in_") + p->name()));
+        Input* cin = new Input(UUID::make_sub(getUUID(), std::string("in_") + p->name()));
         cin->setEnabled(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -228,7 +228,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         input_2_param_[cin] = p;
     }
     {
-        Output* cout = new Output(settings_, UUID::make_sub(getUUID(), std::string("out_") + p->name()));
+        Output* cout = new Output(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
         cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -606,7 +606,7 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
 Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
 {
     int id = inputs_.size();
-    Input* c = new Input(settings_, this, id);
+    Input* c = new Input(this, id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
@@ -619,7 +619,7 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
 Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 {
     int id = outputs_.size();
-    Output* c = new Output(settings_, this, id);
+    Output* c = new Output(this, id);
     c->setLabel(label);
     c->setType(type);
 
@@ -630,7 +630,7 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
 Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> callback)
 {
     int id = slots_.size();
-    Slot* slot = new Slot(callback, settings_, this, id);
+    Slot* slot = new Slot(callback, this, id);
     slot->setLabel(label);
     slot->setEnabled(true);
 
@@ -642,7 +642,7 @@ Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> call
 Trigger* NodeWorker::addTrigger(const std::string& label)
 {
     int id = triggers_.size();
-    Trigger* trigger = new Trigger(settings_, this, id);
+    Trigger* trigger = new Trigger(this, id);
     trigger->setLabel(label);
     trigger->setEnabled(true);
 
