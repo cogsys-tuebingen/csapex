@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1038</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -102,10 +102,28 @@
    </widget>
    <widget class="QMenu" name="menuProcessing">
     <property name="title">
-     <string>&amp;Processing</string>
+     <string>P&amp;rocessing</string>
     </property>
     <addaction name="actionPause"/>
     <addaction name="actionClearBlock"/>
+   </widget>
+   <widget class="QMenu" name="menuPlugins">
+    <property name="title">
+     <string>&amp;Plugins</string>
+    </property>
+    <widget class="QMenu" name="menu_Available_Plugins">
+     <property name="title">
+      <string>&amp;Available Plugins</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../res/csapex_resources.qrc">
+       <normaloff>:/plugin.png</normaloff>:/plugin.png</iconset>
+     </property>
+     <addaction name="actionDeselect_plugins_to_ignore_them"/>
+     <addaction name="separator"/>
+    </widget>
+    <addaction name="menu_Available_Plugins"/>
+    <addaction name="action_How_to_install"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -113,6 +131,7 @@
    <addaction name="menuSelection"/>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuPlugins"/>
   </widget>
   <widget class="QToolBar" name="Tools">
    <property name="windowTitle">
@@ -250,15 +269,15 @@
      <item>
       <widget class="QToolBox" name="help_toolbox">
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="ui">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>96</height>
+          <width>88</width>
+          <height>88</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -270,7 +289,7 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
-          <widget class="QTextBrowser" name="textBrowser">
+          <widget class="QTextBrowser" name="text_ui">
            <property name="html">
             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -338,8 +357,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>282</width>
-          <height>302</height>
+          <width>218</width>
+          <height>199</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -397,7 +416,75 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="plugins">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>274</width>
+          <height>89</height>
+         </rect>
+        </property>
+        <attribute name="icon">
+         <iconset resource="../res/csapex_resources.qrc">
+          <normaloff>:/add_node.png</normaloff>:/add_node.png</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>Plugins</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_10">
+         <item>
+          <widget class="QTextBrowser" name="text_plugins">
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:22pt; font-weight:600;&quot;&gt;HOW TO INSTALL NEW PLUGINS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This guide explains how to install plugins. &lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;INSTALL A &amp;quot;BOOT&amp;quot; PLUGIN&lt;/span&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Boot plugins are raw plugins that are loaded when the program is started.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;To install one, simply follow these steps:&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINUX:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	create the directory ~/.csapex/boot&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	create a link to the plugin library, e.g. &lt;br /&gt;		~/.csapex/boot/libcsapex_ros_boot.so -&amp;gt; ~/ws/apex/devel/lib/libcsapex_ros_boot.so&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;NON-BOOT-PLUGINS USING ROS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Create a catkin_package&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	catkin_create_pkg &lt;span style=&quot; font-weight:600; color:#ff6868;&quot;&gt;my_plugins&lt;/span&gt; csapex csapex_ros&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Create a plugins meta file&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	roscd &lt;span style=&quot; font-weight:600; color:#ff6868;&quot;&gt;my_plugins&lt;br /&gt;	&lt;/span&gt;touch plugins.xml&lt;br /&gt;	Enter into package.xml:&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Courier New,courier';&quot;&gt;	&amp;lt;export&amp;gt;&lt;br /&gt;	    &amp;lt;csapex plugin=&amp;quot;${prefix}/plugins.xml&amp;quot; /&amp;gt;&lt;br /&gt;	&amp;lt;/export&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Enter into plugins.xml:&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;LC1&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Courier New,courier';&quot;&gt;	&lt;/span&gt;&lt;span style=&quot; font-family:'Courier New,courier';&quot;&gt;&amp;lt;library path=&amp;quot;lib&lt;/span&gt;&lt;span style=&quot; font-weight:600; color:#ff6868;&quot;&gt;my_plugins&lt;/span&gt;&lt;span style=&quot; font-family:'Courier New,courier';&quot;&gt;&amp;quot;&amp;gt;&amp;lt;/library&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Now &lt;span style=&quot; font-weight:600;&quot;&gt;lib&lt;/span&gt;&lt;span style=&quot; font-weight:600; color:#ff6868;&quot;&gt;my_plugins&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;.so&lt;/span&gt; will be loaded.&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;TODO: describe how to create nodes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="Profiler">
+   <property name="allowedAreas">
+    <set>Qt::AllDockWidgetAreas</set>
+   </property>
+   <property name="windowTitle">
+    <string>Profiler</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_9">
+     <item>
+      <widget class="QGraphicsView" name="profiler_timeline_view"/>
      </item>
     </layout>
    </widget>
@@ -628,6 +715,23 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Display Threads</string>
+   </property>
+  </action>
+  <action name="action_How_to_install">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/help.png</normaloff>:/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;How to install </string>
+   </property>
+  </action>
+  <action name="actionDeselect_plugins_to_ignore_them">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>deselect plugins to ignore them</string>
    </property>
   </action>
  </widget>

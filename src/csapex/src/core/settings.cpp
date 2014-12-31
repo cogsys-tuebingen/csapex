@@ -104,6 +104,11 @@ void Settings::add(param::Parameter::Ptr p)
     settingsChanged();
 }
 
+param::Parameter::Ptr Settings::get(const std::string &name)
+{
+    return settings_.at(name);
+}
+
 bool Settings::knows(const std::string &name) const
 {
     return settings_.find(name) != settings_.end();

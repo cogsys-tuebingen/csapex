@@ -17,6 +17,7 @@
 #include <csapex/view/designer.h>
 #include <csapex/view/widget_controller.h>
 #include "ui_csapex_window.h"
+#include <csapex/plugin/plugin_locator.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>
@@ -28,11 +29,15 @@
 #include <QFileDialog>
 #include <QApplication>
 #include <QTreeWidget>
+#include <QSignalMapper>
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphWorkerPtr graph, Designer* designer, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph), ui(new Ui::CsApexWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL)
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl,
+                           GraphWorkerPtr graph,
+                           Designer* designer, PluginLocator *locator, QWidget *parent)
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph),
+      ui(new Ui::CsApexWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL), plugin_locator_(locator)
 {
     core_.addListener(this);
 }
@@ -90,6 +95,7 @@ void CsApexWindow::construct()
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
     QObject::connect(designer_, SIGNAL(helpRequest(NodeBox*)), this, SLOT(showHelp(NodeBox*)));
+    QObject::connect(ui->action_How_to_install, SIGNAL(triggered()), this, SLOT(showHowToInstall()));
 
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
@@ -122,6 +128,8 @@ void CsApexWindow::construct()
 
     updateMenu();
     updateTitle();
+
+    createPluginsMenu();
 
     timer.setInterval(100);
     timer.setSingleShot(false);
@@ -163,6 +171,13 @@ void CsApexWindow::showHelp(NodeBox *box)
         }
         ++it;
     }
+}
+
+void CsApexWindow::showHowToInstall()
+{
+    ui->HelpCenter->show();
+    ui->help_toolbox->show();
+    ui->help_toolbox->setCurrentWidget(ui->plugins);
 }
 
 void CsApexWindow::updateDebugInfo()
@@ -369,6 +384,45 @@ void CsApexWindow::updateTitle()
     }
 
     setWindowTitle(window.str().c_str());
+}
+
+void CsApexWindow::createPluginsMenu()
+{
+    std::vector<std::string> plugins = plugin_locator_->getAllLibraries();
+
+    foreach(const std::string& library, plugins) {
+        QAction* a = new QAction(QString::fromStdString(library), ui->menu_Available_Plugins);
+        a->setCheckable(true);
+        a->setObjectName(QString::fromStdString(library));
+
+        bool ignored = plugin_locator_->isLibraryIgnored(library);
+        bool error = plugin_locator_->hasLibraryError(library);
+
+        a->setChecked(!ignored);
+        if(ignored) {
+            a->setIcon(QIcon(":/plugin_disabled.png"));
+        } else if(error) {
+            a->setIcon(QIcon(":/plugin_error.png"));
+            a->setToolTip(QString::fromStdString(plugin_locator_->getLibraryError(library)));
+        } else {
+            a->setIcon(QIcon(":/plugin.png"));
+        }
+
+        QSignalMapper* mapper = new QSignalMapper(this);
+        QObject::connect(a, SIGNAL(toggled(bool)), mapper, SLOT(map()));
+        mapper->setMapping(a, a);
+
+        QObject::connect(mapper, SIGNAL(mapped(QObject*)), this, SLOT(updatePlugin(QObject*)));
+
+        ui->menu_Available_Plugins->addAction(a);
+    }
+}
+
+void CsApexWindow::updatePlugin(const QObject* &action)
+{
+    const QAction* a = dynamic_cast<const QAction*>(action);
+
+    plugin_locator_->ignoreLibrary(a->objectName().toStdString(), !a->isChecked());
 }
 
 void CsApexWindow::tick()

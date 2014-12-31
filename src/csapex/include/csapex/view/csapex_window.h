@@ -31,7 +31,9 @@ public:
      * @brief CsApexWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphWorkerPtr graph, Designer *designer, QWidget* parent = 0);
+    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl,
+                          GraphWorkerPtr graph,
+                          Designer *designer, PluginLocator* locator, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void closeEvent(QCloseEvent* event);
@@ -46,6 +48,9 @@ private Q_SLOTS:
     void loadStyleSheet(const QString& path);
     void updateDeleteAction();
     void showHelp(NodeBox* box);
+    void showHowToInstall();
+
+    void updatePlugin(const QObject *&action);
 
 public Q_SLOTS:
     void save();
@@ -80,6 +85,7 @@ Q_SIGNALS:
 
 private:
     void construct();
+    void createPluginsMenu();
     void loadStyleSheet();
 
     std::string getConfigFile();
@@ -99,6 +105,7 @@ private:
     bool init_;
 
     QFileSystemWatcher* style_sheet_watcher_;
+    PluginLocator* plugin_locator_;
 };
 
 } /// NAMESPACE

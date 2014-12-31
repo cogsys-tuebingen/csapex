@@ -7,7 +7,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/utility/plugin_manager.hpp>
+#include <csapex/plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

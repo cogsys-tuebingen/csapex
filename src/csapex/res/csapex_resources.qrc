@@ -31,5 +31,7 @@
         <file>thread_group.png</file>
         <file>thread_group_add.png</file>
         <file>thread_group_none.png</file>
+        <file>plugin_disabled.png</file>
+        <file>plugin_error.png</file>
     </qresource>
 </RCC>

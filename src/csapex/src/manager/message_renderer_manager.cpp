@@ -2,7 +2,7 @@
 #include <csapex/manager/message_renderer_manager.h>
 
 /// COMPONENT
-#include <csapex/utility/plugin_manager.hpp>
+#include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/core/settings.h>
 #include <csapex/msg/apex_message_provider.h>
 

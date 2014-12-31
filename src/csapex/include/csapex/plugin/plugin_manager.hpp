@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/constructor.hpp>
-#include <csapex/utility/plugin_locator.h>
+#include <csapex/plugin/plugin_locator.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
@@ -47,13 +47,13 @@ protected:
         std::vector<std::string> xml_files = locator->enumerateXmlFiles<M>();
 
         for(std::vector<std::string>::const_iterator manifest = xml_files.begin(); manifest != xml_files.end(); ++manifest) {
-            processManifest(*manifest);
+            processManifest(locator, *manifest);
         }
 
         plugins_loaded_ = true;
     }
 
-    bool processManifest(const std::string& xml_file)
+    bool processManifest(csapex::PluginLocator* locator, const std::string& xml_file)
     {
         TiXmlDocument document;
         document.LoadFile(xml_file);
@@ -76,10 +76,15 @@ protected:
                 continue;
             }
 
-            try {
-                loadLibrary(library_name, library);
-            } catch(const class_loader::ClassLoaderException& e) {
-                std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
+            if(!locator->isLibraryIgnored(library_name)) {
+                try {
+                    loadLibrary(library_name, library);
+                    locator->setLibraryLoaded(library_name);
+
+                } catch(const class_loader::ClassLoaderException& e) {
+                    std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
+                    locator->setLibraryError(library_name, e.what());
+                }
             }
 
             library = library->NextSiblingElement( "library" );

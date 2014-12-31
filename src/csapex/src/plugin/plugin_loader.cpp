@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/plugin_loader.h>
+#include <csapex/plugin/plugin_loader.h>
 
 /// SYSTEM
 #include <boost/foreach.hpp>

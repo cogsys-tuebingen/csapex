@@ -9,7 +9,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/msg/message.h>
 #include <csapex/msg/message_factory.h>
-#include <csapex/utility/plugin_manager.hpp>
+#include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/model/tag.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/graph_worker.h>

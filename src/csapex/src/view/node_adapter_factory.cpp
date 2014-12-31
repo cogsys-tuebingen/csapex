@@ -5,7 +5,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/view/node_adapter.h>
 #include <csapex/view/default_node_adapter.h>
-#include <csapex/utility/plugin_manager.hpp>
+#include <csapex/plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <qglobal.h>

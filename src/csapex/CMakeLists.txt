@@ -120,6 +120,9 @@ set(SRC_PLUGIN
 )
 
 set(SRC_APP
+    src/plugin/plugin_loader.cpp
+    src/plugin/plugin_locator.cpp
+
     src/model/node_worker.cpp
     src/model/graph.cpp
     src/model/graph_worker.cpp
@@ -194,8 +197,6 @@ set(SRC_APP
     src/utility/thread.cpp
     src/utility/uuid.cpp
     src/utility/assert.cpp
-    src/utility/plugin_loader.cpp
-    src/utility/plugin_locator.cpp
     src/utility/widget_picker.cpp
 
     src/view/box.cpp

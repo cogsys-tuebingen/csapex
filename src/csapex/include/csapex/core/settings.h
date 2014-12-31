@@ -60,6 +60,7 @@ public:
     }
 
     void add(param::Parameter::Ptr p);
+    param::ParameterPtr get(const std::string& name);
 
     template <typename T>
     void set(const std::string& name, const T& val)

@@ -21,7 +21,7 @@
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/designer_scene.h>
 #include <csapex/core/thread_pool.h>
-#include <csapex/utility/plugin_locator.h>
+#include <csapex/plugin/plugin_locator.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -128,7 +128,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         settings.set("additional_args", additional_args);
     }
 
-    PluginLocatorPtr plugin_locator(new PluginLocator);
+    PluginLocatorPtr plugin_locator(new PluginLocator(settings));
 
     NodeFactory::Ptr node_factory(new NodeFactory(settings, plugin_locator.get()));
     NodeAdapterFactory::Ptr node_adapter_factory(new NodeAdapterFactory(settings, plugin_locator.get()));
@@ -166,7 +166,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer);
+        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, plugin_locator.get());
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
