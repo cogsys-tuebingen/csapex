@@ -32,8 +32,8 @@ public:
      * @param parent
      */
     explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl,
-                          GraphWorkerPtr graph,
-                          Designer *designer, PluginLocator* locator, QWidget* parent = 0);
+                          GraphWorkerPtr graph, Designer *designer, ActivityLegend *legend, ActivityTimeline* timeline,
+                          PluginLocator* locator, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void closeEvent(QCloseEvent* event);
@@ -102,6 +102,8 @@ private:
     Ui::CsApexWindow* ui;
 
     Designer* designer_;
+    ActivityLegend* activity_legend_;
+    ActivityTimeline* activity_timeline_;
 
     QTimer timer;
 

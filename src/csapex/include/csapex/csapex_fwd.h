@@ -91,6 +91,8 @@ class Settings;
 FWD(Buffer);
 
 FWD(Timer);
+FWD(ActivityTimeline);
+FWD(ActivityLegend);
 
 FWD(Command);
 

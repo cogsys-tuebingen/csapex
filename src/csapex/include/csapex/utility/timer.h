@@ -18,6 +18,8 @@ public:
     typedef boost::shared_ptr<Timer> Ptr;
 
     struct Interval {
+        friend class Timer;
+
         typedef boost::shared_ptr<Interval> Ptr;
 
         Interval(const std::string& name);
@@ -62,6 +64,9 @@ public:
     std::vector<std::pair<std::string, int> > entries() const;
 
     Interlude::Ptr step(const std::string& name);
+
+    long startTimeMs() const;
+    long stopTimeMs() const;
 
 public:
     std::string timer_name_;

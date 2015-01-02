@@ -42,6 +42,8 @@ template int Parameterizable::doReadParameter<int>(const std::string& name) cons
 template std::string Parameterizable::doReadParameter<std::string>(const std::string& name) const;
 template std::pair<int,int> Parameterizable::doReadParameter<std::pair<int,int> >(const std::string& name) const;
 template std::pair<double,double> Parameterizable::doReadParameter<std::pair<double,double> >(const std::string& name) const;
+template std::vector<double> Parameterizable::doReadParameter<std::vector<double> >(const std::string& name) const;
+template std::vector<int> Parameterizable::doReadParameter<std::vector<int> >(const std::string& name) const;
 
 
 template void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value);
@@ -50,6 +52,8 @@ template void Parameterizable::doSetParameter<int>(const std::string& name, cons
 template void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value);
 template void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
 template void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
+template void Parameterizable::doSetParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
+template void Parameterizable::doSetParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
 
 
 

@@ -29,6 +29,12 @@ struct NodeWorker : public QObject, public Unique
     friend class Node;
 
 public:
+    enum ActivityType {
+        TICK,
+        PROCESS
+    };
+
+public:
     typedef boost::shared_ptr<NodeWorker> Ptr;
 
     static const double DEFAULT_FREQUENCY = 30.0;
@@ -162,6 +168,9 @@ Q_SIGNALS:
 
     void threadSwitchRequested(QThread*, int);
     void tickRequested();
+
+    void timerStarted(NodeWorker* worker, int type, long stamp);
+    void timerStopped(NodeWorker* worker, long stamp);
 
     void panic();
 

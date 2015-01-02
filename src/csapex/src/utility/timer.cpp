@@ -30,6 +30,16 @@ void Timer::finish()
     }
 }
 
+long Timer::startTimeMs() const
+{
+    return root->start_.toMSecsSinceEpoch();
+}
+
+long Timer::stopTimeMs() const
+{
+    return root->end_.toMSecsSinceEpoch();
+}
+
 Timer::Interlude::Ptr Timer::step(const std::string &name)
 {
     return Timer::Interlude::Ptr(new Timer::Interlude(this, name));

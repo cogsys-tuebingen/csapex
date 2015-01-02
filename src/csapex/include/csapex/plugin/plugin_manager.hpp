@@ -250,8 +250,6 @@ public:
     }
 
     virtual void load(csapex::PluginLocator* locator) {
-        std::cerr << typeid(M).name() << "'s group is " << PluginManagerGroup<M>::value << std::endl;
-
         locator->unload_library_request.connect(PluginManagerGroup<M>::value, boost::bind(&PluginManager<M>::unload, this, _1), boost::signals2::at_front);
         locator->reload_library_request.connect(-PluginManagerGroup<M>::value, boost::bind(&PluginManager<M>::reload, this, _1), boost::signals2::at_back);
 

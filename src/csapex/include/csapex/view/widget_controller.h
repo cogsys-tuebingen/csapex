@@ -74,6 +74,8 @@ public:
 Q_SIGNALS:
     void gridLockEnabled(bool);
 
+    void boxAdded(NodeBox* box);
+
 public Q_SLOTS:
     void nodeAdded(NodeWorkerPtr node_worker);
     void nodeRemoved(NodeWorkerPtr node_worker);

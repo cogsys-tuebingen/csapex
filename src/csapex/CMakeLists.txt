@@ -213,6 +213,8 @@ set(SRC_APP
     src/view/fulcrum_widget.cpp
     src/view/fulcrum_handle.cpp
     src/view/parameter_context_menu.cpp
+    src/view/activity_timeline.cpp
+    src/view/activity_legend.cpp
 
     ${QT_RESOURCES}
 

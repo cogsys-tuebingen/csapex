@@ -208,3 +208,5 @@ template int GenericState::readParameter<int>(const std::string& name) const;
 template std::string GenericState::readParameter<std::string>(const std::string& name) const;
 template std::pair<int,int> GenericState::readParameter<std::pair<int,int> >(const std::string& name) const;
 template std::pair<double,double> GenericState::readParameter<std::pair<double,double> >(const std::string& name) const;
+template std::vector<int> GenericState::readParameter<std::vector<int> >(const std::string& name) const;
+template std::vector<double> GenericState::readParameter<std::vector<double> >(const std::string& name) const;

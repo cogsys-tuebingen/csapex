@@ -22,6 +22,8 @@
 #include <csapex/view/designer_scene.h>
 #include <csapex/core/thread_pool.h>
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/view/activity_legend.h>
+#include <csapex/view/activity_timeline.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -146,6 +148,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
     QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Node&)), &thread_pool, SLOT(saveSettings(YAML::Node&)));
     QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), &thread_pool, SLOT(loadSettings(YAML::Node&)));
 
+
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
@@ -165,9 +168,19 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         DesignerView* view = new DesignerView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io);
         Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene);
 
+        ActivityLegend* legend = new ActivityLegend;
+        ActivityTimeline* timeline = new ActivityTimeline;
+
+        QObject::connect(legend, SIGNAL(selectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
+
+        QObject::connect(graph.get(), SIGNAL(nodeAdded(NodeWorkerPtr)), legend, SLOT(addNode(NodeWorkerPtr)));
+        QObject::connect(graph.get(), SIGNAL(nodeRemoved(NodeWorkerPtr)), legend, SLOT(removeNode(NodeWorkerPtr)));
+        QObject::connect(legend, SIGNAL(nodeAdded(NodeWorkerPtr)), timeline, SLOT(addNode(NodeWorkerPtr)));
+        QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorkerPtr)), timeline, SLOT(removeNode(NodeWorkerPtr)));
+
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, plugin_locator.get());
+        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, legend, timeline, plugin_locator.get());
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
@@ -203,7 +216,7 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
-    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
 
     std::string path_to_bin(argv[0]);
 

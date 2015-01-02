@@ -18,6 +18,8 @@
 #include <csapex/view/widget_controller.h>
 #include "ui_csapex_window.h"
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/view/activity_timeline.h>
+#include <csapex/view/activity_legend.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>
@@ -34,10 +36,11 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl,
-                           GraphWorkerPtr graph,
-                           Designer* designer, PluginLocator *locator, QWidget *parent)
+                           GraphWorkerPtr graph, Designer* designer,
+                           ActivityLegend *legend, ActivityTimeline *timeline,
+                           PluginLocator *locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph),
-      ui(new Ui::CsApexWindow), designer_(designer), init_(false), style_sheet_watcher_(NULL), plugin_locator_(locator)
+      ui(new Ui::CsApexWindow), designer_(designer), activity_legend_(legend), activity_timeline_(timeline), init_(false), style_sheet_watcher_(NULL), plugin_locator_(locator)
 {
     core_.addListener(this);
 }
@@ -53,6 +56,13 @@ void CsApexWindow::construct()
     loadStyleSheet();
 
     ui->setupUi(this);
+
+    ui->timeline->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+    QHBoxLayout* layout = dynamic_cast<QHBoxLayout*>(ui->timeline->layout());
+
+    layout->addWidget(activity_legend_, 0, Qt::AlignTop);
+    layout->addWidget(activity_timeline_, 0, Qt::AlignTop);
 
     Graph* graph = graph_worker_->getGraph();
 

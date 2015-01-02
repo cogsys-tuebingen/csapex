@@ -74,8 +74,6 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
 
 NodeWorker::~NodeWorker()
 {
-    std::cerr << "delete nodeworker " << getUUID() << std::endl;
-
     tick_immediate_ = false;
     is_setup_ = false;
 
@@ -575,6 +573,8 @@ void NodeWorker::finishTimer(Timer::Ptr t)
         timer_history_pos_ = 0;
     }
     timer_history_[timer_history_pos_] = t;
+
+    Q_EMIT timerStopped(this, t->stopTimeMs());
 }
 
 void NodeWorker::processInputs(bool all_inputs_are_present)
@@ -583,6 +583,8 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
     QMutexLocker lock_in(&sync);
 
     Timer::Ptr t(new Timer(getUUID()));
+    Q_EMIT timerStarted(this, PROCESS, t->startTimeMs());
+
     node_->useTimer(t.get());
     if(all_inputs_are_present){
         try {
@@ -1129,6 +1131,7 @@ void NodeWorker::tick()
 
 
     Timer::Ptr t(new Timer(getUUID()));
+    Q_EMIT timerStarted(this, TICK, t->startTimeMs());
     node_->useTimer(t.get());
 
     node_->checkConditions(false);

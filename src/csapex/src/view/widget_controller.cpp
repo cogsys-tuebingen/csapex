@@ -216,6 +216,8 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         // subscribe to coming connectors
         QObject::connect(node_worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorCreated(Connectable*)));
         QObject::connect(node_worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
+
+        Q_EMIT boxAdded(box);
     }
 }
 
