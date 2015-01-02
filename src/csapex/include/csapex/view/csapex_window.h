@@ -45,12 +45,15 @@ private Q_SLOTS:
     void updateTitle();
     void tick();
     void init();
+    void reloadStyleSheet(const QString& path);
     void loadStyleSheet(const QString& path);
     void updateDeleteAction();
     void showHelp(NodeBox* box);
     void showHowToInstall();
 
-    void updatePlugin(const QObject *&action);
+    void updatePluginIgnored(const QObject *&action);
+    void reloadPlugin(const QObject *&action);
+    void updatePluginAutoReload(bool autoreload);
 
 public Q_SLOTS:
     void save();

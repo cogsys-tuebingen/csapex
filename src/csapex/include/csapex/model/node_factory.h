@@ -8,14 +8,18 @@
 /// SYSTEM
 #include <vector>
 #include <boost/signals2.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace csapex
 {
 
-class NodeFactory
+class NodeFactory : private boost::noncopyable
 {
 public:
     typedef boost::shared_ptr<NodeFactory> Ptr;
+
+    boost::signals2::signal<void(const UUID&)> unload_request;
+    boost::signals2::signal<void(const UUID&)> reload_request;
 
 public:
     NodeFactory(Settings& settings, PluginLocator *locator);
@@ -41,6 +45,9 @@ public:
     boost::signals2::signal<void()> new_node_type;
 
 protected:
+    void unloadNode(NodeConstructorPtr p, UUID uuid);
+    void reloadNode(NodeConstructorPtr p, UUID uuid);
+
     void ensureLoaded();
     void rebuildPrototypes();
     void rebuildMap();
@@ -53,6 +60,8 @@ protected:
 
     std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::vector<NodeConstructor::Ptr> constructors_;
+
+    boost::unordered_map<UUID, boost::signals2::connection, UUID::Hasher> reload_connections_;
 
     PluginManager<Node>* node_manager_;
 

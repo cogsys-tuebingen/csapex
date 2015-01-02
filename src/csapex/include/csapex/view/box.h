@@ -7,6 +7,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/error_state.h>
+#include <csapex/model/node_worker.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
@@ -152,7 +153,7 @@ protected:
 
     Settings& settings_;
 
-    NodeWorkerPtr node_worker_;
+    NodeWorkerWeakPtr node_worker_;
     NodeAdapterPtr adapter_;
 
     QIcon icon_;

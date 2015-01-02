@@ -41,7 +41,7 @@ struct MockupMessage : public connection_types::Message
     typedef boost::shared_ptr<MockupMessage> Ptr;
 
     MockupMessage()
-        : Message("MockupMessage", "/")
+        : Message("MockupMessage", "/", 0)
     {
     }
 
@@ -108,7 +108,7 @@ protected:
     NodeFactory factory;
 
     NodeCreationTest()
-        : factory(settings)
+        : factory(settings, NULL)
     {
         settings.set("headless", true);
 
@@ -154,7 +154,7 @@ TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
     NodeWorkerPtr node = factory.makeNode("MockupNode", node_id);
 
     ASSERT_TRUE(node != NULL);
-    EXPECT_EQ(node_id, node->getNodeUUID());
+    EXPECT_EQ(node_id, node->getUUID());
 }
 
 TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {

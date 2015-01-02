@@ -122,7 +122,22 @@
      <addaction name="actionDeselect_plugins_to_ignore_them"/>
      <addaction name="separator"/>
     </widget>
+    <widget class="QMenu" name="menu_Reload_Plugin">
+     <property name="title">
+      <string>&amp;Reload Plugin</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../res/csapex_resources.qrc">
+       <normaloff>:/arrow_refresh.png</normaloff>:/arrow_refresh.png</iconset>
+     </property>
+     <addaction name="actionWARNING_Experimental_OS_may_not_allow_to_reload_libraries"/>
+     <addaction name="actionReloading_plugins_respawns_all_the_contained_nodes"/>
+     <addaction name="separator"/>
+     <addaction name="actionAuto_Reload"/>
+     <addaction name="separator"/>
+    </widget>
     <addaction name="menu_Available_Plugins"/>
+    <addaction name="menu_Reload_Plugin"/>
     <addaction name="action_How_to_install"/>
    </widget>
    <addaction name="menuFile"/>
@@ -276,7 +291,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>88</width>
+          <width>98</width>
           <height>88</height>
          </rect>
         </property>
@@ -732,6 +747,50 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>deselect plugins to ignore them</string>
+   </property>
+  </action>
+  <action name="actionReloading_plugins_respawns_all_the_contained_nodes">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Reloading plugins respawns all the contained nodes!</string>
+   </property>
+  </action>
+  <action name="actionUnloading">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Unloading</string>
+   </property>
+  </action>
+  <action name="actionLoading">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Loading</string>
+   </property>
+  </action>
+  <action name="actionAuto_Reload">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/arrow_refresh.png</normaloff>:/arrow_refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Auto Reload</string>
+   </property>
+  </action>
+  <action name="actionWARNING_Experimental_OS_may_not_allow_to_reload_libraries">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>WARNING: Experimental: OS may not allow to reload libraries</string>
    </property>
   </action>
  </widget>

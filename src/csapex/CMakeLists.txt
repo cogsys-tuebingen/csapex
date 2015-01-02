@@ -24,6 +24,7 @@ set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 find_package(OpenGL REQUIRED)
 find_package(TinyXML REQUIRED)
 find_package(Qt5 COMPONENTS OpenGL REQUIRED)
+find_package(console_bridge REQUIRED)
 
 qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
 qt5_wrap_ui(QT_UI
@@ -49,7 +50,7 @@ catkin_package(
    INCLUDE_DIRS include
    LIBRARIES csapex_pluginbase
    CATKIN_DEPENDS utils_param utils_qt
-   DEPENDS Boost
+   DEPENDS Boost console_bridge
    CFG_EXTRAS csapex-extras.cmake
 )
 
@@ -239,6 +240,7 @@ target_link_libraries(csapex_pluginbase
     ${catkin_LIBRARIES}
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
+    ${console_bridge_LIBRARIES}
 )
 
 
@@ -253,6 +255,7 @@ target_link_libraries(csapex_app csapex_pluginbase
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${YAML_LIBRARIES}
+    ${console_bridge_LIBRARIES}
     Qt5::OpenGL
 )
 
@@ -301,7 +304,9 @@ if(${CSAPEX_TESTING})
 
     # PROFILING
     add_executable(csapex_profile_unit_tests
+        ${ALL_HEADERS}
         ${TESTS}
+        ${SRC_ESSENTIAL}
         ${SRC_PLUGIN}
         ${QT_PLUGIN}
         ${SRC_APP}
@@ -312,7 +317,10 @@ if(${CSAPEX_TESTING})
         ${Boost_LIBRARIES}
         ${catkin_LIBRARIES}
         ${OPENGL_LIBRARIES}
-        ${YAML_LIBRARIES})
+        ${YAML_LIBRARIES}
+        ${console_bridge_LIBRARIES}
+        Qt5::OpenGL
+    )
     add_test(csapex_profile_unit_tests ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION}/csapex/csapex_profile_unit_tests)
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
                       DEPENDS csapex_profile_unit_tests)

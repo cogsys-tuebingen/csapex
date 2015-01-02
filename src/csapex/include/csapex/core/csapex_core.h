@@ -5,6 +5,8 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
+#include <csapex/command/meta.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QObject>
@@ -42,6 +44,9 @@ public:
 
     void reset();
 
+    void unloadNode(csapex::UUID uuid);
+    void reloadDone();
+
     void addListener(Listener* l);
     void removeListener(Listener* l);
 
@@ -71,7 +76,13 @@ Q_SIGNALS:
     void paused(bool);
 
 private:
+    CorePluginPtr makeCorePlugin(const std::string& name);
+    void unloadCorePlugin(const std::string& plugin);
+    void reloadCorePlugin(const std::string& plugin);
+
+private:
     Settings& settings_;
+    DragIO* drag_io_;
 
     csapex::PluginLocatorPtr plugin_locator_;
 
@@ -83,11 +94,15 @@ private:
     CommandDispatcher* cmd_dispatch;
 
     PluginManager<CorePlugin>* core_plugin_manager;
-    std::vector<boost::shared_ptr<CorePlugin> > core_plugins_;
+    std::map<std::string, boost::shared_ptr<CorePlugin> > core_plugins_;
+    std::map<std::string, bool> core_plugins_connected_;
+
     std::vector<Listener*> listener_;
 
     std::vector<BootstrapPluginPtr> boot_plugins_;
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
+
+    command::Meta::Ptr unload_commands_;
 
     bool init_;
 };

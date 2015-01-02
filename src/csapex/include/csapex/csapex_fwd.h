@@ -13,16 +13,17 @@ class mutex;
 #define FWD(name) \
     class name;\
     typedef boost::shared_ptr<name> name##Ptr;\
+    typedef boost::weak_ptr<name> name##WeakPtr;\
     typedef boost::shared_ptr<const name> name##ConstPtr;\
     static const name##Ptr name##NullPtr
 
 
+namespace csapex
+{
 template <typename T>
 class PluginManager;
 
-namespace csapex
-{
-class CorePlugin;
+FWD(CorePlugin);
 FWD(BootstrapPlugin);
 FWD(PluginLocator);
 

@@ -14,8 +14,10 @@
   <build_depend>utils_param</build_depend>
   <build_depend>utils_qt</build_depend>
   <build_depend>class_loader</build_depend>
+  <build_depend>libconsole-bridge-dev</build_depend>
 
   <run_depend>utils_param</run_depend>
   <run_depend>utils_qt</run_depend>
   <run_depend>class_loader</run_depend>
+  <run_depend>libconsole-bridge-dev</run_depend>
 </package>

@@ -4,12 +4,16 @@
 /// COMPONENT
 #include <csapex/utility/constructor.hpp>
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/plugin/plugin_constructor.hpp>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
 #include <class_loader/class_loader.h>
 #include <set>
 #include <tinyxml.h>
+
+namespace csapex
+{
 
 template <class M>
 class PluginManagerImp
@@ -18,8 +22,8 @@ class PluginManagerImp
     friend class PluginManager;
 
 protected:
-    typedef DefaultConstructor<M> Constructor;
-    typedef std::map<std::string, Constructor> Constructors;
+    typedef PluginConstructor<M> PluginConstructorM;
+    typedef std::map<std::string, PluginConstructorM> Constructors;
 
 protected:
     PluginManagerImp(const std::string& full_name)
@@ -35,7 +39,7 @@ public:
     }
 
 protected:
-    void registerConstructor(Constructor constructor) {
+    void registerConstructor(PluginConstructorM constructor) {
         available_classes[constructor.getType()] = constructor;
     }
 
@@ -45,12 +49,57 @@ protected:
 
     void load(csapex::PluginLocator* locator) {
         std::vector<std::string> xml_files = locator->enumerateXmlFiles<M>();
+        std::vector<std::string> library_paths = locator->enumerateLibraryPaths();
+
+        library_paths_.insert(library_paths_.end(), library_paths.begin(), library_paths.end());
 
         for(std::vector<std::string>::const_iterator manifest = xml_files.begin(); manifest != xml_files.end(); ++manifest) {
             processManifest(locator, *manifest);
         }
 
         plugins_loaded_ = true;
+    }
+
+    void unload(const std::string& library) {
+        // unload all matching classes
+        for(typename Constructors::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
+            PluginConstructorM& c = it->second;
+            if(c.getLibraryName() == library) {
+                c.unload();
+            }
+        }
+
+        boost::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
+        assert(!loader->isOnDemandLoadUnloadEnabled());
+
+        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
+        int retries = 1;
+        while(retries != 0) {
+            retries = loader->unloadLibrary();
+            if(retries != 0) {
+                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
+            }
+        }
+        if(loader->isLibraryLoadedByAnyClassloader()) {
+            std::cerr << "there still instances of " << library << std::endl;
+        } else {
+            std::cerr << "there no more instances of " << library << std::endl;
+        }
+    }
+
+    void reload(const std::string& library) {
+        boost::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
+        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
+        loader->loadLibrary();
+
+        // reload all matching classes
+        for(typename Constructors::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
+            PluginConstructorM& c = it->second;
+            if(c.getLibraryName() == library) {
+                c.reload();
+            }
+        }
+
     }
 
     bool processManifest(csapex::PluginLocator* locator, const std::string& xml_file)
@@ -78,8 +127,8 @@ protected:
 
             if(!locator->isLibraryIgnored(library_name)) {
                 try {
-                    loadLibrary(library_name, library);
-                    locator->setLibraryLoaded(library_name);
+                    std::string file = loadLibrary(library_name, library);
+                    locator->setLibraryLoaded(library_name, file);
 
                 } catch(const class_loader::ClassLoaderException& e) {
                     std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
@@ -93,22 +142,23 @@ protected:
         return true;
     }
 
-    void loadLibrary(const std::string& library_name, TiXmlElement* library)  {
+    std::string loadLibrary(const std::string& library_name, TiXmlElement* library)  {
         std::string library_path = library_name + ".so";
 
         boost::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
-        loaders_[library_path] = loader;
-
+        loaders_[library_name] = loader;
 
         TiXmlElement* class_element = library->FirstChildElement("class");
         while (class_element) {
-            loadClass(class_element, loader.get());
+            loadClass(library_name, class_element, loader.get());
 
             class_element = class_element->NextSiblingElement( "class" );
         }
+
+        return library_path;
     }
 
-    void loadClass(TiXmlElement* class_element, class_loader::ClassLoader* loader) {
+    void loadClass(const std::string& library_name, TiXmlElement* class_element, class_loader::ClassLoader* loader) {
         std::string base_class_type = class_element->Attribute("base_class_type");
         std::string derived_class = class_element->Attribute("type");
 
@@ -124,12 +174,13 @@ protected:
             std::string icon = readString(class_element, "icon");
             std::string tags = readString(class_element, "tags");
 
-            Constructor constructor;
+            PluginConstructorM constructor;
             constructor.setType(lookup_name);
             constructor.setDescription(description);
             constructor.setIcon(icon);
             constructor.setTags(tags);
             constructor.setConstructor(boost::bind(&class_loader::ClassLoader::createInstance<M>, loader, lookup_name));
+            constructor.setLibraryName(library_name);
 
             registerConstructor(constructor);
         }
@@ -153,8 +204,18 @@ protected:
 
     std::map< std::string, boost::shared_ptr<class_loader::ClassLoader> > loaders_;
 
+    std::vector<std::string> library_paths_;
+
     std::string full_name_;
     Constructors available_classes;
+};
+
+template <typename T>
+struct PluginManagerGroup
+{
+    enum Group {
+        value = 10
+    };
 };
 
 template <class M>
@@ -164,7 +225,7 @@ protected:
     typedef PluginManagerImp<M> Parent;
 
 public:
-    typedef typename Parent::Constructor Constructor;
+    typedef typename Parent::PluginConstructorM Constructor;
     typedef typename Parent::Constructors Constructors;
 
     PluginManager(const std::string& full_name)
@@ -189,7 +250,20 @@ public:
     }
 
     virtual void load(csapex::PluginLocator* locator) {
+        std::cerr << typeid(M).name() << "'s group is " << PluginManagerGroup<M>::value << std::endl;
+
+        locator->unload_library_request.connect(PluginManagerGroup<M>::value, boost::bind(&PluginManager<M>::unload, this, _1), boost::signals2::at_front);
+        locator->reload_library_request.connect(-PluginManagerGroup<M>::value, boost::bind(&PluginManager<M>::reload, this, _1), boost::signals2::at_back);
+
         instance->load(locator);
+    }
+
+    void unload(const std::string& library) {
+        instance->unload(library);
+    }
+
+    void reload(const std::string& library) {
+        instance->reload(library);
     }
 
     const Constructors& availableClasses() const {
@@ -219,5 +293,7 @@ template <class M>
 int PluginManager<M>::i_count = 0;
 template <class M>
 typename PluginManager<M>::Parent* PluginManager<M>::instance(NULL);
+
+}
 
 #endif // PLUGIN_MANAGER_HPP

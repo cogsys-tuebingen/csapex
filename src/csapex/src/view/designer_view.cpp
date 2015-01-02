@@ -329,6 +329,9 @@ void DesignerView::removeBoxEvent(NodeBox *box)
 {
     box->setVisible(false);
     box->deleteLater();
+
+    boxes_.erase(std::find(boxes_.begin(), boxes_.end(), box));
+    profiling_.erase(box);
 }
 
 void DesignerView::profile(NodeBox *box)

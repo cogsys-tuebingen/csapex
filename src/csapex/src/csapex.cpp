@@ -28,6 +28,7 @@
 #include <QtGui>
 #include <execinfo.h>
 #include <stdlib.h>
+#include <console_bridge/console.h>
 
 namespace po = boost::program_options;
 
@@ -202,6 +203,8 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
+    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+
     std::string path_to_bin(argv[0]);
 
     po::options_description desc("Allowed options");

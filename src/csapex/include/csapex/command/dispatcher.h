@@ -37,6 +37,7 @@ public:
     Graph* getGraph();
 
     void executeNotUndoable(Command::Ptr command);
+    void undoNotRedoable(Command::Ptr command);
 
     void populateDebugInfo(QTreeWidget* undo, QTreeWidget *redo);
 

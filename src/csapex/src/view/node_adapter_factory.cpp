@@ -40,18 +40,31 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeWorker* node, WidgetCon
 
 void NodeAdapterFactory::loadPlugins()
 {
-    ensureLoaded();
-
-    rebuildPrototypes();
+    if(node_adapter_builders_.empty()) {
+        ensureLoaded();
+        rebuildPrototypes();
+    }
 }
 
 void NodeAdapterFactory::rebuildPrototypes()
 {
-    typedef std::pair<std::string, DefaultConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
+    typedef std::pair<std::string, PluginConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
     Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
-        NodeAdapterBuilder::Ptr builder = p.second.construct();
-        node_adapter_builders_[builder->getWrappedType()] = builder;
+        const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;
+
+        NodeAdapterBuilder::Ptr builder = constructor.construct();
+        node_adapter_builders_[builder->getWrappedType()] = builder;        
+
+        constructor.unload_request->disconnect_all_slots();
+        constructor.unload_request->connect(boost::bind(&NodeAdapterFactory::unload, this));
+        constructor.reload_request->disconnect_all_slots();
+        constructor.reload_request->connect(boost::bind(&NodeAdapterFactory::loadPlugins, this));
     }
+}
+
+void NodeAdapterFactory::unload()
+{
+    node_adapter_builders_.clear();
 }
 
 void NodeAdapterFactory::ensureLoaded()

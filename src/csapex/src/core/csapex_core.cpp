@@ -7,6 +7,8 @@
 #include <csapex/core/graphio.h>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/command/add_node.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/msg/message.h>
 #include <csapex/msg/message_factory.h>
 #include <csapex/plugin/plugin_manager.hpp>
@@ -19,6 +21,7 @@
 #include <csapex/core/bootstrap_plugin.h>
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/manager/message_renderer_manager.h>
+#include <csapex/plugin/plugin_locator.h>
 
 /// SYSTEM
 #include <fstream>
@@ -32,7 +35,7 @@ using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
                        GraphWorkerPtr graph, NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
-    : settings_(settings), plugin_locator_(plugin_locator), graph_worker_(graph),
+    : settings_(settings), drag_io_(NULL), plugin_locator_(plugin_locator), graph_worker_(graph),
       node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
       cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
@@ -46,6 +49,9 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
 
     settings.settingsChanged.connect(boost::bind(&CsApexCore::settingsChanged, this));
 
+    node_factory->unload_request.connect(boost::bind(&CsApexCore::unloadNode, this, _1));
+    plugin_locator_->reload_done.connect(boost::bind(&CsApexCore::reloadDone, this));
+
     QObject::connect(graph_worker_.get(), SIGNAL(paused(bool)), this, SIGNAL(paused(bool)));
 }
 
@@ -56,8 +62,8 @@ CsApexCore::~CsApexCore()
     MessageProviderManager::instance().shutdown();
     MessageRendererManager::instance().shutdown();
 
-    for(std::vector<CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
-        (*it)->shutdown();
+    for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
+        it->second->shutdown();
     }
     core_plugins_.clear();
     if(destruct) {
@@ -92,6 +98,10 @@ void CsApexCore::setStatusMessage(const std::string &msg)
 
 void CsApexCore::init(DragIO* dragio)
 {
+    qRegisterMetaType<csapex::NodeWorkerPtr>("csapex::NodeWorkerPtr");
+
+    drag_io_ = dragio;
+
     if(!init_) {
         init_ = true;
 
@@ -101,20 +111,21 @@ void CsApexCore::init(DragIO* dragio)
         showStatusMessage("loading core plugins");
         core_plugin_manager->load(plugin_locator_.get());
 
-        typedef const std::pair<std::string, PluginManager<CorePlugin>::Constructor> PAIR;
-        Q_FOREACH(PAIR cp, core_plugin_manager->availableClasses()) {
-            CorePlugin::Ptr plugin = cp.second();
-            core_plugins_.push_back(plugin);
+        typedef const std::pair<std::string, PluginConstructor<CorePlugin> > CONSTRUCTORPAIR;
+        foreach(CONSTRUCTORPAIR cp, core_plugin_manager->availableClasses()) {
+            makeCorePlugin(cp.first);
         }
-        Q_FOREACH(CorePlugin::Ptr plugin, core_plugins_) {
-            plugin->prepare(getSettings());
+
+        typedef const std::pair<std::string, CorePlugin::Ptr > PAIR;
+        foreach(PAIR plugin, core_plugins_) {
+            plugin.second->prepare(getSettings());
         }
-        Q_FOREACH(CorePlugin::Ptr plugin, core_plugins_) {
-            plugin->init(*this);
+        foreach(PAIR plugin, core_plugins_) {
+            plugin.second->init(*this);
         }
         if(dragio) {
-            Q_FOREACH(CorePlugin::Ptr plugin, core_plugins_) {
-                plugin->initUI(*dragio);
+            Q_FOREACH(PAIR plugin, core_plugins_) {
+                plugin.second->initUI(*dragio);
             }
         }
 
@@ -125,6 +136,46 @@ void CsApexCore::init(DragIO* dragio)
 
         node_adapter_factory_->loadPlugins();
     }
+}
+
+CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
+{
+    assert(core_plugins_.find(plugin_name) != core_plugins_.end());
+
+    const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->availableClasses(plugin_name);
+
+    CorePlugin::Ptr plugin = constructor();
+    plugin->setName(plugin_name);
+
+    core_plugins_[plugin_name] = plugin;
+
+    if(!core_plugins_connected_[plugin_name]) {
+        constructor.unload_request->connect(boost::bind(&CsApexCore::unloadCorePlugin, this, plugin_name));
+        constructor.reload_request->connect(boost::bind(&CsApexCore::reloadCorePlugin, this, plugin_name));
+
+        core_plugins_connected_[plugin_name] = true;
+    }
+
+    return plugin;
+}
+
+void CsApexCore::unloadCorePlugin(const std::string& plugin_name)
+{
+    CorePlugin::Ptr plugin = core_plugins_[plugin_name];
+    core_plugins_.erase(plugin_name);
+
+    plugin->shutdown();
+}
+
+void CsApexCore::reloadCorePlugin(const std::string& plugin_name)
+{
+    std::cerr << "reload core plugin " << plugin_name << std::endl;
+
+    CorePlugin::Ptr plugin =  makeCorePlugin(plugin_name);
+
+    plugin->prepare(getSettings());
+    plugin->init(*this);
+    plugin->initUI(*drag_io_);
 }
 
 void CsApexCore::boot()
@@ -180,6 +231,25 @@ void CsApexCore::reset()
 
     Q_FOREACH(Listener* l, listener_) {
         l->resetSignal();
+    }
+}
+
+void CsApexCore::unloadNode(UUID uuid)
+{
+    if(!unload_commands_) {
+        unload_commands_.reset(new command::Meta("unloading"));
+    }
+
+    command::DeleteNode::Ptr del(new command::DeleteNode(uuid));
+    cmd_dispatch->executeNotUndoable(del);
+    unload_commands_->add(del);
+}
+
+void CsApexCore::reloadDone()
+{
+    if(unload_commands_) {
+        cmd_dispatch->undoNotRedoable(unload_commands_);
+        unload_commands_.reset();
     }
 }
 

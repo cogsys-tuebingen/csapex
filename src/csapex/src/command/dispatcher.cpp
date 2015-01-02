@@ -49,7 +49,14 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::executeNotUndoable(Command::Ptr command)
 {
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
     Command::Access::executeCommand(graph_worker_->getGraph(), widget_ctrl_.get(), command);
+}
+
+void CommandDispatcher::undoNotRedoable(Command::Ptr command)
+{
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
+    Command::Access::undoCommand(graph_worker_->getGraph(), widget_ctrl_.get(), command);
 }
 
 

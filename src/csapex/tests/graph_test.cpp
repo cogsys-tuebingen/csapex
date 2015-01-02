@@ -1,5 +1,6 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/core/settings.h>
 #include "gtest/gtest.h"
@@ -29,7 +30,7 @@ protected:
     NodeFactory factory;
 
     GraphTest()
-        : factory(settings)
+        : factory(settings, NULL)
     {
         settings.set("headless", true);
 
@@ -71,7 +72,7 @@ TEST_F(GraphTest, NodeCanBeFound) {
     NodeWorkerPtr node = factory.makeNode("MockupNode", node_id);
     graph.addNode(node);
 
-    Node* node_found = graph.findNode(node_id);
+    NodeWorker* node_found = graph.findNodeWorker(node_id);
 
     ASSERT_TRUE(node_found != NULL);
     EXPECT_EQ(node_id, node_found->getUUID());

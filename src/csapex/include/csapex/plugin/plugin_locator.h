@@ -12,13 +12,26 @@
 #include <boost/function.hpp>
 #include <iostream>
 #include <set>
+#include <boost/signals2.hpp>
+
+class QFileSystemWatcher;
+namespace qt_helper
+{
+class Call;
+}
 
 namespace csapex
 {
-class PluginLocator
+class PluginLocator : private boost::noncopyable
 {
 public:
+    boost::signals2::signal<void(std::string)> unload_library_request;
+    boost::signals2::signal<void(std::string)> reload_library_request;
+    boost::signals2::signal<void()> reload_done;
+
+public:
     PluginLocator(Settings& settings);
+    ~PluginLocator();
 
     template <typename PluginType>
     std::vector<std::string> enumerateXmlFiles() {
@@ -33,11 +46,16 @@ public:
         return files;
     }
 
+    std::vector<std::string> enumerateLibraryPaths();
+
     template <typename PluginType>
     void registerLocator(boost::function<void(std::vector<std::string>&)> fn)
     {
         locators_[&typeid(PluginType)].push_back(fn);
     }
+
+    void reloadLibraryIfExists(const std::string& name, const std::string& abs_path);
+    void reloadLibrary(const std::string& name);
 
     void ignoreLibrary(const std::string& name, bool ignore);
     bool isLibraryIgnored(const std::string& name) const;
@@ -46,21 +64,34 @@ public:
     bool hasLibraryError(const std::string& name) const;
     std::string getLibraryError(const std::string& name) const;
 
-    void setLibraryLoaded(const std::string& name);
+    void setLibraryLoaded(const std::string& name, const std::string &file);
     bool isLibraryLoaded(const std::string& name) const;
 
+    void setAutoReload(bool autoreload);
+    bool isAutoReload() const;
+
     std::vector<std::string> getAllLibraries() const;
+
+private:
+    void createFileWatcher(const std::string &name);
+    void clearFileWatcherCallbacks();
 
 private:
     Settings &settings_;
 
     std::map<const std::type_info*, std::vector<boost::function<void(std::vector<std::string>&)> > > locators_;
 
+    std::vector<std::string> library_paths_;
+
     std::set<std::string> loaded_libraries_;
+    std::map<std::string, std::string> library_file_;
+    std::map<std::string, boost::shared_ptr<QFileSystemWatcher> > library_watchers_;
     std::map<std::string, std::string> error_libraries_;
 
     std::set<std::string> ignored_libraries_;
     param::StringListParameterPtr ignored_persistent_;
+
+    std::vector<qt_helper::Call*> callbacks_;
 };
 }
 

@@ -15,6 +15,18 @@
 
 using namespace csapex;
 
+
+namespace csapex
+{
+template <>
+struct PluginManagerGroup<Node>
+{
+    enum Group {
+        value = 0
+    };
+};
+}
+
 NodeFactory::NodeFactory(Settings &settings, csapex::PluginLocator* locator)
     : settings_(settings), plugin_locator_(locator),
       node_manager_(new PluginManager<Node> ("csapex::Node")),
@@ -50,8 +62,10 @@ void NodeFactory::rebuildPrototypes()
 //    available_elements_prototypes.clear();
 //    node_adapter_builders_.clear();
     
-    typedef std::pair<std::string, DefaultConstructor<Node> > NODE_PAIR;
+    typedef std::pair<std::string, PluginConstructor<Node> > NODE_PAIR;
     Q_FOREACH(const NODE_PAIR& p, node_manager_->availableClasses()) {
+        const PluginConstructor<Node>& plugin_constructor = p.second;
+
         // convert tag list into vector
         std::vector<std::string> tokens;
         std::vector<Tag::Ptr> tags;
@@ -72,7 +86,11 @@ void NodeFactory::rebuildPrototypes()
                                                      p.second.getType(), p.second.getDescription(),
                                                      p.second.getIcon(),
                                                      tags,
-                                                     p.second));
+                                                     plugin_constructor));
+
+        plugin_constructor.unload_request->connect(*constructor->unload_request);
+        plugin_constructor.reload_request->connect(*constructor->reload_request);
+
         registerNodeType(constructor, true);
     }
 }
@@ -163,7 +181,7 @@ bool NodeFactory::isValidType(const std::string &type) const
 
 NodeWorkerPtr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
-    return content->makeContent(uuid);
+    return content->makeNodeWorker(uuid);
 }
 
 NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
@@ -178,7 +196,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
         }
     }
 
-    BOOST_FOREACH(NodeConstructor::Ptr p, constructors_) {
+    foreach(NodeConstructor::Ptr p, constructors_) {
         if(p->getType() == type) {
             return p;
         }
@@ -187,7 +205,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
     // cannot make box, type is unknown, trying different namespace
     std::string type_wo_ns = UUID::stripNamespace(type);
 
-    BOOST_FOREACH(NodeConstructor::Ptr p, constructors_) {
+    foreach(NodeConstructor::Ptr p, constructors_) {
         std::string p_type_wo_ns = UUID::stripNamespace(p->getType());
 
         if(p_type_wo_ns == type_wo_ns) {
@@ -222,10 +240,28 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
             result->setNodeState(state);
         }
 
+        reload_connections_[uuid] = p->unload_request->connect(boost::bind(&NodeFactory::unloadNode, this, p, uuid));
+
         return result;
 
     } else {
         std::cerr << "error: cannot make node, type '" << target_type << "' is unknown" << std::endl;
         return NodeWorkerNullPtr;
     }
+}
+
+void NodeFactory::unloadNode(NodeConstructorPtr p, UUID uuid)
+{
+    reload_connections_[uuid].disconnect();
+    reload_connections_[uuid] = p->reload_request->connect(boost::bind(&NodeFactory::reloadNode, this, p, uuid));
+
+    unload_request(uuid);
+}
+
+
+void NodeFactory::reloadNode(NodeConstructorPtr p, UUID uuid)
+{
+    reload_connections_[uuid].disconnect();
+
+    reload_request(uuid);
 }

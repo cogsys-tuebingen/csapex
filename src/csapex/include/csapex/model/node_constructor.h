@@ -6,6 +6,7 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <utils_param/param_fwd.h>
+#include <csapex/plugin/plugin_constructor.hpp>
 
 /// SYSTEM
 #include <typeinfo>
@@ -37,6 +38,11 @@ public:
     static NodePtr makeNull();
 
 public:
+    boost::shared_ptr< boost::signals2::signal<void()> > unload_request;
+    boost::shared_ptr< boost::signals2::signal<void()> > reload_request;
+
+
+public:
     NodeConstructor(Settings& settings, const std::string& type,
                     const std::string& description, const std::string& icon, const std::vector<TagPtr> &tags,
                     Make c);
@@ -48,8 +54,10 @@ public:
     QIcon getIcon() const;
     std::string getDescription() const;
 
-    virtual NodeWorkerPtr makePrototypeContent() const;
-    virtual NodeWorkerPtr makeContent(const UUID& uuid) const;
+    NodeWorkerPtr makePrototype() const;
+    NodeWorkerPtr makeNodeWorker(const UUID& uuid) const;
+
+    NodePtr makeNode() const;
 
 protected:
     NodeConstructor(Settings &settings, const std::string& type, const std::string& description, const std::string &icon, const std::vector<TagPtr> &tags);

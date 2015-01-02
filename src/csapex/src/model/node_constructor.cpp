@@ -23,7 +23,9 @@ NodeConstructor::NodeConstructor(Settings &settings,
                                  const std::string &icon,
                                  const std::vector<TagPtr>& tags,
                                  Make c)
-    : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
+    : unload_request(new boost::signals2::signal<void()>),
+      reload_request(new boost::signals2::signal<void()>),
+      settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
 {
     apex_assert_hard(!c.empty());
 
@@ -36,7 +38,9 @@ NodeConstructor::NodeConstructor(Settings &settings,
                                  const std::string &type, const std::string &description,
                                  const std::string &icon,
                                  const std::vector<TagPtr>& tags)
-    : settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags)
+    : unload_request(new boost::signals2::signal<void()>),
+      reload_request(new boost::signals2::signal<void()>),
+      settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags)
 {
     if(tags_.empty()) {
         tags_.push_back(Tag::get("General"));
@@ -68,19 +72,23 @@ std::string NodeConstructor::getDescription() const
     return descr_;
 }
 
-NodeWorker::Ptr NodeConstructor::makePrototypeContent() const
+NodeWorker::Ptr NodeConstructor::makePrototype() const
 {
-    return makeContent(UUID::make("prototype"));
+    return makeNodeWorker(UUID::make("prototype"));
 }
 
-NodeWorker::Ptr NodeConstructor::makeContent(const UUID& uuid) const
+NodeWorker::Ptr NodeConstructor::makeNodeWorker(const UUID& uuid) const
 {
     try {
-        Node::Ptr node = c();
-        NodeWorker::Ptr result(new NodeWorker(type_, uuid, settings_, node));
+        NodeWorker::Ptr result(new NodeWorker(type_, uuid, settings_, makeNode()));
         return result;
     } catch(const std::exception& e) {
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;
         return NodeWorkerNullPtr;
     }
+}
+
+Node::Ptr NodeConstructor::makeNode() const
+{
+    return c();
 }

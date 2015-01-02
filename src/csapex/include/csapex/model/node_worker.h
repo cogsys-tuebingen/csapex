@@ -50,6 +50,7 @@ public:
     void triggerPanic();
 
     Node* getNode() const;
+
     std::string getType() const;
 
     bool isEnabled() const;

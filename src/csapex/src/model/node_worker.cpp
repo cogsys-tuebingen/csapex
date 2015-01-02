@@ -13,6 +13,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>
+#include <csapex/model/node_factory.h>
 
 /// SYSTEM
 #include <QThread>
@@ -73,6 +74,8 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
 
 NodeWorker::~NodeWorker()
 {
+    std::cerr << "delete nodeworker " << getUUID() << std::endl;
+
     tick_immediate_ = false;
     is_setup_ = false;
 
@@ -164,6 +167,7 @@ NodeState::Ptr NodeWorker::getNodeState()
 
     return node_state_;
 }
+
 
 Node* NodeWorker::getNode() const
 {
@@ -740,10 +744,10 @@ void NodeWorker::removeTrigger(Trigger *t)
         triggers_.erase(it);
     }
 
-    t->deleteLater();
-
     disconnectConnector(t);
     Q_EMIT connectorRemoved(t);
+
+    t->deleteLater();
 }
 
 void NodeWorker::registerInput(Input* in)

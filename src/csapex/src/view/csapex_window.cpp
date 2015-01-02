@@ -104,6 +104,9 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->node_info_tree, SIGNAL(itemSelectionChanged()), this, SLOT(updateNodeInfo()));
 
+    QObject::connect(ui->actionAuto_Reload, SIGNAL(toggled(bool)), this, SLOT(updatePluginAutoReload(bool)));
+    ui->actionAuto_Reload->setChecked(plugin_locator_->isAutoReload());
+
     QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
     QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
 
@@ -251,7 +254,7 @@ void CsApexWindow::updateNodeInfo()
             ss << "<hr />";
             ss << "<h1>Parameters:</h1>";
 
-            std::vector<param::Parameter::Ptr> params = n->makePrototypeContent()->getNode()->getParameters();
+            std::vector<param::Parameter::Ptr> params = n->makePrototype()->getNode()->getParameters();
 
             Q_FOREACH(const param::Parameter::Ptr& p, params) {
                 ss << "<h2>" << p->name() << "</h2>";
@@ -347,7 +350,21 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     style_sheet_watcher_->addPath(path);
 
     QObject::connect(style_sheet_watcher_, SIGNAL(fileChanged(const QString&)),
-                     this, SLOT(loadStyleSheet(const QString&)));
+                     this, SLOT(reloadStyleSheet(const QString&)));
+}
+
+
+void CsApexWindow::reloadStyleSheet(const QString& path)
+{
+    QFile qfile(path);
+    if(qfile.exists()) {
+        qt_helper::QSleepThread::msleep(100);
+
+        while(qfile.size() == 0) {
+            qt_helper::QSleepThread::msleep(100);
+        }
+        loadStyleSheet(path);
+    }
 }
 
 void CsApexWindow::loadStyleSheet()
@@ -391,38 +408,65 @@ void CsApexWindow::createPluginsMenu()
     std::vector<std::string> plugins = plugin_locator_->getAllLibraries();
 
     foreach(const std::string& library, plugins) {
-        QAction* a = new QAction(QString::fromStdString(library), ui->menu_Available_Plugins);
-        a->setCheckable(true);
-        a->setObjectName(QString::fromStdString(library));
+        /// enable / ignore plugin
+        QAction* enable_ignore = new QAction(QString::fromStdString(library), ui->menu_Available_Plugins);
+        enable_ignore->setCheckable(true);
+        enable_ignore->setObjectName(QString::fromStdString(library));
 
         bool ignored = plugin_locator_->isLibraryIgnored(library);
         bool error = plugin_locator_->hasLibraryError(library);
 
-        a->setChecked(!ignored);
+        enable_ignore->setChecked(!ignored);
         if(ignored) {
-            a->setIcon(QIcon(":/plugin_disabled.png"));
+            enable_ignore->setIcon(QIcon(":/plugin_disabled.png"));
         } else if(error) {
-            a->setIcon(QIcon(":/plugin_error.png"));
-            a->setToolTip(QString::fromStdString(plugin_locator_->getLibraryError(library)));
+            enable_ignore->setIcon(QIcon(":/plugin_error.png"));
+            enable_ignore->setToolTip(QString::fromStdString(plugin_locator_->getLibraryError(library)));
         } else {
-            a->setIcon(QIcon(":/plugin.png"));
+            enable_ignore->setIcon(QIcon(":/plugin.png"));
         }
+        ui->menu_Available_Plugins->addAction(enable_ignore);
 
-        QSignalMapper* mapper = new QSignalMapper(this);
-        QObject::connect(a, SIGNAL(toggled(bool)), mapper, SLOT(map()));
-        mapper->setMapping(a, a);
+        QSignalMapper* enable_ignore_mapper = new QSignalMapper(this);
+        QObject::connect(enable_ignore, SIGNAL(toggled(bool)), enable_ignore_mapper, SLOT(map()));
+        enable_ignore_mapper->setMapping(enable_ignore, enable_ignore);
 
-        QObject::connect(mapper, SIGNAL(mapped(QObject*)), this, SLOT(updatePlugin(QObject*)));
+        QObject::connect(enable_ignore_mapper, SIGNAL(mapped(QObject*)), this, SLOT(updatePluginIgnored(QObject*)));
 
-        ui->menu_Available_Plugins->addAction(a);
+
+        /// reload plugin
+        QAction* reload = new QAction(QString::fromStdString(library), ui->menu_Reload_Plugin);
+        reload->setObjectName(QString::fromStdString(library));
+        reload->setIcon(QIcon(":/plugin.png"));
+        ui->menu_Reload_Plugin->addAction(reload);
+
+        QSignalMapper* reload_mapper = new QSignalMapper(this);
+        QObject::connect(reload, SIGNAL(triggered()), reload_mapper, SLOT(map()));
+        reload_mapper->setMapping(reload, reload);
+
+        QObject::connect(reload_mapper, SIGNAL(mapped(QObject*)), this, SLOT(reloadPlugin(QObject*)));
     }
 }
 
-void CsApexWindow::updatePlugin(const QObject* &action)
+void CsApexWindow::updatePluginIgnored(const QObject* &action)
 {
     const QAction* a = dynamic_cast<const QAction*>(action);
 
     plugin_locator_->ignoreLibrary(a->objectName().toStdString(), !a->isChecked());
+}
+
+void CsApexWindow::reloadPlugin(const QObject* &action)
+{
+    const QAction* a = dynamic_cast<const QAction*>(action);
+
+    core_.setPause(true);
+    plugin_locator_->reloadLibrary(a->objectName().toStdString());
+    core_.setPause(false);
+}
+
+void CsApexWindow::updatePluginAutoReload(bool autoreload)
+{
+    plugin_locator_->setAutoReload(autoreload);
 }
 
 void CsApexWindow::tick()

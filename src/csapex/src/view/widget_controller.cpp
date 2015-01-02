@@ -145,7 +145,7 @@ void WidgetController::setStyleSheet(const QString &str)
 void WidgetController::startPlacingBox(QWidget *parent, const std::string &type, NodeStatePtr state, const QPoint &offset)
 {
     NodeConstructor::Ptr c = node_factory_->getConstructor(type);
-    NodeWorker::Ptr content = c->makePrototypeContent();
+    NodeWorker::Ptr content = c->makePrototype();
 
     QDrag* drag = new QDrag(parent);
     QMimeData* mimeData = new QMimeData;
