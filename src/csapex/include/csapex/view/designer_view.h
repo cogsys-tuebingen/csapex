@@ -77,8 +77,8 @@ public Q_SLOTS:
     void showContextMenuEditBox(NodeBox* box, const QPoint& pos);
     void showContextMenuAddNode(const QPoint& global_pos);
 
-    void profile(NodeBox* box);
-    void stopProfiling(NodeBox* box);
+    void startProfiling(NodeWorker* box);
+    void stopProfiling(NodeWorker *box);
 
     void reset();
     void resetZoom();

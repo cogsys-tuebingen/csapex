@@ -69,7 +69,6 @@ public:
 
     bool isMinimizedSize() const;
     bool isFlipped() const;
-    bool isProfiling() const;
 
     bool isError() const;
     ErrorState::ErrorLevel errorLevel() const;
@@ -139,8 +138,6 @@ Q_SIGNALS:
     void moveSelectionToBox(NodeBox*);
 
     void showContextMenuForBox(NodeBox* box, const QPoint& pos);
-    void profile(NodeBox* box);
-    void stopProfiling(NodeBox* box);
 
 protected:
     void resizeEvent(QResizeEvent * e);
@@ -167,8 +164,6 @@ protected:
 
     QLabel* info_compo;
     QLabel* info_thread;
-
-    bool profiling_;
 
     bool is_placed_;
 };

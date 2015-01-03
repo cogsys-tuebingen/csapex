@@ -33,7 +33,8 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
       sync(QMutex::Recursive),
       messages_waiting_to_be_sent(false),
       timer_history_pos_(-1),
-      thread_initialized_(false), paused_(false), stop_(false)
+      thread_initialized_(false), paused_(false), stop_(false),
+      profiling_(false)
 {
     std::size_t timer_history_length = settings_.get<int>("timer_history_length", DEFAULT_HISTORY_LENGTH);
     timer_history_.resize(timer_history_length);
@@ -393,6 +394,22 @@ void NodeWorker::reset()
 bool NodeWorker::isPaused() const
 {
     return paused_;
+}
+
+void NodeWorker::setProfiling(bool profiling)
+{
+    profiling_ = profiling;
+
+    if(profiling_) {
+        Q_EMIT startProfiling(this);
+    } else {
+        Q_EMIT stopProfiling(this);
+    }
+}
+
+bool NodeWorker::isProfiling() const
+{
+    return profiling_;
 }
 
 void NodeWorker::pause(bool pause)

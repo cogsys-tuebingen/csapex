@@ -27,6 +27,7 @@ struct NodeWorker : public QObject, public Unique
 
     friend class ProfilingWidget;
     friend class Node;
+    friend class NodeBox;
 
 public:
     enum ActivityType {
@@ -63,6 +64,9 @@ public:
     void setEnabled(bool e);
 
     bool isPaused() const;
+
+    void setProfiling(bool profiling);
+    bool isProfiling() const;
 
     void setIOError(bool error);
 
@@ -145,6 +149,7 @@ public Q_SLOTS:
     void trySendMessages();
     void resetInputs();
 
+
 Q_SIGNALS:
     void messageProcessed();
     void ticked();
@@ -171,6 +176,9 @@ Q_SIGNALS:
 
     void timerStarted(NodeWorker* worker, int type, long stamp);
     void timerStopped(NodeWorker* worker, long stamp);
+
+    void startProfiling(NodeWorker* box);
+    void stopProfiling(NodeWorker* box);
 
     void panic();
 
@@ -248,6 +256,8 @@ private:
     QMutex stop_mutex_;
     QMutex pause_mutex_;
     QWaitCondition continue_;
+
+    bool profiling_;
 };
 
 }

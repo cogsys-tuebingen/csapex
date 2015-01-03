@@ -30,7 +30,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_compo(NULL), info_thread(NULL), profiling_(false), is_placed_(false)
+      down_(false), info_compo(NULL), info_thread(NULL), is_placed_(false)
 {
     worker->getNodeState()->flipped_changed->connect(boost::bind(&NodeBox::flipSides, this));
     worker->getNodeState()->minimized_changed->connect(boost::bind(&NodeBox::minimizeBox, this));
@@ -503,13 +503,8 @@ void NodeBox::eventModelChanged()
 
 void NodeBox::showProfiling()
 {
-    profiling_ = !profiling_;
-
-    if(profiling_) {
-        Q_EMIT profile(this);
-    } else {
-        Q_EMIT stopProfiling(this);
-    }
+    NodeWorkerPtr node = node_worker_.lock();
+    node->setProfiling(!node->isProfiling());
 }
 
 void NodeBox::killContent()
@@ -588,11 +583,6 @@ bool NodeBox::isFlipped() const
         return false;
     }
     return worker->getNodeState()->isFlipped();
-}
-
-bool NodeBox::isProfiling() const
-{
-    return profiling_;
 }
 
 bool NodeBox::hasSubGraph()

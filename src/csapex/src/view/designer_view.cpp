@@ -289,8 +289,8 @@ void DesignerView::addBoxEvent(NodeBox *box)
     QObject::connect(graph_.get(), SIGNAL(structureChanged(Graph*)), box, SLOT(updateBoxInformation(Graph*)));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*, QPoint)), this, SLOT(showContextMenuEditBox(NodeBox*, QPoint)));
-    QObject::connect(box, SIGNAL(profile(NodeBox*)), this, SLOT(profile(NodeBox*)));
-    QObject::connect(box, SIGNAL(stopProfiling(NodeBox*)), this, SLOT(stopProfiling(NodeBox*)));
+    QObject::connect(worker, SIGNAL(startProfiling(NodeWorker*)), this, SLOT(startProfiling(NodeWorker*)));
+    QObject::connect(worker, SIGNAL(stopProfiling(NodeWorker*)), this, SLOT(stopProfiling(NodeWorker*)));
 
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     scene_->addItem(proxy);
@@ -334,8 +334,9 @@ void DesignerView::removeBoxEvent(NodeBox *box)
     profiling_.erase(box);
 }
 
-void DesignerView::profile(NodeBox *box)
+void DesignerView::startProfiling(NodeWorker *node)
 {
+    NodeBox* box = widget_ctrl_->getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
     ProfilingWidget* prof = new ProfilingWidget(this, box);
@@ -359,8 +360,10 @@ void DesignerView::profile(NodeBox *box)
     QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(repaint()));
 }
 
-void DesignerView::stopProfiling(NodeBox *box)
+void DesignerView::stopProfiling(NodeWorker *node)
 {
+    NodeBox* box = widget_ctrl_->getBox(node->getUUID());
+
     std::map<NodeBox*, ProfilingWidget*>::iterator pos = profiling_.find(box);
     apex_assert_hard(pos != profiling_.end());
 
@@ -418,6 +421,8 @@ void DesignerView::showContextMenuGlobal(const QPoint& global_pos)
 
 void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
 {
+    NodeWorker* worker = box->getNodeWorker();
+
     QMenu menu;
     std::map<QAction*, boost::function<void()> > handler;
 
@@ -498,7 +503,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
     menu.addSeparator();
 
     QAction* prof;
-    if(box->isProfiling()) {
+    if(worker->isProfiling()) {
         prof = new QAction("stop profiling", &menu);
         prof->setIcon(QIcon(":/stop_profiling.png"));
     } else {
