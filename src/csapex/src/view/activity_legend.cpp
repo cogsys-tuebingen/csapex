@@ -46,26 +46,35 @@ void ActivityLegend::resizeToFit()
     setFixedHeight(rect.height());
 }
 
-void ActivityLegend::addNode(NodeWorkerPtr node)
+void ActivityLegend::startTrackingNode(NodeWorkerPtr node)
 {
     NodeWorker* worker = node.get();
 
+    QObject::connect(worker, SIGNAL(startProfiling(NodeWorker*)), this, SLOT(addNode(NodeWorker*)));
+    QObject::connect(worker, SIGNAL(stopProfiling(NodeWorker*)), this, SLOT(removeNode(NodeWorker*)));
+}
+
+void ActivityLegend::stopTrackingNode(NodeWorkerPtr node)
+{
+    QObject::disconnect(node.get());
+}
+
+void ActivityLegend::addNode(NodeWorker* node)
+{
     int row = rows_.size();
-    rows_.push_back(worker);
+    rows_.push_back(node);
 
     QAbstractItemModel* m = model();
     m->insertRow(row);
-    m->setData(m->index(row, 0), QString::fromStdString(worker->getNodeState()->getLabel()));
+    m->setData(m->index(row, 0), QString::fromStdString(node->getNodeState()->getLabel()));
 
     resizeToFit();
 
     Q_EMIT nodeAdded(node);
 }
 
-void ActivityLegend::removeNode(NodeWorkerPtr node)
+void ActivityLegend::removeNode(NodeWorker* node)
 {
-    NodeWorker* worker = node.get();
-
     bool found = false;
     int row = 0;
     for(std::size_t r = 0; r < rows_.size(); ++r) {
@@ -73,7 +82,7 @@ void ActivityLegend::removeNode(NodeWorkerPtr node)
             // deleted -> move one up
             rows_[r-1] = rows_[r];
         }
-        if(rows_[r] == worker) {
+        if(rows_[r] == node) {
             row = r;
             found = true;
         }

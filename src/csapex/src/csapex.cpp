@@ -173,10 +173,10 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         QObject::connect(legend, SIGNAL(selectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
-        QObject::connect(graph.get(), SIGNAL(nodeAdded(NodeWorkerPtr)), legend, SLOT(addNode(NodeWorkerPtr)));
-        QObject::connect(graph.get(), SIGNAL(nodeRemoved(NodeWorkerPtr)), legend, SLOT(removeNode(NodeWorkerPtr)));
-        QObject::connect(legend, SIGNAL(nodeAdded(NodeWorkerPtr)), timeline, SLOT(addNode(NodeWorkerPtr)));
-        QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorkerPtr)), timeline, SLOT(removeNode(NodeWorkerPtr)));
+        QObject::connect(graph.get(), SIGNAL(nodeAdded(NodeWorkerPtr)), legend, SLOT(startTrackingNode(NodeWorkerPtr)));
+        QObject::connect(graph.get(), SIGNAL(nodeRemoved(NodeWorkerPtr)), legend, SLOT(stopTrackingNode(NodeWorkerPtr)));
+        QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
+        QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));
 
         widget_control->setDesigner(designer);
 

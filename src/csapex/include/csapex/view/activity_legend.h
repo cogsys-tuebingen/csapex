@@ -20,17 +20,21 @@ public:
     ActivityLegend();
 
     void resizeToFit();
+
 public Q_SLOTS:
-    void addNode(NodeWorkerPtr node);
-    void removeNode(NodeWorkerPtr node);
+    void startTrackingNode(NodeWorkerPtr node);
+    void stopTrackingNode(NodeWorkerPtr node);
+
+    void addNode(NodeWorker* node);
+    void removeNode(NodeWorker* node);
 
     void emitSelection();
 
 Q_SIGNALS:
     void selectionChanged(QList<NodeWorker*>);
 
-    void nodeAdded(NodeWorkerPtr);
-    void nodeRemoved(NodeWorkerPtr);
+    void nodeAdded(NodeWorker*);
+    void nodeRemoved(NodeWorker*);
 
 
 private:

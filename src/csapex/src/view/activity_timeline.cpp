@@ -58,31 +58,28 @@ ActivityTimeline::~ActivityTimeline()
 
 void ActivityTimeline::resizeToFit()
 {
-//    QRectF rect = scene_->sceneRect();
-//    rect.setHeight(row_height * rows_.size() + 1);
-//    scene_->setSceneRect(rect);
+    //    QRectF rect = scene_->sceneRect();
+    //    rect.setHeight(row_height * rows_.size() + 1);
+    //    scene_->setSceneRect(rect);
     setFixedHeight(scene_->sceneRect().height() + horizontalScrollBar()->height() + 4);
 }
 
-void ActivityTimeline::addNode(NodeWorkerPtr node)
+void ActivityTimeline::addNode(NodeWorker* node)
 {
     int width = std::max(10000l, time_ + 1000l) / params_.resolution;
     int row = rows_.size();
 
-    Row* r = new Row(params_, scene_, row, width, node.get());
+    Row* r = new Row(params_, scene_, row, width, node);
     rows_.push_back(r);
-    node2row[node.get()] = r;
+    node2row[node] = r;
 
     resizeToFit();
 
-    NodeWorker* worker = node.get();
-
-    QObject::connect(worker, SIGNAL(timerStarted(NodeWorker*, int, long)), this, SLOT(updateRowStart(NodeWorker*, int, long)));
-    QObject::connect(worker, SIGNAL(timerStopped(NodeWorker*, long)), this, SLOT(updateRowStop(NodeWorker*, long)));
-
+    QObject::connect(node, SIGNAL(timerStarted(NodeWorker*, int, long)), this, SLOT(updateRowStart(NodeWorker*, int, long)));
+    QObject::connect(node, SIGNAL(timerStopped(NodeWorker*, long)), this, SLOT(updateRowStop(NodeWorker*, long)));
 }
 
-void ActivityTimeline::removeNode(NodeWorkerPtr node)
+void ActivityTimeline::removeNode(NodeWorker* node)
 {
     bool found = false;
     for(std::size_t r = 0; r < rows_.size(); ++r) {
@@ -93,7 +90,7 @@ void ActivityTimeline::removeNode(NodeWorkerPtr node)
             rows_[r-1]->row = r - 1;
             rows_[r-1]->refresh();
         }
-        if(rows_[r]->node_ == node.get()) {
+        if(rows_[r]->node_ == node) {
             found = true;
             Row* row = rows_.at(r);
             row->clear();
@@ -103,8 +100,13 @@ void ActivityTimeline::removeNode(NodeWorkerPtr node)
     }
 
     if(found) {
-        node2row.erase(node.get());
+        node2row.erase(node);
         rows_.pop_back();
+
+        QObject::disconnect(node, SIGNAL(timerStarted(NodeWorker*, int, long)), this, SLOT(updateRowStart(NodeWorker*, int, long)));
+        QObject::disconnect(node, SIGNAL(timerStopped(NodeWorker*, long)), this, SLOT(updateRowStop(NodeWorker*, long)));
+
+
         resizeToFit();
     }
 }
@@ -122,11 +124,11 @@ void ActivityTimeline::setSelection(QList<NodeWorker *> nodes)
 
 void ActivityTimeline::wheelEvent(QWheelEvent *we)
 {
-//    bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
+    //    bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
     bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
 
     if(ctrl) {
-//        params_.resolution *= we->delta() < 0 ? 1.25 : 0.75;
+        //        params_.resolution *= we->delta() < 0 ? 1.25 : 0.75;
 
         scale(we->delta() > 0 ? 1.25 : 0.75, 1.0);
 
@@ -155,11 +157,19 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
 
 void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)
 {
-    Row* row = node2row.at(node);
+    try {
+        Row* row = node2row.at(node);
+        if(!row->active_activity_) {
+            return;
+        }
 
-    updateTime(stamp);
-    row->active_activity_->stop(time_);
-    row->active_activity_ = NULL;
+        updateTime(stamp);
+        row->active_activity_->stop(time_);
+        row->active_activity_ = NULL;
+
+    } catch(const std::out_of_range& e) {
+        std::cerr << "!!!!" << std::endl;
+    }
 }
 
 void ActivityTimeline::updateTime(long stamp)

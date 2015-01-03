@@ -20,9 +20,10 @@ public:
     ~ActivityTimeline();
 
     void resizeToFit();
+
 public Q_SLOTS:
-    void addNode(NodeWorkerPtr node);
-    void removeNode(NodeWorkerPtr node);
+    void addNode(NodeWorker* node);
+    void removeNode(NodeWorker* node);
 
     void setSelection(QList<NodeWorker*>);
 
