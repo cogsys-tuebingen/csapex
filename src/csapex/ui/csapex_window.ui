@@ -275,7 +275,7 @@
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>164</height>
+          <height>144</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -420,7 +420,7 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>164</height>
+          <height>144</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -538,6 +538,40 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="timeline_reset">
+         <property name="text">
+          <string>reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="timeline_scroll">
+         <property name="text">
+          <string>scroll</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>

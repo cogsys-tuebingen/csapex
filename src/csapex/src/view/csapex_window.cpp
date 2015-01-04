@@ -51,18 +51,14 @@ CsApexWindow::~CsApexWindow()
     delete ui;
 }
 
+
 void CsApexWindow::construct()
 {
     loadStyleSheet();
 
     ui->setupUi(this);
 
-    ui->timeline->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
-    QHBoxLayout* layout = dynamic_cast<QHBoxLayout*>(ui->timeline->layout());
-
-    layout->addWidget(activity_legend_, 0, Qt::AlignTop);
-    layout->addWidget(activity_timeline_, 0, Qt::AlignTop);
+    setupTimeline();
 
     Graph* graph = graph_worker_->getGraph();
 
@@ -149,6 +145,21 @@ void CsApexWindow::construct()
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+}
+
+void CsApexWindow::setupTimeline()
+{
+    ui->timeline->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+    QHBoxLayout* layout = dynamic_cast<QHBoxLayout*>(ui->timeline->layout());
+
+    layout->addWidget(activity_legend_, 0, Qt::AlignTop);
+    layout->addWidget(activity_timeline_, 0, Qt::AlignTop);
+
+    QObject::connect(ui->timeline_reset, SIGNAL(pressed()), activity_timeline_, SLOT(reset()));
+
+    QObject::connect(ui->timeline_scroll, SIGNAL(toggled(bool)), activity_timeline_, SLOT(setScrolling(bool)));
+    QObject::connect(activity_timeline_, SIGNAL(scrollingChanged(bool)), ui->timeline_scroll, SLOT(setChecked(bool)));
 }
 
 void CsApexWindow::updateDeleteAction()

@@ -40,6 +40,7 @@ public:
 
     void resetSignal();
 
+    void setupTimeline();
 private Q_SLOTS:
     void updateMenu();
     void updateTitle();

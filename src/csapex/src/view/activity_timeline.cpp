@@ -23,7 +23,7 @@ static const int row_height = 30;
 }
 
 ActivityTimeline::ActivityTimeline()
-    : scene_(new QGraphicsScene), time_(0)
+    : scene_(new QGraphicsScene), scrolling_(true)
 {
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
@@ -36,16 +36,17 @@ ActivityTimeline::ActivityTimeline()
 
     setFixedHeight(row_height);
 
+    setScrolling(false);
+
     params_.resolution = 2.0;
+    params_.time = 0;
+    params_.start_time_stamp = QDateTime::currentMSecsSinceEpoch();
 
-    start_time_ = QDateTime::currentMSecsSinceEpoch();
+    timer_ = NULL;
 
-    timer_ = new QTimer;
-    timer_->setSingleShot(false);
-    timer_->setInterval(25);
-    timer_->start();
+    setVisible(false);
 
-    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
+    QObject::connect(horizontalScrollBar(), SIGNAL(sliderMoved(int)), this, SLOT(updateScrolling()));
 }
 
 ActivityTimeline::~ActivityTimeline()
@@ -58,15 +59,46 @@ ActivityTimeline::~ActivityTimeline()
 
 void ActivityTimeline::resizeToFit()
 {
-    //    QRectF rect = scene_->sceneRect();
-    //    rect.setHeight(row_height * rows_.size() + 1);
-    //    scene_->setSceneRect(rect);
-    setFixedHeight(scene_->sceneRect().height() + horizontalScrollBar()->height() + 4);
+    QRectF rect = scene_->sceneRect();
+    rect.setHeight(row_height * rows_.size() + 1);
+    rect.setWidth((params_.time - params_.start_time) / params_.resolution);
+    scene_->setSceneRect(rect);
+
+    setFixedHeight(scene_->sceneRect().height() + horizontalScrollBar()->height() + 5);
 }
+
+void ActivityTimeline::startTimer()
+{
+    timer_ = new QTimer;
+    timer_->setSingleShot(false);
+    timer_->setInterval(25);
+    timer_->start();
+
+    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
+
+    setVisible(true);
+
+    reset();
+}
+
+void ActivityTimeline::stopTimer()
+{
+    timer_->stop();
+    QObject::disconnect(timer_);
+    timer_->deleteLater();
+    timer_ = NULL;
+
+    setVisible(false);
+}
+
 
 void ActivityTimeline::addNode(NodeWorker* node)
 {
-    int width = std::max(10000l, time_ + 1000l) / params_.resolution;
+    if(rows_.empty()) {
+        startTimer();
+    }
+
+    int width = std::max(10000l, params_.time + 1000l) / params_.resolution;
     int row = rows_.size();
 
     Row* r = new Row(params_, scene_, row, width, node);
@@ -109,6 +141,10 @@ void ActivityTimeline::removeNode(NodeWorker* node)
 
         resizeToFit();
     }
+
+    if(rows_.empty()) {
+        stopTimer();
+    }
 }
 
 void ActivityTimeline::setSelection(QList<NodeWorker *> nodes)
@@ -120,6 +156,24 @@ void ActivityTimeline::setSelection(QList<NodeWorker *> nodes)
         node2row.at(node)->selected = true;
     }
     refresh();
+}
+
+void ActivityTimeline::updateScrolling()
+{
+    if(scrolling_) {
+        QScrollBar* bar = horizontalScrollBar();
+        if(bar->value() < bar->maximum() - 10) {
+            setScrolling(false);
+        }
+    }
+}
+
+void ActivityTimeline::setScrolling(bool scrolling)
+{
+    if(scrolling != scrolling_) {
+        scrolling_ = scrolling;
+        Q_EMIT scrollingChanged(scrolling);
+    }
 }
 
 void ActivityTimeline::wheelEvent(QWheelEvent *we)
@@ -150,7 +204,7 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
     Row* row = node2row.at(node);
 
     updateTime(stamp);
-    row->activities_.push_back(new Activity(&params_, row, time_, static_cast<NodeWorker::ActivityType>(type)));
+    row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type)));
     row->active_activity_ = row->activities_.back();
     scene_->addItem(row->active_activity_->rect);
 }
@@ -164,42 +218,62 @@ void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)
         }
 
         updateTime(stamp);
-        row->active_activity_->stop(time_);
+        row->active_activity_->stop(params_.time);
         row->active_activity_ = NULL;
 
     } catch(const std::out_of_range& e) {
-        std::cerr << "!!!!" << std::endl;
+        // ignore
     }
+}
+
+void ActivityTimeline::updateTime()
+{
+    updateTime(QDateTime::currentMSecsSinceEpoch());
 }
 
 void ActivityTimeline::updateTime(long stamp)
 {
-    time_ = (stamp - start_time_);
+    params_.time = (stamp - params_.start_time_stamp);
 }
 
 void ActivityTimeline::update()
 {
-    updateTime(QDateTime::currentMSecsSinceEpoch());
+    updateTime();
 
     int i = 0;
-    int width = std::max(10000l, time_ + 1000l) / params_.resolution;
+    int width = std::max(10000l, params_.time + 1000l) / params_.resolution;
 
     for(std::map<NodeWorker*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         Row* row = it->second;
         row->updateLines(width);
 
         if(row->active_activity_) {
-            row->active_activity_->step(time_);
+            row->active_activity_->step(params_.time);
         }
 
         ++i;
     }
+
+    resizeToFit();
+
+    if(scrolling_) {
+        QScrollBar* bar = horizontalScrollBar();
+        bar->setValue(bar->maximum());
+    }
+}
+
+void ActivityTimeline::reset()
+{
+    updateTime();
+
+    params_.start_time = params_.time;
+    refresh();
 }
 
 void ActivityTimeline::refresh()
 {
     int i = 0;
-    int width = std::max(10000l, time_ + 1000l) / params_.resolution;
+    int width = std::max(10000l, params_.time + 1000l) / params_.resolution;
     for(std::map<NodeWorker*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         Row* row = it->second;
         row->updateLines(width);
@@ -246,8 +320,18 @@ void ActivityTimeline::Row::refresh()
 {
     updateLines(width);
 
-    for(std::size_t j = 0, total = activities_.size(); j < total; ++j) {
-        activities_[j]->update();
+    for(std::size_t j = 0; j < activities_.size(); ) {
+        Activity* activity = activities_[j];
+        if(activity->stop_ < params_.start_time) {
+            activities_.erase(activities_.begin() + j);
+            if(active_activity_ == activity) {
+                active_activity_ = NULL;
+            }
+            delete activity;
+        } else {
+            activity->update();
+            ++j;
+        }
     }
 }
 
@@ -307,7 +391,9 @@ void ActivityTimeline::Activity::update()
     rect->setPen(Qt::NoPen);
 
     int bottom = row->line_top_item->line().p1().y();
-    rect->setRect(start_ / params_->resolution, bottom, (stop_ - start_)  / params_->resolution, row_height);
+
+    double x = std::max(0.0, (start_ - params_->start_time) / params_->resolution);
+    rect->setRect(x, bottom, (stop_ - start_)  / params_->resolution, row_height);
 }
 
 void ActivityTimeline::Activity::clear()

@@ -21,19 +21,30 @@ public:
 
     void resizeToFit();
 
+    void startTimer();
+    void stopTimer();
 public Q_SLOTS:
     void addNode(NodeWorker* node);
     void removeNode(NodeWorker* node);
 
     void setSelection(QList<NodeWorker*>);
 
+    void updateScrolling();
+    void setScrolling(bool scrolling);
+
+    void reset();
+
     void refresh();
     void update();
+    void updateTime();
     void updateTime(long stamp);
     void updateRowStart(NodeWorker* worker, int type, long stamp);
     void updateRowStop(NodeWorker* worker, long stamp);
 
     void wheelEvent(QWheelEvent *we);
+
+Q_SIGNALS:
+    void scrollingChanged(bool);
 
 private:
     struct Row;
@@ -41,6 +52,11 @@ private:
     struct Parameters
     {
         double resolution;
+
+        long start_time_stamp;
+
+        long start_time;
+        long time;
     };
 
     struct Activity
@@ -93,8 +109,7 @@ private:
     QGraphicsScene* scene_;
     QTimer* timer_;
 
-    long start_time_;
-    long time_;
+    bool scrolling_;
 
     Parameters params_;
 
