@@ -34,6 +34,7 @@
 #include <QGraphicsItem>
 #include <QGLWidget>
 #include <QInputDialog>
+#include <QScrollBar>
 
 using namespace csapex;
 
@@ -43,7 +44,7 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
                            QWidget *parent)
     : QGraphicsView(parent), scene_(scene), settings_(settings),
       thread_pool_(thread_pool), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
-      scalings_to_perform_(0)
+      scalings_to_perform_(0), move_event_(NULL)
 
 {
     setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
@@ -73,7 +74,8 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
     QObject::connect(scene_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
-//    QObject::connect(&scalings_animation_timer_, SIGNAL(timeout()), this, SLOT(animateZoom()));
+    //    QObject::connect(&scalings_animation_timer_, SIGNAL(timeout()), this, SLOT(animateZoom()));
+    QObject::connect(&scroll_animation_timer_, SIGNAL(timeout()), this, SLOT(animateScroll()));
 
     setContextMenuPolicy(Qt::DefaultContextMenu);
 }
@@ -235,27 +237,91 @@ void DesignerView::mouseMoveEvent(QMouseEvent *me)
 
 void DesignerView::dragEnterEvent(QDragEnterEvent* e)
 {
+    delete move_event_;
+    move_event_ = NULL;
+
     QGraphicsView::dragEnterEvent(e);
     drag_io_.dragEnterEvent(this, e);
 }
 
 void DesignerView::dragMoveEvent(QDragMoveEvent* e)
 {
+    delete move_event_;
+    move_event_ = new QDragMoveEvent(*e);
+
     QGraphicsView::dragMoveEvent(e);
     if(!e->isAccepted()) {
         drag_io_.dragMoveEvent(this, e);
+    }
+
+    static const int border_threshold = 100;
+    static const double scroll_factor = 10.;
+
+    bool scroll_p = false;
+
+    QPointF pos = e->posF();
+    if(pos.x() < border_threshold) {
+        scroll_p = true;
+        scroll_offset_x_ = scroll_factor * (pos.x() - border_threshold) / double(border_threshold);
+    } else if(pos.x() > width() - border_threshold) {
+        scroll_p = true;
+        scroll_offset_x_ = scroll_factor * (pos.x() - (width() - border_threshold)) / double(border_threshold);
+    }
+
+    if(pos.y() < border_threshold) {
+        scroll_p = true;
+        scroll_offset_y_ = scroll_factor * (pos.y() - border_threshold) / double(border_threshold);
+    } else if(pos.y() > height() - border_threshold) {
+        scroll_p = true;
+        scroll_offset_y_ = scroll_factor * (pos.y() - (height() - border_threshold)) / double(border_threshold);
+    }
+
+    if(scroll_p) {
+        if(!scroll_animation_timer_.isActive()) {
+            scroll_animation_timer_.start(1000./60.);
+        }
+    } else {
+        if(scroll_animation_timer_.isActive()) {
+            scroll_animation_timer_.stop();
+        }
     }
 }
 
 void DesignerView::dropEvent(QDropEvent* e)
 {
+    delete move_event_;
+    move_event_ = NULL;
+
     QGraphicsView::dropEvent(e);
     drag_io_.dropEvent(this, e, mapToScene(e->pos()));
+
+    if(scroll_animation_timer_.isActive()) {
+        scroll_animation_timer_.stop();
+    }
 }
 
 void DesignerView::dragLeaveEvent(QDragLeaveEvent* e)
 {
+    delete move_event_;
+    move_event_ = NULL;
+
     QGraphicsView::dragLeaveEvent(e);
+
+    if(scroll_animation_timer_.isActive()) {
+        scroll_animation_timer_.stop();
+    }
+}
+
+void DesignerView::animateScroll()
+{
+    QScrollBar* h = horizontalScrollBar();
+    h->setValue(h->value() + scroll_offset_x_);
+    QScrollBar* v = verticalScrollBar();
+    v->setValue(v->value() + scroll_offset_y_);
+
+    if(move_event_) {
+        drag_io_.dragMoveEvent(this, move_event_);
+    }
 }
 
 void DesignerView::showBoxDialog()

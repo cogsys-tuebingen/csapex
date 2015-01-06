@@ -81,11 +81,14 @@ public Q_SLOTS:
     void stopProfiling(NodeWorker *box);
 
     void reset();
+
     void resetZoom();
     void zoomIn();
     void zoomOut();
     void zoom(double factor);
     void animateZoom();
+
+    void animateScroll();
 
     void updateSelection();
     void selectAll();
@@ -119,6 +122,12 @@ private:
 
     int scalings_to_perform_;
     QTimer scalings_animation_timer_;
+
+    QTimer scroll_animation_timer_;
+    double scroll_offset_x_;
+    double scroll_offset_y_;
+
+    QDragMoveEvent* move_event_;
 };
 }
 
