@@ -40,7 +40,7 @@ WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFac
     : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(NULL), tooltip_view_(NULL)
 {
     if(settings_.knows("grid-lock")) {
-       enableGridLock(settings_.get<bool>("grid-lock"));
+        enableGridLock(settings_.get<bool>("grid-lock"));
     }
 }
 
@@ -292,11 +292,13 @@ Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLay
     if(designer_) {
         Port* port = new Port(dispatcher_, this, connector);
 
-        port->setFlipped(box->isFlipped());
-        port->setMinimizedSize(box->isMinimizedSize());
+        if(box) {
+            port->setFlipped(box->isFlipped());
+            port->setMinimizedSize(box->isMinimizedSize());
 
-        QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
-        QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
+            QObject::connect(box, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
+            QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
+        }
 
         insertPort(layout, port);
 
