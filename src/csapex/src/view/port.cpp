@@ -227,12 +227,8 @@ void Port::createToolTip()
     setToolTip(tooltip.str().c_str());
 }
 
-void Port::mouseMoveEvent(QMouseEvent* e)
+void Port::startDrag()
 {
-    if(buttons_down_ == Qt::NoButton) {
-        return;
-    }
-
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
     bool right = (buttons_down_ & Qt::RightButton) != 0;
 
@@ -262,16 +258,26 @@ void Port::mouseMoveEvent(QMouseEvent* e)
             drag->exec();
         }
 
-        e->accept();
-
         Q_EMIT adaptee_->connectionDone(adaptee_);
         buttons_down_ = Qt::NoButton;
     }
+}
+
+void Port::mouseMoveEvent(QMouseEvent* e)
+{
+    if(buttons_down_ == Qt::NoButton) {
+        return;
+    }
+
+    startDrag();
+
     e->accept();
 }
 
 void Port::mouseReleaseEvent(QMouseEvent* e)
 {
+    startDrag();
+
     buttons_down_ = e->buttons();
 
     if(e->button() == Qt::MiddleButton) {

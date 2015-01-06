@@ -66,6 +66,7 @@ public Q_SLOTS:
     void updateTooltip();
 
 protected:
+    void startDrag();
     void createToolTip();
     void paintEvent(QPaintEvent *);
 
