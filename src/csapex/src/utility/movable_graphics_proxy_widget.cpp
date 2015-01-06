@@ -60,6 +60,11 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         QGraphicsItem::mousePressEvent(event);
     }
 
+    if(event->type() == QEvent::GraphicsSceneMousePress) {
+        static unsigned long nextz = 1;
+        setZValue(nextz++);
+    }
+
     bool do_relay = !ctrl && child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel");
 
     before_ = pos();
