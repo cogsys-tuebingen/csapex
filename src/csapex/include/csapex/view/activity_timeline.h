@@ -19,10 +19,9 @@ public:
     ActivityTimeline();
     ~ActivityTimeline();
 
-    void resizeToFit();
+    virtual void drawBackground(QPainter *painter, const QRectF &rect);
+    virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
-    void startTimer();
-    void stopTimer();
 public Q_SLOTS:
     void addNode(NodeWorker* node);
     void removeNode(NodeWorker* node);
@@ -43,8 +42,15 @@ public Q_SLOTS:
 
     void wheelEvent(QWheelEvent *we);
 
+    void resizeToFit();
+
+
 Q_SIGNALS:
     void scrollingChanged(bool);
+
+private:
+    void startTimer();
+    void stopTimer();
 
 private:
     struct Row;
@@ -81,10 +87,8 @@ private:
 
     struct Row
     {
-        Row(Parameters& params, QGraphicsScene* scene, int row, int width, NodeWorker* worker);
+        Row(Parameters& params, QGraphicsScene* scene, int row, NodeWorker* worker);
         ~Row();
-
-        void updateLines(int width);
 
         void refresh();
         void clear();
@@ -94,10 +98,8 @@ private:
         NodeWorker* node_;
 
         int row;
-        int width;
-
-        QGraphicsLineItem* line_top_item;
-        QGraphicsLineItem* line_bottom_item;
+        int top;
+        int bottom;
 
         std::vector<Activity*> activities_;
         Activity* active_activity_;

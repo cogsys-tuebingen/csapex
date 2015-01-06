@@ -144,6 +144,12 @@ void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param, 
     addParameterCallback(param.get(), cb);
 }
 
+void Parameterizable::removeTemporaryParameter(const param::Parameter::Ptr &param)
+{
+    parameter_state_->removeTemporaryParameter(param);
+}
+
+
 void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter::Ptr> &params)
 {
     setParameterSetSilence(true);

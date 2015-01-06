@@ -26,10 +26,12 @@ public:
     void setParentUUID(const UUID& parent_uuid);
 
     void addParameter(param::ParameterPtr param);
+    void removeParameter(param::ParameterPtr param);
 
     void addPersistentParameter(const param::ParameterPtr& param);
 
     void addTemporaryParameter(const param::ParameterPtr& param);
+    void removeTemporaryParameter(const param::ParameterPtr& param);
     void removeTemporaryParameters();
 
     void setParameterSetSilence(bool silent);
@@ -54,6 +56,7 @@ public:
 
 private:
     void registerParameter(const param::ParameterPtr &param);
+    void unregisterParameter(const param::ParameterPtr &param);
 
 public:
     UUID parent_uuid_;
@@ -67,6 +70,7 @@ public:
 
     boost::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
     boost::shared_ptr<boost::signals2::signal<void(param::Parameter*)> > parameter_added;
+    boost::shared_ptr<boost::signals2::signal<void(param::ParameterPtr)> > parameter_removed;
 };
 
 }

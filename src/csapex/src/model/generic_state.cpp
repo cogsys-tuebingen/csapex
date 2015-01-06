@@ -14,7 +14,8 @@ using namespace csapex;
 GenericState::GenericState()
     : silent_(false),
       parameter_set_changed(new boost::signals2::signal<void()>),
-      parameter_added(new boost::signals2::signal<void(param::Parameter*)>)
+      parameter_added(new boost::signals2::signal<void(param::Parameter*)>),
+      parameter_removed(new boost::signals2::signal<void(param::ParameterPtr)>)
 {
 
 }
@@ -78,6 +79,15 @@ void GenericState::addParameter(param::Parameter::Ptr param)
     registerParameter(param);
 }
 
+void GenericState::removeParameter(param::ParameterPtr param)
+{
+    params.erase(param->name());
+
+    order.erase(std::find(order.begin(), order.end(), param->name()));
+
+    unregisterParameter(param);
+}
+
 void GenericState::setParameterSetSilence(bool silent)
 {
     silent_ = silent;
@@ -111,6 +121,12 @@ void GenericState::addTemporaryParameter(const param::Parameter::Ptr &param)
     temporary[param->name()] = true;
 }
 
+void GenericState::removeTemporaryParameter(const param::Parameter::Ptr &param)
+{
+    removeParameter(param);
+    temporary.erase(param->name());
+}
+
 
 void GenericState::addPersistentParameter(const param::Parameter::Ptr &param)
 {
@@ -126,6 +142,14 @@ void GenericState::registerParameter(const param::Parameter::Ptr &param)
     param->setUUID(parent_uuid_.getFullName());
 
     (*parameter_added)(param.get());
+    triggerParameterSetChanged();
+}
+
+void GenericState::unregisterParameter(const param::Parameter::Ptr &param)
+{
+    params.erase(param->name());
+
+    (*parameter_removed)(param);
     triggerParameterSetChanged();
 }
 

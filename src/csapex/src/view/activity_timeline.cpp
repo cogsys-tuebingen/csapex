@@ -38,7 +38,7 @@ ActivityTimeline::ActivityTimeline()
 
     setScrolling(false);
 
-    params_.resolution = 2.0;
+    params_.resolution = 0.5; /*ms*/
     params_.time = 0;
     params_.start_time_stamp = QDateTime::currentMSecsSinceEpoch();
 
@@ -65,6 +65,39 @@ void ActivityTimeline::resizeToFit()
     scene_->setSceneRect(rect);
 
     setFixedHeight(scene_->sceneRect().height() + horizontalScrollBar()->height() + 5);
+}
+
+
+void ActivityTimeline::drawBackground(QPainter *painter, const QRectF &rect)
+{
+    QGraphicsView::drawBackground(painter, rect);
+}
+
+void ActivityTimeline::drawForeground(QPainter *painter, const QRectF &rect)
+{
+    QGraphicsView::drawForeground(painter, rect);
+
+    double left = rect.x();
+    double right = rect.x() + rect.width();
+    double top = rect.y();
+    double bottom = rect.y() + rect.height() / 2;
+
+    for(std::size_t r = 0; r < rows_.size() + 1; ++r) {
+        double y = r * row_height;
+        painter->drawLine(left,y, right,y);
+    }
+
+    double scale = 1.0 / transform().m11();
+    painter->setPen(QPen(QBrush(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5)), scale));
+
+    double delta = 1e3 / params_.resolution;
+
+    for(double x = std::floor(left); x < std::ceil(right); x += delta) {
+        painter->drawLine(x,top, x,bottom);
+
+//        QString text = QString::number(x);
+//        painter->drawText(QRectF(x-10, 10, 20, 20), text);
+    }
 }
 
 void ActivityTimeline::startTimer()
@@ -98,10 +131,9 @@ void ActivityTimeline::addNode(NodeWorker* node)
         startTimer();
     }
 
-    int width = std::max(10000l, params_.time + 1000l) / params_.resolution;
     int row = rows_.size();
 
-    Row* r = new Row(params_, scene_, row, width, node);
+    Row* r = new Row(params_, scene_, row, node);
     rows_.push_back(r);
     node2row[node] = r;
 
@@ -241,11 +273,9 @@ void ActivityTimeline::update()
     updateTime();
 
     int i = 0;
-    int width = std::max(10000l, params_.time + 1000l) / params_.resolution;
 
     for(std::map<NodeWorker*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         Row* row = it->second;
-        row->updateLines(width);
 
         if(row->active_activity_) {
             row->active_activity_->step(params_.time);
@@ -273,53 +303,29 @@ void ActivityTimeline::reset()
 void ActivityTimeline::refresh()
 {
     int i = 0;
-    int width = std::max(10000l, params_.time + 1000l) / params_.resolution;
     for(std::map<NodeWorker*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         Row* row = it->second;
-        row->updateLines(width);
         row->refresh();
         ++i;
     }
 }
 
 
-ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* scene, int row, int width, NodeWorker* worker)
+ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* scene, int row, NodeWorker* worker)
     : params_(params), node_(worker), row(row), active_activity_(NULL), selected(false)
 {
-    int top = row * row_height;
-    int bottom = (row+1) * row_height;
-
-    QLineF line_top(0, top, width, top);
-    line_top_item = scene->addLine(line_top);
-
-    QLineF line_bottom(0, bottom, width, bottom);
-    line_bottom_item = scene->addLine(line_bottom);
-
-    updateLines(width);
+    top = row * row_height;
+    bottom = (row+1) * row_height;
 }
 
 ActivityTimeline::Row::~Row()
 {
     clear();
-    delete line_bottom_item;
-    delete line_top_item;
 }
 
-void ActivityTimeline::Row::updateLines(int w)
-{
-    width = w;
-
-    int top = row * row_height;
-    int bottom = (row+1) * row_height;
-
-    line_top_item->setLine(QLineF(0, top, width, top));
-    line_bottom_item->setLine(QLineF(0, bottom, width, bottom));
-}
 
 void ActivityTimeline::Row::refresh()
 {
-    updateLines(width);
-
     for(std::size_t j = 0; j < activities_.size(); ) {
         Activity* activity = activities_[j];
         if(activity->stop_ < params_.start_time) {
@@ -390,7 +396,7 @@ void ActivityTimeline::Activity::update()
     rect->setBrush(QBrush(color/*, Qt::Dense4Pattern*/));
     rect->setPen(Qt::NoPen);
 
-    int bottom = row->line_top_item->line().p1().y();
+    int bottom = row->top;
 
     double x = std::max(0.0, (start_ - params_->start_time) / params_->resolution);
     rect->setRect(x, bottom, (stop_ - start_)  / params_->resolution, row_height);

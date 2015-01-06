@@ -45,6 +45,7 @@ public:
 
     void addTemporaryParameter(const param::ParameterPtr& param);
     void addTemporaryParameter(const param::ParameterPtr& param, boost::function<void(param::Parameter *)> cb);
+    void removeTemporaryParameter(const param::ParameterPtr& param);
 
     void setTemporaryParameters(const std::vector<param::ParameterPtr>& param);
     void setTemporaryParameters(const std::vector<param::ParameterPtr>& param, boost::function<void(param::Parameter *)> cb);
