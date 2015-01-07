@@ -72,6 +72,7 @@ class Designer;
 class DesignBoard;
 class DesignerScene;
 class DesignerView;
+class MinimapWidget;
 
 class MovableGraphicsProxyWidget;
 

@@ -25,7 +25,7 @@ class Designer : public QWidget
 
 public:
     Designer(Settings& settings, GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl,
-             DesignerView *view, DesignerScene* scene,  QWidget* parent = 0);
+             DesignerView *view, DesignerScene* scene, MinimapWidget* minimap, QWidget* parent = 0);
     virtual ~Designer();
 
     void setup();
@@ -38,12 +38,14 @@ public:
     bool isSchematicsEnabled() const;
     bool isGraphComponentsEnabled() const;
     bool isThreadsEnabled() const;
+    bool isMinimapEnabled() const;
 
     bool hasSelection() const;
 
 Q_SIGNALS:
     void selectionChanged();
     void gridEnabled(bool);
+    void minimapEnabled(bool);
     void schematicsEnabled(bool);
     void graphComponentsEnabled(bool);
     void threadsEnabled(bool);
@@ -60,6 +62,7 @@ public Q_SLOTS:
     void enableSchematics(bool);
     void displayGraphComponents(bool);
     void displayThreads(bool);
+    void displayMinimap(bool);
 
     void refresh();
     void reset();
@@ -73,6 +76,7 @@ private:
     Ui::Designer* ui;
     DesignerView* designer_view_;
     DesignerScene* designer_scene_;
+    MinimapWidget* minimap_;
 
     Settings& settings_;
     GraphPtr graph_;

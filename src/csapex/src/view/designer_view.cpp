@@ -85,6 +85,26 @@ DesignerView::~DesignerView()
     delete scene_;
 }
 
+void DesignerView::paintEvent(QPaintEvent *e)
+{
+    QGraphicsView::paintEvent(e);
+
+    Q_EMIT viewChanged();
+}
+
+void DesignerView::centerOnPoint(QPointF point)
+{
+    centerOn(point);
+//    QScrollBar* h = horizontalScrollBar();
+//    QScrollBar* v = verticalScrollBar();
+
+//    int x = point.x();
+//    int y = point.y();
+
+//    h->setValue(x);
+//    v->setValue(y);
+}
+
 void DesignerView::reset()
 {
     scene_->clear();
@@ -145,6 +165,11 @@ void DesignerView::animateZoom()
 DesignerScene* DesignerView::designerScene()
 {
     return scene_;
+}
+
+std::vector<NodeBox*> DesignerView::boxes()
+{
+    return boxes_;
 }
 
 void DesignerView::updateSelection()

@@ -25,7 +25,7 @@ public:
     ~DesignerView();
 
     DesignerScene* designerScene();
-
+    std::vector<NodeBox*> boxes();
     CommandPtr deleteSelected();
 
     void keyPressEvent(QKeyEvent* e);
@@ -38,6 +38,8 @@ public:
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
     void dragLeaveEvent(QDragLeaveEvent * e);
+
+    void paintEvent(QPaintEvent* e);
 
     QColor inputColor() const
     {
@@ -57,15 +59,17 @@ public:
         output_color_ = c;
     }
 
-
 Q_SIGNALS:
-    void selectionChanged();
+    void selectionChanged();    
+    void viewChanged();
 
 public Q_SLOTS:
     void showBoxDialog();
     void addBoxEvent(NodeBox* box);
     void removeBoxEvent(NodeBox* box);
     void renameBox(NodeBox* box);
+
+    void centerOnPoint(QPointF point);
 
     void movedBoxes(double dx, double dy);
 

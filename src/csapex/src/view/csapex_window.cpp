@@ -20,6 +20,7 @@
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/view/activity_timeline.h>
 #include <csapex/view/activity_legend.h>
+#include <csapex/view/minimap_widget.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>
@@ -36,11 +37,12 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl,
-                           GraphWorkerPtr graph, Designer* designer,
+                           GraphWorkerPtr graph, Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
                            PluginLocator *locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph),
-      ui(new Ui::CsApexWindow), designer_(designer), activity_legend_(legend), activity_timeline_(timeline), init_(false), style_sheet_watcher_(NULL), plugin_locator_(locator)
+      ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
+      activity_timeline_(timeline), init_(false), style_sheet_watcher_(NULL), plugin_locator_(locator)
 {
     core_.addListener(this);
 }
@@ -71,6 +73,9 @@ void CsApexWindow::construct()
     ui->actionDisplay_Graph_Components->setChecked(designer_->isGraphComponentsEnabled());
     ui->actionDisplay_Threads->setChecked(designer_->isThreadsEnabled());
 
+    minimap_->setVisible(designer_->isMinimapEnabled());
+    ui->actionDisplay_Minimap->setChecked(designer_->isMinimapEnabled());
+
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
     QObject::connect(ui->actionSaveAsCopy, SIGNAL(triggered()), this,  SLOT(saveAsCopy()));
@@ -93,6 +98,8 @@ void CsApexWindow::construct()
     QObject::connect(designer_, SIGNAL(graphComponentsEnabled(bool)), ui->actionDisplay_Graph_Components, SLOT(setChecked(bool)));
     QObject::connect(ui->actionDisplay_Threads, SIGNAL(toggled(bool)), designer_,  SLOT(displayThreads(bool)));
     QObject::connect(designer_, SIGNAL(threadsEnabled(bool)), ui->actionDisplay_Threads, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionDisplay_Minimap, SIGNAL(toggled(bool)), designer_,  SLOT(displayMinimap(bool)));
+    QObject::connect(designer_, SIGNAL(minimapEnabled(bool)), ui->actionDisplay_Minimap, SLOT(setChecked(bool)));
 
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), widget_ctrl_.get(),  SLOT(enableGridLock(bool)));
     QObject::connect(widget_ctrl_.get(), SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));

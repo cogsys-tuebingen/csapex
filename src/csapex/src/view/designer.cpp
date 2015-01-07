@@ -18,6 +18,7 @@
 #include <utils_param/parameter_factory.h>
 #include <csapex/view/designer_scene.h>
 #include <csapex/utility/movable_graphics_proxy_widget.h>
+#include <csapex/view/minimap_widget.h>
 
 /// SYSTEM
 #include <QScrollBar>
@@ -27,8 +28,12 @@
 
 using namespace csapex;
 
-Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerView* view, DesignerScene* scene, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer), designer_view_(view), designer_scene_(scene), settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
+Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl,
+                   DesignerView* view, DesignerScene* scene, MinimapWidget* minimap,
+                   QWidget* parent)
+    : QWidget(parent), ui(new Ui::Designer),
+      designer_view_(view), designer_scene_(scene), minimap_(minimap),
+      settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
 {
 }
 
@@ -64,6 +69,11 @@ void Designer::setup()
     }
 
     setFocusPolicy(Qt::NoFocus);
+
+//    ui->horizontalLayout->addWidget(minimap_);
+    minimap_->setParent(designer_view_);
+    minimap_->move(10, 10);
+    minimap_->setVisible(true);
 }
 
 std::vector<NodeBox*> Designer::getSelectedBoxes() const
@@ -161,6 +171,11 @@ bool Designer::isThreadsEnabled() const
     return settings_.get<bool>("display-threads", false);
 }
 
+bool Designer::isMinimapEnabled() const
+{
+    return settings_.get<bool>("display-minimap", false);
+}
+
 bool Designer::hasSelection() const
 {
     return designer_scene_->selectedItems().size() > 0;
@@ -218,4 +233,18 @@ void Designer::displayThreads(bool display)
     designer_view_->updateBoxInformation();
 
     Q_EMIT threadsEnabled(display);
+}
+
+
+void Designer::displayMinimap(bool display)
+{
+    if(!settings_.knows("display-minimap")) {
+        settings_.add(param::ParameterFactory::declareBool("display-minimap", display));
+    }
+
+    settings_.set("display-minimap", display);
+
+    minimap_->setVisible(display);
+
+    Q_EMIT minimapEnabled(display);
 }

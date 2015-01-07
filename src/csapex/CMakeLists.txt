@@ -208,6 +208,7 @@ set(SRC_APP
     src/view/designer.cpp
     src/view/node_adapter_factory.cpp
     src/view/profiling_widget.cpp
+    src/view/minimap_widget.cpp
     src/view/port.cpp
     src/view/widget_controller.cpp
     src/view/fulcrum_widget.cpp

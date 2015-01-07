@@ -34,5 +34,8 @@
         <file>plugin_disabled.png</file>
         <file>plugin_error.png</file>
         <file>arrow_refresh.png</file>
+        <file>map.png</file>
+        <file>components.png</file>
+        <file>threads.png</file>
     </qresource>
 </RCC>

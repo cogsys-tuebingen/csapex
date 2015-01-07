@@ -74,6 +74,7 @@
     <addaction name="actionSchematics"/>
     <addaction name="actionDisplay_Graph_Components"/>
     <addaction name="actionDisplay_Threads"/>
+    <addaction name="actionDisplay_Minimap"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -155,6 +156,7 @@
    <addaction name="actionSchematics"/>
    <addaction name="actionDisplay_Graph_Components"/>
    <addaction name="actionDisplay_Threads"/>
+   <addaction name="actionDisplay_Minimap"/>
   </widget>
   <widget class="QDockWidget" name="Debug">
    <property name="features">
@@ -792,6 +794,10 @@ p, li { white-space: pre-wrap; }
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/components.png</normaloff>:/components.png</iconset>
+   </property>
    <property name="text">
     <string>Display Graph Components</string>
    </property>
@@ -799,6 +805,10 @@ p, li { white-space: pre-wrap; }
   <action name="actionDisplay_Threads">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/threads.png</normaloff>:/threads.png</iconset>
    </property>
    <property name="text">
     <string>Display Threads</string>
@@ -863,6 +873,18 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>WARNING: Experimental: OS may not allow to reload libraries</string>
+   </property>
+  </action>
+  <action name="actionDisplay_Minimap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/map.png</normaloff>:/map.png</iconset>
+   </property>
+   <property name="text">
+    <string>Display Minimap</string>
    </property>
   </action>
  </widget>

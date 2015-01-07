@@ -3,27 +3,28 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/settings.h>
-#include <csapex/view/csapex_window.h>
-#include <csapex/view/box.h>
-#include <csapex/model/node_factory.h>
-#include <csapex/view/node_adapter_factory.h>
-#include <csapex/model/node_worker.h>
-#include <csapex/model/graph_worker.h>
-#include <csapex/core/graphio.h>
-#include <csapex/utility/thread.h>
-#include <csapex/utility/error_handling.h>
 #include <csapex/core/drag_io.h>
-#include <csapex/view/designer.h>
-#include <csapex/view/designer_view.h>
-#include <csapex/model/node_factory.h>
-#include <utils_param/parameter_factory.h>
-#include <csapex/view/widget_controller.h>
-#include <csapex/view/designer_scene.h>
+#include <csapex/core/graphio.h>
+#include <csapex/core/settings.h>
 #include <csapex/core/thread_pool.h>
+#include <csapex/model/graph_worker.h>
+#include <csapex/model/node_factory.h>
+#include <csapex/model/node_factory.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/utility/error_handling.h>
+#include <csapex/utility/thread.h>
 #include <csapex/view/activity_legend.h>
 #include <csapex/view/activity_timeline.h>
+#include <csapex/view/box.h>
+#include <csapex/view/csapex_window.h>
+#include <csapex/view/designer.h>
+#include <csapex/view/designer_scene.h>
+#include <csapex/view/designer_view.h>
+#include <csapex/view/minimap_widget.h>
+#include <csapex/view/node_adapter_factory.h>
+#include <csapex/view/widget_controller.h>
+#include <utils_param/parameter_factory.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -164,9 +165,15 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         app.processEvents();
 
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
+
         DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control);
         DesignerView* view = new DesignerView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io);
-        Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene);
+        MinimapWidget* minimap = new MinimapWidget(view, scene);
+
+        QObject::connect(view, SIGNAL(viewChanged()), minimap, SLOT(repaint()));
+        QObject::connect(minimap, SIGNAL(positionRequest(QPointF)), view, SLOT(centerOnPoint(QPointF)));
+
+        Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene, minimap);
 
         ActivityLegend* legend = new ActivityLegend;
         ActivityTimeline* timeline = new ActivityTimeline;
@@ -180,7 +187,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, legend, timeline, plugin_locator.get());
+        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, minimap, legend, timeline, plugin_locator.get());
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
