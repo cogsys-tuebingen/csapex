@@ -1214,9 +1214,13 @@ void NodeWorker::checkIO()
     if(isEnabled()) {
         enableInput(canReceive());
         enableOutput(canReceive());
+        enableSlots(true);
+        enableTriggers(true);
     } else {
         enableInput(false);
         enableOutput(false);
+        enableSlots(false);
+        enableTriggers(false);
     }
 }
 
@@ -1225,6 +1229,8 @@ void NodeWorker::enableIO(bool enable)
 {
     enableInput(canReceive() && enable);
     enableOutput(enable);
+    enableSlots(enable);
+    enableTriggers(enable);
 }
 
 void NodeWorker::enableInput (bool enable)
@@ -1246,6 +1252,28 @@ void NodeWorker::enableOutput (bool enable)
             o->enable();
         } else {
             o->disable();
+        }
+    }
+}
+
+void NodeWorker::enableSlots (bool enable)
+{
+    Q_FOREACH(Slot* i, slots_) {
+        if(enable) {
+            i->enable();
+        } else {
+            i->disable();
+        }
+    }
+}
+
+void NodeWorker::enableTriggers (bool enable)
+{
+    Q_FOREACH(Trigger* i, triggers_) {
+        if(enable) {
+            i->enable();
+        } else {
+            i->disable();
         }
     }
 }

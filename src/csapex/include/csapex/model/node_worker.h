@@ -136,6 +136,8 @@ public Q_SLOTS:
     void enableIO(bool enable);
     void enableInput(bool enable);
     void enableOutput(bool enable);
+    void enableSlots(bool enable);
+    void enableTriggers(bool enable);
 
     void setTickFrequency(double f);
     void tick();

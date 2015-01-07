@@ -165,7 +165,9 @@ void Slot::handleTrigger()
     QMutexLocker lock(&trigger_exec_mutex_);
 
     // do the work
-    callback_();
+    if(isEnabled()) {
+        callback_();
+    }
 
     exec_finished_.wakeAll();
 }
