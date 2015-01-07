@@ -19,6 +19,10 @@ MinimapWidget::MinimapWidget(DesignerView *view, DesignerScene *scene)
     setMaximumSize(500, 500);
 
     QObject::connect(this, SIGNAL(resizeRequest(QSize)), this, SLOT(doResize()), Qt::QueuedConnection);
+
+    QObject::connect(view, SIGNAL(viewChanged()), this, SLOT(repaint()));
+    QObject::connect(this, SIGNAL(positionRequest(QPointF)), view, SLOT(centerOnPoint(QPointF)));
+    QObject::connect(this, SIGNAL(zoomRequest(QPointF, double)), view, SLOT(zoomAt(QPointF,double)));
 }
 
 void MinimapWidget::doResize()
@@ -53,6 +57,13 @@ void MinimapWidget::mouseMoveEvent(QMouseEvent *me)
     }
 }
 
+void MinimapWidget::wheelEvent(QWheelEvent *e)
+{
+    int direction = (e->delta() > 0) ? 1 : -1;
+
+    QPoint pos = scene_to_minimap_.inverted().map(e->pos());
+    Q_EMIT zoomRequest(pos, direction * 2.0);
+}
 
 void MinimapWidget::emitPositionRequest(QMouseEvent *me)
 {

@@ -170,9 +170,6 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         DesignerView* view = new DesignerView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io);
         MinimapWidget* minimap = new MinimapWidget(view, scene);
 
-        QObject::connect(view, SIGNAL(viewChanged()), minimap, SLOT(repaint()));
-        QObject::connect(minimap, SIGNAL(positionRequest(QPointF)), view, SLOT(centerOnPoint(QPointF)));
-
         Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene, minimap);
 
         ActivityLegend* legend = new ActivityLegend;

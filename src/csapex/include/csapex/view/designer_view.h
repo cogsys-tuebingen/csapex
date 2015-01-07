@@ -90,6 +90,7 @@ public Q_SLOTS:
     void zoomIn();
     void zoomOut();
     void zoom(double factor);
+    void zoomAt(QPointF point, double factor);
     void animateZoom();
 
     void animateScroll();

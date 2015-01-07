@@ -126,6 +126,12 @@ void DesignerView::zoomOut()
     zoom(-5.0);
 }
 
+void DesignerView::zoomAt(QPointF point, double f)
+{
+    zoom(f);
+    centerOn(point);
+}
+
 void DesignerView::zoom(double f)
 {
     qreal factor = 1.0 + f / 25.0;

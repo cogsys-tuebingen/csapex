@@ -20,6 +20,7 @@ public:
 Q_SIGNALS:
     void resizeRequest(QSize);
     void positionRequest(QPointF);
+    void zoomRequest(QPointF at, double factor);
 
 public Q_SLOTS:
     void doResize();
@@ -28,6 +29,9 @@ protected:
     void mousePressEvent(QMouseEvent* me);
     void mouseReleaseEvent(QMouseEvent* me);
     void mouseMoveEvent(QMouseEvent* me);
+
+    void wheelEvent(QWheelEvent* e);
+
     void paintEvent(QPaintEvent* e);
 
 private:
