@@ -25,7 +25,7 @@ void ApexMessageProvider::load(const std::string& file)
 
 bool ApexMessageProvider::hasNext()
 {
-    return msg_;
+    return (bool) msg_;
 }
 
 connection_types::Message::Ptr ApexMessageProvider::next(std::size_t slot)

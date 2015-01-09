@@ -21,7 +21,8 @@
 
 using namespace csapex;
 
-static const int DEFAULT_HISTORY_LENGTH = 15;
+const int NodeWorker::DEFAULT_HISTORY_LENGTH = 15;
+const double NodeWorker::DEFAULT_FREQUENCY = 30.0;
 
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
     : Unique(uuid),

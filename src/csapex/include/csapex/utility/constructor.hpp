@@ -56,18 +56,32 @@ protected:
 
 
 
-template <typename Any>
-class HasName
-{
-    typedef char Small;
-    class Big { char dummy[2]; };
+//template <typename Any>
+//class HasName
+//{
+//    typedef char Small;
+//    class Big { char dummy[2]; };
 
-    template <typename Class> static Small test(typeof(&Class::setName)) ;
-    template <typename Class> static Big test(...);
+//    template <typename Class> static Small test(typeof(&Class::setName)) ;
+//    template <typename Class> static Big test(...);
 
-public:
-    enum { value = sizeof(test<Any>(0)) == sizeof(Small) };
-};
+//public:
+//    enum { value = sizeof(test<Any>(0)) == sizeof(Small) };
+//};
+
+template<typename> struct Void { typedef void type; };
+
+template<typename T, typename Sfinae = void>
+struct HasName: std::false_type {};
+
+template<typename T>
+struct HasName<
+    T
+    , typename Void<
+        decltype( std::declval<T&>().setName(0) )
+    >::type
+>: std::true_type {};
+
 
 namespace impl {
 template <typename M>

@@ -38,7 +38,8 @@ public:
 public:
     typedef boost::shared_ptr<NodeWorker> Ptr;
 
-    static const double DEFAULT_FREQUENCY = 30.0;
+    static const int DEFAULT_HISTORY_LENGTH;
+    static const double DEFAULT_FREQUENCY;
 
 public:
     NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);

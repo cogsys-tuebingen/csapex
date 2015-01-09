@@ -1,23 +1,25 @@
 cmake_minimum_required(VERSION 2.8.11)
+
 project(csapex)
 
+## Check the build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type, options: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
     message("No CMAKE_BUILD_TYPE specified, defaulting to ${CMAKE_BUILD_TYPE}")
 endif(NOT CMAKE_BUILD_TYPE)
 
+## Add our own cmake subdirectory
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(cmake/csapex-extras.cmake)
 
+## Enable warnings
 add_definitions(-W -Wall)
 
 ## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS utils_param utils_qt class_loader)
 
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
-include(cmake/csapex-extras.cmake)
 
 set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 

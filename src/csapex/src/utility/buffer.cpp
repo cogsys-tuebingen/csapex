@@ -59,5 +59,5 @@ bool Buffer::isFilled() const
 {
     QMutexLocker lock(mutex_);
 
-    return message_;
+    return (bool) message_;
 }

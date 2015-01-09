@@ -38,7 +38,7 @@ public:
     bool isType()
     {
         boost::shared_ptr<T> tmp = boost::dynamic_pointer_cast<T>(message_);
-        return tmp;
+        return (bool) tmp;
     }
 
     void write(ConnectionType::Ptr message);

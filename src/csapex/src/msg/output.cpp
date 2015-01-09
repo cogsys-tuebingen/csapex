@@ -182,7 +182,7 @@ void Output::publish(ConnectionType::Ptr message)
 
 bool Output::hasMessage()
 {
-    return message_to_send_;
+    return (bool) message_to_send_;
 }
 
 bool Output::canSendMessages()

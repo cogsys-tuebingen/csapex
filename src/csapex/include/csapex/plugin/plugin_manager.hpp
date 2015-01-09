@@ -179,7 +179,12 @@ protected:
             constructor.setDescription(description);
             constructor.setIcon(icon);
             constructor.setTags(tags);
-            constructor.setConstructor(boost::bind(&class_loader::ClassLoader::createInstance<M>, loader, lookup_name));
+
+            boost::function< boost::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return boost::shared_ptr<M>(p); };
+
+            auto ptr_maker = boost::bind(&class_loader::ClassLoader::createUnmanagedInstance<M>, loader, lookup_name);
+            auto shared_ptr_maker = boost::bind(make_shared_ptr, ptr_maker);
+            constructor.setConstructor(shared_ptr_maker);
             constructor.setLibraryName(library_name);
 
             registerConstructor(constructor);
