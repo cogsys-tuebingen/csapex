@@ -75,7 +75,7 @@ public:
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
-    Slot* addSlot(const std::string& label, boost::function<void ()> callback);
+    Slot* addSlot(const std::string& label, boost::function<void ()> callback, bool active);
     Trigger* addTrigger(const std::string& label);
 
     Connectable* getConnector(const UUID& uuid) const;

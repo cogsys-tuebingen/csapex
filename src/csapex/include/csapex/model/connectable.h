@@ -53,6 +53,9 @@ public:
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
 
+    bool isEnabled() const;
+    void setEnabled(bool enabled);
+
     bool isBlocked() const;
 
     int sequenceNumber() const;
@@ -77,9 +80,6 @@ public Q_SLOTS:
 
     virtual void disable();
     virtual void enable();
-    void setEnabled(bool enabled);
-
-    bool isEnabled() const;
 
     virtual void stop();
 

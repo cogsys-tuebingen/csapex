@@ -267,7 +267,7 @@ void NodeWorker::makeParameterConnectable(param::Parameter* p)
     param::TriggerParameter* t = dynamic_cast<param::TriggerParameter*>(p);
     if(t) {
         Trigger* trigger = addTrigger(t->name());
-        addSlot(t->name(), boost::bind(&param::TriggerParameter::trigger, t));
+        addSlot(t->name(), boost::bind(&param::TriggerParameter::trigger, t), false);
         node_->addParameterCallback(t, boost::bind(&Trigger::trigger, trigger));
     }
 }
@@ -651,10 +651,10 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
     return c;
 }
 
-Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> callback)
+Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> callback, bool active)
 {
     int id = slots_.size();
-    Slot* slot = new Slot(callback, this, id);
+    Slot* slot = new Slot(callback, this, id, active);
     slot->setLabel(label);
     slot->setEnabled(true);
 

@@ -15,15 +15,15 @@
 
 using namespace csapex;
 
-Slot::Slot(boost::function<void()> callback, const UUID &uuid)
-    : Connectable(uuid), callback_(callback)
+Slot::Slot(boost::function<void()> callback, const UUID &uuid, bool active)
+    : Connectable(uuid), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 //    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
-Slot::Slot(boost::function<void()> callback, Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "slot"), callback_(callback)
+Slot::Slot(boost::function<void()> callback, Unique* parent, int sub_id, bool active)
+    : Connectable(parent, sub_id, "slot"), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 //    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
@@ -165,7 +165,7 @@ void Slot::handleTrigger()
     QMutexLocker lock(&trigger_exec_mutex_);
 
     // do the work
-    if(isEnabled()) {
+    if(isEnabled() || isActive()) {
         callback_();
     }
 
@@ -179,4 +179,9 @@ void Slot::notifyMessageProcessed()
     foreach(Trigger* trigger, sources_) {
         trigger->notifyMessageProcessed();
     }
+}
+
+bool Slot::isActive() const
+{
+    return active_;
 }

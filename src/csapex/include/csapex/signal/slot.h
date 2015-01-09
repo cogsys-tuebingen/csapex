@@ -22,8 +22,8 @@ class Slot : public Connectable
     friend class command::DeleteConnection;
 
 public:
-    Slot(boost::function<void()> callback, const UUID &uuid);
-    Slot(boost::function<void()> callback, Unique *parent, int sub_id);
+    Slot(boost::function<void()> callback, const UUID &uuid, bool active);
+    Slot(boost::function<void()> callback, Unique *parent, int sub_id, bool active);
     virtual ~Slot();
 
     virtual void trigger();
@@ -34,6 +34,8 @@ public:
     virtual bool isInput() const {
         return true;
     }
+
+    bool isActive() const;
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
 
@@ -74,6 +76,7 @@ protected:
     QWaitCondition exec_finished_;
 
     boost::function<void()> callback_;
+    bool active_;
 };
 
 }

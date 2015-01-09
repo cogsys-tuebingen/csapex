@@ -49,7 +49,7 @@ void Node::doSetup()
     setupParameters();
 
     try {
-        modifier_->addSlot("enable", boost::bind(&NodeWorker::setEnabled, worker_, true));
+        modifier_->addActiveSlot("enable", boost::bind(&NodeWorker::setEnabled, worker_, true));
         modifier_->addSlot("disable", boost::bind(&NodeWorker::setEnabled, worker_, false));
 
         setup();
