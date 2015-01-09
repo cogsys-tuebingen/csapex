@@ -227,6 +227,9 @@ private:
     std::vector<Trigger*> triggers_;
     std::vector<Slot*> slots_;
 
+    Trigger* trigger_tick_done_;
+    Trigger* trigger_process_done_;
+
     std::vector<Input*> parameter_inputs_;
     std::vector<Output*> parameter_outputs_;
 

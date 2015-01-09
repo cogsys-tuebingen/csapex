@@ -29,6 +29,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
       settings_(settings),
       node_type_(type), node_(node), node_state_(new NodeState(this)),
       is_setup_(false),
+      trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
       sync(QMutex::Recursive),
@@ -60,6 +61,12 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     }
 
     node_->getParameterState()->parameter_added->connect(boost::bind(&NodeWorker::makeParameterConnectable, this, _1));
+
+    addSlot("enable", boost::bind(&NodeWorker::setEnabled, this, true), true);
+    addSlot("disable", boost::bind(&NodeWorker::setEnabled, this, false), false);
+
+    trigger_tick_done_ = addTrigger("ticked");
+    trigger_process_done_ = addTrigger("inputs\nprocessed");
 
     node_->doSetup();
 
@@ -608,6 +615,11 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
         try {
             node_->process();
 
+            if(trigger_process_done_->isConnected()) {
+                t->step("trigger process done");
+                trigger_process_done_->trigger();
+            }
+
         }  catch(const std::exception& e) {
             node_->setError(true, e.what());
         } catch(const std::string& s) {
@@ -623,7 +635,7 @@ void NodeWorker::processInputs(bool all_inputs_are_present)
     } else {
         messages_waiting_to_be_sent = true;
         Q_EMIT messagesWaitingToBeSent(true);
-    }    
+    }
 }
 
 
@@ -1169,6 +1181,11 @@ void NodeWorker::tick()
             }
 
             node_->tick();
+
+            if(trigger_tick_done_->isConnected()) {
+                t->step("trigger tick done");
+                trigger_tick_done_->trigger();
+            }
 
             Q_EMIT ticked();
 
