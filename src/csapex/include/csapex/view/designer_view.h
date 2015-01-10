@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/view/designer_styleable.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -16,12 +17,22 @@ class DesignerView : public QGraphicsView
 {
     Q_OBJECT
 
-    Q_PROPERTY(QColor inputColor READ inputColor WRITE setInputColor)
-    Q_PROPERTY(QColor outputColor READ outputColor WRITE setOutputColor)
+    Q_PROPERTY(QColor lineColor WRITE setLineColor)
+    Q_PROPERTY(QColor lineColorError WRITE setLineColorError)
+    Q_PROPERTY(QColor lineColorBlocked WRITE setLineColorBlocked)
+    Q_PROPERTY(QColor lineColorDisabled WRITE setLineColorDisabled)
+    Q_PROPERTY(int lineWidth WRITE setLineWidth)
+
+    void setLineColor(const QColor& c) { style_->setLineColor(c); }
+    void setLineColorError(const QColor& c) { style_->setLineColorError(c); }
+    void setLineColorBlocked(const QColor& c) { style_->setLineColorBlocked(c); }
+    void setLineColorDisabled(const QColor& c) { style_->setLineColorDisabled(c);}
+    void setLineWidth(int width) { style_->setLineWidth(width); }
 
 public:
     DesignerView(DesignerScene* scene, csapex::GraphPtr graph,
-                 Settings& settings, ThreadPool& thread_pool, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, QWidget* parent = 0);
+                 Settings& settings, ThreadPool& thread_pool, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
+                 DesignerStyleable* style, QWidget* parent = 0);
     ~DesignerView();
 
     DesignerScene* designerScene();
@@ -41,23 +52,6 @@ public:
 
     void paintEvent(QPaintEvent* e);
 
-    QColor inputColor() const
-    {
-        return input_color_;
-    }
-    QColor outputColor() const
-    {
-        return output_color_;
-    }
-
-    void setInputColor(const QColor& c)
-    {
-        input_color_ = c;
-    }
-    void setOutputColor(const QColor& c)
-    {
-        output_color_ = c;
-    }
 
 Q_SIGNALS:
     void selectionChanged();    
@@ -110,6 +104,7 @@ private:
 
 private:
     DesignerScene* scene_;
+    DesignerStyleable* style_;
 
     Settings& settings_;
     ThreadPool& thread_pool_;
@@ -118,9 +113,6 @@ private:
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;
     DragIO& drag_io_;
-
-    QColor input_color_;
-    QColor output_color_;
 
     std::vector<NodeBox*> boxes_;
     std::map<NodeBox*, ProfilingWidget*> profiling_;

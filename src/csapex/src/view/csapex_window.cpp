@@ -370,9 +370,8 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     QWidget::setStyleSheet(style_sheet);
     widget_ctrl_->setStyleSheet(style_sheet);
 
-    if(style_sheet_watcher_) {
-        delete style_sheet_watcher_;
-    }
+    delete style_sheet_watcher_;
+    style_sheet_watcher_ = NULL;
 
     style_sheet_watcher_ = new QFileSystemWatcher(this);
     style_sheet_watcher_->addPath(path);

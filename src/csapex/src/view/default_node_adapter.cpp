@@ -382,6 +382,9 @@ void DefaultNodeAdapterBridge::setupAdaptiveUi()
 void DefaultNodeAdapterBridge::enableGroup(bool enable, const std::string &group)
 {
     parent_->groups_enabled[group] = enable;
+    parent_->groupsboxes[group]->setProperty("hidden", !enable);
+    QWidget* w = parent_->wrapper_layout_->parentWidget();
+    w->setStyleSheet(w->styleSheet());
 }
 
 void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
@@ -764,6 +767,8 @@ void DefaultNodeAdapter::setupAdaptiveUi()
                 } else {
                     gb = new QGroupBox(QString::fromStdString(group));
                 }
+
+                groupsboxes[group] = gb;
 
                 if(groups_enabled.find(group) != groups_enabled.end()) {
                     hidden = !groups_enabled[group];

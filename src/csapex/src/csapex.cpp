@@ -166,8 +166,9 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
 
-        DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control);
-        DesignerView* view = new DesignerView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io);
+        DesignerStyleable style;
+        DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control, &style);
+        DesignerView* view = new DesignerView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io, &style);
         MinimapWidget* minimap = new MinimapWidget(view, scene);
 
         Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene, minimap);

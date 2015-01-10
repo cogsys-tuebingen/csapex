@@ -20,6 +20,7 @@
 #include <QGraphicsSceneDragDropEvent>
 #include <QMenu>
 #include <QTimer>
+#include <QPainter>
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <cmath>
@@ -64,6 +65,12 @@ void NodeBox::setupUi()
     }
 
     adapter_->doSetupUi(ui->content);
+
+    setAutoFillBackground(false);
+
+    setAttribute( Qt::WA_TranslucentBackground, true );
+    setAttribute(Qt::WA_NoSystemBackground, true);
+//    setBackgroundMode (Qt::NoBackground, true);
 
     updateVisuals();
 
@@ -408,7 +415,7 @@ void NodeBox::blockedChange(bool val)
     ui->boxframe->setProperty("blocked", val);
 }
 
-void NodeBox::paintEvent(QPaintEvent*)
+void NodeBox::paintEvent(QPaintEvent* e)
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker || !adapter_) {
@@ -548,6 +555,7 @@ void NodeBox::updateVisuals()
     }
     bool flip = worker->getNodeState()->isFlipped();
 
+    ui->boxframe->setProperty("flipped", flip);
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 

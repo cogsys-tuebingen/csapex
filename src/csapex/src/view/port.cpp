@@ -211,12 +211,12 @@ void Port::setEnabledFlag(bool enabled)
     setPortProperty("enabled", enabled);
     setPortProperty("disabled", !enabled);
     setEnabled(true);
+    refreshStylesheet();
 }
 
 void Port::setPortProperty(const std::string& name, bool b)
 {
     setProperty(name.c_str(), b);
-    refreshStylesheet();
 }
 
 void Port::createToolTip()

@@ -37,5 +37,7 @@
         <file>map.png</file>
         <file>components.png</file>
         <file>threads.png</file>
+        <file>show.png</file>
+        <file>hide.png</file>
     </qresource>
 </RCC>

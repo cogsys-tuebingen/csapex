@@ -5,6 +5,7 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/view/fulcrum_widget.h>
+#include <csapex/view/designer_styleable.h>
 
 /// SYSTEM
 #include <QGraphicsScene>
@@ -19,10 +20,11 @@ class DesignerScene : public QGraphicsScene
 {
     Q_OBJECT
 
+private:
     static const float ARROW_LENGTH;
 
 public:
-    DesignerScene(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl);
+    DesignerScene(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable* style);
     ~DesignerScene();
 
     void drawBackground(QPainter *painter, const QRectF &rect);
@@ -67,15 +69,6 @@ public Q_SLOTS:
 
     void setScale(double scale);
 
-    void setInputColor(const QColor& c)
-    {
-        input_color_ = c;
-    }
-    void setOutputColor(const QColor& c)
-    {
-        output_color_ = c;
-    }
-
 private:
     struct TempConnection {
         TempConnection(bool is_connected)
@@ -119,7 +112,7 @@ private:
 
 private:
     void drawConnection(QPainter *painter, const Connection &connection);
-    void drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
+    std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
     void drawPort(QPainter *painter, NodeBox *box, Port* p);
 
@@ -127,10 +120,7 @@ private:
     QPointF offset(const QPointF& vector, Position position, double offset);
 
 private:
-    QColor output_color_;
-    QColor input_color_;
-
-
+    DesignerStyleable* style_;
     CurrentConnectionState ccs;
 
     GraphPtr graph_;
@@ -143,6 +133,8 @@ private:
     QImage schematics;
 
     std::vector<TempConnection> temp_;
+
+    std::map<const Connection*,std::vector<QRectF> > connection_bb_;
 
     std::map<Fulcrum*,FulcrumWidget*> fulcrum_2_widget_;
     std::map<Fulcrum*,QPointF> fulcrum_last_pos_;

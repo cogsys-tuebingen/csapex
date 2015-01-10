@@ -32,9 +32,11 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
+#define DEBUG_DRAWINGS_PER_SECOND 0
+
 using namespace csapex;
 
-const float DesignerScene::ARROW_LENGTH = 10.f;
+const float DesignerScene::ARROW_LENGTH = 3.0f;
 
 namespace {
 QRgb id2rgb(int id, int subsection)
@@ -86,8 +88,8 @@ QPointF centerPoint(Port* port)
 
 
 
-DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl)
-    : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
+DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable *style)
+    : style_(style), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
       draw_grid_(false), draw_schema_(false), scale_(1.0), overlay_threshold_(0.45),
       highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false)
 {
@@ -99,9 +101,6 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
     activity_marker_max_opacity_ = 90;
 
     connector_radius_ = 7;
-
-    output_color_ = QColor(0xFF, 0xCC, 0x00);
-    input_color_ = QColor(0xFF, 0x00, 0xCC);
 
     QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
     QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
@@ -173,11 +172,30 @@ void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 
 void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
+#if DEBUG_DRAWINGS_PER_SECOND
+    static int drawings = 0;
+    static long start = QDateTime::currentMSecsSinceEpoch();
+    long now = QDateTime::currentMSecsSinceEpoch();
+    long dt = now - start;
+    ++drawings;
+    if(dt > 0) {
+        std::cerr << "drawing with avg. fps.: " << (drawings / (dt/1e3)) << std::endl;
+    }
+//    auto print_rect = [](const QRectF& rect) {
+//        std::cerr << rect.x() << ", " << rect.y() << ", " << rect.x()+rect.width() << ", " << rect.y()+rect.height();
+//    };
+//    std::cerr << "rect is ";
+//    print_rect(rect);
+//    std::cerr << std::endl;
+
+#endif
+
     QGraphicsScene::drawForeground(painter, rect);
 
     if(isEmpty()) {
         return;
     }
+
 
     // check if we need to update the schematics
     QSize scene_size(sceneRect().width(), sceneRect().height());
@@ -223,8 +241,20 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     }
 
     // draw all connections
-    Q_FOREACH(Connection::Ptr connection, graph_->connections_) {
-        drawConnection(painter, *connection);
+    auto intersects_any = [](const std::vector<QRectF>& rects, const QRectF& rect) {
+        for(auto r : rects) {
+            if(rect.intersects(r)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for(Connection::Ptr connection : graph_->connections_) {
+        auto pos = connection_bb_.find(connection.get());
+        if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
+            drawConnection(painter, *connection);
+        }
     }
 
     // augment nodes
@@ -232,7 +262,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         Node* node = node_worker->getNode();
 
         NodeBox* box = widget_ctrl_->getBox(node_worker->getUUID());
-        if(!box) {
+
+        if(!box || !rect.intersects(box->geometry())) {
             continue;
         }
 
@@ -279,14 +310,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw port information (in)
-        Q_FOREACH(Input* input, node_worker->getMessageInputs()) {
+        foreach(Input* input, node_worker->getMessageInputs()) {
             Port* p = widget_ctrl_->getPort(input);
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw port information (out)
-        Q_FOREACH(Output* output, node_worker->getMessageOutputs()) {
+        foreach(Output* output, node_worker->getMessageOutputs()) {
             Port* p = widget_ctrl_->getPort(output);
             if(p) {
                 drawPort(painter, box, p);
@@ -294,14 +325,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw slots
-        Q_FOREACH(Slot* slot, node_worker->getSlots()) {
+        foreach(Slot* slot, node_worker->getSlots()) {
             Port* p = widget_ctrl_->getPort(slot);
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw triggers
-        Q_FOREACH(Trigger* trigger, node_worker->getTriggers()) {
+        foreach(Trigger* trigger, node_worker->getTriggers()) {
             Port* p = widget_ctrl_->getPort(trigger);
             if(p) {
                 drawPort(painter, box, p);
@@ -503,7 +534,7 @@ void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
         output = to;
 
     } else {
-       input = to;
+        input = to;
         output = from;
     }
 
@@ -567,7 +598,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.start_pos = is_msg ? (fromp->isFlipped() ? LEFT : RIGHT) : BOTTOM;
     ccs.end_pos = is_msg ? (top->isFlipped() ? RIGHT : LEFT) : TOP;
 
-    drawConnection(painter, p1, p2, id);
+    connection_bb_[&connection] = drawConnection(painter, p1, p2, id);
 }
 
 
@@ -595,9 +626,9 @@ QPointF DesignerScene::offset(const QPointF& vector, Position position, double o
 }
 
 
-void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id)
+std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id)
 {
-    QPointF to = offset(real_to, ccs.end_pos, ARROW_LENGTH);
+    QPointF to = offset(real_to, ccs.end_pos, style_->lineWidth()*ARROW_LENGTH);
 
     painter->setRenderHint(QPainter::Antialiasing);
 
@@ -607,7 +638,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     }
 
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
-    ccs.r = ccs.minimized ? 2 : 4;
+    ccs.r = ccs.minimized ? style_->lineWidth() / 2.0 : style_->lineWidth();
     ccs.r *= scale_factor;
 
     double max_slack_height = 40.0;
@@ -639,7 +670,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     std::vector<Path> paths;
 
     // generate lines
-    Q_FOREACH(Fulcrum::Ptr next, targets) {
+    foreach(Fulcrum::Ptr next, targets) {
         QPoint y_offset;
         double x_offset = 0;
         if(direct_length > mindist_for_slack) {
@@ -691,7 +722,7 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     // arrow
     QPolygonF arrow;
-    QPointF a = offset(QPointF(0,0), ccs.end_pos, ARROW_LENGTH) * scale_factor;
+    QPointF a = offset(QPointF(0,0), ccs.end_pos, ARROW_LENGTH * style_->lineWidth()) * scale_factor;
 
     QPointF side(a.y()/2.0, a.x()/2.0);
     arrow.append(to - a);
@@ -719,32 +750,22 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
         }
         painter->drawPath(arrow_path);
 
-    } else {
-        QLinearGradient bg_gradient(from, to);
-        bg_gradient.setColorAt(0, QColor(0,0,0, ccs.minimized_from ? 0 : 255));
-        bg_gradient.setColorAt(1, QColor(0,0,0, ccs.minimized_to ? 0 : 255));
-
-        painter->setPen(QPen(QBrush(bg_gradient), ccs.r + 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        foreach(const Path& path, paths) {
-            painter->drawPath(path.first);
-        }
-        painter->drawPath(arrow_path);
     }
 
-    QColor color_start = output_color_;
-    QColor color_end = input_color_;
+    QColor color_start = style_->lineColor();
+    QColor color_end = style_->lineColor();
 
     if(ccs.blocked_from || ccs.blocked_to) {
-        color_start = ccs.blocked_from ? Qt::yellow : Qt::black;
-        color_end = ccs.blocked_to ? Qt::yellow : Qt::black;
+        color_start = style_->lineColorBlocked();
+        color_end = style_->lineColorBlocked();
 
     } else if(ccs.error) {
-        color_start = Qt::darkRed;
-        color_end = Qt::red;
+        color_start = style_->lineColorError();
+        color_end = style_->lineColorError();
 
     } else if(ccs.disabled) {
-        color_start = Qt::darkGray;
-        color_end = Qt::gray;
+        color_start = style_->lineColorDisabled();
+        color_end = style_->lineColorDisabled();
     }
 
     if(ccs.hidden_from) {
@@ -760,8 +781,11 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
 
     painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
+    std::vector<QRectF> bounding_boxes;
+
     foreach(const Path& path, paths) {
         painter->drawPath(path.first);
+        bounding_boxes.push_back(path.first.boundingRect());
 
         if(id >= 0 && schema_dirty_) {
             QPen schema_pen = QPen(QColor(id2rgb(id, path.second)), ccs.r * 1.75, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin);
@@ -773,9 +797,18 @@ void DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const
     painter->setPen(QPen(painter->brush(), 1.0));
     painter->drawPath(arrow_path);
 
+    if(draw_schema_) {
+        painter->setBrush(QBrush());
+        for(auto r: bounding_boxes) {
+            painter->drawRect(r);
+        }
+    }
+
     if(id >= 0 && schema_dirty_) {
         schematics_painter->drawPath(arrow_path);
     }
+
+    return bounding_boxes;
 }
 
 void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
@@ -823,11 +856,11 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
             opt = QTextOption(Qt::AlignVCenter | Qt::AlignCenter);
         }
 
-        QColor color = c->isOutput() ? output_color_ : input_color_;
+        QColor color = style_->lineColor();
         QPen p = painter->pen();
         p.setColor(color.dark());
         painter->setPen(p);
-//        painter->drawRect(rect);
+        //        painter->drawRect(rect);
         painter->drawText(rect, text, opt);
     }
 }

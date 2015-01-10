@@ -10,21 +10,50 @@ QFrame#boxframe QLabel#label {
 
 /* box */
 QFrame#boxframe {
-        background: qlineargradient(x1:0 y1:0, x2:0 y2:.2, stop:0 rgb(175,175,175), stop:1 rgb(50,65,75));
+        background: rgb(200, 220, 200);
         border: 2px solid rgb(35, 35, 35);
-        border-radius: 5px;
-        outline-offset: 5px;
+        border-radius: 24px;
         padding: 0;
-/*        padding: 0 -12px 0 -12px;*/
 }
+QFrame#boxframe[flipped="false"] {
+        border-top-left-radius: 10px;
+}
+QFrame#boxframe[flipped="true"] {
+        border-top-right-radius: 10px;
+}
+
 QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{
-        color: white;
+        color: black ;
 }
+
+
 QFrame#boxframe QGroupBox {
-        color: white;
+        color: black;
         font-weight: bold;
-        background: qlineargradient(x1:0 y1:0, x2:1 y2:0, stop:0 rgba(175,175,175,255), stop:1 rgba(255,255,255,50));
+        border: 2px solid rgba(0,0,0,0);
+        border-left: 2px solid rgba(0,0,0,40);
+        padding-left: 5px;
+        margin-top: 20px;
 }
+QFrame#boxframe QGroupBox[hidden="true"] {
+        border: none;
+        margin-top: 0;
+}
+QFrame#boxframe QGroupBox::title {
+        subcontrol-origin: margin;
+        padding: 0 0;
+}
+QFrame#boxframe QGroupBox::indicator {
+        border-left: 2px solid rgba(0,0,0,0);
+}
+
+QFrame#boxframe QGroupBox::indicator:unchecked {
+        image: url(:/show.png);
+}
+QFrame#boxframe QGroupBox::indicator:checked {
+        image: url(:/hide.png);
+}
+
 QFrame#boxframe QLabel[component="true"] {
         border: 1px solid black;
         font-size: 8pt;
@@ -59,12 +88,11 @@ QCheckBox::indicator:unchecked {
 
 /* minimized box */
 QFrame#boxframe[content_minimized="true"] {
-        background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 rgb(255,255,255), stop:1 rgb(50,65,75));
 }
 
 /* disabled box */
 QFrame#boxframe[disabled="true"] {
-        background: qlineargradient(x1:0 y1:0, x2:0 y2:.2, stop:0 rgb(255,255,255), stop:1 rgb(225,225,225));
+        background: rgb(200,200,200)
 }
 QFrame#boxframe[disabled="true"]  QLabel {
         color: black!important;
@@ -72,25 +100,24 @@ QFrame#boxframe[disabled="true"]  QLabel {
 
 /* error box */
 QFrame#boxframe[error="true"] {
-        background: qlineargradient(x1:0 y1:0, x2:0 y2:.2, stop:0 rgb(255,200,200), stop:1 rgb(165,30,55));
-        border: 2px solid rgb(180, 0, 0);
+        background: rgb(255, 100, 100);
+        border-color: rgb(100,0,0);
 }
 
 /* warning box */
 QFrame#boxframe[warning="true"] {
-        background: qlineargradient(x1:0 y1:0, x2:0 y2:.2, stop:0 rgb(255,245,200), stop:1 rgb(230,180,50));
-        border: 2px solid rgb(180, 60, 0);
+        background: rgb(240, 230, 200);
+        border-color: rgb(255,200,0);
 }
 
 /* blocked box */
 QFrame#boxframe[blocked="true"] {
-        /*background: rgb(200, 150, 0);
-        border: 2px solid rgb(255, 200, 0);*/
 }
 
 /* selected box */
 QFrame#boxframe[focused="true"] {
-        background: qlineargradient(x1:0 y1:0, x2:0 y2:.2, stop:0 rgb(255,255,255), stop:1 rgb(180,160,105));
+                background-color: rgb(100,200,255);
+                border-style: dashed;
 }
 QFrame#boxframe[focused="true"] QLabel {
         color: black!important;
@@ -111,14 +138,6 @@ csapex--Port[error="true"]  {
         border: 2px solid rgb(165,30,55);
         background: rgb(255,200,200);
 }
-csapex--Port[legacy="true"]  {
-        border: 2px solid rgb(255,255,255);
-        background: rgb(0,0,0);
-}
-csapex--Port[async="true"]  {
-        border: 2px solid rgb(255,200,128);
-        background: rgb(255,255,255);
-}
 csapex--Port[unconnected="true"]  {
         border: 2px solid rgb(128,200,255);
         background: rgb(255,255,255);
@@ -126,11 +145,14 @@ csapex--Port[unconnected="true"]  {
 csapex--Port[optional="true"]  {
 }
 csapex--Port[blocked="true"]  {
-        border: 2px solid rgb(255,255,0)!important;
+        border: 2px solid rgb(255,200,0)!important;
 }
 
 /* connection */
 csapex--DesignerView  {
-        qproperty-outputColor: rgb(165,30,55); /* output */
-        qproperty-inputColor: rgb(180,160,105); /* input */
+        qproperty-lineColor: rgb(0,0,0);
+        qproperty-lineColorError: rgb(255,0,0);
+        qproperty-lineColorBlocked: rgb(255,200,0);
+        qproperty-lineColorDisabled: rgb(200,200,200);
+        qproperty-lineWidth: 5;
 }

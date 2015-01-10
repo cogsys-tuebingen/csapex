@@ -205,6 +205,7 @@ set(SRC_APP
     src/view/box.cpp
     src/view/box_dialog.cpp
     src/view/csapex_window.cpp
+    src/view/designer_styleable.cpp
     src/view/designer_scene.cpp
     src/view/designer_view.cpp
     src/view/designer.cpp

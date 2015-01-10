@@ -9,6 +9,7 @@
 
 /// FORWARD DECLARTIONS
 class QComboBox;
+class QGroupBox;
 
 namespace qt_helper{
 struct Call;
@@ -92,6 +93,7 @@ private:
     std::vector<QObject*> callbacks;
     std::map<std::string, QBoxLayout*> groups;
     std::map<std::string, bool> groups_enabled;
+    std::map<std::string, QGroupBox*> groupsboxes;
 
     QBoxLayout* wrapper_layout_;
 };
