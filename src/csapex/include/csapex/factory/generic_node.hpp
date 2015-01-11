@@ -50,7 +50,8 @@ public:
         output_.resize(N);
         params_.resize(N);
 
-        msg_.resize(N);
+        in_msg_.resize(N);
+        out_msg_.resize(N);
     }
 
     void setup()
@@ -82,7 +83,7 @@ private:
         for(std::size_t i = 0; i < N; ++i) {
             Output* out = output_[i];
             if(out) {
-                out->publish(msg_[i]);
+                out->cloneAndPublish(out_msg_[i]);
             }
         }
     }
@@ -94,15 +95,18 @@ public:
     std::vector<Output*> output_;
     std::vector<std::string> params_;
 
-    std::vector<ConnectionTypePtr> msg_;
+    std::vector<boost::shared_ptr<ConnectionType const>> in_msg_;
+    std::vector<boost::shared_ptr<ConnectionType>> out_msg_;
 
 private:
     struct GenericNodeSetup {
         GenericNodeSetup(GenericNode<Parameters>* instance)
             : instance_(instance), id(0)
         {
-            instance_->msg_.clear();
-            instance_->msg_.resize(instance_->N);
+            instance_->in_msg_.clear();
+            instance_->in_msg_.resize(instance_->N);
+            instance_->out_msg_.clear();
+            instance_->out_msg_.resize(instance_->N);
         }
 
         template<typename U>
@@ -152,15 +156,15 @@ private:
 
         template<typename U>
         void operator()(GenericInput<U>) {
-            typename U::Ptr in = instance_->input_[id]->template getMessage<typename GenericInput<U>::RawType>();
-            instance_->msg_[id] = in;
+            typename U::ConstPtr in = instance_->input_[id]->template getMessage<typename GenericInput<U>::RawType>();
+            instance_->in_msg_[id] = in;
             ++id;
         }
 
         template<typename U>
         void operator()(GenericOutput<U>) {
             typename U::Ptr out(connection_types::makeEmptyMessage<U>());
-            instance_->msg_[id] = out;
+            instance_->out_msg_[id] = out;
             ++id;
         }
 
@@ -203,10 +207,30 @@ struct GenerateParameter
     static
     typename Types<no>::message
     get(GenericNode<Parameters>* instance,
-        typename boost::enable_if<boost::is_reference<typename Types<no>::type> >::type* = 0)
+        typename boost::enable_if<
+            boost::type_traits::ice_and<
+                boost::is_reference<typename Types<no>::type>::value,
+                boost::type_traits::ice_not< boost::is_const<typename Types<no>::type>::value >::value
+            >
+        >::type* = 0)
     {
-        return boost::ref(static_cast<typename Types<no>::type>(*instance->msg_[no]));
+        return boost::ref(static_cast<typename Types<no>::type>(*instance->out_msg_[no]));
     }
+
+    template <int no>
+    static
+    const typename Types<no>::message
+    get(GenericNode<Parameters>* instance,
+        typename boost::enable_if<
+            boost::type_traits::ice_and<
+                boost::is_reference<typename Types<no>::type>::value,
+                boost::is_const<typename Types<no>::type>::value
+            >
+        >::type* = 0)
+    {
+        return boost::ref(static_cast<typename Types<no>::type const>(*instance->in_msg_[no]));
+    }
+
     template <int no>
     static typename Types<no>::param
     get(GenericNode<Parameters>* instance,

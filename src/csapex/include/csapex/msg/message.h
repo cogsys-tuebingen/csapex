@@ -15,6 +15,7 @@ struct Message : public ConnectionType
 {
 public:
     typedef boost::shared_ptr<Message> Ptr;
+    typedef boost::shared_ptr<Message const> ConstPtr;
     typedef u_int64_t Stamp;
 
 protected:
@@ -35,11 +36,11 @@ public:
     NoMessage();
 
 public:
-    virtual ConnectionType::Ptr clone() ;
-    virtual ConnectionType::Ptr toType();
+    virtual ConnectionType::Ptr clone() const override;
+    virtual ConnectionType::Ptr toType() const override;
 
-    bool canConnectTo(const ConnectionType* other_side) const;
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const;
+    bool canConnectTo(const ConnectionType* other_side) const override;
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const override;
 };
 template <>
 struct type<NoMessage> {
@@ -57,11 +58,11 @@ public:
     AnyMessage();
 
 public:
-    virtual ConnectionType::Ptr clone() ;
-    virtual ConnectionType::Ptr toType();
+    virtual ConnectionType::Ptr clone() const override;
+    virtual ConnectionType::Ptr toType() const override;
 
-    bool canConnectTo(const ConnectionType* other_side) const;
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const;
+    bool canConnectTo(const ConnectionType* other_side) const override;
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const override;
 };
 template <>
 struct type<AnyMessage> {

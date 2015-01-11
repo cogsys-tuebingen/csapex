@@ -11,6 +11,7 @@ namespace connection_types {
 template <typename Type>
 struct GenericPointerMessage : public Message {
     typedef boost::shared_ptr<GenericPointerMessage<Type> > Ptr;
+    typedef boost::shared_ptr<GenericPointerMessage<Type> const> ConstPtr;
 
     GenericPointerMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type2name(typeid(Type)), frame_id, stamp)
@@ -18,18 +19,21 @@ struct GenericPointerMessage : public Message {
         static csapex::MessageRegistered<GenericPointerMessage<Type> > reg;
     }
 
-    virtual ConnectionType::Ptr clone() {
+    virtual ConnectionType::Ptr clone() const override
+    {
         Ptr new_msg(new GenericPointerMessage<Type>(frame_id, stamp));
         new_msg->value = value;
         return new_msg;
     }
 
-    virtual ConnectionType::Ptr toType() {
+    virtual ConnectionType::Ptr toType() const override
+    {
         Ptr new_msg(new GenericPointerMessage<Type>(frame_id, 0));
         return new_msg;
     }
 
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const {
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const override
+    {
         return name() == other_side->name();
     }
 

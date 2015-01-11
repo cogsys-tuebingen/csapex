@@ -22,7 +22,7 @@ public:
 public:
     virtual ~MessageRenderer();
 
-    virtual QSharedPointer<QImage> render(const ConnectionTypePtr& msg) = 0;
+    virtual QSharedPointer<QImage> render(const ConnectionTypeConstPtr& msg) = 0;
     virtual const std::type_info* messageType() const = 0;
 
     virtual std::vector<param::ParameterPtr> getParameters() const
@@ -35,9 +35,9 @@ template <class Message>
 class MessageRendererImplementation : public MessageRenderer
 {
 public:
-    virtual QSharedPointer<QImage> render(const ConnectionTypePtr& msg)
+    virtual QSharedPointer<QImage> render(const ConnectionTypeConstPtr& msg) final override
     {
-        const boost::shared_ptr<Message>& real_msg = boost::dynamic_pointer_cast<Message>(msg);
+        const auto& real_msg = boost::dynamic_pointer_cast<Message const>(msg);
         if(real_msg) {
             return doRender(*real_msg);
         } else {

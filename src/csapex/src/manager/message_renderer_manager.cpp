@@ -50,7 +50,7 @@ void MessageRendererManager::loadPlugins()
     }
 }
 
-MessageRendererPtr MessageRendererManager::createMessageRenderer(const ConnectionTypePtr& message)
+MessageRendererPtr MessageRendererManager::createMessageRenderer(const ConnectionTypeConstPtr& message)
 {
     if(!manager_->pluginsLoaded()) {
         loadPlugins();

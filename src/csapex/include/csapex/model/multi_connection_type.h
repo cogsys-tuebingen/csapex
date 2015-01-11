@@ -20,12 +20,12 @@ public:
 public:
     MultiConnectionType(const std::vector<ConnectionType::Ptr>& types);
 
-    virtual bool canConnectTo(const ConnectionType* other_side) const;
-    virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
+    virtual bool canConnectTo(const ConnectionType* other_side) const override;
+    virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const override;
 
 public:
-    virtual ConnectionType::Ptr clone() ;
-    virtual ConnectionType::Ptr toType();
+    virtual ConnectionType::Ptr clone() const override;
+    virtual ConnectionType::Ptr toType() const override;
 
     void writeYaml(YAML::Node& yaml) const;
     void readYaml(const YAML::Node& node);

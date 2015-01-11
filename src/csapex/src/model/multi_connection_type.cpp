@@ -43,13 +43,13 @@ bool MultiConnectionType::acceptsConnectionFrom(const ConnectionType *other_side
     return false;
 }
 
-ConnectionType::Ptr MultiConnectionType::clone()
+ConnectionType::Ptr MultiConnectionType::clone() const
 {
     Ptr new_msg(new MultiConnectionType(types_));
     return new_msg;
 }
 
-ConnectionType::Ptr MultiConnectionType::toType()
+ConnectionType::Ptr MultiConnectionType::toType() const
 {
     Ptr new_msg(new MultiConnectionType(types_));
     return new_msg;

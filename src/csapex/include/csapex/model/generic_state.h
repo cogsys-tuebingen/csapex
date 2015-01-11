@@ -49,8 +49,8 @@ public:
 
     void setFrom(const GenericState& rhs);
 
-    virtual void writeYaml(YAML::Node& out) const;
-    virtual void readYaml(const YAML::Node& node);
+    virtual void writeYaml(YAML::Node& out) const override;
+    virtual void readYaml(const YAML::Node& node) override;
 
     void initializePersistentParameters();
 

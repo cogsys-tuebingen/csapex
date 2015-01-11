@@ -170,6 +170,11 @@ void Output::validateConnections()
     }
 }
 
+void Output::cloneAndPublish(ConnectionType::ConstPtr message)
+{
+    publish(message->clone());
+}
+
 void Output::publish(ConnectionType::Ptr message)
 {
     setType(message->toType());

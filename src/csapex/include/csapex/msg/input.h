@@ -42,24 +42,43 @@ public:
     void inputMessage(ConnectionType::Ptr message);
 
     template <typename R>
-    typename R::Ptr getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
+    boost::shared_ptr<R const>
+    getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) const
+    {
         return buffer_->read<R>();
     }
 
     template <typename R>
-    typename R::Ptr getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) {
+    boost::shared_ptr<R const>
+    getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) const
+    {
         return buffer_->read< connection_types::GenericPointerMessage<R> >() -> value;
     }
 
     template <typename Container, typename R>
     boost::shared_ptr<typename Container::template TypeMap<R>::type const>
-    getMessage() {
+    getMessage() const
+    {
         return buffer_->read<Container>() -> template makeShared<R>();
     }
 
+
     template <typename R>
-    R getValue() {
-        typename connection_types::GenericValueMessage<R>::Ptr msg = getMessage< connection_types::GenericValueMessage<R> >();
+    boost::shared_ptr<R>
+    getClonedMessage() const
+    {
+        const auto& msg = getMessage<R>();
+        if(msg == nullptr) {
+            return nullptr;
+        }
+        return boost::dynamic_pointer_cast<R>(msg->clone());
+    }
+
+
+    template <typename R>
+    R getValue() const
+    {
+        const auto& msg = getMessage< connection_types::GenericValueMessage<R> >();
         if(!msg) {
             throw std::logic_error("cannot convert message to requested value");
         }

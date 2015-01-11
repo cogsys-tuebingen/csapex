@@ -99,7 +99,7 @@ void Port::updateTooltip()
             return;
         }
 
-        ConnectionType::Ptr msg = output->getMessage();
+        ConnectionType::ConstPtr msg = output->getMessage();
 
         if(msg) {
             view->scene()->clear();

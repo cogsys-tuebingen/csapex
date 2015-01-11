@@ -12,16 +12,19 @@ Signal::Signal()
 {
 }
 
-ConnectionType::Ptr Signal::clone() {
+ConnectionType::Ptr Signal::clone() const
+{
     Ptr new_msg(new Signal);
     return new_msg;
 }
 
-ConnectionType::Ptr Signal::toType() {
+ConnectionType::Ptr Signal::toType() const
+{
     Ptr new_msg(new Signal);
     return new_msg;
 }
 
-bool Signal::acceptsConnectionFrom(const ConnectionType* other_side) const {
+bool Signal::acceptsConnectionFrom(const ConnectionType* other_side) const
+{
     return dynamic_cast<const Signal*> (other_side);
 }

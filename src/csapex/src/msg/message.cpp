@@ -52,13 +52,13 @@ AnyMessage::AnyMessage()
     : Message(type<AnyMessage>::name(), "/", 0)
 {}
 
-ConnectionType::Ptr AnyMessage::clone()
+ConnectionType::Ptr AnyMessage::clone() const
 {
     AnyMessage::Ptr new_msg(new AnyMessage);
     return new_msg;
 }
 
-ConnectionType::Ptr AnyMessage::toType()
+ConnectionType::Ptr AnyMessage::toType() const
 {
     Ptr new_msg(new AnyMessage);
     return new_msg;
@@ -99,13 +99,13 @@ NoMessage::NoMessage()
     : Message(type<NoMessage>::name(), "/", 0)
 {}
 
-ConnectionType::Ptr NoMessage::clone()
+ConnectionType::Ptr NoMessage::clone() const
 {
     NoMessage::Ptr new_msg(new NoMessage);
     return new_msg;
 }
 
-ConnectionType::Ptr NoMessage::toType()
+ConnectionType::Ptr NoMessage::toType() const
 {
     Ptr new_msg(new NoMessage);
     return new_msg;

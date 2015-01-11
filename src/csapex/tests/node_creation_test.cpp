@@ -45,11 +45,13 @@ struct MockupMessage : public connection_types::Message
     {
     }
 
-    ConnectionType::Ptr clone() {
+    ConnectionType::Ptr clone() const override
+    {
         throw std::runtime_error ("MOCKUP: not implemented");
     }
 
-    ConnectionType::Ptr toType() {
+    ConnectionType::Ptr toType() const override
+    {
         throw std::runtime_error ("MOCKUP: not implemented");
     }
 
@@ -205,7 +207,7 @@ TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
     //node->process();
 
     Output* out = outputs[0];
-    ConnectionType::Ptr out_msg = out->getMessage();
+    ConnectionType::ConstPtr out_msg = out->getMessage();
 
     ASSERT_TRUE(out_msg != NULL);
 

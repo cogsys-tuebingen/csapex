@@ -27,7 +27,7 @@ public:
     void setPluginLocator(PluginLocatorPtr locator);
     void shutdown();
 
-    MessageRendererPtr createMessageRenderer(const ConnectionTypePtr& message);
+    MessageRendererPtr createMessageRenderer(const ConnectionTypeConstPtr &message);
 
 private:
     MessageRendererManager();

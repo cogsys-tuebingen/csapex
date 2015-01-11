@@ -25,8 +25,14 @@ public:
     ConnectionType(const std::string &name);
     virtual ~ConnectionType();
 
-    virtual ConnectionType::Ptr clone() = 0;
-    virtual ConnectionType::Ptr toType() = 0;
+    template <typename R>
+    boost::shared_ptr<R> cloneAs() const
+    {
+        return boost::dynamic_pointer_cast<R>(clone());
+    }
+
+    virtual ConnectionType::Ptr clone() const = 0;
+    virtual ConnectionType::Ptr toType() const = 0;
     static ConnectionType::Ptr makeDefault();
 
     virtual bool isValid() const;

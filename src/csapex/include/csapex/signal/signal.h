@@ -13,10 +13,10 @@ struct Signal : public ConnectionType
 
     Signal();
 
-    virtual ConnectionType::Ptr clone();
-    virtual ConnectionType::Ptr toType();
+    virtual ConnectionType::Ptr clone() const override;
+    virtual ConnectionType::Ptr toType() const override;
 
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const;
+    bool acceptsConnectionFrom(const ConnectionType* other_side) const override;
 };
 
 

@@ -24,14 +24,16 @@ public:
     Output(Unique *parent, int sub_id);
     ~Output();
 
-    virtual bool canOutput() const {
+    virtual bool canOutput() const override
+    {
         return true;
     }
-    virtual bool isOutput() const {
+    virtual bool isOutput() const override
+    {
         return true;
     }
 
-    virtual void disable();
+    virtual void disable() override;
 
 
     template <typename T>
@@ -60,20 +62,21 @@ public:
         publish(msg);
     }
 
+    void cloneAndPublish(ConnectionType::ConstPtr message);
     void publish(ConnectionType::Ptr message);
 
-    virtual bool targetsCanBeMovedTo(Connectable *other_side) const;
-    virtual bool isConnected() const;
+    virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
+    virtual bool isConnected() const override;
 
-    virtual void connectionMovePreview(Connectable* other_side);
-    virtual void validateConnections();
+    virtual void connectionMovePreview(Connectable* other_side) override;
+    virtual void validateConnections() override;
 
     int noTargets();
     std::vector<Input*> getTargets() const;
 
     void connectForcedWithoutCommand(Input* other_side);
 
-    virtual CommandPtr removeAllConnectionsCmd();
+    virtual CommandPtr removeAllConnectionsCmd() override;
     virtual CommandPtr removeConnectionCmd(Input *other_side);
 
     void forceSendMessage(bool force = true);
@@ -89,9 +92,9 @@ public:
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
-    virtual bool tryConnect(Connectable* other_side);
-    virtual void removeConnection(Connectable* other_side);
-    virtual void removeAllConnectionsNotUndoable();
+    virtual bool tryConnect(Connectable* other_side) override;
+    virtual void removeConnection(Connectable* other_side) override;
+    virtual void removeAllConnectionsNotUndoable() override;
 
     bool connect(Connectable* other_side);
 
