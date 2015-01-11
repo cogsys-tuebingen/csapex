@@ -34,6 +34,7 @@ add_library(utils_param
     src/trigger_parameter.cpp
     src/color_parameter.cpp
     src/null_parameter.cpp
+    src/string_list_parameter.cpp
 
     src/output_progress_parameter.cpp
 

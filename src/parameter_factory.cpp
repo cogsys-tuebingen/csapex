@@ -9,6 +9,7 @@
 #include <utils_param/bitset_parameter.h>
 #include <utils_param/range_parameter.h>
 #include <utils_param/value_parameter.h>
+#include <utils_param/string_list_parameter.h>
 #include <utils_param/output_progress_parameter.h>
 
 using namespace param;
@@ -31,6 +32,8 @@ Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
         return Parameter::Ptr(new PathParameter);
     } else if(t == "trigger") {
         return Parameter::Ptr(new TriggerParameter);
+    } else if(t == "string_list") {
+        return Parameter::Ptr(new StringListParameter);
     } else if(t == "color") {
         return Parameter::Ptr(new ColorParameter);        
     } else if(t == "progress") {

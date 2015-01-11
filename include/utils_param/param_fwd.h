@@ -7,6 +7,7 @@
 #define FWD(name) \
     class name;\
     typedef boost::shared_ptr<name> name##Ptr;\
+    typedef boost::weak_ptr<name> name##WeakPtr;\
     typedef boost::shared_ptr<const name> name##ConstPtr;\
     static const name##Ptr name##NullPtr
 
@@ -22,6 +23,7 @@ FWD(TriggerParameter);
 FWD(ValueParameter);
 FWD(IntervalParameter);
 FWD(ColorParameter);
+FWD(StringListParameter);
 
 FWD(OutputProgressParameter);
 
