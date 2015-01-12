@@ -83,6 +83,7 @@
     <addaction name="actionHelp_Center"/>
     <addaction name="separator"/>
     <addaction name="actionAbout_CS_APEX"/>
+    <addaction name="actionCopyright_Notices"/>
    </widget>
    <widget class="QMenu" name="menuProcessing">
     <property name="title">
@@ -276,8 +277,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>274</width>
-          <height>144</height>
+          <width>88</width>
+          <height>88</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -357,7 +358,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>266</width>
+          <width>218</width>
           <height>199</height>
          </rect>
         </property>
@@ -885,6 +886,11 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Display Minimap</string>
+   </property>
+  </action>
+  <action name="actionCopyright_Notices">
+   <property name="text">
+    <string>Copyright Notices</string>
    </property>
   </action>
  </widget>

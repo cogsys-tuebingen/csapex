@@ -114,6 +114,7 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
 
     QObject::connect(ui->actionAbout_CS_APEX, SIGNAL(triggered()), this, SLOT(about()));
+    QObject::connect(ui->actionCopyright_Notices, SIGNAL(triggered()), this, SLOT(copyRight()));
 
     QObject::connect(ui->node_info_tree, SIGNAL(itemSelectionChanged()), this, SLOT(updateNodeInfo()));
 
@@ -325,6 +326,27 @@ void CsApexWindow::about()
     ss << "<p>The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</p>";
 
     QMessageBox::about(this, "About cs::APEX", ss.str().c_str());
+}
+
+void CsApexWindow::copyRight()
+{
+    QString copyright =
+    "<p>"
+    "<h1>UI</h1>"
+    "<h2>Icons</h2>"
+    "<h3>Silk icon set 1.3</h3>"
+    "<div>Made by Mark James, available from <a href=\"http://www.famfamfam.com/lab/icons/silk/\">famfamfam.com</a> "
+    "is licensed under <a href=\"http://creativecommons.org/licenses/by/2.5/\" title=\"Creative Commons BY 2.5\">CC BY 2.5</a>"
+    "</div>"
+    "<h3>Rounded UI</h3>"
+    "<div>Icon made by <a href=\"http://superstoked.se\" title=\"Robin Kylander\">Robin Kylander</a> "
+    "from <a href=\"http://www.flaticon.com\" title=\"Flaticon\">www.flaticon.com</a> "
+    "is licensed under <a href=\"http://creativecommons.org/licenses/by/3.0/\" title=\"Creative Commons BY 3.0\">CC BY 3.0</a>"
+    "</div>"
+    "</p>"
+            ;
+
+    QMessageBox::information(this, "Copyright", copyright);
 }
 
 void CsApexWindow::clearBlock()

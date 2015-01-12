@@ -82,6 +82,7 @@ public Q_SLOTS:
     void updateNodeInfo();
 
     void about();
+    void copyRight();
     void clearBlock();
 
 Q_SIGNALS:
