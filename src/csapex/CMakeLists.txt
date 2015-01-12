@@ -50,7 +50,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES csapex_pluginbase
    CATKIN_DEPENDS utils_param utils_qt
    DEPENDS Boost console_bridge
    CFG_EXTRAS csapex-extras.cmake
@@ -90,135 +89,122 @@ include_directories(include
     ${OPENGL_INCLUDE_DIR}
 )
 
-#
-# SINGLE OUT PLUGIN RELEVANT FILES
-#
-set(SRC_ESSENTIAL
+
+set(SRC
+    src/command/add_connection.cpp
+    src/command/add_connector.cpp
+    src/command/add_fulcrum.cpp
+    src/command/add_node.cpp
+    src/command/command.cpp
+    src/command/create_thread.cpp
+    src/command/delete_connection.cpp
+    src/command/delete_connector.cpp
+    src/command/delete_fulcrum.cpp
+    src/command/delete_node.cpp
+    src/command/dispatcher.cpp
+    src/command/flip_sides.cpp
+    src/command/meta.cpp
+    src/command/minimize.cpp
+    src/command/modify_fulcrum.cpp
+    src/command/move_box.cpp
+    src/command/move_connection.cpp
+    src/command/move_fulcrum.cpp
+    src/command/switch_thread.cpp
+
     src/core/bootstrap_plugin.cpp
-)
-
-set(SRC_PLUGIN
     src/core/core_plugin.cpp
+    src/core/csapex_core.cpp
+    src/core/designerio.cpp
+    src/core/drag_io.cpp
+    src/core/graphio.cpp
+    src/core/settings.cpp
+    src/core/thread_pool.cpp
 
-    src/model/node.cpp
-    src/model/node_modifier.cpp
-    src/model/connection_type.cpp
-
-    src/msg/message.cpp
-    src/msg/message_factory.cpp
-    src/msg/message_renderer.cpp
-    src/msg/input.cpp
-    src/msg/output.cpp
-
-    src/signal/signal.cpp
-    src/signal/trigger.cpp
-    src/signal/slot.cpp
+    src/factory/generic_node_factory.cpp
 
     src/manager/message_provider_manager.cpp
     src/manager/message_renderer_manager.cpp
 
-    src/view/node_adapter.cpp
-    src/view/node_adapter_builder.cpp
-    src/view/default_node_adapter.cpp
-)
+    src/model/connectable.cpp
+    src/model/connection.cpp
+    src/model/connection_type.cpp
+    src/model/error_state.cpp
+    src/model/fulcrum.cpp
+    src/model/generic_state.cpp
+    src/model/graph.cpp
+    src/model/graph_worker.cpp
+    src/model/memento.cpp
+    src/model/multi_connection_type.cpp
+    src/model/node_constructor.cpp
+    src/model/node.cpp
+    src/model/node_factory.cpp
+    src/model/node_filter_proxy_model.cpp
+    src/model/node_modifier.cpp
+    src/model/node_state.cpp
+    src/model/node_statistics.cpp
+    src/model/node_worker.cpp
+    src/model/parameterizable.cpp
+    src/model/tag.cpp
+    src/model/unique.cpp
 
-set(SRC_APP
+    src/msg/apex_message_provider.cpp
+    src/msg/input.cpp
+    src/msg/message.cpp
+    src/msg/message_factory.cpp
+    src/msg/message_provider.cpp
+    src/msg/message_renderer.cpp
+    src/msg/output.cpp
+
     src/plugin/plugin_loader.cpp
     src/plugin/plugin_locator.cpp
 
-    src/model/node_worker.cpp
-    src/model/graph.cpp
-    src/model/graph_worker.cpp
-    src/model/connectable.cpp
-    src/model/generic_state.cpp
-    src/model/connection.cpp
-    src/model/tag.cpp
-    src/model/node_constructor.cpp
-    src/model/error_state.cpp
-    src/model/fulcrum.cpp
-    src/model/multi_connection_type.cpp
-    src/model/node_factory.cpp
-    src/model/node_state.cpp
-    src/model/node_statistics.cpp
-    src/model/parameterizable.cpp
-    src/model/node_filter_proxy_model.cpp
-    src/model/unique.cpp
-    src/model/memento.cpp
+    src/signal/signal.cpp
+    src/signal/slot.cpp
+    src/signal/trigger.cpp
 
-    src/msg/apex_message_provider.cpp
-
-    src/core/csapex_core.cpp
-    src/core/graphio.cpp
-    src/core/designerio.cpp
-    src/core/drag_io.cpp
-    src/core/settings.cpp
-    src/core/thread_pool.cpp
-
-    src/msg/message_provider.cpp
-
-    src/factory/generic_node_factory.cpp
-
-    src/command/command.cpp
-    src/command/dispatcher.cpp
-    src/command/meta.cpp
-    src/command/add_node.cpp
-    src/command/add_connection.cpp
-    src/command/add_connector.cpp
-    src/command/move_connection.cpp
-    src/command/delete_node.cpp
-    src/command/delete_connection.cpp
-    src/command/delete_connector.cpp
-    src/command/move_box.cpp
-    src/command/add_fulcrum.cpp
-    src/command/move_fulcrum.cpp
-    src/command/modify_fulcrum.cpp
-    src/command/delete_fulcrum.cpp
-    src/command/flip_sides.cpp
-    src/command/minimize.cpp
-    src/command/create_thread.cpp
-    src/command/switch_thread.cpp
-
-
-    src/utility/error_handling.cpp
-    src/utility/timable.cpp
-    src/utility/type.cpp
-    src/utility/q_signal_relay.cpp
-    src/utility/context_menu_handler.cpp
-    src/utility/stream_interceptor.cpp
-    src/utility/stream_relay.cpp
+    src/utility/assert.cpp
     src/utility/bash_parser.cpp
     src/utility/buffer.cpp
-    src/utility/movable_graphics_proxy_widget.cpp
+    src/utility/context_menu_handler.cpp
+    src/utility/error_handling.cpp
     src/utility/html_delegate.cpp
-    src/utility/yaml_node_builder.cpp
-    src/utility/qint_slider.cpp
+    src/utility/movable_graphics_proxy_widget.cpp
     src/utility/qdouble_slider.cpp
+    src/utility/qint_slider.cpp
     src/utility/qsignal_bridges.cpp
-    src/utility/qwrapper.cpp
-    src/utility/timer.cpp
+    src/utility/q_signal_relay.cpp
     src/utility/qt_helper.cpp
+    src/utility/qwrapper.cpp
+    src/utility/stream_interceptor.cpp
+    src/utility/stream_relay.cpp
     src/utility/thread.cpp
+    src/utility/timable.cpp
+    src/utility/timer.cpp
+    src/utility/type.cpp
     src/utility/uuid.cpp
-    src/utility/assert.cpp
     src/utility/widget_picker.cpp
+    src/utility/yaml_node_builder.cpp
 
+    src/view/activity_legend.cpp
+    src/view/activity_timeline.cpp
     src/view/box.cpp
     src/view/box_dialog.cpp
     src/view/csapex_window.cpp
-    src/view/designer_styleable.cpp
-    src/view/designer_scene.cpp
-    src/view/designer_view.cpp
+    src/view/default_node_adapter.cpp
     src/view/designer.cpp
-    src/view/node_adapter_factory.cpp
-    src/view/profiling_widget.cpp
-    src/view/minimap_widget.cpp
-    src/view/port.cpp
-    src/view/widget_controller.cpp
-    src/view/fulcrum_widget.cpp
+    src/view/designer_scene.cpp
+    src/view/designer_styleable.cpp
+    src/view/designer_view.cpp
     src/view/fulcrum_handle.cpp
+    src/view/fulcrum_widget.cpp
+    src/view/minimap_widget.cpp
+    src/view/node_adapter_builder.cpp
+    src/view/node_adapter.cpp
+    src/view/node_adapter_factory.cpp
     src/view/parameter_context_menu.cpp
-    src/view/activity_timeline.cpp
-    src/view/activity_legend.cpp
+    src/view/port.cpp
+    src/view/profiling_widget.cpp
+    src/view/widget_controller.cpp
 
     ${QT_RESOURCES}
 
@@ -230,37 +216,18 @@ set(SRC_APP
 # BUILD THE LIBRARIES
 #
 
-add_library(csapex_core SHARED
-    ${SRC_ESSENTIAL}
-)
-
-
-add_library(csapex_pluginbase SHARED
-    ${SRC_PLUGIN}
-)
-
-target_link_libraries(csapex_pluginbase
-    csapex_core
-    ${QT_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${catkin_LIBRARIES}
-    ${YAML_LIBRARIES}
-    ${TinyXML_LIBRARIES}
-    ${console_bridge_LIBRARIES}
-)
-
-
 add_library(csapex_app SHARED
-    ${SRC_APP}
+    ${SRC}
     ${QT_FORMS_HPP}
 )
 
-target_link_libraries(csapex_app csapex_pluginbase
+target_link_libraries(csapex_app
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${YAML_LIBRARIES}
+    ${TinyXML_LIBRARIES}
     ${console_bridge_LIBRARIES}
     Qt5::OpenGL
 )
@@ -339,11 +306,6 @@ endif()
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
-install(TARGETS csapex_pluginbase
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 install(TARGETS csapex_app
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

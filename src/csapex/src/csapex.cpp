@@ -164,6 +164,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         app.processEvents();
 
+
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
 
         DesignerStyleable style;
