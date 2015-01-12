@@ -12,6 +12,7 @@
 #include <csapex/utility/q_signal_relay.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <QThread>
@@ -658,10 +659,10 @@ void NodeWorker::removeSlot(Slot *s)
         slots_.erase(it);
     }
 
-    s->deleteLater();
-
     disconnectConnector(s);
     Q_EMIT connectorRemoved(s);
+
+    s->deleteLater();
 }
 
 void NodeWorker::removeTrigger(Trigger *t)
@@ -673,10 +674,10 @@ void NodeWorker::removeTrigger(Trigger *t)
         triggers_.erase(it);
     }
 
-    t->deleteLater();
-
     disconnectConnector(t);
     Q_EMIT connectorRemoved(t);
+
+    t->deleteLater();
 }
 
 void NodeWorker::registerInput(Input* in)
@@ -927,9 +928,9 @@ void NodeWorker::publishParameter(param::Parameter* p)
 {
     Output* out = param_2_output_.at(p->name());
     if(out->isConnected()) {
-        if(!out->canSendMessages()) {
-            node_->awarn << "dropping parameter change: " << p->name() << ", output " << out->getUUID() << " cannot send!" << std::endl;
-            return;
+        while(!out->canSendMessages()) {
+            node_->awarn << "waiting for parameter publish: " << p->name() << ", output " << out->getUUID() << " cannot send!" << std::endl;
+            qt_helper::QSleepThread::msleep(100);
         }
 
         if(p->is<int>())
