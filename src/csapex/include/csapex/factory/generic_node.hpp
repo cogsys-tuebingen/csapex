@@ -16,7 +16,6 @@ template <typename Message>
 struct GenericInput
 {
     typedef Message type;
-    typedef typename boost::remove_const<Message>::type RawType;
 };
 template <typename Message>
 struct GenericOutput
@@ -156,7 +155,7 @@ private:
 
         template<typename U>
         void operator()(GenericInput<U>) {
-            typename U::ConstPtr in = instance_->input_[id]->template getMessage<typename GenericInput<U>::RawType>();
+            typename U::ConstPtr in = instance_->input_[id]->template getMessage<U>();
             instance_->in_msg_[id] = in;
             ++id;
         }
@@ -200,6 +199,10 @@ struct GenerateParameter
         typedef typename boost::mpl::at<Parameters, boost::mpl::int_<index> >::type type;
 
         typedef boost::reference_wrapper<typename boost::remove_reference<type>::type> message;
+
+        enum IOType {
+            is_const = boost::is_const<typename message::type>::value
+        };
         typedef type param;
     };
 
@@ -210,7 +213,7 @@ struct GenerateParameter
         typename boost::enable_if<
             boost::type_traits::ice_and<
                 boost::is_reference<typename Types<no>::type>::value,
-                boost::type_traits::ice_not< boost::is_const<typename Types<no>::type>::value >::value
+                boost::type_traits::ice_not< Types<no>::is_const >::value
             >
         >::type* = 0)
     {
@@ -224,7 +227,7 @@ struct GenerateParameter
         typename boost::enable_if<
             boost::type_traits::ice_and<
                 boost::is_reference<typename Types<no>::type>::value,
-                boost::is_const<typename Types<no>::type>::value
+                Types<no>::is_const
             >
         >::type* = 0)
     {
