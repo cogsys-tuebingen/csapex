@@ -28,9 +28,7 @@ public:
         if(result) {
             return result;
         } else {
-            std::stringstream e;
-            e << "cannot cast message from " << msg->toType()->name() << " to " << type2name(typeid(R));
-            throw std::runtime_error(e.str());
+            throw std::runtime_error(std::string ("cannot cast message from ") + msg->toType()->name() + " to " + type2name(typeid(R)));
         }
     }
 

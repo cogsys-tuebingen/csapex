@@ -7,6 +7,7 @@
 #include <csapex/msg/message_factory.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <boost/mpl/vector.hpp>

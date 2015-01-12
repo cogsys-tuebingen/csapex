@@ -5,7 +5,8 @@
 #include <boost/shared_ptr.hpp>
 
 /// FORWARD DELCARATION
-namespace boost {
+namespace boost
+{
 class mutex;
 }
 
@@ -41,7 +42,6 @@ FWD(Connection);
 FWD(Fulcrum);
 FWD(Trigger);
 FWD(Slot);
-FWD(Signal);
 
 FWD(Graph);
 FWD(GraphWorker);
@@ -123,6 +123,8 @@ class AddConnector;
 namespace connection_types
 {
 FWD(Message);
+FWD(Signal);
+
 template <typename Type>
 struct GenericPointerMessage;
 template <typename Type>
