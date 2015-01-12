@@ -14,6 +14,7 @@
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>
 #include <csapex/model/node_factory.h>
+#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <QThread>
@@ -1030,9 +1031,9 @@ void NodeWorker::publishParameter(param::Parameter* p)
 {
     Output* out = param_2_output_.at(p->name());
     if(out->isConnected()) {
-        if(!out->canSendMessages()) {
-            node_->awarn << "dropping parameter change: " << p->name() << ", output " << out->getUUID() << " cannot send!" << std::endl;
-            return;
+        while(!out->canSendMessages()) {
+            node_->awarn << "waiting for parameter publish: " << p->name() << ", output " << out->getUUID() << " cannot send!" << std::endl;
+            qt_helper::QSleepThread::msleep(100);
         }
 
         if(p->is<int>())
