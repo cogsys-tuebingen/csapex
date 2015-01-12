@@ -235,14 +235,8 @@ void Output::sendMessages()
 //    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
     if(!targets.empty()) {
         // all connected inputs are ready to receive, send them the message
-        if(targets.size() == 1)     {
-            targets[0]->inputMessage(message_);
-        } else if(targets.size() > 1) {
-            foreach(Input* i, targets) {
-                ConnectionType::Ptr msg = message_->clone();
-                msg->setSequenceNumber(seq_no_);
-                i->inputMessage(msg);
-            }
+        for(auto i : targets) {
+            i->inputMessage(message_);
         }
         ++count_;
     }
