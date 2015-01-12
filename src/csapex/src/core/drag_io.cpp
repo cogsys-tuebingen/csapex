@@ -66,7 +66,7 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
                 e->accept();
 
                 std::string type = v[Qt::UserRole+1].toString().toStdString();
-                widget_ctrl_->startPlacingBox(src, type, NodeStateNullPtr, QPoint(0,0));
+                widget_ctrl_->startPlacingBox(src, type, nullptr, QPoint(0,0));
             }
         }
     }

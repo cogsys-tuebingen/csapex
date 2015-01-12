@@ -395,7 +395,7 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 
 /// ADAPTER
 DefaultNodeAdapter::DefaultNodeAdapter(NodeWorker *adaptee, WidgetController *widget_ctrl)
-    : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(NULL)
+    : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(nullptr)
 {
     QObject::connect(adaptee, SIGNAL(nodeModelChanged()), &bridge, SLOT(nodeModelChangedEvent()));
 }
@@ -750,7 +750,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         current_display_name_ = current_name_;
         std::size_t separator_pos = current_name_.find_first_of('/');
 
-        QBoxLayout* group_layout = NULL;
+        QBoxLayout* group_layout = nullptr;
 
         if(separator_pos != std::string::npos) {
             std::string group = current_name_.substr(0, separator_pos);

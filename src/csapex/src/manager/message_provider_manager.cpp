@@ -80,7 +80,7 @@ MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const s
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
     if(path.empty()) {
-        return MessageProviderNullPtr;
+        return nullptr;
     }
 
     if(classes.empty()) {

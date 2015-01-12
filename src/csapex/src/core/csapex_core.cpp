@@ -35,7 +35,7 @@ using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
                        GraphWorkerPtr graph, NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
-    : settings_(settings), drag_io_(NULL), plugin_locator_(plugin_locator), graph_worker_(graph),
+    : settings_(settings), drag_io_(nullptr), plugin_locator_(plugin_locator), graph_worker_(graph),
       node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
       cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {

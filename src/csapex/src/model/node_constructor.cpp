@@ -13,11 +13,6 @@
 
 using namespace csapex;
 
-NodePtr NodeConstructor::makeNull()
-{
-    return Node::Ptr (static_cast<Node*>(NULL));
-}
-
 NodeConstructor::NodeConstructor(Settings &settings,
                                  const std::string &type, const std::string &description,
                                  const std::string &icon,
@@ -84,7 +79,7 @@ NodeWorker::Ptr NodeConstructor::makeNodeWorker(const UUID& uuid) const
         return result;
     } catch(const std::exception& e) {
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;
-        return NodeWorkerNullPtr;
+        return nullptr;
     }
 }
 

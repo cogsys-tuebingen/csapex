@@ -94,7 +94,7 @@ StreamInterceptor::~StreamInterceptor()
 
 
 StreamInterceptor::StreamInterceptor()
-    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()), thread(NULL), worker(NULL)
+    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()), thread(nullptr), worker(nullptr)
 {
     clog_global_ = std::clog.rdbuf();
     cout_global_ = std::cout.rdbuf();

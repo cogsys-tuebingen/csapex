@@ -86,8 +86,8 @@ bool DeleteConnection::refresh()
     NodeWorker* from_worker = graph_->findNodeWorkerForConnector(from_uuid);
     NodeWorker* to_worker = graph_->findNodeWorkerForConnector(to_uuid);
 
-    from = NULL;
-    to = NULL;
+    from = nullptr;
+    to = nullptr;
 
     if(!from_worker || !to_worker) {
         return false;

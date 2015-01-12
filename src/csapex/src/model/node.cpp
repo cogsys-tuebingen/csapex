@@ -20,7 +20,7 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      modifier_(NULL), worker_(NULL)
+      modifier_(nullptr), worker_(nullptr)
 {
 }
 

@@ -42,7 +42,7 @@ ActivityTimeline::ActivityTimeline()
     params_.time = 0;
     params_.start_time_stamp = QDateTime::currentMSecsSinceEpoch();
 
-    timer_ = NULL;
+    timer_ = nullptr;
 
     setVisible(false);
 
@@ -53,7 +53,7 @@ ActivityTimeline::~ActivityTimeline()
 {
     foreach(Row* r, rows_) {
         delete r;
-        r = NULL;
+        r = nullptr;
     }
 }
 
@@ -119,7 +119,7 @@ void ActivityTimeline::stopTimer()
     timer_->stop();
     QObject::disconnect(timer_);
     timer_->deleteLater();
-    timer_ = NULL;
+    timer_ = nullptr;
 
     setVisible(false);
 }
@@ -251,7 +251,7 @@ void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)
 
         updateTime(stamp);
         row->active_activity_->stop(params_.time);
-        row->active_activity_ = NULL;
+        row->active_activity_ = nullptr;
 
     } catch(const std::out_of_range& e) {
         // ignore
@@ -312,7 +312,7 @@ void ActivityTimeline::refresh()
 
 
 ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* scene, int row, NodeWorker* worker)
-    : params_(params), node_(worker), row(row), active_activity_(NULL), selected(false)
+    : params_(params), node_(worker), row(row), active_activity_(nullptr), selected(false)
 {
     top = row * row_height;
     bottom = (row+1) * row_height;
@@ -331,7 +331,7 @@ void ActivityTimeline::Row::refresh()
         if(activity->stop_ < params_.start_time) {
             activities_.erase(activities_.begin() + j);
             if(active_activity_ == activity) {
-                active_activity_ = NULL;
+                active_activity_ = nullptr;
             }
             delete activity;
         } else {
@@ -345,10 +345,10 @@ void ActivityTimeline::Row::clear()
 {
     foreach(Activity* a, activities_) {
         delete a;
-        a = NULL;
+        a = nullptr;
     }
     activities_.clear();
-    active_activity_ = NULL;
+    active_activity_ = nullptr;
 }
 
 ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_time, NodeWorker::ActivityType type)
@@ -405,5 +405,5 @@ void ActivityTimeline::Activity::update()
 void ActivityTimeline::Activity::clear()
 {
     delete rect;
-    rect = NULL;
+    rect = nullptr;
 }

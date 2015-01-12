@@ -170,7 +170,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
             UUID from_uuid = UUID::make_forced(from_uuid_tmp);
 
-            NodeWorker* parent = NULL;
+            NodeWorker* parent = nullptr;
             try {
                 parent = graph_->findNodeWorkerForConnector(from_uuid);
 
@@ -198,10 +198,10 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
                 Connectable* from = parent->getOutput(from_uuid);
-                if(from == NULL) {
+                if(from == nullptr) {
                     from = parent->getTrigger(from_uuid);
                 }
-                if(from == NULL) {
+                if(from == nullptr) {
                     std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                     continue;
                 }
@@ -210,7 +210,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                     NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
 
                     Connectable* to = target->getInput(to_uuid);
-                    if(to == NULL) {
+                    if(to == nullptr) {
                         to = target->getSlot(to_uuid);
                     }
                     if(!to) {
@@ -244,13 +244,13 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
             Output* from = dynamic_cast<Output*>(graph_->findConnector(from_uuid));
-            if(from == NULL) {
+            if(from == nullptr) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                 continue;
             }
 
             Input* to = dynamic_cast<Input*>(graph_->findConnector(to_uuid));
-            if(to == NULL) {
+            if(to == nullptr) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
                 continue;
             }

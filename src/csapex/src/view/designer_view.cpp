@@ -44,7 +44,7 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
                            QWidget *parent)
     : QGraphicsView(parent), scene_(scene), style_(style), settings_(settings),
       thread_pool_(thread_pool), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
-      scalings_to_perform_(0), move_event_(NULL)
+      scalings_to_perform_(0), move_event_(nullptr)
 
 {
     setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
@@ -269,7 +269,7 @@ void DesignerView::mouseMoveEvent(QMouseEvent *me)
 void DesignerView::dragEnterEvent(QDragEnterEvent* e)
 {
     delete move_event_;
-    move_event_ = NULL;
+    move_event_ = nullptr;
 
     QGraphicsView::dragEnterEvent(e);
     drag_io_.dragEnterEvent(this, e);
@@ -321,7 +321,7 @@ void DesignerView::dragMoveEvent(QDragMoveEvent* e)
 void DesignerView::dropEvent(QDropEvent* e)
 {
     delete move_event_;
-    move_event_ = NULL;
+    move_event_ = nullptr;
 
     QGraphicsView::dropEvent(e);
     drag_io_.dropEvent(this, e, mapToScene(e->pos()));
@@ -334,7 +334,7 @@ void DesignerView::dropEvent(QDropEvent* e)
 void DesignerView::dragLeaveEvent(QDragLeaveEvent* e)
 {
     delete move_event_;
-    move_event_ = NULL;
+    move_event_ = nullptr;
 
     QGraphicsView::dragLeaveEvent(e);
 
@@ -366,7 +366,7 @@ void DesignerView::showBoxDialog()
         if(!type.empty() && widget_ctrl_->getNodeFactory()->isValidType(type)) {
             UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
             QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
-            dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, NodeStateNullPtr)));
+            dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, nullptr)));
         }
     }
 }
@@ -690,7 +690,7 @@ void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
 
     if(selectedItem) {
         std::string selected = selectedItem->data().toString().toStdString();
-        widget_ctrl_->startPlacingBox(this, selected, NodeStateNullPtr);
+        widget_ctrl_->startPlacingBox(this, selected, nullptr);
     }
 }
 

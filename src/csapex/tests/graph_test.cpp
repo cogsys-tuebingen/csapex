@@ -30,7 +30,7 @@ protected:
     NodeFactory factory;
 
     GraphTest()
-        : factory(settings, NULL)
+        : factory(settings, nullptr)
     {
         settings.set("headless", true);
 
@@ -74,7 +74,7 @@ TEST_F(GraphTest, NodeCanBeFound) {
 
     NodeWorker* node_found = graph.findNodeWorker(node_id);
 
-    ASSERT_TRUE(node_found != NULL);
+    ASSERT_TRUE(node_found != nullptr);
     EXPECT_EQ(node_id, node_found->getUUID());
 }
 
@@ -96,12 +96,12 @@ TEST_F(GraphTest, UnknownNodeCannotBeFound) {
     ASSERT_THROW(graph.findNode(node_id), Graph::NodeNotFoundException);
 }
 
-TEST_F(GraphTest, UnknownNodeNoThrowReturnsNull) {
+TEST_F(GraphTest, nullptr) {
     Graph graph;
     UUID node_id = UUID::make_forced("foobarbaz");
 
     Node* node_found = graph.findNodeNoThrow(node_id);
-    ASSERT_TRUE(node_found == NULL);
+    ASSERT_TRUE(node_found == nullptr);
 }
 
 }

@@ -25,7 +25,7 @@ NodeAdapterFactory::~NodeAdapterFactory()
     node_adapter_builders_.clear();
 
     delete node_adapter_manager_;
-    node_adapter_manager_ = NULL;
+    node_adapter_manager_ = nullptr;
 }
 
 NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeWorker* node, WidgetController* widget_controller)

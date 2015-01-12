@@ -691,7 +691,7 @@ Input* NodeWorker::getParameterInput(const std::string &name) const
 {
     std::map<std::string, Input*>::const_iterator it = param_2_input_.find(name);
     if(it == param_2_input_.end()) {
-        return NULL;
+        return nullptr;
     } else {
         return it->second;
     }
@@ -701,7 +701,7 @@ Output* NodeWorker::getParameterOutput(const std::string &name) const
 {
     std::map<std::string, Output*>::const_iterator it = param_2_output_.find(name);
     if(it == param_2_output_.end()) {
-        return NULL;
+        return nullptr;
     } else {
         return it->second;
     }
@@ -867,7 +867,7 @@ Input* NodeWorker::getInput(const UUID& uuid) const
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 Output* NodeWorker::getOutput(const UUID& uuid) const
@@ -883,7 +883,7 @@ Output* NodeWorker::getOutput(const UUID& uuid) const
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -895,7 +895,7 @@ Slot* NodeWorker::getSlot(const UUID& uuid) const
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -907,7 +907,7 @@ Trigger* NodeWorker::getTrigger(const UUID& uuid) const
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void NodeWorker::removeInput(const UUID &uuid)

@@ -78,7 +78,7 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
 }
 
 Main::Main(CsApexApp& a)
-    : app(a), splash(NULL)
+    : app(a), splash(nullptr)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -203,7 +203,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         return res;
 
     } else {
-        core.init(NULL);
+        core.init(nullptr);
         csapex::error_handling::stop_request().connect(boost::bind(&csapex::error_handling::kill));
         core.startup();
         return run();

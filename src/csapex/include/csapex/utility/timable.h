@@ -21,7 +21,7 @@ static std::stringstream& ss()
 }
 
 #define INTERLUDE(stream) \
-    csapex::Timer::Interlude::Ptr __interlude__##__LINE__ = profiling_timer_ ? profiling_timer_->step(dynamic_cast<std::stringstream &> ((__interlude::ss() << stream)).str()) : csapex::Timer::Interlude::Ptr(static_cast<csapex::Timer::Interlude*>(NULL))
+    csapex::Timer::Interlude::Ptr __interlude__##__LINE__ = profiling_timer_ ? profiling_timer_->step(dynamic_cast<std::stringstream &> ((__interlude::ss() << stream)).str()) : csapex::Timer::Interlude::Ptr(static_cast<csapex::Timer::Interlude*>(nullptr))
 
 class Timable
 {

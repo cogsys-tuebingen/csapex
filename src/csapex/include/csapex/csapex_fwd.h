@@ -14,8 +14,7 @@ class mutex;
     class name;\
     typedef boost::shared_ptr<name> name##Ptr;\
     typedef boost::weak_ptr<name> name##WeakPtr;\
-    typedef boost::shared_ptr<const name> name##ConstPtr;\
-    static const name##Ptr name##NullPtr
+    typedef boost::shared_ptr<const name> name##ConstPtr;
 
 
 namespace csapex

@@ -18,7 +18,7 @@ void ContextMenuHandler::showContextMenu(const QPoint &pos)
 
 void ContextMenuHandler::addHeader(QMenu &menu, const std::string &title)
 {
-    QAction* header = new QAction(title.c_str(), NULL);
+    QAction* header = new QAction(title.c_str(), nullptr);
     header->setDisabled(true);
     QFont f = header->font();
     f.setBold(true);

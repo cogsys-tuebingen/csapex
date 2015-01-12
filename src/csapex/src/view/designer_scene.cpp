@@ -347,7 +347,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
     schema_dirty_ = false;
 
-    schematics_painter = NULL;
+    schematics_painter = nullptr;
 }
 
 void DesignerScene::drawItems(QPainter *painter, int numItems,
@@ -650,7 +650,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double direct_length = hypot(diff.x(), diff.y());
 
 
-    Fulcrum::Ptr first(new Fulcrum(NULL, from, Fulcrum::OUT, from, from));
+    Fulcrum::Ptr first(new Fulcrum(nullptr, from, Fulcrum::OUT, from, from));
     Fulcrum::Ptr current = first;
     Fulcrum::Ptr last = current;
 
@@ -659,7 +659,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         Connection::Ptr connection = graph_->getConnectionWithId(id);
         targets = connection->getFulcrums();
     }
-    targets.push_back(Fulcrum::Ptr(new Fulcrum(NULL, to, Fulcrum::IN, to, to)));
+    targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, to, Fulcrum::IN, to, to)));
 
     int sub_section = 0;
 
@@ -817,7 +817,7 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
     painter->setBrush(QBrush());
 
     Connectable* c = p->getAdaptee();
-    bool is_message = (dynamic_cast<Slot*>(c) == NULL && dynamic_cast<Trigger*>(c) == NULL);
+    bool is_message = (dynamic_cast<Slot*>(c) == nullptr && dynamic_cast<Trigger*>(c) == nullptr);
 
     if(!p->isMinimizedSize()) {
         int font_size = 10;

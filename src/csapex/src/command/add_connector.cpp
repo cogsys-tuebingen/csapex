@@ -16,7 +16,7 @@ using namespace csapex;
 using namespace command;
 
 AddConnector::AddConnector(const UUID &box_uuid, const std::string& label, const std::string& type, bool input, const UUID &uuid)
-    : type(type), label(label), input(input), c(NULL), b_uuid(box_uuid), c_uuid(uuid)
+    : type(type), label(label), input(input), c(nullptr), b_uuid(box_uuid), c_uuid(uuid)
 {
 
 }

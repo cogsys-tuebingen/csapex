@@ -37,7 +37,7 @@
 using namespace csapex;
 
 WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
-    : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(NULL), tooltip_view_(NULL)
+    : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(nullptr), tooltip_view_(nullptr)
 {
     if(settings_.knows("grid-lock")) {
         enableGridLock(settings_.get<bool>("grid-lock"));
@@ -53,7 +53,7 @@ NodeBox* WidgetController::getBox(const UUID &node_id)
 {
     boost::unordered_map<UUID, NodeBox*, UUID::Hasher>::const_iterator pos = box_map_.find(node_id);
     if(pos == box_map_.end()) {
-        return NULL;
+        return nullptr;
     }
 
     return pos->second;
@@ -63,7 +63,7 @@ MovableGraphicsProxyWidget* WidgetController::getProxy(const UUID &node_id)
 {
     boost::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher>::const_iterator pos = proxy_map_.find(node_id);
     if(pos == proxy_map_.end()) {
-        return NULL;
+        return nullptr;
     }
 
     return pos->second;
@@ -73,7 +73,7 @@ Port* WidgetController::getPort(const UUID &connector_id)
 {
     boost::unordered_map<UUID, Port*, UUID::Hasher>::const_iterator pos = port_map_.find(connector_id);
     if(pos == port_map_.end()) {
-        return NULL;
+        return nullptr;
     }
 
     return pos->second;
@@ -83,7 +83,7 @@ Port* WidgetController::getPort(const Connectable* connectable)
 {
     boost::unordered_map<UUID, Port*, UUID::Hasher>::const_iterator pos = port_map_.find(connectable->getUUID());
     if(pos == port_map_.end()) {
-        return NULL;
+        return nullptr;
     }
 
     return pos->second;
@@ -104,7 +104,7 @@ void WidgetController::hideTooltipView()
     if(tooltip_view_) {
         tooltip_view_->hide();
         tooltip_view_->deleteLater();
-        tooltip_view_ = NULL;
+        tooltip_view_ = nullptr;
     }
 }
 
@@ -305,7 +305,7 @@ Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLay
         return port;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 

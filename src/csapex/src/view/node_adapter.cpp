@@ -12,7 +12,7 @@
 using namespace csapex;
 
 NodeAdapter::NodeAdapter(NodeWorker *adaptee, WidgetController* widget_ctrl)
-    : layout_(NULL), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
+    : layout_(nullptr), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
 {
 }
 

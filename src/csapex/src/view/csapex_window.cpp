@@ -42,7 +42,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, 
                            PluginLocator *locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
-      activity_timeline_(timeline), init_(false), style_sheet_watcher_(NULL), plugin_locator_(locator)
+      activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {
     core_.addListener(this);
 }
@@ -371,7 +371,7 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     widget_ctrl_->setStyleSheet(style_sheet);
 
     delete style_sheet_watcher_;
-    style_sheet_watcher_ = NULL;
+    style_sheet_watcher_ = nullptr;
 
     style_sheet_watcher_ = new QFileSystemWatcher(this);
     style_sheet_watcher_->addPath(path);

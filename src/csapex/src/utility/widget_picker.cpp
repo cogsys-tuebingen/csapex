@@ -15,7 +15,7 @@
 using namespace csapex;
 
 WidgetPicker::WidgetPicker()
-    : designer_scene_(NULL), widget_(NULL)
+    : designer_scene_(nullptr), widget_(nullptr)
 {
 
 }
@@ -34,7 +34,7 @@ QWidget* WidgetPicker::getWidget()
 {
     designer_scene_->removeEventFilter(this);
     QApplication::restoreOverrideCursor();
-    designer_scene_ = NULL;
+    designer_scene_ = nullptr;
 
     return widget_;
 }
@@ -48,7 +48,7 @@ bool WidgetPicker::eventFilter(QObject*, QEvent * e)
 
         if(key == Qt::Key_Escape) {
             e->accept();
-            widget_ = NULL;
+            widget_ = nullptr;
 
             Q_EMIT widgetPicked();
             return true;
@@ -69,7 +69,7 @@ bool WidgetPicker::eventFilter(QObject*, QEvent * e)
 
                 widget_ = child;
             } else {
-                widget_ = NULL;
+                widget_ = nullptr;
             }
 
             Q_EMIT widgetPicked();

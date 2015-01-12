@@ -40,7 +40,7 @@ void csapex::error_handling::init()
 //    signal_vec.push_back(SIGILL);
 
     for(unsigned i = 0; i < signal_vec.size(); ++i) {
-        if (sigaction(signal_vec[i], &sigact, (struct sigaction *) NULL) != 0) {
+        if (sigaction(signal_vec[i], &sigact, (struct sigaction *) nullptr) != 0) {
             fprintf(stderr, "error setting signal handler for %d (%s)\n",
                     signal_vec[i], strsignal(signal_vec[i]));
 
@@ -91,7 +91,7 @@ void csapex::error_handling::sigsegvhandler(int sig_num, siginfo_t * info, void 
     char ** messages = backtrace_symbols(array, size);
 
     // skip first stack frame (points here)
-    for (int i = 1; i < size && messages != NULL; ++i)
+    for (int i = 1; i < size && messages != nullptr; ++i)
     {
         char *mangled_name = 0, *offset_begin = 0, *offset_end = 0;
 

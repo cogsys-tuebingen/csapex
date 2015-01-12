@@ -19,7 +19,7 @@ AddNode::AddNode(const std::string &type, QPoint pos, const UUID &parent_uuid, c
 {
     apex_assert_hard(!uuid.empty());
 
-    if(state != MementoNullPtr) {
+    if(state != nullptr) {
         NodeState::Ptr bs = boost::dynamic_pointer_cast<NodeState> (state);
         saved_state_ = bs;
     }

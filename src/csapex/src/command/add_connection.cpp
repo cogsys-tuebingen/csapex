@@ -18,7 +18,7 @@ using namespace csapex::command;
 
 
 AddConnection::AddConnection(const UUID& from_uuid, const UUID& to_uuid)
-    : from(NULL), to(NULL), from_uuid(from_uuid), to_uuid(to_uuid)
+    : from(nullptr), to(nullptr), from_uuid(from_uuid), to_uuid(to_uuid)
 {
 }
 
@@ -34,7 +34,7 @@ std::string AddConnection::getDescription() const
 
 bool AddConnection::doExecute()
 {
-    if(from == NULL) {
+    if(from == nullptr) {
         refresh();
     }
 

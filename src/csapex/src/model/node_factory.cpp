@@ -46,7 +46,7 @@ bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
 NodeFactory::~NodeFactory()
 {
     delete node_manager_;
-    node_manager_ = NULL;
+    node_manager_ = nullptr;
 }
 
 
@@ -213,7 +213,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
         }
     }
 
-    return NodeConstructorNullPtr;
+    return nullptr;
 }
 
 std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
@@ -225,7 +225,7 @@ std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
 
 NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid)
 {
-    return makeNode(target_type, uuid, NodeStateNullPtr);
+    return makeNode(target_type, uuid, nullptr);
 }
 
 NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
@@ -246,7 +246,7 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
 
     } else {
         std::cerr << "error: cannot make node, type '" << target_type << "' is unknown" << std::endl;
-        return NodeWorkerNullPtr;
+        return nullptr;
     }
 }
 

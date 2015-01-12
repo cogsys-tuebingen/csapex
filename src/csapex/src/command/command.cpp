@@ -14,7 +14,7 @@ using namespace csapex;
 std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command()
-    : settings_(NULL), before_save_point_(false), after_save_point_(false)
+    : settings_(nullptr), before_save_point_(false), after_save_point_(false)
 {
 }
 

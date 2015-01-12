@@ -325,7 +325,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -337,7 +337,7 @@ NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 Node* Graph::findNodeForConnector(const UUID &uuid) const
@@ -377,7 +377,7 @@ Connectable* Graph::findConnector(const UUID &uuid)
 
     std::string type = uuid.type();
 
-    Connectable* result = NULL;
+    Connectable* result = nullptr;
     if(type == "in") {
         result = owner->getInput(uuid);
     } else if(type == "out") {
@@ -403,7 +403,7 @@ Connection::Ptr Graph::getConnectionWithId(int id)
         }
     }
 
-    return ConnectionNullPtr;
+    return nullptr;
 }
 
 Connection::Ptr Graph::getConnection(Connection::Ptr c)
@@ -416,14 +416,14 @@ Connection::Ptr Graph::getConnection(Connection::Ptr c)
 
     std::cerr << "error: cannot get connection for " << *c << std::endl;
 
-    return ConnectionNullPtr;
+    return nullptr;
 }
 
 int Graph::getConnectionId(Connection::Ptr c)
 {
     Connection::Ptr internal = getConnection(c);
 
-    if(internal != ConnectionNullPtr) {
+    if(internal != nullptr) {
         return internal->id();
     }
 

@@ -31,7 +31,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_compo(NULL), info_thread(NULL), is_placed_(false)
+      down_(false), info_compo(nullptr), info_thread(nullptr), is_placed_(false)
 {
     worker->getNodeState()->flipped_changed->connect(boost::bind(&NodeBox::flipSides, this));
     worker->getNodeState()->minimized_changed->connect(boost::bind(&NodeBox::minimizeBox, this));
@@ -141,7 +141,7 @@ Node* NodeBox::getNode()
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {
-        return NULL;
+        return nullptr;
     }
     return worker->getNode();
 }
@@ -150,7 +150,7 @@ NodeWorker* NodeBox::getNodeWorker()
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {
-        return NULL;
+        return nullptr;
     }
     return worker.get();
 }
@@ -351,7 +351,7 @@ void NodeBox::unregisterEvent(Connectable*)
 
 void NodeBox::registerInputEvent(Input* in)
 {
-    in->setParent(NULL);
+    in->setParent(nullptr);
 
     Q_EMIT changed(this);
 }
@@ -360,7 +360,7 @@ void NodeBox::registerOutputEvent(Output* out)
 {
     apex_assert_hard(out);
 
-    out->setParent(NULL);
+    out->setParent(nullptr);
 
     Q_EMIT changed(this);
 }

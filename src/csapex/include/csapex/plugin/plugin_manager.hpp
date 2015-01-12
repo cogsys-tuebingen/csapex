@@ -107,7 +107,7 @@ protected:
         TiXmlDocument document;
         document.LoadFile(xml_file);
         TiXmlElement * config = document.RootElement();
-        if (config == NULL) {
+        if (config == nullptr) {
             std::cerr << "[Plugin] Cannot load the file " << xml_file << std::endl;
             return false;
         }
@@ -117,7 +117,7 @@ protected:
         }
 
         TiXmlElement* library = config;
-        while (library != NULL) {
+        while (library != nullptr) {
 
             std::string library_name = library->Attribute("path");
             if (library_name.size() == 0) {
@@ -163,7 +163,7 @@ protected:
         std::string derived_class = class_element->Attribute("type");
 
         std::string lookup_name;
-        if(class_element->Attribute("name") != NULL) {
+        if(class_element->Attribute("name") != nullptr) {
             lookup_name = class_element->Attribute("name");
         } else {
             lookup_name = derived_class;
@@ -295,7 +295,7 @@ protected:
 template <class M>
 int PluginManager<M>::i_count = 0;
 template <class M>
-typename PluginManager<M>::Parent* PluginManager<M>::instance(NULL);
+typename PluginManager<M>::Parent* PluginManager<M>::instance(nullptr);
 
 }
 

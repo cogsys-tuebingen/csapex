@@ -4,7 +4,7 @@
 using namespace csapex;
 
 Timable::Timable()
-    : profiling_timer_(NULL)
+    : profiling_timer_(nullptr)
 {
 
 }

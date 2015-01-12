@@ -13,13 +13,13 @@
 using namespace csapex;
 
 Input::Input(const UUID &uuid)
-    : Connectable(uuid), target(NULL), buffer_(new Buffer), optional_(false)
+    : Connectable(uuid), target(nullptr), buffer_(new Buffer), optional_(false)
 {
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
 
 Input::Input(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "in"), target(NULL), buffer_(new Buffer), optional_(false)
+    : Connectable(parent, sub_id, "in"), target(nullptr), buffer_(new Buffer), optional_(false)
 {
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
@@ -55,9 +55,9 @@ bool Input::acknowledgeConnection(Connectable* other_side)
 
 void Input::removeConnection(Connectable* other_side)
 {
-    if(target != NULL) {
+    if(target != nullptr) {
         apex_assert_hard(other_side == target);
-        target = NULL;
+        target = nullptr;
 
         Q_EMIT connectionRemoved(this);
     }
@@ -128,9 +128,9 @@ void Input::disable()
 
 void Input::removeAllConnectionsNotUndoable()
 {
-    if(target != NULL) {
+    if(target != nullptr) {
         target->removeConnection(this);
-        target = NULL;
+        target = nullptr;
         setError(false);
         Q_EMIT disconnected(this);
     }
@@ -150,7 +150,7 @@ bool Input::targetsCanBeMovedTo(Connectable* other_side) const
 bool Input::isConnected() const
 {
 
-    return target != NULL;
+    return target != nullptr;
 }
 
 void Input::connectionMovePreview(Connectable *other_side)

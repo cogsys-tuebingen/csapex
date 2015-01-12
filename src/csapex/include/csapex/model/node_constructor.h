@@ -35,8 +35,6 @@ public:
 
     typedef boost::shared_ptr<NodeConstructor> Ptr;
 
-    static NodePtr makeNull();
-
 public:
     boost::shared_ptr< boost::signals2::signal<void()> > unload_request;
     boost::shared_ptr< boost::signals2::signal<void()> > reload_request;

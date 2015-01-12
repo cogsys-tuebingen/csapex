@@ -117,7 +117,7 @@ void ThreadPool::useDefaultThreadFor(NodeWorker* node_worker)
 {
     private_thread_[node_worker] = false;
 
-    static QThread* thread = NULL;
+    static QThread* thread = nullptr;
     if(!thread) {
         thread = new QThread;
         thread->start();

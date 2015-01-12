@@ -110,7 +110,7 @@ protected:
     NodeFactory factory;
 
     NodeCreationTest()
-        : factory(settings, NULL)
+        : factory(settings, nullptr)
     {
         settings.set("headless", true);
 
@@ -155,7 +155,7 @@ TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
     UUID node_id = UUID::make_forced("foobarbaz");
     NodeWorkerPtr node = factory.makeNode("MockupNode", node_id);
 
-    ASSERT_TRUE(node != NULL);
+    ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());
 }
 
@@ -163,7 +163,7 @@ TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
     UUID node_id = UUID::make_forced("foobarbaz");
     NodeWorkerPtr node = factory.makeNode("WrappedFunctionNode", node_id);
 
-    ASSERT_TRUE(node != NULL);
+    ASSERT_TRUE(node != nullptr);
 
     std::vector<Input*> inputs = node->getMessageInputs();
     ASSERT_EQ(2, inputs.size());
@@ -179,7 +179,7 @@ TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
     UUID node_id = UUID::make_forced("foobarbaz2");
     NodeWorkerPtr node = factory.makeNode("WrappedFunctionNode", node_id);
 
-    ASSERT_TRUE(node != NULL);
+    ASSERT_TRUE(node != nullptr);
 
     std::vector<Input*> inputs = node->getMessageInputs();
     std::vector<Output*> outputs = node->getMessageOutputs();
@@ -209,11 +209,11 @@ TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
     Output* out = outputs[0];
     ConnectionType::ConstPtr out_msg = out->getMessage();
 
-    ASSERT_TRUE(out_msg != NULL);
+    ASSERT_TRUE(out_msg != nullptr);
 
     MockupMessage::Ptr result = boost::dynamic_pointer_cast<MockupMessage>(out_msg);
 
-    ASSERT_TRUE(result != NULL);
+    ASSERT_TRUE(result != nullptr);
 
     ASSERT_EQ(42, result->value.value);
 }

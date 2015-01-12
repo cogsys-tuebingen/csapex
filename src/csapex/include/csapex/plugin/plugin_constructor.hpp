@@ -34,14 +34,14 @@ public:
     boost::shared_ptr<M> construct() const {
         boost::shared_ptr<M> res(constructor());
 //        impl::setType<M>(res, type);
-        assert(res.get() != NULL);
+        assert(res.get() != nullptr);
         instances_.push_back(res);
         return res;
     }
 
     bool valid() const {
         typename boost::shared_ptr<M> res(constructor());
-        return res.get() != NULL;
+        return res.get() != nullptr;
     }
 
     void setConstructor(Call c) {
