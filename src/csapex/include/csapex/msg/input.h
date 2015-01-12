@@ -5,8 +5,6 @@
 #include <csapex/model/connectable.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/msg/message.h>
-#include <csapex/msg/generic_pointer_message.hpp>
-#include <csapex/msg/generic_value_message.hpp>
 #include <csapex/utility/buffer.h>
 
 /// SYSTEM
@@ -39,7 +37,7 @@ public:
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
 
-    void inputMessage(ConnectionType::Ptr message);
+    void inputMessage(ConnectionType::ConstPtr message);
 
     template <typename R>
     boost::shared_ptr<R const>
@@ -59,7 +57,8 @@ public:
     boost::shared_ptr<typename Container::template TypeMap<R>::type const>
     getMessage() const
     {
-        return buffer_->read<Container>() -> template makeShared<R>();
+        auto msg = buffer_->read<Container>();
+        return msg -> template makeShared<R>();
     }
 
 
@@ -129,10 +128,10 @@ protected:
     virtual void removeAllConnectionsNotUndoable();
 
 Q_SIGNALS:
-    void gotMessage(ConnectionType::Ptr msg);
+    void gotMessage(ConnectionType::ConstPtr msg);
 
 private Q_SLOTS:
-    void handleMessage(ConnectionType::Ptr msg);
+    void handleMessage(ConnectionType::ConstPtr msg);
 
 protected:
     Connectable* target;

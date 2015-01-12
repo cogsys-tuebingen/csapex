@@ -124,6 +124,10 @@ class AddConnector;
 namespace connection_types
 {
 FWD(Message);
+template <typename Type>
+struct GenericPointerMessage;
+template <typename Type>
+struct GenericValueMessage;
 }
 
 }

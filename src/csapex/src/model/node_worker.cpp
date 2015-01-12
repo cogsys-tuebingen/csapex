@@ -538,7 +538,7 @@ void NodeWorker::processMessages()
         //        }
 
         // check if one is "NoMessage";
-        Q_FOREACH(Input* cin, inputs_) {
+        for(Input* cin : inputs_) {
             if(!cin->isOptional() && cin->isMessage<connection_types::NoMessage>()) {
                 all_inputs_are_present = false;
             }

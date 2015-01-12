@@ -83,7 +83,7 @@ private:
         for(std::size_t i = 0; i < N; ++i) {
             Output* out = output_[i];
             if(out) {
-                out->cloneAndPublish(out_msg_[i]);
+                out->publish(out_msg_[i]);
             }
         }
     }

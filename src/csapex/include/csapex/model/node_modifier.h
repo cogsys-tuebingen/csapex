@@ -6,8 +6,6 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/message_factory.h>
 #include <csapex/msg/message_traits.h>
-#include <csapex/msg/generic_pointer_message.hpp>
-#include <csapex/msg/generic_value_message.hpp>
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM

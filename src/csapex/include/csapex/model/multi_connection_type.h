@@ -27,9 +27,6 @@ public:
     virtual ConnectionType::Ptr clone() const override;
     virtual ConnectionType::Ptr toType() const override;
 
-    void writeYaml(YAML::Node& yaml) const;
-    void readYaml(const YAML::Node& node);
-
 private:
     std::vector<ConnectionType::Ptr> types_;
 };

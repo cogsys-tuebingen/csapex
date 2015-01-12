@@ -3,7 +3,12 @@
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
-#include <yaml-cpp/yaml.h>
+
+/// FORWARD DECLARATION
+namespace YAML
+{
+class Node;
+}
 
 namespace csapex
 {

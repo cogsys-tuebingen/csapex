@@ -57,7 +57,7 @@ int ConnectionType::sequenceNumber() const
     return seq_no_;
 }
 
-void ConnectionType::setSequenceNumber(int seq_no)
+void ConnectionType::setSequenceNumber(int seq_no) const
 {
     seq_no_ = seq_no;
 }

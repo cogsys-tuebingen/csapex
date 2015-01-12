@@ -170,12 +170,7 @@ void Output::validateConnections()
     }
 }
 
-void Output::cloneAndPublish(ConnectionType::ConstPtr message)
-{
-    publish(message->clone());
-}
-
-void Output::publish(ConnectionType::Ptr message)
+void Output::publish(ConnectionType::ConstPtr message)
 {
     setType(message->toType());
 
@@ -252,7 +247,7 @@ void Output::forceSendMessage(bool force)
     force_send_message_ = force;
 }
 
-ConnectionType::Ptr Output::getMessage()
+ConnectionType::ConstPtr Output::getMessage()
 {
     return message_;
 }

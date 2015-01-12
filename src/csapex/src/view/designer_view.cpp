@@ -42,7 +42,7 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
                            Settings &settings, ThreadPool &thread_pool,
                            CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, DesignerStyleable *style,
                            QWidget *parent)
-    : QGraphicsView(parent), style_(style), scene_(scene), settings_(settings),
+    : QGraphicsView(parent), scene_(scene), style_(style), settings_(settings),
       thread_pool_(thread_pool), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
       scalings_to_perform_(0), move_event_(NULL)
 

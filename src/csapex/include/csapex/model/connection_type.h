@@ -4,7 +4,6 @@
 /// SYSTEM
 #include <boost/signals2.hpp>
 #include <boost/shared_ptr.hpp>
-#include <yaml-cpp/yaml.h>
 
 namespace csapex {
 
@@ -44,7 +43,7 @@ public:
     std::string rawName() const;
 
     int sequenceNumber() const;
-    void setSequenceNumber(int seq_no_);
+    void setSequenceNumber(int seq_no_) const;
 
     virtual void writeRaw(const std::string& file, const std::string &suffix) const;
 
@@ -53,7 +52,7 @@ protected:
 
 private:
     std::string name_;
-    int seq_no_;
+    mutable int seq_no_;
 
 private:
     static ConnectionType::Ptr default_;

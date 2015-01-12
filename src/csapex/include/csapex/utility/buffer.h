@@ -19,11 +19,11 @@ public:
     void free();
 
     template <typename R>
-    typename boost::shared_ptr<R> read()
+    typename boost::shared_ptr<R const> read()
     {
-        ConnectionType::Ptr msg = readImpl();
+        auto msg = readImpl();
 
-        typename R::Ptr result = boost::dynamic_pointer_cast<R> (msg);
+        typename boost::shared_ptr<R const> result = boost::dynamic_pointer_cast<R const> (msg);
 
         if(result) {
             return result;
@@ -37,22 +37,22 @@ public:
     template <typename T>
     bool isType()
     {
-        boost::shared_ptr<T> tmp = boost::dynamic_pointer_cast<T>(message_);
-        return (bool) tmp;
+        boost::shared_ptr<T const> tmp = boost::dynamic_pointer_cast<T const>(message_);
+        return tmp != nullptr;
     }
 
-    void write(ConnectionType::Ptr message);
+    void write(ConnectionType::ConstPtr message);
 
     bool isFilled() const;
 
 private:
-    ConnectionType::Ptr readImpl() const;
+    ConnectionType::ConstPtr readImpl() const;
 
 private:
     bool enabled_;
 
     QMutex* mutex_;
-    ConnectionType::Ptr message_;
+    ConnectionType::ConstPtr message_;
 };
 }
 

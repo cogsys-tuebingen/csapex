@@ -17,7 +17,7 @@ Buffer::~Buffer()
     delete mutex_;
 }
 
-ConnectionType::Ptr Buffer::readImpl() const
+ConnectionType::ConstPtr Buffer::readImpl() const
 {
     QMutexLocker lock(mutex_);
 
@@ -26,7 +26,7 @@ ConnectionType::Ptr Buffer::readImpl() const
     return message_;
 }
 
-void Buffer::write(ConnectionType::Ptr message)
+void Buffer::write(ConnectionType::ConstPtr message)
 {
     QMutexLocker lock(mutex_);
 

@@ -43,6 +43,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
 
     qRegisterMetaType < QSharedPointer<QImage> > ("QSharedPointer<QImage>");
     qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
+    qRegisterMetaType < ConnectionType::ConstPtr > ("ConnectionType::ConstPtr");
     qRegisterMetaType < std::string > ("std::string");
 
     StreamInterceptor::instance().start();

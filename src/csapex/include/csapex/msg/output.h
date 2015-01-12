@@ -3,9 +3,8 @@
 
 /// COMPONENT
 #include <csapex/model/connectable.h>
+#include <csapex/msg/message_traits.h>
 #include <csapex/csapex_fwd.h>
-#include <csapex/msg/generic_pointer_message.hpp>
-#include <csapex/msg/generic_value_message.hpp>
 
 namespace csapex
 {
@@ -55,15 +54,13 @@ public:
     }
 
     template <class Container, typename T>
-    void publish(const typename Container::template TypeMap<T>::Ptr& message/*,
-                 typename boost::disable_if<boost::is_base_and_derived<connection_types::Message, T> >::type* = 0*/) {
+    void publish(const typename Container::template TypeMap<T>::Ptr& message) {
         typename Container::Ptr msg(Container::template make<T>());
         msg->template set<T>(message);
         publish(msg);
     }
 
-    void cloneAndPublish(ConnectionType::ConstPtr message);
-    void publish(ConnectionType::Ptr message);
+    void publish(ConnectionType::ConstPtr message);
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;
@@ -82,7 +79,7 @@ public:
     void forceSendMessage(bool force = true);
 
     bool hasMessage();
-    ConnectionType::Ptr getMessage();
+    ConnectionType::ConstPtr getMessage();
 
     bool canSendMessages();
     void sendMessages();
@@ -102,8 +99,8 @@ protected:
     std::vector<Input*> targets_;
     bool force_send_message_;
 
-    ConnectionType::Ptr message_;
-    ConnectionType::Ptr message_to_send_;
+    ConnectionType::ConstPtr message_;
+    ConnectionType::ConstPtr message_to_send_;
 };
 
 }

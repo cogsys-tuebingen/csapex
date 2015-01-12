@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
+#include <yaml-cpp/yaml.h>
 
 namespace YAML {
 template<typename T>

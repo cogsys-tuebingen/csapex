@@ -15,13 +15,13 @@ using namespace csapex;
 Input::Input(const UUID &uuid)
     : Connectable(uuid), target(NULL), buffer_(new Buffer), optional_(false)
 {
-    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
 
 Input::Input(Unique* parent, int sub_id)
     : Connectable(parent, sub_id, "in"), target(NULL), buffer_(new Buffer), optional_(false)
 {
-    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::Ptr)), this, SLOT(handleMessage(ConnectionType::Ptr)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
 
 Input::~Input()
@@ -181,7 +181,7 @@ Connectable *Input::getSource() const
     return target;
 }
 
-void Input::inputMessage(ConnectionType::Ptr message)
+void Input::inputMessage(ConnectionType::ConstPtr message)
 {
     assert(!isBlocked());
     setBlocked(true);
@@ -189,7 +189,7 @@ void Input::inputMessage(ConnectionType::Ptr message)
     Q_EMIT gotMessage(message);
 }
 
-void Input::handleMessage(ConnectionType::Ptr message)
+void Input::handleMessage(ConnectionType::ConstPtr message)
 {
     if(!isEnabled()) {
         return;

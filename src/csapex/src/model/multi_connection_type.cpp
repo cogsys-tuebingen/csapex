@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/model/multi_connection_type.h>
 
+/// SYSTEM
+#include <sstream>
+
 using namespace csapex;
 
 namespace {
@@ -53,14 +56,4 @@ ConnectionType::Ptr MultiConnectionType::toType() const
 {
     Ptr new_msg(new MultiConnectionType(types_));
     return new_msg;
-}
-
-void MultiConnectionType::writeYaml(YAML::Node &/*yaml*/) const
-{
-
-}
-
-void MultiConnectionType::readYaml(const YAML::Node &/*node*/)
-{
-
 }

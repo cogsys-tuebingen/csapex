@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 #include <csapex/utility/type.h>
-#include <csapex/utility/yaml_io.hpp>
+#include <csapex/utility/yaml_io.hpp> // TODO: get rid of this....
 #include <csapex/msg/message_traits.h>
 
 namespace csapex {

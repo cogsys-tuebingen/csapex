@@ -10,6 +10,7 @@
 
 /// SYSTEM
 #include <boost/signals2.hpp>
+#include <set>
 
 namespace csapex
 {
