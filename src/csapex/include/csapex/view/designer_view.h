@@ -17,17 +17,23 @@ class DesignerView : public QGraphicsView
 {
     Q_OBJECT
 
-    Q_PROPERTY(QColor lineColor WRITE setLineColor)
-    Q_PROPERTY(QColor lineColorError WRITE setLineColorError)
-    Q_PROPERTY(QColor lineColorBlocked WRITE setLineColorBlocked)
-    Q_PROPERTY(QColor lineColorDisabled WRITE setLineColorDisabled)
-    Q_PROPERTY(int lineWidth WRITE setLineWidth)
+    Q_PROPERTY(QColor lineColor         READ lineColor         WRITE setLineColor)
+    Q_PROPERTY(QColor lineColorError    READ lineColorError    WRITE setLineColorError)
+    Q_PROPERTY(QColor lineColorBlocked  READ lineColorBlocked  WRITE setLineColorBlocked)
+    Q_PROPERTY(QColor lineColorDisabled READ lineColorDisabled WRITE setLineColorDisabled)
+    Q_PROPERTY(int lineWidth            READ lineWidth         WRITE setLineWidth)
 
     void setLineColor(const QColor& c) { style_->setLineColor(c); }
     void setLineColorError(const QColor& c) { style_->setLineColorError(c); }
     void setLineColorBlocked(const QColor& c) { style_->setLineColorBlocked(c); }
     void setLineColorDisabled(const QColor& c) { style_->setLineColorDisabled(c);}
     void setLineWidth(int width) { style_->setLineWidth(width); }
+
+    QColor lineColor() const { return style_->lineColor(); }
+    QColor lineColorError() const { return style_->lineColorError(); }
+    QColor lineColorBlocked() const { return style_->lineColorBlocked(); }
+    QColor lineColorDisabled() const { return style_->lineColorDisabled();}
+    int lineWidth() const { return style_->lineWidth(); }
 
 public:
     DesignerView(DesignerScene* scene, csapex::GraphPtr graph,

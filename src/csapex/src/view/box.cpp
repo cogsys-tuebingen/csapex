@@ -31,7 +31,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_compo(nullptr), info_thread(nullptr), is_placed_(false)
+      down_(false), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), is_placed_(false)
 {
     worker->getNodeState()->flipped_changed->connect(boost::bind(&NodeBox::flipSides, this));
     worker->getNodeState()->minimized_changed->connect(boost::bind(&NodeBox::minimizeBox, this));
@@ -62,6 +62,14 @@ void NodeBox::setupUi()
         info_thread = new QLabel;
         info_thread->setProperty("threadgroup", true);
         ui->infos->addWidget(info_thread);
+    }
+
+    if(!info_error) {
+        info_error = new QLabel;
+        info_error->setText("<img src=':/error.png' />");
+        info_error->setProperty("error", true);
+        info_error->setVisible(false);
+        ui->infos->addWidget(info_error);
     }
 
     adapter_->doSetupUi(ui->content);
@@ -433,11 +441,18 @@ void NodeBox::paintEvent(QPaintEvent* e)
 
     if(error_change || warning_change) {
         if(is_error) {
-            ui->label->setToolTip(worker->getNode()->errorMessage().c_str());
+            QString msg = QString::fromStdString(worker->getNode()->errorMessage());
+            setToolTip(msg);
+            info_error->setToolTip(msg);
+            info_error->setVisible(true);
         } else if(is_warn) {
-            ui->label->setToolTip(worker->getNode()->errorMessage().c_str());
+            QString msg = QString::fromStdString(worker->getNode()->errorMessage());
+            setToolTip(msg);
+            info_error->setToolTip(msg);
+            info_error->setVisible(true);
         } else {
-            ui->label->setToolTip(worker->getUUID().c_str());
+            setToolTip(ui->label->text());
+            info_error->setVisible(false);
         }
 
         refreshStylesheet();

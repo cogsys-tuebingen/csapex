@@ -164,6 +164,7 @@ protected:
 
     QLabel* info_compo;
     QLabel* info_thread;
+    QLabel* info_error;
 
     bool is_placed_;
 };

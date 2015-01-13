@@ -289,19 +289,6 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             continue;
         }
 
-        // draw error message
-        if(node->isError()) {
-            QRectF rect(box->pos() + QPoint(0, box->height() + 8), QSize(box->width(), 64));
-
-            QFont font;
-            font.setPixelSize(8);
-            painter->setFont(font);
-            painter->setPen(node->errorLevel() == Node::EL_ERROR ? Qt::red : QColor(0xCC,0x99,0x00));
-
-            QTextOption opt(Qt::AlignTop | Qt::AlignHCenter);
-            painter->drawText(rect, node->errorMessage().c_str(), opt);
-        }
-
         // draw box overlay
         if(scale_ < overlay_threshold_) {
             double o = 1.0;
