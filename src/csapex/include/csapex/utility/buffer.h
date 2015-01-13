@@ -5,6 +5,9 @@
 #include <csapex/msg/message.h>
 #include <csapex/utility/assert.h>
 
+/// SYSTEM
+#include <mutex>
+
 namespace csapex
 {
 class Buffer
@@ -33,8 +36,11 @@ public:
     template <typename T>
     bool isType()
     {
-        std::shared_ptr<T const> tmp = std::dynamic_pointer_cast<T const>(message_);
-        return tmp != nullptr;
+        auto msg = readImpl();
+
+        typename std::shared_ptr<T const> test = std::dynamic_pointer_cast<T const> (msg);
+
+        return test != nullptr;
     }
 
     void write(ConnectionType::ConstPtr message);
@@ -47,7 +53,7 @@ private:
 private:
     bool enabled_;
 
-    std::mutex* mutex_;
+    mutable std::mutex mutex_;
     ConnectionType::ConstPtr message_;
 };
 }

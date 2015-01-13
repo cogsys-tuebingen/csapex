@@ -10,6 +10,7 @@
 #include <boost/signals2.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
+#include <mutex>
 
 namespace csapex
 {
@@ -130,7 +131,7 @@ private:
     std::map<param::Parameter*, std::vector<boost::signals2::connection> > connections_;
     std::map<param::Parameter*, boost::function<bool()> > conditions_;
 
-    std::mutex* changed_params_mutex_;
+    mutable std::mutex changed_params_mutex_;
     std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
 
 protected:

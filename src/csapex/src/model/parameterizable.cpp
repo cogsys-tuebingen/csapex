@@ -14,14 +14,13 @@ using namespace csapex;
 
 
 Parameterizable::Parameterizable()
-    : changed_params_mutex_(new std::mutex), parameter_state_(new GenericState)
+    : parameter_state_(new GenericState)
 {
 
 }
 
 Parameterizable::~Parameterizable()
 {
-    delete changed_params_mutex_;
 }
 
 template <typename T>
@@ -68,7 +67,7 @@ void Parameterizable::addParameterCallback(param::Parameter* param, boost::funct
 
 void Parameterizable::removeParameterCallbacks(param::Parameter *param)
 {
-    std::lock_guard<std::mutex> lock(*changed_params_mutex_);
+    std::unique_lock<std::mutex> lock(changed_params_mutex_);
 
     typedef std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > PAIR;
     for(std::vector<PAIR>::iterator it = changed_params_.begin(); it != changed_params_.end();) {
@@ -99,7 +98,7 @@ void Parameterizable::parameterChanged(param::Parameter *)
 
 void Parameterizable::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
 {
-    std::lock_guard<std::mutex> lock(*changed_params_mutex_);
+    std::unique_lock<std::mutex> lock(changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
 }
 
@@ -256,7 +255,7 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
 {
     ChangedParameterList changed_params;
 
-    std::lock_guard<std::mutex> lock(*changed_params_mutex_);
+    std::unique_lock<std::mutex> lock(changed_params_mutex_);
     changed_params = changed_params_;
     changed_params_.clear();
 

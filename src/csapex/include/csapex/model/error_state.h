@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <string>
+#include <mutex>
 
 namespace csapex
 {
@@ -33,8 +34,8 @@ protected:
     virtual void errorEvent(bool error, const std::string& msg, ErrorLevel level);
     virtual void errorChanged(bool error);
 
-protected:
-    std::mutex* error_mutex_;
+private:
+    mutable std::recursive_mutex error_mutex_;
     bool error_;
     std::string error_msg_;
     ErrorLevel level_;

@@ -7,19 +7,18 @@
 using namespace csapex;
 
 Buffer::Buffer()
-    : enabled_(true), mutex_(new std::mutex)
+    : enabled_(true)
 {
 
 }
 
 Buffer::~Buffer()
 {
-    delete mutex_;
 }
 
 ConnectionType::ConstPtr Buffer::readImpl() const
 {
-    std::lock_guard<std::mutex> lock(*mutex_);
+    std::unique_lock<std::mutex> lock(mutex_);
 
     apex_assert_hard(message_);
 
@@ -28,11 +27,11 @@ ConnectionType::ConstPtr Buffer::readImpl() const
 
 void Buffer::write(ConnectionType::ConstPtr message)
 {
-    std::lock_guard<std::mutex> lock(*mutex_);
-
     if(!enabled_) {
         return;
     }
+
+    std::unique_lock<std::mutex> lock(mutex_);
 
     apex_assert_hard(!message_);
     message_ = message;
@@ -43,21 +42,17 @@ void Buffer::write(ConnectionType::ConstPtr message)
 
 void Buffer::disable()
 {
-    std::lock_guard<std::mutex> lock(*mutex_);
-
     enabled_ = false;
 }
 
 void Buffer::free()
 {
-    std::lock_guard<std::mutex> lock(*mutex_);
-
+    std::unique_lock<std::mutex> lock(mutex_);
     message_.reset();
 }
 
 bool Buffer::isFilled() const
 {
-    std::lock_guard<std::mutex> lock(*mutex_);
-
-    return (bool) message_;
+    std::unique_lock<std::mutex> lock(mutex_);
+    return message_ != nullptr;
 }
