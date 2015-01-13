@@ -13,11 +13,11 @@ template <class M>
 struct PluginConstructor : public ConstructorInterface {
 
 public:
-    typedef boost::function<typename boost::shared_ptr<M>()> Call;
+    typedef boost::function<typename std::shared_ptr<M>()> Call;
 
 public:
-    boost::shared_ptr< boost::signals2::signal<void()> > unload_request;
-    boost::shared_ptr< boost::signals2::signal<void()> > reload_request;
+    std::shared_ptr< boost::signals2::signal<void()> > unload_request;
+    std::shared_ptr< boost::signals2::signal<void()> > reload_request;
 
 public:
     PluginConstructor()
@@ -27,12 +27,12 @@ public:
 
     }
 
-    typename boost::shared_ptr<M> operator()() const {
+    typename std::shared_ptr<M> operator()() const {
         return construct();
     }
 
-    boost::shared_ptr<M> construct() const {
-        boost::shared_ptr<M> res(constructor());
+    std::shared_ptr<M> construct() const {
+        std::shared_ptr<M> res(constructor());
 //        impl::setType<M>(res, type);
         assert(res.get() != nullptr);
         instances_.push_back(res);
@@ -40,7 +40,7 @@ public:
     }
 
     bool valid() const {
-        typename boost::shared_ptr<M> res(constructor());
+        typename std::shared_ptr<M> res(constructor());
         return res.get() != nullptr;
     }
 
@@ -57,7 +57,7 @@ public:
         return library_name_;
     }
 
-    std::vector< boost::weak_ptr<M> > getInstances() {
+    std::vector< std::weak_ptr<M> > getInstances() {
         return instances_;
     }
 
@@ -73,7 +73,7 @@ private:
     Call constructor;
 
     std::string library_name_;
-    mutable std::vector< boost::weak_ptr<M> > instances_;
+    mutable std::vector< std::weak_ptr<M> > instances_;
 };
 }
 

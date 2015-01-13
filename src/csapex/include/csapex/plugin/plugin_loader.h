@@ -17,7 +17,7 @@ public:
     bool isLoaded(const std::string& path);
 
     template <class T>
-    static boost::shared_ptr<T> createInstance(const std::string& class_name)
+    static std::shared_ptr<T> createInstance(const std::string& class_name)
     {
         return instance().lowlevel_class_loader_.createInstance<T>(class_name);
     }

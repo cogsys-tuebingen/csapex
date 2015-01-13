@@ -19,11 +19,11 @@ public:
     void free();
 
     template <typename R>
-    typename boost::shared_ptr<R const> read()
+    typename std::shared_ptr<R const> read()
     {
         auto msg = readImpl();
 
-        typename boost::shared_ptr<R const> result = boost::dynamic_pointer_cast<R const> (msg);
+        typename std::shared_ptr<R const> result = std::dynamic_pointer_cast<R const> (msg);
 
         if(result) {
             return result;
@@ -35,7 +35,7 @@ public:
     template <typename T>
     bool isType()
     {
-        boost::shared_ptr<T const> tmp = boost::dynamic_pointer_cast<T const>(message_);
+        std::shared_ptr<T const> tmp = std::dynamic_pointer_cast<T const>(message_);
         return tmp != nullptr;
     }
 

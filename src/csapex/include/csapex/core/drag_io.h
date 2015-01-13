@@ -18,17 +18,17 @@ class DragIO
 {
 public:
     struct HandlerEnter {
-        typedef boost::shared_ptr<HandlerEnter> Ptr;
+        typedef std::shared_ptr<HandlerEnter> Ptr;
         virtual ~HandlerEnter() {}
         virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDragEnterEvent* e) = 0;
     };
     struct HandlerMove {
-        typedef boost::shared_ptr<HandlerMove> Ptr;
+        typedef std::shared_ptr<HandlerMove> Ptr;
         virtual ~HandlerMove() {}
         virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDragMoveEvent* e) = 0;
     };
     struct HandlerDrop {
-        typedef boost::shared_ptr<HandlerDrop> Ptr;
+        typedef std::shared_ptr<HandlerDrop> Ptr;
         virtual ~HandlerDrop() {}
         virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e, const QPointF& scene_pos) = 0;
     };
@@ -43,13 +43,13 @@ public:
 public:
     template <typename H>
     void registerHandler() {
-        boost::shared_ptr<H> handler(new H);
+        std::shared_ptr<H> handler(new H);
         if(boost::is_base_of<HandlerEnter,H>::value)
-            registerEnterHandler(boost::static_pointer_cast<HandlerEnter>(handler));
+            registerEnterHandler(std::static_pointer_cast<HandlerEnter>(handler));
         if(boost::is_base_of<HandlerMove,H>::value)
-            registerMoveHandler(boost::static_pointer_cast<HandlerMove>(handler));
+            registerMoveHandler(std::static_pointer_cast<HandlerMove>(handler));
         if(boost::is_base_of<HandlerDrop,H>::value)
-            registerDropHandler(boost::static_pointer_cast<HandlerDrop>(handler));
+            registerDropHandler(std::static_pointer_cast<HandlerDrop>(handler));
     }
 
 private:

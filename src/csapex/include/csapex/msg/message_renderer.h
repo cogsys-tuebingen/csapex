@@ -6,7 +6,7 @@
 #include <utils_param/param_fwd.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <QSharedPointer>
 #include <QImage>
 #include <stdexcept>
@@ -17,7 +17,7 @@ namespace csapex
 class MessageRenderer
 {
 public:
-    typedef boost::shared_ptr<MessageRenderer> Ptr;
+    typedef std::shared_ptr<MessageRenderer> Ptr;
 
 public:
     virtual ~MessageRenderer();
@@ -37,7 +37,7 @@ class MessageRendererImplementation : public MessageRenderer
 public:
     virtual QSharedPointer<QImage> render(const ConnectionTypeConstPtr& msg) final override
     {
-        const auto& real_msg = boost::dynamic_pointer_cast<Message const>(msg);
+        const auto& real_msg = std::dynamic_pointer_cast<Message const>(msg);
         if(real_msg) {
             return doRender(*real_msg);
         } else {

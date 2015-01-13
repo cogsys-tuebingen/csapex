@@ -6,7 +6,7 @@
 
 /// SYSTEM
 #include <QLayout>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/signals2.hpp>
 #include <vector>
 
@@ -17,7 +17,7 @@ namespace csapex
 class NodeAdapter
 {
 public:
-    typedef boost::shared_ptr<NodeAdapter> Ptr;
+    typedef std::shared_ptr<NodeAdapter> Ptr;
 
 protected:
     NodeAdapter(NodeWorker* adaptee, WidgetController *widget_ctrl);

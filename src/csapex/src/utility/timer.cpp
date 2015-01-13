@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/utility/timer.h>
 
+/// SYSTEM
+#include <assert.h>
+
 using namespace csapex;
 
 Timer::Timer(const std::string& name)

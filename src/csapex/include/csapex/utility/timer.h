@@ -4,7 +4,7 @@
 /// SYSTEM
 #include <QTime>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 #include <deque>
 #include <map>
@@ -15,12 +15,12 @@ namespace csapex
 class Timer
 {
 public:
-    typedef boost::shared_ptr<Timer> Ptr;
+    typedef std::shared_ptr<Timer> Ptr;
 
     struct Interval {
         friend class Timer;
 
-        typedef boost::shared_ptr<Interval> Ptr;
+        typedef std::shared_ptr<Interval> Ptr;
 
         Interval(const std::string& name);
 
@@ -46,7 +46,7 @@ public:
 
     class Interlude : public boost::noncopyable {
     public:
-        typedef boost::shared_ptr<Interlude> Ptr;
+        typedef std::shared_ptr<Interlude> Ptr;
 
     public:
         Interlude(Timer* parent, const std::string& name);

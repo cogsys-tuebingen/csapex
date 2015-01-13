@@ -94,7 +94,7 @@ public:
     template <typename T>
     typename T::Ptr getParameter(const std::string& name) const
     {
-        return boost::dynamic_pointer_cast<T> (getParameter(name));
+        return std::dynamic_pointer_cast<T> (getParameter(name));
     }
 
     /***

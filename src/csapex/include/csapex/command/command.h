@@ -5,7 +5,7 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 /// FORWARD DECLARATION
@@ -30,7 +30,7 @@ public:
     };
 
 public:
-    typedef boost::shared_ptr<Command> Ptr;
+    typedef std::shared_ptr<Command> Ptr;
 
 public:
     Command();

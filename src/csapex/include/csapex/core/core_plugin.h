@@ -5,12 +5,12 @@
 #include <csapex/core/csapex_core.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace csapex {
 class CorePlugin {
 public:
-    typedef boost::shared_ptr<CorePlugin> Ptr;
+    typedef std::shared_ptr<CorePlugin> Ptr;
 
 public:
     virtual ~CorePlugin();

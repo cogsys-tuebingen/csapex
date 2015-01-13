@@ -20,7 +20,7 @@ PluginLocator::PluginLocator(Settings &settings)
     : settings_(settings)
 {
     if(settings_.knows("ignored_libraries")) {
-        ignored_persistent_ = boost::dynamic_pointer_cast<param::StringListParameter>(settings_.get("ignored_libraries"));
+        ignored_persistent_ = std::dynamic_pointer_cast<param::StringListParameter>(settings_.get("ignored_libraries"));
 
     } else {
         std::vector<std::string> ignored_libraries(ignored_libraries_.begin(), ignored_libraries_.end());
@@ -119,7 +119,7 @@ void PluginLocator::createFileWatcher(const std::string &name)
 
         QFile qfile(QString::fromStdString(abs_path));
         if(qfile.exists()) {
-            library_watchers_[name] = boost::shared_ptr<QFileSystemWatcher>(new QFileSystemWatcher);
+            library_watchers_[name] = std::shared_ptr<QFileSystemWatcher>(new QFileSystemWatcher);
             library_watchers_[name]->addPath(QString::fromStdString(abs_path));
 
             qt_helper::Call* call = new qt_helper::Call(boost::bind(&PluginLocator::reloadLibraryIfExists, this, name, abs_path));

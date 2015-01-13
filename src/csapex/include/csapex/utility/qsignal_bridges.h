@@ -4,7 +4,7 @@
 /// SYSTEM
 #include <QObject>
 #include <QAbstractSlider>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace QSignalBridges
 {
@@ -16,7 +16,7 @@ public:
     QAbstractSliderLimiter(QAbstractSlider* limitMin, QAbstractSlider* limitMax);
     virtual ~QAbstractSliderLimiter();
 
-    typedef boost::shared_ptr<QAbstractSliderLimiter> Ptr;
+    typedef std::shared_ptr<QAbstractSliderLimiter> Ptr;
 
 private Q_SLOTS:
     void limitMin(int limit);

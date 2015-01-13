@@ -11,8 +11,8 @@ namespace connection_types {
 template <typename Type>
 struct GenericValueMessage : public Message
 {
-    typedef boost::shared_ptr<GenericValueMessage<Type> > Ptr;
-    typedef boost::shared_ptr<GenericValueMessage<Type> const> ConstPtr;
+    typedef std::shared_ptr<GenericValueMessage<Type> > Ptr;
+    typedef std::shared_ptr<GenericValueMessage<Type> const> ConstPtr;
 
     GenericValueMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp)

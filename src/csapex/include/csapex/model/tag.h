@@ -4,7 +4,7 @@
 /// SYSTEM
 #include <string>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace csapex
 {
@@ -12,7 +12,7 @@ namespace csapex
 class Tag
 {
 public:
-    typedef boost::shared_ptr<Tag> Ptr;
+    typedef std::shared_ptr<Tag> Ptr;
 
 private:
     class Manager {

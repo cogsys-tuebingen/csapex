@@ -15,8 +15,8 @@ namespace connection_types {
 struct Message : public ConnectionType
 {
 public:
-    typedef boost::shared_ptr<Message> Ptr;
-    typedef boost::shared_ptr<Message const> ConstPtr;
+    typedef std::shared_ptr<Message> Ptr;
+    typedef std::shared_ptr<Message const> ConstPtr;
     typedef u_int64_t Stamp;
 
 protected:
@@ -31,7 +31,7 @@ public:
 struct NoMessage : public Message
 {
 public:
-    typedef boost::shared_ptr<NoMessage> Ptr;
+    typedef std::shared_ptr<NoMessage> Ptr;
 
 public:
     NoMessage();
@@ -53,7 +53,7 @@ struct type<NoMessage> {
 struct AnyMessage : public Message
 {
 public:
-    typedef boost::shared_ptr<AnyMessage> Ptr;
+    typedef std::shared_ptr<AnyMessage> Ptr;
 
 public:
     AnyMessage();

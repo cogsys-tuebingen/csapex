@@ -5,7 +5,7 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <QObject>
 #include <QPointF>
 
@@ -16,7 +16,7 @@ class Fulcrum : public QObject
     Q_OBJECT
 
 public:
-    typedef boost::shared_ptr<Fulcrum> Ptr;
+    typedef std::shared_ptr<Fulcrum> Ptr;
 
     enum Type {
         CURVE = 0,

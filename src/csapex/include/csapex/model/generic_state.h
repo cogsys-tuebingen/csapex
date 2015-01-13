@@ -18,7 +18,7 @@ namespace csapex
 class GenericState : public Memento
 {
 public:
-    typedef boost::shared_ptr<GenericState> Ptr;
+    typedef std::shared_ptr<GenericState> Ptr;
 
 public:
     GenericState();
@@ -69,9 +69,9 @@ public:
 
     bool silent_;
 
-    boost::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
-    boost::shared_ptr<boost::signals2::signal<void(param::Parameter*)> > parameter_added;
-    boost::shared_ptr<boost::signals2::signal<void(param::ParameterPtr)> > parameter_removed;
+    std::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
+    std::shared_ptr<boost::signals2::signal<void(param::Parameter*)> > parameter_added;
+    std::shared_ptr<boost::signals2::signal<void(param::ParameterPtr)> > parameter_removed;
 };
 
 }

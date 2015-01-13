@@ -16,7 +16,7 @@ class NodeAdapterFactory
     friend class WidgetController;
 
 public:
-    typedef boost::shared_ptr<NodeAdapterFactory> Ptr;
+    typedef std::shared_ptr<NodeAdapterFactory> Ptr;
 
 public:
     NodeAdapterFactory(Settings& settings, csapex::PluginLocator* locator);

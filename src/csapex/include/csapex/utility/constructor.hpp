@@ -2,7 +2,7 @@
 #define CONSTRUCTOR_HPP
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/function.hpp>
 #include <vector>
 
@@ -86,14 +86,14 @@ struct HasName<
 namespace impl {
 template <typename M>
 typename boost::enable_if<HasName<M>, void>::type
-setType(boost::shared_ptr<M> res, const std::string& type)
+setType(std::shared_ptr<M> res, const std::string& type)
 {
     res->setName(type);
 }
 
 template <typename M>
 typename boost::disable_if<HasName<M>, void>::type
-setType(boost::shared_ptr<M> res, const std::string& type)
+setType(std::shared_ptr<M> res, const std::string& type)
 {
     res->setType(type);
 }

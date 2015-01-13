@@ -85,7 +85,7 @@ private:
 
     std::set<std::string> loaded_libraries_;
     std::map<std::string, std::string> library_file_;
-    std::map<std::string, boost::shared_ptr<QFileSystemWatcher> > library_watchers_;
+    std::map<std::string, std::shared_ptr<QFileSystemWatcher> > library_watchers_;
     std::map<std::string, std::string> error_libraries_;
 
     std::set<std::string> ignored_libraries_;

@@ -3,15 +3,15 @@
 
 /// SYSTEM
 #include <boost/signals2.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace csapex {
 
 class ConnectionType
 {
 public:
-    typedef boost::shared_ptr<ConnectionType> Ptr;
-    typedef boost::shared_ptr<const ConnectionType> ConstPtr;
+    typedef std::shared_ptr<ConnectionType> Ptr;
+    typedef std::shared_ptr<const ConnectionType> ConstPtr;
 
 public:
     static void setDefaultConnectionType(ConnectionType::Ptr type) {
@@ -25,9 +25,9 @@ public:
     virtual ~ConnectionType();
 
     template <typename R>
-    boost::shared_ptr<R> cloneAs() const
+    std::shared_ptr<R> cloneAs() const
     {
-        return boost::dynamic_pointer_cast<R>(clone());
+        return std::dynamic_pointer_cast<R>(clone());
     }
 
     virtual ConnectionType::Ptr clone() const = 0;

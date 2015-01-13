@@ -94,7 +94,7 @@ private:
     CommandDispatcher* cmd_dispatch;
 
     PluginManager<CorePlugin>* core_plugin_manager;
-    std::map<std::string, boost::shared_ptr<CorePlugin> > core_plugins_;
+    std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
     std::map<std::string, bool> core_plugins_connected_;
 
     std::vector<Listener*> listener_;

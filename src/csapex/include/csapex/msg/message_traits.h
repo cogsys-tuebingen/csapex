@@ -24,19 +24,19 @@ std::string name()
 }
 
 template <typename T>
-boost::shared_ptr<T> makeEmpty()
+std::shared_ptr<T> makeEmpty()
 {
-    return boost::shared_ptr<T>(new T);
+    return std::shared_ptr<T>(new T);
 }
 
 template <typename T>
-boost::shared_ptr<T> makeEmptyMessage(
+std::shared_ptr<T> makeEmptyMessage(
         typename boost::disable_if<boost::is_const<T> >::type* = 0)
 {
     return makeEmpty<T>();
 }
 template <typename T>
-boost::shared_ptr<typename boost::remove_const<T>::type > makeEmptyMessage(
+std::shared_ptr<typename boost::remove_const<T>::type > makeEmptyMessage(
         typename boost::enable_if<boost::is_const<T> >::type* = 0)
 {
     typedef typename boost::remove_const<T>::type TT;

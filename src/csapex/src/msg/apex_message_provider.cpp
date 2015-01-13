@@ -10,15 +10,15 @@
 
 using namespace csapex;
 
-boost::shared_ptr<MessageProvider> ApexMessageProvider::make()
+std::shared_ptr<MessageProvider> ApexMessageProvider::make()
 {
-    return boost::shared_ptr<MessageProvider> (new ApexMessageProvider);
+    return std::shared_ptr<MessageProvider> (new ApexMessageProvider);
 }
 
 void ApexMessageProvider::load(const std::string& file)
 {
     file_ = file;
-    msg_ = boost::dynamic_pointer_cast<connection_types::Message>(MessageFactory::readMessage(file));
+    msg_ = std::dynamic_pointer_cast<connection_types::Message>(MessageFactory::readMessage(file));
 
     setSlotCount(1);
 }

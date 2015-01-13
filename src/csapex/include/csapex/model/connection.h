@@ -5,7 +5,7 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <QObject>
 #include <vector>
 #include <QPoint>
@@ -26,7 +26,7 @@ class Connection : public QObject {
     friend class Fulcrum;
 
 public:
-    typedef boost::shared_ptr<Connection> Ptr;
+    typedef std::shared_ptr<Connection> Ptr;
 
 public:
     friend std::ostream& operator << (std::ostream& out, const Connection& c) {

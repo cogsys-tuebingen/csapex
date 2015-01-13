@@ -275,7 +275,7 @@ GenericState::Ptr Parameterizable::getParameterState()
 
 void Parameterizable::setParameterState(Memento::Ptr memento)
 {
-    boost::shared_ptr<GenericState> m = boost::dynamic_pointer_cast<GenericState> (memento);
+    std::shared_ptr<GenericState> m = std::dynamic_pointer_cast<GenericState> (memento);
     apex_assert_hard(m.get());
 
     parameter_state_->setFrom(*m);

@@ -5,6 +5,7 @@
 #include <csapex/model/connectable.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/shared_ptr_tools.hpp>
 
 namespace csapex
 {
@@ -36,12 +37,21 @@ public:
 
 
     template <typename T>
-    void publish(typename T::Ptr message,
+    void publish(typename std::shared_ptr<T> message,
                  std::string frame_id = "/",
                  typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
         typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
         msg->value = message;
-        publish(boost::dynamic_pointer_cast<ConnectionType>(msg));
+        publish(std::dynamic_pointer_cast<ConnectionType>(msg));
+    }
+
+    template <typename T>
+    void publish(typename boost::shared_ptr<T> message,
+                 std::string frame_id = "/",
+                 typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
+        typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
+        msg->value = shared_ptr_tools::to_std_shared(message);
+        publish(std::dynamic_pointer_cast<ConnectionType>(msg));
     }
 
     template <typename T>
@@ -50,12 +60,12 @@ public:
                  typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
         typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
         msg->value = message;
-        publish(boost::dynamic_pointer_cast<ConnectionType>(msg));
+        publish(std::dynamic_pointer_cast<ConnectionType>(msg));
     }
 
     template <class Container, typename T>
     void publish(const typename Container::template TypeMap<T>::Ptr& message) {
-        typename Container::Ptr msg(Container::template make<T>());
+        typename std::shared_ptr<Container> msg(Container::template make<T>());
         msg->template set<T>(message);
         publish(msg);
     }

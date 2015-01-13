@@ -10,8 +10,8 @@ namespace connection_types {
 
 template <typename Type>
 struct GenericPointerMessage : public Message {
-    typedef boost::shared_ptr<GenericPointerMessage<Type> > Ptr;
-    typedef boost::shared_ptr<GenericPointerMessage<Type> const> ConstPtr;
+    typedef std::shared_ptr<GenericPointerMessage<Type> > Ptr;
+    typedef std::shared_ptr<GenericPointerMessage<Type> const> ConstPtr;
 
     GenericPointerMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type2name(typeid(Type)), frame_id, stamp)
@@ -37,7 +37,7 @@ struct GenericPointerMessage : public Message {
         return name() == other_side->name();
     }
 
-    typename boost::shared_ptr<Type> value;
+    typename std::shared_ptr<Type> value;
 };
 
 

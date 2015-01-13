@@ -36,7 +36,7 @@ public:
     };
 
 public:
-    typedef boost::shared_ptr<NodeWorker> Ptr;
+    typedef std::shared_ptr<NodeWorker> Ptr;
 
     static const int DEFAULT_HISTORY_LENGTH;
     static const double DEFAULT_FREQUENCY;

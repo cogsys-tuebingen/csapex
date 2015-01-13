@@ -40,21 +40,21 @@ public:
     void inputMessage(ConnectionType::ConstPtr message);
 
     template <typename R>
-    boost::shared_ptr<R const>
+    std::shared_ptr<R const>
     getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) const
     {
         return buffer_->read<R>();
     }
 
     template <typename R>
-    boost::shared_ptr<R const>
+    std::shared_ptr<R const>
     getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) const
     {
         return buffer_->read< connection_types::GenericPointerMessage<R> >() -> value;
     }
 
     template <typename Container, typename R>
-    boost::shared_ptr<typename Container::template TypeMap<R>::type const>
+    std::shared_ptr<typename Container::template TypeMap<R>::type const>
     getMessage() const
     {
         auto msg = buffer_->read<Container>();
@@ -63,14 +63,14 @@ public:
 
 
     template <typename R>
-    boost::shared_ptr<R>
+    std::shared_ptr<R>
     getClonedMessage() const
     {
         const auto& msg = getMessage<R>();
         if(msg == nullptr) {
             return nullptr;
         }
-        return boost::dynamic_pointer_cast<R>(msg->clone());
+        return std::dynamic_pointer_cast<R>(msg->clone());
     }
 
 

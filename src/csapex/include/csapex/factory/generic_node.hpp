@@ -94,8 +94,8 @@ public:
     std::vector<Output*> output_;
     std::vector<std::string> params_;
 
-    std::vector<boost::shared_ptr<ConnectionType const>> in_msg_;
-    std::vector<boost::shared_ptr<ConnectionType>> out_msg_;
+    std::vector<std::shared_ptr<ConnectionType const>> in_msg_;
+    std::vector<std::shared_ptr<ConnectionType>> out_msg_;
 
 private:
     struct GenericNodeSetup {

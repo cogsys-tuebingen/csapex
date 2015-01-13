@@ -11,6 +11,7 @@
 #include <QWidget>
 #include <QGraphicsProxyWidget>
 #include <QApplication>
+#include <assert.h>
 
 using namespace csapex;
 

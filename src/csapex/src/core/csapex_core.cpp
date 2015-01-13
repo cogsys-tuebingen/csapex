@@ -22,6 +22,7 @@
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/utility/shared_ptr_tools.hpp>
 
 /// SYSTEM
 #include <fstream>
@@ -197,7 +198,8 @@ void CsApexCore::boot()
             std::vector<std::string> classes = loader->getAvailableClasses<BootstrapPlugin>();
 
             for(std::size_t c = 0; c < classes.size(); ++c){
-                boost::shared_ptr<BootstrapPlugin> plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
+                auto boost_plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
+                std::shared_ptr<BootstrapPlugin> plugin = shared_ptr_tools::to_std_shared(boost_plugin);
                 boot_plugins_.push_back(plugin);
 
                 plugin->boot(plugin_locator_.get());

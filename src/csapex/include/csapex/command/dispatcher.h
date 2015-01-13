@@ -17,7 +17,7 @@ class CommandDispatcher : public QObject
     Q_OBJECT
 
 public:
-    typedef boost::shared_ptr<CommandDispatcher> Ptr;
+    typedef std::shared_ptr<CommandDispatcher> Ptr;
 
 public:
     CommandDispatcher(Settings& settings, GraphWorkerPtr graph, ThreadPool* thread_pool, WidgetControllerPtr widget_ctrl);

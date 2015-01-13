@@ -6,28 +6,28 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <yaml-cpp/yaml.h>
 
 namespace YAML {
 template<typename T>
-struct convert< boost::shared_ptr<T> > {
-  static Node encode(const boost::shared_ptr<T> rhs)
+struct convert< std::shared_ptr<T> > {
+  static Node encode(const std::shared_ptr<T> rhs)
   {
       return Node (*rhs);
   }
 
-  static bool decode(const Node& node, boost::shared_ptr<T>& rhs)
+  static bool decode(const Node& node, std::shared_ptr<T>& rhs)
   {
       init(rhs);
       return YAML::convert<T>::decode(node, *rhs);
   }
 
-  static void init(boost::shared_ptr<T>& rhs)
+  static void init(std::shared_ptr<T>& rhs)
   {
       rhs = csapex::connection_types::makeEmpty<T>();
   }
-//  static void init(boost::shared_ptr<T>& rhs)
+//  static void init(std::shared_ptr<T>& rhs)
 //  {
 //      rhs.reset(new T);
 //  }

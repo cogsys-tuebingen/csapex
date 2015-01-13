@@ -16,7 +16,7 @@ namespace csapex
 class NodeFactory : private boost::noncopyable
 {
 public:
-    typedef boost::shared_ptr<NodeFactory> Ptr;
+    typedef std::shared_ptr<NodeFactory> Ptr;
 
     boost::signals2::signal<void(const UUID&)> unload_request;
     boost::signals2::signal<void(const UUID&)> reload_request;

@@ -9,7 +9,7 @@ namespace connection_types {
 
 struct Signal : public ConnectionType
 {
-    typedef boost::shared_ptr<Signal> Ptr;
+    typedef std::shared_ptr<Signal> Ptr;
 
     Signal();
 

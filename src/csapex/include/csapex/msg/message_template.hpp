@@ -10,8 +10,8 @@ namespace connection_types {
 
 template <typename Type, class Instance>
 struct MessageTemplate : public Message {
-    typedef boost::shared_ptr<Instance> Ptr;
-    typedef boost::shared_ptr<const Instance> ConstPtr;
+    typedef std::shared_ptr<Instance> Ptr;
+    typedef std::shared_ptr<const Instance> ConstPtr;
 
     MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type<Instance>::name(), frame_id, stamp)

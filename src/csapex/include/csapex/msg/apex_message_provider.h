@@ -10,7 +10,7 @@ namespace csapex
 class ApexMessageProvider : public MessageProvider
 {
 public:
-    static boost::shared_ptr<MessageProvider> make();
+    static std::shared_ptr<MessageProvider> make();
 
 public:
     void load(const std::string& file);

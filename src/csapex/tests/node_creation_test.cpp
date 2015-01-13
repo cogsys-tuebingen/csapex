@@ -38,7 +38,7 @@ struct MockupMessagePayload
 
 struct MockupMessage : public connection_types::Message
 {
-    typedef boost::shared_ptr<MockupMessage> Ptr;
+    typedef std::shared_ptr<MockupMessage> Ptr;
 
     MockupMessage()
         : Message("MockupMessage", "/", 0)
@@ -211,7 +211,7 @@ TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
 
     ASSERT_TRUE(out_msg != nullptr);
 
-    MockupMessage::Ptr result = boost::dynamic_pointer_cast<MockupMessage>(out_msg);
+    MockupMessage::Ptr result = std::dynamic_pointer_cast<MockupMessage>(out_msg);
 
     ASSERT_TRUE(result != nullptr);
 

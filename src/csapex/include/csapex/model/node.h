@@ -14,7 +14,7 @@ namespace csapex {
 class Node : public ErrorState, public Parameterizable, public Timable
 {
 public:
-    typedef boost::shared_ptr<Node> Ptr;
+    typedef std::shared_ptr<Node> Ptr;
 
 public:
     Node();

@@ -69,7 +69,7 @@ protected:
             }
         }
 
-        boost::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
+        std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
         assert(!loader->isOnDemandLoadUnloadEnabled());
 
         std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
@@ -88,7 +88,7 @@ protected:
     }
 
     void reload(const std::string& library) {
-        boost::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
+        std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
         std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
         loader->loadLibrary();
 
@@ -145,7 +145,7 @@ protected:
     std::string loadLibrary(const std::string& library_name, TiXmlElement* library)  {
         std::string library_path = library_name + ".so";
 
-        boost::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
+        std::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
         loaders_[library_name] = loader;
 
         TiXmlElement* class_element = library->FirstChildElement("class");
@@ -180,7 +180,7 @@ protected:
             constructor.setIcon(icon);
             constructor.setTags(tags);
 
-            boost::function< boost::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return boost::shared_ptr<M>(p); };
+            boost::function< std::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return std::shared_ptr<M>(p); };
 
             auto ptr_maker = boost::bind(&class_loader::ClassLoader::createUnmanagedInstance<M>, loader, lookup_name);
             auto shared_ptr_maker = boost::bind(make_shared_ptr, ptr_maker);
@@ -207,7 +207,7 @@ protected:
 protected:
     bool plugins_loaded_;
 
-    std::map< std::string, boost::shared_ptr<class_loader::ClassLoader> > loaders_;
+    std::map< std::string, std::shared_ptr<class_loader::ClassLoader> > loaders_;
 
     std::vector<std::string> library_paths_;
 

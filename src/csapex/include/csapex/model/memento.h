@@ -2,7 +2,7 @@
 #define MEMENTO_H
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 /// FORWARD DECLARATION
 namespace YAML
@@ -16,7 +16,7 @@ namespace csapex
 class Memento
 {
 public:
-    typedef boost::shared_ptr<Memento> Ptr;
+    typedef std::shared_ptr<Memento> Ptr;
 
 public:
     Memento();

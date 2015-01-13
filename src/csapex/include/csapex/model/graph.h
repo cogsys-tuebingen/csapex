@@ -28,7 +28,7 @@ class Graph : public QObject
     /*remove*/ friend class WidgetController;
 
 public:
-    typedef boost::shared_ptr<Graph> Ptr;
+    typedef std::shared_ptr<Graph> Ptr;
 
     struct NodeNotFoundException : public std::logic_error
     {

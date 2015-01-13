@@ -7,7 +7,7 @@
 #include <csapex/model/generic_state.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <QObject>
 #include <QBoxLayout>
 
@@ -17,7 +17,7 @@ namespace csapex
 class MessageProvider
 {
 public:
-    typedef boost::shared_ptr<MessageProvider> Ptr;
+    typedef std::shared_ptr<MessageProvider> Ptr;
 
 public:
     virtual ~MessageProvider();

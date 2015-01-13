@@ -33,11 +33,11 @@ public:
 public:
     typedef boost::function<NodePtr()> Make;
 
-    typedef boost::shared_ptr<NodeConstructor> Ptr;
+    typedef std::shared_ptr<NodeConstructor> Ptr;
 
 public:
-    boost::shared_ptr< boost::signals2::signal<void()> > unload_request;
-    boost::shared_ptr< boost::signals2::signal<void()> > reload_request;
+    std::shared_ptr< boost::signals2::signal<void()> > unload_request;
+    std::shared_ptr< boost::signals2::signal<void()> > reload_request;
 
 
 public:

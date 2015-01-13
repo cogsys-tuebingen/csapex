@@ -17,7 +17,7 @@ class GraphWorker : public QObject
     Q_OBJECT
 
 public:
-    typedef boost::shared_ptr<GraphWorker> Ptr;
+    typedef std::shared_ptr<GraphWorker> Ptr;
 
 public:
     GraphWorker(Settings *settings, Graph* graph);

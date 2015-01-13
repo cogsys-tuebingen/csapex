@@ -15,7 +15,7 @@ namespace csapex
 class MultiConnectionType : public ConnectionType
 {
 public:
-    typedef boost::shared_ptr<MultiConnectionType> Ptr;
+    typedef std::shared_ptr<MultiConnectionType> Ptr;
 
 public:
     MultiConnectionType(const std::vector<ConnectionType::Ptr>& types);

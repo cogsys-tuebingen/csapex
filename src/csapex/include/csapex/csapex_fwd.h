@@ -2,7 +2,7 @@
 #define CSAPEX_FWD_H
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 /// FORWARD DELCARATION
 namespace boost
@@ -13,9 +13,10 @@ class mutex;
 
 #define FWD(name) \
     class name;\
-    typedef boost::shared_ptr<name> name##Ptr;\
-    typedef boost::weak_ptr<name> name##WeakPtr;\
-    typedef boost::shared_ptr<const name> name##ConstPtr;
+    typedef std::shared_ptr<name> name##Ptr;\
+    typedef std::unique_ptr<name> name##UniquePtr;\
+    typedef std::weak_ptr<name> name##WeakPtr;\
+    typedef std::shared_ptr<const name> name##ConstPtr;
 
 
 namespace csapex

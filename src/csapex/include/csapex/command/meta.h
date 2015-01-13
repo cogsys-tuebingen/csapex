@@ -15,7 +15,7 @@ namespace command
 {
 
 struct Meta : public Command {
-    typedef boost::shared_ptr<Meta> Ptr;
+    typedef std::shared_ptr<Meta> Ptr;
 
     Meta(const std::string& type);
     void clear();

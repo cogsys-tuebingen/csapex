@@ -712,7 +712,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
     mapping_[_TYPE_().ID()] = boost::bind(static_cast<void (DefaultNodeAdapter::*)( _TYPE_* )> (&DefaultNodeAdapter::setupParameter), __1, \
-    boost::bind(&boost::shared_ptr<_TYPE_>::get, boost::bind(&boost::dynamic_pointer_cast<_TYPE_, param::Parameter>, __2)))
+    boost::bind(&std::shared_ptr<_TYPE_>::get, boost::bind(&std::dynamic_pointer_cast<_TYPE_, param::Parameter>, __2)))
 
         INSTALL(param::TriggerParameter);
         INSTALL(param::ColorParameter);
@@ -733,7 +733,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     std::vector<param::Parameter::Ptr> params = node_->getNode()->getParameters();
 
-    GenericState::Ptr state = boost::dynamic_pointer_cast<GenericState>(node_->getNode()->getParameterState());
+    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node_->getNode()->getParameterState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));

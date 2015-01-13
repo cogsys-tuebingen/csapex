@@ -7,7 +7,7 @@
 #include <utils_param/param_fwd.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <QObject>
 #include <QPoint>
 #include <boost/function.hpp>
@@ -27,7 +27,7 @@ class WidgetController : public QObject
     Q_OBJECT
 
 public:
-    typedef boost::shared_ptr<WidgetController> Ptr;
+    typedef std::shared_ptr<WidgetController> Ptr;
 
 public:
     WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);

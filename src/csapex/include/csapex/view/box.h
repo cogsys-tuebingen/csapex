@@ -10,7 +10,7 @@
 #include <csapex/model/node_worker.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/function.hpp>
 #include <QIcon>
 #include <QMenu>
@@ -43,7 +43,7 @@ class NodeBox : public QWidget
     friend class BoxSelectionmanager;
 
 public:
-    typedef boost::shared_ptr<NodeBox> Ptr;
+    typedef std::shared_ptr<NodeBox> Ptr;
 
 public:
     static const QString MIME;
