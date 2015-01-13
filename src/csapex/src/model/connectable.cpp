@@ -26,18 +26,16 @@ UUID Connectable::makeUUID(const UUID &box_uuid, const std::string& type, int su
 
 Connectable::Connectable(const UUID& uuid)
     : Unique(uuid),
-      io_mutex(QMutex::Recursive), sync_mutex(QMutex::Recursive),
       buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
-      blocked_(false), guard_(0xDEADBEEF)
+      blocked_(false)
 {
     init();
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, const std::string& type)
     : Unique(makeUUID(parent->getUUID(), type, sub_id)),
-      io_mutex(QMutex::Recursive), sync_mutex(QMutex::Recursive),
       buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
-      blocked_(false), guard_(0xDEADBEEF)
+      blocked_(false)
 {
     init();
 }
@@ -94,7 +92,7 @@ void Connectable::validateConnections()
 
 void Connectable::disable()
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     if(enabled_) {
         enabled_ = false;
         Q_EMIT enabled(enabled_);
@@ -103,7 +101,7 @@ void Connectable::disable()
 
 void Connectable::enable()
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     if(!enabled_) {
         enabled_ = true;
         Q_EMIT enabled(enabled_);
@@ -121,7 +119,7 @@ void Connectable::setEnabled(bool enabled)
 
 bool Connectable::isEnabled() const
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return enabled_;
 }
 
@@ -152,19 +150,19 @@ bool Connectable::shouldMove(bool left, bool right)
 
 std::string Connectable::getLabel() const
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return label_;
 }
 
 void Connectable::setLabel(const std::string &label)
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     label_ = label;
 }
 
 void Connectable::setType(ConnectionType::ConstPtr type)
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     bool validate = type_ != type;
 
     if(validate) {
@@ -176,36 +174,36 @@ void Connectable::setType(ConnectionType::ConstPtr type)
 
 ConnectionType::ConstPtr Connectable::getType() const
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return type_;
 }
 
 int Connectable::getCount() const
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return count_;
 }
 
 bool Connectable::isBlocked() const
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return blocked_;
 }
 void Connectable::setBlocked(bool b)
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     blocked_ = b;
     Q_EMIT blocked(b);
 }
 
 int Connectable::sequenceNumber() const
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return seq_no_;
 }
 
 void Connectable::setSequenceNumber(int seq_no)
 {
-    QMutexLocker lock(&sync_mutex);
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     seq_no_ = seq_no;
 }

@@ -2,12 +2,12 @@
 #include <csapex/utility/buffer.h>
 
 /// SYSTEM
-#include <QMutex>
+#include <mutex>
 
 using namespace csapex;
 
 Buffer::Buffer()
-    : enabled_(true), mutex_(new QMutex)
+    : enabled_(true), mutex_(new std::mutex)
 {
 
 }
@@ -19,7 +19,7 @@ Buffer::~Buffer()
 
 ConnectionType::ConstPtr Buffer::readImpl() const
 {
-    QMutexLocker lock(mutex_);
+    std::lock_guard<std::mutex> lock(*mutex_);
 
     apex_assert_hard(message_);
 
@@ -28,7 +28,7 @@ ConnectionType::ConstPtr Buffer::readImpl() const
 
 void Buffer::write(ConnectionType::ConstPtr message)
 {
-    QMutexLocker lock(mutex_);
+    std::lock_guard<std::mutex> lock(*mutex_);
 
     if(!enabled_) {
         return;
@@ -43,21 +43,21 @@ void Buffer::write(ConnectionType::ConstPtr message)
 
 void Buffer::disable()
 {
-    QMutexLocker lock(mutex_);
+    std::lock_guard<std::mutex> lock(*mutex_);
 
     enabled_ = false;
 }
 
 void Buffer::free()
 {
-    QMutexLocker lock(mutex_);
+    std::lock_guard<std::mutex> lock(*mutex_);
 
     message_.reset();
 }
 
 bool Buffer::isFilled() const
 {
-    QMutexLocker lock(mutex_);
+    std::lock_guard<std::mutex> lock(*mutex_);
 
     return (bool) message_;
 }

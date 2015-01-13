@@ -7,10 +7,6 @@
 #include <csapex/msg/message.h>
 #include <csapex/utility/buffer.h>
 
-/// SYSTEM
-#include <QMutex>
-#include <QWaitCondition>
-
 namespace csapex
 {
 
@@ -104,7 +100,7 @@ public:
 
     template <typename T>
     bool isMessage() {
-        QMutexLocker lock(&sync_mutex);
+        std::lock_guard<std::recursive_mutex> lock(sync_mutex);
         return buffer_->isType<T>();
     }
 

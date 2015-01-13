@@ -358,7 +358,7 @@ void NodeWorker::stop()
     assertNotInGuiThread();
     node_->abort();
 
-    QMutexLocker lock(&stop_mutex_);
+    std::lock_guard<std::mutex> lock(stop_mutex_);
     stop_ = true;
 
     Q_FOREACH(Output* i, outputs_) {
@@ -382,7 +382,7 @@ void NodeWorker::stop()
 
 void NodeWorker::waitUntilFinished()
 {
-    QMutexLocker stop_lock(&stop_mutex_);
+    std::unique_lock<std::mutex> stop_lock(stop_mutex_);
 }
 
 void NodeWorker::reset()
@@ -422,9 +422,9 @@ bool NodeWorker::isProfiling() const
 
 void NodeWorker::pause(bool pause)
 {
-    QMutexLocker lock(&pause_mutex_);
+    std::lock_guard<std::mutex> lock(pause_mutex_);
     paused_ = pause;
-    continue_.wakeAll();
+    continue_.notify_all();
 }
 
 void NodeWorker::killExecution()
@@ -437,11 +437,10 @@ void NodeWorker::messageArrived(Connectable *s)
     assertNotInGuiThread();
 
     {
-        pause_mutex_.lock();
+        std::unique_lock<std::mutex> lock(pause_mutex_);
         while(paused_) {
-            continue_.wait(&pause_mutex_);
+            continue_.wait(lock);
         }
-        pause_mutex_.unlock();
     }
 
     Input* source = dynamic_cast<Input*> (s);
@@ -495,7 +494,7 @@ void NodeWorker::processMessages()
     assertNotInGuiThread();
 
     // everything has a message here
-    QMutexLocker stop_lock(&stop_mutex_);
+    std::unique_lock<std::mutex> stop_lock(stop_mutex_);
     if(stop_) {
         return;
     }
@@ -1147,14 +1146,13 @@ void NodeWorker::tick()
 
 
     {
-        pause_mutex_.lock();
+        std::unique_lock<std::mutex> pause_lock(pause_mutex_);
         while(paused_) {
-            continue_.wait(&pause_mutex_);
+            continue_.wait(pause_lock);
         }
-        pause_mutex_.unlock();
     }
 
-    QMutexLocker lock(&stop_mutex_);
+    std::unique_lock<std::mutex> lock(stop_mutex_);
     if(stop_) {
         return;
     }

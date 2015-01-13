@@ -5,8 +5,7 @@
 #include <csapex/utility/singleton.hpp>
 
 /// SYSTEM
-#include <QWidget>
-#include <QMutex>
+#include <mutex>
 #include <QThread>
 #include <sstream>
 
@@ -33,7 +32,7 @@ public:
     volatile bool in_getline;
     volatile bool had_input;
 
-    QMutex cin_mutex;
+    std::mutex cin_mutex;
     std::stringstream cin_;
 };
 

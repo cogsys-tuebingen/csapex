@@ -8,8 +8,7 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <QMutex>
-#include <QWaitCondition>
+#include <mutex>
 #include <QObject>
 
 /// FORWARDS DECLARATION
@@ -119,8 +118,8 @@ protected:
     virtual bool shouldCreate(bool left, bool right);
 
 protected:
-    mutable QMutex io_mutex;
-    mutable QMutex sync_mutex;
+    mutable std::recursive_mutex io_mutex;
+    mutable std::recursive_mutex sync_mutex;
 
     csapex::DesignBoard* designer;
 
@@ -135,10 +134,7 @@ protected:
 
 private:
     bool enabled_;
-    volatile bool blocked_;
-
-public:
-    mutable long guard_;
+    bool blocked_;
 };
 
 }

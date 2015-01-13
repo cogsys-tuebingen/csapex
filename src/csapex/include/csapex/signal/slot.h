@@ -6,8 +6,8 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <QMutex>
-#include <QWaitCondition>
+#include <mutex>
+#include <condition_variable>
 
 namespace csapex
 {
@@ -72,8 +72,8 @@ private Q_SLOTS:
 protected:
     std::vector<Trigger*> sources_;
 
-    QMutex trigger_exec_mutex_;
-    QWaitCondition exec_finished_;
+    std::mutex trigger_exec_mutex_;
+    std::condition_variable exec_finished_;
 
     boost::function<void()> callback_;
     bool active_;

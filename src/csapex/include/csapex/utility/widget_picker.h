@@ -6,8 +6,6 @@
 
 /// SYSTEM
 #include <QObject>
-#include <QMutex>
-#include <QWaitCondition>
 
 namespace csapex
 {

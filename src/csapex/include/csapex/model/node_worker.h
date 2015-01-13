@@ -13,10 +13,9 @@
 #include <QObject>
 #include <QTimer>
 #include <QThread>
-#include <QMutex>
 #include <map>
 #include <boost/function.hpp>
-#include <QWaitCondition>
+#include <condition_variable>
 #include <mutex>
 #include <vector>
 
@@ -260,9 +259,9 @@ private:
     bool thread_initialized_;
     bool paused_;
     bool stop_;
-    QMutex stop_mutex_;
-    QMutex pause_mutex_;
-    QWaitCondition continue_;
+    std::mutex stop_mutex_;
+    std::mutex pause_mutex_;
+    std::condition_variable continue_;
 
     bool profiling_;
 };

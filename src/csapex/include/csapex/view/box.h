@@ -14,7 +14,6 @@
 #include <boost/function.hpp>
 #include <QIcon>
 #include <QMenu>
-#include <QMutex>
 #include <QWidget>
 #include <QBoxLayout>
 #include <QLabel>

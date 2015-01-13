@@ -5,8 +5,6 @@
 #include <csapex/msg/message.h>
 #include <csapex/utility/assert.h>
 
-class QMutex;
-
 namespace csapex
 {
 class Buffer
@@ -49,7 +47,7 @@ private:
 private:
     bool enabled_;
 
-    QMutex* mutex_;
+    std::mutex* mutex_;
     ConnectionType::ConstPtr message_;
 };
 }

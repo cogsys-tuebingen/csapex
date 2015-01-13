@@ -151,25 +151,26 @@ std::vector<Trigger*> Slot::getSources() const
 
 void Slot::trigger()
 {
-    trigger_exec_mutex_.lock();
+    std::unique_lock<std::mutex> lock(trigger_exec_mutex_);
 
     Q_EMIT triggered();
 
     // wait for the signal to be handled
-    exec_finished_.wait(&trigger_exec_mutex_);
-    trigger_exec_mutex_.unlock();
+    exec_finished_.wait(lock);
 }
 
 void Slot::handleTrigger()
 {
-    QMutexLocker lock(&trigger_exec_mutex_);
+    std::unique_lock<std::mutex> lock(trigger_exec_mutex_);
 
     // do the work
     if(isEnabled() || isActive()) {
         callback_();
     }
 
-    exec_finished_.wakeAll();
+    lock.unlock();
+
+    exec_finished_.notify_all();
 }
 
 void Slot::notifyMessageProcessed()
