@@ -12,7 +12,7 @@ class PathParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<PathParameter> Ptr;
+    typedef std::shared_ptr<PathParameter> Ptr;
 
 public:
     PathParameter();

@@ -14,7 +14,7 @@ class SetParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<SetParameter> Ptr;
+    typedef std::shared_ptr<SetParameter> Ptr;
 
 public:
     SetParameter();

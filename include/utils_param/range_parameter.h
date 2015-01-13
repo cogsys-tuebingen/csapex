@@ -21,7 +21,7 @@ class RangeParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<RangeParameter> Ptr;
+    typedef std::shared_ptr<RangeParameter> Ptr;
 
 public:
     RangeParameter();

@@ -14,7 +14,7 @@ class BitSetParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<BitSetParameter> Ptr;
+    typedef std::shared_ptr<BitSetParameter> Ptr;
 
 public:
     BitSetParameter();

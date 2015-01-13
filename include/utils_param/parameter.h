@@ -6,7 +6,7 @@
 #include <utils_param/parameter_description.h>
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/any.hpp>
 #include <boost/signals2.hpp>
 #include <boost/thread/mutex.hpp>
@@ -25,9 +25,9 @@ class Parameter : boost::noncopyable
 public:
     friend class ParameterFactory;
 
-    typedef boost::shared_ptr<Parameter> Ptr;
+    typedef std::shared_ptr<Parameter> Ptr;
 
-    typedef boost::shared_ptr<boost::recursive_mutex::scoped_lock> Lock;
+    typedef std::shared_ptr<boost::recursive_mutex::scoped_lock> Lock;
 
 public:
     boost::signals2::signal<void(Parameter*)> parameter_changed;

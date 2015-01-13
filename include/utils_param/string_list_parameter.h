@@ -12,7 +12,7 @@ class StringListParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<StringListParameter> Ptr;
+    typedef std::shared_ptr<StringListParameter> Ptr;
 
 public:
     StringListParameter();

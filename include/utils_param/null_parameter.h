@@ -10,7 +10,7 @@ class NullParameter : public Parameter
 {
     friend class ParameterFactory;
 
-    typedef boost::shared_ptr<NullParameter> Ptr;
+    typedef std::shared_ptr<NullParameter> Ptr;
 
 public:
     NullParameter();

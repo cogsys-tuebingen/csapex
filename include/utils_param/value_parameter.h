@@ -12,7 +12,7 @@ class ValueParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<ValueParameter> Ptr;
+    typedef std::shared_ptr<ValueParameter> Ptr;
 
 public:
     ValueParameter();

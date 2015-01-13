@@ -12,7 +12,7 @@ class ColorParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<ColorParameter> Ptr;
+    typedef std::shared_ptr<ColorParameter> Ptr;
 
 public:
     ColorParameter();

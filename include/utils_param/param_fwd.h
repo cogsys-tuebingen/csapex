@@ -2,14 +2,14 @@
 #define PARAM_FWD_H
 
 /// SYSTEM
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #define FWD(name) \
     class name;\
-    typedef boost::shared_ptr<name> name##Ptr;\
-    typedef boost::weak_ptr<name> name##WeakPtr;\
-    typedef boost::shared_ptr<const name> name##ConstPtr;\
-    static const name##Ptr name##NullPtr
+    typedef std::shared_ptr<name> name##Ptr;\
+    typedef std::unique_ptr<name> name##UniquePtr;\
+    typedef std::weak_ptr<name> name##WeakPtr;\
+    typedef std::shared_ptr<const name> name##ConstPtr;
 
 namespace param
 {

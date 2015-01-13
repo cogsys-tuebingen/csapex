@@ -21,7 +21,7 @@ class IntervalParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<IntervalParameter> Ptr;
+    typedef std::shared_ptr<IntervalParameter> Ptr;
 
 public:
     IntervalParameter();

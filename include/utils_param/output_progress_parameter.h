@@ -12,7 +12,7 @@ class OutputProgressParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<OutputProgressParameter> Ptr;
+    typedef std::shared_ptr<OutputProgressParameter> Ptr;
 
 public:
     OutputProgressParameter();

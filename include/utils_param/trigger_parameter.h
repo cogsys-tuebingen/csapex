@@ -12,7 +12,7 @@ class TriggerParameter : public Parameter
     friend class ParameterFactory;
 
 public:
-    typedef boost::shared_ptr<TriggerParameter> Ptr;
+    typedef std::shared_ptr<TriggerParameter> Ptr;
 
 public:
     TriggerParameter();
