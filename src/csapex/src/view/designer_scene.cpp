@@ -281,8 +281,6 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
     // augment nodes
     foreach(NodeWorker* node_worker, graph_->getAllNodeWorkers()) {
-        Node* node = node_worker->getNode();
-
         NodeBox* box = widget_ctrl_->getBox(node_worker->getUUID());
 
         if(!box || !rect.intersects(box->geometry())) {

@@ -5,7 +5,6 @@
 #include <csapex/model/node.h>
 #include <utils_param/string_list_parameter.h>
 #include <utils_param/parameter_factory.h>
-#include <csapex/utility/qt_helper.hpp>
 #include <csapex/utility/q_signal_relay.h>
 
 /// SYSTEM
@@ -13,6 +12,7 @@
 #include <boost/algorithm/string.hpp>
 #include <QFileSystemWatcher>
 #include <QFile>
+#include <thread>
 
 using namespace csapex;
 
@@ -49,10 +49,11 @@ void PluginLocator::reloadLibraryIfExists(const std::string &name, const std::st
 {
     QFile qfile(QString::fromStdString(abs_path));
     if(qfile.exists()) {
-        qt_helper::QSleepThread::msleep(100);
+        std::chrono::milliseconds dura(100);
 
+        std::this_thread::sleep_for(dura);
         while(qfile.size() == 0) {
-            qt_helper::QSleepThread::msleep(100);
+            std::this_thread::sleep_for(dura);
         }
         reloadLibrary(name);
     }

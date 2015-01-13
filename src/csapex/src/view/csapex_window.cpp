@@ -33,6 +33,7 @@
 #include <QApplication>
 #include <QTreeWidget>
 #include <QSignalMapper>
+#include <thread>
 
 using namespace csapex;
 
@@ -407,10 +408,11 @@ void CsApexWindow::reloadStyleSheet(const QString& path)
 {
     QFile qfile(path);
     if(qfile.exists()) {
-        qt_helper::QSleepThread::msleep(100);
+        std::chrono::milliseconds dura(100);
 
+        std::this_thread::sleep_for(dura);
         while(qfile.size() == 0) {
-            qt_helper::QSleepThread::msleep(100);
+            std::this_thread::sleep_for(dura);
         }
         loadStyleSheet(path);
     }

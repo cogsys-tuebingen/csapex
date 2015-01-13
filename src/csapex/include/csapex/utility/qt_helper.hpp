@@ -30,10 +30,8 @@
 
 namespace qt_helper {
 
-struct QSleepThread : public QThread {
-    static void sleep(unsigned long t);
+struct QSleepThread {
     static void msleep(unsigned long t);
-    static void usleep(unsigned long t);
 };
 
 }

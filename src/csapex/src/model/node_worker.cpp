@@ -14,11 +14,11 @@
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>
 #include <csapex/model/node_factory.h>
-#include <csapex/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <QThread>
 #include <QApplication>
+#include <thread>
 
 using namespace csapex;
 
@@ -33,7 +33,6 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
-      sync(QMutex::Recursive),
       messages_waiting_to_be_sent(false),
       timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false),
@@ -448,8 +447,7 @@ void NodeWorker::messageArrived(Connectable *s)
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
-    QMutexLocker lock(&sync);
-
+    std::lock_guard<std::recursive_mutex> lock(sync);
 
     checkIfInputsCanBeProcessed();
 }
@@ -505,7 +503,7 @@ void NodeWorker::processMessages()
     bool all_inputs_are_present = true;
 
     {
-        QMutexLocker lock(&sync);
+        std::lock_guard<std::recursive_mutex> lock(sync);
 
         // check for old messages
         int highest_seq_no = -1;
@@ -568,7 +566,7 @@ void NodeWorker::processMessages()
 
 bool NodeWorker::areAllInputsAvailable()
 {
-    QMutexLocker lock(&sync);
+    std::lock_guard<std::recursive_mutex> lock(sync);
 
     // check if all inputs have messages
     foreach(Input* cin, inputs_) {
@@ -606,7 +604,7 @@ void NodeWorker::finishTimer(Timer::Ptr t)
 void NodeWorker::processInputs(bool all_inputs_are_present)
 {
     assertNotInGuiThread();
-    QMutexLocker lock_in(&sync);
+    std::lock_guard<std::recursive_mutex> lock(sync);
 
     Timer::Ptr t(new Timer(getUUID()));
     Q_EMIT timerStarted(this, PROCESS, t->startTimeMs());
@@ -991,7 +989,7 @@ std::vector<Output*> NodeWorker::getParameterOutputs() const
 
 bool NodeWorker::canSendMessages()
 {
-    QMutexLocker lock(&sync);
+    std::lock_guard<std::recursive_mutex> lock(sync);
 
     foreach(Output* out, outputs_) {
         if(!out->canSendMessages()) {
@@ -1010,7 +1008,7 @@ bool NodeWorker::canSendMessages()
 
 void NodeWorker::resetInputs()
 {
-    QMutexLocker lock(&sync);
+    std::lock_guard<std::recursive_mutex> lock(sync);
     Q_FOREACH(Input* cin, inputs_) {
         cin->free();
     }
@@ -1033,7 +1031,8 @@ void NodeWorker::publishParameter(param::Parameter* p)
     if(out->isConnected()) {
         while(!out->canSendMessages()) {
             node_->awarn << "waiting for parameter publish: " << p->name() << ", output " << out->getUUID() << " cannot send!" << std::endl;
-            qt_helper::QSleepThread::msleep(100);
+            std::chrono::milliseconds dura(100);
+            std::this_thread::sleep_for(dura);
         }
 
         if(p->is<int>())
@@ -1049,7 +1048,7 @@ void NodeWorker::publishParameter(param::Parameter* p)
 void NodeWorker::trySendMessages()
 {
     assertNotInGuiThread();
-    QMutexLocker lock(&sync);
+    std::lock_guard<std::recursive_mutex> lock(sync);
 
     if(!messages_waiting_to_be_sent) {
         return;

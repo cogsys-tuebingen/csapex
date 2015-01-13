@@ -2,13 +2,13 @@
 #include <csapex/model/error_state.h>
 
 /// SYSTEM
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 #include <boost/thread/locks.hpp>
 
 using namespace csapex;
 
 ErrorState::ErrorState()
-    : error_mutex_(new boost::mutex), error_(false)
+    : error_mutex_(new std::mutex), error_(false)
 {
 }
 
@@ -31,7 +31,7 @@ void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
 void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
 {
     {
-        boost::lock_guard<boost::mutex> lock (*error_mutex_);
+        std::lock_guard<std::mutex> lock (*error_mutex_);
 
         if(!error_ && !e) {
             return;
@@ -62,19 +62,19 @@ void ErrorState::errorChanged(bool)
 
 bool ErrorState::isError() const
 {
-    boost::lock_guard<boost::mutex> lock (*error_mutex_);
+    std::lock_guard<std::mutex> lock (*error_mutex_);
     return error_;
 }
 
 ErrorState::ErrorLevel ErrorState::errorLevel() const
 {
-    boost::lock_guard<boost::mutex> lock (*error_mutex_);
+    std::lock_guard<std::mutex> lock (*error_mutex_);
     return level_;
 }
 
 std::string ErrorState::errorMessage() const
 {
-    boost::lock_guard<boost::mutex> lock (*error_mutex_);
+    std::lock_guard<std::mutex> lock (*error_mutex_);
     return error_msg_;
 }
 

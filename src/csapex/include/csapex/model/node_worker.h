@@ -17,6 +17,7 @@
 #include <map>
 #include <boost/function.hpp>
 #include <QWaitCondition>
+#include <mutex>
 #include <vector>
 
 namespace csapex {
@@ -250,7 +251,7 @@ private:
     bool source_;
     bool sink_;
 
-    QMutex sync;
+    std::recursive_mutex sync;
     bool messages_waiting_to_be_sent;
 
     int timer_history_pos_;

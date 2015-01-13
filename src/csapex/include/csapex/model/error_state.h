@@ -34,7 +34,7 @@ protected:
     virtual void errorChanged(bool error);
 
 protected:
-    boost::mutex* error_mutex_;
+    std::mutex* error_mutex_;
     bool error_;
     std::string error_msg_;
     ErrorLevel level_;

@@ -5,7 +5,7 @@
 #include <memory>
 
 /// FORWARD DELCARATION
-namespace boost
+namespace std
 {
 class mutex;
 }

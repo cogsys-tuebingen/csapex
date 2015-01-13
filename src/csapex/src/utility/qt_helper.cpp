@@ -15,16 +15,6 @@
 using namespace qt_helper;
 using namespace csapex;
 
-void QSleepThread::sleep(unsigned long t) {
-    currentThread()->sleep(t);
-}
-void QSleepThread::msleep(unsigned long t) {
-    currentThread()->msleep(t);
-}
-void QSleepThread::usleep(unsigned long t) {
-    currentThread()->usleep(t);
-}
-
 QWidget* QtHelper::wrapLayout(QBoxLayout *l, QWidget *parent)
 {
     QWidget *container = new QWidget(parent);

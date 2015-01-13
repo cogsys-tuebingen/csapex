@@ -2,13 +2,13 @@
 #include <csapex/utility/stream_interceptor.h>
 
 /// PROJECT
-#include <csapex/utility/qt_helper.hpp>
 #include <csapex/utility/thread.h>
 
 /// SYSTEM
 #include <iostream>
 #include <unistd.h>
 #include <stdio.h>
+#include <thread>
 
 using namespace csapex;
 
@@ -84,7 +84,8 @@ void StreamInterceptorWorker::run() {
             continue;
         }
 
-        qt_helper::QSleepThread::msleep(10);
+        std::chrono::milliseconds dura(10);
+        std::this_thread::sleep_for(dura);
     }
 }
 
