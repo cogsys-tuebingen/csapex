@@ -133,7 +133,6 @@ void DesignerScene::setScale(double scale)
     scale_ = scale;
     invalidateSchema();
 }
-
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsScene::drawBackground(painter, rect);
@@ -152,23 +151,46 @@ void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
         }
 
     } else if(draw_grid_) {
-        bool spt = painter->renderHints() & QPainter::SmoothPixmapTransform;
-        painter->setRenderHint(QPainter::SmoothPixmapTransform, scale_ < 1.0);
+        painter->setPen(QPen(QBrush(Qt::gray), 1./scale_));
+        drawGrid(rect, painter, 10.0);
 
-        qreal o = painter->opacity();
-        static const double max_distance = 0.4;
-        if(scale_ < 1.0) {
-            qreal op = (scale_ - max_distance) / max_distance;
-            painter->setOpacity(op);
-        }
+        painter->setPen(QPen(QBrush(Qt::gray), 2./scale_));
+        drawGrid(rect, painter, 100.0);
 
-        painter->drawTiledPixmap(sceneRect(), background_);
 
-        painter->setOpacity(o);
-
-        painter->setRenderHint(QPainter::SmoothPixmapTransform, spt);
+        auto minx = rect.x();
+        auto maxx = rect.x() + rect.width();
+        auto miny = rect.y();
+        auto maxy = rect.y() + rect.height();
+        painter->setPen(QPen(QBrush(Qt::darkGray), 2./scale_));
+        painter->drawLine(0, miny, 0, maxy);
+        painter->drawLine(minx, 0, maxx, 0);
     }
 }
+
+void DesignerScene::drawGrid(const QRectF &rect, QPainter *painter, double dimension)
+{
+    auto w = rect.width();
+    auto h = rect.height();
+
+    double effective_dimension = dimension * scale_;
+    if(effective_dimension < 5.0) {
+        return;
+    }
+
+    auto minx = dimension * std::floor(rect.x() / dimension) - dimension;
+    auto maxx = dimension * std::ceil((rect.x() + w) / dimension) + dimension;
+    auto miny = dimension * std::floor(rect.y() / dimension) - dimension;
+    auto maxy = dimension * std::ceil((rect.y() + h) / dimension) + dimension;
+
+    for(auto x = minx; x <= maxx; x += dimension) {
+        painter->drawLine(x, miny, x, maxy);
+    }
+    for(auto y = miny; y <= maxy; y += dimension) {
+        painter->drawLine(minx, y, maxx, y);
+    }
+}
+
 
 void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 {

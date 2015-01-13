@@ -70,6 +70,9 @@ public Q_SLOTS:
     void setScale(double scale);
 
 private:
+    void drawGrid(const QRectF &rect, QPainter *painter, double dimension);
+
+private:
     struct TempConnection {
         TempConnection(bool is_connected)
             : is_connected(is_connected)
