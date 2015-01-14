@@ -145,6 +145,13 @@ int ThreadPool::createNewThreadGroupFor(NodeWorker* worker, const std::string &n
 {
     private_thread_[worker] = false;
 
+    for(const Group& group : custom_groups_) {
+        if(group.name == name) {
+            switchToThread(worker, group.id);
+            return group.id;
+        }
+    }
+
     custom_groups_.push_back(Group(next_id++, name));
     Group& group = *custom_groups_.rbegin();
 
@@ -170,7 +177,7 @@ void ThreadPool::deleteThreadGroup(int group_id)
         ++it) {
         Group& group = *it->second;
         if(group.id == group_id) {
-            throw std::runtime_error("attempted to delete non-empty thread group");
+            return; // not empty!
         }
     }
 

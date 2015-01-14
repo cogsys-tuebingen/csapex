@@ -16,7 +16,7 @@ namespace command
 
 struct Minimize : public Command
 {
-    Minimize(const UUID& node);
+    Minimize(const UUID& node, bool mini);
 
     virtual std::string getType() const;
     virtual std::string getDescription() const;
@@ -29,6 +29,7 @@ protected:
 private:
     UUID uuid;
     bool mini;
+    bool executed;
 };
 
 }

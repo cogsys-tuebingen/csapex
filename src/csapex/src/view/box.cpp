@@ -523,10 +523,12 @@ void NodeBox::eventModelChanged()
     adapter_->updateDynamicGui(ui->content);
 }
 
-void NodeBox::showProfiling()
+void NodeBox::showProfiling(bool show)
 {
     NodeWorkerPtr node = node_worker_.lock();
-    node->setProfiling(!node->isProfiling());
+    if(node->isProfiling() != show) {
+        node->setProfiling(show);
+    }
 }
 
 void NodeBox::killContent()

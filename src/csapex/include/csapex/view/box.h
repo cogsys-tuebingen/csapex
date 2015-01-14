@@ -104,7 +104,7 @@ public Q_SLOTS:
     void eventModelChanged();
     void killContent();
     void flipSides();
-    void showProfiling();
+    void showProfiling(bool show);
 
     void updateBoxInformation(Graph* graph);
     void updateComponentInformation(Graph* graph);

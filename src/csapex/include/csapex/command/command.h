@@ -24,9 +24,9 @@ public:
         friend class command::Meta;
 
     private:
-        static bool executeCommand(Graph* graph, NodeFactory* node_factory, CommandPtr cmd);
-        static bool undoCommand(Graph* graph, NodeFactory* node_factory, CommandPtr cmd);
-        static bool redoCommand(Graph* graph, NodeFactory* node_factory, CommandPtr cmd);
+        static bool executeCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool undoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool redoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
     };
 
 public:
@@ -49,9 +49,9 @@ public:
     virtual std::string getDescription() const = 0;
 
 protected:
-    static bool executeCommand(Graph* graph, NodeFactory* node_factory, CommandPtr cmd);
-    static bool undoCommand(Graph* graph, NodeFactory* node_factory, CommandPtr cmd);
-    static bool redoCommand(Graph* graph, NodeFactory* node_factory, CommandPtr cmd);
+    static bool executeCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool undoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool redoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
 
     virtual bool doExecute() = 0;
     virtual bool doUndo() = 0;

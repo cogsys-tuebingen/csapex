@@ -15,8 +15,8 @@
 
 using namespace csapex::command;
 
-Minimize::Minimize(const UUID &node)
-    : uuid(node), mini(true)
+Minimize::Minimize(const UUID &node, bool mini)
+    : uuid(node), mini(mini), executed(false)
 {
 }
 
@@ -37,15 +37,27 @@ bool Minimize::doExecute()
     NodeWorker* node_worker = graph_->findNodeWorker(uuid);
     apex_assert_hard(node_worker);
 
-    mini = !node_worker->getNodeState()->isMinimized();
-    node_worker->getNodeState()->setMinimized(mini);
+    bool is_mini = node_worker->getNodeState()->isMinimized();
+
+    if(is_mini != mini) {
+        node_worker->getNodeState()->setMinimized(mini);
+        executed = true;
+    } else {
+        executed = false;
+    }
 
     return true;
 }
 
 bool Minimize::doUndo()
 {
-    return doExecute();
+    if(executed) {
+        NodeWorker* node_worker = graph_->findNodeWorker(uuid);
+        apex_assert_hard(node_worker);
+
+        node_worker->getNodeState()->setMinimized(!mini);
+    }
+    return true;
 }
 
 bool Minimize::doRedo()

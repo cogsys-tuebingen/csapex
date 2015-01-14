@@ -78,7 +78,7 @@ public Q_SLOTS:
 
     void contextMenuEvent(QContextMenuEvent* e);
     void showContextMenuGlobal(const QPoint& pos);
-    void showContextMenuEditBox(NodeBox* box, const QPoint& pos);
+    void showContextMenuForSelectedNodes(NodeBox *box, const QPoint& pos);
     void showContextMenuAddNode(const QPoint& global_pos);
 
     void startProfiling(NodeWorker* box);
@@ -99,14 +99,15 @@ public Q_SLOTS:
     void selectAll();
 
 private:
-    void flipBox(NodeBox* box);
-    void minimizeBox(NodeBox* box);
-    void deleteBox(NodeBox* box);
+    void flipBox(const std::vector<NodeBox *>& boxes);
+    void minimizeBox(const std::vector<NodeBox *>& boxes, bool mini);
+    void deleteBox(const std::vector<NodeBox *>& boxes);
 
+    void usePrivateThreadFor(const std::vector<NodeBox *>& boxes);
+    void switchToThread(const std::vector<NodeBox *>& boxes, int group_id);
+    void createNewThreadGroupFor(const std::vector<NodeBox *>& boxes);
 
-    void usePrivateThreadFor(NodeWorker* worker);
-    void switchToThread(NodeWorker* worker, int group_id);
-    void createNewThreadGroupFor(NodeWorker* worker);
+    void showProfiling(const std::vector<NodeBox *>& boxes, bool visible);
 
 private:
     DesignerScene* scene_;
