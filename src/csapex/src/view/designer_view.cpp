@@ -528,21 +528,21 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
         QAction* max = new QAction("maximize", &menu);
         max->setIcon(QIcon(":/maximize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = boost::bind(&DesignerView::minimizeBox, this, box);
+        handler[max] = std::bind(&DesignerView::minimizeBox, this, box);
         menu.addAction(max);
 
     } else {
         QAction* min = new QAction("minimize", &menu);
         min->setIcon(QIcon(":/minimize.png"));
         min->setIconVisibleInMenu(true);
-        handler[min] = boost::bind(&DesignerView::minimizeBox, this, box);
+        handler[min] = std::bind(&DesignerView::minimizeBox, this, box);
         menu.addAction(min);
     }
 
     QAction* flip = new QAction("flip sides", &menu);
     flip->setIcon(QIcon(":/flip.png"));
     flip->setIconVisibleInMenu(true);
-    handler[flip] = boost::bind(&DesignerView::flipBox, this, box);
+    handler[flip] = std::bind(&DesignerView::flipBox, this, box);
     menu.addAction(flip);
 
     menu.addSeparator();
@@ -557,7 +557,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
         QAction* private_thread = new QAction("private thread", &menu);
         private_thread->setIcon(QIcon(":/thread_group_none.png"));
         private_thread->setIconVisibleInMenu(true);
-        handler[private_thread] = boost::bind(&DesignerView::usePrivateThreadFor, this,  box->getNodeWorker());
+        handler[private_thread] = std::bind(&DesignerView::usePrivateThreadFor, this,  box->getNodeWorker());
         thread_menu.addAction(private_thread);
 
         thread_menu.addSeparator();
@@ -573,7 +573,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
             QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
             switch_thread->setIcon(QIcon(":/thread_group.png"));
             switch_thread->setIconVisibleInMenu(true);
-            handler[switch_thread] = boost::bind(&DesignerView::switchToThread, this, box->getNodeWorker(), group.id);
+            handler[switch_thread] = std::bind(&DesignerView::switchToThread, this, box->getNodeWorker(), group.id);
             choose_group_menu->addAction(switch_thread);
         }
 
@@ -582,8 +582,8 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
         QAction* new_group = new QAction("new thread group", &menu);
         new_group->setIcon(QIcon(":/thread_group_add.png"));
         new_group->setIconVisibleInMenu(true);
-        //        handler[new_group] = boost::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
-        handler[new_group] = boost::bind(&DesignerView::createNewThreadGroupFor, this,  box->getNodeWorker());
+        //        handler[new_group] = std::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
+        handler[new_group] = std::bind(&DesignerView::createNewThreadGroupFor, this,  box->getNodeWorker());
 
         choose_group_menu->addAction(new_group);
 
@@ -593,7 +593,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
     QAction* term = new QAction("terminate thread", &menu);
     term->setIcon(QIcon(":/stop.png"));
     term->setIconVisibleInMenu(true);
-    handler[term] = boost::bind(&NodeBox::killContent, box);
+    handler[term] = std::bind(&NodeBox::killContent, box);
     menu.addAction(term);
 
     menu.addSeparator();
@@ -607,13 +607,13 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
         prof->setIcon(QIcon(":/profiling.png"));
     }
     prof->setIconVisibleInMenu(true);
-    handler[prof] = boost::bind(&NodeBox::showProfiling, box);
+    handler[prof] = std::bind(&NodeBox::showProfiling, box);
     menu.addAction(prof);
 
     QAction* info = new QAction("get information", &menu);
     info->setIcon(QIcon(":/help.png"));
     info->setIconVisibleInMenu(true);
-    handler[info] = boost::bind(&NodeBox::getInformation, box);
+    handler[info] = std::bind(&NodeBox::getInformation, box);
     menu.addAction(info);
 
     menu.addSeparator();
@@ -621,7 +621,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
     QAction* del = new QAction("delete", &menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = boost::bind(&DesignerView::deleteBox, this, box);
+    handler[del] = std::bind(&DesignerView::deleteBox, this, box);
     menu.addAction(del);
 
     QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(scene_pos)));

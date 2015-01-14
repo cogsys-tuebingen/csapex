@@ -240,7 +240,7 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
             result->setNodeState(state);
         }
 
-        reload_connections_[uuid] = p->unload_request->connect(boost::bind(&NodeFactory::unloadNode, this, p, uuid));
+        reload_connections_[uuid] = p->unload_request->connect(std::bind(&NodeFactory::unloadNode, this, p, uuid));
 
         return result;
 
@@ -253,7 +253,7 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
 void NodeFactory::unloadNode(NodeConstructorPtr p, UUID uuid)
 {
     reload_connections_[uuid].disconnect();
-    reload_connections_[uuid] = p->reload_request->connect(boost::bind(&NodeFactory::reloadNode, this, p, uuid));
+    reload_connections_[uuid] = p->reload_request->connect(std::bind(&NodeFactory::reloadNode, this, p, uuid));
 
     unload_request(uuid);
 }

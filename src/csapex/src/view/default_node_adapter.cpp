@@ -352,7 +352,7 @@ void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (
                                                   std::function<void ()> cb)
 {
     // cb should be executed in the gui thread
-    connections.push_back(signal.connect(boost::bind(&DefaultNodeAdapterBridge::modelCallback, this, cb)));
+    connections.push_back(signal.connect(std::bind(&DefaultNodeAdapterBridge::modelCallback, this, cb)));
 }
 
 void DefaultNodeAdapterBridge::disconnect()
@@ -711,9 +711,10 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 {
     static std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
+
 #define INSTALL(_TYPE_) \
-    mapping_[_TYPE_().ID()] = boost::bind(static_cast<void (DefaultNodeAdapter::*)( _TYPE_* )> (&DefaultNodeAdapter::setupParameter), __1, \
-    boost::bind(&std::shared_ptr<_TYPE_>::get, boost::bind(&std::dynamic_pointer_cast<_TYPE_, param::Parameter>, __2)))
+    mapping_[_TYPE_().ID()] = [](DefaultNodeAdapter* a, param::Parameter::Ptr p) { a->setupParameter(static_cast<_TYPE_*>(p.get())); };
+
 
         INSTALL(param::TriggerParameter);
         INSTALL(param::ColorParameter);
@@ -737,7 +738,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
     GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node_->getNode()->getParameterState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
-        state->parameter_set_changed->connect(boost::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
+        state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
     }
 
     Q_FOREACH(param::Parameter::Ptr p, params) {
@@ -797,7 +798,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
                 hider->setHidden(hidden);
 
 
-                qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&DefaultNodeAdapterBridge::enableGroup, &bridge, boost::bind(&QGroupBox::isChecked, gb), group));
+                qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&DefaultNodeAdapterBridge::enableGroup, &bridge, std::bind(&QGroupBox::isChecked, gb), group));
                 callbacks.push_back(call_trigger);
                 QObject::connect(gb, SIGNAL(toggled(bool)), call_trigger, SLOT(call()));
 
@@ -807,7 +808,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         current_layout_ = new QHBoxLayout;
         setDirection(current_layout_, node_);
-        node_->getNodeState()->flipped_changed->connect(boost::bind(&setDirection, current_layout_, node_));
+        node_->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
         Input* param_in = node_->getParameterInput(current_name_);
@@ -820,7 +821,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             }
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_in] = p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
+            parameter_connections_[param_in] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
         }
 
         // generate UI element
@@ -842,9 +843,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             }
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_out] = p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
+            parameter_connections_[param_out] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
 
-            qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&param::Parameter::triggerChange, p.get()));
+            qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&param::Parameter::triggerChange, p.get()));
             callbacks.push_back(call_trigger);
             QObject::connect(param_out, SIGNAL(connectionDone(Connectable*)), call_trigger, SLOT(call()));
         }
@@ -886,7 +887,7 @@ void DefaultNodeAdapter::setupParameter(param::TriggerParameter * trigger_p)
     sub->addWidget(btn);
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(trigger_p)));
 
-    qt_helper::Call* call_trigger = makeModelCall(boost::bind(&param::TriggerParameter::trigger, trigger_p));
+    qt_helper::Call* call_trigger = makeModelCall(std::bind(&param::TriggerParameter::trigger, trigger_p));
     QObject::connect(btn, SIGNAL(clicked()), call_trigger, SLOT(call()));
 }
 
@@ -901,11 +902,11 @@ void DefaultNodeAdapter::setupParameter(param::ColorParameter *color_p)
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(color_p)));
 
     // ui callback
-    qt_helper::Call* call = makeUiCall(boost::bind(&model_updateColorParameter, color_p));
+    qt_helper::Call* call = makeUiCall(std::bind(&model_updateColorParameter, color_p));
     QObject::connect(btn, SIGNAL(clicked()), call, SLOT(call()));
 
     // model change -> ui
-    bridge.connectInGuiThread(color_p->parameter_changed, boost::bind(&ui_updateColorParameter, color_p, btn));
+    bridge.connectInGuiThread(color_p->parameter_changed, std::bind(&ui_updateColorParameter, color_p, btn));
 }
 
 void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
@@ -921,14 +922,14 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(path_p)));
 
     // ui change -> model
-    qt_helper::Call* call_set_path = makeModelCall(boost::bind(&model_updatePathParameter, path_p, path));
+    qt_helper::Call* call_set_path = makeModelCall(std::bind(&model_updatePathParameter, path_p, path));
     QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
 
-    qt_helper::Call* call_select = makeUiCall(boost::bind(&ui_updatePathParameterDialog, path_p));
+    qt_helper::Call* call_select = makeUiCall(std::bind(&ui_updatePathParameterDialog, path_p));
     QObject::connect(select, SIGNAL(clicked()), call_select, SLOT(call()));
 
     // model change -> ui
-    bridge.connectInGuiThread(path_p->parameter_changed, boost::bind(&ui_updatePathParameter, path_p, path));
+    bridge.connectInGuiThread(path_p->parameter_changed, std::bind(&ui_updatePathParameter, path_p, path));
 }
 
 void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
@@ -946,12 +947,12 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateStringValueParameter, value_p, txt));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateStringValueParameter, value_p, txt));
         QObject::connect(txt, SIGNAL(returnPressed()), call, SLOT(call()));
         QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, boost::bind(&ui_updateStringValueParameter, value_p, txt));
+        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateStringValueParameter, value_p, txt));
 
     } else if(value_p->is<bool>()) {
         QCheckBox* box = new QCheckBox;
@@ -960,11 +961,11 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateBoolValueParameter, value_p, box));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateBoolValueParameter, value_p, box));
         QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, boost::bind(&ui_updateBoolValueParameter, value_p, box));
+        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateBoolValueParameter, value_p, box));
 
 
     } else if(value_p->is<double>()) {
@@ -977,11 +978,11 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
         QObject::connect(box, SIGNAL(valueChanged(double)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, boost::bind(&ui_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
+        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
 
     }  else if(value_p->is<int>()) {
         QSpinBox* box = new QSpinBox;
@@ -992,11 +993,11 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameter *value_p)
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateValueParameter<int, QSpinBox>, value_p, box));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateValueParameter<int, QSpinBox>, value_p, box));
         QObject::connect(box, SIGNAL(valueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, boost::bind(&ui_updateValueParameter<int, QSpinBox>, value_p, box));
+        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateValueParameter<int, QSpinBox>, value_p, box));
 
     } else {
         current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (value: " + type2name(value_p->type()) + ")").c_str()));
@@ -1012,28 +1013,28 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameter *range_p)
         slider->setIntValue(range_p->as<int>());
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateIntRangeParameter, range_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntRangeParameter, range_p, slider));
         QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(range_p->parameter_changed, boost::bind(&ui_updateIntRangeParameter, range_p, slider));
+        bridge.connectInGuiThread(range_p->parameter_changed, std::bind(&ui_updateIntRangeParameter, range_p, slider));
 
         // parameter scope changed -> update slider interval
-        bridge.connectInGuiThread(range_p->scope_changed, boost::bind(&ui_updateIntRangeParameterScope, range_p, slider));
+        bridge.connectInGuiThread(range_p->scope_changed, std::bind(&ui_updateIntRangeParameterScope, range_p, slider));
 
     } else if(range_p->is<double>()) {
         QDoubleSlider* slider = makeDoubleSlider(current_layout_, current_display_name_ , range_p, new ParameterContextMenu(range_p));
         slider->setDoubleValue(range_p->as<double>());
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateDoubleRangeParameter, range_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateDoubleRangeParameter, range_p, slider));
         QObject::connect(slider, SIGNAL(doubleValueChanged(double)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(range_p->parameter_changed, boost::bind(&ui_updateDoubleRangeParameter, range_p, slider));
+        bridge.connectInGuiThread(range_p->parameter_changed, std::bind(&ui_updateDoubleRangeParameter, range_p, slider));
 
         // parameter scope changed -> update slider interval
-        bridge.connectInGuiThread(range_p->scope_changed, boost::bind(&ui_updateDoubleRangeParameterScope, range_p, slider));
+        bridge.connectInGuiThread(range_p->scope_changed, std::bind(&ui_updateDoubleRangeParameterScope, range_p, slider));
 
     } else {
         current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (range: " + type2name(range_p->type()) + ")").c_str()));
@@ -1049,15 +1050,15 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                          new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(interval_p->parameter_changed, boost::bind(&ui_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
+        bridge.connectInGuiThread(interval_p->parameter_changed, std::bind(&ui_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
 
         // parameter scope changed -> update slider interval
-        bridge.connectInGuiThread(interval_p->scope_changed, boost::bind(&ui_updateIntervalParameterScope<int, QxtSpanSlider>, interval_p, slider));
+        bridge.connectInGuiThread(interval_p->scope_changed, std::bind(&ui_updateIntervalParameterScope<int, QxtSpanSlider>, interval_p, slider));
 
     } else if(interval_p->is<std::pair<double, double> >()) {
         const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
@@ -1066,15 +1067,15 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                                      new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(interval_p->parameter_changed, boost::bind(&ui_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
+        bridge.connectInGuiThread(interval_p->parameter_changed, std::bind(&ui_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
 
         // parameter scope changed -> update slider interval
-        bridge.connectInGuiThread(interval_p->scope_changed, boost::bind(&ui_updateIntervalParameterScope<double, QxtDoubleSpanSlider>, interval_p, slider));
+        bridge.connectInGuiThread(interval_p->scope_changed, std::bind(&ui_updateIntervalParameterScope<double, QxtDoubleSpanSlider>, interval_p, slider));
 
     } else {
         current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (inverval: " + type2name(interval_p->type()) + ")").c_str()));
@@ -1089,14 +1090,14 @@ void DefaultNodeAdapter::setupParameter(param::SetParameter *set_p)
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, combo, new ParameterContextMenu(set_p)));
 
     // ui change -> model
-    qt_helper::Call* call = makeModelCall(boost::bind(&model_updateSetParameter, set_p, combo));
+    qt_helper::Call* call = makeModelCall(std::bind(&model_updateSetParameter, set_p, combo));
     QObject::connect(combo, SIGNAL(currentIndexChanged(QString)), call, SLOT(call()));
 
     // model change -> ui
-    bridge.connectInGuiThread(set_p->parameter_changed, boost::bind(&ui_updateSetParameter, set_p, combo));
+    bridge.connectInGuiThread(set_p->parameter_changed, std::bind(&ui_updateSetParameter, set_p, combo));
 
     // parameter scope changed -> update slider interval
-    bridge.connectInGuiThread(set_p->scope_changed, boost::bind(&ui_updateSetParameterScope, set_p, combo));
+    bridge.connectInGuiThread(set_p->scope_changed, std::bind(&ui_updateSetParameterScope, set_p, combo));
 
 }
 
@@ -1115,11 +1116,11 @@ void DefaultNodeAdapter::setupParameter(param::BitSetParameter *bitset_p)
         }
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(boost::bind(&model_updateBitSetParameter, bitset_p, item, str));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateBitSetParameter, bitset_p, item, str));
         QObject::connect(item, SIGNAL(toggled(bool)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(bitset_p->parameter_changed, boost::bind(&ui_updateBitSetParameter, bitset_p, item, str));
+        bridge.connectInGuiThread(bitset_p->parameter_changed, std::bind(&ui_updateBitSetParameter, bitset_p, item, str));
     }
 
     current_layout_->addWidget(group);
@@ -1134,10 +1135,10 @@ void DefaultNodeAdapter::setupParameter(param::OutputProgressParameter* progress
     current_layout_->addWidget(bar);
 
     // model change -> ui
-    bridge.connectInGuiThread(progress->parameter_changed, boost::bind(&ui_updateProgressParameter, progress, bar));
+    bridge.connectInGuiThread(progress->parameter_changed, std::bind(&ui_updateProgressParameter, progress, bar));
 
     // parameter scope changed -> update slider interval
-    bridge.connectInGuiThread(progress->scope_changed, boost::bind(&ui_updateProgressScope, progress, bar));
+    bridge.connectInGuiThread(progress->scope_changed, std::bind(&ui_updateProgressScope, progress, bar));
 }
 
 

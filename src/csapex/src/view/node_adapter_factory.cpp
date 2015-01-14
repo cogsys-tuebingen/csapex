@@ -56,9 +56,9 @@ void NodeAdapterFactory::rebuildPrototypes()
         node_adapter_builders_[builder->getWrappedType()] = builder;        
 
         constructor.unload_request->disconnect_all_slots();
-        constructor.unload_request->connect(boost::bind(&NodeAdapterFactory::unload, this));
+        constructor.unload_request->connect(std::bind(&NodeAdapterFactory::unload, this));
         constructor.reload_request->disconnect_all_slots();
-        constructor.reload_request->connect(boost::bind(&NodeAdapterFactory::loadPlugins, this));
+        constructor.reload_request->connect(std::bind(&NodeAdapterFactory::loadPlugins, this));
     }
 }
 

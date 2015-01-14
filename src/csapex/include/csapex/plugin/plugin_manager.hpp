@@ -182,8 +182,8 @@ protected:
 
             std::function< std::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return std::shared_ptr<M>(p); };
 
-            auto ptr_maker = boost::bind(&class_loader::ClassLoader::createUnmanagedInstance<M>, loader, lookup_name);
-            auto shared_ptr_maker = boost::bind(make_shared_ptr, ptr_maker);
+            auto ptr_maker = std::bind(&class_loader::ClassLoader::createUnmanagedInstance<M>, loader, lookup_name);
+            auto shared_ptr_maker = std::bind(make_shared_ptr, ptr_maker);
             constructor.setConstructor(shared_ptr_maker);
             constructor.setLibraryName(library_name);
 
@@ -255,8 +255,8 @@ public:
     }
 
     virtual void load(csapex::PluginLocator* locator) {
-        locator->unload_library_request.connect(PluginManagerGroup<M>::value, boost::bind(&PluginManager<M>::unload, this, _1), boost::signals2::at_front);
-        locator->reload_library_request.connect(-PluginManagerGroup<M>::value, boost::bind(&PluginManager<M>::reload, this, _1), boost::signals2::at_back);
+        locator->unload_library_request.connect(PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::unload, this, std::placeholders::_1), boost::signals2::at_front);
+        locator->reload_library_request.connect(-PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::reload, this, std::placeholders::_1), boost::signals2::at_back);
 
         instance->load(locator);
     }

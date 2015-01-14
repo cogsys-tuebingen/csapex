@@ -59,7 +59,8 @@ template void Parameterizable::doSetParameter<std::vector<double> >(const std::s
 
 void Parameterizable::addParameterCallback(param::Parameter* param, std::function<void(param::Parameter *)> cb)
 {
-    connections_[param].push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
+//    connections_[param].push_back(param->parameter_changed.connect(std::bind(&Parameterizable::parameterChanged, this, std::placeholders::_1, cb)));
+    connections_[param].push_back(param->parameter_changed.connect([cb](param::Parameter* p) { cb(p); } ));
     if(param->hasState()) {
         parameterChanged(param, cb);
     }
@@ -179,8 +180,8 @@ void Parameterizable::addParameter(const param::Parameter::Ptr &param)
 {
     parameter_state_->addParameter(param);
 
-    connections_[param.get()].push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1)));
-    connections_[param.get()].push_back(param->parameter_enabled.connect(boost::bind(&Parameterizable::parameterEnabled, this, _1, _2)));
+    connections_[param.get()].push_back(param->parameter_changed.connect([this](param::Parameter* p) { this->parameterChanged(p); } ));
+    connections_[param.get()].push_back(param->parameter_enabled.connect([this](param::Parameter* p, bool e) { this->parameterEnabled(p, e); } ));
 }
 
 void Parameterizable::addParameter(const param::Parameter::Ptr &param, std::function<void (param::Parameter *)> cb)

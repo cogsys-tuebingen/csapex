@@ -60,10 +60,10 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
         makeParametersConnectable();
     }
 
-    node_->getParameterState()->parameter_added->connect(boost::bind(&NodeWorker::makeParameterConnectable, this, _1));
+    node_->getParameterState()->parameter_added->connect(std::bind(&NodeWorker::makeParameterConnectable, this, std::placeholders::_1));
 
-    addSlot("enable", boost::bind(&NodeWorker::setEnabled, this, true), true);
-    addSlot("disable", boost::bind(&NodeWorker::setEnabled, this, false), false);
+    addSlot("enable", std::bind(&NodeWorker::setEnabled, this, true), true);
+    addSlot("disable", std::bind(&NodeWorker::setEnabled, this, false), false);
 
     trigger_tick_done_ = addTrigger("ticked");
     trigger_process_done_ = addTrigger("inputs\nprocessed");
@@ -130,13 +130,13 @@ void NodeWorker::setNodeState(NodeStatePtr memento)
         node_->setParameterState(memento->getParameterState());
     }
 
-    node_state_->enabled_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->flipped_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->label_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->minimized_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->parent_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->pos_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->thread_changed->connect(boost::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->enabled_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->flipped_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->label_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->minimized_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->parent_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->pos_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
+    node_state_->thread_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
 
     triggerNodeStateChanged();
 
@@ -253,7 +253,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         connectConnector(cout);
         cout->moveToThread(thread());
 
-        p->parameter_changed.connect(boost::bind(&NodeWorker::publishParameter, this, p));
+        p->parameter_changed.connect(std::bind(&NodeWorker::publishParameter, this, p));
 
         param_2_output_[p->name()] = cout;
         output_2_param_[cout] = p;
@@ -280,8 +280,8 @@ void NodeWorker::makeParameterConnectable(param::Parameter* p)
     param::TriggerParameter* t = dynamic_cast<param::TriggerParameter*>(p);
     if(t) {
         Trigger* trigger = addTrigger(t->name());
-        addSlot(t->name(), boost::bind(&param::TriggerParameter::trigger, t), false);
-        node_->addParameterCallback(t, boost::bind(&Trigger::trigger, trigger));
+        addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
+        node_->addParameterCallback(t, std::bind(&Trigger::trigger, trigger));
     }
 }
 

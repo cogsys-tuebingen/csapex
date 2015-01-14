@@ -51,7 +51,7 @@ public:
     {
         return csapex::NodeConstructor::Ptr (new csapex::NodeConstructor(
                                                  settings, name, description, icon, tags,
-                                                 boost::bind(&GenericNodeFactory::wrapFunction<F>, f)));
+                                                 std::bind(&GenericNodeFactory::wrapFunction<F>, f)));
     }
 };
 

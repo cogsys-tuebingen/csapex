@@ -6,9 +6,6 @@
 #include <csapex/model/node_worker.h>
 #include <utils_param/parameter.h>
 
-/// SYSTEM
-#include <boost/bind.hpp>
-
 using namespace csapex;
 
 NodeAdapter::NodeAdapter(NodeWorker *adaptee, WidgetController* widget_ctrl)

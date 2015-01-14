@@ -119,7 +119,7 @@ protected:
                                                             settings,
                                                             "MockupNode", "A mockup node",
                                                             ":/no_icon.png", tags,
-                                                            boost::bind(&NodeCreationTest::makeMockup)));
+                                                            std::bind(&NodeCreationTest::makeMockup)));
         factory.registerNodeType(mockup_constructor);
 
         factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(functionToBeWrappedIntoANode,

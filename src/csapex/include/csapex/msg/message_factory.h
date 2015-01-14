@@ -14,7 +14,6 @@
 #include <map>
 #include <string>
 #include <functional>
-#include <boost/bind.hpp>
 #include <yaml-cpp/yaml.h>
 #include <boost/type_traits.hpp>
 #include <iostream>
@@ -75,9 +74,9 @@ public:
     template <typename M>
     static void registerMessage() {
         MessageFactory::instance().registerMessage(connection_types::name<M>(),
-                                                   boost::bind(&MessageFactory::createMessage<M>),
-                                                   Converter(boost::bind(&MessageFactory::encode<M>, _1),
-                                                             boost::bind(&MessageFactory::decode<M>, _1, _2)));
+                                                   std::bind(&MessageFactory::createMessage<M>),
+                                                   Converter(std::bind(&MessageFactory::encode<M>, std::placeholders::_1),
+                                                             std::bind(&MessageFactory::decode<M>, std::placeholders::_1, std::placeholders::_2)));
     }
 
 private:
@@ -98,9 +97,9 @@ private:
     static void registerDirectMessageImpl(typename std::enable_if< HasYaml<Wrapper,M>::type::value >::type* = 0)
     {
         MessageFactory::instance().registerMessage(connection_types::name< Wrapper<M> >(),
-                                                   boost::bind(&MessageFactory::createDirectMessage<Wrapper, M>),
-                                                   Converter(boost::bind(&MessageFactory::encodeDirectMessage<Wrapper, M>, _1),
-                                                             boost::bind(&MessageFactory::decodeDirectMessage<Wrapper, M>, _1, _2)));
+                                                   std::bind(&MessageFactory::createDirectMessage<Wrapper, M>),
+                                                   Converter(std::bind(&MessageFactory::encodeDirectMessage<Wrapper, M>, std::placeholders::_1),
+                                                             std::bind(&MessageFactory::decodeDirectMessage<Wrapper, M>, std::placeholders::_1, std::placeholders::_2)));
     }
 
     template <typename Message>

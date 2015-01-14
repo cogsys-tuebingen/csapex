@@ -49,10 +49,10 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
 
     StreamInterceptor::instance().start();
 
-    settings.settingsChanged.connect(boost::bind(&CsApexCore::settingsChanged, this));
+    settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this));
 
-    node_factory->unload_request.connect(boost::bind(&CsApexCore::unloadNode, this, _1));
-    plugin_locator_->reload_done.connect(boost::bind(&CsApexCore::reloadDone, this));
+    node_factory->unload_request.connect(std::bind(&CsApexCore::unloadNode, this, std::placeholders::_1));
+    plugin_locator_->reload_done.connect(std::bind(&CsApexCore::reloadDone, this));
 
     QObject::connect(graph_worker_.get(), SIGNAL(paused(bool)), this, SIGNAL(paused(bool)));
 }
@@ -132,8 +132,8 @@ void CsApexCore::init(DragIO* dragio)
         }
 
         showStatusMessage("loading node plugins");
-        node_factory_->loaded.connect(boost::bind(&CsApexCore::showStatusMessage, this, _1));
-        node_factory_->new_node_type.connect(boost::bind(&CsApexCore::reloadBoxMenues, this));
+        node_factory_->loaded.connect(std::bind(&CsApexCore::showStatusMessage, this, std::placeholders::_1));
+        node_factory_->new_node_type.connect(std::bind(&CsApexCore::reloadBoxMenues, this));
         node_factory_->loadPlugins();
 
         node_adapter_factory_->loadPlugins();
@@ -152,8 +152,8 @@ CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
     core_plugins_[plugin_name] = plugin;
 
     if(!core_plugins_connected_[plugin_name]) {
-        constructor.unload_request->connect(boost::bind(&CsApexCore::unloadCorePlugin, this, plugin_name));
-        constructor.reload_request->connect(boost::bind(&CsApexCore::reloadCorePlugin, this, plugin_name));
+        constructor.unload_request->connect(std::bind(&CsApexCore::unloadCorePlugin, this, plugin_name));
+        constructor.reload_request->connect(std::bind(&CsApexCore::reloadCorePlugin, this, plugin_name));
 
         core_plugins_connected_[plugin_name] = true;
     }

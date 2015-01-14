@@ -254,7 +254,7 @@ struct Caller
 {\
     template <typename P>\
     static void call(GenericNode<P>* i) {\
-    boost::bind(PARAMS)();\
+    std::bind(PARAMS)();\
 }\
 };
 

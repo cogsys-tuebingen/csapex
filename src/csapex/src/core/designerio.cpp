@@ -40,7 +40,7 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* widget_ctrl)
 {
-    std::function<void(NodeWorker*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, yaml["adapters"]);
+    std::function<void(NodeWorker*)> cb = std::bind(&DesignerIO::saveBox, this, std::placeholders::_1, widget_ctrl, yaml["adapters"]);
     graph->foreachNode(cb);
 }
 

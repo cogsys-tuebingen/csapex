@@ -8,9 +8,6 @@
 #include <csapex/core/settings.h>
 #include <csapex/model/tag.h>
 
-/// SYSTEM
-#include <boost/bind.hpp>
-
 using namespace csapex;
 
 NodeConstructor::NodeConstructor(Settings &settings,

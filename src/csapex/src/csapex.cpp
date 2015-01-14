@@ -185,7 +185,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, minimap, legend, timeline, plugin_locator.get());
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
-        csapex::error_handling::stop_request().connect(boost::bind(&CsApexWindow::close, &w));
+        csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));
 
         core.init(&drag_io);
         w.start();
@@ -201,7 +201,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
     } else {
         core.init(nullptr);
-        csapex::error_handling::stop_request().connect(boost::bind(&csapex::error_handling::kill));
+        csapex::error_handling::stop_request().connect(std::bind(&csapex::error_handling::kill));
         core.startup();
         return run();
     }

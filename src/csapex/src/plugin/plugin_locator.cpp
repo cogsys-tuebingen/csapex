@@ -123,7 +123,7 @@ void PluginLocator::createFileWatcher(const std::string &name)
             library_watchers_[name] = std::shared_ptr<QFileSystemWatcher>(new QFileSystemWatcher);
             library_watchers_[name]->addPath(QString::fromStdString(abs_path));
 
-            qt_helper::Call* call = new qt_helper::Call(boost::bind(&PluginLocator::reloadLibraryIfExists, this, name, abs_path));
+            qt_helper::Call* call = new qt_helper::Call(std::bind(&PluginLocator::reloadLibraryIfExists, this, name, abs_path));
 
             QObject::connect(library_watchers_[name].get(), SIGNAL(fileChanged(const QString&)),
                              call, SLOT(call()));

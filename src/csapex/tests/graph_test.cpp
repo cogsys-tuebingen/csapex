@@ -39,7 +39,7 @@ protected:
                                                      settings,
                                                      "MockupNode", "A mockup node",
                                                      ":/no_icon.png", tags,
-                                                     boost::bind(&GraphTest::makeMockup)));
+                                                     std::bind(&GraphTest::makeMockup)));
         factory.registerNodeType(constructor);
     }
 
