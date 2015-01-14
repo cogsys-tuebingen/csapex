@@ -14,7 +14,7 @@
 #include <csapex/core/settings.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 
 using namespace csapex;
 

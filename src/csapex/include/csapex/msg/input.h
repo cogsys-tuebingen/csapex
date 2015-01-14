@@ -37,14 +37,14 @@ public:
 
     template <typename R>
     std::shared_ptr<R const>
-    getMessage(typename boost::enable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) const
+    getMessage(typename std::enable_if<std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0) const
     {
         return buffer_->read<R>();
     }
 
     template <typename R>
     std::shared_ptr<R const>
-    getMessage(typename boost::disable_if<boost::is_base_of<ConnectionType, R> >::type* /*dummy*/ = 0) const
+    getMessage(typename std::enable_if<!std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0) const
     {
         return buffer_->read< connection_types::GenericPointerMessage<R> >() -> value;
     }

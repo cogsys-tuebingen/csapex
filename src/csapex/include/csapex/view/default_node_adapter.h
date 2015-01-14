@@ -18,7 +18,7 @@ struct Call;
 namespace csapex
 {
 
-typedef boost::function<void()> Function;
+typedef std::function<void()> Function;
 
 class DefaultNodeAdapter;
 
@@ -30,7 +30,7 @@ public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
 
     void connectInGuiThread(boost::signals2::signal<void(param::Parameter*)>& signal,
-                 boost::function<void()> cb);
+                 std::function<void()> cb);
     void disconnect();
 
 public Q_SLOTS:
@@ -86,8 +86,8 @@ public:
     DefaultNodeAdapterBridge bridge;
 
 private:
-    qt_helper::Call* makeModelCall(boost::function<void()> cb);
-    qt_helper::Call* makeUiCall(boost::function<void()> cb);
+    qt_helper::Call* makeModelCall(std::function<void()> cb);
+    qt_helper::Call* makeUiCall(std::function<void()> cb);
 
 private:
     std::vector<QObject*> callbacks;

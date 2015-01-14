@@ -13,7 +13,7 @@
 /// SYSTEM
 #include <map>
 #include <string>
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/bind.hpp>
 #include <yaml-cpp/yaml.h>
 #include <boost/type_traits.hpp>
@@ -28,11 +28,11 @@ class MessageFactory : public Singleton<MessageFactory>
     friend class Singleton<MessageFactory>;
 
 public:
-    typedef boost::function<ConnectionType::Ptr()>  Constructor;
+    typedef std::function<ConnectionType::Ptr()>  Constructor;
     struct Converter
     {
-        typedef boost::function<YAML::Node(const csapex::ConnectionType&)> Encoder;
-        typedef boost::function<bool(const YAML::Node&, csapex::ConnectionType&)> Decoder;
+        typedef std::function<YAML::Node(const csapex::ConnectionType&)> Encoder;
+        typedef std::function<bool(const YAML::Node&, csapex::ConnectionType&)> Decoder;
 
         Converter(Encoder encode, Decoder decode)
             : encoder(encode), decoder(decode)
@@ -90,12 +90,12 @@ private:
     };
 
     template <template <typename> class Wrapper, typename M>
-    static void registerDirectMessageImpl(typename boost::disable_if< typename HasYaml<Wrapper,M>::type >::type* = 0)
+    static void registerDirectMessageImpl(typename std::enable_if< !HasYaml<Wrapper,M>::type::value >::type* = 0)
     {
         std::cerr << "Using a direct message that is not serializable: " << type2name(typeid(M)) << std::endl;
     }
     template <template <typename> class Wrapper, typename M>
-    static void registerDirectMessageImpl(typename boost::enable_if< typename HasYaml<Wrapper,M>::type >::type* = 0)
+    static void registerDirectMessageImpl(typename std::enable_if< HasYaml<Wrapper,M>::type::value >::type* = 0)
     {
         MessageFactory::instance().registerMessage(connection_types::name< Wrapper<M> >(),
                                                    boost::bind(&MessageFactory::createDirectMessage<Wrapper, M>),

@@ -2,7 +2,7 @@
 #include <csapex/plugin/plugin_loader.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 
 PluginLoader::PluginLoader()
     : lowlevel_class_loader_(false)
@@ -12,7 +12,7 @@ PluginLoader::PluginLoader()
 void PluginLoader::stop()
 {
     typedef std::pair<std::string, bool> PAIR;
-    BOOST_FOREACH(const PAIR& p, loaded_) {
+    for(const PAIR& p : loaded_) {
         if(p.second) {
             lowlevel_class_loader_.unloadLibrary(p.first);
         }

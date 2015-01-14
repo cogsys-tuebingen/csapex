@@ -9,7 +9,7 @@
 /// SYSTEM
 #include <QObject>
 #include <map>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace csapex {
 
@@ -85,8 +85,8 @@ public:
     void deleteConnection(ConnectionPtr connection);
 
     // TODO: do this correctly.. -> iterators
-    void foreachNode(boost::function<void (NodeWorker*)> f);
-    void foreachNode(boost::function<void (NodeWorker*)> f, boost::function<bool (NodeWorker*)> pred);
+    void foreachNode(std::function<void (NodeWorker*)> f);
+    void foreachNode(std::function<void (NodeWorker*)> f, std::function<bool (NodeWorker*)> pred);
 
 private:
    /*rename*/ void verify();

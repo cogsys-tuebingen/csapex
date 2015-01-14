@@ -3,7 +3,7 @@
 
 /// SYSTEM
 #include <QObject>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace qt_helper {
 
@@ -11,7 +11,7 @@ struct Call : public QObject
 {
     Q_OBJECT
 
-    typedef boost::function<void()> CB;
+    typedef std::function<void()> CB;
 
 public:
     Call(CB cb)

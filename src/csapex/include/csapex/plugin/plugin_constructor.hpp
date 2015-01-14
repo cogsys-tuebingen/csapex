@@ -13,7 +13,7 @@ template <class M>
 struct PluginConstructor : public ConstructorInterface {
 
 public:
-    typedef boost::function<typename std::shared_ptr<M>()> Call;
+    typedef std::function<typename std::shared_ptr<M>()> Call;
 
 public:
     std::shared_ptr< boost::signals2::signal<void()> > unload_request;

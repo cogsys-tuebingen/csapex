@@ -22,8 +22,6 @@ NodeConstructor::NodeConstructor(Settings &settings,
       reload_request(new boost::signals2::signal<void()>),
       settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
 {
-    apex_assert_hard(!c.empty());
-
     if(tags_.empty()) {
         tags_.push_back(Tag::get("General"));
     }

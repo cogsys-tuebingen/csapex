@@ -18,7 +18,7 @@ namespace csapex
 class Parameterizable
 {
 public:
-    typedef std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > ChangedParameterList;
+    typedef std::vector<std::pair<param::Parameter*, std::function<void(param::Parameter *)> > > ChangedParameterList;
 
     typedef boost::mpl::vector<bool, int, double,
                                 std::string,
@@ -37,44 +37,44 @@ public:
      *  ADDING PARAMETERS
      */
     void addParameter(const param::ParameterPtr& param);
-    void addParameter(const param::ParameterPtr& param, boost::function<void(param::Parameter *)> cb);
+    void addParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
 
-    void addConditionalParameter(const param::ParameterPtr& param, boost::function<bool()> enable_condition);
-    void addConditionalParameter(const param::ParameterPtr& param, boost::function<bool()> enable_condition, boost::function<void(param::Parameter *)> cb);
+    void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition);
+    void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition, std::function<void(param::Parameter *)> cb);
 
     void addPersistentParameter(const param::ParameterPtr& param);
 
     void addTemporaryParameter(const param::ParameterPtr& param);
-    void addTemporaryParameter(const param::ParameterPtr& param, boost::function<void(param::Parameter *)> cb);
+    void addTemporaryParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
     void removeTemporaryParameter(const param::ParameterPtr& param);
 
     void setTemporaryParameters(const std::vector<param::ParameterPtr>& param);
-    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param, boost::function<void(param::Parameter *)> cb);
+    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param, std::function<void(param::Parameter *)> cb);
 
     /***
      *  GETTING PARAMETERS
      */
     template <typename T>
-    typename boost::enable_if<boost::mpl::contains< SupportedTemplateParameters, T >, T>::type
+    typename std::enable_if<boost::mpl::contains< SupportedTemplateParameters, T >::value, T>::type
     readParameter(const std::string& name) const
     {
         return doReadParameter<T>(name);
     }
     template <typename T>
-    typename boost::disable_if<boost::mpl::contains< SupportedTemplateParameters, T >, T>::type
+    typename std::enable_if<!boost::mpl::contains< SupportedTemplateParameters, T >::value, T>::type
     readParameter(const std::string& name) const
     {
         throw std::runtime_error(std::string("cannot read parameter ") + name);
     }
 
     template <typename T>
-    typename boost::enable_if<boost::mpl::contains< SupportedTemplateParameters, T >, void>::type
+    typename std::enable_if<boost::mpl::contains< SupportedTemplateParameters, T >::value, void>::type
     setParameter(const std::string& name, const T& value)
     {
         doSetParameter<T>(name, value);
     }
     template <typename T>
-    typename boost::disable_if<boost::mpl::contains< SupportedTemplateParameters, T >, void>::type
+    typename std::enable_if<!boost::mpl::contains< SupportedTemplateParameters, T >::value, void>::type
     setParameter(const std::string& name, const T& /*value*/)
     {
         throw std::runtime_error(std::string("cannot set parameter ") + name);
@@ -83,8 +83,8 @@ public:
     /***
      *  PARAMETER CONSTRAINTS
      */
-    void addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
-    void addParameterCondition(param::Parameter* param, boost::function<bool()> enable_condition);
+    void addParameterCallback(param::Parameter* param, std::function<void(param::Parameter *)> cb);
+    void addParameterCondition(param::Parameter* param, std::function<bool()> enable_condition);
 
     void removeParameterCallbacks(param::Parameter* param);
 
@@ -124,15 +124,15 @@ public:
 
 private:
     void parameterChanged(param::Parameter* param);
-    void parameterChanged(param::Parameter* param, boost::function<void(param::Parameter *)> cb);
+    void parameterChanged(param::Parameter* param, std::function<void(param::Parameter *)> cb);
     void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
     std::map<param::Parameter*, std::vector<boost::signals2::connection> > connections_;
-    std::map<param::Parameter*, boost::function<bool()> > conditions_;
+    std::map<param::Parameter*, std::function<bool()> > conditions_;
 
     mutable std::mutex changed_params_mutex_;
-    std::vector<std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > > changed_params_;
+    std::vector<std::pair<param::Parameter*, std::function<void(param::Parameter *)> > > changed_params_;
 
 protected:
     GenericStatePtr parameter_state_;

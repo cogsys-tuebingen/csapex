@@ -27,17 +27,17 @@ public:
     /// "real" messages
     template <typename T>
     Input* addInput(const std::string& label,
-                    typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                    typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
-                            typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                            typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
-                      typename boost::enable_if<boost::is_base_of<ConnectionType, T> >::type* = 0) {
+                      typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
         return addOutput(connection_types::makeEmptyMessage<T>(), label);
     }
 
@@ -63,19 +63,19 @@ public:
     /// "direct" messages
     template <typename T>
     Input* addInput(const std::string& label,
-                    typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
+                    typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
-                            typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
+                            typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
-                      typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
+                      typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label);
     }
@@ -83,17 +83,17 @@ public:
 
     template <typename T>
     Input* addInput(const std::string& label,
-                    typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
+                    typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
-                            typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
+                            typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
-                      typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
+                      typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label);
     }
 
@@ -145,8 +145,8 @@ public:
     /*
      * SIGNALING
      */
-    Slot* addActiveSlot(const std::string& label, boost::function<void()> callback);
-    Slot* addSlot(const std::string& label, boost::function<void()> callback);
+    Slot* addActiveSlot(const std::string& label, std::function<void()> callback);
+    Slot* addSlot(const std::string& label, std::function<void()> callback);
     Trigger* addTrigger(const std::string& label);
 
 

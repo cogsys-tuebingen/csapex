@@ -183,7 +183,7 @@ private:
             typedef typename boost::remove_reference<I>::type RawType;
 
             typedef typename boost::mpl::if_< boost::is_reference<I>,
-            typename boost::mpl::if_< boost::is_const<RawType>, GenericInput<RawType>, GenericOutput<RawType> >::type,
+            typename boost::mpl::if_< std::is_const<RawType>, GenericInput<RawType>, GenericOutput<RawType> >::type,
             GenericParameter<RawType> >::type type;
         };
     };
@@ -201,7 +201,7 @@ struct GenerateParameter
         typedef boost::reference_wrapper<typename boost::remove_reference<type>::type> message;
 
         enum IOType {
-            is_const = boost::is_const<typename message::type>::value
+            is_const = std::is_const<typename message::type>::value
         };
         typedef type param;
     };
@@ -210,11 +210,11 @@ struct GenerateParameter
     static
     typename Types<no>::message
     get(GenericNode<Parameters>* instance,
-        typename boost::enable_if<
+        typename std::enable_if<
             boost::type_traits::ice_and<
                 boost::is_reference<typename Types<no>::type>::value,
                 boost::type_traits::ice_not< Types<no>::is_const >::value
-            >
+            >::value
         >::type* = 0)
     {
         return boost::ref(static_cast<typename Types<no>::type>(*instance->out_msg_[no]));
@@ -224,11 +224,11 @@ struct GenerateParameter
     static
     const typename Types<no>::message
     get(GenericNode<Parameters>* instance,
-        typename boost::enable_if<
+        typename std::enable_if<
             boost::type_traits::ice_and<
                 boost::is_reference<typename Types<no>::type>::value,
                 Types<no>::is_const
-            >
+            >::value
         >::type* = 0)
     {
         return boost::ref(static_cast<typename Types<no>::type const>(*instance->in_msg_[no]));
@@ -237,7 +237,7 @@ struct GenerateParameter
     template <int no>
     static typename Types<no>::param
     get(GenericNode<Parameters>* instance,
-        typename boost::disable_if<boost::is_reference<typename Types<no>::type> >::type* = 0)
+        typename std::enable_if<!boost::is_reference<typename Types<no>::type>::value >::type* = 0)
     {
         return instance->template readParameter<int>(instance->params_[no]);
     }

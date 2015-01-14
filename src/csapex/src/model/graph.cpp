@@ -20,7 +20,7 @@
 #include <csapex/utility/timer.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 #include <QThread>
 
 using namespace csapex;
@@ -98,14 +98,14 @@ int Graph::countNodes()
 
 
 
-void Graph::foreachNode(boost::function<void (NodeWorker*)> f)
+void Graph::foreachNode(std::function<void (NodeWorker*)> f)
 {
     Q_FOREACH(NodeWorker::Ptr b, nodes_) {
         f(b.get());
     }
 }
 
-void Graph::foreachNode(boost::function<void (NodeWorker*)> f, boost::function<bool (NodeWorker*)> pred)
+void Graph::foreachNode(std::function<void (NodeWorker*)> f, std::function<bool (NodeWorker*)> pred)
 {
     Q_FOREACH(NodeWorker::Ptr b, nodes_) {
         if(pred(b.get())) {
@@ -397,7 +397,7 @@ Connectable* Graph::findConnector(const UUID &uuid)
 
 Connection::Ptr Graph::getConnectionWithId(int id)
 {
-    BOOST_FOREACH(Connection::Ptr& connection, connections_) {
+    for(Connection::Ptr& connection : connections_) {
         if(connection->id() == id) {
             return connection;
         }
@@ -408,7 +408,7 @@ Connection::Ptr Graph::getConnectionWithId(int id)
 
 Connection::Ptr Graph::getConnection(Connection::Ptr c)
 {
-    BOOST_FOREACH(Connection::Ptr& connection, connections_) {
+    for(Connection::Ptr& connection : connections_) {
         if(*connection == *c) {
             return connection;
         }

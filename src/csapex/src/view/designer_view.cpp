@@ -520,7 +520,7 @@ void DesignerView::showContextMenuEditBox(NodeBox* box, const QPoint &scene_pos)
     NodeWorker* worker = box->getNodeWorker();
 
     QMenu menu;
-    std::map<QAction*, boost::function<void()> > handler;
+    std::map<QAction*, std::function<void()> > handler;
 
     ContextMenuHandler::addHeader(menu, std::string("Node: ") + box->getNodeWorker()->getUUID().getShortName());
 

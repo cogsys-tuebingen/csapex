@@ -11,7 +11,7 @@
 
 /// SYSTEM
 #include <memory>
-#include <boost/function.hpp>
+#include <functional>
 #include <QIcon>
 #include <QMenu>
 #include <QWidget>

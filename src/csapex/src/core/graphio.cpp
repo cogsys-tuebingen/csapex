@@ -17,7 +17,7 @@
 
 /// SYSTEM
 #include <QMessageBox>
-#include <boost/foreach.hpp>
+
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>

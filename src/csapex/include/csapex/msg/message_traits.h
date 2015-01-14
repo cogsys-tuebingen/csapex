@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <string>
 #include <boost/type_traits/remove_reference.hpp>
+#include <type_traits>
 
 namespace csapex {
 namespace connection_types {
@@ -31,13 +32,13 @@ std::shared_ptr<T> makeEmpty()
 
 template <typename T>
 std::shared_ptr<T> makeEmptyMessage(
-        typename boost::disable_if<boost::is_const<T> >::type* = 0)
+        typename std::enable_if<!std::is_const<T>::value >::type* = 0)
 {
     return makeEmpty<T>();
 }
 template <typename T>
 std::shared_ptr<typename boost::remove_const<T>::type > makeEmptyMessage(
-        typename boost::enable_if<boost::is_const<T> >::type* = 0)
+        typename std::enable_if<std::is_const<T>::value >::type* = 0)
 {
     typedef typename boost::remove_const<T>::type TT;
     return makeEmpty<TT>();
@@ -52,8 +53,8 @@ struct should_use_pointer_message {
     static const bool value = boost::type_traits::ice_and<
     boost::is_class<M>::value,
     has_ptr_member<M>::value,
-    boost::type_traits::ice_not< boost::is_same<std::string, M>::value >::value,
-    boost::type_traits::ice_not< boost::is_base_of<ConnectionType, M>::value >::value
+    boost::type_traits::ice_not< std::is_same<std::string, M>::value >::value,
+    boost::type_traits::ice_not< std::is_base_of<ConnectionType, M>::value >::value
     >::value;
 };
 
@@ -64,7 +65,7 @@ struct should_use_value_message {
             should_use_pointer_message<M>::value
             >::value,
     boost::type_traits::ice_not< has_elem_type_member<M>::value >::value, // reject shared_ptr
-    boost::type_traits::ice_not< boost::is_base_of<ConnectionType, M>::value >::value
+    boost::type_traits::ice_not< std::is_base_of<ConnectionType, M>::value >::value
     >::value;
 };
 

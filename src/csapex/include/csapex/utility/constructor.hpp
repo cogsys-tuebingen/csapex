@@ -3,8 +3,9 @@
 
 /// SYSTEM
 #include <memory>
-#include <boost/function.hpp>
+#include <functional>
 #include <vector>
+#include <type_traits>
 
 struct ConstructorInterface {
     ConstructorInterface() : valid_(false), has_constructor(false) {}
@@ -85,14 +86,14 @@ struct HasName<
 
 namespace impl {
 template <typename M>
-typename boost::enable_if<HasName<M>, void>::type
+typename std::enable_if<HasName<M>::value, void>::type
 setType(std::shared_ptr<M> res, const std::string& type)
 {
     res->setName(type);
 }
 
 template <typename M>
-typename boost::disable_if<HasName<M>, void>::type
+typename std::enable_if<!HasName<M>::value, void>::type
 setType(std::shared_ptr<M> res, const std::string& type)
 {
     res->setType(type);

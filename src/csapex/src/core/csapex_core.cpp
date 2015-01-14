@@ -26,7 +26,7 @@
 
 /// SYSTEM
 #include <fstream>
-#include <boost/foreach.hpp>
+
 #include <boost/filesystem.hpp>
 
 Q_DECLARE_METATYPE(QSharedPointer<QImage>)

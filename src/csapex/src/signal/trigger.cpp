@@ -11,7 +11,7 @@
 #include <csapex/msg/message_traits.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 #include <iostream>
 
 using namespace csapex;

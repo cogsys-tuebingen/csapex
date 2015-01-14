@@ -15,14 +15,14 @@
 
 using namespace csapex;
 
-Slot::Slot(boost::function<void()> callback, const UUID &uuid, bool active)
+Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active)
     : Connectable(uuid), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 //    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
-Slot::Slot(boost::function<void()> callback, Unique* parent, int sub_id, bool active)
+Slot::Slot(std::function<void()> callback, Unique* parent, int sub_id, bool active)
     : Connectable(parent, sub_id, "slot"), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());

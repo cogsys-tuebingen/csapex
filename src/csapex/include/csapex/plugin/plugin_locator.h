@@ -9,7 +9,7 @@
 #include <map>
 #include <typeinfo>
 #include <vector>
-#include <boost/function.hpp>
+#include <functional>
 #include <iostream>
 #include <set>
 #include <boost/signals2.hpp>
@@ -35,10 +35,10 @@ public:
 
     template <typename PluginType>
     std::vector<std::string> enumerateXmlFiles() {
-        std::map<const std::type_info*, std::vector<boost::function<void(std::vector<std::string>&)> > >::iterator pos = locators_.find(&typeid(PluginType));
+        std::map<const std::type_info*, std::vector<std::function<void(std::vector<std::string>&)> > >::iterator pos = locators_.find(&typeid(PluginType));
         std::vector<std::string> files;
         if(pos != locators_.end()) {
-            std::vector<boost::function<void(std::vector<std::string>&)> >& vec = pos->second;
+            std::vector<std::function<void(std::vector<std::string>&)> >& vec = pos->second;
             for(std::size_t i = 0, total = vec.size(); i < total; ++i) {
                 vec.at(i)(files);
             }
@@ -49,7 +49,7 @@ public:
     std::vector<std::string> enumerateLibraryPaths();
 
     template <typename PluginType>
-    void registerLocator(boost::function<void(std::vector<std::string>&)> fn)
+    void registerLocator(std::function<void(std::vector<std::string>&)> fn)
     {
         locators_[&typeid(PluginType)].push_back(fn);
     }
@@ -79,7 +79,7 @@ private:
 private:
     Settings &settings_;
 
-    std::map<const std::type_info*, std::vector<boost::function<void(std::vector<std::string>&)> > > locators_;
+    std::map<const std::type_info*, std::vector<std::function<void(std::vector<std::string>&)> > > locators_;
 
     std::vector<std::string> library_paths_;
 

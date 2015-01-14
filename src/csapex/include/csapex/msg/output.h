@@ -39,7 +39,7 @@ public:
     template <typename T>
     void publish(typename std::shared_ptr<T> message,
                  std::string frame_id = "/",
-                 typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
+                 typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
         typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
         msg->value = message;
         publish(std::dynamic_pointer_cast<ConnectionType>(msg));
@@ -48,7 +48,7 @@ public:
     template <typename T>
     void publish(typename boost::shared_ptr<T> message,
                  std::string frame_id = "/",
-                 typename boost::enable_if<connection_types::should_use_pointer_message<T> >::type* = 0) {
+                 typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
         typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
         msg->value = shared_ptr_tools::to_std_shared(message);
         publish(std::dynamic_pointer_cast<ConnectionType>(msg));
@@ -57,7 +57,7 @@ public:
     template <typename T>
     void publish(T message,
                  std::string frame_id = "/",
-                 typename boost::enable_if<connection_types::should_use_value_message<T> >::type* = 0) {
+                 typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
         typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
         msg->value = message;
         publish(std::dynamic_pointer_cast<ConnectionType>(msg));

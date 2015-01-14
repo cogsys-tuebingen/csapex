@@ -44,11 +44,11 @@ public:
     template <typename H>
     void registerHandler() {
         std::shared_ptr<H> handler(new H);
-        if(boost::is_base_of<HandlerEnter,H>::value)
+        if(std::is_base_of<HandlerEnter,H>::value)
             registerEnterHandler(std::static_pointer_cast<HandlerEnter>(handler));
-        if(boost::is_base_of<HandlerMove,H>::value)
+        if(std::is_base_of<HandlerMove,H>::value)
             registerMoveHandler(std::static_pointer_cast<HandlerMove>(handler));
-        if(boost::is_base_of<HandlerDrop,H>::value)
+        if(std::is_base_of<HandlerDrop,H>::value)
             registerDropHandler(std::static_pointer_cast<HandlerDrop>(handler));
     }
 

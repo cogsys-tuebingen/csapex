@@ -14,7 +14,7 @@
 
 /// SYSTEM
 #include <QMessageBox>
-#include <boost/foreach.hpp>
+
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
@@ -40,7 +40,7 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* widget_ctrl)
 {
-    boost::function<void(NodeWorker*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, yaml["adapters"]);
+    std::function<void(NodeWorker*)> cb = boost::bind(&DesignerIO::saveBox, this, _1, widget_ctrl, yaml["adapters"]);
     graph->foreachNode(cb);
 }
 

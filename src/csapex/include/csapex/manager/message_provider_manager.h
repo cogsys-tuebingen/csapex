@@ -11,7 +11,7 @@
 /// SYSTEM
 #include <map>
 #include <string>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace csapex {
 
@@ -20,7 +20,7 @@ class MessageProviderManager : public Singleton<MessageProviderManager>
     friend class Singleton<MessageProviderManager>;
 
 public:
-    typedef boost::function<MessageProvider::Ptr()>  Constructor;
+    typedef std::function<MessageProvider::Ptr()>  Constructor;
 
 public:    
     static void registerMessageProvider(const std::string& type, Constructor constructor);

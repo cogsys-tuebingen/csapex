@@ -5,7 +5,7 @@
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 #include <QTreeWidgetItem>
 #include <iostream>
 
@@ -22,7 +22,7 @@ QTreeWidgetItem* Meta::createDebugInformation() const
     tl->setText(0, getType().c_str());
     tl->setText(1, getDescription().c_str());
 
-    BOOST_FOREACH(Command::Ptr cmd, nested) {
+    for(Command::Ptr cmd : nested) {
         tl->addChild(cmd->createDebugInformation());
     }
     return tl;
@@ -61,7 +61,7 @@ bool Meta::doExecute()
     locked = true;
 
     bool success = true;
-    BOOST_FOREACH(Command::Ptr cmd, nested) {
+    for(Command::Ptr cmd : nested) {
         bool s = Access::executeCommand(graph_, node_factory_, cmd);
         if(!s) {
             std::cerr << "command failed to execute! (" << typeid(*cmd).name() << ")" << std::endl;
@@ -73,10 +73,10 @@ bool Meta::doExecute()
 
 bool Meta::doUndo()
 {
-    BOOST_REVERSE_FOREACH(Command::Ptr cmd, nested) {
-        bool s = Access::undoCommand(graph_, node_factory_, cmd);
+    for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
+        bool s = Access::undoCommand(graph_, node_factory_, *it);
         if(!s) {
-            undo_later.push_back(cmd);
+            undo_later.push_back(*it);
         }
     }
 
@@ -86,7 +86,7 @@ bool Meta::doUndo()
 bool Meta::doRedo()
 {
     bool success = true;
-    BOOST_FOREACH(Command::Ptr cmd, nested) {
+    for(Command::Ptr cmd : nested) {
         bool s = Access::redoCommand(graph_, node_factory_, cmd);
         success &= s;
     }

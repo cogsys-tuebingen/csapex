@@ -10,7 +10,7 @@
 
 /// SYSTEM
 #include <typeinfo>
-#include <boost/function.hpp>
+#include <functional>
 #include <QIcon>
 
 namespace csapex
@@ -31,7 +31,7 @@ public:
     };
 
 public:
-    typedef boost::function<NodePtr()> Make;
+    typedef std::function<NodePtr()> Make;
 
     typedef std::shared_ptr<NodeConstructor> Ptr;
 

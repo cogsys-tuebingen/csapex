@@ -10,7 +10,7 @@
 #include <csapex/plugin/plugin_manager.hpp>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 #include <boost/algorithm/string.hpp>
 
 using namespace csapex;

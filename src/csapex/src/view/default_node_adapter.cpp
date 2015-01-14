@@ -349,7 +349,7 @@ DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter *parent)
 }
 
 void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (param::Parameter *)> &signal,
-                                                  boost::function<void ()> cb)
+                                                  std::function<void ()> cb)
 {
     // cb should be executed in the gui thread
     connections.push_back(signal.connect(boost::bind(&DefaultNodeAdapterBridge::modelCallback, this, cb)));
@@ -709,7 +709,7 @@ void setDirection(QBoxLayout* layout, NodeWorker* node)
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
-    static std::map<int, boost::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
+    static std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
 #define INSTALL(_TYPE_) \
     mapping_[_TYPE_().ID()] = boost::bind(static_cast<void (DefaultNodeAdapter::*)( _TYPE_* )> (&DefaultNodeAdapter::setupParameter), __1, \
@@ -821,11 +821,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
             port->setVisible(p->isInteractive());
             parameter_connections_[param_in] = p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
-
-            std::function<void(param::Parameter*)> deleter = [param_in](param::Parameter*) mutable {
-                param_in->removeAllConnectionsNotUndoable();
-            };
-            p->destroyed.connect(deleter);
         }
 
         // generate UI element
@@ -868,7 +863,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
     }
 }
 
-qt_helper::Call * DefaultNodeAdapter::makeModelCall(boost::function<void()> cb)
+qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
 {
     qt_helper::Call* call = new qt_helper::Call(cb);
     callbacks.push_back(call);
@@ -876,7 +871,7 @@ qt_helper::Call * DefaultNodeAdapter::makeModelCall(boost::function<void()> cb)
     return call;
 }
 
-qt_helper::Call * DefaultNodeAdapter::makeUiCall(boost::function<void()> cb)
+qt_helper::Call * DefaultNodeAdapter::makeUiCall(std::function<void()> cb)
 {
     qt_helper::Call* call = new qt_helper::Call(cb);
     callbacks.push_back(call);

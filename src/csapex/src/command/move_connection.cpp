@@ -13,7 +13,7 @@
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 
 using namespace csapex::command;
 

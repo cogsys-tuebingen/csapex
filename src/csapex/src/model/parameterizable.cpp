@@ -57,7 +57,7 @@ template void Parameterizable::doSetParameter<std::vector<double> >(const std::s
 
 
 
-void Parameterizable::addParameterCallback(param::Parameter* param, boost::function<void(param::Parameter *)> cb)
+void Parameterizable::addParameterCallback(param::Parameter* param, std::function<void(param::Parameter *)> cb)
 {
     connections_[param].push_back(param->parameter_changed.connect(boost::bind(&Parameterizable::parameterChanged, this, _1, cb)));
     if(param->hasState()) {
@@ -69,7 +69,7 @@ void Parameterizable::removeParameterCallbacks(param::Parameter *param)
 {
     std::unique_lock<std::mutex> lock(changed_params_mutex_);
 
-    typedef std::pair<param::Parameter*, boost::function<void(param::Parameter *)> > PAIR;
+    typedef std::pair<param::Parameter*, std::function<void(param::Parameter *)> > PAIR;
     for(std::vector<PAIR>::iterator it = changed_params_.begin(); it != changed_params_.end();) {
         const PAIR& p = *it;
         if(p.first == param) {
@@ -84,7 +84,7 @@ void Parameterizable::removeParameterCallbacks(param::Parameter *param)
     }
 }
 
-void Parameterizable::addParameterCondition(param::Parameter* param, boost::function<bool ()> enable_condition)
+void Parameterizable::addParameterCondition(param::Parameter* param, std::function<bool ()> enable_condition)
 {
     conditions_[param] = enable_condition;
 }
@@ -96,7 +96,7 @@ void Parameterizable::parameterChanged(param::Parameter *)
     }
 }
 
-void Parameterizable::parameterChanged(param::Parameter *param, boost::function<void(param::Parameter *)> cb)
+void Parameterizable::parameterChanged(param::Parameter *param, std::function<void(param::Parameter *)> cb)
 {
     std::unique_lock<std::mutex> lock(changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
@@ -113,7 +113,7 @@ void Parameterizable::checkConditions(bool silent)
 {
     bool change = false;
     setParameterSetSilence(true);
-    for(std::map<param::Parameter*, boost::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
+    for(std::map<param::Parameter*, std::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
         param::Parameter* p = it->first;
         bool should_be_enabled = it->second();
         if(should_be_enabled != p->isEnabled()) {
@@ -138,7 +138,7 @@ void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param)
     parameter_state_->addTemporaryParameter(param);
 }
 
-void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
+void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param, std::function<void (param::Parameter *)> cb)
 {
     parameter_state_->addTemporaryParameter(param);
     addParameterCallback(param.get(), cb);
@@ -162,7 +162,7 @@ void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter:
     triggerParameterSetChanged();
 }
 
-void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter::Ptr> &params, boost::function<void (param::Parameter *)> cb)
+void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter::Ptr> &params, std::function<void (param::Parameter *)> cb)
 {
     setParameterSetSilence(true);
     removeTemporaryParameters();
@@ -183,21 +183,21 @@ void Parameterizable::addParameter(const param::Parameter::Ptr &param)
     connections_[param.get()].push_back(param->parameter_enabled.connect(boost::bind(&Parameterizable::parameterEnabled, this, _1, _2)));
 }
 
-void Parameterizable::addParameter(const param::Parameter::Ptr &param, boost::function<void (param::Parameter *)> cb)
+void Parameterizable::addParameter(const param::Parameter::Ptr &param, std::function<void (param::Parameter *)> cb)
 {
     addParameter(param);
     addParameterCallback(param.get(), cb);
 }
 
 
-void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition)
+void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param, std::function<bool()> enable_condition)
 {
     addParameter(param);
     addParameterCondition(param.get(), enable_condition);
 }
 
 
-void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param, boost::function<bool()> enable_condition, boost::function<void (param::Parameter *)> cb)
+void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param, std::function<bool()> enable_condition, std::function<void (param::Parameter *)> cb)
 {
     addParameter(param);
     addParameterCallback(param.get(), cb);

@@ -14,7 +14,7 @@
 #include <QTimer>
 #include <QThread>
 #include <map>
-#include <boost/function.hpp>
+#include <functional>
 #include <condition_variable>
 #include <mutex>
 #include <vector>
@@ -75,7 +75,7 @@ public:
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);
-    Slot* addSlot(const std::string& label, boost::function<void ()> callback, bool active);
+    Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
     Trigger* addTrigger(const std::string& label);
 
     Connectable* getConnector(const UUID& uuid) const;

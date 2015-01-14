@@ -235,6 +235,12 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
 
         QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), this, SLOT(parameterMessageArrived(Connectable*)));
 
+
+        std::function<void(param::Parameter*)> deleter = [cin](param::Parameter*) mutable {
+            cin->removeAllConnectionsNotUndoable();
+        };
+        p->destroyed.connect(deleter);
+
         param_2_input_[p->name()] = cin;
         input_2_param_[cin] = p;
     }
@@ -661,7 +667,7 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
     return c;
 }
 
-Slot* NodeWorker::addSlot(const std::string& label, boost::function<void()> callback, bool active)
+Slot* NodeWorker::addSlot(const std::string& label, std::function<void()> callback, bool active)
 {
     int id = slots_.size();
     Slot* slot = new Slot(callback, this, id, active);

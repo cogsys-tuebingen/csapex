@@ -22,7 +22,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <iostream>
-#include <boost/foreach.hpp>
+
 #include <cmath>
 
 using namespace csapex;

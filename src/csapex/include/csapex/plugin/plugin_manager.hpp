@@ -180,7 +180,7 @@ protected:
             constructor.setIcon(icon);
             constructor.setTags(tags);
 
-            boost::function< std::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return std::shared_ptr<M>(p); };
+            std::function< std::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return std::shared_ptr<M>(p); };
 
             auto ptr_maker = boost::bind(&class_loader::ClassLoader::createUnmanagedInstance<M>, loader, lookup_name);
             auto shared_ptr_maker = boost::bind(make_shared_ptr, ptr_maker);

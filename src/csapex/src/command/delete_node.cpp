@@ -14,7 +14,7 @@
 #include <csapex/view/widget_controller.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 
 using namespace csapex::command;
 

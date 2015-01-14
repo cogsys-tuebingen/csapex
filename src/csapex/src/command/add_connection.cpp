@@ -11,7 +11,7 @@
 #include <csapex/model/connection.h>
 
 /// SYSTEM
-#include <boost/foreach.hpp>
+
 
 using namespace csapex;
 using namespace csapex::command;
