@@ -34,6 +34,7 @@ public:
     boost::signals2::signal<void(Parameter*)> scope_changed;
     boost::signals2::signal<void(Parameter*, bool)> interactive_changed;
     boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
+    boost::signals2::signal<void(Parameter*)> destroyed;
 
 public:
     virtual ~Parameter();

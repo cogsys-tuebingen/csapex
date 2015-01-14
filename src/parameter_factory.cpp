@@ -14,67 +14,72 @@
 
 using namespace param;
 
-Parameter::Ptr ParameterFactory::makeEmpty(const std::string &type)
+std::unique_ptr<Parameter> ParameterFactory::makeEmpty(const std::string &type)
 {
     std::string t = type;
     std::transform(t.begin(), t.end(), t.begin(), tolower);
     if(t == "range") {
-        return Parameter::Ptr(new RangeParameter);
+        return std::unique_ptr<Parameter>(new RangeParameter);
     } else if(t == "interval") {
-        return Parameter::Ptr(new IntervalParameter);
+        return std::unique_ptr<Parameter>(new IntervalParameter);
     } else if(t == "value") {
-        return Parameter::Ptr(new ValueParameter);
+        return std::unique_ptr<Parameter>(new ValueParameter);
     } else if(t == "set") {
-        return Parameter::Ptr(new SetParameter);
+        return std::unique_ptr<Parameter>(new SetParameter);
     } else if(t == "bitset") {
-        return Parameter::Ptr(new BitSetParameter);
+        return std::unique_ptr<Parameter>(new BitSetParameter);
     } else if(t == "path") {
-        return Parameter::Ptr(new PathParameter);
+        return std::unique_ptr<Parameter>(new PathParameter);
     } else if(t == "trigger") {
-        return Parameter::Ptr(new TriggerParameter);
+        return std::unique_ptr<Parameter>(new TriggerParameter);
     } else if(t == "string_list") {
-        return Parameter::Ptr(new StringListParameter);
+        return std::unique_ptr<Parameter>(new StringListParameter);
     } else if(t == "color") {
-        return Parameter::Ptr(new ColorParameter);        
+        return std::unique_ptr<Parameter>(new ColorParameter);
     } else if(t == "progress") {
-        return Parameter::Ptr(new OutputProgressParameter);
+        return std::unique_ptr<Parameter>(new OutputProgressParameter);
     } else {
         throw std::runtime_error(std::string("illegal parameter type: ") + t);
     }
 }
 
-Parameter::Ptr ParameterFactory::clone(const Parameter* param)
+std::unique_ptr<Parameter> ParameterFactory::clone(const Parameter* param)
 {
     std::string type = param->TYPE();
-    Parameter::Ptr r = makeEmpty(type);
+    std::unique_ptr<Parameter> r = makeEmpty(type);
     r->clone(*param);
     return r;
 }
-Parameter::Ptr ParameterFactory::clone(const Parameter& param)
+std::unique_ptr<Parameter> ParameterFactory::clone(const Parameter& param)
 {
     return clone(&param);
 }
-Parameter::Ptr ParameterFactory::clone(const Parameter::Ptr& param)
+std::unique_ptr<Parameter> ParameterFactory::clone(const std::unique_ptr<Parameter>& param)
 {
     return clone(param.get());
 }
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, int> &set, int def)
+std::unique_ptr<Parameter> ParameterFactory::clone(const std::shared_ptr<Parameter>& param)
 {
-    BitSetParameter::Ptr result(new BitSetParameter(name, description));
+    return clone(param.get());
+}
+
+std::unique_ptr<Parameter> ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, int> &set, int def)
+{
+    std::unique_ptr<BitSetParameter> result(new BitSetParameter(name, description));
     result->setBitSet(set);
     result->def_ = def;
     result->set<int>(def);
 
-    return result;
+    return std::move(result);
 }
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set, int def)
+std::unique_ptr<Parameter> ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set, int def)
 {
     return declareParameterBitSet(name, ParameterDescription(), set, def);
 }
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> > &set)
+std::unique_ptr<Parameter> ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> > &set)
 {
     std::map<std::string, int> raw_set;
     int def = 0;
@@ -91,132 +96,132 @@ Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name,
     return declareParameterBitSet(name, description, raw_set, def);
 }
 
-Parameter::Ptr ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, std::pair<int, bool> > &set)
+std::unique_ptr<Parameter> ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, std::pair<int, bool> > &set)
 {
     return ParameterFactory::declareParameterBitSet(name, ParameterDescription(), set);
 }
 
-Parameter::Ptr ParameterFactory::declareBool(const std::string& name, const ParameterDescription& description, bool def)
+std::unique_ptr<Parameter> ParameterFactory::declareBool(const std::string& name, const ParameterDescription& description, bool def)
 {
-    ValueParameter::Ptr result(new ValueParameter(name, description));
+    std::unique_ptr<ValueParameter> result(new ValueParameter(name, description));
     result->def_ = def;
     result->set<bool>(def);
 
-    return result;
+    return std::move(result);
 }
 
-Parameter::Ptr ParameterFactory::declareBool(const std::string &name, bool def)
+std::unique_ptr<Parameter> ParameterFactory::declareBool(const std::string &name, bool def)
 {
     return declareBool(name, ParameterDescription(), def);
 }
 
-Parameter::Ptr ParameterFactory::declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b)
+std::unique_ptr<Parameter> ParameterFactory::declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b)
 {
-    ColorParameter::Ptr result(new ColorParameter(name, description, r, g, b));
-    return result;
+    std::unique_ptr<ColorParameter> result(new ColorParameter(name, description, r, g, b));
+    return std::move(result);
 }
 
-Parameter::Ptr ParameterFactory::declareColorParameter(const std::string& name, int r, int g, int b)
+std::unique_ptr<Parameter> ParameterFactory::declareColorParameter(const std::string& name, int r, int g, int b)
 {
     return declareColorParameter(name, ParameterDescription(), r,g,b);
 }
 
-Parameter::Ptr ParameterFactory::declareTrigger(const std::string& name, const ParameterDescription& description)
+std::unique_ptr<Parameter> ParameterFactory::declareTrigger(const std::string& name, const ParameterDescription& description)
 {
-    TriggerParameter::Ptr result(new TriggerParameter(name, description));
-    return result;
+    std::unique_ptr<TriggerParameter> result(new TriggerParameter(name, description));
+    return std::move(result);
 }
 
-Parameter::Ptr ParameterFactory::declareTrigger(const std::string &name)
+std::unique_ptr<Parameter> ParameterFactory::declareTrigger(const std::string &name)
 {
     return declareTrigger(name, ParameterDescription());
 }
 
-Parameter::Ptr ParameterFactory::declarePath(const std::string& name, const ParameterDescription& description,
+std::unique_ptr<Parameter> ParameterFactory::declarePath(const std::string& name, const ParameterDescription& description,
                                              bool is_file, const std::string& def, const std::string& filter, bool input, bool output)
 {
-    PathParameter::Ptr result(new PathParameter(name, description, filter, is_file, input, output));
+    std::unique_ptr<PathParameter> result(new PathParameter(name, description, filter, is_file, input, output));
     result->set(def);
 
-    return result;
+    return std::move(result);
 }
 
-Parameter::Ptr ParameterFactory::declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
 {
     return declarePath(name, description, true, def, filter, true, false);
 }
-Parameter::Ptr ParameterFactory::declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
     return declareFileInputPath(name, ParameterDescription(), def, filter);
 }
 
-Parameter::Ptr ParameterFactory::declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
 {
     return declarePath(name, description, true, def, filter, false, true);
 }
 
-Parameter::Ptr ParameterFactory::declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
     return declareFileOutputPath(name, ParameterDescription(), def, filter);
 }
 
-Parameter::Ptr ParameterFactory::declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
 {
     return declarePath(name, description, true, def, filter, true, true);
 }
-Parameter::Ptr ParameterFactory::declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
     return declareFileInputOutputPath(name, ParameterDescription(), def, filter);
 }
 
 
-Parameter::Ptr ParameterFactory::declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
 {
     return declarePath(name, description, false, def, filter, true, false);
 }
 
-Parameter::Ptr ParameterFactory::declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
     return declareDirectoryInputPath(name, ParameterDescription(), def, filter);
 }
 
-Parameter::Ptr ParameterFactory::declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
 {
     return declarePath(name, description, false, def, filter, false, true);
 }
-Parameter::Ptr ParameterFactory::declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
     return declareDirectoryOutputPath(name, ParameterDescription(), def, filter);
 }
 
-Parameter::Ptr ParameterFactory::declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
 {
     return declarePath(name, description, false, def, filter, true, true);
 }
-Parameter::Ptr ParameterFactory::declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
+std::unique_ptr<Parameter> ParameterFactory::declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter)
 {
     return declareDirectoryInputOutputPath(name, ParameterDescription(), def, filter);
 }
 
 
-Parameter::Ptr ParameterFactory::declareText(const std::string& name, const ParameterDescription& description, const std::string& def)
+std::unique_ptr<Parameter> ParameterFactory::declareText(const std::string& name, const ParameterDescription& description, const std::string& def)
 {
-    ValueParameter::Ptr result(new ValueParameter(name, description));
+    std::unique_ptr<ValueParameter> result(new ValueParameter(name, description));
     result->set(def);
 
-    return result;
+    return std::move(result);
 }
 
-Parameter::Ptr ParameterFactory::declareText(const std::string &name, const std::string &def)
+std::unique_ptr<Parameter> ParameterFactory::declareText(const std::string &name, const std::string &def)
 {
     return declareText(name, ParameterDescription(""), def);
 }
 
-Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const ParameterDescription& description,
+std::unique_ptr<Parameter> ParameterFactory::declareParameterStringSet(const std::string& name, const ParameterDescription& description,
                                                            const std::vector<std::string> & set,
                                                            const std::string &def)
 {
-    SetParameter::Ptr result(new SetParameter(name, description));
+    std::unique_ptr<SetParameter> result(new SetParameter(name, description));
     result->setSet(set);
 
     if(!set.empty()) {
@@ -228,22 +233,22 @@ Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& na
         result->set<std::string>(v);
     }
 
-    return result;
+    return std::move(result);
 }
 
-Parameter::Ptr ParameterFactory::declareParameterStringSet(const std::string& name, const std::vector<std::string> & set, const std::string& def)
+std::unique_ptr<Parameter> ParameterFactory::declareParameterStringSet(const std::string& name, const std::vector<std::string> & set, const std::string& def)
 {
     return declareParameterStringSet(name, ParameterDescription(), set, def);
 }
 
 template <typename T>
-Parameter::Ptr ParameterFactory::declareRange(const std::string& name,
+std::unique_ptr<Parameter> ParameterFactory::declareRange(const std::string& name,
                                    const ParameterDescription& description,
                                    T min, T max, T def, T step)
 {
     BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
 
-    RangeParameter::Ptr result(new RangeParameter(name, description));
+    std::unique_ptr<RangeParameter> result(new RangeParameter(name, description));
     result->def_value_ = def;
     result->def_min_ = min;
     result->def_max_ = max;
@@ -252,16 +257,16 @@ Parameter::Ptr ParameterFactory::declareRange(const std::string& name,
     result->step_ = step;
     result->set<T>(def);
 
-    return result;
+    return std::move(result);
 }
 
 
 template
-Parameter::Ptr ParameterFactory::declareRange<double>(const std::string& name,
+std::unique_ptr<Parameter> ParameterFactory::declareRange<double>(const std::string& name,
                                                       const ParameterDescription& description,
                                                       double min, double max, double def, double step);
 template
-Parameter::Ptr ParameterFactory::declareRange<int>(const std::string& name,
+std::unique_ptr<Parameter> ParameterFactory::declareRange<int>(const std::string& name,
                                                    const ParameterDescription& description,
                                                    int min, int max, int def, int step);
 
@@ -269,13 +274,13 @@ Parameter::Ptr ParameterFactory::declareRange<int>(const std::string& name,
 
 
 template <typename T>
-Parameter::Ptr ParameterFactory::declareInterval(const std::string& name,
+std::unique_ptr<Parameter> ParameterFactory::declareInterval(const std::string& name,
                                                  const ParameterDescription& description,
                                                  T min, T max, T def_min, T def_max, T step)
 {
     BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
 
-    IntervalParameter::Ptr result(new IntervalParameter(name, description));
+    std::unique_ptr<IntervalParameter> result(new IntervalParameter(name, description));
     result->def_ = std::make_pair(def_min, def_max);
     result->min_ = min;
     result->max_ = max;
@@ -284,21 +289,22 @@ Parameter::Ptr ParameterFactory::declareInterval(const std::string& name,
 
     result->set<std::pair<T,T> >(std::make_pair(def_min, def_max));
 
-    return result;
+    return std::move(result);
 }
 
 
 template
-Parameter::Ptr ParameterFactory::declareInterval<double>(const std::string& name,
+std::unique_ptr<Parameter> ParameterFactory::declareInterval<double>(const std::string& name,
                                                       const ParameterDescription& description,
                                                       double min, double max, double def_min, double def_max, double step);
 template
-Parameter::Ptr ParameterFactory::declareInterval<int>(const std::string& name,
+std::unique_ptr<Parameter> ParameterFactory::declareInterval<int>(const std::string& name,
                                                    const ParameterDescription& description,
                                                    int min, int max, int def_min, int def_max, int step);
 
 
-Parameter::Ptr ParameterFactory::declareOutputProgress(const std::string &name, const ParameterDescription &description)
+std::unique_ptr<Parameter> ParameterFactory::declareOutputProgress(const std::string &name, const ParameterDescription &description)
 {
-    return Parameter::Ptr(new OutputProgressParameter(name, description));
+    std::unique_ptr<Parameter> result(new OutputProgressParameter(name, description));
+    return std::move(result);
 }

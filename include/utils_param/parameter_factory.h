@@ -18,7 +18,7 @@ public:
      * @param type
      * @return
      */
-    static Parameter::Ptr makeEmpty(const std::string& type);
+    static std::unique_ptr<Parameter> makeEmpty(const std::string& type);
 
 
 
@@ -28,9 +28,10 @@ public:
      * @param param
      * @return
      */
-    static Parameter::Ptr clone(const Parameter *param);
-    static Parameter::Ptr clone(const Parameter& param);
-    static Parameter::Ptr clone(const Parameter::Ptr& param);
+    static std::unique_ptr<Parameter> clone(const Parameter *param);
+    static std::unique_ptr<Parameter> clone(const Parameter& param);
+    static std::unique_ptr<Parameter> clone(const std::unique_ptr<Parameter>& param);
+    static std::unique_ptr<Parameter> clone(const std::shared_ptr<Parameter>& param);
 
 
 
@@ -48,12 +49,12 @@ public:
      * @return
      */
     template <typename T>
-    static Parameter::Ptr declareRange(const std::string& name,
+    static std::unique_ptr<Parameter> declareRange(const std::string& name,
                                        const ParameterDescription& description,
                                        T min, T max, T def, T step);
 
     template <typename T>
-    static Parameter::Ptr declareRange(const std::string& name, T min, T max, T def, T step)
+    static std::unique_ptr<Parameter> declareRange(const std::string& name, T min, T max, T def, T step)
     {
         return declareRange(name, ParameterDescription(), min, max, def, step);
     }
@@ -73,12 +74,12 @@ public:
      * @return
      */
     template <typename T>
-    static Parameter::Ptr declareInterval(const std::string& name,
+    static std::unique_ptr<Parameter> declareInterval(const std::string& name,
                                           const ParameterDescription& description,
                                           T min, T max, T def_min, T def_max, T step);
 
     template <typename T>
-    static Parameter::Ptr declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
+    static std::unique_ptr<Parameter> declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
     {
         return declareInterval(name, ParameterDescription(), min, max, def_min, def_max, step);
     }
@@ -92,8 +93,8 @@ public:
      * @param def
      * @return
      */
-    static Parameter::Ptr declareBool(const std::string& name, bool def);
-    static Parameter::Ptr declareBool(const std::string& name, const ParameterDescription& description, bool def);
+    static std::unique_ptr<Parameter> declareBool(const std::string& name, bool def);
+    static std::unique_ptr<Parameter> declareBool(const std::string& name, const ParameterDescription& description, bool def);
 
 
 
@@ -106,8 +107,8 @@ public:
      * @param def
      * @return
      */
-    static Parameter::Ptr declareText(const std::string& name, const ParameterDescription& description, const std::string& def);
-    static Parameter::Ptr declareText(const std::string& name, const std::string& def);
+    static std::unique_ptr<Parameter> declareText(const std::string& name, const ParameterDescription& description, const std::string& def);
+    static std::unique_ptr<Parameter> declareText(const std::string& name, const std::string& def);
 
 
 
@@ -123,7 +124,7 @@ public:
      * @param output
      * @return
      */
-    static Parameter::Ptr declarePath(const std::string& name, const ParameterDescription& description,
+    static std::unique_ptr<Parameter> declarePath(const std::string& name, const ParameterDescription& description,
                                       bool is_file, const std::string& def, const std::string& filter = "", bool input = false, bool output = false);
 
 
@@ -137,8 +138,8 @@ public:
      * @param filter
      * @return
      */
-    static Parameter::Ptr declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static Parameter::Ptr declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareFileOutputPath
@@ -148,8 +149,8 @@ public:
      * @param filter
      * @return
      */
-    static Parameter::Ptr declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static Parameter::Ptr declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareFileInputOutputPath
@@ -159,8 +160,8 @@ public:
      * @param filter
      * @return
      */
-    static Parameter::Ptr declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static Parameter::Ptr declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
 
 
@@ -172,8 +173,8 @@ public:
      * @param filter
      * @return
      */
-    static Parameter::Ptr declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static Parameter::Ptr declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
 
     /**
@@ -184,8 +185,8 @@ public:
      * @param filter
      * @return
      */
-    static Parameter::Ptr declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static Parameter::Ptr declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
 
     /**
@@ -196,8 +197,8 @@ public:
      * @param filter
      * @return
      */
-    static Parameter::Ptr declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static Parameter::Ptr declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    static std::unique_ptr<Parameter> declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
 
 
@@ -209,8 +210,8 @@ public:
      * @param description
      * @return
      */
-    static Parameter::Ptr declareTrigger(const std::string& name, const ParameterDescription& description);
-    static Parameter::Ptr declareTrigger(const std::string& name);
+    static std::unique_ptr<Parameter> declareTrigger(const std::string& name, const ParameterDescription& description);
+    static std::unique_ptr<Parameter> declareTrigger(const std::string& name);
 
 
 
@@ -223,8 +224,8 @@ public:
      * @param b
      * @return
      */
-    static Parameter::Ptr declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b);
-    static Parameter::Ptr declareColorParameter(const std::string& name, int r, int g, int b);
+    static std::unique_ptr<Parameter> declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b);
+    static std::unique_ptr<Parameter> declareColorParameter(const std::string& name, int r, int g, int b);
 
 
 
@@ -240,21 +241,21 @@ public:
      * @return
      */
     template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name, const ParameterDescription& description,
+    static std::unique_ptr<Parameter> declareParameterSet(const std::string& name, const ParameterDescription& description,
                                               const std::map<std::string, T> & set_values,
                                               const T& def)
     {
-        SetParameter::Ptr result(new SetParameter(name, description));
+        std::unique_ptr<SetParameter> result(new SetParameter(name, description));
         result->setSet(set_values);
         if(!set_values.empty()) {
             result->def_ = def;
             result->set<T>(def);
         }
 
-        return result;
+        return std::move(result);
     }
     template <typename T>
-    static Parameter::Ptr declareParameterSet(const std::string& name,
+    static std::unique_ptr<Parameter> declareParameterSet(const std::string& name,
                                               const std::map<std::string, T> & set,
                                               const T& def)
     {
@@ -271,11 +272,11 @@ public:
      * @param def default value
      * @return
      */
-    static Parameter::Ptr declareParameterStringSet(const std::string& name,
+    static std::unique_ptr<Parameter> declareParameterStringSet(const std::string& name,
                                                     const ParameterDescription& description,
                                                     const std::vector<std::string> & set,
                                                     const std::string &def = "");
-    static Parameter::Ptr declareParameterStringSet(const std::string& name,
+    static std::unique_ptr<Parameter> declareParameterStringSet(const std::string& name,
                                                     const std::vector<std::string> & set,
                                                     const std::string &def = "");
 
@@ -290,8 +291,8 @@ public:
      * @param def
      * @return
      */
-    static Parameter::Ptr declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, int> &set, int def = 0);
-    static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::map<std::string, int> &set, int def = 0);
+    static std::unique_ptr<Parameter> declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, int> &set, int def = 0);
+    static std::unique_ptr<Parameter> declareParameterBitSet(const std::string& name, const std::map<std::string, int> &set, int def = 0);
 
 
     /**
@@ -301,8 +302,8 @@ public:
      * @param set
      * @return
      */
-    static Parameter::Ptr declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> > &set);
-    static Parameter::Ptr declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> > &set);
+    static std::unique_ptr<Parameter> declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> > &set);
+    static std::unique_ptr<Parameter> declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> > &set);
 
 
 
@@ -316,16 +317,16 @@ public:
      * @return
      */
     template <typename T>
-    static Parameter::Ptr declareValue(const std::string& name, const ParameterDescription& description, const T& def)
+    static std::unique_ptr<Parameter> declareValue(const std::string& name, const ParameterDescription& description, const T& def)
     {
-        ValueParameter::Ptr result(new ValueParameter(name, description));
+        std::unique_ptr<ValueParameter> result(new ValueParameter(name, description));
         result->def_ = def;
         result->set<T>(def);
 
-        return result;
+        return std::move(result);
     }
     template <typename T>
-    static Parameter::Ptr declareValue(const std::string& name, const T& def)
+    static std::unique_ptr<Parameter> declareValue(const std::string& name, const T& def)
     {
         return declareValue(name, ParameterDescription(), def);
     }
@@ -338,7 +339,7 @@ public:
      * @param description
      * @return
      */
-    static Parameter::Ptr declareOutputProgress(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
+    static std::unique_ptr<Parameter> declareOutputProgress(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
 };
 
 }

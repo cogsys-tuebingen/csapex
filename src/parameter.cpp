@@ -13,7 +13,7 @@ Parameter::Parameter(const std::string &name, const ParameterDescription &descri
 
 Parameter::~Parameter()
 {
-
+    destroyed(this);
 }
 
 void Parameter::setUUID(const std::string& uuid)
