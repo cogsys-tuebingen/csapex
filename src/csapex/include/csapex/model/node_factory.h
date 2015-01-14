@@ -8,7 +8,7 @@
 /// SYSTEM
 #include <vector>
 #include <boost/signals2.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace csapex
 {
@@ -61,7 +61,7 @@ protected:
     std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::vector<NodeConstructor::Ptr> constructors_;
 
-    boost::unordered_map<UUID, boost::signals2::connection, UUID::Hasher> reload_connections_;
+    std::unordered_map<UUID, boost::signals2::connection, UUID::Hasher> reload_connections_;
 
     PluginManager<Node>* node_manager_;
 

@@ -99,6 +99,12 @@ int Main::run()
 
 int Main::main(bool headless, bool threadless, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
+    if(!headless) {
+        QPixmap pm(":/apex_splash.png");
+        splash = new QSplashScreen (pm);
+        splash->show();
+    }
+
     Settings settings;
     settings.set("config", config);
 
@@ -139,10 +145,9 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
     Graph::Ptr graph(new Graph);
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
-    WidgetControllerPtr widget_control (new WidgetController(settings, graph, node_factory.get(), node_adapter_factory.get()));
 
     ThreadPool thread_pool(graph.get(), !threadless, thread_grouping);
-    CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, widget_control);
+    CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, node_factory.get());
 
     CsApexCore core(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
 
@@ -153,18 +158,9 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
     if(!headless) {
         app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
-        /*
-         * There seems to be a bug in Qt4:
-         *  A race condition in QApplication sometimes causes a deadlock on startup when using the GTK theme!
-         *  Workaround: Specify as a program argument: '-style Plastique' for the Plastique theme or other non-GTK based theme.
-         */
-        QPixmap pm(":/apex_splash.png");
-        splash = new QSplashScreen (pm);
-        splash->show();
-
         app.processEvents();
 
-
+        WidgetControllerPtr widget_control (new WidgetController(settings, dispatcher, graph, node_factory.get(), node_adapter_factory.get()));
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
 
         DesignerStyleable style;

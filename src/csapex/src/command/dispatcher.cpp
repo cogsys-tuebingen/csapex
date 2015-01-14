@@ -9,11 +9,9 @@
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, ThreadPool* thread_pool, WidgetController::Ptr widget_control)
-    : settings_(settings), graph_worker_(graph), thread_pool_(thread_pool), widget_ctrl_(widget_control), dirty_(false)
+CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, ThreadPool* thread_pool, NodeFactory* node_factory)
+    : settings_(settings), graph_worker_(graph), thread_pool_(thread_pool), node_factory_(node_factory), dirty_(false)
 {
-    widget_ctrl_->setCommandDispatcher(this);
-
     QObject::connect(this, SIGNAL(stateChanged()), graph_worker_->getGraph(), SIGNAL(stateChanged()));
     QObject::connect(this, SIGNAL(dirtyChanged(bool)), graph_worker_->getGraph(), SIGNAL(dirtyChanged(bool)));
 }
@@ -29,13 +27,13 @@ void CommandDispatcher::reset()
 
 void CommandDispatcher::execute(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
     doExecute(command);
 }
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
     later.push_back(command);
 }
 
@@ -49,14 +47,14 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::executeNotUndoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
-    Command::Access::executeCommand(graph_worker_->getGraph(), widget_ctrl_.get(), command);
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
+    Command::Access::executeCommand(graph_worker_->getGraph(), node_factory_, command);
 }
 
 void CommandDispatcher::undoNotRedoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, widget_ctrl_.get());
-    Command::Access::undoCommand(graph_worker_->getGraph(), widget_ctrl_.get(), command);
+    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
+    Command::Access::undoCommand(graph_worker_->getGraph(), node_factory_, command);
 }
 
 
@@ -70,7 +68,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = Command::Access::executeCommand(graph_worker_->getGraph(), widget_ctrl_.get(), command);
+    bool success = Command::Access::executeCommand(graph_worker_->getGraph(), node_factory_, command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -158,7 +156,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = Command::Access::undoCommand(graph_worker_->getGraph(), widget_ctrl_.get(), last);
+    bool ret = Command::Access::undoCommand(graph_worker_->getGraph(), node_factory_, last);
     apex_assert_hard(ret);
 
     setDirty(!last->isAfterSavepoint());
@@ -177,7 +175,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    Command::Access::redoCommand(graph_worker_->getGraph(), widget_ctrl_.get(), last);
+    Command::Access::redoCommand(graph_worker_->getGraph(), node_factory_, last);
 
     done.push_back(last);
 

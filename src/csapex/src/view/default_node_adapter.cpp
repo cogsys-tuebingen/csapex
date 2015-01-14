@@ -38,6 +38,7 @@
 #include <QListWidget>
 #include <QApplication>
 #include <QProgressBar>
+#include <functional>
 
 using namespace csapex;
 using namespace boost::lambda;
@@ -813,9 +814,18 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         if(param_in) {
             Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_->getUUID()), current_layout_);
 
-            port->setVisible(p->isInteractive());
-            p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
+            auto pos = parameter_connections_.find(param_in);
+            if(pos != parameter_connections_.end()) {
+                pos->second.disconnect();
+            }
 
+            port->setVisible(p->isInteractive());
+            parameter_connections_[param_in] = p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
+
+            std::function<void(param::Parameter*)> deleter = [param_in](param::Parameter*) mutable {
+                param_in->removeAllConnectionsNotUndoable();
+            };
+            p->destroyed.connect(deleter);
         }
 
         // generate UI element
@@ -831,8 +841,13 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         if(param_out) {
             Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_->getUUID()), current_layout_);
 
+            auto pos = parameter_connections_.find(param_out);
+            if(pos != parameter_connections_.end()) {
+                pos->second.disconnect();
+            }
+
             port->setVisible(p->isInteractive());
-            p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
+            parameter_connections_[param_out] = p->interactive_changed.connect(boost::bind(&Port::setVisible, port, __2));
 
             qt_helper::Call* call_trigger = new qt_helper::Call(boost::bind(&param::Parameter::triggerChange, p.get()));
             callbacks.push_back(call_trigger);

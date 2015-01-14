@@ -95,6 +95,8 @@ private:
     std::map<std::string, bool> groups_enabled;
     std::map<std::string, QGroupBox*> groupsboxes;
 
+    std::map<Connectable*, boost::signals2::connection> parameter_connections_;
+
     QBoxLayout* wrapper_layout_;
 };
 

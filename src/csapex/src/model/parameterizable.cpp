@@ -147,6 +147,7 @@ void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param, 
 void Parameterizable::removeTemporaryParameter(const param::Parameter::Ptr &param)
 {
     parameter_state_->removeTemporaryParameter(param);
+    triggerParameterSetChanged();
 }
 
 

@@ -62,7 +62,7 @@ bool Meta::doExecute()
 
     bool success = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        bool s = Access::executeCommand(graph_, widget_ctrl_, cmd);
+        bool s = Access::executeCommand(graph_, node_factory_, cmd);
         if(!s) {
             std::cerr << "command failed to execute! (" << typeid(*cmd).name() << ")" << std::endl;
         }
@@ -74,7 +74,7 @@ bool Meta::doExecute()
 bool Meta::doUndo()
 {
     BOOST_REVERSE_FOREACH(Command::Ptr cmd, nested) {
-        bool s = Access::undoCommand(graph_, widget_ctrl_, cmd);
+        bool s = Access::undoCommand(graph_, node_factory_, cmd);
         if(!s) {
             undo_later.push_back(cmd);
         }
@@ -87,7 +87,7 @@ bool Meta::doRedo()
 {
     bool success = true;
     BOOST_FOREACH(Command::Ptr cmd, nested) {
-        bool s = Access::redoCommand(graph_, widget_ctrl_, cmd);
+        bool s = Access::redoCommand(graph_, node_factory_, cmd);
         success &= s;
     }
     return success;

@@ -17,7 +17,7 @@ namespace command
 class MoveBox : public Command
 {
 public:
-    MoveBox(const UUID& node_uuid, QPointF from, QPointF to);
+    MoveBox(const UUID& node_uuid, QPointF from, QPointF to, WidgetController &widget_controller);
 
 protected:
     bool doExecute();
@@ -28,6 +28,8 @@ protected:
     virtual std::string getDescription() const;
 
 protected:
+    WidgetController& widget_controller_;
+
     QPointF from;
     QPointF to;
 

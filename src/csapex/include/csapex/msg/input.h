@@ -94,6 +94,7 @@ public:
     Connectable* getSource() const;
 
     virtual CommandPtr removeAllConnectionsCmd();
+    virtual void removeAllConnectionsNotUndoable();
 
     bool isOptional() const;
     void setOptional(bool optional);
@@ -121,7 +122,6 @@ protected:
     virtual bool tryConnect(Connectable* other_side);
     virtual bool acknowledgeConnection(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
-    virtual void removeAllConnectionsNotUndoable();
 
 Q_SIGNALS:
     void gotMessage(ConnectionType::ConstPtr msg);

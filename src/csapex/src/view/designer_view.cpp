@@ -480,7 +480,7 @@ void DesignerView::movedBoxes(double dx, double dy)
             NodeBox* b = proxy->getBox();
             QPointF to = proxy->pos();
             QPointF from = to - delta;
-            meta->add(Command::Ptr(new command::MoveBox(b->getNodeWorker()->getUUID(), from, to)));
+            meta->add(Command::Ptr(new command::MoveBox(b->getNodeWorker()->getUUID(), from, to, *widget_ctrl_)));
         }
     }
 

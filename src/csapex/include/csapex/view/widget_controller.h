@@ -10,8 +10,6 @@
 #include <memory>
 #include <QObject>
 #include <QPoint>
-#include <boost/function.hpp>
-#include <boost/unordered_map.hpp>
 #include <QLayout>
 #include <QGraphicsView>
 
@@ -30,7 +28,7 @@ public:
     typedef std::shared_ptr<WidgetController> Ptr;
 
 public:
-    WidgetController(Settings& settings, GraphPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);
+    WidgetController(Settings& settings, CommandDispatcher& dispatcher, GraphPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);
     ~WidgetController();
 
     void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
@@ -58,9 +56,6 @@ public:
     void setDesigner(Designer* designer);
 
     CommandDispatcher* getCommandDispatcher() const;
-    void setCommandDispatcher(CommandDispatcher *dispatcher);
-
-    void foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred);
 
     void setStyleSheet(const QString &str);
 
@@ -83,6 +78,8 @@ public Q_SLOTS:
     void connectorCreated(Connectable *connector);
     void connectorRemoved(Connectable *connector);
 
+    void portDestroyed(QObject* o);
+
     void enableGridLock(bool enabled);
 
 private:
@@ -95,20 +92,16 @@ private:
     void connectorMessageRemoved(Connectable *connector);
 
 private:
+
     GraphPtr graph_;
-    CommandDispatcher* dispatcher_;
+    CommandDispatcher& dispatcher_;
     Settings& settings_;
     NodeFactory* node_factory_;
     NodeAdapterFactory* node_adapter_factory_;
     Designer* designer_;
 
-    boost::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
-    boost::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
-    boost::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
-
-    QString style_sheet_;
-
-    QGraphicsView* tooltip_view_;
+    struct Impl;
+    std::unique_ptr<Impl> pimpl;
 };
 
 }

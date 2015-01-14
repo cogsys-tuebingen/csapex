@@ -10,8 +10,8 @@
 
 using namespace csapex::command;
 
-MoveBox::MoveBox(const UUID& node_uuid, QPointF from, QPointF to)
-    : from(from), to(to), uuid(node_uuid)
+MoveBox::MoveBox(const UUID& node_uuid, QPointF from, QPointF to, WidgetController &widget_controller)
+    : widget_controller_(widget_controller), from(from), to(to), uuid(node_uuid)
 {
 }
 
@@ -36,7 +36,7 @@ bool MoveBox::doExecute()
 
 bool MoveBox::doUndo()
 {
-    MovableGraphicsProxyWidget* box = widget_ctrl_->getProxy(uuid);
+    MovableGraphicsProxyWidget* box = widget_controller_.getProxy(uuid);
     box->setPos(from);
 
     return true;
@@ -44,7 +44,7 @@ bool MoveBox::doUndo()
 
 bool MoveBox::doRedo()
 {
-    MovableGraphicsProxyWidget* box = widget_ctrl_->getProxy(uuid);
+    MovableGraphicsProxyWidget* box = widget_controller_.getProxy(uuid);
     box->setPos(to);
 
     return true;

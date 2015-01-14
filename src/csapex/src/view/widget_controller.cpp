@@ -33,11 +33,37 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QStandardItemModel>
+#include <unordered_map>
+#include <QPointer>
 
 using namespace csapex;
 
-WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
-    : graph_(graph), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(nullptr), tooltip_view_(nullptr)
+class WidgetController::Impl
+{
+public:
+    Impl()
+        : tooltip_view_(nullptr)
+    {
+    }
+
+    ~Impl()
+    {
+        delete tooltip_view_;
+    }
+
+public:
+    std::unordered_map<UUID, QPointer<NodeBox>, UUID::Hasher> box_map_;
+    std::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
+    std::unordered_map<UUID, QPointer<Port>, UUID::Hasher> port_map_;
+
+    QString style_sheet_;
+
+    QGraphicsView* tooltip_view_;
+};
+
+WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispatcher, Graph::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
+    : graph_(graph), dispatcher_(dispatcher), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(nullptr),
+      pimpl(new Impl)
 {
     if(settings_.knows("grid-lock")) {
         enableGridLock(settings_.get<bool>("grid-lock"));
@@ -46,13 +72,12 @@ WidgetController::WidgetController(Settings& settings, Graph::Ptr graph, NodeFac
 
 WidgetController::~WidgetController()
 {
-    delete tooltip_view_;
 }
 
 NodeBox* WidgetController::getBox(const UUID &node_id)
 {
-    boost::unordered_map<UUID, NodeBox*, UUID::Hasher>::const_iterator pos = box_map_.find(node_id);
-    if(pos == box_map_.end()) {
+    std::unordered_map<UUID, QPointer<NodeBox>, UUID::Hasher>::const_iterator pos = pimpl->box_map_.find(node_id);
+    if(pos == pimpl->box_map_.end()) {
         return nullptr;
     }
 
@@ -61,8 +86,8 @@ NodeBox* WidgetController::getBox(const UUID &node_id)
 
 MovableGraphicsProxyWidget* WidgetController::getProxy(const UUID &node_id)
 {
-    boost::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher>::const_iterator pos = proxy_map_.find(node_id);
-    if(pos == proxy_map_.end()) {
+    std::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher>::const_iterator pos = pimpl->proxy_map_.find(node_id);
+    if(pos == pimpl->proxy_map_.end()) {
         return nullptr;
     }
 
@@ -71,8 +96,8 @@ MovableGraphicsProxyWidget* WidgetController::getProxy(const UUID &node_id)
 
 Port* WidgetController::getPort(const UUID &connector_id)
 {
-    boost::unordered_map<UUID, Port*, UUID::Hasher>::const_iterator pos = port_map_.find(connector_id);
-    if(pos == port_map_.end()) {
+    std::unordered_map<UUID, QPointer<Port>, UUID::Hasher>::const_iterator pos = pimpl->port_map_.find(connector_id);
+    if(pos == pimpl->port_map_.end()) {
         return nullptr;
     }
 
@@ -81,8 +106,8 @@ Port* WidgetController::getPort(const UUID &connector_id)
 
 Port* WidgetController::getPort(const Connectable* connectable)
 {
-    boost::unordered_map<UUID, Port*, UUID::Hasher>::const_iterator pos = port_map_.find(connectable->getUUID());
-    if(pos == port_map_.end()) {
+    std::unordered_map<UUID, QPointer<Port>, UUID::Hasher>::const_iterator pos = pimpl->port_map_.find(connectable->getUUID());
+    if(pos == pimpl->port_map_.end()) {
         return nullptr;
     }
 
@@ -101,24 +126,24 @@ NodeFactory* WidgetController::getNodeFactory()
 
 void WidgetController::hideTooltipView()
 {
-    if(tooltip_view_) {
-        tooltip_view_->hide();
-        tooltip_view_->deleteLater();
-        tooltip_view_ = nullptr;
+    if(pimpl->tooltip_view_) {
+        pimpl->tooltip_view_->hide();
+        pimpl->tooltip_view_->deleteLater();
+        pimpl->tooltip_view_ = nullptr;
     }
 }
 
 QGraphicsView* WidgetController::getTooltipView(const std::string& title)
 {
-    if(!tooltip_view_) {
-        tooltip_view_ = new QGraphicsView;
-        designer_->getDesignerView()->designerScene()->addWidget(tooltip_view_);
-        tooltip_view_->setWindowTitle(QString::fromStdString(title));
-        tooltip_view_->setScene(new QGraphicsScene);
-        tooltip_view_->setHidden(true);
+    if(!pimpl->tooltip_view_) {
+        pimpl->tooltip_view_ = new QGraphicsView;
+        designer_->getDesignerView()->designerScene()->addWidget(pimpl->tooltip_view_);
+        pimpl->tooltip_view_->setWindowTitle(QString::fromStdString(title));
+        pimpl->tooltip_view_->setScene(new QGraphicsScene);
+        pimpl->tooltip_view_->setHidden(true);
     }
 
-    return tooltip_view_;
+    return pimpl->tooltip_view_;
 }
 
 void WidgetController::setDesigner(Designer *designer)
@@ -128,18 +153,13 @@ void WidgetController::setDesigner(Designer *designer)
 
 CommandDispatcher* WidgetController::getCommandDispatcher() const
 {
-    return dispatcher_;
-}
-
-void WidgetController::setCommandDispatcher(CommandDispatcher* dispatcher)
-{
-    dispatcher_ = dispatcher;
+    return &dispatcher_;
 }
 
 void WidgetController::setStyleSheet(const QString &str)
 {
-    style_sheet_ = str;
-    designer_->overwriteStyleSheet(style_sheet_);
+    pimpl->style_sheet_ = str;
+    designer_->overwriteStyleSheet(pimpl->style_sheet_);
 }
 
 void WidgetController::startPlacingBox(QWidget *parent, const std::string &type, NodeStatePtr state, const QPoint &offset)
@@ -161,7 +181,7 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
 
     NodeBox::Ptr object(new NodeBox(settings_, content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
 
-    object->setStyleSheet(style_sheet_);
+    object->setStyleSheet(pimpl->style_sheet_);
     object->construct();
     object->setObjectName(content->getType().c_str());
     object->setLabel(type);
@@ -192,8 +212,8 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 
         NodeBox* box = new NodeBox(settings_, node_worker, adapter, icon);
 
-        box_map_[node_worker->getUUID()] = box;
-        proxy_map_[node_worker->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
+        pimpl->box_map_[node_worker->getUUID()] = box;
+        pimpl->proxy_map_[node_worker->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
 
         box->construct();
 
@@ -228,7 +248,7 @@ void WidgetController::nodeRemoved(NodeWorkerPtr node_worker)
         NodeBox* box = getBox(node_uuid);
         box->stop();
 
-        box_map_.erase(box_map_.find(node_uuid));
+        pimpl->box_map_.erase(pimpl->box_map_.find(node_uuid));
 
         designer_->removeBox(box);
     }
@@ -266,9 +286,9 @@ void WidgetController::connectorMessageAdded(Connectable* connector)
 void WidgetController::connectorMessageRemoved(Connectable *connector)
 {
     if(designer_) {
-        boost::unordered_map<UUID, Port*, UUID::Hasher>::iterator it = port_map_.find(connector->getUUID());
-        if(it != port_map_.end()) {
-            port_map_.erase(it);
+        auto it = pimpl->port_map_.find(connector->getUUID());
+        if(it != pimpl->port_map_.end()) {
+            pimpl->port_map_.erase(it);
         }
     }
 }
@@ -290,7 +310,7 @@ void WidgetController::connectorSignalRemoved(Connectable *connector)
 Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
 {
     if(designer_) {
-        Port* port = new Port(dispatcher_, this, connector);
+        Port* port = new Port(&dispatcher_, this, connector);
 
         if(box) {
             port->setFlipped(box->isFlipped());
@@ -300,6 +320,8 @@ Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLay
             QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
         }
 
+        QObject::connect(port, SIGNAL(destroyed(QObject*)), this, SLOT(portDestroyed(QObject*)));
+
         insertPort(layout, port);
 
         return port;
@@ -308,24 +330,29 @@ Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLay
     return nullptr;
 }
 
-
-void WidgetController::insertPort(QLayout* layout, Port* port)
+void WidgetController::portDestroyed(QObject *o)
 {
-    port_map_[port->getAdaptee()->getUUID()] = port;
-
-    layout->addWidget(port);
-}
-
-void WidgetController::foreachBox(boost::function<void (NodeBox*)> f, boost::function<bool (NodeBox*)> pred)
-{
-    Q_FOREACH(NodeWorker::Ptr n, graph_->nodes_) {
-        NodeBox* b = getBox(n->getUUID());
-        if(pred(b)) {
-            f(b);
+    Port* p = dynamic_cast<Port*>(o);
+    if(p) {
+        std::cerr << "search port" << std::endl;
+        for(auto it = pimpl->port_map_.begin(); it != pimpl->port_map_.end(); ) {
+            if(it->second == p) {
+                std::cerr << "erase port" << std::endl;
+                it = pimpl->port_map_.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
 }
 
+
+void WidgetController::insertPort(QLayout* layout, Port* port)
+{
+    pimpl->port_map_[port->getAdaptee()->getUUID()] = port;
+
+    layout->addWidget(port);
+}
 
 
 

@@ -63,7 +63,7 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    NodeWorker::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type, uuid);
+    NodeWorker::Ptr node = node_factory_->makeNode(type, uuid);
 
     node->setNodeState(saved_state);
 

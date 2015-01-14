@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/graph.h>
 #include <csapex/utility/assert.h>
-#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
 #include <QTreeWidgetItem>
@@ -18,44 +17,44 @@ Command::Command()
 {
 }
 
-bool Command::Access::executeCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
+bool Command::Access::executeCommand(Graph* graph, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::executeCommand(graph, widget_ctrl, cmd);
+    return Command::executeCommand(graph, node_factory, cmd);
 }
 
-bool Command::Access::undoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
+bool Command::Access::undoCommand(Graph* graph, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::undoCommand(graph, widget_ctrl, cmd);
+    return Command::undoCommand(graph, node_factory, cmd);
 }
 
-bool Command::Access::redoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
+bool Command::Access::redoCommand(Graph* graph, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::redoCommand(graph, widget_ctrl, cmd);
+    return Command::redoCommand(graph, node_factory, cmd);
 }
 
-void Command::init(Settings *settings, Graph* graph, ThreadPool *thread_pool, WidgetController* widget_ctrl)
+void Command::init(Settings *settings, Graph* graph, ThreadPool *thread_pool, NodeFactory* node_factory)
 {
     settings_ = settings;
     graph_ = graph;
     thread_pool_ = thread_pool;
-    widget_ctrl_ = widget_ctrl;
+    node_factory_ = node_factory;
 }
 
-bool Command::executeCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
+bool Command::executeCommand(Graph* graph, NodeFactory* node_factory, Command::Ptr cmd)
 {
     apex_assert_hard(graph);
-    apex_assert_hard(widget_ctrl);
+    apex_assert_hard(node_factory);
     cmd->graph_ = graph;
-    cmd->widget_ctrl_ = widget_ctrl;
+    cmd->node_factory_ = node_factory;
     return cmd->doExecute();
 }
 
-bool Command::undoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
+bool Command::undoCommand(Graph* graph, NodeFactory* node_factory, Command::Ptr cmd)
 {
     apex_assert_hard(graph);
-    apex_assert_hard(widget_ctrl);
+    apex_assert_hard(node_factory);
     cmd->graph_ = graph;
-    cmd->widget_ctrl_ = widget_ctrl;
+    cmd->node_factory_ = node_factory;
     if(!cmd->doUndo()) {
         undo_later.push_back(cmd);
         return false;
@@ -64,12 +63,12 @@ bool Command::undoCommand(Graph* graph, WidgetController* widget_ctrl, Command::
     return true;
 }
 
-bool Command::redoCommand(Graph* graph, WidgetController* widget_ctrl, Command::Ptr cmd)
+bool Command::redoCommand(Graph* graph, NodeFactory* node_factory, Command::Ptr cmd)
 {
     cmd->graph_ = graph;
-    cmd->widget_ctrl_ = widget_ctrl;
+    cmd->node_factory_ = node_factory;
     apex_assert_hard(cmd->graph_);
-    apex_assert_hard(cmd->widget_ctrl_);
+    apex_assert_hard(cmd->node_factory_);
     return cmd->doRedo();
 }
 

@@ -42,7 +42,7 @@ bool AddNode::doExecute()
         uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
     }
 
-    NodeWorker::Ptr node = widget_ctrl_->getNodeFactory()->makeNode(type_, uuid_, saved_state_);
+    NodeWorker::Ptr node = node_factory_->makeNode(type_, uuid_, saved_state_);
 
     if(!node) {
         return false;
