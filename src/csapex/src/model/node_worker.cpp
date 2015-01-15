@@ -556,7 +556,6 @@ void NodeWorker::processMessages()
         processInputs();
     }
 
-    stop_lock.unlock();
 
     if(!isSink()) {
         // send the messages
@@ -564,7 +563,6 @@ void NodeWorker::processMessages()
     } else {
         resetInputs();
     }
-
     Q_EMIT messageProcessed();
 }
 
