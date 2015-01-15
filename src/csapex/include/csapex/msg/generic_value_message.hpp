@@ -22,7 +22,7 @@ struct GenericValueMessage : public Message
 
     virtual ConnectionType::Ptr clone() const override
     {
-        Ptr new_msg(new GenericValueMessage<Type>(frame_id, stamp));
+        Ptr new_msg(new GenericValueMessage<Type>(frame_id, stamp_micro_seconds));
         new_msg->value = value;
         return new_msg;
     }

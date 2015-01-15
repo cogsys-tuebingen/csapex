@@ -20,12 +20,12 @@ public:
     typedef u_int64_t Stamp;
 
 protected:
-    Message(const std::string& name, const std::string& frame_id, Stamp stamp);
+    Message(const std::string& name, const std::string& frame_id, Stamp stamp_micro_seconds);
     virtual ~Message();
 
 public:
     std::string frame_id;
-    Stamp stamp;
+    Stamp stamp_micro_seconds;
 };
 
 struct NoMessage : public Message

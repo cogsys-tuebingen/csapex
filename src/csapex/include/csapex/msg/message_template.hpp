@@ -21,7 +21,7 @@ struct MessageTemplate : public Message {
     {
         Ptr new_msg(new Instance);
         new_msg->frame_id = frame_id;
-        new_msg->stamp = stamp;
+        new_msg->stamp_micro_seconds = stamp_micro_seconds;
         new_msg->value = value;
         return new_msg;
     }
