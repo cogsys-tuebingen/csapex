@@ -277,8 +277,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>88</width>
-          <height>88</height>
+          <width>274</width>
+          <height>144</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -358,7 +358,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>218</width>
+          <width>266</width>
           <height>199</height>
          </rect>
         </property>
@@ -660,7 +660,10 @@ p, li { white-space: pre-wrap; }
     <string>Select &amp;all</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+A</string>
+    <string notr="true">Ctrl+A</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionClear_selection">
@@ -706,6 +709,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>F1</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionAbout_CS_APEX">
@@ -838,22 +844,6 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Reloading plugins respawns all the contained nodes!</string>
-   </property>
-  </action>
-  <action name="actionUnloading">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Unloading</string>
-   </property>
-  </action>
-  <action name="actionLoading">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Loading</string>
    </property>
   </action>
   <action name="actionAuto_Reload">

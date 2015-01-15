@@ -34,6 +34,7 @@
 #include <QTreeWidget>
 #include <QSignalMapper>
 #include <thread>
+#include <QShortcut>
 
 using namespace csapex;
 
@@ -77,6 +78,15 @@ void CsApexWindow::construct()
     minimap_->setVisible(designer_->isMinimapEnabled());
     ui->actionDisplay_Minimap->setChecked(designer_->isMinimapEnabled());
 
+    auto forceShortcut = [this](QAction* action) {
+        QShortcut *shortcut = new QShortcut(action->shortcut(), this);
+        QObject::connect(shortcut, SIGNAL(activated()), action, SLOT(trigger()));
+    };
+    forceShortcut(ui->actionClear_selection);
+    forceShortcut(ui->actionSelect_all);
+    forceShortcut(ui->actionExit);
+    forceShortcut(ui->actionDelete_Selected);
+
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
     QObject::connect(ui->actionSaveAsCopy, SIGNAL(triggered()), this,  SLOT(saveAsCopy()));
@@ -113,6 +123,8 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
+
+
 
     QObject::connect(ui->actionAbout_CS_APEX, SIGNAL(triggered()), this, SLOT(about()));
     QObject::connect(ui->actionCopyright_Notices, SIGNAL(triggered()), this, SLOT(copyRight()));
@@ -332,19 +344,19 @@ void CsApexWindow::about()
 void CsApexWindow::copyRight()
 {
     QString copyright =
-    "<p>"
-    "<h1>UI</h1>"
-    "<h2>Icons</h2>"
-    "<h3>Silk icon set 1.3</h3>"
-    "<div>Made by Mark James, available from <a href=\"http://www.famfamfam.com/lab/icons/silk/\">famfamfam.com</a> "
-    "is licensed under <a href=\"http://creativecommons.org/licenses/by/2.5/\" title=\"Creative Commons BY 2.5\">CC BY 2.5</a>"
-    "</div>"
-    "<h3>Rounded UI</h3>"
-    "<div>Icon made by <a href=\"http://superstoked.se\" title=\"Robin Kylander\">Robin Kylander</a> "
-    "from <a href=\"http://www.flaticon.com\" title=\"Flaticon\">www.flaticon.com</a> "
-    "is licensed under <a href=\"http://creativecommons.org/licenses/by/3.0/\" title=\"Creative Commons BY 3.0\">CC BY 3.0</a>"
-    "</div>"
-    "</p>"
+            "<p>"
+            "<h1>UI</h1>"
+            "<h2>Icons</h2>"
+            "<h3>Silk icon set 1.3</h3>"
+            "<div>Made by Mark James, available from <a href=\"http://www.famfamfam.com/lab/icons/silk/\">famfamfam.com</a> "
+            "is licensed under <a href=\"http://creativecommons.org/licenses/by/2.5/\" title=\"Creative Commons BY 2.5\">CC BY 2.5</a>"
+            "</div>"
+            "<h3>Rounded UI</h3>"
+            "<div>Icon made by <a href=\"http://superstoked.se\" title=\"Robin Kylander\">Robin Kylander</a> "
+            "from <a href=\"http://www.flaticon.com\" title=\"Flaticon\">www.flaticon.com</a> "
+            "is licensed under <a href=\"http://creativecommons.org/licenses/by/3.0/\" title=\"Creative Commons BY 3.0\">CC BY 3.0</a>"
+            "</div>"
+            "</p>"
             ;
 
     QMessageBox::information(this, "Copyright", copyright);
