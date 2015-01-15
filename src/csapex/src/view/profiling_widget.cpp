@@ -17,7 +17,9 @@
 using namespace csapex;
 
 ProfilingWidget::ProfilingWidget(DesignerView *view, NodeBox *box, QWidget *parent)
-    : QWidget(parent), view_(view), box_(box), node_worker_(box->getNode()->getNodeWorker()), count_(0)
+    : QWidget(parent), view_(view), box_(box), node_worker_(box->getNode()->getNodeWorker()),
+      timer_history_pos_(0),
+      count_(0)
 {
     w_ = 300;
     h_ = 80;
@@ -25,6 +27,12 @@ ProfilingWidget::ProfilingWidget(DesignerView *view, NodeBox *box, QWidget *pare
     left_space = 50;
     padding = 5;
     line_height = 14.f;
+
+    //    timer_history_length = settings_.get<int>("timer_history_length", 15);
+    timer_history_length = 15;
+    timer_history_.resize(timer_history_length);
+    apex_assert_hard(timer_history_.size() == timer_history_length);
+    apex_assert_hard(timer_history_.capacity() == timer_history_length);
 
     setFixedSize(w_, h_);
 
@@ -40,6 +48,15 @@ void ProfilingWidget::reposition(double, double)
 
 void ProfilingWidget::paintEvent(QPaintEvent *)
 {
+    auto new_measurements = node_worker_->extractLatestTimers();
+    for(TimerPtr timer : new_measurements) {
+        timer_history_[timer_history_pos_] = timer;
+
+        if(++timer_history_pos_ >= (int) timer_history_.size()) {
+            timer_history_pos_ = 0;
+        }
+    }
+
     QPainter p(this);
 
     left = padding + left_space;
@@ -47,7 +64,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     up = padding;
     bottom = h_ - padding;
 
-    std::size_t history_length = node_worker_->timer_history_.size();
+    std::size_t history_length = timer_history_.size();
 
     content_width_ = right - left - 2 * padding;
     indiv_width_ = content_width_ / history_length;
@@ -56,7 +73,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     int n = history_length;
 
     int max_time_ms = 10;
-    const std::vector<Timer::Ptr>& h = node_worker_->timer_history_;
+    const std::vector<Timer::Ptr>& h = timer_history_;
     for(std::vector<Timer::Ptr>::const_iterator timer = h.begin(); timer != h.end(); ++timer) {
         const Timer::Ptr& t = *timer;
         if(!t) {
@@ -94,7 +111,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     p.drawLine(left, bottom, left, up);
 
 
-    if(node_worker_->timer_history_pos_ < 0) {
+    if(timer_history_pos_ < 0) {
         // no entries
         QFont font = p.font();
         font.setPixelSize(line_height * 2);
@@ -106,7 +123,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // update stats
     {
-        const Timer::Ptr& t = node_worker_->timer_history_[node_worker_->timer_history_pos_];
+        const Timer::Ptr& t = timer_history_[timer_history_pos_];
         if(t) {
             std::vector<std::pair<std::string, int> > names = t->entries();
             for(std::vector<std::pair<std::string, int> >::const_iterator it = names.begin(); it != names.end(); ++it) {
@@ -143,10 +160,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
             static const float min_opacity = 0.25f;
 
-            float op = ((time - node_worker_->timer_history_pos_ + n - 1) % n) / (float) n;
+            float op = ((time - timer_history_pos_ + n - 1) % n) / (float) n;
             p.setOpacity(min_opacity + op * (1.0f - min_opacity));
 
-            const Timer::Ptr& timer = node_worker_->timer_history_[time];
+            const Timer::Ptr& timer = timer_history_[time];
 
             if(timer) {
                 paintTimer(p, timer.get());
@@ -156,7 +173,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // time line
     p.setOpacity(0.8);
-    float pos = left + padding + (node_worker_->timer_history_pos_+1) * indiv_width_;
+    float pos = left + padding + (timer_history_pos_+1) * indiv_width_;
     QPen pen(QColor(255, 20, 20));
     pen.setWidth(3);
     p.setPen(pen);
@@ -217,16 +234,7 @@ float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& in
     f = std::max(0.0f, std::min(1.0f, f));
     float height = f * content_height_;
 
-
-    if(interval->name() == "io") {
-        int r,g,b;
-        r = 0;
-        g = 0;
-        b = 0;
-        p.setBrush(QBrush(QColor(r, g, b)));
-    } else {
-        p.setBrush(QBrush(steps_[interval->name()]));
-    }
+    p.setBrush(QBrush(steps_[interval->name()]));
 
 
     float w = indiv_width_ / (depth+1);

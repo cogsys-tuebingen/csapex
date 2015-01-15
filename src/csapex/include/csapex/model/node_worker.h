@@ -18,6 +18,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <vector>
+#include <atomic>
 
 namespace csapex {
 
@@ -25,20 +26,19 @@ struct NodeWorker : public QObject, public Unique
 {
     Q_OBJECT
 
-    friend class ProfilingWidget;
     friend class Node;
     friend class NodeBox;
 
 public:
     enum ActivityType {
         TICK,
-        PROCESS
+        PROCESS,
+        OTHER
     };
 
 public:
     typedef std::shared_ptr<NodeWorker> Ptr;
 
-    static const int DEFAULT_HISTORY_LENGTH;
     static const double DEFAULT_FREQUENCY;
 
 public:
@@ -124,6 +124,8 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    std::vector<TimerPtr> extractLatestTimers();
+
 public Q_SLOTS:
     void messageArrived(Connectable* source);
     void processMessages();
@@ -204,7 +206,7 @@ private:
     void publishParameters();
     void publishParameter(param::Parameter *p);
 
-    void processInputs(bool all_inputs_are_present);
+    void processInputs();
 
     void assertNotInGuiThread();
 
@@ -253,7 +255,7 @@ private:
     std::recursive_mutex sync;
     bool messages_waiting_to_be_sent;
 
-    int timer_history_pos_;
+    std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;
 
     bool thread_initialized_;
@@ -263,7 +265,7 @@ private:
     std::mutex pause_mutex_;
     std::condition_variable continue_;
 
-    bool profiling_;
+    std::atomic<bool> profiling_;
 };
 
 }

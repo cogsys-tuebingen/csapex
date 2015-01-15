@@ -22,7 +22,6 @@
 
 using namespace csapex;
 
-const int NodeWorker::DEFAULT_HISTORY_LENGTH = 15;
 const double NodeWorker::DEFAULT_FREQUENCY = 30.0;
 
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
@@ -34,17 +33,10 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false),
       messages_waiting_to_be_sent(false),
-      timer_history_pos_(-1),
       thread_initialized_(false), paused_(false), stop_(false),
       profiling_(false)
 {
-    std::size_t timer_history_length = settings_.get<int>("timer_history_length", DEFAULT_HISTORY_LENGTH);
-    timer_history_.resize(timer_history_length);
-    apex_assert_hard(timer_history_.size() == timer_history_length);
-    apex_assert_hard(timer_history_.capacity() == timer_history_length);
-
     apex_assert_hard(node_);
-
 
     tick_timer_ = new QTimer();
     setTickFrequency(DEFAULT_FREQUENCY);
@@ -236,10 +228,10 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), this, SLOT(parameterMessageArrived(Connectable*)));
 
 
-//        std::function<void(param::Parameter*)> deleter = [cin](param::Parameter*) mutable {
-//            cin->removeAllConnectionsNotUndoable();
-//        };
-//        p->destroyed.connect(deleter);
+        //        std::function<void(param::Parameter*)> deleter = [cin](param::Parameter*) mutable {
+        //            cin->removeAllConnectionsNotUndoable();
+        //        };
+        //        p->destroyed.connect(deleter);
 
         param_2_input_[p->name()] = cin;
         input_2_param_[cin] = p;
@@ -414,6 +406,11 @@ void NodeWorker::setProfiling(bool profiling)
 {
     profiling_ = profiling;
 
+    {
+        std::lock_guard<std::recursive_mutex> lock(timer_mutex_);
+        timer_history_.clear();
+    }
+
     if(profiling_) {
         Q_EMIT startProfiling(this);
     } else {
@@ -555,7 +552,9 @@ void NodeWorker::processMessages()
         //        }
     }
 
-    processInputs(all_inputs_are_present);
+    if(all_inputs_are_present) {
+        processInputs();
+    }
 
     stop_lock.unlock();
 
@@ -598,41 +597,55 @@ bool NodeWorker::areAllInputsAvailable()
 void NodeWorker::finishTimer(Timer::Ptr t)
 {
     t->finish();
-    if(++timer_history_pos_ >= (int) timer_history_.size()) {
-        timer_history_pos_ = 0;
-    }
-    timer_history_[timer_history_pos_] = t;
 
+    {
+        std::lock_guard<std::recursive_mutex> lock(timer_mutex_);
+        timer_history_.push_back(t);
+    }
     Q_EMIT timerStopped(this, t->stopTimeMs());
 }
 
-void NodeWorker::processInputs(bool all_inputs_are_present)
+std::vector<TimerPtr> NodeWorker::extractLatestTimers()
+{
+    std::lock_guard<std::recursive_mutex> lock(timer_mutex_);
+
+    std::vector<TimerPtr> result = timer_history_;
+    timer_history_.clear();
+    return result;
+}
+
+void NodeWorker::processInputs()
 {
     assertNotInGuiThread();
     std::lock_guard<std::recursive_mutex> lock(sync);
 
-    Timer::Ptr t(new Timer(getUUID()));
-    Q_EMIT timerStarted(this, PROCESS, t->startTimeMs());
+    Timer::Ptr t = nullptr;
 
-    node_->useTimer(t.get());
-    if(all_inputs_are_present){
-        try {
-            node_->process();
-
-            if(trigger_process_done_->isConnected()) {
-                t->step("trigger process done");
-                trigger_process_done_->trigger();
-            }
-
-        }  catch(const std::exception& e) {
-            node_->setError(true, e.what());
-        } catch(const std::string& s) {
-            node_->setError(true, "Uncatched exception (string) exception: " + s);
-        } catch(...) {
-            throw;
-        }
+    if(profiling_) {
+        t.reset(new Timer(getUUID()));
+        Q_EMIT timerStarted(this, PROCESS, t->startTimeMs());
     }
-    finishTimer(t);
+    node_->useTimer(t.get());
+
+    try {
+        node_->process();
+
+        if(trigger_process_done_->isConnected()) {
+            t->step("trigger process done");
+            trigger_process_done_->trigger();
+        }
+
+    }  catch(const std::exception& e) {
+        node_->setError(true, e.what());
+    } catch(const std::string& s) {
+        node_->setError(true, "Uncatched exception (string) exception: " + s);
+    } catch(...) {
+        throw;
+    }
+
+    if(t) {
+        finishTimer(t);
+    }
 
     if(isSink()) {
         messages_waiting_to_be_sent = false;
@@ -1164,12 +1177,21 @@ void NodeWorker::tick()
     }
 
 
-    Timer::Ptr t(new Timer(getUUID()));
-    Q_EMIT timerStarted(this, TICK, t->startTimeMs());
-    node_->useTimer(t.get());
+    {
+//        Timer::Ptr t = nullptr;
+//        if(profiling_) {
+//            t.reset(new Timer(getUUID()));
+//            Q_EMIT timerStarted(this, OTHER, t->startTimeMs());
+//        }
+//        node_->useTimer(t.get());
 
-    node_->checkConditions(false);
-    checkParameters();
+        node_->checkConditions(false);
+        checkParameters();
+
+//        if(t) {
+//            finishTimer(t);
+//        }
+    }
 
     if(!thread_initialized_) {
         thread::set_name(thread()->objectName().toStdString().c_str());
@@ -1184,10 +1206,18 @@ void NodeWorker::tick()
                 out->clearMessage();
             }
 
+            TimerPtr t = nullptr;
+            if(profiling_) {
+                t.reset(new Timer(getUUID()));
+                Q_EMIT timerStarted(this, TICK, t->startTimeMs());
+            }
+            node_->useTimer(t.get());
             node_->tick();
 
             if(trigger_tick_done_->isConnected()) {
-                t->step("trigger tick done");
+                if(t) {
+                    t->step("trigger tick done");
+                }
                 trigger_tick_done_->trigger();
             }
 
@@ -1201,10 +1231,13 @@ void NodeWorker::tick()
             Q_EMIT messagesWaitingToBeSent(messages_waiting_to_be_sent);
 
             trySendMessages();
+
+            if(t) {
+                finishTimer(t);
+            }
         }
     }
 
-    finishTimer(t);
 
     if(tick_immediate_) {
         Q_EMIT tickRequested();

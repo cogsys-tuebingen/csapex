@@ -386,6 +386,9 @@ void ActivityTimeline::Activity::update()
         color = QColor::fromRgbF(1.0, 0.2, 0.2, 1.0);
         break;
     case NodeWorker::TICK:
+        color = QColor::fromRgbF(0.2, 1.0, 0.2, 1.0);
+        break;
+    case NodeWorker::OTHER:
         color = QColor::fromRgbF(0.5, 0.5, 0.5, 1.0);
         break;
     }

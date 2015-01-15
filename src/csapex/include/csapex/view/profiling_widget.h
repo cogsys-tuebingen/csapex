@@ -43,6 +43,10 @@ private:
     float padding;
     float line_height;
 
+    std::size_t timer_history_length;
+    int timer_history_pos_;
+    std::vector<TimerPtr> timer_history_;
+
     float left;
     float right;
     float up;
