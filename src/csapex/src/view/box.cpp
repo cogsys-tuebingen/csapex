@@ -129,7 +129,9 @@ void NodeBox::construct()
     QObject::connect(worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(worker.get(), SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
 
+    enabledChange(worker->isEnabled());
     QObject::connect(worker.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
+
     QObject::connect(worker.get(), SIGNAL(messagesWaitingToBeSent(bool)), this, SLOT(blockedChange(bool)));
     QObject::connect(worker.get(), SIGNAL(threadChanged()), this, SLOT(updateThreadInformation()));
 
