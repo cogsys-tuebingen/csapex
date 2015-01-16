@@ -79,6 +79,8 @@ add_definitions("-DGIT_BRANCH=${GIT_BRANCH}")
 add_definitions("-DMAINTAINER=${csapex_MAINTAINER}")
 add_definitions("-DVERSION=${csapex_VERSION}")
 add_definitions("-DCSAPEX_BOOT_PLUGIN_DIR=\"${CSAPEX_BOOT_PLUGIN_DIR}\"")
+add_definitions("-DCSAPEX_VERSION=\"${csapex_VERSION}\"")
+
 
 ###########
 ## Build ##

@@ -210,7 +210,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 void Main::showMessage(const QString& msg)
 {
     if(splash->isVisible()) {
-        splash->showMessage(msg, Qt::AlignBottom | Qt::AlignRight, Qt::black);
+        splash->showMessage(msg, Qt::AlignTop | Qt::AlignRight, Qt::black);
     }
     app.processEvents();
 }

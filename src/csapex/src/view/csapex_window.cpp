@@ -324,7 +324,7 @@ void CsApexWindow::updateUndoInfo()
 void CsApexWindow::about()
 {
     std::stringstream ss;
-    ss << "<h1>cs::APEX 0.9</h1>";
+    ss << "<h1>cs::APEX " << CSAPEX_VERSION << "</h1>";
     ss << "<p>Based on QT " << QT_VERSION_STR ;
 #ifdef __GNUC__
     ss << " (GCC " << __VERSION__ << ")";
