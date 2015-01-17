@@ -11,7 +11,7 @@ QFrame#boxframe QLabel#label {
 /* box */
 QFrame#boxframe {
         background: rgb(200, 220, 200);
-        border: 2px solid rgb(35, 35, 35);
+        border: 2px solid rgb(90, 135, 80);
         border-radius: 24px;
         padding: 0;
 }
