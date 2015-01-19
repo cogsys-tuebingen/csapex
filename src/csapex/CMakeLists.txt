@@ -50,6 +50,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
+   LIBRARIES csapex_plugin_base
    CATKIN_DEPENDS utils_param utils_qt
    DEPENDS Boost console_bridge
    CFG_EXTRAS csapex-extras.cmake
@@ -91,41 +92,22 @@ include_directories(include
     ${OPENGL_INCLUDE_DIR}
 )
 
-
-set(SRC
-    src/command/add_connection.cpp
-    src/command/add_connector.cpp
-    src/command/add_fulcrum.cpp
-    src/command/add_node.cpp
-    src/command/command.cpp
-    src/command/create_thread.cpp
-    src/command/delete_connection.cpp
-    src/command/delete_connector.cpp
-    src/command/delete_fulcrum.cpp
-    src/command/delete_node.cpp
-    src/command/dispatcher.cpp
-    src/command/flip_sides.cpp
-    src/command/meta.cpp
-    src/command/minimize.cpp
-    src/command/modify_fulcrum.cpp
-    src/command/move_box.cpp
-    src/command/move_connection.cpp
-    src/command/move_fulcrum.cpp
-    src/command/switch_thread.cpp
-
-    src/core/bootstrap_plugin.cpp
+set(SRC_PLUGIN
     src/core/core_plugin.cpp
-    src/core/csapex_core.cpp
-    src/core/designerio.cpp
-    src/core/drag_io.cpp
-    src/core/graphio.cpp
-    src/core/settings.cpp
-    src/core/thread_pool.cpp
+    src/core/bootstrap_plugin.cpp
 
     src/factory/generic_node_factory.cpp
 
     src/manager/message_provider_manager.cpp
     src/manager/message_renderer_manager.cpp
+
+    src/msg/apex_message_provider.cpp
+    src/msg/message_factory.cpp
+    src/msg/message_provider.cpp
+    src/msg/message_renderer.cpp
+
+    src/plugin/plugin_loader.cpp
+    src/plugin/plugin_locator.cpp
 
     src/model/connectable.cpp
     src/model/connection.cpp
@@ -149,18 +131,10 @@ set(SRC
     src/model/tag.cpp
     src/model/unique.cpp
 
-    src/msg/apex_message_provider.cpp
     src/msg/input.cpp
-    src/msg/message.cpp
-    src/msg/message_factory.cpp
-    src/msg/message_provider.cpp
-    src/msg/message_renderer.cpp
     src/msg/output.cpp
+    src/msg/message.cpp
 
-    src/plugin/plugin_loader.cpp
-    src/plugin/plugin_locator.cpp
-
-    src/signal/signal.cpp
     src/signal/slot.cpp
     src/signal/trigger.cpp
 
@@ -180,12 +154,43 @@ set(SRC
     src/utility/stream_interceptor.cpp
     src/utility/stream_relay.cpp
     src/utility/thread.cpp
-    src/utility/timable.cpp
-    src/utility/timer.cpp
     src/utility/type.cpp
-    src/utility/uuid.cpp
     src/utility/widget_picker.cpp
     src/utility/yaml_node_builder.cpp
+    src/utility/timable.cpp
+    src/utility/timer.cpp
+    src/utility/uuid.cpp
+)
+
+set(SRC_APP
+    src/command/add_connection.cpp
+    src/command/add_connector.cpp
+    src/command/add_fulcrum.cpp
+    src/command/add_node.cpp
+    src/command/command.cpp
+    src/command/create_thread.cpp
+    src/command/delete_connection.cpp
+    src/command/delete_connector.cpp
+    src/command/delete_fulcrum.cpp
+    src/command/delete_node.cpp
+    src/command/dispatcher.cpp
+    src/command/flip_sides.cpp
+    src/command/meta.cpp
+    src/command/minimize.cpp
+    src/command/modify_fulcrum.cpp
+    src/command/move_box.cpp
+    src/command/move_connection.cpp
+    src/command/move_fulcrum.cpp
+    src/command/switch_thread.cpp
+
+    src/core/csapex_core.cpp
+    src/core/designerio.cpp
+    src/core/drag_io.cpp
+    src/core/graphio.cpp
+    src/core/settings.cpp
+    src/core/thread_pool.cpp
+
+    src/signal/signal.cpp
 
     src/view/activity_legend.cpp
     src/view/activity_timeline.cpp
@@ -218,12 +223,28 @@ set(SRC
 # BUILD THE LIBRARIES
 #
 
+add_library(csapex_plugin_base SHARED
+    ${SRC_PLUGIN}
+)
+
+target_link_libraries(csapex_plugin_base
+    ${QT_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${YAML_LIBRARIES}
+    ${TinyXML_LIBRARIES}
+    ${console_bridge_LIBRARIES}
+    Qt5::OpenGL
+)
+
 add_library(csapex_app SHARED
-    ${SRC}
-    ${QT_FORMS_HPP}
+    ${SRC_APP}
 )
 
 target_link_libraries(csapex_app
+    csapex_plugin_base
+
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
@@ -281,7 +302,6 @@ if(${CSAPEX_TESTING})
     add_executable(csapex_profile_unit_tests
         ${ALL_HEADERS}
         ${TESTS}
-        ${SRC_ESSENTIAL}
         ${SRC_PLUGIN}
         ${QT_PLUGIN}
         ${SRC_APP}
@@ -310,6 +330,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(TARGETS csapex_app
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_plugin_base
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})

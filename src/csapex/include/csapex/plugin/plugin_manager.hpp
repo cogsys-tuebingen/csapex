@@ -145,6 +145,8 @@ protected:
     std::string loadLibrary(const std::string& library_name, TiXmlElement* library)  {
         std::string library_path = library_name + ".so";
 
+        std::cerr << "loading library " << library_name << " @" << library_path << std::endl;
+
         std::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
         loaders_[library_name] = loader;
 

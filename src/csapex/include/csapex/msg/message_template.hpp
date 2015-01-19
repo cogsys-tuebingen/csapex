@@ -5,11 +5,15 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/message_traits.h>
 
-namespace csapex {
-namespace connection_types {
+namespace csapex
+{
+namespace connection_types
+{
 
 template <typename Type, class Instance>
-struct MessageTemplate : public Message {
+class MessageTemplate : public Message
+{
+public:
     typedef std::shared_ptr<Instance> Ptr;
     typedef std::shared_ptr<const Instance> ConstPtr;
 

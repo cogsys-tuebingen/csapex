@@ -1,5 +1,5 @@
 add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function)
-add_definitions(-g -rdynamic)
+#add_definitions(-g -rdynamic)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 set(CMAKE_AUTOMOC ON)

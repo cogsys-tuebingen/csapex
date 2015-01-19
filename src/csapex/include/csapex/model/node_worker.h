@@ -22,7 +22,7 @@
 
 namespace csapex {
 
-struct NodeWorker : public QObject, public Unique
+class NodeWorker : public QObject, public Unique
 {
     Q_OBJECT
 

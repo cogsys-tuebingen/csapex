@@ -13,8 +13,9 @@ namespace csapex
 namespace command
 {
 
-struct AddFulcrum : public Command
+class AddFulcrum : public Command
 {
+public:
     AddFulcrum(int connection_id, int sub_section_to_split, const QPoint& pos, int type);
 
 protected:

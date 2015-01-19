@@ -100,7 +100,7 @@ private:
     NodeAdapterFactory* node_adapter_factory_;
     Designer* designer_;
 
-    struct Impl;
+    class Impl;
     std::unique_ptr<Impl> pimpl;
 };
 

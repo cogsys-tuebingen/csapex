@@ -11,8 +11,9 @@ namespace csapex
 namespace command
 {
 
-struct AddConnector : public Command
+class AddConnector : public Command
 {
+public:
     AddConnector(const UUID &box_uuid, const std::string& label, const std::string& type, bool input, const UUID &uuid);
 
 protected:

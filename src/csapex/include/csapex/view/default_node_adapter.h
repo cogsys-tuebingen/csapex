@@ -12,7 +12,7 @@ class QComboBox;
 class QGroupBox;
 
 namespace qt_helper{
-struct Call;
+class Call;
 }
 
 namespace csapex

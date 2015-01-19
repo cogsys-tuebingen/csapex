@@ -13,8 +13,9 @@ namespace csapex
 namespace command
 {
 
-struct MoveFulcrum : public Command
+class MoveFulcrum : public Command
 {
+public:
     MoveFulcrum(int connection_id, int fulcrum_id, const QPointF& from, const QPointF& to);
 
     virtual std::string getType() const;
