@@ -356,7 +356,7 @@ void NodeWorker::stop()
     assertNotInGuiThread();
     node_->abort();
 
-    std::lock_guard<std::mutex> lock(stop_mutex_);
+    std::lock_guard<std::recursive_mutex> lock(stop_mutex_);
     stop_ = true;
 
     Q_FOREACH(Output* i, outputs_) {
@@ -380,7 +380,7 @@ void NodeWorker::stop()
 
 void NodeWorker::waitUntilFinished()
 {
-    std::unique_lock<std::mutex> stop_lock(stop_mutex_);
+    std::unique_lock<std::recursive_mutex> stop_lock(stop_mutex_);
 }
 
 void NodeWorker::reset()
@@ -497,8 +497,9 @@ void NodeWorker::processMessages()
     assertNotInGuiThread();
 
     // everything has a message here
-    std::unique_lock<std::mutex> stop_lock(stop_mutex_);
+    std::unique_lock<std::recursive_mutex> stop_lock(stop_mutex_);
     if(stop_) {
+        resetInputs();
         return;
     }
 
@@ -1169,7 +1170,7 @@ void NodeWorker::tick()
         }
     }
 
-    std::unique_lock<std::mutex> lock(stop_mutex_);
+    std::unique_lock<std::recursive_mutex> lock(stop_mutex_);
     if(stop_) {
         return;
     }

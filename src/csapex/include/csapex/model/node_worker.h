@@ -261,7 +261,7 @@ private:
     bool thread_initialized_;
     bool paused_;
     bool stop_;
-    std::mutex stop_mutex_;
+    std::recursive_mutex stop_mutex_;
     std::mutex pause_mutex_;
     std::condition_variable continue_;
 

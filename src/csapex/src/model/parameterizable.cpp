@@ -59,8 +59,7 @@ template void Parameterizable::doSetParameter<std::vector<double> >(const std::s
 
 void Parameterizable::addParameterCallback(param::Parameter* param, std::function<void(param::Parameter *)> cb)
 {
-//    connections_[param].push_back(param->parameter_changed.connect(std::bind(&Parameterizable::parameterChanged, this, std::placeholders::_1, cb)));
-    connections_[param].push_back(param->parameter_changed.connect([cb](param::Parameter* p) { cb(p); } ));
+    connections_[param].push_back(param->parameter_changed.connect([this,cb](param::Parameter* p) { this->parameterChanged(p, cb); } ));
     if(param->hasState()) {
         parameterChanged(param, cb);
     }
