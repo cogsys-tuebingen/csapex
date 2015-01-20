@@ -116,8 +116,9 @@ QFrame#boxframe[blocked="true"] {
 
 /* selected box */
 QFrame#boxframe[focused="true"] {
-                background-color: rgb(100,200,255);
-                border-style: dashed;
+        background-color: rgb(100,200,255);
+        border-color: rgb(50,100,200);
+        border-style: dashed;
 }
 QFrame#boxframe[focused="true"] QLabel {
         color: black!important;
