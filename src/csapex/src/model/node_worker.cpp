@@ -1358,3 +1358,5 @@ void NodeWorker::assertNotInGuiThread()
 {
     assert(this->thread() != QApplication::instance()->thread());
 }
+/// MOC
+#include "../../include/csapex/model/moc_node_worker.cpp"

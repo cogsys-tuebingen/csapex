@@ -284,3 +284,5 @@ void GraphIO::loadConnections(const YAML::Node &doc)
         }
     }
 }
+/// MOC
+#include "../../include/csapex/core/moc_graphio.cpp"

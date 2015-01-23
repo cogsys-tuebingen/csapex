@@ -226,3 +226,5 @@ void Input::notifyMessageProcessed()
         target->notifyMessageProcessed();
     }
 }
+/// MOC
+#include "../../include/csapex/msg/moc_input.cpp"

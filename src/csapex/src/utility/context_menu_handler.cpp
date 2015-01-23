@@ -26,3 +26,5 @@ void ContextMenuHandler::addHeader(QMenu &menu, const std::string &title)
     header->setFont(f);
     menu.addAction(header);
 }
+/// MOC
+#include "../../include/csapex/utility/moc_context_menu_handler.cpp"

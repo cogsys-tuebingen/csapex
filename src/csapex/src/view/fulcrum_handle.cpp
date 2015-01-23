@@ -41,3 +41,5 @@ bool FulcrumHandle::sceneEvent(QEvent *event)
 
     return r;
 }
+/// MOC
+#include "../../include/csapex/view/moc_fulcrum_handle.cpp"

@@ -31,7 +31,7 @@ public Q_SLOTS:
     void emitSelection();
 
 Q_SIGNALS:
-    void selectionChanged(QList<NodeWorker*>);
+    void nodeSelectionChanged(QList<NodeWorker*>);
 
     void nodeAdded(NodeWorker*);
     void nodeRemoved(NodeWorker*);

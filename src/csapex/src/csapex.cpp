@@ -174,7 +174,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         ActivityLegend* legend = new ActivityLegend;
         ActivityTimeline* timeline = new ActivityTimeline;
 
-        QObject::connect(legend, SIGNAL(selectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
+        QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
         QObject::connect(graph.get(), SIGNAL(nodeAdded(NodeWorkerPtr)), legend, SLOT(startTrackingNode(NodeWorkerPtr)));
         QObject::connect(graph.get(), SIGNAL(nodeRemoved(NodeWorkerPtr)), legend, SLOT(stopTrackingNode(NodeWorkerPtr)));

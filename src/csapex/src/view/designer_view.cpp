@@ -764,3 +764,5 @@ void DesignerView::selectAll()
         item->setSelected(true);
     }
 }
+/// MOC
+#include "../../include/csapex/view/moc_designer_view.cpp"

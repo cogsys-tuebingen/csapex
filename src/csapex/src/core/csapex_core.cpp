@@ -142,7 +142,7 @@ void CsApexCore::init(DragIO* dragio)
 
 CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
 {
-    assert(core_plugins_.find(plugin_name) != core_plugins_.end());
+//    assert(core_plugins_.find(plugin_name) != core_plugins_.end());
 
     const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->availableClasses(plugin_name);
 
@@ -384,3 +384,5 @@ void CsApexCore::load(const std::string &file)
 
     graph_worker_->setPause(false);
 }
+/// MOC
+#include "../../include/csapex/core/moc_csapex_core.cpp"

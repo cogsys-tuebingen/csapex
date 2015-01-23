@@ -167,3 +167,5 @@ NodeBox* MovableGraphicsProxyWidget::getBox()
 {
     return box_;
 }
+/// MOC
+#include "../../include/csapex/utility/moc_movable_graphics_proxy_widget.cpp"

@@ -457,3 +457,5 @@ void WidgetController::enableGridLock(bool enabled)
 
     Q_EMIT gridLockEnabled(enabled);
 }
+/// MOC
+#include "../../include/csapex/view/moc_widget_controller.cpp"

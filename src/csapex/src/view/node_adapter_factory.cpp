@@ -48,12 +48,13 @@ void NodeAdapterFactory::loadPlugins()
 
 void NodeAdapterFactory::rebuildPrototypes()
 {
+    return; // somehow this doesn't work with clang
     typedef std::pair<std::string, PluginConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
     Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
         const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;
 
         NodeAdapterBuilder::Ptr builder = constructor.construct();
-        node_adapter_builders_[builder->getWrappedType()] = builder;        
+        node_adapter_builders_[builder->getWrappedType()] = builder;
 
         constructor.unload_request->disconnect_all_slots();
         constructor.unload_request->connect(std::bind(&NodeAdapterFactory::unload, this));

@@ -177,3 +177,5 @@ bool FulcrumWidget::sceneEvent(QEvent *event)
 
     return r;
 }
+/// MOC
+#include "../../include/csapex/view/moc_fulcrum_widget.cpp"

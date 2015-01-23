@@ -61,12 +61,6 @@ std::pair<int,int> rgb2id(QRgb rgb)
     return std::make_pair(id, subsection);
 }
 
-QWidget* topLevelParentWidget (QWidget* widget)
-{
-    while (widget -> parentWidget()) widget = widget -> parentWidget() ;
-    return widget ;
-}
-
 QPointF centerPoint(Port* port)
 {
 
@@ -914,3 +908,5 @@ void DesignerScene::refresh()
 {
     invalidateSchema();
 }
+/// MOC
+#include "../../include/csapex/view/moc_designer_scene.cpp"

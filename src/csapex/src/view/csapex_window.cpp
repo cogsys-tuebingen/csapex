@@ -697,3 +697,5 @@ void CsApexWindow::loadView(YAML::Node &doc)
     designerio.loadBoxes(doc, widget_ctrl_.get());
 }
 
+/// MOC
+#include "../../include/csapex/view/moc_csapex_window.cpp"

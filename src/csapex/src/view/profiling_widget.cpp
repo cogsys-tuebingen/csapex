@@ -16,8 +16,8 @@
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(DesignerView *view, NodeBox *box, QWidget *parent)
-    : QWidget(parent), view_(view), box_(box), node_worker_(box->getNode()->getNodeWorker()),
+ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *parent)
+    : QWidget(parent), box_(box), node_worker_(box->getNode()->getNodeWorker()),
       timer_history_pos_(0),
       count_(0)
 {
@@ -248,3 +248,5 @@ float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& in
 
     return height;
 }
+/// MOC
+#include "../../include/csapex/view/moc_profiling_widget.cpp"

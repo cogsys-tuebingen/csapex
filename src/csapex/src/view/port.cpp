@@ -345,12 +345,12 @@ void Port::dropEvent(QDropEvent* e)
     }
 }
 
-void Port::enterEvent(QEvent *e)
+void Port::enterEvent(QEvent */*e*/)
 {
 
 }
 
-void Port::leaveEvent(QEvent *e)
+void Port::leaveEvent(QEvent */*e*/)
 {
     //    QObject::disconnect(this, SLOT(updateTooltip()));
 
@@ -383,3 +383,5 @@ QPoint Port::centerPoint()
     QPoint offset = 0.5 * (geometry().bottomRight() - geometry().topLeft());
     return topLeft() + offset;
 }
+/// MOC
+#include "../../include/csapex/view/moc_port.cpp"

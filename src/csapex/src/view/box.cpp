@@ -425,7 +425,7 @@ void NodeBox::blockedChange(bool val)
     ui->boxframe->setProperty("blocked", val);
 }
 
-void NodeBox::paintEvent(QPaintEvent* e)
+void NodeBox::paintEvent(QPaintEvent* /*e*/)
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker || !adapter_) {
@@ -638,3 +638,5 @@ void NodeBox::nodeStateChanged()
 
     move(worker->getNodeState()->getPos());
 }
+/// MOC
+#include "../../include/csapex/view/moc_box.cpp"

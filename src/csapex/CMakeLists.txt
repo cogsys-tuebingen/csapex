@@ -20,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS utils_param utils_qt class_loader)
 
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
-
 set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 
 find_package(OpenGL REQUIRED)
@@ -56,6 +55,21 @@ catkin_package(
    CFG_EXTRAS csapex-extras.cmake
 )
 
+#
+# IWYU
+#
+set(CSAPEX_IWYU 0 CACHE BOOL "optimize using iwyu?")
+if(${CSAPEX_IWYU})
+
+include(CMakeForceCompiler)
+CMAKE_FORCE_C_COMPILER(include-what-you-use CLANG)
+CMAKE_FORCE_CXX_COMPILER(include-what-you-use CLANG)
+add_custom_target(iwyu
+COMMAND make -k 3>&1 1>&2 2>&3 | tee iwyu.log
+COMMAND iwyu-fix_includes.py < iwyu.log)
+
+endif()
+
 ###########
 ## INFO  ##
 ###########
@@ -75,6 +89,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+# REMOVE THIS SOMEHOW...
 add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
 add_definitions("-DGIT_BRANCH=${GIT_BRANCH}")
 add_definitions("-DMAINTAINER=${csapex_MAINTAINER}")
@@ -160,9 +175,7 @@ set(SRC_PLUGIN
     src/utility/timable.cpp
     src/utility/timer.cpp
     src/utility/uuid.cpp
-)
 
-set(SRC_APP
     src/command/add_connection.cpp
     src/command/add_connector.cpp
     src/command/add_fulcrum.cpp
@@ -213,9 +226,13 @@ set(SRC_APP
     src/view/profiling_widget.cpp
     src/view/widget_controller.cpp
 
+
     ${QT_RESOURCES}
 
     ${QT_UI}
+)
+
+set(SRC_APP
 )
 
 
@@ -277,6 +294,7 @@ add_custom_command(TARGET cfg POST_BUILD
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
+
 
 #
 # TESTS

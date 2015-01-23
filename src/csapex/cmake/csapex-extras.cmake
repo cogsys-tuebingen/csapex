@@ -1,4 +1,4 @@
-add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function)
+add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function -Wno-deprecated-register)
 #add_definitions(-g -rdynamic)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
