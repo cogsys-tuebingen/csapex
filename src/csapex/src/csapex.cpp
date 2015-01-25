@@ -38,8 +38,12 @@ namespace po = boost::program_options;
 using namespace csapex;
 
 
-CsApexApp::CsApexApp(int& argc, char** argv, bool headless, bool fatal_exceptions)
-    : QApplication(argc, argv, !headless), fatal_exceptions_(fatal_exceptions)
+CsApexApp::CsApexApp(int& argc, char** argv, bool fatal_exceptions)
+    : QApplication(argc, argv), fatal_exceptions_(fatal_exceptions)
+{}
+
+CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, bool fatal_exceptions)
+    : QCoreApplication(argc, argv), fatal_exceptions_(fatal_exceptions)
 {}
 
 bool CsApexApp::notify(QObject* receiver, QEvent* event) {
@@ -77,8 +81,43 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
     return true;
 }
 
-Main::Main(CsApexApp& a)
-    : app(a), splash(nullptr)
+bool CsApexCoreApp::notify(QObject* receiver, QEvent* event) {
+    try {
+        return QCoreApplication::notify(receiver, event);
+
+    } catch(const std::exception& e) {
+        ErrorState* er = dynamic_cast<ErrorState*> (receiver);
+        NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
+
+        if(fatal_exceptions_) {
+            std::cerr << "caught an exception in --fatal-exceptions mode: Abort!" << std::endl;
+            std::abort();
+        }
+
+        std::cerr << "exception: " << e.what() << std::endl;
+
+        if(er) {
+            er->setError(true, e.what());
+        } else if(bw) {
+            bw->triggerError(true, e.what());
+        } else {
+            std::cerr << "Uncatched exception:" << e.what() << std::endl;
+        }
+
+        return false;
+
+    } catch(const std::string& s) {
+        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
+    } catch(...) {
+        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
+        std::abort();
+    }
+
+    return true;
+}
+
+Main::Main(std::unique_ptr<QCoreApplication> &&a)
+    : app(std::move(a)), splash(nullptr)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -92,7 +131,7 @@ int Main::run()
 {
     csapex::error_handling::init();
 
-    int result = app.exec();
+    int result = app->exec();
 
     return result;
 }
@@ -154,11 +193,10 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
     QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Node&)), &thread_pool, SLOT(saveSettings(YAML::Node&)));
     QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), &thread_pool, SLOT(loadSettings(YAML::Node&)));
 
-
     if(!headless) {
-        app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+        app->processEvents();
 
-        app.processEvents();
+        app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
         WidgetControllerPtr widget_control (new WidgetController(settings, dispatcher, graph, node_factory.get(), node_adapter_factory.get()));
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
@@ -212,7 +250,7 @@ void Main::showMessage(const QString& msg)
     if(splash->isVisible()) {
         splash->showMessage(msg, Qt::AlignTop | Qt::AlignRight, Qt::black);
     }
-    app.processEvents();
+    app->processEvents();
 }
 
 
@@ -264,7 +302,13 @@ int main(int argc, char** argv)
     }
 
     // filters all qt parameters from argv
-    CsApexApp app(argc, argv, headless, fatal_exceptions);
+
+    std::unique_ptr<QCoreApplication> app;
+    if(headless) {
+        app.reset(new CsApexCoreApp(argc, argv, fatal_exceptions));
+    } else {
+        app.reset(new CsApexApp(argc, argv, fatal_exceptions));
+    }
 
     // now check for remaining parameters
     po::variables_map vm;
@@ -311,7 +355,7 @@ int main(int argc, char** argv)
     bool thread_grouping = vm.count("thread_grouping");
 
     // start the app
-    Main m(app);
+    Main m(std::move(app));
     return m.main(headless, threadless, thread_grouping, input, path_to_bin, additional_args);
 }
 
