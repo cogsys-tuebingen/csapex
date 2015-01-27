@@ -58,17 +58,17 @@ catkin_package(
 #
 # IWYU
 #
-set(CSAPEX_IWYU 0 CACHE BOOL "optimize using iwyu?")
-if(${CSAPEX_IWYU})
+#set(CSAPEX_IWYU 0 CACHE BOOL "optimize using iwyu?")
+#if(${CSAPEX_IWYU})
 
-include(CMakeForceCompiler)
-CMAKE_FORCE_C_COMPILER(include-what-you-use CLANG)
-CMAKE_FORCE_CXX_COMPILER(include-what-you-use CLANG)
-add_custom_target(iwyu
-COMMAND make -k 3>&1 1>&2 2>&3 | tee iwyu.log
-COMMAND iwyu-fix_includes.py < iwyu.log)
+#include(CMakeForceCompiler)
+#CMAKE_FORCE_C_COMPILER(include-what-you-use CLANG)
+#CMAKE_FORCE_CXX_COMPILER(include-what-you-use CLANG)
+#add_custom_target(iwyu
+#COMMAND make -k 3>&1 1>&2 2>&3 | tee iwyu.log
+#COMMAND iwyu-fix_includes.py < iwyu.log)
 
-endif()
+#endif()
 
 ###########
 ## INFO  ##
