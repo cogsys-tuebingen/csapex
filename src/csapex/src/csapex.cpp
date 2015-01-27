@@ -99,7 +99,7 @@ int Main::run()
 
 int Main::main(bool headless, bool threadless, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
-    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
         QPixmap pm(":/apex_splash.png");
         splash = new QSplashScreen (pm);

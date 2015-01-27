@@ -48,7 +48,6 @@ void NodeAdapterFactory::loadPlugins()
 
 void NodeAdapterFactory::rebuildPrototypes()
 {
-    return; // somehow this doesn't work with clang
     typedef std::pair<std::string, PluginConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
     Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
         const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;

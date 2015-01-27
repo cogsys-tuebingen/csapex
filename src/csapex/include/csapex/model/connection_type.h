@@ -45,7 +45,7 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_) const;
 
-    virtual void writeRaw(const std::string& file, const std::string &suffix) const;
+    virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
 
 protected:
     void setName(const std::string& name);

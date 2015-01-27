@@ -78,7 +78,7 @@ bool ConnectionType::isValid() const
     return true;
 }
 
-void ConnectionType::writeRaw(const std::string &/*file*/, const std::string& /*suffix*/) const
+void ConnectionType::writeRaw(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
 {
     std::cerr << "error: writeRaw not implemented for message type " << name() << std::endl;
 }
