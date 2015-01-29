@@ -21,6 +21,7 @@
 #include <csapex/view/activity_timeline.h>
 #include <csapex/view/activity_legend.h>
 #include <csapex/view/minimap_widget.h>
+#include <csapex/info.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>
@@ -324,18 +325,14 @@ void CsApexWindow::updateUndoInfo()
 void CsApexWindow::about()
 {
     std::stringstream ss;
-    ss << "<h1>cs::APEX " << CSAPEX_VERSION << "</h1>";
+    ss << "<h1>cs::APEX " << csapex::info::CSAPEX_VERSION << "</h1>";
     ss << "<p>Based on QT " << QT_VERSION_STR ;
 #ifdef __GNUC__
     ss << " (GCC " << __VERSION__ << ")";
 #endif
     ss << "</p>";
     ss << "<p>Built on " << __DATE__ << " at " << __TIME__ << "</p>";
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
-    ss << "<p>From revision " << TOSTRING(GIT_COMMIT_HASH) << " (" << TOSTRING(GIT_BRANCH) << ")</p>";
+    ss << "<p>From revision " << csapex::info::GIT_COMMIT_HASH << " (" << csapex::info::GIT_BRANCH << ")</p>";
     ss << "<p>The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</p>";
 
     QMessageBox::about(this, "About cs::APEX", ss.str().c_str());

@@ -89,13 +89,19 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# REMOVE THIS SOMEHOW...
-add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
-add_definitions("-DGIT_BRANCH=${GIT_BRANCH}")
-add_definitions("-DMAINTAINER=${csapex_MAINTAINER}")
-add_definitions("-DVERSION=${csapex_VERSION}")
-add_definitions("-DCSAPEX_BOOT_PLUGIN_DIR=\"${CSAPEX_BOOT_PLUGIN_DIR}\"")
-add_definitions("-DCSAPEX_VERSION=\"${csapex_VERSION}\"")
+# generate meta infos
+set(INFO ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h)
+
+file(WRITE ${INFO} "namespace csapex {\nnamespace info {\n")
+
+file(APPEND ${INFO} "static const std::string GIT_COMMIT_HASH { \"${GIT_COMMIT_HASH}\" };\n")
+file(APPEND ${INFO} "static const std::string GIT_BRANCH { \"${GIT_BRANCH}\" };\n")
+file(APPEND ${INFO} "static const std::string MAINTAINER { \"${csapex_MAINTAINER}\" };\n")
+file(APPEND ${INFO} "static const std::string VERSION { \"${csapex_VERSION}\" };\n")
+file(APPEND ${INFO} "static const std::string CSAPEX_BOOT_PLUGIN_DIR { \"${CSAPEX_BOOT_PLUGIN_DIR}\" };\n")
+file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_VERSION}\" };\n")
+
+file(APPEND ${INFO} "}\n}\n\n")
 
 
 ###########

@@ -23,6 +23,7 @@
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
+#include <csapex/info.h>
 
 /// SYSTEM
 #include <fstream>
@@ -182,7 +183,7 @@ void CsApexCore::reloadCorePlugin(const std::string& plugin_name)
 
 void CsApexCore::boot()
 {
-    std::string dir_string = CSAPEX_BOOT_PLUGIN_DIR;
+    std::string dir_string = csapex::info::CSAPEX_BOOT_PLUGIN_DIR;
 
     boost::filesystem::path directory(dir_string);
     boost::filesystem::directory_iterator dir(directory);
