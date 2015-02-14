@@ -167,3 +167,5 @@ std::string BoxDialog::getName()
     return name_edit_->text().toStdString();
 }
 
+/// MOC
+#include "../../include/csapex/view/moc_box_dialog.cpp"

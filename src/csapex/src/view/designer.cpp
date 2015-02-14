@@ -240,3 +240,5 @@ void Designer::displayMinimap(bool display)
 
     Q_EMIT minimapEnabled(display);
 }
+/// MOC
+#include "../../include/csapex/view/moc_designer.cpp"

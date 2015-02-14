@@ -207,3 +207,5 @@ void Connectable::setSequenceNumber(int seq_no)
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     seq_no_ = seq_no;
 }
+/// MOC
+#include "../../include/csapex/model/moc_connectable.cpp"

@@ -41,7 +41,7 @@ void MinimapWidget::mousePressEvent(QMouseEvent *me)
     }
 }
 
-void MinimapWidget::mouseReleaseEvent(QMouseEvent *me)
+void MinimapWidget::mouseReleaseEvent(QMouseEvent */*me*/)
 {
     dragging_ = false;
 }
@@ -77,7 +77,7 @@ void MinimapWidget::emitPositionRequest(QMouseEvent *me)
     Q_EMIT positionRequest(pos);
 }
 
-void MinimapWidget::paintEvent(QPaintEvent* event)
+void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
 {
     int max_length = 300;
 
@@ -151,3 +151,5 @@ void MinimapWidget::paintEvent(QPaintEvent* event)
     painter.setBrush(brush_rect);
     painter.drawRect(QRectF(tl_view, br_view));
 }
+/// MOC
+#include "../../include/csapex/view/moc_minimap_widget.cpp"

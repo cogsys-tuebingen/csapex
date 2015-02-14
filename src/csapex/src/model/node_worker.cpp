@@ -425,7 +425,7 @@ bool NodeWorker::isProfiling() const
 
 void NodeWorker::pause(bool pause)
 {
-    std::lock_guard<std::mutex> lock(pause_mutex_);
+    std::lock_guard<std::recursive_mutex> lock(pause_mutex_);
     paused_ = pause;
     continue_.notify_all();
 }
@@ -440,7 +440,7 @@ void NodeWorker::messageArrived(Connectable *s)
     assertNotInGuiThread();
 
     {
-        std::unique_lock<std::mutex> lock(pause_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(pause_mutex_);
         while(paused_) {
             continue_.wait(lock);
         }
@@ -1164,7 +1164,7 @@ void NodeWorker::tick()
 
 
     {
-        std::unique_lock<std::mutex> pause_lock(pause_mutex_);
+        std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
         while(paused_) {
             continue_.wait(pause_lock);
         }
@@ -1359,3 +1359,5 @@ void NodeWorker::assertNotInGuiThread()
 {
     assert(this->thread() != QApplication::instance()->thread());
 }
+/// MOC
+#include "../../include/csapex/model/moc_node_worker.cpp"

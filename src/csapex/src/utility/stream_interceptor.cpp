@@ -131,3 +131,5 @@ void StreamInterceptor::stop()
 }
 
 
+/// MOC
+#include "../../include/csapex/utility/moc_stream_interceptor.cpp"

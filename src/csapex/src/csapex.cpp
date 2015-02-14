@@ -138,6 +138,7 @@ int Main::run()
 
 int Main::main(bool headless, bool threadless, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
+//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
         QPixmap pm(":/apex_splash.png");
         splash = new QSplashScreen (pm);
@@ -211,7 +212,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
         ActivityLegend* legend = new ActivityLegend;
         ActivityTimeline* timeline = new ActivityTimeline;
 
-        QObject::connect(legend, SIGNAL(selectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
+        QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
         QObject::connect(graph.get(), SIGNAL(nodeAdded(NodeWorkerPtr)), legend, SLOT(startTrackingNode(NodeWorkerPtr)));
         QObject::connect(graph.get(), SIGNAL(nodeRemoved(NodeWorkerPtr)), legend, SLOT(stopTrackingNode(NodeWorkerPtr)));
@@ -359,3 +360,5 @@ int main(int argc, char** argv)
     return m.main(headless, threadless, thread_grouping, input, path_to_bin, additional_args);
 }
 
+/// MOC
+#include "moc_csapex.cpp"

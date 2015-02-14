@@ -51,71 +51,6 @@ namespace {
 
 
 /// UI HANDLES
-QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size,
-                                csapex::ContextMenuHandler *context_handler)
-{
-    apex_assert_hard(min<=max);
-
-    QHBoxLayout *internal_layout = new QHBoxLayout;
-
-    QSpinBox* spinner = new QSpinBox;
-    spinner->setMinimum(min);
-    spinner->setMaximum(max);
-    spinner->setValue(def);
-    spinner->setSingleStep(step_size);
-
-    QLabel* label = new QLabel(name.c_str());
-    if(context_handler) {
-        label->setContextMenuPolicy(Qt::CustomContextMenu);
-        context_handler->setParent(label);
-        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
-    }
-
-    internal_layout->addWidget(label);
-    internal_layout->addWidget(spinner);
-    layout->addLayout(internal_layout);
-
-    return spinner;
-}
-
-QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max,
-                              csapex::ContextMenuHandler *context_handler) {
-    apex_assert_hard(min<=max);
-
-    QHBoxLayout* internal_layout = new QHBoxLayout;
-
-    QSlider* slider = new QSlider(Qt::Horizontal);
-    slider->setMinimum(min);
-    slider->setMaximum(max);
-    slider->setValue(def);
-    slider->setMinimumWidth(100);
-
-    QWrapper::QSpinBoxExt* display = new QWrapper::QSpinBoxExt;
-    display->setMinimum(min);
-    display->setMaximum(max);
-    display->setValue(def);
-
-    QLabel* label = new QLabel(name.c_str());
-    if(context_handler) {
-        label->setContextMenuPolicy(Qt::CustomContextMenu);
-        context_handler->setParent(label);
-        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
-    }
-
-    internal_layout->addWidget(label);
-    internal_layout->addWidget(slider);
-    internal_layout->addWidget(display);
-
-    layout->addLayout(internal_layout);
-
-    QObject::connect(slider, SIGNAL(valueChanged(int)),     display, SLOT(setValue(int)));
-    QObject::connect(slider, SIGNAL(rangeChanged(int,int)), display, SLOT(setRange(int,int)));
-    QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
-
-
-    return slider;
-}
-
 QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step,
                                     csapex::ContextMenuHandler *context_handler) {
     apex_assert_hard(min<=max);
@@ -370,11 +305,6 @@ void DefaultNodeAdapterBridge::executeModelCallback(Function cb)
     cb();
 }
 
-void DefaultNodeAdapterBridge::nodeModelChangedEvent()
-{
-    parent_->nodeModelChangedEvent();
-}
-
 void DefaultNodeAdapterBridge::setupAdaptiveUi()
 {
     parent_->setupAdaptiveUi();
@@ -398,7 +328,6 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 DefaultNodeAdapter::DefaultNodeAdapter(NodeWorker *adaptee, WidgetController *widget_ctrl)
     : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(nullptr)
 {
-    QObject::connect(adaptee, SIGNAL(nodeModelChanged()), &bridge, SLOT(nodeModelChangedEvent()));
 }
 
 DefaultNodeAdapter::~DefaultNodeAdapter()
@@ -1147,3 +1076,5 @@ void DefaultNodeAdapter::stop()
     NodeAdapter::stop();
     bridge.disconnect();
 }
+/// MOC
+#include "../../include/csapex/view/moc_default_node_adapter.cpp"

@@ -12,7 +12,9 @@
 namespace csapex
 {
 
-struct NodeState : public Memento {
+class NodeState : public Memento
+{
+public:
     typedef std::shared_ptr<NodeState> Ptr;
     typedef boost::signals2::signal<void()> SignalImpl;
     typedef std::shared_ptr< SignalImpl > Signal;

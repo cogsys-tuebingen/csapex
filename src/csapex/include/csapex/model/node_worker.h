@@ -22,7 +22,7 @@
 
 namespace csapex {
 
-struct NodeWorker : public QObject, public Unique
+class NodeWorker : public QObject, public Unique
 {
     Q_OBJECT
 
@@ -173,7 +173,6 @@ Q_SIGNALS:
     void connectorDisabled(Connectable*);
 
     void nodeStateChanged();
-    void nodeModelChanged();
     void threadChanged();
 
     void threadSwitchRequested(QThread*, int);
@@ -262,8 +261,8 @@ private:
     bool paused_;
     bool stop_;
     std::recursive_mutex stop_mutex_;
-    std::mutex pause_mutex_;
-    std::condition_variable continue_;
+    std::recursive_mutex pause_mutex_;
+    std::condition_variable_any continue_;
 
     std::atomic<bool> profiling_;
 };

@@ -1,3 +1,7 @@
+# GENERATED #
+#############
+src/csapex/include/csapex/info.h
+
 # TESTS #
 #########
 tests/coverage

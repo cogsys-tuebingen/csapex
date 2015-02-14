@@ -7,8 +7,9 @@
 namespace csapex {
 namespace connection_types {
 
-struct Signal : public ConnectionType
+class Signal : public ConnectionType
 {
+public:
     typedef std::shared_ptr<Signal> Ptr;
 
     Signal();

@@ -13,8 +13,9 @@ namespace csapex
 namespace command
 {
 
-struct DeleteFulcrum : public Command
+class DeleteFulcrum : public Command
 {
+public:
     DeleteFulcrum(int connection_id, int fulcrum_id);
 
 protected:

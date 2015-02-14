@@ -11,7 +11,9 @@ namespace csapex
 namespace command
 {
 
-struct DeleteConnection : public Meta {
+class DeleteConnection : public Meta
+{
+public:
     DeleteConnection(Connectable* a, Connectable* b);
 
 protected:

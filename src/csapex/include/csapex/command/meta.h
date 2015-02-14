@@ -14,7 +14,9 @@ namespace csapex
 namespace command
 {
 
-struct Meta : public Command {
+class Meta : public Command
+{
+public:
     typedef std::shared_ptr<Meta> Ptr;
 
     Meta(const std::string& type);

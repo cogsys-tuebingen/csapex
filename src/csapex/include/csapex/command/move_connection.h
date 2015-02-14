@@ -11,8 +11,9 @@ namespace csapex
 namespace command
 {
 
-struct MoveConnection : public Meta
+class MoveConnection : public Meta
 {
+public:
     MoveConnection(Connectable* a, Connectable* b);
 
 private:

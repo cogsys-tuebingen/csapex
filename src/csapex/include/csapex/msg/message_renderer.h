@@ -41,7 +41,7 @@ public:
         if(real_msg) {
             return doRender(*real_msg);
         } else {
-            throw std::runtime_error(std::string("cannot render message of type ") + typeid(*msg).name());
+            throw std::runtime_error(std::string("cannot render message of type ") + typeid(Message).name());
         }
     }
 

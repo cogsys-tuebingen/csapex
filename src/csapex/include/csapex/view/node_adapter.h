@@ -29,9 +29,6 @@ public:
 
     void doSetupUi(QBoxLayout* layout);
 
-    virtual void nodeModelChangedEvent();
-    virtual void updateDynamicGui(QBoxLayout* layout);
-
     virtual void stop();
 
     virtual MementoPtr getState() const;

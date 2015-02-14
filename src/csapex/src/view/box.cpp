@@ -124,7 +124,6 @@ void NodeBox::construct()
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
     QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    QObject::connect(worker.get(), SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
     QObject::connect(worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
     QObject::connect(worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(worker.get(), SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
@@ -425,7 +424,7 @@ void NodeBox::blockedChange(bool val)
     ui->boxframe->setProperty("blocked", val);
 }
 
-void NodeBox::paintEvent(QPaintEvent* e)
+void NodeBox::paintEvent(QPaintEvent* /*e*/)
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker || !adapter_) {
@@ -516,13 +515,6 @@ void NodeBox::getInformation()
 void NodeBox::refreshStylesheet()
 {
     setStyleSheet(styleSheet());
-}
-
-void NodeBox::eventModelChanged()
-{
-    setupUi();
-
-    adapter_->updateDynamicGui(ui->content);
 }
 
 void NodeBox::showProfiling(bool show)
@@ -638,3 +630,5 @@ void NodeBox::nodeStateChanged()
 
     move(worker->getNodeState()->getPos());
 }
+/// MOC
+#include "../../include/csapex/view/moc_box.cpp"

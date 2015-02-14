@@ -259,7 +259,7 @@ void NodeFactory::unloadNode(NodeConstructorPtr p, UUID uuid)
 }
 
 
-void NodeFactory::reloadNode(NodeConstructorPtr p, UUID uuid)
+void NodeFactory::reloadNode(NodeConstructorPtr /*p*/, UUID uuid)
 {
     reload_connections_[uuid].disconnect();
 

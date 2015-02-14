@@ -22,9 +22,9 @@ public: \
     } \
 }; \
 }\
-CSAPEX_REGISTER_CLASS(Namespace::Adapter##Builder, csapex::NodeAdapterBuilder)
+CSAPEX_REGISTER_CLASS(Namespace::Adapter##Builder,csapex::NodeAdapterBuilder)
 
 #define CSAPEX_REGISTER_NODE_ADAPTER(Adapter, Adaptee) \
-CSAPEX_REGISTER_NODE_ADAPTER_NS(csapex, Adapter, Adaptee)
+CSAPEX_REGISTER_NODE_ADAPTER_NS(csapex,Adapter,Adaptee)
 
 #endif // REGISTER_NODE_ADAPTER_H

@@ -471,3 +471,5 @@ Command::Ptr Graph::deleteConnectionById(int id)
 
     return cmd;
 }
+/// MOC
+#include "../../include/csapex/model/moc_graph.cpp"

@@ -28,14 +28,14 @@ bool ApexMessageProvider::hasNext()
     return (bool) msg_;
 }
 
-connection_types::Message::Ptr ApexMessageProvider::next(std::size_t slot)
+connection_types::Message::Ptr ApexMessageProvider::next(std::size_t /*slot*/)
 {
     connection_types::Message::Ptr r = msg_;
     msg_.reset();
     return r;
 }
 
-std::string ApexMessageProvider::getLabel(std::size_t slot) const
+std::string ApexMessageProvider::getLabel(std::size_t /*slot*/) const
 {
     return msg_->toType()->name();
 }
@@ -52,7 +52,7 @@ Memento::Ptr ApexMessageProvider::getState() const
     return r;
 }
 
-void ApexMessageProvider::setParameterState(Memento::Ptr memento)
+void ApexMessageProvider::setParameterState(Memento::Ptr /*memento*/)
 {
 
 }

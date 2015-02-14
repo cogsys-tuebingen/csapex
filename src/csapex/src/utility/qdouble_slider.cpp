@@ -139,3 +139,5 @@ void QDoubleSlider::emitRangeChanged(int min, int max)
 
     Q_EMIT doubleRangeChanged(min_, max_);
 }
+/// MOC
+#include "../../include/csapex/utility/moc_qdouble_slider.cpp"

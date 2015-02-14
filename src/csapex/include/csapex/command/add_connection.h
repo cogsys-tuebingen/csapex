@@ -13,8 +13,9 @@ namespace csapex
 namespace command
 {
 
-struct AddConnection : public Command
+class AddConnection : public Command
 {
+public:
     AddConnection(const UUID &from_uuid, const UUID &to_uuid);
 
 protected:

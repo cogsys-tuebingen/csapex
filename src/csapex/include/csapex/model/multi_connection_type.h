@@ -51,7 +51,7 @@ struct static_for_each
 template < typename End, typename F, typename A >
 struct static_for_each< End, End, F, A >
 {
-    static void call(A& type)
+    static void call(A& /*type*/)
     {
     }
 };

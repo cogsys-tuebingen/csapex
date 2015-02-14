@@ -7,7 +7,6 @@
 class QDoubleSlider : public QSlider
 {
     Q_OBJECT
-
 public:
     QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget *parent = 0);
     virtual ~QDoubleSlider();
@@ -28,13 +27,16 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void scaleValue(int value);
+
     void setDoubleMinimum(double min);
     void setDoubleMaximum(double max);
     void setDoubleRange(double min, double max);
     void setDoubleValue(double val);
     void setNearestDoubleValue(double val);
+
     void limitMin(double limit);
     void limitMax(double limit);
+
     double doubleValue();
     double doubleMaximum();
     double doubleMinimum();

@@ -280,7 +280,4 @@ void Parameterizable::setParameterState(Memento::Ptr memento)
     apex_assert_hard(m.get());
 
     parameter_state_->setFrom(*m);
-
-    // TODO: is this necessary?
-//    triggerModelChanged();
 }

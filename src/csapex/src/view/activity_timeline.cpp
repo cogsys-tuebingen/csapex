@@ -410,3 +410,5 @@ void ActivityTimeline::Activity::clear()
     delete rect;
     rect = nullptr;
 }
+/// MOC
+#include "../../include/csapex/view/moc_activity_timeline.cpp"

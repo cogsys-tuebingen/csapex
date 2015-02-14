@@ -155,3 +155,5 @@ void Connection::deleteFulcrum(int fulcrum_id)
 
     fulcrums_.erase(index);
 }
+/// MOC
+#include "../../include/csapex/model/moc_connection.cpp"

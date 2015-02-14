@@ -29,7 +29,7 @@ Node::~Node()
     delete modifier_;
 }
 
-void Node::initialize(const std::string& type, const UUID& uuid,
+void Node::initialize(const std::string& /*type*/, const UUID& uuid,
                    NodeWorker* node_worker)
 {
     worker_ = node_worker;
@@ -73,13 +73,6 @@ void Node::process()
 {
 }
 
-
-
-void Node::triggerModelChanged()
-{
-    Q_EMIT worker_->nodeModelChanged();
-}
-
 bool Node::canTick()
 {
     return true;
@@ -93,14 +86,9 @@ void Node::abort()
 {
 }
 
-NodeWorker* Node::getNodeWorker() const
-{
-    return worker_;
-}
-
-
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
+    // TODO: handle this completely in worker!
     aerr << msg << std::endl;
 
     if(error && level == EL_ERROR) {

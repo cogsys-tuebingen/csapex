@@ -87,3 +87,5 @@ bool WidgetPicker::eventFilter(QObject*, QEvent * e)
 
     return false;
 }
+/// MOC
+#include "../../include/csapex/utility/moc_widget_picker.cpp"

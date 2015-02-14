@@ -23,9 +23,6 @@ public:
     void initialize(const std::string &type, const UUID &uuid, NodeWorker *node_worker);
     void doSetup();
 
-    NodeWorker* getNodeWorker() const;
-
-
 public:
     virtual void setup() = 0;
     virtual void setupParameters();
@@ -35,10 +32,6 @@ public:
     virtual bool canTick();
     virtual void tick();
     virtual void abort();
-
-protected:
-    /* CAN THIS BIS REMOVED???? */
-    void triggerModelChanged();
 
 private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
