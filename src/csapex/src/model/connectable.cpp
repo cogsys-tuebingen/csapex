@@ -65,7 +65,7 @@ Connectable::~Connectable()
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    Q_EMIT connectableError(error,msg,level);
+    Q_EMIT connectableError(error,msg,static_cast<int>(level));
 }
 
 bool Connectable::tryConnect(QObject* other_side)

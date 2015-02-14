@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
-#include <csapex/model/error_state.h>
 #include <csapex/model/parameterizable.h>
 #include <csapex/utility/stream_relay.h>
 #include <csapex/utility/assert.h>
@@ -11,7 +10,7 @@
 
 namespace csapex {
 
-class Node : public ErrorState, public Parameterizable, public Timable
+class Node : public Parameterizable, public Timable
 {
 public:
     typedef std::shared_ptr<Node> Ptr;
@@ -33,9 +32,6 @@ public:
     virtual void tick();
     virtual void abort();
 
-private:
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
-
 
 public:
     StreamRelay adebug;
@@ -45,9 +41,6 @@ public:
 
 protected:
     NodeModifier* modifier_;
-
-private:
-    NodeWorker* worker_;
 };
 
 }

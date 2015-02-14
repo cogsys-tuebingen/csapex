@@ -670,26 +670,26 @@ void CsApexWindow::load()
 
 void CsApexWindow::saveSettings(YAML::Node& doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.saveSettings(doc);
 }
 
 void CsApexWindow::loadSettings(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.loadSettings(doc);
 }
 
 
 void CsApexWindow::saveView(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.saveBoxes(doc, graph_worker_->getGraph(), widget_ctrl_.get());
 }
 
 void CsApexWindow::loadView(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.loadBoxes(doc, widget_ctrl_.get());
 }
 

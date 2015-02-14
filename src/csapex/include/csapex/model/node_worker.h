@@ -7,6 +7,7 @@
 /// PROJECT
 #include <utils_param/parameter.h>
 #include <csapex/model/unique.h>
+#include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
@@ -22,7 +23,7 @@
 
 namespace csapex {
 
-class NodeWorker : public QObject, public Unique
+class NodeWorker : public QObject, public ErrorState, public Unique
 {
     Q_OBJECT
 
@@ -212,6 +213,8 @@ private:
     void triggerNodeStateChanged();
 
     void finishTimer(TimerPtr t);
+
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 private:
     Settings& settings_;

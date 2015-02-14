@@ -166,7 +166,7 @@ void Port::refreshStylesheet()
 
 void Port::setError(bool error, const std::string& msg)
 {
-    setError(error, msg, ErrorState::EL_ERROR);
+    setError(error, msg, static_cast<int>(ErrorState::ErrorLevel::ERROR));
 }
 
 void Port::setError(bool error, const std::string& /*msg*/, int /*level*/)

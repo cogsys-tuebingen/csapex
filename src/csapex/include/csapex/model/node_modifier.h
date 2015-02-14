@@ -176,6 +176,11 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    bool isError() const;
+    void setNoError();
+    void setError(const std::string& msg);
+    void setWarning(const std::string& msg);
+
 private:
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label);

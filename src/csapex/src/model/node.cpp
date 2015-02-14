@@ -8,7 +8,6 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/settings.h>
@@ -20,7 +19,7 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      modifier_(nullptr), worker_(nullptr)
+      modifier_(nullptr)
 {
 }
 
@@ -32,7 +31,6 @@ Node::~Node()
 void Node::initialize(const std::string& /*type*/, const UUID& uuid,
                    NodeWorker* node_worker)
 {
-    worker_ = node_worker;
     modifier_ = new NodeModifier(node_worker);
 
     parameter_state_->setParentUUID(uuid);
@@ -84,16 +82,4 @@ void Node::tick()
 
 void Node::abort()
 {
-}
-
-void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
-{
-    // TODO: handle this completely in worker!
-    aerr << msg << std::endl;
-
-    if(error && level == EL_ERROR) {
-        worker_->setIOError(true);
-    } else {
-        worker_->setIOError(false);
-    }
 }

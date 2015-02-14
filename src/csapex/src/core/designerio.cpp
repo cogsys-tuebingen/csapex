@@ -25,8 +25,7 @@
 
 using namespace csapex;
 
-DesignerIO::DesignerIO(Designer &designer)
-    : designer_(designer)
+DesignerIO::DesignerIO()
 {
 }
 

@@ -295,15 +295,15 @@ bool NodeBox::isError() const
     if(!worker) {
         return false;
     }
-    return worker->getNode()->isError();
+    return worker->isError();
 }
 ErrorState::ErrorLevel NodeBox::errorLevel() const
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {
-        return 0;
+        return ErrorState::ErrorLevel::NONE;
     }
-    return worker->getNode()->errorLevel();
+    return worker->errorLevel();
 }
 std::string NodeBox::errorMessage() const
 {
@@ -311,7 +311,7 @@ std::string NodeBox::errorMessage() const
     if(!worker) {
         return "";
     }
-    return worker->getNode()->errorMessage();
+    return worker->errorMessage();
 }
 
 void NodeBox::setLabel(const std::string& label)
@@ -431,8 +431,8 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         return;
     }
 
-    bool is_error = worker->getNode()->isError() && worker->getNode()->errorLevel() == ErrorState::EL_ERROR;
-    bool is_warn = worker->getNode()->isError() && worker->getNode()->errorLevel() == ErrorState::EL_WARNING;
+    bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
+    bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;
 
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
@@ -442,12 +442,12 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
 
     if(error_change || warning_change) {
         if(is_error) {
-            QString msg = QString::fromStdString(worker->getNode()->errorMessage());
+            QString msg = QString::fromStdString(worker->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
             info_error->setVisible(true);
         } else if(is_warn) {
-            QString msg = QString::fromStdString(worker->getNode()->errorMessage());
+            QString msg = QString::fromStdString(worker->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
             info_error->setVisible(true);

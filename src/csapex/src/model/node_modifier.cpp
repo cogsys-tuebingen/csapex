@@ -110,3 +110,20 @@ void NodeModifier::setIsSink(bool sink)
 {
     node_worker_->setIsSink(sink);
 }
+
+bool NodeModifier::isError() const
+{
+    return node_worker_->isError();
+}
+void NodeModifier::setNoError()
+{
+    node_worker_->setError(false);
+}
+void NodeModifier::setError(const std::string &msg)
+{
+    node_worker_->setError(true, msg, ErrorState::ErrorLevel::ERROR);
+}
+void NodeModifier::setWarning(const std::string &msg)
+{
+    node_worker_->setError(true, msg, ErrorState::ErrorLevel::WARNING);
+}

@@ -188,7 +188,7 @@ void NodeWorker::setEnabled(bool e)
     node_state_->setEnabled(e);
 
     if(!e) {
-        node_->setError(false);
+        setError(false);
     }
 
     checkIO();
@@ -388,7 +388,7 @@ void NodeWorker::reset()
     assertNotInGuiThread();
 
     node_->abort();
-    node_->setError(false);
+    setError(false);
     Q_FOREACH(Input* i, inputs_) {
         i->reset();
     }
@@ -635,9 +635,9 @@ void NodeWorker::processInputs()
         }
 
     }  catch(const std::exception& e) {
-        node_->setError(true, e.what());
+        setError(true, e.what());
     } catch(const std::string& s) {
-        node_->setError(true, "Uncatched exception (string) exception: " + s);
+        setError(true, "Uncatched exception (string) exception: " + s);
     } catch(...) {
         throw;
     }
@@ -1334,10 +1334,8 @@ void NodeWorker::enableTriggers (bool enable)
 
 void NodeWorker::triggerError(bool e, const std::string &what)
 {
-    node_->setError(e, what);
+    setError(e, what);
 }
-
-
 
 void NodeWorker::setIOError(bool error)
 {
@@ -1359,5 +1357,19 @@ void NodeWorker::assertNotInGuiThread()
 {
     assert(this->thread() != QApplication::instance()->thread());
 }
+
+
+
+void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+{
+    node_->aerr << msg << std::endl;
+
+    if(error && level == ErrorState::ErrorLevel::ERROR) {
+        setIOError(true);
+    } else {
+        setIOError(false);
+    }
+}
+
 /// MOC
 #include "../../include/csapex/model/moc_node_worker.cpp"
