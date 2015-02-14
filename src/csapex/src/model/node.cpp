@@ -93,14 +93,9 @@ void Node::abort()
 {
 }
 
-NodeWorker* Node::getNodeWorker() const
-{
-    return worker_;
-}
-
-
 void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
+    // TODO: handle this completely in worker!
     aerr << msg << std::endl;
 
     if(error && level == EL_ERROR) {

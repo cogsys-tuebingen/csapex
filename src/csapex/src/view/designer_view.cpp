@@ -378,8 +378,7 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     QObject::connect(box, SIGNAL(moved(NodeBox*, int, int)), scene_, SLOT(boxMoved(NodeBox*)));
 
-    Node* node = box->getNode();
-    NodeWorker* worker = node->getNodeWorker();
+    NodeWorker* worker = box->getNodeWorker();
     QObject::connect(worker, SIGNAL(connectionStart(Connectable*)), scene_, SLOT(deleteTemporaryConnections()), Qt::QueuedConnection);
     QObject::connect(worker, SIGNAL(connectionInProgress(Connectable*,Connectable*)), scene_, SLOT(previewConnection(Connectable*,Connectable*)), Qt::QueuedConnection);
     QObject::connect(worker, SIGNAL(connectionDone(Connectable*)), scene_, SLOT(deleteTemporaryConnectionsAndRepaint()), Qt::QueuedConnection);
@@ -455,8 +454,8 @@ void DesignerView::startProfiling(NodeWorker *node)
 
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
-    QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(repaint()));
-    QObject::connect(box->getNode()->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(repaint()));
+    QObject::connect(box->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(repaint()));
+    QObject::connect(box->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(repaint()));
 }
 
 void DesignerView::stopProfiling(NodeWorker *node)

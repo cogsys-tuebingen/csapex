@@ -17,7 +17,7 @@
 using namespace csapex;
 
 ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *parent)
-    : QWidget(parent), box_(box), node_worker_(box->getNode()->getNodeWorker()),
+    : QWidget(parent), box_(box), node_worker_(box->getNodeWorker()),
       timer_history_pos_(0),
       count_(0)
 {

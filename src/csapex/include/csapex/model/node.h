@@ -23,9 +23,6 @@ public:
     void initialize(const std::string &type, const UUID &uuid, NodeWorker *node_worker);
     void doSetup();
 
-    NodeWorker* getNodeWorker() const;
-
-
 public:
     virtual void setup() = 0;
     virtual void setupParameters();

@@ -356,7 +356,7 @@ void NodeWorker::stop()
     assertNotInGuiThread();
     node_->abort();
 
-    std::lock_guard<std::mutex> lock(stop_mutex_);
+    std::lock_guard<std::recursive_mutex> lock(stop_mutex_);
     stop_ = true;
 
     Q_FOREACH(Output* i, outputs_) {
@@ -380,7 +380,7 @@ void NodeWorker::stop()
 
 void NodeWorker::waitUntilFinished()
 {
-    std::unique_lock<std::mutex> stop_lock(stop_mutex_);
+    std::unique_lock<std::recursive_mutex> stop_lock(stop_mutex_);
 }
 
 void NodeWorker::reset()
@@ -425,7 +425,7 @@ bool NodeWorker::isProfiling() const
 
 void NodeWorker::pause(bool pause)
 {
-    std::lock_guard<std::mutex> lock(pause_mutex_);
+    std::lock_guard<std::recursive_mutex> lock(pause_mutex_);
     paused_ = pause;
     continue_.notify_all();
 }
@@ -440,7 +440,7 @@ void NodeWorker::messageArrived(Connectable *s)
     assertNotInGuiThread();
 
     {
-        std::unique_lock<std::mutex> lock(pause_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(pause_mutex_);
         while(paused_) {
             continue_.wait(lock);
         }
@@ -497,7 +497,7 @@ void NodeWorker::processMessages()
     assertNotInGuiThread();
 
     // everything has a message here
-    std::unique_lock<std::mutex> stop_lock(stop_mutex_);
+    std::unique_lock<std::recursive_mutex> stop_lock(stop_mutex_);
     if(stop_) {
         return;
     }
@@ -1163,13 +1163,13 @@ void NodeWorker::tick()
 
 
     {
-        std::unique_lock<std::mutex> pause_lock(pause_mutex_);
+        std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
         while(paused_) {
             continue_.wait(pause_lock);
         }
     }
 
-    std::unique_lock<std::mutex> lock(stop_mutex_);
+    std::unique_lock<std::recursive_mutex> lock(stop_mutex_);
     if(stop_) {
         return;
     }

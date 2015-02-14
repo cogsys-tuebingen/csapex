@@ -261,9 +261,9 @@ private:
     bool thread_initialized_;
     bool paused_;
     bool stop_;
-    std::mutex stop_mutex_;
-    std::mutex pause_mutex_;
-    std::condition_variable continue_;
+    std::recursive_mutex stop_mutex_;
+    std::recursive_mutex pause_mutex_;
+    std::condition_variable_any continue_;
 
     std::atomic<bool> profiling_;
 };
