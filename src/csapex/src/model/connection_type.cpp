@@ -78,6 +78,24 @@ bool ConnectionType::isValid() const
     return true;
 }
 
+bool ConnectionType::isContainer() const
+{
+    return false;
+}
+
+ConnectionType::Ptr ConnectionType::nestedType() const
+{
+    throw std::logic_error("cannot get nested type for non-container messages");
+}
+ConnectionType::ConstPtr ConnectionType::nestedValue(std::size_t index) const
+{
+    throw std::logic_error("cannot get nested value for non-container messages");
+}
+std::size_t ConnectionType::nestedValueCount() const
+{
+    throw std::logic_error("cannot get nested count for non-container messages");
+}
+
 void ConnectionType::writeRaw(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
 {
     std::cerr << "error: writeRaw not implemented for message type " << name() << std::endl;

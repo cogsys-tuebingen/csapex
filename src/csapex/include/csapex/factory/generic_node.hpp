@@ -1,7 +1,6 @@
 /// PROJECT
 #include <csapex/model/node.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
+#include <csapex/msg/io.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/model/node_modifier.h>
 #include <utils_param/parameter_factory.h>
@@ -82,7 +81,7 @@ private:
         for(std::size_t i = 0; i < N; ++i) {
             Output* out = output_[i];
             if(out) {
-                out->publish(out_msg_[i]);
+                msg::publish(out, out_msg_[i]);
             }
         }
     }
@@ -155,7 +154,7 @@ private:
 
         template<typename U>
         void operator()(GenericInput<U>) {
-            typename U::ConstPtr in = instance_->input_[id]->template getMessage<U>();
+            typename U::ConstPtr in = msg::getMessage<U>(instance_->input_[id]);
             instance_->in_msg_[id] = in;
             ++id;
         }

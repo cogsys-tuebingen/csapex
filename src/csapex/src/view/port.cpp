@@ -222,8 +222,12 @@ void Port::setPortProperty(const std::string& name, bool b)
 void Port::createToolTip()
 {
     std::stringstream tooltip;
-    tooltip << "UUID: " << adaptee_->getUUID().c_str() << ", Type: " << adaptee_->getType()->name() << ", Messages: " << adaptee_->getCount();
-    tooltip << ", Enabled: " << adaptee_->isEnabled() << ", Blocked: " << adaptee_->isBlocked() << ", #: " << adaptee_->sequenceNumber();
+    tooltip << "UUID: " << adaptee_->getUUID().c_str();
+    tooltip << ", Type: " << adaptee_->getType()->name();
+    tooltip << ", Messages: " << adaptee_->getCount();
+    tooltip << ", Enabled: " << adaptee_->isEnabled();
+    tooltip << ", Blocked: " << adaptee_->isBlocked();
+    tooltip << ", #: " << adaptee_->sequenceNumber();
     setToolTip(tooltip.str().c_str());
 }
 

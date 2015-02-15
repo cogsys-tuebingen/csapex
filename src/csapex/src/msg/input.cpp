@@ -86,13 +86,11 @@ bool Input::hasReceived() const
 
 bool Input::hasMessage() const
 {
-    return hasReceived() && !buffer_->isType<connection_types::NoMessage>();
+    return hasReceived() && !buffer_->containsNoMessage();
 }
 
 void Input::stop()
 {
-
-
     buffer_->disable();
     Connectable::stop();
 }
@@ -186,6 +184,11 @@ void Input::inputMessage(ConnectionType::ConstPtr message)
     setBlocked(true);
 
     Q_EMIT gotMessage(message);
+}
+
+ConnectionTypeConstPtr Input::getMessage() const
+{
+    return buffer_->read();
 }
 
 void Input::handleMessage(ConnectionType::ConstPtr message)

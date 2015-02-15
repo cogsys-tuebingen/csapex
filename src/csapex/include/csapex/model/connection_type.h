@@ -36,6 +36,11 @@ public:
 
     virtual bool isValid() const;
 
+    virtual bool isContainer() const;
+    virtual Ptr nestedType() const;
+    virtual ConstPtr nestedValue(std::size_t i) const;
+    virtual std::size_t nestedValueCount() const;
+
     virtual bool canConnectTo(const ConnectionType* other_side) const;
     virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 

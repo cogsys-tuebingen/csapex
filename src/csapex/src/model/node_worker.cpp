@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
+#include <csapex/msg/io.h>
 #include <csapex/msg/output.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
@@ -463,12 +464,12 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
 
     param::Parameter* p = input_2_param_.at(source);
 
-    if(source->isValue<int>()) {
-        p->set<int>(source->getValue<int>());
-    } else if(source->isValue<double>()) {
-        p->set<double>(source->getValue<double>());
-    } else if(source->isValue<std::string>()) {
-        p->set<std::string>(source->getValue<std::string>());
+    if(msg::isValue<int>(source)) {
+        p->set<int>(msg::getValue<int>(source));
+    } else if(msg::isValue<double>(source)) {
+        p->set<double>(msg::getValue<double>(source));
+    } else if(msg::isValue<std::string>(source)) {
+        p->set<std::string>(msg::getValue<std::string>(source));
     } else {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
@@ -541,7 +542,7 @@ void NodeWorker::processMessages()
 
         // check if one is "NoMessage";
         for(Input* cin : inputs_) {
-            if(!cin->isOptional() && cin->isMessage<connection_types::NoMessage>()) {
+            if(!cin->isOptional() && msg::isMessage<connection_types::NoMessage>(cin)) {
                 all_inputs_are_present = false;
             }
         }
@@ -1053,11 +1054,11 @@ void NodeWorker::publishParameter(param::Parameter* p)
         }
 
         if(p->is<int>())
-            out->publish(p->as<int>());
+            msg::publish(out, p->as<int>());
         else if(p->is<double>())
-            out->publish(p->as<double>());
+            msg::publish(out, p->as<double>());
         else if(p->is<std::string>())
-            out->publish(p->as<std::string>());
+            msg::publish(out, p->as<std::string>());
         out->sendMessages();
     }
 }
@@ -1224,7 +1225,7 @@ void NodeWorker::tick()
 
             ++ticks_;
             foreach(Output* out, outputs_) {
-                messages_waiting_to_be_sent |= out->hasMessage();
+                messages_waiting_to_be_sent |= msg::hasMessage(out);
             }
 
             Q_EMIT messagesWaitingToBeSent(messages_waiting_to_be_sent);

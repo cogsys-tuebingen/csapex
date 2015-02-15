@@ -161,6 +161,7 @@ set(SRC_PLUGIN
     src/model/tag.cpp
     src/model/unique.cpp
 
+    src/msg/io.cpp
     src/msg/input.cpp
     src/msg/output.cpp
     src/msg/message.cpp
