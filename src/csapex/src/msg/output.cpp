@@ -10,7 +10,6 @@
 #include <csapex/msg/message_traits.h>
 
 /// SYSTEM
-
 #include <iostream>
 
 using namespace csapex;
@@ -31,11 +30,10 @@ Output::~Output()
 
 void Output::reset()
 {
-    clearMessage();
+    clear();
 
     setBlocked(false);
     setSequenceNumber(0);
-    message_.reset();
 }
 
 int Output::noTargets()
@@ -96,11 +94,6 @@ void Output::removeAllConnectionsNotUndoable()
 void Output::disable()
 {
     Connectable::disable();
-
-//    if(isBlocked()) {
-        message_to_send_.reset();
-        message_.reset();
-//    }
 }
 
 void Output::connectForcedWithoutCommand(Input *other_side)
@@ -170,22 +163,7 @@ void Output::validateConnections()
     }
 }
 
-void Output::publish(ConnectionType::ConstPtr message)
-{
-    setType(message->toType());
-
-    // update buffer
-    message_to_send_ = message;
-
-    setBlocked(true);
-}
-
-bool Output::hasMessage()
-{
-    return (bool) message_to_send_;
-}
-
-bool Output::canSendMessages()
+bool Output::canSendMessages() const
 {
     foreach(Input* input, targets_) {
         bool blocked = /*input->isEnabled() && */input->isBlocked();
@@ -196,58 +174,7 @@ bool Output::canSendMessages()
     return true;
 }
 
-void Output::clearMessage()
-{
-    message_to_send_.reset();
-}
-
-void Output::sendMessages()
-{
-    assert(canSendMessages());
-    if(message_to_send_) {
-        message_ = message_to_send_;
-        clearMessage();
-
-    } else {
-        if(!targets_.empty()) {
-//            std::cout << getUUID() << " sends empty message" << std::endl;
-        }
-        message_ = connection_types::makeEmpty<connection_types::NoMessage>();
-    }
-
-    message_->setSequenceNumber(seq_no_);
-
-    // wait for all connected inputs to be able to receive
-    //  * inputs can only be connected to this output since they are 1:1
-    std::vector<Input*> targets;
-    foreach(Input* i, targets_) {
-        if(i->isEnabled()) {
-            targets.push_back(i);
-            assert(!i->isBlocked());
-        }
-    }
-
-//    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
-    if(!targets.empty()) {
-        // all connected inputs are ready to receive, send them the message
-        for(auto i : targets) {
-            i->inputMessage(message_);
-        }
-        ++count_;
-    }
-
-    setBlocked(false);
-
-    ++seq_no_;
-    Q_EMIT messageSent(this);
-}
-
 void Output::forceSendMessage(bool force)
 {
     force_send_message_ = force;
-}
-
-ConnectionType::ConstPtr Output::getMessage()
-{
-    return message_;
 }

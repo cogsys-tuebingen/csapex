@@ -35,7 +35,10 @@ public:
 
     virtual void disable() override;
 
-    void publish(ConnectionType::ConstPtr message);
+    virtual void publish(ConnectionType::ConstPtr message) = 0;
+
+    virtual bool canSendMessages() const;
+    virtual bool sendMessages() = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;
@@ -53,14 +56,10 @@ public:
 
     void forceSendMessage(bool force = true);
 
-    bool hasMessage();
-    ConnectionType::ConstPtr getMessage();
+    virtual bool hasMessage() = 0;
 
-    bool canSendMessages();
-    void sendMessages();
-
-    void reset();
-    void clearMessage();
+    virtual void reset();
+    virtual void clear() = 0;
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
@@ -73,9 +72,6 @@ protected:
 protected:
     std::vector<Input*> targets_;
     bool force_send_message_;
-
-    ConnectionType::ConstPtr message_;
-    ConnectionType::ConstPtr message_to_send_;
 };
 
 }

@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
+#include <csapex/msg/static_output.h>
 #include <csapex/model/connection_type.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
@@ -44,7 +44,7 @@ bool AddConnector::doExecute()
         node_worker->registerInput(in);
     } else {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getUUID(), "out", node_worker->getMessageOutputs().size()) : c_uuid;
-        Output* out = new Output(uuid);
+        Output* out = new StaticOutput(uuid);
         c = out;
         node_worker->registerOutput(out);
     }

@@ -299,6 +299,16 @@ int Graph::getComponent(const UUID &node_uuid) const
     return node_component_.at(node);
 }
 
+int Graph::getLevel(const UUID &node_uuid) const
+{
+    NodeWorker* node = findNodeWorkerNoThrow(node_uuid);
+    if(!node) {
+        return 0;
+    }
+
+    return node_level_.at(node);
+}
+
 Node* Graph::findNode(const UUID& uuid) const
 {
     Node* node = findNodeNoThrow(uuid);

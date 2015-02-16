@@ -59,6 +59,7 @@ public:
     std::vector<NodeWorker*> getAllNodeWorkers();
 
     int getComponent(const UUID& node_uuid) const;
+    int getLevel(const UUID& node_uuid) const;
 
     Connectable* findConnector(const UUID &uuid);
 
@@ -108,6 +109,7 @@ Q_SIGNALS:
 protected:
     std::vector<NodeWorkerPtr> nodes_;
     std::map<NodeWorker*, int> node_component_;
+    std::map<NodeWorker*, int> node_level_;
 
     std::map<NodeWorker*, std::vector<NodeWorker*> > node_parents_;
     std::map<NodeWorker*, std::vector<NodeWorker*> > node_children_;
