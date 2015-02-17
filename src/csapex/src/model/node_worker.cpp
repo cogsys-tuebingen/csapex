@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/io.h>
+#include <csapex/msg/transition.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/utility/timer.h>
@@ -30,6 +31,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     : Unique(uuid),
       settings_(settings),
       node_type_(type), node_(node), node_state_(new NodeState(this)),
+      transition_in_(new Transition(this)),
       is_setup_(false),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       tick_enabled_(false), ticks_(0),
@@ -111,6 +113,11 @@ NodeWorker::~NodeWorker()
         cb->deleteLater();
     }
     callbacks.clear();
+}
+
+Transition* NodeWorker::getInputTransition() const
+{
+    return transition_in_.get();
 }
 
 void NodeWorker::setNodeState(NodeStatePtr memento)
@@ -219,7 +226,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
     }
 
     {
-        Input* cin = new Input(UUID::make_sub(getUUID(), std::string("in_") + p->name()));
+        Input* cin = new Input(transition_in_.get(), UUID::make_sub(getUUID(), std::string("in_") + p->name()));
         cin->setEnabled(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -660,7 +667,7 @@ void NodeWorker::processInputs()
 Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
 {
     int id = inputs_.size();
-    Input* c = new Input(this, id);
+    Input* c = new Input(transition_in_.get(), this, id);
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);

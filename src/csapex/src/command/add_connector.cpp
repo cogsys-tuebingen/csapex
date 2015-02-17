@@ -39,7 +39,7 @@ bool AddConnector::doExecute()
 
     if(input) {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getUUID(), "in", node_worker->getMessageInputs().size()) : c_uuid;
-        Input* in = new Input(uuid);
+        Input* in = new Input(node_worker->getInputTransition(), uuid);
         c = in;
         node_worker->registerInput(in);
     } else {

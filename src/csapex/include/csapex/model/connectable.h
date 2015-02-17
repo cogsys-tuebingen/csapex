@@ -60,12 +60,16 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
+    std::vector<ConnectionWeakPtr> getConnections() const;
+    void addConnection(ConnectionWeakPtr connection);
+
+    virtual bool isConnected() const;
+
     /**
      * INTERFACE
      */
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
-    virtual bool isConnected() const = 0;
-    virtual bool tryConnect(Connectable* other_side) = 0;
+    virtual bool isConnectionPossible(Connectable* other_side) = 0;
     virtual void removeConnection(Connectable* other_side) = 0;
     virtual void validateConnections();
     virtual void connectionMovePreview(Connectable* other_side) = 0;
@@ -74,7 +78,7 @@ protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
 
 public Q_SLOTS:
-    virtual bool tryConnect(QObject* other_side);
+    virtual bool isConnectionPossible(QObject* other_side);
     virtual void removeConnection(QObject* other_side);
 
     virtual void disable();
@@ -128,6 +132,7 @@ protected:
     std::string label_;
 
     ConnectionType::ConstPtr type_;
+    std::vector<ConnectionWeakPtr> connections_;
 
     int count_;
     int seq_no_;

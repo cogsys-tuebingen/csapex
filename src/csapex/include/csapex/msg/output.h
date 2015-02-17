@@ -46,13 +46,11 @@ public:
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
 
-    int noTargets();
-    std::vector<Input*> getTargets() const;
+    int countConnections();
+    std::vector<ConnectionWeakPtr> getConnections() const;
 
-    void connectForcedWithoutCommand(Input* other_side);
-
-    virtual CommandPtr removeAllConnectionsCmd() override;
-    virtual CommandPtr removeConnectionCmd(Input *other_side);
+    CommandPtr removeAllConnectionsCmd() override;
+    CommandPtr removeConnectionCmd(Connection *connection);
 
     void forceSendMessage(bool force = true);
 
@@ -63,14 +61,11 @@ public:
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
-    virtual bool tryConnect(Connectable* other_side) override;
+    virtual bool isConnectionPossible(Connectable* other_side) override;
     virtual void removeConnection(Connectable* other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
-    bool connect(Connectable* other_side);
-
 protected:
-    std::vector<Input*> targets_;
     bool force_send_message_;
 };
 

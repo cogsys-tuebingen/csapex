@@ -166,6 +166,7 @@ set(SRC_PLUGIN
     src/msg/output.cpp
     src/msg/dynamic_output.cpp
     src/msg/static_output.cpp
+    src/msg/transition.cpp
     src/msg/message.cpp
 
     src/signal/slot.cpp

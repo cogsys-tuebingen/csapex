@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/msg/input.h>
+#include <csapex/model/connection.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
@@ -36,23 +37,24 @@ void Output::reset()
     setSequenceNumber(0);
 }
 
-int Output::noTargets()
+int Output::countConnections()
 {
-    return targets_.size();
+    return connections_.size();
 }
 
-std::vector<Input*> Output::getTargets() const
+std::vector<ConnectionWeakPtr> Output::getConnections() const
 {
-    return targets_;
+    return connections_;
 }
 
 void Output::removeConnection(Connectable* other_side)
 {
-    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
-        if(*i == other_side) {
+    for(std::vector<ConnectionWeakPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+        ConnectionPtr c = i->lock();
+        if(c->to() == other_side) {
             other_side->removeConnection(this);
 
-            i = targets_.erase(i);
+            i = connections_.erase(i);
 
             Q_EMIT connectionRemoved(this);
             return;
@@ -63,8 +65,8 @@ void Output::removeConnection(Connectable* other_side)
     }
 }
 
-Command::Ptr Output::removeConnectionCmd(Input* other_side) {
-    Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
+Command::Ptr Output::removeConnectionCmd(Connection* connection) {
+    Command::Ptr removeThis(new command::DeleteConnection(this, connection->to()));
 
     return removeThis;
 }
@@ -73,8 +75,8 @@ Command::Ptr Output::removeAllConnectionsCmd()
 {
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
-    foreach(Input* target, targets_) {
-        Command::Ptr removeThis(new command::DeleteConnection(this, target));
+    for(ConnectionWeakPtr connection : connections_) {
+        Command::Ptr removeThis(new command::DeleteConnection(this, connection.lock()->to()));
         removeAll->add(removeThis);
     }
 
@@ -83,9 +85,9 @@ Command::Ptr Output::removeAllConnectionsCmd()
 
 void Output::removeAllConnectionsNotUndoable()
 {
-    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
-        (*i)->removeConnection(this);
-        i = targets_.erase(i);
+    for(std::vector<ConnectionWeakPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+        i->lock()->to()->removeConnection(this);
+        i = connections_.erase(i);
     }
 
     Q_EMIT disconnected(this);
@@ -96,17 +98,7 @@ void Output::disable()
     Connectable::disable();
 }
 
-void Output::connectForcedWithoutCommand(Input *other_side)
-{
-    tryConnect(other_side);
-}
-
-bool Output::tryConnect(Connectable *other_side)
-{
-    return connect(other_side);
-}
-
-bool Output::connect(Connectable *other_side)
+bool Output::isConnectionPossible(Connectable *other_side)
 {
     if(!other_side->canInput()) {
         std::cerr << "cannot connect, other side can't input" << std::endl;
@@ -117,27 +109,13 @@ bool Output::connect(Connectable *other_side)
         return false;
     }
 
-    Input* input = dynamic_cast<Input*>(other_side);
-
-    if(!input->acknowledgeConnection(this)) {
-        std::cerr << "cannot connect, other side doesn't acknowledge" << std::endl;
-        return false;
-    }
-
-    apex_assert_hard(input);
-    targets_.push_back(input);
-
-    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
-
-    validateConnections();
-
     return true;
 }
 
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    foreach(Input* input, targets_) {
-        if(!input->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+    foreach(ConnectionWeakPtr connection, connections_) {
+        if(!connection.lock()->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
@@ -146,28 +124,31 @@ bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 
 bool Output::isConnected() const
 {
-    return targets_.size() > 0 || force_send_message_;
+    return connections_.size() > 0 || force_send_message_;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
 {
-    foreach(Input* input, targets_) {
-        Q_EMIT(connectionInProgress(input, other_side));
+    for(ConnectionWeakPtr connection : connections_) {
+        Q_EMIT(connectionInProgress(connection.lock()->to(), other_side));
     }
 }
 
 void Output::validateConnections()
 {
-    foreach(Input* target, targets_) {
-        target->validateConnections();
+    for(ConnectionWeakPtr connection : connections_) {
+        connection.lock()->to()->validateConnections();
     }
 }
 
 bool Output::canSendMessages() const
 {
-    foreach(Input* input, targets_) {
-        bool blocked = /*input->isEnabled() && */input->isBlocked();
-        if(blocked) {
+    for(ConnectionWeakPtr connection : connections_) {
+        ConnectionPtr c = connection.lock();
+        if(!c) {
+            continue;
+        }
+        if(c->to()->isBlocked()) {
             return false;
         }
     }

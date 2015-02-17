@@ -5,6 +5,7 @@
 #include <csapex/command/command.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/connection.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/signal/slot.h>
 #include <csapex/command/meta.h>
@@ -33,9 +34,16 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     if(is_output) {
         Output* out = dynamic_cast<Output*>(from);
         if(out) {
-            foreach(Input* input, out->getTargets()) {
-                add(Command::Ptr(new DeleteConnection(from, input)));
-                add(Command::Ptr(new AddConnection(to_uuid, input->getUUID())));
+            for(ConnectionWeakPtr connection : out->getConnections()) {
+                ConnectionPtr c = connection.lock();
+                if(!c) {
+                    continue;
+                }
+                Input* input = dynamic_cast<Input*>(c->to());
+                if(input) {
+                    add(Command::Ptr(new DeleteConnection(from, input)));
+                    add(Command::Ptr(new AddConnection(to_uuid, input->getUUID())));
+                }
             }
         } else {
             Trigger* trigger = dynamic_cast<Trigger*>(from);

@@ -311,7 +311,7 @@ void ActivityTimeline::refresh()
 }
 
 
-ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* scene, int row, NodeWorker* worker)
+ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* /*scene*/, int row, NodeWorker* worker)
     : params_(params), node_(worker), row(row), active_activity_(nullptr), selected(false)
 {
     top = row * row_height;

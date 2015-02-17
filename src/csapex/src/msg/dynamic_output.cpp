@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/msg/message.h>
 #include <csapex/msg/input.h>
+#include <csapex/model/connection.h>
 
 using namespace csapex;
 
@@ -42,10 +43,16 @@ bool DynamicOutput::sendMessages()
 
     // wait for all connected inputs to be able to receive
     //  * inputs can only be connected to this output since they are 1:1
-    std::vector<Input*> targets;
-    foreach(Input* i, targets_) {
-        if(i->isEnabled()) {
-            targets.push_back(i);
+    std::vector<Connection*> targets;
+    for(ConnectionWeakPtr connection : connections_) {
+        ConnectionPtr c = connection.lock();
+        if(!c) {
+            continue;
+        }
+
+        Input* i = dynamic_cast<Input*>(c->to());
+        if(i && i->isEnabled()) {
+            targets.push_back(c.get());
             assert(!i->isBlocked());
         }
     }

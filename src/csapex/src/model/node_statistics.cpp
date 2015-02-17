@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/connection.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node_worker.h>
 
@@ -95,9 +96,10 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             targets->setText(0, "Target");
-            foreach(Input* target, connector->getTargets()) {
+            for(ConnectionWeakPtr connection : connector->getConnections()) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-                target_widget->setText(0, target->getUUID().c_str());
+                Connectable* input = connection.lock()->to();
+                target_widget->setText(0, input->getUUID().c_str());
                 //target_widget->setIcon(1, target->getNode()->getIcon());
                 //target_widget->setText(1, target->getNode()->getType().c_str());
                 target_widget->setIcon(1, QIcon(":/connector.png"));

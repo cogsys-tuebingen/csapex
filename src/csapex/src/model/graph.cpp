@@ -116,11 +116,13 @@ void Graph::foreachNode(std::function<void (NodeWorker*)> f, std::function<bool 
 
 bool Graph::addConnection(Connection::Ptr connection)
 {
-    if(connection->from()->tryConnect(connection->to())) {
+    if(connection->from()->isConnectionPossible(connection->to())) {
         Connectable* from = findConnector(connection->from()->getUUID());
         Connectable* to = findConnector(connection->to()->getUUID());
 
         connections_.push_back(connection);
+        from->addConnection(connection);
+        to->addConnection(connection);
 
         NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
         NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
@@ -306,7 +308,7 @@ int Graph::getLevel(const UUID &node_uuid) const
         return 0;
     }
 
-    return node_level_.at(node);
+    return 0;//node_level_.at(node);
 }
 
 Node* Graph::findNode(const UUID& uuid) const

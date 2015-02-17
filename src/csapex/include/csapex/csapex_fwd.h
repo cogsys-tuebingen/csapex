@@ -39,6 +39,7 @@ FWD(Port);
 FWD(Connectable);
 FWD(Input);
 FWD(Output);
+FWD(Transition);
 FWD(Connection);
 FWD(Fulcrum);
 FWD(Trigger);

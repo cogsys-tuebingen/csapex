@@ -92,6 +92,11 @@ void Connection::tick()
 {
 }
 
+void Connection::inputMessage(const ConnectionTypeConstPtr &msg)
+{
+    message_queue_.push_back(msg);
+}
+
 std::vector<Fulcrum::Ptr> Connection::getFulcrums() const
 {
     return fulcrums_;

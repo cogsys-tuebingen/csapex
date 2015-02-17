@@ -58,7 +58,7 @@ public:
     void reset();
 
 protected:
-    virtual bool tryConnect(Connectable* other_side);
+    virtual bool isConnectionPossible(Connectable* other_side);
     virtual bool acknowledgeConnection(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();

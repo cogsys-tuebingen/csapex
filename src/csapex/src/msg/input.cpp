@@ -2,7 +2,7 @@
 #include <csapex/msg/input.h>
 
 /// COMPONENT
-#include <csapex/msg/output.h>
+#include <csapex/model/connection.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
@@ -12,15 +12,17 @@
 
 using namespace csapex;
 
-Input::Input(const UUID &uuid)
-    : Connectable(uuid), target(nullptr), buffer_(new Buffer), optional_(false)
+Input::Input(Transition* transition, const UUID &uuid)
+    : Connectable(uuid), transition_(transition), buffer_(new Buffer), optional_(false)
 {
+    apex_assert_hard(transition != nullptr);
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
 
-Input::Input(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "in"), target(nullptr), buffer_(new Buffer), optional_(false)
+Input::Input(Transition *transition, Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "in"), transition_(transition), buffer_(new Buffer), optional_(false)
 {
+    apex_assert_hard(transition != nullptr);
     QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
 
@@ -29,43 +31,46 @@ Input::~Input()
     free();
 }
 
+Transition* Input::getTransition() const
+{
+    return transition_;
+}
+
 void Input::reset()
 {
     free();
     setSequenceNumber(0);
 }
 
-bool Input::tryConnect(Connectable* other_side)
+bool Input::isConnectionPossible(Connectable* other_side)
 {
     if(!other_side->canOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
         return false;
     }
 
-    return other_side->tryConnect(this);
-}
-
-bool Input::acknowledgeConnection(Connectable* other_side)
-{
-    target = dynamic_cast<Output*>(other_side);
-    connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
-    connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
-    return true;
+    return other_side->isConnectionPossible(this);
 }
 
 void Input::removeConnection(Connectable* other_side)
 {
-    if(target != nullptr) {
-        apex_assert_hard(other_side == target);
-        target = nullptr;
-
-        Q_EMIT connectionRemoved(this);
+    if(connections_.empty()) {
+        return;
     }
+    apex_assert_hard(connections_.size() == 1);
+    apex_assert_hard(connections_.front().lock()->from() == other_side);
+
+    connections_.clear();
+    Q_EMIT connectionRemoved(this);
 }
 
 Command::Ptr Input::removeAllConnectionsCmd()
 {
-    Command::Ptr cmd(new command::DeleteConnection(target, this));
+    if(connections_.empty()) {
+        return nullptr;
+    }
+    apex_assert_hard(connections_.size() == 1);
+    Command::Ptr cmd(new command::DeleteConnection(connections_.front().lock()->from(), this));
     return cmd;
 }
 
@@ -125,9 +130,11 @@ void Input::disable()
 
 void Input::removeAllConnectionsNotUndoable()
 {
-    if(target != nullptr) {
-        target->removeConnection(this);
-        target = nullptr;
+    if(!connections_.empty()) {
+        apex_assert_hard(connections_.size() == 1);
+
+        connections_.front().lock()->from()->removeConnection(this);
+        connections_.clear();
         setError(false);
         Q_EMIT disconnected(this);
     }
@@ -141,13 +148,8 @@ bool Input::canConnectTo(Connectable* other_side, bool move) const
 
 bool Input::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    return target->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
-}
-
-bool Input::isConnected() const
-{
-
-    return target != nullptr;
+    apex_assert_hard(connections_.size() == 1);
+    return connections_.front().lock()->from()->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
 void Input::connectionMovePreview(Connectable *other_side)
@@ -160,7 +162,9 @@ void Input::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
-        ConnectionType::ConstPtr target_type = target->getType();
+        apex_assert_hard(connections_.size() == 1);
+
+        ConnectionType::ConstPtr target_type = connections_.front().lock()->from()->getType();
         ConnectionType::ConstPtr type = getType();
         if(!target_type) {
             e = true;
@@ -174,8 +178,12 @@ void Input::validateConnections()
 
 Connectable *Input::getSource() const
 {
-
-    return target;
+    assert(connections_.size() <= 1);
+    if(connections_.empty()) {
+        return nullptr;
+    } else {
+        return connections_.front().lock()->from();
+    }
 }
 
 void Input::inputMessage(ConnectionType::ConstPtr message)
@@ -225,8 +233,10 @@ void Input::notifyMessageProcessed()
 
     Connectable::notifyMessageProcessed();
 
-    if(target) {
-        target->notifyMessageProcessed();
+    if(isConnected()) {
+        apex_assert_hard(connections_.size() == 1);
+
+        connections_.front().lock()->from()->notifyMessageProcessed();
     }
 }
 /// MOC

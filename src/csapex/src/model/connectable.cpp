@@ -68,11 +68,11 @@ void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel leve
     Q_EMIT connectableError(error,msg,static_cast<int>(level));
 }
 
-bool Connectable::tryConnect(QObject* other_side)
+bool Connectable::isConnectionPossible(QObject* other_side)
 {
     Connectable* c = dynamic_cast<Connectable*>(other_side);
     if(c) {
-        return tryConnect(c);
+        return isConnectionPossible(c);
     }
     return false;
 }
@@ -207,5 +207,21 @@ void Connectable::setSequenceNumber(int seq_no)
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     seq_no_ = seq_no;
 }
+
+void Connectable::addConnection(ConnectionWeakPtr connection)
+{
+    connections_.push_back(connection);
+}
+
+std::vector<ConnectionWeakPtr> Connectable::getConnections() const
+{
+    return connections_;
+}
+
+bool Connectable::isConnected() const
+{
+    return !connections_.empty();
+}
+
 /// MOC
 #include "../../include/csapex/model/moc_connectable.cpp"

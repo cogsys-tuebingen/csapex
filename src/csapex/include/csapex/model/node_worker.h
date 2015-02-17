@@ -46,6 +46,8 @@ public:
     NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);
     ~NodeWorker();
 
+    Transition* getInputTransition() const;
+
     void setNodeState(NodeStatePtr memento);
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
@@ -223,6 +225,7 @@ private:
     NodePtr node_;    
     NodeStatePtr node_state_;
 
+    TransitionPtr transition_in_;
 
     bool is_setup_;
 

@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_factory.h>
+#include <csapex/model/connection.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/trigger.h>
@@ -91,13 +92,13 @@ void GraphIO::saveConnections(YAML::Node &yaml)
     foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
         if(!node->getAllOutputs().empty()) {
             foreach(Output* o, node->getAllOutputs()) {
-                if(o->noTargets() == 0) {
+                if(o->countConnections() == 0) {
                     continue;
                 }
                 YAML::Node connection;
                 connection["uuid"] = o->getUUID();
-                foreach(Input* i, o->getTargets()) {
-                    connection["targets"].push_back(i->getUUID());
+                foreach(ConnectionWeakPtr c, o->getConnections()) {
+                    connection["targets"].push_back(c.lock()->to()->getUUID());
                 }
 
                 yaml["connections"].push_back(connection);

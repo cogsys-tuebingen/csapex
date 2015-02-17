@@ -9,6 +9,7 @@
 #include <QObject>
 #include <vector>
 #include <QPoint>
+#include <deque>
 
 namespace csapex
 {
@@ -51,6 +52,8 @@ public:
 
     void tick();
 
+    void inputMessage(const ConnectionTypeConstPtr& msg);
+
 private Q_SLOTS:
     void messageSentEvent();
 
@@ -80,6 +83,8 @@ protected:
     Connectable* to_;
 
     std::vector<FulcrumPtr> fulcrums_;
+
+    std::deque<ConnectionTypeConstPtr> message_queue_;
 
     int id_;
 

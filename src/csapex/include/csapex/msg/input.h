@@ -1,5 +1,5 @@
-#ifndef CONNECTOR_IN_H
-#define CONNECTOR_IN_H
+#ifndef INPUT_H
+#define INPUT_H
 
 /// COMPONENT
 #include <csapex/model/connectable.h>
@@ -20,9 +20,11 @@ class Input : public Connectable
     friend class command::DeleteConnection;
 
 public:
-    Input(const UUID &uuid);
-    Input(Unique *parent, int sub_id);
+    Input(Transition* transition, const UUID &uuid);
+    Input(Transition* transition, Unique *parent, int sub_id);
     virtual ~Input();
+
+    Transition* getTransition() const;
 
     virtual bool canInput() const {
         return true;
@@ -37,7 +39,6 @@ public:
     ConnectionTypeConstPtr getMessage() const;
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
-    virtual bool isConnected() const;
 
     virtual void connectionMovePreview(Connectable* other_side);
     virtual void validateConnections();
@@ -64,8 +65,7 @@ public:
     void reset();
 
 protected:
-    virtual bool tryConnect(Connectable* other_side);
-    virtual bool acknowledgeConnection(Connectable* other_side);
+    virtual bool isConnectionPossible(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
 
 Q_SIGNALS:
@@ -75,7 +75,7 @@ private Q_SLOTS:
     void handleMessage(ConnectionType::ConstPtr msg);
 
 protected:
-    Connectable* target;
+    Transition* transition_;
 
     BufferPtr buffer_;
 
@@ -84,4 +84,4 @@ protected:
 
 }
 
-#endif // CONNECTOR_IN_H
+#endif // INPUT_H
