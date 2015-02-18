@@ -57,7 +57,6 @@ public:
 public Q_SLOTS:
     void setMinimizedSize(bool mini);
     void setFlipped(bool flipped);
-    void setBlocked(bool blocked);
     void setEnabledFlag(bool disabled);
 
     void setError(bool e, const std::string& msg);

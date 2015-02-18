@@ -45,7 +45,7 @@ bool AddConnection::doUndo()
 {
     refresh();
 
-    graph_->deleteConnection(Connection::Ptr(new Connection(from, to)));
+    graph_->deleteConnection(graph_->getConnection(from, to));
 
     return true;
 }

@@ -91,12 +91,7 @@ void Slot::disable()
 {
     Connectable::disable();
 
-    //    if(isBlocked()) {
     notifyMessageProcessed();
-    //    }
-    //    if(isConnected() && getSource()->isEnabled()) {
-    //        getSource()->disable();
-    //    }
 }
 
 void Slot::removeAllConnectionsNotUndoable()

@@ -34,7 +34,6 @@ Trigger::~Trigger()
 
 void Trigger::reset()
 {
-    setBlocked(false);
     setSequenceNumber(0);
 }
 

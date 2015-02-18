@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/msg/dynamic_output.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/core/settings.h>
@@ -19,43 +20,57 @@ int Connection::next_connection_id_ = 0;
 
 
 Connection::Connection(Connectable *from, Connectable *to)
-    : from_(from), to_(to), id_(next_connection_id_++)
+    : from_(from), to_(to), id_(next_connection_id_++), dimensionality_(-1)
 {
+    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+    message_state_ = State::COLLECTING;
+
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Connectable *from, Connectable *to, int id)
-    : from_(from), to_(to), id_(id)
+    : from_(from), to_(to), id_(id), dimensionality_(-1)
 {
+    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+    message_state_ = State::COLLECTING;
+
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Output *from, Input *to)
-    : from_(from), to_(to), id_(next_connection_id_++)
+    : from_(from), to_(to), id_(next_connection_id_++), dimensionality_(-1)
 {
+    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+    message_state_ = State::COLLECTING;
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Output *from, Input *to, int id)
-    : from_(from), to_(to), id_(id)
+    : from_(from), to_(to), id_(id), dimensionality_(-1)
 {
+    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+    message_state_ = State::COLLECTING;
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 
 Connection::Connection(Trigger *from, Slot *to)
-    : from_(from), to_(to), id_(next_connection_id_++)
+    : from_(from), to_(to), id_(next_connection_id_++), dimensionality_(-1)
 {
+    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+    message_state_ = State::COLLECTING;
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Trigger *from, Slot *to, int id)
-    : from_(from), to_(to), id_(id)
+    : from_(from), to_(to), id_(id), dimensionality_(-1)
 {
+    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+    message_state_ = State::COLLECTING;
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
@@ -92,9 +107,81 @@ void Connection::tick()
 {
 }
 
-void Connection::inputMessage(const ConnectionTypeConstPtr &msg)
+bool Connection::acceptsMessages() const
 {
+    std::unique_lock<std::mutex> lock(messages_mutex_);
+
+    if(message_state_ == State::COMMITTED) {
+        return false;
+    }
+
+    if(is_dynamic_) {
+        return message_queue_.empty();;///true;
+    } else {
+        return message_queue_.empty();
+    }
+}
+
+void Connection::addMessage(const ConnectionTypeConstPtr &msg)
+{
+    std::unique_lock<std::mutex> lock(messages_mutex_);
     message_queue_.push_back(msg);
+}
+
+void Connection::commitMessages()
+{
+    {
+    std::unique_lock<std::mutex> lock(messages_mutex_);
+//    while(has_committed_msgs_) {
+//        can_commit_.wait(lock);
+//    }
+    message_state_ = State::COMMITTED;
+    dimensionality_ = message_queue_.size();
+
+    committed_messages_.clear();
+    committed_messages_.assign(message_queue_.begin(), message_queue_.end());
+
+    message_queue_.clear();
+    }
+
+    messages_committed_();
+}
+
+int Connection::countCommittedMessages() const
+{
+    std::unique_lock<std::mutex> lock(messages_mutex_);
+//    return dimensionality_;
+    return committed_messages_.size();
+}
+
+ConnectionTypeConstPtr Connection::takeMessage()
+{
+    assert(dimensionality_ != -1);
+    if(committed_messages_.empty()) {
+        return connection_types::makeEmpty<connection_types::NoMessage>();
+    }
+
+    if(is_dynamic_) {
+        auto r = committed_messages_.front();
+        committed_messages_.pop_front();
+        return r;
+
+    } else {
+        return committed_messages_.front();
+    }
+}
+
+void Connection::freeMessages()
+{
+    {
+        std::unique_lock<std::mutex> lock(messages_mutex_);
+//        committed_messages_.clear();
+//        dimensionality_ = -1;
+        message_state_ = State::LATCHING;
+    }
+
+
+    from_->notifyMessageProcessed();
 }
 
 std::vector<Fulcrum::Ptr> Connection::getFulcrums() const

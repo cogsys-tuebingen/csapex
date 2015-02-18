@@ -35,8 +35,8 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
       is_setup_(false),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       tick_enabled_(false), ticks_(0),
-      source_(false), sink_(false),
-      messages_waiting_to_be_sent(false),
+      source_(false), sink_(false), level_(0),
+      state_(State::WAIT_FOR_FULL_INPUTS),
       thread_initialized_(false), paused_(false), stop_(false),
       profiling_(false)
 {
@@ -45,6 +45,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     tick_timer_ = new QTimer();
     setTickFrequency(DEFAULT_FREQUENCY);
 
+    QObject::connect(this, SIGNAL(processRequested()), this, SLOT(processMessages()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 
     node_state_->setLabel(uuid);
@@ -206,16 +207,12 @@ void NodeWorker::setEnabled(bool e)
 
 bool NodeWorker::canReceive()
 {
-    bool can_receive = true;
-    Q_FOREACH(Input* i, inputs_) {
+    for(Input* i : inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
-            can_receive = false;
-        } /*else if(i->isConnected() && !i->getSource()->isEnabled()) {
-            can_receive = false;
-        }*/
+            return false;
+        }
     }
-
-    return can_receive;
+    return true;
 }
 
 template <typename T>
@@ -235,12 +232,6 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         cin->moveToThread(thread());
 
         QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), this, SLOT(parameterMessageArrived(Connectable*)));
-
-
-        //        std::function<void(param::Parameter*)> deleter = [cin](param::Parameter*) mutable {
-        //            cin->removeAllConnectionsNotUndoable();
-        //        };
-        //        p->destroyed.connect(deleter);
 
         param_2_input_[p->name()] = cin;
         input_2_param_[cin] = p;
@@ -303,6 +294,11 @@ void NodeWorker::triggerSwitchThreadRequest(QThread* thread, int id)
 void NodeWorker::triggerPanic()
 {
     Q_EMIT panic();
+}
+
+void NodeWorker::triggerProcess()
+{
+    Q_EMIT processRequested();
 }
 
 void NodeWorker::switchThread(QThread *thread, int id)
@@ -398,11 +394,11 @@ void NodeWorker::reset()
 
     node_->abort();
     setError(false);
-    Q_FOREACH(Input* i, inputs_) {
+    for(Input* i : inputs_) {
         i->reset();
     }
-    Q_FOREACH(Output* i, outputs_) {
-        i->reset();
+    for(Output* o : outputs_) {
+        o->reset();
     }
 }
 
@@ -446,21 +442,21 @@ void NodeWorker::killExecution()
 
 void NodeWorker::messageArrived(Connectable *s)
 {
-    assertNotInGuiThread();
+//    assertNotInGuiThread();
 
-    {
-        std::unique_lock<std::recursive_mutex> lock(pause_mutex_);
-        while(paused_) {
-            continue_.wait(lock);
-        }
-    }
+//    {
+//        std::unique_lock<std::recursive_mutex> lock(pause_mutex_);
+//        while(paused_) {
+//            continue_.wait(lock);
+//        }
+//    }
 
-    Input* source = dynamic_cast<Input*> (s);
-    apex_assert_hard(source);
+//    Input* source = dynamic_cast<Input*> (s);
+//    apex_assert_hard(source);
 
-    std::lock_guard<std::recursive_mutex> lock(sync);
+//    std::lock_guard<std::recursive_mutex> lock(sync);
 
-    checkIfInputsCanBeProcessed();
+//    checkIfInputsCanBeProcessed();
 }
 
 void NodeWorker::parameterMessageArrived(Connectable *s)
@@ -490,19 +486,29 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
 
 void NodeWorker::checkIfInputsCanBeProcessed()
 {
-    if(isEnabled() && areAllInputsAvailable()) {
-        processMessages();
-    }
+//    if(isEnabled() && areAllInputsAvailable()) {
+//        processMessages();
+//    }
 }
 
 
 void NodeWorker::checkIfOutputIsReady(Connectable*)
 {
-    trySendMessages();
+    std::lock_guard<std::recursive_mutex> lock(sync);
+    if(state_ == State::SEND_MESSAGES) {
+        trySendMessages();
+    } else if(state_ == State::WAIT_FOR_FREE_OUTPUTS) {
+        if(canSendMessages()) {
+            resetInputs();
+        }
+    }
 }
 
 void NodeWorker::processMessages()
 {
+    apex_assert_hard(state_ == State::WAIT_FOR_FULL_INPUTS);
+    state_ = State::PROCESSING;
+
     assertNotInGuiThread();
 
     // everything has a message here
@@ -517,61 +523,55 @@ void NodeWorker::processMessages()
     {
         std::lock_guard<std::recursive_mutex> lock(sync);
 
-        // check for old messages
-        int highest_seq_no = -1;
-        UUID highest = UUID::NONE;
-        foreach(Input* cin, inputs_) {
-            if(cin->hasReceived()) {
-                int s = cin->sequenceNumber();
-                if(s > highest_seq_no) {
-                    highest_seq_no = s;
-                    highest = cin->getUUID();
-                }
-            }
-        }
-
-        // if a message was dropped we can already return
-        //        if(had_old_message) {
-        //            return;
-        //        }
-
-        // now all sequence numbers must be equal!
-        //        Q_FOREACH(const PAIR& pair, has_msg_) {
-        //            Input* cin = pair.first;
-
-        //            if(has_msg_[cin]) {
-        //                if(highest_seq_no != cin->sequenceNumber()) {
-        //                    std::cerr << "input @" << cin->getUUID().getFullName() <<
-        //                                 ": assertion failed: highest_seq_no (" << highest_seq_no << ") == cin->seq_no (" << cin->sequenceNumber() << ")" << std::endl;
-        //                    apex_assert_hard(false);
-        //                }
-        //            }
-        //        }
-
         // check if one is "NoMessage";
         for(Input* cin : inputs_) {
             if(!cin->isOptional() && msg::isMessage<connection_types::NoMessage>(cin)) {
                 all_inputs_are_present = false;
             }
         }
-
-        // set output sequence numbers
-        //        for(std::size_t i = 0; i < outputs_.size(); ++i) {
-        //            Output* out = outputs_[i];
-        //            out->setSequenceNumber(highest_seq_no);
-        //        }
     }
 
     if(all_inputs_are_present) {
-        processInputs();
+        std::lock_guard<std::recursive_mutex> lock(sync);
+
+        Timer::Ptr t = nullptr;
+
+        if(profiling_) {
+            t.reset(new Timer(getUUID()));
+            Q_EMIT timerStarted(this, PROCESS, t->startTimeMs());
+        }
+        node_->useTimer(t.get());
+
+        try {
+            node_->process();
+
+            if(trigger_process_done_->isConnected()) {
+                t->step("trigger process done");
+                trigger_process_done_->trigger();
+            }
+
+        }  catch(const std::exception& e) {
+            setError(true, e.what());
+        } catch(const std::string& s) {
+            setError(true, "Uncatched exception (string) exception: " + s);
+        } catch(...) {
+            throw;
+        }
+
+        if(t) {
+            finishTimer(t);
+        }
     }
 
 
-    if(!isSink()) {
+    if(isSink()) {
+        state_ = State::WAIT_FOR_FREE_OUTPUTS;
+        resetInputs();
+
+    } else {
+        state_ = State::SEND_MESSAGES;
         // send the messages
         trySendMessages();
-    } else {
-        resetInputs();
     }
     Q_EMIT messageProcessed();
 }
@@ -621,48 +621,6 @@ std::vector<TimerPtr> NodeWorker::extractLatestTimers()
     timer_history_.clear();
     return result;
 }
-
-void NodeWorker::processInputs()
-{
-    assertNotInGuiThread();
-    std::lock_guard<std::recursive_mutex> lock(sync);
-
-    Timer::Ptr t = nullptr;
-
-    if(profiling_) {
-        t.reset(new Timer(getUUID()));
-        Q_EMIT timerStarted(this, PROCESS, t->startTimeMs());
-    }
-    node_->useTimer(t.get());
-
-    try {
-        node_->process();
-
-        if(trigger_process_done_->isConnected()) {
-            t->step("trigger process done");
-            trigger_process_done_->trigger();
-        }
-
-    }  catch(const std::exception& e) {
-        setError(true, e.what());
-    } catch(const std::string& s) {
-        setError(true, "Uncatched exception (string) exception: " + s);
-    } catch(...) {
-        throw;
-    }
-
-    if(t) {
-        finishTimer(t);
-    }
-
-    if(isSink()) {
-        messages_waiting_to_be_sent = false;
-    } else {
-        messages_waiting_to_be_sent = true;
-        Q_EMIT messagesWaitingToBeSent(true);
-    }
-}
-
 
 Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
 {
@@ -860,9 +818,9 @@ void NodeWorker::registerTrigger(Trigger* t)
     t->moveToThread(thread());
 
     connectConnector(t);
-    QObject::connect(t, SIGNAL(messageProcessed(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
-    QObject::connect(t, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
-    QObject::connect(t, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
+//    QObject::connect(t, SIGNAL(messageProcessed(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
+//    QObject::connect(t, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
+//    QObject::connect(t, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
 
     Q_EMIT connectorCreated(t);
 }
@@ -1039,11 +997,14 @@ bool NodeWorker::canSendMessages()
 
 void NodeWorker::resetInputs()
 {
+    apex_assert_hard(state_ == State::WAIT_FOR_FREE_OUTPUTS);
+    state_ = State::WAIT_FOR_FULL_INPUTS;
+
     std::lock_guard<std::recursive_mutex> lock(sync);
-    Q_FOREACH(Input* cin, inputs_) {
+    for(Input* cin : inputs_) {
         cin->free();
     }
-    Q_FOREACH(Input* cin, inputs_) {
+    for(Input* cin : inputs_) {
         cin->notifyMessageProcessed();
     }
 }
@@ -1081,7 +1042,7 @@ void NodeWorker::trySendMessages()
     assertNotInGuiThread();
     std::lock_guard<std::recursive_mutex> lock(sync);
 
-    if(!messages_waiting_to_be_sent) {
+    if(state_ != State::SEND_MESSAGES) {
         return;
     }
 
@@ -1091,18 +1052,24 @@ void NodeWorker::trySendMessages()
 
 
     //    publishParameters();
-
-    messages_waiting_to_be_sent = false;
+    bool is_connected = false;
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
-        // TODO: support dynamic + static outputs at the same time!
-        messages_waiting_to_be_sent |= out->sendMessages();
+        out->sendMessages();
+
+        is_connected |= out->isConnected();
     }
 
-    if(!messages_waiting_to_be_sent) {
-        Q_EMIT messagesWaitingToBeSent(false);
+    state_ = State::WAIT_FOR_FREE_OUTPUTS;
+    if(!is_connected) {
         resetInputs();
     }
+
+    Q_EMIT messagesWaitingToBeSent(false);
+
+//    if(!messages_waiting_to_be_sent) {
+//        resetInputs();
+//    }
 
 }
 
@@ -1172,6 +1139,16 @@ bool NodeWorker::isSink() const
     return sink_ || outputs_.empty();
 }
 
+int NodeWorker::getLevel() const
+{
+    return level_;
+}
+
+void NodeWorker::setLevel(int level)
+{
+    level_ = level;
+}
+
 void NodeWorker::tick()
 {
     if(!is_setup_) {
@@ -1219,9 +1196,7 @@ void NodeWorker::tick()
     if(isEnabled() && (isTickEnabled() && isSource())) {
 
         if(canSendMessages() && node_->canTick() /*|| ticks_ != 0*/) {
-            foreach(Output* out, outputs_) {
-                out->clear();
-            }
+            apex_assert_hard(state_ == State::WAIT_FOR_FULL_INPUTS);
 
             TimerPtr t = nullptr;
             if(profiling_) {
@@ -1241,13 +1216,18 @@ void NodeWorker::tick()
             Q_EMIT ticked();
 
             ++ticks_;
+
+            bool has_msg = false;
             foreach(Output* out, outputs_) {
-                messages_waiting_to_be_sent |= msg::hasMessage(out);
+                has_msg |= msg::hasMessage(out);
             }
 
-            Q_EMIT messagesWaitingToBeSent(messages_waiting_to_be_sent);
+            if(has_msg) {
+                state_ = State::SEND_MESSAGES;
 
-            trySendMessages();
+                Q_EMIT messagesWaitingToBeSent(true);
+                trySendMessages();
+            }
 
             if(t) {
                 finishTimer(t);

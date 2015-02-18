@@ -256,7 +256,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 continue;
             }
 
-            Connection::Ptr connection = graph_->getConnection(Connection::Ptr(new Connection(from, to)));
+            Connection::Ptr connection = graph_->getConnection(from, to);
 
             std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 

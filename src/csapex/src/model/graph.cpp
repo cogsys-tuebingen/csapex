@@ -100,14 +100,14 @@ int Graph::countNodes()
 
 void Graph::foreachNode(std::function<void (NodeWorker*)> f)
 {
-    Q_FOREACH(NodeWorker::Ptr b, nodes_) {
+    for(NodeWorker::Ptr b :  nodes_) {
         f(b.get());
     }
 }
 
 void Graph::foreachNode(std::function<void (NodeWorker*)> f, std::function<bool (NodeWorker*)> pred)
 {
-    Q_FOREACH(NodeWorker::Ptr b, nodes_) {
+    for(NodeWorker::Ptr b :  nodes_) {
         if(pred(b.get())) {
             f(b.get());
         }
@@ -116,6 +116,9 @@ void Graph::foreachNode(std::function<void (NodeWorker*)> f, std::function<bool 
 
 bool Graph::addConnection(Connection::Ptr connection)
 {
+    NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
+    NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
+
     if(connection->from()->isConnectionPossible(connection->to())) {
         Connectable* from = findConnector(connection->from()->getUUID());
         Connectable* to = findConnector(connection->to()->getUUID());
@@ -124,8 +127,6 @@ bool Graph::addConnection(Connection::Ptr connection)
         from->addConnection(connection);
         to->addConnection(connection);
 
-        NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
-        NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
 
         node_parents_[n_to].push_back(n_from);
         node_children_[n_from].push_back(n_to);
@@ -136,21 +137,21 @@ bool Graph::addConnection(Connection::Ptr connection)
 
             int highest_seq_no = -1;
             // search all parents of the target for the highest seq no
-            Q_FOREACH(Input* input, n_to->getMessageInputs()) {
+            for(Input* input :  n_to->getMessageInputs()) {
                 if(!input->isConnected()) {
                     continue;
                 }
                 NodeWorker* ni = findNodeWorkerForConnector(input->getSource()->getUUID());
 
-                Q_FOREACH(Output* output, ni->getMessageOutputs()) {
+                for(Output* output :  ni->getMessageOutputs()) {
                     if(output->sequenceNumber() > highest_seq_no) {
                         highest_seq_no = output->sequenceNumber();
                     }
                 }
             }
             if(highest_seq_no != -1) {
-//                std::cerr << "setting the sequence numbers:\n";
-                Q_FOREACH(Input* input, n_to->getMessageInputs()) {
+                //                std::cerr << "setting the sequence numbers:\n";
+                for(Input* input :  n_to->getMessageInputs()) {
                     input->setSequenceNumber(highest_seq_no);
                 }
             }
@@ -161,13 +162,13 @@ bool Graph::addConnection(Connection::Ptr connection)
             // set the sequence no of the child component to the one given by this connector
             int seq_no = from->sequenceNumber();
 
-//            std::cerr << "synchronize components" << std::endl;
-            Q_FOREACH(NodeWorker::Ptr n, nodes_) {
+            //            std::cerr << "synchronize components" << std::endl;
+            for(NodeWorker::Ptr n :  nodes_) {
                 if(node_component_[n.get()] == node_component_[n_to]) {
-                    Q_FOREACH(Output* output, n->getMessageOutputs()) {
+                    for(Output* output :  n->getMessageOutputs()) {
                         output->setSequenceNumber(seq_no);
                     }
-                    Q_FOREACH(Input* input, n->getMessageInputs()) {
+                    for(Input* input :  n->getMessageInputs()) {
                         input->setSequenceNumber(seq_no);
                     }
                 }
@@ -192,6 +193,9 @@ bool Graph::addConnection(Connection::Ptr connection)
 void Graph::deleteConnection(Connection::Ptr connection)
 {
     connection->from()->removeConnection(connection->to());
+
+    connection->from()->removeConnection(connection);
+    connection->to()->removeConnection(connection);
 
     for(std::vector<Connection::Ptr>::iterator c = connections_.begin(); c != connections_.end();) {
         if(*connection == **c) {
@@ -221,6 +225,7 @@ void Graph::deleteConnection(Connection::Ptr connection)
         }
     }
 
+
     throw std::runtime_error("cannot delete connection");
 }
 
@@ -232,7 +237,7 @@ void Graph::buildConnectedComponents()
     node_component_.clear();
 
     std::deque<NodeWorker*> unmarked;
-    Q_FOREACH(NodeWorker::Ptr node, nodes_) {
+    for(NodeWorker::Ptr node :  nodes_) {
         unmarked.push_back(node.get());
         node_component_[node.get()] = -1;
     }
@@ -254,14 +259,14 @@ void Graph::buildConnectedComponents()
 
             // iterate all neighbors
             std::vector<NodeWorker*> neighbors;
-            Q_FOREACH(NodeWorker* parent, node_parents_[front]) {
+            for(NodeWorker* parent :  node_parents_[front]) {
                 neighbors.push_back(parent);
             }
-            Q_FOREACH(NodeWorker* child, node_children_[front]) {
+            for(NodeWorker* child :  node_children_[front]) {
                 neighbors.push_back(child);
             }
 
-            Q_FOREACH(NodeWorker* neighbor, neighbors) {
+            for(NodeWorker* neighbor :  neighbors) {
                 if(node_component_[neighbor] == -1) {
                     node_component_[neighbor] = component;
                     Q.push_back(neighbor);
@@ -272,7 +277,92 @@ void Graph::buildConnectedComponents()
         ++component;
     }
 
+    assignLevels();
+
     Q_EMIT structureChanged(this);
+}
+
+void Graph::assignLevels()
+{
+    std::map<NodeWorker*, int> node_level;
+
+    static const int NO_LEVEL = std::numeric_limits<int>::min();
+
+    std::deque<NodeWorker*> unmarked;
+    for(NodeWorker::Ptr node :  nodes_) {
+        if(node_parents_[node.get()].empty()) {
+            node_level[node.get()] = 0;
+        } else {
+            node_level[node.get()] = NO_LEVEL;
+            unmarked.push_back(node.get());
+        }
+    }
+
+    // to assign a level, every parent must be known
+    while(!unmarked.empty()) {
+        NodeWorker* current = unmarked.front();
+        unmarked.pop_front();
+
+        int max_level = NO_LEVEL;
+        for(NodeWorker* parent : node_parents_.at(current)) {
+            int parent_level = node_level[parent];
+            if(parent_level == NO_LEVEL) {
+                max_level = NO_LEVEL;
+                break;
+            } else {
+                if(parent_level > max_level) {
+                    max_level = parent_level;
+                }
+            }
+        }
+
+        int max_dynamic_level = NO_LEVEL;
+        bool has_dynamic_parent_output = false;
+        bool has_dynamic_input = false;
+        for(const auto& input : current->getMessageInputs()) {
+            if(input->isDynamic()) {
+                has_dynamic_input = true;
+            }
+
+            for(const auto& connection_ptr : input->getConnections()) {
+                const auto& connection = connection_ptr.lock();
+                const auto& parent_output = connection->from();
+                if(parent_output->isDynamic()) {
+                    has_dynamic_parent_output = true;
+                    NodeWorker* node = findNodeWorkerForConnector(parent_output->getUUID());
+                    int level = node_level.at(node);
+                    apex_assert_hard(level != NO_LEVEL);
+
+                    if(level > max_dynamic_level) {
+                        max_dynamic_level = level;
+                    }
+                }
+            }
+        }
+
+        bool unknown_parent = max_level == NO_LEVEL;
+        if(unknown_parent) {
+            unmarked.push_back(current);
+
+        } else {
+            if(!has_dynamic_parent_output && !has_dynamic_input) {
+                node_level[current] = max_level;
+
+            } else if(has_dynamic_parent_output && !has_dynamic_input) {
+                node_level[current] = max_level + 1;
+
+            } else if(!has_dynamic_parent_output && has_dynamic_input) {
+                node_level[current] = max_level - 1;
+
+            } else if(has_dynamic_parent_output && has_dynamic_input) {
+                node_level[current] = max_level;
+            }
+        }
+    }
+
+    for(NodeWorker::Ptr node :  nodes_) {
+        node->setLevel(node_level[node.get()]);
+    }
 }
 
 void Graph::verify()
@@ -283,7 +373,7 @@ Command::Ptr Graph::clear()
 {
     command::Meta::Ptr clear(new command::Meta("Clear Graph"));
 
-    Q_FOREACH(NodeWorker::Ptr node, nodes_) {
+    for(NodeWorker::Ptr node :  nodes_) {
         Command::Ptr cmd(new command::DeleteNode(node->getUUID()));
         clear->add(cmd);
     }
@@ -308,7 +398,7 @@ int Graph::getLevel(const UUID &node_uuid) const
         return 0;
     }
 
-    return 0;//node_level_.at(node);
+    return node->getLevel();
 }
 
 Node* Graph::findNode(const UUID& uuid) const
@@ -331,7 +421,7 @@ NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
 
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
-    Q_FOREACH(NodeWorker::Ptr b, nodes_) {
+    for(NodeWorker::Ptr b :  nodes_) {
         if(b->getUUID() == uuid) {
             return b->getNode();
         }
@@ -343,7 +433,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
 
 NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
 {
-    Q_FOREACH(const NodeWorker::Ptr b, nodes_) {
+    for(const NodeWorker::Ptr b :  nodes_) {
         if(b->getUUID() == uuid) {
             return b.get();
         }
@@ -418,32 +508,30 @@ Connection::Ptr Graph::getConnectionWithId(int id)
     return nullptr;
 }
 
-Connection::Ptr Graph::getConnection(Connection::Ptr c)
+Connection::Ptr Graph::getConnection(Connectable* from, Connectable* to)
 {
     for(Connection::Ptr& connection : connections_) {
-        if(*connection == *c) {
+        if(connection->from() == from && connection->to() == to) {
             return connection;
         }
     }
 
-    std::cerr << "error: cannot get connection for " << *c << std::endl;
+    std::cerr << "error: cannot get connection from " << from->getUUID() << " to " << to->getUUID() << std::endl;
 
     return nullptr;
 }
 
 int Graph::getConnectionId(Connection::Ptr c)
 {
-    Connection::Ptr internal = getConnection(c);
-
-    if(internal != nullptr) {
-        return internal->id();
+    if(c != nullptr) {
+        return c->id();
     }
 
     return -1;
 }
 Command::Ptr Graph::deleteConnectionByIdCommand(int id)
 {
-    Q_FOREACH(const Connection::Ptr& connection, connections_) {
+    for(const Connection::Ptr& connection :  connections_) {
         if(connection->id() == id) {
             return Command::Ptr(new command::DeleteConnection(connection->from(), connection->to()));
         }

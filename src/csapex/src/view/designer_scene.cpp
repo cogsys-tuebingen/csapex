@@ -587,8 +587,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.disabled = (!from->isEnabled() || !to->isEnabled());
-    ccs.blocked_from = from->isBlocked();
-    ccs.blocked_to = to->isBlocked();
+    ccs.blocked_from = !connection.acceptsMessages();
+    ccs.blocked_to = ccs.blocked_from;
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
     ccs.hidden_from = !fromp->isVisible();

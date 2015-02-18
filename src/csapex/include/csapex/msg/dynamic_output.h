@@ -17,7 +17,7 @@ public:
 
     virtual void publish(ConnectionType::ConstPtr message) override;
 
-    virtual bool sendMessages() override;
+    virtual void sendMessages() override;
     virtual bool hasMessage() override;
 
     virtual void clear() override;

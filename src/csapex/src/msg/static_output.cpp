@@ -26,8 +26,6 @@ void StaticOutput::publish(ConnectionType::ConstPtr message)
 
     // update buffer
     message_to_send_ = message;
-
-    setBlocked(true);
 }
 
 bool StaticOutput::hasMessage()
@@ -35,7 +33,7 @@ bool StaticOutput::hasMessage()
     return (bool) message_to_send_;
 }
 
-bool StaticOutput::sendMessages()
+void StaticOutput::sendMessages()
 {
     assert(canSendMessages());
     if(message_to_send_) {
@@ -44,7 +42,7 @@ bool StaticOutput::sendMessages()
 
     } else {
         if(!connections_.empty()) {
-//            std::cout << getUUID() << " sends empty message" << std::endl;
+            //            std::cout << getUUID() << " sends empty message" << std::endl;
         }
         message_ = connection_types::makeEmpty<connection_types::NoMessage>();
     }
@@ -63,25 +61,21 @@ bool StaticOutput::sendMessages()
         Input* i = dynamic_cast<Input*>(c->to());
         if(i && i->isEnabled()) {
             targets.push_back(c.get());
-            assert(!i->isBlocked());
         }
     }
 
-//    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
+    //    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
     if(!targets.empty()) {
         // all connected inputs are ready to receive, send them the message
         for(auto i : targets) {
-            i->inputMessage(message_);
+            i->addMessage(message_);
+            i->commitMessages();
         }
         ++count_;
     }
 
-    setBlocked(false);
-
     ++seq_no_;
     Q_EMIT messageSent(this);
-
-    return false;
 }
 
 void StaticOutput::reset()
@@ -94,11 +88,8 @@ void StaticOutput::disable()
 {
     Output::disable();
 
-    //    if(isBlocked()) {
-            message_to_send_.reset();
-            message_.reset();
-    //    }
-
+    message_to_send_.reset();
+    message_.reset();
 }
 
 ConnectionType::ConstPtr StaticOutput::getMessage()

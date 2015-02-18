@@ -33,6 +33,8 @@ public:
         return true;
     }
 
+    void addConnection(ConnectionWeakPtr connection) override;
+    void removeConnection(ConnectionWeakPtr connection) override;
     bool canConnectTo(Connectable* other_side, bool move) const;
 
     void inputMessage(ConnectionType::ConstPtr message);
@@ -64,20 +66,16 @@ public:
 
     void reset();
 
+
 protected:
     virtual bool isConnectionPossible(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
 
-Q_SIGNALS:
-    void gotMessage(ConnectionType::ConstPtr msg);
-
-private Q_SLOTS:
-    void handleMessage(ConnectionType::ConstPtr msg);
-
 protected:
     Transition* transition_;
 
-    BufferPtr buffer_;
+    mutable std::mutex message_mutex_;
+    ConnectionTypeConstPtr message_;
 
     bool optional_;
 };

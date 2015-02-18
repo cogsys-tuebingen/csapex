@@ -46,6 +46,9 @@ public:
         return false;
     }
 
+    void setDynamic(bool dynamic);
+    bool isDynamic() const;
+
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
@@ -55,13 +58,12 @@ public:
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
-    bool isBlocked() const;
-
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
     std::vector<ConnectionWeakPtr> getConnections() const;
-    void addConnection(ConnectionWeakPtr connection);
+    virtual void addConnection(ConnectionWeakPtr connection);
+    virtual void removeConnection(ConnectionWeakPtr connection);
 
     virtual bool isConnected() const;
 
@@ -88,9 +90,6 @@ public Q_SLOTS:
 
     virtual void notifyMessageProcessed();
 
-protected:
-    void setBlocked(bool b);
-
 
 Q_SIGNALS:
     void disconnected(QObject*);
@@ -101,7 +100,6 @@ Q_SIGNALS:
     void connectionRemoved(Connectable*);
     void connectionEnabled(bool);
     void messageProcessed(Connectable*);
-    void blocked(bool);
     void connectableError(bool error, const std::string &msg, int level);
 
     void messageSent(Connectable* source);
@@ -139,7 +137,7 @@ protected:
 
 private:
     bool enabled_;
-    bool blocked_;
+    bool dynamic_;
 };
 
 }

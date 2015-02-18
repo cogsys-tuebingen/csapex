@@ -10,6 +10,9 @@
 #include <vector>
 #include <QPoint>
 #include <deque>
+#include <boost/signals2.hpp>
+#include <mutex>
+#include <condition_variable>
 
 namespace csapex
 {
@@ -52,7 +55,15 @@ public:
 
     void tick();
 
-    void inputMessage(const ConnectionTypeConstPtr& msg);
+    bool acceptsMessages() const;
+    void addMessage(const ConnectionTypeConstPtr& msg);
+    void commitMessages();
+    void freeMessages();
+    int countCommittedMessages() const;
+    ConnectionTypeConstPtr takeMessage();
+
+public:
+    boost::signals2::signal<void()> messages_committed_;
 
 private Q_SLOTS:
     void messageSentEvent();
@@ -81,12 +92,18 @@ private:
 protected:
     Connectable* from_;
     Connectable* to_;
+    int id_;
+    bool is_dynamic_;
 
     std::vector<FulcrumPtr> fulcrums_;
 
-    std::deque<ConnectionTypeConstPtr> message_queue_;
+    enum class State { COLLECTING, COMMITTED, LATCHING };
+    std::list<ConnectionTypeConstPtr> message_queue_;
+    std::deque<ConnectionTypeConstPtr> committed_messages_;
+    State message_state_;
+    mutable std::mutex messages_mutex_;
 
-    int id_;
+    int dimensionality_;
 
     static int next_connection_id_;
 };

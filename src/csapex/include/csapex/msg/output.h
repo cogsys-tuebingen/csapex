@@ -38,7 +38,7 @@ public:
     virtual void publish(ConnectionType::ConstPtr message) = 0;
 
     virtual bool canSendMessages() const;
-    virtual bool sendMessages() = 0;
+    virtual void sendMessages() = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;

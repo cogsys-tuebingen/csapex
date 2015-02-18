@@ -33,7 +33,6 @@ void Output::reset()
 {
     clear();
 
-    setBlocked(false);
     setSequenceNumber(0);
 }
 
@@ -124,7 +123,16 @@ bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 
 bool Output::isConnected() const
 {
-    return connections_.size() > 0 || force_send_message_;
+    if(force_send_message_) {
+        return true;
+    }
+
+    for(const auto& c : connections_) {
+        if(c.lock()->to()->isEnabled()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
@@ -148,7 +156,7 @@ bool Output::canSendMessages() const
         if(!c) {
             continue;
         }
-        if(c->to()->isBlocked()) {
+        if(!c->acceptsMessages()) {
             return false;
         }
     }

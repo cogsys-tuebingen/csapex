@@ -47,7 +47,7 @@ std::string DeleteConnection::getDescription() const
 
 bool DeleteConnection::doExecute()
 {
-    Connection::Ptr connection(new Connection(from, to));
+    Connection::Ptr connection = graph_->getConnection(from, to);
 
     connection_id = graph_->getConnectionId(connection);
 

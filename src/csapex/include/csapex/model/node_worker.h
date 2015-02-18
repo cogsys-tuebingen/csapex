@@ -57,6 +57,7 @@ public:
     void waitUntilFinished();
     void reset();
 
+    void triggerProcess();
     void triggerSwitchThreadRequest(QThread* thread, int id);
     void triggerPanic();
 
@@ -127,6 +128,9 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    int getLevel() const;
+    void setLevel(int level);
+
     std::vector<TimerPtr> extractLatestTimers();
 
 public Q_SLOTS:
@@ -188,6 +192,7 @@ Q_SIGNALS:
     void stopProfiling(NodeWorker* box);
 
     void panic();
+    void processRequested();
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
@@ -207,8 +212,6 @@ private:
     void makeParameterConnectableImpl(param::Parameter*);
     void publishParameters();
     void publishParameter(param::Parameter *p);
-
-    void processInputs();
 
     void assertNotInGuiThread();
 
@@ -256,9 +259,18 @@ private:
 
     bool source_;
     bool sink_;
+    int level_;
 
     std::recursive_mutex sync;
-    bool messages_waiting_to_be_sent;
+
+    enum class State {
+        WAIT_FOR_FULL_INPUTS,
+        PROCESSING,
+        SEND_MESSAGES,
+        WAIT_FOR_FREE_OUTPUTS
+    };
+
+    State state_;
 
     std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;

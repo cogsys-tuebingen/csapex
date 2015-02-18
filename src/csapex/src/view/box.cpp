@@ -131,7 +131,6 @@ void NodeBox::construct()
     enabledChange(worker->isEnabled());
     QObject::connect(worker.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
 
-    QObject::connect(worker.get(), SIGNAL(messagesWaitingToBeSent(bool)), this, SLOT(blockedChange(bool)));
     QObject::connect(worker.get(), SIGNAL(threadChanged()), this, SLOT(updateThreadInformation()));
 
 
@@ -419,11 +418,6 @@ void NodeBox::enabledChange(bool val)
     ui->enablebtn->setChecked(val);
 
     refreshStylesheet();
-}
-
-void NodeBox::blockedChange(bool val)
-{
-    ui->boxframe->setProperty("blocked", val);
 }
 
 void NodeBox::paintEvent(QPaintEvent* /*e*/)
