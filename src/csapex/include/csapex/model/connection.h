@@ -32,6 +32,12 @@ class Connection : public QObject {
 public:
     typedef std::shared_ptr<Connection> Ptr;
 
+    enum class State {
+        READY_TO_RECEIVE,
+        UNREAD,
+        READ
+    };
+
 public:
     friend std::ostream& operator << (std::ostream& out, const Connection& c) {
         out << "Connection: [" << c.from() << " / " << c.to() << "]";
@@ -55,15 +61,15 @@ public:
 
     void tick();
 
-    bool acceptsMessages() const;
-    void addMessage(const ConnectionTypeConstPtr& msg);
-    void commitMessages();
-    void freeMessages();
-    int countCommittedMessages() const;
-    ConnectionTypeConstPtr takeMessage();
+    void setMessage(const ConnectionTypeConstPtr& msg);
+    ConnectionTypeConstPtr getMessage() const;
+    void notifyMessageProcessed();
+
+    State getState() const;
+    void setState(State s);
 
 public:
-    boost::signals2::signal<void()> messages_committed_;
+    boost::signals2::signal<void()> new_message;
 
 private Q_SLOTS:
     void messageSentEvent();
@@ -97,13 +103,8 @@ protected:
 
     std::vector<FulcrumPtr> fulcrums_;
 
-    enum class State { COLLECTING, COMMITTED, LATCHING };
-    std::list<ConnectionTypeConstPtr> message_queue_;
-    std::deque<ConnectionTypeConstPtr> committed_messages_;
-    State message_state_;
-    mutable std::mutex messages_mutex_;
-
-    int dimensionality_;
+    State state_;
+    ConnectionTypeConstPtr message_;
 
     static int next_connection_id_;
 };

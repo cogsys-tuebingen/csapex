@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/core/thread_pool.h>
@@ -36,7 +37,7 @@ std::string CreateThread::getDescription() const
 
 bool CreateThread::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
+    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
     apex_assert_hard(node_worker);
 
     old_id = node_worker->getNodeState()->getThread();
@@ -47,7 +48,7 @@ bool CreateThread::doExecute()
 
 bool CreateThread::doUndo()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
+    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
     apex_assert_hard(node_worker);
 
     if(old_id == 0) {

@@ -20,11 +20,11 @@ class Input : public Connectable
     friend class command::DeleteConnection;
 
 public:
-    Input(Transition* transition, const UUID &uuid);
-    Input(Transition* transition, Unique *parent, int sub_id);
+    Input(InputTransition* transition, const UUID &uuid);
+    Input(InputTransition* transition, Unique *parent, int sub_id);
     virtual ~Input();
 
-    Transition* getTransition() const;
+    InputTransition* getTransition() const;
 
     virtual bool canInput() const {
         return true;
@@ -72,7 +72,7 @@ protected:
     virtual void removeConnection(Connectable* other_side);
 
 protected:
-    Transition* transition_;
+    InputTransition* transition_;
 
     mutable std::mutex message_mutex_;
     ConnectionTypeConstPtr message_;

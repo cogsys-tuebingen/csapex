@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
+#include <csapex/msg/output_transition.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
@@ -15,18 +16,36 @@
 
 using namespace csapex;
 
-Output::Output(const UUID& uuid)
-    : Connectable(uuid), force_send_message_(false)
+Output::Output(OutputTransition* transition, const UUID& uuid)
+    : Connectable(uuid), transition_(transition),
+      force_send_message_(false), state_(State::RECEIVING)
 {
 }
 
-Output::Output(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "out"), force_send_message_(false)
+Output::Output(OutputTransition* transition, Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "out"),  transition_(transition),
+      force_send_message_(false), state_(State::RECEIVING)
 {
 }
 
 Output::~Output()
 {
+}
+
+OutputTransition* Output::getTransition() const
+{
+    return transition_;
+}
+
+
+void Output::setState(State s)
+{
+    state_ = s;
+}
+
+Output::State Output::getState() const
+{
+    return state_;
 }
 
 void Output::reset()
@@ -44,6 +63,19 @@ int Output::countConnections()
 std::vector<ConnectionWeakPtr> Output::getConnections() const
 {
     return connections_;
+}
+
+
+void Output::addConnection(ConnectionWeakPtr connection)
+{
+    transition_->addConnection(connection);
+    Connectable::addConnection(connection);
+}
+
+void Output::removeConnection(ConnectionWeakPtr connection)
+{
+    transition_->removeConnection(connection);
+    Connectable::removeConnection(connection);
 }
 
 void Output::removeConnection(Connectable* other_side)
@@ -155,9 +187,6 @@ bool Output::canSendMessages() const
         ConnectionPtr c = connection.lock();
         if(!c) {
             continue;
-        }
-        if(!c->acceptsMessages()) {
-            return false;
         }
     }
     return true;

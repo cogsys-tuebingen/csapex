@@ -159,6 +159,7 @@ protected:
     QIcon minimize_icon_;
     QIcon maximize_icon_;
 
+    QLabel* info_exec;
     QLabel* info_compo;
     QLabel* info_thread;
     QLabel* info_error;

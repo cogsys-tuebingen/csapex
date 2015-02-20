@@ -12,18 +12,22 @@ namespace csapex
 class DynamicOutput : public Output
 {
 public:
-    DynamicOutput(const UUID &uuid);
-    DynamicOutput(Unique *parent, int sub_id);
+    DynamicOutput(OutputTransition* transition, const UUID &uuid);
+    DynamicOutput(OutputTransition* transition, Unique *parent, int sub_id);
 
     virtual void publish(ConnectionType::ConstPtr message) override;
 
-    virtual void sendMessages() override;
+    virtual void commitMessages() override;
     virtual bool hasMessage() override;
+    virtual void nextMessage() override;
+    virtual ConnectionTypeConstPtr getMessage() const override;
 
     virtual void clear() override;
 
 private:
     std::deque<ConnectionType::ConstPtr> messages_to_send_;
+    std::deque<ConnectionType::ConstPtr> committed_messages_;
+    ConnectionTypeConstPtr current_message_;
 };
 }
 

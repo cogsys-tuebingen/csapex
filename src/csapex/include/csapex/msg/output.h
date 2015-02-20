@@ -20,9 +20,18 @@ class Output : public Connectable
     friend class DesignerIO;
 
 public:
-    Output(const UUID &uuid);
-    Output(Unique *parent, int sub_id);
+    enum class State {
+        RECEIVING, // output is collecting messages
+        ACTIVE,    // output has sent it's messages, no answer yet
+        DONE       // output's messages have all been processed
+    };
+
+public:
+    Output(OutputTransition* transition, const UUID &uuid);
+    Output(OutputTransition* transition, Unique *parent, int sub_id);
     ~Output();
+
+    OutputTransition* getTransition() const;
 
     virtual bool canOutput() const override
     {
@@ -33,12 +42,19 @@ public:
         return true;
     }
 
+    State getState() const;
+
+    virtual void addConnection(ConnectionWeakPtr connection) override;
+    void removeConnection(ConnectionWeakPtr connection) override;
+
     virtual void disable() override;
 
     virtual void publish(ConnectionType::ConstPtr message) = 0;
 
     virtual bool canSendMessages() const;
-    virtual void sendMessages() = 0;
+    virtual void commitMessages() = 0;
+    virtual void nextMessage() = 0;
+    virtual ConnectionTypeConstPtr getMessage() const = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;
@@ -60,13 +76,19 @@ public:
     virtual void clear() = 0;
 
 protected:
+    void setState(State s);
+
+protected:
     /// PRIVATE: Use command to create a connection (undoable)
     virtual bool isConnectionPossible(Connectable* other_side) override;
     virtual void removeConnection(Connectable* other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
 protected:
+    OutputTransition* transition_;
+
     bool force_send_message_;
+    State state_;
 };
 
 }

@@ -101,8 +101,9 @@ private:
         bool highlighted;
         bool error;
         bool disabled;
-        bool blocked_from;
-        bool blocked_to;
+        bool empty;
+        bool full_read;
+        bool full_unread;
         bool minimized_from;
         bool minimized_to;
         bool minimized;

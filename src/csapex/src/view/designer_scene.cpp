@@ -587,8 +587,9 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.disabled = (!from->isEnabled() || !to->isEnabled());
-    ccs.blocked_from = !connection.acceptsMessages();
-    ccs.blocked_to = ccs.blocked_from;
+    ccs.empty = connection.getState() == Connection::State::READY_TO_RECEIVE;
+    ccs.full_read = connection.getState() == Connection::State::READ;
+    ccs.full_unread = connection.getState() == Connection::State::UNREAD;
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
     ccs.hidden_from = !fromp->isVisible();
@@ -756,9 +757,14 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     QColor color_start = style_->lineColor();
     QColor color_end = style_->lineColor();
 
-    if(ccs.blocked_from || ccs.blocked_to) {
+    if(ccs.full_read || ccs.full_unread) {
         color_start = style_->lineColorBlocked();
         color_end = style_->lineColorBlocked();
+
+        if(ccs.full_read) {
+            color_start = color_start.dark();
+            color_end = color_end.dark();
+        }
 
     } else if(ccs.error) {
         color_start = style_->lineColorError();

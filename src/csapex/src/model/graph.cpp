@@ -331,7 +331,7 @@ void Graph::assignLevels()
                     has_dynamic_parent_output = true;
                     NodeWorker* node = findNodeWorkerForConnector(parent_output->getUUID());
                     int level = node_level.at(node);
-                    apex_assert_hard(level != NO_LEVEL);
+//                    apex_assert_hard(level != NO_LEVEL);
 
                     if(level > max_dynamic_level) {
                         max_dynamic_level = level;

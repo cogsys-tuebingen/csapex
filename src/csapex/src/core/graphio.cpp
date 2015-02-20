@@ -6,6 +6,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/connection.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/trigger.h>
@@ -28,27 +29,27 @@
 
 using namespace csapex;
 
-GraphIO::GraphIO(Graph *graph, NodeFactory* node_factory)
-    : graph_(graph), node_factory_(node_factory)
+GraphIO::GraphIO(GraphWorker *graph, NodeFactory* node_factory)
+    : graph_worker_(graph), node_factory_(node_factory)
 {
 }
 
 
 void GraphIO::saveSettings(YAML::Node& doc)
 {
-    doc["uuid_map"] = graph_->uuids_;
+    doc["uuid_map"] = graph_worker_->getGraph()->uuids_;
 }
 
 void GraphIO::loadSettings(const YAML::Node &doc)
 {
     if(doc["uuid_map"].IsDefined()) {
-        graph_->uuids_ = doc["uuid_map"].as<std::map<std::string, int> >();
+        graph_worker_->getGraph()->uuids_ = doc["uuid_map"].as<std::map<std::string, int> >();
     }
 }
 
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
+    foreach(NodeWorker* node, graph_worker_->getGraph()->getAllNodeWorkers()) {
         try {
             YAML::Node yaml_node;
             node->getNodeState()->writeYaml(yaml_node);
@@ -84,12 +85,13 @@ void GraphIO::loadNode(const YAML::Node& doc)
     if(x != 0 || y != 0) {
         node_worker->getNodeState()->setPos(QPoint(x,y));
     }
-    graph_->addNode(node_worker);
+    node_worker->pause(graph_worker_->isPaused());
+    graph_worker_->getGraph()->addNode(node_worker);
 }
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
+    foreach(NodeWorker* node, graph_worker_->getGraph()->getAllNodeWorkers()) {
         if(!node->getAllOutputs().empty()) {
             foreach(Output* o, node->getAllOutputs()) {
                 if(o->countConnections() == 0) {
@@ -118,7 +120,7 @@ void GraphIO::saveConnections(YAML::Node &yaml)
         }
     }
 
-    foreach(const Connection::Ptr& connection, graph_->connections_) {
+    foreach(const Connection::Ptr& connection, graph_worker_->getGraph()->connections_) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }
@@ -173,7 +175,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
             NodeWorker* parent = nullptr;
             try {
-                parent = graph_->findNodeWorkerForConnector(from_uuid);
+                parent = graph_worker_->getGraph()->findNodeWorkerForConnector(from_uuid);
 
             } catch(const std::exception& e) {
                 std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
@@ -208,7 +210,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 }
 
                 try {
-                    NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
+                    NodeWorker* target = graph_worker_->getGraph()->findNodeWorkerForConnector(to_uuid);
 
                     Connectable* to = target->getInput(to_uuid);
                     if(to == nullptr) {
@@ -218,7 +220,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                         continue;
                     }
 
-                    graph_->addConnection(Connection::Ptr(new Connection(from, to)));
+                    graph_worker_->getGraph()->addConnection(Connection::Ptr(new Connection(from, to)));
 
                 } catch(const std::exception& e) {
                     std::cerr << "cannot load connection: " << e.what() << std::endl;
@@ -244,19 +246,19 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             UUID from_uuid = UUID::make_forced(from_uuid_tmp);
             UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
-            Output* from = dynamic_cast<Output*>(graph_->findConnector(from_uuid));
+            Output* from = dynamic_cast<Output*>(graph_worker_->getGraph()->findConnector(from_uuid));
             if(from == nullptr) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                 continue;
             }
 
-            Input* to = dynamic_cast<Input*>(graph_->findConnector(to_uuid));
+            Input* to = dynamic_cast<Input*>(graph_worker_->getGraph()->findConnector(to_uuid));
             if(to == nullptr) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
                 continue;
             }
 
-            Connection::Ptr connection = graph_->getConnection(from, to);
+            Connection::Ptr connection = graph_worker_->getGraph()->getConnection(from, to);
 
             std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 

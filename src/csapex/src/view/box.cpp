@@ -31,7 +31,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), is_placed_(false)
+      down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), is_placed_(false)
 {
     worker->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::flipSides, this));
     worker->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
@@ -52,6 +52,11 @@ void NodeBox::setupUi()
 
     worker->getNode()->checkConditions(true);
 
+    if(!info_exec) {
+        info_exec = new QLabel;
+        info_exec->setProperty("exec", true);
+        ui->infos->addWidget(info_exec);
+    }
     if(!info_compo) {
         info_compo = new QLabel;
         info_compo->setProperty("component", true);
@@ -426,6 +431,11 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     if(!worker || !adapter_) {
         return;
     }
+
+    info_exec->setVisible(true);
+    info_exec->setText(QString("<img src=\":/") +
+                       (worker->getState() == NodeWorker::State::IDLE ? "idle" : "running") +
+                       ".png\" />");
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;

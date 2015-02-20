@@ -42,11 +42,17 @@ public:
 
     static const double DEFAULT_FREQUENCY;
 
+    enum class State {
+        IDLE,
+        PROCESSING
+    };
+
 public:
     NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);
     ~NodeWorker();
 
-    Transition* getInputTransition() const;
+    InputTransition* getInputTransition() const;
+    OutputTransition* getOutputTransition() const;
 
     void setNodeState(NodeStatePtr memento);
     NodeStatePtr getNodeState();
@@ -57,11 +63,13 @@ public:
     void waitUntilFinished();
     void reset();
 
+    void triggerCheckInputs();
     void triggerProcess();
     void triggerSwitchThreadRequest(QThread* thread, int id);
     void triggerPanic();
 
     Node* getNode() const;
+    State getState() const;
 
     std::string getType() const;
 
@@ -136,6 +144,7 @@ public:
 public Q_SLOTS:
     void messageArrived(Connectable* source);
     void processMessages();
+    void checkInputs();
 
     void parameterMessageArrived(Connectable* source);
 
@@ -157,9 +166,9 @@ public Q_SLOTS:
     void pause(bool pause);
     void killExecution();
 
-    bool canSendMessages();
+//    bool canSendMessages();
     void trySendMessages();
-    void resetInputs();
+    void notifyMessagesProcessed();
 
 
 Q_SIGNALS:
@@ -193,6 +202,7 @@ Q_SIGNALS:
 
     void panic();
     void processRequested();
+    void checkInputsRequested();
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
@@ -219,6 +229,8 @@ private:
 
     void finishTimer(TimerPtr t);
 
+    void setState(State state);
+
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 private:
@@ -228,9 +240,11 @@ private:
     NodePtr node_;    
     NodeStatePtr node_state_;
 
-    TransitionPtr transition_in_;
+    InputTransitionPtr transition_in_;
+    OutputTransitionPtr transition_out_;
 
     bool is_setup_;
+    State state_;
 
     std::vector<Input*> inputs_;
     std::vector<Output*> outputs_;
@@ -262,15 +276,6 @@ private:
     int level_;
 
     std::recursive_mutex sync;
-
-    enum class State {
-        WAIT_FOR_FULL_INPUTS,
-        PROCESSING,
-        SEND_MESSAGES,
-        WAIT_FOR_FREE_OUTPUTS
-    };
-
-    State state_;
 
     std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;

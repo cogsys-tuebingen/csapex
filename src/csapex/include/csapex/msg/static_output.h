@@ -9,13 +9,15 @@ namespace csapex
 class StaticOutput : public Output
 {
 public:
-    StaticOutput(const UUID &uuid);
-    StaticOutput(Unique *parent, int sub_id);
+    StaticOutput(OutputTransition* transition, const UUID &uuid);
+    StaticOutput(OutputTransition* transition, Unique *parent, int sub_id);
 
     virtual void publish(ConnectionType::ConstPtr message) override;
 
-    virtual void sendMessages() override;
+    virtual void commitMessages() override;
     virtual bool hasMessage() override;
+    virtual void nextMessage() override;
+    virtual ConnectionTypeConstPtr getMessage() const override;
 
     virtual void disable() override;
     virtual void reset() override;
@@ -24,8 +26,8 @@ public:
     ConnectionType::ConstPtr getMessage();
 
 private:
-    ConnectionType::ConstPtr message_;
     ConnectionType::ConstPtr message_to_send_;
+    ConnectionType::ConstPtr committed_message_;
 };
 }
 

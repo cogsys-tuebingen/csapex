@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/model/connection.h>
 
 /// SYSTEM
 #include <mutex>
@@ -15,24 +16,23 @@ class Transition
 {
 public:
     Transition(NodeWorker* node);
+    virtual ~Transition();
 
     NodeWorker* getNode() const;
 
     void addConnection(ConnectionWeakPtr connection);
     void removeConnection(ConnectionWeakPtr connection);
 
-    void notifyMessageProcessed();
-    void fireIfPossible();
-    int determineNeededFirings() const;
-    void fire();
+protected:
+    virtual void connectionAdded(Connection* connection);
+    bool areConnections(Connection::State state) const;
+    bool isConnection(Connection::State state) const;
 
-private:
+protected:
     NodeWorker* node_;
 
     std::vector<ConnectionWeakPtr> connections_;
     mutable std::recursive_mutex sync;
-
-    int firings_left_;
 };
 
 }

@@ -6,20 +6,20 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
-#include <csapex/msg/transition.h>
+#include <csapex/msg/input_transition.h>
 
 /// SYSTEM
 #include <iostream>
 
 using namespace csapex;
 
-Input::Input(Transition* transition, const UUID &uuid)
+Input::Input(InputTransition* transition, const UUID &uuid)
     : Connectable(uuid), transition_(transition), optional_(false)
 {
     apex_assert_hard(transition != nullptr);
 }
 
-Input::Input(Transition *transition, Unique* parent, int sub_id)
+Input::Input(InputTransition *transition, Unique* parent, int sub_id)
     : Connectable(parent, sub_id, "in"), transition_(transition), optional_(false)
 {
     apex_assert_hard(transition != nullptr);
@@ -30,7 +30,7 @@ Input::~Input()
     free();
 }
 
-Transition* Input::getTransition() const
+InputTransition* Input::getTransition() const
 {
     return transition_;
 }
@@ -107,6 +107,7 @@ void Input::stop()
 void Input::free()
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
+    std::cerr << "clear input " << getUUID() << std::endl;
     message_.reset();
 }
 
@@ -119,8 +120,10 @@ void Input::disable()
 {
     Connectable::disable();
 
-    free();
-    notifyMessageProcessed();
+    if(message_ != nullptr) {
+        free();
+        notifyMessageProcessed();
+    }
 }
 
 void Input::removeAllConnectionsNotUndoable()
@@ -195,7 +198,6 @@ Connectable *Input::getSource() const
 ConnectionTypeConstPtr Input::getMessage() const
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
-    apex_assert_hard(message_ != nullptr);
     return message_;
 }
 
@@ -203,11 +205,11 @@ void Input::inputMessage(ConnectionType::ConstPtr message)
 {
     apex_assert_hard(message != nullptr);
 
-    if(!isEnabled()) {
-        notifyMessageProcessed();
+//    if(!isEnabled()) {
+//        notifyMessageProcessed();
 
-        return;
-    }
+//        return;
+//    }
 
 
     int s = message->sequenceNumber();
@@ -231,6 +233,7 @@ void Input::inputMessage(ConnectionType::ConstPtr message)
 
 void Input::notifyMessageProcessed()
 {
+    std::cerr << "notify input " <<  getUUID() << std::endl;
     Connectable::notifyMessageProcessed();
 
     if(isConnected()) {

@@ -7,6 +7,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/model/connection.h>
 
@@ -47,17 +48,18 @@ std::string DeleteConnection::getDescription() const
 
 bool DeleteConnection::doExecute()
 {
-    Connection::Ptr connection = graph_->getConnection(from, to);
+    const auto& graph = graph_worker_->getGraph();
+    Connection::Ptr connection = graph->getConnection(from, to);
 
-    connection_id = graph_->getConnectionId(connection);
+    connection_id = graph->getConnectionId(connection);
 
     locked = false;
     clear();
-    add(graph_->deleteAllConnectionFulcrumsCommand(connection));
+    add(graph->deleteAllConnectionFulcrumsCommand(connection));
     locked = true;
 
     if(Meta::doExecute()) {
-        graph_->deleteConnection(connection);
+        graph->deleteConnection(connection);
     }
 
     return true;
@@ -68,7 +70,7 @@ bool DeleteConnection::doUndo()
     if(!refresh()) {
         return false;
     }
-    graph_->addConnection(Connection::Ptr(new Connection(from, to, connection_id)));
+    graph_worker_->getGraph()->addConnection(Connection::Ptr(new Connection(from, to, connection_id)));
 
     return Meta::doUndo();
 }
@@ -83,8 +85,8 @@ bool DeleteConnection::doRedo()
 
 bool DeleteConnection::refresh()
 {
-    NodeWorker* from_worker = graph_->findNodeWorkerForConnector(from_uuid);
-    NodeWorker* to_worker = graph_->findNodeWorkerForConnector(to_uuid);
+    NodeWorker* from_worker = graph_worker_->getGraph()->findNodeWorkerForConnector(from_uuid);
+    NodeWorker* to_worker = graph_worker_->getGraph()->findNodeWorkerForConnector(to_uuid);
 
     from = nullptr;
     to = nullptr;

@@ -75,6 +75,7 @@ void CsApexWindow::construct()
     ui->actionLock_to_Grid->setChecked(widget_ctrl_->isGridLockEnabled());
     ui->actionDisplay_Graph_Components->setChecked(designer_->isGraphComponentsEnabled());
     ui->actionDisplay_Threads->setChecked(designer_->isThreadsEnabled());
+    ui->actionPause->setChecked(graph_worker_->isPaused());
 
     minimap_->setVisible(designer_->isMinimapEnabled());
     ui->actionDisplay_Minimap->setChecked(designer_->isMinimapEnabled());

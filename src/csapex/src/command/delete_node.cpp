@@ -9,6 +9,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/view/widget_controller.h>
@@ -36,7 +37,7 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorkerForConnector(uuid);
+    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorkerForConnector(uuid);
 
     type = node_worker->getType();
 
@@ -54,7 +55,7 @@ bool DeleteNode::doExecute()
     if(Meta::doExecute()) {
         saved_state = node_worker->getNodeStateCopy();
 
-        graph_->deleteNode(node_worker->getUUID());
+        graph_worker_->getGraph()->deleteNode(node_worker->getUUID());
         return true;
     }
 
@@ -66,8 +67,9 @@ bool DeleteNode::doUndo()
     NodeWorker::Ptr node = node_factory_->makeNode(type, uuid);
 
     node->setNodeState(saved_state);
+    node->pause(graph_worker_->isPaused());
 
-    graph_->addNode(node);
+    graph_worker_->getGraph()->addNode(node);
 
     return Meta::doUndo();
 }
@@ -75,10 +77,10 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        NodeWorker* node_worker = graph_->findNodeWorker(uuid);
+        NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
         saved_state = node_worker->getNodeStateCopy();
 
-        graph_->deleteNode(node_worker->getUUID());
+        graph_worker_->getGraph()->deleteNode(node_worker->getUUID());
         return true;
     }
 

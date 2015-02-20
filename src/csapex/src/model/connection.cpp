@@ -5,6 +5,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/msg/dynamic_output.h>
+#include <csapex/msg/output_transition.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/core/settings.h>
@@ -20,10 +21,9 @@ int Connection::next_connection_id_ = 0;
 
 
 Connection::Connection(Connectable *from, Connectable *to)
-    : from_(from), to_(to), id_(next_connection_id_++), dimensionality_(-1)
+    : from_(from), to_(to), id_(next_connection_id_++), state_(State::READY_TO_RECEIVE)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-    message_state_ = State::COLLECTING;
 
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
@@ -31,10 +31,9 @@ Connection::Connection(Connectable *from, Connectable *to)
 }
 
 Connection::Connection(Connectable *from, Connectable *to, int id)
-    : from_(from), to_(to), id_(id), dimensionality_(-1)
+    : from_(from), to_(to), id_(id), state_(State::READY_TO_RECEIVE)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-    message_state_ = State::COLLECTING;
 
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
@@ -42,36 +41,83 @@ Connection::Connection(Connectable *from, Connectable *to, int id)
 }
 
 Connection::Connection(Output *from, Input *to)
-    : from_(from), to_(to), id_(next_connection_id_++), dimensionality_(-1)
+    : from_(from), to_(to), id_(next_connection_id_++), state_(State::READY_TO_RECEIVE)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-    message_state_ = State::COLLECTING;
+
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Output *from, Input *to, int id)
-    : from_(from), to_(to), id_(id), dimensionality_(-1)
+    : from_(from), to_(to), id_(id), state_(State::READY_TO_RECEIVE)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-    message_state_ = State::COLLECTING;
+
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 
 Connection::Connection(Trigger *from, Slot *to)
-    : from_(from), to_(to), id_(next_connection_id_++), dimensionality_(-1)
+    : from_(from), to_(to), id_(next_connection_id_++), state_(State::READY_TO_RECEIVE)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-    message_state_ = State::COLLECTING;
+
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Trigger *from, Slot *to, int id)
-    : from_(from), to_(to), id_(id), dimensionality_(-1)
+    : from_(from), to_(to), id_(id), state_(State::READY_TO_RECEIVE)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-    message_state_ = State::COLLECTING;
+
     QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
+}
+
+ConnectionTypeConstPtr Connection::getMessage() const
+{
+    return message_;
+}
+
+void Connection::notifyMessageProcessed()
+{
+    std::cerr << "notify connection " <<  from_->getUUID() << " => " << to_->getUUID() << std::endl;
+    Output* o = dynamic_cast<Output*>(from_);
+    if(o) {
+        o->getTransition()->notifyMessageProcessed();
+    }
+}
+
+void Connection::setMessage(const ConnectionTypeConstPtr &msg)
+{
+    message_ = msg;
+    setState(State::UNREAD);
+    new_message();
+}
+
+Connection::State Connection::getState() const
+{
+    return state_;
+}
+
+void Connection::setState(State s)
+{
+    std::cerr << "SET connection " <<  from_->getUUID() << " => " << to_->getUUID() << ": ";
+    switch (s) {
+    case State::READY_TO_RECEIVE:
+        std::cerr << "empty";
+        break;
+    case State::UNREAD:
+        std::cerr << "unread";
+        break;
+    case State::READ:
+        std::cerr << "read";
+        break;
+    default:
+        break;
+    }
+    std::cerr << std::endl;
+
+    state_ = s;
 }
 
 Connectable* Connection::from() const
@@ -105,83 +151,6 @@ void Connection::messageSentEvent()
 
 void Connection::tick()
 {
-}
-
-bool Connection::acceptsMessages() const
-{
-    std::unique_lock<std::mutex> lock(messages_mutex_);
-
-    if(message_state_ == State::COMMITTED) {
-        return false;
-    }
-
-    if(is_dynamic_) {
-        return message_queue_.empty();;///true;
-    } else {
-        return message_queue_.empty();
-    }
-}
-
-void Connection::addMessage(const ConnectionTypeConstPtr &msg)
-{
-    std::unique_lock<std::mutex> lock(messages_mutex_);
-    message_queue_.push_back(msg);
-}
-
-void Connection::commitMessages()
-{
-    {
-    std::unique_lock<std::mutex> lock(messages_mutex_);
-//    while(has_committed_msgs_) {
-//        can_commit_.wait(lock);
-//    }
-    message_state_ = State::COMMITTED;
-    dimensionality_ = message_queue_.size();
-
-    committed_messages_.clear();
-    committed_messages_.assign(message_queue_.begin(), message_queue_.end());
-
-    message_queue_.clear();
-    }
-
-    messages_committed_();
-}
-
-int Connection::countCommittedMessages() const
-{
-    std::unique_lock<std::mutex> lock(messages_mutex_);
-//    return dimensionality_;
-    return committed_messages_.size();
-}
-
-ConnectionTypeConstPtr Connection::takeMessage()
-{
-    assert(dimensionality_ != -1);
-    if(committed_messages_.empty()) {
-        return connection_types::makeEmpty<connection_types::NoMessage>();
-    }
-
-    if(is_dynamic_) {
-        auto r = committed_messages_.front();
-        committed_messages_.pop_front();
-        return r;
-
-    } else {
-        return committed_messages_.front();
-    }
-}
-
-void Connection::freeMessages()
-{
-    {
-        std::unique_lock<std::mutex> lock(messages_mutex_);
-//        committed_messages_.clear();
-//        dimensionality_ = -1;
-        message_state_ = State::LATCHING;
-    }
-
-
-    from_->notifyMessageProcessed();
 }
 
 std::vector<Fulcrum::Ptr> Connection::getFulcrums() const
