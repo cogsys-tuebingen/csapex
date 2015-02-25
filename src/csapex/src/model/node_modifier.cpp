@@ -14,9 +14,9 @@ NodeModifier::NodeModifier(NodeWorker *node)
 
 }
 
-Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
+Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
 {
-    return node_worker_->addInput(type, label, optional);
+    return node_worker_->addInput(type, label, dynamic, optional);
 }
 
 Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)

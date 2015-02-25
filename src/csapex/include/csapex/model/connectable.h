@@ -46,7 +46,6 @@ public:
         return false;
     }
 
-    void setDynamic(bool dynamic);
     bool isDynamic() const;
 
     void setLabel(const std::string& label);
@@ -110,6 +109,9 @@ protected:
     Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, const std::string &type);
     virtual ~Connectable();
+
+    void setDynamic(bool dynamic);
+
     void init();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);

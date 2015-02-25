@@ -9,11 +9,16 @@
 
 namespace csapex
 {
+class DynamicInput;
+
 class DynamicOutput : public Output
 {
 public:
     DynamicOutput(OutputTransition* transition, const UUID &uuid);
     DynamicOutput(OutputTransition* transition, Unique *parent, int sub_id);
+
+    void clearCorrespondents();
+    void addCorrespondent(DynamicInput* input);
 
     virtual void publish(ConnectionType::ConstPtr message) override;
 
@@ -25,6 +30,8 @@ public:
     virtual void clear() override;
 
 private:
+    std::vector<DynamicInput*> correspondents_;
+
     std::deque<ConnectionType::ConstPtr> messages_to_send_;
     std::deque<ConnectionType::ConstPtr> committed_messages_;
     ConnectionTypeConstPtr current_message_;

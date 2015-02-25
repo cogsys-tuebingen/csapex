@@ -5,6 +5,7 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
+#include <csapex/msg/dynamic_input.h>
 
 /// SYSTEM
 #include <iostream>
@@ -21,6 +22,16 @@ DynamicOutput::DynamicOutput(OutputTransition* transition, Unique *parent, int s
     : Output(transition, parent, sub_id)
 {
     setDynamic(true);
+}
+
+void DynamicOutput::clearCorrespondents()
+{
+    correspondents_.clear();
+}
+
+void DynamicOutput::addCorrespondent(DynamicInput *input)
+{
+    correspondents_.push_back(input);
 }
 
 void DynamicOutput::publish(ConnectionType::ConstPtr message)
@@ -57,13 +68,19 @@ void DynamicOutput::commitMessages()
 
     messages_to_send_.clear();
 
+    ++seq_no_;
+
+    for(DynamicInput* di : correspondents_) {
+        di->setCurrentMessageLength(committed_messages_.size(), seq_no_);
+    }
+
     if(!committed_messages_.empty()) {
         current_message_ = committed_messages_.front();
         committed_messages_.pop_front();
     }
+
     setState(State::ACTIVE);
 
-    ++seq_no_;
     Q_EMIT messageSent(this);
 }
 

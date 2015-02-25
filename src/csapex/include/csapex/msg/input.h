@@ -38,7 +38,7 @@ public:
     bool canConnectTo(Connectable* other_side, bool move) const;
 
     void inputMessage(ConnectionType::ConstPtr message);
-    ConnectionTypeConstPtr getMessage() const;
+    virtual ConnectionTypeConstPtr getMessage() const;
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
 
@@ -53,8 +53,8 @@ public:
     bool isOptional() const;
     void setOptional(bool optional);
 
-    bool hasMessage() const;
-    bool hasReceived() const;
+    virtual bool hasMessage() const;
+    virtual bool hasReceived() const;
 
     void free();
     void stop();

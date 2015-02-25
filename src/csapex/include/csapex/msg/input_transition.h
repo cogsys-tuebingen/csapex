@@ -22,6 +22,9 @@ private:
     void fire();
 
     bool areConnectionsReady() const;
+
+private:
+    bool one_input_is_dynamic_;
 };
 
 }

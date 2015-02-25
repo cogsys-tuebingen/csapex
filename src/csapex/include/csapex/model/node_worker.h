@@ -87,7 +87,7 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
+    Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
     Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
     Trigger* addTrigger(const std::string& label);

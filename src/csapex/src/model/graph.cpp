@@ -13,6 +13,8 @@
 #include <csapex/model/connection.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/msg/dynamic_input.h>
+#include <csapex/msg/dynamic_output.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/model/node.h>
@@ -298,6 +300,8 @@ void Graph::assignLevels()
         }
     }
 
+    std::deque<NodeWorker*> gateways;
+
     // to assign a level, every parent must be known
     while(!unmarked.empty()) {
         NodeWorker* current = unmarked.front();
@@ -331,7 +335,7 @@ void Graph::assignLevels()
                     has_dynamic_parent_output = true;
                     NodeWorker* node = findNodeWorkerForConnector(parent_output->getUUID());
                     int level = node_level.at(node);
-//                    apex_assert_hard(level != NO_LEVEL);
+                    //                    apex_assert_hard(level != NO_LEVEL);
 
                     if(level > max_dynamic_level) {
                         max_dynamic_level = level;
@@ -353,6 +357,7 @@ void Graph::assignLevels()
 
             } else if(!has_dynamic_parent_output && has_dynamic_input) {
                 node_level[current] = max_level - 1;
+                gateways.push_back(current);
 
             } else if(has_dynamic_parent_output && has_dynamic_input) {
                 node_level[current] = max_level;
@@ -362,7 +367,60 @@ void Graph::assignLevels()
 
     for(NodeWorker::Ptr node :  nodes_) {
         node->setLevel(node_level[node.get()]);
+
+        for(Output* o : node->getMessageOutputs()) {
+            if(o->isDynamic()) {
+                DynamicOutput* dout = dynamic_cast<DynamicOutput*>(o);
+                dout->clearCorrespondents();
+            }
+        }
     }
+
+    std::cerr << "got " << gateways.size() << " gateways" << std::endl;
+    for(NodeWorker* node :  gateways) {
+        DynamicOutput* correspondent = nullptr;
+
+        // perform bfs to find the parent with a dynamic output
+        std::deque<NodeWorker*> Q;
+        std::set<NodeWorker*> visited;
+        Q.push_back(node);
+        while(!Q.empty()) {
+            NodeWorker* current = Q.front();
+            Q.pop_front();
+            visited.insert(current);
+
+            for(Input* i : current->getMessageInputs()) {
+                if(i->isConnected()) {
+                    ConnectionPtr connection = i->getConnections().front().lock();
+                    Output* out = dynamic_cast<Output*>(connection->from());
+                    if(out) {
+                        NodeWorker* parent = findNodeWorkerForConnector(out->getUUID());
+
+                        if(out->isDynamic() && parent->getLevel() == node->getLevel()) {
+                            correspondent = dynamic_cast<DynamicOutput*>(out);
+                            Q.clear();
+                            break;
+                        }
+
+                        if(visited.find(parent) == visited.end()) {
+                            Q.push_back(parent);
+                        }
+                    }
+                }
+            }
+        }
+
+        if(correspondent) {
+            for(Input* i : node->getMessageInputs()) {
+                if(i->isDynamic()) {
+                    DynamicInput* di = dynamic_cast<DynamicInput*>(i);
+                    di->setCorrespondent(correspondent);
+                    correspondent->addCorrespondent(di);
+                }
+            }
+        }
+    }
+
 }
 
 void Graph::verify()

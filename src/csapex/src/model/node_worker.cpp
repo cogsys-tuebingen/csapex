@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/msg/input.h>
+#include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
@@ -511,7 +512,7 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
         p->set<double>(msg::getValue<double>(source));
     } else if(msg::isValue<std::string>(source)) {
         p->set<std::string>(msg::getValue<std::string>(source));
-    } else if(!msg::isMessage<connection_types::NoMessage>(source)) {
+    } else if(msg::hasMessage(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
 
@@ -570,7 +571,7 @@ void NodeWorker::processMessages()
         // check if one is "NoMessage";
         for(Input* cin : inputs_) {
             apex_assert_hard(cin->hasReceived() || (cin->isOptional() && !cin->isConnected()));
-            if(!cin->isOptional() && msg::isMessage<connection_types::NoMessage>(cin)) {
+            if(!cin->isOptional() && !msg::hasMessage(cin)) {
                 all_inputs_are_present = false;
             }
         }
@@ -667,10 +668,15 @@ std::vector<TimerPtr> NodeWorker::extractLatestTimers()
     return result;
 }
 
-Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
+Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
 {
     int id = inputs_.size();
-    Input* c = new Input(transition_in_.get(), this, id);
+    Input* c = nullptr;
+    if(dynamic) {
+        c = new DynamicInput(transition_in_.get(), this, id);
+    } else {
+        c = new Input(transition_in_.get(), this, id);
+    }
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
