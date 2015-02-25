@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
+#include <csapex/model/node_modifier.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/input_transition.h>
@@ -51,7 +52,8 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 
     node_state_->setLabel(uuid);
-    node_->initialize(type, uuid, this);
+    modifier_ = std::make_shared<NodeModifier>(this);
+    node_->initialize(uuid, modifier_.get());
 
     bool params_created_in_constructor = node_->getParameterCount() != 0;
 
@@ -222,6 +224,11 @@ void NodeWorker::setEnabled(bool e)
     Q_EMIT enabled(e);
 }
 
+bool NodeWorker::canProcess()
+{
+    return canReceive();
+}
+
 bool NodeWorker::canReceive()
 {
     for(Input* i : inputs_) {
@@ -315,7 +322,9 @@ void NodeWorker::triggerPanic()
 
 void NodeWorker::triggerProcess()
 {
-    setState(State::PROCESSING);
+    apex_assert_hard(state_ == State::IDLE);
+    apex_assert_hard(transition_out_->canSendMessages());
+    setState(State::FIRED);
     Q_EMIT processRequested();
 }
 void NodeWorker::triggerCheckInputs()
@@ -462,7 +471,7 @@ void NodeWorker::killExecution()
     // TODO: implement
 }
 
-void NodeWorker::messageArrived(Connectable *s)
+void NodeWorker::messageArrived(Connectable */*s*/)
 {
 //    assertNotInGuiThread();
 
@@ -532,6 +541,11 @@ void NodeWorker::checkIfOutputIsReady(Connectable*)
 
 void NodeWorker::processMessages()
 {
+    apex_assert_hard(state_ == State::FIRED);
+    apex_assert_hard(transition_out_->canSendMessages());
+    apex_assert_hard(isEnabled());
+    setState(State::PROCESSING);
+
     assertNotInGuiThread();
 
     {
@@ -555,14 +569,18 @@ void NodeWorker::processMessages()
 
         // check if one is "NoMessage";
         for(Input* cin : inputs_) {
+            apex_assert_hard(cin->hasReceived() || (cin->isOptional() && !cin->isConnected()));
             if(!cin->isOptional() && msg::isMessage<connection_types::NoMessage>(cin)) {
                 all_inputs_are_present = false;
             }
         }
     }
 
+    transition_out_->setConnectionsReadyToReceive();
+
     if(all_inputs_are_present) {
         std::lock_guard<std::recursive_mutex> lock(sync);
+
 
         Timer::Ptr t = nullptr;
 
@@ -594,8 +612,7 @@ void NodeWorker::processMessages()
         }
     }
 
-
-    trySendMessages();
+    sendMessages();
     Q_EMIT messageProcessed();
 }
 
@@ -1025,6 +1042,8 @@ std::vector<Output*> NodeWorker::getParameterOutputs() const
 
 void NodeWorker::notifyMessagesProcessed()
 {
+    apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS);
+    apex_assert_hard(transition_out_->canSendMessages());
     setState(State::IDLE);
 
     node_->aerr << "notifyMessagesProcessed" << std::endl;
@@ -1068,8 +1087,11 @@ void NodeWorker::publishParameter(param::Parameter* p)
     }
 }
 
-void NodeWorker::trySendMessages()
+void NodeWorker::sendMessages()
 {
+    apex_assert_hard(getState() == State::PROCESSING);
+    setState(State::WAITING_FOR_OUTPUTS);
+
     assertNotInGuiThread();
     std::lock_guard<std::recursive_mutex> lock(sync);
 
@@ -1078,17 +1100,12 @@ void NodeWorker::trySendMessages()
         return;
     }
 
-    if(!transition_out_->canSendMessages()) {
-        return;
-    }
+//    if(!transition_out_->canSendMessages()) {
+//        return;
+//    }
 
     node_->aerr << "SEND" << std::endl;
-    int connected = transition_out_->sendMessages();
-
-
-    if(connected == 0) {
-        notifyMessagesProcessed();
-    }
+    transition_out_->sendMessages();
 
 
     Q_EMIT messagesWaitingToBeSent(false);
@@ -1157,7 +1174,7 @@ void NodeWorker::setIsSink(bool sink)
 
 bool NodeWorker::isSink() const
 {
-    return sink_ || outputs_.empty();
+    return sink_ || outputs_.empty() || transition_out_->isSink();
 }
 
 int NodeWorker::getLevel() const
@@ -1215,9 +1232,15 @@ void NodeWorker::tick()
     }
 
 
-    if(isEnabled() && (isTickEnabled() && isSource())) {
+    if(isEnabled() && isTickEnabled() && isSource() && node_->canTick()) {
+        std::cerr << "should tick, state is " << (int)getState() << ", can send messages is " << transition_out_->canSendMessages() << std::endl;
+        if(getState() == State::IDLE && transition_out_->canSendMessages()) {
+            std::cerr << "ticks" << std::endl;
+            apex_assert_hard(getState() == State::IDLE);
+            setState(State::PROCESSING);
 
-        if(transition_out_->canSendMessages() && node_->canTick() /*|| ticks_ != 0*/) {
+            transition_out_->setConnectionsReadyToReceive();
+
             TimerPtr t = nullptr;
             if(profiling_) {
                 t.reset(new Timer(getUUID()));
@@ -1244,7 +1267,9 @@ void NodeWorker::tick()
 
             if(has_msg) {
                 Q_EMIT messagesWaitingToBeSent(true);
-                trySendMessages();
+                sendMessages();
+            } else {
+                setState(State::IDLE);
             }
 
             if(t) {

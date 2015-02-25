@@ -19,19 +19,20 @@ public:
     Node();
     virtual ~Node();
 
-    void initialize(const std::string &type, const UUID &uuid, NodeWorker *node_worker);
+    void initialize(const UUID &uuid, NodeModifier *node_modifier);
     void doSetup();
 
 public:
-    virtual void setup() = 0;
-    virtual void setupParameters();
-    virtual void messageArrived(Input* source);
+    virtual void setup(csapex::NodeModifier& node_modifier) = 0;
+    virtual void setupParameters(Parameterizable& parameters);
     virtual void process() = 0;
-    virtual void stateChanged();
+
     virtual bool canTick();
     virtual void tick();
+
     virtual void abort();
 
+    virtual void stateChanged();
 
 public:
     StreamRelay adebug;

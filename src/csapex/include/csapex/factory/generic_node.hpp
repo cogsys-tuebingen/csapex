@@ -52,12 +52,12 @@ public:
         out_msg_.resize(N);
     }
 
-    void setup()
+    void setup(NodeModifier& /*node_modifier*/)
     {
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this));
     }
 
-    void setupParameters()
+    void setupParameters(Parameterizable&)
     {
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this));
     }

@@ -44,7 +44,9 @@ public:
 
     enum class State {
         IDLE,
-        PROCESSING
+        FIRED,
+        PROCESSING,
+        WAITING_FOR_OUTPUTS
     };
 
 public:
@@ -122,6 +124,7 @@ public:
     std::vector<Input*> getParameterInputs() const;
     std::vector<Output*> getParameterOutputs() const;
 
+    bool canProcess();
     bool canReceive();
     bool areAllInputsAvailable();
 
@@ -167,7 +170,7 @@ public Q_SLOTS:
     void killExecution();
 
 //    bool canSendMessages();
-    void trySendMessages();
+    void sendMessages();
     void notifyMessagesProcessed();
 
 
@@ -239,6 +242,7 @@ private:
     std::string node_type_;
     NodePtr node_;    
     NodeStatePtr node_state_;
+    NodeModifierPtr modifier_;
 
     InputTransitionPtr transition_in_;
     OutputTransitionPtr transition_out_;

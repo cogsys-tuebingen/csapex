@@ -75,7 +75,7 @@ bool DynamicOutput::hasMessage()
 void DynamicOutput::nextMessage()
 {
     if(committed_messages_.empty()) {
-        setState(State::DONE);
+        setState(State::IDLE);
     } else {
         current_message_ = committed_messages_.front();
         committed_messages_.pop_front();

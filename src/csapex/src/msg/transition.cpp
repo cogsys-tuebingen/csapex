@@ -37,7 +37,18 @@ bool Transition::areConnections(Connection::State state) const
 {
     for(ConnectionWeakPtr c : connections_) {
         ConnectionPtr connection = c.lock();
-        if(connection->getState() != state) {
+        if(connection->isEnabled() && connection->getState() != state) {
+            return false;
+        }
+    }
+    return true;
+}
+bool Transition::areConnections(Connection::State a, Connection::State b) const
+{
+    for(ConnectionWeakPtr c : connections_) {
+        ConnectionPtr connection = c.lock();
+        auto s = connection->getState();
+        if(connection->isEnabled() && s != a && s != b) {
             return false;
         }
     }
@@ -48,7 +59,7 @@ bool Transition::isConnection(Connection::State state) const
 {
     for(ConnectionWeakPtr c : connections_) {
         ConnectionPtr connection = c.lock();
-        if(connection->getState() == state) {
+        if(connection->isEnabled() && connection->getState() == state) {
             return true;
         }
     }

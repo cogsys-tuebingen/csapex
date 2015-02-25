@@ -586,7 +586,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
 
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
-    ccs.disabled = (!from->isEnabled() || !to->isEnabled());
+    ccs.disabled = !connection.isEnabled();
     ccs.empty = connection.getState() == Connection::State::READY_TO_RECEIVE;
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;

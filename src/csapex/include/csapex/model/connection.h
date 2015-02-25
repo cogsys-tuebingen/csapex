@@ -33,6 +33,7 @@ public:
     typedef std::shared_ptr<Connection> Ptr;
 
     enum class State {
+        NOT_INITIALIZED,
         READY_TO_RECEIVE,
         UNREAD,
         READ
@@ -62,8 +63,12 @@ public:
     void tick();
 
     void setMessage(const ConnectionTypeConstPtr& msg);
+    void notifyMessageSet();
+
     ConnectionTypeConstPtr getMessage() const;
     void notifyMessageProcessed();
+
+    bool isEnabled() const;
 
     State getState() const;
     void setState(State s);

@@ -29,19 +29,21 @@ void InputTransition::connectionAdded(Connection *connection)
 
 void InputTransition::update()
 {
-    //    if(areConnections(Connection::State::READY_TO_RECEIVE)) {
-    //        std::cerr << "!!!! all connections are empty in " << node_->getUUID() << std::endl;
-    ////        for(auto& connection : connections_) {
-    ////            ConnectionPtr c = connection.lock();
-    ////            c->notifyMessageProcessed();
-    ////        }
+    if(!node_->canProcess()) {
+        return;
+    }
 
-    ////    } else if(!isConnection(Connection::State::EMPTY)) {
-    //    } else
-    if(!isConnection(Connection::State::READY_TO_RECEIVE) &&
-            isConnection(Connection::State::UNREAD)) {
-        if(node_->getState() == NodeWorker::State::IDLE) {
-            fire();
+    if(node_->isSource()) {
+        apex_assert_hard(node_->getState() == NodeWorker::State::IDLE);
+        apex_assert_hard(connections_.empty());
+        //fire(); -> instead of tick!!!!
+    } else {
+        if(!isConnection(Connection::State::READY_TO_RECEIVE) &&
+                !isConnection(Connection::State::NOT_INITIALIZED) &&
+                isConnection(Connection::State::UNREAD)) {
+            if(node_->getState() == NodeWorker::State::IDLE) {
+                fire();
+            }
         }
     }
 }
@@ -63,6 +65,12 @@ void InputTransition::notifyMessageProcessed()
 void InputTransition::fire()
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
+    apex_assert_hard(node_->canProcess());
+    apex_assert_hard(node_->getState() == NodeWorker::State::IDLE);
+    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
+    apex_assert_hard(!isConnection(Connection::State::READY_TO_RECEIVE));
+    apex_assert_hard(connections_.empty() || !areConnections(Connection::State::READ));
+
     std::cerr << "fire " <<  node_->getUUID() << std::endl;
 
     for(Input* input : node_->getMessageInputs()) {
@@ -72,6 +80,8 @@ void InputTransition::fire()
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
             auto connection = connections.front().lock();
+            apex_assert_hard(connection->getState() == Connection::State::READ ||
+                             connection->getState() == Connection::State::UNREAD);
             auto msg = connection->getMessage();
             apex_assert_hard(msg != nullptr);
             input->inputMessage(msg);
@@ -87,5 +97,6 @@ void InputTransition::fire()
 
     std::cerr << "-> process " <<  node_->getUUID() << std::endl;
 
+    apex_assert_hard(node_->getState() == NodeWorker::State::IDLE);
     node_->triggerProcess();
 }

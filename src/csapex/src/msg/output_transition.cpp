@@ -17,21 +17,30 @@ OutputTransition::OutputTransition(NodeWorker *node)
 bool OutputTransition::canSendMessages() const
 {
     for(Output* output : node_->getMessageOutputs()) {
-        if(output->getState() != Output::State::RECEIVING) {
+        if(output->isEnabled() && output->isConnected() && output->getState() != Output::State::IDLE) {
             return false;
         }
     }
     return true;
 }
 
-int OutputTransition::sendMessages()
+bool OutputTransition::isSink() const
 {
-    int connected = 0;
+    for(Output* output : node_->getMessageOutputs()) {
+        if(output->isConnected()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void OutputTransition::sendMessages()
+{
+    apex_assert_hard(!isSink());
     std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
     for(Output* out : node_->getMessageOutputs()) {
         if(out->isConnected()) {
             out->commitMessages();
-            ++connected;
         }
     }
 
@@ -39,24 +48,25 @@ int OutputTransition::sendMessages()
 
     std::cerr << "fill first time: " << node_->getUUID() << std::endl;
     fillConnections();
-
-    return connected;
 }
 
 void OutputTransition::notifyMessageProcessed()
 {
     if(!areConnections(Connection::State::READ)) {
-        std::cerr << "there are unread connections at: " << node_->getUUID() << std::endl;
         return;
     }
-    std::cerr << "notified output transition: " << node_->getUUID() << std::endl;
 
     for(Output* out : node_->getMessageOutputs()) {
         out->nextMessage();
     }
     if(areOutputsDone()) {
-        std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
-        clear();
+        if(areConnections(Connection::State::READ)) {
+            if(node_->getState() == NodeWorker::State::WAITING_FOR_OUTPUTS) {
+                std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
+                node_->notifyMessagesProcessed();
+            }
+        }
+
     } else {
         std::cerr << "fill again: " << node_->getUUID() << std::endl;
         fillConnections();
@@ -66,7 +76,7 @@ void OutputTransition::notifyMessageProcessed()
 bool OutputTransition::areOutputsDone() const
 {
     for(Output* out : node_->getMessageOutputs()) {
-        if(out->getState() != Output::State::DONE) {
+        if(out->getState() != Output::State::IDLE) {
             return false;
         }
     }
@@ -78,23 +88,33 @@ void OutputTransition::fillConnections()
     std::cerr << "fill connections output transition: " << node_->getUUID() << std::endl;
     for(ConnectionWeakPtr c : connections_) {
         ConnectionPtr connection = c.lock();
-        Output* out = dynamic_cast<Output*>(connection->from());
-        apex_assert_hard(out);
-        auto msg = out->getMessage();
-        apex_assert_hard(msg);
-        connection->setMessage(msg);
+        if(connection->isEnabled()) {
+            Output* out = dynamic_cast<Output*>(connection->from());
+            apex_assert_hard(out);
+            auto msg = out->getMessage();
+            apex_assert_hard(msg);
+            connection->setMessage(msg);
+            apex_assert_hard(connection->getState() == Connection::State::UNREAD);
+        }
+    }
+    for(ConnectionWeakPtr c : connections_) {
+        ConnectionPtr connection = c.lock();
+        if(connection->isEnabled()) {
+            apex_assert_hard(connection->getState() == Connection::State::UNREAD);
+            connection->notifyMessageSet();
+        }
     }
 }
 
-void OutputTransition::clear()
+void OutputTransition::setConnectionsReadyToReceive()
 {
-    std::cerr << "clear output transition: " << node_->getUUID() << std::endl;
+    apex_assert_hard(node_->getState() == NodeWorker::State::PROCESSING);
+    apex_assert_hard(areConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
+
     for(ConnectionWeakPtr c : connections_) {
         c.lock()->setState(Connection::State::READY_TO_RECEIVE);
     }
     for(Output* output : node_->getMessageOutputs()) {
         output->clear();
     }
-    node_->notifyMessagesProcessed();
 }
-

@@ -26,6 +26,7 @@ public:
 protected:
     virtual void connectionAdded(Connection* connection);
     bool areConnections(Connection::State state) const;
+    bool areConnections(Connection::State a, /*or*/ Connection::State b) const;
     bool isConnection(Connection::State state) const;
 
 protected:

@@ -36,7 +36,7 @@ bool StaticOutput::hasMessage()
 
 void StaticOutput::nextMessage()
 {
-    setState(State::DONE);
+    setState(State::IDLE);
 }
 
 ConnectionTypeConstPtr StaticOutput::getMessage() const

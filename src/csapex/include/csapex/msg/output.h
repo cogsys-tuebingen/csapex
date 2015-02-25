@@ -23,7 +23,7 @@ public:
     enum class State {
         RECEIVING, // output is collecting messages
         ACTIVE,    // output has sent it's messages, no answer yet
-        DONE       // output's messages have all been processed
+        IDLE       // output's messages have all been processed
     };
 
 public:

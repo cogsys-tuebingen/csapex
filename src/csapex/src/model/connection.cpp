@@ -21,7 +21,7 @@ int Connection::next_connection_id_ = 0;
 
 
 Connection::Connection(Connectable *from, Connectable *to)
-    : from_(from), to_(to), id_(next_connection_id_++), state_(State::READY_TO_RECEIVE)
+    : from_(from), to_(to), id_(next_connection_id_++), state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -31,7 +31,7 @@ Connection::Connection(Connectable *from, Connectable *to)
 }
 
 Connection::Connection(Connectable *from, Connectable *to, int id)
-    : from_(from), to_(to), id_(id), state_(State::READY_TO_RECEIVE)
+    : from_(from), to_(to), id_(id), state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -41,7 +41,7 @@ Connection::Connection(Connectable *from, Connectable *to, int id)
 }
 
 Connection::Connection(Output *from, Input *to)
-    : from_(from), to_(to), id_(next_connection_id_++), state_(State::READY_TO_RECEIVE)
+    : from_(from), to_(to), id_(next_connection_id_++), state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -49,7 +49,7 @@ Connection::Connection(Output *from, Input *to)
 }
 
 Connection::Connection(Output *from, Input *to, int id)
-    : from_(from), to_(to), id_(id), state_(State::READY_TO_RECEIVE)
+    : from_(from), to_(to), id_(id), state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -58,7 +58,7 @@ Connection::Connection(Output *from, Input *to, int id)
 
 
 Connection::Connection(Trigger *from, Slot *to)
-    : from_(from), to_(to), id_(next_connection_id_++), state_(State::READY_TO_RECEIVE)
+    : from_(from), to_(to), id_(next_connection_id_++), state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -66,7 +66,7 @@ Connection::Connection(Trigger *from, Slot *to)
 }
 
 Connection::Connection(Trigger *from, Slot *to, int id)
-    : from_(from), to_(to), id_(id), state_(State::READY_TO_RECEIVE)
+    : from_(from), to_(to), id_(id), state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -75,7 +75,13 @@ Connection::Connection(Trigger *from, Slot *to, int id)
 
 ConnectionTypeConstPtr Connection::getMessage() const
 {
+    apex_assert_hard(message_ != nullptr);
     return message_;
+}
+
+void Connection::notifyMessageSet()
+{
+    new_message();
 }
 
 void Connection::notifyMessageProcessed()
@@ -89,9 +95,15 @@ void Connection::notifyMessageProcessed()
 
 void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 {
+    apex_assert_hard(isEnabled());
+    apex_assert_hard(msg != nullptr);
     message_ = msg;
     setState(State::UNREAD);
-    new_message();
+}
+
+bool Connection::isEnabled() const
+{
+    return from()->isEnabled() && to()->isEnabled();
 }
 
 Connection::State Connection::getState() const
@@ -104,13 +116,15 @@ void Connection::setState(State s)
     std::cerr << "SET connection " <<  from_->getUUID() << " => " << to_->getUUID() << ": ";
     switch (s) {
     case State::READY_TO_RECEIVE:
-        std::cerr << "empty";
+        std::cerr << "ready to receive";
         break;
     case State::UNREAD:
         std::cerr << "unread";
+        apex_assert_hard(message_ != nullptr);
         break;
     case State::READ:
         std::cerr << "read";
+        apex_assert_hard(message_ != nullptr);
         break;
     default:
         break;

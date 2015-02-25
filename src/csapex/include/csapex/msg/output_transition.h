@@ -11,11 +11,13 @@ class OutputTransition : public Transition
 public:
     OutputTransition(NodeWorker* node);
 
+    bool isSink() const;
     bool canSendMessages() const;
-    int sendMessages();
+    void sendMessages();
     void notifyMessageProcessed();
 
-    void clear();
+    void setConnectionsReadyToReceive();
+
 private:
     bool areOutputsDone() const;
 

@@ -25,13 +25,11 @@ Node::Node()
 
 Node::~Node()
 {
-    delete modifier_;
 }
 
-void Node::initialize(const std::string& /*type*/, const UUID& uuid,
-                   NodeWorker* node_worker)
+void Node::initialize(const UUID& uuid, NodeModifier *node_modifier)
 {
-    modifier_ = new NodeModifier(node_worker);
+    modifier_ = node_modifier;
 
     parameter_state_->setParentUUID(uuid);
 
@@ -44,20 +42,16 @@ void Node::initialize(const std::string& /*type*/, const UUID& uuid,
 
 void Node::doSetup()
 {
-    setupParameters();
+    setupParameters(*this);
 
     try {
-        setup();
+        setup(*modifier_);
     } catch(std::runtime_error& e) {
         aerr << "setup failed: " << e.what() << std::endl;
     }
 }
 
-void Node::messageArrived(Input *)
-{
-
-}
-void Node::setupParameters()
+void Node::setupParameters(Parameterizable& )
 {
 
 }

@@ -18,13 +18,13 @@ using namespace csapex;
 
 Output::Output(OutputTransition* transition, const UUID& uuid)
     : Connectable(uuid), transition_(transition),
-      force_send_message_(false), state_(State::RECEIVING)
+      force_send_message_(false), state_(State::IDLE)
 {
 }
 
 Output::Output(OutputTransition* transition, Unique* parent, int sub_id)
     : Connectable(parent, sub_id, "out"),  transition_(transition),
-      force_send_message_(false), state_(State::RECEIVING)
+      force_send_message_(false), state_(State::IDLE)
 {
 }
 
