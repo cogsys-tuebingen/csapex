@@ -46,7 +46,8 @@ public:
         IDLE,
         FIRED,
         PROCESSING,
-        WAITING_FOR_OUTPUTS
+        WAITING_FOR_OUTPUTS,
+        WAITING_FOR_RESET
     };
 
 public:
@@ -147,6 +148,8 @@ public:
 public Q_SLOTS:
     void messageArrived(Connectable* source);
     void processMessages();
+
+    void prepareForNextProcess();
     void checkInputs();
 
     void parameterMessageArrived(Connectable* source);
@@ -175,7 +178,7 @@ public Q_SLOTS:
 
 
 Q_SIGNALS:
-    void messageProcessed();
+    void messagesProcessed();
     void ticked();
 
     void enabled(bool);
@@ -279,7 +282,8 @@ private:
     bool sink_;
     int level_;
 
-    std::recursive_mutex sync;
+    mutable std::recursive_mutex sync;
+    mutable std::recursive_mutex state_mutex_;
 
     std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;
@@ -287,8 +291,8 @@ private:
     bool thread_initialized_;
     bool paused_;
     bool stop_;
-    std::recursive_mutex stop_mutex_;
-    std::recursive_mutex pause_mutex_;
+    mutable std::recursive_mutex stop_mutex_;
+    mutable std::recursive_mutex pause_mutex_;
     std::condition_variable_any continue_;
 
     std::atomic<bool> profiling_;

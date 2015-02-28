@@ -27,7 +27,7 @@ std::string name()
 template <typename T>
 std::shared_ptr<T> makeEmpty()
 {
-    return std::shared_ptr<T>(new T);
+    return std::make_shared<T>();
 }
 
 template <typename T>

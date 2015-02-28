@@ -36,7 +36,8 @@ public:
         NOT_INITIALIZED,
         READY_TO_RECEIVE,
         UNREAD,
-        READ
+        READ,
+        DONE
     };
 
 public:
@@ -112,6 +113,8 @@ protected:
     ConnectionTypeConstPtr message_;
 
     static int next_connection_id_;
+
+    mutable std::recursive_mutex sync;
 };
 
 }

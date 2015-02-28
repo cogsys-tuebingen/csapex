@@ -75,6 +75,7 @@ Connection::Connection(Trigger *from, Slot *to, int id)
 
 ConnectionTypeConstPtr Connection::getMessage() const
 {
+    std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(message_ != nullptr);
     return message_;
 }
@@ -86,6 +87,13 @@ void Connection::notifyMessageSet()
 
 void Connection::notifyMessageProcessed()
 {
+    {
+        std::unique_lock<std::recursive_mutex> lock(sync);
+        if(state_ != State::DONE) {
+            setState(Connection::State::DONE);
+        }
+    }
+
     std::cerr << "notify connection " <<  from_->getUUID() << " => " << to_->getUUID() << std::endl;
     Output* o = dynamic_cast<Output*>(from_);
     if(o) {
@@ -95,8 +103,10 @@ void Connection::notifyMessageProcessed()
 
 void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 {
+    std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(isEnabled());
     apex_assert_hard(msg != nullptr);
+    apex_assert_hard(state_ == State::NOT_INITIALIZED || state_ == State::READY_TO_RECEIVE);
     message_ = msg;
     setState(State::UNREAD);
 }
@@ -108,22 +118,32 @@ bool Connection::isEnabled() const
 
 Connection::State Connection::getState() const
 {
+    std::unique_lock<std::recursive_mutex> lock(sync);
     return state_;
 }
 
 void Connection::setState(State s)
 {
+    std::unique_lock<std::recursive_mutex> lock(sync);
     std::cerr << "SET connection " <<  from_->getUUID() << " => " << to_->getUUID() << ": ";
     switch (s) {
     case State::READY_TO_RECEIVE:
         std::cerr << "ready to receive";
+        apex_assert_hard(state_ == State::DONE || state_ == State::NOT_INITIALIZED);
         break;
     case State::UNREAD:
         std::cerr << "unread";
+        apex_assert_hard(state_ == State::READY_TO_RECEIVE);
         apex_assert_hard(message_ != nullptr);
         break;
     case State::READ:
         std::cerr << "read";
+        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
+        apex_assert_hard(message_ != nullptr);
+        break;
+    case State::DONE:
+        std::cerr << "done";
+        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ); // |
         apex_assert_hard(message_ != nullptr);
         break;
     default:

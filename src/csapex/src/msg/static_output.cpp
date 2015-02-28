@@ -49,6 +49,9 @@ ConnectionTypeConstPtr StaticOutput::getMessage() const
 void StaticOutput::commitMessages()
 {
     assert(canSendMessages());
+
+    setState(State::ACTIVE);
+
     if(message_to_send_) {
         committed_message_ = message_to_send_;
         clear();
@@ -62,7 +65,6 @@ void StaticOutput::commitMessages()
 
     committed_message_->setSequenceNumber(seq_no_);
 
-    setState(State::ACTIVE);
 
 //    // wait for all connected inputs to be able to receive
 //    //  * inputs can only be connected to this output since they are 1:1

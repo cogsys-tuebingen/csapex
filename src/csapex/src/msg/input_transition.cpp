@@ -16,12 +16,6 @@ using namespace csapex;
 InputTransition::InputTransition(NodeWorker* node)
     : Transition(node), one_input_is_dynamic_(false)
 {
-    for(Input* i : node->getMessageInputs()) {
-        if(i->isDynamic()) {
-            one_input_is_dynamic_ = true;
-            break;
-        }
-    }
 }
 
 void InputTransition::connectionAdded(Connection *connection)
@@ -31,9 +25,17 @@ void InputTransition::connectionAdded(Connection *connection)
         //        update();
         node_->triggerCheckInputs();
     });
+
+    one_input_is_dynamic_ = false;
+    for(Input* i : node_->getMessageInputs()) {
+        if(i->isDynamic()) {
+            one_input_is_dynamic_ = true;
+            break;
+        }
+    }
 }
 
-void InputTransition::update()
+void InputTransition::fireIfPossible()
 {
     if(!node_->canProcess()) {
         return;
@@ -56,26 +58,33 @@ void InputTransition::update()
 
 void InputTransition::notifyMessageProcessed()
 {
-    //todo: dynamic output -> lock connected input transitions' notifyMessageProcessed capability
-    if(!isConnection(Connection::State::UNREAD)) {
-        std::cerr << "notify input transition " <<  node_->getUUID() << std::endl;
-        std::lock_guard<std::recursive_mutex> lock(sync);
-        for(auto& connection : connections_) {
-            ConnectionPtr c = connection.lock();
-            c->notifyMessageProcessed();
-        }
+    apex_assert_hard(!isConnection(Connection::State::UNREAD) &&
+                     !isConnection(Connection::State::NOT_INITIALIZED) &&
+                     !isConnection(Connection::State::READY_TO_RECEIVE));
+
+    std::cerr << "notify input transition " <<  node_->getUUID() << std::endl;
+//    for(auto& connection : connections_) {
+//        ConnectionPtr c = connection.lock();
+//        if(c->getState() != Connection::State::DONE) {
+//            c->setState(Connection::State::DONE);
+//        }
+//    }
+    for(auto& connection : connections_) {
+        ConnectionPtr c = connection.lock();
+        c->notifyMessageProcessed();
     }
-    //    update();
 }
 
 void InputTransition::fire()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync);
+    apex_assert_hard(node_->thread() == QThread::currentThread());
     apex_assert_hard(node_->canProcess());
     apex_assert_hard(node_->getState() == NodeWorker::State::IDLE);
+    apex_assert_hard(!areConnections(Connection::State::DONE));
     apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(!isConnection(Connection::State::READY_TO_RECEIVE));
     apex_assert_hard(connections_.empty() || !areConnections(Connection::State::READ));
+    apex_assert_hard(connections_.empty() || !areConnections(Connection::State::DONE));
 
     std::vector<DynamicInput*> dynamic_inputs;
     ConnectionTypeConstPtr dynamic_message_part;
@@ -86,8 +95,10 @@ void InputTransition::fire()
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
             dynamic_connection = connections.front().lock();
-            apex_assert_hard(dynamic_connection->getState() == Connection::State::READ ||
-                             dynamic_connection->getState() == Connection::State::UNREAD);
+            auto s = dynamic_connection->getState();
+            apex_assert_hard(s == Connection::State::READ ||
+                             s == Connection::State::UNREAD ||
+                             s == Connection::State::DONE);
             dynamic_message_part = dynamic_connection->getMessage();
             apex_assert_hard(dynamic_message_part != nullptr);
             DynamicInput* di = dynamic_cast<DynamicInput*>(input);
@@ -101,7 +112,12 @@ void InputTransition::fire()
         bool every_part_received = di->inputMessagePart(dynamic_message_part);
         if(!every_part_received) {
             // wait until everything is here, then proceed.
+            auto s = dynamic_connection->getState();
+            apex_assert_hard(s == Connection::State::UNREAD ||
+                             s == Connection::State::READ ||
+                             s == Connection::State::DONE);
             dynamic_connection->setState(Connection::State::READ);
+            dynamic_connection->setState(Connection::State::DONE);
             dynamic_connection->notifyMessageProcessed();
             return;
         }
@@ -121,8 +137,10 @@ void InputTransition::fire()
                 auto connections = input->getConnections();
                 apex_assert_hard(connections.size() == 1);
                 auto connection = connections.front().lock();
-                apex_assert_hard(connection->getState() == Connection::State::READ ||
-                                 connection->getState() == Connection::State::UNREAD);
+                auto s = connection->getState();
+                apex_assert_hard(s == Connection::State::READ ||
+                                 s == Connection::State::UNREAD ||
+                                 s == Connection::State::DONE);
                 auto msg = connection->getMessage();
                 apex_assert_hard(msg != nullptr);
                 input->inputMessage(msg);
@@ -134,7 +152,20 @@ void InputTransition::fire()
 
     for(auto& connection : connections_) {
         ConnectionPtr c = connection.lock();
-        c->setState(Connection::State::READ);
+        auto s = c->getState();
+        apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
+        apex_assert_hard(s != Connection::State::READY_TO_RECEIVE);
+        apex_assert_hard(s == Connection::State::UNREAD ||
+                         s == Connection::State::READ ||
+                         s == Connection::State::DONE);
+    }
+
+    apex_assert_hard(!areConnections(Connection::State::DONE));
+    for(auto& connection : connections_) {
+        ConnectionPtr c = connection.lock();
+        if(c->getState() != Connection::State::DONE) {
+            c->setState(Connection::State::READ);
+        }
     }
 
     std::cerr << "-> process " <<  node_->getUUID() << std::endl;

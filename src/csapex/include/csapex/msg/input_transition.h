@@ -13,7 +13,7 @@ public:
     InputTransition(NodeWorker* node);
 
     void notifyMessageProcessed();
-    void update();
+    void fireIfPossible();
 
 protected:
     virtual void connectionAdded(Connection* connection) override;

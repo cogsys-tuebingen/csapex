@@ -18,7 +18,11 @@ void _apex_assert_hard(bool assertion, const char* code, const char* file, int l
 {
     if(!assertion) {
         std::cerr << "assertion \"" << code << "\" failed in " << file << ", line " << line << std::endl;
+//        std::cerr.flush();
 
+//        for(std::size_t i = 0; i < 20; ++i) {
+//            std::cerr.flush();
+//        }
 
 //        const size_t max_depth = 100;
 //        size_t stack_depth;

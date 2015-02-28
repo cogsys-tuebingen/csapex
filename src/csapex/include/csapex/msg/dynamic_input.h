@@ -37,6 +37,7 @@ private:
 
     std::size_t current_message_length_;
     std::vector<ConnectionTypeConstPtr> msg_parts_;
+    std::vector<ConnectionTypeConstPtr> composed_msg_;
 };
 
 }

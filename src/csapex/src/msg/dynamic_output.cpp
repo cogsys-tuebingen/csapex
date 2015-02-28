@@ -44,42 +44,26 @@ void DynamicOutput::commitMessages()
 {
     apex_assert_hard(canSendMessages());
 
-//    // wait for all connected inputs to be able to receive
-//    //  * inputs can only be connected to this output since they are 1:1
-//    std::vector<Connection*> targets;
-//    for(ConnectionWeakPtr connection : connections_) {
-//        ConnectionPtr c = connection.lock();
-//        if(!c) {
-//            continue;
-//        }
+    setState(State::ACTIVE);
 
-//        Input* i = dynamic_cast<Input*>(c->to());
-//        if(i && i->isEnabled()) {
-//            targets.push_back(c.get());
-//        }
-//    }
+    if(messages_to_send_.empty()) {
+        messages_to_send_.push_back(connection_types::makeEmpty<connection_types::NoMessage>());
+    }
 
-//    if(!targets.empty()) {
-        // all connected inputs are ready to receive, send them the message
-        committed_messages_ = messages_to_send_;
-        ++count_;
-//    }
+    committed_messages_ = messages_to_send_;
+    ++count_;
 
 
     messages_to_send_.clear();
 
     ++seq_no_;
 
+
     for(DynamicInput* di : correspondents_) {
         di->setCurrentMessageLength(committed_messages_.size(), seq_no_);
     }
-
-    if(!committed_messages_.empty()) {
-        current_message_ = committed_messages_.front();
-        committed_messages_.pop_front();
-    }
-
-    setState(State::ACTIVE);
+    current_message_ = committed_messages_.front();
+    committed_messages_.pop_front();
 
     Q_EMIT messageSent(this);
 }

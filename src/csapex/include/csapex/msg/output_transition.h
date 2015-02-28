@@ -16,12 +16,16 @@ public:
     void sendMessages();
     void notifyMessageProcessed();
 
+    void clearOutputs();
     void setConnectionsReadyToReceive();
+    bool areOutputsIdle() const;
 
 private:
-    bool areOutputsDone() const;
 
     void fillConnections();
+
+private:
+    bool notify_called_;
 };
 }
 

@@ -238,7 +238,7 @@ void Input::notifyMessageProcessed()
 
     if(isConnected()) {
         apex_assert_hard(connections_.size() == 1);
-        transition_->notifyMessageProcessed();
+//        transition_->notifyMessageProcessed();
     }
 }
 /// MOC
