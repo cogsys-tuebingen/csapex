@@ -62,7 +62,7 @@ void InputTransition::notifyMessageProcessed()
                      !isConnection(Connection::State::NOT_INITIALIZED) &&
                      !isConnection(Connection::State::READY_TO_RECEIVE));
 
-    std::cerr << "notify input transition " <<  node_->getUUID() << std::endl;
+//    std::cerr << "notify input transition " <<  node_->getUUID() << std::endl;
 //    for(auto& connection : connections_) {
 //        ConnectionPtr c = connection.lock();
 //        if(c->getState() != Connection::State::DONE) {
@@ -123,10 +123,10 @@ void InputTransition::fire()
         }
     }
 
-    std::cerr << "fire " <<  node_->getUUID() << std::endl;
+//    std::cerr << "fire " <<  node_->getUUID() << std::endl;
 
     for(Input* input : node_->getMessageInputs()) {
-        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
+//        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
 
         if(input->isConnected()) {
             if(input->isDynamic()) {
@@ -168,7 +168,7 @@ void InputTransition::fire()
         }
     }
 
-    std::cerr << "-> process " <<  node_->getUUID() << std::endl;
+//    std::cerr << "-> process " <<  node_->getUUID() << std::endl;
 
     apex_assert_hard(node_->getState() == NodeWorker::State::IDLE);
     node_->triggerProcess();

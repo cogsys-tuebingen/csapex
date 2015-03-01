@@ -107,7 +107,7 @@ void Input::stop()
 void Input::free()
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
-    std::cerr << "clear input " << getUUID() << std::endl;
+//    std::cerr << "clear input " << getUUID() << std::endl;
     message_.reset();
 }
 
@@ -233,7 +233,7 @@ void Input::inputMessage(ConnectionType::ConstPtr message)
 
 void Input::notifyMessageProcessed()
 {
-    std::cerr << "notify input " <<  getUUID() << std::endl;
+//    std::cerr << "notify input " <<  getUUID() << std::endl;
     Connectable::notifyMessageProcessed();
 
     if(isConnected()) {

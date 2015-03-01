@@ -604,7 +604,7 @@ void NodeWorker::processMessages()
         node_->useTimer(t.get());
 
         try {
-            node_->aerr << "processing" << std::endl;
+//            node_->aerr << "processing" << std::endl;
             node_->process();
 
             if(trigger_process_done_->isConnected()) {
@@ -1056,7 +1056,7 @@ std::vector<Output*> NodeWorker::getParameterOutputs() const
 void NodeWorker::notifyMessagesProcessed()
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
-    node_->aerr << "notifyMessagesProcessed" << std::endl;
+//    node_->aerr << "notifyMessagesProcessed" << std::endl;
 
     apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS); // |||
     apex_assert_hard(transition_out_->canSendMessages()); // |
@@ -1073,7 +1073,7 @@ void NodeWorker::prepareForNextProcess()
 
     {
         std::lock_guard<std::recursive_mutex> lock(sync);
-        node_->aerr << "prepareForNextProcess" << std::endl;
+//        node_->aerr << "prepareForNextProcess" << std::endl;
 
         apex_assert_hard(thread() == QThread::currentThread());
         apex_assert_hard(state_ == State::WAITING_FOR_RESET);
@@ -1086,7 +1086,7 @@ void NodeWorker::prepareForNextProcess()
             cin->free();
         }
         for(Input* cin : inputs_) {
-            node_->aerr << "notify => " << cin->getUUID() << std::endl;
+//            node_->aerr << "notify => " << cin->getUUID() << std::endl;
             cin->notifyMessageProcessed();
         }
 
@@ -1104,7 +1104,7 @@ void NodeWorker::checkInputs()
         std::lock_guard<std::recursive_mutex> lock(sync);
         if(state_ != State::IDLE) {
             // suppress notification
-            node_->aerr << "suppressing check inputs" << std::endl;
+//            node_->aerr << "suppressing check inputs" << std::endl;
             //apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS);
             return;
         }
@@ -1161,7 +1161,7 @@ void NodeWorker::sendMessages()
     //        return;
     //    }
 
-    node_->aerr << "SEND" << std::endl;
+//    node_->aerr << "SEND" << std::endl;
     transition_out_->sendMessages();
 
 
@@ -1291,9 +1291,9 @@ void NodeWorker::tick()
 
     if(isEnabled() && isTickEnabled() && isSource() && node_->canTick()) {
         std::lock_guard<std::recursive_mutex> lock(sync);
-        std::cerr << "should tick, state is " << (int)getState() << ", can send messages is " << transition_out_->canSendMessages() << std::endl;
+//        std::cerr << "should tick, state is " << (int)getState() << ", can send messages is " << transition_out_->canSendMessages() << std::endl;
         if(getState() == State::IDLE && transition_out_->canSendMessages()) {
-            std::cerr << "ticks" << std::endl;
+//            std::cerr << "ticks" << std::endl;
             apex_assert_hard(getState() == State::IDLE);
             setState(State::PROCESSING);
 

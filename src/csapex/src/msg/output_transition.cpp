@@ -42,7 +42,7 @@ void OutputTransition::sendMessages()
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     apex_assert_hard(!isSink());
-    std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
+//    std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
     for(Output* out : node_->getMessageOutputs()) {
         if(out->isConnected()) {
             out->commitMessages();
@@ -53,7 +53,7 @@ void OutputTransition::sendMessages()
 
     notify_called_ = false;
 
-    std::cerr << "fill first time: " << node_->getUUID() << std::endl;
+//    std::cerr << "fill first time: " << node_->getUUID() << std::endl;
     fillConnections();
 }
 
@@ -62,18 +62,18 @@ void OutputTransition::notifyMessageProcessed()
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     if(!areConnections(Connection::State::DONE)) {
-        std::cerr << node_->getUUID() << ": cannot continue: connections are: \n";
+//        std::cerr << node_->getUUID() << ": cannot continue: connections are: \n";
         for(auto cw : connections_) {
             ConnectionPtr c = cw.lock();
-            std::cerr << c->from()->getUUID() << " => " << c->to()->getUUID();
-            std::cerr << ": " << (int) c->getState() << '\n';
+//            std::cerr << c->from()->getUUID() << " => " << c->to()->getUUID();
+//            std::cerr << ": " << (int) c->getState() << '\n';
         }
-        std::cerr.flush();
+//        std::cerr.flush();
         return;
     }
 
     if(notify_called_) {
-        std::cerr << "supressing notifyMessageProcessed in output" << std::endl;
+//        std::cerr << "supressing notifyMessageProcessed in output" << std::endl;
         return;
     }
 
@@ -84,13 +84,13 @@ void OutputTransition::notifyMessageProcessed()
     }
     if(areOutputsIdle()) {
         if(areConnections(Connection::State::DONE)) {
-            std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
+//            std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
             notify_called_ = true;
             node_->notifyMessagesProcessed();
         }
 
     } else {
-        std::cerr << "fill again: " << node_->getUUID() << std::endl;
+//        std::cerr << "fill again: " << node_->getUUID() << std::endl;
 //        apex_assert_hard(areConnections(Connection::State::READ));
 //        for(ConnectionWeakPtr c : connections_) {
 //            c.lock()->setState(Connection::State::READY_TO_RECEIVE);
@@ -117,7 +117,7 @@ void OutputTransition::fillConnections()
     apex_assert_hard(!areOutputsIdle());
     apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
-    std::cerr << "fill connections output transition: " << node_->getUUID() << std::endl;
+//    std::cerr << "fill connections output transition: " << node_->getUUID() << std::endl;
     for(ConnectionWeakPtr c : connections_) {
         ConnectionPtr connection = c.lock();
         if(connection->isEnabled()) {

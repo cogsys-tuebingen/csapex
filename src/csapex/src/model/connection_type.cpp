@@ -11,15 +11,32 @@
 
 using namespace csapex;
 
+
+namespace {
+    struct InstanceCounter
+    {
+        static InstanceCounter& instance()
+        {
+            static InstanceCounter i;
+            return i;
+        }
+
+        int count;
+    };
+}
+
 ConnectionType::Ptr ConnectionType::default_;
 
 ConnectionType::ConnectionType(const std::string& name)
     : name_(name), seq_no_(-1)
 {
+    InstanceCounter::instance().count++;
 }
 
 ConnectionType::~ConnectionType()
 {
+    InstanceCounter::instance().count--;
+    std::cerr << "instances left: " << InstanceCounter::instance().count << std::endl;
 }
 
 void ConnectionType::setName(const std::string &name)
