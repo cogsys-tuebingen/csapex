@@ -71,11 +71,20 @@ public:
 
     bool isEnabled() const;
 
+    void establishSource();
+    void establishSink();
+    void establish();
+    bool isSourceEstablished() const;
+    bool isSinkEstablished() const;
+    bool isEstablished() const;
+
     State getState() const;
     void setState(State s);
 
 public:
     boost::signals2::signal<void()> new_message;
+    boost::signals2::signal<void()> endpoint_established;
+    boost::signals2::signal<void()> connection_established;
 
 private Q_SLOTS:
     void messageSentEvent();
@@ -106,6 +115,10 @@ protected:
     Connectable* to_;
     int id_;
     bool is_dynamic_;
+
+    bool source_established_;
+    bool sink_established_;
+    bool established_;
 
     std::vector<FulcrumPtr> fulcrums_;
 

@@ -21,7 +21,9 @@ int Connection::next_connection_id_ = 0;
 
 
 Connection::Connection(Connectable *from, Connectable *to)
-    : from_(from), to_(to), id_(next_connection_id_++), state_(State::NOT_INITIALIZED)
+    : from_(from), to_(to), id_(next_connection_id_++),
+      source_established_(false), sink_established_(false), established_(false),
+      state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -31,7 +33,9 @@ Connection::Connection(Connectable *from, Connectable *to)
 }
 
 Connection::Connection(Connectable *from, Connectable *to, int id)
-    : from_(from), to_(to), id_(id), state_(State::NOT_INITIALIZED)
+    : from_(from), to_(to), id_(id),
+      source_established_(false), sink_established_(false), established_(false),
+      state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -41,7 +45,9 @@ Connection::Connection(Connectable *from, Connectable *to, int id)
 }
 
 Connection::Connection(Output *from, Input *to)
-    : from_(from), to_(to), id_(next_connection_id_++), state_(State::NOT_INITIALIZED)
+    : from_(from), to_(to), id_(next_connection_id_++),
+      source_established_(false), sink_established_(false), established_(false),
+      state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -49,7 +55,9 @@ Connection::Connection(Output *from, Input *to)
 }
 
 Connection::Connection(Output *from, Input *to, int id)
-    : from_(from), to_(to), id_(id), state_(State::NOT_INITIALIZED)
+    : from_(from), to_(to), id_(id),
+      source_established_(false), sink_established_(false), established_(false),
+      state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -58,7 +66,9 @@ Connection::Connection(Output *from, Input *to, int id)
 
 
 Connection::Connection(Trigger *from, Slot *to)
-    : from_(from), to_(to), id_(next_connection_id_++), state_(State::NOT_INITIALIZED)
+    : from_(from), to_(to), id_(next_connection_id_++),
+      source_established_(false), sink_established_(false), established_(false),
+      state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -66,7 +76,9 @@ Connection::Connection(Trigger *from, Slot *to)
 }
 
 Connection::Connection(Trigger *from, Slot *to, int id)
-    : from_(from), to_(to), id_(id), state_(State::NOT_INITIALIZED)
+    : from_(from), to_(to), id_(id),
+      source_established_(false), sink_established_(false), established_(false),
+      state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
@@ -114,6 +126,59 @@ void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 bool Connection::isEnabled() const
 {
     return from()->isEnabled() && to()->isEnabled();
+}
+
+void Connection::establish()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    if(established_) {
+        return;
+    }
+
+    established_ = true;
+    lock.unlock();
+    connection_established();
+}
+
+void Connection::establishSource()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    if(source_established_) {
+        return;
+    }
+    source_established_ = true;
+    lock.unlock();
+    endpoint_established();
+}
+
+void Connection::establishSink()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    if(sink_established_) {
+        return;
+    }
+
+    sink_established_ = true;
+    lock.unlock();
+    endpoint_established();
+}
+
+bool Connection::isEstablished() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return established_;
+}
+
+bool Connection::isSourceEstablished() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return source_established_;
+}
+
+bool Connection::isSinkEstablished() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return sink_established_;
 }
 
 Connection::State Connection::getState() const

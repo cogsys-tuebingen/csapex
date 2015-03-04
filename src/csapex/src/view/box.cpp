@@ -432,9 +432,12 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         return;
     }
 
+    bool idle = worker->getState() == NodeWorker::State::IDLE ||
+            worker->getState() == NodeWorker::State::ENABLED;
+
     info_exec->setVisible(true);
     info_exec->setText(QString("<img src=\":/") +
-                       (worker->getState() == NodeWorker::State::IDLE ? "idle" : "running") +
+                       (idle ? "idle" : "running") +
                        ".png\" /> ");
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;

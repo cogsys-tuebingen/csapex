@@ -11,6 +11,8 @@ class OutputTransition : public Transition
 public:
     OutputTransition(NodeWorker* node);
 
+    void connectionAdded(Connection* connection);
+
     bool isSink() const;
     bool canSendMessages() const;
     void sendMessages();
@@ -19,6 +21,8 @@ public:
     void clearOutputs();
     void setConnectionsReadyToReceive();
     bool areOutputsIdle() const;
+
+    void establish();
 
 private:
 

@@ -15,6 +15,8 @@ public:
     void notifyMessageProcessed();
     void fireIfPossible();
 
+    void establish();
+
 protected:
     virtual void connectionAdded(Connection* connection) override;
 

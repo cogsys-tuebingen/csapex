@@ -587,6 +587,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
     ccs.disabled = !connection.isEnabled();
+    ccs.established = connection.isEstablished();
     ccs.empty = connection.getState() == Connection::State::READY_TO_RECEIVE;
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
@@ -786,7 +787,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);
 
-    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    if(ccs.established) {
+        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+
+    } else {
+        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin));
+    }
 
     std::vector<QRectF> bounding_boxes;
 
@@ -809,10 +815,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         for(auto r: bounding_boxes) {
             painter->drawRect(r);
         }
-    }
-
-    if(id >= 0 && schema_dirty_) {
-        schematics_painter->drawPath(arrow_path);
     }
 
     return bounding_boxes;

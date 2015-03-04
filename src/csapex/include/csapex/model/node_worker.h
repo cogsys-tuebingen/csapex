@@ -44,6 +44,7 @@ public:
 
     enum class State {
         IDLE,
+        ENABLED,
         FIRED,
         PROCESSING,
         WAITING_FOR_OUTPUTS,
@@ -150,7 +151,7 @@ public Q_SLOTS:
     void processMessages();
 
     void prepareForNextProcess();
-    void checkInputs();
+    void checkTransitions();
 
     void parameterMessageArrived(Connectable* source);
 

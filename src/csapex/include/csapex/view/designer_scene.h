@@ -103,6 +103,7 @@ private:
         bool disabled;
         bool empty;
         bool full_read;
+        bool established;
         bool full_unread;
         bool minimized_from;
         bool minimized_to;
