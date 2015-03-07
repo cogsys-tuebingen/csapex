@@ -646,11 +646,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double mindist_for_slack = 60.0;
     double slack_smooth_distance = 300.0;
 
-    QPointF diff = (to - from);
-
-    double direct_length = hypot(diff.x(), diff.y());
-
-
     Fulcrum::Ptr first(new Fulcrum(nullptr, from, Fulcrum::OUT, from, from));
     Fulcrum::Ptr current = first;
     Fulcrum::Ptr last = current;
@@ -671,7 +666,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     std::vector<Path> paths;
 
     // generate lines
-    foreach(Fulcrum::Ptr next, targets) {
+    for(std::size_t i = 0; i < targets.size(); ++i) {
+        const Fulcrum::Ptr& next = targets[i];
+
+        QPointF diff = (next->pos() - current->pos());
+        double direct_length = hypot(diff.x(), diff.y());
+
         QPoint y_offset;
         double x_offset = 0;
         if(direct_length > mindist_for_slack) {
