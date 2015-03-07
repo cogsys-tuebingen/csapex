@@ -221,8 +221,10 @@ void NodeBox::updateComponentInformation(Graph* graph)
 
     if(info_compo) {
         int compo = graph->getComponent(worker->getUUID());
+        int level = graph->getLevel(worker->getUUID());
         std::stringstream info;
         info << "C:" << compo;
+        info << "L:" << level;
         info_compo->setText(info.str().c_str());
 
         setStyleForId(info_compo, compo);

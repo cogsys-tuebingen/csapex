@@ -5,7 +5,8 @@
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/io.h>
-#include <csapex/msg/output.h>
+#include <csapex/msg/static_output.h>
+#include <csapex/msg/dynamic_output.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/core/settings.h>
@@ -15,6 +16,7 @@
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>
 #include <csapex/model/node_factory.h>
+#include <csapex/model/node_modifier.h>
 
 /// SYSTEM
 #include <QThread>
@@ -45,7 +47,8 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 
     node_state_->setLabel(uuid);
-    node_->initialize(type, uuid, this);
+    modifier_ = std::make_shared<NodeModifier>(this);
+    node_->initialize(uuid, modifier_.get());
 
     bool params_created_in_constructor = node_->getParameterCount() != 0;
 
@@ -238,7 +241,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         input_2_param_[cin] = p;
     }
     {
-        Output* cout = new Output(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
+        Output* cout = new StaticOutput(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
         cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -470,7 +473,7 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
         p->set<double>(msg::getValue<double>(source));
     } else if(msg::isValue<std::string>(source)) {
         p->set<std::string>(msg::getValue<std::string>(source));
-    } else {
+    } else if(!msg::isMessage<connection_types::NoMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
 
@@ -669,10 +672,15 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
     return c;
 }
 
-Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
+Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
 {
     int id = outputs_.size();
-    Output* c = new Output(this, id);
+    Output* c = nullptr;
+    if(dynamic) {
+        c = new DynamicOutput(this, id);
+    } else {
+        c = new StaticOutput(this, id);
+    }
     c->setLabel(label);
     c->setType(type);
 
@@ -1076,17 +1084,21 @@ void NodeWorker::trySendMessages()
         return;
     }
 
-    messages_waiting_to_be_sent = false;
-    Q_EMIT messagesWaitingToBeSent(false);
 
     //    publishParameters();
 
+    messages_waiting_to_be_sent = false;
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
-        out->sendMessages();
+        // TODO: support dynamic + static outputs at the same time!
+        messages_waiting_to_be_sent |= out->sendMessages();
     }
 
-    resetInputs();
+    if(!messages_waiting_to_be_sent) {
+        Q_EMIT messagesWaitingToBeSent(false);
+        resetInputs();
+    }
+
 }
 
 void NodeWorker::setTickFrequency(double f)
@@ -1203,7 +1215,7 @@ void NodeWorker::tick()
 
         if(canSendMessages() && node_->canTick() /*|| ticks_ != 0*/) {
             foreach(Output* out, outputs_) {
-                out->clearMessage();
+                out->clear();
             }
 
             TimerPtr t = nullptr;

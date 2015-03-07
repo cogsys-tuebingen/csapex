@@ -130,7 +130,11 @@ csapex--Port {
         background: rgb(255,255,255);
         border-radius: 8px;
 }
-
+csapex--Port[dynamic="true"] {
+        border: 2px solid rgb(0, 0, 0);
+        background: rgb(255,255,255);
+        border-radius: 0px;
+}
 csapex--Port[disabled="true"]  {
         border: 2px solid rgb(128, 128, 128);
         background: rgb(200,200,200);

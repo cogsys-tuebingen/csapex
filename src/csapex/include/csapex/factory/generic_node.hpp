@@ -52,12 +52,12 @@ public:
         out_msg_.resize(N);
     }
 
-    void setup()
+    virtual void setup(csapex::NodeModifier& node_modifier)
     {
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this));
     }
 
-    void setupParameters()
+    virtual void setupParameters(Parameterizable& parameters)
     {
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this));
     }

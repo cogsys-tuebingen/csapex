@@ -75,7 +75,7 @@ public:
     /* REMOVE => UI*/ void setMinimized(bool min);
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
-    Output* addOutput(ConnectionTypePtr type, const std::string& label);
+    Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
     Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
     Trigger* addTrigger(const std::string& label);
 
@@ -222,6 +222,7 @@ private:
     std::string node_type_;
     NodePtr node_;    
     NodeStatePtr node_state_;
+    NodeModifierPtr modifier_;
 
 
     bool is_setup_;

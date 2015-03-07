@@ -95,6 +95,10 @@ std::size_t ConnectionType::nestedValueCount() const
 {
     throw std::logic_error("cannot get nested count for non-container messages");
 }
+void ConnectionType::addNestedValue(const ConstPtr &msg)
+{
+    throw std::logic_error("cannot add nested value to non-container messages");
+}
 
 void ConnectionType::writeRaw(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
 {
