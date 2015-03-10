@@ -106,7 +106,7 @@ std::string SetParameter::getText() const
 const std::type_info& SetParameter::type() const
 {
     Lock l = lock();
-    return value_.type();
+    return def_.type();
 }
 
 std::string SetParameter::toStringImpl() const
@@ -116,7 +116,11 @@ std::string SetParameter::toStringImpl() const
 
 boost::any SetParameter::get_unsafe() const
 {
-    return value_;
+    if(value_.empty()) {
+        return def_;
+    } else {
+        return value_;
+    }
 }
 
 

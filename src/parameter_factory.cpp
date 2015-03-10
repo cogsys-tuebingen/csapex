@@ -224,14 +224,14 @@ std::unique_ptr<Parameter> ParameterFactory::declareParameterStringSet(const std
     std::unique_ptr<SetParameter> result(new SetParameter(name, description));
     result->setSet(set);
 
+    std::string v = def;
     if(!set.empty()) {
-        std::string v = def;
         if(v.empty()) {
             v = set[0];
         }
-        result->def_ = v;
-        result->set<std::string>(v);
     }
+    result->def_ = v;
+    result->set<std::string>(v);
 
     return std::move(result);
 }
