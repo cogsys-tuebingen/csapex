@@ -8,6 +8,7 @@
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/model/connectable.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
@@ -61,7 +62,7 @@ public:
     QGraphicsView* tooltip_view_;
 };
 
-WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispatcher, Graph::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
+WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispatcher, GraphWorker::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
     : graph_(graph), dispatcher_(dispatcher), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(nullptr),
       pimpl(new Impl)
 {
@@ -114,7 +115,7 @@ Port* WidgetController::getPort(const Connectable* connectable)
     return pos->second;
 }
 
-Graph::Ptr WidgetController::getGraph()
+GraphWorker::Ptr WidgetController::getGraph()
 {
     return graph_;
 }

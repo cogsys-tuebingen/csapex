@@ -89,6 +89,7 @@ public:
 private:
     qt_helper::Call* makeModelCall(std::function<void()> cb);
     qt_helper::Call* makeUiCall(std::function<void()> cb);
+    qt_helper::Call* makePausedUiCall(std::function<void()> cb);
 
 private:
     std::vector<QObject*> callbacks;

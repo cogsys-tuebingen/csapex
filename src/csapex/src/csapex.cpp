@@ -199,7 +199,7 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
-        WidgetControllerPtr widget_control (new WidgetController(settings, dispatcher, graph, node_factory.get(), node_adapter_factory.get()));
+        WidgetControllerPtr widget_control (new WidgetController(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get()));
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
 
         DesignerStyleable style;

@@ -28,7 +28,7 @@ public:
     typedef std::shared_ptr<WidgetController> Ptr;
 
 public:
-    WidgetController(Settings& settings, CommandDispatcher& dispatcher, GraphPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);
+    WidgetController(Settings& settings, CommandDispatcher& dispatcher, GraphWorkerPtr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory);
     ~WidgetController();
 
     void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
@@ -47,7 +47,7 @@ public:
     Port* getPort(const UUID& connector_id);
     Port* getPort(const Connectable* connector_id);
 
-    GraphPtr getGraph();
+    GraphWorkerPtr getGraph();
     NodeFactory* getNodeFactory();
 
     void hideTooltipView();
@@ -93,7 +93,7 @@ private:
 
 private:
 
-    GraphPtr graph_;
+    GraphWorkerPtr graph_;
     CommandDispatcher& dispatcher_;
     Settings& settings_;
     NodeFactory* node_factory_;

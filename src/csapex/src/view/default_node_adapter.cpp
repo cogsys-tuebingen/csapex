@@ -12,6 +12,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/view/parameter_context_menu.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/graph_worker.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -341,7 +342,7 @@ void DefaultNodeAdapter::clear()
 
     QtHelper::clearLayout(wrapper_layout_);
 
-    Q_FOREACH(QObject* cb, callbacks) {
+    for(QObject* cb : callbacks) {
         qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
         if(call) {
             call->disconnect();
@@ -413,7 +414,7 @@ void ui_updatePathParameterDialog(param::PathParameter* path_p)
         filter = "All files (*.*)";
     }
 
-    int flags = 0;
+    int flags = QFileDialog::DontUseNativeDialog;
     bool is_file = path_p->isFile();
 
     QString dir(path_p->as<std::string>().c_str());
@@ -814,6 +815,19 @@ qt_helper::Call * DefaultNodeAdapter::makeUiCall(std::function<void()> cb)
     return call;
 }
 
+qt_helper::Call * DefaultNodeAdapter::makePausedUiCall(std::function<void()> cb)
+{
+    qt_helper::Call* call = new qt_helper::Call([this, cb](){
+        auto g = widget_ctrl_->getGraph();
+        bool paused = g->isPaused();
+        g->setPause(true);
+        cb();
+        g->setPause(paused);
+    });
+    callbacks.push_back(call);
+    return call;
+}
+
 void DefaultNodeAdapter::setupParameter(param::TriggerParameter * trigger_p)
 {
     QPushButton* btn = new QPushButton(trigger_p->name().c_str());
@@ -860,7 +874,7 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     qt_helper::Call* call_set_path = makeModelCall(std::bind(&model_updatePathParameter, path_p, path));
     QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
 
-    qt_helper::Call* call_select = makeUiCall(std::bind(&ui_updatePathParameterDialog, path_p));
+    qt_helper::Call* call_select = makePausedUiCall(std::bind(&ui_updatePathParameterDialog, path_p));
     QObject::connect(select, SIGNAL(clicked()), call_select, SLOT(call()));
 
     // model change -> ui
