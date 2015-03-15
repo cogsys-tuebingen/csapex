@@ -63,11 +63,8 @@ public:
 
     virtual void stop();
 
-protected:
-    virtual void setupAdaptiveUi();
-    virtual void setupUi(QBoxLayout* layout);
-
-protected:
+public:
+    // TODO: WeakPtrs!!!!
     void setupParameter(param::TriggerParameter* trigger_p);
     void setupParameter(param::ColorParameter* color_p);
     void setupParameter(param::PathParameter* path_p);
@@ -78,6 +75,11 @@ protected:
     void setupParameter(param::BitSetParameter* bitset_p);
 
     void setupParameter(param::OutputProgressParameter* bitset_p);
+
+
+protected:
+    virtual void setupAdaptiveUi();
+    virtual void setupUi(QBoxLayout* layout);
 
     void clear();
 

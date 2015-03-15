@@ -520,11 +520,16 @@ void ui_updateIntervalParameter(param::IntervalParameter* interval_p, Widget* sl
     assertGuiThread();
     slider->setSpan(interval_p->lower<T>(), interval_p->upper<T>());
 }
-template <typename T, typename Widget>
-void model_updateIntervalParameter(param::IntervalParameter* interval_p, Widget* slider)
+
+void model_updateIntIntervalParameter(param::IntervalParameter* interval_p, QxtSpanSlider* slider)
 {
     assertNotGuiThread();
     interval_p->set(std::make_pair(slider->lowerValue(), slider->upperValue()));
+}
+void model_updateDoubleIntervalParameter(param::IntervalParameter* interval_p, QxtDoubleSpanSlider* slider)
+{
+    assertNotGuiThread();
+    interval_p->set(std::make_pair(slider->lowerDoubleValue(), slider->upperDoubleValue()));
 }
 
 template <typename T, typename Widget>
@@ -634,28 +639,29 @@ void setDirection(QBoxLayout* layout, NodeWorker* node)
 {
     layout->setDirection(node->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
 }
+
+template <typename P>
+void install(std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> >& map)
+{
+    map[P().ID()] = [](DefaultNodeAdapter* a, param::Parameter::Ptr p) { a->setupParameter(static_cast<P*>(p.get())); };
+}
+
 }
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
     static std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
+        install<param::TriggerParameter>(mapping_);
+        install<param::ColorParameter>(mapping_);
+        install<param::PathParameter>(mapping_);
+        install<param::ValueParameter>(mapping_);
+        install<param::RangeParameter>(mapping_);
+        install<param::IntervalParameter>(mapping_);
+        install<param::SetParameter>(mapping_);
+        install<param::BitSetParameter>(mapping_);
 
-#define INSTALL(_TYPE_) \
-    mapping_[_TYPE_().ID()] = [](DefaultNodeAdapter* a, param::Parameter::Ptr p) { a->setupParameter(static_cast<_TYPE_*>(p.get())); };
-
-
-        INSTALL(param::TriggerParameter);
-        INSTALL(param::ColorParameter);
-        INSTALL(param::PathParameter);
-        INSTALL(param::ValueParameter);
-        INSTALL(param::RangeParameter);
-        INSTALL(param::IntervalParameter);
-        INSTALL(param::SetParameter);
-        INSTALL(param::BitSetParameter);
-
-        INSTALL(param::OutputProgressParameter);
-#undef INSTALL
+        install<param::OutputProgressParameter>(mapping_);
     }
 
     clear();
@@ -979,7 +985,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                          new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntIntervalParameter, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
@@ -996,7 +1002,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                                      new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateDoubleIntervalParameter, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
