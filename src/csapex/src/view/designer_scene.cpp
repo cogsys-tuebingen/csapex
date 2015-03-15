@@ -129,6 +129,8 @@ void DesignerScene::setScale(double scale)
 }
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
+    setBackgroundBrush(QBrush(Qt::white));
+
     QGraphicsScene::drawBackground(painter, rect);
 
     if(isEmpty()) {

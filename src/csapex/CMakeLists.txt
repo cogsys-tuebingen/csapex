@@ -227,6 +227,7 @@ set(SRC_PLUGIN
     src/view/activity_timeline.cpp
     src/view/box.cpp
     src/view/box_dialog.cpp
+    src/view/screenshot_dialog.cpp
     src/view/csapex_window.cpp
     src/view/default_node_adapter.cpp
     src/view/designer.cpp

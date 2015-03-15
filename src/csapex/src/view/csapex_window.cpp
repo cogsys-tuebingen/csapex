@@ -22,6 +22,7 @@
 #include <csapex/view/activity_legend.h>
 #include <csapex/view/minimap_widget.h>
 #include <csapex/info.h>
+#include <csapex/view/screenshot_dialog.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>
@@ -125,7 +126,7 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
 
-
+    QObject::connect(ui->actionMake_Screenshot, SIGNAL(triggered()), this, SLOT(makeScreenshot()));
 
     QObject::connect(ui->actionAbout_CS_APEX, SIGNAL(triggered()), this, SLOT(about()));
     QObject::connect(ui->actionCopyright_Notices, SIGNAL(triggered()), this, SLOT(copyRight()));
@@ -657,6 +658,12 @@ void CsApexWindow::undo()
 void CsApexWindow::redo()
 {
     cmd_dispatcher_->redo();
+}
+
+void CsApexWindow::makeScreenshot()
+{
+    ScreenshotDialog diag(graph_worker_, this);
+    diag.exec();
 }
 
 void CsApexWindow::load()

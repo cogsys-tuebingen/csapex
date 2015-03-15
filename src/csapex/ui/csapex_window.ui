@@ -75,6 +75,8 @@
     <addaction name="actionDisplay_Graph_Components"/>
     <addaction name="actionDisplay_Threads"/>
     <addaction name="actionDisplay_Minimap"/>
+    <addaction name="separator"/>
+    <addaction name="actionMake_Screenshot"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -881,6 +883,15 @@ p, li { white-space: pre-wrap; }
   <action name="actionCopyright_Notices">
    <property name="text">
     <string>Copyright Notices</string>
+   </property>
+  </action>
+  <action name="actionMake_Screenshot">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/image.png</normaloff>:/image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Make Screenshot</string>
    </property>
   </action>
  </widget>
