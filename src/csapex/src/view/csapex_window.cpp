@@ -612,7 +612,8 @@ void CsApexWindow::save()
 
 void CsApexWindow::saveAs()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()),
+                                                    QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
@@ -623,7 +624,8 @@ void CsApexWindow::saveAs()
 
 void CsApexWindow::saveAsCopy()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()),
+                                                    QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
@@ -668,7 +670,8 @@ void CsApexWindow::makeScreenshot()
 
 void CsApexWindow::load()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Load config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", QString::fromStdString(getConfigFile()),
+                                                    QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(QFile(filename).exists()) {
         core_.load(filename.toStdString());

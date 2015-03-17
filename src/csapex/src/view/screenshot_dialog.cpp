@@ -104,7 +104,7 @@ void ScreenshotDialog::save()
 {
     bool pause = graph_->isPaused();
     graph_->setPause(true);
-    QString filename = QFileDialog::getSaveFileName(0, "Save Screenshot", "", "*.png");
+    QString filename = QFileDialog::getSaveFileName(0, "Save Screenshot", "", "*.png", 0, QFileDialog::DontUseNativeDialog);
 
     if(!filename.isEmpty()) {
         image_.save(filename);
