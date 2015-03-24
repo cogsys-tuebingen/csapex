@@ -39,6 +39,8 @@ public:
     bool isGraphComponentsEnabled() const;
     bool isThreadsEnabled() const;
     bool isMinimapEnabled() const;
+    bool areSignalConnectionsVisible() const;
+    bool areMessageConnectionsVisibile() const;
 
     bool hasSelection() const;
 
@@ -46,6 +48,8 @@ Q_SIGNALS:
     void selectionChanged();
     void gridEnabled(bool);
     void minimapEnabled(bool);
+    void signalsEnabled(bool);
+    void messagesEnabled(bool);
     void schematicsEnabled(bool);
     void graphComponentsEnabled(bool);
     void threadsEnabled(bool);
@@ -63,6 +67,8 @@ public Q_SLOTS:
     void displayGraphComponents(bool);
     void displayThreads(bool);
     void displayMinimap(bool);
+    void displaySignalConnections(bool);
+    void displayMessageConnections(bool);
 
     void refresh();
     void reset();

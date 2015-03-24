@@ -48,6 +48,7 @@ std::vector<Input*> Output::getTargets() const
 
 void Output::removeConnection(Connectable* other_side)
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
             other_side->removeConnection(this);
@@ -71,6 +72,7 @@ Command::Ptr Output::removeConnectionCmd(Input* other_side) {
 
 Command::Ptr Output::removeAllConnectionsCmd()
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
     foreach(Input* target, targets_) {
@@ -83,6 +85,7 @@ Command::Ptr Output::removeAllConnectionsCmd()
 
 void Output::removeAllConnectionsNotUndoable()
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
         (*i)->removeConnection(this);
         i = targets_.erase(i);
@@ -124,6 +127,7 @@ bool Output::connect(Connectable *other_side)
         return false;
     }
 
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     apex_assert_hard(input);
     targets_.push_back(input);
 
@@ -136,6 +140,7 @@ bool Output::connect(Connectable *other_side)
 
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* input, targets_) {
         if(!input->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
@@ -146,11 +151,13 @@ bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 
 bool Output::isConnected() const
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return targets_.size() > 0 || force_send_message_;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* input, targets_) {
         Q_EMIT(connectionInProgress(input, other_side));
     }
@@ -158,6 +165,7 @@ void Output::connectionMovePreview(Connectable *other_side)
 
 void Output::validateConnections()
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* target, targets_) {
         target->validateConnections();
     }
@@ -165,6 +173,7 @@ void Output::validateConnections()
 
 bool Output::canSendMessages() const
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* input, targets_) {
         bool blocked = /*input->isEnabled() && */input->isBlocked();
         if(blocked) {

@@ -68,8 +68,17 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menuDisplay_Connections">
+     <property name="title">
+      <string>Visible Connections</string>
+     </property>
+     <addaction name="actionMessage_Connections"/>
+     <addaction name="actionSignal_Connections"/>
+    </widget>
     <addaction name="actionGrid"/>
     <addaction name="actionLock_to_Grid"/>
+    <addaction name="separator"/>
+    <addaction name="menuDisplay_Connections"/>
     <addaction name="separator"/>
     <addaction name="actionSchematics"/>
     <addaction name="actionDisplay_Graph_Components"/>
@@ -160,6 +169,8 @@
    <addaction name="actionDisplay_Graph_Components"/>
    <addaction name="actionDisplay_Threads"/>
    <addaction name="actionDisplay_Minimap"/>
+   <addaction name="actionMessage_Connections"/>
+   <addaction name="actionSignal_Connections"/>
   </widget>
   <widget class="QDockWidget" name="Debug">
    <property name="features">
@@ -892,6 +903,28 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Make Screenshot</string>
+   </property>
+  </action>
+  <action name="actionMessage_Connections">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Message Connections</string>
+   </property>
+  </action>
+  <action name="actionSignal_Connections">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Signal Connections</string>
    </property>
   </action>
  </widget>
