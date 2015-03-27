@@ -31,7 +31,7 @@ CompleteLineEdit::CompleteLineEdit(QWidget *parent)
 
 
 void CompleteLineEdit::focusOutEvent(QFocusEvent */*e*/) {
-    Q_EMIT editingFinished();
+//    Q_EMIT editingFinished();
 }
 
 void CompleteLineEdit::keyPressEvent(QKeyEvent *e) {

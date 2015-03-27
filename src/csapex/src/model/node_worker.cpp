@@ -634,7 +634,9 @@ void NodeWorker::processInputs()
         node_->process();
 
         if(trigger_process_done_->isConnected()) {
-            t->step("trigger process done");
+            if(profiling_) {
+                t->step("trigger process done");
+            }
             trigger_process_done_->trigger();
         }
 
