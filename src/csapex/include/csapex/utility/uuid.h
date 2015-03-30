@@ -5,6 +5,7 @@
 #include <string>
 #include <ostream>
 #include <map>
+#include <mutex>
 
 namespace csapex {
 
@@ -78,6 +79,7 @@ private:
 private:
     std::string representation_;
 
+    static std::mutex hash_mutex_;
     static std::map<std::string, int> hash_;
 };
 
