@@ -48,7 +48,13 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
       scalings_to_perform_(0), move_event_(nullptr)
 
 {
-    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
+    //    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
+    QGLFormat fmt;
+    fmt.setSampleBuffers(true);
+    fmt.setSamples(2);
+    setViewport(new QGLWidget(fmt));
+
+    setCacheMode(QGraphicsView::CacheBackground);
     setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 
     setScene(scene_);
@@ -88,22 +94,31 @@ DesignerView::~DesignerView()
 
 void DesignerView::paintEvent(QPaintEvent *e)
 {
-    QGraphicsView::paintEvent(e);
+//    static qint64 last = QDateTime::currentMSecsSinceEpoch();
+//    qint64 time = QDateTime::currentMSecsSinceEpoch();
 
+//    qint64 delta = time - last;
+//    std::cerr << "dt: " << delta << std::endl;
+//    if(delta > 100) {
+        QGraphicsView::paintEvent(e);
+
+//        last = time;
+
+//    }
     Q_EMIT viewChanged();
 }
 
 void DesignerView::centerOnPoint(QPointF point)
 {
     centerOn(point);
-//    QScrollBar* h = horizontalScrollBar();
-//    QScrollBar* v = verticalScrollBar();
+    //    QScrollBar* h = horizontalScrollBar();
+    //    QScrollBar* v = verticalScrollBar();
 
-//    int x = point.x();
-//    int y = point.y();
+    //    int x = point.x();
+    //    int y = point.y();
 
-//    h->setValue(x);
-//    v->setValue(y);
+    //    h->setValue(x);
+    //    v->setValue(y);
 }
 
 void DesignerView::reset()
@@ -245,18 +260,18 @@ void DesignerView::wheelEvent(QWheelEvent *we)
         int scaleFactor = shift ? 1 : 4;
         int direction = (we->delta() > 0) ? 1 : -1;
 
-//        if((direction > 0) != (scalings_to_perform_ > 0)) {
-//            scalings_to_perform_ = 0;
-//        }
+        //        if((direction > 0) != (scalings_to_perform_ > 0)) {
+        //            scalings_to_perform_ = 0;
+        //        }
 
-//        scalings_to_perform_ +=  2 * direction * scaleFactor;
+        //        scalings_to_perform_ +=  2 * direction * scaleFactor;
 
         zoom(direction * scaleFactor);
 
-//        if(!scalings_animation_timer_.isActive()) {
-//            scalings_animation_timer_.setInterval(1000.0 / 60.0);
-//            scalings_animation_timer_.start();
-//        }
+        //        if(!scalings_animation_timer_.isActive()) {
+        //            scalings_animation_timer_.setInterval(1000.0 / 60.0);
+        //            scalings_animation_timer_.start();
+        //        }
 
     } else {
         QGraphicsView::wheelEvent(we);
@@ -457,8 +472,8 @@ void DesignerView::startProfiling(NodeWorker *node)
 
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
-    QObject::connect(box->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(repaint()));
-    QObject::connect(box->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(repaint()));
+    QObject::connect(box->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(update()));
+    QObject::connect(box->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(update()));
 }
 
 void DesignerView::stopProfiling(NodeWorker *node)
@@ -469,7 +484,7 @@ void DesignerView::stopProfiling(NodeWorker *node)
     apex_assert_hard(pos != profiling_.end());
 
     pos->second->deleteLater();
-//    delete pos->second;
+    //    delete pos->second;
     profiling_.erase(pos);
 }
 
@@ -612,11 +627,11 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         thread_menu.addMenu(choose_group_menu);
     }
 
-//    QAction* term = new QAction("terminate thread", &menu);
-//    term->setIcon(QIcon(":/stop.png"));
-//    term->setIconVisibleInMenu(true);
-//    handler[term] = std::bind(&NodeBox::killContent, box);
-//    menu.addAction(term);
+    //    QAction* term = new QAction("terminate thread", &menu);
+    //    term->setIcon(QIcon(":/stop.png"));
+    //    term->setIconVisibleInMenu(true);
+    //    handler[term] = std::bind(&NodeBox::killContent, box);
+    //    menu.addAction(term);
 
     menu.addSeparator();
 

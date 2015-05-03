@@ -20,7 +20,7 @@ MinimapWidget::MinimapWidget(DesignerView *view, DesignerScene *scene)
 
     QObject::connect(this, SIGNAL(resizeRequest(QSize)), this, SLOT(doResize()), Qt::QueuedConnection);
 
-    QObject::connect(view, SIGNAL(viewChanged()), this, SLOT(repaint()));
+    QObject::connect(view, SIGNAL(viewChanged()), this, SLOT(update()));
     QObject::connect(this, SIGNAL(positionRequest(QPointF)), view, SLOT(centerOnPoint(QPointF)));
     QObject::connect(this, SIGNAL(zoomRequest(QPointF, double)), view, SLOT(zoomAt(QPointF,double)));
 }

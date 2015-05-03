@@ -193,7 +193,7 @@ void Connectable::setBlocked(bool b)
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     blocked_ = b;
-    Q_EMIT blocked(b);
+//    Q_EMIT blocked(b);
 }
 
 int Connectable::sequenceNumber() const

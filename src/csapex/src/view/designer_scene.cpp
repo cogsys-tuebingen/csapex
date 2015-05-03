@@ -32,7 +32,7 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
-#define DEBUG_DRAWINGS_PER_SECOND 0
+#define DEBUG_DRAWINGS_PER_SECOND 1
 
 using namespace csapex;
 
@@ -226,6 +226,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 //    print_rect(rect);
 //    std::cerr << std::endl;
 
+    long draw_begin = QDateTime::currentMSecsSinceEpoch();
+
 #endif
 
     QGraphicsScene::drawForeground(painter, rect);
@@ -371,6 +373,12 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     schema_dirty_ = false;
 
     schematics_painter = nullptr;
+
+#if DEBUG_DRAWINGS_PER_SECOND
+    long draw_end = QDateTime::currentMSecsSinceEpoch();
+    long dt_drawing = draw_end - draw_begin;
+        std::cerr << "drawing took " << dt_drawing << "ms" << std::endl;
+#endif
 }
 
 void DesignerScene::drawItems(QPainter *painter, int numItems,
