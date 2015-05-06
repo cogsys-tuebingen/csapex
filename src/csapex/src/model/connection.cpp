@@ -110,7 +110,7 @@ void Connection::notifyMessageProcessed()
 //    std::cerr << "notify connection " <<  from_->getUUID() << " => " << to_->getUUID() << std::endl;
     Output* o = dynamic_cast<Output*>(from_);
     if(o) {
-        o->getTransition()->notifyMessageProcessed();
+        o->getTransition()->updateOutputs();
     }
 }
 

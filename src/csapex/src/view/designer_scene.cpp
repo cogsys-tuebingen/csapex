@@ -197,12 +197,12 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     if(dt > 0) {
         std::cerr << "drawing with avg. fps.: " << (drawings / (dt/1e3)) << std::endl;
     }
-//    auto print_rect = [](const QRectF& rect) {
-//        std::cerr << rect.x() << ", " << rect.y() << ", " << rect.x()+rect.width() << ", " << rect.y()+rect.height();
-//    };
-//    std::cerr << "rect is ";
-//    print_rect(rect);
-//    std::cerr << std::endl;
+    //    auto print_rect = [](const QRectF& rect) {
+    //        std::cerr << rect.x() << ", " << rect.y() << ", " << rect.x()+rect.width() << ", " << rect.y()+rect.height();
+    //    };
+    //    std::cerr << "rect is ";
+    //    print_rect(rect);
+    //    std::cerr << std::endl;
 
 #endif
 
@@ -588,6 +588,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.error = (to->isError() || from->isError());
     ccs.disabled = !connection.isEnabled();
     ccs.established = connection.isEstablished();
+    ccs.source_established = connection.isSourceEstablished();
+    ccs.sink_established = connection.isSinkEstablished();
     ccs.empty = connection.getState() == Connection::State::READY_TO_RECEIVE;
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
@@ -809,6 +811,17 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     painter->setBrush(color_end);
     painter->setPen(QPen(painter->brush(), 1.0));
     painter->drawPath(arrow_path);
+
+    if(!ccs.established) {
+        painter->setBrush(QBrush(Qt::red, Qt::Dense2Pattern));
+        if(!ccs.source_established) {
+            painter->drawEllipse(from, 10, 10);
+        }
+        if(!ccs.source_established) {
+            painter->drawEllipse(real_to, 10, 10);
+        }
+    }
+
 
     if(draw_schema_) {
         painter->setBrush(QBrush());

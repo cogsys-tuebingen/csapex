@@ -346,9 +346,9 @@ void NodeWorker::triggerProcess()
     Q_EMIT processRequested();
 }
 
-void NodeWorker::triggerCheckInputs()
+void NodeWorker::triggerCheckTransitions()
 {
-    Q_EMIT checkInputsRequested();
+    Q_EMIT checkTransitionsRequested();
 }
 
 void NodeWorker::switchThread(QThread *thread, int id)
@@ -388,7 +388,7 @@ void NodeWorker::switchThread(QThread *thread, int id)
     QObject::connect(this, SIGNAL(processRequested()), this, SLOT(processMessages()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(tickRequested()), this, SLOT(tick()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(messagesProcessed()), this, SLOT(prepareForNextProcess()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(checkInputsRequested()), this, SLOT(checkTransitions()), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(checkTransitionsRequested()), this, SLOT(checkTransitions()), Qt::QueuedConnection);
 }
 
 void NodeWorker::connectConnector(Connectable *c)
@@ -552,15 +552,15 @@ void NodeWorker::checkIfInputsCanBeProcessed()
 }
 
 
-void NodeWorker::checkIfOutputIsReady(Connectable*)
+void NodeWorker::outputConnectionChanged(Connectable*)
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
-   // triggerCheckInputs();
-    //    if(transition_out_->canSendMessages()) {
-    //        trySendMessages();
-    //    } else {
-    //    }
-    //    transition_out_->update();
+
+    if(state_ == State::WAITING_FOR_OUTPUTS) {
+        transition_out_->updateOutputs();
+    }
+
+    triggerCheckTransitions();
 }
 
 void NodeWorker::processMessages()
@@ -867,9 +867,9 @@ void NodeWorker::registerOutput(Output* out)
     out->moveToThread(thread());
 
     connectConnector(out);
-    QObject::connect(out, SIGNAL(messageProcessed(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
-    QObject::connect(out, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
-    QObject::connect(out, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
+    QObject::connect(out, SIGNAL(messageProcessed(Connectable*)), this, SLOT(outputConnectionChanged(Connectable*)));
+    QObject::connect(out, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(outputConnectionChanged(Connectable*)));
+    QObject::connect(out, SIGNAL(connectionDone(Connectable*)), this, SLOT(outputConnectionChanged(Connectable*)));
 
     Q_EMIT connectorCreated(out);
 }
@@ -1134,13 +1134,6 @@ void NodeWorker::checkTransitions()
     {
         std::lock_guard<std::recursive_mutex> lock(sync);
         if(state_ != State::IDLE && state_ != State::ENABLED) {
-            // suppress notification
-            //            node_->aerr << "suppressing check inputs" << std::endl;
-            //apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS);
-            return;
-        }
-
-        if(!transition_out_->canSendMessages()) {
             return;
         }
     }
@@ -1316,7 +1309,6 @@ void NodeWorker::tick()
 
     std::unique_lock<std::recursive_mutex> lock(stop_mutex_);
     if(stop_) {
-        setState(State::IDLE);
         return;
     }
 
@@ -1439,7 +1431,7 @@ void NodeWorker::checkIO()
         enableSlots(true);
         enableTriggers(true);
 
-        triggerCheckInputs();
+        triggerCheckTransitions();
 
     } else {
         enableInput(false);

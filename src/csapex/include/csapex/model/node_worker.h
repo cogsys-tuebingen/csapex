@@ -67,7 +67,7 @@ public:
     void waitUntilFinished();
     void reset();
 
-    void triggerCheckInputs();
+    void triggerCheckTransitions();
     void triggerProcess();
     void triggerSwitchThreadRequest(QThread* thread, int id);
     void triggerPanic();
@@ -209,11 +209,11 @@ Q_SIGNALS:
 
     void panic();
     void processRequested();
-    void checkInputsRequested();
+    void checkTransitionsRequested();
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
-    void checkIfOutputIsReady(Connectable*);
+    void outputConnectionChanged(Connectable*);
     void checkIfInputsCanBeProcessed();
 
 private:

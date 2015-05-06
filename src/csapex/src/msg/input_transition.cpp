@@ -44,12 +44,12 @@ void InputTransition::connectionAdded(Connection *connection)
     connection->new_message.connect([this]() {
         //        std::cerr << "new message in " << node_->getUUID() << std::endl;
         //        update();
-        node_->triggerCheckInputs();
+        node_->triggerCheckTransitions();
     });
 
     connection->endpoint_established.connect([this]() {
        // establish();
-        node_->triggerCheckInputs();
+        node_->triggerCheckTransitions();
     });
 
     one_input_is_dynamic_ = false;

@@ -59,6 +59,8 @@ public:
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;
 
+    virtual bool isForced() const;
+
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
 

@@ -104,6 +104,8 @@ private:
         bool empty;
         bool full_read;
         bool established;
+        bool source_established;
+        bool sink_established;
         bool full_unread;
         bool minimized_from;
         bool minimized_to;

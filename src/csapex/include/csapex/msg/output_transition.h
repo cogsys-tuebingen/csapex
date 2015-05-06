@@ -16,7 +16,7 @@ public:
     bool isSink() const;
     bool canSendMessages() const;
     void sendMessages();
-    void notifyMessageProcessed();
+    void updateOutputs();
 
     void clearOutputs();
     void setConnectionsReadyToReceive();

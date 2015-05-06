@@ -168,6 +168,20 @@ bool Output::isConnected() const
     return false;
 }
 
+bool Output::isForced() const
+{
+    if(!force_send_message_) {
+        return false;
+    }
+    for(const auto& c : connections_) {
+        auto connection = c.lock();
+        if(connection->to()->isEnabled() && connection->isEstablished()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Output::connectionMovePreview(Connectable *other_side)
 {
     for(ConnectionWeakPtr connection : connections_) {

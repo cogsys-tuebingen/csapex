@@ -19,7 +19,7 @@ void OutputTransition::connectionAdded(Connection *connection)
 {
     connection->endpoint_established.connect([this]() {
        // establish();
-        node_->triggerCheckInputs();
+        node_->triggerCheckTransitions();
     });
 
     std::cerr << node_->getUUID() << ": out connection added to " << connection->to()->getUUID() << std::endl;
@@ -84,23 +84,39 @@ void OutputTransition::sendMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
+    int non_forced_connections = 0;
+
     apex_assert_hard(!isSink());
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
     for(Output* out : node_->getMessageOutputs()) {
         if(out->isConnected()) {
             out->commitMessages();
+
+            if(!out->isForced()) {
+                ++non_forced_connections;
+            }
         }
     }
 
-    apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
-
     outputs_done_ = false;
 
-    //    std::cerr << "fill first time: " << node_->getUUID() << std::endl;
-    fillConnections();
+    if(non_forced_connections == 0) {
+        // all outputs are forced -> there is no connections that can send back a notification!
+
+        apex_assert_hard(areConnections(Connection::State::DONE));
+        updateOutputs();
+
+    } else {
+        // at least one output is not forced and will send back a notification
+        apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
+
+        //    std::cerr << "fill first time: " << node_->getUUID() << std::endl;
+        fillConnections();
+    }
+
 }
 
-void OutputTransition::notifyMessageProcessed()
+void OutputTransition::updateOutputs()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
