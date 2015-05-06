@@ -1342,7 +1342,7 @@ void NodeWorker::tick()
 
             static int ticks = 0;
             if(isTickEnabled() && isSource() && node_->canTick() /*&& ticks++ == 0*/) {
-                std::cerr << "should tick, state is " << (int)getState() << ", can send messages is " << transition_out_->canSendMessages() << std::endl;
+//                std::cerr << "should tick, state is " << (int)getState() << ", can send messages is " << transition_out_->canSendMessages() << std::endl;
                 if(transition_out_->canSendMessages()) {
                     //            std::cerr << "ticks" << std::endl;
                     apex_assert_hard(state == State::IDLE || state == State::ENABLED);

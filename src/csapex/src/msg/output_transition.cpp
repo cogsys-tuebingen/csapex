@@ -22,8 +22,6 @@ void OutputTransition::connectionAdded(Connection *connection)
         node_->triggerCheckTransitions();
     });
 
-    std::cerr << node_->getUUID() << ": out connection added to " << connection->to()->getUUID() << std::endl;
-
 //    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
 //        establish();
 //    }
@@ -42,8 +40,7 @@ void OutputTransition::establish()
                 c->establishSource();
             }
             if(c->isSourceEstablished() && c->isSinkEstablished()) {
-                std::cerr << "establish out connection "  << c->from()->getUUID() << " => " << c->to()->getUUID() << std::endl;
-                establishConnection(cw);
+               establishConnection(cw);
             }
         }
     }
@@ -179,14 +176,13 @@ void OutputTransition::fillConnections()
     apex_assert_hard(!areOutputsIdle());
     apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
-    std::cerr << "fill connections output transition: " << node_->getUUID() << std::endl;
     for(ConnectionWeakPtr c : established_connections_) {
         ConnectionPtr connection = c.lock();
-        std::cerr << "connection:" << connection->from()->getUUID() << " => " << connection->to()->getUUID() << std::endl;
+
         if(connection->isEnabled()) {
             Output* out = dynamic_cast<Output*>(connection->from());
             apex_assert_hard(out);
-            std::cerr << "--> " << out->getUUID() << std::endl;
+
             auto msg = out->getMessage();
             apex_assert_hard(msg);
             connection->setMessage(msg);

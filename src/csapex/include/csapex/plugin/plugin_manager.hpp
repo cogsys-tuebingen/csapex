@@ -72,24 +72,24 @@ protected:
         std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
         assert(!loader->isOnDemandLoadUnloadEnabled());
 
-        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
+//        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
         int retries = 1;
         while(retries != 0) {
             retries = loader->unloadLibrary();
             if(retries != 0) {
-                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
+//                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
             }
         }
         if(loader->isLibraryLoadedByAnyClassloader()) {
-            std::cerr << "there still instances of " << library << std::endl;
+//            std::cerr << "there still instances of " << library << std::endl;
         } else {
-            std::cerr << "there no more instances of " << library << std::endl;
+//            std::cerr << "there no more instances of " << library << std::endl;
         }
     }
 
     void reload(const std::string& library) {
         std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
-        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
+//        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
         loader->loadLibrary();
 
         // reload all matching classes

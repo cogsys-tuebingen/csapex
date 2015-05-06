@@ -45,7 +45,7 @@ void Transition::establishConnection(ConnectionWeakPtr connection)
             if(!cptr->isEstablished()) {
                 cptr->establish();
             }
-            std::cerr << "!!! establish connection "  << cptr->from()->getUUID() << " => " << cptr->to()->getUUID() << std::endl;
+
             it = unestablished_connections_.erase(it);
             established_connections_.push_back(cptr);
         } else {

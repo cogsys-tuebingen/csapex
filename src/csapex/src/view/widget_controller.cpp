@@ -334,10 +334,8 @@ void WidgetController::portDestroyed(QObject *o)
 {
     Port* p = dynamic_cast<Port*>(o);
     if(p) {
-        std::cerr << "search port" << std::endl;
         for(auto it = pimpl->port_map_.begin(); it != pimpl->port_map_.end(); ) {
             if(it->second == p) {
-                std::cerr << "erase port" << std::endl;
                 it = pimpl->port_map_.erase(it);
             } else {
                 ++it;
