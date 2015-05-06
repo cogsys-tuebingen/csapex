@@ -48,7 +48,7 @@ void InputTransition::connectionAdded(Connection *connection)
     });
 
     connection->endpoint_established.connect([this]() {
-        establish();
+       // establish();
         node_->triggerCheckInputs();
     });
 
@@ -62,9 +62,9 @@ void InputTransition::connectionAdded(Connection *connection)
 
     std::cerr << node_->getUUID() << ": in connection added from " << connection->from()->getUUID() << std::endl;
 
-    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
-        establish();
-    }
+//    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
+//        establish();
+//    }
 }
 
 void InputTransition::fireIfPossible()
@@ -78,7 +78,8 @@ void InputTransition::fireIfPossible()
         //fire(); -> instead of tick!!!!
     } else {
         if(!isConnection(Connection::State::READY_TO_RECEIVE) &&
-                isConnection(Connection::State::UNREAD)) {
+                areConnections(Connection::State::UNREAD, Connection::State::READ) &&
+                !areConnections(Connection::State::READ)) {
             if(node_->getState() == NodeWorker::State::ENABLED) {
 
                 for(const auto& c : established_connections_) {
@@ -98,9 +99,12 @@ void InputTransition::fireIfPossible()
 
 void InputTransition::notifyMessageProcessed()
 {
-    apex_assert_hard(!isConnection(Connection::State::UNREAD) &&
-                     !isConnection(Connection::State::NOT_INITIALIZED) &&
-                     !isConnection(Connection::State::READY_TO_RECEIVE));
+//    apex_assert_hard(!isConnection(Connection::State::UNREAD));
+//    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
+//    apex_assert_hard(!isConnection(Connection::State::READY_TO_RECEIVE));
+
+    apex_assert_hard(unestablished_connections_.empty());
+    apex_assert_hard(areConnections(Connection::State::READ));
 
     //    std::cerr << "notify input transition " <<  node_->getUUID() << std::endl;
     //    for(auto& connection : connections_) {
@@ -109,6 +113,12 @@ void InputTransition::notifyMessageProcessed()
     //            c->setState(Connection::State::DONE);
     //        }
     //    }
+    for(auto& connection : established_connections_) {
+        ConnectionPtr c = connection.lock();
+        c->setState(Connection::State::DONE);
+    }
+    apex_assert_hard(areConnections(Connection::State::DONE));
+
     for(auto& connection : established_connections_) {
         ConnectionPtr c = connection.lock();
         c->notifyMessageProcessed();
@@ -122,11 +132,10 @@ void InputTransition::fire()
     apex_assert_hard(node_->thread() == QThread::currentThread());
     apex_assert_hard(node_->canProcess());
     apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
-    apex_assert_hard(!areConnections(Connection::State::DONE));
+    apex_assert_hard(!isConnection(Connection::State::DONE));
     //    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(!isConnection(Connection::State::READY_TO_RECEIVE));
     apex_assert_hard(established_connections_.empty() || !areConnections(Connection::State::READ));
-    apex_assert_hard(established_connections_.empty() || !areConnections(Connection::State::DONE));
 
     std::vector<DynamicInput*> dynamic_inputs;
     ConnectionTypeConstPtr dynamic_message_part;

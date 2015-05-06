@@ -160,7 +160,8 @@ bool Output::isConnected() const
     }
 
     for(const auto& c : connections_) {
-        if(c.lock()->to()->isEnabled()) {
+        auto connection = c.lock();
+        if(connection->to()->isEnabled() && connection->isEstablished()) {
             return true;
         }
     }

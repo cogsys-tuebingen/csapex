@@ -200,6 +200,21 @@ NodeWorker::State NodeWorker::getState() const
 void NodeWorker::setState(State state)
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    switch(state) {
+    case State::IDLE:
+        apex_assert_hard(state_ == State::WAITING_FOR_RESET);
+        break;
+    case State::FIRED:
+        apex_assert_hard(state_ == State::ENABLED);
+        break;
+    case State::PROCESSING:
+        apex_assert_hard(state_ == State::FIRED);
+        break;
+
+    default:
+        break;
+    }
+
     state_ = state;
 }
 
@@ -540,7 +555,7 @@ void NodeWorker::checkIfInputsCanBeProcessed()
 void NodeWorker::checkIfOutputIsReady(Connectable*)
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
-    triggerCheckInputs();
+   // triggerCheckInputs();
     //    if(transition_out_->canSendMessages()) {
     //        trySendMessages();
     //    } else {
@@ -1085,6 +1100,17 @@ void NodeWorker::prepareForNextProcess()
         apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
         apex_assert_hard(transition_out_->canSendMessages());
 
+        static int iter = 0;
+        for(Input* cin : inputs_) {
+            for(ConnectionWeakPtr cw : cin->getConnections()) {
+                apex_assert_hard(cw.lock()->getState() != Connection::State::UNREAD);
+                apex_assert_hard(cw.lock()->getState() != Connection::State::DONE);
+                apex_assert_hard(cw.lock()->getState() != Connection::State::READY_TO_RECEIVE);
+                apex_assert_hard(cw.lock()->getState() == Connection::State::READ);
+            }
+        }
+        ++iter;
+
         setState(State::IDLE);
 
         for(Input* cin : inputs_) {
@@ -1127,9 +1153,14 @@ void NodeWorker::checkTransitions()
         transition_out_->establish();
     }
     if(transition_in_->hasUnestablishedConnection() || transition_out_->hasUnestablishedConnection()) {
-        setState(State::IDLE);
+//        setState(State::IDLE);
         return;
     }
+
+    if(!transition_out_->canSendMessages()) {
+        return;
+    }
+
     setState(State::ENABLED);
 
     apex_assert_hard(transition_out_->canSendMessages());
@@ -1184,6 +1215,7 @@ void NodeWorker::sendMessages()
     //    }
 
     //    node_->aerr << "SEND" << std::endl;
+    apex_assert_hard(transition_out_->canSendMessages());
     transition_out_->sendMessages();
 
 
@@ -1322,6 +1354,10 @@ void NodeWorker::tick()
                 if(transition_out_->canSendMessages()) {
                     //            std::cerr << "ticks" << std::endl;
                     apex_assert_hard(state == State::IDLE || state == State::ENABLED);
+                    if(state == State::IDLE) {
+                        setState(State::ENABLED);
+                    }
+                    setState(State::FIRED);
                     setState(State::PROCESSING);
 
                     transition_out_->clearOutputs();
@@ -1355,6 +1391,8 @@ void NodeWorker::tick()
                         transition_out_->setConnectionsReadyToReceive();
 
                         Q_EMIT messagesWaitingToBeSent(true);
+
+                        apex_assert_hard(transition_out_->canSendMessages());
                         sendMessages();
                     } else {
                         setState(state);

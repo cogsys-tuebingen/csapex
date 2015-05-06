@@ -10,7 +10,7 @@
 using namespace csapex;
 
 OutputTransition::OutputTransition(NodeWorker *node)
-    : Transition(node), notify_called_(true)
+    : Transition(node), outputs_done_(true)
 {
 
 }
@@ -18,15 +18,15 @@ OutputTransition::OutputTransition(NodeWorker *node)
 void OutputTransition::connectionAdded(Connection *connection)
 {
     connection->endpoint_established.connect([this]() {
-        establish();
+       // establish();
         node_->triggerCheckInputs();
     });
 
     std::cerr << node_->getUUID() << ": out connection added to " << connection->to()->getUUID() << std::endl;
 
-    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
-        establish();
-    }
+//    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
+//        establish();
+//    }
 }
 
 void OutputTransition::establish()
@@ -51,22 +51,22 @@ void OutputTransition::establish()
 
 bool OutputTransition::canSendMessages() const
 {
-    if(!notify_called_) {
+    if(!outputs_done_) {
         return false;
     }
     for(Output* output : node_->getMessageOutputs()) {
         if(output->isEnabled() && output->isConnected()) {
-            if(output->getState() != Output::State::IDLE) {
+            if(output->getState() == Output::State::ACTIVE) {
                 return false;
             }
         }
     }
-//    for(auto cw : established_connections_) {
-//        ConnectionPtr c = cw.lock();
-//        if(!c->isEstablished()) {
-//            return false;
-//        }
-//    }
+    //    for(auto cw : established_connections_) {
+    //        ConnectionPtr c = cw.lock();
+    //        if(!c->isEstablished()) {
+    //            return false;
+    //        }
+    //    }
     return true;
 }
 
@@ -85,7 +85,7 @@ void OutputTransition::sendMessages()
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     apex_assert_hard(!isSink());
-//        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
+    //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
     for(Output* out : node_->getMessageOutputs()) {
         if(out->isConnected()) {
             out->commitMessages();
@@ -94,7 +94,7 @@ void OutputTransition::sendMessages()
 
     apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
-    notify_called_ = false;
+    outputs_done_ = false;
 
     //    std::cerr << "fill first time: " << node_->getUUID() << std::endl;
     fillConnections();
@@ -115,7 +115,9 @@ void OutputTransition::notifyMessageProcessed()
         return;
     }
 
-    if(notify_called_) {
+    apex_assert_hard(areConnections(Connection::State::DONE));
+
+    if(outputs_done_) {
         //        std::cerr << "supressing notifyMessageProcessed in output" << std::endl;
         return;
     }
@@ -128,9 +130,9 @@ void OutputTransition::notifyMessageProcessed()
     if(areOutputsIdle()) {
         if(areConnections(Connection::State::DONE)) {
             //            std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
-            notify_called_ = true;
+            outputs_done_ = true;
             node_->notifyMessagesProcessed();
-//            establish();
+            //            establish();
         }
 
     } else {
@@ -161,7 +163,7 @@ void OutputTransition::fillConnections()
     apex_assert_hard(!areOutputsIdle());
     apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
-        std::cerr << "fill connections output transition: " << node_->getUUID() << std::endl;
+    std::cerr << "fill connections output transition: " << node_->getUUID() << std::endl;
     for(ConnectionWeakPtr c : established_connections_) {
         ConnectionPtr connection = c.lock();
         std::cerr << "connection:" << connection->from()->getUUID() << " => " << connection->to()->getUUID() << std::endl;

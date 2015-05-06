@@ -101,9 +101,10 @@ void Connection::notifyMessageProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
-        if(state_ != State::DONE) {
-            setState(Connection::State::DONE);
-        }
+        apex_assert_hard(state_ == State::DONE);
+//        if(state_ != State::DONE) {
+//            setState(Connection::State::DONE);
+//        }
     }
 
 //    std::cerr << "notify connection " <<  from_->getUUID() << " => " << to_->getUUID() << std::endl;
@@ -208,7 +209,7 @@ void Connection::setState(State s)
         break;
     case State::DONE:
 //        std::cerr << "done";
-        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ); // |
+        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ); // |
         apex_assert_hard(message_ != nullptr);
         break;
     default:

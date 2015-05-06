@@ -29,7 +29,7 @@ private:
     void fillConnections();
 
 private:
-    bool notify_called_;
+    bool outputs_done_;
 };
 }
 
