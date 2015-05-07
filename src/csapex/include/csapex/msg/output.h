@@ -49,6 +49,7 @@ public:
 
     virtual void disable() override;
 
+    virtual void setMultipart(bool multipart, bool last_part) = 0;
     virtual void publish(ConnectionType::ConstPtr message) = 0;
 
     virtual bool canSendMessages() const;

@@ -1289,6 +1289,12 @@ int NodeWorker::getLevel() const
 void NodeWorker::setLevel(int level)
 {
     level_ = level;
+    for(Input* in : inputs_) {
+        in->setLevel(level);
+    }
+    for(Output* out : outputs_) {
+        out->setLevel(level);
+    }
 }
 
 void NodeWorker::tick()

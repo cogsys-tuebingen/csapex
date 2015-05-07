@@ -31,7 +31,6 @@ void InputTransition::establish()
                 c->establishSink();
             }
             if(c->isSourceEstablished() && c->isSinkEstablished()) {
-                std::cerr << "establish in connection "  << c->from()->getUUID() << " => " << c->to()->getUUID() << std::endl;
                 establishConnection(cw);
             }
         }
@@ -48,7 +47,7 @@ void InputTransition::connectionAdded(Connection *connection)
     });
 
     connection->endpoint_established.connect([this]() {
-       // establish();
+        // establish();
         node_->triggerCheckTransitions();
     });
 
@@ -59,12 +58,6 @@ void InputTransition::connectionAdded(Connection *connection)
             break;
         }
     }
-
-    std::cerr << node_->getUUID() << ": in connection added from " << connection->from()->getUUID() << std::endl;
-
-//    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
-//        establish();
-//    }
 }
 
 void InputTransition::fireIfPossible()
@@ -102,16 +95,42 @@ void InputTransition::notifyMessageProcessed()
     apex_assert_hard(unestablished_connections_.empty());
     apex_assert_hard(areConnections(Connection::State::READ));
 
+    bool has_multipart = false;
+    bool multipart_are_done = true;
 
     for(auto& connection : established_connections_) {
         ConnectionPtr c = connection.lock();
-        c->setState(Connection::State::DONE);
+        int f = c->getMessage()->flags.data;
+        if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
+            has_multipart = true;
+
+            bool last_part = f & (int) ConnectionType::Flags::Fields::LAST_PART;
+            multipart_are_done &= last_part;
+        }
     }
-    apex_assert_hard(areConnections(Connection::State::DONE));
 
-    for(auto& connection : established_connections_) {
-        ConnectionPtr c = connection.lock();
-        c->notifyMessageProcessed();
+    if(!multipart_are_done) {
+        for(auto& connection : established_connections_) {
+            ConnectionPtr c = connection.lock();
+            int f = c->getMessage()->flags.data;
+
+            if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
+                c->setState(Connection::State::DONE);
+                c->notifyMessageProcessed();
+            }
+        }
+
+    } else {
+        for(auto& connection : established_connections_) {
+            ConnectionPtr c = connection.lock();
+            c->setState(Connection::State::DONE);
+        }
+        apex_assert_hard(areConnections(Connection::State::DONE));
+
+        for(auto& connection : established_connections_) {
+            ConnectionPtr c = connection.lock();
+            c->notifyMessageProcessed();
+        }
     }
 }
 

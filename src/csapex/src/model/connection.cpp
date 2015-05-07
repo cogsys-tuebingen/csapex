@@ -188,6 +188,19 @@ Connection::State Connection::getState() const
     return state_;
 }
 
+bool Connection::inLevel() const
+{
+    return to_->getLevel() == from_->getLevel();
+}
+bool Connection::upLevel() const
+{
+    return to_->getLevel() < from_->getLevel();
+}
+bool Connection::downLevel() const
+{
+    return to_->getLevel() > from_->getLevel();
+}
+
 void Connection::setState(State s)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);

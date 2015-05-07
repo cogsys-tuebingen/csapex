@@ -54,6 +54,9 @@ public:
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
 
+    void setLevel(int level);
+    int getLevel() const;
+
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
@@ -140,6 +143,7 @@ protected:
 private:
     bool enabled_;
     bool dynamic_;
+    int level_;
 };
 
 }

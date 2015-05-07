@@ -376,7 +376,6 @@ void Graph::assignLevels()
         }
     }
 
-    std::cerr << "got " << gateways.size() << " gateways" << std::endl;
     for(NodeWorker* node :  gateways) {
         DynamicOutput* correspondent = nullptr;
 

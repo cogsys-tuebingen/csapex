@@ -45,6 +45,15 @@ ConnectionTypeConstPtr StaticOutput::getMessage() const
     return committed_message_;
 }
 
+void StaticOutput::setMultipart(bool multipart, bool last_part)
+{
+    if(multipart) {
+        committed_message_->flags.data |= (int) ConnectionType::Flags::Fields::MULTI_PART;
+        if(last_part) {
+            committed_message_->flags.data |= (int) ConnectionType::Flags::Fields::LAST_PART;
+        }
+    }
+}
 
 void StaticOutput::commitMessages()
 {

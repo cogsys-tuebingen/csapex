@@ -81,6 +81,10 @@ public:
     State getState() const;
     void setState(State s);
 
+    bool inLevel() const;
+    bool upLevel() const;
+    bool downLevel() const;
+
 public:
     boost::signals2::signal<void()> new_message;
     boost::signals2::signal<void()> endpoint_established;

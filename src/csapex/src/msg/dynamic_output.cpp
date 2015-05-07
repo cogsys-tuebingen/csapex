@@ -40,6 +40,11 @@ void DynamicOutput::publish(ConnectionType::ConstPtr message)
     messages_to_send_.push_back(message);
 }
 
+void DynamicOutput::setMultipart(bool multipart, bool last_part)
+{
+    // ignored since this is already dynamic
+}
+
 void DynamicOutput::commitMessages()
 {
     apex_assert_hard(canSendMessages());
@@ -53,6 +58,12 @@ void DynamicOutput::commitMessages()
     committed_messages_ = messages_to_send_;
     ++count_;
 
+    for(ConnectionTypeConstPtr& m : committed_messages_) {
+        m->flags.data |= (int) ConnectionType::Flags::Fields::MULTI_PART;
+    }
+
+    apex_assert_hard(committed_messages_.size() > 0);
+    committed_messages_.back()->flags.data |= (int) ConnectionType::Flags::Fields::LAST_PART;
 
     messages_to_send_.clear();
 

@@ -22,6 +22,8 @@ public:
 
     virtual void publish(ConnectionType::ConstPtr message) override;
 
+    virtual void setMultipart(bool multipart, bool last_part) override;
+
     virtual void commitMessages() override;
     virtual bool hasMessage() override;
     virtual void nextMessage() override;

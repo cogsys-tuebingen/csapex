@@ -6,6 +6,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
 #include <csapex/utility/assert.h>
+#include <csapex/msg/input.h>
 
 using namespace csapex;
 
@@ -18,13 +19,13 @@ OutputTransition::OutputTransition(NodeWorker *node)
 void OutputTransition::connectionAdded(Connection *connection)
 {
     connection->endpoint_established.connect([this]() {
-       // establish();
+        // establish();
         node_->triggerCheckTransitions();
     });
 
-//    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
-//        establish();
-//    }
+    //    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
+    //        establish();
+    //    }
 }
 
 void OutputTransition::establish()
@@ -40,7 +41,7 @@ void OutputTransition::establish()
                 c->establishSource();
             }
             if(c->isSourceEstablished() && c->isSinkEstablished()) {
-               establishConnection(cw);
+                establishConnection(cw);
             }
         }
     }
@@ -85,12 +86,41 @@ void OutputTransition::sendMessages()
 
     apex_assert_hard(!isSink());
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
+
+    bool has_multipart = false;
+    bool multipart_are_done = true;
+
+    for(Input* in : node_->getMessageInputs()) {
+        for(auto& connection : in->getConnections()) {
+            ConnectionPtr c = connection.lock();
+            int f = c->getMessage()->flags.data;
+            if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
+                has_multipart = true;
+
+                bool last_part = f & (int) ConnectionType::Flags::Fields::LAST_PART;
+                multipart_are_done &= last_part;
+            }
+        }
+    }
+
     for(Output* out : node_->getMessageOutputs()) {
         if(out->isConnected()) {
             out->commitMessages();
 
             if(!out->isForced()) {
                 ++non_forced_connections;
+            }
+        }
+    }
+
+
+    if(has_multipart) {
+        for(ConnectionWeakPtr c : established_connections_) {
+            ConnectionPtr connection = c.lock();
+            Output* out = dynamic_cast<Output*>(connection->from());
+            if(out) {
+                bool is_last = multipart_are_done;
+                out->setMultipart(true, is_last);
             }
         }
     }
