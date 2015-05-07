@@ -29,6 +29,7 @@ protected:
     virtual void connectionAdded(Connection* connection);
     bool areConnections(Connection::State state) const;
     bool areConnections(Connection::State a, /*or*/ Connection::State b) const;
+    bool areConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isConnection(Connection::State state) const;
 
     void establishConnection(ConnectionWeakPtr connection);

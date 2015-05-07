@@ -79,6 +79,19 @@ bool Transition::areConnections(Connection::State a, Connection::State b) const
     return true;
 }
 
+bool Transition::areConnections(Connection::State a, Connection::State b, Connection::State c) const
+{
+    std::lock_guard<std::recursive_mutex> lock(sync);
+    for(ConnectionWeakPtr cwp : established_connections_) {
+        ConnectionPtr connection = cwp.lock();
+        auto s = connection->getState();
+        if(connection->isEnabled() && s != a && s != b && s != c) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Transition::isConnection(Connection::State state) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync);

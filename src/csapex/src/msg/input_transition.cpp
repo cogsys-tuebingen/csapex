@@ -78,7 +78,7 @@ void InputTransition::fireIfPossible()
         //fire(); -> instead of tick!!!!
     } else {
         if(!isConnection(Connection::State::READY_TO_RECEIVE) &&
-                areConnections(Connection::State::UNREAD, Connection::State::READ) &&
+                areConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/) &&
                 !areConnections(Connection::State::READ)) {
             if(node_->getState() == NodeWorker::State::ENABLED) {
 
@@ -99,20 +99,10 @@ void InputTransition::fireIfPossible()
 
 void InputTransition::notifyMessageProcessed()
 {
-//    apex_assert_hard(!isConnection(Connection::State::UNREAD));
-//    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
-//    apex_assert_hard(!isConnection(Connection::State::READY_TO_RECEIVE));
-
     apex_assert_hard(unestablished_connections_.empty());
     apex_assert_hard(areConnections(Connection::State::READ));
 
-    //    std::cerr << "notify input transition " <<  node_->getUUID() << std::endl;
-    //    for(auto& connection : connections_) {
-    //        ConnectionPtr c = connection.lock();
-    //        if(c->getState() != Connection::State::DONE) {
-    //            c->setState(Connection::State::DONE);
-    //        }
-    //    }
+
     for(auto& connection : established_connections_) {
         ConnectionPtr c = connection.lock();
         c->setState(Connection::State::DONE);
@@ -123,8 +113,6 @@ void InputTransition::notifyMessageProcessed()
         ConnectionPtr c = connection.lock();
         c->notifyMessageProcessed();
     }
-
-//    establish();
 }
 
 void InputTransition::fire()
@@ -148,8 +136,7 @@ void InputTransition::fire()
             dynamic_connection = connections.front().lock();
             auto s = dynamic_connection->getState();
             apex_assert_hard(s == Connection::State::READ ||
-                             s == Connection::State::UNREAD ||
-                             s == Connection::State::DONE);
+                             s == Connection::State::UNREAD);
             dynamic_message_part = dynamic_connection->getMessage();
             apex_assert_hard(dynamic_message_part != nullptr);
             DynamicInput* di = dynamic_cast<DynamicInput*>(input);
@@ -165,8 +152,7 @@ void InputTransition::fire()
             // wait until everything is here, then proceed.
             auto s = dynamic_connection->getState();
             apex_assert_hard(s == Connection::State::UNREAD ||
-                             s == Connection::State::READ ||
-                             s == Connection::State::DONE);
+                             s == Connection::State::READ);
             dynamic_connection->setState(Connection::State::READ);
             dynamic_connection->setState(Connection::State::DONE);
             dynamic_connection->notifyMessageProcessed();

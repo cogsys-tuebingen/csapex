@@ -116,6 +116,8 @@ private:
         Position start_pos;
         Position end_pos;
 
+        int level;
+
         double r;
     };
 
