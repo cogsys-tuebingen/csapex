@@ -27,13 +27,13 @@ void CommandDispatcher::reset()
 
 void CommandDispatcher::execute(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
+    command->init(&settings_, graph_worker_.get(), thread_pool_, node_factory_);
     doExecute(command);
 }
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
+    command->init(&settings_, graph_worker_.get(), thread_pool_, node_factory_);
     later.push_back(command);
 }
 
@@ -47,14 +47,14 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::executeNotUndoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
-    Command::Access::executeCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, command);
+    command->init(&settings_, graph_worker_.get(), thread_pool_, node_factory_);
+    Command::Access::executeCommand(graph_worker_.get(), thread_pool_, node_factory_, command);
 }
 
 void CommandDispatcher::undoNotRedoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
-    Command::Access::undoCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, command);
+    command->init(&settings_, graph_worker_.get(), thread_pool_, node_factory_);
+    Command::Access::undoCommand(graph_worker_.get(), thread_pool_, node_factory_, command);
 }
 
 
@@ -68,7 +68,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = Command::Access::executeCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, command);
+    bool success = Command::Access::executeCommand(graph_worker_.get(), thread_pool_, node_factory_, command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -156,7 +156,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = Command::Access::undoCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, last);
+    bool ret = Command::Access::undoCommand(graph_worker_.get(), thread_pool_, node_factory_, last);
     apex_assert_hard(ret);
 
     setDirty(!last->isAfterSavepoint());
@@ -175,7 +175,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    Command::Access::redoCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, last);
+    Command::Access::redoCommand(graph_worker_.get(), thread_pool_, node_factory_, last);
 
     done.push_back(last);
 

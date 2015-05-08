@@ -34,7 +34,6 @@ Trigger::~Trigger()
 
 void Trigger::reset()
 {
-    setBlocked(false);
     setSequenceNumber(0);
 }
 
@@ -110,12 +109,7 @@ void Trigger::disable()
     Connectable::disable();
 }
 
-void Trigger::connectForcedWithoutCommand(Slot *other_side)
-{
-    tryConnect(other_side);
-}
-
-bool Trigger::tryConnect(Connectable *other_side)
+bool Trigger::isConnectionPossible(Connectable *other_side)
 {
     return connect(other_side);
 }

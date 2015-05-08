@@ -136,7 +136,7 @@ int Main::run()
     return result;
 }
 
-int Main::main(bool headless, bool threadless, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
+int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
 //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
@@ -185,6 +185,8 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
     Graph::Ptr graph(new Graph);
     GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
+
+    graph_worker->setPause(paused);
 
     ThreadPool thread_pool(graph.get(), !threadless, thread_grouping);
     CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, node_factory.get());
@@ -265,6 +267,7 @@ int main(int argc, char** argv)
     desc.add_options()
             ("help", "show help message")
             ("dump", "show variables")
+            ("paused", "start paused")
             ("headless", "run without gui")
             ("threadless", "run without threading")
             ("fatal_exceptions", "abort execution on exception")
@@ -354,10 +357,11 @@ int main(int argc, char** argv)
 
     bool threadless = vm.count("threadless");
     bool thread_grouping = vm.count("thread_grouping");
+    bool paused = vm.count("paused");
 
     // start the app
     Main m(std::move(app));
-    return m.main(headless, threadless, thread_grouping, input, path_to_bin, additional_args);
+    return m.main(headless, threadless, paused, thread_grouping, input, path_to_bin, additional_args);
 }
 
 /// MOC

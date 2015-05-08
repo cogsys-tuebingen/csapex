@@ -38,14 +38,14 @@ void Slot::reset()
     setSequenceNumber(0);
 }
 
-bool Slot::tryConnect(Connectable* other_side)
+bool Slot::isConnectionPossible(Connectable* other_side)
 {
     if(!other_side->canOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
         return false;
     }
 
-    return other_side->tryConnect(this);
+    return other_side->isConnectionPossible(this);
 }
 
 bool Slot::acknowledgeConnection(Connectable* other_side)
@@ -91,12 +91,7 @@ void Slot::disable()
 {
     Connectable::disable();
 
-    //    if(isBlocked()) {
     notifyMessageProcessed();
-    //    }
-    //    if(isConnected() && getSource()->isEnabled()) {
-    //        getSource()->disable();
-    //    }
 }
 
 void Slot::removeAllConnectionsNotUndoable()

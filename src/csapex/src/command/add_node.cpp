@@ -8,6 +8,7 @@
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
 #include <csapex/view/widget_controller.h>
@@ -39,7 +40,7 @@ std::string AddNode::getDescription() const
 bool AddNode::doExecute()
 {
     if(uuid_.empty()) {
-        uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
+        uuid_ = UUID::make(graph_worker_->getGraph()->makeUUIDPrefix(type_));
     }
 
     NodeWorker::Ptr node = node_factory_->makeNode(type_, uuid_, saved_state_);
@@ -49,21 +50,22 @@ bool AddNode::doExecute()
     }
 
     node->getNodeState()->setPos(pos_);
+    node->pause(graph_worker_->isPaused());
 
-    graph_->addNode(node);
+    graph_worker_->getGraph()->addNode(node);
 
     return true;
 }
 
 bool AddNode::doUndo()
 {
-    NodeWorker* node_ = graph_->findNodeWorker(uuid_);
+    NodeWorker* node_ = graph_worker_->getGraph()->findNodeWorker(uuid_);
 
     saved_state_ = node_->getNodeStateCopy();
 
 
     if(parent_uuid_.empty()) {
-        graph_->deleteNode(node_->getUUID());
+        graph_worker_->getGraph()->deleteNode(node_->getUUID());
     }
 
     return true;
@@ -72,7 +74,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        graph_->findNodeWorker(uuid_)->setNodeState(saved_state_);
+        graph_worker_->getGraph()->findNodeWorker(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

@@ -40,5 +40,7 @@
         <file>hide.png</file>
         <file>error.png</file>
         <file>image.png</file>
+        <file>idle.png</file>
+        <file>running.png</file>
     </qresource>
 </RCC>

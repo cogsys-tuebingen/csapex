@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 
@@ -34,7 +35,7 @@ std::string Minimize::getDescription() const
 
 bool Minimize::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
+    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
     apex_assert_hard(node_worker);
 
     bool is_mini = node_worker->getNodeState()->isMinimized();
@@ -52,7 +53,7 @@ bool Minimize::doExecute()
 bool Minimize::doUndo()
 {
     if(executed) {
-        NodeWorker* node_worker = graph_->findNodeWorker(uuid);
+        NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
         apex_assert_hard(node_worker);
 
         node_worker->getNodeState()->setMinimized(!mini);

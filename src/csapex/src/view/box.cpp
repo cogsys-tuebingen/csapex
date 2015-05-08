@@ -31,7 +31,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), is_placed_(false)
+      down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), is_placed_(false)
 {
     worker->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::flipSides, this));
     worker->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
@@ -52,6 +52,11 @@ void NodeBox::setupUi()
 
     worker->getNode()->checkConditions(true);
 
+    if(!info_exec) {
+        info_exec = new QLabel;
+        info_exec->setProperty("exec", true);
+        ui->infos->addWidget(info_exec);
+    }
     if(!info_compo) {
         info_compo = new QLabel;
         info_compo->setProperty("component", true);
@@ -131,7 +136,6 @@ void NodeBox::construct()
     enabledChange(worker->isEnabled());
     QObject::connect(worker.get(), SIGNAL(enabled(bool)), this, SLOT(enabledChange(bool)));
 
-    QObject::connect(worker.get(), SIGNAL(messagesWaitingToBeSent(bool)), this, SLOT(blockedChange(bool)));
     QObject::connect(worker.get(), SIGNAL(threadChanged()), this, SLOT(updateThreadInformation()));
 
 
@@ -421,17 +425,20 @@ void NodeBox::enabledChange(bool val)
     refreshStylesheet();
 }
 
-void NodeBox::blockedChange(bool val)
-{
-    ui->boxframe->setProperty("blocked", val);
-}
-
 void NodeBox::paintEvent(QPaintEvent* /*e*/)
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker || !adapter_) {
         return;
     }
+
+    bool idle = worker->getState() == NodeWorker::State::IDLE ||
+            worker->getState() == NodeWorker::State::ENABLED;
+
+    info_exec->setVisible(true);
+    info_exec->setText(QString("<img src=\":/") +
+                       (idle ? "idle" : "running") +
+                       ".png\" /> " + QString::number((int) worker->getState()));
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;

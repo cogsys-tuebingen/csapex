@@ -9,6 +9,10 @@
 #include <QObject>
 #include <vector>
 #include <QPoint>
+#include <deque>
+#include <boost/signals2.hpp>
+#include <mutex>
+#include <condition_variable>
 
 namespace csapex
 {
@@ -27,6 +31,14 @@ class Connection : public QObject {
 
 public:
     typedef std::shared_ptr<Connection> Ptr;
+
+    enum class State {
+        NOT_INITIALIZED,
+        READY_TO_RECEIVE,
+        UNREAD,
+        READ,
+        DONE
+    };
 
 public:
     friend std::ostream& operator << (std::ostream& out, const Connection& c) {
@@ -50,6 +62,33 @@ public:
     bool contains(Connectable* c) const;
 
     void tick();
+
+    void setMessage(const ConnectionTypeConstPtr& msg);
+    void notifyMessageSet();
+
+    ConnectionTypeConstPtr getMessage() const;
+    void notifyMessageProcessed();
+
+    bool isEnabled() const;
+
+    void establishSource();
+    void establishSink();
+    void establish();
+    bool isSourceEstablished() const;
+    bool isSinkEstablished() const;
+    bool isEstablished() const;
+
+    State getState() const;
+    void setState(State s);
+
+    bool inLevel() const;
+    bool upLevel() const;
+    bool downLevel() const;
+
+public:
+    boost::signals2::signal<void()> new_message;
+    boost::signals2::signal<void()> endpoint_established;
+    boost::signals2::signal<void()> connection_established;
 
 private Q_SLOTS:
     void messageSentEvent();
@@ -78,12 +117,21 @@ private:
 protected:
     Connectable* from_;
     Connectable* to_;
+    int id_;
+    bool is_dynamic_;
+
+    bool source_established_;
+    bool sink_established_;
+    bool established_;
 
     std::vector<FulcrumPtr> fulcrums_;
 
-    int id_;
+    State state_;
+    ConnectionTypeConstPtr message_;
 
     static int next_connection_id_;
+
+    mutable std::recursive_mutex sync;
 };
 
 }

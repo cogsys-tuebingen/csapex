@@ -8,6 +8,7 @@
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/connection.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/node.h>
@@ -123,8 +124,15 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         if(c->isOutput()) {
             Output* out = dynamic_cast<Output*> (c);
             if(out) {
-                foreach(Input* input, out->getTargets()) {
-                    scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
+                foreach(ConnectionWeakPtr connection, out->getConnections()) {
+                    ConnectionPtr c = connection.lock();
+                    if(!c) {
+                        continue;
+                    }
+                    Input* input = dynamic_cast<Input*>(c->to());
+                    if(input) {
+                        scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
+                    }
                 }
             } else {
                 Trigger* trigger = dynamic_cast<Trigger*> (c);

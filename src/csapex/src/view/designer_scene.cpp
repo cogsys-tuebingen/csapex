@@ -219,12 +219,12 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     if(dt > 0) {
         std::cerr << "drawing with avg. fps.: " << (drawings / (dt/1e3)) << std::endl;
     }
-//    auto print_rect = [](const QRectF& rect) {
-//        std::cerr << rect.x() << ", " << rect.y() << ", " << rect.x()+rect.width() << ", " << rect.y()+rect.height();
-//    };
-//    std::cerr << "rect is ";
-//    print_rect(rect);
-//    std::cerr << std::endl;
+    //    auto print_rect = [](const QRectF& rect) {
+    //        std::cerr << rect.x() << ", " << rect.y() << ", " << rect.x()+rect.width() << ", " << rect.y()+rect.height();
+    //    };
+    //    std::cerr << "rect is ";
+    //    print_rect(rect);
+    //    std::cerr << std::endl;
 
     long draw_begin = QDateTime::currentMSecsSinceEpoch();
 
@@ -630,14 +630,26 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
 
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
-    ccs.disabled = (!from->isEnabled() || !to->isEnabled());
-    ccs.blocked_from = from->isBlocked();
-    ccs.blocked_to = to->isBlocked();
+    ccs.disabled = !connection.isEnabled();
+    ccs.established = connection.isEstablished();
+    ccs.source_established = connection.isSourceEstablished();
+    ccs.sink_established = connection.isSinkEstablished();
+    ccs.empty = connection.getState() == Connection::State::READY_TO_RECEIVE;
+    ccs.full_read = connection.getState() == Connection::State::READ;
+    ccs.full_unread = connection.getState() == Connection::State::UNREAD;
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
     ccs.hidden_from = !fromp->isVisible();
     ccs.hidden_to = !top->isVisible();
 
+    int lf = graph_->getLevel(graph_->findNodeWorkerForConnector(from->getUUID())->getUUID());
+    int lt = graph_->getLevel(graph_->findNodeWorkerForConnector(to->getUUID())->getUUID());
+
+    if(from->isDynamic()) {
+        ccs.level = lt;
+    } else {
+        ccs.level = lf;
+    }
     bool is_msg = dynamic_cast<Input*>(from) || dynamic_cast<Output*>(from);
 
     ccs.start_pos = is_msg ? (fromp->isFlipped() ? LEFT : RIGHT) : BOTTOM;
@@ -685,6 +697,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? style_->lineWidth() / 2.0 : style_->lineWidth();
     ccs.r *= scale_factor;
+    ccs.r *= (ccs.level + 1);
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;
@@ -800,9 +813,14 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     QColor color_start = style_->lineColor();
     QColor color_end = style_->lineColor();
 
-    if(ccs.blocked_from || ccs.blocked_to) {
+    if(ccs.full_read || ccs.full_unread) {
         color_start = style_->lineColorBlocked();
         color_end = style_->lineColorBlocked();
+
+        if(ccs.full_read) {
+            color_start = color_start.dark();
+            color_end = color_end.dark();
+        }
 
     } else if(ccs.error) {
         color_start = style_->lineColorError();
@@ -824,7 +842,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);
 
-    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == ConnectionType::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
+    if(ccs.established) {
+        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == ConnectionType::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
+
+    } else {
+        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin));
+    }
 
     std::vector<QRectF> bounding_boxes;
 
@@ -842,16 +865,23 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     painter->setPen(QPen(painter->brush(), 1.0));
     painter->drawPath(arrow_path);
 
+    if(!ccs.established) {
+        painter->setBrush(QBrush(Qt::red, Qt::Dense2Pattern));
+        if(!ccs.source_established) {
+            painter->drawEllipse(from, 10, 10);
+        }
+        if(!ccs.source_established) {
+            painter->drawEllipse(real_to, 10, 10);
+        }
+    }
+
+
     if(draw_schema_) {
         painter->setBrush(QBrush());
         for(auto r: bounding_boxes) {
             painter->drawRect(r);
         }
     }
-
-//    if(id >= 0 && schema_dirty_) {
-//        schematics_painter->drawPath(arrow_path);
-//    }
 
     return bounding_boxes;
 }

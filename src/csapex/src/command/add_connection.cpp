@@ -7,6 +7,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/connection.h>
 
@@ -38,14 +39,15 @@ bool AddConnection::doExecute()
         refresh();
     }
 
-    return graph_->addConnection(Connection::Ptr(new Connection(from, to)));
+    return graph_worker_->getGraph()->addConnection(Connection::Ptr(new Connection(from, to)));
 }
 
 bool AddConnection::doUndo()
 {
     refresh();
 
-    graph_->deleteConnection(Connection::Ptr(new Connection(from, to)));
+    const auto& graph = graph_worker_->getGraph();
+    graph->deleteConnection(graph->getConnection(from, to));
 
     return true;
 }
@@ -58,8 +60,8 @@ bool AddConnection::doRedo()
 
 void AddConnection::refresh()
 {
-    Connectable* f = graph_->findConnector(from_uuid);
-    Connectable* t = graph_->findConnector(to_uuid);
+    Connectable* f = graph_worker_->getGraph()->findConnector(from_uuid);
+    Connectable* t = graph_worker_->getGraph()->findConnector(to_uuid);
 
     if((f->isOutput() && t->isInput())) {
         from = f;

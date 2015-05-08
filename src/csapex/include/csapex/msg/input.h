@@ -1,5 +1,5 @@
-#ifndef CONNECTOR_IN_H
-#define CONNECTOR_IN_H
+#ifndef INPUT_H
+#define INPUT_H
 
 /// COMPONENT
 #include <csapex/model/connectable.h>
@@ -20,9 +20,11 @@ class Input : public Connectable
     friend class command::DeleteConnection;
 
 public:
-    Input(const UUID &uuid);
-    Input(Unique *parent, int sub_id);
+    Input(InputTransition* transition, const UUID &uuid);
+    Input(InputTransition* transition, Unique *parent, int sub_id);
     virtual ~Input();
+
+    InputTransition* getTransition() const;
 
     virtual bool canInput() const {
         return true;
@@ -31,13 +33,14 @@ public:
         return true;
     }
 
+    void addConnection(ConnectionWeakPtr connection) override;
+    void removeConnection(ConnectionWeakPtr connection) override;
     bool canConnectTo(Connectable* other_side, bool move) const;
 
     void inputMessage(ConnectionType::ConstPtr message);
-    ConnectionTypeConstPtr getMessage() const;
+    virtual ConnectionTypeConstPtr getMessage() const;
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
-    virtual bool isConnected() const;
 
     virtual void connectionMovePreview(Connectable* other_side);
     virtual void validateConnections();
@@ -50,8 +53,8 @@ public:
     bool isOptional() const;
     void setOptional(bool optional);
 
-    bool hasMessage() const;
-    bool hasReceived() const;
+    virtual bool hasMessage() const;
+    virtual bool hasReceived() const;
 
     void free();
     void stop();
@@ -63,25 +66,20 @@ public:
 
     void reset();
 
+
 protected:
-    virtual bool tryConnect(Connectable* other_side);
-    virtual bool acknowledgeConnection(Connectable* other_side);
+    virtual bool isConnectionPossible(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
 
-Q_SIGNALS:
-    void gotMessage(ConnectionType::ConstPtr msg);
-
-private Q_SLOTS:
-    void handleMessage(ConnectionType::ConstPtr msg);
-
 protected:
-    Connectable* target;
+    InputTransition* transition_;
 
-    BufferPtr buffer_;
+    mutable std::mutex message_mutex_;
+    ConnectionTypeConstPtr message_;
 
     bool optional_;
 };
 
 }
 
-#endif // CONNECTOR_IN_H
+#endif // INPUT_H

@@ -46,26 +46,34 @@ public:
         return false;
     }
 
+    bool isDynamic() const;
+
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
 
+    void setLevel(int level);
+    int getLevel() const;
+
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
-    bool isBlocked() const;
-
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
+
+    std::vector<ConnectionWeakPtr> getConnections() const;
+    virtual void addConnection(ConnectionWeakPtr connection);
+    virtual void removeConnection(ConnectionWeakPtr connection);
+
+    virtual bool isConnected() const;
 
     /**
      * INTERFACE
      */
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
-    virtual bool isConnected() const = 0;
-    virtual bool tryConnect(Connectable* other_side) = 0;
+    virtual bool isConnectionPossible(Connectable* other_side) = 0;
     virtual void removeConnection(Connectable* other_side) = 0;
     virtual void validateConnections();
     virtual void connectionMovePreview(Connectable* other_side) = 0;
@@ -74,7 +82,7 @@ protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
 
 public Q_SLOTS:
-    virtual bool tryConnect(QObject* other_side);
+    virtual bool isConnectionPossible(QObject* other_side);
     virtual void removeConnection(QObject* other_side);
 
     virtual void disable();
@@ -83,9 +91,6 @@ public Q_SLOTS:
     virtual void stop();
 
     virtual void notifyMessageProcessed();
-
-protected:
-    void setBlocked(bool b);
 
 
 Q_SIGNALS:
@@ -97,7 +102,6 @@ Q_SIGNALS:
     void connectionRemoved(Connectable*);
     void connectionEnabled(bool);
     void messageProcessed(Connectable*);
-    void blocked(bool);
     void connectableError(bool error, const std::string &msg, int level);
 
     void messageSent(Connectable* source);
@@ -108,6 +112,9 @@ protected:
     Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, const std::string &type);
     virtual ~Connectable();
+
+    void setDynamic(bool dynamic);
+
     void init();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
@@ -128,13 +135,15 @@ protected:
     std::string label_;
 
     ConnectionType::ConstPtr type_;
+    std::vector<ConnectionWeakPtr> connections_;
 
     int count_;
     int seq_no_;
 
 private:
     bool enabled_;
-    bool blocked_;
+    bool dynamic_;
+    int level_;
 };
 
 }

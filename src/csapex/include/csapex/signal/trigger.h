@@ -46,8 +46,6 @@ public:
     int noTargets();
     std::vector<Slot*> getTargets() const;
 
-    void connectForcedWithoutCommand(Slot* other_side);
-
     virtual CommandPtr removeAllConnectionsCmd();
     CommandPtr removeConnectionCmd(Slot *other_side);
 
@@ -56,7 +54,7 @@ public:
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
-    virtual bool tryConnect(Connectable* other_side);
+    virtual bool isConnectionPossible(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 

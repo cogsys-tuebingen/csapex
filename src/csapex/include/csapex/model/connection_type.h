@@ -11,7 +11,20 @@ class ConnectionType
 {
 public:
     typedef std::shared_ptr<ConnectionType> Ptr;
-    typedef std::shared_ptr<const ConnectionType> ConstPtr;
+    typedef std::shared_ptr<const ConnectionType> ConstPtr;    
+
+    struct Flags
+    {
+        enum class Fields {
+            MULTI_PART = 1,
+            LAST_PART = 2
+        };
+
+        Flags();
+
+        u_int8_t data;
+    };
+
 
 public:
     static void setDefaultConnectionType(ConnectionType::Ptr type) {
@@ -59,6 +72,9 @@ protected:
 private:
     std::string name_;
     mutable int seq_no_;
+
+public:
+    mutable Flags flags;
 
 private:
     static ConnectionType::Ptr default_;

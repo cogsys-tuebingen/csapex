@@ -70,8 +70,7 @@ NodeWorker::Ptr NodeConstructor::makePrototype() const
 NodeWorker::Ptr NodeConstructor::makeNodeWorker(const UUID& uuid) const
 {
     try {
-        NodeWorker::Ptr result(new NodeWorker(type_, uuid, settings_, makeNode()));
-        return result;
+        return std::make_shared<NodeWorker>(type_, uuid, settings_, makeNode());
     } catch(const std::exception& e) {
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;
         return nullptr;

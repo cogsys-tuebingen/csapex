@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>
 
@@ -36,12 +37,12 @@ bool MoveFulcrum::doExecute()
 
 bool MoveFulcrum::doUndo()
 {
-    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from, false);
+    graph_worker_->getGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from, false);
     return true;
 }
 
 bool MoveFulcrum::doRedo()
 {
-    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
+    graph_worker_->getGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
     return doExecute();
 }

@@ -72,7 +72,7 @@ public:
     Command::Ptr clear();
 
     ConnectionPtr getConnectionWithId(int id);
-    ConnectionPtr getConnection(ConnectionPtr);
+    ConnectionPtr getConnection(Connectable* from, Connectable* to);
     int getConnectionId(ConnectionPtr);
 
     std::string makeUUIDPrefix(const std::string& name);
@@ -92,6 +92,7 @@ public:
 private:
    /*rename*/ void verify();
     void buildConnectedComponents();
+    void assignLevels();
 
 Q_SIGNALS:
     void stateChanged();

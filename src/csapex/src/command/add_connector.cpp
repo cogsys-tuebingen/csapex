@@ -6,6 +6,7 @@
 #include <csapex/msg/static_output.h>
 #include <csapex/model/connection_type.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/msg/message_factory.h>
@@ -34,17 +35,17 @@ std::string AddConnector::getDescription() const
 
 bool AddConnector::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(b_uuid);
+    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(b_uuid);
     apex_assert_hard(node_worker);
 
     if(input) {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getUUID(), "in", node_worker->getMessageInputs().size()) : c_uuid;
-        Input* in = new Input(uuid);
+        Input* in = new Input(node_worker->getInputTransition(), uuid);
         c = in;
         node_worker->registerInput(in);
     } else {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getUUID(), "out", node_worker->getMessageOutputs().size()) : c_uuid;
-        Output* out = new StaticOutput(uuid);
+        Output* out = new StaticOutput(node_worker->getOutputTransition(), uuid);
         c = out;
         node_worker->registerOutput(out);
     }
@@ -58,7 +59,7 @@ bool AddConnector::doExecute()
 
 bool AddConnector::doUndo()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(b_uuid);
+    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(b_uuid);
     apex_assert_hard(node_worker);
 
     if(input) {

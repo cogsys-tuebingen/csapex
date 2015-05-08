@@ -26,16 +26,14 @@ UUID Connectable::makeUUID(const UUID &box_uuid, const std::string& type, int su
 
 Connectable::Connectable(const UUID& uuid)
     : Unique(uuid),
-      buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
-      blocked_(false)
+      buttons_down_(0), count_(0), seq_no_(0), enabled_(false), dynamic_(false), level_(0)
 {
     init();
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, const std::string& type)
     : Unique(makeUUID(parent->getUUID(), type, sub_id)),
-      buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
-      blocked_(false)
+      buttons_down_(0), count_(0), seq_no_(0), enabled_(false), dynamic_(false), level_(0)
 {
     init();
 }
@@ -68,11 +66,11 @@ void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel leve
     Q_EMIT connectableError(error,msg,static_cast<int>(level));
 }
 
-bool Connectable::tryConnect(QObject* other_side)
+bool Connectable::isConnectionPossible(QObject* other_side)
 {
     Connectable* c = dynamic_cast<Connectable*>(other_side);
     if(c) {
-        return tryConnect(c);
+        return isConnectionPossible(c);
     }
     return false;
 }
@@ -117,6 +115,16 @@ void Connectable::setEnabled(bool enabled)
     }
 }
 
+void Connectable::setLevel(int level)
+{
+    level_ = level;
+}
+
+int Connectable::getLevel() const
+{
+    return level_;
+}
+
 bool Connectable::isEnabled() const
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
@@ -154,6 +162,16 @@ std::string Connectable::getLabel() const
     return label_;
 }
 
+bool Connectable::isDynamic() const
+{
+    return dynamic_;
+}
+
+void Connectable::setDynamic(bool dynamic)
+{
+    dynamic_ = dynamic;
+}
+
 void Connectable::setLabel(const std::string &label)
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
@@ -184,18 +202,6 @@ int Connectable::getCount() const
     return count_;
 }
 
-bool Connectable::isBlocked() const
-{
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    return blocked_;
-}
-void Connectable::setBlocked(bool b)
-{
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    blocked_ = b;
-//    Q_EMIT blocked(b);
-}
-
 int Connectable::sequenceNumber() const
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
@@ -205,7 +211,35 @@ int Connectable::sequenceNumber() const
 void Connectable::setSequenceNumber(int seq_no)
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+
     seq_no_ = seq_no;
 }
+
+void Connectable::addConnection(ConnectionWeakPtr connection)
+{
+    connections_.push_back(connection);
+}
+
+void Connectable::removeConnection(ConnectionWeakPtr connection)
+{
+    for(auto it = connections_.begin(); it != connections_.end(); ) {
+        const auto& c = *it;
+        if(c.lock() == connection.lock()) {
+            it = connections_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+std::vector<ConnectionWeakPtr> Connectable::getConnections() const
+{
+    return connections_;
+}
+
+bool Connectable::isConnected() const
+{
+    return !connections_.empty();
+}
+
 /// MOC
 #include "../../include/csapex/model/moc_connectable.cpp"

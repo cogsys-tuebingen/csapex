@@ -108,8 +108,12 @@ private:
         bool highlighted;
         bool error;
         bool disabled;
-        bool blocked_from;
-        bool blocked_to;
+        bool empty;
+        bool full_read;
+        bool established;
+        bool source_established;
+        bool sink_established;
+        bool full_unread;
         bool minimized_from;
         bool minimized_to;
         bool minimized;
@@ -120,6 +124,8 @@ private:
 
         Position start_pos;
         Position end_pos;
+
+        int level;
 
         double r;
     };

@@ -13,6 +13,15 @@ using namespace csapex;
 
 ConnectionType::Ptr ConnectionType::default_;
 
+/***
+ * MESSAGE FLAGS
+ */
+ConnectionType::Flags::Flags()
+    : data(0)
+{
+
+}
+
 ConnectionType::ConnectionType(const std::string& name)
     : name_(name), seq_no_(-1)
 {

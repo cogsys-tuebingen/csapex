@@ -23,7 +23,7 @@ class GraphIO : public QObject
     Q_OBJECT
 
 public:
-    GraphIO(Graph* graph, NodeFactory* node_factory);
+    GraphIO(GraphWorker* graph, NodeFactory* node_factory);
 
 public:
     void saveSettings(YAML::Node& yaml);
@@ -36,7 +36,7 @@ public:
     void loadConnections(const YAML::Node& doc);
 
 private:
-    Graph* graph_;
+    GraphWorker* graph_worker_;
     NodeFactory* node_factory_;
 };
 

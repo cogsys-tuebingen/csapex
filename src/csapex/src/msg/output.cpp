@@ -3,6 +3,8 @@
 
 /// COMPONENT
 #include <csapex/msg/input.h>
+#include <csapex/model/connection.h>
+#include <csapex/msg/output_transition.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
@@ -14,13 +16,15 @@
 
 using namespace csapex;
 
-Output::Output(const UUID& uuid)
-    : Connectable(uuid), force_send_message_(false)
+Output::Output(OutputTransition* transition, const UUID& uuid)
+    : Connectable(uuid), transition_(transition),
+      force_send_message_(false), state_(State::IDLE)
 {
 }
 
-Output::Output(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "out"), force_send_message_(false)
+Output::Output(OutputTransition* transition, Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "out"),  transition_(transition),
+      force_send_message_(false), state_(State::IDLE)
 {
 }
 
@@ -28,32 +32,61 @@ Output::~Output()
 {
 }
 
+OutputTransition* Output::getTransition() const
+{
+    return transition_;
+}
+
+
+void Output::setState(State s)
+{
+    state_ = s;
+}
+
+Output::State Output::getState() const
+{
+    return state_;
+}
+
 void Output::reset()
 {
     clear();
 
-    setBlocked(false);
     setSequenceNumber(0);
 }
 
-int Output::noTargets()
+int Output::countConnections()
 {
-    return targets_.size();
+    return connections_.size();
 }
 
-std::vector<Input*> Output::getTargets() const
+std::vector<ConnectionWeakPtr> Output::getConnections() const
 {
-    return targets_;
+    return connections_;
+}
+
+
+void Output::addConnection(ConnectionWeakPtr connection)
+{
+    transition_->addConnection(connection);
+    Connectable::addConnection(connection);
+}
+
+void Output::removeConnection(ConnectionWeakPtr connection)
+{
+    transition_->removeConnection(connection);
+    Connectable::removeConnection(connection);
 }
 
 void Output::removeConnection(Connectable* other_side)
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
-        if(*i == other_side) {
+    for(std::vector<ConnectionWeakPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+        ConnectionPtr c = i->lock();
+        if(c->to() == other_side) {
             other_side->removeConnection(this);
 
-            i = targets_.erase(i);
+            i = connections_.erase(i);
 
             Q_EMIT connectionRemoved(this);
             return;
@@ -64,8 +97,8 @@ void Output::removeConnection(Connectable* other_side)
     }
 }
 
-Command::Ptr Output::removeConnectionCmd(Input* other_side) {
-    Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
+Command::Ptr Output::removeConnectionCmd(Connection* connection) {
+    Command::Ptr removeThis(new command::DeleteConnection(this, connection->to()));
 
     return removeThis;
 }
@@ -75,8 +108,8 @@ Command::Ptr Output::removeAllConnectionsCmd()
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
-    foreach(Input* target, targets_) {
-        Command::Ptr removeThis(new command::DeleteConnection(this, target));
+    for(ConnectionWeakPtr connection : connections_) {
+        Command::Ptr removeThis(new command::DeleteConnection(this, connection.lock()->to()));
         removeAll->add(removeThis);
     }
 
@@ -86,9 +119,9 @@ Command::Ptr Output::removeAllConnectionsCmd()
 void Output::removeAllConnectionsNotUndoable()
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
-        (*i)->removeConnection(this);
-        i = targets_.erase(i);
+    for(std::vector<ConnectionWeakPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+        i->lock()->to()->removeConnection(this);
+        i = connections_.erase(i);
     }
 
     Q_EMIT disconnected(this);
@@ -99,17 +132,7 @@ void Output::disable()
     Connectable::disable();
 }
 
-void Output::connectForcedWithoutCommand(Input *other_side)
-{
-    tryConnect(other_side);
-}
-
-bool Output::tryConnect(Connectable *other_side)
-{
-    return connect(other_side);
-}
-
-bool Output::connect(Connectable *other_side)
+bool Output::isConnectionPossible(Connectable *other_side)
 {
     if(!other_side->canInput()) {
         std::cerr << "cannot connect, other side can't input" << std::endl;
@@ -120,29 +143,14 @@ bool Output::connect(Connectable *other_side)
         return false;
     }
 
-    Input* input = dynamic_cast<Input*>(other_side);
-
-    if(!input->acknowledgeConnection(this)) {
-        std::cerr << "cannot connect, other side doesn't acknowledge" << std::endl;
-        return false;
-    }
-
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    apex_assert_hard(input);
-    targets_.push_back(input);
-
-    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
-
-    validateConnections();
-
     return true;
 }
 
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    foreach(Input* input, targets_) {
-        if(!input->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+    foreach(ConnectionWeakPtr connection, connections_) {
+        if(!connection.lock()->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
@@ -151,33 +159,54 @@ bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 
 bool Output::isConnected() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    return targets_.size() > 0 || force_send_message_;
+    if(force_send_message_) {
+        return true;
+    }
+
+    for(const auto& c : connections_) {
+        auto connection = c.lock();
+        if(connection->to()->isEnabled() && connection->isEstablished()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Output::isForced() const
+{
+    if(!force_send_message_) {
+        return false;
+    }
+    for(const auto& c : connections_) {
+        auto connection = c.lock();
+        if(connection->to()->isEnabled() && connection->isEstablished()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    foreach(Input* input, targets_) {
-        Q_EMIT(connectionInProgress(input, other_side));
+    for(ConnectionWeakPtr connection : connections_) {
+        Q_EMIT(connectionInProgress(connection.lock()->to(), other_side));
     }
 }
 
 void Output::validateConnections()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    foreach(Input* target, targets_) {
-        target->validateConnections();
+    for(ConnectionWeakPtr connection : connections_) {
+        connection.lock()->to()->validateConnections();
     }
 }
 
 bool Output::canSendMessages() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    foreach(Input* input, targets_) {
-        bool blocked = /*input->isEnabled() && */input->isBlocked();
-        if(blocked) {
-            return false;
+    for(ConnectionWeakPtr connection : connections_) {
+        ConnectionPtr c = connection.lock();
+        if(!c) {
+            continue;
         }
     }
     return true;

@@ -8,7 +8,6 @@
 #include <csapex/command/move_connection.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
-#include <csapex/msg/dynamic_output.h>
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/designer_view.h>
@@ -31,12 +30,11 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
     if(adaptee_) {
         createToolTip();
 
-        QObject::connect(adaptee, SIGNAL(blocked(bool)), this, SLOT(setBlocked(bool)));
         QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
         QObject::connect(adaptee, SIGNAL(connectableError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
         QObject::connect(adaptee, SIGNAL(enabled(bool)), this, SLOT(setEnabledFlag(bool)));
 
-        if(dynamic_cast<DynamicOutput*>(adaptee)) {
+        if(adaptee_->isDynamic()) {
             setProperty("dynamic", true);
         }
 
@@ -207,11 +205,6 @@ bool Port::isFlipped() const
     return flipped_;
 }
 
-void Port::setBlocked(bool blocked)
-{
-    setPortProperty("blocked", blocked);
-}
-
 void Port::setEnabledFlag(bool enabled)
 {
     setPortProperty("enabled", enabled);
@@ -232,7 +225,6 @@ void Port::createToolTip()
     tooltip << ", Type: " << adaptee_->getType()->name();
     tooltip << ", Messages: " << adaptee_->getCount();
     tooltip << ", Enabled: " << adaptee_->isEnabled();
-    tooltip << ", Blocked: " << adaptee_->isBlocked();
     tooltip << ", #: " << adaptee_->sequenceNumber();
     setToolTip(tooltip.str().c_str());
 }

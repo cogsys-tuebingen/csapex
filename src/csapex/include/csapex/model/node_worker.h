@@ -42,9 +42,21 @@ public:
 
     static const double DEFAULT_FREQUENCY;
 
+    enum class State {
+        IDLE,
+        ENABLED,
+        FIRED,
+        PROCESSING,
+        WAITING_FOR_OUTPUTS,
+        WAITING_FOR_RESET
+    };
+
 public:
     NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);
     ~NodeWorker();
+
+    InputTransition* getInputTransition() const;
+    OutputTransition* getOutputTransition() const;
 
     void setNodeState(NodeStatePtr memento);
     NodeStatePtr getNodeState();
@@ -55,10 +67,13 @@ public:
     void waitUntilFinished();
     void reset();
 
+    void triggerCheckTransitions();
+    void triggerProcess();
     void triggerSwitchThreadRequest(QThread* thread, int id);
     void triggerPanic();
 
     Node* getNode() const;
+    State getState() const;
 
     std::string getType() const;
 
@@ -74,7 +89,7 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
+    Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
     Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
     Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
     Trigger* addTrigger(const std::string& label);
@@ -111,6 +126,7 @@ public:
     std::vector<Input*> getParameterInputs() const;
     std::vector<Output*> getParameterOutputs() const;
 
+    bool canProcess();
     bool canReceive();
     bool areAllInputsAvailable();
 
@@ -125,11 +141,17 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    int getLevel() const;
+    void setLevel(int level);
+
     std::vector<TimerPtr> extractLatestTimers();
 
 public Q_SLOTS:
     void messageArrived(Connectable* source);
     void processMessages();
+
+    void prepareForNextProcess();
+    void checkTransitions();
 
     void parameterMessageArrived(Connectable* source);
 
@@ -151,13 +173,13 @@ public Q_SLOTS:
     void pause(bool pause);
     void killExecution();
 
-    bool canSendMessages();
-    void trySendMessages();
-    void resetInputs();
+//    bool canSendMessages();
+    void sendMessages();
+    void notifyMessagesProcessed();
 
 
 Q_SIGNALS:
-    void messageProcessed();
+    void messagesProcessed();
     void ticked();
 
     void enabled(bool);
@@ -186,10 +208,12 @@ Q_SIGNALS:
     void stopProfiling(NodeWorker* box);
 
     void panic();
+    void processRequested();
+    void checkTransitionsRequested();
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
-    void checkIfOutputIsReady(Connectable*);
+    void outputConnectionChanged(Connectable*);
     void checkIfInputsCanBeProcessed();
 
 private:
@@ -206,13 +230,13 @@ private:
     void publishParameters();
     void publishParameter(param::Parameter *p);
 
-    void processInputs();
-
     void assertNotInGuiThread();
 
     void triggerNodeStateChanged();
 
     void finishTimer(TimerPtr t);
+
+    void setState(State state);
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
@@ -224,8 +248,11 @@ private:
     NodeStatePtr node_state_;
     NodeModifierPtr modifier_;
 
+    InputTransitionPtr transition_in_;
+    OutputTransitionPtr transition_out_;
 
     bool is_setup_;
+    State state_;
 
     std::vector<Input*> inputs_;
     std::vector<Output*> outputs_;
@@ -254,9 +281,10 @@ private:
 
     bool source_;
     bool sink_;
+    int level_;
 
-    std::recursive_mutex sync;
-    bool messages_waiting_to_be_sent;
+    mutable std::recursive_mutex sync;
+    mutable std::recursive_mutex state_mutex_;
 
     std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;
@@ -264,8 +292,8 @@ private:
     bool thread_initialized_;
     bool paused_;
     bool stop_;
-    std::recursive_mutex stop_mutex_;
-    std::recursive_mutex pause_mutex_;
+    mutable std::recursive_mutex stop_mutex_;
+    mutable std::recursive_mutex pause_mutex_;
     std::condition_variable_any continue_;
 
     std::atomic<bool> profiling_;

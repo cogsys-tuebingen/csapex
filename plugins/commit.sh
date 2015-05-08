@@ -13,8 +13,10 @@ fi
 for f in *; do
   if [[ -d $f ]]; then
     cd $f
-    echo "${bld}${blu}committing $f${rst}"
-    git commit -am "$msg"
+    if [[ -d .git ]]; then
+      echo "${bld}${blu}committing $f${rst}"
+      git commit -am "$msg"
+    fi
     cd - 1> /dev/null
   fi
 done

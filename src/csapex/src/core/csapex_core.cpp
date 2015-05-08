@@ -301,7 +301,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     YAML::Node node_map(YAML::NodeType::Map);
 
-    GraphIO graphio(graph_worker_->getGraph(), node_factory_);
+    GraphIO graphio(graph_worker_.get(),  node_factory_);
 
     Q_EMIT saveSettingsRequest(node_map);
 
@@ -334,9 +334,10 @@ void CsApexCore::load(const std::string &file)
 
     apex_assert_hard(graph_worker_->getGraph()->countNodes() == 0);
 
+    bool paused = graph_worker_->isPaused();
     graph_worker_->setPause(true);
 
-    GraphIO graphio(graph_worker_->getGraph(), node_factory_);
+    GraphIO graphio(graph_worker_.get(), node_factory_);
 
     {
         std::ifstream ifs(file.c_str());
@@ -383,7 +384,7 @@ void CsApexCore::load(const std::string &file)
     cmd_dispatch->setClean();
     cmd_dispatch->resetDirtyPoint();
 
-    graph_worker_->setPause(false);
+    graph_worker_->setPause(paused);
 }
 /// MOC
 #include "../../include/csapex/core/moc_csapex_core.cpp"

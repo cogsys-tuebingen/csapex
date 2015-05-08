@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>
 
@@ -33,13 +34,13 @@ std::string AddFulcrum::getDescription() const
 
 bool AddFulcrum::doExecute()
 {
-    graph_->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos, type);
+    graph_worker_->getGraph()->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos, type);
     return true;
 }
 
 bool AddFulcrum::doUndo()
 {
-    graph_->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
+    graph_worker_->getGraph()->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
     return true;
 }
 
