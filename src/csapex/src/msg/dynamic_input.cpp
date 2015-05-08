@@ -4,13 +4,13 @@
 using namespace csapex;
 
 DynamicInput::DynamicInput(InputTransition *transition, const UUID &uuid)
-    : Input(transition, uuid), correspondent_(nullptr), current_message_length_(0)
+    : Input(transition, uuid), correspondent_(nullptr)
 {
     setDynamic(true);
 }
 
 DynamicInput::DynamicInput(InputTransition *transition, Unique *parent, int sub_id)
-    : Input(transition, parent, sub_id), correspondent_(nullptr), current_message_length_(0)
+    : Input(transition, parent, sub_id), correspondent_(nullptr)
 {
     setDynamic(true);
 }
@@ -18,14 +18,6 @@ DynamicInput::DynamicInput(InputTransition *transition, Unique *parent, int sub_
 void DynamicInput::setCorrespondent(DynamicOutput *output)
 {
     correspondent_ = output;
-}
-
-void DynamicInput::setCurrentMessageLength(std::size_t size, int sequence_number)
-{
-    std::unique_lock<std::mutex> lock(message_mutex_);
-    current_message_length_ = size;
-    msg_parts_.clear();
-    setSequenceNumber(sequence_number);
 }
 
 std::vector<ConnectionTypeConstPtr> DynamicInput::getMessageParts() const
@@ -41,15 +33,18 @@ bool DynamicInput::inputMessagePart(const ConnectionTypeConstPtr &msg)
     std::unique_lock<std::mutex> lock(message_mutex_);
     msg_parts_.push_back(msg);
 
-    return msg_parts_.size() == current_message_length_;
+    composed_msg_.clear();
+
+    return msg->flags.data & (int) ConnectionType::Flags::Fields::LAST_PART;
 }
 
 void DynamicInput::composeMessage()
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
-    apex_assert_hard(msg_parts_.size() == current_message_length_);
     composed_msg_ = msg_parts_;
     count_++;
+
+    msg_parts_.clear();
 
     Q_EMIT messageArrived(this);
 }
@@ -63,7 +58,7 @@ ConnectionTypeConstPtr DynamicInput::getMessage() const
 bool DynamicInput::hasReceived() const
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
-    return isConnected() && composed_msg_.size() == current_message_length_;
+    return isConnected() && !composed_msg_.empty();
 }
 
 bool DynamicInput::hasMessage() const
@@ -73,5 +68,5 @@ bool DynamicInput::hasMessage() const
     }
 
     std::unique_lock<std::mutex> lock(message_mutex_);
-    return !msg_parts_.empty();
+    return !composed_msg_.empty();
 }

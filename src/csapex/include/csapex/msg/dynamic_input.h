@@ -30,12 +30,9 @@ public:
 
     virtual ConnectionTypeConstPtr getMessage() const override;
 
-    void setCurrentMessageLength(std::size_t size, int sequence_number);
-
 private:
     DynamicOutput* correspondent_;
 
-    std::size_t current_message_length_;
     std::vector<ConnectionTypeConstPtr> msg_parts_;
     std::vector<ConnectionTypeConstPtr> composed_msg_;
 };

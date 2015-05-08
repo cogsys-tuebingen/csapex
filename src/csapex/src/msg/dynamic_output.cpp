@@ -71,7 +71,7 @@ void DynamicOutput::commitMessages()
 
 
     for(DynamicInput* di : correspondents_) {
-        di->setCurrentMessageLength(committed_messages_.size(), seq_no_);
+//        di->setCurrentMessageLength(committed_messages_.size(), seq_no_);
     }
     current_message_ = committed_messages_.front();
     committed_messages_.pop_front();
