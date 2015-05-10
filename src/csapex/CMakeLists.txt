@@ -382,3 +382,19 @@ install(TARGETS csapex_plugin_base
 
 install(TARGETS csapex_node
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+#
+# ANALYSIS TOOLS
+#
+
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+
+set(directories "")
+foreach(dir ${dirs})
+  #message(STATUS "dir='${dir}'")
+  set(directories "-I${dir} ${directories}")
+endforeach()
+
+add_custom_command(OUTPUT includes.txt
+                   COMMAND eval "echo ${directories} >includes.txt")
+add_custom_target(generate_includes ALL DEPENDS includes.txt)
