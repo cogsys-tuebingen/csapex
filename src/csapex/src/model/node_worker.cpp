@@ -1392,8 +1392,8 @@ void NodeWorker::tick()
                         has_msg |= msg::hasMessage(out);
                     }
 
+                    apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
                     if(has_msg) {
-                        apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
                         transition_out_->setConnectionsReadyToReceive();
 
                         Q_EMIT messagesWaitingToBeSent(true);
@@ -1401,6 +1401,7 @@ void NodeWorker::tick()
                         apex_assert_hard(transition_out_->canSendMessages());
                         sendMessages();
                     } else {
+                        setState(State::WAITING_FOR_RESET);
                         setState(state);
                     }
 

@@ -29,10 +29,6 @@ public:
 
     void drawBackground(QPainter *painter, const QRectF &rect);
     void drawForeground(QPainter *painter, const QRectF &rect);
-    void drawItems(QPainter *painter, int numItems,
-                   QGraphicsItem *items[],
-                   const QStyleOptionGraphicsItem options[],
-                   QWidget *widget = 0);
 
     void mousePressEvent(QGraphicsSceneMouseEvent* e);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* e);

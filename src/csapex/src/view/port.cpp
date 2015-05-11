@@ -52,7 +52,6 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
     setMinimizedSize(minimized_);
 
     setEnabled(true);
-    setMouseTracking(true);
 }
 
 Port::~Port()

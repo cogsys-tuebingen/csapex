@@ -32,7 +32,7 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
-#define DEBUG_DRAWINGS_PER_SECOND 1
+#define DEBUG_DRAWINGS_PER_SECOND 0
 
 using namespace csapex;
 
@@ -97,6 +97,8 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
 
     connector_radius_ = 7;
 
+    setBackgroundBrush(QBrush(Qt::white));
+
     QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
     QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
 }
@@ -149,8 +151,6 @@ void DesignerScene::setScale(double scale)
 }
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
-    setBackgroundBrush(QBrush(Qt::white));
-
     QGraphicsScene::drawBackground(painter, rect);
 
     if(isEmpty()) {
@@ -381,13 +381,6 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 #endif
 }
 
-void DesignerScene::drawItems(QPainter *painter, int numItems,
-                              QGraphicsItem *items[],
-                              const QStyleOptionGraphicsItem options[],
-                              QWidget *widget)
-{
-    QGraphicsScene::drawItems(painter, numItems, items, options, widget);
-}
 
 void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {

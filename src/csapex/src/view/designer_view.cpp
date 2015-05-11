@@ -94,17 +94,8 @@ DesignerView::~DesignerView()
 
 void DesignerView::paintEvent(QPaintEvent *e)
 {
-//    static qint64 last = QDateTime::currentMSecsSinceEpoch();
-//    qint64 time = QDateTime::currentMSecsSinceEpoch();
+    QGraphicsView::paintEvent(e);
 
-//    qint64 delta = time - last;
-//    std::cerr << "dt: " << delta << std::endl;
-//    if(delta > 100) {
-        QGraphicsView::paintEvent(e);
-
-//        last = time;
-
-//    }
     Q_EMIT viewChanged();
 }
 

@@ -46,18 +46,8 @@ void Designer::setup()
     ui->setupUi(this);
 
     ui->horizontalLayout->addWidget(designer_view_);
-    designer_view_->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::DoubleBuffer)));
-    designer_view_->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-
-
-    designer_view_->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
     QObject::connect(designer_view_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
-
-//    designer_view_->setSceneRect(0, 0, 1000, 1000);
-
-    //    designer_board = board;
-    //    ui->scrollArea->setWidget(designer_board);
 
     if(settings_.knows("grid")) {
         enableGrid(settings_.get<bool>("grid"));
