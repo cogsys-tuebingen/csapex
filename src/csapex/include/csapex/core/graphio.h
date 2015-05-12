@@ -35,6 +35,10 @@ public:
     void saveConnections(YAML::Node &yaml);
     void loadConnections(const YAML::Node& doc);
 
+protected:
+    void serializeNode(YAML::Node& doc, NodeWorker *node_worker);
+    void deserializeNode(const YAML::Node& doc, NodeWorker* node_worker);
+
 private:
     GraphWorker* graph_worker_;
     NodeFactory* node_factory_;

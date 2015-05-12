@@ -16,10 +16,10 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/connection.h>
 #include <csapex/utility/yaml_node_builder.h>
+#include <csapex/core/serialization.h>
 
 /// SYSTEM
 #include <QMessageBox>
-
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
@@ -52,7 +52,7 @@ void GraphIO::saveNodes(YAML::Node &yaml)
     foreach(NodeWorker* node, graph_worker_->getGraph()->getAllNodeWorkers()) {
         try {
             YAML::Node yaml_node;
-            node->getNodeState()->writeYaml(yaml_node);
+            serializeNode(yaml_node, node);
             yaml["nodes"].push_back(yaml_node);
         } catch(const std::exception& e) {
             std::cerr << "cannot save state for node " << node->getUUID() << ": " << e.what() << std::endl;
@@ -66,24 +66,16 @@ void GraphIO::loadNode(const YAML::Node& doc)
     std::string type = doc["type"].as<std::string>();
     UUID uuid = doc["uuid"].as<UUID>();
 
-    int x = doc["pos"][0].as<int>();
-    int y = doc["pos"][1].as<int>();
-
     NodeWorker::Ptr node_worker = node_factory_->makeNode(type, uuid);
     if(!node_worker) {
         return;
     }
 
     try {
-        NodeState::Ptr s = node_worker->getNodeState();
-        s->readYaml(doc);
-        node_worker->setNodeState(s);
+        deserializeNode(doc, node_worker.get());
 
     } catch(const std::exception& e) {
         std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
-    }
-    if(x != 0 || y != 0) {
-        node_worker->getNodeState()->setPos(QPoint(x,y));
     }
     node_worker->pause(graph_worker_->isPaused());
     graph_worker_->getGraph()->addNode(node_worker);
@@ -287,5 +279,32 @@ void GraphIO::loadConnections(const YAML::Node &doc)
         }
     }
 }
+
+void GraphIO::serializeNode(YAML::Node& doc, NodeWorker* node_worker)
+{
+    node_worker->getNodeState()->writeYaml(doc);
+
+    // hook for nodes to serialize
+    Serialization::instance().serialize(*node_worker->getNode(), doc);
+}
+
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
+{
+    NodeState::Ptr s = node_worker->getNodeState();
+    s->readYaml(doc);
+
+    int x = doc["pos"][0].as<int>();
+    int y = doc["pos"][1].as<int>();
+
+    if(x != 0 || y != 0) {
+        s->setPos(QPoint(x,y));
+    }
+    node_worker->setNodeState(s);
+
+    // hook for nodes to deserialize
+    Serialization::instance().deserialize(*node_worker->getNode(), doc);
+}
+
+
 /// MOC
 #include "../../include/csapex/core/moc_graphio.cpp"

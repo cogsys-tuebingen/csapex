@@ -224,6 +224,7 @@ set(SRC_PLUGIN
     src/core/graphio.cpp
     src/core/settings.cpp
     src/core/thread_pool.cpp
+    src/core/serialization.cpp
 
     src/signal/signal.cpp
 
