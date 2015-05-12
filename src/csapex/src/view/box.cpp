@@ -523,7 +523,9 @@ void NodeBox::getInformation()
 
 void NodeBox::refreshStylesheet()
 {
-    setStyleSheet(styleSheet());
+    ui->boxframe->style()->unpolish(ui->boxframe);
+    ui->boxframe->style()->polish(ui->boxframe);
+    ui->boxframe->update();
 }
 
 void NodeBox::showProfiling(bool show)
