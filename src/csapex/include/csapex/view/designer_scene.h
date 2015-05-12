@@ -37,6 +37,7 @@ public:
     int getHighlightedConnectionId() const;
     bool isEmpty() const;
 
+    void setSelection(const NodeBox* box);
     std::vector<NodeBox*> getSelectedBoxes() const;
 
 public Q_SLOTS:

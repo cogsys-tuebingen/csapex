@@ -953,6 +953,18 @@ bool DesignerScene::showConnectionContextMenu()
     return true;
 }
 
+void DesignerScene::setSelection(const NodeBox *box)
+{
+    clearSelection();
+
+    for(QGraphicsItem* item : items()) {
+        MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
+        if(proxy->getBox() == box) {
+            proxy->setSelected(true);
+        }
+    }
+}
+
 std::vector<NodeBox*> DesignerScene::getSelectedBoxes() const
 {
     std::vector<NodeBox*> r;

@@ -529,7 +529,11 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 {
     auto selected_boxes = scene_->getSelectedBoxes();
 
-    if(selected_boxes.empty()) {
+    if(std::find(selected_boxes.begin(), selected_boxes.end(), box) == selected_boxes.end()) {
+        scene_->setSelection(box);
+        selected_boxes = scene_->getSelectedBoxes();
+
+    } else if(selected_boxes.empty()) {
         selected_boxes.push_back(box);
     }
 
