@@ -15,7 +15,7 @@ using namespace csapex;
 
 
 CompleteLineEdit::CompleteLineEdit(QWidget *parent)
-    : QLineEdit(parent)
+    : QLineEdit(parent), was_hidden(false)
 {
     line_height = 20;
 
@@ -31,7 +31,16 @@ CompleteLineEdit::CompleteLineEdit(QWidget *parent)
 
 
 void CompleteLineEdit::focusOutEvent(QFocusEvent */*e*/) {
-//    Q_EMIT editingFinished();
+    list_view->hide();
+    was_hidden = true;
+}
+
+void CompleteLineEdit::focusInEvent(QFocusEvent */*e*/) {
+    // only show the view, if it has been visible before and then has been hidden!
+    if(was_hidden) {
+        list_view->show();
+        update();
+    }
 }
 
 void CompleteLineEdit::keyPressEvent(QKeyEvent *e) {
@@ -129,6 +138,7 @@ void BoxDialog::makeUI()
     setWindowTitle("Create Node");
 
     setModal(true);
+    setWindowFlags(Qt::WindowStaysOnTopHint);
 
     QVBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);

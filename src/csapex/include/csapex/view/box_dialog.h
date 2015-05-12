@@ -30,10 +30,12 @@ public Q_SLOTS:
 protected:
     virtual void keyPressEvent(QKeyEvent *e);
     virtual void focusOutEvent(QFocusEvent *e);
+    virtual void focusInEvent(QFocusEvent* e);
 
 private:
     QListView *list_view;
 
+    bool was_hidden;
     int line_height;
 };
 
