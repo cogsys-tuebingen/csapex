@@ -637,7 +637,7 @@ void NodeWorker::processMessages()
 
         try {
             //            node_->aerr << "processing" << std::endl;
-            node_->process();
+            node_->process(*node_);
 
             if(trigger_process_done_->isConnected()) {
                 t->step("trigger process done");

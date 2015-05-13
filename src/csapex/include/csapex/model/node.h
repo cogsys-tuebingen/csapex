@@ -25,7 +25,8 @@ public:
 public:
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
     virtual void setupParameters(Parameterizable& parameters);
-    virtual void process() = 0;
+
+    virtual void process(csapex::Parameterizable& parameters);
 
     virtual bool canTick();
     virtual void tick();
@@ -33,6 +34,9 @@ public:
     virtual void abort();
 
     virtual void stateChanged();
+
+protected:
+    virtual void process(); /*deprecated*/
 
 public:
     StreamRelay adebug;

@@ -61,8 +61,15 @@ void Node::stateChanged()
 
 }
 
+void Node::process(csapex::Parameterizable& parameters)
+{
+    // default to deprecated style
+    process();
+}
+
 void Node::process()
 {
+    // default: do nothing, clients overwrite this
 }
 
 bool Node::canTick()
