@@ -34,7 +34,9 @@ void MessageRendererManager::shutdown()
 
 void MessageRendererManager::loadPlugins()
 {
-    manager_->load(plugin_locator_.get());
+    if(!manager_->pluginsLoaded()) {
+        manager_->load(plugin_locator_.get());
+    }
 
     renderers.clear();
 
@@ -52,7 +54,7 @@ void MessageRendererManager::loadPlugins()
 
 MessageRendererPtr MessageRendererManager::createMessageRenderer(const ConnectionTypeConstPtr& message)
 {
-    if(!manager_->pluginsLoaded()) {
+    if(!manager_->pluginsLoaded() || renderers.empty()) {
         loadPlugins();
     }
     if(renderers.empty()) {

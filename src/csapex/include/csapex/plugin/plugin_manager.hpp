@@ -11,6 +11,7 @@
 #include <class_loader/class_loader.h>
 #include <set>
 #include <tinyxml.h>
+#include <mutex>
 
 namespace csapex
 {
@@ -223,6 +224,23 @@ struct PluginManagerGroup
     };
 };
 
+class PluginManagerLocker
+{
+public:
+    static std::mutex& getMutex()
+    {
+        static PluginManagerLocker instance;
+        return instance.mutex;
+    }
+
+private:
+    PluginManagerLocker()
+    {}
+
+private:
+    std::mutex mutex;
+};
+
 template <class M>
 class PluginManager
 {
@@ -251,10 +269,13 @@ public:
     }
 
     virtual bool pluginsLoaded() const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->plugins_loaded_;
     }
 
     virtual void load(csapex::PluginLocator* locator) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
+
         locator->unload_library_request.connect(PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::unload, this, std::placeholders::_1), boost::signals2::at_front);
         locator->reload_library_request.connect(-PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::reload, this, std::placeholders::_1), boost::signals2::at_back);
 
@@ -262,25 +283,31 @@ public:
     }
 
     void unload(const std::string& library) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         instance->unload(library);
     }
 
     void reload(const std::string& library) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         instance->reload(library);
     }
 
     const Constructors& availableClasses() const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes;
     }
     const Constructor& availableClasses(unsigned index) const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         typename Constructors::iterator it = instance->available_classes.begin();
         std::advance(it, index);
         return it->second;
     }
     const Constructor& availableClasses(const std::string& key) const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes[key];
     }
     Constructor& availableClasses(const std::string& key) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes[key];
     }
 
