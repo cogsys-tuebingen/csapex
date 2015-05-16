@@ -1516,11 +1516,13 @@ void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level
 {
     node_->aerr << msg << std::endl;
 
-    if(error && level == ErrorState::ErrorLevel::ERROR) {
-        setIOError(true);
-    } else {
-        setIOError(false);
-    }
+    errorHappened(error);
+
+//    if(error && level == ErrorState::ErrorLevel::ERROR) {
+//        setIOError(true);
+//    } else {
+//        setIOError(false);
+//    }
 }
 
 /// MOC

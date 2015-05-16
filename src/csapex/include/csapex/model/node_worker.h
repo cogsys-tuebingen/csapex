@@ -197,6 +197,7 @@ Q_SIGNALS:
 
     void nodeStateChanged();
     void threadChanged();
+    void errorHappened(bool error);
 
     void threadSwitchRequested(QThread*, int);
     void tickRequested();

@@ -138,6 +138,7 @@ void NodeBox::construct()
 
     QObject::connect(worker.get(), SIGNAL(threadChanged()), this, SLOT(updateThreadInformation()));
 
+    QObject::connect(worker.get(), SIGNAL(errorHappened(bool)), this, SLOT(updateVisuals()));
 
 
     Q_FOREACH(Input* input, worker->getMessageInputs()) {
