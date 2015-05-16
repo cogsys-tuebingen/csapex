@@ -284,7 +284,7 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
     if(e->button() == Qt::MiddleButton) {
         dispatcher_->execute(adaptee_->removeAllConnectionsCmd());
     } else if(e->button() == Qt::RightButton) {
-        dispatcher_->execute(adaptee_->removeAllConnectionsCmd());
+//        dispatcher_->execute(adaptee_->removeAllConnectionsCmd());
     }
 
     e->accept();
