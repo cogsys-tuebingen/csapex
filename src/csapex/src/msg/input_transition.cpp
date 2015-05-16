@@ -52,7 +52,7 @@ void InputTransition::connectionAdded(Connection *connection)
     });
 
     one_input_is_dynamic_ = false;
-    for(Input* i : node_->getMessageInputs()) {
+    for(Input* i : node_->getAllInputs()) {
         if(i->isDynamic()) {
             one_input_is_dynamic_ = true;
             break;
@@ -148,7 +148,7 @@ void InputTransition::fire()
     ConnectionTypeConstPtr dynamic_message_part;
     ConnectionPtr dynamic_connection;
 
-    for(Input* input : node_->getMessageInputs()) {
+    for(Input* input : node_->getAllInputs()) {
         if(input->isDynamic() && input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
@@ -181,7 +181,7 @@ void InputTransition::fire()
 
     //    std::cerr << "fire " <<  node_->getUUID() << std::endl;
 
-    for(Input* input : node_->getMessageInputs()) {
+    for(Input* input : node_->getAllInputs()) {
         //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
 
         if(input->isConnected()) {

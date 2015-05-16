@@ -139,13 +139,13 @@ bool Graph::addConnection(Connection::Ptr connection)
 
             int highest_seq_no = -1;
             // search all parents of the target for the highest seq no
-            for(Input* input :  n_to->getMessageInputs()) {
+            for(Input* input :  n_to->getAllInputs()) {
                 if(!input->isConnected()) {
                     continue;
                 }
                 NodeWorker* ni = findNodeWorkerForConnector(input->getSource()->getUUID());
 
-                for(Output* output :  ni->getMessageOutputs()) {
+                for(Output* output :  ni->getAllOutputs()) {
                     if(output->sequenceNumber() > highest_seq_no) {
                         highest_seq_no = output->sequenceNumber();
                     }
@@ -153,7 +153,7 @@ bool Graph::addConnection(Connection::Ptr connection)
             }
             if(highest_seq_no != -1) {
                 //                std::cerr << "setting the sequence numbers:\n";
-                for(Input* input :  n_to->getMessageInputs()) {
+                for(Input* input :  n_to->getAllInputs()) {
                     input->setSequenceNumber(highest_seq_no);
                 }
             }
@@ -167,10 +167,10 @@ bool Graph::addConnection(Connection::Ptr connection)
             //            std::cerr << "synchronize components" << std::endl;
             for(NodeWorker::Ptr n :  nodes_) {
                 if(node_component_[n.get()] == node_component_[n_to]) {
-                    for(Output* output :  n->getMessageOutputs()) {
+                    for(Output* output :  n->getAllOutputs()) {
                         output->setSequenceNumber(seq_no);
                     }
-                    for(Input* input :  n->getMessageInputs()) {
+                    for(Input* input :  n->getAllInputs()) {
                         input->setSequenceNumber(seq_no);
                     }
                 }
@@ -323,7 +323,7 @@ void Graph::assignLevels()
         int max_dynamic_level = NO_LEVEL;
         bool has_dynamic_parent_output = false;
         bool has_dynamic_input = false;
-        for(const auto& input : current->getMessageInputs()) {
+        for(const auto& input : current->getAllInputs()) {
             if(input->isDynamic()) {
                 has_dynamic_input = true;
             }
@@ -368,7 +368,7 @@ void Graph::assignLevels()
     for(NodeWorker::Ptr node :  nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(Output* o : node->getMessageOutputs()) {
+        for(Output* o : node->getAllOutputs()) {
             if(o->isDynamic()) {
                 DynamicOutput* dout = dynamic_cast<DynamicOutput*>(o);
                 dout->clearCorrespondents();
@@ -388,7 +388,7 @@ void Graph::assignLevels()
             Q.pop_front();
             visited.insert(current);
 
-            for(Input* i : current->getMessageInputs()) {
+            for(Input* i : current->getAllInputs()) {
                 if(i->isConnected()) {
                     ConnectionPtr connection = i->getConnections().front().lock();
                     Output* out = dynamic_cast<Output*>(connection->from());
@@ -410,7 +410,7 @@ void Graph::assignLevels()
         }
 
         if(correspondent) {
-            for(Input* i : node->getMessageInputs()) {
+            for(Input* i : node->getAllInputs()) {
                 if(i->isDynamic()) {
                     DynamicInput* di = dynamic_cast<DynamicInput*>(i);
                     di->setCorrespondent(correspondent);

@@ -52,7 +52,7 @@ bool OutputTransition::canSendMessages() const
     if(!outputs_done_) {
         return false;
     }
-    for(Output* output : node_->getMessageOutputs()) {
+    for(Output* output : node_->getAllOutputs()) {
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() == Output::State::ACTIVE) {
                 return false;
@@ -70,7 +70,7 @@ bool OutputTransition::canSendMessages() const
 
 bool OutputTransition::isSink() const
 {
-    for(Output* output : node_->getMessageOutputs()) {
+    for(Output* output : node_->getAllOutputs()) {
         if(output->isConnected()) {
             return false;
         }
@@ -90,7 +90,7 @@ void OutputTransition::sendMessages()
     bool has_multipart = false;
     bool multipart_are_done = true;
 
-    for(Input* in : node_->getMessageInputs()) {
+    for(Input* in : node_->getAllInputs()) {
         for(auto& connection : in->getConnections()) {
             ConnectionPtr c = connection.lock();
             int f = c->getMessage()->flags.data;
@@ -103,7 +103,7 @@ void OutputTransition::sendMessages()
         }
     }
 
-    for(Output* out : node_->getMessageOutputs()) {
+    for(Output* out : node_->getAllOutputs()) {
         if(out->isConnected()) {
             out->commitMessages();
 
@@ -167,7 +167,7 @@ void OutputTransition::updateOutputs()
 
     apex_assert_hard(node_->getState() == NodeWorker::State::WAITING_FOR_OUTPUTS);
 
-    for(Output* out : node_->getMessageOutputs()) {
+    for(Output* out : node_->getAllOutputs()) {
         out->nextMessage();
     }
     if(areOutputsIdle()) {
@@ -192,7 +192,7 @@ void OutputTransition::updateOutputs()
 bool OutputTransition::areOutputsIdle() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(Output* out : node_->getMessageOutputs()) {
+    for(Output* out : node_->getAllOutputs()) {
         if(out->getState() != Output::State::IDLE) {
             return false;
         }
@@ -231,7 +231,7 @@ void OutputTransition::fillConnections()
 void OutputTransition::clearOutputs()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(Output* output : node_->getMessageOutputs()) {
+    for(Output* output : node_->getAllOutputs()) {
         output->clear();
     }
 }

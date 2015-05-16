@@ -278,13 +278,12 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
     {
         Input* cin = new Input(transition_in_.get(), UUID::make_sub(getUUID(), std::string("in_") + p->name()));
         cin->setEnabled(true);
+        cin->setOptional(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
         parameter_inputs_.push_back(cin);
         connectConnector(cin);
         cin->moveToThread(thread());
-
-        QObject::connect(cin, SIGNAL(messageArrived(Connectable*)), this, SLOT(parameterMessageArrived(Connectable*)));
 
         param_2_input_[p->name()] = cin;
         input_2_param_[cin] = p;
@@ -507,26 +506,7 @@ void NodeWorker::killExecution()
     // TODO: implement
 }
 
-void NodeWorker::messageArrived(Connectable */*s*/)
-{
-    //    assertNotInGuiThread();
-
-    //    {
-    //        std::unique_lock<std::recursive_mutex> lock(pause_mutex_);
-    //        while(paused_) {
-    //            continue_.wait(lock);
-    //        }
-    //    }
-
-    //    Input* source = dynamic_cast<Input*> (s);
-    //    apex_assert_hard(source);
-
-    //    std::lock_guard<std::recursive_mutex> lock(sync);
-
-    //    checkIfInputsCanBeProcessed();
-}
-
-void NodeWorker::parameterMessageArrived(Connectable *s)
+void NodeWorker::updateParameterValue(Connectable *s)
 {
     assertNotInGuiThread();
     {
@@ -536,6 +516,7 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
         }
     }
 
+    apex_assert_hard(getState() == State::PROCESSING);
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
@@ -551,10 +532,10 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
 
-    source->free();
-    source->notifyMessageProcessed();
+//    source->free();
+//    source->notifyMessageProcessed();
 
-    publishParameter(p);
+//    publishParameter(p);
 }
 
 void NodeWorker::checkIfInputsCanBeProcessed()
@@ -615,6 +596,15 @@ void NodeWorker::processMessages()
             apex_assert_hard(cin->hasReceived() || (cin->isOptional() && !cin->isConnected()));
             if(!cin->isOptional() && !msg::hasMessage(cin)) {
                 all_inputs_are_present = false;
+            }
+        }
+
+        // update parameters
+        for(Input* cin : parameter_inputs_) {
+            apex_assert_hard(cin->isOptional());
+            if(msg::hasMessage(cin)) {
+//                auto msg = cin->getMessage();
+                updateParameterValue(cin);
             }
         }
     }
@@ -867,7 +857,6 @@ void NodeWorker::registerInput(Input* in)
     in->moveToThread(thread());
 
     connectConnector(in);
-    QObject::connect(in, SIGNAL(messageArrived(Connectable*)), this, SLOT(messageArrived(Connectable*)));
     //    QObject::connect(in, SIGNAL(connectionDone(Connectable*)), this, SLOT(trySendMessages()));
 
     Q_EMIT connectorCreated(in);
@@ -894,8 +883,6 @@ void NodeWorker::registerSlot(Slot* s)
     s->moveToThread(thread());
 
     connectConnector(s);
-    QObject::connect(s, SIGNAL(messageArrived(Connectable*)), this, SLOT(messageArrived(Connectable*)));
-    //    QObject::connect(s, SIGNAL(connectionDone(Connectable*)), this, SLOT(trySendMessages()));
     QObject::connect(s, SIGNAL(triggered()), s, SLOT(handleTrigger()), Qt::QueuedConnection);
 
     Q_EMIT connectorCreated(s);
@@ -1066,25 +1053,6 @@ std::vector<Output*> NodeWorker::getParameterOutputs() const
     return parameter_outputs_;
 }
 
-//bool NodeWorker::canSendMessages()
-//{
-//    std::lock_guard<std::recursive_mutex> lock(sync);
-
-//    foreach(Output* out, outputs_) {
-//        if(!out->canSendMessages()) {
-//            return false;
-//        }
-//    }
-
-//    //    foreach(Output* out, parameter_outputs_) {
-//    //        if(!out->canSendMessages()) {
-//    //            return false;
-//    //        }
-//    //    }
-
-//    return true;
-//}
-
 void NodeWorker::notifyMessagesProcessed()
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
@@ -1187,19 +1155,12 @@ void NodeWorker::publishParameter(param::Parameter* p)
 {
     Output* out = param_2_output_.at(p->name());
     if(out->isConnected()) {
-        while(!out->canSendMessages()) {
-            node_->awarn << "waiting for parameter publish: " << p->name() << ", output " << out->getUUID() << " cannot send!" << std::endl;
-            std::chrono::milliseconds dura(100);
-            std::this_thread::sleep_for(dura);
-        }
-
         if(p->is<int>())
             msg::publish(out, p->as<int>());
         else if(p->is<double>())
             msg::publish(out, p->as<double>());
         else if(p->is<std::string>())
             msg::publish(out, p->as<std::string>());
-        out->commitMessages();
     }
 }
 
@@ -1216,6 +1177,7 @@ void NodeWorker::sendMessages()
         return;
     }
 
+    publishParameters();
 
     //    node_->aerr << "SEND" << std::endl;
     apex_assert_hard(transition_out_->canSendMessages());
@@ -1467,7 +1429,14 @@ void NodeWorker::enableIO(bool enable)
 
 void NodeWorker::enableInput (bool enable)
 {
-    Q_FOREACH(Input* i, inputs_) {
+    for(Input* i : inputs_) {
+        if(enable) {
+            i->enable();
+        } else {
+            i->disable();
+        }
+    }
+    for(Input* i : parameter_inputs_) {
         if(enable) {
             i->enable();
         } else {
@@ -1479,7 +1448,14 @@ void NodeWorker::enableInput (bool enable)
 
 void NodeWorker::enableOutput (bool enable)
 {
-    Q_FOREACH(Output* o, outputs_) {
+    for(Output* o : outputs_) {
+        if(enable) {
+            o->enable();
+        } else {
+            o->disable();
+        }
+    }
+    for(Output* o : parameter_outputs_) {
         if(enable) {
             o->enable();
         } else {
@@ -1490,7 +1466,7 @@ void NodeWorker::enableOutput (bool enable)
 
 void NodeWorker::enableSlots (bool enable)
 {
-    Q_FOREACH(Slot* i, slots_) {
+    for(Slot* i : slots_) {
         if(enable) {
             i->enable();
         } else {
@@ -1501,7 +1477,7 @@ void NodeWorker::enableSlots (bool enable)
 
 void NodeWorker::enableTriggers (bool enable)
 {
-    Q_FOREACH(Trigger* i, triggers_) {
+    for(Trigger* i : triggers_) {
         if(enable) {
             i->enable();
         } else {

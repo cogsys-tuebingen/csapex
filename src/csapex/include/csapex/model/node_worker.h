@@ -146,14 +146,14 @@ public:
 
     std::vector<TimerPtr> extractLatestTimers();
 
+private:
+    void updateParameterValue(Connectable* source);
+
 public Q_SLOTS:
-    void messageArrived(Connectable* source);
     void processMessages();
 
     void prepareForNextProcess();
     void checkTransitions();
-
-    void parameterMessageArrived(Connectable* source);
 
 
     void checkParameters();    

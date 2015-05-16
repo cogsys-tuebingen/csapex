@@ -221,16 +221,16 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         designer_->addBox(box);
 
         // add existing connectors
-        Q_FOREACH(Input* input, node_worker->getMessageInputs()) {
+        for(Input* input : node_worker->getMessageInputs()) {
             connectorMessageAdded(input);
         }
-        Q_FOREACH(Output* output, node_worker->getMessageOutputs()) {
+        for(Output* output : node_worker->getMessageOutputs()) {
             connectorMessageAdded(output);
         }
-        Q_FOREACH(Slot* slot, node_worker->getSlots()) {
+        for(Slot* slot : node_worker->getSlots()) {
             connectorSignalAdded(slot);
         }
-        Q_FOREACH(Trigger* trigger, node_worker->getTriggers()) {
+        for(Trigger* trigger : node_worker->getTriggers()) {
             connectorSignalAdded(trigger);
         }
 
