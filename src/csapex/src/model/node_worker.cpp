@@ -634,10 +634,8 @@ void NodeWorker::processMessages()
                 trigger_process_done_->trigger();
             }
 
-        }  catch(const std::exception& e) {
+        } catch(const std::exception& e) {
             setError(true, e.what());
-        } catch(const std::string& s) {
-            setError(true, "Uncatched exception (string) exception: " + s);
         } catch(...) {
             throw;
         }
@@ -1493,13 +1491,13 @@ void NodeWorker::triggerError(bool e, const std::string &what)
 
 void NodeWorker::setIOError(bool error)
 {
-    Q_FOREACH(Input* i, inputs_) {
-        i->setErrorSilent(error);
-    }
-    Q_FOREACH(Output* i, outputs_) {
-        i->setErrorSilent(error);
-    }
-    enableIO(!error);
+//    Q_FOREACH(Input* i, inputs_) {
+//        i->setErrorSilent(error);
+//    }
+//    Q_FOREACH(Output* i, outputs_) {
+//        i->setErrorSilent(error);
+//    }
+//    enableIO(!error);
 }
 
 void NodeWorker::setMinimized(bool min)
