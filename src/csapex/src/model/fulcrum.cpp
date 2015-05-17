@@ -14,7 +14,7 @@ Fulcrum::Fulcrum(Connection* parent, const QPointF& p, int type, const QPointF &
 void Fulcrum::move(const QPointF& pos, bool dropped)
 {
     pos_ = pos;
-    Q_EMIT moved(this, dropped);
+    moved(this, dropped);
 }
 
 QPointF Fulcrum::pos() const
@@ -27,7 +27,7 @@ void Fulcrum::moveHandles(const QPointF& in, const QPointF& out, bool dropped)
     if(in != handle_in_ || out != handle_out_ || dropped) {
         handle_in_ = in;
         handle_out_ = out;
-        Q_EMIT movedHandle(this, dropped, Fulcrum::HANDLE_BOTH);
+        movedHandle(this, dropped, Fulcrum::HANDLE_BOTH);
     }
 }
 
@@ -36,7 +36,7 @@ void Fulcrum::moveHandleIn(const QPointF& pos, bool dropped)
 {
     if(pos != handle_in_ || dropped) {
         handle_in_ = pos;
-        Q_EMIT movedHandle(this, dropped, Fulcrum::HANDLE_IN);
+        movedHandle(this, dropped, Fulcrum::HANDLE_IN);
     }
 }
 
@@ -49,7 +49,7 @@ void Fulcrum::moveHandleOut(const QPointF& pos, bool dropped)
 {
     if(pos != handle_out_ || dropped) {
         handle_out_ = pos;
-        Q_EMIT movedHandle(this, dropped, Fulcrum::HANDLE_OUT);
+        movedHandle(this, dropped, Fulcrum::HANDLE_OUT);
     }
 }
 
@@ -81,7 +81,7 @@ int Fulcrum::type() const
 void Fulcrum::setType(int type)
 {
     type_ = type;
-    Q_EMIT typeChanged(this, type);
+    typeChanged(this, type);
 }
 
 Connection* Fulcrum::connection() const

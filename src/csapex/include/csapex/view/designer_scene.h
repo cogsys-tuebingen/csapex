@@ -40,6 +40,22 @@ public:
     void setSelection(const NodeBox* box);
     std::vector<NodeBox*> getSelectedBoxes() const;
 
+
+Q_SIGNALS:
+    void eventFulcrumAdded(void *f);
+    void eventFulcrumMoved(void *f, bool dropped);
+    void eventFulcrumTypeChanged(void *f, int type);
+    void eventFulcrumHandleMoved(void *f, bool dropped, int which);
+    void eventFulcrumDeleted(void *);
+
+public Q_SLOTS:
+    void fulcrumAdded(void *f);
+    void fulcrumMoved(void *f, bool dropped);
+    void fulcrumTypeChanged(void *f, int type);
+    void fulcrumHandleMoved(void *f, bool dropped, int which);
+    void fulcrumDeleted(void *);
+
+
 public Q_SLOTS:
     void addTemporaryConnection(Connectable* from, Connectable* to);
     void previewConnection(Connectable* from, Connectable* to);
@@ -51,12 +67,6 @@ public Q_SLOTS:
     void connectionDeleted(Connection*);
 
     void boxMoved(NodeBox* box);
-
-    void fulcrumAdded(Fulcrum *f);
-    void fulcrumMoved(Fulcrum *f, bool dropped);
-    void fulcrumTypeChanged(Fulcrum *f, int type);
-    void fulcrumHandleMoved(Fulcrum *f, bool dropped, int which);
-    void fulcrumDeleted(Fulcrum *);
 
     bool showConnectionContextMenu();
 

@@ -283,11 +283,11 @@ void Connection::addFulcrum(int fulcrum_id, const QPointF &pos, int type, const 
 
     fulcrums_.insert(index, fulcrum);
 
-    QObject::connect(f, SIGNAL(moved(Fulcrum*,bool)), this, SIGNAL(fulcrum_moved(Fulcrum*,bool)));
-    QObject::connect(f, SIGNAL(movedHandle(Fulcrum*,bool,int)), this, SIGNAL(fulcrum_moved_handle(Fulcrum*,bool,int)));
-    QObject::connect(f, SIGNAL(typeChanged(Fulcrum*,int)), this, SIGNAL(fulcrum_type_changed(Fulcrum*,int)));
+    f->moved.connect(fulcrum_moved);
+    f->movedHandle.connect(fulcrum_moved_handle);
+    f->typeChanged.connect(fulcrum_type_changed);
 
-    Q_EMIT fulcrum_added(f);
+    fulcrum_added(f);
 }
 
 void Connection::modifyFulcrum(int fulcrum_id, int type, const QPointF &handle_in, const QPointF &handle_out)
@@ -305,7 +305,7 @@ void Connection::moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped)
 void Connection::deleteFulcrum(int fulcrum_id)
 {
     apex_assert_hard(fulcrum_id >= 0 && fulcrum_id < (int) fulcrums_.size());
-    Q_EMIT fulcrum_deleted((fulcrums_[fulcrum_id]).get());
+    fulcrum_deleted((fulcrums_[fulcrum_id]).get());
 
     // update the ids of the later fulcrums
     std::vector<Fulcrum::Ptr>::iterator index = fulcrums_.begin() + fulcrum_id;

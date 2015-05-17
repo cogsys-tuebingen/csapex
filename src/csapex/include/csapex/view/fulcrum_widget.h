@@ -22,6 +22,10 @@ public:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* e);
     bool sceneEvent(QEvent *event);
 
+Q_SIGNALS:
+    void movedEvent();
+    void movedHandlesEvent(Fulcrum* f, bool dropped, int which);
+
 public Q_SLOTS:
     void moved();
 

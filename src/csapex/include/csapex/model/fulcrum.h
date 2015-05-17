@@ -6,15 +6,13 @@
 
 /// SYSTEM
 #include <memory>
-#include <QObject>
+#include <boost/signals2/signal.hpp>
 #include <QPointF>
 
 namespace csapex
 {
-class Fulcrum : public QObject
+class Fulcrum
 {
-    Q_OBJECT
-
 public:
     typedef std::shared_ptr<Fulcrum> Ptr;
 
@@ -56,10 +54,10 @@ public:
 
     Connection* connection() const;
 
-Q_SIGNALS:
-    void moved(Fulcrum*, bool dropped);
-    void movedHandle(Fulcrum*, bool dropped, int no);
-    void typeChanged(Fulcrum*, int type);
+public:
+    boost::signals2::signal<void (Fulcrum*, bool dropped)> moved;
+    boost::signals2::signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
+    boost::signals2::signal<void (Fulcrum*, int type)> typeChanged;
 
 private:
     Connection* parent_;

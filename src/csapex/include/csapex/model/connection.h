@@ -6,7 +6,6 @@
 
 /// SYSTEM
 #include <memory>
-#include <QObject>
 #include <vector>
 #include <QPoint>
 #include <deque>
@@ -17,10 +16,7 @@
 namespace csapex
 {
 
-class Connection : public QObject {
-
-    Q_OBJECT
-
+class Connection {
     friend class command::AddFulcrum;
     friend class command::MoveFulcrum;
     friend class command::ModifyFulcrum;
@@ -90,12 +86,11 @@ public:
     boost::signals2::signal<void()> endpoint_established;
     boost::signals2::signal<void()> connection_established;
 
-Q_SIGNALS:
-    void fulcrum_added(Fulcrum*);
-    void fulcrum_moved(Fulcrum*,bool dropped);
-    void fulcrum_moved_handle(Fulcrum*,bool dropped, int which);
-    void fulcrum_type_changed(Fulcrum*,int type);
-    void fulcrum_deleted(Fulcrum*);
+    boost::signals2::signal<void(Fulcrum*)> fulcrum_added;
+    boost::signals2::signal<void(Fulcrum*,bool dropped)> fulcrum_moved;
+    boost::signals2::signal<void(Fulcrum*,bool dropped, int which)> fulcrum_moved_handle;
+    boost::signals2::signal<void(Fulcrum*,int type)> fulcrum_type_changed;
+    boost::signals2::signal<void(Fulcrum*)> fulcrum_deleted;
 
 public:
     bool operator == (const Connection& c) const;

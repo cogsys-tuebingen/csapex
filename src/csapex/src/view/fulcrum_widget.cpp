@@ -29,7 +29,10 @@ FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, CommandDispatcher* dispatcher, QG
     setPos(fulcrum->pos());
     setRect(QRectF(-half_size_, half_size_));
 
-    QObject::connect(fulcrum, SIGNAL(moved(Fulcrum*,bool)), this, SLOT(moved()));
+    fulcrum->moved.connect(std::bind(&FulcrumWidget::movedEvent, this));
+    fulcrum->movedHandle.connect(std::bind(&FulcrumWidget::movedEvent, this));
+    QObject::connect(this, SIGNAL(movedEvent()), this, SLOT(moved()));
+    QObject::connect(this, SIGNAL(movedHandlesEvent(Fulcrum*,bool,int)), this, SLOT(updateHandles(Fulcrum*,bool,int)));
 
     handle_in_ = new FulcrumHandle(fulcrum->handleIn(), this);
     handle_out_ = new FulcrumHandle(fulcrum_->handleOut(), this);
@@ -45,7 +48,6 @@ FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, CommandDispatcher* dispatcher, QG
     QObject::connect(handle_in_, SIGNAL(moved(bool)), this, SLOT(updateHandleIn(bool)));
     QObject::connect(handle_out_, SIGNAL(moved(bool)), this, SLOT(updateHandleOut(bool)));
 
-    QObject::connect(fulcrum, SIGNAL(movedHandle(Fulcrum*,bool,int)), this, SLOT(updateHandles(Fulcrum*,bool,int)));
 }
 
 void FulcrumWidget::moved()
