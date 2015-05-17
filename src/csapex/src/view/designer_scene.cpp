@@ -22,6 +22,7 @@
 #include <csapex/view/fulcrum_widget.h>
 #include <csapex/utility/movable_graphics_proxy_widget.h>
 #include <csapex/utility/assert.h>
+#include <csapex/model/fulcrum.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -77,6 +78,13 @@ QPointF centerPoint(Port* port)
     } else {
         return pos + port->centerPoint();
     }
+}
+
+QPointF convert(const Point& p) {
+    return QPointF(p.x, p.y);
+}
+Point convert(const QPointF& p) {
+    return Point(p.x(), p.y());
 }
 }
 
@@ -399,7 +407,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
     if(!e->isAccepted() && e->button() == Qt::LeftButton) {
         if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
-            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, highlight_connection_sub_id_, pos, 0)));
+            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(highlight_connection_id_, highlight_connection_sub_id_, Point(pos.x(), pos.y()), 0)));
             e->accept();
 
             // allow moving the fulcrum directly
@@ -719,7 +727,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double mindist_for_slack = 60.0;
     double slack_smooth_distance = 300.0;
 
-    Fulcrum::Ptr first(new Fulcrum(nullptr, from, Fulcrum::OUT, from, from));
+    Fulcrum::Ptr first(new Fulcrum(nullptr, convert(from), Fulcrum::OUT, convert(from), convert(from)));
     Fulcrum::Ptr current = first;
     Fulcrum::Ptr last = current;
 
@@ -728,7 +736,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         Connection::Ptr connection = graph_->getConnectionWithId(id);
         targets = connection->getFulcrums();
     }
-    targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, to, Fulcrum::IN, to, to)));
+    targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, convert(to), Fulcrum::IN, convert(to), convert(to))));
 
     int sub_section = 0;
 
@@ -742,7 +750,10 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     for(std::size_t i = 0; i < targets.size(); ++i) {
         const Fulcrum::Ptr& next = targets[i];
 
-        QPointF diff = (next->pos() - current->pos());
+        QPointF current_pos = convert(current->pos());
+        QPointF next_pos = convert(next->pos());
+
+        QPointF diff = (next_pos - current_pos);
         double direct_length = hypot(diff.x(), diff.y());
 
         QPoint y_offset;
@@ -754,38 +765,38 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
             y_offset = QPoint(0, offset_factor * max_slack_height);
         }
 
-        QPainterPath path(current->pos());
+        QPainterPath path(current_pos);
 
         if(current->type() == Fulcrum::OUT) {
-            cp1 = offset(current->pos(), ccs.start_pos, x_offset) + y_offset;
+            cp1 = offset(current_pos, ccs.start_pos, x_offset) + y_offset;
 
         } else if(current->type() == Fulcrum::IN) {
-            cp1 = offset(current->pos(), ccs.end_pos, x_offset) + y_offset;
+            cp1 = offset(current_pos, ccs.end_pos, x_offset) + y_offset;
 
         } else {
             const Fulcrum::Ptr& last = targets[sub_section-1];
             if(last->type() == Fulcrum::LINEAR) {
-                cp1 = current->pos();
+                cp1 = current_pos;
             } else {
-                cp1 = current->pos() + current->handleOut();
+                cp1 = current_pos + convert(current->handleOut());
             }
         }
 
         if(next->type() == Fulcrum::OUT) {
-            cp2 = offset(next->pos(), ccs.start_pos, x_offset) + y_offset;
+            cp2 = offset(next_pos, ccs.start_pos, x_offset) + y_offset;
 
         } else if(next->type() == Fulcrum::IN) {
-            cp2 = offset(next->pos(), ccs.end_pos, x_offset) + y_offset;
+            cp2 = offset(next_pos, ccs.end_pos, x_offset) + y_offset;
 
         } else {
             if(next->type() == Fulcrum::LINEAR) {
-                cp2 = next->pos();
+                cp2 = next_pos;
             } else {
-                cp2 = next->pos() + next->handleIn();
+                cp2 = next_pos + convert(next->handleIn());
             }
         }
 
-        path.cubicTo(cp1, cp2, next->pos());
+        path.cubicTo(cp1, cp2, next_pos);
 
         paths.push_back(std::make_pair(path, sub_section));
 

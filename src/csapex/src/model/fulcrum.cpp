@@ -7,22 +7,22 @@
 using namespace csapex;
 
 
-Fulcrum::Fulcrum(Connection* parent, const QPointF& p, int type, const QPointF &handle_in, const QPointF &handle_out)
+Fulcrum::Fulcrum(Connection* parent, const Point& p, int type, const Point &handle_in, const Point &handle_out)
     : parent_(parent), type_(type), pos_(p), handle_in_(handle_in), handle_out_(handle_out)
 {}
 
-void Fulcrum::move(const QPointF& pos, bool dropped)
+void Fulcrum::move(const Point& pos, bool dropped)
 {
     pos_ = pos;
     moved(this, dropped);
 }
 
-QPointF Fulcrum::pos() const
+Point Fulcrum::pos() const
 {
     return pos_;
 }
 
-void Fulcrum::moveHandles(const QPointF& in, const QPointF& out, bool dropped)
+void Fulcrum::moveHandles(const Point& in, const Point& out, bool dropped)
 {
     if(in != handle_in_ || out != handle_out_ || dropped) {
         handle_in_ = in;
@@ -32,7 +32,7 @@ void Fulcrum::moveHandles(const QPointF& in, const QPointF& out, bool dropped)
 }
 
 
-void Fulcrum::moveHandleIn(const QPointF& pos, bool dropped)
+void Fulcrum::moveHandleIn(const Point& pos, bool dropped)
 {
     if(pos != handle_in_ || dropped) {
         handle_in_ = pos;
@@ -40,12 +40,12 @@ void Fulcrum::moveHandleIn(const QPointF& pos, bool dropped)
     }
 }
 
-QPointF Fulcrum::handleIn() const
+Point Fulcrum::handleIn() const
 {
     return handle_in_;
 }
 
-void Fulcrum::moveHandleOut(const QPointF& pos, bool dropped)
+void Fulcrum::moveHandleOut(const Point& pos, bool dropped)
 {
     if(pos != handle_out_ || dropped) {
         handle_out_ = pos;
@@ -53,7 +53,7 @@ void Fulcrum::moveHandleOut(const QPointF& pos, bool dropped)
     }
 }
 
-QPointF Fulcrum::handleOut() const
+Point Fulcrum::handleOut() const
 {
     return handle_out_;
 }

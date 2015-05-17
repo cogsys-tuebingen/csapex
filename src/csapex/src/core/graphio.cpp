@@ -121,20 +121,20 @@ void GraphIO::saveConnections(YAML::Node &yaml)
         fulcrum["from"] = connection->from()->getUUID();
         fulcrum["to"] = connection->to()->getUUID();
 
-        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
             YAML::Node pt;
-            pt.push_back(f->pos().x());
-            pt.push_back(f->pos().y());
+            pt.push_back(f->pos().x);
+            pt.push_back(f->pos().y);
 
             fulcrum["pts"].push_back(pt);
         }
 
-        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
             YAML::Node handle;
-            handle.push_back(f->handleIn().x());
-            handle.push_back(f->handleIn().y());
-            handle.push_back(f->handleOut().x());
-            handle.push_back(f->handleOut().y());
+            handle.push_back(f->handleIn().x);
+            handle.push_back(f->handleIn().y);
+            handle.push_back(f->handleOut().x);
+            handle.push_back(f->handleOut().y);
 
             fulcrum["handles"].push_back(handle);
         }
@@ -269,11 +269,11 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             for(int i = 0; i < n; ++i) {
                 int type = (!types.empty()) ? types[i] : Fulcrum::CURVE;
                 if(has_handle) {
-                    QPointF in(handles[i][0], handles[i][1]);
-                    QPointF out(handles[i][2], handles[i][3]);
-                    connection->addFulcrum(i, QPointF(pts[i][0], pts[i][1]), type, in, out);
+                    Point in(handles[i][0], handles[i][1]);
+                    Point out(handles[i][2], handles[i][3]);
+                    connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type, in, out);
                 } else {
-                    connection->addFulcrum(i, QPointF(pts[i][0], pts[i][1]), type);
+                    connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type);
                 }
             }
         }

@@ -4,9 +4,7 @@
 /// COMPONENT
 #include "command.h"
 #include <csapex/csapex_fwd.h>
-
-/// SYSTEM
-#include <QPoint>
+#include <csapex/data/point.h>
 
 namespace csapex
 {
@@ -16,7 +14,7 @@ namespace command
 class MoveFulcrum : public Command
 {
 public:
-    MoveFulcrum(int connection_id, int fulcrum_id, const QPointF& from, const QPointF& to);
+    MoveFulcrum(int connection_id, int fulcrum_id, const Point& from, const Point& to);
 
     virtual std::string getType() const;
     virtual std::string getDescription() const;
@@ -29,8 +27,8 @@ protected:
 private:
     int connection_id;
     int fulcrum_id;
-    QPointF from;
-    QPointF to;
+    Point from;
+    Point to;
 };
 
 }

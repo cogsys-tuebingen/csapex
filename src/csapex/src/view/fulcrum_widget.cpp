@@ -19,6 +19,15 @@
 
 using namespace csapex;
 
+namespace {
+QPointF convert(const Point& p) {
+    return QPointF(p.x, p.y);
+}
+Point convert(const QPointF& p) {
+    return Point(p.x(), p.y());
+}
+}
+
 FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, CommandDispatcher* dispatcher, QGraphicsItem *parent)
     : QGraphicsEllipseItem(parent), fulcrum_(fulcrum), cmd_dispatcher_(dispatcher)
 {
@@ -26,7 +35,7 @@ FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, CommandDispatcher* dispatcher, QG
 
     setFlag(QGraphicsItem::ItemIsMovable);
 
-    setPos(fulcrum->pos());
+    setPos(convert(fulcrum->pos()));
     setRect(QRectF(-half_size_, half_size_));
 
     fulcrum->moved.connect(std::bind(&FulcrumWidget::movedEvent, this));
@@ -34,8 +43,8 @@ FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, CommandDispatcher* dispatcher, QG
     QObject::connect(this, SIGNAL(movedEvent()), this, SLOT(moved()));
     QObject::connect(this, SIGNAL(movedHandlesEvent(Fulcrum*,bool,int)), this, SLOT(updateHandles(Fulcrum*,bool,int)));
 
-    handle_in_ = new FulcrumHandle(fulcrum->handleIn(), this);
-    handle_out_ = new FulcrumHandle(fulcrum_->handleOut(), this);
+    handle_in_ = new FulcrumHandle(convert(fulcrum->handleIn()), this);
+    handle_out_ = new FulcrumHandle(convert(fulcrum->handleOut()), this);
 
     line_in = new QGraphicsLineItem(QLineF(QPointF(), handle_in_->pos()), this);
     line_out = new QGraphicsLineItem(QLineF(QPointF(), handle_out_->pos()), this);
@@ -52,7 +61,7 @@ FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, CommandDispatcher* dispatcher, QG
 
 void FulcrumWidget::moved()
 {
-    QPointF pos = fulcrum_->pos();
+    QPointF pos = convert(fulcrum_->pos());
     if(pos != scenePos()) {
         setPos(pos);
     }
@@ -75,14 +84,14 @@ void FulcrumWidget::updateHandlesHelper(FulcrumHandle& a, QGraphicsLineItem* lin
     lineb->setLine(QLineF(QPointF(), other_pos));
 
 
-    fulcrum_->moveHandles(handle_in_->pos(), handle_out_->pos(), dropped);
+    fulcrum_->moveHandles(convert(handle_in_->pos()), convert(handle_out_->pos()), dropped);
 }
 
 void FulcrumWidget::updateHandles(Fulcrum* f, bool dropped, int /*which*/)
 {
-    if(f->handleIn() != handle_in_->pos() || f->handleOut() != handle_out_->pos()) {
-        handle_in_->setPos(f->handleIn());
-        handle_out_->setPos(f->handleOut());
+    if(convert(f->handleIn()) != handle_in_->pos() || convert(f->handleOut()) != handle_out_->pos()) {
+        handle_in_->setPos(convert(f->handleIn()));
+        handle_out_->setPos(convert(f->handleOut()));
         updateHandleIn(dropped);
     }
 }
@@ -166,11 +175,11 @@ bool FulcrumWidget::sceneEvent(QEvent *event)
         break;
 
     case QEvent::GraphicsSceneMouseMove:
-        fulcrum_->move(scenePos(), false);
+        fulcrum_->move(convert(scenePos()), false);
         break;
 
     case QEvent::GraphicsSceneMouseRelease:
-        fulcrum_->move(scenePos(), true);
+        fulcrum_->move(convert(scenePos()), true);
         break;
 
     default:

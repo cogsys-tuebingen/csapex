@@ -3,11 +3,11 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/data/point.h>
 
 /// SYSTEM
 #include <memory>
 #include <vector>
-#include <QPoint>
 #include <deque>
 #include <boost/signals2.hpp>
 #include <mutex>
@@ -101,9 +101,9 @@ public:
 
 private:
     /// COMMANDS
-    void addFulcrum(int fulcrum_id, const QPointF& pos, int type, const QPointF& handle_in=QPointF(-10.0, 0.0), const QPointF& handle_out=QPointF(10.0, 0.0));
-    void modifyFulcrum(int fulcrum_id, int type, const QPointF& handle_in=QPointF(-10.0, 0.0), const QPointF& handle_out=QPointF(10.0, 0.0));
-    void moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped);
+    void addFulcrum(int fulcrum_id, const Point& pos, int type, const Point& handle_in=Point(-10.0, 0.0), const Point& handle_out=Point(10.0, 0.0));
+    void modifyFulcrum(int fulcrum_id, int type, const Point& handle_in=Point(-10.0, 0.0), const Point& handle_out=Point(10.0, 0.0));
+    void moveFulcrum(int fulcrum_id, const Point &pos, bool dropped);
     void deleteFulcrum(int fulcrum_id);
 
 protected:

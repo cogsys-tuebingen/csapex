@@ -123,6 +123,8 @@ include_directories(include
 )
 
 set(SRC_PLUGIN
+    src/data/point.cpp
+
     src/core/core_plugin.cpp
     src/core/bootstrap_plugin.cpp
 

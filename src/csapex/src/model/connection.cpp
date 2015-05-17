@@ -267,7 +267,7 @@ Fulcrum::Ptr Connection::getFulcrum(int fulcrum_id)
     return fulcrums_[fulcrum_id];
 }
 
-void Connection::addFulcrum(int fulcrum_id, const QPointF &pos, int type, const QPointF &handle_in, const QPointF &handle_out)
+void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Point &handle_in, const Point &handle_out)
 {
     // create the new fulcrum
     Fulcrum::Ptr fulcrum(new Fulcrum(this, pos, type, handle_in, handle_out));
@@ -290,14 +290,14 @@ void Connection::addFulcrum(int fulcrum_id, const QPointF &pos, int type, const 
     fulcrum_added(f);
 }
 
-void Connection::modifyFulcrum(int fulcrum_id, int type, const QPointF &handle_in, const QPointF &handle_out)
+void Connection::modifyFulcrum(int fulcrum_id, int type, const Point &handle_in, const Point &handle_out)
 {
     Fulcrum::Ptr f = fulcrums_[fulcrum_id];
     f->setType(type);
     f->moveHandles(handle_in, handle_out, false);
 }
 
-void Connection::moveFulcrum(int fulcrum_id, const QPointF &pos, bool dropped)
+void Connection::moveFulcrum(int fulcrum_id, const Point &pos, bool dropped)
 {
     fulcrums_[fulcrum_id]->move(pos, dropped);
 }

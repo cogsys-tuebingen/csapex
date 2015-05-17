@@ -3,11 +3,11 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/data/point.h>
 
 /// SYSTEM
 #include <memory>
 #include <boost/signals2/signal.hpp>
-#include <QPointF>
 
 namespace csapex
 {
@@ -33,16 +33,16 @@ public:
     };
 
 public:
-    Fulcrum(Connection* parent, const QPointF& p, int type, const QPointF& handle_in, const QPointF& handle_out);
+    Fulcrum(Connection* parent, const Point& p, int type, const Point& handle_in, const Point& handle_out);
 
-    void move(const QPointF& pos, bool dropped);
-    QPointF pos() const;
+    void move(const Point& pos, bool dropped);
+    Point pos() const;
 
-    void moveHandles(const QPointF& in, const QPointF& out, bool dropped);
-    void moveHandleIn(const QPointF& pos, bool dropped);
-    void moveHandleOut(const QPointF& pos, bool dropped);
-    QPointF handleIn() const;
-    QPointF handleOut() const;
+    void moveHandles(const Point& in, const Point& out, bool dropped);
+    void moveHandleIn(const Point& pos, bool dropped);
+    void moveHandleOut(const Point& pos, bool dropped);
+    Point handleIn() const;
+    Point handleOut() const;
 
     int id() const;
     void setId(int id);
@@ -63,9 +63,9 @@ private:
     Connection* parent_;
     int id_;
     int type_;
-    QPointF pos_;
-    QPointF handle_in_;
-    QPointF handle_out_;
+    Point pos_;
+    Point handle_in_;
+    Point handle_out_;
 };
 }
 #endif // FULCRUM_H

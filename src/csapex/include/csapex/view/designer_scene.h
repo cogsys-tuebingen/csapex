@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
-#include <csapex/model/fulcrum.h>
+#include <csapex/data/point.h>
 #include <csapex/view/fulcrum_widget.h>
 #include <csapex/view/designer_styleable.h>
 
@@ -164,10 +164,10 @@ private:
     std::map<const Connection*,std::vector<QRectF> > connection_bb_;
 
     std::map<Fulcrum*,FulcrumWidget*> fulcrum_2_widget_;
-    std::map<Fulcrum*,QPointF> fulcrum_last_pos_;
+    std::map<Fulcrum*,Point> fulcrum_last_pos_;
     std::map<Fulcrum*,int> fulcrum_last_type_;
-    std::map<Fulcrum*,QPointF> fulcrum_last_hin_;
-    std::map<Fulcrum*,QPointF> fulcrum_last_hout_;
+    std::map<Fulcrum*,Point> fulcrum_last_hin_;
+    std::map<Fulcrum*,Point> fulcrum_last_hout_;
 
     bool draw_grid_;
     bool draw_schema_;
