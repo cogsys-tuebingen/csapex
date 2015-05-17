@@ -630,7 +630,9 @@ void NodeWorker::processMessages()
             node_->process(*node_);
 
             if(trigger_process_done_->isConnected()) {
-                t->step("trigger process done");
+                if(t) {
+                    t->step("trigger process done");
+                }
                 trigger_process_done_->trigger();
             }
 
