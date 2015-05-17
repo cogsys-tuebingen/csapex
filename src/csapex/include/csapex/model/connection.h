@@ -90,9 +90,6 @@ public:
     boost::signals2::signal<void()> endpoint_established;
     boost::signals2::signal<void()> connection_established;
 
-private Q_SLOTS:
-    void messageSentEvent();
-
 Q_SIGNALS:
     void fulcrum_added(Fulcrum*);
     void fulcrum_moved(Fulcrum*,bool dropped);

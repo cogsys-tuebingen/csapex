@@ -29,7 +29,6 @@ Connection::Connection(Connectable *from, Connectable *to)
 
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
-    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Connectable *from, Connectable *to, int id)
@@ -41,7 +40,6 @@ Connection::Connection(Connectable *from, Connectable *to, int id)
 
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
-    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Output *from, Input *to)
@@ -50,8 +48,6 @@ Connection::Connection(Output *from, Input *to)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Output *from, Input *to, int id)
@@ -60,8 +56,6 @@ Connection::Connection(Output *from, Input *to, int id)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 
@@ -71,8 +65,6 @@ Connection::Connection(Trigger *from, Slot *to)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 Connection::Connection(Trigger *from, Slot *to, int id)
@@ -81,8 +73,6 @@ Connection::Connection(Trigger *from, Slot *to, int id)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    QObject::connect(from_, SIGNAL(messageSent(Connectable*)), this, SLOT(messageSentEvent()));
 }
 
 ConnectionTypeConstPtr Connection::getMessage() const
@@ -256,10 +246,6 @@ bool Connection::contains(Connectable *c) const
 bool Connection::operator == (const Connection& c) const
 {
     return from_ == c.from() && to_ == c.to();
-}
-
-void Connection::messageSentEvent()
-{
 }
 
 void Connection::tick()
