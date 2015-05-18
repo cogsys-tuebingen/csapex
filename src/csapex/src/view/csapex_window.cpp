@@ -165,9 +165,8 @@ void CsApexWindow::construct()
     QObject::connect(graph, SIGNAL(nodeRemoved(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodeWorkerPtr)));
     QObject::connect(graph, SIGNAL(panic()), this, SLOT(clearBlock()));
 
-    QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
-
-    QObject::connect(cmd_dispatcher_, SIGNAL(stateChanged()), this, SLOT(updateUndoInfo()));
+    cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); });
+    cmd_dispatcher_->dirtyChanged.connect([this](bool dirty) { updateTitle(); });
 
     updateMenu();
     updateTitle();
@@ -327,7 +326,31 @@ void CsApexWindow::updateUndoInfo()
     ui->undo->clear();
     ui->redo->clear();
 
-    cmd_dispatcher_->populateDebugInfo(ui->undo, ui->redo);
+    std::deque<QTreeWidgetItem*> stack;
+
+    auto iterator = [&stack](QTreeWidget* tree, int level, const Command& cmd) {
+        while(level < (int) stack.size()) {
+            stack.pop_back();
+        }
+        QTreeWidgetItem* tl = new QTreeWidgetItem;
+        tl->setText(0, cmd.getType().c_str());
+        tl->setText(1, cmd.getDescription().c_str());
+
+        if(level == 0) {
+            tree->addTopLevelItem(tl);
+            stack.push_back(tl);
+        } else {
+            stack.back()->addChild(tl);
+        }
+    };
+
+    cmd_dispatcher_->visitUndoCommands([this, &iterator](int level, const Command& cmd) {
+       iterator(ui->undo, level, cmd);
+    });
+    stack.clear();
+    cmd_dispatcher_->visitRedoCommands([this, &iterator](int level, const Command& cmd) {
+       iterator(ui->redo, level, cmd);
+    });
 
     ui->undo->expandAll();
     ui->redo->expandAll();

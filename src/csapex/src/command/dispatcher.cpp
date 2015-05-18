@@ -12,8 +12,7 @@ using namespace csapex;
 CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, ThreadPool* thread_pool, NodeFactory* node_factory)
     : settings_(settings), graph_worker_(graph), thread_pool_(thread_pool), node_factory_(node_factory), dirty_(false)
 {
-    QObject::connect(this, SIGNAL(stateChanged()), graph_worker_->getGraph(), SIGNAL(stateChanged()));
-    QObject::connect(this, SIGNAL(dirtyChanged(bool)), graph_worker_->getGraph(), SIGNAL(dirtyChanged(bool)));
+    stateChanged.connect([this](){ graph_worker_->getGraph()->stateChanged(); });
 }
 
 void CommandDispatcher::reset()
@@ -77,7 +76,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
 
     if(success) {
         setDirty();
-        Q_EMIT stateChanged();
+        stateChanged();
     }
 }
 
@@ -99,7 +98,7 @@ void CommandDispatcher::resetDirtyPoint()
         undone.back()->setAfterSavepoint(true);
     }
 
-    Q_EMIT dirtyChanged(dirty_);
+    dirtyChanged(dirty_);
 }
 
 void CommandDispatcher::clearSavepoints()
@@ -112,7 +111,7 @@ void CommandDispatcher::clearSavepoints()
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
-    Q_EMIT dirtyChanged(dirty_);
+    dirtyChanged(dirty_);
 }
 
 void CommandDispatcher::setDirty()
@@ -132,7 +131,7 @@ void CommandDispatcher::setDirty(bool dirty)
     dirty_ = dirty;
 
     if(change) {
-        Q_EMIT dirtyChanged(dirty_);
+        dirtyChanged(dirty_);
     }
 }
 
@@ -163,7 +162,7 @@ void CommandDispatcher::undo()
 
     undone.push_back(last);
 
-    Q_EMIT stateChanged();
+    stateChanged();
 }
 
 void CommandDispatcher::redo()
@@ -181,7 +180,7 @@ void CommandDispatcher::redo()
 
     setDirty(!last->isBeforeSavepoint());
 
-    Q_EMIT stateChanged();
+    stateChanged();
 }
 
 Graph* CommandDispatcher::getGraph()
@@ -189,14 +188,16 @@ Graph* CommandDispatcher::getGraph()
     return graph_worker_->getGraph();
 }
 
-void CommandDispatcher::populateDebugInfo(QTreeWidget *undo, QTreeWidget *redo)
+void CommandDispatcher::visitUndoCommands(std::function<void (int level, const Command &)> callback) const
 {
-    Q_FOREACH(const Command::Ptr& c, done) {
-        undo->addTopLevelItem(c->createDebugInformation());
-    }
-    Q_FOREACH(const Command::Ptr& c, undone) {
-        redo->addTopLevelItem(c->createDebugInformation());
+    for(const Command::Ptr& c : done) {
+        c->accept(0, callback);
     }
 }
-/// MOC
-#include "../../include/csapex/command/moc_dispatcher.cpp"
+
+void CommandDispatcher::visitRedoCommands(std::function<void (int level, const Command &)> callback) const
+{
+    for(const Command::Ptr& c : undone) {
+        c->accept(0, callback);
+    }
+}

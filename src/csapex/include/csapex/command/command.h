@@ -8,9 +8,6 @@
 #include <memory>
 #include <vector>
 
-/// FORWARD DECLARATION
-class QTreeWidgetItem;
-
 namespace csapex
 {
 
@@ -43,7 +40,7 @@ public:
     void setBeforeSavepoint(bool save);
     bool isBeforeSavepoint();
 
-    virtual QTreeWidgetItem* createDebugInformation() const;
+    virtual void accept(int level, std::function<void (int level, const Command &)> callback) const;
 
     virtual std::string getType() const = 0;
     virtual std::string getDescription() const = 0;

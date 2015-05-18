@@ -6,9 +6,6 @@
 #include <csapex/model/graph_worker.h>
 #include <csapex/utility/assert.h>
 
-/// SYSTEM
-#include <QTreeWidgetItem>
-
 using namespace csapex;
 
 std::vector<Command::Ptr> Command::undo_later;
@@ -109,10 +106,7 @@ bool Command::isBeforeSavepoint()
     return before_save_point_;
 }
 
-QTreeWidgetItem* Command::createDebugInformation() const
+void Command::accept(int level, std::function<void (int level, const Command &)> callback) const
 {
-    QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, getType().c_str());
-    tl->setText(1, getDescription().c_str());
-    return tl;
+    callback(level, *this);
 }

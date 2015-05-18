@@ -5,8 +5,6 @@
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
-
-#include <QTreeWidgetItem>
 #include <iostream>
 
 using namespace csapex::command;
@@ -16,16 +14,12 @@ Meta::Meta(const std::string &type)
 {
 }
 
-QTreeWidgetItem* Meta::createDebugInformation() const
+void Meta::accept(int level, std::function<void (int level, const Command &)> callback) const
 {
-    QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, getType().c_str());
-    tl->setText(1, getDescription().c_str());
-
+    callback(level, *this);
     for(Command::Ptr cmd : nested) {
-        tl->addChild(cmd->createDebugInformation());
+        cmd->accept(level+1, callback);
     }
-    return tl;
 }
 
 std::string Meta::getType() const

@@ -97,7 +97,6 @@ private:
 Q_SIGNALS:
     void stateChanged();
     void structureChanged(Graph*);
-    /*extract?*/ void dirtyChanged(bool);
 
     void panic();
 

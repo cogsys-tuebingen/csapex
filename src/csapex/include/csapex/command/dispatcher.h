@@ -6,16 +6,13 @@
 
 /// SYSTEM
 #include <deque>
-#include <QObject>
-#include <QTreeWidget>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex
 {
 
-class CommandDispatcher : public QObject
+class CommandDispatcher
 {
-    Q_OBJECT
-
 public:
     typedef std::shared_ptr<CommandDispatcher> Ptr;
 
@@ -39,19 +36,18 @@ public:
     void executeNotUndoable(Command::Ptr command);
     void undoNotRedoable(Command::Ptr command);
 
-    void populateDebugInfo(QTreeWidget* undo, QTreeWidget *redo);
+    void visitUndoCommands(std::function<void(int level, const Command& cmd)> callback) const;
+    void visitRedoCommands(std::function<void(int level, const Command& cmd)> callback) const;
 
-public Q_SLOTS:
+    void reset();
     void setDirty();
     void setClean();
     void resetDirtyPoint();
     void clearSavepoints();
 
-    void reset();
-
-Q_SIGNALS:
-    void stateChanged();
-    void dirtyChanged(bool);
+public:
+    boost::signals2::signal<void()> stateChanged;
+    boost::signals2::signal<void(bool)> dirtyChanged;
 
 private:
     void doExecute(Command::Ptr command);
