@@ -422,25 +422,25 @@ void NodeWorker::disconnectConnector(Connectable* c)
 
 void NodeWorker::stop()
 {
+    std::lock_guard<std::recursive_mutex> lock(stop_mutex_);
     QObject::disconnect(tick_timer_);
 
     assertNotInGuiThread();
     node_->abort();
 
-    std::lock_guard<std::recursive_mutex> lock(stop_mutex_);
     stop_ = true;
 
-    Q_FOREACH(Output* i, outputs_) {
+    for(Output* i : outputs_) {
         i->stop();
     }
-    Q_FOREACH(Input* i, inputs_) {
+    for(Input* i : inputs_) {
         i->stop();
     }
 
-    Q_FOREACH(Input* i, inputs_) {
+    for(Input* i : inputs_) {
         disconnectConnector(i);
     }
-    Q_FOREACH(Output* i, outputs_) {
+    for(Output* i : outputs_) {
         disconnectConnector(i);
     }
 
@@ -565,8 +565,8 @@ void NodeWorker::processMessages()
 
     assertNotInGuiThread();
 
-    if(stop_) {
-        notifyMessagesProcessed();
+    if(stop_ || !isEnabled()) {
+//        notifyMessagesProcessed();
         return;
     }
 
@@ -1055,6 +1055,11 @@ std::vector<Output*> NodeWorker::getParameterOutputs() const
 
 void NodeWorker::notifyMessagesProcessed()
 {
+    std::unique_lock<std::recursive_mutex> stop_lock(stop_mutex_);
+    if(stop_) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(sync);
     //    node_->aerr << "notifyMessagesProcessed" << std::endl;
 
@@ -1070,6 +1075,11 @@ void NodeWorker::notifyMessagesProcessed()
 void NodeWorker::prepareForNextProcess()
 {
     apex_assert_hard(thread() == QThread::currentThread());
+
+    std::unique_lock<std::recursive_mutex> lock(stop_mutex_);
+    if(stop_) {
+        return;
+    }
 
     {
         std::lock_guard<std::recursive_mutex> lock(sync);
@@ -1111,6 +1121,11 @@ void NodeWorker::prepareForNextProcess()
 void NodeWorker::checkTransitions()
 {
     apex_assert_hard(thread() == QThread::currentThread());
+
+    std::unique_lock<std::recursive_mutex> lock(stop_mutex_);
+    if(stop_) {
+        return;
+    }
 
     {
         std::lock_guard<std::recursive_mutex> lock(sync);
@@ -1167,6 +1182,12 @@ void NodeWorker::publishParameter(param::Parameter* p)
 void NodeWorker::sendMessages()
 {
     assertNotInGuiThread();
+
+    std::unique_lock<std::recursive_mutex> stop_lock(stop_mutex_);
+    if(stop_) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(sync);
 
     apex_assert_hard(getState() == State::PROCESSING);

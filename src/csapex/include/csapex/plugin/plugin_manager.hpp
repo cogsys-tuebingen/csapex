@@ -253,6 +253,7 @@ public:
 
     PluginManager(const std::string& full_name)
     {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         if(i_count == 0) {
             ++i_count;
             instance = new Parent(full_name);
@@ -262,6 +263,7 @@ public:
 
     virtual ~PluginManager()
     {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         --i_count;
         if(i_count == 0) {
             delete instance;

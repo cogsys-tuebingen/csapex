@@ -54,9 +54,9 @@ void GraphWorker::setPause(bool pause)
 
 void GraphWorker::stop()
 {
-    for(NodeWorker* node : graph_->getAllNodeWorkers()) {
-        node->setEnabled(false);
-    }
+//    for(NodeWorker* node : graph_->getAllNodeWorkers()) {
+//        node->setEnabled(false);
+//    }
     for(NodeWorker* node : graph_->getAllNodeWorkers()) {
         node->stop();
     }
