@@ -5,17 +5,13 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <QObject>
-
-class QTimer;
+#include <boost/signals2/signal.hpp>
 
 namespace csapex
 {
 
-class GraphWorker : public QObject
+class GraphWorker
 {
-    Q_OBJECT
-
 public:
     typedef std::shared_ptr<GraphWorker> Ptr;
 
@@ -29,17 +25,14 @@ public:
     bool isPaused() const;
     void setPause(bool pause);
 
-public Q_SLOTS:
-    void tick();
     void reset();
 
-Q_SIGNALS:
-    void paused(bool);
+public:
+    boost::signals2::signal<void (bool)> paused;
 
 private:
     Graph* graph_;
-
-    QTimer* timer_;
+    bool paused_;
 };
 
 }

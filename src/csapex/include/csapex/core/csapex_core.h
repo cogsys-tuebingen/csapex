@@ -9,7 +9,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <QObject>
+#include <boost/signals2/signal.hpp>
 #include <yaml-cpp/yaml.h>
 
 namespace class_loader {
@@ -19,15 +19,8 @@ class ClassLoader;
 namespace csapex
 {
 
-class CsApexCore : public QObject
+class CsApexCore
 {
-    Q_OBJECT
-
-public:
-    struct Listener {
-        virtual void resetSignal() = 0;
-    };
-
 public:
     CsApexCore(Settings& settings_,
                PluginLocatorPtr plugin_locator,
@@ -47,33 +40,30 @@ public:
     void unloadNode(csapex::UUID uuid);
     void reloadDone();
 
-    void addListener(Listener* l);
-    void removeListener(Listener* l);
-
     Settings& getSettings() const;
     NodeFactory& getNodeFactory() const;
 
     bool isPaused() const;
-
-public Q_SLOTS:
     void setPause(bool pause);
+
     void settingsChanged();
     void setStatusMessage(const std::string& msg);
 
-Q_SIGNALS:
-    void configChanged();
-    void showStatusMessage(const std::string& msg);
-    void reloadBoxMenues();
+public:
+    boost::signals2::signal<void ()> configChanged;
+    boost::signals2::signal<void (const std::string& msg)> showStatusMessage;
+    boost::signals2::signal<void ()> newNodeType;
 
-    void resetRequest();
+    boost::signals2::signal<void ()> resetRequest;
+    boost::signals2::signal<void ()> resetDone;
 
-    void saveSettingsRequest(YAML::Node& e);
-    void loadSettingsRequest(YAML::Node& n);
+    boost::signals2::signal<void (YAML::Node& e)> saveSettingsRequest;
+    boost::signals2::signal<void (YAML::Node& n)> loadSettingsRequest;
 
-    void saveViewRequest(YAML::Node& e);
-    void loadViewRequest(YAML::Node& n);
+    boost::signals2::signal<void (YAML::Node& e)> saveViewRequest;
+    boost::signals2::signal<void (YAML::Node& n)> loadViewRequest;
 
-    void paused(bool);
+    boost::signals2::signal<void (bool)> paused;
 
 private:
     CorePluginPtr makeCorePlugin(const std::string& name);
@@ -96,8 +86,6 @@ private:
     PluginManager<CorePlugin>* core_plugin_manager;
     std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
     std::map<std::string, bool> core_plugins_connected_;
-
-    std::vector<Listener*> listener_;
 
     std::vector<BootstrapPluginPtr> boot_plugins_;
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;

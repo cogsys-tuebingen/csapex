@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
-#include <csapex/core/csapex_core.h>
 
 /// SYSTEM
 #include <QMainWindow>
@@ -16,13 +15,18 @@ namespace Ui
 class CsApexWindow;
 }
 
+namespace YAML
+{
+class Node;
+}
+
 namespace csapex
 {
 
 /**
  * @brief The CsApexWindow class provides the window for the evaluator program
  */
-class CsApexWindow : public QMainWindow, public CsApexCore::Listener
+class CsApexWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -38,9 +42,8 @@ public:
 
     void closeEvent(QCloseEvent* event);
 
-    void resetSignal();
-
     void setupTimeline();
+
 private Q_SLOTS:
     void updateMenu();
     void updateTitle();
@@ -71,7 +74,7 @@ public Q_SLOTS:
 
     void start();
     void showStatusMessage(const std::string& msg);
-    void reloadBoxMenues();
+    void updateNodeTypes();
 
     void saveSettings(YAML::Node& doc);
     void loadSettings(YAML::Node& doc);

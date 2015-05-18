@@ -30,9 +30,6 @@
 
 #include <boost/filesystem.hpp>
 
-Q_DECLARE_METATYPE(QSharedPointer<QImage>)
-Q_DECLARE_METATYPE(std::string)
-
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
@@ -55,7 +52,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
     node_factory->unload_request.connect(std::bind(&CsApexCore::unloadNode, this, std::placeholders::_1));
     plugin_locator_->reload_done.connect(std::bind(&CsApexCore::reloadDone, this));
 
-    QObject::connect(graph_worker_.get(), SIGNAL(paused(bool)), this, SIGNAL(paused(bool)));
+    graph_worker_->paused.connect(paused);
 }
 
 CsApexCore::~CsApexCore()
@@ -96,7 +93,7 @@ bool CsApexCore::isPaused() const
 
 void CsApexCore::setStatusMessage(const std::string &msg)
 {
-    Q_EMIT showStatusMessage(msg);
+    showStatusMessage(msg);
 }
 
 void CsApexCore::init(DragIO* dragio)
@@ -127,14 +124,14 @@ void CsApexCore::init(DragIO* dragio)
             plugin.second->init(*this);
         }
         if(dragio) {
-            Q_FOREACH(PAIR plugin, core_plugins_) {
+            for(PAIR plugin : core_plugins_) {
                 plugin.second->initUI(*dragio);
             }
         }
 
         showStatusMessage("loading node plugins");
-        node_factory_->loaded.connect(std::bind(&CsApexCore::showStatusMessage, this, std::placeholders::_1));
-        node_factory_->new_node_type.connect(std::bind(&CsApexCore::reloadBoxMenues, this));
+        node_factory_->loaded.connect(showStatusMessage);
+        node_factory_->new_node_type.connect(newNodeType);
         node_factory_->loadPlugins();
 
         node_adapter_factory_->loadPlugins();
@@ -227,15 +224,14 @@ void CsApexCore::startup()
 
 void CsApexCore::reset()
 {
-    Q_EMIT resetRequest();
+    resetRequest();
 
     cmd_dispatch->reset();
 
     UUID::reset();
 
-    Q_FOREACH(Listener* l, listener_) {
-        l->resetSignal();
-    }
+
+    resetDone();
 }
 
 void CsApexCore::unloadNode(UUID uuid)
@@ -257,20 +253,6 @@ void CsApexCore::reloadDone()
     }
 }
 
-void CsApexCore::addListener(Listener *l)
-{
-    listener_.push_back(l);
-}
-
-void CsApexCore::removeListener(Listener *l)
-{
-    std::vector<Listener*>::iterator it = std::find(listener_.begin(), listener_.end(), l);
-    if(it != listener_.end()) {
-        listener_.erase(it);
-    }
-}
-
-
 Settings &CsApexCore::getSettings() const
 {
     return settings_;
@@ -284,7 +266,7 @@ NodeFactory &CsApexCore::getNodeFactory() const
 void CsApexCore::settingsChanged()
 {
     settings_.save();
-    Q_EMIT configChanged();
+    configChanged();
 }
 
 void CsApexCore::saveAs(const std::string &file)
@@ -303,12 +285,12 @@ void CsApexCore::saveAs(const std::string &file)
 
     GraphIO graphio(graph_worker_.get(),  node_factory_);
 
-    Q_EMIT saveSettingsRequest(node_map);
+    saveSettingsRequest(node_map);
 
     graphio.saveSettings(node_map);
     graphio.saveConnections(node_map);
 
-    Q_EMIT saveViewRequest(node_map);
+    saveViewRequest(node_map);
 
     graphio.saveNodes(node_map);
 
@@ -376,9 +358,9 @@ void CsApexCore::load(const std::string &file)
 
         graphio.loadConnections(doc);
 
-        Q_EMIT loadViewRequest(doc);
+        loadViewRequest(doc);
 
-        Q_EMIT loadSettingsRequest(doc);
+        loadSettingsRequest(doc);
     }
 
     cmd_dispatch->setClean();
@@ -386,5 +368,3 @@ void CsApexCore::load(const std::string &file)
 
     graph_worker_->setPause(paused);
 }
-/// MOC
-#include "../../include/csapex/core/moc_csapex_core.cpp"

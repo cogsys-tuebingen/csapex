@@ -2,6 +2,7 @@
 #include <csapex/view/csapex_window.h>
 
 /// COMPONENT
+#include <csapex/core/csapex_core.h>
 #include <csapex/core/designerio.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
@@ -48,12 +49,10 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, 
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {
-    core_.addListener(this);
 }
 
 CsApexWindow::~CsApexWindow()
 {
-    core_.removeListener(this);
     delete ui;
 }
 
@@ -104,8 +103,10 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this,  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this,  SLOT(redo()));
 
-    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
-    QObject::connect(&core_, SIGNAL(paused(bool)), ui->actionPause, SLOT(setChecked(bool)));
+//    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
+    QObject::connect(ui->actionPause, &QAction::triggered, [this](bool pause) { core_.setPause(pause); });
+    core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); });
+
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
@@ -147,16 +148,16 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionAuto_Reload, SIGNAL(toggled(bool)), this, SLOT(updatePluginAutoReload(bool)));
     ui->actionAuto_Reload->setChecked(plugin_locator_->isAutoReload());
 
-    QObject::connect(&core_, SIGNAL(configChanged()), this, SLOT(updateTitle()));
-    QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
-    QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
+    core_.resetDone.connect([this](){ designer_->reset(); });
+    core_.configChanged.connect([this](){ updateTitle(); });
+    core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); });
+    core_.newNodeType.connect([this](){ updateNodeTypes(); });
+    core_.resetRequest.connect([this](){ designer_->reset(); });
 
-    QObject::connect(&core_, SIGNAL(resetRequest()), designer_, SLOT(reset()));
-
-    QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Node&)), this, SLOT(saveSettings(YAML::Node&)));
-    QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
-    QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Node&)), this, SLOT(saveView(YAML::Node&)));
-    QObject::connect(&core_, SIGNAL(loadViewRequest(YAML::Node&)), this, SLOT(loadView(YAML::Node&)));
+    core_.saveSettingsRequest.connect([this](YAML::Node& node){ saveSettings(node); });
+    core_.loadSettingsRequest.connect([this](YAML::Node& node){ loadSettings(node); });
+    core_.saveViewRequest.connect([this](YAML::Node& node){ saveView(node); });
+    core_.loadViewRequest.connect([this](YAML::Node& node){ loadView(node); });
 
     graph->stateChanged.connect([this]() { updateMenu(); });
     graph->nodeAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); });
@@ -403,7 +404,7 @@ void CsApexWindow::clearBlock()
     core_.setPause(false);
 }
 
-void CsApexWindow::reloadBoxMenues()
+void CsApexWindow::updateNodeTypes()
 {
     if(ui->boxes->layout()) {
         QtHelper::clearLayout(ui->boxes->layout());
@@ -420,11 +421,6 @@ void CsApexWindow::reloadBoxMenues()
     widget_ctrl_->insertAvailableNodeTypes(ui->node_info_tree);
 }
 
-
-void CsApexWindow::resetSignal()
-{
-    designer_->reset();
-}
 
 void CsApexWindow::loadStyleSheet(const QString& path)
 {
@@ -618,7 +614,7 @@ void CsApexWindow::init()
 {
     init_ = true;
 
-    reloadBoxMenues();
+    updateNodeTypes();
     //    designer_->show();
 
     Settings& settings = core_.getSettings();

@@ -194,8 +194,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     CsApexCore core(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
 
-    QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Node&)), &thread_pool, SLOT(saveSettings(YAML::Node&)));
-    QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), &thread_pool, SLOT(loadSettings(YAML::Node&)));
+    core.saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
+    core.loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
 
     if(!headless) {
         app->processEvents();

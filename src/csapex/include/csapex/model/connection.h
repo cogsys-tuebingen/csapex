@@ -57,8 +57,6 @@ public:
 
     bool contains(Connectable* c) const;
 
-    void tick();
-
     void setMessage(const ConnectionTypeConstPtr& msg);
     void notifyMessageSet();
 

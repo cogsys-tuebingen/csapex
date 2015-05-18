@@ -248,10 +248,6 @@ bool Connection::operator == (const Connection& c) const
     return from_ == c.from() && to_ == c.to();
 }
 
-void Connection::tick()
-{
-}
-
 std::vector<Fulcrum::Ptr> Connection::getFulcrums() const
 {
     return fulcrums_;
