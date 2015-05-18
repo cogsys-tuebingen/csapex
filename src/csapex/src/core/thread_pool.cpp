@@ -288,9 +288,7 @@ QThread * ThreadPool::setupThread(int id, bool custom, const std::string& name)
     thread->setProperty("custom", custom);
     thread->setProperty("name", QVariant(QString::fromStdString(name)));
     thread->start();
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
     return thread;
 }
-/// MOC
-#include "../../include/csapex/core/moc_thread_pool.cpp"

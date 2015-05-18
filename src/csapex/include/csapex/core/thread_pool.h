@@ -5,21 +5,19 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <QObject>
 #include <map>
 #include <vector>
 #include <set>
 #include <yaml-cpp/yaml.h>
+#include <QThread>
 
 namespace csapex
 {
 
 class CsApexCore;
 
-class ThreadPool : public QObject
+class ThreadPool
 {
-    Q_OBJECT
-
 public:
     enum {
         UNDEFINED_THREAD = -1,
@@ -45,7 +43,6 @@ public:
 
     std::string nextName();
 
-public Q_SLOTS:
     void nodeAdded(NodeWorkerPtr);
     void structureChanged();
 
