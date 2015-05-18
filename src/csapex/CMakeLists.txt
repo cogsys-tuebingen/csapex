@@ -154,7 +154,6 @@ set(SRC_PLUGIN
     src/model/node_constructor.cpp
     src/model/node.cpp
     src/model/node_factory.cpp
-    src/model/node_filter_proxy_model.cpp
     src/model/node_modifier.cpp
     src/model/node_state.cpp
     src/model/node_statistics.cpp
@@ -251,6 +250,7 @@ set(SRC_PLUGIN
     src/view/port.cpp
     src/view/profiling_widget.cpp
     src/view/widget_controller.cpp
+    src/view/node_filter_proxy_model.cpp
 
 
     ${QT_RESOURCES}

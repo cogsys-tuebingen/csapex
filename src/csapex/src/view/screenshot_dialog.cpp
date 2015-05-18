@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/view/widget_controller.h>
-#include <csapex/model/node_filter_proxy_model.h>
 #include <csapex/utility/html_delegate.h>
 #include <csapex/view/designer_view.h>
 #include <csapex/model/graph_worker.h>

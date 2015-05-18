@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/node_filter_proxy_model.h>
+#include <csapex/view/node_filter_proxy_model.h>
 
 /// SYSTEM
 #include <QStringList>
@@ -20,7 +20,7 @@ bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) 
     QStringList qrys = filterRegExp().pattern().split(" ", QString::SkipEmptyParts);
 
     bool contains_all = true;
-    Q_FOREACH(const QString& qry, qrys) {
+    for(const QString& qry : qrys) {
         bool tagged = false;
         Q_FOREACH(const QString& t, tags) {
             if(t.contains(qry, Qt::CaseInsensitive)) {
@@ -38,4 +38,4 @@ bool NodeFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
     return QSortFilterProxyModel::lessThan(left, right);
 }
 /// MOC
-#include "../../include/csapex/model/moc_node_filter_proxy_model.cpp"
+#include "../../include/csapex/view/moc_node_filter_proxy_model.cpp"
