@@ -147,9 +147,6 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionAuto_Reload, SIGNAL(toggled(bool)), this, SLOT(updatePluginAutoReload(bool)));
     ui->actionAuto_Reload->setChecked(plugin_locator_->isAutoReload());
 
-    QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
-    QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
-
     QObject::connect(&core_, SIGNAL(configChanged()), this, SLOT(updateTitle()));
     QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
     QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
@@ -161,9 +158,10 @@ void CsApexWindow::construct()
     QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Node&)), this, SLOT(saveView(YAML::Node&)));
     QObject::connect(&core_, SIGNAL(loadViewRequest(YAML::Node&)), this, SLOT(loadView(YAML::Node&)));
 
-    QObject::connect(graph, SIGNAL(nodeAdded(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodeWorkerPtr)));
-    QObject::connect(graph, SIGNAL(nodeRemoved(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodeWorkerPtr)));
-    QObject::connect(graph, SIGNAL(panic()), this, SLOT(clearBlock()));
+    graph->stateChanged.connect([this]() { updateMenu(); });
+    graph->nodeAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); });
+    graph->nodeRemoved.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeRemoved(n); });
+    graph->panic.connect([this]() { clearBlock(); });
 
     cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); });
     cmd_dispatcher_->dirtyChanged.connect([this](bool dirty) { updateTitle(); });

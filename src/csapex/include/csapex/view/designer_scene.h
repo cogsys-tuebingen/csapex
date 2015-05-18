@@ -48,6 +48,9 @@ Q_SIGNALS:
     void eventFulcrumHandleMoved(void *f, bool dropped, int which);
     void eventFulcrumDeleted(void *);
 
+    void eventConnectionAdded(Connection*);
+    void evetnConnectionDeleted(Connection*);
+
 public Q_SLOTS:
     void fulcrumAdded(void *f);
     void fulcrumMoved(void *f, bool dropped);

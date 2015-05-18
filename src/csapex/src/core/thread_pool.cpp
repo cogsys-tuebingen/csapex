@@ -17,8 +17,8 @@ using namespace csapex;
 ThreadPool::ThreadPool(Graph *graph, bool enable_threading, bool grouping)
     : next_id(MINIMUM_THREAD_ID), graph_(graph), enable_threading_(enable_threading), grouping_(grouping)
 {
-    connect(graph_, SIGNAL(nodeAdded(NodeWorkerPtr)), this, SLOT(nodeAdded(NodeWorkerPtr)));
-    connect(graph_, SIGNAL(structureChanged(Graph*)), this, SLOT(structureChanged()));
+    graph_->nodeAdded.connect([this](NodeWorkerPtr n) { nodeAdded(n); });
+    graph_->structureChanged.connect([this](Graph *g) { structureChanged(); });
 }
 
 std::vector<ThreadPool::Group> ThreadPool::getCustomGroups()

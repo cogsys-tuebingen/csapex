@@ -136,13 +136,6 @@ void Designer::removeBox(NodeBox *box)
     designer_view_->removeBoxEvent(box);
 }
 
-
-void Designer::stateChangedEvent()
-{
-    //designer_board->refresh();
-}
-
-
 bool Designer::isGridEnabled() const
 {
     return settings_.get<bool>("grid", false);

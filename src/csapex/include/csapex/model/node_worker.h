@@ -20,6 +20,7 @@
 #include <mutex>
 #include <vector>
 #include <atomic>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex {
 
@@ -177,6 +178,9 @@ public Q_SLOTS:
     void sendMessages();
     void notifyMessagesProcessed();
 
+public:
+
+    boost::signals2::signal<void()> panic;
 
 Q_SIGNALS:
     void messagesProcessed();
@@ -208,7 +212,6 @@ Q_SIGNALS:
     void startProfiling(NodeWorker* box);
     void stopProfiling(NodeWorker* box);
 
-    void panic();
     void processRequested();
     void checkTransitionsRequested();
 

@@ -57,9 +57,14 @@ void Graph::addNode(NodeWorker::Ptr node_worker)
 
     node_worker->checkParameters();
 
-    QObject::connect(node_worker.get(), SIGNAL(panic()), this, SIGNAL(panic()));
+    node_worker->panic.connect(panic);
 
-    Q_EMIT nodeAdded(node_worker);
+    nodeAdded(node_worker);
+}
+
+std::vector<ConnectionPtr> Graph::getConnections()
+{
+    return connections_;
 }
 
 void Graph::deleteNode(const UUID& uuid)
@@ -88,7 +93,7 @@ void Graph::deleteNode(const UUID& uuid)
     }
 
     if(removed) {
-        Q_EMIT nodeRemoved(removed);
+        nodeRemoved(removed);
         buildConnectedComponents();
     }
 }
@@ -182,9 +187,9 @@ bool Graph::addConnection(Connection::Ptr connection)
 
 
 
-        Q_EMIT connectionAdded(connection.get());
-        Q_EMIT from->connectionDone(from);
-        Q_EMIT to->connectionDone(to);
+        connectionAdded(connection.get());
+        from->connectionDone(from);
+        to->connectionDone(to);
         return true;
     }
 
@@ -218,8 +223,8 @@ void Graph::deleteConnection(Connection::Ptr connection)
 
             buildConnectedComponents();
             verify();
-            Q_EMIT connectionDeleted(connection.get());
-            Q_EMIT stateChanged();
+            connectionDeleted(connection.get());
+            stateChanged();
             return;
 
         } else {
@@ -281,7 +286,7 @@ void Graph::buildConnectedComponents()
 
     assignLevels();
 
-    Q_EMIT structureChanged(this);
+    structureChanged(this);
 }
 
 void Graph::assignLevels()
@@ -628,5 +633,3 @@ Command::Ptr Graph::deleteConnectionById(int id)
 
     return cmd;
 }
-/// MOC
-#include "../../include/csapex/model/moc_graph.cpp"

@@ -93,6 +93,10 @@ protected:
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
 
+
+public:
+    void updateBoxInformation(Graph* graph);
+
 public Q_SLOTS:
     void setupUiAgain();
 
@@ -105,7 +109,6 @@ public Q_SLOTS:
     void flipSides();
     void showProfiling(bool show);
 
-    void updateBoxInformation(Graph* graph);
     void updateComponentInformation(Graph* graph);
     void updateThreadInformation();
     void contextMenuEvent(QContextMenuEvent* e);

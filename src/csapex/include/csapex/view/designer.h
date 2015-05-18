@@ -58,7 +58,6 @@ Q_SIGNALS:
 public Q_SLOTS:
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
-    void stateChangedEvent();
 
     void overwriteStyleSheet(QString& stylesheet);
 

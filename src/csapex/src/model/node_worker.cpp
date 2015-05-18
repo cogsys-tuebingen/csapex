@@ -345,7 +345,7 @@ void NodeWorker::triggerSwitchThreadRequest(QThread* thread, int id)
 
 void NodeWorker::triggerPanic()
 {
-    Q_EMIT panic();
+    panic();
 }
 
 void NodeWorker::triggerProcess()

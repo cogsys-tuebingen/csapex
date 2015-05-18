@@ -7,6 +7,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/core/thread_pool.h>
+#include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node_factory.h>
@@ -216,8 +217,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
-        QObject::connect(graph.get(), SIGNAL(nodeAdded(NodeWorkerPtr)), legend, SLOT(startTrackingNode(NodeWorkerPtr)));
-        QObject::connect(graph.get(), SIGNAL(nodeRemoved(NodeWorkerPtr)), legend, SLOT(stopTrackingNode(NodeWorkerPtr)));
+        graph->nodeAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); });
+        graph->nodeRemoved.connect([legend](NodeWorkerPtr n) { legend->stopTrackingNode(n); });
+
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
         QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));
 

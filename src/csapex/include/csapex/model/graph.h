@@ -7,25 +7,20 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <QObject>
+#include <boost/signals2/signal.hpp>
 #include <map>
 #include <functional>
 
 namespace csapex {
 
-class Graph : public QObject
+class Graph
 {
-    Q_OBJECT
-
     friend class GraphIO;
     friend class GraphWorker;
     friend class command::AddNode;
     friend class command::AddConnection;
     friend class command::DeleteConnection;
     friend class command::DeleteNode;
-
-    /*remove*/ friend class DesignerScene;
-    /*remove*/ friend class WidgetController;
 
 public:
     typedef std::shared_ptr<Graph> Ptr;
@@ -75,6 +70,8 @@ public:
     ConnectionPtr getConnection(Connectable* from, Connectable* to);
     int getConnectionId(ConnectionPtr);
 
+    std::vector<ConnectionPtr> getConnections();
+
     std::string makeUUIDPrefix(const std::string& name);
 
     int countNodes();
@@ -94,17 +91,17 @@ private:
     void buildConnectedComponents();
     void assignLevels();
 
-Q_SIGNALS:
-    void stateChanged();
-    void structureChanged(Graph*);
+public:
+    boost::signals2::signal<void()> stateChanged;
+    boost::signals2::signal<void(Graph*)> structureChanged;
 
-    void panic();
+    boost::signals2::signal<void()> panic;
 
-    void connectionAdded(Connection*);
-    void connectionDeleted(Connection*);
+    boost::signals2::signal<void(Connection*)> connectionAdded;
+    boost::signals2::signal<void(Connection*)> connectionDeleted;
 
-    void nodeAdded(NodeWorkerPtr);
-    void nodeRemoved(NodeWorkerPtr);
+    boost::signals2::signal<void(NodeWorkerPtr)> nodeAdded;
+    boost::signals2::signal<void(NodeWorkerPtr)> nodeRemoved;
 
 protected:
     std::vector<NodeWorkerPtr> nodes_;

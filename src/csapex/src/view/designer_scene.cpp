@@ -107,8 +107,10 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
 
     setBackgroundBrush(QBrush(Qt::white));
 
-    QObject::connect(graph_.get(), SIGNAL(connectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
-    QObject::connect(graph_.get(), SIGNAL(connectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
+    graph_->connectionAdded.connect([this](Connection* c) { connectionAdded(c); });
+    graph_->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); });
+//    QObject::connect(this, SIGNAL(eventConnectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
+//    QObject::connect(this, SIGNAL(eventConnectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
 }
 
 DesignerScene::~DesignerScene()
@@ -298,7 +300,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         return false;
     };
 
-    for(Connection::Ptr connection : graph_->connections_) {
+    for(Connection::Ptr connection : graph_->getConnections()) {
         auto pos = connection_bb_.find(connection.get());
         if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
             drawConnection(painter, *connection);
@@ -446,7 +448,7 @@ int DesignerScene::getHighlightedConnectionId() const
 
 bool DesignerScene::isEmpty() const
 {
-    return graph_->nodes_.empty();
+    return graph_->countNodes() == 0;
 }
 
 void DesignerScene::connectionAdded(Connection* c)
