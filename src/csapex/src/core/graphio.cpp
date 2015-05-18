@@ -19,12 +19,10 @@
 #include <csapex/core/serialization.h>
 
 /// SYSTEM
-#include <QMessageBox>
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
-#include <QScrollBar>
 #include <sys/types.h>
 
 using namespace csapex;
@@ -304,7 +302,3 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
     // hook for nodes to deserialize
     Serialization::instance().deserialize(*node_worker->getNode(), doc);
 }
-
-
-/// MOC
-#include "../../include/csapex/core/moc_graphio.cpp"

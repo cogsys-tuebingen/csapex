@@ -6,22 +6,13 @@
 #include <csapex/csapex_fwd.h>
 
 /// SYSTEM
-#include <map>
-#include <string>
 #include <yaml-cpp/yaml.h>
-#include <QList>
-#include <QPoint>
-#include <QSize>
-
-/// FORWARD DECLARATION
 
 namespace csapex
 {
 
-class GraphIO : public QObject
+class GraphIO
 {
-    Q_OBJECT
-
 public:
     GraphIO(GraphWorker* graph, NodeFactory* node_factory);
 
