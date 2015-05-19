@@ -293,7 +293,7 @@ void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (
 
 void DefaultNodeAdapterBridge::disconnect()
 {
-    Q_FOREACH(const boost::signals2::connection& c, connections) {
+    for(const boost::signals2::connection& c : connections) {
         c.disconnect();
     }
 
@@ -677,7 +677,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
     }
 
-    Q_FOREACH(param::Parameter::Ptr p, params) {
+    for(param::Parameter::Ptr p : params) {
         param::Parameter* parameter = p.get();
 
         if(!parameter->isEnabled()) {

@@ -72,7 +72,7 @@ void Slot::removeConnection(Connectable* other_side)
 Command::Ptr Slot::removeAllConnectionsCmd()
 {
     command::Meta::Ptr cmd(new command::Meta("Delete sources"));
-    foreach(Trigger* source, sources_) {
+    for(Trigger* source : sources_) {
         cmd->add(Command::Ptr(new command::DeleteConnection(source, this)));
     }
     return cmd;
@@ -114,7 +114,7 @@ bool Slot::canConnectTo(Connectable* other_side, bool /*move*/) const
 
 bool Slot::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    foreach(Trigger* trigger, sources_) {
+    for(Trigger* trigger : sources_) {
         if(!trigger->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
@@ -129,7 +129,7 @@ bool Slot::isConnected() const
 
 void Slot::connectionMovePreview(Connectable *other_side)
 {
-    foreach(Trigger* trigger, sources_) {
+    for(Trigger* trigger : sources_) {
         Q_EMIT(connectionInProgress(trigger, other_side));
     }
 }
@@ -172,7 +172,7 @@ void Slot::notifyMessageProcessed()
 {
     Connectable::notifyMessageProcessed();
 
-    foreach(Trigger* trigger, sources_) {
+    for(Trigger* trigger : sources_) {
         trigger->notifyMessageProcessed();
     }
 }

@@ -42,10 +42,10 @@ void MessageProviderManager::loadPlugins()
     registerMessageProvider(Settings::message_extension, std::bind(&ApexMessageProvider::make));
 
     typedef std::pair<std::string, PluginManager<csapex::MessageProvider>::Constructor> PAIR;
-    foreach(PAIR pair, manager_->availableClasses()) {
+    for(PAIR pair : manager_->availableClasses()) {
         try {
             MessageProvider::Ptr prov(pair.second());
-            Q_FOREACH(const std::string& extension, prov->getExtensions()) {
+            for(const std::string& extension : prov->getExtensions()) {
                 std::string ext = extension;
                 std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
                 registerMessageProvider(ext, pair.second);

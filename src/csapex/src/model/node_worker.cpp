@@ -110,7 +110,7 @@ NodeWorker::~NodeWorker()
         removeTrigger(*triggers_.begin());
     }
 
-    Q_FOREACH(QObject* cb, callbacks) {
+    for(QObject* cb : callbacks) {
         qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
         if(call) {
             call->disconnect();
@@ -365,26 +365,34 @@ void NodeWorker::triggerCheckTransitions()
 
 void NodeWorker::switchThread(QThread *thread, int id)
 {
+    // PROBLEM: if this is called when node is not idle -> fsm gets corrupted
+    // will be fixed once nodeworker is independent of qt!
     QObject::disconnect(tick_timer_);
+
+    QObject::disconnect(this, SIGNAL(processRequested()));
+
+    QObject::disconnect(this, SIGNAL(tickRequested()));
+    QObject::disconnect(this, SIGNAL(messagesProcessed()));
+    QObject::disconnect(this, SIGNAL(checkTransitionsRequested()));
 
     assert(thread);
 
-    foreach(Input* input, inputs_){
+    for(Input* input : inputs_){
         input->moveToThread(thread);
     }
-    foreach(Input* input, parameter_inputs_){
+    for(Input* input : parameter_inputs_){
         input->moveToThread(thread);
     }
-    foreach(Output* output, outputs_){
+    for(Output* output : outputs_){
         output->moveToThread(thread);
     }
-    foreach(Output* output, parameter_outputs_){
+    for(Output* output : parameter_outputs_){
         output->moveToThread(thread);
     }
-    foreach(Slot* slot, slots_){
+    for(Slot* slot : slots_){
         slot->moveToThread(thread);
     }
-    foreach(Trigger* trigger, triggers_){
+    for(Trigger* trigger : triggers_){
         trigger->moveToThread(thread);
     }
     moveToThread(thread);
@@ -655,7 +663,7 @@ bool NodeWorker::areAllInputsAvailable()
     std::lock_guard<std::recursive_mutex> lock(sync);
 
     // check if all inputs have messages
-    foreach(Input* cin, inputs_) {
+    for(Input* cin : inputs_) {
         if(!cin->hasReceived()) {
             // connector doesn't have a message
             if(cin->isOptional()) {
@@ -921,12 +929,12 @@ Connectable* NodeWorker::getConnector(const UUID &uuid) const
 
 Input* NodeWorker::getInput(const UUID& uuid) const
 {
-    foreach(Input* in, inputs_) {
+    for(Input* in : inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
     }
-    foreach(Input* in, parameter_inputs_) {
+    for(Input* in : parameter_inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
@@ -937,12 +945,12 @@ Input* NodeWorker::getInput(const UUID& uuid) const
 
 Output* NodeWorker::getOutput(const UUID& uuid) const
 {
-    foreach(Output* out, outputs_) {
+    for(Output* out : outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
     }
-    foreach(Output* out, parameter_outputs_) {
+    for(Output* out : parameter_outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
@@ -954,7 +962,7 @@ Output* NodeWorker::getOutput(const UUID& uuid) const
 
 Slot* NodeWorker::getSlot(const UUID& uuid) const
 {
-    foreach(Slot* s, slots_) {
+    for(Slot* s : slots_) {
         if(s->getUUID() == uuid) {
             return s;
         }
@@ -966,7 +974,7 @@ Slot* NodeWorker::getSlot(const UUID& uuid) const
 
 Trigger* NodeWorker::getTrigger(const UUID& uuid) const
 {
-    foreach(Trigger* t, triggers_) {
+    for(Trigger* t : triggers_) {
         if(t->getUUID() == uuid) {
             return t;
         }
@@ -1252,7 +1260,7 @@ bool NodeWorker::isSource() const
     // check if there are no (mandatory) inputs -> then it's a virtual source
     // TODO: remove and refactor old plugins
     if(!inputs_.empty()) {
-        foreach(Input* in, inputs_) {
+        for(Input* in : inputs_) {
             if(!in->isOptional() || in->isConnected()) {
                 return false;
             }
@@ -1371,7 +1379,7 @@ void NodeWorker::tick()
                     ++ticks_;
 
                     bool has_msg = false;
-                    foreach(Output* out, outputs_) {
+                    for(Output* out : outputs_) {
                         has_msg |= msg::hasMessage(out);
                     }
 
@@ -1514,10 +1522,10 @@ void NodeWorker::triggerError(bool e, const std::string &what)
 
 void NodeWorker::setIOError(bool error)
 {
-//    Q_FOREACH(Input* i, inputs_) {
+//    for(Input* i : inputs_) {
 //        i->setErrorSilent(error);
 //    }
-//    Q_FOREACH(Output* i, outputs_) {
+//    for(Output* i : outputs_) {
 //        i->setErrorSilent(error);
 //    }
 //    enableIO(!error);

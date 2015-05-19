@@ -38,7 +38,7 @@ void CommandDispatcher::executeLater(Command::Ptr command)
 
 void CommandDispatcher::executeLater()
 {
-    Q_FOREACH(Command::Ptr cmd, later) {
+    for(Command::Ptr cmd : later) {
         doExecute(cmd);
     }
     later.clear();
@@ -103,11 +103,11 @@ void CommandDispatcher::resetDirtyPoint()
 
 void CommandDispatcher::clearSavepoints()
 {
-    Q_FOREACH(Command::Ptr cmd, done) {
+    for(Command::Ptr cmd : done) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
-    Q_FOREACH(Command::Ptr cmd, undone) {
+    for(Command::Ptr cmd : undone) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }

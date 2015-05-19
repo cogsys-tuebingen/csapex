@@ -73,7 +73,7 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
     }
 
 
-    Q_FOREACH(HandlerEnter::Ptr h, handler_enter) {
+    for(HandlerEnter::Ptr h : handler_enter) {
         if(h->handle(dispatcher_, src, e)) {
             return;
         }
@@ -92,7 +92,7 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
         if(cmd != NodeBox::MIME.toStdString()) {
             std::cout << "warning: data is ";
             typedef const std::pair<int, QVariant> PAIR;
-            Q_FOREACH(PAIR& pair, v.toStdMap()) {
+            for(PAIR& pair : v.toStdMap()) {
                 std::cout << pair.first << ":\t" << pair.second.toString().toStdString() << '\n';
             }
             std::cout << std::endl;
@@ -124,7 +124,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         if(c->isOutput()) {
             Output* out = dynamic_cast<Output*> (c);
             if(out) {
-                foreach(ConnectionWeakPtr connection, out->getConnections()) {
+                for(ConnectionWeakPtr connection : out->getConnections()) {
                     ConnectionPtr c = connection.lock();
                     if(!c) {
                         continue;
@@ -137,7 +137,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
             } else {
                 Trigger* trigger = dynamic_cast<Trigger*> (c);
                 if(trigger) {
-                    foreach(Slot* slot, trigger->getTargets()) {
+                    for(Slot* slot : trigger->getTargets()) {
                         scene->addTemporaryConnection(slot, src->mapToScene(e->pos()));
                     }
                 }
@@ -149,7 +149,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
             } else {
                 Slot* slot = dynamic_cast<Slot*> (c);
                 if(slot) {
-                    foreach(Trigger* trigger, slot->getSources()) {
+                    for(Trigger* trigger : slot->getSources()) {
                         scene->addTemporaryConnection(trigger, src->mapToScene(e->pos()));
                     }
                 }
@@ -158,7 +158,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         scene->update();
 
     } else {
-        Q_FOREACH(HandlerMove::Ptr h, handler_move) {
+        for(HandlerMove::Ptr h : handler_move) {
             if(h->handle(dispatcher_, src, e)) {
                 return;
             }
@@ -203,7 +203,7 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_po
         scene->deleteTemporaryConnectionsAndRepaint();
 
     } else {
-        Q_FOREACH(HandlerDrop::Ptr h, handler_drop) {
+        for(HandlerDrop::Ptr h : handler_drop) {
             if(h->handle(dispatcher_, src, e, scene_pos)) {
                 return;
             }

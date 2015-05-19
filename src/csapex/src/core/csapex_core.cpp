@@ -112,15 +112,15 @@ void CsApexCore::init(DragIO* dragio)
         core_plugin_manager->load(plugin_locator_.get());
 
         typedef const std::pair<std::string, PluginConstructor<CorePlugin> > CONSTRUCTORPAIR;
-        foreach(CONSTRUCTORPAIR cp, core_plugin_manager->availableClasses()) {
+        for(CONSTRUCTORPAIR cp : core_plugin_manager->availableClasses()) {
             makeCorePlugin(cp.first);
         }
 
         typedef const std::pair<std::string, CorePlugin::Ptr > PAIR;
-        foreach(PAIR plugin, core_plugins_) {
+        for(PAIR plugin : core_plugins_) {
             plugin.second->prepare(getSettings());
         }
-        foreach(PAIR plugin, core_plugins_) {
+        for(PAIR plugin : core_plugins_) {
             plugin.second->init(*this);
         }
         if(dragio) {

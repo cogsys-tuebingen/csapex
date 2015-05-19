@@ -188,7 +188,7 @@ std::vector<NodeBox*> DesignerView::boxes()
 void DesignerView::updateSelection()
 {
     QList<QGraphicsItem *> selected = scene_->items();
-    foreach(QGraphicsItem* item, selected) {
+    for(QGraphicsItem* item : selected) {
         MovableGraphicsProxyWidget* m = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(m) {
             NodeBox* box = m->getBox();
@@ -202,7 +202,7 @@ void DesignerView::updateSelection()
 Command::Ptr DesignerView::deleteSelected()
 {
     command::Meta::Ptr meta(new command::Meta("delete selected boxes"));
-    foreach(QGraphicsItem* item, scene_->selectedItems()) {
+    for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             meta->add(Command::Ptr(new command::DeleteNode(proxy->getBox()->getNodeWorker()->getUUID())));
@@ -484,7 +484,7 @@ void DesignerView::movedBoxes(double dx, double dy)
     QPointF delta(dx, dy);
 
     command::Meta::Ptr meta(new command::Meta("move boxes"));
-    foreach(QGraphicsItem* item, scene_->selectedItems()) {
+    for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             NodeBox* b = proxy->getBox();
@@ -510,7 +510,7 @@ void DesignerView::overwriteStyleSheet(QString &stylesheet)
 
 void DesignerView::updateBoxInformation()
 {
-    foreach(QGraphicsItem* item, scene_->items()) {
+    for(QGraphicsItem* item : scene_->items()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             NodeBox* b = proxy->getBox();
@@ -772,7 +772,7 @@ void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
 
 void DesignerView::selectAll()
 {
-    foreach(QGraphicsItem* item, scene_->items()) {
+    for(QGraphicsItem* item : scene_->items()) {
         item->setSelected(true);
     }
 }

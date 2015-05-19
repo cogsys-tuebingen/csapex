@@ -74,7 +74,7 @@ Command::Ptr Trigger::removeAllConnectionsCmd()
 {
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
-    foreach(Slot* target, targets_) {
+    for(Slot* target : targets_) {
         Command::Ptr removeThis(new command::DeleteConnection(this, target));
         removeAll->add(removeThis);
     }
@@ -94,7 +94,7 @@ void Trigger::removeAllConnectionsNotUndoable()
 
 void Trigger::trigger()
 {
-    foreach(Slot* s, targets_) {
+    for(Slot* s : targets_) {
         try {
             s->trigger();
         } catch(const std::exception& e) {
@@ -154,7 +154,7 @@ bool Trigger::canConnectTo(Connectable* other_side, bool move) const
 
 bool Trigger::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    foreach(Slot* slot, targets_) {
+    for(Slot* slot : targets_) {
         if(!slot->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
@@ -169,14 +169,14 @@ bool Trigger::isConnected() const
 
 void Trigger::connectionMovePreview(Connectable *other_side)
 {
-    foreach(Slot* slot, targets_) {
+    for(Slot* slot : targets_) {
         Q_EMIT(connectionInProgress(slot, other_side));
     }
 }
 
 void Trigger::validateConnections()
 {
-    foreach(Slot* target, targets_) {
+    for(Slot* target : targets_) {
         target->validateConnections();
     }
 }

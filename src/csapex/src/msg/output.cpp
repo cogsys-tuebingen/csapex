@@ -149,7 +149,7 @@ bool Output::isConnectionPossible(Connectable *other_side)
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    foreach(ConnectionWeakPtr connection, connections_) {
+    for(ConnectionWeakPtr connection : connections_) {
         if(!connection.lock()->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }

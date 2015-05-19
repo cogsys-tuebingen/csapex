@@ -282,7 +282,7 @@ void CsApexWindow::updateNodeInfo()
 {
     std::stringstream ss;
 
-    Q_FOREACH(QTreeWidgetItem* item, ui->node_info_tree->selectedItems()) {
+    for(QTreeWidgetItem* item : ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
             NodeConstructor::Ptr n = widget_ctrl_->getNodeFactory()->getConstructor(type.toStdString());
@@ -294,7 +294,7 @@ void CsApexWindow::updateNodeInfo()
             ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << n->getType() << "</h1>";
             ss << "<p>Tags: <i>";
             int i = 0;
-            Q_FOREACH(const Tag::Ptr& tag, n->getTags()) {
+            for(const Tag::Ptr& tag : n->getTags()) {
                 if(i++ > 0) {
                     ss << ", ";
                 }
@@ -308,7 +308,7 @@ void CsApexWindow::updateNodeInfo()
 
             std::vector<param::Parameter::Ptr> params = n->makePrototype()->getNode()->getParameters();
 
-            Q_FOREACH(const param::Parameter::Ptr& p, params) {
+            for(const param::Parameter::Ptr& p : params) {
                 ss << "<h2>" << p->name() << "</h2>";
                 ss << "<p>" << p->description().toString() << "</p>";
                 ss << "<p>" << p->toString() << "</p>";
@@ -397,7 +397,7 @@ void CsApexWindow::clearBlock()
     std::cerr << "clearing blocking connections" << std::endl;
     core_.setPause(true);
     Graph* graph = graph_worker_->getGraph();
-    foreach(NodeWorker* nw, graph->getAllNodeWorkers()) {
+    for(NodeWorker* nw : graph->getAllNodeWorkers()) {
         nw->reset();
     }
 
@@ -495,7 +495,7 @@ void CsApexWindow::createPluginsMenu()
 {
     std::vector<std::string> plugins = plugin_locator_->getAllLibraries();
 
-    foreach(const std::string& library, plugins) {
+    for(const std::string& library : plugins) {
         /// enable / ignore plugin
         QAction* enable_ignore = new QAction(QString::fromStdString(library), ui->menu_Available_Plugins);
         enable_ignore->setCheckable(true);

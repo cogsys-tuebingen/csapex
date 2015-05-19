@@ -107,14 +107,14 @@ int Graph::countNodes()
 
 void Graph::foreachNode(std::function<void (NodeWorker*)> f)
 {
-    for(NodeWorker::Ptr b :  nodes_) {
+    for(NodeWorker::Ptr b : nodes_) {
         f(b.get());
     }
 }
 
 void Graph::foreachNode(std::function<void (NodeWorker*)> f, std::function<bool (NodeWorker*)> pred)
 {
-    for(NodeWorker::Ptr b :  nodes_) {
+    for(NodeWorker::Ptr b : nodes_) {
         if(pred(b.get())) {
             f(b.get());
         }
@@ -144,13 +144,13 @@ bool Graph::addConnection(Connection::Ptr connection)
 
             int highest_seq_no = -1;
             // search all parents of the target for the highest seq no
-            for(Input* input :  n_to->getAllInputs()) {
+            for(Input* input : n_to->getAllInputs()) {
                 if(!input->isConnected()) {
                     continue;
                 }
                 NodeWorker* ni = findNodeWorkerForConnector(input->getSource()->getUUID());
 
-                for(Output* output :  ni->getAllOutputs()) {
+                for(Output* output : ni->getAllOutputs()) {
                     if(output->sequenceNumber() > highest_seq_no) {
                         highest_seq_no = output->sequenceNumber();
                     }
@@ -158,7 +158,7 @@ bool Graph::addConnection(Connection::Ptr connection)
             }
             if(highest_seq_no != -1) {
                 //                std::cerr << "setting the sequence numbers:\n";
-                for(Input* input :  n_to->getAllInputs()) {
+                for(Input* input : n_to->getAllInputs()) {
                     input->setSequenceNumber(highest_seq_no);
                 }
             }
@@ -170,12 +170,12 @@ bool Graph::addConnection(Connection::Ptr connection)
             int seq_no = from->sequenceNumber();
 
             //            std::cerr << "synchronize components" << std::endl;
-            for(NodeWorker::Ptr n :  nodes_) {
+            for(NodeWorker::Ptr n : nodes_) {
                 if(node_component_[n.get()] == node_component_[n_to]) {
-                    for(Output* output :  n->getAllOutputs()) {
+                    for(Output* output : n->getAllOutputs()) {
                         output->setSequenceNumber(seq_no);
                     }
-                    for(Input* input :  n->getAllInputs()) {
+                    for(Input* input : n->getAllInputs()) {
                         input->setSequenceNumber(seq_no);
                     }
                 }
@@ -244,7 +244,7 @@ void Graph::buildConnectedComponents()
     node_component_.clear();
 
     std::deque<NodeWorker*> unmarked;
-    for(NodeWorker::Ptr node :  nodes_) {
+    for(NodeWorker::Ptr node : nodes_) {
         unmarked.push_back(node.get());
         node_component_[node.get()] = -1;
     }
@@ -266,14 +266,14 @@ void Graph::buildConnectedComponents()
 
             // iterate all neighbors
             std::vector<NodeWorker*> neighbors;
-            for(NodeWorker* parent :  node_parents_[front]) {
+            for(NodeWorker* parent : node_parents_[front]) {
                 neighbors.push_back(parent);
             }
-            for(NodeWorker* child :  node_children_[front]) {
+            for(NodeWorker* child : node_children_[front]) {
                 neighbors.push_back(child);
             }
 
-            for(NodeWorker* neighbor :  neighbors) {
+            for(NodeWorker* neighbor : neighbors) {
                 if(node_component_[neighbor] == -1) {
                     node_component_[neighbor] = component;
                     Q.push_back(neighbor);
@@ -296,7 +296,7 @@ void Graph::assignLevels()
     static const int NO_LEVEL = std::numeric_limits<int>::min();
 
     std::deque<NodeWorker*> unmarked;
-    for(NodeWorker::Ptr node :  nodes_) {
+    for(NodeWorker::Ptr node : nodes_) {
         if(node_parents_[node.get()].empty()) {
             node_level[node.get()] = 0;
         } else {
@@ -370,7 +370,7 @@ void Graph::assignLevels()
         }
     }
 
-    for(NodeWorker::Ptr node :  nodes_) {
+    for(NodeWorker::Ptr node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
         for(Output* o : node->getAllOutputs()) {
@@ -381,7 +381,7 @@ void Graph::assignLevels()
         }
     }
 
-    for(NodeWorker* node :  gateways) {
+    for(NodeWorker* node : gateways) {
         DynamicOutput* correspondent = nullptr;
 
         // perform bfs to find the parent with a dynamic output
@@ -435,7 +435,7 @@ Command::Ptr Graph::clear()
 {
     command::Meta::Ptr clear(new command::Meta("Clear Graph"));
 
-    for(NodeWorker::Ptr node :  nodes_) {
+    for(NodeWorker::Ptr node : nodes_) {
         Command::Ptr cmd(new command::DeleteNode(node->getUUID()));
         clear->add(cmd);
     }
@@ -483,7 +483,7 @@ NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
 
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
-    for(NodeWorker::Ptr b :  nodes_) {
+    for(NodeWorker::Ptr b : nodes_) {
         if(b->getUUID() == uuid) {
             return b->getNode();
         }
@@ -495,7 +495,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
 
 NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
 {
-    for(const NodeWorker::Ptr b :  nodes_) {
+    for(const NodeWorker::Ptr b : nodes_) {
         if(b->getUUID() == uuid) {
             return b.get();
         }
@@ -527,7 +527,7 @@ NodeWorker* Graph::findNodeWorkerForConnector(const UUID &uuid) const
 std::vector<NodeWorker*> Graph::getAllNodeWorkers()
 {
     std::vector<NodeWorker*> node_workers;
-    foreach(const NodeWorkerPtr& node, nodes_) {
+    for(const NodeWorkerPtr& node : nodes_) {
         node_workers.push_back(node.get());
     }
 
@@ -593,7 +593,7 @@ int Graph::getConnectionId(Connection::Ptr c)
 }
 Command::Ptr Graph::deleteConnectionByIdCommand(int id)
 {
-    for(const Connection::Ptr& connection :  connections_) {
+    for(const Connection::Ptr& connection : connections_) {
         if(connection->id() == id) {
             return Command::Ptr(new command::DeleteConnection(connection->from(), connection->to()));
         }

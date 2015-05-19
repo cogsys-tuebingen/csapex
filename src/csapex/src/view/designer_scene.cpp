@@ -269,7 +269,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
     // check if we have temporary connections
     if(!temp_.empty()) {
-        foreach(const TempConnection& temp, temp_) {
+        for(const TempConnection& temp : temp_) {
             if(temp.is_connected) {
                 drawConnection(painter, Connection(temp.from, temp.to_c, -1));
 
@@ -308,7 +308,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     }
 
     // augment nodes
-    foreach(NodeWorker* node_worker, graph_->getAllNodeWorkers()) {
+    for(NodeWorker* node_worker : graph_->getAllNodeWorkers()) {
         NodeBox* box = widget_ctrl_->getBox(node_worker->getUUID());
 
         if(!box || !rect.intersects(box->geometry())) {
@@ -345,14 +345,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw port information (in)
-        foreach(Input* input, node_worker->getMessageInputs()) {
+        for(Input* input : node_worker->getMessageInputs()) {
             Port* p = widget_ctrl_->getPort(input);
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw port information (out)
-        foreach(Output* output, node_worker->getMessageOutputs()) {
+        for(Output* output : node_worker->getMessageOutputs()) {
             Port* p = widget_ctrl_->getPort(output);
             if(p) {
                 drawPort(painter, box, p);
@@ -360,14 +360,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw slots
-        foreach(Slot* slot, node_worker->getSlots()) {
+        for(Slot* slot : node_worker->getSlots()) {
             Port* p = widget_ctrl_->getPort(slot);
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw triggers
-        foreach(Trigger* trigger, node_worker->getTriggers()) {
+        for(Trigger* trigger : node_worker->getTriggers()) {
             Port* p = widget_ctrl_->getPort(trigger);
             if(p) {
                 drawPort(painter, box, p);
@@ -453,7 +453,7 @@ bool DesignerScene::isEmpty() const
 
 void DesignerScene::connectionAdded(Connection* c)
 {
-    foreach(FulcrumPtr f, c->getFulcrums()) {
+    for(FulcrumPtr f : c->getFulcrums()) {
         fulcrumAdded(f.get());
     }
 
@@ -826,13 +826,13 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     // draw
     if(ccs.highlighted) {
         painter->setPen(QPen(Qt::black, ccs.r + 6*scale_factor, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        foreach(const Path& path, paths) {
+        for(const Path& path : paths) {
             painter->drawPath(path.first);
         }
         painter->drawPath(arrow_path);
 
         painter->setPen(QPen(Qt::white, ccs.r + 3*scale_factor, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        foreach(const Path& path, paths) {
+        for(const Path& path : paths) {
             painter->drawPath(path.first);
         }
         painter->drawPath(arrow_path);
@@ -880,7 +880,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
     std::vector<QRectF> bounding_boxes;
 
-    foreach(const Path& path, paths) {
+    for(const Path& path : paths) {
         painter->drawPath(path.first);
         bounding_boxes.push_back(path.first.boundingRect());
 

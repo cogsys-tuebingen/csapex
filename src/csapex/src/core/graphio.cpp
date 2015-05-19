@@ -47,7 +47,7 @@ void GraphIO::loadSettings(const YAML::Node &doc)
 
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    foreach(NodeWorker* node, graph_worker_->getGraph()->getAllNodeWorkers()) {
+    for(NodeWorker* node : graph_worker_->getGraph()->getAllNodeWorkers()) {
         try {
             YAML::Node yaml_node;
             serializeNode(yaml_node, node);
@@ -81,27 +81,27 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    foreach(NodeWorker* node, graph_worker_->getGraph()->getAllNodeWorkers()) {
+    for(NodeWorker* node : graph_worker_->getGraph()->getAllNodeWorkers()) {
         if(!node->getAllOutputs().empty()) {
-            foreach(Output* o, node->getAllOutputs()) {
+            for(Output* o : node->getAllOutputs()) {
                 if(o->countConnections() == 0) {
                     continue;
                 }
                 YAML::Node connection;
                 connection["uuid"] = o->getUUID();
-                foreach(ConnectionWeakPtr c, o->getConnections()) {
+                for(ConnectionWeakPtr c : o->getConnections()) {
                     connection["targets"].push_back(c.lock()->to()->getUUID());
                 }
 
                 yaml["connections"].push_back(connection);
             }
-            foreach(Trigger* o, node->getTriggers()) {
+            for(Trigger* o : node->getTriggers()) {
                 if(o->noTargets() == 0) {
                     continue;
                 }
                 YAML::Node connection;
                 connection["uuid"] = o->getUUID();
-                foreach(Slot* i, o->getTargets()) {
+                for(Slot* i : o->getTargets()) {
                     connection["targets"].push_back(i->getUUID());
                 }
 
@@ -110,7 +110,7 @@ void GraphIO::saveConnections(YAML::Node &yaml)
         }
     }
 
-    foreach(const Connection::Ptr& connection, graph_worker_->getGraph()->connections_) {
+    for(const Connection::Ptr& connection : graph_worker_->getGraph()->connections_) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }
@@ -137,7 +137,7 @@ void GraphIO::saveConnections(YAML::Node &yaml)
             fulcrum["handles"].push_back(handle);
         }
 
-        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
             fulcrum["types"].push_back(f->type());
         }
 

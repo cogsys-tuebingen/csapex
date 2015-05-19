@@ -51,7 +51,7 @@ ActivityTimeline::ActivityTimeline()
 
 ActivityTimeline::~ActivityTimeline()
 {
-    foreach(Row* r, rows_) {
+    for(Row* r : rows_) {
         delete r;
         r = nullptr;
     }
@@ -184,7 +184,7 @@ void ActivityTimeline::setSelection(QList<NodeWorker *> nodes)
     for(std::map<NodeWorker*,Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         it->second->selected = false;
     }
-    foreach(NodeWorker* node, nodes) {
+    for(NodeWorker* node : nodes) {
         node2row.at(node)->selected = true;
     }
     refresh();
@@ -343,7 +343,7 @@ void ActivityTimeline::Row::refresh()
 
 void ActivityTimeline::Row::clear()
 {
-    foreach(Activity* a, activities_) {
+    for(Activity* a : activities_) {
         delete a;
         a = nullptr;
     }

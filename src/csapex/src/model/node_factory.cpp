@@ -63,7 +63,7 @@ void NodeFactory::rebuildPrototypes()
 //    node_adapter_builders_.clear();
     
     typedef std::pair<std::string, PluginConstructor<Node> > NODE_PAIR;
-    Q_FOREACH(const NODE_PAIR& p, node_manager_->availableClasses()) {
+    for(const NODE_PAIR& p : node_manager_->availableClasses()) {
         const PluginConstructor<Node>& plugin_constructor = p.second;
 
         // convert tag list into vector
@@ -110,7 +110,7 @@ void NodeFactory::rebuildMap()
         
         try {
             bool has_tag = false;
-            Q_FOREACH(const Tag::Ptr& tag, p->getTags()) {
+            for(const Tag::Ptr& tag : p->getTags()) {
                 tag_map_[tag].push_back(p);
                 has_tag = true;
             }
@@ -170,7 +170,7 @@ void NodeFactory::registerNodeType(NodeConstructor::Ptr provider, bool suppress_
 
 bool NodeFactory::isValidType(const std::string &type) const
 {
-    Q_FOREACH(NodeConstructor::Ptr p, constructors_) {
+    for(NodeConstructor::Ptr p : constructors_) {
         if(p->getType() == type) {
             return true;
         }
@@ -196,7 +196,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
         }
     }
 
-    foreach(NodeConstructor::Ptr p, constructors_) {
+    for(NodeConstructor::Ptr p : constructors_) {
         if(p->getType() == type) {
             return p;
         }
@@ -205,7 +205,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
     // cannot make box, type is unknown, trying different namespace
     std::string type_wo_ns = UUID::stripNamespace(type);
 
-    foreach(NodeConstructor::Ptr p, constructors_) {
+    for(NodeConstructor::Ptr p : constructors_) {
         std::string p_type_wo_ns = UUID::stripNamespace(p->getType());
 
         if(p_type_wo_ns == type_wo_ns) {

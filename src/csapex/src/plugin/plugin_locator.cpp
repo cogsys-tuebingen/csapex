@@ -82,7 +82,7 @@ void PluginLocator::setAutoReload(bool autoreload)
         clearFileWatcherCallbacks();
 
         if(autoreload) {
-            foreach(const std::string& name, loaded_libraries_) {
+            for(const std::string& name : loaded_libraries_) {
                 createFileWatcher(name);
             }
         }

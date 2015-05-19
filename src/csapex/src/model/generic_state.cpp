@@ -55,7 +55,7 @@ void GenericState::readYaml(const YAML::Node& node) {
 
 void GenericState::initializePersistentParameters()
 {
-    foreach(const std::string& name, persistent) {
+    for(const std::string& name : persistent) {
         (*parameter_added)(params[name].get());
     }
 }
@@ -193,7 +193,7 @@ std::vector<param::Parameter::Ptr> GenericState::getParameters() const
     for(std::vector<std::string>::const_iterator n = order.begin(); n != order.end(); ++n) {
         result.push_back(params.at(*n));
     }
-    foreach(const std::string& p, persistent) {
+    for(const std::string& p : persistent) {
         result.push_back(params.at(p));
     }
 
@@ -204,7 +204,7 @@ std::vector<param::Parameter::Ptr> GenericState::getTemporaryParameters() const
 {
     std::vector<param::Parameter::Ptr> result;
     typedef std::pair<const std::string&,bool> PAIR;
-    foreach(const PAIR& pair, temporary) {
+    for(const PAIR& pair : temporary) {
         result.push_back(params.at(pair.first));
     }
 

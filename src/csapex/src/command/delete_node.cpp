@@ -44,7 +44,7 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    foreach(Connectable* i, node_worker->getAllConnectors()) {
+    for(Connectable* i : node_worker->getAllConnectors()) {
         if(i->isConnected()) {
             add(i->removeAllConnectionsCmd());
         }

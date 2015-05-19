@@ -253,7 +253,7 @@ void ThreadPool::deleteEmptyGroupThreads(const std::set<int>& components)
 std::set<int> ThreadPool::assignGroupThreads()
 {
     std::set<int> components;
-    foreach(NodeWorker* node_worker, graph_->getAllNodeWorkers()) {
+    for(NodeWorker* node_worker : graph_->getAllNodeWorkers()) {
         if(custom_group_assignment_.find(node_worker) != custom_group_assignment_.end()) {
             // this worker has a custom group!
             continue;

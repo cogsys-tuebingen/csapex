@@ -360,14 +360,14 @@ void WidgetController::insertAvailableNodeTypes(QMenu* menu)
     std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tags = node_factory_->getTagMap();
 
     typedef std::pair<TagPtr, std::vector<NodeConstructor::Ptr> > PAIR;
-    Q_FOREACH(const PAIR& pair, tags) {
+    for(const PAIR& pair : tags) {
         const TagPtr& tag = pair.first;
         const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
 
         QMenu* submenu = new QMenu(tag->getName().c_str());
         menu->addMenu(submenu);
 
-        Q_FOREACH(const NodeConstructor::Ptr& proxy, constructors) {
+        for(const NodeConstructor::Ptr& proxy : constructors) {
             QIcon icon = proxy->getIcon();
             QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
@@ -391,7 +391,7 @@ void WidgetController::insertAvailableNodeTypes(QTreeWidget* tree)
     tree->setDragEnabled(true);
 
     typedef std::pair<TagPtr, std::vector<NodeConstructor::Ptr> > PAIR;
-    Q_FOREACH(const PAIR& pair, tags) {
+    for(const PAIR& pair : tags) {
         const TagPtr& tag = pair.first;
         const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
 
@@ -399,7 +399,7 @@ void WidgetController::insertAvailableNodeTypes(QTreeWidget* tree)
         submenu->setText(0, tag->getName().c_str());
         tree->addTopLevelItem(submenu);
 
-        Q_FOREACH(const NodeConstructor::Ptr& proxy, constructors) {
+        for(const NodeConstructor::Ptr& proxy : constructors) {
             QIcon icon = proxy->getIcon();
             std::string name = UUID::stripNamespace(proxy->getType());
 
@@ -419,13 +419,13 @@ QAbstractItemModel* WidgetController::listAvailableNodeTypes()
 {
     QStandardItemModel* model = new QStandardItemModel;
 
-    Q_FOREACH(const NodeConstructor::Ptr& proxy, node_factory_->getConstructors()) {
+    for(const NodeConstructor::Ptr& proxy : node_factory_->getConstructors()) {
         QString name = QString::fromStdString(UUID::stripNamespace(proxy->getType()));
         QString descr(proxy->getDescription().c_str());
         QString type(proxy->getType().c_str());
 
         QStringList tags;
-        Q_FOREACH(const Tag::Ptr& tag, proxy->getTags()) {
+        for(const Tag::Ptr& tag : proxy->getTags()) {
             tags << tag->getName().c_str();
         }
 

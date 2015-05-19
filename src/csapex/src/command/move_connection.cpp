@@ -48,7 +48,7 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
         } else {
             Trigger* trigger = dynamic_cast<Trigger*>(from);
             if(trigger) {
-                foreach(Slot* slot, trigger->getTargets()) {
+                for(Slot* slot : trigger->getTargets()) {
                     add(Command::Ptr(new DeleteConnection(from, slot)));
                     add(Command::Ptr(new AddConnection(to_uuid, slot->getUUID())));
                 }
@@ -66,7 +66,7 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
             Slot* in = dynamic_cast<Slot*>(from);
 
             if(in) {
-                foreach(Trigger* target, in->getSources()) {
+                for(Trigger* target : in->getSources()) {
                     add(Command::Ptr(new DeleteConnection(target, from)));
                     add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
                 }

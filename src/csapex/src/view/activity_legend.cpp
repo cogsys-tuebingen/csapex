@@ -102,7 +102,7 @@ void ActivityLegend::emitSelection()
 {
     QList<NodeWorker*> list;
 
-    foreach(QModelIndex i, selectedIndexes()) {
+    for(QModelIndex i : selectedIndexes()) {
         list.push_back(rows_[i.row()]);
     }
 

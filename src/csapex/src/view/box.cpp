@@ -141,10 +141,10 @@ void NodeBox::construct()
     QObject::connect(worker.get(), SIGNAL(errorHappened(bool)), this, SLOT(updateVisuals()));
 
 
-    Q_FOREACH(Input* input, worker->getMessageInputs()) {
+    for(Input* input : worker->getMessageInputs()) {
         registerInputEvent(input);
     }
-    Q_FOREACH(Output* output, worker->getMessageOutputs()) {
+    for(Output* output : worker->getMessageOutputs()) {
         registerOutputEvent(output);
     }
 

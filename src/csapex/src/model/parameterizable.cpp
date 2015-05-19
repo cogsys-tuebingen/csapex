@@ -79,7 +79,7 @@ void Parameterizable::removeParameterCallbacks(param::Parameter *param)
         }
     }
 
-    foreach(boost::signals2::connection c, connections_[param]) {
+    for(boost::signals2::connection c : connections_[param]) {
         c.disconnect();
     }
 }
@@ -155,7 +155,7 @@ void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter:
 {
     setParameterSetSilence(true);
     removeTemporaryParameters();
-    Q_FOREACH(param::Parameter::Ptr param, params) {
+    for(param::Parameter::Ptr param : params) {
         addTemporaryParameter(param);
     }
     setParameterSetSilence(false);
@@ -166,7 +166,7 @@ void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter:
 {
     setParameterSetSilence(true);
     removeTemporaryParameters();
-    Q_FOREACH(param::Parameter::Ptr param, params) {
+    for(param::Parameter::Ptr param : params) {
         addTemporaryParameter(param, cb);
     }
     setParameterSetSilence(false);
@@ -240,7 +240,7 @@ void Parameterizable::setParameterSetSilence(bool silent)
 void Parameterizable::removeTemporaryParameters()
 {
     // TODO: handle callbacks!
-    foreach(param::Parameter::Ptr param, parameter_state_->getTemporaryParameters()) {
+    for(param::Parameter::Ptr param : parameter_state_->getTemporaryParameters()) {
         removeParameterCallbacks(param.get());
     }
 

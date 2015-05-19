@@ -41,7 +41,7 @@ void MessageRendererManager::loadPlugins()
     renderers.clear();
 
     typedef std::pair<std::string, PluginManager<csapex::MessageRenderer>::Constructor> PAIR;
-    foreach(PAIR pair, manager_->availableClasses()) {
+    for(PAIR pair : manager_->availableClasses()) {
         try {
             MessageRenderer::Ptr renderer(pair.second());
             renderers[renderer->messageType()] = renderer;

@@ -22,7 +22,7 @@ bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) 
     bool contains_all = true;
     for(const QString& qry : qrys) {
         bool tagged = false;
-        Q_FOREACH(const QString& t, tags) {
+        for(const QString& t : tags) {
             if(t.contains(qry, Qt::CaseInsensitive)) {
                 tagged = true;
             }

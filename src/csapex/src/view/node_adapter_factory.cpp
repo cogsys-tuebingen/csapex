@@ -49,7 +49,7 @@ void NodeAdapterFactory::loadPlugins()
 void NodeAdapterFactory::rebuildPrototypes()
 {
     typedef std::pair<std::string, PluginConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
-    Q_FOREACH(const ADAPTER_PAIR& p, node_adapter_manager_->availableClasses()) {
+    for(const ADAPTER_PAIR& p : node_adapter_manager_->availableClasses()) {
         const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;
 
         NodeAdapterBuilder::Ptr builder = constructor.construct();
