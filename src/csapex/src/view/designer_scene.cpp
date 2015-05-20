@@ -995,7 +995,7 @@ void DesignerScene::setSelection(const NodeBox *box)
 
     for(QGraphicsItem* item : items()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
-        if(proxy->getBox() == box) {
+        if(proxy && proxy->getBox() == box) {
             proxy->setSelected(true);
         }
     }
