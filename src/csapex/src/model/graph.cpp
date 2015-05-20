@@ -333,8 +333,7 @@ void Graph::assignLevels()
                 has_dynamic_input = true;
             }
 
-            for(const auto& connection_ptr : input->getConnections()) {
-                const auto& connection = connection_ptr.lock();
+            for(const auto& connection : input->getConnections()) {
                 const auto& parent_output = connection->from();
                 if(parent_output->isDynamic()) {
                     has_dynamic_parent_output = true;
@@ -395,7 +394,7 @@ void Graph::assignLevels()
 
             for(Input* i : current->getAllInputs()) {
                 if(i->isConnected()) {
-                    ConnectionPtr connection = i->getConnections().front().lock();
+                    ConnectionPtr connection = i->getConnections().front();
                     Output* out = dynamic_cast<Output*>(connection->from());
                     if(out) {
                         NodeWorker* parent = findNodeWorkerForConnector(out->getUUID());

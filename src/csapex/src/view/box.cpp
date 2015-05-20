@@ -83,7 +83,7 @@ void NodeBox::setupUi()
 
     setAttribute( Qt::WA_TranslucentBackground, true );
     setAttribute(Qt::WA_NoSystemBackground, true);
-//    setBackgroundMode (Qt::NoBackground, true);
+    //    setBackgroundMode (Qt::NoBackground, true);
 
     updateVisuals();
 
@@ -436,10 +436,28 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     bool idle = worker->getState() == NodeWorker::State::IDLE ||
             worker->getState() == NodeWorker::State::ENABLED;
 
+    QString state;
+    switch(worker->getState()) {
+    case NodeWorker::State::IDLE:
+        state = "idle"; break;
+    case NodeWorker::State::ENABLED:
+        state = "enabled"; break;
+    case NodeWorker::State::FIRED:
+        state = "fired"; break;
+    case NodeWorker::State::PROCESSING:
+        state = "processing"; break;
+    case NodeWorker::State::WAITING_FOR_OUTPUTS:
+        state = "waiting_output"; break;
+    case NodeWorker::State::WAITING_FOR_RESET:
+        state = "waiting_reset"; break;
+    default:
+        state = "?"; break;
+    }
+
     info_exec->setVisible(true);
     info_exec->setText(QString("<img src=\":/") +
                        (idle ? "idle" : "running") +
-                       ".png\" /> " + QString::number((int) worker->getState()));
+                       ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> " + state);
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;

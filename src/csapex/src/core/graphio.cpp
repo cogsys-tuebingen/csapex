@@ -89,8 +89,8 @@ void GraphIO::saveConnections(YAML::Node &yaml)
                 }
                 YAML::Node connection;
                 connection["uuid"] = o->getUUID();
-                for(ConnectionWeakPtr c : o->getConnections()) {
-                    connection["targets"].push_back(c.lock()->to()->getUUID());
+                for(ConnectionPtr c : o->getConnections()) {
+                    connection["targets"].push_back(c->to()->getUUID());
                 }
 
                 yaml["connections"].push_back(connection);

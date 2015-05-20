@@ -138,15 +138,15 @@ void Input::removeAllConnectionsNotUndoable()
     }
 }
 
-void Input::addConnection(ConnectionWeakPtr connection)
+void Input::addConnection(ConnectionPtr connection)
 {
     transition_->addConnection(connection);
     Connectable::addConnection(connection);
 }
 
-void Input::removeConnection(ConnectionWeakPtr connection)
+void Input::removeConnection(ConnectionPtr connection)
 {
-    transition_->removeConnection(connection);
+    transition_->fadeConnection(connection);
     Connectable::removeConnection(connection);
 }
 
@@ -191,7 +191,7 @@ Connectable *Input::getSource() const
     if(connections_.empty()) {
         return nullptr;
     } else {
-        return connections_.front().lock()->from();
+        return connections_.front()->from();
     }
 }
 

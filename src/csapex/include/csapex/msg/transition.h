@@ -20,10 +20,14 @@ public:
 
     NodeWorker* getNode() const;
 
-    void addConnection(ConnectionWeakPtr connection);
-    void removeConnection(ConnectionWeakPtr connection);
+    void addConnection(ConnectionPtr connection);
+    void fadeConnection(ConnectionPtr connection);
 
+    bool hasEstablishedConnection() const;
     bool hasUnestablishedConnection() const;
+    bool hasFadingConnection() const;
+
+    void removeFadingConnections();
 
 protected:
     virtual void connectionAdded(Connection* connection);
@@ -32,13 +36,15 @@ protected:
     bool areConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isConnection(Connection::State state) const;
 
-    void establishConnection(ConnectionWeakPtr connection);
+    void establishConnection(ConnectionPtr connection);
 
 protected:
     NodeWorker* node_;
 
-    std::vector<ConnectionWeakPtr> established_connections_;
-    std::vector<ConnectionWeakPtr> unestablished_connections_;
+    std::vector<ConnectionPtr> established_connections_;
+    std::vector<ConnectionPtr> unestablished_connections_;
+    std::vector<ConnectionPtr> fading_connections_;
+
     mutable std::recursive_mutex sync;
 };
 

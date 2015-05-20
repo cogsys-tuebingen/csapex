@@ -34,8 +34,7 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     if(is_output) {
         Output* out = dynamic_cast<Output*>(from);
         if(out) {
-            for(ConnectionWeakPtr connection : out->getConnections()) {
-                ConnectionPtr c = connection.lock();
+            for(ConnectionPtr c : out->getConnections()) {
                 if(!c) {
                     continue;
                 }

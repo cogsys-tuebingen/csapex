@@ -124,8 +124,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         if(c->isOutput()) {
             Output* out = dynamic_cast<Output*> (c);
             if(out) {
-                for(ConnectionWeakPtr connection : out->getConnections()) {
-                    ConnectionPtr c = connection.lock();
+                for(ConnectionPtr c : out->getConnections()) {
                     if(!c) {
                         continue;
                     }

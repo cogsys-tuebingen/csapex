@@ -63,9 +63,9 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
-    std::vector<ConnectionWeakPtr> getConnections() const;
-    virtual void addConnection(ConnectionWeakPtr connection);
-    virtual void removeConnection(ConnectionWeakPtr connection);
+    std::vector<ConnectionPtr> getConnections() const;
+    virtual void addConnection(ConnectionPtr connection);
+    virtual void removeConnection(ConnectionPtr connection);
 
     virtual bool isConnected() const;
 
@@ -135,7 +135,7 @@ protected:
     std::string label_;
 
     ConnectionType::ConstPtr type_;
-    std::vector<ConnectionWeakPtr> connections_;
+    std::vector<ConnectionPtr> connections_;
 
     int count_;
     int seq_no_;

@@ -33,8 +33,8 @@ public:
         return true;
     }
 
-    void addConnection(ConnectionWeakPtr connection) override;
-    void removeConnection(ConnectionWeakPtr connection) override;
+    void addConnection(ConnectionPtr connection) override;
+    void removeConnection(ConnectionPtr connection) override;
     bool canConnectTo(Connectable* other_side, bool move) const;
 
     void inputMessage(ConnectionType::ConstPtr message);

@@ -1068,12 +1068,13 @@ void NodeWorker::notifyMessagesProcessed()
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(sync);
-    //    node_->aerr << "notifyMessagesProcessed" << std::endl;
+    {
+        std::lock_guard<std::recursive_mutex> lock(state_mutex_);
+        //    node_->aerr << "notifyMessagesProcessed" << std::endl;
 
-    apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS);
-    apex_assert_hard(transition_out_->canSendMessages());
-    apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
+        apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS);
+        apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
+    }
 
     setState(State::WAITING_FOR_RESET);
 
@@ -1098,17 +1099,6 @@ void NodeWorker::prepareForNextProcess()
         apex_assert_hard(state_ == State::WAITING_FOR_RESET);
         apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
         apex_assert_hard(transition_out_->canSendMessages());
-
-        static int iter = 0;
-        for(Input* cin : inputs_) {
-            for(ConnectionWeakPtr cw : cin->getConnections()) {
-                apex_assert_hard(cw.lock()->getState() != Connection::State::UNREAD);
-                apex_assert_hard(cw.lock()->getState() != Connection::State::DONE);
-                apex_assert_hard(cw.lock()->getState() != Connection::State::READY_TO_RECEIVE);
-                apex_assert_hard(cw.lock()->getState() == Connection::State::READ);
-            }
-        }
-        ++iter;
 
         setState(State::IDLE);
 
@@ -1143,11 +1133,18 @@ void NodeWorker::checkTransitions()
     }
 
 
+    // TODO: can this be moved into transition?
     if(transition_in_->hasUnestablishedConnection()) {
         transition_in_->establish();
     }
     if(transition_out_->hasUnestablishedConnection()) {
         transition_out_->establish();
+    }
+    if(transition_in_->hasFadingConnection()) {
+        transition_in_->removeFadingConnections();
+    }
+    if(transition_out_->hasFadingConnection()) {
+        transition_out_->removeFadingConnections();
     }
     if(transition_in_->hasUnestablishedConnection() || transition_out_->hasUnestablishedConnection()) {
 //        setState(State::IDLE);
@@ -1348,7 +1345,9 @@ void NodeWorker::tick()
             static int ticks = 0;
             if(isTickEnabled() && isSource() && node_->canTick() /*&& ticks++ == 0*/) {
 //                std::cerr << "should tick, state is " << (int)getState() << ", can send messages is " << transition_out_->canSendMessages() << std::endl;
-                if(transition_out_->canSendMessages()) {
+                checkTransitions();
+
+                if(transition_out_->canSendMessages() && !transition_out_->hasFadingConnection()) {
                     //            std::cerr << "ticks" << std::endl;
                     apex_assert_hard(state == State::IDLE || state == State::ENABLED);
                     if(state == State::IDLE) {

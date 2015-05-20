@@ -60,29 +60,29 @@ int Output::countConnections()
     return connections_.size();
 }
 
-std::vector<ConnectionWeakPtr> Output::getConnections() const
+std::vector<ConnectionPtr> Output::getConnections() const
 {
     return connections_;
 }
 
 
-void Output::addConnection(ConnectionWeakPtr connection)
+void Output::addConnection(ConnectionPtr connection)
 {
     transition_->addConnection(connection);
     Connectable::addConnection(connection);
 }
 
-void Output::removeConnection(ConnectionWeakPtr connection)
+void Output::removeConnection(ConnectionPtr connection)
 {
-    transition_->removeConnection(connection);
+    transition_->fadeConnection(connection);
     Connectable::removeConnection(connection);
 }
 
 void Output::removeConnection(Connectable* other_side)
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    for(std::vector<ConnectionWeakPtr>::iterator i = connections_.begin(); i != connections_.end();) {
-        ConnectionPtr c = i->lock();
+    for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+        ConnectionPtr c = *i;
         if(c->to() == other_side) {
             other_side->removeConnection(this);
 
@@ -108,8 +108,8 @@ Command::Ptr Output::removeAllConnectionsCmd()
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
-    for(ConnectionWeakPtr connection : connections_) {
-        Command::Ptr removeThis(new command::DeleteConnection(this, connection.lock()->to()));
+    for(ConnectionPtr connection : connections_) {
+        Command::Ptr removeThis(new command::DeleteConnection(this, connection->to()));
         removeAll->add(removeThis);
     }
 
@@ -119,8 +119,8 @@ Command::Ptr Output::removeAllConnectionsCmd()
 void Output::removeAllConnectionsNotUndoable()
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    for(std::vector<ConnectionWeakPtr>::iterator i = connections_.begin(); i != connections_.end();) {
-        i->lock()->to()->removeConnection(this);
+    for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+        (*i)->to()->removeConnection(this);
         i = connections_.erase(i);
     }
 
@@ -149,8 +149,8 @@ bool Output::isConnectionPossible(Connectable *other_side)
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    for(ConnectionWeakPtr connection : connections_) {
-        if(!connection.lock()->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+    for(ConnectionPtr connection : connections_) {
+        if(!connection->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
@@ -163,13 +163,7 @@ bool Output::isConnected() const
         return true;
     }
 
-    for(const auto& c : connections_) {
-        auto connection = c.lock();
-        if(connection->to()->isEnabled() && connection->isEstablished()) {
-            return true;
-        }
-    }
-    return false;
+    return transition_->hasEstablishedConnection();
 }
 
 bool Output::isForced() const
@@ -177,34 +171,28 @@ bool Output::isForced() const
     if(!force_send_message_) {
         return false;
     }
-    for(const auto& c : connections_) {
-        auto connection = c.lock();
-        if(connection->to()->isEnabled() && connection->isEstablished()) {
-            return false;
-        }
-    }
-    return true;
+
+    return !transition_->hasEstablishedConnection();
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
 {
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    for(ConnectionWeakPtr connection : connections_) {
-        Q_EMIT(connectionInProgress(connection.lock()->to(), other_side));
+    for(ConnectionPtr connection : connections_) {
+        Q_EMIT(connectionInProgress(connection->to(), other_side));
     }
 }
 
 void Output::validateConnections()
 {
-    for(ConnectionWeakPtr connection : connections_) {
-        connection.lock()->to()->validateConnections();
+    for(ConnectionPtr connection : connections_) {
+        connection->to()->validateConnections();
     }
 }
 
 bool Output::canSendMessages() const
 {
-    for(ConnectionWeakPtr connection : connections_) {
-        ConnectionPtr c = connection.lock();
+    for(ConnectionPtr c : connections_) {
         if(!c) {
             continue;
         }

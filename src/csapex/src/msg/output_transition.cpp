@@ -35,13 +35,12 @@ void OutputTransition::establish()
     lock.unlock();
 
     if(!unestablished_connections.empty()) {
-        for(auto cw : unestablished_connections) {
-            ConnectionPtr c = cw.lock();
+        for(auto c : unestablished_connections) {
             if(!c->isSourceEstablished()) {
                 c->establishSource();
             }
             if(c->isSourceEstablished() && c->isSinkEstablished()) {
-                establishConnection(cw);
+                establishConnection(c);
             }
         }
     }
@@ -59,12 +58,11 @@ bool OutputTransition::canSendMessages() const
             }
         }
     }
-    //    for(auto cw : established_connections_) {
-    //        ConnectionPtr c = cw.lock();
-    //        if(!c->isEstablished()) {
-    //            return false;
-    //        }
-    //    }
+
+//    if(hasFadingConnection()) {
+//        return false;
+//    }
+
     return true;
 }
 
@@ -91,8 +89,7 @@ void OutputTransition::sendMessages()
     bool multipart_are_done = true;
 
     for(Input* in : node_->getAllInputs()) {
-        for(auto& connection : in->getConnections()) {
-            ConnectionPtr c = connection.lock();
+        for(auto& c : in->getConnections()) {
             int f = c->getMessage()->flags.data;
             if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
                 has_multipart = true;
@@ -115,8 +112,7 @@ void OutputTransition::sendMessages()
 
 
     if(has_multipart) {
-        for(ConnectionWeakPtr c : established_connections_) {
-            ConnectionPtr connection = c.lock();
+        for(ConnectionPtr connection : established_connections_) {
             Output* out = dynamic_cast<Output*>(connection->from());
             if(out) {
                 bool is_last = multipart_are_done;
@@ -148,13 +144,6 @@ void OutputTransition::updateOutputs()
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     if(!areConnections(Connection::State::DONE)) {
-        //        std::cerr << node_->getUUID() << ": cannot continue: connections are: \n";
-        for(auto cw : established_connections_) {
-            ConnectionPtr c = cw.lock();
-            //            std::cerr << c->from()->getUUID() << " => " << c->to()->getUUID();
-            //            std::cerr << ": " << (int) c->getState() << '\n';
-        }
-        //        std::cerr.flush();
         return;
     }
 
@@ -174,14 +163,20 @@ void OutputTransition::updateOutputs()
         if(areConnections(Connection::State::DONE)) {
             //            std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
             outputs_done_ = true;
-            node_->notifyMessagesProcessed();
             //            establish();
+
+
+            if(hasFadingConnection()) {
+                removeFadingConnections();
+            }
+
+            node_->notifyMessagesProcessed();
         }
 
     } else {
         //        std::cerr << "fill again: " << node_->getUUID() << std::endl;
         //        apex_assert_hard(areConnections(Connection::State::READ));
-        //        for(ConnectionWeakPtr c : connections_) {
+        //        for(ConnectionPtr c : connections_) {
         //            c.lock()->setState(Connection::State::READY_TO_RECEIVE);
         //        }
         setConnectionsReadyToReceive();
@@ -206,9 +201,7 @@ void OutputTransition::fillConnections()
     apex_assert_hard(!areOutputsIdle());
     apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
-    for(ConnectionWeakPtr c : established_connections_) {
-        ConnectionPtr connection = c.lock();
-
+    for(ConnectionPtr connection : established_connections_) {
         if(connection->isEnabled()) {
             Output* out = dynamic_cast<Output*>(connection->from());
             apex_assert_hard(out);
@@ -219,8 +212,7 @@ void OutputTransition::fillConnections()
         }
     }
 
-    for(ConnectionWeakPtr c : established_connections_) {
-        ConnectionPtr connection = c.lock();
+    for(ConnectionPtr connection : established_connections_) {
         if(connection->isEnabled()) {
             //            apex_assert_hard(connection->getState() == Connection::State::UNREAD);
             connection->notifyMessageSet();
@@ -242,8 +234,7 @@ void OutputTransition::setConnectionsReadyToReceive()
 
     apex_assert_hard(areConnections(Connection::State::DONE, Connection::State::NOT_INITIALIZED));
 
-    for(ConnectionWeakPtr c : established_connections_) {
-        auto connection = c.lock();
+    for(ConnectionPtr connection : established_connections_) {
         if(connection->isEnabled()) {
             connection->setState(Connection::State::READY_TO_RECEIVE);
         }

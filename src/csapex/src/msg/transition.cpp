@@ -19,15 +19,44 @@ Transition::~Transition()
 {
 
 }
-void Transition::addConnection(ConnectionWeakPtr connection)
+void Transition::addConnection(ConnectionPtr connection)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     unestablished_connections_.push_back(connection);
-
-    ConnectionPtr c = connection.lock();
     lock.unlock();
 
-    connectionAdded(c.get());
+    connectionAdded(connection.get());
+}
+
+void Transition::fadeConnection(ConnectionPtr connection)
+{
+    std::lock_guard<std::recursive_mutex> lock(sync);
+    bool contained = false;
+    for(auto it = established_connections_.begin(); it != established_connections_.end(); ++it) {
+        if(*it == connection) {
+            contained = true;
+            break;
+        }
+    }
+    apex_assert_hard(contained);
+
+    fading_connections_.push_back(connection);
+}
+
+void Transition::removeFadingConnections()
+{
+    std::lock_guard<std::recursive_mutex> lock(sync);
+    for(ConnectionPtr connection : fading_connections_) {
+        for(auto it = established_connections_.begin(); it != established_connections_.end(); ) {
+            const auto& c = *it;
+            if(c == connection) {
+                it = established_connections_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    fading_connections_.clear();
 }
 
 void Transition::connectionAdded(Connection *connection)
@@ -35,19 +64,18 @@ void Transition::connectionAdded(Connection *connection)
 
 }
 
-void Transition::establishConnection(ConnectionWeakPtr connection)
+void Transition::establishConnection(ConnectionPtr connection)
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
     for(auto it = unestablished_connections_.begin(); it != unestablished_connections_.end(); ) {
-        ConnectionWeakPtr c = *it;
-        if(connection.lock() == c.lock()) {
-            auto cptr = c.lock();
-            if(!cptr->isEstablished()) {
-                cptr->establish();
+        ConnectionPtr c = *it;
+        if(connection == c) {
+            if(!c->isEstablished()) {
+                c->establish();
             }
 
             it = unestablished_connections_.erase(it);
-            established_connections_.push_back(cptr);
+            established_connections_.push_back(c);
         } else {
             ++it;
         }
@@ -58,8 +86,7 @@ void Transition::establishConnection(ConnectionWeakPtr connection)
 bool Transition::areConnections(Connection::State state) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
-    for(ConnectionWeakPtr c : established_connections_) {
-        ConnectionPtr connection = c.lock();
+    for(ConnectionPtr connection : established_connections_) {
         if(connection->isEnabled() && connection->getState() != state) {
             return false;
         }
@@ -69,8 +96,7 @@ bool Transition::areConnections(Connection::State state) const
 bool Transition::areConnections(Connection::State a, Connection::State b) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
-    for(ConnectionWeakPtr c : established_connections_) {
-        ConnectionPtr connection = c.lock();
+    for(ConnectionPtr connection : established_connections_) {
         auto s = connection->getState();
         if(connection->isEnabled() && s != a && s != b) {
             return false;
@@ -82,8 +108,7 @@ bool Transition::areConnections(Connection::State a, Connection::State b) const
 bool Transition::areConnections(Connection::State a, Connection::State b, Connection::State c) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
-    for(ConnectionWeakPtr cwp : established_connections_) {
-        ConnectionPtr connection = cwp.lock();
+    for(ConnectionPtr connection : established_connections_) {
         auto s = connection->getState();
         if(connection->isEnabled() && s != a && s != b && s != c) {
             return false;
@@ -95,8 +120,7 @@ bool Transition::areConnections(Connection::State a, Connection::State b, Connec
 bool Transition::isConnection(Connection::State state) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
-    for(ConnectionWeakPtr c : established_connections_) {
-        ConnectionPtr connection = c.lock();
+    for(ConnectionPtr connection : established_connections_) {
         if(connection->isEnabled() && connection->getState() == state) {
             return true;
         }
@@ -104,23 +128,22 @@ bool Transition::isConnection(Connection::State state) const
     return false;
 }
 
-void Transition::removeConnection(ConnectionWeakPtr connection)
+bool Transition::hasEstablishedConnection() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync);
-    for(auto it = established_connections_.begin(); it != established_connections_.end(); ) {
-        const auto& c = *it;
-        if(c.lock() == connection.lock()) {
-            it = established_connections_.erase(it);
-        } else {
-            ++it;
-        }
-    }
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return !established_connections_.empty();
 }
 
 bool Transition::hasUnestablishedConnection() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     return !unestablished_connections_.empty();
+}
+
+bool Transition::hasFadingConnection() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return !fading_connections_.empty();
 }
 
 NodeWorker* Transition::getNode() const

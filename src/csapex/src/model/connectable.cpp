@@ -215,23 +215,22 @@ void Connectable::setSequenceNumber(int seq_no)
     seq_no_ = seq_no;
 }
 
-void Connectable::addConnection(ConnectionWeakPtr connection)
+void Connectable::addConnection(ConnectionPtr connection)
 {
     connections_.push_back(connection);
 }
 
-void Connectable::removeConnection(ConnectionWeakPtr connection)
+void Connectable::removeConnection(ConnectionPtr connection)
 {
     for(auto it = connections_.begin(); it != connections_.end(); ) {
-        const auto& c = *it;
-        if(c.lock() == connection.lock()) {
+        if(*it == connection) {
             it = connections_.erase(it);
         } else {
             ++it;
         }
     }
 }
-std::vector<ConnectionWeakPtr> Connectable::getConnections() const
+std::vector<ConnectionPtr> Connectable::getConnections() const
 {
     return connections_;
 }

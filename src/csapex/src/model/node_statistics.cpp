@@ -96,9 +96,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             targets->setText(0, "Target");
-            for(ConnectionWeakPtr connection : connector->getConnections()) {
+            for(ConnectionPtr connection : connector->getConnections()) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-                Connectable* input = connection.lock()->to();
+                Connectable* input = connection->to();
                 target_widget->setText(0, input->getUUID().c_str());
                 //target_widget->setIcon(1, target->getNode()->getIcon());
                 //target_widget->setText(1, target->getNode()->getType().c_str());

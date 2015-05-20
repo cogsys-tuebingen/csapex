@@ -80,7 +80,7 @@ void StaticOutput::commitMessages()
 //    // wait for all connected inputs to be able to receive
 //    //  * inputs can only be connected to this output since they are 1:1
 //    std::vector<Connection*> targets;
-//    for(ConnectionWeakPtr connection : connections_) {
+//    for(ConnectionPtr connection : connections_) {
 //        ConnectionPtr c = connection.lock();
 //        if(!c) {
 //            continue;

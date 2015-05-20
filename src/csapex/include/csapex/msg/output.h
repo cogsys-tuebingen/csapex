@@ -44,8 +44,8 @@ public:
 
     State getState() const;
 
-    virtual void addConnection(ConnectionWeakPtr connection) override;
-    void removeConnection(ConnectionWeakPtr connection) override;
+    virtual void addConnection(ConnectionPtr connection) override;
+    void removeConnection(ConnectionPtr connection) override;
 
     virtual void disable() override;
 
@@ -66,7 +66,7 @@ public:
     virtual void validateConnections() override;
 
     int countConnections();
-    std::vector<ConnectionWeakPtr> getConnections() const;
+    std::vector<ConnectionPtr> getConnections() const;
 
     CommandPtr removeAllConnectionsCmd() override;
     CommandPtr removeConnectionCmd(Connection *connection);

@@ -194,31 +194,26 @@ bool Connection::downLevel() const
 void Connection::setState(State s)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-//    std::cerr << "SET connection " <<  from_->getUUID() << " => " << to_->getUUID() << ": ";
+
     switch (s) {
     case State::READY_TO_RECEIVE:
-//        std::cerr << "ready to receive";
         apex_assert_hard(state_ == State::DONE || state_ == State::NOT_INITIALIZED);
         break;
     case State::UNREAD:
-//        std::cerr << "unread";
         apex_assert_hard(state_ == State::READY_TO_RECEIVE);
         apex_assert_hard(message_ != nullptr);
         break;
     case State::READ:
-//        std::cerr << "read";
         apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
         apex_assert_hard(message_ != nullptr);
         break;
     case State::DONE:
-//        std::cerr << "done";
-        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ); // |
+        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
         apex_assert_hard(message_ != nullptr);
         break;
     default:
         break;
     }
-//    std::cerr << std::endl;
 
     state_ = s;
 }

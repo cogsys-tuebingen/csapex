@@ -25,13 +25,12 @@ void InputTransition::establish()
     lock.unlock();
 
     if(!unestablished_connections.empty()) {
-        for(auto cw : unestablished_connections) {
-            ConnectionPtr c = cw.lock();
+        for(auto c : unestablished_connections) {
             if(!c->isSinkEstablished()) {
                 c->establishSink();
             }
             if(c->isSourceEstablished() && c->isSinkEstablished()) {
-                establishConnection(cw);
+                establishConnection(c);
             }
         }
     }
@@ -75,8 +74,7 @@ void InputTransition::fireIfPossible()
                 !areConnections(Connection::State::READ)) {
             if(node_->getState() == NodeWorker::State::ENABLED) {
 
-                for(const auto& c : established_connections_) {
-                    auto connection = c.lock();
+                for(const auto& connection : established_connections_) {
                     if(connection->getState() == Connection::State::NOT_INITIALIZED) {
                         if(connection->isEstablished()) {
                             return;
@@ -98,8 +96,7 @@ void InputTransition::notifyMessageProcessed()
     bool has_multipart = false;
     bool multipart_are_done = true;
 
-    for(auto& connection : established_connections_) {
-        ConnectionPtr c = connection.lock();
+    for(auto& c : established_connections_) {
         int f = c->getMessage()->flags.data;
         if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
             has_multipart = true;
@@ -110,8 +107,7 @@ void InputTransition::notifyMessageProcessed()
     }
 
     if(!multipart_are_done) {
-        for(auto& connection : established_connections_) {
-            ConnectionPtr c = connection.lock();
+        for(auto& c : established_connections_) {
             int f = c->getMessage()->flags.data;
 
             if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
@@ -121,16 +117,20 @@ void InputTransition::notifyMessageProcessed()
         }
 
     } else {
-        for(auto& connection : established_connections_) {
-            ConnectionPtr c = connection.lock();
+        for(auto& c : established_connections_) {
             c->setState(Connection::State::DONE);
         }
+
         apex_assert_hard(areConnections(Connection::State::DONE));
 
-        for(auto& connection : established_connections_) {
-            ConnectionPtr c = connection.lock();
+        for(auto& c : established_connections_) {
             c->notifyMessageProcessed();
         }
+
+        if(hasFadingConnection()) {
+            removeFadingConnections();
+        }
+
     }
 }
 
@@ -152,7 +152,7 @@ void InputTransition::fire()
         if(input->isDynamic() && input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
-            dynamic_connection = connections.front().lock();
+            dynamic_connection = connections.front();
             auto s = dynamic_connection->getState();
             apex_assert_hard(s == Connection::State::READ ||
                              s == Connection::State::UNREAD);
@@ -192,7 +192,7 @@ void InputTransition::fire()
             } else {
                 auto connections = input->getConnections();
                 apex_assert_hard(connections.size() == 1);
-                auto connection = connections.front().lock();
+                auto connection = connections.front();
                 auto s = connection->getState();
                 apex_assert_hard(s == Connection::State::READ ||
                                  s == Connection::State::UNREAD ||
@@ -206,8 +206,7 @@ void InputTransition::fire()
         }
     }
 
-    for(auto& connection : established_connections_) {
-        ConnectionPtr c = connection.lock();
+    for(auto& c : established_connections_) {
         auto s = c->getState();
         apex_assert_hard(c->isEstablished());
         apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
@@ -218,8 +217,7 @@ void InputTransition::fire()
     }
 
     apex_assert_hard(!areConnections(Connection::State::DONE));
-    for(auto& connection : established_connections_) {
-        ConnectionPtr c = connection.lock();
+    for(auto& c : established_connections_) {
         if(c->getState() != Connection::State::DONE) {
             c->setState(Connection::State::READ);
         }
