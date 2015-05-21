@@ -103,7 +103,7 @@ bool Transition::areConnections(Connection::State state) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
-        if(connection->isEnabled() && connection->getState() != state) {
+        if(connection->isSinkEnabled() && connection->getState() != state) {
             return false;
         }
     }
@@ -114,7 +114,7 @@ bool Transition::areConnections(Connection::State a, Connection::State b) const
     std::lock_guard<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
         auto s = connection->getState();
-        if(connection->isEnabled() && s != a && s != b) {
+        if(connection->isSinkEnabled() && s != a && s != b) {
             return false;
         }
     }
@@ -126,7 +126,7 @@ bool Transition::areConnections(Connection::State a, Connection::State b, Connec
     std::lock_guard<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
         auto s = connection->getState();
-        if(connection->isEnabled() && s != a && s != b && s != c) {
+        if(connection->isSinkEnabled() &&  s != a && s != b && s != c) {
             return false;
         }
     }
@@ -137,7 +137,7 @@ bool Transition::isConnection(Connection::State state) const
 {
     std::lock_guard<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
-        if(connection->isEnabled() && connection->getState() == state) {
+        if(connection->isSinkEnabled() &&  connection->getState() == state) {
             return true;
         }
     }

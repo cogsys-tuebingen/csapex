@@ -218,7 +218,7 @@ void OutputTransition::fillConnections()
     apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
     for(ConnectionPtr connection : established_connections_) {
-        if(connection->isEnabled()) {
+        if(connection->isSinkEnabled()) {
             Output* out = dynamic_cast<Output*>(connection->from());
             apex_assert_hard(out);
 
@@ -229,7 +229,7 @@ void OutputTransition::fillConnections()
     }
 
     for(ConnectionPtr connection : established_connections_) {
-        if(connection->isEnabled()) {
+        if(connection->isSinkEnabled()) {
             //            apex_assert_hard(connection->getState() == Connection::State::UNREAD);
             connection->notifyMessageSet();
         }
@@ -251,7 +251,7 @@ void OutputTransition::setConnectionsReadyToReceive()
     apex_assert_hard(areConnections(Connection::State::DONE, Connection::State::NOT_INITIALIZED));
 
     for(ConnectionPtr connection : established_connections_) {
-        if(connection->isEnabled()) {
+        if(connection->isSinkEnabled()) {
             connection->setState(Connection::State::READY_TO_RECEIVE);
         }
     }

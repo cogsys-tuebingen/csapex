@@ -94,6 +94,7 @@ void Connectable::disable()
     if(enabled_) {
         enabled_ = false;
         Q_EMIT enabled(enabled_);
+        enabled_changed(enabled_);
     }
 }
 
@@ -103,6 +104,7 @@ void Connectable::enable()
     if(!enabled_) {
         enabled_ = true;
         Q_EMIT enabled(enabled_);
+        enabled_changed(enabled_);
     }
 }
 

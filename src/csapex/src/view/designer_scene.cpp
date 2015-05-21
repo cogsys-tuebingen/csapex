@@ -659,7 +659,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
 
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
-    ccs.disabled = !connection.isEnabled();
+    ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
     ccs.established = connection.isEstablished();
     ccs.source_established = connection.isSourceEstablished();
     ccs.sink_established = connection.isSinkEstablished();

@@ -419,6 +419,8 @@ void NodeWorker::connectConnector(Connectable *c)
     QObject::connect(c, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIO()));
     QObject::connect(c, SIGNAL(connectionEnabled(bool)), this, SLOT(checkIO()));
     QObject::connect(c, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(checkIO()));
+
+    c->enabled_changed.connect(std::bind(&NodeWorker::checkIO, this));
 }
 
 
@@ -1343,9 +1345,7 @@ void NodeWorker::tick()
         std::lock_guard<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-
-            static int ticks = 0;
-            if(isTickEnabled() && isSource() && node_->canTick() /*&& ticks++ == 0*/) {
+            if(isTickEnabled() && isSource() && node_->canTick()) {
                 checkTransitions();
 
                 if(transition_out_->canSendMessages() && !transition_out_->hasFadingConnection()) {

@@ -63,7 +63,8 @@ public:
     ConnectionTypeConstPtr getMessage() const;
     void notifyMessageProcessed();
 
-    bool isEnabled() const;
+    bool isSourceEnabled() const;
+    bool isSinkEnabled() const;
 
     void establishSource();
     void establishSink();
@@ -85,6 +86,9 @@ public:
     boost::signals2::signal<void()> new_message;
     boost::signals2::signal<void()> endpoint_established;
     boost::signals2::signal<void()> connection_established;
+
+    boost::signals2::signal<void(bool)> source_enable_changed;
+    boost::signals2::signal<void(bool)> sink_enabled_changed;
 
     boost::signals2::signal<void(Fulcrum*)> fulcrum_added;
     boost::signals2::signal<void(Fulcrum*,bool dropped)> fulcrum_moved;

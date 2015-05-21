@@ -38,6 +38,9 @@ Connection::Connection(Connectable *from, Connectable *to, int id)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 
+    from->enabled_changed.connect(source_enable_changed);
+    to->enabled_changed.connect(sink_enabled_changed);
+
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
 }
@@ -48,6 +51,9 @@ Connection::Connection(Output *from, Input *to)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+
+    from->enabled_changed.connect(source_enable_changed);
+    to->enabled_changed.connect(sink_enabled_changed);
 }
 
 Connection::Connection(Output *from, Input *to, int id)
@@ -56,6 +62,9 @@ Connection::Connection(Output *from, Input *to, int id)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+
+    from->enabled_changed.connect(source_enable_changed);
+    to->enabled_changed.connect(sink_enabled_changed);
 }
 
 
@@ -65,6 +74,9 @@ Connection::Connection(Trigger *from, Slot *to)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+
+    from->enabled_changed.connect(source_enable_changed);
+    to->enabled_changed.connect(sink_enabled_changed);
 }
 
 Connection::Connection(Trigger *from, Slot *to, int id)
@@ -73,6 +85,9 @@ Connection::Connection(Trigger *from, Slot *to, int id)
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
+
+    from->enabled_changed.connect(source_enable_changed);
+    to->enabled_changed.connect(sink_enabled_changed);
 }
 
 void Connection::reset()
@@ -108,16 +123,21 @@ void Connection::notifyMessageProcessed()
 void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(isEnabled());
+    apex_assert_hard(isSinkEnabled());
     apex_assert_hard(msg != nullptr);
     apex_assert_hard(state_ == State::NOT_INITIALIZED || state_ == State::READY_TO_RECEIVE);
     message_ = msg;
     setState(State::UNREAD);
 }
 
-bool Connection::isEnabled() const
+bool Connection::isSourceEnabled() const
 {
-    return /*from()->isEnabled() && */to()->isEnabled();
+    return from()->isEnabled();
+}
+
+bool Connection::isSinkEnabled() const
+{
+    return to()->isEnabled();
 }
 
 void Connection::establish()

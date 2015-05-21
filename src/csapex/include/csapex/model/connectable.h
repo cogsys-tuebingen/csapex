@@ -92,6 +92,8 @@ public Q_SLOTS:
 
     virtual void notifyMessageProcessed();
 
+public:
+    boost::signals2::signal<void(bool)> enabled_changed;
 
 Q_SIGNALS:
     void disconnected(QObject*);
