@@ -23,11 +23,16 @@ public:
     void addConnection(ConnectionPtr connection);
     void fadeConnection(ConnectionPtr connection);
 
+    void update();
+
     bool hasEstablishedConnection() const;
     bool hasUnestablishedConnection() const;
     bool hasFadingConnection() const;
 
     void removeFadingConnections();
+
+    virtual void establish() = 0;
+    virtual void reset() = 0;
 
 protected:
     bool areConnections(Connection::State state) const;

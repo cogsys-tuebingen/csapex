@@ -17,6 +17,8 @@ public:
 
     void establish();
 
+    virtual void reset() override;
+
 protected:
     virtual void connectionAdded(Connection* connection) override;
 

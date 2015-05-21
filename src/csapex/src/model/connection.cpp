@@ -75,6 +75,11 @@ Connection::Connection(Trigger *from, Slot *to, int id)
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
 }
 
+void Connection::reset()
+{
+    state_ = Connection::State::NOT_INITIALIZED;
+}
+
 ConnectionTypeConstPtr Connection::getMessage() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -92,12 +97,8 @@ void Connection::notifyMessageProcessed()
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(state_ == State::DONE);
-//        if(state_ != State::DONE) {
-//            setState(Connection::State::DONE);
-//        }
     }
 
-//    std::cerr << "notify connection " <<  from_->getUUID() << " => " << to_->getUUID() << std::endl;
     Output* o = dynamic_cast<Output*>(from_);
     if(o) {
         o->getTransition()->updateOutputs();
@@ -267,12 +268,17 @@ void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Po
     f->setId(fulcrum_id);
 
     // update the ids of the later fulcrums
-    std::vector<Fulcrum::Ptr>::iterator index = fulcrums_.begin() + fulcrum_id;
-    for(std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
-        (*it)->setId((*it)->id() + 1);
+    if(fulcrum_id < (int) fulcrums_.size()) {
+        std::vector<Fulcrum::Ptr>::iterator index = fulcrums_.begin() + fulcrum_id;
+        for(std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
+            (*it)->setId((*it)->id() + 1);
+        }
+        fulcrums_.insert(index, fulcrum);
+
+    } else {
+        fulcrums_.push_back(fulcrum);
     }
 
-    fulcrums_.insert(index, fulcrum);
 
     f->moved.connect(fulcrum_moved);
     f->movedHandle.connect(fulcrum_moved_handle);

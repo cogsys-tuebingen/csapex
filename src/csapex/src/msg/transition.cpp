@@ -70,6 +70,16 @@ void Transition::removeFadingConnections()
     fading_connections_.clear();
 }
 
+void Transition::update()
+{
+    if(hasUnestablishedConnection()) {
+        establish();
+    }
+    if(hasFadingConnection()) {
+        removeFadingConnections();
+    }
+}
+
 void Transition::establishConnection(ConnectionPtr connection)
 {
     std::lock_guard<std::recursive_mutex> lock(sync);

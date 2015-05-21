@@ -23,6 +23,8 @@ public:
     void setConnectionsReadyToReceive();
     bool areOutputsIdle() const;
 
+    virtual void reset() override;
+
     void establish();
 
 private:

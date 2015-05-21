@@ -53,6 +53,7 @@ void Output::reset()
     clear();
 
     setSequenceNumber(0);
+    setState(State::IDLE);
 }
 
 int Output::countConnections()

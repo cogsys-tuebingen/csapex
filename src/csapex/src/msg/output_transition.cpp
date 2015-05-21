@@ -16,6 +16,19 @@ OutputTransition::OutputTransition(NodeWorker *node)
 
 }
 
+void OutputTransition::reset()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    for(Output* output : node_->getAllOutputs()) {
+        output->reset();
+    }
+    for(ConnectionPtr connection : established_connections_) {
+        connection->reset();
+    }
+    outputs_done_ = true;
+}
+
+
 void OutputTransition::connectionAdded(Connection *connection)
 {
     connection->endpoint_established.connect([this]() {
@@ -66,13 +79,6 @@ bool OutputTransition::canSendMessages() const
             }
         }
     }
-
-    areConnections(Connection::State::DONE, Connection::State::NOT_INITIALIZED);
-
-//    if(hasFadingConnection()) {
-//        return false;
-//    }
-
     return true;
 }
 

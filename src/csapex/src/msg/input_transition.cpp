@@ -36,6 +36,16 @@ void InputTransition::establish()
     }
 }
 
+void InputTransition::reset()
+{
+    for(Input* input : node_->getAllInputs()) {
+        input->reset();
+    }
+    for(ConnectionPtr connection : established_connections_) {
+        connection->reset();
+    }
+}
+
 void InputTransition::connectionAdded(Connection *connection)
 {
 

@@ -75,6 +75,8 @@ public:
     State getState() const;
     void setState(State s);
 
+    void reset();
+
     bool inLevel() const;
     bool upLevel() const;
     bool downLevel() const;

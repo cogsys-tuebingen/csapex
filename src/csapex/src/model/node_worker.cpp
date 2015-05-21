@@ -468,12 +468,14 @@ void NodeWorker::reset()
 
     node_->abort();
     setError(false);
-    for(Input* i : inputs_) {
-        i->reset();
-    }
-    for(Output* o : outputs_) {
-        o->reset();
-    }
+
+    // set state without checking!
+    state_ = State::IDLE;
+
+    transition_in_->reset();
+    transition_out_->reset();
+
+    updateTransitions();
 }
 
 bool NodeWorker::isPaused() const
@@ -539,11 +541,6 @@ void NodeWorker::updateParameterValue(Connectable *s)
     } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::NoMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
-
-//    source->free();
-//    source->notifyMessageProcessed();
-
-//    publishParameter(p);
 }
 
 void NodeWorker::checkIfInputsCanBeProcessed()
@@ -574,7 +571,6 @@ void NodeWorker::processMessages()
     assertNotInGuiThread();
 
     if(stop_ || !isEnabled()) {
-//        notifyMessagesProcessed();
         return;
     }
 
@@ -585,11 +581,9 @@ void NodeWorker::processMessages()
     apex_assert_hard(isEnabled());
     setState(State::PROCESSING);
 
-    {
-        std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
-        while(paused_) {
-            continue_.wait(pause_lock);
-        }
+    std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
+    while(paused_) {
+        continue_.wait(pause_lock);
     }
 
     // everything has a message here
@@ -611,7 +605,6 @@ void NodeWorker::processMessages()
         for(Input* cin : parameter_inputs_) {
             apex_assert_hard(cin->isOptional());
             if(msg::hasMessage(cin)) {
-//                auto msg = cin->getMessage();
                 updateParameterValue(cin);
             }
         }
@@ -1117,6 +1110,26 @@ void NodeWorker::prepareForNextProcess()
     //    checkInputs();
 }
 
+void NodeWorker::updateTransitions()
+{
+    // TODO: can this be moved into transition?
+    transition_in_->update();
+    transition_out_->update();
+
+    if(transition_in_->hasUnestablishedConnection()) {
+        transition_in_->establish();
+    }
+    if(transition_in_->hasFadingConnection()) {
+        transition_in_->removeFadingConnections();
+    }
+    if(transition_out_->hasUnestablishedConnection()) {
+        transition_out_->establish();
+    }
+    if(transition_out_->hasFadingConnection()) {
+        transition_out_->removeFadingConnections();
+    }
+}
+
 void NodeWorker::checkTransitions()
 {
     apex_assert_hard(thread() == QThread::currentThread());
@@ -1134,21 +1147,9 @@ void NodeWorker::checkTransitions()
     }
 
 
-    // TODO: can this be moved into transition?
-    if(transition_in_->hasUnestablishedConnection()) {
-        transition_in_->establish();
-    }
-    if(transition_out_->hasUnestablishedConnection()) {
-        transition_out_->establish();
-    }
-    if(transition_in_->hasFadingConnection()) {
-        transition_in_->removeFadingConnections();
-    }
-    if(transition_out_->hasFadingConnection()) {
-        transition_out_->removeFadingConnections();
-    }
+    updateTransitions();
+
     if(transition_in_->hasUnestablishedConnection() || transition_out_->hasUnestablishedConnection()) {
-//        setState(State::IDLE);
         return;
     }
 
@@ -1345,7 +1346,6 @@ void NodeWorker::tick()
 
             static int ticks = 0;
             if(isTickEnabled() && isSource() && node_->canTick() /*&& ticks++ == 0*/) {
-//                std::cerr << "should tick, state is " << (int)getState() << ", can send messages is " << transition_out_->canSendMessages() << std::endl;
                 checkTransitions();
 
                 if(transition_out_->canSendMessages() && !transition_out_->hasFadingConnection()) {
@@ -1522,13 +1522,6 @@ void NodeWorker::triggerError(bool e, const std::string &what)
 
 void NodeWorker::setIOError(bool error)
 {
-//    for(Input* i : inputs_) {
-//        i->setErrorSilent(error);
-//    }
-//    for(Output* i : outputs_) {
-//        i->setErrorSilent(error);
-//    }
-//    enableIO(!error);
 }
 
 void NodeWorker::setMinimized(bool min)
@@ -1549,11 +1542,6 @@ void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level
 
     errorHappened(error);
 
-//    if(error && level == ErrorState::ErrorLevel::ERROR) {
-//        setIOError(true);
-//    } else {
-//        setIOError(false);
-//    }
 }
 
 /// MOC
