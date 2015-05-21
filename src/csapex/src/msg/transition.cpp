@@ -38,9 +38,18 @@ void Transition::fadeConnection(ConnectionPtr connection)
             break;
         }
     }
-    apex_assert_hard(contained);
 
-    fading_connections_.push_back(connection);
+    if(contained) {
+        fading_connections_.push_back(connection);
+    } else {
+        // connection is not yet established but should already be deleted?
+        for(auto it = unestablished_connections_.begin(); it != unestablished_connections_.end(); ++it) {
+            if(*it == connection) {
+                unestablished_connections_.erase(it);
+                break;
+            }
+        }
+    }
 }
 
 void Transition::removeFadingConnections()
@@ -51,17 +60,14 @@ void Transition::removeFadingConnections()
             const auto& c = *it;
             if(c == connection) {
                 it = established_connections_.erase(it);
+                connectionRemoved(connection.get());
+
             } else {
                 ++it;
             }
         }
     }
     fading_connections_.clear();
-}
-
-void Transition::connectionAdded(Connection *connection)
-{
-
 }
 
 void Transition::establishConnection(ConnectionPtr connection)
@@ -149,4 +155,15 @@ bool Transition::hasFadingConnection() const
 NodeWorker* Transition::getNode() const
 {
     return node_;
+}
+
+
+void Transition::connectionAdded(Connection *connection)
+{
+
+}
+
+void Transition::connectionRemoved(Connection *connection)
+{
+
 }

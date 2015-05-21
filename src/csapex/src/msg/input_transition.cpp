@@ -90,7 +90,6 @@ void InputTransition::fireIfPossible()
 
 void InputTransition::notifyMessageProcessed()
 {
-    apex_assert_hard(unestablished_connections_.empty());
     apex_assert_hard(areConnections(Connection::State::READ));
 
     bool has_multipart = false;
@@ -117,6 +116,7 @@ void InputTransition::notifyMessageProcessed()
         }
 
     } else {
+        apex_assert_hard(areConnections(Connection::State::READ));
         for(auto& c : established_connections_) {
             c->setState(Connection::State::DONE);
         }
@@ -139,6 +139,7 @@ void InputTransition::fire()
     apex_assert_hard(node_->thread() == QThread::currentThread());
     apex_assert_hard(node_->canProcess());
     apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
+    apex_assert_hard(node_->isEnabled());
     apex_assert_hard(!isConnection(Connection::State::DONE));
     //    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(!isConnection(Connection::State::READY_TO_RECEIVE));

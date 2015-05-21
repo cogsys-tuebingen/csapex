@@ -30,13 +30,15 @@ public:
     void removeFadingConnections();
 
 protected:
-    virtual void connectionAdded(Connection* connection);
     bool areConnections(Connection::State state) const;
     bool areConnections(Connection::State a, /*or*/ Connection::State b) const;
     bool areConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isConnection(Connection::State state) const;
 
     void establishConnection(ConnectionPtr connection);
+
+    virtual void connectionAdded(Connection* connection);
+    virtual void connectionRemoved(Connection* connection);
 
 protected:
     NodeWorker* node_;

@@ -116,7 +116,7 @@ void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 
 bool Connection::isEnabled() const
 {
-    return from()->isEnabled() && to()->isEnabled();
+    return /*from()->isEnabled() && */to()->isEnabled();
 }
 
 void Connection::establish()

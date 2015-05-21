@@ -400,7 +400,10 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
         return;
 
     } else*/ if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
-        dispatcher_->execute(graph_->deleteConnectionById(highlight_connection_id_));
+        auto cmd = graph_->deleteConnectionById(highlight_connection_id_);
+        if(cmd) {
+            dispatcher_->execute(cmd);
+        }
         return;
     }
 

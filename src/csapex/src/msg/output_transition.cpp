@@ -28,6 +28,14 @@ void OutputTransition::connectionAdded(Connection *connection)
     //    }
 }
 
+void OutputTransition::connectionRemoved(Connection *connection)
+{
+    if(established_connections_.empty()) {
+        outputs_done_ = true;
+//        node_->notifyMessagesProcessed();
+    }
+}
+
 void OutputTransition::establish()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -58,6 +66,8 @@ bool OutputTransition::canSendMessages() const
             }
         }
     }
+
+    areConnections(Connection::State::DONE, Connection::State::NOT_INITIALIZED);
 
 //    if(hasFadingConnection()) {
 //        return false;

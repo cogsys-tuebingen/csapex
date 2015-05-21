@@ -12,6 +12,7 @@ public:
     OutputTransition(NodeWorker* node);
 
     void connectionAdded(Connection* connection);
+    void connectionRemoved(Connection *connection);
 
     bool isSink() const;
     bool canSendMessages() const;

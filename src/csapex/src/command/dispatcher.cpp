@@ -7,6 +7,9 @@
 #include <csapex/view/widget_controller.h>
 #include <csapex/utility/assert.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, ThreadPool* thread_pool, NodeFactory* node_factory)
@@ -26,12 +29,20 @@ void CommandDispatcher::reset()
 
 void CommandDispatcher::execute(Command::Ptr command)
 {
+    if(!command) {
+        std::cerr << "trying to execute null command" << std::endl;
+        return;
+    }
     command->init(&settings_, graph_worker_.get(), thread_pool_, node_factory_);
     doExecute(command);
 }
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
+    if(!command) {
+        std::cerr << "trying to execute null command" << std::endl;
+        return;
+    }
     command->init(&settings_, graph_worker_.get(), thread_pool_, node_factory_);
     later.push_back(command);
 }
