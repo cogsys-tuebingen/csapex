@@ -1074,6 +1074,7 @@ void NodeWorker::notifyMessagesProcessed()
     setState(State::WAITING_FOR_RESET);
 
     Q_EMIT messagesProcessed();
+    messages_processed();
 }
 
 void NodeWorker::prepareForNextProcess()
@@ -1094,7 +1095,6 @@ void NodeWorker::prepareForNextProcess()
         apex_assert_hard(state_ == State::WAITING_FOR_RESET);
         apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
         apex_assert_hard(transition_out_->canSendMessages());
-        apex_assert_hard(isEnabled());
 
         setState(State::IDLE);
 

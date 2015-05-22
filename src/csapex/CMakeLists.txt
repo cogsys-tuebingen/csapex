@@ -122,11 +122,7 @@ include_directories(include
     ${OPENGL_INCLUDE_DIR}
 )
 
-set(SRC_PLUGIN
-    src/data/point.cpp
-
-    src/core/core_plugin.cpp
-    src/core/bootstrap_plugin.cpp
+set(SRC_BASE
 
     src/factory/generic_node_factory.cpp
 
@@ -137,9 +133,6 @@ set(SRC_PLUGIN
     src/msg/message_factory.cpp
     src/msg/message_provider.cpp
     src/msg/message_renderer.cpp
-
-    src/plugin/plugin_loader.cpp
-    src/plugin/plugin_locator.cpp
 
     src/model/connectable.cpp
     src/model/connection.cpp
@@ -177,7 +170,6 @@ set(SRC_PLUGIN
     src/signal/trigger.cpp
 
     src/utility/assert.cpp
-    src/utility/bash_parser.cpp
     src/utility/buffer.cpp
     src/utility/context_menu_handler.cpp
     src/utility/error_handling.cpp
@@ -189,6 +181,7 @@ set(SRC_PLUGIN
     src/utility/q_signal_relay.cpp
     src/utility/qt_helper.cpp
     src/utility/qwrapper.cpp
+    src/utility/bash_parser.cpp
     src/utility/stream_interceptor.cpp
     src/utility/stream_relay.cpp
     src/utility/thread.cpp
@@ -229,20 +222,11 @@ set(SRC_PLUGIN
 
     src/signal/signal.cpp
 
-    src/view/activity_legend.cpp
-    src/view/activity_timeline.cpp
     src/view/box.cpp
-    src/view/box_dialog.cpp
-    src/view/screenshot_dialog.cpp
-    src/view/csapex_window.cpp
     src/view/default_node_adapter.cpp
-    src/view/designer.cpp
-    src/view/designer_scene.cpp
     src/view/designer_styleable.cpp
-    src/view/designer_view.cpp
     src/view/fulcrum_handle.cpp
     src/view/fulcrum_widget.cpp
-    src/view/minimap_widget.cpp
     src/view/node_adapter_builder.cpp
     src/view/node_adapter.cpp
     src/view/node_adapter_factory.cpp
@@ -250,15 +234,36 @@ set(SRC_PLUGIN
     src/view/port.cpp
     src/view/profiling_widget.cpp
     src/view/widget_controller.cpp
-    src/view/node_filter_proxy_model.cpp
 
+    src/view/designer.cpp
+    src/view/designer_view.cpp
+    src/view/designer_scene.cpp
+    src/view/box_dialog.cpp
+    src/view/node_filter_proxy_model.cpp
 
     ${QT_RESOURCES}
 
     ${QT_UI}
 )
 
+set(SRC_PLUGIN
+    src/data/point.cpp
+
+    src/plugin/plugin_locator.cpp
+
+    src/core/core_plugin.cpp
+    src/core/bootstrap_plugin.cpp
+)
+
 set(SRC_APP
+    src/plugin/plugin_loader.cpp
+
+    src/view/activity_legend.cpp
+    src/view/activity_timeline.cpp
+    src/view/minimap_widget.cpp
+
+    src/view/csapex_window.cpp
+    src/view/screenshot_dialog.cpp
 )
 
 
@@ -266,11 +271,28 @@ set(SRC_APP
 # BUILD THE LIBRARIES
 #
 
+add_library(csapex SHARED
+    ${SRC_BASE}
+)
+
+target_link_libraries(csapex
+    ${QT_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${YAML_LIBRARIES}
+    ${TinyXML_LIBRARIES}
+    ${console_bridge_LIBRARIES}
+    Qt5::OpenGL
+)
+
 add_library(csapex_plugin_base SHARED
     ${SRC_PLUGIN}
 )
 
 target_link_libraries(csapex_plugin_base
+    csapex
+
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}

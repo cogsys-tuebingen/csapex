@@ -181,6 +181,7 @@ public Q_SLOTS:
 public:
 
     boost::signals2::signal<void()> panic;
+    boost::signals2::signal<void()> messages_processed;
 
 Q_SIGNALS:
     void messagesProcessed();

@@ -6,6 +6,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
 #include <csapex/msg/dynamic_input.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <iostream>

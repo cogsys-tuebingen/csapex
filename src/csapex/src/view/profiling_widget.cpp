@@ -38,6 +38,8 @@ ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *
 
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
+
+    node_worker_->messages_processed.connect(boost::bind(&ProfilingWidget::update, this));
 }
 
 void ProfilingWidget::reposition(double, double)

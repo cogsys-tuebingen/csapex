@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/msg/dynamic_input.h>
 
+/// PROJECT
+#include <csapex/utility/assert.h>
+
 using namespace csapex;
 
 DynamicInput::DynamicInput(InputTransition *transition, const UUID &uuid)

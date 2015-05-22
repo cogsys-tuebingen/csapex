@@ -457,7 +457,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     info_exec->setVisible(true);
     info_exec->setText(QString("<img src=\":/") +
                        (idle ? "idle" : "running") +
-                       ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> " + state);
+                       ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> ");
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;

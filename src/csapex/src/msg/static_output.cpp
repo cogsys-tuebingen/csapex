@@ -5,6 +5,7 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
+#include <csapex/utility/assert.h>
 
 using namespace csapex;
 
