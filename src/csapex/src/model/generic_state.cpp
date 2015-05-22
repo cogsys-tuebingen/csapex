@@ -101,6 +101,8 @@ void GenericState::removeTemporaryParameters()
 
         params.erase(params.find(name));
         order.erase(std::find(order.begin(), order.end(), name));
+
+        (*parameter_removed)(p);
     }
 
     temporary.clear();
