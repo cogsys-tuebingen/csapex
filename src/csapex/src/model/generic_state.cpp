@@ -72,9 +72,9 @@ void GenericState::addParameter(param::Parameter::Ptr param)
         }
     }
     apex_assert_hard(param->name() != "noname");
-    apex_assert_hard(std::find(order.begin(), order.end(), param->name()) == order.end());
-
-    order.push_back(param->name());
+    if(std::find(order.begin(), order.end(), param->name()) == order.end()) {
+        order.push_back(param->name());
+    }
 
     registerParameter(param);
 }
@@ -99,7 +99,7 @@ void GenericState::removeTemporaryParameters()
         std::string name(it->first);
         param::Parameter::Ptr p = getParameter(name);
 
-        params.erase(params.find(name));
+//        params.erase(params.find(name));
         order.erase(std::find(order.begin(), order.end(), name));
 
         (*parameter_removed)(p);

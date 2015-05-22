@@ -103,14 +103,11 @@ void InputTransition::notifyMessageProcessed()
 {
     apex_assert_hard(areConnections(Connection::State::READ));
 
-    bool has_multipart = false;
     bool multipart_are_done = true;
 
     for(auto& c : established_connections_) {
         int f = c->getMessage()->flags.data;
         if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
-            has_multipart = true;
-
             bool last_part = f & (int) ConnectionType::Flags::Fields::LAST_PART;
             multipart_are_done &= last_part;
         }

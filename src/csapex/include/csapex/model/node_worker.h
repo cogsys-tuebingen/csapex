@@ -101,9 +101,10 @@ public:
     Slot* getSlot(const UUID& uuid) const;
     Trigger* getTrigger(const UUID& uuid) const;
 
-    /* experimental */ void makeParameterConnectable(param::Parameter*);
-    /* experimental */ Input* getParameterInput(const std::string& name) const;
-    /* experimental */ Output* getParameterOutput(const std::string& name) const;
+    void makeParameterConnectable(param::Parameter*);
+    void makeParameterNotConnectable(param::ParameterPtr);
+    Input* getParameterInput(const std::string& name) const;
+    Output* getParameterOutput(const std::string& name) const;
 
     /* NAMING */ void registerInput(Input* in);
     /* NAMING */ void registerOutput(Output* out);

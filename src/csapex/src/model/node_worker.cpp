@@ -62,6 +62,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     }
 
     node_->getParameterState()->parameter_added->connect(std::bind(&NodeWorker::makeParameterConnectable, this, std::placeholders::_1));
+    node_->getParameterState()->parameter_removed->connect(std::bind(&NodeWorker::makeParameterNotConnectable, this, std::placeholders::_1));
 
     addSlot("enable", std::bind(&NodeWorker::setEnabled, this, true), true);
     addSlot("disable", std::bind(&NodeWorker::setEnabled, this, false), false);
@@ -327,6 +328,28 @@ void NodeWorker::makeParameterConnectable(param::Parameter* p)
         addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
         node_->addParameterCallback(t, std::bind(&Trigger::trigger, trigger));
     }
+}
+
+void NodeWorker::makeParameterNotConnectable(param::ParameterPtr p)
+{
+    Input* cin = param_2_input_[p->name()];
+    Output* cout = param_2_output_[p->name()];
+
+    disconnectConnector(cin);
+    disconnectConnector(cout);
+
+    parameter_inputs_.erase(std::find(parameter_inputs_.begin(), parameter_inputs_.end(), cin));
+    parameter_outputs_.erase(std::find(parameter_outputs_.begin(), parameter_outputs_.end(), cout));
+
+    param_2_input_.erase(p->name());
+    input_2_param_.erase(cin);
+
+    param_2_output_.erase(p->name());
+    output_2_param_.erase(cout);
+
+    p->parameter_changed.disconnect(this);
+    p->parameter_enabled.disconnect(this);
+
 }
 
 void NodeWorker::makeParametersConnectable()
@@ -1172,19 +1195,24 @@ void NodeWorker::publishParameters()
 {
     for(std::size_t i = 0; i < parameter_outputs_.size(); ++i) {
         Output* out = parameter_outputs_[i];
-        publishParameter(output_2_param_.at(out));
+        auto pos = output_2_param_.find(out);
+        if(pos != output_2_param_.end()) {
+            publishParameter(pos->second);
+        }
     }
 }
 void NodeWorker::publishParameter(param::Parameter* p)
 {
-    Output* out = param_2_output_.at(p->name());
-    if(out->isConnected()) {
-        if(p->is<int>())
-            msg::publish(out, p->as<int>());
-        else if(p->is<double>())
-            msg::publish(out, p->as<double>());
-        else if(p->is<std::string>())
-            msg::publish(out, p->as<std::string>());
+    if(param_2_output_.find(p->name()) != param_2_output_.end()) {
+        Output* out = param_2_output_.at(p->name());
+        if(out->isConnected()) {
+            if(p->is<int>())
+                msg::publish(out, p->as<int>());
+            else if(p->is<double>())
+                msg::publish(out, p->as<double>());
+            else if(p->is<std::string>())
+                msg::publish(out, p->as<std::string>());
+        }
     }
 }
 
