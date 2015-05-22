@@ -18,7 +18,38 @@ ThreadPool::ThreadPool(Graph *graph, bool enable_threading, bool grouping)
     : next_id(MINIMUM_THREAD_ID), graph_(graph), enable_threading_(enable_threading), grouping_(grouping)
 {
     graph_->nodeAdded.connect([this](NodeWorkerPtr n) { nodeAdded(n); });
+    graph_->nodeRemoved.connect([this](NodeWorkerPtr n) { nodeRemoved(n); });
     graph_->structureChanged.connect([this](Graph *g) { structureChanged(); });
+}
+
+
+void ThreadPool::nodeAdded(NodeWorkerPtr node_worker)
+{
+    private_thread_[node_worker.get()] = false;
+
+    if(enable_threading_) {
+        if(!grouping_) {
+            usePrivateThreadFor(node_worker.get());
+        } else {
+            // if we use grouping -> wait for structure change
+            useDefaultThreadFor(node_worker.get());
+        }
+    } else {
+        // this is the one thread to use when threading is disabled
+        // we need this to make the ui responsive
+        useDefaultThreadFor(node_worker.get());
+    }
+}
+
+void ThreadPool::nodeRemoved(NodeWorkerPtr node_worker)
+{
+    NodeWorker* nw = node_worker.get();
+    if(private_thread_[nw]) {
+        deletePrivateThread(nw);
+    }
+
+    custom_group_assignment_.erase(nw);
+    private_thread_.erase(nw);
 }
 
 std::vector<ThreadPool::Group> ThreadPool::getCustomGroups()
@@ -111,6 +142,8 @@ void ThreadPool::usePrivateThreadFor(NodeWorker *worker)
 
     QThread* thread = setupThread(PRIVATE_THREAD, false, worker->getUUID().getShortName());
     worker->triggerSwitchThreadRequest(thread, PRIVATE_THREAD);
+
+    private_threads_[worker] = thread;
 }
 
 void ThreadPool::useDefaultThreadFor(NodeWorker* node_worker)
@@ -125,10 +158,12 @@ void ThreadPool::useDefaultThreadFor(NodeWorker* node_worker)
 
     node_worker->triggerSwitchThreadRequest(thread, UNDEFINED_THREAD);
 }
-
 void ThreadPool::switchToThread(NodeWorker *worker, int group_id)
 {
-    private_thread_[worker] = false;
+    if(private_thread_[worker]) {
+        private_thread_[worker] = false;
+        deletePrivateThread(worker);
+    }
 
     for(std::size_t i = 0, total =  custom_groups_.size(); i < total; ++i) {
         if(custom_groups_[i].id == group_id) {
@@ -138,6 +173,15 @@ void ThreadPool::switchToThread(NodeWorker *worker, int group_id)
     }
 
     worker->triggerSwitchThreadRequest(custom_group_threads_[group_id], group_id);
+}
+
+
+void ThreadPool::deletePrivateThread(NodeWorker *worker)
+{
+    if(private_threads_.find(worker) != private_threads_.end()) {
+        private_threads_[worker]->quit();
+        private_threads_.erase(worker);
+    }
 }
 
 
@@ -207,24 +251,6 @@ std::string ThreadPool::nextName()
     std::stringstream name;
     name << "Thread " << next_id;
     return name.str();
-}
-
-void ThreadPool::nodeAdded(NodeWorkerPtr node_worker)
-{
-    private_thread_[node_worker.get()] = false;
-
-    if(enable_threading_) {
-        if(!grouping_) {
-            usePrivateThreadFor(node_worker.get());
-        } else {
-            // if we use grouping -> wait for structure change
-            useDefaultThreadFor(node_worker.get());
-        }
-    } else {
-        // this is the one thread to use when threading is disabled
-        // we need this to make the ui responsive
-        useDefaultThreadFor(node_worker.get());
-    }
 }
 
 void ThreadPool::structureChanged()

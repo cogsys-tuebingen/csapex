@@ -44,6 +44,7 @@ public:
     std::string nextName();
 
     void nodeAdded(NodeWorkerPtr);
+    void nodeRemoved(NodeWorkerPtr);
     void structureChanged();
 
     void usePrivateThreadFor(NodeWorker* worker);
@@ -61,6 +62,7 @@ private:
     QThread *setupThread(int id, bool custom, const std::string &name);
     std::set<int> assignGroupThreads();
     void deleteEmptyGroupThreads(const std::set<int> &components);
+    void deletePrivateThread(NodeWorker *worker);
 
 private:
     int next_id;
@@ -75,6 +77,7 @@ private:
     std::map<NodeWorker*, Group*> custom_group_assignment_;
     std::map<int, QThread*> custom_group_threads_;
 
+    std::map<NodeWorker*, QThread*> private_threads_;
     std::map<NodeWorker*, bool> private_thread_;
 };
 
