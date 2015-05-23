@@ -376,7 +376,7 @@ void DesignerView::showBoxDialog()
         if(!type.empty() && widget_ctrl_->getNodeFactory()->isValidType(type)) {
             UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
             QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
-            dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, nullptr)));
+            dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, Point(pos.x(), pos.y()), UUID::NONE, uuid, nullptr)));
         }
     }
 }
@@ -490,7 +490,9 @@ void DesignerView::movedBoxes(double dx, double dy)
             NodeBox* b = proxy->getBox();
             QPointF to = proxy->pos();
             QPointF from = to - delta;
-            meta->add(Command::Ptr(new command::MoveBox(b->getNodeWorker()->getUUID(), from, to, *widget_ctrl_)));
+            meta->add(Command::Ptr(new command::MoveBox(b->getNodeWorker()->getUUID(),
+                                                        Point(from.x(), from.y()), Point(to.x(), to.y()),
+                                                        *widget_ctrl_)));
         }
     }
 

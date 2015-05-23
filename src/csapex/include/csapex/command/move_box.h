@@ -5,9 +5,7 @@
 #include "command.h"
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
-
-/// SYSTEM
-#include <QPointF>
+#include <csapex/data/point.h>
 
 namespace csapex
 {
@@ -17,7 +15,7 @@ namespace command
 class MoveBox : public Command
 {
 public:
-    MoveBox(const UUID& node_uuid, QPointF from, QPointF to, WidgetController &widget_controller);
+    MoveBox(const UUID& node_uuid, Point from, Point to, WidgetController &widget_controller);
 
 protected:
     bool doExecute();
@@ -30,8 +28,8 @@ protected:
 protected:
     WidgetController& widget_controller_;
 
-    QPointF from;
-    QPointF to;
+    Point from;
+    Point to;
 
     UUID uuid;
 };

@@ -295,7 +295,7 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
     int y = doc["pos"][1].as<int>();
 
     if(x != 0 || y != 0) {
-        s->setPos(QPoint(x,y));
+        s->setPos(Point(x,y));
     }
     node_worker->setNodeState(s);
 

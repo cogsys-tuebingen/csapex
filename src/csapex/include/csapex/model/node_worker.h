@@ -246,6 +246,9 @@ private:
 
     void updateTransitions();
 
+    void startRunning();
+    void stopRunning();
+
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 private:

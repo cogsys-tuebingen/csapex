@@ -4,9 +4,9 @@
 /// COMPNENT
 #include <csapex/csapex_fwd.h>
 #include <csapex/model/memento.h>
+#include <csapex/data/point.h>
 
 /// SYSTEM
-#include <QPoint>
 #include <boost/signals2/signal.hpp>
 
 namespace csapex
@@ -27,8 +27,8 @@ public:
     virtual void readYaml(const YAML::Node& node);
 
 public:
-    QPoint getPos() const;
-    void setPos(const QPoint &value);
+    Point getPos() const;
+    void setPos(const Point &value);
     Signal pos_changed;
 
     std::string getLabel() const;
@@ -64,7 +64,7 @@ private:
     mutable Memento::Ptr child_state;
 
     std::string label_;
-    QPoint pos;
+    Point pos;
 
     bool minimized;
     bool enabled;

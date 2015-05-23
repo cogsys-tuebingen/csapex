@@ -21,10 +21,6 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/timer.h>
 
-/// SYSTEM
-
-#include <QThread>
-
 using namespace csapex;
 
 Graph::Graph()

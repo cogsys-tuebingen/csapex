@@ -60,7 +60,7 @@ void NodeState::readYaml(const YAML::Node &node)
     if(node["pos"].IsDefined()) {
         double x = node["pos"][0].as<double>();
         double y = node["pos"][1].as<double>();
-        QPoint p(x,y);
+        Point p(x,y);
         setPos(p);
     }
 
@@ -77,12 +77,12 @@ void NodeState::readYaml(const YAML::Node &node)
         }
     }
 }
-QPoint NodeState::getPos() const
+Point NodeState::getPos() const
 {
     return pos;
 }
 
-void NodeState::setPos(const QPoint &value)
+void NodeState::setPos(const Point &value)
 {
     if(pos != value) {
         pos = value;
@@ -184,8 +184,8 @@ void NodeState::writeYaml(YAML::Node &out) const
         out["uuid"] = parent->getUUID();
     }
     out["label"] = label_;
-    out["pos"][0] = pos.x();
-    out["pos"][1] = pos.y();
+    out["pos"][0] = pos.x;
+    out["pos"][1] = pos.y;
     out["minimized"] = minimized;
     out["enabled"] = enabled;
     out["flipped"] = flipped;

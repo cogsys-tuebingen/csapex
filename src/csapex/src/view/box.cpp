@@ -395,7 +395,8 @@ void NodeBox::init()
         setVisible(false);
     }
 
-    move(worker->getNodeState()->getPos());
+    Point pt = worker->getNodeState()->getPos();
+    move(QPoint(pt.x, pt.y));
 }
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
@@ -504,7 +505,7 @@ void NodeBox::moveEvent(QMoveEvent* e)
 
     QPoint delta = pos - e->oldPos();
 
-    worker->getNodeState()->setPos(pos);
+    worker->getNodeState()->setPos(Point(pos.x(), pos.y()));
 
     Q_EMIT moved(this, delta.x(), delta.y());
 }
@@ -654,7 +655,8 @@ void NodeBox::nodeStateChanged()
     setLabel(worker->getNodeState()->getLabel());
     ui->label->setToolTip(worker->getUUID().c_str());
 
-    move(worker->getNodeState()->getPos());
+    auto pt = worker->getNodeState()->getPos();
+    move(QPoint(pt.x, pt.y));
 }
 /// MOC
 #include "../../include/csapex/view/moc_box.cpp"

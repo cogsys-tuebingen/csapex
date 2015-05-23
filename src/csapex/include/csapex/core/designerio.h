@@ -8,11 +8,6 @@
 #include <map>
 #include <string>
 #include <yaml-cpp/yaml.h>
-#include <QList>
-#include <QPoint>
-#include <QSize>
-
-/// FORWARD DECLARATION
 
 namespace csapex
 {

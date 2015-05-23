@@ -508,6 +508,9 @@ void NodeWorker::reset()
     // set state without checking!
     state_ = State::IDLE;
 
+    running_ = false;
+    running_changed_.notify_all();
+
     transition_in_->reset();
     transition_out_->reset();
 
@@ -600,13 +603,11 @@ void NodeWorker::outputConnectionChanged(Connectable*)
 
 void NodeWorker::processMessages()
 {
-    {
-        if(stop_ || !isEnabled()) {
-            return;
-        }
-        std::unique_lock<std::recursive_mutex> lock(running_mutex_);
-        running_ = true;
+    if(stop_ || !isEnabled()) {
+        return;
     }
+
+    startRunning();
 
     std::lock_guard<std::recursive_mutex> lock(sync);
 
@@ -1197,20 +1198,32 @@ void NodeWorker::notifyMessagesProcessed()
 
     setState(State::WAITING_FOR_RESET);
 
-    {
-        std::unique_lock<std::recursive_mutex> lock(running_mutex_);
-        running_ = false;
-        running_changed_.notify_all();
-    }
+    stopRunning();
 
     messagesProcessed();
     messages_processed();
+}
+
+void NodeWorker::startRunning()
+{
+    std::unique_lock<std::recursive_mutex> lock(running_mutex_);
+    running_ = true;
+    running_changed_.notify_all();
+}
+
+void NodeWorker::stopRunning()
+{
+    std::unique_lock<std::recursive_mutex> lock(running_mutex_);
+    running_ = false;
+    running_changed_.notify_all();
 }
 
 void NodeWorker::prepareForNextProcess()
 {
     apex_assert_hard(thread() == QThread::currentThread());
     if(stop_) {
+        stopRunning();
+
         // artfact of qt signals...
         return;
     }
@@ -1427,8 +1440,6 @@ void NodeWorker::tick()
         if(stop_ || !isEnabled()) {
             return;
         }
-        std::unique_lock<std::recursive_mutex> lock(running_mutex_);
-        running_ = true;
     }
 
     {
@@ -1457,6 +1468,8 @@ void NodeWorker::tick()
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
             if(isTickEnabled() && isSource() && node_->canTick()) {
+                startRunning();
+
                 checkTransitions();
 
                 if(transition_out_->canSendMessages() && !transition_out_->hasFadingConnection()) {
@@ -1515,12 +1528,7 @@ void NodeWorker::tick()
         }
     }
 
-
-    {
-        std::unique_lock<std::recursive_mutex> lock(running_mutex_);
-        running_ = false;
-        running_changed_.notify_all();
-    }
+    stopRunning();
 
     if(tick_immediate_) {
         tickRequested();

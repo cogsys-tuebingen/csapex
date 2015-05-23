@@ -15,7 +15,7 @@
 
 using namespace csapex::command;
 
-AddNode::AddNode(const std::string &type, QPoint pos, const UUID &parent_uuid, const UUID& uuid, NodeState::Ptr state)
+AddNode::AddNode(const std::string &type, Point pos, const UUID &parent_uuid, const UUID& uuid, NodeState::Ptr state)
     : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
     apex_assert_hard(!uuid.empty());
