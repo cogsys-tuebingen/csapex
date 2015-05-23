@@ -29,9 +29,6 @@ private:
     std::string label;
     bool input;
 
-
-    Connectable* c;
-
     UUID b_uuid;
     UUID c_uuid;
 };

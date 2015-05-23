@@ -130,7 +130,7 @@ bool Trigger::connect(Connectable *other_side)
 
     targets_.push_back(slot);
 
-    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
+//    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
 
     validateConnections();
 

@@ -783,7 +783,8 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
             qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&param::Parameter::triggerChange, p.get()));
             callbacks.push_back(call_trigger);
-            QObject::connect(param_out, SIGNAL(connectionDone(Connectable*)), call_trigger, SLOT(call()));
+
+            param_out->connectionDone.connect([call_trigger](Connectable*) { call_trigger->call(); });
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());

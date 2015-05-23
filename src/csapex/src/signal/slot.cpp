@@ -54,8 +54,8 @@ bool Slot::acknowledgeConnection(Connectable* other_side)
 
     sources_.push_back(target);
 
-    connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
-    connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
+    other_side->enabled_changed.connect(connectionEnabled);
+
     return true;
 }
 
@@ -65,7 +65,7 @@ void Slot::removeConnection(Connectable* other_side)
     if(pos != sources_.end()) {
         sources_.erase(pos);
 
-        Q_EMIT connectionRemoved(this);
+        connectionRemoved(this);
     }
 }
 
@@ -102,7 +102,7 @@ void Slot::removeAllConnectionsNotUndoable()
         i = sources_.erase(i);
     }
 
-    Q_EMIT disconnected(this);
+    disconnected(this);
 }
 
 
@@ -148,7 +148,7 @@ void Slot::trigger()
 {
     std::unique_lock<std::mutex> lock(trigger_exec_mutex_);
 
-    Q_EMIT triggered();
+    triggered();
 
     // wait for the signal to be handled
     exec_finished_.wait(lock);

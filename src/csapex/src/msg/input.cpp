@@ -60,7 +60,7 @@ void Input::removeConnection(Connectable* other_side)
     apex_assert_hard(getSource() == other_side);
 
     connections_.clear();
-    Q_EMIT connectionRemoved(this);
+    connectionRemoved(this);
 }
 
 Command::Ptr Input::removeAllConnectionsCmd()
@@ -134,7 +134,7 @@ void Input::removeAllConnectionsNotUndoable()
         getSource()->removeConnection(this);
         connections_.clear();
         setError(false);
-        Q_EMIT disconnected(this);
+        disconnected(this);
     }
 }
 
@@ -144,10 +144,10 @@ void Input::addConnection(ConnectionPtr connection)
     Connectable::addConnection(connection);
 }
 
-void Input::removeConnection(ConnectionPtr connection)
+void Input::fadeConnection(ConnectionPtr connection)
 {
     transition_->fadeConnection(connection);
-    Connectable::removeConnection(connection);
+    Connectable::fadeConnection(connection);
 }
 
 bool Input::canConnectTo(Connectable* other_side, bool move) const
@@ -163,7 +163,7 @@ bool Input::targetsCanBeMovedTo(Connectable* other_side) const
 
 void Input::connectionMovePreview(Connectable *other_side)
 {
-    Q_EMIT(connectionInProgress(getSource(), other_side));
+    connectionInProgress(getSource(), other_side);
 }
 
 
@@ -228,7 +228,7 @@ void Input::inputMessage(ConnectionType::ConstPtr message)
     }
     count_++;
 
-    Q_EMIT messageArrived(this);
+    messageArrived(this);
 }
 
 void Input::notifyMessageProcessed()
@@ -241,5 +241,3 @@ void Input::notifyMessageProcessed()
 //        transition_->notifyMessageProcessed();
     }
 }
-/// MOC
-#include "../../include/csapex/msg/moc_input.cpp"

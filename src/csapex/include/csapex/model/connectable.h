@@ -9,26 +9,25 @@
 
 /// SYSTEM
 #include <mutex>
-#include <QObject>
 
 /// FORWARDS DECLARATION
 namespace csapex
 {
 
-class Connectable : public QObject, public ErrorState, public Unique
+class Connectable : public ErrorState, public Unique
 {
-    Q_OBJECT
-
     friend class Port;
     friend class Graph;
 
 public:
-    static const QString MIME_CREATE_CONNECTION;
-    static const QString MIME_MOVE_CONNECTIONS;
+    static const std::string MIME_CREATE_CONNECTION;
+    static const std::string MIME_MOVE_CONNECTIONS;
 
     static UUID makeUUID(const UUID &box_uuid, const std::string &type, int sub_id);
 
 public:
+    virtual ~Connectable();
+
     int getCount() const;
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
@@ -65,25 +64,9 @@ public:
 
     std::vector<ConnectionPtr> getConnections() const;
     virtual void addConnection(ConnectionPtr connection);
-    virtual void removeConnection(ConnectionPtr connection);
+    virtual void fadeConnection(ConnectionPtr connection);
 
     virtual bool isConnected() const;
-
-    /**
-     * INTERFACE
-     */
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
-    virtual bool isConnectionPossible(Connectable* other_side) = 0;
-    virtual void removeConnection(Connectable* other_side) = 0;
-    virtual void validateConnections();
-    virtual void connectionMovePreview(Connectable* other_side) = 0;
-    virtual CommandPtr removeAllConnectionsCmd() = 0;
-protected:
-    virtual void removeAllConnectionsNotUndoable() = 0;
-
-public Q_SLOTS:
-    virtual bool isConnectionPossible(QObject* other_side);
-    virtual void removeConnection(QObject* other_side);
 
     virtual void disable();
     virtual void enable();
@@ -95,25 +78,51 @@ public Q_SLOTS:
 public:
     boost::signals2::signal<void(bool)> enabled_changed;
 
-Q_SIGNALS:
-    void disconnected(QObject*);
-    void enabled(bool e);
-    void connectionStart(Connectable*);
-    void connectionInProgress(Connectable*, Connectable*);
-    void connectionDone(Connectable*);
-    void connectionRemoved(Connectable*);
-    void connectionEnabled(bool);
-    void messageProcessed(Connectable*);
-    void connectableError(bool error, const std::string &msg, int level);
+    boost::signals2::signal<void(Connectable*)> disconnected;
+    boost::signals2::signal<void(Connectable*)> connectionStart;
+    boost::signals2::signal<void(Connectable*,Connectable*)> connectionInProgress;
+    boost::signals2::signal<void(Connectable*)> connectionDone;
+    boost::signals2::signal<void(Connectable*)> connectionRemoved;
+    boost::signals2::signal<void(bool)> connectionEnabled;
+    boost::signals2::signal<void(Connectable*)> messageProcessed;
+    boost::signals2::signal<void(bool, std::string, int)> connectableError;
 
-    void messageSent(Connectable* source);
-    void messageArrived(Connectable* source);
-    void typeChanged();
+    boost::signals2::signal<void(Connectable*)> messageSent;
+    boost::signals2::signal<void(Connectable*)> messageArrived;
+    boost::signals2::signal<void()> typeChanged;
 
+
+//Q_SIGNALS:
+//    void disconnected(QObject*);
+//    void enabled(bool e);
+//    void connectionStart(Connectable*);
+//    void connectionInProgress(Connectable*, Connectable*);
+//    void connectionDone(Connectable*);
+//    void connectionRemoved(Connectable*);
+//    void connectionEnabled(bool);
+//    void messageProcessed(Connectable*);
+//    void connectableError(bool error, const std::string &msg, int level);
+
+//    void messageSent(Connectable* source);
+//    void messageArrived(Connectable* source);
+//    void typeChanged();
+
+public:
+    /**
+     * INTERFACE
+     */
+    virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
+    virtual bool isConnectionPossible(Connectable* other_side) = 0;
+    virtual void removeConnection(Connectable* other_side) = 0;
+    virtual void validateConnections();
+    virtual void connectionMovePreview(Connectable* other_side) = 0;
+    virtual CommandPtr removeAllConnectionsCmd() = 0;
+
+protected:
+    virtual void removeAllConnectionsNotUndoable() = 0;
 protected:
     Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, const std::string &type);
-    virtual ~Connectable();
 
     void setDynamic(bool dynamic);
 
@@ -131,8 +140,6 @@ protected:
     mutable std::recursive_mutex sync_mutex;
 
     csapex::DesignBoard* designer;
-
-    Qt::MouseButtons buttons_down_;
 
     std::string label_;
 

@@ -11,7 +11,11 @@
 
 void _apex_assert(bool assertion, const char* code, const char* file, int line)
 {
-    _apex_assert_hard(assertion, code, file, line);
+    if(!assertion) {
+        std::stringstream ss;
+        ss << "[cs::APEX - ASSERTION FAILED] \"" << code << "\" [file " << file << ", line " << line << "]";
+        throw std::logic_error(ss.str());
+    }
 }
 
 void _apex_assert_hard(bool assertion, const char* code, const char* file, int line)

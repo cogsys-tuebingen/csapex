@@ -15,7 +15,8 @@ public:
     void notifyMessageProcessed();
     void fireIfPossible();
 
-    void establish();
+    void establish() override;
+    void connectionRemoved(Connection* connection) override;
 
     virtual void reset() override;
 

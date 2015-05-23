@@ -46,10 +46,10 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
     if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         e->acceptProposedAction();
 
     } else {
@@ -106,7 +106,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
     if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         e->acceptProposedAction();
 
@@ -114,7 +114,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         scene->deleteTemporaryConnections();
         scene->addTemporaryConnection(c, src->mapToScene(e->pos()));
 
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         e->acceptProposedAction();
 
@@ -191,12 +191,12 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_po
 
         dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, pos.toPoint(), UUID::NONE, uuid, state)));
 
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         e->ignore();
         DesignerScene* scene = src->designerScene();
         scene->deleteTemporaryConnectionsAndRepaint();
 
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         e->ignore();
         DesignerScene* scene = src->designerScene();
         scene->deleteTemporaryConnectionsAndRepaint();

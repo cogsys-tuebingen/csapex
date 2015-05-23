@@ -45,7 +45,7 @@ public:
     State getState() const;
 
     virtual void addConnection(ConnectionPtr connection) override;
-    void removeConnection(ConnectionPtr connection) override;
+    void fadeConnection(ConnectionPtr connection) override;
 
     virtual void disable() override;
 

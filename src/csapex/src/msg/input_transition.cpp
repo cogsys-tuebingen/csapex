@@ -37,6 +37,11 @@ void InputTransition::establish()
     }
 }
 
+void InputTransition::connectionRemoved(Connection *connection)
+{
+    connection->fadeSink();
+}
+
 void InputTransition::reset()
 {
     for(Input* input : node_->getAllInputs()) {

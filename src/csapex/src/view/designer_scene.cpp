@@ -300,7 +300,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         return false;
     };
 
-    for(Connection::Ptr connection : graph_->getConnections()) {
+    for(ConnectionPtr connection : graph_->getConnections()) {
         auto pos = connection_bb_.find(connection.get());
         if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
             drawConnection(painter, *connection);
@@ -738,7 +738,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
     std::vector<Fulcrum::Ptr> targets;
     if(id >= 0) {
-        Connection::Ptr connection = graph_->getConnectionWithId(id);
+        ConnectionPtr connection = graph_->getConnectionWithId(id);
         targets = connection->getFulcrums();
     }
     targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, convert(to), Fulcrum::IN, convert(to), convert(to))));

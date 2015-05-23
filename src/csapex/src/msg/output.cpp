@@ -73,10 +73,10 @@ void Output::addConnection(ConnectionPtr connection)
     Connectable::addConnection(connection);
 }
 
-void Output::removeConnection(ConnectionPtr connection)
+void Output::fadeConnection(ConnectionPtr connection)
 {
     transition_->fadeConnection(connection);
-    Connectable::removeConnection(connection);
+    Connectable::fadeConnection(connection);
 }
 
 void Output::removeConnection(Connectable* other_side)
@@ -89,7 +89,7 @@ void Output::removeConnection(Connectable* other_side)
 
             i = connections_.erase(i);
 
-            Q_EMIT connectionRemoved(this);
+            connectionRemoved(this);
             return;
 
         } else {
@@ -125,7 +125,7 @@ void Output::removeAllConnectionsNotUndoable()
         i = connections_.erase(i);
     }
 
-    Q_EMIT disconnected(this);
+    disconnected(this);
 }
 
 void Output::disable()

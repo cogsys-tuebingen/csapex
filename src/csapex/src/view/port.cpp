@@ -30,9 +30,10 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
     if(adaptee_) {
         createToolTip();
 
-        QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-        QObject::connect(adaptee, SIGNAL(connectableError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
-        QObject::connect(adaptee, SIGNAL(enabled(bool)), this, SLOT(setEnabledFlag(bool)));
+        connections_.push_back(adaptee_->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
+        connections_.push_back(adaptee_->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
+
+//        QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
         if(adaptee_->isDynamic()) {
             setProperty("dynamic", true);
@@ -57,6 +58,11 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
 Port::~Port()
 {
     guard_ = 0x1;
+
+    tooltip_connection.disconnect();
+    for(auto c : connections_) {
+        c.disconnect();
+    }
 }
 
 bool Port::event(QEvent *e)
@@ -82,7 +88,8 @@ bool Port::event(QEvent *e)
                 view->show();
 
                 updateTooltip();
-                QObject::connect(output, SIGNAL(messageSent(Connectable*)), this, SLOT(updateTooltip()));
+
+                tooltip_connection = output->messageSent.connect([this](Connectable* c) { updateTooltip(); });
             }
         }
     }
@@ -243,7 +250,7 @@ void Port::startDrag()
         QMimeData* mimeData = new QMimeData;
 
         if(move) {
-            mimeData->setData(Connectable::MIME_MOVE_CONNECTIONS, QByteArray());
+            mimeData->setData(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS), QByteArray());
             mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee_)));
 
             drag->setMimeData(mimeData);
@@ -251,7 +258,7 @@ void Port::startDrag()
             drag->exec();
 
         } else {
-            mimeData->setData(Connectable::MIME_CREATE_CONNECTION, QByteArray());
+            mimeData->setData(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION), QByteArray());
             mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee_)));
 
             drag->setMimeData(mimeData);
@@ -292,7 +299,7 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
 
 void Port::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from == adaptee_) {
             return;
@@ -304,7 +311,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
                 Q_EMIT(adaptee_->connectionInProgress(adaptee_, from));
             }
         }
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* original = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(original->targetsCanBeMovedTo(adaptee_)) {
@@ -315,10 +322,10 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
 void Port::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         from->connectionMovePreview(adaptee_);
@@ -329,13 +336,13 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
 
 void Port::dropEvent(QDropEvent* e)
 {
-    if(e->mimeData()->hasFormat(Connectable::MIME_CREATE_CONNECTION)) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(from && from != adaptee_) {
             dispatcher_->execute(Command::Ptr(new command::AddConnection(adaptee_->getUUID(), from->getUUID())));
         }
-    } else if(e->mimeData()->hasFormat(Connectable::MIME_MOVE_CONNECTIONS)) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(from) {
@@ -360,7 +367,7 @@ void Port::leaveEvent(QEvent */*e*/)
         if(output) {
             output->forceSendMessage(false);
 
-            QObject::disconnect(output, SIGNAL(messageSent(Connectable*)), this, SLOT(updateTooltip()));
+            tooltip_connection.disconnect();
 
             widget_controller_->hideTooltipView();
         }

@@ -106,10 +106,10 @@ public:
     Input* getParameterInput(const std::string& name) const;
     Output* getParameterOutput(const std::string& name) const;
 
-    /* NAMING */ void registerInput(Input* in);
-    /* NAMING */ void registerOutput(Output* out);
-    /* NAMING */ void registerSlot(Slot* s);
-    /* NAMING */ void registerTrigger(Trigger* t);
+    /* NAMING */ void registerInput(InputPtr in);
+    /* NAMING */ void registerOutput(OutputPtr out);
+    /* NAMING */ void registerSlot(SlotPtr s);
+    /* NAMING */ void registerTrigger(TriggerPtr t);
 
     void removeInput(const UUID& uuid);
     void removeOutput(const UUID& uuid);
@@ -262,19 +262,19 @@ private:
     bool is_setup_;
     State state_;
 
-    std::vector<Input*> inputs_;
-    std::vector<Output*> outputs_;
-    std::vector<Trigger*> triggers_;
-    std::vector<Slot*> slots_;
+    std::vector<InputPtr> inputs_;
+    std::vector<OutputPtr> outputs_;
+    std::vector<TriggerPtr> triggers_;
+    std::vector<SlotPtr> slots_;
 
     Trigger* trigger_tick_done_;
     Trigger* trigger_process_done_;
 
-    std::vector<Input*> parameter_inputs_;
-    std::vector<Output*> parameter_outputs_;
+    std::vector<InputPtr> parameter_inputs_;
+    std::vector<OutputPtr> parameter_outputs_;
 
-    std::map<std::string, Input*> param_2_input_;
-    std::map<std::string, Output*> param_2_output_;
+    std::map<std::string, InputPtr> param_2_input_;
+    std::map<std::string, OutputPtr> param_2_output_;
 
     std::map<Input*,param::Parameter*> input_2_param_;
     std::map<Output*,param::Parameter*> output_2_param_;
@@ -300,9 +300,12 @@ private:
     bool thread_initialized_;
     bool paused_;
     bool stop_;
-    mutable std::recursive_mutex stop_mutex_;
     mutable std::recursive_mutex pause_mutex_;
     std::condition_variable_any continue_;
+
+    mutable std::recursive_mutex running_mutex_;
+    bool running_;
+    std::condition_variable_any running_changed_;
 
     std::atomic<bool> profiling_;
 };

@@ -11,8 +11,6 @@ namespace csapex
 
 class Input : public Connectable
 {
-    Q_OBJECT
-
     friend class Output;
     friend class command::AddConnection;
     friend class command::MoveConnection;
@@ -33,7 +31,7 @@ public:
     }
 
     void addConnection(ConnectionPtr connection) override;
-    void removeConnection(ConnectionPtr connection) override;
+    void fadeConnection(ConnectionPtr connection) override;
     bool canConnectTo(Connectable* other_side, bool move) const;
 
     void inputMessage(ConnectionType::ConstPtr message);

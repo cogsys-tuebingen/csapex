@@ -43,6 +43,8 @@ void OutputTransition::connectionAdded(Connection *connection)
 
 void OutputTransition::connectionRemoved(Connection *connection)
 {
+    connection->fadeSource();
+
     if(established_connections_.empty()) {
         outputs_done_ = true;
 //        node_->notifyMessagesProcessed();

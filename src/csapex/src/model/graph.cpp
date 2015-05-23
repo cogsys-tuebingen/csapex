@@ -121,7 +121,7 @@ void Graph::foreachNode(std::function<void (NodeWorker*)> f, std::function<bool 
     }
 }
 
-bool Graph::addConnection(Connection::Ptr connection)
+bool Graph::addConnection(ConnectionPtr connection)
 {
     NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
     NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
@@ -197,14 +197,17 @@ bool Graph::addConnection(Connection::Ptr connection)
     return false;
 }
 
-void Graph::deleteConnection(Connection::Ptr connection)
+void Graph::deleteConnection(ConnectionPtr connection)
 {
-    connection->from()->removeConnection(connection->to());
+    auto out = connection->from();
+    auto in = connection->to();
 
-    connection->from()->removeConnection(connection);
-    connection->to()->removeConnection(connection);
+    out->removeConnection(in);
 
-    for(std::vector<Connection::Ptr>::iterator c = connections_.begin(); c != connections_.end();) {
+    out->fadeConnection(connection);
+    in->fadeConnection(connection);
+
+    for(std::vector<ConnectionPtr>::iterator c = connections_.begin(); c != connections_.end();) {
         if(*connection == **c) {
             Connectable* to = connection->to();
             to->setError(false);
@@ -540,7 +543,7 @@ Connectable* Graph::findConnector(const UUID &uuid)
 
     std::string type = uuid.type();
 
-    Connectable* result = nullptr;
+    Connectable* result;
     if(type == "in") {
         result = owner->getInput(uuid);
     } else if(type == "out") {
@@ -558,9 +561,9 @@ Connectable* Graph::findConnector(const UUID &uuid)
     return result;
 }
 
-Connection::Ptr Graph::getConnectionWithId(int id)
+ConnectionPtr Graph::getConnectionWithId(int id)
 {
-    for(Connection::Ptr& connection : connections_) {
+    for(ConnectionPtr& connection : connections_) {
         if(connection->id() == id) {
             return connection;
         }
@@ -569,9 +572,9 @@ Connection::Ptr Graph::getConnectionWithId(int id)
     return nullptr;
 }
 
-Connection::Ptr Graph::getConnection(Connectable* from, Connectable* to)
+ConnectionPtr Graph::getConnection(Connectable* from, Connectable* to)
 {
-    for(Connection::Ptr& connection : connections_) {
+    for(ConnectionPtr& connection : connections_) {
         if(connection->from() == from && connection->to() == to) {
             return connection;
         }
@@ -582,7 +585,20 @@ Connection::Ptr Graph::getConnection(Connectable* from, Connectable* to)
     return nullptr;
 }
 
-int Graph::getConnectionId(Connection::Ptr c)
+ConnectionPtr Graph::getConnection(const UUID &from, const UUID &to)
+{
+    for(ConnectionPtr& connection : connections_) {
+        if(connection->from()->getUUID() == from && connection->to() ->getUUID()== to) {
+            return connection;
+        }
+    }
+
+    std::cerr << "error: cannot get connection from " << from << " to " << to << std::endl;
+
+    return nullptr;
+}
+
+int Graph::getConnectionId(ConnectionPtr c)
 {
     if(c != nullptr) {
         return c->id();
@@ -592,7 +608,7 @@ int Graph::getConnectionId(Connection::Ptr c)
 }
 Command::Ptr Graph::deleteConnectionByIdCommand(int id)
 {
-    for(const Connection::Ptr& connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         if(connection->id() == id) {
             return Command::Ptr(new command::DeleteConnection(connection->from(), connection->to()));
         }
@@ -620,7 +636,7 @@ Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(int connection)
     return meta;
 }
 
-Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(Connection::Ptr connection)
+Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(ConnectionPtr connection)
 {
     return deleteAllConnectionFulcrumsCommand(getConnectionId(connection));
 }

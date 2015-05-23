@@ -110,7 +110,7 @@ void GraphIO::saveConnections(YAML::Node &yaml)
         }
     }
 
-    for(const Connection::Ptr& connection : graph_worker_->getGraph()->connections_) {
+    for(const ConnectionPtr& connection : graph_worker_->getGraph()->connections_) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }
@@ -210,7 +210,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                         continue;
                     }
 
-                    graph_worker_->getGraph()->addConnection(Connection::Ptr(new Connection(from, to)));
+                    graph_worker_->getGraph()->addConnection(ConnectionPtr(new Connection(from, to)));
 
                 } catch(const std::exception& e) {
                     std::cerr << "cannot load connection: " << e.what() << std::endl;
@@ -248,7 +248,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 continue;
             }
 
-            Connection::Ptr connection = graph_worker_->getGraph()->getConnection(from, to);
+            ConnectionPtr connection = graph_worker_->getGraph()->getConnection(from, to);
 
             std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 

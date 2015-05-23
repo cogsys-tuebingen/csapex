@@ -49,7 +49,7 @@ void DynamicInput::composeMessage()
 
     msg_parts_.clear();
 
-    Q_EMIT messageArrived(this);
+    messageArrived(this);
 }
 
 

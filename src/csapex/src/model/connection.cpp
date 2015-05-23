@@ -90,6 +90,10 @@ Connection::Connection(Trigger *from, Slot *to, int id)
     to->enabled_changed.connect(sink_enabled_changed);
 }
 
+Connection::~Connection()
+{
+}
+
 void Connection::reset()
 {
     state_ = Connection::State::NOT_INITIALIZED;
@@ -191,6 +195,34 @@ bool Connection::isSinkEstablished() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     return sink_established_;
+}
+
+void Connection::fadeSource()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    source_established_ = false;
+
+    if(isFaded()) {
+        lock.unlock();
+        deleted();
+    }
+}
+
+void Connection::fadeSink()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    sink_established_ = false;
+
+    if(isFaded()) {
+        lock.unlock();
+        deleted();
+    }
+}
+
+bool Connection::isFaded() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return !source_established_ && !sink_established_;
 }
 
 Connection::State Connection::getState() const
@@ -332,5 +364,3 @@ void Connection::deleteFulcrum(int fulcrum_id)
 
     fulcrums_.erase(index);
 }
-/// MOC
-#include "../../include/csapex/model/moc_connection.cpp"

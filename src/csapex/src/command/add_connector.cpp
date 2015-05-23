@@ -17,7 +17,7 @@ using namespace csapex;
 using namespace command;
 
 AddConnector::AddConnector(const UUID &box_uuid, const std::string& label, const std::string& type, bool input, const UUID &uuid)
-    : type(type), label(label), input(input), c(nullptr), b_uuid(box_uuid), c_uuid(uuid)
+    : type(type), label(label), input(input), b_uuid(box_uuid), c_uuid(uuid)
 {
 
 }
@@ -38,14 +38,15 @@ bool AddConnector::doExecute()
     NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(b_uuid);
     apex_assert_hard(node_worker);
 
+    ConnectablePtr c;
     if(input) {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getUUID(), "in", node_worker->getMessageInputs().size()) : c_uuid;
-        Input* in = new Input(node_worker->getInputTransition(), uuid);
+        InputPtr in = std::make_shared<Input>(node_worker->getInputTransition(), uuid);
         c = in;
         node_worker->registerInput(in);
     } else {
         UUID uuid = c_uuid.empty() ? Connectable::makeUUID(node_worker->getUUID(), "out", node_worker->getMessageOutputs().size()) : c_uuid;
-        Output* out = new StaticOutput(node_worker->getOutputTransition(), uuid);
+        OutputPtr out = std::make_shared<StaticOutput>(node_worker->getOutputTransition(), uuid);
         c = out;
         node_worker->registerOutput(out);
     }

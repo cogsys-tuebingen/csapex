@@ -14,8 +14,6 @@ namespace csapex
 
 class Slot : public Connectable
 {
-    Q_OBJECT
-
     friend class Trigger;
     friend class command::AddConnection;
     friend class command::MoveConnection;
@@ -57,17 +55,16 @@ public:
 
     void reset();
 
+    void handleTrigger();
+
+public:
+    boost::signals2::signal<void()> triggered;
+
 protected:
     virtual bool isConnectionPossible(Connectable* other_side);
     virtual bool acknowledgeConnection(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
-
-Q_SIGNALS:
-    void triggered();
-
-private Q_SLOTS:
-    void handleTrigger();
 
 protected:
     std::vector<Trigger*> sources_;

@@ -79,6 +79,9 @@ protected:
 
     Qt::MouseButtons buttons_down_;
 
+    boost::signals2::connection tooltip_connection;
+    std::vector<boost::signals2::connection> connections_;
+
 public:
     mutable long guard_;
 };

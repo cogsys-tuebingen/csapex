@@ -51,6 +51,8 @@ public:
     Connection(Trigger* from, Slot* to);
     Connection(Trigger* from, Slot* to, int id);
 
+    ~Connection();
+
     Connectable* from() const;
     Connectable* to() const;
     int id() const;
@@ -73,6 +75,10 @@ public:
     bool isSinkEstablished() const;
     bool isEstablished() const;
 
+    void fadeSource();
+    void fadeSink();
+    bool isFaded() const;
+
     State getState() const;
     void setState(State s);
 
@@ -86,6 +92,8 @@ public:
     boost::signals2::signal<void()> new_message;
     boost::signals2::signal<void()> endpoint_established;
     boost::signals2::signal<void()> connection_established;
+
+    boost::signals2::signal<void()> deleted;
 
     boost::signals2::signal<void(bool)> source_enable_changed;
     boost::signals2::signal<void(bool)> sink_enabled_changed;

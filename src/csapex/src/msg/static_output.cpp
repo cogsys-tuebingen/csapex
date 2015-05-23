@@ -100,7 +100,7 @@ void StaticOutput::commitMessages()
 //    }
 
     ++seq_no_;
-    Q_EMIT messageSent(this);
+    messageSent(this);
 }
 
 void StaticOutput::reset()

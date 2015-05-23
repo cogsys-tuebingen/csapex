@@ -367,16 +367,12 @@ void NodeBox::unregisterEvent(Connectable*)
 
 void NodeBox::registerInputEvent(Input* in)
 {
-    in->setParent(nullptr);
-
     Q_EMIT changed(this);
 }
 
 void NodeBox::registerOutputEvent(Output* out)
 {
     apex_assert_hard(out);
-
-    out->setParent(nullptr);
 
     Q_EMIT changed(this);
 }

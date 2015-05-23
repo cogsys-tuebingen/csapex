@@ -39,7 +39,7 @@ bool AddConnection::doExecute()
         refresh();
     }
 
-    return graph_worker_->getGraph()->addConnection(Connection::Ptr(new Connection(from, to)));
+    return graph_worker_->getGraph()->addConnection(ConnectionPtr(new Connection(from, to)));
 }
 
 bool AddConnection::doUndo()

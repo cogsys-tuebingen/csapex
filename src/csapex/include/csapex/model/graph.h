@@ -56,7 +56,7 @@ public:
     int getComponent(const UUID& node_uuid) const;
     int getLevel(const UUID& node_uuid) const;
 
-    Connectable* findConnector(const UUID &uuid);
+    Connectable *findConnector(const UUID &uuid);
 
     // TODO: extract commands from here!!
     Command::Ptr deleteConnectionByIdCommand(int id);
@@ -67,6 +67,7 @@ public:
     Command::Ptr clear();
 
     ConnectionPtr getConnectionWithId(int id);
+    ConnectionPtr getConnection(const UUID& from, const UUID& to);
     ConnectionPtr getConnection(Connectable* from, Connectable* to);
     int getConnectionId(ConnectionPtr);
 
