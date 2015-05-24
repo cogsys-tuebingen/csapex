@@ -582,14 +582,6 @@ void NodeWorker::updateParameterValue(Connectable *s)
     }
 }
 
-void NodeWorker::checkIfInputsCanBeProcessed()
-{
-    //    if(isEnabled() && areAllInputsAvailable()) {
-    //        processMessages();
-    //    }
-}
-
-
 void NodeWorker::outputConnectionChanged(Connectable*)
 {
     std::lock_guard<std::recursive_mutex> lock(sync);

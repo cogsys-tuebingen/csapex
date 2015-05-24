@@ -11,6 +11,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
+#include <boost/signals2/connection.hpp>
 
 namespace csapex
 {
@@ -21,6 +22,7 @@ class ProfilingWidget : public QWidget
 
 public:
     ProfilingWidget(DesignerView *view, NodeBox* box, QWidget* parent=0);
+    ~ProfilingWidget();
 
 public Q_SLOTS:
     void reposition(double x, double y);
@@ -33,6 +35,8 @@ protected:
 private:
     NodeBox* box_;
     NodeWorker* node_worker_;
+
+    boost::signals2::connection connection_;
 
     float w_;
     float h_;

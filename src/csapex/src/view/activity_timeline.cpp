@@ -47,6 +47,7 @@ ActivityTimeline::ActivityTimeline()
     setVisible(false);
 
     QObject::connect(horizontalScrollBar(), SIGNAL(sliderMoved(int)), this, SLOT(updateScrolling()));
+    QObject::connect(this, SIGNAL(addItemRequest(QGraphicsItem*)), this, SLOT(addItem(QGraphicsItem*)));
 }
 
 ActivityTimeline::~ActivityTimeline()
@@ -65,6 +66,11 @@ void ActivityTimeline::resizeToFit()
     scene_->setSceneRect(rect);
 
     setFixedHeight(scene_->sceneRect().height() + horizontalScrollBar()->height() + 5);
+}
+
+void ActivityTimeline::addItem(QGraphicsItem *item)
+{
+    scene_->addItem(item);
 }
 
 
@@ -139,8 +145,15 @@ void ActivityTimeline::addNode(NodeWorker* node)
 
     resizeToFit();
 
-    QObject::connect(node, SIGNAL(timerStarted(NodeWorker*, int, long)), this, SLOT(updateRowStart(NodeWorker*, int, long)));
-    QObject::connect(node, SIGNAL(timerStopped(NodeWorker*, long)), this, SLOT(updateRowStop(NodeWorker*, long)));
+    auto cstart = node->timerStarted.connect([this](NodeWorker* worker, int type, long stamp) {
+            if(isVisible()) updateRowStart(worker, type, stamp);
+    });
+    node2connections_[node].push_back(cstart);
+
+    auto cstop = node->timerStopped.connect([this](NodeWorker* worker, long stamp) {
+            if(isVisible()) updateRowStop(worker, stamp);
+    });
+    node2connections_[node].push_back(cstop);
 }
 
 void ActivityTimeline::removeNode(NodeWorker* node)
@@ -167,9 +180,10 @@ void ActivityTimeline::removeNode(NodeWorker* node)
         node2row.erase(node);
         rows_.pop_back();
 
-        QObject::disconnect(node, SIGNAL(timerStarted(NodeWorker*, int, long)), this, SLOT(updateRowStart(NodeWorker*, int, long)));
-        QObject::disconnect(node, SIGNAL(timerStopped(NodeWorker*, long)), this, SLOT(updateRowStop(NodeWorker*, long)));
-
+        for(boost::signals2::connection& c : node2connections_[node]) {
+            c.disconnect();
+        }
+        node2connections_.erase(node);
 
         resizeToFit();
     }
@@ -238,7 +252,8 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
     updateTime(stamp);
     row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type)));
     row->active_activity_ = row->activities_.back();
-    scene_->addItem(row->active_activity_->rect);
+
+    Q_EMIT addItemRequest(row->active_activity_->rect);
 }
 
 void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)

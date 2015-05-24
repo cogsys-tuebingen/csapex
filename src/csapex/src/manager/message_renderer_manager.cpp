@@ -29,11 +29,14 @@ void MessageRendererManager::setPluginLocator(PluginLocatorPtr locator)
 
 void MessageRendererManager::shutdown()
 {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
     renderers.clear();
 }
 
 void MessageRendererManager::loadPlugins()
 {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+
     if(!manager_->pluginsLoaded()) {
         manager_->load(plugin_locator_.get());
     }
@@ -54,6 +57,7 @@ void MessageRendererManager::loadPlugins()
 
 MessageRendererPtr MessageRendererManager::createMessageRenderer(const ConnectionTypeConstPtr& message)
 {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
     if(!manager_->pluginsLoaded() || renderers.empty()) {
         loadPlugins();
     }

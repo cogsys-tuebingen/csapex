@@ -50,8 +50,8 @@ void ActivityLegend::startTrackingNode(NodeWorkerPtr node)
 {
     NodeWorker* worker = node.get();
 
-    QObject::connect(worker, SIGNAL(startProfiling(NodeWorker*)), this, SLOT(addNode(NodeWorker*)));
-    QObject::connect(worker, SIGNAL(stopProfiling(NodeWorker*)), this, SLOT(removeNode(NodeWorker*)));
+    worker->startProfiling.connect([this](NodeWorker* nw) { addNode(nw); });
+    worker->stopProfiling.connect([this](NodeWorker* nw) { removeNode(nw); });
 }
 
 void ActivityLegend::stopTrackingNode(NodeWorkerPtr node)

@@ -9,6 +9,7 @@
 #include <QGraphicsView>
 #include <map>
 #include <QTimer>
+#include <boost/signals2/connection.hpp>
 
 namespace csapex
 {
@@ -62,6 +63,9 @@ public:
 Q_SIGNALS:
     void selectionChanged();    
     void viewChanged();
+
+    void startProfilingRequest(NodeWorker* box);
+    void stopProfilingRequest(NodeWorker *box);
 
 public Q_SLOTS:
     void showBoxDialog();
@@ -123,6 +127,7 @@ private:
 
     std::vector<NodeBox*> boxes_;
     std::map<NodeBox*, ProfilingWidget*> profiling_;
+    std::map<NodeBox*, std::vector<boost::signals2::connection>> profiling_connections_;
 
     int scalings_to_perform_;
     QTimer scalings_animation_timer_;

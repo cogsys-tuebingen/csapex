@@ -44,9 +44,13 @@ public Q_SLOTS:
 
     void resizeToFit();
 
+    void addItem(QGraphicsItem* item);
+
 
 Q_SIGNALS:
     void scrollingChanged(bool);
+
+    void addItemRequest(QGraphicsItem* item);
 
 private:
     void startTimer();
@@ -117,6 +121,7 @@ private:
 
     std::vector<Row*> rows_;
     std::map<NodeWorker*, Row*> node2row;
+    std::map<NodeWorker*, std::vector<boost::signals2::connection>> node2connections_;
 };
 
 }

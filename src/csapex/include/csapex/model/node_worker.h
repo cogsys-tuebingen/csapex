@@ -179,16 +179,25 @@ public Q_SLOTS:
     void sendMessages();
     void notifyMessagesProcessed();
 
-public:
+    /** SLOTS **/
+    void outputConnectionChanged(Connectable*);
 
+public:
     boost::signals2::signal<void()> panic;
     boost::signals2::signal<void()> messages_processed;
 
+    boost::signals2::signal<void()> ticked;
+    boost::signals2::signal<void(bool)> enabled;
+
+    boost::signals2::signal<void(NodeWorker* worker, int type, long stamp)> timerStarted;
+    boost::signals2::signal<void(NodeWorker* worker, long stamp)> timerStopped;
+
+    boost::signals2::signal<void(NodeWorker* worker)> startProfiling;
+    boost::signals2::signal<void(NodeWorker* worker)> stopProfiling;
+
 Q_SIGNALS:
     void messagesProcessed();
-    void ticked();
 
-    void enabled(bool);
     void messagesWaitingToBeSent(bool);
 
     void connectionInProgress(Connectable*, Connectable*);
@@ -208,19 +217,11 @@ Q_SIGNALS:
     void threadSwitchRequested(QThread*, int);
     void tickRequested();
 
-    void timerStarted(NodeWorker* worker, int type, long stamp);
-    void timerStopped(NodeWorker* worker, long stamp);
-
-    void startProfiling(NodeWorker* box);
-    void stopProfiling(NodeWorker* box);
-
     void processRequested();
     void checkTransitionsRequested();
 
 private Q_SLOTS:
     void switchThread(QThread* thread, int id);
-    void outputConnectionChanged(Connectable*);
-    void checkIfInputsCanBeProcessed();
 
 private:
     void removeInput(Input *in);

@@ -84,6 +84,9 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
     //    QObject::connect(&scalings_animation_timer_, SIGNAL(timeout()), this, SLOT(animateZoom()));
     QObject::connect(&scroll_animation_timer_, SIGNAL(timeout()), this, SLOT(animateScroll()));
 
+    QObject::connect(this, SIGNAL(startProfilingRequest(NodeWorker*)), this, SLOT(startProfiling(NodeWorker*)));
+    QObject::connect(this, SIGNAL(stopProfilingRequest(NodeWorker*)), this, SLOT(stopProfiling(NodeWorker*)));
+
     setContextMenuPolicy(Qt::DefaultContextMenu);
 }
 
@@ -396,8 +399,9 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
-    QObject::connect(worker, SIGNAL(startProfiling(NodeWorker*)), this, SLOT(startProfiling(NodeWorker*)));
-    QObject::connect(worker, SIGNAL(stopProfiling(NodeWorker*)), this, SLOT(stopProfiling(NodeWorker*)));
+    worker->startProfiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); });
+    worker->stopProfiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); });
+
 
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     scene_->addItem(proxy);
@@ -463,13 +467,24 @@ void DesignerView::startProfiling(NodeWorker *node)
 
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
     QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
-    QObject::connect(box->getNodeWorker(), SIGNAL(messageProcessed()), prof, SLOT(update()));
-    QObject::connect(box->getNodeWorker(), SIGNAL(ticked()), prof, SLOT(update()));
+
+    auto nw = box->getNodeWorker();
+
+    auto cp = nw->messages_processed.connect([prof](){ prof->update(); });
+    profiling_connections_[box].push_back(cp);
+
+    auto ct = nw->ticked.connect([prof](){ prof->update(); });
+    profiling_connections_[box].push_back(ct);
 }
 
 void DesignerView::stopProfiling(NodeWorker *node)
 {
     NodeBox* box = widget_ctrl_->getBox(node->getUUID());
+
+    for(auto& connection : profiling_connections_[box]) {
+        connection.disconnect();
+    }
+    profiling_connections_.erase(box);
 
     std::map<NodeBox*, ProfilingWidget*>::iterator pos = profiling_.find(box);
     apex_assert_hard(pos != profiling_.end());

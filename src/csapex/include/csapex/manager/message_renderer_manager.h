@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <functional>
+#include <mutex>
 
 namespace csapex {
 
@@ -36,6 +37,8 @@ private:
     void loadPlugins();
 
 private:
+    std::recursive_mutex mutex_;
+
     csapex::PluginLocatorPtr plugin_locator_;
 
     std::map<const std::type_info*, MessageRendererPtr> renderers;
