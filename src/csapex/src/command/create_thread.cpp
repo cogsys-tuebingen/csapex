@@ -41,7 +41,7 @@ bool CreateThread::doExecute()
     apex_assert_hard(node_worker);
 
     old_id = node_worker->getNodeState()->getThread();
-    new_id = thread_pool_->createNewThreadGroupFor(node_worker, name);
+    new_id = thread_pool_->createNewGroupFor(node_worker, name);
 
     return true;
 }
@@ -54,9 +54,9 @@ bool CreateThread::doUndo()
     if(old_id == 0) {
         thread_pool_->usePrivateThreadFor(node_worker);
     } else {
-        thread_pool_->switchToThread(node_worker, old_id);
+        thread_pool_->addToGroup(node_worker, old_id);
     }
-    thread_pool_->deleteThreadGroup(new_id);
+    thread_pool_->deleteGroup(new_id);
 
     return true;
 }

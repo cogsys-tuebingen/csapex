@@ -7,6 +7,7 @@
 #include <csapex/core/csapex_core.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/utility/thread.h>
+#include <csapex/scheduling/thread_group.h>
 
 /// SYSTEM
 #include <set>
@@ -52,17 +53,15 @@ void ThreadPool::nodeRemoved(NodeWorkerPtr node_worker)
     private_thread_.erase(nw);
 }
 
-std::vector<ThreadGroup> ThreadPool::getCustomGroups()
+std::vector<ThreadGroupPtr> ThreadPool::getCustomGroups()
 {
     return custom_groups_;
 }
 
-ThreadGroup ThreadPool::getCustomGroup(int id)
+ThreadGroupPtr ThreadPool::getCustomGroup(int id)
 {
-    for(std::vector<ThreadGroup>::iterator it = custom_groups_.begin();
-         it != custom_groups_.end(); ++it) {
-         ThreadGroup& group = *it;
-         if(group.id == id) {
+    for(auto group : custom_groups_) {
+         if(group->id == id) {
              return group;
          }
     }
@@ -77,8 +76,8 @@ void ThreadPool::saveSettings(YAML::Node& node)
     YAML::Node groups;
     for(std::size_t i = 0, total =  custom_groups_.size(); i < total; ++i) {
         YAML::Node group;
-        group["id"] =  custom_groups_[i].id;
-        group["name"] =  custom_groups_[i].name;
+        group["id"] =  custom_groups_[i]->id;
+        group["name"] =  custom_groups_[i]->name;
         groups.push_back(group);
     }
     threads["groups"] = groups;
@@ -111,7 +110,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
 
                 int group_id = group["id"].as<int>();
                 std::string group_name = group["name"].as<std::string>();
-                custom_groups_.push_back(ThreadGroup(group_id, group_name));
+                custom_groups_.emplace_back(std::make_shared<ThreadGroup>(group_id, group_name));
 
                 custom_group_threads_[group_id] = setupThread(group_id, true, group_name);
             }
@@ -127,7 +126,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
                 NodeWorker* worker = graph_->findNodeWorkerNoThrow(uuid);
                 if(worker) {
                     int id = assignment["id"].as<int>();
-                    switchToThread(worker, id);
+                    addToGroup(worker, id);
                 }
             }
         }
@@ -158,7 +157,7 @@ void ThreadPool::useDefaultThreadFor(NodeWorker* node_worker)
 
     node_worker->triggerSwitchThreadRequest(thread, UNDEFINED_THREAD);
 }
-void ThreadPool::switchToThread(NodeWorker *worker, int group_id)
+void ThreadPool::addToGroup(NodeWorker *worker, int group_id)
 {
     if(private_thread_[worker]) {
         private_thread_[worker] = false;
@@ -166,8 +165,8 @@ void ThreadPool::switchToThread(NodeWorker *worker, int group_id)
     }
 
     for(std::size_t i = 0, total =  custom_groups_.size(); i < total; ++i) {
-        if(custom_groups_[i].id == group_id) {
-            custom_group_assignment_[worker] = &custom_groups_[i];
+        if(custom_groups_[i]->id == group_id) {
+            custom_group_assignment_[worker] = custom_groups_[i].get();
             break;
         }
     }
@@ -185,29 +184,29 @@ void ThreadPool::deletePrivateThread(NodeWorker *worker)
 }
 
 
-int ThreadPool::createNewThreadGroupFor(NodeWorker* worker, const std::string &name)
+int ThreadPool::createNewGroupFor(NodeWorker* worker, const std::string &name)
 {
     private_thread_[worker] = false;
 
-    for(const ThreadGroup& group : custom_groups_) {
-        if(group.name == name) {
-            switchToThread(worker, group.id);
-            return group.id;
+    for(auto group : custom_groups_) {
+        if(group->name == name) {
+            addToGroup(worker, group->id);
+            return group->id;
         }
     }
 
-    custom_groups_.push_back(ThreadGroup(next_id++, name));
-    ThreadGroup& group = *custom_groups_.rbegin();
+    custom_groups_.emplace_back(std::make_shared<ThreadGroup>(next_id++, name));
+    ThreadGroupPtr group = *custom_groups_.rbegin();
 
-    custom_group_assignment_[worker] = &group;
-    custom_group_threads_[group.id] = setupThread(group.id, true, name);
+    custom_group_assignment_[worker] = group.get();
+    custom_group_threads_[group->id] = setupThread(group->id, true, name);
 
-    worker->triggerSwitchThreadRequest(custom_group_threads_[group.id], group.id);
+    worker->triggerSwitchThreadRequest(custom_group_threads_[group->id], group->id);
 
-    return group.id;
+    return group->id;
 }
 
-void ThreadPool::deleteThreadGroup(int group_id)
+void ThreadPool::deleteGroup(int group_id)
 {
     // check if group exists
     std::map<int, QThread*>::iterator pos = custom_group_threads_.find(group_id);
@@ -230,10 +229,9 @@ void ThreadPool::deleteThreadGroup(int group_id)
     custom_group_threads_.erase(pos);
 
     // delete the group
-    for(std::vector<ThreadGroup>::iterator it = custom_groups_.begin();
-        it != custom_groups_.end();) {
-        ThreadGroup& group = *it;
-        if(group.id == group_id) {
+    for(auto it = custom_groups_.begin(); it != custom_groups_.end();) {
+        ThreadGroupPtr group = *it;
+        if(group->id == group_id) {
             it = custom_groups_.erase(it);
         } else {
             ++it;

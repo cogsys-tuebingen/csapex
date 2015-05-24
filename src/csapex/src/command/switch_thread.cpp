@@ -8,6 +8,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/scheduling/thread_pool.h>
+#include <csapex/scheduling/thread_group.h>
 
 /// SYSTEM
 #include <sstream>
@@ -48,8 +49,8 @@ bool SwitchThread::doExecute()
     if(id == 0) {
         thread_pool_->usePrivateThreadFor(node_worker);
     } else {
-        name = thread_pool_->getCustomGroup(id).name;
-        thread_pool_->switchToThread(node_worker, id);
+        name = thread_pool_->getCustomGroup(id)->name;
+        thread_pool_->addToGroup(node_worker, id);
     }
 
     return true;
@@ -63,7 +64,7 @@ bool SwitchThread::doUndo()
     if(old_id == 0) {
         thread_pool_->usePrivateThreadFor(node_worker);
     } else {
-        thread_pool_->switchToThread(node_worker, old_id);
+        thread_pool_->addToGroup(node_worker, old_id);
     }
     return true;
 }

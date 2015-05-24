@@ -35,6 +35,9 @@ FWD(NodeConstructor);
 FWD(NodeStatistics);
 
 FWD(ThreadPool);
+FWD(ThreadGroup);
+FWD(Scheduler);
+FWD(Schedulable);
 
 FWD(Port);
 FWD(Connectable);

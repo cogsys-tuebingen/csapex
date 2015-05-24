@@ -26,6 +26,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/view/box.h>
+#include <csapex/scheduling/thread_group.h>
 
 /// SYSTEM
 #include <iostream>
@@ -613,9 +614,9 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 
         QMenu* choose_group_menu = new QMenu("thread group", &menu);
 
-        std::vector<ThreadGroup> thread_groups = thread_pool_.getCustomGroups();
+        std::vector<ThreadGroupPtr> thread_groups = thread_pool_.getCustomGroups();
         for(std::size_t i = 0; i < thread_groups.size(); ++i) {
-            const ThreadGroup& group = thread_groups[i];
+            const ThreadGroup& group = *thread_groups[i];
 
             std::stringstream ss;
             ss << "(" << group.id << ") " << group.name;
