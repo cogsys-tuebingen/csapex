@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/scheduling/thread_group.h>
 
 /// SYSTEM
 #include <map>
@@ -25,21 +26,11 @@ public:
         MINIMUM_THREAD_ID = 1
     };
 
-    struct Group
-    {
-        Group(int id, std::string name)
-            : id(id), name(name)
-        {}
-
-        int id;
-        std::string name;
-    };
-
 public:
     ThreadPool(Graph* graph, bool enable_threading, bool grouping);
 
-    std::vector<Group> getCustomGroups();
-    Group getCustomGroup(int id);
+    std::vector<ThreadGroup> getCustomGroups();
+    ThreadGroup getCustomGroup(int id);
 
     std::string nextName();
 
@@ -73,8 +64,8 @@ private:
 
     std::map<int, QThread*> component_group_threads_;
 
-    std::vector<Group> custom_groups_;
-    std::map<NodeWorker*, Group*> custom_group_assignment_;
+    std::vector<ThreadGroup> custom_groups_;
+    std::map<NodeWorker*, ThreadGroup*> custom_group_assignment_;
     std::map<int, QThread*> custom_group_threads_;
 
     std::map<NodeWorker*, QThread*> private_threads_;

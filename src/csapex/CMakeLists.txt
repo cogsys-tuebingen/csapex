@@ -219,6 +219,7 @@ set(SRC_BASE
     src/core/settings.cpp
     src/core/serialization.cpp
 
+    src/scheduling/thread_group.cpp
     src/scheduling/thread_pool.cpp
 
     src/signal/signal.cpp

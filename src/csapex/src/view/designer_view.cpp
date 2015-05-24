@@ -613,9 +613,9 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 
         QMenu* choose_group_menu = new QMenu("thread group", &menu);
 
-        std::vector<ThreadPool::Group> thread_groups = thread_pool_.getCustomGroups();
+        std::vector<ThreadGroup> thread_groups = thread_pool_.getCustomGroups();
         for(std::size_t i = 0; i < thread_groups.size(); ++i) {
-            const ThreadPool::Group& group = thread_groups[i];
+            const ThreadGroup& group = thread_groups[i];
 
             std::stringstream ss;
             ss << "(" << group.id << ") " << group.name;

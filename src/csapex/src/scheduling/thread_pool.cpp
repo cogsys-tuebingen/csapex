@@ -52,16 +52,16 @@ void ThreadPool::nodeRemoved(NodeWorkerPtr node_worker)
     private_thread_.erase(nw);
 }
 
-std::vector<ThreadPool::Group> ThreadPool::getCustomGroups()
+std::vector<ThreadGroup> ThreadPool::getCustomGroups()
 {
     return custom_groups_;
 }
 
-ThreadPool::Group ThreadPool::getCustomGroup(int id)
+ThreadGroup ThreadPool::getCustomGroup(int id)
 {
-    for(std::vector<Group>::iterator it = custom_groups_.begin();
+    for(std::vector<ThreadGroup>::iterator it = custom_groups_.begin();
          it != custom_groups_.end(); ++it) {
-         Group& group = *it;
+         ThreadGroup& group = *it;
          if(group.id == id) {
              return group;
          }
@@ -84,7 +84,7 @@ void ThreadPool::saveSettings(YAML::Node& node)
     threads["groups"] = groups;
 
     YAML::Node assignments;
-    for(std::map<NodeWorker*, Group*>::const_iterator it = custom_group_assignment_.begin();
+    for(std::map<NodeWorker*, ThreadGroup*>::const_iterator it = custom_group_assignment_.begin();
         it != custom_group_assignment_.end(); ++it)
     {
         YAML::Node assignment;
@@ -111,7 +111,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
 
                 int group_id = group["id"].as<int>();
                 std::string group_name = group["name"].as<std::string>();
-                custom_groups_.push_back(Group(group_id, group_name));
+                custom_groups_.push_back(ThreadGroup(group_id, group_name));
 
                 custom_group_threads_[group_id] = setupThread(group_id, true, group_name);
             }
@@ -189,15 +189,15 @@ int ThreadPool::createNewThreadGroupFor(NodeWorker* worker, const std::string &n
 {
     private_thread_[worker] = false;
 
-    for(const Group& group : custom_groups_) {
+    for(const ThreadGroup& group : custom_groups_) {
         if(group.name == name) {
             switchToThread(worker, group.id);
             return group.id;
         }
     }
 
-    custom_groups_.push_back(Group(next_id++, name));
-    Group& group = *custom_groups_.rbegin();
+    custom_groups_.push_back(ThreadGroup(next_id++, name));
+    ThreadGroup& group = *custom_groups_.rbegin();
 
     custom_group_assignment_[worker] = &group;
     custom_group_threads_[group.id] = setupThread(group.id, true, name);
@@ -216,10 +216,10 @@ void ThreadPool::deleteThreadGroup(int group_id)
     }
 
     // check if group is empty
-    for(std::map<NodeWorker*, Group*>::iterator it = custom_group_assignment_.begin();
+    for(std::map<NodeWorker*, ThreadGroup*>::iterator it = custom_group_assignment_.begin();
         it != custom_group_assignment_.end();
         ++it) {
-        Group& group = *it->second;
+        ThreadGroup& group = *it->second;
         if(group.id == group_id) {
             return; // not empty!
         }
@@ -230,9 +230,9 @@ void ThreadPool::deleteThreadGroup(int group_id)
     custom_group_threads_.erase(pos);
 
     // delete the group
-    for(std::vector<Group>::iterator it = custom_groups_.begin();
+    for(std::vector<ThreadGroup>::iterator it = custom_groups_.begin();
         it != custom_groups_.end();) {
-        Group& group = *it;
+        ThreadGroup& group = *it;
         if(group.id == group_id) {
             it = custom_groups_.erase(it);
         } else {
