@@ -262,12 +262,12 @@ QxtDoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout *layout, const std::string 
 /// THREADING
 void assertGuiThread()
 {
-    assert(QThread::currentThread() == QApplication::instance()->thread());
+    apex_assert_hard(QThread::currentThread() == QApplication::instance()->thread());
 }
 
 void assertNotGuiThread()
 {
-    assert(QThread::currentThread() != QApplication::instance()->thread());
+    apex_assert_hard(QThread::currentThread() != QApplication::instance()->thread());
 }
 }
 
@@ -278,7 +278,7 @@ DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter *parent)
     qRegisterMetaType < Function > ("Function");
 
     assertGuiThread();
-    assert(thread() == QApplication::instance()->thread());
+    apex_assert_hard(thread() == QApplication::instance()->thread());
 
     QObject::connect(this, SIGNAL(setupAdaptiveUiRequest()), this, SLOT(setupAdaptiveUi()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(modelCallback(Function)), this, SLOT(executeModelCallback(Function)));

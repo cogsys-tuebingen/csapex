@@ -36,6 +36,8 @@ FWD(NodeStatistics);
 
 FWD(ThreadPool);
 FWD(ThreadGroup);
+FWD(NodeRunner);
+FWD(NodeFacade);
 FWD(Scheduler);
 FWD(Schedulable);
 
