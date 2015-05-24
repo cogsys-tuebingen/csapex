@@ -195,10 +195,11 @@ public:
     boost::signals2::signal<void(NodeWorker* worker)> startProfiling;
     boost::signals2::signal<void(NodeWorker* worker)> stopProfiling;
 
+    boost::signals2::signal<void()> threadChanged;
+    boost::signals2::signal<void(bool)> errorHappened;
+
 Q_SIGNALS:
     void messagesProcessed();
-
-    void messagesWaitingToBeSent(bool);
 
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone(Connectable*);
@@ -207,12 +208,7 @@ Q_SIGNALS:
     void connectorCreated(Connectable*);
     void connectorRemoved(Connectable*);
 
-    void connectorEnabled(Connectable*);
-    void connectorDisabled(Connectable*);
-
     void nodeStateChanged();
-    void threadChanged();
-    void errorHappened(bool error);
 
     void threadSwitchRequested(QThread*, int);
     void tickRequested();

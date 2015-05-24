@@ -1326,8 +1326,6 @@ void NodeWorker::sendMessages()
     //    node_->aerr << "SEND" << std::endl;
     apex_assert_hard(transition_out_->canSendMessages());
     transition_out_->sendMessages();
-
-    messagesWaitingToBeSent(false);
 }
 
 void NodeWorker::setTickFrequency(double f)
@@ -1502,8 +1500,6 @@ void NodeWorker::tick()
                     apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
                     if(has_msg) {
                         transition_out_->setConnectionsReadyToReceive();
-
-                        messagesWaitingToBeSent(true);
 
                         apex_assert_hard(transition_out_->canSendMessages());
                         sendMessages();

@@ -139,6 +139,8 @@ Q_SIGNALS:
 
     void showContextMenuForBox(NodeBox* box, const QPoint& pos);
 
+    void updateVisualsRequest();
+
 protected:
     void resizeEvent(QResizeEvent * e);
 

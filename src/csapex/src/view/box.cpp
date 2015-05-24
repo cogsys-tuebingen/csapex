@@ -35,6 +35,8 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
 {
     worker->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::flipSides, this));
     worker->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
+
+    QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
 }
 
 NodeBox::~NodeBox()
@@ -136,10 +138,8 @@ void NodeBox::construct()
     enabledChange(worker->isEnabled());
     worker->enabled.connect([this](bool e){ enabledChange(e); });
 
-
-    QObject::connect(worker.get(), SIGNAL(threadChanged()), this, SLOT(updateThreadInformation()));
-
-    QObject::connect(worker.get(), SIGNAL(errorHappened(bool)), this, SLOT(updateVisuals()));
+    worker->threadChanged.connect([this](){ updateThreadInformation(); });
+    worker->errorHappened.connect([this](bool){ updateVisualsRequest(); });
 
 
     for(Input* input : worker->getMessageInputs()) {
