@@ -24,7 +24,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/context_menu_handler.h>
 #include <csapex/core/settings.h>
-#include <csapex/core/thread_pool.h>
+#include <csapex/scheduling/thread_pool.h>
 #include <csapex/view/box.h>
 
 /// SYSTEM

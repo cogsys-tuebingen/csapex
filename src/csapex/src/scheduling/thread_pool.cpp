@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/core/thread_pool.h>
+#include <csapex/scheduling/thread_pool.h>
 
 /// COMPONENT
 #include <csapex/model/graph.h>

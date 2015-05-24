@@ -7,7 +7,7 @@
 #include <csapex/model/graph_worker.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
-#include <csapex/core/thread_pool.h>
+#include <csapex/scheduling/thread_pool.h>
 
 /// SYSTEM
 #include <sstream>

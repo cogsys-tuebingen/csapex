@@ -6,7 +6,7 @@
 #include <csapex/core/drag_io.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
-#include <csapex/core/thread_pool.h>
+#include <csapex/scheduling/thread_pool.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/model/node_factory.h>

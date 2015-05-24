@@ -217,8 +217,9 @@ set(SRC_BASE
     src/core/drag_io.cpp
     src/core/graphio.cpp
     src/core/settings.cpp
-    src/core/thread_pool.cpp
     src/core/serialization.cpp
+
+    src/scheduling/thread_pool.cpp
 
     src/signal/signal.cpp
 
