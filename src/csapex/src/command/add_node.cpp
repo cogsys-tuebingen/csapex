@@ -50,7 +50,6 @@ bool AddNode::doExecute()
     }
 
     node->getNodeState()->setPos(pos_);
-    node->pause(graph_worker_->isPaused());
 
     graph_worker_->getGraph()->addNode(node);
 

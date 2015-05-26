@@ -58,6 +58,8 @@ void InputTransition::connectionAdded(Connection *connection)
     connection->new_message.connect([this]() {
         //        std::cerr << "new message in " << node_->getUUID() << std::endl;
         //        update();
+
+        // TODO: is this necessary?
         node_->triggerCheckTransitions();
     });
 
@@ -149,7 +151,6 @@ void InputTransition::notifyMessageProcessed()
 
 void InputTransition::fire()
 {
-    apex_assert_hard(node_->thread() == QThread::currentThread());
     apex_assert_hard(node_->canProcess());
     apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
     apex_assert_hard(node_->isEnabled());

@@ -75,7 +75,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
     } catch(const std::exception& e) {
         std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
     }
-    node_worker->pause(graph_worker_->isPaused());
+
     graph_worker_->getGraph()->addNode(node_worker);
 }
 

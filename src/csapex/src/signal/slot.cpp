@@ -163,8 +163,6 @@ void Slot::handleTrigger()
         callback_();
     }
 
-    lock.unlock();
-
     exec_finished_.notify_all();
 }
 

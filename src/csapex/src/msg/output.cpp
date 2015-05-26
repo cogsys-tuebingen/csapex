@@ -81,7 +81,7 @@ void Output::fadeConnection(ConnectionPtr connection)
 
 void Output::removeConnection(Connectable* other_side)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
         ConnectionPtr c = *i;
         if(c->to() == other_side) {
@@ -106,7 +106,7 @@ Command::Ptr Output::removeConnectionCmd(Connection* connection) {
 
 Command::Ptr Output::removeAllConnectionsCmd()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
     for(ConnectionPtr connection : connections_) {
@@ -119,7 +119,7 @@ Command::Ptr Output::removeAllConnectionsCmd()
 
 void Output::removeAllConnectionsNotUndoable()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
         (*i)->to()->removeConnection(this);
         i = connections_.erase(i);
@@ -149,7 +149,7 @@ bool Output::isConnectionPossible(Connectable *other_side)
 
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {
         if(!connection->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
@@ -178,7 +178,7 @@ bool Output::isForced() const
 
 void Output::connectionMovePreview(Connectable *other_side)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {
         Q_EMIT(connectionInProgress(connection->to(), other_side));
     }

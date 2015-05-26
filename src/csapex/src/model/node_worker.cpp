@@ -26,6 +26,7 @@
 #include <QThread>
 #include <QApplication>
 #include <thread>
+#include <iostream>
 
 using namespace csapex;
 
@@ -41,7 +42,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       tick_enabled_(false), ticks_(0),
       source_(false), sink_(false), level_(0),
-      thread_initialized_(false), paused_(false), stop_(false),
+      thread_initialized_(false),
       profiling_(false)
 {
     apex_assert_hard(node_);
@@ -49,9 +50,8 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     tick_timer_ = new QTimer();
     setTickFrequency(DEFAULT_FREQUENCY);
 
-    QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
-
     node_state_->setLabel(uuid);
+
     modifier_ = std::make_shared<NodeModifier>(this);
     node_->initialize(uuid, modifier_.get());
 
@@ -81,6 +81,11 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     if(params_created_in_constructor) {
         node_->awarn << "Node creates parameters in its constructor! Please implement 'setupParameters'" << std::endl;
     }
+
+    QObject::connect(tick_timer_, &QTimer::timeout, [this]() {
+        tickRequested();
+    });
+//    tickRequested();
 }
 
 NodeWorker::~NodeWorker()
@@ -88,7 +93,9 @@ NodeWorker::~NodeWorker()
     tick_immediate_ = false;
     is_setup_ = false;
 
-    waitUntilFinished();
+//    waitUntilFinished();
+
+    tick_timer_->stop();
 
     QObject::disconnect(this);
 
@@ -359,12 +366,6 @@ void NodeWorker::makeParametersConnectable()
     }
 }
 
-
-void NodeWorker::triggerSwitchThreadRequest(QThread* thread, int id)
-{
-    threadSwitchRequested(thread, id);
-}
-
 void NodeWorker::triggerPanic()
 {
     panic();
@@ -372,7 +373,7 @@ void NodeWorker::triggerPanic()
 
 void NodeWorker::triggerProcess()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync);
+    std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(state_ == State::ENABLED);
 
     apex_assert_hard(transition_out_->canSendMessages());
@@ -385,53 +386,53 @@ void NodeWorker::triggerCheckTransitions()
     checkTransitionsRequested();
 }
 
-void NodeWorker::switchThread(QThread *thread, int id)
-{
-    // PROBLEM: if this is called when node is not idle -> fsm gets corrupted
-    // will be fixed once nodeworker is independent of qt!
-    QObject::disconnect(tick_timer_);
+//void NodeWorker::switchThread(QThread *thread, int id)
+//{
+//    // PROBLEM: if this is called when node is not idle -> fsm gets corrupted
+//    // will be fixed once nodeworker is independent of qt!
+//    QObject::disconnect(tick_timer_);
 
-    QObject::disconnect(this, SIGNAL(processRequested()));
+//    QObject::disconnect(this, SIGNAL(processRequested()));
 
-    QObject::disconnect(this, SIGNAL(tickRequested()));
-    QObject::disconnect(this, SIGNAL(messagesProcessed()));
-    QObject::disconnect(this, SIGNAL(checkTransitionsRequested()));
+//    QObject::disconnect(this, SIGNAL(tickRequested()));
+//    QObject::disconnect(this, SIGNAL(messagesProcessed()));
+//    QObject::disconnect(this, SIGNAL(checkTransitionsRequested()));
 
-    assert(thread);
+//    assert(thread);
 
-    //    for(Input* input : inputs_){
-    //        input->moveToThread(thread);
-    //    }
-    //    for(Input* input : parameter_inputs_){
-    //        input->moveToThread(thread);
-    //    }
-    //    for(Output* output : outputs_){
-    //        output->moveToThread(thread);
-    //    }
-    //    for(Output* output : parameter_outputs_){
-    //        output->moveToThread(thread);
-    //    }
-    //    for(Slot* slot : slots_){
-    //        slot->moveToThread(thread);
-    //    }
-    //    for(Trigger* trigger : triggers_){
-    //        trigger->moveToThread(thread);
-    //    }
-    moveToThread(thread);
+//    //    for(Input* input : inputs_){
+//    //        input->moveToThread(thread);
+//    //    }
+//    //    for(Input* input : parameter_inputs_){
+//    //        input->moveToThread(thread);
+//    //    }
+//    //    for(Output* output : outputs_){
+//    //        output->moveToThread(thread);
+//    //    }
+//    //    for(Output* output : parameter_outputs_){
+//    //        output->moveToThread(thread);
+//    //    }
+//    //    for(Slot* slot : slots_){
+//    //        slot->moveToThread(thread);
+//    //    }
+//    //    for(Trigger* trigger : triggers_){
+//    //        trigger->moveToThread(thread);
+//    //    }
+//    moveToThread(thread);
 
-    assertNotInGuiThread();
+//    assertNotInGuiThread();
 
-    node_state_->setThread(id);
+//    node_state_->setThread(id);
 
-    threadChanged();
+//    threadChanged();
 
-    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
+//    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
 
-    QObject::connect(this, SIGNAL(processRequested()), this, SLOT(processMessages()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(tickRequested()), this, SLOT(tick()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(messagesProcessed()), this, SLOT(prepareForNextProcess()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(checkTransitionsRequested()), this, SLOT(checkTransitions()), Qt::QueuedConnection);
-}
+//    QObject::connect(this, SIGNAL(processRequested()), this, SLOT(processMessages()), Qt::QueuedConnection);
+//    QObject::connect(this, SIGNAL(tickRequested()), this, SLOT(tick()), Qt::QueuedConnection);
+//    QObject::connect(this, SIGNAL(messagesProcessed()), this, SLOT(prepareForNextProcess()), Qt::QueuedConnection);
+//    QObject::connect(this, SIGNAL(checkTransitionsRequested()), this, SLOT(checkTransitions()), Qt::QueuedConnection);
+//}
 
 void NodeWorker::connectConnector(Connectable *c)
 {
@@ -461,10 +462,6 @@ void NodeWorker::disconnectConnector(Connectable* c)
 
 void NodeWorker::stop()
 {
-    stop_ = true;
-
-    waitUntilFinished();
-
     QObject::disconnect(tick_timer_);
 
     assertNotInGuiThread();
@@ -486,16 +483,6 @@ void NodeWorker::stop()
     }
 
     QObject::disconnect(this);
-
-    pause(false);
-}
-
-void NodeWorker::waitUntilFinished()
-{
-    std::unique_lock<std::recursive_mutex> lock(running_mutex_);
-    while(running_) {
-        running_changed_.wait(running_mutex_);
-    }
 }
 
 void NodeWorker::reset()
@@ -508,18 +495,10 @@ void NodeWorker::reset()
     // set state without checking!
     state_ = State::IDLE;
 
-    running_ = false;
-    running_changed_.notify_all();
-
     transition_in_->reset();
     transition_out_->reset();
 
     updateTransitions();
-}
-
-bool NodeWorker::isPaused() const
-{
-    return paused_;
 }
 
 void NodeWorker::setProfiling(bool profiling)
@@ -527,7 +506,7 @@ void NodeWorker::setProfiling(bool profiling)
     profiling_ = profiling;
 
     {
-        std::lock_guard<std::recursive_mutex> lock(timer_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
         timer_history_.clear();
     }
 
@@ -543,13 +522,6 @@ bool NodeWorker::isProfiling() const
     return profiling_;
 }
 
-void NodeWorker::pause(bool pause)
-{
-    std::lock_guard<std::recursive_mutex> lock(pause_mutex_);
-    paused_ = pause;
-    continue_.notify_all();
-}
-
 void NodeWorker::killExecution()
 {
     // TODO: implement
@@ -558,12 +530,6 @@ void NodeWorker::killExecution()
 void NodeWorker::updateParameterValue(Connectable *s)
 {
     assertNotInGuiThread();
-    {
-        std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
-        while(paused_) {
-            continue_.wait(pause_lock);
-        }
-    }
 
     apex_assert_hard(getState() == State::PROCESSING);
     Input* source = dynamic_cast<Input*> (s);
@@ -584,24 +550,16 @@ void NodeWorker::updateParameterValue(Connectable *s)
 
 void NodeWorker::outputConnectionChanged(Connectable*)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync);
-
-    if(state_ == State::WAITING_FOR_OUTPUTS) {
-        transition_out_->updateOutputs();
-    }
-
     triggerCheckTransitions();
 }
 
 void NodeWorker::processMessages()
 {
-    if(stop_ || !isEnabled()) {
+    if(!isEnabled()) {
         return;
     }
 
-    startRunning();
-
-    std::lock_guard<std::recursive_mutex> lock(sync);
+    std::unique_lock<std::recursive_mutex> lock(sync);
 
     assertNotInGuiThread();
 
@@ -612,17 +570,12 @@ void NodeWorker::processMessages()
     apex_assert_hard(isEnabled());
     setState(State::PROCESSING);
 
-    std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
-    while(paused_) {
-        continue_.wait(pause_lock);
-    }
-
     // everything has a message here
 
     bool all_inputs_are_present = true;
 
     {
-        std::lock_guard<std::recursive_mutex> lock(sync);
+        std::unique_lock<std::recursive_mutex> lock(sync);
 
         // check if one is "NoMessage";
         for(InputPtr cin : inputs_) {
@@ -646,7 +599,7 @@ void NodeWorker::processMessages()
     transition_out_->clearOutputs();
 
     if(all_inputs_are_present) {
-        std::lock_guard<std::recursive_mutex> lock(sync);
+        std::unique_lock<std::recursive_mutex> lock(sync);
 
 
         Timer::Ptr t = nullptr;
@@ -684,7 +637,7 @@ void NodeWorker::processMessages()
 
 bool NodeWorker::areAllInputsAvailable()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync);
+    std::unique_lock<std::recursive_mutex> lock(sync);
 
     // check if all inputs have messages
     for(InputPtr cin : inputs_) {
@@ -713,7 +666,7 @@ void NodeWorker::finishTimer(Timer::Ptr t)
     t->finish();
 
     {
-        std::lock_guard<std::recursive_mutex> lock(timer_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
         timer_history_.push_back(t);
     }
     timerStopped(this, t->stopTimeMs());
@@ -721,7 +674,7 @@ void NodeWorker::finishTimer(Timer::Ptr t)
 
 std::vector<TimerPtr> NodeWorker::extractLatestTimers()
 {
-    std::lock_guard<std::recursive_mutex> lock(timer_mutex_);
+    std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
 
     std::vector<TimerPtr> result = timer_history_;
     timer_history_.clear();
@@ -748,7 +701,7 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
 
 Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync);
+    std::unique_lock<std::recursive_mutex> lock(sync);
     int id = outputs_.size();
     OutputPtr c;
     if(dynamic) {
@@ -1181,7 +1134,7 @@ std::vector<Output*> NodeWorker::getParameterOutputs() const
 void NodeWorker::notifyMessagesProcessed()
 {
     {
-        std::lock_guard<std::recursive_mutex> lock(state_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(state_mutex_);
         //    node_->aerr << "notifyMessagesProcessed" << std::endl;
 
         apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS);
@@ -1190,41 +1143,16 @@ void NodeWorker::notifyMessagesProcessed()
 
     setState(State::WAITING_FOR_RESET);
 
-    stopRunning();
-
-    messagesProcessed();
     messages_processed();
-}
-
-void NodeWorker::startRunning()
-{
-    std::unique_lock<std::recursive_mutex> lock(running_mutex_);
-    running_ = true;
-    running_changed_.notify_all();
-}
-
-void NodeWorker::stopRunning()
-{
-    std::unique_lock<std::recursive_mutex> lock(running_mutex_);
-    running_ = false;
-    running_changed_.notify_all();
 }
 
 void NodeWorker::prepareForNextProcess()
 {
-    apex_assert_hard(thread() == QThread::currentThread());
-    if(stop_) {
-        stopRunning();
-
-        // artfact of qt signals...
-        return;
-    }
     {
-        std::lock_guard<std::recursive_mutex> lock(sync);
+        std::unique_lock<std::recursive_mutex> lock(sync);
 
         //        node_->aerr << "prepareForNextProcess" << std::endl;
 
-        apex_assert_hard(thread() == QThread::currentThread());
         apex_assert_hard(state_ == State::WAITING_FOR_RESET);
         apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
         apex_assert_hard(transition_out_->canSendMessages());
@@ -1254,10 +1182,13 @@ void NodeWorker::updateTransitions()
 
 void NodeWorker::checkTransitions()
 {
-    apex_assert_hard(thread() == QThread::currentThread());
-
     {
-        std::lock_guard<std::recursive_mutex> lock(sync);
+        std::unique_lock<std::recursive_mutex> lock(sync);
+
+        if(state_ == State::WAITING_FOR_OUTPUTS) {
+            transition_out_->updateOutputs();
+        }
+
         if(state_ != State::IDLE && state_ != State::ENABLED) {
             return;
         }
@@ -1311,7 +1242,7 @@ void NodeWorker::sendMessages()
 {
     assertNotInGuiThread();
 
-    std::lock_guard<std::recursive_mutex> lock(sync);
+    std::unique_lock<std::recursive_mutex> lock(sync);
 
     apex_assert_hard(getState() == State::PROCESSING);
     setState(State::WAITING_FOR_OUTPUTS);
@@ -1418,16 +1349,8 @@ void NodeWorker::tick()
 
     assertNotInGuiThread();
 
-
     {
-        std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
-        while(paused_) {
-            continue_.wait(pause_lock);
-        }
-    }
-
-    {
-        if(stop_ || !isEnabled()) {
+        if(!isEnabled()) {
             return;
         }
     }
@@ -1454,12 +1377,10 @@ void NodeWorker::tick()
     }
 
     if(isEnabled()) {
-        std::lock_guard<std::recursive_mutex> lock(sync);
+        std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
             if(isTickEnabled() && isSource() && node_->canTick()) {
-                startRunning();
-
                 checkTransitions();
 
                 if(transition_out_->canSendMessages() && !transition_out_->hasFadingConnection()) {
@@ -1515,8 +1436,6 @@ void NodeWorker::tick()
             }
         }
     }
-
-    stopRunning();
 
     if(tick_immediate_) {
         tickRequested();

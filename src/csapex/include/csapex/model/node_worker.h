@@ -65,12 +65,10 @@ public:
 
 
     void stop();
-    void waitUntilFinished();
     void reset();
 
     void triggerCheckTransitions();
     void triggerProcess();
-    void triggerSwitchThreadRequest(QThread* thread, int id);
     void triggerPanic();
 
     Node* getNode() const;
@@ -80,8 +78,6 @@ public:
 
     bool isEnabled() const;
     void setEnabled(bool e);
-
-    bool isPaused() const;
 
     void setProfiling(bool profiling);
     bool isProfiling() const;
@@ -151,13 +147,13 @@ public:
 private:
     void updateParameterValue(Connectable* source);
 
-public Q_SLOTS:
+public:
+    void tick();
     void processMessages();
-
     void prepareForNextProcess();
     void checkTransitions();
 
-
+public Q_SLOTS:
     void checkParameters();    
     void checkIO();
 
@@ -168,11 +164,9 @@ public Q_SLOTS:
     void enableTriggers(bool enable);
 
     void setTickFrequency(double f);
-    void tick();
 
     void triggerError(bool e, const std::string& what);
 
-    void pause(bool pause);
     void killExecution();
 
 //    bool canSendMessages();
@@ -184,7 +178,6 @@ public Q_SLOTS:
 
 public:
     boost::signals2::signal<void()> panic;
-    boost::signals2::signal<void()> messages_processed;
 
     boost::signals2::signal<void()> ticked;
     boost::signals2::signal<void(bool)> enabled;
@@ -198,9 +191,14 @@ public:
     boost::signals2::signal<void()> threadChanged;
     boost::signals2::signal<void(bool)> errorHappened;
 
-Q_SIGNALS:
-    void messagesProcessed();
+    boost::signals2::signal<void()> messages_processed;
+    boost::signals2::signal<void()> tickRequested;
+    boost::signals2::signal<void()> processRequested;
+    boost::signals2::signal<void()> checkTransitionsRequested;
 
+    boost::signals2::signal<void(std::function<void()>)> executionRequested;
+
+Q_SIGNALS:
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone(Connectable*);
     void connectionStart(Connectable*);
@@ -209,15 +207,6 @@ Q_SIGNALS:
     void connectorRemoved(Connectable*);
 
     void nodeStateChanged();
-
-    void threadSwitchRequested(QThread*, int);
-    void tickRequested();
-
-    void processRequested();
-    void checkTransitionsRequested();
-
-private Q_SLOTS:
-    void switchThread(QThread* thread, int id);
 
 private:
     void removeInput(Input *in);
@@ -242,9 +231,6 @@ private:
     void setState(State state);
 
     void updateTransitions();
-
-    void startRunning();
-    void stopRunning();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
@@ -298,14 +284,6 @@ private:
     std::vector<TimerPtr> timer_history_;
 
     bool thread_initialized_;
-    bool paused_;
-    bool stop_;
-    mutable std::recursive_mutex pause_mutex_;
-    std::condition_variable_any continue_;
-
-    mutable std::recursive_mutex running_mutex_;
-    bool running_;
-    std::condition_variable_any running_changed_;
 
     std::atomic<bool> profiling_;
 };

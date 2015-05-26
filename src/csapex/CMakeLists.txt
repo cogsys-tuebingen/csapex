@@ -146,6 +146,7 @@ set(SRC_BASE
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
     src/model/node.cpp
+    src/model/node_runner.cpp
     src/model/node_factory.cpp
     src/model/node_modifier.cpp
     src/model/node_state.cpp
@@ -221,6 +222,9 @@ set(SRC_BASE
 
     src/scheduling/thread_group.cpp
     src/scheduling/thread_pool.cpp
+    src/scheduling/scheduler.cpp
+    src/scheduling/task.cpp
+    src/scheduling/task_generator.cpp
 
     src/signal/signal.cpp
 

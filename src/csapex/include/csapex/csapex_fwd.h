@@ -39,7 +39,8 @@ FWD(ThreadGroup);
 FWD(NodeRunner);
 FWD(NodeFacade);
 FWD(Scheduler);
-FWD(Schedulable);
+FWD(Task);
+FWD(TaskGenerator);
 
 FWD(Port);
 FWD(Connectable);

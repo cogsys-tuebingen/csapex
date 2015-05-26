@@ -19,56 +19,46 @@ class CsApexCore;
 class ThreadPool
 {
 public:
-    enum {
-        UNDEFINED_THREAD = -1,
-        PRIVATE_THREAD = 0,
-        MINIMUM_THREAD_ID = 1
-    };
+    ThreadPool(bool enable_threading, bool grouping);
 
-public:
-    ThreadPool(Graph* graph, bool enable_threading, bool grouping);
+    void setPause(bool pause);
+    void stop();
 
-    std::vector<ThreadGroupPtr> getCustomGroups();
-    ThreadGroupPtr getCustomGroup(int id);
+    std::vector<ThreadGroupPtr> getGroups();
+    ThreadGroup* getGroup(int id);
+    ThreadGroup* getGroupFor(TaskGenerator* generator);
 
     std::string nextName();
 
-    void nodeAdded(NodeWorkerPtr);
-    void nodeRemoved(NodeWorkerPtr);
-    void structureChanged();
+    void add(TaskGenerator*);
+    void remove(TaskGenerator *);
 
-    void usePrivateThreadFor(NodeWorker* worker);
-    void addToGroup(NodeWorker* worker, int group_id);
+    void usePrivateThreadFor(TaskGenerator* task);
+    void addToGroup(TaskGenerator* task, int group_id);
 
-    int createNewGroupFor(NodeWorker* worker, const std::string &name);
-    void deleteGroup(int group_id);
+    int createNewGroupFor(TaskGenerator *task, const std::string &name);
 
-    void useDefaultThreadFor(NodeWorker *node_worker);
+    void useDefaultThreadFor(TaskGenerator *task);
 
     void saveSettings(YAML::Node&);
     void loadSettings(YAML::Node&);
 
 private:
-    QThread *setupThread(int id, bool custom, const std::string &name);
-    std::set<int> assignGroupThreads();
-    void deleteEmptyGroupThreads(const std::set<int> &components);
-    void deletePrivateThread(NodeWorker *worker);
+    void assignGeneratorToGroup(TaskGenerator* task, ThreadGroup* group);
+
+    bool isInPrivateThread(TaskGenerator* task) const;
+    bool isInGroup(TaskGenerator* task, int id) const;
+
+//    void clearGroup(ThreadGroup *group);
 
 private:
-    int next_id;
-
-    Graph *graph_;
     bool enable_threading_;
     bool grouping_;
 
-    std::map<int, QThread*> component_group_threads_;
+    ThreadGroupPtr default_group_;
 
-    std::vector<ThreadGroupPtr> custom_groups_;
-    std::map<NodeWorker*, ThreadGroup*> custom_group_assignment_;
-    std::map<int, QThread*> custom_group_threads_;
-
-    std::map<NodeWorker*, QThread*> private_threads_;
-    std::map<NodeWorker*, bool> private_thread_;
+    std::vector<ThreadGroupPtr> groups_;
+    std::map<TaskGenerator*, ThreadGroup*> group_assignment_;
 };
 
 }

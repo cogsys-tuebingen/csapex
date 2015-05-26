@@ -267,7 +267,6 @@ void NodeBox::updateThreadInformation()
             info << worker->thread()->property("name").toString().toStdString();
             setStyleForId(info_thread, id);
         }
-        info_thread->setProperty("custom", worker->thread()->property("custom"));
         info_thread->setText(info.str().c_str());
     }
 }

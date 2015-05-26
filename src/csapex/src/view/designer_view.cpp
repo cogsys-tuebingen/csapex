@@ -614,16 +614,20 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 
         QMenu* choose_group_menu = new QMenu("thread group", &menu);
 
-        std::vector<ThreadGroupPtr> thread_groups = thread_pool_.getCustomGroups();
+        std::vector<ThreadGroupPtr> thread_groups = thread_pool_.getGroups();
         for(std::size_t i = 0; i < thread_groups.size(); ++i) {
             const ThreadGroup& group = *thread_groups[i];
 
+            if(group.id() == ThreadGroup::PRIVATE_THREAD) {
+                continue;
+            }
+
             std::stringstream ss;
-            ss << "(" << group.id << ") " << group.name;
+            ss << "(" << group.id() << ") " << group.name();
             QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
             switch_thread->setIcon(QIcon(":/thread_group.png"));
             switch_thread->setIconVisibleInMenu(true);
-            handler[switch_thread] = std::bind(&DesignerView::switchToThread, this, selected_boxes, group.id);
+            handler[switch_thread] = std::bind(&DesignerView::switchToThread, this, selected_boxes, group.id());
             choose_group_menu->addAction(switch_thread);
         }
 

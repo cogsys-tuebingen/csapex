@@ -181,15 +181,28 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     PluginLocatorPtr plugin_locator(new PluginLocator(settings));
 
-    NodeFactory::Ptr node_factory(new NodeFactory(settings, plugin_locator.get()));
-    NodeAdapterFactory::Ptr node_adapter_factory(new NodeAdapterFactory(settings, plugin_locator.get()));
+    NodeFactoryPtr node_factory(new NodeFactory(settings, plugin_locator.get()));
+    NodeAdapterFactoryPtr node_adapter_factory(new NodeAdapterFactory(settings, plugin_locator.get()));
 
-    Graph::Ptr graph(new Graph);
-    GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
+    GraphPtr graph(new Graph);
+    GraphWorkerPtr graph_worker(new GraphWorker(&settings, graph.get()));
 
     graph_worker->setPause(paused);
 
-    ThreadPool thread_pool(graph.get(), !threadless, thread_grouping);
+    ThreadPool thread_pool(!threadless, thread_grouping);
+    graph_worker->generatorAdded.connect([&thread_pool](TaskGeneratorPtr tg) {
+        thread_pool.add(tg.get());
+    });
+    graph_worker->generatorRemoved.connect([&thread_pool](TaskGeneratorPtr tg) {
+        thread_pool.remove(tg.get());
+    });
+    graph_worker->paused.connect([&thread_pool](bool pause) {
+        thread_pool.setPause(pause);
+    });
+    graph_worker->stopped.connect([&thread_pool]() {
+        thread_pool.stop();
+    });
+
     CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, node_factory.get());
 
     CsApexCore core(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);

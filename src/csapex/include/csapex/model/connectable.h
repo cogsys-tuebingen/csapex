@@ -9,6 +9,7 @@
 
 /// SYSTEM
 #include <mutex>
+#include <atomic>
 
 /// FORWARDS DECLARATION
 namespace csapex
@@ -150,8 +151,8 @@ protected:
     int seq_no_;
 
 private:
-    bool enabled_;
-    bool dynamic_;
+    std::atomic<bool> enabled_;
+    std::atomic<bool> dynamic_;
     int level_;
 };
 

@@ -803,9 +803,10 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
 qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
 {
-    qt_helper::Call* call = new qt_helper::Call(cb);
+    qt_helper::Call* call = new qt_helper::Call([this, cb](){
+        node_->executionRequested(cb);
+    });
     callbacks.push_back(call);
-    call->moveToThread(node_->thread());
     return call;
 }
 

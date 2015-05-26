@@ -75,7 +75,6 @@ void Connectable::validateConnections()
 
 void Connectable::disable()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     if(enabled_) {
         enabled_ = false;
         enabled_changed(enabled_);
@@ -84,7 +83,6 @@ void Connectable::disable()
 
 void Connectable::enable()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     if(!enabled_) {
         enabled_ = true;
         enabled_changed(enabled_);
@@ -112,7 +110,6 @@ int Connectable::getLevel() const
 
 bool Connectable::isEnabled() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return enabled_;
 }
 
@@ -143,7 +140,7 @@ bool Connectable::shouldMove(bool left, bool right)
 
 std::string Connectable::getLabel() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return label_;
 }
 
@@ -159,43 +156,45 @@ void Connectable::setDynamic(bool dynamic)
 
 void Connectable::setLabel(const std::string &label)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     label_ = label;
 }
 
 void Connectable::setType(ConnectionType::ConstPtr type)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     bool validate = type_ != type;
 
     if(validate) {
         type_ = type;
         validateConnections();
+        lock.unlock();
+
         typeChanged();
     }
 }
 
 ConnectionType::ConstPtr Connectable::getType() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return type_;
 }
 
 int Connectable::getCount() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return count_;
 }
 
 int Connectable::sequenceNumber() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return seq_no_;
 }
 
 void Connectable::setSequenceNumber(int seq_no)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
 
     seq_no_ = seq_no;
 }
