@@ -287,7 +287,8 @@ void CsApexWindow::updateNodeInfo()
         if(!type.isEmpty()) {
             NodeConstructor::Ptr n = widget_ctrl_->getNodeFactory()->getConstructor(type.toStdString());
 
-            QImage image = n->getIcon().pixmap(QSize(16,16)).toImage();
+            QString icon = QString::fromStdString(n->getIcon());
+            QImage image = QIcon(icon).pixmap(QSize(16,16)).toImage();
             QUrl uri ( QString::fromStdString(n->getType()));
             ui->node_info_text->document()->addResource( QTextDocument::ImageResource, uri, QVariant ( image ) );
 

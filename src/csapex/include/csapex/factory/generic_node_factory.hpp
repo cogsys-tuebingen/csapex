@@ -24,9 +24,7 @@ public:
     static Node::Ptr wrapFunction(F f)
     {
         typedef typename boost::function_types::parameter_types<F>::type params;
-
-        Node::Ptr result(new GenericNode<params>(f));
-        return result;
+        return std::make_shared<GenericNode<params>>(f);
     }
 
 
@@ -45,14 +43,17 @@ public:
                                                               const std::string& name,
                                                               const std::string& description,
                                                               Settings& settings,
-                                                              const std::vector<TagPtr>& tags = std::vector<TagPtr>(),
+                                                              const std::vector<std::string>& tag_names = std::vector<std::string>(),
                                                               const std::string& icon = ":/no_icon.png"
                                                               )
     {
         return csapex::NodeConstructor::Ptr (new csapex::NodeConstructor(
-                                                 settings, name, description, icon, tags,
+                                                 settings, name, description, icon, stringsToTags(tag_names),
                                                  std::bind(&GenericNodeFactory::wrapFunction<F>, f)));
     }
+
+private:
+    static std::vector<TagPtr> stringsToTags(const std::vector<std::string>& strings);
 };
 
 }

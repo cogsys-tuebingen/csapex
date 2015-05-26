@@ -51,7 +51,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
 
     NodeConstructor::Ptr constructor = node_factory->getConstructor(node_worker_->getType());
 
-    tl->setIcon(0, constructor->getIcon());
+    tl->setIcon(0, QIcon(QString::fromStdString(constructor->getIcon())));
 
     {
         QTreeWidgetItem* connectors = new QTreeWidgetItem;

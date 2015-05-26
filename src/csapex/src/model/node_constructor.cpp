@@ -52,9 +52,9 @@ std::vector<TagPtr> NodeConstructor::getTags() const
     return tags_;
 }
 
-QIcon NodeConstructor::getIcon() const
+std::string NodeConstructor::getIcon() const
 {
-    return icon_.empty() ? QIcon(":/plugin.png") : QIcon(QString::fromStdString(icon_));
+    return icon_.empty() ?  ":/plugin.png" : icon_;
 }
 
 std::string NodeConstructor::getDescription() const

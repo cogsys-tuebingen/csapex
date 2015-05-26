@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <boost/function_types/function_pointer.hpp>
 #include <boost/mpl/for_each.hpp>
+#include <boost/mpl/if.hpp>
 
 namespace csapex
 {
@@ -33,9 +34,6 @@ class GenericNode : public Node
     typedef typename boost::mpl::push_front<Parameters, void>::type Sig;
     typedef typename boost::function_types::function_pointer<Sig>::type Callback;
 
-    template <int argc>
-    friend class Caller;
-
     enum {
         N = boost::mpl::size< Parameters >::value
     };
@@ -52,14 +50,14 @@ public:
         out_msg_.resize(N);
     }
 
-    virtual void setup(csapex::NodeModifier&)
+    virtual void setup(csapex::NodeModifier& modifier)
     {
-        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this));
+        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this, modifier));
     }
 
-    virtual void setupParameters(Parameterizable& )
+    virtual void setupParameters(Parameterizable& params)
     {
-        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this));
+        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this, params));
     }
 
     void process()
@@ -98,8 +96,8 @@ public:
 
 private:
     struct GenericNodeSetup {
-        GenericNodeSetup(GenericNode<Parameters>* instance)
-            : instance_(instance), id(0)
+        GenericNodeSetup(GenericNode<Parameters>* instance, csapex::NodeModifier& modifier)
+            : instance_(instance), modifier_(modifier), id(0)
         {
             instance_->in_msg_.clear();
             instance_->in_msg_.resize(instance_->N);
@@ -122,12 +120,13 @@ private:
         void operator()(GenericParameter<U>) {++id;}
 
         GenericNode<Parameters>* instance_;
+        csapex::NodeModifier& modifier_;
         int id;
     };
 
     struct GenericNodeParameterSetup {
-        GenericNodeParameterSetup(GenericNode<Parameters>* instance)
-            : instance_(instance), id(0)
+        GenericNodeParameterSetup(GenericNode<Parameters>* instance, Parameterizable& params)
+            : instance_(instance), parameterizable_(params), id(0)
         {}
 
         template<typename U>
@@ -144,6 +143,7 @@ private:
         }
 
         GenericNode<Parameters>* instance_;
+        Parameterizable& parameterizable_;
         int id;
     };
 
@@ -242,52 +242,36 @@ struct GenerateParameter
     }
 };
 
-template <int argc>
+// Calling the function pointer
+namespace detail {
+template <typename ParameterList, int... indices>
+struct CallerSentinel
+{
+    static void call(GenericNode<ParameterList>* i)
+    {
+        i->cb_(GenerateParameter<ParameterList>::template get<indices>(i)...);
+    }
+};
+
+template <typename ParameterList, typename Rest, int index, int... indices>
 struct Caller
 {
+    typedef typename Caller<
+        ParameterList, typename boost::mpl::pop_front<Rest>::type , index - 1, index, indices...
+    >::type type;
 };
 
-#define MAKE_CALLER(params, PARAMS) \
-    template <> \
-    struct Caller<params>\
-{\
-    template <typename P>\
-    static void call(GenericNode<P>* i) {\
-    std::bind(PARAMS)();\
-}\
+template <typename ParameterList, typename Rest, int... indices>
+struct Caller<ParameterList, Rest, -1, indices...>
+{
+    typedef CallerSentinel<ParameterList, indices...> type;
 };
-
-#define GET(no)\
-    GenerateParameter<P>::template get<no>(i)
-
-#define CALL_0 i->cb_
-#define CALL_1 CALL_0, GET(0)
-#define CALL_2 CALL_1, GET(1)
-#define CALL_3 CALL_2, GET(2)
-#define CALL_4 CALL_3, GET(3)
-#define CALL_5 CALL_4, GET(4)
-#define CALL_6 CALL_5, GET(5)
-#define CALL_7 CALL_6, GET(6)
-#define CALL_8 CALL_7, GET(7)
-#define CALL_9 CALL_8, GET(8)
-
-#define CALLER(params) \
-    MAKE_CALLER(params, CALL_##params)
-
-CALLER(1)
-CALLER(2)
-CALLER(3)
-CALLER(4)
-CALLER(5)
-CALLER(6)
-CALLER(7)
-CALLER(8)
-CALLER(9)
+}
 
 template <typename Parameters>
 void GenericNode<Parameters>::call()
 {
-    Caller < boost::mpl::size< Parameters >::value >::call(this);
+    detail::Caller<Parameters, Parameters, boost::mpl::size<Parameters>::value - 1>::type::call(this);
 }
 
 

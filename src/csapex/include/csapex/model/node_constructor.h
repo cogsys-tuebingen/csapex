@@ -11,7 +11,6 @@
 /// SYSTEM
 #include <typeinfo>
 #include <functional>
-#include <QIcon>
 
 namespace csapex
 {
@@ -49,7 +48,7 @@ public:
 
     std::string getType() const;
     std::vector<TagPtr> getTags() const;
-    QIcon getIcon() const;
+    std::string getIcon() const;
     std::string getDescription() const;
 
     NodeWorkerPtr makePrototype() const;

@@ -180,7 +180,9 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    NodeBox::Ptr object(new NodeBox(settings_, content, NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)), c->getIcon()));
+    NodeBox::Ptr object(new NodeBox(settings_, content,
+                                    NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)),
+                                    QIcon(QString::fromStdString(c->getIcon()))));
 
     object->setStyleSheet(pimpl->style_sheet_);
     object->construct();
@@ -209,7 +211,7 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 
         NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node_worker.get(), this);
 
-        QIcon icon = node_factory_->getConstructor(type)->getIcon();
+        QIcon icon = QIcon(QString::fromStdString(node_factory_->getConstructor(type)->getIcon()));
 
         NodeBox* box = new NodeBox(settings_, node_worker, adapter, icon);
 
@@ -368,7 +370,7 @@ void WidgetController::insertAvailableNodeTypes(QMenu* menu)
         menu->addMenu(submenu);
 
         for(const NodeConstructor::Ptr& proxy : constructors) {
-            QIcon icon = proxy->getIcon();
+            QIcon icon = QIcon(QString::fromStdString(proxy->getIcon()));
             QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
             if(!icon.isNull()) {
@@ -400,7 +402,7 @@ void WidgetController::insertAvailableNodeTypes(QTreeWidget* tree)
         tree->addTopLevelItem(submenu);
 
         for(const NodeConstructor::Ptr& proxy : constructors) {
-            QIcon icon = proxy->getIcon();
+            QIcon icon = QIcon(QString::fromStdString(proxy->getIcon()));
             std::string name = UUID::stripNamespace(proxy->getType());
 
             QTreeWidgetItem* child = new QTreeWidgetItem;
@@ -429,7 +431,7 @@ QAbstractItemModel* WidgetController::listAvailableNodeTypes()
             tags << tag->getName().c_str();
         }
 
-        QStandardItem* item = new QStandardItem(proxy->getIcon(), type);
+        QStandardItem* item = new QStandardItem(QIcon(QString::fromStdString(proxy->getIcon())), type);
         item->setData(type, Qt::UserRole);
         item->setData(descr, Qt::UserRole + 1);
         item->setData(name, Qt::UserRole + 2);
