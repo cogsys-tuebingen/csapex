@@ -172,7 +172,7 @@ void ThreadGroup::startThread()
                 running_ = !generators_.empty();
                 while(running_ && tasks_.empty()) {
                     work_available_.wait_for(lock, std::chrono::seconds(1));
-                    running_ = !generators_.empty();
+                    running_ = running_ && !generators_.empty();
                 }
             }
 
