@@ -1,10 +1,12 @@
 /// PROJECT
 #include <csapex/factory/generic_node.hpp>
 #include <csapex/model/node_constructor.h>
+#include <csapex/msg/message_traits.h>
 
 /// SYSTEM
 #include <boost/function_types/parameter_types.hpp>
 #include <boost/type_traits.hpp>
+#include <boost/mpl/transform.hpp>
 
 namespace csapex {
 
@@ -20,11 +22,11 @@ public:
      * @param f is a pointer to the function that should be converted
      * @return an instance of the wrapped Node
      */
-    template<typename F>
+    template<typename F, typename Info = generic_node::DefaultInfo>
     static Node::Ptr wrapFunction(F f)
     {
         typedef typename boost::function_types::parameter_types<F>::type params;
-        return std::make_shared<GenericNode<params>>(f);
+        return std::make_shared<GenericNode<params, Info>>(f);
     }
 
 
@@ -38,7 +40,7 @@ public:
      * @param icon
      * @return the generated NodeConstructor
      */
-    template<typename F>
+    template<typename Info, typename F>
     static NodeConstructor::Ptr createConstructorFromFunction(F f,
                                                               const std::string& name,
                                                               const std::string& description,
@@ -49,7 +51,18 @@ public:
     {
         return csapex::NodeConstructor::Ptr (new csapex::NodeConstructor(
                                                  settings, name, description, icon, stringsToTags(tag_names),
-                                                 std::bind(&GenericNodeFactory::wrapFunction<F>, f)));
+                                                 std::bind(&GenericNodeFactory::wrapFunction<F, Info>, f)));
+    }
+    template<typename F>
+    static NodeConstructor::Ptr createConstructorFromFunction(F f,
+                                                              const std::string& name,
+                                                              const std::string& description,
+                                                              Settings& settings,
+                                                              const std::vector<std::string>& tag_names = std::vector<std::string>(),
+                                                              const std::string& icon = ":/no_icon.png"
+                                                              )
+    {
+        return createConstructorFromFunction<generic_node::DefaultInfo, F>(f, name, description, settings, tag_names, icon);
     }
 
 private:

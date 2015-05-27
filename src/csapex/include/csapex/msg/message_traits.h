@@ -30,6 +30,19 @@ std::shared_ptr<T> makeEmpty()
     return std::make_shared<T>();
 }
 
+template <typename M>
+struct MessageContainer
+{
+    typedef M type;
+
+    static M& access(M& msg) {
+        return msg;
+    }
+    static const M& accessConst(const M& msg) {
+        return msg;
+    }
+};
+
 template <typename T>
 std::shared_ptr<T> makeEmptyMessage(
         typename std::enable_if<!std::is_const<T>::value >::type* = 0)
