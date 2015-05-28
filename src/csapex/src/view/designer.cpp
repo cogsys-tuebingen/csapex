@@ -184,6 +184,9 @@ void Designer::enableGrid(bool grid)
 
     designer_scene_->enableGrid(grid);
 
+    designer_view_->setCacheMode(QGraphicsView::CacheNone);
+    designer_view_->setCacheMode(QGraphicsView::CacheBackground);
+
     Q_EMIT gridEnabled(grid);
 
 }
