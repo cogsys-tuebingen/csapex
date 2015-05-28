@@ -13,7 +13,6 @@
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
-#include <csapex/core/settings.h>
 #include <csapex/model/node_state.h>
 #include <csapex/utility/q_signal_relay.h>
 #include <csapex/signal/slot.h>
@@ -32,9 +31,8 @@ using namespace csapex;
 
 const double NodeWorker::DEFAULT_FREQUENCY = 30.0;
 
-NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, Node::Ptr node)
+NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node)
     : Unique(uuid),
-      settings_(settings),
       node_type_(type), node_(node), node_state_(std::make_shared<NodeState>(this)),
       transition_in_(std::make_shared<InputTransition>(this)),
       transition_out_(std::make_shared<OutputTransition>(this)),

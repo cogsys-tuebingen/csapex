@@ -149,7 +149,7 @@ void OutputTransition::sendMessages()
 
     } else {
         // at least one output is not forced and will send back a notification
-        apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
+//        apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
         //    std::cerr << "fill first time: " << node_->getUUID() << std::endl;
         fillConnections();
@@ -217,7 +217,7 @@ void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(!areOutputsIdle());
-    apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
+//    apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
     for(ConnectionPtr connection : established_connections_) {
         if(connection->isSinkEnabled()) {

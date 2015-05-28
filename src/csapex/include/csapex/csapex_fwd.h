@@ -24,6 +24,8 @@ namespace csapex
 template <typename T>
 class PluginManager;
 
+FWD(UUID);
+
 FWD(CsApexCore);
 FWD(CorePlugin);
 FWD(BootstrapPlugin);

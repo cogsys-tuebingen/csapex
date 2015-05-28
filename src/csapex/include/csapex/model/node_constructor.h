@@ -2,15 +2,13 @@
 #define NODE_CONSTRUCTOR_H
 
 /// COMPONENT
-#include <csapex/utility/constructor.hpp>
 #include <csapex/csapex_fwd.h>
-#include <csapex/utility/uuid.h>
 #include <utils_param/param_fwd.h>
-#include <csapex/plugin/plugin_constructor.hpp>
 
 /// SYSTEM
 #include <typeinfo>
 #include <functional>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex
 {
@@ -30,25 +28,28 @@ public:
     };
 
 public:
-    typedef std::function<NodePtr()> Make;
-
     typedef std::shared_ptr<NodeConstructor> Ptr;
 
 public:
-    std::shared_ptr< boost::signals2::signal<void()> > unload_request;
-    std::shared_ptr< boost::signals2::signal<void()> > reload_request;
+    boost::signals2::signal<void()> unload_request;
+    boost::signals2::signal<void()> reload_request;
 
 
 public:
-    NodeConstructor(Settings& settings, const std::string& type,
-                    const std::string& description, const std::string& icon, const std::vector<TagPtr> &tags,
-                    Make c);
+    NodeConstructor(const std::string& type, std::function<NodePtr()> c);
 
     virtual ~NodeConstructor();
 
     std::string getType() const;
+
+    NodeConstructor& setTags(const std::vector<std::string> &tags);
+    NodeConstructor& setTags(const std::vector<TagPtr> &tags);
     std::vector<TagPtr> getTags() const;
+
+    NodeConstructor& setIcon(const std::string &icon);
     std::string getIcon() const;
+
+    NodeConstructor& setDescription(const std::string &description);
     std::string getDescription() const;
 
     NodeWorkerPtr makePrototype() const;
@@ -57,16 +58,15 @@ public:
     NodePtr makeNode() const;
 
 protected:
-    NodeConstructor(Settings &settings, const std::string& type, const std::string& description, const std::string &icon, const std::vector<TagPtr> &tags);
+    NodeConstructor(const std::string& type);
 
 protected:
-    Settings& settings_;
     std::string type_;
     std::string descr_;
     std::string icon_;
     std::vector<TagPtr> tags_;
 
-    Make c;
+    std::function<NodePtr()> c;
 };
 
 }

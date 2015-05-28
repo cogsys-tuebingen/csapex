@@ -85,21 +85,13 @@ ThreadGroup* ThreadPool::getGroupFor(TaskGenerator* generator)
 void ThreadPool::assignGeneratorToGroup(TaskGenerator *task, ThreadGroup *group)
 {
     if(!isInGroup(task, group->id())) {
-        ThreadGroup* old_group = nullptr;
-
         auto pos = group_assignment_.find(task);
         if(pos != group_assignment_.end()) {
-            old_group = pos->second;
             group_assignment_.erase(pos);
         }
 
         task->detach();
         task->assignToScheduler(group);
-
-//        if(old_group && old_group->isEmpty()) {
-//            clearGroup(old_group);
-//        }
-
         group_assignment_[task] = group;
     }
 }

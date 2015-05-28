@@ -359,14 +359,13 @@ void WidgetController::insertPort(QLayout* layout, Port* port)
 
 void WidgetController::insertAvailableNodeTypes(QMenu* menu)
 {
-    std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tags = node_factory_->getTagMap();
+    auto tags = node_factory_->getTagMap();
 
-    typedef std::pair<TagPtr, std::vector<NodeConstructor::Ptr> > PAIR;
-    for(const PAIR& pair : tags) {
-        const TagPtr& tag = pair.first;
+    for(const auto& pair : tags) {
+        const std::string& tag = pair.first;
         const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
 
-        QMenu* submenu = new QMenu(tag->getName().c_str());
+        QMenu* submenu = new QMenu(QString::fromStdString(tag));
         menu->addMenu(submenu);
 
         for(const NodeConstructor::Ptr& proxy : constructors) {
@@ -388,17 +387,16 @@ void WidgetController::insertAvailableNodeTypes(QMenu* menu)
 
 void WidgetController::insertAvailableNodeTypes(QTreeWidget* tree)
 {
-    std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tags = node_factory_->getTagMap();
+    auto tags = node_factory_->getTagMap();
 
     tree->setDragEnabled(true);
 
-    typedef std::pair<TagPtr, std::vector<NodeConstructor::Ptr> > PAIR;
-    for(const PAIR& pair : tags) {
-        const TagPtr& tag = pair.first;
+    for(const auto& pair : tags) {
+        const std::string& tag = pair.first;
         const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
 
         QTreeWidgetItem* submenu = new QTreeWidgetItem;
-        submenu->setText(0, tag->getName().c_str());
+        submenu->setText(0, QString::fromStdString(tag));
         tree->addTopLevelItem(submenu);
 
         for(const NodeConstructor::Ptr& proxy : constructors) {
@@ -439,6 +437,8 @@ QAbstractItemModel* WidgetController::listAvailableNodeTypes()
 
         model->appendRow(item);
     }
+
+    model->sort(0);
 
     return model;
 }

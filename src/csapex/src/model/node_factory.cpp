@@ -81,15 +81,12 @@ void NodeFactory::rebuildPrototypes()
         }
 
         // make the constructor
-        csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor(
-                                                     settings_,
-                                                     p.second.getType(), p.second.getDescription(),
-                                                     p.second.getIcon(),
-                                                     tags,
-                                                     plugin_constructor));
+        csapex::NodeConstructor::Ptr constructor = std::make_shared<NodeConstructor>(p.second.getType(), plugin_constructor);
 
-        plugin_constructor.unload_request->connect(*constructor->unload_request);
-        plugin_constructor.reload_request->connect(*constructor->reload_request);
+        constructor->setDescription(p.second.getDescription()).setIcon(p.second.getIcon()).setTags(tags);
+
+        plugin_constructor.unload_request->connect(constructor->unload_request);
+        plugin_constructor.reload_request->connect(constructor->reload_request);
 
         registerNodeType(constructor, true);
     }
@@ -111,12 +108,12 @@ void NodeFactory::rebuildMap()
         try {
             bool has_tag = false;
             for(const Tag::Ptr& tag : p->getTags()) {
-                tag_map_[tag].push_back(p);
+                tag_map_[tag->getName()].push_back(p);
                 has_tag = true;
             }
             
             if(!has_tag) {
-                tag_map_[general].push_back(p);
+                tag_map_[general->getName()].push_back(p);
             }
             
             ++it;
@@ -128,7 +125,7 @@ void NodeFactory::rebuildMap()
     }
     
 
-    typedef std::map<TagPtr, std::vector<NodeConstructor::Ptr> > map;
+    typedef std::map<std::string, std::vector<NodeConstructor::Ptr> > map;
     for(map::iterator it = tag_map_.begin(); it != tag_map_.end(); ++it) {
         std::sort(it->second.begin(), it->second.end(), compare);
     }
@@ -136,7 +133,7 @@ void NodeFactory::rebuildMap()
     tag_map_has_to_be_rebuilt_ = false;
 }
 
-std::map<TagPtr, std::vector<NodeConstructor::Ptr> > NodeFactory::getTagMap()
+std::map<std::string, std::vector<NodeConstructor::Ptr> > NodeFactory::getTagMap()
 {
     ensureLoaded();
     return tag_map_;
@@ -240,7 +237,7 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
             result->setNodeState(state);
         }
 
-        reload_connections_[uuid] = p->unload_request->connect(std::bind(&NodeFactory::unloadNode, this, p, uuid));
+        reload_connections_[uuid] = p->unload_request.connect(std::bind(&NodeFactory::unloadNode, this, p, uuid));
 
         return result;
 
@@ -253,7 +250,7 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
 void NodeFactory::unloadNode(NodeConstructorPtr p, UUID uuid)
 {
     reload_connections_[uuid].disconnect();
-    reload_connections_[uuid] = p->reload_request->connect(std::bind(&NodeFactory::reloadNode, this, p, uuid));
+    reload_connections_[uuid] = p->reload_request.connect(std::bind(&NodeFactory::reloadNode, this, p, uuid));
 
     unload_request(uuid);
 }

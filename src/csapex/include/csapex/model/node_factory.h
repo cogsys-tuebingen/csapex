@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node_constructor.h>
 #include <csapex/csapex_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <vector>
@@ -38,7 +39,7 @@ public:
     NodeWorkerPtr makeNode(const std::string& type, const UUID& uuid);
     NodeWorkerPtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
 
-    std::map<TagPtr, std::vector<NodeConstructor::Ptr> > getTagMap();
+    std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap();
 
 public:
     boost::signals2::signal<void(const std::string&)> loaded;
@@ -58,7 +59,7 @@ protected:
     Settings& settings_;
     csapex::PluginLocator* plugin_locator_;
 
-    std::map<TagPtr, std::vector<NodeConstructor::Ptr> > tag_map_;
+    std::map<std::string, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::vector<NodeConstructor::Ptr> constructors_;
 
     std::unordered_map<UUID, boost::signals2::connection, UUID::Hasher> reload_connections_;

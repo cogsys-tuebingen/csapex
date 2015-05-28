@@ -53,7 +53,7 @@ public:
     };
 
 public:
-    NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);
+    NodeWorker(const std::string& type, const UUID& uuid, NodePtr node);
     ~NodeWorker();
 
     InputTransition* getInputTransition() const;
@@ -235,8 +235,6 @@ private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 private:
-    Settings& settings_;
-
     std::string node_type_;
     NodePtr node_;    
     NodeStatePtr node_state_;

@@ -41,32 +41,15 @@ public:
      * @return the generated NodeConstructor
      */
     template<typename Info, typename F>
-    static NodeConstructor::Ptr createConstructorFromFunction(F f,
-                                                              const std::string& name,
-                                                              const std::string& description,
-                                                              Settings& settings,
-                                                              const std::vector<std::string>& tag_names = std::vector<std::string>(),
-                                                              const std::string& icon = ":/no_icon.png"
-                                                              )
+    static NodeConstructor::Ptr createConstructorFromFunction(F f, const std::string& name)
     {
-        return csapex::NodeConstructor::Ptr (new csapex::NodeConstructor(
-                                                 settings, name, description, icon, stringsToTags(tag_names),
-                                                 std::bind(&GenericNodeFactory::wrapFunction<F, Info>, f)));
+        return std::make_shared<csapex::NodeConstructor>(name, std::bind(&GenericNodeFactory::wrapFunction<F, Info>, f));
     }
     template<typename F>
-    static NodeConstructor::Ptr createConstructorFromFunction(F f,
-                                                              const std::string& name,
-                                                              const std::string& description,
-                                                              Settings& settings,
-                                                              const std::vector<std::string>& tag_names = std::vector<std::string>(),
-                                                              const std::string& icon = ":/no_icon.png"
-                                                              )
+    static NodeConstructor::Ptr createConstructorFromFunction(F f, const std::string& name)
     {
-        return createConstructorFromFunction<generic_node::DefaultInfo, F>(f, name, description, settings, tag_names, icon);
+        return createConstructorFromFunction<generic_node::DefaultInfo, F>(f, name);
     }
-
-private:
-    static std::vector<TagPtr> stringsToTags(const std::vector<std::string>& strings);
 };
 
 }
