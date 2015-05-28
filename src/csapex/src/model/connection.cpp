@@ -113,11 +113,6 @@ void Connection::notifyMessageSet()
 
 void Connection::notifyMessageProcessed()
 {
-    {
-        std::unique_lock<std::recursive_mutex> lock(sync);
-        apex_assert_hard(state_ == State::DONE);
-    }
-
     Output* o = dynamic_cast<Output*>(from_);
     if(o) {
         o->getTransition()->updateOutputs();

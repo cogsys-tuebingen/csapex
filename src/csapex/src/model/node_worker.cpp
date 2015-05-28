@@ -596,6 +596,8 @@ void NodeWorker::processMessages()
     transition_out_->setConnectionsReadyToReceive();
     transition_out_->clearOutputs();
 
+    transition_in_->notifyMessageProcessed();
+
     if(all_inputs_are_present) {
         std::unique_lock<std::recursive_mutex> lock(sync);
 
@@ -1165,9 +1167,10 @@ void NodeWorker::prepareForNextProcess()
             cin->notifyMessageProcessed();
         }
 
-        transition_in_->notifyMessageProcessed();
+//        transition_in_->notifyMessageProcessed();
     }
 
+    checkTransitions();
     //    checkInputs();
 }
 
