@@ -111,14 +111,15 @@ void Port::updateTooltip()
         ConnectionType::ConstPtr msg = output->getMessage();
 
         if(msg) {
-            view->scene()->clear();
 
             try {
                 MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
                 if(renderer) {
                     QSharedPointer<QImage> img = renderer->render(msg);
 
-                    view->scene()->addPixmap(QPixmap::fromImage(*img));
+                    auto pm = QPixmap::fromImage(*img);
+                    view->scene()->clear();
+                    view->scene()->addPixmap(pm);
                     view->setMaximumSize(256, 256);
                     view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
                 }
