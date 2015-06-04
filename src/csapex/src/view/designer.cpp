@@ -70,7 +70,6 @@ void Designer::setup()
 //    ui->horizontalLayout->addWidget(minimap_);
     minimap_->setParent(designer_view_);
     minimap_->move(10, 10);
-    minimap_->setVisible(true);
 }
 
 std::vector<NodeBox*> Designer::getSelectedBoxes() const
@@ -129,11 +128,15 @@ void Designer::addBox(NodeBox *box)
     QObject::connect(box, SIGNAL(helpRequest(NodeBox*)), this, SIGNAL(helpRequest(NodeBox*)));
 
     designer_view_->addBoxEvent(box);
+
+    minimap_->update();
 }
 
 void Designer::removeBox(NodeBox *box)
 {
     designer_view_->removeBoxEvent(box);
+
+    minimap_->update();
 }
 
 bool Designer::isGridEnabled() const

@@ -79,31 +79,35 @@ void MinimapWidget::emitPositionRequest(QMouseEvent *me)
 
 void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
 {
+    QPainter painter(this);
+
+    auto boxes = view_->boxes();
+
     int max_length = 300;
 
     QRectF scene_rect = scene_->sceneRect();
     double scene_width = scene_rect.width();
     double scene_height = scene_rect.height();
 
-    if(scene_width == 0.0 || scene_height == 0.0) {
-        return;
-    }
-
-    double aspect_ratio = scene_width / scene_height;
-
     double screen_scale;
-    if(scene_width > scene_height) {
-        size_screen_ = QSize(max_length, max_length / aspect_ratio);
-        screen_scale = max_length / scene_width;
-    } else {
-        size_screen_ = QSize(max_length * aspect_ratio, max_length);
-        screen_scale = max_length / scene_height;
-    }
+    if(scene_width == 0.0 || scene_height == 0.0) {
+        screen_scale = 0.0;
+        size_screen_ = QSize(0, 0);
 
+    } else {
+        double aspect_ratio = scene_width / scene_height;
+
+        if(scene_width > scene_height) {
+            size_screen_ = QSize(max_length, max_length / aspect_ratio);
+            screen_scale = max_length / scene_width;
+        } else {
+            size_screen_ = QSize(max_length * aspect_ratio, max_length);
+            screen_scale = max_length / scene_height;
+        }
+    }
     Q_EMIT resizeRequest(size_screen_);
 
 
-    QPainter painter(this);
     scene_to_minimap_ = QTransform::fromTranslate(-scene_rect.topLeft().x(), -scene_rect.topLeft().y()) * QTransform::fromScale(screen_scale, screen_scale);
 
     QPoint tl_map = scene_to_minimap_.map(scene_rect.topLeft()).toPoint();
@@ -139,7 +143,7 @@ void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
     QPen pen_box(QBrush(QColor::fromRgb(0,0,0)), 2);
     painter.setPen(pen_box);
     painter.setBrush(brush_box);
-    foreach (NodeBox *box, view_->boxes()) {
+    foreach (NodeBox *box, boxes) {
         QRectF rect(box->pos(), box->size());
         painter.drawPolygon(scene_to_minimap_.map(rect));
     }
