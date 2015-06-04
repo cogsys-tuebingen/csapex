@@ -54,6 +54,7 @@ void ThreadPool::add(TaskGenerator *schedulable)
 void ThreadPool::remove(TaskGenerator *task)
 {
     task->detach();
+    group_assignment_.erase(task);
 }
 
 std::vector<ThreadGroupPtr> ThreadPool::getGroups()

@@ -73,6 +73,9 @@ WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispat
 
 WidgetController::~WidgetController()
 {
+    for(auto remaining_connections : connections_) {
+        remaining_connections.disconnect();
+    }
 }
 
 NodeBox* WidgetController::getBox(const UUID &node_id)
@@ -237,8 +240,10 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         }
 
         // subscribe to coming connectors
-        QObject::connect(node_worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(connectorCreated(Connectable*)));
-        QObject::connect(node_worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
+        auto c1 = node_worker->connectorCreated.connect([this](ConnectablePtr c) { connectorCreated(c.get()); });
+        connections_.push_back(c1);
+        auto c2 = node_worker->connectorRemoved.connect([this](ConnectablePtr c) { connectorRemoved(c.get()); });
+        connections_.push_back(c2);
 
         Q_EMIT boxAdded(box);
     }

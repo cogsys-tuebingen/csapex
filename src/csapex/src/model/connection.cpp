@@ -102,7 +102,6 @@ void Connection::reset()
 ConnectionTypeConstPtr Connection::getMessage() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(message_ != nullptr);
     return message_;
 }
 
@@ -111,11 +110,15 @@ void Connection::notifyMessageSet()
     new_message();
 }
 
-void Connection::notifyMessageProcessed()
+void Connection::allowNewMessage()
 {
+    {
+        std::unique_lock<std::recursive_mutex> lock(sync);
+        apex_assert_hard(state_ == State::DONE);
+    }
     Output* o = dynamic_cast<Output*>(from_);
     if(o) {
-        o->getTransition()->updateOutputs();
+        o->getTransition()->publishNextMessage();
     }
 }
 

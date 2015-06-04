@@ -131,9 +131,10 @@ void NodeBox::construct()
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
     QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    QObject::connect(worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
-    QObject::connect(worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(worker.get(), SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
+
+    worker->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
+    worker->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
     enabledChange(worker->isEnabled());
     worker->enabled.connect([this](bool e){ enabledChange(e); });
@@ -443,10 +444,6 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         state = "fired"; break;
     case NodeWorker::State::PROCESSING:
         state = "processing"; break;
-    case NodeWorker::State::WAITING_FOR_OUTPUTS:
-        state = "waiting_output"; break;
-    case NodeWorker::State::WAITING_FOR_RESET:
-        state = "waiting_reset"; break;
     default:
         state = "?"; break;
     }
@@ -454,7 +451,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     info_exec->setVisible(true);
     info_exec->setText(QString("<img src=\":/") +
                        (idle ? "idle" : "running") +
-                       ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> ");
+                       ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> " + state);
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;

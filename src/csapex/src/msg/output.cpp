@@ -37,6 +37,11 @@ OutputTransition* Output::getTransition() const
     return transition_;
 }
 
+void Output::activate()
+{
+    apex_assert_hard(state_ == State::RECEIVING);
+    setState(State::ACTIVE);
+}
 
 void Output::setState(State s)
 {

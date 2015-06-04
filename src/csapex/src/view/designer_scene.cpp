@@ -109,8 +109,8 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
 
     graph_->connectionAdded.connect([this](Connection* c) { connectionAdded(c); });
     graph_->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); });
-//    QObject::connect(this, SIGNAL(eventConnectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
-//    QObject::connect(this, SIGNAL(eventConnectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
+    //    QObject::connect(this, SIGNAL(eventConnectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
+    //    QObject::connect(this, SIGNAL(eventConnectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
 }
 
 DesignerScene::~DesignerScene()
@@ -387,7 +387,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 #if DEBUG_DRAWINGS_PER_SECOND
     long draw_end = QDateTime::currentMSecsSinceEpoch();
     long dt_drawing = draw_end - draw_begin;
-        std::cerr << "drawing took " << dt_drawing << "ms" << std::endl;
+    std::cerr << "drawing took " << dt_drawing << "ms" << std::endl;
 #endif
 }
 
@@ -437,10 +437,60 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
     std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
 
-    if(data.first != highlight_connection_id_) {
-        highlight_connection_id_ = data.first;
-        highlight_connection_sub_id_ = data.second;
+    if(data.first > 0) {
+        if(data.first != highlight_connection_id_) {
+            highlight_connection_id_ = data.first;
+            highlight_connection_sub_id_ = data.second;
+        }
+
+        auto c = graph_->getConnectionWithId(highlight_connection_id_);
+        auto m = c->getMessage();
+
+        QString descr("Connection #");
+        descr += QString::number(c->id());
+        descr += " (";
+        descr += QString::fromStdString(c->from()->getUUID().getShortName());
+        descr += " -> ";
+        descr += QString::fromStdString(c->to()->getUUID().getShortName());
+        descr += "), state: ";
+
+        switch (c->getState()) {
+        case Connection::State::NOT_INITIALIZED:
+            descr += "NOT_INITIALIZED";
+            break;
+        case Connection::State::READY_TO_RECEIVE:
+            descr += "READY_TO_RECEIVE";
+            break;
+        case Connection::State::UNREAD:
+            descr += "UNREAD";
+            break;
+        case Connection::State::READ:
+            descr += "READ";
+            break;
+        case Connection::State::DONE:
+            descr += "DONE";
+            break;
+        default:
+            break;
+        }
+
+        if(m) {
+            descr += ", Message: ";
+            descr += QString::fromStdString(m->name());
+            descr += ", # " + QString::number(m->sequenceNumber());
+        }
+
+        for(auto v : views()) {
+            v->setToolTip(descr);
+        }
+
         update();
+
+    } else  {
+        highlight_connection_id_ = -1;
+        for(auto v : views()) {
+            v->setToolTip("");
+        }
     }
 }
 
@@ -523,7 +573,7 @@ void DesignerScene::fulcrumDeleted(void *fulcrum)
         return;
     }
 
-//    delete pos->second;
+    //    delete pos->second;
     pos->second->deleteLater();
     fulcrum_2_widget_.erase(pos);
 
@@ -663,7 +713,6 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.established = connection.isEstablished();
     ccs.source_established = connection.isSourceEstablished();
     ccs.sink_established = connection.isSinkEstablished();
-    ccs.empty = connection.getState() == Connection::State::READY_TO_RECEIVE;
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
     ccs.minimized_from = fromp->isMinimizedSize();

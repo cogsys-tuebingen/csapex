@@ -50,10 +50,11 @@ ConnectionTypeConstPtr StaticOutput::getMessage() const
 
 void StaticOutput::setMultipart(bool multipart, bool last_part)
 {
+    message_flags_ = 0;
     if(multipart) {
-        committed_message_->flags.data |= (int) ConnectionType::Flags::Fields::MULTI_PART;
+        message_flags_ |= (int) ConnectionType::Flags::Fields::MULTI_PART;
         if(last_part) {
-            committed_message_->flags.data |= (int) ConnectionType::Flags::Fields::LAST_PART;
+            message_flags_ |= (int) ConnectionType::Flags::Fields::LAST_PART;
         }
     }
 }
@@ -62,7 +63,7 @@ void StaticOutput::commitMessages()
 {
     assert(canSendMessages());
 
-    setState(State::ACTIVE);
+    activate();
 
     if(message_to_send_) {
         committed_message_ = message_to_send_;
@@ -76,7 +77,7 @@ void StaticOutput::commitMessages()
     }
 
     committed_message_->setSequenceNumber(seq_no_);
-
+    committed_message_->flags.data = message_flags_;
 
 //    // wait for all connected inputs to be able to receive
 //    //  * inputs can only be connected to this output since they are 1:1
@@ -99,7 +100,7 @@ void StaticOutput::commitMessages()
         ++count_;
 //    }
 
-    ++seq_no_;
+//    ++seq_no_;
     messageSent(this);
 }
 

@@ -12,6 +12,7 @@
 #include <QPoint>
 #include <QLayout>
 #include <QGraphicsView>
+#include <boost/signals2/connection.hpp>
 
 class QTreeWidget;
 class QMenu;
@@ -99,6 +100,8 @@ private:
     NodeFactory* node_factory_;
     NodeAdapterFactory* node_adapter_factory_;
     Designer* designer_;
+
+    std::vector<boost::signals2::connection> connections_;
 
     class Impl;
     std::unique_ptr<Impl> pimpl;

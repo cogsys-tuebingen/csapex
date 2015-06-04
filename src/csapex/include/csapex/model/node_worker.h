@@ -47,9 +47,7 @@ public:
         IDLE,
         ENABLED,
         FIRED,
-        PROCESSING,
-        WAITING_FOR_OUTPUTS,
-        WAITING_FOR_RESET
+        PROCESSING
     };
 
 public:
@@ -126,6 +124,7 @@ public:
 
     bool canProcess();
     bool canReceive();
+    bool canSend();
     bool areAllInputsAvailable();
 
     void makeParametersConnectable();
@@ -198,13 +197,14 @@ public:
 
     boost::signals2::signal<void(std::function<void()>)> executionRequested;
 
+    boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
+    boost::signals2::signal<void (ConnectablePtr)> connectorRemoved;
+
 Q_SIGNALS:
     void connectionInProgress(Connectable*, Connectable*);
     void connectionDone(Connectable*);
     void connectionStart(Connectable*);
 
-    void connectorCreated(Connectable*);
-    void connectorRemoved(Connectable*);
 
     void nodeStateChanged();
 

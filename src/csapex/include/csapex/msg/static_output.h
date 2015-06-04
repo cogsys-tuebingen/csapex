@@ -30,6 +30,8 @@ public:
 private:
     ConnectionType::ConstPtr message_to_send_;
     ConnectionType::ConstPtr committed_message_;
+
+    int message_flags_;
 };
 }
 

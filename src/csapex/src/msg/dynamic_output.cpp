@@ -50,7 +50,7 @@ void DynamicOutput::commitMessages()
 {
     apex_assert_hard(canSendMessages());
 
-    setState(State::ACTIVE);
+    activate();
 
     if(messages_to_send_.empty()) {
         messages_to_send_.push_back(connection_types::makeEmpty<connection_types::NoMessage>());
@@ -61,14 +61,17 @@ void DynamicOutput::commitMessages()
 
     for(ConnectionTypeConstPtr& m : committed_messages_) {
         m->flags.data |= (int) ConnectionType::Flags::Fields::MULTI_PART;
+        m->setSequenceNumber(seq_no_);
     }
 
     apex_assert_hard(committed_messages_.size() > 0);
     committed_messages_.back()->flags.data |= (int) ConnectionType::Flags::Fields::LAST_PART;
 
+    std::cerr << "commit " << committed_messages_.size() << " messages" << std::endl;
+
     messages_to_send_.clear();
 
-    ++seq_no_;
+//    ++seq_no_;
 
 
 //    for(DynamicInput* di : correspondents_) {

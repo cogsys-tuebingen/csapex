@@ -63,7 +63,7 @@ public:
     void notifyMessageSet();
 
     ConnectionTypeConstPtr getMessage() const;
-    void notifyMessageProcessed();
+    void allowNewMessage();
 
     bool isSourceEnabled() const;
     bool isSinkEnabled() const;

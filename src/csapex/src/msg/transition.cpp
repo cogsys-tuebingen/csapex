@@ -99,7 +99,7 @@ void Transition::establishConnection(ConnectionPtr connection)
 }
 
 
-bool Transition::areConnections(Connection::State state) const
+bool Transition::areAllConnections(Connection::State state) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
@@ -109,7 +109,7 @@ bool Transition::areConnections(Connection::State state) const
     }
     return true;
 }
-bool Transition::areConnections(Connection::State a, Connection::State b) const
+bool Transition::areAllConnections(Connection::State a, Connection::State b) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
@@ -121,7 +121,7 @@ bool Transition::areConnections(Connection::State a, Connection::State b) const
     return true;
 }
 
-bool Transition::areConnections(Connection::State a, Connection::State b, Connection::State c) const
+bool Transition::areAllConnections(Connection::State a, Connection::State b, Connection::State c) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
@@ -133,7 +133,7 @@ bool Transition::areConnections(Connection::State a, Connection::State b, Connec
     return true;
 }
 
-bool Transition::isConnection(Connection::State state) const
+bool Transition::isOneConnection(Connection::State state) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {

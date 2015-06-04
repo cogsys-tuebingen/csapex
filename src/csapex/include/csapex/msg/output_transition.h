@@ -15,9 +15,9 @@ public:
     void connectionRemoved(Connection *connection);
 
     bool isSink() const;
-    bool canSendMessages() const;
+    bool canStartSendingMessages() const;
     void sendMessages();
-    void updateOutputs();
+    void publishNextMessage();
 
     void clearOutputs();
     void setConnectionsReadyToReceive();
@@ -32,7 +32,7 @@ private:
     void fillConnections();
 
 private:
-    bool outputs_done_;
+//    bool outputs_done_;
 };
 }
 

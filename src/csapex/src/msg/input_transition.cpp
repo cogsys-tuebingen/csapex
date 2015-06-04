@@ -87,9 +87,9 @@ void InputTransition::fireIfPossible()
         apex_assert_hard(established_connections_.empty());
         //fire(); -> instead of tick!!!!
     } else {
-        if(!isConnection(Connection::State::READY_TO_RECEIVE) &&
-                areConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/) &&
-                !areConnections(Connection::State::READ)) {
+        if(!isOneConnection(Connection::State::READY_TO_RECEIVE) &&
+                areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/) &&
+                !areAllConnections(Connection::State::READ)) {
             if(node_->getState() == NodeWorker::State::ENABLED) {
 
                 for(const auto& connection : established_connections_) {
@@ -108,38 +108,41 @@ void InputTransition::fireIfPossible()
 
 void InputTransition::notifyMessageProcessed()
 {
-    apex_assert_hard(areConnections(Connection::State::READ));
+    apex_assert_hard(areAllConnections(Connection::State::READ));
 
+    bool has_multipart = false;
     bool multipart_are_done = true;
 
     for(auto& c : established_connections_) {
         int f = c->getMessage()->flags.data;
         if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
+            has_multipart = true;
             bool last_part = f & (int) ConnectionType::Flags::Fields::LAST_PART;
             multipart_are_done &= last_part;
         }
     }
 
-    if(!multipart_are_done) {
-        for(auto& c : established_connections_) {
+    if(has_multipart && !multipart_are_done) {
+        for(ConnectionPtr& c : established_connections_) {
             int f = c->getMessage()->flags.data;
 
             if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
                 c->setState(Connection::State::DONE);
-                c->notifyMessageProcessed();
+                c->allowNewMessage();
             }
         }
 
     } else {
-        apex_assert_hard(areConnections(Connection::State::READ));
+
+        apex_assert_hard(areAllConnections(Connection::State::READ));
         for(auto& c : established_connections_) {
             c->setState(Connection::State::DONE);
         }
 
-        apex_assert_hard(areConnections(Connection::State::DONE));
+        apex_assert_hard(areAllConnections(Connection::State::DONE));
 
-        for(auto& c : established_connections_) {
-            c->notifyMessageProcessed();
+        for(ConnectionPtr& c : established_connections_) {
+            c->allowNewMessage();
         }
 
         if(hasFadingConnection()) {
@@ -154,10 +157,11 @@ void InputTransition::fire()
     apex_assert_hard(node_->canProcess());
     apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
     apex_assert_hard(node_->isEnabled());
-    apex_assert_hard(!isConnection(Connection::State::DONE));
+    apex_assert_hard(!isOneConnection(Connection::State::DONE));
     //    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
-    apex_assert_hard(!isConnection(Connection::State::READY_TO_RECEIVE));
-    apex_assert_hard(established_connections_.empty() || !areConnections(Connection::State::READ));
+    apex_assert_hard(!isOneConnection(Connection::State::READY_TO_RECEIVE));
+    apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
+    apex_assert_hard(established_connections_.empty() || !areAllConnections(Connection::State::READ));
 
     std::vector<DynamicInput*> dynamic_inputs;
     ConnectionTypeConstPtr dynamic_message_part;
@@ -189,12 +193,14 @@ void InputTransition::fire()
                              s == Connection::State::READ);
             dynamic_connection->setState(Connection::State::READ);
             dynamic_connection->setState(Connection::State::DONE);
-            dynamic_connection->notifyMessageProcessed();
+            dynamic_connection->allowNewMessage();
             return;
         }
     }
 
     //    std::cerr << "fire " <<  node_->getUUID() << std::endl;
+
+    int seq = -1;
 
     for(Input* input : node_->getAllInputs()) {
         //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
@@ -210,11 +216,13 @@ void InputTransition::fire()
                 auto connection = connections.front();
                 auto s = connection->getState();
                 apex_assert_hard(s == Connection::State::READ ||
-                                 s == Connection::State::UNREAD ||
-                                 s == Connection::State::DONE);
+                                 s == Connection::State::UNREAD);
                 auto msg = connection->getMessage();
                 apex_assert_hard(msg != nullptr);
                 input->inputMessage(msg);
+
+//                apex_assert_hard(seq == -1 || seq == msg->sequenceNumber());
+                seq = msg->sequenceNumber();
             }
         } else {
             input->inputMessage(connection_types::makeEmpty<connection_types::NoMessage>());
@@ -227,15 +235,12 @@ void InputTransition::fire()
         apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
         apex_assert_hard(s != Connection::State::READY_TO_RECEIVE);
         apex_assert_hard(s == Connection::State::UNREAD ||
-                         s == Connection::State::READ ||
-                         s == Connection::State::DONE);
+                         s == Connection::State::READ);
     }
 
-    apex_assert_hard(!areConnections(Connection::State::DONE));
+    apex_assert_hard(!areAllConnections(Connection::State::DONE));
     for(auto& c : established_connections_) {
-        if(c->getState() != Connection::State::DONE) {
-            c->setState(Connection::State::READ);
-        }
+        c->setState(Connection::State::READ);
     }
 
     //    std::cerr << "-> process " <<  node_->getUUID() << std::endl;

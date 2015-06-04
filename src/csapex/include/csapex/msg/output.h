@@ -21,9 +21,9 @@ class Output : public Connectable
 
 public:
     enum class State {
-        RECEIVING, // output is collecting messages
-        ACTIVE,    // output has sent it's messages, no answer yet
-        IDLE       // output's messages have all been processed
+        RECEIVING,
+        ACTIVE,
+        IDLE
     };
 
 public:
@@ -42,6 +42,7 @@ public:
         return true;
     }
 
+    void activate();
     State getState() const;
 
     virtual void addConnection(ConnectionPtr connection) override;
