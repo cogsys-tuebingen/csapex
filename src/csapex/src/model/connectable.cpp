@@ -1,6 +1,7 @@
 /// HEADER
 #include <csapex/model/connectable.h>
 
+/// COMPONENT
 #include <csapex/model/connection.h>
 
 /// SYSTEM

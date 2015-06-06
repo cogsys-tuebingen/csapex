@@ -244,7 +244,7 @@ void Port::startDrag()
     bool create = adaptee_->shouldCreate(left, right);
     bool move = adaptee_->shouldMove(left, right);
 
-    Q_EMIT(adaptee_->connectionStart(adaptee_));
+    adaptee_->connectionStart(adaptee_);
 
     if(create || move) {
         QDrag* drag = new QDrag(this);

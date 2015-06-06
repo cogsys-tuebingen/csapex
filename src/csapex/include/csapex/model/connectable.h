@@ -92,22 +92,6 @@ public:
     boost::signals2::signal<void(Connectable*)> messageArrived;
     boost::signals2::signal<void()> typeChanged;
 
-
-//Q_SIGNALS:
-//    void disconnected(QObject*);
-//    void enabled(bool e);
-//    void connectionStart(Connectable*);
-//    void connectionInProgress(Connectable*, Connectable*);
-//    void connectionDone(Connectable*);
-//    void connectionRemoved(Connectable*);
-//    void connectionEnabled(bool);
-//    void messageProcessed(Connectable*);
-//    void connectableError(bool error, const std::string &msg, int level);
-
-//    void messageSent(Connectable* source);
-//    void messageArrived(Connectable* source);
-//    void typeChanged();
-
 public:
     /**
      * INTERFACE
@@ -139,8 +123,6 @@ protected:
 protected:
     mutable std::recursive_mutex io_mutex;
     mutable std::recursive_mutex sync_mutex;
-
-    csapex::DesignBoard* designer;
 
     std::string label_;
 

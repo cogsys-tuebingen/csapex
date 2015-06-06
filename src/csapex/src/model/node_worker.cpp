@@ -434,25 +434,13 @@ void NodeWorker::triggerCheckTransitions()
 //    threadChanged();
 
 //    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
-
-//    QObject::connect(this, SIGNAL(processRequested()), this, SLOT(processMessages()), Qt::QueuedConnection);
-//    QObject::connect(this, SIGNAL(tickRequested()), this, SLOT(tick()), Qt::QueuedConnection);
-//    QObject::connect(this, SIGNAL(messagesProcessed()), this, SLOT(prepareForNextProcess()), Qt::QueuedConnection);
-//    QObject::connect(this, SIGNAL(checkTransitionsRequested()), this, SLOT(checkTransitions()), Qt::QueuedConnection);
 //}
 
 void NodeWorker::connectConnector(Connectable *c)
 {
-    //    QObject::connect(c, SIGNAL(connectionInProgress(Connectable*,Connectable*)), this, SIGNAL(connectionInProgress(Connectable*,Connectable*)));
-    //    QObject::connect(c, SIGNAL(connectionStart(Connectable*)), this, SIGNAL(connectionStart(Connectable*)));
-    //    QObject::connect(c, SIGNAL(connectionDone(Connectable*)), this, SIGNAL(connectionDone(Connectable*)));
-    //    QObject::connect(c, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIO()));
-    //    QObject::connect(c, SIGNAL(connectionEnabled(bool)), this, SLOT(checkIO()));
-    //    QObject::connect(c, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(checkIO()));
-
-    c->connectionInProgress.connect([this](Connectable* from, Connectable* to) { connectionInProgress(from, to); });
-    c->connectionStart.connect([this](Connectable* c) { connectionStart(c); });
-    c->connectionDone.connect([this](Connectable* c) { connectionDone(c); });
+    c->connectionInProgress.connect(connectionInProgress);
+    c->connectionStart.connect(connectionStart);
+    c->connectionDone.connect(connectionDone);
     c->connectionDone.connect([this](Connectable* c) { checkIO(); });
     c->connectionEnabled.connect([this](bool) { checkIO(); });
     c->connectionRemoved.connect([this](Connectable* from) { checkIO(); });

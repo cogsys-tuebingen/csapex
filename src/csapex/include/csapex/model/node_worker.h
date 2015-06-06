@@ -152,7 +152,6 @@ public:
     void prepareForNextProcess();
     void checkTransitions();
 
-public Q_SLOTS:
     void checkParameters();    
     void checkIO();
 
@@ -168,11 +167,9 @@ public Q_SLOTS:
 
     void killExecution();
 
-//    bool canSendMessages();
     void sendMessages();
     void notifyMessagesProcessed();
 
-    /** SLOTS **/
     void outputConnectionChanged(Connectable*);
 
 public:
@@ -200,13 +197,12 @@ public:
     boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
     boost::signals2::signal<void (ConnectablePtr)> connectorRemoved;
 
-Q_SIGNALS:
-    void connectionInProgress(Connectable*, Connectable*);
-    void connectionDone(Connectable*);
-    void connectionStart(Connectable*);
+    boost::signals2::signal<void (Connectable*, Connectable*)> connectionInProgress;
+    boost::signals2::signal<void (Connectable*)> connectionDone;
+    boost::signals2::signal<void (Connectable*)> connectionStart;
 
 
-    void nodeStateChanged();
+    boost::signals2::signal<void()> nodeStateChanged;
 
 private:
     void removeInput(Input *in);

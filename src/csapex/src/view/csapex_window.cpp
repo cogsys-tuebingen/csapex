@@ -248,7 +248,7 @@ void CsApexWindow::updateDebugInfo()
 
     foreach (NodeBox* box, selected) {
         NodeWorker* worker = box->getNodeWorker();
-        QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(updateDebugInfo()));
+        worker->nodeStateChanged.connect([this](){ updateDebugInfo(); });
         ui->box_info->addTopLevelItem(NodeStatistics(worker).createDebugInformation(widget_ctrl_->getNodeFactory()));
     }
 

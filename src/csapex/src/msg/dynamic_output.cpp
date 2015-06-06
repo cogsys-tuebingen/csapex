@@ -67,8 +67,6 @@ void DynamicOutput::commitMessages()
     apex_assert_hard(committed_messages_.size() > 0);
     committed_messages_.back()->flags.data |= (int) ConnectionType::Flags::Fields::LAST_PART;
 
-    std::cerr << "commit " << committed_messages_.size() << " messages" << std::endl;
-
     messages_to_send_.clear();
 
 //    ++seq_no_;
