@@ -43,7 +43,9 @@ public:
     }
 
     void activate();
+
     State getState() const;
+    void setState(State s);
 
     virtual void addConnection(ConnectionPtr connection) override;
     void fadeConnection(ConnectionPtr connection) override;
@@ -78,9 +80,6 @@ public:
 
     virtual void reset();
     virtual void clear() = 0;
-
-protected:
-    void setState(State s);
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)

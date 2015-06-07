@@ -233,6 +233,24 @@ void Port::createToolTip()
     tooltip << ", Messages: " << adaptee_->getCount();
     tooltip << ", Enabled: " << adaptee_->isEnabled();
     tooltip << ", #: " << adaptee_->sequenceNumber();
+
+    Output* o = dynamic_cast<Output*>(adaptee_);
+    if(o) {
+        tooltip << ", state: ";
+        switch(o->getState()) {
+        case Output::State::ACTIVE:
+            tooltip << "ACTIVE";
+            break;
+        case Output::State::IDLE:
+            tooltip << "IDLE";
+            break;
+        case Output::State::RECEIVING:
+            tooltip << "RECEIVING";
+            break;
+        default:
+            tooltip << "UNKNOWN";
+        }
+    }
     setToolTip(tooltip.str().c_str());
 }
 

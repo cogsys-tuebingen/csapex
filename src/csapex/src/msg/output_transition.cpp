@@ -220,6 +220,15 @@ void OutputTransition::clearOutputs()
     }
 }
 
+void OutputTransition::abortSendingMessages()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    for(Output* output : node_->getAllOutputs()) {
+        apex_assert_hard(output->getState() == Output::State::RECEIVING);
+        output->setState(Output::State::IDLE);
+    }
+}
+
 void OutputTransition::setConnectionsReadyToReceive()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);

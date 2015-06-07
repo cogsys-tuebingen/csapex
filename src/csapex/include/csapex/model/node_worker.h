@@ -277,8 +277,6 @@ private:
     std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;
 
-    bool thread_initialized_;
-
     std::atomic<bool> profiling_;
 };
 

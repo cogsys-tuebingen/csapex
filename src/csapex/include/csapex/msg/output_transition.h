@@ -20,6 +20,7 @@ public:
     void publishNextMessage();
 
     void clearOutputs();
+    void abortSendingMessages();
     void setConnectionsReadyToReceive();
     bool areOutputsIdle() const;
 
