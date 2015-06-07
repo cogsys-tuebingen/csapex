@@ -437,7 +437,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
     std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
 
-    if(data.first > 0) {
+    if(data.first >= 0) {
         if(data.first != highlight_connection_id_) {
             highlight_connection_id_ = data.first;
             highlight_connection_sub_id_ = data.second;
@@ -486,11 +486,12 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
         update();
 
-    } else  {
+    } else if(highlight_connection_id_ >= 0)  {
         highlight_connection_id_ = -1;
         for(auto v : views()) {
             v->setToolTip("");
         }
+        update();
     }
 }
 
