@@ -179,13 +179,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         settings.set("additional_args", additional_args);
     }
 
-    PluginLocatorPtr plugin_locator(new PluginLocator(settings));
+    PluginLocatorPtr plugin_locator =std::make_shared<PluginLocator>(settings);
 
-    NodeFactoryPtr node_factory(new NodeFactory(settings, plugin_locator.get()));
-    NodeAdapterFactoryPtr node_adapter_factory(new NodeAdapterFactory(settings, plugin_locator.get()));
 
-    GraphPtr graph(new Graph);
-    GraphWorkerPtr graph_worker(new GraphWorker(&settings, graph.get()));
+    GraphPtr graph = std::make_shared<Graph>();
+    GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(&settings, graph.get());
 
     graph_worker->setPause(paused);
 
@@ -203,19 +201,23 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         thread_pool.stop();
     });
 
+    NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(settings, plugin_locator.get());
+    NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
     CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, node_factory.get());
 
-    CsApexCore core(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
+    // TODO: core must be destroyed AFTER the factories -> refactor it
+    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
 
-    core.saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
-    core.loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
+    core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
+    core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
 
+    int res;
     if(!headless) {
         app->processEvents();
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
-        WidgetControllerPtr widget_control (new WidgetController(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get()));
+        WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get());
         DragIO drag_io(graph.get(), &dispatcher, widget_control);
 
         DesignerStyleable style;
@@ -238,29 +240,33 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, minimap, legend, timeline, plugin_locator.get());
+        CsApexWindow w(*core, &dispatcher, widget_control, graph_worker, designer, minimap, legend, timeline, plugin_locator.get());
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));
 
-        core.init(&drag_io);
+        core->init(&drag_io);
         w.start();
-        core.startup();
+        core->startup();
 
         w.show();
         splash->finish(&w);
 
-        int res = run();
+        res = run();
 
         delete designer;
-        return res;
 
     } else {
-        core.init(nullptr);
+        core->init(nullptr);
         csapex::error_handling::stop_request().connect(std::bind(&csapex::error_handling::kill));
-        core.startup();
-        return run();
+        core->startup();
+        res = run();
     }
+
+    node_factory.reset();
+    node_adapter_factory.reset();
+
+    return res;
 }
 
 void Main::showMessage(const QString& msg)

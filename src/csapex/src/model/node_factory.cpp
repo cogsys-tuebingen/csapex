@@ -29,7 +29,7 @@ struct PluginManagerGroup<Node>
 
 NodeFactory::NodeFactory(Settings &settings, csapex::PluginLocator* locator)
     : settings_(settings), plugin_locator_(locator),
-      node_manager_(new PluginManager<Node> ("csapex::Node")),
+      node_manager_(std::make_shared<PluginManager<Node>> ("csapex::Node")),
       tag_map_has_to_be_rebuilt_(false)
 {
 }
@@ -45,8 +45,6 @@ bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
 
 NodeFactory::~NodeFactory()
 {
-    delete node_manager_;
-    node_manager_ = nullptr;
 }
 
 

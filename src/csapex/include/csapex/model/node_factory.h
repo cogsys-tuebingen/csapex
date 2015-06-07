@@ -64,7 +64,7 @@ protected:
 
     std::unordered_map<UUID, boost::signals2::connection, UUID::Hasher> reload_connections_;
 
-    PluginManager<Node>* node_manager_;
+    std::shared_ptr<PluginManager<Node>> node_manager_;
 
     bool tag_map_has_to_be_rebuilt_;
 };
