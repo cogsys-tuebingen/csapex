@@ -184,7 +184,7 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     drag->setMimeData(mimeData);
 
     NodeBox::Ptr object(new NodeBox(settings_, content,
-                                    NodeAdapter::Ptr(new DefaultNodeAdapter(content.get(), this)),
+                                    NodeAdapter::Ptr(std::make_shared<DefaultNodeAdapter>(content, this)),
                                     QIcon(QString::fromStdString(c->getIcon()))));
 
     object->setStyleSheet(pimpl->style_sheet_);
@@ -212,7 +212,7 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
     if(designer_) {
         std::string type = node_worker->getType();
 
-        NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node_worker.get(), this);
+        NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node_worker, this);
 
         QIcon icon = QIcon(QString::fromStdString(node_factory_->getConstructor(type)->getIcon()));
 

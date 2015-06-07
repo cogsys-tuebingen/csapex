@@ -326,7 +326,7 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeWorker *adaptee, WidgetController *widget_ctrl)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController *widget_ctrl)
     : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(nullptr)
 {
 }
@@ -636,9 +636,13 @@ void setTooltip(QLayout* l, const QString& tooltip)
     }
 }
 
-void setDirection(QBoxLayout* layout, NodeWorker* node)
+void setDirection(QBoxLayout* layout, NodeWorkerWeakPtr node)
 {
-    layout->setDirection(node->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
+
+    NodeWorkerPtr n = node.lock();
+    if(n) {
+        layout->setDirection(n->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
+    }
 }
 
 template <typename P>
@@ -651,6 +655,11 @@ void install(std::map<int, std::function<void(DefaultNodeAdapter*, param::Parame
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
+    NodeWorkerPtr node = node_.lock();
+    if(!node) {
+        return;
+    }
+
     static std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
         install<param::TriggerParameter>(mapping_);
@@ -669,9 +678,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     current_layout_ = wrapper_layout_;
 
-    std::vector<param::Parameter::Ptr> params = node_->getNode()->getParameters();
+    std::vector<param::Parameter::Ptr> params = node->getNode()->getParameters();
 
-    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node_->getNode()->getParameterState());
+    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getNode()->getParameterState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
@@ -744,12 +753,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         current_layout_ = new QHBoxLayout;
         setDirection(current_layout_, node_);
-        node_->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
+        node->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
-        Input* param_in = node_->getParameterInput(current_name_);
+        Input* param_in = node->getParameterInput(current_name_);
         if(param_in) {
-            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_in);
             if(pos != parameter_connections_.end()) {
@@ -769,9 +778,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        Output* param_out = node_->getParameterOutput(current_name_);
+        Output* param_out = node->getParameterOutput(current_name_);
         if(param_out) {
-            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_out);
             if(pos != parameter_connections_.end()) {
@@ -804,7 +813,10 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
 {
     qt_helper::Call* call = new qt_helper::Call([this, cb](){
-        node_->executionRequested(cb);
+        NodeWorkerPtr node = node_.lock();
+        if(node) {
+            node->executionRequested(cb);
+        }
     });
     callbacks.push_back(call);
     return call;

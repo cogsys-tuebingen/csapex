@@ -15,10 +15,10 @@ public: \
     { \
         return #Adaptee; \
     } \
-    virtual NodeAdapterPtr build(NodeWorker* worker, WidgetController* widget_ctrl) const \
+    virtual NodeAdapterPtr build(NodeWorkerPtr worker, WidgetController* widget_ctrl) const \
     { \
         Adaptee* adaptee = dynamic_cast<Adaptee*> (worker->getNode()); \
-        return NodeAdapter::Ptr(new Adapter(worker, adaptee, widget_ctrl)); \
+        return std::make_shared<Adapter>(worker, adaptee, widget_ctrl); \
     } \
 }; \
 }\

@@ -28,7 +28,7 @@ NodeAdapterFactory::~NodeAdapterFactory()
     node_adapter_manager_ = nullptr;
 }
 
-NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeWorker* node, WidgetController* widget_controller)
+NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeWorkerPtr node, WidgetController* widget_controller)
 {
     std::string type = node->getType();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {

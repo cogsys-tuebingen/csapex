@@ -22,7 +22,7 @@ public:
     NodeAdapterFactory(Settings& settings, csapex::PluginLocator* locator);
     ~NodeAdapterFactory();
 
-    NodeAdapterPtr makeNodeAdapter(NodeWorker* node, WidgetController* widget_controller);
+    NodeAdapterPtr makeNodeAdapter(NodeWorkerPtr node, WidgetController* widget_controller);
 
     void loadPlugins();
 

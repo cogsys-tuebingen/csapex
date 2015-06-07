@@ -20,12 +20,12 @@ public:
     typedef std::shared_ptr<NodeAdapter> Ptr;
 
 protected:
-    NodeAdapter(NodeWorker* adaptee, WidgetController *widget_ctrl);
+    NodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController *widget_ctrl);
 
 public:
     virtual ~NodeAdapter();
 
-    NodeWorker *getNodeWorker();
+//    NodeWorker *getNodeWorker();
 
     void doSetupUi(QBoxLayout* layout);
 
@@ -45,7 +45,7 @@ protected:
     std::string current_display_name_;
     QBoxLayout* current_layout_;
 
-    NodeWorker* node_;
+    NodeWorkerWeakPtr node_;
     WidgetController* widget_ctrl_;
 };
 

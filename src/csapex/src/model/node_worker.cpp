@@ -1219,7 +1219,6 @@ void NodeWorker::checkTransitions()
     updateTransitions();
 
     if(transition_in_->hasUnestablishedConnection() || transition_out_->hasUnestablishedConnection()) {
-        node_->aerr << "cannot fire: in: " << transition_in_->hasUnestablishedConnection() << ", out: " << transition_out_->hasUnestablishedConnection() << std::endl;
         if(state_ == State::ENABLED) {
             setState(State::IDLE);
         }

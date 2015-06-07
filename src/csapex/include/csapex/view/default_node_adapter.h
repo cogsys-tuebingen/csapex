@@ -58,7 +58,7 @@ class DefaultNodeAdapter : public NodeAdapter
     friend class DefaultNodeAdapterBridge;
 
 public:
-    DefaultNodeAdapter(NodeWorker* adaptee, WidgetController* widget_ctrl);
+    DefaultNodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController* widget_ctrl);
     virtual ~DefaultNodeAdapter();
 
     virtual void stop();
