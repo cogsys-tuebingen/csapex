@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(utils_param)
 
+add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function -Wno-deprecated-register)
+
 ## Enforce that we use C++11
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
