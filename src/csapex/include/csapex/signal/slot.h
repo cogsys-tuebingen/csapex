@@ -24,7 +24,7 @@ public:
     Slot(std::function<void()> callback, Unique *parent, int sub_id, bool active);
     virtual ~Slot();
 
-    virtual void trigger();
+    virtual void trigger(Trigger *source);
 
     virtual bool canInput() const {
         return true;
@@ -58,7 +58,7 @@ public:
     void handleTrigger();
 
 public:
-    boost::signals2::signal<void()> triggered;
+    boost::signals2::signal<void(Trigger*)> triggered;
 
 protected:
     virtual bool isConnectionPossible(Connectable* other_side);
@@ -68,9 +68,6 @@ protected:
 
 protected:
     std::vector<Trigger*> sources_;
-
-    std::mutex trigger_exec_mutex_;
-    std::condition_variable exec_finished_;
 
     std::function<void()> callback_;
     bool active_;

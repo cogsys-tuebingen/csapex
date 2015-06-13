@@ -110,3 +110,9 @@ UUID NodeRunner::getUUID() const
 {
     return worker_->getUUID();
 }
+
+void NodeRunner::setError(const std::string &msg)
+{
+    std::cerr << "error happened: " << msg << std::endl;
+    worker_->setError(true, msg);
+}

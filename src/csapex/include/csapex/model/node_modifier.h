@@ -13,6 +13,24 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/type_traits.hpp>
 
+/// this is used for generating more readable warnings
+namespace warning
+{
+    template<typename T, int>
+        constexpr auto is_complete(int) -> decltype(sizeof(T),bool{}) {
+            return true;
+        }
+
+    template<typename T, int>
+        constexpr auto is_complete(...) -> bool {
+            return false;
+        }
+}
+
+#define IS_COMPLETE(T) warning::is_complete<T,__LINE__>(0)
+
+
+
 namespace csapex
 {
 class NodeModifier
@@ -84,30 +102,45 @@ public:
     template <typename T>
     Input* addInput(const std::string& label,
                     typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
+                      "connection_types::GenericPointerMessage is not included: "
+                      "#include <csapex/msg/generic_pointer_message.hpp>");
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
                             typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
+                      "connection_types::GenericPointerMessage is not included: "
+                      "#include <csapex/msg/generic_pointer_message.hpp>");
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, true);
     }
     template <typename T>
     Input* addDynamicInput(const std::string& label,
                            typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
+                      "connection_types::GenericPointerMessage is not included: "
+                      "#include <csapex/msg/generic_pointer_message.hpp>");
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true, false);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
                       typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
+                      "connection_types::GenericPointerMessage is not included: "
+                      "#include <csapex/msg/generic_pointer_message.hpp>");
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false);
     }
     template <typename T>
     Output* addDynamicOutput(const std::string& label,
                       typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
+                      "connection_types::GenericPointerMessage is not included: "
+                      "#include <csapex/msg/generic_pointer_message.hpp>");
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true);
     }
@@ -116,26 +149,41 @@ public:
     template <typename T>
     Input* addInput(const std::string& label,
                     typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
+                      "connection_types::GenericValueMessage is not included: "
+                      "#include <csapex/msg/generic_value_message.hpp>");
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false, false);
     }
     template <typename T>
     Input* addDynamicInput(const std::string& label,
                            typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
+                      "connection_types::GenericValueMessage is not included: "
+                      "#include <csapex/msg/generic_value_message.hpp>");
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
                             typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
+                      "connection_types::GenericValueMessage is not included: "
+                      "#include <csapex/msg/generic_value_message.hpp>");
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
                       typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
+                      "connection_types::GenericValueMessage is not included: "
+                      "#include <csapex/msg/generic_value_message.hpp>");
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false);
     }
     template <typename T>
     Output* addDynamicOutput(const std::string& label,
                              typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
+        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
+                      "connection_types::GenericValueMessage is not included: "
+                      "#include <csapex/msg/generic_value_message.hpp>");
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true);
     }
 

@@ -258,9 +258,19 @@ void NodeWorker::setEnabled(bool e)
     enabled(e);
 }
 
+bool NodeWorker::isWaitingForTrigger() const
+{
+    for(TriggerPtr t : triggers_) {
+        if(t->isBeingProcessed()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool NodeWorker::canProcess()
 {
-    return canReceive() && canSend();
+    return canReceive() && canSend() && !isWaitingForTrigger();
 }
 
 bool NodeWorker::canReceive()
@@ -540,11 +550,6 @@ void NodeWorker::updateParameterValue(Connectable *s)
     } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::NoMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
-}
-
-void NodeWorker::outputConnectionChanged(Connectable*)
-{
-    triggerCheckTransitions();
 }
 
 void NodeWorker::processMessages()
@@ -917,9 +922,10 @@ void NodeWorker::registerOutput(OutputPtr out)
 
     connectConnector(out.get());
 
-    out->messageProcessed.connect([this](Connectable* c) { outputConnectionChanged(c); });
-    out->connectionRemoved.connect([this](Connectable* c) { outputConnectionChanged(c); });
-    out->connectionDone.connect([this](Connectable* c) { outputConnectionChanged(c); });
+    out->messageProcessed.connect([this](Connectable* c) { triggerCheckTransitions(); });
+    out->connectionRemoved.connect([this](Connectable* c) { triggerCheckTransitions(); });
+    out->connectionDone.connect([this](Connectable* c) { triggerCheckTransitions(); });
+    out->connectionEnabled.connect([this](bool) { triggerCheckTransitions(); });
 
     connectorCreated(out);
 }
@@ -932,8 +938,17 @@ void NodeWorker::registerSlot(SlotPtr s)
 
     Slot* slot = s.get();
 
-    s->triggered.connect([slot]() { slot->handleTrigger(); });
-    //    QObject::connect(s, SIGNAL(triggered()), s, SLOT(handleTrigger()), Qt::QueuedConnection);
+    s->triggered.connect([this, slot](Trigger* source) {
+        executionRequested([this, slot, source]() {
+            std::cerr << getUUID() << ":  handle trigger" << source->getLabel() << std::endl;
+            slot->handleTrigger();
+            /// PROBLEM: Relaying signals not yet possible here
+            ///  if slot triggeres a signal itself...
+            /// SOLUTION: boost signal?
+            source->signalHandled(slot);
+            std::cerr << getUUID() << ": /handle trigger" << source->getLabel() << std::endl;
+        });
+    });
 
     connectorCreated(s);
 }
@@ -942,10 +957,20 @@ void NodeWorker::registerTrigger(TriggerPtr t)
 {
     triggers_.push_back(t);
 
+    //PROBLEM: wait for all m slots to be done...
+    // in the mean time, allow NO TICK; NO PROCESS;
+    // BUT ALSO EXECUTE OTHER TRIGGERS OF THE SAME PROCESS / TICK...
+    // solution: "lock" the nodeworker, "unlock" it in signalHandled, once all
+    //  TRIGGERs are done (not only this one!!!!!)
+
+    t->triggered.connect([this](){
+        triggerCheckTransitions();
+    });
+    t->all_signals_handled.connect([this](){
+        triggerCheckTransitions();
+    });
+
     connectConnector(t.get());
-    //    QObject::connect(t, SIGNAL(messageProcessed(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
-    //    QObject::connect(t, SIGNAL(connectionRemoved(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
-    //    QObject::connect(t, SIGNAL(connectionDone(Connectable*)), this, SLOT(checkIfOutputIsReady(Connectable*)));
 
     connectorCreated(t);
 }
@@ -1422,7 +1447,7 @@ void NodeWorker::tick()
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-            if(isTickEnabled() && isSource() && node_->canTick()) {
+            if(!isWaitingForTrigger() && isTickEnabled() && isSource() && node_->canTick()) {
                 if(state == State::ENABLED) {
                     setState(State::IDLE);
                 }

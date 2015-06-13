@@ -87,7 +87,12 @@ MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const s
         throw std::runtime_error("no message providers registered!");
     }
 
-    return classes.at(ext)();
+    auto pos = classes.find(ext);
+    if(pos == classes.end()) {
+        throw std::runtime_error(std::string("cannot import ") + path);
+    }
+
+    return (pos->second)();
 }
 
 void MessageProviderManager::registerMessageProvider(const std::string &type, Constructor constructor)

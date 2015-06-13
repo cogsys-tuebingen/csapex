@@ -116,8 +116,8 @@ public Q_SLOTS:
     void registerEvent(Connectable*);
     void unregisterEvent(Connectable*);
 
-    void nodeStateChanged();
-    void enabledChange(bool val);
+    void nodeStateChangedEvent();
+    void enabledChangeEvent(bool val);
 
     void updateVisuals();
 
@@ -140,6 +140,9 @@ Q_SIGNALS:
     void showContextMenuForBox(NodeBox* box, const QPoint& pos);
 
     void updateVisualsRequest();
+
+    void nodeStateChanged();
+    void enabledChange(bool val);
 
 protected:
     void resizeEvent(QResizeEvent * e);

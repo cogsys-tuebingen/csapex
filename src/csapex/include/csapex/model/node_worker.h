@@ -122,6 +122,7 @@ public:
     std::vector<Input*> getParameterInputs() const;
     std::vector<Output*> getParameterOutputs() const;
 
+    bool isWaitingForTrigger() const;
     bool canProcess();
     bool canReceive();
     bool canSend();
@@ -169,8 +170,6 @@ public:
 
     void sendMessages();
     void notifyMessagesProcessed();
-
-    void outputConnectionChanged(Connectable*);
 
 public:
     boost::signals2::signal<void()> panic;

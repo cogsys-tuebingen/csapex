@@ -28,6 +28,12 @@ namespace csapex
     : \
     csapex::Timer::Interlude::Ptr(nullptr)
 
+#define NAMED_INTERLUDE(name) \
+    csapex::Timer::Interlude::Ptr interlude_##name = profiling_timer_ ? \
+    profiling_timer_->step(#name) \
+    : \
+    csapex::Timer::Interlude::Ptr(nullptr)
+
 class Timable
 {
 public:

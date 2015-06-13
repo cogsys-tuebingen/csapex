@@ -127,19 +127,13 @@ void InputTransition::notifyMessageProcessed()
             int f = c->getMessage()->flags.data;
 
             if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
-                c->setState(Connection::State::DONE);
+//                c->setState(Connection::State::DONE);
                 c->allowNewMessage();
             }
         }
 
     } else {
-
         apex_assert_hard(areAllConnections(Connection::State::READ));
-        for(auto& c : established_connections_) {
-            c->setState(Connection::State::DONE);
-        }
-
-        apex_assert_hard(areAllConnections(Connection::State::DONE));
 
         for(ConnectionPtr& c : established_connections_) {
             c->allowNewMessage();
@@ -192,7 +186,7 @@ void InputTransition::fire()
             apex_assert_hard(s == Connection::State::UNREAD ||
                              s == Connection::State::READ);
             dynamic_connection->setState(Connection::State::READ);
-            dynamic_connection->setState(Connection::State::DONE);
+//            dynamic_connection->setState(Connection::State::DONE);
             dynamic_connection->allowNewMessage();
             return;
         }

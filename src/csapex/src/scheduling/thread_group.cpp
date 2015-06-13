@@ -6,6 +6,9 @@
 #include <csapex/utility/thread.h>
 #include <csapex/scheduling/task_generator.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
@@ -202,8 +205,19 @@ void ThreadGroup::startThread()
                         if(running_) {
                             state_lock.unlock();
 
-                            // TODO: this can fail...
-                            task->execute();
+                            try {
+                                task->execute();
+
+                            } catch(const std::exception& e) {
+                                TaskGenerator* gen = task->getParent();
+                                gen->setError(e.what());
+
+                            } catch(const std::string& s) {
+                                std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
+                            } catch(...) {
+                                std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
+                                std::abort();
+                            }
 
                         } else {
                             done = true;

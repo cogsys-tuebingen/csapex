@@ -24,6 +24,8 @@ public:
 
     virtual UUID getUUID() const override;
 
+    virtual void setError(const std::string& msg) override;
+
     void schedule(TaskPtr task);
 
 private:

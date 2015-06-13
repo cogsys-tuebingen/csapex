@@ -203,6 +203,7 @@ void Connectable::setSequenceNumber(int seq_no)
 void Connectable::addConnection(ConnectionPtr connection)
 {
     connections_.push_back(connection);
+    connection->sink_enabled_changed.connect(connectionEnabled);
 }
 
 void Connectable::fadeConnection(ConnectionPtr connection)

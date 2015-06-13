@@ -32,6 +32,7 @@ public:
     }
 
     void trigger();
+    void signalHandled(Slot* slot);
 
     virtual void disable();
 
@@ -49,8 +50,13 @@ public:
     virtual CommandPtr removeAllConnectionsCmd();
     CommandPtr removeConnectionCmd(Slot *other_side);
 
-
     void reset();
+
+    bool isBeingProcessed() const;
+
+public:
+    boost::signals2::signal<void()> triggered;
+    boost::signals2::signal<void()> all_signals_handled;
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
@@ -62,6 +68,9 @@ protected:
 
 protected:
     std::vector<Slot*> targets_;
+
+    mutable std::recursive_mutex targets_running_mtx_;
+    std::map<Slot*, bool> targets_running_;
 
 };
 

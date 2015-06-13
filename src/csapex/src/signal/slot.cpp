@@ -54,7 +54,7 @@ bool Slot::acknowledgeConnection(Connectable* other_side)
 
     sources_.push_back(target);
 
-    other_side->enabled_changed.connect(connectionEnabled);
+//    other_side->enabled_changed.connect(connectionEnabled);
 
     return true;
 }
@@ -144,26 +144,19 @@ std::vector<Trigger*> Slot::getSources() const
     return sources_;
 }
 
-void Slot::trigger()
+void Slot::trigger(Trigger* source)
 {
-    std::unique_lock<std::mutex> lock(trigger_exec_mutex_);
-
-    triggered();
-
-    // wait for the signal to be handled
-    exec_finished_.wait(lock);
+    triggered(source);
 }
 
 void Slot::handleTrigger()
 {
-    std::unique_lock<std::mutex> lock(trigger_exec_mutex_);
-
     // do the work
     if(isEnabled() || isActive()) {
+        std::cerr << " trigger slot " << getLabel() << std::endl;
         callback_();
+        std::cerr << "/trigger slot " << getLabel() << std::endl;
     }
-
-    exec_finished_.notify_all();
 }
 
 void Slot::notifyMessageProcessed()

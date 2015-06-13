@@ -49,7 +49,9 @@ public:
 
     ~Impl()
     {
-        delete tooltip_view_;
+        if(tooltip_view_) {
+            tooltip_view_->deleteLater();
+        }
     }
 
 public:

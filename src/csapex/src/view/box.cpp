@@ -133,12 +133,14 @@ void NodeBox::construct()
     QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
     worker->nodeStateChanged.connect([this]() { nodeStateChanged(); });
+    QObject::connect(this, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChangedEvent()), Qt::QueuedConnection);
 
     worker->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
     worker->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
     enabledChange(worker->isEnabled());
     worker->enabled.connect([this](bool e){ enabledChange(e); });
+    QObject::connect(this, SIGNAL(enabledChange(bool)), this, SLOT(enabledChangeEvent(bool)), Qt::QueuedConnection);
 
     worker->threadChanged.connect([this](){ updateThreadInformation(); });
     worker->errorHappened.connect([this](bool){ updateVisualsRequest(); });
@@ -417,7 +419,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
     return false;
 }
 
-void NodeBox::enabledChange(bool val)
+void NodeBox::enabledChangeEvent(bool val)
 {
     ui->boxframe->setProperty("disabled", !val);
     ui->enablebtn->setChecked(val);
@@ -537,6 +539,7 @@ void NodeBox::getInformation()
 
 void NodeBox::refreshStylesheet()
 {
+    apex_assert_hard(QThread::currentThread() == QApplication::instance()->thread());
     ui->boxframe->style()->unpolish(ui->boxframe);
     ui->boxframe->style()->polish(ui->boxframe);
     ui->boxframe->update();
@@ -639,7 +642,7 @@ Graph::Ptr NodeBox::getSubGraph()
     throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
 }
 
-void NodeBox::nodeStateChanged()
+void NodeBox::nodeStateChangedEvent()
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {

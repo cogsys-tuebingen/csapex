@@ -17,6 +17,8 @@ public:
     virtual void detach() = 0;
 
     virtual UUID getUUID() const = 0;
+
+    virtual void setError(const std::string& msg) = 0;
 };
 
 }

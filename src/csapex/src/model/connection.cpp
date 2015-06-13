@@ -114,7 +114,8 @@ void Connection::allowNewMessage()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
-        apex_assert_hard(state_ == State::DONE);
+        apex_assert_hard(state_ == State::READ);
+        setState(State::DONE);
     }
     Output* o = dynamic_cast<Output*>(from_);
     if(o) {

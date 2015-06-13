@@ -94,14 +94,40 @@ void Trigger::removeAllConnectionsNotUndoable()
 
 void Trigger::trigger()
 {
+    {
+        std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
+        apex_assert_hard(targets_running_.empty());
+        for(Slot* s : targets_) {
+            targets_running_[s] = true;
+        }
+    }
+
+    triggered();
+
     for(Slot* s : targets_) {
         try {
-            s->trigger();
+            s->trigger(this);
         } catch(const std::exception& e) {
             std::cout << "triggering slot " << s->getLabel()  << " failed: " << e.what();
         }
     }
     ++count_;
+}
+
+void Trigger::signalHandled(Slot *slot)
+{
+    std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
+    targets_running_.erase(slot);
+
+    if(targets_running_.empty()) {
+        all_signals_handled();
+    }
+}
+
+bool Trigger::isBeingProcessed() const
+{
+    std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
+    return !targets_running_.empty();
 }
 
 void Trigger::disable()
