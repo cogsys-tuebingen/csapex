@@ -39,6 +39,7 @@ void InputTransition::establish()
 
 void InputTransition::connectionRemoved(Connection *connection)
 {
+    Transition::connectionRemoved(connection);
     connection->fadeSink();
 }
 
@@ -54,19 +55,20 @@ void InputTransition::reset()
 
 void InputTransition::connectionAdded(Connection *connection)
 {
+    Transition::connectionAdded(connection);
 
-    connection->new_message.connect([this]() {
+    trackConnection(connection, connection->new_message.connect([this]() {
         //        std::cerr << "new message in " << node_->getUUID() << std::endl;
         //        update();
 
         // TODO: is this necessary?
         node_->triggerCheckTransitions();
-    });
+    }));
 
-    connection->endpoint_established.connect([this]() {
+    trackConnection(connection, connection->endpoint_established.connect([this]() {
         // establish();
         node_->triggerCheckTransitions();
-    });
+    }));
 
     one_input_is_dynamic_ = false;
     for(Input* i : node_->getAllInputs()) {
@@ -84,7 +86,7 @@ void InputTransition::fireIfPossible()
     }
 
     if(node_->isSource()) {
-        apex_assert_hard(established_connections_.empty());
+//        apex_assert_hard(established_connections_.empty());
         //fire(); -> instead of tick!!!!
     } else {
         if(!isOneConnection(Connection::State::READY_TO_RECEIVE) &&

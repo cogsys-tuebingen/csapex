@@ -69,7 +69,9 @@ public:
     void triggerProcess();
     void triggerPanic();
 
-    Node* getNode() const;
+    NodeWeakPtr getNodeSafe() const;
+    /*TODO: REMOVE!*/ Node* getNode() const;
+
     State getState() const;
 
     std::string getType() const;

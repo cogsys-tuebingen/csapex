@@ -209,6 +209,11 @@ Node* NodeWorker::getNode() const
     return node_.get();
 }
 
+NodeWeakPtr NodeWorker::getNodeSafe() const
+{
+    return node_;
+}
+
 NodeWorker::State NodeWorker::getState() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);

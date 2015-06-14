@@ -31,10 +31,12 @@ void OutputTransition::reset()
 
 void OutputTransition::connectionAdded(Connection *connection)
 {
-    connection->endpoint_established.connect([this]() {
+    Transition::connectionAdded(connection);
+
+    trackConnection(connection, connection->endpoint_established.connect([this]() {
         // establish();
         node_->triggerCheckTransitions();
-    });
+    }));
 
     //    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
     //        establish();
@@ -43,6 +45,8 @@ void OutputTransition::connectionAdded(Connection *connection)
 
 void OutputTransition::connectionRemoved(Connection *connection)
 {
+    Transition::connectionRemoved(connection);
+
     connection->fadeSource();
 
     if(established_connections_.empty()) {

@@ -175,5 +175,13 @@ void Transition::connectionAdded(Connection *connection)
 
 void Transition::connectionRemoved(Connection *connection)
 {
+    for(auto& c : signal_connections_[connection]) {
+        c.disconnect();
+    }
+    signal_connections_.erase(connection);
+}
 
+void Transition::trackConnection(Connection *connection, const boost::signals2::connection &c)
+{
+    signal_connections_[connection].push_back(c);
 }

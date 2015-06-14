@@ -45,12 +45,16 @@ protected:
     virtual void connectionAdded(Connection* connection);
     virtual void connectionRemoved(Connection* connection);
 
+    void trackConnection(Connection* connection, const boost::signals2::connection& c);
+
 protected:
     NodeWorker* node_;
 
     std::vector<ConnectionPtr> established_connections_;
     std::vector<ConnectionPtr> unestablished_connections_;
     std::vector<ConnectionPtr> fading_connections_;
+
+    std::map<Connection*, std::vector<boost::signals2::connection>> signal_connections_;
 
     mutable std::recursive_mutex sync;
 };

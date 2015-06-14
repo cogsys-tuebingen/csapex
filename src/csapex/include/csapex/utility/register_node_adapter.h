@@ -17,7 +17,7 @@ public: \
     } \
     virtual NodeAdapterPtr build(NodeWorkerPtr worker, WidgetController* widget_ctrl) const \
     { \
-        Adaptee* adaptee = dynamic_cast<Adaptee*> (worker->getNode()); \
+        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (worker->getNodeSafe().lock()); \
         return std::make_shared<Adapter>(worker, adaptee, widget_ctrl); \
     } \
 }; \
