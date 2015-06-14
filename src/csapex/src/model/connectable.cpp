@@ -210,7 +210,6 @@ void Connectable::fadeConnection(ConnectionPtr connection)
 {
     for(auto it = connections_.begin(); it != connections_.end(); ) {
         if(*it == connection) {
-            std::cerr << "Connectable: erase connection from " << connection->from()->getUUID() << " to " << connection->to()->getUUID() << std::endl;
             it = connections_.erase(it);
         } else {
             ++it;
