@@ -70,7 +70,7 @@ public:
     bool silent_;
 
     std::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
-    std::shared_ptr<boost::signals2::signal<void(param::Parameter*)> > parameter_added;
+    std::shared_ptr<boost::signals2::signal<void(param::ParameterPtr)> > parameter_added;
     std::shared_ptr<boost::signals2::signal<void(param::ParameterPtr)> > parameter_removed;
 };
 

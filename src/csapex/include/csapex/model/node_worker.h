@@ -97,7 +97,7 @@ public:
     Slot* getSlot(const UUID& uuid) const;
     Trigger* getTrigger(const UUID& uuid) const;
 
-    void makeParameterConnectable(param::Parameter*);
+    void makeParameterConnectable(param::ParameterPtr);
     void makeParameterNotConnectable(param::ParameterPtr);
     Input* getParameterInput(const std::string& name) const;
     Output* getParameterOutput(const std::string& name) const;
@@ -215,7 +215,7 @@ private:
     void disconnectConnector(Connectable* c);
 
     template <typename T>
-    void makeParameterConnectableImpl(param::Parameter*);
+    void makeParameterConnectableImpl(param::ParameterPtr);
     void publishParameters();
     void publishParameter(param::Parameter *p);
 
@@ -259,6 +259,8 @@ private:
 
     std::map<Input*,param::Parameter*> input_2_param_;
     std::map<Output*,param::Parameter*> output_2_param_;
+
+    std::map<param::Parameter*, boost::signals2::scoped_connection> param_connections_;
 
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;

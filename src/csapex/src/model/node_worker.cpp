@@ -294,8 +294,10 @@ bool NodeWorker::canSend()
 }
 
 template <typename T>
-void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
+void NodeWorker::makeParameterConnectableImpl(param::ParameterPtr param)
 {
+    param::Parameter* p = param.get();
+
     if(param_2_input_.find(p->name()) != param_2_input_.end()) {
         return;
     }
@@ -326,14 +328,16 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         connectConnector(cout.get());
         //        cout->moveToThread(thread());
 
-        p->parameter_changed.connect(std::bind(&NodeWorker::publishParameter, this, p));
+        auto cb = std::bind(&NodeWorker::publishParameter, this, p);
+        auto c = p->parameter_changed.connect(cb);
+        param_connections_.insert(std::make_pair(p, c));
 
         param_2_output_[p->name()] = cout;
         output_2_param_[cout.get()] = p;
     }
 }
 
-void NodeWorker::makeParameterConnectable(param::Parameter* p)
+void NodeWorker::makeParameterConnectable(param::ParameterPtr p)
 {
     if(p->is<int>()) {
         makeParameterConnectableImpl<int>(p);
@@ -350,11 +354,11 @@ void NodeWorker::makeParameterConnectable(param::Parameter* p)
     }
     // else: do nothing and ignore the parameter
 
-    param::TriggerParameter* t = dynamic_cast<param::TriggerParameter*>(p);
+    param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
     if(t) {
         Trigger* trigger = addTrigger(t->name());
         addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
-        node_->addParameterCallback(t, std::bind(&Trigger::trigger, trigger));
+        node_->addParameterCallback(t.get(), std::bind(&Trigger::trigger, trigger));
     }
 }
 
@@ -375,15 +379,14 @@ void NodeWorker::makeParameterNotConnectable(param::ParameterPtr p)
     param_2_output_.erase(p->name());
     output_2_param_.erase(cout.get());
 
-    p->parameter_changed.disconnect(this);
-    p->parameter_enabled.disconnect(this);
+    param_connections_.erase(p.get());
 }
 
 void NodeWorker::makeParametersConnectable()
 {
     GenericState::Ptr state = node_->getParameterState();
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
-        makeParameterConnectable(it->second.get());
+        makeParameterConnectable(it->second);
     }
 }
 

@@ -14,7 +14,7 @@ using namespace csapex;
 GenericState::GenericState()
     : silent_(false),
       parameter_set_changed(new boost::signals2::signal<void()>),
-      parameter_added(new boost::signals2::signal<void(param::Parameter*)>),
+      parameter_added(new boost::signals2::signal<void(param::ParameterPtr)>),
       parameter_removed(new boost::signals2::signal<void(param::ParameterPtr)>)
 {
 
@@ -56,7 +56,7 @@ void GenericState::readYaml(const YAML::Node& node) {
 void GenericState::initializePersistentParameters()
 {
     for(const std::string& name : persistent) {
-        (*parameter_added)(params[name].get());
+        (*parameter_added)(params[name]);
     }
 }
 
@@ -143,7 +143,7 @@ void GenericState::registerParameter(const param::Parameter::Ptr &param)
 
     param->setUUID(parent_uuid_.getFullName());
 
-    (*parameter_added)(param.get());
+    (*parameter_added)(param);
     triggerParameterSetChanged();
 }
 

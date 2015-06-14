@@ -37,6 +37,8 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
     worker->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
 
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
+
+    setVisible(false);
 }
 
 NodeBox::~NodeBox()
@@ -391,12 +393,6 @@ void NodeBox::init()
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {
         return;
-    }
-
-    if(parent()) {
-        setVisible(true);
-    } else {
-        setVisible(false);
     }
 
     Point pt = worker->getNodeState()->getPos();
