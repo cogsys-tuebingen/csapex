@@ -284,6 +284,11 @@ DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter *parent)
     QObject::connect(this, SIGNAL(modelCallback(Function)), this, SLOT(executeModelCallback(Function)));
 }
 
+DefaultNodeAdapterBridge::~DefaultNodeAdapterBridge()
+{
+    disconnect();
+}
+
 void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (param::Parameter *)> &signal,
                                                   std::function<void ()> cb)
 {
@@ -353,6 +358,7 @@ void DefaultNodeAdapter::clear()
     callbacks.clear();
     groups.clear();
 }
+
 
 namespace {
 

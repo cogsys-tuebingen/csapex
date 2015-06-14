@@ -115,9 +115,9 @@ void Port::updateTooltip()
             try {
                 MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
                 if(renderer) {
-                    QSharedPointer<QImage> img = renderer->render(msg);
+                    QImage img = renderer->render(msg);
 
-                    auto pm = QPixmap::fromImage(*img);
+                    auto pm = QPixmap::fromImage(img);
                     view->scene()->clear();
                     view->scene()->addPixmap(pm);
                     view->setMaximumSize(256, 256);

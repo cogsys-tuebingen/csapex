@@ -36,6 +36,7 @@ public:
 
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;
+    void trackConnection(const boost::signals2::connection &c);
 
 protected:
     QBoxLayout *layout_;
@@ -47,6 +48,8 @@ protected:
 
     NodeWorkerWeakPtr node_;
     WidgetController* widget_ctrl_;
+
+    std::vector<boost::signals2::connection> connections_;
 };
 
 }

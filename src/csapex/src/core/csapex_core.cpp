@@ -40,7 +40,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
 {
     destruct = true;
 
-    qRegisterMetaType < QSharedPointer<QImage> > ("QSharedPointer<QImage>");
+    qRegisterMetaType < QImage > ("QImage");
     qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
     qRegisterMetaType < ConnectionType::ConstPtr > ("ConnectionType::ConstPtr");
     qRegisterMetaType < std::string > ("std::string");

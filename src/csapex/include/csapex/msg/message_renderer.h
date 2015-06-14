@@ -22,7 +22,7 @@ public:
 public:
     virtual ~MessageRenderer();
 
-    virtual QSharedPointer<QImage> render(const ConnectionTypeConstPtr& msg) = 0;
+    virtual QImage render(const ConnectionTypeConstPtr& msg) = 0;
     virtual const std::type_info* messageType() const = 0;
 
     virtual std::vector<param::ParameterPtr> getParameters() const
@@ -35,7 +35,7 @@ template <class Message>
 class MessageRendererImplementation : public MessageRenderer
 {
 public:
-    virtual QSharedPointer<QImage> render(const ConnectionTypeConstPtr& msg) final override
+    virtual QImage render(const ConnectionTypeConstPtr& msg) final override
     {
         const auto& real_msg = std::dynamic_pointer_cast<Message const>(msg);
         if(real_msg) {
@@ -50,7 +50,7 @@ public:
         return &typeid(Message);
     }
 
-    virtual QSharedPointer<QImage> doRender(const Message& msg) = 0;
+    virtual QImage doRender(const Message& msg) = 0;
 };
 
 }

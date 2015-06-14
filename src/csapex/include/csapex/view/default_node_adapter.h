@@ -26,8 +26,11 @@ class DefaultNodeAdapterBridge : public QObject
 {
     Q_OBJECT
 
+    friend class DefaultNodeAdapter;
+
 public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
+    ~DefaultNodeAdapterBridge();
 
     void connectInGuiThread(boost::signals2::signal<void(param::Parameter*)>& signal,
                  std::function<void()> cb);
@@ -92,6 +95,8 @@ private:
     qt_helper::Call* makePausedUiCall(std::function<void()> cb);
 
 private:
+    std::vector<boost::signals2::scoped_connection> connections_;
+
     std::vector<QObject*> callbacks;
     std::map<std::string, QBoxLayout*> groups;
     std::map<std::string, bool> groups_enabled;

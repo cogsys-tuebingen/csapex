@@ -15,13 +15,13 @@ NodeAdapter::NodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController* widget_ctr
 
 NodeAdapter::~NodeAdapter()
 {
+    for(auto& c : connections_) {
+        c.disconnect();
+    }
+
+    connections_.clear();
 }
 
-
-//NodeWorker* NodeAdapter::getNodeWorker()
-//{
-//    return node_;
-//}
 
 void NodeAdapter::doSetupUi(QBoxLayout *layout)
 {
@@ -50,4 +50,9 @@ Memento::Ptr NodeAdapter::getState() const
 void NodeAdapter::setParameterState(Memento::Ptr)
 {
 
+}
+
+void NodeAdapter::trackConnection(const boost::signals2::connection &c)
+{
+    connections_.push_back(c);
 }
