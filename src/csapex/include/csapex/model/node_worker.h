@@ -262,6 +262,12 @@ private:
 
     std::map<param::Parameter*, boost::signals2::scoped_connection> param_connections_;
 
+    std::map<Slot*, boost::signals2::scoped_connection> slot_connections_;
+
+    std::map<Trigger*, boost::signals2::scoped_connection> trigger_triggered_connections_;
+    std::map<Trigger*, boost::signals2::scoped_connection> trigger_handled_connections_;
+
+
     std::vector<boost::signals2::connection> connections;
     std::vector<QObject*> callbacks;
 

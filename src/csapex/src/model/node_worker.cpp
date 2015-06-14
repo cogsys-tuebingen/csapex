@@ -883,6 +883,8 @@ void NodeWorker::removeSlot(Slot* s)
         }
     }
 
+    slot_connections_.erase(s);
+
 
     if(it != slots_.end()) {
         SlotPtr slot = *it;
@@ -903,6 +905,9 @@ void NodeWorker::removeTrigger(Trigger* t)
             break;
         }
     }
+
+    trigger_triggered_connections_.erase(t);
+    trigger_handled_connections_.erase(t);
 
     if(it != triggers_.end()) {
         TriggerPtr trigger = *it;
@@ -946,17 +951,16 @@ void NodeWorker::registerSlot(SlotPtr s)
 
     Slot* slot = s.get();
 
-    s->triggered.connect([this, slot](Trigger* source) {
+    auto connection = s->triggered.connect([this, slot](Trigger* source) {
         executionRequested([this, slot, source]() {
-            std::cerr << getUUID() << ":  handle trigger" << source->getLabel() << std::endl;
             slot->handleTrigger();
             /// PROBLEM: Relaying signals not yet possible here
             ///  if slot triggeres a signal itself...
             /// SOLUTION: boost signal?
             source->signalHandled(slot);
-            std::cerr << getUUID() << ": /handle trigger" << source->getLabel() << std::endl;
         });
     });
+    slot_connections_.insert(std::make_pair(slot, connection));
 
     connectorCreated(s);
 }
@@ -971,12 +975,15 @@ void NodeWorker::registerTrigger(TriggerPtr t)
     // solution: "lock" the nodeworker, "unlock" it in signalHandled, once all
     //  TRIGGERs are done (not only this one!!!!!)
 
-    t->triggered.connect([this](){
+    auto connection_triggered = t->triggered.connect([this](){
         triggerCheckTransitions();
     });
-    t->all_signals_handled.connect([this](){
+    trigger_triggered_connections_.insert(std::make_pair(t.get(), connection_triggered));
+
+    auto connection_handled = t->all_signals_handled.connect([this](){
         triggerCheckTransitions();
     });
+    trigger_handled_connections_.insert(std::make_pair(t.get(), connection_handled));
 
     connectConnector(t.get());
 

@@ -153,9 +153,7 @@ void Slot::handleTrigger()
 {
     // do the work
     if(isEnabled() || isActive()) {
-        std::cerr << " trigger slot " << getLabel() << std::endl;
         callback_();
-        std::cerr << "/trigger slot " << getLabel() << std::endl;
     }
 }
 

@@ -67,17 +67,16 @@ public:
     virtual void stop();
 
 public:
-    // TODO: WeakPtrs!!!!
-    void setupParameter(param::TriggerParameter* trigger_p);
-    void setupParameter(param::ColorParameter* color_p);
-    void setupParameter(param::PathParameter* path_p);
-    void setupParameter(param::ValueParameter* value_p);
-    void setupParameter(param::RangeParameter* range_p);
-    void setupParameter(param::IntervalParameter* interval_p);
-    void setupParameter(param::SetParameter* set_p);
-    void setupParameter(param::BitSetParameter* bitset_p);
+    void setupParameter(param::TriggerParameterPtr trigger_p);
+    void setupParameter(param::ColorParameterPtr color_p);
+    void setupParameter(param::PathParameterPtr path_p);
+    void setupParameter(param::ValueParameterPtr value_p);
+    void setupParameter(param::RangeParameterPtr range_p);
+    void setupParameter(param::IntervalParameterPtr interval_p);
+    void setupParameter(param::SetParameterPtr set_p);
+    void setupParameter(param::BitSetParameterPtr bitset_p);
 
-    void setupParameter(param::OutputProgressParameter* bitset_p);
+    void setupParameter(param::OutputProgressParameterPtr bitset_p);
 
 
 protected:
