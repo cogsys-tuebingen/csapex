@@ -23,7 +23,7 @@ public:
     void addConnection(ConnectionPtr connection);
     void fadeConnection(ConnectionPtr connection);
 
-    void update();
+    void updateConnections();
 
     bool hasEstablishedConnection() const;
     bool hasUnestablishedConnection() const;
@@ -31,7 +31,7 @@ public:
 
     void removeFadingConnections();
 
-    virtual void establish() = 0;
+    virtual void establishConnections() = 0;
     virtual void reset() = 0;
 
 protected:

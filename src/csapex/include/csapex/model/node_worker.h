@@ -227,7 +227,7 @@ private:
 
     void setState(State state);
 
-    void updateTransitions();
+    void updateTransitionConnections();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 

@@ -70,10 +70,10 @@ void Transition::removeFadingConnections()
     fading_connections_.clear();
 }
 
-void Transition::update()
+void Transition::updateConnections()
 {
     if(hasUnestablishedConnection()) {
-        establish();
+        establishConnections();
     }
     if(hasFadingConnection()) {
         removeFadingConnections();

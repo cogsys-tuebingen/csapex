@@ -55,7 +55,7 @@ void OutputTransition::connectionRemoved(Connection *connection)
     }
 }
 
-void OutputTransition::establish()
+void OutputTransition::establishConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     auto unestablished_connections = unestablished_connections_;

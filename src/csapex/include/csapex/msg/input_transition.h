@@ -15,7 +15,7 @@ public:
     void notifyMessageProcessed();
     void fireIfPossible();
 
-    void establish() override;
+    void establishConnections() override;
     void connectionRemoved(Connection* connection) override;
 
     virtual void reset() override;
@@ -25,6 +25,8 @@ protected:
 
 private:
     void fire();
+    int findHighestDeviantSequenceNumber() const;
+    void notifyOlderConnections(int highest_seq);
 
     bool areConnectionsReady() const;
 

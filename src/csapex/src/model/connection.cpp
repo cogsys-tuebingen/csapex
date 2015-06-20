@@ -252,7 +252,7 @@ void Connection::setState(State s)
         apex_assert_hard(state_ == State::DONE || state_ == State::NOT_INITIALIZED);
         break;
     case State::UNREAD:
-        apex_assert_hard(state_ == State::READY_TO_RECEIVE);
+        apex_assert_hard(state_ == State::READY_TO_RECEIVE || state_ == State::NOT_INITIALIZED);
         apex_assert_hard(message_ != nullptr);
         break;
     case State::READ:

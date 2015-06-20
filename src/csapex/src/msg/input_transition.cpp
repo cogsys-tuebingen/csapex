@@ -19,7 +19,7 @@ InputTransition::InputTransition(NodeWorker* node)
 {
 }
 
-void InputTransition::establish()
+void InputTransition::establishConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     auto unestablished_connections = unestablished_connections_;
@@ -86,7 +86,7 @@ void InputTransition::fireIfPossible()
     }
 
     if(node_->isSource()) {
-//        apex_assert_hard(established_connections_.empty());
+        //        apex_assert_hard(established_connections_.empty());
         //fire(); -> instead of tick!!!!
     } else {
         if(!isOneConnection(Connection::State::READY_TO_RECEIVE) &&
@@ -102,7 +102,64 @@ void InputTransition::fireIfPossible()
                     }
                 }
 
-                fire();
+
+                int highest_deviant_seq = findHighestDeviantSequenceNumber();
+
+                if(highest_deviant_seq >= 0) {
+                    notifyOlderConnections(highest_deviant_seq);
+
+                } else {
+                    fire();
+                }
+            }
+        }
+    }
+}
+
+int InputTransition::findHighestDeviantSequenceNumber() const
+{
+    int highest_deviant_seq = -1;
+
+    bool a_connection_deviates = false;
+    for(Input* input : node_->getAllInputs()) {
+        //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
+
+        if(input->isConnected()) {
+            auto connections = input->getConnections();
+            apex_assert_hard(connections.size() == 1);
+            auto connection = connections.front();
+            auto msg = connection->getMessage();
+
+            int s = msg->sequenceNumber();
+            if(highest_deviant_seq != -1 && highest_deviant_seq != s) {
+                a_connection_deviates = true;
+            }
+            if(s > highest_deviant_seq) {
+                highest_deviant_seq = s;
+            }
+        }
+    }
+    if(a_connection_deviates) {
+        return highest_deviant_seq;
+    } else {
+        return -1;
+    }
+}
+
+void InputTransition::notifyOlderConnections(int seq)
+{
+    for(Input* input : node_->getAllInputs()) {
+        if(input->isConnected()) {
+            auto connections = input->getConnections();
+            apex_assert_hard(connections.size() == 1);
+            auto connection = connections.front();
+            auto msg = connection->getMessage();
+
+            int s = msg->sequenceNumber();
+            if(seq != s) {
+                std::cerr << input->getUUID().getFullName() << " has seq " << s << " instead of " << seq << std::endl;
+                connection->setState(Connection::State::READ);
+                connection->allowNewMessage();
             }
         }
     }
@@ -129,7 +186,7 @@ void InputTransition::notifyMessageProcessed()
             int f = c->getMessage()->flags.data;
 
             if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
-//                c->setState(Connection::State::DONE);
+                //                c->setState(Connection::State::DONE);
                 c->allowNewMessage();
             }
         }
@@ -188,15 +245,13 @@ void InputTransition::fire()
             apex_assert_hard(s == Connection::State::UNREAD ||
                              s == Connection::State::READ);
             dynamic_connection->setState(Connection::State::READ);
-//            dynamic_connection->setState(Connection::State::DONE);
+            //            dynamic_connection->setState(Connection::State::DONE);
             dynamic_connection->allowNewMessage();
             return;
         }
     }
 
     //    std::cerr << "fire " <<  node_->getUUID() << std::endl;
-
-    int seq = -1;
 
     for(Input* input : node_->getAllInputs()) {
         //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
@@ -216,9 +271,6 @@ void InputTransition::fire()
                 auto msg = connection->getMessage();
                 apex_assert_hard(msg != nullptr);
                 input->inputMessage(msg);
-
-//                apex_assert_hard(seq == -1 || seq == msg->sequenceNumber());
-                seq = msg->sequenceNumber();
             }
         } else {
             input->inputMessage(connection_types::makeEmpty<connection_types::NoMessage>());

@@ -26,7 +26,7 @@ public:
 
     virtual void reset() override;
 
-    void establish();
+    void establishConnections();
 
 private:
 

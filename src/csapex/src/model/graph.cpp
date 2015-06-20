@@ -134,54 +134,8 @@ bool Graph::addConnection(ConnectionPtr connection)
         node_parents_[n_to].push_back(n_from);
         node_children_[n_from].push_back(n_to);
 
-        if(node_component_[n_from] == node_component_[n_to]) {
-            // if both nodes are already in the same component
-            // we need to have the same seq no
-
-            int highest_seq_no = -1;
-            // search all parents of the target for the highest seq no
-            for(Input* input : n_to->getAllInputs()) {
-                if(!input->isConnected()) {
-                    continue;
-                }
-                NodeWorker* ni = findNodeWorkerForConnector(input->getSource()->getUUID());
-
-                for(Output* output : ni->getAllOutputs()) {
-                    if(output->sequenceNumber() > highest_seq_no) {
-                        highest_seq_no = output->sequenceNumber();
-                    }
-                }
-            }
-            if(highest_seq_no != -1) {
-                //                std::cerr << "setting the sequence numbers:\n";
-                for(Input* input : n_to->getAllInputs()) {
-                    input->setSequenceNumber(highest_seq_no);
-                }
-            }
-
-        } else {
-            // if both nodes are in different components we need to synchronize the two components
-            // this connection is the only connection between the two components.
-            // set the sequence no of the child component to the one given by this connector
-            int seq_no = from->sequenceNumber();
-
-            //            std::cerr << "synchronize components" << std::endl;
-            for(NodeWorker::Ptr n : nodes_) {
-                if(node_component_[n.get()] == node_component_[n_to]) {
-                    for(Output* output : n->getAllOutputs()) {
-                        output->setSequenceNumber(seq_no);
-                    }
-                    for(Input* input : n->getAllInputs()) {
-                        input->setSequenceNumber(seq_no);
-                    }
-                }
-            }
-        }
-
         buildConnectedComponents();
         verify();
-
-
 
         connectionAdded(connection.get());
         from->connectionDone(from);

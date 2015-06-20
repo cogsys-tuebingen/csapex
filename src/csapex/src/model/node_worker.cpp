@@ -510,7 +510,7 @@ void NodeWorker::reset()
     transition_in_->reset();
     transition_out_->reset();
 
-    updateTransitions();
+    updateTransitionConnections();
 }
 
 void NodeWorker::setProfiling(bool profiling)
@@ -1232,15 +1232,15 @@ void NodeWorker::prepareForNextProcess()
     //        transition_in_->notifyMessageProcessed();
     //    }
 
-    checkTransitions();
+//    checkTransitions();
     //    checkInputs();
 }
 
-void NodeWorker::updateTransitions()
+void NodeWorker::updateTransitionConnections()
 {
     // TODO: can this be moved into transition?
-    transition_in_->update();
-    transition_out_->update();
+    transition_in_->updateConnections();
+    transition_out_->updateConnections();
 }
 
 void NodeWorker::checkTransitions()
@@ -1256,7 +1256,7 @@ void NodeWorker::checkTransitions()
             return;
         }
     }
-    updateTransitions();
+    updateTransitionConnections();
 
     if(transition_in_->hasUnestablishedConnection() || transition_out_->hasUnestablishedConnection()) {
         if(state_ == State::ENABLED) {
@@ -1310,6 +1310,8 @@ void NodeWorker::sendMessages()
     assertNotInGuiThread();
 
     std::unique_lock<std::recursive_mutex> lock(sync);
+
+    transition_out_->updateConnections();
 
     apex_assert_hard(getState() == State::PROCESSING);
     //    setState(State::WAITING_FOR_OUTPUTS);
