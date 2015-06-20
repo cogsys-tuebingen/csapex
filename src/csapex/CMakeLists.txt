@@ -99,7 +99,8 @@ execute_process(
 )
 
 # generate meta infos
-set(INFO ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h)
+set(INFO_H ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h)
+set(INFO ${INFO_H}.tmp)
 
 file(WRITE ${INFO} "namespace csapex {\nnamespace info {\n")
 
@@ -112,6 +113,8 @@ file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_VERSIO
 
 file(APPEND ${INFO} "}\n}\n\n")
 
+execute_process(COMMAND bash -c "if [[ `diff info.h.tmp info.h` ]]; then mv info.h.tmp info.h; else rm info.h.tmp; fi"
+                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
 
 ###########
 ## Build ##
