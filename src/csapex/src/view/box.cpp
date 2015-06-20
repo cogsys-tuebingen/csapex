@@ -279,7 +279,7 @@ void NodeBox::updateThreadInformation()
 
 void NodeBox::contextMenuEvent(QContextMenuEvent* e)
 {
-    Q_EMIT showContextMenuForBox(this, pos() + e->globalPos());
+    Q_EMIT showContextMenuForBox(this, e->globalPos());
 }
 
 QBoxLayout* NodeBox::getInputLayout()
