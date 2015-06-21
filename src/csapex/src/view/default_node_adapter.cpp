@@ -953,9 +953,9 @@ qt_helper::Call * DefaultNodeAdapter::makePausedUiCall(std::function<void()> cb)
     qt_helper::Call* call = new qt_helper::Call([this, cb](){
         auto g = widget_ctrl_->getGraph();
         bool paused = g->isPaused();
-        g->setPause(true);
+        g->pauseRequest(true);
         cb();
-        g->setPause(paused);
+        g->pauseRequest(paused);
     });
     callbacks.push_back(call);
     return call;

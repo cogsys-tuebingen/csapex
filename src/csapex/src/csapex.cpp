@@ -183,11 +183,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
 
     GraphPtr graph = std::make_shared<Graph>();
-    GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(&settings, graph.get());
-
-    graph_worker->setPause(paused);
-
     ThreadPool thread_pool(!threadless, thread_grouping);
+    GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(thread_pool, graph.get());
+
+    thread_pool.setPause(paused);
+
     graph_worker->generatorAdded.connect([&thread_pool](TaskGeneratorPtr tg) {
         thread_pool.add(tg.get());
     });
@@ -206,7 +206,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, node_factory.get());
 
     // TODO: core must be destroyed AFTER the factories -> refactor it
-    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
+    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator, graph_worker, thread_pool, node_factory.get(), node_adapter_factory.get(), &dispatcher);
 
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
@@ -240,7 +240,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(*core, &dispatcher, widget_control, graph_worker, designer, minimap, legend, timeline, plugin_locator.get());
+        CsApexWindow w(*core, &dispatcher, widget_control, graph_worker, thread_pool, designer, minimap, legend, timeline, plugin_locator.get());
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));

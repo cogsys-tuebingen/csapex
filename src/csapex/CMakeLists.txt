@@ -223,9 +223,10 @@ set(SRC_BASE
     src/core/settings.cpp
     src/core/serialization.cpp
 
+    src/scheduling/executor.cpp
+    src/scheduling/scheduler.cpp
     src/scheduling/thread_group.cpp
     src/scheduling/thread_pool.cpp
-    src/scheduling/scheduler.cpp
     src/scheduling/task.cpp
     src/scheduling/task_generator.cpp
 

@@ -6,24 +6,25 @@
 #include <csapex/core/designerio.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/info.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
+#include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/node_statistics.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/tag.h>
+#include <csapex/plugin/plugin_locator.h>
+#include <csapex/scheduling/executor.h>
 #include <csapex/utility/qt_helper.hpp>
+#include <csapex/view/activity_legend.h>
+#include <csapex/view/activity_timeline.h>
 #include <csapex/view/box.h>
 #include <csapex/view/designer.h>
+#include <csapex/view/minimap_widget.h>
+#include <csapex/view/screenshot_dialog.h>
 #include <csapex/view/widget_controller.h>
 #include "ui_csapex_window.h"
-#include <csapex/plugin/plugin_locator.h>
-#include <csapex/view/activity_timeline.h>
-#include <csapex/view/activity_legend.h>
-#include <csapex/view/minimap_widget.h>
-#include <csapex/info.h>
-#include <csapex/view/screenshot_dialog.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>
@@ -42,10 +43,12 @@
 using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl,
-                           GraphWorkerPtr graph, Designer* designer, MinimapWidget* minimap,
+                           GraphWorkerPtr graph, Executor& executor,
+                           Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
                            PluginLocator *locator, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph),
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl),
+      graph_worker_(graph), executor_(executor),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {
@@ -79,7 +82,7 @@ void CsApexWindow::construct()
     ui->actionSignal_Connections->setChecked(designer_->areSignalConnectionsVisible());
     ui->actionMessage_Connections->setChecked(designer_->areMessageConnectionsVisibile());
 
-    ui->actionPause->setChecked(graph_worker_->isPaused());
+    ui->actionPause->setChecked(executor_.isPaused());
 
     minimap_->setVisible(designer_->isMinimapEnabled());
     ui->actionDisplay_Minimap->setChecked(designer_->isMinimapEnabled());
@@ -396,12 +399,9 @@ void CsApexWindow::copyRight()
 void CsApexWindow::clearBlock()
 {
     std::cerr << "clearing blocking connections" << std::endl;
-    core_.setPause(true);
-    Graph* graph = graph_worker_->getGraph();
-    for(NodeWorker* nw : graph->getAllNodeWorkers()) {
-        nw->reset();
-    }
 
+    core_.setPause(true);
+    graph_worker_->clearBlock();
     core_.setPause(false);
 }
 

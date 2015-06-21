@@ -2,28 +2,29 @@
 #include <csapex/core/csapex_core.h>
 
 /// COMPONENT
-#include <csapex/model/node_factory.h>
-#include <csapex/core/core_plugin.h>
-#include <csapex/core/graphio.h>
-#include <csapex/utility/stream_interceptor.h>
-#include <csapex/command/dispatcher.h>
 #include <csapex/command/add_node.h>
 #include <csapex/command/delete_node.h>
-#include <csapex/msg/message.h>
-#include <csapex/msg/message_factory.h>
-#include <csapex/plugin/plugin_manager.hpp>
-#include <csapex/model/tag.h>
-#include <csapex/utility/assert.h>
-#include <csapex/model/graph_worker.h>
-#include <csapex/utility/register_msg.h>
-#include <csapex/view/node_adapter_factory.h>
-#include <csapex/utility/yaml_node_builder.h>
+#include <csapex/command/dispatcher.h>
 #include <csapex/core/bootstrap_plugin.h>
+#include <csapex/core/core_plugin.h>
+#include <csapex/core/graphio.h>
+#include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/manager/message_renderer_manager.h>
+#include <csapex/model/graph_worker.h>
+#include <csapex/model/node_factory.h>
+#include <csapex/model/tag.h>
+#include <csapex/msg/message_factory.h>
+#include <csapex/msg/message.h>
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/plugin/plugin_manager.hpp>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/utility/assert.h>
+#include <csapex/utility/register_msg.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
-#include <csapex/info.h>
+#include <csapex/utility/stream_interceptor.h>
+#include <csapex/utility/yaml_node_builder.h>
+#include <csapex/view/node_adapter_factory.h>
 
 /// SYSTEM
 #include <fstream>
@@ -33,8 +34,10 @@
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       GraphWorkerPtr graph, NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
-    : settings_(settings), drag_io_(nullptr), plugin_locator_(plugin_locator), graph_worker_(graph),
+                       GraphWorkerPtr graph, ThreadPool &thread_pool,
+                       NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
+    : settings_(settings), drag_io_(nullptr), plugin_locator_(plugin_locator),
+      graph_worker_(graph), thread_pool_(thread_pool),
       node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
       cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
@@ -52,7 +55,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
     node_factory->unload_request.connect(std::bind(&CsApexCore::unloadNode, this, std::placeholders::_1));
     plugin_locator_->reload_done.connect(std::bind(&CsApexCore::reloadDone, this));
 
-    graph_worker_->paused.connect(paused);
+    thread_pool_.paused.connect(paused);
 }
 
 CsApexCore::~CsApexCore()
@@ -80,15 +83,14 @@ CsApexCore::~CsApexCore()
 
 void CsApexCore::setPause(bool pause)
 {
-    if(pause != graph_worker_->isPaused()) {
-        std::cout << (pause ? "pause" : "unpause") << std::endl;
-        graph_worker_->setPause(pause);
+    if(pause != thread_pool_.isPaused()) {
+        thread_pool_.setPause(pause);
     }
 }
 
 bool CsApexCore::isPaused() const
 {
-    return graph_worker_->isPaused();
+    return thread_pool_.isPaused();
 }
 
 void CsApexCore::setStatusMessage(const std::string &msg)
@@ -316,8 +318,8 @@ void CsApexCore::load(const std::string &file)
 
     apex_assert_hard(graph_worker_->getGraph()->countNodes() == 0);
 
-    bool paused = graph_worker_->isPaused();
-    graph_worker_->setPause(true);
+    bool paused = thread_pool_.isPaused();
+    thread_pool_.setPause(true);
 
     GraphIO graphio(graph_worker_.get(), node_factory_);
 
@@ -366,5 +368,5 @@ void CsApexCore::load(const std::string &file)
     cmd_dispatch->setClean();
     cmd_dispatch->resetDirtyPoint();
 
-    graph_worker_->setPause(paused);
+    thread_pool_.setPause(paused);
 }

@@ -9,14 +9,12 @@
 #include <csapex/core/settings.h>
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/node_runner.h>
-
-/// SYSTEM
-#include <QTimer>
+#include <csapex/scheduling/executor.h>
 
 using namespace csapex;
 
-GraphWorker::GraphWorker(Settings* /*settings*/, Graph* graph)
-    : graph_(graph), paused_(false)
+GraphWorker::GraphWorker(Executor &executor, Graph* graph)
+    : graph_(graph), executor_(executor)
 {
     graph->nodeAdded.connect([this](NodeWorkerPtr n) {
         TaskGeneratorPtr runner = std::make_shared<NodeRunner>(n);
@@ -50,16 +48,16 @@ void GraphWorker::reset()
 
 bool GraphWorker::isPaused() const
 {
-    return paused_;
+    return executor_.isPaused();
 }
 
-void GraphWorker::setPause(bool pause)
+void GraphWorker::pauseRequest(bool pause)
 {
-    if(pause == isPaused()) {
+    if(executor_.isPaused() == pause) {
         return;
     }
 
-    paused_ = pause;
+    executor_.setPause(pause);
 
     paused(pause);
 }
@@ -70,4 +68,12 @@ void GraphWorker::stop()
     stopped();
 
     graph_->nodes_.clear();
+}
+
+void GraphWorker::clearBlock()
+{
+    // TODO: move to executor completely?
+    for(NodeWorker* nw : graph_->getAllNodeWorkers()) {
+        nw->reset();
+    }
 }

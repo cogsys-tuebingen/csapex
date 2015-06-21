@@ -20,17 +20,17 @@ ThreadPool::ThreadPool(bool enable_threading, bool grouping)
     default_group_ = std::make_shared<ThreadGroup>(ThreadGroup::DEFAULT_GROUP_ID, "default");
 }
 
-void ThreadPool::setPause(bool pause)
-{
-    for(auto g : groups_) {
-        g->setPause(pause);
-    }
-}
-
 void ThreadPool::stop()
 {
     for(auto g : groups_) {
         g->stop();
+    }
+}
+
+void ThreadPool::pauseChanged(bool pause)
+{
+    for(auto g : groups_) {
+        g->setPause(pause);
     }
 }
 

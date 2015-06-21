@@ -36,13 +36,15 @@ FWD(Group);
 FWD(NodeConstructor);
 FWD(NodeStatistics);
 
+FWD(Executor);
+FWD(Scheduler);
+FWD(TaskGenerator);
+
 FWD(ThreadPool);
 FWD(ThreadGroup);
 FWD(NodeRunner);
 FWD(NodeFacade);
-FWD(Scheduler);
 FWD(Task);
-FWD(TaskGenerator);
 
 FWD(Port);
 FWD(Connectable);

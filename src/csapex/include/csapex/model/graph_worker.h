@@ -18,16 +18,17 @@ public:
     typedef std::shared_ptr<GraphWorker> Ptr;
 
 public:
-    GraphWorker(Settings *settings, Graph* graph);
+    GraphWorker(Executor& executor, Graph* graph);
 
     Graph* getGraph();
 
     TaskGenerator* getTaskGenerator(const UUID& uuid);
 
     void stop();
+    void clearBlock();
 
     bool isPaused() const;
-    void setPause(bool pause);
+    void pauseRequest(bool pause);
 
     void reset();
 
@@ -40,10 +41,9 @@ public:
 
 private:
     Graph* graph_;
+    Executor& executor_;
 
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
-
-    bool paused_;
 };
 
 }

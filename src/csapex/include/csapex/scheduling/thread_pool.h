@@ -3,25 +3,25 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/scheduling/executor.h>
 
 /// SYSTEM
 #include <map>
 #include <vector>
 #include <set>
 #include <yaml-cpp/yaml.h>
-#include <QThread>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex
 {
 
 class CsApexCore;
 
-class ThreadPool
+class ThreadPool : public Executor
 {
 public:
     ThreadPool(bool enable_threading, bool grouping);
 
-    void setPause(bool pause);
     void stop();
 
     std::vector<ThreadGroupPtr> getGroups();
@@ -42,6 +42,9 @@ public:
 
     void saveSettings(YAML::Node&);
     void loadSettings(YAML::Node&);
+
+protected:
+    void pauseChanged(bool pause);
 
 private:
     void assignGeneratorToGroup(TaskGenerator* task, ThreadGroup* group);
