@@ -56,21 +56,6 @@ catkin_package(
 )
 
 #
-# IWYU
-#
-#set(CSAPEX_IWYU 0 CACHE BOOL "optimize using iwyu?")
-#if(${CSAPEX_IWYU})
-
-#include(CMakeForceCompiler)
-#CMAKE_FORCE_C_COMPILER(include-what-you-use CLANG)
-#CMAKE_FORCE_CXX_COMPILER(include-what-you-use CLANG)
-#add_custom_target(iwyu
-#COMMAND make -k 3>&1 1>&2 2>&3 | tee iwyu.log
-#COMMAND iwyu-fix_includes.py < iwyu.log)
-
-#endif()
-
-#
 # CCACHE
 #
 set(USE_CCACHE 0 CACHE BOOL "optimize compile using ccache?")
@@ -125,8 +110,11 @@ include_directories(include
     ${OPENGL_INCLUDE_DIR}
 )
 
-set(SRC_BASE
+#
+# BUILD THE LIBRARIES
+#
 
+add_library(csapex SHARED
     src/factory/generic_node_factory.cpp
 
     src/manager/message_provider_manager.cpp
@@ -231,58 +219,6 @@ set(SRC_BASE
     src/scheduling/task_generator.cpp
 
     src/signal/signal.cpp
-
-    src/view/box.cpp
-    src/view/default_node_adapter.cpp
-    src/view/designer_styleable.cpp
-    src/view/fulcrum_handle.cpp
-    src/view/fulcrum_widget.cpp
-    src/view/node_adapter_builder.cpp
-    src/view/node_adapter.cpp
-    src/view/node_adapter_factory.cpp
-    src/view/parameter_context_menu.cpp
-    src/view/port.cpp
-    src/view/profiling_widget.cpp
-    src/view/widget_controller.cpp
-
-    src/view/designer.cpp
-    src/view/designer_view.cpp
-    src/view/designer_scene.cpp
-    src/view/box_dialog.cpp
-    src/view/node_filter_proxy_model.cpp
-
-    ${QT_RESOURCES}
-
-    ${QT_UI}
-)
-
-set(SRC_PLUGIN
-    src/data/point.cpp
-
-    src/plugin/plugin_locator.cpp
-
-    src/core/core_plugin.cpp
-    src/core/bootstrap_plugin.cpp
-)
-
-set(SRC_APP
-    src/plugin/plugin_loader.cpp
-
-    src/view/activity_legend.cpp
-    src/view/activity_timeline.cpp
-    src/view/minimap_widget.cpp
-
-    src/view/csapex_window.cpp
-    src/view/screenshot_dialog.cpp
-)
-
-
-#
-# BUILD THE LIBRARIES
-#
-
-add_library(csapex SHARED
-    ${SRC_BASE}
 )
 
 target_link_libraries(csapex
@@ -296,11 +232,47 @@ target_link_libraries(csapex
     Qt5::OpenGL
 )
 
+# library for plugins
 add_library(csapex_plugin_base SHARED
-    ${SRC_PLUGIN}
+
+    src/data/point.cpp
+
+    src/plugin/plugin_locator.cpp
+
+    src/core/core_plugin.cpp
+    src/core/bootstrap_plugin.cpp
 )
 
 target_link_libraries(csapex_plugin_base
+
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+    ${YAML_LIBRARIES}
+    ${TinyXML_LIBRARIES}
+    ${console_bridge_LIBRARIES}
+)
+
+# Library for view plugins
+add_library(csapex_plugin_qt SHARED
+    src/view/box.cpp
+    src/view/default_node_adapter.cpp
+    src/view/designer_styleable.cpp
+    src/view/fulcrum_handle.cpp
+    src/view/fulcrum_widget.cpp
+    src/view/node_adapter_builder.cpp
+    src/view/node_adapter.cpp
+    src/view/node_adapter_factory.cpp
+    src/view/parameter_context_menu.cpp
+    src/view/port.cpp
+    src/view/profiling_widget.cpp
+    src/view/widget_controller.cpp
+
+    ${QT_RESOURCES}
+
+    ${QT_UI}
+)
+
+target_link_libraries(csapex_plugin_qt
     csapex
 
     ${QT_LIBRARIES}
@@ -313,12 +285,30 @@ target_link_libraries(csapex_plugin_base
     Qt5::OpenGL
 )
 
-add_library(csapex_app SHARED
-    ${SRC_APP}
+# Library for the app itself
+add_library(csapex_qt SHARED
+
+    src/plugin/plugin_loader.cpp
+
+    src/view/activity_legend.cpp
+    src/view/activity_timeline.cpp
+    src/view/minimap_widget.cpp
+
+    src/view/csapex_window.cpp
+    src/view/screenshot_dialog.cpp
+
+    src/view/designer.cpp
+    src/view/designer_view.cpp
+    src/view/designer_scene.cpp
+    src/view/box_dialog.cpp
+    src/view/node_filter_proxy_model.cpp
 )
 
-target_link_libraries(csapex_app
+target_link_libraries(csapex_qt
     csapex_plugin_base
+    csapex_plugin_qt
+
+    csapex
 
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -342,9 +332,9 @@ file(GLOB_RECURSE ALL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLIN
 
 add_executable(csapex_node
     ${ALL_HEADERS}
-
     src/csapex.cpp)
-target_link_libraries(csapex_node csapex_app)
+
+target_link_libraries(csapex_node csapex_qt)
 
 
 add_custom_target(cfg ALL DEPENDS cfg/style.css)
@@ -361,12 +351,17 @@ add_custom_command(TARGET cfg POST_BUILD
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-install(TARGETS csapex_app
+install(TARGETS csapex_qt
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 install(TARGETS csapex_plugin_base
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_plugin_qt
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
