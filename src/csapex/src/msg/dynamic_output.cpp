@@ -41,7 +41,7 @@ void DynamicOutput::publish(ConnectionType::ConstPtr message)
     messages_to_send_.push_back(message);
 }
 
-void DynamicOutput::setMultipart(bool multipart, bool last_part)
+void DynamicOutput::setMultipart(bool /*multipart*/, bool /*last_part*/)
 {
     // ignored since this is already dynamic
 }

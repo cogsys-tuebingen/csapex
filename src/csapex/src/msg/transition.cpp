@@ -168,7 +168,7 @@ NodeWorker* Transition::getNode() const
 }
 
 
-void Transition::connectionAdded(Connection *connection)
+void Transition::connectionAdded(Connection */*connection*/)
 {
 
 }

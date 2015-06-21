@@ -379,7 +379,9 @@ void NodeWorker::makeParameterNotConnectable(param::ParameterPtr p)
     param_2_output_.erase(p->name());
     output_2_param_.erase(cout.get());
 
-    param_connections_.erase(p.get());
+    auto it = param_connections_.find(p.get());
+    it->second.disconnect();
+    param_connections_.erase(it);
 }
 
 void NodeWorker::makeParametersConnectable()
@@ -458,15 +460,15 @@ void NodeWorker::connectConnector(Connectable *c)
     c->connectionInProgress.connect(connectionInProgress);
     c->connectionStart.connect(connectionStart);
     c->connectionDone.connect(connectionDone);
-    c->connectionDone.connect([this](Connectable* c) { checkIO(); });
+    c->connectionDone.connect([this](Connectable*) { checkIO(); });
     c->connectionEnabled.connect([this](bool) { checkIO(); });
-    c->connectionRemoved.connect([this](Connectable* from) { checkIO(); });
+    c->connectionRemoved.connect([this](Connectable*) { checkIO(); });
 
     c->enabled_changed.connect(std::bind(&NodeWorker::checkIO, this));
 }
 
 
-void NodeWorker::disconnectConnector(Connectable* c)
+void NodeWorker::disconnectConnector(Connectable*)
 {
     //    disconnect(c);
 }
@@ -883,7 +885,9 @@ void NodeWorker::removeSlot(Slot* s)
         }
     }
 
-    slot_connections_.erase(s);
+    auto cb_it = slot_connections_.find(s);
+    cb_it->second.disconnect();
+    slot_connections_.erase(cb_it);
 
 
     if(it != slots_.end()) {
@@ -906,8 +910,13 @@ void NodeWorker::removeTrigger(Trigger* t)
         }
     }
 
-    trigger_triggered_connections_.erase(t);
-    trigger_handled_connections_.erase(t);
+    auto pos_t = trigger_triggered_connections_.find(t);
+    pos_t->second.disconnect();
+    trigger_triggered_connections_.erase(pos_t);
+
+    auto pos_h = trigger_handled_connections_.find(t);
+    pos_h->second.disconnect();
+    trigger_handled_connections_.erase(pos_h);
 
     if(it != triggers_.end()) {
         TriggerPtr trigger = *it;
@@ -935,9 +944,9 @@ void NodeWorker::registerOutput(OutputPtr out)
 
     connectConnector(out.get());
 
-    out->messageProcessed.connect([this](Connectable* c) { triggerCheckTransitions(); });
-    out->connectionRemoved.connect([this](Connectable* c) { triggerCheckTransitions(); });
-    out->connectionDone.connect([this](Connectable* c) { triggerCheckTransitions(); });
+    out->messageProcessed.connect([this](Connectable*) { triggerCheckTransitions(); });
+    out->connectionRemoved.connect([this](Connectable*) { triggerCheckTransitions(); });
+    out->connectionDone.connect([this](Connectable*) { triggerCheckTransitions(); });
     out->connectionEnabled.connect([this](bool) { triggerCheckTransitions(); });
 
     connectorCreated(out);
@@ -1640,7 +1649,7 @@ void NodeWorker::triggerError(bool e, const std::string &what)
     setError(e, what);
 }
 
-void NodeWorker::setIOError(bool error)
+void NodeWorker::setIOError(bool /*error*/)
 {
 }
 
@@ -1656,7 +1665,7 @@ void NodeWorker::assertNotInGuiThread()
 
 
 
-void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel /*level*/)
 {
     node_->aerr << msg << std::endl;
 

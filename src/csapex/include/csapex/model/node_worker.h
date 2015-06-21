@@ -260,12 +260,12 @@ private:
     std::map<Input*,param::Parameter*> input_2_param_;
     std::map<Output*,param::Parameter*> output_2_param_;
 
-    std::map<param::Parameter*, boost::signals2::scoped_connection> param_connections_;
+    std::map<param::Parameter*, boost::signals2::connection> param_connections_;
 
-    std::map<Slot*, boost::signals2::scoped_connection> slot_connections_;
+    std::map<Slot*, boost::signals2::connection> slot_connections_;
 
-    std::map<Trigger*, boost::signals2::scoped_connection> trigger_triggered_connections_;
-    std::map<Trigger*, boost::signals2::scoped_connection> trigger_handled_connections_;
+    std::map<Trigger*, boost::signals2::connection> trigger_triggered_connections_;
+    std::map<Trigger*, boost::signals2::connection> trigger_handled_connections_;
 
 
     std::vector<boost::signals2::connection> connections;

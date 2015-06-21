@@ -89,7 +89,7 @@ bool Port::event(QEvent *e)
 
                 updateTooltip();
 
-                tooltip_connection = output->messageSent.connect([this](Connectable* c) { updateTooltip(); });
+                tooltip_connection = output->messageSent.connect([this](Connectable*) { updateTooltip(); });
             }
         }
     }

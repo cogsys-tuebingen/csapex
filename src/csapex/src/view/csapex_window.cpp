@@ -168,7 +168,7 @@ void CsApexWindow::construct()
     graph->panic.connect([this]() { clearBlock(); });
 
     cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); });
-    cmd_dispatcher_->dirtyChanged.connect([this](bool dirty) { updateTitle(); });
+    cmd_dispatcher_->dirtyChanged.connect([this](bool) { updateTitle(); });
 
     updateMenu();
     updateTitle();

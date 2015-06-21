@@ -8,7 +8,6 @@
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/box.h>
 #include <csapex/view/node_adapter.h>
-#include "ui_designer.h"
 #include <csapex/utility/assert.h>
 #include <csapex/utility/yaml_io.hpp>
 

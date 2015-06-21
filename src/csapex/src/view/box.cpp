@@ -371,7 +371,7 @@ void NodeBox::unregisterEvent(Connectable*)
 {
 }
 
-void NodeBox::registerInputEvent(Input* in)
+void NodeBox::registerInputEvent(Input* /*in*/)
 {
     Q_EMIT changed(this);
 }

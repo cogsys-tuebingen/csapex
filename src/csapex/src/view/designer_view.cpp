@@ -393,9 +393,9 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     NodeWorker* worker = box->getNodeWorker();
 
-    worker->connectionStart.connect([this](Connectable* c) { scene_->deleteTemporaryConnections(); });
+    worker->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); });
     worker->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); });
-    worker->connectionDone.connect([this](Connectable* c) { scene_->deleteTemporaryConnectionsAndRepaint(); });
+    worker->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); });
 
     graph_->structureChanged.connect([this](Graph*){ updateBoxInformation(); });
 
