@@ -39,14 +39,14 @@ bool AddConnection::doExecute()
         refresh();
     }
 
-    return graph_worker_->getGraph()->addConnection(ConnectionPtr(new Connection(from, to)));
+    return graph_->addConnection(ConnectionPtr(new Connection(from, to)));
 }
 
 bool AddConnection::doUndo()
 {
     refresh();
 
-    const auto& graph = graph_worker_->getGraph();
+    const auto& graph = graph_;
     graph->deleteConnection(graph->getConnection(from, to));
 
     return true;
@@ -60,8 +60,8 @@ bool AddConnection::doRedo()
 
 void AddConnection::refresh()
 {
-    Connectable* f = graph_worker_->getGraph()->findConnector(from_uuid);
-    Connectable* t = graph_worker_->getGraph()->findConnector(to_uuid);
+    Connectable* f = graph_->findConnector(from_uuid);
+    Connectable* t = graph_->findConnector(to_uuid);
 
     if((f->isOutput() && t->isInput())) {
         from = f;

@@ -43,7 +43,7 @@ std::string DeleteConnection::getDescription() const
 
 bool DeleteConnection::doExecute()
 {
-    const auto& graph = graph_worker_->getGraph();
+    const auto& graph = graph_;
 
     ConnectionPtr connection = graph->getConnection(from_uuid, to_uuid);
 
@@ -63,7 +63,7 @@ bool DeleteConnection::doExecute()
 
 bool DeleteConnection::doUndo()
 {
-    auto graph = graph_worker_->getGraph();
+    auto graph = graph_;
     Connectable* from = graph->findConnector(from_uuid);
     Connectable* to = graph->findConnector(to_uuid);;
     graph->addConnection(ConnectionPtr(new Connection(from, to, connection_id)));

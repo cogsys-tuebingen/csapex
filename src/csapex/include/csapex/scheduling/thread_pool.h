@@ -23,6 +23,7 @@ public:
     ThreadPool(bool enable_threading, bool grouping);
 
     void stop();
+    virtual void clear() override;
 
     std::vector<ThreadGroupPtr> getGroups();
     ThreadGroup* getGroup(int id);

@@ -40,6 +40,7 @@ public:
 
     virtual void setPause(bool pause) override;
     virtual void stop() override;
+    virtual void clear() override;
 
     virtual void add(TaskGenerator *generator) override;
     virtual void add(TaskGenerator *generator, const std::vector<TaskPtr>& initial_tasks) override;
@@ -69,6 +70,8 @@ private:
     std::recursive_mutex state_mtx_;
     std::atomic<bool> running_;
     std::atomic<bool> pause_;
+
+    std::recursive_mutex execution_mtx_;
 
 };
 

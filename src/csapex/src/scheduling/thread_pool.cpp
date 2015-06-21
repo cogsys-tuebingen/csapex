@@ -27,6 +27,16 @@ void ThreadPool::stop()
     }
 }
 
+void ThreadPool::clear()
+{
+    bool p = isPaused();
+    setPause(true);
+    for(auto g : groups_) {
+        g->clear();
+    }
+    setPause(p);
+}
+
 void ThreadPool::pauseChanged(bool pause)
 {
     for(auto g : groups_) {

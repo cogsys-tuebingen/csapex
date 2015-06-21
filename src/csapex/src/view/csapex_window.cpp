@@ -42,13 +42,13 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl,
-                           GraphWorkerPtr graph, Executor& executor,
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphWorkerPtr graph_worker,
+                           GraphPtr graph, Executor& executor,
                            Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
                            PluginLocator *locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl),
-      graph_worker_(graph), executor_(executor),
+      graph_worker_(graph_worker), graph_(graph), executor_(executor),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {
@@ -399,10 +399,7 @@ void CsApexWindow::copyRight()
 void CsApexWindow::clearBlock()
 {
     std::cerr << "clearing blocking connections" << std::endl;
-
-    core_.setPause(true);
     graph_worker_->clearBlock();
-    core_.setPause(false);
 }
 
 void CsApexWindow::updateNodeTypes()
@@ -678,7 +675,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    cmd_dispatcher_->execute(graph_worker_->getGraph()->clear());
+    cmd_dispatcher_->execute(graph_->clear());
 }
 
 void CsApexWindow::undo()

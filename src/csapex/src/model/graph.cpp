@@ -32,6 +32,12 @@ Graph::~Graph()
 
 }
 
+void Graph::reset()
+{
+    uuids_.clear();
+    connections_.clear();
+}
+
 std::string Graph::makeUUIDPrefix(const std::string& name)
 {
     int& last_id = uuids_[name];

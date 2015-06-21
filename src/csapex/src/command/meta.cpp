@@ -56,7 +56,7 @@ bool Meta::doExecute()
 
     bool success = true;
     for(Command::Ptr cmd : nested) {
-        bool s = Access::executeCommand(graph_worker_, thread_pool_, node_factory_, cmd);
+        bool s = Access::executeCommand(graph_worker_, graph_, thread_pool_, node_factory_, cmd);
         if(!s) {
             std::cerr << "command failed to execute! (" << typeid(*cmd).name() << ")" << std::endl;
         }
@@ -68,7 +68,7 @@ bool Meta::doExecute()
 bool Meta::doUndo()
 {
     for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
-        bool s = Access::undoCommand(graph_worker_, thread_pool_, node_factory_, *it);
+        bool s = Access::undoCommand(graph_worker_, graph_, thread_pool_, node_factory_, *it);
         if(!s) {
             undo_later.push_back(*it);
         }
@@ -81,7 +81,7 @@ bool Meta::doRedo()
 {
     bool success = true;
     for(Command::Ptr cmd : nested) {
-        bool s = Access::redoCommand(graph_worker_, thread_pool_, node_factory_, cmd);
+        bool s = Access::redoCommand(graph_worker_, graph_, thread_pool_, node_factory_, cmd);
         success &= s;
     }
     return success;

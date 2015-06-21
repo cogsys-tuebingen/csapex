@@ -203,10 +203,12 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(settings, plugin_locator.get());
     NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
-    CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, node_factory.get());
+    CommandDispatcher dispatcher(settings, graph_worker, graph, &thread_pool, node_factory.get());
 
     // TODO: core must be destroyed AFTER the factories -> refactor it
-    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator, graph_worker, thread_pool, node_factory.get(), node_adapter_factory.get(), &dispatcher);
+    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
+                                                      graph_worker, graph,
+                                                      thread_pool, node_factory.get(), node_adapter_factory.get(), &dispatcher);
 
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
@@ -240,7 +242,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(*core, &dispatcher, widget_control, graph_worker, thread_pool, designer, minimap, legend, timeline, plugin_locator.get());
+        CsApexWindow w(*core, &dispatcher, widget_control,
+                       graph_worker, graph,
+                       thread_pool, designer, minimap, legend, timeline, plugin_locator.get());
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));

@@ -26,6 +26,8 @@ public:
 
     virtual void setError(const std::string& msg) override;
 
+    virtual void reset() override;
+
     void schedule(TaskPtr task);
 
 private:

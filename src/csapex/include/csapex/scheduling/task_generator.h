@@ -19,6 +19,8 @@ public:
     virtual UUID getUUID() const = 0;
 
     virtual void setError(const std::string& msg) = 0;
+
+    virtual void reset() = 0;
 };
 
 }

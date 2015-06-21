@@ -17,7 +17,9 @@ public:
     typedef std::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    CommandDispatcher(Settings& settings, GraphWorkerPtr graph, ThreadPool* thread_pool, NodeFactory* node_factory);
+    CommandDispatcher(Settings& settings, GraphWorkerPtr graph_worker,
+                      GraphPtr graph,
+                      ThreadPool* thread_pool, NodeFactory* node_factory);
 
     void execute(Command::Ptr command);
     void executeLater(Command::Ptr command);
@@ -60,6 +62,7 @@ protected:
 private:
     Settings& settings_;
     GraphWorkerPtr graph_worker_;
+    GraphPtr graph_;
     ThreadPool* thread_pool_;
     NodeFactory* node_factory_;
 

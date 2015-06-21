@@ -17,6 +17,7 @@ public:
 
     virtual void setPause(bool pause) = 0;
     virtual void stop() = 0;
+    virtual void clear() = 0;
 
     virtual bool isEmpty() const = 0;
 

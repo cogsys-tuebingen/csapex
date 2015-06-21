@@ -35,7 +35,7 @@ std::string AddConnector::getDescription() const
 
 bool AddConnector::doExecute()
 {
-    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(b_uuid);
+    NodeWorker* node_worker = graph_->findNodeWorker(b_uuid);
     apex_assert_hard(node_worker);
 
     ConnectablePtr c;
@@ -60,7 +60,7 @@ bool AddConnector::doExecute()
 
 bool AddConnector::doUndo()
 {
-    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(b_uuid);
+    NodeWorker* node_worker = graph_->findNodeWorker(b_uuid);
     apex_assert_hard(node_worker);
 
     if(input) {

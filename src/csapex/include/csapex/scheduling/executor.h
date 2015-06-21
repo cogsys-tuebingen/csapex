@@ -15,6 +15,8 @@ public:
     bool isPaused() const;
     void setPause(bool pause);
 
+    virtual void clear() = 0;
+
 protected:
     virtual void pauseChanged(bool pause) = 0;
 

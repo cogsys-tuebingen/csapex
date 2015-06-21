@@ -77,6 +77,9 @@ void ThreadGroup::stop()
         pause_changed_.notify_all();
     }
     {
+        std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+    }
+    {
         std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
         work_available_.notify_all();
         if(thread_.joinable()) {
@@ -84,6 +87,19 @@ void ThreadGroup::stop()
 
             thread_.join();
         }
+    }
+}
+
+void ThreadGroup::clear()
+{
+
+    std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+    {
+        std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
+        tasks_.clear();
+    }
+    for(auto generator : generators_) {
+         generator->reset();
     }
 }
 
@@ -206,7 +222,10 @@ void ThreadGroup::startThread()
                             state_lock.unlock();
 
                             try {
-                                task->execute();
+                                {
+                                    std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+                                    task->execute();
+                                }
 
                             } catch(const std::exception& e) {
                                 TaskGenerator* gen = task->getParent();

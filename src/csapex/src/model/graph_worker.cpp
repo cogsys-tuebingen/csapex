@@ -41,9 +41,7 @@ TaskGenerator* GraphWorker::getTaskGenerator(const UUID &uuid)
 void GraphWorker::reset()
 {
     stop();
-
-    graph_->uuids_.clear();
-    graph_->connections_.clear();
+    graph_->reset();
 }
 
 bool GraphWorker::isPaused() const
@@ -66,14 +64,9 @@ void GraphWorker::pauseRequest(bool pause)
 void GraphWorker::stop()
 {
     stopped();
-
-    graph_->nodes_.clear();
 }
 
 void GraphWorker::clearBlock()
 {
-    // TODO: move to executor completely?
-    for(NodeWorker* nw : graph_->getAllNodeWorkers()) {
-        nw->reset();
-    }
+    executor_.clear();
 }

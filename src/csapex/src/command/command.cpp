@@ -16,53 +16,56 @@ Command::Command()
 {
 }
 
-bool Command::Access::executeCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::executeCommand(graph, thread_pool, node_factory, cmd);
+    return Command::executeCommand(graph_worker, graph, thread_pool, node_factory, cmd);
 }
 
-bool Command::Access::undoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::undoCommand(graph, thread_pool, node_factory, cmd);
+    return Command::undoCommand(graph_worker, graph, thread_pool, node_factory, cmd);
 }
 
-bool Command::Access::redoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::redoCommand(graph, thread_pool, node_factory, cmd);
+    return Command::redoCommand(graph_worker, graph, thread_pool, node_factory, cmd);
 }
 
-void Command::init(Settings *settings, GraphWorker* graph, ThreadPool *thread_pool, NodeFactory* node_factory)
+void Command::init(Settings *settings, GraphWorker* graph_worker, Graph* graph, ThreadPool *thread_pool, NodeFactory* node_factory)
 {
     apex_assert_hard(settings);
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
     settings_ = settings;
-    graph_worker_ = graph;
+    graph_worker_ = graph_worker;
+    graph_ = graph;
     thread_pool_ = thread_pool;
     node_factory_ = node_factory;
 }
 
-bool Command::executeCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
-    cmd->graph_worker_ = graph;
+    cmd->graph_worker_ = graph_worker;
+    cmd->graph_ = graph;
     cmd->thread_pool_ = thread_pool;
     cmd->node_factory_ = node_factory;
     return cmd->doExecute();
 }
 
-bool Command::undoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
-    cmd->graph_worker_ = graph;
+    cmd->graph_worker_ = graph_worker;
+    cmd->graph_ = graph;
     cmd->thread_pool_ = thread_pool;
     cmd->node_factory_ = node_factory;
     if(!cmd->doUndo()) {
@@ -73,13 +76,14 @@ bool Command::undoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFacto
     return true;
 }
 
-bool Command::redoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
-    cmd->graph_worker_ = graph;
+    cmd->graph_worker_ = graph_worker;
+    cmd->graph_ = graph;
     cmd->thread_pool_ = thread_pool;
     cmd->node_factory_ = node_factory;
 

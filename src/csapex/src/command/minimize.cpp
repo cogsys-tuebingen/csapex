@@ -35,7 +35,7 @@ std::string Minimize::getDescription() const
 
 bool Minimize::doExecute()
 {
-    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
+    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
     apex_assert_hard(node_worker);
 
     bool is_mini = node_worker->getNodeState()->isMinimized();
@@ -53,7 +53,7 @@ bool Minimize::doExecute()
 bool Minimize::doUndo()
 {
     if(executed) {
-        NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
+        NodeWorker* node_worker = graph_->findNodeWorker(uuid);
         apex_assert_hard(node_worker);
 
         node_worker->getNodeState()->setMinimized(!mini);

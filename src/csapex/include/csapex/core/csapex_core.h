@@ -24,7 +24,8 @@ class CsApexCore
 public:
     CsApexCore(Settings& settings_,
                PluginLocatorPtr plugin_locator,
-               GraphWorkerPtr graph, ThreadPool& thread_pool,
+               GraphWorkerPtr graph_worker, GraphPtr graph,
+               ThreadPool& thread_pool,
                NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory,
                CommandDispatcher *cmd_dispatcher);
     virtual ~CsApexCore();
@@ -78,6 +79,7 @@ private:
     csapex::PluginLocatorPtr plugin_locator_;
 
     GraphWorkerPtr graph_worker_;
+    GraphPtr graph_;
     ThreadPool& thread_pool_;
 
     NodeFactory* node_factory_;

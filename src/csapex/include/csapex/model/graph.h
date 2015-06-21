@@ -43,6 +43,8 @@ public:
     Graph();
     virtual ~Graph();
 
+    void reset();
+
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
     Node* findNodeForConnector(const UUID &uuid) const;

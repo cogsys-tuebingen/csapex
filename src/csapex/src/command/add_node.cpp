@@ -40,7 +40,7 @@ std::string AddNode::getDescription() const
 bool AddNode::doExecute()
 {
     if(uuid_.empty()) {
-        uuid_ = UUID::make(graph_worker_->getGraph()->makeUUIDPrefix(type_));
+        uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
     }
 
     NodeWorker::Ptr node = node_factory_->makeNode(type_, uuid_, saved_state_);
@@ -51,20 +51,20 @@ bool AddNode::doExecute()
 
     node->getNodeState()->setPos(pos_);
 
-    graph_worker_->getGraph()->addNode(node);
+    graph_->addNode(node);
 
     return true;
 }
 
 bool AddNode::doUndo()
 {
-    NodeWorker* node_ = graph_worker_->getGraph()->findNodeWorker(uuid_);
+    NodeWorker* node_ = graph_->findNodeWorker(uuid_);
 
     saved_state_ = node_->getNodeStateCopy();
 
 
     if(parent_uuid_.empty()) {
-        graph_worker_->getGraph()->deleteNode(node_->getUUID());
+        graph_->deleteNode(node_->getUUID());
     }
 
     return true;
@@ -73,7 +73,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        graph_worker_->getGraph()->findNodeWorker(uuid_)->setNodeState(saved_state_);
+        graph_->findNodeWorker(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

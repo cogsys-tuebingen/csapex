@@ -14,7 +14,7 @@ namespace csapex
 class GraphIO
 {
 public:
-    GraphIO(GraphWorker* graph, NodeFactory* node_factory);
+    GraphIO(Graph *graph, NodeFactory* node_factory);
 
 public:
     void saveSettings(YAML::Node& yaml);
@@ -31,7 +31,7 @@ protected:
     void deserializeNode(const YAML::Node& doc, NodeWorker* node_worker);
 
 private:
-    GraphWorker* graph_worker_;
+    Graph* graph_;
     NodeFactory* node_factory_;
 };
 

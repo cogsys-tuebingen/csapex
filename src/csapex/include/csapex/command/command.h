@@ -21,9 +21,9 @@ public:
         friend class command::Meta;
 
     private:
-        static bool executeCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-        static bool undoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-        static bool redoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
     };
 
 public:
@@ -32,7 +32,7 @@ public:
 public:
     Command();
 
-    void init(Settings* settings, GraphWorker *graph, ThreadPool* thread_pool, NodeFactory *node_factory);
+    void init(Settings* settings, GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory *node_factory);
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -46,9 +46,9 @@ public:
     virtual std::string getDescription() const = 0;
 
 protected:
-    static bool executeCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-    static bool undoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-    static bool redoCommand(GraphWorker* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
 
     virtual bool doExecute() = 0;
     virtual bool doUndo() = 0;
@@ -57,6 +57,7 @@ protected:
 protected:
     Settings* settings_;
     GraphWorker* graph_worker_;
+    Graph* graph_;
     ThreadPool* thread_pool_;
     NodeFactory* node_factory_;
 

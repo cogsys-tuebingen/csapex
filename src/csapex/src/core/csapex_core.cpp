@@ -34,10 +34,12 @@
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       GraphWorkerPtr graph, ThreadPool &thread_pool,
+                       GraphWorkerPtr graph_worker, GraphPtr graph,
+                       ThreadPool &thread_pool,
                        NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
     : settings_(settings), drag_io_(nullptr), plugin_locator_(plugin_locator),
-      graph_worker_(graph), thread_pool_(thread_pool),
+      graph_worker_(graph_worker), graph_(graph),
+      thread_pool_(thread_pool),
       node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
       cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
@@ -285,7 +287,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     YAML::Node node_map(YAML::NodeType::Map);
 
-    GraphIO graphio(graph_worker_.get(),  node_factory_);
+    GraphIO graphio(graph_.get(),  node_factory_);
 
     saveSettingsRequest(node_map);
 
@@ -316,12 +318,12 @@ void CsApexCore::load(const std::string &file)
 
     reset();
 
-    apex_assert_hard(graph_worker_->getGraph()->countNodes() == 0);
+    apex_assert_hard(graph_->countNodes() == 0);
 
     bool paused = thread_pool_.isPaused();
     thread_pool_.setPause(true);
 
-    GraphIO graphio(graph_worker_.get(), node_factory_);
+    GraphIO graphio(graph_.get(), node_factory_);
 
     {
         std::ifstream ifs(file.c_str());

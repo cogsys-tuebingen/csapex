@@ -38,6 +38,11 @@ NodeRunner::~NodeRunner()
     }
 }
 
+void NodeRunner::reset()
+{
+    worker_->reset();
+}
+
 void NodeRunner::assignToScheduler(Scheduler *scheduler)
 {
     std::unique_lock<std::mutex> lock(mutex_);

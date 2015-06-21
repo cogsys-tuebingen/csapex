@@ -37,7 +37,7 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorkerForConnector(uuid);
+    NodeWorker* node_worker = graph_->findNodeWorkerForConnector(uuid);
 
     type = node_worker->getType();
 
@@ -55,7 +55,7 @@ bool DeleteNode::doExecute()
     if(Meta::doExecute()) {
         saved_state = node_worker->getNodeStateCopy();
 
-        graph_worker_->getGraph()->deleteNode(node_worker->getUUID());
+        graph_->deleteNode(node_worker->getUUID());
         return true;
     }
 
@@ -68,7 +68,7 @@ bool DeleteNode::doUndo()
 
     node->setNodeState(saved_state);
 
-    graph_worker_->getGraph()->addNode(node);
+    graph_->addNode(node);
 
     return Meta::doUndo();
 }
@@ -76,10 +76,10 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
+        NodeWorker* node_worker = graph_->findNodeWorker(uuid);
         saved_state = node_worker->getNodeStateCopy();
 
-        graph_worker_->getGraph()->deleteNode(node_worker->getUUID());
+        graph_->deleteNode(node_worker->getUUID());
         return true;
     }
 

@@ -35,7 +35,7 @@ std::string FlipSides::getDescription() const
 
 bool FlipSides::doExecute()
 {
-    NodeWorker* node_worker = graph_worker_->getGraph()->findNodeWorker(uuid);
+    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
     apex_assert_hard(node_worker);
 
     bool flip = !node_worker->getNodeState()->isFlipped();
