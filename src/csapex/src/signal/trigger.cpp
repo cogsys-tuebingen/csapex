@@ -55,7 +55,7 @@ void Trigger::removeConnection(Connectable* other_side)
 
             i = targets_.erase(i);
 
-            Q_EMIT connectionRemoved(this);
+            connectionRemoved(this);
             return;
 
         } else {
@@ -89,7 +89,7 @@ void Trigger::removeAllConnectionsNotUndoable()
         i = targets_.erase(i);
     }
 
-    Q_EMIT disconnected(this);
+    disconnected(this);
 }
 
 void Trigger::trigger()
@@ -168,7 +168,7 @@ bool Trigger::canConnectTo(Connectable* other_side, bool move) const
     if(!Connectable::canConnectTo(other_side, move)) {
         return false;
     } else {
-        foreach (Slot* target, targets_) {
+        for (Slot* target : targets_) {
             if(target == other_side) {
                 return false;
             }
@@ -196,7 +196,7 @@ bool Trigger::isConnected() const
 void Trigger::connectionMovePreview(Connectable *other_side)
 {
     for(Slot* slot : targets_) {
-        Q_EMIT(connectionInProgress(slot, other_side));
+        connectionInProgress(slot, other_side);
     }
 }
 

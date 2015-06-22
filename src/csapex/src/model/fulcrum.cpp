@@ -88,5 +88,3 @@ Connection* Fulcrum::connection() const
 {
     return parent_;
 }
-/// MOC
-#include "../../include/csapex/model/moc_fulcrum.cpp"

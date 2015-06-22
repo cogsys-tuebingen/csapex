@@ -7,7 +7,6 @@
 
 /// SYSTEM
 #include <memory>
-#include <QSharedPointer>
 #include <QImage>
 #include <stdexcept>
 

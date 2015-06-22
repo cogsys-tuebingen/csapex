@@ -170,5 +170,3 @@ bool Slot::isActive() const
 {
     return active_;
 }
-/// MOC
-#include "../../include/csapex/signal/moc_slot.cpp"

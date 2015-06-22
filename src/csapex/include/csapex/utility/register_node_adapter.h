@@ -6,6 +6,7 @@
 #include <csapex/utility/register_apex_plugin.h>
 #include <csapex/view/node_adapter_builder.h>
 
+#define MAKE_CLASS(NS, C) NS::C##Builder
 #define CSAPEX_REGISTER_NODE_ADAPTER_NS(Namespace, Adapter, Adaptee) \
 namespace Namespace {\
 class Adapter##Builder : public csapex::NodeAdapterBuilder \
@@ -15,14 +16,14 @@ public: \
     { \
         return #Adaptee; \
     } \
-    virtual NodeAdapterPtr build(NodeWorkerPtr worker, WidgetController* widget_ctrl) const \
+    virtual csapex::NodeAdapterPtr build(csapex::NodeWorkerPtr worker, csapex::WidgetController* widget_ctrl) const \
     { \
         std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (worker->getNodeSafe().lock()); \
         return std::make_shared<Adapter>(worker, adaptee, widget_ctrl); \
     } \
 }; \
 }\
-CSAPEX_REGISTER_CLASS(Namespace::Adapter##Builder,csapex::NodeAdapterBuilder)
+CSAPEX_REGISTER_CLASS(MAKE_CLASS(Namespace,Adapter),csapex::NodeAdapterBuilder)
 
 #define CSAPEX_REGISTER_NODE_ADAPTER(Adapter, Adaptee) \
 CSAPEX_REGISTER_NODE_ADAPTER_NS(csapex,Adapter,Adaptee)

@@ -1672,6 +1672,3 @@ void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel /*lev
     errorHappened(error);
 
 }
-
-/// MOC
-#include "../../include/csapex/model/moc_node_worker.cpp"

@@ -73,10 +73,6 @@ public:
     std::vector<std::string> getAllLibraries() const;
 
 private:
-    void createFileWatcher(const std::string &name);
-    void clearFileWatcherCallbacks();
-
-private:
     Settings &settings_;
 
     std::map<const std::type_info*, std::vector<std::function<void(std::vector<std::string>&)> > > locators_;
@@ -85,13 +81,10 @@ private:
 
     std::set<std::string> loaded_libraries_;
     std::map<std::string, std::string> library_file_;
-    std::map<std::string, std::shared_ptr<QFileSystemWatcher> > library_watchers_;
     std::map<std::string, std::string> error_libraries_;
 
     std::set<std::string> ignored_libraries_;
     param::StringListParameterPtr ignored_persistent_;
-
-    std::vector<qt_helper::Call*> callbacks_;
 };
 }
 

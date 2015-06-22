@@ -185,7 +185,7 @@ void Output::connectionMovePreview(Connectable *other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {
-        Q_EMIT(connectionInProgress(connection->to(), other_side));
+        connectionInProgress(connection->to(), other_side);
     }
 }
 

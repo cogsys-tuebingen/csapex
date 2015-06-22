@@ -6,6 +6,9 @@
 #include <csapex/model/node_worker.h>
 #include <utils_param/parameter.h>
 
+/// SYSTEM
+#include <QLayout>
+
 using namespace csapex;
 
 NodeAdapter::NodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController* widget_ctrl)

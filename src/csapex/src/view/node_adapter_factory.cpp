@@ -14,7 +14,7 @@ using namespace csapex;
 
 NodeAdapterFactory::NodeAdapterFactory(Settings &settings, PluginLocator *locator)
     : settings_(settings), plugin_locator_(locator),
-    node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder"))
+      node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder"))
 {
 
 }
@@ -52,13 +52,18 @@ void NodeAdapterFactory::rebuildPrototypes()
     for(const ADAPTER_PAIR& p : node_adapter_manager_->availableClasses()) {
         const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;
 
-        NodeAdapterBuilder::Ptr builder = constructor.construct();
-        node_adapter_builders_[builder->getWrappedType()] = builder;
+        try {
+            NodeAdapterBuilder::Ptr builder = constructor.construct();
+            node_adapter_builders_[builder->getWrappedType()] = builder;
 
-        constructor.unload_request->disconnect_all_slots();
-        constructor.unload_request->connect(std::bind(&NodeAdapterFactory::unload, this));
-        constructor.reload_request->disconnect_all_slots();
-        constructor.reload_request->connect(std::bind(&NodeAdapterFactory::loadPlugins, this));
+            constructor.unload_request->disconnect_all_slots();
+            constructor.unload_request->connect(std::bind(&NodeAdapterFactory::unload, this));
+            constructor.reload_request->disconnect_all_slots();
+            constructor.reload_request->connect(std::bind(&NodeAdapterFactory::loadPlugins, this));
+
+        } catch(const std::exception& e) {
+            std::cerr << "adapter " << p.first << " cannot be built: " << e.what() << std::endl;
+        }
     }
 }
 

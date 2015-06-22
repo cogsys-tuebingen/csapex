@@ -18,6 +18,7 @@ add_definitions(-W -Wall)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS utils_param utils_qt class_loader)
 
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
 set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
@@ -27,6 +28,7 @@ find_package(TinyXML REQUIRED)
 find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 find_package(console_bridge REQUIRED)
 
+set(CMAKE_AUTOMOC ON)
 qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
 qt5_wrap_ui(QT_UI
     ui/box.ui
@@ -49,7 +51,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES csapex_plugin_base
    CATKIN_DEPENDS utils_param utils_qt
    DEPENDS Boost console_bridge
    CFG_EXTRAS csapex-extras.cmake
@@ -108,6 +109,7 @@ execute_process(COMMAND bash -c "if [[ `diff info.h.tmp info.h` ]]; then mv info
 include_directories(include
     ${catkin_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
+    ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS}
 )
 
 #
@@ -115,15 +117,25 @@ include_directories(include
 #
 
 add_library(csapex SHARED
+
+    src/command/command.cpp
+    src/command/dispatcher.cpp
+    src/command/meta.cpp
+
+    src/core/bootstrap_plugin.cpp
+    src/core/core_plugin.cpp
+    src/core/csapex_core.cpp
+    src/core/designerio.cpp
+    src/core/drag_io.cpp
+    src/core/graphio.cpp
+    src/core/serialization.cpp
+    src/core/settings.cpp
+    src/data/point.cpp
+
     src/factory/generic_node_factory.cpp
 
     src/manager/message_provider_manager.cpp
     src/manager/message_renderer_manager.cpp
-
-    src/msg/apex_message_provider.cpp
-    src/msg/message_factory.cpp
-    src/msg/message_provider.cpp
-    src/msg/message_renderer.cpp
 
     src/model/connectable.cpp
     src/model/connection.cpp
@@ -137,88 +149,55 @@ add_library(csapex SHARED
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
     src/model/node.cpp
-    src/model/node_runner.cpp
     src/model/node_factory.cpp
     src/model/node_modifier.cpp
+    src/model/node_runner.cpp
     src/model/node_state.cpp
     src/model/node_statistics.cpp
-    src/model/node_worker.cpp
     src/model/parameterizable.cpp
     src/model/tag.cpp
     src/model/unique.cpp
 
-    src/msg/io.cpp
-    src/msg/input.cpp
+    src/msg/apex_message_provider.cpp
     src/msg/dynamic_input.cpp
-    src/msg/output.cpp
     src/msg/dynamic_output.cpp
+    src/msg/input.cpp
+    src/msg/input_transition.cpp
+    src/msg/io.cpp
+    src/msg/message.cpp
+    src/msg/message_factory.cpp
+    src/msg/message_provider.cpp
+    src/msg/message_renderer.cpp
+    src/msg/output.cpp
+    src/msg/output_transition.cpp
     src/msg/static_output.cpp
     src/msg/transition.cpp
-    src/msg/input_transition.cpp
-    src/msg/output_transition.cpp
-    src/msg/message.cpp
 
+    src/plugin/plugin_locator.cpp
+
+    src/scheduling/executor.cpp
+    src/scheduling/scheduler.cpp
+    src/scheduling/task.cpp
+    src/scheduling/task_generator.cpp
+    src/scheduling/thread_group.cpp
+    src/scheduling/thread_pool.cpp
+
+    src/signal/signal.cpp
     src/signal/slot.cpp
     src/signal/trigger.cpp
 
     src/utility/assert.cpp
-    src/utility/buffer.cpp
-    src/utility/context_menu_handler.cpp
-    src/utility/error_handling.cpp
-    src/utility/html_delegate.cpp
-    src/utility/movable_graphics_proxy_widget.cpp
-    src/utility/qdouble_slider.cpp
-    src/utility/qint_slider.cpp
-    src/utility/qsignal_bridges.cpp
-    src/utility/q_signal_relay.cpp
-    src/utility/qt_helper.cpp
-    src/utility/qwrapper.cpp
     src/utility/bash_parser.cpp
+    src/utility/buffer.cpp
+    src/utility/error_handling.cpp
     src/utility/stream_interceptor.cpp
     src/utility/stream_relay.cpp
     src/utility/thread.cpp
-    src/utility/type.cpp
-    src/utility/widget_picker.cpp
-    src/utility/yaml_node_builder.cpp
     src/utility/timable.cpp
     src/utility/timer.cpp
+    src/utility/type.cpp
     src/utility/uuid.cpp
-
-    src/command/add_connection.cpp
-    src/command/add_connector.cpp
-    src/command/add_fulcrum.cpp
-    src/command/add_node.cpp
-    src/command/command.cpp
-    src/command/create_thread.cpp
-    src/command/delete_connection.cpp
-    src/command/delete_connector.cpp
-    src/command/delete_fulcrum.cpp
-    src/command/delete_node.cpp
-    src/command/dispatcher.cpp
-    src/command/flip_sides.cpp
-    src/command/meta.cpp
-    src/command/minimize.cpp
-    src/command/modify_fulcrum.cpp
-    src/command/move_box.cpp
-    src/command/move_connection.cpp
-    src/command/move_fulcrum.cpp
-    src/command/switch_thread.cpp
-
-    src/core/csapex_core.cpp
-    src/core/designerio.cpp
-    src/core/drag_io.cpp
-    src/core/graphio.cpp
-    src/core/settings.cpp
-    src/core/serialization.cpp
-
-    src/scheduling/executor.cpp
-    src/scheduling/scheduler.cpp
-    src/scheduling/thread_group.cpp
-    src/scheduling/thread_pool.cpp
-    src/scheduling/task.cpp
-    src/scheduling/task_generator.cpp
-
-    src/signal/signal.cpp
+    src/utility/yaml_node_builder.cpp
 )
 
 target_link_libraries(csapex
@@ -232,92 +211,82 @@ target_link_libraries(csapex
     Qt5::OpenGL
 )
 
-# library for plugins
-add_library(csapex_plugin_base SHARED
 
-    src/data/point.cpp
+# Library for the app itself
+add_library(csapex_qt SHARED
 
-    src/plugin/plugin_locator.cpp
+    src/command/add_connection.cpp
+    src/command/add_connector.cpp
+    src/command/add_fulcrum.cpp
+    src/command/add_node.cpp
+    src/command/create_thread.cpp
+    src/command/delete_connection.cpp
+    src/command/delete_connector.cpp
+    src/command/delete_fulcrum.cpp
+    src/command/delete_node.cpp
+    src/command/flip_sides.cpp
+    src/command/minimize.cpp
+    src/command/modify_fulcrum.cpp
+    src/command/move_box.cpp
+    src/command/move_connection.cpp
+    src/command/move_fulcrum.cpp
+    src/command/switch_thread.cpp
 
-    src/core/core_plugin.cpp
-    src/core/bootstrap_plugin.cpp
-)
+    src/plugin/plugin_loader.cpp
 
-target_link_libraries(csapex_plugin_base
+    # is here because it is still a qobject...
+    src/model/node_worker.cpp
 
-    ${Boost_LIBRARIES}
-    ${catkin_LIBRARIES}
-    ${YAML_LIBRARIES}
-    ${TinyXML_LIBRARIES}
-    ${console_bridge_LIBRARIES}
-)
-
-# Library for view plugins
-add_library(csapex_plugin_qt SHARED
+    src/view/activity_legend.cpp
+    src/view/activity_timeline.cpp
     src/view/box.cpp
+    src/view/box_dialog.cpp
+    src/view/csapex_window.cpp
     src/view/default_node_adapter.cpp
+    src/view/designer.cpp
+    src/view/designer_scene.cpp
     src/view/designer_styleable.cpp
+    src/view/designer_view.cpp
     src/view/fulcrum_handle.cpp
     src/view/fulcrum_widget.cpp
+    src/view/minimap_widget.cpp
     src/view/node_adapter_builder.cpp
     src/view/node_adapter.cpp
     src/view/node_adapter_factory.cpp
+    src/view/node_filter_proxy_model.cpp
     src/view/parameter_context_menu.cpp
     src/view/port.cpp
     src/view/profiling_widget.cpp
+    src/view/screenshot_dialog.cpp
     src/view/widget_controller.cpp
+
+
+    src/utility/context_menu_handler.cpp
+    src/utility/html_delegate.cpp
+    src/utility/movable_graphics_proxy_widget.cpp
+    src/utility/qdouble_slider.cpp
+    src/utility/qint_slider.cpp
+    src/utility/qsignal_bridges.cpp
+    src/utility/q_signal_relay.cpp
+    src/utility/qt_helper.cpp
+    src/utility/qwrapper.cpp
+    src/utility/widget_picker.cpp
 
     ${QT_RESOURCES}
 
     ${QT_UI}
 )
 
-target_link_libraries(csapex_plugin_qt
-    csapex
-
-    ${QT_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${catkin_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${YAML_LIBRARIES}
-    ${TinyXML_LIBRARIES}
-    ${console_bridge_LIBRARIES}
-    Qt5::OpenGL
-)
-
-# Library for the app itself
-add_library(csapex_qt SHARED
-
-    src/plugin/plugin_loader.cpp
-
-    src/view/activity_legend.cpp
-    src/view/activity_timeline.cpp
-    src/view/minimap_widget.cpp
-
-    src/view/csapex_window.cpp
-    src/view/screenshot_dialog.cpp
-
-    src/view/designer.cpp
-    src/view/designer_view.cpp
-    src/view/designer_scene.cpp
-    src/view/box_dialog.cpp
-    src/view/node_filter_proxy_model.cpp
-)
-
 target_link_libraries(csapex_qt
-    csapex_plugin_base
-    csapex_plugin_qt
-
     csapex
 
-    ${QT_LIBRARIES}
+    Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
-    ${console_bridge_LIBRARIES}
-    Qt5::OpenGL
+    ${console_bridge_LIBRARIES}   
 )
 
 #
@@ -351,17 +320,12 @@ add_custom_command(TARGET cfg POST_BUILD
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
+install(TARGETS csapex
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
 install(TARGETS csapex_qt
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-
-install(TARGETS csapex_plugin_base
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-
-install(TARGETS csapex_plugin_qt
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})

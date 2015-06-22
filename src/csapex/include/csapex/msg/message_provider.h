@@ -8,8 +8,6 @@
 
 /// SYSTEM
 #include <memory>
-#include <QObject>
-#include <QBoxLayout>
 
 namespace csapex
 {

@@ -10,8 +10,8 @@
 /// SYSTEM
 #include <istream>
 #include <boost/algorithm/string.hpp>
-#include <QFileSystemWatcher>
-#include <QFile>
+#include <fstream>
+
 #include <thread>
 
 using namespace csapex;
@@ -37,7 +37,6 @@ PluginLocator::PluginLocator(Settings &settings)
 
 PluginLocator::~PluginLocator()
 {
-    clearFileWatcherCallbacks();
 }
 
 std::vector<std::string> PluginLocator::enumerateLibraryPaths()
@@ -47,14 +46,8 @@ std::vector<std::string> PluginLocator::enumerateLibraryPaths()
 
 void PluginLocator::reloadLibraryIfExists(const std::string &name, const std::string &abs_path)
 {
-    QFile qfile(QString::fromStdString(abs_path));
-    if(qfile.exists()) {
-        std::chrono::milliseconds dura(100);
-
-        std::this_thread::sleep_for(dura);
-        while(qfile.size() == 0) {
-            std::this_thread::sleep_for(dura);
-        }
+    std::ifstream file(abs_path);
+    if(file.good()) {
         reloadLibrary(name);
     }
 }
@@ -67,10 +60,6 @@ void PluginLocator::reloadLibrary(const std::string &name)
     reload_library_request(name);
 
     reload_done();
-
-    if(isAutoReload()) {
-        createFileWatcher(name);
-    }
 }
 
 void PluginLocator::setAutoReload(bool autoreload)
@@ -78,14 +67,7 @@ void PluginLocator::setAutoReload(bool autoreload)
     if(isAutoReload() != autoreload) {
         settings_.set("auto_reload_libraries", autoreload);
 
-        library_watchers_.clear();
-        clearFileWatcherCallbacks();
-
-        if(autoreload) {
-            for(const std::string& name : loaded_libraries_) {
-                createFileWatcher(name);
-            }
-        }
+        // not implemented... does not work reliably...
     }
 }
 
@@ -110,44 +92,13 @@ bool PluginLocator::isLibraryIgnored(const std::string &name) const
     return ignored_libraries_.find(name) != ignored_libraries_.end();
 }
 
-void PluginLocator::createFileWatcher(const std::string &name)
-{
-    const std::string& file = library_file_[name];
-
-    for(int i = -1, total = library_paths_.size(); i < total; ++i) {
-        const std::string& path = (i == -1) ? "" : library_paths_[i];
-        std::string abs_path = path + "/" + file;
-
-        QFile qfile(QString::fromStdString(abs_path));
-        if(qfile.exists()) {
-            library_watchers_[name] = std::shared_ptr<QFileSystemWatcher>(new QFileSystemWatcher);
-            library_watchers_[name]->addPath(QString::fromStdString(abs_path));
-
-            qt_helper::Call* call = new qt_helper::Call(std::bind(&PluginLocator::reloadLibraryIfExists, this, name, abs_path));
-
-            QObject::connect(library_watchers_[name].get(), SIGNAL(fileChanged(const QString&)),
-                             call, SLOT(call()));
-            break;
-        }
-    }
-}
-
-void PluginLocator::clearFileWatcherCallbacks()
-{
-    while(!callbacks_.empty()) {
-        callbacks_.back()->disconnect();
-        delete callbacks_.back();
-        callbacks_.pop_back();
-    }
-}
-
 void PluginLocator::setLibraryLoaded(const std::string &name, const std::string& file)
 {
     loaded_libraries_.insert(name);
     library_file_[name] = file;
 
     if(isAutoReload()) {
-        createFileWatcher(name);
+        // not implemented yet
     }
 }
 

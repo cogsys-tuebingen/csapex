@@ -7,6 +7,9 @@
 /// PROJECT
 #include <utils_param/param_fwd.h>
 
+/// SYSTEM
+#include <QObject>
+
 /// FORWARD DECLARTIONS
 class QComboBox;
 class QGroupBox;

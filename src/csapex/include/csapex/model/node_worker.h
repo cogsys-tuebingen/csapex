@@ -26,8 +26,6 @@ namespace csapex {
 
 class NodeWorker : public QObject, public ErrorState, public Unique
 {
-    Q_OBJECT
-
     friend class Node;
     friend class NodeBox;
 

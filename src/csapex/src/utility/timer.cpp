@@ -35,12 +35,12 @@ void Timer::finish()
 
 long Timer::startTimeMs() const
 {
-    return root->start_.toMSecsSinceEpoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(root->start_.time_since_epoch()).count();
 }
 
 long Timer::stopTimeMs() const
 {
-    return root->end_.toMSecsSinceEpoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(root->end_.time_since_epoch()).count();
 }
 
 Timer::Interlude::Ptr Timer::step(const std::string &name)
@@ -108,11 +108,11 @@ std::string Timer::Interval::name() const
 
 void Timer::Interval::start()
 {
-    start_ = QDateTime::currentDateTime();
+    start_ = std::chrono::system_clock::now();
 }
 
 void Timer::Interval::stop()
 {
-    end_ = QDateTime::currentDateTime();
-    length_ += end_.toMSecsSinceEpoch() - start_.toMSecsSinceEpoch();
+    end_ = std::chrono::system_clock::now();
+    length_ += std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count();
 }

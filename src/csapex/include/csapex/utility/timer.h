@@ -2,7 +2,7 @@
 #define TIMER_H
 
 /// SYSTEM
-#include <QTime>
+#include <chrono>
 #include <boost/noncopyable.hpp>
 #include <memory>
 #include <vector>
@@ -39,8 +39,8 @@ public:
 
     private:
         std::string name_;
-        QDateTime start_;
-        QDateTime end_;
+        std::chrono::time_point<std::chrono::system_clock> start_;
+        std::chrono::time_point<std::chrono::system_clock> end_;
         int length_;
     };
 
