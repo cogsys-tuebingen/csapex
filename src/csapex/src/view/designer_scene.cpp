@@ -947,17 +947,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     painter->setPen(QPen(painter->brush(), 1.0));
     painter->drawPath(arrow_path);
 
-    if(!ccs.established) {
-        painter->setBrush(QBrush(Qt::red, Qt::Dense2Pattern));
-        if(!ccs.source_established) {
-            painter->drawEllipse(from, 10, 10);
-        }
-        if(!ccs.source_established) {
-            painter->drawEllipse(real_to, 10, 10);
-        }
-    }
-
-
     if(draw_schema_) {
         painter->setBrush(QBrush());
         for(auto r: bounding_boxes) {
