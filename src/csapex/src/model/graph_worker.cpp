@@ -42,6 +42,10 @@ void GraphWorker::reset()
 {
     stop();
     graph_->reset();
+    for(auto& gen: generators_) {
+        generatorRemoved(gen.second);
+    }
+    generators_.clear();
 }
 
 bool GraphWorker::isPaused() const
@@ -63,6 +67,9 @@ void GraphWorker::pauseRequest(bool pause)
 
 void GraphWorker::stop()
 {
+    for(NodeWorker* nw : graph_->getAllNodeWorkers()) {
+        nw->stop();
+    }
     stopped();
 }
 

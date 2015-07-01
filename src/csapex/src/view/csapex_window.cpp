@@ -155,7 +155,6 @@ void CsApexWindow::construct()
     core_.configChanged.connect([this](){ updateTitle(); });
     core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); });
     core_.newNodeType.connect([this](){ updateNodeTypes(); });
-    core_.resetRequest.connect([this](){ designer_->reset(); });
 
     core_.saveSettingsRequest.connect([this](YAML::Node& node){ saveSettings(node); });
     core_.loadSettingsRequest.connect([this](YAML::Node& node){ loadSettings(node); });

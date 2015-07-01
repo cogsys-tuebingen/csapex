@@ -34,8 +34,23 @@ Graph::~Graph()
 
 void Graph::reset()
 {
+    for(ConnectionPtr c : getConnections()) {
+        deleteConnection(c);
+    }
+
+    for(NodeWorker* node : getAllNodeWorkers()) {
+        deleteNode(node->getUUID());
+    }
+
     uuids_.clear();
     connections_.clear();
+
+    nodes_.clear();
+    node_component_.clear();
+    node_level_.clear();
+
+    node_parents_.clear();
+    node_children_.clear();
 }
 
 std::string Graph::makeUUIDPrefix(const std::string& name)
@@ -57,7 +72,7 @@ void Graph::addNode(NodeWorker::Ptr node_worker)
 
     buildConnectedComponents();
 
-    node_worker->checkParameters();
+//    node_worker->checkParameters();
 
     node_worker->panic.connect(panic);
 

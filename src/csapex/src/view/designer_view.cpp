@@ -119,6 +119,7 @@ void DesignerView::centerOnPoint(QPointF point)
 void DesignerView::reset()
 {
     scene_->clear();
+    update();
 }
 
 void DesignerView::resetZoom()

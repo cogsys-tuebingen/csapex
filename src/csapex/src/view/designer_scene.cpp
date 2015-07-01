@@ -444,6 +444,9 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         }
 
         auto c = graph_->getConnectionWithId(highlight_connection_id_);
+        if(!c) {
+            return;
+        }
         auto m = c->getMessage();
 
         QString descr("Connection #");
