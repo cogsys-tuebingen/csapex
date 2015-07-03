@@ -149,7 +149,9 @@ private:
 
 public:
     void tick();
-    void processMessages();
+    void startProcessingMessages();
+    void finishProcessingMessages(bool was_executed);
+
     void prepareForNextProcess();
     void checkTransitions();
 
@@ -285,6 +287,7 @@ private:
     std::vector<TimerPtr> timer_history_;
 
     std::atomic<bool> profiling_;
+    TimerPtr current_process_timer_;
 };
 
 }

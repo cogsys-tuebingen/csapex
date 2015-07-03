@@ -17,7 +17,7 @@ class Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(CommandDispatcher* dispatcher, WidgetController *widget_controller, Connectable* adaptee);
+    Port(CommandDispatcher* dispatcher, WidgetController *widget_controller, Connectable* adaptee, QWidget *parent = nullptr);
     virtual ~Port();
 
     bool event(QEvent *e);

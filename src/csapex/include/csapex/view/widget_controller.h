@@ -72,6 +72,9 @@ Q_SIGNALS:
 
     void boxAdded(NodeBox* box);
 
+    void triggerConnectorCreated(Connectable *connector);
+    void triggerConnectorRemoved(Connectable *connector);
+
 public Q_SLOTS:
     void nodeAdded(NodeWorkerPtr node_worker);
     void nodeRemoved(NodeWorkerPtr node_worker);

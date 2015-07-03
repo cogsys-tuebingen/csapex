@@ -71,6 +71,9 @@ WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispat
     if(settings_.knows("grid-lock")) {
         enableGridLock(settings_.get<bool>("grid-lock"));
     }
+
+    connect(this, SIGNAL(triggerConnectorCreated(Connectable*)), this, SLOT(connectorCreated(Connectable*)));
+    connect(this, SIGNAL(triggerConnectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
 }
 
 WidgetController::~WidgetController()
@@ -242,9 +245,9 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         }
 
         // subscribe to coming connectors
-        auto c1 = node_worker->connectorCreated.connect([this](ConnectablePtr c) { connectorCreated(c.get()); });
+        auto c1 = node_worker->connectorCreated.connect([this](ConnectablePtr c) { triggerConnectorCreated(c.get()); });
         connections_.push_back(c1);
-        auto c2 = node_worker->connectorRemoved.connect([this](ConnectablePtr c) { connectorRemoved(c.get()); });
+        auto c2 = node_worker->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c.get()); });
         connections_.push_back(c2);
 
         Q_EMIT boxAdded(box);
@@ -319,6 +322,8 @@ void WidgetController::connectorSignalRemoved(Connectable *connector)
 
 Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
 {
+    apex_assert_hard(QApplication::instance()->thread() == QThread::currentThread());
+
     if(designer_) {
         Port* port = new Port(&dispatcher_, this, connector);
 

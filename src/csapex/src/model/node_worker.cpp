@@ -141,7 +141,7 @@ void NodeWorker::setNodeState(NodeStatePtr memento)
 
     *node_state_ = *memento;
 
-    node_state_->setParent(this);
+    //    node_state_->setParent(this);
     if(memento->getParameterState()) {
         node_->setParameterState(memento->getParameterState());
     }
@@ -562,7 +562,7 @@ void NodeWorker::updateParameterValue(Connectable *s)
     }
 }
 
-void NodeWorker::processMessages()
+void NodeWorker::startProcessingMessages()
 {
     if(!isEnabled()) {
         return;
@@ -635,47 +635,71 @@ void NodeWorker::processMessages()
 
     transition_in_->notifyMessageProcessed();
 
-    if(all_inputs_are_present) {
-        std::unique_lock<std::recursive_mutex> lock(sync);
+    if(!all_inputs_are_present) {
+        finishProcessingMessages(false);
+        return;
+    }
 
 
-        Timer::Ptr t = nullptr;
+    std::unique_lock<std::recursive_mutex> sync_lock(sync);
 
-        if(profiling_) {
-            t.reset(new Timer(getUUID()));
-            timerStarted(this, PROCESS, t->startTimeMs());
-        }
-        node_->useTimer(t.get());
+    current_process_timer_.reset();
 
-        try {
-            //            node_->aerr << "processing" << std::endl;
+    if(profiling_) {
+        current_process_timer_.reset(new Timer(getUUID()));
+        timerStarted(this, PROCESS, current_process_timer_->startTimeMs());
+    }
+    node_->useTimer(current_process_timer_.get());
+
+    bool sync = !node_->isAsynchronous();
+
+    try {
+        //            node_->aerr << "processing" << std::endl;
+        if(sync) {
             node_->process(*node_);
 
-            if(trigger_process_done_->isConnected()) {
-                if(t) {
-                    t->step("trigger process done");
-                }
-                trigger_process_done_->trigger();
-            }
+        } else {
+            node_->process(*node_, [this](std::function<void()> f) {
+                executionRequested(f);
 
-        } catch(const std::exception& e) {
-            setError(true, e.what());
-        } catch(...) {
-            throw;
+                finishProcessingMessages(true);
+            });
         }
 
-        if(t) {
-            finishTimer(t);
+
+
+    } catch(const std::exception& e) {
+        setError(true, e.what());
+    } catch(...) {
+        throw;
+    }
+    if(sync) {
+        finishProcessingMessages(true);
+    }
+}
+
+void NodeWorker::finishProcessingMessages(bool was_executed)
+{
+    if(was_executed) {
+        if(current_process_timer_) {
+            finishTimer(current_process_timer_);
+        }
+
+        if(trigger_process_done_->isConnected()) {
+            if(current_process_timer_) {
+                current_process_timer_->step("trigger process done");
+            }
+            trigger_process_done_->trigger();
         }
     }
 
-    sendMessages();
+    if(getState() == State::PROCESSING) {
+        sendMessages();
 
-    setState(State::IDLE);
+        setState(State::IDLE);
 
-    messages_processed();
-
-
+        messages_processed();
+    }
 }
 
 bool NodeWorker::areAllInputsAvailable()
@@ -1241,7 +1265,7 @@ void NodeWorker::prepareForNextProcess()
     //        transition_in_->notifyMessageProcessed();
     //    }
 
-//    checkTransitions();
+    //    checkTransitions();
     //    checkInputs();
 }
 

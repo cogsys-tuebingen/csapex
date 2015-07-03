@@ -72,7 +72,7 @@ void Graph::addNode(NodeWorker::Ptr node_worker)
 
     buildConnectedComponents();
 
-//    node_worker->checkParameters();
+    node_worker->checkParameters();
 
     node_worker->panic.connect(panic);
 

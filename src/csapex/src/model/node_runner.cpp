@@ -19,7 +19,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
                                       std::bind(&NodeWorker::prepareForNextProcess, worker),
                                       this);
     process_ = std::make_shared<Task>(std::string("process ") + worker->getUUID().getFullName(),
-                                      std::bind(&NodeWorker::processMessages, worker),
+                                      std::bind(&NodeWorker::startProcessingMessages, worker),
                                       this);
     check_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
                                     std::bind(&NodeWorker::checkTransitions, worker),

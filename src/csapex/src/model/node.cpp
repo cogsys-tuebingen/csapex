@@ -61,10 +61,22 @@ void Node::stateChanged()
 
 }
 
+bool Node::isAsynchronous() const
+{
+    return false;
+}
+
 void Node::process(csapex::Parameterizable& parameters)
 {
     // default to deprecated style
     process();
+}
+
+
+void Node::process(csapex::Parameterizable& parameters, std::function<void(std::function<void ()>)> continuation)
+{
+    process(parameters);
+    continuation([](){});
 }
 
 void Node::process()

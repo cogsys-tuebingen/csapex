@@ -24,8 +24,8 @@
 
 using namespace csapex;
 
-Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, Connectable *adaptee)
-    : dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
+Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, Connectable *adaptee, QWidget *parent)
+    : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
     if(adaptee_) {
         createToolTip();

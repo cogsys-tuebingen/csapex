@@ -22,11 +22,14 @@ public:
     void initialize(const UUID &uuid, NodeModifier *node_modifier);
     void doSetup();
 
+    virtual void process(csapex::Parameterizable& parameters);
+    virtual void process(csapex::Parameterizable& parameters, std::function<void(std::function<void ()>)> continuation);
+
 public:
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
     virtual void setupParameters(Parameterizable& parameters);
 
-    virtual void process(csapex::Parameterizable& parameters);
+    virtual bool isAsynchronous() const;
 
     virtual bool canTick();
     virtual void tick();
