@@ -595,6 +595,8 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 
     try {
         graph_worker_->stop();
+    } catch(const std::exception& e) {
+        std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
     } catch(...) {
         std::abort();
     }

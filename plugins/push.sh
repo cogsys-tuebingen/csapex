@@ -8,7 +8,11 @@ for f in *; do
     cd $f
     if [[ -d .git ]]; then
       echo "${bld}${blu}checking $f${rst}"
-      git push origin master
+      if [[ $1 ]] && [[ $2 ]]; then
+        git push $1 $2
+      else
+        git push origin master
+      fi
     fi
     cd - 1> /dev/null
   fi
