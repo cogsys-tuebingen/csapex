@@ -298,14 +298,10 @@ int main(int argc, char** argv)
             ("fatal_exceptions", "abort execution on exception")
             ("thread_grouping", "create one thread per graph component")
             ("input", "config file to load")
-            ("ros-name", "(ros parameter (provided by launch files))")
-            ("ros-log", "(ros parameter (provided by launch files))")
             ;
 
     po::positional_options_description p;
     p.add("input", 1);
-    p.add("ros-name", 1);
-    p.add("ros-log", 1);
 
     // first check for --headless or --fatal_exceptions parameter
     // this has to be done before the qapp can be created, which
@@ -331,7 +327,6 @@ int main(int argc, char** argv)
     }
 
     // filters all qt parameters from argv
-
     std::unique_ptr<QCoreApplication> app;
     if(headless) {
         app.reset(new CsApexCoreApp(argc, argv, fatal_exceptions));
@@ -339,12 +334,24 @@ int main(int argc, char** argv)
         app.reset(new CsApexApp(argc, argv, fatal_exceptions));
     }
 
+    // filters ros remappings
+    std::vector<std::string> remapping_args;
+    std::vector<std::string> rest_args;
+    for(int i = 1; i < argc; ++i) {
+        std::string arg(argv[i]);
+        if(arg.find(":=") != std::string::npos)  {
+            remapping_args.push_back(arg);
+        } else {
+            rest_args.push_back(arg);
+        }
+    }
+
     // now check for remaining parameters
     po::variables_map vm;
     std::vector<std::string> additional_args;
 
     try {
-        po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).positional(p).run();
+        po::parsed_options parsed = po::command_line_parser(rest_args).options(desc).positional(p).run();
 
         po::store(parsed, vm);
 
@@ -356,6 +363,9 @@ int main(int argc, char** argv)
         std::cerr << "cannot parse parameters: " << e.what() << std::endl;
         return 4;
     }
+
+    // add ros remappings
+    additional_args.insert(additional_args.end(), remapping_args.begin(), remapping_args.end());
 
 
     // display help?
