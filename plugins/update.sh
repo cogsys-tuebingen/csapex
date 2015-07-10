@@ -8,7 +8,11 @@ for f in *; do
     cd $f
     if [[ -d .git ]]; then
       echo "${bld}${blu}pulling $f${rst}"
-      git pull
+      if [[ $1 ]] && [[ $2 ]]; then
+        git pull $1 $2
+      else
+        git pull
+      fi
     fi
     cd - 1> /dev/null
   fi
