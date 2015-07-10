@@ -141,7 +141,8 @@ void NodeWorker::setNodeState(NodeStatePtr memento)
 
     *node_state_ = *memento;
 
-    //    node_state_->setParent(this);
+    node_state_->setParent(this);
+
     if(memento->getParameterState()) {
         node_->setParameterState(memento->getParameterState());
     }
