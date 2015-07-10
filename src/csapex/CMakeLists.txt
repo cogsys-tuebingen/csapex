@@ -173,6 +173,8 @@ add_library(csapex SHARED
     src/msg/static_output.cpp
     src/msg/transition.cpp
 
+    src/serialization/yaml.cpp
+
     src/plugin/plugin_locator.cpp
 
     src/scheduling/executor.cpp

@@ -22,6 +22,32 @@ HAS_MEM_FUNC(encode, has_yaml_implementation);
 
 namespace csapex {
 
+// TODO: move to separate file
+namespace serial {
+
+template <typename Message, typename Selector = void>
+struct Serializer
+{
+static YAML::Node encode(const Message& msg) {
+    return YAML::convert<Message>::encode(msg);
+}
+static bool decode(const YAML::Node& node, Message& msg) {
+    return YAML::convert<Message>::decode(node, msg);
+}
+};
+
+
+template <typename Message>
+YAML::Node encodeMessage(const csapex::ConnectionType& msg) {
+    return serial::Serializer<Message>::encode(dynamic_cast<const Message&>(msg));
+}
+template <typename Message>
+bool decodeMessage(const YAML::Node& node, csapex::ConnectionType& msg) {
+    return serial::Serializer<Message>::decode(node, dynamic_cast<Message&>(msg));
+}
+
+}
+
 class MessageFactory : public Singleton<MessageFactory>
 {
     friend class Singleton<MessageFactory>;
@@ -75,8 +101,8 @@ public:
     static void registerMessage() {
         MessageFactory::instance().registerMessage(connection_types::serializationName<M>(),
                                                    std::bind(&MessageFactory::createMessage<M>),
-                                                   Converter(std::bind(&MessageFactory::encode<M>, std::placeholders::_1),
-                                                             std::bind(&MessageFactory::decode<M>, std::placeholders::_1, std::placeholders::_2)));
+                                                   Converter(std::bind(&serial::encodeMessage<M>, std::placeholders::_1),
+                                                             std::bind(&serial::decodeMessage<M>, std::placeholders::_1, std::placeholders::_2)));
     }
 
 private:
@@ -100,15 +126,6 @@ private:
                                                    std::bind(&MessageFactory::createDirectMessage<Wrapper, M>),
                                                    Converter(std::bind(&MessageFactory::encodeDirectMessage<Wrapper, M>, std::placeholders::_1),
                                                              std::bind(&MessageFactory::decodeDirectMessage<Wrapper, M>, std::placeholders::_1, std::placeholders::_2)));
-    }
-
-    template <typename Message>
-    static YAML::Node encode(const csapex::ConnectionType& msg) {
-        return YAML::convert<Message>::encode(dynamic_cast<const Message&>(msg));
-    }
-    template <typename Message>
-    static bool decode(const YAML::Node& node, csapex::ConnectionType& msg) {
-        return YAML::convert<Message>::decode(node, dynamic_cast<Message&>(msg));
     }
 
 
