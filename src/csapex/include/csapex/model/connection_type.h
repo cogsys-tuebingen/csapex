@@ -27,14 +27,7 @@ public:
 
 
 public:
-    static void setDefaultConnectionType(ConnectionType::Ptr type) {
-        default_ = type;
-    }
-
-    static ConnectionType::Ptr getDefaultConnectionType();
-
-public:
-    ConnectionType(const std::string &name);
+    ConnectionType(const std::string &type_name);
     virtual ~ConnectionType();
 
     template <typename R>
@@ -45,7 +38,6 @@ public:
 
     virtual ConnectionType::Ptr clone() const = 0;
     virtual ConnectionType::Ptr toType() const = 0;
-    static ConnectionType::Ptr makeDefault();
 
     virtual bool isValid() const;
 
@@ -58,8 +50,8 @@ public:
     virtual bool canConnectTo(const ConnectionType* other_side) const;
     virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 
-    virtual std::string name() const;
-    std::string rawName() const;
+    virtual std::string descriptiveName() const;
+    std::string typeName() const;
 
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_) const;
@@ -67,17 +59,15 @@ public:
     virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
 
 protected:
-    void setName(const std::string& name);
+    void setDescriptiveName(const std::string& descriptiveName);
 
 private:
-    std::string name_;
+    std::string type_name_;
+    std::string descriptive_name_;
     mutable int seq_no_;
 
 public:
     mutable Flags flags;
-
-private:
-    static ConnectionType::Ptr default_;
 };
 
 }

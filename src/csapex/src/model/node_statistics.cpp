@@ -36,7 +36,7 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* c
 
     QTreeWidgetItem* type = new QTreeWidgetItem;
     type->setText(0, "Type");
-    type->setText(1, connector->getType()->name().c_str());
+    type->setText(1, connector->getType()->descriptiveName().c_str());
     connector_widget->addChild(type);
 
     return connector_widget;

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection.h>
+#include <csapex/msg/message.h>
 
 /// SYSTEM
 #include <iostream>
@@ -53,7 +54,7 @@ void Connectable::stop()
 
 void Connectable::init()
 {
-    setType(ConnectionType::makeDefault());
+    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 
     disable();
 }

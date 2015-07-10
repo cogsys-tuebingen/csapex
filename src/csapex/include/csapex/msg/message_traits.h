@@ -18,7 +18,7 @@ template <typename T>
 struct type;
 
 template <typename T>
-std::string name()
+std::string serializationName()
 {
     typedef typename boost::remove_const<T>::type TT;
     return type<TT>::name();

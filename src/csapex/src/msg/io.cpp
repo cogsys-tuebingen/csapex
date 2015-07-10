@@ -73,7 +73,7 @@ void csapex::msg::throwError(const ConnectionTypeConstPtr &msg, const std::type_
     if(!msg) {
         throw std::runtime_error(std::string ("cannot cast null message from to ") + type2name(type));
     } else {
-        throw std::runtime_error(std::string ("cannot cast message from ") + msg->toType()->name() + " to " + type2name(type));
+        throw std::runtime_error(std::string ("cannot cast message from ") + msg->toType()->descriptiveName() + " to " + type2name(type));
     }
 }
 

@@ -12,7 +12,7 @@ std::string toString(const std::vector<ConnectionType::Ptr>& types) {
     int i = 0;
     for(std::vector<ConnectionType::Ptr>::const_iterator it = types.begin(); it != types.end(); ++it) {
         if(i++ > 0) ss << ", ";
-        ss << (*it)->name();
+        ss << (*it)->typeName();
     }
     return ss.str();
 }

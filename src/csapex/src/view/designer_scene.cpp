@@ -479,7 +479,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
         if(m) {
             descr += ", Message: ";
-            descr += QString::fromStdString(m->name());
+            descr += QString::fromStdString(m->descriptiveName());
             descr += ", # " + QString::number(m->sequenceNumber());
         }
 
@@ -982,7 +982,7 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
             if(text.length() != 0) {
                 text += "\n";
             }
-            text += c->getType()->name().c_str();
+            text += c->getType()->descriptiveName().c_str();
             ++lines;
         }
 

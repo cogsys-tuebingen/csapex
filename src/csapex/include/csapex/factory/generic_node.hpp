@@ -123,7 +123,7 @@ private:
         void operator()(GenericInput<U>) {
             std::string label = Info::getName(id);
             if(label.empty()) {
-                label = connection_types::name<U>();
+                label = connection_types::serializationName<U>();
             }
             instance_->input_[id++] = instance_->modifier_->template addInput<U>(label);
         }
@@ -131,7 +131,7 @@ private:
         void operator()(GenericOutput<U>) {
             std::string label = Info::getName(id);
             if(label.empty()) {
-                label = connection_types::name<U>();
+                label = connection_types::serializationName<U>();
             }
             instance_->output_[id++] = instance_->modifier_->template addOutput<U>(label);
 

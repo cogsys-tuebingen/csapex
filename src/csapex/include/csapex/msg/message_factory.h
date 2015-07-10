@@ -73,7 +73,7 @@ public:
 
     template <typename M>
     static void registerMessage() {
-        MessageFactory::instance().registerMessage(connection_types::name<M>(),
+        MessageFactory::instance().registerMessage(connection_types::serializationName<M>(),
                                                    std::bind(&MessageFactory::createMessage<M>),
                                                    Converter(std::bind(&MessageFactory::encode<M>, std::placeholders::_1),
                                                              std::bind(&MessageFactory::decode<M>, std::placeholders::_1, std::placeholders::_2)));
@@ -96,7 +96,7 @@ private:
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessageImpl(typename std::enable_if< HasYaml<Wrapper,M>::type::value >::type* = 0)
     {
-        MessageFactory::instance().registerMessage(connection_types::name< Wrapper<M> >(),
+        MessageFactory::instance().registerMessage(connection_types::serializationName< Wrapper<M> >(),
                                                    std::bind(&MessageFactory::createDirectMessage<Wrapper, M>),
                                                    Converter(std::bind(&MessageFactory::encodeDirectMessage<Wrapper, M>, std::placeholders::_1),
                                                              std::bind(&MessageFactory::decodeDirectMessage<Wrapper, M>, std::placeholders::_1, std::placeholders::_2)));

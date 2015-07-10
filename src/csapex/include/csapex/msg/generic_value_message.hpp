@@ -35,7 +35,7 @@ struct GenericValueMessage : public Message
 
     bool acceptsConnectionFrom(const ConnectionType* other_side) const override
     {
-        return name() == other_side->name();
+        return descriptiveName() == other_side->descriptiveName();
     }
 
     Type getValue()
