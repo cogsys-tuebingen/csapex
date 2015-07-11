@@ -71,7 +71,7 @@ YAML::Node MessageFactory::serializeMessage(const ConnectionType &msg)
 
     } catch(const std::out_of_range& e) {
         throw SerializationError(std::string("cannot serialize message of type ")
-                                 + msg.descriptiveName() + ", no YAML converter registered!");
+                                 + msg.descriptiveName() + ", no YAML converter registered for " + msg.typeName());
     }
 }
 

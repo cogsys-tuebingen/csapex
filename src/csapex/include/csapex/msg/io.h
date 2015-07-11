@@ -6,6 +6,7 @@
 #include <csapex/msg/message_traits.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
+#include <iostream>
 
 namespace csapex
 {
@@ -34,6 +35,44 @@ void setLabel(Output* input, const std::string& label);
 void throwError(const ConnectionTypeConstPtr& msg, const std::type_info& type);
 
 
+/// CASTING
+
+template <typename R, typename S, typename Selector = void>
+struct DefaultMessageCaster
+{
+    static std::shared_ptr<R const> constcast(const std::shared_ptr<S const>& msg)
+    {
+        return std::dynamic_pointer_cast<R const>(msg);
+    }
+    static std::shared_ptr<R> cast(const std::shared_ptr<S>& msg)
+    {
+        return std::dynamic_pointer_cast<R>(msg);
+    }
+};
+
+template <typename R, typename S, typename Selector = void>
+struct MessageCaster
+{
+    static std::shared_ptr<R const> constcast(const std::shared_ptr<S const>& msg)
+    {
+        return DefaultMessageCaster<R,S,Selector>::constcast(msg);
+    }
+    static std::shared_ptr<R> cast(const std::shared_ptr<S>& msg)
+    {
+        return DefaultMessageCaster<R,S,Selector>::cast(msg);
+    }
+};
+
+template <typename R, typename S, typename Selector = void>
+std::shared_ptr<R const> message_cast(const std::shared_ptr<S const>& msg)
+{
+    return MessageCaster<typename std::remove_const<R>::type,typename std::remove_const<S>::type,Selector>::constcast(msg);
+}
+template <typename R, typename S, typename Selector = void>
+std::shared_ptr<R> message_cast(const std::shared_ptr<S>& msg)
+{
+    return MessageCaster<typename std::remove_const<R>::type,typename std::remove_const<S>::type,Selector>::cast(msg);
+}
 
 /// INPUT
 ConnectionTypeConstPtr getMessage(Input* input);
@@ -44,7 +83,7 @@ getMessage(Input* input,
            typename std::enable_if<std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0)
 {
     auto msg = getMessage(input);
-    typename std::shared_ptr<R const> result = std::dynamic_pointer_cast<R const> (msg);
+    typename std::shared_ptr<R const> result = message_cast<R const> (msg);
     if(!result) {
         throwError(msg, typeid(R));
     }
@@ -57,7 +96,7 @@ getMessage(Input* input,
            typename std::enable_if<!std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0)
 {
     auto msg = getMessage(input);
-    auto result = std::dynamic_pointer_cast<connection_types::GenericPointerMessage<R> const> (msg);
+    auto result = message_cast<connection_types::GenericPointerMessage<R> const> (msg);
     if(!result) {
         throwError(msg, typeid(R));
     }
@@ -69,7 +108,7 @@ std::shared_ptr<typename Container::template TypeMap<R>::type const>
 getMessage(Input* input)
 {
     auto msg = getMessage(input);
-    typename std::shared_ptr<Container const> result = std::dynamic_pointer_cast<Container const> (msg);
+    typename std::shared_ptr<Container const> result = message_cast<Container const> (msg);
     return result -> template makeShared<R>();
 }
 
@@ -82,7 +121,7 @@ getClonedMessage(Input* input)
     if(msg == nullptr) {
         return nullptr;
     }
-    return std::dynamic_pointer_cast<R>(msg->clone());
+    return message_cast<R>(msg->clone());
 }
 
 
@@ -99,7 +138,7 @@ R getValue(Input* input)
 template <typename T>
 bool isMessage(Input* input) {
     auto msg = getMessage(input);
-    auto test = std::dynamic_pointer_cast<T const> (msg);
+    auto test = message_cast<T const> (msg);
     return test != nullptr;
 }
 template <typename R>
@@ -118,7 +157,7 @@ void publish(Output* output,
              typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
     typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
     msg->value = message;
-    publish(output, std::dynamic_pointer_cast<ConnectionType>(msg));
+    publish(output, message_cast<ConnectionType>(msg));
 }
 
 template <typename T>
@@ -128,7 +167,7 @@ void publish(Output* output,
              typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
     typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
     msg->value = shared_ptr_tools::to_std_shared(message);
-    publish(output, std::dynamic_pointer_cast<ConnectionType>(msg));
+    publish(output, message_cast<ConnectionType>(msg));
 }
 
 template <typename T>
@@ -138,7 +177,7 @@ void publish(Output* output,
              typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
     typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
     msg->value = message;
-    publish(output, std::dynamic_pointer_cast<ConnectionType>(msg));
+    publish(output, message_cast<ConnectionType>(msg));
 }
 
 template <class Container, typename T>

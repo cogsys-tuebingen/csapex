@@ -20,7 +20,7 @@ public:
     typedef u_int64_t Stamp;
 
 protected:
-    Message(const std::string& descriptiveName, const std::string& frame_id, Stamp stamp_micro_seconds);
+    Message(const std::string& name, const std::string& frame_id, Stamp stamp_micro_seconds);
     virtual ~Message();
 
 public:
