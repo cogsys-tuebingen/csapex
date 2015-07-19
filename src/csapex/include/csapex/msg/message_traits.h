@@ -43,6 +43,16 @@ struct MessageContainer
     }
 };
 
+template <template <class> class Container, typename T, class Enable = void>
+class MessageConversionHook
+{
+public:
+    static void registerConversion() {
+        // do nothing
+    }
+};
+
+
 template <typename T>
 std::shared_ptr<T> makeEmptyMessage(
         typename std::enable_if<!std::is_const<T>::value >::type* = 0)

@@ -174,6 +174,7 @@ add_library(csapex SHARED
     src/msg/transition.cpp
 
     src/serialization/yaml.cpp
+    src/serialization/message_serializer.cpp
 
     src/plugin/plugin_locator.cpp
 

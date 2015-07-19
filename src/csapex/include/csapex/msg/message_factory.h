@@ -8,45 +8,15 @@
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>
-#include <csapex/utility/tmp.hpp>
 
 /// SYSTEM
 #include <map>
 #include <string>
 #include <functional>
-#include <yaml-cpp/yaml.h>
 #include <boost/type_traits.hpp>
 #include <iostream>
 
-HAS_MEM_FUNC(encode, has_yaml_implementation);
-
 namespace csapex {
-
-// TODO: move to separate file
-namespace serial {
-
-template <typename Message, typename Selector = void>
-struct Serializer
-{
-static YAML::Node encode(const Message& msg) {
-    return YAML::convert<Message>::encode(msg);
-}
-static bool decode(const YAML::Node& node, Message& msg) {
-    return YAML::convert<Message>::decode(node, msg);
-}
-};
-
-
-template <typename Message>
-YAML::Node encodeMessage(const csapex::ConnectionType& msg) {
-    return serial::Serializer<Message>::encode(dynamic_cast<const Message&>(msg));
-}
-template <typename Message>
-bool decodeMessage(const YAML::Node& node, csapex::ConnectionType& msg) {
-    return serial::Serializer<Message>::decode(node, dynamic_cast<Message&>(msg));
-}
-
-}
 
 class MessageFactory : public Singleton<MessageFactory>
 {
@@ -54,21 +24,6 @@ class MessageFactory : public Singleton<MessageFactory>
 
 public:
     typedef std::function<ConnectionType::Ptr()>  Constructor;
-    struct Converter
-    {
-        typedef std::function<YAML::Node(const csapex::ConnectionType&)> Encoder;
-        typedef std::function<bool(const YAML::Node&, csapex::ConnectionType&)> Decoder;
-
-        Converter(Encoder encode, Decoder decode)
-            : encoder(encode), decoder(decode)
-        {}
-
-        Encoder encoder;
-        Decoder decoder;
-    };
-
-    typedef std::runtime_error SerializationError;
-    typedef std::runtime_error DeserializationError;
 
 public:
     template <typename M>
@@ -82,84 +37,38 @@ public:
 
     static ConnectionType::Ptr createMessage(const std::string& type);
 
-    static ConnectionType::Ptr deserializeMessage(const YAML::Node &node);
-    static YAML::Node serializeMessage(const ConnectionType& msg);
-
     static ConnectionType::Ptr readMessage(const std::string& path);
     static void writeMessage(const std::string& path, const ConnectionType &msg);
-
-    static ConnectionType::Ptr readYaml(const YAML::Node& node);
 
 public:
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessage()
     {
-        registerDirectMessageImpl<Wrapper, M>();
+        MessageFactory::instance().registerMessage(connection_types::serializationName< Wrapper<M> >(),
+                                                   std::bind(&MessageFactory::createDirectMessage<Wrapper, M>));
     }
 
     template <typename M>
     static void registerMessage() {
         MessageFactory::instance().registerMessage(connection_types::serializationName<M>(),
-                                                   std::bind(&MessageFactory::createMessage<M>),
-                                                   Converter(std::bind(&serial::encodeMessage<M>, std::placeholders::_1),
-                                                             std::bind(&serial::decodeMessage<M>, std::placeholders::_1, std::placeholders::_2)));
-    }
-
-private:
-    template <template <typename> class Wrapper, typename M>
-    struct HasYaml {
-        typedef typename boost::type_traits::ice_and<
-        boost::is_class<M>::value,
-        has_yaml_implementation< YAML::convert<M>, YAML::Node(YAML::convert<M>::*)(const M&) >::value
-        > type;
-    };
-
-    template <template <typename> class Wrapper, typename M>
-    static void registerDirectMessageImpl(typename std::enable_if< !HasYaml<Wrapper,M>::type::value >::type* = 0)
-    {
-        std::cerr << "Using a direct message that is not serializable: " << type2name(typeid(M)) << std::endl;
-    }
-    template <template <typename> class Wrapper, typename M>
-    static void registerDirectMessageImpl(typename std::enable_if< HasYaml<Wrapper,M>::type::value >::type* = 0)
-    {
-        MessageFactory::instance().registerMessage(connection_types::serializationName< Wrapper<M> >(),
-                                                   std::bind(&MessageFactory::createDirectMessage<Wrapper, M>),
-                                                   Converter(std::bind(&MessageFactory::encodeDirectMessage<Wrapper, M>, std::placeholders::_1),
-                                                             std::bind(&MessageFactory::decodeDirectMessage<Wrapper, M>, std::placeholders::_1, std::placeholders::_2)));
-    }
-
-
-    template <template <typename> class Wrapper, typename Message>
-    static YAML::Node encodeDirectMessage(const csapex::ConnectionType& msg) {
-        typedef Wrapper<Message> Implementation;
-        const Implementation& impl = dynamic_cast<const Implementation&>(msg);
-
-        return YAML::convert<Message>::encode(impl);
-    }
-    template <template <typename> class Wrapper, typename Message>
-    static bool decodeDirectMessage(const YAML::Node& node, csapex::ConnectionType& msg) {
-        typedef Wrapper<Message> Implementation;
-        Implementation& impl = dynamic_cast<Implementation&>(msg);
-
-        return YAML::convert<Message>::decode(node, impl);
+                                                   std::bind(&MessageFactory::createMessage<M>));
     }
 
 private:
     MessageFactory();
 
-    static void registerMessage(std::string type, Constructor constructor, Converter converter);
+    static void registerMessage(std::string type, Constructor constructor);
 
 private:
     std::map<std::string, Constructor> type_to_constructor;
-    std::map<std::string, Converter> type_to_converter;
 };
 
 
 
 template <typename T>
-struct MessageRegistered
+struct MessageConstructorRegistered
 {
-    MessageRegistered() {
+    MessageConstructorRegistered() {
         csapex::MessageFactory::registerMessage<T>();
     }
 };
