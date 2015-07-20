@@ -346,9 +346,9 @@ void Graph::assignLevels()
     for(NodeWorker::Ptr node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(Output* o : node->getAllOutputs()) {
-            if(o->isDynamic()) {
-                DynamicOutput* dout = dynamic_cast<DynamicOutput*>(o);
+        for(auto output : node->getAllOutputs()) {
+            if(output->isDynamic()) {
+                DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
                 dout->clearCorrespondents();
             }
         }
@@ -366,9 +366,9 @@ void Graph::assignLevels()
             Q.pop_front();
             visited.insert(current);
 
-            for(Input* i : current->getAllInputs()) {
-                if(i->isConnected()) {
-                    ConnectionPtr connection = i->getConnections().front();
+            for(auto input : current->getAllInputs()) {
+                if(input->isConnected()) {
+                    ConnectionPtr connection = input->getConnections().front();
                     Output* out = dynamic_cast<Output*>(connection->from());
                     if(out) {
                         NodeWorker* parent = findNodeWorkerForConnector(out->getUUID());
@@ -388,9 +388,9 @@ void Graph::assignLevels()
         }
 
         if(correspondent) {
-            for(Input* i : node->getAllInputs()) {
-                if(i->isDynamic()) {
-                    DynamicInput* di = dynamic_cast<DynamicInput*>(i);
+            for(auto input : node->getAllInputs()) {
+                if(input->isDynamic()) {
+                    DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
                     di->setCorrespondent(correspondent);
                     correspondent->addCorrespondent(di);
                 }

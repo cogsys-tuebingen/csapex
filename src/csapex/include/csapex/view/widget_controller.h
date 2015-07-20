@@ -43,7 +43,7 @@ public:
 
 
     //** FACTORY ??? **//
-    Port *createPort(Connectable* connector, NodeBox *box, QBoxLayout *layout);
+    Port *createPort(ConnectablePtr connector, NodeBox *box, QBoxLayout *layout);
 
     Port* getPort(const UUID& connector_id);
     Port* getPort(const Connectable* connector_id);
@@ -72,28 +72,24 @@ Q_SIGNALS:
 
     void boxAdded(NodeBox* box);
 
-    void triggerConnectorCreated(Connectable *connector);
-    void triggerConnectorRemoved(Connectable *connector);
+    void triggerConnectorCreated(ConnectablePtr connector);
+    void triggerConnectorRemoved(ConnectablePtr connector);
 
 public Q_SLOTS:
     void nodeAdded(NodeWorkerPtr node_worker);
     void nodeRemoved(NodeWorkerPtr node_worker);
 
-    void connectorCreated(Connectable *connector);
-    void connectorRemoved(Connectable *connector);
-
-    void portDestroyed(QObject* o);
+    void connectorCreated(ConnectablePtr connector);
+    void connectorRemoved(ConnectablePtr connector);
 
     void enableGridLock(bool enabled);
 
 private:
     void insertPort(QLayout* layout, Port* port);
 
-    void connectorSignalAdded(Connectable *connector);
-    void connectorSignalRemoved(Connectable *connector);
+    void connectorSignalAdded(ConnectablePtr connector);
 
-    void connectorMessageAdded(Connectable *connector);
-    void connectorMessageRemoved(Connectable *connector);
+    void connectorMessageAdded(ConnectablePtr connector);
 
 private:
 

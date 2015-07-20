@@ -24,18 +24,16 @@
 
 using namespace csapex;
 
-Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, Connectable *adaptee, QWidget *parent)
+Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, ConnectablePtr adaptee, QWidget *parent)
     : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
-    if(adaptee_) {
+    if(adaptee) {
         createToolTip();
 
-        connections_.push_back(adaptee_->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
-        connections_.push_back(adaptee_->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
+        connections_.push_back(adaptee->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
+        connections_.push_back(adaptee->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
 
-//        QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-
-        if(adaptee_->isDynamic()) {
+        if(adaptee->isDynamic()) {
             setProperty("dynamic", true);
         }
 
@@ -68,10 +66,14 @@ Port::~Port()
 bool Port::event(QEvent *e)
 {
     if (e->type() == QEvent::ToolTip) {
+        ConnectablePtr adaptee = adaptee_.lock();
+        if(!adaptee) {
+            return false;
+        }
         createToolTip();
 
-        if(adaptee_->isOutput()) {
-            Output* output = dynamic_cast<Output*>(adaptee_);
+        if(adaptee->isOutput()) {
+            Output* output = dynamic_cast<Output*>(adaptee.get());
             if(output) {
                 if(!output->isConnected()) {
                     output->forceSendMessage(true);
@@ -99,7 +101,11 @@ bool Port::event(QEvent *e)
 
 void Port::updateTooltip()
 {
-    StaticOutput* output = dynamic_cast<StaticOutput*>(adaptee_);
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
+    StaticOutput* output = dynamic_cast<StaticOutput*>(adaptee.get());
 
     if(output) {
         QGraphicsView* view = widget_controller_->getTooltipView("Output");
@@ -133,25 +139,41 @@ void Port::updateTooltip()
 
 bool Port::canOutput() const
 {
-    return adaptee_->canOutput();
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return false;
+    }
+    return adaptee->canOutput();
 }
 
 bool Port::canInput() const
 {
-    return adaptee_->canInput();
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return false;
+    }
+    return adaptee->canInput();
 }
 
 bool Port::isOutput() const
 {
-    return adaptee_->isOutput();
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return false;
+    }
+    return adaptee->isOutput();
 }
 
 bool Port::isInput() const
 {
-    return adaptee_->isInput();
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return false;
+    }
+    return adaptee->isInput();
 }
 
-Connectable* Port::getAdaptee() const
+ConnectableWeakPtr Port::getAdaptee() const
 {
     return adaptee_;
 }
@@ -159,8 +181,12 @@ Connectable* Port::getAdaptee() const
 
 void Port::paintEvent(QPaintEvent *e)
 {
-    bool opt = dynamic_cast<Input*>(adaptee_) && dynamic_cast<Input*>(adaptee_)->isOptional();
-    setProperty("unconnected", isInput() && !opt && !adaptee_->isConnected());
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
+    bool opt = dynamic_cast<Input*>(adaptee.get()) && dynamic_cast<Input*>(adaptee.get())->isOptional();
+    setProperty("unconnected", isInput() && !opt && !adaptee->isConnected());
     setProperty("optional", opt);
 
     if(refresh_style_sheet_) {
@@ -227,14 +253,19 @@ void Port::setPortProperty(const std::string& name, bool b)
 
 void Port::createToolTip()
 {
-    std::stringstream tooltip;
-    tooltip << "UUID: " << adaptee_->getUUID().c_str();
-    tooltip << ", Type: " << adaptee_->getType()->descriptiveName();
-    tooltip << ", Messages: " << adaptee_->getCount();
-    tooltip << ", Enabled: " << adaptee_->isEnabled();
-    tooltip << ", #: " << adaptee_->sequenceNumber();
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
 
-    Output* o = dynamic_cast<Output*>(adaptee_);
+    std::stringstream tooltip;
+    tooltip << "UUID: " << adaptee->getUUID().c_str();
+    tooltip << ", Type: " << adaptee->getType()->descriptiveName();
+    tooltip << ", Messages: " << adaptee->getCount();
+    tooltip << ", Enabled: " << adaptee->isEnabled();
+    tooltip << ", #: " << adaptee->sequenceNumber();
+
+    Output* o = dynamic_cast<Output*>(adaptee.get());
     if(o) {
         tooltip << ", state: ";
         switch(o->getState()) {
@@ -256,13 +287,18 @@ void Port::createToolTip()
 
 void Port::startDrag()
 {
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
+
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
     bool right = (buttons_down_ & Qt::RightButton) != 0;
 
-    bool create = adaptee_->shouldCreate(left, right);
-    bool move = adaptee_->shouldMove(left, right);
+    bool create = adaptee->shouldCreate(left, right);
+    bool move = adaptee->shouldMove(left, right);
 
-    adaptee_->connectionStart(adaptee_);
+    adaptee->connectionStart(adaptee.get());
 
     if(create || move) {
         QDrag* drag = new QDrag(this);
@@ -270,7 +306,7 @@ void Port::startDrag()
 
         if(move) {
             mimeData->setData(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS), QByteArray());
-            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee_)));
+            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee.get())));
 
             drag->setMimeData(mimeData);
 
@@ -278,14 +314,14 @@ void Port::startDrag()
 
         } else {
             mimeData->setData(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION), QByteArray());
-            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee_)));
+            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee.get())));
 
             drag->setMimeData(mimeData);
 
             drag->exec();
         }
 
-        Q_EMIT adaptee_->connectionDone(adaptee_);
+        adaptee->connectionDone(adaptee.get());
         buttons_down_ = Qt::NoButton;
     }
 }
@@ -308,9 +344,13 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
     buttons_down_ = e->buttons();
 
     if(e->button() == Qt::MiddleButton) {
-        dispatcher_->execute(adaptee_->removeAllConnectionsCmd());
+        ConnectablePtr adaptee = adaptee_.lock();
+        if(!adaptee) {
+            return;
+        }
+        dispatcher_->execute(adaptee->removeAllConnectionsCmd());
     } else if(e->button() == Qt::RightButton) {
-//        dispatcher_->execute(adaptee_->removeAllConnectionsCmd());
+        //        dispatcher_->execute(adaptee->removeAllConnectionsCmd());
     }
 
     e->accept();
@@ -318,22 +358,26 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
 
 void Port::dragEnterEvent(QDragEnterEvent* e)
 {
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
     if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        if(from == adaptee_) {
+        if(from == adaptee.get()) {
             return;
         }
 
-        if(from->canConnectTo(adaptee_, false)) {
-            if(adaptee_->canConnectTo(from, false)) {
+        if(from->canConnectTo(adaptee.get(), false)) {
+            if(adaptee->canConnectTo(from, false)) {
                 e->acceptProposedAction();
-                Q_EMIT(adaptee_->connectionInProgress(adaptee_, from));
+                Q_EMIT(adaptee->connectionInProgress(adaptee.get(), from));
             }
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* original = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
-        if(original->targetsCanBeMovedTo(adaptee_)) {
+        if(original->targetsCanBeMovedTo(adaptee.get())) {
             e->acceptProposedAction();
         }
     }
@@ -341,13 +385,17 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
 void Port::dragMoveEvent(QDragMoveEvent* e)
 {
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
     if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
-        from->connectionMovePreview(adaptee_);
+        from->connectionMovePreview(adaptee.get());
 
         e->acceptProposedAction();
     }
@@ -355,17 +403,21 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
 
 void Port::dropEvent(QDropEvent* e)
 {
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
     if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
-        if(from && from != adaptee_) {
-            dispatcher_->execute(Command::Ptr(new command::AddConnection(adaptee_->getUUID(), from->getUUID())));
+        if(from && from != adaptee.get()) {
+            dispatcher_->execute(Command::Ptr(new command::AddConnection(adaptee->getUUID(), from->getUUID())));
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(from) {
-            Command::Ptr cmd(new command::MoveConnection(from, adaptee_));
+            Command::Ptr cmd(new command::MoveConnection(from, adaptee.get()));
             dispatcher_->execute(cmd);
             e->setDropAction(Qt::MoveAction);
         }
@@ -378,11 +430,15 @@ void Port::enterEvent(QEvent */*e*/)
 }
 
 void Port::leaveEvent(QEvent */*e*/)
-{
+{    
+    ConnectablePtr adaptee = adaptee_.lock();
+    if(!adaptee) {
+        return;
+    }
     //    QObject::disconnect(this, SLOT(updateTooltip()));
 
-    if(adaptee_->isOutput()) {
-        Output* output = dynamic_cast<Output*>(adaptee_);
+    if(adaptee->isOutput()) {
+        Output* output = dynamic_cast<Output*>(adaptee.get());
         if(output) {
             output->forceSendMessage(false);
 

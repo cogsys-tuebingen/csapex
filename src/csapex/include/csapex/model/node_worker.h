@@ -97,8 +97,8 @@ public:
 
     void makeParameterConnectable(param::ParameterPtr);
     void makeParameterNotConnectable(param::ParameterPtr);
-    Input* getParameterInput(const std::string& name) const;
-    Output* getParameterOutput(const std::string& name) const;
+    InputPtr getParameterInput(const std::string& name) const;
+    OutputPtr getParameterOutput(const std::string& name) const;
 
     /* NAMING */ void registerInput(InputPtr in);
     /* NAMING */ void registerOutput(OutputPtr out);
@@ -110,17 +110,17 @@ public:
     void removeSlot(const UUID& uuid);
     void removeTrigger(const UUID& uuid);
 
-    std::vector<Connectable*> getAllConnectors() const;
-    std::vector<Input*> getAllInputs() const;
-    std::vector<Output*> getAllOutputs() const;
+    std::vector<ConnectablePtr> getAllConnectors() const;
+    std::vector<InputPtr> getAllInputs() const;
+    std::vector<OutputPtr> getAllOutputs() const;
 
-    std::vector<Input*> getMessageInputs() const;
-    std::vector<Output*> getMessageOutputs() const;
-    std::vector<Slot*> getSlots() const;
-    std::vector<Trigger*> getTriggers() const;
+    std::vector<InputPtr> getMessageInputs() const;
+    std::vector<OutputPtr> getMessageOutputs() const;
+    std::vector<SlotPtr> getSlots() const;
+    std::vector<TriggerPtr> getTriggers() const;
 
-    std::vector<Input*> getParameterInputs() const;
-    std::vector<Output*> getParameterOutputs() const;
+    std::vector<InputPtr> getParameterInputs() const;
+    std::vector<OutputPtr> getParameterOutputs() const;
 
     bool isWaitingForTrigger() const;
     bool canProcess();

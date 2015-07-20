@@ -45,7 +45,7 @@ void InputTransition::connectionRemoved(Connection *connection)
 
 void InputTransition::reset()
 {
-    for(Input* input : node_->getAllInputs()) {
+    for(auto input : node_->getAllInputs()) {
         input->reset();
     }
     for(ConnectionPtr connection : established_connections_) {
@@ -71,8 +71,8 @@ void InputTransition::connectionAdded(Connection *connection)
     }));
 
     one_input_is_dynamic_ = false;
-    for(Input* i : node_->getAllInputs()) {
-        if(i->isDynamic()) {
+    for(auto input : node_->getAllInputs()) {
+        if(input->isDynamic()) {
             one_input_is_dynamic_ = true;
             break;
         }
@@ -121,7 +121,7 @@ int InputTransition::findHighestDeviantSequenceNumber() const
     int highest_deviant_seq = -1;
 
     bool a_connection_deviates = false;
-    for(Input* input : node_->getAllInputs()) {
+    for(auto input : node_->getAllInputs()) {
         //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
 
         if(input->isConnected()) {
@@ -148,7 +148,7 @@ int InputTransition::findHighestDeviantSequenceNumber() const
 
 void InputTransition::notifyOlderConnections(int seq)
 {
-    for(Input* input : node_->getAllInputs()) {
+    for(auto input : node_->getAllInputs()) {
         if(input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
@@ -220,7 +220,7 @@ void InputTransition::fire()
     ConnectionTypeConstPtr dynamic_message_part;
     ConnectionPtr dynamic_connection;
 
-    for(Input* input : node_->getAllInputs()) {
+    for(auto input : node_->getAllInputs()) {
         if(input->isDynamic() && input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
@@ -230,7 +230,7 @@ void InputTransition::fire()
                              s == Connection::State::UNREAD);
             dynamic_message_part = dynamic_connection->getMessage();
             apex_assert_hard(dynamic_message_part != nullptr);
-            DynamicInput* di = dynamic_cast<DynamicInput*>(input);
+            DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
             dynamic_inputs.push_back(di);
         }
     }
@@ -253,12 +253,12 @@ void InputTransition::fire()
 
     //    std::cerr << "fire " <<  node_->getUUID() << std::endl;
 
-    for(Input* input : node_->getAllInputs()) {
+    for(auto input : node_->getAllInputs()) {
         //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
 
         if(input->isConnected()) {
             if(input->isDynamic()) {
-                DynamicInput* di = dynamic_cast<DynamicInput*>(input);
+                DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
                 di->composeMessage();
 
             } else {

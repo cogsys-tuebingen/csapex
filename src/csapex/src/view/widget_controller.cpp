@@ -72,8 +72,10 @@ WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispat
         enableGridLock(settings_.get<bool>("grid-lock"));
     }
 
-    connect(this, SIGNAL(triggerConnectorCreated(Connectable*)), this, SLOT(connectorCreated(Connectable*)));
-    connect(this, SIGNAL(triggerConnectorRemoved(Connectable*)), this, SLOT(connectorRemoved(Connectable*)));
+    connect(this, SIGNAL(triggerConnectorCreated(ConnectablePtr)), this, SLOT(connectorCreated(ConnectablePtr)));
+    connect(this, SIGNAL(triggerConnectorRemoved(ConnectablePtr)), this, SLOT(connectorRemoved(ConnectablePtr)));
+
+    qRegisterMetaType < ConnectablePtr > ("ConnectablePtr");
 }
 
 WidgetController::~WidgetController()
@@ -231,23 +233,23 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         designer_->addBox(box);
 
         // add existing connectors
-        for(Input* input : node_worker->getMessageInputs()) {
+        for(auto input : node_worker->getMessageInputs()) {
             connectorMessageAdded(input);
         }
-        for(Output* output : node_worker->getMessageOutputs()) {
+        for(auto output : node_worker->getMessageOutputs()) {
             connectorMessageAdded(output);
         }
-        for(Slot* slot : node_worker->getSlots()) {
+        for(auto slot : node_worker->getSlots()) {
             connectorSignalAdded(slot);
         }
-        for(Trigger* trigger : node_worker->getTriggers()) {
+        for(auto trigger : node_worker->getTriggers()) {
             connectorSignalAdded(trigger);
         }
 
         // subscribe to coming connectors
-        auto c1 = node_worker->connectorCreated.connect([this](ConnectablePtr c) { triggerConnectorCreated(c.get()); });
+        auto c1 = node_worker->connectorCreated.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
         connections_.push_back(c1);
-        auto c2 = node_worker->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c.get()); });
+        auto c2 = node_worker->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
         connections_.push_back(c2);
 
         Q_EMIT boxAdded(box);
@@ -267,27 +269,29 @@ void WidgetController::nodeRemoved(NodeWorkerPtr node_worker)
     }
 }
 
-void WidgetController::connectorCreated(Connectable* connector)
+void WidgetController::connectorCreated(ConnectablePtr connector)
 {
     // TODO: dirty...
-    if(dynamic_cast<Slot*> (connector) || dynamic_cast<Trigger*>(connector)) {
+    if(dynamic_cast<Slot*> (connector.get()) || dynamic_cast<Trigger*>(connector.get())) {
         connectorSignalAdded(connector);
     } else {
         connectorMessageAdded(connector);
     }
 }
 
-void WidgetController::connectorRemoved(Connectable *connector)
+void WidgetController::connectorRemoved(ConnectablePtr connector)
 {
-    // TODO: dirty...
-    if(dynamic_cast<Slot*> (connector) || dynamic_cast<Trigger*>(connector)) {
-        connectorSignalRemoved(connector);
-    } else {
-        connectorMessageRemoved(connector);
+    if(designer_) {
+        auto it = pimpl->port_map_.find(connector->getUUID());
+        if(it != pimpl->port_map_.end()) {
+            Port* port = it->second;
+            port->deleteLater();
+            pimpl->port_map_.erase(it);
+        }
     }
 }
 
-void WidgetController::connectorMessageAdded(Connectable* connector)
+void WidgetController::connectorMessageAdded(ConnectablePtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
     NodeBox* box = getBox(parent_uuid);
@@ -296,31 +300,16 @@ void WidgetController::connectorMessageAdded(Connectable* connector)
     createPort(connector, box, layout);
 }
 
-void WidgetController::connectorMessageRemoved(Connectable *connector)
-{
-    if(designer_) {
-        auto it = pimpl->port_map_.find(connector->getUUID());
-        if(it != pimpl->port_map_.end()) {
-            pimpl->port_map_.erase(it);
-        }
-    }
-}
-
-void WidgetController::connectorSignalAdded(Connectable *connector)
+void WidgetController::connectorSignalAdded(ConnectablePtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
     NodeBox* box = getBox(parent_uuid);
-    QBoxLayout* layout = dynamic_cast<Trigger*>(connector) ? box->getTriggerLayout() : box->getSlotLayout();
+    QBoxLayout* layout = dynamic_cast<Trigger*>(connector.get()) ? box->getTriggerLayout() : box->getSlotLayout();
 
     createPort(connector, box, layout);
 }
 
-void WidgetController::connectorSignalRemoved(Connectable *connector)
-{
-    connectorMessageRemoved(connector);
-}
-
-Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLayout* layout)
+Port* WidgetController::createPort(ConnectablePtr connector, NodeBox* box, QBoxLayout* layout)
 {
     apex_assert_hard(QApplication::instance()->thread() == QThread::currentThread());
 
@@ -335,8 +324,6 @@ Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLay
             QObject::connect(box, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
         }
 
-        QObject::connect(port, SIGNAL(destroyed(QObject*)), this, SLOT(portDestroyed(QObject*)));
-
         insertPort(layout, port);
 
         return port;
@@ -345,24 +332,15 @@ Port* WidgetController::createPort(Connectable* connector, NodeBox* box, QBoxLay
     return nullptr;
 }
 
-void WidgetController::portDestroyed(QObject *o)
-{
-    Port* p = dynamic_cast<Port*>(o);
-    if(p) {
-        for(auto it = pimpl->port_map_.begin(); it != pimpl->port_map_.end(); ) {
-            if(it->second == p) {
-                it = pimpl->port_map_.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-}
-
 
 void WidgetController::insertPort(QLayout* layout, Port* port)
 {
-    pimpl->port_map_[port->getAdaptee()->getUUID()] = port;
+    ConnectablePtr adaptee = port->getAdaptee().lock();
+    if(!adaptee) {
+        return;
+    }
+
+    pimpl->port_map_[adaptee->getUUID()] = port;
 
     layout->addWidget(port);
 }

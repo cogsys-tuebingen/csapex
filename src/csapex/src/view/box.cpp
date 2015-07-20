@@ -148,11 +148,11 @@ void NodeBox::construct()
     worker->errorHappened.connect([this](bool){ updateVisualsRequest(); });
 
 
-    for(Input* input : worker->getMessageInputs()) {
-        registerInputEvent(input);
+    for(auto input : worker->getMessageInputs()) {
+        registerInputEvent(input.get());
     }
-    for(Output* output : worker->getMessageOutputs()) {
-        registerOutputEvent(output);
+    for(auto output : worker->getMessageOutputs()) {
+        registerOutputEvent(output.get());
     }
 
     setupUi();

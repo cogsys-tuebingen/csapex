@@ -83,25 +83,25 @@ void GraphIO::saveConnections(YAML::Node &yaml)
 {
     for(NodeWorker* node : graph_->getAllNodeWorkers()) {
         if(!node->getAllOutputs().empty()) {
-            for(Output* o : node->getAllOutputs()) {
-                if(o->countConnections() == 0) {
+            for(auto output : node->getAllOutputs()) {
+                if(output->countConnections() == 0) {
                     continue;
                 }
                 YAML::Node connection;
-                connection["uuid"] = o->getUUID();
-                for(ConnectionPtr c : o->getConnections()) {
+                connection["uuid"] = output->getUUID();
+                for(ConnectionPtr c : output->getConnections()) {
                     connection["targets"].push_back(c->to()->getUUID());
                 }
 
                 yaml["connections"].push_back(connection);
             }
-            for(Trigger* o : node->getTriggers()) {
-                if(o->noTargets() == 0) {
+            for(auto trigger : node->getTriggers()) {
+                if(trigger->noTargets() == 0) {
                     continue;
                 }
                 YAML::Node connection;
-                connection["uuid"] = o->getUUID();
-                for(Slot* i : o->getTargets()) {
+                connection["uuid"] = trigger->getUUID();
+                for(Slot* i : trigger->getTargets()) {
                     connection["targets"].push_back(i->getUUID());
                 }
 

@@ -587,8 +587,8 @@ void NodeWorker::startProcessingMessages()
         bool has_multipart = false;
         bool multipart_are_done = true;
 
-        for(Input* in : getAllInputs()) {
-            for(auto& c : in->getConnections()) {
+        for(auto input : getAllInputs()) {
+            for(auto& c : input->getConnections()) {
                 int f = c->getMessage()->flags.data;
                 if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
                     has_multipart = true;
@@ -600,9 +600,9 @@ void NodeWorker::startProcessingMessages()
         }
 
         if(has_multipart) {
-            for(Output* out : getAllOutputs()) {
+            for(auto output : getAllOutputs()) {
                 bool is_last = multipart_are_done;
-                out->setMultipart(true, is_last);
+                output->setMultipart(true, is_last);
             }
         }
     }
@@ -808,23 +808,23 @@ Trigger* NodeWorker::addTrigger(const std::string& label)
     return trigger.get();
 }
 
-Input* NodeWorker::getParameterInput(const std::string &name) const
+InputPtr NodeWorker::getParameterInput(const std::string &name) const
 {
     std::map<std::string, InputPtr>::const_iterator it = param_2_input_.find(name);
     if(it == param_2_input_.end()) {
         return nullptr;
     } else {
-        return it->second.get();
+        return it->second;
     }
 }
 
-Output* NodeWorker::getParameterOutput(const std::string &name) const
+OutputPtr NodeWorker::getParameterOutput(const std::string &name) const
 {
     std::map<std::string, OutputPtr>::const_iterator it = param_2_output_.find(name);
     if(it == param_2_output_.end()) {
         return nullptr;
     } else {
-        return it->second.get();
+        return it->second;
     }
 }
 
@@ -1117,120 +1117,90 @@ void NodeWorker::removeTrigger(const UUID &uuid)
     removeTrigger(getTrigger(uuid));
 }
 
-std::vector<Connectable*> NodeWorker::getAllConnectors() const
+std::vector<ConnectablePtr> NodeWorker::getAllConnectors() const
 {
     std::size_t n = inputs_.size() + parameter_inputs_.size();
     n += outputs_.size() + parameter_outputs_.size();
     n += triggers_.size() + slots_.size();
-    std::vector<Connectable*> result(n, nullptr);
+    std::vector<ConnectablePtr> result(n, nullptr);
     std::size_t pos = 0;
     for(auto i : inputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     for(auto i : parameter_inputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     for(auto i : outputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     for(auto i : parameter_outputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     for(auto i : triggers_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     for(auto i : slots_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     return result;
 }
 
-std::vector<Input*> NodeWorker::getAllInputs() const
+std::vector<InputPtr> NodeWorker::getAllInputs() const
 {
     std::size_t n = inputs_.size() + parameter_inputs_.size();
-    std::vector<Input*> result(n, nullptr);
+    std::vector<InputPtr> result(n, nullptr);
     std::size_t pos = 0;
     for(auto i : inputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     for(auto i : parameter_inputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     return result;
 }
 
-std::vector<Output*> NodeWorker::getAllOutputs() const
+std::vector<OutputPtr> NodeWorker::getAllOutputs() const
 {
     std::size_t n = outputs_.size() + parameter_outputs_.size();
-    std::vector<Output*> result(n, nullptr);
+    std::vector<OutputPtr> result(n, nullptr);
     std::size_t pos = 0;
     for(auto i : outputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     for(auto i : parameter_outputs_) {
-        result[pos++] = i.get();
+        result[pos++] = i;
     }
     return result;
 }
 
-std::vector<Input*> NodeWorker::getMessageInputs() const
+std::vector<InputPtr> NodeWorker::getMessageInputs() const
 {
-    std::vector<Input*> result(inputs_.size(), nullptr);
-    std::size_t pos = 0;
-    for(auto i : inputs_) {
-        result[pos++] = i.get();
-    }
-    return result;
+    return inputs_;
 }
 
-std::vector<Output*> NodeWorker::getMessageOutputs() const
+std::vector<OutputPtr> NodeWorker::getMessageOutputs() const
 {
-    std::vector<Output*> result(outputs_.size(), nullptr);
-    std::size_t pos = 0;
-    for(auto i : outputs_) {
-        result[pos++] = i.get();
-    }
-    return result;
+    return outputs_;
 }
 
-std::vector<Slot*> NodeWorker::getSlots() const
+std::vector<SlotPtr> NodeWorker::getSlots() const
 {
-    std::vector<Slot*> result(slots_.size(), nullptr);
-    std::size_t pos = 0;
-    for(auto i : slots_) {
-        result[pos++] = i.get();
-    }
-    return result;
+    return slots_;
 }
 
-std::vector<Trigger*> NodeWorker::getTriggers() const
+std::vector<TriggerPtr> NodeWorker::getTriggers() const
 {
-    std::vector<Trigger*> result(triggers_.size(), nullptr);
-    std::size_t pos = 0;
-    for(auto i : triggers_) {
-        result[pos++] = i.get();
-    }
-    return result;
+    return triggers_;
 }
 
-std::vector<Input*> NodeWorker::getParameterInputs() const
+std::vector<InputPtr> NodeWorker::getParameterInputs() const
 {
-    std::vector<Input*> result(parameter_inputs_.size(), nullptr);
-    std::size_t pos = 0;
-    for(auto i : parameter_inputs_) {
-        result[pos++] = i.get();
-    }
-    return result;
+    return parameter_inputs_;
 }
 
-std::vector<Output*> NodeWorker::getParameterOutputs() const
+std::vector<OutputPtr> NodeWorker::getParameterOutputs() const
 {
-    std::vector<Output*> result(parameter_outputs_.size(), nullptr);
-    std::size_t pos = 0;
-    for(auto i : parameter_outputs_) {
-        result[pos++] = i.get();
-    }
-    return result;
+    return parameter_outputs_;
 }
 
 void NodeWorker::notifyMessagesProcessed()

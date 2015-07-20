@@ -19,7 +19,7 @@ OutputTransition::OutputTransition(NodeWorker *node)
 void OutputTransition::reset()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(Output* output : node_->getAllOutputs()) {
+    for(auto output : node_->getAllOutputs()) {
         output->reset();
     }
     for(ConnectionPtr connection : established_connections_) {
@@ -78,7 +78,7 @@ bool OutputTransition::canStartSendingMessages() const
 //    if(!outputs_done_) {
 //        return false;
 //    }
-    for(Output* output : node_->getAllOutputs()) {
+    for(auto output : node_->getAllOutputs()) {
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() != Output::State::IDLE) {
                 return false;
@@ -90,7 +90,7 @@ bool OutputTransition::canStartSendingMessages() const
 
 bool OutputTransition::isSink() const
 {
-    for(Output* output : node_->getAllOutputs()) {
+    for(auto output : node_->getAllOutputs()) {
         if(output->isConnected()) {
             return false;
         }
@@ -107,7 +107,7 @@ void OutputTransition::sendMessages()
     apex_assert_hard(!isSink());
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
-    for(Output* out : node_->getAllOutputs()) {
+    for(auto out : node_->getAllOutputs()) {
         if(out->isConnected()) {
             out->commitMessages();
 
@@ -152,7 +152,7 @@ void OutputTransition::publishNextMessage()
 
 //    apex_assert_hard(node_->getState() == NodeWorker::State::WAITING_FOR_OUTPUTS);
 
-    for(Output* out : node_->getAllOutputs()) {
+    for(auto out : node_->getAllOutputs()) {
         out->nextMessage();
     }
     if(areOutputsIdle()) {
@@ -183,7 +183,7 @@ void OutputTransition::publishNextMessage()
 bool OutputTransition::areOutputsIdle() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(Output* out : node_->getAllOutputs()) {
+    for(auto out : node_->getAllOutputs()) {
         if(out->getState() != Output::State::IDLE) {
             return false;
         }
@@ -219,7 +219,7 @@ void OutputTransition::fillConnections()
 void OutputTransition::clearOutputs()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(Output* output : node_->getAllOutputs()) {
+    for(auto output : node_->getAllOutputs()) {
         output->clear();
     }
 }
@@ -227,7 +227,7 @@ void OutputTransition::clearOutputs()
 void OutputTransition::abortSendingMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(Output* output : node_->getAllOutputs()) {
+    for(auto output : node_->getAllOutputs()) {
         apex_assert_hard(output->getState() == Output::State::RECEIVING);
         output->setState(Output::State::IDLE);
     }

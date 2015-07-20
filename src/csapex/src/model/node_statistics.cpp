@@ -57,15 +57,15 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
 
-        for(Input* connector : node_worker_->getAllInputs()) {
-            QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
+        for(auto input : node_worker_->getAllInputs()) {
+            QTreeWidgetItem* connector_widget = createDebugInformationConnector(input.get());
 
-            QTreeWidgetItem* input = new QTreeWidgetItem;
-            input->setText(0, "Input");
+            QTreeWidgetItem* input_widget = new QTreeWidgetItem;
+            input_widget->setText(0, "Input");
 
             QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-            if(connector->isConnected()) {
-                Connectable* target = connector->getSource();
+            if(input->isConnected()) {
+                Connectable* target = input->getSource();
                 target_widget->setText(0, target->getUUID().c_str());
                 //target_widget->setIcon(1, target->getNode()->getIcon());
                 //target_widget->setText(1, target->getNode()->getType().c_str());
@@ -75,9 +75,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
                 target_widget->setIcon(1, QIcon(":/disconnected.png"));
             }
 
-            input->addChild(target_widget);
+            input_widget->addChild(target_widget);
 
-            connector_widget->addChild(input);
+            connector_widget->addChild(input_widget);
 
             connectors->addChild(connector_widget);
         }
@@ -87,12 +87,12 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(Output* connector : node_worker_->getAllOutputs()) {
-            QTreeWidgetItem* connector_widget = createDebugInformationConnector(connector);
+        for(auto output : node_worker_->getAllOutputs()) {
+            QTreeWidgetItem* output_widget = createDebugInformationConnector(output.get());
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             targets->setText(0, "Target");
-            for(ConnectionPtr connection : connector->getConnections()) {
+            for(ConnectionPtr connection : output->getConnections()) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
                 Connectable* input = connection->to();
                 target_widget->setText(0, input->getUUID().c_str());
@@ -101,9 +101,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
                 target_widget->setIcon(1, QIcon(":/connector.png"));
                 targets->addChild(target_widget);
             }
-            connector_widget->addChild(targets);
+            output_widget->addChild(targets);
 
-            connectors->addChild(connector_widget);
+            connectors->addChild(output_widget);
         }
         tl->addChild(connectors);
     }

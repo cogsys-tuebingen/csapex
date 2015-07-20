@@ -17,7 +17,7 @@ class Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(CommandDispatcher* dispatcher, WidgetController *widget_controller, Connectable* adaptee, QWidget *parent = nullptr);
+    Port(CommandDispatcher* dispatcher, WidgetController *widget_controller, ConnectablePtr adaptee, QWidget *parent = nullptr);
     virtual ~Port();
 
     bool event(QEvent *e);
@@ -50,7 +50,7 @@ public:
     virtual bool isOutput() const;
     virtual bool isInput() const;
 
-    Connectable* getAdaptee() const;
+    ConnectableWeakPtr getAdaptee() const;
 
     void refreshStylesheet();
 
@@ -72,7 +72,7 @@ protected:
 protected:
     CommandDispatcher* dispatcher_;
     WidgetController *widget_controller_;
-    Connectable * adaptee_;
+    ConnectableWeakPtr adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;
     bool flipped_;

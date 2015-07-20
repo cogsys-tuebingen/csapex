@@ -46,19 +46,43 @@ Trigger* NodeModifier::addTrigger(const std::string& label)
 
 std::vector<Input*> NodeModifier::getMessageInputs() const
 {
-    return node_worker_->getMessageInputs();
+    auto vec = node_worker_->getMessageInputs();
+    std::vector<Input*> result(vec.size());
+    std::size_t i = 0;
+    for(auto entry : vec) {
+        result[i++] = entry.get();
+    }
+    return result;
 }
 std::vector<Output*> NodeModifier::getMessageOutputs() const
 {
-    return node_worker_->getMessageOutputs();
+    auto vec = node_worker_->getMessageOutputs();
+    std::vector<Output*> result(vec.size());
+    std::size_t i = 0;
+    for(auto entry : vec) {
+        result[i++] = entry.get();
+    }
+    return result;
 }
 std::vector<Slot*> NodeModifier::getSlots() const
 {
-    return node_worker_->getSlots();
+    auto vec = node_worker_->getSlots();
+    std::vector<Slot*> result(vec.size());
+    std::size_t i = 0;
+    for(auto entry : vec) {
+        result[i++] = entry.get();
+    }
+    return result;
 }
 std::vector<Trigger*> NodeModifier::getTriggers() const
 {
-    return node_worker_->getTriggers();
+    auto vec = node_worker_->getTriggers();
+    std::vector<Trigger*> result(vec.size());
+    std::size_t i = 0;
+    for(auto entry : vec) {
+        result[i++] = entry.get();
+    }
+    return result;
 }
 
 

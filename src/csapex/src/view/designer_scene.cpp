@@ -345,30 +345,30 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw port information (in)
-        for(Input* input : node_worker->getMessageInputs()) {
-            Port* p = widget_ctrl_->getPort(input);
+        for(auto input : node_worker->getMessageInputs()) {
+            Port* p = widget_ctrl_->getPort(input.get());
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw port information (out)
-        for(Output* output : node_worker->getMessageOutputs()) {
-            Port* p = widget_ctrl_->getPort(output);
+        for(auto output : node_worker->getMessageOutputs()) {
+            Port* p = widget_ctrl_->getPort(output.get());
             if(p) {
                 drawPort(painter, box, p);
             }
         }
 
         // draw slots
-        for(Slot* slot : node_worker->getSlots()) {
-            Port* p = widget_ctrl_->getPort(slot);
+        for(auto slot : node_worker->getSlots()) {
+            Port* p = widget_ctrl_->getPort(slot.get());
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw triggers
-        for(Trigger* trigger : node_worker->getTriggers()) {
-            Port* p = widget_ctrl_->getPort(trigger);
+        for(auto trigger : node_worker->getTriggers()) {
+            Port* p = widget_ctrl_->getPort(trigger.get());
             if(p) {
                 drawPort(painter, box, p);
             }
@@ -965,8 +965,12 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
     // reset brush if it is set
     painter->setBrush(QBrush());
 
-    Connectable* c = p->getAdaptee();
-    bool is_message = (dynamic_cast<Slot*>(c) == nullptr && dynamic_cast<Trigger*>(c) == nullptr);
+    ConnectablePtr c = p->getAdaptee().lock();
+    if(!c) {
+        return;
+    }
+
+    bool is_message = (dynamic_cast<Slot*>(c.get()) == nullptr && dynamic_cast<Trigger*>(c.get()) == nullptr);
 
     if(!p->isMinimizedSize()) {
         int font_size = 10;

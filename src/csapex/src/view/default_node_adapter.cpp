@@ -875,17 +875,17 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         node->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
-        Input* param_in = node->getParameterInput(current_name_);
+        InputPtr param_in = node->getParameterInput(current_name_);
         if(param_in) {
             Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node->getUUID()), current_layout_);
 
-            auto pos = parameter_connections_.find(param_in);
+            auto pos = parameter_connections_.find(param_in.get());
             if(pos != parameter_connections_.end()) {
                 pos->second.disconnect();
             }
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_in] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
+            parameter_connections_[param_in.get()] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
         }
 
         // generate UI element
@@ -897,17 +897,17 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        Output* param_out = node->getParameterOutput(current_name_);
+        OutputPtr param_out = node->getParameterOutput(current_name_);
         if(param_out) {
             Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node->getUUID()), current_layout_);
 
-            auto pos = parameter_connections_.find(param_out);
+            auto pos = parameter_connections_.find(param_out.get());
             if(pos != parameter_connections_.end()) {
                 pos->second.disconnect();
             }
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_out] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
+            parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
 
             qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&param::Parameter::triggerChange, p.get()));
             callbacks.push_back(call_trigger);
