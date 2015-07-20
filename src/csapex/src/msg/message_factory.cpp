@@ -41,7 +41,6 @@ void MessageFactory::writeMessage(const std::string &path, const ConnectionType&
     std::ofstream out(path.c_str());
 
     YAML::Emitter yaml;
-    yaml.SetSeqFormat(YAML::Flow);
     yaml << MessageSerializer::instance().serializeMessage(msg);
     out << yaml.c_str();
 }

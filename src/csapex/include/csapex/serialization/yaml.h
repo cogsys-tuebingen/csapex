@@ -14,6 +14,11 @@ struct convert<csapex::ConnectionType> {
     static Node encode(const csapex::ConnectionType& rhs);
     static bool decode(const Node& node, csapex::ConnectionType& rhs);
 };
+template<>
+struct convert<csapex::ConnectionTypeConstPtr> {
+    static Node encode(const csapex::ConnectionTypeConstPtr& rhs);
+    static bool decode(const Node& node, csapex::ConnectionTypeConstPtr& rhs);
+};
 }
 
 #endif // YAML_HPP
