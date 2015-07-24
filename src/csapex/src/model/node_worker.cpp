@@ -661,9 +661,10 @@ void NodeWorker::startProcessingMessages()
 
         } else {
             node_->process(*node_, [this](std::function<void()> f) {
-                executionRequested(f);
-
-                finishProcessingMessages(true);
+                executionRequested([this, f]() {
+                    f();
+                    finishProcessingMessages(true);
+                });
             });
         }
 

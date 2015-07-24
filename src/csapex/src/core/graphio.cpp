@@ -291,8 +291,8 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
     NodeState::Ptr s = node_worker->getNodeState();
     s->readYaml(doc);
 
-    int x = doc["pos"][0].as<int>();
-    int y = doc["pos"][1].as<int>();
+    int x = doc["pos"][0].as<double>();
+    int y = doc["pos"][1].as<double>();
 
     if(x != 0 || y != 0) {
         s->setPos(Point(x,y));
