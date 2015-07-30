@@ -558,6 +558,10 @@ void NodeWorker::updateParameterValue(Connectable *s)
         p->set<double>(msg::getValue<double>(source));
     } else if(msg::isValue<std::string>(source)) {
         p->set<std::string>(msg::getValue<std::string>(source));
+    } else if(msg::isValue<std::pair<int,int>>(source)) {
+        p->set<std::pair<int, int>>(msg::getValue<std::pair<int,int>>(source));
+    } else if(msg::isValue<std::pair<double,double>>(source)) {
+        p->set<std::pair<double, double>>(msg::getValue<std::pair<double,double>>(source));
     } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::NoMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
@@ -1306,6 +1310,10 @@ void NodeWorker::publishParameter(param::Parameter* p)
                 msg::publish(out.get(), p->as<double>());
             else if(p->is<std::string>())
                 msg::publish(out.get(), p->as<std::string>());
+            else if(p->is<std::pair<int, int>>())
+                msg::publish(out.get(), p->as<std::pair<int, int>>());
+            else if(p->is<std::pair<double, double>>())
+                msg::publish(out.get(), p->as<std::pair<double, double>>());
         }
     }
 }
@@ -1321,23 +1329,29 @@ void NodeWorker::sendMessages()
     apex_assert_hard(getState() == State::PROCESSING);
     //    setState(State::WAITING_FOR_OUTPUTS);
 
-    if(isSink()) {
+    if(transition_out_->isSink()) {
         notifyMessagesProcessed();
 
         return;
     }
 
     int seq = 0;
-    if(inputs_.empty()) {
-        seq = outputs_.front()->sequenceNumber();
+
+    bool source = isSource();//inputs_.empty();
+
+    if(source) {
         for(auto o : outputs_) {
             seq = std::max(seq, o->sequenceNumber());
         }
-        ++seq;
+        for(auto o : parameter_outputs_) {
+            seq = std::max(seq, o->sequenceNumber());
+        }
 
     } else {
-        seq = inputs_.front()->sequenceNumber();
         for(auto i : inputs_) {
+            seq = std::max(seq, i->sequenceNumber());
+        }
+        for(auto i : parameter_inputs_) {
             seq = std::max(seq, i->sequenceNumber());
         }
     }
@@ -1349,6 +1363,11 @@ void NodeWorker::sendMessages()
 
     transition_out_->sendMessages();
 
+    if(source) {
+        for(auto o : getAllOutputs()) {
+            o->setSequenceNumber(seq+1);
+        }
+    }
 
     //    node_->aerr << "SEND" << std::endl;
 }
@@ -1507,6 +1526,9 @@ void NodeWorker::tick()
 
                     bool has_msg = false;
                     for(OutputPtr out : outputs_) {
+                        has_msg |= (msg::hasMessage(out.get()) && msg::isConnected(out.get()));
+                    }
+                    for(OutputPtr out : parameter_outputs_) {
                         has_msg |= (msg::hasMessage(out.get()) && msg::isConnected(out.get()));
                     }
 

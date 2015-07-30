@@ -85,7 +85,8 @@ void InputTransition::fireIfPossible()
         return;
     }
 
-    if(node_->isSource()) {
+    // TODO: replace tick with process where possible
+    if(node_->isSource() && !node_->isSink()) {
         //        apex_assert_hard(established_connections_.empty());
         //fire(); -> instead of tick!!!!
     } else {
