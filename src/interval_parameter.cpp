@@ -36,6 +36,7 @@ const std::type_info& IntervalParameter::type() const
 
 std::string IntervalParameter::toStringImpl() const
 {
+    Lock l = lock();
     std::stringstream v;
     v << "[interval: ";
 
@@ -54,6 +55,7 @@ std::string IntervalParameter::toStringImpl() const
 
 boost::any IntervalParameter::get_unsafe() const
 {
+    Lock l = lock();
     if(is<std::pair<int, int> >()) {
         return std::make_pair(boost::any_cast<int>(values_.first), boost::any_cast<int>(values_.second));
     } else {
@@ -64,6 +66,7 @@ boost::any IntervalParameter::get_unsafe() const
 
 void IntervalParameter::set_unsafe(const boost::any &v)
 {
+    Lock l = lock();
     if(is<std::pair<int, int> >()) {
         values_ = boost::any_cast<std::pair<int, int> > (v);
     } else {
@@ -74,6 +77,7 @@ void IntervalParameter::set_unsafe(const boost::any &v)
 
 void IntervalParameter::doSetValueFrom(const Parameter &other)
 {
+    Lock l = lock();
     const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
     if(interval) {
         bool change = false;
@@ -95,6 +99,7 @@ void IntervalParameter::doSetValueFrom(const Parameter &other)
 
 void IntervalParameter::doClone(const Parameter &other)
 {
+    Lock l = lock();
     const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
     if(interval) {
         values_ = interval->values_;
@@ -109,13 +114,20 @@ void IntervalParameter::doClone(const Parameter &other)
 
 void IntervalParameter::doSerialize(YAML::Node& n) const
 {
+    Lock l = lock();
     if(values_.first.type() == typeid(int)) {
         n["int"][0] = boost::any_cast<int> (values_.first);
         n["int"][1] = boost::any_cast<int> (values_.second);
+        n["min"] = boost::any_cast<int> (min_);
+        n["max"] = boost::any_cast<int> (max_);
+        n["step"] = boost::any_cast<int> (step_);
 
     } else if(values_.first.type() == typeid(double)) {
         n["double"][0] = boost::any_cast<double> (values_.first);
         n["double"][1] = boost::any_cast<double> (values_.second);
+        n["min"] = boost::any_cast<double> (min_);
+        n["max"] = boost::any_cast<double> (max_);
+        n["step"] = boost::any_cast<double> (step_);
     }
 }
 
@@ -140,9 +152,21 @@ void IntervalParameter::doDeserialize(const YAML::Node& n)
 
     if(n["int"].IsDefined()) {
         values_ = __read<int>(n["int"]);
+        if(n["min"].IsDefined())
+            min_ = n["min"].as<int>();
+        if(n["max"].IsDefined())
+            max_ = n["max"].as<int>();
+        if(n["step"].IsDefined())
+            step_ = n["step"].as<int>();
 
     } else if(n["double"].IsDefined()) {
         values_ = __read<double>(n["double"]);
+        if(n["min"].IsDefined())
+            min_ = n["min"].as<double>();
+        if(n["max"].IsDefined())
+            max_ = n["max"].as<double>();
+        if(n["step"].IsDefined())
+            step_ = n["step"].as<double>();
 
     } else {
         throw std::runtime_error("cannot read interval");

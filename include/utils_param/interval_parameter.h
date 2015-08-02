@@ -42,11 +42,13 @@ public:
 
     template <typename T>
     void setLower(T v) {
+        Lock l = lock();
         values_.first = v;
         parameter_changed(this);
     }
     template <typename T>
     void setUpper(T v) {
+        Lock l = lock();
         values_.second = v;
         parameter_changed(this);
     }
@@ -77,6 +79,7 @@ public:
 
     template <typename T>
     void setInterval(T min, T max) {
+        Lock l = lock();
         if(min != read<T>(min_) || max != read<T>(max_)) {
             min_ = min;
             max_ = max;
@@ -87,6 +90,7 @@ public:
     template <typename T>
     void setMin(T min) {
         if(min != read<T>(min_)) {
+            Lock l = lock();
             min_ = min; scope_changed(this);
         }
     }
@@ -94,6 +98,7 @@ public:
     template <typename T>
     void setMax(T max) {
         if(read<T>(max_) != max) {
+            Lock l = lock();
             max_ = max;
             scope_changed(this);
         }
@@ -109,6 +114,7 @@ private:
     {
         BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
         try {
+            Lock l = lock();
             return boost::any_cast<T> (var);
 
         } catch(const boost::bad_any_cast& e) {
