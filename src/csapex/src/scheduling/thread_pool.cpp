@@ -254,8 +254,11 @@ void ThreadPool::loadSettings(YAML::Node& node)
             }
         }
 
+        std::vector<TaskGenerator*> tasks;
         for(auto it = group_assignment_.begin(); it != group_assignment_.end(); ++it) {
-            TaskGenerator* task = it->first;
+            tasks.push_back(it->first);
+        }
+        for(TaskGenerator* task : tasks) {
             if(assignment_map.find(task->getUUID()) != assignment_map.end()) {
                 int id = assignment_map[task->getUUID()];
                 addToGroup(task, id);
