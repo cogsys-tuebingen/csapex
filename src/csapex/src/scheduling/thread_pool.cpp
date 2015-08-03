@@ -14,10 +14,10 @@
 
 using namespace csapex;
 
-ThreadPool::ThreadPool(bool enable_threading, bool grouping)
+ThreadPool::ThreadPool(bool enable_threading, bool grouping, bool paused)
     : enable_threading_(enable_threading), grouping_(grouping)
 {
-    default_group_ = std::make_shared<ThreadGroup>(ThreadGroup::DEFAULT_GROUP_ID, "default");
+    default_group_ = std::make_shared<ThreadGroup>(ThreadGroup::DEFAULT_GROUP_ID, "default", paused);
 }
 
 void ThreadPool::stop()
@@ -124,7 +124,7 @@ bool ThreadPool::isInGroup(TaskGenerator *task, int id) const
 void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
 {
     if(!isInPrivateThread(task)) {
-        auto group = std::make_shared<ThreadGroup>(ThreadGroup::PRIVATE_THREAD, task->getUUID().getShortName());
+        auto group = std::make_shared<ThreadGroup>(ThreadGroup::PRIVATE_THREAD, task->getUUID().getShortName(), isPaused());
         groups_.push_back(group);
 
         assignGeneratorToGroup(task, group.get());
@@ -164,7 +164,7 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
         }
     }
 
-    ThreadGroupPtr group = std::make_shared<ThreadGroup>(name);
+    ThreadGroupPtr group = std::make_shared<ThreadGroup>(name, isPaused());
     groups_.push_back(group);
 
     assignGeneratorToGroup(task, group.get());
@@ -234,7 +234,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
 
                 if(group_id >= ThreadGroup::MINIMUM_THREAD_ID) {
                     std::string group_name = group["name"].as<std::string>();
-                    groups_.emplace_back(std::make_shared<ThreadGroup>(group_id, group_name));
+                    groups_.emplace_back(std::make_shared<ThreadGroup>(group_id, group_name, isPaused()));
                 }
             }
         }

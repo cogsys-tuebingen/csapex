@@ -28,8 +28,8 @@ public:
     static int nextId();
 
 public:
-    ThreadGroup(int id, std::string name);
-    ThreadGroup(std::string name);
+    ThreadGroup(int id, std::string name, bool paused);
+    ThreadGroup(std::string name, bool paused);
     ~ThreadGroup();
 
     int id() const;

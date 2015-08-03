@@ -183,10 +183,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
 
     GraphPtr graph = std::make_shared<Graph>();
-    ThreadPool thread_pool(!threadless, thread_grouping);
+    ThreadPool thread_pool(!threadless, thread_grouping, paused);
     GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(thread_pool, graph.get());
-
-    thread_pool.setPause(paused);
 
     graph_worker->generatorAdded.connect([&thread_pool](TaskGeneratorPtr tg) {
         thread_pool.add(tg.get());
@@ -212,6 +210,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
+
 
     int res;
     if(!headless) {

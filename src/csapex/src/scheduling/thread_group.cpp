@@ -13,14 +13,14 @@ using namespace csapex;
 
 int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 
-ThreadGroup::ThreadGroup(int id, std::string name)
-    : id_(id), name_(name), running_(false), pause_(false)
+ThreadGroup::ThreadGroup(int id, std::string name, bool paused)
+    : id_(id), name_(name), running_(false), pause_(paused)
 {
     next_id_ = std::max(next_id_, id + 1);
     startThread();
 }
-ThreadGroup::ThreadGroup(std::string name)
-    : id_(next_id_++), name_(name), running_(false), pause_(false)
+ThreadGroup::ThreadGroup(std::string name, bool paused)
+    : id_(next_id_++), name_(name), running_(false), pause_(paused)
 {
     startThread();
 }

@@ -53,7 +53,7 @@ Timer::Interlude::Interlude(Timer *parent, const std::string &name)
 {
     // start new interval in timer
     if(parent_->active.back()->sub.find(name) == parent_->active.back()->sub.end()) {
-        interval_.reset(new Interval(name));
+        interval_ = std::make_shared<Interval>(name);
         parent_->active.back()->sub[name] = interval_;
 
     } else {
