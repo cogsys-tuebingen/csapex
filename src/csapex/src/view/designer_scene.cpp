@@ -536,11 +536,7 @@ void DesignerScene::connectionDeleted(Connection*)
 
 void DesignerScene::boxMoved(NodeBox *box)
 {
-    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
-    proxy->setPos(box->pos());
     invalidateSchema();
-
-    QObject::connect(proxy, SIGNAL(geometryChanged()), this, SLOT(invalidateSchema()));
 }
 
 

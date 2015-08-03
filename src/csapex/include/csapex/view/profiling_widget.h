@@ -46,7 +46,6 @@ private:
 
     QVBoxLayout* layout_;
     QSpacerItem* space_for_painting_;
-    float w_;
     float bar_height_;
     float content_height_ ;
 

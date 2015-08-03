@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <fstream>
+#include <QSizeGrip>
 
 using namespace csapex;
 
@@ -26,7 +27,7 @@ ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *
       timer_history_pos_(0),
       count_(0)
 {
-    w_ = 300;
+    int min_w = 300;
     bar_height_ = 80;
 
     left_space = 50;
@@ -42,7 +43,7 @@ ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *
     layout_ = new QVBoxLayout;
     setLayout(layout_);
 
-    space_for_painting_ = new QSpacerItem(w_, bar_height_);
+    space_for_painting_ = new QSpacerItem(min_w, bar_height_);
     layout_->addItem(space_for_painting_);
 
     auto* buttons_layout = new QHBoxLayout;
@@ -56,6 +57,8 @@ ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *
     connect(export_csv, SIGNAL(clicked(bool)), this, SLOT(exportCsv()));
 
     layout_->addLayout(buttons_layout);
+
+    layout_->addWidget(new QSizeGrip(this), 0, Qt::AlignBottom | Qt::AlignRight);
 
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
@@ -119,10 +122,16 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     QPainter p(this);
 
+    int w = width();
+    int h = space_for_painting_->geometry().height();
+
+
     left = padding + left_space;
-    right = w_ - padding;
+    right = w - padding;
     up = padding;
-    bottom = bar_height_ - padding;
+    bottom = h - 2 * padding - 2 * line_height - line_height * steps_.size();
+
+    bar_height_ = bottom - padding;
 
     std::size_t history_length = timer_history_.size();
 
@@ -226,10 +235,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // legend
     p.setOpacity(1.0);
-    float y = bar_height_;
+    float y = bottom;
     float text_x = left_space + 2*padding;
-    float text_w = (w_ - text_x) / 2.0f - padding;
-    float info_w = w_ - text_w - text_x;
+    float text_w = (w - text_x) / 2.0f - padding;
+    float info_w = w - text_w - text_x;
     float info_x = text_x + text_w + padding;
 
     // label
@@ -265,7 +274,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // resize to fit content
     if(space_for_painting_->geometry().height() != y) {
-        space_for_painting_->changeSize(w_, y);
+        space_for_painting_->changeSize(0, y, QSizePolicy::MinimumExpanding,  QSizePolicy::MinimumExpanding);
         layout()->invalidate();
     }
 }
