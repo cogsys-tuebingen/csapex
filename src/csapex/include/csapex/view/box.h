@@ -24,6 +24,8 @@ namespace Ui
 class Box;
 }
 
+class QSizeGrip;
+
 namespace csapex
 {
 
@@ -152,6 +154,7 @@ protected:
 
 protected:
     Ui::Box* ui;
+    QSizeGrip* grip_;
 
     Settings& settings_;
 

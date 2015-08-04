@@ -22,7 +22,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <iostream>
-
+#include <QSizeGrip>
 #include <cmath>
 
 using namespace csapex;
@@ -37,6 +37,8 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
     worker->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
 
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
+
+    grip_ = new QSizeGrip(this);
 
     setVisible(false);
 }
@@ -81,6 +83,14 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
+
+    setupUiAgain();
+
+    Q_EMIT changed(this);
+}
+
+void NodeBox::setupUiAgain()
+{
     adapter_->doSetupUi(ui->content);
 
     setAutoFillBackground(false);
@@ -89,14 +99,6 @@ void NodeBox::setupUi()
     setAttribute(Qt::WA_NoSystemBackground, true);
     //    setBackgroundMode (Qt::NoBackground, true);
 
-    updateVisuals();
-
-    Q_EMIT changed(this);
-}
-
-void NodeBox::setupUiAgain()
-{
-    adapter_->doSetupUi(ui->content);
     updateVisuals();
 }
 
@@ -383,7 +385,7 @@ void NodeBox::registerOutputEvent(Output* out)
     Q_EMIT changed(this);
 }
 
-void NodeBox::resizeEvent(QResizeEvent *)
+void NodeBox::resizeEvent(QResizeEvent *e)
 {
     Q_EMIT changed(this);
 }
@@ -480,7 +482,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         refreshStylesheet();
     }
 
-    resize(sizeHint());
+    //    resize(sizeHint());
 }
 
 void NodeBox::moveEvent(QMoveEvent* e)
@@ -589,6 +591,16 @@ void NodeBox::updateVisuals()
         return;
     }
     bool flip = worker->getNodeState()->isFlipped();
+
+    auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
+    if(layout) {
+        if(flip) {
+            layout->addWidget(grip_, 3, 0, Qt::AlignBottom | Qt::AlignLeft);
+
+        } else {
+            layout->addWidget(grip_, 3, 2, Qt::AlignBottom | Qt::AlignRight);
+        }
+    }
 
     ui->boxframe->setProperty("flipped", flip);
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);

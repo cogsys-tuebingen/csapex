@@ -16,10 +16,12 @@ QFrame#boxframe {
         padding: 0;
 }
 QFrame#boxframe[flipped="false"] {
-        border-top-left-radius: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 0px;
 }
 QFrame#boxframe[flipped="true"] {
         border-top-right-radius: 10px;
+        border-bottom-right-radius: 0px;
 }
 
 QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{

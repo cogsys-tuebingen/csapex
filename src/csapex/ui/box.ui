@@ -31,6 +31,12 @@
    </property>
    <item>
     <widget class="QFrame" name="boxframe">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frameShape">
       <enum>QFrame::WinPanel</enum>
      </property>
