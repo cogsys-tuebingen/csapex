@@ -260,7 +260,7 @@ void NodeBox::updateThreadInformation()
     }
 
     if(info_thread && worker->thread()) {
-        int id = worker->thread()->property("id").toInt();
+        int id = worker->getNodeState()->getThreadId();
         std::stringstream info;
         if(settings_.get<bool>("threadless")) {
             info << "<i><b><small>threadless</small></b></i>";
@@ -272,7 +272,7 @@ void NodeBox::updateThreadInformation()
             info << "<i><b><small>private</small></b></i>";
             info_thread->setStyleSheet("QLabel { background-color : rgb(255,255,255); color: rgb(0,0,0);}");
         } else {
-            info << worker->thread()->property("name").toString().toStdString();
+            info << worker->getNodeState()->getThreadName();
             setStyleForId(info_thread, id);
         }
         info_thread->setText(info.str().c_str());
@@ -663,6 +663,8 @@ void NodeBox::nodeStateChangedEvent()
 
     setLabel(worker->getNodeState()->getLabel());
     ui->label->setToolTip(worker->getUUID().c_str());
+
+    updateThreadInformation();
 
     auto pt = worker->getNodeState()->getPos();
     move(QPoint(pt.x, pt.y));

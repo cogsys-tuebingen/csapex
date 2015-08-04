@@ -17,6 +17,7 @@ using namespace csapex;
 ThreadPool::ThreadPool(bool enable_threading, bool grouping, bool paused)
     : enable_threading_(enable_threading), grouping_(grouping)
 {
+    setPause(paused);
     default_group_ = std::make_shared<ThreadGroup>(ThreadGroup::DEFAULT_GROUP_ID, "default", paused);
 }
 
@@ -201,9 +202,12 @@ void ThreadPool::saveSettings(YAML::Node& node)
     YAML::Node groups;
     for(std::size_t i = 0, total =  groups_.size(); i < total; ++i) {
         YAML::Node group;
-        group["id"] =  groups_[i]->id();
-        group["name"] =  groups_[i]->name();
-        groups.push_back(group);
+        int id = groups_[i]->id();
+        if(id >= ThreadGroup::MINIMUM_THREAD_ID) {
+            group["id"] =  id;
+            group["name"] =  groups_[i]->name();
+            groups.push_back(group);
+        }
     }
     threads["groups"] = groups;
 

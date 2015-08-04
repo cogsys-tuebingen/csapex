@@ -413,49 +413,6 @@ void NodeWorker::triggerCheckTransitions()
     checkTransitionsRequested();
 }
 
-//void NodeWorker::switchThread(QThread *thread, int id)
-//{
-//    // PROBLEM: if this is called when node is not idle -> fsm gets corrupted
-//    // will be fixed once nodeworker is independent of qt!
-//    QObject::disconnect(tick_timer_);
-
-//    QObject::disconnect(this, SIGNAL(processRequested()));
-
-//    QObject::disconnect(this, SIGNAL(tickRequested()));
-//    QObject::disconnect(this, SIGNAL(messagesProcessed()));
-//    QObject::disconnect(this, SIGNAL(checkTransitionsRequested()));
-
-//    assert(thread);
-
-//    //    for(Input* input : inputs_){
-//    //        input->moveToThread(thread);
-//    //    }
-//    //    for(Input* input : parameter_inputs_){
-//    //        input->moveToThread(thread);
-//    //    }
-//    //    for(Output* output : outputs_){
-//    //        output->moveToThread(thread);
-//    //    }
-//    //    for(Output* output : parameter_outputs_){
-//    //        output->moveToThread(thread);
-//    //    }
-//    //    for(Slot* slot : slots_){
-//    //        slot->moveToThread(thread);
-//    //    }
-//    //    for(Trigger* trigger : triggers_){
-//    //        trigger->moveToThread(thread);
-//    //    }
-//    moveToThread(thread);
-
-//    assertNotInGuiThread();
-
-//    node_state_->setThread(id);
-
-//    threadChanged();
-
-//    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
-//}
-
 void NodeWorker::connectConnector(Connectable *c)
 {
     c->connectionInProgress.connect(connectionInProgress);

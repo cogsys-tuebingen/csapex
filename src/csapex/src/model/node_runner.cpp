@@ -6,6 +6,7 @@
 #include <csapex/scheduling/scheduler.h>
 #include <csapex/scheduling/task.h>
 #include <csapex/utility/assert.h>
+#include <csapex/model/node_state.h>
 
 using namespace csapex;
 
@@ -52,6 +53,8 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     scheduler_ = scheduler;
 
     scheduler_->add(this, remaining_tasks_);
+    worker_->getNodeState()->setThread(scheduler->name(), scheduler->id());
+
     remaining_tasks_.clear();
 
     for(boost::signals2::connection& c : connections_) {
