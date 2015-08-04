@@ -787,7 +787,12 @@ void install(std::map<int, std::function<void(DefaultNodeAdapter*, param::Parame
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
-    NodeWorkerPtr node = node_.lock();
+    NodeWorkerPtr node_worker = node_.lock();
+    if(!node_worker) {
+        return;
+    }
+
+    auto node = node_worker->getNode().lock();
     if(!node) {
         return;
     }
@@ -810,9 +815,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     current_layout_ = wrapper_layout_;
 
-    std::vector<param::Parameter::Ptr> params = node->getNode()->getParameters();
+    std::vector<param::Parameter::Ptr> params = node->getParameters();
 
-    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getNode()->getParameterState());
+    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getParameterState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
@@ -885,12 +890,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         current_layout_ = new QHBoxLayout;
         setDirection(current_layout_, node_);
-        node->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
+        node_worker->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
-        InputPtr param_in = node->getParameterInput(current_name_);
+        InputPtr param_in = node_worker->getParameterInput(current_name_);
         if(param_in) {
-            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_in.get());
             if(pos != parameter_connections_.end()) {
@@ -910,9 +915,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        OutputPtr param_out = node->getParameterOutput(current_name_);
+        OutputPtr param_out = node_worker->getParameterOutput(current_name_);
         if(param_out) {
-            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_out.get());
             if(pos != parameter_connections_.end()) {

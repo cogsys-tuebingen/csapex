@@ -67,8 +67,7 @@ public:
     void triggerProcess();
     void triggerPanic();
 
-    NodeWeakPtr getNodeSafe() const;
-    /*TODO: REMOVE!*/ Node* getNode() const;
+    NodeWeakPtr getNode() const;
 
     State getState() const;
 

@@ -56,7 +56,11 @@ void NodeBox::setupUi()
         return;
     }
 
-    worker->getNode()->checkConditions(true);
+    auto node = worker->getNode().lock();
+    if(!node) {
+        return;
+    }
+    node->checkConditions(true);
 
     if(!info_exec) {
         info_exec = new QLabel;
@@ -166,7 +170,7 @@ Node* NodeBox::getNode()
     if(!worker) {
         return nullptr;
     }
-    return worker->getNode();
+    return worker->getNode().lock().get();
 }
 
 NodeWorker* NodeBox::getNodeWorker()

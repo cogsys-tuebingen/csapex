@@ -66,7 +66,11 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(node["state"].IsDefined()) {
         const YAML::Node& state_map = node["state"];
-        child_state_ = parent_->getNode()->getParameterStateClone();
+        auto node = parent_->getNode().lock();
+        if(!node) {
+            return;
+        }
+        child_state_ = node->getParameterStateClone();
 
         if(child_state_) {
             child_state_->readYaml(state_map);
@@ -195,7 +199,10 @@ void NodeState::writeYaml(YAML::Node &out) const
 
     try {
         if(parent_) {
-            child_state_ = parent_->getNode()->getParameterStateClone();
+            auto node = parent_->getNode().lock();
+            if(node) {
+                child_state_ = node->getParameterStateClone();
+            }
         }
     } catch(const std::exception& e) {
         std::cerr << "cannot clone child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;

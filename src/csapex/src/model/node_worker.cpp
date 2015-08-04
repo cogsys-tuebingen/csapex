@@ -204,13 +204,7 @@ NodeState::Ptr NodeWorker::getNodeState()
     return node_state_;
 }
 
-
-Node* NodeWorker::getNode() const
-{
-    return node_.get();
-}
-
-NodeWeakPtr NodeWorker::getNodeSafe() const
+NodeWeakPtr NodeWorker::getNode() const
 {
     return node_;
 }

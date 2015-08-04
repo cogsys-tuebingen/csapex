@@ -464,9 +464,12 @@ NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
 
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
-    for(NodeWorker::Ptr b : nodes_) {
-        if(b->getUUID() == uuid) {
-            return b->getNode();
+    for(NodeWorker::Ptr worker : nodes_) {
+        if(worker->getUUID() == uuid) {
+            auto node = worker->getNode().lock();
+            if(node) {
+                return node.get();
+            }
         }
     }
 
