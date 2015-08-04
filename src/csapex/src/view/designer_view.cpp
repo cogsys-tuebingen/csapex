@@ -46,7 +46,7 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
                            QWidget *parent)
     : QGraphicsView(parent), scene_(scene), style_(style), settings_(settings),
       thread_pool_(thread_pool), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
-      scalings_to_perform_(0), move_event_(nullptr)
+      scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr)
 
 {
     //    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
@@ -240,6 +240,56 @@ void DesignerView::keyReleaseEvent(QKeyEvent* e)
     }
 }
 
+void DesignerView::mousePressEvent(QMouseEvent* e)
+{
+    bool was_rubber_band = false;
+    if(e->button() == Qt::MiddleButton) {
+        if(dragMode() == QGraphicsView::RubberBandDrag) {
+            was_rubber_band = true;
+            setDragMode(QGraphicsView::NoDrag);
+        }
+    }
+    QGraphicsView::mousePressEvent(e);
+
+    if(e->button() == Qt::MiddleButton && !e->isAccepted() && !middle_mouse_dragging_) {
+        middle_mouse_dragging_ = true;
+        middle_mouse_drag_start_ = e->pos();
+
+        setDragMode(QGraphicsView::ScrollHandDrag);
+        setInteractive(false);
+        e->accept();
+
+        QMouseEvent fake(e->type(), e->pos(), Qt::LeftButton, Qt::LeftButton, e->modifiers());
+        QGraphicsView::mousePressEvent(&fake);
+
+    } else if(was_rubber_band) {
+        setDragMode(QGraphicsView::RubberBandDrag);
+    }
+}
+
+void DesignerView::mouseReleaseEvent(QMouseEvent* e)
+{
+    QGraphicsView::mouseReleaseEvent(e);
+
+    if(middle_mouse_dragging_) {
+        middle_mouse_dragging_ = false;
+
+        QMouseEvent fake(e->type(), e->pos(), Qt::LeftButton, Qt::LeftButton, e->modifiers());
+        QGraphicsView::mouseReleaseEvent(&fake);
+
+        setDragMode(QGraphicsView::RubberBandDrag);
+        setInteractive(true);
+        e->accept();
+    }
+}
+
+void DesignerView::mouseMoveEvent(QMouseEvent *e)
+{
+    QGraphicsView::mouseMoveEvent(e);
+
+    setFocus();
+}
+
 void DesignerView::wheelEvent(QWheelEvent *we)
 {
     bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
@@ -272,13 +322,6 @@ void DesignerView::wheelEvent(QWheelEvent *we)
     } else {
         QGraphicsView::wheelEvent(we);
     }
-}
-
-void DesignerView::mouseMoveEvent(QMouseEvent *me)
-{
-    QGraphicsView::mouseMoveEvent(me);
-
-    setFocus();
 }
 
 void DesignerView::dragEnterEvent(QDragEnterEvent* e)

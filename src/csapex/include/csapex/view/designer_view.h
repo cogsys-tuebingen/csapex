@@ -49,6 +49,9 @@ public:
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
 
+    void mousePressEvent(QMouseEvent* e);
+    void mouseReleaseEvent(QMouseEvent* e);
+
     void wheelEvent(QWheelEvent* we);
 
     void mouseMoveEvent(QMouseEvent* me);
@@ -135,6 +138,9 @@ private:
     QTimer scroll_animation_timer_;
     double scroll_offset_x_;
     double scroll_offset_y_;
+
+    bool middle_mouse_dragging_;
+    QPoint middle_mouse_drag_start_;
 
     QDragMoveEvent* move_event_;
 };
