@@ -300,7 +300,7 @@ void DesignerView::dragMoveEvent(QDragMoveEvent* e)
         drag_io_.dragMoveEvent(this, e);
     }
 
-    static const int border_threshold = 100;
+    static const int border_threshold = 20;
     static const double scroll_factor = 10.;
 
     bool scroll_p = false;
