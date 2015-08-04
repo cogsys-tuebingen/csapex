@@ -28,6 +28,11 @@ QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{
         color: black ;
 }
 
+QFrame#boxframe QSizeGrip {
+        image: url(:/sizegrip.png);
+        width: 16px;
+        height: 16px;
+}
 
 QFrame#boxframe QGroupBox {
         color: black;

@@ -42,5 +42,6 @@
         <file>image.png</file>
         <file>idle.png</file>
         <file>running.png</file>
+        <file>sizegrip.png</file>
     </qresource>
 </RCC>
