@@ -140,7 +140,8 @@ private:
     double scroll_offset_y_;
 
     bool middle_mouse_dragging_;
-    QPoint middle_mouse_drag_start_;
+    bool middle_mouse_panning_;
+    QPointF middle_mouse_drag_start_;
 
     QDragMoveEvent* move_event_;
 };

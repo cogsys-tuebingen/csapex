@@ -155,6 +155,7 @@ add_library(csapex SHARED
     src/model/node_state.cpp
     src/model/node_statistics.cpp
     src/model/parameterizable.cpp
+    src/model/tickable_node.cpp
     src/model/tag.cpp
     src/model/unique.cpp
 

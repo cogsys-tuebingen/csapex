@@ -253,14 +253,8 @@ void DesignerView::mousePressEvent(QMouseEvent* e)
 
     if(e->button() == Qt::MiddleButton && !e->isAccepted() && !middle_mouse_dragging_) {
         middle_mouse_dragging_ = true;
-        middle_mouse_drag_start_ = e->pos();
-
-        setDragMode(QGraphicsView::ScrollHandDrag);
-        setInteractive(false);
-        e->accept();
-
-        QMouseEvent fake(e->type(), e->pos(), Qt::LeftButton, Qt::LeftButton, e->modifiers());
-        QGraphicsView::mousePressEvent(&fake);
+        middle_mouse_panning_ = false;
+        middle_mouse_drag_start_ = e->screenPos();
 
     } else if(was_rubber_band) {
         setDragMode(QGraphicsView::RubberBandDrag);
@@ -273,6 +267,7 @@ void DesignerView::mouseReleaseEvent(QMouseEvent* e)
 
     if(middle_mouse_dragging_) {
         middle_mouse_dragging_ = false;
+        middle_mouse_panning_ = false;
 
         QMouseEvent fake(e->type(), e->pos(), Qt::LeftButton, Qt::LeftButton, e->modifiers());
         QGraphicsView::mouseReleaseEvent(&fake);
@@ -285,6 +280,20 @@ void DesignerView::mouseReleaseEvent(QMouseEvent* e)
 
 void DesignerView::mouseMoveEvent(QMouseEvent *e)
 {
+    if(middle_mouse_dragging_ && !middle_mouse_panning_) {
+        auto delta = e->screenPos() - middle_mouse_drag_start_;
+        if(std::hypot(delta.x(), delta.y()) > 10) {
+            middle_mouse_panning_ = true;
+
+            setDragMode(QGraphicsView::ScrollHandDrag);
+            setInteractive(false);
+            e->accept();
+
+            QMouseEvent fake(e->type(), e->pos(), Qt::LeftButton, Qt::LeftButton, e->modifiers());
+            QGraphicsView::mousePressEvent(&fake);
+        }
+    }
+
     QGraphicsView::mouseMoveEvent(e);
 
     setFocus();

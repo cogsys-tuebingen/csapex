@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/node_worker.h>
+#include <csapex/model/tickable_node.h>
 #include <csapex/scheduling/scheduler.h>
 #include <csapex/scheduling/task.h>
 #include <csapex/utility/assert.h>
@@ -13,9 +14,12 @@ using namespace csapex;
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
     : worker_(worker), scheduler_(nullptr)
 {
-    tick_ = std::make_shared<Task>(std::string("tick ") + worker->getUUID().getFullName(),
-                                   std::bind(&NodeWorker::tick, worker),
-                                   this);
+    NodePtr node = worker_->getNode().lock();
+    if(node && std::dynamic_pointer_cast<TickableNode>(node)) {
+        tick_ = std::make_shared<Task>(std::string("tick ") + worker->getUUID().getFullName(),
+                                       std::bind(&NodeWorker::tick, worker),
+                                       this);
+    }
     prepare_ = std::make_shared<Task>(std::string("prepare ") + worker->getUUID().getFullName(),
                                       std::bind(&NodeWorker::prepareForNextProcess, worker),
                                       this);
@@ -35,7 +39,7 @@ NodeRunner::~NodeRunner()
     connections_.clear();
 
     if(scheduler_) {
-//        detach();
+        //        detach();
     }
 }
 
@@ -68,11 +72,6 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     });
     connections_.push_back(cmp);
 
-    auto ct = worker_->tickRequested.connect([this]() {
-        schedule(tick_);
-    });
-    connections_.push_back(ct);
-
     auto cp = worker_->processRequested.connect([this]() {
         schedule(process_);
     });
@@ -83,10 +82,18 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     });
     connections_.push_back(ctr);
 
+    // tick?
+    if(tick_) {
+        auto ct = worker_->tickRequested.connect([this]() {
+            schedule(tick_);
+        });
+        connections_.push_back(ct);
+    }
+
     // generic task
     auto cg = worker_->executionRequested.connect([this](std::function<void()> cb) {
-        schedule(std::make_shared<Task>("anonymous", cb));
-    });
+            schedule(std::make_shared<Task>("anonymous", cb));
+});
     connections_.push_back(cg);
 }
 

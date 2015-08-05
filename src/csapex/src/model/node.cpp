@@ -84,14 +84,6 @@ void Node::process()
     // default: do nothing, clients overwrite this
 }
 
-bool Node::canTick()
-{
-    return true;
-}
-
-void Node::tick()
-{
-}
 
 void Node::abort()
 {

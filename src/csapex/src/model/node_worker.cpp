@@ -20,6 +20,7 @@
 #include <utils_param/trigger_parameter.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node_modifier.h>
+#include <csapex/model/tickable_node.h>
 
 /// SYSTEM
 #include <QThread>
@@ -1411,6 +1412,9 @@ void NodeWorker::tick()
         return;
     }
 
+    auto tickable = std::dynamic_pointer_cast<TickableNode>(node_);
+    apex_assert_hard(tickable);
+
     assertNotInGuiThread();
 
     {
@@ -1439,7 +1443,7 @@ void NodeWorker::tick()
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-            if(!isWaitingForTrigger() && isTickEnabled() && isSource() && node_->canTick()) {
+            if(!isWaitingForTrigger() && isTickEnabled() && isSource() && tickable->canTick()) {
                 if(state == State::ENABLED) {
                     setState(State::IDLE);
                 }
@@ -1462,7 +1466,7 @@ void NodeWorker::tick()
                         timerStarted(this, TICK, t->startTimeMs());
                     }
                     node_->useTimer(t.get());
-                    node_->tick();
+                    tickable->tick();
 
                     if(trigger_tick_done_->isConnected()) {
                         if(t) {
