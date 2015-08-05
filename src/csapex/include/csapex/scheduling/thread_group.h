@@ -52,13 +52,21 @@ public:
 private:
     void startThread();
 
+    void schedulingLoop();
+
+    bool waitForTasks();
+    void handlePause();
+    bool executeNextTask();
+
+    void executeTask(const TaskPtr& task);
+
 private:
     static int next_id_;
 
     int id_;
     std::string name_;
 
-    std::thread thread_;
+    std::thread scheduler_thread_;
 
     std::vector<TaskGenerator*> generators_;
     std::condition_variable_any work_available_;

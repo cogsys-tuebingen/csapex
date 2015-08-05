@@ -27,7 +27,7 @@ ThreadGroup::ThreadGroup(std::string name, bool paused)
 
 ThreadGroup::~ThreadGroup()
 {
-    if(running_ || thread_.joinable()) {
+    if(running_ || scheduler_thread_.joinable()) {
         stop();
     }
 }
@@ -48,7 +48,7 @@ std::string ThreadGroup::name() const
 }
 const std::thread& ThreadGroup::thread() const
 {
-    return thread_;
+    return scheduler_thread_;
 }
 
 bool ThreadGroup::isEmpty() const
@@ -82,10 +82,10 @@ void ThreadGroup::stop()
     {
         std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
         work_available_.notify_all();
-        if(thread_.joinable()) {
+        if(scheduler_thread_.joinable()) {
             lock.unlock();
 
-            thread_.join();
+            scheduler_thread_.join();
         }
     }
 }
@@ -99,7 +99,7 @@ void ThreadGroup::clear()
         tasks_.clear();
     }
     for(auto generator : generators_) {
-         generator->reset();
+        generator->reset();
     }
 }
 
@@ -171,79 +171,94 @@ void ThreadGroup::schedule(TaskPtr task)
 void ThreadGroup::startThread()
 {
     std::unique_lock<std::recursive_mutex> lock(state_mtx_);
-    if(thread_.joinable()) {
+    if(scheduler_thread_.joinable()) {
         running_ = false;
         pause_changed_.notify_all();
         lock.unlock();
 
-        thread_.join();
+        scheduler_thread_.join();
     }
 
     running_ = true;
 
-    thread_ = std::thread ([this]() {
-
-        csapex::thread::set_name((name_ + "!").c_str());
-
-        while(running_) {
-            {
-                std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
-                running_ = !generators_.empty();
-                while(running_ && tasks_.empty()) {
-                    work_available_.wait_for(lock, std::chrono::seconds(1));
-                    running_ = running_ && !generators_.empty();
-                }
-            }
-
-            bool done = !running_;
-            while(!done) {
-                {
-                    // pause?
-                    std::unique_lock<std::recursive_mutex> state_lock(state_mtx_);
-                    while(running_ && pause_) {
-                        pause_changed_.wait(state_lock);
-                    }
-                }
-
-                // execute one task
-                std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
-                if(tasks_.empty()) {
-                    done = true;
-
-                } else {
-                    auto task = tasks_.front();
-                    tasks_.pop_front();
-
-                    tasks_lock.unlock();
-
-                    {
-                        std::unique_lock<std::recursive_mutex> state_lock(state_mtx_);
-                        if(running_) {
-                            state_lock.unlock();
-
-                            try {
-                                {
-                                    std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
-                                    task->execute();
-                                }
-
-                            } catch(const std::exception& e) {
-                                TaskGenerator* gen = task->getParent();
-                                gen->setError(e.what());
-
-                            } catch(const std::string& s) {
-                                std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-                            } catch(...) {
-                                std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-                                std::abort();
-                            }
-
-                        } else {
-                            done = true;
-                        }
-                    }
-                }
-            }
-        }
+    scheduler_thread_ = std::thread ([this]() {
+        csapex::thread::set_name((name_).c_str());
+        schedulingLoop();
     });
 }
+
+void ThreadGroup::schedulingLoop()
+{
+    while(running_) {
+        bool keep_executing = waitForTasks();
+        while(running_ && keep_executing) {
+            handlePause();
+
+            keep_executing = executeNextTask();
+        }
+    }
+}
+
+bool ThreadGroup::waitForTasks()
+{
+    std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
+    while(tasks_.empty()) {
+        work_available_.wait_for(lock, std::chrono::seconds(1));
+
+        if(!running_) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void ThreadGroup::handlePause()
+{
+    std::unique_lock<std::recursive_mutex> state_lock(state_mtx_);
+    while(running_ && pause_) {
+        pause_changed_.wait(state_lock);
+    }
+}
+
+bool ThreadGroup::executeNextTask()
+{
+    std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
+    if(!tasks_.empty()) {
+        auto task = tasks_.front();
+        tasks_.pop_front();
+
+        tasks_lock.unlock();
+
+        {
+            std::unique_lock<std::recursive_mutex> state_lock(state_mtx_);
+            if(running_) {
+                state_lock.unlock();
+
+                executeTask(task);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void ThreadGroup::executeTask(const TaskPtr& task)
+{
+    try {
+        std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+        task->execute();
+
+    } catch(const std::exception& e) {
+        TaskGenerator* gen = task->getParent();
+        gen->setError(e.what());
+
+    } catch(const std::string& s) {
+        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
+    } catch(...) {
+        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
+        std::abort();
+    }
+}
+
