@@ -450,13 +450,11 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     case NodeWorker::State::PROCESSING:
         state = "processing"; break;
     default:
-        state = "?"; break;
+        state = "unknown"; break;
     }
 
     info_exec->setVisible(true);
-    info_exec->setText(QString("<img src=\":/") +
-                       (idle ? "idle" : "running") +
-                       ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> ");
+    info_exec->setText(QString("<img src=\":/node_") + state + ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> ");
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;

@@ -221,7 +221,7 @@ void NodeWorker::setState(State state)
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     switch(state) {
     case State::IDLE:
-        apex_assert_hard(state_ == State::PROCESSING || state_ == State::ENABLED);
+        apex_assert_hard(state_ == State::PROCESSING || state_ == State::ENABLED || state_ == State::IDLE);
         break;
     case State::FIRED:
         apex_assert_hard(state_ == State::ENABLED);
@@ -1233,7 +1233,12 @@ void NodeWorker::checkTransitions()
         return;
     }
 
-    setState(State::ENABLED);
+    if(transition_in_->isEnabled()) {
+        setState(State::ENABLED);
+    } else {
+        setState(State::IDLE);
+        return;
+    }
 
     apex_assert_hard(transition_out_->canStartSendingMessages());
 

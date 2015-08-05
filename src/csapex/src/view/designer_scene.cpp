@@ -432,7 +432,18 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
     std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
 
-    if(data.first >= 0) {
+    auto* item = itemAt(e->scenePos(), QTransform());
+    Port* port = nullptr;
+    if(item && item->type() == QGraphicsProxyWidget::Type) {
+        QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);
+        QWidget* widget = proxy->widget();
+        QPointF p = proxy->mapFromScene(e->scenePos());
+        QWidget* child = widget->childAt(p.toPoint());
+
+        port = dynamic_cast<Port*>(child);
+    }
+
+    if(!port && data.first >= 0) {
         if(data.first != highlight_connection_id_) {
             highlight_connection_id_ = data.first;
             highlight_connection_sub_id_ = data.second;
@@ -911,6 +922,13 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         color_start.setAlpha(60);
     }
     if(ccs.hidden_to) {
+        color_end.setAlpha(60);
+    }
+
+    if(!ccs.source_established) {
+        color_start.setAlpha(60);
+    }
+    if(!ccs.sink_established) {
         color_end.setAlpha(60);
     }
 

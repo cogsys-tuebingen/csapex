@@ -157,11 +157,6 @@ void OutputTransition::publishNextMessage()
     }
     if(areOutputsIdle()) {
         if(areAllConnections(Connection::State::DONE)) {
-            //            std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
-//            outputs_done_ = true;
-            //            establish();
-
-
             if(hasFadingConnection()) {
                 removeFadingConnections();
             }
@@ -170,11 +165,6 @@ void OutputTransition::publishNextMessage()
         }
 
     } else {
-        //        std::cerr << "fill again: " << node_->getUUID() << std::endl;
-        //        apex_assert_hard(areConnections(Connection::State::READ));
-        //        for(ConnectionPtr c : connections_) {
-        //            c.lock()->setState(Connection::State::READY_TO_RECEIVE);
-        //        }
         setConnectionsReadyToReceive();
         fillConnections();
     }

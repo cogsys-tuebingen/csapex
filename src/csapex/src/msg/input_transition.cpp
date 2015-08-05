@@ -90,9 +90,7 @@ void InputTransition::fireIfPossible()
         //        apex_assert_hard(established_connections_.empty());
         //fire(); -> instead of tick!!!!
     } else {
-        if(!isOneConnection(Connection::State::READY_TO_RECEIVE) &&
-                areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/) &&
-                !areAllConnections(Connection::State::READ)) {
+        if(isEnabled()) {
             if(node_->getState() == NodeWorker::State::ENABLED) {
 
                 for(const auto& connection : established_connections_) {
@@ -115,6 +113,17 @@ void InputTransition::fireIfPossible()
             }
         }
     }
+}
+
+bool InputTransition::isEnabled() const
+{
+    if(isOneConnection(Connection::State::READY_TO_RECEIVE)) {
+        return false;
+    }
+    if(!areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/)) {
+        return false;
+    }
+    return !areAllConnections(Connection::State::READ);
 }
 
 int InputTransition::findHighestDeviantSequenceNumber() const

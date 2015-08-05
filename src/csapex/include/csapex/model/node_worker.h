@@ -69,6 +69,7 @@ public:
 
     NodeWeakPtr getNode() const;
 
+    void setState(State state);
     State getState() const;
 
     std::string getType() const;
@@ -223,8 +224,6 @@ private:
     void triggerNodeStateChanged();
 
     void finishTimer(TimerPtr t);
-
-    void setState(State state);
 
     void updateTransitionConnections();
 

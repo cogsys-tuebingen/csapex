@@ -6,6 +6,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
 #include <csapex/utility/assert.h>
+#include <csapex/msg/output_transition.h>
 
 using namespace csapex;
 
@@ -79,28 +80,7 @@ void StaticOutput::commitMessages()
     committed_message_->setSequenceNumber(seq_no_);
     committed_message_->flags.data = message_flags_;
 
-//    // wait for all connected inputs to be able to receive
-//    //  * inputs can only be connected to this output since they are 1:1
-//    std::vector<Connection*> targets;
-//    for(ConnectionPtr connection : connections_) {
-//        ConnectionPtr c = connection.lock();
-//        if(!c) {
-//            continue;
-//        }
-
-//        Input* i = dynamic_cast<Input*>(c->to());
-//        if(i && i->isEnabled()) {
-//            targets.push_back(c.get());
-//        }
-//    }
-
-    //    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
-//    if(!targets.empty()) {
-        // all connected inputs are ready to receive, send them the message
-        ++count_;
-//    }
-
-//    ++seq_no_;
+    ++count_;
     messageSent(this);
 }
 
