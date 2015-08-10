@@ -118,16 +118,22 @@ void IntervalParameter::doSerialize(YAML::Node& n) const
     if(values_.first.type() == typeid(int)) {
         n["int"][0] = boost::any_cast<int> (values_.first);
         n["int"][1] = boost::any_cast<int> (values_.second);
-        n["min"] = boost::any_cast<int> (min_);
-        n["max"] = boost::any_cast<int> (max_);
-        n["step"] = boost::any_cast<int> (step_);
+        if(!min_.empty())
+            n["min"] = boost::any_cast<int> (min_);
+        if(!max_.empty())
+            n["max"] = boost::any_cast<int> (max_);
+        if(!step_.empty())
+            n["step"] = boost::any_cast<int> (step_);
 
     } else if(values_.first.type() == typeid(double)) {
         n["double"][0] = boost::any_cast<double> (values_.first);
         n["double"][1] = boost::any_cast<double> (values_.second);
-        n["min"] = boost::any_cast<double> (min_);
-        n["max"] = boost::any_cast<double> (max_);
-        n["step"] = boost::any_cast<double> (step_);
+        if(!min_.empty())
+            n["min"] = boost::any_cast<double> (min_);
+        if(!max_.empty())
+            n["max"] = boost::any_cast<double> (max_);
+        if(!step_.empty())
+            n["step"] = boost::any_cast<double> (step_);
     }
 }
 
