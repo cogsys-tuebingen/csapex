@@ -19,3 +19,8 @@ void Timable::useTimer(Timer *timer)
 {
     profiling_timer_ = timer;
 }
+
+Timer* Timable::getTimer()
+{
+    return profiling_timer_;
+}

@@ -47,8 +47,9 @@ public:
     void setFlipped(bool value);
     Signal flipped_changed;
 
-    int getThread() const;
-    void setThread(int id);
+    int getThreadId() const;
+    std::string getThreadName() const;
+    void setThread(const std::string& name, int id);
     Signal thread_changed;
 
     const NodeWorker* getParent() const;
@@ -59,18 +60,19 @@ public:
     void setParameterState(const Memento::Ptr &value);
 
 private:
-    const NodeWorker* parent;
+    const NodeWorker* parent_;
 
-    mutable Memento::Ptr child_state;
+    mutable Memento::Ptr child_state_;
 
     std::string label_;
-    Point pos;
+    Point pos_;
 
-    bool minimized;
-    bool enabled;
-    bool flipped;
+    bool minimized_;
+    bool enabled_;
+    bool flipped_;
 
-    int thread;
+    int thread_id_;
+    std::string thread_name_;
 };
 
 }

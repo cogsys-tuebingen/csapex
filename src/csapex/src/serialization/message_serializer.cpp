@@ -19,7 +19,14 @@ ConnectionType::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node
 {
     MessageSerializer& i = instance();
 
-    std::string type = node["type"].as<std::string>();
+    std::string type;
+    try {
+        type = node["type"].as<std::string>();
+
+    } catch(const std::exception& e) {
+        std::cerr << "node: " << node << std::endl;
+        throw DeserializationError("cannot get type");
+    }
 
     if(i.type_to_converter.empty()) {
         throw DeserializationError("no connection types registered!");

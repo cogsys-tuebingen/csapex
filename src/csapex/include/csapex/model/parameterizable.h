@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/csapex_fwd.h>
 #include <utils_param/param_fwd.h>
+#include <utils_param/parameter.h>
 #include <csapex/model/generic_state.h>
 
 /// SYSTEM
@@ -30,6 +31,9 @@ public:
     SupportedTemplateParameters;
 
 public:
+    boost::signals2::signal<void()> parameters_changed;
+
+public:
     Parameterizable();
     virtual ~Parameterizable();
 
@@ -39,8 +43,21 @@ public:
     void addParameter(const param::ParameterPtr& param);
     void addParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
 
+    template <typename T>
+    void addParameter(const param::ParameterPtr& param, T& target)
+    {
+        addParameter(param, [&](param::Parameter* p) { target = p->as<T>(); });
+    }
+
     void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition);
     void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition, std::function<void(param::Parameter *)> cb);
+
+    template <typename T>
+    void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition,T& target)
+    {
+        addConditionalParameter(param, enable_condition, [&](param::Parameter* p) { target = p->as<T>(); });
+    }
+
 
     void addPersistentParameter(const param::ParameterPtr& param);
 

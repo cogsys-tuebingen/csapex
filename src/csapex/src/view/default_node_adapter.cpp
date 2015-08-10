@@ -53,7 +53,8 @@ namespace {
 
 /// UI HANDLES
 QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step,
-                                    csapex::ContextMenuHandler *context_handler) {
+                          param::RangeParameterPtr range_param,
+                          csapex::ContextMenuHandler *context_handler) {
     apex_assert_hard(min<=max);
 
     if(((def - min) / step) * step != (def - min)) {
@@ -97,6 +98,12 @@ QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name, int def, 
 
     layout->addLayout(internal_layout);
 
+
+    for(int i = 0; i < internal_layout->count(); ++i) {
+        QWidget* child = internal_layout->itemAt(i)->widget();
+        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<param::Parameter*>(range_param.get()))));
+    }
+
     QObject::connect(slider, SIGNAL(intValueChanged(int)),  display, SLOT(setValue(int)));
     QObject::connect(slider, SIGNAL(intRangeChanged(int,int)), display, SLOT(setRange(int,int)));
     QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setIntValue(int)));
@@ -106,8 +113,9 @@ QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name, int def, 
 }
 
 
-QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string display_name, param::RangeParameterPtr range_param,
-                                          csapex::ContextMenuHandler *context_handler)
+QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string display_name,
+                                param::RangeParameterPtr range_param,
+                                csapex::ContextMenuHandler *context_handler)
 {
     apex_assert_hard(range_param->min<double>()<=range_param->max<double>());
 
@@ -134,7 +142,7 @@ QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string display_na
 
     QWrapper::QDoubleSpinBoxExt* display = new  QWrapper::QDoubleSpinBoxExt;
     display->setDecimals(decimals);
-//    display->setDecimals(std::log10(1.0 / step_size) + 1);
+    //    display->setDecimals(std::log10(1.0 / step_size) + 1);
     display->setMinimum(range_param->min<double>());
     display->setMaximum(range_param->max<double>());
     display->setValue(range_param->def<double>());
@@ -168,9 +176,9 @@ QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string display_na
 }
 
 
-
 QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int lower, int upper, int min, int max,
-                                        csapex::ContextMenuHandler *context_handler)
+                              param::IntervalParameterPtr interval_param,
+                              csapex::ContextMenuHandler *context_handler)
 {
     apex_assert_hard(min<=max);
 
@@ -206,6 +214,11 @@ QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int l
 
     layout->addLayout(internal_layout);
 
+    for(int i = 0; i < internal_layout->count(); ++i) {
+        QWidget* child = internal_layout->itemAt(i)->widget();
+        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<param::Parameter*>(interval_param.get()))));
+    }
+
     QObject::connect(slider,        SIGNAL(rangeChanged(int,int)),  displayUpper,   SLOT(setRange(int,int)));
     QObject::connect(slider,        SIGNAL(lowerValueChanged(int)), displayLower,   SLOT(setValue(int)));
     QObject::connect(slider,        SIGNAL(upperValueChanged(int)), displayUpper,   SLOT(setValue(int)));
@@ -217,7 +230,7 @@ QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int l
 
 
 QxtDoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size,
-                                                    csapex::ContextMenuHandler *context_handler)
+                                          csapex::ContextMenuHandler *context_handler)
 {
     apex_assert_hard(min<=max);
 
@@ -651,7 +664,6 @@ void model_updateSetParameter(param::SetParameterWeakPtr set_p, QComboBox* combo
         return;
     }
     if(!combo->currentText().isEmpty()) {
-        std::cout << "set set: " << combo->currentText().toStdString() << std::endl;
         assertNotGuiThread();
         p->setByName(combo->currentText().toStdString());
     }
@@ -774,7 +786,12 @@ void install(std::map<int, std::function<void(DefaultNodeAdapter*, param::Parame
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
-    NodeWorkerPtr node = node_.lock();
+    NodeWorkerPtr node_worker = node_.lock();
+    if(!node_worker) {
+        return;
+    }
+
+    auto node = node_worker->getNode().lock();
     if(!node) {
         return;
     }
@@ -797,9 +814,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     current_layout_ = wrapper_layout_;
 
-    std::vector<param::Parameter::Ptr> params = node->getNode()->getParameters();
+    std::vector<param::Parameter::Ptr> params = node->getParameters();
 
-    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getNode()->getParameterState());
+    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getParameterState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
@@ -872,12 +889,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         current_layout_ = new QHBoxLayout;
         setDirection(current_layout_, node_);
-        node->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
+        node_worker->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
-        InputPtr param_in = node->getParameterInput(current_name_);
+        InputPtr param_in = node_worker->getParameterInput(current_name_);
         if(param_in) {
-            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_in.get());
             if(pos != parameter_connections_.end()) {
@@ -897,9 +914,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        OutputPtr param_out = node->getParameterOutput(current_name_);
+        OutputPtr param_out = node_worker->getParameterOutput(current_name_);
         if(param_out) {
-            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_out.get());
             if(pos != parameter_connections_.end()) {
@@ -1090,8 +1107,9 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameterPtr range_p)
 {
     if(range_p->is<int>()) {
         QIntSlider* slider = makeIntSlider(current_layout_, current_display_name_ ,
-                                                     range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(),
-                                                     new ParameterContextMenu(range_p));
+                                           range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(),
+                                           range_p,
+                                           new ParameterContextMenu(range_p));
         slider->setIntValue(range_p->as<int>());
 
         // ui change -> model
@@ -1128,8 +1146,9 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)
     if(interval_p->is<std::pair<int, int> >()) {
         const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
         QxtSpanSlider* slider = makeSpanSlider(current_layout_, current_display_name_,
-                                                         v.first, v.second, interval_p->min<int>(), interval_p->max<int>(),
-                                                         new ParameterContextMenu(interval_p));
+                                               v.first, v.second, interval_p->min<int>(), interval_p->max<int>(),
+                                               interval_p,
+                                               new ParameterContextMenu(interval_p));
 
         // ui change -> model
         qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntIntervalParameter, interval_p, slider));
@@ -1145,8 +1164,8 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)
     } else if(interval_p->is<std::pair<double, double> >()) {
         const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
         QxtDoubleSpanSlider* slider = makeDoubleSpanSlider(current_layout_, current_display_name_,
-                                                                     v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>(),
-                                                                     new ParameterContextMenu(interval_p));
+                                                           v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>(),
+                                                           new ParameterContextMenu(interval_p));
 
         // ui change -> model
         qt_helper::Call* call = makeModelCall(std::bind(&model_updateDoubleIntervalParameter, interval_p, slider));

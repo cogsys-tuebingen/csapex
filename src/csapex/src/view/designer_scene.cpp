@@ -394,19 +394,6 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
 void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
-    /*if(e->button() == Qt::RightButton && highlight_connection_id_ >= 0 && items(e->scenePos(), Qt::ContainsItemShape, Qt::AscendingOrder).empty()) {
-        e->accept();
-        showConnectionContextMenu();
-        return;
-
-    } else*/ if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
-        auto cmd = graph_->deleteConnectionById(highlight_connection_id_);
-        if(cmd) {
-            dispatcher_->execute(cmd);
-        }
-        return;
-    }
-
     QGraphicsScene::mousePressEvent(e);
 
     if(!e->isAccepted() && e->button() == Qt::LeftButton) {
@@ -423,6 +410,14 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
+    if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
+        auto cmd = graph_->deleteConnectionById(highlight_connection_id_);
+        if(cmd) {
+            dispatcher_->execute(cmd);
+        }
+        return;
+    }
+
     QGraphicsScene::mouseReleaseEvent(e);
 }
 
@@ -437,7 +432,18 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
     std::pair<int, int> data = rgb2id(schematics.pixel(pos.x(),pos.y()));
 
-    if(data.first >= 0) {
+    auto* item = itemAt(e->scenePos(), QTransform());
+    Port* port = nullptr;
+    if(item && item->type() == QGraphicsProxyWidget::Type) {
+        QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);
+        QWidget* widget = proxy->widget();
+        QPointF p = proxy->mapFromScene(e->scenePos());
+        QWidget* child = widget->childAt(p.toPoint());
+
+        port = dynamic_cast<Port*>(child);
+    }
+
+    if(!port && data.first >= 0) {
         if(data.first != highlight_connection_id_) {
             highlight_connection_id_ = data.first;
             highlight_connection_sub_id_ = data.second;
@@ -536,11 +542,7 @@ void DesignerScene::connectionDeleted(Connection*)
 
 void DesignerScene::boxMoved(NodeBox *box)
 {
-    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
-    proxy->setPos(box->pos());
     invalidateSchema();
-
-    QObject::connect(proxy, SIGNAL(geometryChanged()), this, SLOT(invalidateSchema()));
 }
 
 
@@ -920,6 +922,13 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         color_start.setAlpha(60);
     }
     if(ccs.hidden_to) {
+        color_end.setAlpha(60);
+    }
+
+    if(!ccs.source_established) {
+        color_start.setAlpha(60);
+    }
+    if(!ccs.sink_established) {
         color_end.setAlpha(60);
     }
 

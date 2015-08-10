@@ -22,7 +22,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <iostream>
-
+#include <QSizeGrip>
 #include <cmath>
 
 using namespace csapex;
@@ -37,6 +37,8 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
     worker->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
 
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
+
+    grip_ = new QSizeGrip(this);
 
     setVisible(false);
 }
@@ -54,7 +56,11 @@ void NodeBox::setupUi()
         return;
     }
 
-    worker->getNode()->checkConditions(true);
+    auto node = worker->getNode().lock();
+    if(!node) {
+        return;
+    }
+    node->checkConditions(true);
 
     if(!info_exec) {
         info_exec = new QLabel;
@@ -81,6 +87,14 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
+
+    setupUiAgain();
+
+    Q_EMIT changed(this);
+}
+
+void NodeBox::setupUiAgain()
+{
     adapter_->doSetupUi(ui->content);
 
     setAutoFillBackground(false);
@@ -89,14 +103,6 @@ void NodeBox::setupUi()
     setAttribute(Qt::WA_NoSystemBackground, true);
     //    setBackgroundMode (Qt::NoBackground, true);
 
-    updateVisuals();
-
-    Q_EMIT changed(this);
-}
-
-void NodeBox::setupUiAgain()
-{
-    adapter_->doSetupUi(ui->content);
     updateVisuals();
 }
 
@@ -140,7 +146,7 @@ void NodeBox::construct()
     worker->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
     worker->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
-    enabledChange(worker->isEnabled());
+    enabledChange(worker->isProcessingEnabled());
     worker->enabled.connect([this](bool e){ enabledChange(e); });
     QObject::connect(this, SIGNAL(enabledChange(bool)), this, SLOT(enabledChangeEvent(bool)), Qt::QueuedConnection);
 
@@ -164,7 +170,7 @@ Node* NodeBox::getNode()
     if(!worker) {
         return nullptr;
     }
-    return worker->getNode();
+    return worker->getNode().lock().get();
 }
 
 NodeWorker* NodeBox::getNodeWorker()
@@ -188,7 +194,7 @@ void NodeBox::enableContent(bool enable)
         return;
     }
 
-    worker->setEnabled(enable);
+    worker->setProcessingEnabled(enable);
 
     ui->label->setEnabled(enable);
 }
@@ -258,7 +264,7 @@ void NodeBox::updateThreadInformation()
     }
 
     if(info_thread && worker->thread()) {
-        int id = worker->thread()->property("id").toInt();
+        int id = worker->getNodeState()->getThreadId();
         std::stringstream info;
         if(settings_.get<bool>("threadless")) {
             info << "<i><b><small>threadless</small></b></i>";
@@ -270,7 +276,7 @@ void NodeBox::updateThreadInformation()
             info << "<i><b><small>private</small></b></i>";
             info_thread->setStyleSheet("QLabel { background-color : rgb(255,255,255); color: rgb(0,0,0);}");
         } else {
-            info << worker->thread()->property("name").toString().toStdString();
+            info << worker->getNodeState()->getThreadName();
             setStyleForId(info_thread, id);
         }
         info_thread->setText(info.str().c_str());
@@ -383,7 +389,7 @@ void NodeBox::registerOutputEvent(Output* out)
     Q_EMIT changed(this);
 }
 
-void NodeBox::resizeEvent(QResizeEvent *)
+void NodeBox::resizeEvent(QResizeEvent *e)
 {
     Q_EMIT changed(this);
 }
@@ -430,9 +436,6 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         return;
     }
 
-    bool idle = worker->getState() == NodeWorker::State::IDLE ||
-            worker->getState() == NodeWorker::State::ENABLED;
-
     QString state;
     switch(worker->getState()) {
     case NodeWorker::State::IDLE:
@@ -444,13 +447,11 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     case NodeWorker::State::PROCESSING:
         state = "processing"; break;
     default:
-        state = "?"; break;
+        state = "unknown"; break;
     }
 
     info_exec->setVisible(true);
-    info_exec->setText(QString("<img src=\":/") +
-                       (idle ? "idle" : "running") +
-                       ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> ");
+    info_exec->setText(QString("<img src=\":/node_") + state + ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> ");
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;
@@ -480,7 +481,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         refreshStylesheet();
     }
 
-    resize(sizeHint());
+    //    resize(sizeHint());
 }
 
 void NodeBox::moveEvent(QMoveEvent* e)
@@ -590,6 +591,16 @@ void NodeBox::updateVisuals()
     }
     bool flip = worker->getNodeState()->isFlipped();
 
+    auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
+    if(layout) {
+        if(flip) {
+            layout->addWidget(grip_, 3, 0, Qt::AlignBottom | Qt::AlignLeft);
+
+        } else {
+            layout->addWidget(grip_, 3, 2, Qt::AlignBottom | Qt::AlignRight);
+        }
+    }
+
     ui->boxframe->setProperty("flipped", flip);
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
@@ -651,6 +662,8 @@ void NodeBox::nodeStateChangedEvent()
 
     setLabel(worker->getNodeState()->getLabel());
     ui->label->setToolTip(worker->getUUID().c_str());
+
+    updateThreadInformation();
 
     auto pt = worker->getNodeState()->getPos();
     move(QPoint(pt.x, pt.y));

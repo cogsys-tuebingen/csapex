@@ -15,6 +15,9 @@ class Scheduler
 public:
     virtual ~Scheduler();
 
+    virtual int id() const = 0;
+    virtual std::string name() const = 0;
+
     virtual void setPause(bool pause) = 0;
     virtual void stop() = 0;
     virtual void clear() = 0;

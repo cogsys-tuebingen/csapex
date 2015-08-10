@@ -198,11 +198,6 @@ void Output::validateConnections()
 
 bool Output::canSendMessages() const
 {
-    for(ConnectionPtr c : connections_) {
-        if(!c) {
-            continue;
-        }
-    }
     return true;
 }
 

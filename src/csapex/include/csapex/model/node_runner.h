@@ -34,12 +34,13 @@ private:
     NodeWorkerPtr worker_;
     Scheduler* scheduler_;
 
-    std::mutex mutex_;
+    mutable std::recursive_mutex mutex_;
 
     TaskPtr tick_;
+    TaskPtr check_parameters_;
     TaskPtr process_;
     TaskPtr prepare_;
-    TaskPtr check_;
+    TaskPtr check_transitions_;
 
     std::vector<boost::signals2::connection> connections_;
 

@@ -67,15 +67,20 @@ public:
     void triggerProcess();
     void triggerPanic();
 
-    NodeWeakPtr getNodeSafe() const;
-    /*TODO: REMOVE!*/ Node* getNode() const;
+    NodeWeakPtr getNode() const;
 
+    void setState(State state);
     State getState() const;
+
+    bool isEnabled() const;
+    bool isIdle() const;
+    bool isProcessing() const;
+    bool isFired() const;
 
     std::string getType() const;
 
-    bool isEnabled() const;
-    void setEnabled(bool e);
+    bool isProcessingEnabled() const;
+    void setProcessingEnabled(bool e);
 
     void setProfiling(bool profiling);
     bool isProfiling() const;
@@ -193,6 +198,8 @@ public:
     boost::signals2::signal<void()> processRequested;
     boost::signals2::signal<void()> checkTransitionsRequested;
 
+    boost::signals2::signal<void()> parametersChanged;
+
     boost::signals2::signal<void(std::function<void()>)> executionRequested;
 
     boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
@@ -224,8 +231,6 @@ private:
     void triggerNodeStateChanged();
 
     void finishTimer(TimerPtr t);
-
-    void setState(State state);
 
     void updateTransitionConnections();
 

@@ -20,6 +20,7 @@
 #include <utils_param/trigger_parameter.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node_modifier.h>
+#include <csapex/model/tickable_node.h>
 
 /// SYSTEM
 #include <QThread>
@@ -58,11 +59,13 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
         makeParametersConnectable();
     }
 
+    node_->parameters_changed.connect(parametersChanged);
+    node_->getParameterState()->parameter_set_changed->connect(parametersChanged);
     node_->getParameterState()->parameter_added->connect(std::bind(&NodeWorker::makeParameterConnectable, this, std::placeholders::_1));
     node_->getParameterState()->parameter_removed->connect(std::bind(&NodeWorker::makeParameterNotConnectable, this, std::placeholders::_1));
 
-    addSlot("enable", std::bind(&NodeWorker::setEnabled, this, true), true);
-    addSlot("disable", std::bind(&NodeWorker::setEnabled, this, false), false);
+    addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
+    addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
 
     trigger_tick_done_ = addTrigger("ticked");
     trigger_process_done_ = addTrigger("inputs\nprocessed");
@@ -204,13 +207,7 @@ NodeState::Ptr NodeWorker::getNodeState()
     return node_state_;
 }
 
-
-Node* NodeWorker::getNode() const
-{
-    return node_.get();
-}
-
-NodeWeakPtr NodeWorker::getNodeSafe() const
+NodeWeakPtr NodeWorker::getNode() const
 {
     return node_;
 }
@@ -221,12 +218,33 @@ NodeWorker::State NodeWorker::getState() const
     return state_;
 }
 
+bool NodeWorker::isEnabled() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::ENABLED;
+}
+bool NodeWorker::isIdle() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::IDLE;
+}
+bool NodeWorker::isProcessing() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::PROCESSING;
+}
+bool NodeWorker::isFired() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::FIRED;
+}
+
 void NodeWorker::setState(State state)
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     switch(state) {
     case State::IDLE:
-        apex_assert_hard(state_ == State::PROCESSING || state_ == State::ENABLED);
+        apex_assert_hard(state_ == State::PROCESSING || state_ == State::ENABLED || state_ == State::IDLE);
         break;
     case State::FIRED:
         apex_assert_hard(state_ == State::ENABLED);
@@ -247,12 +265,12 @@ std::string NodeWorker::getType() const
     return node_type_;
 }
 
-bool NodeWorker::isEnabled() const
+bool NodeWorker::isProcessingEnabled() const
 {
     return node_state_->isEnabled();
 }
 
-void NodeWorker::setEnabled(bool e)
+void NodeWorker::setProcessingEnabled(bool e)
 {
     node_state_->setEnabled(e);
 
@@ -413,49 +431,6 @@ void NodeWorker::triggerCheckTransitions()
     checkTransitionsRequested();
 }
 
-//void NodeWorker::switchThread(QThread *thread, int id)
-//{
-//    // PROBLEM: if this is called when node is not idle -> fsm gets corrupted
-//    // will be fixed once nodeworker is independent of qt!
-//    QObject::disconnect(tick_timer_);
-
-//    QObject::disconnect(this, SIGNAL(processRequested()));
-
-//    QObject::disconnect(this, SIGNAL(tickRequested()));
-//    QObject::disconnect(this, SIGNAL(messagesProcessed()));
-//    QObject::disconnect(this, SIGNAL(checkTransitionsRequested()));
-
-//    assert(thread);
-
-//    //    for(Input* input : inputs_){
-//    //        input->moveToThread(thread);
-//    //    }
-//    //    for(Input* input : parameter_inputs_){
-//    //        input->moveToThread(thread);
-//    //    }
-//    //    for(Output* output : outputs_){
-//    //        output->moveToThread(thread);
-//    //    }
-//    //    for(Output* output : parameter_outputs_){
-//    //        output->moveToThread(thread);
-//    //    }
-//    //    for(Slot* slot : slots_){
-//    //        slot->moveToThread(thread);
-//    //    }
-//    //    for(Trigger* trigger : triggers_){
-//    //        trigger->moveToThread(thread);
-//    //    }
-//    moveToThread(thread);
-
-//    assertNotInGuiThread();
-
-//    node_state_->setThread(id);
-
-//    threadChanged();
-
-//    QObject::connect(tick_timer_, SIGNAL(timeout()), this, SLOT(tick()));
-//}
-
 void NodeWorker::connectConnector(Connectable *c)
 {
     c->connectionInProgress.connect(connectionInProgress);
@@ -558,6 +533,10 @@ void NodeWorker::updateParameterValue(Connectable *s)
         p->set<double>(msg::getValue<double>(source));
     } else if(msg::isValue<std::string>(source)) {
         p->set<std::string>(msg::getValue<std::string>(source));
+    } else if(msg::isValue<std::pair<int,int>>(source)) {
+        p->set<std::pair<int, int>>(msg::getValue<std::pair<int,int>>(source));
+    } else if(msg::isValue<std::pair<double,double>>(source)) {
+        p->set<std::pair<double, double>>(msg::getValue<std::pair<double,double>>(source));
     } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::NoMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
@@ -565,7 +544,7 @@ void NodeWorker::updateParameterValue(Connectable *s)
 
 void NodeWorker::startProcessingMessages()
 {
-    if(!isEnabled()) {
+    if(!isProcessingEnabled()) {
         return;
     }
 
@@ -577,7 +556,7 @@ void NodeWorker::startProcessingMessages()
     apex_assert_hard(!transition_in_->hasUnestablishedConnection());
     apex_assert_hard(!transition_out_->hasUnestablishedConnection());
     apex_assert_hard(transition_out_->canStartSendingMessages());
-    apex_assert_hard(isEnabled());
+    apex_assert_hard(isProcessingEnabled());
     apex_assert_hard(canProcess());
     setState(State::PROCESSING);
 
@@ -661,9 +640,10 @@ void NodeWorker::startProcessingMessages()
 
         } else {
             node_->process(*node_, [this](std::function<void()> f) {
-                executionRequested(f);
-
-                finishProcessingMessages(true);
+                executionRequested([this, f]() {
+                    f();
+                    finishProcessingMessages(true);
+                });
             });
         }
 
@@ -1276,7 +1256,12 @@ void NodeWorker::checkTransitions()
         return;
     }
 
-    setState(State::ENABLED);
+    if(transition_in_->isEnabled()) {
+        setState(State::ENABLED);
+    } else {
+        setState(State::IDLE);
+        return;
+    }
 
     apex_assert_hard(transition_out_->canStartSendingMessages());
 
@@ -1305,6 +1290,10 @@ void NodeWorker::publishParameter(param::Parameter* p)
                 msg::publish(out.get(), p->as<double>());
             else if(p->is<std::string>())
                 msg::publish(out.get(), p->as<std::string>());
+            else if(p->is<std::pair<int, int>>())
+                msg::publish(out.get(), p->as<std::pair<int, int>>());
+            else if(p->is<std::pair<double, double>>())
+                msg::publish(out.get(), p->as<std::pair<double, double>>());
         }
     }
 }
@@ -1320,23 +1309,29 @@ void NodeWorker::sendMessages()
     apex_assert_hard(getState() == State::PROCESSING);
     //    setState(State::WAITING_FOR_OUTPUTS);
 
-    if(isSink()) {
+    if(transition_out_->isSink()) {
         notifyMessagesProcessed();
 
         return;
     }
 
     int seq = 0;
-    if(inputs_.empty()) {
-        seq = outputs_.front()->sequenceNumber();
+
+    bool source = isSource();//inputs_.empty();
+
+    if(source) {
         for(auto o : outputs_) {
             seq = std::max(seq, o->sequenceNumber());
         }
-        ++seq;
+        for(auto o : parameter_outputs_) {
+            seq = std::max(seq, o->sequenceNumber());
+        }
 
     } else {
-        seq = inputs_.front()->sequenceNumber();
         for(auto i : inputs_) {
+            seq = std::max(seq, i->sequenceNumber());
+        }
+        for(auto i : parameter_inputs_) {
             seq = std::max(seq, i->sequenceNumber());
         }
     }
@@ -1348,6 +1343,11 @@ void NodeWorker::sendMessages()
 
     transition_out_->sendMessages();
 
+    if(source) {
+        for(auto o : getAllOutputs()) {
+            o->setSequenceNumber(seq+1);
+        }
+    }
 
     //    node_->aerr << "SEND" << std::endl;
 }
@@ -1440,35 +1440,22 @@ void NodeWorker::tick()
         return;
     }
 
+    auto tickable = std::dynamic_pointer_cast<TickableNode>(node_);
+    apex_assert_hard(tickable);
+
     assertNotInGuiThread();
 
     {
-        if(!isEnabled()) {
+        if(!isProcessingEnabled()) {
             return;
         }
     }
 
-    {
-        //        Timer::Ptr t = nullptr;
-        //        if(profiling_) {
-        //            t.reset(new Timer(getUUID()));
-        //            timerStarted(this, OTHER, t->startTimeMs());
-        //        }
-        //        node_->useTimer(t.get());
-
-        node_->checkConditions(false);
-        checkParameters();
-
-        //        if(t) {
-        //            finishTimer(t);
-        //        }
-    }
-
-    if(isEnabled()) {
+    if(isProcessingEnabled()) {
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-            if(!isWaitingForTrigger() && isTickEnabled() && isSource() && node_->canTick()) {
+            if(!isWaitingForTrigger() && isTickEnabled() && isSource() && tickable->canTick()) {
                 if(state == State::ENABLED) {
                     setState(State::IDLE);
                 }
@@ -1491,7 +1478,7 @@ void NodeWorker::tick()
                         timerStarted(this, TICK, t->startTimeMs());
                     }
                     node_->useTimer(t.get());
-                    node_->tick();
+                    tickable->tick();
 
                     if(trigger_tick_done_->isConnected()) {
                         if(t) {
@@ -1506,6 +1493,9 @@ void NodeWorker::tick()
 
                     bool has_msg = false;
                     for(OutputPtr out : outputs_) {
+                        has_msg |= (msg::hasMessage(out.get()) && msg::isConnected(out.get()));
+                    }
+                    for(OutputPtr out : parameter_outputs_) {
                         has_msg |= (msg::hasMessage(out.get()) && msg::isConnected(out.get()));
                     }
 
@@ -1535,7 +1525,7 @@ void NodeWorker::tick()
 
 void NodeWorker::checkParameters()
 {
-    // check if a parameter-connection has a message
+    node_->checkConditions(false);
 
     // check if a parameter was changed
     Parameterizable::ChangedParameterList changed_params = node_->getChangedParameters();
@@ -1555,7 +1545,7 @@ void NodeWorker::checkParameters()
 
 void NodeWorker::checkIO()
 {
-    if(isEnabled()) {
+    if(isProcessingEnabled()) {
         enableInput(canReceive());
         enableOutput(canReceive());
         enableSlots(true);

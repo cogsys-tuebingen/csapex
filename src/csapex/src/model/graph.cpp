@@ -152,11 +152,13 @@ bool Graph::addConnection(ConnectionPtr connection)
         to->addConnection(connection);
 
 
-        node_parents_[n_to].push_back(n_from);
-        node_children_[n_from].push_back(n_to);
+        if(n_to != n_from) {
+            node_parents_[n_to].push_back(n_from);
+            node_children_[n_from].push_back(n_to);
 
-        buildConnectedComponents();
-        verify();
+            buildConnectedComponents();
+            verify();
+        }
 
         connectionAdded(connection.get());
         from->connectionDone(from);
@@ -170,6 +172,9 @@ bool Graph::addConnection(ConnectionPtr connection)
 
 void Graph::deleteConnection(ConnectionPtr connection)
 {
+    if(!connection) {
+        return;
+    }
     auto out = connection->from();
     auto in = connection->to();
 
@@ -187,12 +192,13 @@ void Graph::deleteConnection(ConnectionPtr connection)
             NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
 
             // erase pointer from TO to FROM
-            // if there are multiple edges, this only erases one entry
-            node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
+            if(n_from != n_to) {
+                // if there are multiple edges, this only erases one entry
+                node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
 
-            // erase pointer from FROM to TO
-            node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
-
+                // erase pointer from FROM to TO
+                node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+            }
             connections_.erase(c);
 
             buildConnectedComponents();
@@ -271,7 +277,9 @@ void Graph::assignLevels()
 
     std::deque<NodeWorker*> unmarked;
     for(NodeWorker::Ptr node : nodes_) {
-        if(node_parents_[node.get()].empty()) {
+        if(node->isSource() && node->isSink()) {
+            node_level[node.get()] = 0;
+        } else if(node_parents_[node.get()].empty()) {
             node_level[node.get()] = 0;
         } else {
             node_level[node.get()] = NO_LEVEL;
@@ -302,7 +310,7 @@ void Graph::assignLevels()
         int max_dynamic_level = NO_LEVEL;
         bool has_dynamic_parent_output = false;
         bool has_dynamic_input = false;
-        for(const auto& input : current->getAllInputs()) {
+        for(const auto& input : current->getMessageInputs()) {
             if(input->isDynamic()) {
                 has_dynamic_input = true;
             }
@@ -346,7 +354,7 @@ void Graph::assignLevels()
     for(NodeWorker::Ptr node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(auto output : node->getAllOutputs()) {
+        for(auto output : node->getMessageOutputs()) {
             if(output->isDynamic()) {
                 DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
                 dout->clearCorrespondents();
@@ -366,7 +374,7 @@ void Graph::assignLevels()
             Q.pop_front();
             visited.insert(current);
 
-            for(auto input : current->getAllInputs()) {
+            for(auto input : current->getMessageInputs()) {
                 if(input->isConnected()) {
                     ConnectionPtr connection = input->getConnections().front();
                     Output* out = dynamic_cast<Output*>(connection->from());
@@ -388,7 +396,7 @@ void Graph::assignLevels()
         }
 
         if(correspondent) {
-            for(auto input : node->getAllInputs()) {
+            for(auto input : node->getMessageInputs()) {
                 if(input->isDynamic()) {
                     DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
                     di->setCorrespondent(correspondent);
@@ -456,9 +464,12 @@ NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
 
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
-    for(NodeWorker::Ptr b : nodes_) {
-        if(b->getUUID() == uuid) {
-            return b->getNode();
+    for(NodeWorker::Ptr worker : nodes_) {
+        if(worker->getUUID() == uuid) {
+            auto node = worker->getNode().lock();
+            if(node) {
+                return node.get();
+            }
         }
     }
 

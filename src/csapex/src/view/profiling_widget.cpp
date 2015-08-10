@@ -12,17 +12,23 @@
 
 /// SYSTEM
 #include <QPainter>
+#include <QBoxLayout>
 #include <QGraphicsProxyWidget>
+#include <QPushButton>
+#include <QFileDialog>
+#include <fstream>
+#include <QSizeGrip>
 
 using namespace csapex;
 
 ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *parent)
     : QWidget(parent), box_(box), node_worker_(box->getNodeWorker()),
+      space_for_painting_(nullptr),
       timer_history_pos_(0),
       count_(0)
 {
-    w_ = 300;
-    h_ = 80;
+    int min_w = 300;
+    bar_height_ = 80;
 
     left_space = 50;
     padding = 5;
@@ -34,7 +40,25 @@ ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *
     apex_assert_hard(timer_history_.size() == timer_history_length);
     apex_assert_hard(timer_history_.capacity() == timer_history_length);
 
-    setFixedSize(w_, h_);
+    layout_ = new QVBoxLayout;
+    setLayout(layout_);
+
+    space_for_painting_ = new QSpacerItem(min_w, bar_height_);
+    layout_->addItem(space_for_painting_);
+
+    auto* buttons_layout = new QHBoxLayout;
+
+    QPushButton* reset = new QPushButton("reset");
+    buttons_layout->addWidget(reset);
+    connect(reset, SIGNAL(clicked(bool)), this, SLOT(reset()));
+
+    QPushButton* export_csv = new QPushButton("export");
+    buttons_layout->addWidget(export_csv);
+    connect(export_csv, SIGNAL(clicked(bool)), this, SLOT(exportCsv()));
+
+    layout_->addLayout(buttons_layout);
+
+    layout_->addWidget(new QSizeGrip(this), 0, Qt::AlignBottom | Qt::AlignRight);
 
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
@@ -53,8 +77,35 @@ void ProfilingWidget::reposition(double, double)
     graphicsProxyWidget()->setPos(pos);
 }
 
+void ProfilingWidget::reset()
+{
+//    timer_history_pos_ = 0;
+//    timer_history_.clear();
+//    steps_.clear();
+    steps_acc_.clear();
+    count_ = 0;
+}
+
+void ProfilingWidget::exportCsv()
+{
+    QString filename = QFileDialog::getSaveFileName(0, "Save CSV File", "", "*.csv", 0, QFileDialog::DontUseNativeDialog);
+
+    if(!filename.isEmpty()) {
+        std::ofstream of(filename.toStdString());
+
+        for(std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
+            const std::string& name = it->first;
+            accumulator::sample_type mean = boost::accumulators::mean(steps_acc_[name]);
+            accumulator::sample_type stddev = std::sqrt(boost::accumulators::variance(steps_acc_[name]));
+
+            of << name << "," << mean << "," << stddev << "\n";
+        }
+    }
+}
+
 void ProfilingWidget::paintEvent(QPaintEvent *)
 {
+    // update stats
     auto new_measurements = node_worker_->extractLatestTimers();
     for(TimerPtr timer : new_measurements) {
         timer_history_[timer_history_pos_] = timer;
@@ -62,14 +113,25 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         if(++timer_history_pos_ >= (int) timer_history_.size()) {
             timer_history_pos_ = 0;
         }
+
+        for(const auto& it : timer->entries()) {
+            steps_acc_[it.first](it.second);
+        }
+        ++count_;
     }
 
     QPainter p(this);
 
+    int w = width();
+    int h = space_for_painting_->geometry().height();
+
+
     left = padding + left_space;
-    right = w_ - padding;
+    right = w - padding;
     up = padding;
-    bottom = h_ - padding;
+    bottom = h - 2 * padding - 2 * line_height - line_height * steps_.size();
+
+    bar_height_ = bottom - padding;
 
     std::size_t history_length = timer_history_.size();
 
@@ -79,23 +141,21 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     int n = history_length;
 
-    int max_time_ms = 10;
-    const std::vector<Timer::Ptr>& h = timer_history_;
-    for(std::vector<Timer::Ptr>::const_iterator timer = h.begin(); timer != h.end(); ++timer) {
-        const Timer::Ptr& t = *timer;
-        if(!t) {
+    double max_time_ms = 10;
+
+    for(const auto& timer : timer_history_) {
+        if(!timer) {
             continue;
         }
 
-        max_time_ms = std::max(max_time_ms, t->root->lengthMs());
+        max_time_ms = std::max(max_time_ms, timer->root->lengthMs());
 
-        std::vector<std::pair<std::string, int> > names = t->entries();
-        for(std::vector<std::pair<std::string, int> >::const_iterator it = names.begin(); it != names.end(); ++it) {
+        auto names = timer->entries();
+        for(auto it = names.begin(); it != names.end(); ++it) {
             const std::string& name = it->first;
             std::map<std::string, QColor>::iterator pos = steps_.find(name);
             if(pos == steps_.end()) {
                 steps_[name] = color::fromCount(steps_.size()).light();
-                setFixedHeight(h_ + (steps_.size()+2) * line_height + padding);
             }
         }
     }
@@ -128,19 +188,6 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         return;
     }
 
-    // update stats
-    {
-        const Timer::Ptr& t = timer_history_[timer_history_pos_];
-        if(t) {
-            std::vector<std::pair<std::string, int> > names = t->entries();
-            for(std::vector<std::pair<std::string, int> >::const_iterator it = names.begin(); it != names.end(); ++it) {
-                const std::string& name = it->first;
-                steps_acc_[name](it->second);
-            }
-            ++count_;
-        }
-    }
-
     // bars
     if(n > 0) {
         std::stringstream txt;
@@ -160,7 +207,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         p.drawText(QRect(0, up, left -padding, dy), txt.str().c_str(), opt);
         p.drawText(QRect(0, bottom - dy, left - padding, dy), "0 ms", opt);
 
-        max_time_ms_ = std::max(1, max_time_ms);
+        max_time_ms_ = std::max(1.0, max_time_ms);
 
         current_draw_x = left + padding + (history_length - n) * indiv_width_;
         for(int time = 0; time < n; ++time) {
@@ -188,10 +235,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // legend
     p.setOpacity(1.0);
-    float y = h_;
+    float y = bottom;
     float text_x = left_space + 2*padding;
-    float text_w = (w_ - text_x) / 2.0f - padding;
-    float info_w = w_ - text_w - text_x;
+    float text_w = (w - text_x) / 2.0f - padding;
+    float info_w = w - text_w - text_x;
     float info_x = text_x + text_w + padding;
 
     // label
@@ -224,6 +271,12 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         p.drawText(QRectF(info_x + info_w / 2.0f, y, info_w / 2.0f, line_height), QString::number(stddev));
         y += line_height;
     }
+
+    // resize to fit content
+    if(space_for_painting_->geometry().height() != y) {
+        space_for_painting_->changeSize(0, y, QSizePolicy::MinimumExpanding,  QSizePolicy::MinimumExpanding);
+        layout()->invalidate();
+    }
 }
 
 void ProfilingWidget::paintTimer(QPainter& p, const Timer * timer)
@@ -235,7 +288,7 @@ void ProfilingWidget::paintTimer(QPainter& p, const Timer * timer)
 
 float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& interval, float height_offset, int depth)
 {
-    int interval_time = interval->lengthMs();
+    float interval_time = interval->lengthMs();
 
     float f = interval_time / max_time_ms_;
     f = std::max(0.0f, std::min(1.0f, f));

@@ -14,10 +14,11 @@
 
 using namespace csapex;
 
-ThreadPool::ThreadPool(bool enable_threading, bool grouping)
+ThreadPool::ThreadPool(bool enable_threading, bool grouping, bool paused)
     : enable_threading_(enable_threading), grouping_(grouping)
 {
-    default_group_ = std::make_shared<ThreadGroup>(ThreadGroup::DEFAULT_GROUP_ID, "default");
+    setPause(paused);
+    default_group_ = std::make_shared<ThreadGroup>(ThreadGroup::DEFAULT_GROUP_ID, "default", paused);
 }
 
 void ThreadPool::stop()
@@ -124,7 +125,7 @@ bool ThreadPool::isInGroup(TaskGenerator *task, int id) const
 void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
 {
     if(!isInPrivateThread(task)) {
-        auto group = std::make_shared<ThreadGroup>(ThreadGroup::PRIVATE_THREAD, task->getUUID().getShortName());
+        auto group = std::make_shared<ThreadGroup>(ThreadGroup::PRIVATE_THREAD, task->getUUID().getShortName(), isPaused());
         groups_.push_back(group);
 
         assignGeneratorToGroup(task, group.get());
@@ -164,7 +165,7 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
         }
     }
 
-    ThreadGroupPtr group = std::make_shared<ThreadGroup>(name);
+    ThreadGroupPtr group = std::make_shared<ThreadGroup>(name, isPaused());
     groups_.push_back(group);
 
     assignGeneratorToGroup(task, group.get());
@@ -201,9 +202,12 @@ void ThreadPool::saveSettings(YAML::Node& node)
     YAML::Node groups;
     for(std::size_t i = 0, total =  groups_.size(); i < total; ++i) {
         YAML::Node group;
-        group["id"] =  groups_[i]->id();
-        group["name"] =  groups_[i]->name();
-        groups.push_back(group);
+        int id = groups_[i]->id();
+        if(id >= ThreadGroup::MINIMUM_THREAD_ID) {
+            group["id"] =  id;
+            group["name"] =  groups_[i]->name();
+            groups.push_back(group);
+        }
     }
     threads["groups"] = groups;
 
@@ -234,7 +238,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
 
                 if(group_id >= ThreadGroup::MINIMUM_THREAD_ID) {
                     std::string group_name = group["name"].as<std::string>();
-                    groups_.emplace_back(std::make_shared<ThreadGroup>(group_id, group_name));
+                    groups_.emplace_back(std::make_shared<ThreadGroup>(group_id, group_name, isPaused()));
                 }
             }
         }
@@ -254,8 +258,11 @@ void ThreadPool::loadSettings(YAML::Node& node)
             }
         }
 
+        std::vector<TaskGenerator*> tasks;
         for(auto it = group_assignment_.begin(); it != group_assignment_.end(); ++it) {
-            TaskGenerator* task = it->first;
+            tasks.push_back(it->first);
+        }
+        for(TaskGenerator* task : tasks) {
             if(assignment_map.find(task->getUUID()) != assignment_map.end()) {
                 int id = assignment_map[task->getUUID()];
                 addToGroup(task, id);

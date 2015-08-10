@@ -20,7 +20,7 @@ class CsApexCore;
 class ThreadPool : public Executor
 {
 public:
-    ThreadPool(bool enable_threading, bool grouping);
+    ThreadPool(bool enable_threading, bool grouping, bool paused);
 
     void stop();
     virtual void clear() override;

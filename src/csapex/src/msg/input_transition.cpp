@@ -85,14 +85,13 @@ void InputTransition::fireIfPossible()
         return;
     }
 
-    if(node_->isSource()) {
+    // TODO: replace tick with process where possible
+    if(node_->isSource() && !node_->isSink()) {
         //        apex_assert_hard(established_connections_.empty());
         //fire(); -> instead of tick!!!!
     } else {
-        if(!isOneConnection(Connection::State::READY_TO_RECEIVE) &&
-                areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/) &&
-                !areAllConnections(Connection::State::READ)) {
-            if(node_->getState() == NodeWorker::State::ENABLED) {
+        if(isEnabled()) {
+            if(node_->isEnabled()) {
 
                 for(const auto& connection : established_connections_) {
                     if(connection->getState() == Connection::State::NOT_INITIALIZED) {
@@ -114,6 +113,17 @@ void InputTransition::fireIfPossible()
             }
         }
     }
+}
+
+bool InputTransition::isEnabled() const
+{
+    if(isOneConnection(Connection::State::READY_TO_RECEIVE)) {
+        return false;
+    }
+    if(!areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/)) {
+        return false;
+    }
+    return !areAllConnections(Connection::State::READ);
 }
 
 int InputTransition::findHighestDeviantSequenceNumber() const
@@ -208,8 +218,8 @@ void InputTransition::notifyMessageProcessed()
 void InputTransition::fire()
 {
     apex_assert_hard(node_->canProcess());
-    apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
     apex_assert_hard(node_->isEnabled());
+    apex_assert_hard(node_->isProcessingEnabled());
     apex_assert_hard(!isOneConnection(Connection::State::DONE));
     //    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(!isOneConnection(Connection::State::READY_TO_RECEIVE));
@@ -293,6 +303,6 @@ void InputTransition::fire()
 
     //    std::cerr << "-> process " <<  node_->getUUID() << std::endl;
 
-    apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
+    apex_assert_hard(node_->isEnabled());
     node_->triggerProcess();
 }

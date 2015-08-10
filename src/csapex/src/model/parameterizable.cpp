@@ -100,6 +100,8 @@ void Parameterizable::parameterChanged(param::Parameter *param, std::function<vo
 {
     std::unique_lock<std::mutex> lock(changed_params_mutex_);
     changed_params_.push_back(std::make_pair(param, cb));
+
+    parameters_changed();
 }
 
 void Parameterizable::parameterEnabled(param::Parameter */*param*/, bool /*enabled*/)

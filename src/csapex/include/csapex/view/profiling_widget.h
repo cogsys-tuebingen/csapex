@@ -13,6 +13,9 @@
 #include <boost/accumulators/statistics.hpp>
 #include <boost/signals2/connection.hpp>
 
+class QSpacerItem;
+class QVBoxLayout;
+
 namespace csapex
 {
 
@@ -27,6 +30,9 @@ public:
 public Q_SLOTS:
     void reposition(double x, double y);
 
+    void reset();
+    void exportCsv();
+
 protected:
     void paintEvent(QPaintEvent *);
     void paintTimer(QPainter &p, const Timer*);
@@ -38,8 +44,9 @@ private:
 
     boost::signals2::connection connection_;
 
-    float w_;
-    float h_;
+    QVBoxLayout* layout_;
+    QSpacerItem* space_for_painting_;
+    float bar_height_;
     float content_height_ ;
 
     float left_space;
