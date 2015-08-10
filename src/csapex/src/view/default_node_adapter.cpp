@@ -664,7 +664,6 @@ void model_updateSetParameter(param::SetParameterWeakPtr set_p, QComboBox* combo
         return;
     }
     if(!combo->currentText().isEmpty()) {
-        std::cout << "set set: " << combo->currentText().toStdString() << std::endl;
         assertNotGuiThread();
         p->setByName(combo->currentText().toStdString());
     }

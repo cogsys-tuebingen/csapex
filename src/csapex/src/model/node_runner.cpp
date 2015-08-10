@@ -20,15 +20,18 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
                                        std::bind(&NodeWorker::tick, worker),
                                        this);
     }
+    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + worker->getUUID().getFullName(),
+                                               std::bind(&NodeWorker::checkParameters, worker),
+                                               this);
     prepare_ = std::make_shared<Task>(std::string("prepare ") + worker->getUUID().getFullName(),
                                       std::bind(&NodeWorker::prepareForNextProcess, worker),
                                       this);
     process_ = std::make_shared<Task>(std::string("process ") + worker->getUUID().getFullName(),
                                       std::bind(&NodeWorker::startProcessingMessages, worker),
                                       this);
-    check_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
-                                    std::bind(&NodeWorker::checkTransitions, worker),
-                                    this);
+    check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
+                                                std::bind(&NodeWorker::checkTransitions, worker),
+                                                this);
 }
 
 NodeRunner::~NodeRunner()
@@ -50,7 +53,7 @@ void NodeRunner::reset()
 
 void NodeRunner::assignToScheduler(Scheduler *scheduler)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     apex_assert_hard(scheduler_ == nullptr);
 
@@ -78,7 +81,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     connections_.push_back(cp);
 
     auto ctr = worker_->checkTransitionsRequested.connect([this]() {
-        schedule(check_);
+        schedule(check_transitions_);
     });
     connections_.push_back(ctr);
 
@@ -90,6 +93,15 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
         connections_.push_back(ct);
     }
 
+    // parameter change
+    auto check = worker_->parametersChanged.connect([this]() {
+        schedule(check_parameters_);
+    });
+    connections_.push_back(check);
+
+    schedule(check_parameters_);
+
+
     // generic task
     auto cg = worker_->executionRequested.connect([this](std::function<void()> cb) {
             schedule(std::make_shared<Task>("anonymous", cb));
@@ -99,7 +111,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
 void NodeRunner::schedule(TaskPtr task)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
     remaining_tasks_.push_back(task);
 
     if(scheduler_) {
@@ -112,7 +124,7 @@ void NodeRunner::schedule(TaskPtr task)
 
 void NodeRunner::detach()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     if(scheduler_) {
         auto t = scheduler_->remove(this);

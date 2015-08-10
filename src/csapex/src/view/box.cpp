@@ -146,7 +146,7 @@ void NodeBox::construct()
     worker->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
     worker->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
-    enabledChange(worker->isEnabled());
+    enabledChange(worker->isProcessingEnabled());
     worker->enabled.connect([this](bool e){ enabledChange(e); });
     QObject::connect(this, SIGNAL(enabledChange(bool)), this, SLOT(enabledChangeEvent(bool)), Qt::QueuedConnection);
 
@@ -194,7 +194,7 @@ void NodeBox::enableContent(bool enable)
         return;
     }
 
-    worker->setEnabled(enable);
+    worker->setProcessingEnabled(enable);
 
     ui->label->setEnabled(enable);
 }
@@ -435,9 +435,6 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     if(!worker || !adapter_) {
         return;
     }
-
-    bool idle = worker->getState() == NodeWorker::State::IDLE ||
-            worker->getState() == NodeWorker::State::ENABLED;
 
     QString state;
     switch(worker->getState()) {

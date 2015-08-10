@@ -141,7 +141,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     int n = history_length;
 
-    int max_time_ms = 10;
+    double max_time_ms = 10;
 
     for(const auto& timer : timer_history_) {
         if(!timer) {
@@ -150,8 +150,8 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
         max_time_ms = std::max(max_time_ms, timer->root->lengthMs());
 
-        std::vector<std::pair<std::string, int> > names = timer->entries();
-        for(std::vector<std::pair<std::string, int> >::const_iterator it = names.begin(); it != names.end(); ++it) {
+        auto names = timer->entries();
+        for(auto it = names.begin(); it != names.end(); ++it) {
             const std::string& name = it->first;
             std::map<std::string, QColor>::iterator pos = steps_.find(name);
             if(pos == steps_.end()) {
@@ -207,7 +207,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         p.drawText(QRect(0, up, left -padding, dy), txt.str().c_str(), opt);
         p.drawText(QRect(0, bottom - dy, left - padding, dy), "0 ms", opt);
 
-        max_time_ms_ = std::max(1, max_time_ms);
+        max_time_ms_ = std::max(1.0, max_time_ms);
 
         current_draw_x = left + padding + (history_length - n) * indiv_width_;
         for(int time = 0; time < n; ++time) {
@@ -288,7 +288,7 @@ void ProfilingWidget::paintTimer(QPainter& p, const Timer * timer)
 
 float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& interval, float height_offset, int depth)
 {
-    int interval_time = interval->lengthMs();
+    float interval_time = interval->lengthMs();
 
     float f = interval_time / max_time_ms_;
     f = std::max(0.0f, std::min(1.0f, f));

@@ -59,11 +59,13 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
         makeParametersConnectable();
     }
 
+    node_->parameters_changed.connect(parametersChanged);
+    node_->getParameterState()->parameter_set_changed->connect(parametersChanged);
     node_->getParameterState()->parameter_added->connect(std::bind(&NodeWorker::makeParameterConnectable, this, std::placeholders::_1));
     node_->getParameterState()->parameter_removed->connect(std::bind(&NodeWorker::makeParameterNotConnectable, this, std::placeholders::_1));
 
-    addSlot("enable", std::bind(&NodeWorker::setEnabled, this, true), true);
-    addSlot("disable", std::bind(&NodeWorker::setEnabled, this, false), false);
+    addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
+    addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
 
     trigger_tick_done_ = addTrigger("ticked");
     trigger_process_done_ = addTrigger("inputs\nprocessed");
@@ -216,6 +218,27 @@ NodeWorker::State NodeWorker::getState() const
     return state_;
 }
 
+bool NodeWorker::isEnabled() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::ENABLED;
+}
+bool NodeWorker::isIdle() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::IDLE;
+}
+bool NodeWorker::isProcessing() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::PROCESSING;
+}
+bool NodeWorker::isFired() const
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+    return state_ == State::FIRED;
+}
+
 void NodeWorker::setState(State state)
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
@@ -242,12 +265,12 @@ std::string NodeWorker::getType() const
     return node_type_;
 }
 
-bool NodeWorker::isEnabled() const
+bool NodeWorker::isProcessingEnabled() const
 {
     return node_state_->isEnabled();
 }
 
-void NodeWorker::setEnabled(bool e)
+void NodeWorker::setProcessingEnabled(bool e)
 {
     node_state_->setEnabled(e);
 
@@ -521,7 +544,7 @@ void NodeWorker::updateParameterValue(Connectable *s)
 
 void NodeWorker::startProcessingMessages()
 {
-    if(!isEnabled()) {
+    if(!isProcessingEnabled()) {
         return;
     }
 
@@ -533,7 +556,7 @@ void NodeWorker::startProcessingMessages()
     apex_assert_hard(!transition_in_->hasUnestablishedConnection());
     apex_assert_hard(!transition_out_->hasUnestablishedConnection());
     apex_assert_hard(transition_out_->canStartSendingMessages());
-    apex_assert_hard(isEnabled());
+    apex_assert_hard(isProcessingEnabled());
     apex_assert_hard(canProcess());
     setState(State::PROCESSING);
 
@@ -1423,28 +1446,12 @@ void NodeWorker::tick()
     assertNotInGuiThread();
 
     {
-        if(!isEnabled()) {
+        if(!isProcessingEnabled()) {
             return;
         }
     }
 
-    {
-        //        Timer::Ptr t = nullptr;
-        //        if(profiling_) {
-        //            t.reset(new Timer(getUUID()));
-        //            timerStarted(this, OTHER, t->startTimeMs());
-        //        }
-        //        node_->useTimer(t.get());
-
-        node_->checkConditions(false);
-        checkParameters();
-
-        //        if(t) {
-        //            finishTimer(t);
-        //        }
-    }
-
-    if(isEnabled()) {
+    if(isProcessingEnabled()) {
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
@@ -1518,7 +1525,7 @@ void NodeWorker::tick()
 
 void NodeWorker::checkParameters()
 {
-    // check if a parameter-connection has a message
+    node_->checkConditions(false);
 
     // check if a parameter was changed
     Parameterizable::ChangedParameterList changed_params = node_->getChangedParameters();
@@ -1538,7 +1545,7 @@ void NodeWorker::checkParameters()
 
 void NodeWorker::checkIO()
 {
-    if(isEnabled()) {
+    if(isProcessingEnabled()) {
         enableInput(canReceive());
         enableOutput(canReceive());
         enableSlots(true);

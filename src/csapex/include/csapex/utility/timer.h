@@ -29,19 +29,19 @@ public:
 
         std::string name() const;
 
-        int lengthMs() const;
-        int lengthSubMs() const;
+        double lengthMs() const;
+        double lengthSubMs() const;
 
-        void entries(std::vector<std::pair<std::string, int> > &out) const;
+        void entries(std::vector<std::pair<std::string, double> > &out) const;
 
     public:
         std::map<std::string, Interval::Ptr> sub;
 
     private:
         std::string name_;
-        std::chrono::time_point<std::chrono::system_clock> start_;
-        std::chrono::time_point<std::chrono::system_clock> end_;
-        int length_;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+        std::chrono::time_point<std::chrono::high_resolution_clock> end_;
+        long length_micro_seconds_;
     };
 
     class Interlude : public boost::noncopyable {
@@ -61,7 +61,7 @@ public:
     ~Timer();
 
     void finish();
-    std::vector<std::pair<std::string, int> > entries() const;
+    std::vector<std::pair<std::string, double> > entries() const;
 
     Interlude::Ptr step(const std::string& name);
 

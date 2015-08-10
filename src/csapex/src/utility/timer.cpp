@@ -16,11 +16,11 @@ Timer::~Timer()
     finish();
 }
 
-std::vector<std::pair<std::string, int> > Timer::entries() const
+std::vector<std::pair<std::string, double> > Timer::entries() const
 {
     assert(active.empty());
 
-    std::vector<std::pair<std::string, int> > result;
+    std::vector<std::pair<std::string, double> > result;
     root->entries(result);
     return result;
 }
@@ -72,31 +72,31 @@ Timer::Interlude::~Interlude()
     parent_->active.pop_back();
 }
 
-void Timer::Interval::entries(std::vector<std::pair<std::string, int> > &out) const
+void Timer::Interval::entries(std::vector<std::pair<std::string, double> > &out) const
 {
     out.push_back(std::make_pair(name_, lengthMs()));
-    for(std::map<std::string, Interval::Ptr>::const_iterator it = sub.begin(); it != sub.end(); ++it) {
+    for(auto it = sub.begin(); it != sub.end(); ++it) {
         it->second->entries(out);
     }
 }
 
-int Timer::Interval::lengthMs() const
+double Timer::Interval::lengthMs() const
 {
-    return length_;
+    return length_micro_seconds_ * 1e-3;
 }
 
-int Timer::Interval::lengthSubMs() const
+double Timer::Interval::lengthSubMs() const
 {
     int sum = 0;
     for(std::map<std::string, Interval::Ptr>::const_iterator it = sub.begin(); it != sub.end(); ++it) {
         const Interval& i = *it->second;
         sum += i.lengthMs();
     }
-    return sum;
+    return sum * 1e-3;
 }
 
 Timer::Interval::Interval(const std::string &name)
-    : name_(name), length_(0)
+    : name_(name), length_micro_seconds_(0)
 {
     start();
 }
@@ -108,11 +108,11 @@ std::string Timer::Interval::name() const
 
 void Timer::Interval::start()
 {
-    start_ = std::chrono::system_clock::now();
+    start_ = std::chrono::high_resolution_clock::now();
 }
 
 void Timer::Interval::stop()
 {
-    end_ = std::chrono::system_clock::now();
-    length_ += std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count();
+    end_ = std::chrono::high_resolution_clock::now();
+    length_micro_seconds_ += std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
 }

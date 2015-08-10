@@ -31,9 +31,6 @@ public:
 private:
 
     void fillConnections();
-
-private:
-//    bool outputs_done_;
 };
 }
 

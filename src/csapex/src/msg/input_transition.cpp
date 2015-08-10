@@ -91,7 +91,7 @@ void InputTransition::fireIfPossible()
         //fire(); -> instead of tick!!!!
     } else {
         if(isEnabled()) {
-            if(node_->getState() == NodeWorker::State::ENABLED) {
+            if(node_->isEnabled()) {
 
                 for(const auto& connection : established_connections_) {
                     if(connection->getState() == Connection::State::NOT_INITIALIZED) {
@@ -218,8 +218,8 @@ void InputTransition::notifyMessageProcessed()
 void InputTransition::fire()
 {
     apex_assert_hard(node_->canProcess());
-    apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
     apex_assert_hard(node_->isEnabled());
+    apex_assert_hard(node_->isProcessingEnabled());
     apex_assert_hard(!isOneConnection(Connection::State::DONE));
     //    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(!isOneConnection(Connection::State::READY_TO_RECEIVE));
@@ -303,6 +303,6 @@ void InputTransition::fire()
 
     //    std::cerr << "-> process " <<  node_->getUUID() << std::endl;
 
-    apex_assert_hard(node_->getState() == NodeWorker::State::ENABLED);
+    apex_assert_hard(node_->isEnabled());
     node_->triggerProcess();
 }
