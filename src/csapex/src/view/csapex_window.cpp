@@ -110,6 +110,13 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionPause, &QAction::triggered, [this](bool pause) { core_.setPause(pause); });
     core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); });
 
+    QObject::connect(ui->actionSteppingMode, &QAction::triggered, [this](bool step) { core_.setSteppingMode(step); });
+    QObject::connect(ui->actionStep, &QAction::triggered, [this](bool) { core_.step(); });
+
+    core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); });
+    core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); });
+
+
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
@@ -570,8 +577,6 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if(r == QMessageBox::Save) {
-            std::cout << "save" << std::endl;
-
             save();
             event->accept();
         } else if(r == QMessageBox::Discard) {

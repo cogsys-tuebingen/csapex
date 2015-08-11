@@ -144,6 +144,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         QPixmap pm(":/apex_splash.png");
         splash = new QSplashScreen (pm);
         splash->show();
+        showMessage("loading libraries");
     }
 
     Settings settings;

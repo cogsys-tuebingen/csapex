@@ -173,6 +173,8 @@ void OutputTransition::fillConnections()
     apex_assert_hard(!areOutputsIdle());
 //    apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
+    int seq = -1;
+
     for(ConnectionPtr connection : established_connections_) {
         if(connection->isSinkEnabled()) {
             Output* out = dynamic_cast<Output*>(connection->from());
@@ -180,6 +182,7 @@ void OutputTransition::fillConnections()
 
             auto msg = out->getMessage();
             apex_assert_hard(msg);
+
             connection->setMessage(msg);
         }
     }

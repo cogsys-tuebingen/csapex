@@ -12,13 +12,24 @@
 using namespace csapex;
 
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
-    : worker_(worker), scheduler_(nullptr)
+    : worker_(worker), scheduler_(nullptr),
+      paused_(false), ticking_(false), is_source_(false), stepping_(false), can_step_(false)
 {
     NodePtr node = worker_->getNode().lock();
-    if(node && std::dynamic_pointer_cast<TickableNode>(node)) {
+    is_source_ = worker->isSource();
+    ticking_ = node && std::dynamic_pointer_cast<TickableNode>(node);
+    if(ticking_) {
         tick_ = std::make_shared<Task>(std::string("tick ") + worker->getUUID().getFullName(),
-                                       std::bind(&NodeWorker::tick, worker),
-                                       this);
+                                       [this, worker]() {
+            bool success = worker->tick();
+            if(stepping_) {
+                if(!success) {
+                    can_step_ = true;
+                } else {
+                    end_step();
+                }
+            }
+        }, this);
     }
     check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + worker->getUUID().getFullName(),
                                                std::bind(&NodeWorker::checkParameters, worker),
@@ -30,7 +41,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
                                       std::bind(&NodeWorker::startProcessingMessages, worker),
                                       this);
     check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
-                                                std::bind(&NodeWorker::checkTransitions, worker),
+                                                std::bind(&NodeWorker::checkTransitions, worker, true),
                                                 this);
 }
 
@@ -88,7 +99,12 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     // tick?
     if(tick_) {
         auto ct = worker_->tickRequested.connect([this]() {
-            schedule(tick_);
+            if(!paused_) {
+                if(!stepping_ || can_step_) {
+                    can_step_ = false;
+                    schedule(tick_);
+                }
+            }
         });
         connections_.push_back(ct);
     }
@@ -131,6 +147,46 @@ void NodeRunner::detach()
         remaining_tasks_.insert(remaining_tasks_.end(), t.begin(), t.end());
         scheduler_ = nullptr;
     }
+}
+
+bool NodeRunner::isPaused() const
+{
+    return paused_;
+}
+
+void NodeRunner::setPause(bool pause)
+{
+    paused_ = pause;
+}
+
+void NodeRunner::setSteppingMode(bool stepping)
+{
+    stepping_ = stepping;
+    can_step_ = false;
+}
+
+void NodeRunner::step()
+{
+    if(is_source_ && worker_->isProcessingEnabled()) {
+        begin_step();
+        can_step_ = true;
+    } else {
+        can_step_ = false;
+        end_step();
+    }
+}
+
+bool NodeRunner::isStepping() const
+{
+    return stepping_;
+}
+
+bool NodeRunner::isStepDone() const
+{
+    if(!ticking_) {
+        return true;
+    }
+    return !can_step_;
 }
 
 UUID NodeRunner::getUUID() const

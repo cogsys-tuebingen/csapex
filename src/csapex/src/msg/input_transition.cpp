@@ -91,6 +91,7 @@ void InputTransition::fireIfPossible()
         //fire(); -> instead of tick!!!!
     } else {
         if(isEnabled()) {
+            apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::UNREAD));
             if(node_->isEnabled()) {
 
                 for(const auto& connection : established_connections_) {
@@ -167,7 +168,7 @@ void InputTransition::notifyOlderConnections(int seq)
 
             int s = msg->sequenceNumber();
             if(seq != s) {
-                std::cerr << input->getUUID().getFullName() << " has seq " << s << " instead of " << seq << std::endl;
+                std::cout << input->getUUID().getFullName() << " has seq " << s << " instead of " << seq << std::endl;
                 connection->setState(Connection::State::READ);
                 connection->allowNewMessage();
             }

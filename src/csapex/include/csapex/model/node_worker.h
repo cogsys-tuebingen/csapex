@@ -153,12 +153,13 @@ private:
     void updateParameterValue(Connectable* source);
 
 public:
-    void tick();
+    bool tick();
+
     void startProcessingMessages();
     void finishProcessingMessages(bool was_executed);
 
     void prepareForNextProcess();
-    void checkTransitions();
+    void checkTransitions(bool try_fire = true);
 
     void checkParameters();    
     void checkIO();

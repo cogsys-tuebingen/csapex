@@ -5,6 +5,7 @@
 #include <csapex/scheduling/task.h>
 #include <csapex/utility/thread.h>
 #include <csapex/scheduling/task_generator.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <iostream>
@@ -63,9 +64,60 @@ void ThreadGroup::setPause(bool pause)
     if(pause != pause_) {
         pause_ = pause;
 
+        for(auto generator : generators_) {
+            generator->setPause(pause);
+        }
+
         std::unique_lock<std::recursive_mutex> lock(state_mtx_);
         pause_changed_.notify_all();
     }
+}
+
+void ThreadGroup::setSteppingMode(bool stepping)
+{
+    std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+    for(auto generator : generators_) {
+        generator->setSteppingMode(stepping);
+    }
+}
+
+void ThreadGroup::step()
+{
+    begin_step();
+
+    std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+    for(auto generator : generators_) {
+        generator->step();
+    }
+}
+
+bool ThreadGroup::isStepping() const
+{
+    // this is only consistency checking...
+    int stepping = 0;
+    int not_stepping = 0;
+    for(auto generator : generators_) {
+        if(generator->isStepping()) {
+            ++stepping;
+        } else {
+            ++not_stepping;
+        }
+    }
+
+    apex_assert_hard(stepping == 0 || not_stepping == 0);
+
+    return stepping > 0;
+}
+
+bool ThreadGroup::isStepDone() const
+{
+    for(auto generator : generators_) {
+        if(!generator->isStepDone()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void ThreadGroup::stop()
@@ -105,11 +157,17 @@ void ThreadGroup::clear()
 
 void ThreadGroup::add(TaskGenerator* generator)
 {
+    generator->setPause(pause_);
+
     std::unique_lock<std::recursive_mutex> lock(state_mtx_);
     if(!running_) {
         startThread();
     }
     generators_.push_back(generator);
+
+    auto& cs = generator_connections_[generator];
+
+    cs.push_back(generator->end_step.connect([this]() { checkIfStepIsDone(); }));
 }
 
 void ThreadGroup::add(TaskGenerator *generator, const std::vector<TaskPtr> &initial_tasks)
@@ -122,6 +180,13 @@ void ThreadGroup::add(TaskGenerator *generator, const std::vector<TaskPtr> &init
     }
 
     work_available_.notify_all();
+}
+
+void ThreadGroup::checkIfStepIsDone()
+{
+    if(isStepDone()) {
+        end_step();
+    }
 }
 
 std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
@@ -149,6 +214,10 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
     }
 
     work_available_.notify_all();
+
+    for(auto connection : generator_connections_[generator]) {
+        connection.disconnect();
+    }
 
     return remaining_tasks;
 }

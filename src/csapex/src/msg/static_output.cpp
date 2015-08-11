@@ -8,16 +8,19 @@
 #include <csapex/utility/assert.h>
 #include <csapex/msg/output_transition.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 StaticOutput::StaticOutput(OutputTransition* transition, const UUID &uuid)
-    : Output(transition, uuid)
+    : Output(transition, uuid), message_flags_(0)
 {
 
 }
 
 StaticOutput::StaticOutput(OutputTransition* transition, Unique *parent, int sub_id)
-    : Output(transition, parent, sub_id)
+    : Output(transition, parent, sub_id), message_flags_(0)
 {
 
 }
@@ -72,7 +75,7 @@ void StaticOutput::commitMessages()
 
     } else {
         if(!connections_.empty()) {
-            //            std::cout << getUUID() << " sends empty message" << std::endl;
+//            std::cout << getUUID() << " sends empty message" << std::endl;
         }
         committed_message_ = connection_types::makeEmpty<connection_types::NoMessage>();
     }

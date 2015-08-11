@@ -48,6 +48,10 @@ public:
     bool isPaused() const;
     void setPause(bool pause);
 
+    bool isSteppingMode() const;
+    void setSteppingMode(bool stepping);
+    void step();
+
     void settingsChanged();
     void setStatusMessage(const std::string& msg);
 
@@ -66,6 +70,9 @@ public:
     boost::signals2::signal<void (YAML::Node& n)> loadViewRequest;
 
     boost::signals2::signal<void (bool)> paused;
+
+    boost::signals2::signal<void ()> begin_step;
+    boost::signals2::signal<void ()> end_step;
 
 private:
     CorePluginPtr makeCorePlugin(const std::string& name);

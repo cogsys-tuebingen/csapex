@@ -246,6 +246,9 @@ void NodeWorker::setState(State state)
     case State::IDLE:
         apex_assert_hard(state_ == State::PROCESSING || state_ == State::ENABLED || state_ == State::IDLE);
         break;
+    case State::ENABLED:
+        apex_assert_hard(state_ == State::IDLE || state_ == State::ENABLED);
+        break;
     case State::FIRED:
         apex_assert_hard(state_ == State::ENABLED);
         break;
@@ -619,7 +622,6 @@ void NodeWorker::startProcessingMessages()
         finishProcessingMessages(false);
         return;
     }
-
 
     std::unique_lock<std::recursive_mutex> sync_lock(sync);
 
@@ -1227,7 +1229,7 @@ void NodeWorker::updateTransitionConnections()
     transition_out_->updateConnections();
 }
 
-void NodeWorker::checkTransitions()
+void NodeWorker::checkTransitions(bool try_fire)
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
@@ -1263,9 +1265,11 @@ void NodeWorker::checkTransitions()
         return;
     }
 
-    apex_assert_hard(transition_out_->canStartSendingMessages());
+    if(try_fire) {
+        apex_assert_hard(transition_out_->canStartSendingMessages());
 
-    transition_in_->fireIfPossible();
+        transition_in_->fireIfPossible();
+    }
 }
 
 
@@ -1434,12 +1438,13 @@ void NodeWorker::setLevel(int level)
     }
 }
 
-void NodeWorker::tick()
+bool NodeWorker::tick()
 {
-    if(!is_setup_) {
-        return;
-    }
+    bool has_ticked = false;
 
+    if(!is_setup_) {
+        return has_ticked;
+    }
     auto tickable = std::dynamic_pointer_cast<TickableNode>(node_);
     apex_assert_hard(tickable);
 
@@ -1447,7 +1452,7 @@ void NodeWorker::tick()
 
     {
         if(!isProcessingEnabled()) {
-            return;
+            return has_ticked;
         }
     }
 
@@ -1455,11 +1460,12 @@ void NodeWorker::tick()
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-            if(!isWaitingForTrigger() && isTickEnabled() && isSource() && tickable->canTick()) {
+            if(!isWaitingForTrigger() && isTickEnabled() && tickable->canTick()) {
                 if(state == State::ENABLED) {
                     setState(State::IDLE);
                 }
-                checkTransitions();
+
+                checkTransitions(false);
 
                 if(transition_out_->canStartSendingMessages() && !transition_out_->hasFadingConnection()) {
                     //            std::cerr << "ticks" << std::endl;
@@ -1478,7 +1484,10 @@ void NodeWorker::tick()
                         timerStarted(this, TICK, t->startTimeMs());
                     }
                     node_->useTimer(t.get());
+
                     tickable->tick();
+
+                    has_ticked = true;
 
                     if(trigger_tick_done_->isConnected()) {
                         if(t) {
@@ -1521,6 +1530,8 @@ void NodeWorker::tick()
     if(tick_immediate_) {
         tickRequested();
     }
+
+    return has_ticked;
 }
 
 void NodeWorker::checkParameters()

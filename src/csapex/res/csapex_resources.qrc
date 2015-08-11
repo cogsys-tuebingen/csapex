@@ -45,5 +45,7 @@
         <file>node_fired.png</file>
         <file>node_idle.png</file>
         <file>node_processing.png</file>
+        <file>step.png</file>
+        <file>step_next.png</file>
     </qresource>
 </RCC>
