@@ -321,8 +321,9 @@ void ThreadGroup::executeTask(const TaskPtr& task)
 
     } catch(const std::exception& e) {
         TaskGenerator* gen = task->getParent();
-        gen->setError(e.what());
-
+        if(gen) {
+            gen->setError(e.what());
+        }
     } catch(const std::string& s) {
         std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
     } catch(...) {

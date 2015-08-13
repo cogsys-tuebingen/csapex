@@ -78,6 +78,7 @@ public:
     void setupParameter(param::IntervalParameterPtr interval_p);
     void setupParameter(param::SetParameterPtr set_p);
     void setupParameter(param::BitSetParameterPtr bitset_p);
+    void setupParameter(param::AngleParameterPtr angle_p);
 
     void setupParameter(param::OutputProgressParameterPtr bitset_p);
 
