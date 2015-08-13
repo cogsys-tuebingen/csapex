@@ -258,6 +258,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         res = run();
 
+        // FIXME: this is necessary for some adapted nodes.
+        graph->reset();
         delete designer;
 
     } else {
