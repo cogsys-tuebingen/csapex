@@ -216,6 +216,18 @@ public:
 
 
     /**
+     * @brief declareAngleParameter
+     * @param name
+     * @param description
+     * @param angle default value
+     * @return
+     */
+    static std::unique_ptr<Parameter> declareAngle(const std::string& name, const ParameterDescription& description, double angle);
+    static std::unique_ptr<Parameter> declareAngle(const std::string& name, double angle);
+
+
+
+    /**
      * @brief declareColorParameter
      * @param name
      * @param description

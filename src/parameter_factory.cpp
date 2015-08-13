@@ -2,6 +2,7 @@
 #include <utils_param/parameter_factory.h>
 
 /// COMPONENT
+#include <utils_param/angle_parameter.h>
 #include <utils_param/color_parameter.h>
 #include <utils_param/path_parameter.h>
 #include <utils_param/interval_parameter.h>
@@ -36,6 +37,8 @@ std::unique_ptr<Parameter> ParameterFactory::makeEmpty(const std::string &type)
         return std::unique_ptr<Parameter>(new StringListParameter);
     } else if(t == "color") {
         return std::unique_ptr<Parameter>(new ColorParameter);
+    } else if(t == "angle") {
+        return std::unique_ptr<Parameter>(new AngleParameter);
     } else if(t == "progress") {
         return std::unique_ptr<Parameter>(new OutputProgressParameter);
     } else {
@@ -113,6 +116,17 @@ std::unique_ptr<Parameter> ParameterFactory::declareBool(const std::string& name
 std::unique_ptr<Parameter> ParameterFactory::declareBool(const std::string &name, bool def)
 {
     return declareBool(name, ParameterDescription(), def);
+}
+
+std::unique_ptr<Parameter> ParameterFactory::declareAngle(const std::string& name, const ParameterDescription& description, double angle)
+{
+    std::unique_ptr<AngleParameter> result(new AngleParameter(name, description, angle));
+    return std::move(result);
+}
+
+std::unique_ptr<Parameter> ParameterFactory::declareAngle(const std::string& name, double angle)
+{
+    return declareAngle(name, ParameterDescription(), angle);
 }
 
 std::unique_ptr<Parameter> ParameterFactory::declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b)
