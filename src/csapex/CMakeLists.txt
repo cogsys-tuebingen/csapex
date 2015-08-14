@@ -246,6 +246,7 @@ add_library(csapex_qt SHARED
     src/view/box.cpp
     src/view/box_dialog.cpp
     src/view/csapex_window.cpp
+    src/view/csapex_splashscreen.cpp
     src/view/default_node_adapter.cpp
     src/view/designer.cpp
     src/view/designer_scene.cpp

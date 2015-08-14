@@ -141,8 +141,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 {
 //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
-        QPixmap pm(":/apex_splash.png");
-        splash = new QSplashScreen (pm);
+        splash = new CsApexSplashScreen;
         splash->show();
         showMessage("loading libraries");
     }
@@ -276,7 +275,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 void Main::showMessage(const QString& msg)
 {
     if(splash->isVisible()) {
-        splash->showMessage(msg, Qt::AlignTop | Qt::AlignRight, Qt::black);
+        splash->showMessage(msg);
     }
     app->processEvents();
 }
