@@ -228,6 +228,7 @@ add_library(csapex_qt SHARED
     src/command/delete_connector.cpp
     src/command/delete_fulcrum.cpp
     src/command/delete_node.cpp
+    src/command/disable_node.cpp
     src/command/flip_sides.cpp
     src/command/minimize.cpp
     src/command/modify_fulcrum.cpp

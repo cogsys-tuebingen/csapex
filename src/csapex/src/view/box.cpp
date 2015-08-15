@@ -136,7 +136,7 @@ void NodeBox::construct()
 
     setLabel(worker->getNodeState()->getLabel());
 
-    QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
+    QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
 
     QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
@@ -147,7 +147,7 @@ void NodeBox::construct()
     worker->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
     enabledChange(worker->isProcessingEnabled());
-    worker->enabled.connect([this](bool e){ enabledChange(e); });
+//    worker->enabled.connect([this](bool e){ enabledChange(e); });
     QObject::connect(this, SIGNAL(enabledChange(bool)), this, SLOT(enabledChangeEvent(bool)), Qt::QueuedConnection);
 
     worker->threadChanged.connect([this](){ updateThreadInformation(); });
@@ -187,17 +187,6 @@ NodeAdapter::Ptr NodeBox::getNodeAdapter()
     return adapter_;
 }
 
-void NodeBox::enableContent(bool enable)
-{
-    NodeWorkerPtr worker = node_worker_.lock();
-    if(!worker) {
-        return;
-    }
-
-    worker->setProcessingEnabled(enable);
-
-    ui->label->setEnabled(enable);
-}
 
 void NodeBox::updateBoxInformation(Graph* graph)
 {
@@ -424,7 +413,10 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
 void NodeBox::enabledChangeEvent(bool val)
 {
     ui->boxframe->setProperty("disabled", !val);
+
+    ui->enablebtn->blockSignals(true);
     ui->enablebtn->setChecked(val);
+    ui->enablebtn->blockSignals(false);
 
     refreshStylesheet();
 }
@@ -657,8 +649,11 @@ void NodeBox::nodeStateChangedEvent()
     }
     minimizeBox();
 
-    enableContent(worker->getNodeState()->isEnabled());
-    ui->enablebtn->setChecked(worker->getNodeState()->isEnabled());
+    bool enabled = worker->getNodeState()->isEnabled();
+    worker->setProcessingEnabled(enabled);
+    ui->label->setEnabled(enabled);
+
+    enabledChange(worker->getNodeState()->isEnabled());
 
     setLabel(worker->getNodeState()->getLabel());
     ui->label->setToolTip(worker->getUUID().c_str());

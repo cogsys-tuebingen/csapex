@@ -4,8 +4,8 @@
 /// PROJECT
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/command/move_box.h>
-#include <csapex/command/move_fulcrum.h>
+#include <csapex/command/dispatcher.h>
+#include <csapex/command/disable_node.h>
 #include <csapex/model/connectable.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
@@ -251,6 +251,12 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         connections_.push_back(c1);
         auto c2 = node_worker->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
         connections_.push_back(c2);
+
+
+        UUID uuid = node_worker->getUUID();
+        QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
+            dispatcher_.execute(std::make_shared<command::DisableNode>(uuid, !checked));
+        });
 
         Q_EMIT boxAdded(box);
     }

@@ -105,7 +105,6 @@ public Q_SLOTS:
 
     void getInformation();
     void minimizeBox();
-    void enableContent(bool enable);
     void refreshStylesheet();
     void killContent();
     void flipSides();
