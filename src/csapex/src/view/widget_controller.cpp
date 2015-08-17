@@ -233,10 +233,10 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         designer_->addBox(box);
 
         // add existing connectors
-        for(auto input : node_worker->getMessageInputs()) {
+        for(auto input : node_worker->getAllInputs()) {
             connectorMessageAdded(input);
         }
-        for(auto output : node_worker->getMessageOutputs()) {
+        for(auto output : node_worker->getAllOutputs()) {
             connectorMessageAdded(output);
         }
         for(auto slot : node_worker->getSlots()) {
@@ -300,10 +300,25 @@ void WidgetController::connectorRemoved(ConnectablePtr connector)
 void WidgetController::connectorMessageAdded(ConnectablePtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
-    NodeBox* box = getBox(parent_uuid);
-    QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
 
-    createPort(connector, box, layout);
+    Graph* g = graph_->getGraph();
+    NodeWorker* node_worker = g->findNodeWorker(parent_uuid);
+    if(node_worker) {
+        Output* o = dynamic_cast<Output*>(connector.get());
+        if(o && node_worker->isParameterOutput(o)) {
+            return;
+        }
+
+        Input* i = dynamic_cast<Input*>(connector.get());
+        if(i && node_worker->isParameterInput(i)) {
+            return;
+        }
+
+        NodeBox* box = getBox(parent_uuid);
+        QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
+
+        createPort(connector, box, layout);
+    }
 }
 
 void WidgetController::connectorSignalAdded(ConnectablePtr connector)
@@ -315,7 +330,7 @@ void WidgetController::connectorSignalAdded(ConnectablePtr connector)
     createPort(connector, box, layout);
 }
 
-Port* WidgetController::createPort(ConnectablePtr connector, NodeBox* box, QBoxLayout* layout)
+Port* WidgetController::createPort(ConnectableWeakPtr connector, NodeBox* box, QBoxLayout* layout)
 {
     apex_assert_hard(QApplication::instance()->thread() == QThread::currentThread());
 

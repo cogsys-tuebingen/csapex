@@ -345,17 +345,21 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw port information (in)
-        for(auto input : node_worker->getMessageInputs()) {
-            Port* p = widget_ctrl_->getPort(input.get());
-            if(p) {
-                drawPort(painter, box, p);
+        for(auto input : node_worker->getAllInputs()) {
+            if(!node_worker->isParameterInput(input.get())) {
+                Port* p = widget_ctrl_->getPort(input.get());
+                if(p) {
+                    drawPort(painter, box, p);
+                }
             }
         }
         // draw port information (out)
-        for(auto output : node_worker->getMessageOutputs()) {
-            Port* p = widget_ctrl_->getPort(output.get());
-            if(p) {
-                drawPort(painter, box, p);
+        for(auto output : node_worker->getAllOutputs()) {
+            if(!node_worker->isParameterOutput(output.get())) {
+                Port* p = widget_ctrl_->getPort(output.get());
+                if(p) {
+                    drawPort(painter, box, p);
+                }
             }
         }
 

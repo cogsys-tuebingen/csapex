@@ -9,6 +9,7 @@
 #include <memory>
 #include <QImage>
 #include <stdexcept>
+#include <typeindex>
 
 namespace csapex
 {
@@ -22,7 +23,7 @@ public:
     virtual ~MessageRenderer();
 
     virtual QImage render(const ConnectionTypeConstPtr& msg) = 0;
-    virtual const std::type_info* messageType() const = 0;
+    virtual std::type_index messageType() const = 0;
 
     virtual std::vector<param::ParameterPtr> getParameters() const
     {
@@ -44,9 +45,9 @@ public:
         }
     }
 
-    virtual const std::type_info* messageType() const
+    virtual std::type_index messageType() const
     {
-        return &typeid(Message);
+        return std::type_index(typeid(Message));
     }
 
     virtual QImage doRender(const Message& msg) = 0;

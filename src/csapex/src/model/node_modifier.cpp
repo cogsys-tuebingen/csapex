@@ -46,21 +46,25 @@ Trigger* NodeModifier::addTrigger(const std::string& label)
 
 std::vector<Input*> NodeModifier::getMessageInputs() const
 {
-    auto vec = node_worker_->getMessageInputs();
-    std::vector<Input*> result(vec.size());
-    std::size_t i = 0;
+    // hide parameter inputs from the nodes
+    auto vec = node_worker_->getAllInputs();
+    std::vector<Input*> result;
     for(auto entry : vec) {
-        result[i++] = entry.get();
+        if(!node_worker_->isParameterInput(entry.get()))  {
+            result.push_back(entry.get());
+        }
     }
     return result;
 }
 std::vector<Output*> NodeModifier::getMessageOutputs() const
 {
-    auto vec = node_worker_->getMessageOutputs();
-    std::vector<Output*> result(vec.size());
-    std::size_t i = 0;
+    // hide parameter outputs from the nodes
+    auto vec = node_worker_->getAllOutputs();
+    std::vector<Output*> result;
     for(auto entry : vec) {
-        result[i++] = entry.get();
+        if(!node_worker_->isParameterOutput(entry.get()))  {
+            result.push_back(entry.get());
+        }
     }
     return result;
 }

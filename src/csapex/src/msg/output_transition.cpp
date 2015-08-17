@@ -171,9 +171,6 @@ void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(!areOutputsIdle());
-//    apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
-
-    int seq = -1;
 
     for(ConnectionPtr connection : established_connections_) {
         if(connection->isSinkEnabled()) {
@@ -189,7 +186,6 @@ void OutputTransition::fillConnections()
 
     for(ConnectionPtr connection : established_connections_) {
         if(connection->isSinkEnabled()) {
-            //            apex_assert_hard(connection->getState() == Connection::State::UNREAD);
             connection->notifyMessageSet();
         }
     }

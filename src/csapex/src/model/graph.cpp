@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <csapex/command/add_connection.h>
-#include <csapex/command/add_connector.h>
 #include <csapex/command/add_node.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/delete_fulcrum.h>
@@ -310,7 +309,7 @@ void Graph::assignLevels()
         int max_dynamic_level = NO_LEVEL;
         bool has_dynamic_parent_output = false;
         bool has_dynamic_input = false;
-        for(const auto& input : current->getMessageInputs()) {
+        for(const auto& input : current->getAllInputs()) {
             if(input->isDynamic()) {
                 has_dynamic_input = true;
             }
@@ -354,7 +353,7 @@ void Graph::assignLevels()
     for(NodeWorker::Ptr node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(auto output : node->getMessageOutputs()) {
+        for(auto output : node->getAllInputs()) {
             if(output->isDynamic()) {
                 DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
                 dout->clearCorrespondents();
@@ -374,7 +373,7 @@ void Graph::assignLevels()
             Q.pop_front();
             visited.insert(current);
 
-            for(auto input : current->getMessageInputs()) {
+            for(auto input : current->getAllInputs()) {
                 if(input->isConnected()) {
                     ConnectionPtr connection = input->getConnections().front();
                     Output* out = dynamic_cast<Output*>(connection->from());
@@ -396,7 +395,7 @@ void Graph::assignLevels()
         }
 
         if(correspondent) {
-            for(auto input : node->getMessageInputs()) {
+            for(auto input : node->getAllInputs()) {
                 if(input->isDynamic()) {
                     DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
                     di->setCorrespondent(correspondent);

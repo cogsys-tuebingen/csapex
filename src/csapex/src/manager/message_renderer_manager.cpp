@@ -66,7 +66,7 @@ MessageRendererPtr MessageRendererManager::createMessageRenderer(const Connectio
     }
 
     try {
-        return renderers.at(&typeid(*message));
+        return renderers.at(std::type_index(typeid(*message)));
     } catch(const std::exception& e) {
         throw std::runtime_error(std::string("cannot create message renderer for ") + type2name(typeid(*message)));
     }

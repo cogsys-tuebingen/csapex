@@ -40,7 +40,6 @@ class NodeBox : public QWidget
     friend class NodeWorker;
     friend class Node;
     friend class command::MoveBox;
-    friend class command::AddConnector;
     friend class BoxSelectionmanager;
 
 public:

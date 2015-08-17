@@ -24,16 +24,17 @@
 
 using namespace csapex;
 
-Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, ConnectablePtr adaptee, QWidget *parent)
+Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, ConnectableWeakPtr adaptee, QWidget *parent)
     : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
 {
-    if(adaptee) {
+    ConnectablePtr adaptee_ptr = adaptee_.lock();
+    if(adaptee_ptr) {
         createToolTip();
 
-        connections_.push_back(adaptee->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
-        connections_.push_back(adaptee->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
+        connections_.push_back(adaptee_ptr->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
+        connections_.push_back(adaptee_ptr->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
 
-        if(adaptee->isDynamic()) {
+        if(adaptee_ptr->isDynamic()) {
             setProperty("dynamic", true);
         }
 

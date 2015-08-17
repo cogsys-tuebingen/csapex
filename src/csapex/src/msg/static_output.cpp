@@ -48,8 +48,11 @@ void StaticOutput::nextMessage()
 
 ConnectionTypeConstPtr StaticOutput::getMessage() const
 {
-    apex_assert_hard(committed_message_ != nullptr);
-    return committed_message_;
+    if(!committed_message_) {
+        return connection_types::makeEmpty<connection_types::NoMessage>();
+    } else {
+        return committed_message_;
+    }
 }
 
 void StaticOutput::setMultipart(bool multipart, bool last_part)

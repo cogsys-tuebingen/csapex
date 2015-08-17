@@ -986,7 +986,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         node_worker->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
-        InputPtr param_in = node_worker->getParameterInput(current_name_);
+        InputPtr param_in = node_worker->getParameterInput(current_name_).lock();
         if(param_in) {
             Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
@@ -1008,7 +1008,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        OutputPtr param_out = node_worker->getParameterOutput(current_name_);
+        OutputPtr param_out = node_worker->getParameterOutput(current_name_).lock();
         if(param_out) {
             Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
@@ -1019,11 +1019,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
             port->setVisible(p->isInteractive());
             parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
-
-            qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&param::Parameter::triggerChange, p.get()));
-            callbacks.push_back(call_trigger);
-
-            param_out->connectionDone.connect([call_trigger](Connectable*) { call_trigger->call(); });
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());

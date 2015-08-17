@@ -154,10 +154,10 @@ void NodeBox::construct()
     worker->errorHappened.connect([this](bool){ updateVisualsRequest(); });
 
 
-    for(auto input : worker->getMessageInputs()) {
+    for(auto input : worker->getAllInputs()) {
         registerInputEvent(input.get());
     }
-    for(auto output : worker->getMessageOutputs()) {
+    for(auto output : worker->getAllOutputs()) {
         registerOutputEvent(output.get());
     }
 

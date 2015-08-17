@@ -220,7 +220,6 @@ target_link_libraries(csapex
 add_library(csapex_qt SHARED
 
     src/command/add_connection.cpp
-    src/command/add_connector.cpp
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
     src/command/create_thread.cpp
