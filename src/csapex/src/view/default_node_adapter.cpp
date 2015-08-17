@@ -792,22 +792,20 @@ void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, 
     if(!p) {
         return;
     }
-    return;
-
 
     double angle = normalizeAngle(p->as<double>());
-    double val = angleToDial(angle);
     double min = p->min();
     double max = p->max();
 
-    if(val < min) {
-        val = min;
-    } else if(val > max) {
-        val = max;
+    if(angle < min) {
+        angle = min;
+    } else if(angle > max) {
+        angle = max;
     }
+    double val = angleToDial(angle);
 
     dial->setValue(val);
-    spin->setValue(angle);
+    //spin->setValue(angle);
 }
 
 // PROGRESS ////////////////////
