@@ -14,7 +14,7 @@ AngleParameter::AngleParameter()
 AngleParameter::AngleParameter(const std::string &name, const ParameterDescription& description, double angle, double min, double max)
     : Parameter(name, description), angle_(angle), min_(min), max_(max)
 {
-    set(angle_);
+   set(angle_);
 }
 
 const std::type_info& AngleParameter::type() const
@@ -94,6 +94,12 @@ void AngleParameter::doSerialize(YAML::Node& n) const
 
 void AngleParameter::doDeserialize(const YAML::Node& n)
 {
+    if(!n["name"].IsDefined()) {
+        return;
+    }
+
+    name_ = n["name"].as<std::string>();
+
     if(!n["value"].IsDefined()) {
         return;
     }
