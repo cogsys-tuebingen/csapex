@@ -44,13 +44,13 @@ public:
     void setLower(T v) {
         Lock l = lock();
         values_.first = v;
-        parameter_changed(this);
+        triggerChange();
     }
     template <typename T>
     void setUpper(T v) {
         Lock l = lock();
         values_.second = v;
-        parameter_changed(this);
+        triggerChange();
     }
 
     template <typename T>
@@ -105,8 +105,8 @@ public:
     }
 
 protected:
-    virtual boost::any get_unsafe() const;
-    virtual void set_unsafe(const boost::any& v);
+    virtual boost::any get_unsafe() const override;
+    virtual bool set_unsafe(const boost::any& v) override;
 
 private:
     template <typename T>

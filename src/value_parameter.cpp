@@ -54,9 +54,26 @@ boost::any ValueParameter::get_unsafe() const
 }
 
 
-void ValueParameter::set_unsafe(const boost::any &v)
+bool ValueParameter::set_unsafe(const boost::any &v)
 {
-    value_ = v;
+    bool change = true;
+    if(!value_.empty()) {
+        if(v.type() == typeid(int)) {
+            change = boost::any_cast<int>(value_) != boost::any_cast<int>(v);
+        } else if(v.type() == typeid(double)) {
+            change = boost::any_cast<double>(value_) != boost::any_cast<double>(v);
+        } else if(v.type() == typeid(bool)) {
+            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(v);
+        } else if(v.type() == typeid(std::string)) {
+            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(v);
+        }
+    }
+    if(change) {
+        value_ = v;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -73,6 +90,8 @@ void ValueParameter::doSetValueFrom(const Parameter &other)
             change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
         } else if(value_.type() == typeid(std::string)) {
             change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
+        } else {
+            change = true;
         }
         if(change) {
             value_ = value->value_;

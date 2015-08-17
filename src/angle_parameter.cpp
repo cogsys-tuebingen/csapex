@@ -34,13 +34,19 @@ boost::any AngleParameter::get_unsafe() const
 }
 
 
-void AngleParameter::set_unsafe(const boost::any &v)
+bool AngleParameter::set_unsafe(const boost::any &v)
 {
     double a = boost::any_cast<double> (v);
     if(a < min_ || a >= max_) {
         throw std::out_of_range("angle is not in the valid interval");
     }
-    angle_ = a;
+
+    if(a != angle_) {
+        angle_ = a;
+        return true;
+    }
+
+    return false;
 }
 
 double AngleParameter::min() const

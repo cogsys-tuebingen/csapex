@@ -39,8 +39,8 @@ public:
     bool isOutput() const;
 
 protected:
-    virtual boost::any get_unsafe() const;
-    virtual void set_unsafe(const boost::any& v);
+    virtual boost::any get_unsafe() const override;
+    virtual bool set_unsafe(const boost::any& v) override;
 
 private:
     std::string value_;

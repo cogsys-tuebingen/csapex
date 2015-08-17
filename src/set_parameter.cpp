@@ -124,10 +124,29 @@ boost::any SetParameter::get_unsafe() const
 }
 
 
-void SetParameter::set_unsafe(const boost::any &v)
+bool SetParameter::set_unsafe(const boost::any &v)
 {
-    value_ = v;
-    txt_ = getText();
+    bool change = true;
+    if(!value_.empty()) {
+        if(v.type() == typeid(int)) {
+            change = boost::any_cast<int>(value_) != boost::any_cast<int>(v);
+        } else if(v.type() == typeid(double)) {
+            change = boost::any_cast<double>(value_) != boost::any_cast<double>(v);
+        } else if(v.type() == typeid(bool)) {
+            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(v);
+        } else if(v.type() == typeid(std::string)) {
+            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(v);
+        }
+    }
+
+    if(change) {
+        value_ = v;
+        txt_ = getText();
+
+        return true;
+    }
+
+    return false;
 }
 
 

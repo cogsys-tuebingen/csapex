@@ -38,9 +38,15 @@ boost::any PathParameter::get_unsafe() const
 }
 
 
-void PathParameter::set_unsafe(const boost::any &v)
+bool PathParameter::set_unsafe(const boost::any &v)
 {
-    value_ = boost::any_cast<std::string>(v);
+    auto val = boost::any_cast<std::string>(v);
+    if(value_ != val) {
+        value_ = val;
+        return true;
+    }
+
+    return false;
 }
 
 

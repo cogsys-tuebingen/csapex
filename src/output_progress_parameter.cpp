@@ -32,9 +32,15 @@ boost::any OutputProgressParameter::get_unsafe() const
 {
     return value;
 }
-void OutputProgressParameter::set_unsafe(const boost::any& v)
+bool OutputProgressParameter::set_unsafe(const boost::any& v)
 {
-    value = boost::any_cast<int>(v);
+    auto val = boost::any_cast<int>(v);
+    if(val != value) {
+        value = val;
+        return true;
+    }
+
+    return false;
 }
 
 void OutputProgressParameter::doSerialize(YAML::Node& n) const

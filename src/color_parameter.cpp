@@ -52,9 +52,15 @@ boost::any ColorParameter::get_unsafe() const
 }
 
 
-void ColorParameter::set_unsafe(const boost::any &v)
+bool ColorParameter::set_unsafe(const boost::any &v)
 {
-    colors_ = boost::any_cast<std::vector<int> > (v);
+    auto col = boost::any_cast<std::vector<int> > (v);
+    if(colors_  != col) {
+        colors_  = col;
+        return true;
+    }
+
+    return false;
 }
 
 std::vector<int> ColorParameter::def() const

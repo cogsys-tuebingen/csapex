@@ -63,8 +63,8 @@ public:
     int noParameters() const;
 
 protected:
-    virtual boost::any get_unsafe() const;
-    virtual void set_unsafe(const boost::any& v);
+    virtual boost::any get_unsafe() const override;
+    virtual bool set_unsafe(const boost::any& v) override;
 
     std::string convertToString(const boost::any& v) const;
 

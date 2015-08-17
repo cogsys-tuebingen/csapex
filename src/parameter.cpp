@@ -146,16 +146,6 @@ boost::any Parameter::access_unsafe(const Parameter &p) const
     return p.get_unsafe();
 }
 
-boost::any Parameter::get_unsafe() const
-{
-    throw std::logic_error("not implemented");
-}
-
-void Parameter::set_unsafe(const boost::any &v)
-{
-    throw std::logic_error("not implemented");
-}
-
 std::string Parameter::type2string(const std::type_info &type)
 {
     int status;

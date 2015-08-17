@@ -49,9 +49,22 @@ boost::any RangeParameter::get_unsafe() const
 }
 
 
-void RangeParameter::set_unsafe(const boost::any &v)
+bool RangeParameter::set_unsafe(const boost::any &v)
 {
-    value_ = v;
+    bool change = true;
+    if(!value_.empty()) {
+        if(v.type() == typeid(int)) {
+            change = boost::any_cast<int>(value_) != boost::any_cast<int>(v);
+        } else if(v.type() == typeid(double)) {
+            change = boost::any_cast<double>(value_) != boost::any_cast<double>(v);
+        }
+    }
+    if(change) {
+        value_ = v;
+        return true;
+    }
+
+    return false;
 }
 
 

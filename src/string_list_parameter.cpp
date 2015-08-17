@@ -48,9 +48,15 @@ boost::any StringListParameter::get_unsafe() const
 }
 
 
-void StringListParameter::set_unsafe(const boost::any &v)
+bool StringListParameter::set_unsafe(const boost::any &v)
 {
-    list_ = boost::any_cast<std::vector<std::string> >(v);
+    auto l = boost::any_cast<std::vector<std::string> >(v);
+    if(list_ != l) {
+        list_ = l;
+        return true;
+    }
+
+    return false;
 }
 
 

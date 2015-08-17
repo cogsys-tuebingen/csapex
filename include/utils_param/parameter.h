@@ -90,11 +90,15 @@ public:
         if(!is<T>() && !is<void>()) {
             throwTypeError(typeid(T), type(),"set failed: ");
         }
+        bool changed = false;
         {
             Lock l = lock();
-            set_unsafe(v);
+            changed = set_unsafe(v);
         }
-        triggerChange();
+
+        if(changed) {
+            triggerChange();
+        }
     }
 
     template <typename T>
@@ -134,8 +138,8 @@ protected:
 protected:
     explicit Parameter(const std::string& name, const ParameterDescription& description);
 
-    virtual boost::any get_unsafe() const;
-    virtual void set_unsafe(const boost::any& v);
+    virtual boost::any get_unsafe() const = 0;
+    virtual bool set_unsafe(const boost::any& v) = 0;
 
     boost::any access_unsafe(const Parameter &p) const;
 

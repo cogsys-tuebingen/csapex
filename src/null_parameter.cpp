@@ -38,7 +38,7 @@ boost::any NullParameter::get_unsafe() const
 }
 
 
-void NullParameter::set_unsafe(const boost::any &v)
+bool NullParameter::set_unsafe(const boost::any& v)
 {
     throw std::runtime_error("cannot use null parameters");
 }

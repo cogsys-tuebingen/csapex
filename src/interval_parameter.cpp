@@ -64,14 +64,32 @@ boost::any IntervalParameter::get_unsafe() const
 }
 
 
-void IntervalParameter::set_unsafe(const boost::any &v)
+bool IntervalParameter::set_unsafe(const boost::any &v)
 {
     Lock l = lock();
-    if(is<std::pair<int, int> >()) {
-        values_ = boost::any_cast<std::pair<int, int> > (v);
+    if(v.type() == typeid(std::pair<int, int>)) {
+        auto val = boost::any_cast<std::pair<int, int> > (v);
+        if(values_.first.empty()) {
+            values_ = val;
+            return true;
+        }
+        if(boost::any_cast<int>(values_.first) != val.first || boost::any_cast<int>(values_.second) != val.second) {
+            values_ = val;
+            return true;
+        }
     } else {
-        values_ = boost::any_cast<std::pair<double, double> > (v);
+        auto val = boost::any_cast<std::pair<double, double> > (v);
+        if(values_.first.empty()) {
+            values_= val;
+            return true;
+        }
+        if(boost::any_cast<double>(values_.first) != val.first || boost::any_cast<double>(values_.second) != val.second) {
+            values_ = val;
+            return true;
+        }
     }
+
+    return false;
 }
 
 
