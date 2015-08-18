@@ -16,7 +16,7 @@ include(cmake/csapex-extras.cmake)
 add_definitions(-W -Wall)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS utils_param utils_qt class_loader)
+find_package(catkin REQUIRED COMPONENTS utils_param class_loader)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
@@ -29,6 +29,8 @@ find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 find_package(console_bridge REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
 qt5_wrap_ui(QT_UI
     ui/box.ui
@@ -51,7 +53,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS utils_param utils_qt
+   CATKIN_DEPENDS utils_param
    DEPENDS Boost console_bridge
    CFG_EXTRAS csapex-extras.cmake
 )
@@ -264,6 +266,13 @@ add_library(csapex_qt SHARED
     src/view/profiling_widget.cpp
     src/view/screenshot_dialog.cpp
     src/view/widget_controller.cpp
+    src/view/qxtspanslider.cpp
+    src/view/qxtdoublespanslider.cpp
+    src/view/QtCvImageConverter.cpp
+
+#    include/csapex/view/qxtdoublespanslider.h
+#    include/csapex/view/qxtspanslider.h
+#    include/csapex/view/qxtspanslider_p.h
 
 
     src/utility/context_menu_handler.cpp
