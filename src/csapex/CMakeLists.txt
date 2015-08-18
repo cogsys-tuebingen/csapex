@@ -248,42 +248,44 @@ add_library(csapex_qt SHARED
     # is here because it is still a qobject...
     src/model/node_worker.cpp
 
-    src/view/activity_legend.cpp
-    src/view/activity_timeline.cpp
-    src/view/box.cpp
-    src/view/box_dialog.cpp
     src/view/csapex_window.cpp
-    src/view/csapex_splashscreen.cpp
-    src/view/default_node_adapter.cpp
-    src/view/designer.cpp
-    src/view/designer_scene.cpp
-    src/view/designer_styleable.cpp
-    src/view/designer_view.cpp
-    src/view/fulcrum_handle.cpp
-    src/view/fulcrum_widget.cpp
-    src/view/minimap_widget.cpp
-    src/view/node_adapter_builder.cpp
-    src/view/node_adapter.cpp
-    src/view/node_adapter_factory.cpp
-    src/view/node_filter_proxy_model.cpp
-    src/view/parameter_context_menu.cpp
-    src/view/port.cpp
-    src/view/profiling_widget.cpp
-    src/view/screenshot_dialog.cpp
-    src/view/widget_controller.cpp
-    src/view/doublespanslider.cpp
-    src/view/QtCvImageConverter.cpp
 
-    src/utility/context_menu_handler.cpp
-    src/utility/html_delegate.cpp
-    src/utility/movable_graphics_proxy_widget.cpp
-    src/utility/qdouble_slider.cpp
-    src/utility/qint_slider.cpp
-    src/utility/qsignal_bridges.cpp
-    src/utility/q_signal_relay.cpp
-    src/utility/qt_helper.cpp
-    src/utility/qwrapper.cpp
-    src/utility/widget_picker.cpp
+    src/view/designer/designer.cpp
+    src/view/designer/designer_scene.cpp
+    src/view/designer/designer_styleable.cpp
+    src/view/designer/designer_view.cpp
+    src/view/designer/fulcrum_handle.cpp
+    src/view/designer/fulcrum_widget.cpp
+    src/view/designer/widget_controller.cpp
+
+    src/view/node/default_node_adapter.cpp
+    src/view/node/node_adapter_builder.cpp
+    src/view/node/node_adapter.cpp
+    src/view/node/node_adapter_factory.cpp
+    src/view/node/parameter_context_menu.cpp
+    src/view/node/box.cpp
+    src/view/node/port.cpp
+
+    src/view/utility/context_menu_handler.cpp
+    src/view/utility/html_delegate.cpp
+    src/view/utility/qsignal_bridges.cpp
+    src/view/utility/q_signal_relay.cpp
+    src/view/utility/QtCvImageConverter.cpp
+    src/view/utility/qt_helper.cpp
+    src/view/utility/qwrapper.cpp
+    src/view/utility/widget_picker.cpp
+
+    src/view/widgets/activity_legend.cpp
+    src/view/widgets/activity_timeline.cpp
+    src/view/widgets/box_dialog.cpp
+    src/view/widgets/csapex_splashscreen.cpp
+    src/view/widgets/doublespanslider.cpp
+    src/view/widgets/minimap_widget.cpp
+    src/view/widgets/profiling_widget.cpp
+    src/view/widgets/qdouble_slider.cpp
+    src/view/widgets/qint_slider.cpp
+    src/view/widgets/screenshot_dialog.cpp
+    src/view/widgets/movable_graphics_proxy_widget.cpp
 
     ${QT_RESOURCES}
 
