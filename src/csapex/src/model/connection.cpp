@@ -129,7 +129,7 @@ void Connection::setMessage(const ConnectionTypeConstPtr &msg)
     apex_assert_hard(isSinkEnabled());
     apex_assert_hard(msg != nullptr);
     apex_assert_hard(state_ == State::NOT_INITIALIZED || state_ == State::READY_TO_RECEIVE);
-    apex_assert_hard(message_ == nullptr || message_->sequenceNumber() == msg->sequenceNumber() - 1);
+
     message_ = msg;
     setState(State::UNREAD);
 }
