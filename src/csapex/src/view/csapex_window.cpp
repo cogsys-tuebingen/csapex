@@ -106,9 +106,16 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this,  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this,  SLOT(redo()));
 
-//    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
+    //    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
     QObject::connect(ui->actionPause, &QAction::triggered, [this](bool pause) { core_.setPause(pause); });
     core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); });
+
+    QObject::connect(ui->actionSteppingMode, &QAction::triggered, [this](bool step) { core_.setSteppingMode(step); });
+    QObject::connect(ui->actionStep, &QAction::triggered, [this](bool) { core_.step(); });
+
+    core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); });
+    core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); });
+
 
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
 
@@ -309,12 +316,16 @@ void CsApexWindow::updateNodeInfo()
             ss << "<hr />";
             ss << "<h1>Parameters:</h1>";
 
-            std::vector<param::Parameter::Ptr> params = n->makePrototype()->getNode()->getParameters();
 
-            for(const param::Parameter::Ptr& p : params) {
-                ss << "<h2>" << p->name() << "</h2>";
-                ss << "<p>" << p->description().toString() << "</p>";
-                ss << "<p>" << p->toString() << "</p>";
+            auto node = n->makePrototype()->getNode().lock();
+            if(node) {
+                std::vector<param::Parameter::Ptr> params = node->getParameters();
+
+                for(const param::Parameter::Ptr& p : params) {
+                    ss << "<h2>" << p->name() << "</h2>";
+                    ss << "<p>" << p->description().toString() << "</p>";
+                    ss << "<p>" << p->toString() << "</p>";
+                }
             }
         }
     }
@@ -347,11 +358,11 @@ void CsApexWindow::updateUndoInfo()
     };
 
     cmd_dispatcher_->visitUndoCommands([this, &iterator](int level, const Command& cmd) {
-       iterator(ui->undo, level, cmd);
+        iterator(ui->undo, level, cmd);
     });
     stack.clear();
     cmd_dispatcher_->visitRedoCommands([this, &iterator](int level, const Command& cmd) {
-       iterator(ui->redo, level, cmd);
+        iterator(ui->redo, level, cmd);
     });
 
     ui->undo->expandAll();
@@ -566,8 +577,6 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if(r == QMessageBox::Save) {
-            std::cout << "save" << std::endl;
-
             save();
             event->accept();
         } else if(r == QMessageBox::Discard) {

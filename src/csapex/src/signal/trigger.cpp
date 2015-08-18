@@ -108,7 +108,7 @@ void Trigger::trigger()
         try {
             s->trigger(this);
         } catch(const std::exception& e) {
-            std::cout << "triggering slot " << s->getLabel()  << " failed: " << e.what();
+            std::cerr << "triggering slot " << s->getLabel()  << " failed: " << e.what();
         }
     }
     ++count_;

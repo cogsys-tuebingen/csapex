@@ -16,8 +16,8 @@
 #include <csapex/utility/context_menu_handler.h>
 
 /// PROJECT
-#include <utils_qt/qxtspanslider.h>
-#include <utils_qt/qxtdoublespanslider.h>
+#include <csapex/view/qxtspanslider.h>
+#include <csapex/view/qxtdoublespanslider.h>
 
 /// SYSTEM
 #include <QSlider>

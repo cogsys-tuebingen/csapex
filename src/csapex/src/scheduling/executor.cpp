@@ -30,3 +30,31 @@ bool Executor::isPaused() const
 {
     return paused_;
 }
+
+
+void Executor::setSteppingMode(bool stepping)
+{
+    if(stepping == stepping_) {
+        return;
+    }
+
+    stepping_ = stepping;
+
+    steppingChanged(stepping);
+
+    if(stepping) {
+        setPause(false);
+    }
+}
+
+void Executor::step()
+{
+    begin_step();
+
+    performStep();
+}
+
+bool Executor::isSteppingMode() const
+{
+    return stepping_;
+}

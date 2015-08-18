@@ -16,7 +16,7 @@ include(cmake/csapex-extras.cmake)
 add_definitions(-W -Wall)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS utils_param utils_qt class_loader)
+find_package(catkin REQUIRED COMPONENTS utils_param class_loader)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
@@ -29,6 +29,8 @@ find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 find_package(console_bridge REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
 qt5_wrap_ui(QT_UI
     ui/box.ui
@@ -51,7 +53,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS utils_param utils_qt
+   CATKIN_DEPENDS utils_param
    DEPENDS Boost console_bridge
    CFG_EXTRAS csapex-extras.cmake
 )
@@ -155,6 +157,7 @@ add_library(csapex SHARED
     src/model/node_state.cpp
     src/model/node_statistics.cpp
     src/model/parameterizable.cpp
+    src/model/tickable_node.cpp
     src/model/tag.cpp
     src/model/unique.cpp
 
@@ -219,7 +222,6 @@ target_link_libraries(csapex
 add_library(csapex_qt SHARED
 
     src/command/add_connection.cpp
-    src/command/add_connector.cpp
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
     src/command/create_thread.cpp
@@ -227,6 +229,7 @@ add_library(csapex_qt SHARED
     src/command/delete_connector.cpp
     src/command/delete_fulcrum.cpp
     src/command/delete_node.cpp
+    src/command/disable_node.cpp
     src/command/flip_sides.cpp
     src/command/minimize.cpp
     src/command/modify_fulcrum.cpp
@@ -245,6 +248,7 @@ add_library(csapex_qt SHARED
     src/view/box.cpp
     src/view/box_dialog.cpp
     src/view/csapex_window.cpp
+    src/view/csapex_splashscreen.cpp
     src/view/default_node_adapter.cpp
     src/view/designer.cpp
     src/view/designer_scene.cpp
@@ -262,6 +266,13 @@ add_library(csapex_qt SHARED
     src/view/profiling_widget.cpp
     src/view/screenshot_dialog.cpp
     src/view/widget_controller.cpp
+    src/view/qxtspanslider.cpp
+    src/view/qxtdoublespanslider.cpp
+    src/view/QtCvImageConverter.cpp
+
+#    include/csapex/view/qxtdoublespanslider.h
+#    include/csapex/view/qxtspanslider.h
+#    include/csapex/view/qxtspanslider_p.h
 
 
     src/utility/context_menu_handler.cpp

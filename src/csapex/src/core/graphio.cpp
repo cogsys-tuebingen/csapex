@@ -282,8 +282,11 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeWorker* node_worker)
 {
     node_worker->getNodeState()->writeYaml(doc);
 
-    // hook for nodes to serialize
-    Serialization::instance().serialize(*node_worker->getNode(), doc);
+    auto node = node_worker->getNode().lock();
+    if(node) {
+        // hook for nodes to serialize
+        Serialization::instance().serialize(*node, doc);
+    }
 }
 
 void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
@@ -300,5 +303,8 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
     node_worker->setNodeState(s);
 
     // hook for nodes to deserialize
-    Serialization::instance().deserialize(*node_worker->getNode(), doc);
+    auto node = node_worker->getNode().lock();
+    if(node) {
+        Serialization::instance().deserialize(*node, doc);
+    }
 }

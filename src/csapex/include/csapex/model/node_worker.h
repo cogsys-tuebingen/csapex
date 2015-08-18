@@ -67,15 +67,20 @@ public:
     void triggerProcess();
     void triggerPanic();
 
-    NodeWeakPtr getNodeSafe() const;
-    /*TODO: REMOVE!*/ Node* getNode() const;
+    NodeWeakPtr getNode() const;
 
+    void setState(State state);
     State getState() const;
+
+    bool isEnabled() const;
+    bool isIdle() const;
+    bool isProcessing() const;
+    bool isFired() const;
 
     std::string getType() const;
 
-    bool isEnabled() const;
-    void setEnabled(bool e);
+    bool isProcessingEnabled() const;
+    void setProcessingEnabled(bool e);
 
     void setProfiling(bool profiling);
     bool isProfiling() const;
@@ -85,9 +90,18 @@ public:
     /* REMOVE => UI*/ void setMinimized(bool min);
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
+    void addInput(InputPtr in);
+    bool isParameterInput(Input* in) const;
+
     Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
+    void addOutput(OutputPtr out);
+    bool isParameterOutput(Output* out) const;
+
     Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
+    void addSlot(SlotPtr s);
+
     Trigger* addTrigger(const std::string& label);
+    void addTrigger(TriggerPtr t);
 
     Connectable* getConnector(const UUID& uuid) const;
     Input* getInput(const UUID& uuid) const;
@@ -97,13 +111,9 @@ public:
 
     void makeParameterConnectable(param::ParameterPtr);
     void makeParameterNotConnectable(param::ParameterPtr);
-    InputPtr getParameterInput(const std::string& name) const;
-    OutputPtr getParameterOutput(const std::string& name) const;
+    InputWeakPtr getParameterInput(const std::string& name) const;
+    OutputWeakPtr getParameterOutput(const std::string& name) const;
 
-    /* NAMING */ void registerInput(InputPtr in);
-    /* NAMING */ void registerOutput(OutputPtr out);
-    /* NAMING */ void registerSlot(SlotPtr s);
-    /* NAMING */ void registerTrigger(TriggerPtr t);
 
     void removeInput(const UUID& uuid);
     void removeOutput(const UUID& uuid);
@@ -114,13 +124,8 @@ public:
     std::vector<InputPtr> getAllInputs() const;
     std::vector<OutputPtr> getAllOutputs() const;
 
-    std::vector<InputPtr> getMessageInputs() const;
-    std::vector<OutputPtr> getMessageOutputs() const;
     std::vector<SlotPtr> getSlots() const;
     std::vector<TriggerPtr> getTriggers() const;
-
-    std::vector<InputPtr> getParameterInputs() const;
-    std::vector<OutputPtr> getParameterOutputs() const;
 
     bool isWaitingForTrigger() const;
     bool canProcess();
@@ -148,12 +153,13 @@ private:
     void updateParameterValue(Connectable* source);
 
 public:
-    void tick();
+    bool tick();
+
     void startProcessingMessages();
     void finishProcessingMessages(bool was_executed);
 
     void prepareForNextProcess();
-    void checkTransitions();
+    void checkTransitions(bool try_fire = true);
 
     void checkParameters();    
     void checkIO();
@@ -193,6 +199,8 @@ public:
     boost::signals2::signal<void()> processRequested;
     boost::signals2::signal<void()> checkTransitionsRequested;
 
+    boost::signals2::signal<void()> parametersChanged;
+
     boost::signals2::signal<void(std::function<void()>)> executionRequested;
 
     boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
@@ -218,14 +226,13 @@ private:
     void makeParameterConnectableImpl(param::ParameterPtr);
     void publishParameters();
     void publishParameter(param::Parameter *p);
+    void publishParameterOn(const param::Parameter &p, Output *out);
 
     void assertNotInGuiThread();
 
     void triggerNodeStateChanged();
 
     void finishTimer(TimerPtr t);
-
-    void setState(State state);
 
     void updateTransitionConnections();
 
@@ -248,19 +255,19 @@ private:
     std::vector<TriggerPtr> triggers_;
     std::vector<SlotPtr> slots_;
 
+    int next_input_id_;
+    int next_output_id_;
+    int next_trigger_id_;
+    int next_slot_id_;
+
     Trigger* trigger_tick_done_;
     Trigger* trigger_process_done_;
 
-    std::vector<InputPtr> parameter_inputs_;
-    std::vector<OutputPtr> parameter_outputs_;
-
-    std::map<std::string, InputPtr> param_2_input_;
-    std::map<std::string, OutputPtr> param_2_output_;
+    std::map<std::string, InputWeakPtr> param_2_input_;
+    std::map<std::string, OutputWeakPtr> param_2_output_;
 
     std::map<Input*,param::Parameter*> input_2_param_;
     std::map<Output*,param::Parameter*> output_2_param_;
-
-    std::map<param::Parameter*, boost::signals2::connection> param_connections_;
 
     std::map<Slot*, boost::signals2::connection> slot_connections_;
 

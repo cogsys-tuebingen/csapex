@@ -15,6 +15,8 @@ public:
     void notifyMessageProcessed();
     void fireIfPossible();
 
+    bool isEnabled() const;
+
     void establishConnections() override;
     void connectionRemoved(Connection* connection) override;
 

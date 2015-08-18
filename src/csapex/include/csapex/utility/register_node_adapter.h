@@ -18,7 +18,7 @@ public: \
     } \
     virtual csapex::NodeAdapterPtr build(csapex::NodeWorkerPtr worker, csapex::WidgetController* widget_ctrl) const \
     { \
-        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (worker->getNodeSafe().lock()); \
+        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (worker->getNode().lock()); \
         return std::make_shared<Adapter>(worker, adaptee, widget_ctrl); \
     } \
 }; \

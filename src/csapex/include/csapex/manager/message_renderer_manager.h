@@ -13,6 +13,7 @@
 #include <string>
 #include <functional>
 #include <mutex>
+#include <typeindex>
 
 namespace csapex {
 
@@ -41,7 +42,7 @@ private:
 
     csapex::PluginLocatorPtr plugin_locator_;
 
-    std::map<const std::type_info*, MessageRendererPtr> renderers;
+    std::map<std::type_index, MessageRendererPtr> renderers;
 
     PluginManager<MessageRenderer>* manager_;
 };

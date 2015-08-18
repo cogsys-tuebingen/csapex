@@ -33,7 +33,7 @@ public:
         READY_TO_RECEIVE,
         UNREAD,
         READ,
-        DONE
+        DONE = NOT_INITIALIZED
     };
 
 public:

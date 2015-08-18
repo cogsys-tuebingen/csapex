@@ -8,7 +8,7 @@
 /// SYSTEM
 #include <map>
 #include <functional>
-
+#include <typeindex>
 
 #define CSAPEX_REGISTER_SERIALIZER_NS(Node, Serializer,instancename) \
 namespace csapex { \
@@ -32,10 +32,10 @@ public:
     template <typename N, typename Instance>
     static void registerInstance()
     {
-        instance().serializers[&typeid(const N)] = [](const csapex::Node& node, YAML::Node& doc) {
+        instance().serializers[std::type_index(typeid(const N))] = [](const csapex::Node& node, YAML::Node& doc) {
             Instance::serialize(static_cast<const N&>(node), doc);
         };
-        instance().deserializers[&typeid(const N)] = [](csapex::Node& node, const YAML::Node& doc) {
+        instance().deserializers[std::type_index(typeid(const N))] = [](csapex::Node& node, const YAML::Node& doc) {
             Instance::deserialize(static_cast<N&>(node), doc);
         };
     }
@@ -44,8 +44,8 @@ public:
     void deserialize(csapex::Node& node, const YAML::Node& doc);
 
 private:
-    std::map<const std::type_info*, std::function<void(const csapex::Node&, YAML::Node&)>> serializers;
-    std::map<const std::type_info*, std::function<void(csapex::Node&, const YAML::Node&)>> deserializers;
+    std::map<std::type_index, std::function<void(const csapex::Node&, YAML::Node&)>> serializers;
+    std::map<std::type_index, std::function<void(csapex::Node&, const YAML::Node&)>> deserializers;
 };
 }
 

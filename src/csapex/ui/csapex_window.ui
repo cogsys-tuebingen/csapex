@@ -101,6 +101,9 @@
      <string>P&amp;rocessing</string>
     </property>
     <addaction name="actionPause"/>
+    <addaction name="actionSteppingMode"/>
+    <addaction name="separator"/>
+    <addaction name="actionStep"/>
     <addaction name="actionClearBlock"/>
    </widget>
    <widget class="QMenu" name="menuPlugins">
@@ -162,6 +165,8 @@
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
    <addaction name="actionPause"/>
+   <addaction name="actionSteppingMode"/>
+   <addaction name="actionStep"/>
    <addaction name="actionClearBlock"/>
    <addaction name="separator"/>
    <addaction name="actionGrid"/>
@@ -927,6 +932,36 @@ p, li { white-space: pre-wrap; }
     <string>Signal Connections</string>
    </property>
   </action>
+  <action name="actionSteppingMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/step.png</normaloff>:/step.png</iconset>
+   </property>
+   <property name="text">
+    <string>Steping &amp;Mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to stepping mode</string>
+   </property>
+  </action>
+  <action name="actionStep">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/step_next.png</normaloff>:/step_next.png</iconset>
+   </property>
+   <property name="text">
+    <string>Step</string>
+   </property>
+   <property name="toolTip">
+    <string>Perform one step</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../res/csapex_resources.qrc"/>
@@ -977,6 +1012,38 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>149</x>
      <y>444</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSteppingMode</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>actionStep</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSteppingMode</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>actionPause</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

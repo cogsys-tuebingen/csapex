@@ -22,6 +22,8 @@ class ThreadPool : public Executor
 public:
     ThreadPool(bool enable_threading, bool grouping, bool paused);
 
+    virtual void performStep() override;
+
     void stop();
     virtual void clear() override;
 
@@ -46,6 +48,7 @@ public:
 
 protected:
     void pauseChanged(bool pause);
+    void steppingChanged(bool performStep);
 
 private:
     void assignGeneratorToGroup(TaskGenerator* task, ThreadGroup* group);
@@ -53,6 +56,7 @@ private:
     bool isInPrivateThread(TaskGenerator* task) const;
     bool isInGroup(TaskGenerator* task, int id) const;
 
+    void checkIfStepIsDone();
 //    void clearGroup(ThreadGroup *group);
 
 private:

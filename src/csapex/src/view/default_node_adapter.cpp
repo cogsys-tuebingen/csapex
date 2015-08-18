@@ -23,6 +23,7 @@
 #include <utils_param/path_parameter.h>
 #include <utils_param/trigger_parameter.h>
 #include <utils_param/color_parameter.h>
+#include <utils_param/angle_parameter.h>
 #include <utils_param/output_progress_parameter.h>
 
 /// SYSTEM
@@ -39,6 +40,7 @@
 #include <QListWidget>
 #include <QApplication>
 #include <QProgressBar>
+#include <QDial>
 #include <functional>
 
 using namespace csapex;
@@ -664,7 +666,6 @@ void model_updateSetParameter(param::SetParameterWeakPtr set_p, QComboBox* combo
         return;
     }
     if(!combo->currentText().isEmpty()) {
-        std::cout << "set set: " << combo->currentText().toStdString() << std::endl;
         assertNotGuiThread();
         p->setByName(combo->currentText().toStdString());
     }
@@ -716,6 +717,95 @@ void model_updateBitSetParameter(param::BitSetParameterWeakPtr bitset_p, QCheckB
         return;
     }
     p->setBitTo(str, item->isChecked());
+}
+
+// ANGLE ///////////////////////
+
+double normalizeAngle(double a)
+{
+    double r = a;
+    while(r < -M_PI) r += 2*M_PI;
+    while(r >= M_PI) r -= 2*M_PI;
+    return r;
+}
+
+double angleToDial(double angle)
+{
+    return (normalizeAngle(angle) + M_PI) * 4.0 * 180.0 / M_PI;
+}
+
+double dialToAngle(double dial)
+{
+    return normalizeAngle(dial  / 4.0 / 180.0 * M_PI - M_PI);
+}
+
+void model_updateAngleDialParameter(param::AngleParameterWeakPtr angle_p, QDial* dial, QDoubleSpinBox* spin)
+{
+    assertNotGuiThread();
+    auto p = angle_p.lock();
+    if(!p) {
+        return;
+    }
+
+    double angle = dialToAngle(dial->value());
+    double min = p->min();
+    double max = p->max();
+
+    if(angle < min) {
+        angle = min;
+    } else if(angle > max) {
+        angle = max;
+    }
+
+    p->set<double>(angle);
+    spin->blockSignals(true);
+    spin->setValue(angle);
+    spin->blockSignals(false);
+}
+void model_updateAngleSpinParameter(param::AngleParameterWeakPtr angle_p, QDial* dial, QDoubleSpinBox* spin)
+{
+    assertNotGuiThread();
+    auto p = angle_p.lock();
+    if(!p) {
+        return;
+    }
+
+    double angle = spin->value();
+    double min = p->min();
+    double max = p->max();
+
+    if(angle < min) {
+        angle = min;
+    } else if(angle > max) {
+        angle = max;
+    }
+
+    p->set<double>(angle);
+    dial->blockSignals(true);
+    dial->setValue(angleToDial(p->as<double>()));
+    dial->blockSignals(false);
+}
+void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, QDoubleSpinBox* spin)
+{
+    assertGuiThread();
+    auto p = range_p.lock();
+    if(!p) {
+        return;
+    }
+
+    double angle = normalizeAngle(p->as<double>());
+    double min = p->min();
+    double max = p->max();
+
+    if(angle < min) {
+        angle = min;
+    } else if(angle > max) {
+        angle = max;
+    }
+    double val = angleToDial(angle);
+
+    dial->setValue(val);
+    //spin->setValue(angle);
 }
 
 // PROGRESS ////////////////////
@@ -787,7 +877,12 @@ void install(std::map<int, std::function<void(DefaultNodeAdapter*, param::Parame
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
-    NodeWorkerPtr node = node_.lock();
+    NodeWorkerPtr node_worker = node_.lock();
+    if(!node_worker) {
+        return;
+    }
+
+    auto node = node_worker->getNode().lock();
     if(!node) {
         return;
     }
@@ -802,6 +897,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         install<param::IntervalParameter>(mapping_);
         install<param::SetParameter>(mapping_);
         install<param::BitSetParameter>(mapping_);
+        install<param::AngleParameter>(mapping_);
 
         install<param::OutputProgressParameter>(mapping_);
     }
@@ -810,9 +906,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     current_layout_ = wrapper_layout_;
 
-    std::vector<param::Parameter::Ptr> params = node->getNode()->getParameters();
+    std::vector<param::Parameter::Ptr> params = node->getParameters();
 
-    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getNode()->getParameterState());
+    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getParameterState());
     if(state) {
         state->parameter_set_changed->disconnect_all_slots();
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
@@ -885,12 +981,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         current_layout_ = new QHBoxLayout;
         setDirection(current_layout_, node_);
-        node->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
+        node_worker->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
-        InputPtr param_in = node->getParameterInput(current_name_);
+        InputPtr param_in = node_worker->getParameterInput(current_name_).lock();
         if(param_in) {
-            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_in.get());
             if(pos != parameter_connections_.end()) {
@@ -910,9 +1006,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        OutputPtr param_out = node->getParameterOutput(current_name_);
+        OutputPtr param_out = node_worker->getParameterOutput(current_name_).lock();
         if(param_out) {
-            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_out.get());
             if(pos != parameter_connections_.end()) {
@@ -921,11 +1017,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
             port->setVisible(p->isInteractive());
             parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
-
-            qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&param::Parameter::triggerChange, p.get()));
-            callbacks.push_back(call_trigger);
-
-            param_out->connectionDone.connect([call_trigger](Connectable*) { call_trigger->call(); });
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());
@@ -1221,6 +1312,46 @@ void DefaultNodeAdapter::setupParameter(param::BitSetParameterPtr bitset_p)
     }
 
     current_layout_->addWidget(group);
+}
+
+
+void DefaultNodeAdapter::setupParameter(param::AngleParameterPtr angle_p)
+{
+    QLabel* label = new QLabel(angle_p->name().c_str());
+
+    ParameterContextMenu* context_handler = new ParameterContextMenu(angle_p);
+    label->setContextMenuPolicy(Qt::CustomContextMenu);
+    context_handler->setParent(label);
+    QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+
+    current_layout_->addWidget(label);
+
+    QDial* dial = new QDial;
+    dial->setMinimum(0);
+    dial->setMaximum(360.0 * 4);
+    dial->setWrapping(true);
+    dial->setValue(angleToDial(angle_p->as<double>()));
+
+    current_layout_->addWidget(dial);
+
+    QDoubleSpinBox* spin = new QDoubleSpinBox;
+    spin->setValue(angle_p->as<double>());
+    spin->setMinimum(-M_PI);
+    spin->setMaximum(M_PI);
+    spin->setDecimals(4);
+    spin->setSingleStep(0.01);
+
+    current_layout_->addWidget(spin);
+
+    // ui change -> model
+    qt_helper::Call* call_dial = makeModelCall(std::bind(&model_updateAngleDialParameter, angle_p, dial, spin));
+    QObject::connect(dial, SIGNAL(valueChanged(int)), call_dial, SLOT(call()));
+
+    qt_helper::Call* call_spin = makeModelCall(std::bind(&model_updateAngleSpinParameter, angle_p, dial, spin));
+    QObject::connect(spin, SIGNAL(valueChanged(double)), call_spin, SLOT(call()));
+
+    // model change -> ui
+    bridge.connectInGuiThread(angle_p->parameter_changed, std::bind(&ui_updateAngleParameter, angle_p, dial, spin));
 }
 
 void DefaultNodeAdapter::setupParameter(param::OutputProgressParameterPtr progress)

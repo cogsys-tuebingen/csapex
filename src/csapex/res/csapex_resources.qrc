@@ -40,7 +40,12 @@
         <file>hide.png</file>
         <file>error.png</file>
         <file>image.png</file>
-        <file>idle.png</file>
-        <file>running.png</file>
+        <file>sizegrip.png</file>
+        <file>node_enabled.png</file>
+        <file>node_fired.png</file>
+        <file>node_idle.png</file>
+        <file>node_processing.png</file>
+        <file>step.png</file>
+        <file>step_next.png</file>
     </qresource>
 </RCC>

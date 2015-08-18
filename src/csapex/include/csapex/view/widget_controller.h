@@ -43,7 +43,7 @@ public:
 
 
     //** FACTORY ??? **//
-    Port *createPort(ConnectablePtr connector, NodeBox *box, QBoxLayout *layout);
+    Port *createPort(ConnectableWeakPtr connector, NodeBox *box, QBoxLayout *layout);
 
     Port* getPort(const UUID& connector_id);
     Port* getPort(const Connectable* connector_id);

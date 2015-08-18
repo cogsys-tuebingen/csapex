@@ -11,7 +11,7 @@
 using namespace csapex;
 
 OutputTransition::OutputTransition(NodeWorker *node)
-    : Transition(node)/*, outputs_done_(true)*/
+    : Transition(node)
 {
 
 }
@@ -25,7 +25,6 @@ void OutputTransition::reset()
     for(ConnectionPtr connection : established_connections_) {
         connection->reset();
     }
-//    outputs_done_ = true;
 }
 
 
@@ -50,7 +49,6 @@ void OutputTransition::connectionRemoved(Connection *connection)
     connection->fadeSource();
 
     if(established_connections_.empty()) {
-//        outputs_done_ = true;
 //        node_->notifyMessagesProcessed();
     }
 }
@@ -75,9 +73,6 @@ void OutputTransition::establishConnections()
 
 bool OutputTransition::canStartSendingMessages() const
 {
-//    if(!outputs_done_) {
-//        return false;
-//    }
     for(auto output : node_->getAllOutputs()) {
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() != Output::State::IDLE) {
@@ -117,8 +112,6 @@ void OutputTransition::sendMessages()
         }
     }
 
-//    outputs_done_ = false;
-
     if(non_forced_connections == 0) {
         // all outputs are forced -> there is no connections that can send back a notification!
 
@@ -145,23 +138,11 @@ void OutputTransition::publishNextMessage()
 
     apex_assert_hard(areAllConnections(Connection::State::DONE));
 
-//    if(outputs_done_) {
-//        //        std::cerr << "supressing notifyMessageProcessed in output" << std::endl;
-//        return;
-//    }
-
-//    apex_assert_hard(node_->getState() == NodeWorker::State::WAITING_FOR_OUTPUTS);
-
     for(auto out : node_->getAllOutputs()) {
         out->nextMessage();
     }
     if(areOutputsIdle()) {
         if(areAllConnections(Connection::State::DONE)) {
-            //            std::cerr << "all outputs are done: " << node_->getUUID() << std::endl;
-//            outputs_done_ = true;
-            //            establish();
-
-
             if(hasFadingConnection()) {
                 removeFadingConnections();
             }
@@ -170,11 +151,6 @@ void OutputTransition::publishNextMessage()
         }
 
     } else {
-        //        std::cerr << "fill again: " << node_->getUUID() << std::endl;
-        //        apex_assert_hard(areConnections(Connection::State::READ));
-        //        for(ConnectionPtr c : connections_) {
-        //            c.lock()->setState(Connection::State::READY_TO_RECEIVE);
-        //        }
         setConnectionsReadyToReceive();
         fillConnections();
     }
@@ -195,7 +171,6 @@ void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(!areOutputsIdle());
-//    apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
 
     for(ConnectionPtr connection : established_connections_) {
         if(connection->isSinkEnabled()) {
@@ -204,13 +179,13 @@ void OutputTransition::fillConnections()
 
             auto msg = out->getMessage();
             apex_assert_hard(msg);
+
             connection->setMessage(msg);
         }
     }
 
     for(ConnectionPtr connection : established_connections_) {
         if(connection->isSinkEnabled()) {
-            //            apex_assert_hard(connection->getState() == Connection::State::UNREAD);
             connection->notifyMessageSet();
         }
     }

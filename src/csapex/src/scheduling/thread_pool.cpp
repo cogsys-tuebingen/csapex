@@ -11,13 +11,26 @@
 /// SYSTEM
 #include <set>
 #include <unordered_map>
+#include <iostream>
 
 using namespace csapex;
 
 ThreadPool::ThreadPool(bool enable_threading, bool grouping, bool paused)
     : enable_threading_(enable_threading), grouping_(grouping)
 {
+    setPause(paused);
     default_group_ = std::make_shared<ThreadGroup>(ThreadGroup::DEFAULT_GROUP_ID, "default", paused);
+    default_group_->end_step.connect([this]() {
+        checkIfStepIsDone();
+    });
+
+}
+
+void ThreadPool::performStep()
+{
+    for(auto g : groups_) {
+        g->step();
+    }
 }
 
 void ThreadPool::stop()
@@ -41,6 +54,14 @@ void ThreadPool::pauseChanged(bool pause)
 {
     for(auto g : groups_) {
         g->setPause(pause);
+    }
+}
+
+
+void ThreadPool::steppingChanged(bool step)
+{
+    for(auto g : groups_) {
+        g->setSteppingMode(step);
     }
 }
 
@@ -126,6 +147,9 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
     if(!isInPrivateThread(task)) {
         auto group = std::make_shared<ThreadGroup>(ThreadGroup::PRIVATE_THREAD, task->getUUID().getShortName(), isPaused());
         groups_.push_back(group);
+        group->end_step.connect([this]() {
+            checkIfStepIsDone();
+        });
 
         assignGeneratorToGroup(task, group.get());
     }
@@ -166,10 +190,26 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
 
     ThreadGroupPtr group = std::make_shared<ThreadGroup>(name, isPaused());
     groups_.push_back(group);
+    group->end_step.connect([this]() {
+        checkIfStepIsDone();
+    });
 
     assignGeneratorToGroup(task, group.get());
 
     return group->id();
+}
+
+void ThreadPool::checkIfStepIsDone()
+{
+    for(auto group : groups_) {
+        if(!group->isStepDone()) {
+            return;
+        }
+    }
+
+    // step is done
+    end_step();
+    return;
 }
 
 //void ThreadPool::clearGroup(ThreadGroup* g)
@@ -201,9 +241,12 @@ void ThreadPool::saveSettings(YAML::Node& node)
     YAML::Node groups;
     for(std::size_t i = 0, total =  groups_.size(); i < total; ++i) {
         YAML::Node group;
-        group["id"] =  groups_[i]->id();
-        group["name"] =  groups_[i]->name();
-        groups.push_back(group);
+        int id = groups_[i]->id();
+        if(id >= ThreadGroup::MINIMUM_THREAD_ID) {
+            group["id"] =  id;
+            group["name"] =  groups_[i]->name();
+            groups.push_back(group);
+        }
     }
     threads["groups"] = groups;
 
@@ -234,7 +277,13 @@ void ThreadPool::loadSettings(YAML::Node& node)
 
                 if(group_id >= ThreadGroup::MINIMUM_THREAD_ID) {
                     std::string group_name = group["name"].as<std::string>();
-                    groups_.emplace_back(std::make_shared<ThreadGroup>(group_id, group_name, isPaused()));
+
+                    auto g = std::make_shared<ThreadGroup>(group_id, group_name, isPaused());
+                    groups_.push_back(g);
+                    g->end_step.connect([this]() {
+                        checkIfStepIsDone();
+                    });
+
                 }
             }
         }

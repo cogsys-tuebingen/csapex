@@ -24,6 +24,8 @@ namespace Ui
 class Box;
 }
 
+class QSizeGrip;
+
 namespace csapex
 {
 
@@ -38,7 +40,6 @@ class NodeBox : public QWidget
     friend class NodeWorker;
     friend class Node;
     friend class command::MoveBox;
-    friend class command::AddConnector;
     friend class BoxSelectionmanager;
 
 public:
@@ -103,7 +104,6 @@ public Q_SLOTS:
 
     void getInformation();
     void minimizeBox();
-    void enableContent(bool enable);
     void refreshStylesheet();
     void killContent();
     void flipSides();
@@ -152,6 +152,7 @@ protected:
 
 protected:
     Ui::Box* ui;
+    QSizeGrip* grip_;
 
     Settings& settings_;
 

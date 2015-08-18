@@ -1,9 +1,11 @@
 #ifndef CSAPEX_H
 #define CSAPEX_H
 
+/// PROJECT
+#include <csapex/view/csapex_splashscreen.h>
+
 /// SYSTEM
 #include <QApplication>
-#include <QSplashScreen>
 #include <memory>
 
 #define DEBUG 0
@@ -42,7 +44,7 @@ public Q_SLOTS:
 
 private:
     std::unique_ptr<QCoreApplication> app;
-    QSplashScreen* splash;
+    CsApexSplashScreen* splash;
 };
 
 }

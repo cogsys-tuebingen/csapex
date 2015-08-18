@@ -58,6 +58,9 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
     plugin_locator_->reload_done.connect(std::bind(&CsApexCore::reloadDone, this));
 
     thread_pool_.paused.connect(paused);
+
+    thread_pool_.begin_step.connect(begin_step);
+    thread_pool_.end_step.connect(end_step);
 }
 
 CsApexCore::~CsApexCore()
@@ -93,6 +96,21 @@ void CsApexCore::setPause(bool pause)
 bool CsApexCore::isPaused() const
 {
     return thread_pool_.isPaused();
+}
+
+bool CsApexCore::isSteppingMode() const
+{
+    return thread_pool_.isSteppingMode();
+}
+
+void CsApexCore::setSteppingMode(bool stepping)
+{
+    thread_pool_.setSteppingMode(stepping);
+}
+
+void CsApexCore::step()
+{
+    thread_pool_.step();
 }
 
 void CsApexCore::setStatusMessage(const std::string &msg)

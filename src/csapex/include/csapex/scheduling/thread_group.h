@@ -39,6 +39,12 @@ public:
     virtual bool isEmpty() const override;
 
     virtual void setPause(bool pause) override;
+    virtual void setSteppingMode(bool stepping) override;
+
+    virtual void step() override;
+    virtual bool isStepping() const override;
+    virtual bool isStepDone() const override;
+
     virtual void stop() override;
     virtual void clear() override;
 
@@ -52,15 +58,27 @@ public:
 private:
     void startThread();
 
+    void schedulingLoop();
+
+    bool waitForTasks();
+    void handlePause();
+    bool executeNextTask();
+
+    void executeTask(const TaskPtr& task);
+
+    void checkIfStepIsDone();
+
 private:
     static int next_id_;
 
     int id_;
     std::string name_;
 
-    std::thread thread_;
+    std::thread scheduler_thread_;
 
     std::vector<TaskGenerator*> generators_;
+    std::map<TaskGenerator*, std::vector<boost::signals2::connection>> generator_connections_;
+
     std::condition_variable_any work_available_;
     std::condition_variable_any pause_changed_;
 
@@ -71,7 +89,7 @@ private:
     std::atomic<bool> running_;
     std::atomic<bool> pause_;
 
-    std::recursive_mutex execution_mtx_;
+    mutable std::recursive_mutex execution_mtx_;
 
 };
 

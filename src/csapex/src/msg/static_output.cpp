@@ -6,17 +6,21 @@
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
 #include <csapex/utility/assert.h>
+#include <csapex/msg/output_transition.h>
+
+/// SYSTEM
+#include <iostream>
 
 using namespace csapex;
 
 StaticOutput::StaticOutput(OutputTransition* transition, const UUID &uuid)
-    : Output(transition, uuid)
+    : Output(transition, uuid), message_flags_(0)
 {
 
 }
 
 StaticOutput::StaticOutput(OutputTransition* transition, Unique *parent, int sub_id)
-    : Output(transition, parent, sub_id)
+    : Output(transition, parent, sub_id), message_flags_(0)
 {
 
 }
@@ -44,8 +48,11 @@ void StaticOutput::nextMessage()
 
 ConnectionTypeConstPtr StaticOutput::getMessage() const
 {
-    apex_assert_hard(committed_message_ != nullptr);
-    return committed_message_;
+    if(!committed_message_) {
+        return connection_types::makeEmpty<connection_types::NoMessage>();
+    } else {
+        return committed_message_;
+    }
 }
 
 void StaticOutput::setMultipart(bool multipart, bool last_part)
@@ -71,7 +78,7 @@ void StaticOutput::commitMessages()
 
     } else {
         if(!connections_.empty()) {
-            //            std::cout << getUUID() << " sends empty message" << std::endl;
+//            std::cout << getUUID() << " sends empty message" << std::endl;
         }
         committed_message_ = connection_types::makeEmpty<connection_types::NoMessage>();
     }
@@ -79,28 +86,7 @@ void StaticOutput::commitMessages()
     committed_message_->setSequenceNumber(seq_no_);
     committed_message_->flags.data = message_flags_;
 
-//    // wait for all connected inputs to be able to receive
-//    //  * inputs can only be connected to this output since they are 1:1
-//    std::vector<Connection*> targets;
-//    for(ConnectionPtr connection : connections_) {
-//        ConnectionPtr c = connection.lock();
-//        if(!c) {
-//            continue;
-//        }
-
-//        Input* i = dynamic_cast<Input*>(c->to());
-//        if(i && i->isEnabled()) {
-//            targets.push_back(c.get());
-//        }
-//    }
-
-    //    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
-//    if(!targets.empty()) {
-        // all connected inputs are ready to receive, send them the message
-        ++count_;
-//    }
-
-//    ++seq_no_;
+    ++count_;
     messageSent(this);
 }
 

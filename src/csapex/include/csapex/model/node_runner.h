@@ -22,6 +22,14 @@ public:
     virtual void assignToScheduler(Scheduler* scheduler) override;
     virtual void detach() override;
 
+    virtual bool isPaused() const;
+    virtual void setPause(bool pause);
+
+    virtual void setSteppingMode(bool stepping) override;
+    virtual void step() override;
+    virtual bool isStepping() const override;
+    virtual bool isStepDone() const override;
+
     virtual UUID getUUID() const override;
 
     virtual void setError(const std::string& msg) override;
@@ -34,12 +42,19 @@ private:
     NodeWorkerPtr worker_;
     Scheduler* scheduler_;
 
-    std::mutex mutex_;
+    mutable std::recursive_mutex mutex_;
+
+    bool paused_;
+    bool ticking_;
+    bool is_source_;
+    bool stepping_;
+    bool can_step_;
 
     TaskPtr tick_;
+    TaskPtr check_parameters_;
     TaskPtr process_;
     TaskPtr prepare_;
-    TaskPtr check_;
+    TaskPtr check_transitions_;
 
     std::vector<boost::signals2::connection> connections_;
 

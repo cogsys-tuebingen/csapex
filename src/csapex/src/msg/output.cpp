@@ -169,16 +169,19 @@ bool Output::isConnected() const
         return true;
     }
 
-    return transition_->hasEstablishedConnection();
+    return !connections_.empty();
 }
 
 bool Output::isForced() const
 {
     if(!force_send_message_) {
         return false;
+
+    } else if(isConnected()) {
+        return false;
     }
 
-    return !transition_->hasEstablishedConnection();
+    return true;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
@@ -198,11 +201,6 @@ void Output::validateConnections()
 
 bool Output::canSendMessages() const
 {
-    for(ConnectionPtr c : connections_) {
-        if(!c) {
-            continue;
-        }
-    }
     return true;
 }
 

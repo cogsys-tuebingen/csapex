@@ -161,10 +161,11 @@ void GenericState::setFrom(const GenericState &rhs)
 
     for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = rhs.params.begin(); it != rhs.params.end(); ++it) {
         param::Parameter::Ptr p = it->second;
-        if(params.find(p->name()) != params.end()) {
-            params[p->name()]->setValueFrom(*p);
+        std::string name = p->name();
+        if(params.find(name) != params.end()) {
+            params[name]->setValueFrom(*p);
         } else {
-            params[p->name()] = param::ParameterFactory::clone(p);
+            params[name] = param::ParameterFactory::clone(p);
         }
     }
 
