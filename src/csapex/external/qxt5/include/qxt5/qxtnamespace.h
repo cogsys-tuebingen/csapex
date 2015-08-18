@@ -26,7 +26,7 @@
 #ifndef QXTNAMESPACE_H
 #define QXTNAMESPACE_H
 
-#include <csapex/view/qxtglobal.h>
+#include "qxtglobal.h"
 #include <QObject>
 
 class QXT_CORE_EXPORT Qxt  : public QObject

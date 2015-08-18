@@ -13,6 +13,7 @@
 #include <csapex/view/parameter_context_menu.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_worker.h>
+#include <csapex/view/doublespanslider.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -42,6 +43,8 @@
 #include <QProgressBar>
 #include <QDial>
 #include <functional>
+#include <QLabel>
+#include <qxt5/qxtspanslider.h>
 
 using namespace csapex;
 using namespace boost::lambda;
@@ -231,14 +234,14 @@ QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int l
 }
 
 
-QxtDoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size,
+DoubleSpanSlider* makeDoubleSpanSlider(QBoxLayout *layout, const std::string &name, double lower, double upper, double min, double max, double step_size,
                                           csapex::ContextMenuHandler *context_handler)
 {
     apex_assert_hard(min<=max);
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
-    QxtDoubleSpanSlider* slider = new QxtDoubleSpanSlider(Qt::Horizontal, step_size);
+    DoubleSpanSlider* slider = new DoubleSpanSlider(Qt::Horizontal, step_size);
     slider->setDoubleRange(min, max);
     slider->setSpan(lower, upper);
 
@@ -625,7 +628,7 @@ void model_updateIntIntervalParameter(param::IntervalParameterWeakPtr interval_p
     }
     p->set(std::make_pair(slider->lowerValue(), slider->upperValue()));
 }
-void model_updateDoubleIntervalParameter(param::IntervalParameterWeakPtr interval_p, QxtDoubleSpanSlider* slider)
+void model_updateDoubleIntervalParameter(param::IntervalParameterWeakPtr interval_p, DoubleSpanSlider* slider)
 {
     assertNotGuiThread();
     auto p = interval_p.lock();
@@ -1250,7 +1253,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)
 
     } else if(interval_p->is<std::pair<double, double> >()) {
         const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
-        QxtDoubleSpanSlider* slider = makeDoubleSpanSlider(current_layout_, current_display_name_,
+        DoubleSpanSlider* slider = makeDoubleSpanSlider(current_layout_, current_display_name_,
                                                            v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>(),
                                                            new ParameterContextMenu(interval_p));
 
@@ -1260,10 +1263,10 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
         // model change -> ui
-        bridge.connectInGuiThread(interval_p->parameter_changed, std::bind(&ui_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
+        bridge.connectInGuiThread(interval_p->parameter_changed, std::bind(&ui_updateIntervalParameter<double, DoubleSpanSlider>, interval_p, slider));
 
         // parameter scope changed -> update slider interval
-        bridge.connectInGuiThread(interval_p->scope_changed, std::bind(&ui_updateIntervalParameterScope<double, QxtDoubleSpanSlider>, interval_p, slider));
+        bridge.connectInGuiThread(interval_p->scope_changed, std::bind(&ui_updateIntervalParameterScope<double, DoubleSpanSlider>, interval_p, slider));
 
     } else {
         current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (inverval: " + type2name(interval_p->type()) + ")").c_str()));

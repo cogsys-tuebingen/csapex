@@ -22,8 +22,8 @@
  ** <http://libqxt.org>  <foundation@libqxt.org>
  **
  ****************************************************************************/
-#include <csapex/view/qxtspanslider.h>
-#include <csapex/view/qxtspanslider_p.h>
+#include <qxt5/qxtspanslider.h>
+#include <qxt5/qxtspanslider_p.h>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QApplication>
@@ -748,4 +748,5 @@ void QxtSpanSlider::paintEvent(QPaintEvent* event)
 }
 
 /// MOC
-#include "../../include/csapex/view/moc_qxtspanslider.cpp"
+#include "../include/qxt5/moc_qxtspanslider.cpp"
+#include "../include/qxt5/moc_qxtspanslider_p.cpp"

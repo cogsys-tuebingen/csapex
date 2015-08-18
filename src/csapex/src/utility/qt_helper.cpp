@@ -11,6 +11,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <QLabel>
 
 using namespace qt_helper;
 using namespace csapex;

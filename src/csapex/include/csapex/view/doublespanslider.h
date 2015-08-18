@@ -1,15 +1,15 @@
-#ifndef QXTDOUBLESPANSLIDER_H
-#define QXTDOUBLESPANSLIDER_H
+#ifndef DOUBLESPANSLIDER_H
+#define DOUBLESPANSLIDER_H
 
 /// COMPONENT
-#include <csapex/view/qxtspanslider.h>
+#include <qxt5/qxtspanslider.h>
 
-class QxtDoubleSpanSlider : public QxtSpanSlider
+class DoubleSpanSlider : public QxtSpanSlider
 {
     Q_OBJECT
 
 public:
-    explicit QxtDoubleSpanSlider(Qt::Orientation orientation, double step_size, QWidget* parent = 0);
+    explicit DoubleSpanSlider(Qt::Orientation orientation, double step_size, QWidget* parent = 0);
 
     double lowerDoubleValue() const;
     double upperDoubleValue() const;
@@ -25,8 +25,6 @@ public Q_SLOTS:
     void setDoubleMaximum(double max);
     void setDoubleRange(double min, double max);
 
-    void scaleLowerValue(int value);
-    void scaleUpperValue(int value);
     void scaleSpan(int l, int u);
     void scaleRange(int l, int u);
 
@@ -48,8 +46,6 @@ private:
     double step_;
     double min_;
     double max_;
-
-
 };
 
-#endif // QXTDOUBLESPANSLIDER_H
+#endif // DOUBLESPANSLIDER_H

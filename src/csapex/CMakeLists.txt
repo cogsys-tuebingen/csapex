@@ -108,7 +108,12 @@ execute_process(COMMAND bash -c "if [[ ! -f info.h  ]] || [[ `diff info.h.tmp in
 ## Build ##
 ###########
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external)
+
 include_directories(include
+
+    external/qxt5/include
+
     ${catkin_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS}
@@ -266,14 +271,8 @@ add_library(csapex_qt SHARED
     src/view/profiling_widget.cpp
     src/view/screenshot_dialog.cpp
     src/view/widget_controller.cpp
-    src/view/qxtspanslider.cpp
-    src/view/qxtdoublespanslider.cpp
+    src/view/doublespanslider.cpp
     src/view/QtCvImageConverter.cpp
-
-#    include/csapex/view/qxtdoublespanslider.h
-#    include/csapex/view/qxtspanslider.h
-#    include/csapex/view/qxtspanslider_p.h
-
 
     src/utility/context_menu_handler.cpp
     src/utility/html_delegate.cpp
@@ -293,6 +292,8 @@ add_library(csapex_qt SHARED
 
 target_link_libraries(csapex_qt
     csapex
+
+    qxt5
 
     Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL
     ${Boost_LIBRARIES}

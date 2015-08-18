@@ -15,16 +15,8 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/context_menu_handler.h>
 
-/// PROJECT
-#include <csapex/view/qxtspanslider.h>
-#include <csapex/view/qxtdoublespanslider.h>
-
 /// SYSTEM
-#include <QSlider>
 #include <QBoxLayout>
-#include <QSpinBox>
-#include <QLabel>
-#include <QDoubleSpinBox>
 #include <QThread>
 #include <cmath>
 
