@@ -18,7 +18,7 @@
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/widgets/movable_graphics_proxy_widget.h>
-#include <csapex/core/drag_io.h>
+#include <csapex/view/designer/drag_io.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/model/node_worker.h>

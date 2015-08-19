@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/core/drag_io.h>
+#include <csapex/view/designer/drag_io.h>
 
 /// PROJECT
 #include <csapex/command/add_node.h>
@@ -74,7 +74,7 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
 
 
     for(HandlerEnter::Ptr h : handler_enter) {
-        if(h->handle(dispatcher_, src, e)) {
+        if(h->handleEnter(dispatcher_, src, e)) {
             return;
         }
     }
@@ -158,7 +158,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
 
     } else {
         for(HandlerMove::Ptr h : handler_move) {
-            if(h->handle(dispatcher_, src, e)) {
+            if(h->handleMove(dispatcher_, src, e)) {
                 return;
             }
         }
@@ -202,7 +202,7 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_po
 
     } else {
         for(HandlerDrop::Ptr h : handler_drop) {
-            if(h->handle(dispatcher_, src, e, scene_pos)) {
+            if(h->handleDrop(dispatcher_, src, e, scene_pos)) {
                 return;
             }
         }

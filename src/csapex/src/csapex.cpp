@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/drag_io.h>
+#include <csapex/view/designer/drag_io.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/scheduling/thread_pool.h>

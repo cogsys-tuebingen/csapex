@@ -73,24 +73,24 @@ protected:
         std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
         assert(!loader->isOnDemandLoadUnloadEnabled());
 
-//        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
+        //        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
         int retries = 1;
         while(retries != 0) {
             retries = loader->unloadLibrary();
             if(retries != 0) {
-//                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
+                //                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
             }
         }
         if(loader->isLibraryLoadedByAnyClassloader()) {
-//            std::cerr << "there still instances of " << library << std::endl;
+            //            std::cerr << "there still instances of " << library << std::endl;
         } else {
-//            std::cerr << "there no more instances of " << library << std::endl;
+            //            std::cerr << "there no more instances of " << library << std::endl;
         }
     }
 
     void reload(const std::string& library) {
         std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
-//        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
+        //        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
         loader->loadLibrary();
 
         // reload all matching classes
@@ -129,7 +129,9 @@ protected:
             if(!locator->isLibraryIgnored(library_name)) {
                 try {
                     std::string file = loadLibrary(library_name, library);
-                    locator->setLibraryLoaded(library_name, file);
+                    if(!file.empty()) {
+                        locator->setLibraryLoaded(library_name, file);
+                    }
 
                 } catch(const class_loader::ClassLoaderException& e) {
                     std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
@@ -145,6 +147,23 @@ protected:
 
     std::string loadLibrary(const std::string& library_name, TiXmlElement* library)  {
         std::string library_path = library_name + ".so";
+
+        bool load = false;
+        {
+            TiXmlElement* class_element = library->FirstChildElement("class");
+            while (class_element) {
+                std::string base_class_type = class_element->Attribute("base_class_type");
+                if(base_class_type == full_name_) {
+                    load = true;
+                    break;
+                }
+                class_element = class_element->NextSiblingElement( "class" );
+            }
+        }
+
+        if(!load) {
+            return "";
+        }
 
         std::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
         loaders_[library_name] = loader;

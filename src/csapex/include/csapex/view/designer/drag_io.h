@@ -17,17 +17,17 @@ public:
     struct HandlerEnter {
         typedef std::shared_ptr<HandlerEnter> Ptr;
         virtual ~HandlerEnter() {}
-        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDragEnterEvent* e) = 0;
+        virtual bool handleEnter(CommandDispatcher* dispatcher, QWidget *src, QDragEnterEvent* e) = 0;
     };
     struct HandlerMove {
         typedef std::shared_ptr<HandlerMove> Ptr;
         virtual ~HandlerMove() {}
-        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDragMoveEvent* e) = 0;
+        virtual bool handleMove(CommandDispatcher* dispatcher, QWidget *src, QDragMoveEvent* e) = 0;
     };
     struct HandlerDrop {
         typedef std::shared_ptr<HandlerDrop> Ptr;
         virtual ~HandlerDrop() {}
-        virtual bool handle(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e, const QPointF& scene_pos) = 0;
+        virtual bool handleDrop(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e, const QPointF& scene_pos) = 0;
     };
 
 public:
