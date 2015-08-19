@@ -2,7 +2,7 @@
 #define PARAMETER_CONTEXT_MENU_H
 
 /// COMPONENT
-#include <csapex/utility/context_menu_handler.h>
+#include <csapex/view/utility/context_menu_handler.h>
 
 /// PROJECT
 #include <utils_param/param_fwd.h>

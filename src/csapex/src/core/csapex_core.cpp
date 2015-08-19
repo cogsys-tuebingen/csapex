@@ -24,7 +24,7 @@
 #include <csapex/utility/shared_ptr_tools.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/utility/yaml_node_builder.h>
-#include <csapex/view/node_adapter_factory.h>
+#include <csapex/view/node/node_adapter_factory.h>
 
 /// SYSTEM
 #include <fstream>

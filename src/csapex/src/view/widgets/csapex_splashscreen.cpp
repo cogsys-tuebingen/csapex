@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/csapex_splashscreen.h>
+#include <csapex/view/widgets/csapex_splashscreen.h>
 
 /// PROJECT
 #include <csapex/info.h>
@@ -74,4 +74,4 @@ void CsApexSplashScreen::drawContents(QPainter *painter)
 }
 
 /// MOC
-#include "../../include/csapex/view/moc_csapex_splashscreen.cpp"
+#include "../../../include/csapex/view/widgets/moc_csapex_splashscreen.cpp"

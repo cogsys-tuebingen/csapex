@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/qint_slider.h>
+#include <csapex/view/widgets/qint_slider.h>
 
 /// SYSTEM
 #include <iostream>
@@ -138,4 +138,4 @@ void QIntSlider::emitRangeChanged(int min, int max)
     Q_EMIT intRangeChanged(min_, max_);
 }
 /// MOC
-#include "../../include/csapex/utility/moc_qint_slider.cpp"
+#include "../../../include/csapex/view/widgets/moc_qint_slider.cpp"

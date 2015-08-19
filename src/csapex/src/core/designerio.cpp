@@ -2,12 +2,12 @@
 #include <csapex/core/designerio.h>
 
 /// PROJECT
-#include <csapex/view/designer.h>
+#include <csapex/view/designer/designer.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/view/widget_controller.h>
-#include <csapex/view/box.h>
-#include <csapex/view/node_adapter.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/node/node_adapter.h>
 #include <csapex/utility/assert.h>
 #include <csapex/utility/yaml_io.hpp>
 

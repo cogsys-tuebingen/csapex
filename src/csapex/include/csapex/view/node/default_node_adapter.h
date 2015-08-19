@@ -2,7 +2,7 @@
 #define DEFAULT_NODE_ADAPTER_H
 
 /// COMPONENT
-#include <csapex/view/node_adapter.h>
+#include <csapex/view/node/node_adapter.h>
 
 /// PROJECT
 #include <utils_param/param_fwd.h>

@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/utility/widget_picker.h>
+#include <csapex/view/utility/widget_picker.h>
 
 /// PROJECT
-#include <csapex/view/designer_scene.h>
+#include <csapex/view/designer/designer_scene.h>
 
 /// SYSTEM
 #include <QEvent>
@@ -88,4 +88,4 @@ bool WidgetPicker::eventFilter(QObject*, QEvent * e)
     return false;
 }
 /// MOC
-#include "../../include/csapex/utility/moc_widget_picker.cpp"
+#include "../../../include/csapex/view/utility/moc_widget_picker.cpp"

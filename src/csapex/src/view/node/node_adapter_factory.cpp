@@ -1,10 +1,10 @@
 /// HEADER
-#include <csapex/view/node_adapter_factory.h>
+#include <csapex/view/node/node_adapter_factory.h>
 
 /// COMPONENT
 #include <csapex/model/node_worker.h>
-#include <csapex/view/node_adapter.h>
-#include <csapex/view/default_node_adapter.h>
+#include <csapex/view/node/node_adapter.h>
+#include <csapex/view/node/default_node_adapter.h>
 #include <csapex/plugin/plugin_manager.hpp>
 
 /// SYSTEM

@@ -9,11 +9,11 @@
 #define QT_HELPER_HPP
 
 /// COMPONENT
-#include <csapex/utility/qdouble_slider.h>
-#include <csapex/utility/qint_slider.h>
-#include <csapex/utility/qwrapper.h>
+#include <csapex/view/widgets/qdouble_slider.h>
+#include <csapex/view/widgets/qint_slider.h>
+#include <csapex/view/utility/qwrapper.h>
+#include <csapex/view/utility/context_menu_handler.h>
 #include <csapex/csapex_fwd.h>
-#include <csapex/utility/context_menu_handler.h>
 
 /// SYSTEM
 #include <QBoxLayout>

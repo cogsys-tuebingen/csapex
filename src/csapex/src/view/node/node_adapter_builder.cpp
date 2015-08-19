@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/node_adapter_builder.h>
+#include <csapex/view/node/node_adapter_builder.h>
 
 using namespace csapex;
 

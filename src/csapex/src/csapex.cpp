@@ -15,16 +15,16 @@
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/thread.h>
-#include <csapex/view/activity_legend.h>
-#include <csapex/view/activity_timeline.h>
-#include <csapex/view/box.h>
+#include <csapex/view/widgets/activity_legend.h>
+#include <csapex/view/widgets/activity_timeline.h>
+#include <csapex/view/node/box.h>
 #include <csapex/view/csapex_window.h>
-#include <csapex/view/designer.h>
-#include <csapex/view/designer_scene.h>
-#include <csapex/view/designer_view.h>
-#include <csapex/view/minimap_widget.h>
-#include <csapex/view/node_adapter_factory.h>
-#include <csapex/view/widget_controller.h>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/widgets/minimap_widget.h>
+#include <csapex/view/node/node_adapter_factory.h>
+#include <csapex/view/designer/widget_controller.h>
 #include <utils_param/parameter_factory.h>
 
 /// SYSTEM

@@ -12,7 +12,6 @@
 #include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/view/widget_controller.h>
 #include <csapex/model/node_state.h>
 
 /// SYSTEM

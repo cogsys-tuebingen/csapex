@@ -1,15 +1,15 @@
 /// HEADER
-#include <csapex/view/designer_scene.h>
+#include <csapex/view/designer/designer_scene.h>
 
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/model/graph.h>
-#include <csapex/view/widget_controller.h>
-#include <csapex/view/port.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/widgets/port.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/connection.h>
-#include <csapex/view/box.h>
+#include <csapex/view/node/box.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/slot.h>
@@ -19,8 +19,8 @@
 #include <csapex/command/add_fulcrum.h>
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/command/modify_fulcrum.h>
-#include <csapex/view/fulcrum_widget.h>
-#include <csapex/utility/movable_graphics_proxy_widget.h>
+#include <csapex/view/designer/fulcrum_widget.h>
+#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/fulcrum.h>
 
@@ -1083,4 +1083,4 @@ void DesignerScene::refresh()
     invalidateSchema();
 }
 /// MOC
-#include "../../include/csapex/view/moc_designer_scene.cpp"
+#include "../../../include/csapex/view/designer/moc_designer_scene.cpp"

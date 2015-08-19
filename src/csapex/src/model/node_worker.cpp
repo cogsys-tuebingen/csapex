@@ -14,7 +14,7 @@
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
-#include <csapex/utility/q_signal_relay.h>
+#include <csapex/view/utility/q_signal_relay.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>

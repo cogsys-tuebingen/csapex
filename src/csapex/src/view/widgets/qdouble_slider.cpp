@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/qdouble_slider.h>
+#include <csapex/view/widgets/qdouble_slider.h>
 
 /// SYSTEM
 #include <iostream>
@@ -140,4 +140,4 @@ void QDoubleSlider::emitRangeChanged(int min, int max)
     Q_EMIT doubleRangeChanged(min_, max_);
 }
 /// MOC
-#include "../../include/csapex/utility/moc_qdouble_slider.cpp"
+#include "../../../include/csapex/view/widgets/moc_qdouble_slider.cpp"

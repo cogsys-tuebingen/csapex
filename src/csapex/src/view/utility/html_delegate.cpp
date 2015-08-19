@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/html_delegate.h>
+#include <csapex/view/utility/html_delegate.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -124,4 +124,4 @@ QSize HTMLBoxDelegate::sizeHint ( const QStyleOptionViewItem & option, const QMo
     return QSize(doc.idealWidth(), 2 * line_height);
 }
 /// MOC
-#include "../../include/csapex/utility/moc_html_delegate.cpp"
+#include "../../../include/csapex/view/utility/moc_html_delegate.cpp"

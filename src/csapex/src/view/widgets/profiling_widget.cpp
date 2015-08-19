@@ -1,13 +1,13 @@
 /// HEADER
-#include <csapex/view/profiling_widget.h>
+#include <csapex/view/widgets/profiling_widget.h>
 
 /// COMPONENT
-#include <csapex/view/box.h>
+#include <csapex/view/node/box.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/timer.h>
 #include <csapex/core/settings.h>
-#include <csapex/view/designer_view.h>
+#include <csapex/view/designer/designer_view.h>
 #include <csapex/utility/color.hpp>
 
 /// SYSTEM
@@ -309,4 +309,4 @@ float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& in
     return height;
 }
 /// MOC
-#include "../../include/csapex/view/moc_profiling_widget.cpp"
+#include "../../../include/csapex/view/widgets/moc_profiling_widget.cpp"

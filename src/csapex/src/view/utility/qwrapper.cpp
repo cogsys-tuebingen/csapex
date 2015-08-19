@@ -1,4 +1,4 @@
 /// HEADER
-#include <csapex/utility/qwrapper.h>
+#include <csapex/view/utility/qwrapper.h>
 /// MOC
-#include "../../include/csapex/utility/moc_qwrapper.cpp"
+#include "../../../include/csapex/view/utility/moc_qwrapper.cpp"

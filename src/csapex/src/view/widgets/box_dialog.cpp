@@ -1,10 +1,10 @@
 /// HEADER
-#include <csapex/view/box_dialog.h>
+#include <csapex/view/widgets/box_dialog.h>
 
 /// COMPONENT
-#include <csapex/view/widget_controller.h>
-#include <csapex/view/node_filter_proxy_model.h>
-#include <csapex/utility/html_delegate.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/node/node_filter_proxy_model.h>
+#include <csapex/view/utility/html_delegate.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -178,4 +178,4 @@ std::string BoxDialog::getName()
 }
 
 /// MOC
-#include "../../include/csapex/view/moc_box_dialog.cpp"
+#include "../../../include/csapex/view/widgets/moc_box_dialog.cpp"

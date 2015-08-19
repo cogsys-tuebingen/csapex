@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/box.h>
+#include <csapex/view/node/box.h>
 
 /// COMPONENT
 #include "ui_box.h"
@@ -11,7 +11,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/view/node_adapter.h>
+#include <csapex/view/node/node_adapter.h>
 #include <csapex/utility/color.hpp>
 #include <csapex/core/settings.h>
 
@@ -664,4 +664,4 @@ void NodeBox::nodeStateChangedEvent()
     move(QPoint(pt.x, pt.y));
 }
 /// MOC
-#include "../../include/csapex/view/moc_box.cpp"
+#include "../../../include/csapex/view/node/moc_box.cpp"

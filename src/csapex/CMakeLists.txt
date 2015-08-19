@@ -262,9 +262,9 @@ add_library(csapex_qt SHARED
     src/view/node/node_adapter_builder.cpp
     src/view/node/node_adapter.cpp
     src/view/node/node_adapter_factory.cpp
+    src/view/node/node_filter_proxy_model.cpp
     src/view/node/parameter_context_menu.cpp
     src/view/node/box.cpp
-    src/view/node/port.cpp
 
     src/view/utility/context_menu_handler.cpp
     src/view/utility/html_delegate.cpp
@@ -281,6 +281,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/csapex_splashscreen.cpp
     src/view/widgets/doublespanslider.cpp
     src/view/widgets/minimap_widget.cpp
+    src/view/widgets/port.cpp
     src/view/widgets/profiling_widget.cpp
     src/view/widgets/qdouble_slider.cpp
     src/view/widgets/qint_slider.cpp

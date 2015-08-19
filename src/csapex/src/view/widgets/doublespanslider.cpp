@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/doublespanslider.h>
+#include <csapex/view/widgets/doublespanslider.h>
 
 /// SYSTEM
 #include <assert.h>
@@ -131,4 +131,4 @@ int DoubleSpanSlider::double2int(double val, double min) const
 }
 
 /// MOC
-#include "../../include/csapex/view/moc_doublespanslider.cpp"
+#include "../../../include/csapex/view/widgets/moc_doublespanslider.cpp"

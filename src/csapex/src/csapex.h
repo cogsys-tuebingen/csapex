@@ -2,7 +2,7 @@
 #define CSAPEX_H
 
 /// PROJECT
-#include <csapex/view/csapex_splashscreen.h>
+#include <csapex/view/widgets/csapex_splashscreen.h>
 
 /// SYSTEM
 #include <QApplication>

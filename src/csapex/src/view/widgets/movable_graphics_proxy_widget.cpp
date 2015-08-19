@@ -1,13 +1,13 @@
 /// HEADER
-#include <csapex/utility/movable_graphics_proxy_widget.h>
+#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
 
 /// COMPONENT
-#include <csapex/view/box.h>
+#include <csapex/view/node/box.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/view/designer_view.h>
-#include <csapex/view/widget_controller.h>
+#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_state.h>
 
 /// SYSTEM
@@ -168,4 +168,4 @@ NodeBox* MovableGraphicsProxyWidget::getBox()
     return box_;
 }
 /// MOC
-#include "../../include/csapex/utility/moc_movable_graphics_proxy_widget.cpp"
+#include "../../../include/csapex/view/widgets/moc_movable_graphics_proxy_widget.cpp"

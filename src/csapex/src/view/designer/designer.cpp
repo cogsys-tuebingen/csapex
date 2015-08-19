@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/designer.h>
+#include <csapex/view/designer/designer.h>
 
 /// COMPONENT
 #include <csapex/command/dispatcher.h>
@@ -10,14 +10,14 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node.h>
-#include <csapex/utility/qt_helper.hpp>
-#include <csapex/view/box.h>
-#include <csapex/view/designer_view.h>
-#include <csapex/view/widget_controller.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/node/box.h>
+#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/widget_controller.h>
 #include "ui_designer.h"
 #include <utils_param/parameter_factory.h>
-#include <csapex/view/designer_scene.h>
-#include <csapex/view/minimap_widget.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/widgets/minimap_widget.h>
 
 /// SYSTEM
 #include <QScrollBar>
@@ -275,4 +275,4 @@ void Designer::displayMessageConnections(bool display)
     Q_EMIT messagesEnabled(display);
 }
 /// MOC
-#include "../../include/csapex/view/moc_designer.cpp"
+#include "../../../include/csapex/view/designer/moc_designer.cpp"

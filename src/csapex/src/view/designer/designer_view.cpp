@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/designer_view.h>
+#include <csapex/view/designer/designer_view.h>
 
 /// COMPONENT
 #include <csapex/command/meta.h>
@@ -9,23 +9,23 @@
 #include <csapex/command/minimize.h>
 #include <csapex/command/create_thread.h>
 #include <csapex/command/switch_thread.h>
-#include <csapex/view/box_dialog.h>
+#include <csapex/view/widgets/box_dialog.h>
 #include <csapex/model/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/graph.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_node.h>
-#include <csapex/view/designer_scene.h>
-#include <csapex/view/box.h>
-#include <csapex/utility/movable_graphics_proxy_widget.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
 #include <csapex/core/drag_io.h>
-#include <csapex/view/widget_controller.h>
-#include <csapex/view/profiling_widget.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/utility/context_menu_handler.h>
+#include <csapex/view/utility/context_menu_handler.h>
 #include <csapex/core/settings.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/view/box.h>
+#include <csapex/view/node/box.h>
 #include <csapex/scheduling/thread_group.h>
 
 /// SYSTEM
@@ -853,4 +853,4 @@ void DesignerView::selectAll()
     }
 }
 /// MOC
-#include "../../include/csapex/view/moc_designer_view.cpp"
+#include "../../../include/csapex/view/designer/moc_designer_view.cpp"

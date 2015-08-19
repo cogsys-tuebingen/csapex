@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/widget_controller.h>
+#include <csapex/view/designer/widget_controller.h>
 
 /// PROJECT
 #include <csapex/command/delete_connection.h>
@@ -17,16 +17,16 @@
 #include <csapex/msg/output.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
-#include <csapex/utility/movable_graphics_proxy_widget.h>
-#include <csapex/view/box.h>
-#include <csapex/view/default_node_adapter.h>
-#include <csapex/view/designer.h>
-#include <csapex/view/port.h>
-#include <csapex/view/node_adapter_factory.h>
-#include <csapex/view/designer_view.h>
+#include <csapex/view/widgets//movable_graphics_proxy_widget.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/node/default_node_adapter.h>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/widgets/port.h>
+#include <csapex/view/node/node_adapter_factory.h>
+#include <csapex/view/designer/designer_view.h>
 #include <csapex/core/settings.h>
 #include <utils_param/parameter_factory.h>
-#include <csapex/view/designer_scene.h>
+#include <csapex/view/designer/designer_scene.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -470,4 +470,4 @@ void WidgetController::enableGridLock(bool enabled)
     Q_EMIT gridLockEnabled(enabled);
 }
 /// MOC
-#include "../../include/csapex/view/moc_widget_controller.cpp"
+#include "../../../include/csapex/view/designer/moc_widget_controller.cpp"

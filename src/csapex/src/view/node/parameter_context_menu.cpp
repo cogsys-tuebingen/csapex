@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/view/parameter_context_menu.h>
+#include <csapex/view/node/parameter_context_menu.h>
 
 /// COMPONENT
-#include <csapex/view/designer_view.h>
+#include <csapex/view/designer/designer_view.h>
 
 /// PROJECT
 #include <utils_param/parameter.h>

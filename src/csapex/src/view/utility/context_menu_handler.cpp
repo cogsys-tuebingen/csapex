@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/context_menu_handler.h>
+#include <csapex/view/utility/context_menu_handler.h>
 
 /// SYSTEM
 #include <QAction>
@@ -27,4 +27,4 @@ void ContextMenuHandler::addHeader(QMenu &menu, const std::string &title)
     menu.addAction(header);
 }
 /// MOC
-#include "../../include/csapex/utility/moc_context_menu_handler.cpp"
+#include "../../../include/csapex/view/utility/moc_context_menu_handler.cpp"

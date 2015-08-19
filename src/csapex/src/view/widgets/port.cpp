@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/port.h>
+#include <csapex/view/widgets/port.h>
 
 /// COMPONENT
 #include <csapex/model/node.h>
@@ -9,8 +9,8 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/manager/message_renderer_manager.h>
-#include <csapex/view/widget_controller.h>
-#include <csapex/view/designer_view.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/designer/designer_view.h>
 
 /// SYSTEM
 #include <sstream>
@@ -468,4 +468,4 @@ QPoint Port::centerPoint()
     return topLeft() + offset;
 }
 /// MOC
-#include "../../include/csapex/view/moc_port.cpp"
+#include "../../../include/csapex/view/widgets/moc_port.cpp"

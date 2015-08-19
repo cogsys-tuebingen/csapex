@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/node_filter_proxy_model.h>
+#include <csapex/view/node/node_filter_proxy_model.h>
 
 /// SYSTEM
 #include <QStringList>
@@ -38,4 +38,4 @@ bool NodeFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
     return QSortFilterProxyModel::lessThan(left, right);
 }
 /// MOC
-#include "../../include/csapex/view/moc_node_filter_proxy_model.cpp"
+#include "../../../include/csapex/view/node/moc_node_filter_proxy_model.cpp"

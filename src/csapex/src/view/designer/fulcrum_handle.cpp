@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/fulcrum_handle.h>
+#include <csapex/view/designer/fulcrum_handle.h>
 
 /// SYSTEM
 #include <QEvent>
@@ -42,4 +42,4 @@ bool FulcrumHandle::sceneEvent(QEvent *event)
     return r;
 }
 /// MOC
-#include "../../include/csapex/view/moc_fulcrum_handle.cpp"
+#include "../../../include/csapex/view/designer/moc_fulcrum_handle.cpp"

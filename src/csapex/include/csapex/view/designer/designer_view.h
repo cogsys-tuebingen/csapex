@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
-#include <csapex/view/designer_styleable.h>
+#include <csapex/view/designer/designer_styleable.h>
 
 /// SYSTEM
 #include <QGraphicsView>

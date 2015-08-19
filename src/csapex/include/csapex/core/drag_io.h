@@ -4,9 +4,6 @@
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
 
-/// PROJECT
-#include <csapex/view/designer_view.h>
-
 /// SYSTEM
 #include <QDragEnterEvent>
 #include <vector>

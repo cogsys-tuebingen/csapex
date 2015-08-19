@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/register_apex_plugin.h>
-#include <csapex/view/node_adapter_builder.h>
+#include <csapex/view/node/node_adapter_builder.h>
 
 #define MAKE_CLASS(NS, C) NS::C##Builder
 #define CSAPEX_REGISTER_NODE_ADAPTER_NS(Namespace, Adapter, Adaptee) \

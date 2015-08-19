@@ -1,4 +1,4 @@
 /// HEADER
-#include <csapex/utility/q_signal_relay.h>
+#include <csapex/view/utility/q_signal_relay.h>
 /// MOC
-#include "../../include/csapex/utility/moc_q_signal_relay.cpp"
+#include "../../../include/csapex/view/utility/moc_q_signal_relay.cpp"

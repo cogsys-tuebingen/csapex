@@ -11,7 +11,6 @@
 #include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
-#include <csapex/view/widget_controller.h>
 
 using namespace csapex::command;
 

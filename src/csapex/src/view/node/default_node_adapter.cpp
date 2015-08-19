@@ -1,19 +1,19 @@
 /// HEADER
-#include <csapex/view/default_node_adapter.h>
+#include <csapex/view/node/default_node_adapter.h>
 
 /// COMPONENT
-#include <csapex/utility/qt_helper.hpp>
-#include <csapex/utility/q_signal_relay.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/utility/q_signal_relay.h>
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/view/port.h>
-#include <csapex/view/widget_controller.h>
+#include <csapex/view/widgets/port.h>
+#include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/view/parameter_context_menu.h>
+#include <csapex/view/node/parameter_context_menu.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/view/doublespanslider.h>
+#include <csapex/view/widgets/doublespanslider.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -1379,4 +1379,4 @@ void DefaultNodeAdapter::stop()
     bridge.disconnect();
 }
 /// MOC
-#include "../../include/csapex/view/moc_default_node_adapter.cpp"
+#include "../../../include/csapex/view/node/moc_default_node_adapter.cpp"

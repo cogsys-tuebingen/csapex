@@ -1,10 +1,10 @@
 /// HEADER
-#include <csapex/view/minimap_widget.h>
+#include <csapex/view/widgets/minimap_widget.h>
 
 /// COMPONENT
-#include <csapex/view/designer_scene.h>
-#include <csapex/view/designer_view.h>
-#include <csapex/view/box.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/node/box.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -143,7 +143,7 @@ void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
     QPen pen_box(QBrush(QColor::fromRgb(0,0,0)), 2);
     painter.setPen(pen_box);
     painter.setBrush(brush_box);
-    foreach (NodeBox *box, boxes) {
+    for (NodeBox *box : boxes) {
         QRectF rect(box->pos(), box->size());
         painter.drawPolygon(scene_to_minimap_.map(rect));
     }
@@ -156,4 +156,4 @@ void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
     painter.drawRect(QRectF(tl_view, br_view));
 }
 /// MOC
-#include "../../include/csapex/view/moc_minimap_widget.cpp"
+#include "../../../include/csapex/view/widgets/moc_minimap_widget.cpp"

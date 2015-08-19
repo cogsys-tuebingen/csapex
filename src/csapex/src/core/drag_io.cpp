@@ -12,10 +12,10 @@
 #include <csapex/signal/trigger.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/node.h>
-#include <csapex/view/box.h>
-#include <csapex/view/widget_controller.h>
-#include <csapex/view/designer_scene.h>
-#include <csapex/view/designer_view.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/designer/designer_view.h>
 
 /// SYSTEM
 #include <QMimeData>

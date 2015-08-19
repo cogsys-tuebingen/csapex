@@ -1,9 +1,9 @@
 /// HEADER
-#include <csapex/view/fulcrum_widget.h>
+#include <csapex/view/designer/fulcrum_widget.h>
 
 /// COMPONENT
 #include <csapex/model/fulcrum.h>
-#include <csapex/view/fulcrum_handle.h>
+#include <csapex/view/designer/fulcrum_handle.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/modify_fulcrum.h>
@@ -189,4 +189,4 @@ bool FulcrumWidget::sceneEvent(QEvent *event)
     return r;
 }
 /// MOC
-#include "../../include/csapex/view/moc_fulcrum_widget.cpp"
+#include "../../../include/csapex/view/designer/moc_fulcrum_widget.cpp"

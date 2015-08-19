@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/view/activity_timeline.h>
+#include <csapex/view/widgets/activity_timeline.h>
 
 /// COMPONENT
-#include <csapex/view/widget_controller.h>
+#include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 
@@ -426,4 +426,4 @@ void ActivityTimeline::Activity::clear()
     rect = nullptr;
 }
 /// MOC
-#include "../../include/csapex/view/moc_activity_timeline.cpp"
+#include "../../../include/csapex/view/widgets/moc_activity_timeline.cpp"

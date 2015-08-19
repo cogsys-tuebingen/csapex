@@ -1,10 +1,10 @@
 /// HEADER
-#include <csapex/view/screenshot_dialog.h>
+#include <csapex/view/widgets/screenshot_dialog.h>
 
 /// COMPONENT
-#include <csapex/view/widget_controller.h>
-#include <csapex/utility/html_delegate.h>
-#include <csapex/view/designer_view.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/utility/html_delegate.h>
+#include <csapex/view/designer/designer_view.h>
 #include <csapex/model/graph_worker.h>
 
 /// SYSTEM
@@ -119,4 +119,4 @@ void ScreenshotDialog::save()
 
 
 /// MOC
-#include "../../include/csapex/view/moc_screenshot_dialog.cpp"
+#include "../../../include/csapex/view/widgets/moc_screenshot_dialog.cpp"

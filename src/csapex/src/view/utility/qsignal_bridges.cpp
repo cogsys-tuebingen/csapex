@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/qsignal_bridges.h>
+#include <csapex/view/utility/qsignal_bridges.h>
 
 using namespace QSignalBridges;
 
@@ -27,4 +27,4 @@ void QAbstractSliderLimiter::limitMax(int limit)
     limitMin_->setValue(limited);
 }
 /// MOC
-#include "../../include/csapex/utility/moc_qsignal_bridges.cpp"
+#include "../../../include/csapex/view/utility/moc_qsignal_bridges.cpp"

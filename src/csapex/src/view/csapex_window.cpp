@@ -16,14 +16,14 @@
 #include <csapex/model/tag.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/scheduling/executor.h>
-#include <csapex/utility/qt_helper.hpp>
-#include <csapex/view/activity_legend.h>
-#include <csapex/view/activity_timeline.h>
-#include <csapex/view/box.h>
-#include <csapex/view/designer.h>
-#include <csapex/view/minimap_widget.h>
-#include <csapex/view/screenshot_dialog.h>
-#include <csapex/view/widget_controller.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/widgets/activity_legend.h>
+#include <csapex/view/widgets/activity_timeline.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/widgets/minimap_widget.h>
+#include <csapex/view/widgets/screenshot_dialog.h>
+#include <csapex/view/designer/widget_controller.h>
 #include "ui_csapex_window.h"
 
 /// PROJECT

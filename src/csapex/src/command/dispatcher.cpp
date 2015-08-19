@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/view/widget_controller.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
