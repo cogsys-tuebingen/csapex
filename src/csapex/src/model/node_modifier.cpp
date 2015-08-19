@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 
 using namespace csapex;
 

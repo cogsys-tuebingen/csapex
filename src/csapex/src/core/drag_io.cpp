@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/command/add_node.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>

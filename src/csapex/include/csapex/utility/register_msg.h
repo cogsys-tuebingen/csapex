@@ -2,7 +2,7 @@
 #define REGISTER_MSG_H
 
 /// SYSTEM
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 #include <csapex/serialization/message_serializer.h>
 
 #define CSAPEX_REGISTER_MESSAGE_WITH_NAME(name,instancename)\

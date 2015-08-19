@@ -6,7 +6,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node_worker.h>
 
 using namespace csapex;

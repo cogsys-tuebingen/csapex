@@ -6,7 +6,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/core/drag_io.h>
 #include <csapex/core/settings.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node.h>

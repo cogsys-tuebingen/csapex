@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/utility/qt_helper.hpp>
-#include <csapex/view/utility/q_signal_relay.h>
+#include <csapex/view/utility/qsignal_relay.h>
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>

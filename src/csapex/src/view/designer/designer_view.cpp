@@ -10,7 +10,7 @@
 #include <csapex/command/create_thread.h>
 #include <csapex/command/switch_thread.h>
 #include <csapex/view/widgets/box_dialog.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/graph.h>
 #include <csapex/command/dispatcher.h>

@@ -12,9 +12,9 @@
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/tag.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 #include <csapex/msg/message.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/plugin/plugin_manager.hpp>

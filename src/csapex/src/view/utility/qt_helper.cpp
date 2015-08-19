@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 #include <csapex/command/meta.h>
 #include <csapex/utility/assert.h>
 

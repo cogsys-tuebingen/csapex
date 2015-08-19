@@ -1,7 +1,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/core/settings.h>
 #include "gtest/gtest.h"
 

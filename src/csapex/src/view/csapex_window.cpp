@@ -9,7 +9,7 @@
 #include <csapex/info.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_statistics.h>
 #include <csapex/model/node_worker.h>

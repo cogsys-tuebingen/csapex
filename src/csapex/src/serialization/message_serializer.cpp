@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 #include <csapex/utility/yaml_node_builder.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 
 /// SYSTEM
 #include <fstream>

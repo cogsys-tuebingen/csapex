@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/node/box.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/view/designer/designer_view.h>

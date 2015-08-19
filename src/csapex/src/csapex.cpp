@@ -9,8 +9,8 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/model/node_factory.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/utility/error_handling.h>

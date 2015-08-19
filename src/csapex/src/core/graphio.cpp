@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/connection.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
@@ -16,7 +16,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/connection.h>
 #include <csapex/utility/yaml_node_builder.h>
-#include <csapex/core/serialization.h>
+#include <csapex/serialization/serialization.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>

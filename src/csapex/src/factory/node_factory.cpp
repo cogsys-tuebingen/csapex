@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 
 /// COMPONENT
 #include <csapex/model/node_constructor.h>

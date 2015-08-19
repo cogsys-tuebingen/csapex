@@ -135,11 +135,12 @@ add_library(csapex SHARED
     src/core/designerio.cpp
     src/core/drag_io.cpp
     src/core/graphio.cpp
-    src/core/serialization.cpp
     src/core/settings.cpp
     src/data/point.cpp
 
     src/factory/generic_node_factory.cpp
+    src/factory/node_factory.cpp
+    src/factory/message_factory.cpp
 
     src/manager/message_provider_manager.cpp
     src/manager/message_renderer_manager.cpp
@@ -156,7 +157,6 @@ add_library(csapex SHARED
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
     src/model/node.cpp
-    src/model/node_factory.cpp
     src/model/node_modifier.cpp
     src/model/node_runner.cpp
     src/model/node_state.cpp
@@ -173,7 +173,6 @@ add_library(csapex SHARED
     src/msg/input_transition.cpp
     src/msg/io.cpp
     src/msg/message.cpp
-    src/msg/message_factory.cpp
     src/msg/message_provider.cpp
     src/msg/message_renderer.cpp
     src/msg/output.cpp
@@ -183,6 +182,7 @@ add_library(csapex SHARED
 
     src/serialization/yaml.cpp
     src/serialization/message_serializer.cpp
+    src/serialization/serialization.cpp
 
     src/plugin/plugin_locator.cpp
 
@@ -215,11 +215,9 @@ target_link_libraries(csapex
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
-    ${OPENGL_LIBRARIES}
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
     ${console_bridge_LIBRARIES}
-    Qt5::OpenGL
 )
 
 
@@ -242,8 +240,6 @@ add_library(csapex_qt SHARED
     src/command/move_connection.cpp
     src/command/move_fulcrum.cpp
     src/command/switch_thread.cpp
-
-    src/plugin/plugin_loader.cpp
 
     # is here because it is still a qobject...
     src/model/node_worker.cpp
@@ -269,7 +265,7 @@ add_library(csapex_qt SHARED
     src/view/utility/context_menu_handler.cpp
     src/view/utility/html_delegate.cpp
     src/view/utility/qsignal_bridges.cpp
-    src/view/utility/q_signal_relay.cpp
+    src/view/utility/qsignal_relay.cpp
     src/view/utility/QtCvImageConverter.cpp
     src/view/utility/qt_helper.cpp
     src/view/utility/qwrapper.cpp

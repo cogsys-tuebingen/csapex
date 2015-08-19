@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/core/settings.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 
 /// SYSTEM
 #include <boost/assign.hpp>

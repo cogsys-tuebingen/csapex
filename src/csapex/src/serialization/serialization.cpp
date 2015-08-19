@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/core/serialization.h>
+#include <csapex/serialization/serialization.h>
 
 /// COMPONENT
 #include <csapex/model/node.h>

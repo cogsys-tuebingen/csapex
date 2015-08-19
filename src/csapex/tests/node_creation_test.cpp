@@ -1,6 +1,6 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/msg/message.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/generic_node_factory.hpp>

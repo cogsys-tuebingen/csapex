@@ -14,11 +14,11 @@
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
-#include <csapex/view/utility/q_signal_relay.h>
+#include <csapex/view/utility/qsignal_relay.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/tickable_node.h>
 

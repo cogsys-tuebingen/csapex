@@ -1,5 +1,5 @@
-#ifndef Q_SIGNAL_RELAY_H
-#define Q_SIGNAL_RELAY_H
+#ifndef qsignal_relay_H
+#define qsignal_relay_H
 
 /// SYSTEM
 #include <QObject>
@@ -28,4 +28,4 @@ private:
 };
 
 }
-#endif // Q_SIGNAL_RELAY_H
+#endif // qsignal_relay_H

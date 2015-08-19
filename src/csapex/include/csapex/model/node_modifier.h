@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/multi_connection_type.h>
 #include <csapex/msg/message.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/csapex_fwd.h>
