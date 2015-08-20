@@ -249,6 +249,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));
 
         core->init();
+        node_adapter_factory->loadPlugins();
+
         w.start();
         core->startup();
 

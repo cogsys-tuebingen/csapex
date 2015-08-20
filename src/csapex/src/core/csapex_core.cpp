@@ -24,7 +24,6 @@
 #include <csapex/utility/shared_ptr_tools.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/utility/yaml_node_builder.h>
-#include <csapex/view/node/node_adapter_factory.h>
 
 /// SYSTEM
 #include <fstream>
@@ -40,7 +39,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
     : settings_(settings), plugin_locator_(plugin_locator),
       graph_worker_(graph_worker), graph_(graph),
       thread_pool_(thread_pool),
-      node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
+      node_factory_(node_factory),
       cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
 {
     destruct = true;
@@ -148,8 +147,6 @@ void CsApexCore::init()
         node_factory_->loaded.connect(showStatusMessage);
         node_factory_->new_node_type.connect(newNodeType);
         node_factory_->loadPlugins();
-
-        node_adapter_factory_->loadPlugins();
     }
 }
 

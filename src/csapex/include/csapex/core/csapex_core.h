@@ -89,7 +89,6 @@ private:
     ThreadPool& thread_pool_;
 
     NodeFactory* node_factory_;
-    NodeAdapterFactory* node_adapter_factory_;
 
     bool destruct;
     CommandDispatcher* cmd_dispatch;
