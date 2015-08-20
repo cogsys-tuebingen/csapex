@@ -219,7 +219,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
         WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get());
-        DragIO drag_io(graph.get(), &dispatcher, widget_control);
+        DragIO drag_io(plugin_locator, graph.get(), &dispatcher, widget_control);
 
         DesignerStyleable style;
         DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control, &style);
@@ -248,7 +248,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));
 
-        core->init(&drag_io);
+        core->init();
         w.start();
         core->startup();
 
@@ -262,7 +262,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         delete designer;
 
     } else {
-        core->init(nullptr);
+        core->init();
         csapex::error_handling::stop_request().connect(std::bind(&csapex::error_handling::kill));
         core->startup();
         res = run();

@@ -16,33 +16,57 @@
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/designer_view.h>
+#include <csapex/plugin/plugin_manager.hpp>
 
 /// SYSTEM
 #include <QMimeData>
 
 using namespace csapex;
 
-void DragIO::registerEnterHandler(HandlerEnter::Ptr h)
+DragIO::DragIO(PluginLocatorPtr locator, Graph *graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl)
+    : loaded_(false), plugin_locator_(locator), manager_(new PluginManager<DragIOHandler>("csapex::DragIOHandler")),
+      graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl)
 {
-    handler_enter.push_back(h);
-}
-void DragIO::registerMoveHandler(HandlerMove::Ptr h)
-{
-    handler_move.push_back(h);
-}
-void DragIO::registerDropHandler(HandlerDrop::Ptr h)
-{
-    handler_drop.push_back(h);
 }
 
-DragIO::DragIO(Graph *graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl)
-    : graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl)
+DragIO::~DragIO()
 {
+    handler_.clear();
+    delete manager_;
+}
 
+void DragIO::load()
+{
+    if(loaded_) {
+        return;
+    }
+
+    manager_->load(plugin_locator_.get());
+
+    for(auto pair : manager_->availableClasses()) {
+        try {
+            DragIOHandler::Ptr handler(pair.second());
+            registerHandler(handler);
+
+        } catch(const std::exception& e) {
+            std::cerr << "cannot load DragIOHandler " << pair.first << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
+        }
+    }
+
+    loaded_ = true;
+}
+
+void DragIO::registerHandler(DragIOHandler::Ptr h)
+{
+    handler_.push_back(h);
 }
 
 void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
 {
+    if(!loaded_) {
+        load();
+    }
+
     if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
@@ -73,7 +97,7 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
     }
 
 
-    for(HandlerEnter::Ptr h : handler_enter) {
+    for(auto h : handler_) {
         if(h->handleEnter(dispatcher_, src, e)) {
             return;
         }
@@ -103,6 +127,10 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
 
 void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
 {
+    if(!loaded_) {
+        load();
+    }
+
     if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
@@ -157,7 +185,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
         scene->update();
 
     } else {
-        for(HandlerMove::Ptr h : handler_move) {
+        for(auto h : handler_) {
             if(h->handleMove(dispatcher_, src, e)) {
                 return;
             }
@@ -167,6 +195,10 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
 
 void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_pos)
 {
+    if(!loaded_) {
+        load();
+    }
+
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
     if(e->mimeData()->hasFormat(NodeBox::MIME)) {
@@ -201,7 +233,7 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_po
         scene->deleteTemporaryConnectionsAndRepaint();
 
     } else {
-        for(HandlerDrop::Ptr h : handler_drop) {
+        for(auto h : handler_) {
             if(h->handleDrop(dispatcher_, src, e, scene_pos)) {
                 return;
             }

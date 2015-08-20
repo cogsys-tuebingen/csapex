@@ -30,7 +30,7 @@ public:
                CommandDispatcher *cmd_dispatcher);
     virtual ~CsApexCore();
 
-    void init(DragIO *dragio);
+    void init();
     void boot();
     void startup();
 
@@ -81,7 +81,6 @@ private:
 
 private:
     Settings& settings_;
-    DragIO* drag_io_;
 
     csapex::PluginLocatorPtr plugin_locator_;
 

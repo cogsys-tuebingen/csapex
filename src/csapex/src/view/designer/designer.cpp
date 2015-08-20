@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
-#include <csapex/view/designer/drag_io.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/input.h>

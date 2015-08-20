@@ -3,60 +3,40 @@
 
 /// COMPONENT
 #include <csapex/csapex_fwd.h>
+#include <csapex/view/designer/drag_io_handler.h>
 
 /// SYSTEM
 #include <QDragEnterEvent>
 #include <vector>
 #include <boost/type_traits.hpp>
 
-namespace csapex{
+namespace csapex
+{
 
 class DragIO
 {
 public:
-    struct HandlerEnter {
-        typedef std::shared_ptr<HandlerEnter> Ptr;
-        virtual ~HandlerEnter() {}
-        virtual bool handleEnter(CommandDispatcher* dispatcher, QWidget *src, QDragEnterEvent* e) = 0;
-    };
-    struct HandlerMove {
-        typedef std::shared_ptr<HandlerMove> Ptr;
-        virtual ~HandlerMove() {}
-        virtual bool handleMove(CommandDispatcher* dispatcher, QWidget *src, QDragMoveEvent* e) = 0;
-    };
-    struct HandlerDrop {
-        typedef std::shared_ptr<HandlerDrop> Ptr;
-        virtual ~HandlerDrop() {}
-        virtual bool handleDrop(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e, const QPointF& scene_pos) = 0;
-    };
 
 public:
-    DragIO(Graph* graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl);
+    DragIO(PluginLocatorPtr locator, Graph* graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl);
+    ~DragIO();
 
     void dragEnterEvent(DesignerView *src, QDragEnterEvent* e);
     void dragMoveEvent(DesignerView *src, QDragMoveEvent* e);
     void dropEvent(DesignerView *src, QDropEvent* e, const QPointF &scene_pos);
 
 public:
-    template <typename H>
-    void registerHandler() {
-        std::shared_ptr<H> handler(new H);
-        if(std::is_base_of<HandlerEnter,H>::value)
-            registerEnterHandler(std::static_pointer_cast<HandlerEnter>(handler));
-        if(std::is_base_of<HandlerMove,H>::value)
-            registerMoveHandler(std::static_pointer_cast<HandlerMove>(handler));
-        if(std::is_base_of<HandlerDrop,H>::value)
-            registerDropHandler(std::static_pointer_cast<HandlerDrop>(handler));
-    }
+    void registerHandler(DragIOHandler::Ptr h);
 
 private:
-    void registerEnterHandler(HandlerEnter::Ptr h);
-    void registerMoveHandler(HandlerMove::Ptr h);
-    void registerDropHandler(HandlerDrop::Ptr h);
+    void load();
 
-    std::vector<HandlerEnter::Ptr> handler_enter;
-    std::vector<HandlerMove::Ptr> handler_move;
-    std::vector<HandlerDrop::Ptr> handler_drop;
+private:
+    std::vector<DragIOHandler::Ptr> handler_;
+
+    bool loaded_;
+    csapex::PluginLocatorPtr plugin_locator_;
+    PluginManager<DragIOHandler>* manager_;
 
     Graph* graph_;
     CommandDispatcher* dispatcher_;

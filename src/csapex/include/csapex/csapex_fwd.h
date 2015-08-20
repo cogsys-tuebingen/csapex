@@ -90,6 +90,7 @@ class MinimapWidget;
 class MovableGraphicsProxyWidget;
 
 class DragIO;
+FWD(DragIOHandler);
 
 class Overlay;
 

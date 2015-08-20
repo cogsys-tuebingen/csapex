@@ -37,7 +37,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
                        GraphWorkerPtr graph_worker, GraphPtr graph,
                        ThreadPool &thread_pool,
                        NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
-    : settings_(settings), drag_io_(nullptr), plugin_locator_(plugin_locator),
+    : settings_(settings), plugin_locator_(plugin_locator),
       graph_worker_(graph_worker), graph_(graph),
       thread_pool_(thread_pool),
       node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
@@ -118,11 +118,9 @@ void CsApexCore::setStatusMessage(const std::string &msg)
     showStatusMessage(msg);
 }
 
-void CsApexCore::init(DragIO* dragio)
+void CsApexCore::init()
 {
     qRegisterMetaType<csapex::NodeWorkerPtr>("csapex::NodeWorkerPtr");
-
-    drag_io_ = dragio;
 
     if(!init_) {
         init_ = true;
@@ -144,11 +142,6 @@ void CsApexCore::init(DragIO* dragio)
         }
         for(PAIR plugin : core_plugins_) {
             plugin.second->init(*this);
-        }
-        if(dragio) {
-            for(PAIR plugin : core_plugins_) {
-                plugin.second->initUI(*dragio);
-            }
         }
 
         showStatusMessage("loading node plugins");
@@ -197,7 +190,6 @@ void CsApexCore::reloadCorePlugin(const std::string& plugin_name)
 
     plugin->prepare(getSettings());
     plugin->init(*this);
-    plugin->initUI(*drag_io_);
 }
 
 void CsApexCore::boot()
