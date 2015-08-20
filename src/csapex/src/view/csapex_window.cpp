@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/designerio.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/info.h>
@@ -21,6 +20,7 @@
 #include <csapex/view/widgets/activity_timeline.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/designerio.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
 #include <csapex/view/designer/widget_controller.h>

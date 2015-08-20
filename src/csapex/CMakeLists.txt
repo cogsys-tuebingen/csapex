@@ -132,7 +132,6 @@ add_library(csapex SHARED
     src/core/bootstrap_plugin.cpp
     src/core/core_plugin.cpp
     src/core/csapex_core.cpp
-    src/core/designerio.cpp
     src/core/graphio.cpp
     src/core/settings.cpp
     src/data/point.cpp
@@ -249,6 +248,7 @@ add_library(csapex_qt SHARED
     src/view/designer/designer_scene.cpp
     src/view/designer/designer_styleable.cpp
     src/view/designer/designer_view.cpp
+    src/view/designer/designerio.cpp
     src/view/designer/drag_io.cpp
     src/view/designer/drag_io_handler.cpp
     src/view/designer/fulcrum_handle.cpp
