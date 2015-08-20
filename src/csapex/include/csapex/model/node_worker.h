@@ -276,7 +276,6 @@ private:
 
 
     std::vector<boost::signals2::connection> connections;
-    std::vector<QObject*> callbacks;
 
     QTimer* tick_timer_;
     bool tick_enabled_;

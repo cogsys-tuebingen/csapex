@@ -14,7 +14,6 @@
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
-#include <csapex/view/utility/qsignal_relay.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>
@@ -112,15 +111,6 @@ NodeWorker::~NodeWorker()
     while(!triggers_.empty()) {
         removeTrigger(triggers_.begin()->get());
     }
-
-    for(QObject* cb : callbacks) {
-        qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
-        if(call) {
-            call->disconnect();
-        }
-        cb->deleteLater();
-    }
-    callbacks.clear();
 }
 
 InputTransition* NodeWorker::getInputTransition() const
