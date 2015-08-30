@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -51,7 +52,7 @@ bool DeleteConnection::doExecute()
 
     locked = false;
     clear();
-    add(graph->deleteAllConnectionFulcrumsCommand(connection));
+    add(CommandFactory::deleteAllConnectionFulcrumsCommand(graph, connection));
     locked = true;
 
     if(Meta::doExecute()) {

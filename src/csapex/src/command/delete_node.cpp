@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/delete_connection.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
@@ -44,7 +45,7 @@ bool DeleteNode::doExecute()
 
     for(auto connectable : node_worker->getAllConnectors()) {
         if(connectable->isConnected()) {
-            add(connectable->removeAllConnectionsCmd());
+            add(CommandFactory::removeAllConnectionsCmd(connectable));
         }
     }
 

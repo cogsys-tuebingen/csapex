@@ -71,9 +71,6 @@ public:
     int countConnections();
     std::vector<ConnectionPtr> getConnections() const;
 
-    CommandPtr removeAllConnectionsCmd() override;
-    CommandPtr removeConnectionCmd(Connection *connection);
-
     void forceSendMessage(bool force = true);
 
     virtual bool hasMessage() = 0;

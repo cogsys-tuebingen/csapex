@@ -3,8 +3,6 @@
 
 /// COMPONENT
 #include <csapex/model/connection.h>
-#include <csapex/command/delete_connection.h>
-#include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/input_transition.h>
 
@@ -61,16 +59,6 @@ void Input::removeConnection(Connectable* other_side)
 
     connections_.clear();
     connectionRemoved(this);
-}
-
-Command::Ptr Input::removeAllConnectionsCmd()
-{
-    if(connections_.empty()) {
-        return nullptr;
-    }
-    apex_assert_hard(connections_.size() == 1);
-    Command::Ptr cmd(new command::DeleteConnection(getSource(), this));
-    return cmd;
 }
 
 void Input::setOptional(bool optional)

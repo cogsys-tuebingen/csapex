@@ -15,9 +15,6 @@ namespace csapex
 class Slot : public Connectable
 {
     friend class Trigger;
-    friend class command::AddConnection;
-    friend class command::MoveConnection;
-    friend class command::DeleteConnection;
 
 public:
     Slot(std::function<void()> callback, const UUID &uuid, bool active);
@@ -45,8 +42,6 @@ public:
     virtual void validateConnections();
 
     std::vector<Trigger*> getSources() const;
-
-    virtual CommandPtr removeAllConnectionsCmd();
 
     virtual void enable();
     virtual void disable();

@@ -12,9 +12,6 @@ namespace csapex
 class Input : public Connectable
 {
     friend class Output;
-    friend class command::AddConnection;
-    friend class command::MoveConnection;
-    friend class command::DeleteConnection;
 
 public:
     Input(InputTransition* transition, const UUID &uuid);
@@ -44,7 +41,6 @@ public:
 
     Connectable* getSource() const;
 
-    virtual CommandPtr removeAllConnectionsCmd();
     virtual void removeAllConnectionsNotUndoable();
 
     bool isOptional() const;

@@ -2,9 +2,6 @@
 #include <csapex/core/csapex_core.h>
 
 /// COMPONENT
-#include <csapex/command/add_node.h>
-#include <csapex/command/delete_node.h>
-#include <csapex/command/dispatcher.h>
 #include <csapex/core/bootstrap_plugin.h>
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/graphio.h>
@@ -52,9 +49,6 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
     StreamInterceptor::instance().start();
 
     settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this));
-
-    node_factory->unload_request.connect(std::bind(&CsApexCore::unloadNode, this, std::placeholders::_1));
-    plugin_locator_->reload_done.connect(std::bind(&CsApexCore::reloadDone, this));
 
     thread_pool_.paused.connect(paused);
 
@@ -243,25 +237,6 @@ void CsApexCore::reset()
 
 
     resetDone();
-}
-
-void CsApexCore::unloadNode(UUID uuid)
-{
-    if(!unload_commands_) {
-        unload_commands_.reset(new command::Meta("unloading"));
-    }
-
-    command::DeleteNode::Ptr del(new command::DeleteNode(uuid));
-    cmd_dispatch->executeNotUndoable(del);
-    unload_commands_->add(del);
-}
-
-void CsApexCore::reloadDone()
-{
-    if(unload_commands_) {
-        cmd_dispatch->undoNotRedoable(unload_commands_);
-        unload_commands_.reset();
-    }
 }
 
 Settings &CsApexCore::getSettings() const

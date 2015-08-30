@@ -2,7 +2,6 @@
 #define GRAPH_H
 
 /// COMPONENT
-#include <csapex/command/command.h>
 #include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 
@@ -17,10 +16,6 @@ class Graph
 {
     friend class GraphIO;
     friend class GraphWorker;
-    friend class command::AddNode;
-    friend class command::AddConnection;
-    friend class command::DeleteConnection;
-    friend class command::DeleteNode;
 
 public:
     typedef std::shared_ptr<Graph> Ptr;
@@ -59,13 +54,6 @@ public:
     int getLevel(const UUID& node_uuid) const;
 
     Connectable *findConnector(const UUID &uuid);
-
-    // TODO: extract commands from here!!
-    Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
-    Command::Ptr deleteAllConnectionFulcrumsCommand(int connection);
-    Command::Ptr deleteAllConnectionFulcrumsCommand(ConnectionPtr connection);
-    Command::Ptr deleteConnectionByIdCommand(int id);
-    Command::Ptr clearCommand();
 
     ConnectionPtr getConnectionWithId(int id);
     ConnectionPtr getConnection(const UUID& from, const UUID& to);

@@ -5,8 +5,6 @@
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
 #include <csapex/msg/output_transition.h>
-#include <csapex/command/meta.h>
-#include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/message_traits.h>
@@ -102,24 +100,6 @@ void Output::removeConnection(Connectable* other_side)
     }
 }
 
-Command::Ptr Output::removeConnectionCmd(Connection* connection) {
-    Command::Ptr removeThis(new command::DeleteConnection(this, connection->to()));
-
-    return removeThis;
-}
-
-Command::Ptr Output::removeAllConnectionsCmd()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
-
-    for(ConnectionPtr connection : connections_) {
-        Command::Ptr removeThis(new command::DeleteConnection(this, connection->to()));
-        removeAll->add(removeThis);
-    }
-
-    return removeAll;
-}
 
 void Output::removeAllConnectionsNotUndoable()
 {

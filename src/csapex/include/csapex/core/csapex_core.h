@@ -5,7 +5,6 @@
 #include <csapex/csapex_fwd.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
-#include <csapex/command/meta.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
@@ -38,9 +37,6 @@ public:
     void saveAs(const std::string& file);
 
     void reset();
-
-    void unloadNode(csapex::UUID uuid);
-    void reloadDone();
 
     Settings& getSettings() const;
     NodeFactory& getNodeFactory() const;
@@ -99,8 +95,6 @@ private:
 
     std::vector<BootstrapPluginPtr> boot_plugins_;
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
-
-    command::Meta::Ptr unload_commands_;
 
     bool init_;
 };

@@ -2,7 +2,6 @@
 #include <csapex/model/node.h>
 
 /// COMPONENT
-#include <csapex/command/meta.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/slot.h>

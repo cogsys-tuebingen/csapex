@@ -4,8 +4,6 @@
 /// COMPONENT
 #include <csapex/signal/slot.h>
 #include <csapex/signal/signal.h>
-#include <csapex/command/meta.h>
-#include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/message_traits.h>
@@ -62,24 +60,6 @@ void Trigger::removeConnection(Connectable* other_side)
             ++i;
         }
     }
-}
-
-Command::Ptr Trigger::removeConnectionCmd(Slot* other_side) {
-    Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
-
-    return removeThis;
-}
-
-Command::Ptr Trigger::removeAllConnectionsCmd()
-{
-    command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
-
-    for(Slot* target : targets_) {
-        Command::Ptr removeThis(new command::DeleteConnection(this, target));
-        removeAll->add(removeThis);
-    }
-
-    return removeAll;
 }
 
 void Trigger::removeAllConnectionsNotUndoable()

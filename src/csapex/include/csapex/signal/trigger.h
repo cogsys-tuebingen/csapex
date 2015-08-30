@@ -14,10 +14,6 @@ class Trigger : public Connectable
 {
     friend class Input;
     friend class Graph;
-    friend class command::AddConnection;
-    friend class command::MoveConnection;
-    friend class command::DeleteConnection;
-    friend class DesignerIO;
 
 public:
     Trigger(const UUID &uuid);
@@ -47,9 +43,6 @@ public:
     int noTargets();
     std::vector<Slot*> getTargets() const;
 
-    virtual CommandPtr removeAllConnectionsCmd();
-    CommandPtr removeConnectionCmd(Slot *other_side);
-
     void reset();
 
     bool isBeingProcessed() const;
@@ -59,7 +52,6 @@ public:
     boost::signals2::signal<void()> all_signals_handled;
 
 protected:
-    /// PRIVATE: Use command to create a connection (undoable)
     virtual bool isConnectionPossible(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();

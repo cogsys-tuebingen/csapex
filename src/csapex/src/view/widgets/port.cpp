@@ -6,6 +6,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/move_connection.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/manager/message_renderer_manager.h>
@@ -349,9 +350,7 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
         if(!adaptee) {
             return;
         }
-        dispatcher_->execute(adaptee->removeAllConnectionsCmd());
-    } else if(e->button() == Qt::RightButton) {
-        //        dispatcher_->execute(adaptee->removeAllConnectionsCmd());
+        dispatcher_->execute(CommandFactory::removeAllConnectionsCmd(adaptee));
     }
 
     e->accept();

@@ -222,6 +222,7 @@ target_link_libraries(csapex
 # Library for the app itself
 add_library(csapex_qt SHARED
 
+    src/command/command_factory.cpp
     src/command/add_connection.cpp
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp

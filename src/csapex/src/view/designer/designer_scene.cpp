@@ -16,6 +16,7 @@
 #include <csapex/signal/trigger.h>
 #include <csapex/core/settings.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/command/add_fulcrum.h>
 #include <csapex/command/move_fulcrum.h>
 #include <csapex/command/modify_fulcrum.h>
@@ -418,7 +419,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
-        auto cmd = graph_->deleteConnectionByIdCommand(highlight_connection_id_);
+        auto cmd = CommandFactory::deleteConnectionByIdCommand(graph_.get(), highlight_connection_id_);
         if(cmd) {
             dispatcher_->execute(cmd);
         }
@@ -1042,10 +1043,10 @@ bool DesignerScene::showConnectionContextMenu()
     QAction* selectedItem = menu.exec(QCursor::pos());
 
     if(selectedItem == del) {
-        dispatcher_->execute(graph_->deleteConnectionByIdCommand(highlight_connection_id_));
+        dispatcher_->execute(CommandFactory::deleteConnectionByIdCommand(graph_.get(), highlight_connection_id_));
 
     } else if(selectedItem == reset) {
-        dispatcher_->execute(graph_->deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
+        dispatcher_->execute(CommandFactory::deleteAllConnectionFulcrumsCommand(graph_.get(), highlight_connection_id_));
     }
 
     return true;

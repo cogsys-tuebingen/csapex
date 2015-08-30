@@ -2,12 +2,6 @@
 #include <csapex/model/graph.h>
 
 /// PROJECT
-#include <csapex/command/add_connection.h>
-#include <csapex/command/add_node.h>
-#include <csapex/command/delete_connection.h>
-#include <csapex/command/delete_fulcrum.h>
-#include <csapex/command/delete_node.h>
-#include <csapex/command/meta.h>
 #include <csapex/model/connectable.h>
 #include <csapex/model/connection.h>
 #include <csapex/msg/input.h>
@@ -411,18 +405,6 @@ void Graph::verify()
 {
 }
 
-Command::Ptr Graph::clearCommand()
-{
-    command::Meta::Ptr clear(new command::Meta("Clear Graph"));
-
-    for(NodeWorker::Ptr node : nodes_) {
-        Command::Ptr cmd(new command::DeleteNode(node->getUUID()));
-        clear->add(cmd);
-    }
-
-    return clear;
-}
-
 int Graph::getComponent(const UUID &node_uuid) const
 {
     NodeWorker* node = findNodeWorkerNoThrow(node_uuid);
@@ -586,38 +568,4 @@ int Graph::getConnectionId(ConnectionPtr c)
     }
 
     return -1;
-}
-Command::Ptr Graph::deleteConnectionByIdCommand(int id)
-{
-    for(const ConnectionPtr& connection : connections_) {
-        if(connection->id() == id) {
-            return Command::Ptr(new command::DeleteConnection(connection->from(), connection->to()));
-        }
-    }
-
-    return Command::Ptr();
-}
-
-Command::Ptr Graph::deleteConnectionFulcrumCommand(int connection, int fulcrum)
-{
-    return Command::Ptr(new command::DeleteFulcrum(connection, fulcrum));
-}
-
-Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(int connection)
-{
-    command::Meta::Ptr meta(new command::Meta("Delete All Connection Fulcrums"));
-
-    if(connection >= 0) {
-        int n = getConnectionWithId(connection)->getFulcrumCount();
-        for(int i = n - 1; i >= 0; --i) {
-            meta->add(deleteConnectionFulcrumCommand(connection, i));
-        }
-    }
-
-    return meta;
-}
-
-Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(ConnectionPtr connection)
-{
-    return deleteAllConnectionFulcrumsCommand(getConnectionId(connection));
 }

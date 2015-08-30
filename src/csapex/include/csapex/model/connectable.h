@@ -101,10 +101,10 @@ public:
     virtual void removeConnection(Connectable* other_side) = 0;
     virtual void validateConnections();
     virtual void connectionMovePreview(Connectable* other_side) = 0;
-    virtual CommandPtr removeAllConnectionsCmd() = 0;
 
 protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
+
 protected:
     Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, const std::string &type);

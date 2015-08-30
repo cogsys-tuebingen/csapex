@@ -17,10 +17,6 @@ namespace csapex
 {
 
 class Connection {
-    friend class command::AddFulcrum;
-    friend class command::MoveFulcrum;
-    friend class command::ModifyFulcrum;
-    friend class command::DeleteFulcrum;
     friend class GraphIO;
     friend class Graph;
     friend class Fulcrum;
@@ -111,8 +107,6 @@ public:
     int getFulcrumCount() const;
     FulcrumPtr getFulcrum(int fulcrum_id);
 
-private:
-    /// COMMANDS
     void addFulcrum(int fulcrum_id, const Point& pos, int type, const Point& handle_in=Point(-10.0, 0.0), const Point& handle_out=Point(10.0, 0.0));
     void modifyFulcrum(int fulcrum_id, int type, const Point& handle_in=Point(-10.0, 0.0), const Point& handle_out=Point(10.0, 0.0));
     void moveFulcrum(int fulcrum_id, const Point &pos, bool dropped);

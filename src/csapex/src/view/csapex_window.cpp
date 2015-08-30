@@ -15,6 +15,7 @@
 #include <csapex/model/tag.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/scheduling/executor.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/widgets/activity_legend.h>
 #include <csapex/view/widgets/activity_timeline.h>
@@ -691,7 +692,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    cmd_dispatcher_->execute(graph_->clearCommand());
+    cmd_dispatcher_->execute(CommandFactory::clearCommand(graph_.get()));
 }
 
 void CsApexWindow::undo()

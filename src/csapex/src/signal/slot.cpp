@@ -4,10 +4,7 @@
 /// COMPONENT
 #include <csapex/signal/trigger.h>
 #include <csapex/signal/signal.h>
-#include <csapex/command/delete_connection.h>
-#include <csapex/command/command.h>
 #include <csapex/utility/assert.h>
-#include <csapex/command/meta.h>
 
 /// SYSTEM
 #include <iostream>
@@ -68,16 +65,6 @@ void Slot::removeConnection(Connectable* other_side)
         connectionRemoved(this);
     }
 }
-
-Command::Ptr Slot::removeAllConnectionsCmd()
-{
-    command::Meta::Ptr cmd(new command::Meta("Delete sources"));
-    for(Trigger* source : sources_) {
-        cmd->add(Command::Ptr(new command::DeleteConnection(source, this)));
-    }
-    return cmd;
-}
-
 
 void Slot::enable()
 {

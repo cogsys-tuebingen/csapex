@@ -9,6 +9,7 @@
 #include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/command/command_factory.h>
 
 using namespace csapex;
 using namespace command;
@@ -34,12 +35,8 @@ bool DeleteConnector::doExecute()
     NodeWorker* node_worker = graph_->findNodeWorkerForConnector(c_uuid);
 
     if(c->isConnected()) {
-        if(in) {
-//            delete_connections = ((Input*) c)->removeAllConnectionsCmd();
-            delete_connections = dynamic_cast<Input*>(c)->removeAllConnectionsCmd();
-        } else {
-            delete_connections = dynamic_cast<Output*>(c)->removeAllConnectionsCmd();
-        }
+        delete_connections = CommandFactory::removeAllConnectionsCmd(c);
+
         Command::executeCommand(graph_worker_, graph_, thread_pool_, node_factory_, delete_connections);
     }
 
