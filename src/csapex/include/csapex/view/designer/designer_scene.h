@@ -11,7 +11,7 @@
 #include <QGraphicsScene>
 #include <QLabel>
 #include <QTime>
-
+#include <boost/signals2/connection.hpp>
 
 namespace csapex
 {
@@ -163,6 +163,7 @@ private:
 
     std::vector<TempConnection> temp_;
 
+    std::vector<boost::signals2::connection> connections_;
     std::map<const Connection*,std::vector<QRectF> > connection_bb_;
 
     std::map<Fulcrum*,FulcrumWidget*> fulcrum_2_widget_;

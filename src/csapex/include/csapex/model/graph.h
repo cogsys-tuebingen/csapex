@@ -43,7 +43,7 @@ public:
     Graph();
     virtual ~Graph();
 
-    void reset();
+    void clear();
 
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
@@ -61,12 +61,11 @@ public:
     Connectable *findConnector(const UUID &uuid);
 
     // TODO: extract commands from here!!
-    Command::Ptr deleteConnectionByIdCommand(int id);
     Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
     Command::Ptr deleteAllConnectionFulcrumsCommand(int connection);
     Command::Ptr deleteAllConnectionFulcrumsCommand(ConnectionPtr connection);
-    Command::Ptr deleteConnectionById(int id);
-    Command::Ptr clear();
+    Command::Ptr deleteConnectionByIdCommand(int id);
+    Command::Ptr clearCommand();
 
     ConnectionPtr getConnectionWithId(int id);
     ConnectionPtr getConnection(const UUID& from, const UUID& to);

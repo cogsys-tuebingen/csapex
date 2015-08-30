@@ -203,7 +203,6 @@ void OutputTransition::abortSendingMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(auto output : node_->getAllOutputs()) {
-        apex_assert_hard(output->getState() == Output::State::RECEIVING);
         output->setState(Output::State::IDLE);
     }
 }

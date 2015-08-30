@@ -26,7 +26,7 @@ public:
                PluginLocatorPtr plugin_locator,
                GraphWorkerPtr graph_worker, GraphPtr graph,
                ThreadPool& thread_pool,
-               NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory,
+               NodeFactory* node_factory,
                CommandDispatcher *cmd_dispatcher);
     virtual ~CsApexCore();
 

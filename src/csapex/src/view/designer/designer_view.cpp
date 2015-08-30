@@ -93,6 +93,13 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
 
 DesignerView::~DesignerView()
 {
+    for(auto entry : connections_) {
+        for(auto c : entry.second) {
+            c.disconnect();
+        }
+    }
+    connections_.clear();
+
     delete scene_;
 }
 
@@ -446,16 +453,16 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     NodeWorker* worker = box->getNodeWorker();
 
-    worker->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); });
-    worker->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); });
-    worker->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); });
+    connections_[worker].push_back(worker->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
+    connections_[worker].push_back(worker->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
+    connections_[worker].push_back(worker->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
-    graph_->structureChanged.connect([this](Graph*){ updateBoxInformation(); });
+    connections_[worker].push_back(graph_->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
-    worker->startProfiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); });
-    worker->stopProfiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); });
+    connections_[worker].push_back(worker->startProfiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); }));
+    connections_[worker].push_back(worker->stopProfiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); }));
 
 
     MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
@@ -493,6 +500,11 @@ void DesignerView::renameBox(NodeBox *box)
 
 void DesignerView::removeBoxEvent(NodeBox *box)
 {
+    for(auto connection : connections_[box->getNodeWorker()]) {
+        connection.disconnect();
+    }
+    connections_.erase(box->getNodeWorker());
+
     box->setVisible(false);
     box->deleteLater();
 

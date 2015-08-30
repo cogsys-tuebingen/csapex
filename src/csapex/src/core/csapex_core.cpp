@@ -35,7 +35,7 @@ using namespace csapex;
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
                        GraphWorkerPtr graph_worker, GraphPtr graph,
                        ThreadPool &thread_pool,
-                       NodeFactory *node_factory, NodeAdapterFactory *node_adapter_factory, CommandDispatcher* cmd_dispatcher)
+                       NodeFactory *node_factory, CommandDispatcher* cmd_dispatcher)
     : settings_(settings), plugin_locator_(plugin_locator),
       graph_worker_(graph_worker), graph_(graph),
       thread_pool_(thread_pool),

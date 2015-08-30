@@ -128,6 +128,8 @@ private:
     WidgetControllerPtr widget_ctrl_;
     DragIO& drag_io_;
 
+    std::map<NodeWorker*, std::vector<boost::signals2::connection>> connections_;
+
     std::vector<NodeBox*> boxes_;
     std::map<NodeBox*, ProfilingWidget*> profiling_;
     std::map<NodeBox*, std::vector<boost::signals2::connection>> profiling_connections_;

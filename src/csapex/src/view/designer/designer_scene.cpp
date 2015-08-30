@@ -107,15 +107,18 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
 
     setBackgroundBrush(QBrush(Qt::white));
 
-    graph_->connectionAdded.connect([this](Connection* c) { connectionAdded(c); });
-    graph_->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); });
+    connections_.push_back(graph_->connectionAdded.connect([this](Connection* c) { connectionAdded(c); }));
+    connections_.push_back(graph_->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); }));
     //    QObject::connect(this, SIGNAL(eventConnectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
     //    QObject::connect(this, SIGNAL(eventConnectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
 }
 
 DesignerScene::~DesignerScene()
 {
-
+    for(auto c : connections_) {
+        c.disconnect();
+    }
+    connections_.clear();
 }
 
 void DesignerScene::enableGrid(bool draw)
@@ -415,7 +418,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
-        auto cmd = graph_->deleteConnectionById(highlight_connection_id_);
+        auto cmd = graph_->deleteConnectionByIdCommand(highlight_connection_id_);
         if(cmd) {
             dispatcher_->execute(cmd);
         }
@@ -1039,7 +1042,7 @@ bool DesignerScene::showConnectionContextMenu()
     QAction* selectedItem = menu.exec(QCursor::pos());
 
     if(selectedItem == del) {
-        dispatcher_->execute(graph_->deleteConnectionById(highlight_connection_id_));
+        dispatcher_->execute(graph_->deleteConnectionByIdCommand(highlight_connection_id_));
 
     } else if(selectedItem == reset) {
         dispatcher_->execute(graph_->deleteAllConnectionFulcrumsCommand(highlight_connection_id_));

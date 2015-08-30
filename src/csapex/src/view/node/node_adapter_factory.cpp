@@ -16,7 +16,6 @@ NodeAdapterFactory::NodeAdapterFactory(Settings &settings, PluginLocator *locato
     : settings_(settings), plugin_locator_(locator),
       node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder"))
 {
-
 }
 
 

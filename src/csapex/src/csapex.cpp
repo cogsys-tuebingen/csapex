@@ -200,13 +200,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     });
 
     NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(settings, plugin_locator.get());
-    NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
     CommandDispatcher dispatcher(settings, graph_worker, graph, &thread_pool, node_factory.get());
 
-    // TODO: core must be destroyed AFTER the factories -> refactor it
     CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
                                                       graph_worker, graph,
-                                                      thread_pool, node_factory.get(), node_adapter_factory.get(), &dispatcher);
+                                                      thread_pool, node_factory.get(), &dispatcher);
 
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
@@ -218,6 +216,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
+        NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
         WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get());
         DragIO drag_io(plugin_locator, graph.get(), &dispatcher, widget_control);
 
@@ -233,8 +232,10 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
-        graph->nodeAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); });
-        graph->nodeRemoved.connect([legend](NodeWorkerPtr n) { legend->stopTrackingNode(n); });
+        boost::signals2::scoped_connection add_connection
+                (graph->nodeAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); }));
+        boost::signals2::scoped_connection remove_connection
+                (graph->nodeRemoved.connect([legend](NodeWorkerPtr n) { legend->stopTrackingNode(n); }));
 
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
         QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));
@@ -249,6 +250,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));
 
         core->init();
+
         node_adapter_factory->loadPlugins();
 
         w.start();
@@ -259,8 +261,6 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         res = run();
 
-        // FIXME: this is necessary for some adapted nodes.
-        graph->reset();
         delete designer;
 
     } else {
@@ -269,9 +269,6 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         core->startup();
         res = run();
     }
-
-    node_factory.reset();
-    node_adapter_factory.reset();
 
     return res;
 }

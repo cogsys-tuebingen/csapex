@@ -28,10 +28,10 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-
+    clear();
 }
 
-void Graph::reset()
+void Graph::clear()
 {
     for(ConnectionPtr c : getConnections()) {
         deleteConnection(c);
@@ -411,7 +411,7 @@ void Graph::verify()
 {
 }
 
-Command::Ptr Graph::clear()
+Command::Ptr Graph::clearCommand()
 {
     command::Meta::Ptr clear(new command::Meta("Clear Graph"));
 
@@ -620,12 +620,4 @@ Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(int connection)
 Command::Ptr Graph::deleteAllConnectionFulcrumsCommand(ConnectionPtr connection)
 {
     return deleteAllConnectionFulcrumsCommand(getConnectionId(connection));
-}
-
-
-Command::Ptr Graph::deleteConnectionById(int id)
-{
-    Command::Ptr cmd(deleteConnectionByIdCommand(id));
-
-    return cmd;
 }

@@ -56,6 +56,11 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, 
 
 CsApexWindow::~CsApexWindow()
 {
+    for(auto connection : connections_) {
+        connection.disconnect();
+    }
+    connections_.clear();
+
     delete ui;
 }
 
@@ -108,13 +113,9 @@ void CsApexWindow::construct()
 
     //    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
     QObject::connect(ui->actionPause, &QAction::triggered, [this](bool pause) { core_.setPause(pause); });
-    core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); });
 
     QObject::connect(ui->actionSteppingMode, &QAction::triggered, [this](bool step) { core_.setSteppingMode(step); });
     QObject::connect(ui->actionStep, &QAction::triggered, [this](bool) { core_.step(); });
-
-    core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); });
-    core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); });
 
 
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
@@ -158,23 +159,28 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionAuto_Reload, SIGNAL(toggled(bool)), this, SLOT(updatePluginAutoReload(bool)));
     ui->actionAuto_Reload->setChecked(plugin_locator_->isAutoReload());
 
-    core_.resetDone.connect([this](){ designer_->reset(); });
-    core_.configChanged.connect([this](){ updateTitle(); });
-    core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); });
-    core_.newNodeType.connect([this](){ updateNodeTypes(); });
+    connections_.push_back(core_.resetDone.connect([this](){ designer_->reset(); }));
+    connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
+    connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
+    connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
 
-    core_.saveSettingsRequest.connect([this](YAML::Node& node){ saveSettings(node); });
-    core_.loadSettingsRequest.connect([this](YAML::Node& node){ loadSettings(node); });
-    core_.saveViewRequest.connect([this](YAML::Node& node){ saveView(node); });
-    core_.loadViewRequest.connect([this](YAML::Node& node){ loadView(node); });
+    connections_.push_back(core_.saveSettingsRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
+    connections_.push_back(core_.loadSettingsRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
+    connections_.push_back(core_.saveViewRequest.connect([this](YAML::Node& node){ saveView(node); }));
+    connections_.push_back(core_.loadViewRequest.connect([this](YAML::Node& node){ loadView(node); }));
 
-    graph->stateChanged.connect([this]() { updateMenu(); });
-    graph->nodeAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); });
-    graph->nodeRemoved.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeRemoved(n); });
-    graph->panic.connect([this]() { clearBlock(); });
+    connections_.push_back(graph->stateChanged.connect([this]() { updateMenu(); }));
+    connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); }));
+    connections_.push_back(graph->nodeRemoved.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeRemoved(n); }));
+    connections_.push_back(graph->panic.connect([this]() { clearBlock(); }));
 
-    cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); });
-    cmd_dispatcher_->dirtyChanged.connect([this](bool) { updateTitle(); });
+    connections_.push_back(cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); }));
+    connections_.push_back(cmd_dispatcher_->dirtyChanged.connect([this](bool) { updateTitle(); }));
+
+    connections_.push_back(core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); }));
+
+    connections_.push_back(core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); }));
+    connections_.push_back(core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); }));
 
     updateMenu();
     updateTitle();
@@ -685,7 +691,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    cmd_dispatcher_->execute(graph_->clear());
+    cmd_dispatcher_->execute(graph_->clearCommand());
 }
 
 void CsApexWindow::undo()

@@ -16,16 +16,24 @@ using namespace csapex;
 GraphWorker::GraphWorker(Executor &executor, Graph* graph)
     : graph_(graph), executor_(executor)
 {
-    graph->nodeAdded.connect([this](NodeWorkerPtr n) {
+    connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) {
         TaskGeneratorPtr runner = std::make_shared<NodeRunner>(n);
         generators_[n->getUUID()] = runner;
         generatorAdded(runner);
-    });
-    graph->nodeRemoved.connect([this](NodeWorkerPtr n) {
+    }));
+    connections_.push_back(graph->nodeRemoved.connect([this](NodeWorkerPtr n) {
         TaskGeneratorPtr runner = generators_[n->getUUID()];
         generators_.erase(n->getUUID());
         generatorRemoved(runner);
-    });
+    }));
+}
+
+GraphWorker::~GraphWorker()
+{
+    for(auto connection : connections_) {
+        connection.disconnect();
+    }
+    connections_.clear();
 }
 
 Graph* GraphWorker::getGraph()
@@ -41,7 +49,7 @@ TaskGenerator* GraphWorker::getTaskGenerator(const UUID &uuid)
 void GraphWorker::reset()
 {
     stop();
-    graph_->reset();
+    graph_->clear();
     for(auto& gen: generators_) {
         generatorRemoved(gen.second);
     }

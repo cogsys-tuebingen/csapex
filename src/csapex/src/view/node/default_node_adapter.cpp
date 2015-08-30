@@ -443,8 +443,8 @@ void model_updatePathParameter(param::PathParameterWeakPtr path_p, QLineEdit* pa
     if(!p) {
         return;
     }
-    p->set<std::string>(path->text().toStdString());
-    // gui changed
+    auto path_str = path->text().toStdString();
+    p->set<std::string>(path_str);
 }
 
 void ui_updatePathParameterDialog(param::PathParameterWeakPtr path_p)

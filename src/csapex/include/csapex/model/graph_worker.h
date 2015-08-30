@@ -19,6 +19,7 @@ public:
 
 public:
     GraphWorker(Executor& executor, Graph* graph);
+    ~GraphWorker();
 
     Graph* getGraph();
 
@@ -43,6 +44,7 @@ private:
     Graph* graph_;
     Executor& executor_;
 
+    std::vector<boost::signals2::connection> connections_;
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 };
 

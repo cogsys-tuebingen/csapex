@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QFileSystemWatcher>
 #include <QBoxLayout>
+#include <boost/signals2/connection.hpp>
 
 namespace Ui
 {
@@ -121,6 +122,8 @@ private:
 
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocator* plugin_locator_;
+
+    std::vector<boost::signals2::connection> connections_;
 };
 
 } /// NAMESPACE
