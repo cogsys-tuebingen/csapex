@@ -2,7 +2,7 @@
 #define MINIMAP_WIDGET_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <QWidget>

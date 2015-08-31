@@ -2,7 +2,7 @@
 #define WIDGET_PICKER_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <QObject>

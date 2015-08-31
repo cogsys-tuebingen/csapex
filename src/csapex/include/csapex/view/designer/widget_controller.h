@@ -2,8 +2,12 @@
 #define WIDGET_CONTROLLER_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/core/core_fwd.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/view/view_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/factory/factory_fwd.h>
 #include <utils_param/param_fwd.h>
 
 /// SYSTEM
@@ -61,6 +65,7 @@ public:
     void setStyleSheet(const QString &str);
 
 
+    // TODO: extract into something like NodeTypeListGenerator
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
     QAbstractItemModel *listAvailableNodeTypes();

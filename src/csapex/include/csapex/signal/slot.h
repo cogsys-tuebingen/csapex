@@ -2,8 +2,8 @@
 #define SLOT_H
 
 /// COMPONENT
+#include <csapex/signal/signal_fwd.h>
 #include <csapex/model/connectable.h>
-#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <mutex>

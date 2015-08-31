@@ -2,10 +2,11 @@
 #define BOX_H
 
 /// COMPONENT
+#include <csapex/view/view_fwd.h>
+#include <csapex/model/model_fwd.h>
 #include <csapex/model/memento.h>
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/node_worker.h>
 

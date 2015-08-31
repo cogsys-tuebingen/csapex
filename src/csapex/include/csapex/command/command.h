@@ -2,7 +2,13 @@
 #define COMMAND_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/core/core_fwd.h>
+
+/// PROJECT
+#include <csapex/model/model_fwd.h>
+#include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/factory/factory_fwd.h>
 
 /// SYSTEM
 #include <memory>

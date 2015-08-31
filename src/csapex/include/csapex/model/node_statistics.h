@@ -2,7 +2,8 @@
 #define NODE_STATISTICS_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/factory/factory_fwd.h>
 
 /// SYSTEM
 #include <QTreeWidgetItem>

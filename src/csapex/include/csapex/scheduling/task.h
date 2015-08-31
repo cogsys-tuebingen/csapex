@@ -2,7 +2,7 @@
 #define TASK_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/scheduling/scheduling_fwd.h>
 
 /// SYSTEM
 #include <functional>

@@ -2,12 +2,14 @@
 #define NODE_MODIFIER_H
 
 /// COMPONENT
+#include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/signal/signal_fwd.h>
 #include <csapex/model/multi_connection_type.h>
 #include <csapex/msg/message.h>
 #include <csapex/factory/message_factory.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/serialization/message_serializer.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM

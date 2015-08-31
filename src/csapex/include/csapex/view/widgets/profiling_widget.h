@@ -2,8 +2,10 @@
 #define PROFILING_WIDGET_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/timer.h>
+#include <csapex/view/view_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <QWidget>

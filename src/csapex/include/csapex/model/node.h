@@ -2,7 +2,8 @@
 #define NODE_H_
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/signal/signal_fwd.h>
 #include <csapex/model/parameterizable.h>
 #include <csapex/utility/stream_relay.h>
 #include <csapex/utility/assert.h>

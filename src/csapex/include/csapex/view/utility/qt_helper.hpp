@@ -13,7 +13,6 @@
 #include <csapex/view/widgets/qint_slider.h>
 #include <csapex/view/utility/qwrapper.h>
 #include <csapex/view/utility/context_menu_handler.h>
-#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <QBoxLayout>

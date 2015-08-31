@@ -2,8 +2,8 @@
 #define TASK_GENERATOR_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/scheduling/scheduling_fwd.h>
 
 /// SYSTEM
 #include <boost/signals2/signal.hpp>

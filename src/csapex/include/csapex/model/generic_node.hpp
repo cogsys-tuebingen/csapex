@@ -1,4 +1,5 @@
 /// PROJECT
+#include <csapex/msg/msg_fwd.h>
 #include <csapex/model/node.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/message_traits.h>

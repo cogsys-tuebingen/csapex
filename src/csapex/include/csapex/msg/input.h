@@ -2,8 +2,8 @@
 #define INPUT_H
 
 /// COMPONENT
+#include <csapex/msg/msg_fwd.h>
 #include <csapex/model/connectable.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/msg/message.h>
 
 namespace csapex

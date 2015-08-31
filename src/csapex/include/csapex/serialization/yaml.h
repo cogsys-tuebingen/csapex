@@ -2,7 +2,7 @@
 #define YAML_HPP
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>

@@ -2,9 +2,9 @@
 #define NODE_STATE_H
 
 /// COMPNENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/model/memento.h>
 #include <csapex/data/point.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <boost/signals2/signal.hpp>

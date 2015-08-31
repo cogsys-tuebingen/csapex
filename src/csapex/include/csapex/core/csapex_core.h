@@ -2,7 +2,7 @@
 #define CSAPEX_CORE_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/plugin/plugin_fwd.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
 #include <csapex/utility/uuid.h>

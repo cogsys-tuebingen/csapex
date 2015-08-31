@@ -2,7 +2,8 @@
 #define NODE_ADAPTER_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <QLayout>
@@ -24,8 +25,6 @@ protected:
 
 public:
     virtual ~NodeAdapter();
-
-//    NodeWorker *getNodeWorker();
 
     void doSetupUi(QBoxLayout* layout);
 

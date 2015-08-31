@@ -2,8 +2,10 @@
 #define NODE_CONSTRUCTOR_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/utility/utility_fwd.h>
 #include <utils_param/param_fwd.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <typeinfo>

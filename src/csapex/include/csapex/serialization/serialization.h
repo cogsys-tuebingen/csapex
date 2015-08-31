@@ -2,8 +2,8 @@
 #define SERIALIZATION_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/singleton.hpp>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <map>

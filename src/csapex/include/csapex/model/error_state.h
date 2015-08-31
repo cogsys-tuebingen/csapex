@@ -2,7 +2,6 @@
 #define DISPLAYABLE_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <string>

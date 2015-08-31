@@ -3,7 +3,9 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/csapex_fwd.h>
+
+/// PROJECT
+#include <csapex/factory/factory_fwd.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>

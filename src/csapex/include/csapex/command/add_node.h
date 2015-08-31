@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/data/point.h>
 

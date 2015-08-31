@@ -2,7 +2,8 @@
 #define DESIGNERIO_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <map>

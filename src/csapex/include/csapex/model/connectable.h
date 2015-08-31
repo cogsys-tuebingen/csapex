@@ -2,10 +2,10 @@
 #define CONNECTOR_H
 
 /// COMPONENT
+#include <csapex/model/model_fwd.h>
 #include <csapex/model/connection_type.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
-#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <mutex>

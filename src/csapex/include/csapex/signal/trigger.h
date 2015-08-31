@@ -2,8 +2,8 @@
 #define TRIGGER_H
 
 /// COMPONENT
+#include <csapex/signal/signal_fwd.h>
 #include <csapex/model/connectable.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/msg/generic_value_message.hpp>
 

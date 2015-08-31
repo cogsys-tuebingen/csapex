@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include "command.h"
-#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <vector>

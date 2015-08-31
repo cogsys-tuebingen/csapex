@@ -2,7 +2,10 @@
 #define DESIGNER_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/core/core_fwd.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/view/view_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <QWidget>

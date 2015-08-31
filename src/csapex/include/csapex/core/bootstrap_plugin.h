@@ -2,7 +2,7 @@
 #define BOOTSTRAP_PLUGIN_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/plugin/plugin_fwd.h>
 
 /// SYSTEM
 #include <class_loader/class_loader_register_macro.h>

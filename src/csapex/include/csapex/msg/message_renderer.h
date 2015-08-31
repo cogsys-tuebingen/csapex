@@ -2,8 +2,8 @@
 #define MESSAGE_RENDERER_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
 #include <utils_param/param_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <memory>

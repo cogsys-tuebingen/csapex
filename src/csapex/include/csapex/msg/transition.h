@@ -2,7 +2,6 @@
 #define TRANSITION_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/model/connection.h>
 
 /// SYSTEM

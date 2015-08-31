@@ -2,7 +2,6 @@
 #define NODE_COMPLETER_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/model/tag.h>
 
 /// SYSTEM

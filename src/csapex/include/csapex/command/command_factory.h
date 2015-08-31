@@ -2,7 +2,10 @@
 #define COMMAND_FACTORY_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/signal/signal_fwd.h>
+#include <csapex/command/command_fwd.h>
 
 namespace csapex
 {

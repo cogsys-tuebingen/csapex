@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/scheduling/task_generator.h>
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <vector>

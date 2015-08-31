@@ -3,8 +3,12 @@
 
 /// COMPONENT
 #include <csapex/model/node_constructor.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
+
+/// PROJECT
+#include <csapex/core/core_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/plugin/plugin_fwd.h>
 
 /// SYSTEM
 #include <vector>

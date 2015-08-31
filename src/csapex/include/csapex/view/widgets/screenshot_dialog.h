@@ -2,7 +2,7 @@
 #define SCREENSHOT_DIALOG_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <QDialog>

@@ -2,7 +2,7 @@
 #define TIMABLE_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <sstream>

@@ -3,8 +3,8 @@
 
 /// COMPONENT
 #include "command.h"
-#include <csapex/csapex_fwd.h>
 #include <csapex/data/point.h>
+#include <string>
 
 namespace csapex
 {

@@ -2,8 +2,10 @@
 #define DRAG_IO_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/view/designer/drag_io_handler.h>
+#include <csapex/plugin/plugin_fwd.h>
+#include <csapex/view/view_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <QDragEnterEvent>
@@ -15,8 +17,6 @@ namespace csapex
 
 class DragIO
 {
-public:
-
 public:
     DragIO(PluginLocatorPtr locator, Graph* graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl);
     ~DragIO();

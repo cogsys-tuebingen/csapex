@@ -2,7 +2,7 @@
 #define BOX_DIALOG_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <QDialog>

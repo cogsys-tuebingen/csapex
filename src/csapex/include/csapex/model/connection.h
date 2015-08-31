@@ -2,8 +2,10 @@
 #define CONNECTION_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/data/point.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/signal/signal_fwd.h>
 
 /// SYSTEM
 #include <memory>

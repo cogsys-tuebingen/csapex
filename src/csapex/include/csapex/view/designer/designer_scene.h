@@ -2,8 +2,9 @@
 #define DESIGNER_SCENE_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/data/point.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/view/view_fwd.h>
 #include <csapex/view/designer/fulcrum_widget.h>
 #include <csapex/view/designer/designer_styleable.h>
 

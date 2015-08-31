@@ -2,8 +2,8 @@
 #define THREAD_POOL_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/scheduling/executor.h>
+#include <csapex/scheduling/scheduling_fwd.h>
 
 /// SYSTEM
 #include <map>

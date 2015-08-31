@@ -2,7 +2,8 @@
 #define NODE_ADAPTER_BUILDER_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/view/view_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <string>

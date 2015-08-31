@@ -2,7 +2,8 @@
 #define FULCRUM_WIDGET_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <QGraphicsItem>

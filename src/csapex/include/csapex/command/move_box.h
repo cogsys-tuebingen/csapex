@@ -3,9 +3,9 @@
 
 /// COMPONENT
 #include "command.h"
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/data/point.h>
+#include <csapex/view/designer/widget_controller.h>
 
 namespace csapex
 {

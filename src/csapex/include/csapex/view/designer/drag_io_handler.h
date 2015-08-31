@@ -2,7 +2,7 @@
 #define DRAG_IO_HANDLER_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/command/command_fwd.h>
 
 /// SYSTEM
 #include <memory>

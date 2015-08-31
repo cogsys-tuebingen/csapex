@@ -2,7 +2,8 @@
 #define GRAPH_WORKER_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM

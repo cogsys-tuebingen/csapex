@@ -26,7 +26,7 @@
 using namespace csapex;
 
 Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, ConnectableWeakPtr adaptee, QWidget *parent)
-    : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0), guard_(0xDEADBEEF)
+    : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0)
 {
     ConnectablePtr adaptee_ptr = adaptee_.lock();
     if(adaptee_ptr) {
@@ -57,8 +57,6 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
 
 Port::~Port()
 {
-    guard_ = 0x1;
-
     tooltip_connection.disconnect();
     for(auto c : connections_) {
         c.disconnect();

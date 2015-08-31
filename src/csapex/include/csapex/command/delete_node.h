@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/command/meta.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
 
 namespace csapex

@@ -3,6 +3,8 @@
 
 /// PROJECT
 #include <csapex/model/connectable.h>
+#include <csapex/view/view_fwd.h>
+#include <csapex/command/command_fwd.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -81,9 +83,6 @@ protected:
 
     boost::signals2::connection tooltip_connection;
     std::vector<boost::signals2::connection> connections_;
-
-public:
-    mutable long guard_;
 };
 
 }

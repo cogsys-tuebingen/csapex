@@ -2,7 +2,7 @@
 #define PARAMETERIZABLE_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
 #include <utils_param/param_fwd.h>
 #include <utils_param/parameter.h>
 #include <csapex/model/generic_state.h>

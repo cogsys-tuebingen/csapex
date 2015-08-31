@@ -2,7 +2,6 @@
 #define ACTIVITY_TIMELINE_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/model/node_worker.h>
 
 /// SYSTEM
