@@ -7,7 +7,7 @@
 using namespace param;
 
 AngleParameter::AngleParameter()
-    : Parameter("angle", ParameterDescription())
+    : Parameter("angle", ParameterDescription()),  min_(-M_PI), max_(M_PI)
 {
 }
 
@@ -38,7 +38,8 @@ bool AngleParameter::set_unsafe(const boost::any &v)
 {
     double a = boost::any_cast<double> (v);
     if(a < min_ || a >= max_) {
-        throw std::out_of_range("angle is not in the valid interval");
+        throw std::out_of_range(std::string("angle ") + std::to_string(a) +
+                                " is not in the valid interval [" + std::to_string(min_) + ", " + std::to_string(max_) + "]");
     }
 
     if(a != angle_) {
@@ -104,8 +105,9 @@ void AngleParameter::doDeserialize(const YAML::Node& n)
         return;
     }
 
-    angle_ = n["value"].as<double>();
-    min_ = n["min"].as<double>();
-    max_ = n["max"].as<double>();
+    double a = n["value"].as<double>();
+    set(a);
+    //min_ = n["min"].as<double>();
+    //max_ = n["max"].as<double>();
 }
 
