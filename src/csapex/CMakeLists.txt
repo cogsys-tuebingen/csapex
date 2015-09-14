@@ -16,7 +16,7 @@ include(cmake/csapex-extras.cmake)
 add_definitions(-W -Wall)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS utils_param class_loader)
+find_package(catkin REQUIRED COMPONENTS class_loader)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
@@ -53,7 +53,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS utils_param
+   # CATKIN_DEPENDS
    DEPENDS Boost console_bridge
    CFG_EXTRAS csapex-extras.cmake
 )
@@ -124,10 +124,27 @@ include_directories(include
 #
 
 add_library(csapex SHARED
+    src/param/io.cpp
+    src/param/parameter.cpp
+    src/param/parameter_description.cpp
 
-    src/command/command.cpp
-    src/command/dispatcher.cpp
-    src/command/meta.cpp
+    src/param/range_parameter.cpp
+    src/param/interval_parameter.cpp
+    src/param/set_parameter.cpp
+    src/param/bitset_parameter.cpp
+    src/param/value_parameter.cpp
+    src/param/path_parameter.cpp
+    src/param/trigger_parameter.cpp
+    src/param/color_parameter.cpp
+    src/param/angle_parameter.cpp
+    src/param/null_parameter.cpp
+    src/param/string_list_parameter.cpp
+
+    src/param/output_progress_parameter.cpp
+
+    src/param/parameter_factory.cpp
+    src/param/parameter_map.cpp
+    src/param/parameter_provider.cpp
 
     src/core/bootstrap_plugin.cpp
     src/core/core_plugin.cpp
@@ -222,6 +239,9 @@ target_link_libraries(csapex
 # Library for the app itself
 add_library(csapex_qt SHARED
 
+    src/command/command.cpp
+    src/command/dispatcher.cpp
+    src/command/meta.cpp
     src/command/command_factory.cpp
     src/command/add_connection.cpp
     src/command/add_fulcrum.cpp

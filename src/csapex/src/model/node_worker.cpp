@@ -16,7 +16,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
-#include <utils_param/trigger_parameter.h>
+#include <csapex/param/trigger_parameter.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/tickable_node.h>

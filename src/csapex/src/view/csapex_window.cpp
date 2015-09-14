@@ -28,7 +28,7 @@
 #include "ui_csapex_window.h"
 
 /// PROJECT
-#include <utils_param/parameter_factory.h>
+#include <csapex/param/parameter_factory.h>
 
 /// SYSTEM
 #include <iostream>

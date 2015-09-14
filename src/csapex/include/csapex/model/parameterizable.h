@@ -3,8 +3,8 @@
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
-#include <utils_param/param_fwd.h>
-#include <utils_param/parameter.h>
+#include <csapex/param/param_fwd.h>
+#include <csapex/param/parameter.h>
 #include <csapex/model/generic_state.h>
 
 /// SYSTEM

@@ -2,8 +2,8 @@
 #define SETTINGS_H
 
 /// PROJECT
-#include <utils_param/parameter.h>
-#include <utils_param/value_parameter.h>
+#include <csapex/param/parameter.h>
+#include <csapex/param/value_parameter.h>
 
 /// SYSTEM
 #include <string>

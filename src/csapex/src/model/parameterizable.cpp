@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/model/generic_state.h>
 #include <csapex/utility/assert.h>
-#include <utils_param/parameter.h>
+#include <csapex/param/parameter.h>
 
 /// SYSTEM
 #include <QtGlobal>

@@ -14,7 +14,7 @@
 #include <csapex/view/designer/designer_view.h>
 #include <csapex/view/designer/widget_controller.h>
 #include "ui_designer.h"
-#include <utils_param/parameter_factory.h>
+#include <csapex/param/parameter_factory.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/widgets/minimap_widget.h>
 
