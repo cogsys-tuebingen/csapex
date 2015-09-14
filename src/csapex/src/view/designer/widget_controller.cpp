@@ -25,7 +25,7 @@
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/designer_view.h>
 #include <csapex/core/settings.h>
-#include <utils_param/parameter_factory.h>
+#include <csapex/param/parameter_factory.h>
 #include <csapex/view/designer/designer_scene.h>
 
 /// SYSTEM

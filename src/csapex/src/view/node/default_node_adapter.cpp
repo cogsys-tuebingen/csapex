@@ -16,16 +16,16 @@
 #include <csapex/view/widgets/doublespanslider.h>
 
 /// PROJECT
-#include <utils_param/range_parameter.h>
-#include <utils_param/interval_parameter.h>
-#include <utils_param/value_parameter.h>
-#include <utils_param/set_parameter.h>
-#include <utils_param/bitset_parameter.h>
-#include <utils_param/path_parameter.h>
-#include <utils_param/trigger_parameter.h>
-#include <utils_param/color_parameter.h>
-#include <utils_param/angle_parameter.h>
-#include <utils_param/output_progress_parameter.h>
+#include <csapex/param/range_parameter.h>
+#include <csapex/param/interval_parameter.h>
+#include <csapex/param/value_parameter.h>
+#include <csapex/param/set_parameter.h>
+#include <csapex/param/bitset_parameter.h>
+#include <csapex/param/path_parameter.h>
+#include <csapex/param/trigger_parameter.h>
+#include <csapex/param/color_parameter.h>
+#include <csapex/param/angle_parameter.h>
+#include <csapex/param/output_progress_parameter.h>
 
 /// SYSTEM
 #include <boost/lambda/lambda.hpp>

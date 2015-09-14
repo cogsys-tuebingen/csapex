@@ -25,7 +25,7 @@
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/widget_controller.h>
-#include <utils_param/parameter_factory.h>
+#include <csapex/param/parameter_factory.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>

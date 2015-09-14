@@ -3,8 +3,8 @@
 
 /// PROJECT
 #include <csapex/model/node.h>
-#include <utils_param/string_list_parameter.h>
-#include <utils_param/parameter_factory.h>
+#include <csapex/param/string_list_parameter.h>
+#include <csapex/param/parameter_factory.h>
 
 /// SYSTEM
 #include <istream>

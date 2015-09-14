@@ -8,7 +8,7 @@
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/factory/factory_fwd.h>
-#include <utils_param/param_fwd.h>
+#include <csapex/param/param_fwd.h>
 
 /// SYSTEM
 #include <memory>
