@@ -270,6 +270,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         res = run();
     }
 
+    graph.reset();
+
     return res;
 }
 
