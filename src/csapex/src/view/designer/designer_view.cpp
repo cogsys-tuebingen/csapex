@@ -368,17 +368,21 @@ void DesignerView::dragMoveEvent(QDragMoveEvent* e)
     if(pos.x() < border_threshold) {
         scroll_p = true;
         scroll_offset_x_ = scroll_factor * (pos.x() - border_threshold) / double(border_threshold);
-    } else if(pos.x() > width() - border_threshold) {
+    } else if(pos.x() > viewport()->width() - border_threshold) {
         scroll_p = true;
-        scroll_offset_x_ = scroll_factor * (pos.x() - (width() - border_threshold)) / double(border_threshold);
+        scroll_offset_x_ = scroll_factor * (pos.x() - (viewport()->width() - border_threshold)) / double(border_threshold);
+    } else {
+        scroll_offset_x_ = 0;
     }
 
     if(pos.y() < border_threshold) {
         scroll_p = true;
         scroll_offset_y_ = scroll_factor * (pos.y() - border_threshold) / double(border_threshold);
-    } else if(pos.y() > height() - border_threshold) {
+    } else if(pos.y() > viewport()->height() - border_threshold) {
         scroll_p = true;
-        scroll_offset_y_ = scroll_factor * (pos.y() - (height() - border_threshold)) / double(border_threshold);
+        scroll_offset_y_ = scroll_factor * (pos.y() - (viewport()->height() - border_threshold)) / double(border_threshold);
+    } else {
+        scroll_offset_y_ = 0;
     }
 
     if(scroll_p) {
