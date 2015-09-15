@@ -4,6 +4,7 @@
 #include <yaml-cpp/yaml.h>
 #include <cxxabi.h>
 
+using namespace csapex;
 using namespace param;
 
 Parameter::Parameter(const std::string &name, const ParameterDescription &description)
@@ -69,6 +70,11 @@ void Parameter::triggerChange()
     parameter_changed(this);
 }
 
+void Parameter::setName(const std::string &name)
+{
+    name_ = name;
+}
+
 std::string Parameter::name() const
 {
     return name_;
@@ -87,6 +93,11 @@ std::string Parameter::toString() const
 const ParameterDescription& Parameter::description() const
 {
     return description_;
+}
+
+void Parameter::setDescription(const ParameterDescription &desc)
+{
+    description_ = desc;
 }
 
 std::string Parameter::toStringImpl() const

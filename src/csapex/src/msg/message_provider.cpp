@@ -37,7 +37,7 @@ void MessageProvider::setName(const std::string& name)
     name_ = name;
 }
 
-std::vector<param::Parameter::Ptr> MessageProvider::getParameters() const
+std::vector<csapex::param::Parameter::Ptr> MessageProvider::getParameters() const
 {
     return state.getParameters();
 }

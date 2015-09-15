@@ -4,16 +4,17 @@
 /// COMPONENT
 #include <csapex/param/parameter_factory.h>
 
+using namespace csapex;
 using namespace param;
 using namespace YAML;
 
-Node YAML::convert<param::Parameter::Ptr>::encode(const param::Parameter::Ptr& rhs) {
+Node YAML::convert<csapex::param::Parameter::Ptr>::encode(const csapex::param::Parameter::Ptr& rhs) {
     YAML::Node n;
     rhs->serialize(n);
     return n;
 }
 
-bool YAML::convert<param::Parameter::Ptr>::decode(const Node& node, param::Parameter::Ptr& rhs) {
+bool YAML::convert<csapex::param::Parameter::Ptr>::decode(const Node& node, csapex::param::Parameter::Ptr& rhs) {
     std::string type;
 
     if(node["type"].IsDefined()) {

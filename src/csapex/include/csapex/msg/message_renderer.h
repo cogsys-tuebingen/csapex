@@ -25,9 +25,9 @@ public:
     virtual QImage render(const ConnectionTypeConstPtr& msg) = 0;
     virtual std::type_index messageType() const = 0;
 
-    virtual std::vector<param::ParameterPtr> getParameters() const
+    virtual std::vector<csapex::param::ParameterPtr> getParameters() const
     {
-        return std::vector<param::ParameterPtr>();
+        return std::vector<csapex::param::ParameterPtr>();
     }
 };
 

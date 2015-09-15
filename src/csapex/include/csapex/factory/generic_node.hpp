@@ -20,7 +20,7 @@ struct DefaultInfo
     }
 
     template <typename P>
-    static param::ParameterPtr declareParameter(int index) {
+    static csapex::param::ParameterPtr declareParameter(int index) {
         return nullptr;
     }
 };
@@ -160,9 +160,9 @@ private:
             if(name.empty()) {
                 name =  std::string("param ") + std::to_string(id);
             }
-            param::Parameter::Ptr p = Info::template declareParameter<U>(id);
+            csapex::param::Parameter::Ptr p = Info::template declareParameter<U>(id);
             if(p == nullptr) {
-                p = param::ParameterFactory::declareValue<U>(name, 0);
+                p = csapex::param::ParameterFactory::declareValue<U>(name, 0);
             }
             instance_->addParameter(p);
             instance_->params_[id] = name;

@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 
+namespace csapex {
 namespace param {
-
 
 class ValueParameter : public Parameter
 {
@@ -60,6 +60,7 @@ private:
     boost::any def_;
 };
 
+}
 }
 
 #endif // VALUE_PARAMETER_H

@@ -462,7 +462,7 @@ bool WidgetController::isGridLockEnabled() const
 void WidgetController::enableGridLock(bool enabled)
 {
     if(!settings_.knows("grid-lock")) {
-        settings_.add(param::ParameterFactory::declareBool("grid-lock", enabled));
+        settings_.add(csapex::param::ParameterFactory::declareBool("grid-lock", enabled));
     }
 
     settings_.set("grid-lock", enabled);

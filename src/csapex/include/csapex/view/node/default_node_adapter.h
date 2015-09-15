@@ -35,7 +35,7 @@ public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
     ~DefaultNodeAdapterBridge();
 
-    void connectInGuiThread(boost::signals2::signal<void(param::Parameter*)>& signal,
+    void connectInGuiThread(boost::signals2::signal<void(csapex::param::Parameter*)>& signal,
                  std::function<void()> cb);
     void disconnect();
 

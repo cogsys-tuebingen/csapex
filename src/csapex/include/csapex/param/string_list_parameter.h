@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 
+namespace csapex {
 namespace param {
-
 
 class StringListParameter : public Parameter
 {
@@ -58,6 +58,7 @@ private:
     std::vector<std::string> list_;
 };
 
+}
 }
 
 #endif // STRING_LIST_PARAMETER_H

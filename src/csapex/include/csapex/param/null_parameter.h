@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 
+namespace csapex {
 namespace param {
 
 class NullParameter : public Parameter
@@ -34,6 +35,7 @@ protected:
     virtual bool set_unsafe(const boost::any& v) override;
 };
 
+}
 }
 
 #endif // NULL_PARAMETER_H

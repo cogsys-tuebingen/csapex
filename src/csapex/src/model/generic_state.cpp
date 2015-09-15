@@ -14,8 +14,8 @@ using namespace csapex;
 GenericState::GenericState()
     : silent_(false),
       parameter_set_changed(new boost::signals2::signal<void()>),
-      parameter_added(new boost::signals2::signal<void(param::ParameterPtr)>),
-      parameter_removed(new boost::signals2::signal<void(param::ParameterPtr)>)
+      parameter_added(new boost::signals2::signal<void(csapex::param::ParameterPtr)>),
+      parameter_removed(new boost::signals2::signal<void(csapex::param::ParameterPtr)>)
 {
 
 }
@@ -24,7 +24,7 @@ void GenericState::setParentUUID(const UUID &parent_uuid)
 {
     parent_uuid_ = parent_uuid;
 
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = params.begin(); it != params.end(); ++it) {
+    for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = params.begin(); it != params.end(); ++it) {
         it->second->setUUID(parent_uuid_);
     }
 }
@@ -44,7 +44,7 @@ void GenericState::writeYaml(YAML::Node& out) const {
 
 void GenericState::readYaml(const YAML::Node& node) {
     if(node["params"].IsDefined()) {
-        params = node["params"].as<std::map<std::string, param::Parameter::Ptr> >();
+        params = node["params"].as<std::map<std::string, csapex::param::Parameter::Ptr> >();
     }
     if(node["persistent_params"].IsDefined()) {
         std::vector<std::string> persistent_v = node["persistent_params"].as<std::vector<std::string> >();
@@ -60,9 +60,9 @@ void GenericState::initializePersistentParameters()
     }
 }
 
-void GenericState::addParameter(param::Parameter::Ptr param)
+void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 {
-    param::Parameter::Ptr old_value;
+    csapex::param::Parameter::Ptr old_value;
     if(params.find(param->name()) != params.end()) {
         // already here, keep value!
         try {
@@ -79,7 +79,7 @@ void GenericState::addParameter(param::Parameter::Ptr param)
     registerParameter(param);
 }
 
-void GenericState::removeParameter(param::ParameterPtr param)
+void GenericState::removeParameter(csapex::param::ParameterPtr param)
 {
     params.erase(param->name());
 
@@ -97,7 +97,7 @@ void GenericState::removeTemporaryParameters()
 {
     for(std::map<std::string,bool>::iterator it = temporary.begin(); it != temporary.end(); ++it) {
         std::string name(it->first);
-        param::Parameter::Ptr p = getParameter(name);
+        csapex::param::Parameter::Ptr p = getParameter(name);
 
 //        params.erase(params.find(name));
         order.erase(std::find(order.begin(), order.end(), name));
@@ -117,27 +117,27 @@ void GenericState::triggerParameterSetChanged()
     }
 }
 
-void GenericState::addTemporaryParameter(const param::Parameter::Ptr &param)
+void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
     addParameter(param);
     temporary[param->name()] = true;
 }
 
-void GenericState::removeTemporaryParameter(const param::Parameter::Ptr &param)
+void GenericState::removeTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
     removeParameter(param);
     temporary.erase(param->name());
 }
 
 
-void GenericState::addPersistentParameter(const param::Parameter::Ptr &param)
+void GenericState::addPersistentParameter(const csapex::param::Parameter::Ptr &param)
 {
     persistent.insert(param->name());
 
     registerParameter(param);
 }
 
-void GenericState::registerParameter(const param::Parameter::Ptr &param)
+void GenericState::registerParameter(const csapex::param::Parameter::Ptr &param)
 {
     params[param->name()] = param;
 
@@ -147,7 +147,7 @@ void GenericState::registerParameter(const param::Parameter::Ptr &param)
     triggerParameterSetChanged();
 }
 
-void GenericState::unregisterParameter(const param::Parameter::Ptr &param)
+void GenericState::unregisterParameter(const csapex::param::Parameter::Ptr &param)
 {
     params.erase(param->name());
 
@@ -159,20 +159,20 @@ void GenericState::setFrom(const GenericState &rhs)
 {
     persistent = rhs.persistent;
 
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = rhs.params.begin(); it != rhs.params.end(); ++it) {
-        param::Parameter::Ptr p = it->second;
+    for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = rhs.params.begin(); it != rhs.params.end(); ++it) {
+        csapex::param::Parameter::Ptr p = it->second;
         std::string name = p->name();
         if(params.find(name) != params.end()) {
             params[name]->setValueFrom(*p);
         } else {
-            params[name] = param::ParameterFactory::clone(p);
+            params[name] = csapex::param::ParameterFactory::clone(p);
         }
     }
 
     initializePersistentParameters();
 }
 
-param::Parameter &GenericState::operator [](const std::string& name) const
+csapex::param::Parameter &GenericState::operator [](const std::string& name) const
 {
     try {
         return *params.at(name);
@@ -181,7 +181,7 @@ param::Parameter &GenericState::operator [](const std::string& name) const
     }
 }
 
-param::Parameter::Ptr GenericState::getParameter(const std::string &name) const
+csapex::param::Parameter::Ptr GenericState::getParameter(const std::string &name) const
 {
     try {
         return params.at(name);
@@ -190,9 +190,9 @@ param::Parameter::Ptr GenericState::getParameter(const std::string &name) const
     }
 }
 
-std::vector<param::Parameter::Ptr> GenericState::getParameters() const
+std::vector<csapex::param::Parameter::Ptr> GenericState::getParameters() const
 {
-    std::vector<param::Parameter::Ptr> result;
+    std::vector<csapex::param::Parameter::Ptr> result;
     for(std::vector<std::string>::const_iterator n = order.begin(); n != order.end(); ++n) {
         result.push_back(params.at(*n));
     }
@@ -203,9 +203,9 @@ std::vector<param::Parameter::Ptr> GenericState::getParameters() const
     return result;
 }
 
-std::vector<param::Parameter::Ptr> GenericState::getTemporaryParameters() const
+std::vector<csapex::param::Parameter::Ptr> GenericState::getTemporaryParameters() const
 {
-    std::vector<param::Parameter::Ptr> result;
+    std::vector<csapex::param::Parameter::Ptr> result;
     typedef std::pair<const std::string&,bool> PAIR;
     for(const PAIR& pair : temporary) {
         result.push_back(params.at(pair.first));

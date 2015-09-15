@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/param/value_parameter.h>
 
+namespace csapex {
 namespace param {
-
 
 class ColorParameter : public Parameter
 {
@@ -49,6 +49,7 @@ private:
     std::vector<int> def_;
 };
 
+}
 }
 
 #endif // COLOR_PARAMETER_H

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/param/range_parameter.h>
 
+using namespace csapex;
 using namespace param;
 
 ParameterMap::ParameterMap()

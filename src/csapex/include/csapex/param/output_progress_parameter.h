@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 
+namespace csapex {
 namespace param {
-
 
 class OutputProgressParameter : public Parameter
 {
@@ -43,5 +43,7 @@ private:
 };
 
 }
+}
+
 #endif // OUTPUT_PROGRESS_PARAMETER_H
 

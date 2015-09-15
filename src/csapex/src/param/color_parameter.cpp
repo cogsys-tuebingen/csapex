@@ -4,6 +4,7 @@
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 
+using namespace csapex;
 using namespace param;
 
 ColorParameter::ColorParameter()

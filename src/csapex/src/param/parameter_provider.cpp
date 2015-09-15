@@ -1,6 +1,7 @@
 /// HEADER
 #include <csapex/param/parameter_provider.h>
 
+using namespace csapex;
 using namespace param;
 
 ParameterProvider::ParameterProvider()

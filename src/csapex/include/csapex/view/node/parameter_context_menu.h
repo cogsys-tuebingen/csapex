@@ -13,12 +13,12 @@ namespace csapex
 class ParameterContextMenu : public ContextMenuHandler
 {
 public:
-    ParameterContextMenu(param::ParameterWeakPtr p);
+    ParameterContextMenu(csapex::param::ParameterWeakPtr p);
 
     void doShowContextMenu(const QPoint& pt);
 
 private:
-    param::ParameterWeakPtr param_;
+    csapex::param::ParameterWeakPtr param_;
 };
 }
 

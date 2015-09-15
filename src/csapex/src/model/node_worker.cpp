@@ -301,9 +301,9 @@ bool NodeWorker::canSend()
 }
 
 template <typename T>
-void NodeWorker::makeParameterConnectableImpl(param::ParameterPtr param)
+void NodeWorker::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
 {
-    param::Parameter* p = param.get();
+    csapex::param::Parameter* p = param.get();
 
     if(param_2_input_.find(p->name()) != param_2_input_.end()) {
         return;
@@ -338,7 +338,7 @@ void NodeWorker::makeParameterConnectableImpl(param::ParameterPtr param)
     }
 }
 
-void NodeWorker::makeParameterConnectable(param::ParameterPtr p)
+void NodeWorker::makeParameterConnectable(csapex::param::ParameterPtr p)
 {
     if(p->is<int>()) {
         makeParameterConnectableImpl<int>(p);
@@ -363,7 +363,7 @@ void NodeWorker::makeParameterConnectable(param::ParameterPtr p)
     }
 }
 
-void NodeWorker::makeParameterNotConnectable(param::ParameterPtr p)
+void NodeWorker::makeParameterNotConnectable(csapex::param::ParameterPtr p)
 {
     InputPtr cin_ptr = param_2_input_[p->name()].lock();
     OutputPtr cout_ptr = param_2_output_[p->name()].lock();
@@ -387,7 +387,7 @@ void NodeWorker::makeParameterNotConnectable(param::ParameterPtr p)
 void NodeWorker::makeParametersConnectable()
 {
     GenericState::Ptr state = node_->getParameterState();
-    for(std::map<std::string, param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
+    for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
         makeParameterConnectable(it->second);
     }
 }
@@ -500,7 +500,7 @@ void NodeWorker::killExecution()
 
 namespace {
 template <typename V>
-void updateParameterValueFrom(param::Parameter* p, Input* source)
+void updateParameterValueFrom(csapex::param::Parameter* p, Input* source)
 {
     auto current = p->as<V>();
     auto next = msg::getValue<V>(source);
@@ -518,7 +518,7 @@ void NodeWorker::updateParameterValue(Connectable *s)
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
 
-    param::Parameter* p = input_2_param_.at(source);
+    csapex::param::Parameter* p = input_2_param_.at(source);
 
     if(msg::isValue<int>(source)) {
         updateParameterValueFrom<int>(p, source);
@@ -1202,7 +1202,7 @@ void NodeWorker::publishParameters()
         publishParameterOn(*p, out);
     }
 }
-void NodeWorker::publishParameterOn(const param::Parameter& p, Output* out)
+void NodeWorker::publishParameterOn(const csapex::param::Parameter& p, Output* out)
 {
     if(out->isConnected()) {
         if(p.is<int>())
@@ -1218,7 +1218,7 @@ void NodeWorker::publishParameterOn(const param::Parameter& p, Output* out)
     }
 }
 
-void NodeWorker::publishParameter(param::Parameter* p)
+void NodeWorker::publishParameter(csapex::param::Parameter* p)
 {
     if(param_2_output_.find(p->name()) != param_2_output_.end()) {
         OutputPtr out = param_2_output_.at(p->name()).lock();

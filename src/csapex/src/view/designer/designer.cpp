@@ -179,7 +179,7 @@ bool Designer::hasSelection() const
 void Designer::enableGrid(bool grid)
 {
     if(!settings_.knows("grid")) {
-        settings_.add(param::ParameterFactory::declareBool("grid", grid));
+        settings_.add(csapex::param::ParameterFactory::declareBool("grid", grid));
     }
 
     settings_.set("grid", grid);
@@ -196,7 +196,7 @@ void Designer::enableGrid(bool grid)
 void Designer::enableSchematics(bool schema)
 {
     if(!settings_.knows("schematics")) {
-        settings_.add(param::ParameterFactory::declareBool("schematics", schema));
+        settings_.add(csapex::param::ParameterFactory::declareBool("schematics", schema));
     }
 
     settings_.set("schematics", schema);
@@ -210,7 +210,7 @@ void Designer::enableSchematics(bool schema)
 void Designer::displayGraphComponents(bool display)
 {
     if(!settings_.knows("display-graph-components")) {
-        settings_.add(param::ParameterFactory::declareBool("display-graph-components", display));
+        settings_.add(csapex::param::ParameterFactory::declareBool("display-graph-components", display));
     }
 
     settings_.set("display-graph-components", display);
@@ -223,7 +223,7 @@ void Designer::displayGraphComponents(bool display)
 void Designer::displayThreads(bool display)
 {
     if(!settings_.knows("display-threads")) {
-        settings_.add(param::ParameterFactory::declareBool("display-threads", display));
+        settings_.add(csapex::param::ParameterFactory::declareBool("display-threads", display));
     }
 
     settings_.set("display-threads", display);
@@ -237,7 +237,7 @@ void Designer::displayThreads(bool display)
 void Designer::displayMinimap(bool display)
 {
     if(!settings_.knows("display-minimap")) {
-        settings_.add(param::ParameterFactory::declareBool("display-minimap", display));
+        settings_.add(csapex::param::ParameterFactory::declareBool("display-minimap", display));
     }
 
     settings_.set("display-minimap", display);
@@ -250,7 +250,7 @@ void Designer::displayMinimap(bool display)
 void Designer::displaySignalConnections(bool display)
 {
     if(!settings_.knows("display-signals")) {
-        settings_.add(param::ParameterFactory::declareBool("display-signals", display));
+        settings_.add(csapex::param::ParameterFactory::declareBool("display-signals", display));
     }
 
     settings_.set("display-signals", display);
@@ -264,7 +264,7 @@ void Designer::displaySignalConnections(bool display)
 void Designer::displayMessageConnections(bool display)
 {
     if(!settings_.knows("display-messages")) {
-        settings_.add(param::ParameterFactory::declareBool("display-messages", display));
+        settings_.add(csapex::param::ParameterFactory::declareBool("display-messages", display));
     }
 
     settings_.set("display-messages", display);

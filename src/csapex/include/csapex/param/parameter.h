@@ -18,12 +18,14 @@ namespace YAML {
 class Node;
 }
 
+namespace csapex {
 namespace param {
 
 class Parameter : boost::noncopyable
 {
 public:
     friend class ParameterFactory;
+    friend class ParameterBuilder;
 
     typedef std::shared_ptr<Parameter> Ptr;
 
@@ -143,6 +145,10 @@ protected:
 
     boost::any access_unsafe(const Parameter &p) const;
 
+private:
+    void setName(const std::string& name);
+    void setDescription(const ParameterDescription& desc);
+
 protected:
     std::string name_;
     std::string uuid_;
@@ -154,6 +160,7 @@ protected:
     mutable boost::recursive_mutex mutex_;
 };
 
+}
 }
 
 #endif // PARAMETER_H

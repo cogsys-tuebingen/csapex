@@ -16,7 +16,8 @@ include(cmake/csapex-extras.cmake)
 add_definitions(-W -Wall)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS class_loader)
+find_package(catkin REQUIRED)
+find_package(class_loader REQUIRED)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
@@ -126,6 +127,7 @@ include_directories(include
 add_library(csapex SHARED
     src/param/io.cpp
     src/param/parameter.cpp
+    src/param/parameter_builder.cpp
     src/param/parameter_description.cpp
 
     src/param/range_parameter.cpp
@@ -233,6 +235,7 @@ target_link_libraries(csapex
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
     ${console_bridge_LIBRARIES}
+    ${class_loader_LIBRARIES}
 )
 
 
@@ -323,6 +326,7 @@ target_link_libraries(csapex_qt
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
     ${console_bridge_LIBRARIES}   
+    ${class_loader_LIBRARIES}
 )
 
 #

@@ -110,8 +110,8 @@ public:
     Slot* getSlot(const UUID& uuid) const;
     Trigger* getTrigger(const UUID& uuid) const;
 
-    void makeParameterConnectable(param::ParameterPtr);
-    void makeParameterNotConnectable(param::ParameterPtr);
+    void makeParameterConnectable(csapex::param::ParameterPtr);
+    void makeParameterNotConnectable(csapex::param::ParameterPtr);
     InputWeakPtr getParameterInput(const std::string& name) const;
     OutputWeakPtr getParameterOutput(const std::string& name) const;
 
@@ -224,10 +224,10 @@ private:
     void disconnectConnector(Connectable* c);
 
     template <typename T>
-    void makeParameterConnectableImpl(param::ParameterPtr);
+    void makeParameterConnectableImpl(csapex::param::ParameterPtr);
     void publishParameters();
-    void publishParameter(param::Parameter *p);
-    void publishParameterOn(const param::Parameter &p, Output *out);
+    void publishParameter(csapex::param::Parameter *p);
+    void publishParameterOn(const csapex::param::Parameter &p, Output *out);
 
     void assertNotInGuiThread();
 
@@ -267,8 +267,8 @@ private:
     std::map<std::string, InputWeakPtr> param_2_input_;
     std::map<std::string, OutputWeakPtr> param_2_output_;
 
-    std::map<Input*,param::Parameter*> input_2_param_;
-    std::map<Output*,param::Parameter*> output_2_param_;
+    std::map<Input*,csapex::param::Parameter*> input_2_param_;
+    std::map<Output*,csapex::param::Parameter*> output_2_param_;
 
     std::map<Slot*, boost::signals2::connection> slot_connections_;
 

@@ -326,9 +326,9 @@ void CsApexWindow::updateNodeInfo()
 
             auto node = n->makePrototype()->getNode().lock();
             if(node) {
-                std::vector<param::Parameter::Ptr> params = node->getParameters();
+                std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
 
-                for(const param::Parameter::Ptr& p : params) {
+                for(const csapex::param::Parameter::Ptr& p : params) {
                     ss << "<h2>" << p->name() << "</h2>";
                     ss << "<p>" << p->description().toString() << "</p>";
                     ss << "<p>" << p->toString() << "</p>";
@@ -599,10 +599,10 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 
     Settings& settings = core_.getSettings();
     if(!settings.knows("uistate")) {
-        settings.add(param::ParameterFactory::declareText("uistate", ""));
+        settings.add(csapex::param::ParameterFactory::declareText("uistate", ""));
     }
     if(!settings.knows("geometry")) {
-        settings.add(param::ParameterFactory::declareText("geometry", "geometry.toStdString()"));
+        settings.add(csapex::param::ParameterFactory::declareText("geometry", "geometry.toStdString()"));
     }
 
     settings.set("uistate", uistate.toStdString());

@@ -106,7 +106,7 @@ QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name, int def, 
 
     for(int i = 0; i < internal_layout->count(); ++i) {
         QWidget* child = internal_layout->itemAt(i)->widget();
-        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<param::Parameter*>(range_param.get()))));
+        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(range_param.get()))));
     }
 
     QObject::connect(slider, SIGNAL(intValueChanged(int)),  display, SLOT(setValue(int)));
@@ -170,7 +170,7 @@ QDoubleSlider* makeDoubleSlider(QBoxLayout* layout, const std::string display_na
 
     for(int i = 0; i < internal_layout->count(); ++i) {
         QWidget* child = internal_layout->itemAt(i)->widget();
-        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<param::Parameter*>(range_param.get()))));
+        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(range_param.get()))));
     }
 
     QObject::connect(slider, SIGNAL(doubleValueChanged(double)), display, SLOT(setValue(double)));
@@ -221,7 +221,7 @@ QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int l
 
     for(int i = 0; i < internal_layout->count(); ++i) {
         QWidget* child = internal_layout->itemAt(i)->widget();
-        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<param::Parameter*>(interval_param.get()))));
+        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(interval_param.get()))));
     }
 
     QObject::connect(slider,        SIGNAL(rangeChanged(int,int)),  displayUpper,   SLOT(setRange(int,int)));
@@ -307,7 +307,7 @@ DefaultNodeAdapterBridge::~DefaultNodeAdapterBridge()
     disconnect();
 }
 
-void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (param::Parameter *)> &signal,
+void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (csapex::param::Parameter *)> &signal,
                                                   std::function<void ()> cb)
 {
     // cb should be executed in the gui thread
@@ -871,9 +871,9 @@ void setDirection(QBoxLayout* layout, NodeWorkerWeakPtr node)
 }
 
 template <typename P>
-void install(std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> >& map)
+void install(std::map<int, std::function<void(DefaultNodeAdapter*, csapex::param::Parameter::Ptr)> >& map)
 {
-    map[P().ID()] = [](DefaultNodeAdapter* a, param::Parameter::Ptr p) { a->setupParameter(std::dynamic_pointer_cast<P>(p)); };
+    map[P().ID()] = [](DefaultNodeAdapter* a, csapex::param::Parameter::Ptr p) { a->setupParameter(std::dynamic_pointer_cast<P>(p)); };
 }
 
 }
@@ -890,7 +890,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         return;
     }
 
-    static std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
+    static std::map<int, std::function<void(DefaultNodeAdapter*, csapex::param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
         install<param::TriggerParameter>(mapping_);
         install<param::ColorParameter>(mapping_);
@@ -909,7 +909,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     current_layout_ = wrapper_layout_;
 
-    std::vector<param::Parameter::Ptr> params = node->getParameters();
+    std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
 
     GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getParameterState());
     if(state) {
@@ -917,8 +917,8 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
     }
 
-    for(param::Parameter::Ptr p : params) {
-        param::Parameter* parameter = p.get();
+    for(csapex::param::Parameter::Ptr p : params) {
+        csapex::param::Parameter* parameter = p.get();
 
         if(!parameter->isEnabled()) {
             continue;
@@ -997,7 +997,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             }
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_in.get()] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
+            parameter_connections_[param_in.get()] = p->interactive_changed.connect([port](csapex::param::Parameter*, bool i) { return port->setVisible(i); });
         }
 
         // generate UI element
@@ -1019,7 +1019,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             }
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](param::Parameter*, bool i) { return port->setVisible(i); });
+            parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](csapex::param::Parameter*, bool i) { return port->setVisible(i); });
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());

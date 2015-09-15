@@ -9,6 +9,8 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/utility.hpp>
 
+namespace csapex
+{
 namespace param
 {
 
@@ -30,6 +32,7 @@ private:
     std::map<std::string, Parameter::Ptr> map_;
 };
 
+}
 }
 
 #endif // PARAMETER_MAP_H

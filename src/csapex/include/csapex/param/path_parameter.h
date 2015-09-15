@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 
+namespace csapex {
 namespace param {
-
 
 class PathParameter : public Parameter
 {
@@ -52,6 +52,7 @@ private:
     bool output_;
 };
 
+}
 }
 
 #endif // PATH_PARAMETER_H

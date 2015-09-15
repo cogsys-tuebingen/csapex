@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/param/value_parameter.h>
 
+namespace csapex {
 namespace param {
 
 
@@ -49,6 +50,7 @@ private:
     double max_;
 };
 
+}
 }
 
 #endif // ANGLE_PARAMETER_H

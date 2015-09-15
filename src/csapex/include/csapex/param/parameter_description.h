@@ -4,6 +4,7 @@
 /// SYSTEM
 #include <string>
 
+namespace csapex {
 namespace param
 {
 class ParameterDescription
@@ -17,6 +18,7 @@ public:
 private:
     std::string description_;
 };
+}
 }
 
 #endif // PARAMETER_DESCRIPTION_H

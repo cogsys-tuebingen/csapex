@@ -8,6 +8,7 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
 
+namespace csapex {
 namespace param {
 
 typedef boost::mpl::vector<
@@ -134,6 +135,7 @@ private:
     boost::any step_;
 };
 
+}
 }
 
 #endif // RANGE_PARAMETER_H

@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <vector>
 
+namespace csapex {
 namespace param {
 
 class SetParameter : public Parameter
@@ -87,6 +88,7 @@ private:
     boost::any def_;
 };
 
+}
 }
 
 #endif // SET_PARAMETER_H

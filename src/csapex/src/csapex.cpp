@@ -150,31 +150,31 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     settings.set("config", config);
 
     if(!settings.knows("path_to_bin")) {
-        settings.add(param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
+        settings.add(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
     } else {
         settings.set("path_to_bin", path_to_bin);
     }
 
     if(!settings.knows("headless")) {
-        settings.add(param::ParameterFactory::declareBool("headless", headless));
+        settings.add(csapex::param::ParameterFactory::declareBool("headless", headless));
     } else {
         settings.set("headless", headless);
     }
 
     if(!settings.knows("threadless")) {
-        settings.add(param::ParameterFactory::declareBool("threadless", threadless));
+        settings.add(csapex::param::ParameterFactory::declareBool("threadless", threadless));
     } else {
         settings.set("threadless", threadless);
     }
 
     if(!settings.knows("thread_grouping")) {
-        settings.add(param::ParameterFactory::declareBool("thread_grouping", thread_grouping));
+        settings.add(csapex::param::ParameterFactory::declareBool("thread_grouping", thread_grouping));
     } else {
         settings.set("thread_grouping", thread_grouping);
     }
 
     if(!settings.knows("additional_args")) {
-        settings.add(param::ParameterFactory::declareValue< std::vector<std::string> >("additional_args", additional_args));
+        settings.add(csapex::param::ParameterFactory::declareValue< std::vector<std::string> >("additional_args", additional_args));
     } else {
         settings.set("additional_args", additional_args);
     }

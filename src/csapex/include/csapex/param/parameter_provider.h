@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 
+namespace csapex {
 namespace param {
 
 class ParameterProvider
@@ -38,6 +39,7 @@ private:
     Map params_;
 };
 
+}
 }
 
 #endif // PARAMETER_PROVIDER_H

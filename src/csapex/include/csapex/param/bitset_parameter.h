@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <vector>
 
+namespace csapex {
 namespace param {
 
 class BitSetParameter : public Parameter
@@ -67,6 +68,7 @@ private:
     int def_;
 };
 
+}
 }
 
 #endif // BITSET_PARAMETER_H

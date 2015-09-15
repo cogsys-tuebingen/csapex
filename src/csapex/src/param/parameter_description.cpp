@@ -1,6 +1,7 @@
 /// HEADER
 #include <csapex/param/parameter_description.h>
 
+using namespace csapex;
 using namespace param;
 
 ParameterDescription::ParameterDescription(const std::string &description)

@@ -12,7 +12,7 @@
 
 using namespace csapex;
 
-ParameterContextMenu::ParameterContextMenu(param::ParameterWeakPtr p)
+ParameterContextMenu::ParameterContextMenu(csapex::param::ParameterWeakPtr p)
     : param_(p)
 {
 

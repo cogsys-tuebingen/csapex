@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 
+namespace csapex {
 namespace param {
-
 
 class TriggerParameter : public Parameter
 {
@@ -41,5 +41,6 @@ protected:
 private:
 };
 
+}
 }
 #endif // TRIGGER_PARAM_H

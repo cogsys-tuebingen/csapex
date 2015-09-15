@@ -11,6 +11,7 @@
     typedef std::weak_ptr<name> name##WeakPtr;\
     typedef std::shared_ptr<const name> name##ConstPtr;
 
+namespace csapex {
 namespace param
 {
 
@@ -28,6 +29,7 @@ FWD(StringListParameter);
 
 FWD(OutputProgressParameter);
 
+}
 }
 
 #undef FWD
