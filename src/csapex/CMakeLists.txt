@@ -127,7 +127,10 @@ include_directories(include
 add_library(csapex SHARED
     src/param/io.cpp
     src/param/parameter.cpp
+<<<<<<< HEAD
     src/param/parameter_builder.cpp
+=======
+>>>>>>> 560cc9d0e04654f80302232d4e41fcf32cfc65c8
     src/param/parameter_description.cpp
 
     src/param/range_parameter.cpp
