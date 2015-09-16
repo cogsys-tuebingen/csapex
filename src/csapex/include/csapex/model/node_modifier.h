@@ -268,9 +268,6 @@ public:
      * MISCELLANEOUS
      */
 
-    void setTickEnabled(bool tick);
-    void setTickFrequency(double f);
-
     bool isSource() const;
     void setIsSource(bool source);
 

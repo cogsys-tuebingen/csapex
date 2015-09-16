@@ -30,6 +30,7 @@
 
 /// SYSTEM
 #include <QApplication>
+#include <QThread>
 #include <QTreeWidget>
 #include <QDrag>
 #include <QMimeData>
@@ -272,6 +273,8 @@ void WidgetController::nodeRemoved(NodeWorkerPtr node_worker)
         pimpl->box_map_.erase(pimpl->box_map_.find(node_uuid));
 
         designer_->removeBox(box);
+
+        box->deleteLater();
     }
 }
 

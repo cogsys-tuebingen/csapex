@@ -8,6 +8,8 @@
 /// SYSTEM
 #include <vector>
 #include <mutex>
+#include <atomic>
+#include <thread>
 #include <boost/signals2/connection.hpp>
 
 namespace csapex
@@ -39,6 +41,9 @@ public:
     void schedule(TaskPtr task);
 
 private:
+    void tickLoop();
+
+private:
     NodeWorkerPtr worker_;
     Scheduler* scheduler_;
 
@@ -56,8 +61,12 @@ private:
     TaskPtr prepare_;
     TaskPtr check_transitions_;
 
+    std::thread ticking_thread_;
+
     std::vector<boost::signals2::connection> connections_;
 
+    std::atomic<bool> tick_thread_running_;
+    std::atomic<bool> tick_thread_stop_;
     std::vector<TaskPtr> remaining_tasks_;
 };
 

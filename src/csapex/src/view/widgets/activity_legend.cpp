@@ -56,7 +56,6 @@ void ActivityLegend::startTrackingNode(NodeWorkerPtr node)
 
 void ActivityLegend::stopTrackingNode(NodeWorkerPtr node)
 {
-    QObject::disconnect(node.get());
 }
 
 void ActivityLegend::addNode(NodeWorker* node)

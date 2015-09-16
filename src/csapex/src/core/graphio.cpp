@@ -14,7 +14,6 @@
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/connection.h>
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/serialization/serialization.h>
 

@@ -12,9 +12,6 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <QObject>
-#include <QTimer>
-#include <QThread>
 #include <map>
 #include <functional>
 #include <condition_variable>
@@ -25,7 +22,7 @@
 
 namespace csapex {
 
-class NodeWorker : public QObject, public ErrorState, public Unique
+class NodeWorker : public ErrorState, public Unique
 {
     friend class Node;
     friend class NodeBox;
@@ -136,9 +133,6 @@ public:
 
     void makeParametersConnectable();
 
-    bool isTickEnabled() const;
-    void setTickEnabled(bool enabled);
-
     bool isSource() const;
     void setIsSource(bool source);
 
@@ -171,8 +165,6 @@ public:
     void enableSlots(bool enable);
     void enableTriggers(bool enable);
 
-    void setTickFrequency(double f);
-
     void triggerError(bool e, const std::string& what);
 
     void killExecution();
@@ -196,7 +188,6 @@ public:
     boost::signals2::signal<void(bool)> errorHappened;
 
     boost::signals2::signal<void()> messages_processed;
-    boost::signals2::signal<void()> tickRequested;
     boost::signals2::signal<void()> processRequested;
     boost::signals2::signal<void()> checkTransitionsRequested;
 
@@ -278,9 +269,6 @@ private:
 
     std::vector<boost::signals2::connection> connections;
 
-    QTimer* tick_timer_;
-    bool tick_enabled_;
-    bool tick_immediate_;
     int ticks_;
 
     bool source_;

@@ -23,6 +23,7 @@
 #include <QPainter>
 #include <iostream>
 #include <QSizeGrip>
+#include <QThread>
 #include <cmath>
 
 using namespace csapex;
@@ -138,7 +139,7 @@ void NodeBox::construct()
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
 
-    QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    //QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
     worker->nodeStateChanged.connect([this]() { nodeStateChanged(); });
     QObject::connect(this, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChangedEvent()), Qt::QueuedConnection);
@@ -252,7 +253,7 @@ void NodeBox::updateThreadInformation()
         info_thread->setVisible(true);
     }
 
-    if(info_thread && worker->thread()) {
+    if(info_thread) {
         int id = worker->getNodeState()->getThreadId();
         std::stringstream info;
         if(settings_.get<bool>("threadless")) {

@@ -22,7 +22,6 @@
 #include <csapex/model/tickable_node.h>
 
 /// SYSTEM
-#include <QThread>
 #include <QApplication>
 #include <thread>
 #include <iostream>
@@ -39,14 +38,11 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
       is_setup_(false), state_(State::IDLE),
       next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
-      tick_enabled_(false), ticks_(0),
+      ticks_(0),
       source_(false), sink_(false), level_(0),
       profiling_(false)
 {
     apex_assert_hard(node_);
-
-    tick_timer_ = new QTimer();
-    setTickFrequency(DEFAULT_FREQUENCY);
 
     node_state_->setLabel(uuid);
 
@@ -72,32 +68,18 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
 
     node_->doSetup();
 
-    if(isSource()) {
-        setTickEnabled(true);
-    }
-
     is_setup_ = true;
 
     if(params_created_in_constructor) {
         node_->awarn << "Node creates parameters in its constructor! Please implement 'setupParameters'" << std::endl;
     }
-
-    QObject::connect(tick_timer_, &QTimer::timeout, [this]() {
-        tickRequested();
-    });
-    //    tickRequested();
 }
 
 NodeWorker::~NodeWorker()
 {
-    tick_immediate_ = false;
     is_setup_ = false;
 
     //    waitUntilFinished();
-
-    tick_timer_->stop();
-
-    QObject::disconnect(this);
 
     while(!inputs_.empty()) {
         removeInput(inputs_.begin()->get());
@@ -433,8 +415,6 @@ void NodeWorker::disconnectConnector(Connectable*)
 
 void NodeWorker::stop()
 {
-    QObject::disconnect(tick_timer_);
-
     assertNotInGuiThread();
     node_->abort();
 
@@ -452,8 +432,6 @@ void NodeWorker::stop()
     for(OutputPtr i : outputs_) {
         disconnectConnector(i.get());
     }
-
-    QObject::disconnect(this);
 }
 
 void NodeWorker::reset()
@@ -1275,37 +1253,6 @@ void NodeWorker::sendMessages()
     //    node_->aerr << "SEND" << std::endl;
 }
 
-void NodeWorker::setTickFrequency(double f)
-{
-    if(tick_timer_->isActive()) {
-        tick_timer_->stop();
-    }
-    if(f == 0.0) {
-        return;
-    }
-
-    tick_immediate_ = (f < 0.0);
-
-    if(tick_immediate_) {
-        tick_timer_->setSingleShot(true);
-    } else {
-        tick_timer_->setInterval(1000. / f);
-        tick_timer_->setSingleShot(false);
-    }
-    tick_timer_->start();
-}
-
-void NodeWorker::setTickEnabled(bool enabled)
-{
-    tick_enabled_ = enabled;
-}
-
-bool NodeWorker::isTickEnabled() const
-{
-    return tick_enabled_;
-}
-
-
 void NodeWorker::setIsSource(bool source)
 {
     source_ = source;
@@ -1379,7 +1326,7 @@ bool NodeWorker::tick()
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-            if(!isWaitingForTrigger() && isTickEnabled() && tickable->canTick()) {
+            if(!isWaitingForTrigger() && tickable->canTick()) {
                 if(state == State::ENABLED) {
                     setState(State::IDLE);
                 }
@@ -1450,10 +1397,6 @@ bool NodeWorker::tick()
                 }
             }
         }
-    }
-
-    if(tick_immediate_) {
-        tickRequested();
     }
 
     return has_ticked;

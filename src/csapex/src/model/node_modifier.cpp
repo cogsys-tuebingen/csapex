@@ -110,17 +110,6 @@ void NodeModifier::removeTrigger(const UUID &uuid)
     node_worker_->removeTrigger(uuid);
 }
 
-
-void NodeModifier::setTickEnabled(bool tick)
-{
-    node_worker_->setTickEnabled(tick);
-}
-
-void NodeModifier::setTickFrequency(double f)
-{
-    node_worker_->setTickFrequency(f);
-}
-
 bool NodeModifier::isSource() const
 {
     return node_worker_->isSource();
