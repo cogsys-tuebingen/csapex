@@ -15,12 +15,6 @@
 #include <boost/signals2.hpp>
 #include <typeindex>
 
-class QFileSystemWatcher;
-namespace qt_helper
-{
-class Call;
-}
-
 namespace csapex
 {
 class PluginLocator : private boost::noncopyable

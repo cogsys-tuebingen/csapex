@@ -176,8 +176,8 @@ add_library(csapex SHARED
     src/model/node.cpp
     src/model/node_modifier.cpp
     src/model/node_runner.cpp
+    src/model/node_worker.cpp
     src/model/node_state.cpp
-    src/model/node_statistics.cpp
     src/model/parameterizable.cpp
     src/model/tickable_node.cpp
     src/model/tag.cpp
@@ -191,7 +191,6 @@ add_library(csapex SHARED
     src/msg/io.cpp
     src/msg/message.cpp
     src/msg/message_provider.cpp
-    src/msg/message_renderer.cpp
     src/msg/output.cpp
     src/msg/output_transition.cpp
     src/msg/static_output.cpp
@@ -263,10 +262,8 @@ add_library(csapex_qt SHARED
     src/command/move_fulcrum.cpp
     src/command/switch_thread.cpp
 
-    # is here because it is still a qobject...
-    src/model/node_worker.cpp
-
     src/view/csapex_window.cpp
+    src/view/message_renderer.cpp
 
     src/view/designer/designer.cpp
     src/view/designer/designer_scene.cpp
@@ -286,6 +283,7 @@ add_library(csapex_qt SHARED
     src/view/node/node_filter_proxy_model.cpp
     src/view/node/parameter_context_menu.cpp
     src/view/node/box.cpp
+    src/view/node/node_statistics.cpp
 
     src/view/utility/context_menu_handler.cpp
     src/view/utility/html_delegate.cpp
@@ -351,7 +349,6 @@ add_custom_command(TARGET cfg POST_BUILD
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
-
 
 #
 # INSTALL

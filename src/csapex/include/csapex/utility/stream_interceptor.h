@@ -6,40 +6,15 @@
 
 /// SYSTEM
 #include <mutex>
-#include <QThread>
+#include <atomic>
 #include <sstream>
+#include <thread>
 
 namespace csapex
 {
 
-class StreamInterceptorWorker : public QObject {
-    Q_OBJECT
-
-public:
-    StreamInterceptorWorker();
-    ~StreamInterceptorWorker();
-
-public Q_SLOTS:
-    void run();
-
-Q_SIGNALS:
-    void finished();
-    void error(QString err);
-
-public:
-    bool running;
-
-    volatile bool in_getline;
-    volatile bool had_input;
-
-    std::mutex cin_mutex;
-    std::stringstream cin_;
-};
-
-class StreamInterceptor : public QObject, public Singleton<StreamInterceptor>
+class StreamInterceptor : public Singleton<StreamInterceptor>
 {
-    Q_OBJECT
-
     friend class Singleton<StreamInterceptor>;
 
 public:
@@ -60,14 +35,25 @@ private:
     StreamInterceptor();
     ~StreamInterceptor();
 
+    void run();
+
+private:
     std::streambuf *clog_global_;
     std::streambuf *cout_global_;
 
     std::stringstream fake_cout_;
     std::stringstream fake_cerr_;
 
-    QThread* thread;
-    StreamInterceptorWorker* worker;
+    std::thread thread_;
+
+    std::atomic<bool> stop_;
+    bool running_;
+
+    volatile bool in_getline_;
+    volatile bool had_input_;
+
+    std::mutex cin_mutex_;
+    std::stringstream cin_;
 };
 
 }

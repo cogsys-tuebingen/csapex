@@ -2,7 +2,7 @@
 #define MESSAGE_RENDERER_MANAGER_H
 
 /// COMPONENT
-#include <csapex/msg/message_renderer.h>
+#include <csapex/view/message_renderer.h>
 
 /// PROJECT
 #include <csapex/view/view_fwd.h>

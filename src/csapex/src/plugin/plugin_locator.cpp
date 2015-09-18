@@ -10,7 +10,6 @@
 #include <istream>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-
 #include <thread>
 
 using namespace csapex;

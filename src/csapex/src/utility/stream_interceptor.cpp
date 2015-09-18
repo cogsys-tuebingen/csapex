@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <thread>
+#include <assert.h>
 
 using namespace csapex;
 
@@ -37,51 +38,63 @@ std::string StreamInterceptor::getCerr()
 
 std::string StreamInterceptor::getCin()
 {
-    if(!worker) {
-        return "";
-    }
+    std::unique_lock<std::mutex>(cin_mutex_);
 
-    std::unique_lock<std::mutex>(worker->cin_mutex);
-
-    std::string in = worker->cin_.str();
-    worker->cin_.str(std::string());
+    std::string in = cin_.str();
+    cin_.str(std::string());
 
     return in;
 }
 
-StreamInterceptorWorker::StreamInterceptorWorker()
-    : running(true),  in_getline(false), had_input(false)
+namespace {
+bool inputAvailable()
 {
-
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    return (FD_ISSET(0, &fds));
 }
-StreamInterceptorWorker::~StreamInterceptorWorker()
-{
 }
 
-void StreamInterceptorWorker::run() {
+void StreamInterceptor::run() {
     csapex::thread::set_name("stream_interceptor");
 
-//    if (isatty(fileno(stdin))) {
-//        std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
-//        return;
+    if (isatty(fileno(stdin))) {
+        std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
+        return;
 
-//    } else {
-//        std::cout << "<b>std::cin is a file or pipe -> polling</b>" << std::endl;
-//    }
+    } else {
+        std::cout << "<b>std::cin is a file or pipe -> polling</b>" << std::endl;
+    }
 
-    while(running) {
-        std::string line;
-
-        in_getline = true;
-        std::getline(std::cin,line);
-        in_getline = false;
-
-        if(line[0] != '\0') {
-            had_input = true;
-
-            std::unique_lock<std::mutex> lock(cin_mutex);
-            cin_ << line;
+    running_ = true;
+    std::string line;
+    while(!stop_) {
+        if(!std::cin.good()) {
+            stop_ = true;
             continue;
+        }
+
+        if(inputAvailable()) {
+            in_getline_ = true;
+            std::getline(std::cin,line);
+            in_getline_ = false;
+
+            if(stop_) {
+                continue;
+            }
+
+            if(line[0] != '\0') {
+                had_input_ = true;
+
+                std::unique_lock<std::mutex> lock(cin_mutex_);
+                cin_ << line << '\n';
+                continue;
+            }
         }
 
         std::chrono::milliseconds dura(10);
@@ -95,7 +108,8 @@ StreamInterceptor::~StreamInterceptor()
 
 
 StreamInterceptor::StreamInterceptor()
-    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()), thread(nullptr), worker(nullptr)
+    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()),
+      running_(true),  in_getline_(false), had_input_(false)
 {
     clog_global_ = std::clog.rdbuf();
     cout_global_ = std::cout.rdbuf();
@@ -104,32 +118,20 @@ StreamInterceptor::StreamInterceptor()
 
     fake_cout_.str(std::string());
 
- //   std::cout.rdbuf(fake_cout_.rdbuf());
-//    std::cerr.rdbuf(fake_cerr_.rdbuf());
+    std::cout.rdbuf(std::clog.rdbuf());
 }
 
 void StreamInterceptor::start()
 {
-    thread = new QThread;
-    worker = new StreamInterceptorWorker;
-    worker->moveToThread(thread);
-    QObject::connect(thread, SIGNAL(started()), worker, SLOT(run()));
-    QObject::connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
-    QObject::connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-    QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    thread->start();
+    thread_ = std::thread([this]() {
+        run();
+    });
 }
 
 void StreamInterceptor::stop()
 {
-    if(!worker) {
-        return;
+    if(running_) {
+        stop_ = true;
+        thread_.join();
     }
-
-    worker->running = false;
-    thread->quit();
 }
-
-
-/// MOC
-#include "../../include/csapex/utility/moc_stream_interceptor.cpp"

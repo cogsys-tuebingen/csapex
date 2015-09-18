@@ -8,7 +8,7 @@
 #include <csapex/utility/timer.h>
 #include <csapex/core/settings.h>
 #include <csapex/view/designer/designer_view.h>
-#include <csapex/utility/color.hpp>
+#include <csapex/view/utility/color.hpp>
 
 /// SYSTEM
 #include <QPainter>

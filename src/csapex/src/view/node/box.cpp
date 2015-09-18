@@ -12,7 +12,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/node/node_adapter.h>
-#include <csapex/utility/color.hpp>
+#include <csapex/view/utility/color.hpp>
 #include <csapex/core/settings.h>
 
 /// SYSTEM

@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/node_statistics.h>
+#include <csapex/view/node/node_statistics.h>
 
 /// COMPONENT
 #include <csapex/model/node.h>
