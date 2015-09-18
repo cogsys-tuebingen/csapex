@@ -7,7 +7,6 @@
 #include <csapex/param/parameter.h>
 
 /// SYSTEM
-#include <QtGlobal>
 #include <mutex>
 
 using namespace csapex;

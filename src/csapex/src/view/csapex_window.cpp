@@ -29,6 +29,8 @@
 
 /// PROJECT
 #include <csapex/param/parameter_factory.h>
+#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/model/connection_type.h>
 
 /// SYSTEM
 #include <iostream>
@@ -47,16 +49,24 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, 
                            GraphPtr graph, Executor& executor,
                            Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
-                           PluginLocator *locator, QWidget *parent)
+                           PluginLocatorPtr locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl),
       graph_worker_(graph_worker), graph_(graph), executor_(executor),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
-{
+{    
+    qRegisterMetaType < QImage > ("QImage");
+    qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
+    qRegisterMetaType < ConnectionType::ConstPtr > ("ConnectionType::ConstPtr");
+    qRegisterMetaType < std::string > ("std::string");
+
+    MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 }
 
 CsApexWindow::~CsApexWindow()
 {
+    MessageRendererManager::instance().shutdown();
+
     for(auto connection : connections_) {
         connection.disconnect();
     }

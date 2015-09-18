@@ -43,7 +43,7 @@ public:
      */
     explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl,
                           GraphWorkerPtr graph_worker, GraphPtr graph, Executor &executor, Designer *designer, MinimapWidget* minimap, ActivityLegend *legend, ActivityTimeline* timeline,
-                          PluginLocator* locator, QWidget* parent = 0);
+                          PluginLocatorPtr locator, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void closeEvent(QCloseEvent* event);
@@ -126,7 +126,7 @@ private:
     bool init_;
 
     QFileSystemWatcher* style_sheet_watcher_;
-    PluginLocator* plugin_locator_;
+    PluginLocatorPtr plugin_locator_;
 
     std::vector<boost::signals2::connection> connections_;
 };

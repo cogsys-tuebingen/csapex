@@ -27,8 +27,8 @@ struct PluginManagerGroup<Node>
 };
 }
 
-NodeFactory::NodeFactory(Settings &settings, csapex::PluginLocator* locator)
-    : settings_(settings), plugin_locator_(locator),
+NodeFactory::NodeFactory(csapex::PluginLocator* locator)
+    : plugin_locator_(locator),
       node_manager_(std::make_shared<PluginManager<Node>> ("csapex::Node")),
       tag_map_has_to_be_rebuilt_(false)
 {
@@ -57,8 +57,8 @@ void NodeFactory::loadPlugins()
 
 void NodeFactory::rebuildPrototypes()
 {
-//    available_elements_prototypes.clear();
-//    node_adapter_builders_.clear();
+    //    available_elements_prototypes.clear();
+    //    node_adapter_builders_.clear();
     
     typedef std::pair<std::string, PluginConstructor<Node> > NODE_PAIR;
     for(const NODE_PAIR& p : node_manager_->availableClasses()) {
@@ -139,16 +139,18 @@ std::map<std::string, std::vector<NodeConstructor::Ptr> > NodeFactory::getTagMap
 
 void NodeFactory::ensureLoaded()
 {
-    if(!node_manager_->pluginsLoaded()) {
-        node_manager_->load(plugin_locator_);
-        
-        rebuildPrototypes();
-        
-        tag_map_has_to_be_rebuilt_ = true;
-    }
-    
-    if(tag_map_has_to_be_rebuilt_) {
-        rebuildMap();
+    if(plugin_locator_) {
+        if(!node_manager_->pluginsLoaded()) {
+            node_manager_->load(plugin_locator_);
+
+            rebuildPrototypes();
+
+            tag_map_has_to_be_rebuilt_ = true;
+        }
+
+        if(tag_map_has_to_be_rebuilt_) {
+            rebuildMap();
+        }
     }
 }
 

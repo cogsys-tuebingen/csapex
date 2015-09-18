@@ -32,20 +32,15 @@ using namespace csapex;
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
                        GraphWorkerPtr graph_worker, GraphPtr graph,
                        ThreadPool &thread_pool,
-                       NodeFactory *node_factory, CommandDispatcher* cmd_dispatcher)
+                       NodeFactory *node_factory)
     : settings_(settings), plugin_locator_(plugin_locator),
       graph_worker_(graph_worker), graph_(graph),
       thread_pool_(thread_pool),
       node_factory_(node_factory),
-      cmd_dispatch(cmd_dispatcher), core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")), init_(false)
+      core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")),
+      init_(false)
 {
     destruct = true;
-
-    qRegisterMetaType < QImage > ("QImage");
-    qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
-    qRegisterMetaType < ConnectionType::ConstPtr > ("ConnectionType::ConstPtr");
-    qRegisterMetaType < std::string > ("std::string");
-
     StreamInterceptor::instance().start();
 
     settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this));
@@ -61,7 +56,6 @@ CsApexCore::~CsApexCore()
     StreamInterceptor::instance().stop();
 
     MessageProviderManager::instance().shutdown();
-    MessageRendererManager::instance().shutdown();
 
     for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         it->second->shutdown();
@@ -113,8 +107,6 @@ void CsApexCore::setStatusMessage(const std::string &msg)
 
 void CsApexCore::init()
 {
-    qRegisterMetaType<csapex::NodeWorkerPtr>("csapex::NodeWorkerPtr");
-
     if(!init_) {
         init_ = true;
 
@@ -213,7 +205,6 @@ void CsApexCore::boot()
     }
 
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
-    MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 }
 
 void CsApexCore::startup()
@@ -231,10 +222,7 @@ void CsApexCore::reset()
 {
     resetRequest();
 
-    cmd_dispatch->reset();
-
     UUID::reset();
-
 
     resetDone();
 }
@@ -289,8 +277,7 @@ void CsApexCore::saveAs(const std::string &file)
 
     std::cout << "save: " << yaml.c_str() << std::endl;
 
-    cmd_dispatch->setClean();
-    cmd_dispatch->resetDirtyPoint();
+    saved();
 }
 
 
@@ -349,8 +336,7 @@ void CsApexCore::load(const std::string &file)
         loadSettingsRequest(doc);
     }
 
-    cmd_dispatch->setClean();
-    cmd_dispatch->resetDirtyPoint();
+    loaded();
 
     thread_pool_.setPause(paused);
 }

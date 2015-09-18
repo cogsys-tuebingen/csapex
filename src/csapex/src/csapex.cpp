@@ -199,12 +199,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         thread_pool.stop();
     });
 
-    NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(settings, plugin_locator.get());
-    CommandDispatcher dispatcher(settings, graph_worker, graph, &thread_pool, node_factory.get());
+    NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(plugin_locator.get());
 
     CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
                                                       graph_worker, graph,
-                                                      thread_pool, node_factory.get(), &dispatcher);
+                                                      thread_pool, node_factory.get());
 
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
@@ -215,6 +214,20 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         app->processEvents();
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
+
+        CommandDispatcher dispatcher(settings, graph_worker, graph, &thread_pool, node_factory.get());
+        boost::signals2::scoped_connection saved_connection(core->saved.connect([&](){
+            dispatcher.setClean();
+            dispatcher.resetDirtyPoint();
+        }));
+        boost::signals2::scoped_connection loaded_connection(core->loaded.connect([&](){
+            dispatcher.setClean();
+            dispatcher.resetDirtyPoint();
+        }));
+        boost::signals2::scoped_connection reset(core->resetRequest.connect([&](){
+            dispatcher.reset();
+        }));
+
 
         NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
         WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get());
@@ -244,7 +257,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         CsApexWindow w(*core, &dispatcher, widget_control,
                        graph_worker, graph,
-                       thread_pool, designer, minimap, legend, timeline, plugin_locator.get());
+                       thread_pool, designer, minimap, legend, timeline, plugin_locator);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));

@@ -27,7 +27,7 @@ public:
     boost::signals2::signal<void(const UUID&)> reload_request;
 
 public:
-    NodeFactory(Settings& settings, PluginLocator *locator);
+    NodeFactory(PluginLocator *locator);
     ~NodeFactory();
 
     void loadPlugins();
@@ -60,7 +60,6 @@ protected:
     NodeWorkerPtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
 
 protected:
-    Settings& settings_;
     csapex::PluginLocator* plugin_locator_;
 
     std::map<std::string, std::vector<NodeConstructor::Ptr> > tag_map_;

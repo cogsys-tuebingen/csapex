@@ -8,7 +8,6 @@
 
 /// SYSTEM
 #include <iostream>
-#include <QFuture>
 
 using namespace csapex;
 
@@ -16,14 +15,12 @@ Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active)
     : Connectable(uuid), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
-//    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
 Slot::Slot(std::function<void()> callback, Unique* parent, int sub_id, bool active)
     : Connectable(parent, sub_id, "slot"), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
-//    QObject::connect(this, SIGNAL(triggered()), this, SLOT(handleTrigger()), Qt::QueuedConnection);
 }
 
 Slot::~Slot()
@@ -117,7 +114,7 @@ bool Slot::isConnected() const
 void Slot::connectionMovePreview(Connectable *other_side)
 {
     for(Trigger* trigger : sources_) {
-        Q_EMIT(connectionInProgress(trigger, other_side));
+        connectionInProgress(trigger, other_side);
     }
 }
 

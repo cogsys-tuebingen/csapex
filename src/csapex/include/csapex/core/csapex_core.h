@@ -25,8 +25,7 @@ public:
                PluginLocatorPtr plugin_locator,
                GraphWorkerPtr graph_worker, GraphPtr graph,
                ThreadPool& thread_pool,
-               NodeFactory* node_factory,
-               CommandDispatcher *cmd_dispatcher);
+               NodeFactory* node_factory);
     virtual ~CsApexCore();
 
     void init();
@@ -59,6 +58,9 @@ public:
     boost::signals2::signal<void ()> resetRequest;
     boost::signals2::signal<void ()> resetDone;
 
+    boost::signals2::signal<void ()> saved;
+    boost::signals2::signal<void ()> loaded;
+
     boost::signals2::signal<void (YAML::Node& e)> saveSettingsRequest;
     boost::signals2::signal<void (YAML::Node& n)> loadSettingsRequest;
 
@@ -87,7 +89,6 @@ private:
     NodeFactory* node_factory_;
 
     bool destruct;
-    CommandDispatcher* cmd_dispatch;
 
     PluginManager<CorePlugin>* core_plugin_manager;
     std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;

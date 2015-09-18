@@ -124,7 +124,9 @@ include_directories(include
 # BUILD THE LIBRARIES
 #
 
-add_library(csapex SHARED
+set(csapex_LIBRARIES)
+
+add_library(csapex_param SHARED
     src/param/io.cpp
     src/param/parameter.cpp
     src/param/parameter_builder.cpp
@@ -147,10 +149,43 @@ add_library(csapex SHARED
     src/param/parameter_factory.cpp
     src/param/parameter_map.cpp
     src/param/parameter_provider.cpp
+)
+target_link_libraries(csapex_param
+    ${Boost_LIBRARIES}
+    ${YAML_LIBRARIES}
+)
 
-    src/core/bootstrap_plugin.cpp
-    src/core/core_plugin.cpp
+list(APPEND csapex_LIBRARIES csapex_param)
+
+
+
+add_library(csapex_util SHARED
+    src/utility/assert.cpp
+    src/utility/bash_parser.cpp
+    src/utility/buffer.cpp
+    src/utility/error_handling.cpp
+    src/utility/stream_interceptor.cpp
+    src/utility/stream_relay.cpp
+    src/utility/thread.cpp
+    src/utility/timable.cpp
+    src/utility/timer.cpp
+    src/utility/type.cpp
+    src/utility/uuid.cpp
+    src/utility/yaml_node_builder.cpp
+)
+
+target_link_libraries(csapex_util
+    ${Boost_LIBRARIES}
+    ${YAML_LIBRARIES}
+)
+
+list(APPEND csapex_LIBRARIES csapex_util)
+
+
+add_library(csapex SHARED
     src/core/csapex_core.cpp
+    src/core/core_plugin.cpp
+    src/core/bootstrap_plugin.cpp
     src/core/graphio.cpp
     src/core/settings.cpp
     src/data/point.cpp
@@ -160,7 +195,6 @@ add_library(csapex SHARED
     src/factory/message_factory.cpp
 
     src/manager/message_provider_manager.cpp
-    src/manager/message_renderer_manager.cpp
 
     src/model/connectable.cpp
     src/model/connection.cpp
@@ -212,30 +246,17 @@ add_library(csapex SHARED
     src/signal/signal.cpp
     src/signal/slot.cpp
     src/signal/trigger.cpp
-
-    src/utility/assert.cpp
-    src/utility/bash_parser.cpp
-    src/utility/buffer.cpp
-    src/utility/error_handling.cpp
-    src/utility/stream_interceptor.cpp
-    src/utility/stream_relay.cpp
-    src/utility/thread.cpp
-    src/utility/timable.cpp
-    src/utility/timer.cpp
-    src/utility/type.cpp
-    src/utility/uuid.cpp
-    src/utility/yaml_node_builder.cpp
 )
 
 target_link_libraries(csapex
-    ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${catkin_LIBRARIES}
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
     ${console_bridge_LIBRARIES}
     ${class_loader_LIBRARIES}
 )
+
+list(APPEND csapex_LIBRARIES csapex)
 
 
 # Library for the app itself
@@ -263,6 +284,7 @@ add_library(csapex_qt SHARED
     src/command/switch_thread.cpp
 
     src/view/csapex_window.cpp
+    src/manager/message_renderer_manager.cpp
     src/view/message_renderer.cpp
 
     src/view/designer/designer.cpp
@@ -313,7 +335,7 @@ add_library(csapex_qt SHARED
 )
 
 target_link_libraries(csapex_qt
-    csapex
+    ${csapex_LIBRARIES}
 
     qxt5
 
@@ -349,6 +371,13 @@ add_custom_command(TARGET cfg POST_BUILD
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
+
+#
+# TESTS
+#
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests/CMakeLists.txt)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
+endif()
 
 #
 # INSTALL

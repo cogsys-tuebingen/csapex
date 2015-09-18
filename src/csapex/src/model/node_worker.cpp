@@ -22,7 +22,6 @@
 #include <csapex/model/tickable_node.h>
 
 /// SYSTEM
-#include <QApplication>
 #include <thread>
 #include <iostream>
 
