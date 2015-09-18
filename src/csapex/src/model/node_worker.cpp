@@ -291,7 +291,7 @@ void NodeWorker::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
     }
 
     {
-        InputPtr cin = std::make_shared<Input>(transition_in_.get(), UUID::make_sub(getUUID(), std::string("in_") + p->name()));
+        InputPtr cin = std::make_shared<Input>(UUID::make_sub(getUUID(), std::string("in_") + p->name()));
         cin->setEnabled(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cin->setOptional(true);
@@ -303,7 +303,7 @@ void NodeWorker::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         input_2_param_[cin.get()] = p;
     }
     {
-        OutputPtr cout = std::make_shared<StaticOutput>(transition_out_.get(), UUID::make_sub(getUUID(), std::string("out_") + p->name()));
+        OutputPtr cout = std::make_shared<StaticOutput>(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
         cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cout->setLabel(p->name());
@@ -397,10 +397,10 @@ void NodeWorker::connectConnector(Connectable *c)
 {
     c->connectionInProgress.connect(connectionInProgress);
     c->connectionStart.connect(connectionStart);
-    c->connectionDone.connect(connectionDone);
-    c->connectionDone.connect([this](Connectable*) { checkIO(); });
+    c->connection_added_to.connect(connectionDone);
+    c->connection_added_to.connect([this](Connectable*) { checkIO(); });
     c->connectionEnabled.connect([this](bool) { checkIO(); });
-    c->connectionRemoved.connect([this](Connectable*) { checkIO(); });
+    c->connection_removed_to.connect([this](Connectable*) { checkIO(); });
 
     c->enabled_changed.connect(std::bind(&NodeWorker::checkIO, this));
 }
@@ -706,9 +706,9 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
     int id = next_input_id_++;
     InputPtr c;
     if(dynamic) {
-        c = std::make_shared<DynamicInput>(transition_in_.get(), this, id);
+        c = std::make_shared<DynamicInput>(this, id);
     } else {
-        c = std::make_shared<Input>(transition_in_.get(), this, id);
+        c = std::make_shared<Input>(this, id);
     }
     c->setLabel(label);
     c->setOptional(optional);
@@ -725,9 +725,9 @@ Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label, 
     int id = next_output_id_++;
     OutputPtr c;
     if(dynamic) {
-        c = std::make_shared<DynamicOutput>(transition_out_.get(), this, id);
+        c = std::make_shared<DynamicOutput>(this, id);
     } else {
-        c = std::make_shared<StaticOutput>(transition_out_.get(), this, id);
+        c = std::make_shared<StaticOutput>(this, id);
     }
     c->setLabel(label);
     c->setType(type);
@@ -792,6 +792,8 @@ void NodeWorker::removeInput(Input* in)
 
     if(it != inputs_.end()) {
         InputPtr input = *it;
+        transition_in_->removeInput(input);
+
         inputs_.erase(it);
 
         disconnectConnector(input.get());
@@ -804,6 +806,7 @@ void NodeWorker::removeInput(Input* in)
 
 void NodeWorker::removeOutput(Output* out)
 {
+
     std::vector<OutputPtr>::iterator it;
     for(it = outputs_.begin(); it != outputs_.end(); ++it) {
         if(it->get() == out) {
@@ -813,6 +816,8 @@ void NodeWorker::removeOutput(Output* out)
 
     if(it != outputs_.end()) {
         OutputPtr output = *it;
+        transition_out_->removeOutput(output);
+
         outputs_.erase(it);
 
         disconnectConnector(output.get());
@@ -884,6 +889,7 @@ void NodeWorker::addInput(InputPtr in)
     //    QObject::connect(in, SIGNAL(connectionDone(Connectable*)), this, SLOT(trySendMessages()));
 
     connectorCreated(in);
+    transition_in_->addInput(in);
 }
 
 void NodeWorker::addOutput(OutputPtr out)
@@ -893,11 +899,12 @@ void NodeWorker::addOutput(OutputPtr out)
     connectConnector(out.get());
 
     out->messageProcessed.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connectionRemoved.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connectionDone.connect([this](Connectable*) { triggerCheckTransitions(); });
+    out->connection_removed_to.connect([this](Connectable*) { triggerCheckTransitions(); });
+    out->connection_added_to.connect([this](Connectable*) { triggerCheckTransitions(); });
     out->connectionEnabled.connect([this](bool) { triggerCheckTransitions(); });
 
     connectorCreated(out);
+    transition_out_->addOutput(out);
 }
 
 bool NodeWorker::isParameterInput(Input *in) const

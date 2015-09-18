@@ -11,6 +11,9 @@ class OutputTransition : public Transition
 public:
     OutputTransition(NodeWorker* node);
 
+    void addOutput(OutputPtr output);
+    void removeOutput(OutputPtr output);
+
     void connectionAdded(Connection* connection);
     void connectionRemoved(Connection *connection);
 
@@ -29,8 +32,10 @@ public:
     void establishConnections();
 
 private:
-
     void fillConnections();
+
+private:
+    std::map<OutputPtr, std::vector<boost::signals2::connection>> output_signal_connections_;
 };
 }
 

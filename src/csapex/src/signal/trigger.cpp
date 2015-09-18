@@ -53,7 +53,7 @@ void Trigger::removeConnection(Connectable* other_side)
 
             i = targets_.erase(i);
 
-            connectionRemoved(this);
+            connection_removed_to(this);
             return;
 
         } else {

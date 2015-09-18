@@ -11,8 +11,8 @@ class DynamicOutput;
 class DynamicInput : public Input
 {
 public:
-    DynamicInput(InputTransition* transition, const UUID &uuid);
-    DynamicInput(InputTransition* transition, Unique *parent, int sub_id);
+    DynamicInput(const UUID &uuid);
+    DynamicInput(Unique *parent, int sub_id);
 
     void setCorrespondent(DynamicOutput* output);
 

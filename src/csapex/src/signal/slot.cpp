@@ -59,7 +59,7 @@ void Slot::removeConnection(Connectable* other_side)
     if(pos != sources_.end()) {
         sources_.erase(pos);
 
-        connectionRemoved(this);
+        connection_removed_to(this);
     }
 }
 

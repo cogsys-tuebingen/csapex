@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
-#include <csapex/msg/output_transition.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/message_traits.h>
@@ -14,14 +13,14 @@
 
 using namespace csapex;
 
-Output::Output(OutputTransition* transition, const UUID& uuid)
-    : Connectable(uuid), transition_(transition),
+Output::Output(const UUID& uuid)
+    : Connectable(uuid),
       force_send_message_(false), state_(State::IDLE)
 {
 }
 
-Output::Output(OutputTransition* transition, Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "out"),  transition_(transition),
+Output::Output(Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "out"),
       force_send_message_(false), state_(State::IDLE)
 {
 }
@@ -30,9 +29,9 @@ Output::~Output()
 {
 }
 
-OutputTransition* Output::getTransition() const
+void Output::setMessageProcessed()
 {
-    return transition_;
+    message_processed();
 }
 
 void Output::activate()
@@ -68,19 +67,6 @@ std::vector<ConnectionPtr> Output::getConnections() const
     return connections_;
 }
 
-
-void Output::addConnection(ConnectionPtr connection)
-{
-    transition_->addConnection(connection);
-    Connectable::addConnection(connection);
-}
-
-void Output::fadeConnection(ConnectionPtr connection)
-{
-    transition_->fadeConnection(connection);
-    Connectable::fadeConnection(connection);
-}
-
 void Output::removeConnection(Connectable* other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
@@ -91,7 +77,7 @@ void Output::removeConnection(Connectable* other_side)
 
             i = connections_.erase(i);
 
-            connectionRemoved(this);
+            connection_removed_to(this);
             return;
 
         } else {

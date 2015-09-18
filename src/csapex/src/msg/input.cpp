@@ -11,26 +11,19 @@
 
 using namespace csapex;
 
-Input::Input(InputTransition* transition, const UUID &uuid)
-    : Connectable(uuid), transition_(transition), optional_(false)
+Input::Input(const UUID &uuid)
+    : Connectable(uuid), optional_(false)
 {
-    apex_assert_hard(transition != nullptr);
 }
 
-Input::Input(InputTransition *transition, Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "in"), transition_(transition), optional_(false)
+Input::Input(Unique* parent, int sub_id)
+    : Connectable(parent, sub_id, "in"), optional_(false)
 {
-    apex_assert_hard(transition != nullptr);
 }
 
 Input::~Input()
 {
     free();
-}
-
-InputTransition* Input::getTransition() const
-{
-    return transition_;
 }
 
 void Input::reset()
@@ -58,7 +51,7 @@ void Input::removeConnection(Connectable* other_side)
     apex_assert_hard(getSource() == other_side);
 
     connections_.clear();
-    connectionRemoved(this);
+    connection_removed_to(this);
 }
 
 void Input::setOptional(bool optional)
@@ -124,18 +117,6 @@ void Input::removeAllConnectionsNotUndoable()
         setError(false);
         disconnected(this);
     }
-}
-
-void Input::addConnection(ConnectionPtr connection)
-{
-    transition_->addConnection(connection);
-    Connectable::addConnection(connection);
-}
-
-void Input::fadeConnection(ConnectionPtr connection)
-{
-    transition_->fadeConnection(connection);
-    Connectable::fadeConnection(connection);
 }
 
 bool Input::canConnectTo(Connectable* other_side, bool move) const
@@ -226,6 +207,5 @@ void Input::notifyMessageProcessed()
 
     if(isConnected()) {
         apex_assert_hard(connections_.size() == 1);
-//        transition_->notifyMessageProcessed();
     }
 }

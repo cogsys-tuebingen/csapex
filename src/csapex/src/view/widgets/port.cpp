@@ -321,7 +321,7 @@ void Port::startDrag()
             drag->exec();
         }
 
-        adaptee->connectionDone(adaptee.get());
+        adaptee->connection_added_to(adaptee.get());
         buttons_down_ = Qt::NoButton;
     }
 }

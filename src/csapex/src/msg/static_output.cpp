@@ -13,14 +13,14 @@
 
 using namespace csapex;
 
-StaticOutput::StaticOutput(OutputTransition* transition, const UUID &uuid)
-    : Output(transition, uuid), message_flags_(0)
+StaticOutput::StaticOutput(const UUID &uuid)
+    : Output(uuid), message_flags_(0)
 {
 
 }
 
-StaticOutput::StaticOutput(OutputTransition* transition, Unique *parent, int sub_id)
-    : Output(transition, parent, sub_id), message_flags_(0)
+StaticOutput::StaticOutput(Unique *parent, int sub_id)
+    : Output(parent, sub_id), message_flags_(0)
 {
 
 }

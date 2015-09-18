@@ -154,8 +154,8 @@ bool Graph::addConnection(ConnectionPtr connection)
         }
 
         connectionAdded(connection.get());
-        from->connectionDone(from);
-        to->connectionDone(to);
+        from->connection_added_to(from);
+        to->connection_added_to(to);
         return true;
     }
 

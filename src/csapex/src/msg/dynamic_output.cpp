@@ -13,14 +13,14 @@
 
 using namespace csapex;
 
-DynamicOutput::DynamicOutput(OutputTransition* transition, const UUID &uuid)
-    : Output(transition, uuid)
+DynamicOutput::DynamicOutput(const UUID &uuid)
+    : Output(uuid)
 {
     setDynamic(true);
 }
 
-DynamicOutput::DynamicOutput(OutputTransition* transition, Unique *parent, int sub_id)
-    : Output(transition, parent, sub_id)
+DynamicOutput::DynamicOutput(Unique *parent, int sub_id)
+    : Output(parent, sub_id)
 {
     setDynamic(true);
 }

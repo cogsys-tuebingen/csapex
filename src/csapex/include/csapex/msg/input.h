@@ -14,11 +14,9 @@ class Input : public Connectable
     friend class Output;
 
 public:
-    Input(InputTransition* transition, const UUID &uuid);
-    Input(InputTransition* transition, Unique *parent, int sub_id);
+    Input(const UUID &uuid);
+    Input(Unique *parent, int sub_id);
     virtual ~Input();
-
-    InputTransition* getTransition() const;
 
     virtual bool canInput() const {
         return true;
@@ -27,8 +25,6 @@ public:
         return true;
     }
 
-    void addConnection(ConnectionPtr connection) override;
-    void fadeConnection(ConnectionPtr connection) override;
     bool canConnectTo(Connectable* other_side, bool move) const;
 
     void inputMessage(ConnectionType::ConstPtr message);
@@ -65,8 +61,6 @@ protected:
     virtual void removeConnection(Connectable* other_side);
 
 protected:
-    InputTransition* transition_;
-
     mutable std::mutex message_mutex_;
     ConnectionTypeConstPtr message_;
 

@@ -110,7 +110,7 @@ void Connection::notifyMessageSet()
     new_message();
 }
 
-void Connection::allowNewMessage()
+void Connection::setMessageProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
@@ -119,7 +119,7 @@ void Connection::allowNewMessage()
     }
     Output* o = dynamic_cast<Output*>(from_);
     if(o) {
-        o->getTransition()->publishNextMessage();
+        o->setMessageProcessed();
     }
 }
 

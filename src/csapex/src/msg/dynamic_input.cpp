@@ -6,14 +6,14 @@
 
 using namespace csapex;
 
-DynamicInput::DynamicInput(InputTransition *transition, const UUID &uuid)
-    : Input(transition, uuid), correspondent_(nullptr)
+DynamicInput::DynamicInput(const UUID &uuid)
+    : Input(uuid), correspondent_(nullptr)
 {
     setDynamic(true);
 }
 
-DynamicInput::DynamicInput(InputTransition *transition, Unique *parent, int sub_id)
-    : Input(transition, parent, sub_id), correspondent_(nullptr)
+DynamicInput::DynamicInput(Unique *parent, int sub_id)
+    : Input(parent, sub_id), correspondent_(nullptr)
 {
     setDynamic(true);
 }

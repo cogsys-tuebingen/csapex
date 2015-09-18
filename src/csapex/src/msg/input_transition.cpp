@@ -19,6 +19,27 @@ InputTransition::InputTransition(NodeWorker* node)
 {
 }
 
+void InputTransition::addInput(InputPtr input)
+{
+    auto ca = input->connection_added.connect([this](ConnectionPtr connection) {
+        addConnection(connection);
+    });
+    input_signal_connections_[input].push_back(ca);
+
+    auto cf = input->connection_faded.connect([this](ConnectionPtr connection) {
+        fadeConnection(connection);
+    });
+    input_signal_connections_[input].push_back(cf);
+}
+
+void InputTransition::removeInput(InputPtr input)
+{
+    for(auto f : input_signal_connections_[input]) {
+        f.disconnect();
+    }
+    input_signal_connections_.erase(input);
+}
+
 void InputTransition::establishConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -163,14 +184,14 @@ void InputTransition::notifyOlderConnections(int seq)
         if(input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
-            auto connection = connections.front();
+            ConnectionPtr connection = connections.front();
             auto msg = connection->getMessage();
 
             int s = msg->sequenceNumber();
             if(seq != s) {
                 std::cout << input->getUUID().getFullName() << " has seq " << s << " instead of " << seq << std::endl;
                 connection->setState(Connection::State::READ);
-                connection->allowNewMessage();
+                connection->setMessageProcessed();
             }
         }
     }
@@ -198,7 +219,7 @@ void InputTransition::notifyMessageProcessed()
 
             if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
                 //                c->setState(Connection::State::DONE);
-                c->allowNewMessage();
+                c->setMessageProcessed();
             }
         }
 
@@ -206,7 +227,7 @@ void InputTransition::notifyMessageProcessed()
         apex_assert_hard(areAllConnections(Connection::State::READ));
 
         for(ConnectionPtr& c : established_connections_) {
-            c->allowNewMessage();
+            c->setMessageProcessed();
         }
 
         if(hasFadingConnection()) {
@@ -257,7 +278,7 @@ void InputTransition::fire()
                              s == Connection::State::READ);
             dynamic_connection->setState(Connection::State::READ);
             //            dynamic_connection->setState(Connection::State::DONE);
-            dynamic_connection->allowNewMessage();
+            dynamic_connection->setMessageProcessed();
             return;
         }
     }

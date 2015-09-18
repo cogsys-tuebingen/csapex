@@ -82,8 +82,13 @@ public:
     boost::signals2::signal<void(Connectable*)> disconnected;
     boost::signals2::signal<void(Connectable*)> connectionStart;
     boost::signals2::signal<void(Connectable*,Connectable*)> connectionInProgress;
-    boost::signals2::signal<void(Connectable*)> connectionDone;
-    boost::signals2::signal<void(Connectable*)> connectionRemoved;
+
+    boost::signals2::signal<void(Connectable*)> connection_added_to;
+    boost::signals2::signal<void(Connectable*)> connection_removed_to;
+
+    boost::signals2::signal<void(ConnectionPtr)> connection_added;
+    boost::signals2::signal<void(ConnectionPtr)> connection_faded;
+
     boost::signals2::signal<void(bool)> connectionEnabled;
     boost::signals2::signal<void(Connectable*)> messageProcessed;
     boost::signals2::signal<void(bool, std::string, int)> connectableError;

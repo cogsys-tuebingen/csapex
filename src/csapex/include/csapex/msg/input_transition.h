@@ -12,6 +12,9 @@ class InputTransition : public Transition
 public:
     InputTransition(NodeWorker* node);
 
+    void addInput(InputPtr input);
+    void removeInput(InputPtr input);
+
     void notifyMessageProcessed();
     void fireIfPossible();
 
@@ -34,6 +37,8 @@ private:
 
 private:
     bool one_input_is_dynamic_;
+
+    std::map<InputPtr, std::vector<boost::signals2::connection>> input_signal_connections_;
 };
 
 }

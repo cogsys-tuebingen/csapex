@@ -27,6 +27,31 @@ void OutputTransition::reset()
     }
 }
 
+void OutputTransition::addOutput(OutputPtr output)
+{
+    auto ca = output->connection_added.connect([this](ConnectionPtr connection) {
+        addConnection(connection);
+    });
+    output_signal_connections_[output].push_back(ca);
+
+    auto cf = output->connection_faded.connect([this](ConnectionPtr connection) {
+        fadeConnection(connection);
+    });
+    output_signal_connections_[output].push_back(cf);
+
+    auto cp = output->message_processed.connect([this]() {
+        publishNextMessage();
+    });
+    output_signal_connections_[output].push_back(cp);
+}
+
+void OutputTransition::removeOutput(OutputPtr output)
+{
+    for(auto f : output_signal_connections_[output]) {
+        f.disconnect();
+    }
+    output_signal_connections_.erase(output);
+}
 
 void OutputTransition::connectionAdded(Connection *connection)
 {

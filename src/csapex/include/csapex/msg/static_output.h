@@ -9,8 +9,8 @@ namespace csapex
 class StaticOutput : public Output
 {
 public:
-    StaticOutput(OutputTransition* transition, const UUID &uuid);
-    StaticOutput(OutputTransition* transition, Unique *parent, int sub_id);
+    StaticOutput(const UUID &uuid);
+    StaticOutput(Unique *parent, int sub_id);
 
     virtual void publish(ConnectionType::ConstPtr message) override;
 

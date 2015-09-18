@@ -28,11 +28,11 @@ public:
     };
 
 public:
-    Output(OutputTransition* transition, const UUID &uuid);
-    Output(OutputTransition* transition, Unique *parent, int sub_id);
+    Output(const UUID &uuid);
+    Output(Unique *parent, int sub_id);
     ~Output();
 
-    OutputTransition* getTransition() const;
+    void setMessageProcessed();
 
     virtual bool canOutput() const override
     {
@@ -47,9 +47,6 @@ public:
 
     State getState() const;
     void setState(State s);
-
-    virtual void addConnection(ConnectionPtr connection) override;
-    void fadeConnection(ConnectionPtr connection) override;
 
     virtual void disable() override;
 
@@ -79,6 +76,9 @@ public:
     virtual void reset();
     virtual void clear() = 0;
 
+public:
+    boost::signals2::signal<void()> message_processed;
+
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
     virtual bool isConnectionPossible(Connectable* other_side) override;
@@ -86,8 +86,6 @@ protected:
     virtual void removeAllConnectionsNotUndoable() override;
 
 protected:
-    OutputTransition* transition_;
-
     bool force_send_message_;
     State state_;
 };

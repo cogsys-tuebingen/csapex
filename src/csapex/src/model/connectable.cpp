@@ -205,6 +205,8 @@ void Connectable::addConnection(ConnectionPtr connection)
 {
     connections_.push_back(connection);
     connection->sink_enabled_changed.connect(connectionEnabled);
+
+    connection_added(connection);
 }
 
 void Connectable::fadeConnection(ConnectionPtr connection)
@@ -216,6 +218,8 @@ void Connectable::fadeConnection(ConnectionPtr connection)
             ++it;
         }
     }
+
+    connection_faded(connection);
 }
 std::vector<ConnectionPtr> Connectable::getConnections() const
 {
