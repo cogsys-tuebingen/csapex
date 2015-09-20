@@ -30,14 +30,14 @@ UUID Connectable::makeUUID(const UUID &box_uuid, const std::string& type, int su
 
 Connectable::Connectable(const UUID& uuid)
     : Unique(uuid),
-      count_(0), seq_no_(0), enabled_(false), dynamic_(false), level_(0)
+      count_(0), seq_no_(0), enabled_(true), dynamic_(false), level_(0)
 {
     init();
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, const std::string& type)
     : Unique(makeUUID(parent->getUUID(), type, sub_id)),
-      count_(0), seq_no_(0), enabled_(false), dynamic_(false), level_(0)
+      count_(0), seq_no_(0), enabled_(true), dynamic_(false), level_(0)
 {
     init();
 }
@@ -55,14 +55,11 @@ void Connectable::stop()
 void Connectable::init()
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
-
-    disable();
 }
 
 
 Connectable::~Connectable()
 {
-    //    UUID::free(getUUID());
 }
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)

@@ -44,11 +44,6 @@ public:
     Connection(Connectable* from, Connectable* to);
     Connection(Connectable* from, Connectable* to, int id);
 
-    Connection(Output* from, Input* to);
-    Connection(Output* from, Input* to, int id);
-    Connection(Trigger* from, Slot* to);
-    Connection(Trigger* from, Slot* to, int id);
-
     ~Connection();
 
     Connectable* from() const;

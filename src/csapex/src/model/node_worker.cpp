@@ -292,7 +292,6 @@ void NodeWorker::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
 
     {
         InputPtr cin = std::make_shared<Input>(UUID::make_sub(getUUID(), std::string("in_") + p->name()));
-        cin->setEnabled(true);
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cin->setOptional(true);
         cin->setLabel(p->name());
@@ -304,7 +303,6 @@ void NodeWorker::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
     }
     {
         OutputPtr cout = std::make_shared<StaticOutput>(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
-        cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cout->setLabel(p->name());
 
@@ -741,7 +739,6 @@ Slot* NodeWorker::addSlot(const std::string& label, std::function<void()> callba
     int id = next_slot_id_++;
     SlotPtr slot = std::make_shared<Slot>(callback, this, id, active);
     slot->setLabel(label);
-    slot->setEnabled(true);
 
     addSlot(slot);
 
@@ -753,7 +750,6 @@ Trigger* NodeWorker::addTrigger(const std::string& label)
     int id = next_trigger_id_++;
     TriggerPtr trigger = std::make_shared<Trigger>(this, id);
     trigger->setLabel(label);
-    trigger->setEnabled(true);
 
     addTrigger(trigger);
 

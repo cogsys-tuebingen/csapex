@@ -17,8 +17,8 @@ namespace csapex
 
 class Connectable : public ErrorState, public Unique
 {
-    friend class Port;
     friend class Graph;
+    friend class Connection;
 
 public:
     static const std::string MIME_CREATE_CONNECTION;
@@ -64,8 +64,6 @@ public:
     void setSequenceNumber(int seq_no_);
 
     std::vector<ConnectionPtr> getConnections() const;
-    virtual void addConnection(ConnectionPtr connection);
-    virtual void fadeConnection(ConnectionPtr connection);
 
     virtual bool isConnected() const;
 
@@ -75,6 +73,9 @@ public:
     virtual void stop();
 
     virtual void notifyMessageProcessed();
+
+    /*REFACTOR*/ virtual bool shouldMove(bool left, bool right);
+    /*REFACTOR*/ virtual bool shouldCreate(bool left, bool right);
 
 public:
     boost::signals2::signal<void(bool)> enabled_changed;
@@ -114,16 +115,15 @@ protected:
     Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, const std::string &type);
 
+    virtual void addConnection(ConnectionPtr connection);
+    virtual void fadeConnection(ConnectionPtr connection);
+
     void setDynamic(bool dynamic);
 
     void init();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
-
-protected:
-    virtual bool shouldMove(bool left, bool right);
-    virtual bool shouldCreate(bool left, bool right);
 
 protected:
     mutable std::recursive_mutex io_mutex;

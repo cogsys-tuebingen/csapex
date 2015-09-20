@@ -47,16 +47,15 @@ public:
 
     bool isBeingProcessed() const;
 
-public:
-    boost::signals2::signal<void()> triggered;
-    boost::signals2::signal<void()> all_signals_handled;
-
-protected:
     virtual bool isConnectionPossible(Connectable* other_side);
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
     bool connect(Connectable* other_side);
+
+public:
+    boost::signals2::signal<void()> triggered;
+    boost::signals2::signal<void()> all_signals_handled;
 
 protected:
     std::vector<Slot*> targets_;

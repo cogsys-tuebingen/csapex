@@ -136,31 +136,28 @@ bool Graph::addConnection(ConnectionPtr connection)
     NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
     NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
 
-    if(connection->from()->isConnectionPossible(connection->to())) {
-        Connectable* from = findConnector(connection->from()->getUUID());
-        Connectable* to = findConnector(connection->to()->getUUID());
+    apex_assert_hard(connection->from()->isConnectionPossible(connection->to()));
 
-        connections_.push_back(connection);
-        from->addConnection(connection);
-        to->addConnection(connection);
+    Connectable* from = findConnector(connection->from()->getUUID());
+    Connectable* to = findConnector(connection->to()->getUUID());
+
+    connections_.push_back(connection);
+    from->addConnection(connection);
+    to->addConnection(connection);
 
 
-        if(n_to != n_from) {
-            node_parents_[n_to].push_back(n_from);
-            node_children_[n_from].push_back(n_to);
+    if(n_to != n_from) {
+        node_parents_[n_to].push_back(n_from);
+        node_children_[n_from].push_back(n_to);
 
-            buildConnectedComponents();
-            verify();
-        }
-
-        connectionAdded(connection.get());
-        from->connection_added_to(from);
-        to->connection_added_to(to);
-        return true;
+        buildConnectedComponents();
+        verify();
     }
 
-    std::cerr << "cannot connect " << connection->from()->getUUID() << " (" <<( connection->from()->isInput() ? "i": "o" )<< ") to " << connection->to()->getUUID() << " (" <<( connection->to()->isInput() ? "i": "o" )<< ")"  << std::endl;
-    return false;
+    connectionAdded(connection.get());
+    from->connection_added_to(from);
+    to->connection_added_to(to);
+    return true;
 }
 
 void Graph::deleteConnection(ConnectionPtr connection)

@@ -45,51 +45,6 @@ Connection::Connection(Connectable *from, Connectable *to, int id)
     apex_assert_hard(to->isInput());
 }
 
-Connection::Connection(Output *from, Input *to)
-    : from_(from), to_(to), id_(next_connection_id_++),
-      source_established_(false), sink_established_(false), established_(false),
-      state_(State::NOT_INITIALIZED)
-{
-    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    from->enabled_changed.connect(source_enable_changed);
-    to->enabled_changed.connect(sink_enabled_changed);
-}
-
-Connection::Connection(Output *from, Input *to, int id)
-    : from_(from), to_(to), id_(id),
-      source_established_(false), sink_established_(false), established_(false),
-      state_(State::NOT_INITIALIZED)
-{
-    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    from->enabled_changed.connect(source_enable_changed);
-    to->enabled_changed.connect(sink_enabled_changed);
-}
-
-
-Connection::Connection(Trigger *from, Slot *to)
-    : from_(from), to_(to), id_(next_connection_id_++),
-      source_established_(false), sink_established_(false), established_(false),
-      state_(State::NOT_INITIALIZED)
-{
-    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    from->enabled_changed.connect(source_enable_changed);
-    to->enabled_changed.connect(sink_enabled_changed);
-}
-
-Connection::Connection(Trigger *from, Slot *to, int id)
-    : from_(from), to_(to), id_(id),
-      source_established_(false), sink_established_(false), established_(false),
-      state_(State::NOT_INITIALIZED)
-{
-    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    from->enabled_changed.connect(source_enable_changed);
-    to->enabled_changed.connect(sink_enabled_changed);
-}
-
 Connection::~Connection()
 {
 }
