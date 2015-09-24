@@ -5,7 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/connection.h>
+#include <csapex/msg/bundled_connection.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -209,7 +209,12 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                         continue;
                     }
 
-                    graph_->addConnection(ConnectionPtr(new Connection(from, to)));
+                    Output* out = dynamic_cast<Output*>(from);
+                    Input* in = dynamic_cast<Input*>(to);
+                    if(out && in) {
+                        ConnectionPtr c = BundledConnection::connect(out, in);
+                        graph_->addConnection(c);
+                    }
 
                 } catch(const std::exception& e) {
                     std::cerr << "cannot load connection: " << e.what() << std::endl;

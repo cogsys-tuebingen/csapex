@@ -10,8 +10,8 @@
 
 using namespace csapex;
 
-OutputTransition::OutputTransition(NodeWorker *node)
-    : Transition(node)
+OutputTransition::OutputTransition()
+    : Transition()
 {
 
 }
@@ -19,7 +19,8 @@ OutputTransition::OutputTransition(NodeWorker *node)
 void OutputTransition::reset()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(auto output : node_->getAllOutputs()) {
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
         output->reset();
     }
     for(ConnectionPtr connection : established_connections_) {
@@ -29,14 +30,18 @@ void OutputTransition::reset()
 
 void OutputTransition::addOutput(OutputPtr output)
 {
+    // remember the output
+    outputs_[output->getUUID()] = output;
+
+    // connect signals
     auto ca = output->connection_added.connect([this](ConnectionPtr connection) {
-        addConnection(connection);
-    });
+            addConnection(connection);
+});
     output_signal_connections_[output].push_back(ca);
 
     auto cf = output->connection_faded.connect([this](ConnectionPtr connection) {
-        fadeConnection(connection);
-    });
+            fadeConnection(connection);
+});
     output_signal_connections_[output].push_back(cf);
 
     auto cp = output->message_processed.connect([this]() {
@@ -47,24 +52,14 @@ void OutputTransition::addOutput(OutputPtr output)
 
 void OutputTransition::removeOutput(OutputPtr output)
 {
+    // disconnect signals
     for(auto f : output_signal_connections_[output]) {
         f.disconnect();
     }
     output_signal_connections_.erase(output);
-}
 
-void OutputTransition::connectionAdded(Connection *connection)
-{
-    Transition::connectionAdded(connection);
-
-    trackConnection(connection, connection->endpoint_established.connect([this]() {
-        // establish();
-        node_->triggerCheckTransitions();
-    }));
-
-    //    if(node_->getState() == NodeWorker::State::IDLE || node_->getState() == NodeWorker::State::ENABLED) {
-    //        establish();
-    //    }
+    // forget the output
+    outputs_.erase(output->getUUID());
 }
 
 void OutputTransition::connectionRemoved(Connection *connection)
@@ -74,7 +69,7 @@ void OutputTransition::connectionRemoved(Connection *connection)
     connection->fadeSource();
 
     if(established_connections_.empty()) {
-//        node_->notifyMessagesProcessed();
+        //        node_->notifyMessagesProcessed();
     }
 }
 
@@ -98,7 +93,8 @@ void OutputTransition::establishConnections()
 
 bool OutputTransition::canStartSendingMessages() const
 {
-    for(auto output : node_->getAllOutputs()) {
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() != Output::State::IDLE) {
                 return false;
@@ -110,7 +106,8 @@ bool OutputTransition::canStartSendingMessages() const
 
 bool OutputTransition::isSink() const
 {
-    for(auto output : node_->getAllOutputs()) {
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
         if(output->isConnected()) {
             return false;
         }
@@ -122,35 +119,17 @@ void OutputTransition::sendMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    int non_forced_connections = 0;
-
     apex_assert_hard(!isSink());
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
-    for(auto out : node_->getAllOutputs()) {
-        if(out->isConnected()) {
-            out->commitMessages();
-
-            if(!out->isForced()) {
-                ++non_forced_connections;
-            }
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
+        if(output->isConnected()) {
+            output->commitMessages();
         }
     }
 
-    if(non_forced_connections == 0) {
-        // all outputs are forced -> there is no connections that can send back a notification!
-
-        apex_assert_hard(areAllConnections(Connection::State::DONE));
-        publishNextMessage();
-
-    } else {
-        // at least one output is not forced and will send back a notification
-//        apex_assert_hard(areConnections(Connection::State::READY_TO_RECEIVE));
-
-        //    std::cerr << "fill first time: " << node_->getUUID() << std::endl;
-        fillConnections();
-    }
-
+    fillConnections();
 }
 
 void OutputTransition::publishNextMessage()
@@ -163,8 +142,9 @@ void OutputTransition::publishNextMessage()
 
     apex_assert_hard(areAllConnections(Connection::State::DONE));
 
-    for(auto out : node_->getAllOutputs()) {
-        out->nextMessage();
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
+        output->nextMessage();
     }
     if(areOutputsIdle()) {
         if(areAllConnections(Connection::State::DONE)) {
@@ -172,7 +152,7 @@ void OutputTransition::publishNextMessage()
                 removeFadingConnections();
             }
 
-            node_->notifyMessagesProcessed();
+            messages_processed();
         }
 
     } else {
@@ -184,8 +164,9 @@ void OutputTransition::publishNextMessage()
 bool OutputTransition::areOutputsIdle() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(auto out : node_->getAllOutputs()) {
-        if(out->getState() != Output::State::IDLE) {
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
+        if(output->getState() != Output::State::IDLE) {
             return false;
         }
     }
@@ -197,29 +178,19 @@ void OutputTransition::fillConnections()
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(!areOutputsIdle());
 
-    for(ConnectionPtr connection : established_connections_) {
-        if(connection->isSinkEnabled()) {
-            Output* out = dynamic_cast<Output*>(connection->from());
-            apex_assert_hard(out);
+    for(auto pair : outputs_) {
+        OutputPtr out = pair.second;
+        apex_assert_hard(out);
 
-            auto msg = out->getMessage();
-            apex_assert_hard(msg);
-
-            connection->setMessage(msg);
-        }
-    }
-
-    for(ConnectionPtr connection : established_connections_) {
-        if(connection->isSinkEnabled()) {
-            connection->notifyMessageSet();
-        }
+        out->publish();
     }
 }
 
 void OutputTransition::clearOutputs()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(auto output : node_->getAllOutputs()) {
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
         output->clear();
     }
 }
@@ -227,7 +198,8 @@ void OutputTransition::clearOutputs()
 void OutputTransition::abortSendingMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(auto output : node_->getAllOutputs()) {
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
         output->setState(Output::State::IDLE);
     }
 }

@@ -51,17 +51,16 @@ public:
     virtual void disable() override;
 
     virtual void setMultipart(bool multipart, bool last_part) = 0;
-    virtual void publish(ConnectionType::ConstPtr message) = 0;
+    virtual void addMessage(ConnectionType::ConstPtr message) = 0;
 
     virtual bool canSendMessages() const;
     virtual void commitMessages() = 0;
+    virtual void publish();
     virtual void nextMessage() = 0;
     virtual ConnectionTypeConstPtr getMessage() const = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;
-
-    virtual bool isForced() const;
 
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
@@ -69,24 +68,20 @@ public:
     int countConnections();
     std::vector<ConnectionPtr> getConnections() const;
 
-    void forceSendMessage(bool force = true);
-
     virtual bool hasMessage() = 0;
 
     virtual void reset();
     virtual void clear() = 0;
 
-public:
-    boost::signals2::signal<void()> message_processed;
-
-protected:
-    /// PRIVATE: Use command to create a connection (undoable)
     virtual bool isConnectionPossible(Connectable* other_side) override;
     virtual void removeConnection(Connectable* other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
+public:
+    boost::signals2::signal<void()> message_processed;
+
+
 protected:
-    bool force_send_message_;
     State state_;
 };
 

@@ -274,11 +274,12 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     // check if we have temporary connections
     if(!temp_.empty()) {
         for(const TempConnection& temp : temp_) {
+            ccs = CurrentConnectionState();
+
             if(temp.is_connected) {
-                drawConnection(painter, Connection(temp.from, temp.to_c, -1));
+                drawConnection(painter, temp.from, temp.to_c, -1);
 
             } else {
-                ccs = CurrentConnectionState();
                 Port* fromp = widget_ctrl_->getPort(temp.from);
 
                 ccs.start_pos = UNDEFINED;
@@ -419,7 +420,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
-        auto cmd = CommandFactory::deleteConnectionByIdCommand(graph_.get(), highlight_connection_id_);
+        auto cmd = dispatcher_->getCommandFactory()->deleteConnectionByIdCommand(highlight_connection_id_);
         if(cmd) {
             dispatcher_->execute(cmd);
         }
@@ -690,24 +691,40 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     Connectable* from = connection.from();
     Connectable* to = connection.to();
 
+    int id = connection.id();
+
+    ccs = CurrentConnectionState();
+
+    ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
+    ccs.established = connection.isEstablished();
+    ccs.source_established = connection.isSourceEstablished();
+    ccs.sink_established = connection.isSinkEstablished();
+    ccs.full_read = connection.getState() == Connection::State::READ;
+    ccs.full_unread = connection.getState() == Connection::State::UNREAD;
+
+    connection_bb_[&connection] = drawConnection(painter, from, to, id);
+}
+
+std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
+                                                  Connectable *from, Connectable *to,
+                                                  int id)
+{
     Port* fromp = widget_ctrl_->getPort(from);
     Port* top = widget_ctrl_->getPort(to);
 
     if(!fromp || !top) {
-        return;
+        return std::vector<QRectF>();
     }
-
-    ccs = CurrentConnectionState();
 
     if(dynamic_cast<Trigger*>(from) != nullptr) {
         if(!display_signals_) {
-            return;
+            return std::vector<QRectF>();
         }
         ccs.type = ConnectionType::SIG;
 
     } else {
         if(!display_messages_) {
-            return;
+            return std::vector<QRectF>();
         }
         ccs.type = ConnectionType::MSG;
     }
@@ -716,16 +733,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     QPointF p1 = centerPoint(fromp);
     QPointF p2 = centerPoint(top);
 
-    int id = connection.id();
-
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
-    ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
-    ccs.established = connection.isEstablished();
-    ccs.source_established = connection.isSourceEstablished();
-    ccs.sink_established = connection.isSinkEstablished();
-    ccs.full_read = connection.getState() == Connection::State::READ;
-    ccs.full_unread = connection.getState() == Connection::State::UNREAD;
     ccs.minimized_from = fromp->isMinimizedSize();
     ccs.minimized_to = top->isMinimizedSize();
     ccs.hidden_from = !fromp->isVisible();
@@ -744,7 +753,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.start_pos = is_msg ? (fromp->isFlipped() ? LEFT : RIGHT) : BOTTOM;
     ccs.end_pos = is_msg ? (top->isFlipped() ? RIGHT : LEFT) : TOP;
 
-    connection_bb_[&connection] = drawConnection(painter, p1, p2, id);
+    return drawConnection(painter, p1, p2, id);
 }
 
 
@@ -1043,10 +1052,10 @@ bool DesignerScene::showConnectionContextMenu()
     QAction* selectedItem = menu.exec(QCursor::pos());
 
     if(selectedItem == del) {
-        dispatcher_->execute(CommandFactory::deleteConnectionByIdCommand(graph_.get(), highlight_connection_id_));
+        dispatcher_->execute(dispatcher_->getCommandFactory()->deleteConnectionByIdCommand(highlight_connection_id_));
 
     } else if(selectedItem == reset) {
-        dispatcher_->execute(CommandFactory::deleteAllConnectionFulcrumsCommand(graph_.get(), highlight_connection_id_));
+        dispatcher_->execute(dispatcher_->getCommandFactory()->deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
     }
 
     return true;

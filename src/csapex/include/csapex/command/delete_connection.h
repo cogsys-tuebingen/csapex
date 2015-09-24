@@ -13,18 +13,17 @@ namespace command
 
 class DeleteConnection : public Meta
 {
-public:
+protected:
     DeleteConnection(Connectable* a, Connectable* b);
 
 protected:
     bool doExecute();
-    bool doUndo();
     bool doRedo();
 
     virtual std::string getType() const;
     virtual std::string getDescription() const;
 
-private:
+protected:
     int connection_id;
 
     UUID from_uuid;

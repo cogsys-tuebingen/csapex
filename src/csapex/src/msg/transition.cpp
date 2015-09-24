@@ -9,8 +9,7 @@
 
 using namespace csapex;
 
-Transition::Transition(NodeWorker *node)
-    : node_(node)
+Transition::Transition()
 {
 
 }
@@ -161,12 +160,6 @@ bool Transition::hasFadingConnection() const
     std::unique_lock<std::recursive_mutex> lock(sync);
     return !fading_connections_.empty();
 }
-
-NodeWorker* Transition::getNode() const
-{
-    return node_;
-}
-
 
 void Transition::connectionAdded(Connection */*connection*/)
 {

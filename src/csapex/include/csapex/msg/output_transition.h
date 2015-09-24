@@ -3,18 +3,21 @@
 
 /// COMPONENT
 #include <csapex/msg/transition.h>
+#include <csapex/utility/uuid.h>
+
+/// SYSTEM
+#include <unordered_map>
 
 namespace csapex
 {
 class OutputTransition : public Transition
 {
 public:
-    OutputTransition(NodeWorker* node);
+    OutputTransition();
 
     void addOutput(OutputPtr output);
     void removeOutput(OutputPtr output);
 
-    void connectionAdded(Connection* connection);
     void connectionRemoved(Connection *connection);
 
     bool isSink() const;
@@ -31,11 +34,16 @@ public:
 
     void establishConnections();
 
+public:
+    boost::signals2::signal<void()> messages_processed;
+
 private:
     void fillConnections();
 
 private:
-    std::map<OutputPtr, std::vector<boost::signals2::connection>> output_signal_connections_;
+    std::unordered_map<OutputPtr, std::vector<boost::signals2::connection>> output_signal_connections_;
+
+    std::unordered_map<UUID, OutputPtr, UUID::Hasher> outputs_;
 };
 }
 

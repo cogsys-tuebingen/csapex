@@ -117,16 +117,15 @@ void Trigger::disable()
 
 bool Trigger::isConnectionPossible(Connectable *other_side)
 {
-    return connect(other_side);
-}
-
-bool Trigger::connect(Connectable *other_side)
-{
     Slot* slot = dynamic_cast<Slot*>(other_side);
     if(!slot) {
         return false;
     }
+    return true;
+}
 
+bool Trigger::connect(Slot *slot)
+{
     apex_assert_hard(slot);
 
     if(!slot->acknowledgeConnection(this)) {
@@ -137,7 +136,6 @@ bool Trigger::connect(Connectable *other_side)
     targets_.push_back(slot);
 
     validateConnections();
-
     return true;
 }
 

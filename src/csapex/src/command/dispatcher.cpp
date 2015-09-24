@@ -5,6 +5,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/utility/assert.h>
+#include <csapex/command/command_factory.h>
 
 /// SYSTEM
 #include <iostream>
@@ -14,7 +15,9 @@ using namespace csapex;
 CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph_worker,
                                      GraphPtr graph,
                                      ThreadPool* thread_pool, NodeFactory* node_factory)
-    : settings_(settings), graph_worker_(graph_worker), graph_(graph), thread_pool_(thread_pool), node_factory_(node_factory), dirty_(false)
+    : settings_(settings), graph_worker_(graph_worker), graph_(graph), thread_pool_(thread_pool), node_factory_(node_factory),
+      cmd_factory_(std::make_shared<CommandFactory>(graph.get())),
+      dirty_(false)
 {
     stateChanged.connect([this](){ graph_->stateChanged(); });
 }
@@ -198,6 +201,11 @@ void CommandDispatcher::redo()
 Graph* CommandDispatcher::getGraph()
 {
     return graph_.get();
+}
+
+CommandFactory* CommandDispatcher::getCommandFactory()
+{
+    return cmd_factory_.get();
 }
 
 void CommandDispatcher::visitUndoCommands(std::function<void (int level, const Command &)> callback) const

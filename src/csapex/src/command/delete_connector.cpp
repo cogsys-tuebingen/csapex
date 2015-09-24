@@ -35,7 +35,7 @@ bool DeleteConnector::doExecute()
     NodeWorker* node_worker = graph_->findNodeWorkerForConnector(c_uuid);
 
     if(c->isConnected()) {
-        delete_connections = CommandFactory::removeAllConnectionsCmd(c);
+        delete_connections = CommandFactory(graph_).removeAllConnectionsCmd(c);
 
         Command::executeCommand(graph_worker_, graph_, thread_pool_, node_factory_, delete_connections);
     }

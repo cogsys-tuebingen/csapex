@@ -11,7 +11,6 @@
 #include <mutex>
 #include <atomic>
 
-/// FORWARDS DECLARATION
 namespace csapex
 {
 
@@ -45,6 +44,9 @@ public:
     virtual bool isInput() const {
         return false;
     }
+
+    virtual void addConnection(ConnectionPtr connection);
+    virtual void fadeConnection(ConnectionPtr connection);
 
     bool isDynamic() const;
 
@@ -114,9 +116,6 @@ protected:
 protected:
     Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, const std::string &type);
-
-    virtual void addConnection(ConnectionPtr connection);
-    virtual void fadeConnection(ConnectionPtr connection);
 
     void setDynamic(bool dynamic);
 

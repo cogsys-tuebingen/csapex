@@ -33,7 +33,7 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
     : Unique(uuid),
       node_type_(type), node_(node), node_state_(std::make_shared<NodeState>(this)),
       transition_in_(std::make_shared<InputTransition>(this)),
-      transition_out_(std::make_shared<OutputTransition>(this)),
+      transition_out_(std::make_shared<OutputTransition>()),
       is_setup_(false), state_(State::IDLE),
       next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
@@ -42,6 +42,10 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
       profiling_(false)
 {
     apex_assert_hard(node_);
+
+    transition_out_->messages_processed.connect([this](){
+        notifyMessagesProcessed();
+    });
 
     node_state_->setLabel(uuid);
 
@@ -62,7 +66,10 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
     addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
     addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
 
-    trigger_tick_done_ = addTrigger("ticked");
+    auto tickable = std::dynamic_pointer_cast<TickableNode>(node_);
+    if(tickable) {
+        trigger_tick_done_ = addTrigger("ticked");
+    }
     trigger_process_done_ = addTrigger("inputs\nprocessed");
 
     node_->doSetup();
@@ -1214,14 +1221,13 @@ void NodeWorker::sendMessages()
 
     std::unique_lock<std::recursive_mutex> lock(sync);
 
+    apex_assert_hard(getState() == State::PROCESSING);
+
+    publishParameters();
+
     transition_out_->updateConnections();
 
-    apex_assert_hard(getState() == State::PROCESSING);
-    //    setState(State::WAITING_FOR_OUTPUTS);
-
     if(transition_out_->isSink()) {
-        notifyMessagesProcessed();
-
         return;
     }
 
@@ -1241,8 +1247,6 @@ void NodeWorker::sendMessages()
     for(auto o : getAllOutputs()) {
         o->setSequenceNumber(seq);
     }
-
-    publishParameters();
 
     transition_out_->sendMessages();
 

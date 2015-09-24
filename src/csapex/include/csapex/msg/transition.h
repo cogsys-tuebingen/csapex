@@ -14,10 +14,8 @@ namespace csapex
 class Transition
 {
 public:
-    Transition(NodeWorker* node);
+    Transition();
     virtual ~Transition();
-
-    NodeWorker* getNode() const;
 
     void addConnection(ConnectionPtr connection);
     void fadeConnection(ConnectionPtr connection);
@@ -47,8 +45,6 @@ protected:
     void trackConnection(Connection* connection, const boost::signals2::connection& c);
 
 protected:
-    NodeWorker* node_;
-
     std::vector<ConnectionPtr> established_connections_;
     std::vector<ConnectionPtr> unestablished_connections_;
     std::vector<ConnectionPtr> fading_connections_;

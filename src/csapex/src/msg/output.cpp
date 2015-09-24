@@ -15,13 +15,13 @@ using namespace csapex;
 
 Output::Output(const UUID& uuid)
     : Connectable(uuid),
-      force_send_message_(false), state_(State::IDLE)
+      state_(State::IDLE)
 {
 }
 
 Output::Output(Unique* parent, int sub_id)
     : Connectable(parent, sub_id, "out"),
-      force_send_message_(false), state_(State::IDLE)
+      state_(State::IDLE)
 {
 }
 
@@ -130,23 +130,7 @@ bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 
 bool Output::isConnected() const
 {
-    if(force_send_message_) {
-        return true;
-    }
-
     return !connections_.empty();
-}
-
-bool Output::isForced() const
-{
-    if(!force_send_message_) {
-        return false;
-
-    } else if(isConnected()) {
-        return false;
-    }
-
-    return true;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
@@ -169,7 +153,14 @@ bool Output::canSendMessages() const
     return true;
 }
 
-void Output::forceSendMessage(bool force)
+void Output::publish()
 {
-    force_send_message_ = force;
+    auto msg = getMessage();
+    apex_assert_hard(msg);
+
+    for(auto connection : connections_) {
+        if(connection->isSinkEnabled()) {
+            connection->setMessage(msg);
+        }
+    }
 }

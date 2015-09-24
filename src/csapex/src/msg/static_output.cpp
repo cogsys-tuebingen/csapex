@@ -25,7 +25,7 @@ StaticOutput::StaticOutput(Unique *parent, int sub_id)
 
 }
 
-void StaticOutput::publish(ConnectionType::ConstPtr message)
+void StaticOutput::addMessage(ConnectionType::ConstPtr message)
 {
     setType(message->toType());
 
@@ -88,6 +88,7 @@ void StaticOutput::commitMessages()
 
     ++count_;
     messageSent(this);
+
 }
 
 void StaticOutput::reset()

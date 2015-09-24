@@ -75,9 +75,8 @@ bool Port::event(QEvent *e)
         if(adaptee->isOutput()) {
             Output* output = dynamic_cast<Output*>(adaptee.get());
             if(output) {
-                if(!output->isConnected()) {
-                    output->forceSendMessage(true);
-                }
+                // TODO: implement correctly using an Input instance
+                return false;
 
                 QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
                 QPoint global_pos = helpEvent->globalPos();
@@ -348,7 +347,7 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
         if(!adaptee) {
             return;
         }
-        dispatcher_->execute(CommandFactory::removeAllConnectionsCmd(adaptee));
+        dispatcher_->execute(dispatcher_->getCommandFactory()->removeAllConnectionsCmd(adaptee));
     }
 
     e->accept();
@@ -409,7 +408,8 @@ void Port::dropEvent(QDropEvent* e)
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(from && from != adaptee.get()) {
-            dispatcher_->execute(Command::Ptr(new command::AddConnection(adaptee->getUUID(), from->getUUID())));
+            auto cmd = dispatcher_->getCommandFactory()->addConnection(adaptee->getUUID(), from->getUUID());
+            dispatcher_->execute(cmd);
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
@@ -438,7 +438,9 @@ void Port::leaveEvent(QEvent */*e*/)
     if(adaptee->isOutput()) {
         Output* output = dynamic_cast<Output*>(adaptee.get());
         if(output) {
-            output->forceSendMessage(false);
+            return;
+
+            // TODO: remove Input
 
             tooltip_connection.disconnect();
 

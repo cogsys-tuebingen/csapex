@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "command.h"
 #include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -19,19 +20,15 @@ public:
     AddConnection(const UUID &from_uuid, const UUID &to_uuid);
 
 protected:
-    bool doExecute();
     bool doUndo();
     bool doRedo();
 
-    void refresh();
+    virtual void refresh() = 0;
 
     virtual std::string getType() const;
     virtual std::string getDescription() const;
 
-private:
-    Connectable* from;
-    Connectable* to;
-
+protected:
     UUID from_uuid;
     UUID to_uuid;
 };

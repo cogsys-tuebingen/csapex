@@ -35,7 +35,7 @@ void DynamicOutput::addCorrespondent(DynamicInput *input)
     correspondents_.push_back(input);
 }
 
-void DynamicOutput::publish(ConnectionType::ConstPtr message)
+void DynamicOutput::addMessage(ConnectionType::ConstPtr message)
 {
     setType(message->toType());
     messages_to_send_.push_back(message);

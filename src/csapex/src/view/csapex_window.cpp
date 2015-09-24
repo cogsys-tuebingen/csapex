@@ -702,7 +702,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    cmd_dispatcher_->execute(CommandFactory::clearCommand(graph_.get()));
+    cmd_dispatcher_->execute(cmd_dispatcher_->getCommandFactory()->clearCommand());
 }
 
 void CsApexWindow::undo()

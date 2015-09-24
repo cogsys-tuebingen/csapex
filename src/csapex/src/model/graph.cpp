@@ -136,14 +136,16 @@ bool Graph::addConnection(ConnectionPtr connection)
     NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
     NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
 
-    apex_assert_hard(connection->from()->isConnectionPossible(connection->to()));
+    //apex_assert_hard(connection->from()->isConnectionPossible(connection->to()));
 
-    Connectable* from = findConnector(connection->from()->getUUID());
-    Connectable* to = findConnector(connection->to()->getUUID());
+    //Connectable* from = findConnector(connection->from()->getUUID());
+    //Connectable* to = findConnector(connection->to()->getUUID());
 
     connections_.push_back(connection);
-    from->addConnection(connection);
-    to->addConnection(connection);
+    //from->addConnection(connection);
+    //to->addConnection(connection);
+    //from->connection_added_to(from);
+    //to->connection_added_to(to);
 
 
     if(n_to != n_from) {
@@ -155,8 +157,6 @@ bool Graph::addConnection(ConnectionPtr connection)
     }
 
     connectionAdded(connection.get());
-    from->connection_added_to(from);
-    to->connection_added_to(to);
     return true;
 }
 
@@ -344,7 +344,7 @@ void Graph::assignLevels()
     for(NodeWorker::Ptr node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(auto output : node->getAllInputs()) {
+        for(auto output : node->getAllOutputs()) {
             if(output->isDynamic()) {
                 DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
                 dout->clearCorrespondents();

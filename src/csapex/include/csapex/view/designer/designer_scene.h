@@ -142,6 +142,7 @@ private:
 
 private:
     void drawConnection(QPainter *painter, const Connection &connection);
+    std::vector<QRectF> drawConnection(QPainter *painter, Connectable* from, Connectable* to, int id);
     std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
     void drawPort(QPainter *painter, NodeBox *box, Port* p);

@@ -204,6 +204,8 @@ void Connectable::addConnection(ConnectionPtr connection)
     connection->sink_enabled_changed.connect(connectionEnabled);
 
     connection_added(connection);
+
+    connection_added_to(this);
 }
 
 void Connectable::fadeConnection(ConnectionPtr connection)

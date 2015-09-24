@@ -12,7 +12,7 @@ public:
     StaticOutput(const UUID &uuid);
     StaticOutput(Unique *parent, int sub_id);
 
-    virtual void publish(ConnectionType::ConstPtr message) override;
+    virtual void addMessage(ConnectionType::ConstPtr message) override;
 
     virtual void setMultipart(bool multipart, bool last_part) override;
 

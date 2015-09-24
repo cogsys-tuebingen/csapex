@@ -147,7 +147,7 @@ void NodeBox::construct()
     worker->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
     worker->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
-    enabledChange(worker->isProcessingEnabled());
+    enabledChangeEvent(worker->isProcessingEnabled());
 //    worker->enabled.connect([this](bool e){ enabledChange(e); });
     QObject::connect(this, SIGNAL(enabledChange(bool)), this, SLOT(enabledChangeEvent(bool)), Qt::QueuedConnection);
 

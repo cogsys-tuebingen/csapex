@@ -3,6 +3,10 @@
 
 /// COMPONENT
 #include <csapex/msg/transition.h>
+#include <csapex/utility/uuid.h>
+
+/// SYSTEM
+#include <unordered_map>
 
 namespace csapex
 {
@@ -36,9 +40,13 @@ private:
     bool areConnectionsReady() const;
 
 private:
+    NodeWorker* node_;
+
     bool one_input_is_dynamic_;
 
     std::map<InputPtr, std::vector<boost::signals2::connection>> input_signal_connections_;
+
+    std::unordered_map<UUID, InputPtr, UUID::Hasher> inputs_;
 };
 
 }

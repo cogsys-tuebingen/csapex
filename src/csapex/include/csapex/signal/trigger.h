@@ -51,7 +51,7 @@ public:
     virtual void removeConnection(Connectable* other_side);
     virtual void removeAllConnectionsNotUndoable();
 
-    bool connect(Connectable* other_side);
+    bool connect(Slot* other_side);
 
 public:
     boost::signals2::signal<void()> triggered;

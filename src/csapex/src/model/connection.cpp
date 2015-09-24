@@ -19,16 +19,9 @@ using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
 
-
 Connection::Connection(Connectable *from, Connectable *to)
-    : from_(from), to_(to), id_(next_connection_id_++),
-      source_established_(false), sink_established_(false), established_(false),
-      state_(State::NOT_INITIALIZED)
+    : Connection(from, to, next_connection_id_++)
 {
-    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
-    apex_assert_hard(from->isOutput());
-    apex_assert_hard(to->isInput());
 }
 
 Connection::Connection(Connectable *from, Connectable *to, int id)
@@ -87,6 +80,8 @@ void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 
     message_ = msg;
     setState(State::UNREAD);
+
+    notifyMessageSet();
 }
 
 bool Connection::isSourceEnabled() const

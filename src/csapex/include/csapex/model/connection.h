@@ -18,7 +18,8 @@
 namespace csapex
 {
 
-class Connection {
+class Connection
+{
     friend class GraphIO;
     friend class Graph;
     friend class Fulcrum;
@@ -40,10 +41,11 @@ public:
         return out;
     }
 
-public:
+protected:
     Connection(Connectable* from, Connectable* to);
     Connection(Connectable* from, Connectable* to, int id);
 
+public:
     ~Connection();
 
     Connectable* from() const;
@@ -53,7 +55,6 @@ public:
     bool contains(Connectable* c) const;
 
     void setMessage(const ConnectionTypeConstPtr& msg);
-    void notifyMessageSet();
 
     ConnectionTypeConstPtr getMessage() const;
     void setMessageProcessed();
@@ -108,6 +109,9 @@ public:
     void modifyFulcrum(int fulcrum_id, int type, const Point& handle_in=Point(-10.0, 0.0), const Point& handle_out=Point(10.0, 0.0));
     void moveFulcrum(int fulcrum_id, const Point &pos, bool dropped);
     void deleteFulcrum(int fulcrum_id);
+
+protected:
+    void notifyMessageSet();
 
 protected:
     Connectable* from_;

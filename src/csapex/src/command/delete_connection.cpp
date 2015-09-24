@@ -10,10 +10,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
-#include <csapex/model/connection.h>
-
-/// SYSTEM
-
+#include <csapex/msg/bundled_connection.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -52,7 +49,7 @@ bool DeleteConnection::doExecute()
 
     locked = false;
     clear();
-    add(CommandFactory::deleteAllConnectionFulcrumsCommand(graph, connection));
+    add(CommandFactory(graph_).deleteAllConnectionFulcrumsCommand(connection));
     locked = true;
 
     if(Meta::doExecute()) {
@@ -60,16 +57,6 @@ bool DeleteConnection::doExecute()
     }
 
     return true;
-}
-
-bool DeleteConnection::doUndo()
-{
-    auto graph = graph_;
-    Connectable* from = graph->findConnector(from_uuid);
-    Connectable* to = graph->findConnector(to_uuid);;
-    graph->addConnection(ConnectionPtr(new Connection(from, to, connection_id)));
-
-    return Meta::doUndo();
 }
 
 bool DeleteConnection::doRedo()

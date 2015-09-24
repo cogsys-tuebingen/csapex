@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
+#include <csapex/command/command_fwd.h>
 
 /// SYSTEM
 #include <deque>
@@ -34,6 +35,7 @@ public:
     void redo();
 
     Graph* getGraph();
+    CommandFactory* getCommandFactory();
 
     void executeNotUndoable(Command::Ptr command);
     void undoNotRedoable(Command::Ptr command);
@@ -65,6 +67,8 @@ private:
     GraphPtr graph_;
     ThreadPool* thread_pool_;
     NodeFactory* node_factory_;
+
+    CommandFactoryPtr cmd_factory_;
 
     std::vector<Command::Ptr> later;
 

@@ -45,7 +45,7 @@ bool DeleteNode::doExecute()
 
     for(auto connectable : node_worker->getAllConnectors()) {
         if(connectable->isConnected()) {
-            add(CommandFactory::removeAllConnectionsCmd(connectable));
+            add(CommandFactory(graph_).removeAllConnectionsCmd(connectable));
         }
     }
 

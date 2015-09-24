@@ -15,29 +15,37 @@
 using namespace csapex;
 
 InputTransition::InputTransition(NodeWorker* node)
-    : Transition(node), one_input_is_dynamic_(false)
+    : Transition(), node_(node), one_input_is_dynamic_(false)
 {
 }
 
 void InputTransition::addInput(InputPtr input)
 {
+    // remember the input
+    inputs_[input->getUUID()] = input;
+
+    // connect signals
     auto ca = input->connection_added.connect([this](ConnectionPtr connection) {
-        addConnection(connection);
-    });
+            addConnection(connection);
+});
     input_signal_connections_[input].push_back(ca);
 
     auto cf = input->connection_faded.connect([this](ConnectionPtr connection) {
-        fadeConnection(connection);
-    });
+            fadeConnection(connection);
+});
     input_signal_connections_[input].push_back(cf);
 }
 
 void InputTransition::removeInput(InputPtr input)
 {
+    // disconnect signals
     for(auto f : input_signal_connections_[input]) {
         f.disconnect();
     }
     input_signal_connections_.erase(input);
+
+    // forget the input
+    inputs_.erase(input->getUUID());
 }
 
 void InputTransition::establishConnections()
@@ -66,7 +74,8 @@ void InputTransition::connectionRemoved(Connection *connection)
 
 void InputTransition::reset()
 {
-    for(auto input : node_->getAllInputs()) {
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
         input->reset();
     }
     for(ConnectionPtr connection : established_connections_) {
@@ -92,7 +101,8 @@ void InputTransition::connectionAdded(Connection *connection)
     }));
 
     one_input_is_dynamic_ = false;
-    for(auto input : node_->getAllInputs()) {
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
         if(input->isDynamic()) {
             one_input_is_dynamic_ = true;
             break;
@@ -106,32 +116,26 @@ void InputTransition::fireIfPossible()
         return;
     }
 
-    // TODO: replace tick with process where possible
-    if(node_->isSource() && !node_->isSink()) {
-        //        apex_assert_hard(established_connections_.empty());
-        //fire(); -> instead of tick!!!!
-    } else {
-        if(isEnabled()) {
-            apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::UNREAD));
-            if(node_->isEnabled()) {
+    if(isEnabled()) {
+        apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::UNREAD));
+        if(node_->isEnabled()) {
 
-                for(const auto& connection : established_connections_) {
-                    if(connection->getState() == Connection::State::NOT_INITIALIZED) {
-                        if(connection->isEstablished()) {
-                            return;
-                        }
+            for(const auto& connection : established_connections_) {
+                if(connection->getState() == Connection::State::NOT_INITIALIZED) {
+                    if(connection->isEstablished()) {
+                        return;
                     }
                 }
+            }
 
 
-                int highest_deviant_seq = findHighestDeviantSequenceNumber();
+            int highest_deviant_seq = findHighestDeviantSequenceNumber();
 
-                if(highest_deviant_seq >= 0) {
-                    notifyOlderConnections(highest_deviant_seq);
+            if(highest_deviant_seq >= 0) {
+                notifyOlderConnections(highest_deviant_seq);
 
-                } else {
-                    fire();
-                }
+            } else {
+                fire();
             }
         }
     }
@@ -153,7 +157,8 @@ int InputTransition::findHighestDeviantSequenceNumber() const
     int highest_deviant_seq = -1;
 
     bool a_connection_deviates = false;
-    for(auto input : node_->getAllInputs()) {
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
         //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
 
         if(input->isConnected()) {
@@ -180,7 +185,8 @@ int InputTransition::findHighestDeviantSequenceNumber() const
 
 void InputTransition::notifyOlderConnections(int seq)
 {
-    for(auto input : node_->getAllInputs()) {
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
         if(input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
@@ -239,11 +245,7 @@ void InputTransition::notifyMessageProcessed()
 
 void InputTransition::fire()
 {
-    apex_assert_hard(node_->canProcess());
-    apex_assert_hard(node_->isEnabled());
-    apex_assert_hard(node_->isProcessingEnabled());
     apex_assert_hard(!isOneConnection(Connection::State::DONE));
-    //    apex_assert_hard(!isConnection(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(!isOneConnection(Connection::State::READY_TO_RECEIVE));
     apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
     apex_assert_hard(established_connections_.empty() || !areAllConnections(Connection::State::READ));
@@ -252,7 +254,8 @@ void InputTransition::fire()
     ConnectionTypeConstPtr dynamic_message_part;
     ConnectionPtr dynamic_connection;
 
-    for(auto input : node_->getAllInputs()) {
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
         if(input->isDynamic() && input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
@@ -285,7 +288,8 @@ void InputTransition::fire()
 
     //    std::cerr << "fire " <<  node_->getUUID() << std::endl;
 
-    for(auto input : node_->getAllInputs()) {
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
         //        std::cerr << "input message from " <<  node_->getUUID() << " -> " << input->getUUID() << std::endl;
 
         if(input->isConnected()) {
@@ -325,6 +329,5 @@ void InputTransition::fire()
 
     //    std::cerr << "-> process " <<  node_->getUUID() << std::endl;
 
-    apex_assert_hard(node_->isEnabled());
     node_->triggerProcess();
 }

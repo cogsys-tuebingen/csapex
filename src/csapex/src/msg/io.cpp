@@ -79,5 +79,5 @@ void csapex::msg::throwError(const ConnectionTypeConstPtr &msg, const std::type_
 
 void csapex::msg::publish(Output *output, ConnectionTypeConstPtr message)
 {
-    output->publish(message);
+    output->addMessage(message);
 }

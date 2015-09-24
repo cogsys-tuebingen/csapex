@@ -229,6 +229,8 @@ add_library(csapex SHARED
     src/msg/output_transition.cpp
     src/msg/static_output.cpp
     src/msg/transition.cpp
+    src/msg/bundled_connection.cpp
+    src/msg/direct_connection.cpp
 
     src/serialization/yaml.cpp
     src/serialization/message_serializer.cpp
@@ -244,6 +246,7 @@ add_library(csapex SHARED
     src/scheduling/thread_pool.cpp
 
     src/signal/signal.cpp
+    src/signal/signal_connection.cpp
     src/signal/slot.cpp
     src/signal/trigger.cpp
 )
@@ -267,10 +270,14 @@ add_library(csapex_qt SHARED
     src/command/meta.cpp
     src/command/command_factory.cpp
     src/command/add_connection.cpp
+    src/command/add_msg_connection.cpp
+    src/command/add_signal_connection.cpp
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
     src/command/create_thread.cpp
     src/command/delete_connection.cpp
+    src/command/delete_msg_connection.cpp
+    src/command/delete_signal_connection.cpp
     src/command/delete_connector.cpp
     src/command/delete_fulcrum.cpp
     src/command/delete_node.cpp

@@ -20,7 +20,7 @@ public:
     void clearCorrespondents();
     void addCorrespondent(DynamicInput* input);
 
-    virtual void publish(ConnectionType::ConstPtr message) override;
+    virtual void addMessage(ConnectionType::ConstPtr message) override;
 
     virtual void setMultipart(bool multipart, bool last_part) override;
 
