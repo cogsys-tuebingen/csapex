@@ -47,9 +47,9 @@ public:
 
     bool isBeingProcessed() const;
 
-    virtual bool isConnectionPossible(Connectable* other_side);
-    virtual void removeConnection(Connectable* other_side);
-    virtual void removeAllConnectionsNotUndoable();
+    virtual bool isConnectionPossible(Connectable* other_side) override;
+    virtual void removeConnection(Connectable* other_side) override;
+    virtual void removeAllConnectionsNotUndoable() override;
 
     bool connect(Slot* other_side);
 

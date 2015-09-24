@@ -13,9 +13,15 @@ public:
     static ConnectionPtr connect(Output* from, Input* to);
     static ConnectionPtr connect(Output* from, Input* to, int id);
 
+public:
+    ~DirectConnection();
+
+    virtual void setMessage(const ConnectionTypeConstPtr& msg) override;
+
 private:
     DirectConnection(Output* from, Input* to);
     DirectConnection(Output* from, Input* to, int id);
+
 };
 
 }

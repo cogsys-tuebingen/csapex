@@ -46,7 +46,7 @@ protected:
     Connection(Connectable* from, Connectable* to, int id);
 
 public:
-    ~Connection();
+    virtual ~Connection();
 
     Connectable* from() const;
     Connectable* to() const;
@@ -54,7 +54,7 @@ public:
 
     bool contains(Connectable* c) const;
 
-    void setMessage(const ConnectionTypeConstPtr& msg);
+    virtual void setMessage(const ConnectionTypeConstPtr& msg);
 
     ConnectionTypeConstPtr getMessage() const;
     void setMessageProcessed();

@@ -25,6 +25,11 @@ ConnectionPtr DirectConnection::connect(Output *from, Input *to, int id)
     return r;
 }
 
+DirectConnection::~DirectConnection()
+{
+}
+
+
 DirectConnection::DirectConnection(Output *from, Input *to)
     : Connection(from, to)
 {
@@ -35,4 +40,15 @@ DirectConnection::DirectConnection(Output *from, Input *to, int id)
     : Connection(from, to)
 {
 
+}
+
+void DirectConnection::setMessage(const ConnectionTypeConstPtr &msg)
+{
+    Connection::setMessage(msg);
+
+    dynamic_cast<Input*>(to())->inputMessage(msg);
+
+    setState(Connection::State::READ);
+    setState(Connection::State::DONE);
+    setState(Connection::State::READY_TO_RECEIVE);
 }

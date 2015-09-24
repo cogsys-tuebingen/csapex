@@ -57,8 +57,8 @@ public:
 
 
 protected:
-    virtual bool isConnectionPossible(Connectable* other_side);
-    virtual void removeConnection(Connectable* other_side);
+    virtual bool isConnectionPossible(Connectable* other_side) override;
+    virtual void removeConnection(Connectable* other_side) override;
 
 protected:
     mutable std::mutex message_mutex_;

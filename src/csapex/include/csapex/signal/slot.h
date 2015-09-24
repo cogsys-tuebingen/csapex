@@ -56,10 +56,11 @@ public:
     boost::signals2::signal<void(Trigger*)> triggered;
 
 protected:
-    virtual bool isConnectionPossible(Connectable* other_side);
-    virtual bool acknowledgeConnection(Connectable* other_side);
-    virtual void removeConnection(Connectable* other_side);
-    virtual void removeAllConnectionsNotUndoable();
+    bool acknowledgeConnection(Connectable* other_side);
+
+    virtual bool isConnectionPossible(Connectable* other_side) override;
+    virtual void removeConnection(Connectable* other_side) override;
+    virtual void removeAllConnectionsNotUndoable() override;
 
 protected:
     std::vector<Trigger*> sources_;
