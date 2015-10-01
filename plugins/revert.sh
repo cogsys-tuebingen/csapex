@@ -8,7 +8,7 @@ for f in *; do
     cd $f
     if [[ -d .git ]]; then
       echo "${bld}${blu}reverting $f${rst}"
-      git checkout *
+      git reset HEAD --hard
     fi
     cd - 1> /dev/null
   fi

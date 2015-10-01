@@ -19,7 +19,6 @@ MessageRendererManager::MessageRendererManager()
 
 MessageRendererManager::~MessageRendererManager()
 {
-    delete manager_;
 }
 
 void MessageRendererManager::setPluginLocator(PluginLocatorPtr locator)
@@ -31,6 +30,7 @@ void MessageRendererManager::shutdown()
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     renderers.clear();
+    manager_.reset();
 }
 
 void MessageRendererManager::loadPlugins()
