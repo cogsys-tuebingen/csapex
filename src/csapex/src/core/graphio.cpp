@@ -212,7 +212,9 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                     Output* out = dynamic_cast<Output*>(from);
                     Input* in = dynamic_cast<Input*>(to);
                     if(out && in) {
-                        ConnectionPtr c = BundledConnection::connect(out, in);
+                        ConnectionPtr c = BundledConnection::connect(
+                                    out, in,
+                                    parent->getOutputTransition(), target->getInputTransition());
                         graph_->addConnection(c);
                     }
 

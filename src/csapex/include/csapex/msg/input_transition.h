@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/msg/transition.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/node_runner.h>
 
 /// SYSTEM
 #include <unordered_map>
@@ -21,6 +22,8 @@ public:
 
     void notifyMessageProcessed();
     void fireIfPossible();
+
+    /*TODO: find better name*/ void checkIfEnabled();
 
     bool isEnabled() const;
 

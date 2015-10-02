@@ -383,16 +383,6 @@ void NodeWorker::triggerPanic()
     panic();
 }
 
-void NodeWorker::triggerProcess()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(state_ == State::ENABLED);
-
-    apex_assert_hard(transition_out_->canStartSendingMessages());
-    setState(State::FIRED);
-    processRequested();
-}
-
 void NodeWorker::triggerCheckTransitions()
 {
     checkTransitionsRequested();
@@ -519,13 +509,18 @@ void NodeWorker::updateParameterValue(Connectable *s)
 
 void NodeWorker::startProcessingMessages()
 {
+    assertNotInGuiThread();
+
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    apex_assert_hard(state_ == State::ENABLED);
+
+    apex_assert_hard(transition_out_->canStartSendingMessages());
+    setState(State::FIRED);
+
     if(!isProcessingEnabled()) {
         return;
     }
 
-    std::unique_lock<std::recursive_mutex> lock(sync);
-
-    assertNotInGuiThread();
 
     apex_assert_hard(state_ == State::FIRED);
     apex_assert_hard(!transition_in_->hasUnestablishedConnection());

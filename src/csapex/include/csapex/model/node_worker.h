@@ -62,7 +62,6 @@ public:
     void reset();
 
     void triggerCheckTransitions();
-    void triggerProcess();
     void triggerPanic();
 
     NodeWeakPtr getNode() const;

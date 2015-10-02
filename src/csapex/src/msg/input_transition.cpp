@@ -87,19 +87,6 @@ void InputTransition::connectionAdded(Connection *connection)
 {
     Transition::connectionAdded(connection);
 
-    trackConnection(connection, connection->new_message.connect([this]() {
-        //        std::cerr << "new message in " << node_->getUUID() << std::endl;
-        //        update();
-
-        // TODO: is this necessary?
-        node_->triggerCheckTransitions();
-    }));
-
-    trackConnection(connection, connection->endpoint_established.connect([this]() {
-        // establish();
-        node_->triggerCheckTransitions();
-    }));
-
     one_input_is_dynamic_ = false;
     for(auto pair : inputs_) {
         InputPtr input = pair.second;
@@ -139,6 +126,16 @@ void InputTransition::fireIfPossible()
             }
         }
     }
+}
+
+void InputTransition::checkIfEnabled()
+{
+//    who should be responsible for checking this?
+//    - InputTransition? - rather not
+//    - NodeWorker? - no!
+//    - NodeRunner? - maybe
+//    - Node....? NodeExecutor - new class, but also separate responsibility
+    node_->triggerCheckTransitions();
 }
 
 bool InputTransition::isEnabled() const
@@ -329,5 +326,6 @@ void InputTransition::fire()
 
     //    std::cerr << "-> process " <<  node_->getUUID() << std::endl;
 
-    node_->triggerProcess();
+    // runnable -> run()
+    node_->startProcessingMessages();
 }

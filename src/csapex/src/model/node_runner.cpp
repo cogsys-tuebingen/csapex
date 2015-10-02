@@ -52,9 +52,6 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
     prepare_ = std::make_shared<Task>(std::string("prepare ") + worker->getUUID().getFullName(),
                                       std::bind(&NodeWorker::prepareForNextProcess, worker),
                                       this);
-    process_ = std::make_shared<Task>(std::string("process ") + worker->getUUID().getFullName(),
-                                      std::bind(&NodeWorker::startProcessingMessages, worker),
-                                      this);
     check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
                                                 std::bind(&NodeWorker::checkTransitions, worker, true),
                                                 this);
@@ -106,28 +103,10 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     });
     connections_.push_back(cmp);
 
-    auto cp = worker_->processRequested.connect([this]() {
-        schedule(process_);
-    });
-    connections_.push_back(cp);
-
     auto ctr = worker_->checkTransitionsRequested.connect([this]() {
         schedule(check_transitions_);
     });
     connections_.push_back(ctr);
-
-    // tick?
-//    if(tick_) {
-//        auto ct = worker_->tickRequested.connect([this]() {
-//            if(!paused_) {
-//                if(!stepping_ || can_step_) {
-//                    can_step_ = false;
-//                    schedule(tick_);
-//                }
-//            }
-//        });
-//        connections_.push_back(ct);
-//    }
 
     // parameter change
     auto check = worker_->parametersChanged.connect([this]() {

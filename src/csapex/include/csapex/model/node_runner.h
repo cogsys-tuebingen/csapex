@@ -57,7 +57,6 @@ private:
 
     TaskPtr tick_;
     TaskPtr check_parameters_;
-    TaskPtr process_;
     TaskPtr prepare_;
     TaskPtr check_transitions_;
 

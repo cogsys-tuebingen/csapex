@@ -62,9 +62,10 @@ public:
     bool isSourceEnabled() const;
     bool isSinkEnabled() const;
 
-    void establishSource();
-    void establishSink();
-    void establish();
+    virtual void establishSource();
+    virtual void establishSink();
+    virtual void establish();
+
     bool isSourceEstablished() const;
     bool isSinkEstablished() const;
     bool isEstablished() const;
