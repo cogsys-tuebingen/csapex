@@ -11,7 +11,7 @@
 using namespace csapex;
 
 OutputTransition::OutputTransition()
-    : Transition()
+    : Transition(), sequence_number_(-1)
 {
 
 }
@@ -60,6 +60,21 @@ void OutputTransition::removeOutput(OutputPtr output)
 
     // forget the output
     outputs_.erase(output->getUUID());
+}
+
+void OutputTransition::setSequenceNumber(long seq_no)
+{
+    sequence_number_ = seq_no;
+
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
+        output->setSequenceNumber(sequence_number_);
+    }
+}
+
+long OutputTransition::getSequenceNumber() const
+{
+    return sequence_number_;
 }
 
 void OutputTransition::connectionRemoved(Connection *connection)
@@ -119,17 +134,33 @@ void OutputTransition::sendMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    apex_assert_hard(!isSink());
+    updateConnections();
+
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
-        if(output->isConnected()) {
+//        if(output->isConnected()) {
             output->commitMessages();
+//        }
+    }
+
+    long seq_no = -1;
+    for(auto pair : outputs_) {
+        OutputPtr output = pair.second;
+        long s = output->sequenceNumber();
+        if(seq_no == -1) {
+            seq_no = s;
+        } else {
+            apex_assert_hard(seq_no == s);
         }
     }
 
-    fillConnections();
+    setSequenceNumber(seq_no);
+
+    if(!isSink()) {
+        fillConnections();
+    }
 }
 
 void OutputTransition::publishNextMessage()

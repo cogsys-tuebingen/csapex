@@ -1225,38 +1225,7 @@ void NodeWorker::sendMessages()
 
     publishParameters();
 
-    transition_out_->updateConnections();
-
-    if(transition_out_->isSink()) {
-        return;
-    }
-
-    int seq = 0;
-
-    bool source = isSource();//inputs_.empty();
-
-    if(source) {
-        for(auto o : outputs_) {
-            seq = std::max(seq, o->sequenceNumber());
-        }
-    } else {
-        for(auto i : inputs_) {
-            seq = std::max(seq, i->sequenceNumber());
-        }
-    }
-    for(auto o : getAllOutputs()) {
-        o->setSequenceNumber(seq);
-    }
-
     transition_out_->sendMessages();
-
-    if(source) {
-        for(auto o : getAllOutputs()) {
-            o->setSequenceNumber(seq+1);
-        }
-    }
-
-    //    node_->aerr << "SEND" << std::endl;
 }
 
 void NodeWorker::setIsSource(bool source)

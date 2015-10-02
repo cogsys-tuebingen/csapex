@@ -59,6 +59,8 @@ void DynamicOutput::commitMessages()
     committed_messages_ = messages_to_send_;
     ++count_;
 
+    ++seq_no_;
+
     for(ConnectionTypeConstPtr& m : committed_messages_) {
         m->flags.data |= (int) ConnectionType::Flags::Fields::MULTI_PART;
         m->setSequenceNumber(seq_no_);
@@ -69,7 +71,6 @@ void DynamicOutput::commitMessages()
 
     messages_to_send_.clear();
 
-//    ++seq_no_;
 
 
 //    for(DynamicInput* di : correspondents_) {

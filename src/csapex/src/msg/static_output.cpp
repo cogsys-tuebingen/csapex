@@ -72,6 +72,7 @@ void StaticOutput::commitMessages()
 
     activate();
 
+
     if(message_to_send_) {
         committed_message_ = message_to_send_;
         clear();
@@ -83,12 +84,12 @@ void StaticOutput::commitMessages()
         committed_message_ = connection_types::makeEmpty<connection_types::NoMessage>();
     }
 
+    ++seq_no_;
     committed_message_->setSequenceNumber(seq_no_);
     committed_message_->flags.data = message_flags_;
 
     ++count_;
     messageSent(this);
-
 }
 
 void StaticOutput::reset()
