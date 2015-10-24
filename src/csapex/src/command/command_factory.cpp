@@ -37,13 +37,16 @@ Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to)
 {
     auto from_c = graph_->findConnector(from);
 
-    if(dynamic_cast<Output*>(from_c) || dynamic_cast<Input*>(from_c)) {
+    if(dynamic_cast<Output*>(from_c)) {
         return std::make_shared<command::AddMessageConnection>(from, to);
+    } else if(dynamic_cast<Input*>(from_c)) {
+        return std::make_shared<command::AddMessageConnection>(to, from);
     }
-    if(dynamic_cast<Trigger*>(from_c) || dynamic_cast<Slot*>(from_c)) {
+    if(dynamic_cast<Trigger*>(from_c)) {
         return std::make_shared<command::AddSignalConnection>(from, to);
+    } else if(dynamic_cast<Slot*>(from_c)) {
+        return std::make_shared<command::AddSignalConnection>(to, from);
     }
-
     return nullptr;
 }
 

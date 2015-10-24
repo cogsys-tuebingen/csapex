@@ -9,7 +9,8 @@
 
 using namespace csapex;
 
-Transition::Transition()
+Transition::Transition(std::function<void ()> activation_fn)
+    : activation_fn_(activation_fn)
 {
 
 }
@@ -77,6 +78,15 @@ void Transition::updateConnections()
     if(hasFadingConnection()) {
         removeFadingConnections();
     }
+}
+
+
+
+void Transition::checkIfEnabled()
+{
+//    if(isEnabled()) { // TODO: check here if enabled
+        activation_fn_();
+//    }
 }
 
 void Transition::establishConnection(ConnectionPtr connection)

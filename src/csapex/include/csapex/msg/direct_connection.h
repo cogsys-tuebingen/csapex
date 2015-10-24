@@ -18,7 +18,7 @@ public:
 
     virtual void setMessage(const ConnectionTypeConstPtr& msg) override;
 
-private:
+protected:
     DirectConnection(Output* from, Input* to);
     DirectConnection(Output* from, Input* to, int id);
 

@@ -15,7 +15,9 @@
 namespace csapex
 {
 FWD(Input);
+FWD(DynamicInput);
 FWD(Output);
+FWD(DynamicOutput);
 FWD(InputTransition);
 FWD(OutputTransition);
 FWD(MessageProvider);

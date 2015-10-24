@@ -10,8 +10,8 @@
 
 using namespace csapex;
 
-OutputTransition::OutputTransition()
-    : Transition(), sequence_number_(-1)
+OutputTransition::OutputTransition(std::function<void ()> activation_fn)
+    : Transition(activation_fn), sequence_number_(-1)
 {
 
 }
@@ -77,6 +77,11 @@ long OutputTransition::getSequenceNumber() const
     return sequence_number_;
 }
 
+bool OutputTransition::isEnabled() const
+{
+    return canStartSendingMessages();
+}
+
 void OutputTransition::connectionRemoved(Connection *connection)
 {
     Transition::connectionRemoved(connection);
@@ -104,6 +109,8 @@ void OutputTransition::establishConnections()
             }
         }
     }
+
+    checkIfEnabled();
 }
 
 bool OutputTransition::canStartSendingMessages() const

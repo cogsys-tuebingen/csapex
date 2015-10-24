@@ -14,7 +14,7 @@ namespace csapex
 class Transition
 {
 public:
-    Transition();
+    Transition(std::function<void()> activation_fn);
     virtual ~Transition();
 
     void addConnection(ConnectionPtr connection);
@@ -31,6 +31,10 @@ public:
     virtual void establishConnections() = 0;
     virtual void reset() = 0;
 
+
+    virtual bool isEnabled() const = 0;
+    /*TODO: find better name*/ void checkIfEnabled();
+
 protected:
     bool areAllConnections(Connection::State state) const;
     bool areAllConnections(Connection::State a, /*or*/ Connection::State b) const;
@@ -45,6 +49,8 @@ protected:
     void trackConnection(Connection* connection, const boost::signals2::connection& c);
 
 protected:
+    std::function<void()> activation_fn_;
+
     std::vector<ConnectionPtr> established_connections_;
     std::vector<ConnectionPtr> unestablished_connections_;
     std::vector<ConnectionPtr> fading_connections_;

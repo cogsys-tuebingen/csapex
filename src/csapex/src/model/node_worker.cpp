@@ -32,8 +32,8 @@ const double NodeWorker::DEFAULT_FREQUENCY = 30.0;
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node)
     : Unique(uuid),
       node_type_(type), node_(node), node_state_(std::make_shared<NodeState>(this)),
-      transition_in_(std::make_shared<InputTransition>(this)),
-      transition_out_(std::make_shared<OutputTransition>()),
+      transition_in_(std::make_shared<InputTransition>(std::bind(&NodeWorker::triggerCheckTransitions, this))),
+      transition_out_(std::make_shared<OutputTransition>(std::bind(&NodeWorker::triggerCheckTransitions, this))),
       is_setup_(false), state_(State::IDLE),
       next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
@@ -268,12 +268,12 @@ bool NodeWorker::isWaitingForTrigger() const
     return false;
 }
 
-bool NodeWorker::canProcess()
+bool NodeWorker::canProcess() const
 {
     return canReceive() && canSend() && !isWaitingForTrigger();
 }
 
-bool NodeWorker::canReceive()
+bool NodeWorker::canReceive() const
 {
     for(InputPtr i : inputs_) {
         if(!i->isConnected() && !i->isOptional()) {
@@ -283,7 +283,7 @@ bool NodeWorker::canReceive()
     return true;
 }
 
-bool NodeWorker::canSend()
+bool NodeWorker::canSend() const
 {
     return transition_out_->canStartSendingMessages();
 }
@@ -655,7 +655,7 @@ void NodeWorker::finishProcessingMessages(bool was_executed)
     }
 }
 
-bool NodeWorker::areAllInputsAvailable()
+bool NodeWorker::areAllInputsAvailable() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
@@ -1170,7 +1170,15 @@ void NodeWorker::checkTransitions(bool try_fire)
     if(try_fire) {
         apex_assert_hard(transition_out_->canStartSendingMessages());
 
-        transition_in_->fireIfPossible();
+        int highest_deviant_seq = transition_in_->findHighestDeviantSequenceNumber();
+
+        if(highest_deviant_seq >= 0) {
+            transition_in_->notifyOlderConnections(highest_deviant_seq);
+        } else {
+            transition_in_->forwardMessages();
+
+            startProcessingMessages();
+        }
     }
 }
 

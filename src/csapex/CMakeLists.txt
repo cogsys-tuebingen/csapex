@@ -208,6 +208,7 @@ add_library(csapex SHARED
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
     src/model/node.cpp
+    src/model/node_handle.cpp
     src/model/node_modifier.cpp
     src/model/node_runner.cpp
     src/model/node_worker.cpp

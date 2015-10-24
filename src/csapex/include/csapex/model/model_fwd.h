@@ -14,6 +14,7 @@
 
 namespace csapex
 {
+FWD(NodeHandle);
 FWD(NodeConstructor);
 FWD(NodeStatistics);
 FWD(NodeRunner);

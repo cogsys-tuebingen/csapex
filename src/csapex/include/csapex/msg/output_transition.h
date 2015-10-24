@@ -13,7 +13,7 @@ namespace csapex
 class OutputTransition : public Transition
 {
 public:
-    OutputTransition();
+    OutputTransition(std::function<void()> activation_fn = [](){});
 
     void addOutput(OutputPtr output);
     void removeOutput(OutputPtr output);
@@ -32,6 +32,8 @@ public:
     void abortSendingMessages();
     void setConnectionsReadyToReceive();
     bool areOutputsIdle() const;
+
+    virtual bool isEnabled() const override;
 
     virtual void reset() override;
 

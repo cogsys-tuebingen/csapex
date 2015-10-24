@@ -8,6 +8,7 @@
 
 /// SYSTEM
 #include <unordered_map>
+#include <functional>
 
 namespace csapex
 {
@@ -15,20 +16,22 @@ namespace csapex
 class InputTransition : public Transition
 {
 public:
-    InputTransition(NodeWorker* node);
+    InputTransition(std::function<void()> activation_fn = [](){});
 
     void addInput(InputPtr input);
     void removeInput(InputPtr input);
 
     void notifyMessageProcessed();
-    void fireIfPossible();
 
-    /*TODO: find better name*/ void checkIfEnabled();
+    void forwardMessages();
 
-    bool isEnabled() const;
+    int findHighestDeviantSequenceNumber() const;
+    void notifyOlderConnections(int highest_seq);
 
-    void establishConnections() override;
-    void connectionRemoved(Connection* connection) override;
+    virtual bool isEnabled() const override;
+
+    virtual void establishConnections() override;
+    virtual void connectionRemoved(Connection* connection) override;
 
     virtual void reset() override;
 
@@ -36,15 +39,10 @@ protected:
     virtual void connectionAdded(Connection* connection) override;
 
 private:
-    void fire();
-    int findHighestDeviantSequenceNumber() const;
-    void notifyOlderConnections(int highest_seq);
 
     bool areConnectionsReady() const;
 
 private:
-    NodeWorker* node_;
-
     bool one_input_is_dynamic_;
 
     std::map<InputPtr, std::vector<boost::signals2::connection>> input_signal_connections_;

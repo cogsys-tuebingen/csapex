@@ -10,6 +10,7 @@
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <map>
@@ -22,7 +23,9 @@
 
 namespace csapex {
 
-class NodeWorker : public ErrorState, public Unique
+class NodeWorker :
+        public NodeHandle, // TODO: separate
+        public ErrorState, public Unique
 {
     friend class Node;
     friend class NodeBox;
@@ -61,7 +64,7 @@ public:
     void stop();
     void reset();
 
-    void triggerCheckTransitions();
+    virtual void triggerCheckTransitions() override;
     void triggerPanic();
 
     NodeWeakPtr getNode() const;
@@ -69,7 +72,7 @@ public:
     void setState(State state);
     State getState() const;
 
-    bool isEnabled() const;
+    virtual bool isEnabled() const override;
     bool isIdle() const;
     bool isProcessing() const;
     bool isFired() const;
@@ -125,10 +128,10 @@ public:
     std::vector<TriggerPtr> getTriggers() const;
 
     bool isWaitingForTrigger() const;
-    bool canProcess();
-    bool canReceive();
-    bool canSend();
-    bool areAllInputsAvailable();
+    virtual bool canProcess() const override;
+    bool canReceive() const;
+    bool canSend() const;
+    bool areAllInputsAvailable() const;
 
     void makeParametersConnectable();
 
@@ -149,7 +152,7 @@ private:
 public:
     bool tick();
 
-    void startProcessingMessages();
+    virtual void startProcessingMessages() override;
     void finishProcessingMessages(bool was_executed);
 
     void prepareForNextProcess();
