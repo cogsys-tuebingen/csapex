@@ -64,12 +64,7 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 {
     csapex::param::Parameter::Ptr old_value;
     if(params.find(param->name()) != params.end()) {
-        // already here, keep value!
-        try {
-            param->setValueFrom(*params[param->name()]);
-        } catch(const std::exception& e) {
-            std::cerr << "cannot use serialized value for " << param->name() << ": " << e.what() << std::endl;
-        }
+        throw std::logic_error(std::string("a parameter with the name ") + param->name() + " has already been added.");
     }
     apex_assert_hard(param->name() != "noname");
     if(std::find(order.begin(), order.end(), param->name()) == order.end()) {
