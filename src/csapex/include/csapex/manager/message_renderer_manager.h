@@ -45,7 +45,7 @@ private:
 
     std::map<std::type_index, MessageRendererPtr> renderers;
 
-    std::shared_ptr<PluginManager<MessageRenderer>> manager_;
+    std::unique_ptr<PluginManager<MessageRenderer>> manager_;
 };
 
 }

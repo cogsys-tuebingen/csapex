@@ -1313,13 +1313,17 @@ bool NodeWorker::tick()
 
                 if(transition_out_->canStartSendingMessages() && !transition_out_->hasFadingConnection()) {
                     //            std::cerr << "ticks" << std::endl;
-                    apex_assert_hard(state == State::IDLE || state == State::ENABLED);
-                    if(state == State::IDLE) {
-                        setState(State::ENABLED);
-                    }
-                    setState(State::FIRED);
-                    setState(State::PROCESSING);
 
+                    {
+                        std::unique_lock<std::recursive_mutex> lock(state_mutex_);
+                        auto state = getState();
+                        apex_assert_hard(state == State::IDLE || state == State::ENABLED);
+                        if(state == State::IDLE) {
+                            setState(State::ENABLED);
+                        }
+                        setState(State::FIRED);
+                        setState(State::PROCESSING);
+                    }
                     transition_out_->clearOutputs();
 
                     TimerPtr t = nullptr;
