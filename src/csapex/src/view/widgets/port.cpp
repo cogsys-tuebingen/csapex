@@ -12,6 +12,8 @@
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/designer/designer_view.h>
+#include <csapex/view/widgets/message_preview_widget.h>
+#include <csapex/view/designer/designer_scene.h>
 
 /// SYSTEM
 #include <sstream>
@@ -57,7 +59,6 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
 
 Port::~Port()
 {
-    tooltip_connection.disconnect();
     for(auto c : connections_) {
         c.disconnect();
     }
@@ -75,22 +76,23 @@ bool Port::event(QEvent *e)
         if(adaptee->isOutput()) {
             Output* output = dynamic_cast<Output*>(adaptee.get());
             if(output) {
-                // TODO: implement correctly using an Input instance
-                return false;
-
                 QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
                 QPoint global_pos = helpEvent->globalPos();
                 DesignerView* dview = widget_controller_->getDesignerView();
                 QPointF pos = dview->mapToScene(dview->mapFromGlobal(global_pos));
                 pos.setY(pos.y() + 50);
 
-                QGraphicsView* view = widget_controller_->getTooltipView("Output");
+                MessagePreviewWidget* view = widget_controller_->getTooltipView("Output");
                 view->move(pos.toPoint());
+
+                if(!view->isConnected()) {
+                    view->connectTo(output);
+                    view->setCallback(std::bind(&Port::updateTooltip, this, std::placeholders::_1));
+
+                    dview->designerScene()->addWidget(view);
+                }
+
                 view->show();
-
-                updateTooltip();
-
-                tooltip_connection = output->messageSent.connect([this](Connectable*) { updateTooltip(); });
             }
         }
     }
@@ -98,40 +100,32 @@ bool Port::event(QEvent *e)
     return QWidget::event(e);
 }
 
-void Port::updateTooltip()
+void Port::updateTooltip(ConnectionType::ConstPtr msg)
 {
     ConnectablePtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return;
     }
-    StaticOutput* output = dynamic_cast<StaticOutput*>(adaptee.get());
 
-    if(output) {
-        QGraphicsView* view = widget_controller_->getTooltipView("Output");
+    MessagePreviewWidget* view = widget_controller_->getTooltipView("Output");
+    if(view->isHidden() || !view->isConnected()) {
+        return;
+    }
 
-        if(view->isHidden()) {
-            return;
-        }
+    if(msg) {
+        try {
+            MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
+            if(renderer) {
+                QImage img = renderer->render(msg);
 
-        ConnectionType::ConstPtr msg = output->getMessage();
-
-        if(msg) {
-
-            try {
-                MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
-                if(renderer) {
-                    QImage img = renderer->render(msg);
-
-                    auto pm = QPixmap::fromImage(img);
-                    view->scene()->clear();
-                    view->scene()->addPixmap(pm);
-                    view->setMaximumSize(256, 256);
-                    view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
-                }
-            } catch(const std::exception& e) {
-                view->hide();
+                auto pm = QPixmap::fromImage(img);
+                view->scene()->clear();
+                view->scene()->addPixmap(pm);
+                view->setMaximumSize(256, 256);
+                view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
             }
-
+        } catch(const std::exception& e) {
+            view->hide();
         }
     }
 }
@@ -438,12 +432,6 @@ void Port::leaveEvent(QEvent */*e*/)
     if(adaptee->isOutput()) {
         Output* output = dynamic_cast<Output*>(adaptee.get());
         if(output) {
-            return;
-
-            // TODO: remove Input
-
-            tooltip_connection.disconnect();
-
             widget_controller_->hideTooltipView();
         }
     }

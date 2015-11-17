@@ -34,6 +34,7 @@ class MinimapWidget;
 
 class MovableGraphicsProxyWidget;
 class ProfilingWidget;
+class MessagePreviewWidget;
 
 class DragIO;
 FWD(DragIOHandler);

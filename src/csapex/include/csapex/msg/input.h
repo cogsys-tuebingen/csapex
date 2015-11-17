@@ -27,7 +27,7 @@ public:
 
     bool canConnectTo(Connectable* other_side, bool move) const;
 
-    void inputMessage(ConnectionType::ConstPtr message);
+    virtual void inputMessage(ConnectionType::ConstPtr message);
     virtual ConnectionTypeConstPtr getMessage() const;
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;

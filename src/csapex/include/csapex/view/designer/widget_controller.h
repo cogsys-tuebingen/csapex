@@ -56,7 +56,7 @@ public:
     NodeFactory* getNodeFactory();
 
     void hideTooltipView();
-    QGraphicsView* getTooltipView(const std::string& title);
+    MessagePreviewWidget *getTooltipView(const std::string& title);
 
     void setDesigner(Designer* designer);
 

@@ -27,6 +27,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/widgets/message_preview_widget.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -44,15 +45,35 @@ class WidgetController::Impl
 {
 public:
     Impl()
-        : tooltip_view_(nullptr)
+        : preview_widget_(nullptr)
     {
     }
 
     ~Impl()
     {
-        if(tooltip_view_) {
-            tooltip_view_->deleteLater();
+        if(preview_widget_) {
+            preview_widget_->deleteLater();
         }
+    }
+
+    void hideTooltipView()
+    {
+        if(preview_widget_) {
+            preview_widget_->hide();
+            preview_widget_->disconnect();
+        }
+    }
+
+    MessagePreviewWidget* getTooltipView(const std::string& title)
+    {
+        if(!preview_widget_) {
+            preview_widget_ = new MessagePreviewWidget;
+            preview_widget_->setScene(new QGraphicsScene);
+            preview_widget_->setHidden(true);
+        }
+        preview_widget_->setWindowTitle(QString::fromStdString(title));
+
+        return preview_widget_;
     }
 
 public:
@@ -62,7 +83,7 @@ public:
 
     QString style_sheet_;
 
-    QGraphicsView* tooltip_view_;
+    MessagePreviewWidget* preview_widget_;
 };
 
 WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispatcher, GraphWorker::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
@@ -138,24 +159,12 @@ NodeFactory* WidgetController::getNodeFactory()
 
 void WidgetController::hideTooltipView()
 {
-    if(pimpl->tooltip_view_) {
-        pimpl->tooltip_view_->hide();
-        pimpl->tooltip_view_->deleteLater();
-        pimpl->tooltip_view_ = nullptr;
-    }
+    pimpl->hideTooltipView();
 }
 
-QGraphicsView* WidgetController::getTooltipView(const std::string& title)
+MessagePreviewWidget* WidgetController::getTooltipView(const std::string& title)
 {
-    if(!pimpl->tooltip_view_) {
-        pimpl->tooltip_view_ = new QGraphicsView;
-        designer_->getDesignerView()->designerScene()->addWidget(pimpl->tooltip_view_);
-        pimpl->tooltip_view_->setWindowTitle(QString::fromStdString(title));
-        pimpl->tooltip_view_->setScene(new QGraphicsScene);
-        pimpl->tooltip_view_->setHidden(true);
-    }
-
-    return pimpl->tooltip_view_;
+    return pimpl->getTooltipView(title);
 }
 
 void WidgetController::setDesigner(Designer *designer)

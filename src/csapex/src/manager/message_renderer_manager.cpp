@@ -6,10 +6,6 @@
 #include <csapex/core/settings.h>
 #include <csapex/msg/apex_message_provider.h>
 
-/// SYSTEM
-#include <boost/filesystem.hpp>
-
-namespace bfs = boost::filesystem;
 using namespace csapex;
 
 MessageRendererManager::MessageRendererManager()
@@ -43,8 +39,7 @@ void MessageRendererManager::loadPlugins()
 
     renderers.clear();
 
-    typedef std::pair<std::string, PluginManager<csapex::MessageRenderer>::Constructor> PAIR;
-    for(PAIR pair : manager_->availableClasses()) {
+    for(auto pair : manager_->availableClasses()) {
         try {
             MessageRenderer::Ptr renderer(pair.second());
             renderers[renderer->messageType()] = renderer;
