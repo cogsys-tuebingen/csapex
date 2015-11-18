@@ -113,7 +113,5 @@ ConnectionType::ConstPtr StaticOutput::getMessage()
 
 void StaticOutput::startReceiving()
 {
-    std::cerr << getUUID() << " start receiving" << std::endl;
     message_to_send_.reset();
-    setState(Output::State::RECEIVING);
 }

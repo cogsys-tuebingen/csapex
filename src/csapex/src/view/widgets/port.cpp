@@ -236,9 +236,6 @@ void Port::createToolTip()
         case Output::State::IDLE:
             tooltip << "IDLE";
             break;
-        case Output::State::RECEIVING:
-            tooltip << "RECEIVING";
-            break;
         default:
             tooltip << "UNKNOWN";
         }

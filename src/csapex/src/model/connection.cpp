@@ -112,7 +112,6 @@ void Connection::establishSource()
     if(source_established_) {
         return;
     }
-    std::cerr << from_->getUUID() << " -> " << to_->getUUID() << ": establish source" << std::endl;
     source_established_ = true;
     lock.unlock();
     endpoint_established();
@@ -124,8 +123,6 @@ void Connection::establishSink()
     if(sink_established_) {
         return;
     }
-    std::cerr << from_->getUUID() << " -> " << to_->getUUID() << ": establish sink" << std::endl;
-
     sink_established_ = true;
     lock.unlock();
     endpoint_established();

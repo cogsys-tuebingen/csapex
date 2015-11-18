@@ -509,7 +509,6 @@ void NodeWorker::updateParameterValue(Connectable *s)
 
 void NodeWorker::startProcessingMessages()
 {
-    node_->ainfo << "start processing" << std::endl;
     assertNotInGuiThread();
 
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -519,7 +518,6 @@ void NodeWorker::startProcessingMessages()
     setState(State::FIRED);
 
     if(!isProcessingEnabled()) {
-        node_->ainfo << "processing is disabled" << std::endl;
         return;
     }
 
@@ -586,14 +584,12 @@ void NodeWorker::startProcessingMessages()
 
     apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
     transition_out_->setConnectionsReadyToReceive();
-    node_->ainfo << "start receiving" << std::endl;
     transition_out_->startReceiving();
 
     transition_in_->notifyMessageProcessed();
 
     if(!all_inputs_are_present) {
         finishProcessingMessages(false);
-        node_->ainfo << "not all inputs are present" << std::endl;
         return;
     }
 
@@ -610,7 +606,6 @@ void NodeWorker::startProcessingMessages()
     bool sync = !node_->isAsynchronous();
 
     try {
-        //            node_->aerr << "processing" << std::endl;
         if(sync) {
             node_->process(*node_);
 
@@ -630,7 +625,7 @@ void NodeWorker::startProcessingMessages()
     } catch(...) {
         throw;
     }
-    node_->ainfo << "done" << std::endl;
+
     if(sync) {
         finishProcessingMessages(true);
     }
@@ -1096,38 +1091,12 @@ void NodeWorker::notifyMessagesProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-        //    node_->aerr << "notifyMessagesProcessed" << std::endl;
-
-        //        apex_assert_hard(state_ == State::WAITING_FOR_OUTPUTS);
         apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
     }
-
-    //    setState(State::WAITING_FOR_RESET);
-
-    //    messages_processed();
 
     triggerCheckTransitions();
 }
 
-void NodeWorker::prepareForNextProcess()
-{
-    //    {
-    //        std::unique_lock<std::recursive_mutex> lock(sync);
-
-    //        //        node_->aerr << "prepareForNextProcess" << std::endl;
-
-    //        apex_assert_hard(state_ == State::WAITING_FOR_RESET);
-    //        apex_assert_hard(transition_out_->isSink() || transition_out_->areOutputsIdle());
-    //        apex_assert_hard(transition_out_->canSendMessages());
-
-    //        setState(State::IDLE);
-
-    //        transition_in_->notifyMessageProcessed();
-    //    }
-
-    //    checkTransitions();
-    //    checkInputs();
-}
 
 void NodeWorker::updateTransitionConnections()
 {
@@ -1144,10 +1113,6 @@ void NodeWorker::checkTransitions(bool try_fire)
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
 
-        //        if(state_ == State::WAITING_FOR_OUTPUTS) {
-        //        transition_out_->updateOutputs();
-        //        }
-
         if(state_ != State::IDLE && state_ != State::ENABLED) {
             return;
         }
@@ -1162,7 +1127,6 @@ void NodeWorker::checkTransitions(bool try_fire)
     }
 
     if(!transition_out_->isEnabled()) {
-        node_->aerr << "output not enabled" << std::endl;
         if(state_ == State::ENABLED) {
             setState(State::IDLE);
         }
@@ -1177,7 +1141,6 @@ void NodeWorker::checkTransitions(bool try_fire)
     }
 
     if(try_fire) {
-        node_->ainfo << "fire" << std::endl;
         apex_assert_hard(transition_out_->canStartSendingMessages());
 
         int highest_deviant_seq = transition_in_->findHighestDeviantSequenceNumber();

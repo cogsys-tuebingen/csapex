@@ -119,7 +119,6 @@ bool OutputTransition::canStartSendingMessages() const
         OutputPtr output = pair.second;
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() != Output::State::IDLE) {
-                std::cerr << "output: " << output->getUUID() << " has state " << (int) output->getState() << std::endl;
                 return false;
             }
         }

@@ -155,7 +155,6 @@ public:
     virtual void startProcessingMessages() override;
     void finishProcessingMessages(bool was_executed);
 
-    void prepareForNextProcess();
     void checkTransitions(bool try_fire = true);
 
     void checkParameters();    

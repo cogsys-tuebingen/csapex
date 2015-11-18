@@ -49,9 +49,6 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
     check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + worker->getUUID().getFullName(),
                                                std::bind(&NodeWorker::checkParameters, worker),
                                                this);
-    prepare_ = std::make_shared<Task>(std::string("prepare ") + worker->getUUID().getFullName(),
-                                      std::bind(&NodeWorker::prepareForNextProcess, worker),
-                                      this);
     check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
                                                 std::bind(&NodeWorker::checkTransitions, worker, true),
                                                 this);
@@ -98,11 +95,6 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     connections_.clear();
 
     // node tasks
-    auto cmp = worker_->messages_processed.connect([this]() {
-        schedule(prepare_);
-    });
-    connections_.push_back(cmp);
-
     auto ctr = worker_->checkTransitionsRequested.connect([this]() {
         schedule(check_transitions_);
     });

@@ -118,6 +118,7 @@ bool Transition::areAllConnections(Connection::State state) const
     }
     return true;
 }
+
 bool Transition::areAllConnections(Connection::State a, Connection::State b) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);

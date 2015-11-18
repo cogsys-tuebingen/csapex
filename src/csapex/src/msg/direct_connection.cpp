@@ -49,5 +49,7 @@ void DirectConnection::setMessage(const ConnectionTypeConstPtr &msg)
     dynamic_cast<Input*>(to())->inputMessage(msg);
 
     setState(Connection::State::READ);
-    setState(Connection::State::DONE);
+//    setState(Connection::State::DONE);
+
+    setMessageProcessed();
 }

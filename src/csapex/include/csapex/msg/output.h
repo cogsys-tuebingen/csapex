@@ -22,7 +22,6 @@ class Output : public Connectable
 
 public:
     enum class State {
-        RECEIVING,
         ACTIVE,
         IDLE
     };
