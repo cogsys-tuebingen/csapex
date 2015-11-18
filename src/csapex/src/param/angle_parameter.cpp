@@ -8,7 +8,7 @@ using namespace csapex;
 using namespace param;
 
 AngleParameter::AngleParameter()
-    : Parameter("angle", ParameterDescription()),  min_(-M_PI), max_(M_PI)
+    : Parameter("angle", ParameterDescription()), angle_(0.0), min_(-M_PI), max_(M_PI)
 {
 }
 
