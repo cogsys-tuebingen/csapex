@@ -22,7 +22,7 @@ void PreviewInput::inputMessage(ConnectionType::ConstPtr message)
 {
     Input::inputMessage(message);
 
-    parent_->display(message);
+    Q_EMIT parent_->displayMessage(message);
 
     notifyMessageProcessed();
 }
@@ -32,6 +32,10 @@ MessagePreviewWidget::MessagePreviewWidget()
 {
     input_ = std::make_shared<impl::PreviewInput>(this);
     setScene(new QGraphicsScene);
+
+    qRegisterMetaType < ConnectionTypeConstPtr > ("ConnectionTypeConstPtr");
+
+    QObject::connect(this, SIGNAL(displayMessage(ConnectionTypeConstPtr)), this, SLOT(display(ConnectionTypeConstPtr)));
 }
 
 MessagePreviewWidget::~MessagePreviewWidget()

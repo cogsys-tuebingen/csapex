@@ -40,9 +40,14 @@ public:
 
     void setCallback(std::function<void(ConnectionType::ConstPtr)> cb);
 
-    void display(const ConnectionTypeConstPtr& msg);
 
     bool isConnected() const;
+
+Q_SIGNALS:
+    void displayMessage(const ConnectionTypeConstPtr& msg);
+
+public Q_SLOTS:
+    void display(const ConnectionTypeConstPtr& msg);
 
 private:
     void connectToImpl(Output* out);
