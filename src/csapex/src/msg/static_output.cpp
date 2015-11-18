@@ -75,7 +75,7 @@ void StaticOutput::commitMessages()
 
     if(message_to_send_) {
         committed_message_ = message_to_send_;
-        clear();
+        startReceiving();
 
     } else {
         if(!connections_.empty()) {
@@ -111,7 +111,7 @@ ConnectionType::ConstPtr StaticOutput::getMessage()
     return committed_message_;
 }
 
-void StaticOutput::clear()
+void StaticOutput::startReceiving()
 {
     message_to_send_.reset();
     setState(Output::State::RECEIVING);

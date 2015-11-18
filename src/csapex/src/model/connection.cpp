@@ -76,7 +76,7 @@ void Connection::setMessage(const ConnectionTypeConstPtr &msg)
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(isSinkEnabled());
     apex_assert_hard(msg != nullptr);
-    apex_assert_hard(state_ == State::NOT_INITIALIZED || state_ == State::READY_TO_RECEIVE);
+    apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
     message_ = msg;
     setState(State::UNREAD);
@@ -112,6 +112,7 @@ void Connection::establishSource()
     if(source_established_) {
         return;
     }
+    std::cerr << from_->getUUID() << " -> " << to_->getUUID() << ": establish source" << std::endl;
     source_established_ = true;
     lock.unlock();
     endpoint_established();
@@ -123,6 +124,7 @@ void Connection::establishSink()
     if(sink_established_) {
         return;
     }
+    std::cerr << from_->getUUID() << " -> " << to_->getUUID() << ": establish sink" << std::endl;
 
     sink_established_ = true;
     lock.unlock();
@@ -199,11 +201,8 @@ void Connection::setState(State s)
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     switch (s) {
-    case State::READY_TO_RECEIVE:
-        apex_assert_hard(state_ == State::DONE || state_ == State::NOT_INITIALIZED);
-        break;
     case State::UNREAD:
-        apex_assert_hard(state_ == State::READY_TO_RECEIVE || state_ == State::NOT_INITIALIZED);
+        apex_assert_hard(state_ == State::NOT_INITIALIZED);
         apex_assert_hard(message_ != nullptr);
         break;
     case State::READ:

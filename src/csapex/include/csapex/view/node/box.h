@@ -151,6 +151,8 @@ protected:
     void registerInputEvent(Input* in);
     void registerOutputEvent(Output* out);
 
+    QString getNodeState();
+
 protected:
     Ui::Box* ui;
     QSizeGrip* grip_;

@@ -35,6 +35,7 @@ MessagePreviewWidget::MessagePreviewWidget()
 void MessagePreviewWidget::connectTo(Output *out)
 {
     connection_ = DirectConnection::connect(out, input_.get());
+    connection_->establishSink();
 }
 
 void MessagePreviewWidget::disconnect()

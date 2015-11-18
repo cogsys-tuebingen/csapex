@@ -50,5 +50,4 @@ void DirectConnection::setMessage(const ConnectionTypeConstPtr &msg)
 
     setState(Connection::State::READ);
     setState(Connection::State::DONE);
-    setState(Connection::State::READY_TO_RECEIVE);
 }

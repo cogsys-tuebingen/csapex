@@ -28,7 +28,7 @@ public:
     void sendMessages();
     void publishNextMessage();
 
-    void clearOutputs();
+    void startReceiving();
     void abortSendingMessages();
     void setConnectionsReadyToReceive();
     bool areOutputsIdle() const;

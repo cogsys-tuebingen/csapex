@@ -29,7 +29,6 @@ public:
 
     enum class State {
         NOT_INITIALIZED,
-        READY_TO_RECEIVE,
         UNREAD,
         READ,
         DONE = NOT_INITIALIZED

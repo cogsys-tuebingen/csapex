@@ -51,7 +51,7 @@ Output::State Output::getState() const
 
 void Output::reset()
 {
-    clear();
+    startReceiving();
 
     setSequenceNumber(0);
     setState(State::IDLE);

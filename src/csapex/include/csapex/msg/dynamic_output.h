@@ -29,7 +29,7 @@ public:
     virtual void nextMessage() override;
     virtual ConnectionTypeConstPtr getMessage() const override;
 
-    virtual void clear() override;
+    virtual void startReceiving() override;
 
 private:
     std::vector<DynamicInput*> correspondents_;

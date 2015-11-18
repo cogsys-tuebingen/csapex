@@ -101,9 +101,6 @@ void InputTransition::connectionAdded(Connection *connection)
 
 bool InputTransition::isEnabled() const
 {
-    if(isOneConnection(Connection::State::READY_TO_RECEIVE)) {
-        return false;
-    }
     if(!areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/)) {
         return false;
     }
@@ -213,7 +210,6 @@ void InputTransition::notifyMessageProcessed()
 void InputTransition::forwardMessages()
 {
     apex_assert_hard(!isOneConnection(Connection::State::DONE));
-    apex_assert_hard(!isOneConnection(Connection::State::READY_TO_RECEIVE));
     apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
     apex_assert_hard(established_connections_.empty() || !areAllConnections(Connection::State::READ));
 
@@ -245,7 +241,6 @@ void InputTransition::forwardMessages()
         auto s = c->getState();
         apex_assert_hard(c->isEstablished());
         apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
-        apex_assert_hard(s != Connection::State::READY_TO_RECEIVE);
         apex_assert_hard(s == Connection::State::UNREAD ||
                          s == Connection::State::READ);
     }

@@ -103,7 +103,7 @@ ConnectionTypeConstPtr DynamicOutput::getMessage() const
     return current_message_;
 }
 
-void DynamicOutput::clear()
+void DynamicOutput::startReceiving()
 {
     messages_to_send_.clear();
     setState(Output::State::RECEIVING);

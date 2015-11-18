@@ -254,6 +254,7 @@ void Port::createToolTip()
     std::stringstream tooltip;
     tooltip << "UUID: " << adaptee->getUUID().c_str();
     tooltip << ", Type: " << adaptee->getType()->descriptiveName();
+    tooltip << ", Connections: " << adaptee->getConnections().size();
     tooltip << ", Messages: " << adaptee->getCount();
     tooltip << ", Enabled: " << adaptee->isEnabled();
     tooltip << ", #: " << adaptee->sequenceNumber();

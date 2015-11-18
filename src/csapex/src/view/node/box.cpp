@@ -422,12 +422,9 @@ void NodeBox::enabledChangeEvent(bool val)
     refreshStylesheet();
 }
 
-void NodeBox::paintEvent(QPaintEvent* /*e*/)
+QString NodeBox::getNodeState()
 {
     NodeWorkerPtr worker = node_worker_.lock();
-    if(!worker || !adapter_) {
-        return;
-    }
 
     QString state;
     switch(worker->getState()) {
@@ -443,8 +440,21 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         state = "unknown"; break;
     }
 
+    return state;
+}
+
+void NodeBox::paintEvent(QPaintEvent* /*e*/)
+{
+    NodeWorkerPtr worker = node_worker_.lock();
+    if(!worker || !adapter_) {
+        return;
+    }
+
     info_exec->setVisible(true);
-    info_exec->setText(QString("<img src=\":/node_") + state + ".png\" alt=\"" + state + "\" title=\"" + state + "\" /> ");
+
+    QString state = getNodeState();
+    info_exec->setText(QString("<img src=\":/node_") + state + ".png\" /> ");
+    info_exec->setToolTip(state);
 
     bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;

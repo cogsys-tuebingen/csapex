@@ -224,12 +224,12 @@ void OutputTransition::fillConnections()
     }
 }
 
-void OutputTransition::clearOutputs()
+void OutputTransition::startReceiving()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
-        output->clear();
+        output->startReceiving();
     }
 }
 
@@ -248,9 +248,4 @@ void OutputTransition::setConnectionsReadyToReceive()
 
     apex_assert_hard(areAllConnections(Connection::State::DONE, Connection::State::NOT_INITIALIZED));
 
-    for(ConnectionPtr connection : established_connections_) {
-        if(connection->isSinkEnabled()) {
-            connection->setState(Connection::State::READY_TO_RECEIVE);
-        }
-    }
 }

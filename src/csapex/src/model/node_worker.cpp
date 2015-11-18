@@ -314,7 +314,7 @@ void NodeWorker::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         cout->setLabel(p->name());
 
         if(getState() == State::PROCESSING) {
-            cout->clear();
+            cout->startReceiving();
         }
 
         addOutput(cout);
@@ -509,6 +509,7 @@ void NodeWorker::updateParameterValue(Connectable *s)
 
 void NodeWorker::startProcessingMessages()
 {
+    node_->ainfo << "start processing" << std::endl;
     assertNotInGuiThread();
 
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -518,6 +519,7 @@ void NodeWorker::startProcessingMessages()
     setState(State::FIRED);
 
     if(!isProcessingEnabled()) {
+        node_->ainfo << "processing is disabled" << std::endl;
         return;
     }
 
@@ -584,12 +586,13 @@ void NodeWorker::startProcessingMessages()
 
     apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
     transition_out_->setConnectionsReadyToReceive();
-    transition_out_->clearOutputs();
+    transition_out_->startReceiving();
 
     transition_in_->notifyMessageProcessed();
 
     if(!all_inputs_are_present) {
         finishProcessingMessages(false);
+        node_->ainfo << "not all inputs are present" << std::endl;
         return;
     }
 
@@ -1126,9 +1129,12 @@ void NodeWorker::prepareForNextProcess()
 
 void NodeWorker::updateTransitionConnections()
 {
-    // TODO: can this be moved into transition?
-    transition_in_->updateConnections();
-    transition_out_->updateConnections();
+    std::unique_lock<std::recursive_mutex> lock(sync);
+
+    if(state_ == State::IDLE || state_ == State::ENABLED) {
+        transition_in_->updateConnections();
+        transition_out_->updateConnections();
+    }
 }
 
 void NodeWorker::checkTransitions(bool try_fire)
@@ -1153,7 +1159,7 @@ void NodeWorker::checkTransitions(bool try_fire)
         return;
     }
 
-    if(!transition_out_->canStartSendingMessages()) {
+    if(!transition_out_->isEnabled()) {
         if(state_ == State::ENABLED) {
             setState(State::IDLE);
         }
@@ -1168,6 +1174,7 @@ void NodeWorker::checkTransitions(bool try_fire)
     }
 
     if(try_fire) {
+        node_->ainfo << "fire" << std::endl;
         apex_assert_hard(transition_out_->canStartSendingMessages());
 
         int highest_deviant_seq = transition_in_->findHighestDeviantSequenceNumber();
@@ -1324,7 +1331,7 @@ bool NodeWorker::tick()
                         setState(State::FIRED);
                         setState(State::PROCESSING);
                     }
-                    transition_out_->clearOutputs();
+                    transition_out_->startReceiving();
 
                     TimerPtr t = nullptr;
                     if(profiling_) {

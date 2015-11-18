@@ -476,9 +476,6 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         case Connection::State::DONE:
             descr += "NOT_INITIALIZED / DONE";
             break;
-        case Connection::State::READY_TO_RECEIVE:
-            descr += "READY_TO_RECEIVE";
-            break;
         case Connection::State::UNREAD:
             descr += "UNREAD";
             break;
