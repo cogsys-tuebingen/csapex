@@ -24,6 +24,7 @@
 #include <csapex/view/widgets/movable_graphics_proxy_widget.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/fulcrum.h>
+#include <csapex/view/widgets/message_preview_widget.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -93,6 +94,7 @@ Point convert(const QPointF& p) {
 
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable *style)
     : style_(style), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
+      preview_(nullptr),
       draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
       scale_(1.0), overlay_threshold_(0.45),
       highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false)
@@ -496,12 +498,37 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             v->setToolTip(descr);
         }
 
+        QPointF preview_pos = e->scenePos();
+        preview_pos.setY(preview_pos.y() + 50);
+
+        if(!preview_) {
+            preview_ = new MessagePreviewWidget;
+            preview_->hide();
+        }
+
+        preview_->setWindowTitle(QString::fromStdString("Output"));
+        preview_->move(preview_pos.toPoint());
+
+        if(!preview_->isConnected()) {
+            preview_->connectTo(c->from());
+            addWidget(preview_);
+        }
+
+        preview_->show();
+
         update();
 
     } else if(highlight_connection_id_ >= 0)  {
         highlight_connection_id_ = -1;
         for(auto v : views()) {
             v->setToolTip("");
+        }
+
+        if(preview_) {
+            preview_->disconnect();
+            preview_->hide();
+            preview_->deleteLater();
+            preview_ = nullptr;
         }
         update();
     }

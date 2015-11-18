@@ -163,6 +163,8 @@ private:
     QPainter* schematics_painter;
     QImage schematics;
 
+    MessagePreviewWidget* preview_;
+
     std::vector<TempConnection> temp_;
 
     std::vector<boost::signals2::connection> connections_;
