@@ -119,6 +119,7 @@ bool OutputTransition::canStartSendingMessages() const
         OutputPtr output = pair.second;
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() != Output::State::IDLE) {
+                std::cerr << "output: " << output->getUUID() << " has state " << (int) output->getState() << std::endl;
                 return false;
             }
         }
@@ -141,7 +142,7 @@ void OutputTransition::sendMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    updateConnections();
+//    updateConnections();
 
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
@@ -167,6 +168,8 @@ void OutputTransition::sendMessages()
 
     if(!isSink()) {
         fillConnections();
+    } else {
+        abortSendingMessages();
     }
 }
 

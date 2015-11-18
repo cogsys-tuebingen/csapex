@@ -119,7 +119,6 @@ void MessagePreviewWidget::display(const ConnectionTypeConstPtr &msg)
     }
 
     hide();
-    QApplication::setOverrideCursor(Qt::ForbiddenCursor);
 }
 
 bool MessagePreviewWidget::isConnected() const

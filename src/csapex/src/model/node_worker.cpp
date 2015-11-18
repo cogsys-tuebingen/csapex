@@ -586,6 +586,7 @@ void NodeWorker::startProcessingMessages()
 
     apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
     transition_out_->setConnectionsReadyToReceive();
+    node_->ainfo << "start receiving" << std::endl;
     transition_out_->startReceiving();
 
     transition_in_->notifyMessageProcessed();
@@ -629,6 +630,7 @@ void NodeWorker::startProcessingMessages()
     } catch(...) {
         throw;
     }
+    node_->ainfo << "done" << std::endl;
     if(sync) {
         finishProcessingMessages(true);
     }
@@ -1160,6 +1162,7 @@ void NodeWorker::checkTransitions(bool try_fire)
     }
 
     if(!transition_out_->isEnabled()) {
+        node_->aerr << "output not enabled" << std::endl;
         if(state_ == State::ENABLED) {
             setState(State::IDLE);
         }
