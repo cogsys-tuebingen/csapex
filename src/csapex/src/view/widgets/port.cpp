@@ -9,7 +9,6 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
-#include <csapex/manager/message_renderer_manager.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/designer/designer_view.h>
 #include <csapex/view/widgets/message_preview_widget.h>
@@ -28,7 +27,9 @@
 using namespace csapex;
 
 Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, ConnectableWeakPtr adaptee, QWidget *parent)
-    : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee), refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0)
+    : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee),
+      refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0),
+      preview_(nullptr)
 {
     ConnectablePtr adaptee_ptr = adaptee_.lock();
     if(adaptee_ptr) {
@@ -73,61 +74,27 @@ bool Port::event(QEvent *e)
         }
         createToolTip();
 
-        if(adaptee->isOutput()) {
-            Output* output = dynamic_cast<Output*>(adaptee.get());
-            if(output) {
-                QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
-                QPoint global_pos = helpEvent->globalPos();
-                DesignerView* dview = widget_controller_->getDesignerView();
-                QPointF pos = dview->mapToScene(dview->mapFromGlobal(global_pos));
-                pos.setY(pos.y() + 50);
+        QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
+        QPoint global_pos = helpEvent->globalPos();
+        DesignerView* dview = widget_controller_->getDesignerView();
+        QPointF pos = dview->mapToScene(dview->mapFromGlobal(global_pos));
+        pos.setY(pos.y() + 50);
 
-                MessagePreviewWidget* view = widget_controller_->getTooltipView("Output");
-                view->move(pos.toPoint());
+        if(!preview_) {
+            preview_ = new MessagePreviewWidget;
+            preview_->hide();
+        }
 
-                if(!view->isConnected()) {
-                    view->connectTo(output);
-                    view->setCallback(std::bind(&Port::updateTooltip, this, std::placeholders::_1));
+        preview_->setWindowTitle(QString::fromStdString("Output"));
+        preview_->move(pos.toPoint());
 
-                    dview->designerScene()->addWidget(view);
-                }
-
-                view->show();
-            }
+        if(!preview_->isConnected()) {
+            preview_->connectTo(adaptee.get());
+            dview->designerScene()->addWidget(preview_);
         }
     }
 
     return QWidget::event(e);
-}
-
-void Port::updateTooltip(ConnectionType::ConstPtr msg)
-{
-    ConnectablePtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return;
-    }
-
-    MessagePreviewWidget* view = widget_controller_->getTooltipView("Output");
-    if(view->isHidden() || !view->isConnected()) {
-        return;
-    }
-
-    if(msg) {
-        try {
-            MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
-            if(renderer) {
-                QImage img = renderer->render(msg);
-
-                auto pm = QPixmap::fromImage(img);
-                view->scene()->clear();
-                view->scene()->addPixmap(pm);
-                view->setMaximumSize(256, 256);
-                view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
-            }
-        } catch(const std::exception& e) {
-            view->hide();
-        }
-    }
 }
 
 bool Port::canOutput() const
@@ -424,17 +391,11 @@ void Port::enterEvent(QEvent */*e*/)
 
 void Port::leaveEvent(QEvent */*e*/)
 {    
-    ConnectablePtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return;
-    }
-    //    QObject::disconnect(this, SLOT(updateTooltip()));
-
-    if(adaptee->isOutput()) {
-        Output* output = dynamic_cast<Output*>(adaptee.get());
-        if(output) {
-            widget_controller_->hideTooltipView();
-        }
+    if(preview_) {
+        preview_->disconnect();
+        preview_->hide();
+        preview_->deleteLater();
+        preview_ = nullptr;
     }
 }
 

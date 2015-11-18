@@ -11,21 +11,19 @@
 namespace csapex
 {
 
+class MessagePreviewWidget;
 
 namespace impl {
-
 class PreviewInput : public Input
 {
 public:
-    PreviewInput();
+    PreviewInput(MessagePreviewWidget* parent);
 
     virtual void inputMessage(ConnectionType::ConstPtr message) override;
-    void setCallback(std::function<void (ConnectionType::ConstPtr)> cb);
 
 private:
-    std::function<void (ConnectionType::ConstPtr)> cb_;
+    MessagePreviewWidget* parent_;
 };
-
 }
 
 class MessagePreviewWidget : public QGraphicsView
@@ -34,20 +32,25 @@ class MessagePreviewWidget : public QGraphicsView
 
 public:
     MessagePreviewWidget();
+    ~MessagePreviewWidget();
 
 public:
-    void connectTo(Output* out);
+    void connectTo(Connectable* c);
     void disconnect();
 
     void setCallback(std::function<void(ConnectionType::ConstPtr)> cb);
 
+    void display(const ConnectionTypeConstPtr& msg);
+
     bool isConnected() const;
+
+private:
+    void connectToImpl(Output* out);
+    void connectToImpl(Input* out);
 
 private:
     ConnectionPtr connection_;
     std::shared_ptr<impl::PreviewInput> input_;
-
-    std::function<void(ConnectionType::ConstPtr)> cb_;
 };
 
 }

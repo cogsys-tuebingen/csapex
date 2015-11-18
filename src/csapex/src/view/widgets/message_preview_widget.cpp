@@ -3,12 +3,17 @@
 
 /// PROJECT
 #include <csapex/msg/direct_connection.h>
+#include <csapex/manager/message_renderer_manager.h>
+
+/// SYSTEM
+#include <QApplication>
 
 using namespace csapex;
 using namespace csapex::impl;
 
-PreviewInput::PreviewInput()
-    : Input(UUID::make("message_preview_in"))
+PreviewInput::PreviewInput(MessagePreviewWidget *parent)
+    : Input(UUID::make("message_preview_in")),
+      parent_(parent)
 {
     setType(std::make_shared<connection_types::AnyMessage>());
 }
@@ -17,25 +22,56 @@ void PreviewInput::inputMessage(ConnectionType::ConstPtr message)
 {
     Input::inputMessage(message);
 
-    cb_(message);
+    parent_->display(message);
 
     notifyMessageProcessed();
 }
 
-void PreviewInput::setCallback(std::function<void (ConnectionType::ConstPtr)> cb)
-{
-    cb_ = cb;
-}
 
 MessagePreviewWidget::MessagePreviewWidget()
 {
-    input_ = std::make_shared<impl::PreviewInput>();
+    input_ = std::make_shared<impl::PreviewInput>(this);
+    setScene(new QGraphicsScene);
 }
 
-void MessagePreviewWidget::connectTo(Output *out)
+MessagePreviewWidget::~MessagePreviewWidget()
+{
+    if(isConnected()) {
+        disconnect();
+    }
+}
+
+void MessagePreviewWidget::connectTo(Connectable *c)
+{
+    scene()->clear();
+
+    if(Output* o = dynamic_cast<Output*>(c)) {
+        connectToImpl(o);
+    } else if(Input* i = dynamic_cast<Input*>(c)) {
+        connectToImpl(i);
+    } else {
+        return;
+    }
+
+    if(connection_) {
+        connection_->establishSink();
+        QApplication::setOverrideCursor(Qt::BusyCursor);
+    }
+}
+
+void MessagePreviewWidget::connectToImpl(Output *out)
 {
     connection_ = DirectConnection::connect(out, input_.get());
-    connection_->establishSink();
+}
+
+
+void MessagePreviewWidget::connectToImpl(Input *in)
+{
+    if(in->isConnected()) {
+        if(Output* source = dynamic_cast<Output*>(in->getSource())) {
+            connection_ = DirectConnection::connect(source, input_.get());
+        }
+    }
 }
 
 void MessagePreviewWidget::disconnect()
@@ -43,6 +79,11 @@ void MessagePreviewWidget::disconnect()
     if(!connection_) {
         return;
     }
+
+    while(QApplication::overrideCursor()) {
+        QApplication::restoreOverrideCursor();
+    }
+
     Output* out = dynamic_cast<Output*> (connection_->from());
     if(out) {
         out->removeConnection(input_.get());
@@ -50,12 +91,31 @@ void MessagePreviewWidget::disconnect()
     connection_.reset();
 }
 
-void MessagePreviewWidget::setCallback(std::function<void (ConnectionType::ConstPtr)> cb)
+void MessagePreviewWidget::display(const ConnectionTypeConstPtr &msg)
 {
-    cb_ = cb;
-    if(input_) {
-        input_->setCallback(cb_);
+    if(isConnected()) {
+        try {
+            MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
+            if(renderer) {
+                QImage img = renderer->render(msg);
+
+
+                auto pm = QPixmap::fromImage(img);
+                scene()->clear();
+                scene()->addPixmap(pm);
+                setMaximumSize(256, 256);
+                fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
+
+                show();
+                return;
+            }
+        } catch(const std::exception& e) {
+            // silent death
+        }
     }
+
+    hide();
+    QApplication::setOverrideCursor(Qt::ForbiddenCursor);
 }
 
 bool MessagePreviewWidget::isConnected() const

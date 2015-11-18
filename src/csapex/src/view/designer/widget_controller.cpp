@@ -3,31 +3,28 @@
 
 /// PROJECT
 #include <csapex/command/delete_connection.h>
-#include <csapex/command/dispatcher.h>
-#include <csapex/command/dispatcher.h>
 #include <csapex/command/disable_node.h>
+#include <csapex/command/dispatcher.h>
+#include <csapex/core/settings.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/connectable.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/tag.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/param/parameter_factory.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
-#include <csapex/view/widgets//movable_graphics_proxy_widget.h>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/designer_view.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/default_node_adapter.h>
-#include <csapex/view/designer/designer.h>
-#include <csapex/view/widgets/port.h>
 #include <csapex/view/node/node_adapter_factory.h>
-#include <csapex/view/designer/designer_view.h>
-#include <csapex/core/settings.h>
-#include <csapex/param/parameter_factory.h>
-#include <csapex/view/designer/designer_scene.h>
-#include <csapex/view/widgets/message_preview_widget.h>
+#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
+#include <csapex/view/widgets/port.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -45,36 +42,13 @@ class WidgetController::Impl
 {
 public:
     Impl()
-        : preview_widget_(nullptr)
     {
     }
 
     ~Impl()
     {
-        if(preview_widget_) {
-            preview_widget_->deleteLater();
-        }
     }
 
-    void hideTooltipView()
-    {
-        if(preview_widget_) {
-            preview_widget_->hide();
-            preview_widget_->disconnect();
-        }
-    }
-
-    MessagePreviewWidget* getTooltipView(const std::string& title)
-    {
-        if(!preview_widget_) {
-            preview_widget_ = new MessagePreviewWidget;
-            preview_widget_->setScene(new QGraphicsScene);
-            preview_widget_->setHidden(true);
-        }
-        preview_widget_->setWindowTitle(QString::fromStdString(title));
-
-        return preview_widget_;
-    }
 
 public:
     std::unordered_map<UUID, QPointer<NodeBox>, UUID::Hasher> box_map_;
@@ -155,16 +129,6 @@ GraphWorker::Ptr WidgetController::getGraph()
 NodeFactory* WidgetController::getNodeFactory()
 {
     return node_factory_;
-}
-
-void WidgetController::hideTooltipView()
-{
-    pimpl->hideTooltipView();
-}
-
-MessagePreviewWidget* WidgetController::getTooltipView(const std::string& title)
-{
-    return pimpl->getTooltipView(title);
 }
 
 void WidgetController::setDesigner(Designer *designer)

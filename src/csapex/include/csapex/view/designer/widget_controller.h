@@ -55,9 +55,6 @@ public:
     GraphWorkerPtr getGraph();
     NodeFactory* getNodeFactory();
 
-    void hideTooltipView();
-    MessagePreviewWidget *getTooltipView(const std::string& title);
-
     void setDesigner(Designer* designer);
 
     CommandDispatcher* getCommandDispatcher() const;

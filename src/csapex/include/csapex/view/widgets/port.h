@@ -64,8 +64,6 @@ public Q_SLOTS:
     void setError(bool e, const std::string& msg);
     void setError(bool e, const std::string& msg, int level);
 
-    void updateTooltip(ConnectionType::ConstPtr msg);
-
 protected:
     void startDrag();
     void createToolTip();
@@ -82,6 +80,8 @@ protected:
     Qt::MouseButtons buttons_down_;
 
     std::vector<boost::signals2::connection> connections_;
+
+    MessagePreviewWidget* preview_;
 };
 
 }
