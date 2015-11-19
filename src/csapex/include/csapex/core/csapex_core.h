@@ -33,7 +33,7 @@ public:
     void startup();
 
     void load(const std::string& file);
-    void saveAs(const std::string& file);
+    void saveAs(const std::string& file, bool quiet = false);
 
     void reset();
 
@@ -98,6 +98,7 @@ private:
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
 
     bool init_;
+    bool load_needs_reset_;
 };
 
 }

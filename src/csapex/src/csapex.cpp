@@ -30,9 +30,20 @@
 /// SYSTEM
 #include <boost/program_options.hpp>
 #include <QtGui>
+#include <QMessageBox>
 #include <execinfo.h>
 #include <stdlib.h>
 #include <console_bridge/console.h>
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+#include <boost/filesystem.hpp>
+#undef BOOST_NO_CXX11_SCOPED_ENUMS
+#include <boost/version.hpp>
+
+#if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
+namespace bf3 = boost::filesystem;
+#else
+namespace bf3 = boost::filesystem3;
+#endif
 
 namespace po = boost::program_options;
 
@@ -139,15 +150,21 @@ int Main::run()
 
 int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
-//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
         splash = new CsApexSplashScreen;
         splash->show();
         showMessage("loading libraries");
     }
 
-    Settings settings;
-    settings.set("config", config);
+    std::string config_to_load = config;
+
+    settings.set("config", config_to_load);
+    settings.set("config_recovery", false);
+
+    if(!headless) {
+        askForRecoveryConfig(config_to_load);
+    }
 
     if(!settings.knows("path_to_bin")) {
         settings.add(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
@@ -219,6 +236,17 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         boost::signals2::scoped_connection saved_connection(core->saved.connect([&](){
             dispatcher.setClean();
             dispatcher.resetDirtyPoint();
+
+            bool recovery = settings.get<bool>("config_recovery", false);
+            if(recovery) {
+                // delete recovery file
+                bf3::path recov_file = settings.get<std::string>("config_recovery_file");
+                bf3::path current_config  = settings.get<std::string>("config");
+                if(recov_file != current_config) {
+                    bf3::remove(recov_file);
+                    settings.set("config_recovery", false);
+                }
+            }
         }));
         boost::signals2::scoped_connection loaded_connection(core->loaded.connect([&](){
             dispatcher.setClean();
@@ -226,6 +254,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         }));
         boost::signals2::scoped_connection reset(core->resetRequest.connect([&](){
             dispatcher.reset();
+            settings.set("config_recovery", false);
+        }));
+        boost::signals2::scoped_connection change(dispatcher.stateChanged.connect([&](){
+            std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
+            core->saveAs(temp_file_name, true);
         }));
 
 
@@ -274,6 +307,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         res = run();
 
+        deleteRecoveryConfig();
+
         delete designer;
 
     } else {
@@ -288,6 +323,43 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     return res;
 }
 
+void Main::askForRecoveryConfig(const std::string& config_to_load)
+{
+    bf3::path temp_file = config_to_load + ".recover";
+    if(bf3::exists(temp_file)) {
+        QMessageBox::StandardButton reply;
+
+        std::time_t mod_time_t = bf3::last_write_time(temp_file);
+        char mod_time[20];
+        strftime(mod_time, 20, "%Y-%m-%d %H:%M:%S", localtime(&mod_time_t));
+
+        std::string question = "The application did not exit correctly. "
+                               "Do you want to recover<br /><b>" +
+                temp_file.filename().string() +
+                "</b>?<br />(last modified: " + mod_time + ")";
+
+        reply = QMessageBox::question(splash, "Configuration Recovery",
+                                      QString::fromStdString(question),
+                                      QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            settings.set("config_recovery", true);
+            settings.set("config_recovery_file", temp_file.string());
+            settings.set("config_recovery_original", config_to_load);
+        }
+    }
+}
+
+void Main::deleteRecoveryConfig()
+{
+    bool recovery = settings.get<bool>("config_recovery", false);
+    if(!recovery) {
+        bf3::path temp_file = settings.get("config")->as<std::string>() + ".recover";
+        if(bf3::exists(temp_file)) {
+            bf3::remove(temp_file);
+        }
+    }
+}
+
 void Main::showMessage(const QString& msg)
 {
     if(splash->isVisible()) {
@@ -299,7 +371,7 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
-//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
 
     std::string path_to_bin(argv[0]);
 

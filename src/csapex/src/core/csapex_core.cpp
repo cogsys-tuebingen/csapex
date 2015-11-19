@@ -38,7 +38,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
       thread_pool_(thread_pool),
       node_factory_(node_factory),
       core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")),
-      init_(false)
+      init_(false), load_needs_reset_(false)
 {
     destruct = true;
     StreamInterceptor::instance().start();
@@ -211,7 +211,17 @@ void CsApexCore::startup()
 {
     showStatusMessage("loading config");
     try {
-        load(settings_.get<std::string>("config", Settings::defaultConfigFile()));
+        std::string cfg = settings_.get<std::string>("config", Settings::defaultConfigFile());
+
+        bool recovery = settings_.get<bool>("config_recovery", false);
+        if(!recovery) {
+            load(cfg);
+
+        } else {
+            load(settings_.get<std::string>("config_recovery_file"));
+            settings_.set("config", cfg);
+        }
+
     } catch(const std::exception& e) {
         std::cerr << "error loading the config: " << e.what() << std::endl;
     }
@@ -243,7 +253,7 @@ void CsApexCore::settingsChanged()
     configChanged();
 }
 
-void CsApexCore::saveAs(const std::string &file)
+void CsApexCore::saveAs(const std::string &file, bool quiet)
 {
     std::string dir = file.substr(0, file.find_last_of('/')+1);
 
@@ -275,9 +285,9 @@ void CsApexCore::saveAs(const std::string &file)
     ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';
     ofs << yaml.c_str();
 
-    std::cout << "save: " << yaml.c_str() << std::endl;
-
-    saved();
+    if(!quiet) {
+        saved();
+    }
 }
 
 
@@ -285,7 +295,9 @@ void CsApexCore::load(const std::string &file)
 {
     settings_.set("config", file);
 
-    reset();
+    if(load_needs_reset_) {
+        reset();
+    }
 
     apex_assert_hard(graph_->countNodes() == 0);
 
@@ -335,6 +347,8 @@ void CsApexCore::load(const std::string &file)
 
         loadSettingsRequest(doc);
     }
+
+    load_needs_reset_ = true;
 
     loaded();
 

@@ -372,7 +372,9 @@ add_executable(csapex_node
     ${ALL_HEADERS}
     src/csapex.cpp)
 
-target_link_libraries(csapex_node csapex_qt)
+target_link_libraries(csapex_node
+    csapex_qt
+    ${Boost_LIBRARIES})
 
 
 add_custom_target(cfg ALL DEPENDS cfg/style.css)

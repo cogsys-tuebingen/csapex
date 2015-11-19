@@ -528,6 +528,11 @@ void CsApexWindow::updateTitle()
         window << " *";
     }
 
+    bool recovery = core_.getSettings().get<bool>("config_recovery", false);
+    if(recovery) {
+        window << " (recovery)";
+    }
+
     setWindowTitle(window.str().c_str());
 }
 

@@ -3,6 +3,8 @@
 
 /// PROJECT
 #include <csapex/view/widgets/csapex_splashscreen.h>
+#include <csapex/core/settings.h>
+#include <csapex/command/command_fwd.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -43,8 +45,14 @@ public Q_SLOTS:
     void showMessage(const QString& msg);
 
 private:
+    void askForRecoveryConfig(const std::string &config_to_load);
+    void deleteRecoveryConfig();
+
+private:
     std::unique_ptr<QCoreApplication> app;
     CsApexSplashScreen* splash;
+
+    Settings settings;
 };
 
 }
