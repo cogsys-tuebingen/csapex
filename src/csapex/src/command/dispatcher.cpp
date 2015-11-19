@@ -95,7 +95,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
     }
 }
 
-bool CommandDispatcher::isDirty()
+bool CommandDispatcher::isDirty() const
 {
     return dirty_;
 }
@@ -151,12 +151,12 @@ void CommandDispatcher::setDirty(bool dirty)
 }
 
 
-bool CommandDispatcher::canUndo()
+bool CommandDispatcher::canUndo() const
 {
     return !done.empty();
 }
 
-bool CommandDispatcher::canRedo()
+bool CommandDispatcher::canRedo() const
 {
     return !undone.empty();
 }
@@ -196,6 +196,24 @@ void CommandDispatcher::redo()
     setDirty(!last->isBeforeSavepoint());
 
     stateChanged();
+}
+
+CommandConstPtr CommandDispatcher::getNextUndoCommand() const
+{
+    if(canUndo()) {
+        return done.back();
+    } else {
+        return nullptr;
+    }
+}
+
+CommandConstPtr CommandDispatcher::getNextRedoCommand() const
+{
+    if(canRedo()) {
+        return undone.back();
+    } else {
+        return nullptr;
+    }
 }
 
 Graph* CommandDispatcher::getGraph()

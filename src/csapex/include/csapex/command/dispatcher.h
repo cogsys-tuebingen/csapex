@@ -26,13 +26,16 @@ public:
     void executeLater(Command::Ptr command);
     void executeLater();
 
-    bool isDirty();
+    bool isDirty() const;
 
-    bool canUndo();
-    bool canRedo();
+    bool canUndo() const;
+    bool canRedo() const;
 
     void undo();
     void redo();
+
+    CommandConstPtr getNextUndoCommand() const;
+    CommandConstPtr getNextRedoCommand() const;
 
     Graph* getGraph();
     CommandFactory* getCommandFactory();

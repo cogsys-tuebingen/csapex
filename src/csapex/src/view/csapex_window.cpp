@@ -25,6 +25,7 @@
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
 #include <csapex/view/designer/widget_controller.h>
+#include <csapex/command/command.h>
 #include "ui_csapex_window.h"
 
 /// PROJECT
@@ -500,8 +501,22 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    ui->actionUndo->setDisabled(!cmd_dispatcher_->canUndo());
-    ui->actionRedo->setDisabled(!cmd_dispatcher_->canRedo());
+    bool can_undo = cmd_dispatcher_->canUndo();
+    ui->actionUndo->setDisabled(!can_undo);
+    if(can_undo) {
+        ui->actionUndo->setText(QString("&Undo ") + QString::fromStdString(cmd_dispatcher_->getNextUndoCommand()->getType()));
+    } else {
+        ui->actionUndo->setText(QString("&Undo"));
+    }
+
+    bool can_redo = cmd_dispatcher_->canRedo();
+    ui->actionRedo->setDisabled(!can_redo);
+    if(can_redo) {
+        ui->actionRedo->setText(QString("&Redo ") + QString::fromStdString(cmd_dispatcher_->getNextRedoCommand()->getType()));
+    } else {
+        ui->actionRedo->setText(QString("&Redo"));
+    }
+
 }
 
 void CsApexWindow::updateTitle()
