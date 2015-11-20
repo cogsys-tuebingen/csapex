@@ -483,8 +483,6 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
 
         refreshStylesheet();
     }
-
-    //    resize(sizeHint());
 }
 
 void NodeBox::moveEvent(QMoveEvent* e)
@@ -502,8 +500,6 @@ void NodeBox::moveEvent(QMoveEvent* e)
     QPoint pos = e->pos();
 
     eventFilter(this, e);
-
-    QPoint delta = pos - e->oldPos();
 
     worker->getNodeState()->setPos(Point(pos.x(), pos.y()));
 }

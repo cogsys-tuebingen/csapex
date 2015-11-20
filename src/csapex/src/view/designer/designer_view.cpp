@@ -615,8 +615,6 @@ void DesignerView::showContextMenuGlobal(const QPoint& global_pos)
 
 void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scene_pos)
 {
-    std::cerr << "context: " << scene_pos.x() << " / " << scene_pos.y() << std::endl;
-
     auto selected_boxes = scene_->getSelectedBoxes();
 
     if(std::find(selected_boxes.begin(), selected_boxes.end(), box) == selected_boxes.end()) {
@@ -764,7 +762,6 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
     menu.addAction(del);
 
     QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(scene_pos)));
-//    QAction* selectedItem = menu.exec(mapFromScene(scene_pos));
 
     if(selectedItem) {
         handler[selectedItem]();
