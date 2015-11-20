@@ -70,8 +70,6 @@ public Q_SLOTS:
     void connectionAdded(Connection*);
     void connectionDeleted(Connection*);
 
-    void boxMoved(NodeBox* box);
-
     bool showConnectionContextMenu();
 
     void refresh();

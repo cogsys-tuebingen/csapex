@@ -131,9 +131,6 @@ Q_SIGNALS:
     void renameRequest(NodeBox*);
     void helpRequest(NodeBox*);
 
-    void moveRequest(NodeBox*, QPoint);
-    void moved(NodeBox*, int dx, int dy);
-
     void changed(NodeBox*);
     void clicked(NodeBox*);
     void moveSelectionToBox(NodeBox*);
@@ -176,6 +173,7 @@ protected:
     QLabel* info_thread;
     QLabel* info_error;
 
+    bool moved_;
     bool is_placed_;
 };
 

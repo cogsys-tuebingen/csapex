@@ -570,12 +570,6 @@ void DesignerScene::connectionDeleted(Connection*)
     invalidateSchema();
 }
 
-void DesignerScene::boxMoved(NodeBox *box)
-{
-    invalidateSchema();
-}
-
-
 void DesignerScene::fulcrumAdded(void * fulcrum)
 {
     Fulcrum* f = (Fulcrum*) fulcrum;

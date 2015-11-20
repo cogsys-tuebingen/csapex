@@ -97,14 +97,14 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
 {
     clone_p_ = false;
 
-//    QPoint pt = event->pos().toPoint();
-//    QWidget* child = widget()->childAt(pt);
+    //    QPoint pt = event->pos().toPoint();
+    //    QWidget* child = widget()->childAt(pt);
 
     QGraphicsItem::mouseReleaseEvent(event);
 
     if(relay_) { // child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel")) {
         QGraphicsProxyWidget::mouseReleaseEvent(event);
-        relay_ = false;        
+        relay_ = false;
 
     }
 
@@ -116,8 +116,8 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
 
 void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-//    QPoint pt = event->pos().toPoint();
-//    QWidget* child = widget()->childAt(pt);
+    //    QPoint pt = event->pos().toPoint();
+    //    QWidget* child = widget()->childAt(pt);
 
     if(clone_p_) {
         QPointF delta = clone_start_ - event->pos();
@@ -160,7 +160,25 @@ void MovableGraphicsProxyWidget::dragLeaveEvent(QGraphicsSceneDragDropEvent * e)
 
 void MovableGraphicsProxyWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent* e)
 {
-    QGraphicsProxyWidget::contextMenuEvent(e);
+    std::cerr << "ctx  " << e->pos().x() << " / " << e->pos().y() << std::endl;
+    std::cerr << "ctxs " << e->scenePos().x() << " / " << e->scenePos().y() << std::endl;
+    std::cerr << "ctxg " << e->screenPos().x() << " / " << e->screenPos().y() << std::endl;
+    std::cerr << "pos  " << x() << " / " << y() << std::endl;
+    //    QGraphicsProxyWidget::contextMenuEvent(e);
+
+    if (!e || !hasFocus())
+        return;
+
+    QPointF pos = e->scenePos();
+    QPoint globalPos = e->scenePos().toPoint();
+
+    auto target = box_->childAt(e->pos().toPoint());
+
+    QContextMenuEvent contextMenuEvent(QContextMenuEvent::Reason(e->reason()),
+                                       pos.toPoint(), globalPos, e->modifiers());
+    QApplication::sendEvent(target, &contextMenuEvent);
+
+    e->setAccepted(contextMenuEvent.isAccepted());
 }
 
 NodeBox* MovableGraphicsProxyWidget::getBox()

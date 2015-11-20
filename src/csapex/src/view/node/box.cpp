@@ -506,8 +506,6 @@ void NodeBox::moveEvent(QMoveEvent* e)
     QPoint delta = pos - e->oldPos();
 
     worker->getNodeState()->setPos(Point(pos.x(), pos.y()));
-
-    Q_EMIT moved(this, delta.x(), delta.y());
 }
 
 void NodeBox::triggerPlaced()
