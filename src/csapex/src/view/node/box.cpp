@@ -401,6 +401,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
 
     if(o == ui->label) {
         if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
+            apex_assert_hard(false); // TEMPORARY TRIGGER FOR FATAL ASSERTION
             Q_EMIT renameRequest(this);
             e->accept();
 

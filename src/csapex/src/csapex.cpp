@@ -26,6 +26,7 @@
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/param/parameter_factory.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -49,22 +50,32 @@ namespace po = boost::program_options;
 
 using namespace csapex;
 
+ExceptionHandler::ExceptionHandler(bool headless_, bool fatal_exceptions)
+    : headless(headless_), fatal_exceptions_(fatal_exceptions), core_(nullptr)
+{
 
-CsApexApp::CsApexApp(int& argc, char** argv, bool fatal_exceptions)
-    : QApplication(argc, argv), fatal_exceptions_(fatal_exceptions)
-{}
+}
 
-CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, bool fatal_exceptions)
-    : QCoreApplication(argc, argv), fatal_exceptions_(fatal_exceptions)
-{}
+void ExceptionHandler::pause()
+{
+    if(core_) {
+        core_->setPause(true);
+    }
+}
 
-bool CsApexApp::notify(QObject* receiver, QEvent* event) {
+void ExceptionHandler::setCore(CsApexCore *core)
+{
+    core_ = core;
+}
+
+bool ExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *event)
+{
     try {
-        return QApplication::notify(receiver, event);
+        return app->doNotify(receiver, event);
 
     } catch(const std::exception& e) {
         ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-        NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
+        NodeWorker* node_worker = dynamic_cast<NodeWorker*> (receiver);
 
         if(fatal_exceptions_) {
             std::cerr << "caught an exception in --fatal-exceptions mode: Abort!" << std::endl;
@@ -75,14 +86,16 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
 
         if(er) {
             er->setError(true, e.what());
-        } else if(bw) {
-            bw->triggerError(true, e.what());
+        } else if(node_worker) {
+            node_worker->triggerError(true, e.what());
         } else {
             std::cerr << "Uncatched exception:" << e.what() << std::endl;
         }
 
         return false;
 
+    } catch(const csapex::HardAssertionFailure& assertion) {
+        handleAssertionFailure(assertion);
     } catch(const std::string& s) {
         std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
     } catch(...) {
@@ -91,45 +104,75 @@ bool CsApexApp::notify(QObject* receiver, QEvent* event) {
     }
 
     return true;
+}
+
+void ExceptionHandler::handleAssertionFailure(const HardAssertionFailure &assertion)
+{
+    pause();
+
+    assertion.printStackTrace();
+    if(headless) {
+        std::abort();
+    }
+    auto window = QApplication::activeWindow();
+
+    std::stringstream msg;
+    msg << "assertion \"" << assertion.code << "\" failed in "
+        << assertion.file << ", line " << assertion.line << ", thread \"" << assertion.thread << "\"" << std::endl;
+
+    msg << "\n\n" << assertion.stackTrace(12);
+
+    int reply = QMessageBox::critical(window, QString::fromStdString(assertion.code),
+                                      QString::fromStdString(msg.str()), "&Ignore", "&Report (Email)", "&Create Issue on GitLab");
+
+    switch(reply) {
+    case 0: // ignore
+        break;
+    case 1: // report
+    {
+        QString mail = "mailto:sebastian.buck@uni-tuebingen.de?";
+        mail += "subject=[CS::APEX] Bug Report&body=" + QString::fromStdString(msg.str());
+        QDesktopServices::openUrl(QUrl(mail, QUrl::TolerantMode));
+    }
+        break;
+    case 2: // issue
+    {
+        QString issue = "https://gitlab.cs.uni-tuebingen.de/csapex/csapex/issues/new?issue[assignee_id]=&issue[milestone_id]=&issue[title]=";
+        issue += "Assertion Failed&issue[description]=" + QString::fromStdString(msg.str());
+        QDesktopServices::openUrl(QUrl(issue, QUrl::TolerantMode));
+    }
+        break;
+    }
+}
+
+CsApexGuiApp::CsApexGuiApp(int& argc, char** argv, ExceptionHandler &handler)
+    : QApplication(argc, argv), handler(handler)
+{}
+
+CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, ExceptionHandler &handler)
+    : QCoreApplication(argc, argv), handler(handler)
+{}
+
+bool CsApexGuiApp::doNotify(QObject* receiver, QEvent* event)
+{
+    return QApplication::notify(receiver, event);
+}
+
+bool CsApexCoreApp::doNotify(QObject *receiver, QEvent *event)
+{
+    return QCoreApplication::notify(receiver, event);
 }
 
 bool CsApexCoreApp::notify(QObject* receiver, QEvent* event) {
-    try {
-        return QCoreApplication::notify(receiver, event);
-
-    } catch(const std::exception& e) {
-        ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-        NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
-
-        if(fatal_exceptions_) {
-            std::cerr << "caught an exception in --fatal-exceptions mode: Abort!" << std::endl;
-            std::abort();
-        }
-
-        std::cerr << "exception: " << e.what() << std::endl;
-
-        if(er) {
-            er->setError(true, e.what());
-        } else if(bw) {
-            bw->triggerError(true, e.what());
-        } else {
-            std::cerr << "Uncatched exception:" << e.what() << std::endl;
-        }
-
-        return false;
-
-    } catch(const std::string& s) {
-        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-    } catch(...) {
-        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-        std::abort();
-    }
-
-    return true;
+    return handler.notifyImpl(this, receiver, event);
+}
+bool CsApexGuiApp::notify(QObject* receiver, QEvent* event) {
+    return handler.notifyImpl(this, receiver, event);
 }
 
-Main::Main(std::unique_ptr<QCoreApplication> &&a)
-    : app(std::move(a)), splash(nullptr)
+
+Main::Main(std::unique_ptr<QCoreApplication> &&a, ExceptionHandler& handler)
+    : app(std::move(a)), handler(handler), splash(nullptr)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -225,6 +268,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
 
+    handler.setCore(core.get());
 
     int res;
     if(!headless) {
@@ -327,8 +371,6 @@ void Main::askForRecoveryConfig(const std::string& config_to_load)
 {
     bf3::path temp_file = config_to_load + ".recover";
     if(bf3::exists(temp_file)) {
-        QMessageBox::StandardButton reply;
-
         std::time_t mod_time_t = bf3::last_write_time(temp_file);
         char mod_time[20];
         strftime(mod_time, 20, "%Y-%m-%d %H:%M:%S", localtime(&mod_time_t));
@@ -338,7 +380,7 @@ void Main::askForRecoveryConfig(const std::string& config_to_load)
                 temp_file.filename().string() +
                 "</b>?<br />(last modified: " + mod_time + ")";
 
-        reply = QMessageBox::question(splash, "Configuration Recovery",
+        QMessageBox::StandardButton reply = QMessageBox::question(splash, "Configuration Recovery",
                                       QString::fromStdString(question),
                                       QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes) {
@@ -413,12 +455,15 @@ int main(int argc, char** argv)
         }
     }
 
+
+    ExceptionHandler handler(headless, fatal_exceptions);
+
     // filters all qt parameters from argv
     std::unique_ptr<QCoreApplication> app;
     if(headless) {
-        app.reset(new CsApexCoreApp(argc, argv, fatal_exceptions));
+        app.reset(new CsApexCoreApp(argc, argv, handler));
     } else {
-        app.reset(new CsApexApp(argc, argv, fatal_exceptions));
+        app.reset(new CsApexGuiApp(argc, argv, handler));
     }
 
     // filters ros remappings
@@ -482,7 +527,7 @@ int main(int argc, char** argv)
     bool paused = vm.count("paused");
 
     // start the app
-    Main m(std::move(app));
+    Main m(std::move(app), handler);
     return m.main(headless, threadless, paused, thread_grouping, input, path_to_bin, additional_args);
 }
 

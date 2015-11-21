@@ -99,7 +99,6 @@ std::string SetParameter::getText() const
         return as<std::string>();
     }
 
-    std::abort();
     throw std::runtime_error("cannot get the text for parameter '" + name() + "'");
 }
 

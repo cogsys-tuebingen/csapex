@@ -3,8 +3,10 @@
 
 /// PROJECT
 #include <csapex/view/widgets/csapex_splashscreen.h>
+#include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
 #include <csapex/command/command_fwd.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -15,27 +17,60 @@
 namespace csapex
 {
 
-struct CsApexCoreApp : public QCoreApplication {
-    CsApexCoreApp(int& argc, char** argv, bool fatal_exceptions);
-
-    virtual bool notify(QObject* receiver, QEvent* event);
-
-    bool fatal_exceptions_;
+struct AppProxy
+{
+    virtual bool doNotify(QObject* receiver, QEvent* event) = 0;
 };
 
-struct CsApexApp : public QApplication {
-    CsApexApp(int& argc, char** argv, bool fatal_exceptions);
+struct ExceptionHandler
+{
+public:
+    ExceptionHandler(bool headless, bool fatal_exceptions);
+
+    bool notifyImpl(AppProxy* app, QObject* receiver, QEvent* event);
+
+    void setCore(csapex::CsApexCore* core);
+
+protected:
+    void pause();
+    void handleAssertionFailure(const csapex::HardAssertionFailure& assertion);
+
+protected:
+    bool headless;
+    bool fatal_exceptions_;
+
+    csapex::CsApexCore* core_;
+};
+
+struct CsApexCoreApp : public QCoreApplication, public AppProxy
+{
+    CsApexCoreApp(int& argc, char** argv, ExceptionHandler& handler);
 
     virtual bool notify(QObject* receiver, QEvent* event);
+    virtual bool doNotify(QObject* receiver, QEvent* event) override;
 
-    bool fatal_exceptions_;
+private:
+    ExceptionHandler& handler;
+};
+
+struct CsApexGuiApp : public QApplication, public AppProxy
+{
+    CsApexGuiApp(int& argc, char** argv, ExceptionHandler& handler);
+
+    virtual bool notify(QObject* receiver, QEvent* event);
+    virtual bool doNotify(QObject* receiver, QEvent* event) override;
+
+    void handleAssertionFailure(const csapex::HardAssertionFailure& assertion);
+
+private:
+    ExceptionHandler& handler;
 };
 
 struct Main : public QObject {
     Q_OBJECT
 
 public:
-    Main(std::unique_ptr<QCoreApplication> &&app);
+    Main(std::unique_ptr<QCoreApplication> &&app, ExceptionHandler &handler);
     ~Main();
 
     int run();
@@ -50,6 +85,7 @@ private:
 
 private:
     std::unique_ptr<QCoreApplication> app;
+    ExceptionHandler& handler;
     CsApexSplashScreen* splash;
 
     Settings settings;

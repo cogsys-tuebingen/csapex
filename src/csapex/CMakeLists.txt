@@ -161,6 +161,7 @@ list(APPEND csapex_LIBRARIES csapex_param)
 
 add_library(csapex_util SHARED
     src/utility/assert.cpp
+    src/utility/exceptions.cpp
     src/utility/bash_parser.cpp
     src/utility/buffer.cpp
     src/utility/error_handling.cpp

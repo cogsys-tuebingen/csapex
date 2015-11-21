@@ -328,7 +328,7 @@ void ThreadGroup::executeTask(const TaskPtr& task)
         std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
     } catch(...) {
         std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-        std::abort();
+        throw;
     }
 }
 
