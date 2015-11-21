@@ -27,6 +27,7 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/view/node/box.h>
 #include <csapex/scheduling/thread_group.h>
+#include <csapex/view/utility/node_list_generator.h>
 
 /// SYSTEM
 #include <iostream>
@@ -852,7 +853,8 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
 void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
 {
     QMenu menu;
-    widget_ctrl_->insertAvailableNodeTypes(&menu);
+    NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
+    generator.insertAvailableNodeTypes(&menu);
 
     QAction* selectedItem = menu.exec(global_pos);
 

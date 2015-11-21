@@ -316,6 +316,7 @@ add_library(csapex_qt SHARED
     src/view/node/box.cpp
     src/view/node/node_statistics.cpp
 
+    src/view/utility/node_list_generator.cpp
     src/view/utility/context_menu_handler.cpp
     src/view/utility/html_delegate.cpp
     src/view/utility/qsignal_bridges.cpp

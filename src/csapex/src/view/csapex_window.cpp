@@ -27,6 +27,7 @@
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/command/command.h>
 #include "ui_csapex_window.h"
+#include <csapex/view/utility/node_list_generator.h>
 
 /// PROJECT
 #include <csapex/param/parameter_factory.h>
@@ -443,8 +444,10 @@ void CsApexWindow::updateNodeTypes()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    widget_ctrl_->insertAvailableNodeTypes(ui->boxes);
-    widget_ctrl_->insertAvailableNodeTypes(ui->node_info_tree);
+    NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
+
+    generator.insertAvailableNodeTypes(ui->boxes);
+    generator.insertAvailableNodeTypes(ui->node_info_tree);
 }
 
 

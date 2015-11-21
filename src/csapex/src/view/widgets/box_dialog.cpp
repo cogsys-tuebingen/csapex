@@ -5,6 +5,7 @@
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/node/node_filter_proxy_model.h>
 #include <csapex/view/utility/html_delegate.h>
+#include <csapex/view/utility/node_list_generator.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -150,7 +151,9 @@ void BoxDialog::makeUI()
 
     NodeFilterProxyModel* filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    filter->setSourceModel(widget_controller_->listAvailableNodeTypes());
+
+    NodeListGenerator generator(*widget_controller_->getNodeFactory());
+    filter->setSourceModel(generator.listAvailableNodeTypes());
 
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
     connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));

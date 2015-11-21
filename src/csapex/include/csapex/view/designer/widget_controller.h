@@ -18,10 +18,6 @@
 #include <QGraphicsView>
 #include <boost/signals2/connection.hpp>
 
-class QTreeWidget;
-class QMenu;
-class QAbstractItemModel;
-
 namespace csapex
 {
 
@@ -60,12 +56,6 @@ public:
     CommandDispatcher* getCommandDispatcher() const;
 
     void setStyleSheet(const QString &str);
-
-
-    // TODO: extract into something like NodeTypeListGenerator
-    void insertAvailableNodeTypes(QMenu* menu);
-    void insertAvailableNodeTypes(QTreeWidget *tree);
-    QAbstractItemModel *listAvailableNodeTypes();
 
     bool isGridLockEnabled() const;
 
