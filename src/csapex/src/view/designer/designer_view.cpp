@@ -669,9 +669,8 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
     menu.addSeparator();
 
     bool threading = !settings_.get("threadless", false);
-    bool grouping = settings_.get("thread_grouping", false);
     QMenu thread_menu("thread grouping", &menu);
-    thread_menu.setEnabled(threading && !grouping);
+    thread_menu.setEnabled(threading);
     menu.addMenu(&thread_menu);
 
     if(thread_menu.isEnabled()) {

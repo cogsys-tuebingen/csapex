@@ -332,7 +332,7 @@ int main(int argc, char** argv)
             ("headless", "run without gui")
             ("threadless", "run without threading")
             ("fatal_exceptions", "abort execution on exception")
-            ("thread_grouping", "create one thread per graph component")
+            ("disable_thread_grouping", "by default create one thread per node")
             ("input", "config file to load")
             ;
 
@@ -436,7 +436,7 @@ int main(int argc, char** argv)
     }
 
     bool threadless = vm.count("threadless");
-    bool thread_grouping = vm.count("thread_grouping");
+    bool thread_grouping = !vm.count("disable_thread_grouping");
     bool paused = vm.count("paused");
 
     // start the app

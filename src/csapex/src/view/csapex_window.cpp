@@ -100,6 +100,8 @@ void CsApexWindow::construct()
     ui->actionSignal_Connections->setChecked(designer_->areSignalConnectionsVisible());
     ui->actionMessage_Connections->setChecked(designer_->areMessageConnectionsVisibile());
 
+    ui->actionDebug->setChecked(designer_->isDebug());
+
     ui->actionPause->setChecked(executor_.isPaused());
 
     minimap_->setVisible(designer_->isMinimapEnabled());
@@ -149,6 +151,9 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionMessage_Connections, SIGNAL(toggled(bool)), designer_, SLOT(displayMessageConnections(bool)));
     QObject::connect(designer_, SIGNAL(messagesEnabled(bool)), ui->actionMessage_Connections, SLOT(setChecked(bool)));
+
+    QObject::connect(ui->actionDebug, SIGNAL(toggled(bool)), designer_, SLOT(enableDebug(bool)));
+    QObject::connect(designer_, SIGNAL(debugEnabled(bool)), ui->actionDebug, SLOT(setChecked(bool)));
 
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), widget_ctrl_.get(),  SLOT(enableGridLock(bool)));
     QObject::connect(widget_ctrl_.get(), SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));

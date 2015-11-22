@@ -45,6 +45,7 @@ void ThreadPool::clear()
 {
     bool p = isPaused();
     setPause(true);
+    default_group_->clear();
     for(auto g : groups_) {
         g->clear();
     }
@@ -53,6 +54,7 @@ void ThreadPool::clear()
 
 void ThreadPool::pauseChanged(bool pause)
 {
+    default_group_->setPause(pause);
     for(auto g : groups_) {
         g->setPause(pause);
     }
@@ -61,6 +63,7 @@ void ThreadPool::pauseChanged(bool pause)
 
 void ThreadPool::steppingChanged(bool step)
 {
+    default_group_->setSteppingMode(step);
     for(auto g : groups_) {
         g->setSteppingMode(step);
     }

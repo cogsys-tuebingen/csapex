@@ -47,5 +47,6 @@
         <file>node_processing.png</file>
         <file>step.png</file>
         <file>step_next.png</file>
+        <file>bug.png</file>
     </qresource>
 </RCC>

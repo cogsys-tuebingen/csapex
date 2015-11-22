@@ -174,22 +174,18 @@ void Input::inputMessage(ConnectionType::ConstPtr message)
 {
     apex_assert_hard(message != nullptr);
 
-//    if(!isEnabled()) {
-//        notifyMessageProcessed();
+    if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message)){
+        int s = message->sequenceNumber();
 
-//        return;
-//    }
+        //    if(s < sequenceNumber()) {
+        //        std::cerr << "connector @" << getUUID().getFullName() <<
+        //                     ": dropping old message @ with #" << s <<
+        //                     " < #" << sequenceNumber() << std::endl;
+        //        return;
+        //    }
 
-
-    int s = message->sequenceNumber();
-//    if(s < sequenceNumber()) {
-//        std::cerr << "connector @" << getUUID().getFullName() <<
-//                     ": dropping old message @ with #" << s <<
-//                     " < #" << sequenceNumber() << std::endl;
-//        return;
-//    }
-
-    setSequenceNumber(s);
+        setSequenceNumber(s);
+    }
 
     {
         std::unique_lock<std::mutex> lock(message_mutex_);

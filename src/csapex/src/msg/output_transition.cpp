@@ -165,9 +165,9 @@ void OutputTransition::sendMessages()
 
     setSequenceNumber(seq_no);
 
-    if(!isSink()) {
-        fillConnections();
-    } else {
+    fillConnections();
+
+    if(isSink()) {
         abortSendingMessages();
     }
 }
@@ -216,7 +216,7 @@ bool OutputTransition::areOutputsIdle() const
 void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(!areOutputsIdle());
+    apex_assert_hard(outputs_.empty() || !areOutputsIdle());
 
     for(auto pair : outputs_) {
         OutputPtr out = pair.second;

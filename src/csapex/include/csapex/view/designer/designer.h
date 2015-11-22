@@ -44,6 +44,7 @@ public:
     bool isMinimapEnabled() const;
     bool areSignalConnectionsVisible() const;
     bool areMessageConnectionsVisibile() const;
+    bool isDebug() const;
 
     bool hasSelection() const;
 
@@ -53,6 +54,7 @@ Q_SIGNALS:
     void minimapEnabled(bool);
     void signalsEnabled(bool);
     void messagesEnabled(bool);
+    void debugEnabled(bool);
     void schematicsEnabled(bool);
     void graphComponentsEnabled(bool);
     void threadsEnabled(bool);
@@ -71,6 +73,7 @@ public Q_SLOTS:
     void displayMinimap(bool);
     void displaySignalConnections(bool);
     void displayMessageConnections(bool);
+    void enableDebug(bool);
 
     void refresh();
     void reset();

@@ -165,6 +165,20 @@ void InputTransition::notifyOlderConnections(int seq)
             }
         }
     }
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
+        if(input->isConnected()) {
+            auto connections = input->getConnections();
+            apex_assert_hard(connections.size() == 1);
+            ConnectionPtr connection = connections.front();
+            auto msg = connection->getMessage();
+
+            int s = msg->sequenceNumber();
+            if(seq == s) {
+                std::cout << input->getUUID().getFullName() << " has seq " << s << std::endl;
+            }
+        }
+    }
 }
 
 void InputTransition::notifyMessageProcessed()

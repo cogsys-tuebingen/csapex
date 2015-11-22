@@ -36,6 +36,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
             }
         }, this);
 
+        // TODO: get rid of this!
         ticking_thread_ = std::thread([this, worker]() {
             csapex::thread::set_name((std::string("T") + worker->getUUID().getShortName()).c_str());
             tick_thread_running_ = true;

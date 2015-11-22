@@ -12,7 +12,7 @@ using namespace csapex;
 using namespace csapex::impl;
 
 PreviewInput::PreviewInput(MessagePreviewWidget *parent)
-    : Input(UUID::make("message_preview_in")),
+    : Input(UUID::make_forced("message_preview_in")),
       parent_(parent)
 {
     setType(std::make_shared<connection_types::AnyMessage>());

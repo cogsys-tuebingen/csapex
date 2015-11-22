@@ -97,7 +97,8 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
       preview_(nullptr),
       draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
       scale_(1.0), overlay_threshold_(0.45),
-      highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false)
+      highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false),
+      debug_(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
 
@@ -145,6 +146,15 @@ void DesignerScene::displayMessages(bool display)
 {
     if(display != display_messages_) {
         display_messages_ = display;
+
+        update();
+    }
+}
+
+void DesignerScene::enableDebug(bool debug)
+{
+    if(debug != debug_) {
+        debug_ = debug;
 
         update();
     }
@@ -720,6 +730,11 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
 
+    if(debug_){
+        ccs.label = QString::number(connection.from()->sequenceNumber()) +
+                " -> " +
+                QString::number(connection.to()->sequenceNumber());
+    }
     connection_bb_[&connection] = drawConnection(painter, from, to, id);
 }
 
@@ -998,6 +1013,8 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         }
     }
 
+    painter->drawText(QPointF(from + real_to) * 0.5, ccs.label);
+
     return bounding_boxes;
 }
 
@@ -1014,21 +1031,31 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
     bool is_message = (dynamic_cast<Slot*>(c.get()) == nullptr && dynamic_cast<Trigger*>(c.get()) == nullptr);
 
     if(!p->isMinimizedSize()) {
-        int font_size = 10;
+        int font_size = debug_ ? 12 : 10;
         int lines = 2;
 
         QFont font;
         font.setPixelSize(font_size);
         painter->setFont(font);
 
-        QString text = c->getLabel().c_str();
+        QString text;
 
-        if(is_message) {
-            if(text.length() != 0) {
-                text += "\n";
+        if(debug_) {
+            text = "Seq: ";
+            text += QString::number(c->sequenceNumber());
+            text += "\nCount: ";
+            text += QString::number(c->getCount());
+
+        } else {
+            text = c->getLabel().c_str();
+
+            if(is_message) {
+                if(text.length() != 0) {
+                    text += "\n";
+                }
+                text += c->getType()->descriptiveName().c_str();
+                ++lines;
             }
-            text += c->getType()->descriptiveName().c_str();
-            ++lines;
         }
 
 

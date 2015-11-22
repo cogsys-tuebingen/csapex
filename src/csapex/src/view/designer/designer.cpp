@@ -64,6 +64,9 @@ void Designer::setup()
         designer_scene_->displaySignals(settings_.get<bool>("display-signals"));
     }
 
+    if(settings_.knows("debug")) {
+        designer_scene_->enableDebug(settings_.get<bool>("debug"));
+    }
     setFocusPolicy(Qt::NoFocus);
 
 //    ui->horizontalLayout->addWidget(minimap_);
@@ -170,6 +173,10 @@ bool Designer::areSignalConnectionsVisible() const
 {
     return settings_.get<bool>("display-signals", true);
 }
+bool Designer::isDebug() const
+{
+    return settings_.get<bool>("debug", true);
+}
 
 bool Designer::hasSelection() const
 {
@@ -272,6 +279,19 @@ void Designer::displayMessageConnections(bool display)
     designer_scene_->displayMessages(display);
 
     Q_EMIT messagesEnabled(display);
+}
+
+void Designer::enableDebug(bool debug)
+{
+    if(!settings_.knows("debug")) {
+        settings_.add(csapex::param::ParameterFactory::declareBool("debug", debug));
+    }
+
+    settings_.set("debug", debug);
+
+    designer_scene_->enableDebug(debug);
+
+    Q_EMIT debugEnabled(debug);
 }
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer.cpp"

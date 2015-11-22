@@ -81,6 +81,8 @@ public Q_SLOTS:
     void displaySignals(bool display);
     void displayMessages(bool display);
 
+    void enableDebug(bool debug);
+
     void setScale(double scale);
 
 private:
@@ -132,6 +134,8 @@ private:
 
         Position start_pos;
         Position end_pos;
+
+        QString label;
 
         int level;
 
@@ -194,6 +198,8 @@ private:
     int connector_radius_;
 
     bool schema_dirty_;
+
+    bool debug_;
 };
 
 }
