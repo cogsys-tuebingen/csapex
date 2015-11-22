@@ -16,6 +16,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/serialization/serialization.h>
+#include <csapex/signal/signal_connection.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -190,38 +191,19 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
                 Connectable* from = parent->getOutput(from_uuid);
-                if(from == nullptr) {
-                    from = parent->getTrigger(from_uuid);
-                }
-                if(from == nullptr) {
-                    std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+                if(from != nullptr) {
+                    loadMessageConnection(from, parent, to_uuid);
                     continue;
-                }
 
-                try {
-                    NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
-
-                    Connectable* to = target->getInput(to_uuid);
-                    if(to == nullptr) {
-                        to = target->getSlot(to_uuid);
-                    }
-                    if(!to) {
+                } else {
+                    from = parent->getTrigger(from_uuid);
+                    if(from != nullptr) {
+                        loadSignalConnection(from, to_uuid);
                         continue;
                     }
-
-                    Output* out = dynamic_cast<Output*>(from);
-                    Input* in = dynamic_cast<Input*>(to);
-                    if(out && in) {
-                        ConnectionPtr c = BundledConnection::connect(
-                                    out, in,
-                                    parent->getOutputTransition(), target->getInputTransition());
-                        graph_->addConnection(c);
-                    }
-
-                } catch(const std::exception& e) {
-                    std::cerr << "cannot load connection: " << e.what() << std::endl;
-                    continue;
                 }
+
+                std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
 
             }
         }
@@ -283,6 +265,55 @@ void GraphIO::loadConnections(const YAML::Node &doc)
         }
     }
 }
+
+void GraphIO::loadMessageConnection(Connectable* from, NodeWorker* parent, const UUID& to_uuid)
+{
+    try {
+        NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
+
+        Input* in = target->getInput(to_uuid);
+        if(!in) {
+            std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", input doesn't exist." << std::endl;
+            return;
+        }
+
+        Output* out = dynamic_cast<Output*>(from);
+        if(out && in) {
+            ConnectionPtr c = BundledConnection::connect(
+                        out, in,
+                        parent->getOutputTransition(), target->getInputTransition());
+            graph_->addConnection(c);
+        }
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot load connection: " << e.what() << std::endl;
+    }
+}
+
+
+void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
+{
+    try {
+        NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
+
+        Slot* in = target->getSlot(to_uuid);
+        if(!in) {
+            std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", slot doesn't exist." << std::endl;
+            return;
+        }
+
+        Trigger* out = dynamic_cast<Trigger*>(from);
+        if(out && in) {
+            ConnectionPtr c = SignalConnection::connect(
+                        out, in);
+            graph_->addConnection(c);
+        }
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot load connection: " << e.what() << std::endl;
+    }
+}
+
 
 void GraphIO::serializeNode(YAML::Node& doc, NodeWorker* node_worker)
 {

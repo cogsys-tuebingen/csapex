@@ -6,6 +6,8 @@
 #include <csapex/utility/thread.h>
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/utility/assert.h>
+#include <csapex/utility/exceptions.h>
+#include <csapex/core/exception_handler.h>
 
 /// SYSTEM
 #include <iostream>
@@ -14,14 +16,16 @@ using namespace csapex;
 
 int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 
-ThreadGroup::ThreadGroup(int id, std::string name, bool paused)
-    : id_(id), name_(name), running_(false), pause_(paused)
+ThreadGroup::ThreadGroup(ExceptionHandler& handler, int id, std::string name, bool paused)
+    : handler_(handler),
+      id_(id), name_(name), running_(false), pause_(paused)
 {
     next_id_ = std::max(next_id_, id + 1);
     startThread();
 }
-ThreadGroup::ThreadGroup(std::string name, bool paused)
-    : id_(next_id_++), name_(name), running_(false), pause_(paused)
+ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name, bool paused)
+    : handler_(handler),
+      id_(next_id_++), name_(name), running_(false), pause_(paused)
 {
     startThread();
 }
@@ -325,9 +329,13 @@ void ThreadGroup::executeTask(const TaskPtr& task)
             gen->setError(e.what());
         }
     } catch(const std::string& s) {
-        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
+        std::cerr << "Uncaught exception (string) exception: " << s << std::endl;
+
+    } catch(const csapex::HardAssertionFailure& assertion) {
+        handler_.handleAssertionFailure(assertion);
+
     } catch(...) {
-        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
+        std::cerr << "Uncaught exception of unknown type and origin in execution of task " << task->getName() << "!" << std::endl;
         throw;
     }
 }

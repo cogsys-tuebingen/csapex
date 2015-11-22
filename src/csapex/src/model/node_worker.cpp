@@ -1140,7 +1140,7 @@ void NodeWorker::checkTransitions(bool try_fire)
         return;
     }
 
-    if(try_fire) {
+    if(try_fire && canProcess()) {
         apex_assert_hard(transition_out_->canStartSendingMessages());
 
         int highest_deviant_seq = transition_in_->findHighestDeviantSequenceNumber();

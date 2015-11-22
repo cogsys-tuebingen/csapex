@@ -11,6 +11,7 @@ namespace csapex
 class HardAssertionFailure
 {
 public:
+    HardAssertionFailure();
     HardAssertionFailure(const char* code, const char* file, int line);
     ~HardAssertionFailure();
 

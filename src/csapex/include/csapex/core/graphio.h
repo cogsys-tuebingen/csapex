@@ -32,6 +32,9 @@ protected:
     void serializeNode(YAML::Node& doc, NodeWorker *node_worker);
     void deserializeNode(const YAML::Node& doc, NodeWorker* node_worker);
 
+    void loadMessageConnection(Connectable *from, NodeWorker *parent, const UUID &to_uuid);
+    void loadSignalConnection(Connectable *from, const UUID &to_uuid);
+
 private:
     Graph* graph_;
     NodeFactory* node_factory_;

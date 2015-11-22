@@ -27,6 +27,7 @@
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/view/gui_exception_handler.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -49,101 +50,6 @@ namespace bf3 = boost::filesystem3;
 namespace po = boost::program_options;
 
 using namespace csapex;
-
-ExceptionHandler::ExceptionHandler(bool headless_, bool fatal_exceptions)
-    : headless(headless_), fatal_exceptions_(fatal_exceptions), core_(nullptr)
-{
-
-}
-
-void ExceptionHandler::pause()
-{
-    if(core_) {
-        core_->setPause(true);
-    }
-}
-
-void ExceptionHandler::setCore(CsApexCore *core)
-{
-    core_ = core;
-}
-
-bool ExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *event)
-{
-    try {
-        return app->doNotify(receiver, event);
-
-    } catch(const std::exception& e) {
-        ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-        NodeWorker* node_worker = dynamic_cast<NodeWorker*> (receiver);
-
-        if(fatal_exceptions_) {
-            std::cerr << "caught an exception in --fatal-exceptions mode: Abort!" << std::endl;
-            std::abort();
-        }
-
-        std::cerr << "exception: " << e.what() << std::endl;
-
-        if(er) {
-            er->setError(true, e.what());
-        } else if(node_worker) {
-            node_worker->triggerError(true, e.what());
-        } else {
-            std::cerr << "Uncatched exception:" << e.what() << std::endl;
-        }
-
-        return false;
-
-    } catch(const csapex::HardAssertionFailure& assertion) {
-        handleAssertionFailure(assertion);
-    } catch(const std::string& s) {
-        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-    } catch(...) {
-        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-        std::abort();
-    }
-
-    return true;
-}
-
-void ExceptionHandler::handleAssertionFailure(const HardAssertionFailure &assertion)
-{
-    pause();
-
-    assertion.printStackTrace();
-    if(headless) {
-        std::abort();
-    }
-    auto window = QApplication::activeWindow();
-
-    std::stringstream msg;
-    msg << "assertion \"" << assertion.code << "\" failed in "
-        << assertion.file << ", line " << assertion.line << ", thread \"" << assertion.thread << "\"" << std::endl;
-
-    msg << "\n\n" << assertion.stackTrace(12);
-
-    int reply = QMessageBox::critical(window, QString::fromStdString(assertion.code),
-                                      QString::fromStdString(msg.str()), "&Ignore", "&Report (Email)", "&Create Issue on GitLab");
-
-    switch(reply) {
-    case 0: // ignore
-        break;
-    case 1: // report
-    {
-        QString mail = "mailto:sebastian.buck@uni-tuebingen.de?";
-        mail += "subject=[CS::APEX] Bug Report&body=" + QString::fromStdString(msg.str());
-        QDesktopServices::openUrl(QUrl(mail, QUrl::TolerantMode));
-    }
-        break;
-    case 2: // issue
-    {
-        QString issue = "https://gitlab.cs.uni-tuebingen.de/csapex/csapex/issues/new?issue[assignee_id]=&issue[milestone_id]=&issue[title]=";
-        issue += "Assertion Failed&issue[description]=" + QString::fromStdString(msg.str());
-        QDesktopServices::openUrl(QUrl(issue, QUrl::TolerantMode));
-    }
-        break;
-    }
-}
 
 CsApexGuiApp::CsApexGuiApp(int& argc, char** argv, ExceptionHandler &handler)
     : QApplication(argc, argv), handler(handler)
@@ -191,7 +97,8 @@ int Main::run()
     return result;
 }
 
-int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
+int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping,
+               const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
     //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
@@ -243,7 +150,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
 
     GraphPtr graph = std::make_shared<Graph>();
-    ThreadPool thread_pool(!threadless, thread_grouping, paused);
+    ThreadPool thread_pool(handler, !threadless, thread_grouping, paused);
     GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(thread_pool, graph.get());
 
     graph_worker->generatorAdded.connect([&thread_pool](TaskGeneratorPtr tg) {
@@ -456,14 +363,20 @@ int main(int argc, char** argv)
     }
 
 
-    ExceptionHandler handler(headless, fatal_exceptions);
+    std::shared_ptr<ExceptionHandler> handler;
 
     // filters all qt parameters from argv
     std::unique_ptr<QCoreApplication> app;
     if(headless) {
-        app.reset(new CsApexCoreApp(argc, argv, handler));
+        handler.reset(new ExceptionHandler(fatal_exceptions));
+        app.reset(new CsApexCoreApp(argc, argv, *handler));
     } else {
-        app.reset(new CsApexGuiApp(argc, argv, handler));
+        std::shared_ptr<GuiExceptionHandler> h(new GuiExceptionHandler(fatal_exceptions));
+
+        handler = h;
+        app.reset(new CsApexGuiApp(argc, argv, *handler));
+
+        h->moveToThread(app->thread());
     }
 
     // filters ros remappings
@@ -527,7 +440,7 @@ int main(int argc, char** argv)
     bool paused = vm.count("paused");
 
     // start the app
-    Main m(std::move(app), handler);
+    Main m(std::move(app), *handler);
     return m.main(headless, threadless, paused, thread_grouping, input, path_to_bin, additional_args);
 }
 

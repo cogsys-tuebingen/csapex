@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/scheduling/scheduler.h>
+#include <csapex/core/core_fwd.h>
 
 /// SYSTEM
 #include <string>
@@ -28,8 +29,8 @@ public:
     static int nextId();
 
 public:
-    ThreadGroup(int id, std::string name, bool paused);
-    ThreadGroup(std::string name, bool paused);
+    ThreadGroup(ExceptionHandler& handler, int id, std::string name, bool paused);
+    ThreadGroup(ExceptionHandler& handler, std::string name, bool paused);
     ~ThreadGroup();
 
     int id() const;
@@ -69,6 +70,8 @@ private:
     void checkIfStepIsDone();
 
 private:
+    ExceptionHandler& handler_;
+
     static int next_id_;
 
     int id_;

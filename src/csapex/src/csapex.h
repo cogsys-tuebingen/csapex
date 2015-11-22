@@ -7,6 +7,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/core/exception_handler.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -17,30 +18,6 @@
 namespace csapex
 {
 
-struct AppProxy
-{
-    virtual bool doNotify(QObject* receiver, QEvent* event) = 0;
-};
-
-struct ExceptionHandler
-{
-public:
-    ExceptionHandler(bool headless, bool fatal_exceptions);
-
-    bool notifyImpl(AppProxy* app, QObject* receiver, QEvent* event);
-
-    void setCore(csapex::CsApexCore* core);
-
-protected:
-    void pause();
-    void handleAssertionFailure(const csapex::HardAssertionFailure& assertion);
-
-protected:
-    bool headless;
-    bool fatal_exceptions_;
-
-    csapex::CsApexCore* core_;
-};
 
 struct CsApexCoreApp : public QCoreApplication, public AppProxy
 {

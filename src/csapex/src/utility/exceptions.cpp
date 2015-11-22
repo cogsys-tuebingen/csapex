@@ -11,6 +11,12 @@
 
 using namespace csapex;
 
+HardAssertionFailure::HardAssertionFailure()
+    : line(-1), stack_depth_(0)
+{
+
+}
+
 HardAssertionFailure::HardAssertionFailure(const char* code, const char* file, int line)
     : code(code), file(file), line(line), thread(csapex::thread::get_name())
 {

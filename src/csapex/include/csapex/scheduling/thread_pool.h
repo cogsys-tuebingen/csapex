@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/scheduling/executor.h>
 #include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/core/exception_handler.h>
 
 /// SYSTEM
 #include <map>
@@ -20,7 +21,7 @@ class CsApexCore;
 class ThreadPool : public Executor
 {
 public:
-    ThreadPool(bool enable_threading, bool grouping, bool paused);
+    ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping, bool paused);
 
     virtual void performStep() override;
 
@@ -60,6 +61,8 @@ private:
 //    void clearGroup(ThreadGroup *group);
 
 private:
+    ExceptionHandler& handler_;
+
     bool enable_threading_;
     bool grouping_;
 

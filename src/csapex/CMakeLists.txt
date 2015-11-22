@@ -189,6 +189,8 @@ add_library(csapex SHARED
     src/core/bootstrap_plugin.cpp
     src/core/graphio.cpp
     src/core/settings.cpp
+    src/core/exception_handler.cpp
+
     src/data/point.cpp
 
     src/factory/generic_node_factory.cpp
@@ -293,8 +295,10 @@ add_library(csapex_qt SHARED
     src/command/switch_thread.cpp
 
     src/view/csapex_window.cpp
-    src/manager/message_renderer_manager.cpp
     src/view/message_renderer.cpp
+    src/view/gui_exception_handler.cpp
+
+    src/manager/message_renderer_manager.cpp
 
     src/view/designer/designer.cpp
     src/view/designer/designer_scene.cpp
