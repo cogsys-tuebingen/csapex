@@ -19,7 +19,7 @@ public:
     typedef boost::signals2::signal<void()> SignalImpl;
     typedef std::shared_ptr< SignalImpl > Signal;
 
-    NodeState(const NodeWorker *parent);
+    NodeState(const NodeHandle *parent);
 
     NodeState& operator = (const NodeState& rhs);
 
@@ -52,15 +52,15 @@ public:
     void setThread(const std::string& name, int id);
     Signal thread_changed;
 
-    const NodeWorker* getParent() const;
-    void setParent(const NodeWorker *value);
+    const NodeHandle* getParent() const;
+    void setParent(const NodeHandle *value);
     Signal parent_changed;
 
     Memento::Ptr getParameterState() const;
     void setParameterState(const Memento::Ptr &value);
 
 private:
-    const NodeWorker* parent_;
+    const NodeHandle* parent_;
 
     mutable Memento::Ptr child_state_;
 

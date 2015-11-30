@@ -7,7 +7,6 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/param/parameter.h>
-#include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/node_handle.h>
@@ -24,8 +23,8 @@
 namespace csapex {
 
 class NodeWorker :
-        public NodeHandle, // TODO: separate
-        public ErrorState, public Unique
+        public NodeHandle,
+        public ErrorState
 {
     friend class Node;
     friend class NodeBox;
@@ -67,8 +66,6 @@ public:
     virtual void triggerCheckTransitions() override;
     void triggerPanic();
 
-    NodeWeakPtr getNode() const;
-
     void setState(State state);
     State getState() const;
 
@@ -77,7 +74,6 @@ public:
     bool isProcessing() const;
     bool isFired() const;
 
-    std::string getType() const;
 
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool e);
@@ -232,8 +228,6 @@ private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 private:
-    std::string node_type_;
-    NodePtr node_;    
     NodeStatePtr node_state_;
     NodeModifierPtr modifier_;
 
@@ -242,11 +236,6 @@ private:
 
     bool is_setup_;
     State state_;
-
-    std::vector<InputPtr> inputs_;
-    std::vector<OutputPtr> outputs_;
-    std::vector<TriggerPtr> triggers_;
-    std::vector<SlotPtr> slots_;
 
     int next_input_id_;
     int next_output_id_;

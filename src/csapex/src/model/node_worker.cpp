@@ -30,8 +30,8 @@ using namespace csapex;
 const double NodeWorker::DEFAULT_FREQUENCY = 30.0;
 
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node)
-    : Unique(uuid),
-      node_type_(type), node_(node), node_state_(std::make_shared<NodeState>(this)),
+    : NodeHandle(type, uuid, node),
+      node_state_(std::make_shared<NodeState>(this)),
       transition_in_(std::make_shared<InputTransition>(std::bind(&NodeWorker::triggerCheckTransitions, this))),
       transition_out_(std::make_shared<OutputTransition>(std::bind(&NodeWorker::triggerCheckTransitions, this))),
       is_setup_(false), state_(State::IDLE),
@@ -180,11 +180,6 @@ NodeState::Ptr NodeWorker::getNodeState()
     return node_state_;
 }
 
-NodeWeakPtr NodeWorker::getNode() const
-{
-    return node_;
-}
-
 NodeWorker::State NodeWorker::getState() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
@@ -234,11 +229,6 @@ void NodeWorker::setState(State state)
     }
 
     state_ = state;
-}
-
-std::string NodeWorker::getType() const
-{
-    return node_type_;
 }
 
 bool NodeWorker::isProcessingEnabled() const

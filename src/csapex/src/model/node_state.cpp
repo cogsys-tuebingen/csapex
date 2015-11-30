@@ -8,7 +8,7 @@
 
 using namespace csapex;
 
-NodeState::NodeState(const NodeWorker *parent)
+NodeState::NodeState(const NodeHandle *parent)
     : pos_changed(new SignalImpl),
       label_changed(new SignalImpl),
       minimized_changed(new SignalImpl),
@@ -150,12 +150,12 @@ void NodeState::setParameterState(const Memento::Ptr &value)
     child_state_ = value;
 }
 
-const NodeWorker *NodeState::getParent() const
+const NodeHandle *NodeState::getParent() const
 {
     return parent_;
 }
 
-void NodeState::setParent(const NodeWorker *value)
+void NodeState::setParent(const NodeHandle *value)
 {
     if(parent_ != value) {
         parent_ = value;
