@@ -1,0 +1,12 @@
+stages:
+  - build
+
+framework:
+  stage: build
+  script:
+    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
+    - cd src/csapex
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j $(nproc)
