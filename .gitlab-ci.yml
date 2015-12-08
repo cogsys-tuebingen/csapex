@@ -1,0 +1,9 @@
+stages:
+  - build
+
+framework:
+  stage: build
+  script:
+    - mkdir build; cd build; cmake ..; make -j $(nproc)
+  only:
+    - devel
