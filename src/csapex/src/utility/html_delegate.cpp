@@ -123,3 +123,5 @@ QSize HTMLBoxDelegate::sizeHint ( const QStyleOptionViewItem & option, const QMo
     doc.setTextWidth(options.rect.width());
     return QSize(doc.idealWidth(), 2 * line_height);
 }
+/// MOC
+#include "../../include/csapex/utility/moc_html_delegate.cpp"

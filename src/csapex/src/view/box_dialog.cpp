@@ -31,7 +31,7 @@ CompleteLineEdit::CompleteLineEdit(QWidget *parent)
 
 
 void CompleteLineEdit::focusOutEvent(QFocusEvent */*e*/) {
-    Q_EMIT editingFinished();
+//    Q_EMIT editingFinished();
 }
 
 void CompleteLineEdit::keyPressEvent(QKeyEvent *e) {
@@ -167,3 +167,5 @@ std::string BoxDialog::getName()
     return name_edit_->text().toStdString();
 }
 
+/// MOC
+#include "../../include/csapex/view/moc_box_dialog.cpp"

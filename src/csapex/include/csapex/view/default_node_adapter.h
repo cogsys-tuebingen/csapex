@@ -12,7 +12,7 @@ class QComboBox;
 class QGroupBox;
 
 namespace qt_helper{
-struct Call;
+class Call;
 }
 
 namespace csapex
@@ -34,7 +34,6 @@ public:
     void disconnect();
 
 public Q_SLOTS:
-    void nodeModelChangedEvent();
     void setupAdaptiveUi();
 
     void enableGroup(bool enable, const std::string& group);
@@ -64,11 +63,8 @@ public:
 
     virtual void stop();
 
-protected:
-    virtual void setupAdaptiveUi();
-    virtual void setupUi(QBoxLayout* layout);
-
-protected:
+public:
+    // TODO: WeakPtrs!!!!
     void setupParameter(param::TriggerParameter* trigger_p);
     void setupParameter(param::ColorParameter* color_p);
     void setupParameter(param::PathParameter* path_p);
@@ -80,6 +76,11 @@ protected:
 
     void setupParameter(param::OutputProgressParameter* bitset_p);
 
+
+protected:
+    virtual void setupAdaptiveUi();
+    virtual void setupUi(QBoxLayout* layout);
+
     void clear();
 
 public:
@@ -88,6 +89,7 @@ public:
 private:
     qt_helper::Call* makeModelCall(std::function<void()> cb);
     qt_helper::Call* makeUiCall(std::function<void()> cb);
+    qt_helper::Call* makePausedUiCall(std::function<void()> cb);
 
 private:
     std::vector<QObject*> callbacks;

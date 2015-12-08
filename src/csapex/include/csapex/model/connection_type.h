@@ -36,6 +36,12 @@ public:
 
     virtual bool isValid() const;
 
+    virtual bool isContainer() const;
+    virtual Ptr nestedType() const;
+    virtual ConstPtr nestedValue(std::size_t i) const;
+    virtual void addNestedValue(const ConstPtr& msg);
+    virtual std::size_t nestedValueCount() const;
+
     virtual bool canConnectTo(const ConnectionType* other_side) const;
     virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
 
@@ -45,7 +51,7 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_) const;
 
-    virtual void writeRaw(const std::string& file, const std::string &suffix) const;
+    virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
 
 protected:
     void setName(const std::string& name);

@@ -198,3 +198,5 @@ void CommandDispatcher::populateDebugInfo(QTreeWidget *undo, QTreeWidget *redo)
         redo->addTopLevelItem(c->createDebugInformation());
     }
 }
+/// MOC
+#include "../../include/csapex/command/moc_dispatcher.cpp"

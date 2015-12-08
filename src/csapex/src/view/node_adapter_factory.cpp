@@ -53,7 +53,7 @@ void NodeAdapterFactory::rebuildPrototypes()
         const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;
 
         NodeAdapterBuilder::Ptr builder = constructor.construct();
-        node_adapter_builders_[builder->getWrappedType()] = builder;        
+        node_adapter_builders_[builder->getWrappedType()] = builder;
 
         constructor.unload_request->disconnect_all_slots();
         constructor.unload_request->connect(std::bind(&NodeAdapterFactory::unload, this));

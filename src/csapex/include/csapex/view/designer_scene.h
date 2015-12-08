@@ -69,6 +69,9 @@ public Q_SLOTS:
     void enableGrid(bool draw);
     void enableSchema(bool draw);
 
+    void displaySignals(bool display);
+    void displayMessages(bool display);
+
     void setScale(double scale);
 
 private:
@@ -97,6 +100,10 @@ private:
         UNDEFINED = 99
     };
 
+    enum class ConnectionType {
+        SIG, MSG
+    };
+
     struct CurrentConnectionState {
         bool highlighted;
         bool error;
@@ -108,6 +115,8 @@ private:
         bool minimized;
         bool hidden_from;
         bool hidden_to;
+
+        ConnectionType type;
 
         Position start_pos;
         Position end_pos;
@@ -149,6 +158,9 @@ private:
 
     bool draw_grid_;
     bool draw_schema_;
+    bool display_messages_;
+    bool display_signals_;
+
     double scale_;
     double overlay_threshold_;
 

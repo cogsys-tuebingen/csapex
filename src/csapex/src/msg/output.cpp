@@ -10,7 +10,6 @@
 #include <csapex/msg/message_traits.h>
 
 /// SYSTEM
-
 #include <iostream>
 
 using namespace csapex;
@@ -31,11 +30,10 @@ Output::~Output()
 
 void Output::reset()
 {
-    clearMessage();
+    clear();
 
     setBlocked(false);
     setSequenceNumber(0);
-    message_.reset();
 }
 
 int Output::noTargets()
@@ -50,6 +48,7 @@ std::vector<Input*> Output::getTargets() const
 
 void Output::removeConnection(Connectable* other_side)
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
             other_side->removeConnection(this);
@@ -73,6 +72,7 @@ Command::Ptr Output::removeConnectionCmd(Input* other_side) {
 
 Command::Ptr Output::removeAllConnectionsCmd()
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
 
     foreach(Input* target, targets_) {
@@ -85,6 +85,7 @@ Command::Ptr Output::removeAllConnectionsCmd()
 
 void Output::removeAllConnectionsNotUndoable()
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<Input*>::iterator i = targets_.begin(); i != targets_.end();) {
         (*i)->removeConnection(this);
         i = targets_.erase(i);
@@ -96,11 +97,6 @@ void Output::removeAllConnectionsNotUndoable()
 void Output::disable()
 {
     Connectable::disable();
-
-//    if(isBlocked()) {
-        message_to_send_.reset();
-        message_.reset();
-//    }
 }
 
 void Output::connectForcedWithoutCommand(Input *other_side)
@@ -131,6 +127,7 @@ bool Output::connect(Connectable *other_side)
         return false;
     }
 
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     apex_assert_hard(input);
     targets_.push_back(input);
 
@@ -143,6 +140,7 @@ bool Output::connect(Connectable *other_side)
 
 bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* input, targets_) {
         if(!input->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
@@ -153,11 +151,13 @@ bool Output::targetsCanBeMovedTo(Connectable* other_side) const
 
 bool Output::isConnected() const
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return targets_.size() > 0 || force_send_message_;
 }
 
 void Output::connectionMovePreview(Connectable *other_side)
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* input, targets_) {
         Q_EMIT(connectionInProgress(input, other_side));
     }
@@ -165,28 +165,15 @@ void Output::connectionMovePreview(Connectable *other_side)
 
 void Output::validateConnections()
 {
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* target, targets_) {
         target->validateConnections();
     }
 }
 
-void Output::publish(ConnectionType::ConstPtr message)
+bool Output::canSendMessages() const
 {
-    setType(message->toType());
-
-    // update buffer
-    message_to_send_ = message;
-
-    setBlocked(true);
-}
-
-bool Output::hasMessage()
-{
-    return (bool) message_to_send_;
-}
-
-bool Output::canSendMessages()
-{
+    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     foreach(Input* input, targets_) {
         bool blocked = /*input->isEnabled() && */input->isBlocked();
         if(blocked) {
@@ -196,58 +183,7 @@ bool Output::canSendMessages()
     return true;
 }
 
-void Output::clearMessage()
-{
-    message_to_send_.reset();
-}
-
-void Output::sendMessages()
-{
-    assert(canSendMessages());
-    if(message_to_send_) {
-        message_ = message_to_send_;
-        clearMessage();
-
-    } else {
-        if(!targets_.empty()) {
-//            std::cout << getUUID() << " sends empty message" << std::endl;
-        }
-        message_ = connection_types::makeEmpty<connection_types::NoMessage>();
-    }
-
-    message_->setSequenceNumber(seq_no_);
-
-    // wait for all connected inputs to be able to receive
-    //  * inputs can only be connected to this output since they are 1:1
-    std::vector<Input*> targets;
-    foreach(Input* i, targets_) {
-        if(i->isEnabled()) {
-            targets.push_back(i);
-            assert(!i->isBlocked());
-        }
-    }
-
-//    std::cerr << getUUID() << "Publish message with #" << seq_no_ << std::endl;
-    if(!targets.empty()) {
-        // all connected inputs are ready to receive, send them the message
-        for(auto i : targets) {
-            i->inputMessage(message_);
-        }
-        ++count_;
-    }
-
-    setBlocked(false);
-
-    ++seq_no_;
-    Q_EMIT messageSent(this);
-}
-
 void Output::forceSendMessage(bool force)
 {
     force_send_message_ = force;
-}
-
-ConnectionType::ConstPtr Output::getMessage()
-{
-    return message_;
 }

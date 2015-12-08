@@ -37,16 +37,6 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
     }
 }
 
-void NodeAdapter::nodeModelChangedEvent()
-{
-
-}
-
-void NodeAdapter::updateDynamicGui(QBoxLayout* /*layout*/)
-{
-
-}
-
 void NodeAdapter::stop()
 {
 }

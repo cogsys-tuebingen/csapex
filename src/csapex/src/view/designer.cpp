@@ -67,6 +67,14 @@ void Designer::setup()
         enableSchematics(settings_.get<bool>("schematics"));
     }
 
+    if(settings_.knows("display-messages")) {
+        designer_scene_->displayMessages(settings_.get<bool>("display-messages"));
+    }
+
+    if(settings_.knows("display-signals")) {
+        designer_scene_->displaySignals(settings_.get<bool>("display-signals"));
+    }
+
     setFocusPolicy(Qt::NoFocus);
 
 //    ui->horizontalLayout->addWidget(minimap_);
@@ -168,6 +176,16 @@ bool Designer::isMinimapEnabled() const
     return settings_.get<bool>("display-minimap", false);
 }
 
+bool Designer::areMessageConnectionsVisibile() const
+{
+    return settings_.get<bool>("display-messages", true);
+}
+
+bool Designer::areSignalConnectionsVisible() const
+{
+    return settings_.get<bool>("display-signals", true);
+}
+
 bool Designer::hasSelection() const
 {
     return designer_scene_->selectedItems().size() > 0;
@@ -240,3 +258,32 @@ void Designer::displayMinimap(bool display)
 
     Q_EMIT minimapEnabled(display);
 }
+
+void Designer::displaySignalConnections(bool display)
+{
+    if(!settings_.knows("display-signals")) {
+        settings_.add(param::ParameterFactory::declareBool("display-signals", display));
+    }
+
+    settings_.set("display-signals", display);
+
+    designer_scene_->displaySignals(display);
+
+
+    Q_EMIT signalsEnabled(display);
+}
+
+void Designer::displayMessageConnections(bool display)
+{
+    if(!settings_.knows("display-messages")) {
+        settings_.add(param::ParameterFactory::declareBool("display-messages", display));
+    }
+
+    settings_.set("display-messages", display);
+
+    designer_scene_->displayMessages(display);
+
+    Q_EMIT messagesEnabled(display);
+}
+/// MOC
+#include "../../include/csapex/view/moc_designer.cpp"

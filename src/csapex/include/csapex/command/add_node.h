@@ -15,8 +15,9 @@ namespace csapex
 namespace command
 {
 
-struct AddNode : public Command
+class AddNode : public Command
 {
+public:
     AddNode(const std::string& type, QPoint pos_, const UUID& parent_uuid_, const UUID& uuid_, NodeStatePtr state);
 
 protected:

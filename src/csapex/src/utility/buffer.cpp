@@ -16,7 +16,7 @@ Buffer::~Buffer()
 {
 }
 
-ConnectionType::ConstPtr Buffer::readImpl() const
+ConnectionType::ConstPtr Buffer::read() const
 {
     std::unique_lock<std::mutex> lock(mutex_);
 
@@ -55,4 +55,10 @@ bool Buffer::isFilled() const
 {
     std::unique_lock<std::mutex> lock(mutex_);
     return message_ != nullptr;
+}
+
+bool Buffer::containsNoMessage() const
+{
+    auto test = std::dynamic_pointer_cast<connection_types::NoMessage const>(message_);
+    return test != nullptr;
 }

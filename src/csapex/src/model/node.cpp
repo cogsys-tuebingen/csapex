@@ -8,7 +8,6 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/settings.h>
@@ -20,20 +19,17 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      modifier_(nullptr), worker_(nullptr)
+      modifier_(nullptr)
 {
 }
 
 Node::~Node()
 {
-    delete modifier_;
 }
 
-void Node::initialize(const std::string& type, const UUID& uuid,
-                   NodeWorker* node_worker)
+void Node::initialize(const UUID& uuid, NodeModifier *node_modifier)
 {
-    worker_ = node_worker;
-    modifier_ = new NodeModifier(node_worker);
+    modifier_ = node_modifier;
 
     parameter_state_->setParentUUID(uuid);
 
@@ -46,20 +42,16 @@ void Node::initialize(const std::string& type, const UUID& uuid,
 
 void Node::doSetup()
 {
-    setupParameters();
+    setupParameters(*this);
 
     try {
-        setup();
+        setup(*modifier_);
     } catch(std::runtime_error& e) {
         aerr << "setup failed: " << e.what() << std::endl;
     }
 }
 
-void Node::messageArrived(Input *)
-{
-
-}
-void Node::setupParameters()
+void Node::setupParameters(Parameterizable& )
 {
 
 }
@@ -73,13 +65,6 @@ void Node::process()
 {
 }
 
-
-
-void Node::triggerModelChanged()
-{
-    Q_EMIT worker_->nodeModelChanged();
-}
-
 bool Node::canTick()
 {
     return true;
@@ -91,21 +76,4 @@ void Node::tick()
 
 void Node::abort()
 {
-}
-
-NodeWorker* Node::getNodeWorker() const
-{
-    return worker_;
-}
-
-
-void Node::errorEvent(bool error, const std::string& msg, ErrorLevel level)
-{
-    aerr << msg << std::endl;
-
-    if(error && level == EL_ERROR) {
-        worker_->setIOError(true);
-    } else {
-        worker_->setIOError(false);
-    }
 }

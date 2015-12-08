@@ -31,7 +31,6 @@ protected:
     float paintInterval(QPainter &p, const Timer::Interval::Ptr &interval, float height_offset, int depth);
 
 private:
-    DesignerView* view_;
     NodeBox* box_;
     NodeWorker* node_worker_;
 

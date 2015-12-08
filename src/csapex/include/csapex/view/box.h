@@ -101,7 +101,6 @@ public Q_SLOTS:
     void minimizeBox();
     void enableContent(bool enable);
     void refreshStylesheet();
-    void eventModelChanged();
     void killContent();
     void flipSides();
     void showProfiling(bool show);

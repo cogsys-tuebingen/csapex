@@ -20,7 +20,7 @@ namespace csapex
 class DesignerIO
 {
 public:
-    DesignerIO(Designer& designer);
+    DesignerIO();
 
     void saveSettings(YAML::Node& yaml);
     void loadSettings(YAML::Node& doc);
@@ -30,9 +30,6 @@ public:
 
 private:
     void saveBox(NodeWorker *node, WidgetController* widget_ctrl, YAML::Node &yaml);
-
-private:
-    Designer& designer_;
 };
 
 }

@@ -67,6 +67,8 @@ public Q_SLOTS:
     void undo();
     void redo();
 
+    void makeScreenshot();
+
     void start();
     void showStatusMessage(const std::string& msg);
     void reloadBoxMenues();

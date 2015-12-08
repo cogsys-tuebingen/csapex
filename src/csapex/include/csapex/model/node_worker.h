@@ -7,6 +7,7 @@
 /// PROJECT
 #include <utils_param/parameter.h>
 #include <csapex/model/unique.h>
+#include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
@@ -22,7 +23,7 @@
 
 namespace csapex {
 
-struct NodeWorker : public QObject, public Unique
+class NodeWorker : public QObject, public ErrorState, public Unique
 {
     Q_OBJECT
 
@@ -74,7 +75,7 @@ public:
     /* REMOVE => UI*/ void setMinimized(bool min);
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
-    Output* addOutput(ConnectionTypePtr type, const std::string& label);
+    Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
     Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
     Trigger* addTrigger(const std::string& label);
 
@@ -173,7 +174,6 @@ Q_SIGNALS:
     void connectorDisabled(Connectable*);
 
     void nodeStateChanged();
-    void nodeModelChanged();
     void threadChanged();
 
     void threadSwitchRequested(QThread*, int);
@@ -214,12 +214,15 @@ private:
 
     void finishTimer(TimerPtr t);
 
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+
 private:
     Settings& settings_;
 
     std::string node_type_;
     NodePtr node_;    
     NodeStatePtr node_state_;
+    NodeModifierPtr modifier_;
 
 
     bool is_setup_;
@@ -262,8 +265,8 @@ private:
     bool paused_;
     bool stop_;
     std::recursive_mutex stop_mutex_;
-    std::mutex pause_mutex_;
-    std::condition_variable continue_;
+    std::recursive_mutex pause_mutex_;
+    std::condition_variable_any continue_;
 
     std::atomic<bool> profiling_;
 };

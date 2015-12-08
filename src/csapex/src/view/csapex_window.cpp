@@ -21,6 +21,8 @@
 #include <csapex/view/activity_timeline.h>
 #include <csapex/view/activity_legend.h>
 #include <csapex/view/minimap_widget.h>
+#include <csapex/info.h>
+#include <csapex/view/screenshot_dialog.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>
@@ -74,6 +76,8 @@ void CsApexWindow::construct()
     ui->actionLock_to_Grid->setChecked(widget_ctrl_->isGridLockEnabled());
     ui->actionDisplay_Graph_Components->setChecked(designer_->isGraphComponentsEnabled());
     ui->actionDisplay_Threads->setChecked(designer_->isThreadsEnabled());
+    ui->actionSignal_Connections->setChecked(designer_->areSignalConnectionsVisible());
+    ui->actionMessage_Connections->setChecked(designer_->areMessageConnectionsVisibile());
 
     minimap_->setVisible(designer_->isMinimapEnabled());
     ui->actionDisplay_Minimap->setChecked(designer_->isMinimapEnabled());
@@ -112,6 +116,12 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionDisplay_Minimap, SIGNAL(toggled(bool)), designer_,  SLOT(displayMinimap(bool)));
     QObject::connect(designer_, SIGNAL(minimapEnabled(bool)), ui->actionDisplay_Minimap, SLOT(setChecked(bool)));
 
+    QObject::connect(ui->actionSignal_Connections, SIGNAL(toggled(bool)), designer_, SLOT(displaySignalConnections(bool)));
+    QObject::connect(designer_, SIGNAL(signalsEnabled(bool)), ui->actionSignal_Connections, SLOT(setChecked(bool)));
+
+    QObject::connect(ui->actionMessage_Connections, SIGNAL(toggled(bool)), designer_, SLOT(displayMessageConnections(bool)));
+    QObject::connect(designer_, SIGNAL(messagesEnabled(bool)), ui->actionMessage_Connections, SLOT(setChecked(bool)));
+
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), widget_ctrl_.get(),  SLOT(enableGridLock(bool)));
     QObject::connect(widget_ctrl_.get(), SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
@@ -124,7 +134,7 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
 
-
+    QObject::connect(ui->actionMake_Screenshot, SIGNAL(triggered()), this, SLOT(makeScreenshot()));
 
     QObject::connect(ui->actionAbout_CS_APEX, SIGNAL(triggered()), this, SLOT(about()));
     QObject::connect(ui->actionCopyright_Notices, SIGNAL(triggered()), this, SLOT(copyRight()));
@@ -238,7 +248,6 @@ void CsApexWindow::updateDebugInfo()
     foreach (NodeBox* box, selected) {
         NodeWorker* worker = box->getNodeWorker();
         QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(updateDebugInfo()));
-        QObject::connect(worker, SIGNAL(nodeModelChanged()), this, SLOT(updateDebugInfo()));
         ui->box_info->addTopLevelItem(NodeStatistics(worker).createDebugInformation(widget_ctrl_->getNodeFactory()));
     }
 
@@ -324,18 +333,14 @@ void CsApexWindow::updateUndoInfo()
 void CsApexWindow::about()
 {
     std::stringstream ss;
-    ss << "<h1>cs::APEX " << CSAPEX_VERSION << "</h1>";
+    ss << "<h1>cs::APEX " << csapex::info::CSAPEX_VERSION << "</h1>";
     ss << "<p>Based on QT " << QT_VERSION_STR ;
 #ifdef __GNUC__
     ss << " (GCC " << __VERSION__ << ")";
 #endif
     ss << "</p>";
     ss << "<p>Built on " << __DATE__ << " at " << __TIME__ << "</p>";
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
-    ss << "<p>From revision " << TOSTRING(GIT_COMMIT_HASH) << " (" << TOSTRING(GIT_BRANCH) << ")</p>";
+    ss << "<p>From revision " << csapex::info::GIT_COMMIT_HASH << " (" << csapex::info::GIT_BRANCH << ")</p>";
     ss << "<p>The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</p>";
 
     QMessageBox::about(this, "About cs::APEX", ss.str().c_str());
@@ -615,7 +620,8 @@ void CsApexWindow::save()
 
 void CsApexWindow::saveAs()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()),
+                                                    QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
@@ -626,7 +632,8 @@ void CsApexWindow::saveAs()
 
 void CsApexWindow::saveAsCopy()
 {
-    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
+    QString filename = QFileDialog::getSaveFileName(0, "Save config", QString::fromStdString(getConfigFile()),
+                                                    QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(!filename.isEmpty()) {
         core_.saveAs(filename.toStdString());
@@ -663,9 +670,16 @@ void CsApexWindow::redo()
     cmd_dispatcher_->redo();
 }
 
+void CsApexWindow::makeScreenshot()
+{
+    ScreenshotDialog diag(graph_worker_, this);
+    diag.exec();
+}
+
 void CsApexWindow::load()
 {
-    QString filename = QFileDialog::getOpenFileName(0, "Load config", QString::fromStdString(getConfigFile()), QString::fromStdString(Settings::config_selector));
+    QString filename = QFileDialog::getOpenFileName(0, "Load config", QString::fromStdString(getConfigFile()),
+                                                    QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(QFile(filename).exists()) {
         core_.load(filename.toStdString());
@@ -674,26 +688,28 @@ void CsApexWindow::load()
 
 void CsApexWindow::saveSettings(YAML::Node& doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.saveSettings(doc);
 }
 
 void CsApexWindow::loadSettings(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.loadSettings(doc);
 }
 
 
 void CsApexWindow::saveView(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.saveBoxes(doc, graph_worker_->getGraph(), widget_ctrl_.get());
 }
 
 void CsApexWindow::loadView(YAML::Node &doc)
 {
-    DesignerIO designerio(*designer_);
+    DesignerIO designerio;
     designerio.loadBoxes(doc, widget_ctrl_.get());
 }
 
+/// MOC
+#include "../../include/csapex/view/moc_csapex_window.cpp"

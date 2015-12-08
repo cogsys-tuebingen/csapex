@@ -292,3 +292,5 @@ QThread * ThreadPool::setupThread(int id, bool custom, const std::string& name)
 
     return thread;
 }
+/// MOC
+#include "../../include/csapex/core/moc_thread_pool.cpp"

@@ -12,6 +12,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/view/parameter_context_menu.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/graph_worker.h>
 
 /// PROJECT
 #include <utils_param/range_parameter.h>
@@ -51,71 +52,6 @@ namespace {
 
 
 /// UI HANDLES
-QSpinBox* makeSpinBox(QBoxLayout *layout, const std::string &name, int def, int min, int max, int step_size,
-                                csapex::ContextMenuHandler *context_handler)
-{
-    apex_assert_hard(min<=max);
-
-    QHBoxLayout *internal_layout = new QHBoxLayout;
-
-    QSpinBox* spinner = new QSpinBox;
-    spinner->setMinimum(min);
-    spinner->setMaximum(max);
-    spinner->setValue(def);
-    spinner->setSingleStep(step_size);
-
-    QLabel* label = new QLabel(name.c_str());
-    if(context_handler) {
-        label->setContextMenuPolicy(Qt::CustomContextMenu);
-        context_handler->setParent(label);
-        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
-    }
-
-    internal_layout->addWidget(label);
-    internal_layout->addWidget(spinner);
-    layout->addLayout(internal_layout);
-
-    return spinner;
-}
-
-QSlider* makeSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max,
-                              csapex::ContextMenuHandler *context_handler) {
-    apex_assert_hard(min<=max);
-
-    QHBoxLayout* internal_layout = new QHBoxLayout;
-
-    QSlider* slider = new QSlider(Qt::Horizontal);
-    slider->setMinimum(min);
-    slider->setMaximum(max);
-    slider->setValue(def);
-    slider->setMinimumWidth(100);
-
-    QWrapper::QSpinBoxExt* display = new QWrapper::QSpinBoxExt;
-    display->setMinimum(min);
-    display->setMaximum(max);
-    display->setValue(def);
-
-    QLabel* label = new QLabel(name.c_str());
-    if(context_handler) {
-        label->setContextMenuPolicy(Qt::CustomContextMenu);
-        context_handler->setParent(label);
-        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
-    }
-
-    internal_layout->addWidget(label);
-    internal_layout->addWidget(slider);
-    internal_layout->addWidget(display);
-
-    layout->addLayout(internal_layout);
-
-    QObject::connect(slider, SIGNAL(valueChanged(int)),     display, SLOT(setValue(int)));
-    QObject::connect(slider, SIGNAL(rangeChanged(int,int)), display, SLOT(setRange(int,int)));
-    QObject::connect(display, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
-
-
-    return slider;
-}
-
 QIntSlider* makeIntSlider(QBoxLayout* layout, const std::string& name, int def, int min, int max, int step,
                                     csapex::ContextMenuHandler *context_handler) {
     apex_assert_hard(min<=max);
@@ -370,11 +306,6 @@ void DefaultNodeAdapterBridge::executeModelCallback(Function cb)
     cb();
 }
 
-void DefaultNodeAdapterBridge::nodeModelChangedEvent()
-{
-    parent_->nodeModelChangedEvent();
-}
-
 void DefaultNodeAdapterBridge::setupAdaptiveUi()
 {
     parent_->setupAdaptiveUi();
@@ -398,7 +329,6 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 DefaultNodeAdapter::DefaultNodeAdapter(NodeWorker *adaptee, WidgetController *widget_ctrl)
     : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(nullptr)
 {
-    QObject::connect(adaptee, SIGNAL(nodeModelChanged()), &bridge, SLOT(nodeModelChangedEvent()));
 }
 
 DefaultNodeAdapter::~DefaultNodeAdapter()
@@ -412,7 +342,7 @@ void DefaultNodeAdapter::clear()
 
     QtHelper::clearLayout(wrapper_layout_);
 
-    Q_FOREACH(QObject* cb, callbacks) {
+    for(QObject* cb : callbacks) {
         qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
         if(call) {
             call->disconnect();
@@ -484,7 +414,7 @@ void ui_updatePathParameterDialog(param::PathParameter* path_p)
         filter = "All files (*.*)";
     }
 
-    int flags = 0;
+    int flags = QFileDialog::DontUseNativeDialog;
     bool is_file = path_p->isFile();
 
     QString dir(path_p->as<std::string>().c_str());
@@ -591,11 +521,16 @@ void ui_updateIntervalParameter(param::IntervalParameter* interval_p, Widget* sl
     assertGuiThread();
     slider->setSpan(interval_p->lower<T>(), interval_p->upper<T>());
 }
-template <typename T, typename Widget>
-void model_updateIntervalParameter(param::IntervalParameter* interval_p, Widget* slider)
+
+void model_updateIntIntervalParameter(param::IntervalParameter* interval_p, QxtSpanSlider* slider)
 {
     assertNotGuiThread();
     interval_p->set(std::make_pair(slider->lowerValue(), slider->upperValue()));
+}
+void model_updateDoubleIntervalParameter(param::IntervalParameter* interval_p, QxtDoubleSpanSlider* slider)
+{
+    assertNotGuiThread();
+    interval_p->set(std::make_pair(slider->lowerDoubleValue(), slider->upperDoubleValue()));
 }
 
 template <typename T, typename Widget>
@@ -705,28 +640,29 @@ void setDirection(QBoxLayout* layout, NodeWorker* node)
 {
     layout->setDirection(node->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
 }
+
+template <typename P>
+void install(std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> >& map)
+{
+    map[P().ID()] = [](DefaultNodeAdapter* a, param::Parameter::Ptr p) { a->setupParameter(static_cast<P*>(p.get())); };
+}
+
 }
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
     static std::map<int, std::function<void(DefaultNodeAdapter*, param::Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
+        install<param::TriggerParameter>(mapping_);
+        install<param::ColorParameter>(mapping_);
+        install<param::PathParameter>(mapping_);
+        install<param::ValueParameter>(mapping_);
+        install<param::RangeParameter>(mapping_);
+        install<param::IntervalParameter>(mapping_);
+        install<param::SetParameter>(mapping_);
+        install<param::BitSetParameter>(mapping_);
 
-#define INSTALL(_TYPE_) \
-    mapping_[_TYPE_().ID()] = [](DefaultNodeAdapter* a, param::Parameter::Ptr p) { a->setupParameter(static_cast<_TYPE_*>(p.get())); };
-
-
-        INSTALL(param::TriggerParameter);
-        INSTALL(param::ColorParameter);
-        INSTALL(param::PathParameter);
-        INSTALL(param::ValueParameter);
-        INSTALL(param::RangeParameter);
-        INSTALL(param::IntervalParameter);
-        INSTALL(param::SetParameter);
-        INSTALL(param::BitSetParameter);
-
-        INSTALL(param::OutputProgressParameter);
-#undef INSTALL
+        install<param::OutputProgressParameter>(mapping_);
     }
 
     clear();
@@ -879,6 +815,19 @@ qt_helper::Call * DefaultNodeAdapter::makeUiCall(std::function<void()> cb)
     return call;
 }
 
+qt_helper::Call * DefaultNodeAdapter::makePausedUiCall(std::function<void()> cb)
+{
+    qt_helper::Call* call = new qt_helper::Call([this, cb](){
+        auto g = widget_ctrl_->getGraph();
+        bool paused = g->isPaused();
+        g->setPause(true);
+        cb();
+        g->setPause(paused);
+    });
+    callbacks.push_back(call);
+    return call;
+}
+
 void DefaultNodeAdapter::setupParameter(param::TriggerParameter * trigger_p)
 {
     QPushButton* btn = new QPushButton(trigger_p->name().c_str());
@@ -925,7 +874,7 @@ void DefaultNodeAdapter::setupParameter(param::PathParameter *path_p)
     qt_helper::Call* call_set_path = makeModelCall(std::bind(&model_updatePathParameter, path_p, path));
     QObject::connect(path, SIGNAL(returnPressed()), call_set_path, SLOT(call()));
 
-    qt_helper::Call* call_select = makeUiCall(std::bind(&ui_updatePathParameterDialog, path_p));
+    qt_helper::Call* call_select = makePausedUiCall(std::bind(&ui_updatePathParameterDialog, path_p));
     QObject::connect(select, SIGNAL(clicked()), call_select, SLOT(call()));
 
     // model change -> ui
@@ -1050,7 +999,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                          new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntervalParameter<int, QxtSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntIntervalParameter, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
@@ -1067,7 +1016,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameter *interval_p)
                                                                      new ParameterContextMenu(interval_p));
 
         // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntervalParameter<double, QxtDoubleSpanSlider>, interval_p, slider));
+        qt_helper::Call* call = makeModelCall(std::bind(&model_updateDoubleIntervalParameter, interval_p, slider));
         QObject::connect(slider, SIGNAL(lowerValueChanged(int)), call, SLOT(call()));
         QObject::connect(slider, SIGNAL(upperValueChanged(int)), call, SLOT(call()));
 
@@ -1147,3 +1096,5 @@ void DefaultNodeAdapter::stop()
     NodeAdapter::stop();
     bridge.disconnect();
 }
+/// MOC
+#include "../../include/csapex/view/moc_default_node_adapter.cpp"

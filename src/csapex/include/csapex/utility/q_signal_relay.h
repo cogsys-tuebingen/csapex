@@ -7,7 +7,7 @@
 
 namespace qt_helper {
 
-struct Call : public QObject
+class Call : public QObject
 {
     Q_OBJECT
 

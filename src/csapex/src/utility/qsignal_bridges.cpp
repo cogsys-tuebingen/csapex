@@ -26,3 +26,5 @@ void QAbstractSliderLimiter::limitMax(int limit)
     int limited = std::min(limitMin_->value(), limit);
     limitMin_->setValue(limited);
 }
+/// MOC
+#include "../../include/csapex/utility/moc_qsignal_bridges.cpp"

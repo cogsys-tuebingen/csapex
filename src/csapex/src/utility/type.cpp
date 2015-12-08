@@ -6,17 +6,6 @@
 #include <cxxabi.h>
 #include <cstdlib>
 
-namespace {
-std::string replace(const std::string& s, const std::string& find, const std::string& replace) {
-    std::string result = s;
-    std::size_t ptr_pos = s.find(find);
-    if(ptr_pos != std::string::npos) {
-        result.replace(ptr_pos, find.size(), replace);
-    }
-    return result;
-}
-}
-
 std::string csapex::type2name(const std::type_info& info)
 {
     int status;

@@ -37,7 +37,6 @@ Q_SIGNALS:
     void paused(bool);
 
 private:
-    Settings *settings_;
     Graph* graph_;
 
     QTimer* timer_;

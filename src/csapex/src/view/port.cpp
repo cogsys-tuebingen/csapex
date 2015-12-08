@@ -7,7 +7,8 @@
 #include <csapex/command/add_connection.h>
 #include <csapex/command/move_connection.h>
 #include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
+#include <csapex/msg/static_output.h>
+#include <csapex/msg/dynamic_output.h>
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/view/widget_controller.h>
 #include <csapex/view/designer_view.h>
@@ -34,6 +35,10 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
         QObject::connect(adaptee, SIGNAL(destroyed()), this, SLOT(deleteLater()));
         QObject::connect(adaptee, SIGNAL(connectableError(bool,std::string,int)), this, SLOT(setError(bool, std::string, int)));
         QObject::connect(adaptee, SIGNAL(enabled(bool)), this, SLOT(setEnabledFlag(bool)));
+
+        if(dynamic_cast<DynamicOutput*>(adaptee)) {
+            setProperty("dynamic", true);
+        }
 
     } else {
         std::cerr << "creating empty port!" << std::endl;
@@ -90,7 +95,7 @@ bool Port::event(QEvent *e)
 
 void Port::updateTooltip()
 {
-    Output* output = dynamic_cast<Output*>(adaptee_);
+    StaticOutput* output = dynamic_cast<StaticOutput*>(adaptee_);
 
     if(output) {
         QGraphicsView* view = widget_controller_->getTooltipView("Output");
@@ -106,12 +111,13 @@ void Port::updateTooltip()
 
             try {
                 MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
-                QSharedPointer<QImage> img = renderer->render(msg);
+                if(renderer) {
+                    QSharedPointer<QImage> img = renderer->render(msg);
 
-                view->scene()->addPixmap(QPixmap::fromImage(*img));
-                view->setMaximumSize(256, 256);
-                view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
-
+                    view->scene()->addPixmap(QPixmap::fromImage(*img));
+                    view->setMaximumSize(256, 256);
+                    view->fitInView(view->scene()->sceneRect(), Qt::KeepAspectRatio);
+                }
             } catch(const std::exception& e) {
                 view->hide();
             }
@@ -166,7 +172,7 @@ void Port::refreshStylesheet()
 
 void Port::setError(bool error, const std::string& msg)
 {
-    setError(error, msg, ErrorState::EL_ERROR);
+    setError(error, msg, static_cast<int>(ErrorState::ErrorLevel::ERROR));
 }
 
 void Port::setError(bool error, const std::string& /*msg*/, int /*level*/)
@@ -222,8 +228,12 @@ void Port::setPortProperty(const std::string& name, bool b)
 void Port::createToolTip()
 {
     std::stringstream tooltip;
-    tooltip << "UUID: " << adaptee_->getUUID().c_str() << ", Type: " << adaptee_->getType()->name() << ", Messages: " << adaptee_->getCount();
-    tooltip << ", Enabled: " << adaptee_->isEnabled() << ", Blocked: " << adaptee_->isBlocked() << ", #: " << adaptee_->sequenceNumber();
+    tooltip << "UUID: " << adaptee_->getUUID().c_str();
+    tooltip << ", Type: " << adaptee_->getType()->name();
+    tooltip << ", Messages: " << adaptee_->getCount();
+    tooltip << ", Enabled: " << adaptee_->isEnabled();
+    tooltip << ", Blocked: " << adaptee_->isBlocked();
+    tooltip << ", #: " << adaptee_->sequenceNumber();
     setToolTip(tooltip.str().c_str());
 }
 
@@ -345,12 +355,12 @@ void Port::dropEvent(QDropEvent* e)
     }
 }
 
-void Port::enterEvent(QEvent *e)
+void Port::enterEvent(QEvent */*e*/)
 {
 
 }
 
-void Port::leaveEvent(QEvent *e)
+void Port::leaveEvent(QEvent */*e*/)
 {
     //    QObject::disconnect(this, SLOT(updateTooltip()));
 
@@ -383,3 +393,5 @@ QPoint Port::centerPoint()
     QPoint offset = 0.5 * (geometry().bottomRight() - geometry().topLeft());
     return topLeft() + offset;
 }
+/// MOC
+#include "../../include/csapex/view/moc_port.cpp"

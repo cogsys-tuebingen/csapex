@@ -65,7 +65,7 @@ Connectable::~Connectable()
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    Q_EMIT connectableError(error,msg,level);
+    Q_EMIT connectableError(error,msg,static_cast<int>(level));
 }
 
 bool Connectable::tryConnect(QObject* other_side)
@@ -207,3 +207,5 @@ void Connectable::setSequenceNumber(int seq_no)
     std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     seq_no_ = seq_no;
 }
+/// MOC
+#include "../../include/csapex/model/moc_connectable.cpp"

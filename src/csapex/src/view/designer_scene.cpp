@@ -61,12 +61,6 @@ std::pair<int,int> rgb2id(QRgb rgb)
     return std::make_pair(id, subsection);
 }
 
-QWidget* topLevelParentWidget (QWidget* widget)
-{
-    while (widget -> parentWidget()) widget = widget -> parentWidget() ;
-    return widget ;
-}
-
 QPointF centerPoint(Port* port)
 {
 
@@ -90,7 +84,8 @@ QPointF centerPoint(Port* port)
 
 DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable *style)
     : style_(style), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
-      draw_grid_(false), draw_schema_(false), scale_(1.0), overlay_threshold_(0.45),
+      draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
+      scale_(1.0), overlay_threshold_(0.45),
       highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));
@@ -128,6 +123,25 @@ void DesignerScene::enableSchema(bool draw)
     }
 }
 
+void DesignerScene::displayMessages(bool display)
+{
+    if(display != display_messages_) {
+        display_messages_ = display;
+
+        update();
+    }
+}
+
+
+void DesignerScene::displaySignals(bool display)
+{
+    if(display != display_signals_) {
+        display_signals_ = display;
+
+        update();
+    }
+}
+
 void DesignerScene::setScale(double scale)
 {
     scale_ = scale;
@@ -135,6 +149,8 @@ void DesignerScene::setScale(double scale)
 }
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
+    setBackgroundBrush(QBrush(Qt::white));
+
     QGraphicsScene::drawBackground(painter, rect);
 
     if(isEmpty()) {
@@ -583,12 +599,26 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
         return;
     }
 
+    ccs = CurrentConnectionState();
+
+    if(dynamic_cast<Trigger*>(from) != nullptr) {
+        if(!display_signals_) {
+            return;
+        }
+        ccs.type = ConnectionType::SIG;
+
+    } else {
+        if(!display_messages_) {
+            return;
+        }
+        ccs.type = ConnectionType::MSG;
+    }
+
+
     QPointF p1 = centerPoint(fromp);
     QPointF p2 = centerPoint(top);
 
     int id = connection.id();
-
-    ccs = CurrentConnectionState();
 
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
@@ -652,11 +682,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double mindist_for_slack = 60.0;
     double slack_smooth_distance = 300.0;
 
-    QPointF diff = (to - from);
-
-    double direct_length = hypot(diff.x(), diff.y());
-
-
     Fulcrum::Ptr first(new Fulcrum(nullptr, from, Fulcrum::OUT, from, from));
     Fulcrum::Ptr current = first;
     Fulcrum::Ptr last = current;
@@ -677,7 +702,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     std::vector<Path> paths;
 
     // generate lines
-    foreach(Fulcrum::Ptr next, targets) {
+    for(std::size_t i = 0; i < targets.size(); ++i) {
+        const Fulcrum::Ptr& next = targets[i];
+
+        QPointF diff = (next->pos() - current->pos());
+        double direct_length = hypot(diff.x(), diff.y());
+
         QPoint y_offset;
         double x_offset = 0;
         if(direct_length > mindist_for_slack) {
@@ -786,7 +816,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);
 
-    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == ConnectionType::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
 
     std::vector<QRectF> bounding_boxes;
 
@@ -811,9 +841,9 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         }
     }
 
-    if(id >= 0 && schema_dirty_) {
-        schematics_painter->drawPath(arrow_path);
-    }
+//    if(id >= 0 && schema_dirty_) {
+//        schematics_painter->drawPath(arrow_path);
+//    }
 
     return bounding_boxes;
 }
@@ -914,3 +944,5 @@ void DesignerScene::refresh()
 {
     invalidateSchema();
 }
+/// MOC
+#include "../../include/csapex/view/moc_designer_scene.cpp"

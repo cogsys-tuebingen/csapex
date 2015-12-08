@@ -13,8 +13,9 @@ namespace csapex
 namespace command
 {
 
-struct ModifyFulcrum : public Command
+class ModifyFulcrum : public Command
 {
+public:
     ModifyFulcrum(int connection_id, int fulcrum_id,
                   int f_type, const QPointF& f_handle_in, const QPointF& f_handle_out,
                   int t_type, const QPointF &t_handle_in, const QPointF &t_handle_out);

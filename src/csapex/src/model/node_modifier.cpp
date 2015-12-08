@@ -19,9 +19,9 @@ Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, 
     return node_worker_->addInput(type, label, optional);
 }
 
-Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label)
+Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
 {
-    return node_worker_->addOutput(type, label);
+    return node_worker_->addOutput(type, label, dynamic);
 }
 
 
@@ -109,4 +109,21 @@ bool NodeModifier::isSink() const
 void NodeModifier::setIsSink(bool sink)
 {
     node_worker_->setIsSink(sink);
+}
+
+bool NodeModifier::isError() const
+{
+    return node_worker_->isError();
+}
+void NodeModifier::setNoError()
+{
+    node_worker_->setError(false);
+}
+void NodeModifier::setError(const std::string &msg)
+{
+    node_worker_->setError(true, msg, ErrorState::ErrorLevel::ERROR);
+}
+void NodeModifier::setWarning(const std::string &msg)
+{
+    node_worker_->setError(true, msg, ErrorState::ErrorLevel::WARNING);
 }

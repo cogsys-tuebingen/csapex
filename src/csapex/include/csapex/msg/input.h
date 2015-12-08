@@ -31,59 +31,10 @@ public:
         return true;
     }
 
-    virtual bool canConnectTo(Connectable* other_side, bool move) const;
+    bool canConnectTo(Connectable* other_side, bool move) const;
 
     void inputMessage(ConnectionType::ConstPtr message);
-
-    template <typename R>
-    std::shared_ptr<R const>
-    getMessage(typename std::enable_if<std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0) const
-    {
-        return buffer_->read<R>();
-    }
-
-    template <typename R>
-    std::shared_ptr<R const>
-    getMessage(typename std::enable_if<!std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0) const
-    {
-        return buffer_->read< connection_types::GenericPointerMessage<R> >() -> value;
-    }
-
-    template <typename Container, typename R>
-    std::shared_ptr<typename Container::template TypeMap<R>::type const>
-    getMessage() const
-    {
-        auto msg = buffer_->read<Container>();
-        return msg -> template makeShared<R>();
-    }
-
-
-    template <typename R>
-    std::shared_ptr<R>
-    getClonedMessage() const
-    {
-        const auto& msg = getMessage<R>();
-        if(msg == nullptr) {
-            return nullptr;
-        }
-        return std::dynamic_pointer_cast<R>(msg->clone());
-    }
-
-
-    template <typename R>
-    R getValue() const
-    {
-        const auto& msg = getMessage< connection_types::GenericValueMessage<R> >();
-        if(!msg) {
-            throw std::logic_error("cannot convert message to requested value");
-        }
-        return msg->value;
-    }
-
-    template <typename R>
-    bool isValue() {
-        return isMessage< connection_types::GenericValueMessage<R> >();
-    }
+    ConnectionTypeConstPtr getMessage() const;
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
     virtual bool isConnected() const;
@@ -98,12 +49,6 @@ public:
 
     bool isOptional() const;
     void setOptional(bool optional);
-
-    template <typename T>
-    bool isMessage() {
-        std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-        return buffer_->isType<T>();
-    }
 
     bool hasMessage() const;
     bool hasReceived() const;

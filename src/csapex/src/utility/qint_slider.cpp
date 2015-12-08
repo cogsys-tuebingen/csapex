@@ -137,3 +137,5 @@ void QIntSlider::emitRangeChanged(int min, int max)
 
     Q_EMIT intRangeChanged(min_, max_);
 }
+/// MOC
+#include "../../include/csapex/utility/moc_qint_slider.cpp"

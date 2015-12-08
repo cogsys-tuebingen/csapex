@@ -13,8 +13,8 @@
 
 using namespace csapex;
 
-GraphWorker::GraphWorker(Settings* settings, Graph* graph)
-    : settings_(settings), graph_(graph), timer_(new QTimer)
+GraphWorker::GraphWorker(Settings* /*settings*/, Graph* graph)
+    : graph_(graph), timer_(new QTimer)
 {
     timer_->setInterval(1000. / 30.);
     timer_->start();
@@ -87,3 +87,5 @@ void GraphWorker::stop()
 
     graph_->nodes_.clear();
 }
+/// MOC
+#include "../../include/csapex/model/moc_graph_worker.cpp"

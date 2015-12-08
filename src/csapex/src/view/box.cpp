@@ -124,7 +124,6 @@ void NodeBox::construct()
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SLOT(enableContent(bool)));
 
     QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
-    QObject::connect(worker.get(), SIGNAL(nodeModelChanged()), this, SLOT(eventModelChanged()));
     QObject::connect(worker.get(), SIGNAL(connectorCreated(Connectable*)), this, SLOT(registerEvent(Connectable*)));
     QObject::connect(worker.get(), SIGNAL(connectorRemoved(Connectable*)), this, SLOT(unregisterEvent(Connectable*)));
     QObject::connect(worker.get(), SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChanged()));
@@ -222,8 +221,10 @@ void NodeBox::updateComponentInformation(Graph* graph)
 
     if(info_compo) {
         int compo = graph->getComponent(worker->getUUID());
+        int level = graph->getLevel(worker->getUUID());
         std::stringstream info;
         info << "C:" << compo;
+        info << "L:" << level;
         info_compo->setText(info.str().c_str());
 
         setStyleForId(info_compo, compo);
@@ -296,15 +297,15 @@ bool NodeBox::isError() const
     if(!worker) {
         return false;
     }
-    return worker->getNode()->isError();
+    return worker->isError();
 }
 ErrorState::ErrorLevel NodeBox::errorLevel() const
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {
-        return 0;
+        return ErrorState::ErrorLevel::NONE;
     }
-    return worker->getNode()->errorLevel();
+    return worker->errorLevel();
 }
 std::string NodeBox::errorMessage() const
 {
@@ -312,7 +313,7 @@ std::string NodeBox::errorMessage() const
     if(!worker) {
         return "";
     }
-    return worker->getNode()->errorMessage();
+    return worker->errorMessage();
 }
 
 void NodeBox::setLabel(const std::string& label)
@@ -425,15 +426,15 @@ void NodeBox::blockedChange(bool val)
     ui->boxframe->setProperty("blocked", val);
 }
 
-void NodeBox::paintEvent(QPaintEvent* e)
+void NodeBox::paintEvent(QPaintEvent* /*e*/)
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker || !adapter_) {
         return;
     }
 
-    bool is_error = worker->getNode()->isError() && worker->getNode()->errorLevel() == ErrorState::EL_ERROR;
-    bool is_warn = worker->getNode()->isError() && worker->getNode()->errorLevel() == ErrorState::EL_WARNING;
+    bool is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
+    bool is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;
 
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
@@ -443,12 +444,12 @@ void NodeBox::paintEvent(QPaintEvent* e)
 
     if(error_change || warning_change) {
         if(is_error) {
-            QString msg = QString::fromStdString(worker->getNode()->errorMessage());
+            QString msg = QString::fromStdString(worker->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
             info_error->setVisible(true);
         } else if(is_warn) {
-            QString msg = QString::fromStdString(worker->getNode()->errorMessage());
+            QString msg = QString::fromStdString(worker->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
             info_error->setVisible(true);
@@ -516,13 +517,6 @@ void NodeBox::getInformation()
 void NodeBox::refreshStylesheet()
 {
     setStyleSheet(styleSheet());
-}
-
-void NodeBox::eventModelChanged()
-{
-    setupUi();
-
-    adapter_->updateDynamicGui(ui->content);
 }
 
 void NodeBox::showProfiling(bool show)
@@ -638,3 +632,5 @@ void NodeBox::nodeStateChanged()
 
     move(worker->getNodeState()->getPos());
 }
+/// MOC
+#include "../../include/csapex/view/moc_box.cpp"

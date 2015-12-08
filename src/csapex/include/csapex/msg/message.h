@@ -12,7 +12,7 @@ namespace csapex {
 namespace connection_types {
 
 /// DEFAULT TYPES
-struct Message : public ConnectionType
+class Message : public ConnectionType
 {
 public:
     typedef std::shared_ptr<Message> Ptr;

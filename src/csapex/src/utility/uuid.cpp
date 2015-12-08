@@ -30,9 +30,11 @@ void split_first(const std::string& haystack, const std::string& needle,
 }
 
 std::map<std::string, int> UUID::hash_;
+std::mutex UUID::hash_mutex_;
 
 void UUID::reset()
 {
+    std::unique_lock<std::mutex> lock(hash_mutex_);
     hash_.clear();
 }
 
@@ -44,6 +46,8 @@ std::string UUID::stripNamespace(const std::string &name)
 
 UUID UUID::make(const std::string &prefix)
 {
+    std::unique_lock<std::mutex> lock(hash_mutex_);
+
     // ensure uniqueness
     std::string rep = prefix;
     if(hash_.find(rep) != hash_.end()) {
@@ -67,9 +71,8 @@ UUID UUID::make_sub_forced(const UUID &parent, const std::string &prefix)
 
 void UUID::free(const UUID &uuid)
 {
-//    if(!uuid.getFullName().empty()) {
-//        std::cerr << "freeing UUID " << uuid.getFullName() << std::endl;
-//    }
+    std::unique_lock<std::mutex> lock(hash_mutex_);
+
     std::map<std::string, int>::iterator it = hash_.find(uuid.representation_);
     if(it != hash_.end()) {
         hash_.erase(it);

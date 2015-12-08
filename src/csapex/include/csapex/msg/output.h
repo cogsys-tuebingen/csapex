@@ -35,42 +35,10 @@ public:
 
     virtual void disable() override;
 
+    virtual void publish(ConnectionType::ConstPtr message) = 0;
 
-    template <typename T>
-    void publish(typename std::shared_ptr<T> message,
-                 std::string frame_id = "/",
-                 typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
-        typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
-        msg->value = message;
-        publish(std::dynamic_pointer_cast<ConnectionType>(msg));
-    }
-
-    template <typename T>
-    void publish(typename boost::shared_ptr<T> message,
-                 std::string frame_id = "/",
-                 typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
-        typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
-        msg->value = shared_ptr_tools::to_std_shared(message);
-        publish(std::dynamic_pointer_cast<ConnectionType>(msg));
-    }
-
-    template <typename T>
-    void publish(T message,
-                 std::string frame_id = "/",
-                 typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
-        typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
-        msg->value = message;
-        publish(std::dynamic_pointer_cast<ConnectionType>(msg));
-    }
-
-    template <class Container, typename T>
-    void publish(const typename Container::template TypeMap<T>::Ptr& message) {
-        typename std::shared_ptr<Container> msg(Container::template make<T>());
-        msg->template set<T>(message);
-        publish(msg);
-    }
-
-    void publish(ConnectionType::ConstPtr message);
+    virtual bool canSendMessages() const;
+    virtual bool sendMessages() = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;
@@ -88,14 +56,10 @@ public:
 
     void forceSendMessage(bool force = true);
 
-    bool hasMessage();
-    ConnectionType::ConstPtr getMessage();
+    virtual bool hasMessage() = 0;
 
-    bool canSendMessages();
-    void sendMessages();
-
-    void reset();
-    void clearMessage();
+    virtual void reset();
+    virtual void clear() = 0;
 
 protected:
     /// PRIVATE: Use command to create a connection (undoable)
@@ -108,9 +72,6 @@ protected:
 protected:
     std::vector<Input*> targets_;
     bool force_send_message_;
-
-    ConnectionType::ConstPtr message_;
-    ConnectionType::ConstPtr message_to_send_;
 };
 
 }

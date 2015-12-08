@@ -38,7 +38,12 @@ public:
     template <typename T>
     Output* addOutput(const std::string& label,
                       typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
-        return addOutput(connection_types::makeEmptyMessage<T>(), label);
+        return addOutput(connection_types::makeEmptyMessage<T>(), label, false);
+    }
+    template <typename T>
+    Output* addDynamicOutput(const std::string& label,
+                      typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
+        return addOutput(connection_types::makeEmptyMessage<T>(), label, true);
     }
 
     /// "container" messages
@@ -55,7 +60,12 @@ public:
     template <typename Container, typename T>
     Output* addOutput(const std::string& label) {
         Container::template registerType<T>();
-        return addOutput(Container::template make<T>(), label);
+        return addOutput(Container::template make<T>(), label, false);
+    }
+    template <typename Container, typename T>
+    Output* addDynamicOutput(const std::string& label) {
+        Container::template registerType<T>();
+        return addOutput(Container::template make<T>(), label, true);
     }
 
 
@@ -77,7 +87,13 @@ public:
     Output* addOutput(const std::string& label,
                       typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
         MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label);
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false);
+    }
+    template <typename T>
+    Output* addDynamicOutput(const std::string& label,
+                      typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true);
     }
 
 
@@ -94,7 +110,12 @@ public:
     template <typename T>
     Output* addOutput(const std::string& label,
                       typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
-        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label);
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false);
+    }
+    template <typename T>
+    Output* addDynamicOutput(const std::string& label,
+                      typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true);
     }
 
 
@@ -150,8 +171,6 @@ public:
     Trigger* addTrigger(const std::string& label);
 
 
-
-
     std::vector<Input*> getMessageInputs() const;
     std::vector<Output*> getMessageOutputs() const;
     std::vector<Slot*> getSlots() const;
@@ -176,9 +195,14 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    bool isError() const;
+    void setNoError();
+    void setError(const std::string& msg);
+    void setWarning(const std::string& msg);
+
 private:
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
-    Output* addOutput(ConnectionTypePtr type, const std::string& label);
+    Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
 
 private:
     NodeWorker* node_worker_;

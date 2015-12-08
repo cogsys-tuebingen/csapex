@@ -37,3 +37,5 @@ bool NodeFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
 {
     return QSortFilterProxyModel::lessThan(left, right);
 }
+/// MOC
+#include "../../include/csapex/model/moc_node_filter_proxy_model.cpp"

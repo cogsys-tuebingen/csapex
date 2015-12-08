@@ -106,5 +106,7 @@ void ActivityLegend::emitSelection()
         list.push_back(rows_[i.row()]);
     }
 
-    Q_EMIT selectionChanged(list);
+    Q_EMIT nodeSelectionChanged(list);
 }
+/// MOC
+#include "../../include/csapex/view/moc_activity_legend.cpp"

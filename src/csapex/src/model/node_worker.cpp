@@ -4,7 +4,9 @@
 /// COMPONENT
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
+#include <csapex/msg/io.h>
+#include <csapex/msg/static_output.h>
+#include <csapex/msg/dynamic_output.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/core/settings.h>
@@ -14,6 +16,7 @@
 #include <csapex/signal/trigger.h>
 #include <utils_param/trigger_parameter.h>
 #include <csapex/model/node_factory.h>
+#include <csapex/model/node_modifier.h>
 
 /// SYSTEM
 #include <QThread>
@@ -44,7 +47,8 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Settings& sett
     QObject::connect(this, SIGNAL(threadSwitchRequested(QThread*, int)), this, SLOT(switchThread(QThread*, int)));
 
     node_state_->setLabel(uuid);
-    node_->initialize(type, uuid, this);
+    modifier_ = std::make_shared<NodeModifier>(this);
+    node_->initialize(uuid, modifier_.get());
 
     bool params_created_in_constructor = node_->getParameterCount() != 0;
 
@@ -188,7 +192,7 @@ void NodeWorker::setEnabled(bool e)
     node_state_->setEnabled(e);
 
     if(!e) {
-        node_->setError(false);
+        setError(false);
     }
 
     checkIO();
@@ -237,7 +241,7 @@ void NodeWorker::makeParameterConnectableImpl(param::Parameter *p)
         input_2_param_[cin] = p;
     }
     {
-        Output* cout = new Output(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
+        Output* cout = new StaticOutput(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
         cout->setEnabled(true);
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
 
@@ -388,7 +392,7 @@ void NodeWorker::reset()
     assertNotInGuiThread();
 
     node_->abort();
-    node_->setError(false);
+    setError(false);
     Q_FOREACH(Input* i, inputs_) {
         i->reset();
     }
@@ -425,7 +429,7 @@ bool NodeWorker::isProfiling() const
 
 void NodeWorker::pause(bool pause)
 {
-    std::lock_guard<std::mutex> lock(pause_mutex_);
+    std::lock_guard<std::recursive_mutex> lock(pause_mutex_);
     paused_ = pause;
     continue_.notify_all();
 }
@@ -440,7 +444,7 @@ void NodeWorker::messageArrived(Connectable *s)
     assertNotInGuiThread();
 
     {
-        std::unique_lock<std::mutex> lock(pause_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(pause_mutex_);
         while(paused_) {
             continue_.wait(lock);
         }
@@ -463,13 +467,13 @@ void NodeWorker::parameterMessageArrived(Connectable *s)
 
     param::Parameter* p = input_2_param_.at(source);
 
-    if(source->isValue<int>()) {
-        p->set<int>(source->getValue<int>());
-    } else if(source->isValue<double>()) {
-        p->set<double>(source->getValue<double>());
-    } else if(source->isValue<std::string>()) {
-        p->set<std::string>(source->getValue<std::string>());
-    } else {
+    if(msg::isValue<int>(source)) {
+        p->set<int>(msg::getValue<int>(source));
+    } else if(msg::isValue<double>(source)) {
+        p->set<double>(msg::getValue<double>(source));
+    } else if(msg::isValue<std::string>(source)) {
+        p->set<std::string>(msg::getValue<std::string>(source));
+    } else if(!msg::isMessage<connection_types::NoMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
 
@@ -541,7 +545,7 @@ void NodeWorker::processMessages()
 
         // check if one is "NoMessage";
         for(Input* cin : inputs_) {
-            if(!cin->isOptional() && cin->isMessage<connection_types::NoMessage>()) {
+            if(!cin->isOptional() && msg::isMessage<connection_types::NoMessage>(cin)) {
                 all_inputs_are_present = false;
             }
         }
@@ -630,14 +634,16 @@ void NodeWorker::processInputs()
         node_->process();
 
         if(trigger_process_done_->isConnected()) {
-            t->step("trigger process done");
+            if(profiling_) {
+                t->step("trigger process done");
+            }
             trigger_process_done_->trigger();
         }
 
     }  catch(const std::exception& e) {
-        node_->setError(true, e.what());
+        setError(true, e.what());
     } catch(const std::string& s) {
-        node_->setError(true, "Uncatched exception (string) exception: " + s);
+        setError(true, "Uncatched exception (string) exception: " + s);
     } catch(...) {
         throw;
     }
@@ -668,10 +674,15 @@ Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bo
     return c;
 }
 
-Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label)
+Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
 {
     int id = outputs_.size();
-    Output* c = new Output(this, id);
+    Output* c = nullptr;
+    if(dynamic) {
+        c = new DynamicOutput(this, id);
+    } else {
+        c = new StaticOutput(this, id);
+    }
     c->setLabel(label);
     c->setType(type);
 
@@ -1053,11 +1064,11 @@ void NodeWorker::publishParameter(param::Parameter* p)
         }
 
         if(p->is<int>())
-            out->publish(p->as<int>());
+            msg::publish(out, p->as<int>());
         else if(p->is<double>())
-            out->publish(p->as<double>());
+            msg::publish(out, p->as<double>());
         else if(p->is<std::string>())
-            out->publish(p->as<std::string>());
+            msg::publish(out, p->as<std::string>());
         out->sendMessages();
     }
 }
@@ -1075,17 +1086,21 @@ void NodeWorker::trySendMessages()
         return;
     }
 
-    messages_waiting_to_be_sent = false;
-    Q_EMIT messagesWaitingToBeSent(false);
 
     //    publishParameters();
 
+    messages_waiting_to_be_sent = false;
     for(std::size_t i = 0; i < outputs_.size(); ++i) {
         Output* out = outputs_[i];
-        out->sendMessages();
+        // TODO: support dynamic + static outputs at the same time!
+        messages_waiting_to_be_sent |= out->sendMessages();
     }
 
-    resetInputs();
+    if(!messages_waiting_to_be_sent) {
+        Q_EMIT messagesWaitingToBeSent(false);
+        resetInputs();
+    }
+
 }
 
 void NodeWorker::setTickFrequency(double f)
@@ -1164,7 +1179,7 @@ void NodeWorker::tick()
 
 
     {
-        std::unique_lock<std::mutex> pause_lock(pause_mutex_);
+        std::unique_lock<std::recursive_mutex> pause_lock(pause_mutex_);
         while(paused_) {
             continue_.wait(pause_lock);
         }
@@ -1202,7 +1217,7 @@ void NodeWorker::tick()
 
         if(canSendMessages() && node_->canTick() /*|| ticks_ != 0*/) {
             foreach(Output* out, outputs_) {
-                out->clearMessage();
+                out->clear();
             }
 
             TimerPtr t = nullptr;
@@ -1224,7 +1239,7 @@ void NodeWorker::tick()
 
             ++ticks_;
             foreach(Output* out, outputs_) {
-                messages_waiting_to_be_sent |= out->hasMessage();
+                messages_waiting_to_be_sent |= msg::hasMessage(out);
             }
 
             Q_EMIT messagesWaitingToBeSent(messages_waiting_to_be_sent);
@@ -1334,10 +1349,8 @@ void NodeWorker::enableTriggers (bool enable)
 
 void NodeWorker::triggerError(bool e, const std::string &what)
 {
-    node_->setError(e, what);
+    setError(e, what);
 }
-
-
 
 void NodeWorker::setIOError(bool error)
 {
@@ -1359,3 +1372,19 @@ void NodeWorker::assertNotInGuiThread()
 {
     assert(this->thread() != QApplication::instance()->thread());
 }
+
+
+
+void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level)
+{
+    node_->aerr << msg << std::endl;
+
+    if(error && level == ErrorState::ErrorLevel::ERROR) {
+        setIOError(true);
+    } else {
+        setIOError(false);
+    }
+}
+
+/// MOC
+#include "../../include/csapex/model/moc_node_worker.cpp"
