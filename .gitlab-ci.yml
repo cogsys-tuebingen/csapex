@@ -4,6 +4,6 @@ stages:
 framework:
   stage: build
   script:
-    - pwd; mkdir build; cd build; cmake ..; make -j $(nproc)
+    - cd src/csapex; pwd; mkdir build; cd build; cmake ..; make -j $(nproc)
   only:
     - devel
