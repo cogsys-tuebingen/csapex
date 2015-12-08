@@ -4,6 +4,11 @@ stages:
 framework:
   stage: build
   script:
-    - cd src/csapex; pwd; mkdir build; cd build; cmake ..; make -j $(nproc)
+    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
+    - cd src/csapex
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j $(nproc)
   only:
     - devel
