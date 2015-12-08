@@ -2,7 +2,7 @@
 #include <csapex/msg/message_provider.h>
 
 /// PROJECT
-#include <utils_param/parameter.h>
+#include <csapex/param/parameter.h>
 
 using namespace csapex;
 
@@ -37,7 +37,7 @@ void MessageProvider::setName(const std::string& name)
     name_ = name;
 }
 
-std::vector<param::Parameter::Ptr> MessageProvider::getParameters() const
+std::vector<csapex::param::Parameter::Ptr> MessageProvider::getParameters() const
 {
     return state.getParameters();
 }
@@ -63,5 +63,5 @@ std::size_t MessageProvider::slotCount() const
 
 std::string MessageProvider::getLabel(std::size_t /*slot*/) const
 {
-    return getType()->name();
+    return getType()->descriptiveName();
 }

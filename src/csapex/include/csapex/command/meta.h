@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include "command.h"
-#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <vector>
@@ -30,7 +29,7 @@ protected:
     bool doUndo();
     bool doRedo();
 
-    virtual QTreeWidgetItem* createDebugInformation() const;
+    virtual void accept(int level, std::function<void (int, const Command &)> callback) const override;
 
     virtual std::string getType() const;
     virtual std::string getDescription() const;

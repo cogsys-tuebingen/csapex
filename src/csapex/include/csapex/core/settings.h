@@ -2,8 +2,8 @@
 #define SETTINGS_H
 
 /// PROJECT
-#include <utils_param/parameter.h>
-#include <utils_param/value_parameter.h>
+#include <csapex/param/parameter.h>
+#include <csapex/param/value_parameter.h>
 
 /// SYSTEM
 #include <string>
@@ -36,7 +36,7 @@ public:
     template <typename T>
     T get(const std::string& name) const
     {
-        std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
         if(pos == settings_.end()) {
             throw std::runtime_error(std::string("settings.get: unknown parameter '") + name + "'");
         }
@@ -47,9 +47,9 @@ public:
     template <typename T>
     T get(const std::string& name, T def)
     {
-        std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
         if(pos == settings_.end()) {
-            param::ValueParameter::Ptr p(new param::ValueParameter(name, param::ParameterDescription()));
+            param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(def);
             add(p);
             settingsChanged();
@@ -59,15 +59,15 @@ public:
         return pos->second->as<T>();
     }
 
-    void add(param::Parameter::Ptr p);
-    param::ParameterPtr get(const std::string& name);
+    void add(csapex::param::Parameter::Ptr p);
+    csapex::param::ParameterPtr get(const std::string& name);
 
     template <typename T>
     void set(const std::string& name, const T& val)
     {
-        std::map<std::string, param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
         if(pos == settings_.end()) {
-            param::ValueParameter::Ptr p(new param::ValueParameter(name, param::ParameterDescription()));
+            param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(val);
             add(p);
 
@@ -84,7 +84,7 @@ public:
     boost::signals2::signal<void()> settingsChanged;
 
 private:
-    std::map<std::string, param::Parameter::Ptr> settings_;
+    std::map<std::string, csapex::param::Parameter::Ptr> settings_;
 };
 
 }

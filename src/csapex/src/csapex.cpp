@@ -3,121 +3,82 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/drag_io.h>
+#include <csapex/view/designer/drag_io.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
-#include <csapex/core/thread_pool.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/model/node_factory.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/thread.h>
-#include <csapex/view/activity_legend.h>
-#include <csapex/view/activity_timeline.h>
-#include <csapex/view/box.h>
+#include <csapex/view/widgets/activity_legend.h>
+#include <csapex/view/widgets/activity_timeline.h>
+#include <csapex/view/node/box.h>
 #include <csapex/view/csapex_window.h>
-#include <csapex/view/designer.h>
-#include <csapex/view/designer_scene.h>
-#include <csapex/view/designer_view.h>
-#include <csapex/view/minimap_widget.h>
-#include <csapex/view/node_adapter_factory.h>
-#include <csapex/view/widget_controller.h>
-#include <utils_param/parameter_factory.h>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/widgets/minimap_widget.h>
+#include <csapex/view/node/node_adapter_factory.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/param/parameter_factory.h>
+#include <csapex/utility/exceptions.h>
+#include <csapex/view/gui_exception_handler.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
 #include <QtGui>
+#include <QMessageBox>
 #include <execinfo.h>
 #include <stdlib.h>
 #include <console_bridge/console.h>
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+#include <boost/filesystem.hpp>
+#undef BOOST_NO_CXX11_SCOPED_ENUMS
+#include <boost/version.hpp>
+
+#if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
+namespace bf3 = boost::filesystem;
+#else
+namespace bf3 = boost::filesystem3;
+#endif
 
 namespace po = boost::program_options;
 
 using namespace csapex;
 
-
-CsApexApp::CsApexApp(int& argc, char** argv, bool fatal_exceptions)
-    : QApplication(argc, argv), fatal_exceptions_(fatal_exceptions)
+CsApexGuiApp::CsApexGuiApp(int& argc, char** argv, ExceptionHandler &handler)
+    : QApplication(argc, argv), handler(handler)
 {}
 
-CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, bool fatal_exceptions)
-    : QCoreApplication(argc, argv), fatal_exceptions_(fatal_exceptions)
+CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, ExceptionHandler &handler)
+    : QCoreApplication(argc, argv), handler(handler)
 {}
 
-bool CsApexApp::notify(QObject* receiver, QEvent* event) {
-    try {
-        return QApplication::notify(receiver, event);
+bool CsApexGuiApp::doNotify(QObject* receiver, QEvent* event)
+{
+    return QApplication::notify(receiver, event);
+}
 
-    } catch(const std::exception& e) {
-        ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-        NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
-
-        if(fatal_exceptions_) {
-            std::cerr << "caught an exception in --fatal-exceptions mode: Abort!" << std::endl;
-            std::abort();
-        }
-
-        std::cerr << "exception: " << e.what() << std::endl;
-
-        if(er) {
-            er->setError(true, e.what());
-        } else if(bw) {
-            bw->triggerError(true, e.what());
-        } else {
-            std::cerr << "Uncatched exception:" << e.what() << std::endl;
-        }
-
-        return false;
-
-    } catch(const std::string& s) {
-        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-    } catch(...) {
-        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-        std::abort();
-    }
-
-    return true;
+bool CsApexCoreApp::doNotify(QObject *receiver, QEvent *event)
+{
+    return QCoreApplication::notify(receiver, event);
 }
 
 bool CsApexCoreApp::notify(QObject* receiver, QEvent* event) {
-    try {
-        return QCoreApplication::notify(receiver, event);
-
-    } catch(const std::exception& e) {
-        ErrorState* er = dynamic_cast<ErrorState*> (receiver);
-        NodeWorker* bw = dynamic_cast<NodeWorker*> (receiver);
-
-        if(fatal_exceptions_) {
-            std::cerr << "caught an exception in --fatal-exceptions mode: Abort!" << std::endl;
-            std::abort();
-        }
-
-        std::cerr << "exception: " << e.what() << std::endl;
-
-        if(er) {
-            er->setError(true, e.what());
-        } else if(bw) {
-            bw->triggerError(true, e.what());
-        } else {
-            std::cerr << "Uncatched exception:" << e.what() << std::endl;
-        }
-
-        return false;
-
-    } catch(const std::string& s) {
-        std::cerr << "Uncatched exception (string) exception: " << s << std::endl;
-    } catch(...) {
-        std::cerr << "Uncatched exception of unknown type and origin!" << std::endl;
-        std::abort();
-    }
-
-    return true;
+    return handler.notifyImpl(this, receiver, event);
+}
+bool CsApexGuiApp::notify(QObject* receiver, QEvent* event) {
+    return handler.notifyImpl(this, receiver, event);
 }
 
-Main::Main(std::unique_ptr<QCoreApplication> &&a)
-    : app(std::move(a)), splash(nullptr)
+
+Main::Main(std::unique_ptr<QCoreApplication> &&a, ExceptionHandler& handler)
+    : app(std::move(a)), handler(handler), splash(nullptr)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -136,71 +97,125 @@ int Main::run()
     return result;
 }
 
-int Main::main(bool headless, bool threadless, bool thread_grouping, const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
+int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping,
+               const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
-//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
-        QPixmap pm(":/apex_splash.png");
-        splash = new QSplashScreen (pm);
+        splash = new CsApexSplashScreen;
         splash->show();
+        showMessage("loading libraries");
     }
 
-    Settings settings;
-    settings.set("config", config);
+    std::string config_to_load = config;
+
+    settings.set("config", config_to_load);
+    settings.set("config_recovery", false);
+
+    if(!headless) {
+        askForRecoveryConfig(config_to_load);
+    }
 
     if(!settings.knows("path_to_bin")) {
-        settings.add(param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
+        settings.add(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
     } else {
         settings.set("path_to_bin", path_to_bin);
     }
 
     if(!settings.knows("headless")) {
-        settings.add(param::ParameterFactory::declareBool("headless", headless));
+        settings.add(csapex::param::ParameterFactory::declareBool("headless", headless));
     } else {
         settings.set("headless", headless);
     }
 
     if(!settings.knows("threadless")) {
-        settings.add(param::ParameterFactory::declareBool("threadless", threadless));
+        settings.add(csapex::param::ParameterFactory::declareBool("threadless", threadless));
     } else {
         settings.set("threadless", threadless);
     }
 
     if(!settings.knows("thread_grouping")) {
-        settings.add(param::ParameterFactory::declareBool("thread_grouping", thread_grouping));
+        settings.add(csapex::param::ParameterFactory::declareBool("thread_grouping", thread_grouping));
     } else {
         settings.set("thread_grouping", thread_grouping);
     }
 
     if(!settings.knows("additional_args")) {
-        settings.add(param::ParameterFactory::declareValue< std::vector<std::string> >("additional_args", additional_args));
+        settings.add(csapex::param::ParameterFactory::declareValue< std::vector<std::string> >("additional_args", additional_args));
     } else {
         settings.set("additional_args", additional_args);
     }
 
-    PluginLocatorPtr plugin_locator(new PluginLocator(settings));
+    PluginLocatorPtr plugin_locator =std::make_shared<PluginLocator>(settings);
 
-    NodeFactory::Ptr node_factory(new NodeFactory(settings, plugin_locator.get()));
-    NodeAdapterFactory::Ptr node_adapter_factory(new NodeAdapterFactory(settings, plugin_locator.get()));
 
-    Graph::Ptr graph(new Graph);
-    GraphWorker::Ptr graph_worker(new GraphWorker(&settings, graph.get()));
+    GraphPtr graph = std::make_shared<Graph>();
+    ThreadPool thread_pool(handler, !threadless, thread_grouping, paused);
+    GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(thread_pool, graph.get());
 
-    ThreadPool thread_pool(graph.get(), !threadless, thread_grouping);
-    CommandDispatcher dispatcher(settings, graph_worker, &thread_pool, node_factory.get());
+    graph_worker->generatorAdded.connect([&thread_pool](TaskGeneratorPtr tg) {
+        thread_pool.add(tg.get());
+    });
+    graph_worker->generatorRemoved.connect([&thread_pool](TaskGeneratorPtr tg) {
+        thread_pool.remove(tg.get());
+    });
+    graph_worker->paused.connect([&thread_pool](bool pause) {
+        thread_pool.setPause(pause);
+    });
+    graph_worker->stopped.connect([&thread_pool]() {
+        thread_pool.stop();
+    });
 
-    CsApexCore core(settings, plugin_locator, graph_worker, node_factory.get(), node_adapter_factory.get(), &dispatcher);
+    NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(plugin_locator.get());
 
-    QObject::connect(&core, SIGNAL(saveSettingsRequest(YAML::Node&)), &thread_pool, SLOT(saveSettings(YAML::Node&)));
-    QObject::connect(&core, SIGNAL(loadSettingsRequest(YAML::Node&)), &thread_pool, SLOT(loadSettings(YAML::Node&)));
+    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
+                                                      graph_worker, graph,
+                                                      thread_pool, node_factory.get());
 
+    core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
+    core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
+
+    handler.setCore(core.get());
+
+    int res;
     if(!headless) {
         app->processEvents();
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
-        WidgetControllerPtr widget_control (new WidgetController(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get()));
-        DragIO drag_io(graph.get(), &dispatcher, widget_control);
+        CommandDispatcher dispatcher(settings, graph_worker, graph, &thread_pool, node_factory.get());
+        boost::signals2::scoped_connection saved_connection(core->saved.connect([&](){
+            dispatcher.setClean();
+            dispatcher.resetDirtyPoint();
+
+            bool recovery = settings.get<bool>("config_recovery", false);
+            if(recovery) {
+                // delete recovery file
+                bf3::path recov_file = settings.get<std::string>("config_recovery_file");
+                bf3::path current_config  = settings.get<std::string>("config");
+                if(recov_file != current_config) {
+                    bf3::remove(recov_file);
+                    settings.set("config_recovery", false);
+                }
+            }
+        }));
+        boost::signals2::scoped_connection loaded_connection(core->loaded.connect([&](){
+            dispatcher.setClean();
+            dispatcher.resetDirtyPoint();
+        }));
+        boost::signals2::scoped_connection reset(core->resetRequest.connect([&](){
+            dispatcher.reset();
+            settings.set("config_recovery", false);
+        }));
+        boost::signals2::scoped_connection change(dispatcher.stateChanged.connect([&](){
+            std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
+            core->saveAs(temp_file_name, true);
+        }));
+
+
+        NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
+        WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get());
+        DragIO drag_io(plugin_locator, graph.get(), &dispatcher, widget_control);
 
         DesignerStyleable style;
         DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control, &style);
@@ -214,42 +229,90 @@ int Main::main(bool headless, bool threadless, bool thread_grouping, const std::
 
         QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
-        QObject::connect(graph.get(), SIGNAL(nodeAdded(NodeWorkerPtr)), legend, SLOT(startTrackingNode(NodeWorkerPtr)));
-        QObject::connect(graph.get(), SIGNAL(nodeRemoved(NodeWorkerPtr)), legend, SLOT(stopTrackingNode(NodeWorkerPtr)));
+        boost::signals2::scoped_connection add_connection
+                (graph->nodeAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); }));
+        boost::signals2::scoped_connection remove_connection
+                (graph->nodeRemoved.connect([legend](NodeWorkerPtr n) { legend->stopTrackingNode(n); }));
+
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
         QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));
 
         widget_control->setDesigner(designer);
 
-        CsApexWindow w(core, &dispatcher, widget_control, graph_worker, designer, minimap, legend, timeline, plugin_locator.get());
+        CsApexWindow w(*core, &dispatcher, widget_control,
+                       graph_worker, graph,
+                       thread_pool, designer, minimap, legend, timeline, plugin_locator);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));
 
-        core.init(&drag_io);
+        core->init();
+
+        node_adapter_factory->loadPlugins();
+
         w.start();
-        core.startup();
+        core->startup();
 
         w.show();
         splash->finish(&w);
 
-        int res = run();
+        res = run();
+
+        deleteRecoveryConfig();
 
         delete designer;
-        return res;
 
     } else {
-        core.init(nullptr);
+        core->init();
         csapex::error_handling::stop_request().connect(std::bind(&csapex::error_handling::kill));
-        core.startup();
-        return run();
+        core->startup();
+        res = run();
+    }
+
+    graph.reset();
+
+    return res;
+}
+
+void Main::askForRecoveryConfig(const std::string& config_to_load)
+{
+    bf3::path temp_file = config_to_load + ".recover";
+    if(bf3::exists(temp_file)) {
+        std::time_t mod_time_t = bf3::last_write_time(temp_file);
+        char mod_time[20];
+        strftime(mod_time, 20, "%Y-%m-%d %H:%M:%S", localtime(&mod_time_t));
+
+        std::string question = "The application did not exit correctly. "
+                               "Do you want to recover<br /><b>" +
+                temp_file.filename().string() +
+                "</b>?<br />(last modified: " + mod_time + ")";
+
+        QMessageBox::StandardButton reply = QMessageBox::question(splash, "Configuration Recovery",
+                                      QString::fromStdString(question),
+                                      QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            settings.set("config_recovery", true);
+            settings.set("config_recovery_file", temp_file.string());
+            settings.set("config_recovery_original", config_to_load);
+        }
+    }
+}
+
+void Main::deleteRecoveryConfig()
+{
+    bool recovery = settings.get<bool>("config_recovery", false);
+    if(!recovery) {
+        bf3::path temp_file = settings.get("config")->as<std::string>() + ".recover";
+        if(bf3::exists(temp_file)) {
+            bf3::remove(temp_file);
+        }
     }
 }
 
 void Main::showMessage(const QString& msg)
 {
     if(splash->isVisible()) {
-        splash->showMessage(msg, Qt::AlignTop | Qt::AlignRight, Qt::black);
+        splash->showMessage(msg);
     }
     app->processEvents();
 }
@@ -257,7 +320,7 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
-//    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
 
     std::string path_to_bin(argv[0]);
 
@@ -265,19 +328,16 @@ int main(int argc, char** argv)
     desc.add_options()
             ("help", "show help message")
             ("dump", "show variables")
+            ("paused", "start paused")
             ("headless", "run without gui")
             ("threadless", "run without threading")
             ("fatal_exceptions", "abort execution on exception")
-            ("thread_grouping", "create one thread per graph component")
+            ("disable_thread_grouping", "by default create one thread per node")
             ("input", "config file to load")
-            ("ros-name", "(ros parameter (provided by launch files))")
-            ("ros-log", "(ros parameter (provided by launch files))")
             ;
 
     po::positional_options_description p;
     p.add("input", 1);
-    p.add("ros-name", 1);
-    p.add("ros-log", 1);
 
     // first check for --headless or --fatal_exceptions parameter
     // this has to be done before the qapp can be created, which
@@ -302,13 +362,33 @@ int main(int argc, char** argv)
         }
     }
 
-    // filters all qt parameters from argv
 
+    std::shared_ptr<ExceptionHandler> handler;
+
+    // filters all qt parameters from argv
     std::unique_ptr<QCoreApplication> app;
     if(headless) {
-        app.reset(new CsApexCoreApp(argc, argv, fatal_exceptions));
+        handler.reset(new ExceptionHandler(fatal_exceptions));
+        app.reset(new CsApexCoreApp(argc, argv, *handler));
     } else {
-        app.reset(new CsApexApp(argc, argv, fatal_exceptions));
+        std::shared_ptr<GuiExceptionHandler> h(new GuiExceptionHandler(fatal_exceptions));
+
+        handler = h;
+        app.reset(new CsApexGuiApp(argc, argv, *handler));
+
+        h->moveToThread(app->thread());
+    }
+
+    // filters ros remappings
+    std::vector<std::string> remapping_args;
+    std::vector<std::string> rest_args;
+    for(int i = 1; i < argc; ++i) {
+        std::string arg(argv[i]);
+        if(arg.find(":=") != std::string::npos)  {
+            remapping_args.push_back(arg);
+        } else {
+            rest_args.push_back(arg);
+        }
     }
 
     // now check for remaining parameters
@@ -316,7 +396,7 @@ int main(int argc, char** argv)
     std::vector<std::string> additional_args;
 
     try {
-        po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).positional(p).run();
+        po::parsed_options parsed = po::command_line_parser(rest_args).options(desc).positional(p).run();
 
         po::store(parsed, vm);
 
@@ -328,6 +408,9 @@ int main(int argc, char** argv)
         std::cerr << "cannot parse parameters: " << e.what() << std::endl;
         return 4;
     }
+
+    // add ros remappings
+    additional_args.insert(additional_args.end(), remapping_args.begin(), remapping_args.end());
 
 
     // display help?
@@ -353,11 +436,12 @@ int main(int argc, char** argv)
     }
 
     bool threadless = vm.count("threadless");
-    bool thread_grouping = vm.count("thread_grouping");
+    bool thread_grouping = !vm.count("disable_thread_grouping");
+    bool paused = vm.count("paused");
 
     // start the app
-    Main m(std::move(app));
-    return m.main(headless, threadless, thread_grouping, input, path_to_bin, additional_args);
+    Main m(std::move(app), *handler);
+    return m.main(headless, threadless, paused, thread_grouping, input, path_to_bin, additional_args);
 }
 
 /// MOC

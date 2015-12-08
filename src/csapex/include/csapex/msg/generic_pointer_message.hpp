@@ -3,20 +3,25 @@
 
 /// COMPONENT
 #include <csapex/msg/message.h>
+#include <csapex/serialization/message_serializer.h>
 #include <csapex/utility/register_msg.h>
 
 namespace csapex {
 namespace connection_types {
 
 template <typename Type>
-struct GenericPointerMessage : public Message {
+struct GenericPointerMessage : public Message
+{
     typedef std::shared_ptr<GenericPointerMessage<Type> > Ptr;
     typedef std::shared_ptr<GenericPointerMessage<Type> const> ConstPtr;
 
     GenericPointerMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
-        : Message(type2name(typeid(Type)), frame_id, stamp)
+        : Message(type<GenericPointerMessage<Type>>::name(), frame_id, stamp)
     {
-        static csapex::MessageRegistered<GenericPointerMessage<Type> > reg;
+        static csapex::MessageConstructorRegistered<GenericPointerMessage<Type> > reg_c;
+        static csapex::MessageSerializerRegistered<GenericPointerMessage<Type> > reg_s;
+
+        setDescriptiveName(type2name(typeid(Type)));
     }
 
     virtual ConnectionType::Ptr clone() const override
@@ -34,7 +39,7 @@ struct GenericPointerMessage : public Message {
 
     bool acceptsConnectionFrom(const ConnectionType* other_side) const override
     {
-        return name() == other_side->name();
+        return descriptiveName() == other_side->descriptiveName();
     }
 
     typename std::shared_ptr<Type> value;

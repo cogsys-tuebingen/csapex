@@ -4,9 +4,12 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
-#include <csapex/core/thread_pool.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/scheduling/thread_group.h>
+#include <csapex/model/node_runner.h>
 
 /// SYSTEM
 #include <sstream>
@@ -36,26 +39,21 @@ std::string CreateThread::getDescription() const
 
 bool CreateThread::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
-    apex_assert_hard(node_worker);
+    TaskGenerator* tg = graph_worker_->getTaskGenerator(uuid);
 
-    old_id = node_worker->getNodeState()->getThread();
-    new_id = thread_pool_->createNewThreadGroupFor(node_worker, name);
+    auto group = thread_pool_->getGroupFor(tg);
+
+    old_id = group->id();
+    new_id = thread_pool_->createNewGroupFor(tg, name);
 
     return true;
 }
 
 bool CreateThread::doUndo()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
-    apex_assert_hard(node_worker);
+    TaskGenerator* tg = graph_worker_->getTaskGenerator(uuid);
 
-    if(old_id == 0) {
-        thread_pool_->usePrivateThreadFor(node_worker);
-    } else {
-        thread_pool_->switchToThread(node_worker, old_id);
-    }
-    thread_pool_->deleteThreadGroup(new_id);
+    thread_pool_->addToGroup(tg, old_id);
 
     return true;
 }

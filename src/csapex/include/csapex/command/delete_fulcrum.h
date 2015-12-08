@@ -3,10 +3,7 @@
 
 /// COMPONENT
 #include "command.h"
-#include <csapex/csapex_fwd.h>
-
-/// SYSTEM
-#include <QPoint>
+#include <csapex/data/point.h>
 
 namespace csapex
 {
@@ -29,9 +26,9 @@ protected:
 private:
     int connection_id;
     int fulcrum_id;
-    QPointF pos;
-    QPointF in;
-    QPointF out;
+    Point pos;
+    Point in;
+    Point out;
     int type;
 };
 

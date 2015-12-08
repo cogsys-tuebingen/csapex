@@ -7,19 +7,33 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/settings.h>
-
-/// SYSTEM
-#include <QTimer>
+#include <csapex/scheduling/task_generator.h>
+#include <csapex/model/node_runner.h>
+#include <csapex/scheduling/executor.h>
 
 using namespace csapex;
 
-GraphWorker::GraphWorker(Settings* /*settings*/, Graph* graph)
-    : graph_(graph), timer_(new QTimer)
+GraphWorker::GraphWorker(Executor &executor, Graph* graph)
+    : graph_(graph), executor_(executor)
 {
-    timer_->setInterval(1000. / 30.);
-    timer_->start();
+    connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) {
+        TaskGeneratorPtr runner = std::make_shared<NodeRunner>(n);
+        generators_[n->getUUID()] = runner;
+        generatorAdded(runner);
+    }));
+    connections_.push_back(graph->nodeRemoved.connect([this](NodeWorkerPtr n) {
+        TaskGeneratorPtr runner = generators_[n->getUUID()];
+        generators_.erase(n->getUUID());
+        generatorRemoved(runner);
+    }));
+}
 
-    QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(tick()));
+GraphWorker::~GraphWorker()
+{
+    for(auto connection : connections_) {
+        connection.disconnect();
+    }
+    connections_.clear();
 }
 
 Graph* GraphWorker::getGraph()
@@ -27,65 +41,47 @@ Graph* GraphWorker::getGraph()
     return graph_;
 }
 
-void GraphWorker::tick()
+TaskGenerator* GraphWorker::getTaskGenerator(const UUID &uuid)
 {
-    //    Q_FOREACH(Node::Ptr n, nodes_) {
-    //        if(n->isEnabled()) {
-    //            n->tick();
-    //        }
-    //    }
-
-//    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
-//        node->checkParameters();
-//    }
-
-    Q_FOREACH(const Connection::Ptr& connection, graph_->connections_) {
-        connection->tick();
-    }
+    return generators_.at(uuid).get();
 }
 
 void GraphWorker::reset()
 {
     stop();
-
-    graph_->uuids_.clear();
-    graph_->connections_.clear();
+    graph_->clear();
+    for(auto& gen: generators_) {
+        generatorRemoved(gen.second);
+    }
+    generators_.clear();
 }
 
 bool GraphWorker::isPaused() const
 {
-    return !timer_->isActive();
+    return executor_.isPaused();
 }
 
-void GraphWorker::setPause(bool pause)
+void GraphWorker::pauseRequest(bool pause)
 {
-    if(pause == isPaused()) {
+    if(executor_.isPaused() == pause) {
         return;
     }
 
-    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
-        node->pause(pause);
-    }
-    if(pause) {
-        timer_->stop();
-    } else {
-        timer_->start();
-    }
+    executor_.setPause(pause);
 
-    Q_EMIT paused(pause);
+    paused(pause);
 }
 
 
 void GraphWorker::stop()
 {
-    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
-        node->setEnabled(false);
+    for(NodeWorker* nw : graph_->getAllNodeWorkers()) {
+        nw->stop();
     }
-    Q_FOREACH(NodeWorker* node, graph_->getAllNodeWorkers()) {
-        node->stop();
-    }
-
-    graph_->nodes_.clear();
+    stopped();
 }
-/// MOC
-#include "../../include/csapex/model/moc_graph_worker.cpp"
+
+void GraphWorker::clearBlock()
+{
+    executor_.clear();
+}

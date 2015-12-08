@@ -4,9 +4,12 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
-#include <csapex/core/thread_pool.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/scheduling/thread_group.h>
+#include <csapex/model/node_runner.h>
 
 /// SYSTEM
 #include <sstream>
@@ -39,31 +42,25 @@ std::string SwitchThread::getDescription() const
 
 bool SwitchThread::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
-    apex_assert_hard(node_worker);
+    TaskGenerator* tg = graph_worker_->getTaskGenerator(uuid);
 
-    old_id = node_worker->getNodeState()->getThread();
+    auto group = thread_pool_->getGroupFor(tg);
+    old_id = group->id();
 
-    if(id == 0) {
-        thread_pool_->usePrivateThreadFor(node_worker);
-    } else {
-        name = thread_pool_->getCustomGroup(id).name;
-        thread_pool_->switchToThread(node_worker, id);
+    if(id != ThreadGroup::PRIVATE_THREAD) {
+        name = group->name();
     }
+    thread_pool_->addToGroup(tg, id);
 
     return true;
 }
 
 bool SwitchThread::doUndo()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
-    apex_assert_hard(node_worker);
+    TaskGenerator* tg = graph_worker_->getTaskGenerator(uuid);
 
-    if(old_id == 0) {
-        thread_pool_->usePrivateThreadFor(node_worker);
-    } else {
-        thread_pool_->switchToThread(node_worker, old_id);
-    }
+    thread_pool_->addToGroup(tg, old_id);
+
     return true;
 }
 

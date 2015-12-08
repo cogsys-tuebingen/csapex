@@ -4,8 +4,6 @@
 /// COMPONENT
 #include <csapex/signal/slot.h>
 #include <csapex/signal/signal.h>
-#include <csapex/command/meta.h>
-#include <csapex/command/delete_connection.h>
 #include <csapex/utility/timer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/message_traits.h>
@@ -34,7 +32,6 @@ Trigger::~Trigger()
 
 void Trigger::reset()
 {
-    setBlocked(false);
     setSequenceNumber(0);
 }
 
@@ -56,31 +53,13 @@ void Trigger::removeConnection(Connectable* other_side)
 
             i = targets_.erase(i);
 
-            Q_EMIT connectionRemoved(this);
+            connection_removed_to(this);
             return;
 
         } else {
             ++i;
         }
     }
-}
-
-Command::Ptr Trigger::removeConnectionCmd(Slot* other_side) {
-    Command::Ptr removeThis(new command::DeleteConnection(this, other_side));
-
-    return removeThis;
-}
-
-Command::Ptr Trigger::removeAllConnectionsCmd()
-{
-    command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
-
-    foreach(Slot* target, targets_) {
-        Command::Ptr removeThis(new command::DeleteConnection(this, target));
-        removeAll->add(removeThis);
-    }
-
-    return removeAll;
 }
 
 void Trigger::removeAllConnectionsNotUndoable()
@@ -90,19 +69,45 @@ void Trigger::removeAllConnectionsNotUndoable()
         i = targets_.erase(i);
     }
 
-    Q_EMIT disconnected(this);
+    disconnected(this);
 }
 
 void Trigger::trigger()
 {
-    foreach(Slot* s, targets_) {
+    {
+        std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
+        apex_assert_hard(targets_running_.empty());
+        for(Slot* s : targets_) {
+            targets_running_[s] = true;
+        }
+    }
+
+    triggered();
+
+    for(Slot* s : targets_) {
         try {
-            s->trigger();
+            s->trigger(this);
         } catch(const std::exception& e) {
-            std::cout << "triggering slot " << s->getLabel()  << " failed: " << e.what();
+            std::cerr << "triggering slot " << s->getLabel()  << " failed: " << e.what();
         }
     }
     ++count_;
+}
+
+void Trigger::signalHandled(Slot *slot)
+{
+    std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
+    targets_running_.erase(slot);
+
+    if(targets_running_.empty()) {
+        all_signals_handled();
+    }
+}
+
+bool Trigger::isBeingProcessed() const
+{
+    std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
+    return !targets_running_.empty();
 }
 
 void Trigger::disable()
@@ -110,23 +115,17 @@ void Trigger::disable()
     Connectable::disable();
 }
 
-void Trigger::connectForcedWithoutCommand(Slot *other_side)
-{
-    tryConnect(other_side);
-}
-
-bool Trigger::tryConnect(Connectable *other_side)
-{
-    return connect(other_side);
-}
-
-bool Trigger::connect(Connectable *other_side)
+bool Trigger::isConnectionPossible(Connectable *other_side)
 {
     Slot* slot = dynamic_cast<Slot*>(other_side);
     if(!slot) {
         return false;
     }
+    return true;
+}
 
+bool Trigger::connect(Slot *slot)
+{
     apex_assert_hard(slot);
 
     if(!slot->acknowledgeConnection(this)) {
@@ -136,10 +135,7 @@ bool Trigger::connect(Connectable *other_side)
 
     targets_.push_back(slot);
 
-    QObject::connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
-
     validateConnections();
-
     return true;
 }
 
@@ -148,7 +144,7 @@ bool Trigger::canConnectTo(Connectable* other_side, bool move) const
     if(!Connectable::canConnectTo(other_side, move)) {
         return false;
     } else {
-        foreach (Slot* target, targets_) {
+        for (Slot* target : targets_) {
             if(target == other_side) {
                 return false;
             }
@@ -160,7 +156,7 @@ bool Trigger::canConnectTo(Connectable* other_side, bool move) const
 
 bool Trigger::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    foreach(Slot* slot, targets_) {
+    for(Slot* slot : targets_) {
         if(!slot->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
@@ -175,14 +171,14 @@ bool Trigger::isConnected() const
 
 void Trigger::connectionMovePreview(Connectable *other_side)
 {
-    foreach(Slot* slot, targets_) {
-        Q_EMIT(connectionInProgress(slot, other_side));
+    for(Slot* slot : targets_) {
+        connectionInProgress(slot, other_side);
     }
 }
 
 void Trigger::validateConnections()
 {
-    foreach(Slot* target, targets_) {
+    for(Slot* target : targets_) {
         target->validateConnections();
     }
 }

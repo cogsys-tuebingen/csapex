@@ -3,10 +3,8 @@
 
 /// COMPONENT
 #include "command.h"
-#include <csapex/csapex_fwd.h>
-
-/// SYSTEM
-#include <QPoint>
+#include <csapex/data/point.h>
+#include <string>
 
 namespace csapex
 {
@@ -16,7 +14,7 @@ namespace command
 class AddFulcrum : public Command
 {
 public:
-    AddFulcrum(int connection_id, int sub_section_to_split, const QPoint& pos, int type);
+    AddFulcrum(int connection_id, int sub_section_to_split, const Point& pos, int type);
 
 protected:
     bool doExecute();
@@ -29,7 +27,7 @@ protected:
 private:
     int connection_id;
     int sub_section_to_split;
-    const QPoint pos;
+    Point pos;
     int type;
 };
 

@@ -2,9 +2,10 @@
 #define CONNECTOR_OUT_H
 
 /// COMPONENT
+#include <csapex/command/command_fwd.h>
+#include <csapex/msg/msg_fwd.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/message_traits.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
 
 namespace csapex
@@ -14,15 +15,23 @@ class Output : public Connectable
 {
     friend class Input;
     friend class Graph;
-    friend class command::AddConnection;
-    friend class command::MoveConnection;
-    friend class command::DeleteConnection;
+//    friend class command::AddConnection;
+//    friend class command::MoveConnection;
+//    friend class command::DeleteConnection;
     friend class DesignerIO;
+
+public:
+    enum class State {
+        ACTIVE,
+        IDLE
+    };
 
 public:
     Output(const UUID &uuid);
     Output(Unique *parent, int sub_id);
     ~Output();
+
+    void setMessageProcessed();
 
     virtual bool canOutput() const override
     {
@@ -33,12 +42,21 @@ public:
         return true;
     }
 
+    void activate();
+
+    State getState() const;
+    void setState(State s);
+
     virtual void disable() override;
 
-    virtual void publish(ConnectionType::ConstPtr message) = 0;
+    virtual void setMultipart(bool multipart, bool last_part) = 0;
+    virtual void addMessage(ConnectionType::ConstPtr message) = 0;
 
     virtual bool canSendMessages() const;
-    virtual bool sendMessages() = 0;
+    virtual void commitMessages() = 0;
+    virtual void publish();
+    virtual void nextMessage() = 0;
+    virtual ConnectionTypeConstPtr getMessage() const = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;
@@ -46,34 +64,26 @@ public:
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
 
-    int noTargets();
-    std::vector<Input*> getTargets() const;
-
-    void connectForcedWithoutCommand(Input* other_side);
-
-    virtual CommandPtr removeAllConnectionsCmd() override;
-    virtual CommandPtr removeConnectionCmd(Input *other_side);
-
-    void forceSendMessage(bool force = true);
+    int countConnections();
+    std::vector<ConnectionPtr> getConnections() const;
 
     virtual bool hasMessage() = 0;
 
     virtual void reset();
-    virtual void clear() = 0;
+    virtual void startReceiving() = 0;
 
-protected:
-    /// PRIVATE: Use command to create a connection (undoable)
-    virtual bool tryConnect(Connectable* other_side) override;
+    virtual bool isConnectionPossible(Connectable* other_side) override;
     virtual void removeConnection(Connectable* other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
-    bool connect(Connectable* other_side);
+public:
+    boost::signals2::signal<void()> message_processed;
+
 
 protected:
-    std::vector<Input*> targets_;
-    bool force_send_message_;
+    State state_;
 };
 
 }
 
-#endif // CONNECTOR_OUT_H
+#endif // FOR_OUT_H

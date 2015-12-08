@@ -62,7 +62,6 @@ void csapex::error_handling::stop()
 
 void csapex::error_handling::siginthandler(int)
 {
-    printf("User pressed Ctrl+C\n");
     stop();
 }
 

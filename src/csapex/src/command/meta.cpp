@@ -5,8 +5,6 @@
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
-
-#include <QTreeWidgetItem>
 #include <iostream>
 
 using namespace csapex::command;
@@ -16,16 +14,12 @@ Meta::Meta(const std::string &type)
 {
 }
 
-QTreeWidgetItem* Meta::createDebugInformation() const
+void Meta::accept(int level, std::function<void (int level, const Command &)> callback) const
 {
-    QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, getType().c_str());
-    tl->setText(1, getDescription().c_str());
-
+    callback(level, *this);
     for(Command::Ptr cmd : nested) {
-        tl->addChild(cmd->createDebugInformation());
+        cmd->accept(level+1, callback);
     }
-    return tl;
 }
 
 std::string Meta::getType() const
@@ -62,7 +56,7 @@ bool Meta::doExecute()
 
     bool success = true;
     for(Command::Ptr cmd : nested) {
-        bool s = Access::executeCommand(graph_, thread_pool_, node_factory_, cmd);
+        bool s = Access::executeCommand(graph_worker_, graph_, thread_pool_, node_factory_, cmd);
         if(!s) {
             std::cerr << "command failed to execute! (" << typeid(*cmd).name() << ")" << std::endl;
         }
@@ -74,7 +68,7 @@ bool Meta::doExecute()
 bool Meta::doUndo()
 {
     for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
-        bool s = Access::undoCommand(graph_, thread_pool_, node_factory_, *it);
+        bool s = Access::undoCommand(graph_worker_, graph_, thread_pool_, node_factory_, *it);
         if(!s) {
             undo_later.push_back(*it);
         }
@@ -87,7 +81,7 @@ bool Meta::doRedo()
 {
     bool success = true;
     for(Command::Ptr cmd : nested) {
-        bool s = Access::redoCommand(graph_, thread_pool_, node_factory_, cmd);
+        bool s = Access::redoCommand(graph_worker_, graph_, thread_pool_, node_factory_, cmd);
         success &= s;
     }
     return success;

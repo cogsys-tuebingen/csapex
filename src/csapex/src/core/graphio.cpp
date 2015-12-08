@@ -4,7 +4,9 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
+#include <csapex/msg/bundled_connection.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/trigger.h>
@@ -12,17 +14,15 @@
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/connection.h>
 #include <csapex/utility/yaml_node_builder.h>
+#include <csapex/serialization/serialization.h>
+#include <csapex/signal/signal_connection.h>
 
 /// SYSTEM
-#include <QMessageBox>
-
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
-#include <QScrollBar>
 #include <sys/types.h>
 
 using namespace csapex;
@@ -47,10 +47,10 @@ void GraphIO::loadSettings(const YAML::Node &doc)
 
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
+    for(NodeWorker* node : graph_->getAllNodeWorkers()) {
         try {
             YAML::Node yaml_node;
-            node->getNodeState()->writeYaml(yaml_node);
+            serializeNode(yaml_node, node);
             yaml["nodes"].push_back(yaml_node);
         } catch(const std::exception& e) {
             std::cerr << "cannot save state for node " << node->getUUID() << ": " << e.what() << std::endl;
@@ -64,51 +64,44 @@ void GraphIO::loadNode(const YAML::Node& doc)
     std::string type = doc["type"].as<std::string>();
     UUID uuid = doc["uuid"].as<UUID>();
 
-    int x = doc["pos"][0].as<int>();
-    int y = doc["pos"][1].as<int>();
-
     NodeWorker::Ptr node_worker = node_factory_->makeNode(type, uuid);
     if(!node_worker) {
         return;
     }
 
     try {
-        NodeState::Ptr s = node_worker->getNodeState();
-        s->readYaml(doc);
-        node_worker->setNodeState(s);
+        deserializeNode(doc, node_worker.get());
 
     } catch(const std::exception& e) {
         std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
     }
-    if(x != 0 || y != 0) {
-        node_worker->getNodeState()->setPos(QPoint(x,y));
-    }
+
     graph_->addNode(node_worker);
 }
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    foreach(NodeWorker* node, graph_->getAllNodeWorkers()) {
+    for(NodeWorker* node : graph_->getAllNodeWorkers()) {
         if(!node->getAllOutputs().empty()) {
-            foreach(Output* o, node->getAllOutputs()) {
-                if(o->noTargets() == 0) {
+            for(auto output : node->getAllOutputs()) {
+                if(output->countConnections() == 0) {
                     continue;
                 }
                 YAML::Node connection;
-                connection["uuid"] = o->getUUID();
-                foreach(Input* i, o->getTargets()) {
-                    connection["targets"].push_back(i->getUUID());
+                connection["uuid"] = output->getUUID();
+                for(ConnectionPtr c : output->getConnections()) {
+                    connection["targets"].push_back(c->to()->getUUID());
                 }
 
                 yaml["connections"].push_back(connection);
             }
-            foreach(Trigger* o, node->getTriggers()) {
-                if(o->noTargets() == 0) {
+            for(auto trigger : node->getTriggers()) {
+                if(trigger->noTargets() == 0) {
                     continue;
                 }
                 YAML::Node connection;
-                connection["uuid"] = o->getUUID();
-                foreach(Slot* i, o->getTargets()) {
+                connection["uuid"] = trigger->getUUID();
+                for(Slot* i : trigger->getTargets()) {
                     connection["targets"].push_back(i->getUUID());
                 }
 
@@ -117,7 +110,7 @@ void GraphIO::saveConnections(YAML::Node &yaml)
         }
     }
 
-    foreach(const Connection::Ptr& connection, graph_->connections_) {
+    for(const ConnectionPtr& connection : graph_->connections_) {
         if(connection->getFulcrumCount() == 0) {
             continue;
         }
@@ -126,25 +119,25 @@ void GraphIO::saveConnections(YAML::Node &yaml)
         fulcrum["from"] = connection->from()->getUUID();
         fulcrum["to"] = connection->to()->getUUID();
 
-        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
             YAML::Node pt;
-            pt.push_back(f->pos().x());
-            pt.push_back(f->pos().y());
+            pt.push_back(f->pos().x);
+            pt.push_back(f->pos().y);
 
             fulcrum["pts"].push_back(pt);
         }
 
-        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
             YAML::Node handle;
-            handle.push_back(f->handleIn().x());
-            handle.push_back(f->handleIn().y());
-            handle.push_back(f->handleOut().x());
-            handle.push_back(f->handleOut().y());
+            handle.push_back(f->handleIn().x);
+            handle.push_back(f->handleIn().y);
+            handle.push_back(f->handleOut().x);
+            handle.push_back(f->handleOut().y);
 
             fulcrum["handles"].push_back(handle);
         }
 
-        Q_FOREACH(const Fulcrum::Ptr& f, connection->getFulcrums()) {
+        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
             fulcrum["types"].push_back(f->type());
         }
 
@@ -198,31 +191,19 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 UUID to_uuid = UUID::make_forced(to_uuid_tmp);
 
                 Connectable* from = parent->getOutput(from_uuid);
-                if(from == nullptr) {
-                    from = parent->getTrigger(from_uuid);
-                }
-                if(from == nullptr) {
-                    std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+                if(from != nullptr) {
+                    loadMessageConnection(from, parent, to_uuid);
                     continue;
-                }
 
-                try {
-                    NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
-
-                    Connectable* to = target->getInput(to_uuid);
-                    if(to == nullptr) {
-                        to = target->getSlot(to_uuid);
-                    }
-                    if(!to) {
+                } else {
+                    from = parent->getTrigger(from_uuid);
+                    if(from != nullptr) {
+                        loadSignalConnection(from, to_uuid);
                         continue;
                     }
-
-                    graph_->addConnection(Connection::Ptr(new Connection(from, to)));
-
-                } catch(const std::exception& e) {
-                    std::cerr << "cannot load connection: " << e.what() << std::endl;
-                    continue;
                 }
+
+                std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
 
             }
         }
@@ -255,7 +236,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 continue;
             }
 
-            Connection::Ptr connection = graph_->getConnection(Connection::Ptr(new Connection(from, to)));
+            ConnectionPtr connection = graph_->getConnection(from, to);
 
             std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 
@@ -274,15 +255,93 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             for(int i = 0; i < n; ++i) {
                 int type = (!types.empty()) ? types[i] : Fulcrum::CURVE;
                 if(has_handle) {
-                    QPointF in(handles[i][0], handles[i][1]);
-                    QPointF out(handles[i][2], handles[i][3]);
-                    connection->addFulcrum(i, QPointF(pts[i][0], pts[i][1]), type, in, out);
+                    Point in(handles[i][0], handles[i][1]);
+                    Point out(handles[i][2], handles[i][3]);
+                    connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type, in, out);
                 } else {
-                    connection->addFulcrum(i, QPointF(pts[i][0], pts[i][1]), type);
+                    connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type);
                 }
             }
         }
     }
 }
-/// MOC
-#include "../../include/csapex/core/moc_graphio.cpp"
+
+void GraphIO::loadMessageConnection(Connectable* from, NodeWorker* parent, const UUID& to_uuid)
+{
+    try {
+        NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
+
+        Input* in = target->getInput(to_uuid);
+        if(!in) {
+            std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", input doesn't exist." << std::endl;
+            return;
+        }
+
+        Output* out = dynamic_cast<Output*>(from);
+        if(out && in) {
+            ConnectionPtr c = BundledConnection::connect(
+                        out, in,
+                        parent->getOutputTransition(), target->getInputTransition());
+            graph_->addConnection(c);
+        }
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot load connection: " << e.what() << std::endl;
+    }
+}
+
+
+void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
+{
+    try {
+        NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
+
+        Slot* in = target->getSlot(to_uuid);
+        if(!in) {
+            std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", slot doesn't exist." << std::endl;
+            return;
+        }
+
+        Trigger* out = dynamic_cast<Trigger*>(from);
+        if(out && in) {
+            ConnectionPtr c = SignalConnection::connect(
+                        out, in);
+            graph_->addConnection(c);
+        }
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot load connection: " << e.what() << std::endl;
+    }
+}
+
+
+void GraphIO::serializeNode(YAML::Node& doc, NodeWorker* node_worker)
+{
+    node_worker->getNodeState()->writeYaml(doc);
+
+    auto node = node_worker->getNode().lock();
+    if(node) {
+        // hook for nodes to serialize
+        Serialization::instance().serialize(*node, doc);
+    }
+}
+
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
+{
+    NodeState::Ptr s = node_worker->getNodeState();
+    s->readYaml(doc);
+
+    int x = doc["pos"][0].as<double>();
+    int y = doc["pos"][1].as<double>();
+
+    if(x != 0 || y != 0) {
+        s->setPos(Point(x,y));
+    }
+    node_worker->setNodeState(s);
+
+    // hook for nodes to deserialize
+    auto node = node_worker->getNode().lock();
+    if(node) {
+        Serialization::instance().deserialize(*node, doc);
+    }
+}

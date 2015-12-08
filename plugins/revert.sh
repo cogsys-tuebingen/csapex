@@ -6,8 +6,10 @@ rst=$(tput sgr0)       # Text reset
 for f in *; do
   if [[ -d $f ]]; then
     cd $f
-    echo "${bld}${blu}reverting $f${rst}"
-    git checkout *
+    if [[ -d .git ]]; then
+      echo "${bld}${blu}reverting $f${rst}"
+      git reset HEAD --hard
+    fi
     cd - 1> /dev/null
   fi
 done

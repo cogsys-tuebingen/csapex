@@ -5,16 +5,16 @@
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
-#include <csapex/view/widget_controller.h>
 
 using namespace csapex::command;
 
-AddNode::AddNode(const std::string &type, QPoint pos, const UUID &parent_uuid, const UUID& uuid, NodeState::Ptr state)
+AddNode::AddNode(const std::string &type, Point pos, const UUID &parent_uuid, const UUID& uuid, NodeState::Ptr state)
     : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
 {
     apex_assert_hard(!uuid.empty());

@@ -27,8 +27,3 @@ void CorePlugin::prepare(Settings&)
 {
 
 }
-
-void CorePlugin::initUI(DragIO&)
-{
-
-}

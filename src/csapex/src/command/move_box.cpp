@@ -3,14 +3,16 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
-#include <csapex/view/box.h>
 #include <csapex/model/graph.h>
-#include <csapex/view/widget_controller.h>
-#include <csapex/utility/movable_graphics_proxy_widget.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
+
+/// SYSTEM
+#include <QPoint>
 
 using namespace csapex::command;
 
-MoveBox::MoveBox(const UUID& node_uuid, QPointF from, QPointF to, WidgetController &widget_controller)
+MoveBox::MoveBox(const UUID& node_uuid, Point from, Point to, WidgetController &widget_controller)
     : widget_controller_(widget_controller), from(from), to(to), uuid(node_uuid)
 {
 }
@@ -23,8 +25,8 @@ std::string MoveBox::getType() const
 std::string MoveBox::getDescription() const
 {
     std::stringstream ss;
-    ss << "moved box " << uuid << " from (" << from.x() << ", " << from.y() << ") to";
-    ss << "(" << to.x() << ", " << to.y() << ")";
+    ss << "moved box " << uuid << " from (" << from.x << ", " << from.y << ") to";
+    ss << "(" << to.x << ", " << to.y << ")";
     return ss.str();
 }
 
@@ -37,7 +39,7 @@ bool MoveBox::doExecute()
 bool MoveBox::doUndo()
 {
     MovableGraphicsProxyWidget* box = widget_controller_.getProxy(uuid);
-    box->setPos(from);
+    box->setPos(QPoint(from.x, from.y));
 
     return true;
 }
@@ -45,7 +47,7 @@ bool MoveBox::doUndo()
 bool MoveBox::doRedo()
 {
     MovableGraphicsProxyWidget* box = widget_controller_.getProxy(uuid);
-    box->setPos(to);
+    box->setPos(QPoint(to.x, to.y));
 
     return true;
 }

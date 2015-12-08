@@ -2,7 +2,7 @@
 #define TIMABLE_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <sstream>
@@ -28,12 +28,25 @@ namespace csapex
     : \
     csapex::Timer::Interlude::Ptr(nullptr)
 
+#define NAMED_INTERLUDE(name) \
+    csapex::Timer::Interlude::Ptr interlude_##name = profiling_timer_ ? \
+    profiling_timer_->step(#name) \
+    : \
+    csapex::Timer::Interlude::Ptr(nullptr)
+#define NAMED_INTERLUDE_INSTANCE(instance,name) \
+    csapex::Timer::Interlude::Ptr interlude_##name = instance->getTimer() ? \
+    instance->getTimer()->step(#name) \
+    : \
+    csapex::Timer::Interlude::Ptr(nullptr)
+
 class Timable
 {
 public:
     Timable();
     Timable(Timer* timer);
+
     virtual void useTimer(Timer* timer);
+    Timer* getTimer();
 
 protected:
     Timer* profiling_timer_;

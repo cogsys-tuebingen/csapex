@@ -6,10 +6,6 @@
 #include <csapex/core/settings.h>
 #include <csapex/msg/apex_message_provider.h>
 
-/// SYSTEM
-#include <boost/filesystem.hpp>
-
-namespace bfs = boost::filesystem;
 using namespace csapex;
 
 MessageRendererManager::MessageRendererManager()
@@ -19,7 +15,6 @@ MessageRendererManager::MessageRendererManager()
 
 MessageRendererManager::~MessageRendererManager()
 {
-    delete manager_;
 }
 
 void MessageRendererManager::setPluginLocator(PluginLocatorPtr locator)
@@ -29,17 +24,22 @@ void MessageRendererManager::setPluginLocator(PluginLocatorPtr locator)
 
 void MessageRendererManager::shutdown()
 {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
     renderers.clear();
+    manager_.reset();
 }
 
 void MessageRendererManager::loadPlugins()
 {
-    manager_->load(plugin_locator_.get());
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+
+    if(!manager_->pluginsLoaded()) {
+        manager_->load(plugin_locator_.get());
+    }
 
     renderers.clear();
 
-    typedef std::pair<std::string, PluginManager<csapex::MessageRenderer>::Constructor> PAIR;
-    foreach(PAIR pair, manager_->availableClasses()) {
+    for(auto pair : manager_->availableClasses()) {
         try {
             MessageRenderer::Ptr renderer(pair.second());
             renderers[renderer->messageType()] = renderer;
@@ -52,7 +52,8 @@ void MessageRendererManager::loadPlugins()
 
 MessageRendererPtr MessageRendererManager::createMessageRenderer(const ConnectionTypeConstPtr& message)
 {
-    if(!manager_->pluginsLoaded()) {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    if(!manager_->pluginsLoaded() || renderers.empty()) {
         loadPlugins();
     }
     if(renderers.empty()) {
@@ -60,7 +61,7 @@ MessageRendererPtr MessageRendererManager::createMessageRenderer(const Connectio
     }
 
     try {
-        return renderers.at(&typeid(*message));
+        return renderers.at(std::type_index(typeid(*message)));
     } catch(const std::exception& e) {
         throw std::runtime_error(std::string("cannot create message renderer for ") + type2name(typeid(*message)));
     }

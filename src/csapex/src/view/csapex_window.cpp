@@ -2,30 +2,37 @@
 #include <csapex/view/csapex_window.h>
 
 /// COMPONENT
-#include <csapex/core/designerio.h>
+#include <csapex/core/csapex_core.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/info.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
+#include <csapex/view/node/node_statistics.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/node_statistics.h>
 #include <csapex/model/tag.h>
-#include <csapex/utility/qt_helper.hpp>
-#include <csapex/view/box.h>
-#include <csapex/view/designer.h>
-#include <csapex/view/widget_controller.h>
-#include "ui_csapex_window.h"
 #include <csapex/plugin/plugin_locator.h>
-#include <csapex/view/activity_timeline.h>
-#include <csapex/view/activity_legend.h>
-#include <csapex/view/minimap_widget.h>
-#include <csapex/info.h>
-#include <csapex/view/screenshot_dialog.h>
+#include <csapex/scheduling/executor.h>
+#include <csapex/command/command_factory.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/widgets/activity_legend.h>
+#include <csapex/view/widgets/activity_timeline.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/designerio.h>
+#include <csapex/view/widgets/minimap_widget.h>
+#include <csapex/view/widgets/screenshot_dialog.h>
+#include <csapex/view/designer/widget_controller.h>
+#include <csapex/command/command.h>
+#include "ui_csapex_window.h"
+#include <csapex/view/utility/node_list_generator.h>
 
 /// PROJECT
-#include <utils_param/parameter_factory.h>
+#include <csapex/param/parameter_factory.h>
+#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/model/connection_type.h>
 
 /// SYSTEM
 #include <iostream>
@@ -40,20 +47,33 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl,
-                           GraphWorkerPtr graph, Designer* designer, MinimapWidget* minimap,
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphWorkerPtr graph_worker,
+                           GraphPtr graph, Executor& executor,
+                           Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
-                           PluginLocator *locator, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl), graph_worker_(graph),
+                           PluginLocatorPtr locator, QWidget *parent)
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl),
+      graph_worker_(graph_worker), graph_(graph), executor_(executor),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
-{
-    core_.addListener(this);
+{    
+    qRegisterMetaType < QImage > ("QImage");
+    qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
+    qRegisterMetaType < ConnectionType::ConstPtr > ("ConnectionType::ConstPtr");
+    qRegisterMetaType < std::string > ("std::string");
+
+    MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 }
 
 CsApexWindow::~CsApexWindow()
 {
-    core_.removeListener(this);
+    MessageRendererManager::instance().shutdown();
+
+    for(auto connection : connections_) {
+        connection.disconnect();
+    }
+    connections_.clear();
+
     delete ui;
 }
 
@@ -76,8 +96,13 @@ void CsApexWindow::construct()
     ui->actionLock_to_Grid->setChecked(widget_ctrl_->isGridLockEnabled());
     ui->actionDisplay_Graph_Components->setChecked(designer_->isGraphComponentsEnabled());
     ui->actionDisplay_Threads->setChecked(designer_->isThreadsEnabled());
+
     ui->actionSignal_Connections->setChecked(designer_->areSignalConnectionsVisible());
     ui->actionMessage_Connections->setChecked(designer_->areMessageConnectionsVisibile());
+
+    ui->actionDebug->setChecked(designer_->isDebug());
+
+    ui->actionPause->setChecked(executor_.isPaused());
 
     minimap_->setVisible(designer_->isMinimapEnabled());
     ui->actionDisplay_Minimap->setChecked(designer_->isMinimapEnabled());
@@ -101,8 +126,13 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this,  SLOT(undo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this,  SLOT(redo()));
 
-    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
-    QObject::connect(&core_, SIGNAL(paused(bool)), ui->actionPause, SLOT(setChecked(bool)));
+    //    QObject::connect(ui->actionPause, SIGNAL(triggered(bool)), &core_, SLOT(setPause(bool)));
+    QObject::connect(ui->actionPause, &QAction::triggered, [this](bool pause) { core_.setPause(pause); });
+
+    QObject::connect(ui->actionSteppingMode, &QAction::triggered, [this](bool step) { core_.setSteppingMode(step); });
+    QObject::connect(ui->actionStep, &QAction::triggered, [this](bool) { core_.step(); });
+
+
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
 
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
@@ -121,6 +151,9 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionMessage_Connections, SIGNAL(toggled(bool)), designer_, SLOT(displayMessageConnections(bool)));
     QObject::connect(designer_, SIGNAL(messagesEnabled(bool)), ui->actionMessage_Connections, SLOT(setChecked(bool)));
+
+    QObject::connect(ui->actionDebug, SIGNAL(toggled(bool)), designer_, SLOT(enableDebug(bool)));
+    QObject::connect(designer_, SIGNAL(debugEnabled(bool)), ui->actionDebug, SLOT(setChecked(bool)));
 
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), widget_ctrl_.get(),  SLOT(enableGridLock(bool)));
     QObject::connect(widget_ctrl_.get(), SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
@@ -144,27 +177,28 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionAuto_Reload, SIGNAL(toggled(bool)), this, SLOT(updatePluginAutoReload(bool)));
     ui->actionAuto_Reload->setChecked(plugin_locator_->isAutoReload());
 
-    QObject::connect(graph, SIGNAL(stateChanged()), designer_, SLOT(stateChangedEvent()));
-    QObject::connect(graph, SIGNAL(stateChanged()), this, SLOT(updateMenu()));
+    connections_.push_back(core_.resetDone.connect([this](){ designer_->reset(); }));
+    connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
+    connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
+    connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
 
-    QObject::connect(&core_, SIGNAL(configChanged()), this, SLOT(updateTitle()));
-    QObject::connect(&core_, SIGNAL(showStatusMessage(const std::string&)), this, SLOT(showStatusMessage(const std::string&)));
-    QObject::connect(&core_, SIGNAL(reloadBoxMenues()), this, SLOT(reloadBoxMenues()));
+    connections_.push_back(core_.saveSettingsRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
+    connections_.push_back(core_.loadSettingsRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
+    connections_.push_back(core_.saveViewRequest.connect([this](YAML::Node& node){ saveView(node); }));
+    connections_.push_back(core_.loadViewRequest.connect([this](YAML::Node& node){ loadView(node); }));
 
-    QObject::connect(&core_, SIGNAL(resetRequest()), designer_, SLOT(reset()));
+    connections_.push_back(graph->stateChanged.connect([this]() { updateMenu(); }));
+    connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); }));
+    connections_.push_back(graph->nodeRemoved.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeRemoved(n); }));
+    connections_.push_back(graph->panic.connect([this]() { clearBlock(); }));
 
-    QObject::connect(&core_, SIGNAL(saveSettingsRequest(YAML::Node&)), this, SLOT(saveSettings(YAML::Node&)));
-    QObject::connect(&core_, SIGNAL(loadSettingsRequest(YAML::Node&)), this, SLOT(loadSettings(YAML::Node&)));
-    QObject::connect(&core_, SIGNAL(saveViewRequest(YAML::Node&)), this, SLOT(saveView(YAML::Node&)));
-    QObject::connect(&core_, SIGNAL(loadViewRequest(YAML::Node&)), this, SLOT(loadView(YAML::Node&)));
+    connections_.push_back(cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); }));
+    connections_.push_back(cmd_dispatcher_->dirtyChanged.connect([this](bool) { updateTitle(); }));
 
-    QObject::connect(graph, SIGNAL(nodeAdded(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeAdded(NodeWorkerPtr)));
-    QObject::connect(graph, SIGNAL(nodeRemoved(NodeWorkerPtr)), widget_ctrl_.get(), SLOT(nodeRemoved(NodeWorkerPtr)));
-    QObject::connect(graph, SIGNAL(panic()), this, SLOT(clearBlock()));
+    connections_.push_back(core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); }));
 
-    QObject::connect(graph, SIGNAL(dirtyChanged(bool)), this, SLOT(updateTitle()));
-
-    QObject::connect(cmd_dispatcher_, SIGNAL(stateChanged()), this, SLOT(updateUndoInfo()));
+    connections_.push_back(core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); }));
+    connections_.push_back(core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); }));
 
     updateMenu();
     updateTitle();
@@ -247,7 +281,7 @@ void CsApexWindow::updateDebugInfo()
 
     foreach (NodeBox* box, selected) {
         NodeWorker* worker = box->getNodeWorker();
-        QObject::connect(worker, SIGNAL(nodeStateChanged()), this, SLOT(updateDebugInfo()));
+        worker->nodeStateChanged.connect([this](){ updateDebugInfo(); });
         ui->box_info->addTopLevelItem(NodeStatistics(worker).createDebugInformation(widget_ctrl_->getNodeFactory()));
     }
 
@@ -281,19 +315,20 @@ void CsApexWindow::updateNodeInfo()
 {
     std::stringstream ss;
 
-    Q_FOREACH(QTreeWidgetItem* item, ui->node_info_tree->selectedItems()) {
+    for(QTreeWidgetItem* item : ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
             NodeConstructor::Ptr n = widget_ctrl_->getNodeFactory()->getConstructor(type.toStdString());
 
-            QImage image = n->getIcon().pixmap(QSize(16,16)).toImage();
+            QString icon = QString::fromStdString(n->getIcon());
+            QImage image = QIcon(icon).pixmap(QSize(16,16)).toImage();
             QUrl uri ( QString::fromStdString(n->getType()));
             ui->node_info_text->document()->addResource( QTextDocument::ImageResource, uri, QVariant ( image ) );
 
             ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << n->getType() << "</h1>";
             ss << "<p>Tags: <i>";
             int i = 0;
-            Q_FOREACH(const Tag::Ptr& tag, n->getTags()) {
+            for(const Tag::Ptr& tag : n->getTags()) {
                 if(i++ > 0) {
                     ss << ", ";
                 }
@@ -305,12 +340,16 @@ void CsApexWindow::updateNodeInfo()
             ss << "<hr />";
             ss << "<h1>Parameters:</h1>";
 
-            std::vector<param::Parameter::Ptr> params = n->makePrototype()->getNode()->getParameters();
 
-            Q_FOREACH(const param::Parameter::Ptr& p, params) {
-                ss << "<h2>" << p->name() << "</h2>";
-                ss << "<p>" << p->description().toString() << "</p>";
-                ss << "<p>" << p->toString() << "</p>";
+            auto node = n->makePrototype()->getNode().lock();
+            if(node) {
+                std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
+
+                for(const csapex::param::Parameter::Ptr& p : params) {
+                    ss << "<h2>" << p->name() << "</h2>";
+                    ss << "<p>" << p->description().toString() << "</p>";
+                    ss << "<p>" << p->toString() << "</p>";
+                }
             }
         }
     }
@@ -324,7 +363,31 @@ void CsApexWindow::updateUndoInfo()
     ui->undo->clear();
     ui->redo->clear();
 
-    cmd_dispatcher_->populateDebugInfo(ui->undo, ui->redo);
+    std::deque<QTreeWidgetItem*> stack;
+
+    auto iterator = [&stack](QTreeWidget* tree, int level, const Command& cmd) {
+        while(level < (int) stack.size()) {
+            stack.pop_back();
+        }
+        QTreeWidgetItem* tl = new QTreeWidgetItem;
+        tl->setText(0, cmd.getType().c_str());
+        tl->setText(1, cmd.getDescription().c_str());
+
+        if(level == 0) {
+            tree->addTopLevelItem(tl);
+            stack.push_back(tl);
+        } else {
+            stack.back()->addChild(tl);
+        }
+    };
+
+    cmd_dispatcher_->visitUndoCommands([this, &iterator](int level, const Command& cmd) {
+        iterator(ui->undo, level, cmd);
+    });
+    stack.clear();
+    cmd_dispatcher_->visitRedoCommands([this, &iterator](int level, const Command& cmd) {
+        iterator(ui->redo, level, cmd);
+    });
 
     ui->undo->expandAll();
     ui->redo->expandAll();
@@ -370,16 +433,10 @@ void CsApexWindow::copyRight()
 void CsApexWindow::clearBlock()
 {
     std::cerr << "clearing blocking connections" << std::endl;
-    core_.setPause(true);
-    Graph* graph = graph_worker_->getGraph();
-    foreach(NodeWorker* nw, graph->getAllNodeWorkers()) {
-        nw->reset();
-    }
-
-    core_.setPause(false);
+    graph_worker_->clearBlock();
 }
 
-void CsApexWindow::reloadBoxMenues()
+void CsApexWindow::updateNodeTypes()
 {
     if(ui->boxes->layout()) {
         QtHelper::clearLayout(ui->boxes->layout());
@@ -392,15 +449,12 @@ void CsApexWindow::reloadBoxMenues()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    widget_ctrl_->insertAvailableNodeTypes(ui->boxes);
-    widget_ctrl_->insertAvailableNodeTypes(ui->node_info_tree);
+    NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
+
+    generator.insertAvailableNodeTypes(ui->boxes);
+    generator.insertAvailableNodeTypes(ui->node_info_tree);
 }
 
-
-void CsApexWindow::resetSignal()
-{
-    designer_->reset();
-}
 
 void CsApexWindow::loadStyleSheet(const QString& path)
 {
@@ -455,8 +509,22 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    ui->actionUndo->setDisabled(!cmd_dispatcher_->canUndo());
-    ui->actionRedo->setDisabled(!cmd_dispatcher_->canRedo());
+    bool can_undo = cmd_dispatcher_->canUndo();
+    ui->actionUndo->setDisabled(!can_undo);
+    if(can_undo) {
+        ui->actionUndo->setText(QString("&Undo ") + QString::fromStdString(cmd_dispatcher_->getNextUndoCommand()->getType()));
+    } else {
+        ui->actionUndo->setText(QString("&Undo"));
+    }
+
+    bool can_redo = cmd_dispatcher_->canRedo();
+    ui->actionRedo->setDisabled(!can_redo);
+    if(can_redo) {
+        ui->actionRedo->setText(QString("&Redo ") + QString::fromStdString(cmd_dispatcher_->getNextRedoCommand()->getType()));
+    } else {
+        ui->actionRedo->setText(QString("&Redo"));
+    }
+
 }
 
 void CsApexWindow::updateTitle()
@@ -468,6 +536,11 @@ void CsApexWindow::updateTitle()
         window << " *";
     }
 
+    bool recovery = core_.getSettings().get<bool>("config_recovery", false);
+    if(recovery) {
+        window << " (recovery)";
+    }
+
     setWindowTitle(window.str().c_str());
 }
 
@@ -475,7 +548,7 @@ void CsApexWindow::createPluginsMenu()
 {
     std::vector<std::string> plugins = plugin_locator_->getAllLibraries();
 
-    foreach(const std::string& library, plugins) {
+    for(const std::string& library : plugins) {
         /// enable / ignore plugin
         QAction* enable_ignore = new QAction(QString::fromStdString(library), ui->menu_Available_Plugins);
         enable_ignore->setCheckable(true);
@@ -549,8 +622,6 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if(r == QMessageBox::Save) {
-            std::cout << "save" << std::endl;
-
             save();
             event->accept();
         } else if(r == QMessageBox::Discard) {
@@ -566,10 +637,10 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 
     Settings& settings = core_.getSettings();
     if(!settings.knows("uistate")) {
-        settings.add(param::ParameterFactory::declareText("uistate", ""));
+        settings.add(csapex::param::ParameterFactory::declareText("uistate", ""));
     }
     if(!settings.knows("geometry")) {
-        settings.add(param::ParameterFactory::declareText("geometry", "geometry.toStdString()"));
+        settings.add(csapex::param::ParameterFactory::declareText("geometry", "geometry.toStdString()"));
     }
 
     settings.set("uistate", uistate.toStdString());
@@ -578,8 +649,10 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 
     try {
         graph_worker_->stop();
+    } catch(const std::exception& e) {
+        std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
     } catch(...) {
-        std::abort();
+        throw;
     }
 
     event->accept();
@@ -594,7 +667,7 @@ void CsApexWindow::init()
 {
     init_ = true;
 
-    reloadBoxMenues();
+    updateNodeTypes();
     //    designer_->show();
 
     Settings& settings = core_.getSettings();
@@ -657,7 +730,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    cmd_dispatcher_->execute(graph_worker_->getGraph()->clear());
+    cmd_dispatcher_->execute(cmd_dispatcher_->getCommandFactory()->clearCommand());
 }
 
 void CsApexWindow::undo()

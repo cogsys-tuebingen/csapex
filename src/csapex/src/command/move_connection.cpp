@@ -5,11 +5,14 @@
 #include <csapex/command/command.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/connection.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/signal/slot.h>
 #include <csapex/command/meta.h>
-#include <csapex/command/delete_connection.h>
-#include <csapex/command/add_connection.h>
+#include <csapex/command/delete_msg_connection.h>
+#include <csapex/command/delete_signal_connection.h>
+#include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_signal_connection.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -33,16 +36,22 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
     if(is_output) {
         Output* out = dynamic_cast<Output*>(from);
         if(out) {
-            foreach(Input* input, out->getTargets()) {
-                add(Command::Ptr(new DeleteConnection(from, input)));
-                add(Command::Ptr(new AddConnection(to_uuid, input->getUUID())));
+            for(ConnectionPtr c : out->getConnections()) {
+                if(!c) {
+                    continue;
+                }
+                Input* input = dynamic_cast<Input*>(c->to());
+                if(input) {
+                    add(Command::Ptr(new DeleteMessageConnection(out, input)));
+                    add(Command::Ptr(new AddMessageConnection(to_uuid, input->getUUID())));
+                }
             }
         } else {
             Trigger* trigger = dynamic_cast<Trigger*>(from);
             if(trigger) {
-                foreach(Slot* slot, trigger->getTargets()) {
-                    add(Command::Ptr(new DeleteConnection(from, slot)));
-                    add(Command::Ptr(new AddConnection(to_uuid, slot->getUUID())));
+                for(Slot* slot : trigger->getTargets()) {
+                    add(Command::Ptr(new DeleteSignalConnection(trigger, slot)));
+                    add(Command::Ptr(new AddSignalConnection(to_uuid, slot->getUUID())));
                 }
             }
         }
@@ -51,16 +60,16 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
         Input* in = dynamic_cast<Input*>(from);
 
         if(in) {
-            Connectable* target = in->getSource();
-            add(Command::Ptr(new DeleteConnection(target, from)));
-            add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
+            Output* target = dynamic_cast<Output*>(in->getSource());
+            add(Command::Ptr(new DeleteMessageConnection(target, in)));
+            add(Command::Ptr(new AddMessageConnection(target->getUUID(), to_uuid)));
         } else {
             Slot* in = dynamic_cast<Slot*>(from);
 
             if(in) {
-                foreach(Trigger* target, in->getSources()) {
-                    add(Command::Ptr(new DeleteConnection(target, from)));
-                    add(Command::Ptr(new AddConnection(target->getUUID(), to_uuid)));
+                for(Trigger* target : in->getSources()) {
+                    add(Command::Ptr(new DeleteSignalConnection(target, in)));
+                    add(Command::Ptr(new AddSignalConnection(target->getUUID(), to_uuid)));
                 }
             }
         }

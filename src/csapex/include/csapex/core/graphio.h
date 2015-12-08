@@ -3,27 +3,20 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/csapex_fwd.h>
+
+/// PROJECT
+#include <csapex/factory/factory_fwd.h>
 
 /// SYSTEM
-#include <map>
-#include <string>
 #include <yaml-cpp/yaml.h>
-#include <QList>
-#include <QPoint>
-#include <QSize>
-
-/// FORWARD DECLARATION
 
 namespace csapex
 {
 
-class GraphIO : public QObject
+class GraphIO
 {
-    Q_OBJECT
-
 public:
-    GraphIO(Graph* graph, NodeFactory* node_factory);
+    GraphIO(Graph *graph, NodeFactory* node_factory);
 
 public:
     void saveSettings(YAML::Node& yaml);
@@ -34,6 +27,13 @@ public:
 
     void saveConnections(YAML::Node &yaml);
     void loadConnections(const YAML::Node& doc);
+
+protected:
+    void serializeNode(YAML::Node& doc, NodeWorker *node_worker);
+    void deserializeNode(const YAML::Node& doc, NodeWorker* node_worker);
+
+    void loadMessageConnection(Connectable *from, NodeWorker *parent, const UUID &to_uuid);
+    void loadSignalConnection(Connectable *from, const UUID &to_uuid);
 
 private:
     Graph* graph_;

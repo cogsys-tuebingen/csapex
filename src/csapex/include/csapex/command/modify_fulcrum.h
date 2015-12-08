@@ -3,10 +3,7 @@
 
 /// COMPONENT
 #include "command.h"
-#include <csapex/csapex_fwd.h>
-
-/// SYSTEM
-#include <QPoint>
+#include <csapex/data/point.h>
 
 namespace csapex
 {
@@ -17,8 +14,8 @@ class ModifyFulcrum : public Command
 {
 public:
     ModifyFulcrum(int connection_id, int fulcrum_id,
-                  int f_type, const QPointF& f_handle_in, const QPointF& f_handle_out,
-                  int t_type, const QPointF &t_handle_in, const QPointF &t_handle_out);
+                  int f_type, const Point& f_handle_in, const Point& f_handle_out,
+                  int t_type, const Point &t_handle_in, const Point &t_handle_out);
 
     virtual std::string getType() const;
     virtual std::string getDescription() const;
@@ -33,12 +30,12 @@ private:
     int fulcrum_id;
 
     int f_type;
-    QPointF f_in;
-    QPointF f_out;
+    Point f_in;
+    Point f_out;
 
     int t_type;
-    QPointF t_in;
-    QPointF t_out;
+    Point t_in;
+    Point t_out;
 };
 
 }

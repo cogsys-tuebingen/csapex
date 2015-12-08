@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 
 using namespace csapex;
 
@@ -14,9 +14,9 @@ NodeModifier::NodeModifier(NodeWorker *node)
 
 }
 
-Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool optional)
+Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
 {
-    return node_worker_->addInput(type, label, optional);
+    return node_worker_->addInput(type, label, dynamic, optional);
 }
 
 Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
@@ -46,19 +46,47 @@ Trigger* NodeModifier::addTrigger(const std::string& label)
 
 std::vector<Input*> NodeModifier::getMessageInputs() const
 {
-    return node_worker_->getMessageInputs();
+    // hide parameter inputs from the nodes
+    auto vec = node_worker_->getAllInputs();
+    std::vector<Input*> result;
+    for(auto entry : vec) {
+        if(!node_worker_->isParameterInput(entry.get()))  {
+            result.push_back(entry.get());
+        }
+    }
+    return result;
 }
 std::vector<Output*> NodeModifier::getMessageOutputs() const
 {
-    return node_worker_->getMessageOutputs();
+    // hide parameter outputs from the nodes
+    auto vec = node_worker_->getAllOutputs();
+    std::vector<Output*> result;
+    for(auto entry : vec) {
+        if(!node_worker_->isParameterOutput(entry.get()))  {
+            result.push_back(entry.get());
+        }
+    }
+    return result;
 }
 std::vector<Slot*> NodeModifier::getSlots() const
 {
-    return node_worker_->getSlots();
+    auto vec = node_worker_->getSlots();
+    std::vector<Slot*> result(vec.size());
+    std::size_t i = 0;
+    for(auto entry : vec) {
+        result[i++] = entry.get();
+    }
+    return result;
 }
 std::vector<Trigger*> NodeModifier::getTriggers() const
 {
-    return node_worker_->getTriggers();
+    auto vec = node_worker_->getTriggers();
+    std::vector<Trigger*> result(vec.size());
+    std::size_t i = 0;
+    for(auto entry : vec) {
+        result[i++] = entry.get();
+    }
+    return result;
 }
 
 
@@ -80,17 +108,6 @@ void NodeModifier::removeSlot(const UUID &uuid)
 void NodeModifier::removeTrigger(const UUID &uuid)
 {
     node_worker_->removeTrigger(uuid);
-}
-
-
-void NodeModifier::setTickEnabled(bool tick)
-{
-    node_worker_->setTickEnabled(tick);
-}
-
-void NodeModifier::setTickFrequency(double f)
-{
-    node_worker_->setTickFrequency(f);
 }
 
 bool NodeModifier::isSource() const

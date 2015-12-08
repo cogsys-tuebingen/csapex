@@ -2,44 +2,51 @@
 #define GRAPH_WORKER_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <QObject>
-
-class QTimer;
+#include <boost/signals2/signal.hpp>
+#include <unordered_map>
 
 namespace csapex
 {
 
-class GraphWorker : public QObject
+class GraphWorker
 {
-    Q_OBJECT
-
 public:
     typedef std::shared_ptr<GraphWorker> Ptr;
 
 public:
-    GraphWorker(Settings *settings, Graph* graph);
+    GraphWorker(Executor& executor, Graph* graph);
+    ~GraphWorker();
 
     Graph* getGraph();
 
+    TaskGenerator* getTaskGenerator(const UUID& uuid);
+
     void stop();
+    void clearBlock();
 
     bool isPaused() const;
-    void setPause(bool pause);
+    void pauseRequest(bool pause);
 
-public Q_SLOTS:
-    void tick();
     void reset();
 
-Q_SIGNALS:
-    void paused(bool);
+public:
+    boost::signals2::signal<void (bool)> paused;
+    boost::signals2::signal<void ()> stopped;
+
+    boost::signals2::signal<void(TaskGeneratorPtr)> generatorAdded;
+    boost::signals2::signal<void(TaskGeneratorPtr)> generatorRemoved;
 
 private:
     Graph* graph_;
+    Executor& executor_;
 
-    QTimer* timer_;
+    std::vector<boost::signals2::connection> connections_;
+    std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 };
 
 }

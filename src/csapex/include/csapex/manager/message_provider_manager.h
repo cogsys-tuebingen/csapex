@@ -3,9 +3,9 @@
 
 /// COMPONENT
 #include <csapex/msg/message_provider.h>
-#include <csapex/csapex_fwd.h>
 
 /// PROJECT
+#include <csapex/plugin/plugin_fwd.h>
 #include <csapex/utility/singleton.hpp>
 
 /// SYSTEM

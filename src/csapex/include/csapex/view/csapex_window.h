@@ -2,18 +2,28 @@
 #define CSAPEX_WINDOW_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
-#include <csapex/core/csapex_core.h>
+#include <csapex/view/view_fwd.h>
+#include <csapex/core/core_fwd.h>
+#include <csapex/plugin/plugin_fwd.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/scheduling/scheduling_fwd.h>
 
 /// SYSTEM
 #include <QMainWindow>
 #include <QTimer>
 #include <QFileSystemWatcher>
 #include <QBoxLayout>
+#include <boost/signals2/connection.hpp>
 
 namespace Ui
 {
 class CsApexWindow;
+}
+
+namespace YAML
+{
+class Node;
 }
 
 namespace csapex
@@ -22,7 +32,7 @@ namespace csapex
 /**
  * @brief The CsApexWindow class provides the window for the evaluator program
  */
-class CsApexWindow : public QMainWindow, public CsApexCore::Listener
+class CsApexWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -32,15 +42,14 @@ public:
      * @param parent
      */
     explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl,
-                          GraphWorkerPtr graph, Designer *designer, MinimapWidget* minimap, ActivityLegend *legend, ActivityTimeline* timeline,
-                          PluginLocator* locator, QWidget* parent = 0);
+                          GraphWorkerPtr graph_worker, GraphPtr graph, Executor &executor, Designer *designer, MinimapWidget* minimap, ActivityLegend *legend, ActivityTimeline* timeline,
+                          PluginLocatorPtr locator, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void closeEvent(QCloseEvent* event);
 
-    void resetSignal();
-
     void setupTimeline();
+
 private Q_SLOTS:
     void updateMenu();
     void updateTitle();
@@ -71,7 +80,7 @@ public Q_SLOTS:
 
     void start();
     void showStatusMessage(const std::string& msg);
-    void reloadBoxMenues();
+    void updateNodeTypes();
 
     void saveSettings(YAML::Node& doc);
     void loadSettings(YAML::Node& doc);
@@ -102,6 +111,8 @@ private:
     CommandDispatcher* cmd_dispatcher_;
     WidgetControllerPtr widget_ctrl_;
     GraphWorkerPtr graph_worker_;
+    GraphPtr graph_;
+    Executor& executor_;
 
     Ui::CsApexWindow* ui;
 
@@ -115,7 +126,9 @@ private:
     bool init_;
 
     QFileSystemWatcher* style_sheet_watcher_;
-    PluginLocator* plugin_locator_;
+    PluginLocatorPtr plugin_locator_;
+
+    std::vector<boost::signals2::connection> connections_;
 };
 
 } /// NAMESPACE

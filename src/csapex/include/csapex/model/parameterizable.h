@@ -2,8 +2,9 @@
 #define PARAMETERIZABLE_H
 
 /// PROJECT
-#include <csapex/csapex_fwd.h>
-#include <utils_param/param_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/param/param_fwd.h>
+#include <csapex/param/parameter.h>
 #include <csapex/model/generic_state.h>
 
 /// SYSTEM
@@ -18,7 +19,7 @@ namespace csapex
 class Parameterizable
 {
 public:
-    typedef std::vector<std::pair<param::Parameter*, std::function<void(param::Parameter *)> > > ChangedParameterList;
+    typedef std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > ChangedParameterList;
 
     typedef boost::mpl::vector<bool, int, double,
                                 std::string,
@@ -30,26 +31,42 @@ public:
     SupportedTemplateParameters;
 
 public:
+    boost::signals2::signal<void()> parameters_changed;
+
+public:
     Parameterizable();
     virtual ~Parameterizable();
 
     /***
      *  ADDING PARAMETERS
      */
-    void addParameter(const param::ParameterPtr& param);
-    void addParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
+    void addParameter(const csapex::param::ParameterPtr& param);
+    void addParameter(const csapex::param::ParameterPtr& param, std::function<void(csapex::param::Parameter *)> cb);
 
-    void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition);
-    void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition, std::function<void(param::Parameter *)> cb);
+    template <typename T>
+    void addParameter(const csapex::param::ParameterPtr& param, T& target)
+    {
+        addParameter(param, [&](csapex::param::Parameter* p) { target = p->as<T>(); });
+    }
 
-    void addPersistentParameter(const param::ParameterPtr& param);
+    void addConditionalParameter(const csapex::param::ParameterPtr& param, std::function<bool()> enable_condition);
+    void addConditionalParameter(const csapex::param::ParameterPtr& param, std::function<bool()> enable_condition, std::function<void(csapex::param::Parameter *)> cb);
 
-    void addTemporaryParameter(const param::ParameterPtr& param);
-    void addTemporaryParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
-    void removeTemporaryParameter(const param::ParameterPtr& param);
+    template <typename T>
+    void addConditionalParameter(const csapex::param::ParameterPtr& param, std::function<bool()> enable_condition,T& target)
+    {
+        addConditionalParameter(param, enable_condition, [&](csapex::param::Parameter* p) { target = p->as<T>(); });
+    }
 
-    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param);
-    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param, std::function<void(param::Parameter *)> cb);
+
+    void addPersistentParameter(const csapex::param::ParameterPtr& param);
+
+    void addTemporaryParameter(const csapex::param::ParameterPtr& param);
+    void addTemporaryParameter(const csapex::param::ParameterPtr& param, std::function<void(csapex::param::Parameter *)> cb);
+    void removeTemporaryParameter(const csapex::param::ParameterPtr& param);
+
+    void setTemporaryParameters(const std::vector<csapex::param::ParameterPtr>& param);
+    void setTemporaryParameters(const std::vector<csapex::param::ParameterPtr>& param, std::function<void(csapex::param::Parameter *)> cb);
 
     /***
      *  GETTING PARAMETERS
@@ -83,15 +100,15 @@ public:
     /***
      *  PARAMETER CONSTRAINTS
      */
-    void addParameterCallback(param::Parameter* param, std::function<void(param::Parameter *)> cb);
-    void addParameterCondition(param::Parameter* param, std::function<bool()> enable_condition);
+    void addParameterCallback(csapex::param::Parameter* param, std::function<void(csapex::param::Parameter *)> cb);
+    void addParameterCondition(csapex::param::Parameter* param, std::function<bool()> enable_condition);
 
-    void removeParameterCallbacks(param::Parameter* param);
+    void removeParameterCallbacks(csapex::param::Parameter* param);
 
-    std::vector<param::ParameterPtr> getParameters() const;
+    std::vector<csapex::param::ParameterPtr> getParameters() const;
     std::size_t getParameterCount() const;
 
-    param::ParameterPtr getParameter(const std::string& name) const;
+    csapex::param::ParameterPtr getParameter(const std::string& name) const;
     template <typename T>
     typename T::Ptr getParameter(const std::string& name) const
     {
@@ -123,16 +140,16 @@ public:
     void doSetParameter(const std::string& name, const T& value);
 
 private:
-    void parameterChanged(param::Parameter* param);
-    void parameterChanged(param::Parameter* param, std::function<void(param::Parameter *)> cb);
-    void parameterEnabled(param::Parameter* param, bool enabled);
+    void parameterChanged(csapex::param::Parameter* param);
+    void parameterChanged(csapex::param::Parameter* param, std::function<void(csapex::param::Parameter *)> cb);
+    void parameterEnabled(csapex::param::Parameter* param, bool enabled);
 
 private:
-    std::map<param::Parameter*, std::vector<boost::signals2::connection> > connections_;
-    std::map<param::Parameter*, std::function<bool()> > conditions_;
+    std::map<csapex::param::Parameter*, std::vector<boost::signals2::connection> > connections_;
+    std::map<csapex::param::Parameter*, std::function<bool()> > conditions_;
 
     mutable std::mutex changed_params_mutex_;
-    std::vector<std::pair<param::Parameter*, std::function<void(param::Parameter *)> > > changed_params_;
+    std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > changed_params_;
 
 protected:
     GenericStatePtr parameter_state_;

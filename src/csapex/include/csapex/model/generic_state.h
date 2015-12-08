@@ -6,7 +6,7 @@
 #include <csapex/utility/uuid.h>
 
 /// PROJECT
-#include <utils_param/param_fwd.h>
+#include <csapex/param/param_fwd.h>
 
 /// SYSTEM
 #include <boost/signals2.hpp>
@@ -26,22 +26,22 @@ public:
 
     void setParentUUID(const UUID& parent_uuid);
 
-    void addParameter(param::ParameterPtr param);
-    void removeParameter(param::ParameterPtr param);
+    void addParameter(csapex::param::ParameterPtr param);
+    void removeParameter(csapex::param::ParameterPtr param);
 
-    void addPersistentParameter(const param::ParameterPtr& param);
+    void addPersistentParameter(const csapex::param::ParameterPtr& param);
 
-    void addTemporaryParameter(const param::ParameterPtr& param);
-    void removeTemporaryParameter(const param::ParameterPtr& param);
+    void addTemporaryParameter(const csapex::param::ParameterPtr& param);
+    void removeTemporaryParameter(const csapex::param::ParameterPtr& param);
     void removeTemporaryParameters();
 
     void setParameterSetSilence(bool silent);
     void triggerParameterSetChanged();
 
-    param::Parameter& operator [] (const std::string& name) const;
-    param::ParameterPtr getParameter(const std::string& name) const;
-    std::vector<param::ParameterPtr> getParameters() const;
-    std::vector<param::ParameterPtr> getTemporaryParameters() const;
+    csapex::param::Parameter& operator [] (const std::string& name) const;
+    csapex::param::ParameterPtr getParameter(const std::string& name) const;
+    std::vector<csapex::param::ParameterPtr> getParameters() const;
+    std::vector<csapex::param::ParameterPtr> getTemporaryParameters() const;
 
     std::size_t getParameterCount() const;
 
@@ -56,13 +56,13 @@ public:
     void initializePersistentParameters();
 
 private:
-    void registerParameter(const param::ParameterPtr &param);
-    void unregisterParameter(const param::ParameterPtr &param);
+    void registerParameter(const csapex::param::ParameterPtr &param);
+    void unregisterParameter(const csapex::param::ParameterPtr &param);
 
 public:
     UUID parent_uuid_;
 
-    std::map<std::string, param::ParameterPtr> params;
+    std::map<std::string, csapex::param::ParameterPtr> params;
     std::map<std::string, bool> temporary;
     std::set<std::string> persistent;
     std::vector<std::string> order;
@@ -70,8 +70,8 @@ public:
     bool silent_;
 
     std::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
-    std::shared_ptr<boost::signals2::signal<void(param::Parameter*)> > parameter_added;
-    std::shared_ptr<boost::signals2::signal<void(param::ParameterPtr)> > parameter_removed;
+    std::shared_ptr<boost::signals2::signal<void(csapex::param::ParameterPtr)> > parameter_added;
+    std::shared_ptr<boost::signals2::signal<void(csapex::param::ParameterPtr)> > parameter_removed;
 };
 
 }

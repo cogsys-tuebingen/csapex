@@ -1,23 +1,28 @@
 /// HEADER
 #include <csapex/utility/assert.h>
 
+/// PROJECT
+#include <csapex/utility/thread.h>
+#include <csapex/utility/exceptions.h>
+
 /// SYSTEM
-#include <assert.h>
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
 
 void _apex_assert(bool assertion, const char* code, const char* file, int line)
 {
-    _apex_assert_hard(assertion, code, file, line);
+    if(!assertion) {
+        std::stringstream ss;
+        ss << "[cs::APEX - ASSERTION FAILED] \"" << code << "\" [file " << file << ", line " << line << ", thread \"" << csapex::thread::get_name() << "\"]";
+        throw std::logic_error(ss.str());
+    }
 }
 
 void _apex_assert_hard(bool assertion, const char* code, const char* file, int line)
 {
     if(!assertion) {
-        std::stringstream ss;
-        ss << "assertion \"" << code << "\" failed in " << file << ", line " << line ;
-        throw std::runtime_error(ss.str());
+        throw csapex::HardAssertionFailure(code, file, line);
     }
 }
 

@@ -3,67 +3,68 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/utility/assert.h>
-
-/// SYSTEM
-#include <QTreeWidgetItem>
 
 using namespace csapex;
 
 std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command()
-    : settings_(nullptr), graph_(nullptr), thread_pool_(nullptr), node_factory_(nullptr),
+    : settings_(nullptr), graph_worker_(nullptr), thread_pool_(nullptr), node_factory_(nullptr),
       before_save_point_(false), after_save_point_(false)
 {
 }
 
-bool Command::Access::executeCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::executeCommand(graph, thread_pool, node_factory, cmd);
+    return Command::executeCommand(graph_worker, graph, thread_pool, node_factory, cmd);
 }
 
-bool Command::Access::undoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::undoCommand(graph, thread_pool, node_factory, cmd);
+    return Command::undoCommand(graph_worker, graph, thread_pool, node_factory, cmd);
 }
 
-bool Command::Access::redoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    return Command::redoCommand(graph, thread_pool, node_factory, cmd);
+    return Command::redoCommand(graph_worker, graph, thread_pool, node_factory, cmd);
 }
 
-void Command::init(Settings *settings, Graph* graph, ThreadPool *thread_pool, NodeFactory* node_factory)
+void Command::init(Settings *settings, GraphWorker* graph_worker, Graph* graph, ThreadPool *thread_pool, NodeFactory* node_factory)
 {
     apex_assert_hard(settings);
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
     settings_ = settings;
+    graph_worker_ = graph_worker;
     graph_ = graph;
     thread_pool_ = thread_pool;
     node_factory_ = node_factory;
 }
 
-bool Command::executeCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
+    cmd->graph_worker_ = graph_worker;
     cmd->graph_ = graph;
     cmd->thread_pool_ = thread_pool;
     cmd->node_factory_ = node_factory;
     return cmd->doExecute();
 }
 
-bool Command::undoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
+    cmd->graph_worker_ = graph_worker;
     cmd->graph_ = graph;
     cmd->thread_pool_ = thread_pool;
     cmd->node_factory_ = node_factory;
@@ -75,12 +76,13 @@ bool Command::undoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* no
     return true;
 }
 
-bool Command::redoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
 {
-    apex_assert_hard(graph);
+    apex_assert_hard(graph_worker);
     apex_assert_hard(thread_pool);
     apex_assert_hard(node_factory);
 
+    cmd->graph_worker_ = graph_worker;
     cmd->graph_ = graph;
     cmd->thread_pool_ = thread_pool;
     cmd->node_factory_ = node_factory;
@@ -108,10 +110,7 @@ bool Command::isBeforeSavepoint()
     return before_save_point_;
 }
 
-QTreeWidgetItem* Command::createDebugInformation() const
+void Command::accept(int level, std::function<void (int level, const Command &)> callback) const
 {
-    QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, getType().c_str());
-    tl->setText(1, getDescription().c_str());
-    return tl;
+    callback(level, *this);
 }

@@ -4,10 +4,9 @@
 /// PROJECT
 #include <csapex/model/generic_state.h>
 #include <csapex/utility/assert.h>
-#include <utils_param/parameter.h>
+#include <csapex/param/parameter.h>
 
 /// SYSTEM
-#include <QtGlobal>
 #include <mutex>
 
 using namespace csapex;
@@ -57,19 +56,19 @@ template void Parameterizable::doSetParameter<std::vector<double> >(const std::s
 
 
 
-void Parameterizable::addParameterCallback(param::Parameter* param, std::function<void(param::Parameter *)> cb)
+void Parameterizable::addParameterCallback(csapex::param::Parameter* param, std::function<void(csapex::param::Parameter *)> cb)
 {
-    connections_[param].push_back(param->parameter_changed.connect([this,cb](param::Parameter* p) { this->parameterChanged(p, cb); } ));
+    connections_[param].push_back(param->parameter_changed.connect([this,cb](csapex::param::Parameter* p) { this->parameterChanged(p, cb); } ));
     if(param->hasState()) {
         parameterChanged(param, cb);
     }
 }
 
-void Parameterizable::removeParameterCallbacks(param::Parameter *param)
+void Parameterizable::removeParameterCallbacks(csapex::param::Parameter *param)
 {
     std::unique_lock<std::mutex> lock(changed_params_mutex_);
 
-    typedef std::pair<param::Parameter*, std::function<void(param::Parameter *)> > PAIR;
+    typedef std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > PAIR;
     for(std::vector<PAIR>::iterator it = changed_params_.begin(); it != changed_params_.end();) {
         const PAIR& p = *it;
         if(p.first == param) {
@@ -79,30 +78,33 @@ void Parameterizable::removeParameterCallbacks(param::Parameter *param)
         }
     }
 
-    foreach(boost::signals2::connection c, connections_[param]) {
+    for(boost::signals2::connection c : connections_[param]) {
         c.disconnect();
     }
 }
 
-void Parameterizable::addParameterCondition(param::Parameter* param, std::function<bool ()> enable_condition)
+void Parameterizable::addParameterCondition(csapex::param::Parameter* param, std::function<bool ()> enable_condition)
 {
     conditions_[param] = enable_condition;
 }
 
-void Parameterizable::parameterChanged(param::Parameter *)
+void Parameterizable::parameterChanged(csapex::param::Parameter *)
 {
     if(!conditions_.empty()) {
         checkConditions(false);
     }
 }
 
-void Parameterizable::parameterChanged(param::Parameter *param, std::function<void(param::Parameter *)> cb)
+void Parameterizable::parameterChanged(csapex::param::Parameter *param, std::function<void(csapex::param::Parameter *)> cb)
 {
     std::unique_lock<std::mutex> lock(changed_params_mutex_);
+
     changed_params_.push_back(std::make_pair(param, cb));
+
+    parameters_changed();
 }
 
-void Parameterizable::parameterEnabled(param::Parameter */*param*/, bool /*enabled*/)
+void Parameterizable::parameterEnabled(csapex::param::Parameter */*param*/, bool /*enabled*/)
 {
     triggerParameterSetChanged();
 }
@@ -113,8 +115,8 @@ void Parameterizable::checkConditions(bool silent)
 {
     bool change = false;
     setParameterSetSilence(true);
-    for(std::map<param::Parameter*, std::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
-        param::Parameter* p = it->first;
+    for(std::map<csapex::param::Parameter*, std::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
+        csapex::param::Parameter* p = it->first;
         bool should_be_enabled = it->second();
         if(should_be_enabled != p->isEnabled()) {
             it->first->setEnabled(should_be_enabled);
@@ -128,45 +130,45 @@ void Parameterizable::checkConditions(bool silent)
     }
 }
 
-void Parameterizable::addPersistentParameter(const param::Parameter::Ptr &param)
+void Parameterizable::addPersistentParameter(const csapex::param::Parameter::Ptr &param)
 {
     parameter_state_->addPersistentParameter(param);
 }
 
-void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param)
+void Parameterizable::addTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
     parameter_state_->addTemporaryParameter(param);
 }
 
-void Parameterizable::addTemporaryParameter(const param::Parameter::Ptr &param, std::function<void (param::Parameter *)> cb)
+void Parameterizable::addTemporaryParameter(const csapex::param::Parameter::Ptr &param, std::function<void (csapex::param::Parameter *)> cb)
 {
     parameter_state_->addTemporaryParameter(param);
     addParameterCallback(param.get(), cb);
 }
 
-void Parameterizable::removeTemporaryParameter(const param::Parameter::Ptr &param)
+void Parameterizable::removeTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
     parameter_state_->removeTemporaryParameter(param);
     triggerParameterSetChanged();
 }
 
 
-void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter::Ptr> &params)
+void Parameterizable::setTemporaryParameters(const std::vector<csapex::param::Parameter::Ptr> &params)
 {
     setParameterSetSilence(true);
     removeTemporaryParameters();
-    Q_FOREACH(param::Parameter::Ptr param, params) {
+    for(csapex::param::Parameter::Ptr param : params) {
         addTemporaryParameter(param);
     }
     setParameterSetSilence(false);
     triggerParameterSetChanged();
 }
 
-void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter::Ptr> &params, std::function<void (param::Parameter *)> cb)
+void Parameterizable::setTemporaryParameters(const std::vector<csapex::param::Parameter::Ptr> &params, std::function<void (csapex::param::Parameter *)> cb)
 {
     setParameterSetSilence(true);
     removeTemporaryParameters();
-    Q_FOREACH(param::Parameter::Ptr param, params) {
+    for(csapex::param::Parameter::Ptr param : params) {
         addTemporaryParameter(param, cb);
     }
     setParameterSetSilence(false);
@@ -175,29 +177,29 @@ void Parameterizable::setTemporaryParameters(const std::vector<param::Parameter:
 
 
 
-void Parameterizable::addParameter(const param::Parameter::Ptr &param)
+void Parameterizable::addParameter(const csapex::param::Parameter::Ptr &param)
 {
     parameter_state_->addParameter(param);
 
-    connections_[param.get()].push_back(param->parameter_changed.connect([this](param::Parameter* p) { this->parameterChanged(p); } ));
-    connections_[param.get()].push_back(param->parameter_enabled.connect([this](param::Parameter* p, bool e) { this->parameterEnabled(p, e); } ));
+    connections_[param.get()].push_back(param->parameter_changed.connect([this](csapex::param::Parameter* p) { this->parameterChanged(p); } ));
+    connections_[param.get()].push_back(param->parameter_enabled.connect([this](csapex::param::Parameter* p, bool e) { this->parameterEnabled(p, e); } ));
 }
 
-void Parameterizable::addParameter(const param::Parameter::Ptr &param, std::function<void (param::Parameter *)> cb)
+void Parameterizable::addParameter(const csapex::param::Parameter::Ptr &param, std::function<void (csapex::param::Parameter *)> cb)
 {
     addParameter(param);
     addParameterCallback(param.get(), cb);
 }
 
 
-void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param, std::function<bool()> enable_condition)
+void Parameterizable::addConditionalParameter(const csapex::param::Parameter::Ptr &param, std::function<bool()> enable_condition)
 {
     addParameter(param);
     addParameterCondition(param.get(), enable_condition);
 }
 
 
-void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param, std::function<bool()> enable_condition, std::function<void (param::Parameter *)> cb)
+void Parameterizable::addConditionalParameter(const csapex::param::Parameter::Ptr &param, std::function<bool()> enable_condition, std::function<void (csapex::param::Parameter *)> cb)
 {
     addParameter(param);
     addParameterCallback(param.get(), cb);
@@ -205,7 +207,7 @@ void Parameterizable::addConditionalParameter(const param::Parameter::Ptr &param
 }
 
 
-std::vector<param::Parameter::Ptr> Parameterizable::getParameters() const
+std::vector<csapex::param::Parameter::Ptr> Parameterizable::getParameters() const
 {
     return parameter_state_->getParameters();
 }
@@ -215,7 +217,7 @@ std::size_t Parameterizable::getParameterCount() const
     return parameter_state_->getParameterCount();
 }
 
-param::Parameter::Ptr Parameterizable::getParameter(const std::string &name) const
+csapex::param::Parameter::Ptr Parameterizable::getParameter(const std::string &name) const
 {
     return parameter_state_->getParameter(name);
 }
@@ -240,7 +242,7 @@ void Parameterizable::setParameterSetSilence(bool silent)
 void Parameterizable::removeTemporaryParameters()
 {
     // TODO: handle callbacks!
-    foreach(param::Parameter::Ptr param, parameter_state_->getTemporaryParameters()) {
+    for(csapex::param::Parameter::Ptr param : parameter_state_->getTemporaryParameters()) {
         removeParameterCallbacks(param.get());
     }
 

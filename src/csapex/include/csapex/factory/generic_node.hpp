@@ -3,7 +3,7 @@
 #include <csapex/msg/io.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/model/node_modifier.h>
-#include <utils_param/parameter_factory.h>
+#include <csapex/param/parameter_factory.h>
 
 /// SYSTEM
 #include <boost/function_types/function_pointer.hpp>
@@ -11,6 +11,21 @@
 
 namespace csapex
 {
+
+namespace generic_node {
+struct DefaultInfo
+{
+    static std::string getName(int index) {
+        return "";
+    }
+
+    template <typename P>
+    static csapex::param::ParameterPtr declareParameter(int index) {
+        return nullptr;
+    }
+};
+}
+
 template <typename Message>
 struct GenericInput
 {
@@ -27,14 +42,11 @@ struct GenericParameter
     typedef T type;
 };
 
-template <typename Parameters>
+template <typename Parameters, typename Info>
 class GenericNode : public Node
 {
     typedef typename boost::mpl::push_front<Parameters, void>::type Sig;
     typedef typename boost::function_types::function_pointer<Sig>::type Callback;
-
-    template <int argc>
-    friend class Caller;
 
     enum {
         N = boost::mpl::size< Parameters >::value
@@ -52,14 +64,14 @@ public:
         out_msg_.resize(N);
     }
 
-    virtual void setup(csapex::NodeModifier& node_modifier)
+    virtual void setup(csapex::NodeModifier& modifier)
     {
-        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this));
+        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this, modifier));
     }
 
-    virtual void setupParameters(Parameterizable& parameters)
+    virtual void setupParameters(Parameterizable& params)
     {
-        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this));
+        boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this, params));
     }
 
     void process()
@@ -98,8 +110,8 @@ public:
 
 private:
     struct GenericNodeSetup {
-        GenericNodeSetup(GenericNode<Parameters>* instance)
-            : instance_(instance), id(0)
+        GenericNodeSetup(GenericNode<Parameters, Info>* instance, csapex::NodeModifier& modifier)
+            : instance_(instance), modifier_(modifier), id(0)
         {
             instance_->in_msg_.clear();
             instance_->in_msg_.resize(instance_->N);
@@ -109,25 +121,32 @@ private:
 
         template<typename U>
         void operator()(GenericInput<U>) {
-            std::string label = connection_types::name<U>();
+            std::string label = Info::getName(id);
+            if(label.empty()) {
+                label = connection_types::serializationName<U>();
+            }
             instance_->input_[id++] = instance_->modifier_->template addInput<U>(label);
         }
         template<typename U>
         void operator()(GenericOutput<U>) {
-            std::string label = connection_types::type<U>::name();
+            std::string label = Info::getName(id);
+            if(label.empty()) {
+                label = connection_types::serializationName<U>();
+            }
             instance_->output_[id++] = instance_->modifier_->template addOutput<U>(label);
 
         }
         template<typename U>
         void operator()(GenericParameter<U>) {++id;}
 
-        GenericNode<Parameters>* instance_;
+        GenericNode<Parameters, Info>* instance_;
+        csapex::NodeModifier& modifier_;
         int id;
     };
 
     struct GenericNodeParameterSetup {
-        GenericNodeParameterSetup(GenericNode<Parameters>* instance)
-            : instance_(instance), id(0)
+        GenericNodeParameterSetup(GenericNode<Parameters, Info>* instance, Parameterizable& params)
+            : instance_(instance), parameterizable_(params), id(0)
         {}
 
         template<typename U>
@@ -137,18 +156,27 @@ private:
 
         template<typename U>
         void operator()(GenericParameter<U>) {
-            std::string name = "param";
-            param::Parameter::Ptr p = param::ParameterFactory::declareValue<U>(name, 0);
+            std::string name = Info::getName(id);
+            if(name.empty()) {
+                name =  std::string("param ") + std::to_string(id);
+            }
+            csapex::param::Parameter::Ptr p = Info::template declareParameter<U>(id);
+            if(p == nullptr) {
+                p = csapex::param::ParameterFactory::declareValue<U>(name, 0);
+            }
             instance_->addParameter(p);
-            instance_->params_[id++] = name;
+            instance_->params_[id] = name;
+
+            ++id;
         }
 
-        GenericNode<Parameters>* instance_;
+        GenericNode<Parameters, Info>* instance_;
+        Parameterizable& parameterizable_;
         int id;
     };
 
     struct GenericNodeMessageCreator {
-        GenericNodeMessageCreator(GenericNode<Parameters>* instance)
+        GenericNodeMessageCreator(GenericNode<Parameters, Info>* instance)
             : instance_(instance), id(0)
         {}
 
@@ -169,7 +197,7 @@ private:
         template<typename U>
         void operator()(GenericParameter<U>) {++id;}
 
-        GenericNode<Parameters>* instance_;
+        GenericNode<Parameters, Info>* instance_;
         int id;
     };
 
@@ -179,23 +207,36 @@ private:
         template <typename I>
         struct apply
         {
-            typedef typename boost::remove_reference<I>::type RawType;
+            typedef typename std::decay<I>::type RawType;
+            typedef typename connection_types::MessageContainer<RawType>::type Msg;
 
-            typedef typename boost::mpl::if_< boost::is_reference<I>,
-            typename boost::mpl::if_< std::is_const<RawType>, GenericInput<RawType>, GenericOutput<RawType> >::type,
-            GenericParameter<RawType> >::type type;
+            static_assert(!std::is_pointer<I>::value, "type is not a pointer");
+            static_assert(std::is_base_of<ConnectionType, Msg>::value ||
+                          std::is_integral<I>::value ||
+                          std::is_floating_point<I>::value ||
+                          std::is_same<std::string, Msg>::value,
+                          "type is usable");
+
+            typedef typename boost::mpl::if_< std::is_reference<I>,
+            typename boost::mpl::if_<
+                std::is_const<typename std::remove_reference<I>::type>,
+                    GenericInput<Msg>,
+                    GenericOutput<Msg> >::type,
+                GenericParameter<RawType>
+            >::type type;
         };
     };
 
 };
 
 
-template <typename Parameters>
+template <typename Parameters, typename Info>
 struct GenerateParameter
 {
     template <int index>
     struct Types {
         typedef typename boost::mpl::at<Parameters, boost::mpl::int_<index> >::type type;
+        typedef typename std::decay<type>::type decay_type;
 
         typedef boost::reference_wrapper<typename boost::remove_reference<type>::type> message;
 
@@ -208,7 +249,7 @@ struct GenerateParameter
     template <int no>
     static
     typename Types<no>::message
-    get(GenericNode<Parameters>* instance,
+    get(GenericNode<Parameters, Info>* instance,
         typename std::enable_if<
             boost::type_traits::ice_and<
                 boost::is_reference<typename Types<no>::type>::value,
@@ -216,13 +257,19 @@ struct GenerateParameter
             >::value
         >::type* = 0)
     {
-        return boost::ref(static_cast<typename Types<no>::type>(*instance->out_msg_[no]));
+        typedef typename Types<no>::decay_type dt;
+        typedef typename connection_types::MessageContainer<dt>::type msg_t;
+        typedef typename Types<no>::type expected;
+
+        msg_t& msg = dynamic_cast<msg_t&>(*instance->out_msg_[no]);
+        auto& val = connection_types::MessageContainer<dt>::access(msg);
+        return boost::ref(static_cast<expected>(val));
     }
 
     template <int no>
     static
     const typename Types<no>::message
-    get(GenericNode<Parameters>* instance,
+    get(GenericNode<Parameters, Info>* instance,
         typename std::enable_if<
             boost::type_traits::ice_and<
                 boost::is_reference<typename Types<no>::type>::value,
@@ -230,64 +277,54 @@ struct GenerateParameter
             >::value
         >::type* = 0)
     {
-        return boost::ref(static_cast<typename Types<no>::type const>(*instance->in_msg_[no]));
+        typedef typename Types<no>::decay_type dt;
+        typedef typename connection_types::MessageContainer<dt>::type msg_t;
+        typedef typename Types<no>::type expected;
+
+        const msg_t& msg = dynamic_cast<const msg_t&>(*instance->in_msg_[no]);
+        auto& val = connection_types::MessageContainer<dt>::accessConst(msg);
+        return boost::ref(static_cast<expected const>(val));
     }
 
     template <int no>
     static typename Types<no>::param
-    get(GenericNode<Parameters>* instance,
+    get(GenericNode<Parameters, Info>* instance,
         typename std::enable_if<!boost::is_reference<typename Types<no>::type>::value >::type* = 0)
     {
-        return instance->template readParameter<int>(instance->params_[no]);
+        return instance->template readParameter<typename Types<no>::decay_type>(instance->params_[no]);
     }
 };
 
-template <int argc>
+// Calling the function pointer
+namespace detail {
+template <typename ParameterList, typename Info, int... indices>
+struct CallerSentinel
+{
+    static void call(GenericNode<ParameterList, Info>* i)
+    {
+        i->cb_(GenerateParameter<ParameterList, Info>::template get<indices>(i)...);
+    }
+};
+
+template <typename ParameterList, typename Info, typename Rest, int index, int... indices>
 struct Caller
 {
+    typedef typename Caller<
+        ParameterList, Info, typename boost::mpl::pop_front<Rest>::type , index - 1, index, indices...
+    >::type type;
 };
 
-#define MAKE_CALLER(params, PARAMS) \
-    template <> \
-    struct Caller<params>\
-{\
-    template <typename P>\
-    static void call(GenericNode<P>* i) {\
-    std::bind(PARAMS)();\
-}\
-};
-
-#define GET(no)\
-    GenerateParameter<P>::template get<no>(i)
-
-#define CALL_0 i->cb_
-#define CALL_1 CALL_0, GET(0)
-#define CALL_2 CALL_1, GET(1)
-#define CALL_3 CALL_2, GET(2)
-#define CALL_4 CALL_3, GET(3)
-#define CALL_5 CALL_4, GET(4)
-#define CALL_6 CALL_5, GET(5)
-#define CALL_7 CALL_6, GET(6)
-#define CALL_8 CALL_7, GET(7)
-#define CALL_9 CALL_8, GET(8)
-
-#define CALLER(params) \
-    MAKE_CALLER(params, CALL_##params)
-
-CALLER(1)
-CALLER(2)
-CALLER(3)
-CALLER(4)
-CALLER(5)
-CALLER(6)
-CALLER(7)
-CALLER(8)
-CALLER(9)
-
-template <typename Parameters>
-void GenericNode<Parameters>::call()
+template <typename ParameterList, typename Info, typename Rest, int... indices>
+struct Caller<ParameterList, Info, Rest, -1, indices...>
 {
-    Caller < boost::mpl::size< Parameters >::value >::call(this);
+    typedef CallerSentinel<ParameterList, Info, indices...> type;
+};
+}
+
+template <typename Parameters, typename Info>
+void GenericNode<Parameters, Info>::call()
+{
+    detail::Caller<Parameters, Info, Parameters, boost::mpl::size<Parameters>::value - 1>::type::call(this);
 }
 
 

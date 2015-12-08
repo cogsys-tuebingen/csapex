@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>
 
@@ -12,7 +13,7 @@
 
 using namespace csapex::command;
 
-MoveFulcrum::MoveFulcrum(int connection_id, int fulcrum_id, const QPointF &from, const QPointF &to)
+MoveFulcrum::MoveFulcrum(int connection_id, int fulcrum_id, const Point &from, const Point &to)
     : connection_id(connection_id), fulcrum_id(fulcrum_id), from(from), to(to)
 {
 }

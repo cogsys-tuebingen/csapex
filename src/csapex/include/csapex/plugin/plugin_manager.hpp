@@ -11,6 +11,7 @@
 #include <class_loader/class_loader.h>
 #include <set>
 #include <tinyxml.h>
+#include <mutex>
 
 namespace csapex
 {
@@ -72,24 +73,24 @@ protected:
         std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
         assert(!loader->isOnDemandLoadUnloadEnabled());
 
-        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
+        //        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
         int retries = 1;
         while(retries != 0) {
             retries = loader->unloadLibrary();
             if(retries != 0) {
-                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
+                //                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
             }
         }
         if(loader->isLibraryLoadedByAnyClassloader()) {
-            std::cerr << "there still instances of " << library << std::endl;
+            //            std::cerr << "there still instances of " << library << std::endl;
         } else {
-            std::cerr << "there no more instances of " << library << std::endl;
+            //            std::cerr << "there no more instances of " << library << std::endl;
         }
     }
 
     void reload(const std::string& library) {
         std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
-        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
+        //        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
         loader->loadLibrary();
 
         // reload all matching classes
@@ -128,7 +129,9 @@ protected:
             if(!locator->isLibraryIgnored(library_name)) {
                 try {
                     std::string file = loadLibrary(library_name, library);
-                    locator->setLibraryLoaded(library_name, file);
+                    if(!file.empty()) {
+                        locator->setLibraryLoaded(library_name, file);
+                    }
 
                 } catch(const class_loader::ClassLoaderException& e) {
                     std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
@@ -144,6 +147,23 @@ protected:
 
     std::string loadLibrary(const std::string& library_name, TiXmlElement* library)  {
         std::string library_path = library_name + ".so";
+
+        bool load = false;
+        {
+            TiXmlElement* class_element = library->FirstChildElement("class");
+            while (class_element) {
+                std::string base_class_type = class_element->Attribute("base_class_type");
+                if(base_class_type == full_name_) {
+                    load = true;
+                    break;
+                }
+                class_element = class_element->NextSiblingElement( "class" );
+            }
+        }
+
+        if(!load) {
+            return "";
+        }
 
         std::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
         loaders_[library_name] = loader;
@@ -223,6 +243,23 @@ struct PluginManagerGroup
     };
 };
 
+class PluginManagerLocker
+{
+public:
+    static std::mutex& getMutex()
+    {
+        static PluginManagerLocker instance;
+        return instance.mutex;
+    }
+
+private:
+    PluginManagerLocker()
+    {}
+
+private:
+    std::mutex mutex;
+};
+
 template <class M>
 class PluginManager
 {
@@ -235,6 +272,7 @@ public:
 
     PluginManager(const std::string& full_name)
     {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         if(i_count == 0) {
             ++i_count;
             instance = new Parent(full_name);
@@ -244,6 +282,7 @@ public:
 
     virtual ~PluginManager()
     {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         --i_count;
         if(i_count == 0) {
             delete instance;
@@ -251,10 +290,13 @@ public:
     }
 
     virtual bool pluginsLoaded() const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->plugins_loaded_;
     }
 
     virtual void load(csapex::PluginLocator* locator) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
+
         locator->unload_library_request.connect(PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::unload, this, std::placeholders::_1), boost::signals2::at_front);
         locator->reload_library_request.connect(-PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::reload, this, std::placeholders::_1), boost::signals2::at_back);
 
@@ -262,25 +304,31 @@ public:
     }
 
     void unload(const std::string& library) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         instance->unload(library);
     }
 
     void reload(const std::string& library) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         instance->reload(library);
     }
 
     const Constructors& availableClasses() const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes;
     }
     const Constructor& availableClasses(unsigned index) const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         typename Constructors::iterator it = instance->available_classes.begin();
         std::advance(it, index);
         return it->second;
     }
     const Constructor& availableClasses(const std::string& key) const {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes[key];
     }
     Constructor& availableClasses(const std::string& key) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes[key];
     }
 

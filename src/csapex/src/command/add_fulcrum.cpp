@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>
 
@@ -12,7 +13,7 @@
 
 using namespace csapex::command;
 
-AddFulcrum::AddFulcrum(int connection_id, int sub_section_to_split, const QPoint &pos, int type)
+AddFulcrum::AddFulcrum(int connection_id, int sub_section_to_split, const Point &pos, int type)
     : connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
 {
 

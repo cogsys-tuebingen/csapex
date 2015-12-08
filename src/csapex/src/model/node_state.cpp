@@ -16,7 +16,7 @@ NodeState::NodeState(const NodeWorker *parent)
       flipped_changed(new SignalImpl),
       thread_changed(new SignalImpl),
       parent_changed(new SignalImpl),
-      parent(parent), minimized(false), enabled(true), flipped(false), thread(-1)
+      parent_(parent), minimized_(false), enabled_(true), flipped_(false), thread_id_(-1)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
@@ -25,13 +25,13 @@ NodeState::NodeState(const NodeWorker *parent)
 
 NodeState& NodeState::operator = (const NodeState& rhs)
 {
-    setPos(rhs.pos);
-    setEnabled(rhs.enabled);
-    setMinimized(rhs.minimized);
-    setFlipped(rhs.flipped);
-    setParent(rhs.parent);
+    setPos(rhs.pos_);
+    setEnabled(rhs.enabled_);
+    setMinimized(rhs.minimized_);
+    setFlipped(rhs.flipped_);
+    setParent(rhs.parent_);
     setLabel(rhs.label_);
-    setThread(rhs.thread);
+    setThread(rhs.thread_name_, rhs.thread_id_);
 
     return *this;
 }
@@ -53,39 +53,39 @@ void NodeState::readYaml(const YAML::Node &node)
     if(node["label"].IsDefined()) {
         setLabel(node["label"].as<std::string>());
         if(label_.empty()) {
-            setLabel(parent->getUUID());
+            setLabel(parent_->getUUID());
         }
     }
 
     if(node["pos"].IsDefined()) {
         double x = node["pos"][0].as<double>();
         double y = node["pos"][1].as<double>();
-        QPoint p(x,y);
+        Point p(x,y);
         setPos(p);
-    }
-
-    if(node["thread"].IsDefined()) {
-        setThread(node["thread"].as<int>());
     }
 
     if(node["state"].IsDefined()) {
         const YAML::Node& state_map = node["state"];
-        child_state = parent->getNode()->getParameterStateClone();
+        auto node = parent_->getNode().lock();
+        if(!node) {
+            return;
+        }
+        child_state_ = node->getParameterStateClone();
 
-        if(child_state) {
-            child_state->readYaml(state_map);
+        if(child_state_) {
+            child_state_->readYaml(state_map);
         }
     }
 }
-QPoint NodeState::getPos() const
+Point NodeState::getPos() const
 {
-    return pos;
+    return pos_;
 }
 
-void NodeState::setPos(const QPoint &value)
+void NodeState::setPos(const Point &value)
 {
-    if(pos != value) {
-        pos = value;
+    if(pos_ != value) {
+        pos_ = value;
         (*pos_changed)();
     }
 }
@@ -105,73 +105,80 @@ void NodeState::setLabel(const std::string &label)
 
 bool NodeState::isMinimized() const
 {
-    return minimized;
+    return minimized_;
 }
 
 void NodeState::setMinimized(bool value)
 {
-    if(minimized != value) {
-        minimized = value;
+    if(minimized_ != value) {
+        minimized_ = value;
         (*minimized_changed)();
     }
 }
 bool NodeState::isEnabled() const
 {
-    return enabled;
+    return enabled_;
 }
 
 void NodeState::setEnabled(bool value)
 {
-    if(enabled != value) {
-        enabled = value;
+    if(enabled_ != value) {
+        enabled_ = value;
         (*enabled_changed)();
     }
 }
 
 bool NodeState::isFlipped() const
 {
-    return flipped;
+    return flipped_;
 }
 
 void NodeState::setFlipped(bool value)
 {
-    if(flipped != value) {
-        flipped = value;
+    if(flipped_ != value) {
+        flipped_ = value;
         (*flipped_changed)();
     }
 }
 Memento::Ptr NodeState::getParameterState() const
 {
-    return child_state;
+    return child_state_;
 }
 
 void NodeState::setParameterState(const Memento::Ptr &value)
 {
-    child_state = value;
+    child_state_ = value;
 }
 
 const NodeWorker *NodeState::getParent() const
 {
-    return parent;
+    return parent_;
 }
 
 void NodeState::setParent(const NodeWorker *value)
 {
-    if(parent != value) {
-        parent = value;
+    if(parent_ != value) {
+        parent_ = value;
         (*parent_changed)();
     }
 }
 
-int NodeState::getThread() const
+int NodeState::getThreadId() const
 {
-    return thread;
+    return thread_id_;
 }
 
-void NodeState::setThread(int id)
+std::string NodeState::getThreadName() const
 {
-    if(thread != id) {
-        thread = id;
+    return thread_name_;
+}
+
+void NodeState::setThread(const std::string& name, int id)
+{
+    if(thread_id_ != id || name != thread_name_) {
+        thread_id_ = id;
+        thread_name_ = name;
+
         (*thread_changed)();
     }
 }
@@ -179,34 +186,36 @@ void NodeState::setThread(int id)
 
 void NodeState::writeYaml(YAML::Node &out) const
 {
-    if(parent) {
-        out["type"] = parent->getType();
-        out["uuid"] = parent->getUUID();
+    if(parent_) {
+        out["type"] = parent_->getType();
+        out["uuid"] = parent_->getUUID();
     }
     out["label"] = label_;
-    out["pos"][0] = pos.x();
-    out["pos"][1] = pos.y();
-    out["minimized"] = minimized;
-    out["enabled"] = enabled;
-    out["flipped"] = flipped;
-    out["thread"] = thread;
+    out["pos"][0] = pos_.x;
+    out["pos"][1] = pos_.y;
+    out["minimized"] = minimized_;
+    out["enabled"] = enabled_;
+    out["flipped"] = flipped_;
 
     try {
-        if(parent) {
-            child_state = parent->getNode()->getParameterStateClone();
+        if(parent_) {
+            auto node = parent_->getNode().lock();
+            if(node) {
+                child_state_ = node->getParameterStateClone();
+            }
         }
     } catch(const std::exception& e) {
-        std::cerr << "cannot clone child state for node " << parent->getUUID() << ": " << e.what() << std::endl;
+        std::cerr << "cannot clone child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
         throw e;
     }
 
-    if(child_state.get()) {
+    if(child_state_.get()) {
         try {
             YAML::Node sub_node;
-            child_state->writeYaml(sub_node);
+            child_state_->writeYaml(sub_node);
             out["state"] = sub_node;
         } catch(const std::exception& e) {
-            std::cerr << "cannot save child state for node " << parent->getUUID() << ": " << e.what() << std::endl;
+            std::cerr << "cannot save child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
             throw e;
         }
     }

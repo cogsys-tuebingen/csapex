@@ -4,16 +4,22 @@
 /// COMPONENT
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/view/widget_controller.h>
 #include <csapex/utility/assert.h>
+#include <csapex/command/command_factory.h>
+
+/// SYSTEM
+#include <iostream>
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph, ThreadPool* thread_pool, NodeFactory* node_factory)
-    : settings_(settings), graph_worker_(graph), thread_pool_(thread_pool), node_factory_(node_factory), dirty_(false)
+CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph_worker,
+                                     GraphPtr graph,
+                                     ThreadPool* thread_pool, NodeFactory* node_factory)
+    : settings_(settings), graph_worker_(graph_worker), graph_(graph), thread_pool_(thread_pool), node_factory_(node_factory),
+      cmd_factory_(std::make_shared<CommandFactory>(graph.get())),
+      dirty_(false)
 {
-    QObject::connect(this, SIGNAL(stateChanged()), graph_worker_->getGraph(), SIGNAL(stateChanged()));
-    QObject::connect(this, SIGNAL(dirtyChanged(bool)), graph_worker_->getGraph(), SIGNAL(dirtyChanged(bool)));
+    stateChanged.connect([this](){ graph_->stateChanged(); });
 }
 
 void CommandDispatcher::reset()
@@ -27,19 +33,27 @@ void CommandDispatcher::reset()
 
 void CommandDispatcher::execute(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
+    if(!command) {
+        std::cerr << "trying to execute null command" << std::endl;
+        return;
+    }
+    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
     doExecute(command);
 }
 
 void CommandDispatcher::executeLater(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
+    if(!command) {
+        std::cerr << "trying to execute null command" << std::endl;
+        return;
+    }
+    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
     later.push_back(command);
 }
 
 void CommandDispatcher::executeLater()
 {
-    Q_FOREACH(Command::Ptr cmd, later) {
+    for(Command::Ptr cmd : later) {
         doExecute(cmd);
     }
     later.clear();
@@ -47,14 +61,14 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::executeNotUndoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
-    Command::Access::executeCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, command);
+    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
+    Command::Access::executeCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, command);
 }
 
 void CommandDispatcher::undoNotRedoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_->getGraph(), thread_pool_, node_factory_);
-    Command::Access::undoCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, command);
+    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
+    Command::Access::undoCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, command);
 }
 
 
@@ -68,7 +82,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = Command::Access::executeCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, command);
+    bool success = Command::Access::executeCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -77,11 +91,11 @@ void CommandDispatcher::doExecute(Command::Ptr command)
 
     if(success) {
         setDirty();
-        Q_EMIT stateChanged();
+        stateChanged();
     }
 }
 
-bool CommandDispatcher::isDirty()
+bool CommandDispatcher::isDirty() const
 {
     return dirty_;
 }
@@ -99,20 +113,20 @@ void CommandDispatcher::resetDirtyPoint()
         undone.back()->setAfterSavepoint(true);
     }
 
-    Q_EMIT dirtyChanged(dirty_);
+    dirtyChanged(dirty_);
 }
 
 void CommandDispatcher::clearSavepoints()
 {
-    Q_FOREACH(Command::Ptr cmd, done) {
+    for(Command::Ptr cmd : done) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
-    Q_FOREACH(Command::Ptr cmd, undone) {
+    for(Command::Ptr cmd : undone) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
-    Q_EMIT dirtyChanged(dirty_);
+    dirtyChanged(dirty_);
 }
 
 void CommandDispatcher::setDirty()
@@ -132,17 +146,17 @@ void CommandDispatcher::setDirty(bool dirty)
     dirty_ = dirty;
 
     if(change) {
-        Q_EMIT dirtyChanged(dirty_);
+        dirtyChanged(dirty_);
     }
 }
 
 
-bool CommandDispatcher::canUndo()
+bool CommandDispatcher::canUndo() const
 {
     return !done.empty();
 }
 
-bool CommandDispatcher::canRedo()
+bool CommandDispatcher::canRedo() const
 {
     return !undone.empty();
 }
@@ -156,14 +170,14 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = Command::Access::undoCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, last);
+    bool ret = Command::Access::undoCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, last);
     apex_assert_hard(ret);
 
     setDirty(!last->isAfterSavepoint());
 
     undone.push_back(last);
 
-    Q_EMIT stateChanged();
+    stateChanged();
 }
 
 void CommandDispatcher::redo()
@@ -175,28 +189,53 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    Command::Access::redoCommand(graph_worker_->getGraph(), thread_pool_, node_factory_, last);
+    Command::Access::redoCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, last);
 
     done.push_back(last);
 
     setDirty(!last->isBeforeSavepoint());
 
-    Q_EMIT stateChanged();
+    stateChanged();
+}
+
+CommandConstPtr CommandDispatcher::getNextUndoCommand() const
+{
+    if(canUndo()) {
+        return done.back();
+    } else {
+        return nullptr;
+    }
+}
+
+CommandConstPtr CommandDispatcher::getNextRedoCommand() const
+{
+    if(canRedo()) {
+        return undone.back();
+    } else {
+        return nullptr;
+    }
 }
 
 Graph* CommandDispatcher::getGraph()
 {
-    return graph_worker_->getGraph();
+    return graph_.get();
 }
 
-void CommandDispatcher::populateDebugInfo(QTreeWidget *undo, QTreeWidget *redo)
+CommandFactory* CommandDispatcher::getCommandFactory()
 {
-    Q_FOREACH(const Command::Ptr& c, done) {
-        undo->addTopLevelItem(c->createDebugInformation());
-    }
-    Q_FOREACH(const Command::Ptr& c, undone) {
-        redo->addTopLevelItem(c->createDebugInformation());
+    return cmd_factory_.get();
+}
+
+void CommandDispatcher::visitUndoCommands(std::function<void (int level, const Command &)> callback) const
+{
+    for(const Command::Ptr& c : done) {
+        c->accept(0, callback);
     }
 }
-/// MOC
-#include "../../include/csapex/command/moc_dispatcher.cpp"
+
+void CommandDispatcher::visitRedoCommands(std::function<void (int level, const Command &)> callback) const
+{
+    for(const Command::Ptr& c : undone) {
+        c->accept(0, callback);
+    }
+}

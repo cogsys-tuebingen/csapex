@@ -6,7 +6,6 @@
 #include <csapex/utility/type.h>
 #include <csapex/utility/yaml_io.hpp> // TODO: get rid of this....
 #include <csapex/msg/message_traits.h>
-#include <csapex/csapex_fwd.h>
 
 namespace csapex {
 namespace connection_types {

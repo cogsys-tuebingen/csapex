@@ -2,7 +2,6 @@
 #include <csapex/model/node.h>
 
 /// COMPONENT
-#include <csapex/command/meta.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/slot.h>
@@ -61,18 +60,29 @@ void Node::stateChanged()
 
 }
 
+bool Node::isAsynchronous() const
+{
+    return false;
+}
+
+void Node::process(csapex::Parameterizable& parameters)
+{
+    // default to deprecated style
+    process();
+}
+
+
+void Node::process(csapex::Parameterizable& parameters, std::function<void(std::function<void ()>)> continuation)
+{
+    process(parameters);
+    continuation([](){});
+}
+
 void Node::process()
 {
+    // default: do nothing, clients overwrite this
 }
 
-bool Node::canTick()
-{
-    return true;
-}
-
-void Node::tick()
-{
-}
 
 void Node::abort()
 {

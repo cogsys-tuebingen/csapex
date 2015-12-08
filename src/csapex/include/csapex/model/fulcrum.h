@@ -2,19 +2,17 @@
 #define FULCRUM_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/data/point.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <memory>
-#include <QObject>
-#include <QPointF>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex
 {
-class Fulcrum : public QObject
+class Fulcrum
 {
-    Q_OBJECT
-
 public:
     typedef std::shared_ptr<Fulcrum> Ptr;
 
@@ -35,16 +33,16 @@ public:
     };
 
 public:
-    Fulcrum(Connection* parent, const QPointF& p, int type, const QPointF& handle_in, const QPointF& handle_out);
+    Fulcrum(Connection* parent, const Point& p, int type, const Point& handle_in, const Point& handle_out);
 
-    void move(const QPointF& pos, bool dropped);
-    QPointF pos() const;
+    void move(const Point& pos, bool dropped);
+    Point pos() const;
 
-    void moveHandles(const QPointF& in, const QPointF& out, bool dropped);
-    void moveHandleIn(const QPointF& pos, bool dropped);
-    void moveHandleOut(const QPointF& pos, bool dropped);
-    QPointF handleIn() const;
-    QPointF handleOut() const;
+    void moveHandles(const Point& in, const Point& out, bool dropped);
+    void moveHandleIn(const Point& pos, bool dropped);
+    void moveHandleOut(const Point& pos, bool dropped);
+    Point handleIn() const;
+    Point handleOut() const;
 
     int id() const;
     void setId(int id);
@@ -56,18 +54,18 @@ public:
 
     Connection* connection() const;
 
-Q_SIGNALS:
-    void moved(Fulcrum*, bool dropped);
-    void movedHandle(Fulcrum*, bool dropped, int no);
-    void typeChanged(Fulcrum*, int type);
+public:
+    boost::signals2::signal<void (Fulcrum*, bool dropped)> moved;
+    boost::signals2::signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
+    boost::signals2::signal<void (Fulcrum*, int type)> typeChanged;
 
 private:
     Connection* parent_;
     int id_;
     int type_;
-    QPointF pos_;
-    QPointF handle_in_;
-    QPointF handle_out_;
+    Point pos_;
+    Point handle_in_;
+    Point handle_out_;
 };
 }
 #endif // FULCRUM_H

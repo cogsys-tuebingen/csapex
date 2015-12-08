@@ -3,18 +3,18 @@
 
 /// COMPONENT
 #include <csapex/command/delete_connection.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_factory.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/view/widget_controller.h>
 
 /// SYSTEM
-
 
 using namespace csapex::command;
 
@@ -43,9 +43,9 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    foreach(Connectable* i, node_worker->getAllConnectors()) {
-        if(i->isConnected()) {
-            add(i->removeAllConnectionsCmd());
+    for(auto connectable : node_worker->getAllConnectors()) {
+        if(connectable->isConnected()) {
+            add(CommandFactory(graph_).removeAllConnectionsCmd(connectable));
         }
     }
 

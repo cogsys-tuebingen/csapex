@@ -2,14 +2,17 @@
 #define COMMAND_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/command/command_fwd.h>
+#include <csapex/core/core_fwd.h>
+
+/// PROJECT
+#include <csapex/model/model_fwd.h>
+#include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/factory/factory_fwd.h>
 
 /// SYSTEM
 #include <memory>
 #include <vector>
-
-/// FORWARD DECLARATION
-class QTreeWidgetItem;
 
 namespace csapex
 {
@@ -24,9 +27,9 @@ public:
         friend class command::Meta;
 
     private:
-        static bool executeCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-        static bool undoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-        static bool redoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
     };
 
 public:
@@ -35,7 +38,7 @@ public:
 public:
     Command();
 
-    void init(Settings* settings, Graph *graph, ThreadPool* thread_pool, NodeFactory *node_factory);
+    void init(Settings* settings, GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory *node_factory);
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -43,15 +46,15 @@ public:
     void setBeforeSavepoint(bool save);
     bool isBeforeSavepoint();
 
-    virtual QTreeWidgetItem* createDebugInformation() const;
+    virtual void accept(int level, std::function<void (int level, const Command &)> callback) const;
 
     virtual std::string getType() const = 0;
     virtual std::string getDescription() const = 0;
 
 protected:
-    static bool executeCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-    static bool undoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-    static bool redoCommand(Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool executeCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool undoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool redoCommand(GraphWorker* graph_worker, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
 
     virtual bool doExecute() = 0;
     virtual bool doUndo() = 0;
@@ -59,6 +62,7 @@ protected:
 
 protected:
     Settings* settings_;
+    GraphWorker* graph_worker_;
     Graph* graph_;
     ThreadPool* thread_pool_;
     NodeFactory* node_factory_;

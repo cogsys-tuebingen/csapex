@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/msg/message.h>
 #include <csapex/utility/register_msg.h>
+#include <csapex/serialization/message_serializer.h>
 
 namespace csapex {
 namespace connection_types {
@@ -17,7 +18,8 @@ struct GenericValueMessage : public Message
     GenericValueMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp)
     {
-        static csapex::MessageRegistered<GenericValueMessage<Type> > reg;
+        static csapex::MessageConstructorRegistered<GenericValueMessage<Type> > reg_c;
+        static csapex::MessageSerializerRegistered<GenericValueMessage<Type> > reg_s;
     }
 
     virtual ConnectionType::Ptr clone() const override
@@ -35,7 +37,7 @@ struct GenericValueMessage : public Message
 
     bool acceptsConnectionFrom(const ConnectionType* other_side) const override
     {
-        return name() == other_side->name();
+        return descriptiveName() == other_side->descriptiveName();
     }
 
     Type getValue()

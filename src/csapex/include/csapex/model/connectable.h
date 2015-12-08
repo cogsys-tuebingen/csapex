@@ -2,33 +2,32 @@
 #define CONNECTOR_H
 
 /// COMPONENT
+#include <csapex/model/model_fwd.h>
 #include <csapex/model/connection_type.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
-#include <csapex/csapex_fwd.h>
 
 /// SYSTEM
 #include <mutex>
-#include <QObject>
+#include <atomic>
 
-/// FORWARDS DECLARATION
 namespace csapex
 {
 
-class Connectable : public QObject, public ErrorState, public Unique
+class Connectable : public ErrorState, public Unique
 {
-    Q_OBJECT
-
-    friend class Port;
     friend class Graph;
+    friend class Connection;
 
 public:
-    static const QString MIME_CREATE_CONNECTION;
-    static const QString MIME_MOVE_CONNECTIONS;
+    static const std::string MIME_CREATE_CONNECTION;
+    static const std::string MIME_MOVE_CONNECTIONS;
 
     static UUID makeUUID(const UUID &box_uuid, const std::string &type, int sub_id);
 
 public:
+    virtual ~Connectable();
+
     int getCount() const;
 
     virtual bool canConnectTo(Connectable* other_side, bool move) const;
@@ -46,36 +45,29 @@ public:
         return false;
     }
 
+    virtual void addConnection(ConnectionPtr connection);
+    virtual void fadeConnection(ConnectionPtr connection);
+
+    bool isDynamic() const;
+
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
 
+    void setLevel(int level);
+    int getLevel() const;
+
     bool isEnabled() const;
     void setEnabled(bool enabled);
-
-    bool isBlocked() const;
 
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
-    /**
-     * INTERFACE
-     */
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
-    virtual bool isConnected() const = 0;
-    virtual bool tryConnect(Connectable* other_side) = 0;
-    virtual void removeConnection(Connectable* other_side) = 0;
-    virtual void validateConnections();
-    virtual void connectionMovePreview(Connectable* other_side) = 0;
-    virtual CommandPtr removeAllConnectionsCmd() = 0;
-protected:
-    virtual void removeAllConnectionsNotUndoable() = 0;
+    std::vector<ConnectionPtr> getConnections() const;
 
-public Q_SLOTS:
-    virtual bool tryConnect(QObject* other_side);
-    virtual void removeConnection(QObject* other_side);
+    virtual bool isConnected() const;
 
     virtual void disable();
     virtual void enable();
@@ -84,57 +76,70 @@ public Q_SLOTS:
 
     virtual void notifyMessageProcessed();
 
+    /*REFACTOR*/ virtual bool shouldMove(bool left, bool right);
+    /*REFACTOR*/ virtual bool shouldCreate(bool left, bool right);
+
+public:
+    boost::signals2::signal<void(bool)> enabled_changed;
+
+    boost::signals2::signal<void(Connectable*)> disconnected;
+    boost::signals2::signal<void(Connectable*)> connectionStart;
+    boost::signals2::signal<void(Connectable*,Connectable*)> connectionInProgress;
+
+    boost::signals2::signal<void(Connectable*)> connection_added_to;
+    boost::signals2::signal<void(Connectable*)> connection_removed_to;
+
+    boost::signals2::signal<void(ConnectionPtr)> connection_added;
+    boost::signals2::signal<void(ConnectionPtr)> connection_faded;
+
+    boost::signals2::signal<void(bool)> connectionEnabled;
+    boost::signals2::signal<void(Connectable*)> messageProcessed;
+    boost::signals2::signal<void(bool, std::string, int)> connectableError;
+
+    boost::signals2::signal<void(Connectable*)> messageSent;
+    boost::signals2::signal<void(Connectable*)> messageArrived;
+    boost::signals2::signal<void()> typeChanged;
+
+public:
+    /**
+     * INTERFACE
+     */
+    virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
+    virtual bool isConnectionPossible(Connectable* other_side) = 0;
+    virtual void removeConnection(Connectable* other_side) = 0;
+    virtual void validateConnections();
+    virtual void connectionMovePreview(Connectable* other_side) = 0;
+
 protected:
-    void setBlocked(bool b);
-
-
-Q_SIGNALS:
-    void disconnected(QObject*);
-    void enabled(bool e);
-    void connectionStart(Connectable*);
-    void connectionInProgress(Connectable*, Connectable*);
-    void connectionDone(Connectable*);
-    void connectionRemoved(Connectable*);
-    void connectionEnabled(bool);
-    void messageProcessed(Connectable*);
-    void blocked(bool);
-    void connectableError(bool error, const std::string &msg, int level);
-
-    void messageSent(Connectable* source);
-    void messageArrived(Connectable* source);
-    void typeChanged();
+    virtual void removeAllConnectionsNotUndoable() = 0;
 
 protected:
     Connectable(const UUID &uuid);
     Connectable(Unique *parent, int sub_id, const std::string &type);
-    virtual ~Connectable();
+
+    void setDynamic(bool dynamic);
+
     void init();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 
 protected:
-    virtual bool shouldMove(bool left, bool right);
-    virtual bool shouldCreate(bool left, bool right);
-
-protected:
     mutable std::recursive_mutex io_mutex;
     mutable std::recursive_mutex sync_mutex;
-
-    csapex::DesignBoard* designer;
-
-    Qt::MouseButtons buttons_down_;
 
     std::string label_;
 
     ConnectionType::ConstPtr type_;
+    std::vector<ConnectionPtr> connections_;
 
     int count_;
     int seq_no_;
 
 private:
-    bool enabled_;
-    bool blocked_;
+    std::atomic<bool> enabled_;
+    std::atomic<bool> dynamic_;
+    int level_;
 };
 
 }

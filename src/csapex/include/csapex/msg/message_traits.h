@@ -18,7 +18,7 @@ template <typename T>
 struct type;
 
 template <typename T>
-std::string name()
+std::string serializationName()
 {
     typedef typename boost::remove_const<T>::type TT;
     return type<TT>::name();
@@ -27,8 +27,31 @@ std::string name()
 template <typename T>
 std::shared_ptr<T> makeEmpty()
 {
-    return std::shared_ptr<T>(new T);
+    return std::make_shared<T>();
 }
+
+template <typename M>
+struct MessageContainer
+{
+    typedef M type;
+
+    static M& access(M& msg) {
+        return msg;
+    }
+    static const M& accessConst(const M& msg) {
+        return msg;
+    }
+};
+
+template <template <class> class Container, typename T, class Enable = void>
+class MessageConversionHook
+{
+public:
+    static void registerConversion() {
+        // do nothing
+    }
+};
+
 
 template <typename T>
 std::shared_ptr<T> makeEmptyMessage(

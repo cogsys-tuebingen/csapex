@@ -2,7 +2,8 @@
 #define NODE_H_
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/signal/signal_fwd.h>
 #include <csapex/model/parameterizable.h>
 #include <csapex/utility/stream_relay.h>
 #include <csapex/utility/assert.h>
@@ -22,17 +23,21 @@ public:
     void initialize(const UUID &uuid, NodeModifier *node_modifier);
     void doSetup();
 
-public:
+public: /* API */
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
-    virtual void setupParameters(Parameterizable& parameters);
-    virtual void process() = 0;
 
-    virtual bool canTick();
-    virtual void tick();
+    virtual void setupParameters(Parameterizable& parameters);
+
+    virtual void process(csapex::Parameterizable& parameters);
+    virtual void process(csapex::Parameterizable& parameters, std::function<void(std::function<void ()>)> continuation);
 
     virtual void abort();
 
+    virtual bool isAsynchronous() const;
     virtual void stateChanged();
+
+protected:
+    virtual void process(); /*deprecated*/
 
 public:
     StreamRelay adebug;

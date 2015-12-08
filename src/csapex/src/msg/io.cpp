@@ -70,10 +70,14 @@ void csapex::msg::setLabel(Output *output, const std::string &label)
 
 void csapex::msg::throwError(const ConnectionTypeConstPtr &msg, const std::type_info &type)
 {
-    throw std::runtime_error(std::string ("cannot cast message from ") + msg->toType()->name() + " to " + type2name(type));
+    if(!msg) {
+        throw std::runtime_error(std::string ("cannot cast null message from to ") + type2name(type));
+    } else {
+        throw std::runtime_error(std::string ("cannot cast message from ") + msg->toType()->descriptiveName() + " to " + type2name(type));
+    }
 }
 
 void csapex::msg::publish(Output *output, ConnectionTypeConstPtr message)
 {
-    output->publish(message);
+    output->addMessage(message);
 }

@@ -8,8 +8,6 @@
 
 /// SYSTEM
 #include <memory>
-#include <QObject>
-#include <QBoxLayout>
 
 namespace csapex
 {
@@ -41,7 +39,7 @@ public:
     virtual Memento::Ptr getState() const = 0;
     virtual void setParameterState(Memento::Ptr memento) = 0;
 
-    std::vector<param::ParameterPtr> getParameters() const;
+    std::vector<csapex::param::ParameterPtr> getParameters() const;
 
 public:
     boost::signals2::signal<void(std::size_t)> slot_count_changed;

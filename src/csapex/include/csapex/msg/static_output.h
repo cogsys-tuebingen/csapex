@@ -12,20 +12,26 @@ public:
     StaticOutput(const UUID &uuid);
     StaticOutput(Unique *parent, int sub_id);
 
-    virtual void publish(ConnectionType::ConstPtr message) override;
+    virtual void addMessage(ConnectionType::ConstPtr message) override;
 
-    virtual bool sendMessages() override;
+    virtual void setMultipart(bool multipart, bool last_part) override;
+
+    virtual void commitMessages() override;
     virtual bool hasMessage() override;
+    virtual void nextMessage() override;
+    virtual ConnectionTypeConstPtr getMessage() const override;
 
     virtual void disable() override;
     virtual void reset() override;
-    virtual void clear() override;
+    virtual void startReceiving() override;
 
     ConnectionType::ConstPtr getMessage();
 
 private:
-    ConnectionType::ConstPtr message_;
     ConnectionType::ConstPtr message_to_send_;
+    ConnectionType::ConstPtr committed_message_;
+
+    int message_flags_;
 };
 }
 

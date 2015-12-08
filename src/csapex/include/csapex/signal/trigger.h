@@ -2,8 +2,8 @@
 #define TRIGGER_H
 
 /// COMPONENT
+#include <csapex/signal/signal_fwd.h>
 #include <csapex/model/connectable.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/msg/generic_value_message.hpp>
 
@@ -14,10 +14,6 @@ class Trigger : public Connectable
 {
     friend class Input;
     friend class Graph;
-    friend class command::AddConnection;
-    friend class command::MoveConnection;
-    friend class command::DeleteConnection;
-    friend class DesignerIO;
 
 public:
     Trigger(const UUID &uuid);
@@ -32,6 +28,7 @@ public:
     }
 
     void trigger();
+    void signalHandled(Slot* slot);
 
     virtual void disable();
 
@@ -46,24 +43,25 @@ public:
     int noTargets();
     std::vector<Slot*> getTargets() const;
 
-    void connectForcedWithoutCommand(Slot* other_side);
-
-    virtual CommandPtr removeAllConnectionsCmd();
-    CommandPtr removeConnectionCmd(Slot *other_side);
-
-
     void reset();
 
-protected:
-    /// PRIVATE: Use command to create a connection (undoable)
-    virtual bool tryConnect(Connectable* other_side);
-    virtual void removeConnection(Connectable* other_side);
-    virtual void removeAllConnectionsNotUndoable();
+    bool isBeingProcessed() const;
 
-    bool connect(Connectable* other_side);
+    virtual bool isConnectionPossible(Connectable* other_side) override;
+    virtual void removeConnection(Connectable* other_side) override;
+    virtual void removeAllConnectionsNotUndoable() override;
+
+    bool connect(Slot* other_side);
+
+public:
+    boost::signals2::signal<void()> triggered;
+    boost::signals2::signal<void()> all_signals_handled;
 
 protected:
     std::vector<Slot*> targets_;
+
+    mutable std::recursive_mutex targets_running_mtx_;
+    std::map<Slot*, bool> targets_running_;
 
 };
 

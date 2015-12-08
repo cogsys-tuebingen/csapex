@@ -4,9 +4,6 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 
-/// SYSTEM
-#include <iostream>
-
 using namespace csapex;
 
 Tag::Manager::Manager()

@@ -2,14 +2,13 @@
 #define CSAPEX_CORE_H
 
 /// COMPONENT
-#include <csapex/csapex_fwd.h>
+#include <csapex/plugin/plugin_fwd.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
-#include <csapex/command/meta.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <QObject>
+#include <boost/signals2/signal.hpp>
 #include <yaml-cpp/yaml.h>
 
 namespace class_loader {
@@ -19,61 +18,59 @@ class ClassLoader;
 namespace csapex
 {
 
-class CsApexCore : public QObject
+class CsApexCore
 {
-    Q_OBJECT
-
-public:
-    struct Listener {
-        virtual void resetSignal() = 0;
-    };
-
 public:
     CsApexCore(Settings& settings_,
                PluginLocatorPtr plugin_locator,
-               GraphWorkerPtr graph,
-               NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory, CommandDispatcher *cmd_dispatcher);
+               GraphWorkerPtr graph_worker, GraphPtr graph,
+               ThreadPool& thread_pool,
+               NodeFactory* node_factory);
     virtual ~CsApexCore();
 
-    void init(DragIO *dragio);
+    void init();
     void boot();
     void startup();
 
     void load(const std::string& file);
-    void saveAs(const std::string& file);
+    void saveAs(const std::string& file, bool quiet = false);
 
     void reset();
-
-    void unloadNode(csapex::UUID uuid);
-    void reloadDone();
-
-    void addListener(Listener* l);
-    void removeListener(Listener* l);
 
     Settings& getSettings() const;
     NodeFactory& getNodeFactory() const;
 
     bool isPaused() const;
-
-public Q_SLOTS:
     void setPause(bool pause);
+
+    bool isSteppingMode() const;
+    void setSteppingMode(bool stepping);
+    void step();
+
     void settingsChanged();
     void setStatusMessage(const std::string& msg);
 
-Q_SIGNALS:
-    void configChanged();
-    void showStatusMessage(const std::string& msg);
-    void reloadBoxMenues();
+public:
+    boost::signals2::signal<void ()> configChanged;
+    boost::signals2::signal<void (const std::string& msg)> showStatusMessage;
+    boost::signals2::signal<void ()> newNodeType;
 
-    void resetRequest();
+    boost::signals2::signal<void ()> resetRequest;
+    boost::signals2::signal<void ()> resetDone;
 
-    void saveSettingsRequest(YAML::Node& e);
-    void loadSettingsRequest(YAML::Node& n);
+    boost::signals2::signal<void ()> saved;
+    boost::signals2::signal<void ()> loaded;
 
-    void saveViewRequest(YAML::Node& e);
-    void loadViewRequest(YAML::Node& n);
+    boost::signals2::signal<void (YAML::Node& e)> saveSettingsRequest;
+    boost::signals2::signal<void (YAML::Node& n)> loadSettingsRequest;
 
-    void paused(bool);
+    boost::signals2::signal<void (YAML::Node& e)> saveViewRequest;
+    boost::signals2::signal<void (YAML::Node& n)> loadViewRequest;
+
+    boost::signals2::signal<void (bool)> paused;
+
+    boost::signals2::signal<void ()> begin_step;
+    boost::signals2::signal<void ()> end_step;
 
 private:
     CorePluginPtr makeCorePlugin(const std::string& name);
@@ -82,29 +79,26 @@ private:
 
 private:
     Settings& settings_;
-    DragIO* drag_io_;
 
     csapex::PluginLocatorPtr plugin_locator_;
 
     GraphWorkerPtr graph_worker_;
+    GraphPtr graph_;
+    ThreadPool& thread_pool_;
+
     NodeFactory* node_factory_;
-    NodeAdapterFactory* node_adapter_factory_;
 
     bool destruct;
-    CommandDispatcher* cmd_dispatch;
 
     PluginManager<CorePlugin>* core_plugin_manager;
     std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
     std::map<std::string, bool> core_plugins_connected_;
 
-    std::vector<Listener*> listener_;
-
     std::vector<BootstrapPluginPtr> boot_plugins_;
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
 
-    command::Meta::Ptr unload_commands_;
-
     bool init_;
+    bool load_needs_reset_;
 };
 
 }

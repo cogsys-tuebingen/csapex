@@ -2,10 +2,9 @@
 #include <csapex/msg/input.h>
 
 /// COMPONENT
-#include <csapex/msg/output.h>
-#include <csapex/command/delete_connection.h>
-#include <csapex/command/command.h>
+#include <csapex/model/connection.h>
 #include <csapex/utility/assert.h>
+#include <csapex/msg/input_transition.h>
 
 /// SYSTEM
 #include <iostream>
@@ -13,15 +12,13 @@
 using namespace csapex;
 
 Input::Input(const UUID &uuid)
-    : Connectable(uuid), target(nullptr), buffer_(new Buffer), optional_(false)
+    : Connectable(uuid), optional_(false)
 {
-    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
 
 Input::Input(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "in"), target(nullptr), buffer_(new Buffer), optional_(false)
+    : Connectable(parent, sub_id, "in"), optional_(false)
 {
-    QObject::connect(this, SIGNAL(gotMessage(ConnectionType::ConstPtr)), this, SLOT(handleMessage(ConnectionType::ConstPtr)), Qt::QueuedConnection);
 }
 
 Input::~Input()
@@ -35,38 +32,26 @@ void Input::reset()
     setSequenceNumber(0);
 }
 
-bool Input::tryConnect(Connectable* other_side)
+bool Input::isConnectionPossible(Connectable* other_side)
 {
     if(!other_side->canOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
         return false;
     }
 
-    return other_side->tryConnect(this);
-}
-
-bool Input::acknowledgeConnection(Connectable* other_side)
-{
-    target = dynamic_cast<Output*>(other_side);
-    connect(other_side, SIGNAL(destroyed(QObject*)), this, SLOT(removeConnection(QObject*)), Qt::DirectConnection);
-    connect(other_side, SIGNAL(enabled(bool)), this, SIGNAL(connectionEnabled(bool)));
-    return true;
+    return other_side->isConnectionPossible(this);
 }
 
 void Input::removeConnection(Connectable* other_side)
 {
-    if(target != nullptr) {
-        apex_assert_hard(other_side == target);
-        target = nullptr;
-
-        Q_EMIT connectionRemoved(this);
+    if(connections_.empty()) {
+        return;
     }
-}
+    apex_assert_hard(connections_.size() == 1);
+    apex_assert_hard(getSource() == other_side);
 
-Command::Ptr Input::removeAllConnectionsCmd()
-{
-    Command::Ptr cmd(new command::DeleteConnection(target, this));
-    return cmd;
+    connections_.clear();
+    connection_removed_to(this);
 }
 
 void Input::setOptional(bool optional)
@@ -81,58 +66,58 @@ bool Input::isOptional() const
 
 bool Input::hasReceived() const
 {
-    return isConnected() && buffer_->isFilled();
+    std::unique_lock<std::mutex> lock(message_mutex_);
+    return isConnected() && message_ != nullptr;
 }
 
 bool Input::hasMessage() const
 {
-    return hasReceived() && !buffer_->containsNoMessage();
+    if(!hasReceived()) {
+        return false;
+    }
+
+    std::unique_lock<std::mutex> lock(message_mutex_);
+    return !std::dynamic_pointer_cast<connection_types::NoMessage const>(message_);
 }
 
 void Input::stop()
 {
-    buffer_->disable();
     Connectable::stop();
 }
 
 void Input::free()
 {
-    buffer_->free();
-
-    setBlocked(false);
+    std::unique_lock<std::mutex> lock(message_mutex_);
+//    std::cerr << "clear input " << getUUID() << std::endl;
+    message_.reset();
 }
 
 void Input::enable()
 {
     Connectable::enable();
-    //    if(isConnected() && !getSource()->isEnabled()) {
-    //        getSource()->enable();
-    //    }
 }
 
 void Input::disable()
 {
     Connectable::disable();
 
-    //    if(isBlocked()) {
-    free();
-    notifyMessageProcessed();
-    //    }
-    //    if(isConnected() && getSource()->isEnabled()) {
-    //        getSource()->disable();
-    //    }
+    if(message_ != nullptr) {
+        free();
+        notifyMessageProcessed();
+    }
 }
 
 void Input::removeAllConnectionsNotUndoable()
 {
-    if(target != nullptr) {
-        target->removeConnection(this);
-        target = nullptr;
+    if(!connections_.empty()) {
+        apex_assert_hard(connections_.size() == 1);
+
+        getSource()->removeConnection(this);
+        connections_.clear();
         setError(false);
-        Q_EMIT disconnected(this);
+        disconnected(this);
     }
 }
-
 
 bool Input::canConnectTo(Connectable* other_side, bool move) const
 {
@@ -141,18 +126,13 @@ bool Input::canConnectTo(Connectable* other_side, bool move) const
 
 bool Input::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    return target->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
-}
-
-bool Input::isConnected() const
-{
-
-    return target != nullptr;
+    apex_assert_hard(connections_.size() == 1);
+    return getSource()->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
 void Input::connectionMovePreview(Connectable *other_side)
 {
-    Q_EMIT(connectionInProgress(getSource(), other_side));
+    connectionInProgress(getSource(), other_side);
 }
 
 
@@ -160,7 +140,9 @@ void Input::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
-        ConnectionType::ConstPtr target_type = target->getType();
+        apex_assert_hard(connections_.size() == 1);
+
+        ConnectionType::ConstPtr target_type = getSource()->getType();
         ConnectionType::ConstPtr type = getType();
         if(!target_type) {
             e = true;
@@ -174,60 +156,52 @@ void Input::validateConnections()
 
 Connectable *Input::getSource() const
 {
-
-    return target;
-}
-
-void Input::inputMessage(ConnectionType::ConstPtr message)
-{
-    assert(!isBlocked());
-    setBlocked(true);
-
-    Q_EMIT gotMessage(message);
+    assert(connections_.size() <= 1);
+    if(connections_.empty()) {
+        return nullptr;
+    } else {
+        return connections_.front()->from();
+    }
 }
 
 ConnectionTypeConstPtr Input::getMessage() const
 {
-    return buffer_->read();
+    std::unique_lock<std::mutex> lock(message_mutex_);
+    return message_;
 }
 
-void Input::handleMessage(ConnectionType::ConstPtr message)
+void Input::inputMessage(ConnectionType::ConstPtr message)
 {
-    if(!isEnabled()) {
-        return;
+    apex_assert_hard(message != nullptr);
+
+    if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message)){
+        int s = message->sequenceNumber();
+
+        //    if(s < sequenceNumber()) {
+        //        std::cerr << "connector @" << getUUID().getFullName() <<
+        //                     ": dropping old message @ with #" << s <<
+        //                     " < #" << sequenceNumber() << std::endl;
+        //        return;
+        //    }
+
+        setSequenceNumber(s);
     }
 
-
-    int s = message->sequenceNumber();
-    if(s < sequenceNumber()) {
-        std::cerr << "connector @" << getUUID().getFullName() <<
-                     ": dropping old message @ with #" << s <<
-                     " < #" << sequenceNumber() << std::endl;
-        return;
+    {
+        std::unique_lock<std::mutex> lock(message_mutex_);
+        message_ = message;
     }
-
-    setSequenceNumber(s);
-
-    try {
-        buffer_->write(message);
-    } catch(const std::exception& e) {
-        std::cerr << getUUID() << ": writing message failed: " << e.what() << std::endl;
-        throw e;
-    }
-
     count_++;
 
-    Q_EMIT messageArrived(this);
+    messageArrived(this);
 }
 
 void Input::notifyMessageProcessed()
 {
-
+//    std::cerr << "notify input " <<  getUUID() << std::endl;
     Connectable::notifyMessageProcessed();
 
-    if(target) {
-        target->notifyMessageProcessed();
+    if(isConnected()) {
+        apex_assert_hard(connections_.size() == 1);
     }
 }
-/// MOC
-#include "../../include/csapex/msg/moc_input.cpp"

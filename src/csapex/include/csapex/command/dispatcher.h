@@ -3,55 +3,58 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
+#include <csapex/command/command_fwd.h>
 
 /// SYSTEM
 #include <deque>
-#include <QObject>
-#include <QTreeWidget>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex
 {
 
-class CommandDispatcher : public QObject
+class CommandDispatcher
 {
-    Q_OBJECT
-
 public:
     typedef std::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    CommandDispatcher(Settings& settings, GraphWorkerPtr graph, ThreadPool* thread_pool, NodeFactory* node_factory);
+    CommandDispatcher(Settings& settings, GraphWorkerPtr graph_worker,
+                      GraphPtr graph,
+                      ThreadPool* thread_pool, NodeFactory* node_factory);
 
     void execute(Command::Ptr command);
     void executeLater(Command::Ptr command);
     void executeLater();
 
-    bool isDirty();
+    bool isDirty() const;
 
-    bool canUndo();
-    bool canRedo();
+    bool canUndo() const;
+    bool canRedo() const;
 
     void undo();
     void redo();
 
+    CommandConstPtr getNextUndoCommand() const;
+    CommandConstPtr getNextRedoCommand() const;
+
     Graph* getGraph();
+    CommandFactory* getCommandFactory();
 
     void executeNotUndoable(Command::Ptr command);
     void undoNotRedoable(Command::Ptr command);
 
-    void populateDebugInfo(QTreeWidget* undo, QTreeWidget *redo);
+    void visitUndoCommands(std::function<void(int level, const Command& cmd)> callback) const;
+    void visitRedoCommands(std::function<void(int level, const Command& cmd)> callback) const;
 
-public Q_SLOTS:
+    void reset();
     void setDirty();
     void setClean();
     void resetDirtyPoint();
     void clearSavepoints();
 
-    void reset();
-
-Q_SIGNALS:
-    void stateChanged();
-    void dirtyChanged(bool);
+public:
+    boost::signals2::signal<void()> stateChanged;
+    boost::signals2::signal<void(bool)> dirtyChanged;
 
 private:
     void doExecute(Command::Ptr command);
@@ -64,8 +67,11 @@ protected:
 private:
     Settings& settings_;
     GraphWorkerPtr graph_worker_;
+    GraphPtr graph_;
     ThreadPool* thread_pool_;
     NodeFactory* node_factory_;
+
+    CommandFactoryPtr cmd_factory_;
 
     std::vector<Command::Ptr> later;
 

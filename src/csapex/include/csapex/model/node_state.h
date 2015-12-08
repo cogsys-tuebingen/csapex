@@ -2,11 +2,11 @@
 #define NODE_STATE_H
 
 /// COMPNENT
-#include <csapex/csapex_fwd.h>
 #include <csapex/model/memento.h>
+#include <csapex/data/point.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
-#include <QPoint>
 #include <boost/signals2/signal.hpp>
 
 namespace csapex
@@ -27,8 +27,8 @@ public:
     virtual void readYaml(const YAML::Node& node);
 
 public:
-    QPoint getPos() const;
-    void setPos(const QPoint &value);
+    Point getPos() const;
+    void setPos(const Point &value);
     Signal pos_changed;
 
     std::string getLabel() const;
@@ -47,8 +47,9 @@ public:
     void setFlipped(bool value);
     Signal flipped_changed;
 
-    int getThread() const;
-    void setThread(int id);
+    int getThreadId() const;
+    std::string getThreadName() const;
+    void setThread(const std::string& name, int id);
     Signal thread_changed;
 
     const NodeWorker* getParent() const;
@@ -59,18 +60,19 @@ public:
     void setParameterState(const Memento::Ptr &value);
 
 private:
-    const NodeWorker* parent;
+    const NodeWorker* parent_;
 
-    mutable Memento::Ptr child_state;
+    mutable Memento::Ptr child_state_;
 
     std::string label_;
-    QPoint pos;
+    Point pos_;
 
-    bool minimized;
-    bool enabled;
-    bool flipped;
+    bool minimized_;
+    bool enabled_;
+    bool flipped_;
 
-    int thread;
+    int thread_id_;
+    std::string thread_name_;
 };
 
 }

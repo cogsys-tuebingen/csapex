@@ -5,36 +5,19 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
-#include <csapex/core/settings.h>
 #include <csapex/model/tag.h>
+#include <csapex/utility/uuid.h>
 
 using namespace csapex;
 
-NodeConstructor::NodeConstructor(Settings &settings,
-                                 const std::string &type, const std::string &description,
-                                 const std::string &icon,
-                                 const std::vector<TagPtr>& tags,
-                                 Make c)
-    : unload_request(new boost::signals2::signal<void()>),
-      reload_request(new boost::signals2::signal<void()>),
-      settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags), c(c)
+NodeConstructor::NodeConstructor(const std::string &type, std::function<NodePtr()> c)
+    : type_(type), icon_(":/no_icon.png"), c(c)
 {
-    if(tags_.empty()) {
-        tags_.push_back(Tag::get("General"));
-    }
 }
 
-NodeConstructor::NodeConstructor(Settings &settings,
-                                 const std::string &type, const std::string &description,
-                                 const std::string &icon,
-                                 const std::vector<TagPtr>& tags)
-    : unload_request(new boost::signals2::signal<void()>),
-      reload_request(new boost::signals2::signal<void()>),
-      settings_(settings), type_(type), descr_(description), icon_(icon), tags_(tags)
+NodeConstructor::NodeConstructor(const std::string &type)
+    : type_(type), icon_(":/no_icon.png")
 {
-    if(tags_.empty()) {
-        tags_.push_back(Tag::get("General"));
-    }
 }
 
 NodeConstructor::~NodeConstructor()
@@ -47,14 +30,47 @@ std::string NodeConstructor::getType() const
     return type_;
 }
 
+NodeConstructor& NodeConstructor::setTags(const std::vector<std::string> &strings)
+{
+    for(const std::string& name : strings) {
+        tags_.push_back(Tag::get(name));
+    }
+    return *this;
+}
+
+
+NodeConstructor& NodeConstructor::setTags(const std::vector<TagPtr> &tags)
+{
+    tags_ = tags;
+    return *this;
+}
+
 std::vector<TagPtr> NodeConstructor::getTags() const
 {
+    if(tags_.empty()) {
+        return std::vector<TagPtr> { Tag::get("General") };
+    }
     return tags_;
 }
 
-QIcon NodeConstructor::getIcon() const
+
+
+NodeConstructor& NodeConstructor::setIcon(const std::string& icon)
 {
-    return icon_.empty() ? QIcon(":/plugin.png") : QIcon(QString::fromStdString(icon_));
+    icon_ = icon;
+    return *this;
+}
+
+std::string NodeConstructor::getIcon() const
+{
+    return icon_.empty() ?  ":/plugin.png" : icon_;
+}
+
+
+NodeConstructor& NodeConstructor::setDescription(const std::string& description)
+{
+    descr_ = description;
+    return *this;
 }
 
 std::string NodeConstructor::getDescription() const
@@ -70,8 +86,7 @@ NodeWorker::Ptr NodeConstructor::makePrototype() const
 NodeWorker::Ptr NodeConstructor::makeNodeWorker(const UUID& uuid) const
 {
     try {
-        NodeWorker::Ptr result(new NodeWorker(type_, uuid, settings_, makeNode()));
-        return result;
+        return std::make_shared<NodeWorker>(type_, uuid, makeNode());
     } catch(const std::exception& e) {
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;
         return nullptr;

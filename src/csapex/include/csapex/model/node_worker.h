@@ -1,32 +1,32 @@
 #ifndef NODE_WORKER_H
 #define NODE_WORKER_H
 
-/// COMPONENT
-#include <csapex/csapex_fwd.h>
-
 /// PROJECT
-#include <utils_param/parameter.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/utility/utility_fwd.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/signal/signal_fwd.h>
+#include <csapex/param/parameter.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
-#include <QObject>
-#include <QTimer>
-#include <QThread>
 #include <map>
 #include <functional>
 #include <condition_variable>
 #include <mutex>
 #include <vector>
 #include <atomic>
+#include <boost/signals2/signal.hpp>
 
 namespace csapex {
 
-class NodeWorker : public QObject, public ErrorState, public Unique
+class NodeWorker :
+        public NodeHandle, // TODO: separate
+        public ErrorState, public Unique
 {
-    Q_OBJECT
-
     friend class Node;
     friend class NodeBox;
 
@@ -42,9 +42,19 @@ public:
 
     static const double DEFAULT_FREQUENCY;
 
+    enum class State {
+        IDLE,
+        ENABLED,
+        FIRED,
+        PROCESSING
+    };
+
 public:
-    NodeWorker(const std::string& type, const UUID& uuid, Settings& settings, NodePtr node);
+    NodeWorker(const std::string& type, const UUID& uuid, NodePtr node);
     ~NodeWorker();
+
+    InputTransition* getInputTransition() const;
+    OutputTransition* getOutputTransition() const;
 
     void setNodeState(NodeStatePtr memento);
     NodeStatePtr getNodeState();
@@ -52,20 +62,25 @@ public:
 
 
     void stop();
-    void waitUntilFinished();
     void reset();
 
-    void triggerSwitchThreadRequest(QThread* thread, int id);
+    virtual void triggerCheckTransitions() override;
     void triggerPanic();
 
-    Node* getNode() const;
+    NodeWeakPtr getNode() const;
+
+    void setState(State state);
+    State getState() const;
+
+    virtual bool isEnabled() const override;
+    bool isIdle() const;
+    bool isProcessing() const;
+    bool isFired() const;
 
     std::string getType() const;
 
-    bool isEnabled() const;
-    void setEnabled(bool e);
-
-    bool isPaused() const;
+    bool isProcessingEnabled() const;
+    void setProcessingEnabled(bool e);
 
     void setProfiling(bool profiling);
     bool isProfiling() const;
@@ -74,10 +89,19 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool optional);
+    Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
+    void addInput(InputPtr in);
+    bool isParameterInput(Input* in) const;
+
     Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
+    void addOutput(OutputPtr out);
+    bool isParameterOutput(Output* out) const;
+
     Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
+    void addSlot(SlotPtr s);
+
     Trigger* addTrigger(const std::string& label);
+    void addTrigger(TriggerPtr t);
 
     Connectable* getConnector(const UUID& uuid) const;
     Input* getInput(const UUID& uuid) const;
@@ -85,39 +109,31 @@ public:
     Slot* getSlot(const UUID& uuid) const;
     Trigger* getTrigger(const UUID& uuid) const;
 
-    /* experimental */ void makeParameterConnectable(param::Parameter*);
-    /* experimental */ Input* getParameterInput(const std::string& name) const;
-    /* experimental */ Output* getParameterOutput(const std::string& name) const;
+    void makeParameterConnectable(csapex::param::ParameterPtr);
+    void makeParameterNotConnectable(csapex::param::ParameterPtr);
+    InputWeakPtr getParameterInput(const std::string& name) const;
+    OutputWeakPtr getParameterOutput(const std::string& name) const;
 
-    /* NAMING */ void registerInput(Input* in);
-    /* NAMING */ void registerOutput(Output* out);
-    /* NAMING */ void registerSlot(Slot* s);
-    /* NAMING */ void registerTrigger(Trigger* t);
 
     void removeInput(const UUID& uuid);
     void removeOutput(const UUID& uuid);
     void removeSlot(const UUID& uuid);
     void removeTrigger(const UUID& uuid);
 
-    std::vector<Connectable*> getAllConnectors() const;
-    std::vector<Input*> getAllInputs() const;
-    std::vector<Output*> getAllOutputs() const;
+    std::vector<ConnectablePtr> getAllConnectors() const;
+    std::vector<InputPtr> getAllInputs() const;
+    std::vector<OutputPtr> getAllOutputs() const;
 
-    std::vector<Input*> getMessageInputs() const;
-    std::vector<Output*> getMessageOutputs() const;
-    std::vector<Slot*> getSlots() const;
-    std::vector<Trigger*> getTriggers() const;
+    std::vector<SlotPtr> getSlots() const;
+    std::vector<TriggerPtr> getTriggers() const;
 
-    std::vector<Input*> getParameterInputs() const;
-    std::vector<Output*> getParameterOutputs() const;
-
-    bool canReceive();
-    bool areAllInputsAvailable();
+    bool isWaitingForTrigger() const;
+    virtual bool canProcess() const override;
+    bool canReceive() const;
+    bool canSend() const;
+    bool areAllInputsAvailable() const;
 
     void makeParametersConnectable();
-
-    bool isTickEnabled() const;
-    void setTickEnabled(bool enabled);
 
     bool isSource() const;
     void setIsSource(bool source);
@@ -125,14 +141,21 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    int getLevel() const;
+    void setLevel(int level);
+
     std::vector<TimerPtr> extractLatestTimers();
 
-public Q_SLOTS:
-    void messageArrived(Connectable* source);
-    void processMessages();
+private:
+    void updateParameterValue(Connectable* source);
 
-    void parameterMessageArrived(Connectable* source);
+public:
+    bool tick();
 
+    virtual void startProcessingMessages() override;
+    void finishProcessingMessages(bool was_executed);
+
+    void checkTransitions(bool try_fire = true);
 
     void checkParameters();    
     void checkIO();
@@ -143,54 +166,45 @@ public Q_SLOTS:
     void enableSlots(bool enable);
     void enableTriggers(bool enable);
 
-    void setTickFrequency(double f);
-    void tick();
-
     void triggerError(bool e, const std::string& what);
 
-    void pause(bool pause);
     void killExecution();
 
-    bool canSendMessages();
-    void trySendMessages();
-    void resetInputs();
+    void sendMessages();
+    void notifyMessagesProcessed();
+
+public:
+    boost::signals2::signal<void()> panic;
+
+    boost::signals2::signal<void()> ticked;
+    boost::signals2::signal<void(bool)> enabled;
+
+    boost::signals2::signal<void(NodeWorker* worker, int type, long stamp)> timerStarted;
+    boost::signals2::signal<void(NodeWorker* worker, long stamp)> timerStopped;
+
+    boost::signals2::signal<void(NodeWorker* worker)> startProfiling;
+    boost::signals2::signal<void(NodeWorker* worker)> stopProfiling;
+
+    boost::signals2::signal<void()> threadChanged;
+    boost::signals2::signal<void(bool)> errorHappened;
+
+    boost::signals2::signal<void()> messages_processed;
+    boost::signals2::signal<void()> processRequested;
+    boost::signals2::signal<void()> checkTransitionsRequested;
+
+    boost::signals2::signal<void()> parametersChanged;
+
+    boost::signals2::signal<void(std::function<void()>)> executionRequested;
+
+    boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
+    boost::signals2::signal<void (ConnectablePtr)> connectorRemoved;
+
+    boost::signals2::signal<void (Connectable*, Connectable*)> connectionInProgress;
+    boost::signals2::signal<void (Connectable*)> connectionDone;
+    boost::signals2::signal<void (Connectable*)> connectionStart;
 
 
-Q_SIGNALS:
-    void messageProcessed();
-    void ticked();
-
-    void enabled(bool);
-    void messagesWaitingToBeSent(bool);
-
-    void connectionInProgress(Connectable*, Connectable*);
-    void connectionDone(Connectable*);
-    void connectionStart(Connectable*);
-
-    void connectorCreated(Connectable*);
-    void connectorRemoved(Connectable*);
-
-    void connectorEnabled(Connectable*);
-    void connectorDisabled(Connectable*);
-
-    void nodeStateChanged();
-    void threadChanged();
-
-    void threadSwitchRequested(QThread*, int);
-    void tickRequested();
-
-    void timerStarted(NodeWorker* worker, int type, long stamp);
-    void timerStopped(NodeWorker* worker, long stamp);
-
-    void startProfiling(NodeWorker* box);
-    void stopProfiling(NodeWorker* box);
-
-    void panic();
-
-private Q_SLOTS:
-    void switchThread(QThread* thread, int id);
-    void checkIfOutputIsReady(Connectable*);
-    void checkIfInputsCanBeProcessed();
+    boost::signals2::signal<void()> nodeStateChanged;
 
 private:
     void removeInput(Input *in);
@@ -202,11 +216,10 @@ private:
     void disconnectConnector(Connectable* c);
 
     template <typename T>
-    void makeParameterConnectableImpl(param::Parameter*);
+    void makeParameterConnectableImpl(csapex::param::ParameterPtr);
     void publishParameters();
-    void publishParameter(param::Parameter *p);
-
-    void processInputs();
+    void publishParameter(csapex::param::Parameter *p);
+    void publishParameterOn(const csapex::param::Parameter &p, Output *out);
 
     void assertNotInGuiThread();
 
@@ -214,61 +227,63 @@ private:
 
     void finishTimer(TimerPtr t);
 
+    void updateTransitionConnections();
+
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
 private:
-    Settings& settings_;
-
     std::string node_type_;
     NodePtr node_;    
     NodeStatePtr node_state_;
     NodeModifierPtr modifier_;
 
+    InputTransitionPtr transition_in_;
+    OutputTransitionPtr transition_out_;
 
     bool is_setup_;
+    State state_;
 
-    std::vector<Input*> inputs_;
-    std::vector<Output*> outputs_;
-    std::vector<Trigger*> triggers_;
-    std::vector<Slot*> slots_;
+    std::vector<InputPtr> inputs_;
+    std::vector<OutputPtr> outputs_;
+    std::vector<TriggerPtr> triggers_;
+    std::vector<SlotPtr> slots_;
+
+    int next_input_id_;
+    int next_output_id_;
+    int next_trigger_id_;
+    int next_slot_id_;
 
     Trigger* trigger_tick_done_;
     Trigger* trigger_process_done_;
 
-    std::vector<Input*> parameter_inputs_;
-    std::vector<Output*> parameter_outputs_;
+    std::map<std::string, InputWeakPtr> param_2_input_;
+    std::map<std::string, OutputWeakPtr> param_2_output_;
 
-    std::map<std::string, Input*> param_2_input_;
-    std::map<std::string, Output*> param_2_output_;
+    std::map<Input*,csapex::param::Parameter*> input_2_param_;
+    std::map<Output*,csapex::param::Parameter*> output_2_param_;
 
-    std::map<Input*,param::Parameter*> input_2_param_;
-    std::map<Output*,param::Parameter*> output_2_param_;
+    std::map<Slot*, boost::signals2::connection> slot_connections_;
+
+    std::map<Trigger*, boost::signals2::connection> trigger_triggered_connections_;
+    std::map<Trigger*, boost::signals2::connection> trigger_handled_connections_;
+
 
     std::vector<boost::signals2::connection> connections;
-    std::vector<QObject*> callbacks;
 
-    QTimer* tick_timer_;
-    bool tick_enabled_;
-    bool tick_immediate_;
     int ticks_;
 
     bool source_;
     bool sink_;
+    int level_;
 
-    std::recursive_mutex sync;
-    bool messages_waiting_to_be_sent;
+    mutable std::recursive_mutex sync;
+    mutable std::recursive_mutex state_mutex_;
 
     std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;
 
-    bool thread_initialized_;
-    bool paused_;
-    bool stop_;
-    std::recursive_mutex stop_mutex_;
-    std::recursive_mutex pause_mutex_;
-    std::condition_variable_any continue_;
-
     std::atomic<bool> profiling_;
+    TimerPtr current_process_timer_;
 };
 
 }

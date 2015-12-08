@@ -2,30 +2,20 @@
 #define GRAPH_H
 
 /// COMPONENT
-#include <csapex/command/command.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
-#include <QObject>
+#include <boost/signals2/signal.hpp>
 #include <map>
 #include <functional>
 
 namespace csapex {
 
-class Graph : public QObject
+class Graph
 {
-    Q_OBJECT
-
     friend class GraphIO;
     friend class GraphWorker;
-    friend class command::AddNode;
-    friend class command::AddConnection;
-    friend class command::DeleteConnection;
-    friend class command::DeleteNode;
-
-    /*remove*/ friend class DesignerScene;
-    /*remove*/ friend class WidgetController;
 
 public:
     typedef std::shared_ptr<Graph> Ptr;
@@ -48,6 +38,8 @@ public:
     Graph();
     virtual ~Graph();
 
+    void clear();
+
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const;
     Node* findNodeForConnector(const UUID &uuid) const;
@@ -61,19 +53,14 @@ public:
     int getComponent(const UUID& node_uuid) const;
     int getLevel(const UUID& node_uuid) const;
 
-    Connectable* findConnector(const UUID &uuid);
-
-    // TODO: extract commands from here!!
-    Command::Ptr deleteConnectionByIdCommand(int id);
-    Command::Ptr deleteConnectionFulcrumCommand(int connection, int fulcrum);
-    Command::Ptr deleteAllConnectionFulcrumsCommand(int connection);
-    Command::Ptr deleteAllConnectionFulcrumsCommand(ConnectionPtr connection);
-    Command::Ptr deleteConnectionById(int id);
-    Command::Ptr clear();
+    Connectable *findConnector(const UUID &uuid);
 
     ConnectionPtr getConnectionWithId(int id);
-    ConnectionPtr getConnection(ConnectionPtr);
+    ConnectionPtr getConnection(const UUID& from, const UUID& to);
+    ConnectionPtr getConnection(Connectable* from, Connectable* to);
     int getConnectionId(ConnectionPtr);
+
+    std::vector<ConnectionPtr> getConnections();
 
     std::string makeUUIDPrefix(const std::string& name);
 
@@ -92,19 +79,19 @@ public:
 private:
    /*rename*/ void verify();
     void buildConnectedComponents();
+    void assignLevels();
 
-Q_SIGNALS:
-    void stateChanged();
-    void structureChanged(Graph*);
-    /*extract?*/ void dirtyChanged(bool);
+public:
+    boost::signals2::signal<void()> stateChanged;
+    boost::signals2::signal<void(Graph*)> structureChanged;
 
-    void panic();
+    boost::signals2::signal<void()> panic;
 
-    void connectionAdded(Connection*);
-    void connectionDeleted(Connection*);
+    boost::signals2::signal<void(Connection*)> connectionAdded;
+    boost::signals2::signal<void(Connection*)> connectionDeleted;
 
-    void nodeAdded(NodeWorkerPtr);
-    void nodeRemoved(NodeWorkerPtr);
+    boost::signals2::signal<void(NodeWorkerPtr)> nodeAdded;
+    boost::signals2::signal<void(NodeWorkerPtr)> nodeRemoved;
 
 protected:
     std::vector<NodeWorkerPtr> nodes_;

@@ -3,12 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/meta.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
-
-/// SYSTEM
-#include <QPoint>
-#include <QWidget>
 
 namespace csapex
 {
@@ -29,8 +24,6 @@ protected:
     virtual std::string getDescription() const;
 
 protected:
-    QPoint pos;
-
     std::string type;
     UUID uuid;
 

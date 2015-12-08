@@ -1,6 +1,10 @@
 /// HEADER
 #include <csapex/model/connectable.h>
 
+/// COMPONENT
+#include <csapex/model/connection.h>
+#include <csapex/msg/message.h>
+
 /// SYSTEM
 #include <iostream>
 #include <sstream>
@@ -8,8 +12,8 @@
 
 using namespace csapex;
 
-const QString Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
-const QString Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
+const std::string Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
+const std::string Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
 //bool Connectable::allow_processing = true;
 
@@ -26,23 +30,21 @@ UUID Connectable::makeUUID(const UUID &box_uuid, const std::string& type, int su
 
 Connectable::Connectable(const UUID& uuid)
     : Unique(uuid),
-      buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
-      blocked_(false)
+      count_(0), seq_no_(-1), enabled_(true), dynamic_(false), level_(0)
 {
     init();
 }
 
 Connectable::Connectable(Unique* parent, int sub_id, const std::string& type)
     : Unique(makeUUID(parent->getUUID(), type, sub_id)),
-      buttons_down_(0), count_(0), seq_no_(0), enabled_(false),
-      blocked_(false)
+      count_(0), seq_no_(-1), enabled_(true), dynamic_(false), level_(0)
 {
     init();
 }
 
 void Connectable::notifyMessageProcessed()
 {
-    Q_EMIT messageProcessed(this);
+    messageProcessed(this);
 }
 
 void Connectable::stop()
@@ -52,37 +54,17 @@ void Connectable::stop()
 
 void Connectable::init()
 {
-    setType(ConnectionType::makeDefault());
-
-    disable();
+    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
 
 
 Connectable::~Connectable()
 {
-    //    UUID::free(getUUID());
 }
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    Q_EMIT connectableError(error,msg,static_cast<int>(level));
-}
-
-bool Connectable::tryConnect(QObject* other_side)
-{
-    Connectable* c = dynamic_cast<Connectable*>(other_side);
-    if(c) {
-        return tryConnect(c);
-    }
-    return false;
-}
-
-void Connectable::removeConnection(QObject* other_side)
-{
-    Connectable* c = dynamic_cast<Connectable*>(other_side);
-    if(c) {
-        removeConnection(c);
-    }
+    connectableError(error,msg,static_cast<int>(level));
 }
 
 void Connectable::validateConnections()
@@ -92,19 +74,17 @@ void Connectable::validateConnections()
 
 void Connectable::disable()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     if(enabled_) {
         enabled_ = false;
-        Q_EMIT enabled(enabled_);
+        enabled_changed(enabled_);
     }
 }
 
 void Connectable::enable()
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     if(!enabled_) {
         enabled_ = true;
-        Q_EMIT enabled(enabled_);
+        enabled_changed(enabled_);
     }
 }
 
@@ -117,9 +97,18 @@ void Connectable::setEnabled(bool enabled)
     }
 }
 
+void Connectable::setLevel(int level)
+{
+    level_ = level;
+}
+
+int Connectable::getLevel() const
+{
+    return level_;
+}
+
 bool Connectable::isEnabled() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
     return enabled_;
 }
 
@@ -150,62 +139,93 @@ bool Connectable::shouldMove(bool left, bool right)
 
 std::string Connectable::getLabel() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return label_;
+}
+
+bool Connectable::isDynamic() const
+{
+    return dynamic_;
+}
+
+void Connectable::setDynamic(bool dynamic)
+{
+    dynamic_ = dynamic;
 }
 
 void Connectable::setLabel(const std::string &label)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     label_ = label;
 }
 
 void Connectable::setType(ConnectionType::ConstPtr type)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     bool validate = type_ != type;
 
     if(validate) {
         type_ = type;
         validateConnections();
-        Q_EMIT typeChanged();
+        lock.unlock();
+
+        typeChanged();
     }
 }
 
 ConnectionType::ConstPtr Connectable::getType() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return type_;
 }
 
 int Connectable::getCount() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return count_;
-}
-
-bool Connectable::isBlocked() const
-{
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    return blocked_;
-}
-void Connectable::setBlocked(bool b)
-{
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
-    blocked_ = b;
-    Q_EMIT blocked(b);
 }
 
 int Connectable::sequenceNumber() const
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return seq_no_;
 }
 
 void Connectable::setSequenceNumber(int seq_no)
 {
-    std::lock_guard<std::recursive_mutex> lock(sync_mutex);
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
+
     seq_no_ = seq_no;
 }
-/// MOC
-#include "../../include/csapex/model/moc_connectable.cpp"
+
+void Connectable::addConnection(ConnectionPtr connection)
+{
+    connections_.push_back(connection);
+    connection->sink_enabled_changed.connect(connectionEnabled);
+
+    connection_added(connection);
+
+    connection_added_to(this);
+}
+
+void Connectable::fadeConnection(ConnectionPtr connection)
+{
+    for(auto it = connections_.begin(); it != connections_.end(); ) {
+        if(*it == connection) {
+            it = connections_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    connection_faded(connection);
+}
+std::vector<ConnectionPtr> Connectable::getConnections() const
+{
+    return connections_;
+}
+
+bool Connectable::isConnected() const
+{
+    return !connections_.empty();
+}

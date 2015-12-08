@@ -13,12 +13,7 @@
 #include <iostream>
 #include <set>
 #include <boost/signals2.hpp>
-
-class QFileSystemWatcher;
-namespace qt_helper
-{
-class Call;
-}
+#include <typeindex>
 
 namespace csapex
 {
@@ -35,7 +30,7 @@ public:
 
     template <typename PluginType>
     std::vector<std::string> enumerateXmlFiles() {
-        std::map<const std::type_info*, std::vector<std::function<void(std::vector<std::string>&)> > >::iterator pos = locators_.find(&typeid(PluginType));
+        std::map<std::type_index, std::vector<std::function<void(std::vector<std::string>&)> > >::iterator pos = locators_.find(std::type_index(typeid(PluginType)));
         std::vector<std::string> files;
         if(pos != locators_.end()) {
             std::vector<std::function<void(std::vector<std::string>&)> >& vec = pos->second;
@@ -51,7 +46,7 @@ public:
     template <typename PluginType>
     void registerLocator(std::function<void(std::vector<std::string>&)> fn)
     {
-        locators_[&typeid(PluginType)].push_back(fn);
+        locators_[std::type_index(typeid(PluginType))].push_back(fn);
     }
 
     void reloadLibraryIfExists(const std::string& name, const std::string& abs_path);
@@ -73,25 +68,18 @@ public:
     std::vector<std::string> getAllLibraries() const;
 
 private:
-    void createFileWatcher(const std::string &name);
-    void clearFileWatcherCallbacks();
-
-private:
     Settings &settings_;
 
-    std::map<const std::type_info*, std::vector<std::function<void(std::vector<std::string>&)> > > locators_;
+    std::map<std::type_index, std::vector<std::function<void(std::vector<std::string>&)> > > locators_;
 
     std::vector<std::string> library_paths_;
 
     std::set<std::string> loaded_libraries_;
     std::map<std::string, std::string> library_file_;
-    std::map<std::string, std::shared_ptr<QFileSystemWatcher> > library_watchers_;
     std::map<std::string, std::string> error_libraries_;
 
     std::set<std::string> ignored_libraries_;
     param::StringListParameterPtr ignored_persistent_;
-
-    std::vector<qt_helper::Call*> callbacks_;
 };
 }
 

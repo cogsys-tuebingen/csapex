@@ -2,7 +2,7 @@
 #include <csapex/core/settings.h>
 
 /// PROJECT
-#include <utils_param/io.h>
+#include <csapex/param/io.h>
 #include <csapex/utility/yaml_node_builder.h>
 
 /// SYSTEM
@@ -62,8 +62,8 @@ void Settings::save()
     YAML::Emitter yaml;
     yaml << YAML::BeginSeq;
 
-    for(std::map<std::string, param::Parameter::Ptr>::iterator it = settings_.begin(); it != settings_.end(); ++it) {
-        param::Parameter::Ptr p = it->second;
+    for(std::map<std::string, csapex::param::Parameter::Ptr>::iterator it = settings_.begin(); it != settings_.end(); ++it) {
+        csapex::param::Parameter::Ptr p = it->second;
         YAML::Node n;
         p->serialize(n);
         yaml << n;
@@ -92,19 +92,19 @@ void Settings::load()
     }
 
     for(std::size_t i = 0, n = doc.size(); i < n; ++i) {
-        param::Parameter::Ptr p = doc[i].as<param::Parameter::Ptr>();
+        csapex::param::Parameter::Ptr p = doc[i].as<csapex::param::Parameter::Ptr>();
 
         settings_[p->name()] = p;
     }
 }
 
-void Settings::add(param::Parameter::Ptr p)
+void Settings::add(csapex::param::Parameter::Ptr p)
 {
     settings_[p->name()] = p;
     settingsChanged();
 }
 
-param::Parameter::Ptr Settings::get(const std::string &name)
+csapex::param::Parameter::Ptr Settings::get(const std::string &name)
 {
     return settings_.at(name);
 }

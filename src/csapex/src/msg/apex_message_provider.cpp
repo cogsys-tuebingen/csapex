@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/core/settings.h>
-#include <csapex/msg/message_factory.h>
+#include <csapex/factory/message_factory.h>
 
 /// SYSTEM
 #include <boost/assign.hpp>
@@ -37,7 +37,7 @@ connection_types::Message::Ptr ApexMessageProvider::next(std::size_t /*slot*/)
 
 std::string ApexMessageProvider::getLabel(std::size_t /*slot*/) const
 {
-    return msg_->toType()->name();
+    return msg_->toType()->descriptiveName();
 }
 
 std::vector<std::string> ApexMessageProvider::getExtensions() const

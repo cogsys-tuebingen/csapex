@@ -39,7 +39,7 @@ public:
 
     bool acceptsConnectionFrom(const ConnectionType* other_side) const override
     {
-        return rawName() == other_side->rawName();
+        return typeName() == other_side->typeName();
     }
 
     Type value;

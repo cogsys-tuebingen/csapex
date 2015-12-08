@@ -3,11 +3,8 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/csapex_fwd.h>
 #include <csapex/utility/uuid.h>
-
-/// SYSTEM
-#include <QWidget>
+#include <csapex/data/point.h>
 
 namespace csapex
 {
@@ -18,7 +15,7 @@ namespace command
 class AddNode : public Command
 {
 public:
-    AddNode(const std::string& type, QPoint pos_, const UUID& parent_uuid_, const UUID& uuid_, NodeStatePtr state);
+    AddNode(const std::string& type, Point pos, const UUID& parent_uuid_, const UUID& uuid_, NodeStatePtr state);
 
 protected:
     bool doExecute();
@@ -30,7 +27,7 @@ protected:
 
 private:
     std::string type_;
-    QPoint pos_;
+    Point pos_;
 
     UUID parent_uuid_;
     UUID uuid_;
