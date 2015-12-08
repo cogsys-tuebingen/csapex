@@ -4,6 +4,6 @@ stages:
 framework:
   stage: build
   script:
-    - mkdir build; cd build; cmake ..; make -j $(nproc)
+    - cd csapex; mkdir build; cd build; cmake ..; make -j $(nproc)
   only:
     - devel
