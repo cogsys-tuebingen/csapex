@@ -52,9 +52,6 @@ public:
     NodeWorker(const std::string& type, const UUID& uuid, NodePtr node);
     ~NodeWorker();
 
-    InputTransition* getInputTransition() const;
-    OutputTransition* getOutputTransition() const;
-
     void setNodeState(NodeStatePtr memento);
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
@@ -230,9 +227,6 @@ private:
 private:
     NodeStatePtr node_state_;
     NodeModifierPtr modifier_;
-
-    InputTransitionPtr transition_in_;
-    OutputTransitionPtr transition_out_;
 
     bool is_setup_;
     State state_;

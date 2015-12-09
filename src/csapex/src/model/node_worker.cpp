@@ -32,8 +32,6 @@ const double NodeWorker::DEFAULT_FREQUENCY = 30.0;
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node)
     : NodeHandle(type, uuid, node),
       node_state_(std::make_shared<NodeState>(this)),
-      transition_in_(std::make_shared<InputTransition>(std::bind(&NodeWorker::triggerCheckTransitions, this))),
-      transition_out_(std::make_shared<OutputTransition>(std::bind(&NodeWorker::triggerCheckTransitions, this))),
       is_setup_(false), state_(State::IDLE),
       next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
@@ -99,16 +97,6 @@ NodeWorker::~NodeWorker()
     while(!triggers_.empty()) {
         removeTrigger(triggers_.begin()->get());
     }
-}
-
-InputTransition* NodeWorker::getInputTransition() const
-{
-    return transition_in_.get();
-}
-
-OutputTransition* NodeWorker::getOutputTransition() const
-{
-    return transition_out_.get();
 }
 
 void NodeWorker::setNodeState(NodeStatePtr memento)

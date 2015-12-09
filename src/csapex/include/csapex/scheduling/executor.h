@@ -1,6 +1,9 @@
 #ifndef EXECUTOR_H
 #define EXECUTOR_H
 
+/// COMPONENT
+#include <csapex/scheduling/scheduling_fwd.h>
+
 /// SYSTEM
 #include <boost/signals2/signal.hpp>
 
@@ -12,6 +15,9 @@ public:
     Executor();
     virtual ~Executor();
 
+    virtual void add(TaskGenerator*) = 0;
+    virtual void remove(TaskGenerator *) = 0;
+
     bool isPaused() const;
     void setPause(bool pause);
 
@@ -19,6 +25,7 @@ public:
     void setSteppingMode(bool stepping);
     void step();
 
+    virtual void stop() = 0;
     virtual void clear() = 0;
 
 protected:

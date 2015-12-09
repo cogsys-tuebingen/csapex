@@ -4,7 +4,7 @@
 using namespace csapex;
 
 Executor::Executor()
-    : paused_(false)
+    : paused_(false), stepping_(false)
 {
 
 }

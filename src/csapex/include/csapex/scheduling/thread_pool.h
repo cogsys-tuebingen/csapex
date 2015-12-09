@@ -21,11 +21,11 @@ class CsApexCore;
 class ThreadPool : public Executor
 {
 public:
-    ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping, bool paused);
+    ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
 
     virtual void performStep() override;
 
-    void stop();
+    virtual void stop() override;
     virtual void clear() override;
 
     std::vector<ThreadGroupPtr> getGroups();
@@ -34,8 +34,8 @@ public:
 
     std::string nextName();
 
-    void add(TaskGenerator*);
-    void remove(TaskGenerator *);
+    virtual void add(TaskGenerator*) override;
+    virtual void remove(TaskGenerator *) override;
 
     void usePrivateThreadFor(TaskGenerator* task);
     void addToGroup(TaskGenerator* task, int group_id);

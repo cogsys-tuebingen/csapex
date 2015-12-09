@@ -16,16 +16,16 @@ using namespace csapex;
 
 int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 
-ThreadGroup::ThreadGroup(ExceptionHandler& handler, int id, std::string name, bool paused)
+ThreadGroup::ThreadGroup(ExceptionHandler& handler, int id, std::string name)
     : handler_(handler),
-      id_(id), name_(name), running_(false), pause_(paused)
+      id_(id), name_(name), running_(false), pause_(false)
 {
     next_id_ = std::max(next_id_, id + 1);
     startThread();
 }
-ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name, bool paused)
+ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name)
     : handler_(handler),
-      id_(next_id_++), name_(name), running_(false), pause_(paused)
+      id_(next_id_++), name_(name), running_(false), pause_(false)
 {
     startThread();
 }
@@ -80,8 +80,12 @@ void ThreadGroup::setPause(bool pause)
 void ThreadGroup::setSteppingMode(bool stepping)
 {
     std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+
+    if(stepping != stepping_) {
+        stepping_ = stepping;
+    }
     for(auto generator : generators_) {
-        generator->setSteppingMode(stepping);
+        generator->setSteppingMode(stepping_);
     }
 }
 
@@ -162,6 +166,7 @@ void ThreadGroup::clear()
 void ThreadGroup::add(TaskGenerator* generator)
 {
     generator->setPause(pause_);
+    generator->setSteppingMode(stepping_);
 
     std::unique_lock<std::recursive_mutex> lock(state_mtx_);
     if(!running_) {

@@ -21,8 +21,16 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
       tick_thread_running_(false)
 {
     NodePtr node = worker_->getNode().lock();
-    is_source_ = worker->isSource();
+    is_source_ = worker_->isSource();
     ticking_ = node && std::dynamic_pointer_cast<TickableNode>(node);
+
+    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + worker->getUUID().getFullName(),
+                                               std::bind(&NodeWorker::checkParameters, worker),
+                                               this);
+    check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
+                                                std::bind(&NodeWorker::checkTransitions, worker, true),
+                                                this);
+
     if(ticking_) {
         tick_ = std::make_shared<Task>(std::string("tick ") + worker->getUUID().getFullName(),
                                        [this, worker]() {
@@ -35,24 +43,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
                 }
             }
         }, this);
-
-        // TODO: get rid of this!
-        ticking_thread_ = std::thread([this, worker]() {
-            csapex::thread::set_name((std::string("T") + worker->getUUID().getShortName()).c_str());
-            tick_thread_running_ = true;
-
-            tick_thread_stop_ = false;
-            tickLoop();
-
-            tick_thread_running_ = false;
-        });
     }
-    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + worker->getUUID().getFullName(),
-                                               std::bind(&NodeWorker::checkParameters, worker),
-                                               this);
-    check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
-                                                std::bind(&NodeWorker::checkTransitions, worker, true),
-                                                this);
 }
 
 NodeRunner::~NodeRunner()
@@ -115,6 +106,21 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
             schedule(std::make_shared<Task>("anonymous", cb));
 });
     connections_.push_back(cg);
+
+    if(ticking_ && !tick_thread_running_) {
+        std::cerr << "start ticking" << std::endl;
+
+        // TODO: get rid of this!
+        ticking_thread_ = std::thread([this]() {
+            csapex::thread::set_name((std::string("T") + worker_->getUUID().getShortName()).c_str());
+            tick_thread_running_ = true;
+
+            tick_thread_stop_ = false;
+            tickLoop();
+
+            tick_thread_running_ = false;
+        });
+    }
 }
 
 void NodeRunner::tickLoop()

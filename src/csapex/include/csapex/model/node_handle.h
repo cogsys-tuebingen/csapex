@@ -27,10 +27,12 @@ public:
     virtual bool isEnabled() const = 0;
 
     virtual void triggerCheckTransitions() = 0;
-    virtual void startProcessingMessages() = 0;
+    virtual void startProcessingMessages() = 0;  
+
+    InputTransition* getInputTransition() const;
+    OutputTransition* getOutputTransition() const;
 
 protected:
-    std::string node_type_;
 
     NodePtr node_;
 
@@ -38,6 +40,11 @@ protected:
     std::vector<OutputPtr> outputs_;
     std::vector<TriggerPtr> triggers_;
     std::vector<SlotPtr> slots_;
+
+    std::string node_type_;
+
+    InputTransitionPtr transition_in_;
+    OutputTransitionPtr transition_out_;
 
 };
 

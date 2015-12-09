@@ -29,8 +29,8 @@ public:
     static int nextId();
 
 public:
-    ThreadGroup(ExceptionHandler& handler, int id, std::string name, bool paused);
-    ThreadGroup(ExceptionHandler& handler, std::string name, bool paused);
+    ThreadGroup(ExceptionHandler& handler, int id, std::string name);
+    ThreadGroup(ExceptionHandler& handler, std::string name);
     ~ThreadGroup();
 
     int id() const;
@@ -91,6 +91,7 @@ private:
     std::recursive_mutex state_mtx_;
     std::atomic<bool> running_;
     std::atomic<bool> pause_;
+    std::atomic<bool> stepping_;
 
     mutable std::recursive_mutex execution_mtx_;
 

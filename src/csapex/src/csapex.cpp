@@ -150,21 +150,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
 
     GraphPtr graph = std::make_shared<Graph>();
-    ThreadPool thread_pool(handler, !threadless, thread_grouping, paused);
+    ThreadPool thread_pool(handler, !threadless, thread_grouping);
+    thread_pool.setPause(paused);
     GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(thread_pool, graph.get());
-
-    graph_worker->generatorAdded.connect([&thread_pool](TaskGeneratorPtr tg) {
-        thread_pool.add(tg.get());
-    });
-    graph_worker->generatorRemoved.connect([&thread_pool](TaskGeneratorPtr tg) {
-        thread_pool.remove(tg.get());
-    });
-    graph_worker->paused.connect([&thread_pool](bool pause) {
-        thread_pool.setPause(pause);
-    });
-    graph_worker->stopped.connect([&thread_pool]() {
-        thread_pool.stop();
-    });
 
     NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(plugin_locator.get());
 

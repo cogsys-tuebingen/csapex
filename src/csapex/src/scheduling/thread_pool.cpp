@@ -15,12 +15,14 @@
 
 using namespace csapex;
 
-ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping, bool paused)
+ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping)
     : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
 {
-    setPause(paused);
+    setPause(false);
+    setSteppingMode(false);
+
     default_group_ = std::make_shared<ThreadGroup>(handler_,
-                                                   ThreadGroup::DEFAULT_GROUP_ID, "default", paused);
+                                                   ThreadGroup::DEFAULT_GROUP_ID, "default");
     default_group_->end_step.connect([this]() {
         checkIfStepIsDone();
     });
@@ -29,8 +31,14 @@ ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool gr
 
 void ThreadPool::performStep()
 {
-    for(auto g : groups_) {
-        g->step();
+    if(!default_group_->isEmpty() || !groups_.empty()) {
+        default_group_->step();
+        for(auto g : groups_) {
+            g->step();
+        }
+
+    } else {
+        end_step();
     }
 }
 
@@ -150,7 +158,9 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
 {
     if(!isInPrivateThread(task)) {
         auto group = std::make_shared<ThreadGroup>(handler_, ThreadGroup::PRIVATE_THREAD,
-                                                   task->getUUID().getShortName(), isPaused());
+                                                   task->getUUID().getShortName());
+        group->setPause(isPaused());
+
         groups_.push_back(group);
         group->end_step.connect([this]() {
             checkIfStepIsDone();
@@ -193,7 +203,9 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
         }
     }
 
-    ThreadGroupPtr group = std::make_shared<ThreadGroup>(handler_, name, isPaused());
+    ThreadGroupPtr group = std::make_shared<ThreadGroup>(handler_, name);
+    group->setPause(isPaused());
+
     groups_.push_back(group);
     group->end_step.connect([this]() {
         checkIfStepIsDone();
@@ -283,7 +295,9 @@ void ThreadPool::loadSettings(YAML::Node& node)
                 if(group_id >= ThreadGroup::MINIMUM_THREAD_ID) {
                     std::string group_name = group["name"].as<std::string>();
 
-                    auto g = std::make_shared<ThreadGroup>(handler_, group_id, group_name, isPaused());
+                    auto g = std::make_shared<ThreadGroup>(handler_, group_id, group_name);
+                    g->setPause(isPaused());
+
                     groups_.push_back(g);
                     g->end_step.connect([this]() {
                         checkIfStepIsDone();
