@@ -34,6 +34,16 @@ public:
         {}
     };
 
+    struct NodeHandleNotFoundException : public std::logic_error
+    {
+        NodeHandleNotFoundException(const std::string& name)
+            : std::logic_error("node handle for node " + name + " cannot be found")
+        {}
+    };
+
+    typedef std::vector<NodeWorkerPtr>::iterator node_iterator;
+    typedef std::vector<NodeWorkerPtr>::const_iterator node_const_iterator;
+
 public:
     Graph();
     virtual ~Graph();
@@ -48,7 +58,12 @@ public:
     NodeWorker* findNodeWorkerNoThrow(const UUID& uuid) const;
     NodeWorker* findNodeWorkerForConnector(const UUID &uuid) const;
 
+    NodeHandle* findNodeHandle(const UUID& uuid) const;
+    NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const;
+    NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
+
     std::vector<NodeWorker*> getAllNodeWorkers();
+    std::vector<NodeHandle*> getAllNodeHandles();
 
     int getComponent(const UUID& node_uuid) const;
     int getLevel(const UUID& node_uuid) const;
@@ -72,9 +87,12 @@ public:
     bool addConnection(ConnectionPtr connection);
     void deleteConnection(ConnectionPtr connection);
 
-    // TODO: do this correctly.. -> iterators
-    void foreachNode(std::function<void (NodeWorker*)> f);
-    void foreachNode(std::function<void (NodeWorker*)> f, std::function<bool (NodeWorker*)> pred);
+    // iterators
+    node_iterator beginNodes();
+    const node_const_iterator beginNodes() const;
+
+    node_iterator endNodes();
+    const node_const_iterator endNodes() const;
 
 private:
    /*rename*/ void verify();

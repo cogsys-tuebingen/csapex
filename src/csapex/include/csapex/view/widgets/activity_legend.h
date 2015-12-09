@@ -2,7 +2,7 @@
 #define ACTIVITY_LEGEND_H
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <QFrame>

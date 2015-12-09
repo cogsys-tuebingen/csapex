@@ -11,6 +11,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/timer.h>
 
@@ -31,7 +32,7 @@ void Graph::clear()
         deleteConnection(c);
     }
 
-    for(NodeWorker* node : getAllNodeWorkers()) {
+    for(NodeHandle* node : getAllNodeHandles()) {
         deleteNode(node->getUUID());
     }
 
@@ -113,23 +114,6 @@ int Graph::countNodes()
     return nodes_.size();
 }
 
-
-
-void Graph::foreachNode(std::function<void (NodeWorker*)> f)
-{
-    for(NodeWorker::Ptr b : nodes_) {
-        f(b.get());
-    }
-}
-
-void Graph::foreachNode(std::function<void (NodeWorker*)> f, std::function<bool (NodeWorker*)> pred)
-{
-    for(NodeWorker::Ptr b : nodes_) {
-        if(pred(b.get())) {
-            f(b.get());
-        }
-    }
-}
 
 bool Graph::addConnection(ConnectionPtr connection)
 {
@@ -440,6 +424,16 @@ NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
     throw NodeWorkerNotFoundException(uuid.getFullName());
 }
 
+
+NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
+{
+    NodeHandle* node_handle = findNodeHandleNoThrow(uuid);
+    if(node_handle) {
+        return node_handle;
+    }
+    throw NodeHandleNotFoundException(uuid.getFullName());
+}
+
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
     for(NodeWorker::Ptr worker : nodes_) {
@@ -456,6 +450,17 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
 
 
 NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
+{
+    for(const NodeWorker::Ptr b : nodes_) {
+        if(b->getUUID() == uuid) {
+            return b.get();
+        }
+    }
+
+    return nullptr;
+}
+
+NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const
 {
     for(const NodeWorker::Ptr b : nodes_) {
         if(b->getUUID() == uuid) {
@@ -486,6 +491,16 @@ NodeWorker* Graph::findNodeWorkerForConnector(const UUID &uuid) const
     }
 }
 
+NodeHandle* Graph::findNodeHandleForConnector(const UUID &uuid) const
+{
+    try {
+        return findNodeHandle(uuid.parentUUID());
+
+    } catch(const std::exception& e) {
+        throw std::runtime_error(std::string("cannot find handle of connector \"") + uuid.getFullName());
+    }
+}
+
 std::vector<NodeWorker*> Graph::getAllNodeWorkers()
 {
     std::vector<NodeWorker*> node_workers;
@@ -494,6 +509,16 @@ std::vector<NodeWorker*> Graph::getAllNodeWorkers()
     }
 
     return node_workers;
+}
+
+std::vector<NodeHandle*> Graph::getAllNodeHandles()
+{
+    std::vector<NodeHandle*> node_handles;
+    for(const NodeWorkerPtr& node : nodes_) {
+        node_handles.push_back(node.get());
+    }
+
+    return node_handles;
 }
 
 Connectable* Graph::findConnector(const UUID &uuid)
@@ -565,4 +590,25 @@ int Graph::getConnectionId(ConnectionPtr c)
     }
 
     return -1;
+}
+
+Graph::node_iterator Graph::beginNodes()
+{
+    return nodes_.begin();
+}
+
+const Graph::node_const_iterator Graph::beginNodes() const
+{
+    return nodes_.cbegin();
+}
+
+
+Graph::node_iterator Graph::endNodes()
+{
+    return nodes_.end();
+}
+
+const Graph::node_const_iterator Graph::endNodes() const
+{
+    return nodes_.cend();
 }

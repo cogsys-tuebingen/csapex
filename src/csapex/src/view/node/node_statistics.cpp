@@ -7,12 +7,12 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 
 using namespace csapex;
 
-NodeStatistics::NodeStatistics(NodeWorker *node)
-    : node_worker_(node)
+NodeStatistics::NodeStatistics(NodeHandle *node)
+    : node_handle_(node)
 {
 
 }
@@ -44,15 +44,15 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* c
 
 QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factory) const
 {
-    auto node = node_worker_->getNode().lock();
+    auto node = node_handle_->getNode().lock();
     if(!node) {
         return nullptr;
     }
 
     QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, node_worker_->getUUID().c_str());
+    tl->setText(0, node_handle_->getUUID().c_str());
 
-    NodeConstructor::Ptr constructor = node_factory->getConstructor(node_worker_->getType());
+    NodeConstructor::Ptr constructor = node_factory->getConstructor(node_handle_->getType());
 
     tl->setIcon(0, QIcon(QString::fromStdString(constructor->getIcon())));
 
@@ -60,7 +60,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
 
-        for(auto input : node_worker_->getAllInputs()) {
+        for(auto input : node_handle_->getAllInputs()) {
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(input.get());
 
             QTreeWidgetItem* input_widget = new QTreeWidgetItem;
@@ -90,7 +90,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(auto output : node_worker_->getAllOutputs()) {
+        for(auto output : node_handle_->getAllOutputs()) {
             QTreeWidgetItem* output_widget = createDebugInformationConnector(output.get());
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;

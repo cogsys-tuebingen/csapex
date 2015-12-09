@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/param/parameter.h>
 
 /// SYSTEM
@@ -11,7 +11,7 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController* widget_ctrl)
+NodeAdapter::NodeAdapter(NodeHandleWeakPtr adaptee, WidgetController* widget_ctrl)
     : layout_(nullptr), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
 {
 }

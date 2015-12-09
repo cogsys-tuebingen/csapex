@@ -2,7 +2,7 @@
 #define REGISTER_NODE_ADAPTER_H
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/utility/register_apex_plugin.h>
 #include <csapex/view/node/node_adapter_builder.h>
 
@@ -16,10 +16,10 @@ public: \
     { \
         return #Adaptee; \
     } \
-    virtual csapex::NodeAdapterPtr build(csapex::NodeWorkerPtr worker, csapex::WidgetController* widget_ctrl) const \
+    virtual csapex::NodeAdapterPtr build(csapex::NodeHandlePtr handle, csapex::WidgetController* widget_ctrl) const \
     { \
-        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (worker->getNode().lock()); \
-        return std::make_shared<Adapter>(worker, adaptee, widget_ctrl); \
+        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (handle->getNode().lock()); \
+        return std::make_shared<Adapter>(handle, adaptee, widget_ctrl); \
     } \
 }; \
 }\

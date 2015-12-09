@@ -31,9 +31,7 @@ const double NodeWorker::DEFAULT_FREQUENCY = 30.0;
 
 NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node)
     : NodeHandle(type, uuid, node),
-      node_state_(std::make_shared<NodeState>(this)),
       is_setup_(false), state_(State::IDLE),
-      next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       ticks_(0),
       source_(false), sink_(false), level_(0),
@@ -41,25 +39,17 @@ NodeWorker::NodeWorker(const std::string& type, const UUID& uuid, Node::Ptr node
 {
     apex_assert_hard(node_);
 
-    transition_out_->messages_processed.connect([this](){
-        notifyMessagesProcessed();
-    });
-
-    node_state_->setLabel(uuid);
-
     modifier_ = std::make_shared<NodeModifier>(this);
     node_->initialize(uuid, modifier_.get());
 
     bool params_created_in_constructor = node_->getParameterCount() != 0;
+    apex_assert_hard(!params_created_in_constructor);
 
-    if(params_created_in_constructor) {
-        makeParametersConnectable();
-    }
+    transition_out_->messages_processed.connect([this](){
+        notifyMessagesProcessed();
+    });
 
-    node_->parameters_changed.connect(parametersChanged);
-    node_->getParameterState()->parameter_set_changed->connect(parametersChanged);
-    node_->getParameterState()->parameter_added->connect(std::bind(&NodeWorker::makeParameterConnectable, this, std::placeholders::_1));
-    node_->getParameterState()->parameter_removed->connect(std::bind(&NodeWorker::makeParameterNotConnectable, this, std::placeholders::_1));
+
 
     addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
     addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
@@ -85,88 +75,8 @@ NodeWorker::~NodeWorker()
 
     //    waitUntilFinished();
 
-    while(!inputs_.empty()) {
-        removeInput(inputs_.begin()->get());
-    }
-    while(!outputs_.empty()) {
-        removeOutput(outputs_.begin()->get());
-    }
-    while(!slots_.empty()) {
-        removeSlot(slots_.begin()->get());
-    }
-    while(!triggers_.empty()) {
-        removeTrigger(triggers_.begin()->get());
-    }
 }
 
-void NodeWorker::setNodeState(NodeStatePtr memento)
-{
-    std::string old_label = node_state_->getLabel();
-
-    *node_state_ = *memento;
-
-    node_state_->setParent(this);
-
-    if(memento->getParameterState()) {
-        node_->setParameterState(memento->getParameterState());
-    }
-
-    node_state_->enabled_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->flipped_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->label_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->minimized_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->parent_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->pos_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
-    node_state_->thread_changed->connect(std::bind(&NodeWorker::triggerNodeStateChanged, this));
-
-    node_state_->label_changed->connect([this]() {
-        std::string label = node_state_->getLabel();
-        if(label.empty()) {
-            label = getUUID().getShortName();
-        }
-
-        node_->adebug.setPrefix(label);
-        node_->ainfo.setPrefix(label);
-        node_->awarn.setPrefix(label);
-        node_->aerr.setPrefix(label);
-    });
-
-    triggerNodeStateChanged();
-
-    node_->stateChanged();
-
-    if(node_state_->getLabel().empty()) {
-        if(old_label.empty()) {
-            node_state_->setLabel(getUUID().getShortName());
-        } else {
-            node_state_->setLabel(old_label);
-        }
-    }
-}
-
-void NodeWorker::triggerNodeStateChanged()
-{
-    nodeStateChanged();
-}
-
-NodeState::Ptr NodeWorker::getNodeStateCopy() const
-{
-    apex_assert_hard(node_state_);
-
-    NodeState::Ptr memento(new NodeState(this));
-    *memento = *node_state_;
-
-    memento->setParameterState(node_->getParameterStateClone());
-
-    return memento;
-}
-
-NodeState::Ptr NodeWorker::getNodeState()
-{
-    apex_assert_hard(node_state_);
-
-    return node_state_;
-}
 
 NodeWorker::State NodeWorker::getState() const
 {
@@ -266,96 +176,6 @@ bool NodeWorker::canSend() const
     return transition_out_->canStartSendingMessages();
 }
 
-template <typename T>
-void NodeWorker::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
-{
-    csapex::param::Parameter* p = param.get();
-
-    if(param_2_input_.find(p->name()) != param_2_input_.end()) {
-        return;
-    }
-
-    {
-        InputPtr cin = std::make_shared<Input>(UUID::make_sub(getUUID(), std::string("in_") + p->name()));
-        cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
-        cin->setOptional(true);
-        cin->setLabel(p->name());
-
-        addInput(cin);
-
-        param_2_input_[p->name()] = cin;
-        input_2_param_[cin.get()] = p;
-    }
-    {
-        OutputPtr cout = std::make_shared<StaticOutput>(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
-        cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
-        cout->setLabel(p->name());
-
-        if(getState() == State::PROCESSING) {
-            cout->startReceiving();
-        }
-
-        addOutput(cout);
-
-        param_2_output_[p->name()] = cout;
-        output_2_param_[cout.get()] = p;
-    }
-}
-
-void NodeWorker::makeParameterConnectable(csapex::param::ParameterPtr p)
-{
-    if(p->is<int>()) {
-        makeParameterConnectableImpl<int>(p);
-    } else if(p->is<double>()) {
-        makeParameterConnectableImpl<double>(p);
-    } else if(p->is<std::string>()) {
-        makeParameterConnectableImpl<std::string>(p);
-    } else if(p->is<bool>()) {
-        makeParameterConnectableImpl<bool>(p);
-    } else if(p->is<std::pair<int, int> >()) {
-        makeParameterConnectableImpl<std::pair<int, int> >(p);
-    } else if(p->is<std::pair<double, double> >()) {
-        makeParameterConnectableImpl<std::pair<double, double> >(p);
-    }
-    // else: do nothing and ignore the parameter
-
-    param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
-    if(t) {
-        Trigger* trigger = addTrigger(t->name());
-        addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
-        node_->addParameterCallback(t.get(), std::bind(&Trigger::trigger, trigger));
-    }
-}
-
-void NodeWorker::makeParameterNotConnectable(csapex::param::ParameterPtr p)
-{
-    InputPtr cin_ptr = param_2_input_[p->name()].lock();
-    OutputPtr cout_ptr = param_2_output_[p->name()].lock();
-
-    Input* cin = cin_ptr.get();
-    Output* cout = cout_ptr.get();
-
-    disconnectConnector(cin);
-    disconnectConnector(cout);
-
-    removeInput(cin);
-    removeOutput(cout);
-
-    apex_assert_hard(param_2_input_.erase(p->name()) != 0);
-    apex_assert_hard(input_2_param_.erase(cin) != 0);
-
-    apex_assert_hard(param_2_output_.erase(p->name()) != 0);
-    apex_assert_hard(output_2_param_.erase(cout) != 0);
-}
-
-void NodeWorker::makeParametersConnectable()
-{
-    GenericState::Ptr state = node_->getParameterState();
-    for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
-        makeParameterConnectable(it->second);
-    }
-}
-
 void NodeWorker::triggerPanic()
 {
     panic();
@@ -364,24 +184,6 @@ void NodeWorker::triggerPanic()
 void NodeWorker::triggerCheckTransitions()
 {
     checkTransitionsRequested();
-}
-
-void NodeWorker::connectConnector(Connectable *c)
-{
-    c->connectionInProgress.connect(connectionInProgress);
-    c->connectionStart.connect(connectionStart);
-    c->connection_added_to.connect(connectionDone);
-    c->connection_added_to.connect([this](Connectable*) { checkIO(); });
-    c->connectionEnabled.connect([this](bool) { checkIO(); });
-    c->connection_removed_to.connect([this](Connectable*) { checkIO(); });
-
-    c->enabled_changed.connect(std::bind(&NodeWorker::checkIO, this));
-}
-
-
-void NodeWorker::disconnectConnector(Connectable*)
-{
-    //    disconnect(c);
 }
 
 
@@ -448,42 +250,7 @@ void NodeWorker::killExecution()
     // TODO: implement
 }
 
-namespace {
-template <typename V>
-void updateParameterValueFrom(csapex::param::Parameter* p, Input* source)
-{
-    auto current = p->as<V>();
-    auto next = msg::getValue<V>(source);
-    if(current != next) {
-        p->set<V>(next);
-    }
-}
-}
 
-void NodeWorker::updateParameterValue(Connectable *s)
-{
-    assertNotInGuiThread();
-
-    apex_assert_hard(getState() == State::PROCESSING);
-    Input* source = dynamic_cast<Input*> (s);
-    apex_assert_hard(source);
-
-    csapex::param::Parameter* p = input_2_param_.at(source);
-
-    if(msg::isValue<int>(source)) {
-        updateParameterValueFrom<int>(p, source);
-    } else if(msg::isValue<double>(source)) {
-        updateParameterValueFrom<double>(p, source);
-    } else if(msg::isValue<std::string>(source)) {
-        updateParameterValueFrom<std::string>(p, source);
-    } else if(msg::isValue<std::pair<int,int>>(source)) {
-        updateParameterValueFrom<std::pair<int, int>>(p, source);
-    } else if(msg::isValue<std::pair<double,double>>(source)) {
-        updateParameterValueFrom<std::pair<double, double>>(p, source);
-    } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::NoMessage>(source)) {
-        node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
-    }
-}
 
 void NodeWorker::startProcessingMessages()
 {
@@ -679,391 +446,6 @@ std::vector<TimerPtr> NodeWorker::extractLatestTimers()
     return result;
 }
 
-Input* NodeWorker::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
-{
-    int id = next_input_id_++;
-    InputPtr c;
-    if(dynamic) {
-        c = std::make_shared<DynamicInput>(this, id);
-    } else {
-        c = std::make_shared<Input>(this, id);
-    }
-    c->setLabel(label);
-    c->setOptional(optional);
-    c->setType(type);
-
-    addInput(c);
-
-    return c.get();
-}
-
-Output* NodeWorker::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    int id = next_output_id_++;
-    OutputPtr c;
-    if(dynamic) {
-        c = std::make_shared<DynamicOutput>(this, id);
-    } else {
-        c = std::make_shared<StaticOutput>(this, id);
-    }
-    c->setLabel(label);
-    c->setType(type);
-
-    addOutput(c);
-    return c.get();
-}
-
-Slot* NodeWorker::addSlot(const std::string& label, std::function<void()> callback, bool active)
-{
-    int id = next_slot_id_++;
-    SlotPtr slot = std::make_shared<Slot>(callback, this, id, active);
-    slot->setLabel(label);
-
-    addSlot(slot);
-
-    return slot.get();
-}
-
-Trigger* NodeWorker::addTrigger(const std::string& label)
-{
-    int id = next_trigger_id_++;
-    TriggerPtr trigger = std::make_shared<Trigger>(this, id);
-    trigger->setLabel(label);
-
-    addTrigger(trigger);
-
-    return trigger.get();
-}
-
-InputWeakPtr NodeWorker::getParameterInput(const std::string &name) const
-{
-    auto it = param_2_input_.find(name);
-    if(it == param_2_input_.end()) {
-        return std::weak_ptr<Input>();
-    } else {
-        return it->second;
-    }
-}
-
-OutputWeakPtr NodeWorker::getParameterOutput(const std::string &name) const
-{
-    auto it = param_2_output_.find(name);
-    if(it == param_2_output_.end()) {
-        return std::weak_ptr<Output>();
-    } else {
-        return it->second;
-    }
-}
-
-
-void NodeWorker::removeInput(Input* in)
-{
-    std::vector<InputPtr>::iterator it;
-    for(it = inputs_.begin(); it != inputs_.end(); ++it) {
-        if(it->get() == in) {
-            break;
-        }
-    }
-
-    if(it != inputs_.end()) {
-        InputPtr input = *it;
-        transition_in_->removeInput(input);
-
-        inputs_.erase(it);
-
-        disconnectConnector(input.get());
-        connectorRemoved(input);
-
-    } else {
-        std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
-    }
-}
-
-void NodeWorker::removeOutput(Output* out)
-{
-
-    std::vector<OutputPtr>::iterator it;
-    for(it = outputs_.begin(); it != outputs_.end(); ++it) {
-        if(it->get() == out) {
-            break;
-        }
-    }
-
-    if(it != outputs_.end()) {
-        OutputPtr output = *it;
-        transition_out_->removeOutput(output);
-
-        outputs_.erase(it);
-
-        disconnectConnector(output.get());
-        connectorRemoved(output);
-
-    } else {
-        std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
-    }
-
-}
-
-void NodeWorker::removeSlot(Slot* s)
-{
-    std::vector<SlotPtr>::iterator it;
-    for(it = slots_.begin(); it != slots_.end(); ++it) {
-        if(it->get() == s) {
-            break;
-        }
-    }
-
-    auto cb_it = slot_connections_.find(s);
-    cb_it->second.disconnect();
-    slot_connections_.erase(cb_it);
-
-
-    if(it != slots_.end()) {
-        SlotPtr slot = *it;
-
-        slots_.erase(it);
-
-        disconnectConnector(slot.get());
-        connectorRemoved(slot);
-    }
-
-}
-
-void NodeWorker::removeTrigger(Trigger* t)
-{
-    std::vector<TriggerPtr>::iterator it;
-    for(it = triggers_.begin(); it != triggers_.end(); ++it) {
-        if(it->get() == t) {
-            break;
-        }
-    }
-
-    auto pos_t = trigger_triggered_connections_.find(t);
-    pos_t->second.disconnect();
-    trigger_triggered_connections_.erase(pos_t);
-
-    auto pos_h = trigger_handled_connections_.find(t);
-    pos_h->second.disconnect();
-    trigger_handled_connections_.erase(pos_h);
-
-    if(it != triggers_.end()) {
-        TriggerPtr trigger = *it;
-
-        triggers_.erase(it);
-
-        disconnectConnector(trigger.get());
-        connectorRemoved(trigger);
-    }
-}
-
-void NodeWorker::addInput(InputPtr in)
-{
-    inputs_.push_back(in);
-
-    connectConnector(in.get());
-    //    QObject::connect(in, SIGNAL(connectionDone(Connectable*)), this, SLOT(trySendMessages()));
-
-    connectorCreated(in);
-    transition_in_->addInput(in);
-}
-
-void NodeWorker::addOutput(OutputPtr out)
-{
-    outputs_.push_back(out);
-
-    connectConnector(out.get());
-
-    out->messageProcessed.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connection_removed_to.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connection_added_to.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connectionEnabled.connect([this](bool) { triggerCheckTransitions(); });
-
-    connectorCreated(out);
-    transition_out_->addOutput(out);
-}
-
-bool NodeWorker::isParameterInput(Input *in) const
-{
-    return input_2_param_.find(in) != input_2_param_.end();
-}
-
-bool NodeWorker::isParameterOutput(Output *out) const
-{
-    return output_2_param_.find(out) != output_2_param_.end();
-}
-
-void NodeWorker::addSlot(SlotPtr s)
-{
-    slots_.push_back(s);
-
-    connectConnector(s.get());
-
-    Slot* slot = s.get();
-
-    auto connection = s->triggered.connect([this, slot](Trigger* source) {
-        executionRequested([this, slot, source]() {
-            slot->handleTrigger();
-            /// PROBLEM: Relaying signals not yet possible here
-            ///  if slot triggeres a signal itself...
-            /// SOLUTION: boost signal?
-            source->signalHandled(slot);
-        });
-    });
-    slot_connections_.insert(std::make_pair(slot, connection));
-
-    connectorCreated(s);
-}
-
-void NodeWorker::addTrigger(TriggerPtr t)
-{
-    triggers_.push_back(t);
-
-    //PROBLEM: wait for all m slots to be done...
-    // in the mean time, allow NO TICK; NO PROCESS;
-    // BUT ALSO EXECUTE OTHER TRIGGERS OF THE SAME PROCESS / TICK...
-    // solution: "lock" the nodeworker, "unlock" it in signalHandled, once all
-    //  TRIGGERs are done (not only this one!!!!!)
-
-    auto connection_triggered = t->triggered.connect([this](){
-        triggerCheckTransitions();
-    });
-    trigger_triggered_connections_.insert(std::make_pair(t.get(), connection_triggered));
-
-    auto connection_handled = t->all_signals_handled.connect([this](){
-        triggerCheckTransitions();
-    });
-    trigger_handled_connections_.insert(std::make_pair(t.get(), connection_handled));
-
-    connectConnector(t.get());
-
-    connectorCreated(t);
-}
-
-Connectable* NodeWorker::getConnector(const UUID &uuid) const
-{
-    std::string type = uuid.type();
-
-    if(type == "in") {
-        return getInput(uuid);
-    } else if(type == "out") {
-        return getOutput(uuid);
-    } else if(type == "slot") {
-        return getSlot(uuid);
-    } else if(type == "trigger") {
-        return getTrigger(uuid);
-    } else {
-        throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
-    }
-}
-
-Input* NodeWorker::getInput(const UUID& uuid) const
-{
-    for(InputPtr in : inputs_) {
-        if(in->getUUID() == uuid) {
-            return in.get();
-        }
-    }
-
-    return nullptr;
-}
-
-Output* NodeWorker::getOutput(const UUID& uuid) const
-{
-    for(OutputPtr out : outputs_) {
-        if(out->getUUID() == uuid) {
-            return out.get();
-        }
-    }
-
-    return nullptr;
-}
-
-
-Slot* NodeWorker::getSlot(const UUID& uuid) const
-{
-    for(SlotPtr s : slots_) {
-        if(s->getUUID() == uuid) {
-            return s.get();
-        }
-    }
-
-    return nullptr;
-}
-
-
-Trigger* NodeWorker::getTrigger(const UUID& uuid) const
-{
-    for(TriggerPtr t : triggers_) {
-        if(t->getUUID() == uuid) {
-            return t.get();
-        }
-    }
-
-    return nullptr;
-}
-
-void NodeWorker::removeInput(const UUID &uuid)
-{
-    removeInput(getInput(uuid));
-}
-
-void NodeWorker::removeOutput(const UUID &uuid)
-{
-    removeOutput(getOutput(uuid));
-}
-
-void NodeWorker::removeSlot(const UUID &uuid)
-{
-    removeSlot(getSlot(uuid));
-}
-
-void NodeWorker::removeTrigger(const UUID &uuid)
-{
-    removeTrigger(getTrigger(uuid));
-}
-
-std::vector<ConnectablePtr> NodeWorker::getAllConnectors() const
-{
-    std::size_t n = inputs_.size();
-    n += outputs_.size();
-    n += triggers_.size() + slots_.size();
-    std::vector<ConnectablePtr> result(n, nullptr);
-    std::size_t pos = 0;
-    for(auto i : inputs_) {
-        result[pos++] = i;
-    }
-    for(auto i : outputs_) {
-        result[pos++] = i;
-    }
-    for(auto i : triggers_) {
-        result[pos++] = i;
-    }
-    for(auto i : slots_) {
-        result[pos++] = i;
-    }
-    return result;
-}
-
-std::vector<InputPtr> NodeWorker::getAllInputs() const
-{
-    return inputs_;
-}
-
-std::vector<OutputPtr> NodeWorker::getAllOutputs() const
-{
-    return outputs_;
-}
-
-std::vector<SlotPtr> NodeWorker::getSlots() const
-{
-    return slots_;
-}
-
-std::vector<TriggerPtr> NodeWorker::getTriggers() const
-{
-    return triggers_;
-}
 
 void NodeWorker::notifyMessagesProcessed()
 {
@@ -1353,6 +735,16 @@ void NodeWorker::checkParameters()
             }
         }
     }
+}
+
+
+void NodeWorker::connectConnector(Connectable *c)
+{
+    c->connection_added_to.connect([this](Connectable*) { checkIO(); });
+    c->connectionEnabled.connect([this](bool) { checkIO(); });
+    c->connection_removed_to.connect([this](Connectable*) { checkIO(); });
+
+    c->enabled_changed.connect([this](bool) { checkIO(); });
 }
 
 void NodeWorker::checkIO()

@@ -21,7 +21,7 @@ public:
     typedef std::shared_ptr<NodeAdapter> Ptr;
 
 protected:
-    NodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController *widget_ctrl);
+    NodeAdapter(NodeHandleWeakPtr adaptee, WidgetController *widget_ctrl);
 
 public:
     virtual ~NodeAdapter();
@@ -45,7 +45,7 @@ protected:
     std::string current_display_name_;
     QBoxLayout* current_layout_;
 
-    NodeWorkerWeakPtr node_;
+    NodeHandleWeakPtr node_;
     WidgetController* widget_ctrl_;
 
     std::vector<boost::signals2::connection> connections_;

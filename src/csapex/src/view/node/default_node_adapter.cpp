@@ -9,7 +9,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/designer/widget_controller.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/view/node/parameter_context_menu.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_worker.h>
@@ -349,7 +349,7 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeWorkerWeakPtr adaptee, WidgetController *widget_ctrl)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeHandleWeakPtr adaptee, WidgetController *widget_ctrl)
     : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(nullptr)
 {
 }
@@ -861,10 +861,9 @@ void setTooltip(QLayout* l, const QString& tooltip)
     }
 }
 
-void setDirection(QBoxLayout* layout, NodeWorkerWeakPtr node)
+void setDirection(QBoxLayout* layout, NodeHandleWeakPtr node)
 {
-
-    NodeWorkerPtr n = node.lock();
+    NodeHandlePtr n = node.lock();
     if(n) {
         layout->setDirection(n->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
     }
@@ -880,12 +879,12 @@ void install(std::map<int, std::function<void(DefaultNodeAdapter*, csapex::param
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
-    NodeWorkerPtr node_worker = node_.lock();
-    if(!node_worker) {
+    NodeHandlePtr node_handle = node_.lock();
+    if(!node_handle) {
         return;
     }
 
-    auto node = node_worker->getNode().lock();
+    auto node = node_handle->getNode().lock();
     if(!node) {
         return;
     }
@@ -984,12 +983,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         current_layout_ = new QHBoxLayout;
         setDirection(current_layout_, node_);
-        node_worker->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
+        node_handle->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
 
         // connect parameter input, if available
-        InputPtr param_in = node_worker->getParameterInput(current_name_).lock();
+        InputPtr param_in = node_handle->getParameterInput(current_name_).lock();
         if(param_in) {
-            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_handle->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_in.get());
             if(pos != parameter_connections_.end()) {
@@ -1009,9 +1008,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        OutputPtr param_out = node_worker->getParameterOutput(current_name_).lock();
+        OutputPtr param_out = node_handle->getParameterOutput(current_name_).lock();
         if(param_out) {
-            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_worker->getUUID()), current_layout_);
+            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_handle->getUUID()), current_layout_);
 
             auto pos = parameter_connections_.find(param_out.get());
             if(pos != parameter_connections_.end()) {
@@ -1039,7 +1038,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
 {
     qt_helper::Call* call = new qt_helper::Call([this, cb](){
-        NodeWorkerPtr node = node_.lock();
+        NodeHandlePtr node = node_.lock();
         if(node) {
             node->executionRequested(cb);
         }

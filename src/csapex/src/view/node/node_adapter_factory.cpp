@@ -2,7 +2,7 @@
 #include <csapex/view/node/node_adapter_factory.h>
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/view/node/default_node_adapter.h>
 #include <csapex/plugin/plugin_manager.hpp>
@@ -27,7 +27,7 @@ NodeAdapterFactory::~NodeAdapterFactory()
     node_adapter_manager_ = nullptr;
 }
 
-NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeWorkerPtr node, WidgetController* widget_controller)
+NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeHandlePtr node, WidgetController* widget_controller)
 {
     std::string type = node->getType();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {

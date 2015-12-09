@@ -7,6 +7,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/meta.h>
@@ -175,6 +176,15 @@ Node* NodeBox::getNode()
 }
 
 NodeWorker* NodeBox::getNodeWorker()
+{
+    NodeWorkerPtr worker = node_worker_.lock();
+    if(!worker) {
+        return nullptr;
+    }
+    return worker.get();
+}
+
+NodeHandle* NodeBox::getNodeHandle()
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {

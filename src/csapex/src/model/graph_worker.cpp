@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/settings.h>

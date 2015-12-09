@@ -184,6 +184,9 @@ list(APPEND csapex_LIBRARIES csapex_util)
 
 
 add_library(csapex SHARED
+    src/model/node_handle.cpp
+    src/model/node_worker.cpp
+
     src/core/csapex_core.cpp
     src/core/core_plugin.cpp
     src/core/bootstrap_plugin.cpp
@@ -211,10 +214,8 @@ add_library(csapex SHARED
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
     src/model/node.cpp
-    src/model/node_handle.cpp
     src/model/node_modifier.cpp
     src/model/node_runner.cpp
-    src/model/node_worker.cpp
     src/model/node_state.cpp
     src/model/parameterizable.cpp
     src/model/tickable_node.cpp

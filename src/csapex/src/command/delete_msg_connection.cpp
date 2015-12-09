@@ -6,7 +6,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/msg/input.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -23,16 +23,16 @@ bool DeleteMessageConnection::doUndo()
     Connectable* from = graph->findConnector(from_uuid);
     Connectable* to = graph->findConnector(to_uuid);
 
-    NodeWorker* from_nw = graph->findNodeWorkerForConnector(from_uuid);
-    NodeWorker* to_nw = graph->findNodeWorkerForConnector(to_uuid);
+    NodeHandle* from_nh = graph->findNodeHandleForConnector(from_uuid);
+    NodeHandle* to_nh = graph->findNodeHandleForConnector(to_uuid);
 
     Output* output = dynamic_cast<Output*>(from);
     Input* input = dynamic_cast<Input*>(to);
 
     graph->addConnection(BundledConnection::connect(
                              output, input,
-                             from_nw->getOutputTransition(),
-                             to_nw->getInputTransition(),
+                             from_nh->getOutputTransition(),
+                             to_nh->getInputTransition(),
                              connection_id));
 
     return Meta::doUndo();

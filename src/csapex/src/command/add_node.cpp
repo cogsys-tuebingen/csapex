@@ -4,11 +4,11 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
 
@@ -57,7 +57,7 @@ bool AddNode::doExecute()
 
 bool AddNode::doUndo()
 {
-    NodeWorker* node_ = graph_->findNodeWorker(uuid_);
+    NodeHandle* node_ = graph_->findNodeHandle(uuid_);
 
     saved_state_ = node_->getNodeStateCopy();
 
@@ -72,7 +72,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        graph_->findNodeWorker(uuid_)->setNodeState(saved_state_);
+        graph_->findNodeHandle(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

@@ -52,10 +52,6 @@ public:
     NodeWorker(const std::string& type, const UUID& uuid, NodePtr node);
     ~NodeWorker();
 
-    void setNodeState(NodeStatePtr memento);
-    NodeStatePtr getNodeState();
-    NodeStatePtr getNodeStateCopy() const;
-
 
     void stop();
     void reset();
@@ -82,51 +78,11 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
-    void addInput(InputPtr in);
-    bool isParameterInput(Input* in) const;
-
-    Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
-    void addOutput(OutputPtr out);
-    bool isParameterOutput(Output* out) const;
-
-    Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
-    void addSlot(SlotPtr s);
-
-    Trigger* addTrigger(const std::string& label);
-    void addTrigger(TriggerPtr t);
-
-    Connectable* getConnector(const UUID& uuid) const;
-    Input* getInput(const UUID& uuid) const;
-    Output* getOutput(const UUID& uuid) const;
-    Slot* getSlot(const UUID& uuid) const;
-    Trigger* getTrigger(const UUID& uuid) const;
-
-    void makeParameterConnectable(csapex::param::ParameterPtr);
-    void makeParameterNotConnectable(csapex::param::ParameterPtr);
-    InputWeakPtr getParameterInput(const std::string& name) const;
-    OutputWeakPtr getParameterOutput(const std::string& name) const;
-
-
-    void removeInput(const UUID& uuid);
-    void removeOutput(const UUID& uuid);
-    void removeSlot(const UUID& uuid);
-    void removeTrigger(const UUID& uuid);
-
-    std::vector<ConnectablePtr> getAllConnectors() const;
-    std::vector<InputPtr> getAllInputs() const;
-    std::vector<OutputPtr> getAllOutputs() const;
-
-    std::vector<SlotPtr> getSlots() const;
-    std::vector<TriggerPtr> getTriggers() const;
-
     bool isWaitingForTrigger() const;
     virtual bool canProcess() const override;
     bool canReceive() const;
     bool canSend() const;
     bool areAllInputsAvailable() const;
-
-    void makeParametersConnectable();
 
     bool isSource() const;
     void setIsSource(bool source);
@@ -138,9 +94,6 @@ public:
     void setLevel(int level);
 
     std::vector<TimerPtr> extractLatestTimers();
-
-private:
-    void updateParameterValue(Connectable* source);
 
 public:
     bool tick();
@@ -185,38 +138,12 @@ public:
     boost::signals2::signal<void()> processRequested;
     boost::signals2::signal<void()> checkTransitionsRequested;
 
-    boost::signals2::signal<void()> parametersChanged;
-
-    boost::signals2::signal<void(std::function<void()>)> executionRequested;
-
-    boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
-    boost::signals2::signal<void (ConnectablePtr)> connectorRemoved;
-
-    boost::signals2::signal<void (Connectable*, Connectable*)> connectionInProgress;
-    boost::signals2::signal<void (Connectable*)> connectionDone;
-    boost::signals2::signal<void (Connectable*)> connectionStart;
-
-
-    boost::signals2::signal<void()> nodeStateChanged;
-
 private:
-    void removeInput(Input *in);
-    void removeOutput(Output *out);
-    void removeSlot(Slot *out);
-    void removeTrigger(Trigger *out);
-
-    void connectConnector(Connectable* c);
-    void disconnectConnector(Connectable* c);
-
-    template <typename T>
-    void makeParameterConnectableImpl(csapex::param::ParameterPtr);
     void publishParameters();
     void publishParameter(csapex::param::Parameter *p);
     void publishParameterOn(const csapex::param::Parameter &p, Output *out);
 
     void assertNotInGuiThread();
-
-    void triggerNodeStateChanged();
 
     void finishTimer(TimerPtr t);
 
@@ -224,31 +151,18 @@ private:
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level);
 
+
+    virtual void connectConnector(Connectable *c) override;
+
+
 private:
-    NodeStatePtr node_state_;
     NodeModifierPtr modifier_;
 
     bool is_setup_;
     State state_;
 
-    int next_input_id_;
-    int next_output_id_;
-    int next_trigger_id_;
-    int next_slot_id_;
-
     Trigger* trigger_tick_done_;
     Trigger* trigger_process_done_;
-
-    std::map<std::string, InputWeakPtr> param_2_input_;
-    std::map<std::string, OutputWeakPtr> param_2_output_;
-
-    std::map<Input*,csapex::param::Parameter*> input_2_param_;
-    std::map<Output*,csapex::param::Parameter*> output_2_param_;
-
-    std::map<Slot*, boost::signals2::connection> slot_connections_;
-
-    std::map<Trigger*, boost::signals2::connection> trigger_triggered_connections_;
-    std::map<Trigger*, boost::signals2::connection> trigger_handled_connections_;
 
 
     std::vector<boost::signals2::connection> connections;
@@ -259,7 +173,6 @@ private:
     bool sink_;
     int level_;
 
-    mutable std::recursive_mutex sync;
     mutable std::recursive_mutex state_mutex_;
 
     std::recursive_mutex timer_mutex_;

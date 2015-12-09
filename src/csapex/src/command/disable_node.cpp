@@ -5,11 +5,10 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node_state.h>
@@ -45,20 +44,20 @@ std::string DisableNode::getDescription() const
 
 bool DisableNode::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorkerForConnector(uuid);
+    NodeHandle* node_handle = graph_->findNodeHandleForConnector(uuid);
 
-//    node_worker->setProcessingEnabled(!disable_);
-    node_worker->getNodeState()->setEnabled(!disable_);
+//    node_handle->setProcessingEnabled(!disable_);
+    node_handle->getNodeState()->setEnabled(!disable_);
 
     return true;
 }
 
 bool DisableNode::doUndo()
 {
-    NodeWorker* node_worker = graph_->findNodeWorkerForConnector(uuid);
+    NodeHandle* node_handle = graph_->findNodeHandleForConnector(uuid);
 
-//    node_worker->setProcessingEnabled(disable_);
-    node_worker->getNodeState()->setEnabled(disable_);
+//    node_handle->setProcessingEnabled(disable_);
+    node_handle->getNodeState()->setEnabled(disable_);
 
     return true;
 }

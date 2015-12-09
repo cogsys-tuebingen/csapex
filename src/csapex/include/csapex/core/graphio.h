@@ -29,10 +29,10 @@ public:
     void loadConnections(const YAML::Node& doc);
 
 protected:
-    void serializeNode(YAML::Node& doc, NodeWorker *node_worker);
-    void deserializeNode(const YAML::Node& doc, NodeWorker* node_worker);
+    void serializeNode(YAML::Node& doc, NodeHandle* node_handle);
+    void deserializeNode(const YAML::Node& doc, NodeHandle* node_handle);
 
-    void loadMessageConnection(Connectable *from, NodeWorker *parent, const UUID &to_uuid);
+    void loadMessageConnection(Connectable *from, NodeHandle *parent, const UUID &to_uuid);
     void loadSignalConnection(Connectable *from, const UUID &to_uuid);
 
 private:

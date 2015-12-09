@@ -11,7 +11,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/view/node/node_statistics.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/tag.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/scheduling/executor.h>

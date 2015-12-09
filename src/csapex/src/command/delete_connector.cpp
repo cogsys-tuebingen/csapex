@@ -2,11 +2,10 @@
 #include <csapex/command/delete_connector.h>
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
@@ -32,7 +31,7 @@ std::string DeleteConnector::getDescription() const
 
 bool DeleteConnector::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorkerForConnector(c_uuid);
+    NodeHandle* node_worker = graph_->findNodeHandleForConnector(c_uuid);
 
     if(c->isConnected()) {
         delete_connections = CommandFactory(graph_).removeAllConnectionsCmd(c);
@@ -65,16 +64,16 @@ bool DeleteConnector::doRedo()
 
 bool DeleteConnector::refresh()
 {
-    NodeWorker* node_worker = graph_->findNodeWorkerForConnector(c_uuid);
+    NodeHandle* node_handle = graph_->findNodeHandleForConnector(c_uuid);
 
-    if(!node_worker) {
+    if(!node_handle) {
         return false;
     }
 
     if(in) {
-        c = node_worker->getInput(c_uuid);
+        c = node_handle->getInput(c_uuid);
     } else {
-        c = node_worker->getOutput(c_uuid);
+        c = node_handle->getOutput(c_uuid);
     }
 
     apex_assert_hard(c);

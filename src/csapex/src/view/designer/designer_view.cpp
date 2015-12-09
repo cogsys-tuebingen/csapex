@@ -218,7 +218,7 @@ Command::Ptr DesignerView::deleteSelected()
     for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
-            meta->add(Command::Ptr(new command::DeleteNode(proxy->getBox()->getNodeWorker()->getUUID())));
+            meta->add(Command::Ptr(new command::DeleteNode(proxy->getBox()->getNodeHandle()->getUUID())));
         }
     }
     return meta;

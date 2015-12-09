@@ -276,7 +276,7 @@ void WidgetController::connectorMessageAdded(ConnectablePtr connector)
     UUID parent_uuid = connector->getUUID().parentUUID();
 
     Graph* g = graph_->getGraph();
-    NodeWorker* node_worker = g->findNodeWorker(parent_uuid);
+    NodeHandle* node_worker = g->findNodeHandle(parent_uuid);
     if(node_worker) {
         Output* o = dynamic_cast<Output*>(connector.get());
         if(o && node_worker->isParameterOutput(o)) {

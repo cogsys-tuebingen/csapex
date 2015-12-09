@@ -18,7 +18,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/delete_connection.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/utility/assert.h>
 
 using namespace csapex;
@@ -141,7 +141,7 @@ Command::Ptr CommandFactory::clearCommand()
 {
     command::Meta::Ptr clear(new command::Meta("Clear graph_"));
 
-    for(auto node : graph_->getAllNodeWorkers()) {
+    for(auto node : graph_->getAllNodeHandles()) {
         clear->add(Command::Ptr (new command::DeleteNode(node->getUUID())));
     }
 

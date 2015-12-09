@@ -7,7 +7,7 @@
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/connection.h>
 #include <csapex/view/node/box.h>
 #include <csapex/msg/input.h>
@@ -325,8 +325,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     }
 
     // augment nodes
-    for(NodeWorker* node_worker : graph_->getAllNodeWorkers()) {
-        NodeBox* box = widget_ctrl_->getBox(node_worker->getUUID());
+    for(NodeHandle* node_handle : graph_->getAllNodeHandles()) {
+        NodeBox* box = widget_ctrl_->getBox(node_handle->getUUID());
 
         if(!box || !rect.intersects(box->geometry())) {
             continue;
@@ -362,8 +362,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw port information (in)
-        for(auto input : node_worker->getAllInputs()) {
-            if(!node_worker->isParameterInput(input.get())) {
+        for(auto input : node_handle->getAllInputs()) {
+            if(!node_handle->isParameterInput(input.get())) {
                 Port* p = widget_ctrl_->getPort(input.get());
                 if(p) {
                     drawPort(painter, box, p);
@@ -371,8 +371,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
         }
         // draw port information (out)
-        for(auto output : node_worker->getAllOutputs()) {
-            if(!node_worker->isParameterOutput(output.get())) {
+        for(auto output : node_handle->getAllOutputs()) {
+            if(!node_handle->isParameterOutput(output.get())) {
                 Port* p = widget_ctrl_->getPort(output.get());
                 if(p) {
                     drawPort(painter, box, p);
@@ -381,14 +381,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw slots
-        for(auto slot : node_worker->getSlots()) {
+        for(auto slot : node_handle->getSlots()) {
             Port* p = widget_ctrl_->getPort(slot.get());
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw triggers
-        for(auto trigger : node_worker->getTriggers()) {
+        for(auto trigger : node_handle->getTriggers()) {
             Port* p = widget_ctrl_->getPort(trigger.get());
             if(p) {
                 drawPort(painter, box, p);
@@ -773,8 +773,8 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     ccs.hidden_from = !fromp->isVisible();
     ccs.hidden_to = !top->isVisible();
 
-    int lf = graph_->getLevel(graph_->findNodeWorkerForConnector(from->getUUID())->getUUID());
-    int lt = graph_->getLevel(graph_->findNodeWorkerForConnector(to->getUUID())->getUUID());
+    int lf = graph_->getLevel(graph_->findNodeHandleForConnector(from->getUUID())->getUUID());
+    int lt = graph_->getLevel(graph_->findNodeHandleForConnector(to->getUUID())->getUUID());
 
     if(from->isDynamic()) {
         ccs.level = lt;

@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/designer/widget_controller.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 
 /// SYSTEM

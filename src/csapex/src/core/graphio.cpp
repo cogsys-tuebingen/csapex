@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/node.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/bundled_connection.h>
@@ -47,7 +48,7 @@ void GraphIO::loadSettings(const YAML::Node &doc)
 
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    for(NodeWorker* node : graph_->getAllNodeWorkers()) {
+    for(NodeHandle* node : graph_->getAllNodeHandles()) {
         try {
             YAML::Node yaml_node;
             serializeNode(yaml_node, node);
@@ -81,7 +82,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    for(NodeWorker* node : graph_->getAllNodeWorkers()) {
+    for(NodeHandle* node : graph_->getAllNodeHandles()) {
         if(!node->getAllOutputs().empty()) {
             for(auto output : node->getAllOutputs()) {
                 if(output->countConnections() == 0) {
@@ -163,9 +164,9 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
             UUID from_uuid = UUID::make_forced(from_uuid_tmp);
 
-            NodeWorker* parent = nullptr;
+            NodeHandle* parent = nullptr;
             try {
-                parent = graph_->findNodeWorkerForConnector(from_uuid);
+                parent = graph_->findNodeHandleForConnector(from_uuid);
 
             } catch(const std::exception& e) {
                 std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
@@ -266,10 +267,10 @@ void GraphIO::loadConnections(const YAML::Node &doc)
     }
 }
 
-void GraphIO::loadMessageConnection(Connectable* from, NodeWorker* parent, const UUID& to_uuid)
+void GraphIO::loadMessageConnection(Connectable* from, NodeHandle* parent, const UUID& to_uuid)
 {
     try {
-        NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
+        NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
 
         Input* in = target->getInput(to_uuid);
         if(!in) {
@@ -294,7 +295,7 @@ void GraphIO::loadMessageConnection(Connectable* from, NodeWorker* parent, const
 void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
 {
     try {
-        NodeWorker* target = graph_->findNodeWorkerForConnector(to_uuid);
+        NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
 
         Slot* in = target->getSlot(to_uuid);
         if(!in) {
@@ -315,20 +316,20 @@ void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
 }
 
 
-void GraphIO::serializeNode(YAML::Node& doc, NodeWorker* node_worker)
+void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
 {
-    node_worker->getNodeState()->writeYaml(doc);
+    node_handle->getNodeState()->writeYaml(doc);
 
-    auto node = node_worker->getNode().lock();
+    auto node = node_handle->getNode().lock();
     if(node) {
         // hook for nodes to serialize
         Serialization::instance().serialize(*node, doc);
     }
 }
 
-void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandle* node_handle)
 {
-    NodeState::Ptr s = node_worker->getNodeState();
+    NodeState::Ptr s = node_handle->getNodeState();
     s->readYaml(doc);
 
     int x = doc["pos"][0].as<double>();
@@ -337,10 +338,10 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeWorker* node_worker)
     if(x != 0 || y != 0) {
         s->setPos(Point(x,y));
     }
-    node_worker->setNodeState(s);
+    node_handle->setNodeState(s);
 
     // hook for nodes to deserialize
-    auto node = node_worker->getNode().lock();
+    auto node = node_handle->getNode().lock();
     if(node) {
         Serialization::instance().deserialize(*node, doc);
     }

@@ -4,8 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 
 /// SYSTEM
@@ -35,11 +34,11 @@ std::string FlipSides::getDescription() const
 
 bool FlipSides::doExecute()
 {
-    NodeWorker* node_worker = graph_->findNodeWorker(uuid);
-    apex_assert_hard(node_worker);
+    NodeHandle* node_handle = graph_->findNodeHandle(uuid);
+    apex_assert_hard(node_handle);
 
-    bool flip = !node_worker->getNodeState()->isFlipped();
-    node_worker->getNodeState()->setFlipped(flip);
+    bool flip = !node_handle->getNodeState()->isFlipped();
+    node_handle->getNodeState()->setFlipped(flip);
 
     return true;
 }

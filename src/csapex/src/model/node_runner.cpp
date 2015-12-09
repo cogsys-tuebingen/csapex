@@ -2,6 +2,7 @@
 #include <csapex/model/node_runner.h>
 
 /// PROJECT
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/tickable_node.h>
 #include <csapex/scheduling/scheduler.h>
@@ -108,8 +109,6 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     connections_.push_back(cg);
 
     if(ticking_ && !tick_thread_running_) {
-        std::cerr << "start ticking" << std::endl;
-
         // TODO: get rid of this!
         ticking_thread_ = std::thread([this]() {
             csapex::thread::set_name((std::string("T") + worker_->getUUID().getShortName()).c_str());

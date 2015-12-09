@@ -4,11 +4,10 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/command/command_factory.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
 #include <csapex/model/node.h>
 #include <csapex/msg/bundled_connection.h>
 

@@ -5,7 +5,7 @@
 #include <csapex/view/node/box.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/view/designer/designer_view.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_state.h>
@@ -116,9 +116,9 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if(clone_p_) {
         QPointF delta = clone_start_ - event->pos();
         if(hypot(delta.x(), delta.y()) > 10) {
-            NodeStatePtr state = box_->getNodeWorker()->getNodeStateCopy();
+            NodeStatePtr state = box_->getNodeHandle()->getNodeStateCopy();
             state->setLabel("");
-            widget_ctrl_->startPlacingBox(view_, box_->getNodeWorker()->getType(), state);
+            widget_ctrl_->startPlacingBox(view_, box_->getNodeHandle()->getType(), state);
         }
         return;
     }

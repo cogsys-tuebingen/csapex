@@ -25,7 +25,7 @@ public:
     void loadBoxes(YAML::Node& doc, WidgetController* widget_ctrl);
 
 private:
-    void saveBox(NodeWorker *node, WidgetController* widget_ctrl, YAML::Node &yaml);
+    void saveBox(NodeHandle *node, WidgetController* widget_ctrl, YAML::Node &yaml);
 };
 
 }

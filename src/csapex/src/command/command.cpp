@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
 #include <csapex/utility/assert.h>
 
 using namespace csapex;

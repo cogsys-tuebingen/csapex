@@ -5,7 +5,7 @@
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_worker.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>

@@ -2,7 +2,7 @@
 #include <csapex/msg/transition.h>
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/connection.h>
 #include <csapex/model/connectable.h>
 #include <csapex/utility/assert.h>

@@ -8,7 +8,7 @@
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/error_state.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <memory>
@@ -59,6 +59,7 @@ public:
     /// ACCESSORS
     Node* getNode();
     NodeWorker* getNodeWorker();
+    NodeHandle* getNodeHandle();
     NodeAdapterPtr getNodeAdapter();
 
     virtual bool hasSubGraph();

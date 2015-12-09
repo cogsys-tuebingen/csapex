@@ -5,7 +5,6 @@
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
 #include <csapex/utility/assert.h>
 #include <csapex/signal/signal_connection.h>
 #include <csapex/signal/trigger.h>
