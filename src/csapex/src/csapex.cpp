@@ -8,7 +8,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node_handle.h>
@@ -152,12 +152,12 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     GraphPtr graph = std::make_shared<Graph>();
     ThreadPool thread_pool(handler, !threadless, thread_grouping);
     thread_pool.setPause(paused);
-    GraphWorkerPtr graph_worker = std::make_shared<GraphWorker>(thread_pool, graph.get());
+    GraphFacadePtr graph_facade = std::make_shared<GraphFacade>(thread_pool, graph.get());
 
     NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(plugin_locator.get());
 
     CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
-                                                      graph_worker, graph,
+                                                      graph_facade, graph,
                                                       thread_pool, node_factory.get());
 
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
@@ -171,7 +171,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
-        CommandDispatcher dispatcher(settings, graph_worker, graph, &thread_pool, node_factory.get());
+        CommandDispatcher dispatcher(settings, graph_facade, graph, &thread_pool, node_factory.get());
         boost::signals2::scoped_connection saved_connection(core->saved.connect([&](){
             dispatcher.setClean();
             dispatcher.resetDirtyPoint();
@@ -202,7 +202,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
 
         NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
-        WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_worker, node_factory.get(), node_adapter_factory.get());
+        WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_facade, node_factory.get(), node_adapter_factory.get());
         DragIO drag_io(plugin_locator, graph.get(), &dispatcher, widget_control);
 
         DesignerStyleable style;
@@ -228,7 +228,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         widget_control->setDesigner(designer);
 
         CsApexWindow w(*core, &dispatcher, widget_control,
-                       graph_worker, graph,
+                       graph_facade, graph,
                        thread_pool, designer, minimap, legend, timeline, plugin_locator);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 

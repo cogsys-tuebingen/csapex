@@ -7,7 +7,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/bundled_connection.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/trigger.h>

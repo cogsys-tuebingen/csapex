@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
 #include <csapex/command/command_factory.h>
 
@@ -12,10 +12,10 @@
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph_worker,
+CommandDispatcher::CommandDispatcher(Settings& settings, GraphFacade::Ptr graph_facade,
                                      GraphPtr graph,
                                      ThreadPool* thread_pool, NodeFactory* node_factory)
-    : settings_(settings), graph_worker_(graph_worker), graph_(graph), thread_pool_(thread_pool), node_factory_(node_factory),
+    : settings_(settings), graph_facade_(graph_facade), graph_(graph), thread_pool_(thread_pool), node_factory_(node_factory),
       cmd_factory_(std::make_shared<CommandFactory>(graph.get())),
       dirty_(false)
 {
@@ -24,7 +24,7 @@ CommandDispatcher::CommandDispatcher(Settings& settings, GraphWorker::Ptr graph_
 
 void CommandDispatcher::reset()
 {
-    graph_worker_->reset();
+    graph_facade_->reset();
     later.clear();
     done.clear();
     undone.clear();
@@ -37,7 +37,7 @@ void CommandDispatcher::execute(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
+    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
     doExecute(command);
 }
 
@@ -47,7 +47,7 @@ void CommandDispatcher::executeLater(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
+    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
     later.push_back(command);
 }
 
@@ -61,14 +61,14 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::executeNotUndoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
-    Command::Access::executeCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, command);
+    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
+    Command::Access::executeCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, command);
 }
 
 void CommandDispatcher::undoNotRedoable(Command::Ptr command)
 {
-    command->init(&settings_, graph_worker_.get(), graph_.get(), thread_pool_, node_factory_);
-    Command::Access::undoCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, command);
+    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
+    Command::Access::undoCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, command);
 }
 
 
@@ -82,7 +82,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = Command::Access::executeCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, command);
+    bool success = Command::Access::executeCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -170,7 +170,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = Command::Access::undoCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, last);
+    bool ret = Command::Access::undoCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, last);
     apex_assert_hard(ret);
 
     setDirty(!last->isAfterSavepoint());
@@ -189,7 +189,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    Command::Access::redoCommand(graph_worker_.get(), graph_.get(), thread_pool_, node_factory_, last);
+    Command::Access::redoCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, last);
 
     done.push_back(last);
 

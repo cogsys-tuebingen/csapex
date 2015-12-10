@@ -7,7 +7,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/bundled_connection.h>
 

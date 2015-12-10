@@ -209,7 +209,7 @@ add_library(csapex SHARED
     src/model/fulcrum.cpp
     src/model/generic_state.cpp
     src/model/graph.cpp
-    src/model/graph_worker.cpp
+    src/model/graph_facade.cpp
     src/model/memento.cpp
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp

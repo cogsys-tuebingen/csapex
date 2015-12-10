@@ -8,7 +8,7 @@
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/manager/message_renderer_manager.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/tag.h>
 #include <csapex/factory/message_factory.h>
@@ -30,11 +30,11 @@
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       GraphWorkerPtr graph_worker, GraphPtr graph,
+                       GraphFacadePtr graph_facade, GraphPtr graph,
                        ThreadPool &thread_pool,
                        NodeFactory *node_factory)
     : settings_(settings), plugin_locator_(plugin_locator),
-      graph_worker_(graph_worker), graph_(graph),
+      graph_facade_(graph_facade), graph_(graph),
       thread_pool_(thread_pool),
       node_factory_(node_factory),
       core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")),

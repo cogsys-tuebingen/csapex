@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/scheduling/thread_pool.h>
@@ -42,7 +42,7 @@ std::string SwitchThread::getDescription() const
 
 bool SwitchThread::doExecute()
 {
-    TaskGenerator* tg = graph_worker_->getTaskGenerator(uuid);
+    TaskGenerator* tg = graph_facade_->getTaskGenerator(uuid);
 
     auto group = thread_pool_->getGroupFor(tg);
     old_id = group->id();
@@ -57,7 +57,7 @@ bool SwitchThread::doExecute()
 
 bool SwitchThread::doUndo()
 {
-    TaskGenerator* tg = graph_worker_->getTaskGenerator(uuid);
+    TaskGenerator* tg = graph_facade_->getTaskGenerator(uuid);
 
     thread_pool_->addToGroup(tg, old_id);
 

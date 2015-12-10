@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/uuid.h>
 
@@ -13,16 +14,19 @@
 namespace csapex
 {
 
-class GraphWorker
+class GraphFacade
 {
 public:
-    typedef std::shared_ptr<GraphWorker> Ptr;
+    typedef std::shared_ptr<GraphFacade> Ptr;
 
 public:
-    GraphWorker(Executor& executor, Graph* graph);
-    ~GraphWorker();
+    GraphFacade(Executor& executor, Graph* graph);
+    ~GraphFacade();
 
     Graph* getGraph();
+
+    ConnectionPtr connect(Output* output, Input* input,
+                          OutputTransition* ot, InputTransition* it);
 
     TaskGenerator* getTaskGenerator(const UUID& uuid);
 

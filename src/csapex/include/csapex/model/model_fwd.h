@@ -21,7 +21,7 @@ FWD(NodeRunner);
 FWD(Connectable);
 FWD(Memento);
 FWD(Graph);
-FWD(GraphWorker);
+FWD(GraphFacade);
 FWD(ConnectionType);
 FWD(GenericState);
 FWD(Node);

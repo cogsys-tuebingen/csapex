@@ -15,7 +15,7 @@ namespace csapex {
 class Graph
 {
     friend class GraphIO;
-    friend class GraphWorker;
+    friend class GraphFacade;
 
 public:
     typedef std::shared_ptr<Graph> Ptr;

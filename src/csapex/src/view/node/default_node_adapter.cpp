@@ -12,7 +12,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/view/node/parameter_context_menu.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/doublespanslider.h>
 
 /// PROJECT

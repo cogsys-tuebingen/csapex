@@ -5,7 +5,7 @@
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/utility/html_delegate.h>
 #include <csapex/view/designer/designer_view.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -16,7 +16,7 @@
 
 using namespace csapex;
 
-ScreenshotDialog::ScreenshotDialog(GraphWorkerPtr graph, QWidget* widget, QWidget *parent, Qt::WindowFlags f)
+ScreenshotDialog::ScreenshotDialog(GraphFacadePtr graph, QWidget* widget, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f), graph_(graph), widget_(widget)
 {
     setWindowIcon(QIcon(":/image.png"));

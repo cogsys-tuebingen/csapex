@@ -36,7 +36,7 @@ bool DeleteConnector::doExecute()
     if(c->isConnected()) {
         delete_connections = CommandFactory(graph_).removeAllConnectionsCmd(c);
 
-        Command::executeCommand(graph_worker_, graph_, thread_pool_, node_factory_, delete_connections);
+        Command::executeCommand(graph_facade_, graph_, thread_pool_, node_factory_, delete_connections);
     }
 
     if(in) {

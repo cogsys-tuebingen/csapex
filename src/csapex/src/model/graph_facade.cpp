@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 
 /// COMPONENT
 #include <csapex/model/graph.h>
@@ -11,10 +11,11 @@
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/scheduling/executor.h>
+#include <csapex/msg/bundled_connection.h>
 
 using namespace csapex;
 
-GraphWorker::GraphWorker(Executor &executor, Graph* graph)
+GraphFacade::GraphFacade(Executor &executor, Graph* graph)
     : graph_(graph), executor_(executor)
 {
     connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) {
@@ -31,7 +32,7 @@ GraphWorker::GraphWorker(Executor &executor, Graph* graph)
     }));
 }
 
-GraphWorker::~GraphWorker()
+GraphFacade::~GraphFacade()
 {
     for(auto connection : connections_) {
         connection.disconnect();
@@ -39,17 +40,24 @@ GraphWorker::~GraphWorker()
     connections_.clear();
 }
 
-Graph* GraphWorker::getGraph()
+Graph* GraphFacade::getGraph()
 {
     return graph_;
 }
 
-TaskGenerator* GraphWorker::getTaskGenerator(const UUID &uuid)
+ConnectionPtr GraphFacade::connect(Output *output, Input *input, OutputTransition *ot, InputTransition *it)
+{
+    auto c = BundledConnection::connect(output, input, ot, it);
+    graph_->addConnection(c);
+    return c;
+}
+
+TaskGenerator* GraphFacade::getTaskGenerator(const UUID &uuid)
 {
     return generators_.at(uuid).get();
 }
 
-void GraphWorker::reset()
+void GraphFacade::reset()
 {
     stop();
     graph_->clear();
@@ -59,12 +67,12 @@ void GraphWorker::reset()
     generators_.clear();
 }
 
-bool GraphWorker::isPaused() const
+bool GraphFacade::isPaused() const
 {
     return executor_.isPaused();
 }
 
-void GraphWorker::pauseRequest(bool pause)
+void GraphFacade::pauseRequest(bool pause)
 {
     if(executor_.isPaused() == pause) {
         return;
@@ -76,7 +84,7 @@ void GraphWorker::pauseRequest(bool pause)
 }
 
 
-void GraphWorker::stop()
+void GraphFacade::stop()
 {
     for(NodeWorker* nw : graph_->getAllNodeWorkers()) {
         nw->stop();
@@ -87,7 +95,7 @@ void GraphWorker::stop()
     stopped();    
 }
 
-void GraphWorker::clearBlock()
+void GraphFacade::clearBlock()
 {
     executor_.clear();
 }

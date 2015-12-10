@@ -19,7 +19,7 @@ class ScreenshotDialog : public QDialog
     Q_OBJECT
 
 public:
-    ScreenshotDialog(GraphWorkerPtr graph, QWidget *widget, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ScreenshotDialog(GraphFacadePtr graph, QWidget *widget, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
 private Q_SLOTS:
     void refreshScreenshot();
@@ -27,7 +27,7 @@ private Q_SLOTS:
     void handle(QAbstractButton* button);
 
 private:
-    GraphWorkerPtr graph_;
+    GraphFacadePtr graph_;
     QWidget* widget_;
     QImage image_;
     QGraphicsView* view_;

@@ -7,7 +7,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/info.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_worker.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/view/node/node_statistics.h>
@@ -47,13 +47,13 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphWorkerPtr graph_worker,
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphFacadePtr graph_facade,
                            GraphPtr graph, Executor& executor,
                            Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
                            PluginLocatorPtr locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl),
-      graph_worker_(graph_worker), graph_(graph), executor_(executor),
+      graph_facade_(graph_facade), graph_(graph), executor_(executor),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {    
@@ -86,7 +86,7 @@ void CsApexWindow::construct()
 
     setupTimeline();
 
-    Graph* graph = graph_worker_->getGraph();
+    Graph* graph = graph_facade_->getGraph();
 
     designer_->setup();
     setCentralWidget(designer_);
@@ -433,7 +433,7 @@ void CsApexWindow::copyRight()
 void CsApexWindow::clearBlock()
 {
     std::cerr << "clearing blocking connections" << std::endl;
-    graph_worker_->clearBlock();
+    graph_facade_->clearBlock();
 }
 
 void CsApexWindow::updateNodeTypes()
@@ -648,7 +648,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     core_.settingsChanged();
 
     try {
-        graph_worker_->stop();
+        graph_facade_->stop();
     } catch(const std::exception& e) {
         std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
     } catch(...) {
@@ -745,7 +745,7 @@ void CsApexWindow::redo()
 
 void CsApexWindow::makeScreenshot()
 {
-    ScreenshotDialog diag(graph_worker_, this);
+    ScreenshotDialog diag(graph_facade_, this);
     diag.exec();
 }
 
@@ -775,7 +775,7 @@ void CsApexWindow::loadSettings(YAML::Node &doc)
 void CsApexWindow::saveView(YAML::Node &doc)
 {
     DesignerIO designerio;
-    designerio.saveBoxes(doc, graph_worker_->getGraph(), widget_ctrl_.get());
+    designerio.saveBoxes(doc, graph_facade_->getGraph(), widget_ctrl_.get());
 }
 
 void CsApexWindow::loadView(YAML::Node &doc)
