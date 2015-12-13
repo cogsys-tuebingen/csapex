@@ -20,25 +20,25 @@ public:
     Trigger(Unique *parent, int sub_id);
     ~Trigger();
 
-    virtual bool canOutput() const {
+    virtual bool canOutput() const override {
         return true;
     }
-    virtual bool isOutput() const {
+    virtual bool isOutput() const override {
         return true;
     }
 
     void trigger();
     void signalHandled(Slot* slot);
 
-    virtual void disable();
+    virtual void disable() override;
 
-    virtual bool canConnectTo(Connectable* other_side, bool move) const;
+    virtual bool canConnectTo(Connectable* other_side, bool move) const override;
 
-    virtual bool targetsCanBeMovedTo(Connectable *other_side) const;
-    virtual bool isConnected() const;
+    virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
+    virtual bool isConnected() const override;
 
-    virtual void connectionMovePreview(Connectable* other_side);
-    virtual void validateConnections();
+    virtual void connectionMovePreview(Connectable* other_side) override;
+    virtual void validateConnections() override;
 
     int noTargets();
     std::vector<Slot*> getTargets() const;

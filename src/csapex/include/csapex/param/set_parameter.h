@@ -22,17 +22,17 @@ public:
     explicit SetParameter(const std::string& name, const ParameterDescription &description);
     virtual ~SetParameter();
 
-    virtual int ID() const { return 0x006; }
-    virtual std::string TYPE() const { return "set"; }
+    virtual int ID() const override { return 0x006; }
+    virtual std::string TYPE() const override { return "set"; }
 
-    virtual const std::type_info &type() const;
-    virtual std::string toStringImpl() const;
+    virtual const std::type_info &type() const override;
+    virtual std::string toStringImpl() const override;
 
-    void doSetValueFrom(const Parameter& other);
-    void doClone(const Parameter& other);
+    void doSetValueFrom(const Parameter& other) override;
+    void doClone(const Parameter& other) override;
 
-    void doSerialize(YAML::Node& e) const;
-    void doDeserialize(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const override;
+    void doDeserialize(const YAML::Node& n) override;
 
     template <typename T>
     T def() const { return read<T>(def_); }

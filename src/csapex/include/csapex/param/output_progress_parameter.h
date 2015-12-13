@@ -19,8 +19,8 @@ public:
     explicit OutputProgressParameter(const std::string& name, const ParameterDescription& description);
     virtual ~OutputProgressParameter();
 
-    virtual int ID() const { return 0x009; }
-    virtual std::string TYPE() const { return "progress"; }
+    virtual int ID() const override { return 0x009; }
+    virtual std::string TYPE() const override { return "progress"; }
 
     void setProgress(int progress, int maximum);
     double getProgress() const;
@@ -29,13 +29,13 @@ public:
 protected:
     virtual boost::any get_unsafe() const override;
     virtual bool set_unsafe(const boost::any& v) override;
-    virtual std::string toStringImpl() const;
+    virtual std::string toStringImpl() const override;
 
-    virtual void doSerialize(YAML::Node& n) const;
-    virtual void doDeserialize(const YAML::Node& n);
+    virtual void doSerialize(YAML::Node& n) const override;
+    virtual void doDeserialize(const YAML::Node& n) override;
 
-    virtual void doSetValueFrom(const Parameter& other);
-    virtual void doClone(const Parameter& other);
+    virtual void doSetValueFrom(const Parameter& other) override;
+    virtual void doClone(const Parameter& other) override;
 
 private:
     int value;

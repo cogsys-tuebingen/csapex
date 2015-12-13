@@ -20,13 +20,13 @@ public:
     AddConnection(const UUID &from_uuid, const UUID &to_uuid);
 
 protected:
-    bool doUndo();
-    bool doRedo();
+    bool doUndo() override;
+    bool doRedo() override;
 
     virtual void refresh() = 0;
 
-    virtual std::string getType() const;
-    virtual std::string getDescription() const;
+    virtual std::string getType() const override;
+    virtual std::string getDescription() const override;
 
 protected:
     UUID from_uuid;

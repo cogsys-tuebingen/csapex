@@ -19,20 +19,20 @@ public:
     explicit TriggerParameter(const std::string& name, const ParameterDescription& description);
     virtual ~TriggerParameter();
 
-    virtual int ID() const { return 0x007; }
-    virtual std::string TYPE() const { return "trigger"; }
+    virtual int ID() const override { return 0x007; }
+    virtual std::string TYPE() const override { return "trigger"; }
 
     void trigger();
-    virtual bool hasState() const;
+    virtual bool hasState() const override;
 
-    virtual const std::type_info &type() const;
-    virtual std::string toStringImpl() const;
+    virtual const std::type_info &type() const override;
+    virtual std::string toStringImpl() const override;
 
-    void doSetValueFrom(const Parameter& other);
-    void doClone(const Parameter& other);
+    void doSetValueFrom(const Parameter& other) override;
+    void doClone(const Parameter& other) override;
 
-    void doSerialize(YAML::Node& e) const;
-    void doDeserialize(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const override;
+    void doDeserialize(const YAML::Node& n) override;
 
 protected:
     virtual boost::any get_unsafe() const override;

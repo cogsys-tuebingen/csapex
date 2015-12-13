@@ -23,7 +23,7 @@ struct CsApexCoreApp : public QCoreApplication, public AppProxy
 {
     CsApexCoreApp(int& argc, char** argv, ExceptionHandler& handler);
 
-    virtual bool notify(QObject* receiver, QEvent* event);
+    virtual bool notify(QObject* receiver, QEvent* event) override;
     virtual bool doNotify(QObject* receiver, QEvent* event) override;
 
 private:
@@ -34,7 +34,7 @@ struct CsApexGuiApp : public QApplication, public AppProxy
 {
     CsApexGuiApp(int& argc, char** argv, ExceptionHandler& handler);
 
-    virtual bool notify(QObject* receiver, QEvent* event);
+    virtual bool notify(QObject* receiver, QEvent* event) override;
     virtual bool doNotify(QObject* receiver, QEvent* event) override;
 
     void handleAssertionFailure(const csapex::HardAssertionFailure& assertion);

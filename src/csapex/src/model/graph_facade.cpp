@@ -12,6 +12,7 @@
 #include <csapex/model/node_runner.h>
 #include <csapex/scheduling/executor.h>
 #include <csapex/msg/bundled_connection.h>
+#include <csapex/model/connectable.h>
 
 using namespace csapex;
 
@@ -45,9 +46,24 @@ Graph* GraphFacade::getGraph()
     return graph_;
 }
 
+void GraphFacade::addNode(NodeWorkerPtr node)
+{
+    graph_->addNode(node);
+}
+
 ConnectionPtr GraphFacade::connect(Output *output, Input *input, OutputTransition *ot, InputTransition *it)
 {
     auto c = BundledConnection::connect(output, input, ot, it);
+    graph_->addConnection(c);
+    return c;
+}
+
+ConnectionPtr GraphFacade::connect(NodeHandle *output, int output_id,
+                                   NodeHandle *input, int input_id)
+{
+    Output* o = output->getOutput(Connectable::makeUUID_forced(output->getUUID(), "out", output_id));
+    Input* i = input->getInput(Connectable::makeUUID_forced(input->getUUID(), "in", input_id));
+    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
     graph_->addConnection(c);
     return c;
 }

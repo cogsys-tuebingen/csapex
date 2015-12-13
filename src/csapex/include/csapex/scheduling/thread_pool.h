@@ -48,8 +48,8 @@ public:
     void loadSettings(YAML::Node&);
 
 protected:
-    void pauseChanged(bool pause);
-    void steppingChanged(bool performStep);
+    void pauseChanged(bool pause) override;
+    void steppingChanged(bool performStep) override;
 
 private:
     void assignGeneratorToGroup(TaskGenerator* task, ThreadGroup* group);

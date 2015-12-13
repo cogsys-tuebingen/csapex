@@ -23,8 +23,8 @@ public:
 
     NodeState& operator = (const NodeState& rhs);
 
-    virtual void writeYaml(YAML::Node& out) const;
-    virtual void readYaml(const YAML::Node& node);
+    virtual void writeYaml(YAML::Node& out) const override;
+    virtual void readYaml(const YAML::Node& node) override;
 
 public:
     Point getPos() const;

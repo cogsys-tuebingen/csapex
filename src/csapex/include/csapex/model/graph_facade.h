@@ -25,8 +25,13 @@ public:
 
     Graph* getGraph();
 
+
+    void addNode(NodeWorkerPtr node);
+
     ConnectionPtr connect(Output* output, Input* input,
                           OutputTransition* ot, InputTransition* it);
+    ConnectionPtr connect(NodeHandle* output, int output_id,
+                          NodeHandle* input, int input_id);
 
     TaskGenerator* getTaskGenerator(const UUID& uuid);
 

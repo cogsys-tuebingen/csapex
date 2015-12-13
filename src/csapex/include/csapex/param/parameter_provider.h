@@ -33,8 +33,8 @@ public:
     StaticParameterProvider(const Vec& params);
     StaticParameterProvider(const Map& params);
 
-    virtual Parameter::Ptr getParameter(const std::string& name);
-    virtual const Parameter::Ptr getConstParameter(const std::string& name) const;
+    virtual Parameter::Ptr getParameter(const std::string& name) override;
+    virtual const Parameter::Ptr getConstParameter(const std::string& name) const override;
 private:
     Map params_;
 };

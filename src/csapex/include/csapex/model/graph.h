@@ -54,10 +54,6 @@ public:
     Node* findNodeNoThrow(const UUID& uuid) const;
     Node* findNodeForConnector(const UUID &uuid) const;
 
-    NodeWorker* findNodeWorker(const UUID& uuid) const;
-    NodeWorker* findNodeWorkerNoThrow(const UUID& uuid) const;
-    NodeWorker* findNodeWorkerForConnector(const UUID &uuid) const;
-
     NodeHandle* findNodeHandle(const UUID& uuid) const;
     NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const;
     NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
@@ -98,6 +94,11 @@ private:
    /*rename*/ void verify();
     void buildConnectedComponents();
     void assignLevels();
+
+
+    NodeWorker* findNodeWorker(const UUID& uuid) const;
+    NodeWorker* findNodeWorkerNoThrow(const UUID& uuid) const;
+    NodeWorker* findNodeWorkerForConnector(const UUID &uuid) const;
 
 public:
     boost::signals2::signal<void()> stateChanged;

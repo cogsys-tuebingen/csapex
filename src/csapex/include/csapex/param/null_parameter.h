@@ -18,17 +18,17 @@ public:
     explicit NullParameter(const std::string& name, const ParameterDescription &description);
     virtual ~NullParameter();
 
-    virtual int ID() const { return 0x000; }
-    virtual std::string TYPE() const { return "null"; }
+    virtual int ID() const override { return 0x000; }
+    virtual std::string TYPE() const override { return "null"; }
 
-    virtual const std::type_info &type() const;
-    virtual std::string toStringImpl() const;
+    virtual const std::type_info &type() const override;
+    virtual std::string toStringImpl() const override;
 
-    void doSetValueFrom(const Parameter& other);
-    void doClone(const Parameter& other);
+    void doSetValueFrom(const Parameter& other) override;
+    void doClone(const Parameter& other) override;
 
-    void doSerialize(YAML::Node& e) const;
-    void doDeserialize(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const override;
+    void doDeserialize(const YAML::Node& n) override;
 
 protected:
     virtual boost::any get_unsafe() const override;

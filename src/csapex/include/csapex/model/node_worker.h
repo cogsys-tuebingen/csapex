@@ -149,7 +149,7 @@ private:
 
     void updateTransitionConnections();
 
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
 
     virtual void connectConnector(Connectable *c) override;

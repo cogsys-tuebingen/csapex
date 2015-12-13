@@ -26,17 +26,17 @@ public:
     std::size_t count() const;
     std::vector<std::string> getValues() const;
 
-    virtual int ID() const { return 0x00A; }
-    virtual std::string TYPE() const { return "string_list"; }
+    virtual int ID() const override { return 0x00A; }
+    virtual std::string TYPE() const override { return "string_list"; }
 
-    virtual const std::type_info &type() const;
-    virtual std::string toStringImpl() const;
+    virtual const std::type_info &type() const override;
+    virtual std::string toStringImpl() const override;
 
-    void doSetValueFrom(const Parameter& other);
-    void doClone(const Parameter& other);
+    void doSetValueFrom(const Parameter& other) override;
+    void doClone(const Parameter& other) override;
 
-    void doSerialize(YAML::Node& e) const;
-    void doDeserialize(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const override;
+    void doDeserialize(const YAML::Node& n) override;
 
 protected:
     virtual boost::any get_unsafe() const override;

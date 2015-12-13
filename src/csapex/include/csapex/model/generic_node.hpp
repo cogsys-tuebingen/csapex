@@ -65,17 +65,17 @@ public:
         out_msg_.resize(N);
     }
 
-    virtual void setup(csapex::NodeModifier& modifier)
+    virtual void setup(csapex::NodeModifier& modifier) override
     {
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this, modifier));
     }
 
-    virtual void setupParameters(Parameterizable& params)
+    virtual void setupParameters(Parameterizable& params) override
     {
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this, params));
     }
 
-    void process()
+    void process() override
     {
         createMsgs();
         call();

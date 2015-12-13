@@ -17,13 +17,13 @@ public:
                   int f_type, const Point& f_handle_in, const Point& f_handle_out,
                   int t_type, const Point &t_handle_in, const Point &t_handle_out);
 
-    virtual std::string getType() const;
-    virtual std::string getDescription() const;
+    virtual std::string getType() const override;
+    virtual std::string getDescription() const override;
 
 protected:
-    bool doExecute();
-    bool doUndo();
-    bool doRedo();
+    bool doExecute() override;
+    bool doUndo() override;
+    bool doRedo() override;
 
 private:
     int connection_id;

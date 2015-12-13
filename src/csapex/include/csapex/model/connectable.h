@@ -122,7 +122,7 @@ protected:
 
     void init();
 
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level);
+    void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
 
 protected:

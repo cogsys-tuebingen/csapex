@@ -17,12 +17,12 @@ public:
     AddFulcrum(int connection_id, int sub_section_to_split, const Point& pos, int type);
 
 protected:
-    bool doExecute();
-    bool doUndo();
-    bool doRedo();
+    bool doExecute() override;
+    bool doUndo() override;
+    bool doRedo() override;
 
-    virtual std::string getType() const;
-    virtual std::string getDescription() const;
+    virtual std::string getType() const override;
+    virtual std::string getDescription() const override;
 
 private:
     int connection_id;

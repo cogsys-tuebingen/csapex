@@ -19,9 +19,9 @@ public:
     AddSignalConnection(const UUID &from_uuid, const UUID &to_uuid);
 
 protected:
-    bool doExecute();
+    bool doExecute() override;
 
-    void refresh();
+    void refresh() override;
 
 private:
     Trigger* from;

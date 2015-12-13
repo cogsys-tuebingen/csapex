@@ -21,7 +21,7 @@ public:
     void setSequenceNumber(long seq_no);
     long getSequenceNumber() const;
 
-    void connectionRemoved(Connection *connection);
+    void connectionRemoved(Connection *connection) override;
 
     bool isSink() const;
     bool canStartSendingMessages() const;
@@ -37,7 +37,7 @@ public:
 
     virtual void reset() override;
 
-    void establishConnections();
+    void establishConnections() override;
 
 public:
     boost::signals2::signal<void()> messages_processed;

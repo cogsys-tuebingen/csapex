@@ -18,12 +18,12 @@ public:
     AddNode(const std::string& type, Point pos, const UUID& parent_uuid_, const UUID& uuid_, NodeStatePtr state);
 
 protected:
-    bool doExecute();
-    bool doUndo();
-    bool doRedo();
+    bool doExecute() override;
+    bool doUndo() override;
+    bool doRedo() override;
 
-    virtual std::string getType() const;
-    virtual std::string getDescription() const;
+    virtual std::string getType() const override;
+    virtual std::string getDescription() const override;
 
 private:
     std::string type_;

@@ -33,8 +33,8 @@ public:
     ThreadGroup(ExceptionHandler& handler, std::string name);
     ~ThreadGroup();
 
-    int id() const;
-    std::string name() const;
+    int id() const override;
+    std::string name() const override;
     const std::thread &thread() const;
 
     virtual bool isEmpty() const override;

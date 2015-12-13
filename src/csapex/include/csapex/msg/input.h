@@ -18,26 +18,26 @@ public:
     Input(Unique *parent, int sub_id);
     virtual ~Input();
 
-    virtual bool canInput() const {
+    virtual bool canInput() const override {
         return true;
     }
-    virtual bool isInput() const {
+    virtual bool isInput() const override {
         return true;
     }
 
-    bool canConnectTo(Connectable* other_side, bool move) const;
+    bool canConnectTo(Connectable* other_side, bool move) const override;
 
     virtual void inputMessage(ConnectionType::ConstPtr message);
     virtual ConnectionTypeConstPtr getMessage() const;
 
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
+    virtual bool targetsCanBeMovedTo(Connectable* other_side) const override;
 
-    virtual void connectionMovePreview(Connectable* other_side);
-    virtual void validateConnections();
+    virtual void connectionMovePreview(Connectable* other_side) override;
+    virtual void validateConnections() override;
 
     Connectable* getSource() const;
 
-    virtual void removeAllConnectionsNotUndoable();
+    virtual void removeAllConnectionsNotUndoable() override;
 
     bool isOptional() const;
     void setOptional(bool optional);
@@ -46,12 +46,12 @@ public:
     virtual bool hasReceived() const;
 
     void free();
-    void stop();
+    void stop() override;
 
-    virtual void enable();
-    virtual void disable();
+    virtual void enable() override;
+    virtual void disable() override;
 
-    virtual void notifyMessageProcessed();
+    virtual void notifyMessageProcessed() override;
 
     void reset();
 

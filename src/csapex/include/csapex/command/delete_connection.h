@@ -17,11 +17,11 @@ protected:
     DeleteConnection(Connectable* a, Connectable* b);
 
 protected:
-    bool doExecute();
-    bool doRedo();
+    bool doExecute() override;
+    bool doRedo() override;
 
-    virtual std::string getType() const;
-    virtual std::string getDescription() const;
+    virtual std::string getType() const override;
+    virtual std::string getDescription() const override;
 
 protected:
     int connection_id;

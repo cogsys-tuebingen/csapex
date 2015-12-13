@@ -13,16 +13,16 @@ public:
     static std::shared_ptr<MessageProvider> make();
 
 public:
-    void load(const std::string& file);
+    void load(const std::string& file) override;
 
-    virtual bool hasNext();
-    virtual connection_types::Message::Ptr next(std::size_t slot);
-    virtual std::string getLabel(std::size_t slot) const;
+    virtual bool hasNext() override;
+    virtual connection_types::Message::Ptr next(std::size_t slot) override;
+    virtual std::string getLabel(std::size_t slot) const override;
 
-    virtual std::vector<std::string> getExtensions() const;
+    virtual std::vector<std::string> getExtensions() const override;
 
-    virtual Memento::Ptr getState() const;
-    virtual void setParameterState(Memento::Ptr memento);
+    virtual Memento::Ptr getState() const override;
+    virtual void setParameterState(Memento::Ptr memento) override;
 
 private:
     std::string file_;

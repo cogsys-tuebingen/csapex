@@ -19,18 +19,18 @@ public:
     AngleParameter();
     explicit AngleParameter(const std::string& name, const ParameterDescription& description, double angle, double min = -M_PI, double max = M_PI);
 
-    virtual const std::type_info &type() const;
+    virtual const std::type_info &type() const override;
 
-    virtual int ID() const { return 0x00B; }
-    virtual std::string TYPE() const { return "angle"; }
+    virtual int ID() const override { return 0x00B; }
+    virtual std::string TYPE() const override { return "angle"; }
 
-    virtual std::string toStringImpl() const;
+    virtual std::string toStringImpl() const override;
 
-    void doSetValueFrom(const Parameter& other);
-    void doClone(const Parameter& other);
+    void doSetValueFrom(const Parameter& other) override;
+    void doClone(const Parameter& other) override;
 
-    void doSerialize(YAML::Node& e) const;
-    void doDeserialize(const YAML::Node& n);
+    void doSerialize(YAML::Node& e) const override;
+    void doDeserialize(const YAML::Node& n) override;
 
     double min() const;
     double max() const;

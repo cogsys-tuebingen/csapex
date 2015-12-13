@@ -24,8 +24,8 @@ public:
     virtual void assignToScheduler(Scheduler* scheduler) override;
     virtual void detach() override;
 
-    virtual bool isPaused() const;
-    virtual void setPause(bool pause);
+    virtual bool isPaused() const override;
+    virtual void setPause(bool pause) override;
 
     virtual void setSteppingMode(bool stepping) override;
     virtual void step() override;

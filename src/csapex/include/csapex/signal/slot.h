@@ -23,30 +23,30 @@ public:
 
     virtual void trigger(Trigger *source);
 
-    virtual bool canInput() const {
+    virtual bool canInput() const override {
         return true;
     }
-    virtual bool isInput() const {
+    virtual bool isInput() const override {
         return true;
     }
 
     bool isActive() const;
 
-    virtual bool canConnectTo(Connectable* other_side, bool move) const;
+    virtual bool canConnectTo(Connectable* other_side, bool move) const override;
 
 
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const;
-    virtual bool isConnected() const;
+    virtual bool targetsCanBeMovedTo(Connectable* other_side) const override;
+    virtual bool isConnected() const override;
 
-    virtual void connectionMovePreview(Connectable* other_side);
-    virtual void validateConnections();
+    virtual void connectionMovePreview(Connectable* other_side) override;
+    virtual void validateConnections() override;
 
     std::vector<Trigger*> getSources() const;
 
-    virtual void enable();
-    virtual void disable();
+    virtual void enable() override;
+    virtual void disable() override;
 
-    virtual void notifyMessageProcessed();
+    virtual void notifyMessageProcessed() override;
 
     void reset();
 

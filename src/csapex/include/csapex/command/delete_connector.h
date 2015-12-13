@@ -16,14 +16,14 @@ struct DeleteConnector : public Command
     DeleteConnector(Connectable *_c);
 
 protected:
-    bool doExecute();
-    bool doUndo();
-    bool doRedo();
+    bool doExecute() override;
+    bool doUndo() override;
+    bool doRedo() override;
 
     bool refresh();
 
-    virtual std::string getType() const;
-    virtual std::string getDescription() const;
+    virtual std::string getType() const override;
+    virtual std::string getDescription() const override;
 
 private:
     bool       in;

@@ -16,12 +16,12 @@ public:
     DeleteNode(const UUID &uuid);
 
 protected:
-    bool doExecute();
-    bool doUndo();
-    bool doRedo();
+    bool doExecute() override;
+    bool doUndo() override;
+    bool doRedo() override;
 
-    virtual std::string getType() const;
-    virtual std::string getDescription() const;
+    virtual std::string getType() const override;
+    virtual std::string getDescription() const override;
 
 protected:
     std::string type;

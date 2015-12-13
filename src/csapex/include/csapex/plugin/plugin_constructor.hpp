@@ -39,7 +39,7 @@ public:
         return res;
     }
 
-    bool valid() const {
+    bool valid() const override {
         typename std::shared_ptr<M> res(constructor());
         return res.get() != nullptr;
     }
