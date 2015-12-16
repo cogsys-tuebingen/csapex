@@ -39,27 +39,27 @@ boost::any NullParameter::get_unsafe() const
 }
 
 
-bool NullParameter::set_unsafe(const boost::any& v)
+bool NullParameter::set_unsafe(const boost::any& /*v*/)
 {
     throw std::runtime_error("cannot use null parameters");
 }
 
 
-void NullParameter::doSetValueFrom(const Parameter &other)
+void NullParameter::doSetValueFrom(const Parameter &/*other*/)
 {
     throw std::runtime_error("cannot use null parameters");
 }
 
-void NullParameter::doClone(const Parameter &other)
+void NullParameter::doClone(const Parameter &/*other*/)
 {
     throw std::runtime_error("cannot use null parameters");
 }
 
-void NullParameter::doSerialize(YAML::Node& n) const
+void NullParameter::doSerialize(YAML::Node& /*n*/) const
 {
 }
 
-void NullParameter::doDeserialize(const YAML::Node& n)
+void NullParameter::doDeserialize(const YAML::Node& /*n*/)
 {
 }
 

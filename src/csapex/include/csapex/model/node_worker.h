@@ -62,7 +62,7 @@ public:
     void setState(State state);
     State getState() const;
 
-    virtual bool isEnabled() const override;
+    bool isEnabled() const;
     bool isIdle() const;
     bool isProcessing() const;
     bool isFired() const;
@@ -79,7 +79,7 @@ public:
     /* REMOVE => UI*/ void setMinimized(bool min);
 
     bool isWaitingForTrigger() const;
-    virtual bool canProcess() const override;
+    bool canProcess() const;
     bool canReceive() const;
     bool canSend() const;
     bool areAllInputsAvailable() const;
@@ -98,7 +98,7 @@ public:
 public:
     bool tick();
 
-    virtual void startProcessingMessages() override;
+    void startProcessingMessages();
     void finishProcessingMessages(bool was_executed);
 
     void checkTransitions(bool try_fire = true);

@@ -41,17 +41,17 @@ boost::any TriggerParameter::get_unsafe() const
 }
 
 
-bool TriggerParameter::set_unsafe(const boost::any &v)
+bool TriggerParameter::set_unsafe(const boost::any &/*v*/)
 {
     return false;
 }
 
 
-void TriggerParameter::doSetValueFrom(const Parameter &other)
+void TriggerParameter::doSetValueFrom(const Parameter &/*other*/)
 {
 }
 
-void TriggerParameter::doClone(const Parameter &other)
+void TriggerParameter::doClone(const Parameter &/*other*/)
 {
 }
 

@@ -62,6 +62,15 @@ void GenericState::initializePersistentParameters()
 
 void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 {
+    if(param->name() == "playback/resend") {
+        std::cerr << "add parameter " << param->name() << " to " << (long) this << std::endl;
+
+        std::cerr << "already there: \n";
+        for(auto p : params) {
+            std::cerr << "- " << p.second->name() << "\n";
+        }
+        std::cerr << std::flush;
+    }
     csapex::param::Parameter::Ptr old_value;
     if(params.find(param->name()) != params.end()) {
         throw std::logic_error(std::string("a parameter with the name ") + param->name() + " has already been added.");

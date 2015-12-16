@@ -16,12 +16,12 @@ namespace csapex
 namespace generic_node {
 struct DefaultInfo
 {
-    static std::string getName(int index) {
+    static std::string getName(int /*index*/) {
         return "";
     }
 
     template <typename P>
-    static csapex::param::ParameterPtr declareParameter(int index) {
+    static csapex::param::ParameterPtr declareParameter(int /*index*/) {
         return nullptr;
     }
 };

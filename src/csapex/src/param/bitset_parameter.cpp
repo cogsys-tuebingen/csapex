@@ -151,7 +151,7 @@ boost::any BitSetParameter::get_unsafe() const
 }
 
 
-bool BitSetParameter::set_unsafe(const boost::any &v)
+bool BitSetParameter::set_unsafe(const boost::any &/*v*/)
 {
     int val = boost::any_cast<int>(val);
     if(val != value_) {

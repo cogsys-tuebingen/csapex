@@ -120,6 +120,10 @@ include_directories(include
     ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS}
 )
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_definitions(--system-header-prefix=/usr/include)
+endif()
+
 #
 # BUILD THE LIBRARIES
 #

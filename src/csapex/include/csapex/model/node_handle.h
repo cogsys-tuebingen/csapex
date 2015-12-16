@@ -74,11 +74,7 @@ public:
     std::vector<SlotPtr> getSlots() const;
     std::vector<TriggerPtr> getTriggers() const;
 
-    virtual bool canProcess() const = 0;
-    virtual bool isEnabled() const = 0;
-
     virtual void triggerCheckTransitions() = 0;
-    virtual void startProcessingMessages() = 0;
 
 
 public:
