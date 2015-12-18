@@ -69,7 +69,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void nodeAdded(NodeWorkerPtr node_worker);
-    void nodeRemoved(NodeWorkerPtr node_worker);
+    void nodeRemoved(NodeHandlePtr node_handle);
 
     void connectorCreated(ConnectablePtr connector);
     void connectorRemoved(ConnectablePtr connector);

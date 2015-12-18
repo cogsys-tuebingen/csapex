@@ -5,7 +5,6 @@
 #include <csapex/view/designer/designer.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/node_adapter.h>
@@ -40,9 +39,9 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* widget_ctrl)
 {
     for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
-        NodeWorkerPtr nh = *it;
+        NodeHandlePtr nh = *it;
         YAML::Node adapters;
-        saveBox(nh->getNodeHandle().get(), widget_ctrl, adapters);
+        saveBox(nh.get(), widget_ctrl, adapters);
         yaml["adapters"] = adapters;
     }
 }

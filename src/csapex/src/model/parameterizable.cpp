@@ -15,7 +15,6 @@ using namespace csapex;
 Parameterizable::Parameterizable()
     : parameter_state_(new GenericState)
 {
-
 }
 
 Parameterizable::~Parameterizable()

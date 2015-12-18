@@ -148,8 +148,7 @@ void WidgetController::setStyleSheet(const QString &str)
 void WidgetController::startPlacingBox(QWidget *parent, const std::string &type, NodeStatePtr state, const QPoint &offset)
 {
     NodeConstructorPtr c = node_factory_->getConstructor(type);
-    NodeWorkerPtr worker = c->makePrototype();
-    NodeHandlePtr handle = worker->getNodeHandle();
+    NodeHandlePtr handle = c->makePrototype();
 
     QDrag* drag = new QDrag(parent);
     QMimeData* mimeData = new QMimeData;
@@ -163,7 +162,7 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    NodeBox::Ptr object(new NodeBox(settings_, worker,
+    NodeBox::Ptr object(new NodeBox(settings_, handle,
                                     NodeAdapter::Ptr(std::make_shared<DefaultNodeAdapter>(handle, this)),
                                     QIcon(QString::fromStdString(c->getIcon()))));
 
@@ -197,7 +196,7 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 
         QIcon icon = QIcon(QString::fromStdString(node_factory_->getConstructor(type)->getIcon()));
 
-        NodeBox* box = new NodeBox(settings_, node_worker, adapter, icon);
+        NodeBox* box = new NodeBox(settings_, node_handle, node_worker, adapter, icon);
 
         pimpl->box_map_[node_handle->getUUID()] = box;
         pimpl->proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
@@ -236,10 +235,10 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
     }
 }
 
-void WidgetController::nodeRemoved(NodeWorkerPtr node_worker)
+void WidgetController::nodeRemoved(NodeHandlePtr node_handle)
 {
     if(designer_) {
-        UUID node_uuid = node_worker->getUUID();
+        UUID node_uuid = node_handle->getUUID();
         NodeBox* box = getBox(node_uuid);
         box->stop();
 

@@ -24,16 +24,21 @@ public:
                InputTransitionPtr transition_in, OutputTransitionPtr transition_out);
     virtual ~NodeHandle();    
 
+    void stop();
+
     std::string getType() const;
     NodeWeakPtr getNode() const;
 
     InputTransition* getInputTransition() const;
     OutputTransition* getOutputTransition() const;
 
-
     void setNodeState(NodeStatePtr memento);
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
+
+    int getLevel() const;
+    void setLevel(int level);
+
 
     Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
     void addInput(InputPtr in);
@@ -81,6 +86,13 @@ public:
 
     std::map<Input*,csapex::param::Parameter*>& inputToParamMap();
     std::map<Output*,csapex::param::Parameter*>& outputToParamMap();
+
+
+    bool isSource() const;
+    void setIsSource(bool source);
+
+    bool isSink() const;
+    void setIsSink(bool sink);
 
 public:
     // TODO: get rid of
@@ -150,12 +162,14 @@ private:
     int next_trigger_id_;
     int next_slot_id_;
 
-
-
     std::map<Slot*, boost::signals2::connection> slot_connections_;
     std::map<Trigger*, boost::signals2::connection> trigger_triggered_connections_;
     std::map<Trigger*, boost::signals2::connection> trigger_handled_connections_;
 
+    int level_;
+
+    bool source_;
+    bool sink_;
 };
 
 }

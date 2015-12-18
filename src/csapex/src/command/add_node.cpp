@@ -42,13 +42,13 @@ bool AddNode::doExecute()
         uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
     }
 
-    NodeWorker::Ptr node = node_factory_->makeNode(type_, uuid_, saved_state_);
+    NodeHandlePtr node = node_factory_->makeNode(type_, uuid_, saved_state_);
 
     if(!node) {
         return false;
     }
 
-    node->getNodeHandle()->getNodeState()->setPos(pos_);
+    node->getNodeState()->setPos(pos_);
 
     graph_->addNode(node);
 

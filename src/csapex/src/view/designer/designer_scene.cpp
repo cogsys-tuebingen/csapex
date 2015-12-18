@@ -524,8 +524,6 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             addWidget(preview_);
         }
 
-        preview_->show();
-
         update();
 
     } else if(highlight_connection_id_ >= 0)  {

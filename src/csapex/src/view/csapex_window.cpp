@@ -188,9 +188,9 @@ void CsApexWindow::construct()
     connections_.push_back(core_.loadViewRequest.connect([this](YAML::Node& node){ loadView(node); }));
 
     connections_.push_back(graph->stateChanged.connect([this]() { updateMenu(); }));
-    connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); }));
-    connections_.push_back(graph->nodeRemoved.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeRemoved(n); }));
-    connections_.push_back(graph->panic.connect([this]() { clearBlock(); }));
+    connections_.push_back(graph_facade_->nodeWorkerAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); }));
+    connections_.push_back(graph_facade_->nodeRemoved.connect([this](NodeHandlePtr n) { widget_ctrl_->nodeRemoved(n); }));
+    connections_.push_back(graph_facade_->panic.connect([this]() { clearBlock(); }));
 
     connections_.push_back(cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); }));
     connections_.push_back(cmd_dispatcher_->dirtyChanged.connect([this](bool) { updateTitle(); }));
@@ -341,7 +341,7 @@ void CsApexWindow::updateNodeInfo()
             ss << "<h1>Parameters:</h1>";
 
 
-            auto node = n->makePrototype()->getNode();
+            auto node = n->makePrototype()->getNode().lock();
             if(node) {
                 std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
 

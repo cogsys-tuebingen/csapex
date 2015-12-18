@@ -40,8 +40,8 @@ public:
     NodeConstructorPtr getConstructor(const std::string& type);
     std::vector<NodeConstructorPtr> getConstructors();
 
-    NodeWorkerPtr makeNode(const std::string& type, const UUID& uuid);
-    NodeWorkerPtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
+    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid);
+    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
 
     std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap();
 
@@ -57,7 +57,7 @@ protected:
     void rebuildPrototypes();
     void rebuildMap();
 
-    NodeWorkerPtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
+    NodeHandlePtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
 
 protected:
     csapex::PluginLocator* plugin_locator_;

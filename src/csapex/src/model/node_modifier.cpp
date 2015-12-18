@@ -113,20 +113,20 @@ void NodeModifier::removeTrigger(const UUID &uuid)
 
 bool NodeModifier::isSource() const
 {
-    return node_worker_->isSource();
+    return node_worker_->getNodeHandle()->isSource();
 }
 void NodeModifier::setIsSource(bool source)
 {
-    node_worker_->setIsSource(source);
+    node_worker_->getNodeHandle()->setIsSource(source);
 }
 
 bool NodeModifier::isSink() const
 {
-    return node_worker_->isSink();
+    return node_worker_->getNodeHandle()->isSink();
 }
 void NodeModifier::setIsSink(bool sink)
 {
-    node_worker_->setIsSink(sink);
+    node_worker_->getNodeHandle()->setIsSink(sink);
 }
 
 bool NodeModifier::isError() const

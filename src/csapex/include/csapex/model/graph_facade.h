@@ -26,7 +26,7 @@ public:
     Graph* getGraph();
 
 
-    void addNode(NodeWorkerPtr node);
+    void addNode(NodeHandlePtr node);
 
     ConnectionPtr connect(Output* output, Input* input,
                           OutputTransition* ot, InputTransition* it);
@@ -47,8 +47,16 @@ public:
     boost::signals2::signal<void (bool)> paused;
     boost::signals2::signal<void ()> stopped;
 
+    boost::signals2::signal<void(NodeHandlePtr)> nodeAdded;
+    boost::signals2::signal<void(NodeHandlePtr)> nodeRemoved;
+
+    boost::signals2::signal<void(NodeWorkerPtr)> nodeWorkerAdded;
+    boost::signals2::signal<void(NodeWorkerPtr)> nodeWorkerRemoved;
+
     boost::signals2::signal<void(TaskGeneratorPtr)> generatorAdded;
     boost::signals2::signal<void(TaskGeneratorPtr)> generatorRemoved;
+
+    boost::signals2::signal<void()> panic;
 
 private:
     Graph* graph_;
@@ -56,6 +64,8 @@ private:
 
     std::vector<boost::signals2::connection> connections_;
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
+
+    std::map<NodeHandle*, NodeWorkerPtr> node_workers_;
 };
 
 }

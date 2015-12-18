@@ -65,19 +65,19 @@ void GraphIO::loadNode(const YAML::Node& doc)
     std::string type = doc["type"].as<std::string>();
     UUID uuid = doc["uuid"].as<UUID>();
 
-    NodeWorker::Ptr node_worker = node_factory_->makeNode(type, uuid);
-    if(!node_worker) {
+    NodeHandlePtr node_handle = node_factory_->makeNode(type, uuid);
+    if(!node_handle) {
         return;
     }
 
     try {
-        deserializeNode(doc, node_worker->getNodeHandle().get());
+        deserializeNode(doc, node_handle.get());
 
     } catch(const std::exception& e) {
         std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
     }
 
-    graph_->addNode(node_worker);
+    graph_->addNode(node_handle);
 }
 
 void GraphIO::saveConnections(YAML::Node &yaml)

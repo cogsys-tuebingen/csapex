@@ -27,13 +27,6 @@ public:
         {}
     };
 
-    struct NodeWorkerNotFoundException : public std::logic_error
-    {
-        NodeWorkerNotFoundException(const std::string& name)
-            : std::logic_error("node worker for node " + name + " cannot be found")
-        {}
-    };
-
     struct NodeHandleNotFoundException : public std::logic_error
     {
         NodeHandleNotFoundException(const std::string& name)
@@ -41,8 +34,8 @@ public:
         {}
     };
 
-    typedef std::vector<NodeWorkerPtr>::iterator node_iterator;
-    typedef std::vector<NodeWorkerPtr>::const_iterator node_const_iterator;
+    typedef std::vector<NodeHandlePtr>::iterator node_iterator;
+    typedef std::vector<NodeHandlePtr>::const_iterator node_const_iterator;
 
 public:
     Graph();
@@ -58,7 +51,6 @@ public:
     NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const;
     NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
 
-    std::vector<NodeWorker*> getAllNodeWorkers();
     std::vector<NodeHandle*> getAllNodeHandles();
 
     int getComponent(const UUID& node_uuid) const;
@@ -77,7 +69,7 @@ public:
 
     int countNodes();
 
-    void addNode(NodeWorkerPtr node);
+    void addNode(NodeHandlePtr node);
     void deleteNode(const UUID &uuid);
 
     bool addConnection(ConnectionPtr connection);
@@ -95,30 +87,23 @@ private:
     void buildConnectedComponents();
     void assignLevels();
 
-
-    NodeWorker* findNodeWorker(const UUID& uuid) const;
-    NodeWorker* findNodeWorkerNoThrow(const UUID& uuid) const;
-    NodeWorker* findNodeWorkerForConnector(const UUID &uuid) const;
-
 public:
     boost::signals2::signal<void()> stateChanged;
     boost::signals2::signal<void(Graph*)> structureChanged;
 
-    boost::signals2::signal<void()> panic;
-
     boost::signals2::signal<void(Connection*)> connectionAdded;
     boost::signals2::signal<void(Connection*)> connectionDeleted;
 
-    boost::signals2::signal<void(NodeWorkerPtr)> nodeAdded;
-    boost::signals2::signal<void(NodeWorkerPtr)> nodeRemoved;
+    boost::signals2::signal<void(NodeHandlePtr)> nodeAdded;
+    boost::signals2::signal<void(NodeHandlePtr)> nodeRemoved;
 
 protected:
-    std::vector<NodeWorkerPtr> nodes_;
-    std::map<NodeWorker*, int> node_component_;
-    std::map<NodeWorker*, int> node_level_;
+    std::vector<NodeHandlePtr> nodes_;
+    std::map<NodeHandle*, int> node_component_;
+    std::map<NodeHandle*, int> node_level_;
 
-    std::map<NodeWorker*, std::vector<NodeWorker*> > node_parents_;
-    std::map<NodeWorker*, std::vector<NodeWorker*> > node_children_;
+    std::map<NodeHandle*, std::vector<NodeHandle*> > node_parents_;
+    std::map<NodeHandle*, std::vector<NodeHandle*> > node_children_;
 
     std::vector<ConnectionPtr> connections_;
 

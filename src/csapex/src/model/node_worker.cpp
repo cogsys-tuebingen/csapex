@@ -21,6 +21,7 @@
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/tickable_node.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/utility/delegate_bind.h>
 
 /// SYSTEM
 #include <thread>
@@ -33,16 +34,12 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
       is_setup_(false), state_(State::IDLE),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       ticks_(0),
-      source_(false), sink_(false), level_(0),
       profiling_(false)
 {
     modifier_ = std::make_shared<NodeModifier>(this);
     NodePtr node = node_handle_->getNode().lock();
 
     node->initialize(node_handle->getUUID(), modifier_.get());
-
-    bool params_created_in_constructor = node->getParameterCount() != 0;
-    apex_assert_hard(!params_created_in_constructor);
 
     node_handle_->getOutputTransition()->messages_processed.connect([this](){
         notifyMessagesProcessed();
@@ -59,13 +56,15 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     }
     trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
 
-    node->doSetup();
+    apex_assert_hard(!node->isSetup());
+
+    if(!node->isSetup()) {
+        node->doSetup();
+    }
+
+    apex_assert_hard(node->isSetup());
 
     is_setup_ = true;
-
-    if(params_created_in_constructor) {
-        node->awarn << "Node creates parameters in its constructor! Please implement 'setupParameters'" << std::endl;
-    }
 
     node_handle_->mightBeEnabled.connect([this]() {
         triggerCheckTransitions();
@@ -74,6 +73,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
         connectConnector(c.get());
     });
+
+    auto af = delegate::bind(&NodeWorker::triggerCheckTransitions, this);
+    node_handle_->getInputTransition()->setActivationFunction(af);
+    node_handle_->getOutputTransition()->setActivationFunction(af);
 }
 
 NodeWorker::~NodeWorker()
@@ -205,20 +208,6 @@ void NodeWorker::triggerPanic()
 void NodeWorker::triggerCheckTransitions()
 {
     checkTransitionsRequested();
-}
-
-
-void NodeWorker::stop()
-{
-    getNode()->abort();
-
-
-    for(OutputPtr i : node_handle_->getAllOutputs()) {
-        i->stop();
-    }
-    for(InputPtr i : node_handle_->getAllInputs()) {
-        i->stop();
-    }
 }
 
 void NodeWorker::reset()
@@ -592,54 +581,6 @@ void NodeWorker::sendMessages()
     node_handle_->getOutputTransition()->sendMessages();
 }
 
-void NodeWorker::setIsSource(bool source)
-{
-    source_ = source;
-}
-
-bool NodeWorker::isSource() const
-{
-    if(source_) {
-        return true;
-    }
-
-    // check if there are no (mandatory) inputs -> then it's a virtual source
-    // TODO: remove and refactor old plugins
-    for(InputPtr in : node_handle_->getAllInputs()) {
-        if(!in->isOptional() || in->isConnected()) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-void NodeWorker::setIsSink(bool sink)
-{
-    sink_ = sink;
-}
-
-bool NodeWorker::isSink() const
-{
-    return sink_ || node_handle_->getAllOutputs().empty() || node_handle_->getOutputTransition()->isSink();
-}
-
-int NodeWorker::getLevel() const
-{
-    return level_;
-}
-
-void NodeWorker::setLevel(int level)
-{
-    level_ = level;
-    for(InputPtr in : node_handle_->getAllInputs()) {
-        in->setLevel(level);
-    }
-    for(OutputPtr out : node_handle_->getAllOutputs()) {
-        out->setLevel(level);
-    }
-}
 
 bool NodeWorker::tick()
 {

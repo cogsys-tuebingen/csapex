@@ -218,9 +218,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
         boost::signals2::scoped_connection add_connection
-                (graph->nodeAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); }));
+                (graph_facade->nodeWorkerAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); }));
         boost::signals2::scoped_connection remove_connection
-                (graph->nodeRemoved.connect([legend](NodeWorkerPtr n) { legend->stopTrackingNode(n); }));
+                (graph_facade->nodeRemoved.connect([legend](NodeHandlePtr n) { legend->stopTrackingNode(n); }));
 
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
         QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));

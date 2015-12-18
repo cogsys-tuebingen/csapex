@@ -22,7 +22,7 @@ public:
 
 public Q_SLOTS:
     void startTrackingNode(NodeWorkerPtr node);
-    void stopTrackingNode(NodeWorkerPtr node);
+    void stopTrackingNode(NodeHandlePtr node);
 
     void addNode(NodeWorker* node);
     void removeNode(NodeWorker* node);

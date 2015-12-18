@@ -65,16 +65,23 @@ void GenericState::initializePersistentParameters()
 
 void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 {
-    if(params.find(param->name()) != params.end()) {
-        throw std::logic_error(std::string("a parameter with the name ") + param->name() + " has already been added.");
-    }
     apex_assert_hard(param->name() != "noname");
-    legacy.erase(param->name());
+    auto legacy_pos = legacy.find(param->name());
+    auto param_pos = params.find(param->name());
+    if(param_pos != params.end()) {
+        if(legacy_pos == legacy.end()) {
+            throw std::logic_error(std::string("a parameter with the name ") + param->name() + " has already been added.");
+        }
+        param->setValueFrom(*param_pos->second);
+    }
+    registerParameter(param);
+
+    if(legacy_pos != legacy.end()) {
+        legacy.erase(legacy_pos);
+    }
     if(std::find(order.begin(), order.end(), param->name()) == order.end()) {
         order.push_back(param->name());
     }
-
-    registerParameter(param);
 }
 
 void GenericState::removeParameter(csapex::param::ParameterPtr param)

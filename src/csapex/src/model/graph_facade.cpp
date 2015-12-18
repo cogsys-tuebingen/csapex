@@ -19,18 +19,33 @@ using namespace csapex;
 GraphFacade::GraphFacade(Executor &executor, Graph* graph)
     : graph_(graph), executor_(executor)
 {
-    connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) {
-        TaskGeneratorPtr runner = std::make_shared<NodeRunner>(n);
-        generators_[n->getNodeHandle()->getUUID()] = runner;
-        executor_.add(runner.get());
-        generatorAdded(runner);
-    }));
-    connections_.push_back(graph->nodeRemoved.connect([this](NodeWorkerPtr n) {
-        TaskGeneratorPtr runner = generators_[n->getNodeHandle()->getUUID()];
-        generators_.erase(n->getNodeHandle()->getUUID());
-        executor_.remove(runner.get());
-        generatorRemoved(runner);
-    }));
+    connections_.push_back(graph->nodeAdded.connect([this](NodeHandlePtr n) {
+                               NodeWorkerPtr nw = std::make_shared<NodeWorker>(n);
+
+                               TaskGeneratorPtr runner = std::make_shared<NodeRunner>(nw);
+                               generators_[n->getUUID()] = runner;
+                               executor_.add(runner.get());
+                               generatorAdded(runner);
+
+                               nodeAdded(n);
+                               nodeWorkerAdded(nw);
+
+                               nw->checkParameters();
+                               nw->panic.connect(panic);
+
+                           }));
+
+    connections_.push_back(graph->nodeRemoved.connect([this](NodeHandlePtr n) {
+                               TaskGeneratorPtr runner = generators_[n->getUUID()];
+                               generators_.erase(n->getUUID());
+                               executor_.remove(runner.get());
+                               generatorRemoved(runner);
+
+                               NodeWorkerPtr nw = node_workers_[n.get()];
+                               nodeWorkerRemoved(nw);
+                               node_workers_.erase(n.get());
+                               nodeRemoved(n);
+                           }));
 }
 
 GraphFacade::~GraphFacade()
@@ -46,7 +61,7 @@ Graph* GraphFacade::getGraph()
     return graph_;
 }
 
-void GraphFacade::addNode(NodeWorkerPtr node)
+void GraphFacade::addNode(NodeHandlePtr node)
 {
     graph_->addNode(node);
 }
@@ -102,13 +117,13 @@ void GraphFacade::pauseRequest(bool pause)
 
 void GraphFacade::stop()
 {
-    for(NodeWorker* nw : graph_->getAllNodeWorkers()) {
+    for(NodeHandle* nw : graph_->getAllNodeHandles()) {
         nw->stop();
     }
 
     executor_.stop();
 
-    stopped();    
+    stopped();
 }
 
 void GraphFacade::clearBlock()

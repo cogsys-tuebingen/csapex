@@ -21,7 +21,10 @@ public:
     virtual ~Node();
 
     void initialize(const UUID &uuid, NodeModifier *node_modifier);
+
     void doSetup();
+    bool isSetup() const;
+
 
 public: /* API */
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
@@ -47,6 +50,7 @@ public:
 
 protected:
     NodeModifier* modifier_;
+    bool setup_;
 };
 
 }

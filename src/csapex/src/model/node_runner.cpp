@@ -21,19 +21,20 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
       paused_(false), ticking_(false), is_source_(false), stepping_(false), can_step_(false),
       tick_thread_running_(false)
 {
-    NodePtr node = worker_->getNodeHandle()->getNode().lock();
-    is_source_ = worker_->isSource();
+    NodeHandlePtr handle = worker_->getNodeHandle();
+    NodePtr node = handle->getNode().lock();
+    is_source_ = handle->isSource();
     ticking_ = node && std::dynamic_pointer_cast<TickableNode>(node);
 
-    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + worker->getUUID().getFullName(),
+    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + handle->getUUID().getFullName(),
                                                std::bind(&NodeWorker::checkParameters, worker),
                                                this);
-    check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
+    check_transitions_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
                                                 std::bind(&NodeWorker::checkTransitions, worker),
                                                 this);
 
     if(ticking_) {
-        tick_ = std::make_shared<Task>(std::string("tick ") + worker->getUUID().getFullName(),
+        tick_ = std::make_shared<Task>(std::string("tick ") + handle->getUUID().getFullName(),
                                        [this, worker]() {
             bool success = worker->tick();
             if(stepping_) {

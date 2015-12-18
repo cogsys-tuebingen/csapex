@@ -54,8 +54,8 @@ public:
     NodeConstructor& setDescription(const std::string &description);
     std::string getDescription() const;
 
-    NodeWorkerPtr makePrototype() const;
-    NodeWorkerPtr makeNodeWorker(const UUID& uuid) const;
+    NodeHandlePtr makePrototype() const;
+    NodeHandlePtr makeNodeHandle(const UUID& uuid) const;
 
     NodePtr makeNode() const;
 

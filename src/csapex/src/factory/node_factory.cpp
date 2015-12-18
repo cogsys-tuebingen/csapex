@@ -177,9 +177,9 @@ bool NodeFactory::isValidType(const std::string &type) const
     return false;
 }
 
-NodeWorkerPtr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
+NodeHandlePtr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
 {
-    return content->makeNodeWorker(uuid);
+    return content->makeNodeHandle(uuid);
 }
 
 NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
@@ -221,21 +221,21 @@ std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
     return constructors_;
 }
 
-NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid)
+NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid)
 {
     return makeNode(target_type, uuid, nullptr);
 }
 
-NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
+NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, NodeStatePtr state)
 {
     apex_assert_hard(!uuid.empty());
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {
-        NodeWorkerPtr result = makeSingleNode(p, uuid);
+        NodeHandlePtr result = makeSingleNode(p, uuid);
 
         if(state) {
-            result->getNodeHandle()->setNodeState(state);
+            result->setNodeState(state);
         }
 
         reload_connections_[uuid] = p->unload_request.connect(std::bind(&NodeFactory::unloadNode, this, p, uuid));

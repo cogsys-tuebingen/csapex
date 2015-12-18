@@ -54,7 +54,7 @@ void ActivityLegend::startTrackingNode(NodeWorkerPtr node)
     worker->stopProfiling.connect([this](NodeWorker* nw) { removeNode(nw); });
 }
 
-void ActivityLegend::stopTrackingNode(NodeWorkerPtr /*node*/)
+void ActivityLegend::stopTrackingNode(NodeHandlePtr /*node*/)
 {
 }
 

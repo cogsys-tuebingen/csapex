@@ -13,7 +13,6 @@
 /// SYSTEM
 #include <map>
 #include <functional>
-#include <condition_variable>
 #include <mutex>
 #include <vector>
 #include <atomic>
@@ -23,9 +22,6 @@ namespace csapex {
 
 class NodeWorker : public ErrorState
 {
-    friend class Node;
-    friend class NodeBox;
-
 public:
     enum ActivityType {
         TICK,
@@ -51,7 +47,6 @@ public:
     NodePtr getNode() const;
     UUID getUUID() const;
 
-    void stop();
     void reset();
 
     void triggerCheckTransitions();
@@ -81,15 +76,6 @@ public:
     bool canReceive() const;
     bool canSend() const;
     bool areAllInputsAvailable() const;
-
-    bool isSource() const;
-    void setIsSource(bool source);
-
-    bool isSink() const;
-    void setIsSink(bool sink);
-
-    int getLevel() const;
-    void setLevel(int level);
 
     std::vector<TimerPtr> extractLatestTimers();
 
@@ -168,10 +154,6 @@ private:
     std::vector<boost::signals2::connection> connections;
 
     int ticks_;
-
-    bool source_;
-    bool sink_;
-    int level_;
 
     mutable std::recursive_mutex state_mutex_;
 

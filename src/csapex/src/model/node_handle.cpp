@@ -26,7 +26,9 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
       transition_in_(transition_in),
       transition_out_(transition_out),
-      next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0)
+      next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
+      level_(0),
+      source_(false), sink_(false)
 {
     node_state_->setLabel(uuid);
 
@@ -49,6 +51,68 @@ NodeHandle::~NodeHandle()
     }
     while(!triggers_.empty()) {
         removeTrigger(triggers_.begin()->get());
+    }
+}
+
+int NodeHandle::getLevel() const
+{
+    return level_;
+}
+
+void NodeHandle::setLevel(int level)
+{
+    level_ = level;
+    for(InputPtr in : inputs_) {
+        in->setLevel(level);
+    }
+    for(OutputPtr out : outputs_) {
+        out->setLevel(level);
+    }
+}
+
+void NodeHandle::setIsSource(bool source)
+{
+    source_ = source;
+}
+
+bool NodeHandle::isSource() const
+{
+    if(source_) {
+        return true;
+    }
+
+    // check if there are no (mandatory) inputs -> then it's a virtual source
+    // TODO: remove and refactor old plugins
+    for(InputPtr in : inputs_) {
+        if(!in->isOptional() || in->isConnected()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+void NodeHandle::setIsSink(bool sink)
+{
+    sink_ = sink;
+}
+
+bool NodeHandle::isSink() const
+{
+    return sink_ || outputs_.empty() || transition_out_->isSink();
+}
+
+
+void NodeHandle::stop()
+{
+    node_->abort();
+
+    for(OutputPtr i : getAllOutputs()) {
+        i->stop();
+    }
+    for(InputPtr i : getAllInputs()) {
+        i->stop();
     }
 }
 

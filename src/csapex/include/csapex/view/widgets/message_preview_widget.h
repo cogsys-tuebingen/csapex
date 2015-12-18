@@ -48,7 +48,8 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void display(const ConnectionTypeConstPtr& msg);
-
+    void showText(const QString &txt);
+    
 private:
     void connectToImpl(Output* out);
     void connectToImpl(Input* out);
@@ -56,6 +57,8 @@ private:
 private:
     ConnectionPtr connection_;
     std::shared_ptr<impl::PreviewInput> input_;
+
+    QString displayed_;
 };
 
 }

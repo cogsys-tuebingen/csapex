@@ -58,19 +58,16 @@ std::string Graph::makeUUIDPrefix(const std::string& name)
     return ss.str();
 }
 
-void Graph::addNode(NodeWorker::Ptr node_worker)
+void Graph::addNode(NodeHandlePtr nh)
 {
-    nodes_.push_back(node_worker);
-    node_parents_[node_worker.get()] = std::vector<NodeWorker*>();
-    node_children_[node_worker.get()] = std::vector<NodeWorker*>();
+    nodes_.push_back(nh);
+
+    node_parents_[nh.get()] = std::vector<NodeHandle*>();
+    node_children_[nh.get()] = std::vector<NodeHandle*>();
 
     buildConnectedComponents();
 
-    node_worker->checkParameters();
-
-    node_worker->panic.connect(panic);
-
-    nodeAdded(node_worker);
+    nodeAdded(nh);
 }
 
 std::vector<ConnectionPtr> Graph::getConnections()
@@ -80,21 +77,20 @@ std::vector<ConnectionPtr> Graph::getConnections()
 
 void Graph::deleteNode(const UUID& uuid)
 {
-    NodeWorker* node_worker = findNodeWorker(uuid);
-
-    node_worker->stop();
+    NodeHandle* node_handle = findNodeHandle(uuid);
+    node_handle->stop();
 
     /// assert that all connections have already been deleted
-    apex_assert_hard(node_parents_[node_worker].empty());
-    apex_assert_hard(node_children_[node_worker].empty());
+    apex_assert_hard(node_parents_[node_handle].empty());
+    apex_assert_hard(node_children_[node_handle].empty());
 
-    node_parents_.erase(node_worker);
-    node_children_.erase(node_worker);
+    node_parents_.erase(node_handle);
+    node_children_.erase(node_handle);
 
-    NodeWorker::Ptr removed;
+    NodeHandlePtr removed;
 
-    for(std::vector<NodeWorker::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
-        if((*it)->getNodeHandle()->getUUID() == uuid) {
+    for(auto it = nodes_.begin(); it != nodes_.end();) {
+        if((*it)->getUUID() == uuid) {
             removed = *it;
             it = nodes_.erase(it);
 
@@ -117,8 +113,8 @@ int Graph::countNodes()
 
 bool Graph::addConnection(ConnectionPtr connection)
 {
-    NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
-    NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
+    NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
+    NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
     //apex_assert_hard(connection->from()->isConnectionPossible(connection->to()));
 
@@ -162,8 +158,8 @@ void Graph::deleteConnection(ConnectionPtr connection)
             Connectable* to = connection->to();
             to->setError(false);
 
-            NodeWorker* n_from = findNodeWorkerForConnector(connection->from()->getUUID());
-            NodeWorker* n_to = findNodeWorkerForConnector(connection->to()->getUUID());
+            NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
+            NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
             // erase pointer from TO to FROM
             if(n_from != n_to) {
@@ -197,37 +193,37 @@ void Graph::buildConnectedComponents()
     //    std::map<Node*, int> old_node_component = node_component_;
     node_component_.clear();
 
-    std::deque<NodeWorker*> unmarked;
-    for(NodeWorker::Ptr node : nodes_) {
+    std::deque<NodeHandle*> unmarked;
+    for(auto node : nodes_) {
         unmarked.push_back(node.get());
         node_component_[node.get()] = -1;
     }
 
-    std::deque<NodeWorker*> Q;
+    std::deque<NodeHandle*> Q;
     int component = 0;
     while(!unmarked.empty()) {
         // take a random unmarked node to start bfs from
-        NodeWorker* start = unmarked.front();
+        auto* start = unmarked.front();
         Q.push_back(start);
 
         node_component_[start] = component;
 
         while(!Q.empty()) {
-            NodeWorker* front = Q.front();
+            auto* front = Q.front();
             Q.pop_front();
 
             unmarked.erase(std::find(unmarked.begin(), unmarked.end(), front));
 
             // iterate all neighbors
-            std::vector<NodeWorker*> neighbors;
-            for(NodeWorker* parent : node_parents_[front]) {
+            std::vector<NodeHandle*> neighbors;
+            for(auto* parent : node_parents_[front]) {
                 neighbors.push_back(parent);
             }
-            for(NodeWorker* child : node_children_[front]) {
+            for(auto* child : node_children_[front]) {
                 neighbors.push_back(child);
             }
 
-            for(NodeWorker* neighbor : neighbors) {
+            for(auto* neighbor : neighbors) {
                 if(node_component_[neighbor] == -1) {
                     node_component_[neighbor] = component;
                     Q.push_back(neighbor);
@@ -245,31 +241,31 @@ void Graph::buildConnectedComponents()
 
 void Graph::assignLevels()
 {
-    std::map<NodeWorker*, int> node_level;
+    std::map<NodeHandle*, int> node_level;
 
     static const int NO_LEVEL = std::numeric_limits<int>::min();
 
-    std::deque<NodeWorker*> unmarked;
-    for(NodeWorker::Ptr node : nodes_) {
-        if(node->isSource() && node->isSink()) {
-            node_level[node.get()] = 0;
-        } else if(node_parents_[node.get()].empty()) {
-            node_level[node.get()] = 0;
+    std::deque<NodeHandle*> unmarked;
+    for(auto nh : nodes_) {
+        if(nh->isSource() && nh->isSink()) {
+            node_level[nh.get()] = 0;
+        } else if(node_parents_[nh.get()].empty()) {
+            node_level[nh.get()] = 0;
         } else {
-            node_level[node.get()] = NO_LEVEL;
-            unmarked.push_back(node.get());
+            node_level[nh.get()] = NO_LEVEL;
+            unmarked.push_back(nh.get());
         }
     }
 
-    std::deque<NodeWorker*> gateways;
+    std::deque<NodeHandle*> gateways;
 
     // to assign a level, every parent must be known
     while(!unmarked.empty()) {
-        NodeWorker* current = unmarked.front();
+        NodeHandle* current = unmarked.front();
         unmarked.pop_front();
 
         int max_level = NO_LEVEL;
-        for(NodeWorker* parent : node_parents_.at(current)) {
+        for(NodeHandle* parent : node_parents_.at(current)) {
             int parent_level = node_level[parent];
             if(parent_level == NO_LEVEL) {
                 max_level = NO_LEVEL;
@@ -284,7 +280,7 @@ void Graph::assignLevels()
         int max_dynamic_level = NO_LEVEL;
         bool has_dynamic_parent_output = false;
         bool has_dynamic_input = false;
-        for(const auto& input : current->getNodeHandle()->getAllInputs()) {
+        for(const auto& input : current->getAllInputs()) {
             if(input->isDynamic()) {
                 has_dynamic_input = true;
             }
@@ -293,7 +289,7 @@ void Graph::assignLevels()
                 const auto& parent_output = connection->from();
                 if(parent_output->isDynamic()) {
                     has_dynamic_parent_output = true;
-                    NodeWorker* node = findNodeWorkerForConnector(parent_output->getUUID());
+                    NodeHandle* node = findNodeHandleForConnector(parent_output->getUUID());
                     int level = node_level.at(node);
                     //                    apex_assert_hard(level != NO_LEVEL);
 
@@ -325,10 +321,10 @@ void Graph::assignLevels()
         }
     }
 
-    for(NodeWorker::Ptr node : nodes_) {
+    for(auto node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(auto output : node->getNodeHandle()->getAllOutputs()) {
+        for(auto output : node->getAllOutputs()) {
             if(output->isDynamic()) {
                 DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
                 dout->clearCorrespondents();
@@ -336,24 +332,24 @@ void Graph::assignLevels()
         }
     }
 
-    for(NodeWorker* node : gateways) {
+    for(NodeHandle* node : gateways) {
         DynamicOutput* correspondent = nullptr;
 
         // perform bfs to find the parent with a dynamic output
-        std::deque<NodeWorker*> Q;
-        std::set<NodeWorker*> visited;
+        std::deque<NodeHandle*> Q;
+        std::set<NodeHandle*> visited;
         Q.push_back(node);
         while(!Q.empty()) {
-            NodeWorker* current = Q.front();
+            auto* current = Q.front();
             Q.pop_front();
             visited.insert(current);
 
-            for(auto input : current->getNodeHandle()->getAllInputs()) {
+            for(auto input : current->getAllInputs()) {
                 if(input->isConnected()) {
                     ConnectionPtr connection = input->getConnections().front();
                     Output* out = dynamic_cast<Output*>(connection->from());
                     if(out) {
-                        NodeWorker* parent = findNodeWorkerForConnector(out->getUUID());
+                        auto* parent = findNodeHandleForConnector(out->getUUID());
 
                         if(out->isDynamic() && parent->getLevel() == node->getLevel()) {
                             correspondent = dynamic_cast<DynamicOutput*>(out);
@@ -370,7 +366,7 @@ void Graph::assignLevels()
         }
 
         if(correspondent) {
-            for(auto input : node->getNodeHandle()->getAllInputs()) {
+            for(auto input : node->getAllInputs()) {
                 if(input->isDynamic()) {
                     DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
                     di->setCorrespondent(correspondent);
@@ -388,7 +384,7 @@ void Graph::verify()
 
 int Graph::getComponent(const UUID &node_uuid) const
 {
-    NodeWorker* node = findNodeWorkerNoThrow(node_uuid);
+    NodeHandle* node = findNodeHandleNoThrow(node_uuid);
     if(!node) {
         return -1;
     }
@@ -398,7 +394,7 @@ int Graph::getComponent(const UUID &node_uuid) const
 
 int Graph::getLevel(const UUID &node_uuid) const
 {
-    NodeWorker* node = findNodeWorkerNoThrow(node_uuid);
+    NodeHandle* node = findNodeHandleNoThrow(node_uuid);
     if(!node) {
         return 0;
     }
@@ -415,14 +411,6 @@ Node* Graph::findNode(const UUID& uuid) const
     throw NodeNotFoundException(uuid.getFullName());
 }
 
-NodeWorker* Graph::findNodeWorker(const UUID& uuid) const
-{
-    NodeWorker* node_worker = findNodeWorkerNoThrow(uuid);
-    if(node_worker) {
-        return node_worker;
-    }
-    throw NodeWorkerNotFoundException(uuid.getFullName());
-}
 
 
 NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
@@ -436,9 +424,9 @@ NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
 
 Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
-    for(NodeWorker::Ptr worker : nodes_) {
-        if(worker->getUUID() == uuid) {
-            auto node = worker->getNodeHandle()->getNode().lock();
+    for(auto nh : nodes_) {
+        if(nh->getUUID() == uuid) {
+            auto node = nh->getNode().lock();
             if(node) {
                 return node.get();
             }
@@ -449,22 +437,11 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
 }
 
 
-NodeWorker* Graph::findNodeWorkerNoThrow(const UUID& uuid) const
-{
-    for(const NodeWorker::Ptr b : nodes_) {
-        if(b->getUUID() == uuid) {
-            return b.get();
-        }
-    }
-
-    return nullptr;
-}
-
 NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const
 {
-    for(const NodeWorker::Ptr b : nodes_) {
+    for(const auto b : nodes_) {
         if(b->getUUID() == uuid) {
-            return b->getNodeHandle().get();
+            return b.get();
         }
     }
 
@@ -481,15 +458,6 @@ Node* Graph::findNodeForConnector(const UUID &uuid) const
     }
 }
 
-NodeWorker* Graph::findNodeWorkerForConnector(const UUID &uuid) const
-{
-    try {
-        return findNodeWorker(uuid.parentUUID());
-
-    } catch(const std::exception& e) {
-        throw std::runtime_error(std::string("cannot find worker of connector \"") + uuid.getFullName());
-    }
-}
 
 NodeHandle* Graph::findNodeHandleForConnector(const UUID &uuid) const
 {
@@ -501,21 +469,11 @@ NodeHandle* Graph::findNodeHandleForConnector(const UUID &uuid) const
     }
 }
 
-std::vector<NodeWorker*> Graph::getAllNodeWorkers()
-{
-    std::vector<NodeWorker*> node_workers;
-    for(const NodeWorkerPtr& node : nodes_) {
-        node_workers.push_back(node.get());
-    }
-
-    return node_workers;
-}
-
 std::vector<NodeHandle*> Graph::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;
-    for(const NodeWorkerPtr& node : nodes_) {
-        node_handles.push_back(node->getNodeHandle().get());
+    for(const auto& node : nodes_) {
+        node_handles.push_back(node.get());
     }
 
     return node_handles;
@@ -523,20 +481,20 @@ std::vector<NodeHandle*> Graph::getAllNodeHandles()
 
 Connectable* Graph::findConnector(const UUID &uuid)
 {
-    NodeWorker* owner = findNodeWorker(uuid.parentUUID());
+    NodeHandle* owner = findNodeHandle(uuid.parentUUID());
     apex_assert_hard(owner);
 
     std::string type = uuid.type();
 
     Connectable* result;
     if(type == "in") {
-        result = owner->getNodeHandle()->getInput(uuid);
+        result = owner->getInput(uuid);
     } else if(type == "out") {
-        result = owner->getNodeHandle()->getOutput(uuid);
+        result = owner->getOutput(uuid);
     } else if(type == "slot") {
-        result = owner->getNodeHandle()->getSlot(uuid);
+        result = owner->getSlot(uuid);
     } else if(type == "trigger") {
-        result = owner->getNodeHandle()->getTrigger(uuid);
+        result = owner->getTrigger(uuid);
     } else {
         throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
     }

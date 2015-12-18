@@ -35,14 +35,6 @@ class NodeBox : public QWidget
 {
     Q_OBJECT
 
-    friend class DesignerIO;
-    friend class GraphIO;
-    friend class Graph;
-    friend class NodeWorker;
-    friend class Node;
-    friend class command::MoveBox;
-    friend class BoxSelectionmanager;
-
 public:
     typedef std::shared_ptr<NodeBox> Ptr;
 
@@ -51,7 +43,12 @@ public:
 
 public:
     /// CONSTRUCTION
-    NodeBox(Settings& settings, NodeWorkerPtr content, NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
+    NodeBox(Settings& settings,
+            NodeHandlePtr handle, NodeWorkerPtr worker,
+            NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
+    NodeBox(Settings& settings,
+            NodeHandlePtr handle,
+            NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
     virtual ~NodeBox();
     void construct();
     void init();
@@ -157,6 +154,7 @@ protected:
 
     Settings& settings_;
 
+    NodeHandleWeakPtr node_handle_;
     NodeWorkerWeakPtr node_worker_;
     NodeAdapterPtr adapter_;
 

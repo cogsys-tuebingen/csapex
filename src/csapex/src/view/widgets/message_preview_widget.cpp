@@ -4,6 +4,8 @@
 /// PROJECT
 #include <csapex/msg/direct_connection.h>
 #include <csapex/manager/message_renderer_manager.h>
+#include <csapex/msg/io.h>
+#include <csapex/msg/generic_value_message.hpp>
 
 /// SYSTEM
 #include <QApplication>
@@ -33,9 +35,18 @@ MessagePreviewWidget::MessagePreviewWidget()
     input_ = std::make_shared<impl::PreviewInput>(this);
     setScene(new QGraphicsScene);
 
+
+    scene()->setBackgroundBrush(QBrush());
+
     qRegisterMetaType < ConnectionTypeConstPtr > ("ConnectionTypeConstPtr");
 
     QObject::connect(this, SIGNAL(displayMessage(ConnectionTypeConstPtr)), this, SLOT(display(ConnectionTypeConstPtr)));
+
+    setMaximumSize(256, 256);
+    setAutoFillBackground(false);
+
+    setAttribute( Qt::WA_TranslucentBackground, true );
+    setAttribute(Qt::WA_NoSystemBackground, true);
 }
 
 MessagePreviewWidget::~MessagePreviewWidget()
@@ -95,19 +106,47 @@ void MessagePreviewWidget::disconnect()
     connection_.reset();
 }
 
+void MessagePreviewWidget::showText(const QString& txt)
+{
+    if(txt != displayed_) {
+        displayed_ = txt;
+        scene()->addText(displayed_);
+        resize(scene()->sceneRect().width() + 4, scene()->sceneRect().height() + 4);
+        show();
+        fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
+    }
+}
+
 void MessagePreviewWidget::display(const ConnectionTypeConstPtr &msg)
 {
     if(isConnected()) {
         try {
+            if(auto m = msg::message_cast<connection_types::GenericValueMessage<int>>(msg)) {
+                showText(QString::number(m->value));
+                return;
+
+            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<float>>(msg)) {
+                showText(QString::number(m->value));
+                return;
+
+            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<double>>(msg)) {
+                showText(QString::number(m->value));
+                return;
+
+            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<std::string>>(msg)) {
+                showText(QString::fromStdString(m->value));
+                return;
+            }
+
+            displayed_ = "";
+
             MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
             if(renderer) {
                 QImage img = renderer->render(msg);
 
-
                 auto pm = QPixmap::fromImage(img);
                 scene()->clear();
                 scene()->addPixmap(pm);
-                setMaximumSize(256, 256);
                 fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
 
                 show();

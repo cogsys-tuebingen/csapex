@@ -18,7 +18,7 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      modifier_(nullptr)
+      modifier_(nullptr), setup_(false)
 {
 }
 
@@ -48,6 +48,13 @@ void Node::doSetup()
     } catch(std::runtime_error& e) {
         aerr << "setup failed: " << e.what() << std::endl;
     }
+
+    setup_ = true;
+}
+
+bool Node::isSetup() const
+{
+    return setup_;
 }
 
 void Node::setupParameters(Parameterizable& )
